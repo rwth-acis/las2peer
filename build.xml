@@ -1,0 +1,325 @@
+<project name="las2peer" default="jars" basedir=".">
+	
+	<property name="src.main" location="src/main/java" />
+	<property name="src.junit" location="src/test/java" />
+	<property name="src.help1" location="src/test_help/java" />
+	<property name="src.help2" location="src/test_help2/java" />
+	
+	<property name="tmp" location="tmp" />
+	
+	<property name="tmp.classes" location="${tmp}/classes" />
+	<property name="tmp.junit" location="${tmp}/test" />
+	<property name="tmp.help1" location="${tmp}/test_help1" />
+	<property name="tmp.help2" location="${tmp}/test_help2" />
+	
+    <property name="junit.report" location="${tmp}/test_reports" />
+	
+	<property name="export" location="export" />
+	<property name="export.jars" location="${export}/jars" />
+	<property name="export.doc" location="${export}/javadoc" />
+	<property name="export.junitdoc" location="${export}/junitdoc" />
+	
+	<property name="lib" location="lib" />
+	<property name="lib.cp" 
+		location="${lib}/i5-simpleXML-0.1.jar:${lib}/commons-codec-1.7.jar:${lib}/FreePastry-2.1.jar:${lib}/i5-httpServer-0.2.jar:${lib}/junit-4.11.jar:${lib}/qvs/guava-9.jar:${lib}/xpp3-1.1.4c.jar" />
+	<!--property name="lib.junit" location="${lib}/junit4-4.8.2.jar" /-->
+	<property name="lib.junit" location="${lib}/junit-4.11.jar" />
+		
+	
+	<target name="init_general">
+		<tstamp/>
+		<mkdir dir="${tmp}" />		
+		<mkdir dir="${export}" />
+	</target>
+	
+	
+	<target name="init_compile" depends="init_general">
+		<mkdir dir="${tmp.classes}" />
+		<mkdir dir="${tmp.junit}" />
+		<mkdir dir="${tmp.help1}" />
+		<mkdir dir="${tmp.help2}" />
+	</target>
+	
+	<target name="init_jars" depends="init_general">
+		<mkdir dir="${export.jars}" />
+	</target>
+	
+	<target name="init_doc" depends="init_general">
+		<mkdir dir="${export.doc}" />
+		<mkdir dir="${export.junitdoc}" />
+	</target>
+		
+		
+		
+	
+	<!-- compilation -->
+	<target name="compile_main" depends="init_compile">
+		<javac srcdir="${src.main}"
+		       destdir="${tmp.classes}"
+			   classpath="${lib.cp}"
+			   debug="on"
+			   source="1.6"
+			   target="1.6"
+			   encoding="UTF-8"
+		/>
+		<copy todir="${tmp.classes}">
+			<fileset dir="${src.main}">
+				<include name="**/*.xml" />
+			</fileset>
+		</copy>
+	</target>
+	<target name="compile_junit" depends="init_compile, compile_main">
+		<javac srcdir="${src.junit}"
+		       destdir="${tmp.junit}"
+			   classpath="${lib.cp}:${tmp.classes}:${lib.junit}"
+			   debug="on"
+			   source="1.6"
+			   target="1.6"
+			   encoding="UTF-8"
+		/>
+		<copy todir="${tmp.junit}">
+			<fileset dir="${src.junit}">
+				<include name="**/*.xml" />
+			</fileset>
+		</copy>
+	</target>
+	<target name="compile_help1" depends="init_compile">
+		<javac srcdir="${src.help1}"
+		       destdir="${tmp.help1}"
+			   classpath=""
+			   debug="on"
+			   source="1.6"
+			   target="1.6"
+			   encoding="UTF-8"
+		/>
+		<copy todir="${tmp.help1}">
+			<fileset dir="${src.help1}">
+				<exclude name="**/*.java" />
+				<exclude name="*.java" />
+			</fileset>
+		</copy>
+	</target>
+	<target name="compile_help2" depends="init_compile">
+		<javac srcdir="${src.help2}"
+		       destdir="${tmp.help2}"
+			   classpath=""
+			   debug="on"
+			   source="1.6"
+			   target="1.6"
+			   encoding="UTF-8"
+		/>
+		<copy todir="${tmp.help2}">
+			<fileset dir="${src.help2}">
+				<exclude name="**/*.java" />
+				<exclude name="*.java" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="compile_all" depends="compile_main, compile_junit, compile_help1, compile_help2" />
+	
+	
+	
+	<target name="jar_test1-1.1" depends="init_jars, compile_help1">
+		<jar jarfile="${export.jars}/i5.las2peer.classLoaders.testPackage1-1.0.jar">
+			<fileset dir="${tmp.help1}">
+				<include name="i5/las2peer/classLoaders/testPackage1/**/*" />
+			</fileset>
+			<manifest>
+				<!--attribute name="Export-Package" value="i5.las2peer.classLoaders.testPackage1" /-->
+				<attribute name="Library-SymbolicName" value="i5.las2peer.classLoaders.testPackage1" />
+				<attribute name="Library-Version" value="1.0" />
+				<attribute name="Import-Bundle" value="" />
+				<attribute name="Library-Name" value="JUNIT TestPackage(1)" />
+				<attribute name="Library-Description" value="a simple test package" />
+				<attribute name="Import-Library" value="" />
+			</manifest>
+		</jar>
+	</target>
+	
+	<target name="jar_test1-1.2" depends="init_jars, compile_help2">
+		<jar jarfile="${export.jars}/i5.las2peer.classLoaders.testPackage1-1.1.jar">
+			<fileset dir="${tmp.help2}">
+				<include name="i5/las2peer/classLoaders/testPackage1/**/*" />
+			</fileset>
+			<manifest>
+				<attribute name="Library-SymbolicName" value="i5.las2peer.classLoaders.testPackage1" />
+				<attribute name="Library-Version" value="1.1" />
+				<attribute name="Import-Bundle" value="" />
+				<attribute name="Library-Name" value="JUNIT TestPackage(1)" />
+				<attribute name="Library-Description" value="a simple test package" />
+				<attribute name="Import-Library" value="" />
+			</manifest>
+		</jar>
+	</target>
+	
+	<target name="jar_test2-1.0" depends="init_jars, compile_help1">
+		<jar jarfile="${export.jars}/i5.las2peer.classLoaders.testPackage2-1.0.jar">
+			<fileset dir="${tmp.help1}">
+				<include name="i5/las2peer/classLoaders/testPackage2/**/*" />
+			</fileset>
+			<manifest>
+				<attribute name="Library-SymbolicName" value="i5.las2peer.classLoaders.testPackage2" />
+				<attribute name="Library-Version" value="1.0" />
+				<attribute name="Import-Bundle" value="" />
+				<attribute name="Library-Name" value="JUNIT TestPackage(2)" />
+				<attribute name="Library-Description" value="a simple test package" />
+				<attribute name="Import-Library" value='i5.las2peer.classLoaders.testPackage1;version="[1.1,2.0)"' />
+				
+				<attribute name="l2p-Name" value="test2" />
+				<attribute name="l2p-Version" value="1.0" />
+				<attribute name="l2p-deps" value="test1-(1.1--1.2)" />
+			</manifest>
+		</jar>
+	</target>
+	
+	
+	
+	<target name="jars" depends="jar_test1-1.1, jar_test1-1.2, jar_test2-1.0, main_jar, test_service_jar, test_service_helper_jar, qvz_jar" />
+	
+	<target name="main_jar" depends="compile_all">
+		<jar jarfile="${export.jars}/las2peer.jar">
+			<fileset dir="${tmp.classes}">
+				<exclude name="i5/las2peer/testing/services/**" />
+				<exclude name="i5/las2peer/services/**"/>
+			</fileset>
+			<manifest>
+				<attribute name="Main-Class" value="i5.las2peer.tools.ServiceStarter"/>
+				<attribute 
+					name="Class-Path" 
+					value="simpleXML.jar commons-codec-1.7.jar xpp3-1.1.4c.jar FreePastry-2.1.jar httpServer.jar"
+				/>
+			</manifest>
+		</jar>
+	</target>
+	
+	<target name="qvz_jar" depends="compile_all">
+		<jar jarfile="${export.jars}/i5.las2peer.services.queryVisualization.jar">
+			<fileset dir="${tmp.classes}"
+				includes="i5/las2peer/services/queryVisualization/**">
+			</fileset>
+			<manifest>
+				<attribute name="Library-Version" value="0.0.1" />
+				<attribute name="Library-SymbolicName" value="i5.las2peer.services.queryVisualization" />
+				
+				<attribute name="Import-Library" value='guava;version="9",db2jcc;version="0,1",db2jcc_license_cu;version="0,1",db2jcc_javax;version="0,1",ojdbc;version="14",mysqlConnectorJava;version="5.1.16"' />
+			</manifest>
+		</jar>
+	</target>
+	
+	<target name="test_service_jar" depends="compile_main">
+		<property name="testService.version" value="0.0.1" />
+		
+		<jar jarfile="${export.jars}/i5.las2peer.testing.services-${testService.version}.jar">
+			<fileset dir="${tmp.classes}"
+				includes="i5/las2peer/testing/services/*" />
+			<manifest>
+				<attribute name="Library-Version" value="${testService.version}" />
+				<attribute name="Library-SymbolicName" value="i5.las2peer.testing.services" />
+				<attribute name="Import-Library" value='test_service_helper;version="(0.0.1,1.0)"' />
+			</manifest>
+		</jar>
+	</target>
+	
+	<target name="test_service_helper_jar" depends="compile_main">
+		<property name="testServiceHelper.version" value="0.2" />
+		
+		<jar jarfile="${export.jars}/test_service_helper-${testServiceHelper.version}.jar">
+			<fileset dir="${tmp.classes}"
+				includes="i5/las2peer/testing/services/helperClasses/**" />
+			<manifest>
+				<attribute name="Library-Version" value="${testServiceHelper.version}" />
+				<attribute name="Library-SymbolicName" value="i5.las2peer.testing.services.helperClasses" />
+				<attribute name="Import-Library" value="" />
+			</manifest>
+		</jar>
+	</target>
+	
+	
+	
+	<target name="docs" depends="java_doc, junit_doc" />
+	
+	<target name="java_doc" depends="init_doc">
+	                <javadoc destdir="${export.doc}"
+	                         author="true"
+	                 version="true"
+	                     use="true"
+	                     source="1.5"
+	                 windowtitle="las2peer documentation"
+	                 failonerror="yes"
+	                 encoding="utf8"
+	                classpath="${lib.cp}:${tmp.classes}:/usr/share/java/junit4-4.8.2.jar"
+	                 >	            
+	            <packageset dir="${src.main}" defaultexcludes="yes">
+	                <include name="i5/las2peer/**" />
+	            </packageset>
+	            
+	            <bottom><![CDATA[<p class="bottom">Copyright &#169; 2012 by Holger Janßen, Aachen, Germany. All Rights Reserved.</p>]]></bottom>
+	                </javadoc>
+	</target>
+
+	<target name="junit_doc" depends="init_doc">
+	                <javadoc destdir="${export.junitdoc}"
+	                         author="true"
+	                 version="true"
+	                     use="true"
+	                     source="1.5"
+	                 windowtitle="las2peer documentation"
+	                 failonerror="yes"
+	                 encoding="utf8"
+		                classpath="${lib.cp}:${tmp.classes}:/usr/share/java/junit4-4.8.2.jar"
+	                 >
+	            
+	            <packageset dir="${src.junit}" defaultexcludes="yes">
+	                <include name="i5/las2peer/**" />
+	            </packageset>
+	            
+	            <bottom><![CDATA[<p class="bottom">Copyright &#169; 2012 by Holger Janßen, Aachen, Germany. All Rights Reserved.</p>]]></bottom>
+	                </javadoc>
+	</target>
+	
+	
+	
+	
+	<!--   JUNIT testing -->
+		
+	<target name="junit" depends="junit_tests, junit_clean" />
+	
+	<target name="init_junit" depends="init_general">
+		<mkdir dir="${junit.report}" />
+		<mkdir dir="log" />
+	</target>
+	
+	<target name="junit_clean">
+		<delete dir="${tmp.junit}" />
+	</target>
+	
+	 <target name="junit_tests" depends="init_junit, compile_all">
+	                <junit fork="yes" haltonerror="no" haltonfailure="no" printsummary="yes">
+	                                <!-- jvmarg value="-Djunit.las.basedir=${testserver}" / -->
+	                                <classpath>
+                                        <pathelement path="${tmp.classes}" />
+                                        <pathelement path="${tmp.junit}" />
+                                        <pathelement path="${lib.cp}" />
+                                        <pathelement path="${lib.junit}" />
+	                                </classpath>
+	                                <formatter type="plain" />
+	                                                        
+	                                <batchtest fork="yes" todir="${junit.report}">
+	                                        <fileset dir="${tmp.junit}">
+	                                                <include name="**/*Test.class"/>
+	                                                <exclude name="i5/las/test/testUserManager/**" />
+	                                        </fileset>
+	                                </batchtest>
+	                </junit>
+	        </target>
+
+	<!-- general cleanup -->
+	<target name="clean">
+		<delete dir="${tmp}" />
+		<delete dir="log" />
+	</target>
+	
+	<target name="all" depends="junit, jars, docs, clean" />
+	
+</project>
