@@ -1,8 +1,8 @@
 Welcome to las2peer!
---------------------
+=================
 
 PREPARATIONS
-------------
+-----------------------
 
 If you use an Oracle Java version, you have to enable strong encryption for this software.
 To do this, you can use the provided
@@ -54,19 +54,19 @@ For simplicity, you can just use the helper script located at bin/start_node.sh.
 
 So to start a new network, follow this steps:
 
-1./ build everything with
+1. build everything with
     ant compile_all
 
-2./ set up a log directory with
+2. set up a log directory with
     mkdir log
 
-3./ run the starter script with
+3. run the starter script with
     bin/start_node.sh -s 9001 NEW
 
-4./a) add an additional to the net with
+4. a) add an additional to the net with
       bin/start_node.sh -s 9002 [local_ip]:9001
 
-4./b) add an additional hosted at another machine with
+4. b) add an additional hosted at another machine with
       bin/start_node.sh -s 9001 [ip_of_the_first_machine]:9001
 
 
@@ -88,8 +88,8 @@ As an alternative to starting single nodes for testing purposes (see last sectio
 
 Each node configuration file follows a simple syntax:
     line    content
-    1:  port
-    2:  bootstrap
+    1:      port
+    2:      bootstrap
     3-x:    test method
 
 In lines 3-x instructions starting with // or # will be left out. You can use all public methods of the L2pNodeLauncher class (see api doc) as testing methods. Those expecting a String parameter can be called simply as
