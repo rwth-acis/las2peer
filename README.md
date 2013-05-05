@@ -16,9 +16,9 @@ of your used java runtime. (You have to replace the existing one.)
 
 The policy files are downloadable via the Oracle webpage as well:
 
-http://www.oracle.com/technetwork/java/javase/downloads/jce-6-download-429243.html
+[JCE for Java 6](http://www.oracle.com/technetwork/java/javase/downloads/jce-6-download-429243.html "JCE-6")
 or
-http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html
+[JCE for Java 7](http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html "JCE-7")
 
 
 
@@ -32,7 +32,7 @@ Unit tests:
 All JUnit tests are started with
     ant junit_tests
 
-Reports can be found in ../temp/reports afterwards.
+Reports can be found in ../tmp/reports afterwards.
 
 Java-Docs:
 ----------
@@ -63,10 +63,10 @@ So to start a new network, follow this steps:
 3. run the starter script with
     bin/start_node.sh -s 9001 NEW
 
-4. a) add an additional to the net with
+4. a) add an additional node to the net with
       bin/start_node.sh -s 9002 [local_ip]:9001
 
-4. b) add an additional hosted at another machine with
+4. b) add an additional node hosted at another machine with
       bin/start_node.sh -s 9001 [ip_of_the_first_machine]:9001
 
 
@@ -87,6 +87,7 @@ Start a complete network of testing nodes
 As an alternative to starting single nodes for testing purposes (see last section) you can use the start_node.sh script to start a complete network configured by a directory containing one [name].node file.
 
 Each node configuration file follows a simple syntax:
+
     line    content
     1:      port
     2:      bootstrap
