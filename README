@@ -32,7 +32,7 @@ Unit tests:
 All JUnit tests are started with
 	ant junit_tests
 	
-Reports can be found in ../temp/reports afterwards.
+Reports can be found in ../tmp/reports afterwards.
 	
 Java-Docs:
 ----------
@@ -49,7 +49,7 @@ The class i5.las2peer.testing.L2pNodeLaucher provides a simple way to start a no
 All you have to know is a port, which you can open at your local machine.
 If you want to join an existing network, you will need to know address and port of at least one participant.
 
-For simplicity, you can just use the helper script located at bin_tools/start_node.sh.
+For simplicity, you can just use the helper script located at bin/start_node.sh.
 
 
 So to start a new network, follow this steps:
@@ -61,19 +61,19 @@ So to start a new network, follow this steps:
 	mkdir log
 
 3./ run the starter script with
-	bin_tools/start_node.sh -s 9001 NEW
+	bin/start_node.sh -s 9001 NEW
 
 4./a) add an additional to the net with
-	  bin_tools/start_node.sh -s 9002 [local_ip]:9001
+	  bin/start_node.sh -s 9002 [local_ip]:9001
 	
 4./b) add an additional hosted at another machine with
-	  bin_tools/start_node.sh -s 9001 [ip_of_the_first_machine]:9001
+	  bin/start_node.sh -s 9001 [ip_of_the_first_machine]:9001
 
 
 If you want to execute test methods at the nodes just put their names as additional command line parameters to the start_node.sh script like
-	bin_tools/start_node.sh 9001 NEW uploadAgents waitALittle waitALittle searchEve
+	bin/start_node.sh 9001 NEW uploadAgents waitALittle waitALittle searchEve
 and for the second node
-	bin_tools/start_node.sh 9002 [local_ip]:9001 waitALittle fetchAgent registerEve
+	bin/start_node.sh 9002 [local_ip]:9001 waitALittle fetchAgent registerEve
 	
 More informations about existing test methods can be found in the Java Docs in the documentation of the i5.las2peer.testing.L2pNodeLauncher class.
 Basically you can use all public (non-static) methods of the class.
@@ -113,7 +113,7 @@ The uploadStartupDirectory method can be used to upload a set of artifacts and a
 You can use the command line tools EnvelopeGenerator, ServiceAgentGenerator and UserAgentGenerator from the i5.las2peer.tools package to create such xml files.
 
 To start the the network, use the following command:
-	bin_tools/start_node.sh -d [config_dir]	
+	bin/start_node.sh -d [config_dir]	
 	
 	
 	
