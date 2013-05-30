@@ -295,7 +295,7 @@
 	</target>
 	
 	 <target name="junit_tests" depends="init_junit, compile_all">
-	                <junit fork="yes" haltonerror="no" haltonfailure="no" printsummary="yes">
+	                <junit fork="yes" haltonerror="yes" haltonfailure="yes" printsummary="yes">
 	                                <!-- jvmarg value="-Djunit.las.basedir=${testserver}" / -->
 	                                <classpath>
                                         <pathelement path="${tmp.classes}" />
