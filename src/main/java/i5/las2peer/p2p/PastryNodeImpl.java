@@ -305,9 +305,7 @@ public class PastryNodeImpl extends Node {
 			properties.put( "nat_network_prefixes", "127.0.0.1;10.;192.168.;");
 		
 		if ( !properties.containsKey("pastry_socket_known_network_address"))
-			//properties.put( "pastry_socket_known_network_address", "tosini.informatik.rwth-aachen.de");
 			//properties.put( "pastry_socket_known_network_address", "127.0.0.1");
-			properties.put( "pastry_socket_known_network_address", "www-i5.informatik.rwth-aachen.de");
 		if ( !properties.containsKey("pastry_socket_known_network_address_port"))
 			properties.put( "pastry_socket_known_network_address_port", "80");
 		

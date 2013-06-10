@@ -13,10 +13,10 @@ if [ $(uname -o) = "Cygwin" ]
 then
     # we're in cygwin
 	export COLOR_DISABLED=1
-	export CLASSPATH="${BASE}tmp/classes/;${BASE}tmp/junit/;${BASE}lib/simpleXML.jar;${BASE}lib/FreePastry-2.1.jar;${BASE}lib/commons-codec-1.7.jar;${BASE}lib/xpp3.jar;${BASE}lib/httpServer.jar;${BASE}lib/qvs/guava-9.jar"
+	export CLASSPATH="${BASE}tmp/classes/;${BASE}tmp/junit/;${BASE}lib/i5-simpleXML-0.1.jar;${BASE}lib/FreePastry-2.1.jar;${BASE}lib/commons-codec-1.7.jar;${BASE}lib/xpp3-1.1.4c.jar;${BASE}lib/i5-httpServer-0.2.jar;${BASE}lib/qvs/guava-9.jar"
 else
 	# we're somewhere else
-	export CLASSPATH="${BASE}tmp/classes/:${BASE}tmp/junit/:${BASE}lib/simpleXML.jar:${BASE}lib/FreePastry-2.1.jar:${BASE}lib/commons-codec-1.7.jar:${BASE}lib/xpp3.jar:${BASE}lib/httpServer.jar:${BASE}lib/qvs/guava-9.jar"
+	export CLASSPATH="${BASE}tmp/classes/:${BASE}tmp/junit/:${BASE}lib/i5-simpleXML-0.1.jar:${BASE}lib/FreePastry-2.1.jar:${BASE}lib/commons-codec-1.7.jar:${BASE}lib/xpp3-1.1.4c.jar:${BASE}lib/i5-httpServer-0.2.jar:${BASE}lib/qvs/guava-9.jar"
 fi
 
 
