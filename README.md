@@ -67,7 +67,7 @@ So to start a new network, follow this steps:
       bin/start_node.sh -s 9002 /127.0.0.1:9001
 
 4. b) add an additional node hosted at another machine with
-      bin/start_node.sh -s 9001 [ip_of_the_first_machine]:9001
+      bin/start_node.sh -s 9001 /IP_OF_THE_FIRST_MACHINE:9001
 
 
 If you want to execute test methods at the nodes just put their names as additional command line parameters to the start_node.sh script like
