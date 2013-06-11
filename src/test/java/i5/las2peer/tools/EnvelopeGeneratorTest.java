@@ -40,7 +40,7 @@ public class EnvelopeGeneratorTest {
 	
 	@Test
 	public void testGeneration() throws Exception {
-		EnvelopeGenerator.main( new String [] {"testing/local_xml_startup/agent_eve.xml", "evespass", "java.lang.Integer", "102"});
+		EnvelopeGenerator.main( new String [] {"src/main/java/i5/las2peer/testing/eve.xml", "evespass", "java.lang.Integer", "102"});
 		String output = standardOut.toString();
 		String error = standardError.toString();
 		
@@ -70,8 +70,8 @@ public class EnvelopeGeneratorTest {
 	
 	@Test
 	public void testOpenFail() throws SerializationException, DecodingFailedException, L2pSecurityException, MalformedXMLException, IOException {
-		EnvelopeGenerator.main( new String [] {"testing/local_xml_startup/agent_eve.xml", "failure", "Integer", "102"});
-		
+		EnvelopeGenerator.main( new String [] {"src/main/java/i5/las2peer/testing/eve.xml", "failure", "Integer", "102"});
+
 		String error = standardError.toString();
 		String output = standardOut.toString();
 		
