@@ -319,6 +319,6 @@
 		<delete dir="log" />
 	</target>
 	
-	<target name="all" depends="junit, jars, docs, clean" />
+	<target name="all" depends="jars, junit, docs, clean" />
 	
 </project>
