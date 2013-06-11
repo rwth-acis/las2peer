@@ -1,4 +1,5 @@
 <project name="las2peer" default="jars" basedir=".">
+
 	
 	<property name="src.main" location="src/main/java" />
 	<property name="src.junit" location="src/test/java" />
@@ -22,7 +23,6 @@
 	<property name="lib" location="lib" />
 	<property name="lib.cp" 
 		location="${lib}/i5-simpleXML-0.1.jar:${lib}/commons-codec-1.7.jar:${lib}/FreePastry-2.1.jar:${lib}/i5-httpServer-0.2.jar:${lib}/junit-4.11.jar:${lib}/qvs/guava-9.jar:${lib}/xpp3-1.1.4c.jar" />
-	<!--property name="lib.junit" location="${lib}/junit4-4.8.2.jar" /-->
 	<property name="lib.junit" location="${lib}/junit-4.11.jar" />
 		
 	
@@ -248,7 +248,7 @@
 	                 windowtitle="las2peer documentation"
 	                 failonerror="yes"
 	                 encoding="utf8"
-	                classpath="${lib.cp}:${tmp.classes}:/usr/share/java/junit4-4.8.2.jar"
+	                classpath="${lib.cp}:${tmp.classes}"
 	                 >	            
 	            <packageset dir="${src.main}" defaultexcludes="yes">
 	                <include name="i5/las2peer/**" />
@@ -267,7 +267,7 @@
 	                 windowtitle="las2peer documentation"
 	                 failonerror="yes"
 	                 encoding="utf8"
-		                classpath="${lib.cp}:${tmp.classes}:/usr/share/java/junit4-4.8.2.jar"
+		                classpath="${lib.cp}:${tmp.classes}"
 	                 >
 	            
 	            <packageset dir="${src.junit}" defaultexcludes="yes">
@@ -296,7 +296,6 @@
 	
 	 <target name="junit_tests" depends="init_junit, compile_all">
 	                <junit fork="yes" haltonerror="yes" haltonfailure="yes" printsummary="yes">
-	                                <!-- jvmarg value="-Djunit.las.basedir=${testserver}" / -->
 	                                <classpath>
                                         <pathelement path="${tmp.classes}" />
                                         <pathelement path="${tmp.junit}" />
