@@ -13,51 +13,51 @@ import org.junit.Test;
 public class LoadedJarLibraryTest {
 
 	@Test
-	public void testCreation() throws IOException {		
-		LoadedJarLibrary testee = LoadedJarLibrary.createFromJar( "../export/jars/i5.las2peer.classLoaders.testPackage1-1.1.jar" );
+	public void testCreation() throws IOException {
+		LoadedJarLibrary testee = LoadedJarLibrary.createFromJar( "export/jars/i5.las2peer.classLoaders.testPackage1-1.1.jar" );
 		assertEquals ( "i5.las2peer.classLoaders.testPackage1;version=\"1.1\"", testee.getIdentifier().toString() );
-		assertEquals ( "../export/jars/i5.las2peer.classLoaders.testPackage1-1.1.jar", testee.getJarFileName());
+		assertEquals ( "export/jars/i5.las2peer.classLoaders.testPackage1-1.1.jar", testee.getJarFileName());
 		assertEquals ( 0, testee.getDependencies().length );
-		
-		testee = LoadedJarLibrary.createFromJar( "../export/jars/i5.las2peer.classLoaders.testPackage2-1.0.jar" );
+
+		testee = LoadedJarLibrary.createFromJar( "export/jars/i5.las2peer.classLoaders.testPackage2-1.0.jar" );
 		assertEquals ( "i5.las2peer.classLoaders.testPackage2;version=\"1.0\"", testee.getIdentifier().toString() );
-		assertEquals ( "../export/jars/i5.las2peer.classLoaders.testPackage2-1.0.jar", testee.getJarFileName());
+		assertEquals ( "export/jars/i5.las2peer.classLoaders.testPackage2-1.0.jar", testee.getJarFileName());
 		assertEquals ( 1, testee.getDependencies().length );
 		assertEquals ( "i5.las2peer.classLoaders.testPackage1;version=\"[1.1,2.0)\"", testee.getDependencies()[0].toString());
-		
+
 		try {
-			testee = LoadedJarLibrary.createFromJar( "../export/jars/test2-1.4.jar");
+			testee = LoadedJarLibrary.createFromJar( "export/jars/test2-1.4.jar");
 			fail ( "IOException should have been thrown!");
 		} catch ( IOException e ) {
 		}
 	}
-	
-	
+
+
 	@Test
 	public void testStringGetter () throws IOException, NotFoundException, ResourceNotFoundException {
-		LoadedJarLibrary testee = LoadedJarLibrary.createFromJar( "../export/jars/i5.las2peer.classLoaders.testPackage1-1.1.jar" );
+		LoadedJarLibrary testee = LoadedJarLibrary.createFromJar( "export/jars/i5.las2peer.classLoaders.testPackage1-1.1.jar" );
 		String test = testee.getResourceAsString ("i5/las2peer/classLoaders/testPackage1/test.properties");
 		assertEquals ( "attribute=otherValue\ninteger=987", test);
 	}
-	
+
 	@Test
 	public void testFiles () throws IOException, NotFoundException, ResourceNotFoundException {
-		LoadedJarLibrary testee = LoadedJarLibrary.createFromJar( "../export/jars/i5.las2peer.classLoaders.testPackage1-1.1.jar" );
-	
+		LoadedJarLibrary testee = LoadedJarLibrary.createFromJar( "export/jars/i5.las2peer.classLoaders.testPackage1-1.1.jar" );
+
 		URL test = testee.getResourceAsUrl("i5/las2peer/classLoaders/testPackage1/CounterClass.class");
 		assertNotNull ( test );
-		
+
 		test = testee.getResourceAsUrl( "i5/las2peer/classLoaders/testPackage1/test.properties" );
 		assertNotNull ( test );
 	}
-	
+
 	@Test
 	public void testBinaryContent () throws IOException, NotFoundException, ResourceNotFoundException {
-		LoadedJarLibrary testee = LoadedJarLibrary.createFromJar( "../export/jars/i5.las2peer.classLoaders.testPackage1-1.1.jar" );
+		LoadedJarLibrary testee = LoadedJarLibrary.createFromJar( "export/jars/i5.las2peer.classLoaders.testPackage1-1.1.jar" );
 		byte[] result = testee.getResourceAsBinary("i5/las2peer/classLoaders/testPackage1/test.properties");
 		assertNotNull ( result );
 		assertTrue ( result.length > 0 );
-		
+
 		result = testee.getResourceAsBinary("i5/las2peer/classLoaders/testPackage1/CounterClass.class");
 		assertNotNull ( result );
 		assertTrue ( result.length > 0 );
