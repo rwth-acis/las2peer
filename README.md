@@ -22,7 +22,7 @@ or
 
 
 
-Building instructions: [![Build Status](https://travis-ci.org/Gordin/las2peer.png?branch=master)](https://travis-ci.org/Gordin/las2peer)
+Building instructions: [![Build Status](https://travis-ci.org/rwth-acis/las2peer.png?branch=master)](https://travis-ci.org/rwth-acis/las2peer)
 ----------------------
 For building simply run
     ant compile_all
