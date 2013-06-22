@@ -22,7 +22,7 @@
 	
 	<property name="lib" location="lib" />
 	<property name="lib.cp" 
-		location="${lib}/i5-simpleXML-0.1.jar:${lib}/commons-codec-1.7.jar:${lib}/FreePastry-2.1.jar:${lib}/i5-httpServer-0.2.jar:${lib}/junit-4.11.jar:${lib}/qvs/guava-9.jar:${lib}/xpp3-1.1.4c.jar" />
+		location="${lib}/simpleXML-0.1.jar:${lib}/commonsCodec-1.7.jar:${lib}/FreePastry-2.1.jar:${lib}/httpServer-0.2.jar:${lib}/junit-4.11.jar:${lib}/xpp3-1.1.4.jar" />
 	<property name="lib.junit" location="${lib}/junit-4.11.jar" />
 		
 	
@@ -175,7 +175,7 @@
 	
 	
 	
-	<target name="jars" depends="jar_test1-1.1, jar_test1-1.2, jar_test2-1.0, main_jar, test_service_jar, test_service_helper_jar, qvz_jar" />
+	<target name="jars" depends="jar_test1-1.1, jar_test1-1.2, jar_test2-1.0, main_jar, test_service_jar, test_service_helper_jar" />
 	
 	<target name="main_jar" depends="compile_all">
 		<jar jarfile="${export.jars}/las2peer.jar">
@@ -187,22 +187,8 @@
 				<attribute name="Main-Class" value="i5.las2peer.tools.ServiceStarter"/>
 				<attribute 
 					name="Class-Path" 
-					value="simpleXML.jar commons-codec-1.7.jar xpp3-1.1.4c.jar FreePastry-2.1.jar httpServer.jar"
+					value="simpleXML.jar commonsCodec-1.7.jar xpp3-1.1.4.jar FreePastry-2.1.jar httpServer.jar"
 				/>
-			</manifest>
-		</jar>
-	</target>
-	
-	<target name="qvz_jar" depends="compile_all">
-		<jar jarfile="${export.jars}/i5.las2peer.services.queryVisualization.jar">
-			<fileset dir="${tmp.classes}"
-				includes="i5/las2peer/services/queryVisualization/**">
-			</fileset>
-			<manifest>
-				<attribute name="Library-Version" value="0.0.1" />
-				<attribute name="Library-SymbolicName" value="i5.las2peer.services.queryVisualization" />
-				
-				<attribute name="Import-Library" value='guava;version="9",db2jcc;version="0,1",db2jcc_license_cu;version="0,1",db2jcc_javax;version="0,1",ojdbc;version="14",mysqlConnectorJava;version="5.1.16"' />
 			</manifest>
 		</jar>
 	</target>

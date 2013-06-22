@@ -4,3 +4,5 @@ output/
 .project
 export/
 tmp/
+.las2peer/
+log/

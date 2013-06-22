@@ -5,10 +5,6 @@ PREPARATIONS
 -----------------------
 
 If you use an Oracle Java version, you have to enable strong encryption for this software.
-To do this, you can use the provided
-    lib/java_stuff/local-policy.jar.java6
-or
-    lib/java_stuff/local-policy.jar.java7
 
 Just put the file matching your java version to
     [...]/lib/security/local-policy.jar
@@ -20,7 +16,7 @@ The policy files are downloadable via the Oracle webpage as well:
 or
 [JCE for Java 7](http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html "JCE-7")
 
-
+(If the unit-test "i5.las2peer.communication.MessageTest" runs successfully, you have enabled strong encryption correctly)
 
 Building instructions: [![Build Status](https://travis-ci.org/rwth-acis/las2peer.png?branch=master)](https://travis-ci.org/rwth-acis/las2peer)
 ----------------------
@@ -49,7 +45,7 @@ The class i5.las2peer.testing.L2pNodeLaucher provides a simple way to start a no
 All you have to know is a port, which you can open at your local machine.
 If you want to join an existing network, you will need to know address and port of at least one participant.
 
-For simplicity, you can just use the helper script located at bin/start_node.sh.
+For simplicity, you can just use the helper scripts located at bin/start_node.sh/.bat.
 
 
 So to start a new network, follow this steps:
@@ -57,18 +53,23 @@ So to start a new network, follow this steps:
 1. build everything with
     ant compile_all
 
-2. set up a log directory with
-    mkdir log
+2. run the starter script with
+    bin/start_node.sh -s 9001 - (Linux)
+    
+    cd bin
+    start_node.bat -s 9001 (Windows)
 
-3. run the starter script with
-    bin/start_node.sh -s 9001 -
-
-4. a) add an additional node to the net with
-      bin/start_node.sh -s 9002 /127.0.0.1:9001
+3. a) add an additional node to the net with
+      bin/start_node.sh -s 9002 /127.0.0.1:9001 (Linux)
+      
+      cd bin
+      start_node.bat -s 9002 /127.0.0.1:9001 (Windows)
 
 4. b) add an additional node hosted at another machine with
-      bin/start_node.sh -s 9001 /IP_OF_THE_FIRST_MACHINE:9001
-
+      bin/start_node.sh -s 9001 /IP_OF_THE_FIRST_MACHINE:9001 (Linux)
+	  
+	  cd bin
+	  start_node.bat -s 9001 /IP_OF_THE_FIRST_MACHINE:9001 (Windows)
 
 If you want to execute test methods at the nodes just put their names as additional command line parameters to the start_node.sh script like
     bin/start_node.sh 9001 - uploadAgents waitALittle waitALittle searchEve
