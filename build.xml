@@ -1,5 +1,8 @@
 <project name="las2peer" default="jars" basedir=".">
-
+	
+	<presetdef name="javac">
+	    <javac includeantruntime="false" />
+	</presetdef>
 	
 	<property name="src.main" location="src/main/java" />
 	<property name="src.junit" location="src/test/java" />
