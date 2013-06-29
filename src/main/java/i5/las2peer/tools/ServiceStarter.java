@@ -444,10 +444,10 @@ public class ServiceStarter {
 	 */
 	private static void checkClasses() {
 		String[] neededJars = new String[]{
-				"simpleXML.jar",
-				"xpp3.jar",
-				"FreePastry-2.1.jar",
-				"commons-codec-1.7.jar"
+			"i5-simpleXML-0.1.jar",
+			"xpp3-1.1.4c.jar",
+			"FreePastry-2.1.jar",
+			"commons-codec-1.7.jar"
 		};
 		
 		boolean check = true;
