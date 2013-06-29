@@ -181,13 +181,12 @@
 		<jar jarfile="${export.jars}/las2peer.jar">
 			<fileset dir="${tmp.classes}">
 				<exclude name="i5/las2peer/testing/services/**" />
-				<exclude name="i5/las2peer/services/**"/>
 			</fileset>
 			<manifest>
 				<attribute name="Main-Class" value="i5.las2peer.tools.ServiceStarter"/>
 				<attribute 
-					name="Class-Path" 
-					value="simpleXML.jar commons-codec-1.7.jar xpp3-1.1.4c.jar FreePastry-2.1.jar httpServer.jar"
+					name="Class-Path"
+					value="i5-simpleXML-0.1.jar commons-codec-1.7.jar xpp3-1.1.4c.jar FreePastry-2.1.jar i5-httpServer-0.2.jar"
 				/>
 			</manifest>
 		</jar>
