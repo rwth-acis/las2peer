@@ -139,7 +139,15 @@ public class LibraryClassLoader extends ClassLoader {
     	
 		// First, check if the class has already been loaded
 		Class<?> c = findLoadedClass(name);
-		
+
+		// Then check if the class is already known
+		try {
+			return getSystemClassLoader().loadClass(name);
+		} catch (ClassNotFoundException e) {
+			// Class in not known
+		}
+
+
 		if ( c == null ) {
 		    try {
 		    	return findClassInternal ( name );
@@ -152,11 +160,7 @@ public class LibraryClassLoader extends ClassLoader {
 			for ( Iterator<BundleClassLoader> it = parents.iterator(); it.hasNext() && c == null ; )
 				c = it.next().loadClass ( name, resolve, this );
 		}
-		            
-		// looks into bootstrap loader as well
-		if ( c == null )
-			return getSystemClassLoader().loadClass(name);
-		
+
 		if (resolve && c != null) {
 		    resolveClass(c);
 		}
