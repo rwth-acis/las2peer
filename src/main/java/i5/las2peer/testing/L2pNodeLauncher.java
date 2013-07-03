@@ -1748,7 +1748,7 @@ public class L2pNodeLauncher {
 			L2pNodeLauncher launcher = launchSingle( args, -1);
 			
 			if ( launcher.isFinished() )
-				System.out.println( "single node has handled all commands an shut down!");
+				System.out.println( "single node has handled all commands and shut down!");
 			else {
 				System.out.println ( "single node has handled all commands -- keeping node open\n");
 				System.out.println ( "press Strg-C to exit\n");
