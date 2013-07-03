@@ -165,12 +165,12 @@ public class LibraryClassLoader extends ClassLoader {
 		    resolveClass(c);
 		}
 		
-		if ( c == null  )
+		if ( c == null  ) {
 			Logger.logLoading(this, name, false, lookUp);
-		else
-			Logger.logLoading(this, name, true, lookUp);
-	
-		
+			throw new ClassNotFoundException();
+		}
+
+		Logger.logLoading(this, name, true, lookUp);
 		return c;
     }
 	
