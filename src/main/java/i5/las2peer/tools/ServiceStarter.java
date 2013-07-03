@@ -388,7 +388,6 @@ public class ServiceStarter {
 			Hashtable<String, Object> parameters = parseParameters ( argv );
 			addDefaultValues ( parameters );
 			
-			checkClasses ();
 			
 			L2pClassLoader cl = setupClassLoader( (Vector<String>) parameters.get("libdirs"));
 			
@@ -436,54 +435,6 @@ public class ServiceStarter {
 		}
 		
 	}
-
-
-	/**
-	 * check for needed java classes or libraries
-	 */
-	private static void checkClasses() {
-		String[] neededJars = new String[]{
-			"i5-simpleXML-0.1.jar",
-			"xpp3-1.1.4c.jar",
-			"FreePastry-2.1.jar",
-			"commons-codec-1.7.jar"
-		};
-		
-		boolean check = true;
-		for ( String checkJar : neededJars ) {
-			if ( ! new File ( checkJar ).exists() ) {
-				System.err.println( "Warning: needed jar " + checkJar + " not found!");
-				check = false;
-			}
-		}
-		
-		if ( check ) return;
-		
-		
-		String[] testClasses = new String [] {
-			"rice.p2p.past.Past",
-			"org.apache.commons.codec.binary.Base64",
-			"i5.simpleXML.Parser",
-			"org.xmlpull.v1.XmlPullParser"
-		};
-		
-	
-		for ( String testClass : testClasses ) {
-			try {
-				Class.forName( testClass );
-			} catch ( ClassNotFoundException e ) {
-				printHelp( "Attention: either make sure, that all needed jars (" 
-						+ SimpleTools.join(neededJars,  ", ") 
-						+ ") are available either in the execution directory or in the classpath");
-				System.exit(10);
-			}
-		}
-		
-		
-	}	
-	
-	
-	
 	
 	private static void startHttpConnector ( Node node, final int iPort ) {
 		
