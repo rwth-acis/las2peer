@@ -42,8 +42,7 @@ public class ServiceStarter {
 
 	
 	public static final String DEFAULT_LOG = "./log/las2peer.log";
-	//public static final String DEFAULT_BOOTSTRAP = "127.0.0.1:9000";
-	public static final String DEFAULT_BOOTSTRAP = "tosini.informatik.rwth-aachen.de:9085";
+	public static final String DEFAULT_BOOTSTRAP = "127.0.0.1:9000";
 	
 	public static final int DEFAULT_PORT = 9010;
 	public static final String DEFAULT_PASTRY_DIR = ".pastry_data";
@@ -88,7 +87,7 @@ public class ServiceStarter {
 				result.put( "logfile",  argv[lauf+1]);
 				lauf += 2;
 			} else if ( argv[lauf].equals ( "-d")) {
-				((Vector<String>)result.get( "libdir")).add(argv[lauf+1]);
+				((Vector<String>)result.get( "libdirs")).add(argv[lauf+1]);
 				lauf += 2;
 			} else if ( argv[lauf].equals ( "-b")) {
 				if ( result.containsKey("bootstrap"))
