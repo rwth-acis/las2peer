@@ -58,8 +58,6 @@
 		       destdir="${tmp.classes}"
 			   classpath="${lib.cp}"
 			   debug="on"
-			   source="1.6"
-			   target="1.6"
 			   encoding="UTF-8"
 		/>
 		<copy todir="${tmp.classes}">
@@ -73,8 +71,6 @@
 		       destdir="${tmp.junit}"
 			   classpath="${lib.cp}:${tmp.classes}:${lib.junit}"
 			   debug="on"
-			   source="1.6"
-			   target="1.6"
 			   encoding="UTF-8"
 		/>
 		<copy todir="${tmp.junit}">
@@ -88,8 +84,6 @@
 		       destdir="${tmp.help1}"
 			   classpath=""
 			   debug="on"
-			   source="1.6"
-			   target="1.6"
 			   encoding="UTF-8"
 		/>
 		<copy todir="${tmp.help1}">
@@ -104,8 +98,6 @@
 		       destdir="${tmp.help2}"
 			   classpath=""
 			   debug="on"
-			   source="1.6"
-			   target="1.6"
 			   encoding="UTF-8"
 		/>
 		<copy todir="${tmp.help2}">
@@ -243,7 +235,6 @@
 	                         author="true"
 	                 version="true"
 	                     use="true"
-	                     source="1.5"
 	                 windowtitle="las2peer documentation"
 	                 failonerror="yes"
 	                 encoding="utf8"
@@ -262,7 +253,6 @@
 	                         author="true"
 	                 version="true"
 	                     use="true"
-	                     source="1.5"
 	                 windowtitle="las2peer documentation"
 	                 failonerror="yes"
 	                 encoding="utf8"
