@@ -410,16 +410,6 @@ public class ServiceStarter {
 			if ( parameters.containsKey("startHttp")) 
 				startHttpConnector(n, (Integer) parameters.get("startHttp"));
 			
-			try {
-				Thread.sleep( 5000 );
-				
-				System.out.println( "testing eve retrieval");
-				Agent eve = n.getAgent ( MockAgentFactory.getEve().getId() );
-				
-				System.out.println( "successfully fetched eve: " + eve );
-			} catch ( Exception e ) {}
-			
-			
 		} catch ( IllegalArgumentException e ) {
 			printHelp ( e.getMessage() );
 			System.exit(10);
