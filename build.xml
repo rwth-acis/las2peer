@@ -24,7 +24,7 @@
 	<property name="export.junitdoc" location="${export}/junitdoc" />
 	
 	<property name="lib" location="lib" />
-	<property name="lib.cp" 
+	<property name="lib.cp"
 		location="${lib}/i5-simpleXML-0.1.jar:${lib}/commons-codec-1.7.jar:${lib}/FreePastry-2.1.jar:${lib}/i5-httpServer-0.2.jar:${lib}/junit-4.11.jar:${lib}/qvs/guava-9.jar:${lib}/xpp3-1.1.4c.jar" />
 	<property name="lib.junit" location="${lib}/junit-4.11.jar" />
 		
@@ -61,8 +61,6 @@
 		       destdir="${tmp.classes}"
 			   classpath="${lib.cp}"
 			   debug="on"
-			   source="1.6"
-			   target="1.6"
 			   encoding="UTF-8"
 		/>
 		<copy todir="${tmp.classes}">
@@ -76,8 +74,6 @@
 		       destdir="${tmp.junit}"
 			   classpath="${lib.cp}:${tmp.classes}:${lib.junit}"
 			   debug="on"
-			   source="1.6"
-			   target="1.6"
 			   encoding="UTF-8"
 		/>
 		<copy todir="${tmp.junit}">
@@ -91,8 +87,6 @@
 		       destdir="${tmp.help1}"
 			   classpath=""
 			   debug="on"
-			   source="1.6"
-			   target="1.6"
 			   encoding="UTF-8"
 		/>
 		<copy todir="${tmp.help1}">
@@ -107,8 +101,6 @@
 		       destdir="${tmp.help2}"
 			   classpath=""
 			   debug="on"
-			   source="1.6"
-			   target="1.6"
 			   encoding="UTF-8"
 		/>
 		<copy todir="${tmp.help2}">
@@ -187,9 +179,9 @@
 			</fileset>
 			<manifest>
 				<attribute name="Main-Class" value="i5.las2peer.tools.ServiceStarter"/>
-				<attribute 
+				<attribute
 					name="Class-Path"
-					value="i5-simpleXML-0.1.jar commons-codec-1.7.jar xpp3-1.1.4c.jar FreePastry-2.1.jar i5-httpServer-0.2.jar"
+					value="${lib}/i5-simpleXML-0.1.jar ${lib}/commons-codec-1.7.jar ${lib}/FreePastry-2.1.jar ${lib}/i5-httpServer-0.2.jar ${lib}/xpp3-1.1.4c.jar"
 				/>
 			</manifest>
 		</jar>
@@ -246,7 +238,6 @@
 	                         author="true"
 	                 version="true"
 	                     use="true"
-	                     source="1.5"
 	                 windowtitle="las2peer documentation"
 	                 failonerror="yes"
 	                 encoding="utf8"
@@ -265,7 +256,6 @@
 	                         author="true"
 	                 version="true"
 	                     use="true"
-	                     source="1.5"
 	                 windowtitle="las2peer documentation"
 	                 failonerror="yes"
 	                 encoding="utf8"

@@ -46,7 +46,7 @@ public class ServiceStarter {
 	
 	public static final int DEFAULT_PORT = 9010;
 	public static final String DEFAULT_PASTRY_DIR = ".pastry_data";
-	public static final String DEFAULT_LIB ="./lib/";
+	public static final String DEFAULT_SERVICE ="./service/";
 	
 	
 	/**
@@ -59,7 +59,7 @@ public class ServiceStarter {
 	@SuppressWarnings("unchecked")
 	private static Hashtable<String, Object> parseParameters ( String[] argv ) {
 		Hashtable<String, Object> result = new Hashtable<String, Object> ();
-		result.put("libdirs", new Vector<String>());
+		result.put("servicedirs", new Vector<String>());
 		
 		Vector<String> serviceClasses = new Vector<String> ();
 		Vector<String> serviceXmls = new Vector<String > ();
@@ -87,7 +87,7 @@ public class ServiceStarter {
 				result.put( "logfile",  argv[lauf+1]);
 				lauf += 2;
 			} else if ( argv[lauf].equals ( "-d")) {
-				((Vector<String>)result.get( "libdirs")).add(argv[lauf+1]);
+				((Vector<String>)result.get( "servicedirs")).add(argv[lauf+1]);
 				lauf += 2;
 			} else if ( argv[lauf].equals ( "-b")) {
 				if ( result.containsKey("bootstrap"))
@@ -145,10 +145,10 @@ public class ServiceStarter {
 			parameters.put( "port", DEFAULT_PORT);
 		if ( ! parameters.containsKey("pastryDir"))
 			parameters.put( "pastryDir", DEFAULT_PASTRY_DIR);
-		if ( ! parameters.containsKey("libdirs") || ((Vector<String>) parameters.get("libdirs")).size() == 0 ) {
-			Vector<String> libdirs = new Vector<String> ();
-			libdirs.add (DEFAULT_LIB);
-			parameters.put ( "libdirs", libdirs);
+		if ( ! parameters.containsKey("servicedirs") || ((Vector<String>) parameters.get("servicedirs")).size() == 0 ) {
+			Vector<String> servicedirs = new Vector<String> ();
+			servicedirs.add (DEFAULT_SERVICE);
+			parameters.put ( "servicedirs", servicedirs);
 		}
 		if ( ! parameters.containsKey("logprefix"))
 			parameters.put( "logprefix", DEFAULT_LOG);
@@ -181,8 +181,8 @@ public class ServiceStarter {
 	 * @return a class loader looking into the given directories
 	 * 
 	 */
-	private static L2pClassLoader setupClassLoader( Vector<String> libDirs ) {
-		return new L2pClassLoader( new FileSystemRepository ( libDirs.toArray(new String[0])), ServiceStarter.class.getClassLoader() );
+	private static L2pClassLoader setupClassLoader( Vector<String> servicedirs ) {
+		return new L2pClassLoader( new FileSystemRepository ( servicedirs.toArray(new String[0])), ServiceStarter.class.getClassLoader() );
 	}
 	
 	
@@ -389,7 +389,7 @@ public class ServiceStarter {
 			addDefaultValues ( parameters );
 			
 			
-			L2pClassLoader cl = setupClassLoader( (Vector<String>) parameters.get("libdirs"));
+			L2pClassLoader cl = setupClassLoader( (Vector<String>) parameters.get("servicedirs"));
 			
 			Vector<ServiceAgent> agentsFromXml = loadAgents (
 					(Vector<String>) parameters.get("serviceXmls"), 
@@ -409,16 +409,6 @@ public class ServiceStarter {
 			
 			if ( parameters.containsKey("startHttp")) 
 				startHttpConnector(n, (Integer) parameters.get("startHttp"));
-			
-			try {
-				Thread.sleep( 5000 );
-				
-				System.out.println( "testing eve retrieval");
-				Agent eve = n.getAgent ( MockAgentFactory.getEve().getId() );
-				
-				System.out.println( "successfully fetched eve: " + eve );
-			} catch ( Exception e ) {}
-			
 			
 		} catch ( IllegalArgumentException e ) {
 			printHelp ( e.getMessage() );
