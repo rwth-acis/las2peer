@@ -490,15 +490,14 @@ public abstract class Node implements AgentStorage {
 	 * @throws CryptoException 
 	 */
 	public NodeInformation getNodeInformation () throws CryptoException {
-		NodeInformation result;
+		NodeInformation result = new NodeInformation( getRegisteredServices() );
+
 		try {
 			if ( sInformationFileName != null && new File(sInformationFileName).exists())
 				result = NodeInformation.createFromXmlFile ( sInformationFileName, getRegisteredServices());
 		} catch ( Exception e ) {
 			e.printStackTrace();
 		}
-		
-		result =  new NodeInformation ( getRegisteredServices());
 		
 		result.setNodeHandle(getNodeId());
 		result.setNodeKey ( nodeKeyPair.getPublic());
