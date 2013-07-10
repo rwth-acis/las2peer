@@ -136,9 +136,6 @@ public class LibraryClassLoader extends ClassLoader {
 		throws ClassNotFoundException {
     	    
 		Logger.logLoading(this, name, null, lookUp);
-    	
-		// First, check if the class has already been loaded
-		Class<?> c = findLoadedClass(name);
 
 		// Then check if the class is already known
 		try {
@@ -147,6 +144,8 @@ public class LibraryClassLoader extends ClassLoader {
 			// Class in not known
 		}
 
+		// First, check if the class has already been loaded
+		Class<?> c = findLoadedClass(name);
 
 		if ( c == null ) {
 		    try {
