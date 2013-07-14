@@ -405,7 +405,7 @@ public class L2pNodeLauncher {
 			
 			printMessage ( "Started Service: " + agent.getServiceClassName());
 		} catch (Exception e) {
-			printWarning ("Exception while registerung Service-Agent for TestService: " + e ); 
+			printWarning ("Exception while registering Service-Agent for TestService: " + e );
 		}
 	}
 	
