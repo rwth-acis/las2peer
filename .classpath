@@ -13,7 +13,7 @@
 	<classpathentry kind="lib" path="lib/FreePastry-2.1.jar"/>
 	<classpathentry kind="lib" path="lib/i5-httpServer-0.2.jar"/>
 	<classpathentry kind="lib" path="lib/i5-simpleXML-0.1.jar"/>
-	<classpathentry kind="lib" path="lib/junit4-4.8.2.jar"/>
 	<classpathentry kind="lib" path="lib/xpp3-1.1.4c.jar"/>
+	<classpathentry kind="lib" path="lib/junit-4.11.jar"/>
 	<classpathentry kind="output" path="output"/>
 </classpath>
