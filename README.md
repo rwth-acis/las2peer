@@ -5,22 +5,18 @@ PREPARATIONS
 -----------------------
 
 If you use an Oracle Java version, you have to enable strong encryption for this software.
-To do this, you can use the provided
-    lib/java_stuff/local-policy.jar.java6
-or
-    lib/java_stuff/local-policy.jar.java7
 
 Just put the file matching your java version to
     [...]/lib/security/local-policy.jar
 of your used java runtime. (You have to replace the existing one.)
 
-The policy files are downloadable via the Oracle webpage as well:
+The policy files are downloadable via the Oracle webpage:
 
 [JCE for Java 6](http://www.oracle.com/technetwork/java/javase/downloads/jce-6-download-429243.html "JCE-6")
 or
 [JCE for Java 7](http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html "JCE-7")
 
-
+(If the unit-test "i5.las2peer.communication.MessageTest" runs successfully, you have enabled strong encryption correctly)
 
 Building instructions: [![Build Status](https://travis-ci.org/rwth-acis/las2peer.png?branch=master)](https://travis-ci.org/rwth-acis/las2peer)
 ----------------------
