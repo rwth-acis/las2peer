@@ -181,7 +181,7 @@
 				<attribute name="Main-Class" value="i5.las2peer.tools.ServiceStarter"/>
 				<attribute
 					name="Class-Path"
-					value="${lib}/i5-simpleXML-0.1.jar ${lib}/commons-codec-1.7.jar ${lib}/FreePastry-2.1.jar ${lib}/i5-httpServer-0.2.jar ${lib}/xpp3-1.1.4c.jar"
+					value="i5-simpleXML-0.1.jar commons-codec-1.7.jar FreePastry-2.1.jar i5-httpServer-0.2.jar xpp3-1.1.4c.jar"
 				/>
 			</manifest>
 		</jar>
