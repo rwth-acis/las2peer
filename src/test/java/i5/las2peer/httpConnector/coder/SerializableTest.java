@@ -13,7 +13,7 @@ import org.junit.Test;
 
 
 /**
- * TestSerializable.java
+ * SerializableTest.java
  *
  * @author Holger Jan�en
  * @version	$Revision: 1.1 $, $Date: 2013/01/23 20:08:04 $

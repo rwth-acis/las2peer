@@ -1,9 +1,9 @@
 package i5.las2peer.httpConnector.coder;
 
-import java.io.ObjectOutputStream;
 import java.io.IOException;
-import java.io.Serializable;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 
 
 /**
@@ -19,14 +19,14 @@ import java.io.ObjectInputStream;
  * i field.
  * <br />
  * Next point in the demonstration is, that the standard constructor of the
- * superclass ({@link SomeClass#()}) is called in the deserialization.
+ * superclass ({@link SomeClass}) is called in the deserialization.
  * It is the standard constructor of the first superclass not implementing
  * Serializable. If this class does not have a standard constructor, an exception
  * is thrown during the deserialization process.
  * <br />
  * Feel free to comment out the constructor of SomeClass or the writeObject and
  * readObject methods of this class to observe the described behaviour while running
- * the {@link TestSerializable} TestCase.
+ * the {@link SerializableTest} TestCase.
  *
  *
  * @author Holger Jan�en
