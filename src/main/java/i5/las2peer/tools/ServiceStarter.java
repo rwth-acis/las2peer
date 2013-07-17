@@ -11,11 +11,9 @@ import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.NodeException;
 import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.persistency.MalformedXMLException;
-import i5.las2peer.security.Agent;
 import i5.las2peer.security.AgentException;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.ServiceAgent;
-import i5.las2peer.testing.MockAgentFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
