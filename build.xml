@@ -96,8 +96,24 @@
 			</fileset>
 		</copy>
 	</target>
+	<target name="compile_help2" depends="init_compile">
+		<javac srcdir="${src.help2}"
+		       destdir="${tmp.help2}"
+			   classpath=""
+			   debug="on"
+			   encoding="UTF-8"
+		/>
+		<copy todir="${tmp.help2}">
+			<fileset dir="${src.help2}">
+				<exclude name="**/*.java" />
+				<exclude name="*.java" />
+			</fileset>
+		</copy>
+	</target>
 
-	<target name="compile_all" depends="compile_main, compile_junit, compile_help1" />
+	<target name="compile_all" depends="compile_main, compile_junit, compile_help1, compile_help2" />
+	
+	
 	
 	<target name="jar_test1-1.1" depends="init_jars, compile_help1">
 		<jar jarfile="${export.jars}/i5.las2peer.classLoaders.testPackage1-1.0.jar">
@@ -116,7 +132,7 @@
 		</jar>
 	</target>
 	
-	<target name="jar_test1-1.2" depends="init_jars">
+	<target name="jar_test1-1.2" depends="init_jars, compile_help2">
 		<jar jarfile="${export.jars}/i5.las2peer.classLoaders.testPackage1-1.1.jar">
 			<fileset dir="${tmp.help2}">
 				<include name="i5/las2peer/classLoaders/testPackage1/**/*" />
