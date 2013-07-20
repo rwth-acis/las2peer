@@ -7,7 +7,6 @@ import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
 import i5.las2peer.tools.SerializationException;
 import i5.las2peer.tools.SerializeTools;
-import i5.las2peer.security.L2pSecurityException;
 import i5.simpleXML.Element;
 import i5.simpleXML.Parser;
 import i5.simpleXML.XMLSyntaxException;
@@ -28,7 +27,7 @@ import org.apache.commons.codec.binary.Base64;
  * The storage of the group information is stored encrypted in a similar manner to 
  * {@link i5.las2peer.persistency.Envelope}:
  * 
- * The (symmetric) key to unlock the private key of the group is encryped asymmetricalle for
+ * The (symmetric) key to unlock the private key of the group is encrypted asymmetrically for
  * each entitled agent (i.e. <i>member</i> of the group).
  * 
  * 
