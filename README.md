@@ -53,16 +53,13 @@ So to start a new network, follow this steps:
 1. build everything with
     ant compile_all
 
-2. set up a log directory with
-    mkdir log
-
-3. run the starter script with
+2. run the starter script with
     bin/start_node.sh -s 9001 -
 
-4. a) add an additional node to the net with
+3. a) add an additional node to the net with
       bin/start_node.sh -s 9002 /127.0.0.1:9001
 
-4. b) add an additional node hosted at another machine with
+3. b) add an additional node hosted at another machine with
       bin/start_node.sh -s 9001 /IP_OF_THE_FIRST_MACHINE:9001
 
 
