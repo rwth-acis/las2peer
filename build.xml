@@ -170,7 +170,8 @@
 	
 	
 	
-	<target name="jars" depends="jar_test1-1.1, jar_test1-1.2, jar_test2-1.0, main_jar, test_service_jar, test_service_helper_jar" />
+	<target name="jars" depends="main_jar, test_service_jar, test_service_helper_jar" />
+	<target name="junit_jars" depends="jar_test1-1.1, jar_test1-1.2, jar_test2-1.0" />
 	
 	<target name="main_jar" depends="compile_all">
 		<jar jarfile="${export.jars}/las2peer.jar">
@@ -272,7 +273,7 @@
 		<delete dir="${tmp.junit}" />
 	</target>
 	
-	 <target name="junit_tests" depends="init_junit, compile_all">
+	 <target name="junit_tests" depends="init_junit, junit_jars, compile_all">
 	                <junit fork="yes" haltonerror="yes" haltonfailure="yes" printsummary="yes">
 	                                <classpath>
                                         <pathelement path="${tmp.classes}" />
