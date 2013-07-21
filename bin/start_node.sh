@@ -1,8 +1,8 @@
 #! /bin/sh
 
-BINPATH=$(dirname $0)/
+BINPATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 mkdir -p log
 
-${BINPATH}start_java.sh i5.las2peer.testing.L2pNodeLauncher $1 $2 $3 $4 $5 $6 $7 $8 $9
+${BINPATH}/start_java.sh i5.las2peer.testing.L2pNodeLauncher "$@"
 

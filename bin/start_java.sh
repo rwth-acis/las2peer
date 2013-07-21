@@ -1,9 +1,9 @@
 #! /bin/bash
 
-BASE=$(dirname $0)/../
+BASE="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../
 
-if [ ! -d ${BASE}tmp/classes ]; then
-	echo "Classes directory does not exist - did you do an 'ant' or 'ant complile_all'?"
+if [ ! -e "${BASE}export/jars/las2peer.jar" ]; then
+	echo "Do 'ant jars' before running this!"
 	echo
 	exit
 fi;
@@ -13,11 +13,11 @@ if [ $(uname -o) = "Cygwin" ]
 then
     # we're in cygwin
 	export COLOR_DISABLED=1
-	export CLASSPATH="${BASE}tmp/classes/;${BASE}tmp/junit/;${BASE}lib/i5-simpleXML-0.1.jar;${BASE}lib/FreePastry-2.1.jar;${BASE}lib/commons-codec-1.7.jar;${BASE}lib/xpp3-1.1.4c.jar;${BASE}lib/i5-httpServer-0.2.jar;"
+	export CLASSPATH="${BASE}lib/*;${BASE}export/jars/las2peer.jar;"
 else
 	# we're somewhere else
-	export CLASSPATH="${BASE}tmp/classes/:${BASE}tmp/junit/:${BASE}lib/i5-simpleXML-0.1.jar:${BASE}lib/FreePastry-2.1.jar:${BASE}lib/commons-codec-1.7.jar:${BASE}lib/xpp3-1.1.4c.jar:${BASE}lib/i5-httpServer-0.2.jar"
+	export CLASSPATH="${BASE}lib/*:${BASE}export/jars/las2peer.jar"
 fi
 
 
-java "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9"
+java -cp "${CLASSPATH}" "$@"
