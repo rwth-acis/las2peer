@@ -219,7 +219,7 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	 */
 	public void notifyUnregister() {
 		if ( this instanceof ServiceAgent )
-			runningAt.observerNotice(Event.SERVICE_SHUTDOWN, "started Service " + ((ServiceAgent)this).getServiceClassName());
+			runningAt.observerNotice(Event.SERVICE_SHUTDOWN, "Service " + ((ServiceAgent)this).getServiceClassName());
 		runningAt = null;
 	}
 	
