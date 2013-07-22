@@ -217,7 +217,7 @@ public class HttpConnectorRequestHandler implements RequestHandler {
 			// unknown or not processable request!
 			response.setStatus( HttpResponse.STATUS_NOT_FOUND );
 			response.setContentType( "text/plain" );
-			response.println ( "File delivery is not enabled at this server. THis is just an application server." );
+			response.println ( "File delivery is not enabled at this server. This is just an application server." );
 			connector.logMessage( request.getRemoteAddress() + ": unknown request - " + request.getPath() );
 		}
 				
