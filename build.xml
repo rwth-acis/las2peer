@@ -234,7 +234,7 @@
 	                <include name="i5/las2peer/**" />
 	            </packageset>
 	            
-	            <bottom><![CDATA[<p class="bottom">Copyright &#169; 2012 by Holger Janßen, Aachen, Germany. All Rights Reserved.</p>]]></bottom>
+	            <bottom><![CDATA[<p class="bottom">Copyright &#169; 2012 - 2013 by Holger Jan&szlig;en, Aachen, Germany. All Rights Reserved.</p>]]></bottom>
 	                </javadoc>
 	</target>
 
@@ -253,7 +253,7 @@
 	                <include name="i5/las2peer/**" />
 	            </packageset>
 	            
-	            <bottom><![CDATA[<p class="bottom">Copyright &#169; 2012 by Holger Janßen, Aachen, Germany. All Rights Reserved.</p>]]></bottom>
+	            <bottom><![CDATA[<p class="bottom">Copyright &#169; 2012 - 2013 by Holger Jan&szlig;en, Aachen, Germany. All Rights Reserved.</p>]]></bottom>
 	                </javadoc>
 	</target>
 	
