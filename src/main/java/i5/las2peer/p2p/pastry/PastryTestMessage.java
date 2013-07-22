@@ -5,11 +5,10 @@ import rice.p2p.commonapi.Message;
 
 
 /**
- * a simple test message to be sent through the pastry network
+ * A simple test message to be sent through the pastry network
  * will be removed later
  * 
- * @author Holger Janssen
- * @version $Revision: 1.2 $, $Date: 2012/12/11 16:17:44 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class PastryTestMessage implements Message {

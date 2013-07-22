@@ -1,19 +1,19 @@
-/**
- * Simple tests for the XML decoder
- *
- * @author Holger Jan�en
- * @version	$Revision: 1.1 $, $Date: 2013/01/23 20:08:04 $
- */
-
 package i5.las2peer.httpConnector;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import i5.las2peer.httpConnector.coder.InvalidCodingException;
 import i5.las2peer.httpConnector.coder.XmlDecoder;
 
 import java.io.StringReader;
 
-import org.junit.*;
-import static org.junit.Assert.*;
+import org.junit.Test;
+
+/**
+ * Simple tests for the XML decoder
+ *
+ * @author Holger Jan&szlig;en
+ */
 
 public class TestXmlDecoder 
 {

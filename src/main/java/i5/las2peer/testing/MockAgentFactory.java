@@ -16,10 +16,9 @@ import java.security.NoSuchAlgorithmException;
 
 
 /**
- * simple Factory class to load Agents from the nested xml files
+ * Simple Factory class to load Agents from the nested XML files.
  * 
- * @author Holger Janssen
- * @version $Revision: 1.6 $, $Date: 2013/04/10 11:16:20 $
+ * @author Holger Jan&szlig;en
  *
  */
 public abstract class MockAgentFactory  {

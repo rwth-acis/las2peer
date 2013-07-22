@@ -32,26 +32,24 @@ import org.apache.commons.codec.binary.Base64;
 
 
 /**
- * An envelope provides a secure storage for any serializable content within the las2peer network.
+ * An envelope provides a secure storage for any serializable content within the LAS2peer network.
  * 
  * The content will be encrypted symmetrically, the key for opening the envelope will be provided to all 
  * entitled {@link i5.las2peer.security.Agent}s  via asymmetrical encryption.
  * All encrypted versions of the decryption key are part of the envelope itself.
  * 
- * The serialization of the content may be implementad via simple java serialization
+ * The serialization of the content may be implemented via simple java serialization
  * or the {@link XmlAble} facilities of las2peer.
  * 
  * @author Holger Janßen
- * @version $Revision: 1.21 $, $Date: 2013/04/10 10:09:54 $
  *
  */
 public final class Envelope implements XmlAble, Cloneable {
 		
 	/**
-	 * type of the content inside the envelope
+	 * Type of the content inside the envelope.
 	 * 
-	 * @author Holger Janssen
-	 * @version $Revision: 1.21 $, $Date: 2013/04/10 10:09:54 $
+	 * @author Holger Jan&szlig;en
 	 *
 	 */
 	public enum ContentType { String, XmlAble, Serializable, Binary };

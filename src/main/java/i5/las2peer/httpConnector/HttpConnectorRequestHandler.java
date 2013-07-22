@@ -4,10 +4,10 @@ import i5.httpServer.HttpRequest;
 import i5.httpServer.HttpResponse;
 import i5.httpServer.RequestHandler;
 import i5.las2peer.api.ConnectorException;
-import i5.las2peer.execution.UnlockNeededException;
 import i5.las2peer.execution.NoSuchServiceException;
 import i5.las2peer.execution.NoSuchServiceMethodException;
 import i5.las2peer.execution.ServiceInvocationException;
+import i5.las2peer.execution.UnlockNeededException;
 import i5.las2peer.httpConnector.coder.CodingException;
 import i5.las2peer.httpConnector.coder.InvalidCodingException;
 import i5.las2peer.httpConnector.coder.ParamCoder;
@@ -35,16 +35,15 @@ import java.util.Hashtable;
 
 
 /**
- * A HttpServer RequestHandler for handling requests to the las http connector.
+ * A HttpServer RequestHandler for handling requests to the LAS2peer HTTP connector.
  * Each request will be distributed to its corresponding session.
  *
- * Current Problem:
+ * Current Problem (LAS related, maybe out-dated..):
  * This class will be used by an library (the HttpServer), so it has to be provided
  * as an library as well. To gain access to the configuration parameters the way
  * back to the service will be needed, but this is not allowed by the las class loaders.
  *
  * @author Holger Janßen
- * @version $Revision: 1.17 $, $Date: 2013/04/10 11:20:15 $
  */
 
 

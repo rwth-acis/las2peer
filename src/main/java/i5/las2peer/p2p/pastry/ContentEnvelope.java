@@ -1,11 +1,12 @@
 package i5.las2peer.p2p.pastry;
 
-import java.util.Date;
-
 import i5.las2peer.persistency.Envelope;
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.security.Agent;
 import i5.las2peer.security.L2pSecurityException;
+
+import java.util.Date;
+
 import rice.environment.Environment;
 import rice.p2p.commonapi.Id;
 import rice.p2p.commonapi.IdFactory;
@@ -15,13 +16,12 @@ import rice.p2p.past.PastException;
 import rice.pastry.commonapi.PastryIdFactory;
 
 /**
- * A simple envelope for las2peer data to be stored in the p2p network.
+ * A simple envelope for LAS2peer data to be stored in the p2p network.
  * 
  * On knowledge of the class of the contained data the user may use the <i>getContained...</i>
  * methods to get typed access. 
  * 
- * @author Holger Janssen
- * @version $Revision: 1.11 $, $Date: 2013/04/10 10:09:54 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class ContentEnvelope extends ContentHashPastContent {

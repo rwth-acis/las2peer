@@ -1,25 +1,23 @@
 package i5.las2peer.httpConnector.coder;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.BufferedReader;
-import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Reader;
 import java.io.Serializable;
-import java.io.ObjectInputStream;
-import java.io.ByteArrayInputStream;
-
-import org.apache.commons.codec.binary.Base64;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.apache.commons.codec.binary.Base64;
 
 /**
  * The XmlDecoder decodes parameters coded by the {@link XmlCoder} and read as XML data
  * from the given reader.
  *
  * @author Holger Janßen
- * @version $Revision: 1.3 $, $Date: 2013/01/23 20:08:04 $
  */
 
 public class XmlDecoder extends ParamDecoder {

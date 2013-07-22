@@ -21,8 +21,7 @@ import java.util.regex.Pattern;
  * The connector client is the basic class for accessing a remote LAS server
  * via the http connector within any java application.
  *
- * @author Holger Jan�en
- * @version $Revision: 1.3 $, $Date: 2013/02/12 17:53:23 $
+ * @author Holger Jan&szlig;en
  */
 
 public class Client {

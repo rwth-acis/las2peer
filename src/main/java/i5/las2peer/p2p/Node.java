@@ -54,13 +54,12 @@ import java.util.Vector;
 import rice.pastry.NodeHandle;
 
 /**
- * Base class for nodes in the las2peer environment.
+ * Base class for nodes in the LAS2peer environment.
  * 
  * A Node represents one enclosed unit in the network hosting an arbitrary number of
  * agents willing to participate in the P2P networking.
  * 
- * @author Holger Janssen
- * @version $Revision: 1.29 $, $Date: 2013/04/15 02:21:37 $
+ * @author Holger Jan&szlig;en
  *
  */
 public abstract class Node implements AgentStorage {
@@ -71,10 +70,9 @@ public abstract class Node implements AgentStorage {
 
 
 	/**
-	 * sending mode for outgoing messages
+	 * The Sending mode for outgoing messages.
 	 * 
-	 * @author Holger Janssen
-	 * @version $Revision: 1.29 $, $Date: 2013/04/15 02:21:37 $
+	 * @author Holger Jan&szlig;en
 	 *
 	 */
 	public enum SendMode { ANYCAST, BROADCAST };
@@ -83,7 +81,6 @@ public abstract class Node implements AgentStorage {
 	 * enum with the possible states of a node.
 	 * 
 	 * @author Holger Janßen
-	 * @version $Revision: 1.29 $, $Date: 2013/04/15 02:21:37 $
 	 *
 	 */
 	public enum NodeStatus {

@@ -18,8 +18,7 @@ import java.util.Iterator;
  * implements a repository which loads all libraries from a given directory or from severeal ones.
  * The search for library files (jars) may be recursive.
  *  
- * @author Holger Janssen
- * @version $Revision: 1.6 $, $Date: 2013/02/22 01:45:18 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class FileSystemRepository implements Repository {

@@ -1,10 +1,9 @@
 package i5.las2peer.tools;
 
 /**
- * a simple thread waiting for a result
+ * A simple thread waiting for a result.
  * 
- * @author Holger Janssen
- * @version $Revision: 1.3 $, $Date: 2013/02/25 00:31:20 $
+ * @author Holger Jan&szlig;en
  *
  * @param <T>
  */

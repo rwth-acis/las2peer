@@ -1,6 +1,5 @@
 package i5.las2peer.execution;
 
-import i5.las2peer.execution.L2pServiceException;
 
 
 /**
@@ -8,7 +7,6 @@ import i5.las2peer.execution.L2pServiceException;
  * method leads to an internal exception
  * 
  * @author Holger Janßen
- * @version $Revision: 1.1 $, $Date: 2013/01/25 14:19:18 $
  *
  */
 public class ServiceInvocationException extends L2pServiceException {

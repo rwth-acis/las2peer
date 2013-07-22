@@ -62,7 +62,7 @@ import rice.p2p.commonapi.NodeHandle;
 
 
 /**
- * this class implements a simple node launcher with additional 
+ * This class implements a simple node launcher with additional 
  * methods for testing purposes.
  * 
  * The first command line parameter is the port to open for access from the p2p network.
@@ -74,8 +74,7 @@ import rice.p2p.commonapi.NodeHandle;
  * 
  * All static and parameterless methods of this class can be used this way.
  * 
- * @author Holger Janssen
- * @version $Revision: 1.31 $, $Date: 2013/04/15 02:21:38 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class L2pNodeLauncher {

@@ -4,8 +4,7 @@ package i5.las2peer.api;
 /**
  * static helper methods for invocation of service methods via reflection 
  * 
- * @author Holger Janssen
- * @version $Revision: 1.2 $, $Date: 2013/02/12 17:53:23 $
+ * @author Holger Jan&szlig;en
  *
  */
 public abstract class ServiceHelper {

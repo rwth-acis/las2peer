@@ -41,10 +41,9 @@ import rice.pastry.commonapi.PastryIdFactory;
  * network.
  * 
  * In particular, message sending and retrieval, artifact storage via past and publish/subscribe via
- * scribe are used to provide the las2peer node (and agent) communication
+ * scribe are used to provide the LAS2peer node (and agent) communication.
  * 
- * @author Holger Janssen
- * @version $Revision: 1.24 $, $Date: 2013/03/09 10:48:50 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class NodeApplication implements Application, ScribeMultiClient {

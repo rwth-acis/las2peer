@@ -1,7 +1,21 @@
 package i5.las2peer.httpConnector;
 
-import i5.las2peer.httpConnector.client.*;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import i5.las2peer.httpConnector.client.AccessDeniedException;
+import i5.las2peer.httpConnector.client.AuthenticationFailedException;
+import i5.las2peer.httpConnector.client.Client;
+import i5.las2peer.httpConnector.client.ConnectorClientException;
+import i5.las2peer.httpConnector.client.InvalidServerAnswerException;
+import i5.las2peer.httpConnector.client.NotFoundException;
+import i5.las2peer.httpConnector.client.ReturnTypeNotImplementedException;
+import i5.las2peer.httpConnector.client.ServerErrorException;
+import i5.las2peer.httpConnector.client.TimeoutException;
+import i5.las2peer.httpConnector.client.UnableToConnectException;
 import i5.las2peer.httpConnector.coder.ParameterTypeNotImplementedException;
 import i5.las2peer.p2p.LocalNode;
 import i5.las2peer.persistency.MalformedXMLException;
@@ -14,16 +28,16 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Random;
 
-import org.junit.*;
-import static org.junit.Assert.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
- * Test for the http connector client (using http)
+ * Test for the HTTP connector client (using HTTP).
  *
- * @author Holger Janßen
- * @version $Revision: 1.8 $
+ * @author Holger Jan&szlig;en
+ * 
  */
-
 
 public class ConnectorClientTest 
 {

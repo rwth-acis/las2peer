@@ -6,10 +6,9 @@ import rice.p2p.commonapi.NodeHandle;
 
 
 /**
- * content class for messages to be broadcastd via the pastry ring
+ * content class for messages to be broadcasted via the pastry ring
  * 
- * @author Holger Janssen
- * @version $Revision: 1.3 $, $Date: 2013/02/12 18:10:24 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class BroadcastMessageContent extends L2pScribeContent {

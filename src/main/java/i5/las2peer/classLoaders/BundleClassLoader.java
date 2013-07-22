@@ -10,8 +10,7 @@ import java.util.Set;
 /**
  * A BundleClassLoader is responsible of providing all classes for a main class / service via separate libraries.
  *  
- * @author Holger Janssen
- * @version $Revision: 1.10 $, $Date: 2013/02/26 01:58:06 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class BundleClassLoader extends ClassLoader {

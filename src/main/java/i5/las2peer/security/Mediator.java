@@ -2,8 +2,8 @@ package i5.las2peer.security;
 
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
-import i5.las2peer.execution.UnlockNeededException;
 import i5.las2peer.execution.ServiceInvocationException;
+import i5.las2peer.execution.UnlockNeededException;
 import i5.las2peer.mobsos.NodeObserver.Event;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.Node;
@@ -18,8 +18,7 @@ import java.util.Vector;
  * users logged in via a {@link i5.las2peer.api.Connector} to collect incoming messages from the
  * P2P network and transfer it to the connector. 
  * 
- * @author Holger Janssen
- * @version $Revision: 1.11 $, $Date: 2013/02/27 23:33:13 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class Mediator implements MessageReceiver {

@@ -5,18 +5,14 @@ import rice.p2p.commonapi.NodeHandle;
 
 
 /**
- * a message as answer to a {@link SearchAgentContent} indicating that the requested agent
+ * A message as answer to a {@link SearchAgentContent} indicating that the requested agent
  * is running at the sending node of this response message
  * 
- * @author Holger Janssen
- * @version $Revision: 1.2 $, $Date: 2012/12/11 16:17:44 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class SearchAnswerMessage implements Message {
 	
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 2852577083676648181L;
 	
 	private NodeHandle sender;

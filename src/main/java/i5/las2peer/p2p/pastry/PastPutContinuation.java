@@ -9,10 +9,9 @@ import rice.Continuation;
 
 
 /**
- * a continuation for putting artifacts into the past p2p storage
+ * A continuation for putting artifacts into the past p2p storage
  * 
- * @author Holger Janssen
- * @version $Revision: 1.6 $, $Date: 2013/03/15 20:19:46 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class PastPutContinuation implements Continuation<Boolean[] ,Exception>{

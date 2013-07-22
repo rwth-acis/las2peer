@@ -4,13 +4,12 @@ import i5.las2peer.security.UserAgent;
 
 
 /**
- * a simple command line tool creating a new agent
+ * A simple command line tool creating a new agent.
  * 
  * Provided a passphrase, the tool will generate an xml representation of the
  * required agent and put it to standard out.
  * 
- * @author Holger Janssen
- * @version $Revision: 1.2 $, $Date: 2013/04/10 11:17:04 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class UserAgentGenerator {

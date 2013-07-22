@@ -5,8 +5,7 @@ package i5.las2peer.execution;
  * exception thrown on access to a service that could not be found or is not run by the
  * node which has been asked for it
  * 
- * @author Holger Janssen
- * @version $Revision: 1.4 $, $Date: 2013/02/12 18:10:24 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class NoSuchServiceException extends ServiceInvocationException {

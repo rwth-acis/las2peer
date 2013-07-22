@@ -8,10 +8,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 /**
- * a simple reader for string contents of a file or input stream
+ * A simple reader for string contents of a file or input stream.
  * 
- * @author Holger Janssen
- * @version $Revision: 1.3 $, $Date: 2013/02/16 23:43:57 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class FileContentReader {

@@ -20,13 +20,13 @@ package i5.las2peer.persistency;
  * </ol>
  * 
  * @author Holger Janßen
- * @version $Revision: 1.3 $, $Date: 2012/12/11 12:33:32 $
+ * 
  */
 public interface XmlAble
 {
 	
 	/**
-	 * returns a xml representation of this object.
+	 * Returns a XML representation of this object.
 	 *
 	 * This method will be used by an object manager to get a persistency representation
 	 * of this object.

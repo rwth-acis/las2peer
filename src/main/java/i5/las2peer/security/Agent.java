@@ -23,13 +23,11 @@ import javax.crypto.SecretKey;
 import org.apache.commons.codec.binary.Base64;
 
 
-
 /**
- * An Agent is the basic acting entity in the las2peer network.
+ * An Agent is the basic acting entity in the LAS2peer network.
  * At the moment, an agent can represent a simple user, a group or a service.
  * 
- * @author Holger Janssen
- * @version $Revision: 1.14 $, $Date: 2013/02/12 17:42:24 $
+ * @author Holger Jan&szlig;en
  *
  */
 public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {

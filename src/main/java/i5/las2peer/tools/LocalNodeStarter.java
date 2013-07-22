@@ -19,13 +19,12 @@ import java.lang.reflect.Modifier;
 
 
 /**
- * command line tool for starting a {@link i5.las2peer.p2p.LocalNode} and set up some
- * artifacts from a directory containing xml files
+ * Command line tool for starting a {@link i5.las2peer.p2p.LocalNode} and set up some
+ * artifacts from a directory containing XML files.
  * 
  * After starting a given static method may be invoked (i.e. for testing purposes)
  *  
- * @author Holger Janssen
- * @version $Revision: 1.3 $, $Date: 2013/04/10 10:09:54 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class LocalNodeStarter {

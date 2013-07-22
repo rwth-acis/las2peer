@@ -2,10 +2,9 @@ package i5.las2peer.security;
 
 
 /**
- * base class for all security related exceptions in the las2peer setting
+ * Base class for all security related exceptions in the LAS2peer setting.
  * 
- * @author Holger Janssen
- * @version $Revision: 1.2 $, $Date: 2012/12/11 16:17:44 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class L2pSecurityException extends Exception {

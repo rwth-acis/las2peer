@@ -4,10 +4,9 @@ import i5.las2peer.p2p.StorageException;
 
 
 /**
- * exception thrown on failures in the underlying pastry storage
+ * Exception thrown on failures in the underlying pastry storage
  * 
- * @author Holger Janssen
- * @version $Revision: 1.3 $, $Date: 2013/01/15 18:18:52 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class PastryStorageException extends StorageException {

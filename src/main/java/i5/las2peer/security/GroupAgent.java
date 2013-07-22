@@ -31,8 +31,7 @@ import org.apache.commons.codec.binary.Base64;
  * each entitled agent (i.e. <i>member</i> of the group).
  * 
  * 
- * @author Holger Janssen
- * @version $Revision: 1.6 $, $Date: 2013/01/14 10:05:51 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class GroupAgent extends Agent {

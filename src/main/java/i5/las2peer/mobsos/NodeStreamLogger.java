@@ -15,11 +15,10 @@ import java.util.Date;
  * For id based log file names, it is possible to buffer a set of log messages and given the name of
  * the log file afterwards. 
  * 
- * This is usefull, e.g. because on pastry nodes, the first event will occur before the id of the node is set 
+ * This is useful, e.g. because on pastry nodes, the first event will occur before the id of the node is set 
  * (by the pastry implementation itself)
  * 
- * @author Holger Janssen
- * @version $Revision: 1.3 $, $Date: 2013/01/18 11:29:39 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class NodeStreamLogger extends NodeObserver {

@@ -1,9 +1,5 @@
 package i5.las2peer.testing;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.Hashtable;
-
 import i5.las2peer.api.Service;
 import i5.las2peer.persistency.DecodingFailedException;
 import i5.las2peer.persistency.EncodingFailedException;
@@ -12,11 +8,14 @@ import i5.las2peer.persistency.EnvelopeException;
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.security.L2pSecurityException;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.Hashtable;
+
 /**
- * simple testservice for connectors to have a service with methods to call
+ * Simple test service for connectors to have a service with methods to call.
  *
  * @author Holger Janßen
- * @version $Revision: 1.5 $, $Date: 2013/02/28 23:40:12 $
  */
 
 

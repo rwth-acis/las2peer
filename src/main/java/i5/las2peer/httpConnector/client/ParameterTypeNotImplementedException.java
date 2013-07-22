@@ -8,8 +8,7 @@ package i5.las2peer.httpConnector.client;
  * invokation parameter which type is not sendable via this connector.
  *
  *
- * @author Holger Jan�en
- * @version $Revision: 1.1 $, $Date: 2013/01/23 00:27:21 $
+ * @author Holger Jan&szlig;en
  */
 
 

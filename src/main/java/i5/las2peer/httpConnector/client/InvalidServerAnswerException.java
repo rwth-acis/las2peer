@@ -4,8 +4,7 @@ package i5.las2peer.httpConnector.client;
  * Exception thrown if the {@link Client} is not able to interpret the answer
  * of the server.
  *
- * @author Holger Jan�en
- * @version $Revision: 1.1 $, $Date: 2013/01/23 00:27:21 $
+ * @author Holger Jan&szlig;en
  */
 
 public class InvalidServerAnswerException extends ConnectorClientException

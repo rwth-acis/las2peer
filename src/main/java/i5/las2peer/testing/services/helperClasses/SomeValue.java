@@ -4,10 +4,9 @@ import java.io.Serializable;
 
 
 /**
- * a simple serializable class storing just an integer value for demonstration and testing purposes
+ * A simple serializable class storing just an integer value for demonstration and testing purposes.
  * 
- * @author Holger Janssen
- * @version $Revision: 1.1 $, $Date: 2013/02/16 23:43:57 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class SomeValue implements Serializable {

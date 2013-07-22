@@ -6,8 +6,7 @@ import i5.las2peer.api.ConnectorException;
  * Exception thrown (and handled) inside the (@see HttpConnectorRequestHandler)
  * when one tries to access a session from different remote addresses.
  *
- * @author Holger Jan�en
- * @version $Revision: 1.1 $, $Date: 2013/01/22 14:06:47 $
+ * @author Holger Jan&szlig;en
  */
 
 public class AddressNotAllowedException extends ConnectorException {

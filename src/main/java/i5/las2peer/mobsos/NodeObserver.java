@@ -11,8 +11,7 @@ import rice.pastry.socket.SocketNodeHandle;
  * The NodeObserver is an abstract class providing all necessary methods for a {@link i5.las2peer.p2p.Node} implementation, 
  * -- mainly {@link i5.las2peer.p2p.PastryNodeImpl} -- to log all interesting node events 
  * 
- * @author Holger Janssen
- * @version $Revision: 1.8 $, $Date: 2013/04/10 10:09:54 $
+ * @author Holger Jan&szlig;en
  *
  */
 public abstract class NodeObserver {
@@ -20,9 +19,8 @@ public abstract class NodeObserver {
 	/**
 	 * an enum with all types of events
 	 * 
-	 * @author Holger Janssen
-	 * @version $Revision: 1.8 $, $Date: 2013/04/10 10:09:54 $
-	 *
+	 * @author Holger Jan&szlig;en
+	 * 
 	 */
 	public enum Event {
 		NODE_CREATED(100),

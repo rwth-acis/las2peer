@@ -4,11 +4,10 @@ import i5.las2peer.security.AgentException;
 
 
 /**
- * exception thrown on (an attempted) access to an agent, which is not known
- * (to this node or in general)
+ * Exception thrown on (an attempted) access to an agent, which is not known
+ * (to this node or in general).
  * 
- * @author Holger Janssen
- * @version $Revision: 1.5 $, $Date: 2013/04/10 10:09:54 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class AgentNotKnownException extends AgentException {

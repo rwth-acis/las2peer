@@ -41,12 +41,11 @@ import org.apache.commons.codec.binary.Base64;
 
 
 /**
- * a service agent represents a service and its access rights in the las2peer setting
+ * A service agent represents a service and its access rights in the LAS2peer setting.
  *  
  * // TODO: work on  LAS integration / RMI
  *  
- * @author Holger Janssen
- * @version $Revision: 1.19 $, $Date: 2013/02/26 23:46:43 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class ServiceAgent extends PassphraseAgent {

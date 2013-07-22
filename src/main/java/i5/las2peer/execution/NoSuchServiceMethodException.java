@@ -5,8 +5,7 @@ package i5.las2peer.execution;
  * exception thrown on a service method invocation, if the requested
  * method is not implemented at the given service
  * 
- * @author Holger Janssen
- * @version $Revision: 1.2 $, $Date: 2013/01/25 14:19:18 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class NoSuchServiceMethodException extends ServiceInvocationException {

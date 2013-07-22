@@ -2,10 +2,9 @@ package i5.las2peer.p2p;
 
 
 /**
- * exception thrown on access to a node which is not knwon to the network
+ * Exception thrown on access to a node which is not known to the network.
  * 
- * @author Holger Janssen
- * @version $Revision: 1.2 $, $Date: 2012/12/11 12:33:32 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class NodeNotFoundException extends Exception {

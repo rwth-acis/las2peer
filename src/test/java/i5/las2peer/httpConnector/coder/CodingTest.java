@@ -2,24 +2,22 @@
 package i5.las2peer.httpConnector.coder;
 
 
-import java.io.IOException;
-import java.io.StringWriter;
-import java.io.StringReader;
+import static org.junit.Assert.assertEquals;
 
-import i5.las2peer.httpConnector.coder.InvalidCodingException;
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.Random;
 
-import org.junit.*;
-import static org.junit.Assert.*;
+import org.junit.Test;
 
 
 /**
- * TestCoding.java
+ * CodingTest.java
  *
- * @author Holger Jan�en
- * @version $Revision: 1.1 $, $Date: 2013/01/23 20:08:04 $
+ * @author Holger Jan&szlig;en
+ * 
  */
-
 
 public class CodingTest
 {

@@ -4,11 +4,9 @@ import i5.las2peer.security.AgentException;
 
 
 /**
- * exception thrown on an attempt to register an agent, which is already 
- * registered
+ * Exception thrown on an attempt to register an agent, which is already registered.
  *  
- * @author Holger Janssen
- * @version $Revision: 1.3 $, $Date: 2013/04/10 10:09:54 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class AgentAlreadyRegisteredException extends AgentException {

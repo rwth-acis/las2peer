@@ -4,10 +4,9 @@ import i5.las2peer.communication.Message;
 
 
 /**
- * a simple interface to register message handlers to {@link Mediator}s
+ * A simple interface to register message handlers to {@link Mediator}s.
  * 
- * @author Holger Janssen
- * @version $Revision: 1.2 $, $Date: 2013/02/12 17:42:24 $
+ * @author Holger Jan&szlig;en
  *
  */
 public interface MessageHandler {

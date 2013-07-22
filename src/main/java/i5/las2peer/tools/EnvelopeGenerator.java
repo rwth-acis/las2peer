@@ -14,11 +14,9 @@ import java.lang.reflect.InvocationTargetException;
 
 
 /**
- * a simple command line tool for generating xml envelopes
- * to the standard out
+ * A simple command line tool for generating xml envelopes to the standard out.
  * 
- * @author Holger Janssen
- * @version $Revision: 1.3 $, $Date: 2013/02/12 17:42:24 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class EnvelopeGenerator {

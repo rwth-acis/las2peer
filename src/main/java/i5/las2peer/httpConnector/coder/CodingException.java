@@ -4,7 +4,6 @@ package i5.las2peer.httpConnector.coder;
  * Basic Exception for all coding related exceptions in this package
  *
  * @author Holger Janßen
- * @version $Revision: 1.2 $, $Date: 2013/01/23 10:04:54 $
  */
 
 public class CodingException extends Exception

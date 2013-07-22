@@ -1,20 +1,17 @@
-/**
- * SomeClass.java
- *
- * @author Created by Omnicore CodeGuide
- */
+
 
 package i5.las2peer.httpConnector.coder;
 
 import java.io.Serializable;
 
 
-
+/**
+ * SomeClass.java
+ *
+ * @author Holger Jan&szlig;en
+ */
 public class SomeClass implements Serializable {
-		
-	/**
-	 * 
-	 */
+	
 	private static final long serialVersionUID = 2288806517337791582L;
 	protected int  i;
 	

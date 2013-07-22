@@ -6,9 +6,7 @@ package i5.las2peer.httpConnector.coder;
  * of a message.
  *
  * @author Holger Janßen
- * @version $Revision: 1.2 $, $Date: 2013/01/23 10:04:54 $
  */
-
 
 public class InvalidCodingException extends CodingException
 {
