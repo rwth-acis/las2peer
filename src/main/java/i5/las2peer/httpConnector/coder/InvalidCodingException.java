@@ -5,7 +5,7 @@ package i5.las2peer.httpConnector.coder;
  * Exception thrown by a {@link XmlDecoder} subclass on problems during decoding
  * of a message.
  *
- * @author Holger Janßen
+ * @author Holger Jan&szlig;en
  */
 
 public class InvalidCodingException extends CodingException

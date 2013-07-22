@@ -80,7 +80,7 @@ public abstract class Node implements AgentStorage {
 	/**
 	 * enum with the possible states of a node.
 	 * 
-	 * @author Holger Janßen
+	 * @author Holger Jan&szlig;en
 	 *
 	 */
 	public enum NodeStatus {

@@ -15,7 +15,7 @@ import java.util.Hashtable;
 /**
  * Simple test service for connectors to have a service with methods to call.
  *
- * @author Holger Janßen
+ * @author Holger Jan&szlig;en
  */
 
 

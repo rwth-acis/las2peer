@@ -43,7 +43,7 @@ import java.util.Hashtable;
  * as an library as well. To gain access to the configuration parameters the way
  * back to the service will be needed, but this is not allowed by the las class loaders.
  *
- * @author Holger Janßen
+ * @author Holger Jan&szlig;en
  */
 
 

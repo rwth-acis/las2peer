@@ -7,7 +7,7 @@ import java.io.Serializable;
  * The abstract ParamDecoder class defines all necessary methods to decode
  * parameters coded by a fitting {@link ParamCoder} class.
  *
- * @author Holger Janßen
+ * @author Holger Jan&szlig;en
  */
 
 

@@ -17,7 +17,7 @@ import org.apache.commons.codec.binary.Base64;
  * The XmlDecoder decodes parameters coded by the {@link XmlCoder} and read as XML data
  * from the given reader.
  *
- * @author Holger Janßen
+ * @author Holger Jan&szlig;en
  */
 
 public class XmlDecoder extends ParamDecoder {

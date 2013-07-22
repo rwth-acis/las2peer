@@ -6,7 +6,7 @@ package i5.las2peer.execution;
  * a Service InvocationException is thrown when the invocation of a service
  * method leads to an internal exception
  * 
- * @author Holger Janßen
+ * @author Holger Jan&szlig;en
  *
  */
 public class ServiceInvocationException extends L2pServiceException {
