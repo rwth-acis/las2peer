@@ -2,7 +2,7 @@ package i5.las2peer.api;
 
 
 /**
- * basic exception for connectors
+ * Basic exception for connectors.
  * 
  * @author Holger Jan&szlig;en
  *
