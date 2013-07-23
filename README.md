@@ -57,16 +57,16 @@ So to start a new network, follow this steps:
     bin/start_node.sh -s 9001 -
 
 3. a) add an additional node to the net with
-      bin/start_node.sh -s 9002 /127.0.0.1:9001
+      bin/start_node.sh -s 9002 127.0.0.1:9001
 
 3. b) add an additional node hosted at another machine with
-      bin/start_node.sh -s 9001 /IP_OF_THE_FIRST_MACHINE:9001
+      bin/start_node.sh -s 9001 IP_OF_THE_FIRST_MACHINE:9001
 
 
 If you want to execute test methods at the nodes just put their names as additional command line parameters to the start_node.sh script like
-    bin/start_node.sh 9001 - uploadAgents waitALittle waitALittle searchEve
+    bin/start_node.sh -s 9001 - uploadAgents waitALittle waitALittle searchEve
 and for the second node
-    bin/start_node.sh 9002 /127.0.0.1:9001 waitALittle fetchAgent registerEve
+    bin/start_node.sh -s 9002 127.0.0.1:9001 waitALittle fetchAgent registerEve
 
 More informations about existing test methods can be found in the Java Docs in the documentation of the i5.las2peer.testing.L2pNodeLauncher class.
 Basically you can use all public (non-static) methods of the class.
