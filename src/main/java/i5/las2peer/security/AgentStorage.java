@@ -4,10 +4,9 @@ import i5.las2peer.p2p.AgentNotKnownException;
 
 
 /**
- * interface for agent storages
+ * Interface for agent storages.
  * 
- * @author Holger Janssen
- * @version $Revision: 1.6 $, $Date: 2013/02/12 18:10:24 $
+ * @author Holger Jan&szlig;en
  *
  */
 public interface AgentStorage {

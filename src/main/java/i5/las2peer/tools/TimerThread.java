@@ -1,10 +1,9 @@
 package i5.las2peer.tools;
 
 /**
- * A simple thread calling the worker method {@link #waitTimeMs} periodically 
+ * A simple thread calling the worker method {@link #waitTimeMs} periodically.
  *  
- * @author Holger Janssen
- * @version $Revision: 1.3 $, $Date: 2013/02/25 00:31:20 $
+ * @author Holger Jan&szlig;en
  *
  */
 public abstract class TimerThread extends Thread {

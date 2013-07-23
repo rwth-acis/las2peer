@@ -4,13 +4,12 @@ import i5.las2peer.security.ServiceAgent;
 
 
 /**
- * a simple command line tool creating a service agent for the given service class
+ * A simple command line tool creating a service agent for the given service class.
  * 
- * Provided a passphrase, the tool will generate an xml representation of the
+ * Provided a passphrase, the tool will generate an XML representation of the
  * required agent and put it to standard out.
  * 
- * @author Holger Janssen
- * @version $Revision: 1.1 $, $Date: 2013/01/09 10:25:14 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class ServiceAgentGenerator {

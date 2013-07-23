@@ -13,8 +13,7 @@ import org.apache.commons.codec.binary.Base64;
  * to code parameters of a message into an XML String delivered by the connector
  * (for client request and server answer).
  *
- * @author Holger Jan�en
- * @version $Revision: 1.2 $, $Date: 2013/01/23 10:04:54 $
+ * @author Holger Jan&szlig;en
  */
 
 

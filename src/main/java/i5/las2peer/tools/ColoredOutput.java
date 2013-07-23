@@ -3,7 +3,7 @@ package i5.las2peer.tools;
 import java.io.PrintStream;
 
 /**
- * A simple static class providing access to the color features of the bash console on standard out
+ * A simple static class providing access to the color features of the bash console on standard out.
  * 
  * All bash codes are printed in the form of
  * 	\033[xxx;xxx;xxxm
@@ -15,8 +15,7 @@ import java.io.PrintStream;
  * 
  * 
  * 
- * @author Holger Janssen
- * @version $Revision: 1.4 $, $Date: 2013/02/18 23:49:46 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class ColoredOutput {
@@ -27,9 +26,8 @@ public class ColoredOutput {
 	
 	
 	/**
-	 * a color used by the {@link ColoredOutput} methods
-	 * @author Holger Janssen
-	 * @version $Revision: 1.4 $, $Date: 2013/02/18 23:49:46 $
+	 * A color used by the {@link ColoredOutput} methods.
+	 * @author Holger Jan&szlig;en
 	 *
 	 */
 	public enum Color {

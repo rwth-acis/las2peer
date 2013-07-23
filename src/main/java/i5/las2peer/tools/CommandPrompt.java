@@ -14,20 +14,18 @@ import java.util.Hashtable;
 
 
 /**
- * a simple command line for executing commands, generating new instances
- * and handling local variables
+ * A simple command line for executing commands, generating new instances
+ * and handling local variables.
  * 
- * @author Holger Janssen
- * @version $Revision: 1.6 $, $Date: 2013/02/22 15:54:33 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class CommandPrompt {
 
 	/**
-	 * enumeration for different return status codes of executed lines
+	 * Enumeration for different return status codes of executed lines.
 	 * 
-	 * @author Holger Janssen
-	 * @version $Revision: 1.6 $, $Date: 2013/02/22 15:54:33 $
+	 * @author Holger Jan&szlig;en
 	 *
 	 */
 	public enum ReturnStatus {

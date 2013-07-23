@@ -7,12 +7,11 @@ import rice.p2p.commonapi.NodeHandle;
 
 
 /**
- * a request message where the target node should try to unlock the given agent with the given passphrase
+ * A request message where the target node should try to unlock the given agent with the given passphrase.
  * 
- * this passphrase is encrypted for the destination node
+ * This passphrase is encrypted for the destination node.
  * 
- * @author Holger Janssen
- * @version $Revision: 1.1 $, $Date: 2013/02/26 17:57:28 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class UnlockAgentMessage implements Message {

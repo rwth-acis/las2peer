@@ -7,8 +7,7 @@ import java.security.PublicKey;
 /**
  * simple content signalling, that an (executing) agent has to be unlocked
  * 
- * @author Holger Janssen
- * @version $Revision: 1.1 $, $Date: 2013/02/26 17:57:28 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class RMIUnlockContent implements Serializable {

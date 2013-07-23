@@ -30,11 +30,10 @@ import javax.crypto.spec.SecretKeySpec;
 
 
 /**
- * simple <i>static</i> class collecting useful cryptographic methods end encapsulating 
- * the access to the underlying cryptografic library
+ * Simple <i>static</i> class collecting useful cryptographic methods end encapsulating 
+ * the access to the underlying cryptografic library.
  *   
- * @author Holger Janssen
- * @version $Revision: 1.8 $, $Date: 2013/03/15 20:06:54 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class CryptoTools {

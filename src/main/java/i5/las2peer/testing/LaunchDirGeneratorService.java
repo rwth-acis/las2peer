@@ -10,12 +10,11 @@ import java.text.DecimalFormat;
 
 
 /**
- * A simple command line generator for setup directories for the {@link L2pNodeLauncher}
+ * A simple command line generator for setup directories for the {@link L2pNodeLauncher}.
  *  
- * The last node is always interactive 
+ * The last node is always interactive.
  * 
- * @author Holger Janssen
- * @version $Revision: 1.2 $, $Date: 2013/04/10 10:09:54 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class LaunchDirGeneratorService {

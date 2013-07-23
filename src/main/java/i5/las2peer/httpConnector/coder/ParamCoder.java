@@ -2,15 +2,14 @@ package i5.las2peer.httpConnector.coder;
 
 
 import java.io.IOException;
-import java.io.Writer;
 import java.io.Serializable;
+import java.io.Writer;
 
 /**
- * The abstract ParamCode Class definies all methods neccessary to code parameters
+ * The abstract ParamCode Class defines all methods necessary to code parameters
  * of a message into a java.io.Writer.
  *
- * @author Holger Jan�en
- * @version $Revision: 1.1 $, $Date: 2013/01/22 14:06:47 $
+ * @author Holger Jan&szlig;en
  */
 
 

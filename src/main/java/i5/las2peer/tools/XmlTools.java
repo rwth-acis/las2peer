@@ -1,18 +1,17 @@
 package i5.las2peer.tools;
 
+import i5.las2peer.persistency.MalformedXMLException;
+import i5.las2peer.persistency.XmlAble;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import i5.las2peer.persistency.MalformedXMLException;
-import i5.las2peer.persistency.XmlAble;
-
 
 /**
- * simple <i>static</i> class collecting useful methods for xml (de-)serialization
+ * Simple <i>static</i> class collecting useful methods for XML (de-)serialization.
  * 
- * @author Holger Janssen
- * @version $Revision: 1.4 $, $Date: 2013/02/18 02:00:17 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class XmlTools {

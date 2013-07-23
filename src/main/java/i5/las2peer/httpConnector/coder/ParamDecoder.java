@@ -4,11 +4,10 @@ import java.io.IOException;
 import java.io.Serializable;
 
 /**
- * The abstract ParamDecoder class defines all neccessary methods to decode
+ * The abstract ParamDecoder class defines all necessary methods to decode
  * parameters coded by a fitting {@link ParamCoder} class.
  *
- * @author Holger Janßen
- * @version $Revision: 1.3 $, $Date: 2013/01/23 20:08:04 $
+ * @author Holger Jan&szlig;en
  */
 
 

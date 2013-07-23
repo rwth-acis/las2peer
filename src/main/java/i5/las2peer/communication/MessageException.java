@@ -4,8 +4,7 @@ package i5.las2peer.communication;
 /**
  * exception thrown on problems to handle messages inside an agent
  * 
- * @author Holger Janssen
- * @version $Revision: 1.1 $, $Date: 2013/01/14 07:29:53 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class MessageException extends Exception {

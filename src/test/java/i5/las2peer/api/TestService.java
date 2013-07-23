@@ -3,11 +3,10 @@ package i5.las2peer.api;
 import java.util.Hashtable;
 
 /**
- * a simple service for testing (R)MI and service start
+ * A simple service for testing (R)MI and service start.
  * 
- * @author Holger Janssen
- * @version $Revision: 1.3 $, $Date: 2013/02/21 12:18:21 $
- *
+ * @author Holger Jan&szlig;en
+ * 
  */
 public class TestService extends Service {
 

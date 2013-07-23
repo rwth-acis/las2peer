@@ -62,7 +62,7 @@ import rice.p2p.commonapi.NodeHandle;
 
 
 /**
- * this class implements a simple node launcher with additional 
+ * This class implements a simple node launcher with additional 
  * methods for testing purposes.
  * 
  * The first command line parameter is the port to open for access from the p2p network.
@@ -74,8 +74,7 @@ import rice.p2p.commonapi.NodeHandle;
  * 
  * All static and parameterless methods of this class can be used this way.
  * 
- * @author Holger Janssen
- * @version $Revision: 1.31 $, $Date: 2013/04/15 02:21:38 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class L2pNodeLauncher {
@@ -296,7 +295,8 @@ public class L2pNodeLauncher {
 	
 	
 	/**
-	 * upload the mock agents adam, eve and abel to the p2p network
+	 * Uploads the mock agents Adam, Eve and Abel to the p2p network.
+	 * Also stores Group1, Group2, Group3 and GroupA to the p2p network.
 	 * 
 	 * @throws AgentAlreadyRegisteredException
 	 * @throws L2pSecurityException
@@ -308,7 +308,7 @@ public class L2pNodeLauncher {
 	public void uploadAgents () throws L2pSecurityException, MalformedXMLException, IOException, AgentException {
 		printMessage( "Storing Mock agents");
 		
-		int success =0;
+		int success = 0;
 		int known = 0;
 		UserAgent eve = MockAgentFactory.getEve();
 		eve.unlockPrivateKey("evespass");
@@ -316,7 +316,7 @@ public class L2pNodeLauncher {
 			node.storeAgent(eve);
 			success ++;
 		} catch (AgentAlreadyRegisteredException e) {
-			printWarning ( "Message: " + e.getMessage() );
+			printWarning ( "Exception for Agent Eve. Message: " + e.getMessage() );
 			known ++;
 		}
 		
@@ -326,7 +326,7 @@ public class L2pNodeLauncher {
 			node.storeAgent(adam);
 			success++;
 		} catch (AgentAlreadyRegisteredException e) {
-			printWarning ( "Message: " + e.getMessage() );
+			printWarning ( "Exception for Agent Adam. Message: " + e.getMessage() );
 			known ++;
 		}
 
@@ -336,53 +336,51 @@ public class L2pNodeLauncher {
 			node.storeAgent(abel);
 			success++;
 		} catch (AgentAlreadyRegisteredException e) {
-			printWarning ( "Message: " + e.getMessage() );
+			printWarning ( "Exception for Agent Abel. Message: " + e.getMessage() );
 			known ++;
 		}
-		
-		UserAgent anonym = MockAgentFactory.getAnonymous();
-		anonym.unlockPrivateKey("anonymous");
-		try {
-			node.storeAgent(anonym);
-			success++;
-		} catch (AgentAlreadyRegisteredException e) {
-			printWarning ( "Message: " + e.getMessage() );
-			known ++;
-		}
-		
+
 		try {
 			GroupAgent g = MockAgentFactory.getGroup1();
 			g.unlockPrivateKey(adam);
 			node.storeAgent( g );
+			success++;
 		} catch (Exception e) {
-			System.out.println ( "Error storing group1: " + e);
+			printWarning ( "Exception for Agent Group1. Message: " + e.getMessage() );
+			known ++;
 		}
 		
 		try {
 			GroupAgent g = MockAgentFactory.getGroup2();
 			g.unlockPrivateKey(adam);
 			node.storeAgent( g );
+			success++;
 		} catch (Exception e) {
-			System.out.println ( "Error storing group2: " + e);
+			printWarning ( "Exception for Agent Group2. Message: " + e.getMessage() );
+			known ++;		
 		}
 		
 		try {
 			GroupAgent g = MockAgentFactory.getGroup3();
 			g.unlockPrivateKey(adam);
 			node.storeAgent( g );
+			success++;
 		} catch (Exception e) {
-			System.out.println ( "Error storing group3: " + e);
+			printWarning ( "Exception for Agent Group3. Message: " + e.getMessage() );
+			known ++;		
 		}
 		
 		try {
 			GroupAgent g = MockAgentFactory.getGroupA();
 			g.unlockPrivateKey(adam);
 			node.storeAgent( g );
+			success++;
 		} catch (Exception e) {
-			System.out.println ( "Error storing groupA: " + e);
+			printWarning ( "Exception for Agent GroupA. Message: " + e.getMessage() );
+			known ++;		
 		}
 		
-		printMessage ( "--> successfully stored " + success + " agents! - (" + known + " are already known!)" );
+		printMessage ( "--> successfully stored " + success + " agents! - (" + known + " are already known or had problems registering!)" );
 	}
 
 	

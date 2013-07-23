@@ -1,18 +1,18 @@
 package i5.las2peer.tools;
 
-import java.io.IOException;
-import java.util.Vector;
-
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.security.Agent;
 import i5.las2peer.security.GroupAgent;
 import i5.las2peer.security.L2pSecurityException;
 
+import java.io.IOException;
+import java.util.Vector;
+
 
 /**
- * a simple command line client generating a group agent xml file
- * @author Holger Janssen
- * @version $Revision: 1.1 $, $Date: 2013/02/27 16:23:14 $
+ * A simple command line client generating a group agent XML file.
+ * 
+ * @author Holger Jan&szlig;en
  *
  */
 public class GroupAgentGenerator {

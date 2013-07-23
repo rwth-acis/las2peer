@@ -20,24 +20,24 @@ import java.lang.reflect.Modifier;
 
 
 /**
- * Base class for services to be hosted within the las2peer network.
+ * Base class for services to be hosted within the LAS2peer network.
  * 
  * <h2>Basic implementation hints</h2>
  * 
  * <p>To implement a service simply derive this API class an implement the intended functionality.
- * If parameters and results are to be transported via the las2peer network use types implementing the
+ * If parameters and results are to be transported via the LAS2peer network use types implementing the
  * {@link java.io.Serializable} interface.
  * 
  * <p>Especially implemented helper classes like parameters and results to be transported via the network
  * should be encapsulated into a separate jar archive so that using remote clients or other services
  * may use this jar for their implementation.
  * 
- * <p>Please be aware, that only one instance of the service is instantiated at a las2peer node.
+ * <p>Please be aware, that only one instance of the service is instantiated at a LAS2peer node.
  * There are no per user instantiations as in former LAS server implementations.
  * To access the current user, just use the helper methods of this abstract class like 
  * {@link #getActiveAgent()}
  * 
- * <p>If you want to access the current user agent, the las2peer node or logging from outside your service class, 
+ * <p>If you want to access the current user agent, the LAS2peer node or logging from outside your service class, 
  * e.g. in helper classes or the like, you can make use of the {@link i5.las2peer.security.Context} class, especially
  * of the static {@link i5.las2peer.security.Context#getCurrent} method.
  * 
@@ -59,7 +59,7 @@ import java.lang.reflect.Modifier;
  * </pre>
  * 
  * <p>For own helper and 3rd party libraries, you can use any arbitrary library name 
- * consisting of alpha-numerical characters. For Jars archives providing a las2peer service please 
+ * consisting of alpha-numerical characters. For Jars archives providing a LAS2peer service please 
  * use the package name of the service as library name and name for the jar archive.
  * 
  * <p>As build version please use a format of [main].[mayor].[minor]-[build] where you may leave 
@@ -79,7 +79,7 @@ import java.lang.reflect.Modifier;
  * 
  * 
  * <h2>(JUnit-)Testing</h2>
- * <p>For unit testing of your service within a las2peer setting, you can use the prepared
+ * <p>For unit testing of your service within a LAS2peer setting, you can use the prepared
  * (abstract) class {@link i5.las2peer.testing.LocalServiceTestCase} to derive your test case from.
  * <br>
  * This class starts a {@link i5.las2peer.p2p.LocalNode} running your service to test on each test case.
@@ -96,8 +96,7 @@ import java.lang.reflect.Modifier;
  * of the {@link i5.las2peer.tools} package. There are e.g. some command line generators for XML helper files.  
  * 
  * 
- * @author Holger Janssen
- * @version $Revision: 1.15 $, $Date: 2013/03/15 20:19:46 $
+ * @author Holger Jan&szlig;en
  *
  */
 public abstract class Service extends Configurable {	

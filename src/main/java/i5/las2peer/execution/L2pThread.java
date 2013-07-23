@@ -1,16 +1,15 @@
 package i5.las2peer.execution;
 
-import java.io.Serializable;
-
 import i5.las2peer.security.Context;
 import i5.las2peer.security.ServiceAgent;
+
+import java.io.Serializable;
 
 /**
  * a L2pThread is responsible for running a single {@link RMITask} inside a 
  * {@link i5.las2peer.p2p.Node}
  * 
- * @author Holger Janssen
- * @version $Revision: 1.7 $, $Date: 2013/02/26 17:57:28 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class L2pThread extends Thread {

@@ -6,8 +6,7 @@ package i5.las2peer.classLoaders.helpers;
  * major.minor.subversion-build
  * where minor, subversion and build are optional
  * 
- * @author Holger Janssen
- * @version $Revision: 1.3 $, $Date: 2013/02/16 23:43:56 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class LibraryVersion implements Comparable<LibraryVersion> {

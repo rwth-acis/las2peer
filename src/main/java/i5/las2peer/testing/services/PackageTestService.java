@@ -1,18 +1,17 @@
 package i5.las2peer.testing.services;
 
-import java.io.IOException;
-
 import i5.las2peer.api.Service;
 import i5.las2peer.testing.services.helperClasses.MyException;
 import i5.las2peer.testing.services.helperClasses.SomeValue;
 import i5.las2peer.tools.FileContentReader;
 
+import java.io.IOException;
+
 
 /**
- * a simple test service for testing the classloader possibilities of the Las2peer framework
+ * A simple test service for testing the classloader possibilities of the LAS2peer framework.
  * 
- * @author Holger Janssen
- * @version $Revision: 1.3 $, $Date: 2013/02/25 00:31:20 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class PackageTestService extends Service {

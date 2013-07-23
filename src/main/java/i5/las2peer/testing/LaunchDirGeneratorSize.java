@@ -12,12 +12,11 @@ import java.util.Vector;
 
 
 /**
- * A simple command line generator for setup directories for the {@link L2pNodeLauncher}
- *  
- * The last node is always interactive 
+ * A simple command line generator for setup directories for the {@link L2pNodeLauncher}.
  * 
- * @author Holger Janssen
- * @version $Revision: 1.2 $, $Date: 2013/04/10 10:09:54 $
+ * The last node is always interactive.
+ * 
+ * @author Holger Jan&szlig;en
  *
  */
 public class LaunchDirGeneratorSize {

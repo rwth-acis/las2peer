@@ -14,8 +14,7 @@ import java.util.HashSet;
 /**
  * a loaded library represents a library in the l2p classloader context
  * 
- * @author Holger Janssen
- * @version $Revision: 1.3 $, $Date: 2012/12/12 02:15:41 $
+ * @author Holger Jan&szlig;en
  *
  */
 public abstract class LoadedLibrary {

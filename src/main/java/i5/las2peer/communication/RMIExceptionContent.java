@@ -6,8 +6,7 @@ import java.io.Serializable;
  * a simple message content for an {@link Message} indicating an exception
  * thrown via an remote method invocation
  *  
- * @author Holger Janssen
- * @version $Revision: 1.2 $, $Date: 2013/02/12 18:10:24 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class RMIExceptionContent implements Serializable {

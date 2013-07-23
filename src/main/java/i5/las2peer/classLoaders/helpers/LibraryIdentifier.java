@@ -7,8 +7,7 @@ package i5.las2peer.classLoaders.helpers;
  * name-number
  * where number fits the format of {@link LibraryVersion}
  * 
- * @author Holger Janssen
- * @version $Revision: 1.4 $, $Date: 2013/02/26 01:58:06 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class LibraryIdentifier implements Comparable<LibraryIdentifier> {

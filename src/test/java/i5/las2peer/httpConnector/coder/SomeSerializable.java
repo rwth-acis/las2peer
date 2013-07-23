@@ -29,10 +29,8 @@ import java.io.Serializable;
  * the {@link SerializableTest} TestCase.
  *
  *
- * @author Holger Jan�en
- * @version $Revision: 1.1 $, $Date: 2013/01/23 20:08:04 $
+ * @author Holger Jan&szlig;en 
  */
-
 
 public class SomeSerializable extends SomeClass implements Serializable
 {

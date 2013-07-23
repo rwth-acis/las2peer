@@ -9,10 +9,9 @@ import java.util.Date;
 import java.util.HashSet;
 
 /**
- * a session object storing all session relevant information for an http connector session
+ * a session object storing all session relevant information for an HTTP connector session
  * 
- * @author Holger Janssen
- * @version $Revision: 1.6 $, $Date: 2013/02/26 17:57:28 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class HttpSession {

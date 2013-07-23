@@ -3,11 +3,10 @@ package i5.las2peer.p2p.pastry;
 import rice.p2p.commonapi.NodeHandle;
 
 /**
- * a <i>content</i> to be published to an agent's scribe topic, if someone is looking for
+ * A <i>content</i> to be published to an agent's scribe topic, if someone is looking for
  * running versions of this agent.
  * 
- * @author Holger Janssen
- * @version $Revision: 1.3 $, $Date: 2013/01/15 18:18:52 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class SearchAgentContent extends L2pScribeContent {

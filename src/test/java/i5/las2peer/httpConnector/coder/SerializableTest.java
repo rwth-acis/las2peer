@@ -1,7 +1,6 @@
 package i5.las2peer.httpConnector.coder;
 
 
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -15,11 +14,9 @@ import org.junit.Test;
 /**
  * SerializableTest.java
  *
- * @author Holger Jan�en
- * @version	$Revision: 1.1 $, $Date: 2013/01/23 20:08:04 $
+ * @author Holger Jan&szlig;en
+ * 
  */
-
-
 
 public class SerializableTest
 {

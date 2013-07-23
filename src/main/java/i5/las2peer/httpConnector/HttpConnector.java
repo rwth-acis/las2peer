@@ -1,26 +1,24 @@
 package i5.las2peer.httpConnector;
 
 
+import i5.httpServer.HttpServer;
+import i5.httpServer.HttpsServer;
+import i5.httpServer.RequestHandler;
+import i5.las2peer.api.Connector;
+import i5.las2peer.api.ConnectorException;
+import i5.las2peer.p2p.Node;
+
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.text.DateFormat;
 import java.util.Date;
 
-import i5.las2peer.api.Connector;
-import i5.las2peer.api.ConnectorException;
-import i5.las2peer.p2p.Node;
-
-import i5.httpServer.HttpServer;
-import i5.httpServer.HttpsServer;
-import i5.httpServer.RequestHandler;
-
 
 /**
- * Starter class for registering the http connector at the las server.
+ * Starter class for registering the HTTP connector at the LAS2peer server.
  *
- * @author Holger Janssen
- * @version $Revision: 1.11 $, $Date: 2013/02/27 02:49:50 $
+ * @author Holger Jan&szlig;en
  */
 
 

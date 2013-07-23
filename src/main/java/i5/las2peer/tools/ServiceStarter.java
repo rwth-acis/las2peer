@@ -32,8 +32,7 @@ import java.util.Vector;
  * This class is the main class of the las2peer library jar.
  * 
  * 
- * @author Holger Janssen
- * @version $Revision: 1.5 $, $Date: 2013/02/27 21:48:11 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class ServiceStarter {

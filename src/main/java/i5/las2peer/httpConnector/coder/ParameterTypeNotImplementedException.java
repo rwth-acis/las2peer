@@ -4,8 +4,7 @@ package i5.las2peer.httpConnector.coder;
  * Exception thrown by a {@link ParamDecoder} subclass, if the coding of
  * the type of a parameter delivered to the coder has not been implemented (yet).
  *
- * @author Holger Jan�en
- * @version $Revision: 1.1 $, $Date: 2013/01/22 14:06:47 $
+ * @author Holger Jan&szlig;en
  */
 
 public class ParameterTypeNotImplementedException extends CodingException

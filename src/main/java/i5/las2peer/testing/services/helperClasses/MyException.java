@@ -2,11 +2,10 @@ package i5.las2peer.testing.services.helperClasses;
 
 
 /**
- * an exception inside the used library for testing purposes
+ * An exception inside the used library for testing purposes.
  * 
  * 
- * @author Holger Janssen
- * @version $Revision: 1.1 $, $Date: 2013/02/16 23:43:57 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class MyException extends Exception {

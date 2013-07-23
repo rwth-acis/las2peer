@@ -1,8 +1,5 @@
 package i5.las2peer.classLoaders;
 
-import java.util.Enumeration;
-import java.util.Hashtable;
-
 import i5.las2peer.classLoaders.helpers.LibraryDependency;
 import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
 import i5.las2peer.classLoaders.helpers.LibraryVersion;
@@ -10,14 +7,16 @@ import i5.las2peer.classLoaders.libraries.LoadedLibrary;
 import i5.las2peer.classLoaders.libraries.NotFoundException;
 import i5.las2peer.classLoaders.libraries.Repository;
 
+import java.util.Enumeration;
+import java.util.Hashtable;
+
 /**
  * The main class for loading classes in the las2peer environment.
  * This ClassLoader handles library registering and resolving (i.e. loading) dependencies as well as hotplugging.
  * 
  * The main idea is to keep each service separate but load each needed library only once.
  *  
- * @author Holger Janssen
- * @version $Revision: 1.13 $, $Date: 2013/02/22 15:54:33 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class L2pClassLoader extends ClassLoader {

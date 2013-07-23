@@ -2,10 +2,9 @@ package i5.las2peer.persistency;
 
 
 /**
- * exception for problems with xml deserialization
+ * Exception for problems with XML-deserialization.
  * 
- * @author Holger Janssen
- * @version $Revision: 1.2 $, $Date: 2012/12/11 12:33:32 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class MalformedXMLException extends Exception {

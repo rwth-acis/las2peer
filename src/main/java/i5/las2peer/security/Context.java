@@ -15,11 +15,10 @@ import java.util.Date;
 import java.util.Hashtable;
 
 /**
- * each {@link i5.las2peer.execution.L2pThread} is bound to a context
- * which is mainly determined by the executing agent
+ * Each {@link i5.las2peer.execution.L2pThread} is bound to a context
+ * which is mainly determined by the executing agent.
  * 
- * @author Holger Janssen
- * @version $Revision: 1.9 $, $Date: 2013/03/15 20:18:27 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class Context implements AgentStorage {

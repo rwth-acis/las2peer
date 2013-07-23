@@ -5,11 +5,10 @@ import i5.las2peer.execution.L2pServiceException;
 import i5.las2peer.p2p.Node;
 
 /**
- * a simple service for testing a service which has problems in the 
- * notification method of node registering
+ * A simple service for testing a service which has problems in the 
+ * notification method of node registering.
  * 
- * @author Holger Janssen
- * @version $Revision: 1.1 $, $Date: 2013/02/21 12:15:17 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class NotStartingService extends Service {

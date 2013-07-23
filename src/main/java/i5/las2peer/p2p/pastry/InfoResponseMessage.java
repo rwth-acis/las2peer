@@ -8,8 +8,7 @@ import rice.p2p.commonapi.NodeHandle;
 /**
  * this message is sent from node to node as response to an {@link GetInfoMessage}
  * 
- * @author Holger Janssen
- * @version $Revision: 1.2 $, $Date: 2013/02/18 02:00:17 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class InfoResponseMessage implements Message {

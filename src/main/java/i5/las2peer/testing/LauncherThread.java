@@ -8,11 +8,10 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * A simple Thread handling one laucher task for running multiple lauchers of
+ * A simple thread handling one launcher task for running multiple launchers of
  * a configuration directory via {@link L2pNodeLauncher#launchFromConfigDir}. 
  * 
- * @author Holger Janssen
- * @version $Revision: 1.3 $, $Date: 2013/02/19 00:51:50 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class LauncherThread extends Thread {

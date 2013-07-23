@@ -15,7 +15,6 @@ import i5.las2peer.tools.CryptoTools;
 import i5.las2peer.tools.TimerThread;
 
 import java.security.PublicKey;
-
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Random;
@@ -29,8 +28,7 @@ import java.util.Random;
  * 
  * TODO: uses loggers / observers 
  * 
- * @author Holger Janssen
- * @version $Revision: 1.16 $, $Date: 2013/04/10 10:09:54 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class LocalNode extends Node {

@@ -1,10 +1,9 @@
 package i5.las2peer.persistency;
 
 /**
- * exception thrown on failed cryptografic signature verifications 
+ * Exception thrown on failed cryptografic signature verifications.
  * 
- * @author Holger Janssen
- * @version $Revision: 1.2 $, $Date: 2012/12/11 12:33:32 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class VerificationFailedException extends Exception {

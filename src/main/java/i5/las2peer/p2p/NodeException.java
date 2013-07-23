@@ -3,8 +3,7 @@ package i5.las2peer.p2p;
 /**
  * base class for any exception occurring in a {@link Node}
  * 
- * @author Holger Janssen
- * @version $Revision: 1.2 $, $Date: 2012/12/11 12:33:32 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class NodeException extends Exception {

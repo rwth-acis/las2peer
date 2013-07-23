@@ -2,10 +2,9 @@ package i5.las2peer.api;
 
 
 /**
- * basic exception for connectors
+ * Basic exception for connectors.
  * 
- * @author Holger Janssen
- * @version $Revision: 1.1 $, $Date: 2013/01/22 14:06:46 $
+ * @author Holger Jan&szlig;en
  *
  */
 public class ConnectorException extends Exception {

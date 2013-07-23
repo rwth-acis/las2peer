@@ -14,8 +14,7 @@ import rice.p2p.past.PastContent;
  * and check the Continuation's state via {@link #isFinished()} or do a (non) blocking wait for 
  * the result via {@link #waitForResult} or  {@link #getResultWaiting}.
  * 
- * @author Holger Janssen
- * @version $Revision: 1.11 $, $Date: 2013/04/15 02:58:58 $
+ * @author Holger Jan&szlig;en
  *
  * @param <T>
  */
