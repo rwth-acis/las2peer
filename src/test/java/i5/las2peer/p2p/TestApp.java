@@ -15,7 +15,7 @@ public class TestApp implements Application {
 	
 	
 	/**
-	 * The Endpoint represents the underlieing node. By making calls on the
+	 * The Endpoint represents the underlining node. By making calls on the
 	 * Endpoint, it assures that the message will be delivered to a MyApp on
 	 * whichever node the message is intended for.
 	 */

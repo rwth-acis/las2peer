@@ -78,7 +78,7 @@ public class EnvelopeOverwriteTest {
 		Envelope overwrite = Envelope.createClassIdEnvelope(new Long ( 200), "simple", adam);		
 		try {
 			node.storeArtifact( overwrite );
-			fail ( "L2pSecurityExcsption expected");
+			fail ( "L2pSecurityException expected");
 		} catch (L2pSecurityException e) {
 			// expected
 		}
