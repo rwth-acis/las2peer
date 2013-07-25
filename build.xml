@@ -1,8 +1,12 @@
-<project name="las2peer" default="jars" basedir=".">
+<project name="las2peer" default="jars" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
 	
 	<presetdef name="javac">
 	    <javac includeantruntime="false" />
 	</presetdef>
+
+    <property name="ivy.install.version" value="2.3.0" />
+    <property name="ivy.jar.dir" value="${basedir}/ivy" />
+    <property name="ivy.jar.file" value="${ivy.jar.dir}/ivy.jar" />
 	
 	<property name="src.main" location="src/main/java" />
 	<property name="src.junit" location="src/test/java" />
@@ -26,8 +30,37 @@
 	<property name="lib" location="lib" />
 	<property name="lib.cp"
 		location="${lib}/i5-simpleXML-0.1.jar:${lib}/commons-codec-1.7.jar:${lib}/FreePastry-2.1.jar:${lib}/i5-httpServer-0.2.jar:${lib}/junit-4.11.jar:${lib}/xpp3-1.1.4c.jar" />
-	<property name="lib.junit" location="${lib}/junit-4.11.jar" />
+	<property name="lib.junit" location="${lib}/junit-4.11.jar:${lib}/hamcrest-core-1.3.jar" />
 		
+    <target name="download-ivy" unless="skip.download">
+        <mkdir dir="${ivy.jar.dir}"/>
+        <!-- download Ivy from web site so that it can be used even without any special installation -->
+        <echo message="installing ivy..."/>
+        <get src="http://repo1.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar"
+            dest="${ivy.jar.file}" usetimestamp="true"/>
+    </target>
+
+    <target name="install-ivy" depends="download-ivy" description="--> install ivy">
+        <!-- try to load ivy here from local ivy dir, in case the user has not already dropped
+              it into ant's lib dir (note that the latter copy will always take precedence).
+              We will not fail as long as local lib dir exists (it may be empty) and
+              ivy is in at least one of ant's lib dir or the local lib dir. -->
+        <path id="ivy.lib.path">
+            <fileset dir="${ivy.jar.dir}" includes="*.jar"/>
+        </path>
+        <taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" classpathref="ivy.lib.path"/>
+    </target>
+
+    <target name="get_deps" depends="install-ivy" description="--> resolve dependencies, compile and run the project">
+        <ivy:retrieve type="jar"/>
+
+        <get src="http://www.freepastry.org/FreePastry/FreePastry-2.1.jar"
+            dest="${lib}/FreePastry-2.1.jar" usetimestamp="true" skipexisting="true"/>
+        <condition property="match">
+            <checksum file="${lib}/FreePastry-2.1.jar" property="f53f8c9cc11cd11b2f965155812868e0"/>
+        </condition>
+        <fail message="MD5 sum of the FreePastry jar is wrong! (delete it to automatically redownload)" unless="match"/>
+    </target>
 	
 	<target name="init_general">
 		<tstamp/>
@@ -36,7 +69,7 @@
 	</target>
 	
 	
-	<target name="init_compile" depends="init_general">
+	<target name="init_compile" depends="init_general, get_deps">
 		<mkdir dir="${tmp.classes}" />
 		<mkdir dir="${tmp.junit}" />
 		<mkdir dir="${tmp.help1}" />
@@ -297,6 +330,17 @@
 		<delete dir="${tmp}" />
 		<delete dir="log" />
 	</target>
+
+	<target name="clean_deps">
+		<delete dir="ivy" />
+        <delete file="commons-codec-1.7.jar" />
+        <delete file="FreePastry-2.1.jar" />
+        <delete file="hamcrest-core-1.3.jar" />
+        <delete file="junit-4.11.jar" />
+        <delete file="xpp3-1.1.4c.jar" />
+	</target>
+
+    <target name="clean_all" depends="clean, clean_deps"/>
 	
 	<target name="all" depends="jars, junit, docs, clean" />
 	

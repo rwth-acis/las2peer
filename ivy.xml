@@ -1,0 +1,8 @@
+<ivy-module version="2.0">
+    <info organisation="i5" module="las2peer"/>
+    <dependencies>
+        <dependency org="commons-codec" name="commons-codec" rev="1.7" />
+        <dependency org="xpp3" name="xpp3" rev="1.1.4c" />
+        <dependency org="junit" name="junit" rev="4.11" />
+    </dependencies>
+</ivy-module>
