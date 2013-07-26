@@ -2,7 +2,7 @@ package i5.las2peer.p2p;
 
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
-import i5.las2peer.mobsos.NodeObserver.Event;
+import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.p2p.pastry.ContentEnvelope;
 import i5.las2peer.p2p.pastry.MessageEnvelope;
 import i5.las2peer.p2p.pastry.NodeApplication;

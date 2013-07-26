@@ -1,4 +1,4 @@
-package i5.las2peer.mobsos;
+package i5.las2peer.logging;
 
 import i5.las2peer.security.Agent;
 

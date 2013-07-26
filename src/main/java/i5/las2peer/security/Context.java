@@ -1,7 +1,7 @@
 package i5.las2peer.security;
 
 import i5.las2peer.execution.L2pThread;
-import i5.las2peer.mobsos.NodeObserver.Event;
+import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.ArtifactNotFoundException;
 import i5.las2peer.p2p.Node;

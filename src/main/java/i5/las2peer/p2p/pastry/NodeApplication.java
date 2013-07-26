@@ -1,7 +1,7 @@
 package i5.las2peer.p2p.pastry;
 
 import i5.las2peer.communication.MessageException;
-import i5.las2peer.mobsos.NodeObserver.Event;
+import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.NodeInformation;
 import i5.las2peer.p2p.NodeNotFoundException;

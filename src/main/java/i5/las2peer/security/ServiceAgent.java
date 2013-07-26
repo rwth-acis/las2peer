@@ -15,7 +15,7 @@ import i5.las2peer.execution.NoSuchServiceMethodException;
 import i5.las2peer.execution.NotFinishedException;
 import i5.las2peer.execution.RMITask;
 import i5.las2peer.execution.ServiceInvocationException;
-import i5.las2peer.mobsos.NodeObserver.Event;
+import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.NodeNotFoundException;
