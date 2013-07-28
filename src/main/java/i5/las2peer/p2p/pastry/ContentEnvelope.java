@@ -69,7 +69,7 @@ public class ContentEnvelope extends ContentHashPastContent {
 	 * 
 	 * @see #TYPE_AGENT
 	 * @see #TYPE_ENVELOPE
-	 * @return
+	 * @return the type
 	 */
 	public byte getType () {
 		return type;

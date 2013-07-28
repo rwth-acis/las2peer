@@ -183,14 +183,15 @@ public class L2pNodeLauncher {
 	}
 
 	/**
-	 * get an envelope of the given id 
+	 * Get an envelope of the given id.
+	 * If empty, the main user-list is returned.
 	 * 
 	 * @param id
 	 * 
-	 * @return
-	 * @throws StorageException 
-	 * @throws ArtifactNotFoundException 
-	 * @throws NumberFormatException 
+	 * @return the XML-representation of an envelope as a String
+	 * @throws StorageException
+	 * @throws ArtifactNotFoundException
+	 * @throws NumberFormatException
 	 */
 	public String getEnvelope ( String id ) throws NumberFormatException, ArtifactNotFoundException, StorageException {
 		if ( id == null || id.equals (""))
@@ -202,7 +203,7 @@ public class L2pNodeLauncher {
 	
 	
 	/**
-	 * fetch a random envelope previously stored with {@link storeRandoms}
+	 * fetch a random envelope previously stored with {@link #storeRandoms(String, String)}
 	 * 
 	 * stores the time needed for the document retrieval for analysis
 	 * 

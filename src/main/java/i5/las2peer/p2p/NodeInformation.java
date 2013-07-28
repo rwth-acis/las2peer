@@ -157,7 +157,7 @@ public class NodeInformation implements XmlAble {
 	/**
 	 * the content for the signature
 	 * 
-	 * @return
+	 * @return an array containing the signature content as bytes
 	 */
 	public byte[] getSignatureContent () {
 		String toSign = nodeKey.toString() + getAdminEmail() + nodeHandle.toString();
@@ -168,7 +168,7 @@ public class NodeInformation implements XmlAble {
 	/**
 	 * get the handle of the described node
 	 * 
-	 * @return	 a node handle, either Long or NodeHandle
+	 * @return a node handle, either Long or NodeHandle
 	 */
 	public Object getNodeHandle () {
 		return nodeHandle;
@@ -176,7 +176,7 @@ public class NodeInformation implements XmlAble {
 	
 	/**
 	 * get the public encryption key of the node
-	 * @return
+	 * @return the public node key
 	 */
 	public PublicKey getNodeKey () {
 		return nodeKey;

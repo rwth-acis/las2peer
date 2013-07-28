@@ -78,7 +78,7 @@ public class UserAgentList implements Serializable {
 	/**
 	 * is the given login name free for registration?
 	 * @param login
-	 * @return
+	 * @return if the given login is free for registration
 	 */
 	public boolean isLoginFree ( String login ) {
 		return !htLogin2UserIds.containsKey(login);
@@ -87,7 +87,7 @@ public class UserAgentList implements Serializable {
 	/**
 	 * is the given email address free for registration?
 	 * @param email
-	 * @return
+	 * @return returns if the given mail is free for registration
 	 */
 	public boolean isEmailFree ( String email ) {
 		return ! htEmail2UserIds.containsKey(email.toLowerCase());
@@ -114,7 +114,7 @@ public class UserAgentList implements Serializable {
 	/**
 	 * get the id of the {@link UserAgent} assigned to the given email
 	 * 
-	 * @param login
+	 * @param email
 	 * 
 	 * @return	UserAgent id
 	 * 

@@ -397,7 +397,7 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * 
 	 * By default, blindly overwriting is turned off. In this case, another envelope trying to replace
 	 * this one, has to refer to the timestamp of this envelope suggesting to be an updated version.
-	 * Otherwise a replacement will fail with an {@linnk UpdateException}.
+	 * Otherwise a replacement will fail with an {@link i5.las2peer.security.L2pSecurityException}.
 	 * 
 	 * @param overwrite
 	 * @throws L2pSecurityException 
@@ -420,7 +420,7 @@ public final class Envelope implements XmlAble, Cloneable {
 	
 	/**
 	 * get the timestamp 
-	 * @return
+	 * @return the timestamp
 	 */
 	public long getReferalTimestamp () {
 		return loadedTimestamp;
@@ -678,7 +678,7 @@ public final class Envelope implements XmlAble, Cloneable {
 	}
 	
 	/**
-	 * may the {@link #baCipherData method be used on this envelope?
+	 * may the {@link #baCipherData} method be used on this envelope?
 	 * 
 	 * @return true, if updateContent is enabled
 	 */
@@ -1164,7 +1164,7 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * Requires an active Las2Peer @{link i5.las2peer.security.Context}.
 	 * 
 	 * @param id
-	 * @return
+	 * @return an envelope
 	 * @throws ArtifactNotFoundException
 	 * @throws StorageException
 	 */
@@ -1176,10 +1176,11 @@ public final class Envelope implements XmlAble, Cloneable {
 	/**
 	 * Get a previously stored envelope from the p2p network.
 	 * 
-	 * Requires an active Las2Peer @{link i5.las2peer.security.Context}.
+	 * Requires an active LAS2Peer @{link i5.las2peer.security.Context}.
 	 * 
-	 * @param id
-	 * @return
+	 * @param cls type of the class
+	 * @param identifier an unique identifier for the envelope
+	 * @return an envelope
 	 * @throws ArtifactNotFoundException
 	 * @throws StorageException
 	 */

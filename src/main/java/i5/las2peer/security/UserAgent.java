@@ -66,7 +66,7 @@ public class UserAgent extends PassphraseAgent {
 		
 	/**
 	 * get the login name stored for this user agent
-	 * @return
+	 * @return the user login name
 	 */
 	public String getLoginName () {
 		return sLoginName;
@@ -82,8 +82,8 @@ public class UserAgent extends PassphraseAgent {
 	
 	/**
 	 * select a login name for this agent
-	 * @param sLoginName
-	 * @return
+	 * @param loginName
+	 * 
 	 * @throws L2pSecurityException 
 	 * @throws UserAgentException 
 	 */

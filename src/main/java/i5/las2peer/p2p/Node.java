@@ -14,8 +14,8 @@ import i5.las2peer.execution.RMITask;
 import i5.las2peer.execution.ServiceInvocationException;
 import i5.las2peer.execution.UnlockNeededException;
 import i5.las2peer.logging.NodeObserver;
-import i5.las2peer.logging.NodeStreamLogger;
 import i5.las2peer.logging.NodeObserver.Event;
+import i5.las2peer.logging.NodeStreamLogger;
 import i5.las2peer.p2p.pastry.PastryStorageException;
 import i5.las2peer.persistency.DecodingFailedException;
 import i5.las2peer.persistency.EncodingFailedException;
@@ -1111,7 +1111,7 @@ public abstract class Node implements AgentStorage {
 	
 	/**
 	 * Update the registry of login and mail addresses of known / stored user agents on
-	 * an {@link updateAgent} oder {@link storeAgent} action.
+	 * an {@link #updateAgent(Agent)} or {@link #storeAgent(Agent)} action.
 	 * 
 	 * @param agent
 	 * @throws DuplicateEmailException
