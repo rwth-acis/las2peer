@@ -57,7 +57,7 @@ public class BasicAgentStorage implements AgentStorage {
 			htRegistered.put( register.getId(), register );
 		} catch (CloneNotSupportedException e) {
 			// should not occur, since agent is cloneable
-			throw new RuntimeException ( "Cone problems", e);
+			throw new RuntimeException ( "Clone problems", e);
 		}
 	}
 	
