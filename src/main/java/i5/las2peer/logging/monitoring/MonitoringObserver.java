@@ -48,15 +48,32 @@ public class MonitoringObserver extends NodeObserver {
 			} catch (AgentException e) {
 				e.printStackTrace();
 			}
-		} catch (CryptoException | L2pSecurityException e) {
+		} catch (CryptoException e){
+			e.printStackTrace();	
+		} catch(L2pSecurityException e) {
 			e.printStackTrace();
 		}
+		
 		try {
 			receivingAgent = (MonitoringAgent) getActiveNode().invokeGlobally(sendingAgent,
 					"i5.las2peer.services.monitoring.processing.MonitoringDataProcessingService", "getReceivingAgent", null);
-		} catch (ServiceInvocationException | UnlockNeededException
-				| L2pSecurityException | InterruptedException
-				| TimeoutException e) {
+		} catch (UnlockNeededException e) {
+			System.out.println("Monitoring: Processing service does not seem available! " + e);
+			monitor = false;
+			e.printStackTrace();
+		} catch (L2pSecurityException e) {
+			System.out.println("Monitoring: Processing service does not seem available! " + e);
+			monitor = false;
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			System.out.println("Monitoring: Processing service does not seem available! " + e);
+			monitor = false;
+			e.printStackTrace();
+		} catch (TimeoutException e) {
+			System.out.println("Monitoring: Processing service does not seem available! " + e);
+			monitor = false;
+			e.printStackTrace();
+		} catch (ServiceInvocationException e) {
 			System.out.println("Monitoring: Processing service does not seem available! " + e);
 			monitor = false;
 			e.printStackTrace();
@@ -80,7 +97,6 @@ public class MonitoringObserver extends NodeObserver {
 	private void sendMessages() {
 		if(!monitor)
 			return; //TODO: Throw Exception
-		try {
 			try {
 				Message message = new Message(sendingAgent,receivingAgent,messages);
 				if(messageResultListener == null || messageResultListener.isFinished()){
@@ -95,13 +111,14 @@ public class MonitoringObserver extends NodeObserver {
 				else{
 					System.out.println("Monitoring: busy.."); //TODO
 				}
-				
-			} catch (L2pSecurityException e) {
-				e.printStackTrace();
-			}
-		} catch (EncodingFailedException | SerializationException e) {
+		} catch (L2pSecurityException e) {
+			e.printStackTrace();
+		} catch (EncodingFailedException e) {
+			e.printStackTrace();
+		} catch (SerializationException e){
 			e.printStackTrace();
 		}
+ 		
 	}
 	
 	

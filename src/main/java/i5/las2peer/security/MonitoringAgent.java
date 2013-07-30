@@ -217,6 +217,7 @@ public class MonitoringAgent extends PassphraseAgent {
 		} catch (L2pSecurityException e) {
 			throw new MessageException ( "Security problems handling the received message", e);
 		} catch (AgentNotKnownException e) {
+			//Do nothing..
 		}
 	}
 	
