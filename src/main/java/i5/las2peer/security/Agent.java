@@ -25,7 +25,7 @@ import org.apache.commons.codec.binary.Base64;
 
 /**
  * An Agent is the basic acting entity in the LAS2peer network.
- * At the moment, an agent can represent a simple user, a group or a service.
+ * At the moment, an agent can represent a simple user, a group, a service or a monitoring agent.
  * 
  * @author Holger Jan&szlig;en
  *
@@ -144,7 +144,6 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	}
 
 
-
 	/**
 	 * returns the id of this agent
 	 * @return id of the agent
@@ -153,6 +152,10 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 		return id;
 	}
 	
+	/**
+	 * returns the id of this agent
+	 * @return id of the agent
+	 */
 	@Override
 	public long getResponsibleForAgentId() {
 		return getId();
@@ -246,10 +249,10 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 
 	
 	/**
-	 * factory: create an agent from its XML string representation
+	 * Factory: Create an agent from its XML string representation.
 	 * 
-	 * depending on the type attribute of the root node, the type will be
-	 * a {@link UserAgent}, {@link GroupAgent} or {@link ServiceAgent}
+	 * Depending on the type attribute of the root node, the type will be
+	 * a {@link UserAgent}, {@link GroupAgent}, {@link ServiceAgent}, or a {@link MonitoringAgent}.
 	 * 
 	 * @param xml
 	 * 
@@ -259,21 +262,23 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	 */
 	public static Agent createFromXml(String xml) throws MalformedXMLException {
 		try {
-			Element root = Parser.parse( xml, false);
+			Element root = Parser.parse(xml, false);
 
-			if ( ! root.getName ().equals( "agent"))
+			if ( !root.getName().equals("agent") )
 				throw new MalformedXMLException ( "this is not an agent but a " + root.getName() );
 			
 			String type = root.getAttribute( "type");
 			
-			if ( "passphrase".equals( type ))
+			if ( "user".equals( type ))
 				return UserAgent.createFromXml(root);
-			else if ( "group".equals( type) )
+			else if ( "group".equals( type ) )
 				return GroupAgent.createFromXml(root);
-			else if ( "service".equals( type) )
+			else if ( "service".equals( type ) )
 				return ServiceAgent.createFromXml(root);
+			else if ("monitoring".equals( type ))
+				return MonitoringAgent.createFromXml(root);
 			else 
-				throw new MalformedXMLException ( "Unknown agent type: " + type);
+				throw new MalformedXMLException("Unknown agent type: " + type);
 			
 		} catch (XMLSyntaxException e) {
 			throw new MalformedXMLException("Error parsing xml string", e);
