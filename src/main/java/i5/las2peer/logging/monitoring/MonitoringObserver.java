@@ -29,7 +29,7 @@ import i5.las2peer.tools.SerializationException;
  *
  */
 public class MonitoringObserver extends NodeObserver {
-	private boolean initializing = false; //Is set to false, as long as the Agents are not initialized.
+	private boolean readyForInitializing = false; //Is set to false, as long as the Agents are not initialized.
 	private MonitoringMessage[] messages; //The size is determined by the constructor, will be send at once.
 	int messagesCount; //Counter to determine how many messages are currently inside the messages Array.
 	MonitoringAgent sendingAgent; //The Agent responsible for this observer.
@@ -115,10 +115,15 @@ public class MonitoringObserver extends NodeObserver {
 	protected void writeLog(long timestamp, long timespan, Event event,
 			String sourceNode, Long sourceAgentId, String originNode,
 			Long originAgentId, String remarks) {
-		
-		if(!initializing && event == Event.SERVICE_STARTUP){ //We know the Node is "really" up and running once the first service is loaded
-			initializing = true;
+		//Now this is a bit tricky..
+		//We get a "Node is Running" event, but we have to wait until the next event to be sure that
+		//the method that called the "Running" event has terminated, otherwise our request will crash this startup method
+		if(readyForInitializing){
+			readyForInitializing = false; //"Nearly" atomic, enough in this case;-)
 			initializedDone = initializeAgents();
+		}
+		if(event == Event.NODE_STATUS_CHANGE && remarks.equals("RUNNING")){
+			readyForInitializing = true;
 		}
 		if(messagesCount >= messages.length){
 			

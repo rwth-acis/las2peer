@@ -459,7 +459,7 @@ public abstract class Node implements AgentStorage {
 					String filename = sLogFilePrefix + "_pastry_"  + fmt.format(new Date()) + "_" +  nh.getNodeId().toStringFull();
 					filename += ".log";										
 					System.out.println ( "set logfile to " + filename);
-					((NodeStreamLogger)observer).setOutputFile( filename);		
+					((NodeStreamLogger)observer).setOutputFile( filename);
 					} catch ( Exception e ) {	
 						System.out.println ( "error setting logfile: " + e );
 					}
