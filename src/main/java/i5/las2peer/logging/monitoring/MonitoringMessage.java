@@ -2,6 +2,8 @@ package i5.las2peer.logging.monitoring;
 
 import i5.las2peer.logging.NodeObserver.Event;
 
+import java.io.Serializable;
+
 /**
  * MonitoringMessage.java
  * 
@@ -11,7 +13,9 @@ import i5.las2peer.logging.NodeObserver.Event;
  * @author Peter de Lange
  *
  */
-public class MonitoringMessage{
+public class MonitoringMessage implements Serializable{
+
+	private static final long serialVersionUID = -1481582785721621545L;
 	
 	private long timestamp;
 	private long timespan;

@@ -157,9 +157,7 @@ public class PastryNodeImpl extends Node {
 	 * create a node listening to the given port an 
 	 * trying to connect to the hosts given in the bootstrap string
 	 * The bootstrap string may be a comma separated lists of host possibly including
-	 * port information separated be a colon.
-	 * 
-	 * Leave empty or null to start a new ring
+	 * port information separated be a colon. Leave empty or null to start a new ring.
 	 * 
 	 * @param port
 	 * @param bootstrap
@@ -173,9 +171,7 @@ public class PastryNodeImpl extends Node {
 	 * create a node listening to the given port an 
 	 * trying to connect to the hosts given in the bootstrap string
 	 * The bootstrap string may be a comma separated lists of host possibly including
-	 * port information separated be a colon.
-	 * 
-	 * Leave empty or null to start a new ring
+	 * port information separated be a colon. Leave empty or null to start a new ring.
 	 * 
 	 * @param port
 	 * @param bootstrap
@@ -186,6 +182,23 @@ public class PastryNodeImpl extends Node {
 		initialize(port, bootstrap, mode);
 	}
 
+	/**
+	 * create a node listening to the given port an 
+	 * trying to connect to the hosts given in the bootstrap string
+	 * The bootstrap string may be a comma separated lists of host possibly including
+	 * port information separated be a colon. Leave empty or null to start a new ring.
+	 * 
+	 * The observer-flag determines, if the node will be available for monitoring.
+	 *  
+	 * @param port
+	 * @param bootstrap
+	 * @param mode
+	 */
+	public PastryNodeImpl ( int port, String bootstrap, STORAGE_MODE mode, boolean monitoringObserver) {
+		super(null, true, monitoringObserver);
+		initialize(port, bootstrap, mode);
+	}
+	
 	
 	/**
 	 * local initialization for constructors
@@ -696,7 +709,7 @@ public class PastryNodeImpl extends Node {
 				locallyKnownAgents.registerAgent(agentFromNet);
 			} catch (Exception e) {
 				observerNotice(Event.AGENT_GET_FAILED, pastryNode, id, "" );
-				throw new AgentNotKnownException ( "unable to retrieve Agent "+id+"from past storage", e);
+				throw new AgentNotKnownException ( "unable to retrieve Agent "+id+" from past storage", e);
 			}			
 		}
 	

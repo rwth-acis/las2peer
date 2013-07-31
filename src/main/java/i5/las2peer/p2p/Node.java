@@ -16,6 +16,7 @@ import i5.las2peer.execution.UnlockNeededException;
 import i5.las2peer.logging.NodeObserver;
 import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.logging.NodeStreamLogger;
+import i5.las2peer.logging.monitoring.MonitoringObserver;
 import i5.las2peer.p2p.pastry.PastryStorageException;
 import i5.las2peer.persistency.DecodingFailedException;
 import i5.las2peer.persistency.EncodingFailedException;
@@ -165,6 +166,7 @@ public abstract class Node implements AgentStorage {
 	/**
 	 * 
 	 * @param baseClassLoader
+	 * 
 	 */
 	public Node ( ClassLoader baseClassLoader ) {
 		this ( baseClassLoader, true);
@@ -172,13 +174,32 @@ public abstract class Node implements AgentStorage {
 	
 	/**
 	 * 
+	 * @param baseClassLoader
+	 * @param standardObserver
+	 * 
+	 */
+	public Node ( ClassLoader baseClassLoader, boolean standardObserver ) {
+		this (baseClassLoader, standardObserver, false);
+	}
+	
+	
+	/**
+	 * 
+	 * Generates a new Node with the given baseClassLoader.
+	 * The Observer-flags determine, which observers will be registered at startup.
 	 * 
 	 * @param baseClassLoader
 	 * @param standardObserver
+	 * @param monitoringObserver
+	 * 
 	 */
-	public Node ( ClassLoader baseClassLoader, boolean standardObserver ) {
-		if ( standardObserver )
+	public Node(ClassLoader baseClassLoader, boolean standardObserver, boolean monitoringObserver){
+		if ( standardObserver ){
 			initStandardLogfile ();
+		}
+		if(monitoringObserver){
+			addObserver(new MonitoringObserver(50, this));
+		}
 		
 		this.baseClassLoader = baseClassLoader;
 		
@@ -431,16 +452,19 @@ public abstract class Node implements AgentStorage {
 	protected void setStatus ( NodeStatus newstatus ) {
 		if ( newstatus == NodeStatus.RUNNING && this instanceof PastryNodeImpl )
 			for ( NodeObserver observer : observers ) {
-				try {
+				if(observer instanceof NodeStreamLogger){
+					try {
 					DateFormat fmt = new SimpleDateFormat( "yyyy-MM-dd_HH-mm-ss" );
 					NodeHandle nh = (NodeHandle) getNodeId();			
 					String filename = sLogFilePrefix + "_pastry_"  + fmt.format(new Date()) + "_" +  nh.getNodeId().toStringFull();
 					filename += ".log";										
 					System.out.println ( "set logfile to " + filename);
 					((NodeStreamLogger)observer).setOutputFile( filename);		
-				} catch ( Exception e ) {	
-					System.out.println ( "error setting logfile: " + e );
+					} catch ( Exception e ) {	
+						System.out.println ( "error setting logfile: " + e );
+					}
 				}
+
 			}
 		
 		observerNotice(Event.NODE_STATUS_CHANGE, ""+newstatus );
@@ -1223,6 +1247,7 @@ public abstract class Node implements AgentStorage {
 	/**
 	 * invoke a service method of a local running service agent
 	 * 
+	 * @param executingAgentId
 	 * @param serviceClass
 	 * @param method
 	 * @param parameters
@@ -1235,7 +1260,7 @@ public abstract class Node implements AgentStorage {
 	 * @throws L2pServiceException 
 	 * 
 	 */
-	public Serializable invokeLocally ( long executingAgent, String serviceClass, String method, Serializable[] parameters ) throws L2pSecurityException, AgentNotKnownException, InterruptedException, L2pServiceException  {
+	public Serializable invokeLocally ( long executingAgentId, String serviceClass, String method, Serializable[] parameters ) throws L2pSecurityException, AgentNotKnownException, InterruptedException, L2pServiceException  {
 		if ( getStatus() != NodeStatus.RUNNING )
 			throw new IllegalStateException ( "you can invoce methods only on a running node!");
 		
@@ -1251,7 +1276,7 @@ public abstract class Node implements AgentStorage {
 		}
 		
 		RMITask task = new RMITask (serviceClass, method, parameters);
-		Context context = getAgentContext ( executingAgent );
+		Context context = getAgentContext ( executingAgentId );
 		
 		L2pThread thread = new L2pThread (serviceAgent, task, context);
 		

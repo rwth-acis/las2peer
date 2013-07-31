@@ -1298,29 +1298,32 @@ public class L2pNodeLauncher {
 	
 	
 	/**
-	 * create a new node launcher instance
+	 * Creates a new node launcher instance.
 	 * 
-	 * @param port		local port number to open
-	 * @param bootstrap	comma separated list of bootstrap nodes to connect to or "NEW"
+	 * @param port local port number to open
+	 * @param bootstrap comma separated list of bootstrap nodes to connect to or "NEW"
+	 * @param monitoringObserver determines, if the monitoring-observer will be started at this node
 	 */
-	private L2pNodeLauncher ( int port, String bootstrap ) {
+	private L2pNodeLauncher ( int port, String bootstrap, boolean monitoringObserver ) {
 		if ( System.getenv().containsKey("MEM_STORAGE"))
-			node = new PastryNodeImpl ( port, bootstrap, STORAGE_MODE.memory );		
+			node = new PastryNodeImpl ( port, bootstrap, STORAGE_MODE.memory, monitoringObserver );		
 		else
-			node = new PastryNodeImpl ( port, bootstrap, STORAGE_MODE.filesystem );		
+			node = new PastryNodeImpl ( port, bootstrap, STORAGE_MODE.filesystem, monitoringObserver );		
 		
 		commandPrompt = new CommandPrompt ( this );
 	}
 	
+	
 	/**
-	 * create a new node launcher instance 
+	 * Creates a new node launcher instance. 
 	 * 
-	 * @param port		local port number to open
+	 * @param port local port number to open
 	 * @param bootstrap	comma separated list of bootstrap nodes to connect to or "NEW"
-	 * @param nodeNumber	(local) number to identify the launcher instance
+	 * @param nodeNumber (local) number to identify the launcher instance
+	 * @param monitoringObserver determines, if the monitoring-observer will be started at this node
 	 */
-	private L2pNodeLauncher ( int port, String bootstrap, int nodeNumber ) {
-		this ( port, bootstrap );
+	private L2pNodeLauncher ( int port, String bootstrap, int nodeNumber, boolean monitoringObserver ) {
+		this ( port, bootstrap, monitoringObserver );
 		
 		this.nodeNumber = nodeNumber;
 	}
@@ -1361,48 +1364,6 @@ public class L2pNodeLauncher {
 		return "Node " + nodeNumber;
 	}
 	
-	/**
-	 * invoke a testing method at the node
-	 * 
-	 * @param methodName
-	 */
-	/** moved to comman dprompt
-	private void invoke ( String methodName ) {
-		String parameter = null;
-		try {
-			printMessage ( "Invoking: " + methodName);
-			
-			if (methodName.contains("(") && methodName.contains (")")) {
-				parameter = methodName.substring(methodName.indexOf("(")+1, methodName.lastIndexOf(")")).trim();
-				methodName = methodName.substring(0, methodName.indexOf("(")).trim();
-			}
-				
-			Method method;
-			if ( parameter != null )
-				method = L2pNodeLauncher.class.getMethod( methodName , String.class );
-			else
-				method = L2pNodeLauncher.class.getMethod(methodName);
-			
-			if ( Modifier.isStatic ( method.getModifiers())
-					|| ! Modifier.isPublic( method.getModifiers() ) ) {
-				printWarning ( "Method " + methodName + " is not available!");
-				return;
-			}
-			
-			if ( parameter != null )
-				method.invoke ( this, parameter );
-			else
-				method.invoke( this );
-		} catch ( NoSuchMethodException e ) {
-			if ( parameter != null)
-				printWarning ("method " + methodName + "(String) not known to the launcher!");
-			else				
-				printWarning ("method " + methodName + "() not known to the launcher!");
-		} catch (Exception e) {
-			printWarning ( "Exception while executing method " + methodName + "!");
-			e.printStackTrace();
-		}
-	} **/
 	
 	/**
 	 * print a (yellow) message to the console
@@ -1412,6 +1373,7 @@ public class L2pNodeLauncher {
 		ColoredOutput.printlnYellow ( nodeString() + message );
 	}
 	
+	
 	/**
 	 * print a (red) warning message to the console
 	 * @param message
@@ -1419,21 +1381,6 @@ public class L2pNodeLauncher {
 	private void printWarning ( String message ) {
 		ColoredOutput.printlnRed( nodeString() + message );
 	}
-	
-	/**
-	 * execute several command lines 
-	 * 
-	 * @param commandLines
-	 */
-	
-	/** moved to CommandPrompt
-	private void executeLines ( String [] commandLines ) {
-		commandPrompt = new CommandPrompt ( this ) ;
-		
-		for ( int i=2; i<commandLines.length; i++) {
-			commandPrompt.handleLine(commandLines[i]);
-		}	
-	} **/
 	
 	
 	private static Integer finished = 0;
@@ -1498,8 +1445,6 @@ public class L2pNodeLauncher {
 	}
 	
 	
-	
-	
 	/**
 	 * launch single node
 	 * 
@@ -1511,8 +1456,15 @@ public class L2pNodeLauncher {
 	static L2pNodeLauncher launchSingle ( String[] args, int nodeNumber, File logDir) throws NodeException {
 		int port = Integer.parseInt(args[0].trim());
 		String bootstrap = args[1];
-		
-		L2pNodeLauncher launcher = new L2pNodeLauncher (port, bootstrap, nodeNumber);
+		L2pNodeLauncher launcher;
+		int startWith = 2; //To be backwards compatible, startObserver flag is not required
+		if (args.length > 3 && args[2].equals("startObserver")){
+			launcher = new L2pNodeLauncher (port, bootstrap, nodeNumber, true);
+			startWith++;
+		}
+		else{
+			launcher = new L2pNodeLauncher (port, bootstrap, nodeNumber, false);
+		}
 		try {
 			if ( logDir != null )
 				launcher.setLogDir ( logDir );
@@ -1520,7 +1472,7 @@ public class L2pNodeLauncher {
 			
 			CommandPrompt cmd = new CommandPrompt ( launcher ) ;
 					
-			for ( int i=2; i<args.length; i++) {
+			for ( int i=startWith; i<args.length; i++) {
 				System.out.println ( "Handling: '" + args[i]+ "'");
 				cmd.handleLine(args[i]);
 			}	
@@ -1656,7 +1608,6 @@ public class L2pNodeLauncher {
 		ColoredOutput.printlnYellow("\n\nall nodes seem to have finished - exiting!");
 		System.exit(0);
 	}
-	
 	
 	
 	/**

@@ -2,6 +2,7 @@ package i5.las2peer.security;
 
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
+import i5.las2peer.execution.L2pServiceException;
 import i5.las2peer.logging.monitoring.MonitoringMessage;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.persistency.MalformedXMLException;
@@ -13,6 +14,7 @@ import i5.simpleXML.Element;
 import i5.simpleXML.Parser;
 import i5.simpleXML.XMLSyntaxException;
 
+import java.io.Serializable;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.Random;
@@ -31,6 +33,9 @@ import org.apache.commons.codec.binary.Base64;
  */
 public class MonitoringAgent extends PassphraseAgent {
 	
+	public static final long PROCESSING_SERVICE_RECEIVING_AGENT_ID = 1L;
+	public static final String PROCESSING_SERVICE_ClASS_NAME = "i5.las2peer.services.monitoring.processing.MonitoringDataProcessingService";
+	
 	
 	/**
 	 * 
@@ -48,6 +53,96 @@ public class MonitoringAgent extends PassphraseAgent {
 	}
 	
 	
+	/**
+	 * 
+	 * Creates a new MonitoringAgent with a locked private key.
+	 * 
+	 * used within {@link #createFromXml}
+	 * 
+	 * @param id
+	 * @param pubKey
+	 * @param encodedPrivate
+	 * @param salt
+	 * 
+	 */
+	protected MonitoringAgent ( long id, PublicKey pubKey, byte[] encodedPrivate, byte[] salt ) {
+		super ( id, pubKey, encodedPrivate, salt );
+	}
+	
+	
+	/**
+	 * 
+	 * Create a new MonitoringAgent protected by the given passphrase.
+	 * 
+	 * @param passphrase passphrase for the secret key of the new user
+	 * 
+	 * @return a new UserAgent
+	 * 
+	 * @throws CryptoException
+	 * @throws L2pSecurityException
+	 * 
+	 */
+	public static MonitoringAgent createMonitoringAgent ( String passphrase ) throws CryptoException, L2pSecurityException {
+		Random r = new Random();
+		return new MonitoringAgent( r.nextLong(), CryptoTools.generateKeyPair(), passphrase, CryptoTools.generateSalt() );
+
+	}
+	
+	
+	/**
+	 * 
+	 * Create a new MonitoringAgent with the given Id and protected by the given passphrase.
+	 * 
+	 * @param passphrase passphrase for the secret key of the new user
+	 * 
+	 * @return a new UserAgent
+	 * 
+	 * @throws CryptoException
+	 * @throws L2pSecurityException
+	 * 
+	 */
+	public static MonitoringAgent createReceivingMonitoringAgent(String passphrase)throws CryptoException, L2pSecurityException{
+		byte[] salt = CryptoTools.generateSalt();
+		return new MonitoringAgent( PROCESSING_SERVICE_RECEIVING_AGENT_ID, CryptoTools.generateKeyPair(), passphrase, salt );
+	}
+	
+	
+	@Override
+	public void receiveMessage(Message message, Context context) throws MessageException {
+		try {
+			//Test for instance
+			message.open(this, getRunningAtNode());
+			Object content = message.getContent();
+			if ( content instanceof MonitoringMessage[]) {
+				if(this.getId() == PROCESSING_SERVICE_RECEIVING_AGENT_ID){
+					Serializable[] parameters = {(Serializable) content};
+					try {
+						//Try to send the content of the message to the Processing Service
+						boolean success = (Boolean) getRunningAtNode().invokeLocally(getId(), PROCESSING_SERVICE_ClASS_NAME, "getMessages", parameters);
+						if(!success)
+							System.out.println("Monitoring: Something went wrong while invoking Processing Service!");
+					} catch (L2pServiceException e) {
+						System.out.println("Monitoring: Something went wrong while invoking Processing Service!");
+						e.printStackTrace();
+					} catch (InterruptedException e) {
+						System.out.println("Monitoring: Something went wrong while invoking Processing Service!");
+						e.printStackTrace();
+					}
+				}
+				else{
+					throw new MessageException ("I am not the Agent of the Processing Service!");
+				}
+			} else {
+				throw new MessageException ( "MonitoringAgents only receive monitoring messages!");
+			}
+		} catch (L2pSecurityException e) {
+			throw new MessageException ( "Security problems handling the received message", e);
+		} catch (AgentNotKnownException e) {
+			//Do nothing..
+		}
+	}
+	
+	
 	@Override
 	public String toXmlString() {
 		try {
@@ -55,7 +150,7 @@ public class MonitoringAgent extends PassphraseAgent {
 					"<las2peer:agent type=\"monitoring\">\n"
 					+"\t<id>" + getId() + "</id>\n"
 					+"\t<publickey encoding=\"base64\">"
-					+ SerializeTools.serializeToBase64( getPublicKey()  ) 
+					+ SerializeTools.serializeToBase64( getPublicKey() )
 					+"</publickey>\n"
 					+"\t<privatekey encrypted=\""+CryptoTools.getSymmetricAlgorithm() +"\" keygen=\""+CryptoTools.getSymmetricKeygenMethod()+"\">\n"
 					+"\t\t<salt encoding=\"base64\">" + Base64.encodeBase64String(getSalt()) + "</salt>\n"
@@ -81,7 +176,7 @@ public class MonitoringAgent extends PassphraseAgent {
 	 * class and to set the complete state via this method.
 	 *
 	 *
-	 * @param xml a String
+	 * @param XML a String
 	 *
 	 * @exception MalformedXMLException
 	 *
@@ -101,42 +196,11 @@ public class MonitoringAgent extends PassphraseAgent {
 	
 	
 	/**
-	 * Create a new MonitoringAgent protected by the given passphrase.
-	 * 
-	 * @param passphrase passphrase for the secret key of the new user
-	 * 
-	 * @return a new UserAgent
-	 * 
-	 * @throws CryptoException
-	 * @throws L2pSecurityException
-	 */
-	public static MonitoringAgent createMonitoringAgent ( String passphrase ) throws CryptoException, L2pSecurityException {
-		Random r = new Random();
-		return createMonitoringAgent(r.nextLong(), passphrase);
-	}
-	
-	
-	/**
-	 * Create a new MonitoringAgent with the given Id and protected by the given passphrase.
-	 * 
-	 * @param passphrase passphrase for the secret key of the new user
-	 * 
-	 * @return a new UserAgent
-	 * 
-	 * @throws CryptoException
-	 * @throws L2pSecurityException
-	 */
-	public static MonitoringAgent createMonitoringAgent(long id, String passphrase) throws CryptoException, L2pSecurityException{
-		byte[] salt = CryptoTools.generateSalt();
-		return new MonitoringAgent( id, CryptoTools.generateKeyPair(), passphrase, salt );
-	}
-	
-	
-	/**
 	 * Sets the state of the object from a string representation resulting from
 	 * a previous {@link #toXmlString} call.
+	 * 
 	 *
-	 * @param root parsed xml document
+	 * @param root parsed XML document
 	 *
 	 * @exception MalformedXMLException
 	 *
@@ -181,50 +245,16 @@ public class MonitoringAgent extends PassphraseAgent {
 			
 			return result;
 		} catch (XMLSyntaxException e) {
-			throw new MalformedXMLException("Error parsing xml string", e);
+			throw new MalformedXMLException("Error parsing XML string", e);
 		} catch (SerializationException e) {
 			throw new MalformedXMLException("Deserialization problems", e );
 		}		
 	}
 	
 	
-	/**
-	 * Creates a MonitoringAgent with a locked private key.
-	 * 
-	 * used within {@link #createFromXml}
-	 * 
-	 * @param id
-	 * @param pubKey
-	 * @param encodedPrivate
-	 * @param salt
-	 */
-	protected MonitoringAgent ( long id, PublicKey pubKey, byte[] encodedPrivate, byte[] salt ) {
-		super ( id, pubKey, encodedPrivate, salt );
-	}
-	
-	
-	@Override
-	public void receiveMessage(Message message, Context context) throws MessageException {
-		try {
-			message.open(this, getRunningAtNode());
-			Object content = message.getContent();
-			
-			if ( content instanceof MonitoringMessage[] ) {
-				System.out.print("Received Message!"); //TODO: Processing!
-			} else {
-				throw new MessageException ( "Monitoring Agents only receive monitoring messages!");
-			}
-		} catch (L2pSecurityException e) {
-			throw new MessageException ( "Security problems handling the received message", e);
-		} catch (AgentNotKnownException e) {
-			//Do nothing..
-		}
-	}
-	
-	
 	@Override
 	public void notifyUnregister() {
-		// TODO Auto-generated method stub
+		// TODO well..do nothing for the moment.. (something necessary?)
 	}
 	
 }
