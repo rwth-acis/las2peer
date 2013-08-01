@@ -6,6 +6,7 @@ import i5.httpServer.HttpsServer;
 import i5.httpServer.RequestHandler;
 import i5.las2peer.api.Connector;
 import i5.las2peer.api.ConnectorException;
+import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.p2p.Node;
 
 import java.io.FileNotFoundException;
@@ -24,11 +25,7 @@ import java.util.Date;
 
 public class HttpConnector extends Connector
 {
-	public static final int LOGLEVEL_NORMAL = 10;
-	public static final int LOGLEVEL_ERROR = -100;
 	
-	
-
 	/* configuration parameters */
 	public static final int DEFAULT_HTTP_CONNECTOR_PORT = 8080;
 	protected int httpConnectorPort = DEFAULT_HTTP_CONNECTOR_PORT;
@@ -231,7 +228,7 @@ public class HttpConnector extends Connector
 			} while ( handler == null );
 			
 			((HttpConnectorRequestHandler) handler).setConnector( this );
-			//LasLogger.logMessage ( getCode(), "Http-Connector running on port " + httpConnectorPort, LasLogger.LOGLEVEL_NORMAL );
+			logMessage("Http-Connector running on port " + httpConnectorPort);
 		}
 		
 		if ( startHttpsConnector ) {
@@ -243,13 +240,7 @@ public class HttpConnector extends Connector
 			
 			https.setSocketTimeout( socketTimeout );
 			https.start();
-			//LasLogger.logMessage ( getCode(), "Https-Connector running on port " + httpsConnectorPort, LasLogger.LOGLEVEL_NORMAL );
-		
-			/*
-			try {
-				Thread.sleep ( 3000 );
-			} catch (InterruptedException e) {}
-			 */
+			logMessage("Https-Connector running on port " + httpConnectorPort);
 		}
 	}
 	
@@ -257,8 +248,6 @@ public class HttpConnector extends Connector
 	@Override
 	public void stop () throws ConnectorException {
 		
-		this.myNode = null;
-				
 		// stop the listener
 		if ( http != null )
 			http.stopServer();
@@ -268,21 +257,19 @@ public class HttpConnector extends Connector
 		
 		try {
 			if ( http != null  ) {
-				//LasLogger.logMessage( getCode(), "Joining Http Server for closing!", true );
 				http.join ();
-				//LasLogger.logMessage ( getCode(), "HttpServer has been stopped!", true );
+				logMessage("Http-Connector has been stopped");
+
 			}
-			
 			if ( https != null ) {
-				//LasLogger.logMessage( getCode(), "Joining Https Server for closing!", true );
 				https.join ();
-				//LasLogger.logMessage ( getCode(), "HttpsServer has been stopped!", true );
+				logMessage("Https-Connector has been stopped");
 			}
 		} catch (InterruptedException e) {
-			//LasLogger.logError( getCode(), "Joining has been interrupted!" );
+			logError("Joining has been interrupted!");
 		}
+		this.myNode = null;
 		
-		//super.stop ();
 	}
 	
 	
@@ -312,7 +299,7 @@ public class HttpConnector extends Connector
 	 * get a timeout value for a suggested timeout (e.g. given by the remote user)
 	 * based on the set minimal an maximal timeout values
 	 * 
-	 * e.g. a getSessionTimeout(0) always gives the minimal session timout value
+	 * e.g. a getSessionTimeout(0) always gives the minimal session timeout value
 	 *   	
 	 * @param suggested
 	 * @return
@@ -350,7 +337,8 @@ public class HttpConnector extends Connector
 	
 	/**
 	 * get the default timeout for persistent sessions
-	 * @return
+	 * 
+	 * @return the default timeout
 	 */
 	long getDefaultPersistentTimeout () {
 		return defaultPersistentTimeoutMS;
@@ -358,21 +346,35 @@ public class HttpConnector extends Connector
 	
 	
 	/**
-	 * write a log message
+	 * Logs a message.
+	 * 
 	 * @param message
 	 */
-	void logMessage ( String message ) {
-		logMessage ( message, LOGLEVEL_NORMAL );
+	void logMessage (String message) {
+		logStream.println( dateFormat.format ( new Date() ) + "\t" + message);
+		myNode.observerNotice(Event.HTTP_CONNECTOR_MESSAGE, message);
 	}
 	
 	
 	/**
-	 * write a log message 
+	 * Logs a request.
+	 * 
 	 * @param message
-	 * @param logLevel
 	 */
-	void logMessage ( String message, int logLevel ) {
-		logStream.println( dateFormat.format ( new Date() ) + "\t" + logLevel + "\t" + message);
+	void logRequest (String request) {
+		logStream.println( dateFormat.format ( new Date() ) + "\t Request:" + request);
+		myNode.observerNotice(Event.HTTP_CONNECTOR_REQUEST, request);
+	}
+	
+	
+	/**
+	 * Logs an error.
+	 * 
+	 * @param error
+	 */
+	void logError (String error) {
+		logStream.println( dateFormat.format ( new Date() ) + "\t Error: " + error);
+		myNode.observerNotice(Event.HTTP_CONNECTOR_ERROR, error);
 	}
 	
 	/**

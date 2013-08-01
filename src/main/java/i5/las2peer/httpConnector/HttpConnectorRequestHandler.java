@@ -128,7 +128,7 @@ public class HttpConnectorRequestHandler implements RequestHandler {
 	public void processRequest(HttpRequest request, HttpResponse response) throws Exception {
 		response.setHeaderField( "Server-Name", "Las2peer 0.1" );
 		
-		connector.logMessage("request: " + request.getPath()+"?"+request.getQueryString());
+		connector.logRequest(request.getPath()); //+"?"+request.getQueryString()); <--No Password logging!!
 		
 		try
 		{
@@ -155,7 +155,7 @@ public class HttpConnectorRequestHandler implements RequestHandler {
 			response.setStatus ( HttpResponse.STATUS_FORBIDDEN );
 			response.setContentType( "text/plain" );
 			response.print ( "Access to this session not allowed from your host!" );
-			connector.logMessage( "Access to session " + request.getGetVar ( SESSSION_GET_VAR ) + " not allowed from address " + request.getRemoteAddress() + "!" );
+			connector.logError( "Access to session " + request.getGetVar ( SESSSION_GET_VAR ) + " not allowed from address " + request.getRemoteAddress() + "!" );
 		}
 		
 	}
@@ -210,7 +210,7 @@ public class HttpConnectorRequestHandler implements RequestHandler {
 				response.setContentType( "text/plain");
 				response.print ( "The document you requested cannot be found at this server!" );
 				
-				connector.logMessage( "File not Found: " + requested, HttpConnector.LOGLEVEL_NORMAL);
+				connector.logError( "File not Found: " + requested);
 				return;
 			}
 		} else {
@@ -218,7 +218,7 @@ public class HttpConnectorRequestHandler implements RequestHandler {
 			response.setStatus( HttpResponse.STATUS_NOT_FOUND );
 			response.setContentType( "text/plain" );
 			response.println ( "File delivery is not enabled at this server. This is just an application server." );
-			connector.logMessage( request.getRemoteAddress() + ": unknown request - " + request.getPath() );
+			connector.logError("Unknown request - " + request.getPath() );
 		}
 				
 	}
@@ -240,7 +240,7 @@ public class HttpConnectorRequestHandler implements RequestHandler {
 			response.setContentType( "text/plain" );
 			response.print ( "No corresponding session available!" );
 			
-			connector.logMessage ( request.getRemoteAddress() + ": touchsession request for unknown session " + sid );
+			connector.logError ("Touchsession request for unknown session " + sid );
 			
 			return;
 		}
@@ -291,7 +291,7 @@ public class HttpConnectorRequestHandler implements RequestHandler {
 		htSessions.remove ( sid );
 		response.println ( "Ok, session is closed!" );
 		
-		connector.logMessage ( request.getRemoteAddress() + ": closed session " + sid );
+		connector.logMessage ("Closed session " + sid );
 	}
 	
 	
@@ -426,7 +426,7 @@ public class HttpConnectorRequestHandler implements RequestHandler {
 		response.setContentType( "text/plain" );
 		response.println ( "The invokation parameters could not be read!" );
 		response.println ( "Exception-Message: " + e.getMessage() );
-		connector.logMessage ( request.getRemoteAddress() + ": request coding exception in invokation request " + request.getPath() + " for session " + sid);
+		connector.logError("Request coding exception in invokation request " + request.getPath() + " for session " + sid);
 	}
 
 	
@@ -442,7 +442,7 @@ public class HttpConnectorRequestHandler implements RequestHandler {
 		response.setStatus (HttpResponse.STATUS_INTERNAL_SERVER_ERROR );
 		response.setContentType ( "text/plain");
 		response.println ( "The invoction has been interrupted!");
-		connector.logMessage ( request.getRemoteAddress() + ": invocation has been interrupted!" );
+		connector.logError("Invocation has been interrupted!");
 	}
 
 
@@ -460,7 +460,7 @@ public class HttpConnectorRequestHandler implements RequestHandler {
 		response.clearContent();
 		response.setStatus( HttpResponse.STATUS_INTERNAL_SERVER_ERROR );
 		response.setContentType( "text/xml" );
-		connector.logMessage ( request.getRemoteAddress() + ": exception while processing RMI: " + request.getPath() + " in session " + sid );
+		connector.logError("Exception while processing RMI: " + request.getPath() + " in session " + sid );
 		
 		Object[] ret = new Object[4];
 		ret[0] = "Exception during RMI invocation!";
@@ -493,7 +493,7 @@ public class HttpConnectorRequestHandler implements RequestHandler {
 		response.setStatus( HttpResponse.STATUS_INTERNAL_SERVER_ERROR );
 		response.setContentType( "text/xml" );
 		response.println ("the result of the method call is not transferable!");
-		connector.logMessage ( request.getRemoteAddress() + ": exception while processing RMI: " + request.getPath() + " in session " + sid );
+		connector.logError("Exception while processing RMI: " + request.getPath() + " in session " + sid );
 	}
 
 
@@ -510,7 +510,7 @@ public class HttpConnectorRequestHandler implements RequestHandler {
 		response.setStatus( HttpResponse.STATUS_FORBIDDEN );
 		response.setContentType( "text/plain" );
 		response.println ( "You don't have access to the method you requested" );
-		connector.logMessage ( request.getRemoteAddress() + ": security exception in invokation request " + request.getPath() + " in session " + sid );
+		connector.logError("Security exception in invokation request " + request.getPath() + " in session " + sid);
 		
 		if ( System.getProperty("http-connector.printSecException") != null
 				&& System.getProperty( "http-connector.printSecException").equals ( "true" ) )
@@ -530,7 +530,7 @@ public class HttpConnectorRequestHandler implements RequestHandler {
 		response.setStatus( HttpResponse.STATUS_NOT_FOUND );
 		response.setContentType( "text/plain" );
 		response.println ( "The method you requested is not known to this service!" );
-		connector.logMessage ( request.getRemoteAddress() + ": invocation request " + request.getPath() + " for unknown service method in session " + sid );
+		connector.logError("Invocation request " + request.getPath() + " for unknown service method in session " + sid);
 	}
 
 
@@ -547,7 +547,7 @@ public class HttpConnectorRequestHandler implements RequestHandler {
 		response.setContentType( "text/plain" );
 		response.println ( "The service you requested is not known to this server!" );
 		
-		connector.logMessage ( request.getRemoteAddress() + ": service not found: " + sRequest[1]);
+		connector.logError ("Service not found: " + sRequest[1]);
 	}
 
 
@@ -619,7 +619,7 @@ public class HttpConnectorRequestHandler implements RequestHandler {
 					try {
 						userId = Long.valueOf(user);
 					} catch ( NumberFormatException e ) {
-						throw new L2pSecurityException ("the given user does not contain a valid agent id!");
+						throw new L2pSecurityException ("The given user does not contain a valid agent id!");
 					}
 				} else {
 					userId = l2pNode.getAgentIdForLogin(user);
@@ -627,7 +627,7 @@ public class HttpConnectorRequestHandler implements RequestHandler {
 				
 				userAgent = l2pNode.getAgent(userId);
 				if ( ! (userAgent instanceof PassphraseAgent ))
-					throw new L2pSecurityException ( "Agent is not passphrase protected!");
+					throw new L2pSecurityException ("Agent is not passphrase protected!");
 				((PassphraseAgent)userAgent).unlockPrivateKey(passwd);
 			}
 			
@@ -656,7 +656,7 @@ public class HttpConnectorRequestHandler implements RequestHandler {
 			response.setContentType( "text/xml" );
 			response.println ( "<?xml version=\"1.0\"?>");
 			response.println( session.toXmlString());
-			connector.logMessage ( request.getRemoteAddress() + ": created session " + session.getId() );
+			connector.logMessage("Created session: " + session.getId() );
 		} catch (AgentNotKnownException e) {
 			sendUnauthorizedResponse(response, null, request.getRemoteAddress() + ": login denied for user " + user);
 		} catch (L2pSecurityException e) {
@@ -724,7 +724,7 @@ public class HttpConnectorRequestHandler implements RequestHandler {
 			response.setStatus( HttpResponse.STATUS_BAD_REQUEST );
 			response.setContentType( "test/plain" );
 			response.println( "Your session is not persistent, so you cannot detach!" );
-			connector.logMessage( request.getRemoteAddress() + ": attempt to detach from nonpersistent session!" );
+			connector.logError("Attempt to detach from nonpersistent session!" );
 			return;			
 		}
 		
