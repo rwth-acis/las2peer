@@ -25,8 +25,8 @@ public class MonitoringMessage implements Serializable{
 	private Event event;
 	private String sourceNode;
 	private Long sourceAgentId;
-	private String originNode;
-	private Long originAgentId;
+	private String destinationNode;
+	private Long destinationAgentId;
 	private String remarks;
 	
 	
@@ -51,8 +51,8 @@ public class MonitoringMessage implements Serializable{
 		this.event = event;
 		this.sourceNode = sourceNode;
 		this.sourceAgentId = sourceAgentId;
-		this.originNode = destinationNode;
-		this.originAgentId = destinationAgentId;
+		this.destinationNode = destinationNode;
+		this.destinationAgentId = destinationAgentId;
 		this.remarks = remarks;
 	}
 	
@@ -82,12 +82,12 @@ public class MonitoringMessage implements Serializable{
 	}
 	
 	public String getDestinationNode() {
-		return originNode;
+		return destinationNode;
 	}
 	
 	
 	public Long getDestinationAgentId() {
-		return originAgentId;
+		return destinationAgentId;
 	}
 	
 	
