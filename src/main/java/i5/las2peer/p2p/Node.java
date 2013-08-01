@@ -129,7 +129,7 @@ public abstract class Node implements AgentStorage {
 	private String sLogFilePrefix = "log/l2p_node_";
 	
 	
-	private final static String DEFAULT_INFORMATION_FILE = "nodeInfo.xml";
+	private final static String DEFAULT_INFORMATION_FILE = "config/nodeInfo.xml";
 	private String sInformationFileName = DEFAULT_INFORMATION_FILE;
 	
 	

@@ -18,27 +18,36 @@ import i5.las2peer.tools.SerializationException;
 
 /**
  * 
+ * MonitoringObserver.java
+ * <br>
  * This is the base class of the logging module of LAS2peer.
- * It sends the collected data to the Monitoring Data Processing Service
- * via the LAS2peer message concept.
- * 
- * UNDER CONSTRUCTION!!
- * 
+ * It sends the collected data to the "Monitoring Data Processing Service" via the LAS2peer message concept.
  * 
  * @author Peter de Lange
  *
  */
 public class MonitoringObserver extends NodeObserver {
-	private boolean readyForInitializing = false; //Is set to false, as long as the Agents are not initialized.
+	
+	private boolean readyForInitializing = false; //Is set to false, as long as the node is not ready to initialize the monitoring agents.
+	private boolean initializedDone = false; //Used to determine, if the initialization process has finished.
 	private MonitoringMessage[] messages; //The size is determined by the constructor, will be send at once.
-	int messagesCount; //Counter to determine how many messages are currently inside the messages Array.
-	MonitoringAgent sendingAgent; //The Agent responsible for this observer.
-	MonitoringAgent receivingAgent; //The Agent registered at the Processing Service.
-	MessageResultListener messageResultListener; //The ResultListener that will be used for message-sending.
-	Node registeredAt; //If we want to send messages, we need a node.
+	private int messagesCount; //Counter to determine how many messages are currently stored at the messages array.
+	private MonitoringAgent sendingAgent; //The agent responsible for this observer.
+	private MonitoringAgent receivingAgent; //The agent registered at the Processing Service.
+	private MessageResultListener messageResultListener; //The ResultListener that will be used for message-sending.
+	private Node registeredAt; //If we want to send messages, we need a node.
 	
-	boolean initializedDone = false;
 	
+	/**
+	 * 
+	 * Constructor for the MonitoringObserver.
+	 * Can be added to a node by adding "startObserver" after the bootstrap parameter
+	 * at the {@link i5.las2peer.testing.L2pNodeLauncher}. Will be instantiated at a {@link i5.las2peer.p2p.Node}.
+	 *
+	 * @param messageCache determines, how many messages will be stored locally before send to the central collection unit
+	 * @param registeredAt the node this observer is registered at
+	 * 
+	 */
 	public MonitoringObserver (int messageCache, Node registeredAt) {
 		this.registeredAt = registeredAt;
 		if(messageCache < 50)
@@ -52,7 +61,6 @@ public class MonitoringObserver extends NodeObserver {
 		} catch (L2pSecurityException e) {
 			e.printStackTrace();
 		}
-		
 	}
 	
 	
@@ -111,6 +119,7 @@ public class MonitoringObserver extends NodeObserver {
 		return true;
 	}
 	
+	
 	@Override
 	protected void writeLog(long timestamp, long timespan, Event event,
 			String sourceNode, Long sourceAgentId, String originNode,
@@ -167,7 +176,7 @@ public class MonitoringObserver extends NodeObserver {
 		} catch (SerializationException e){
 			e.printStackTrace();
 		}
- 		
 	}
+	
 	
 }

@@ -135,15 +135,15 @@ public class NodeStreamLogger extends NodeObserver {
 			throw new IllegalStateException ( "This log is closed!");
 		
 		printer.println(
-			"timestamp\ttimespan\tevent code\tsource node\tsource agent\torigin node\torigin agent\tadditional remarks\n"+
+			"timestamp\ttimespan\tevent code\tsource node\tsource agent\tdestination node\tdestination agent\tadditional remarks\n"+
 			"---------\t--------\t----------\t-----------\t------------\t-----------\t------------\t------------------"		
 		);
 	}
 	
 	@Override
 	protected void writeLog(long timestamp, long timespan, Event e,
-			String sourceNode, Long sourceAgentId, String originNode,
-			Long originAgentId, String remarks) {
+			String sourceNode, Long sourceAgentId, String destinationNode,
+			Long destinationAgentId, String remarks) {
 		
 		if ( isClosed )
 			throw new IllegalStateException ( "This log is closed!");
@@ -160,9 +160,9 @@ public class NodeStreamLogger extends NodeObserver {
 	
 		logLine.append ( appendPart ( sourceNode ));			
 		logLine.append ( appendPart ( sourceAgentId ));			
-		logLine.append ( appendPart ( originNode ));			
+		logLine.append ( appendPart ( destinationNode ));			
 		
-		logLine.append ( appendPart ( originAgentId ));			
+		logLine.append ( appendPart ( destinationAgentId ));			
 		logLine.append ( appendPart ( remarks ));
 		
 		
@@ -173,8 +173,8 @@ public class NodeStreamLogger extends NodeObserver {
 	}
 	
 	/**
-	 * simple method for one log line entry -- null will be printed as "-"
-	 * all values will be followed by a tab char
+	 * Simple method for one log line entry. Null will be printed as "-".
+	 * All values will be followed by a tab char.
 	 * @param o
 	 * @return
 	 */

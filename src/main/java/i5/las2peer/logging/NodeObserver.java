@@ -8,8 +8,10 @@ import rice.pastry.PastryNode;
 import rice.pastry.socket.SocketNodeHandle;
 
 /**
- * The NodeObserver is an abstract class providing all necessary methods for a {@link i5.las2peer.p2p.Node} implementation, 
- * -- mainly {@link i5.las2peer.p2p.PastryNodeImpl} -- to log all interesting node events 
+ * 
+ * The NodeObserver is an abstract class providing all necessary methods
+ * to log all interesting node events for a {@link i5.las2peer.p2p.Node}
+ * (mainly {@link i5.las2peer.p2p.PastryNodeImpl}).
  * 
  * @author Holger Jan&szlig;en
  *
@@ -17,7 +19,7 @@ import rice.pastry.socket.SocketNodeHandle;
 public abstract class NodeObserver {
 	
 	/**
-	 * an enum with all types of events
+	 * An enumeration element with all types of events.
 	 * 
 	 * @author Holger Jan&szlig;en
 	 * 
@@ -116,7 +118,7 @@ public abstract class NodeObserver {
 	
 	
 	/**
-	 * log a node event
+	 * Logs a node event.
 	 * 
 	 * @param event
 	 * @param nodeId
@@ -129,7 +131,7 @@ public abstract class NodeObserver {
 	
 	
 	/**
-	 * log a node event
+	 * Logs a node event.
 	 * 
 	 * @param event
 	 * @param fromNode
@@ -143,7 +145,7 @@ public abstract class NodeObserver {
 	}
 	
 	/**
-	 * log a node event
+	 * Logs a node event.
 	 * 
 	 * @param event
 	 * @param timespan
@@ -158,7 +160,7 @@ public abstract class NodeObserver {
 	}
 
 	/**
-	 * log a node event
+	 * Logs a node event.
 	 * 
 	 * @param event
 	 * @param timespan
@@ -173,7 +175,7 @@ public abstract class NodeObserver {
 	}
 	
 	/**
-	 * log a node event
+	 * Logs a node event.
 	 * 
 	 * @param event
 	 */
@@ -182,7 +184,7 @@ public abstract class NodeObserver {
 	}
 	
 	/**
-	 * log a node event
+	 * Logs a node event.
 	 * 
 	 * @param event
 	 * @param remarks
@@ -193,7 +195,7 @@ public abstract class NodeObserver {
 	
 	
 	/**
-	 * log a node event
+	 * Logs a node event.
 	 * 
 	 * @param event
 	 * @param timespan
@@ -205,16 +207,16 @@ public abstract class NodeObserver {
 	
 
 	/**
-	 * derive a String representation for a node from the given identifier
-	 * object. - the type of the object depends on the setting of the current node
+	 * Derive a String representation for a node from the given identifier
+	 * object. The type of the object depends on the setting of the current node.
 	 * 
-	 * tries to specifiy an ip address and a port for an actual p2p node (PastryNode or NodeHandle).
+	 * Tries to specify an ip address and a port for an actual p2p node
+	 * ({@link i5.las2peer.p2p.PastryNodeImpl} or {@link rice.pastry.NodeHandle}).
 	 * 
 	 * @param nodeId
 	 * @return string representation for the given node object
 	 */
 	private String getNodeDesc ( Object nodeId ) {
-		
 		if ( nodeId == null)
 			return null;
 		else if ( nodeId instanceof SocketNodeHandle ) {
@@ -227,105 +229,93 @@ public abstract class NodeObserver {
 		}
 		else
 			return "" + nodeId + " (" + nodeId.getClass().getName() + ")";
-		/*
-		else if ( nodeId instanceof NodeHandle ) {
-			NodeHandle nh = (NodeHandle) nodeId;
-			return "handle: " + nh + "/" + nh.getClass().getName();
-		} else if ( nodeId instanceof Id )
-			return "ID: " + ((Id) nodeId);
-		else if ( nodeId instanceof PastryNode ) {
-			PastryNode node = (PastryNode) nodeId;
-			return "local:" + node.getId();
-		}
-			return nodeId.getClass().getName() + ": " + nodeId.toString();
-			*/
 	}
 	
 	
 	/**
-	 * write a log entry
+	 * Write a log entry.
 	 * 
 	 * @param timespan
 	 * @param event
 	 * @param sourceNode
 	 * @param sourceAgent
-	 * @param originNode
-	 * @param originAgent
+	 * @param destinationNode
+	 * @param destinationAgent
 	 * @param remarks
 	 */
-	protected void writeLog (long timespan, Event event, Object sourceNode, Agent sourceAgent, Object originNode , Agent originAgent, String remarks ) {
-		writeLog ( new Date().getTime(), timespan, event, sourceNode, sourceAgent, originNode, originAgent, remarks);
+	protected void writeLog (long timespan, Event event, Object sourceNode, Agent sourceAgent, Object destinationNode , Agent destinationAgent, String remarks ) {
+		writeLog ( new Date().getTime(), timespan, event, sourceNode, sourceAgent, destinationNode, destinationAgent, remarks);
 	}
 
 	/**
-	 * write a log entry
+	 * Write a log entry.
 	 * 
 	 * @param timespan
 	 * @param event
 	 * @param sourceNode
 	 * @param sourceAgentId
-	 * @param originNode
-	 * @param originAgentId
+	 * @param destinationNode
+	 * @param destinationAgentId
 	 * @param remarks
 	 */
-	protected void writeLog (long timespan, Event event, Object sourceNode, Long sourceAgentId, Object originNode , Long originAgentId, String remarks ) {
-		writeLog ( new Date().getTime(), timespan, event, getNodeDesc(sourceNode), sourceAgentId, getNodeDesc(originNode), originAgentId, remarks);
+	protected void writeLog (long timespan, Event event, Object sourceNode, Long sourceAgentId, Object destinationNode , Long destinationAgentId, String remarks ) {
+		writeLog ( new Date().getTime(), timespan, event, getNodeDesc(sourceNode), sourceAgentId, getNodeDesc(destinationNode), destinationAgentId, remarks);
 	}
 
 	
 	/**
-	 * write a log entry
+	 * Write a log entry.
 	 * 
 	 * @param timestamp
 	 * @param timespan
-	 * @param e
+	 * @param event
 	 * @param sourceNode
 	 * @param sourceAgent
-	 * @param originNode
-	 * @param originAgent
+	 * @param destinationNode
+	 * @param destinationAgent
 	 * @param remarks
 	 */
-	protected void writeLog ( long timestamp, long timespan, Event e, Object sourceNode, Agent sourceAgent, Object originNode , Agent originAgent, String remarks ) {
-		writeLog ( timestamp, timespan, e, getNodeDesc( sourceNode), sourceAgent, getNodeDesc ( originNode), originAgent, remarks);
+	protected void writeLog ( long timestamp, long timespan, Event event, Object sourceNode, Agent sourceAgent, Object destinationNode , Agent destinationAgent, String remarks ) {
+		writeLog ( timestamp, timespan, event, getNodeDesc( sourceNode), sourceAgent, getNodeDesc ( destinationNode), destinationAgent, remarks);
 	}
 	
 	
 	/**
-	 * write a log entry
+	 * Write a log entry.
 	 * 
 	 * @param timestamp
 	 * @param timespan
-	 * @param e
+	 * @param event
 	 * @param sourceNode
 	 * @param sourceAgent
-	 * @param originNode
-	 * @param originAgent
+	 * @param destinationNode
+	 * @param destinationAgent
 	 * @param remarks
 	 */
-	protected void writeLog ( long timestamp, long timespan, Event e, String sourceNode, Agent sourceAgent, String originNode , Agent originAgent, String remarks ) {
+	protected void writeLog ( long timestamp, long timespan, Event event, String sourceNode, Agent sourceAgent, String destinationNode , Agent destinationAgent, String remarks ) {
 		Long sourceAgentId = null;
 		if ( sourceAgent != null ) sourceAgentId = sourceAgent.getId();
-		Long originAgentId = null;
-		if ( originAgent != null) originAgentId = originAgent.getId();
-		writeLog ( timestamp, timespan, e, sourceNode, sourceAgentId, originNode, originAgentId, remarks  );
+		Long destinationAgentId = null;
+		if ( destinationAgent != null) destinationAgentId = destinationAgent.getId();
+		writeLog ( timestamp, timespan, event, sourceNode, sourceAgentId, destinationNode, destinationAgentId, remarks  );
 	}
 
 	
 	/**
 	 * This method has to be implemented by any (non abstract) deriving class.
 	 * Each call represents one event to log by this observer. All parameters except the time stamp 
-	 * and the Event may be null.
+	 * and the event may be null.
 	 * 
-	 * @param timestamp		unix time stamp of the event
+	 * @param timestamp		UNIX time stamp of the event
 	 * @param timespan		a corresponding time span (e.g. for an answer retrieval, the time span between sending and answer
 	 * @param event			the event to log
 	 * @param sourceNode	a source (p2p) node of the event (e.g. message sender)
 	 * @param sourceAgentId	a source (las2peer) agent of the event (e.g. message sender)
-	 * @param originNode	an origin (p2p) node for the event (e.g. message receiver)
-	 * @param originAgentid an origin (las2peer) agent of the event (e.g. message receiver)
+	 * @param destinationNode	an origin (p2p) node for the event (e.g. message receiver)
+	 * @param destinationAgentId an origin (las2peer) agent of the event (e.g. message receiver)
 	 * @param remarks		(optional) additional remarks
 	 */
-	protected abstract void writeLog ( long timestamp, long timespan, Event event, String sourceNode, Long sourceAgentId, String originNode , Long originAgentid, String remarks );
+	protected abstract void writeLog ( long timestamp, long timespan, Event event, String sourceNode, Long sourceAgentId, String destinationNode , Long destinationAgentId, String remarks );
 	
 	
 	
