@@ -1108,6 +1108,7 @@ public class L2pNodeLauncher {
 			
 			return passPhrase;
 		} catch (Exception e) {
+			
 			if ( e instanceof L2pServiceException )
 				throw (L2pServiceException) e;
 			else

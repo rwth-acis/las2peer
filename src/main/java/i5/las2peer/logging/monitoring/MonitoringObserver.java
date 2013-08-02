@@ -150,6 +150,11 @@ public class MonitoringObserver extends NodeObserver {
 		messagesCount++;
 	}
 	
+	@Override
+	protected void enableServiceMonitoring(Long serviceAgentId){
+		System.out.print("Monitoring: ServiceAgent " + serviceAgentId + " added to monitoring!");
+		//TODO
+	}
 	
 	private void sendMessages() {
 		System.out.println("Sending..");

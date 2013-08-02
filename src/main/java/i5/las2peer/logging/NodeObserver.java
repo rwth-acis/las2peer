@@ -189,7 +189,7 @@ public abstract class NodeObserver {
 	 * 
 	 * @param event
 	 * @param sourceNode
-	 * @param fromAgentId
+	 * @param sourceAgentId
 	 * @param destinationNode
 	 * @param destinationAgentId
 	 * @param remarks
@@ -205,7 +205,7 @@ public abstract class NodeObserver {
 	 * @param timespan
 	 * @param event
 	 * @param sourceNode
-	 * @param fromAgentId
+	 * @param sourceAgentId
 	 * @param destinationNode
 	 * @param destinationAgentId
 	 * @param remarks
@@ -240,6 +240,26 @@ public abstract class NodeObserver {
 	}
 	
 	
+	
+	/**
+	 * Implemented by the MonitoringObserver.
+	 * 
+	 * @param serviceAgentId the service to be monitored
+	 */
+	protected abstract void enableServiceMonitoring(Long serviceAgentId);
+	
+	
+	/**
+	 * Enables monitoring for the given service agent.
+	 * This only affects the MonitoringObserver.
+	 * 
+	 * @param serviceAgentId the service to be monitored
+	 */
+	public void setServiceMonitoring(Long serviceAgentId){
+		enableServiceMonitoring(serviceAgentId);
+	}
+	
+	
 	/**
 	 * Writes a log entry.
 	 * 
@@ -249,7 +269,7 @@ public abstract class NodeObserver {
 	 * 		will be transferred to an node representation if possible (see {@link #getNodeRepresentation}) (can be null)
 	 * @param sourceAgentId the id of the source agent (can be null)
 	 * @param destinationNode (can be null)
-	 * @param destinationAgent (can be null)
+	 * @param destinationAgentId (can be null)
 	 * @param remarks (can be null)
 	 */
 	protected void log (Long timespan, Event event, Object sourceNode, Long sourceAgentId, Object destinationNode , Long destinationAgentId, String remarks ) {

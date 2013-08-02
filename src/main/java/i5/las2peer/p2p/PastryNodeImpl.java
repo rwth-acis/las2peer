@@ -442,9 +442,7 @@ public class PastryNodeImpl extends Node {
 		
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 		    public void run() {
-		    	self.setStatus ( NodeStatus.CLOSING);
 		        self.shutDown();
-		        self.setStatus ( NodeStatus.CLOSED);
 		    }
 		});		
 	}
@@ -454,7 +452,7 @@ public class PastryNodeImpl extends Node {
 		this.setStatus(NodeStatus.CLOSING);
 		pastryNode.destroy();
 		
-		super.shutDown();		
+		super.shutDown();
 		this.setStatus(NodeStatus.CLOSED);
 	}
 
@@ -577,10 +575,9 @@ public class PastryNodeImpl extends Node {
 			
 			stored.checkOverwrite ( envelope );
 		} catch (ArtifactNotFoundException e) {
-			// ok, new artifact
+			//OK, new artifact
 		} catch ( StorageException e ) {
-			// new artifact?!?
-			observerNotice(Event.NODE_ERROR, pastryNode, "Got a StorageException while checking for Artifact " + envelope.getId() + " overwrite!");
+			//Always thrown..
 		} catch ( L2pSecurityException e ){
 			observerNotice (Event.ARTIFACT_OVERWRITE_FAILED, pastryNode, envelope.getId()+"" );
 			throw e;

@@ -100,7 +100,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 			htAgentTopics.put( receiver.getResponsibleForAgentId(), agentTopic);
 			
 			ColoredOutput.printlnYellow( "\t--> registering agent topic for " + receiver.getResponsibleForAgentId() + " (" + agentTopic.getId() + ")");
-	
+			
 			
 			// always subscribe to the root:
 			NodeHandle root = scribeClient.getRoot(agentTopic);
@@ -111,7 +111,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 					new AgentJoinedContent ( getLocalHandle(), receiver.getResponsibleForAgentId()),
 					root
 			);
-			
+			l2pNode.observerNotice(Event.PASTRY_TOPIC_SUBSCRIPTION_SUCCESS, l2pNode.getNodeId(), receiver, "" +agentTopic.getId());
 			/*
 			System.out.println( "children of agent topic: " + scribeClient.numChildren(getAgentTopic(receiver)) );
 			for ( NodeHandle nh: scribeClient.getChildrenOfTopic(getAgentTopic ( receiver ))) 
@@ -523,9 +523,6 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	@Override
 	public void subscribeSuccess(Collection<Topic> topics) {
 		for ( Topic t : topics ) {
-			l2pNode.observerNotice(Event.PASTRY_TOPIC_SUBSCRIPTION_SUCCESS, "" + t.toString());
-			
-			
 			System.out.println ( "Subscribe success! Topic info:");
 			System.out.println( "\troot: " + scribeClient.getRoot(t)   + " / " +scribeClient.isRoot ( t ));
 			System.out.println( "\tparent: " + scribeClient.getParent(t));

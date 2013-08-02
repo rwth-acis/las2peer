@@ -135,7 +135,7 @@ public class Message implements XmlAble {
 	 * @param data
 	 * 
 	 * @throws EncodingFailedException
-	 * @throws L2pSecurityException		the private key of the sender is not accessible for signing
+	 * @throws L2pSecurityException	the private key of the sender is not accessible for signing
 	 * @throws SerializationException
 	 */
 	public Message( Agent from, Agent to, Serializable data ) throws EncodingFailedException, L2pSecurityException, SerializationException {

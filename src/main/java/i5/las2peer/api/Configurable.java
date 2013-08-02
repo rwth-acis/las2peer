@@ -13,7 +13,7 @@ import java.util.Set;
 /**
  * Base (abstract) super type for classes that may be configurable via property files.
  * 
- * The basic idea ist, that the runtime system will look for .property files in the current runtime
+ * The basic idea is, that the runtime system will look for .property files in the current runtime
  * directory or the subdirectories ./config and ./properties for a file named
  * as the sub class of Configurable (including the package name).
  * 
@@ -25,6 +25,8 @@ import java.util.Set;
  *
  */
 public abstract class Configurable {
+	
+	
 	/**
 	 * Tries to find a (service) class specific property file
 	 * 
@@ -35,8 +37,8 @@ public abstract class Configurable {
 	 *  <li>./properties/</li>
 	 * </ul>
 	 * 
-	 * The name of the property file is the name of the implenting service class
-	 * followed by .properties
+	 * The name of the property file is the name of the implementing service class
+	 * followed by .properties.
 	 * 
 	 * @return hashtable with all property entries
 	 */
@@ -64,7 +66,7 @@ public abstract class Configurable {
 	
 
 	/**
-	 * set a field to the given value 
+	 * Sets a field to the given value.
 	 * 
 	 * @param f
 	 * @param value
@@ -93,9 +95,9 @@ public abstract class Configurable {
 		}
 	}
 	
+	
 	/**
-	 * set all field values from the classes property file
-	 * 
+	 * Sets all field values from the classes property file.
 	 * This method uses {@link #getProperties} to get the value stored in the classes property file
 	 * to set all fields with the name of the properties.
 	 * 
@@ -106,10 +108,8 @@ public abstract class Configurable {
 	}
 	
 	
-	
 	/**
-	 * set all field values from the classes property file
-	 * 
+	 * Sets all field values from the classes property file.
 	 * This method uses {@link #getProperties} to get the value stored in the classes property file
 	 * to set all fields with the name of the properties.
 	 * 
@@ -146,7 +146,7 @@ public abstract class Configurable {
 
 	
 	/**
-	 * look for a property file named after the service class calling this method
+	 * Looks for a property file named after the service class calling this method.
 	 * 
 	 * @return name of a property file
 	 */

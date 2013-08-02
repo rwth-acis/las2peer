@@ -295,7 +295,18 @@ public abstract class Node implements AgentStorage {
 		observers.remove ( observer );
 	}
 	
-
+	
+	/**
+	 * Enables the service monitoring for the requested Service.
+	 * 
+	 * @param service
+	 */
+	public void setServiceMonitoring(ServiceAgent service){
+		for ( NodeObserver ob: observers )
+			ob.setServiceMonitoring(service.getId());
+	}
+	
+	
 	/**
 	 * Logs an event to all observers.
 	 * 
@@ -769,7 +780,8 @@ public abstract class Node implements AgentStorage {
 			if ( handoverAnswer(message))
 				return;
 		
-		observerNotice(Event.MESSAGE_RECEIVED, message.getSendingNodeId(), message.getSenderId(), this, message.getRecipientId(), "");
+		System.out.println(message.getSendingNodeId().toString());
+		observerNotice(Event.MESSAGE_RECEIVED, message.getSendingNodeId(), message.getSenderId(), this.getNodeId(), message.getRecipientId(), "");
 		
 		MessageReceiver receiver = htRegisteredReceivers.get( message.getRecipientId() );
 		
@@ -1450,7 +1462,7 @@ public abstract class Node implements AgentStorage {
 		
 		MessageResultListener listener = htAnswerListeners.get ( answer.getResponseToId() );
 		if ( listener == null ) {
-			System.out.println ( "Did not find corresponding observer!");
+			System.out.println ("Did not find corresponding observer!");
 			return false;
 		}
 		

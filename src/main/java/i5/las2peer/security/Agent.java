@@ -220,7 +220,7 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	 */
 	public void notifyUnregister() {
 		if ( this instanceof ServiceAgent )
-			runningAt.observerNotice(Event.SERVICE_SHUTDOWN, "Service " + ((ServiceAgent)this).getServiceClassName());
+			runningAt.observerNotice(Event.SERVICE_SHUTDOWN, runningAt.getNodeId(), this, "" + ((ServiceAgent)this).getServiceClassName());
 		runningAt = null;
 	}
 	
@@ -236,7 +236,7 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	 */
 	public void notifyRegistrationTo ( Node n ) throws AgentException {
 		if ( this instanceof ServiceAgent )
-			n.observerNotice(Event.SERVICE_STARTUP, "started Service " + ((ServiceAgent)this).getServiceClassName());
+			n.observerNotice(Event.SERVICE_STARTUP, n.getNodeId(), this, "" + ((ServiceAgent)this).getServiceClassName());
 		runningAt = n;
 	}
 	

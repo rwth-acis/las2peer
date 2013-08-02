@@ -337,7 +337,7 @@ public abstract class Service extends Configurable {
 	/**
 	 * notify the Service, that it has been stopped at the node
 	 * 
-	 * simple shutdown hook to be overridden in subclasses
+	 * simple shutdown hook to be overwritten in subclasses
 	 */
 	public void close () {
 		System.out.println( "Service " + this.getClass().getCanonicalName() + " has been stopped!" );

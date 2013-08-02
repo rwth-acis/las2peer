@@ -350,7 +350,7 @@ public class HttpConnector extends Connector
 	 */
 	void logMessage (String message) {
 		logStream.println( dateFormat.format ( new Date() ) + "\t" + message);
-		myNode.observerNotice(Event.HTTP_CONNECTOR_MESSAGE, message);
+		myNode.observerNotice(Event.HTTP_CONNECTOR_MESSAGE, myNode.getNodeId(), message);
 	}
 	
 	
@@ -361,7 +361,7 @@ public class HttpConnector extends Connector
 	 */
 	void logRequest (String request) {
 		logStream.println( dateFormat.format ( new Date() ) + "\t Request:" + request);
-		myNode.observerNotice(Event.HTTP_CONNECTOR_REQUEST, request);
+		myNode.observerNotice(Event.HTTP_CONNECTOR_REQUEST, myNode.getNodeId(), request);
 	}
 	
 	
@@ -372,7 +372,7 @@ public class HttpConnector extends Connector
 	 */
 	void logError (String error) {
 		logStream.println( dateFormat.format ( new Date() ) + "\t Error: " + error);
-		myNode.observerNotice(Event.HTTP_CONNECTOR_ERROR, error);
+		myNode.observerNotice(Event.HTTP_CONNECTOR_ERROR, myNode.getNodeId(), error);
 	}
 	
 	
