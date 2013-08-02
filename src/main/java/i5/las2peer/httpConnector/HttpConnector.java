@@ -39,20 +39,17 @@ public class HttpConnector extends Connector
 	public static final boolean DEFAULT_START_HTTPS_CONNECTOR = false;
 	protected boolean startHttpsConnector = DEFAULT_START_HTTPS_CONNECTOR;
 	
-	
 	public static final String DEFAULT_SSL_KEYSTORE = "keys/ssl";
 	protected String sslKeystore = DEFAULT_SSL_KEYSTORE;
 	
 	public static final String DEFAULT_SSL_KEY_PASSWD = "123456";
 	protected String sslKeyPasswd = DEFAULT_SSL_KEY_PASSWD;
 	
-	
 	public static final boolean DEFAULT_ENABLE_FILE_ACCESS = false;
 	protected boolean enableFileAccess = DEFAULT_ENABLE_FILE_ACCESS;
 	
 	public static final String DEFAULT_FILE_DIRECTORY = "./htdocs";
 	protected String fileDirectory = DEFAULT_FILE_DIRECTORY;
-		
 	
 	public static final long DEFAULT_MAX_SESSION_TIMEOUT = 30*60*60 * 1000; // 30 minutes
 	protected long maxSessionTimeoutMS = DEFAULT_MAX_SESSION_TIMEOUT;
@@ -63,7 +60,6 @@ public class HttpConnector extends Connector
 	public static final long DEFAULT_DEFAULT_SESSION_TIMEOUT = 10*60*60 * 1000; // 10 minutes
 	protected long defaultSessionTimeout = DEFAULT_DEFAULT_SESSION_TIMEOUT;
 	
-	
 	public static final long DEFAULT_DEFAULT_PERSISTENT_OUTDATE_S = 60 * 60 * 24 * 1000; // 1 day
 	protected long defaultPersistentTimeoutMS = DEFAULT_DEFAULT_PERSISTENT_OUTDATE_S;
 	
@@ -73,13 +69,11 @@ public class HttpConnector extends Connector
 	public static final long DEFAULT_MAX_PERSISTENT_OUTDATE_S = 60 * 60 * 1000; // 1 hour
 	protected long maxPersistentTimeoutMS = DEFAULT_MAX_PERSISTENT_OUTDATE_S;
 	
-	
 	public static final boolean DEFAULT_PRINT_SEC_EXCEPTIONS = false;
 	protected boolean printSecExceptions = DEFAULT_PRINT_SEC_EXCEPTIONS;
 	
-	public static final int DEFAULT_SOCKET_TIMEOUT = 60*1000; /* 1 minute */
+	public static final int DEFAULT_SOCKET_TIMEOUT = 60*1000; // 1 minute
 	protected int socketTimeout = DEFAULT_SOCKET_TIMEOUT;
-	
 	
 	public static final String DEFAULT_CROSS_ORIGIN_RESOURCE_DOMAIN = "localhost";
 	protected String crossOriginResourceDomain = DEFAULT_CROSS_ORIGIN_RESOURCE_DOMAIN;
@@ -89,7 +83,6 @@ public class HttpConnector extends Connector
 
 	public static final boolean DEFAULT_ENABLE_CROSS_ORIGIN_RESOURCE_SHARING = false;
 	protected boolean enableCrossOriginResourceSharing = DEFAULT_ENABLE_CROSS_ORIGIN_RESOURCE_SHARING;
-
 	
 	public static final boolean DEFAULT_PREFER_LOCAL_SERVICES = true;
 	protected boolean preferLocalServices = DEFAULT_PREFER_LOCAL_SERVICES;
@@ -100,16 +93,15 @@ public class HttpConnector extends Connector
 	
 	
 	private Node myNode = null;
-
+	
 	
 	private final static String DEFAULT_LOGFILE = "log/httpConnector.log";
-
-
-
+	
 	
 	private PrintStream logStream = null;
 	private DateFormat dateFormat = DateFormat.getDateTimeInstance();
-
+	
+	
 	/**
 	 * create a new HTTP connector instance. 	
 	 * @throws FileNotFoundException
@@ -132,6 +124,7 @@ public class HttpConnector extends Connector
 		setLogStream ( new PrintStream ( new FileOutputStream ( filename, true )));
 	}
 	
+	
 	/**
 	 * set the port for the HTTP connector to listen to
 	 * 
@@ -145,6 +138,7 @@ public class HttpConnector extends Connector
 		
 		httpConnectorPort = port;
 	}
+	
 	
 	/**
 	 * set the port for the HTTP connector to listen to for the secure line
@@ -161,7 +155,6 @@ public class HttpConnector extends Connector
 	}
 	
 	
-	
 	/**
 	 * set the socket timeout for the underlying http server
 	 * (only at configuration not during runtim)
@@ -170,6 +163,7 @@ public class HttpConnector extends Connector
 	public void setSocketTimeout ( int timeoutInMs ) {
 		socketTimeout = timeoutInMs;
 	}
+	
 	
 	/**
 	 * set a stream to log all messages to
@@ -295,6 +289,7 @@ public class HttpConnector extends Connector
 		return myNode;
 	}
 	
+	
 	/**
 	 * get a timeout value for a suggested timeout (e.g. given by the remote user)
 	 * based on the set minimal an maximal timeout values
@@ -313,6 +308,7 @@ public class HttpConnector extends Connector
 		return suggested;
 	}
 	
+	
 	/**
 	 * get the default timeout for remote sessions
 	 * @return
@@ -320,6 +316,7 @@ public class HttpConnector extends Connector
 	long getDefaultSessionTimeout () {
 		return defaultSessionTimeout;
 	}
+	
 	
 	/**
 	 * 
@@ -334,6 +331,7 @@ public class HttpConnector extends Connector
 		
 		return suggested;
 	}
+	
 	
 	/**
 	 * get the default timeout for persistent sessions
@@ -376,6 +374,7 @@ public class HttpConnector extends Connector
 		logStream.println( dateFormat.format ( new Date() ) + "\t Error: " + error);
 		myNode.observerNotice(Event.HTTP_CONNECTOR_ERROR, error);
 	}
+	
 	
 	/**
 	 * 

@@ -146,7 +146,7 @@ public class ServiceAgent extends PassphraseAgent {
 						} else {
 							response = new Message (m, new RMIExceptionContent ( thread.getException () ));
 							getRunningAtNode().observerNotice(Event.SERVICE_INVOKATION_FAILED, "Exception: " + thread.getException() );						
-						}						
+						}
 					} else {
 						response = new Message ( m, new RMIResultContent ( thread.getResult() ));
 						getRunningAtNode().observerNotice(Event.SERVICE_INVOKATION_FINISHED, "" );

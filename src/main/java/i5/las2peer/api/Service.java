@@ -354,7 +354,7 @@ public abstract class Service extends Configurable {
 	 * @param message
 	 */
 	protected void logMessage ( String message ) {
-		runningAt.observerNotice(Event.SERVICE_MESSAGE, this.getClass().getName() + ": " + message);
+		runningAt.observerNotice(Event.SERVICE_MESSAGE, this.getActiveNode().getNodeId(), this.getActiveAgent(), this.getClass().getName() + ": " + message);
 	}
 	
 	/**
@@ -362,7 +362,7 @@ public abstract class Service extends Configurable {
 	 * @param message
 	 */
 	protected void logError ( String message ) {
-		runningAt.observerNotice(Event.SERVICE_ERROR, this.getClass().getName() + ": " + message);		
+		runningAt.observerNotice(Event.SERVICE_ERROR, this.getActiveNode().getNodeId(), this.getActiveAgent(), this.getClass().getName() + ": " + message);
 	}
 	
 	/**
