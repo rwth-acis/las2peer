@@ -89,7 +89,7 @@ public class PastryNodeImpl extends Node {
 		filesystem,
 		memory
 	}
-		
+	
 	public static final int STANDARD_PORT = 9901;
 	public static final String STANDARD_BOOTSTRAP = "localhost:9900,localhost:9999";
 	private static final int AGENT_GET_TIMEOUT = 10000;
@@ -476,7 +476,7 @@ public class PastryNodeImpl extends Node {
 		synchronized (this) {
 			application.unregisterAgentTopic (id);
 			
-			super.unregisterAgent(id);						
+			super.unregisterAgent(id);
 		}
 	}
 
@@ -506,16 +506,16 @@ public class PastryNodeImpl extends Node {
 			throw e;
 		}
 		
-		observerNotice(Event.MESSAGE_SENDING, this, message.getSenderId(), (NodeHandle) atNodeId, message.getRecipientId(), "" );
+		observerNotice(Event.MESSAGE_SENDING, pastryNode, message.getSenderId(), (NodeHandle) atNodeId, message.getRecipientId(), "" );
 		
 		registerAnswerListener(message.getId(), listener);
 		
 		try {
 			application.sendMessage(new MessageEnvelope( pastryNode.getLocalHandle(), message), (NodeHandle) atNodeId );
 		} catch (MalformedXMLException e) {
-			observerNotice(Event.MESSAGE_FAILED, this, message.getSenderId(), (NodeHandle) atNodeId, message.getRecipientId(), "XML exception!" );			
+			observerNotice(Event.MESSAGE_FAILED, pastryNode, message.getSenderId(), (NodeHandle) atNodeId, message.getRecipientId(), "XML exception!" );			
 		} catch ( MessageException e ) {
-			observerNotice(Event.MESSAGE_FAILED, this, message.getSenderId(), (NodeHandle) atNodeId, message.getRecipientId(), "Message exception!" );
+			observerNotice(Event.MESSAGE_FAILED, pastryNode, message.getSenderId(), (NodeHandle) atNodeId, message.getRecipientId(), "Message exception!" );
 		}
 	}
 	
@@ -582,7 +582,7 @@ public class PastryNodeImpl extends Node {
 			// new artifact?!?
 			observerNotice(Event.NODE_ERROR, pastryNode, "Got a StorageException while checking for Artifact " + envelope.getId() + " overwrite!");
 		} catch ( L2pSecurityException e ){
-			observerNotice ( Event.ARTIFACT_OVERWRITE_FAILED, pastryNode, envelope.getId()+"" );
+			observerNotice (Event.ARTIFACT_OVERWRITE_FAILED, pastryNode, envelope.getId()+"" );
 			throw e;
 		}
 		
@@ -601,11 +601,10 @@ public class PastryNodeImpl extends Node {
 					throw new PastryStorageException ( "Error storing update" );
 			}
 			
-
 		} catch (InterruptedException e) {
 			throw new PastryStorageException ( "Storage has been interrupted", e );
 		}
-
+		
 		observerNotice(Event.ARTIFACT_ADDED, pastryNode, envelope.getId()+"");
 		
 	}
@@ -614,15 +613,15 @@ public class PastryNodeImpl extends Node {
 	public void removeArtifact(long id, byte[] signature) throws StorageException, ArtifactNotFoundException {
 		throw new PastryStorageException ( "delete not implemented in pastry!");
 	}
-
+	
+	
 	@Override
 	public Object[] findRegisteredAgent(long agentId, int hintOfExpectedCount) throws AgentNotKnownException {
 		observerNotice(Event.AGENT_SEARCH_STARTED, pastryNode, "" + agentId);
 		
 		return application.searchAgent ( agentId, hintOfExpectedCount ).toArray();
 	}
-
-
+	
 	
 	@Override
 	public boolean knowsAgentLocally(long agentId) {
@@ -807,7 +806,7 @@ public class PastryNodeImpl extends Node {
 			throws NodeNotFoundException {
 		
 		if ( ! ( nodeId instanceof NodeHandle ))
-			throw new NodeNotFoundException ( "given node id is not a pastry Node Handle!");
+			throw new NodeNotFoundException ("Given node id is not a pastry Node Handle!");
 		
 		return application.getNodeInformation ( (NodeHandle) nodeId );
 	}
@@ -819,9 +818,9 @@ public class PastryNodeImpl extends Node {
 			throws L2pSecurityException {
 		try {
 			application.unlockRemoteAgent(agentId, passphrase, (NodeHandle) targetNode, nodeEncryptionKey);
-			observerNotice(Event.AGENT_UNLOCKED, null, null, targetNode, null, "Agent " + agentId + " unlocked at target node" );
+			observerNotice(Event.AGENT_UNLOCKED, pastryNode, null, targetNode, null, "Agent " + agentId + " unlocked at target node" );
 		} catch ( L2pSecurityException e ) {
-			observerNotice(Event.AGENT_UNLOCK_FAILED, null, null, targetNode, null, "Unlocking of Agent " + agentId + " failed!");
+			observerNotice(Event.AGENT_UNLOCK_FAILED, pastryNode, null, targetNode, null, "Unlocking of Agent " + agentId + " failed!");
 			throw e;
 		}
 	}

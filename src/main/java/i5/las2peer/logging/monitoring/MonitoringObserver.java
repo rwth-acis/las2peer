@@ -121,7 +121,7 @@ public class MonitoringObserver extends NodeObserver {
 	
 	
 	@Override
-	protected void writeLog(long timestamp, long timespan, Event event,
+	protected void writeLog(long timestamp, Long timespan, Event event,
 			String sourceNode, Long sourceAgentId, String originNode,
 			Long originAgentId, String remarks) {
 		//Now this is a bit tricky..

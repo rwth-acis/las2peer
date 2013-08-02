@@ -1,7 +1,6 @@
 package i5.las2peer.p2p;
 
 import i5.las2peer.communication.Message;
-import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.p2p.pastry.PastryStorageException;
 import i5.las2peer.persistency.Envelope;
 import i5.las2peer.persistency.MalformedXMLException;
@@ -34,13 +33,14 @@ import java.util.Random;
 public class LocalNode extends Node {
 	
 	private BasicAgentStorage locallyKnownAgents;
-
+	
 	
 	/**
 	 * an id for this node
 	 */
 	private long nodeId;
-
+	
+	
 	/**
 	 * create a LocalNode
 	 */
@@ -50,11 +50,11 @@ public class LocalNode extends Node {
 		Random r = new Random();
 		nodeId = r.nextLong();
 		
-		//htStoredArtifacts = new Hashtable<Long, Envelope>();
 		locallyKnownAgents = new BasicAgentStorage(this);
 		
 		setStatus ( NodeStatus.CONFIGURED );
 	}
+	
 	
 	/**
 	 * get the id of this node
@@ -65,7 +65,6 @@ public class LocalNode extends Node {
 	}
 	
 	
-	
 	@Override
 	public void launch() {
 		setStatus ( NodeStatus.RUNNING );
@@ -73,12 +72,14 @@ public class LocalNode extends Node {
 		registerNode ( this );
 	}
 
+	
 	@Override
 	public void shutDown() {
 		super.shutDown();
 		unregisterNode ( this );
 	}
-
+	
+	
 	@Override
 	public void registerReceiver(MessageReceiver receiver) throws AgentAlreadyRegisteredException, L2pSecurityException, AgentException {
 		super.registerReceiver( receiver );
@@ -114,7 +115,8 @@ public class LocalNode extends Node {
 			storeMessage ( message, listener );
 		}
 	}
-
+	
+	
 	@Override
 	public void sendMessage(Message message, Object atNodeId, MessageResultListener listener ) throws AgentNotKnownException, NodeNotFoundException {
 		message.setSendingNodeId ( this.getNodeId());
@@ -130,15 +132,15 @@ public class LocalNode extends Node {
 		}
 	}
 	
-			
-
+	
 	@Override
 	public Envelope fetchArtifact(long id) throws ArtifactNotFoundException {
 		if ( htStoredArtifacts.get( id ) == null)
 			throw new ArtifactNotFoundException(id);
 		return htStoredArtifacts.get( id );
 	}
-
+	
+	
 	@Override
 	public void storeArtifact(Envelope envelope) throws L2pSecurityException {
 		
@@ -151,7 +153,8 @@ public class LocalNode extends Node {
 		
 		htStoredArtifacts.put( envelope.getId(), envelope);
 	}
-
+	
+	
 	@Override
 	public void removeArtifact(long id, byte[] signature) throws ArtifactNotFoundException {
 		if ( htStoredArtifacts.get ( id) == null )
@@ -159,11 +162,13 @@ public class LocalNode extends Node {
 		
 		htStoredArtifacts.remove( id );
 	}
-
+	
+	
 	@Override
 	public Object[] findRegisteredAgent(long agentId, int hintOfExpectedCount) throws AgentNotKnownException {
 		return findAllNodesWithAgent( agentId);		
 	}
+	
 	
 	@Override
 	public Agent getAgent(long id) throws AgentNotKnownException {
@@ -205,7 +210,8 @@ public class LocalNode extends Node {
 				updateUserAgentList((UserAgent) agent);
 		}
 	}
-
+	
+	
 	@Override
 	public void updateAgent(Agent agent) throws AgentException, L2pSecurityException {
 		if ( agent.isLocked() )
@@ -234,6 +240,48 @@ public class LocalNode extends Node {
 		}
 	}	
 	
+
+	@Override
+	public boolean knowsAgentLocally(long agentId) {
+		return locallyKnownAgents.hasAgent( agentId);
+	}
+	
+	
+	@Override
+	public Object[] getOtherKnownNodes() {
+		return htLocalNodes.values().toArray();
+	}
+	
+	
+	@Override
+	public NodeInformation getNodeInformation(Object nodeId) throws NodeNotFoundException {
+		try {
+			LocalNode node = getNode( (Long) nodeId );			
+			return node.getNodeInformation();
+		} catch ( Exception e) {
+			throw new NodeNotFoundException ( "Node with id " + nodeId + " not found");
+		}
+	}
+	
+	
+	@Override
+	public void sendUnlockRequest(long agentId, String passphrase, Object targetNode,
+			PublicKey nodeEncryptionKey) throws L2pSecurityException  {
+
+		if ( ! ( targetNode instanceof Long))
+			throw new IllegalArgumentException ( "node id is not a Long value but a " + targetNode.getClass().getName() + "(" + targetNode + ")");
+	
+		try {
+			byte[] encPass = CryptoTools.encryptAsymmetric(passphrase, nodeEncryptionKey);
+			getNode((Long) targetNode).unlockRemoteAgent(agentId, encPass);
+			
+		} catch (Exception e) {
+			throw new L2pSecurityException ( "unable to unlock agent at node " + targetNode );
+		}
+		
+	}
+	
+	
 	
 	/************************** factories ***************************************/
 	
@@ -245,6 +293,7 @@ public class LocalNode extends Node {
 		return new LocalNode();
 	}
 	
+	
 	/**
 	 * factory: launch a node
 	 * 
@@ -255,6 +304,7 @@ public class LocalNode extends Node {
 		result.launch();
 		return result;
 	}
+	
 	
 	/**
 	 * factory: launch a node an register the given agent
@@ -277,12 +327,6 @@ public class LocalNode extends Node {
 	
 	
 	
-	
-	
-	
-
-	
-	
 	/****************************** static *****************************************/
 	
 	
@@ -298,7 +342,6 @@ public class LocalNode extends Node {
 	private static Hashtable <Long, String> htKnownAgents = new Hashtable<Long, String> ();
 	
 	
-	
 	/**
 	 * register a node for later use
 	 * 
@@ -310,6 +353,7 @@ public class LocalNode extends Node {
 		}
 	}
 	
+	
 	/**
 	 * remove a node from the central storage
 	 * @param node
@@ -319,7 +363,8 @@ public class LocalNode extends Node {
 			htLocalNodes.remove ( node.getNodeId());
 		}
 	}
-
+	
+	
 	/**
 	 * get a node from the central storage
 	 * @param id
@@ -331,6 +376,7 @@ public class LocalNode extends Node {
 		}
 	}
 	
+	
 	/**
 	 * does the given node exist in the central storage?
 	 * @param id
@@ -341,6 +387,7 @@ public class LocalNode extends Node {
 			return getNode ( id ) != null;
 		}
 	}
+	
 	
 	/**
 	 * do a complete restart of all nodes, artifacts and messages
@@ -355,6 +402,7 @@ public class LocalNode extends Node {
 		
 		startPendingTimer();
 	}
+	
 	
 	/**
 	 * stop the timeout cleaner thread
@@ -391,6 +439,7 @@ public class LocalNode extends Node {
 		}
 	}
 	
+	
 	/**
 	 * get the ids of all nodes where the given agent is running
 	 * 
@@ -411,10 +460,6 @@ public class LocalNode extends Node {
 	}
 	
 	
-	
-
-	
-	
 	/**
 	 * store messages for agents not known to this "network" of nodes
 	 * @param message
@@ -431,6 +476,7 @@ public class LocalNode extends Node {
 			pending.put(message, listener);
 		}
 	}
+	
 	
 	/**
 	 * fetch all pending messages for the given agent
@@ -482,6 +528,7 @@ public class LocalNode extends Node {
 		}
 	}
 	
+	
 	private static final long DEFAULT_PENDING_TIMEOUT = 20000; // 20 seconds
 	private static final int DEFAULT_MESSAGE_MIN_WAIT = 500;
 	private static final int DEFAULT_MESSAGE_MAX_WAIT = 3000;
@@ -496,9 +543,11 @@ public class LocalNode extends Node {
 	
 	public static int getMaxMessageWait () { return iMessageMaxWait; }
 	
+	
 	static {
 		startPendingTimer();
 	}
+	
 	
 	/**
 	 * start a thread clearing up expired messages from time to time
@@ -553,48 +602,6 @@ public class LocalNode extends Node {
 		).start();
 		
 	}
-
-	@Override
-	public boolean knowsAgentLocally(long agentId) {
-		return locallyKnownAgents.hasAgent( agentId);
-	}
-
-	@Override
-	public Object[] getOtherKnownNodes() {
-		return htLocalNodes.values().toArray();
-	}
-
-	@Override
-	public NodeInformation getNodeInformation(Object nodeId) throws NodeNotFoundException {
-		try {
-			LocalNode node = getNode( (Long) nodeId );			
-			return node.getNodeInformation();
-		} catch ( Exception e) {
-			throw new NodeNotFoundException ( "Node with id " + nodeId + " not found");
-		}
-	}
-
-	@Override
-	public void sendUnlockRequest(long agentId, String passphrase, Object targetNode,
-			PublicKey nodeEncryptionKey) throws L2pSecurityException  {
-
-		if ( ! ( targetNode instanceof Long))
-			throw new IllegalArgumentException ( "node id is not a Long value but a " + targetNode.getClass().getName() + "(" + targetNode + ")");
 	
-		try {
-			byte[] encPass = CryptoTools.encryptAsymmetric(passphrase, nodeEncryptionKey);
-			getNode((Long) targetNode).unlockRemoteAgent(agentId, encPass);
-			
-			observerNotice(Event.AGENT_UNLOCKED, targetNode, "agent " + agentId + " unlocked at target node" );
-		} catch (Exception e) {
-			observerNotice(Event.AGENT_UNLOCK_FAILED, "unlocking of agent " + agentId + " failed: " + e );
-			throw new L2pSecurityException ( "unable to unlock agent at node " + targetNode );
-		}
-		
-		
-	}
-
-
-
 	
 }

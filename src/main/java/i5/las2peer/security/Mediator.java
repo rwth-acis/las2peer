@@ -105,7 +105,7 @@ public class Mediator implements MessageReceiver {
 				if ( registeredHandlers.get(i).handleMessage(message, context))
 					return true;
 			} catch (Exception e) {
-				runningAt.observerNotice(Event.MESSAGE_FAILED, "Exception in MessageHandler " + registeredHandlers.get(i) + ": " + e );
+				runningAt.observerNotice(Event.MESSAGE_FAILED, runningAt.getNodeId(), this, "Exception in MessageHandler " + registeredHandlers.get(i) + ": " + e );
 			}
 		
 		return false;

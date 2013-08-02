@@ -253,7 +253,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 			
 			WaiterThread<Message> waiter = appMessageWaiters.get( irm.getResponseToId());
 			if ( waiter == null )
-				l2pNode.observerNotice(Event.MESSAGE_FAILED, irm.getSender(), (MessageReceiver) null, "got an answer to an information request, I do not know!");
+				l2pNode.observerNotice(Event.MESSAGE_FAILED, irm.getSender(), (MessageReceiver) null, "got an answer to an information request I do not know!");
 			else {
 				l2pNode.observerNotice(Event.MESSAGE_RECEIVED, irm.getSender(), (MessageReceiver) null, "got an answer for Information Request " + irm.getResponseToId());
 				waiter.collectResult(irm);
@@ -264,7 +264,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 			WaiterThread<Message> waiter = appMessageWaiters.get( uar.getOriginalMessageId());
 			waiter.collectResult(uar);
 		} else { 
-			l2pNode.observerNotice( Event.MESSAGE_RECEIVED, l2pNode.getPastryNode(), (Long) null, "unkown message: "+pastMessage );
+			l2pNode.observerNotice( Event.MESSAGE_RECEIVED, l2pNode.getPastryNode(), null, "unkown message: "+pastMessage );
 			ColoredOutput.printlnYellow( "\t<-- received unknown message: " + pastMessage);
 		}
 	}
@@ -279,7 +279,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	@Override
 	public void update(NodeHandle nh, boolean arg1) {
 		// called when a new neighbor joined the net		
-		l2pNode.observerNotice( Event.NEW_NODE_NOTICE, nh );
+		l2pNode.observerNotice( Event.NEW_NODE_NOTICE, null, ""+nh);
 	}
 
 	

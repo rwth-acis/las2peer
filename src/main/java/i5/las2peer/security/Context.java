@@ -259,10 +259,10 @@ public class Context implements AgentStorage {
 	
 	
 	/**
-	 * log a message to the l2p system using the observers
+	 * Logs a message to the l2p system using the observers.
 	 * 
-	 * Since this method will/should only be used in an L2pThread, the message will com from a
-	 * service or a helper, so a SERVICE_MESSAGE is assumed 
+	 * Since this method will/should only be used in an L2pThread, the message will come from a
+	 * service or a helper, so a SERVICE_MESSAGE is assumed.
 	 * 
 	 * @param message
 	 */
@@ -270,15 +270,15 @@ public class Context implements AgentStorage {
 		try {
 			getCurrent().getLocalNode().observerNotice(Event.SERVICE_MESSAGE, from.getClass().getSimpleName() + ": " + message);
 		} catch ( IllegalStateException e ) {
-			System.err.println ( "Logmessage not in a l2p context: " + message );
+			System.err.println ( "Log message not in a l2p context: " + message );
 		}
 	}
 	
 	/**
-	 * log an error message to the l2p system using the observers
+	 * Logs an error message to the l2p system using the observers.
 	 * 
-	 * Since this method will/should only be used in an L2pThread, the message will com from a
-	 * service or a helper, so a SERVICE_MESSAGE is assumed 
+	 * Since this method will/should only be used in an L2pThread, the message will come from a
+	 * service or a helper, so a SERVICE_MESSAGE is assumed.
 	 * 
 	 * @param message
 	 */

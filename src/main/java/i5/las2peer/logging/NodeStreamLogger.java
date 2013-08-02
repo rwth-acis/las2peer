@@ -141,7 +141,7 @@ public class NodeStreamLogger extends NodeObserver {
 	}
 	
 	@Override
-	protected void writeLog(long timestamp, long timespan, Event e,
+	protected void writeLog(long timestamp, Long timespan, Event e,
 			String sourceNode, Long sourceAgentId, String destinationNode,
 			Long destinationAgentId, String remarks) {
 		
@@ -150,7 +150,7 @@ public class NodeStreamLogger extends NodeObserver {
 		
 		StringBuffer logLine = new StringBuffer (  dateFormat.format ( new Date(timestamp) ) + "\t" );
 		
-		if ( timespan != -1 )
+		if ( timespan != null )
 			logLine.append ( timespan ).append("\t");
 		else
 			logLine.append ( appendPart(null));

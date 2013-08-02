@@ -79,7 +79,7 @@ public abstract class Node implements AgentStorage {
 	public enum SendMode { ANYCAST, BROADCAST };
 	
 	/**
-	 * enum with the possible states of a node.
+	 * Enum with the possible states of a node.
 	 * 
 	 * @author Holger Jan&szlig;en
 	 *
@@ -99,7 +99,7 @@ public abstract class Node implements AgentStorage {
 	private HashSet<NodeObserver> observers = new HashSet<NodeObserver>(); 
 	
 	/**
-	 *	contexts for local method invocation 
+	 * contexts for local method invocation 
 	 */
 	private Hashtable <Long, Context> htLocalExecutionContexts = new Hashtable<Long, Context>();
 	
@@ -112,7 +112,7 @@ public abstract class Node implements AgentStorage {
 
 	
 	/**
-	 * Hashtable with all {@link i5.las2peer.security.MessageReceiver}s registered at this node 
+	 * hashtable with all {@link i5.las2peer.security.MessageReceiver}s registered at this node 
 	 */
 	private Hashtable<Long,MessageReceiver> htRegisteredReceivers = new Hashtable<Long, MessageReceiver>();
 	
@@ -148,9 +148,9 @@ public abstract class Node implements AgentStorage {
 	
 	
 	/**
-	 * create a new node, if the standardObserver flag is true, an observer logging all events to a 
+	 * Creates a new node, if the standardObserver flag is true, an observer logging all events to a 
 	 * simple plain text log file will be generated.
-	 * If not, no observer will be used at startup. 
+	 * If not, no observer will be used at startup.
 	 * 
 	 * @param standardObserver
 	 */
@@ -159,7 +159,7 @@ public abstract class Node implements AgentStorage {
 	}
 	
 	/**
-	 * generate a new Node with a standard plain text log file observer
+	 * Creates a new node with a standard plain text log file observer.
 	 */
 	public Node () { this ( true ); }
 	
@@ -209,8 +209,10 @@ public abstract class Node implements AgentStorage {
 		nodeKeyPair = CryptoTools.generateKeyPair();
 	}
 	
+	
 	/**
-	 * get the public key of this node
+	 * Gets the public key of this node.
+	 * 
 	 * @return a public key
 	 */
 	public PublicKey getPublicNodeKey () {
@@ -219,9 +221,9 @@ public abstract class Node implements AgentStorage {
 	
 	
 	/**
-	 * create an observer for a standard logfile.
+	 * Creates an observer for a standard logfile.
 	 * The name of the logfile will contain the id of the node to prevent disturbances if
-	 * running multiple nodes on the same machine
+	 * running multiple nodes on the same machine.
 	 */
 	private void initStandardLogfile () {
 		
@@ -241,7 +243,8 @@ public abstract class Node implements AgentStorage {
 	}
 	
 	/**
-	 * handle a request from the (p2p) net to unlock the private key of a remote Agent
+	 * Handles a request from the (p2p) net to unlock the private key of a remote Agent.
+	 * 
 	 * @throws L2pSecurityException 
 	 * @throws AgentNotKnownException 
 	 * @throws CryptoException 
@@ -262,7 +265,7 @@ public abstract class Node implements AgentStorage {
 	}
 	
 	/**
-	 * send a request to unlock the agent's private key to the target node
+	 * Sends a request to unlock the agent's private key to the target node.
 	 * 
 	 * @param agentId
 	 * @param passphrase
@@ -274,7 +277,8 @@ public abstract class Node implements AgentStorage {
 	
 	
 	/**
-	 * add an observer for this node
+	 * Adds an observer to this node.
+	 * 
 	 * @param observer
 	 */
 	public void addObserver ( NodeObserver observer ) {
@@ -283,155 +287,164 @@ public abstract class Node implements AgentStorage {
 	
 	
 	/**
-	 * remove an observer from this node
+	 * Removes an observer from this node.
+	 * 
 	 * @param observer
 	 */
 	public void removeObserver ( NodeObserver observer ) {
 		observers.remove ( observer );
 	}
 	
-	
 
 	/**
-	 * log an event to all observers
+	 * Logs an event to all observers.
 	 * 
 	 * @param event
 	 * @param remarks
 	 */
 	public void observerNotice ( Event event, String remarks ) {
-		observerNotice ( event, -1, null, (Long) null, null, null, remarks );
+		for ( NodeObserver ob: observers )
+			ob.logEvent(event, remarks);
 	}
 	
-	/**
-	 * log an event to all observers
-	 * 
-	 * @param event
-	 * @param nodeHandle
-	 */
-	public void observerNotice ( Event event, Object nodeHandle ) {
-		observerNotice ( event, -1, nodeHandle, (Long) null, null, null, null );
-	}
-
-	/**
-	 * log an event to all observers
-	 * 
-	 * @param event
-	 * @param nodeHandle
-	 */
-	public void observerNotice ( Event event, Object nodeHandle, String remarks ) {
-		observerNotice ( event, -1, nodeHandle, (Long) null, null, null, remarks );
-	}
-
 	
 	/**
-	 * log an event to all observers
+	 * Logs an event to all observers.
 	 * 
 	 * @param event
-	 * @param sourceNodeId
-	 * @param sourceAgent
+	 * @param sourceNode
 	 * @param remarks
 	 */
-	public void observerNotice ( Event event, Object sourceNodeId, MessageReceiver sourceAgent, String remarks ) {
-		Long sourceId = null;
-		if ( sourceAgent != null )
-			sourceAgent.getResponsibleForAgentId();
-		observerNotice ( event, -1, sourceNodeId, sourceId, null, null, remarks);
+	public void observerNotice ( Event event, Object sourceNode, String remarks ) {
+		for ( NodeObserver ob: observers )
+			ob.logEvent(event, sourceNode, remarks);
 	}
 	
+	
 	/**
-	 * log an event to all observers
+	 * Logs an event to all observers.
 	 * 
 	 * @param event
-	 * @param sourceNodeId
+	 * @param sourceNode
 	 * @param sourceAgentId
 	 * @param remarks
 	 */
-	public void observerNotice ( Event event, Object sourceNodeId, Long sourceAgentId, String remarks ) {
-		observerNotice ( event, -1, sourceNodeId, sourceAgentId, null, null, remarks);
+	public void observerNotive ( Event event, Object sourceNode, Long sourceAgentId, String remarks ) {
+		for ( NodeObserver ob: observers )
+			ob.logEvent(event, sourceNode, sourceAgentId, remarks);
 	}
 	
+	
 	/**
-	 * log a node event to all observers
+	 * Logs an event to all observers.
+	 * 
+	 * @param event
+	 * @param sourceNode
+	 * @param sourceAgent
+	 * @param remarks
+	 */
+	public void observerNotice ( Event event, Object sourceNode, MessageReceiver sourceAgent, String remarks ) {
+		Long sourceAgentId = null;
+		if(sourceAgent != null)
+			sourceAgentId = sourceAgent.getResponsibleForAgentId();
+		for ( NodeObserver ob: observers )
+			ob.logEvent(event, sourceNode, sourceAgentId, remarks);
+	}
+	
+	
+	/**
+	 * Logs an event to all observers.
 	 *  
 	 * @param event
-	 * @param sourceNodeId
+	 * @param sourceNode
 	 * @param sourceAgent
-	 * @param destinationNodeId
+	 * @param destinationNode
 	 * @param destinationAgent
 	 * @param remarks
 	 */
-	public void observerNotice ( Event event, Object sourceNodeId, Agent sourceAgent, Object destinationNodeId, Agent destinationAgent, String remarks ) {
-		observerNotice ( event, -1, sourceNodeId, sourceAgent, destinationNodeId, destinationAgent, remarks);
+	public void observerNotice ( Event event, Object sourceNode, Agent sourceAgent, Object destinationNode, Agent destinationAgent, String remarks ) {
+		Long sourceAgentId = null;
+		if(sourceAgent != null)
+			sourceAgentId = sourceAgent.getId();
+		Long destinationAgentId = null;
+		if(destinationAgent != null)
+			destinationAgentId = sourceAgent.getId();
+		for ( NodeObserver ob: observers )
+			ob.logEvent(event, sourceNode, sourceAgentId, destinationNode, destinationAgentId, remarks);
 	}
 	
+	
 	/**
-	 * log a node event to all observers 
+	 * Logs an event to all observers.
 	 * 
 	 * @param event
-	 * @param sourceNodeId
+	 * @param sourceNode
 	 * @param sourceAgentId
-	 * @param destinationNodeId
+	 * @param destinationNode
 	 * @param destinationAgentId
 	 * @param remarks
 	 */
-	public void observerNotice ( Event event, Object sourceNodeId, long sourceAgentId, Object destinationNodeId, long destinationAgentId, String remarks ) {
-		observerNotice ( event, -1, sourceNodeId, sourceAgentId, destinationNodeId, destinationAgentId, remarks);
+	public void observerNotice ( Event event, Object sourceNode, long sourceAgentId, Object destinationNode, long destinationAgentId, String remarks ) {
+		for ( NodeObserver ob: observers )
+			ob.logEvent(event, sourceNode, sourceAgentId, destinationNode, destinationAgentId, remarks);
 	}
 	
+	
 	/**
-	 * log an node event to all observers
+	 * Logs an event to all observers.
+	 * 
 	 * @param event
 	 * @param timespan
-	 * @param sourceNodeId
+	 * @param sourceNode
 	 * @param sourceAgent
-	 * @param destinationNodeId
+	 * @param destinationNode
 	 * @param destinationAgent
 	 * @param remarks
 	 */
-	public void observerNotice ( Event event, long timespan, Object sourceNodeId, Agent sourceAgent, Object destinationNodeId, Agent destinationAgent, String remarks ) {
+	public void observerNotice ( Event event, long timespan, Object sourceNode, Agent sourceAgent, Object destinationNode, Agent destinationAgent, String remarks ) {
+		Long sourceAgentId = null;
+		if(sourceAgent != null)
+			sourceAgentId = sourceAgent.getId();
+		Long destinationAgentId = null;
+		if(destinationAgent != null)
+			destinationAgentId = sourceAgent.getId();
 		for ( NodeObserver ob: observers )
-			ob.logEvent(event,  timespan, sourceNodeId, sourceAgent, destinationNodeId, destinationAgent, remarks);
+			ob.logEvent(event, timespan, sourceNode, sourceAgentId, destinationNode, destinationAgentId, remarks);
 	}
 	
+	
 	/**
-	 * log an event to all observers
+	 * Logs an event to all observers.
+	 * 
 	 * @param event
 	 * @param timespan
-	 * @param sourceNodeId
+	 * @param sourceNode
 	 * @param sourceAgentId
-	 * @param destinationNodeId
+	 * @param destinationNode
 	 * @param destinationAgentId
 	 * @param remarks
 	 */
-	public void observerNotice ( Event event, long timespan, Object sourceNodeId, Long sourceAgentId, Object destinationNodeId, Long destinationAgentId, String remarks ) {
+	public void observerNotice ( Event event, long timespan, Object sourceNode, Long sourceAgentId, Object destinationNode, Long destinationAgentId, String remarks ) {
 		for ( NodeObserver ob: observers )
-			ob.logEvent(event,  timespan, sourceNodeId, sourceAgentId, destinationNodeId, destinationAgentId, remarks);
+			ob.logEvent(event, timespan, sourceNode, sourceAgentId, destinationNode, destinationAgentId, remarks);
 	}
 	
 	
 	/**
-	 * log an event to all observers
+	 * Gets the status of this node.
 	 * 
-	 * @param event
-	 * @param sourceNodeId
-	 * @param agentId
-	 */
-	public void observerNotive ( Event event, Object sourceNodeId, Long agentId ) {
-		observerNotice ( event, -1 , sourceNodeId, agentId, null, null, null);
-	}
-	
-	
-	/**
 	 * @return status of this node
 	 */
 	public NodeStatus getStatus () { return status; };
 	
+	
 	/**
-	 * get some kind of node identifier 
+	 * Gets some kind of node identifier.
 	 * 
 	 * @return id of this node
 	 */
 	public abstract Serializable getNodeId ();
+	
 	
 	/**
 	 * Gets the class loader, this node is bound to.
@@ -443,6 +456,7 @@ public abstract class Node implements AgentStorage {
 	 * @return 	a class loader
 	 */
 	public ClassLoader getBaseClassLoader () { return baseClassLoader; }
+	
 	
 	/**
 	 * Sets the status of this node.
@@ -471,8 +485,9 @@ public abstract class Node implements AgentStorage {
 		status = newstatus; 
 	}
 	
+	
 	/**
-	 * set a prefix for a log file, if the node has not been started yet
+	 * Sets a prefix for a log file, if the node has not been started yet.
 	 * 
 	 * @param prefix
 	 */
@@ -485,8 +500,8 @@ public abstract class Node implements AgentStorage {
 	
 	
 	/**
-	 * get the filename of the current information file for this node
-	 * the file should be an XML file representation of {@link NodeInformation}
+	 * Gets the filename of the current information file for this node.
+	 * The file should be an XML file representation of a {@link NodeInformation}.
 	 * 
 	 * @return filename
 	 */
@@ -494,8 +509,9 @@ public abstract class Node implements AgentStorage {
 		return sInformationFileName;
 	}
 	
+	
 	/**
-	 * set the node information filename
+	 * Sets the nodes information filename.
 	 *  
 	 * @param filename
 	 */
@@ -504,8 +520,9 @@ public abstract class Node implements AgentStorage {
 			sInformationFileName = filename;
 	}
 	
+	
 	/**
-	 * get informations about this node including all registered service classes
+	 * Gets information about this node including all registered service classes.
 	 * 
 	 * @return	node information
 	 * @throws CryptoException 
@@ -530,7 +547,7 @@ public abstract class Node implements AgentStorage {
 	
 	
 	/**
-	 * get information about a distant node
+	 * Gets information about a distant node.
 	 * 
 	 * @param nodeId
 	 * 
@@ -541,7 +558,7 @@ public abstract class Node implements AgentStorage {
 	
 	
 	/**
-	 * get an array with identifiers of other (locally known) nodes in this network
+	 * Gets an array with identifiers of other (locally known) nodes in this network.
 	 *  
 	 * @return array with handles of other (known) p2p network nodes
 	 */
@@ -549,13 +566,13 @@ public abstract class Node implements AgentStorage {
 	
 	
 	/**
-	 * start this node
+	 * Starts this node.
 	 */
 	public abstract void launch() throws NodeException; 
 	
 	
 	/**
-	 * stop the node
+	 * Stops the node.
 	 */
 	public void shutDown () {
 		for ( Long id: htRegisteredReceivers.keySet() )
@@ -568,14 +585,14 @@ public abstract class Node implements AgentStorage {
 	
 	
 	/**
-	 * register a (local) Agent for usage through this node.
+	 * Registers a (local) Agent for usage through this node.
 	 * The Agent has to be unlocked before registration.
 	 * 
 	 * @param receiver
 	 * 
-	 * @throws AgentAlreadyRegisteredException	the given agent is already registered to this node 
-	 * @throws L2pSecurityException	 		the agent is not unlocked
-	 * @throws AgentException               any problem with the agent itself (probably on calling {@link i5.las2peer.security.Agent#notifyRegistrationTo}
+	 * @throws AgentAlreadyRegisteredException the given agent is already registered to this node 
+	 * @throws L2pSecurityException the agent is not unlocked
+	 * @throws AgentException any problem with the agent itself (probably on calling {@link i5.las2peer.security.Agent#notifyRegistrationTo}
 	 * @throws PastryStorageException 
 	 */
 	public void registerReceiver(MessageReceiver receiver) throws AgentAlreadyRegisteredException, L2pSecurityException, AgentException {
@@ -627,19 +644,21 @@ public abstract class Node implements AgentStorage {
 		}
 		
 	}
-		
+	
+	
 	/**
-	 * unregister an agent from this node
+	 * Unregisters an agent from this node.
 	 * 
 	 * @param agent
-	 * @throws AgentNotKnownException 	the agent is not registered to this node
+	 * @throws AgentNotKnownException the agent is not registered to this node
 	 */
 	public void unregisterAgent ( Agent agent ) throws AgentNotKnownException {
 		unregisterAgent ( agent.getId());
 	}
 	
+	
 	/**
-	 * is an instance of the given agent running at this node?
+	 * Is an instance of the given agent running at this node?
 	 * 
 	 * @param agentId
 	 */
@@ -647,25 +666,27 @@ public abstract class Node implements AgentStorage {
 		if ( htRegisteredReceivers.get( agentId) == null)
 			throw new AgentNotKnownException ( agentId );
 		
-		observerNotice(Event.AGENT_REMOVED, this.getNodeId(), (Long)null, "agent id: " + agentId );
+		observerNotice(Event.AGENT_REMOVED, this.getNodeId(), "" + agentId );
 		
 		htRegisteredReceivers.get(agentId).notifyUnregister();
 		
 		htRegisteredReceivers.remove( agentId );
 	}
 	
+	
 	/**
-	 * is an instance of the given agent running at this node?
+	 * Is an instance of the given agent running at this node?
 	 * 
 	 * @param agent
-	 * @return	true, if the given agent is running at this node
+	 * @return true, if the given agent is running at this node
 	 */
 	public boolean hasLocalAgent ( Agent agent ) {
 		return hasLocalAgent ( agent.getId() );
 	}
-
+	
+	
 	/**
-	 * is an instance of the given agent running at this node?
+	 * Is an instance of the given agent running at this node?
 	 * 
 	 * @param agentId
 	 * @return true, if the given agent is registered here
@@ -676,7 +697,7 @@ public abstract class Node implements AgentStorage {
 	
 	
 	/**
-	 * Send a message, recipient and sender are stated in the message.
+	 * Sends a message, recipient and sender are stated in the message.
 	 * The node tries to find a node hosting the recipient
 	 * and sends the message there.
 	 * 
@@ -687,8 +708,9 @@ public abstract class Node implements AgentStorage {
 		sendMessage ( message, listener, SendMode.ANYCAST);
 	}
 	
+	
 	/**
-	 * Send a message, recipient and sender are stated in the message.
+	 * Sends a message, recipient and sender are stated in the message.
 	 * Depending on the mode, either all nodes running the given agent
 	 * will be notified of this message, or only a random one.
 	 * 
@@ -696,13 +718,13 @@ public abstract class Node implements AgentStorage {
 	 * 
 	 * @param message	the message to send
 	 * @param listener	a listener for getting the result separately
-	 * @param mode		is it a broadcast or an anycast message?
+	 * @param mode		is it a broadcast or an any-cast message?
 	 */
 	public abstract void sendMessage ( Message message, MessageResultListener listener, SendMode mode );
-
-		
+	
+	
 	/**
-	 * send a message to the agent residing at the given node
+	 * Sends a message to the agent residing at the given node.
 	 * 
 	 * @param message
 	 * @param atNodeId
@@ -714,9 +736,9 @@ public abstract class Node implements AgentStorage {
 	 */
 	public abstract void sendMessage ( Message message, Object atNodeId, MessageResultListener listener ) throws AgentNotKnownException, NodeNotFoundException, L2pSecurityException;
 	
-
+	
 	/**
-	 * send the given response message to the given node
+	 * Sends the given response message to the given node.
 	 *   
 	 * @param message
 	 * @param atNodeId
@@ -728,6 +750,7 @@ public abstract class Node implements AgentStorage {
 	public void sendResponse(Message message, Object atNodeId) throws AgentNotKnownException, NodeNotFoundException, L2pSecurityException {
 		sendMessage ( message, atNodeId, null );
 	}	
+	
 	
 	/**
 	 * For <i>external</i> access to this node. Will be called by the (P2P) network library, when
@@ -756,12 +779,13 @@ public abstract class Node implements AgentStorage {
 		receiver.receiveMessage(message, getAgentContext ( message.getSenderId()));		
 	}
 	
+	
 	/**
-	 * get an artifact from the p2p storage
+	 * Gets an artifact from the p2p storage.
 	 * 
 	 * @param id
 	 * 
-	 * @return	the envelope containing the requested artifact
+	 * @return the envelope containing the requested artifact
 	 * 
 	 * @throws ArtifactNotFoundException 
 	 * @throws StorageException 
@@ -770,7 +794,7 @@ public abstract class Node implements AgentStorage {
 	
 	
 	/**
-	 * store an artifact to the p2p storage
+	 * Stores an artifact to the p2p storage.
 	 * 
 	 * @param envelope
 	 * @throws StorageException 
@@ -781,7 +805,8 @@ public abstract class Node implements AgentStorage {
 	
 	
 	/**
-	 * remove an artifact from the p2p storage
+	 * Removes an artifact from the p2p storage.
+	 * <i>NOTE: This is not possible with a FreePastry backend!</i>
 	 * 
 	 * @param id
 	 * @param signature
@@ -793,12 +818,12 @@ public abstract class Node implements AgentStorage {
 	
 	
 	/**
-	 * search the nodes for registered Versions of the given Agent
-	 * returns an array of objects identifying the nodes the given agent is registered to  
+	 * Searches the nodes for registered Versions of the given Agent.
+	 * Returns an array of objects identifying the nodes the given agent is registered to.
 	 * 
-	 * @param agentId		id of the agent to look for
-	 * @param hintOfExpectedCount	a hint for the expected number of results (e.g. to wait for)
-	 * @return	array with the IDs of nodes, where the given agent is registered
+	 * @param agentId id of the agent to look for
+	 * @param hintOfExpectedCount a hint for the expected number of results (e.g. to wait for)
+	 * @return array with the IDs of nodes, where the given agent is registered
 	 * 
 	 * @throws AgentNotKnownException
 	 */
@@ -806,11 +831,11 @@ public abstract class Node implements AgentStorage {
 	
 	
 	/**
-	 * search the nodes for registered Versions of the given Agent
-	 * returns an array of objects identifying the nodes the given agent is registered to  
+	 * Search the nodes for registered versions of the given agent.
+	 * Returns an array of objects identifying the nodes the given agent is registered to.
 	 * 
 	 * @param agent
-	 * @return	array with the IDs of nodes, where the given agent is registered
+	 * @return array with the IDs of nodes, where the given agent is registered
 	 * @throws AgentNotKnownException 
 	 */
 	public Object[] findRegisteredAgent ( Agent agent ) throws AgentNotKnownException {
@@ -819,32 +844,34 @@ public abstract class Node implements AgentStorage {
 	
 	
 	/**
-	 * search the nodes for registered Versions of the given Agent
-	 * returns an array of objects identifying the nodes the given agent is registered to  
+	 * Searches the nodes for registered versions of the given agentId.
+	 * Returns an array of objects identifying the nodes the given agent is registered to.
 	 * 
-	 * @param agentId		id of the agent to look for
-	 * @return	array with the IDs of nodes, where the given agent is registered
+	 * @param agentId id of the agent to look for
+	 * @return array with the IDs of nodes, where the given agent is registered
 	 * @throws AgentNotKnownException
 	 */
 	public Object[] findRegisteredAgent ( long agentId  ) throws AgentNotKnownException {
 		return findRegisteredAgent ( agentId, 1);
 	}
 	
+	
 	/**
-	 * search the nodes for registered Versions of the given Agent
-	 * returns an array of objects identifying the nodes the given agent is registered to  
+	 * searches the nodes for registered versions of the given agent.
+	 * Returns an array of objects identifying the nodes the given agent is registered to.
 	 * 
 	 * @param agent
-	 * @param hintOfExpectedCount	a hint for the expected number of results (e.g. to wait for)
+	 * @param hintOfExpectedCount a hint for the expected number of results (e.g. to wait for)
 	 * @return	array with the IDs of nodes, where the given agent is registered
-	 * @throws AgentNotKnownException 
+	 * @throws AgentNotKnownException
 	 */
 	public Object[] findRegisteredAgent ( Agent agent, int hintOfExpectedCount ) throws AgentNotKnownException {
 		return findRegisteredAgent(agent.getId(), hintOfExpectedCount);
 	}
 	
+	
 	/**
-	 * get an agent description from the net
+	 * Gets an agent description from the net.
 	 * 
 	 * make sure, always to return fresh versions of the requested agent, so that no thread can unlock the private key 
 	 * for another one!
@@ -858,7 +885,6 @@ public abstract class Node implements AgentStorage {
 	public abstract Agent getAgent ( long id ) throws AgentNotKnownException;
 	
 	
-
 	/**
 	 * Does this node know an agent with the given id?
 	 * 
@@ -882,7 +908,7 @@ public abstract class Node implements AgentStorage {
 	
 	
 	/**
-	 * check, if an agent of the given id is known locally
+	 * Checks, if an agent of the given id is known locally.
 	 * 
 	 * @param agentId
 	 * @return true, if this agent is (already) known here at this node
@@ -891,7 +917,7 @@ public abstract class Node implements AgentStorage {
 	
 	
 	/**
-	 * get a local registered agent by its id
+	 * Gets a local registered agent by its id.
 	 * 
 	 * @param id
 	 * 
@@ -910,8 +936,10 @@ public abstract class Node implements AgentStorage {
 			throw new AgentNotKnownException ( "The requested Agent is only known as a Mediator here!");
 	}
 	
+	
 	/**
-	 * get an array with all {@link i5.las2peer.security.UserAgent}s registered at this node
+	 * Gets an array with all {@link i5.las2peer.security.UserAgent}s registered at this node.
+	 * 
 	 * @return all local registered UserAgents 
 	 */
 	public UserAgent[] getRegisteredAgents() {
@@ -927,7 +955,8 @@ public abstract class Node implements AgentStorage {
 	
 	
 	/**
-	 * get an array with all {@link i5.las2peer.security.ServiceAgent}s registered at this node
+	 * Gets an array with all {@link i5.las2peer.security.ServiceAgent}s registered at this node.
+	 * 
 	 * @return all local registered ServiceAgents 
 	 */
 	public ServiceAgent[] getRegisteredServices() {
@@ -942,18 +971,10 @@ public abstract class Node implements AgentStorage {
 		
 	}
 	
-	/**
-	 * get an array with all mediators acting on this node
-	 * @return array with mediators
-	 */
-	//public abstract Mediator[] getRegisteredUserMediators();
 	
-
-	
-
 	/**
-	 * get a local registered mediator for the given agent id
-	 * if no mediator exists, register a new one to this node
+	 * Gets a local registered mediator for the given agent id.
+	 * If no mediator exists, registers a new one to this node.
 	 * 
 	 * @param agent
 	 * 
@@ -982,8 +1003,9 @@ public abstract class Node implements AgentStorage {
 		return (Mediator) result;
 	}
 	
+	
 	/**
-	 * store a new Agent to the network
+	 * Stores a new Agent to the network.
 	 * 
 	 * @param agent
 	 * 
@@ -995,7 +1017,7 @@ public abstract class Node implements AgentStorage {
 	
 	
 	/**
-	 * update an existing agent in the network
+	 * Updates an existing agent of the network.
 	 * 
 	 * @param agent
 	 * 
@@ -1038,8 +1060,9 @@ public abstract class Node implements AgentStorage {
 		return result;
 	}
 	
+	
 	/**
-	 * load the central user list from the backend
+	 * Loads the central user list from the backend.
 	 */
 	private void loadUserList () {
 		Agent owner = getAnonymous();
@@ -1070,9 +1093,10 @@ public abstract class Node implements AgentStorage {
 		}
 	}
 	
+	
 	/**
-	 * store the current list. If the storage fails e.g. due to a failed up-to-date-check of the current
-	 * user list, the storage is attempted a second time
+	 * Stores the current list. If the storage fails e.g. due to a failed up-to-date-check of the current
+	 * user list, the storage is attempted a second time.
 	 */
 	private void storeUserList() {
 		synchronized ( hsUserUpdates ) {
@@ -1093,9 +1117,10 @@ public abstract class Node implements AgentStorage {
 			}
 		}
 	}
-
+	
+	
 	/**
-	 * the actual backend storage procedure
+	 * The actual backend storage procedure.
 	 * 
 	 * @throws EncodingFailedException
 	 * @throws StorageException
@@ -1114,10 +1139,10 @@ public abstract class Node implements AgentStorage {
 		// ok, all changes are stored
 		hsUserUpdates.clear();
 	}
-
+	
 	
 	/**
-	 * forces the node to publish all changes on the userlist
+	 * Forces the node to publish all changes on the userlist.
 	 */
 	public void forceUserListUpdate() {
 		if ( hsUserUpdates.size() > 0 )
@@ -1157,7 +1182,7 @@ public abstract class Node implements AgentStorage {
 	
 	
 	/**
-	 * get an id for the user for the given login name
+	 * Gets an id for the user for the given login name.
 	 * 
 	 * @param login
 	 * @return agent id
@@ -1186,8 +1211,9 @@ public abstract class Node implements AgentStorage {
 		}
 	}
 	
+	
 	/**
-	 * get an id for the user for the given email address
+	 * Gets an id for the user for the given email address.
 	 * 
 	 * @param email
 	 * @return agent id
@@ -1208,9 +1234,9 @@ public abstract class Node implements AgentStorage {
 		}
 	}
 	
-
+	
 	/**
-	 * get the agent representing a service class
+	 * Gets the agent representing the given service class.
 	 * 
 	 * prefer using a locally registered agent
 	 * 
@@ -1237,7 +1263,7 @@ public abstract class Node implements AgentStorage {
 	
 	
 	/**
-	 * invoke a service method of a local running service agent
+	 * Invokes a service method of a local running service agent.
 	 * 
 	 * @param executingAgentId
 	 * @param serviceClass
@@ -1295,7 +1321,7 @@ public abstract class Node implements AgentStorage {
 	
 	
 	/**
-	 * try to get an instance of the given class as a registered service of this node
+	 * Tries to get an instance of the given class as a registered service of this node.
 	 * 
 	 * @param classname
 	 * @return the instance of the given service class running at this node
@@ -1312,7 +1338,7 @@ public abstract class Node implements AgentStorage {
 	
 	
 	/**
-	 * try to get an instance of the given class as a registered service of this node
+	 * Tries to get an instance of the given class as a registered service of this node.
 	 * @param cls
 	 * @return the (typed) instance of the given service class running at this node
 	 * @throws NoSuchServiceException
@@ -1328,7 +1354,7 @@ public abstract class Node implements AgentStorage {
 	
 	
 	/**
-	 * invoke a service method in the network
+	 * Invokes a service method of the network.
 	 * 
 	 * @param executing
 	 * @param serviceClass
@@ -1338,7 +1364,7 @@ public abstract class Node implements AgentStorage {
 	 * @return	result of the method invocation
 	 * 
 	 * @throws L2pSecurityException 
-	 * @throws ServiceInvocationException 		several reasons -- see subclasses
+	 * @throws ServiceInvocationException several reasons -- see subclasses
 	 * @throws InterruptedException 
 	 * @throws TimeoutException 
 	 * @throws UnlockNeededException 
@@ -1395,8 +1421,9 @@ public abstract class Node implements AgentStorage {
 		}
 	}
 	
+	
 	/**
-	 * register an MessageResultListener for collecting answers 
+	 * Registers a MessageResultListener for collecting answers.
 	 * 
 	 * @param messageId
 	 * @param listener
@@ -1407,8 +1434,9 @@ public abstract class Node implements AgentStorage {
 		htAnswerListeners.put( messageId, listener);
 	}
 	
+	
 	/**
-	 * and over an answer message to the corresponding listener
+	 * Hands over an answer message to the corresponding listener.
 	 * 
 	 * @param answer
 	 * 
@@ -1431,8 +1459,9 @@ public abstract class Node implements AgentStorage {
 		return true;
 	}
 	
+	
 	/**
-	 * send a message and wait for one answer message
+	 * Sends a message and wait for one answer message.
 	 * 
 	 * @param m
 	 * 
@@ -1455,9 +1484,9 @@ public abstract class Node implements AgentStorage {
 			throw new TimeoutException ();
 	}
 	
-
+	
 	/**
-	 * send a message to the given id and wait for one answer message
+	 * Sends a message to the given id and wait for one answer message.
 	 * 
 	 * @param m
 	 * @param atNodeId
@@ -1480,12 +1509,10 @@ public abstract class Node implements AgentStorage {
 		return listener.getResults()[0];		
 	}
 	
-	
-	
 		
 	/**
-	 * get the local execution context of an agent.
-	 * if there is currently none, a new one will be created and stored for later use
+	 * Gets the local execution context of an agent.
+	 * If there is currently none, a new one will be created and stored for later use.
 	 * 
 	 * @param agentId
 	 * 
@@ -1506,8 +1533,9 @@ public abstract class Node implements AgentStorage {
 		return result;
 	}
 	
+	
 	/**
-	 * get a (possibly fresh) context for the given agent
+	 * Gets a (possibly fresh) context for the given agent.
 	 * 
 	 * @param agent
 	 * 
@@ -1526,15 +1554,17 @@ public abstract class Node implements AgentStorage {
 		
 		return result;
 	}
-
-
+	
+	
 	/**
-	 * check, if the given service class is running at this node
+	 * Checks, if the given service class is running at this node.
+	 * 
 	 * @param serviceClass
 	 * @return true, if this node as an instance of the given service running
 	 */
 	public boolean hasService(String serviceClass) {
 		return hasAgent(ServiceAgent.serviceClass2Id(serviceClass));
 	}
+	
 	
 }
