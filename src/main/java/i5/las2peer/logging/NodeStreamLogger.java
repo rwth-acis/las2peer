@@ -141,7 +141,7 @@ public class NodeStreamLogger extends NodeObserver {
 	}
 	
 	@Override
-	protected void writeLog(long timestamp, Long timespan, Event e,
+	protected void writeLog(Long timestamp, Long timespan, Event e,
 			String sourceNode, Long sourceAgentId, String destinationNode,
 			Long destinationAgentId, String remarks) {
 		

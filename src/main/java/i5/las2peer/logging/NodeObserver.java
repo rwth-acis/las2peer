@@ -295,7 +295,7 @@ public abstract class NodeObserver {
 	 * @param destinationAgentId a destination (las2peer) agent of the event (e.g. message receiver)
 	 * @param remarks		(optional) additional remarks
 	 */
-	protected abstract void writeLog ( long timestamp, Long timespan, Event event, String sourceNode, Long sourceAgentId, String destinationNode, Long destinationAgentId, String remarks );
+	protected abstract void writeLog ( Long timestamp, Long timespan, Event event, String sourceNode, Long sourceAgentId, String destinationNode, Long destinationAgentId, String remarks );
 	
 	
 }

@@ -64,6 +64,15 @@ public class MonitoringObserver extends NodeObserver {
 	}
 	
 	
+	/**
+	 * 
+	 * Helper method that is called after a node has been fully configured
+	 * It registers the monitoring agent responsible for this node and tries
+	 * to find the agent of the processing node by invoking the 
+	 * {@link i5.las2peer.services.monitoring.processing.MonitoringDataProcessingService#getReceivingAgentId} method.
+	 *
+	 * @return true, if successfully initialized
+	 */
 	private boolean initializeAgents(){
 		try {
 			System.out.println("Monitoring: initializing..");
@@ -120,10 +129,17 @@ public class MonitoringObserver extends NodeObserver {
 	}
 	
 	
+	/**
+	 * 
+	 * Processes the incoming data by generating a {@link MonitoringMessage} of it.
+	 * This message will be stored in an array of messages, which will be send via an
+	 * {@link i5.las2peer.communication.Message} to the Processing Service.
+	 *
+	 */
 	@Override
-	protected void writeLog(long timestamp, Long timespan, Event event,
-			String sourceNode, Long sourceAgentId, String originNode,
-			Long originAgentId, String remarks) {
+	protected void writeLog(Long timestamp, Long timespan, Event event,
+			String sourceNode, Long sourceAgentId, String destinationNode,
+			Long destinationAgentId, String remarks) {
 		//Now this is a bit tricky..
 		//We get a "Node is Running" event, but we have to wait until the next event to be sure that
 		//the method that called the "Running" event has terminated, otherwise our request will crash this startup method
@@ -146,16 +162,30 @@ public class MonitoringObserver extends NodeObserver {
 			}
 		}
 		messages[messagesCount] = new MonitoringMessage(timestamp, timespan, event, sourceNode,
-				sourceAgentId, originNode, originAgentId, remarks);
+				sourceAgentId, destinationNode, destinationAgentId, remarks);
 		messagesCount++;
 	}
 	
+	
+	/**
+	 * 
+	 * Enables the monitoring for the given service agent.
+	 * 
+	 * UNDER CONSTRUCTION
+	 *
+	 */
 	@Override
 	protected void enableServiceMonitoring(Long serviceAgentId){
-		System.out.print("Monitoring: ServiceAgent " + serviceAgentId + " added to monitoring!");
+		System.out.println("Monitoring: ServiceAgent " + serviceAgentId + " added to monitoring!");
 		//TODO
 	}
 	
+	
+	/**
+	 * 
+	 * Helper method that actually sends the {@link MonitoringMessage}s to the Processing Services agent.
+	 *
+	 */
 	private void sendMessages() {
 		System.out.println("Sending..");
 		try {

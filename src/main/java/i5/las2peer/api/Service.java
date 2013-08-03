@@ -100,16 +100,16 @@ import java.lang.reflect.Modifier;
  *
  */
 public abstract class Service extends Configurable {	
-
+	
+	
 	/**
-	 * the node this service is currently running at
+	 * The node this service is currently running at.
 	 */
 	private Node runningAt = null;
 	
-	
-	
+
 	/**
-	 * execute a service method
+	 * Executes a service method.
 	 * 
 	 * @param method
 	 * 
@@ -126,9 +126,9 @@ public abstract class Service extends Configurable {
 		return execute ( method, new Object[0]);
 	}
 	
-
+	
 	/**
-	 * execute a service method 
+	 * Executes a service method.
 	 * 
 	 * @param method
 	 * @param parameters
@@ -150,7 +150,7 @@ public abstract class Service extends Configurable {
 	
 	
 	/**
-	 * invoke the method of any other service (using the agent of the current service)  
+	 * Invokes the method of any other service (using the agent of the current service).  
 	 * 
 	 * @param service
 	 * @param method
@@ -182,7 +182,7 @@ public abstract class Service extends Configurable {
 	
 	
 	/**
-	 * search the service method fitting to the given parameter classes.
+	 * Searches the service method fitting to the given parameter classes.
 	 *
 	 *
 	 * @param methodName
@@ -267,7 +267,7 @@ public abstract class Service extends Configurable {
 	
 	
 	/**
-	 * create a string with all classes from an array of parameters
+	 * Ereates a string with all classes from an array of parameters.
 	 * 
 	 * @param params
 	 * 
@@ -284,9 +284,8 @@ public abstract class Service extends Configurable {
 	}
 	
 	
-	
 	/**
-	 * get the agent corresponding to this service 
+	 * Gets the agent corresponding to this service.
 	 * 
 	 * @return the agent responsible for this service
 	 * 
@@ -296,8 +295,9 @@ public abstract class Service extends Configurable {
 		return runningAt.getServiceAgent(this.getClass().getCanonicalName());
 	}
 	
+	
 	/**
-	 * get the current execution context 
+	 * Gets the current execution context.
 	 * 
 	 * @return the context we're currently running in
 	 */
@@ -307,7 +307,7 @@ public abstract class Service extends Configurable {
 	
 	
 	/**
-	 * get the current l2p thread
+	 * Gets the current l2p thread.
 	 * @return the L2pThread we're currently running in
 	 */
 	public final L2pThread getL2pThread () {
@@ -318,10 +318,10 @@ public abstract class Service extends Configurable {
 		
 		return (L2pThread) t;
 	}
-
-
+	
+	
 	/**
-	 * notify the Service, that it has been launched at the given node
+	 * Notifies the service, that it has been launched at the given node.
 	 * 
 	 * simple startup hook that may be overwritten in subclasses
 	 * 
@@ -330,26 +330,30 @@ public abstract class Service extends Configurable {
 	 */
 	public void launchedAt(Node node) throws L2pServiceException  {
 		runningAt = node;
+		if(super.monitor){
+			try {
+				runningAt.setServiceMonitoring(getAgent());
+			} catch (AgentNotKnownException e) {
+				e.printStackTrace();
+			}
+		}
 		System.out.println( "Service " + this.getClass().getCanonicalName() + " has been started!" );
 	}
 	
 	
 	/**
-	 * notify the Service, that it has been stopped at the node
+	 * Notifies the service, that it has been stopped at this node.
 	 * 
 	 * simple shutdown hook to be overwritten in subclasses
 	 */
 	public void close () {
 		System.out.println( "Service " + this.getClass().getCanonicalName() + " has been stopped!" );
 		runningAt = null;
-		
-		
 	}
 	
 	
-	
 	/**
-	 * write a log message
+	 * Writes a log message.
 	 * 
 	 * @param message
 	 */
@@ -357,16 +361,18 @@ public abstract class Service extends Configurable {
 		runningAt.observerNotice(Event.SERVICE_MESSAGE, this.getActiveNode().getNodeId(), this.getActiveAgent(), this.getClass().getName() + ": " + message);
 	}
 	
+	
 	/**
-	 * write an error log message
+	 * Writes an error log message.
 	 * @param message
 	 */
 	protected void logError ( String message ) {
 		runningAt.observerNotice(Event.SERVICE_ERROR, this.getActiveNode().getNodeId(), this.getActiveAgent(), this.getClass().getName() + ": " + message);
 	}
 	
+	
 	/**
-	 * write a log error message 
+	 * Writes an error log message.
 	 * 
 	 * @param e
 	 */
@@ -375,10 +381,10 @@ public abstract class Service extends Configurable {
 		
 		e.printStackTrace();
 	}
-
-
+	
+	
 	/**
-	 * get the currently active l2p node (from the current thread context)
+	 * Gets the currently active l2p node (from the current thread context).
 	 * 
 	 * @return 	the currently active las2peer node
 	 */
@@ -386,8 +392,9 @@ public abstract class Service extends Configurable {
 		return getL2pThread().getContext().getLocalNode();
 	}
 	
+	
 	/**
-	 * get the currently active agent from the current thread context
+	 * Gets the currently active agent from the current thread context.
 	 * 
 	 * @return the agent currently executing the L2pThread we're in
 	 */
@@ -396,9 +403,8 @@ public abstract class Service extends Configurable {
 	}
 	
 	
-	
 	/**
-	 * access to my service agent
+	 * Access to this service agent.
 	 * (security problem: just for internal use!)
 	 * 
 	 * @return the service agent responsible for this service
@@ -407,9 +413,9 @@ public abstract class Service extends Configurable {
 		return getL2pThread().getServiceAgent();
 	}
 	
-
+	
 	/**
-	 * invoke a service method using the agent of this service as executing entity
+	 * Invokes a service method using the agent of this service as executing entity.
 	 * 
 	 * @param service
 	 * @param method
@@ -431,8 +437,5 @@ public abstract class Service extends Configurable {
 		}
 	}
 	
-
-	
-
 	
 }

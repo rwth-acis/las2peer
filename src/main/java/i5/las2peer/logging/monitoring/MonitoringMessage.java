@@ -20,8 +20,8 @@ public class MonitoringMessage implements Serializable{
 	
 	private static final long serialVersionUID = -1481582785721621545L;
 	
-	private long timestamp;
-	private long timespan;
+	private Long timestamp;
+	private Long timespan;
 	private Event event;
 	private String sourceNode;
 	private Long sourceAgentId;
@@ -44,7 +44,7 @@ public class MonitoringMessage implements Serializable{
 	 * @param remarks
 	 * 
 	 */
-	public MonitoringMessage(long timestamp, long timespan, Event event, String sourceNode,
+	public MonitoringMessage(Long timestamp, Long timespan, Event event, String sourceNode,
 			Long sourceAgentId, String destinationNode, Long destinationAgentId, String remarks){
 		this.timestamp = timestamp;
 		this.timespan = timespan;
@@ -57,12 +57,12 @@ public class MonitoringMessage implements Serializable{
 	}
 	
 	
-	public long getTimestamp() {
+	public Long getTimestamp() {
 		return timestamp;
 	}
 	
 	
-	public long getTimespan() {
+	public Long getTimespan() {
 		return timespan;
 	}
 	

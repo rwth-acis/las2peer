@@ -28,6 +28,13 @@ public abstract class Configurable {
 	
 	
 	/**
+	 * Used to determine, if this service should be monitored.
+	 * Can be overwritten by service configuration file.
+	 * Deactivated per default.
+	 */
+	protected boolean monitor = false;
+	
+	/**
 	 * Tries to find a (service) class specific property file
 	 * 
 	 * The following dirs will be checked:
@@ -67,7 +74,6 @@ public abstract class Configurable {
 
 	/**
 	 * Sets a field to the given value.
-	 * 
 	 * @param f
 	 * @param value
 	 * 
@@ -101,7 +107,7 @@ public abstract class Configurable {
 	 * This method uses {@link #getProperties} to get the value stored in the classes property file
 	 * to set all fields with the name of the properties.
 	 * 
-	 * 
+	 * Note that the name "monitor" is reserved to switch the monitoring on and off.
 	 */
 	protected void setFieldValues () {
 		setFieldValues ( null );
@@ -112,7 +118,8 @@ public abstract class Configurable {
 	 * Sets all field values from the classes property file.
 	 * This method uses {@link #getProperties} to get the value stored in the classes property file
 	 * to set all fields with the name of the properties.
-	 * 
+	 * Also checks, if the field contains the value for the monitoring switch and sets it if so.
+
 	 * All fields mentioned in <i>except</i> will be left out. 
 	 * 
 	 */
@@ -120,16 +127,16 @@ public abstract class Configurable {
 		Hashtable<String, String> props = getProperties ();
 		
 		for ( String key: props.keySet() ) {
-			if ( except != null && except.contains(key))
+			if ( (except != null && except.contains(key)) || key.equals("monitor") ){
+				this.monitor = 	Boolean.parseBoolean(props.get(key));
 				continue;
-			
+			}
 			try {
 				Field f = getClass().getDeclaredField(key);
-				if ( ! Modifier.isFinal(f.getModifiers())
+				if (! Modifier.isFinal(f.getModifiers())
 						&& ! Modifier.isStatic(f.getModifiers())) {
 					f.setAccessible(true);
 					setField ( f, props.get(key));
-					
 					System.out.println ( "Class: " + getClass().getSimpleName() + " using: " + key + " -> " + props.get(key));
 				}
 			} catch ( NoSuchFieldException e ) {
