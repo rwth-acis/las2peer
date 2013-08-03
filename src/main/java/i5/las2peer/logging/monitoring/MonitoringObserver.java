@@ -150,8 +150,9 @@ public class MonitoringObserver extends NodeObserver {
 		if(event == Event.NODE_STATUS_CHANGE && remarks.equals("RUNNING")){
 			readyForInitializing = true;
 		}
-		if(messagesCount >= messages.length){
-			
+		//We can only send our last message if the node is closing, so we will have to assume that all services are shutdown
+		//when a node is closed (seems to be a fair bet)
+		if(messagesCount >= messages.length || (event == Event.NODE_STATUS_CHANGE && remarks.equals("CLOSING"))){
 			if(initializedDone){
 				messagesCount = 0;
 				sendMessages();
@@ -171,13 +172,14 @@ public class MonitoringObserver extends NodeObserver {
 	 * 
 	 * Enables the monitoring for the given service agent.
 	 * 
-	 * UNDER CONSTRUCTION
 	 *
 	 */
 	@Override
 	protected void enableServiceMonitoring(Long serviceAgentId){
 		System.out.println("Monitoring: ServiceAgent " + serviceAgentId + " added to monitoring!");
-		//TODO
+		//Calling the superclass for things like date, node representation etc
+		//(to avoid code duplication)
+		super.logEvent(Event.SERVICE_ADD_TO_MONITORING, registeredAt.getNodeId(), serviceAgentId+"");
 	}
 	
 	

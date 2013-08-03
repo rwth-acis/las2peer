@@ -780,9 +780,13 @@ public abstract class Node implements AgentStorage {
 			if ( handoverAnswer(message))
 				return;
 		
-		System.out.println(message.getSendingNodeId().toString());
-		observerNotice(Event.MESSAGE_RECEIVED, message.getSendingNodeId(), message.getSenderId(), this.getNodeId(), message.getRecipientId(), "");
-		
+		//Since this field is not always available
+		if (message.getSendingNodeId() != null){
+			observerNotice(Event.MESSAGE_RECEIVED, message.getSendingNodeId(), message.getSenderId(), this.getNodeId(), message.getRecipientId(), "");
+		}
+		else{
+			observerNotice(Event.MESSAGE_RECEIVED, null, message.getSenderId(), this.getNodeId(), message.getRecipientId(), "");
+		}
 		MessageReceiver receiver = htRegisteredReceivers.get( message.getRecipientId() );
 		
 		if ( receiver == null )

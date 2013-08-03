@@ -85,6 +85,7 @@ public abstract class NodeObserver {
 		SERVICE_INVOKATION_FINISHED (6450),
 		SERVICE_INVOKATION_FAILED (-6460),
 		
+		SERVICE_ADD_TO_MONITORING(6550), //Used by the LoggingObserver itself
 		SERVICE_MESSAGE (6500),
 		//To be used by the service developer
 		SERVICE_CUSTOM_MESSAGE_1 (6501),

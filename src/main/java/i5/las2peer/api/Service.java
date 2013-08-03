@@ -363,8 +363,42 @@ public abstract class Service extends Configurable {
 	
 	
 	/**
-	 * Writes an error log message.
+	 * Writes a log message.
+	 * The given index (1-10) can be used to differentiate between different log messages.
+	 * 
 	 * @param message
+	 */
+	protected void logMessage (int index, String message ) {
+		Event event = Event.SERVICE_MESSAGE; //Default
+		switch(index){
+        case 1:
+            event = Event.SERVICE_CUSTOM_MESSAGE_1;
+        case 2:
+            event = Event.SERVICE_CUSTOM_MESSAGE_2;
+        case 3:
+            event = Event.SERVICE_CUSTOM_MESSAGE_3;
+        case 4:
+            event = Event.SERVICE_CUSTOM_MESSAGE_4;
+        case 5:
+            event = Event.SERVICE_CUSTOM_MESSAGE_5;
+        case 6:
+            event = Event.SERVICE_CUSTOM_MESSAGE_6;
+        case 7:
+            event = Event.SERVICE_CUSTOM_MESSAGE_7;
+        case 8:
+            event = Event.SERVICE_CUSTOM_MESSAGE_8;
+        case 9:
+            event = Event.SERVICE_CUSTOM_MESSAGE_9;
+        case 10:
+            event = Event.SERVICE_CUSTOM_MESSAGE_10;
+		}
+		runningAt.observerNotice(event, this.getActiveNode().getNodeId(), this.getActiveAgent(), this.getClass().getName() + ": " + message);
+	}
+	
+	
+	/**
+	 * Writes an error log message.
+	 * @param message a custom message
 	 */
 	protected void logError ( String message ) {
 		runningAt.observerNotice(Event.SERVICE_ERROR, this.getActiveNode().getNodeId(), this.getActiveAgent(), this.getClass().getName() + ": " + message);
@@ -372,13 +406,47 @@ public abstract class Service extends Configurable {
 	
 	
 	/**
-	 * Writes an error log message.
+	 * Writes an error message.
+	 * The given index (1-10) can be used to differentiate between different log messages.
 	 * 
-	 * @param e
+	 * @param message
+	 */
+	protected void logError (int index, String message) {
+		Event event = Event.SERVICE_ERROR; //Default
+		switch(index){
+        case 1:
+            event = Event.SERVICE_CUSTOM_ERROR_1;
+        case 2:
+            event = Event.SERVICE_CUSTOM_ERROR_2;
+        case 3:
+            event = Event.SERVICE_CUSTOM_ERROR_3;
+        case 4:
+            event = Event.SERVICE_CUSTOM_ERROR_4;
+        case 5:
+            event = Event.SERVICE_CUSTOM_ERROR_5;
+        case 6:
+            event = Event.SERVICE_CUSTOM_ERROR_6;
+        case 7:
+            event = Event.SERVICE_CUSTOM_ERROR_7;
+        case 8:
+            event = Event.SERVICE_CUSTOM_ERROR_8;
+        case 9:
+            event = Event.SERVICE_CUSTOM_ERROR_9;
+        case 10:
+            event = Event.SERVICE_CUSTOM_ERROR_10;
+		}
+		runningAt.observerNotice(event, this.getActiveNode().getNodeId(), this.getActiveAgent(), this.getClass().getName() + ": " + message);
+	}
+	
+	
+	/**
+	 * Writes an exception log message
+	 * Additionally the stack trace is printed.
+	 * 
+	 * @param e an exception
 	 */
 	protected void logError ( Exception e ) {
-		logError ( "Exception " + e );
-		
+		logError ( "Exception: " + e );
 		e.printStackTrace();
 	}
 	
