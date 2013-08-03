@@ -633,7 +633,7 @@ public class HttpConnectorRequestHandler implements RequestHandler {
 			
 			long lTimeout = connector.getDefaultSessionTimeout();
 			if ( timeout != null)
-				lTimeout = connector.getSesstionTimeout( Long.valueOf(timeout) );
+				lTimeout = connector.getSessionTimeout( Long.valueOf(timeout) );
 			
 			long persistentTimeout = connector.getDefaultPersistentTimeout();
 			if ( outDate != null)

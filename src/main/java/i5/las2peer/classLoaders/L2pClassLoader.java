@@ -453,7 +453,7 @@ public class L2pClassLoader extends ClassLoader {
 	
 	/**
 	 * statistics: get the number of loaded (registered) jar libraries
-	 * @return
+	 * @return the number of the registered libraries
 	 */
 	int numberOfRegisteredLibraries () {
 		int result = 0;
@@ -467,7 +467,7 @@ public class L2pClassLoader extends ClassLoader {
 	
 	/**
 	 * statistics: get the number of loaded (registered) (service) bundles
-	 * @return
+	 * @return the number of registered bundles
 	 */
 	int numberOfRegisteredBundles () {
 		int result = 0;
@@ -484,7 +484,7 @@ public class L2pClassLoader extends ClassLoader {
 	/** 
 	 * extract the package name from a class name
 	 * @param className
-	 * @return the package name of a complete classname
+	 * @return the package name of a complete class name
 	 */
 	public static final String getPackageName ( String className ) {
 		if ( className.indexOf('.') < 0)

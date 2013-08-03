@@ -297,9 +297,9 @@ public class HttpConnector extends Connector
 	 * e.g. a getSessionTimeout(0) always gives the minimal session timeout value
 	 *   	
 	 * @param suggested
-	 * @return
+	 * @return the session time out
 	 */
-	long getSesstionTimeout ( long suggested ) {
+	long getSessionTimeout ( long suggested ) {
 		if ( suggested < minSessionTimeoutMS )
 			suggested = minSessionTimeoutMS;
 		if ( suggested > maxSessionTimeoutMS )
@@ -311,7 +311,7 @@ public class HttpConnector extends Connector
 	
 	/**
 	 * get the default timeout for remote sessions
-	 * @return
+	 * @return the default session timeout
 	 */
 	long getDefaultSessionTimeout () {
 		return defaultSessionTimeout;
@@ -321,7 +321,7 @@ public class HttpConnector extends Connector
 	/**
 	 * 
 	 * @param suggested
-	 * @return
+	 * @return the persistent session timeout
 	 */
 	long getPersistentSessionTimeout ( long suggested ) {
 		if ( suggested < minPersistentTimeoutMS)

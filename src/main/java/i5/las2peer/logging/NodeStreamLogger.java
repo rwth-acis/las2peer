@@ -175,8 +175,9 @@ public class NodeStreamLogger extends NodeObserver {
 	/**
 	 * Simple method for one log line entry. Null will be printed as "-".
 	 * All values will be followed by a tab char.
+	 * 
 	 * @param o
-	 * @return
+	 * @return a string
 	 */
 	private static String appendPart ( Object o ) {
 		if ( o == null)

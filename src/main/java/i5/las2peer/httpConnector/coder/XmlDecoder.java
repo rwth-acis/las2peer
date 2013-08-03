@@ -484,7 +484,7 @@ public class XmlDecoder extends ParamDecoder {
 	 * @param bytes
 	 * @param offset
 	 * 
-	 * @return
+	 * @return the long value
 	 */
 	private long bytesToLong(byte[] bytes, int offset)  {
 		long helper;

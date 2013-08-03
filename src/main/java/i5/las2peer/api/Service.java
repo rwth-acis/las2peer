@@ -267,7 +267,7 @@ public abstract class Service extends Configurable {
 	
 	
 	/**
-	 * Ereates a string with all classes from an array of parameters.
+	 * Creates a string with all classes from an array of parameters.
 	 * 
 	 * @param params
 	 * 
