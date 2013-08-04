@@ -170,26 +170,11 @@ public class MonitoringObserver extends NodeObserver {
 	
 	/**
 	 * 
-	 * Enables the monitoring for the given service agent.
-	 * 
-	 *
-	 */
-	@Override
-	protected void enableServiceMonitoring(Long serviceAgentId){
-		System.out.println("Monitoring: ServiceAgent " + serviceAgentId + " added to monitoring!");
-		//Calling the superclass for things like date, node representation etc
-		//(to avoid code duplication)
-		super.logEvent(Event.SERVICE_ADD_TO_MONITORING, registeredAt.getNodeId(), serviceAgentId+"");
-	}
-	
-	
-	/**
-	 * 
 	 * Helper method that actually sends the {@link MonitoringMessage}s to the Processing Services agent.
 	 *
 	 */
 	private void sendMessages() {
-		System.out.println("Sending..");
+		System.out.println("Monitoring: Sending..");
 		try {
 			Message message = new Message(sendingAgent,receivingAgent,messages);
 			System.out.println("Monitoring: Message created!");

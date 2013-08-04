@@ -24,11 +24,15 @@ public abstract class NodeObserver {
 	 */
 	public enum Event {
 		NODE_CREATED (100),
-		NEW_NODE_NOTICE (110),
-		NEW_AGENT (200), //Unused
-		NEW_AGENT_NOTICE (210), //Unused
+		NODE_SHUTDOWN (200),
+		NODE_STATUS_CHANGE (300),
 		
-		NODE_STATUS_CHANGE (700),
+		NEW_NODE_NOTICE (110),
+		
+		NODE_ERROR (-100),
+		
+		NEW_AGENT (400), //Unused
+		NEW_AGENT_NOTICE (210), //Unused
 		
 		AGENT_SEARCH_STARTED (1000),
 		AGENT_SEARCH_RECEIVED (1100),
@@ -41,22 +45,22 @@ public abstract class NodeObserver {
 		ARTIFACT_UPDATED (2050),
 		ARTIFACT_FETCH_STARTED (2060),
 		ARTIFACT_RECEIVED (2065),
-		ARTIFACT_FETCH_FAILED (-2067),
+		ARTIFACT_FETCH_FAILED (-2065),
 		ARTIFACT_NOTIFICATION (2100),
 		ARTIFACT_UPLOAD_FAILED (-2200),
 		ARTIFACT_OVERWRITE_FAILED (-2201),
 		
-		AGENT_REGISTERED (3000), //Done at the node superclass
+		AGENT_REGISTERED (3000), //Done at the node class (not its implementation)
 		AGENT_UNLOCKED (3010),
 		AGENT_UNLOCK_FAILED (-3020),
 		AGENT_CREATED (3050),
 		AGENT_REMOVED (3060),
 		AGENT_UPLOAD_STARTED (3100),
 		AGENT_UPLOAD_SUCCESS (3101),
-		AGENT_UPLOAD_FAILED (-3102),
+		AGENT_UPLOAD_FAILED (-3101),
 		AGENT_GET_STARTED (3200),
 		AGENT_GET_SUCCESS (3201),
-		AGENT_GET_FAILED (-3202),
+		AGENT_GET_FAILED (-3201),
 		AGENT_LOAD_FAILED (-3000),
 		
 		RMI_SENT (4000),
@@ -69,7 +73,7 @@ public abstract class NodeObserver {
 		MESSAGE_SENDING(5100),
 		MESSAGE_FORWARDING (5200),
 		MESSAGE_FAILED (-5300),
-		MESSAGE_RECEIVED_UNKNOWN(-5310),
+		MESSAGE_RECEIVED_UNKNOWN(-5300),
 		
 		RESPONSE_SENDING (5500),
 		RESPONSE_FAILED  (5600),
@@ -77,48 +81,50 @@ public abstract class NodeObserver {
 		PASTRY_NEW_TOPIC_CHILD (6000),
 		PASTRY_REMOVED_TOPIC_CHILD (6010),
 		PASTRY_TOPIC_SUBSCRIPTION_FAILED (-6100),
-		PASTRY_TOPIC_SUBSCRIPTION_SUCCESS (6110),
+		PASTRY_TOPIC_SUBSCRIPTION_SUCCESS (6100),
 		
-		SERVICE_STARTUP (6400),
-		SERVICE_SHUTDOWN (6410),
-		SERVICE_INVOKATION (6440),
-		SERVICE_INVOKATION_FINISHED (6450),
-		SERVICE_INVOKATION_FAILED (-6460),
+		//Start service messages
+		//When adding new Events, please mind that the area from |7000| - |7999| is reserved for service messages
+		//(and thus will only be monitored by the monitoring observer if the service monitoring flag was set)
+		SERVICE_STARTUP (7000),
+		SERVICE_SHUTDOWN (7100),
+		SERVICE_INVOKATION (7200),
+		SERVICE_INVOKATION_FINISHED (7210),
+		SERVICE_INVOKATION_FAILED (-7210),
 		
-		SERVICE_ADD_TO_MONITORING(6550), //Used by the LoggingObserver itself
-		SERVICE_MESSAGE (6500),
+		SERVICE_ADD_TO_MONITORING(7300), //Used by the LoggingObserver itself
+		SERVICE_MESSAGE (7500),
 		//To be used by the service developer
-		SERVICE_CUSTOM_MESSAGE_1 (6501),
-		SERVICE_CUSTOM_MESSAGE_2 (6502),
-		SERVICE_CUSTOM_MESSAGE_3 (6503),
-		SERVICE_CUSTOM_MESSAGE_4 (6504),
-		SERVICE_CUSTOM_MESSAGE_5 (6505),
-		SERVICE_CUSTOM_MESSAGE_6 (6506),
-		SERVICE_CUSTOM_MESSAGE_7 (6507),
-		SERVICE_CUSTOM_MESSAGE_8 (6508),
-		SERVICE_CUSTOM_MESSAGE_9 (6509),
-		SERVICE_CUSTOM_MESSAGE_10 (6510),
+		SERVICE_CUSTOM_MESSAGE_1 (7501),
+		SERVICE_CUSTOM_MESSAGE_2 (7502),
+		SERVICE_CUSTOM_MESSAGE_3 (7503),
+		SERVICE_CUSTOM_MESSAGE_4 (7504),
+		SERVICE_CUSTOM_MESSAGE_5 (7505),
+		SERVICE_CUSTOM_MESSAGE_6 (7506),
+		SERVICE_CUSTOM_MESSAGE_7 (7507),
+		SERVICE_CUSTOM_MESSAGE_8 (7508),
+		SERVICE_CUSTOM_MESSAGE_9 (7509),
+		SERVICE_CUSTOM_MESSAGE_10 (7510),
 		
-		SERVICE_ERROR (-6505),
+		SERVICE_ERROR (-7500),
 		//To be used by the service developer
-		SERVICE_CUSTOM_ERROR_1 (-6501),
-		SERVICE_CUSTOM_ERROR_2 (-6502),
-		SERVICE_CUSTOM_ERROR_3 (-6503),
-		SERVICE_CUSTOM_ERROR_4 (-6504),
-		SERVICE_CUSTOM_ERROR_5 (-6505),
-		SERVICE_CUSTOM_ERROR_6 (-6506),
-		SERVICE_CUSTOM_ERROR_7 (-6507),
-		SERVICE_CUSTOM_ERROR_8 (-6508),
-		SERVICE_CUSTOM_ERROR_9 (-6509),
-		SERVICE_CUSTOM_ERROR_10 (-6510),
+		SERVICE_CUSTOM_ERROR_1 (-7501),
+		SERVICE_CUSTOM_ERROR_2 (-7502),
+		SERVICE_CUSTOM_ERROR_3 (-7503),
+		SERVICE_CUSTOM_ERROR_4 (-7504),
+		SERVICE_CUSTOM_ERROR_5 (-7505),
+		SERVICE_CUSTOM_ERROR_6 (-7506),
+		SERVICE_CUSTOM_ERROR_7 (-7507),
+		SERVICE_CUSTOM_ERROR_8 (-7508),
+		SERVICE_CUSTOM_ERROR_9 (-7509),
+		SERVICE_CUSTOM_ERROR_10 (-7510),
+		//End service messages
+		
 		
 		HTTP_CONNECTOR_MESSAGE (8000),
 		HTTP_CONNECTOR_REQUEST (8001),
-		HTTP_CONNECTOR_ERROR (-8100),
-		
-		NODE_SHUTDOWN (10000),
-		
-		NODE_ERROR (-1000);
+		HTTP_CONNECTOR_ERROR (-8100);
+
 		
 		/**
 		 * a numeric event code
@@ -225,7 +231,7 @@ public abstract class NodeObserver {
 	 * @param node
 	 * @return string representation for the given node object
 	 */
-	private String getNodeRepresentation ( Object node ) {
+	protected String getNodeRepresentation ( Object node ) {
 		if ( node == null)
 			return null;
 		else if ( node instanceof SocketNodeHandle ) {
@@ -238,26 +244,6 @@ public abstract class NodeObserver {
 		}
 		else
 			return "" + node + " (" + node.getClass().getName() + ")";
-	}
-	
-	
-	
-	/**
-	 * Implemented by the MonitoringObserver.
-	 * 
-	 * @param serviceAgentId the service to be monitored
-	 */
-	protected abstract void enableServiceMonitoring(Long serviceAgentId);
-	
-	
-	/**
-	 * Enables monitoring for the given service agent.
-	 * This only affects the MonitoringObserver.
-	 * 
-	 * @param serviceAgentId the service to be monitored
-	 */
-	public void setServiceMonitoring(Long serviceAgentId){
-		enableServiceMonitoring(serviceAgentId);
 	}
 	
 	

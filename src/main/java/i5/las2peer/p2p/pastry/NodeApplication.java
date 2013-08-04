@@ -278,7 +278,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 
 	@Override
 	public void update(NodeHandle nh, boolean arg1) {
-		// called when a new neighbor joined the net		
+		// called when a new neighbor joined the net
 		l2pNode.observerNotice( Event.NEW_NODE_NOTICE, null, ""+nh);
 	}
 

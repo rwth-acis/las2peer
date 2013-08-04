@@ -303,7 +303,7 @@ public abstract class Node implements AgentStorage {
 	 */
 	public void setServiceMonitoring(ServiceAgent service){
 		for ( NodeObserver ob: observers )
-			ob.setServiceMonitoring(service.getId());
+			ob.logEvent(Event.SERVICE_ADD_TO_MONITORING, this.getNodeId(), service.getId(), service.getServiceClassName());
 	}
 	
 	
@@ -1462,7 +1462,7 @@ public abstract class Node implements AgentStorage {
 		if ( !answer.isResponse())
 			return false;
 		
-		observerNotice(Event.MESSAGE_RECEIVED_ANSWER, answer.getSendingNodeId(), answer.getSenderId(), this, answer.getRecipientId(), ""+answer.getResponseToId() );
+		observerNotice(Event.MESSAGE_RECEIVED_ANSWER, answer.getSendingNodeId(), answer.getSenderId(), this.getNodeId(), answer.getRecipientId(), ""+answer.getResponseToId() );
 		
 		MessageResultListener listener = htAnswerListeners.get ( answer.getResponseToId() );
 		if ( listener == null ) {

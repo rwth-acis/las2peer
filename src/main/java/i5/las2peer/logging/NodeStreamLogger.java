@@ -185,13 +185,6 @@ public class NodeStreamLogger extends NodeObserver {
 		else
 			return "" + o + "\t";
 	}
-
-
-	@Override
-	public void enableServiceMonitoring(Long serviceAgentId) {
-		//Do Nothing, this is a local logger that logs everything
-	}
-
 	
 	
 }

@@ -119,7 +119,7 @@ public class MonitoringAgent extends PassphraseAgent {
 					boolean success = (Boolean) getRunningAtNode().invokeLocally(getId(), PROCESSING_SERVICE_ClASS_NAME, "getMessages", parameters);
 					if(!success)
 						//TODO: Check for performance of message receiving
-						System.out.println("Monitoring: Something went wrong while invoking Processing Service!");
+						System.out.println("Monitoring: Something went wrong while invoking Processing Service to deliver a monitoring message!");
 				}catch(NoSuchServiceException e){
 					System.out.println("Monitoring: I am not the Processing Service!");
 				} catch (L2pServiceException e) {
