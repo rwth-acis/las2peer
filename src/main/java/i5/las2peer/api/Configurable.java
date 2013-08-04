@@ -110,7 +110,7 @@ public abstract class Configurable {
 	 * Note that the name "monitor" is reserved to switch the monitoring on and off.
 	 */
 	protected void setFieldValues () {
-		setFieldValues ( null );
+		setFieldValues (null);
 	}
 	
 	
@@ -127,8 +127,11 @@ public abstract class Configurable {
 		Hashtable<String, String> props = getProperties ();
 		
 		for ( String key: props.keySet() ) {
-			if ( (except != null && except.contains(key)) || key.equals("monitor") ){
+			if (key.equals("monitor")){
 				this.monitor = 	Boolean.parseBoolean(props.get(key));
+				continue;
+			}
+			if ( (except != null && except.contains(key))){
 				continue;
 			}
 			try {

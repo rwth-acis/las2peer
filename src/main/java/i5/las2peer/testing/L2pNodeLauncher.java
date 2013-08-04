@@ -380,7 +380,7 @@ public class L2pNodeLauncher {
 			printWarning ( "Exception for Agent GroupA. Message: " + e.getMessage() );
 			known ++;		
 		}
-		
+		uploadLoginList();
 		printMessage ( "--> successfully stored " + success + " agents! - (" + known + " are already known or had problems registering!)" );
 	}
 

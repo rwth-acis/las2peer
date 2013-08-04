@@ -185,13 +185,9 @@ public class NodeApplication implements Application, ScribeMultiClient {
 			try {
 				final i5.las2peer.communication.Message m = ((MessageEnvelope)pastMessage).getContainedMessage();
 				
-				l2pNode.observerNotice( 
-						Event.MESSAGE_RECEIVED, 
-						((MessageEnvelope) pastMessage).getSendingNode(), 
-						m.getSender(), 
-						l2pNode.getPastryNode(), 
-						m.getRecipient(), 
-						"Got an envelope for a l2p message" );
+				//Is already done in Node-Classes
+//				l2pNode.observerNotice( Event.MESSAGE_RECEIVED, ((MessageEnvelope) pastMessage).getSendingNode(),
+//						m.getSender(), l2pNode.getPastryNode(), m.getRecipient(), "Got an envelope for a LAS2peer message!" );
 				
 				// hmmmm, is the problem here??
 				new Thread ( new Runnable () {
@@ -271,7 +267,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 
 	@Override
 	public boolean forward(RouteMessage pastMessage) {
-		l2pNode.observerNotice(Event.MESSAGE_FORWARDING, "" + pastMessage);
+		l2pNode.observerNotice(Event.MESSAGE_FORWARDING, l2pNode.getNodeId(), "" + pastMessage);
 		
 		return true;
 	}
