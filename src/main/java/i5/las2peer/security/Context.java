@@ -14,8 +14,9 @@ import i5.las2peer.tools.SerializationException;
 import java.util.Date;
 import java.util.Hashtable;
 
+
 /**
- * Each {@link i5.las2peer.execution.L2pThread} is bound to a context
+ * Each {@link i5.las2peer.execution.L2pThread} is bound to a context,
  * which is mainly determined by the executing agent.
  * 
  * @author Holger Jan&szlig;en
@@ -34,10 +35,11 @@ public class Context implements AgentStorage {
 	
 	
 	/**
-	 * create a new (local) context
+	 * Creates a new (local) context.
 	 * 
 	 * @param mainAgent
 	 * @param localNode
+	 * 
 	 * @throws L2pSecurityException
 	 */
 	public Context ( Node localNode, Agent mainAgent) throws L2pSecurityException {
@@ -51,11 +53,14 @@ public class Context implements AgentStorage {
 		touch();
 	}
 	
+	
 	/**
-	 * create a new (remote) context 
+	 * Creates a new (remote) context.
+	 * 
 	 * @param localNode
 	 * @param mainAgent
 	 * @param remoteNodeReference
+	 * 
 	 * @throws L2pSecurityException
 	 */
 	public Context ( Node localNode, Agent mainAgent, Object remoteNodeReference ) throws L2pSecurityException {
@@ -63,27 +68,29 @@ public class Context implements AgentStorage {
 		this.remoteNodeReference = remoteNodeReference;
 	}
 	
+	
 	/**
-	 * get the main agent of this context
+	 * Gets the main agent of this context.
 	 * 
-	 * @return	the agent of this context
+	 * @return the agent of this context
 	 */
 	public Agent getMainAgent () {
 		return agent;
 	}
 	
-
+	
 	/**
-	 * get all group agents, which have been unlocked in this context
+	 * Gets all group agents, which have been unlocked in this context.
 	 * 
-	 * @return	all (unlocked) group agents of this context
+	 * @return all (unlocked) group agents of this context
 	 */
 	public GroupAgent[] getGroupAgents () {
 		return groupAgents.entrySet().toArray(new GroupAgent[0]);
 	}
 	
+	
 	/**
-	 * try to open the given id for this context
+	 * Tries to open the given id for this context.
 	 * 
 	 * @param groupId
 	 * 
@@ -120,8 +127,9 @@ public class Context implements AgentStorage {
 		return group;
 	}
 	
+	
 	/**
-	 * get a stored envelope from the p2p network
+	 * Gets a stored envelope from the p2p network.
 	 * 
 	 * @param id
 	 * 
@@ -134,15 +142,17 @@ public class Context implements AgentStorage {
 		return localNode.fetchArtifact( id );
 	}
 	
+	
 	/**
-	 * get a stored envelope from the p2p network
-	 * 
-	 * The envelope will be identified by the stored class and an arbitrary indentifier selected by
-	 * the using service(s)
+	 * Gets a stored envelope from the p2p network.
+	 * The envelope will be identified by the stored class and an arbitrary identifier selected by
+	 * the using service(s).
 	 * 
 	 * @param cls
 	 * @param identifier
+	 * 
 	 * @return envelope containing the requested data
+	 * 
 	 * @throws ArtifactNotFoundException
 	 * @throws StorageException
 	 */
@@ -150,16 +160,18 @@ public class Context implements AgentStorage {
 		long id = Envelope.getClassEnvelopeId(cls, identifier);
 		return getStoredObject ( id );
 	}
-
+	
+	
 	/**
-	 * get a stored envelope from the p2p network
-	 * 
-	 * The envelope will be identified by the stored class and an arbitrary indentifier selected by
-	 * the using service(s)
+	 * Gets a stored envelope from the p2p network.
+	 * The envelope will be identified by the stored class and an arbitrary identifier selected by
+	 * the using service(s).
 	 * 
 	 * @param className
 	 * @param identifier
+	 * 
 	 * @return envelope containing the requested data
+	 * 
 	 * @throws ArtifactNotFoundException
 	 * @throws StorageException
 	 */
@@ -168,17 +180,18 @@ public class Context implements AgentStorage {
 	}
 	
 	
-	
 	/**
-	 * reference object to the executing node 
+	 * Returns the reference object to the executing node.
+	 * 
 	 * @return the (possibly remote) node trying to execute something at this (local) node
 	 */
 	public Object getNodeReference () {
 		return remoteNodeReference;
 	}
 	
+	
 	/**
-	 * refers this context to a local executing agent or a remote one? 
+	 * Refers this context to a local executing agent or a remote one? 
 	 * 
 	 * @return true, if the request is started locally and not via the P2P network
 	 */
@@ -186,8 +199,9 @@ public class Context implements AgentStorage {
 		return remoteNodeReference == null;
 	}
 	
+	
 	/**
-	 * access to the local node
+	 * Gives access to the local node.
 	 * 
 	 * @return	the local P2P node
 	 */
@@ -195,27 +209,29 @@ public class Context implements AgentStorage {
 		return localNode;
 	}
 	
+	
 	/**
-	 * mark the current time as the last usage
+	 * Mark the current time as the last usage.
 	 */
 	public void touch() {
 		lastUsageTime = new Date().getTime();
 	}
 	
+	
 	/**
+	 * Returns the time of the last usage of this context.
 	 * 
 	 * @return the timestamp of the last usage
 	 */
 	public long getLastUsageTimestamp () {
 		return lastUsageTime;
 	}
-
-
+	
+	
 	/**
-	 * use this context as {@link AgentStorage}
-	 * return agents that are unlocked in this context first.
-	 * 
-	 * e.g. necessary for opening a received {@link i5.las2peer.communication.Message}. 
+	 * Uses this context as {@link AgentStorage}.
+	 * Returns agents that are unlocked in this context first.
+	 * E.g. necessary for opening a received {@link i5.las2peer.communication.Message}. 
 	 *  
 	 * @param id
 	 * 
@@ -233,20 +249,20 @@ public class Context implements AgentStorage {
 		
 		return localNode.getAgent(id);
 	}
-
+	
+	
 	@Override
 	public boolean hasAgent(long id) {
 		return id == agent.getId() || groupAgents.containsKey(id);
 	}
 	
 	
-	
 	/**
-	 * get the current las2peer context
+	 * Gets the current LAS2peer context.
 	 * 
-	 * @throws 	IllegalStateException	called not in a las2peer execution thread!
+	 * @throws IllegalStateException called not in a LAS2peer execution thread
 	 * 
-	 * @return	the current context
+	 * @return the current context
 	 */
 	public static Context getCurrent () {
 		Thread t = Thread.currentThread();
@@ -264,15 +280,55 @@ public class Context implements AgentStorage {
 	 * Since this method will/should only be used in an L2pThread, the message will come from a
 	 * service or a helper, so a SERVICE_MESSAGE is assumed.
 	 * 
+	 * @param from the calling class
 	 * @param message
 	 */
 	public static void logMessage ( Object from, String message ) {
 		try {
-			getCurrent().getLocalNode().observerNotice(Event.SERVICE_MESSAGE, from.getClass().getSimpleName() + ": " + message);
+			getCurrent().getLocalNode().observerNotice(Event.SERVICE_MESSAGE, getCurrent().getLocalNode().getNodeId(),
+					getCurrent().getMainAgent(), from.getClass().getSimpleName() + ": " + message);
 		} catch ( IllegalStateException e ) {
 			System.err.println ( "Log message not in a l2p context: " + message );
 		}
 	}
+	
+	
+	/**
+	 * Writes a log message.
+	 * The given index (1-10) can be used to differentiate between different log messages.
+	 * 
+	 * @param from the calling class
+	 * @param index an index between 1 and 10
+	 * @param message
+	 */
+	protected void logMessage (Object from, int index, String message ) {
+		Event event = Event.SERVICE_MESSAGE; //Default
+		switch(index){
+        case 1:
+            event = Event.SERVICE_CUSTOM_MESSAGE_1;
+        case 2:
+            event = Event.SERVICE_CUSTOM_MESSAGE_2;
+        case 3:
+            event = Event.SERVICE_CUSTOM_MESSAGE_3;
+        case 4:
+            event = Event.SERVICE_CUSTOM_MESSAGE_4;
+        case 5:
+            event = Event.SERVICE_CUSTOM_MESSAGE_5;
+        case 6:
+            event = Event.SERVICE_CUSTOM_MESSAGE_6;
+        case 7:
+            event = Event.SERVICE_CUSTOM_MESSAGE_7;
+        case 8:
+            event = Event.SERVICE_CUSTOM_MESSAGE_8;
+        case 9:
+            event = Event.SERVICE_CUSTOM_MESSAGE_9;
+        case 10:
+            event = Event.SERVICE_CUSTOM_MESSAGE_10;
+		}
+		getCurrent().getLocalNode().observerNotice(event, getCurrent().getLocalNode().getNodeId(),
+				getCurrent().getMainAgent(), from.getClass().getSimpleName() + ": " + message);
+	}
+	
 	
 	/**
 	 * Logs an error message to the l2p system using the observers.
@@ -280,18 +336,58 @@ public class Context implements AgentStorage {
 	 * Since this method will/should only be used in an L2pThread, the message will come from a
 	 * service or a helper, so a SERVICE_MESSAGE is assumed.
 	 * 
+	 * @param from the calling class
 	 * @param message
 	 */
 	public static void logError ( Object from, String message ) {
 		try {
-			getCurrent().getLocalNode().observerNotice(Event.SERVICE_ERROR, from.getClass().getSimpleName() + ": " + message);
+			getCurrent().getLocalNode().observerNotice(Event.SERVICE_ERROR, getCurrent().getLocalNode().getNodeId(),
+					getCurrent().getMainAgent(), from.getClass().getSimpleName() + ": " + message);
 		} catch ( IllegalStateException e ) {
 			System.err.println ( "Logmessage not in a l2p context: " + message );
 		}
 	}
-
+	
+	
 	/**
-	 * opens the given envelope using the agents of this context
+	 * Writes an error message.
+	 * The given index (1-10) can be used to differentiate between different log messages.
+	 * 
+	 * @param from the calling class
+	 * @param index an index between 1 and 10
+	 * @param message
+	 */
+	protected void logError (Object from, int index, String message) {
+		Event event = Event.SERVICE_ERROR; //Default
+		switch(index){
+        case 1:
+            event = Event.SERVICE_CUSTOM_ERROR_1;
+        case 2:
+            event = Event.SERVICE_CUSTOM_ERROR_2;
+        case 3:
+            event = Event.SERVICE_CUSTOM_ERROR_3;
+        case 4:
+            event = Event.SERVICE_CUSTOM_ERROR_4;
+        case 5:
+            event = Event.SERVICE_CUSTOM_ERROR_5;
+        case 6:
+            event = Event.SERVICE_CUSTOM_ERROR_6;
+        case 7:
+            event = Event.SERVICE_CUSTOM_ERROR_7;
+        case 8:
+            event = Event.SERVICE_CUSTOM_ERROR_8;
+        case 9:
+            event = Event.SERVICE_CUSTOM_ERROR_9;
+        case 10:
+            event = Event.SERVICE_CUSTOM_ERROR_10;
+		}
+		getCurrent().getLocalNode().observerNotice(event, getCurrent().getLocalNode().getNodeId(),
+				getCurrent().getMainAgent(), from.getClass().getSimpleName() + ": " + message);
+	}
+	
+	
+	/**
+	 * Opens the given envelope using the agents of this context.
 	 * 
 	 * @param envelope
 	 * @throws DecodingFailedException
@@ -325,19 +421,17 @@ public class Context implements AgentStorage {
 					e1.printStackTrace();
 				}
 			}
-			
-			
 			throw e;
 		}
-		
-		
 	}
-
+	
+	
 	/**
-	 * try to unlock the private key of the main agent
+	 * Tries to unlock the private key of the main agent.
 	 * 
 	 * @param passphrase
-	 * @throws L2pSecurityException 
+	 * 
+	 * @throws L2pSecurityException
 	 */
 	public void unlockMainAgent(String passphrase) throws L2pSecurityException {
 		if(  agent instanceof PassphraseAgent)

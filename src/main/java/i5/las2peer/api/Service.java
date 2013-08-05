@@ -366,6 +366,7 @@ public abstract class Service extends Configurable {
 	 * Writes a log message.
 	 * The given index (1-10) can be used to differentiate between different log messages.
 	 * 
+	 * @param index an index between 1 and 10
 	 * @param message
 	 */
 	protected void logMessage (int index, String message ) {
@@ -409,6 +410,7 @@ public abstract class Service extends Configurable {
 	 * Writes an error message.
 	 * The given index (1-10) can be used to differentiate between different log messages.
 	 * 
+	 * @param index an index between 1 and 10
 	 * @param message
 	 */
 	protected void logError (int index, String message) {
