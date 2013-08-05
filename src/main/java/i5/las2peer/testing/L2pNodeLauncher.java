@@ -1691,7 +1691,14 @@ public class L2pNodeLauncher {
 			printHelp();
 			System.exit(1);
 		}
-			
+		//Set this parameter to turn of the (bash-) color features for a better readable
+		//output on the windows console.
+		if(argv[0].equals("windows_shell")){
+			ColoredOutput.allOff();
+			String[] args = new String [ argv.length-1];
+			System.arraycopy( argv, 1, args, 0, args.length );
+			argv = args;
+		}
 		if ( argv[0].equals ( "-s")) {
 			String[] args = new String [ argv.length-1]; 
 			System.arraycopy( argv, 1, args, 0, args.length );			
