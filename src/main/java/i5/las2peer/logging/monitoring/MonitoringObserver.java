@@ -168,9 +168,10 @@ public class MonitoringObserver extends NodeObserver {
 		if(event == Event.NODE_STATUS_CHANGE && remarks.equals("CLOSING")){
 			if(initializedDone){
 				//To remove "old" messages since they are not overwritten
-				while(messagesCount < messages.length){
-					messages[messagesCount] = null;
-					messagesCount++;
+				int counter = messagesCount;
+				while(counter < messages.length){
+					messages[counter] = null;
+					counter++;
 				}
 				sendMessages();
 			}
@@ -192,19 +193,9 @@ public class MonitoringObserver extends NodeObserver {
 		try {
 			Message message = new Message(sendingAgent,receivingAgent,messages);
 			System.out.println("Monitoring: Message created!");
-			if(messageResultListener == null || messageResultListener.isFinished()){
-				messageResultListener = new MessageResultListener(2000);
-				registeredAt.sendMessage(message, messageResultListener);
-				try {
-					messageResultListener.waitForOneAnswer(2000);
-					System.out.println("Monitoring: message " + message.getId() + " send!");
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-			else{
-				System.out.println("Monitoring: busy.."); //TODO
-			}
+			messageResultListener = new MessageResultListener(2000); //unused
+			registeredAt.sendMessage(message, messageResultListener);
+			System.out.println("Monitoring: message " + message.getId() + " send!");
 		} catch (L2pSecurityException e) {
 			e.printStackTrace();
 		} catch (EncodingFailedException e) {
