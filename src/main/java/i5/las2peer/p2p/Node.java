@@ -475,7 +475,8 @@ public abstract class Node implements AgentStorage {
 	 * @param newstatus
 	 */
 	protected void setStatus ( NodeStatus newstatus ) {
-		if ( newstatus == NodeStatus.RUNNING && this instanceof PastryNodeImpl )
+		if ( newstatus == NodeStatus.RUNNING && this instanceof PastryNodeImpl ){
+			observerNotice(Event.NODE_STATUS_CHANGE, this.getNodeId(), ""+newstatus );
 			for ( NodeObserver observer : observers ) {
 				if(observer instanceof NodeStreamLogger){
 					try {
@@ -489,10 +490,11 @@ public abstract class Node implements AgentStorage {
 						System.out.println ( "error setting logfile: " + e );
 					}
 				}
-
 			}
-		
-		observerNotice(Event.NODE_STATUS_CHANGE, ""+newstatus );
+		}
+		else{
+			observerNotice(Event.NODE_STATUS_CHANGE, ""+newstatus );
+		}
 		status = newstatus; 
 	}
 	
