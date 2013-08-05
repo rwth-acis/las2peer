@@ -150,9 +150,7 @@ public class MonitoringObserver extends NodeObserver {
 		if(event == Event.NODE_STATUS_CHANGE && remarks.equals("RUNNING")){
 			readyForInitializing = true;
 		}
-		//We can only send our last message if the node is closing, so we will have to assume that all services are shutdown
-		//when a node is closed (seems to be a fair bet)
-		if(messagesCount >= messages.length || (event == Event.NODE_STATUS_CHANGE && remarks.equals("CLOSING"))){
+		if(messagesCount >= messages.length){
 			if(initializedDone){
 				messagesCount = 0;
 				sendMessages();
@@ -165,6 +163,22 @@ public class MonitoringObserver extends NodeObserver {
 		messages[messagesCount] = new MonitoringMessage(timestamp, timespan, event, sourceNode,
 				sourceAgentId, destinationNode, destinationAgentId, remarks);
 		messagesCount++;
+		//We can only send our last message if the node is closing, so we will have to assume that all services are shutdown
+		//when a node is closed (seems to be a fair bet)
+		if(event == Event.NODE_STATUS_CHANGE && remarks.equals("CLOSING")){
+			if(initializedDone){
+				//To remove "old" messages since they are not overwritten
+				while(messagesCount < messages.length){
+					messages[messagesCount] = null;
+					messagesCount++;
+				}
+				sendMessages();
+			}
+			else{
+				System.out.println("Monitoring: Problems with identifying Agents..");
+			}
+		}
+		
 	}
 	
 	
