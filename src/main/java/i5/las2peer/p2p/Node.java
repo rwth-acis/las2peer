@@ -342,7 +342,7 @@ public abstract class Node implements AgentStorage {
 	 * @param sourceAgentId
 	 * @param remarks
 	 */
-	public void observerNotive ( Event event, Object sourceNode, Long sourceAgentId, String remarks ) {
+	public void observerNotive ( Event event, Object sourceNode, long sourceAgentId, String remarks ) {
 		for ( NodeObserver ob: observers )
 			ob.logEvent(event, sourceNode, sourceAgentId, remarks);
 	}
@@ -653,6 +653,7 @@ public abstract class Node implements AgentStorage {
 			}
 		} else {
 			// ok, we have a mediator
+			observerNotice(Event.AGENT_REGISTERED, this.getNodeId(), receiver, "Mediator");
 		}
 		
 		htRegisteredReceivers.put(receiver.getResponsibleForAgentId(), receiver);
@@ -1032,7 +1033,7 @@ public abstract class Node implements AgentStorage {
 			result = new Mediator ( agent );
 			registerReceiver(result);
 		}
-				
+		
 		return (Mediator) result;
 	}
 	
