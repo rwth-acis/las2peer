@@ -28,9 +28,11 @@ import i5.las2peer.security.AgentStorage;
 import i5.las2peer.security.Context;
 import i5.las2peer.security.DuplicateEmailException;
 import i5.las2peer.security.DuplicateLoginNameException;
+import i5.las2peer.security.GroupAgent;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.Mediator;
 import i5.las2peer.security.MessageReceiver;
+import i5.las2peer.security.MonitoringAgent;
 import i5.las2peer.security.ServiceAgent;
 import i5.las2peer.security.UserAgent;
 import i5.las2peer.security.UserAgentList;
@@ -476,7 +478,7 @@ public abstract class Node implements AgentStorage {
 	 */
 	protected void setStatus ( NodeStatus newstatus ) {
 		if ( newstatus == NodeStatus.RUNNING && this instanceof PastryNodeImpl ){
-			observerNotice(Event.NODE_STATUS_CHANGE, this.getNodeId(), ""+newstatus );
+			observerNotice(Event.NODE_STATUS_CHANGE, this.getNodeId(), ""+newstatus);
 			for ( NodeObserver observer : observers ) {
 				if(observer instanceof NodeStreamLogger){
 					try {
@@ -492,7 +494,10 @@ public abstract class Node implements AgentStorage {
 				}
 			}
 		}
-		else{
+		else if(newstatus == NodeStatus.CLOSING){
+			observerNotice(Event.NODE_STATUS_CHANGE, this.getNodeId(), ""+newstatus); //Needing the id for monitoring:-)
+		}
+		else{	
 			observerNotice(Event.NODE_STATUS_CHANGE, ""+newstatus );
 		}
 		status = newstatus; 
@@ -634,8 +639,18 @@ public abstract class Node implements AgentStorage {
 				getAgentContext( (Agent) receiver );
 			} catch ( Exception e ) {
 			}
-			
-			observerNotice(Event.AGENT_REGISTERED, this.getNodeId(), ""+agent.getId() );
+			if ( agent instanceof UserAgent ){
+				observerNotice(Event.AGENT_REGISTERED, this.getNodeId(), agent, "UserAgent");
+			}
+			else if ( agent instanceof ServiceAgent ){
+				observerNotice(Event.AGENT_REGISTERED, this.getNodeId(), agent, "ServiceAgent");
+			}
+			else if ( agent instanceof GroupAgent ){
+				observerNotice(Event.AGENT_REGISTERED, this.getNodeId(), agent, "GroupAgent");
+			}
+			else if ( agent instanceof MonitoringAgent ){
+				observerNotice(Event.AGENT_REGISTERED, this.getNodeId(), agent, "MonitoringAgent");
+			}
 		} else {
 			// ok, we have a mediator
 		}

@@ -1587,7 +1587,7 @@ public class L2pNodeLauncher {
 			try {
 				Thread.sleep ( 1000 );
 			} catch (InterruptedException e) {
-			}			
+			}
 		}
 					
 		
@@ -1628,14 +1628,16 @@ public class L2pNodeLauncher {
 		System.out.println ( "\tjava [-cp classpath] i5.las2peer.testing.L2pNodeLauncher ['--help'|'-h']");
 		
 		System.out.println ("\nStart Single Node:");
-		System.out.println ( "\tjava [-cp classpath] i5.las2peer.testing.L2pNodeLauncher -s [port] ['NEW'|bootstrap] {method1} {method2} ...");
-
-		System.out.println ( "\nWhere" ); 
+		System.out.println ( "\tjava [-cp classpath] i5.las2peer.testing.L2pNodeLauncher {optional: windows_shell} -s [port] ['-'|bootstrap] {optional: startObserver} {method1} {method2} ...");
+		
+		System.out.println ( "\nWhere" );
+		System.out.println ( "\t- {windows_shell} disables the colored output (better readable for windows command line clients)\n");
 		System.out.println ( "\t- [port] specifies the port number for the pastry port of the new local node\n");
-		System.out.println ( "\t- 'NEW' states, that a complete new p2p network is to start");
+		System.out.println ( "\t- '-' states, that a complete new p2p network is to start");
 		System.out.println ( "\tor");
-		System.out.println ( "\t- [bootstrap] gives a comma seperated list of [address:ip] pairs of bootstrap nodes to connect to\n\n");
-
+		System.out.println ( "\t- [bootstrap] gives a comma seperated list of [address:ip] pairs of bootstrap nodes to connect to\n");
+		System.out.println ( "\t- {startObserver} starts a monitoring observer at this node\n\n");
+		
 		System.out.println ("\nStart Multiple Nodes:");
 		System.out.println ( "\tjava [-cp classpath] i5.las2peer.testing.L2pNodeLauncher -d [config directory]");
 		
