@@ -278,15 +278,17 @@ public class Context implements AgentStorage {
 	 * Logs a message to the l2p system using the observers.
 	 * 
 	 * Since this method will/should only be used in an L2pThread, the message will come from a
-	 * service or a helper, so a SERVICE_MESSAGE is assumed.
+	 * service or a helper, so a SERVICE_MESSAGE is assumed. The serviceAgent can be set to null if not known.
+	 * Then this message will not be monitored by the monitoring observer.
 	 * 
 	 * @param from the calling class
 	 * @param message
+	 * @param serviceAgent
 	 */
-	public static void logMessage ( Object from, String message ) {
+	public static void logMessage ( Object from, String message, Agent serviceAgent ) {
 		try {
 			getCurrent().getLocalNode().observerNotice(Event.SERVICE_MESSAGE, getCurrent().getLocalNode().getNodeId(),
-					getCurrent().getMainAgent(), from.getClass().getSimpleName() + ": " + message);
+					getCurrent().getMainAgent(), null, serviceAgent, from.getClass().getSimpleName() + ": " + message);
 		} catch ( IllegalStateException e ) {
 			System.err.println ( "Log message not in a l2p context: " + message );
 		}
@@ -296,12 +298,15 @@ public class Context implements AgentStorage {
 	/**
 	 * Writes a log message.
 	 * The given index (1-10) can be used to differentiate between different log messages.
+	 * The serviceAgent can be set to null if not known.
+	 * Then this message will not be monitored by the monitoring observer.
 	 * 
 	 * @param from the calling class
 	 * @param index an index between 1 and 10
 	 * @param message
+	 * @param serviceAgent
 	 */
-	protected void logMessage (Object from, int index, String message ) {
+	public static void logMessage (Object from, int index, String message, Agent serviceAgent ) {
 		Event event = Event.SERVICE_MESSAGE; //Default
 		switch(index){
         case 1:
@@ -326,7 +331,7 @@ public class Context implements AgentStorage {
             event = Event.SERVICE_CUSTOM_MESSAGE_10;
 		}
 		getCurrent().getLocalNode().observerNotice(event, getCurrent().getLocalNode().getNodeId(),
-				getCurrent().getMainAgent(), from.getClass().getSimpleName() + ": " + message);
+				getCurrent().getMainAgent(), null, serviceAgent, from.getClass().getSimpleName() + ": " + message);
 	}
 	
 	
@@ -335,14 +340,17 @@ public class Context implements AgentStorage {
 	 * 
 	 * Since this method will/should only be used in an L2pThread, the message will come from a
 	 * service or a helper, so a SERVICE_MESSAGE is assumed.
+	 * The serviceAgent can be set to null if not known.
+	 * Then this message will not be monitored by the monitoring observer.
 	 * 
 	 * @param from the calling class
 	 * @param message
+	 * @param serviceAgent
 	 */
-	public static void logError ( Object from, String message ) {
+	public static void logError ( Object from, String message, Agent serviceAgent ) {
 		try {
 			getCurrent().getLocalNode().observerNotice(Event.SERVICE_ERROR, getCurrent().getLocalNode().getNodeId(),
-					getCurrent().getMainAgent(), from.getClass().getSimpleName() + ": " + message);
+					getCurrent().getMainAgent(), null, serviceAgent, from.getClass().getSimpleName() + ": " + message);
 		} catch ( IllegalStateException e ) {
 			System.err.println ( "Logmessage not in a l2p context: " + message );
 		}
@@ -352,12 +360,15 @@ public class Context implements AgentStorage {
 	/**
 	 * Writes an error message.
 	 * The given index (1-10) can be used to differentiate between different log messages.
+	 * The serviceAgent can be set to null if not known.
+	 * Then this message will not be monitored by the monitoring observer.
 	 * 
 	 * @param from the calling class
 	 * @param index an index between 1 and 10
 	 * @param message
+	 * @param serviceAgent
 	 */
-	protected void logError (Object from, int index, String message) {
+	public static void logError (Object from, int index, String message, Agent serviceAgent) {
 		Event event = Event.SERVICE_ERROR; //Default
 		switch(index){
         case 1:
@@ -382,7 +393,7 @@ public class Context implements AgentStorage {
             event = Event.SERVICE_CUSTOM_ERROR_10;
 		}
 		getCurrent().getLocalNode().observerNotice(event, getCurrent().getLocalNode().getNodeId(),
-				getCurrent().getMainAgent(), from.getClass().getSimpleName() + ": " + message);
+				getCurrent().getMainAgent(), null, serviceAgent, from.getClass().getSimpleName() + ": " + message);
 	}
 	
 	

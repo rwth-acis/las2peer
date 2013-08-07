@@ -596,9 +596,15 @@ public abstract class Node implements AgentStorage {
 		for ( Long id: htRegisteredReceivers.keySet() )
 			htRegisteredReceivers.get(id).notifyUnregister();
 		observerNotice(Event.NODE_SHUTDOWN, this.getNodeId(), "" );
-		
+		try {
+			System.out.println("Wait a little to give observer message time to send...");
+		Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		htRegisteredReceivers = new Hashtable<Long, MessageReceiver> ();
-		
+
 	}
 	
 	
@@ -692,11 +698,12 @@ public abstract class Node implements AgentStorage {
 	 * @param agentId
 	 */
 	public void unregisterAgent(long agentId) throws AgentNotKnownException {
-		if ( htRegisteredReceivers.get( agentId) == null)
+		
+		if ( htRegisteredReceivers.get(agentId) == null)
 			throw new AgentNotKnownException ( agentId );
 		
-		observerNotice(Event.AGENT_REMOVED, this.getNodeId(), "" + agentId );
-		
+		observerNotice(Event.AGENT_REMOVED, this.getNodeId(), getAgent(agentId), null);
+
 		htRegisteredReceivers.get(agentId).notifyUnregister();
 		
 		htRegisteredReceivers.remove( agentId );
@@ -800,10 +807,10 @@ public abstract class Node implements AgentStorage {
 		
 		//Since this field is not always available
 		if (message.getSendingNodeId() != null){
-			observerNotice(Event.MESSAGE_RECEIVED, message.getSendingNodeId(), message.getSenderId(), this.getNodeId(), message.getRecipientId(), "");
+			observerNotice(Event.MESSAGE_RECEIVED, message.getSendingNodeId(), message.getSenderId(), this.getNodeId(), message.getRecipientId(), message.getId() + "");
 		}
 		else{
-			observerNotice(Event.MESSAGE_RECEIVED, null, message.getSenderId(), this.getNodeId(), message.getRecipientId(), "");
+			observerNotice(Event.MESSAGE_RECEIVED, null, message.getSenderId(), this.getNodeId(), message.getRecipientId(), message.getId() + "");
 		}
 		MessageReceiver receiver = htRegisteredReceivers.get( message.getRecipientId() );
 		
@@ -1479,8 +1486,7 @@ public abstract class Node implements AgentStorage {
 	public boolean handoverAnswer ( Message answer ) {
 		if ( !answer.isResponse())
 			return false;
-		
-		observerNotice(Event.MESSAGE_RECEIVED_ANSWER, answer.getSendingNodeId(), answer.getSenderId(), this.getNodeId(), answer.getRecipientId(), ""+answer.getResponseToId() );
+		observerNotice(Event.MESSAGE_RECEIVED_ANSWER, answer.getSendingNodeId(), answer.getSenderId(), this.getNodeId(), answer.getRecipientId(), ""+answer.getResponseToId());
 		
 		MessageResultListener listener = htAnswerListeners.get ( answer.getResponseToId() );
 		if ( listener == null ) {

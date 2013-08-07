@@ -358,7 +358,13 @@ public abstract class Service extends Configurable {
 	 * @param message
 	 */
 	protected void logMessage ( String message ) {
-		runningAt.observerNotice(Event.SERVICE_MESSAGE, this.getActiveNode().getNodeId(), this.getActiveAgent(), this.getClass().getName() + ": " + message);
+		Agent serviceAgent = null;
+		try {
+			serviceAgent = this.getAgent();
+		} catch (AgentNotKnownException e) {
+			e.printStackTrace();
+		}
+		runningAt.observerNotice(Event.SERVICE_MESSAGE, this.getActiveNode().getNodeId(), serviceAgent, null, this.getActiveAgent(), message);
 	}
 	
 	
@@ -393,7 +399,13 @@ public abstract class Service extends Configurable {
         case 10:
             event = Event.SERVICE_CUSTOM_MESSAGE_10;
 		}
-		runningAt.observerNotice(event, this.getActiveNode().getNodeId(), this.getActiveAgent(), this.getClass().getName() + ": " + message);
+		Agent serviceAgent = null;
+		try {
+			serviceAgent = this.getAgent();
+		} catch (AgentNotKnownException e) {
+			e.printStackTrace();
+		}
+		runningAt.observerNotice(event, this.getActiveNode().getNodeId(), serviceAgent, null, this.getActiveAgent(), message);
 	}
 	
 	
@@ -402,7 +414,13 @@ public abstract class Service extends Configurable {
 	 * @param message a custom message
 	 */
 	protected void logError ( String message ) {
-		runningAt.observerNotice(Event.SERVICE_ERROR, this.getActiveNode().getNodeId(), this.getActiveAgent(), this.getClass().getName() + ": " + message);
+		Agent serviceAgent = null;
+		try {
+			serviceAgent = this.getAgent();
+		} catch (AgentNotKnownException e) {
+			e.printStackTrace();
+		}
+		runningAt.observerNotice(Event.SERVICE_ERROR, this.getActiveNode().getNodeId(), serviceAgent, null, this.getActiveAgent(), message);
 	}
 	
 	
@@ -437,7 +455,13 @@ public abstract class Service extends Configurable {
         case 10:
             event = Event.SERVICE_CUSTOM_ERROR_10;
 		}
-		runningAt.observerNotice(event, this.getActiveNode().getNodeId(), this.getActiveAgent(), this.getClass().getName() + ": " + message);
+		Agent serviceAgent = null;
+		try {
+			serviceAgent = this.getAgent();
+		} catch (AgentNotKnownException e) {
+			e.printStackTrace();
+		}
+		runningAt.observerNotice(event, this.getActiveNode().getNodeId(), serviceAgent, null, this.getActiveAgent(), message);
 	}
 	
 	

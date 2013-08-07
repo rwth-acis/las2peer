@@ -8,6 +8,8 @@ import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.TimeoutException;
+import i5.las2peer.persistency.EncodingFailedException;
+import i5.las2peer.tools.SerializationException;
 
 import java.io.Serializable;
 import java.util.LinkedList;
@@ -17,7 +19,7 @@ import java.util.Vector;
  * A Mediator acts on behalf of an {@link PassphraseAgent}. This necessary e.g. for remote 
  * users logged in via a {@link i5.las2peer.api.Connector} to collect incoming messages from the
  * P2P network and transfer it to the connector.
- * 
+ * <br>
  * Two ways for message handling are provided: Register a {@link MessageHandlers} that will be called for each
  * received message. Multiple MessageHandlers are possible (for example for different message contents).
  * The second way to handle messages is to get pending messages from the Mediator directly via the provided methods.
@@ -81,10 +83,25 @@ public class Mediator implements MessageReceiver {
 		
 		try {
 			message.open(myAgent, c);
+			
+			//START
+			//This part enables message answering for all messages that were sent to an (UserAgent) mediator.
+			//Disable this section to reduce network traffic
+			try {
+				Message response = new Message(message, "thank you");
+				response.setSendingNodeId(getMyNode().getNodeId());
+				getMyNode().sendMessage(response, null);
+			} catch (EncodingFailedException e) {
+				throw new MessageException ("Unable to send response ", e);
+			} catch (SerializationException e) {
+				throw new MessageException ("Unable to send response ", e);
+			}
+			//END
+			
 		} catch (L2pSecurityException e) {
 			throw new MessageException ("Unable to open message because of security problems! ", e);
 		} catch (AgentNotKnownException e) {
-			throw new MessageException ("Sender unkown (since we are the receiver). Has the sending node gone offline? ", e);
+			throw new MessageException ("Sender unkown (since this is the receiver). Has the sending node gone offline? ", e);
 		}
 		
 		if ( ! workOnMessage ( message, c ))
