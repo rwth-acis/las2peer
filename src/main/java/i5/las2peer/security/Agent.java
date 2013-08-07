@@ -51,12 +51,11 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	private PrivateKey privateKey = null;
 	
 	
-	
 	private Node runningAt = null;
 	
 	
 	/**
-	 * create a new agent
+	 * Creates a new agent.
 	 * 
 	 * @param id
 	 * @param pair
@@ -72,8 +71,9 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 		lockPrivateKey();
 	}
 	
+	
 	/**
-	 * create a new agent
+	 * Creates a new agent.
 	 * 
 	 * @param id
 	 * @param publicKey
@@ -86,10 +86,9 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 		this.privateKey = null;
 	}
 	
-	
 		
 	/**
-	 * (Re-)Lock the private key
+	 * (Re-)Lock the private key.
 	 */
 	public void lockPrivateKey () {
 		privateKey = null;
@@ -97,9 +96,10 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	
 	
 	/**
-	 * unlock the private key
+	 * Unlocks the private key.
 	 * 
 	 * @param key
+	 * 
 	 * @throws L2pSecurityException
 	 */
 	public void unlockPrivateKey ( SecretKey key ) throws L2pSecurityException {
@@ -114,7 +114,7 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	
 	
 	/**
-	 * encrypt the private key into a byte array with strong encryption based on a passphrase
+	 * Encrypts the private key into a byte array with strong encryption based on a passphrase.
 	 * to unlock the key
 	 * 
 	 * @param key
@@ -133,7 +133,6 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 		}
 	}
 	
-
 	
 	/**
 	 * 
@@ -142,25 +141,32 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	public boolean isLocked () {
 		return privateKey == null;
 	}
-
-
+	
+	
 	/**
-	 * returns the id of this agent
+	 * Returns the id of this agent.
+	 * 
 	 * @return id of the agent
 	 */
 	public long getId () {
 		return id;
 	}
 	
+	
 	/**
-	 * returns the id of this agent
+	 * Returns the id of this agent.
+	 * <i>This method is only implemented, since an Agent is
+	 * also a {@link MessageReceiver}, thus has to implement this method.
+	 * It was written for the {@link Mediator} class.</i>
+	 * 
 	 * @return id of the agent
 	 */
 	@Override
 	public long getResponsibleForAgentId() {
 		return getId();
 	}	
-		
+	
+	
 	/**
 	 * 
 	 * @return the cryptographic public key of this agent 
@@ -168,7 +174,8 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	public PublicKey getPublicKey () {
 		return publicKey;
 	}
-		
+	
+	
 	/**
 	 * 
 	 * @return the cryptographic private key of this agent
@@ -182,7 +189,7 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	
 	
 	/**
-	 * get the private key encrypted and encoded in base64
+	 * Gets the private key encrypted and encoded in base64.
 	 * 
 	 * mainly for <code>toXmlString()</code> methods of subclasses
 	 *  
@@ -192,9 +199,10 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 		return Base64.encodeBase64String( baEncrypedPrivate );
 	}
 	
+	
 	/**
-	 * hook to be called by the node where this agent is registered to, when the
-	 * node receives a message destined to this agent
+	 * Hook to be called by the node where this agent is registered to, when the
+	 * node receives a message destined to this agent.
 	 * 
 	 * @param message
 	 * @throws MessageException
@@ -203,7 +211,7 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	
 	
 	/**
-	 * get a locked copy of this agent
+	 * Gets a locked copy of this agent.
 	 * 
 	 * @return a locked clone of this agent
 	 * @throws CloneNotSupportedException 
@@ -216,7 +224,9 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	
 	
 	/**
-	 * notify this agent of unregistering from a node
+	 * 
+	 * Notifies this agent of unregistering from a node.
+	 * 
 	 */
 	public void notifyUnregister() {
 		if ( this instanceof ServiceAgent )
@@ -226,13 +236,16 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	
 	
 	/**
-	 * Notify this agent that it has been registered at a node
-	 * may be overridden in implementing classes
 	 * 
-	 * make sure, overriding methods do a call of this method!
+	 * Notifies this agent that it has been registered at a node.
+	 * May be overridden in implementing classes.
+	 * 
+	 * <i>Make sure, overriding methods do a call of this method!</i>
 	 * 
 	 * @param n
-	 * @throws AgentException 
+	 * 
+	 * @throws AgentException
+	 * 
 	 */
 	public void notifyRegistrationTo ( Node n ) throws AgentException {
 		if ( this instanceof ServiceAgent )
@@ -242,11 +255,12 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	
 	
 	/**
-	 * get the node, this agent is running at
+	 * Gets the node, this agent is running at.
+	 * 
 	 * @return the node, this agent is running at
 	 */
 	public Node getRunningAtNode () { return runningAt; } 
-
+	
 	
 	/**
 	 * Factory: Create an agent from its XML string representation.
@@ -286,8 +300,4 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	}
 	
 	
-	
-	
 }
-
-	

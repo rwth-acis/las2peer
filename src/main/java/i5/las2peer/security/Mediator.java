@@ -16,7 +16,12 @@ import java.util.Vector;
 /**
  * A Mediator acts on behalf of an {@link PassphraseAgent}. This necessary e.g. for remote 
  * users logged in via a {@link i5.las2peer.api.Connector} to collect incoming messages from the
- * P2P network and transfer it to the connector. 
+ * P2P network and transfer it to the connector.
+ * 
+ * Two ways for message handling are provided: Register a {@link MessageHandlers} that will be called for each
+ * received message. Multiple MessageHandlers are possible (for example for different message contents).
+ * The second way to handle messages is to get pending messages from the Mediator directly via the provided methods.
+ * Handling then has to be done via the calling entity (for example a service).
  * 
  * @author Holger Jan&szlig;en
  *
@@ -33,7 +38,7 @@ public class Mediator implements MessageReceiver {
 	
 	
 	/**
-	 * create a new Mediator
+	 * Creates a new mediator.
 	 * 
 	 * @param a
 	 * @throws L2pSecurityException 
@@ -46,10 +51,10 @@ public class Mediator implements MessageReceiver {
 	}
 	
 	
-
 	/**
-	 * get (and remove) the next pending message
-	 * @return	next collected message
+	 * Gets (and removes) the next pending message.
+	 * 
+	 * @return the next collected message
 	 */
 	public Message getNextMessage() {
 		if (pending.size() == 0) return null;
@@ -57,26 +62,29 @@ public class Mediator implements MessageReceiver {
 		return pending.pollFirst();
 	}
 	
+	
 	/**
 	 * Does this mediator have pending messages?
+	 * 
 	 * @return true, if messages have arrived
 	 */
 	public boolean hasMessages() {
 		return pending.size() > 0;
 	}
 	
+	
 	@Override
 	public void receiveMessage(Message message, Context c)
 			throws MessageException {
 		if ( message.getRecipientId() != myAgent.getId())
-			throw new MessageException ( "I'm not responsible for the receiver!?!");
+			throw new MessageException ("I'm not responsible for the receiver (something went very wrong)!");
 		
 		try {
 			message.open(myAgent, c);
 		} catch (L2pSecurityException e) {
-			throw new MessageException ( "Unable to open message because of security problems?!", e);
+			throw new MessageException ("Unable to open message because of security problems! ", e);
 		} catch (AgentNotKnownException e) {
-			throw new MessageException ( "Sender unkown?!?, e");
+			throw new MessageException ("Sender unkown (since we are the receiver). Has the sending node gone offline? ", e);
 		}
 		
 		if ( ! workOnMessage ( message, c ))
@@ -84,35 +92,35 @@ public class Mediator implements MessageReceiver {
 	}
 	
 	
-	
 	/**
-	 * Stub method for message reception treatment.
+	 * Method for message reception treatment.
+	 * Will call all registered {@link MessageHandler}s for message handling.
 	 * 
-	 * Subclasses may implement functionality by overriding this method.
+	 * A return value of true indicates, that the received message has been treated by a MessageHandler and
+	 * does not need further storage for later use (and will not be added to pending messages).
 	 * 
-	 * A return value of true indicates, that the received message has been treated an 
-	 * does not need further storage for later use.
-	 *  
 	 * @param message
 	 * @param context
 	 * 
-	 * @return true, of a message had been treated successfully
+	 * @return true, if a message had been treated successfully
 	 */
 	public boolean workOnMessage( Message message, Context context ) {
 		
-		for ( int i=0; i<registeredHandlers.size(); i++ )
+		for ( int i=0; i<registeredHandlers.size(); i++ ){
 			try {
 				if ( registeredHandlers.get(i).handleMessage(message, context))
 					return true;
 			} catch (Exception e) {
 				runningAt.observerNotice(Event.MESSAGE_FAILED, runningAt.getNodeId(), this, "Exception in MessageHandler " + registeredHandlers.get(i) + ": " + e );
 			}
-		
+		}
 		return false;
 	}
 	
+	
 	/**
-	 * access to the node this Mediator is registered to
+	 * Grants access to the node this Mediator is registered to.
+	 * 
 	 * @return the node this Mediator is running at
 	 */
 	protected Node getMyNode () {
@@ -142,11 +150,12 @@ public class Mediator implements MessageReceiver {
 	
 	
 	/**
-	 * invoke a service method (in the network) for the mediated agent
+	 * Invokes a service method (in the network) for the mediated agent.
 	 * 
 	 * @param service
 	 * @param method
 	 * @param parameters
+	 * @param preferLocal if a local running service should be preferred
 	 * 
 	 * @return result of the method invocation
 	 * 
@@ -162,7 +171,6 @@ public class Mediator implements MessageReceiver {
 				return runningAt.invokeLocally(myAgent.getId(), service,  method, parameters);
 			} catch ( Exception e ) {
 				// just try globally 
-				//e.printStackTrace();
 				System.out.println ( "Local access to service " + service + " failed - trying globally");
 			}
 			
@@ -172,7 +180,8 @@ public class Mediator implements MessageReceiver {
 
 
 	/**
-	 * get the number of waiting messages
+	 * Gets the number of waiting messages.
+	 * 
 	 * @return number of waiting messages
 	 */
 	public int getNumberOfWaiting() {
@@ -181,7 +190,7 @@ public class Mediator implements MessageReceiver {
 
 	
 	/**
-	 * Register a MessageHandler for message processing.
+	 * Registers a MessageHandler for message processing.
 	 * 
 	 * Message handlers will be used for handling incoming messages in the order of 
 	 * registration.
@@ -200,7 +209,7 @@ public class Mediator implements MessageReceiver {
 	
 	
 	/**
-	 * unregister a handler from this mediator
+	 * Unregisters a handler from this mediator.
 	 * 
 	 * @param handler
 	 */
@@ -210,10 +219,11 @@ public class Mediator implements MessageReceiver {
 	
 
 	/**
-	 * unregister all handlers of the given class
+	 * Unregisters all handlers of the given class.
 	 * 
 	 * @param cls
-	 * @return number of successfully removed message handlers 
+	 * 
+	 * @return number of successfully removed message handlers
 	 */
 	public int unregisterMessageHandlerClass ( @SuppressWarnings("rawtypes") Class cls) {
 		int result = 0;
@@ -232,7 +242,7 @@ public class Mediator implements MessageReceiver {
 	}
 	
 	/**
-	 * unregister all handlers of the given class
+	 * Unregisters all handlers of the given class.
 	 * 
 	 * @param classname
 	 * 
@@ -249,7 +259,9 @@ public class Mediator implements MessageReceiver {
 	
 	/**
 	 * Is the given message handler registered at this mediator?
+	 * 
 	 * @param handler
+	 * 
 	 * @return true, if at least one message handler is registered to this mediator
 	 */
 	public boolean hasMessageHandler ( MessageHandler handler ) {

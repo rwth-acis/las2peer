@@ -12,8 +12,8 @@ import i5.las2peer.communication.Message;
 public interface MessageHandler {
 	
 	/**
-	 * get an already opened message from an agent mediator and try to process it.
-	 * return true, if this handle has successfully handled the message, false otherwise.
+	 * Gets an already opened message from an agent mediator and tries to process it.
+	 * Returns true, if this handler has successfully handled the message, false otherwise.
 	 * 
 	 * @param message
 	 * @param context
