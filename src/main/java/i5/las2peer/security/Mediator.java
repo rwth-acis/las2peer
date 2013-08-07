@@ -20,7 +20,7 @@ import java.util.Vector;
  * users logged in via a {@link i5.las2peer.api.Connector} to collect incoming messages from the
  * P2P network and transfer it to the connector.
  * <br>
- * Two ways for message handling are provided: Register a {@link MessageHandlers} that will be called for each
+ * Two ways for message handling are provided: Register a {@link MessageHandler} that will be called for each
  * received message. Multiple MessageHandlers are possible (for example for different message contents).
  * The second way to handle messages is to get pending messages from the Mediator directly via the provided methods.
  * Handling then has to be done via the calling entity (for example a service).
@@ -87,16 +87,19 @@ public class Mediator implements MessageReceiver {
 			//START
 			//This part enables message answering for all messages that were sent to an (UserAgent) mediator.
 			//Disable this section to reduce network traffic
-			try {
-				Message response = new Message(message, "thank you");
-				response.setSendingNodeId(getMyNode().getNodeId());
-				getMyNode().sendMessage(response, null);
-			} catch (EncodingFailedException e) {
-				throw new MessageException ("Unable to send response ", e);
-			} catch (SerializationException e) {
-				throw new MessageException ("Unable to send response ", e);
+			if(getMyNode() != null){ //This line is needed to allow the tests to work (since they do not have a node..)
+				try {
+					Message response = new Message(message, "thank you");
+					response.setSendingNodeId(getMyNode().getNodeId());
+					getMyNode().sendMessage(response, null);
+				} catch (EncodingFailedException e) {
+					throw new MessageException ("Unable to send response ", e);
+				} catch (SerializationException e) {
+					throw new MessageException ("Unable to send response ", e);
+				}
 			}
 			//END
+			
 			
 		} catch (L2pSecurityException e) {
 			throw new MessageException ("Unable to open message because of security problems! ", e);
