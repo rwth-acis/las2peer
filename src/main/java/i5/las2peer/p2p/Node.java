@@ -495,7 +495,7 @@ public abstract class Node implements AgentStorage {
 			}
 		}
 		else if(newstatus == NodeStatus.CLOSING){
-			observerNotice(Event.NODE_STATUS_CHANGE, this.getNodeId(), ""+newstatus); //Needing the id for monitoring:-)
+			observerNotice(Event.NODE_STATUS_CHANGE, this.getNodeId(), ""+newstatus);
 		}
 		else{	
 			observerNotice(Event.NODE_STATUS_CHANGE, ""+newstatus );
@@ -595,10 +595,10 @@ public abstract class Node implements AgentStorage {
 	public void shutDown () {
 		for ( Long id: htRegisteredReceivers.keySet() )
 			htRegisteredReceivers.get(id).notifyUnregister();
+		observerNotice(Event.NODE_SHUTDOWN, this.getNodeId(), "" );
 		
 		htRegisteredReceivers = new Hashtable<Long, MessageReceiver> ();
 		
-		observerNotice(Event.NODE_SHUTDOWN, "" );		
 	}
 	
 	

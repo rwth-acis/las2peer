@@ -267,7 +267,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 
 	@Override
 	public boolean forward(RouteMessage pastMessage) {
-		l2pNode.observerNotice(Event.MESSAGE_FORWARDING, l2pNode.getNodeId(), "" + pastMessage);
+		l2pNode.observerNotice(Event.MESSAGE_FORWARDING, l2pNode.getNodeId(), null, pastMessage.getDestinationId(), null, "" + pastMessage);
 		
 		return true;
 	}
@@ -275,7 +275,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	@Override
 	public void update(NodeHandle nh, boolean arg1) {
 		// called when a new neighbor joined the net
-		l2pNode.observerNotice( Event.NEW_NODE_NOTICE, null, ""+nh);
+		l2pNode.observerNotice( Event.NEW_NODE_NOTICE, l2pNode.getNodeId(), ""+nh);
 	}
 
 	

@@ -82,7 +82,7 @@ public class MonitoringObserver extends NodeObserver {
 			registeredAt.storeAgent(sendingAgent);
 			registeredAt.registerReceiver(sendingAgent);
 			System.out.println("Monitoring: Registered Receiver: " +  sendingAgent.getId());
-
+			
 		} catch (AgentException e) {
 			System.out.println("Monitoring: Problem Storing Agent!" + e);
 			e.printStackTrace();
@@ -150,6 +150,8 @@ public class MonitoringObserver extends NodeObserver {
 		if(event == Event.NODE_STATUS_CHANGE && remarks.equals("RUNNING")){
 			readyForInitializing = true;
 		}
+		if(sourceNode == null)
+			return; //We do not log events without a source node into a database with different sources;-)
 		if(messagesCount >= messages.length){
 			if(initializedDone){
 				messagesCount = 0;
@@ -165,7 +167,7 @@ public class MonitoringObserver extends NodeObserver {
 		messagesCount++;
 		//We can only send our last message if the node is closing, so we will have to assume that all services are shutdown
 		//when a node is closed (seems to be a fair bet)
-		if(event == Event.NODE_STATUS_CHANGE && remarks.equals("CLOSING")){
+		if(event == Event.NODE_SHUTDOWN){
 			if(initializedDone){
 				//To remove "old" messages since they are not overwritten
 				int counter = messagesCount;

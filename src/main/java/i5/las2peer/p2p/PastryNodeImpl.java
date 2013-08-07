@@ -450,9 +450,9 @@ public class PastryNodeImpl extends Node {
 	@Override
 	public void shutDown() {
 		this.setStatus(NodeStatus.CLOSING);
-		pastryNode.destroy();
 		
 		super.shutDown();
+		pastryNode.destroy();
 		this.setStatus(NodeStatus.CLOSED);
 	}
 
