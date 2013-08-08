@@ -56,6 +56,7 @@ import java.util.Vector;
 
 import rice.pastry.NodeHandle;
 
+
 /**
  * Base class for nodes in the LAS2peer environment.
  * 
@@ -68,10 +69,8 @@ import rice.pastry.NodeHandle;
 public abstract class Node implements AgentStorage {
 	
 	
-		
 	private static final String MAINLIST_ID = "mainlist";
-
-
+	
 	/**
 	 * The Sending mode for outgoing messages.
 	 * 
@@ -105,35 +104,27 @@ public abstract class Node implements AgentStorage {
 	 */
 	private Hashtable <Long, Context> htLocalExecutionContexts = new Hashtable<Long, Context>();
 	
-	
 	/**
 	 * status of this node
 	 */
 	private NodeStatus status = NodeStatus.UNCONFIGURED;
-	
-
 	
 	/**
 	 * hashtable with all {@link i5.las2peer.security.MessageReceiver}s registered at this node 
 	 */
 	private Hashtable<Long,MessageReceiver> htRegisteredReceivers = new Hashtable<Long, MessageReceiver>();
 	
-	
 	private ClassLoader baseClassLoader = null;
 	
-
 	private Hashtable<Long, MessageResultListener> htAnswerListeners = new Hashtable <Long, MessageResultListener>();
 	
-
 	/**
 	 * a simple prefix for a logfile to be generated on node startup
 	 */
 	private String sLogFilePrefix = "log/l2p_node_";
 	
-	
 	private final static String DEFAULT_INFORMATION_FILE = "config/nodeInfo.xml";
 	private String sInformationFileName = DEFAULT_INFORMATION_FILE;
-	
 	
 	private KeyPair nodeKeyPair;
 	
@@ -141,7 +132,6 @@ public abstract class Node implements AgentStorage {
 	 * the list of users containing email an login name tables
 	 */
 	private Envelope activeUserList = null;
-	
 	
 	/**
 	 * a set of updates on user Agents to perform, if an update storage of {@link activeUserList} fails
@@ -160,10 +150,12 @@ public abstract class Node implements AgentStorage {
 		this ( null, standardObserver );
 	}
 	
+	
 	/**
 	 * Creates a new node with a standard plain text log file observer.
 	 */
 	public Node () { this ( true ); }
+	
 	
 	/**
 	 * 
@@ -173,6 +165,7 @@ public abstract class Node implements AgentStorage {
 	public Node ( ClassLoader baseClassLoader ) {
 		this ( baseClassLoader, true);
 	}
+	
 	
 	/**
 	 * 
@@ -223,14 +216,11 @@ public abstract class Node implements AgentStorage {
 	
 	
 	/**
-	 * Creates an observer for a standard logfile.
-	 * The name of the logfile will contain the id of the node to prevent disturbances if
+	 * Creates an observer for a standard log-file.
+	 * The name of the log-file will contain the id of the node to prevent conflicts if
 	 * running multiple nodes on the same machine.
 	 */
-	private void initStandardLogfile () {
-		
-		//TODO: configurable log directory
-		
+	private void initStandardLogfile () {		
 		try {
 			if ( this instanceof LocalNode )
 				addObserver( new NodeStreamLogger("log/l2p_local_" + ((LocalNode) this).getNodeId() + ".log"));
@@ -243,6 +233,7 @@ public abstract class Node implements AgentStorage {
 			addObserver ( new NodeStreamLogger ( System.out));
 		}
 	}
+	
 	
 	/**
 	 * Handles a request from the (p2p) net to unlock the private key of a remote Agent.
@@ -265,6 +256,7 @@ public abstract class Node implements AgentStorage {
 		
 		observerNotice(Event.AGENT_UNLOCKED, ""+agentId);
 	}
+	
 	
 	/**
 	 * Sends a request to unlock the agent's private key to the target node.
@@ -595,16 +587,19 @@ public abstract class Node implements AgentStorage {
 	public void shutDown () {
 		for ( Long id: htRegisteredReceivers.keySet() )
 			htRegisteredReceivers.get(id).notifyUnregister();
-		observerNotice(Event.NODE_SHUTDOWN, this.getNodeId(), "" );
-		try {
-			System.out.println("Wait a little to give observer message time to send...");
-		Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		observerNotice(Event.NODE_SHUTDOWN, this.getNodeId(), null);
+		for(NodeObserver observer : observers){
+			if(observer instanceof MonitoringObserver){
+				try {
+					System.out.println("Wait a little to give the observer time to send its last message...");
+				Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				break;
+			}
 		}
 		htRegisteredReceivers = new Hashtable<Long, MessageReceiver> ();
-
 	}
 	
 	

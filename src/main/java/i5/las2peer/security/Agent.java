@@ -266,7 +266,8 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	 * Factory: Create an agent from its XML string representation.
 	 * 
 	 * Depending on the type attribute of the root node, the type will be
-	 * a {@link UserAgent}, {@link GroupAgent}, {@link ServiceAgent}, or a {@link MonitoringAgent}.
+	 * a {@link UserAgent}, {@link GroupAgent}, {@link ServiceAgent}.
+	 * Creation of {@link MonitoringAgent}s is not supported.
 	 * 
 	 * @param xml
 	 * 
@@ -290,7 +291,7 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 			else if ( "service".equals( type ) )
 				return ServiceAgent.createFromXml(root);
 			else if ("monitoring".equals( type ))
-				return MonitoringAgent.createFromXml(root);
+				throw new MalformedXMLException("Monitoring agents should not be created from XML representations!");
 			else 
 				throw new MalformedXMLException("Unknown agent type: " + type);
 			
