@@ -190,7 +190,7 @@ public class Mediator implements MessageReceiver {
 			try {
 				return runningAt.invokeLocally(myAgent.getId(), service,  method, parameters);
 			} catch ( Exception e ) {
-				// just try globally 
+				// just try globally
 				System.out.println ( "Local access to service " + service + " failed - trying globally");
 			}
 			

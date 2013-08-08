@@ -7,7 +7,9 @@ import i5.httpServer.RequestHandler;
 import i5.las2peer.api.Connector;
 import i5.las2peer.api.ConnectorException;
 import i5.las2peer.logging.NodeObserver.Event;
+import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.Node;
+import i5.las2peer.security.Agent;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -186,11 +188,11 @@ public class HttpConnector extends Connector
 			} catch (FileNotFoundException e) {
 				throw new ConnectorException ( "cannot initialize standard log file at " + DEFAULT_LOGFILE, e);
 			}
-
+		
 		myNode = node;
 		
 		System.setProperty( "http-connector.printSecExceptions", ""+printSecExceptions );
-
+		
 		// enable file access ?
 		if ( enableFileAccess && fileDirectory != null ) {
 			System.setProperty( "las.http.fileAccess" , "true" );
@@ -204,10 +206,10 @@ public class HttpConnector extends Connector
 				http = new HttpServer (HttpConnectorRequestHandler.class.getName(), httpConnectorPort, crossOriginResourceDomain, crossOriginResourceMaxAge);
 			} else 
 				http = new HttpServer (HttpConnectorRequestHandler.class.getName(), httpConnectorPort);
-
+			
 			
 			http.setSocketTimeout( socketTimeout );
-	
+			
 			http.start();
 			
 			// wait for the server to start
@@ -230,7 +232,7 @@ public class HttpConnector extends Connector
 				https = new HttpsServer ( sslKeystore, sslKeyPasswd, RequestHandler.class.getName(), httpsConnectorPort, crossOriginResourceDomain, crossOriginResourceMaxAge);
 			else 
 				https = new HttpsServer ( sslKeystore, sslKeyPasswd, HttpConnectorRequestHandler.class.getName(), httpsConnectorPort );
-
+			
 			
 			https.setSocketTimeout( socketTimeout );
 			https.start();
@@ -361,7 +363,23 @@ public class HttpConnector extends Connector
 	 */
 	void logRequest (String request) {
 		logStream.println( dateFormat.format ( new Date() ) + "\t Request:" + request);
-		myNode.observerNotice(Event.HTTP_CONNECTOR_REQUEST, myNode.getNodeId(), request);
+		
+		int lastServiceClassNamePosition = request.lastIndexOf("/");
+		if(lastServiceClassNamePosition > 0){
+			String serviceClass = request.substring(1, lastServiceClassNamePosition);
+			Agent service = null;
+			try {
+				service = myNode.getServiceAgent(serviceClass);
+			} catch (AgentNotKnownException e) {
+				// Should be known..
+				e.printStackTrace();
+			}
+			myNode.observerNotice(Event.HTTP_CONNECTOR_REQUEST, myNode.getNodeId(), service, request);
+		}
+		//Not a service call
+		else{
+			myNode.observerNotice(Event.HTTP_CONNECTOR_REQUEST, myNode.getNodeId(), request);
+		}
 	}
 	
 	
@@ -383,6 +401,6 @@ public class HttpConnector extends Connector
 	boolean preferLocalServices () {
 		return preferLocalServices;
 	}
-		
+	
+	
 }
-

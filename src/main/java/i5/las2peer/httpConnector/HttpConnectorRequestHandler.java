@@ -363,7 +363,7 @@ public class HttpConnectorRequestHandler implements RequestHandler {
 		sess.touch();
 	
 		String[] sRequest = request.getPath().split ( "/", 3 );
-		// first: empty (string starts with '/'
+		// first: empty (string starts with '/')
 		// second: service name
 		// third: method name
 		

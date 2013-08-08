@@ -1316,7 +1316,7 @@ public abstract class Node implements AgentStorage {
 	 */
 	public Serializable invokeLocally ( long executingAgentId, String serviceClass, String method, Serializable[] parameters ) throws L2pSecurityException, AgentNotKnownException, InterruptedException, L2pServiceException  {
 		if ( getStatus() != NodeStatus.RUNNING )
-			throw new IllegalStateException ( "you can invoce methods only on a running node!");
+			throw new IllegalStateException ( "You can invoke methods only on a running node!");
 		
 		long serviceAgentId = ServiceAgent.serviceClass2Id(serviceClass);
 		if ( ! hasLocalAgent ( serviceAgentId ))
@@ -1344,7 +1344,7 @@ public abstract class Node implements AgentStorage {
 			if ( e instanceof ServiceInvocationException )
 				throw ( ServiceInvocationException ) e; 
 			else
-				throw new ServiceInvocationException ( "internal exception in service", thread.getException());	
+				throw new ServiceInvocationException ( "Internal exception in service", thread.getException());	
 		}			
 		
 		try {

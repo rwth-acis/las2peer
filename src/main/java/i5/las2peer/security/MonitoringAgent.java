@@ -212,15 +212,15 @@ public class MonitoringAgent extends PassphraseAgent {
 		try {
 			Element elId = root.getFirstChild();
 			long id = Long.parseLong( elId.getFirstChild().getText());
-
+			
 			Element pubKey = root.getChild(1);
 			if ( !pubKey.getName().equals( "publickey" ))
 				throw new MalformedXMLException("public key expected" );
 			if ( ! pubKey.getAttribute("encoding").equals( "base64"))
 				throw new MalformedXMLException("base64 encoding expected" );
-
+			
 			PublicKey publicKey = (PublicKey) SerializeTools.deserializeBase64 ( pubKey.getFirstChild().getText());
-
+			
 			Element privKey = root.getChild ( 2 );
 			if ( !privKey.getName().equals("privatekey"))
 				throw new MalformedXMLException("private key expected");
@@ -228,30 +228,30 @@ public class MonitoringAgent extends PassphraseAgent {
 				throw new MalformedXMLException(CryptoTools.getSymmetricAlgorithm() + " expected");
 			if ( ! privKey.getAttribute("keygen").equals( CryptoTools.getSymmetricKeygenMethod() ))
 				throw new MalformedXMLException(CryptoTools.getSymmetricKeygenMethod()  + " expected");
-
+			
 			Element elSalt= privKey.getFirstChild();
 			if ( !elSalt.getName().equals("salt"))
 				throw new MalformedXMLException("salt expected");
 			if ( ! elSalt.getAttribute("encoding").equals("base64"))
 				throw new MalformedXMLException("base64 encoding expected");
-
+			
 			byte[] salt = Base64.decodeBase64 (elSalt.getFirstChild().getText());
-
+			
 			Element data = privKey.getChild(1);
 			if ( !data.getName().equals( "data" ))
 				throw new MalformedXMLException("data expected");
 			if ( ! data.getAttribute("encoding").equals("base64"))
 				throw new MalformedXMLException("base64 encoding expected");
 			byte[] encPrivate = Base64.decodeBase64( data.getFirstChild().getText());
-
+			
 			MonitoringAgent result = new MonitoringAgent ( id, publicKey, encPrivate, salt );
-
+			
 			return result;
 		} catch (XMLSyntaxException e) {
 			throw new MalformedXMLException("Error parsing XML string", e);
 		} catch (SerializationException e) {
 			throw new MalformedXMLException("Deserialization problems", e );
-		}		
+		}
 	}
 	
 	
