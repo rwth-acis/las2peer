@@ -15,7 +15,6 @@ import i5.las2peer.security.MonitoringAgent;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.SerializationException;
 
-
 /**
  * 
  * MonitoringObserver.java
@@ -44,7 +43,7 @@ public class MonitoringObserver extends NodeObserver {
 	 * Can be added to a node by adding "startObserver" after the bootstrap parameter
 	 * at the {@link i5.las2peer.testing.L2pNodeLauncher}. Will be instantiated at a {@link i5.las2peer.p2p.Node}.
 	 *
-	 * @param messageCache determines, how many messages will be stored locally before send to the central collection unit
+	 * @param messageCache determines, how many messages will be stored locally before send to the central collection unit (>50)
 	 * @param registeredAt the node this observer is registered at
 	 * 
 	 */
@@ -68,60 +67,55 @@ public class MonitoringObserver extends NodeObserver {
 	 * 
 	 * Helper method that is called after a node has been fully configured
 	 * It registers the monitoring agent responsible for this node and tries
-	 * to find the agent of the processing node by invoking the 
+	 * to find the agent of the processing node by invoking the
 	 * {@link i5.las2peer.services.monitoring.processing.MonitoringDataProcessingService#getReceivingAgentId} method.
 	 *
 	 * @return true, if successfully initialized
 	 */
 	private boolean initializeAgents(){
 		try {
-			System.out.println("Monitoring: initializing..");
 			sendingAgent.unlockPrivateKey("sendingAgentPass");
-			System.out.println("Monitoring: unlocked..");
-			System.out.println("Monitoring: Storing Agent " +  sendingAgent.getId());
 			registeredAt.storeAgent(sendingAgent);
 			registeredAt.registerReceiver(sendingAgent);
-			System.out.println("Monitoring: Registered Receiver: " +  sendingAgent.getId());
+			System.out.println("Monitoring: Registered MonitoringAgent: " +  sendingAgent.getId());
 			
 		} catch (AgentException e) {
-			System.out.println("Monitoring: Problem Storing Agent!" + e);
+			System.out.println("Monitoring: Problems registering MonitoringAgent!" + e);
 			e.printStackTrace();
 		} catch(L2pSecurityException e) {
-			System.out.println("Monitoring: Problem Storing Agent!" + e);
+			System.out.println("Monitoring: Problems registering MonitoringAgent!" + e);
 			e.printStackTrace();
 		}
 		
 		try {
 			System.out.println("Monitoring: Trying to invoke Processing Service..");
 			String[] testParameters = {"Node " + registeredAt.getNodeId() + " registered observer!"};
-			long receivingAgentId =  (Long) registeredAt.invokeGlobally(sendingAgent,
+			long receivingAgentId = (Long) registeredAt.invokeGlobally(sendingAgent,
 					"i5.las2peer.services.monitoring.processing.MonitoringDataProcessingService", "getReceivingAgentId", testParameters);
-			
-			System.out.println("Monitoring: Invoke success, received id: " + receivingAgentId);
 			try {
 				receivingAgent = (MonitoringAgent) registeredAt.getAgent(receivingAgentId);
-				System.out.println("Monitoring: Fetched receiving agent: " + receivingAgent.getId());
+				System.out.println("Monitoring: Fetched receiving MonitoringAgent: " + receivingAgent.getId());
 			} catch (AgentNotKnownException e) {
 				e.printStackTrace();
 			}
 		} catch (UnlockNeededException e) {
-			System.out.println("Monitoring: Processing service does not seem available! " + e);
+			System.out.println("Monitoring: Processing Service does not seem available! " + e);
 			e.printStackTrace();
 			return false;
 		} catch (L2pSecurityException e) {
-			System.out.println("Monitoring: Processing service does not seem available! " + e);
+			System.out.println("Monitoring: Processing Service does not seem available! " + e);
 			e.printStackTrace();
 			return false;
 		} catch (InterruptedException e) {
-			System.out.println("Monitoring: Processing service does not seem available! " + e);
+			System.out.println("Monitoring: Processing Service does not seem available! " + e);
 			e.printStackTrace();
 			return false;
 		} catch (TimeoutException e) {
-			System.out.println("Monitoring: Processing service does not seem available! " + e);
+			System.out.println("Monitoring: Processing Service does not seem available! " + e);
 			e.printStackTrace();
 			return false;
 		} catch (ServiceInvocationException e) {
-			System.out.println("Monitoring: Processing service does not seem available! " + e);
+			System.out.println("Monitoring: Processing Service does not seem available! " + e);
 			e.printStackTrace();
 			return false;
 		}
@@ -132,7 +126,7 @@ public class MonitoringObserver extends NodeObserver {
 	/**
 	 * 
 	 * Processes the incoming data by generating a {@link MonitoringMessage} of it.
-	 * This message will be stored in an array of messages, which will be send via an
+	 * This {@link MonitoringMessage} will be stored in an array of {@link MonitoringMessage}, which will be send via an
 	 * {@link i5.las2peer.communication.Message} to the Processing Service.
 	 *
 	 */
@@ -159,7 +153,7 @@ public class MonitoringObserver extends NodeObserver {
 			}
 			else{
 				messagesCount = 0;
-				System.out.println("Monitoring: Problems with identifying Agents..");
+				System.out.println("Monitoring: Problems with initializing Agents..");
 			}
 		}
 		messages[messagesCount] = new MonitoringMessage(timestamp, timespan, event, sourceNode,
@@ -178,23 +172,20 @@ public class MonitoringObserver extends NodeObserver {
 				sendMessages();
 			}
 			else{
-				System.out.println("Monitoring: Problems with identifying Agents..");
+				System.out.println("Monitoring: Problems with initializing Agents..");
 			}
 		}
-		
 	}
 	
 	
 	/**
 	 * 
-	 * Helper method that actually sends the {@link MonitoringMessage}s to the Processing Services agent.
+	 * Helper method that actually sends the {@link MonitoringMessage}s to the Processing Service's agent.
 	 *
 	 */
 	private void sendMessages() {
-		System.out.println("Monitoring: Sending..");
 		try {
 			Message message = new Message(sendingAgent,receivingAgent,messages);
-			System.out.println("Monitoring: Message created!");
 			messageResultListener = new MessageResultListener(2000); //unused
 			registeredAt.sendMessage(message, messageResultListener);
 			System.out.println("Monitoring: message " + message.getId() + " send!");

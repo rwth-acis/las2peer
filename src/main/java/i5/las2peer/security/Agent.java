@@ -291,7 +291,7 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 			else if ( "service".equals( type ) )
 				return ServiceAgent.createFromXml(root);
 			else if ("monitoring".equals( type ))
-				throw new MalformedXMLException("Monitoring agents should not be created from XML representations!");
+				return MonitoringAgent.createFromXml(root);
 			else 
 				throw new MalformedXMLException("Unknown agent type: " + type);
 			
