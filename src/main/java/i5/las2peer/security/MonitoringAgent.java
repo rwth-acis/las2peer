@@ -25,8 +25,6 @@ import org.apache.commons.codec.binary.Base64;
 
 /**
  * 
- * MonitoringAgent.java
- * <br>
  * A MonitoringAgent is responsible for sending monitoring information collected 
  * at the {@link i5.las2peer.logging.monitoring.MonitoringObserver}. It should only be used for this task.
  * 

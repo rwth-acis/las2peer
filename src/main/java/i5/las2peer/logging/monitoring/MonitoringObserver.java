@@ -17,8 +17,6 @@ import i5.las2peer.tools.SerializationException;
 
 /**
  * 
- * MonitoringObserver.java
- * <br>
  * This is the base class of the logging module of LAS2peer.
  * It sends the collected data to the "Monitoring Data Processing Service" via the LAS2peer message concept.
  * 
@@ -27,14 +25,14 @@ import i5.las2peer.tools.SerializationException;
  */
 public class MonitoringObserver extends NodeObserver {
 	
-	private boolean readyForInitializing = false; //Is set to false, as long as the node is not ready to initialize the monitoring agents.
+	private boolean readyForInitializing = false; //Is set to false as long as the node is not ready to initialize the monitoring agents.
 	private boolean initializedDone = false; //Used to determine, if the initialization process has finished.
-	private MonitoringMessage[] messages; //The size is determined by the constructor, will be send at once.
+	private MonitoringMessage[] messages; //The size is determined by the constructor. Will be send at once.
 	private int messagesCount; //Counter to determine how many messages are currently stored at the messages array.
 	private MonitoringAgent sendingAgent; //The agent responsible for this observer.
 	private MonitoringAgent receivingAgent; //The agent registered at the Processing Service.
-	private MessageResultListener messageResultListener; //The ResultListener that will be used for message-sending.
-	private Node registeredAt; //If we want to send messages, we need a node.
+	private MessageResultListener messageResultListener; //The ResultListener that will be used for message-sending (currently unused though).
+	private Node registeredAt; //If we want to send messages, we need a sending node.
 	
 	
 	/**
@@ -65,7 +63,7 @@ public class MonitoringObserver extends NodeObserver {
 	
 	/**
 	 * 
-	 * Helper method that is called after a node has been fully configured
+	 * Helper method that is called after a node has been fully configured.
 	 * It registers the monitoring agent responsible for this node and tries
 	 * to find the agent of the processing node by invoking the
 	 * {@link i5.las2peer.services.monitoring.processing.MonitoringDataProcessingService#getReceivingAgentId} method.
@@ -126,7 +124,7 @@ public class MonitoringObserver extends NodeObserver {
 	/**
 	 * 
 	 * Processes the incoming data by generating a {@link MonitoringMessage} of it.
-	 * This {@link MonitoringMessage} will be stored in an array of {@link MonitoringMessage}, which will be send via an
+	 * This {@link MonitoringMessage} will be stored in an array of {@link MonitoringMessage}s, which will be send via a
 	 * {@link i5.las2peer.communication.Message} to the Processing Service.
 	 *
 	 */
