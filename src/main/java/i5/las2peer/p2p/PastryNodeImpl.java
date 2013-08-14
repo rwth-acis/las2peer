@@ -815,9 +815,9 @@ public class PastryNodeImpl extends Node {
 			throws L2pSecurityException {
 		try {
 			application.unlockRemoteAgent(agentId, passphrase, (NodeHandle) targetNode, nodeEncryptionKey);
-			observerNotice(Event.AGENT_UNLOCKED, pastryNode, null, targetNode, null, "Agent " + agentId + " unlocked at target node" );
+			observerNotice(Event.AGENT_UNLOCKED, pastryNode, (Long) null, targetNode, (Long) null, "Agent " + agentId + " unlocked at target node" );
 		} catch ( L2pSecurityException e ) {
-			observerNotice(Event.AGENT_UNLOCK_FAILED, pastryNode, null, targetNode, null, "Unlocking of Agent " + agentId + " failed!");
+			observerNotice(Event.AGENT_UNLOCK_FAILED, pastryNode, (Long) null, targetNode, (Long) null, "Unlocking of Agent " + agentId + " failed!");
 			throw e;
 		}
 	}

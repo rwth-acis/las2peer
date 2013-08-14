@@ -389,49 +389,9 @@ public abstract class Node implements AgentStorage {
 	 * @param destinationAgentId
 	 * @param remarks
 	 */
-	public void observerNotice ( Event event, Object sourceNode, long sourceAgentId, Object destinationNode, long destinationAgentId, String remarks ) {
+	public void observerNotice ( Event event, Object sourceNode, Long sourceAgentId, Object destinationNode, Long destinationAgentId, String remarks ) {
 		for ( NodeObserver ob: observers )
 			ob.logEvent(event, sourceNode, sourceAgentId, destinationNode, destinationAgentId, remarks);
-	}
-	
-	
-	/**
-	 * Logs an event to all observers.
-	 * 
-	 * @param event
-	 * @param timespan
-	 * @param sourceNode
-	 * @param sourceAgent
-	 * @param destinationNode
-	 * @param destinationAgent
-	 * @param remarks
-	 */
-	public void observerNotice ( Event event, long timespan, Object sourceNode, Agent sourceAgent, Object destinationNode, Agent destinationAgent, String remarks ) {
-		Long sourceAgentId = null;
-		if(sourceAgent != null)
-			sourceAgentId = sourceAgent.getId();
-		Long destinationAgentId = null;
-		if(destinationAgent != null)
-			destinationAgentId = sourceAgent.getId();
-		for ( NodeObserver ob: observers )
-			ob.logEvent(event, timespan, sourceNode, sourceAgentId, destinationNode, destinationAgentId, remarks);
-	}
-	
-	
-	/**
-	 * Logs an event to all observers.
-	 * 
-	 * @param event
-	 * @param timespan
-	 * @param sourceNode
-	 * @param sourceAgentId
-	 * @param destinationNode
-	 * @param destinationAgentId
-	 * @param remarks
-	 */
-	public void observerNotice ( Event event, long timespan, Object sourceNode, Long sourceAgentId, Object destinationNode, Long destinationAgentId, String remarks ) {
-		for ( NodeObserver ob: observers )
-			ob.logEvent(event, timespan, sourceNode, sourceAgentId, destinationNode, destinationAgentId, remarks);
 	}
 	
 	

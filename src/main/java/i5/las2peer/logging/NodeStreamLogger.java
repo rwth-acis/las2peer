@@ -135,13 +135,13 @@ public class NodeStreamLogger extends NodeObserver {
 			throw new IllegalStateException ( "This log is closed!");
 		
 		printer.println(
-			"timestamp\ttimespan\tevent code\tsource node\tsource agent\tdestination node\tdestination agent\tadditional remarks\n"+
-			"---------\t--------\t----------\t-----------\t------------\t-----------\t------------\t------------------"		
+			"timestamp\tevent code\tsource node\tsource agent\tdestination node\tdestination agent\tadditional remarks\n"+
+			"---------\t----------\t-----------\t------------\t-----------\t------------\t------------------"		
 		);
 	}
 	
 	@Override
-	protected void writeLog(Long timestamp, Long timespan, Event e,
+	protected void writeLog(Long timestamp, Event e,
 			String sourceNode, Long sourceAgentId, String destinationNode,
 			Long destinationAgentId, String remarks) {
 		
@@ -149,11 +149,6 @@ public class NodeStreamLogger extends NodeObserver {
 			throw new IllegalStateException ( "This log is closed!");
 		
 		StringBuffer logLine = new StringBuffer (  dateFormat.format ( new Date(timestamp) ) + "\t" );
-		
-		if ( timespan != null )
-			logLine.append ( timespan ).append("\t");
-		else
-			logLine.append ( appendPart(null));
 		
 		logLine.append( e + " (" + e.getCode() + ")\t" );
 		

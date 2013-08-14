@@ -129,7 +129,7 @@ public class MonitoringObserver extends NodeObserver {
 	 *
 	 */
 	@Override
-	protected void writeLog(Long timestamp, Long timespan, Event event,
+	protected void writeLog(Long timestamp, Event event,
 			String sourceNode, Long sourceAgentId, String destinationNode,
 			Long destinationAgentId, String remarks) {
 		//Now this is a bit tricky..
@@ -154,7 +154,7 @@ public class MonitoringObserver extends NodeObserver {
 				System.out.println("Monitoring: Problems with initializing Agents..");
 			}
 		}
-		messages[messagesCount] = new MonitoringMessage(timestamp, timespan, event, sourceNode,
+		messages[messagesCount] = new MonitoringMessage(timestamp, event, sourceNode,
 				sourceAgentId, destinationNode, destinationAgentId, remarks);
 		messagesCount++;
 		//We can only send our last message if the node is closing, so we will have to assume that all services are shutdown

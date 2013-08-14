@@ -364,7 +364,7 @@ public abstract class Service extends Configurable {
 		} catch (AgentNotKnownException e) {
 			e.printStackTrace();
 		}
-		runningAt.observerNotice(Event.SERVICE_MESSAGE, this.getActiveNode().getNodeId(), serviceAgent, null, this.getActiveAgent(), message);
+		runningAt.observerNotice(Event.SERVICE_MESSAGE, this.getActiveNode().getNodeId(), serviceAgent, message);
 	}
 	
 	
@@ -405,7 +405,7 @@ public abstract class Service extends Configurable {
 		} catch (AgentNotKnownException e) {
 			e.printStackTrace();
 		}
-		runningAt.observerNotice(event, this.getActiveNode().getNodeId(), serviceAgent, null, this.getActiveAgent(), message);
+		runningAt.observerNotice(event, this.getActiveNode().getNodeId(), serviceAgent, message);
 	}
 	
 	
@@ -420,7 +420,7 @@ public abstract class Service extends Configurable {
 		} catch (AgentNotKnownException e) {
 			e.printStackTrace();
 		}
-		runningAt.observerNotice(Event.SERVICE_ERROR, this.getActiveNode().getNodeId(), serviceAgent, null, this.getActiveAgent(), message);
+		runningAt.observerNotice(Event.SERVICE_ERROR, this.getActiveNode().getNodeId(), serviceAgent, message);
 	}
 	
 	
@@ -461,7 +461,7 @@ public abstract class Service extends Configurable {
 		} catch (AgentNotKnownException e) {
 			e.printStackTrace();
 		}
-		runningAt.observerNotice(event, this.getActiveNode().getNodeId(), serviceAgent, null, this.getActiveAgent(), message);
+		runningAt.observerNotice(event, this.getActiveNode().getNodeId(), serviceAgent, message);
 	}
 	
 	

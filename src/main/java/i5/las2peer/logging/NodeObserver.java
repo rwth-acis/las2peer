@@ -150,8 +150,8 @@ public abstract class NodeObserver {
 	 * 
 	 * @param event
 	 */
-	public void logEvent ( Event event ) {
-		log (null, event, null, null, null, null, null);
+	public void logEvent (Event event) {
+		log (event, null, null, null, null, null);
 	}
 	
 	
@@ -161,20 +161,8 @@ public abstract class NodeObserver {
 	 * @param event
 	 * @param remarks
 	 */
-	public void logEvent ( Event event, String remarks ) {
-		log (null, event, null, null, null, null, remarks);		
-	}
-	
-	
-	/**
-	 * Logs a node event.
-	 * 
-	 * @param event
-	 * @param sourceNode
-	 * @param remarks
-	 */
-	public void logEvent ( Event event, Object sourceNode, String remarks ) {
-		log (null, event, sourceNode, null, null, null, remarks);		
+	public void logEvent (Event event, String remarks) {
+		log (event, null, null, null, null, remarks);		
 	}
 	
 	
@@ -183,11 +171,10 @@ public abstract class NodeObserver {
 	 * 
 	 * @param event
 	 * @param sourceNode
-	 * @param sourceAgentId
 	 * @param remarks
 	 */
-	public void logEvent ( Event event, Object sourceNode, Long sourceAgentId, String remarks ) {
-		log (null, event, sourceNode, sourceAgentId, null, null, remarks);
+	public void logEvent (Event event, Object sourceNode, String remarks) {
+		log (event, sourceNode, null, null, null, remarks);		
 	}
 	
 	
@@ -197,19 +184,16 @@ public abstract class NodeObserver {
 	 * @param event
 	 * @param sourceNode
 	 * @param sourceAgentId
-	 * @param destinationNode
-	 * @param destinationAgentId
 	 * @param remarks
 	 */
-	public void logEvent ( Event event, Object sourceNode, Long sourceAgentId, Object destinationNode, Long destinationAgentId, String remarks ) {
-		log (null, event, sourceNode, sourceAgentId, destinationNode, destinationAgentId, remarks);
+	public void logEvent (Event event, Object sourceNode, Long sourceAgentId, String remarks) {
+		log (event, sourceNode, sourceAgentId, null, null, remarks);
 	}
 	
 	
 	/**
 	 * Logs a node event.
 	 * 
-	 * @param timespan
 	 * @param event
 	 * @param sourceNode
 	 * @param sourceAgentId
@@ -217,8 +201,8 @@ public abstract class NodeObserver {
 	 * @param destinationAgentId
 	 * @param remarks
 	 */
-	public void logEvent (Event event, Long timespan, Object sourceNode, Long sourceAgentId, Object destinationNode, Long destinationAgentId, String remarks ) {
-		log (timespan, event, sourceNode, sourceAgentId, destinationNode, destinationAgentId, remarks);
+	public void logEvent (Event event, Object sourceNode, Long sourceAgentId, Object destinationNode, Long destinationAgentId, String remarks) {
+		log (event, sourceNode, sourceAgentId, destinationNode, destinationAgentId, remarks);
 	}
 	
 	/**
@@ -250,7 +234,6 @@ public abstract class NodeObserver {
 	/**
 	 * Writes a log entry.
 	 * 
-	 * @param timespan (can be null)
 	 * @param event necessary
 	 * @param sourceNode an object representing some kind of node
 	 * 		will be transferred to an node representation if possible (see {@link #getNodeRepresentation}) (can be null)
@@ -259,12 +242,12 @@ public abstract class NodeObserver {
 	 * @param destinationAgentId (can be null)
 	 * @param remarks (can be null)
 	 */
-	protected void log (Long timespan, Event event, Object sourceNode, Long sourceAgentId, Object destinationNode , Long destinationAgentId, String remarks ) {
+	protected void log (Event event, Object sourceNode, Long sourceAgentId, Object destinationNode , Long destinationAgentId, String remarks ) {
 		long timestamp =  new Date().getTime();
 		String sourceNodeRepresentation = getNodeRepresentation (sourceNode);
 		String destinationNodeRepresentation = getNodeRepresentation (destinationNode);
 		
-		writeLog (timestamp, timespan, event, sourceNodeRepresentation, sourceAgentId, destinationNodeRepresentation, destinationAgentId, remarks);
+		writeLog (timestamp, event, sourceNodeRepresentation, sourceAgentId, destinationNodeRepresentation, destinationAgentId, remarks);
 	}
 	
 	
@@ -274,7 +257,6 @@ public abstract class NodeObserver {
 	 * and the event may be null.
 	 * 
 	 * @param timestamp		UNIX time stamp of the event
-	 * @param timespan		a time span (e.g. for an answer retrieval, the time span between sending and answer)
 	 * @param event			the event to log
 	 * @param sourceNode	a source (p2p) node of the event (e.g. message sender)
 	 * @param sourceAgentId	a source (las2peer) agent of the event (e.g. message sender)
@@ -282,7 +264,7 @@ public abstract class NodeObserver {
 	 * @param destinationAgentId a destination (las2peer) agent of the event (e.g. message receiver)
 	 * @param remarks		(optional) additional remarks
 	 */
-	protected abstract void writeLog ( Long timestamp, Long timespan, Event event, String sourceNode, Long sourceAgentId, String destinationNode, Long destinationAgentId, String remarks );
+	protected abstract void writeLog (Long timestamp, Event event, String sourceNode, Long sourceAgentId, String destinationNode, Long destinationAgentId, String remarks);
 	
 	
 }

@@ -286,12 +286,8 @@ public class Context implements AgentStorage {
 	 * @param serviceAgent
 	 */
 	public static void logMessage ( Object from, String message, Agent serviceAgent ) {
-		try {
-			getCurrent().getLocalNode().observerNotice(Event.SERVICE_MESSAGE, getCurrent().getLocalNode().getNodeId(),
-					getCurrent().getMainAgent(), null, serviceAgent, from.getClass().getSimpleName() + ": " + message);
-		} catch ( IllegalStateException e ) {
-			System.err.println ( "Log message not in a l2p context: " + message );
-		}
+		getCurrent().getLocalNode().observerNotice(Event.SERVICE_MESSAGE, getCurrent().getLocalNode().getNodeId(),
+			serviceAgent, from.getClass().getSimpleName() + ": " + message);
 	}
 	
 	
@@ -331,7 +327,7 @@ public class Context implements AgentStorage {
             event = Event.SERVICE_CUSTOM_MESSAGE_10;
 		}
 		getCurrent().getLocalNode().observerNotice(event, getCurrent().getLocalNode().getNodeId(),
-				getCurrent().getMainAgent(), null, serviceAgent, from.getClass().getSimpleName() + ": " + message);
+				serviceAgent, from.getClass().getSimpleName() + ": " + message);
 	}
 	
 	
@@ -348,12 +344,8 @@ public class Context implements AgentStorage {
 	 * @param serviceAgent
 	 */
 	public static void logError ( Object from, String message, Agent serviceAgent ) {
-		try {
-			getCurrent().getLocalNode().observerNotice(Event.SERVICE_ERROR, getCurrent().getLocalNode().getNodeId(),
-					getCurrent().getMainAgent(), null, serviceAgent, from.getClass().getSimpleName() + ": " + message);
-		} catch ( IllegalStateException e ) {
-			System.err.println ( "Logmessage not in a l2p context: " + message );
-		}
+		getCurrent().getLocalNode().observerNotice(Event.SERVICE_ERROR, getCurrent().getLocalNode().getNodeId(),
+			serviceAgent, from.getClass().getSimpleName() + ": " + message);
 	}
 	
 	
@@ -393,7 +385,7 @@ public class Context implements AgentStorage {
             event = Event.SERVICE_CUSTOM_ERROR_10;
 		}
 		getCurrent().getLocalNode().observerNotice(event, getCurrent().getLocalNode().getNodeId(),
-				getCurrent().getMainAgent(), null, serviceAgent, from.getClass().getSimpleName() + ": " + message);
+				serviceAgent, from.getClass().getSimpleName() + ": " + message);
 	}
 	
 	

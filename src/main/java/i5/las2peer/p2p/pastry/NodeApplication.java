@@ -209,7 +209,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 			}
 		} else if ( pastMessage instanceof SearchAnswerMessage ) {
 			// k, got an answer for my own search
-			l2pNode.observerNotice(Event.AGENT_SEARCH_ANSWER_RECEIVED, ((SearchAnswerMessage) pastMessage).getSendingNode(), null, l2pNode.getPastryNode(), null, "" );
+			l2pNode.observerNotice(Event.AGENT_SEARCH_ANSWER_RECEIVED, ((SearchAnswerMessage) pastMessage).getSendingNode(), (Long) null, l2pNode.getPastryNode(), (Long) null, "" );
 			
 			// just store the sending node handle
 			HashSet<NodeHandle> pendingCollection = htPendingAgentSearches
@@ -267,7 +267,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 
 	@Override
 	public boolean forward(RouteMessage pastMessage) {
-		l2pNode.observerNotice(Event.MESSAGE_FORWARDING, l2pNode.getNodeId(), null, pastMessage.getDestinationId(), null, "" + pastMessage);
+		l2pNode.observerNotice(Event.MESSAGE_FORWARDING, l2pNode.getNodeId(), (Long) null, pastMessage.getDestinationId(), (Long) null, "" + pastMessage);
 		
 		return true;
 	}
