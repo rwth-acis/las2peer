@@ -373,7 +373,7 @@ public abstract class Node implements AgentStorage {
 			sourceAgentId = sourceAgent.getId();
 		Long destinationAgentId = null;
 		if(destinationAgent != null)
-			destinationAgentId = sourceAgent.getId();
+			destinationAgentId = destinationAgent.getId();
 		for ( NodeObserver ob: observers )
 			ob.logEvent(event, sourceNode, sourceAgentId, destinationNode, destinationAgentId, remarks);
 	}
