@@ -375,106 +375,155 @@ public abstract class Service extends Configurable {
 		switch(index){
         case 1:
             event = Event.SERVICE_CUSTOM_MESSAGE_1;
+            break;
         case 2:
             event = Event.SERVICE_CUSTOM_MESSAGE_2;
+            break;
         case 3:
             event = Event.SERVICE_CUSTOM_MESSAGE_3;
+            break;
         case 4:
             event = Event.SERVICE_CUSTOM_MESSAGE_4;
+            break;
         case 5:
             event = Event.SERVICE_CUSTOM_MESSAGE_5;
+            break;
         case 6:
             event = Event.SERVICE_CUSTOM_MESSAGE_6;
+            break;
         case 7:
             event = Event.SERVICE_CUSTOM_MESSAGE_7;
+            break;
         case 8:
             event = Event.SERVICE_CUSTOM_MESSAGE_8;
+            break;
         case 9:
             event = Event.SERVICE_CUSTOM_MESSAGE_9;
+            break;
         case 10:
             event = Event.SERVICE_CUSTOM_MESSAGE_10;
+            break;
         case 11:
             event = Event.SERVICE_CUSTOM_MESSAGE_11;
+            break;
         case 12:
             event = Event.SERVICE_CUSTOM_MESSAGE_12;
+            break;
         case 13:
             event = Event.SERVICE_CUSTOM_MESSAGE_13;
+            break;
         case 14:
             event = Event.SERVICE_CUSTOM_MESSAGE_14;
+            break;
         case 15:
             event = Event.SERVICE_CUSTOM_MESSAGE_15;
+            break;
         case 16:
             event = Event.SERVICE_CUSTOM_MESSAGE_16;
+            break;
         case 17:
             event = Event.SERVICE_CUSTOM_MESSAGE_17;
+            break;
         case 18:
             event = Event.SERVICE_CUSTOM_MESSAGE_18;
+            break;
         case 19:
             event = Event.SERVICE_CUSTOM_MESSAGE_19;
+            break;
         case 20:
             event = Event.SERVICE_CUSTOM_MESSAGE_20;
+            break;
         case 21:
             event = Event.SERVICE_CUSTOM_MESSAGE_21;
+            break;
         case 22:
             event = Event.SERVICE_CUSTOM_MESSAGE_22;
+            break;
         case 23:
             event = Event.SERVICE_CUSTOM_MESSAGE_23;
+            break;
         case 24:
             event = Event.SERVICE_CUSTOM_MESSAGE_24;
+            break;
         case 25:
             event = Event.SERVICE_CUSTOM_MESSAGE_25;
+            break;
         case 26:
             event = Event.SERVICE_CUSTOM_MESSAGE_26;
+            break;
         case 27:
             event = Event.SERVICE_CUSTOM_MESSAGE_27;
+            break;
         case 28:
             event = Event.SERVICE_CUSTOM_MESSAGE_28;
+            break;
         case 29:
             event = Event.SERVICE_CUSTOM_MESSAGE_29;
+            break;
         case 30:
             event = Event.SERVICE_CUSTOM_MESSAGE_30;
+            break;
         case 31:
             event = Event.SERVICE_CUSTOM_MESSAGE_31;
+            break;
         case 32:
             event = Event.SERVICE_CUSTOM_MESSAGE_32;
+            break;
         case 33:
             event = Event.SERVICE_CUSTOM_MESSAGE_33;
+            break;
         case 34:
             event = Event.SERVICE_CUSTOM_MESSAGE_34;
+            break;
         case 35:
             event = Event.SERVICE_CUSTOM_MESSAGE_35;
+            break;
         case 36:
             event = Event.SERVICE_CUSTOM_MESSAGE_36;
+            break;
         case 37:
             event = Event.SERVICE_CUSTOM_MESSAGE_37;
+            break;
         case 38:
             event = Event.SERVICE_CUSTOM_MESSAGE_38;
+            break;
         case 39:
             event = Event.SERVICE_CUSTOM_MESSAGE_39;
+            break;
         case 40:
             event = Event.SERVICE_CUSTOM_MESSAGE_40;
+            break;
         case 41:
             event = Event.SERVICE_CUSTOM_MESSAGE_41;
+            break;
         case 42:
             event = Event.SERVICE_CUSTOM_MESSAGE_42;
+            break;
         case 43:
             event = Event.SERVICE_CUSTOM_MESSAGE_43;
+            break;
         case 44:
             event = Event.SERVICE_CUSTOM_MESSAGE_44;
+            break;
         case 45:
             event = Event.SERVICE_CUSTOM_MESSAGE_45;
+            break;
         case 46:
             event = Event.SERVICE_CUSTOM_MESSAGE_46;
+            break;
         case 47:
             event = Event.SERVICE_CUSTOM_MESSAGE_47;
+            break;
         case 48:
             event = Event.SERVICE_CUSTOM_MESSAGE_48;
+            break;
         case 49:
             event = Event.SERVICE_CUSTOM_MESSAGE_49;
+            break;
         case 50:
             event = Event.SERVICE_CUSTOM_MESSAGE_50;
+            break;
 		}
-		
 		Agent serviceAgent = null;
 		try {
 			serviceAgent = this.getAgent();
@@ -508,104 +557,154 @@ public abstract class Service extends Configurable {
 		switch(index){
         case 1:
             event = Event.SERVICE_CUSTOM_ERROR_1;
+            break;
         case 2:
             event = Event.SERVICE_CUSTOM_ERROR_2;
+            break;
         case 3:
             event = Event.SERVICE_CUSTOM_ERROR_3;
+            break;
         case 4:
             event = Event.SERVICE_CUSTOM_ERROR_4;
+            break;
         case 5:
             event = Event.SERVICE_CUSTOM_ERROR_5;
+            break;
         case 6:
             event = Event.SERVICE_CUSTOM_ERROR_6;
+            break;
         case 7:
             event = Event.SERVICE_CUSTOM_ERROR_7;
+            break;
         case 8:
             event = Event.SERVICE_CUSTOM_ERROR_8;
+            break;
         case 9:
             event = Event.SERVICE_CUSTOM_ERROR_9;
+            break;
         case 10:
             event = Event.SERVICE_CUSTOM_ERROR_10;
+            break;
         case 11:
             event = Event.SERVICE_CUSTOM_ERROR_11;
+            break;
         case 12:
             event = Event.SERVICE_CUSTOM_ERROR_12;
+            break;
         case 13:
             event = Event.SERVICE_CUSTOM_ERROR_13;
+            break;
         case 14:
             event = Event.SERVICE_CUSTOM_ERROR_14;
+            break;
         case 15:
             event = Event.SERVICE_CUSTOM_ERROR_15;
+            break;
         case 16:
             event = Event.SERVICE_CUSTOM_ERROR_16;
+            break;
         case 17:
             event = Event.SERVICE_CUSTOM_ERROR_17;
+            break;
         case 18:
             event = Event.SERVICE_CUSTOM_ERROR_18;
+            break;
         case 19:
             event = Event.SERVICE_CUSTOM_ERROR_19;
+            break;
         case 20:
             event = Event.SERVICE_CUSTOM_ERROR_20;
+            break;
         case 21:
             event = Event.SERVICE_CUSTOM_ERROR_21;
+            break;
         case 22:
             event = Event.SERVICE_CUSTOM_ERROR_22;
+            break;
         case 23:
             event = Event.SERVICE_CUSTOM_ERROR_23;
+            break;
         case 24:
             event = Event.SERVICE_CUSTOM_ERROR_24;
+            break;
         case 25:
             event = Event.SERVICE_CUSTOM_ERROR_25;
+            break;
         case 26:
             event = Event.SERVICE_CUSTOM_ERROR_26;
+            break;
         case 27:
             event = Event.SERVICE_CUSTOM_ERROR_27;
+            break;
         case 28:
             event = Event.SERVICE_CUSTOM_ERROR_28;
+            break;
         case 29:
             event = Event.SERVICE_CUSTOM_ERROR_29;
+            break;
         case 30:
             event = Event.SERVICE_CUSTOM_ERROR_30;
+            break;
         case 31:
             event = Event.SERVICE_CUSTOM_ERROR_31;
+            break;
         case 32:
             event = Event.SERVICE_CUSTOM_ERROR_32;
+            break;
         case 33:
             event = Event.SERVICE_CUSTOM_ERROR_33;
+            break;
         case 34:
             event = Event.SERVICE_CUSTOM_ERROR_34;
+            break;
         case 35:
             event = Event.SERVICE_CUSTOM_ERROR_35;
+            break;
         case 36:
             event = Event.SERVICE_CUSTOM_ERROR_36;
+            break;
         case 37:
             event = Event.SERVICE_CUSTOM_ERROR_37;
+            break;
         case 38:
             event = Event.SERVICE_CUSTOM_ERROR_38;
+            break;
         case 39:
             event = Event.SERVICE_CUSTOM_ERROR_39;
+            break;
         case 40:
             event = Event.SERVICE_CUSTOM_ERROR_40;
+            break;
         case 41:
             event = Event.SERVICE_CUSTOM_ERROR_41;
+            break;
         case 42:
             event = Event.SERVICE_CUSTOM_ERROR_42;
+            break;
         case 43:
             event = Event.SERVICE_CUSTOM_ERROR_43;
+            break;
         case 44:
             event = Event.SERVICE_CUSTOM_ERROR_44;
+            break;
         case 45:
             event = Event.SERVICE_CUSTOM_ERROR_45;
+            break;
         case 46:
             event = Event.SERVICE_CUSTOM_ERROR_46;
+            break;
         case 47:
             event = Event.SERVICE_CUSTOM_ERROR_47;
+            break;
         case 48:
             event = Event.SERVICE_CUSTOM_ERROR_48;
+            break;
         case 49:
             event = Event.SERVICE_CUSTOM_ERROR_49;
+            break;
         case 50:
             event = Event.SERVICE_CUSTOM_ERROR_50;
+            break;
 		}
 		Agent serviceAgent = null;
 		try {
