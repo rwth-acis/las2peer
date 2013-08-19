@@ -358,24 +358,19 @@ public abstract class Service extends Configurable {
 	 * @param message
 	 */
 	protected void logMessage ( String message ) {
-		Agent serviceAgent = null;
-		try {
-			serviceAgent = this.getAgent();
-		} catch (AgentNotKnownException e) {
-			e.printStackTrace();
-		}
-		runningAt.observerNotice(Event.SERVICE_MESSAGE, this.getActiveNode().getNodeId(), serviceAgent, message);
+		logMessage(0, null, message);
 	}
 	
 	
 	/**
 	 * Writes a log message.
-	 * The given index (1-10) can be used to differentiate between different log messages.
+	 * The given index (1-50) can be used to differentiate between different log messages.
 	 * 
-	 * @param index an index between 1 and 10
+	 * @param index an index between 1 and 50
+	 * @param actingUser can be set to null if unknown / not desired
 	 * @param message
 	 */
-	protected void logMessage (int index, String message ) {
+	protected void logMessage (int index, Agent actingUser, String message) {
 		Event event = Event.SERVICE_MESSAGE; //Default
 		switch(index){
         case 1:
@@ -398,40 +393,117 @@ public abstract class Service extends Configurable {
             event = Event.SERVICE_CUSTOM_MESSAGE_9;
         case 10:
             event = Event.SERVICE_CUSTOM_MESSAGE_10;
+        case 11:
+            event = Event.SERVICE_CUSTOM_MESSAGE_11;
+        case 12:
+            event = Event.SERVICE_CUSTOM_MESSAGE_12;
+        case 13:
+            event = Event.SERVICE_CUSTOM_MESSAGE_13;
+        case 14:
+            event = Event.SERVICE_CUSTOM_MESSAGE_14;
+        case 15:
+            event = Event.SERVICE_CUSTOM_MESSAGE_15;
+        case 16:
+            event = Event.SERVICE_CUSTOM_MESSAGE_16;
+        case 17:
+            event = Event.SERVICE_CUSTOM_MESSAGE_17;
+        case 18:
+            event = Event.SERVICE_CUSTOM_MESSAGE_18;
+        case 19:
+            event = Event.SERVICE_CUSTOM_MESSAGE_19;
+        case 20:
+            event = Event.SERVICE_CUSTOM_MESSAGE_20;
+        case 21:
+            event = Event.SERVICE_CUSTOM_MESSAGE_21;
+        case 22:
+            event = Event.SERVICE_CUSTOM_MESSAGE_22;
+        case 23:
+            event = Event.SERVICE_CUSTOM_MESSAGE_23;
+        case 24:
+            event = Event.SERVICE_CUSTOM_MESSAGE_24;
+        case 25:
+            event = Event.SERVICE_CUSTOM_MESSAGE_25;
+        case 26:
+            event = Event.SERVICE_CUSTOM_MESSAGE_26;
+        case 27:
+            event = Event.SERVICE_CUSTOM_MESSAGE_27;
+        case 28:
+            event = Event.SERVICE_CUSTOM_MESSAGE_28;
+        case 29:
+            event = Event.SERVICE_CUSTOM_MESSAGE_29;
+        case 30:
+            event = Event.SERVICE_CUSTOM_MESSAGE_30;
+        case 31:
+            event = Event.SERVICE_CUSTOM_MESSAGE_31;
+        case 32:
+            event = Event.SERVICE_CUSTOM_MESSAGE_32;
+        case 33:
+            event = Event.SERVICE_CUSTOM_MESSAGE_33;
+        case 34:
+            event = Event.SERVICE_CUSTOM_MESSAGE_34;
+        case 35:
+            event = Event.SERVICE_CUSTOM_MESSAGE_35;
+        case 36:
+            event = Event.SERVICE_CUSTOM_MESSAGE_36;
+        case 37:
+            event = Event.SERVICE_CUSTOM_MESSAGE_37;
+        case 38:
+            event = Event.SERVICE_CUSTOM_MESSAGE_38;
+        case 39:
+            event = Event.SERVICE_CUSTOM_MESSAGE_39;
+        case 40:
+            event = Event.SERVICE_CUSTOM_MESSAGE_40;
+        case 41:
+            event = Event.SERVICE_CUSTOM_MESSAGE_41;
+        case 42:
+            event = Event.SERVICE_CUSTOM_MESSAGE_42;
+        case 43:
+            event = Event.SERVICE_CUSTOM_MESSAGE_43;
+        case 44:
+            event = Event.SERVICE_CUSTOM_MESSAGE_44;
+        case 45:
+            event = Event.SERVICE_CUSTOM_MESSAGE_45;
+        case 46:
+            event = Event.SERVICE_CUSTOM_MESSAGE_46;
+        case 47:
+            event = Event.SERVICE_CUSTOM_MESSAGE_47;
+        case 48:
+            event = Event.SERVICE_CUSTOM_MESSAGE_48;
+        case 49:
+            event = Event.SERVICE_CUSTOM_MESSAGE_49;
+        case 50:
+            event = Event.SERVICE_CUSTOM_MESSAGE_50;
 		}
+		
 		Agent serviceAgent = null;
 		try {
 			serviceAgent = this.getAgent();
 		} catch (AgentNotKnownException e) {
 			e.printStackTrace();
 		}
-		runningAt.observerNotice(event, this.getActiveNode().getNodeId(), serviceAgent, message);
+		runningAt.observerNotice(event, this.getActiveNode().getNodeId(), serviceAgent, null, actingUser, message);
 	}
 	
 	
 	/**
 	 * Writes an error log message.
+	 * 
 	 * @param message a custom message
 	 */
 	protected void logError ( String message ) {
-		Agent serviceAgent = null;
-		try {
-			serviceAgent = this.getAgent();
-		} catch (AgentNotKnownException e) {
-			e.printStackTrace();
-		}
-		runningAt.observerNotice(Event.SERVICE_ERROR, this.getActiveNode().getNodeId(), serviceAgent, message);
+		logError(0, null, message);
 	}
 	
 	
 	/**
 	 * Writes an error message.
-	 * The given index (1-10) can be used to differentiate between different log messages.
+	 * The given index (1-50) can be used to differentiate between different log messages.
 	 * 
-	 * @param index an index between 1 and 10
+	 * @param index an index between 1 and 50
+	 * @param actingUser can be set to null if unknown / not desired
 	 * @param message
 	 */
-	protected void logError (int index, String message) {
+	protected void logError (int index, Agent actingUser, String message) {
 		Event event = Event.SERVICE_ERROR; //Default
 		switch(index){
         case 1:
@@ -454,6 +526,86 @@ public abstract class Service extends Configurable {
             event = Event.SERVICE_CUSTOM_ERROR_9;
         case 10:
             event = Event.SERVICE_CUSTOM_ERROR_10;
+        case 11:
+            event = Event.SERVICE_CUSTOM_ERROR_11;
+        case 12:
+            event = Event.SERVICE_CUSTOM_ERROR_12;
+        case 13:
+            event = Event.SERVICE_CUSTOM_ERROR_13;
+        case 14:
+            event = Event.SERVICE_CUSTOM_ERROR_14;
+        case 15:
+            event = Event.SERVICE_CUSTOM_ERROR_15;
+        case 16:
+            event = Event.SERVICE_CUSTOM_ERROR_16;
+        case 17:
+            event = Event.SERVICE_CUSTOM_ERROR_17;
+        case 18:
+            event = Event.SERVICE_CUSTOM_ERROR_18;
+        case 19:
+            event = Event.SERVICE_CUSTOM_ERROR_19;
+        case 20:
+            event = Event.SERVICE_CUSTOM_ERROR_20;
+        case 21:
+            event = Event.SERVICE_CUSTOM_ERROR_21;
+        case 22:
+            event = Event.SERVICE_CUSTOM_ERROR_22;
+        case 23:
+            event = Event.SERVICE_CUSTOM_ERROR_23;
+        case 24:
+            event = Event.SERVICE_CUSTOM_ERROR_24;
+        case 25:
+            event = Event.SERVICE_CUSTOM_ERROR_25;
+        case 26:
+            event = Event.SERVICE_CUSTOM_ERROR_26;
+        case 27:
+            event = Event.SERVICE_CUSTOM_ERROR_27;
+        case 28:
+            event = Event.SERVICE_CUSTOM_ERROR_28;
+        case 29:
+            event = Event.SERVICE_CUSTOM_ERROR_29;
+        case 30:
+            event = Event.SERVICE_CUSTOM_ERROR_30;
+        case 31:
+            event = Event.SERVICE_CUSTOM_ERROR_31;
+        case 32:
+            event = Event.SERVICE_CUSTOM_ERROR_32;
+        case 33:
+            event = Event.SERVICE_CUSTOM_ERROR_33;
+        case 34:
+            event = Event.SERVICE_CUSTOM_ERROR_34;
+        case 35:
+            event = Event.SERVICE_CUSTOM_ERROR_35;
+        case 36:
+            event = Event.SERVICE_CUSTOM_ERROR_36;
+        case 37:
+            event = Event.SERVICE_CUSTOM_ERROR_37;
+        case 38:
+            event = Event.SERVICE_CUSTOM_ERROR_38;
+        case 39:
+            event = Event.SERVICE_CUSTOM_ERROR_39;
+        case 40:
+            event = Event.SERVICE_CUSTOM_ERROR_40;
+        case 41:
+            event = Event.SERVICE_CUSTOM_ERROR_41;
+        case 42:
+            event = Event.SERVICE_CUSTOM_ERROR_42;
+        case 43:
+            event = Event.SERVICE_CUSTOM_ERROR_43;
+        case 44:
+            event = Event.SERVICE_CUSTOM_ERROR_44;
+        case 45:
+            event = Event.SERVICE_CUSTOM_ERROR_45;
+        case 46:
+            event = Event.SERVICE_CUSTOM_ERROR_46;
+        case 47:
+            event = Event.SERVICE_CUSTOM_ERROR_47;
+        case 48:
+            event = Event.SERVICE_CUSTOM_ERROR_48;
+        case 49:
+            event = Event.SERVICE_CUSTOM_ERROR_49;
+        case 50:
+            event = Event.SERVICE_CUSTOM_ERROR_50;
 		}
 		Agent serviceAgent = null;
 		try {
@@ -461,7 +613,7 @@ public abstract class Service extends Configurable {
 		} catch (AgentNotKnownException e) {
 			e.printStackTrace();
 		}
-		runningAt.observerNotice(event, this.getActiveNode().getNodeId(), serviceAgent, message);
+		runningAt.observerNotice(event, this.getActiveNode().getNodeId(), serviceAgent, null, actingUser, message);
 	}
 	
 	

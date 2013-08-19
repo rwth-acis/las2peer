@@ -278,31 +278,31 @@ public class Context implements AgentStorage {
 	 * Logs a message to the l2p system using the observers.
 	 * 
 	 * Since this method will/should only be used in an L2pThread, the message will come from a
-	 * service or a helper, so a SERVICE_MESSAGE is assumed. The serviceAgent can be set to null if not known.
+	 * service or a helper, so a SERVICE_MESSAGE is assumed.
 	 * Then this message will not be monitored by the monitoring observer.
 	 * 
 	 * @param from the calling class
 	 * @param message
-	 * @param serviceAgent
 	 */
-	public static void logMessage ( Object from, String message, Agent serviceAgent ) {
+	public static void logMessage ( Object from, String message) {
 		getCurrent().getLocalNode().observerNotice(Event.SERVICE_MESSAGE, getCurrent().getLocalNode().getNodeId(),
-			serviceAgent, from.getClass().getSimpleName() + ": " + message);
+			from.getClass().getSimpleName() + ": " + message);
 	}
 	
 	
 	/**
 	 * Writes a log message.
-	 * The given index (1-10) can be used to differentiate between different log messages.
-	 * The serviceAgent can be set to null if not known.
+	 * The given index (1-50) can be used to differentiate between different log messages.
+	 * The serviceAgent and actingUser can be set to null if not known.
 	 * Then this message will not be monitored by the monitoring observer.
 	 * 
 	 * @param from the calling class
-	 * @param index an index between 1 and 10
+	 * @param index an index between 1 and 50
 	 * @param message
 	 * @param serviceAgent
+	 * @param actingUser
 	 */
-	public static void logMessage (Object from, int index, String message, Agent serviceAgent ) {
+	public static void logMessage (Object from, int index, String message, Agent serviceAgent, Agent actingUser) {
 		Event event = Event.SERVICE_MESSAGE; //Default
 		switch(index){
         case 1:
@@ -325,9 +325,89 @@ public class Context implements AgentStorage {
             event = Event.SERVICE_CUSTOM_MESSAGE_9;
         case 10:
             event = Event.SERVICE_CUSTOM_MESSAGE_10;
+        case 11:
+            event = Event.SERVICE_CUSTOM_MESSAGE_11;
+        case 12:
+            event = Event.SERVICE_CUSTOM_MESSAGE_12;
+        case 13:
+            event = Event.SERVICE_CUSTOM_MESSAGE_13;
+        case 14:
+            event = Event.SERVICE_CUSTOM_MESSAGE_14;
+        case 15:
+            event = Event.SERVICE_CUSTOM_MESSAGE_15;
+        case 16:
+            event = Event.SERVICE_CUSTOM_MESSAGE_16;
+        case 17:
+            event = Event.SERVICE_CUSTOM_MESSAGE_17;
+        case 18:
+            event = Event.SERVICE_CUSTOM_MESSAGE_18;
+        case 19:
+            event = Event.SERVICE_CUSTOM_MESSAGE_19;
+        case 20:
+            event = Event.SERVICE_CUSTOM_MESSAGE_20;
+        case 21:
+            event = Event.SERVICE_CUSTOM_MESSAGE_21;
+        case 22:
+            event = Event.SERVICE_CUSTOM_MESSAGE_22;
+        case 23:
+            event = Event.SERVICE_CUSTOM_MESSAGE_23;
+        case 24:
+            event = Event.SERVICE_CUSTOM_MESSAGE_24;
+        case 25:
+            event = Event.SERVICE_CUSTOM_MESSAGE_25;
+        case 26:
+            event = Event.SERVICE_CUSTOM_MESSAGE_26;
+        case 27:
+            event = Event.SERVICE_CUSTOM_MESSAGE_27;
+        case 28:
+            event = Event.SERVICE_CUSTOM_MESSAGE_28;
+        case 29:
+            event = Event.SERVICE_CUSTOM_MESSAGE_29;
+        case 30:
+            event = Event.SERVICE_CUSTOM_MESSAGE_30;
+        case 31:
+            event = Event.SERVICE_CUSTOM_MESSAGE_31;
+        case 32:
+            event = Event.SERVICE_CUSTOM_MESSAGE_32;
+        case 33:
+            event = Event.SERVICE_CUSTOM_MESSAGE_33;
+        case 34:
+            event = Event.SERVICE_CUSTOM_MESSAGE_34;
+        case 35:
+            event = Event.SERVICE_CUSTOM_MESSAGE_35;
+        case 36:
+            event = Event.SERVICE_CUSTOM_MESSAGE_36;
+        case 37:
+            event = Event.SERVICE_CUSTOM_MESSAGE_37;
+        case 38:
+            event = Event.SERVICE_CUSTOM_MESSAGE_38;
+        case 39:
+            event = Event.SERVICE_CUSTOM_MESSAGE_39;
+        case 40:
+            event = Event.SERVICE_CUSTOM_MESSAGE_40;
+        case 41:
+            event = Event.SERVICE_CUSTOM_MESSAGE_41;
+        case 42:
+            event = Event.SERVICE_CUSTOM_MESSAGE_42;
+        case 43:
+            event = Event.SERVICE_CUSTOM_MESSAGE_43;
+        case 44:
+            event = Event.SERVICE_CUSTOM_MESSAGE_44;
+        case 45:
+            event = Event.SERVICE_CUSTOM_MESSAGE_45;
+        case 46:
+            event = Event.SERVICE_CUSTOM_MESSAGE_46;
+        case 47:
+            event = Event.SERVICE_CUSTOM_MESSAGE_47;
+        case 48:
+            event = Event.SERVICE_CUSTOM_MESSAGE_48;
+        case 49:
+            event = Event.SERVICE_CUSTOM_MESSAGE_49;
+        case 50:
+            event = Event.SERVICE_CUSTOM_MESSAGE_50;
 		}
 		getCurrent().getLocalNode().observerNotice(event, getCurrent().getLocalNode().getNodeId(),
-				serviceAgent, from.getClass().getSimpleName() + ": " + message);
+				serviceAgent, null, actingUser, from.getClass().getSimpleName() + ": " + message);
 	}
 	
 	
@@ -336,56 +416,135 @@ public class Context implements AgentStorage {
 	 * 
 	 * Since this method will/should only be used in an L2pThread, the message will come from a
 	 * service or a helper, so a SERVICE_MESSAGE is assumed.
-	 * The serviceAgent can be set to null if not known.
 	 * Then this message will not be monitored by the monitoring observer.
 	 * 
 	 * @param from the calling class
 	 * @param message
-	 * @param serviceAgent
 	 */
-	public static void logError ( Object from, String message, Agent serviceAgent ) {
+	public static void logError (Object from, String message) {
 		getCurrent().getLocalNode().observerNotice(Event.SERVICE_ERROR, getCurrent().getLocalNode().getNodeId(),
-			serviceAgent, from.getClass().getSimpleName() + ": " + message);
+			from.getClass().getSimpleName() + ": " + message);
 	}
 	
 	
 	/**
 	 * Writes an error message.
-	 * The given index (1-10) can be used to differentiate between different log messages.
-	 * The serviceAgent can be set to null if not known.
+	 * The given index (1-50) can be used to differentiate between different log messages.
+	 * The serviceAgent and userAgent can be set to null if not known.
 	 * Then this message will not be monitored by the monitoring observer.
 	 * 
 	 * @param from the calling class
-	 * @param index an index between 1 and 10
+	 * @param index an index between 1 and 50
 	 * @param message
 	 * @param serviceAgent
+	 * @param actingUser
 	 */
-	public static void logError (Object from, int index, String message, Agent serviceAgent) {
+	public static void logError (Object from, int index, String message, Agent serviceAgent, Agent actingUser) {
 		Event event = Event.SERVICE_ERROR; //Default
 		switch(index){
-        case 1:
-            event = Event.SERVICE_CUSTOM_ERROR_1;
-        case 2:
-            event = Event.SERVICE_CUSTOM_ERROR_2;
-        case 3:
-            event = Event.SERVICE_CUSTOM_ERROR_3;
-        case 4:
-            event = Event.SERVICE_CUSTOM_ERROR_4;
-        case 5:
-            event = Event.SERVICE_CUSTOM_ERROR_5;
-        case 6:
-            event = Event.SERVICE_CUSTOM_ERROR_6;
-        case 7:
-            event = Event.SERVICE_CUSTOM_ERROR_7;
-        case 8:
-            event = Event.SERVICE_CUSTOM_ERROR_8;
-        case 9:
-            event = Event.SERVICE_CUSTOM_ERROR_9;
-        case 10:
-            event = Event.SERVICE_CUSTOM_ERROR_10;
-		}
+		  case 1:
+	            event = Event.SERVICE_CUSTOM_ERROR_1;
+	        case 2:
+	            event = Event.SERVICE_CUSTOM_ERROR_2;
+	        case 3:
+	            event = Event.SERVICE_CUSTOM_ERROR_3;
+	        case 4:
+	            event = Event.SERVICE_CUSTOM_ERROR_4;
+	        case 5:
+	            event = Event.SERVICE_CUSTOM_ERROR_5;
+	        case 6:
+	            event = Event.SERVICE_CUSTOM_ERROR_6;
+	        case 7:
+	            event = Event.SERVICE_CUSTOM_ERROR_7;
+	        case 8:
+	            event = Event.SERVICE_CUSTOM_ERROR_8;
+	        case 9:
+	            event = Event.SERVICE_CUSTOM_ERROR_9;
+	        case 10:
+	            event = Event.SERVICE_CUSTOM_ERROR_10;
+	        case 11:
+	            event = Event.SERVICE_CUSTOM_ERROR_11;
+	        case 12:
+	            event = Event.SERVICE_CUSTOM_ERROR_12;
+	        case 13:
+	            event = Event.SERVICE_CUSTOM_ERROR_13;
+	        case 14:
+	            event = Event.SERVICE_CUSTOM_ERROR_14;
+	        case 15:
+	            event = Event.SERVICE_CUSTOM_ERROR_15;
+	        case 16:
+	            event = Event.SERVICE_CUSTOM_ERROR_16;
+	        case 17:
+	            event = Event.SERVICE_CUSTOM_ERROR_17;
+	        case 18:
+	            event = Event.SERVICE_CUSTOM_ERROR_18;
+	        case 19:
+	            event = Event.SERVICE_CUSTOM_ERROR_19;
+	        case 20:
+	            event = Event.SERVICE_CUSTOM_ERROR_20;
+	        case 21:
+	            event = Event.SERVICE_CUSTOM_ERROR_21;
+	        case 22:
+	            event = Event.SERVICE_CUSTOM_ERROR_22;
+	        case 23:
+	            event = Event.SERVICE_CUSTOM_ERROR_23;
+	        case 24:
+	            event = Event.SERVICE_CUSTOM_ERROR_24;
+	        case 25:
+	            event = Event.SERVICE_CUSTOM_ERROR_25;
+	        case 26:
+	            event = Event.SERVICE_CUSTOM_ERROR_26;
+	        case 27:
+	            event = Event.SERVICE_CUSTOM_ERROR_27;
+	        case 28:
+	            event = Event.SERVICE_CUSTOM_ERROR_28;
+	        case 29:
+	            event = Event.SERVICE_CUSTOM_ERROR_29;
+	        case 30:
+	            event = Event.SERVICE_CUSTOM_ERROR_30;
+	        case 31:
+	            event = Event.SERVICE_CUSTOM_ERROR_31;
+	        case 32:
+	            event = Event.SERVICE_CUSTOM_ERROR_32;
+	        case 33:
+	            event = Event.SERVICE_CUSTOM_ERROR_33;
+	        case 34:
+	            event = Event.SERVICE_CUSTOM_ERROR_34;
+	        case 35:
+	            event = Event.SERVICE_CUSTOM_ERROR_35;
+	        case 36:
+	            event = Event.SERVICE_CUSTOM_ERROR_36;
+	        case 37:
+	            event = Event.SERVICE_CUSTOM_ERROR_37;
+	        case 38:
+	            event = Event.SERVICE_CUSTOM_ERROR_38;
+	        case 39:
+	            event = Event.SERVICE_CUSTOM_ERROR_39;
+	        case 40:
+	            event = Event.SERVICE_CUSTOM_ERROR_40;
+	        case 41:
+	            event = Event.SERVICE_CUSTOM_ERROR_41;
+	        case 42:
+	            event = Event.SERVICE_CUSTOM_ERROR_42;
+	        case 43:
+	            event = Event.SERVICE_CUSTOM_ERROR_43;
+	        case 44:
+	            event = Event.SERVICE_CUSTOM_ERROR_44;
+	        case 45:
+	            event = Event.SERVICE_CUSTOM_ERROR_45;
+	        case 46:
+	            event = Event.SERVICE_CUSTOM_ERROR_46;
+	        case 47:
+	            event = Event.SERVICE_CUSTOM_ERROR_47;
+	        case 48:
+	            event = Event.SERVICE_CUSTOM_ERROR_48;
+	        case 49:
+	            event = Event.SERVICE_CUSTOM_ERROR_49;
+	        case 50:
+	            event = Event.SERVICE_CUSTOM_ERROR_50;
+			}
 		getCurrent().getLocalNode().observerNotice(event, getCurrent().getLocalNode().getNodeId(),
-				serviceAgent, from.getClass().getSimpleName() + ": " + message);
+				serviceAgent, null, actingUser, from.getClass().getSimpleName() + ": " + message);
 	}
 	
 	
