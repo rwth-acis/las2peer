@@ -810,16 +810,13 @@ public class L2pNodeLauncher {
 			connector.setHttpPort( iPort );
 			connector.start( node );
 			
-			printMessage( " -> waiting a little");
-			Thread.sleep( 2000 );
-			
 			// work around: start a non-daemon thread to keep the connector open...
 			Thread reminder = new Thread ( new Runnable () {
 				@Override
 				public void run() {
 					try {
 						while ( true ) {
-							System.out.println( "--- http connector still running at port " + iPort +" (press Enter to exit) ---" );
+							System.out.println("--- http connector still running at port " + iPort +" ---" );
 								Thread.sleep( 10000 );
 						}
 					} catch (InterruptedException e) {
@@ -845,8 +842,6 @@ public class L2pNodeLauncher {
 			printWarning ( " --> Error finding connector logfile!" + e );
 		} catch (ConnectorException e) {
 			printWarning ( " --> problems starting the connector: " + e);
-		} catch (InterruptedException e) {
-			printWarning ( " --> interrupted!!");
 		}
 		
 	}

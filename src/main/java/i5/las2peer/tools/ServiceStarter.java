@@ -428,8 +428,6 @@ public class ServiceStarter {
 			final HttpConnector connector = new HttpConnector ();
 			connector.setHttpPort( iPort );
 			connector.start( node );
-			
-			System.out.println ( " -> waiting a little");
 						
 			try {
 				System.in.read();
