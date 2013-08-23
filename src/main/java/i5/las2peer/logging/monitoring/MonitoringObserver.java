@@ -27,7 +27,7 @@ public class MonitoringObserver extends NodeObserver {
 	
 	private boolean readyForInitializing = false; //Is set to false as long as the node is not ready to initialize the monitoring agents.
 	private boolean initializedDone = false; //Used to determine, if the initialization process has finished.
-	private MonitoringMessage[] messages; //The size is determined by the constructor. Will be send at once.
+	private MonitoringMessage[] monitoringMessages; //The size is determined by the constructor. Will be send at once.
 	private int messagesCount; //Counter to determine how many messages are currently stored at the messages array.
 	private MonitoringAgent sendingAgent; //The agent responsible for this observer.
 	private MonitoringAgent receivingAgent; //The agent registered at the Processing Service.
@@ -49,7 +49,7 @@ public class MonitoringObserver extends NodeObserver {
 		this.registeredAt = registeredAt;
 		if(messageCache < 50)
 			messageCache = 50; //Minimum cache to give the observer enough time to initialize before first sending
-		this.messages = new MonitoringMessage[messageCache];
+		this.monitoringMessages = new MonitoringMessage[messageCache];
 		this.messagesCount = 0;
 		try {
 			sendingAgent = MonitoringAgent.createMonitoringAgent("sendingAgentPass");
@@ -144,7 +144,7 @@ public class MonitoringObserver extends NodeObserver {
 		}
 		if(sourceNode == null)
 			return; //We do not log events without a source node into a database with different sources;-)
-		if(messagesCount >= messages.length){
+		if(messagesCount >= monitoringMessages.length){
 			if(initializedDone){
 				messagesCount = 0;
 				sendMessages();
@@ -154,7 +154,7 @@ public class MonitoringObserver extends NodeObserver {
 				System.out.println("Monitoring: Problems with initializing Agents..");
 			}
 		}
-		messages[messagesCount] = new MonitoringMessage(timestamp, event, sourceNode,
+		monitoringMessages[messagesCount] = new MonitoringMessage(timestamp, event, sourceNode,
 				sourceAgentId, destinationNode, destinationAgentId, remarks);
 		messagesCount++;
 		//We can only send our last message if the node is closing, so we will have to assume that all services are shutdown
@@ -163,8 +163,8 @@ public class MonitoringObserver extends NodeObserver {
 			if(initializedDone){
 				//To remove "old" messages since they are not overwritten
 				int counter = messagesCount;
-				while(counter < messages.length){
-					messages[counter] = null;
+				while(counter < monitoringMessages.length){
+					monitoringMessages[counter] = null;
 					counter++;
 				}
 				sendMessages();
@@ -183,10 +183,10 @@ public class MonitoringObserver extends NodeObserver {
 	 */
 	private void sendMessages() {
 		try {
-			Message message = new Message(sendingAgent,receivingAgent,messages);
+			Message LAS2peerMessage = new Message(sendingAgent,receivingAgent,monitoringMessages);
 			messageResultListener = new MessageResultListener(2000); //unused
-			registeredAt.sendMessage(message, messageResultListener);
-			System.out.println("Monitoring: message " + message.getId() + " send!");
+			registeredAt.sendMessage(LAS2peerMessage, messageResultListener);
+			System.out.println("Monitoring: message " + LAS2peerMessage.getId() + " send!");
 		} catch (L2pSecurityException e) {
 			e.printStackTrace();
 		} catch (EncodingFailedException e) {
