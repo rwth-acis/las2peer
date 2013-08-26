@@ -726,8 +726,8 @@ public class L2pNodeLauncher {
 			} catch ( StorageException e ) {
 				printWarning( "unable to store contents of " + xml.toString() + "!");				
 			}
-		}		
-		
+		}
+		uploadLoginList();
 	}
 	
 	/**
