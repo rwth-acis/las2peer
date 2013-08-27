@@ -254,7 +254,7 @@ public abstract class Node implements AgentStorage {
 		
 		context.unlockMainAgent ( passphrase );
 		
-		observerNotice(Event.AGENT_UNLOCKED, ""+agentId);
+		observerNotice(Event.AGENT_UNLOCKED, this.getNodeId(), agentId, null, (Long) null, "");
 	}
 	
 	
@@ -657,7 +657,7 @@ public abstract class Node implements AgentStorage {
 		if ( htRegisteredReceivers.get(agentId) == null)
 			throw new AgentNotKnownException ( agentId );
 		
-		observerNotice(Event.AGENT_REMOVED, this.getNodeId(), getAgent(agentId), null);
+		observerNotice(Event.AGENT_REMOVED, this.getNodeId(), getAgent(agentId), "");
 
 		htRegisteredReceivers.get(agentId).notifyUnregister();
 		
