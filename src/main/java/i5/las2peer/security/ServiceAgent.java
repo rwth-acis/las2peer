@@ -128,7 +128,7 @@ public class ServiceAgent extends PassphraseAgent {
 			Object content = m.getContent();
 			
 			if ( content instanceof RMITask ) {
-				getRunningAtNode().observerNotice(Event.SERVICE_INVOKATION, this.getServiceClassName() + "/" + ((RMITask) content).getMethodName());
+				getRunningAtNode().observerNotice(Event.SERVICE_INVOKATION, m.getSendingNodeId(), m.getSender(), getRunningAtNode().getNodeId(), this, this.getServiceClassName() + "/" + ((RMITask) content).getMethodName());
 				
 				L2pThread thread = new L2pThread (this, (RMITask) content, c );
 				Message response;
@@ -141,24 +141,24 @@ public class ServiceAgent extends PassphraseAgent {
 						thread.getException().printStackTrace();
 						if ( thread.getException() instanceof InvocationTargetException 
 								&& thread.getException().getCause() instanceof AgentLockedException ) {							
-							getRunningAtNode().observerNotice(Event.SERVICE_INVOKATION_FAILED, "need to unlock agent key for envelope access" );							
+							getRunningAtNode().observerNotice(Event.SERVICE_INVOKATION_FAILED, m.getSendingNodeId(), m.getSender(), getRunningAtNode().getNodeId(), this, "Need to unlock agent key for envelope access" );							
 							response = new Message (m, new RMIUnlockContent ( getRunningAtNode().getPublicNodeKey() ));							
 						} else {
 							response = new Message (m, new RMIExceptionContent ( thread.getException () ));
-							getRunningAtNode().observerNotice(Event.SERVICE_INVOKATION_FAILED, "Exception: " + thread.getException() );						
+							getRunningAtNode().observerNotice(Event.SERVICE_INVOKATION_FAILED, m.getSendingNodeId(), m.getSender(), getRunningAtNode().getNodeId(), this, "Exception: " + thread.getException() );						
 						}
 					} else {
 						response = new Message ( m, new RMIResultContent ( thread.getResult() ));
-						getRunningAtNode().observerNotice(Event.SERVICE_INVOKATION_FINISHED, "" );
+						getRunningAtNode().observerNotice(Event.SERVICE_INVOKATION_FINISHED, m.getSendingNodeId(), m.getSender(), getRunningAtNode().getNodeId(), this, this.getServiceClassName() + "/" + ((RMITask) content).getMethodName());
 					}
 					response.setSendingNodeId( getRunningAtNode().getNodeId());
 				} catch (InterruptedException e) {
 					response = new Message (m, new RMIExceptionContent ( e ));
-					getRunningAtNode().observerNotice(Event.SERVICE_INVOKATION_FAILED, "Exception: " + e );
+					getRunningAtNode().observerNotice(Event.SERVICE_INVOKATION_FAILED, m.getSendingNodeId(), m.getSender(), getRunningAtNode().getNodeId(), this, "Exception: " + e );
 				} catch (NotFinishedException e) {
 					// should not occur, since join has been called!
 					response = new Message (m, new RMIExceptionContent ( e ));
-					getRunningAtNode().observerNotice(Event.SERVICE_INVOKATION_FAILED, "Exception: "+ e );
+					getRunningAtNode().observerNotice(Event.SERVICE_INVOKATION_FAILED, m.getSendingNodeId(), m.getSender(), getRunningAtNode().getNodeId(), this, "Exception: "+ e );
 				}
 				
 				if ( m.getSendingNodeId() == null)
