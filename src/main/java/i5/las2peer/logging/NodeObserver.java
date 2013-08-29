@@ -31,9 +31,6 @@ public abstract class NodeObserver {
 		
 		NODE_ERROR (-100),
 		
-		NEW_AGENT (400), //Unused
-		NEW_AGENT_NOTICE (210), //Unused
-		
 		AGENT_SEARCH_STARTED (1000),
 		AGENT_SEARCH_RECEIVED (1100),
 		AGENT_SEARCH_ANSWER_SENT (1150),
@@ -88,9 +85,9 @@ public abstract class NodeObserver {
 		//(and thus will only be monitored by the monitoring observer if the service monitoring flag was set)
 		SERVICE_STARTUP (7000),
 		SERVICE_SHUTDOWN (7100),
-		SERVICE_INVOKATION (7200),
-		SERVICE_INVOKATION_FINISHED (7210),
-		SERVICE_INVOKATION_FAILED (-7210),
+		SERVICE_INVOCATION (7200),
+		SERVICE_INVOCATION_FINISHED (7210),
+		SERVICE_INVOCATION_FAILED (-7210),
 		
 		SERVICE_ADD_TO_MONITORING(7300), //Used by the LoggingObserver itself
 		

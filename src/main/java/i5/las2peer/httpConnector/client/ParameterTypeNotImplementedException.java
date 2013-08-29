@@ -5,7 +5,7 @@ package i5.las2peer.httpConnector.client;
  * of the coder package.
  *
  * This exception will be thrown by the client, if a user tries to send an
- * invokation parameter which type is not sendable via this connector.
+ * invocation parameter which type is not sendable via this connector.
  *
  *
  * @author Holger Jan&szlig;en

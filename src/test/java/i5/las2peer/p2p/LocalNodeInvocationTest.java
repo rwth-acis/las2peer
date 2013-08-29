@@ -17,7 +17,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class LocalNodeInvokationTest {
+public class LocalNodeInvocationTest {
 
 	@Before
 	public void reset() {
@@ -30,7 +30,7 @@ public class LocalNodeInvokationTest {
 	}
 	
 	@Test
-	public void testLocalInvokation() throws SecurityException, IllegalArgumentException, AgentNotKnownException, L2pSecurityException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InterruptedException, AgentAlreadyRegisteredException, MalformedXMLException, IOException, CryptoException, AgentException {		
+	public void testLocalInvocation() throws SecurityException, IllegalArgumentException, AgentNotKnownException, L2pSecurityException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InterruptedException, AgentAlreadyRegisteredException, MalformedXMLException, IOException, CryptoException, AgentException {		
 		LocalNode node = LocalNode.newNode();
 		UserAgent eve = MockAgentFactory.getEve();
 		
@@ -48,7 +48,7 @@ public class LocalNodeInvokationTest {
 	}
 	
 	@Test
-	public void testGlobalInvokation() throws SecurityException, IllegalArgumentException, AgentNotKnownException, L2pSecurityException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InterruptedException, AgentAlreadyRegisteredException, MalformedXMLException, IOException, CryptoException, AgentException, TimeoutException {		
+	public void testGlobalInvocation() throws SecurityException, IllegalArgumentException, AgentNotKnownException, L2pSecurityException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InterruptedException, AgentAlreadyRegisteredException, MalformedXMLException, IOException, CryptoException, AgentException, TimeoutException {		
 		LocalNode serviceNode = LocalNode.newNode();
 		UserAgent eve = MockAgentFactory.getEve();
 		
@@ -69,7 +69,7 @@ public class LocalNodeInvokationTest {
 	
 	
 	@Test
-	public void testSubinvokation ()  throws MalformedXMLException, IOException, L2pSecurityException, CryptoException, InterruptedException, AgentAlreadyRegisteredException, AgentException, TimeoutException {
+	public void testSubinvocation ()  throws MalformedXMLException, IOException, L2pSecurityException, CryptoException, InterruptedException, AgentAlreadyRegisteredException, AgentException, TimeoutException {
 		LocalNode serviceNode1 = LocalNode.newNode();
 		LocalNode serviceNode2 = LocalNode.newNode();
 		UserAgent eve = MockAgentFactory.getEve();
@@ -96,7 +96,7 @@ public class LocalNodeInvokationTest {
 	
 	
 	@Test 
-	public void testSubinvokationFail () throws MalformedXMLException, IOException, L2pSecurityException, CryptoException, InterruptedException, AgentAlreadyRegisteredException, AgentException, TimeoutException {
+	public void testSubinvocationFail () throws MalformedXMLException, IOException, L2pSecurityException, CryptoException, InterruptedException, AgentAlreadyRegisteredException, AgentException, TimeoutException {
 		LocalNode serviceNode2 = LocalNode.newNode();
 		UserAgent eve = MockAgentFactory.getEve();
 

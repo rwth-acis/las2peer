@@ -706,11 +706,11 @@ public class Client {
 				throw new NotFoundException ();
 			
 			if ( responseCode == HttpURLConnection.HTTP_INTERNAL_ERROR ) {
-				String mess = "Remote Exception during invokation";
+				String mess = "Remote Exception during invocation";
 				try {
 					if ( "text/xml".equals ( connection.getContentType() ) ) {
 						// we have a object array response describing the exception
-						Object[] result = (Object[]) interpretInvokationResult( (InputStream) connection.getErrorStream() );
+						Object[] result = (Object[]) interpretInvocationResult( (InputStream) connection.getErrorStream() );
 						throw new ServerErrorException ( (Exception) result[3] );
 					} else
 						// simple text message (to stay compatible to older versions of the connector
@@ -732,7 +732,7 @@ public class Client {
 				return null;
 			
 			if ( responseCode == HttpURLConnection.HTTP_NOT_ACCEPTABLE )
-				throw new ConnectorClientException ( "The server could no read the invokation parameters!" );
+				throw new ConnectorClientException ( "The server could no read the invocation parameters!" );
 			
 			if ( responseCode == HttpURLConnection.HTTP_NOT_IMPLEMENTED ) {
 				//String mess = ""; //readHttpContent( (InputStream) connection.getContent(), connection.getContentLength() );
@@ -744,7 +744,7 @@ public class Client {
 			if ( ! "text/xml".equals ( type ) )
 				throw new ConnectorClientException ( "Problems to interpret the server's answer - content type not text/xml!");
 
-			Object result = interpretInvokationResult( (InputStream) connection.getContent() );
+			Object result = interpretInvocationResult( (InputStream) connection.getContent() );
 			
 			return result;
 		} catch ( IOException e ) {
@@ -792,7 +792,7 @@ public class Client {
 			
 			return sw.toString();
 		} catch (i5.las2peer.httpConnector.coder.ParameterTypeNotImplementedException e) {
-			throw new ParameterTypeNotImplementedException ( "One or more of the invokation parameters could not be coded for transfer!", e );
+			throw new ParameterTypeNotImplementedException ( "One or more of the invocation parameters could not be coded for transfer!", e );
 		}
 	}
 	
@@ -881,7 +881,7 @@ public class Client {
 	 * @exception   InvalidCodingException
 	 *
 	 */
-	private Object interpretInvokationResult ( InputStream content ) throws ConnectorClientException {
+	private Object interpretInvocationResult ( InputStream content ) throws ConnectorClientException {
 		ParamDecoder decoder = null;
 		try {
 			@SuppressWarnings("rawtypes")

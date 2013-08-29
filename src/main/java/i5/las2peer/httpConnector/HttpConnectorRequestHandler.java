@@ -424,9 +424,9 @@ public class HttpConnectorRequestHandler implements RequestHandler {
 		response.clearContent();
 		response.setStatus( HttpResponse.STATUS_NOT_ACCEPTABLE );
 		response.setContentType( "text/plain" );
-		response.println ( "The invokation parameters could not be read!" );
+		response.println ( "The invocation parameters could not be read!" );
 		response.println ( "Exception-Message: " + e.getMessage() );
-		connector.logError("Request coding exception in invokation request " + request.getPath() + " for session " + sid);
+		connector.logError("Request coding exception in invocation request " + request.getPath() + " for session " + sid);
 	}
 
 	
@@ -510,7 +510,7 @@ public class HttpConnectorRequestHandler implements RequestHandler {
 		response.setStatus( HttpResponse.STATUS_FORBIDDEN );
 		response.setContentType( "text/plain" );
 		response.println ( "You don't have access to the method you requested" );
-		connector.logError("Security exception in invokation request " + request.getPath() + " in session " + sid);
+		connector.logError("Security exception in invocation request " + request.getPath() + " in session " + sid);
 		
 		if ( System.getProperty("http-connector.printSecException") != null
 				&& System.getProperty( "http-connector.printSecException").equals ( "true" ) )

@@ -77,13 +77,13 @@ public class HttpConnector extends Connector
 	public static final int DEFAULT_SOCKET_TIMEOUT = 60*1000; // 1 minute
 	protected int socketTimeout = DEFAULT_SOCKET_TIMEOUT;
 	
-	public static final String DEFAULT_CROSS_ORIGIN_RESOURCE_DOMAIN = "localhost";
+	public static final String DEFAULT_CROSS_ORIGIN_RESOURCE_DOMAIN = "http://role-is.dbis.rwth-aachen.de:9080";
 	protected String crossOriginResourceDomain = DEFAULT_CROSS_ORIGIN_RESOURCE_DOMAIN;
 	
 	public static final int DEFAULT_CROSS_ORIGIN_RESOURCE_MAX_AGE = 60;
 	protected int crossOriginResourceMaxAge = DEFAULT_CROSS_ORIGIN_RESOURCE_MAX_AGE;
 
-	public static final boolean DEFAULT_ENABLE_CROSS_ORIGIN_RESOURCE_SHARING = false;
+	public static final boolean DEFAULT_ENABLE_CROSS_ORIGIN_RESOURCE_SHARING = true;
 	protected boolean enableCrossOriginResourceSharing = DEFAULT_ENABLE_CROSS_ORIGIN_RESOURCE_SHARING;
 	
 	public static final boolean DEFAULT_PREFER_LOCAL_SERVICES = true;

@@ -288,7 +288,7 @@ public class LocalNodeTest {
 	
 	
 	@Test
-	public void testSimpleInvokation () throws L2pSecurityException, CryptoException, AgentAlreadyRegisteredException, AgentException, SecurityException, IllegalArgumentException, AgentNotKnownException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InterruptedException {
+	public void testSimpleInvocation () throws L2pSecurityException, CryptoException, AgentAlreadyRegisteredException, AgentException, SecurityException, IllegalArgumentException, AgentNotKnownException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InterruptedException {
 		String serviceClass = "i5.las2peer.api.TestService";
 		ServiceAgent testService = ServiceAgent.generateNewAgent(serviceClass, "a passphrase");
 		testService.unlockPrivateKey("a passphrase");

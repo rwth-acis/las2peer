@@ -463,7 +463,7 @@ public class L2pNodeLauncher {
 			
 			Object result;
 			/*if ( nodeHandleForTestService != null) {
-				printMessage ( "Sending invokation message directly!");
+				printMessage ( "Sending invocation message directly!");
 				Message rmiMessage = new Message ( eve, node.getServiceAgent("i5.las2peer.api.TestService"), new RMITask ( "i5.las2peer.api.TestService", "inc", new Serializable[] { new Integer ( 10) }));
 				rmiMessage.setSendingNodeId((NodeHandle) node.getNodeId());
 				Message resultMessage = node.sendMessageAndWaitForAnswer(rmiMessage, nodeHandleForTestService);
