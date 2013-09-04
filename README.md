@@ -36,7 +36,29 @@ Simply build the standard java docs with
     ant java_doc
 
 
+How to develop a Service for las2peer
+-------------------------------------
+1. Get the SampleService Project frome here: [LAS2Peer-Sample-Project](https://github.com/rwth-acis/LAS2peer-Sample-Service/archive/master.zip)
+2. If you use Eclipse, import the project or just create a new Project in the same folder.
+3. Change conf/service.properties according to the service you want to build
+4. Run "ant get_deps" once to pull all dependencies. (You can skip this but Eclipse will complain about missing libraries until you build the first time)
+5. Implement a Service by inheriting from i5.las2peer.api.Service (Or refactor from the existing i5.las2peer.ServicePackage.ServiceClass)
+6. run "ant" to just build the service jar or "ant run" to directly run your service
 
+A jar file with your service will be in export/ and a generated service agent XML file in startup/
+
+Using a different build system/directory structure
+-------------------------------------------------
+If you really want to use las2peer in a different project structure/ with a different build system you can point your build-System to this
+Maven repository: http://role.dbis.rwth-aachen.de:9911/archiva/repository/internal/ and add the las2peer as dependency for your project:
+```
+<dependency>
+    <groupId>i5</groupId>
+    <artifactId>las2peer</artifactId>
+    <version>0.0.1</version>
+</dependency>
+```
+For information about the build process look at the "jar" and "generate_configs" tasks in build.xml
 
 Simple Node-Starter for Testing purposes
 ----------------------------------------
