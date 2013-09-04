@@ -267,7 +267,7 @@ public class HttpConnectorRequestHandler implements RequestHandler {
 	 */
 	private void closeSessionRequest(HttpRequest request, HttpResponse response) throws AddressNotAllowedException {
 		String sid = request.getGetVar ( SESSSION_GET_VAR );
-		
+		String appCode = request.getGetVar ( "appcode" );
 		HttpSession session = htSessions.get ( sid ) ;
 						
 		if ( session == null ) 
@@ -290,11 +290,11 @@ public class HttpConnectorRequestHandler implements RequestHandler {
 		session.endSession();
 		htSessions.remove ( sid );
 		response.println ( "Ok, session is closed!" );
-		
-		connector.logMessage ("Closed session " + sid );
+		if(appCode != null)
+			connector.logSessionClose(sid + " " + appCode);
+		else
+			connector.logSessionClose(sid + " noAppCode");
 	}
-	
-	
 	
 	
 	/**
@@ -606,6 +606,7 @@ public class HttpConnectorRequestHandler implements RequestHandler {
 		String timeout = request.getGetVar ( "timeout" );
 		String outDate = request.getGetVar ( "outdate" );
 		String persistent = request.getGetVar ( "persistent" );
+		String appCode = request.getGetVar ( "appcode" );
 		
 		try {
 			boolean bPersistent = persistent != null && (persistent.equals ( "1" ) || persistent.equals ( "true" ));
@@ -656,7 +657,10 @@ public class HttpConnectorRequestHandler implements RequestHandler {
 			response.setContentType( "text/xml" );
 			response.println ( "<?xml version=\"1.0\"?>");
 			response.println( session.toXmlString());
-			connector.logMessage("Created session: " + session.getId() );
+			if(appCode != null)
+				connector.logSessionOpen(session.getId() + " " + appCode);
+			else
+				connector.logSessionOpen(session.getId() + " noAppCode");
 		} catch (AgentNotKnownException e) {
 			sendUnauthorizedResponse(response, null, request.getRemoteAddress() + ": login denied for user " + user);
 		} catch (L2pSecurityException e) {

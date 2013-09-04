@@ -356,6 +356,29 @@ public class HttpConnector extends Connector
 	}
 	
 	
+	
+	/**
+	 * Logs a session creation.
+	 * 
+	 * @param message
+	 */
+	void logSessionOpen (String message) {
+		logStream.println( dateFormat.format ( new Date() ) + "\t" + message);
+		myNode.observerNotice(Event.HTTP_CONNECTOR_SESSION_START, myNode.getNodeId(), message);
+	}
+	
+	
+	/**
+	 * Logs a session closing.
+	 * 
+	 * @param message
+	 */
+	void logSessionClose (String message) {
+		logStream.println( dateFormat.format ( new Date() ) + "\t" + message);
+		myNode.observerNotice(Event.HTTP_CONNECTOR_SESSION_END, myNode.getNodeId(), message);
+	}
+	
+	
 	/**
 	 * Logs a request.
 	 * 
