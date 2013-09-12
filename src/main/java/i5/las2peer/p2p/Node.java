@@ -1368,10 +1368,10 @@ public abstract class Node implements AgentStorage {
 	public Serializable invokeGlobally ( Agent executing, String serviceClass, String serviceMethod, Serializable[] parameters ) throws L2pSecurityException, ServiceInvocationException, InterruptedException, TimeoutException, UnlockNeededException {
 		if ( getStatus() != NodeStatus.RUNNING )
 			throw new IllegalStateException ( "you can invoce methods only on a running node!");
-
+		this.observerNotice(Event.RMI_SENT, this.getNodeId(), executing, null); //Do not log service class name (privacy..)
 		if ( executing.isLocked() )
 			throw new L2pSecurityException ( "The executing agent has to be unlocked to call a RMI");
-				
+			
 		try {
 			Agent target = getServiceAgent(serviceClass);
 			Message rmiMessage = new Message ( executing, target, new RMITask ( serviceClass, serviceMethod, parameters));
@@ -1388,14 +1388,15 @@ public abstract class Node implements AgentStorage {
 			
 			if ( resultContent instanceof RMIUnlockContent ) {
 				// service method needed to unlock some envelope(s)
+				this.observerNotice(Event.RMI_FAILED, this.getNodeId(), executing, "mediator needed at the target node"); //Do not log service class name (privacy..)
 				throw new UnlockNeededException ( 
-						"mediator needed at the target node", 
-						resultMessage.getSendingNodeId(),
-						((RMIUnlockContent) resultContent).getNodeKey()
-				);				
+					"mediator needed at the target node", 
+					resultMessage.getSendingNodeId(),
+					((RMIUnlockContent) resultContent).getNodeKey()
+				);
 			} else if ( resultContent instanceof RMIExceptionContent ) {
 				Exception thrown = ((RMIExceptionContent) resultContent).getException();
-				
+				this.observerNotice(Event.RMI_FAILED, this.getNodeId(), executing, thrown.toString()); //Do not log service class name (privacy..)
 				if ( thrown instanceof ServiceInvocationException )
 					throw (ServiceInvocationException ) thrown;
 				else if (( thrown instanceof InvocationTargetException )&& (thrown.getCause() instanceof L2pSecurityException) ) {
@@ -1404,15 +1405,22 @@ public abstract class Node implements AgentStorage {
 				} else 
 					throw new ServiceInvocationException ( "remote exception at target node", thrown);
 				
-			} else if ( resultContent instanceof RMIResultContent )
+			} else if ( resultContent instanceof RMIResultContent ){
+				this.observerNotice(Event.RMI_SUCCESSFUL, this.getNodeId(), executing, null); //Do not log service class name (privacy..)
 				return ((RMIResultContent) resultContent).getContent();
-			else
-				throw new ServiceInvocationException ( "Unknown RMI response type: " +resultContent.getClass().getCanonicalName());
+			}
+			else{
+				this.observerNotice(Event.RMI_FAILED, this.getNodeId(), executing, "Unknown RMI response type: " +resultContent.getClass().getCanonicalName()); //Do not log service class name (privacy..)
+				throw new ServiceInvocationException ("Unknown RMI response type: " +resultContent.getClass().getCanonicalName());
+			}
 		} catch (AgentNotKnownException e) {
+			this.observerNotice(Event.RMI_FAILED, this.getNodeId(), executing, e.toString()); //Do not log service class name (privacy..)
 			throw new NoSuchServiceException ( serviceClass, e );
 		} catch (EncodingFailedException e) {
+			this.observerNotice(Event.RMI_FAILED, this.getNodeId(), executing, e.toString()); //Do not log service class name (privacy..)
 			throw new ServiceInvocationException("message problems!", e);
 		} catch (SerializationException e) {
+			this.observerNotice(Event.RMI_FAILED, this.getNodeId(), executing, e.toString()); //Do not log service class name (privacy..)
 			throw new ServiceInvocationException("message problems!", e);
 		}
 	}
