@@ -25,7 +25,7 @@ import org.apache.commons.codec.binary.Base64;
 
 /**
  * An Agent is the basic acting entity in the LAS2peer network.
- * At the moment, an agent can represent a simple user, a group or a service.
+ * At the moment, an agent can represent a simple user, a group, a service or a monitoring agent.
  * 
  * @author Holger Jan&szlig;en
  *
@@ -51,12 +51,11 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	private PrivateKey privateKey = null;
 	
 	
-	
 	private Node runningAt = null;
 	
 	
 	/**
-	 * create a new agent
+	 * Creates a new agent.
 	 * 
 	 * @param id
 	 * @param pair
@@ -72,8 +71,9 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 		lockPrivateKey();
 	}
 	
+	
 	/**
-	 * create a new agent
+	 * Creates a new agent.
 	 * 
 	 * @param id
 	 * @param publicKey
@@ -86,10 +86,9 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 		this.privateKey = null;
 	}
 	
-	
 		
 	/**
-	 * (Re-)Lock the private key
+	 * (Re-)Lock the private key.
 	 */
 	public void lockPrivateKey () {
 		privateKey = null;
@@ -97,9 +96,10 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	
 	
 	/**
-	 * unlock the private key
+	 * Unlocks the private key.
 	 * 
 	 * @param key
+	 * 
 	 * @throws L2pSecurityException
 	 */
 	public void unlockPrivateKey ( SecretKey key ) throws L2pSecurityException {
@@ -114,7 +114,7 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	
 	
 	/**
-	 * encrypt the private key into a byte array with strong encryption based on a passphrase
+	 * Encrypts the private key into a byte array with strong encryption based on a passphrase.
 	 * to unlock the key
 	 * 
 	 * @param key
@@ -133,7 +133,6 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 		}
 	}
 	
-
 	
 	/**
 	 * 
@@ -142,22 +141,32 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	public boolean isLocked () {
 		return privateKey == null;
 	}
-
-
-
+	
+	
 	/**
-	 * returns the id of this agent
+	 * Returns the id of this agent.
+	 * 
 	 * @return id of the agent
 	 */
 	public long getId () {
 		return id;
 	}
 	
+	
+	/**
+	 * Returns the id of this agent.
+	 * <i>This method is only implemented, since an Agent is
+	 * also a {@link MessageReceiver}, thus has to implement this method.
+	 * It was written for the {@link Mediator} class.</i>
+	 * 
+	 * @return id of the agent
+	 */
 	@Override
 	public long getResponsibleForAgentId() {
 		return getId();
 	}	
-		
+	
+	
 	/**
 	 * 
 	 * @return the cryptographic public key of this agent 
@@ -165,7 +174,8 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	public PublicKey getPublicKey () {
 		return publicKey;
 	}
-		
+	
+	
 	/**
 	 * 
 	 * @return the cryptographic private key of this agent
@@ -179,7 +189,7 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	
 	
 	/**
-	 * get the private key encrypted and encoded in base64
+	 * Gets the private key encrypted and encoded in base64.
 	 * 
 	 * mainly for <code>toXmlString()</code> methods of subclasses
 	 *  
@@ -189,9 +199,10 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 		return Base64.encodeBase64String( baEncrypedPrivate );
 	}
 	
+	
 	/**
-	 * hook to be called by the node where this agent is registered to, when the
-	 * node receives a message destined to this agent
+	 * Hook to be called by the node where this agent is registered to, when the
+	 * node receives a message destined to this agent.
 	 * 
 	 * @param message
 	 * @throws MessageException
@@ -200,7 +211,7 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	
 	
 	/**
-	 * get a locked copy of this agent
+	 * Gets a locked copy of this agent.
 	 * 
 	 * @return a locked clone of this agent
 	 * @throws CloneNotSupportedException 
@@ -213,43 +224,50 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	
 	
 	/**
-	 * notify this agent of unregistering from a node
+	 * 
+	 * Notifies this agent of unregistering from a node.
+	 * 
 	 */
 	public void notifyUnregister() {
 		if ( this instanceof ServiceAgent )
-			runningAt.observerNotice(Event.SERVICE_SHUTDOWN, "Service " + ((ServiceAgent)this).getServiceClassName());
+			runningAt.observerNotice(Event.SERVICE_SHUTDOWN, runningAt.getNodeId(), this, "" + ((ServiceAgent)this).getServiceClassName());
 		runningAt = null;
 	}
 	
 	
 	/**
-	 * Notify this agent that it has been registered at a node
-	 * may be overridden in implementing classes
 	 * 
-	 * make sure, overriding methods do a call of this method!
+	 * Notifies this agent that it has been registered at a node.
+	 * May be overridden in implementing classes.
+	 * 
+	 * <i>Make sure, overriding methods do a call of this method!</i>
 	 * 
 	 * @param n
-	 * @throws AgentException 
+	 * 
+	 * @throws AgentException
+	 * 
 	 */
 	public void notifyRegistrationTo ( Node n ) throws AgentException {
 		if ( this instanceof ServiceAgent )
-			n.observerNotice(Event.SERVICE_STARTUP, "started Service " + ((ServiceAgent)this).getServiceClassName());
+			n.observerNotice(Event.SERVICE_STARTUP, n.getNodeId(), this, "" + ((ServiceAgent)this).getServiceClassName());
 		runningAt = n;
 	}
 	
 	
 	/**
-	 * get the node, this agent is running at
+	 * Gets the node, this agent is running at.
+	 * 
 	 * @return the node, this agent is running at
 	 */
 	public Node getRunningAtNode () { return runningAt; } 
-
+	
 	
 	/**
-	 * factory: create an agent from its XML string representation
+	 * Factory: Create an agent from its XML string representation.
 	 * 
-	 * depending on the type attribute of the root node, the type will be
-	 * a {@link UserAgent}, {@link GroupAgent} or {@link ServiceAgent}
+	 * Depending on the type attribute of the root node, the type will be
+	 * a {@link UserAgent}, {@link GroupAgent}, {@link ServiceAgent}.
+	 * Creation of {@link MonitoringAgent}s is not supported.
 	 * 
 	 * @param xml
 	 * 
@@ -259,21 +277,23 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	 */
 	public static Agent createFromXml(String xml) throws MalformedXMLException {
 		try {
-			Element root = Parser.parse( xml, false);
+			Element root = Parser.parse(xml, false);
 
-			if ( ! root.getName ().equals( "agent"))
+			if ( !root.getName().equals("agent") )
 				throw new MalformedXMLException ( "this is not an agent but a " + root.getName() );
 			
 			String type = root.getAttribute( "type");
 			
-			if ( "passphrase".equals( type ))
+			if ( "user".equals( type ))
 				return UserAgent.createFromXml(root);
-			else if ( "group".equals( type) )
+			else if ( "group".equals( type ) )
 				return GroupAgent.createFromXml(root);
-			else if ( "service".equals( type) )
+			else if ( "service".equals( type ) )
 				return ServiceAgent.createFromXml(root);
+			else if ("monitoring".equals( type ))
+				return MonitoringAgent.createFromXml(root);
 			else 
-				throw new MalformedXMLException ( "Unknown agent type: " + type);
+				throw new MalformedXMLException("Unknown agent type: " + type);
 			
 		} catch (XMLSyntaxException e) {
 			throw new MalformedXMLException("Error parsing xml string", e);
@@ -281,8 +301,4 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	}
 	
 	
-	
-	
 }
-
-	

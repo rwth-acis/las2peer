@@ -209,7 +209,7 @@ public class LibraryClassLoader extends ClassLoader {
 	 * 
 	 * @param resourceName
 	 * @param lookUp 
-	 * @return
+	 * @return the resource
 	 */
 	URL getResource(String resourceName, boolean lookUp) {
 		try {

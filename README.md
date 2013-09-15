@@ -1,4 +1,4 @@
-Welcome to las2peer!
+Welcome to LAS2peer!
 =================
 
 PREPARATIONS

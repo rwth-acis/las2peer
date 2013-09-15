@@ -215,7 +215,7 @@ public class ConnectorClientTest
 	
 	/**
 	 * simple test with anonymous connection, three basic
-	 * invokations, and disconnection
+	 * invocations, and disconnection
 	 *
 	 */
 	@Test
@@ -288,7 +288,7 @@ public class ConnectorClientTest
 	
 	
 	/**
-	 * test the delivery of an array of strings as the result of an invokation
+	 * test the delivery of an array of strings as the result of an invocation
 	 *
 	 * @exception   ConnectorClientException
 	 *
@@ -315,7 +315,7 @@ public class ConnectorClientTest
 	
 	
 	/**
-	 * test the delivery of an empty string array as the result of an invokation
+	 * test the delivery of an empty string array as the result of an invocation
 	 *
 	 * @exception   ConnectorClientException
 	 *

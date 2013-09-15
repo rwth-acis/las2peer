@@ -89,7 +89,7 @@ public class PastryNodeImpl extends Node {
 		filesystem,
 		memory
 	}
-		
+	
 	public static final int STANDARD_PORT = 9901;
 	public static final String STANDARD_BOOTSTRAP = "localhost:9900,localhost:9999";
 	private static final int AGENT_GET_TIMEOUT = 10000;
@@ -157,9 +157,7 @@ public class PastryNodeImpl extends Node {
 	 * create a node listening to the given port an 
 	 * trying to connect to the hosts given in the bootstrap string
 	 * The bootstrap string may be a comma separated lists of host possibly including
-	 * port information separated be a colon.
-	 * 
-	 * Leave empty or null to start a new ring
+	 * port information separated be a colon. Leave empty or null to start a new ring.
 	 * 
 	 * @param port
 	 * @param bootstrap
@@ -173,9 +171,7 @@ public class PastryNodeImpl extends Node {
 	 * create a node listening to the given port an 
 	 * trying to connect to the hosts given in the bootstrap string
 	 * The bootstrap string may be a comma separated lists of host possibly including
-	 * port information separated be a colon.
-	 * 
-	 * Leave empty or null to start a new ring
+	 * port information separated be a colon. Leave empty or null to start a new ring.
 	 * 
 	 * @param port
 	 * @param bootstrap
@@ -186,6 +182,23 @@ public class PastryNodeImpl extends Node {
 		initialize(port, bootstrap, mode);
 	}
 
+	/**
+	 * create a node listening to the given port an 
+	 * trying to connect to the hosts given in the bootstrap string
+	 * The bootstrap string may be a comma separated lists of host possibly including
+	 * port information separated be a colon. Leave empty or null to start a new ring.
+	 * 
+	 * The observer-flag determines, if the node will be available for monitoring.
+	 *  
+	 * @param port
+	 * @param bootstrap
+	 * @param mode
+	 */
+	public PastryNodeImpl ( int port, String bootstrap, STORAGE_MODE mode, boolean monitoringObserver) {
+		super(null, true, monitoringObserver);
+		initialize(port, bootstrap, mode);
+	}
+	
 	
 	/**
 	 * local initialization for constructors
@@ -429,9 +442,7 @@ public class PastryNodeImpl extends Node {
 		
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 		    public void run() {
-		    	self.setStatus ( NodeStatus.CLOSING);
 		        self.shutDown();
-		        self.setStatus ( NodeStatus.CLOSED);
 		    }
 		});		
 	}
@@ -439,9 +450,9 @@ public class PastryNodeImpl extends Node {
 	@Override
 	public void shutDown() {
 		this.setStatus(NodeStatus.CLOSING);
-		pastryNode.destroy();
 		
-		super.shutDown();		
+		super.shutDown();
+		pastryNode.destroy();
 		this.setStatus(NodeStatus.CLOSED);
 	}
 
@@ -454,7 +465,7 @@ public class PastryNodeImpl extends Node {
 			
 			application.registerAgentTopic(receiver);
 			
-			observerNotice(Event.AGENT_LOADED, pastryNode, receiver, null );
+			//Observer is called in superclass!
 		}
 	}
 
@@ -463,7 +474,7 @@ public class PastryNodeImpl extends Node {
 		synchronized (this) {
 			application.unregisterAgentTopic (id);
 			
-			super.unregisterAgent(id);						
+			super.unregisterAgent(id);
 		}
 	}
 
@@ -472,7 +483,7 @@ public class PastryNodeImpl extends Node {
 	public void sendMessage(Message message, MessageResultListener listener,
 			SendMode mode) {
 		// TODO: use mode?!?!
-		observerNotice(Event.MESSAGE_SENDING, pastryNode.getLocalHandle(), message.getSenderId(), null, message.getRecipientId(), "message broadcast started");
+		observerNotice(Event.MESSAGE_SENDING, pastryNode, message.getSenderId(), null, message.getRecipientId(), "broadcasting");
 		
 		registerAnswerListener(message.getId(), listener);
 		
@@ -486,22 +497,23 @@ public class PastryNodeImpl extends Node {
 		
 		if ( ! ( atNodeId instanceof NodeHandle )) {
 			String addition = "(null)";
-			if ( atNodeId != null) addition = ""+atNodeId.getClass();
+			if ( atNodeId != null)
+				addition = ""+atNodeId.getClass();
 			IllegalArgumentException e = new IllegalArgumentException ( "node id in pastry nets has to be a NodeHandle instance but is " + addition);
 			e.printStackTrace();
 			throw e;
 		}
 		
-		observerNotice(Event.MESSAGE_SENDING, this, message.getSenderId(), (NodeHandle) atNodeId, message.getRecipientId(), "" );
+		observerNotice(Event.MESSAGE_SENDING, pastryNode, message.getSenderId(), (NodeHandle) atNodeId, message.getRecipientId(), "" );
 		
 		registerAnswerListener(message.getId(), listener);
 		
 		try {
 			application.sendMessage(new MessageEnvelope( pastryNode.getLocalHandle(), message), (NodeHandle) atNodeId );
 		} catch (MalformedXMLException e) {
-			observerNotice(Event.MESSAGE_FAILED, this, message.getSenderId(), (NodeHandle) atNodeId, message.getRecipientId(), "XML exception!" );			
+			observerNotice(Event.MESSAGE_FAILED, pastryNode, message.getSenderId(), (NodeHandle) atNodeId, message.getRecipientId(), "XML exception!" );			
 		} catch ( MessageException e ) {
-			observerNotice(Event.MESSAGE_FAILED, this, message.getSenderId(), (NodeHandle) atNodeId, message.getRecipientId(), "Message exception!" );
+			observerNotice(Event.MESSAGE_FAILED, pastryNode, message.getSenderId(), (NodeHandle) atNodeId, message.getRecipientId(), "Message exception!" );
 		}
 	}
 	
@@ -534,7 +546,7 @@ public class PastryNodeImpl extends Node {
 	@Override
 	public Envelope fetchArtifact(long id) throws ArtifactNotFoundException, StorageException {
 
-		observerNotice(Event.ARTIFACT_FETCH_STARTED, pastryNode, id, "" );
+		observerNotice(Event.ARTIFACT_FETCH_STARTED, pastryNode, ""+id);
 		
 		Id pastryId = ContentEnvelope.getPastEnvelopeId(id);
 		
@@ -545,31 +557,29 @@ public class PastryNodeImpl extends Node {
 		try {
 			Envelope contentFromNet = continuation.getResultWaiting();
 
-			observerNotice(Event.ARTIFACT_RECEIVED, pastryNode, id, "" );
+			observerNotice(Event.ARTIFACT_RECEIVED, pastryNode, ""+id);
 			
 			return contentFromNet;
 		} catch (Exception e) {
-			observerNotice(Event.ARTIFACT_FETCH_FAILED, pastryNode, id, "" );
-			throw new StorageException ( "unable to retrieve Artefact from past storage", e);
+			observerNotice(Event.ARTIFACT_FETCH_FAILED, pastryNode, ""+id);
+			throw new StorageException ( "Unable to retrieve Artifact from past storage", e);
 		}			
 	}
 
 	@Override
 	public void storeArtifact(Envelope envelope) throws StorageException, L2pSecurityException {
-
-		observerNotice(Event.ARTIFACT_ADDED, pastryNode );
-
+		
 		// check for overwriting
 		try {
 			Envelope stored = fetchArtifact(envelope.getId());
 			
 			stored.checkOverwrite ( envelope );
 		} catch (ArtifactNotFoundException e) {
-			// ok, new artifact
+			//OK, new artifact
 		} catch ( StorageException e ) {
-			// new artefact?!?
+			//Always thrown..
 		} catch ( L2pSecurityException e ){
-			observerNotice ( Event.ARTIFACT_OVERWRITE_FAILED, pastryNode );
+			observerNotice (Event.ARTIFACT_OVERWRITE_FAILED, pastryNode, envelope.getId()+"" );
 			throw e;
 		}
 		
@@ -577,23 +587,22 @@ public class PastryNodeImpl extends Node {
 		pastStorage.insert ( new ContentEnvelope ( envelope ), conti );
 
 		//System.out.println ( "back from insert call");
-		
 		try {
 			//System.out.println ( "   now waiting for feedback...");
 			conti.waitForResult();
 			if ( !conti.isSuccess() ) {
-				observerNotice(Event.ARTIFACT_UPLOAD_FAILED, pastryNode, "storage error" );
+				observerNotice(Event.ARTIFACT_UPLOAD_FAILED, pastryNode, "Storage error for Artifact " + envelope.getId());
 				if ( conti.hasException())
-					throw new PastryStorageException ( "error storing update", conti.getExceptions()[0] );
+					throw new PastryStorageException ( "Error storing update", conti.getExceptions()[0] );
 				else
-					throw new PastryStorageException ( "error storing update" );
+					throw new PastryStorageException ( "Error storing update" );
 			}
 			
-			observerNotice(Event.AGENT_UPLOAD_SUCCESS, pastryNode );
 		} catch (InterruptedException e) {
 			throw new PastryStorageException ( "Storage has been interrupted", e );
 		}
 		
+		observerNotice(Event.ARTIFACT_ADDED, pastryNode, envelope.getId()+"");
 		
 	}
 
@@ -601,15 +610,14 @@ public class PastryNodeImpl extends Node {
 	public void removeArtifact(long id, byte[] signature) throws StorageException, ArtifactNotFoundException {
 		throw new PastryStorageException ( "delete not implemented in pastry!");
 	}
-
+	
+	
 	@Override
 	public Object[] findRegisteredAgent(long agentId, int hintOfExpectedCount) throws AgentNotKnownException {
-		observerNotice(Event.AGENT_SEARCH_STARTED, pastryNode, agentId, null);
-		
+		observerNotice(Event.AGENT_SEARCH_STARTED, pastryNode, agentId, null, (Long) null, "");
 		return application.searchAgent ( agentId, hintOfExpectedCount ).toArray();
 	}
-
-
+	
 	
 	@Override
 	public boolean knowsAgentLocally(long agentId) {
@@ -679,9 +687,8 @@ public class PastryNodeImpl extends Node {
 	@Override
 	public Agent getAgent(long id) throws AgentNotKnownException {
 		if ( ! locallyKnownAgents.hasAgent ( id )) {
-			//System.out.println( "don't known " + id + " - fetching...");
-			observerNotice(Event.AGENT_GET_STARTED, pastryNode, id, "" );
-		
+			observerNotice(Event.AGENT_GET_STARTED, pastryNode, id, null, (Long) null, "");
+
 			Id pastryId = ContentEnvelope.getPastAgentId(id);
 			
 			PastGetContinuation<Agent> continuation = new PastGetContinuation<Agent>( Agent.class, AGENT_GET_TIMEOUT,  "fetching agent: " + id );
@@ -690,13 +697,12 @@ public class PastryNodeImpl extends Node {
 			
 			try {
 				Agent agentFromNet = continuation.getResultWaiting();
-
-				observerNotice(Event.AGENT_GET_SUCCESS, pastryNode, id, "" );
 				
+				observerNotice(Event.AGENT_GET_SUCCESS, pastryNode, id, null, (Long) null, "");
 				locallyKnownAgents.registerAgent(agentFromNet);
 			} catch (Exception e) {
-				observerNotice(Event.AGENT_GET_FAILED, pastryNode, id, "" );
-				throw new AgentNotKnownException ( "unable to retrieve Agent "+id+"from past storage", e);
+				observerNotice(Event.AGENT_GET_FAILED, pastryNode, id, null, (Long) null, "");
+				throw new AgentNotKnownException ( "Unable to retrieve Agent "+id+" from past storage", e);
 			}			
 		}
 	
@@ -709,12 +715,12 @@ public class PastryNodeImpl extends Node {
 			throw new L2pSecurityException ( "You have to unlock the agent before storage!");
 		if ( locallyKnownAgents.hasAgent(agent.getId()))
 			throw new AgentAlreadyRegisteredException("This agent is already known locally!");
-				
-		observerNotice(Event.AGENT_UPLOAD_STARTED, pastryNode, agent, "" );
-				
+		
+		observerNotice(Event.AGENT_UPLOAD_STARTED, pastryNode, agent, "");
+		
 		try {
 			Agent stored = getAgent ( agent.getId() );
-			observerNotice(Event.AGENT_UPLOAD_FAILED, pastryNode, agent, "already known!" );
+			observerNotice(Event.AGENT_UPLOAD_FAILED, pastryNode, agent, "Agent already known!" );
 			throw new AgentAlreadyRegisteredException ( "I already know stored version: " + stored );
 		} catch (AgentNotKnownException e) {
 		}
@@ -728,7 +734,7 @@ public class PastryNodeImpl extends Node {
 		try {
 			conti.waitForResult();
 			if ( !conti.isSuccess() ) {
-				observerNotice(Event.AGENT_UPLOAD_FAILED, pastryNode, agent, "storage error" );
+				observerNotice(Event.AGENT_UPLOAD_FAILED, pastryNode, agent, "Storage error for agent!");
 				locallyKnownAgents.unregisterAgent(agent);
 				throw new AgentException ( "Storage problems", new PastryStorageException ( "error storing update" ));
 			}
@@ -736,9 +742,10 @@ public class PastryNodeImpl extends Node {
 			if ( agent instanceof UserAgent )
 				updateUserAgentList((UserAgent) agent);			
 			
-			observerNotice(Event.AGENT_UPLOAD_SUCCESS, pastryNode, agent, "" );
+			observerNotice(Event.AGENT_UPLOAD_SUCCESS, pastryNode, agent, "");
 		} catch (InterruptedException e) {
 			locallyKnownAgents.unregisterAgent(agent);
+			observerNotice(Event.AGENT_UPLOAD_FAILED, pastryNode, agent, "Got interrupted!");
 			throw new AgentException ( "Storage has been interrupted", e );
 		}
 	}
@@ -794,7 +801,7 @@ public class PastryNodeImpl extends Node {
 			throws NodeNotFoundException {
 		
 		if ( ! ( nodeId instanceof NodeHandle ))
-			throw new NodeNotFoundException ( "given node id is not a pastry Node Handle!");
+			throw new NodeNotFoundException ("Given node id is not a pastry Node Handle!");
 		
 		return application.getNodeInformation ( (NodeHandle) nodeId );
 	}
@@ -806,14 +813,12 @@ public class PastryNodeImpl extends Node {
 			throws L2pSecurityException {
 		try {
 			application.unlockRemoteAgent(agentId, passphrase, (NodeHandle) targetNode, nodeEncryptionKey);
-			observerNotice(Event.AGENT_UNLOCKED, targetNode, "agent " + agentId + " unlocked at target node" );
+			observerNotice(Event.AGENT_UNLOCKED, pastryNode, agentId, targetNode, (Long) null, "Agent unlocked at target node!" );
 		} catch ( L2pSecurityException e ) {
-			observerNotice(Event.AGENT_UNLOCK_FAILED, "unlocking of agent " + agentId + " failed: " + e );
+			observerNotice(Event.AGENT_UNLOCK_FAILED, pastryNode, agentId, targetNode, (Long) null, "Unlocking of agent failed!");
 			throw e;
 		}
 	}
-
-
-
+	
 	
 }

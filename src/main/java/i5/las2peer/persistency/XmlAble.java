@@ -28,9 +28,6 @@ public interface XmlAble
 	/**
 	 * Returns a XML representation of this object.
 	 *
-	 * This method will be used by an object manager to get a persistency representation
-	 * of this object.
-	 *
 	 *
 	 * @return   a String
 	 *

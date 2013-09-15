@@ -36,7 +36,7 @@ import java.util.Vector;
  *
  */
 public class ServiceStarter {
-
+	
 	
 	public static final String DEFAULT_LOG = "./log/las2peer.log";
 	public static final String DEFAULT_BOOTSTRAP = "127.0.0.1:9000";
@@ -47,11 +47,11 @@ public class ServiceStarter {
 	
 	
 	/**
-	 * walk through the given parameter values, check all parameters and return a corresponding hashtable
+	 * Walks through the given parameter values, check all parameters and return a corresponding hashtable.
 	 * 
 	 * @param argv
 	 * 
-	 * @return hashtable with parsed parameters
+	 * @return a hashtable with parsed parameters
 	 */
 	@SuppressWarnings("unchecked")
 	private static Hashtable<String, Object> parseParameters ( String[] argv ) {
@@ -130,7 +130,7 @@ public class ServiceStarter {
 	
 	
 	/**
-	 * set the default values for all missing parameters
+	 * Sets the default values for all missing parameters.
 	 * 
 	 * @param parameters
 	 */
@@ -151,8 +151,9 @@ public class ServiceStarter {
 			parameters.put( "logprefix", DEFAULT_LOG);
 	}
 	
+	
 	/**
-	 * print an error message to standard error and the normal help message to standard out
+	 * Prints an error message to standard error and the normal help message to standard out.
 	 * @param message
 	 */
 	private static void printHelp ( String message ) {
@@ -160,8 +161,9 @@ public class ServiceStarter {
 		printHelp ();
 	}
 	
+	
 	/**
-	 * print a simple help message to standard out
+	 * Prints a simple help message to standard out.
 	 */
 	private static void printHelp () {
 		System.out.println( "Start a node hosting one or more services. "
@@ -173,7 +175,7 @@ public class ServiceStarter {
 	
 	
 	/**
-	 * set up the classloader
+	 * Sets up the classloader.
 	 * 
 	 * @return a class loader looking into the given directories
 	 * 
@@ -183,11 +185,8 @@ public class ServiceStarter {
 	}
 	
 	
-	
-
-
 	/**
-	 * register all given agents to the running las2peer node
+	 * Registers all given agents to the running LAS2peer node.
 	 * 
 	 * @param node
 	 * @param agents
@@ -210,16 +209,16 @@ public class ServiceStarter {
 			}
 		}
 	}
-
-
+	
+	
 	/**
-	 * start a pastry node implementation of a las2peer network node
-	 * @param cl 
+	 * Starts a pastry node implementation of a LAS2peer network node.
+	 * @param cl
 	 * 
 	 * @param parameters
 	 * 
 	 * @return a running node
-	 * @throws NodeException 
+	 * @throws NodeException
 	 */
 	private static PastryNodeImpl startNode( L2pClassLoader cl, Hashtable<String, Object> parameters ) throws NodeException {
 		String bootstrap = (String) parameters.get("bootstrap");
@@ -232,17 +231,18 @@ public class ServiceStarter {
 		
 		return node;
 	}
-
-
+	
+	
 	/**
-	 * create new service agents for the given service classes
-	 * and store them as [class].agent.xml files in the current directory.
+	 * Creates new service agents for the given service classes
+	 * and stores them as [class].agent.xml files in the current directory.
 	 * 
-	 * The corresponding passphrases will be collected in the file passphrases.txt
+	 * The corresponding passphrases will be collected in the file passphrases.txt.
+	 * 
 	 * @param cl 
 	 *  
 	 * @param vector
-	 * @return
+	 * @return a vector of service agents
 	 * @throws AgentException 
 	 */
 	private static Vector<ServiceAgent> createAgents(L2pClassLoader cl, Vector<String> vector) throws AgentException {
@@ -284,7 +284,7 @@ public class ServiceStarter {
 				passphraseOut.append ( agentFile + "\t:\t" + passphrase + "\n");
 
 				agent.unlockPrivateKey(passphrase);
-				result.add ( agent );	
+				result.add ( agent );
 			} catch ( ClassCastException e ) {
 				throw new AgentException ( "clsName is not a Service class!");
 			} catch ( ClassLoaderException e ) {
@@ -318,14 +318,13 @@ public class ServiceStarter {
 		
 		return result;
 	}
-
-
+	
 	
 	/** 
-	 * load and unlock the agents from the given XML files
+	 * Loads and unlocks the agents from the given XML files.
 	 * 
 	 * @param xmlFiles	strings defining XML files containing service agent information
-	 * @param passphrases	passphrases for the service agents' keys
+	 * @param passphrases passphrases for the service agents' keys
 	 * 
 	 * @return vector with all loaded and unlocked agents
 	 * @throws AgentException 
@@ -351,7 +350,6 @@ public class ServiceStarter {
 		
 		return result;
 	}
-	
 	
 	
 	/**
@@ -423,15 +421,13 @@ public class ServiceStarter {
 		
 	}
 	
+	
 	private static void startHttpConnector ( Node node, final int iPort ) {
-		
 		try {
 			System.out.println ( "Starting Http Connector!");
 			final HttpConnector connector = new HttpConnector ();
 			connector.setHttpPort( iPort );
 			connector.start( node );
-			
-			System.out.println ( " -> waiting a little");
 						
 			try {
 				System.in.read();
@@ -443,7 +439,7 @@ public class ServiceStarter {
 		} catch (ConnectorException e) {
 			System.out.println ( " --> problems starting the connector: " + e);
 		}
-		
-	}	
+	}
+	
 	
 }

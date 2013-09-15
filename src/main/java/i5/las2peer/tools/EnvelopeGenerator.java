@@ -14,22 +14,24 @@ import java.lang.reflect.InvocationTargetException;
 
 
 /**
- * A simple command line tool for generating xml envelopes to the standard out.
+ * A simple command line tool for generating XML envelopes to the standard out.
  * 
  * @author Holger Jan&szlig;en
  *
  */
 public class EnvelopeGenerator {
 	
+	
 	/**
-	 * print a usage help message
+	 * Prints a usage help message.
 	 */
 	public static void usage () {
 		usage ( null );
 	}
 	
+	
 	/**
-	 * print a usage help message and some additional information
+	 * Prints a usage help message and some additional information.
 	 * 
 	 * @param message	additional information
 	 */
@@ -40,9 +42,9 @@ public class EnvelopeGenerator {
 		}
 	}
 	
-
+	
 	/**
-	 * load an agent from the given XML file name
+	 * Loads an agent from the given XML file name.
 	 * 
 	 * @param filename
 	 * 
@@ -57,9 +59,9 @@ public class EnvelopeGenerator {
 	
 	
 	/**
-	 * command line script for generating a simple envelope
+	 * Command line script for generating a simple envelope.
 	 * 
-	 * arguments:
+	 * Arguments:
 	 * <ol>
 	 * 	<li>xml file with owner agent</li>
 	 *  <li>passphrase of the owner for unlocking the key</li>
@@ -112,15 +114,17 @@ public class EnvelopeGenerator {
 		}
 		
 	}
-
+	
 	
 	/**
-	 * try to create an instance of the given class providing a
-	 * String constructor with the given value
+	 * Tries to create an instance of the given class providing a
+	 * String constructor with the given value.
 	 * 
 	 * @param classname
 	 * @param value
-	 * @return
+	 * 
+	 * @return a serializable
+	 * 
 	 * @throws ClassNotFoundException
 	 * @throws SecurityException
 	 * @throws NoSuchMethodException
@@ -138,8 +142,6 @@ public class EnvelopeGenerator {
 		
 		return (Serializable) cons.newInstance(value);
 	}
-	
-	
 	
 	
 }

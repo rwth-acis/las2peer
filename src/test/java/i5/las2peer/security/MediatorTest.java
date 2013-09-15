@@ -1,10 +1,9 @@
 package i5.las2peer.security;
 
-import static org.junit.Assert.*;
-
-import java.io.IOException;
-import java.util.HashSet;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
 import i5.las2peer.p2p.AgentNotKnownException;
@@ -13,8 +12,14 @@ import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.testing.MockAgentFactory;
 import i5.las2peer.tools.SerializationException;
 
+import java.io.IOException;
+import java.util.HashSet;
+
 import org.junit.Test;
 
+
+//NOTE: Answering each message is disabled in testing mode (since there exists no real LAS2peer context here).
+//Also refer to the Mediator implementation for more information.
 public class MediatorTest {
 
 	
