@@ -135,34 +135,29 @@ public class NodeStreamLogger extends NodeObserver {
 			throw new IllegalStateException ( "This log is closed!");
 		
 		printer.println(
-			"timestamp\ttimespan\tevent code\tsource node\tsource agent\torigin node\torigin agent\tadditional remarks\n"+
-			"---------\t--------\t----------\t-----------\t------------\t-----------\t------------\t------------------"		
+			"timestamp\tevent code\tsource node\tsource agent\tdestination node\tdestination agent\tadditional remarks\n"+
+			"---------\t----------\t-----------\t------------\t-----------\t------------\t------------------"		
 		);
 	}
 	
 	@Override
-	protected void writeLog(long timestamp, long timespan, Event e,
-			String sourceNode, Long sourceAgentId, String originNode,
-			Long originAgentId, String remarks) {
+	protected void writeLog(Long timestamp, Event e,
+			String sourceNode, Long sourceAgentId, String destinationNode,
+			Long destinationAgentId, String remarks) {
 		
 		if ( isClosed )
 			throw new IllegalStateException ( "This log is closed!");
 		
 		StringBuffer logLine = new StringBuffer (  dateFormat.format ( new Date(timestamp) ) + "\t" );
 		
-		if ( timespan != -1 )
-			logLine.append ( timespan ).append("\t");
-		else
-			logLine.append ( appendPart(null));
-		
 		logLine.append( e + " (" + e.getCode() + ")\t" );
 		
 	
 		logLine.append ( appendPart ( sourceNode ));			
 		logLine.append ( appendPart ( sourceAgentId ));			
-		logLine.append ( appendPart ( originNode ));			
+		logLine.append ( appendPart ( destinationNode ));			
 		
-		logLine.append ( appendPart ( originAgentId ));			
+		logLine.append ( appendPart ( destinationAgentId ));			
 		logLine.append ( appendPart ( remarks ));
 		
 		
@@ -173,10 +168,11 @@ public class NodeStreamLogger extends NodeObserver {
 	}
 	
 	/**
-	 * simple method for one log line entry -- null will be printed as "-"
-	 * all values will be followed by a tab char
+	 * Simple method for one log line entry. Null will be printed as "-".
+	 * All values will be followed by a tab char.
+	 * 
 	 * @param o
-	 * @return
+	 * @return a string
 	 */
 	private static String appendPart ( Object o ) {
 		if ( o == null)
@@ -184,7 +180,6 @@ public class NodeStreamLogger extends NodeObserver {
 		else
 			return "" + o + "\t";
 	}
-
 	
 	
 }

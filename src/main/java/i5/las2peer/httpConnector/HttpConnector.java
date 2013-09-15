@@ -6,7 +6,10 @@ import i5.httpServer.HttpsServer;
 import i5.httpServer.RequestHandler;
 import i5.las2peer.api.Connector;
 import i5.las2peer.api.ConnectorException;
+import i5.las2peer.logging.NodeObserver.Event;
+import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.Node;
+import i5.las2peer.security.Agent;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -24,11 +27,7 @@ import java.util.Date;
 
 public class HttpConnector extends Connector
 {
-	public static final int LOGLEVEL_NORMAL = 10;
-	public static final int LOGLEVEL_ERROR = -100;
 	
-	
-
 	/* configuration parameters */
 	public static final int DEFAULT_HTTP_CONNECTOR_PORT = 8080;
 	protected int httpConnectorPort = DEFAULT_HTTP_CONNECTOR_PORT;
@@ -42,20 +41,17 @@ public class HttpConnector extends Connector
 	public static final boolean DEFAULT_START_HTTPS_CONNECTOR = false;
 	protected boolean startHttpsConnector = DEFAULT_START_HTTPS_CONNECTOR;
 	
-	
 	public static final String DEFAULT_SSL_KEYSTORE = "keys/ssl";
 	protected String sslKeystore = DEFAULT_SSL_KEYSTORE;
 	
 	public static final String DEFAULT_SSL_KEY_PASSWD = "123456";
 	protected String sslKeyPasswd = DEFAULT_SSL_KEY_PASSWD;
 	
-	
 	public static final boolean DEFAULT_ENABLE_FILE_ACCESS = false;
 	protected boolean enableFileAccess = DEFAULT_ENABLE_FILE_ACCESS;
 	
 	public static final String DEFAULT_FILE_DIRECTORY = "./htdocs";
 	protected String fileDirectory = DEFAULT_FILE_DIRECTORY;
-		
 	
 	public static final long DEFAULT_MAX_SESSION_TIMEOUT = 30*60*60 * 1000; // 30 minutes
 	protected long maxSessionTimeoutMS = DEFAULT_MAX_SESSION_TIMEOUT;
@@ -66,7 +62,6 @@ public class HttpConnector extends Connector
 	public static final long DEFAULT_DEFAULT_SESSION_TIMEOUT = 10*60*60 * 1000; // 10 minutes
 	protected long defaultSessionTimeout = DEFAULT_DEFAULT_SESSION_TIMEOUT;
 	
-	
 	public static final long DEFAULT_DEFAULT_PERSISTENT_OUTDATE_S = 60 * 60 * 24 * 1000; // 1 day
 	protected long defaultPersistentTimeoutMS = DEFAULT_DEFAULT_PERSISTENT_OUTDATE_S;
 	
@@ -76,23 +71,20 @@ public class HttpConnector extends Connector
 	public static final long DEFAULT_MAX_PERSISTENT_OUTDATE_S = 60 * 60 * 1000; // 1 hour
 	protected long maxPersistentTimeoutMS = DEFAULT_MAX_PERSISTENT_OUTDATE_S;
 	
-	
 	public static final boolean DEFAULT_PRINT_SEC_EXCEPTIONS = false;
 	protected boolean printSecExceptions = DEFAULT_PRINT_SEC_EXCEPTIONS;
 	
-	public static final int DEFAULT_SOCKET_TIMEOUT = 60*1000; /* 1 minute */
+	public static final int DEFAULT_SOCKET_TIMEOUT = 60*1000; // 1 minute
 	protected int socketTimeout = DEFAULT_SOCKET_TIMEOUT;
 	
-	
-	public static final String DEFAULT_CROSS_ORIGIN_RESOURCE_DOMAIN = "localhost";
+	public static final String DEFAULT_CROSS_ORIGIN_RESOURCE_DOMAIN = "http://role-is.dbis.rwth-aachen.de:9080";
 	protected String crossOriginResourceDomain = DEFAULT_CROSS_ORIGIN_RESOURCE_DOMAIN;
 	
 	public static final int DEFAULT_CROSS_ORIGIN_RESOURCE_MAX_AGE = 60;
 	protected int crossOriginResourceMaxAge = DEFAULT_CROSS_ORIGIN_RESOURCE_MAX_AGE;
 
-	public static final boolean DEFAULT_ENABLE_CROSS_ORIGIN_RESOURCE_SHARING = false;
+	public static final boolean DEFAULT_ENABLE_CROSS_ORIGIN_RESOURCE_SHARING = true;
 	protected boolean enableCrossOriginResourceSharing = DEFAULT_ENABLE_CROSS_ORIGIN_RESOURCE_SHARING;
-
 	
 	public static final boolean DEFAULT_PREFER_LOCAL_SERVICES = true;
 	protected boolean preferLocalServices = DEFAULT_PREFER_LOCAL_SERVICES;
@@ -103,16 +95,15 @@ public class HttpConnector extends Connector
 	
 	
 	private Node myNode = null;
-
+	
 	
 	private final static String DEFAULT_LOGFILE = "log/httpConnector.log";
-
-
-
+	
 	
 	private PrintStream logStream = null;
 	private DateFormat dateFormat = DateFormat.getDateTimeInstance();
-
+	
+	
 	/**
 	 * create a new HTTP connector instance. 	
 	 * @throws FileNotFoundException
@@ -135,6 +126,7 @@ public class HttpConnector extends Connector
 		setLogStream ( new PrintStream ( new FileOutputStream ( filename, true )));
 	}
 	
+	
 	/**
 	 * set the port for the HTTP connector to listen to
 	 * 
@@ -148,6 +140,7 @@ public class HttpConnector extends Connector
 		
 		httpConnectorPort = port;
 	}
+	
 	
 	/**
 	 * set the port for the HTTP connector to listen to for the secure line
@@ -164,7 +157,6 @@ public class HttpConnector extends Connector
 	}
 	
 	
-	
 	/**
 	 * set the socket timeout for the underlying http server
 	 * (only at configuration not during runtim)
@@ -173,6 +165,7 @@ public class HttpConnector extends Connector
 	public void setSocketTimeout ( int timeoutInMs ) {
 		socketTimeout = timeoutInMs;
 	}
+	
 	
 	/**
 	 * set a stream to log all messages to
@@ -195,11 +188,11 @@ public class HttpConnector extends Connector
 			} catch (FileNotFoundException e) {
 				throw new ConnectorException ( "cannot initialize standard log file at " + DEFAULT_LOGFILE, e);
 			}
-
+		
 		myNode = node;
 		
 		System.setProperty( "http-connector.printSecExceptions", ""+printSecExceptions );
-
+		
 		// enable file access ?
 		if ( enableFileAccess && fileDirectory != null ) {
 			System.setProperty( "las.http.fileAccess" , "true" );
@@ -213,10 +206,10 @@ public class HttpConnector extends Connector
 				http = new HttpServer (HttpConnectorRequestHandler.class.getName(), httpConnectorPort, crossOriginResourceDomain, crossOriginResourceMaxAge);
 			} else 
 				http = new HttpServer (HttpConnectorRequestHandler.class.getName(), httpConnectorPort);
-
+			
 			
 			http.setSocketTimeout( socketTimeout );
-	
+			
 			http.start();
 			
 			// wait for the server to start
@@ -231,7 +224,7 @@ public class HttpConnector extends Connector
 			} while ( handler == null );
 			
 			((HttpConnectorRequestHandler) handler).setConnector( this );
-			//LasLogger.logMessage ( getCode(), "Http-Connector running on port " + httpConnectorPort, LasLogger.LOGLEVEL_NORMAL );
+			logMessage("Http-Connector running on port " + httpConnectorPort);
 		}
 		
 		if ( startHttpsConnector ) {
@@ -239,17 +232,11 @@ public class HttpConnector extends Connector
 				https = new HttpsServer ( sslKeystore, sslKeyPasswd, RequestHandler.class.getName(), httpsConnectorPort, crossOriginResourceDomain, crossOriginResourceMaxAge);
 			else 
 				https = new HttpsServer ( sslKeystore, sslKeyPasswd, HttpConnectorRequestHandler.class.getName(), httpsConnectorPort );
-
+			
 			
 			https.setSocketTimeout( socketTimeout );
 			https.start();
-			//LasLogger.logMessage ( getCode(), "Https-Connector running on port " + httpsConnectorPort, LasLogger.LOGLEVEL_NORMAL );
-		
-			/*
-			try {
-				Thread.sleep ( 3000 );
-			} catch (InterruptedException e) {}
-			 */
+			logMessage("Https-Connector running on port " + httpConnectorPort);
 		}
 	}
 	
@@ -257,8 +244,6 @@ public class HttpConnector extends Connector
 	@Override
 	public void stop () throws ConnectorException {
 		
-		this.myNode = null;
-				
 		// stop the listener
 		if ( http != null )
 			http.stopServer();
@@ -268,21 +253,19 @@ public class HttpConnector extends Connector
 		
 		try {
 			if ( http != null  ) {
-				//LasLogger.logMessage( getCode(), "Joining Http Server for closing!", true );
 				http.join ();
-				//LasLogger.logMessage ( getCode(), "HttpServer has been stopped!", true );
+				logMessage("Http-Connector has been stopped");
+
 			}
-			
 			if ( https != null ) {
-				//LasLogger.logMessage( getCode(), "Joining Https Server for closing!", true );
 				https.join ();
-				//LasLogger.logMessage ( getCode(), "HttpsServer has been stopped!", true );
+				logMessage("Https-Connector has been stopped");
 			}
 		} catch (InterruptedException e) {
-			//LasLogger.logError( getCode(), "Joining has been interrupted!" );
+			logError("Joining has been interrupted!");
 		}
+		this.myNode = null;
 		
-		//super.stop ();
 	}
 	
 	
@@ -308,16 +291,17 @@ public class HttpConnector extends Connector
 		return myNode;
 	}
 	
+	
 	/**
 	 * get a timeout value for a suggested timeout (e.g. given by the remote user)
 	 * based on the set minimal an maximal timeout values
 	 * 
-	 * e.g. a getSessionTimeout(0) always gives the minimal session timout value
+	 * e.g. a getSessionTimeout(0) always gives the minimal session timeout value
 	 *   	
 	 * @param suggested
-	 * @return
+	 * @return the session time out
 	 */
-	long getSesstionTimeout ( long suggested ) {
+	long getSessionTimeout ( long suggested ) {
 		if ( suggested < minSessionTimeoutMS )
 			suggested = minSessionTimeoutMS;
 		if ( suggested > maxSessionTimeoutMS )
@@ -326,18 +310,20 @@ public class HttpConnector extends Connector
 		return suggested;
 	}
 	
+	
 	/**
 	 * get the default timeout for remote sessions
-	 * @return
+	 * @return the default session timeout
 	 */
 	long getDefaultSessionTimeout () {
 		return defaultSessionTimeout;
 	}
 	
+	
 	/**
 	 * 
 	 * @param suggested
-	 * @return
+	 * @return the persistent session timeout
 	 */
 	long getPersistentSessionTimeout ( long suggested ) {
 		if ( suggested < minPersistentTimeoutMS)
@@ -348,9 +334,11 @@ public class HttpConnector extends Connector
 		return suggested;
 	}
 	
+	
 	/**
 	 * get the default timeout for persistent sessions
-	 * @return
+	 * 
+	 * @return the default timeout
 	 */
 	long getDefaultPersistentTimeout () {
 		return defaultPersistentTimeoutMS;
@@ -358,22 +346,76 @@ public class HttpConnector extends Connector
 	
 	
 	/**
-	 * write a log message
+	 * Logs a message.
+	 * 
 	 * @param message
 	 */
-	void logMessage ( String message ) {
-		logMessage ( message, LOGLEVEL_NORMAL );
+	void logMessage (String message) {
+		logStream.println( dateFormat.format ( new Date() ) + "\t" + message);
+		myNode.observerNotice(Event.HTTP_CONNECTOR_MESSAGE, myNode.getNodeId(), message);
+	}
+	
+	
+	
+	/**
+	 * Logs a session creation.
+	 * 
+	 * @param message
+	 */
+	void logSessionOpen (String message) {
+		logStream.println( dateFormat.format ( new Date() ) + "\t" + message);
+		myNode.observerNotice(Event.HTTP_CONNECTOR_SESSION_START, myNode.getNodeId(), message);
 	}
 	
 	
 	/**
-	 * write a log message 
+	 * Logs a session closing.
+	 * 
 	 * @param message
-	 * @param logLevel
 	 */
-	void logMessage ( String message, int logLevel ) {
-		logStream.println( dateFormat.format ( new Date() ) + "\t" + logLevel + "\t" + message);
+	void logSessionClose (String message) {
+		logStream.println( dateFormat.format ( new Date() ) + "\t" + message);
+		myNode.observerNotice(Event.HTTP_CONNECTOR_SESSION_END, myNode.getNodeId(), message);
 	}
+	
+	
+	/**
+	 * Logs a request.
+	 * 
+	 * @param message
+	 */
+	void logRequest (String request) {
+		logStream.println( dateFormat.format ( new Date() ) + "\t Request:" + request);
+		
+		int lastServiceClassNamePosition = request.lastIndexOf("/");
+		if(lastServiceClassNamePosition > 0){
+			String serviceClass = request.substring(1, lastServiceClassNamePosition);
+			Agent service = null;
+			try {
+				service = myNode.getServiceAgent(serviceClass);
+			} catch (AgentNotKnownException e) {
+				// Should be known..
+				e.printStackTrace();
+			}
+			myNode.observerNotice(Event.HTTP_CONNECTOR_REQUEST, myNode.getNodeId(), service, request);
+		}
+		//Not a service call
+		else{
+			myNode.observerNotice(Event.HTTP_CONNECTOR_REQUEST, myNode.getNodeId(), request);
+		}
+	}
+	
+	
+	/**
+	 * Logs an error.
+	 * 
+	 * @param error
+	 */
+	void logError (String error) {
+		logStream.println( dateFormat.format ( new Date() ) + "\t Error: " + error);
+		myNode.observerNotice(Event.HTTP_CONNECTOR_ERROR, myNode.getNodeId(), error);
+	}
+	
 	
 	/**
 	 * 
@@ -382,6 +424,6 @@ public class HttpConnector extends Connector
 	boolean preferLocalServices () {
 		return preferLocalServices;
 	}
-		
+	
+	
 }
-

@@ -13,7 +13,7 @@ import java.util.Set;
 /**
  * Base (abstract) super type for classes that may be configurable via property files.
  * 
- * The basic idea ist, that the runtime system will look for .property files in the current runtime
+ * The basic idea is, that the runtime system will look for .property files in the current runtime
  * directory or the subdirectories ./config and ./properties for a file named
  * as the sub class of Configurable (including the package name).
  * 
@@ -25,6 +25,15 @@ import java.util.Set;
  *
  */
 public abstract class Configurable {
+	
+	
+	/**
+	 * Used to determine, if this service should be monitored.
+	 * Can be overwritten by service configuration file.
+	 * Deactivated per default.
+	 */
+	protected boolean monitor = false;
+	
 	/**
 	 * Tries to find a (service) class specific property file
 	 * 
@@ -35,8 +44,8 @@ public abstract class Configurable {
 	 *  <li>./properties/</li>
 	 * </ul>
 	 * 
-	 * The name of the property file is the name of the implenting service class
-	 * followed by .properties
+	 * The name of the property file is the name of the implementing service class
+	 * followed by .properties.
 	 * 
 	 * @return hashtable with all property entries
 	 */
@@ -64,8 +73,7 @@ public abstract class Configurable {
 	
 
 	/**
-	 * set a field to the given value 
-	 * 
+	 * Sets a field to the given value.
 	 * @param f
 	 * @param value
 	 * 
@@ -93,26 +101,25 @@ public abstract class Configurable {
 		}
 	}
 	
+	
 	/**
-	 * set all field values from the classes property file
-	 * 
+	 * Sets all field values from the classes property file.
 	 * This method uses {@link #getProperties} to get the value stored in the classes property file
 	 * to set all fields with the name of the properties.
 	 * 
-	 * 
+	 * Note that the name "monitor" is reserved to switch the monitoring on and off.
 	 */
 	protected void setFieldValues () {
-		setFieldValues ( null );
+		setFieldValues (null);
 	}
 	
 	
-	
 	/**
-	 * set all field values from the classes property file
-	 * 
+	 * Sets all field values from the classes property file.
 	 * This method uses {@link #getProperties} to get the value stored in the classes property file
 	 * to set all fields with the name of the properties.
-	 * 
+	 * Also checks, if the field contains the value for the monitoring switch and sets it if so.
+
 	 * All fields mentioned in <i>except</i> will be left out. 
 	 * 
 	 */
@@ -120,16 +127,19 @@ public abstract class Configurable {
 		Hashtable<String, String> props = getProperties ();
 		
 		for ( String key: props.keySet() ) {
-			if ( except != null && except.contains(key))
+			if (key.equals("monitor")){
+				this.monitor = 	Boolean.parseBoolean(props.get(key));
 				continue;
-			
+			}
+			if ( (except != null && except.contains(key))){
+				continue;
+			}
 			try {
 				Field f = getClass().getDeclaredField(key);
-				if ( ! Modifier.isFinal(f.getModifiers())
+				if (! Modifier.isFinal(f.getModifiers())
 						&& ! Modifier.isStatic(f.getModifiers())) {
 					f.setAccessible(true);
 					setField ( f, props.get(key));
-					
 					System.out.println ( "Class: " + getClass().getSimpleName() + " using: " + key + " -> " + props.get(key));
 				}
 			} catch ( NoSuchFieldException e ) {
@@ -146,7 +156,7 @@ public abstract class Configurable {
 
 	
 	/**
-	 * look for a property file named after the service class calling this method
+	 * Looks for a property file named after the service class calling this method.
 	 * 
 	 * @return name of a property file
 	 */

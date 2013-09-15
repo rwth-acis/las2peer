@@ -100,7 +100,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 			htAgentTopics.put( receiver.getResponsibleForAgentId(), agentTopic);
 			
 			ColoredOutput.printlnYellow( "\t--> registering agent topic for " + receiver.getResponsibleForAgentId() + " (" + agentTopic.getId() + ")");
-	
+			
 			
 			// always subscribe to the root:
 			NodeHandle root = scribeClient.getRoot(agentTopic);
@@ -111,7 +111,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 					new AgentJoinedContent ( getLocalHandle(), receiver.getResponsibleForAgentId()),
 					root
 			);
-			
+			l2pNode.observerNotice(Event.PASTRY_TOPIC_SUBSCRIPTION_SUCCESS, this.l2pNode.getNodeId(), receiver, "" +agentTopic.getId());
 			/*
 			System.out.println( "children of agent topic: " + scribeClient.numChildren(getAgentTopic(receiver)) );
 			for ( NodeHandle nh: scribeClient.getChildrenOfTopic(getAgentTopic ( receiver ))) 
@@ -185,13 +185,9 @@ public class NodeApplication implements Application, ScribeMultiClient {
 			try {
 				final i5.las2peer.communication.Message m = ((MessageEnvelope)pastMessage).getContainedMessage();
 				
-				l2pNode.observerNotice( 
-						Event.MESSAGE_RECEIVED, 
-						((MessageEnvelope) pastMessage).getSendingNode(), 
-						m.getSender(), 
-						l2pNode.getPastryNode(), 
-						m.getRecipient(), 
-						"Got an envelope for a l2p message" );
+				//Is already done in Node-Classes
+//				l2pNode.observerNotice( Event.MESSAGE_RECEIVED, ((MessageEnvelope) pastMessage).getSendingNode(),
+//						m.getSender(), l2pNode.getPastryNode(), m.getRecipient(), "Got an envelope for a LAS2peer message!" );
 				
 				// hmmmm, is the problem here??
 				new Thread ( new Runnable () {
@@ -213,7 +209,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 			}
 		} else if ( pastMessage instanceof SearchAnswerMessage ) {
 			// k, got an answer for my own search
-			l2pNode.observerNotice(Event.AGENT_SEARCH_ANSWER_RECEIVED, ((SearchAnswerMessage) pastMessage).getSendingNode(), null, l2pNode.getPastryNode(), null, "" );
+			l2pNode.observerNotice(Event.AGENT_SEARCH_ANSWER_RECEIVED, ((SearchAnswerMessage) pastMessage).getSendingNode(), (Long) null, l2pNode.getPastryNode(), (Long) null, "" );
 			
 			// just store the sending node handle
 			HashSet<NodeHandle> pendingCollection = htPendingAgentSearches
@@ -253,9 +249,9 @@ public class NodeApplication implements Application, ScribeMultiClient {
 			
 			WaiterThread<Message> waiter = appMessageWaiters.get( irm.getResponseToId());
 			if ( waiter == null )
-				l2pNode.observerNotice(Event.MESSAGE_FAILED, irm.getSender(), (MessageReceiver) null, "got an answer to an information request, I do not know!");
+				l2pNode.observerNotice(Event.MESSAGE_FAILED, l2pNode.getNodeId(), (MessageReceiver) null, "Got an answer to an information request I do not know from " + irm.getSender());
 			else {
-				l2pNode.observerNotice(Event.MESSAGE_RECEIVED, irm.getSender(), (MessageReceiver) null, "got an answer for Information Request " + irm.getResponseToId());
+				l2pNode.observerNotice(Event.MESSAGE_RECEIVED, l2pNode.getNodeId(), (MessageReceiver) null, "Got an answer for Information request " + irm.getResponseToId() + "from " + irm.getSender());
 				waiter.collectResult(irm);
 			}
 		} else if ( pastMessage instanceof UnlockAgentResponse ) {
@@ -264,22 +260,22 @@ public class NodeApplication implements Application, ScribeMultiClient {
 			WaiterThread<Message> waiter = appMessageWaiters.get( uar.getOriginalMessageId());
 			waiter.collectResult(uar);
 		} else { 
-			l2pNode.observerNotice( Event.MESSAGE_RECEIVED, l2pNode.getPastryNode(), (Long) null, "unkown message: "+pastMessage );
+			l2pNode.observerNotice( Event.MESSAGE_RECEIVED, l2pNode.getNodeId(), null, "unkown message: " + pastMessage );
 			ColoredOutput.printlnYellow( "\t<-- received unknown message: " + pastMessage);
 		}
 	}
 
 	@Override
 	public boolean forward(RouteMessage pastMessage) {
-		l2pNode.observerNotice(Event.MESSAGE_FORWARDING, "" + pastMessage);
+		l2pNode.observerNotice(Event.MESSAGE_FORWARDING, l2pNode.getNodeId(), (Long) null, pastMessage.getDestinationId(), (Long) null, "" + pastMessage);
 		
 		return true;
 	}
 
 	@Override
 	public void update(NodeHandle nh, boolean arg1) {
-		// called when a new neighbor joined the net		
-		l2pNode.observerNotice( Event.NEW_NODE_NOTICE, nh );
+		// called when a new neighbor joined the net
+		l2pNode.observerNotice( Event.NEW_NODE_NOTICE, l2pNode.getNodeId(), ""+nh);
 	}
 
 	
@@ -314,7 +310,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	 * @throws MessageException 
 	 */
 	public void sendMessage ( MessageEnvelope m , NodeHandle to ) throws MalformedXMLException, L2pSecurityException, AgentNotKnownException, MessageException {
-		l2pNode.observerNotice(Event.MESSAGE_SENDING,l2pNode.getPastryNode(), m.getContainedMessage().getSender(), to, m.getContainedMessage().getRecipient(), "message: " + m );
+		l2pNode.observerNotice(Event.MESSAGE_SENDING, l2pNode.getPastryNode(), m.getContainedMessage().getSender(), to, m.getContainedMessage().getRecipient(), "message: " + m );
 		
 		ColoredOutput.printlnYellow("\t --> " + this + " sending (encapsulated) message directly to " + to);
 		endpoint.route( null,  m, to );
@@ -391,7 +387,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 			System.out.println( "Child in search: " + nh);
 		
 		
-		l2pNode.observerNotice (Event.AGENT_SEARCH_STARTED, "" + agentId + " (" + expectedAnswers + ") - topic: " + getAgentTopic( agentId));		
+		l2pNode.observerNotice (Event.AGENT_SEARCH_STARTED, this.l2pNode.getNodeId(), agentId, null, (Long) null, "(" + expectedAnswers + ") - topic: " + getAgentTopic(agentId));		
 		
 		SearchAgentContent search = new SearchAgentContent(getLocalHandle(), agentId);
 		HashSet<NodeHandle> resultSet = new HashSet<NodeHandle> ();
@@ -416,7 +412,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 
 		htPendingAgentSearches.remove(search.getRandomId());
 		
-		l2pNode.observerNotice (Event.AGENT_SEARCH_FINISHED, "" + agentId+ " (" + resultSet.size() + ")");
+		l2pNode.observerNotice (Event.AGENT_SEARCH_FINISHED, this.l2pNode.getNodeId(), agentId, null, (Long) null, "" + resultSet.size());
 		
 		return resultSet;
 	}
@@ -499,7 +495,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 
 			}).start();
 		} else {
-			l2pNode.observerNotice(Event.MESSAGE_RECEIVED_UNKNOWN, l2pNode, "got an unknown message of type " + content.getClass().getName());
+			l2pNode.observerNotice(Event.MESSAGE_RECEIVED_UNKNOWN, this.l2pNode.getNodeId(), "got an unknown message of type " + content.getClass().getName());
 			ColoredOutput.printlnYellow( "got unknown Scribe content of type " + content.getClass().getName());
 		}		
 	}
@@ -508,7 +504,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	@Override
 	public void subscribeFailed(Topic topic) {
 		//ColoredOutput.printlnYellow( "topic subscription failed!");		
-		l2pNode.observerNotice(Event.PASTRY_TOPIC_SUBSCRIPTION_FAILED, "" + topic.toString());
+		l2pNode.observerNotice(Event.PASTRY_TOPIC_SUBSCRIPTION_FAILED, this.l2pNode.getNodeId(), "" + topic.toString());
 	}
 
 
@@ -523,9 +519,6 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	@Override
 	public void subscribeSuccess(Collection<Topic> topics) {
 		for ( Topic t : topics ) {
-			l2pNode.observerNotice(Event.PASTRY_TOPIC_SUBSCRIPTION_SUCCESS, "" + t.toString());
-			
-			
 			System.out.println ( "Subscribe success! Topic info:");
 			System.out.println( "\troot: " + scribeClient.getRoot(t)   + " / " +scribeClient.isRoot ( t ));
 			System.out.println( "\tparent: " + scribeClient.getParent(t));

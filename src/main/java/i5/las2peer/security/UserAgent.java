@@ -126,7 +126,7 @@ public class UserAgent extends PassphraseAgent {
 	public String toXmlString() {
 		try {
 			StringBuffer result = new StringBuffer(
-					"<las2peer:agent type=\"passphrase\">\n"
+					"<las2peer:agent type=\"user\">\n"
 					+"\t<id>" + getId() + "</id>\n"
 					+"\t<publickey encoding=\"base64\">"
 					+ SerializeTools.serializeToBase64( getPublicKey()  ) 
@@ -169,11 +169,11 @@ public class UserAgent extends PassphraseAgent {
 		try {
 			Element root = Parser.parse( xml, false);
 			
-			if ( ! "passphrase".equals( root.getAttribute("type")))
-				throw new MalformedXMLException("passphrase protected agent expeced" );
+			if ( ! "user".equals( root.getAttribute("type")))
+				throw new MalformedXMLException("user agent expected");
 			
 			if ( ! "agent".equals( root.getName()))
-				throw new MalformedXMLException("agent expeced" );
+				throw new MalformedXMLException("agent expected");
 			return createFromXml ( root );
 		} catch (XMLSyntaxException e) {
 			throw new MalformedXMLException("Error parsing xml string", e);
@@ -181,11 +181,11 @@ public class UserAgent extends PassphraseAgent {
 	}
 	
 	/**
-	 * create a new UserAgent protected by the given passphrase
+	 * Create a new UserAgent protected by the given passphrase.
 	 * 
-	 * @param passphrase	passphrase for the secret key of the new user
+	 * @param passphrase passphrase for the secret key of the new user
 	 * 
-	 * @return	a new UserAgent
+	 * @return a new UserAgent
 	 * 
 	 * @throws CryptoException
 	 * @throws L2pSecurityException
@@ -199,7 +199,7 @@ public class UserAgent extends PassphraseAgent {
 	}
 	
 	/**
-	 * sets the state of the object from a string representation resulting from
+	 * Sets the state of the object from a string representation resulting from
 	 * a previous {@link #toXmlString} call.
 	 *
 	 * @param    root		parsed xml document

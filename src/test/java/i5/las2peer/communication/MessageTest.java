@@ -1,12 +1,12 @@
 package i5.las2peer.communication;
 
-import static org.junit.Assert.*;
-
-import java.io.IOException;
-import java.io.Serializable;
-import java.security.NoSuchAlgorithmException;
-import java.util.Date;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import i5.las2peer.execution.RMITask;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.persistency.EncodingFailedException;
@@ -19,6 +19,11 @@ import i5.las2peer.testing.MockAgentFactory;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.SerializationException;
 import i5.las2peer.tools.XmlTools;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.security.NoSuchAlgorithmException;
+import java.util.Date;
 
 import org.junit.Test;
 
@@ -66,7 +71,7 @@ public class MessageTest {
 	public void testAgentIdChecks () throws MalformedXMLException, SerializationException, L2pSecurityException, AgentNotKnownException {
 		
 		String sAgentA =
-		"<las2peer:agent type=\"passphrase\">"
+		"<las2peer:agent type=\"user\">"
 		+"<id>4882835596055779038</id>"
 		+"<publickey encoding=\"base64\">rO0ABXNyABRqYXZhLnNlY3VyaXR5LktleVJlcL35T7OImqVDAgAETAAJYWxnb3JpdGhtdAASTGphdmEvbGFuZy9TdHJpbmc7WwAHZW5jb2RlZHQAAltCTAAGZm9ybWF0cQB+AAFMAAR0eXBldAAbTGphdmEvc2VjdXJpdHkvS2V5UmVwJFR5cGU7eHB0AANSU0F1cgACW0Ks8xf4BghU4AIAAHhwAAABJjCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAL0wtzx4UeaogMc0AUZ0izqqwdQG9ulSZs9C8Ep+ARsjRzbJ4DcLNoUlGaAOciLMIljXybKn25HRLilqirmnwnx5vex1pwnj8/4lsnjhjvc35TXc2iuJqFfJKnXkxD6jFftZeuPHLOa2uMvn0qiwaJ8fpiqIrmQ3Q2T3h8+5etbKNU/rQms1OvS56BlOb3fXBu9sj6o6sRZk1aFDRwGuhY4en6Ol61B2+k09jc7tDi6NzEY3kgmHIT9oy8Ih3Ys8Yq2SqjPjiNiMqAEMxQyAf1Q1eXJMkOGHZr5dhi0FFInl4Q4t2xy9FNxu9IT7Qb3gec6Cqw1rO2PdGN7IxL7pYIUCAwEAAXQABVguNTA5fnIAGWphdmEuc2VjdXJpdHkuS2V5UmVwJFR5cGUAAAAAAAAAABIAAHhyAA5qYXZhLmxhbmcuRW51bQAAAAAAAAAAEgAAeHB0AAZQVUJMSUM=</publickey>"
 		+"<privatekey encrypted=\"AES\" keygen=\"PBKDF2WithHmacSHA1\">"
@@ -76,7 +81,7 @@ public class MessageTest {
 		+"</las2peer:agent>";
 
 		String sAgentB =
-		"<las2peer:agent type=\"passphrase\">"
+		"<las2peer:agent type=\"user\">"
 		+"<id>2497775129358630574</id>"
 		+"<publickey encoding=\"base64\">rO0ABXNyABRqYXZhLnNlY3VyaXR5LktleVJlcL35T7OImqVDAgAETAAJYWxnb3JpdGhtdAASTGphdmEvbGFuZy9TdHJpbmc7WwAHZW5jb2RlZHQAAltCTAAGZm9ybWF0cQB+AAFMAAR0eXBldAAbTGphdmEvc2VjdXJpdHkvS2V5UmVwJFR5cGU7eHB0AANSU0F1cgACW0Ks8xf4BghU4AIAAHhwAAABJjCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKtp+CcB12xEE7vMYYVFXa7GA82u62utKU6Z3k+3las3QgElOPsz9HQ9UqFnUkhuBkkbP2sMN69ItZgYoOVT6R4ubK/CvoQOOUpTbb1XsjgWRb+i+7EhMOAw1MYLXv2Y4sV/8gxhKEfg34iAXp5j0Jxfx+8g3w+aat0++VBEDMGfSsd7Qj8Qb8wSB8cqYegJ1YD6GgCkzrCOfXjlx7cW08gGh7TVFbsQt8rlHwrueirqDxuW6GBfvpMpYdmLbFqdeWg83YV3gbRhPpEXuHnGYgODog05oSl7Rbmg2sTwN5OThL2Bm0wU75hcUfdZQnz8XFsNSbcpK5BjrmhzStWPklUCAwEAAXQABVguNTA5fnIAGWphdmEuc2VjdXJpdHkuS2V5UmVwJFR5cGUAAAAAAAAAABIAAHhyAA5qYXZhLmxhbmcuRW51bQAAAAAAAAAAEgAAeHB0AAZQVUJMSUM=</publickey>"
 		+"<privatekey encrypted=\"AES\" keygen=\"PBKDF2WithHmacSHA1\">"
@@ -86,7 +91,7 @@ public class MessageTest {
 		+"</las2peer:agent>";
 		
 		String sAgentB2 =
-		"<las2peer:agent type=\"passphrase\">"
+		"<las2peer:agent type=\"user\">"
 		+"<id>10234</id>"
 		+"<publickey encoding=\"base64\">rO0ABXNyABRqYXZhLnNlY3VyaXR5LktleVJlcL35T7OImqVDAgAETAAJYWxnb3JpdGhtdAASTGphdmEvbGFuZy9TdHJpbmc7WwAHZW5jb2RlZHQAAltCTAAGZm9ybWF0cQB+AAFMAAR0eXBldAAbTGphdmEvc2VjdXJpdHkvS2V5UmVwJFR5cGU7eHB0AANSU0F1cgACW0Ks8xf4BghU4AIAAHhwAAABJjCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKtp+CcB12xEE7vMYYVFXa7GA82u62utKU6Z3k+3las3QgElOPsz9HQ9UqFnUkhuBkkbP2sMN69ItZgYoOVT6R4ubK/CvoQOOUpTbb1XsjgWRb+i+7EhMOAw1MYLXv2Y4sV/8gxhKEfg34iAXp5j0Jxfx+8g3w+aat0++VBEDMGfSsd7Qj8Qb8wSB8cqYegJ1YD6GgCkzrCOfXjlx7cW08gGh7TVFbsQt8rlHwrueirqDxuW6GBfvpMpYdmLbFqdeWg83YV3gbRhPpEXuHnGYgODog05oSl7Rbmg2sTwN5OThL2Bm0wU75hcUfdZQnz8XFsNSbcpK5BjrmhzStWPklUCAwEAAXQABVguNTA5fnIAGWphdmEuc2VjdXJpdHkuS2V5UmVwJFR5cGUAAAAAAAAAABIAAHhyAA5qYXZhLmxhbmcuRW51bQAAAAAAAAAAEgAAeHB0AAZQVUJMSUM=</publickey>"
 		+"<privatekey encrypted=\"AES\" keygen=\"PBKDF2WithHmacSHA1\">"
