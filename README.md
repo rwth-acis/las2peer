@@ -2,15 +2,15 @@ Welcome to LAS2peer!
 =================
 
 This project contains LAS2peer itself. To develop a service for LAS2peer, please use the 
-[LAS2Peer-Sample-Project](https://github.com/rwth-acis/LAS2peer-Sample-Service/archive/master.zip) and follow the instructions of the project's ReadMe.
+[LAS2Peer-Sample-Project](https://github.com/rwth-acis/LAS2peer-Sample-Service/) and follow the instructions of the project's ReadMe.
 
 
-PREPARATIONS
+Preparations
 -----------------------
 
 If you use an Oracle Java version, you have to enable strong encryption for this software.
 
-Please put the files to [...]/lib/security/local-policy.jar of your java runtime (replacing the existing files).
+Please put the files to [...]/lib/security/ of your java runtime installation (replacing the existing files).
 
 The policy files can be downloaded via Oracle:
 
