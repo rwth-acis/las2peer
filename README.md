@@ -6,14 +6,10 @@ PREPARATIONS
 
 If you use an Oracle Java version, you have to enable strong encryption for this software.
 
-Just put the file matching your java version to
-    [...]/lib/security/local-policy.jar
-of your used java runtime. (You have to replace the existing one.)
+Just put the files to [...]/lib/security/local-policy.jar of your java runtime. (You have to replace the existing one.)
 
-The policy files are downloadable via the Oracle webpage:
+The policy files can be downloaded via the Oracle webpage:
 
-[JCE for Java 6](http://www.oracle.com/technetwork/java/javase/downloads/jce-6-download-429243.html "JCE-6")
-or
 [JCE for Java 7](http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html "JCE-7")
 
 (If the unit-test "i5.las2peer.communication.MessageTest" runs successfully, you have enabled strong encryption correctly)
@@ -36,31 +32,31 @@ Simply build the standard java docs with
     ant java_doc
 
 
-How to develop a Service for las2peer
+How to develop a service for LAS2peer
 -------------------------------------
-1. Get the SampleService Project frome here: [LAS2Peer-Sample-Project](https://github.com/rwth-acis/LAS2peer-Sample-Service/archive/master.zip)
-2. If you use Eclipse, import the project or just create a new Project in the same folder.
-3. Change conf/service.properties according to the service you want to build
+1. Get the SampleService Project from here: [LAS2Peer-Sample-Project](https://github.com/rwth-acis/LAS2peer-Sample-Service/archive/master.zip)
+2. If you use Eclipse, import the project or just create a new project in the same folder.
+3. Change conf/service.properties according to the service you want to build.
 4. Run "ant get_deps" once to pull all dependencies. (You can skip this but Eclipse will complain about missing libraries until you build the first time)
-5. Implement a Service by inheriting from i5.las2peer.api.Service (Or refactor from the existing i5.las2peer.ServicePackage.ServiceClass)
-6. run "ant" to just build the service jar or "ant run" to directly run your service
+5. Implement a service by inheriting from i5.las2peer.api.Service (Or refactor from the existing i5.las2peer.ServicePackage.ServiceClass).
+6. Run "ant" to just build the service jar or "ant run" to directly run your service.
 
 A jar file with your service will be in export/ and a generated service agent XML file in startup/
 
 Using a different build system/directory structure
 -------------------------------------------------
-If you really want to use las2peer in a different project structure/ with a different build system you can point your build-System to this
-Maven repository: http://role.dbis.rwth-aachen.de:9911/archiva/repository/internal/ and add the las2peer as dependency for your project:
+If you really want to use LAS2peer in a different project structure/ with a different build system you can point your build-system to this
+Maven repository: http://role.dbis.rwth-aachen.de:9911/archiva/repository/internal/ and add the LAS2peer as dependency for your project:
 ```
 <dependency>
     <groupId>i5</groupId>
     <artifactId>las2peer</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
 </dependency>
 ```
-For information about the build process look at the "jar" and "generate_configs" tasks in build.xml
+For information about the build process look at the "jar" and "generate_configs" tasks in the build.xml file.
 
-Simple Node-Starter for Testing purposes
+Simple Node-Starter for testing purposes
 ----------------------------------------
 The class i5.las2peer.testing.L2pNodeLaucher provides a simple way to start a node and launch some testing methods.
 
@@ -76,21 +72,18 @@ So to start a new network, follow this steps:
     ant compile_all
 
 2. run the starter script with
-    bin/start_node.sh -s 9001 -
+    bin/start_node.sh(/bat) -s 9001 -
 
-3. a) add an additional node to the net with
-      bin/start_node.sh -s 9002 127.0.0.1:9001
-
-3. b) add an additional node hosted at another machine with
-      bin/start_node.sh -s 9001 IP_OF_THE_FIRST_MACHINE:9001
+3. add an additional node hosted at another machine with
+      bin/start_node.sh(/bat) -s 9001 IP_OF_THE_FIRST_MACHINE:9001
 
 
 If you want to execute test methods at the nodes just put their names as additional command line parameters to the start_node.sh script like
-    bin/start_node.sh -s 9001 - uploadAgents waitALittle waitALittle searchEve
-and for the second node
-    bin/start_node.sh -s 9002 127.0.0.1:9001 waitALittle fetchAgent registerEve
+    bin/start_node.sh(/bat) -s 9001 - uploadAgents waitALittle waitALittle searchEve
+and for a second node
+    bin/start_node.sh(/bat) -s 9002 IP_OF_THE_FIRST_MACHINE:9001 waitALittle fetchAgent registerEve
 
-More informations about existing test methods can be found in the Java Docs in the documentation of the i5.las2peer.testing.L2pNodeLauncher class.
+More informations about existing test methods can be found in the JavaDoc of the i5.las2peer.testing.L2pNodeLauncher class.
 Basically you can use all public (non-static) methods of the class.
 
 You can find detailed log files for each node in the directory testing/log afterwards.
@@ -108,7 +101,7 @@ Each node configuration file follows a simple syntax:
     2:      bootstrap
     3-x:    test method
 
-In lines 3-x instructions starting with // or # will be left out. You can use all public methods of the L2pNodeLauncher class (see api doc) as testing methods. Those expecting a String parameter can be called simply as
+In lines 3-x instructions starting with // or # will be left out. You can use all public methods of the L2pNodeLauncher class (see API doc) as testing methods. Those expecting a String parameter can be called simply as
     testMethod(myStringValue)
 This may be useful e.g. in combination with uploadStartupDirectory to set up a previously defined set of artifacts and/or agents to be stored in the global storage at startup.
 You can find a short documentation of all possible commands in the Java Doc of the L2pNodeLauncher class.
@@ -129,11 +122,11 @@ The uploadStartupDirectory method can be used to upload a set of artifacts and a
 You can use the command line tools EnvelopeGenerator, ServiceAgentGenerator and UserAgentGenerator from the i5.las2peer.tools package to create such xml files.
 
 To start the the network, use the following command:
-    bin/start_node.sh -d [config_dir]
+    bin/start_node.sh(/bat) -d [config_dir]
 
 
 
-The End of a run
+The end of a run
 ----------------
 Each started node will be kept running if the last command executed either via command line or configuration file does not give a /shutdown/ command.
 In a network of nodes, the simulation (or test run or whatever) will stop only, if all participating nodes have been closed.
