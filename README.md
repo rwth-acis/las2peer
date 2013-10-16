@@ -19,7 +19,7 @@ The policy files can be downloaded via Oracle:
 (If the unit-test "i5.las2peer.communication.MessageTest" runs successfully, you have enabled strong encryption correctly)
 
 
-Building Instructions [![Build Status](https://travis-ci.org/rwth-acis/las2peer.png?branch=master)](https://travis-ci.org/rwth-acis/las2peer)
+Building Instructions [![Build Status](https://travis-ci.org/rwth-acis/LAS2peer.png?branch=master)](https://travis-ci.org/rwth-acis/LAS2peer)
 ----------------------
 
 For building simply run
