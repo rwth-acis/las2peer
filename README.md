@@ -1,4 +1,4 @@
-Welcome to LAS2peer!
+![LAS2peer](https://raw.github.com/rwth-acis/LAS2peer/master/img/las2peer_logo.png)
 =================
 LAS2peer is a server framework for developing and deploying services in a distributed Peer-to-Peer environment written in Java. Its main focus lies on providing developers with a tool to easily develop and test their services and deploy them in the network without having to rely on a centralized infrastructure.
 
