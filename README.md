@@ -11,11 +11,10 @@ LAS2peer is a Java-based framework for distributing community services in a peer
 Preparations
 -----------------------
 
-If you use an Oracle Java version, you have to enable strong encryption for this software.
+LAS2peer depends on strong encryption enabled in its Java Runtime Environment (JRE).
+If you use an Oracle Java version, you have to enable strong encryption by replacing a set of policy files in subdirectory ./lib/security/ of your JRE installation.
 
-Please put the files to [...]/lib/security/ of your java runtime installation (replacing the existing files).
-
-The policy files can be downloaded via Oracle:
+Policy files for strong encryption can be downloaded via Oracle:
 
 [JCE for Java 7](http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html "JCE-7")
 
