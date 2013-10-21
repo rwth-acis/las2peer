@@ -29,15 +29,15 @@ The policy files can be downloaded via Oracle:
 Building Instructions [![Build Status](https://travis-ci.org/rwth-acis/LAS2peer.png?branch=master)](https://travis-ci.org/rwth-acis/LAS2peer)
 ----------------------
 
-For building simply run
-    ant compile_all
+For building simply run:  
+    ```ant compile_all```
 
 
 Unit Tests
 -----------
 
-All JUnit tests are started with
-    ant junit_tests
+All JUnit tests are started with:  
+    ```ant junit_tests```
 
 Reports can be found in ../tmp/reports afterwards.
 
@@ -45,5 +45,5 @@ Reports can be found in ../tmp/reports afterwards.
 JavaDoc
 ----------
 
-Simply build the standard java docs with
-    ant java_doc
+Simply build the standard java docs with:  
+    ```ant java_doc```
