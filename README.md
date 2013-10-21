@@ -4,6 +4,9 @@ Welcome to LAS2peer!
 This project contains LAS2peer itself. To develop a service for LAS2peer, please use the 
 [LAS2Peer-Sample-Project](https://github.com/rwth-acis/LAS2peer-Sample-Service/) and follow the instructions of the project's ReadMe.
 
+What is LAS2peer?
+-----------------------
+LAS2peer is a Java-based framework for distributing community services in a peer-to-peer network infrastructure. LAS2peer was developed by the Advanced Community Information Systems (ACIS) group at the Chair of Computer Science 5 (Information Systems & Databases), RWTH Aachen University, Germany. 
 
 Preparations
 -----------------------
