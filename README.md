@@ -9,7 +9,7 @@ Currently, connection to the outside is realized via a connector that uses the H
 Service Development
 -----------------------
 This project contains LAS2peer itself. To develop a service for LAS2peer, please use the 
-[LAS2Peer-Sample-Project](https://github.com/rwth-acis/LAS2peer-Sample-Service/) and follow the instructions of the project's ReadMe.
+[LAS2Peer-Sample-Service-Project](https://github.com/rwth-acis/LAS2peer-Sample-Service/) and follow the instructions of the project's ReadMe.
 
 Preparations
 -----------------------
@@ -45,3 +45,11 @@ JavaDoc
 
 Simply build the standard java docs with:  
     ```ant java_doc```
+
+
+Start a LAS2peer Instance
+----------
+
+You can use the start scripts located in the "bin/" folder.
+These start scripts use the L2PNodeLauncher to start a LAS2peer instance.
+For more information on how to use the Node-Launcher, please refer to the [LAS2Peer-Sample-Service-Project](https://github.com/rwth-acis/LAS2peer-Sample-Service/) 
