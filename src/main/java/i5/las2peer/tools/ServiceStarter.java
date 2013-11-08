@@ -26,15 +26,15 @@ import java.util.Vector;
 
 /**
  * A command line tool for starting services in a p2p environment.
- * 
  * See {@link #main} for parameter documentation.
  * 
- * This class is the main class of the las2peer library jar.
- * 
+ * <b>This class is deprecated. Please use the @link{L2pNodeLauncher} instead.</b>
+ *  
  * 
  * @author Holger Jan&szlig;en
  *
  */
+@Deprecated
 public class ServiceStarter {
 	
 	
