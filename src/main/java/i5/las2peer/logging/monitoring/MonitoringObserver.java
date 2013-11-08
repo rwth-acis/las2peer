@@ -39,7 +39,7 @@ public class MonitoringObserver extends NodeObserver {
 	 * 
 	 * Constructor for the MonitoringObserver.
 	 * Can be added to a node by adding "startObserver" after the bootstrap parameter
-	 * at the {@link i5.las2peer.testing.L2pNodeLauncher}. Will be instantiated at a {@link i5.las2peer.p2p.Node}.
+	 * at the {@link i5.las2peer.tools.L2pNodeLauncher}. Will be instantiated at a {@link i5.las2peer.p2p.Node}.
 	 *
 	 * @param messageCache determines, how many messages will be stored locally before send to the central collection unit (>50)
 	 * @param registeredAt the node this observer is registered at

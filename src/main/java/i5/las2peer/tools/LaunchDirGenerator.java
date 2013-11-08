@@ -1,6 +1,4 @@
-package i5.las2peer.testing;
-
-import i5.las2peer.tools.SimpleTools;
+package i5.las2peer.tools;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -13,13 +11,13 @@ import java.util.Vector;
 
 /**
  * A simple command line generator for setup directories for the {@link L2pNodeLauncher}.
- * 
- * The last node is always interactive.
+ *  
+ * The last node is always interactive. 
  * 
  * @author Holger Jan&szlig;en
  *
  */
-public class LaunchDirGeneratorSize {
+public class LaunchDirGenerator {
 
 	
 	public static void writeNodeFile ( String name, String bootstrap, int port, String[] methods ) throws IOException {
@@ -85,11 +83,13 @@ public class LaunchDirGeneratorSize {
 
 		
 		methods = createCommands (contentSize, contentPerNode, randRange);
-		String[] finalMethods = new String[ methods.length+3 ];
+		String[] finalMethods = new String[ methods.length+5 ];
 		System.arraycopy(methods, 0, finalMethods, 0, methods.length);
 		finalMethods[methods.length]= "waitFinished ( \""+(nodes-1)+"\")"; 
-		finalMethods[methods.length+1]= "waitEnter (\"size: "+ contentSize + "  per node: " + contentPerNode + "  nodes: " + nodes +"\")";
-		finalMethods[methods.length+2]= "killAll";
+		finalMethods[methods.length+1]= "waitALittle"; 
+		finalMethods[methods.length+2]= "waitALittle"; 
+		finalMethods[methods.length+3]= "fetchRandoms(\"40\",\""+nodes+"\",\""+contentPerNode+"\",\"report_"+nodes+"_"+contentSize + "_" + contentPerNode+".txt\")";
+		finalMethods[methods.length+4]= "killAll";
 		
 	
 		writeNodeFile ( "" + dir + "/node-" + df.format(nodes-1) + ".node", bootstrapPrefix+":" + startPort, startPort + nodes, finalMethods );		
@@ -98,49 +98,14 @@ public class LaunchDirGeneratorSize {
 	
 	
 	public static void main ( String [] argv ) throws IOException {
-		int[][] combinations = new int[][] {
-				new int[] { 20,10,0500 },
-				new int[] { 20,10,1000 },
-				new int[] { 20,10,1500 },
-				new int[] { 20,10,2000 },
-				new int[] { 20,10,2500 },
-				new int[] { 20,10,3000 },
-				new int[] { 20,10,3500 },
-				new int[] { 20,10,4000 },
-				new int[] { 20,10,4500 },
-				new int[] { 20,10,5000 },
-			
-				new int[] { 40,10,2000 },
-				new int[] { 40,20,2000 },
-				new int[] { 40,30,2000 },
-				new int[] { 40,40,2000 },
-				new int[] { 40,50,2000 },
-				new int[] { 40,60,2000 },
-				new int[] { 40,70,2000 },
-				new int[] { 40,80,2000 },
-				new int[] { 40,90,2000 },
-				new int[] { 40,100,2000 },
-				
-				new int[] { 10,20,1000 },
-				new int[] { 20,20,1000 },
-				new int[] { 30,20,1000 },
-				new int[] { 40,20,1000 },
-				new int[] { 50,20,1000 },
-				new int[] { 60,20,1000 },
-				new int[] { 70,20,1000 },
-				new int[] { 80,20,1000 },
-				new int[] { 90,20,1000 },
-				new int[] { 100,20,1000 },
-				new int[] { 110,20,1000 },
-				new int[] { 120,20,1000 },
-				new int[] { 130,20,1000 },
-				new int[] { 140,20,1000 },
-				new int[] { 150,20,1000 },
-				
-		};
+		int[] nodes = new int[] { 10, 25, 50, 75, 100, 150, 200, 300, 400, 500 };
+		int[] sizes = new int [] {1000, 10000, 50000, 100000};
+		int[] perNodes = new int[] {10, 20, 30, 40, 50};
 		
-		for (int[] combin : combinations )
-			writeDir (combin[0], combin[2], combin[1]);
+		for ( int cnt: nodes )
+			for ( int size: sizes )
+				for ( int nrCon: perNodes )
+					writeDir (cnt, size, nrCon);
 	}
 	
 	

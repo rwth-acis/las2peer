@@ -1,8 +1,6 @@
-package i5.las2peer.testing;
+package i5.las2peer.tools;
 
 import i5.las2peer.p2p.NodeException;
-import i5.las2peer.tools.ColoredOutput;
-import i5.las2peer.tools.FileContentReader;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,7 +28,7 @@ public class LauncherThread extends Thread {
 	
 	/**
 	 * create a new Launcher Thread starting a single node
-	 * defnied by a single config file
+	 * defined by a single config file
 	 * 
 	 * 
 	 * @param file

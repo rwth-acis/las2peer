@@ -1,6 +1,4 @@
-package i5.las2peer.testing;
-
-import i5.las2peer.tools.SimpleTools;
+package i5.las2peer.tools;
 
 import java.io.File;
 import java.io.FileOutputStream;

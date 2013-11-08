@@ -1,4 +1,4 @@
-package i5.las2peer.testing;
+package i5.las2peer.tools;
 
 import i5.las2peer.api.ConnectorException;
 import i5.las2peer.communication.ListMethodsContent;
@@ -33,12 +33,7 @@ import i5.las2peer.security.PassphraseAgent;
 import i5.las2peer.security.ServiceAgent;
 import i5.las2peer.security.UserAgent;
 import i5.las2peer.security.UserAgentList;
-import i5.las2peer.tools.ColoredOutput;
-import i5.las2peer.tools.CommandPrompt;
-import i5.las2peer.tools.CryptoException;
-import i5.las2peer.tools.FileContentReader;
-import i5.las2peer.tools.SerializationException;
-import i5.las2peer.tools.SimpleTools;
+import i5.las2peer.testing.MockAgentFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;

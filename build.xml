@@ -188,14 +188,12 @@
 				<attribute name="Library-Name" value="JUNIT TestPackage(2)" />
 				<attribute name="Library-Description" value="a simple test package" />
 				<attribute name="Import-Library" value='i5.las2peer.classLoaders.testPackage1;version="[1.1,2.0)"' />
-				
 				<attribute name="l2p-Name" value="test2" />
 				<attribute name="l2p-Version" value="1.0" />
 				<attribute name="l2p-deps" value="test1-(1.1--1.2)" />
 			</manifest>
 		</jar>
 	</target>
-	
 	
 	
 	<target name="jars" depends="main_jar, test_service_jar, test_service_helper_jar" />
@@ -207,7 +205,7 @@
 				<exclude name="i5/las2peer/testing/services/**" />
 			</fileset>
 			<manifest>
-				<attribute name="Main-Class" value="i5.las2peer.tools.ServiceStarter"/>
+				<attribute name="Main-Class" value="i5.las2peer.tools.L2pNodeLauncher"/>
 				<attribute
 					name="Class-Path"
 					value="i5-simpleXML-0.2.jar commons-codec-1.7.jar FreePastry-2.1.jar i5-httpServer-0.3.jar xpp3-1.1.4c.jar"
@@ -245,51 +243,47 @@
 	</target>
 	
 	
-	
 	<target name="docs" depends="java_doc, junit_doc" />
 	
 	<target name="java_doc" depends="init_doc">
-	                <javadoc destdir="${export.doc}"
-	                         author="true"
-	                 version="true"
-	                     use="true"
-	                 windowtitle="LAS2peer Documentation"
-	                 failonerror="yes"
-	                 encoding="utf8"
-	                classpath="${lib.cp}:${tmp.classes}"
-	                 >	            
-	            <packageset dir="${src.main}" defaultexcludes="yes">
-	                <include name="i5/las2peer/**" />
-	            </packageset>
-	            
-	            <bottom><![CDATA[<p class="bottom">Copyright &#169; 2012 - 2013 by Holger Jan&szlig;en, Aachen, Germany. All Rights Reserved.</p>]]></bottom>
-	                </javadoc>
+        <javadoc destdir="${export.doc}"
+                 author="true"
+         version="true"
+             use="true"
+         windowtitle="LAS2peer Documentation"
+         failonerror="yes"
+         encoding="utf8"
+        classpath="${lib.cp}:${tmp.classes}"
+         >
+            <packageset dir="${src.main}" defaultexcludes="yes">
+                <include name="i5/las2peer/**" />
+            </packageset>
+            
+            <bottom><![CDATA[<p class="bottom">Copyright &#169; 2012 - 2013 by Holger Jan&szlig;en, Aachen, Germany. All Rights Reserved.</p>]]></bottom>
+		
+        </javadoc>
 	</target>
 
 	<target name="junit_doc" depends="init_doc">
-	                <javadoc destdir="${export.junitdoc}"
-	                         author="true"
-	                 version="true"
-	                     use="true"
-	                 windowtitle="LAS2peer Unit Test Documentation"
-	                 failonerror="yes"
-	                 encoding="utf8"
-		                classpath="${lib.cp}:${tmp.classes}"
-	                 >
-	            
-	            <packageset dir="${src.junit}" defaultexcludes="yes">
-	                <include name="i5/las2peer/**" />
-	            </packageset>
-	            
-	            <bottom><![CDATA[<p class="bottom">Copyright &#169; 2012 - 2013 by Holger Jan&szlig;en, Aachen, Germany. All Rights Reserved.</p>]]></bottom>
-	                </javadoc>
+        <javadoc destdir="${export.junitdoc}"
+                 author="true"
+         version="true"
+             use="true"
+         windowtitle="LAS2peer Unit Test Documentation"
+         failonerror="yes"
+         encoding="utf8"
+            classpath="${lib.cp}:${tmp.classes}"
+         >
+        	
+			<packageset dir="${src.junit}" defaultexcludes="yes">
+			    <include name="i5/las2peer/**" />
+			</packageset>
+			<bottom><![CDATA[<p class="bottom">Copyright &#169; 2012 - 2013 by Holger Jan&szlig;en, Aachen, Germany. All Rights Reserved.</p>]]></bottom>
+			
+		</javadoc>
 	</target>
 	
-	
-	
-	
 	<!--   JUNIT testing -->
-		
 	<target name="junit" depends="junit_tests, junit_clean" />
 	
 	<target name="init_junit" depends="init_general">
@@ -301,37 +295,35 @@
 		<delete dir="${tmp.junit}" />
 	</target>
 	
-	 <target name="junit_tests" depends="init_junit, junit_jars, compile_all">
-	                <junit fork="yes" haltonerror="yes" haltonfailure="yes" printsummary="yes">
-	                                <classpath>
-                                        <pathelement path="${tmp.classes}" />
-                                        <pathelement path="${tmp.junit}" />
-                                        <pathelement path="${lib.cp}" />
-                                        <pathelement path="${lib.junit}" />
-	                                </classpath>
-	                                <formatter type="plain" />
-	                                                        
-	                                <batchtest fork="yes" todir="${junit.report}">
-	                                        <fileset dir="${tmp.junit}">
-	                                                <include name="**/*Test.class"/>
-	                                                <exclude name="i5/las/test/testUserManager/**" />
-	                                        </fileset>
-	                                </batchtest>
-	                </junit>
-	        </target>
-
+	<target name="junit_tests" depends="init_junit, junit_jars, compile_all">
+        <junit fork="yes" haltonerror="yes" haltonfailure="yes" printsummary="yes">
+            <classpath>
+                <pathelement path="${tmp.classes}" />
+                <pathelement path="${tmp.junit}" />
+                <pathelement path="${lib.cp}" />
+                <pathelement path="${lib.junit}" />
+            </classpath>
+            <formatter type="plain" />
+        	
+            <batchtest fork="yes" todir="${junit.report}">
+                <fileset dir="${tmp.junit}">
+                    <include name="**/*Test.class"/>
+                    <exclude name="i5/las/test/testUserManager/**" />
+                </fileset>
+            </batchtest>
+        </junit>
+	</target>
+	
 	<!-- general cleanup -->
 	<target name="clean">
 		<delete dir="${tmp}" />
 		<delete dir="log" />
 	</target>
-
+	
 	<target name="clean_deps">
 		<delete dir="ivy" />
         <delete dir="${lib}" />
 	</target>
-
-    <target name="clean_all" depends="clean, clean_deps"/>
 	
 	<target name="all" depends="jars, junit, docs, clean" />
 	
