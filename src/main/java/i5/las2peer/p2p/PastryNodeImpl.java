@@ -270,7 +270,10 @@ public class PastryNodeImpl extends Node {
 			try {
 				result.add( new InetSocketAddress( InetAddress.getByName(hostAndPort[0]), port ));
 			} catch (UnknownHostException e) {
-				System.err.println ( "cannot resolve address for: " + address);
+				if(address.equals("-"))
+					System.out.println("Starting new network..");
+				else
+					System.err.println ( "Cannot resolve address for: " + address + "\n Starting new network..");
 			}
 		}
 		
