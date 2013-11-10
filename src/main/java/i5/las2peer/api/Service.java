@@ -22,7 +22,7 @@ import java.lang.reflect.Modifier;
 /**
  * Base class for services to be hosted within the LAS2peer network.
  * 
- * <h2>Basic implementation hints</h2>
+ * <h2>Basic Implementation Hints</h2>
  * 
  * <p>To implement a service simply derive this API class an implement the intended functionality.
  * If parameters and results are to be transported via the LAS2peer network use types implementing the
@@ -35,13 +35,14 @@ import java.lang.reflect.Modifier;
  * <p>Please be aware, that only one instance of the service is instantiated at a LAS2peer node.
  * There are no per user instantiations as in former LAS server implementations.
  * To access the current user, just use the helper methods of this abstract class like 
- * {@link #getActiveAgent()}
+ * {@link #getActiveAgent()}.
  * 
  * <p>If you want to access the current user agent, the LAS2peer node or logging from outside your service class, 
  * e.g. in helper classes or the like, you can make use of the {@link i5.las2peer.security.Context} class, especially
  * of the static {@link i5.las2peer.security.Context#getCurrent} method.
  * 
  * <h2>Runtime Configuration</h2>
+ * 
  * <p>The preferred method of providing runtime configuration of your service are simple 
  * protected fields which can be configured via property files.
  * See {@link #setFieldValues} and {@link #getProperties}
@@ -74,24 +75,23 @@ import java.lang.reflect.Modifier;
  * version is included in the range.<br>
  * The statement <i>resolution=optional</i> defines a library, that may be used but is not mandatory.
  * 
- * <p>Additionally, you may define a <i>Library-Name</i> entry in the Jar manifest stating a simple human 
+ * <p>Additionally, you may define a <i>Library-Name</i> entry in the jar-manifest stating a simple human 
  * readable name for the provides service.
  * 
- * 
  * <h2>(JUnit-)Testing</h2>
+ * 
  * <p>For unit testing of your service within a LAS2peer setting, you can use the prepared
  * (abstract) class {@link i5.las2peer.testing.LocalServiceTestCase} to derive your test case from.
  * <br>
  * This class starts a {@link i5.las2peer.p2p.LocalNode} running your service to test on each test case.
  * 
- * 
  * <h2>Starting and Hosting a Service</h2>
- * <p>To start a simple node hosting your service, you can use the main method of the class 
- * {@link i5.las2peer.tools.ServiceStarter}, which is the main method of the las2peer.jar library as well.
- * As standard, this class just takes the class name of the service(s) to start as parameter and joins the
- * network hosting your service(s).
  * 
- * <h2>Further tools</h2>
+ * <p>To start a node hosting your service, you can use the methods of the class 
+ * {@link i5.las2peer.tools.L2pNodeLauncher}, which is the main method of the LAS2peer-archive library as well.
+ * 
+ * <h2>Further Tools</h2>
+ * 
  * <p>For further tools like (testing) envelope XML file generators or the like, have a look into the classes 
  * of the {@link i5.las2peer.tools} package. There are e.g. some command line generators for XML helper files.  
  * 

@@ -308,7 +308,6 @@
             <batchtest fork="yes" todir="${junit.report}">
                 <fileset dir="${tmp.junit}">
                     <include name="**/*Test.class"/>
-                    <exclude name="i5/las/test/testUserManager/**" />
                 </fileset>
             </batchtest>
         </junit>
