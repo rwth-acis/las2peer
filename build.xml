@@ -1,4 +1,4 @@
-<project name="las2peer" default="jars" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
+<project name="LAS2peer" default="jars" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
 	
 	<presetdef name="javac">
 	    <javac includeantruntime="false" />
@@ -247,13 +247,13 @@
 	
 	<target name="java_doc" depends="init_doc">
         <javadoc destdir="${export.doc}"
-                 author="true"
-         version="true"
-             use="true"
-         windowtitle="LAS2peer Documentation"
-         failonerror="yes"
-         encoding="utf8"
-        classpath="${lib.cp}:${tmp.classes}"
+        	author="true"
+        	version="true"
+			use="true"
+			windowtitle="LAS2peer Documentation"
+			failonerror="yes"
+			encoding="utf8"
+			classpath="${lib.cp}:${tmp.classes}"
          >
             <packageset dir="${src.main}" defaultexcludes="yes">
                 <include name="i5/las2peer/**" />
@@ -266,12 +266,12 @@
 
 	<target name="junit_doc" depends="init_doc">
         <javadoc destdir="${export.junitdoc}"
-                 author="true"
-         version="true"
-             use="true"
-         windowtitle="LAS2peer Unit Test Documentation"
-         failonerror="yes"
-         encoding="utf8"
+			author="true"
+        	version="true"
+        	use="true"
+        	windowtitle="LAS2peer Unit Test Documentation"
+        	failonerror="yes"
+        	encoding="utf8"
             classpath="${lib.cp}:${tmp.classes}"
          >
         	
