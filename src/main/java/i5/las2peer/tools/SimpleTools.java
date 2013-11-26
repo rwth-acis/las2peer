@@ -1,7 +1,5 @@
 package i5.las2peer.tools;
 
-import i5.las2peer.httpConnector.HttpSession;
-
 import java.util.Random;
 
 
@@ -49,7 +47,7 @@ public class SimpleTools {
 	    Random rand = new Random();
 	    
 	    StringBuffer result = new StringBuffer();
-	    for ( int i=0; i < HttpSession.SESSION_KEY_LENGTH; i++ ) {
+	    for ( int i=0; i < length; i++ ) {
 	    	result.append ( sRandomStringCharSet.charAt( rand.nextInt( sRandomStringCharSet.length() ) ) );
 	    }
 	
