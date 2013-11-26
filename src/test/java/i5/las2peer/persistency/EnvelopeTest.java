@@ -10,7 +10,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
 import java.util.Random;
 
-import i5.las2peer.httpConnector.HttpConnectorRequestHandler;
 import i5.las2peer.security.Agent;
 import i5.las2peer.testing.MockAgentFactory;
 import i5.las2peer.security.GroupAgent;
