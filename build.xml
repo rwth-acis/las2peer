@@ -1,15 +1,15 @@
 <project name="LAS2peer" default="jars" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
 	
 	<presetdef name="javac">
-	    <javac includeantruntime="false" />
+		<javac includeantruntime="false" />
 	</presetdef>
-
+	
     <property name="ivy.install.version" value="2.3.0" />
     <property name="ivy.jar.dir" value="${basedir}/ivy" />
     <property name="ivy.jar.file" value="${ivy.jar.dir}/ivy.jar" />
     <property name="ivy.settings.file" value="${ivy.jar.dir}/ivysettings.xml" />
     <property name="ivy.dep.file" value="${ivy.jar.dir}/ivy.xml" />
-
+	
 	<property name="src.main" location="src/main/java" />
 	<property name="src.junit" location="src/test/java" />
 	<property name="src.help1" location="src/test_help/java" />
@@ -31,27 +31,25 @@
 	
 	<property name="lib" location="lib" />
 	<property name="lib.cp"
-		location="${lib}/i5-simpleXML-0.2.jar:${lib}/commons-codec-1.7.jar:${lib}/FreePastry-2.1.jar:${lib}/i5-httpServer-0.3.jar:${lib}/junit-4.11.jar:${lib}/xpp3-1.1.4c.jar" />
+		location="${lib}/i5-simpleXML-0.2.jar:${lib}/commons-codec-1.7.jar:${lib}/FreePastry-2.1.jar:${lib}/i5-httpConnector-0.1.jar:${lib}/i5-httpServer-0.3.jar:${lib}/junit-4.11.jar:${lib}/xpp3-1.1.4c.jar" />
 	<property name="lib.junit" location="${lib}/junit-4.11.jar:${lib}/hamcrest-core-1.3.jar" />
-		
+	
+	
+	<!-- Download Dependencies (IVY) -->
+	
     <target name="download-ivy" unless="skip.download">
-        <!-- download Ivy from web site so that it can be used even without any special installation -->
-        <echo message="installing ivy..."/>
-        <get src="http://repo1.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar"
-            dest="${ivy.jar.file}" usetimestamp="true"/>
+		<echo message="installing ivy..."/>
+		<get src="http://repo1.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar"
+			dest="${ivy.jar.file}" usetimestamp="true"/>
     </target>
-
+	
     <target name="install-ivy" depends="download-ivy" description="--> install ivy">
-        <!-- try to load ivy here from local ivy dir, in case the user has not already dropped
-              it into ant's lib dir (note that the latter copy will always take precedence).
-              We will not fail as long as local lib dir exists (it may be empty) and
-              ivy is in at least one of ant's lib dir or the local lib dir. -->
         <path id="ivy.lib.path">
             <fileset dir="${ivy.jar.dir}" includes="*.jar"/>
         </path>
         <taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" classpathref="ivy.lib.path"/>
     </target>
-
+	
     <target name="get_deps" depends="install-ivy" description="--> resolve dependencies">
         <ivy:settings>
             <credentials host="role.dbis.rwth-aachen.de:9911/archiva"  realm="Repository internal"/>
@@ -59,12 +57,14 @@
         <ivy:retrieve type="jar"/>
     </target>
 	
+	
+	<!-- Initialization -->
+
 	<target name="init_general">
 		<tstamp/>
 		<mkdir dir="${tmp}" />
 		<mkdir dir="${export}" />
 	</target>
-	
 	
 	<target name="init_compile" depends="init_general, get_deps">
 		<mkdir dir="${tmp.classes}" />
@@ -83,13 +83,14 @@
 	</target>
 	
 	
-	<!-- compilation -->
+	<!-- Compilation -->
+	
 	<target name="compile_main" depends="init_compile">
 		<javac srcdir="${src.main}"
-		       destdir="${tmp.classes}"
-			   classpath="${lib.cp}"
-			   debug="on"
-			   encoding="UTF-8"
+			destdir="${tmp.classes}"
+			classpath="${lib.cp}"
+			debug="on"
+			encoding="UTF-8"
 		/>
 		<copy todir="${tmp.classes}">
 			<fileset dir="${src.main}">
@@ -97,12 +98,13 @@
 			</fileset>
 		</copy>
 	</target>
+	
 	<target name="compile_junit" depends="init_compile, compile_main">
 		<javac srcdir="${src.junit}"
-		       destdir="${tmp.junit}"
-			   classpath="${lib.cp}:${tmp.classes}:${lib.junit}"
-			   debug="on"
-			   encoding="UTF-8"
+			destdir="${tmp.junit}"
+			classpath="${lib.cp}:${tmp.classes}:${lib.junit}"
+			debug="on"
+			encoding="UTF-8"
 		/>
 		<copy todir="${tmp.junit}">
 			<fileset dir="${src.junit}">
@@ -110,12 +112,13 @@
 			</fileset>
 		</copy>
 	</target>
+	
 	<target name="compile_help1" depends="init_compile">
 		<javac srcdir="${src.help1}"
-		       destdir="${tmp.help1}"
-			   classpath=""
-			   debug="on"
-			   encoding="UTF-8"
+			destdir="${tmp.help1}"
+			classpath=""
+			debug="on"
+			encoding="UTF-8"
 		/>
 		<copy todir="${tmp.help1}">
 			<fileset dir="${src.help1}">
@@ -124,12 +127,13 @@
 			</fileset>
 		</copy>
 	</target>
+	
 	<target name="compile_help2" depends="init_compile">
 		<javac srcdir="${src.help2}"
-		       destdir="${tmp.help2}"
-			   classpath=""
-			   debug="on"
-			   encoding="UTF-8"
+			destdir="${tmp.help2}"
+			classpath=""
+			debug="on"
+			encoding="UTF-8"
 		/>
 		<copy todir="${tmp.help2}">
 			<fileset dir="${src.help2}">
@@ -138,10 +142,11 @@
 			</fileset>
 		</copy>
 	</target>
-
+	
 	<target name="compile_all" depends="compile_main, compile_junit, compile_help1, compile_help2" />
 	
 	
+	<!-- Archives -->
 	
 	<target name="jar_test1-1.1" depends="init_jars, compile_help1">
 		<jar jarfile="${export.jars}/i5.las2peer.classLoaders.testPackage1-1.0.jar">
@@ -149,7 +154,6 @@
 				<include name="i5/las2peer/classLoaders/testPackage1/**/*" />
 			</fileset>
 			<manifest>
-				<!--attribute name="Export-Package" value="i5.las2peer.classLoaders.testPackage1" /-->
 				<attribute name="Library-SymbolicName" value="i5.las2peer.classLoaders.testPackage1" />
 				<attribute name="Library-Version" value="1.0" />
 				<attribute name="Import-Bundle" value="" />
@@ -195,7 +199,6 @@
 		</jar>
 	</target>
 	
-	
 	<target name="jars" depends="main_jar, test_service_jar, test_service_helper_jar" />
 	<target name="junit_jars" depends="jar_test1-1.1, jar_test1-1.2, jar_test2-1.0" />
 	
@@ -208,7 +211,7 @@
 				<attribute name="Main-Class" value="i5.las2peer.tools.L2pNodeLauncher"/>
 				<attribute
 					name="Class-Path"
-					value="i5-simpleXML-0.2.jar commons-codec-1.7.jar FreePastry-2.1.jar i5-httpServer-0.3.jar xpp3-1.1.4c.jar"
+					value="i5-simpleXML-0.2.jar commons-codec-1.7.jar FreePastry-2.1.jar i5-httpServer-0.3.jar i5-httpConnector-0.1.jar xpp3-1.1.4c.jar"
 				/>
 			</manifest>
 		</jar>
@@ -216,10 +219,8 @@
 	
 	<target name="test_service_jar" depends="compile_main">
 		<property name="testService.version" value="0.0.1" />
-		
 		<jar jarfile="${export.jars}/i5.las2peer.testing.services-${testService.version}.jar">
-			<fileset dir="${tmp.classes}"
-				includes="i5/las2peer/testing/services/*" />
+			<fileset dir="${tmp.classes}" includes="i5/las2peer/testing/services/*" />
 			<manifest>
 				<attribute name="Library-Version" value="${testService.version}" />
 				<attribute name="Library-SymbolicName" value="i5.las2peer.testing.services" />
@@ -230,7 +231,6 @@
 	
 	<target name="test_service_helper_jar" depends="compile_main">
 		<property name="testServiceHelper.version" value="0.2" />
-		
 		<jar jarfile="${export.jars}/test_service_helper-${testServiceHelper.version}.jar">
 			<fileset dir="${tmp.classes}"
 				includes="i5/las2peer/testing/services/helperClasses/**" />
@@ -243,12 +243,14 @@
 	</target>
 	
 	
+	<!-- Documentation -->
+	
 	<target name="docs" depends="java_doc, junit_doc" />
 	
 	<target name="java_doc" depends="init_doc">
         <javadoc destdir="${export.doc}"
-        	author="true"
-        	version="true"
+			author="true"
+			version="true"
 			use="true"
 			windowtitle="LAS2peer Documentation"
 			failonerror="yes"
@@ -257,33 +259,29 @@
          >
             <packageset dir="${src.main}" defaultexcludes="yes">
                 <include name="i5/las2peer/**" />
-            </packageset>
-            
-            <bottom><![CDATA[<p class="bottom">Copyright &#169; 2012 - 2013 by Holger Jan&szlig;en, Aachen, Germany. All Rights Reserved.</p>]]></bottom>
-		
+            </packageset>		
         </javadoc>
 	</target>
 
 	<target name="junit_doc" depends="init_doc">
         <javadoc destdir="${export.junitdoc}"
 			author="true"
-        	version="true"
-        	use="true"
-        	windowtitle="LAS2peer Unit Test Documentation"
-        	failonerror="yes"
-        	encoding="utf8"
-            classpath="${lib.cp}:${tmp.classes}"
+			version="true"
+			use="true"
+			windowtitle="LAS2peer Unit Test Documentation"
+			failonerror="yes"
+			encoding="utf8"
+			classpath="${lib.cp}:${tmp.classes}"
          >
-        	
-			<packageset dir="${src.junit}" defaultexcludes="yes">
-			    <include name="i5/las2peer/**" />
+        	<packageset dir="${src.junit}" defaultexcludes="yes">
+				<include name="i5/las2peer/**" />
 			</packageset>
-			<bottom><![CDATA[<p class="bottom">Copyright &#169; 2012 - 2013 by Holger Jan&szlig;en, Aachen, Germany. All Rights Reserved.</p>]]></bottom>
-			
 		</javadoc>
 	</target>
 	
-	<!--   JUNIT testing -->
+	
+	<!-- JUnit Testing -->
+	
 	<target name="junit" depends="junit_tests, junit_clean" />
 	
 	<target name="init_junit" depends="init_general">
@@ -304,7 +302,6 @@
                 <pathelement path="${lib.junit}" />
             </classpath>
             <formatter type="plain" />
-        	
             <batchtest fork="yes" todir="${junit.report}">
                 <fileset dir="${tmp.junit}">
                     <include name="**/*Test.class"/>
@@ -313,7 +310,9 @@
         </junit>
 	</target>
 	
-	<!-- general cleanup -->
+	
+	<!-- Cleanup -->
+	
 	<target name="clean">
 		<delete dir="${tmp}" />
 		<delete dir="log" />
@@ -323,6 +322,7 @@
 		<delete dir="ivy" />
         <delete dir="${lib}" />
 	</target>
+	
 	
 	<target name="all" depends="jars, junit, docs, clean" />
 	

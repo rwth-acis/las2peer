@@ -413,7 +413,7 @@ public abstract class Node implements AgentStorage {
 	
 	/**
 	 * Gets the class loader, this node is bound to.
-	 * In a <i>real</i> Las2Peer environment, this should refer to a 
+	 * In a <i>real</i> LAS2peer environment, this should refer to a 
 	 * {@link i5.las2peer.classLoaders.L2pClassLoader}
 	 * 
 	 * Otherwise, the class loader of this Node class is used.

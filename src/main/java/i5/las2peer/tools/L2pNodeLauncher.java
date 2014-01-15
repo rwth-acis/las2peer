@@ -915,14 +915,18 @@ public class L2pNodeLauncher {
 	 * @throws AgentAlreadyRegisteredException
 	 * @throws AgentException
 	 */
-	public void registerUserAgent ( UserAgent agent, String passphrase ) throws L2pSecurityException, AgentAlreadyRegisteredException, AgentException {
+	public void registerUserAgent ( UserAgent agent, String passphrase ) throws L2pSecurityException, AgentException {
 		if ( passphrase != null && agent.isLocked() )
 			agent.unlockPrivateKey(passphrase);
 		if ( agent.isLocked())
 			throw new IllegalStateException ( "You have to unlock the agent first or give a correct passphrase!");
-		
-		node.registerReceiver(agent);
-		
+		try{
+			node.registerReceiver(agent);
+
+		}
+		catch (AgentAlreadyRegisteredException e)
+		{
+		}
 		currentUser = agent;
 	}
 	
@@ -1462,7 +1466,7 @@ public class L2pNodeLauncher {
 			launcher.start();
 			
 			CommandPrompt cmd = new CommandPrompt ( launcher ) ;
-					
+			
 			for ( int i=startWith; i<args.length; i++) {
 				System.out.println ( "Handling: '" + args[i]+ "'");
 				cmd.handleLine(args[i]);
