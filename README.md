@@ -4,7 +4,7 @@ LAS2peer is a Java-based server framework for developing and deploying services 
 
 Developers can develop and test their services locally and then deploy them on any machine that has joined the network. For communication between nodes, the FreePastry (http://www.freepastry.org/) library is used.
 
-Currently, connection to the outside is realized via a [Connector](https://github.com/rwth-acis/LAS2peer-Sample-Service/) that uses the HTTP-Protocol.
+Currently, connection to the outside is realized via a [Connector](https://github.com/rwth-acis/LAS2peer-HttpConnector/) that uses the HTTP-Protocol.
 
 Service Development
 -----------------------
