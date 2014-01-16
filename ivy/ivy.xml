@@ -5,7 +5,6 @@
         <dependency org="xpp3" name="xpp3" rev="1.1.4c" />
         <dependency org="junit" name="junit" rev="4.11" />
         <dependency org="i5" name="i5-simpleXML" rev="0.2" />
-        <dependency org="i5" name="i5-httpServer" rev="0.3" />
         <dependency org="FreePastry" name="FreePastry" rev="2.1" />
         <dependency org="i5" name="i5-httpConnector" rev="0.1"/>
     </dependencies>
