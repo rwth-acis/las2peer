@@ -9,7 +9,9 @@ Currently, connection to the outside is realized via a [Connector](https://githu
 Service Development
 -----------------------
 This project contains LAS2peer itself. To develop a service for LAS2peer, please use the 
-[LAS2Peer-Sample-Service-Project](https://github.com/rwth-acis/LAS2peer-Sample-Service/) and follow the instructions of the project's ReadMe.
+[LAS2Peer-Sample-Service-Project](https://github.com/rwth-acis/LAS2peer-Sample-Service/) and follow the instructions of the project's ReadMe.  
+
+If you want to learn more about LAS2peer, please visit the [LAS2Peer-Tutorial-Project](https://github.com/rwth-acis/LAS2peer-Tutorial-Project).
 
 Preparations
 -----------------------
