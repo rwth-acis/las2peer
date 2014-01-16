@@ -50,6 +50,6 @@ Simply build the standard java docs with:
 Start a LAS2peer Instance
 ----------
 
-You can use the start scripts located in the "bin/" folder.
+You can use the "start_node.bat/sh" scripts located in the "bin/" folder.
 These start scripts use the L2PNodeLauncher to start a LAS2peer instance.
 For more information on how to use the Node-Launcher, please refer to the [LAS2Peer-Sample-Service-Project](https://github.com/rwth-acis/LAS2peer-Sample-Service/).
