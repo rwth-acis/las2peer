@@ -1,11 +1,12 @@
 package i5.las2peer.classLoaders.libraries;
 
 import static org.junit.Assert.*;
-
 import i5.las2peer.classLoaders.libraries.NotFoundException;
 import i5.las2peer.classLoaders.libraries.LoadedJarLibrary;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.StringReader;
 import java.net.URL;
 
 import org.junit.Test;
@@ -37,7 +38,7 @@ public class LoadedJarLibraryTest {
 	public void testStringGetter () throws IOException, NotFoundException, ResourceNotFoundException {
 		LoadedJarLibrary testee = LoadedJarLibrary.createFromJar( "export/jars/i5.las2peer.classLoaders.testPackage1-1.1.jar" );
 		String test = testee.getResourceAsString ("i5/las2peer/classLoaders/testPackage1/test.properties");
-		assertEquals ( "attribute=otherValue\ninteger=987", test);
+		assertEquals ( "attribute=otherValue"+System.lineSeparator()+"integer=987", test);
 	}
 
 	@Test
