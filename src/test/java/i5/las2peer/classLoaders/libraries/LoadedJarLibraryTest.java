@@ -4,9 +4,7 @@ import static org.junit.Assert.*;
 import i5.las2peer.classLoaders.libraries.NotFoundException;
 import i5.las2peer.classLoaders.libraries.LoadedJarLibrary;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.StringReader;
 import java.net.URL;
 
 import org.junit.Test;
@@ -32,7 +30,6 @@ public class LoadedJarLibraryTest {
 		} catch ( IOException e ) {
 		}
 	}
-
 
 	@Test
 	public void testStringGetter () throws IOException, NotFoundException, ResourceNotFoundException {
