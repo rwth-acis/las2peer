@@ -1,12 +1,11 @@
 package i5.las2peer.classLoaders.libraries;
 
-import static org.junit.Assert.*;
-import i5.las2peer.classLoaders.libraries.NotFoundException;
-import i5.las2peer.classLoaders.libraries.LoadedJarLibrary;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.StringReader;
 import java.net.URL;
 
 import org.junit.Test;
@@ -38,7 +37,8 @@ public class LoadedJarLibraryTest {
 	public void testStringGetter () throws IOException, NotFoundException, ResourceNotFoundException {
 		LoadedJarLibrary testee = LoadedJarLibrary.createFromJar( "export/jars/i5.las2peer.classLoaders.testPackage1-1.1.jar" );
 		String test = testee.getResourceAsString ("i5/las2peer/classLoaders/testPackage1/test.properties");
-		assertEquals ( "attribute=otherValue"+System.lineSeparator()+"integer=987", test);
+		test = test.replace("\n", "").replace("\r", ""); //Workaround to prevent different line ending (Win/Unix OS) comparison probelms
+		assertEquals ( "attribute=otherValueinteger=987", test);
 	}
 
 	@Test
