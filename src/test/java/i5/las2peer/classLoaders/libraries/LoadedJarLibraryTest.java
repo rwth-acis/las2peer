@@ -32,7 +32,6 @@ public class LoadedJarLibraryTest {
 		}
 	}
 
-
 	@Test
 	public void testStringGetter () throws IOException, NotFoundException, ResourceNotFoundException {
 		LoadedJarLibrary testee = LoadedJarLibrary.createFromJar( "export/jars/i5.las2peer.classLoaders.testPackage1-1.1.jar" );
