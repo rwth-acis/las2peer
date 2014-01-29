@@ -13,14 +13,22 @@ public abstract class Connector extends Configurable {
 
 	
 	/**
-	 * method stub, may be overridden in implementing subclasses
+	 * Initialize the connector.
 	 */
 	public void init () {
 	}
 	
+	/**
+	 * Sets the port of a connector.
+	 * 
+	 * @param port
+	 */
+	public void setPort ( int port ) {
+		
+	}
 	
 	/**
-	 * start a connector at the given node
+	 * Start a connector at the given node.
 	 * 
 	 * @param node
 	 */
@@ -28,11 +36,11 @@ public abstract class Connector extends Configurable {
 	
 	
 	/**
-	 * stop the connector
+	 * Stops the connector.
 	 * 
 	 * @throws ConnectorException
 	 */
-	public abstract void stop  () throws ConnectorException;
+	public abstract void stop () throws ConnectorException;
 	
 
 	

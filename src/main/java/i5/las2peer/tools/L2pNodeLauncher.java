@@ -1,5 +1,6 @@
 package i5.las2peer.tools;
 
+import i5.las2peer.api.Connector;
 import i5.las2peer.api.ConnectorException;
 import i5.las2peer.communication.ListMethodsContent;
 import i5.las2peer.communication.Message;
@@ -83,7 +84,7 @@ public class L2pNodeLauncher {
 
 	private CommandPrompt commandPrompt;
 	
-	
+	private static Connector connector = null;
 	/**
 	 * is this launcher finished? 
 	 */
@@ -624,7 +625,6 @@ public class L2pNodeLauncher {
 	 */
 	public void shutdown () {
 		node.shutDown();
-		
 		this.bFinished = true;
 	}
 	
@@ -725,6 +725,7 @@ public class L2pNodeLauncher {
 		uploadLoginList();
 	}
 	
+	
 	/**
 	 * upload the contents of <i>startup</i> sub directory to the global storage of the 
 	 * las2peer network.
@@ -739,10 +740,7 @@ public class L2pNodeLauncher {
 		uploadStartupDirectory ("startup");
 	}
 	
-	
-	
-	//private Object nodeHandleForTestService = null;
-	
+		
 	/**
 	 * first get the agent description for TestService
 	 * and then try to find 2 running versions 
@@ -769,9 +767,6 @@ public class L2pNodeLauncher {
 	/**
 	 * start the HTTP connector at the given port
 	 * 
-	 * be aware: all method called after the connector (at this node) will 
-	 * be started after the connector has been closed!
-	 * 
 	 * @param port
 	 */
 	public void startHttpConnector ( String port ) {
@@ -780,10 +775,8 @@ public class L2pNodeLauncher {
 	
 	
 	/**
-	 * start the HTTP connector at the standard port (8080)
+	 * start the HTTP connector at the default port (8080)
 	 * 
-	 * be aware: all method called after the connector (at this node) will 
-	 * be started after the connector has been closed!
 	 */
 	public void startHttpConnector () {
 		startHttpConnector ( 8080 );
@@ -792,46 +785,15 @@ public class L2pNodeLauncher {
 	/**
 	 * start the HTTP connector at the given port
 	 * 
-	 * be aware: all method called after the connector (at this node) will 
-	 * be started after the connector has been closed!
-	 * 
 	 * @param iPort
 	 */
 	public void startHttpConnector ( final int iPort ) {
 		
 		try {
 			printMessage( "Starting Http Connector!");
-			final HttpConnector connector = new HttpConnector ();
-			connector.setHttpPort( iPort );
+			connector = new HttpConnector ();
+			connector.setPort( iPort );
 			connector.start( node );
-			
-			// work around: start a non-daemon thread to keep the connector open...
-			Thread reminder = new Thread ( new Runnable () {
-				@Override
-				public void run() {
-					try {
-						while ( true ) {
-							System.out.println("--- http connector still running at port " + iPort +" ---" );
-								Thread.sleep( 10000 );
-						}
-					} catch (InterruptedException e) {
-					}
-
-					try {
-						connector.stop();
-					} catch (ConnectorException e) {
-					}
-					printMessage ( "--> http connector stopped!");
-				
-				}
-				
-			});
-			reminder.start();
-			
-			try {
-				System.in.read();
-			} catch (IOException e) {
-			}
 			
 		} catch (FileNotFoundException e) {
 			printWarning ( " --> Error finding connector logfile!" + e );
@@ -1666,7 +1628,8 @@ public class L2pNodeLauncher {
 	
 	
 	/**
-	 * main method for command line processing
+	 * 
+	 * Main method for command line processing.
 	 * 
 	 * 
 	 * The method will start a node and try to invoke all command line parameters as
@@ -1701,15 +1664,30 @@ public class L2pNodeLauncher {
 			// launch a single node
 			L2pNodeLauncher launcher = launchSingle( args, -1);
 			
-			if ( launcher.isFinished() )
+			if ( launcher.isFinished() ){
 				System.out.println( "single node has handled all commands and shut down!");
+				try {
+					if(connector != null)
+						connector.stop();
+					} catch (ConnectorException e) {
+					e.printStackTrace();
+				}
+			}
 			else {
 				System.out.println ( "single node has handled all commands -- keeping node open\n");
 				System.out.println ( "press Strg-C to exit\n");
-
-				do {
+				try{
+				while (true) {
 					Thread.sleep(5000);
-				} while ( true );
+				}
+				} catch (InterruptedException e) {
+					try {
+						if(connector != null)
+							connector.stop();
+					} catch (ConnectorException ce) {
+						ce.printStackTrace();
+					}
+				}
 			}
 		} else if ( argv[0].equals ( "-d")) {
 			// launch from a directory

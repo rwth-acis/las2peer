@@ -6,6 +6,6 @@
         <dependency org="junit" name="junit" rev="4.11" />
         <dependency org="i5" name="i5-simpleXML" rev="0.2" />
         <dependency org="FreePastry" name="FreePastry" rev="2.1" />
-        <dependency org="i5" name="i5-httpConnector" rev="0.1"/>
+        <dependency org="i5" name="i5-httpConnector" rev="0.1.1"/>
     </dependencies>
 </ivy-module>

@@ -426,7 +426,7 @@ public class ServiceStarter {
 		try {
 			System.out.println ( "Starting Http Connector!");
 			final HttpConnector connector = new HttpConnector ();
-			connector.setHttpPort( iPort );
+			connector.setPort( iPort );
 			connector.start( node );
 						
 			try {
