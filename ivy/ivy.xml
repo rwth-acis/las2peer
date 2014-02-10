@@ -1,0 +1,7 @@
+<ivy-module version="2.0">
+    <info organisation="i5" module="las2peer-rest-mapper"/>
+    <dependencies>
+        
+        
+    </dependencies>
+</ivy-module>
