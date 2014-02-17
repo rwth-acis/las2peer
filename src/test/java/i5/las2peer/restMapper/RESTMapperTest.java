@@ -1,145 +1,160 @@
 package i5.las2peer.restMapper;
 
 import static org.junit.Assert.*;
-import i5.las2peer.restMapper.annotations.*;
+
+
+import i5.las2peer.restMapper.data.InvocationData;
+import i5.las2peer.restMapper.data.Pair;
+import i5.las2peer.restMapper.data.PathTree;
+
+import java.lang.reflect.Method;
+
+
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class RESTMapperTest {
 
-	public class TestClass1
-	{
-		@GET
-		@Path("")
-		public boolean a1()
-		{
-			return true;
-		}
-		
-		@PUT
-		@Path("/users/{userid}")
-		public float a2(@PathParam("userid")int userID)
-		{
-			return userID*0.1f;			
-		}
-		
-		@DELETE
-		@Path("users/{userid}/products/{productID}/{likes}")
-		public String a3(@PathParam("userid") int userID, @PathParam("productID") short productID,  @PathParam("likes") boolean likes)
-		{
-			return userID*productID+""+likes+"";			
-		}
-		
-		@POST
-		@Path("{a}/b/c")
-		public String a4(@PathParam("a") String a, @DefaultValue("5") @QueryParam("d") int d, @DefaultValue("19") @QueryParam("e") int e)
-		{
-			return a+(d+e);			
-		}
-		
-		@GET
-		@Path("a")
-		public String a5(@ContentParam() String a)
-		{
-			return a+a;			
-		}
-		
-		@PUT
-		@Path("{a}/{b}/{c}/{d}")
-		public String a6(@PathParam("a") String a,@PathParam("b") String b,@PathParam("c") String c,@PathParam("d") int d)
-		{
-			return a+b+c+d;			
-		}
-		
-	}
+	
 	TestClass1 testClass1= new TestClass1();
 	static RESTMapper mapper;
+	static PathTree tree;
 	@BeforeClass
 	public static void testSetup() 
 	{			
-		mapper= new RESTMapper(TestClass1.class);
+		mapper= new RESTMapper();
+		String xml="";
+		try {
+			//tree=mapper.getMappingTree(mapper.getMethodsAsXML(TestClass1.class));
+			xml=mapper.getMethodsAsXML(TestClass1.class);
+			//System.out.println(xml);
+			tree=mapper.getMappingTree(xml);
+			
+		} catch (Exception e) {
+			
+			e.printStackTrace();
+		}
 	}
 	
-	@Test
-	public void testA1(){
-		try	{
-			String result=mapper.parse(testClass1, "get", "", new String[][]{},"");
-			assertEquals("a1","true",result);
-		}
-		catch (Throwable e)	{
-			fail(e.getMessage());
-		}
+	public void invokeMethod(String httpMethod, String uri, Pair<String>[] variables, String content, String assertionMessage, String assertion) throws Exception
+	{
+		
+			InvocationData[] invocation =mapper.parse(tree, httpMethod, uri, variables, content);
+			for (int i = 0; i < invocation.length; i++) {
+				Object[] parameters= invocation[i].getParameters();
+				Class<?> [] parameterTypes =invocation[i].getParameterTypes();
+				
+				//System.out.println(invocation[i].getServiceName());
+				//System.out.println(invocation[i].getMethodName());
+				Class<?> clazz=Class.forName(invocation[i].getServiceName());
+				Method method=clazz.getMethod(invocation[i].getMethodName(), parameterTypes);
+				
+				Object obj=clazz.newInstance();
+				Object result=method.invoke(obj, parameters);
+				String r=RESTMapper.castToString(result);
+				assertEquals(assertionMessage,assertion,r);
+				//System.out.println(r);
+				//System.out.println("__");
+			}
+			
+		
+		
 	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testA1() {
+		try {
+			invokeMethod("get","",new Pair[]{},"","a1","true");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	
+		
+	}
+	
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testA2(){
-		try	{
-			String result=mapper.parse(testClass1, "put", "/users/205", new String[][]{},"");
-			assertEquals("a2","20.5",result);
-		}
-		catch (Throwable e)	{
-			fail(e.getMessage());
-		}
+		
+		try {
+			invokeMethod("put","/users/205",new Pair[]{},"","a2","20.5");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	
+		
 	}
+	
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testA3(){
-		try	{
-			String result=mapper.parse(testClass1, "delete", "/users/12/products/5/true", new String[][]{},"");
-			assertEquals("a3","60true",result);
-		}
-		catch (Throwable e)	{
-			fail(e.getMessage());
-		}
+		try {
+			invokeMethod("delete","/users/12/products/5/true",new Pair[]{},"","a3","60true");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	
+		
 	}
+	
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testA4(){
-		try	{
-			String result=mapper.parse(testClass1, "post", "hi/b/c", new String[][]{{"d","12"},{"e","4"}},"");
-			assertEquals("a4","hi16",result);
+		try {
+			invokeMethod("post","hi/b/c",new Pair[]{new Pair<String>("d","12"),new Pair<String>("e","4")},"","a4","hi16");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		catch (Throwable e)	{
-			
-		}
+		
 	}
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testA4_default(){
-		try	{
-			String result=mapper.parse(testClass1, "post", "hi/b/c", new String[][]{{"e","4"}},"");
-			assertEquals("a4","hi9",result);
-		}
-		catch (Throwable e)	{
-			
-		}
+		try {
+			invokeMethod("post","hi/b/c",new Pair[]{},"","a4","hi9");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	
+		
 	}
+	
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testA4_ex(){
+		
 		try	{
-			mapper.parse(testClass1, "post", "hi/b/", new String[][]{{"d","12"},{"e","4"}},"");
+			invokeMethod("post","hi/b/",new Pair[]{new Pair<String>("d","12"),new Pair<String>("e","4")},"","a4","hi9");
+			
 			fail("Wrong path, no exception");
 		}
-		catch (Throwable e)	{
+		catch (Exception e)	{
 			//e.printStackTrace();
 		}
 	}
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testA5(){
 		try	{
-			String result=mapper.parse(testClass1, "get", "a", new String[][]{},"t");
-			assertEquals("a5","tt",result);
+			invokeMethod("get","a",new Pair[]{},"t","a5","tt");			
 		}
 		catch (Throwable e)	{
-			fail(e.getMessage());
+			e.printStackTrace();
 		}
 	}
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testA6(){
 		try	{
-			String result=mapper.parse(testClass1, "put", "d/c/b/1", new String[][]{},"");
-			assertEquals("a6","dcb1",result);
+			invokeMethod("put","d/c/b/1",new Pair[]{},"","a6","dcb1");			
+			
 		}
 		catch (Throwable e)	{
-			fail(e.getMessage());
+			e.printStackTrace();
 		}
 	}
-
+	
 }
