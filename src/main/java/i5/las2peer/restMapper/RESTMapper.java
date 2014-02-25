@@ -1,5 +1,4 @@
 package i5.las2peer.restMapper;
-import i5.las2peer.restMapper.PathTree.PathNode;
 import i5.las2peer.restMapper.annotations.ContentParam;
 import i5.las2peer.restMapper.annotations.DELETE;
 import i5.las2peer.restMapper.annotations.DefaultValue;
@@ -9,11 +8,43 @@ import i5.las2peer.restMapper.annotations.PUT;
 import i5.las2peer.restMapper.annotations.Path;
 import i5.las2peer.restMapper.annotations.PathParam;
 import i5.las2peer.restMapper.annotations.QueryParam;
+import i5.las2peer.restMapper.annotations.Version;
+import i5.las2peer.restMapper.data.InvocationData;
+import i5.las2peer.restMapper.data.MethodData;
+import i5.las2peer.restMapper.data.Pair;
+import i5.las2peer.restMapper.data.ParameterData;
+import i5.las2peer.restMapper.data.PathTree;
+import i5.las2peer.restMapper.data.PathTree.PathNode;
+import i5.las2peer.restMapper.exceptions.NoMethodFoundException;
+import i5.las2peer.restMapper.exceptions.NotSupportedUriPathException;
 
+
+import java.io.NotSerializableException;
+import java.io.Serializable;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+
+import javax.xml.xpath.XPathFactory;
 
 
 
@@ -24,204 +55,592 @@ import java.util.HashMap;
  *
  */
 public class RESTMapper {
-	private static final String PATH_PARAM_BRACES = "{}";
-	private static final String QUERYPARAM = "q";
-	private static final String PATHPARAM = "p";
-	private static final String CONTENTPARAM = "c";
 	
-	private PathTree _pathMapping=new PathTree();
-	/**
-	 * Constructor accepts a class name as a parameter and extracts all mapping information
-	 * @param cl class name where to look for the methods
+	private static final String END_PATH_PARAMETER = "}";
+	private static final String START_PATH_PARAMETER = "{";
+	private static final String DELETE = "delete";
+	private static final String GET = "get";
+	private static final String PUT = "put";
+	private static final String POST = "post";
+	private static final String DEFAULT_TAG = "default";
+	private static final String ANNOTATION_TAG = "annotation";
+	private static final String CONTENT_ANNOTATION = "content";
+	private static final String QUERY_ANNOTATION = "query";
+	private static final String PATH_ANNOTATION = "path";
+	private static final String INDEX_TAG = "index";
+	private static final String PARAMETER_TAG = "parameter";
+	private static final String PARAMTERS_TAG = "parameters";
+	private static final String TYPE_TAG = "type";
+	private static final String PATH_TAG = PATH_ANNOTATION;
+	private static final String HTTP_METHOD_TAG = "httpMethod";
+	private static final String METHOD_TAG = "method";
+	private static final String VERSION_TAG = "version";
+	private static final String DEFAULT_SERVICE_VERSION = "1.0";
+	private static final String METHODS_TAG = "methods";
+	private static final String NAME_TAG = "name";
+	private static final String SERVICE_TAG = "service";
+	private static final String PATH_PARAM_BRACES = "{}";
+	
+	private XPath _xPath =  XPathFactory.newInstance().newXPath();
+	
+	
+	
+	
+	/** 
+	 * default constructor
 	 */
-	public RESTMapper(Class<?> cl)
+	public RESTMapper()
 	{
-		map(cl); 
+		
 	}
 	/**
-	 * Extracts needed data for later mapping of the RESTful requests
-	 * All needed information is provided inside the annotations
-	 * A path tree is constructed to look up the method
-	 * Also the PathParams&QuereyParams are extracted from the path (position and name)
-	 * 
-	 * @param cl class name where to look for the methods
+	 * accepts a (service) class and creates an XML file from it
+	 * containing all method/parameter information using annotations in the code
+	 * @param cl class to extract information fromm
+	 * @return XML file
+	 * @throws Exception
 	 */
-	
-	public void map(Class<?> cl)
+	public String getMethodsAsXML(Class<?> cl) throws Exception
 	{
-		_pathMapping.getRoot().getChildren().clear();
-		Method[] methods = cl.getMethods();	
-		PathNode root=_pathMapping.getRoot();
-		//first start with http method for the tree
-		root.addChild("post");
-		root.addChild("put");
-		root.addChild("get");
-		root.addChild("delete");
+		DocumentBuilderFactory dbFactory;
+		DocumentBuilder dBuilder;
+		Document doc;
+		dbFactory = DocumentBuilderFactory.newInstance();
+		Element root;
+		Element methodsNode;
 		
-		//search all methods for annotations
-		for (Method method : methods) 
-		{	
-			
-			Annotation[] annotations=method.getAnnotations();
-			Annotation[][] parameterAnnotations = method.getParameterAnnotations();			
-			String httpMethod="";
-			
-			//first: which http method annotation is used?
-			for (Annotation ann : annotations) 
+		dBuilder = dbFactory.newDocumentBuilder();
+		doc=dBuilder.newDocument();
+		root=doc.createElement(SERVICE_TAG);
+		root.setAttribute(NAME_TAG, cl.getName());
+		
+		methodsNode=doc.createElement(METHODS_TAG);
+		root.appendChild(methodsNode);
+		doc.appendChild(root);
+		
+		//gather method and annotation information from class
+		Method[] methods = cl.getMethods();	
+		Annotation[] classAnnotations=cl.getAnnotations();
+		String version=DEFAULT_SERVICE_VERSION;
+		for (int i = 0; i < classAnnotations.length; i++) {//get service version if available
+			if(classAnnotations[i] instanceof Version)
 			{
-				if(ann instanceof POST)
-				{
-					httpMethod="post";
-				}
-				else if(ann instanceof PUT)
-				{
-					httpMethod="put";
-				}
-				else if(ann instanceof GET)
-				{
-					httpMethod="get";
-				}
-				else if(ann instanceof DELETE)
-				{
-					httpMethod="delete";
-				}
+				version=((Version) classAnnotations[i]).value();
+				break;
 			}
-			if(httpMethod.isEmpty())//not supported/http method, just skip
+		}		
+		root.setAttribute(VERSION_TAG, version);
+		
+		for (Method method : methods) { //create method information
+			Annotation[] annotations=method.getAnnotations();
+			Annotation[][] parameterAnnotations = method.getParameterAnnotations();	
+			String httpMethod = getHttpMethod(annotations);
+			
+			//only valid method, if there is a http method and @Path annotation
+			if(httpMethod.isEmpty()||!method.isAnnotationPresent(Path.class))
 				continue;
 			
 			
+	    	String path = method.getAnnotation(Path.class).value();
+	    	
+			Element methodNode=doc.createElement(METHOD_TAG);
 			
 			
-			HashMap<Integer,String> path2nameHash=new HashMap<Integer,String>();//maps pathPosition to a name
-			HashMap<String,Integer> name2paramPosHash=new HashMap<String,Integer>();//maps names to method parameters (order by declaration)
-			HashMap<Integer,String> paramPos2DefaultHash=new HashMap<Integer,String>();//maps pathPosition to a default value
-			//Only @Path is supported
-			if (method.isAnnotationPresent(Path.class)) 
-			{
-		    	Path pathAnnotation = method.getAnnotation(Path.class);	
-		    	String path = pathAnnotation.value();
-		    	
-		    	
-		    	// filter first / if available
-		    	while(path.startsWith("/"))
-		    		path=path.substring(1);
-		    	
-		    
-		    	
-		    	String[] pathParts=path.split("/");
-		    	
-		    	//now traverse path and create/expand mapping tree
-		    	PathNode currentNode=root.getChild(httpMethod);
-		    	
-		    	for (int i = 0; i < pathParts.length; i++) {		    		
-		    		
-					if(pathParts[i].startsWith("{")&&pathParts[i].endsWith("}"))//PathParams are in {}
+			methodNode.setAttribute(NAME_TAG, method.getName());
+			methodNode.setAttribute(HTTP_METHOD_TAG, httpMethod);
+			methodNode.setAttribute(PATH_TAG, path);
+			methodNode.setAttribute(TYPE_TAG, (method.getReturnType().getName()));
+			
+			Element parameters =doc.createElement(PARAMTERS_TAG);
+			methodNode.appendChild(parameters);
+			
+			//handle parameters
+			Class<?>[] parameterTypes = method.getParameterTypes();			
+			for (int i = 0; i < parameterAnnotations.length; i++) 
+	    	{//i:=parameterPos
+				Element parameter =doc.createElement(PARAMETER_TAG);
+				parameter.setAttribute(INDEX_TAG, Integer.toString(i));
+				parameter.setAttribute(TYPE_TAG, (parameterTypes[i].getName()));
+				String parameterAnnotation=null;
+				String parameterName=null;
+				String parameterDefault=null;
+				
+	    		for (int j = 0; j < parameterAnnotations[i].length; j++) 
+	    		{//j:=AnnotationNr
+					Annotation ann=parameterAnnotations[i][j];
+					//check for parameter annotation type
+					if(ann instanceof PathParam)
 					{
-						currentNode.addChild(PATH_PARAM_BRACES);
-						currentNode=currentNode.getChild(PATH_PARAM_BRACES);
-						path2nameHash.put(i,PATHPARAM+pathParts[i].substring(1,pathParts[i].length()-1));//save position and name
+						String paramName=((PathParam) ann).value();
+						parameterAnnotation=PATH_ANNOTATION;
+						parameterName=paramName;
+					}	
+					else if(ann instanceof QueryParam)
+					{
+						String paramName=((QueryParam) ann).value();
+						parameterAnnotation=QUERY_ANNOTATION;
+						parameterName=paramName;
+						
 					}
-					else
+					else if(ann instanceof ContentParam)
 					{
-						currentNode.addChild(pathParts[i]);
-						currentNode=currentNode.getChild(pathParts[i]);						
+						parameterAnnotation=CONTENT_ANNOTATION;
+						parameterName="";
+					}
+					else if(ann instanceof DefaultValue)
+					{
+						String paramVal=((DefaultValue) ann).value();
+						parameterDefault=paramVal;
+						
+					}
+					
+					if(parameterAnnotation!=null)	//if an nonexposed parameter is used, works only if default value is provided				
+						parameter.setAttribute(ANNOTATION_TAG, parameterAnnotation);
+					
+					if(parameterName!=null) //not needed for content annotation or if nonexposed parameter is used
+						parameter.setAttribute(NAME_TAG, parameterName);
+					
+					//default value is optional
+					if(parameterDefault!=null)
+						parameter.setAttribute(DEFAULT_TAG, parameterDefault);
+					
+				}
+	    		parameters.appendChild(parameter);
+			}
+			methodsNode.appendChild(methodNode);
+		}
+			
+		
+		return XMLtoString(doc);
+	}
+	
+	
+	/**
+	 * creates a tree from the class data xml
+	 * the tree can then be used to map requests directly to the proper services and methods
+	 * @param xml XML containing service class information
+	 * @return tree structure for request mapping
+	 * @throws Exception
+	 */
+	public PathTree getMappingTree(String xml) throws Exception
+	{
+		DocumentBuilderFactory dbFactory;
+		DocumentBuilder dBuilder;
+		Document doc;		
+		dbFactory = DocumentBuilderFactory.newInstance();	
+		
+		
+		dBuilder = dbFactory.newDocumentBuilder();
+		doc=dBuilder.parse(new InputSource(new StringReader(xml)));
+		
+		PathTree rootTree=new PathTree();
+		PathNode root=rootTree.getRoot();
+		
+		// start tree with http methods
+		root.addChild(POST);
+		root.addChild(PUT);
+		root.addChild(GET);
+		root.addChild(DELETE);
+		
+		//for each service in the XML
+		NodeList serviceNodeList =(NodeList) _xPath.compile(".//"+SERVICE_TAG).evaluate(doc, XPathConstants.NODESET);
+		for (int i = 0; i < serviceNodeList.getLength(); i++) 
+		{
+			Element serviceNode =(Element)serviceNodeList.item(i);
+			String serviceName=serviceNode.getAttribute(NAME_TAG).trim();
+			String serviceVersion=serviceNode.getAttribute(VERSION_TAG).trim();
+			
+			//for each method in a service
+			NodeList methodeNodeList =(NodeList) _xPath.compile(".//"+METHOD_TAG).evaluate(serviceNode, XPathConstants.NODESET);
+			for (int j = 0; j < methodeNodeList.getLength(); j++) 
+			{
+				Element methodNode =(Element)methodeNodeList.item(j);
+				String methodName=methodNode.getAttribute(NAME_TAG).trim();
+				String methodHttpMethod=methodNode.getAttribute(HTTP_METHOD_TAG).trim().toLowerCase();
+				String methodPath=methodNode.getAttribute(PATH_TAG).trim();
+				String methodType=methodNode.getAttribute(TYPE_TAG).trim();
+				
+				//begin traversing tree, start from http method node
+				PathNode currentNode=root.getChild(methodHttpMethod);
+				
+				//is there any path to traverse?
+				if(methodPath.length()>0){
+					
+					//transform path in correct format
+					if(methodPath.startsWith("/"))
+						methodPath=methodPath.substring(1);
+					if(methodPath.endsWith("/"))
+						methodPath=methodPath.substring(0,methodPath.length()-1);
+					
+					//for each URI path segment
+					String[] pathParts=methodPath.split("/");
+				
+					for (int l = 0; l < pathParts.length; l++) 
+					{	
+						//if it is a variable parameter in the path...
+						if(pathParts[l].startsWith(START_PATH_PARAMETER)&&pathParts[l].endsWith(END_PATH_PARAMETER))//PathParams are in {}
+						{
+							currentNode.addChild(PATH_PARAM_BRACES); //add it as a child with {} as name (parameter node)
+							currentNode=currentNode.getChild(PATH_PARAM_BRACES); //and set is as the current node
+							//add the name of the parameter to a list, for later value mapping
+							currentNode.addPathParameterName(pathParts[l].substring(1,pathParts[l].length()-1));
+						}
+						else 
+						{
+							currentNode.addChild(pathParts[l]); //text content of path as node name
+							currentNode=currentNode.getChild(pathParts[l]);	//set new node as active node
+						}
+					}
+				}
+				//get parameter information from the method
+				NodeList parameterNodeList =
+						(NodeList) _xPath.compile(".//"+PARAMETER_TAG).evaluate(methodNode, XPathConstants.NODESET);
+				ParameterData[] parameters=new ParameterData[parameterNodeList.getLength()];
+				
+				
+				for (int k = 0; k < parameterNodeList.getLength(); k++) 
+				{
+					Element parameter =(Element)parameterNodeList.item(k);
+					
+					int parameterIndex=Integer.parseInt(parameter.getAttribute(INDEX_TAG));
+					String parameterType=parameter.getAttribute(TYPE_TAG);
+					//check of the optional attributes
+					String parameterAnnotation=null;					
+					if(parameter.hasAttribute(ANNOTATION_TAG))
+						parameterAnnotation=parameter.getAttribute(ANNOTATION_TAG).toLowerCase();
+					String parameterName=null;
+					if(parameter.hasAttribute(NAME_TAG))
+						parameterName=parameter.getAttribute(NAME_TAG);
+					String parameterDefault=null;
+					if(parameter.hasAttribute(DEFAULT_TAG))
+						parameterDefault=parameter.getAttribute(DEFAULT_TAG);
+					
+					
+					//create array sorted by the occurrence of the parameter in the method declaration
+					parameters[parameterIndex]=
+							new ParameterData(parameterAnnotation, parameterIndex,
+									parameterName, parameterType, parameterDefault);
+				}
+				//currentNode is the node, where the URI path traversion stopped, so these paths are then mapped to this method
+				//since multiple methods can respond to a single path, a node can store a set of methods from different services
+				currentNode.addMethodData(new MethodData(serviceName, serviceVersion, methodName,methodType,parameters));
+			}
+		}
+		return rootTree;
+	}
+	
+	
+	/**
+	 * gets the proper HTTP method from the used annotations
+	 * @param annotations
+	 * @return HTTP Method (put,post,get etc...)
+	 */
+	private String getHttpMethod(Annotation[] annotations) {
+		String httpMethod="";
+		for (Annotation ann : annotations) 
+		{
+			if(ann instanceof POST)
+			{
+				httpMethod=POST;
+			}
+			else if(ann instanceof PUT)
+			{
+				httpMethod=PUT;
+			}
+			else if(ann instanceof GET)
+			{
+				httpMethod=GET;
+			}
+			else if(ann instanceof DELETE)
+			{
+				httpMethod=DELETE;
+			}
+		}
+		return httpMethod;
+	}
+	
+	/**
+	 * receives a request and tries to map it to an existing service and method
+	 * @param tree structure to use for the mapping process
+	 * @param httpMethod HTTP method of the request
+	 * @param uri URI path of the request
+	 * @param variables array of parameter/value pairs of the request (query variables)
+	 * @param content content of the HTTP body
+	 * @return array of matching services and methods, parameter values are already pre-filled.
+	 * @throws Exception
+	 */
+	public InvocationData[] parse(PathTree tree, String httpMethod, String uri, Pair<String>[] variables, String content) throws Exception
+	{
+		
+		
+		//map input values from uri path and variables to the proper method parameters
+		HashMap<String,String> parameterValues=new HashMap<String,String> ();
+		
+		if(uri.startsWith("/"))			
+			uri=uri.substring(1);
+		
+		//start with creating a value mapping using the provided variables
+		for (int i = 0; i < variables.length; i++) {
+			parameterValues.put(variables[i].getOne(), variables[i].getTwo());
+		}
+		
+		
+		
+		//begin traversing the tree from one of the http method nodes
+		PathNode currentNode=tree.getRoot().getChild(httpMethod);
+		
+		if(currentNode==null)//if not supported method
+			throw new NotSerializableException(httpMethod);
+		
+		if(uri.trim().length()>0)//is there any URI path?
+		{
+			String[] uriSplit=uri.split("/");
+			for (int i = 0; i < uriSplit.length; i++) //for each segment
+			{
+				PathNode nextNode=currentNode.getChild(uriSplit[i]); //get child node with segment name
+				
+				if(nextNode==null)//maybe a PathParam?
+				{
+					currentNode=currentNode.getChild(PATH_PARAM_BRACES);
+					if(currentNode==null)//is it a PathParam?
+					{
+						throw new NotSupportedUriPathException(httpMethod+" "+uri);
+					}
+					
+					String[] paramNames=currentNode.listPathParameterNames();//it is a PathParam, so get all given names of it
+					for (int j = 0; j < paramNames.length; j++) {
+						parameterValues.put(paramNames[j], uriSplit[i]); //map the value provided in the URI path to the stored parameter names
 					}
 					
 				}
-		    	
-		    	
-		    	
-		    	//Parameters
-		    	for (int i = 0; i < parameterAnnotations.length; i++) 
-		    	{//i:=parameterPos
-		    		for (int j = 0; j < parameterAnnotations[i].length; j++) 
-		    		{//j:=AnnotationNr
-						Annotation ann=parameterAnnotations[i][j];
-						if(ann instanceof PathParam)
-						{
-							String paramName=((PathParam) ann).value();
-							name2paramPosHash.put(PATHPARAM+paramName, i);//save name and pos in method params
-						}	
-						else if(ann instanceof QueryParam)
-						{
-							String paramName=((QueryParam) ann).value();
-							name2paramPosHash.put(QUERYPARAM+paramName, i);//save name and pos in method params
-						}
-						else if(ann instanceof ContentParam)
-						{
-							//String paramName=((ContentParam) ann).value();
-							name2paramPosHash.put(CONTENTPARAM/*+paramName*/, i);//there will be only one content param anyway
-						}
-						else if(ann instanceof DefaultValue)
-						{
-							String paramVal=((DefaultValue) ann).value();
-							paramPos2DefaultHash.put(i,paramVal);
-							
-						}
-						//Why? PATHPARAM/QUERYPARAM? to distinguish between PathParams and QueryParams, if they have the same name
+				else
+				{
+					currentNode=nextNode; //continue in tree
+				}
+			}
+		}
+		//so all segments of the URI where handled, current node must contain the correct method, if there is any
+		MethodData[] methodData=currentNode.listMethodData(); 
+		if(methodData==null || methodData.length==0)//no method mapped to the URI path?
+		{
+			throw new NoMethodFoundException(httpMethod+" "+uri);
+		}
+		//create data needed to invoke the methods stored in this node
+		ArrayList<InvocationData> invocationData=new ArrayList<InvocationData>();
+		for (int i = 0; i < methodData.length; i++) {
+			
+			ParameterData[] parameters=methodData[i].getParameters();
+			
+			Serializable[] values= new Serializable[parameters.length]; //web connector uses Serializable for invocation
+			Class<?>[] types= new Class<?>[parameters.length];
+			boolean abort=false;
+			for (int j = 0; j < parameters.length; j++) {
+				
+				ParameterData param=parameters[j];
+				
+				if(param.getAnnotation()!=null && param.getAnnotation().equals(CONTENT_ANNOTATION)) //if it's a content annotation
+				{
+					values[j]=(Serializable) RESTMapper.castToType(content,param.getType()); //fill it with the given content
+					types[j]=param.getType();
+					
+				}
+				else
+				{
+					if(param.getName()!=null && parameterValues.containsKey(param.getName()))//if parameter has a name (given by an annotation) and a value given
+					{
+						values[j]=(Serializable) RESTMapper.castToType(parameterValues.get(param.getName()),param.getType()); //use the created value mapping to assign a value
+						types[j]=param.getType();
 						
 					}
+					else if(param.hasDefaultValue())//if no name, then look for default value
+					{
+						values[j]=(Serializable) param.getDefaultValue();
+						types[j]=param.getType();
+					}
+					else //no value could be assigned to the parameter
+					{
+						
+						abort=true; 
+						break;
+					}
 				}
-		    	
-		    	MethodData methodData = new MethodData(method,path2nameHash,name2paramPosHash,paramPos2DefaultHash);
-		    	currentNode.setMethodData(methodData);
+				
 			}
-			else
-				continue;
+			
+			if(!abort)//return only methods which can be invoked
+			invocationData.add(
+					new InvocationData(methodData[i].getServiceName(), 
+							methodData[i].getServiceVersion(), methodData[i].getName(),
+							methodData[i].getType(),values, types));			
 		}
-		
+		InvocationData[] result=new InvocationData[invocationData.size()];
+		invocationData.toArray(result);
+		return result;
+	}
+	
+	/**
+	 * prints readable XML
+	 * @param doc XML document
+	 * @return readable XML
+	 */
+	private static String XMLtoString(Document doc)
+	{
+		if(doc!=null)
+		{			
+			try
+			{				
+				Transformer t = TransformerFactory.newInstance().newTransformer();
+				StreamResult out = new StreamResult(new StringWriter());
+				t.setOutputProperty(OutputKeys.INDENT, "yes"); //pretty printing
+				t.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+				t.setOutputProperty("{http://xml.apache.org/xalan}indent-amount", "2");
+				t.transform(new DOMSource(doc),out);
+				return out.getWriter().toString();
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+				return "";
+			}
+			
+		}
+		else
+			return "";
+	}
+	
+	/**
+	 * Casts received String values to appropriate types the method demands
+	 * Currently only supports Strings and primitive types
+	 * @param val String value to cast
+	 * @param class1 Type the parameter expects
+	 * @return returns the proper type as an Object
+	 * @throws Exception
+	 */
+	public static Object castToType(String val, Class<?> class1) throws Exception {
+		//Byte		
+		if(class1.equals(Byte.class)||class1.equals(byte.class))
+		{			
+			return Byte.valueOf(val);
+		}
+		//Short		
+		if(class1.equals(Short.class)||class1.equals(short.class))
+		{			
+			return Short.valueOf(val);
+		}
+		//Long		
+		if(class1.equals(Long.class)||class1.equals(long.class))
+		{			
+			return Long.valueOf(val);
+		}
+		//Float		
+		if(class1.equals(Float.class)||class1.equals(float.class))
+		{			
+			return Float.valueOf(val);
+		}
+		//Double		
+		if(class1.equals(Double.class)||class1.equals(double.class))
+		{			
+			return Double.valueOf(val);
+		}
+		//Boolean		
+		if(class1.equals(Boolean.class)||class1.equals(boolean.class))
+		{			
+			return Boolean.valueOf(val);
+		}
+		//Char		
+		if(class1.equals(Character.class)||class1.equals(char.class))
+		{			
+			return val.charAt(0);
+		}
+		//Integer		
+		if(class1.equals(Integer.class)||class1.equals(int.class))
+		{			
+			return Integer.valueOf(val);
+		}
+		//String
+		if(class1.equals(String.class))
+		{			
+			return val;
+		}
+		//not supported type
+		throw new Exception("Parameter Type: "+class1.getName() +"not supported!");
 		
 	}
 	/**
-	 * Parses a RESTful request and invokes the appropriate method, if available
-	 * @param obj instance to use for invocation
-	 * @param method http Method
-	 * @param URI URI without the variables PArt (?var1=val1&...)
-	 * @param variables Query variables in format: {var1,val1} as String array
-	 * @return String as answer
-	 * @throws Throwable 
+	 * Converts a methods return value to String
+	 * @param result value to cast to a String
+	 * @return
 	 */
-	public String parse(Object obj, String method, String URI, String[][] variables, String content) throws Throwable {
-			
-		if(URI.startsWith("/"))
-	
-		URI=URI.substring(1);
-		String[] URISplit=URI.split("/");
-		PathNode currentNode=_pathMapping.getRoot().getChild(method);
-		if(currentNode==null)//Oh! Oh! not supported method!
+	public static String castToString(Object result) {
+		if(result instanceof String)
 		{
-			//Error
-			throw new Exception("Not supported HTTP method: "+ method);
+			return (String)result;
 		}
-		for (int i = 0; i < URISplit.length; i++) 
-		{			
-			
-			PathNode nextNode=currentNode.getChild(URISplit[i]);
-			/*System.out.println(URISplit[i]+"---");
-			for (String string : currentNode.getChildren().keySet()) {
-				System.out.println(string);
-			}*/
-			if(nextNode==null)//maybe a PathParam?
-			{
-				
-				currentNode=currentNode.getChild(PATH_PARAM_BRACES);
-				
-				if(currentNode==null)//is it a PathParam?
-				{
-					throw new Exception("Not supported URI path: "+ URI);
-				}
-			}
-			else
-			{
-				currentNode=nextNode;
-			}
-			
+		if(result instanceof Integer)
+		{
+			return Integer.toString((int) result);
 		}
-		
-		
-		MethodData methodData=currentNode.getMethodData();
-		if(methodData==null)
-			throw new Exception("URI : "+ URI+" is not associated with a method");
-		return methodData.invoke(obj, URISplit,variables, content); 
+		if(result instanceof Byte)
+		{
+			return Byte.toString((byte) result);
+		}
+		if(result instanceof Short)
+		{
+			return Short.toString((short) result);
+		}
+		if(result instanceof Long)
+		{
+			return Long.toString((long) result);
+		}
+		if(result instanceof Float)
+		{
+			return Float.toString((float) result);
+		}
+		if(result instanceof Double)
+		{
+			return Double.toString((double) result);
+		}
+		if(result instanceof Boolean)
+		{
+			return Boolean.toString((boolean) result);
+		}
+		if(result instanceof Character)
+		{
+			return Character.toString((char) result);
+		}
+		return result.toString(); //desperate measures
+	}
+	
+	/**
+	 * Gets the class type based on a string
+	 * needed because int.class.getName() can later not be found by the VM behavior
+	 * only Strings and primitive types are supported
+	 * @param type name of type given by .class.getName()
+	 * @return class type
+	 * @throws ClassNotFoundException
+	 */
+	public static Class<?> getClassType(String type) throws ClassNotFoundException
+	{
+		switch (type) {
+		case "int":
+			return int.class;	
+		case "float":
+			return float.class;	
+		case "byte":
+			return byte.class;	
+		case "short":
+			return short.class;	
+		case "long":
+			return long.class;	
+		case "double":
+			return double.class;
+		case "char":
+			return char.class;
+		case "boolean":
+			return boolean.class;
+
+		default:
+			return Class.forName(type);
+		}
 	}
 }
