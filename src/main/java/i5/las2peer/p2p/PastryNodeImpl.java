@@ -354,7 +354,7 @@ public class PastryNodeImpl extends Node {
 	 * <li>a Past DHT storage from freepastry</li></ul>
 	 * 
 	 * For the past DHT either a memory mode or a disk persistence mode are selected
-	 * based on {@link storageMode}
+	 * based on {@link STORAGE_MODE}
 	 * 
 	 * @throws IOException
 	 */
