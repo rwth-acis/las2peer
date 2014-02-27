@@ -64,7 +64,7 @@ import rice.pastry.NodeHandle;
  * agents willing to participate in the P2P networking.
  * 
  * @author Holger Jan&szlig;en
- *
+ * @author Peter de Lange
  */
 public abstract class Node implements AgentStorage {
 	
@@ -118,10 +118,7 @@ public abstract class Node implements AgentStorage {
 	
 	private Hashtable<Long, MessageResultListener> htAnswerListeners = new Hashtable <Long, MessageResultListener>();
 	
-	/**
-	 * a simple prefix for a logfile to be generated on node startup
-	 */
-	private String sLogFilePrefix = "log/l2p_node_";
+	private String sLogFilePrefix;
 	
 	private final static String DEFAULT_INFORMATION_FILE = "config/nodeInfo.xml";
 	private String sInformationFileName = DEFAULT_INFORMATION_FILE;

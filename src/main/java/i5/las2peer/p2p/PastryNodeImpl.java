@@ -1,5 +1,6 @@
 package i5.las2peer.p2p;
 
+import i5.las2peer.classLoaders.L2pClassLoader;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
 import i5.las2peer.logging.NodeObserver.Event;
@@ -61,7 +62,7 @@ import rice.persistence.StorageManagerImpl;
  * the las2peer setting.
  * 
  * The package {@link i5.las2peer.p2p.pastry} provides all necessary helper classes
- * for the integration (and encapsulation) of the freepastry library.
+ * for the integration (and encapsulation) of the FreePastry library.
  *  
  * @author Holger Jan&szlig;en
  *
@@ -194,10 +195,11 @@ public class PastryNodeImpl extends Node {
 	 * @param bootstrap
 	 * @param mode
 	 * @param monitoringObserver
+	 * @param cl
 	 * 
 	 */
-	public PastryNodeImpl ( int port, String bootstrap, STORAGE_MODE mode, boolean monitoringObserver ) {
-		super(null, true, monitoringObserver);
+	public PastryNodeImpl ( int port, String bootstrap, STORAGE_MODE mode, boolean monitoringObserver, L2pClassLoader cl ) {
+		super(cl, true, monitoringObserver);
 		initialize(port, bootstrap, mode);
 	}
 	

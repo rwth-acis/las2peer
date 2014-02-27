@@ -60,17 +60,11 @@ import rice.p2p.commonapi.NodeHandle;
 
 
 /**
- * This class implements a simple node launcher with additional 
+ * This class implements the LAS2peer node launcher functionalities and additional 
  * methods for testing purposes.
  * 
- * The first command line parameter is the port to open for access from the p2p network.
- * The second parameter can either be "NEW" for starting a completely new p2p network or
- * a comma separated list of bootstrap nodes in form if [address/name]:port.
- * 
  * All methods to be executed can be stated via additional command line parameters to the
- * {@link #main} method. 
- * 
- * All static and parameterless methods of this class can be used this way.
+ * {@link #main} method.
  * 
  * @author Holger Jan&szlig;en
  * @author Peter de Lange
@@ -180,7 +174,8 @@ public class L2pNodeLauncher {
 		
 		printMessage ( m.toString());
 	}
-
+	
+	
 	/**
 	 * Get the envelope with the given id.
 	 * The id is empty, the main user-list is returned.
@@ -198,7 +193,6 @@ public class L2pNodeLauncher {
 		
 		return node.fetchArtifact(Long.valueOf(id)).toXmlString();
 	}
-	
 	
 	
 	/**
@@ -249,7 +243,7 @@ public class L2pNodeLauncher {
 			ps.println ("" + maxNode + "\t" + maxPerNode + "\t" + content.length + "\t" + result);
 	}
 	
-
+	
 	private PrintStream ps = null;
 	
 	/**
@@ -382,7 +376,6 @@ public class L2pNodeLauncher {
 		uploadLoginList();
 		printMessage ( "--> successfully stored " + success + " agents! - (" + known + " are already known or had problems registering!)" );
 	}
-
 	
 	
 	/**
@@ -427,10 +420,10 @@ public class L2pNodeLauncher {
 		ps.println ( "" + nrNodes + "\t" + nrInis + "\t" + (after-before) );
 	}
 	
+	
 	public void checkTestService ( String nrNodes, String nrInis ) throws ServiceInvocationException, UnlockNeededException, NumberFormatException, L2pSecurityException, MalformedXMLException, IOException, InterruptedException, TimeoutException, AgentNotKnownException {
 		checkTestService ( Integer.valueOf(nrNodes), Integer.valueOf(nrInis));
 	}
-	
 	
 	
 	/**
@@ -451,10 +444,7 @@ public class L2pNodeLauncher {
 		}
 	}
 	
-
-	/**
-	 * 
-	 */
+	
 	public void callTestServiceAsEve () {
 		try {
 			UserAgent eve = MockAgentFactory.getEve();
@@ -473,7 +463,6 @@ public class L2pNodeLauncher {
 	
 	
 	public void callTestServiceAsAdam () {
-		
 		try {
 			UserAgent adam = MockAgentFactory.getAdam();
 			adam.unlockPrivateKey("adamspass");
@@ -602,7 +591,7 @@ public class L2pNodeLauncher {
 	
 	
 	/**
-	 * look for the given service in the p2p net
+	 * Looks for the given service in the LAS2peer network.
 	 * 
 	 * @param serviceClass
 	 * @return node handles
@@ -1166,12 +1155,13 @@ public class L2pNodeLauncher {
 	 * @param port local port number to open
 	 * @param bootstrap comma separated list of bootstrap nodes to connect to or "NEW"
 	 * @param monitoringObserver determines, if the monitoring-observer will be started at this node
+	 * @param cl the classloader to be used with this node
 	 */
-	private L2pNodeLauncher ( int port, String bootstrap, boolean monitoringObserver ) {
+	private L2pNodeLauncher ( int port, String bootstrap, boolean monitoringObserver, L2pClassLoader cl ) {
 		if ( System.getenv().containsKey("MEM_STORAGE"))
-			node = new PastryNodeImpl ( port, bootstrap, STORAGE_MODE.memory, monitoringObserver );		
+			node = new PastryNodeImpl ( port, bootstrap, STORAGE_MODE.memory, monitoringObserver, cl );		
 		else
-			node = new PastryNodeImpl ( port, bootstrap, STORAGE_MODE.filesystem, monitoringObserver );		
+			node = new PastryNodeImpl ( port, bootstrap, STORAGE_MODE.filesystem, monitoringObserver, cl );		
 		
 		commandPrompt = new CommandPrompt ( this );
 	}
@@ -1184,20 +1174,24 @@ public class L2pNodeLauncher {
 	 * @param bootstrap	comma separated list of bootstrap nodes to connect to or "NEW"
 	 * @param nodeNumber (local) number to identify the launcher instance
 	 * @param monitoringObserver determines, if the monitoring-observer will be started at this node
+	 * @param cl the classloader to be used with this node
 	 */
-	private L2pNodeLauncher ( int port, String bootstrap, int nodeNumber, boolean monitoringObserver ) {
-		this ( port, bootstrap, monitoringObserver );
+	private L2pNodeLauncher ( int port, String bootstrap, int nodeNumber, boolean monitoringObserver, L2pClassLoader cl ) {
+		this ( port, bootstrap, monitoringObserver, cl );
 		
 		this.nodeNumber = nodeNumber;
 	}
 	
 	/**
-	 * set the directory to write the logfile(s) to
+	 * Sets the directory to write the logfile(s) to.
 	 * 
 	 * @param logDir
 	 */
 	private void setLogDir ( File logDir ) {
-		node.setLogfilePrefix(logDir + "/" + nodeNumber + "__l2p-node__");
+		if(nodeNumber == -1) //Single node
+			node.setLogfilePrefix(logDir + "/l2p-node_");
+		else
+			node.setLogfilePrefix(logDir + "/" + nodeNumber + "_l2p-node_");
 	}
 	
 	/**
@@ -1308,7 +1302,7 @@ public class L2pNodeLauncher {
 	
 	
 	/**
-	 * launch single node
+	 * Launches a single node.
 	 * 
 	 * @param args
 	 * @param nodeNumber
@@ -1319,13 +1313,13 @@ public class L2pNodeLauncher {
 		int port = Integer.parseInt(args[0].trim());
 		String bootstrap = args[1];
 		L2pNodeLauncher launcher;
-		int startWith = 2; //To be backwards compatible, startObserver and service directory entries are not required
+		int startWith = 2; //To be backwards compatible, startObserver flag is not required
 		if (args.length > 3 && args[2].equals("startObserver")){
-			launcher = new L2pNodeLauncher (port, bootstrap, nodeNumber, true);
+			launcher = new L2pNodeLauncher (port, bootstrap, nodeNumber, true, cl);
 			startWith++;
 		}
 		else{
-			launcher = new L2pNodeLauncher (port, bootstrap, nodeNumber, false);
+			launcher = new L2pNodeLauncher (port, bootstrap, nodeNumber, false, cl);
 		}
 		try {
 			if ( logDir != null )
@@ -1482,48 +1476,49 @@ public class L2pNodeLauncher {
 		if ( message != null && ! message.equals( ""))
 			System.out.println (message + "\n\n");
 		
-		System.out.println( "LAS2peer node launcher");
+		System.out.println( "LAS2peer Node Launcher");
 		System.out.println( "----------------------\n");
-		System.out.println( "usage:\n");
+		System.out.println( "Usage:\n");
 		
-		System.out.println( "help message:");
-		System.out.println ( "\tjava [-cp classpath] i5.las2peer.testing.L2pNodeLauncher ['--help'|'-h']");
+		System.out.println( "Help Message:");
+		System.out.println ( "\t['--help'|'-h']");
 		
 		System.out.println ("\nStart Single Node:");
-		System.out.println ( "\tjava [-cp classpath] i5.las2peer.tools.L2pNodeLauncher {optional: windows_shell} -s [port] ['-'|bootstrap] {optional: startObserver} {method1} {method2} ...");
+		System.out.println ( "\t{optional: windows_shell} {optional: log-directory=..} {optional: service-directory=..}"
+				+ "\n\t -s [port] ['-'|bootstrap] {optional: startObserver} {method1} {method2} ...");
 		
 		System.out.println ( "\nWhere" );
 		System.out.println ( "\t- {windows_shell} disables the colored output (better readable for windows command line clients)\n");
-		System.out.println ( "\t- [port] specifies the port number for the pastry port of the new local node\n");
-		System.out.println ( "\t- '-' states, that a complete new p2p network is to start");
+		System.out.println ( "\t- {log-directory=..} lets you choose the directory for log files (default: log)\n");
+		System.out.println ( "\t- {service-directory=..} lets you choose the directory you added your services to (default: services)\n");
+		System.out.println ( "\t- [port] specifies the port number of the node\n");
+		System.out.println ( "\t- '-' states, that a complete new LAS2peer network is to start");
 		System.out.println ( "\tor");
 		System.out.println ( "\t- [bootstrap] gives a comma seperated list of [address:ip] pairs of bootstrap nodes to connect to\n");
 		System.out.println ( "\t- {startObserver} starts a monitoring observer at this node\n\n");
 		
-		System.out.println ("\nStart Multiple Nodes: unchecked functionality at the moment, use at own risk;-)");
-		System.out.println ( "\tjava [-cp classpath] i5.las2peer.testing.L2pNodeLauncher -d [config directory]");
+/*		System.out.println ("\nStart Multiple Nodes: (Note: currently not fully working)");
+		System.out.println ( "\t-d [config directory]");
 		
-		System.out.println ( "\tWhere");
+		System.out.println ( "\nWhere");
 		System.out.println ( "\t- [config directory] gives a directory containing .node-files, where each ");
 		System.out.println ( "\tfile configures a node in of the simulated network. The files follow a simple syntax: ");
 		System.out.println ( "\t\t[port]");
 		System.out.println ( "\t\t[bootstrap]");
 		System.out.println ( "\t\t[method1]");
 		System.out.println ( "\t\t[method2]");
-		System.out.println ( "\t\t...");
+		System.out.println ( "\t\t...");*/
 
-		System.out.println ( "\n\nCurrently implemented testing methods to execute at the new node are:");
+		System.out.println ( "\n\nThe following methods can be used in arbitrary order and number:");
 		
 		for ( Method m : L2pNodeLauncher.class.getMethods()) {
 			if ( Modifier.isPublic ( m.getModifiers()) 
 					&& !Modifier.isStatic(m.getModifiers() )
 					&& m.getParameterTypes().length == 0
 					) {
-				System.out.println( "\t\t- " + m.getName());
+				System.out.println( "\t- " + m.getName());
 			}
 		}
-		
-		System.out.println ( "\nYou can use them in any arbitrary order and number.\n");
 	}
 	
 	
@@ -1545,6 +1540,9 @@ public class L2pNodeLauncher {
 	 * (since this creates cryptic symbols in a Windows environment).
 	 * 
 	 * Hint: with "log-directory=.." you can set the logfile directory you want to use.
+	 * 
+	 * Hint: with "service-directory=.." you can set the directory your service jars are located at.
+	 * 
 	 * @param argv
 	 * 
 	 * @throws InterruptedException
@@ -1557,6 +1555,8 @@ public class L2pNodeLauncher {
 	 */
 	public static void main ( String[] argv ) throws InterruptedException, MalformedXMLException, IOException, L2pSecurityException, EncodingFailedException, SerializationException, NodeException  {
 		String logfileDirectoryString = "log";
+		String[] serviceDirectory = {"./service/"};
+
 		File logfileDirectory = new File (".");
 		if ( argv.length < 2 || argv[0].equals( "--help") || argv[0].equals("-h")) {
 			printHelp();
@@ -1572,17 +1572,21 @@ public class L2pNodeLauncher {
 		}
 		//
 		if(argv[0].contains("log-directory=")){
-			logfileDirectoryString = argv[0].substring(argv[0].indexOf("="));
+			logfileDirectoryString = argv[0].substring(argv[0].indexOf("=")+1);
+			String[] args = new String [argv.length-1];
+			System.arraycopy( argv, 1, args, 0, args.length );
+			argv = args;
+		}
+		if(argv[0].contains("service-directory=")){
+			serviceDirectory[0] = argv[0].substring(argv[0].indexOf("="));
 			String[] args = new String [argv.length-1];
 			System.arraycopy( argv, 1, args, 0, args.length );
 			argv = args;
 		}
 		logfileDirectory = new File ("./" + logfileDirectoryString + "/");
-		System.out.println("Logfile is set to: " + logfileDirectory.toString());
 		if ( argv[0].equals ( "-s")) {
 			String[] args = new String [ argv.length-1];
 			System.arraycopy( argv, 1, args, 0, args.length );
-			String[] serviceDirectory = {"./service/"}; //Temporary solution TODO
 			L2pClassLoader classloader = setupClassLoader(serviceDirectory);
 			// launch a single node
 			L2pNodeLauncher launcher = launchSingle( args, -1, logfileDirectory, classloader);
