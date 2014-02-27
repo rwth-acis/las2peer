@@ -51,7 +51,7 @@ public class LauncherThread extends Thread {
 			
 			ColoredOutput.printlnYellow("configuring node " + nodeCounter + " from file " + config);
 
-			launcher = L2pNodeLauncher.launchSingle(args, nodeCounter, logDir);
+			launcher = L2pNodeLauncher.launchSingle(args, nodeCounter, logDir, null); //TODO Classloader
 			
 			// wait until launcher (node) is finished
 			while ( ! launcher.isFinished () ) {

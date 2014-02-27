@@ -223,8 +223,8 @@ public class FileSystemRepository implements Repository {
 	private void searchJars ( String directory ) {
 		File f = new File ( directory );
 		
-		if ( ! f.isDirectory() ) 
-			throw new IllegalArgumentException( "Given path is not a directory" );
+		if ( ! f.isDirectory() )
+			throw new IllegalArgumentException( "Given path is not a directory: " + f.toString() );
 		
 		File[] entries = f.listFiles ();
 		
