@@ -193,8 +193,10 @@ public class PastryNodeImpl extends Node {
 	 * @param port
 	 * @param bootstrap
 	 * @param mode
+	 * @param monitoringObserver
+	 * 
 	 */
-	public PastryNodeImpl ( int port, String bootstrap, STORAGE_MODE mode, boolean monitoringObserver) {
+	public PastryNodeImpl ( int port, String bootstrap, STORAGE_MODE mode, boolean monitoringObserver ) {
 		super(null, true, monitoringObserver);
 		initialize(port, bootstrap, mode);
 	}
