@@ -88,6 +88,8 @@ public class L2pNodeLauncher {
 	private PastryNodeImpl node;
 	public PastryNodeImpl getNode () { return node; }
 	
+	private UserAgent currentUser;
+	
 	
 	/**
 	 * send simple test messages to the network
@@ -765,10 +767,9 @@ public class L2pNodeLauncher {
 	 */
 	public void startHttpConnector ( final int port ) {
 		try {
-	        Class<?> httpConnector = classloader.loadClass("i5.las2peer.httpConnector.HttpConnector");
-	        
+			
 			printMessage( "Starting Http Connector!");
-			Connector connector = (Connector) httpConnector.newInstance();
+			Connector connector = loadConnector("i5.las2peer.httpConnector.HttpConnector");
 			connector.setPort( port );
 			connector.start( node );
 			connectors.add(connector);
@@ -785,7 +786,21 @@ public class L2pNodeLauncher {
 	}
 	
 	
-	private UserAgent currentUser;
+	/**
+	 * Returns a connector for the given classname.
+	 * 
+	 * @param classname
+	 * @return the loaded connector
+	 * 
+	 * @throws ClassNotFoundException
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 */
+	private Connector loadConnector(String classname) throws ClassNotFoundException, InstantiationException, IllegalAccessException{
+        Class<?> connectorClass = classloader.loadClass(classname);
+		Connector connector = (Connector) connectorClass.newInstance();
+        return connector;
+	}
 	
 	
 	/**
