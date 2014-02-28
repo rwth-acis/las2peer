@@ -7,14 +7,14 @@ import java.io.IOException;
 
 /**
  * A simple thread handling one launcher task for running multiple launchers of
- * a configuration directory via {@link L2pNodeLauncher#launchFromConfigDir}. 
+ * a configuration directory via {@link ExtendedTestLauncher#launchFromConfigDir}. 
  * 
  * @author Holger Jan&szlig;en
  *
  */
 public class LauncherThread extends Thread {
 	
-	private L2pNodeLauncher launcher = null;
+	private ExtendedTestLauncher launcher = null;
 	
 	private File config;
 	private int nodeCounter;
@@ -51,7 +51,7 @@ public class LauncherThread extends Thread {
 			
 			ColoredOutput.printlnYellow("configuring node " + nodeCounter + " from file " + config);
 
-			launcher = L2pNodeLauncher.launchSingle(args, nodeCounter, logDir, null); //TODO Classloader
+			launcher = ExtendedTestLauncher.launchSingle(args, nodeCounter, logDir, null); //TODO Classloader
 			
 			// wait until launcher (node) is finished
 			while ( ! launcher.isFinished () ) {
@@ -74,7 +74,7 @@ public class LauncherThread extends Thread {
 	 * 
 	 * @return	the assigned launcher
 	 */
-	public L2pNodeLauncher getLauncher () {
+	public ExtendedTestLauncher getLauncher () {
 		return launcher;
 	}
 	
