@@ -797,7 +797,7 @@ public class L2pNodeLauncher {
 	 * @throws IllegalAccessException
 	 */
 	private Connector loadConnector(String classname) throws ClassNotFoundException, InstantiationException, IllegalAccessException{
-        Class<?> connectorClass = classloader.loadClass(classname);
+		Class<?> connectorClass = classloader.loadClass(classname);
 		Connector connector = (Connector) connectorClass.newInstance();
         return connector;
 	}
@@ -833,7 +833,7 @@ public class L2pNodeLauncher {
 	
 	
 	/**
-	 * force an upload of the current user list
+	 * Forces an upload (update) of the current user list.
 	 */
 	public void uploadLoginList() {
 		node.forceUserListUpdate();
@@ -854,6 +854,7 @@ public class L2pNodeLauncher {
 	public void registerUserAgent ( UserAgent agent ) throws L2pSecurityException, AgentAlreadyRegisteredException, AgentException {
 		registerUserAgent (agent, null);
 	}
+	
 	
 	/**
 	 * Register the given agent at the l2p node and for later usage with {@link #invoke}.
@@ -1099,17 +1100,14 @@ public class L2pNodeLauncher {
 	}
 	
 	
-	
 	/**
 	 * try to get node information about all known (neighbor) nodes
 	 * 
-	 * @return	array with node informations or catched exceptions
+	 * @return	array with node information or caught exceptions
 	 */
 	public Object[] getInfoOfKnownNodes () {
 		final Object[] known = node.getOtherKnownNodes();
 		final Object[] answer = new Object[ known.length];
-		
-		//System.out.println( "  -> ask " + known.length + " nodes about their information!");
 		
 		
 		final Thread[] subs = new Thread[known.length];
@@ -1121,8 +1119,6 @@ public class L2pNodeLauncher {
 					System.out.println( "" + number + " started");
 					try {
 						answer[number] = node.getNodeInformation(known[number]);
-												
-						// System.out.println( "rec: " + answer[number]);
 						
 						try {
 							((NodeInformation) answer[number]).verifySignature();
@@ -1152,6 +1148,7 @@ public class L2pNodeLauncher {
 		return answer;
 	}
 	
+	
 	/**
 	 * get information about other nodes (probably neighbors in the ring etc)
 	 * 
@@ -1160,7 +1157,6 @@ public class L2pNodeLauncher {
 	public String getNetInfo () {
 		return SimpleTools.join( node.getOtherKnownNodes(), "\n\t");
 	}
-	
 	
 	
 	/**
@@ -1196,6 +1192,7 @@ public class L2pNodeLauncher {
 		this.nodeNumber = nodeNumber;
 	}
 	
+	
 	/**
 	 * Sets the directory to write the logfile(s) to.
 	 * 
@@ -1207,6 +1204,7 @@ public class L2pNodeLauncher {
 		else
 			node.setLogfilePrefix(logDir + "/" + nodeNumber + "_l2p-node_");
 	}
+	
 	
 	/**
 	 * actually start the node
@@ -1229,6 +1227,7 @@ public class L2pNodeLauncher {
 		else
 			return "";
 	}
+	
 	
 	@Override 
 	public String toString () {
@@ -1256,6 +1255,7 @@ public class L2pNodeLauncher {
 	
 	private static Integer finished = 0;
 	
+	
 	/**
 	 * increase the counter of finished nodes
 	 */
@@ -1265,9 +1265,10 @@ public class L2pNodeLauncher {
 		}
 	}
 	
+	
 	private static final long waitTime = 5000; // 5 seconds
 	
-
+	
 	/**
 	 * wait for at least <i>number</i> other nodes to finish their work
 	 * 
@@ -1305,6 +1306,7 @@ public class L2pNodeLauncher {
 		printMessage ( "WAITING FOR ENTER...........");
 		System.in.read();
 	}
+	
 	
 	/**
 	 * wait for an enter key
@@ -1362,6 +1364,7 @@ public class L2pNodeLauncher {
 		return launcher;
 	}
 	
+	
 	/**
 	 * Sets up the classloader.
 	 * 
@@ -1370,8 +1373,8 @@ public class L2pNodeLauncher {
 	 */
 	private static L2pClassLoader setupClassLoader(String[] serviceDirectory) {
 		return new L2pClassLoader( 
-				new FileSystemRepository (serviceDirectory), L2pNodeLauncher.class.getClassLoader() 
-				);
+			new FileSystemRepository (serviceDirectory), L2pNodeLauncher.class.getClassLoader() 
+		);
 	}
 	
 	
@@ -1443,7 +1446,6 @@ public class L2pNodeLauncher {
 		java.util.Arrays.sort( sorted );
 				
 		Vector<LauncherThread> subThreads = new Vector<LauncherThread> ();
-		
 				
 		int nodeNumber = 0;
 		for ( File config : sorted ) {
@@ -1459,7 +1461,6 @@ public class L2pNodeLauncher {
 			} catch (InterruptedException e) {
 			}
 		}
-					
 		
 		boolean finished;
 		try {
@@ -1522,7 +1523,7 @@ public class L2pNodeLauncher {
 		System.out.println ( "\t\t[method1]");
 		System.out.println ( "\t\t[method2]");
 		System.out.println ( "\t\t...");*/
-
+		
 		System.out.println ( "\n\nThe following methods can be used in arbitrary order and number:");
 		
 		for ( Method m : L2pNodeLauncher.class.getMethods()) {
@@ -1543,9 +1544,7 @@ public class L2pNodeLauncher {
 	
 	
 	/**
-	 * 
 	 * Main method for command line processing.
-	 * 
 	 * 
 	 * The method will start a node and try to invoke all command line parameters as
 	 * parameterless methods of this class.
@@ -1570,38 +1569,41 @@ public class L2pNodeLauncher {
 	public static void main ( String[] argv ) throws InterruptedException, MalformedXMLException, IOException, L2pSecurityException, EncodingFailedException, SerializationException, NodeException  {
 		String logfileDirectoryString = "log";
 		String[] serviceDirectory = {"./service/"};
-
 		File logfileDirectory = new File (".");
+		
+		//Help Message
 		if ( argv.length < 2 || argv[0].equals( "--help") || argv[0].equals("-h")) {
 			printHelp();
 			System.exit(1);
 		}
-		//Set this parameter to turn of the (bash-) color features for a better readable
-		//output on the windows console.
+		//Turn off colored output
 		if(argv[0].equals("windows_shell")){
 			ColoredOutput.allOff();
 			String[] args = new String [argv.length-1];
 			System.arraycopy( argv, 1, args, 0, args.length );
 			argv = args;
 		}
+		//Sets the logfile directory
 		if(argv[0].contains("log-directory=")){
 			logfileDirectoryString = argv[0].substring(argv[0].indexOf("=")+1);
 			String[] args = new String [argv.length-1];
 			System.arraycopy( argv, 1, args, 0, args.length );
 			argv = args;
 		}
+		//Sets the service directory
 		if(argv[0].contains("service-directory=")){
 			serviceDirectory[0] = argv[0].substring(argv[0].indexOf("="));
 			String[] args = new String [argv.length-1];
 			System.arraycopy( argv, 1, args, 0, args.length );
 			argv = args;
 		}
-		logfileDirectory = new File ("./" + logfileDirectoryString + "/");
-		if ( argv[0].equals ( "-s")) {
-			// launch a single node
+		
+		//Launches a single node
+		if ( argv[0].equals ("-s")) {
 			String[] args = new String [ argv.length-1];
 			System.arraycopy( argv, 1, args, 0, args.length );
 			classloader = setupClassLoader(serviceDirectory);
+			logfileDirectory = new File ("./" + logfileDirectoryString + "/");
 			L2pNodeLauncher launcher = launchSingle( args, -1, logfileDirectory, classloader);
 			
 			if ( launcher.isFinished() ){
@@ -1631,8 +1633,9 @@ public class L2pNodeLauncher {
 					}
 				}
 			}
+			
+		//Launches from a directory (unchecked functionality at the moment!)
 		} else if ( argv[0].equals ( "-d")) {
-			// launch from a directory (unchecked functionality at the moment!!)
 			System.out.println("Launching multiple nodes, please note that this functionality is not tested at the moment!");
 			launchFromConfigDir ( argv[1] );
 		} else {
@@ -1641,7 +1644,7 @@ public class L2pNodeLauncher {
 					+"nodes defined by a configuration directory with -d. Use --help or -h "
 					+"for further information.");
 		}
-	
 	}
+	
 	
 }
