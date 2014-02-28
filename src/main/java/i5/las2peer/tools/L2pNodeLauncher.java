@@ -11,7 +11,6 @@ import i5.las2peer.execution.L2pServiceException;
 import i5.las2peer.execution.NoSuchServiceException;
 import i5.las2peer.execution.ServiceInvocationException;
 import i5.las2peer.execution.UnlockNeededException;
-import i5.las2peer.httpConnector.HttpConnector;
 import i5.las2peer.p2p.AgentAlreadyRegisteredException;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.ArtifactNotFoundException;
@@ -39,7 +38,6 @@ import i5.las2peer.security.UserAgentList;
 import i5.las2peer.testing.MockAgentFactory;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -49,8 +47,11 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 import java.util.TreeSet;
 import java.util.Vector;
@@ -73,25 +74,18 @@ import rice.p2p.commonapi.NodeHandle;
 public class L2pNodeLauncher {
 	
 	
-	private PastryNodeImpl node;
-	
 	private int nodeNumber = -1;
-	
-	private boolean bFinished = false;
 
 	private CommandPrompt commandPrompt;
 	
-	private static Connector connector = null;
-	/**
-	 * is this launcher finished? 
-	 */
+	private static List<Connector> connectors = new ArrayList<Connector>();
+	
+	private static L2pClassLoader classloader = null;
+	
+	private boolean bFinished = false;
 	public boolean isFinished () { return bFinished; }
 	
-
-	/**
-	 * 
-	 * @return the node of this launcher
-	 */
+	private PastryNodeImpl node;
 	public PastryNodeImpl getNode () { return node; }
 	
 	
@@ -738,8 +732,6 @@ public class L2pNodeLauncher {
 			for ( Object o: handles )
 				ColoredOutput.printlnYellow ( "\t" + o);
 			
-			//if ( handles.length > 0)
-				//nodeHandleForTestService = handles[0];
 		} catch (AgentNotKnownException e) {
 			ColoredOutput.printlnRed( "Exception while looking gor TestService: " + e);
 		}
@@ -747,7 +739,17 @@ public class L2pNodeLauncher {
 	
 	
 	/**
-	 * start the HTTP connector at the given port
+	 * Starts the HTTP connector at the given port.
+	 * 
+	 * @param port
+	 */
+	public void startHttpConnector () {
+		startHttpConnector ( 8080 );
+	}
+	
+	
+	/**
+	 * Starts the HTTP connector at the given port.
 	 * 
 	 * @param port
 	 */
@@ -757,32 +759,29 @@ public class L2pNodeLauncher {
 	
 	
 	/**
-	 * start the HTTP connector at the default port (8080)
-	 * 
-	 */
-	public void startHttpConnector () {
-		startHttpConnector ( 8080 );
-	}
-	
-	/**
-	 * start the HTTP connector at the given port
+	 * Starts the HTTP connector at the given port.
 	 * 
 	 * @param port
 	 */
 	public void startHttpConnector ( final int port ) {
-		
 		try {
+	        Class<?> httpConnector = classloader.loadClass("i5.las2peer.httpConnector.HttpConnector");
+	        
 			printMessage( "Starting Http Connector!");
-			connector = new HttpConnector ();
+			Connector connector = (Connector) httpConnector.newInstance();
 			connector.setPort( port );
 			connector.start( node );
+			connectors.add(connector);
 			
-		} catch (FileNotFoundException e) {
-			printWarning ( " --> Error finding connector logfile!" + e );
 		} catch (ConnectorException e) {
 			printWarning ( " --> problems starting the connector: " + e);
+		} catch (ClassNotFoundException e) {
+	        e.printStackTrace();
+	    } catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
 		}
-		
 	}
 	
 	
@@ -1570,7 +1569,6 @@ public class L2pNodeLauncher {
 			System.arraycopy( argv, 1, args, 0, args.length );
 			argv = args;
 		}
-		//
 		if(argv[0].contains("log-directory=")){
 			logfileDirectoryString = argv[0].substring(argv[0].indexOf("=")+1);
 			String[] args = new String [argv.length-1];
@@ -1585,17 +1583,18 @@ public class L2pNodeLauncher {
 		}
 		logfileDirectory = new File ("./" + logfileDirectoryString + "/");
 		if ( argv[0].equals ( "-s")) {
+			// launch a single node
 			String[] args = new String [ argv.length-1];
 			System.arraycopy( argv, 1, args, 0, args.length );
-			L2pClassLoader classloader = setupClassLoader(serviceDirectory);
-			// launch a single node
+			classloader = setupClassLoader(serviceDirectory);
 			L2pNodeLauncher launcher = launchSingle( args, -1, logfileDirectory, classloader);
 			
 			if ( launcher.isFinished() ){
 				System.out.println( "single node has handled all commands and shut down!");
 				try {
-					if(connector != null)
-						connector.stop();
+					Iterator<Connector> iterator = connectors.iterator();
+					while(iterator.hasNext())
+						iterator.next().stop();
 					} catch (ConnectorException e) {
 					e.printStackTrace();
 				}
@@ -1609,8 +1608,9 @@ public class L2pNodeLauncher {
 				}
 				} catch (InterruptedException e) {
 					try {
-						if(connector != null)
-							connector.stop();
+						Iterator<Connector> iterator = connectors.iterator();
+						while(iterator.hasNext())
+							iterator.next().stop();
 					} catch (ConnectorException ce) {
 						ce.printStackTrace();
 					}

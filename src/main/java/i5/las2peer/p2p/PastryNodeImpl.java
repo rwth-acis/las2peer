@@ -59,7 +59,7 @@ import rice.persistence.StorageManagerImpl;
  * A <a href="http://freepastry.org">FreePastry</a> implementation of a LAS2peer {@link Node}.
  * 
  * This class is the actual heart of the p2p based network of interacting nodes an agents in
- * the las2peer setting.
+ * the LAS2peer setting.
  * 
  * The package {@link i5.las2peer.p2p.pastry} provides all necessary helper classes
  * for the integration (and encapsulation) of the FreePastry library.
