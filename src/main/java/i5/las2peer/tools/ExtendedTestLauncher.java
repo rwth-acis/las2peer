@@ -420,7 +420,7 @@ public class ExtendedTestLauncher {
 	
 	
 	/**
-	 * Start the service {@link i5.las2peer.api.TestService2}, which is using TestService 
+	 * Start the service <i>i5.las2peer.api.TestService2</i>, which is using TestService 
 	 * in it's only method.
 	 * 
 	 * The TestServices can be found in the JUnit source tree.
