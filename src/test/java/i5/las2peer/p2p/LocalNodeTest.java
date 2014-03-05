@@ -195,7 +195,7 @@ public class LocalNodeTest {
 	}
 	
 	
-	
+
 	@Test
 	public void testPending () throws L2pSecurityException, EncodingFailedException, SerializationException, InterruptedException, AgentException {
 		adam.unlockPrivateKey("adamspass");
@@ -203,7 +203,7 @@ public class LocalNodeTest {
 		
 		LocalNode testee = LocalNode.launchAgent(adam);
 		
-		MessageResultListener l = new MessageResultListener(4000) {
+		MessageResultListener l = new MessageResultListener(8000) {
 			@Override
 			public void notifySuccess () { LocalNodeTest.testVariable = true ; }
 		};
@@ -211,7 +211,7 @@ public class LocalNodeTest {
 		Message m = new Message ( adam, eve, new PingPongContent());
 		testee.sendMessage(m, l);
 		
-		Thread.sleep(2000);
+		Thread.sleep(5000);
 		
 		assertFalse ( testVariable);
 		assertFalse ( l.isSuccess());
@@ -219,7 +219,7 @@ public class LocalNodeTest {
 		
 		// launch another node hosting eve
 		LocalNode.launchAgent(eve);
-		Thread.sleep(LocalNode.getMaxMessageWait()+3000);
+		Thread.sleep(LocalNode.getMaxMessageWait()+6000);
 		
 		assertTrue ( l.isSuccess());
 		assertTrue ( l.isFinished());

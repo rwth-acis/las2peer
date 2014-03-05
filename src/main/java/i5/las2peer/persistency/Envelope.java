@@ -920,7 +920,21 @@ public final class Envelope implements XmlAble, Cloneable {
 	public void store() throws StorageException, L2pSecurityException {
 		Context.getCurrent().getLocalNode().storeArtifact(this);
 	}
-	
+
+    /**
+     * stores this envelope to the persistent storage of Las2peer
+     * @param agent one of the owner agents
+     * @throws StorageException
+     * @throws L2pSecurityException
+     */
+    public void store(Agent agent) throws StorageException, L2pSecurityException {
+        if(agent.getRunningAtNode()!=null)
+        {
+            agent.getRunningAtNode().storeArtifact(this);
+        }
+        else
+            throw new StorageException("Agent not registered at any node");
+    }
 	
 	/**
 	 * sets the state of the object from a string representation resulting from
@@ -1187,8 +1201,25 @@ public final class Envelope implements XmlAble, Cloneable {
 	public static Envelope fetchClassIdEnvelope ( Class<?> cls, String identifier ) throws ArtifactNotFoundException, StorageException {
 		return Context.getCurrent().getStoredObject(cls,  identifier );
 	}
-	
-	
+
+    /**
+     * Get a previously stored envelope from the p2p network.
+     *
+     * Requires an active LAS2Peer @{link i5.las2peer.security.Context}.
+     * @param agent executing agent
+     * @param cls type of the class
+     * @param identifier an unique identifier for the envelope
+     * @return an envelope
+     * @throws ArtifactNotFoundException
+     * @throws StorageException
+     */
+    public static Envelope fetchClassIdEnvelope (Agent agent, Class<?> cls, String identifier ) throws ArtifactNotFoundException, StorageException {
+        long id = Envelope.getClassEnvelopeId(cls, identifier);
+        if(agent.getRunningAtNode()!=null)
+            return agent.getRunningAtNode().fetchArtifact( id );
+        else
+            throw new StorageException("Agent is not registered at any node");
+    }
 	
 	/**
 	 * set the contained data to the given binary content 

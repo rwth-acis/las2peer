@@ -207,6 +207,7 @@ public class ServiceAgent extends PassphraseAgent {
 
 	@Override
 	public void notifyUnregister() {
+        serviceInfoAgentNotifyUnregister();
 		serviceInstance.close();
 		
 		serviceInstance = null;
@@ -319,8 +320,64 @@ public class ServiceAgent extends PassphraseAgent {
 			throw new MalformedXMLException("Deserialization problems", e );
 		}		
 	}
-	
-	
+
+    /**
+     * Notifies the {@link i5.las2peer.security.ServiceInfoAgent} about itself
+     */
+    private void serviceInfoAgentNotifyUnregister()
+    {
+        Node node=getRunningAtNode();
+        try
+        {
+            ServiceInfoAgent agent = getServiceInfoAgent(node);
+            agent.serviceRemoved(this);
+        }
+        catch(Exception e)
+        {
+            //ignore for now
+        }
+    }
+
+    /**
+     * Registers and returns the {@link i5.las2peer.security.ServiceInfoAgent}
+     * @param node
+     * @return
+     * @throws CryptoException
+     * @throws L2pSecurityException
+     * @throws SerializationException
+     * @throws AgentException
+     */
+    private ServiceInfoAgent getServiceInfoAgent(Node node)
+            throws CryptoException, L2pSecurityException, SerializationException, AgentException
+    {
+        ServiceInfoAgent agent = ServiceInfoAgent.getServiceInfoAgent();
+
+        if(!node.hasAgent(agent.getId()))
+        {
+            node.registerReceiver(agent);
+        }
+        return agent;
+    }
+
+    /**
+     * Notifies the {@link i5.las2peer.security.ServiceInfoAgent} about itself     *
+     * @throws L2pServiceException
+     */
+    public void serviceInfoAgentNotifyRegister() throws L2pServiceException
+    {
+        Node node=getRunningAtNode();
+        try
+        {
+            ServiceInfoAgent agent = getServiceInfoAgent(node);
+            agent.serviceAdded(this);
+        }
+        catch(Exception e)
+        {
+            throw new L2pServiceException("Error creating ServiceInfoAgent",e);
+        }
+
+
+    }
 	
 	/**
 	 * notify this service agent, that it has been registered (for usage) at the given node
@@ -350,6 +407,9 @@ public class ServiceAgent extends PassphraseAgent {
 
 			// and the agent
 			super.notifyRegistrationTo(node);
+
+            //notify Service Info Agent
+            serviceInfoAgentNotifyRegister();
 			
 		} catch (ClassLoaderException e1) {
 			throw new L2pServiceException ( "Problems with the classloader", e1);
