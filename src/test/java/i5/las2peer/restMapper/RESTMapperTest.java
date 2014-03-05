@@ -18,18 +18,23 @@ public class RESTMapperTest {
 
 	
 	TestClass1 testClass1= new TestClass1();
-	static RESTMapper mapper;
+	
 	static PathTree tree;
+	static PathTree tree2;
 	@BeforeClass
 	public static void testSetup() 
 	{			
-		mapper= new RESTMapper();
+		
 		String xml="";
+		String xml2="";
 		try {
 			//tree=mapper.getMappingTree(mapper.getMethodsAsXML(TestClass1.class));
-			xml=mapper.getMethodsAsXML(TestClass1.class);
+			xml=RESTMapper.getMethodsAsXML(TestClass1.class);
+			xml2=RESTMapper.getMethodsAsXML(TestClass2.class);
 			//System.out.println(xml);
-			tree=mapper.getMappingTree(xml);
+			tree=RESTMapper.getMappingTree(xml);
+			tree2=RESTMapper.getMappingTree(xml2);
+			tree.merge(tree2);
 			
 		} catch (Exception e) {
 			
@@ -40,7 +45,7 @@ public class RESTMapperTest {
 	public void invokeMethod(String httpMethod, String uri, Pair<String>[] variables, String content, String assertionMessage, String assertion) throws Exception
 	{
 		
-			InvocationData[] invocation =mapper.parse(tree, httpMethod, uri, variables, content);
+			InvocationData[] invocation =RESTMapper.parse(tree, httpMethod, uri, variables, content);
 			for (int i = 0; i < invocation.length; i++) {
 				Object[] parameters= invocation[i].getParameters();
 				Class<?> [] parameterTypes =invocation[i].getParameterTypes();
@@ -70,6 +75,7 @@ public class RESTMapperTest {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			fail(e.getMessage());
 		}	
 		
 	}
@@ -83,6 +89,7 @@ public class RESTMapperTest {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			fail(e.getMessage());
 		}	
 		
 	}
@@ -95,6 +102,7 @@ public class RESTMapperTest {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			fail(e.getMessage());
 		}	
 		
 	}
@@ -107,6 +115,7 @@ public class RESTMapperTest {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			fail(e.getMessage());
 		}
 		
 	}
@@ -118,6 +127,7 @@ public class RESTMapperTest {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			fail(e.getMessage());
 		}	
 		
 	}
@@ -143,6 +153,7 @@ public class RESTMapperTest {
 		}
 		catch (Throwable e)	{
 			e.printStackTrace();
+			fail(e.getMessage());
 		}
 	}
 	@SuppressWarnings("unchecked")
@@ -154,6 +165,33 @@ public class RESTMapperTest {
 		}
 		catch (Throwable e)	{
 			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testMerge1(){
+		try	{
+			invokeMethod("put","visitors/12",new Pair[]{},"","Merge1","2.4");			
+			
+		}
+		catch (Throwable e)	{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testMerge2(){
+		try	{
+			invokeMethod("delete","users/12/cart/13/2.33",new Pair[]{},"","Merge2","1562.33");			
+			
+		}
+		catch (Throwable e)	{
+			e.printStackTrace();
+			fail(e.getMessage());
 		}
 	}
 	

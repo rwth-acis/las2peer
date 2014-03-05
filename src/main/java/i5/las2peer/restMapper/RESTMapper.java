@@ -19,10 +19,7 @@ import i5.las2peer.restMapper.exceptions.NoMethodFoundException;
 import i5.las2peer.restMapper.exceptions.NotSupportedUriPathException;
 
 
-import java.io.NotSerializableException;
-import java.io.Serializable;
-import java.io.StringReader;
-import java.io.StringWriter;
+import java.io.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -30,6 +27,7 @@ import java.util.HashMap;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -41,6 +39,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 
@@ -55,33 +55,36 @@ import javax.xml.xpath.XPathFactory;
  *
  */
 public class RESTMapper {
-	
-	private static final String END_PATH_PARAMETER = "}";
-	private static final String START_PATH_PARAMETER = "{";
-	private static final String DELETE = "delete";
-	private static final String GET = "get";
-	private static final String PUT = "put";
-	private static final String POST = "post";
-	private static final String DEFAULT_TAG = "default";
-	private static final String ANNOTATION_TAG = "annotation";
-	private static final String CONTENT_ANNOTATION = "content";
-	private static final String QUERY_ANNOTATION = "query";
-	private static final String PATH_ANNOTATION = "path";
-	private static final String INDEX_TAG = "index";
-	private static final String PARAMETER_TAG = "parameter";
-	private static final String PARAMTERS_TAG = "parameters";
-	private static final String TYPE_TAG = "type";
-	private static final String PATH_TAG = PATH_ANNOTATION;
-	private static final String HTTP_METHOD_TAG = "httpMethod";
-	private static final String METHOD_TAG = "method";
-	private static final String VERSION_TAG = "version";
-	private static final String DEFAULT_SERVICE_VERSION = "1.0";
-	private static final String METHODS_TAG = "methods";
-	private static final String NAME_TAG = "name";
-	private static final String SERVICE_TAG = "service";
-	private static final String PATH_PARAM_BRACES = "{}";
-	
-	private XPath _xPath =  XPathFactory.newInstance().newXPath();
+
+    public static final String SERVICES_TAG = "services";
+    public static final String END_PATH_PARAMETER = "}";
+    public static final String START_PATH_PARAMETER = "{";
+    public static final String DELETE = "delete";
+    public static final String GET = "get";
+    public static final String PUT = "put";
+    public static final String POST = "post";
+    public static final String DEFAULT_TAG = "default";
+    public static final String ANNOTATION_TAG = "annotation";
+    public static final String CONTENT_ANNOTATION = "content";
+    public static final String QUERY_ANNOTATION = "query";
+    public static final String PATH_ANNOTATION = "path";
+    public static final String INDEX_TAG = "index";
+    public static final String PARAMETER_TAG = "parameter";
+    public static final String PARAMTERS_TAG = "parameters";
+    public static final String TYPE_TAG = "type";
+    public static final String PATH_TAG = PATH_ANNOTATION;
+    public static final String HTTP_METHOD_TAG = "httpMethod";
+    public static final String METHOD_TAG = "method";
+    public static final String VERSION_TAG = "version";
+    public static final String DEFAULT_SERVICE_VERSION = "1.0";
+    public static final String METHODS_TAG = "methods";
+    public static final String NAME_TAG = "name";
+    public static final String SERVICE_TAG = "service";
+    public static final String PATH_PARAM_BRACES = "{}";
+
+    private static final HashMap<String,Class<?>> classMap= new HashMap<String, Class<?>>();
+    public static final String XML = ".xml";
+    private static XPath _xPath;
 	
 	
 	
@@ -91,7 +94,7 @@ public class RESTMapper {
 	 */
 	public RESTMapper()
 	{
-		
+
 	}
 	/**
 	 * accepts a (service) class and creates an XML file from it
@@ -100,7 +103,7 @@ public class RESTMapper {
 	 * @return XML file
 	 * @throws Exception
 	 */
-	public String getMethodsAsXML(Class<?> cl) throws Exception
+	public static String getMethodsAsXML(Class<?> cl) throws Exception
 	{
 		DocumentBuilderFactory dbFactory;
 		DocumentBuilder dBuilder;
@@ -213,7 +216,32 @@ public class RESTMapper {
 		
 		return XMLtoString(doc);
 	}
-	
+	public static String mergeXMLs(String[] xmls) throws ParserConfigurationException
+	{
+		
+		DocumentBuilderFactory dbFactory;
+		DocumentBuilder dBuilder;
+		Document doc;		
+		dbFactory = DocumentBuilderFactory.newInstance();	
+		dBuilder = dbFactory.newDocumentBuilder();
+		doc=dBuilder.newDocument();
+		Element root=doc.createElement(SERVICES_TAG);
+		doc.appendChild(root);
+		
+		for (int i = 0; i < xmls.length; i++) {
+			try {
+				Document local=dBuilder.parse(new InputSource(new StringReader(xmls[i])));
+				doc.getDocumentElement().appendChild(doc.importNode(local.getDocumentElement(), true));
+			} catch (SAXException e) {				
+				e.printStackTrace();
+			} catch (IOException e) {				
+				e.printStackTrace();
+			}
+		}
+		doc.getDocumentElement().normalize();
+		return XMLtoString(doc);
+		
+	}
 	
 	/**
 	 * creates a tree from the class data xml
@@ -222,8 +250,9 @@ public class RESTMapper {
 	 * @return tree structure for request mapping
 	 * @throws Exception
 	 */
-	public PathTree getMappingTree(String xml) throws Exception
+	public static PathTree getMappingTree(String xml) throws Exception
 	{
+		 _xPath =  XPathFactory.newInstance().newXPath();
 		DocumentBuilderFactory dbFactory;
 		DocumentBuilder dBuilder;
 		Document doc;		
@@ -335,7 +364,7 @@ public class RESTMapper {
 	 * @param annotations
 	 * @return HTTP Method (put,post,get etc...)
 	 */
-	private String getHttpMethod(Annotation[] annotations) {
+	private static String getHttpMethod(Annotation[] annotations) {
 		String httpMethod="";
 		for (Annotation ann : annotations) 
 		{
@@ -369,7 +398,7 @@ public class RESTMapper {
 	 * @return array of matching services and methods, parameter values are already pre-filled.
 	 * @throws Exception
 	 */
-	public InvocationData[] parse(PathTree tree, String httpMethod, String uri, Pair<String>[] variables, String content) throws Exception
+	public static InvocationData[] parse(PathTree tree, String httpMethod, String uri, Pair<String>[] variables, String content) throws Exception
 	{
 		
 		
@@ -483,7 +512,7 @@ public class RESTMapper {
 	 * @param doc XML document
 	 * @return readable XML
 	 */
-	private static String XMLtoString(Document doc)
+	public static String XMLtoString(Document doc)
 	{
 		if(doc!=null)
 		{			
@@ -578,35 +607,35 @@ public class RESTMapper {
 		}
 		if(result instanceof Integer)
 		{
-			return Integer.toString((int) result);
+			return Integer.toString((Integer) result);
 		}
 		if(result instanceof Byte)
 		{
-			return Byte.toString((byte) result);
+			return Byte.toString((Byte) result);
 		}
 		if(result instanceof Short)
 		{
-			return Short.toString((short) result);
+			return Short.toString((Short) result);
 		}
 		if(result instanceof Long)
 		{
-			return Long.toString((long) result);
+			return Long.toString((Long) result);
 		}
 		if(result instanceof Float)
 		{
-			return Float.toString((float) result);
+			return Float.toString((Float) result);
 		}
 		if(result instanceof Double)
 		{
-			return Double.toString((double) result);
+			return Double.toString((Double) result);
 		}
 		if(result instanceof Boolean)
 		{
-			return Boolean.toString((boolean) result);
+			return Boolean.toString((Boolean) result);
 		}
 		if(result instanceof Character)
 		{
-			return Character.toString((char) result);
+			return Character.toString((Character) result);
 		}
 		return result.toString(); //desperate measures
 	}
@@ -621,26 +650,98 @@ public class RESTMapper {
 	 */
 	public static Class<?> getClassType(String type) throws ClassNotFoundException
 	{
-		switch (type) {
-		case "int":
-			return int.class;	
-		case "float":
-			return float.class;	
-		case "byte":
-			return byte.class;	
-		case "short":
-			return short.class;	
-		case "long":
-			return long.class;	
-		case "double":
-			return double.class;
-		case "char":
-			return char.class;
-		case "boolean":
-			return boolean.class;
-
-		default:
-			return Class.forName(type);
-		}
+        initClassmap();
+        Class<?> result=classMap.get(type);
+        if(result!=null)
+        {
+            return result;
+        }
+        else
+        {
+            return Class.forName(type);
+        }
 	}
+
+    /**
+     * Initializes the String to Class mapping HashSet (faster lookup than else if)
+     * Needed to map String Notations of Types to actual primitive Types
+     */
+    private static void initClassmap()
+    {
+        if(classMap.isEmpty())
+        {
+            classMap.put("int", int.class);
+            classMap.put("float", float.class);
+            classMap.put("byte", byte.class);
+            classMap.put("short", short.class);
+            classMap.put("long", long.class);
+            classMap.put("double", double.class);
+            classMap.put("char", char.class);
+            classMap.put("boolean", boolean.class);
+
+        }
+    }
+
+    /**
+     * Looks for all xml files in a directory and its subdirectories
+     * Reads each file and puts them into a String array
+     * @param dir path to the directory
+     * @return array of all found XML contents
+     * @throws IOException
+     */
+    public static String[] readAllXMLFromDir(String dir) throws IOException
+    {
+        File folder = new File(dir);
+        ArrayList<File> files = new ArrayList<File>();
+        listFilesForFolder(folder, XML,files);
+
+        String[] xmls=new String[files.size()];
+        for(int i = 0; i < xmls.length; i++)
+        {
+            xmls[i]=getFile(files.get(i));
+
+        }
+        return xmls;
+    }
+
+    /**
+     * Reads a given file
+     * @param file file to read
+     * @return content of file
+     * @throws IOException
+     */
+    public static String getFile(File file) throws IOException
+    {
+        String content = null;
+        FileReader reader = null;
+        try {
+            reader = new FileReader(file);
+            char[] chars = new char[(int) file.length()];
+            reader.read(chars);
+            content = new String(chars);
+            reader.close();
+        }
+
+        finally {
+            reader.close();
+        }
+
+        return content;
+    }
+
+    /**
+     * Lists all files matching the given type as suffix
+     * @param folder parent folder from where to start looking
+     * @param type suffix, e.g. ".xml"
+     * @param list reference to result array (stores all files found)
+     */
+    private static void listFilesForFolder(final File folder,String type, ArrayList<File> list) {
+        for (final File fileEntry : folder.listFiles()) {
+            if (fileEntry.isDirectory()) {
+                listFilesForFolder(fileEntry,type,list);
+            } else if (fileEntry.getName().toLowerCase().endsWith(type)){
+                list.add(fileEntry);
+            }
+        }
+    }
 }

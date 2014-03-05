@@ -5,3 +5,6 @@
 /ivy/ivy.jar
 /log
 /tmp
+/out
+/.idea
+*.iml
