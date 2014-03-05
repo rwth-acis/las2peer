@@ -137,8 +137,8 @@ public class ServiceAgent extends PassphraseAgent {
 					thread.join();
 					
 					if ( thread.hasException() ) {
-						System.out.println ( "Exception: " + thread.getException());
-						thread.getException().printStackTrace();
+						//System.out.println ( "Exception: " + thread.getException());
+						//thread.getException().printStackTrace();
 						if ( thread.getException() instanceof InvocationTargetException 
 								&& thread.getException().getCause() instanceof AgentLockedException ) {							
 							getRunningAtNode().observerNotice(Event.SERVICE_INVOCATION_FAILED, m.getSendingNodeId(), m.getSender(), getRunningAtNode().getNodeId(), this, "Need to unlock agent key for envelope access" );							
