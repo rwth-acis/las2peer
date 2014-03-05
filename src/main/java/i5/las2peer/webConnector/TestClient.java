@@ -1,5 +1,7 @@
 package i5.las2peer.webConnector;
 
+import org.apache.commons.codec.binary.Base64;
+
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStream;
@@ -19,7 +21,7 @@ public class TestClient {
 			
 		private String authentication;
 		private String serverAddress;
-		private String serviceClass;
+		
 		/**
 		 * default constructor
 		 */
@@ -51,16 +53,9 @@ public class TestClient {
 		{
 			
 			authentication=username+":"+password;//Base64.encodeBytes((username+":"+password).getBytes("UTF-8"));
-			
+			authentication= Base64.encodeBase64String(authentication.getBytes());
 		}
-		/**
-		 * set the service class to use in the las2peer network
-		 * @param serviceClass e.g. i5.las2peer.webConnector.TestService
-		 */
-		public void setServiceClass(String serviceClass)
-		{
-			this.serviceClass=serviceClass;
-		}
+		
 		/**
 		 * send request to server
 		 * @param method POST, GET, DELETE, PUT
@@ -75,10 +70,10 @@ public class TestClient {
 			    HttpURLConnection connection=null;  
 			    try {
 			      //Create connection
-			      url = new URL(String.format("%s/%s/%s", serverAddress, serviceClass,uri));
+			      url = new URL(String.format("%s/%s", serverAddress,uri));
 			      connection = (HttpURLConnection)url.openConnection();
 			      connection.setRequestMethod(method.toUpperCase());
-			      connection.setRequestProperty("Authentication", 
+			      connection.setRequestProperty("Authorization",
 			           "Basic "+authentication);
 			      
 			      connection.setRequestProperty("Content-Type", 

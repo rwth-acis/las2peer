@@ -1,6 +1,7 @@
 package i5.las2peer.webConnector;
 
 
+
 import i5.las2peer.api.Service;
 
 import i5.las2peer.restMapper.RESTMapper;
@@ -10,22 +11,32 @@ import i5.las2peer.restMapper.annotations.*;
  * @author Alexander
  *
  */
+@Version("0.2")
 public class TestService extends Service
 {
-	private RESTMapper mapper;
+	
 	/**
 	 * constructor, initializes RESTMapper
 	 */
 	public TestService()
 	{
-		initMapper();		
+		
 	}
 	/**
 	 * get all annotation and method data to allow mapping
 	 */
-	private void initMapper() 
+	
+	
+	public String getRESTMapping()
 	{
-		mapper=new RESTMapper(this.getClass());
+		String result="";
+		try {
+			result=RESTMapper.getMethodsAsXML(this.getClass());
+		} catch (Exception e) {
+			
+			e.printStackTrace();
+		}
+		return result;
 	}
 	
 	/**
@@ -119,42 +130,8 @@ public class TestService extends Service
 	{
 		return num1*num2-param1*param2;
 	}
-	/**
-	 * concats 3 strings
-	 * @param a
-	 * @param b
-	 * @param c
-	 * @return abc
-	 */
-	@POST
-	@Path("do/{a}/{b}")
-	public String concat(@PathParam("a") String a, @PathParam("b") String b,
-			@ContentParam String c )
-	{
-		return a+b+c;
-	}
 	
-	/**
-	 * 'Master' method: retrieves all requests from the web connector and maps them via the RESTMapper onto service methods
-	 * @param method HTTP method
-	 * @param URI URI path
-	 * @param variables variables of the query
-	 * @param content content of the HTML body (for POST requests)
-	 * @return values/errors for the web connector
-	 */
-	public String restDecoder(String method, String URI, String[][] variables, String content)
-	{
-		String response="";
-		try 
-		{
-			
-			response=mapper.parse(this, method.toLowerCase(), URI,variables,content);//here the mapping magic happens
-		} 
-		catch (Throwable e) 
-		{			
-			response="Error: "+e.getClass().getName()+" "+e.getMessage();//+" "+errors;
-		}
-		return response;
-	}
+	
+	
 	
 }

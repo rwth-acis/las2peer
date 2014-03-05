@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<service name="i5.las2peer.webConnector.TestService2" version="0.2">
+  <methods>
+    <method httpMethod="post" name="concat" path="do/{a}/{b}" type="java.lang.String">
+      <parameters>
+        <parameter annotation="path" index="0" name="a" type="java.lang.String"/>
+        <parameter annotation="path" index="1" name="b" type="java.lang.String"/>
+        <parameter annotation="content" index="2" name="" type="java.lang.String"/>
+      </parameters>
+    </method>
+  </methods>
+</service>

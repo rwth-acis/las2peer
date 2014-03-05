@@ -6,3 +6,6 @@
 /log
 /tmp
 /.classpath
+/out
+/.idea
+*.iml

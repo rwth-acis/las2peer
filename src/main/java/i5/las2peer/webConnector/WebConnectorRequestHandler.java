@@ -5,6 +5,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Map;
 
 import i5.httpServer.HttpRequest;
 import i5.httpServer.HttpResponse;
@@ -24,8 +25,12 @@ import i5.las2peer.security.Agent;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.Mediator;
 import i5.las2peer.security.PassphraseAgent;
-
+import i5.las2peer.restMapper.*;
+import i5.las2peer.restMapper.data.*;
 //import rice.p2p.util.Base64;
+import i5.las2peer.restMapper.exceptions.NoMethodFoundException;
+import i5.las2peer.restMapper.exceptions.NotSupportedUriPathException;
+import rice.p2p.util.Base64;
 
 
 /**
@@ -44,8 +49,7 @@ import i5.las2peer.security.PassphraseAgent;
 
 public class WebConnectorRequestHandler implements RequestHandler {
 
-	private static final String AUTHENTICATION_FIELD = "Authentication";	
-	private static final String REST_DECODER = "restDecoder";
+	private static final String AUTHENTICATION_FIELD = "Authorization";
 	private WebConnector connector;
 	private Node l2pNode;
 	private Hashtable<Long,Agent> activeUsers;
@@ -89,7 +93,7 @@ public class WebConnectorRequestHandler implements RequestHandler {
 		{
 			//looks like: Authentication Basic <Byte64(name:pass)>
 			userPass=request.getHeaderField(AUTHENTICATION_FIELD).substring(BASIC_PREFIX_LENGTH);
-			//userPass=new String(Base64.decode(userPass), "UTF-8");
+			userPass=new String(Base64.decode(userPass), "UTF-8");
 			int separatorPos=userPass.indexOf(':');
 			
 			//get username and password
@@ -157,27 +161,26 @@ public class WebConnectorRequestHandler implements RequestHandler {
 	 */
 	private boolean invoke(Long userId, HttpRequest request, HttpResponse response) {
 		
-		String[] requestSplit=request.getPath().split("/",3);
+		String[] requestSplit=request.getPath().split("/",2);
 		// first: empty (string starts with '/')
-		// second: service name
-		// third: URI rest
-		String serviceName="";
-		String methodName="";
-		String restURI="";
+		// second: URI
+		
+		
+		
+		String uri="";
 		String content="";
 		
 		try {
 			
-			serviceName=requestSplit[1];
-			methodName=REST_DECODER; //special method in service
 			
-			if(requestSplit.length>=3)
+			
+			if(requestSplit.length>=2)
 			{
-				int varsstart=requestSplit[2].indexOf('?');
+				int varsstart=requestSplit[1].indexOf('?');
 				if(varsstart>0)
-					restURI=requestSplit[2].substring(0,varsstart);
+					uri=requestSplit[1].substring(0,varsstart);
 				else
-					restURI=requestSplit[2];
+					uri=requestSplit[1];
 			}
 			
 			//http body
@@ -213,52 +216,76 @@ public class WebConnectorRequestHandler implements RequestHandler {
 			
 			
 			
+		
 			
-			String[][] variables = {};//extract variables from request ?param=value&param2=value2
-			
-			ArrayList<String[]> variablesList=new ArrayList<String[]>();
+			ArrayList<Pair<String>> variablesList=new ArrayList<Pair<String>>();
 			@SuppressWarnings("rawtypes")
 			Enumeration en = request.getGetVarNames();		
-			//String querystr="";
+			
 			while(en.hasMoreElements())
-			{
+			{				
 				String param = (String) en.nextElement();
 				String val= request.getGetVar(param);
-				
-				String[] pair={param,val};
-				
-				variablesList.add(pair);
-				//querystr+=param+" = "+val+" ";
+				Pair<String> pair= new Pair<String>(param,val);	
+				variablesList.add(pair);				
 			}
+			@SuppressWarnings("unchecked")
+			Pair<String>[] variables=variablesList.toArray(new Pair[variablesList.size()]);
+			
 			connector.logMessage(httpMethod+" "+request.getUrl());
-			variables=variablesList.toArray(new String[variablesList.size()][2]);
 			
 			
-			Serializable[] parameters={httpMethod,restURI,variables,content};
 			
-			Serializable result;	
+			
+			//Serializable[] parameters={httpMethod,restURI,variables,content};
+			
+			Serializable result="";	
+			
 			if(activeUsers.containsKey(userId))	{
-				Mediator mediator = l2pNode.getOrRegisterLocalMediator(activeUsers.get(userId));
-				result= mediator.invoke(serviceName,methodName, parameters, connector.preferLocalServices());// invoke service method
-				sendInvocationSuccess ( result, response );				
+				Mediator mediator = l2pNode.getOrRegisterLocalMediator(activeUsers.get(userId));				
+				boolean gotResult=false;
+
+
+                InvocationData[] invocation =RESTMapper.parse(this.connector.getMappingTree(), httpMethod, uri, variables, content);
+				for (int i = 0; i < invocation.length; i++) {
+					try
+					{
+						
+						result= mediator.invoke(invocation[i].getServiceName(),invocation[i].getMethodName(), invocation[i].getParameters(), connector.preferLocalServices());// invoke service method
+						gotResult=true;
+					
+					} catch ( NoSuchServiceException e ) {
+						sendNoSuchService(request, response, invocation[i].getServiceName());			
+					} catch ( TimeoutException e ) {
+						sendNoSuchService(request, response, invocation[i].getServiceName());
+					} catch ( NoSuchServiceMethodException e ) {
+						sendNoSuchMethod(request, response);
+					} catch ( L2pSecurityException e ) {
+						sendSecurityProblems(request, response, e);					
+					} catch ( ServiceInvocationException e ) {
+						if ( e.getCause() == null )
+							sendResultInterpretationProblems(request, response);
+						else
+							sendInvocationException(request, response, e);								
+					} catch ( InterruptedException e ) {
+						sendInvocationInterrupted(request, response);						
+						
+					}
+				}
+				
+				
+				if (gotResult)
+					sendInvocationSuccess ( result, response );		
+				else
+					sendNoSuchMethod(request, response);
+				
 			}
 			return true;
 			
-		} catch ( NoSuchServiceException e ) {
-			sendNoSuchService(request, response, serviceName);			
-		} catch ( TimeoutException e ) {
-			sendNoSuchService(request, response, serviceName);
-		} catch ( NoSuchServiceMethodException e ) {
-			sendNoSuchMethod(request, response);
-		} catch ( L2pSecurityException e ) {
-			sendSecurityProblems(request, response, e);					
-		} catch ( ServiceInvocationException e ) {
-			if ( e.getCause() == null )
-				sendResultInterpretationProblems(request, response);
-			else
-				sendInvocationException(request, response, e);								
-		} catch ( InterruptedException e ) {
-			sendInvocationInterrupted(request, response);
+		} catch ( NoMethodFoundException e ) {
+			sendNoSuchMethod(request, response);	
+		} catch ( NotSupportedUriPathException e ) {
+			sendNoSuchMethod(request, response);		
 		} catch (Exception e){
 			connector.logError("Error occured:" + request.getPath()+" "+e.getMessage() );
 		}
@@ -293,17 +320,13 @@ public class WebConnectorRequestHandler implements RequestHandler {
 		if((userId=authenticate(request,response))!= -1)
 			if(invoke(userId,request,response))
 				logout(userId);	 
-	
-		
-		
-		
 	}
 	
 	/**
 	 * send a notification, that the requested service does not exists
 	 * @param request
 	 * @param response
-	 * @param sRequest
+     * @param service
 	 */
 	private void sendNoSuchService(HttpRequest request, HttpResponse response,
 			String service) {
@@ -319,7 +342,6 @@ public class WebConnectorRequestHandler implements RequestHandler {
 	 * send a notification, that the requested method does not exists at the requested service
 	 * @param request
 	 * @param response
-	 * @param sid
 	 */
 	private void sendNoSuchMethod(HttpRequest request, HttpResponse response) {
 		response.clearContent();
@@ -333,7 +355,6 @@ public class WebConnectorRequestHandler implements RequestHandler {
 	 * send a notification, that security problems occurred during the requested service method
 	 * @param request
 	 * @param response
-	 * @param sid
 	 * @param e
 	 */
 	private void sendSecurityProblems(HttpRequest request,
@@ -355,7 +376,6 @@ public class WebConnectorRequestHandler implements RequestHandler {
 	 * 
 	 * @param request
 	 * @param response
-	 * @param sid
 	 */
 	private void sendResultInterpretationProblems(HttpRequest request,
 			HttpResponse response) {
@@ -372,7 +392,6 @@ public class WebConnectorRequestHandler implements RequestHandler {
 	 * 
 	 * @param request
 	 * @param response
-	 * @param sid
 	 * @param e
 	 */
 	private void sendInvocationException(HttpRequest request,
@@ -412,7 +431,6 @@ public class WebConnectorRequestHandler implements RequestHandler {
 	 * 
 	 * @param result
 	 * @param response
-	 * @throws CodingException 
 	 */
 	private void sendInvocationSuccess ( Serializable result, HttpResponse response  ) {
 		if ( result != null ) {

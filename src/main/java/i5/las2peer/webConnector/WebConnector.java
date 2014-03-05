@@ -9,13 +9,17 @@ import i5.las2peer.api.ConnectorException;
 import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.Node;
+import i5.las2peer.restMapper.RESTMapper;
+import i5.las2peer.restMapper.data.PathTree;
 import i5.las2peer.security.Agent;
+
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.text.DateFormat;
 import java.util.Date;
+
 
 
 /**
@@ -50,7 +54,7 @@ public class WebConnector extends Connector
 	public static final int DEFAULT_SOCKET_TIMEOUT = 60*1000; // 1 minute
 	protected int socketTimeout = DEFAULT_SOCKET_TIMEOUT;
 	
-	public static final String DEFAULT_CROSS_ORIGIN_RESOURCE_DOMAIN = "http://role-is.dbis.rwth-aachen.de:9080";
+	public static final String DEFAULT_CROSS_ORIGIN_RESOURCE_DOMAIN = "*";
 	protected String crossOriginResourceDomain = DEFAULT_CROSS_ORIGIN_RESOURCE_DOMAIN;
 	
 	public static final int DEFAULT_CROSS_ORIGIN_RESOURCE_MAX_AGE = 60;
@@ -70,19 +74,28 @@ public class WebConnector extends Connector
 	private Node myNode = null;
 	
 	
-	private final static String DEFAULT_LOGFILE = "/log/webConnector.log";
+	private final static String DEFAULT_LOGFILE = "./log/webConnector.log";
 	
 	
 	private PrintStream logStream = null;
 	private DateFormat dateFormat = DateFormat.getDateTimeInstance();
 	
+
+	//--
+	private PathTree tree=new PathTree();
 	
+	public PathTree getMappingTree()
+	{
+		return tree;
+	}
+	//--
 	/**
 	 * create a new web connector instance. 	
 	 * @throws FileNotFoundException
 	 */
 	public WebConnector () throws FileNotFoundException {
 		super.setFieldValues();
+        ServiceRepositoryManager.setTree(tree);
 	}
 	
 	/**
@@ -95,6 +108,18 @@ public class WebConnector extends Connector
 		setHttpPort(httpPort);
 		setHttpsPort(httpsPort);
 	}
+	
+	/**
+	 * create a new web connector instance. 	
+	 * @throws Exception 
+	 */
+	public WebConnector (boolean http, int httpPort, boolean https, int httpsPort, String xmlPath) throws Exception {
+		this();
+		enableHttpHttps(http,https);
+		setHttpPort(httpPort);
+		setHttpsPort(httpsPort);
+        ServiceRepositoryManager.addXML(RESTMapper.readAllXMLFromDir(xmlPath));
+	}
 	/**
 	 * set the log file for this connector
 	 * 
@@ -104,7 +129,19 @@ public class WebConnector extends Connector
 	public void setLogFile ( String filename) throws FileNotFoundException {
 		setLogStream ( new PrintStream ( new FileOutputStream ( filename, true )));
 	}
-	
+
+    @Override
+    public void setPort(int port)
+    {
+        enableHttpHttps(true,false);
+        setHttpPort(port);
+    }
+
+    @Override
+    public void init()
+    {
+
+    }
 	
 	/**
 	 * set the port for the HTTP connector to listen to
@@ -182,7 +219,7 @@ public class WebConnector extends Connector
 	
 	/**
 	 * set the cross origin resource domain
-	 * @param domain
+	 * @param cord
 	 */
 	public void setCrossOriginResourceDomain ( String cord) {
 		crossOriginResourceDomain = cord;
@@ -216,8 +253,15 @@ public class WebConnector extends Connector
 			}
 		
 		myNode = node;
-		
-		if ( startHttp ) {
+        try
+        {
+            ServiceRepositoryManager.start(myNode);
+        }
+        catch(Exception e)
+        {
+            logError("Could not start ServiceRepositoryManager: "+e.getMessage());
+        }
+        if ( startHttp ) {
 			runServer(false);	
 		}
 		
@@ -337,7 +381,7 @@ public class WebConnector extends Connector
 	/**
 	 * Logs a request.
 	 * 
-	 * @param message
+	 * @param request
 	 */
 	void logRequest (String request) {
 		logStream.println( dateFormat.format ( new Date() ) + "\t Request:" + request);
