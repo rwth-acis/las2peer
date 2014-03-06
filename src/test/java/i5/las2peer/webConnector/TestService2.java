@@ -47,8 +47,7 @@ public class TestService2 extends Service
 	{
 		return a+b+c;
 	}
-	
-	
-	
+
+
 	
 }
