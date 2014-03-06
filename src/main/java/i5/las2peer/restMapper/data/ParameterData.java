@@ -60,7 +60,7 @@ public class ParameterData {
 	 */
 	public boolean hasDefaultValue()
 	{
-		return defaultValue==null;
+		return defaultValue!=null;
 	}
 	/**
 	 * constructor

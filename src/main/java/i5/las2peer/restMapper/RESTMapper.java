@@ -183,7 +183,7 @@ public class RESTMapper {
 						String paramName=((QueryParam) ann).value();
 						parameterAnnotation=QUERY_ANNOTATION;
 						parameterName=paramName;
-						
+                        parameterDefault=((QueryParam) ann).defaultValue();
 					}
 					else if(ann instanceof ContentParam)
 					{
@@ -342,7 +342,10 @@ public class RESTMapper {
 						parameterName=parameter.getAttribute(NAME_TAG);
 					String parameterDefault=null;
 					if(parameter.hasAttribute(DEFAULT_TAG))
+                    {
 						parameterDefault=parameter.getAttribute(DEFAULT_TAG);
+
+                    }
 					
 					
 					//create array sorted by the occurrence of the parameter in the method declaration
@@ -457,8 +460,9 @@ public class RESTMapper {
 		//create data needed to invoke the methods stored in this node
 		ArrayList<InvocationData> invocationData=new ArrayList<InvocationData>();
 		for (int i = 0; i < methodData.length; i++) {
-			
-			ParameterData[] parameters=methodData[i].getParameters();
+
+
+            ParameterData[] parameters=methodData[i].getParameters();
 			
 			Serializable[] values= new Serializable[parameters.length]; //web connector uses Serializable for invocation
 			Class<?>[] types= new Class<?>[parameters.length];

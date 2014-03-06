@@ -46,6 +46,8 @@ public class RESTMapperTest {
 	{
 		
 			InvocationData[] invocation =RESTMapper.parse(tree, httpMethod, uri, variables, content);
+            if (invocation.length==0)
+                fail("no method found for " +assertionMessage);
 			for (int i = 0; i < invocation.length; i++) {
 				Object[] parameters= invocation[i].getParameters();
 				Class<?> [] parameterTypes =invocation[i].getParameterTypes();
@@ -59,9 +61,11 @@ public class RESTMapperTest {
 				Object result=method.invoke(obj, parameters);
 				String r=RESTMapper.castToString(result);
 				assertEquals(assertionMessage,assertion,r);
-				//System.out.println(r);
+
+                //System.out.println(r);
 				//System.out.println("__");
 			}
+
 			
 		
 		
@@ -123,7 +127,10 @@ public class RESTMapperTest {
 	@Test
 	public void testA4_default(){
 		try {
-			invokeMethod("post","hi/b/c",new Pair[]{},"","a4","hi9");
+
+           invokeMethod("post","hi/b/c",new Pair[]{},"","a4_default","hi24");
+
+
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -137,7 +144,7 @@ public class RESTMapperTest {
 	public void testA4_ex(){
 		
 		try	{
-			invokeMethod("post","hi/b/",new Pair[]{new Pair<String>("d","12"),new Pair<String>("e","4")},"","a4","hi9");
+			invokeMethod("post","hi/b/",new Pair[]{new Pair<String>("d","12"),new Pair<String>("e","4")},"","a4_ex","hi9");
 			
 			fail("Wrong path, no exception");
 		}
