@@ -2,4 +2,5 @@ language: java
 jdk:
 - openjdk7
 - oraclejdk7
-script: "ant all"
+script:
+- TERM=dumb "ant all"
