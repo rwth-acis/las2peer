@@ -81,7 +81,7 @@ public class ServiceInfoAgentTest
             testService2.unlockPrivateKey("a pass");
             nodes[1].registerReceiver(testService2);
 
-            System.out.println();
+            Thread.sleep(5000);
             ServiceNameVersion [] services = agent.getServices();
 
             String servicesString="";
