@@ -22,4 +22,18 @@ public class TestClass2 {
 	{
 		return userID*productID+""+price+"";			
 	}
+
+    @DELETE
+    @Path("users/{a}")
+    public String b3(@PathParam("a") int userID, @HeaderParam(value="productID",defaultValue = "0") short productID,  @HeaderParam(value="price",defaultValue = "0") float price)
+    {
+        return userID*productID+""+price+"";
+    }
+
+    @DELETE
+    @Path("users/{a}/{b}")
+    public String b4(@PathParam("a") int userID, @HttpHeaders String headers)
+    {
+        return userID+headers;
+    }
 }

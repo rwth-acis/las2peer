@@ -18,7 +18,7 @@ public class TestClass1
 	}
 	
 	@PUT
-	@Path("/users/{userid}")
+	@Path("users/{userid}")
 	public float a2(@PathParam("userid")int userID)
 	{
 		return userID*0.1f;			
@@ -51,5 +51,5 @@ public class TestClass1
 	{
 		return a+b+c+d;			
 	}
-	
+
 }

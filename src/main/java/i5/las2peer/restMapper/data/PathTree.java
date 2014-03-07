@@ -42,19 +42,22 @@ public class PathTree
     @SuppressWarnings("rawtypes")
 	private void merge (PathNode self, PathNode other)
     {
-    	if(other.hasMethodData()) //check for methods
-    	{
-    		for (Map.Entry node : other.getMethodData().entrySet()) {
-    			String key=(String)node.getKey();
-        		MethodData value=(MethodData)node.getValue();
-        		if(!self.getMethodData().containsKey(key))//copy all method data
-        		{
-        			self.addMethodData(value);
-        		}
-    		}
-    	}
-    	
-    	for (Map.Entry node : other.getChildren().entrySet()) { //for each child
+
+        for (Map.Entry node : other.getMethodData().entrySet()) {
+            String key=(String)node.getKey();
+            MethodData value=(MethodData)node.getValue();
+            if(!self.getMethodData().containsKey(key))//copy all method data
+            {
+                self.addMethodData(value);
+            }
+        }
+        String[] parameterNames=other.listPathParameterNames();
+        for(int i = 0; i < parameterNames.length; i++)
+        {
+            self.addPathParameterName(parameterNames[i]);
+        }
+
+        for (Map.Entry node : other.getChildren().entrySet()) { //for each child
     		String key=(String)node.getKey();
     		PathNode value=(PathNode)node.getValue();
     		

@@ -1,14 +1,5 @@
 package i5.las2peer.restMapper;
-import i5.las2peer.restMapper.annotations.ContentParam;
-import i5.las2peer.restMapper.annotations.DELETE;
-import i5.las2peer.restMapper.annotations.DefaultValue;
-import i5.las2peer.restMapper.annotations.GET;
-import i5.las2peer.restMapper.annotations.POST;
-import i5.las2peer.restMapper.annotations.PUT;
-import i5.las2peer.restMapper.annotations.Path;
-import i5.las2peer.restMapper.annotations.PathParam;
-import i5.las2peer.restMapper.annotations.QueryParam;
-import i5.las2peer.restMapper.annotations.Version;
+import i5.las2peer.restMapper.annotations.*;
 import i5.las2peer.restMapper.data.InvocationData;
 import i5.las2peer.restMapper.data.MethodData;
 import i5.las2peer.restMapper.data.Pair;
@@ -81,9 +72,12 @@ public class RESTMapper {
     public static final String NAME_TAG = "name";
     public static final String SERVICE_TAG = "service";
     public static final String PATH_PARAM_BRACES = "{}";
+    public static final String HEADER_ANNOTATION ="header" ;
+    public static final String HEADERS_ANNOTATION ="headers" ;
 
     private static final HashMap<String,Class<?>> classMap= new HashMap<String, Class<?>>();
     public static final String XML = ".xml";
+
     private static XPath _xPath;
 	
 	
@@ -196,6 +190,20 @@ public class RESTMapper {
 						parameterDefault=paramVal;
 						
 					}
+                    else if(ann instanceof HeaderParam)
+                    {
+                        String paramName=((HeaderParam) ann).value();
+                        parameterAnnotation=HEADER_ANNOTATION;
+                        parameterName=paramName;
+                        parameterDefault=((HeaderParam) ann).defaultValue();
+
+                    }
+                    else if(ann instanceof HttpHeaders)
+                    {
+                        parameterAnnotation=HEADERS_ANNOTATION;
+                        parameterName="";
+
+                    }
 					
 					if(parameterAnnotation!=null)	//if an nonexposed parameter is used, works only if default value is provided				
 						parameter.setAttribute(ANNOTATION_TAG, parameterAnnotation);
@@ -401,7 +409,7 @@ public class RESTMapper {
 	 * @return array of matching services and methods, parameter values are already pre-filled.
 	 * @throws Exception
 	 */
-	public static InvocationData[] parse(PathTree tree, String httpMethod, String uri, Pair<String>[] variables, String content) throws Exception
+	public static InvocationData[] parse(PathTree tree, String httpMethod, String uri, Pair<String>[] variables, String content, Pair<String>[] headers) throws Exception
 	{
 		
 		
@@ -415,7 +423,9 @@ public class RESTMapper {
 		for (int i = 0; i < variables.length; i++) {
 			parameterValues.put(variables[i].getOne(), variables[i].getTwo());
 		}
-		
+        for (int i = 0; i < headers.length; i++) {
+            parameterValues.put(headers[i].getOne(), headers[i].getTwo());
+        }
 		
 		
 		//begin traversing the tree from one of the http method nodes
@@ -477,6 +487,13 @@ public class RESTMapper {
 					types[j]=param.getType();
 					
 				}
+                else if(param.getAnnotation()!=null && param.getAnnotation().equals(HEADERS_ANNOTATION)) //if it's a content annotation
+                {
+
+                    values[j]=(Serializable) RESTMapper.castToType(RESTMapper.mergeHeaders(headers),param.getType()); //fill it with the given headers
+                    types[j]=param.getType();
+
+                }
 				else
 				{
 					if(param.getName()!=null && parameterValues.containsKey(param.getName()))//if parameter has a name (given by an annotation) and a value given
@@ -510,8 +527,19 @@ public class RESTMapper {
 		invocationData.toArray(result);
 		return result;
 	}
-	
-	/**
+
+    private static String mergeHeaders(Pair<String>[] headers)
+    {
+        StringBuilder sb = new StringBuilder();
+        for(Pair<String> header : headers)
+        {
+            sb.append(String.format("%s: %s\n", header.getOne(), header.getTwo()));
+
+        }
+        return sb.toString();
+    }
+
+    /**
 	 * prints readable XML
 	 * @param doc XML document
 	 * @return readable XML
