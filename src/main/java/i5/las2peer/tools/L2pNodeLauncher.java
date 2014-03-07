@@ -259,7 +259,7 @@ public class L2pNodeLauncher {
 	 * 
 	 * @param port
 	 */
-	public void startHttpConnector ( final int port ) {
+	private void startHttpConnector ( final int port ) {
 		try {
 			
 			printMessage( "Starting Http Connector!");
@@ -279,13 +279,25 @@ public class L2pNodeLauncher {
 		}
 	}
 	
+	
 	/**
 	 * Starts a connector given by its classname.
 	 * 
 	 * @param connectorClass
 	 * @param port
 	 */
-	public void startConnector(String connectorClass, final int port){
+	public void startConnector (String connectorClass, String port ) {
+		startConnector( connectorClass, Integer.valueOf ( port ) );
+	}
+	
+	
+	/**
+	 * Starts a connector given by its classname.
+	 * 
+	 * @param connectorClass
+	 * @param port
+	 */
+	private void startConnector(String connectorClass, final int port){
 		try {
 			
 			printMessage( "Starting Connector with class name: " + connectorClass + "!");
@@ -770,9 +782,11 @@ public class L2pNodeLauncher {
 		for ( Method m : L2pNodeLauncher.class.getMethods()) {
 			if ( Modifier.isPublic ( m.getModifiers()) 
 					&& !Modifier.isStatic(m.getModifiers() )
-					&& m.getParameterTypes().length == 0
 					) {
-				System.out.println( "\t- " + m.getName());
+				System.out.print( "\t- " + m.getName());
+				for(int i = 0; i< m.getParameterTypes().length; i++)
+					System.out.print(" " + m.getParameterTypes()[i].getName() + " ");
+				System.out.print("\n");
 			}
 		}
 	}
