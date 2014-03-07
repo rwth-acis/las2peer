@@ -231,7 +231,22 @@ public class WebConnectorRequestHandler implements RequestHandler {
 			}
 			@SuppressWarnings("unchecked")
 			Pair<String>[] variables=variablesList.toArray(new Pair[variablesList.size()]);
-			
+
+            ArrayList<Pair<String>> headersList=new ArrayList<Pair<String>>();
+
+
+            en = request.getHeaderFieldNames();
+
+            while(en.hasMoreElements())
+            {
+                String param = (String) en.nextElement();
+                String val= request.getHeaderField(param);
+                Pair<String> pair= new Pair<String>(param,val);
+                headersList.add(pair);
+            }
+            @SuppressWarnings("unchecked")
+            Pair<String>[] headers=headersList.toArray(new Pair[headersList.size()]);
+
 			connector.logMessage(httpMethod+" "+request.getUrl());
 			
 			
@@ -246,7 +261,7 @@ public class WebConnectorRequestHandler implements RequestHandler {
 				boolean gotResult=false;
 
 
-                InvocationData[] invocation =RESTMapper.parse(this.connector.getMappingTree(), httpMethod, uri, variables, content);
+                InvocationData[] invocation =RESTMapper.parse(this.connector.getMappingTree(), httpMethod, uri, variables, content,headers);
 				for (int i = 0; i < invocation.length; i++) {
 					try
 					{
@@ -435,11 +450,36 @@ public class WebConnectorRequestHandler implements RequestHandler {
 	private void sendInvocationSuccess ( Serializable result, HttpResponse response  ) {
 		if ( result != null ) {
 			response.setContentType( "text/xml" );
-			String resultCode =  (result.toString());
-			response.println ( resultCode );
+
+            if(result instanceof i5.las2peer.restMapper.HttpResponse)
+            {
+
+                i5.las2peer.restMapper.HttpResponse res=(i5.las2peer.restMapper.HttpResponse)result;
+                @SuppressWarnings("unchecked")
+                Pair<String>[] headers= res.listHeaders();
+                for(Pair<String> header : headers)
+                {
+                    response.setHeaderField(header.getOne(),header.getTwo());
+
+                    if(header.getOne().toLowerCase().equals("content-type"))//speacial case because of the used http server lib
+                    {
+                        //response.clearContent();
+                        response.setContentType(header.getTwo());
+                    }
+                }
+                response.setStatus(res.getStatus() );
+                response.println ( res.getResult() );
+            }
+            else
+            {
+                String resultCode =  (RESTMapper.castToString(result));
+                response.println ( resultCode );
+            }
+
+
 			
 		} else {
-			response.setStatus( HttpResponse.STATUS_NO_CONTENT );
+			response.setStatus(HttpResponse.STATUS_NO_CONTENT);
 		}
 	}
 	

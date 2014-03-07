@@ -2,6 +2,7 @@ package i5.las2peer.webConnector;
 
 
 
+import i5.las2peer.restMapper.data.Pair;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -28,7 +29,9 @@ public class WebConnectorTest {
 	private static final String testPass = "adamspass";
 	
 	private static final String testServiceClass = "i5.las2peer.webConnector.TestService";
-	private static final String testServiceClass2 = "i5.las2peer.webConnector.TestService2";
+    private static final String testServiceClass2 = "i5.las2peer.webConnector.TestService2";
+    private static final String testServiceClass3 = "i5.las2peer.webConnector.TestService3";
+
 	
 	@BeforeClass
 	public static void startServer () throws Exception {
@@ -42,11 +45,14 @@ public class WebConnectorTest {
 		
 		ServiceAgent testService = ServiceAgent.generateNewAgent(testServiceClass, "a pass");
 		ServiceAgent testService2 = ServiceAgent.generateNewAgent(testServiceClass2, "a pass");
+        ServiceAgent testService3 = ServiceAgent.generateNewAgent(testServiceClass3, "a pass");
 		testService.unlockPrivateKey("a pass");
 		testService2.unlockPrivateKey("a pass");
+        testService3.unlockPrivateKey("a pass");
 		
 		node.registerReceiver(testService);
 		node.registerReceiver(testService2);
+        node.registerReceiver(testService3);
 		
 		// start connector
 		
@@ -304,6 +310,56 @@ public class WebConnectorTest {
 		{
 			e.printStackTrace();
 			fail ( "Exception: " + e );
-		}	
-	}
+		}
+
+
+        try
+        {
+            c.setLogin(Long.toString(testAgent.getId()), testPass);
+            @SuppressWarnings("unchecked")
+            String result=c.sendRequest("GET", "test1/1/2", "",new Pair[]{new Pair<String>("c","5"),new Pair<String>("e","4")});
+            assertEquals("125",result.trim());
+            String[] headers=c.getHeaders().split("\n");
+            boolean found1=false;
+            boolean found2=false;
+            for(int i = 0; i < headers.length; i++)
+            {
+                //System.out.println(headers[i]);
+               if(headers[i].trim().equals("hi: ho"))
+               {
+                   found1=true;
+               }
+                if(headers[i].trim().equals("Content-Type: text/plain"))
+                {
+                    found2=true;
+                }
+
+            }
+
+            assertTrue(found1);
+            assertTrue(found2);
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            fail ( "Exception: " + e );
+        }
+
+        try
+        {
+            c.setLogin(Long.toString(testAgent.getId()), testPass);
+            @SuppressWarnings("unchecked")
+            String result=c.sendRequest("GET", "test2/1/2", "",new Pair[]{});
+
+        }
+        catch(HttpErrorException e)
+        {
+            assertEquals(412,e.getErrorCode());
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            fail ( "Exception: " + e );
+        }
+    }
 }
