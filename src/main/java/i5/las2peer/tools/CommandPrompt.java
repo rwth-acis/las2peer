@@ -60,6 +60,11 @@ public class CommandPrompt {
 	private Object boundTo = null;
 	
 	/**
+	 * the first set bound object
+	 */
+	private Object firstBoundToObject = null;
+	
+	/**
 	 * a package to use with classes
 	 */
 	private String packagePrefix = "";
@@ -100,6 +105,7 @@ public class CommandPrompt {
 	 */
 	public CommandPrompt ( Object boundTo ) {
 		this.boundTo = boundTo;
+		firstBoundToObject=boundTo;
 		
 		input = new BufferedReader(new InputStreamReader ( System.in ));
 	}
@@ -337,7 +343,7 @@ public class CommandPrompt {
 		
 		
 		if ( Modifier.isStatic( m.getModifiers())) {
-			ColoredOutput.printlnYellow( "  warning: this method ist static - executing anyway");
+			ColoredOutput.printlnYellow( "  warning: this method is static - executing anyway");
 			return executeStatic ( on.getClass(), method, parameters);
 		} else 
 			return m.invoke( on, parameters);
@@ -474,7 +480,7 @@ public class CommandPrompt {
 		}
 		
 		
-		if ( status == ReturnStatus.NOT_KNOWN_PROCEED)
+		if ( status == ReturnStatus.NOT_KNOWN_PROCEED) //TODO this will never be reached
 			ColoredOutput.printlnRed("   -> command '" + line + "' not known");
 		
 		return status;
@@ -574,6 +580,10 @@ public class CommandPrompt {
 		} else if ( split[0].equals("print") || split[0].equals( "p") ) {
 			return handlePrint ( line );
 		} else if ( split[0].equals("bind") ) {
+			if ( split.length == 1 ) {
+				boundTo=firstBoundToObject;
+				return ReturnStatus.OK_PROCEED;
+			}
 			if ( split.length != 2 ) {
 				ColoredOutput.printlnRed("  -> usage: bind [local var name]");
 				return ReturnStatus.ERROR_PROCEED;
@@ -717,16 +727,16 @@ public class CommandPrompt {
 				+ "\tp(rint) [var1] [var2] ...\n"
 				+ "\t\t\tprint the contents of the given local variables\n\n"
 				
-				+ "\tpackage\t[some.package.name\n\n"
+				+ "\tpackage\t[some.package.name]\n\n"
 				+ "\t\t\tuse the given package name as prefix for all Class relevant operations\n\n"
 				
 				+ "\tbind [varname]\n"
 				+ "\t\t\tuse the given local variable as object for method calls\n\n"
 				
 				+ "\tl(ist)\n"
-				+ "\t\tprint all accessable methods of the bound object including their parameter list\n\n"
+				+ "\t\tprint all accessible methods of the bound object including their parameter list\n\n"
 				
-				+ "\tpst | printStackTrace\n"
+				+ "\tprintStackTrace / pst\n"
 				+ "\t\tprint the stacktrace of the last caught exception\n\n"
 				
 				+ "\texit/quit/q\texit the console\n\n"
@@ -734,7 +744,7 @@ public class CommandPrompt {
 				+ "\t\t\tcreate a new instance of [some.Class] using the given parameters for the constructor\n"
 				+ "\t\t\tthe parameters may be strings enclosed in ' or \" or local variables\n\n"
 				+ "\t[some.Static.method] ([param1], [param2], ...)\n"
-				+ "\t\t\tExecute a static method. If a package has been defnied before, this package will be\n"
+				+ "\t\t\tExecute a static method. If a package has been defined before, this package will be\n"
 				+ "\t\t\tused as prefix for the package of the class containing the static method\n"
 				+ "\t\t\tparameters mey be strings or local variables\n\n"
 				+ "\t[localVar].[method] ([param1], ...)\n"
