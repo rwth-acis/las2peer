@@ -2,6 +2,7 @@ package i5.las2peer.restMapper;
 
 import i5.las2peer.restMapper.annotations.*;
 
+
 public class TestClass2 {
 
 	public TestClass2()
@@ -25,7 +26,7 @@ public class TestClass2 {
 
     @DELETE
     @Path("users/{a}")
-    public String b3(@PathParam("a") int userID, @HeaderParam(value="productID",defaultValue = "0") short productID,  @HeaderParam(value="price",defaultValue = "0") float price)
+    public String b3(@PathParam("a") int userID, @HeaderParam(name="productID",defaultValue = "0") short productID,  @HeaderParam(name="price",defaultValue = "0") float price)
     {
         return userID*productID+""+price+"";
     }

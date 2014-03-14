@@ -52,9 +52,9 @@ public class PathTree
             }
         }
         String[] parameterNames=other.listPathParameterNames();
-        for(int i = 0; i < parameterNames.length; i++)
+        for(String parameterName : parameterNames)
         {
-            self.addPathParameterName(parameterNames[i]);
+            self.addPathParameterName(parameterName);
         }
 
         for (Map.Entry node : other.getChildren().entrySet()) { //for each child

@@ -8,10 +8,8 @@ import java.lang.annotation.Target;
 /**
  * @author Alexander
  */
-//for ?var1=val1&var2=val2 part
-@Target(ElementType.PARAMETER)
+@Target({ElementType.METHOD,ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface HeaderParam {
-    String name();
-    String defaultValue();
+public @interface Consumes {
+    String[] value();
 }

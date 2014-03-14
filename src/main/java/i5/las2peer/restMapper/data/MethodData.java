@@ -11,12 +11,17 @@ import i5.las2peer.restMapper.RESTMapper;
  */
 public class MethodData {
 
-	String serviceName="";
-	String serviceVersion="";
+	private String serviceName="";
+	private String serviceVersion="";
 	
-	String name = "";
-	Class<?> type; 
-	ParameterData[] parameters;
+	private String name = "";
+
+
+
+    private String[] consumes;
+    private String produces;
+	private Class<?> type;
+	private ParameterData[] parameters;
 	/**
 	 * constructor
 	 * @param serviceName full class name of the service
@@ -26,17 +31,25 @@ public class MethodData {
 	 * @param parameters array of method parameter information
 	 * @throws ClassNotFoundException
 	 */
-	public MethodData(String serviceName, String serviceVersion, String name, String type, ParameterData[] parameters) throws ClassNotFoundException
+	public MethodData(String serviceName, String serviceVersion, String name, String type, String[] consumes, String produces, ParameterData[] parameters) throws ClassNotFoundException
 	{
 		this.serviceName=serviceName;
 		this.serviceVersion=serviceVersion;
 		this.name=name;
 	
 		this.type=RESTMapper.getClassType(type);
+        for(int i = 0; i < consumes.length; i++)
+        {
+            consumes[i]=consumes[i].trim();//more robust
+
+        }
+        this.consumes=consumes;
 		if(parameters==null)
 			this.parameters=new ParameterData[]{};
 		else
 			this.parameters=parameters;
+
+        this.produces=produces;
 	}
 	/**
 	 * returns sercvie name + service version + method name
@@ -86,5 +99,20 @@ public class MethodData {
 	{
 		return parameters;
 	}
+    /**
+     *
+     * @return array of accepted MIME-Types
+     */
+    public String[] getConsumes()
+    {
+        return consumes;
+    }
+    /**
+     *
+     * @return created MIME-Type
+     */
+    public String getProduces() { return produces; }
+
+
 
 }

@@ -8,12 +8,12 @@ import i5.las2peer.restMapper.RESTMapper;
  *
  */
 public class ParameterData {
-	
-	String annotation;
-	int index;
-	String name;
-	Class<?> type;
-	Object defaultValue;
+
+    private String annotation;
+    private int index;
+    private String name;
+    private Class<?> type;
+    private Object defaultValue;
 	/**
 	 * 
 	 * @return type of annotation used (e.g. path, content, query)

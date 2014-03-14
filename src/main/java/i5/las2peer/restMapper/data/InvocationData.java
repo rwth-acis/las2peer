@@ -8,28 +8,35 @@ import java.io.Serializable;
  */
 public class InvocationData {
 	
-	String serviceName;
-	String serviceVersion;
-	String methodName;
-	Serializable[] parameters;
-	Class<?> returnType;
-	Class<?>[] parameterTypes;
+	private String serviceName;
+    private String serviceVersion;
+    private String methodName;
+    private Serializable[] parameters;
+    private Class<?> returnType;
+    private Class<?>[] parameterTypes;
+    private int matchLevel;
+    private String mime;
 	/**
 	 * constructor creating data object 
 	 * @param serviceName full class name of the service containing the method
 	 * @param serviceVersion version of the service
 	 * @param methodName name of the method to invoke
 	 * @param returnType return type of the method
+     * @param mime MIME type the method produces
+     * @param matchLevel how good the MIME type matches the accept header (lower = better)
 	 * @param parameters list of parameter values for invocation
 	 * @param parameterTypes array of the used parameter types
 	 */
-	public InvocationData(String serviceName, String serviceVersion, String methodName, Class<?> returnType, Serializable[] parameters, Class<?>[] parameterTypes)
+	public InvocationData(String serviceName, String serviceVersion, String methodName, Class<?> returnType, String mime, int matchLevel, Serializable[] parameters, Class<?>[] parameterTypes)
 	{
 		this.serviceName=serviceName;
 		this.serviceVersion=serviceVersion;
 		this.methodName=methodName;
 		this.parameters=parameters;
 		this.parameterTypes=parameterTypes;
+        this.returnType=returnType;
+        this.matchLevel=matchLevel;
+        this.mime=mime;
 	}
 	/**
 	 *
@@ -79,4 +86,17 @@ public class InvocationData {
 	{
 		return parameterTypes;
 	}
+    /**
+     *
+     * @return positve value, lower = better match for accept header
+     */
+    public int getMatchLevel()
+    {
+        return matchLevel;
+    }
+
+    public String getMIME()
+    {
+        return mime;
+    }
 }

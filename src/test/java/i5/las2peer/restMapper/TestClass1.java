@@ -33,7 +33,7 @@ public class TestClass1
 	
 	@POST
 	@Path("{a}/b/c")
-	public String a4(@PathParam("a") String a, @DefaultValue("5") @QueryParam(value="d",defaultValue ="5") int d,  @QueryParam(value="e",defaultValue ="19") int e)
+	public String a4(@PathParam("a") String a, @DefaultValue("5") @QueryParam(name="d",defaultValue ="5") int d,  @QueryParam(name="e",defaultValue ="19") int e)
 	{
 		return a+(d+e);			
 	}
