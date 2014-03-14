@@ -44,7 +44,7 @@ public class TestService3 extends Service
     @GET
     @Path("test1/{a}/{b}")
     public HttpResponse test1(@PathParam("a") String a, @PathParam("b") String b,
-                         @HeaderParam(value="c", defaultValue="") String c, @HttpHeaders String headers)
+                         @HeaderParam(name="c", defaultValue="") String c, @HttpHeaders String headers)
     {
         String result=a+b+c;
         HttpResponse response=new HttpResponse(result,200);

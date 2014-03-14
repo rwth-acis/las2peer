@@ -67,10 +67,123 @@ public class TestClient {
             return responseHeaders;
         }
 
+        public String getHeader(String headerName)
+        {
+            headerName=headerName.toLowerCase().trim();
+            String[] headers=this.getHeaders().split("\n");
+            for(int i = 0; i < headers.length; i++)
+            {
+                String header = headers[i];
+                String headerLower=header.toLowerCase();
+                if(headerLower.startsWith(headerName))
+                {
+                    return header.substring(header.indexOf(":")+1).trim();
+                }
+            }
+            return "";
+        }
+
         @SuppressWarnings("unchecked")
         public String sendRequest(String method, String uri, String content) throws HttpErrorException
         {
             return sendRequest(method,uri,content,new Pair[]{});
+        }
+        /**
+         * send request to server
+         * @param method POST, GET, DELETE, PUT
+         * @param uri REST-URI (server address excluded)
+         * @param content if POST is used information can be embedded here
+         * @param contentType value of Content-Type header
+         * @param accept value of Accept Header
+         * @param headers headers for HTTP request
+         * @return returns server response
+         * @throws HttpErrorException contains HTTP error code
+         */
+        public String sendRequest(String method, String uri, String content, String contentType, String accept, Pair<String>[] headers) throws HttpErrorException
+        {
+            URL url;
+            HttpURLConnection connection=null;
+            try
+            {
+                //Create connection
+                url = new URL(String.format("%s/%s", serverAddress,uri));
+                connection = (HttpURLConnection)url.openConnection();
+                connection.setRequestMethod(method.toUpperCase());
+                connection.setRequestProperty("Authorization",
+                                              "Basic "+authentication);
+
+                connection.setRequestProperty("Content-Type",
+                                              contentType);
+
+                connection.setRequestProperty("Accept",
+                                              accept);
+                connection.setRequestProperty("Content-Length", "" +
+                        Integer.toString(content.getBytes().length));
+
+
+                for(Pair<String> header : headers)
+                {
+                    connection.setRequestProperty(header.getOne(), header.getTwo());
+                }
+
+                connection.setUseCaches (false);
+                connection.setDoInput(true);
+                if(method.toUpperCase().equals("POST"))
+                {
+                    connection.setDoOutput(true);
+
+                    //Send request
+                    DataOutputStream wr = new DataOutputStream (
+                            connection.getOutputStream ());
+                    wr.writeBytes (content);
+                    wr.flush ();
+                    wr.close ();
+                }
+                int code = connection.getResponseCode();
+
+                if(code!=200)
+                    throw new HttpErrorException(code);
+                //Get Response
+                InputStream is = connection.getInputStream();
+                BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+                String line;
+                StringBuilder response = new StringBuilder();
+                while((line = rd.readLine()) != null) {
+                    response.append(line);
+                    response.append('\r');
+                }
+
+                Map responseMap=connection.getHeaderFields();
+                StringBuilder sb= new StringBuilder();
+                for (Iterator iterator = responseMap.keySet().iterator(); iterator.hasNext();) {
+                    String key = (String) iterator.next();
+                    sb.append(key).append(":");
+
+                    List values = (List) responseMap.get(key);
+                    for (int i = 0; i < values.size(); i++) {
+                        Object o = values.get(i);
+                        sb.append(" "+o);
+                    }
+                    sb.append("\n");
+                }
+                responseHeaders=sb.toString();
+
+
+                rd.close();
+                return response.toString();
+            } catch (HttpErrorException e) {
+                throw e;
+            } catch (Exception e) {
+
+                e.printStackTrace();
+                return null;
+
+            } finally {
+
+                if(connection != null) {
+                    connection.disconnect();
+                }
+            }
         }
 		/**
 		 * send request to server
@@ -82,85 +195,6 @@ public class TestClient {
 		 */
 		public String sendRequest(String method, String uri, String content, Pair<String>[] headers) throws HttpErrorException
 		{
-			 	URL url;
-			    HttpURLConnection connection=null;  
-			    try
-                {
-                    //Create connection
-                    url = new URL(String.format("%s/%s", serverAddress,uri));
-                    connection = (HttpURLConnection)url.openConnection();
-                    connection.setRequestMethod(method.toUpperCase());
-                    connection.setRequestProperty("Authorization",
-                           "Basic "+authentication);
-
-                    connection.setRequestProperty("Content-Type",
-                              "text/xml");
-                    connection.setRequestProperty("Content-Length", "" +
-                            Integer.toString(content.getBytes().length));
-
-
-                    for(Pair<String> header : headers)
-                    {
-                        connection.setRequestProperty(header.getOne(), header.getTwo());
-                    }
-
-                    connection.setUseCaches (false);
-			        connection.setDoInput(true);
-			        if(method.toUpperCase().equals("POST"))
-			        {
-			    	    connection.setDoOutput(true);
-
-				        //Send request
-				        DataOutputStream wr = new DataOutputStream (
-				                  connection.getOutputStream ());
-				        wr.writeBytes (content);
-				        wr.flush ();
-				        wr.close ();
-			        }
-			        int code = connection.getResponseCode();
-
-			        if(code!=200)
-			    	    throw new HttpErrorException(code);
-			        //Get Response
-			        InputStream is = connection.getInputStream();
-			        BufferedReader rd = new BufferedReader(new InputStreamReader(is));
-			        String line;
-			        StringBuilder response = new StringBuilder();
-			        while((line = rd.readLine()) != null) {
-			            response.append(line);
-			            response.append('\r');
-			        }
-
-                    Map responseMap=connection.getHeaderFields();
-                    StringBuilder sb= new StringBuilder();
-                    for (Iterator iterator = responseMap.keySet().iterator(); iterator.hasNext();) {
-                        String key = (String) iterator.next();
-                        sb.append(key).append(":");
-
-                        List values = (List) responseMap.get(key);
-                        for (int i = 0; i < values.size(); i++) {
-                            Object o = values.get(i);
-                            sb.append(" "+o);
-                        }
-                        sb.append("\n");
-                    }
-                    responseHeaders=sb.toString();
-
-
-			        rd.close();
-			        return response.toString();
-			    } catch (HttpErrorException e) {
-			    	throw e;
-			    } catch (Exception e) {
-
-			        e.printStackTrace();
-			        return null;
-
-			    } finally {
-
-                    if(connection != null) {
-                        connection.disconnect();
-                    }
-			    }
+            return sendRequest(method, uri, content, "text/plain", "*/*", headers);
 		}
 }

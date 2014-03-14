@@ -237,13 +237,28 @@ public class WebConnectorRequestHandler implements RequestHandler {
 
             en = request.getHeaderFieldNames();
 
+            String acceptHeader="*/*";
+            String contentTypeHeader="text/plain";
             while(en.hasMoreElements())
             {
                 String param = (String) en.nextElement();
+
                 String val= request.getHeaderField(param);
                 Pair<String> pair= new Pair<String>(param,val);
                 headersList.add(pair);
+
+                //fetch MIME types
+                if(param.equals("accept") && !val.trim().isEmpty())
+                    acceptHeader=val.trim();
+                if(param.equals("content-type")&& !val.trim().isEmpty())
+                {
+                    contentTypeHeader=val.trim();
+
+                }
+
             }
+
+
             @SuppressWarnings("unchecked")
             Pair<String>[] headers=headersList.toArray(new Pair[headersList.size()]);
 
@@ -260,14 +275,16 @@ public class WebConnectorRequestHandler implements RequestHandler {
 				Mediator mediator = l2pNode.getOrRegisterLocalMediator(activeUsers.get(userId));				
 				boolean gotResult=false;
 
-
-                InvocationData[] invocation =RESTMapper.parse(this.connector.getMappingTree(), httpMethod, uri, variables, content,headers);
+                String returnMIMEType="text/plain";
+                InvocationData[] invocation =RESTMapper.parse(this.connector.getMappingTree(), httpMethod, uri, variables, content,contentTypeHeader,acceptHeader,headers);
 				for (int i = 0; i < invocation.length; i++) {
 					try
 					{
 						
 						result= mediator.invoke(invocation[i].getServiceName(),invocation[i].getMethodName(), invocation[i].getParameters(), connector.preferLocalServices());// invoke service method
 						gotResult=true;
+                        returnMIMEType=invocation[i].getMIME();
+                        break;
 					
 					} catch ( NoSuchServiceException e ) {
 						sendNoSuchService(request, response, invocation[i].getServiceName());			
@@ -290,7 +307,7 @@ public class WebConnectorRequestHandler implements RequestHandler {
 				
 				
 				if (gotResult)
-					sendInvocationSuccess ( result, response );		
+					sendInvocationSuccess ( result, returnMIMEType, response );
 				else
 					sendNoSuchMethod(request, response);
 				
@@ -445,12 +462,13 @@ public class WebConnectorRequestHandler implements RequestHandler {
 	/**
 	 * 
 	 * @param result
+     * @param contentType
 	 * @param response
 	 */
-	private void sendInvocationSuccess ( Serializable result, HttpResponse response  ) {
+	private void sendInvocationSuccess ( Serializable result, String contentType, HttpResponse response  ) {
 		if ( result != null ) {
-			response.setContentType( "text/xml" );
-
+			response.setContentType( contentType );
+            
             if(result instanceof i5.las2peer.restMapper.HttpResponse)
             {
 

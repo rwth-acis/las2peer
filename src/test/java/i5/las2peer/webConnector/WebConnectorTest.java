@@ -2,6 +2,7 @@ package i5.las2peer.webConnector;
 
 
 
+import i5.las2peer.restMapper.MediaType;
 import i5.las2peer.restMapper.data.Pair;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -31,6 +32,7 @@ public class WebConnectorTest {
 	private static final String testServiceClass = "i5.las2peer.webConnector.TestService";
     private static final String testServiceClass2 = "i5.las2peer.webConnector.TestService2";
     private static final String testServiceClass3 = "i5.las2peer.webConnector.TestService3";
+    private static final String testServiceClass4 = "i5.las2peer.webConnector.TestService4";
 
 	
 	@BeforeClass
@@ -46,13 +48,16 @@ public class WebConnectorTest {
 		ServiceAgent testService = ServiceAgent.generateNewAgent(testServiceClass, "a pass");
 		ServiceAgent testService2 = ServiceAgent.generateNewAgent(testServiceClass2, "a pass");
         ServiceAgent testService3 = ServiceAgent.generateNewAgent(testServiceClass3, "a pass");
+        ServiceAgent testService4 = ServiceAgent.generateNewAgent(testServiceClass4, "a pass");
 		testService.unlockPrivateKey("a pass");
 		testService2.unlockPrivateKey("a pass");
         testService3.unlockPrivateKey("a pass");
+        testService4.unlockPrivateKey("a pass");
 		
 		node.registerReceiver(testService);
 		node.registerReceiver(testService2);
         node.registerReceiver(testService3);
+        node.registerReceiver(testService4);
 		
 		// start connector
 		
@@ -198,7 +203,8 @@ public class WebConnectorTest {
 	}
 	
 	@Test
-	public void testCalls() 
+    @SuppressWarnings("unchecked")
+	public void testCalls()
 	{
 
         //avoid timing errors: wait for the repository manager to get all services, before invoking them
@@ -348,13 +354,69 @@ public class WebConnectorTest {
         try
         {
             c.setLogin(Long.toString(testAgent.getId()), testPass);
-            @SuppressWarnings("unchecked")
+
             String result=c.sendRequest("GET", "test2/1/2", "",new Pair[]{});
 
         }
         catch(HttpErrorException e)
         {
             assertEquals(412,e.getErrorCode());
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            fail ( "Exception: " + e );
+        }
+
+
+        try
+        {
+            c.setLogin(Long.toString(testAgent.getId()), testPass);
+
+
+            String result=c.sendRequest("POST", "books/8", "", MediaType.TEXT_PLAIN, "",new Pair[]{});
+            assertEquals("8",result.trim());
+
+            result=c.sendRequest("POST", "books/8", "", MediaType.AUDIO_MPEG, "",new Pair[]{});
+            assertEquals("56",result.trim());
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            fail ( "Exception: " + e );
+        }
+
+        try
+        {
+            c.setLogin(Long.toString(testAgent.getId()), testPass);
+
+
+            String result=c.sendRequest("POST", "books/8", "", MediaType.TEXT_PLAIN, "",new Pair[]{});
+            assertEquals("8",result.trim());
+
+            result=c.sendRequest("POST", "books/8", "", MediaType.AUDIO_MPEG, "",new Pair[]{});
+            assertEquals("56",result.trim());
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            fail ( "Exception: " + e );
+        }
+
+        try
+        {
+            c.setLogin(Long.toString(testAgent.getId()), testPass);
+
+
+            String result=c.sendRequest("GET", "books/8", "", MediaType.AUDIO_MPEG, "audio/*,audio/ogg",new Pair[]{});
+            assertEquals("16",result.trim());
+            String type=c.getHeader("content-type");
+            assertEquals("audio/ogg",type.trim());
+
+            result=c.sendRequest("GET", "books/8", "", MediaType.AUDIO_MPEG, "video/mp4,text/*",new Pair[]{});
+            assertEquals("8",result.trim());
+            type=c.getHeader("content-type");
+            assertEquals("text/plain",type.trim());
         }
         catch(Exception e)
         {

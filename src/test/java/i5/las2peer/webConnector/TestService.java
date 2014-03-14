@@ -96,7 +96,7 @@ public class TestService extends Service
 	@GET
 	@Path("do/{number1}/it/{number2}")
 	public int doIt(@PathParam("number1") int num1, @PathParam("number2") int num2,
-			@QueryParam(value="param1",defaultValue = "0")int param1, @QueryParam(value="param2", defaultValue = "0") int param2 )
+			@QueryParam(name="param1",defaultValue = "0")int param1, @QueryParam(name="param2", defaultValue = "0") int param2 )
 	{
 		return num1+num2+param1+param2;
 	}
@@ -111,7 +111,7 @@ public class TestService extends Service
 	@GET
 	@Path("do/{number1}/it/{number2}/not")
 	public int doItNot(@PathParam("number1") int num1, @PathParam("number2") int num2,
-			@QueryParam(value="param1",defaultValue="0")int param1, @QueryParam(value="param2",defaultValue = "0") int param2 )
+			@QueryParam(name="param1",defaultValue="0")int param1, @QueryParam(name="param2",defaultValue = "0") int param2 )
 	{
 		return num1-num2-param1-param2;
 	}
@@ -126,7 +126,7 @@ public class TestService extends Service
 	@GET
 	@Path("do/{number1}/this/{number2}/not")
 	public int doThisNot(@PathParam("number1") int num1, @PathParam("number2") int num2,
-			@QueryParam(value="param1",defaultValue = "0")int param1, @QueryParam(value="param2",defaultValue = "0") int param2 )
+			@QueryParam(name="param1",defaultValue = "0")int param1, @QueryParam(name="param2",defaultValue = "0") int param2 )
 	{
 		return num1*num2-param1*param2;
 	}
