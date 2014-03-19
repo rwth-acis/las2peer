@@ -12,6 +12,7 @@ import i5.las2peer.p2p.Node;
 import i5.las2peer.restMapper.RESTMapper;
 import i5.las2peer.restMapper.data.PathTree;
 import i5.las2peer.security.Agent;
+import i5.las2peer.webConnector.serviceManagement.ServiceRepositoryManager;
 
 
 import java.io.FileNotFoundException;

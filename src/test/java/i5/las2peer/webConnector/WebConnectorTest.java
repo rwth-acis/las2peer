@@ -4,12 +4,16 @@ package i5.las2peer.webConnector;
 
 import i5.las2peer.restMapper.MediaType;
 import i5.las2peer.restMapper.data.Pair;
+import i5.las2peer.webConnector.client.ClientResponse;
+
+import i5.las2peer.webConnector.client.MiniClient;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+
 import i5.las2peer.p2p.LocalNode;
-import i5.las2peer.restMapper.RESTMapper;
 import i5.las2peer.security.ServiceAgent;
 import i5.las2peer.security.UserAgent;
 import i5.las2peer.testing.MockAgentFactory;
@@ -103,19 +107,16 @@ public class WebConnectorTest {
 		
 		
 		
-		TestClient c = new TestClient();
+		MiniClient c = new MiniClient();
 		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);		
 		
 		try
 		{
 			c.setLogin(Long.toString(testAgent.getId()), testPass);
 			
-			c.sendRequest("GET", "asdag", "");			
-			fail ( "Not existing method caused no exception" );
-		}
-		catch(HttpErrorException e)
-		{
-			assertEquals(404,e.getErrorCode());
+			ClientResponse response = c.sendRequest("GET", "asdag", "");
+            assertEquals(404,response.getHttpCode());
+
 		}
 		catch(Exception e)
 		{
@@ -136,15 +137,15 @@ public class WebConnectorTest {
 		
 		
 		
-		TestClient c = new TestClient();
+		MiniClient c = new MiniClient();
 		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 		
 		//correct, id based
 		try
 		{
 			c.setLogin(Long.toString(testAgent.getId()), testPass);
-			String result=c.sendRequest("get", "", "");			
-			assertEquals("OK",result.trim());
+			ClientResponse result=c.sendRequest("get", "", "");
+			assertEquals("OK",result.getResponse().trim());
 		}
 		catch(Exception e)
 		{
@@ -156,9 +157,9 @@ public class WebConnectorTest {
 		try
 		{
 			c.setLogin("adam", testPass);
-			
-			String result=c.sendRequest("GET", "", "");			
-			assertEquals("OK",result.trim());
+
+            ClientResponse result=c.sendRequest("GET", "", "");
+			assertEquals("OK",result.getResponse().trim());
 		}
 		catch(Exception e)
 		{
@@ -171,12 +172,8 @@ public class WebConnectorTest {
 		{
 			c.setLogin(Long.toString(testAgent.getId()), "aaaaaaaaaaaaa");
 			
-			c.sendRequest("GET", "", "");			
-			fail ( "Login with invalid password caused no exception");
-		}
-		catch(HttpErrorException e)
-		{
-			assertEquals(401,e.getErrorCode());
+			ClientResponse result= c.sendRequest("GET", "", "");
+            assertEquals(401, result.getHttpCode());
 		}
 		catch(Exception e)
 		{
@@ -187,13 +184,9 @@ public class WebConnectorTest {
 		try
 		{
 			c.setLogin(Long.toString(65464), "aaaaaaaaaaaaa");
-			
-			c.sendRequest("GET", "", "");			
-			fail ( "Login with invalid user caused no exception");
-		}
-		catch(HttpErrorException e)
-		{
-			assertEquals(401,e.getErrorCode());
+
+            ClientResponse result=c.sendRequest("GET", "", "");
+            assertEquals(401, result.getHttpCode());
 		}
 		catch(Exception e)
 		{
@@ -217,16 +210,16 @@ public class WebConnectorTest {
         {
             e.printStackTrace();
         }
-		TestClient c = new TestClient();
+		MiniClient c = new MiniClient();
 		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 		//call all methods of the testService
 		
 		try
 		{
 			c.setLogin(Long.toString(testAgent.getId()), testPass);
-			
-			String result=c.sendRequest("PUT", "add/5/6", "");			
-			assertEquals("11",result.trim());
+
+            ClientResponse result=c.sendRequest("PUT", "add/5/6", "");
+			assertEquals("11",result.getResponse().trim());
 		}
 		catch(Exception e)
 		{
@@ -238,9 +231,9 @@ public class WebConnectorTest {
 		try
 		{
 			c.setLogin(Long.toString(testAgent.getId()), testPass);
-			
-			String result=c.sendRequest("POST", "sub/5/6", "");			
-			assertEquals("-1",result.trim());
+
+            ClientResponse result=c.sendRequest("POST", "sub/5/6", "");
+			assertEquals("-1",result.getResponse().trim());
 		}
 		catch(Exception e)
 		{
@@ -252,9 +245,9 @@ public class WebConnectorTest {
 		try
 		{
 			c.setLogin(Long.toString(testAgent.getId()), testPass);
-			
-			String result=c.sendRequest("DELETE", "div/12/6", "");			
-			assertEquals("2",result.trim());
+
+            ClientResponse result=c.sendRequest("DELETE", "div/12/6", "");
+			assertEquals("2",result.getResponse().trim());
 		}
 		catch(Exception e)
 		{
@@ -266,9 +259,9 @@ public class WebConnectorTest {
 		try
 		{
 			c.setLogin(Long.toString(testAgent.getId()), testPass);
-			
-			String result=c.sendRequest("GET", "do/2/it/3?param1=4&param2=5", "");			
-			assertEquals("14",result.trim());
+
+            ClientResponse result=c.sendRequest("GET", "do/2/it/3?param1=4&param2=5", "");
+			assertEquals("14",result.getResponse().trim());
 		}
 		catch(Exception e)
 		{
@@ -280,9 +273,9 @@ public class WebConnectorTest {
 		try
 		{
 			c.setLogin(Long.toString(testAgent.getId()), testPass);
-			
-			String result=c.sendRequest("GET", "do/2/it/3/not?param1=4&param2=5", "");			
-			assertEquals("-10",result.trim());
+
+            ClientResponse result=c.sendRequest("GET", "do/2/it/3/not?param1=4&param2=5", "");
+			assertEquals("-10",result.getResponse().trim());
 		}
 		catch(Exception e)
 		{
@@ -294,9 +287,9 @@ public class WebConnectorTest {
 		try
 		{
 			c.setLogin(Long.toString(testAgent.getId()), testPass);
-			
-			String result=c.sendRequest("GET", "do/2/this/3/not?param1=4&param2=5", "");			
-			assertEquals("-14",result.trim());
+
+            ClientResponse result=c.sendRequest("GET", "do/2/this/3/not?param1=4&param2=5", "");
+			assertEquals("-14",result.getResponse().trim());
 		}
 		catch(Exception e)
 		{
@@ -308,9 +301,9 @@ public class WebConnectorTest {
 		try
 		{
 			c.setLogin(Long.toString(testAgent.getId()), testPass);
-			
-			String result=c.sendRequest("POST", "do/a/b", "c");			
-			assertEquals("abc",result.trim());
+
+            ClientResponse result=c.sendRequest("POST", "do/a/b", "c");
+			assertEquals("abc",result.getResponse().trim());
 		}
 		catch(Exception e)
 		{
@@ -323,27 +316,10 @@ public class WebConnectorTest {
         {
             c.setLogin(Long.toString(testAgent.getId()), testPass);
             @SuppressWarnings("unchecked")
-            String result=c.sendRequest("GET", "test1/1/2", "",new Pair[]{new Pair<String>("c","5"),new Pair<String>("e","4")});
-            assertEquals("125",result.trim());
-            String[] headers=c.getHeaders().split("\n");
-            boolean found1=false;
-            boolean found2=false;
-            for(int i = 0; i < headers.length; i++)
-            {
-                //System.out.println(headers[i]);
-               if(headers[i].trim().equals("hi: ho"))
-               {
-                   found1=true;
-               }
-                if(headers[i].trim().equals("Content-Type: text/plain"))
-                {
-                    found2=true;
-                }
-
-            }
-
-            assertTrue(found1);
-            assertTrue(found2);
+            ClientResponse result=c.sendRequest("GET", "test1/1/2", "",new Pair[]{new Pair<>("c","5"),new Pair<>("e","4")});
+            assertEquals("125",result.getResponse().trim());
+            assertEquals("ho",result.getHeader("hi"));
+            assertEquals("text/plain",result.getHeader("Content-Type"));
         }
         catch(Exception e)
         {
@@ -355,12 +331,8 @@ public class WebConnectorTest {
         {
             c.setLogin(Long.toString(testAgent.getId()), testPass);
 
-            String result=c.sendRequest("GET", "test2/1/2", "",new Pair[]{});
-
-        }
-        catch(HttpErrorException e)
-        {
-            assertEquals(412,e.getErrorCode());
+            ClientResponse result=c.sendRequest("GET", "test2/1/2", "",new Pair[]{});
+            assertEquals(412,result.getHttpCode());
         }
         catch(Exception e)
         {
@@ -374,11 +346,11 @@ public class WebConnectorTest {
             c.setLogin(Long.toString(testAgent.getId()), testPass);
 
 
-            String result=c.sendRequest("POST", "books/8", "", MediaType.TEXT_PLAIN, "",new Pair[]{});
-            assertEquals("8",result.trim());
+            ClientResponse result=c.sendRequest("POST", "books/8", "", MediaType.TEXT_PLAIN, "",new Pair[]{});
+            assertEquals("8",result.getResponse().trim());
 
             result=c.sendRequest("POST", "books/8", "", MediaType.AUDIO_MPEG, "",new Pair[]{});
-            assertEquals("56",result.trim());
+            assertEquals("56",result.getResponse().trim());
         }
         catch(Exception e)
         {
@@ -391,11 +363,11 @@ public class WebConnectorTest {
             c.setLogin(Long.toString(testAgent.getId()), testPass);
 
 
-            String result=c.sendRequest("POST", "books/8", "", MediaType.TEXT_PLAIN, "",new Pair[]{});
-            assertEquals("8",result.trim());
+            ClientResponse result=c.sendRequest("POST", "books/8", "", MediaType.TEXT_PLAIN, "",new Pair[]{});
+            assertEquals("8",result.getResponse().trim());
 
             result=c.sendRequest("POST", "books/8", "", MediaType.AUDIO_MPEG, "",new Pair[]{});
-            assertEquals("56",result.trim());
+            assertEquals("56",result.getResponse().trim());
         }
         catch(Exception e)
         {
@@ -408,15 +380,15 @@ public class WebConnectorTest {
             c.setLogin(Long.toString(testAgent.getId()), testPass);
 
 
-            String result=c.sendRequest("GET", "books/8", "", MediaType.AUDIO_MPEG, "audio/*,audio/ogg",new Pair[]{});
-            assertEquals("16",result.trim());
-            String type=c.getHeader("content-type");
-            assertEquals("audio/ogg",type.trim());
+            ClientResponse result=c.sendRequest("GET", "books/8", "", MediaType.AUDIO_MPEG, "audio/*,audio/ogg",new Pair[]{});
+            assertEquals("16",result.getResponse().trim());
+
+            assertEquals("audio/ogg", result.getHeader("content-type"));
 
             result=c.sendRequest("GET", "books/8", "", MediaType.AUDIO_MPEG, "video/mp4,text/*",new Pair[]{});
-            assertEquals("8",result.trim());
-            type=c.getHeader("content-type");
-            assertEquals("text/plain",type.trim());
+            assertEquals("8",result.getResponse().trim());
+
+            assertEquals("text/plain",result.getHeader("content-type"));
         }
         catch(Exception e)
         {

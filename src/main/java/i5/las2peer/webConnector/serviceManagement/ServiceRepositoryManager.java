@@ -1,19 +1,12 @@
-package i5.las2peer.webConnector;
+package i5.las2peer.webConnector.serviceManagement;
 
 
-import i5.las2peer.execution.NoSuchServiceMethodException;
-import i5.las2peer.execution.ServiceInvocationException;
-import i5.las2peer.execution.UnlockNeededException;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.ServiceNameVersion;
-import i5.las2peer.p2p.TimeoutException;
 import i5.las2peer.persistency.EnvelopeException;
 import i5.las2peer.restMapper.RESTMapper;
-import i5.las2peer.restMapper.annotations.Version;
 import i5.las2peer.restMapper.data.PathTree;
 
-import i5.las2peer.security.L2pSecurityException;
-import i5.las2peer.security.Mediator;
 import i5.las2peer.security.ServiceInfoAgent;
 
 import org.w3c.dom.Document;

@@ -1,4 +1,4 @@
-package i5.las2peer.webConnector;
+package i5.las2peer.webConnector.client;
 
 import i5.las2peer.restMapper.data.Pair;
 import org.apache.commons.codec.binary.Base64;
@@ -10,7 +10,6 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -21,17 +20,18 @@ import java.util.Map;
  * @author Alexander
  *
  */
-public class TestClient {
+public class MiniClient
+{
 
 			
-		private String authentication;
+		private String authorization;
 		private String serverAddress;
 
-        private String responseHeaders="";
+
 		/**
 		 * default constructor
 		 */
-		public TestClient()
+		public MiniClient()
 		{
 		
 		}
@@ -58,36 +58,13 @@ public class TestClient {
 		public void setLogin(String username, String password) throws UnsupportedEncodingException
 		{
 			
-			authentication=username+":"+password;//Base64.encodeBytes((username+":"+password).getBytes("UTF-8"));
-			authentication= Base64.encodeBase64String(authentication.getBytes());
+			authorization =username+":"+password;//Base64.encodeBytes((username+":"+password).getBytes("UTF-8"));
+			authorization = Base64.encodeBase64String(authorization.getBytes());
 		}
 
-        public String getHeaders()
-        {
-            return responseHeaders;
-        }
 
-        public String getHeader(String headerName)
-        {
-            headerName=headerName.toLowerCase().trim();
-            String[] headers=this.getHeaders().split("\n");
-            for(int i = 0; i < headers.length; i++)
-            {
-                String header = headers[i];
-                String headerLower=header.toLowerCase();
-                if(headerLower.startsWith(headerName))
-                {
-                    return header.substring(header.indexOf(":")+1).trim();
-                }
-            }
-            return "";
-        }
 
-        @SuppressWarnings("unchecked")
-        public String sendRequest(String method, String uri, String content) throws HttpErrorException
-        {
-            return sendRequest(method,uri,content,new Pair[]{});
-        }
+
         /**
          * send request to server
          * @param method POST, GET, DELETE, PUT
@@ -97,12 +74,13 @@ public class TestClient {
          * @param accept value of Accept Header
          * @param headers headers for HTTP request
          * @return returns server response
-         * @throws HttpErrorException contains HTTP error code
+
          */
-        public String sendRequest(String method, String uri, String content, String contentType, String accept, Pair<String>[] headers) throws HttpErrorException
+        public ClientResponse sendRequest(String method, String uri, String content, String contentType, String accept, Pair<String>[] headers)
         {
             URL url;
             HttpURLConnection connection=null;
+            ClientResponse response;
             try
             {
                 //Create connection
@@ -110,7 +88,7 @@ public class TestClient {
                 connection = (HttpURLConnection)url.openConnection();
                 connection.setRequestMethod(method.toUpperCase());
                 connection.setRequestProperty("Authorization",
-                                              "Basic "+authentication);
+                                              "Basic "+ authorization);
 
                 connection.setRequestProperty("Content-Type",
                                               contentType);
@@ -141,38 +119,47 @@ public class TestClient {
                 }
                 int code = connection.getResponseCode();
 
-                if(code!=200)
-                    throw new HttpErrorException(code);
-                //Get Response
-                InputStream is = connection.getInputStream();
-                BufferedReader rd = new BufferedReader(new InputStreamReader(is));
-                String line;
-                StringBuilder response = new StringBuilder();
-                while((line = rd.readLine()) != null) {
-                    response.append(line);
-                    response.append('\r');
-                }
+                response=new ClientResponse(code);
 
-                Map responseMap=connection.getHeaderFields();
-                StringBuilder sb= new StringBuilder();
-                for (Iterator iterator = responseMap.keySet().iterator(); iterator.hasNext();) {
-                    String key = (String) iterator.next();
-                    sb.append(key).append(":");
-
-                    List values = (List) responseMap.get(key);
-                    for (int i = 0; i < values.size(); i++) {
-                        Object o = values.get(i);
-                        sb.append(" "+o);
+                if(code==200||code==201)
+                {
+                    //Get Response
+                    InputStream is = connection.getInputStream();
+                    BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+                    String line;
+                    StringBuilder responseText = new StringBuilder();
+                    while((line = rd.readLine()) != null) {
+                        responseText.append(line);
+                        responseText.append('\r');
                     }
-                    sb.append("\n");
+                    response.setResponse(responseText.toString());
+
+                    Map responseMap=connection.getHeaderFields();
+                    StringBuilder sb= new StringBuilder();
+                    for (Iterator iterator = responseMap.keySet().iterator(); iterator.hasNext();) {
+                        String key = (String) iterator.next();
+
+
+                        sb.setLength(0);
+
+                        List values = (List) responseMap.get(key);
+                        for (int i = 0; i < values.size(); i++) {
+                            Object o = values.get(i);
+                            sb.append(" "+o);
+                        }
+
+                        if (key==null)
+                        {
+                            key="head";
+                        }
+
+                        response.addHeader(key.trim().toLowerCase(),sb.toString().trim());
+                    }
+
+                    rd.close();
                 }
-                responseHeaders=sb.toString();
+                return response;
 
-
-                rd.close();
-                return response.toString();
-            } catch (HttpErrorException e) {
-                throw e;
             } catch (Exception e) {
 
                 e.printStackTrace();
@@ -190,11 +177,26 @@ public class TestClient {
 		 * @param method POST, GET, DELETE, PUT
 		 * @param uri REST-URI (server address excluded)
 		 * @param content if POST is used information can be embedded here
+         * @param headers headers for HTTP request
 		 * @return returns server response
-		 * @throws HttpErrorException contains HTTP error code
+
 		 */
-		public String sendRequest(String method, String uri, String content, Pair<String>[] headers) throws HttpErrorException
+		public ClientResponse sendRequest(String method, String uri, String content, Pair<String>[] headers)
 		{
             return sendRequest(method, uri, content, "text/plain", "*/*", headers);
 		}
+
+        /**
+         * send request to server
+         * @param method POST, GET, DELETE, PUT
+         * @param uri REST-URI (server address excluded)
+         * @param content if POST is used information can be embedded here
+         * @return returns server response
+
+         */
+        @SuppressWarnings("unchecked")
+        public ClientResponse sendRequest(String method, String uri, String content)
+        {
+            return sendRequest(method,uri,content,new Pair[]{});
+        }
 }

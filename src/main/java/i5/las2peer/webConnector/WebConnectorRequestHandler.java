@@ -123,8 +123,9 @@ public class WebConnectorRequestHandler implements RequestHandler {
 					throw new L2pSecurityException ("Agent is not passphrase protected!");
 				
 				((PassphraseAgent)userAgent).unlockPrivateKey(password);
-				connector.logMessage("Login: "+username);
-				
+				//connector.logMessage("Login: "+username);
+                //connector.logMessage("successful login");
+				Thread.sleep(10); //TODO: find out how to avoid this 'hack'
 				if(!activeUsers.containsKey(userId)){
 					activeUsers.put(userId, userAgent);
 				}
@@ -262,7 +263,7 @@ public class WebConnectorRequestHandler implements RequestHandler {
             @SuppressWarnings("unchecked")
             Pair<String>[] headers=headersList.toArray(new Pair[headersList.size()]);
 
-			connector.logMessage(httpMethod+" "+request.getUrl());
+			//connector.logMessage(httpMethod+" "+request.getUrl());
 			
 			
 			
@@ -271,8 +272,8 @@ public class WebConnectorRequestHandler implements RequestHandler {
 			
 			Serializable result="";	
 			
-			if(activeUsers.containsKey(userId))	{
-				Mediator mediator = l2pNode.getOrRegisterLocalMediator(activeUsers.get(userId));				
+			//if(activeUsers.containsKey(userId))	{
+				Mediator mediator = l2pNode.getOrRegisterLocalMediator(activeUsers.get(userId));
 				boolean gotResult=false;
 
                 String returnMIMEType="text/plain";
@@ -311,7 +312,7 @@ public class WebConnectorRequestHandler implements RequestHandler {
 				else
 					sendNoSuchMethod(request, response);
 				
-			}
+			//}
 			return true;
 			
 		} catch ( NoMethodFoundException e ) {
@@ -331,10 +332,10 @@ public class WebConnectorRequestHandler implements RequestHandler {
 	private void logout(Long userId)
 	{
 		try {
-			Agent userAgent =activeUsers.get(userId);			
+			Agent userAgent =activeUsers.get(userId);
 			l2pNode.unregisterAgent(userAgent);
 			((PassphraseAgent)userAgent).lockPrivateKey();//don't know if really necessary
-			activeUsers.remove(userId);			
+			activeUsers.remove(userId);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -468,7 +469,7 @@ public class WebConnectorRequestHandler implements RequestHandler {
 	private void sendInvocationSuccess ( Serializable result, String contentType, HttpResponse response  ) {
 		if ( result != null ) {
 			response.setContentType( contentType );
-            
+
             if(result instanceof i5.las2peer.restMapper.HttpResponse)
             {
 

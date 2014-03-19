@@ -1,17 +1,17 @@
 package i5.las2peer.webConnector;
 
 import i5.las2peer.p2p.LocalNode;
-import i5.las2peer.restMapper.RESTMapper;
 import i5.las2peer.security.ServiceAgent;
 import i5.las2peer.security.UserAgent;
 import i5.las2peer.testing.MockAgentFactory;
+import i5.las2peer.webConnector.client.ClientResponse;
+import i5.las2peer.webConnector.client.MiniClient;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.util.Timer;
 
 import static org.junit.Assert.*;
 
@@ -114,14 +114,14 @@ public class WebConnectorServiceInfoTest
             e.printStackTrace();
         }
 
-        TestClient c = new TestClient();
+        MiniClient c = new MiniClient();
         c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 
         try //Calculator3, only known by XML in ./XMLCompatibility
         {
             c.setLogin(Long.toString(testAgent.getId()), testPass);
-            String result=c.sendRequest("GET", "5/add/6", "");
-            assertEquals("11.0",result.trim());
+            ClientResponse result=c.sendRequest("GET", "5/add/6", "");
+            assertEquals("11.0",result.getResponse().trim());
 
         }
 
@@ -133,8 +133,8 @@ public class WebConnectorServiceInfoTest
         try //Testservice1, only known by XML in ./XMLCompatibility AND getRESTMapping()
         {
             c.setLogin(Long.toString(testAgent.getId()), testPass);
-            String result=c.sendRequest("PUT", "add/7/6", "");
-            assertEquals("13",result.trim());
+            ClientResponse result=c.sendRequest("PUT", "add/7/6", "");
+            assertEquals("13",result.getResponse().trim());
 
         }
 
@@ -145,8 +145,8 @@ public class WebConnectorServiceInfoTest
         try //Calculator2 only indirectly known by Calculator2CompatibilityService
         {
             c.setLogin(Long.toString(testAgent.getId()), testPass);
-            String result=c.sendRequest("GET", "mul/7/6", "");
-            assertEquals("42.0",result.trim());
+            ClientResponse result=c.sendRequest("GET", "mul/7/6", "");
+            assertEquals("42.0",result.getResponse().trim());
 
         }
 
@@ -158,8 +158,8 @@ public class WebConnectorServiceInfoTest
         try //TestService2, only known by getRESTMapping()
         {
             c.setLogin(Long.toString(testAgent.getId()), testPass);
-            String result=c.sendRequest("POST", "do/h/i", "!");
-            assertEquals("hi!",result.trim());
+            ClientResponse result=c.sendRequest("POST", "do/h/i", "!");
+            assertEquals("hi!",result.getResponse().trim());
 
         }
 
