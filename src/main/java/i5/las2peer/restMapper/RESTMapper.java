@@ -23,6 +23,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import i5.las2peer.restMapper.tools.ValidationResult;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -190,7 +191,8 @@ public class RESTMapper {
 			
 			methodNode.setAttribute(NAME_TAG, method.getName());
 			methodNode.setAttribute(HTTP_METHOD_TAG, httpMethod);
-			methodNode.setAttribute(PATH_TAG, path);
+            if(path!=null&&!path.isEmpty())
+			    methodNode.setAttribute(PATH_TAG, path);
 			methodNode.setAttribute(TYPE_TAG, (method.getReturnType().getName()));
 
 
@@ -291,10 +293,36 @@ public class RESTMapper {
 		return XMLtoString(doc);
 	}
 
-    private static String formatPath(String pathPrefix)
+    /**
+     * Formats path to the expected format
+     * @param path
+     * @return
+     */
+    private static String formatPath(String path)
     {
-        pathPrefix=pathPrefix.replaceAll("(^/)|(/$)","");//remove trailing / for convenience
-        return pathPrefix;
+        path=path.replaceAll("(^/)|(/$)","");//remove trailing / for convenience
+        return path;
+    }
+
+    /**
+     * Retruns all occurances of match in s as an integer array
+     * @param s
+     * @param match
+     * @return
+     */
+    private static Integer[] getOccurrences(String s, String match)
+    {
+        ArrayList<Integer> occurrences=new ArrayList<Integer>();
+        int index = s.indexOf(match);
+        while (index >= 0) {
+            occurrences.add(index);
+            index = s.indexOf(match, index + 1);
+        }
+        Integer[] result=new Integer[occurrences.size()];
+        occurrences.toArray(result);
+        return result;
+
+
     }
 
     public static String mergeXMLs(String[] xmls) throws ParserConfigurationException
@@ -329,22 +357,35 @@ public class RESTMapper {
 		return XMLtoString(doc);
 		
 	}
-	
+    /**
+     * creates a tree from the class data xml
+     * the tree can then be used to map requests directly to the proper services and methods
+     * @param xml XML containing service class information
+     * @return tree structure for request mapping
+     * @throws Exception
+     */
+    public static PathTree getMappingTree(String xml) throws Exception
+    {
+        return getMappingTree(xml,false,new ValidationResult());
+    }
+
 	/**
 	 * creates a tree from the class data xml
 	 * the tree can then be used to map requests directly to the proper services and methods
 	 * @param xml XML containing service class information
+     * @param validate if a path-annotation validation should be performed
+     * @param result validation result, as reference parameter, if validate is true
 	 * @return tree structure for request mapping
 	 * @throws Exception
 	 */
-	public static PathTree getMappingTree(String xml) throws Exception
+	public static PathTree getMappingTree(String xml, boolean validate, ValidationResult result) throws Exception
 	{
         XPath _xPath = XPathFactory.newInstance().newXPath();
 		DocumentBuilderFactory dbFactory;
 		DocumentBuilder dBuilder;
 		Document doc;		
-		dbFactory = DocumentBuilderFactory.newInstance();	
-		
+		dbFactory = DocumentBuilderFactory.newInstance();
+        result.setValid(true); //assume everything is right
 		
 		dBuilder = dbFactory.newDocumentBuilder();
 		doc=dBuilder.parse(new InputSource(new StringReader(xml)));
@@ -389,10 +430,15 @@ public class RESTMapper {
 				Element methodNode =(Element)methodeNodeList.item(j);
 				String methodName=methodNode.getAttribute(NAME_TAG).trim();
 				String methodHttpMethod=methodNode.getAttribute(HTTP_METHOD_TAG).trim().toLowerCase();
-				String methodPath=methodNode.getAttribute(PATH_TAG).trim();
+				String methodPath="";
+
 				String methodType=methodNode.getAttribute(TYPE_TAG).trim();
                 String[] consumes;
                 String produces;
+                if(methodNode.hasAttribute(PATH_TAG))
+                {
+                    methodPath=methodNode.getAttribute(PATH_TAG).trim();
+                }
                 if(methodNode.hasAttribute(CONSUMES_TAG))
                 {
                     consumes=methodNode.getAttribute(CONSUMES_TAG).trim().split(DEFAULT_MIME_SEPARATOR);
@@ -421,6 +467,36 @@ public class RESTMapper {
 						methodPath=methodPath.substring(1);
 					if(methodPath.endsWith("/"))
 						methodPath=methodPath.substring(0,methodPath.length()-1);
+
+                    if(validate)//is path annotation well formatted?
+                    {
+
+                        Integer[] braceOpen=getOccurrences(methodPath,"{");
+                        Integer[] bracesClosed=getOccurrences(methodPath,"}");
+                        if(bracesClosed.length!=braceOpen.length) //check if all { closed
+                        {
+                            result.setValid(false);
+                            result.addMessage("Path " + methodPath + " of method " + methodName + " has unequal number of { and }");
+                        }
+                        else
+                        {
+                            Integer[] allBraces=new Integer[braceOpen.length+bracesClosed.length];//check if no {{}}
+                            int u=0;
+                            int lastClosed=-1;
+                            for(int k = 0; k < braceOpen.length; k++)
+                            {
+                                if(!(braceOpen[k]<bracesClosed[k])||lastClosed>=braceOpen[k])
+                                {
+                                    result.setValid(false);
+                                    result.addMessage("Path " + methodPath + " of method " + methodName + " has {} inside of {}");
+                                    break;
+                                }
+                                lastClosed=bracesClosed[k];
+                            }
+
+
+                        }
+                    }
 					
 					//for each URI path segment
 					String[] pathParts=methodPath.split("/");
@@ -466,7 +542,18 @@ public class RESTMapper {
                     {
 						parameterDefault=parameter.getAttribute(DEFAULT_TAG);
                     }
-					
+
+                    if(validate&&parameterName!=null&&parameterAnnotation!=null&&parameterAnnotation.equals(PATH_ANNOTATION))
+                    {
+
+                        int index=methodPath.indexOf("{"+parameterName+"}");
+
+                        if(index<=-1)
+                        {
+                            result.setValid(false);
+                            result.addMessage("Path " + methodPath + " of method " + methodName + " lacks the parameter \"" + parameterName+"\"");
+                        }
+                    }
 					
 					//create array sorted by the occurrence of the parameter in the method declaration
 					parameters[parameterIndex]=
@@ -1009,6 +1096,28 @@ public class RESTMapper {
         }
 
         return content;
+    }
+
+    /**
+     * Writes a string to a file
+     * @param file file path
+     * @param content what to write into the file
+     * @throws IOException
+     */
+    public static void writeFile(String file, String content) throws IOException
+    {
+        PrintWriter writer=null;
+        try {
+            writer= new PrintWriter(file, "UTF-8");
+            writer.write(content);
+
+        }
+        finally
+        {
+            if(writer!=null)
+                writer.close();
+
+        }
     }
 
     /**

@@ -16,12 +16,13 @@ import org.junit.Test;
 public class RESTMapperTest {
 
 	
-	TestClass1 testClass1= new TestClass1();
+
 	
 	static PathTree tree;
 	static PathTree tree2;
     static PathTree tree3;
     static PathTree tree4;
+
 	@BeforeClass
 	public static void testSetup() 
 	{			

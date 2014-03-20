@@ -123,6 +123,8 @@
 		<jar jarfile="${export.jars}/LAS2peer-REST-Mapper.jar">
 			<fileset dir="${tmp.classes}">
 			</fileset>
+			<fileset dir="xsd">
+			</fileset>
 		</jar>
 	</target>
 	

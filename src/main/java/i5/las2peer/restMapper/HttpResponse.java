@@ -25,11 +25,20 @@ public class HttpResponse implements Serializable
     private String result;
     private HashMap<String,String> headers= new HashMap<String,String> ();
 
+    /**
+     * cnstructor
+     * @param result string returned as method response
+     */
     public HttpResponse(String result)
     {
         this.result=result;
     }
 
+    /**
+     * constructor
+     * @param result string returned as method response
+     * @param status http status code
+     */
     public HttpResponse(String result,int status)
     {
         this.status = status;
