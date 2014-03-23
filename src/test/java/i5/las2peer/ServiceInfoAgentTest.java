@@ -1,27 +1,24 @@
 package i5.las2peer;
 
 
-import i5.las2peer.p2p.*;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import i5.las2peer.p2p.Node;
+import i5.las2peer.p2p.PastryNodeImpl;
+import i5.las2peer.p2p.ServiceNameVersion;
 import i5.las2peer.security.ServiceAgent;
 import i5.las2peer.security.ServiceInfoAgent;
 import i5.las2peer.security.UserAgent;
-import i5.las2peer.tools.*;
-
-import org.junit.BeforeClass;
-
-
-import org.junit.Test;
-
-
+import i5.las2peer.tools.ColoredOutput;
+import i5.las2peer.tools.CryptoException;
+import i5.las2peer.tools.SerializationException;
 
 //import java.net.InetAddress;
 //import java.net.UnknownHostException;
-
 import java.util.Arrays;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 /**
  * @author Alexander
@@ -48,11 +45,13 @@ public class ServiceInfoAgentTest
 
 
        // String host = getHostString();
-
         nodes[0]=new PastryNodeImpl(START_PORT+0,"");
+        nodes[0].setLogfilePrefix("log/l2p-node_");
+
         /*for(int i = 1; i < nodes.length; i++)
         {
             nodes[i]=new PastryNodeImpl(START_PORT+i,host+":"+Integer.toString(START_PORT+i-1));
+            nodes[i].setLogfilePrefix("log/l2p-node_");
         }*/
 
 
