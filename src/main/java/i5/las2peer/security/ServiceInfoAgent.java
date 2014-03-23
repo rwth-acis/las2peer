@@ -2,22 +2,22 @@ package i5.las2peer.security;
 
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
-
-import i5.las2peer.p2p.*;
+import i5.las2peer.p2p.ServiceInfoData;
+import i5.las2peer.p2p.ServiceNameVersion;
+import i5.las2peer.p2p.StorageException;
 import i5.las2peer.persistency.DecodingFailedException;
-
 import i5.las2peer.persistency.Envelope;
 import i5.las2peer.persistency.EnvelopeException;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
 import i5.las2peer.tools.SerializationException;
 import i5.las2peer.tools.SerializeTools;
-import org.apache.commons.codec.binary.Base64;
-
 
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+
+import org.apache.commons.codec.binary.Base64;
 
 /**
  * @author Alexander
@@ -40,7 +40,7 @@ public class ServiceInfoAgent extends PassphraseAgent
     private static ServiceInfoAgent agent=null;
     /**
      * Agent is public and has a default passphrase
-     * @return
+     * @return the passphrase
      */
     public static String getDefaultPassphrase()
     {
@@ -78,7 +78,7 @@ public class ServiceInfoAgent extends PassphraseAgent
     /**
      * Retrieves the single agent instance
      * @param passphrase
-     * @return
+     * @return a {@link ServiceInfoAgent}
      * @throws CryptoException
      * @throws L2pSecurityException
      * @throws SerializationException
@@ -103,7 +103,7 @@ public class ServiceInfoAgent extends PassphraseAgent
 
     /**
      * Retrieves the single agent instance
-     * @return
+     * @return a {@link ServiceInfoAgent}
      * @throws CryptoException
      * @throws L2pSecurityException
      * @throws SerializationException
@@ -117,7 +117,7 @@ public class ServiceInfoAgent extends PassphraseAgent
 
     /**
      * Envelope which stores {@link i5.las2peer.p2p.ServiceInfoData} has a default name to find it later
-     * @return
+     * @return a String
      */
     private static String getEnvelopeName()
     {
@@ -126,7 +126,7 @@ public class ServiceInfoAgent extends PassphraseAgent
 
     /**
      * Returns an array of currently registered services
-     * @return
+     * @return an array of {@link i5.las2peer.p2p.ServiceNameVersion}s
      * @throws EnvelopeException
      */
     public static ServiceNameVersion[] getServices() throws EnvelopeException
@@ -137,7 +137,7 @@ public class ServiceInfoAgent extends PassphraseAgent
 
     /**
      * Reads {@link i5.las2peer.p2p.ServiceInfoData} from the Envelope
-     * @return
+     * @return {@link i5.las2peer.p2p.ServiceInfoData}
      * @throws EnvelopeException
      */
     private static ServiceInfoData getEnvelopeData() throws EnvelopeException

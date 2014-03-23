@@ -1,9 +1,7 @@
 package i5.las2peer.p2p;
 
 import java.io.Serializable;
-
 import java.util.HashMap;
-import java.util.HashSet;
 
 /**
  * @author Alexander
@@ -29,7 +27,7 @@ public class ServiceInfoData implements Serializable
 
     /**
      * Returns an array with the names of all registered services
-     * @return
+     * @return the service names
      */
     public ServiceNameVersion[] getServices()
     {
