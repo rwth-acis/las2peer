@@ -14,11 +14,11 @@ import java.util.Set;
  * Base (abstract) super type for classes that may be configurable via property files.
  * 
  * The basic idea is, that the runtime system will look for .property files in the current runtime
- * directory or the subdirectories ./config and ./properties for a file named
+ * directory or the subdirectories ./config, ./etc and ./properties for a file named
  * as the sub class of Configurable (including the package name).
  * 
  * All protected (non-static) fields can be set via the {@link #setFieldValues} method.
- * This won't be done automatically, thins subclasses may want to add some extra configuration 
+ * This won't be done automatically, since subclasses may want to add some extra configuration 
  * behavior.
  *  
  * @author Holger Jan&szlig;en
@@ -41,6 +41,7 @@ public abstract class Configurable {
 	 * <ul>
 	 * 	<li>./</li>
 	 *  <li>./config/</li>
+	 *  <li>./etc/</li>
 	 *  <li>./properties/</li>
 	 * </ul>
 	 * 
@@ -162,7 +163,7 @@ public abstract class Configurable {
 	 */
 	private String findPropertyFile () {
 		String filename = getClass().getName() + ".properties";
-		String [] testDirs = new String[] { "./", "config/", "properties/" };
+		String [] testDirs = new String[] { "./", "config/", "etc/", "properties/" };
 		
 		for ( String dir : testDirs )
 			if ( new File( dir + filename).exists() )

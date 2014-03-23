@@ -231,7 +231,7 @@ public class L2pNodeLauncher {
 	 * contains a <i>passphrases.txt</i> file giving the passphrases for the agents.  
 	 */
 	public void uploadStartupDirectory () {
-		uploadStartupDirectory ("startup");
+		uploadStartupDirectory ("etc/startup");
 	}
 	
 	

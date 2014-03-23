@@ -120,7 +120,7 @@ public abstract class Node implements AgentStorage {
 	
 	private String sLogFilePrefix;
 	
-	private final static String DEFAULT_INFORMATION_FILE = "config/nodeInfo.xml";
+	private final static String DEFAULT_INFORMATION_FILE = "etc/nodeInfo.xml";
 	private String sInformationFileName = DEFAULT_INFORMATION_FILE;
 	
 	private KeyPair nodeKeyPair;
