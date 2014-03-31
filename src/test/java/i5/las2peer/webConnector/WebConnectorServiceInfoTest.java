@@ -78,7 +78,7 @@ public class WebConnectorServiceInfoTest
         // eve is the anonymous agent!
         testAgent = MockAgentFactory.getAdam();
 
-
+        Thread.sleep(1000);
     }
 
     @AfterClass

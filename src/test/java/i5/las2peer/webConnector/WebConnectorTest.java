@@ -76,7 +76,7 @@ public class WebConnectorTest {
 		connector.setSocketTimeout(10000);
 		connector.setLogStream(new PrintStream ( logStream));
 		connector.start ( node );
-
+        Thread.sleep(1000);
 		// eve is the anonymous agent!
 		testAgent = MockAgentFactory.getAdam();
         //avoid timing errors: wait for the repository manager to get all services, before invoking them
@@ -301,7 +301,7 @@ public class WebConnectorTest {
 		try
 		{
 			c.setLogin(Long.toString(testAgent.getId()), testPass);
-
+            Thread.sleep(5000);
             ClientResponse result=c.sendRequest("POST", "do/a/b", "c");
 			assertEquals("abc",result.getResponse().trim());
 		}
