@@ -89,24 +89,26 @@ public class WebConnectorTest {
 		
 		connector.stop();
 		node.shutDown();
-		
-		connector = null;
-		node = null;
-		
-		LocalNode.reset();
+
+        connector = null;
+        node = null;
+
+        LocalNode.reset();
 		
 		System.out.println("Connector-Log:");
 		System.out.println("--------------");
 		
 		System.out.println(logStream.toString());
-		
-	}
+        //System.out.println(connector.sslKeystore);
+
+
+    }
 	
 	@Test
 	public void testNotMethodService() {
 		
 		
-		
+		connector.updateServiceList();
 		MiniClient c = new MiniClient();
 		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);		
 		
@@ -134,9 +136,9 @@ public class WebConnectorTest {
 
 	@Test
 	public void testLogin() {
-		
-		
-		
+
+
+        connector.updateServiceList();
 		MiniClient c = new MiniClient();
 		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 		
@@ -199,7 +201,7 @@ public class WebConnectorTest {
     @SuppressWarnings("unchecked")
 	public void testCalls()
 	{
-
+        connector.updateServiceList();
         //avoid timing errors: wait for the repository manager to get all services, before invoking them
         try
         {

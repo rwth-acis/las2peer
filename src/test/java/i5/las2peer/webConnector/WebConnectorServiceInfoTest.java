@@ -102,7 +102,7 @@ public class WebConnectorServiceInfoTest
 
     @Test
     public void testServices() {
-
+        connector.updateServiceList();
         //avoid timing errors: wait for the repository manager to get all services, before invoking them
         try
         {

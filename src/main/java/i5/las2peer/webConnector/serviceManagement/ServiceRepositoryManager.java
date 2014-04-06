@@ -82,77 +82,55 @@ public class ServiceRepositoryManager
         timerRunning=false;
     }
 
-    private static void startTimer(final Node node) throws Exception
+    public static void manualUpdate(final Node node) throws Exception
     {
-        if(timerRunning)
-            return;
-        ServiceInfoAgent agent=null;
+        executeTimer(node,getServiceInfoAgent(node));
+    }
+    private static void executeTimer(Node node, ServiceInfoAgent finalAgent)
+    {
         try
         {
-            agent = ServiceInfoAgent.getServiceInfoAgent(ServiceInfoAgent.getDefaultPassphrase());
+            ServiceNameVersion[] services=ServiceInfoAgent.getServices();
+            checkedServices.clear();
+            Iterator it = serviceRepository.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry pairs = (Map.Entry)it.next();
+                checkedServices.add((String) pairs.getKey());
 
-            if(!node.hasAgent(agent.getId()))
-            {
-
-                node.registerReceiver(agent);
             }
-        }
-        catch(Exception e)
-        {
-            throw new Exception("Error registering ServiceInfoAgent",e);
-        }
 
 
-        final ServiceInfoAgent finalAgent = agent;
-        timerRunning=true;
-        timer.scheduleAtFixedRate(
-                new TimerTask()
+            for(int i = 0; i < services.length; i++)
+            {
+                String internalServiceName=getInternalServiceName(services[i].getName(),services[i].getVersion());
+                // System.out.println("###");
+                // System.out.println(internalServiceName);
+                // System.out.println("###");
+                if(!serviceRepository.containsKey(internalServiceName))//new service
                 {
-                    public void run()
+
+                    String xml="";
+                    try
                     {
+                        xml=(String) node.invokeGlobally(finalAgent, services[i].getName(), SERVICE_SELFINFO_METHOD, new Serializable[]{});
+
                         try
                         {
-                            ServiceNameVersion[] services=ServiceInfoAgent.getServices();
-                            checkedServices.clear();
-                            Iterator it = serviceRepository.entrySet().iterator();
-                            while (it.hasNext()) {
-                                Map.Entry pairs = (Map.Entry)it.next();
-                                checkedServices.add((String) pairs.getKey());
-
-                            }
 
 
-                            for(int i = 0; i < services.length; i++)
-                            {
-                                String internalServiceName=getInternalServiceName(services[i].getName(),services[i].getVersion());
-                               // System.out.println("###");
-                               // System.out.println(internalServiceName);
-                               // System.out.println("###");
-                                if(!serviceRepository.containsKey(internalServiceName))//new service
-                                {
+                            //tree.merge(RESTMapper.getMappingTree(xml));
+                            ServiceData data = new ServiceData(services[i].getName(),services[i].getVersion(),true,xml);
+                            serviceRepository.put(internalServiceName,data);
 
-                                    String xml="";
-                                    try
-                                    {
-                                        xml=(String) node.invokeGlobally(finalAgent, services[i].getName(), SERVICE_SELFINFO_METHOD, new Serializable[]{});
+                            addXML(new String[]{xml});//for compatibility services: a service can also give XML definition to other services
 
-                                        try
-                                        {
+                        }
+                        catch(Exception e)
+                        {
+                            //do nothing for now
 
-
-                                            //tree.merge(RESTMapper.getMappingTree(xml));
-                                            ServiceData data = new ServiceData(services[i].getName(),services[i].getVersion(),true,xml);
-                                            serviceRepository.put(internalServiceName,data);
-
-                                            addXML(new String[]{xml});//for compatibility services: a service can also give XML definition to other services
-
-                                        }
-                                        catch(Exception e)
-                                        {
-                                            //do nothing for now
-
-                                        }
-                                    }
+                        }
+                    }
                                    /* catch(NoSuchServiceMethodException e)
                                     {
                                         //do nothing for now
@@ -167,41 +145,78 @@ public class ServiceRepositoryManager
                                         System.out.println(e.getMessage());
                                         System.out.println("#################");
                                     }*/
-                                    catch(Exception e)
-                                    {
-                                        //do nothing for now
+                    catch(Exception e)
+                    {
+                        //do nothing for now
 
-                                    }
-
-
-
-                                }
-                                else if(!serviceRepository.get(internalServiceName).isActive())//enable not active services
-                                {
-                                    serviceRepository.get(internalServiceName).enable();
-                                }
-                                checkedServices.remove(internalServiceName);
-
-                            }
+                    }
 
 
 
-                           for(String service: checkedServices)
-                           {
+                }
+                else if(!serviceRepository.get(internalServiceName).isActive())//enable not active services
+                {
+                    serviceRepository.get(internalServiceName).enable();
+                }
+                checkedServices.remove(internalServiceName);
 
-                                serviceRepository.get(service).disable();
-                            }
+            }
 
-                        }
-                        catch(EnvelopeException e)
-                        {
-                           //do nothing for now
-                        }
 
+
+            for(String service: checkedServices)
+            {
+
+                serviceRepository.get(service).disable();
+            }
+
+        }
+        catch(EnvelopeException e)
+        {
+            //do nothing for now
+        }
+    }
+    private static void startTimer(final Node node) throws Exception
+    {
+        if(timerRunning)
+            return;
+        ServiceInfoAgent agent;
+        agent = getServiceInfoAgent(node);
+
+
+        final ServiceInfoAgent finalAgent = agent;
+        timerRunning=true;
+
+        timer.scheduleAtFixedRate(
+                new TimerTask()
+                {
+                    public void run()
+                    {
+                        executeTimer(node,finalAgent);
                     }
                 },
                 0,      // run first occurrence immediately
                 timerIntervalSeconds*1000);  // run every three seconds
+    }
+
+    private static ServiceInfoAgent getServiceInfoAgent(Node node) throws Exception
+    {
+        ServiceInfoAgent agent;
+        try
+        {
+            agent = ServiceInfoAgent.getServiceInfoAgent(ServiceInfoAgent.getDefaultPassphrase());
+
+            if(!node.hasAgent(agent.getId()))
+            {
+
+                node.registerReceiver(agent);
+            }
+        }
+        catch(Exception e)
+        {
+            throw new Exception("Error registering ServiceInfoAgent",e);
+        }
+        return agent;
     }
 
     public static void addXML(String[] xmls) throws Exception

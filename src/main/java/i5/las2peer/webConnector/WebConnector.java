@@ -17,6 +17,7 @@ import i5.las2peer.webConnector.serviceManagement.ServiceRepositoryManager;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.text.DateFormat;
 import java.util.Date;
@@ -66,11 +67,12 @@ public class WebConnector extends Connector
 	
 	public static final boolean DEFAULT_PREFER_LOCAL_SERVICES = true;
 	protected boolean preferLocalServices = DEFAULT_PREFER_LOCAL_SERVICES;
-	
+
+    protected String xmlPath;
 	
 	private HttpServer http;
 	private HttpsServer https;
-	
+
 	
 	private Node myNode = null;
 	
@@ -94,20 +96,25 @@ public class WebConnector extends Connector
 	 * create a new web connector instance. 	
 	 * @throws FileNotFoundException
 	 */
-	public WebConnector () throws FileNotFoundException {
+	public WebConnector () throws Exception
+    {
 		super.setFieldValues();
         ServiceRepositoryManager.setTree(tree);
+
 	}
 	
 	/**
 	 * create a new web connector instance. 	
 	 * @throws FileNotFoundException
 	 */
-	public WebConnector (boolean http, int httpPort, boolean https, int httpsPort) throws FileNotFoundException {
+	public WebConnector (boolean http, int httpPort, boolean https, int httpsPort) throws Exception
+    {
 		this();
 		enableHttpHttps(http,https);
 		setHttpPort(httpPort);
 		setHttpsPort(httpsPort);
+        if(this.xmlPath!=null && !this.xmlPath.trim().isEmpty())
+            ServiceRepositoryManager.addXML(RESTMapper.readAllXMLFromDir(xmlPath));
 	}
 	
 	/**
@@ -119,7 +126,10 @@ public class WebConnector extends Connector
 		enableHttpHttps(http,https);
 		setHttpPort(httpPort);
 		setHttpsPort(httpsPort);
-        ServiceRepositoryManager.addXML(RESTMapper.readAllXMLFromDir(xmlPath));
+        this.xmlPath=xmlPath;
+
+        if(this.xmlPath!=null && !this.xmlPath.trim().isEmpty())
+            ServiceRepositoryManager.addXML(RESTMapper.readAllXMLFromDir(xmlPath));
 	}
 	/**
 	 * set the log file for this connector
@@ -270,6 +280,17 @@ public class WebConnector extends Connector
 			runServer(true);
 		}
 	}
+    public void updateServiceList()
+    {
+        try
+        {
+        ServiceRepositoryManager.manualUpdate(this.myNode);
+        }
+        catch(Exception e)
+        {
+            logError("Could not update services: "+e.getMessage());
+        }
+    }
 	/**
 	 * Starts either HTTP server or HTTPS Server
 	 * @param isHttps true to run the HTTPS server, false to run the HTTP server
