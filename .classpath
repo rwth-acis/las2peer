@@ -9,6 +9,8 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/junit-4.11.jar"/>
 	<classpathentry kind="lib" path="lib/hamcrest-core-1.3.jar"/>
-	<classpathentry kind="lib" path="lib/las2peer-0.0.3.1.jar"/>
+	<classpathentry kind="lib" path="lib/las2peer-0.0.3.4.jar"/>
+	<classpathentry kind="lib" path="lib/i5-restMapper-0.0.2.jar"/>
+	<classpathentry kind="lib" path="lib/i5-httpServer-0.4.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

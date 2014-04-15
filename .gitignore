@@ -5,7 +5,6 @@
 /ivy/ivy.jar
 /log
 /tmp
-/.classpath
 /out
 /.idea
 *.iml
