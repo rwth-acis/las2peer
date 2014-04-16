@@ -276,6 +276,46 @@ public class L2pNodeLauncher {
 	
 	
 	/**
+	 * Stops the http Connector.
+	 */
+	public void stopHttpConnector(){
+		stopConnector("i5.las2peer.httpConnector.HttpConnector");
+	}
+	
+	
+	/**
+	 * Stops a connector given by its classname.
+	 */
+	public void stopWebConnector(){
+		stopConnector("i5.las2peer.webConnector.WebConnector");
+	}
+	
+	
+	/**
+	 * Stops a connector given by its classname.
+	 */
+	public void stopConnector(String connectorClass){
+		
+			Iterator<Connector> iterator = connectors.iterator();
+
+			while(iterator.hasNext()){
+				try {
+				Connector connector = iterator.next();
+				if(connector.getClass().getName().equals(connectorClass)){
+					connector.stop();
+					iterator.remove();
+					return;
+				}
+				}catch (ConnectorException e) {
+					e.printStackTrace();
+				}
+			}
+			printWarning("No connector with the given classname was started!");
+			
+	}
+	
+	
+	/**
 	 * Returns a connector for the given classname.
 	 * 
 	 * @param classname
