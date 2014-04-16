@@ -236,47 +236,17 @@ public class L2pNodeLauncher {
 	
 	
 	/**
-	 * Starts the HTTP connector at the default port.
-	 * 
+	 * Starts the HTTP connector.
 	 */
 	public void startHttpConnector () {
-		startHttpConnector ( 8080 );
+		startConnector("i5.las2peer.httpConnector.HttpConnector");
 	}
 	
-	
 	/**
-	 * Starts the HTTP connector at the given port.
-	 * 
-	 * @param port
+	 * Start the Web-Connector.
 	 */
-	public void startHttpConnector ( String port ) {
-		startHttpConnector( Integer.valueOf ( port ) );
-	}
-	
-	
-	/**
-	 * Starts the HTTP connector at the given port.
-	 * 
-	 * @param port
-	 */
-	private void startHttpConnector ( final int port ) {
-		try {
-			
-			printMessage( "Starting Http Connector!");
-			Connector connector = loadConnector("i5.las2peer.httpConnector.HttpConnector");
-			connector.setPort( port );
-			connector.start( node );
-			connectors.add(connector);
-			
-		} catch (ConnectorException e) {
-			printWarning ( " --> problems starting the connector: " + e);
-		} catch (ClassNotFoundException e) {
-	        e.printStackTrace();
-	    } catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		}
+	public void startWebConnector () {
+		startConnector("i5.las2peer.webConnector.WebConnector");
 	}
 	
 	
@@ -284,30 +254,17 @@ public class L2pNodeLauncher {
 	 * Starts a connector given by its classname.
 	 * 
 	 * @param connectorClass
-	 * @param port
 	 */
-	public void startConnector (String connectorClass, String port ) {
-		startConnector( connectorClass, Integer.valueOf ( port ) );
-	}
-	
-	
-	/**
-	 * Starts a connector given by its classname.
-	 * 
-	 * @param connectorClass
-	 * @param port
-	 */
-	private void startConnector(String connectorClass, final int port){
+	public void startConnector(String connectorClass){
 		try {
 			
-			printMessage( "Starting Connector with class name: " + connectorClass + "!");
+			printMessage( "Starting connector with class name: " + connectorClass + "!");
 			Connector connector = loadConnector(connectorClass);
-			connector.setPort( port );
 			connector.start( node );
 			connectors.add(connector);
 			
 		} catch (ConnectorException e) {
-			printWarning ( " --> problems starting the connector: " + e);
+			printWarning ( " --> Problems starting the connector: " + e);
 		} catch (ClassNotFoundException e) {
 	        e.printStackTrace();
 	    } catch (InstantiationException e) {
@@ -650,6 +607,7 @@ public class L2pNodeLauncher {
 		
 		commandPrompt = new CommandPrompt ( this );
 	}
+	
 	
 	/**
 	 * Sets the directory to write the logfile to.
