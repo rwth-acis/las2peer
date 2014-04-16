@@ -284,7 +284,7 @@ public class L2pNodeLauncher {
 	
 	
 	/**
-	 * Stops a connector given by its classname.
+	 * Stops the Web-Connector.
 	 */
 	public void stopWebConnector(){
 		stopConnector("i5.las2peer.webConnector.WebConnector");
