@@ -14,10 +14,8 @@ import i5.las2peer.restMapper.data.PathTree;
 import i5.las2peer.security.Agent;
 import i5.las2peer.webConnector.serviceManagement.ServiceRepositoryManager;
 
-
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.text.DateFormat;
 import java.util.Date;
@@ -140,19 +138,6 @@ public class WebConnector extends Connector
 	public void setLogFile ( String filename) throws FileNotFoundException {
 		setLogStream ( new PrintStream ( new FileOutputStream ( filename, true )));
 	}
-
-    @Override
-    public void setPort(int port)
-    {
-        enableHttpHttps(true,false);
-        setHttpPort(port);
-    }
-
-    @Override
-    public void init()
-    {
-
-    }
 	
 	/**
 	 * set the port for the HTTP connector to listen to
