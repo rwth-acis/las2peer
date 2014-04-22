@@ -1,35 +1,31 @@
 package i5.las2peer.webConnector;
 
-import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Map;
-
 import i5.httpServer.HttpRequest;
 import i5.httpServer.HttpResponse;
 import i5.httpServer.RequestHandler;
 import i5.las2peer.execution.NoSuchServiceException;
 import i5.las2peer.execution.NoSuchServiceMethodException;
 import i5.las2peer.execution.ServiceInvocationException;
-
-import i5.las2peer.webConnector.WebConnector;
-
-
-
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.TimeoutException;
+import i5.las2peer.restMapper.RESTMapper;
+import i5.las2peer.restMapper.data.InvocationData;
+import i5.las2peer.restMapper.data.Pair;
+//import rice.p2p.util.Base64;
+import i5.las2peer.restMapper.exceptions.NoMethodFoundException;
+import i5.las2peer.restMapper.exceptions.NotSupportedUriPathException;
 import i5.las2peer.security.Agent;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.Mediator;
 import i5.las2peer.security.PassphraseAgent;
-import i5.las2peer.restMapper.*;
-import i5.las2peer.restMapper.data.*;
-//import rice.p2p.util.Base64;
-import i5.las2peer.restMapper.exceptions.NoMethodFoundException;
-import i5.las2peer.restMapper.exceptions.NotSupportedUriPathException;
+
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Hashtable;
+
 import rice.p2p.util.Base64;
 
 
@@ -37,12 +33,9 @@ import rice.p2p.util.Base64;
  * A HttpServer RequestHandler for handling requests to the LAS2peer Web connector.
  * Each request will be distributed to its corresponding session.
  *
- * Current Problem (LAS related, maybe out-dated..):
- * This class will be used by a library (the HttpServer), so it has to be provided
- * as an library as well. To gain access to the configuration parameters the way
- * back to the service will be needed, but this is not allowed by the las class loaders.
- *
  * @author Holger Jan&szlig;en
+ * @Author Alexander Ruppert
+ * 
  */
 
 
@@ -76,7 +69,7 @@ public class WebConnectorRequestHandler implements RequestHandler {
 	 * Logs in a las2peer user
 	 * @param request
 	 * @param response
-	 * @return -1 if no succesfull login else userId
+	 * @return -1 if no successful login else userId
 	 * @throws UnsupportedEncodingException
 	 */
 	private long authenticate (HttpRequest request, HttpResponse response) throws UnsupportedEncodingException
@@ -345,7 +338,7 @@ public class WebConnectorRequestHandler implements RequestHandler {
 	 */
 	@Override
 	public void processRequest(HttpRequest request, HttpResponse response) throws Exception {
-		response.setHeaderField( "Server-Name", "Las2peer 0.1" );
+		response.setHeaderField( "Server-Name", "LAS2peer" );
 		response.setContentType( "text/xml" );
 		
 		

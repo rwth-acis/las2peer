@@ -23,9 +23,10 @@ import java.util.Date;
 
 
 /**
- * Starter class for registering the HTTP connector at the LAS2peer server.
+ * Starter class for registering the Web Connector at the LAS2peer server.
  *
  * @author Holger Jan&szlig;en
+ * @author Alexander Ruppert
  */
 
 
@@ -284,7 +285,7 @@ public class WebConnector extends Connector
 	private void runServer(boolean isHttps) throws ConnectorException {
 		if(isHttps){
 			if (enableCrossOriginResourceSharing)
-				https = new HttpsServer ( sslKeystore, sslKeyPassword, RequestHandler.class.getName(), httpsPort, crossOriginResourceDomain, crossOriginResourceMaxAge);
+				https = new HttpsServer ( sslKeystore, sslKeyPassword, WebConnectorRequestHandler.class.getName(), httpsPort, crossOriginResourceDomain, crossOriginResourceMaxAge);
 			else 
 				https = new HttpsServer ( sslKeystore, sslKeyPassword, WebConnectorRequestHandler.class.getName(), httpsPort );
 			https.setSocketTimeout( socketTimeout );
