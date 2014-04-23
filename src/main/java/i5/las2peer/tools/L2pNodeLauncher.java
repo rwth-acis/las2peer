@@ -435,8 +435,8 @@ public class L2pNodeLauncher {
 	 * @param parameters
 	 * @throws L2pServiceException any exception during service method invocation
 	 */
-	public Serializable invoke ( String serviceClass, String serviceMethod, String arguments) throws L2pServiceException {
-		String[] split = arguments.trim().split("-");
+	public Serializable invoke ( String serviceClass, String serviceMethod, String parameters) throws L2pServiceException {
+		String[] split = parameters.trim().split("-");
 		return invoke(serviceClass, serviceMethod, (Serializable[]) split);
 	}
 	
@@ -453,7 +453,7 @@ public class L2pNodeLauncher {
 	 */
 	private Serializable invoke ( String serviceClass, String serviceMethod, Serializable... parameters ) throws L2pServiceException {
 		if ( currentUser == null )
-			throw new IllegalStateException ( "please register a valid user with registerUserAgent before invoking!");
+			throw new IllegalStateException ("Please register a valid user with registerUserAgent before invoking!");
 		
 		try {
 			try {
