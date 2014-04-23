@@ -35,7 +35,8 @@ public class WebConnector extends Connector
 	
 	/* configuration parameters */
 	public static final int DEFAULT_HTTP_PORT = 8080;
-	protected int httpPort = DEFAULT_HTTP_PORT;
+    public static final String WEB_CONNECTOR = "WebConnector: ";
+    protected int httpPort = DEFAULT_HTTP_PORT;
 	
 	public static final int DEFAULT_HTTPS_PORT = 8090;
 	protected int httpsPort = DEFAULT_HTTPS_PORT;
@@ -373,7 +374,7 @@ public class WebConnector extends Connector
 	}
 	
 	
-	//Todo: HTTP_CONNECTOR_MESSAGE
+
 	/**
 	 * Logs a message.
 	 * 
@@ -381,7 +382,7 @@ public class WebConnector extends Connector
 	 */
 	void logMessage (String message) {
 		logStream.println( dateFormat.format ( new Date() ) + "\t" + message);
-		myNode.observerNotice(Event.HTTP_CONNECTOR_MESSAGE, myNode.getNodeId(), message);
+		myNode.observerNotice(Event.CONNECTOR_MESSAGE, myNode.getNodeId(), WEB_CONNECTOR +message);
 	}
 	
 	
@@ -404,11 +405,11 @@ public class WebConnector extends Connector
 				// Should be known..
 				e.printStackTrace();
 			}
-			myNode.observerNotice(Event.HTTP_CONNECTOR_REQUEST, myNode.getNodeId(), service, request);
+			myNode.observerNotice(Event.CONNECTOR_REQUEST, myNode.getNodeId(), service, WEB_CONNECTOR + request);
 		}
 		//Not a service call
 		else{
-			myNode.observerNotice(Event.HTTP_CONNECTOR_REQUEST, myNode.getNodeId(), request);
+			myNode.observerNotice(Event.CONNECTOR_REQUEST, myNode.getNodeId(), WEB_CONNECTOR + request);
 		}
 	}
 	
@@ -420,7 +421,7 @@ public class WebConnector extends Connector
 	 */
 	void logError (String error) {
 		logStream.println( dateFormat.format ( new Date() ) + "\t Error: " + error);
-		myNode.observerNotice(Event.HTTP_CONNECTOR_ERROR, myNode.getNodeId(), error);
+		myNode.observerNotice(Event.CONNECTOR_ERROR, myNode.getNodeId(), WEB_CONNECTOR +error);
 	}
 	
 	

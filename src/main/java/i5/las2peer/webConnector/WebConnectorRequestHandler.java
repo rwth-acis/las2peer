@@ -154,7 +154,8 @@ public class WebConnectorRequestHandler implements RequestHandler {
 	 * @return
 	 */
 	private boolean invoke(Long userId, HttpRequest request, HttpResponse response) {
-		
+
+        response.setStatus(404); //not found onless otherwise specified (errors might occur)
 		String[] requestSplit=request.getPath().split("/",2);
 		// first: empty (string starts with '/')
 		// second: URI
@@ -280,11 +281,10 @@ public class WebConnectorRequestHandler implements RequestHandler {
                         returnMIMEType=invocation[i].getMIME();
                         break;
 					
-					} catch ( NoSuchServiceException e ) {
+					} catch ( NoSuchServiceException | TimeoutException e ) {
 						sendNoSuchService(request, response, invocation[i].getServiceName());			
-					} catch ( TimeoutException e ) {
-						sendNoSuchService(request, response, invocation[i].getServiceName());
-					} catch ( NoSuchServiceMethodException e ) {
+					}
+                    catch ( NoSuchServiceMethodException e ) {
 						sendNoSuchMethod(request, response);
 					} catch ( L2pSecurityException e ) {
 						sendSecurityProblems(request, response, e);					
@@ -308,11 +308,10 @@ public class WebConnectorRequestHandler implements RequestHandler {
 			//}
 			return true;
 			
-		} catch ( NoMethodFoundException e ) {
+		} catch ( NoMethodFoundException | NotSupportedUriPathException e ) {
 			sendNoSuchMethod(request, response);	
-		} catch ( NotSupportedUriPathException e ) {
-			sendNoSuchMethod(request, response);		
-		} catch (Exception e){
+		}
+        catch (Exception e){
 			connector.logError("Error occured:" + request.getPath()+" "+e.getMessage() );
 		}
 		return false;
@@ -344,8 +343,10 @@ public class WebConnectorRequestHandler implements RequestHandler {
 		
 		Long userId;
 		if((userId=authenticate(request,response))!= -1)
-			if(invoke(userId,request,response))
-				logout(userId);	 
+        {
+			invoke(userId,request,response);
+            logout(userId);
+        }
 	}
 	
 	/**
@@ -462,7 +463,7 @@ public class WebConnectorRequestHandler implements RequestHandler {
 	private void sendInvocationSuccess ( Serializable result, String contentType, HttpResponse response  ) {
 		if ( result != null ) {
 			response.setContentType( contentType );
-
+            response.setStatus(200);
             if(result instanceof i5.las2peer.restMapper.HttpResponse)
             {
 
