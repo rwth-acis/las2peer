@@ -423,6 +423,25 @@ public class L2pNodeLauncher {
 	}
 	
 	
+	
+	/**
+	 * Invokes a service method as the current agent.
+	 * 
+	 * The arguments must be passed via ONE String separated by "-".
+	 * 
+	 * @see #registerUserAgent
+	 * 
+	 * @param serviceClass
+	 * @param parameters
+	 * @throws L2pServiceException any exception during service method invocation
+	 */
+	public Serializable invoke ( String serviceClass, String serviceMethod, String arguments) throws L2pServiceException {
+		String[] split = arguments.trim().split("-");
+		return invoke(serviceClass, serviceMethod, (Serializable[]) split);
+	}
+	
+	
+	
 	/**
 	 * Invokes a service method as the current agent.
 	 * 
@@ -432,7 +451,7 @@ public class L2pNodeLauncher {
 	 * @param parameters
 	 * @throws L2pServiceException any exception during service method invocation
 	 */
-	public Serializable invoke ( String serviceClass, String serviceMethod, Serializable... parameters ) throws L2pServiceException {
+	private Serializable invoke ( String serviceClass, String serviceMethod, Serializable... parameters ) throws L2pServiceException {
 		if ( currentUser == null )
 			throw new IllegalStateException ( "please register a valid user with registerUserAgent before invoking!");
 		

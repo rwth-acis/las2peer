@@ -42,7 +42,7 @@ public class GroupAgent extends Agent {
 	
 	
 	/**
-	 * hashtable storing the encrypted versions ot the group secret key
+	 * hashtable storing the encrypted versions of the group secret key
 	 * for each member
 	 */
 	private Hashtable<Long, byte[]> htEncryptedKeyVersions = new Hashtable<Long,byte[]> ();
