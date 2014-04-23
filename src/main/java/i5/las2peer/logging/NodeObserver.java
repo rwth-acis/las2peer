@@ -302,9 +302,16 @@ public abstract class NodeObserver {
 		HTTP_CONNECTOR_SESSION_START (8001),
 		HTTP_CONNECTOR_SESSION_END (8002),
 		HTTP_CONNECTOR_REQUEST (8100),
-		HTTP_CONNECTOR_ERROR (-8100);
+		HTTP_CONNECTOR_ERROR (-8100),
 
-		
+        //for connectors, general
+        CONNECTOR_MESSAGE (9000),
+        CONNECTOR_SESSION_START (9001),
+        CONNECTOR_SESSION_END (9002),
+        CONNECTOR_REQUEST (9100),
+        CONNECTOR_ERROR (-9100);
+
+
 		/**
 		 * a numeric event code
 		 */
