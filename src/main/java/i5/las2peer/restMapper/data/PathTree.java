@@ -117,11 +117,18 @@ public class PathTree
         /**
          * Adds method information to the internal hashMap
          * MethodData.toString is used for the key
+         * Only adds method information, if same service as existing entries (avoid interference)
          * @param md method data to add
          */
         public void addMethodData(MethodData md)
-        {        	
-        	data.put( md.toString(),md);
+        {
+            //only if empty or if same service name, as already existing
+        	if(data.size()==0 || (md.getServiceName().equals(data.entrySet().iterator().next().getValue().getServiceName())))
+            {
+
+                    data.put(md.toString(),md);
+            }
+
         }
         /**
          * 
