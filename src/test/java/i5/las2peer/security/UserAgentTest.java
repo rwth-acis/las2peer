@@ -1,13 +1,16 @@
 package i5.las2peer.security;
 
-import static org.junit.Assert.*;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.tools.CryptoException;
+import i5.las2peer.tools.SerializationException;
 
 import java.security.NoSuchAlgorithmException;
 
 import org.junit.Test;
+
 
 public class UserAgentTest {
 
@@ -17,23 +20,40 @@ public class UserAgentTest {
 		UserAgent a = UserAgent.createUserAgent( passphrase );
 		
 		try {
-			a.getPrivateKey();
-			fail ( "SecurityException should have been thrown");
-		} catch ( L2pSecurityException e) {}
+			a.returnSecretKey(null); //not possible without unlocking the private key first
+			fail ("SecurityException should have been thrown");
+		} catch ( L2pSecurityException e) {
+			//Should be thrown
+		} catch (SerializationException e) {
+			fail ("SecurityException should have been thrown");
+			e.printStackTrace();
+		}
 		
 		try {
 			a.unlockPrivateKey ( "bad passphrase");
-			fail ( "SecurityException should have been thrown");
+			fail ("SecurityException should have been thrown");
 		} catch ( L2pSecurityException e )  {}
 		
 		try {
-			a.getPrivateKey();
-			fail ( "SecurityException should have been thrown");
-		} catch ( L2pSecurityException e) {}
-		
+			a.returnSecretKey(null); //not possible without unlocking the private key first
+			fail ("SecurityException should have been thrown");
+		} catch ( L2pSecurityException e) {
+			//Should be thrown
+		} catch (SerializationException e) {
+			fail ("SecurityException should have been thrown");
+			e.printStackTrace();
+		}
 		a.unlockPrivateKey ( passphrase);
 		
-		a.getPrivateKey();
+		try {
+			a.returnSecretKey(null); //should be possible now
+		} catch (IllegalArgumentException e) {
+			//Well...empty byte array..but ok since no security exception is thrown
+			e.printStackTrace();
+		} catch (SerializationException e) {
+			fail ("Illegal argument exception should have been thrown");
+			e.printStackTrace();
+		}
 	}
 	
 	@Test

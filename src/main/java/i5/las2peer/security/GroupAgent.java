@@ -105,7 +105,7 @@ public class GroupAgent extends Agent {
 		if ( crypted == null )
 			throw new L2pSecurityException ( "the given agent is not listed as a group member!");
 		
-		symmetricGroupKey = (SecretKey) CryptoTools.decryptAsymmetric(crypted, agent.getPrivateKey());
+		symmetricGroupKey = (SecretKey) agent.returnSecretKey(crypted);
 	}
 	
 	/**

@@ -447,10 +447,10 @@ public final class Envelope implements XmlAble, Cloneable {
 				//System.out.println ( this.toXmlString() );
 				throw new L2pSecurityException ("agent " + agent.getId() + " has no access to this object");
 			}
-					
-			symmetricKey = (SecretKey) CryptoTools.decryptAsymmetric( encoded , agent.getPrivateKey() );
+			
+			symmetricKey = (SecretKey) agent.returnSecretKey(encoded);
 			openedBy = agent;
-		
+			
 			decryptData();
 			bOpen = true;
 		} catch (SerializationException e) {
@@ -598,11 +598,10 @@ public final class Envelope implements XmlAble, Cloneable {
 			throw new IllegalStateException ("This envelope is not open!");
 		
 		if ( ! agent.equals( openedBy ) )
-			throw new IllegalStateException("given agent has not opened this envelope!" );
-		
+			throw new IllegalStateException("The given agent has not opened this envelope!");
 
 		try {
-			byte[] signature = CryptoTools.signContent(baPlainData, agent.getPrivateKey());
+			byte[] signature = agent.signContent(baPlainData);
 			htSignatures.put ( agent.getId(), signature);
 		} catch (CryptoException e) {
 			throw new EncodingFailedException("Crypto problems", e);
@@ -625,10 +624,10 @@ public final class Envelope implements XmlAble, Cloneable {
 			throw new IllegalStateException ("This envelope is not open!");
 		
 		if ( ! openedBy.equals ( agent) )
-			throw new EncodingFailedException("given agent has not opened this envelope!" );
+			throw new EncodingFailedException("The given agent has not opened this envelope!" );
 		
 		if ( ! isSignedBy(agent))
-			throw new EncodingFailedException("the given agent has not signed this envelope!");
+			throw new EncodingFailedException("The given agent has not signed this envelope!");
 		
 		htSignatures.remove ( agent.getId() );
 	}

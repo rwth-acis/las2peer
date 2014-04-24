@@ -14,9 +14,12 @@ import i5.simpleXML.Element;
 import i5.simpleXML.Parser;
 import i5.simpleXML.XMLSyntaxException;
 
+import java.security.InvalidKeyException;
 import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.Signature;
 
 import javax.crypto.SecretKey;
 
@@ -28,6 +31,7 @@ import org.apache.commons.codec.binary.Base64;
  * At the moment, an agent can represent a simple user, a group, a service or a monitoring agent.
  * 
  * @author Holger Jan&szlig;en
+ * @author Peter de Lange
  *
  */
 public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
@@ -181,12 +185,58 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	 * @return the cryptographic private key of this agent
 	 * @throws L2pSecurityException the private key has not been unlocked yet
 	 */
-	public PrivateKey getPrivateKey () throws L2pSecurityException {
+	private PrivateKey getPrivateKey () throws L2pSecurityException {
 		if ( privateKey == null )
 			throw new L2pSecurityException("You have to unlock the key using a passphrase first!");
 		return privateKey;
 	}
 	
+	
+	/**
+	 * Uses the {@link i5.las2peer.tools.CryptoTools} to decrypt the passed crypted content with the agent's private key.
+	 * 
+	 * @return a {@link javax.crypto.SecretKey} decrypted from the crypted input and the agent's private key
+	 * 
+	 * @throws L2pSecurityException the private key has not been unlocked yet
+	 * @throws CryptoException
+	 * @throws SerializationException
+	 */
+	public SecretKey returnSecretKey (byte[] crypted) throws L2pSecurityException, SerializationException, CryptoException {
+		SecretKey symmetricGroupKey = (SecretKey) CryptoTools.decryptAsymmetric(crypted, this.getPrivateKey());
+		return symmetricGroupKey;
+	}
+	
+	
+	/**
+	 * Uses the {@link i5.las2peer.tools.CryptoTools} to create a {@link Signature java.security.Signature}
+	 * and initializes the object for signing with the agent's private key.
+	 * 
+	 * @return a {@link Signature java.security.Signature}
+	 * 
+	 * @throws L2pSecurityException the private key has not been unlocked yet
+	 * @throws InvalidKeyException
+	 * @throws NoSuchAlgorithmException
+	 */
+	public Signature createSignature () throws InvalidKeyException, L2pSecurityException, NoSuchAlgorithmException {
+		Signature sig = Signature.getInstance( CryptoTools.getSignatureMethod() );
+		sig.initSign(this.getPrivateKey());
+		return sig;
+	}
+	
+	
+	/**
+	 * Uses the {@link i5.las2peer.tools.CryptoTools} to sign the passed data with the agent's private key.
+	 * 
+	 * @return a signed version of the input
+	 * 
+	 * @throws L2pSecurityException the private key has not been unlocked yet
+	 * @throws CryptoException 
+	 * @throws SerializationException 
+	 */
+	public byte[] signContent (byte[] plainData) throws CryptoException, L2pSecurityException {
+		byte[] signature = CryptoTools.signContent(plainData, this.getPrivateKey());
+		return signature;
+	}
 	
 	/**
 	 * Gets the private key encrypted and encoded in base64.

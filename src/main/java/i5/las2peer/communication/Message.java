@@ -41,11 +41,11 @@ import rice.p2p.commonapi.NodeHandle;
  * Additionally, the contents will be signed with the private key of the sender.
  * 
  * Therefore, it is necessary, that the generating Thread has access to the private key of
- * the sending agent. 
- * 
+ * the sending agent.
  * 
  * 
  * @author Holger Jan&szlig;en
+ * @author Peter de Lange
  *
  */
 public class Message implements XmlAble {
@@ -388,20 +388,19 @@ public class Message implements XmlAble {
 	private void signContent() throws L2pSecurityException, SerializationException, EncodingFailedException {
 		try {
 			byte[] contentBytes = getContentString().getBytes("UTF-8");
-
-			Signature sig = Signature.getInstance( CryptoTools.getSignatureMethod()  );
-			sig.initSign(sender.getPrivateKey());
+			
+			Signature sig = sender.createSignature();
 			sig.update(contentBytes);
 			
 			baSignature = sig.sign();
 		} catch (InvalidKeyException e) {
-			throw new EncodingFailedException ( "key problems", e);
+			throw new EncodingFailedException ("Key problems", e);
 		} catch (NoSuchAlgorithmException e) {
-			throw new EncodingFailedException ( "algorithm problems", e);
+			throw new EncodingFailedException ("Algorithm problems", e);
 		} catch (SignatureException e) {
-			throw new EncodingFailedException ( "signature problems", e);
+			throw new EncodingFailedException ("Signature problems", e);
 		} catch ( UnsupportedEncodingException e ) {
-			throw new EncodingFailedException("utf8 encoding problems with content", e );
+			throw new EncodingFailedException("UTF8 encoding problems with content", e);
 		}
 	}
 	
@@ -525,7 +524,7 @@ public class Message implements XmlAble {
 		
 		Element root = null;
 		try {
-			SecretKey contentKey = (SecretKey) CryptoTools.decryptAsymmetric(baContentKey, recipient.getPrivateKey());
+			SecretKey contentKey = recipient.returnSecretKey(baContentKey);
 		
 			String contentString = new String ( CryptoTools.decryptSymmetric(baEncryptedContent, contentKey), "UTF-8" );
 						
