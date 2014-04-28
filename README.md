@@ -11,7 +11,7 @@ Service Development
 This project contains LAS2peer itself. To develop a service for LAS2peer, please use the 
 [LAS2Peer Template Project](https://github.com/rwth-acis/LAS2peer-Template-Project/) and follow the instructions of the project's ReadMe.  
 
-If you want to learn more about LAS2peer, please visit the [LAS2Peer Template Project's Wiki Page](https://github.com/rwth-acis/LAS2peer-Template-Project/wiki).
+If you want to learn more about LAS2peer, please visit the [LAS2peer Template Project's Wiki Page](https://github.com/rwth-acis/LAS2peer-Template-Project/wiki).
 
 Preparations
 -----------------------
