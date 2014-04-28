@@ -9,9 +9,9 @@ Currently, connection to the outside is realized via the [HTTP-Connector](https:
 Service Development
 -----------------------
 This project contains LAS2peer itself. To develop a service for LAS2peer, please use the 
-[LAS2Peer-Sample-Service-Project](https://github.com/rwth-acis/LAS2peer-Sample-Service/) and follow the instructions of the project's ReadMe.  
+[LAS2Peer Template Project](https://github.com/rwth-acis/LAS2peer-Template-Project/) and follow the instructions of the project's ReadMe.  
 
-If you want to learn more about LAS2peer, please visit the [LAS2Peer-Tutorial-Project](https://github.com/rwth-acis/LAS2peer-Tutorial-Project).
+If you want to learn more about LAS2peer, please visit the [LAS2Peer Template Project's Wiki Page](https://github.com/rwth-acis/LAS2peer-Template-Project/wiki).
 
 Preparations
 -----------------------
@@ -47,11 +47,3 @@ JavaDoc
 
 Simply build the standard java docs with:  
     ```ant java_doc```
-
-
-Start a LAS2peer Instance
-----------
-
-You can use the "start_node.bat/sh" scripts located in the "bin/" folder.
-These start scripts use the L2PNodeLauncher to start a LAS2peer instance.
-For more information on how to use the Node-Launcher, please refer to the [LAS2Peer-Sample-Service-Project](https://github.com/rwth-acis/LAS2peer-Sample-Service/).

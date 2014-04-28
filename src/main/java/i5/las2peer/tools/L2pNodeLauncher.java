@@ -539,7 +539,7 @@ public class L2pNodeLauncher {
 			startService ( sa );
 			return sa;
 		} catch ( Exception e  ) {
-			System.out.println ( "starting service failed");
+			System.out.println ("Starting service failed");
 			e.printStackTrace();
 			throw e;
 		}
