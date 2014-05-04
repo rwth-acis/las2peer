@@ -432,10 +432,12 @@ public class L2pNodeLauncher {
 	 * @see #registerUserAgent
 	 * 
 	 * @param serviceClass
-	 * @param parameters
+	 * @param parameters pass an empty string if you want to call a method without parameters
 	 * @throws L2pServiceException any exception during service method invocation
 	 */
-	public Serializable invoke ( String serviceClass, String serviceMethod, String parameters) throws L2pServiceException {
+	public Serializable invoke (String serviceClass, String serviceMethod, String parameters) throws L2pServiceException {
+		if(parameters.equals(""))
+			return invoke(serviceClass, serviceMethod, new Serializable[0]);
 		String[] split = parameters.trim().split("-");
 		return invoke(serviceClass, serviceMethod, (Serializable[]) split);
 	}
