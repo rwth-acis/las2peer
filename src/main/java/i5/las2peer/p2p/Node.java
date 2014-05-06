@@ -34,6 +34,7 @@ import i5.las2peer.security.Mediator;
 import i5.las2peer.security.MessageReceiver;
 import i5.las2peer.security.MonitoringAgent;
 import i5.las2peer.security.ServiceAgent;
+import i5.las2peer.security.ServiceInfoAgent;
 import i5.las2peer.security.UserAgent;
 import i5.las2peer.security.UserAgentList;
 import i5.las2peer.testing.MockAgentFactory;
@@ -608,6 +609,9 @@ public abstract class Node implements AgentStorage {
 			}
 			else if ( agent instanceof MonitoringAgent ){
 				observerNotice(Event.AGENT_REGISTERED, this.getNodeId(), agent, "MonitoringAgent");
+			}
+			else if ( agent instanceof ServiceInfoAgent ){
+				observerNotice(Event.AGENT_REGISTERED, this.getNodeId(), agent, "ServiceInfoAgent");
 			}
 		} else {
 			// ok, we have a mediator
