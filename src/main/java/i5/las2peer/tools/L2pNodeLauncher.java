@@ -761,7 +761,7 @@ public class L2pNodeLauncher {
 	 */
 	private static L2pClassLoader setupClassLoader(String[] serviceDirectory) {
 		return new L2pClassLoader( 
-			new FileSystemRepository (serviceDirectory), L2pNodeLauncher.class.getClassLoader() 
+			new FileSystemRepository (serviceDirectory, true), L2pNodeLauncher.class.getClassLoader() 
 		);
 	}
 	
