@@ -316,6 +316,8 @@ public class NodeInformation implements XmlAble {
 					result.adminName = child.getFirstChild().getText();
 				else if ( child.getName().equals( "adminEmail") )
 					result.adminEmail = child.getFirstChild().getText();
+				else if ( child.getName().equals( "organization") )
+					result.organization = child.getFirstChild().getText();
 				else if ( child.getName().equals( "description") )
 					result.description = child.getFirstChild().getText();
 				else if ( child.getName().equals( "nodeHandle"))
@@ -337,7 +339,7 @@ public class NodeInformation implements XmlAble {
 					
 					result.hostedServices = serviceClasses.toArray( new String[0] );
 				} else
-					throw new MalformedXMLException("unkown xml element: " + child.getName());
+					throw new MalformedXMLException("unknown xml element: " + child.getName());
 				
 			}
 		} catch (SerializationException e) {
