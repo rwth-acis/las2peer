@@ -22,7 +22,7 @@ public class RESTMapperTest {
 	static PathTree tree2;
     static PathTree tree3;
     static PathTree tree4;
-
+    static PathTree tree5;
 	@BeforeClass
 	public static void testSetup() 
 	{			
@@ -31,20 +31,27 @@ public class RESTMapperTest {
 		String xml2;
         String xml3;
         String xml4;
+        String xml5;
 		try {
 			//tree=mapper.getMappingTree(mapper.getMethodsAsXML(TestClass1.class));
 			xml=RESTMapper.getMethodsAsXML(TestClass1.class);
 			xml2=RESTMapper.getMethodsAsXML(TestClass2.class);
             xml3=RESTMapper.getMethodsAsXML(TestClass3.class);
             xml4=RESTMapper.getMethodsAsXML(TestClass4.class);
+            xml5=RESTMapper.getMethodsAsXML(TestClass5.class);
 			//System.out.println(xml);
 			tree=RESTMapper.getMappingTree(xml);
 			tree2=RESTMapper.getMappingTree(xml2);
             tree3=RESTMapper.getMappingTree(xml3);
             tree4=RESTMapper.getMappingTree(xml4);
+            tree5=RESTMapper.getMappingTree(xml5);
+
 			tree.merge(tree2);
             tree.merge(tree3);
             tree.merge(tree4);
+            String s = tree.merge(tree5);
+
+
             //System.out.println(RESTMapper.mergeXMLs(new String[]{xml,xml2}));
 
         } catch (Exception e) {
@@ -55,8 +62,10 @@ public class RESTMapperTest {
 	
 	public void invokeMethod(String httpMethod, String uri, Pair<String>[] variables, String content, String contentType, String returnType, Pair<String>[] httpHeaders,  String assertionMessage, String assertion) throws Exception
 	{
-		
-			InvocationData[] invocation =RESTMapper.parse(tree, httpMethod, uri, variables, content, contentType, returnType,  httpHeaders);
+
+            StringBuilder warnings=new StringBuilder();
+			InvocationData[] invocation =RESTMapper.parse(tree, httpMethod, uri, variables, content, contentType, returnType,  httpHeaders, warnings);
+            //if (warnings.length()>0) System.out.println(warnings.toString());
             if (invocation.length==0)
                 throw new Exception("no method found for " +assertionMessage);
             for(InvocationData anInvocation : invocation)
@@ -78,7 +87,8 @@ public class RESTMapperTest {
                 //System.out.println("__");
                 break;//take only first
             }
-	}
+
+    }
 
     public void invokeMethod(String httpMethod, String uri, Pair<String>[] variables, String content,String contentType, Pair<String>[] httpHeaders, String assertionMessage, String assertion) throws Exception
     {
@@ -340,6 +350,7 @@ public class RESTMapperTest {
             invokeMethod("get","books/4",new Pair[]{},"", MediaType.VIDEO_AVI,"audio/*,audio/ogg" ,new Pair[]{},"Produces1","8");
             invokeMethod("get","books/4",new Pair[]{},"", MediaType.VIDEO_AVI,"video/mp4,text/*" ,new Pair[]{},"Produces1","4");
 
+
         }
         catch (Throwable e)	{
             e.printStackTrace();
@@ -361,6 +372,21 @@ public class RESTMapperTest {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testPut()
+    {
+
+        try
+        {
+            invokeMethod("put","books/5",new Pair[]{},"asdf",new Pair[]{},"PUT","asdf");
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
 
 
 }

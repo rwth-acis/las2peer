@@ -32,4 +32,11 @@ public class TestClass4
     {
         return id*3;
     }
+
+    @PUT
+    public String b4(@ContentParam String c)
+    {
+        return c;
+    }
+
 }

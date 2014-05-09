@@ -2,6 +2,8 @@ package i5.las2peer.restMapper;
 import i5.las2peer.restMapper.annotations.*;
 import i5.las2peer.restMapper.data.*;
 import i5.las2peer.restMapper.data.PathTree.PathNode;
+import i5.las2peer.restMapper.exceptions.ConflictingMethodPathException;
+import i5.las2peer.restMapper.exceptions.MethodThrowsExceptionException;
 import i5.las2peer.restMapper.exceptions.NoMethodFoundException;
 import i5.las2peer.restMapper.exceptions.NotSupportedUriPathException;
 
@@ -165,9 +167,16 @@ public class RESTMapper {
 			String httpMethod = getHttpMethod(annotations);
 
 
+
 			//only valid method, if there is a http method and @Path annotation
 			if(httpMethod.isEmpty())
 				continue;
+
+            if(method.getExceptionTypes().length>0)
+            {
+                String methodName=cl.getCanonicalName()+"."+  method.getName();
+                throw new MethodThrowsExceptionException(methodName);
+            }
 
             String path=null;
 			if(method.isAnnotationPresent(Path.class))
@@ -198,7 +207,7 @@ public class RESTMapper {
 
 
             String consumes;
-            if(httpMethod.equals(POST))//@consumes only for POST requests
+            if(httpMethod.equals(POST)||httpMethod.equals(PUT))//@consumes only for POST requests
             {
                 if(method.isAnnotationPresent(Consumes.class))//local method @Consumes overrides global class @Consumes
                 {
@@ -562,7 +571,15 @@ public class RESTMapper {
 				}
 				//currentNode is the node, where the URI path traversion stopped, so these paths are then mapped to this method
 				//since multiple methods can respond to a single path, a node can store a set of methods from different services
-				currentNode.addMethodData(new MethodData(serviceName, serviceVersion, methodName,methodType,consumes,produces,parameters));
+                try
+                {
+                    currentNode.addMethodData(new MethodData(serviceName, serviceVersion, methodName,methodType,consumes,produces,parameters));
+                }
+                catch(ConflictingMethodPathException e)
+                {//pass on handle later. Mostly 'merge' will be the problem anyway
+                    throw e;
+                }
+
 			}
 		}
 		return rootTree;
@@ -606,12 +623,14 @@ public class RESTMapper {
 	 * @param uri URI path of the request
 	 * @param variables array of parameter/value pairs of the request (query variables)
 	 * @param content content of the HTTP body
-     * @param contentType MIME-type of the data sent in the POST request
+     * @param contentType MIME-type of the data sent in the POST/PUT request
      * @param returnType Accept HTTP Header
+     * @param headers headers given by the client
+     * @param warnings value by reference object for additional information
 	 * @return array of matching services and methods, parameter values are already pre-filled.
 	 * @throws Exception
 	 */
-	public static InvocationData[] parse(PathTree tree, String httpMethod, String uri, Pair<String>[] variables, String content, String contentType, String returnType, Pair<String>[] headers) throws Exception
+	public static InvocationData[] parse(PathTree tree, String httpMethod, String uri, Pair<String>[] variables, String content, String contentType, String returnType, Pair<String>[] headers, StringBuilder warnings) throws Exception
     {
         httpMethod=httpMethod.toLowerCase(); //for robustness
 
@@ -692,9 +711,11 @@ public class RESTMapper {
 		//create data needed to invoke the methods stored in this node
 		ArrayList<InvocationData> invocationData=new ArrayList<InvocationData>();
 
-        boolean consumesMIME=httpMethod.equals(POST)&&!contentType.isEmpty();//important vor handling @Consumes
+        boolean consumesMIME=(httpMethod.equals(POST)||httpMethod.equals(PUT))&&!contentType.isEmpty();//important vor handling @Consumes
 
+        ArrayList<String> notMatchingConsumesTypes=new ArrayList<String>();
 
+        ArrayList<String> notMatchingProducesTypes=new ArrayList<String>();
         for(MethodData aMethodData : methodData)
         {
 
@@ -702,8 +723,10 @@ public class RESTMapper {
             {
                 String[] methodConsumes=aMethodData.getConsumes();
                 boolean foundMatch=false;
+                StringBuilder sb = new StringBuilder();
                 for(String methodConsume : methodConsumes)
                 {
+                    sb.append(methodConsume).append(("\n"));
                     int wildcardPos = methodConsume.indexOf("*");
                     String toMatch;
                     if(wildcardPos > -1)
@@ -724,6 +747,7 @@ public class RESTMapper {
 
                 if(!foundMatch)//method MIME Type does not match, skip method
                 {
+                    notMatchingConsumesTypes.add(sb.toString());
                     continue;
                 }
             }
@@ -732,10 +756,13 @@ public class RESTMapper {
             if(!returnTypes[0].equals(ACCEPT_ALL_MIME_TYPES))//client wants specific types
             {
                 String produces=aMethodData.getProduces();
+                StringBuilder sb = new StringBuilder();
                 for(int i = 0; i < returnTypes.length; i++)//find best match level (array is already sorted from best to worst)
                 {
 
+
                     String type = returnTypes[i];
+                    sb.append(produces).append(("\n"));
                    //System.out.println(type);
                    //System.out.println(produces);
 
@@ -748,7 +775,10 @@ public class RESTMapper {
 
                 }
                 if(matchLevel==0)//if level is 0, the returnType of the method does not match anything the client accepts -> skip method
+                {
+                    notMatchingProducesTypes.add(sb.toString());
                     continue;
+                }
             }
 
 
@@ -814,6 +844,27 @@ public class RESTMapper {
 
 		InvocationData[] result=new InvocationData[invocationData.size()];
 		invocationData.toArray(result);
+        if (result.length==0)//nothing found?
+        {
+            if(notMatchingConsumesTypes.size()>0)//could not consume something?
+            {
+                warnings.append("Warning: There were methods at the given path: "+httpMethod+" "+uri+" , but none consumes the given MIME-Type: "+contentType+" Accepted types are:").append("\n");
+                for(int i = 0; i < notMatchingConsumesTypes.size(); i++)
+                {
+                   warnings.append(notMatchingConsumesTypes.get(i));
+                }
+                warnings.append("--\n");
+            }
+            if(notMatchingProducesTypes.size()>0)//could not consume something?
+            {
+                warnings.append("Warning: There were methods at the given path: "+httpMethod+" "+uri+" , but none produces the accepted MIME-Type: "+returnType+" Produced types are:").append("\n");
+                for(int i = 0; i < notMatchingProducesTypes.size(); i++)
+                {
+                    warnings.append(notMatchingProducesTypes.get(i));
+                }
+                warnings.append("--\n");
+            }
+        }
 		return result;
 	}
 

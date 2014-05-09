@@ -52,4 +52,11 @@ public class TestClass1
 		return a+b+c+d;			
 	}
 
+    @PUT
+    @Path("asdasfafda")
+    public String a7() //throws Exception
+    {
+        return "1";
+    }
+
 }

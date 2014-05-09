@@ -1,6 +1,8 @@
 package i5.las2peer.restMapper.data;
 
 
+import i5.las2peer.restMapper.exceptions.ConflictingMethodPathException;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -26,12 +28,13 @@ public class PathTree
      * the current tree then contains both data
      * @param tree PathTree to import
      */
-	public void merge(PathTree tree)
+	public String merge(PathTree tree)
     {
     	PathNode currentLeft=getRoot();
     	PathNode currentRight=tree.getRoot();
-    	
-    	merge(currentLeft,currentRight);
+    	StringBuilder sb = new StringBuilder();
+    	merge(currentLeft,currentRight, sb);
+        return sb.toString();
     	
     }
     /**
@@ -40,15 +43,23 @@ public class PathTree
      * @param other node of the giver tree
      */
     @SuppressWarnings("rawtypes")
-	private void merge (PathNode self, PathNode other)
+	private void merge (PathNode self, PathNode other,StringBuilder sb)
     {
+
 
         for (Map.Entry node : other.getMethodData().entrySet()) {
             String key=(String)node.getKey();
             MethodData value=(MethodData)node.getValue();
             if(!self.getMethodData().containsKey(key))//copy all method data
             {
-                self.addMethodData(value);
+                try
+                {
+                    self.addMethodData(value);
+                }
+                catch(ConflictingMethodPathException e)
+                {
+                    sb.append(e.getMessage()).append("\n");
+                }
             }
         }
         String[] parameterNames=other.listPathParameterNames();
@@ -68,10 +79,10 @@ public class PathTree
 			}
 			else
 			{
-				merge (self.getChildren().get(key),value); // if both have the same child, recursive call
+				merge (self.getChildren().get(key),value, sb); // if both have the same child, recursive call
 			}
 		}    
-    	
+
     }
     /**
      * 
@@ -120,13 +131,18 @@ public class PathTree
          * Only adds method information, if same service as existing entries (avoid interference)
          * @param md method data to add
          */
-        public void addMethodData(MethodData md)
+        public void addMethodData(MethodData md) throws ConflictingMethodPathException
         {
             //only if empty or if same service name, as already existing
         	if(data.size()==0 || (md.getServiceName().equals(data.entrySet().iterator().next().getValue().getServiceName())))
             {
 
                     data.put(md.toString(),md);
+            }
+            else
+            {
+                MethodData old =data.entrySet().iterator().next().getValue();
+                throw new ConflictingMethodPathException(md.getServiceName()+"."+md.getName(),old.getServiceName()+"."+old.getName());
             }
 
         }
@@ -222,11 +238,11 @@ public class PathTree
 		 * constructor, initializes with a new method
 		 * @param md method to add to the PathNode
 		 */
-		public PathNode(MethodData md)
+		/*public PathNode(MethodData md)
 		{			
 			this();
 			addMethodData(md);
-		}
+		}*/
         
         
     }
