@@ -37,7 +37,7 @@ public class WebConnectorTest {
     private static final String testServiceClass2 = "i5.las2peer.webConnector.TestService2";
     private static final String testServiceClass3 = "i5.las2peer.webConnector.TestService3";
     private static final String testServiceClass4 = "i5.las2peer.webConnector.TestService4";
-
+    private static final String testServiceClass5 = "i5.las2peer.webConnector.TestService5";
 	
 	@BeforeClass
 	public static void startServer () throws Exception {
@@ -53,15 +53,19 @@ public class WebConnectorTest {
 		ServiceAgent testService2 = ServiceAgent.generateNewAgent(testServiceClass2, "a pass");
         ServiceAgent testService3 = ServiceAgent.generateNewAgent(testServiceClass3, "a pass");
         ServiceAgent testService4 = ServiceAgent.generateNewAgent(testServiceClass4, "a pass");
+        ServiceAgent testService5 = ServiceAgent.generateNewAgent(testServiceClass5, "a pass");
+
 		testService.unlockPrivateKey("a pass");
 		testService2.unlockPrivateKey("a pass");
         testService3.unlockPrivateKey("a pass");
         testService4.unlockPrivateKey("a pass");
-		
+        testService5.unlockPrivateKey("a pass");
+
 		node.registerReceiver(testService);
 		node.registerReceiver(testService2);
         node.registerReceiver(testService3);
         node.registerReceiver(testService4);
+        node.registerReceiver(testService5);
 		
 		// start connector
 		
@@ -196,7 +200,25 @@ public class WebConnectorTest {
 			fail ( "Exception: " + e );
 		}	
 	}
-	
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testExceptions()
+    {
+        connector.updateServiceList();
+        MiniClient c = new MiniClient();
+        c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
+        try
+        {
+            c.setLogin(Long.toString(testAgent.getId()), testPass);
+            ClientResponse result=c.sendRequest("GET", "exception", "");
+            assertEquals(500,result.getHttpCode());
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            fail ( "Exception: " + e );
+        }
+    }
 	@Test
     @SuppressWarnings("unchecked")
 	public void testCalls()
@@ -391,6 +413,35 @@ public class WebConnectorTest {
             assertEquals("8",result.getResponse().trim());
 
             assertEquals("text/plain",result.getHeader("content-type"));
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            fail ( "Exception: " + e );
+        }
+
+        try
+        {
+            c.setLogin(Long.toString(testAgent.getId()), testPass);
+
+
+            ClientResponse result=c.sendRequest("PUT", "books/8/test2", "hi", MediaType.TEXT_PLAIN, "",new Pair[]{});
+            assertEquals("hi",result.getResponse().trim());
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            fail ( "Exception: " + e );
+        }
+
+        try//check for warning if incorrect MIME-Type is given
+        {
+            c.setLogin(Long.toString(testAgent.getId()), testPass);
+
+
+            ClientResponse result=c.sendRequest("POST", "books/8", "", MediaType.VIDEO_AVI, "hjgf",new Pair[]{});
+            assertEquals(404,result.getHttpCode());
+            assertEquals(true,result.getResponse().length()>0);
         }
         catch(Exception e)
         {

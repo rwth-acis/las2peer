@@ -75,5 +75,19 @@ public class TestService4 extends Service
         return id*3;
     }
 
+    @GET
+    @Path("test")
+    public int doubleMethod1()
+    {
+        return 1;
+    }
+
+    @PUT
+    @Path("test2")
+    public String  putTest(@ContentParam String param)
+    {
+        return param;
+    }
+
 
 }

@@ -9,6 +9,7 @@ import i5.las2peer.restMapper.data.PathTree;
 
 import i5.las2peer.security.ServiceInfoAgent;
 
+import i5.las2peer.webConnector.WebConnector;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -40,6 +41,8 @@ public class ServiceRepositoryManager
     private static int timerIntervalSeconds=DEFAULT_TIMER_INTERVAL_SECONDS;
 
     public static final String SERVICE_SELFINFO_METHOD="getRESTMapping";
+    private static WebConnector connector;
+
     public ServiceRepositoryManager()
     {
 
@@ -109,6 +112,7 @@ public class ServiceRepositoryManager
                 if(!serviceRepository.containsKey(internalServiceName))//new service
                 {
 
+                    serviceRepository.put(internalServiceName,new ServiceData("a","b",true,"c"));
                     String xml="";
                     try
                     {
@@ -234,7 +238,13 @@ public class ServiceRepositoryManager
                 String serviceName = serviceNode.getAttribute(RESTMapper.NAME_TAG).trim();
                 String serviceVersion = serviceNode.getAttribute(RESTMapper.VERSION_TAG).trim();
 
-                tree.merge(RESTMapper.getMappingTree(xml));
+                //if tree.merge detects conflicts, output them as an error
+                String s = tree.merge(RESTMapper.getMappingTree(xml));
+                if(s.length()>0)
+                {
+                    connector.logError(s);
+                }
+
                 Document d=dBuilder.newDocument();
                 d.importNode(serviceNode,true);
                 ServiceData data = new ServiceData(serviceName, serviceVersion, true, RESTMapper.XMLtoString(d));
@@ -259,5 +269,15 @@ public class ServiceRepositoryManager
     public static void setTree(PathTree tree)
     {
         ServiceRepositoryManager.tree = tree;
+    }
+
+    public static void setConnector(WebConnector connector)
+    {
+        ServiceRepositoryManager.connector = connector;
+    }
+
+    public static WebConnector getConnector()
+    {
+        return connector;
     }
 }

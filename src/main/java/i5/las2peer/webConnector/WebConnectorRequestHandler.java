@@ -155,7 +155,8 @@ public class WebConnectorRequestHandler implements RequestHandler {
 	 */
 	private boolean invoke(Long userId, HttpRequest request, HttpResponse response) {
 
-        response.setStatus(404); //not found onless otherwise specified (errors might occur)
+
+        response.setStatus(HttpResponse.STATUS_INTERNAL_SERVER_ERROR); //internal server error unless otherwise specified (errors might occur)
 		String[] requestSplit=request.getPath().split("/",2);
 		// first: empty (string starts with '/')
 		// second: URI
@@ -271,8 +272,22 @@ public class WebConnectorRequestHandler implements RequestHandler {
 				boolean gotResult=false;
 
                 String returnMIMEType="text/plain";
-                InvocationData[] invocation =RESTMapper.parse(this.connector.getMappingTree(), httpMethod, uri, variables, content,contentTypeHeader,acceptHeader,headers);
-				for (int i = 0; i < invocation.length; i++) {
+                StringBuilder warnings = new StringBuilder();
+                InvocationData[] invocation =RESTMapper.parse(this.connector.getMappingTree(), httpMethod, uri, variables, content,contentTypeHeader,acceptHeader,headers,warnings);
+
+                if(invocation.length==0)
+                {
+                    response.setStatus(404);
+                    if(warnings.length()>0)
+                    {
+                        response.setContentType( "text/plain" );
+
+                        response.println(warnings.toString().replaceAll("\n"," "));
+                    }
+                    return false;
+                }
+
+                for (int i = 0; i < invocation.length; i++) {
 					try
 					{
 						
@@ -282,17 +297,20 @@ public class WebConnectorRequestHandler implements RequestHandler {
                         break;
 					
 					} catch ( NoSuchServiceException | TimeoutException e ) {
-						sendNoSuchService(request, response, invocation[i].getServiceName());			
+
+                        sendNoSuchService(request, response, invocation[i].getServiceName());
 					}
                     catch ( NoSuchServiceMethodException e ) {
+
 						sendNoSuchMethod(request, response);
 					} catch ( L2pSecurityException e ) {
 						sendSecurityProblems(request, response, e);					
 					} catch ( ServiceInvocationException e ) {
-						if ( e.getCause() == null )
-							sendResultInterpretationProblems(request, response);
-						else
-							sendInvocationException(request, response, e);								
+
+                        if ( e.getCause() == null ){
+                            sendResultInterpretationProblems(request, response);
+                        }else{
+							sendInvocationException(request, response, e);}
 					} catch ( InterruptedException e ) {
 						sendInvocationInterrupted(request, response);						
 						
@@ -302,8 +320,8 @@ public class WebConnectorRequestHandler implements RequestHandler {
 				
 				if (gotResult)
 					sendInvocationSuccess ( result, returnMIMEType, response );
-				else
-					sendNoSuchMethod(request, response);
+
+
 				
 			//}
 			return true;

@@ -106,7 +106,7 @@ public class MiniClient
 
                 connection.setUseCaches (false);
                 connection.setDoInput(true);
-                if(method.toUpperCase().equals("POST"))
+                if(method.toUpperCase().equals("POST")||method.toUpperCase().equals("PUT"))
                 {
                     connection.setDoOutput(true);
 
@@ -121,10 +121,14 @@ public class MiniClient
 
                 response=new ClientResponse(code);
 
-                if(code==200||code==201)
+                if(code==200||code==201||code==404)
                 {
                     //Get Response
-                    InputStream is = connection.getInputStream();
+                    InputStream is;
+                    if(code==404)
+                        is= connection.getErrorStream();
+                    else
+                        is= connection.getInputStream();
                     BufferedReader rd = new BufferedReader(new InputStreamReader(is));
                     String line;
                     StringBuilder responseText = new StringBuilder();

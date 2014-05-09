@@ -130,6 +130,13 @@ public class TestService extends Service
 	{
 		return num1*num2-param1*param2;
 	}
+
+    @GET
+    @Path("books/{id}/test")
+    public int doubleMethod1()
+    {
+        return 1;
+    }
 	
 	
 	

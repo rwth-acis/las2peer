@@ -100,6 +100,7 @@ public class WebConnector extends Connector
     {
 		super.setFieldValues();
         ServiceRepositoryManager.setTree(tree);
+        ServiceRepositoryManager.setConnector(this);
 
 	}
 	
@@ -380,7 +381,7 @@ public class WebConnector extends Connector
 	 * 
 	 * @param message
 	 */
-	void logMessage (String message) {
+	public void logMessage (String message) {
 		logStream.println( dateFormat.format ( new Date() ) + "\t" + message);
 		myNode.observerNotice(Event.CONNECTOR_MESSAGE, myNode.getNodeId(), WEB_CONNECTOR +message);
 	}
@@ -392,7 +393,7 @@ public class WebConnector extends Connector
 	 * 
 	 * @param request
 	 */
-	void logRequest (String request) {
+	public void logRequest (String request) {
 		logStream.println( dateFormat.format ( new Date() ) + "\t Request:" + request);
 		
 		int lastServiceClassNamePosition = request.lastIndexOf("/");
@@ -419,7 +420,7 @@ public class WebConnector extends Connector
 	 * 
 	 * @param error
 	 */
-	void logError (String error) {
+	public void logError (String error) {
 		logStream.println( dateFormat.format ( new Date() ) + "\t Error: " + error);
 		myNode.observerNotice(Event.CONNECTOR_ERROR, myNode.getNodeId(), WEB_CONNECTOR +error);
 	}
