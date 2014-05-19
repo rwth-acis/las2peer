@@ -448,5 +448,21 @@ public class WebConnectorTest {
             e.printStackTrace();
             fail ( "Exception: " + e );
         }
+
+        try//check for ErrorStream
+        {
+            c.setLogin(Long.toString(testAgent.getId()), testPass);
+
+            ClientResponse result=c.sendRequest("GET", "books/a/test3", "",new Pair[]{});
+
+            assertEquals(500,result.getHttpCode());
+            assertEquals(true,result.getResponse().length()>0);
+           
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            fail ( "Exception: " + e );
+        }
     }
 }

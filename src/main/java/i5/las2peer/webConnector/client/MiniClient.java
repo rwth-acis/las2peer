@@ -121,14 +121,25 @@ public class MiniClient
 
                 response=new ClientResponse(code);
 
-                if(code==200||code==201||code==404)
+                //if(code==200||code==201||code==404)
                 {
                     //Get Response
-                    InputStream is;
-                    if(code==404)
+                    InputStream is=null;
+                    try{
                         is= connection.getErrorStream();
-                    else
+                    }catch(Exception e)
+                    {
+
+                    }
+
+                    try{
                         is= connection.getInputStream();
+                    }catch(Exception e)
+                    {
+
+                    }
+                    if(is==null) return response;
+
                     BufferedReader rd = new BufferedReader(new InputStreamReader(is));
                     String line;
                     StringBuilder responseText = new StringBuilder();

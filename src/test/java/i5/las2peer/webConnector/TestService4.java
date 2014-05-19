@@ -3,6 +3,7 @@ package i5.las2peer.webConnector;
 
 import i5.las2peer.api.Service;
 
+import i5.las2peer.restMapper.HttpResponse;
 import i5.las2peer.restMapper.MediaType;
 import i5.las2peer.restMapper.RESTMapper;
 import i5.las2peer.restMapper.annotations.*;
@@ -89,5 +90,12 @@ public class TestService4 extends Service
         return param;
     }
 
+    @GET
+    @Path("test3")
+    public HttpResponse errorTest()
+    {
+        HttpResponse response = new HttpResponse("hi",500);
+        return response;
+    }
 
 }
