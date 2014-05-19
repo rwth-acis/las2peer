@@ -27,7 +27,7 @@ import org.junit.Test;
  */
 public class ServiceInfoAgentTest
 {
-    private static final int NODES_AMOUNT = 2;
+    private static final int NODES_AMOUNT = 1;
     public static final int START_PORT=8000;
     private static Node[] nodes= new Node[NODES_AMOUNT];
     private static ServiceInfoAgent[] agents= new ServiceInfoAgent[NODES_AMOUNT];
@@ -46,15 +46,15 @@ public class ServiceInfoAgentTest
         ColoredOutput.allOff();
 
 
-        String host = getHostString();
+        //String host = getHostString();
         nodes[0]=new PastryNodeImpl(START_PORT+0,"");
         nodes[0].setLogfilePrefix("log/l2p-node_");
 
-        for(int i = 1; i < nodes.length; i++)
+       /* for(int i = 1; i < nodes.length; i++)
         {
             nodes[i]=new PastryNodeImpl(START_PORT+i,host+":"+Integer.toString(START_PORT+i-1));
             nodes[i].setLogfilePrefix("log/l2p-node_");
-        }
+        }*/
 
 
         try
@@ -80,7 +80,7 @@ public class ServiceInfoAgentTest
             String testClass2="i5.las2peer.api.TestService2";
             ServiceAgent testService2 = ServiceAgent.generateNewAgent(testClass2, "a pass");
             testService2.unlockPrivateKey("a pass");
-            nodes[1].registerReceiver(testService2);
+            nodes[0].registerReceiver(testService2);
 
             Thread.sleep(5000);
             ServiceNameVersion [] services = ServiceInfoAgent.getServices();
@@ -109,12 +109,12 @@ public class ServiceInfoAgentTest
 
     }
 
-    private String getHostString() throws UnknownHostException
+   /* private String getHostString() throws UnknownHostException
     {
         String[] hostAddress=String.valueOf(InetAddress.getLocalHost()).split("/");
         System.out.println(hostAddress[hostAddress.length - 1]);
         return hostAddress[hostAddress.length - 1];
-    }
+    }*/
 
 
 }
