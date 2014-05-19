@@ -102,13 +102,14 @@ public class ServiceRepositoryManager
 
             }
 
-
+           // System.out.println("###");
             for(int i = 0; i < services.length; i++)
             {
                 String internalServiceName=getInternalServiceName(services[i].getName(),services[i].getVersion());
-                // System.out.println("###");
-                // System.out.println(internalServiceName);
-                // System.out.println("###");
+
+                //System.out.println(internalServiceName);
+
+
                 if(!serviceRepository.containsKey(internalServiceName))//new service
                 {
 
@@ -215,6 +216,7 @@ public class ServiceRepositoryManager
 
                 node.registerReceiver(agent);
             }
+            agent.notifyRegistrationTo(node);
         }
         catch(Exception e)
         {
