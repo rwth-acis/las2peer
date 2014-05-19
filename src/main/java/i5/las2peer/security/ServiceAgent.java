@@ -326,11 +326,11 @@ public class ServiceAgent extends PassphraseAgent {
      */
     private void serviceInfoAgentNotifyUnregister()
     {
-        Node node=getRunningAtNode();
+
         try
         {
-            ServiceInfoAgent agent = getServiceInfoAgent(node);
-            agent.serviceRemoved(this);
+            ServiceInfoAgent agent = getServiceInfoAgent();
+            agent.serviceRemoved(this,getRunningAtNode());
         }
         catch(Exception e)
         {
@@ -340,22 +340,22 @@ public class ServiceAgent extends PassphraseAgent {
 
     /**
      * Registers and returns the {@link i5.las2peer.security.ServiceInfoAgent}
-     * @param node
+
      * @return
      * @throws CryptoException
      * @throws L2pSecurityException
      * @throws SerializationException
      * @throws AgentException
      */
-    private ServiceInfoAgent getServiceInfoAgent(Node node)
+    private ServiceInfoAgent getServiceInfoAgent()
             throws CryptoException, L2pSecurityException, SerializationException, AgentException
     {
         ServiceInfoAgent agent = ServiceInfoAgent.getServiceInfoAgent();
 
-        if(!node.hasAgent(agent.getId()))
+       /* if(!node.hasAgent(agent.getId()))
         {
             node.registerReceiver(agent);
-        }
+        }*/
         return agent;
     }
 
@@ -365,14 +365,15 @@ public class ServiceAgent extends PassphraseAgent {
      */
     public void serviceInfoAgentNotifyRegister() throws L2pServiceException
     {
-        Node node=getRunningAtNode();
+
         try
         {
-            ServiceInfoAgent agent = getServiceInfoAgent(node);
-            agent.serviceAdded(this);
+            ServiceInfoAgent agent = getServiceInfoAgent();
+            agent.serviceAdded(this,getRunningAtNode());
         }
         catch(Exception e)
         {
+
             throw new L2pServiceException("Error creating ServiceInfoAgent",e);
         }
 

@@ -2,9 +2,7 @@ package i5.las2peer.security;
 
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
-import i5.las2peer.p2p.ServiceInfoData;
-import i5.las2peer.p2p.ServiceNameVersion;
-import i5.las2peer.p2p.StorageException;
+import i5.las2peer.p2p.*;
 import i5.las2peer.persistency.DecodingFailedException;
 import i5.las2peer.persistency.Envelope;
 import i5.las2peer.persistency.EnvelopeException;
@@ -178,8 +176,23 @@ public class ServiceInfoAgent extends PassphraseAgent
      * @param data
      * @throws EnvelopeException
      */
-    private static void setEnvelopeData(ServiceInfoData data) throws EnvelopeException
+    private static void setEnvelopeData(ServiceInfoData data, Node node)
+            throws EnvelopeException, AgentException, L2pSecurityException
     {
+        try
+        {
+            getServiceInfoAgent(); //init (paranoia)
+        }
+        catch(Exception e)
+        {
+            //do nothing
+        }
+        if(!node.hasAgent(agent.getId()))
+        {
+            node.registerReceiver(agent);
+        }
+        agent.notifyRegistrationTo(node);
+
         Envelope env=fetchEnvelope();
 
         if(env==null)
@@ -188,7 +201,8 @@ public class ServiceInfoAgent extends PassphraseAgent
         {
             env.open(getServiceInfoAgent());
             env.updateContent(data);
-            env.store(getServiceInfoAgent());
+            env.setOverWriteBlindly(true);
+            env.store(agent);
             env.close();
 
         }
@@ -294,12 +308,15 @@ public class ServiceInfoAgent extends PassphraseAgent
      * @param serviceAgent
      * @throws EnvelopeException
      */
-    public void serviceAdded(ServiceAgent serviceAgent) throws EnvelopeException
+    public void serviceAdded(ServiceAgent serviceAgent, Node node)
+            throws EnvelopeException, AgentException, L2pSecurityException
     {
+
+
 
         ServiceInfoData data = getEnvelopeData();
         data.addService(serviceAgent.getServiceClassName(), "1.0");//TODO: versions of services
-        setEnvelopeData(data);
+        setEnvelopeData(data, node);
 
     }
 
@@ -309,21 +326,21 @@ public class ServiceInfoAgent extends PassphraseAgent
      * @param serviceAgent
      * @throws EnvelopeException
      */
-    public void serviceRemoved(ServiceAgent serviceAgent) throws EnvelopeException
+    public void serviceRemoved(ServiceAgent serviceAgent, Node node) throws EnvelopeException, AgentException, L2pSecurityException
     {
 
         ServiceInfoData data = getEnvelopeData();
         data.removeService(serviceAgent.getServiceClassName(), "1.0");//TODO: versions of services
-        setEnvelopeData(data);
+        setEnvelopeData(data, node);
     }
 
     /**
      * Resets the stored {@link i5.las2peer.p2p.ServiceInfoData}
      * @throws EnvelopeException
      */
-    public void resetData() throws EnvelopeException
+    public void resetData(Node node) throws EnvelopeException, AgentException, L2pSecurityException
     {
         ServiceInfoData data = new ServiceInfoData();
-        setEnvelopeData(data);
+        setEnvelopeData(data, node);
     }
 }

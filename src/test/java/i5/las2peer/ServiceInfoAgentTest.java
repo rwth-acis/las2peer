@@ -15,6 +15,8 @@ import i5.las2peer.tools.SerializationException;
 
 //import java.net.InetAddress;
 //import java.net.UnknownHostException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 
 import org.junit.BeforeClass;
@@ -25,7 +27,7 @@ import org.junit.Test;
  */
 public class ServiceInfoAgentTest
 {
-    private static final int NODES_AMOUNT = 1;
+    private static final int NODES_AMOUNT = 2;
     public static final int START_PORT=8000;
     private static Node[] nodes= new Node[NODES_AMOUNT];
     private static ServiceInfoAgent[] agents= new ServiceInfoAgent[NODES_AMOUNT];
@@ -38,21 +40,21 @@ public class ServiceInfoAgentTest
     }
 
     @Test
-    public void test() throws /*UnknownHostException,*/ SerializationException, CryptoException
+    public void test() throws UnknownHostException, SerializationException, CryptoException
     {
 
         ColoredOutput.allOff();
 
 
-       // String host = getHostString();
+        String host = getHostString();
         nodes[0]=new PastryNodeImpl(START_PORT+0,"");
         nodes[0].setLogfilePrefix("log/l2p-node_");
 
-        /*for(int i = 1; i < nodes.length; i++)
+        for(int i = 1; i < nodes.length; i++)
         {
             nodes[i]=new PastryNodeImpl(START_PORT+i,host+":"+Integer.toString(START_PORT+i-1));
             nodes[i].setLogfilePrefix("log/l2p-node_");
-        }*/
+        }
 
 
         try
@@ -78,7 +80,7 @@ public class ServiceInfoAgentTest
             String testClass2="i5.las2peer.api.TestService2";
             ServiceAgent testService2 = ServiceAgent.generateNewAgent(testClass2, "a pass");
             testService2.unlockPrivateKey("a pass");
-            nodes[0].registerReceiver(testService2);
+            nodes[1].registerReceiver(testService2);
 
             Thread.sleep(5000);
             ServiceNameVersion [] services = ServiceInfoAgent.getServices();
@@ -99,18 +101,20 @@ public class ServiceInfoAgentTest
         }
         catch(Exception e)
         {
-            fail ( "Exception: " + e );
+            e.printStackTrace();
+            fail("Exception: " + e);
         }
 
 
 
     }
-/*
+
     private String getHostString() throws UnknownHostException
     {
         String[] hostAddress=String.valueOf(InetAddress.getLocalHost()).split("/");
+        System.out.println(hostAddress[hostAddress.length - 1]);
         return hostAddress[hostAddress.length - 1];
-    }*/
+    }
 
 
 }
