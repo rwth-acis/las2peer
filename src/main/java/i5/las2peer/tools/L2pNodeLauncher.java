@@ -732,11 +732,9 @@ public class L2pNodeLauncher {
 				launcher.setLogDir ( logDir );
 			launcher.start();
 			
-			CommandPrompt cmd = new CommandPrompt ( launcher ) ;
-			
 			for ( int i=startWith; i<args.length; i++) {
 				System.out.println ( "Handling: '" + args[i]+ "'");
-				cmd.handleLine(args[i]);
+				launcher.commandPrompt.handleLine(args[i]);
 			}
 			
 			if ( launcher.isFinished() )
