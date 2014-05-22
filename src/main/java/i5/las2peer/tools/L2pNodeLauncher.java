@@ -515,7 +515,7 @@ public class L2pNodeLauncher {
 			myAgent.unlockPrivateKey(passPhrase);
 			
 			node.registerReceiver(myAgent);
-			
+			startService ( myAgent );
 			return passPhrase;
 		} catch (Exception e) {
 			
