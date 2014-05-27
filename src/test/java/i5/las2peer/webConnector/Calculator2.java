@@ -1,8 +1,10 @@
 package i5.las2peer.webConnector;
 
 import i5.las2peer.api.Service;
-import i5.las2peer.restMapper.RESTMapper;
-import i5.las2peer.restMapper.annotations.*;
+import i5.las2peer.restMapper.annotations.GET;
+import i5.las2peer.restMapper.annotations.Path;
+import i5.las2peer.restMapper.annotations.PathParam;
+import i5.las2peer.restMapper.annotations.Version;
 
 @Version("0.1")
 public class Calculator2 extends Service

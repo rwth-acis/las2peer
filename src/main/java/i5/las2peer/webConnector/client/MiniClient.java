@@ -1,7 +1,6 @@
 package i5.las2peer.webConnector.client;
 
 import i5.las2peer.restMapper.data.Pair;
-import org.apache.commons.codec.binary.Base64;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -13,6 +12,8 @@ import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.codec.binary.Base64;
 
 //import rice.p2p.util.Base64;
 /**
@@ -149,15 +150,15 @@ public class MiniClient
                     }
                     response.setResponse(responseText.toString());
 
-                    Map responseMap=connection.getHeaderFields();
+                    Map<String, List<String>> responseMap=connection.getHeaderFields();
                     StringBuilder sb= new StringBuilder();
-                    for (Iterator iterator = responseMap.keySet().iterator(); iterator.hasNext();) {
-                        String key = (String) iterator.next();
+                    for (Iterator<String> iterator = responseMap.keySet().iterator(); iterator.hasNext();) {
+                        String key = iterator.next();
 
 
                         sb.setLength(0);
 
-                        List values = (List) responseMap.get(key);
+                        List<String> values = responseMap.get(key);
                         for (int i = 0; i < values.size(); i++) {
                             Object o = values.get(i);
                             sb.append(" "+o);

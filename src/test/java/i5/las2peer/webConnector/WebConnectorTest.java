@@ -2,24 +2,23 @@ package i5.las2peer.webConnector;
 
 
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import i5.las2peer.p2p.LocalNode;
 import i5.las2peer.restMapper.MediaType;
 import i5.las2peer.restMapper.data.Pair;
-import i5.las2peer.webConnector.client.ClientResponse;
-
-import i5.las2peer.webConnector.client.MiniClient;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
-
-import i5.las2peer.p2p.LocalNode;
 import i5.las2peer.security.ServiceAgent;
 import i5.las2peer.security.UserAgent;
 import i5.las2peer.testing.MockAgentFactory;
+import i5.las2peer.webConnector.client.ClientResponse;
+import i5.las2peer.webConnector.client.MiniClient;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 public class WebConnectorTest {
 
@@ -201,7 +200,6 @@ public class WebConnectorTest {
 		}	
 	}
     @Test
-    @SuppressWarnings("unchecked")
     public void testExceptions()
     {
         connector.updateServiceList();
@@ -339,7 +337,6 @@ public class WebConnectorTest {
         try
         {
             c.setLogin(Long.toString(testAgent.getId()), testPass);
-            @SuppressWarnings("unchecked")
             ClientResponse result=c.sendRequest("GET", "test1/1/2", "",new Pair[]{new Pair<>("c","5"),new Pair<>("e","4")});
             assertEquals("125",result.getResponse().trim());
             assertEquals("ho",result.getHeader("hi"));

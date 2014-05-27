@@ -6,25 +6,28 @@ import i5.las2peer.p2p.ServiceNameVersion;
 import i5.las2peer.persistency.EnvelopeException;
 import i5.las2peer.restMapper.RESTMapper;
 import i5.las2peer.restMapper.data.PathTree;
-
 import i5.las2peer.security.ServiceInfoAgent;
-
 import i5.las2peer.webConnector.WebConnector;
+
+import java.io.Serializable;
+import java.io.StringReader;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathFactory;
-import java.io.Serializable;
-import java.io.StringReader;
-
-import java.util.*;
 
 /**
  * @author Alexander
@@ -95,9 +98,9 @@ public class ServiceRepositoryManager
         {
             ServiceNameVersion[] services=ServiceInfoAgent.getServices();
             checkedServices.clear();
-            Iterator it = serviceRepository.entrySet().iterator();
+            Iterator<Map.Entry<String, ServiceData>> it = serviceRepository.entrySet().iterator();
             while (it.hasNext()) {
-                Map.Entry pairs = (Map.Entry)it.next();
+                Map.Entry<String, ServiceData> pairs = (Map.Entry<String, ServiceData>)it.next();
                 checkedServices.add((String) pairs.getKey());
 
             }

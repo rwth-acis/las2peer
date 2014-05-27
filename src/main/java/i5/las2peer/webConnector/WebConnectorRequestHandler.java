@@ -486,7 +486,6 @@ public class WebConnectorRequestHandler implements RequestHandler {
             {
 
                 i5.las2peer.restMapper.HttpResponse res=(i5.las2peer.restMapper.HttpResponse)result;
-                @SuppressWarnings("unchecked")
                 Pair<String>[] headers= res.listHeaders();
                 for(Pair<String> header : headers)
                 {
