@@ -9,6 +9,6 @@
 	<classpathentry kind="lib" path="lib/las2peer-0.0.3.7.jar"/>
 	<classpathentry kind="lib" path="lib/commons-codec-1.7.jar"/>
 	<classpathentry kind="lib" path="lib/FreePastry-2.1.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/LAS2peer-RESTMapper"/>
+	<classpathentry exported="true" kind="lib" path="lib/i5-restMapper-0.0.7.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>
