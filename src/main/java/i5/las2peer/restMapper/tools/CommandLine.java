@@ -4,7 +4,6 @@ import i5.las2peer.restMapper.RESTMapper;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.ClassLoader;
 /**
  * @author Alexander
  */
@@ -27,7 +26,7 @@ public class CommandLine
                 output=args[2];
                 try
                 {
-                    Class cls = ClassLoader.getSystemClassLoader().loadClass(className);
+                    Class<?> cls = ClassLoader.getSystemClassLoader().loadClass(className);
                     String xml= RESTMapper.getMethodsAsXML(cls);
                     RESTMapper.writeFile(output,xml);
 

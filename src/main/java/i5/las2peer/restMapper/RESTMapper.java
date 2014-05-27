@@ -1,14 +1,41 @@
 package i5.las2peer.restMapper;
-import i5.las2peer.restMapper.annotations.*;
-import i5.las2peer.restMapper.data.*;
+import i5.las2peer.restMapper.annotations.Consumes;
+import i5.las2peer.restMapper.annotations.ContentParam;
+import i5.las2peer.restMapper.annotations.DELETE;
+import i5.las2peer.restMapper.annotations.DefaultValue;
+import i5.las2peer.restMapper.annotations.GET;
+import i5.las2peer.restMapper.annotations.HeaderParam;
+import i5.las2peer.restMapper.annotations.HttpHeaders;
+import i5.las2peer.restMapper.annotations.POST;
+import i5.las2peer.restMapper.annotations.PUT;
+import i5.las2peer.restMapper.annotations.Path;
+import i5.las2peer.restMapper.annotations.PathParam;
+import i5.las2peer.restMapper.annotations.Produces;
+import i5.las2peer.restMapper.annotations.QueryParam;
+import i5.las2peer.restMapper.annotations.Version;
+import i5.las2peer.restMapper.data.AcceptHeaderType;
+import i5.las2peer.restMapper.data.AcceptHeaderTypeComperator;
+import i5.las2peer.restMapper.data.InvocationData;
+import i5.las2peer.restMapper.data.InvocationDataComperator;
+import i5.las2peer.restMapper.data.MethodData;
+import i5.las2peer.restMapper.data.Pair;
+import i5.las2peer.restMapper.data.ParameterData;
+import i5.las2peer.restMapper.data.PathTree;
 import i5.las2peer.restMapper.data.PathTree.PathNode;
 import i5.las2peer.restMapper.exceptions.ConflictingMethodPathException;
 import i5.las2peer.restMapper.exceptions.MethodThrowsExceptionException;
 import i5.las2peer.restMapper.exceptions.NoMethodFoundException;
 import i5.las2peer.restMapper.exceptions.NotSupportedUriPathException;
+import i5.las2peer.restMapper.tools.ValidationResult;
 
-
-import java.io.*;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.NotSerializableException;
+import java.io.PrintWriter;
+import java.io.Serializable;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -18,24 +45,20 @@ import java.util.HashMap;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
 
-import i5.las2peer.restMapper.tools.ValidationResult;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-
-import javax.xml.xpath.XPathFactory;
 
 
 
@@ -489,8 +512,8 @@ public class RESTMapper {
                         }
                         else
                         {
-                            Integer[] allBraces=new Integer[braceOpen.length+bracesClosed.length];//check if no {{}}
-                            int u=0;
+//                            Integer[] allBraces=new Integer[braceOpen.length+bracesClosed.length];//check if no {{}}
+//                            int u=0;
                             int lastClosed=-1;
                             for(int k = 0; k < braceOpen.length; k++)
                             {

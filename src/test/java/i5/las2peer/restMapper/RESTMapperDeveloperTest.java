@@ -1,20 +1,12 @@
 package i5.las2peer.restMapper;
 
 
-import static org.junit.Assert.*;
-
-
-import i5.las2peer.restMapper.data.InvocationData;
-import i5.las2peer.restMapper.data.Pair;
+import static org.junit.Assert.assertEquals;
 import i5.las2peer.restMapper.data.PathTree;
-
-import java.io.File;
-import java.lang.reflect.Method;
-
-
 import i5.las2peer.restMapper.tools.ExampleClass;
 import i5.las2peer.restMapper.tools.ValidationResult;
 import i5.las2peer.restMapper.tools.XMLCheck;
+
 import org.junit.Test;
 /**
  * @author Alexander

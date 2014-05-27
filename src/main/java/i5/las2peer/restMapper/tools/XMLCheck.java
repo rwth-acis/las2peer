@@ -1,50 +1,42 @@
 package i5.las2peer.restMapper.tools;
 
 import i5.las2peer.restMapper.RESTMapper;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
-import javax.xml.XMLConstants;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
-import javax.xml.validation.Validator;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
+
+import javax.xml.XMLConstants;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
+
+import org.xml.sax.SAXException;
 
 /**
  * @author Alexander
  */
 public class XMLCheck
 {
-    private Document doc;
-    private DocumentBuilderFactory dbFactory;
-    private DocumentBuilder dBuilder;
+//    private Document doc;
+//    private DocumentBuilderFactory dbFactory;
+//    private DocumentBuilder dBuilder;
 
     private SchemaFactory factory;
     private Schema schema;
     private Validator validator;
     public static final String XSD_FILE="/validation/restschema.xsd";
-    private XPath xPath = XPathFactory.newInstance().newXPath();
+//    private XPath xPath = XPathFactory.newInstance().newXPath();
     public XMLCheck()
     {
 
 
         try
         {
-            dbFactory=DocumentBuilderFactory.newInstance();
-            dBuilder=dbFactory.newDocumentBuilder();
+//            dbFactory=DocumentBuilderFactory.newInstance();
+//            dBuilder=dbFactory.newDocumentBuilder();
             factory =SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
             //schema = factory.newSchema(new StreamSource(new StringReader(RESTMapper.getFile(new File("./xsd/validation/restschema.xsd")))));
             try
@@ -75,10 +67,10 @@ public class XMLCheck
         {
             e.printStackTrace();
         }*/
-        catch(ParserConfigurationException e)
-        {
-            e.printStackTrace();
-        }
+//        catch(ParserConfigurationException e)
+//        {
+//            e.printStackTrace();
+//        }
     }
 
     public ValidationResult validate(String xml)

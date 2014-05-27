@@ -1,14 +1,12 @@
 package i5.las2peer.restMapper;
 
-import static org.junit.Assert.*;
-
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import i5.las2peer.restMapper.data.InvocationData;
 import i5.las2peer.restMapper.data.Pair;
 import i5.las2peer.restMapper.data.PathTree;
 
 import java.lang.reflect.Method;
-
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -49,7 +47,7 @@ public class RESTMapperTest {
 			tree.merge(tree2);
             tree.merge(tree3);
             tree.merge(tree4);
-            String s = tree.merge(tree5);
+//            String s = tree.merge(tree5);
 
 
             //System.out.println(RESTMapper.mergeXMLs(new String[]{xml,xml2}));
@@ -328,7 +326,6 @@ public class RESTMapperTest {
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testAcceptHeaderSorting(){ //see http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html  14.1 Accept
         try	{
