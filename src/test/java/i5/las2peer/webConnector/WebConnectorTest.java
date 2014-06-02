@@ -46,6 +46,12 @@ public class WebConnectorTest {
 		node.storeAgent(MockAgentFactory.getAdam());
 		node.storeAgent(MockAgentFactory.getAbel());
 		node.storeAgent( MockAgentFactory.getGroup1());
+       /* UserAgent agent1=UserAgent.createUserAgent("hallo");
+
+        node.storeAgent(agent1);
+        agent1.unlockPrivateKey("hallo");
+        agent1.setLoginName("user1");*/
+
 		node.launch();
 		
 		ServiceAgent testService = ServiceAgent.generateNewAgent(testServiceClass, "a pass");
@@ -197,8 +203,44 @@ public class WebConnectorTest {
 		{
 			e.printStackTrace();
 			fail ( "Exception: " + e );
-		}	
-	}
+		}
+
+        //no authentication, use default (wrong)
+        try
+        {
+            connector.defaultLoginUser="Hans";
+            connector.defaultLoginPassword="asdasd";
+            c = new MiniClient();
+            c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
+            //c.setLogin(Long.toString(65464), "aaaaaaaaaaaaa");
+
+            ClientResponse result=c.sendRequest("GET", "", "");
+            assertEquals(401, result.getHttpCode());
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            fail ( "Exception: " + e );
+        }
+
+        //no authentication, use default (correct)
+       /* try
+        {
+            connector.defaultLoginUser="user1";
+            connector.defaultLoginPassword="hallo";
+            c = new MiniClient();
+            c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
+            //c.setLogin(Long.toString(65464), "aaaaaaaaaaaaa");
+
+            ClientResponse result=c.sendRequest("GET", "", "");
+            assertEquals(200, result.getHttpCode());
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            fail ( "Exception: " + e );
+        }*/
+    }
     @Test
     public void testExceptions()
     {
@@ -454,7 +496,7 @@ public class WebConnectorTest {
 
             assertEquals(500,result.getHttpCode());
             assertEquals(true,result.getResponse().length()>0);
-           
+
         }
         catch(Exception e)
         {

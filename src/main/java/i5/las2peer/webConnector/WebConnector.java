@@ -68,6 +68,9 @@ public class WebConnector extends Connector
 	public static final boolean DEFAULT_PREFER_LOCAL_SERVICES = true;
 	protected boolean preferLocalServices = DEFAULT_PREFER_LOCAL_SERVICES;
 
+    protected String defaultLoginUser="";
+    protected String defaultLoginPassword="";
+
     protected String xmlPath;
 	
 	private HttpServer http;

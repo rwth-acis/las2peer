@@ -88,8 +88,11 @@ public class MiniClient
                 url = new URL(String.format("%s/%s", serverAddress,uri));
                 connection = (HttpURLConnection)url.openConnection();
                 connection.setRequestMethod(method.toUpperCase());
-                connection.setRequestProperty("Authorization",
-                                              "Basic "+ authorization);
+                if(authorization!=null&&authorization.length()>0)
+                {
+                    connection.setRequestProperty("Authorization",
+                                                  "Basic "+ authorization);
+                }
 
                 connection.setRequestProperty("Content-Type",
                                               contentType);

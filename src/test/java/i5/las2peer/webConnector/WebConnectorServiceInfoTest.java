@@ -117,6 +117,7 @@ public class WebConnectorServiceInfoTest
         MiniClient c = new MiniClient();
         c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 
+        connector.updateServiceList();
         try //Calculator3, only known by XML in ./XMLCompatibility
         {
             c.setLogin(Long.toString(testAgent.getId()), testPass);

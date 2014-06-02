@@ -88,65 +88,69 @@ public class WebConnectorRequestHandler implements RequestHandler {
 			userPass=request.getHeaderField(AUTHENTICATION_FIELD).substring(BASIC_PREFIX_LENGTH);
 			userPass=new String(Base64.decode(userPass), "UTF-8");
 			int separatorPos=userPass.indexOf(':');
-			
+
 			//get username and password
 			username=userPass.substring(0,separatorPos);
 			password=userPass.substring(separatorPos+1);
 			
 			
-			try
-			{
-				
-				long userId;
-				Agent userAgent;
-				
-				if ( username.matches ("-?[0-9].*") ) {//username is id?
-					try {
-						userId = Long.valueOf(username);
-					} catch ( NumberFormatException e ) {
-						throw new L2pSecurityException ("The given user does not contain a valid agent id!");
-					}
-				} else {//username is string
-					userId = l2pNode.getAgentIdForLogin(username);
-				}
-				
-				userAgent = l2pNode.getAgent(userId);
-				
-				if ( ! (userAgent instanceof PassphraseAgent ))
-					throw new L2pSecurityException ("Agent is not passphrase protected!");
-				
-				((PassphraseAgent)userAgent).unlockPrivateKey(password);
-				//connector.logMessage("Login: "+username);
-                //connector.logMessage("successful login");
-				Thread.sleep(10); //TODO: find out how to avoid this 'hack'
-				if(!activeUsers.containsKey(userId)){
-					activeUsers.put(userId, userAgent);
-				}
-				
-				return userId;
-				
-			}catch (AgentNotKnownException e) {
-				sendUnauthorizedResponse(response, null, request.getRemoteAddress() + ": login denied for user " + username);
-			} catch (L2pSecurityException e) {
-				sendUnauthorizedResponse( response, null, request.getRemoteAddress() + ": unauth access - prob. login problems");
-			} catch (Exception e) {
-				
-				sendInternalErrorResponse(
-						response, 
-						"The server was unable to process your request because of an internal exception!", 
-						"Exception in processing create session request: " + e);
-			}
+			return login(username,password,request,response);
 			
-		}
+		}//no information? check if there is a default account for login
+        else if(connector.defaultLoginUser.length()>0)
+        {
+            return login(connector.defaultLoginUser,connector.defaultLoginPassword,request,response);
+        }
 		else
 		{
-			response.setStatus ( HttpResponse.STATUS_BAD_REQUEST );
-			response.setContentType( "text/plain" );
-			response.print ( "No authentication provided!" );
-			connector.logError( "No authentication provided!" );
+            sendUnauthorizedResponse(response, null, request.getRemoteAddress() + ": No Authentication provided!");
 		}
 		return -1;
 	}
+
+    private long login(String username, String password, HttpRequest request, HttpResponse response)
+    {
+        try
+        {
+
+            long userId;
+            Agent userAgent;
+
+            if ( username.matches ("-?[0-9].*") ) {//username is id?
+                try {
+                    userId = Long.valueOf(username);
+                } catch ( NumberFormatException e ) {
+                    throw new L2pSecurityException ("The given user does not contain a valid agent id!");
+                }
+            } else {//username is string
+                userId = l2pNode.getAgentIdForLogin(username);
+            }
+
+            userAgent = l2pNode.getAgent(userId);
+
+            if ( ! (userAgent instanceof PassphraseAgent ))
+                throw new L2pSecurityException ("Agent is not passphrase protected!");
+
+            ((PassphraseAgent)userAgent).unlockPrivateKey(password);
+            //connector.logMessage("Login: "+username);
+            //connector.logMessage("successful login");
+            Thread.sleep(10); //TODO: find out how to avoid this 'hack'
+            if(!activeUsers.containsKey(userId)){
+                activeUsers.put(userId, userAgent);
+            }
+
+            return userId;
+
+        }catch (AgentNotKnownException e) {
+            sendUnauthorizedResponse(response, null, request.getRemoteAddress() + ": login denied for user " + username);
+        } catch (L2pSecurityException e) {
+            sendUnauthorizedResponse( response, null, request.getRemoteAddress() + ": unauth access - prob. login problems");
+        } catch (Exception e) {
+
+            sendUnauthorizedResponse(response, null, request.getRemoteAddress() + ": something went horribly wrong. Check your request for correctness.");
+        }
+        return -1;
+    }
 	/**
 	 * Delegates the request data to a service method, which then decides what to do with it (maps it internally)
 	 * @param request
@@ -522,6 +526,7 @@ public class WebConnectorRequestHandler implements RequestHandler {
 			String logMessage) {
 		response.clearContent();
 		response.setContentType( "text/plain" );
+        response.setHeaderField("WWW-Authenticate","Basic realm=\"LAS2peer WebConnector\"");
 		if ( answerMessage != null)
 			response.println ( answerMessage );
 		response.setStatus( HttpResponse.STATUS_UNAUTHORIZED );
