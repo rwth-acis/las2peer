@@ -15,16 +15,14 @@ import i5.las2peer.restMapper.data.Pair;
 //import rice.p2p.util.Base64;
 import i5.las2peer.restMapper.exceptions.NoMethodFoundException;
 import i5.las2peer.restMapper.exceptions.NotSupportedUriPathException;
-import i5.las2peer.security.Agent;
-import i5.las2peer.security.L2pSecurityException;
-import i5.las2peer.security.Mediator;
-import i5.las2peer.security.PassphraseAgent;
+import i5.las2peer.security.*;
 
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
+
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.Hashtable;
+
 
 import rice.p2p.util.Base64;
 
@@ -45,14 +43,14 @@ public class WebConnectorRequestHandler implements RequestHandler {
 	private static final String AUTHENTICATION_FIELD = "Authorization";
 	private WebConnector connector;
 	private Node l2pNode;
-	private Hashtable<Long,Agent> activeUsers;
+
 	
 	/**
 	 * Standard Constructor
 	 *
 	 */
 	public WebConnectorRequestHandler () {		
-		activeUsers= new Hashtable<>();
+
 	}
 	
 	
@@ -72,7 +70,7 @@ public class WebConnectorRequestHandler implements RequestHandler {
 	 * @return -1 if no successful login else userId
 	 * @throws UnsupportedEncodingException
 	 */
-	private long authenticate (HttpRequest request, HttpResponse response) throws UnsupportedEncodingException
+	private PassphraseAgent authenticate (HttpRequest request, HttpResponse response) throws UnsupportedEncodingException
 	{
 		
 		final int BASIC_PREFIX_LENGTH="BASIC ".length();
@@ -105,16 +103,16 @@ public class WebConnectorRequestHandler implements RequestHandler {
 		{
             sendUnauthorizedResponse(response, null, request.getRemoteAddress() + ": No Authentication provided!");
 		}
-		return -1;
+		return null;
 	}
 
-    private long login(String username, String password, HttpRequest request, HttpResponse response)
+    private PassphraseAgent login(String username, String password, HttpRequest request, HttpResponse response)
     {
         try
         {
 
             long userId;
-            Agent userAgent;
+            PassphraseAgent userAgent;
 
             if ( username.matches ("-?[0-9].*") ) {//username is id?
                 try {
@@ -126,20 +124,24 @@ public class WebConnectorRequestHandler implements RequestHandler {
                 userId = l2pNode.getAgentIdForLogin(username);
             }
 
-            userAgent = l2pNode.getAgent(userId);
+            userAgent = (PassphraseAgent)l2pNode.getAgent(userId);
 
-            if ( ! (userAgent instanceof PassphraseAgent ))
-                throw new L2pSecurityException ("Agent is not passphrase protected!");
+           /* if ( ! (userAgent instanceof PassphraseAgent ))
+                throw new L2pSecurityException ("Agent is not passphrase protected!");*/
 
-            ((PassphraseAgent)userAgent).unlockPrivateKey(password);
+
+
+            userAgent.unlockPrivateKey(password);
+
+
+
+
             //connector.logMessage("Login: "+username);
             //connector.logMessage("successful login");
-            Thread.sleep(10); //TODO: find out how to avoid this 'hack'
-            if(!activeUsers.containsKey(userId)){
-                activeUsers.put(userId, userAgent);
-            }
+           // Thread.sleep(10); //TODO: find out how to avoid this 'hack'
 
-            return userId;
+
+            return userAgent;
 
         }catch (AgentNotKnownException e) {
             sendUnauthorizedResponse(response, null, request.getRemoteAddress() + ": login denied for user " + username);
@@ -149,7 +151,7 @@ public class WebConnectorRequestHandler implements RequestHandler {
 
             sendUnauthorizedResponse(response, null, request.getRemoteAddress() + ": something went horribly wrong. Check your request for correctness.");
         }
-        return -1;
+        return null;
     }
 	/**
 	 * Delegates the request data to a service method, which then decides what to do with it (maps it internally)
@@ -157,7 +159,7 @@ public class WebConnectorRequestHandler implements RequestHandler {
 	 * @param response
 	 * @return
 	 */
-	private boolean invoke(Long userId, HttpRequest request, HttpResponse response) {
+	private boolean invoke(PassphraseAgent userAgent, HttpRequest request, HttpResponse response) {
 
 
         response.setStatus(HttpResponse.STATUS_INTERNAL_SERVER_ERROR); //internal server error unless otherwise specified (errors might occur)
@@ -269,10 +271,12 @@ public class WebConnectorRequestHandler implements RequestHandler {
 			
 			//Serializable[] parameters={httpMethod,restURI,variables,content};
 			
-			Serializable result="";	
-			
-			//if(activeUsers.containsKey(userId))	{
-				Mediator mediator = l2pNode.getOrRegisterLocalMediator(activeUsers.get(userId));
+			Serializable result="";
+
+
+
+            Mediator mediator = l2pNode.getOrRegisterLocalMediator(userAgent);
+
 				boolean gotResult=false;
 
                 String returnMIMEType="text/plain";
@@ -334,6 +338,12 @@ public class WebConnectorRequestHandler implements RequestHandler {
 			sendNoSuchMethod(request, response);	
 		}
         catch (Exception e){
+
+
+           // System.out.println(((UserAgent) userAgent).getLoginName());
+
+
+            //e.printStackTrace();
 			connector.logError("Error occured:" + request.getPath()+" "+e.getMessage() );
 		}
 		return false;
@@ -341,19 +351,20 @@ public class WebConnectorRequestHandler implements RequestHandler {
 	
 	/**
 	 * Logs the user out	 
-	 * @param userId
+	 * @param userAgent
 	 */
-	private void logout(Long userId)
+	private void logout(PassphraseAgent userAgent)
 	{
 		try {
-			Agent userAgent =activeUsers.get(userId);
-            if(userAgent!=null)
-            {
+
+
+            //if(userAgent!=null)
+
                 //TODO check
                 //l2pNode.unregisterAgent(userAgent);
-                ((PassphraseAgent)userAgent).lockPrivateKey();//don't know if really necessary
-                activeUsers.remove(userId);
-            }
+                userAgent.lockPrivateKey();//don't know if really necessary
+
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -367,11 +378,11 @@ public class WebConnectorRequestHandler implements RequestHandler {
 		response.setContentType( "text/xml" );
 		
 		
-		Long userId;
-		if((userId=authenticate(request,response))!= -1)
+		PassphraseAgent userAgent;
+		if((userAgent=authenticate(request,response))!= null)
         {
-			invoke(userId,request,response);
-            logout(userId);
+			invoke(userAgent,request,response);
+            logout(userAgent);
         }
 	}
 	
