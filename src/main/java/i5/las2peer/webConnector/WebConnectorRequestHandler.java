@@ -347,9 +347,13 @@ public class WebConnectorRequestHandler implements RequestHandler {
 	{
 		try {
 			Agent userAgent =activeUsers.get(userId);
-			l2pNode.unregisterAgent(userAgent);
-			((PassphraseAgent)userAgent).lockPrivateKey();//don't know if really necessary
-			activeUsers.remove(userId);
+            if(userAgent!=null)
+            {
+                //TODO check
+                //l2pNode.unregisterAgent(userAgent);
+                ((PassphraseAgent)userAgent).lockPrivateKey();//don't know if really necessary
+                activeUsers.remove(userId);
+            }
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
