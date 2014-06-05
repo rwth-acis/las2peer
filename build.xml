@@ -65,7 +65,7 @@
         <ivy:retrieve type="jar"/>
     </target>
 	
-	<target name="deploy-snapshot" depends="jar, junit">
+	<target name="deploy-snapshot" depends="jar">
 		
 		<property name="sn" value="${ivy.deliver.revision}-SNAPSHOT" />
 		<local name="ivy.deliver.revision"/>
