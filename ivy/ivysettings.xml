@@ -1,6 +1,11 @@
 <ivysettings>
-    <settings defaultResolver="archiva" />
+	<property name="revision" value="SNAPSHOT" override="false"/>
+    <settings defaultResolver="chain" />
     <resolvers>
-        <ibiblio name="archiva" m2compatible="true" root="http://role.dbis.rwth-aachen.de:9911/archiva/repository/internal/"/>
-    </resolvers>
+		<chain name="chain">
+		<ibiblio name="central" m2compatible="true" />
+        <ibiblio name="acis-internal" m2compatible="true" root="http://role.dbis.rwth-aachen.de:9911/archiva/repository/internal/"/>
+		<ibiblio name="acis-snapshots" m2compatible="true" root="http://role.dbis.rwth-aachen.de:9911/archiva/repository/snapshots/"/>
+		</chain>
+	</resolvers>
 </ivysettings>
