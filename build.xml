@@ -2,7 +2,7 @@
 	
 	<property name="ivy.organisation" value="i5" />
 	<property name="ivy.module" value="las2peer" />
-	<property name="ivy.revision" value="0.1" /> <!-- set this -->
+	<property name="ivy.revision" value="0.1" />
 	<property name="ivy.deliver.revision" value="${ivy.revision}" />
 	<property name="ivy.pom.version" value="${ivy.revision}" />
 	
@@ -72,7 +72,7 @@
 			overwrite="true"
 			forcedeliver="true"
 			status="integration">
-			<artifacts pattern="${export}/jars/las2peer.[ext]" />
+			<artifacts pattern="${export}/jars/${ivy.module}.[ext]" />
 		</ivy:publish>
 
 	</target>
@@ -92,7 +92,7 @@
 			overwrite="true"
 			forcedeliver="true"
 			status="release">
-			<artifacts pattern="${export}/jars/las2peer.[ext]" />
+			<artifacts pattern="${export}/jars/${ivy.module}.[ext]" />
 		</ivy:publish>
 
 	</target>
