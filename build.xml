@@ -2,9 +2,8 @@
 	
 	<property name="ivy.organisation" value="i5" />
 	<property name="ivy.module" value="las2peer" />
-	<property name="ivy.revision" value="0.2-snapshot" />
-	<property name="ivy.deliver.revision" value="0.2-snapshot" />
-	
+	<property name="ivy.revision" value="0.1" /> <!-- set this -->
+	<property name="ivy.deliver.revision" value="${ivy.revision}" />
 	<property name="ivy.pom.version" value="${ivy.revision}" />
 	
 	<presetdef name="javac">
@@ -59,13 +58,27 @@
 	
     <target name="get_deps" depends="install-ivy" description="--> resolve dependencies">
         <ivy:settings>
-            <credentials host="role.dbis.rwth-aachen.de:9911/archiva"  realm="Repository internal" username="" passwd=""/>
+            <!-- <credentials host="role.dbis.rwth-aachen.de:9911/archiva"  realm="Repository internal" username="" passwd=""/> -->
         </ivy:settings>
         <ivy:retrieve type="jar"/>
     </target>
 	
 	<target name="deploy-snapshot" 
-    	 depends="jars">
+    	 depends="jars,junit">
+
+		<ivy:publish resolver="acis-snapshots"
+			pubrevision="${ivy.deliver.revision}-SNAPSHOT"
+			publishivy="false"
+			overwrite="true"
+			forcedeliver="true"
+			status="integration">
+			<artifacts pattern="${export}/jars/las2peer.[ext]" />
+		</ivy:publish>
+
+	</target>
+	
+	<target name="deploy-release" 
+    	 depends="jars,junit">
 
 		<ivy:makepom 
 			ivyfile="${ivy.dep.file}" 
@@ -74,11 +87,11 @@
 			artifactPackaging="jar"
 		/>
 
-		<ivy:publish resolver="acis-snapshots"
+		<ivy:publish resolver="acis-internal"
 			publishivy="false"
 			overwrite="true"
 			forcedeliver="true"
-			status="integration">
+			status="release">
 			<artifacts pattern="${export}/jars/las2peer.[ext]" />
 		</ivy:publish>
 
