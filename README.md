@@ -1,12 +1,11 @@
-![LAS2peer](https://raw.github.com/rwth-acis/LAS2peer/master/img/las2peer_logo.png)
+![LAS2peer](https://raw.github.com/rwth-acis/LAS2peer/master/img/las2peer_logo.png) 
 =================
+
 LAS2peer is a Java-based server framework for developing and deploying services in a distributed Peer-to-Peer (P2P) environment. LAS2peer was developed by the Advanced Community Information Systems (ACIS) group at the Chair of Computer Science 5 (Information Systems & Databases), RWTH Aachen University, Germany. Its main focus lies on providing developers with a tool to easily develop and test their services and deploy them in a P2P network without having to rely on a centralized infrastructure.
 
 Developers can develop and test their services locally and then deploy them on any machine that has joined the network. For communication between nodes, the FreePastry (http://www.freepastry.org/) library is used.
 
 Currently, connection to the outside is realized via the [HTTP-Connector](https://github.com/rwth-acis/LAS2peer-HttpConnector/) or the [Web-Connector](https://github.com/rwth-acis/LAS2peer-WebConnector/).
-
-[![Build Status](http://layers.dbis.rwth-aachen.de/jenkins/buildStatus/icon?job=LAS2peer Core)](http://layers.dbis.rwth-aachen.de/jenkins/job/LAS2peer%20Core/)
 
 Service Development
 -----------------------
@@ -28,7 +27,7 @@ Policy files for strong encryption can be downloaded via Oracle:
 (If the unit-test "i5.las2peer.communication.MessageTest" runs successfully, you have enabled strong encryption correctly)
 
 
-Building Instructions
+Building Instructions [![Build Status](http://layers.dbis.rwth-aachen.de/jenkins/buildStatus/icon?job=LAS2peer Core)](http://layers.dbis.rwth-aachen.de/jenkins/job/LAS2peer%20Core/)
 ----------------------
 
 For building simply run:  
