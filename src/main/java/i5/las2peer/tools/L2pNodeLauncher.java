@@ -22,6 +22,7 @@ import i5.las2peer.persistency.Envelope;
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.security.Agent;
 import i5.las2peer.security.AgentException;
+import i5.las2peer.security.GroupAgent;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.PassphraseAgent;
 import i5.las2peer.security.ServiceAgent;
@@ -35,9 +36,12 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import rice.p2p.commonapi.NodeHandle;
 
@@ -169,9 +173,9 @@ public class L2pNodeLauncher {
 		File dir = new File ( directory );
 		if ( ! dir.isDirectory())
 			throw new IllegalArgumentException ( directory + " is not a directory!");
-		
 		Hashtable<String, String> htPassphrases = loadPassphrases ( directory + "/passphrases.txt");
-		
+		Map<Long, String> agentIdToXml = new HashMap<Long, String>();
+		List<GroupAgent> groupAgents = new LinkedList<GroupAgent>();
 		for ( File xml : dir.listFiles(new FilenameFilter(){
 			@Override
 			public boolean accept(File dir, String name) {
@@ -180,22 +184,23 @@ public class L2pNodeLauncher {
 		})) {
 			try {
 				String content = FileContentReader.read(xml);
-				
 				if ( xml.getName().toLowerCase().startsWith("agent")) {
 					Agent agent = Agent.createFromXml(content);
-					
-					String passphrase = htPassphrases.get(xml.getName());
-					if ( passphrase != null ) {
-						if ( agent instanceof UserAgent )
-							((UserAgent)agent).unlockPrivateKey(passphrase);
-						else if ( agent instanceof ServiceAgent )
-							((ServiceAgent)agent).unlockPrivateKey(passphrase);
-						else
-							throw new IllegalArgumentException ( "Unknown Agent type: " + agent.getClass());
+					agentIdToXml.put(agent.getId(), xml.getName());
+					if ( agent instanceof PassphraseAgent ) {
+						String passphrase = htPassphrases.get(xml.getName());
+						if ( passphrase != null ) {
+							((PassphraseAgent)agent).unlockPrivateKey(passphrase);
+						} else {
+							printWarning ( "\t- got no passphrase for agent from " + xml.getName());
+						}
 						node.storeAgent(agent);
 						printMessage ( "\t- stored agent from " + xml);
+					} else if (agent instanceof GroupAgent) {
+					    GroupAgent ga = (GroupAgent) agent;
+					    groupAgents.add(ga);
 					} else {
-						printWarning ( "\t- got no passphrase for agent from " + xml.getName());
+						throw new IllegalArgumentException ( "Unknown agent type: " + agent.getClass());
 					}
 				} else {
 					Envelope e = Envelope.createFromXml(content);
@@ -211,12 +216,51 @@ public class L2pNodeLauncher {
 			} catch ( AgentAlreadyRegisteredException e ) {
 				printWarning( "agent from " + xml.toString() + " already known at this node!");
 			} catch ( AgentException e ) {
-				printWarning( "unable to generate agent " + xml.toString() + "!");				
+				printWarning( "unable to generate agent " + xml.toString() + "!");
 			} catch ( StorageException e ) {
-				printWarning( "unable to store contents of " + xml.toString() + "!");				
+				printWarning( "unable to store contents of " + xml.toString() + "!");
 			}
 		}
 		node.forceUserListUpdate();
+		// wait till all user agents are added from startup directory to unlock group agents
+		for (GroupAgent currentGroupAgent : groupAgents) {
+			for (Long memberId : currentGroupAgent.getMemberList()) {
+				Agent memberAgent = null;
+				try {
+					memberAgent = node.getAgent(memberId);
+				} catch (AgentNotKnownException e) {
+					printWarning("Can't get agent for group member " + memberId);
+					continue;
+				}
+				if ((memberAgent instanceof PassphraseAgent) == false) {
+					printWarning("Unknown agent type to unlock, type: " + memberAgent.getClass().getName());
+					continue;
+				}
+				PassphraseAgent memberPassAgent = (PassphraseAgent) memberAgent;
+				String xmlName = agentIdToXml.get(memberPassAgent.getId());
+				if (xmlName == null) {
+					printWarning("No known xml file for agent " + memberPassAgent.getId());
+					continue;
+				}
+				String passphrase = htPassphrases.get(xmlName);
+				if (passphrase == null) {
+					printWarning("No known xml file for agent " + memberPassAgent.getId());
+					continue;
+				}
+				try {
+					memberPassAgent.unlockPrivateKey(passphrase);
+					currentGroupAgent.unlockPrivateKey(memberPassAgent);
+					node.storeAgent(currentGroupAgent);
+					printMessage ( "\t- stored group agent from " + xmlName);
+				} catch (Exception e) {
+					printWarning("Can't unlock group agent " + currentGroupAgent.getId() + " with member " + memberPassAgent.getId());
+					continue;
+				}
+			}
+			if (currentGroupAgent.isLocked()) {
+				throw new IllegalArgumentException ( "group agent still locked!");
+			}
+		}
 	}
 	
 	
