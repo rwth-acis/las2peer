@@ -6,6 +6,8 @@ Developers can develop and test their services locally and then deploy them on a
 
 Currently, connection to the outside is realized via the [HTTP-Connector](https://github.com/rwth-acis/LAS2peer-HttpConnector/) or the [Web-Connector](https://github.com/rwth-acis/LAS2peer-WebConnector/).
 
+[![Build Status](http://layers.dbis.rwth-aachen.de/jenkins/buildStatus/icon?job=LAS2peer Core)](http://layers.dbis.rwth-aachen.de/jenkins/job/LAS2peer%20Core/)
+
 Service Development
 -----------------------
 This project contains LAS2peer itself. To develop a service for LAS2peer, please use the 
@@ -26,7 +28,7 @@ Policy files for strong encryption can be downloaded via Oracle:
 (If the unit-test "i5.las2peer.communication.MessageTest" runs successfully, you have enabled strong encryption correctly)
 
 
-Building Instructions [![Build Status](http://layers.dbis.rwth-aachen.de/jenkins/buildStatus/icon?job=LAS2peer Core)](http://layers.dbis.rwth-aachen.de/jenkins/job/LAS2peer%20Core/)
+Building Instructions
 ----------------------
 
 For building simply run:  
