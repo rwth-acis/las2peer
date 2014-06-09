@@ -252,6 +252,7 @@ public class L2pNodeLauncher {
 					currentGroupAgent.unlockPrivateKey(memberPassAgent);
 					node.storeAgent(currentGroupAgent);
 					printMessage ( "\t- stored group agent from " + xmlName);
+					break;
 				} catch (Exception e) {
 					printWarning("Can't unlock group agent " + currentGroupAgent.getId() + " with member " + memberPassAgent.getId());
 					continue;
