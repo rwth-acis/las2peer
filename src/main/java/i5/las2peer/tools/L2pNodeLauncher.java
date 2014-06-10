@@ -244,7 +244,7 @@ public class L2pNodeLauncher {
 				}
 				String passphrase = htPassphrases.get(xmlName);
 				if (passphrase == null) {
-					printWarning("No known xml file for agent " + memberPassAgent.getId());
+					printWarning("No known password for agent " + memberPassAgent.getId());
 					continue;
 				}
 				try {

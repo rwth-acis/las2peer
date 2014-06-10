@@ -2,7 +2,10 @@ package i5.las2peer.security;
 
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
+import i5.las2peer.p2p.AgentNotKnownException;
+import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.persistency.MalformedXMLException;
+import i5.las2peer.persistency.XmlAble;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
 import i5.las2peer.tools.SerializationException;
@@ -11,6 +14,7 @@ import i5.simpleXML.Element;
 import i5.simpleXML.Parser;
 import i5.simpleXML.XMLSyntaxException;
 
+import java.io.Serializable;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.Enumeration;
@@ -352,8 +356,60 @@ public class GroupAgent extends Agent {
 
 	@Override
 	public void receiveMessage(Message message, Context context) throws MessageException {
-		// what to do with messages
-		throw new MessageException ("a group is unable to handle messages!");
+		// extract content from message
+		Object content = null;
+		try {
+			message.open(this, getRunningAtNode());
+			content = message.getContent();
+		} catch (AgentNotKnownException e1) {
+			Context.logError(this, e1.getMessage());
+		} catch (L2pSecurityException e2) {
+			Context.logError(this, e2.getMessage());
+		}
+		if (content == null) {
+			Context.logError(this, "The message content is null. Dropping message!");
+			return;
+		}
+		Serializable contentSerializable = null;
+		XmlAble contentXmlAble = null;
+		if (content instanceof Serializable) {
+			contentSerializable = (Serializable) content;
+		} else if (content instanceof XmlAble) {
+			contentXmlAble = (XmlAble) content;
+		} else {
+			throw new MessageException("The content of the received message is neither Serializable nor XmlAble but "+content.getClass());
+		}
+		// send message content to each member of this group
+		for (Long memberId : getMemberList()) {
+			Agent member = null;
+			try {
+				member = getRunningAtNode().getAgent(memberId);
+			} catch (AgentNotKnownException e1) {
+				Context.logMessage(this, e1.getMessage());
+			}
+			if (member == null) {
+				Context.logMessage(this, "No agent for group member " + memberId + " found! Skipping member.");
+				continue;
+			}
+			try {
+				Message msg = null;
+				if (contentSerializable != null) {
+					msg = new Message(this, member, contentSerializable);
+				} else if (contentXmlAble != null) {
+					msg = new Message(this, member, contentXmlAble);
+				} else {
+					Context.logError(this, "The message content is null. Dropping message!");
+					return;
+				}
+				getRunningAtNode().sendMessage(msg, null);
+			} catch (EncodingFailedException e) {
+				Context.logError(this, e.getMessage());
+			} catch (L2pSecurityException e) {
+				Context.logError(this, e.getMessage());
+			} catch (SerializationException e) {
+				Context.logError(this, e.getMessage());
+			}
+		}
 	}
 
 	@Override
