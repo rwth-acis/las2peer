@@ -82,9 +82,9 @@ public class WebConnectorRequestHandler implements RequestHandler {
 	 */
 	public WebConnectorRequestHandler () throws URISyntaxException {		
 
-		authEndpointUri = new URI("http://137.226.58.15:9085/openid-connect-server-webapp/authorize");
-		tokenEndpointUri = new URI("http://137.226.58.15:9085/openid-connect-server-webapp/token");
-		userinfoEndpointUri = new URI("http://137.226.58.15:9085/openid-connect-server-webapp/userinfo");
+		authEndpointUri = new URI("http://137.226.58.15:9085/openid-connect-server-webapp/authorize/");
+		tokenEndpointUri = new URI("http://137.226.58.15:9085/openid-connect-server-webapp/token/");
+		userinfoEndpointUri = new URI("http://137.226.58.15:9085/openid-connect-server-webapp/userinfo/");
 		redirectURI = new URI("http://localhost:8080/oidc/redirect");
 
 		// Registered client ID, secret and redirect URI
@@ -403,7 +403,7 @@ public class WebConnectorRequestHandler implements RequestHandler {
 		response.setContentType( "text/xml" );
 
 		// Process Open ID Connect login 
-		if(request.getMethod() == HttpRequest.METHOD_GET && request.getPath().equals("/oidc/auth")){
+		if(request.getMethod() == HttpRequest.METHOD_GET && request.getPath().equals("/oidc/login")){
 			handleOIDCLoginRequest(request, response);
 		}
 
@@ -428,7 +428,7 @@ public class WebConnectorRequestHandler implements RequestHandler {
 			URI u = composeAuthzRequestURL();
 			response.setStatus(200);
 			response.setContentType(MediaType.TEXT_HTML);
-			response.println("<html><body><a href='" + u.toString() + "'>Login via Layers OpenID</a></body></html>");
+			response.println("<html><head><title>Learning Layers Open ID Connect - Login</title></head><body><div id='login' style='border: 1 pt solid black; border-radius: 5px;'><a href='" + u.toString() + "'><img src='http://learning-layers.eu/wp-content/themes/learninglayers/images/logo.png' />Login via Layers OpenID</a></div></body></html>");
 		} catch (Exception e) {
 			e.printStackTrace();
 			response.setStatus(500);
@@ -461,7 +461,9 @@ public class WebConnectorRequestHandler implements RequestHandler {
 		AuthenticationResponse authResponse;
 
 		try {
-			authResponse = AuthenticationResponseParser.parse(new URI("http://dominik.renzel.org?" + queryString));
+			URI redirectQuery = new URI(redirectURI.toString()+"?"+queryString);
+			response.println("Redirect with Query URI: " + redirectQuery.toASCIIString());
+			authResponse = AuthenticationResponseParser.parse(redirectQuery);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -536,6 +538,7 @@ public class WebConnectorRequestHandler implements RequestHandler {
 		TokenResponse tokenResponse;
 
 		try {
+			response.println(httpResponse.getContent().toString());
 			tokenResponse = OIDCTokenResponseParser.parse(httpResponse);
 
 		} catch (Exception e) {

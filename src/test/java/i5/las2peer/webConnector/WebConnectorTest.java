@@ -116,10 +116,11 @@ public class WebConnectorTest {
 	public void testOIDCLogin(){
 		MiniClient c = new MiniClient();
 		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
-		ClientResponse result=c.sendRequest("GET","oidc/auth","");
-		System.out.println("OIDC Login Page:");
-		System.out.println(result.getHttpCode());
-		System.out.println(result.getResponse());
+		ClientResponse result=c.sendRequest("GET","oidc/login","");
+
+		System.out.println("Code + " + result.getHttpCode());
+		System.out.println("Location: " + result.getHeader("Location"));
+		System.out.println("Response: " + result.getResponse());
 	}
 	
 	@Test
