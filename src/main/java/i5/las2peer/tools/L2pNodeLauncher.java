@@ -549,8 +549,9 @@ public class L2pNodeLauncher {
 	 * 
 	 * @param serviceClass
 	 * 
-	 * @return	the passphrase of the generated {@link i5.las2peer.security.ServiceAgent}
-	 * @throws L2pServiceException 
+	 * @return Returns the passphrase of the generated {@link i5.las2peer.security.ServiceAgent} or null if the agent is
+	 *         already known.
+	 * @throws L2pServiceException
 	 */
 	public String startService ( String serviceClass ) throws L2pServiceException {
 		try {
@@ -559,9 +560,11 @@ public class L2pNodeLauncher {
 			ServiceAgent myAgent = ServiceAgent.generateNewAgent(serviceClass, passPhrase);
 			myAgent.unlockPrivateKey(passPhrase);
 			
-			node.registerReceiver(myAgent);
-			startService ( myAgent );
+			startService(myAgent);
 			return passPhrase;
+		} catch (AgentAlreadyRegisteredException e) {
+			printMessage("Agent already registered. Please use the existing instance.");
+			return null;
 		} catch (Exception e) {
 			
 			if ( e instanceof L2pServiceException )
