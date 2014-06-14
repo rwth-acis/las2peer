@@ -199,6 +199,26 @@ public class UserAgent extends PassphraseAgent {
 	}
 	
 	/**
+	 * Create a new UserAgent with a given id protected by the given passphrase.
+	 * 
+	 * @param id agent id of new user
+	 * @param passphrase passphrase for the secret key of the new user
+	 * 
+	 * @return a new UserAgent
+	 * 
+	 * @throws CryptoException
+	 * @throws L2pSecurityException
+	 */
+	public static UserAgent createUserAgent ( long id, String passphrase ) throws CryptoException, L2pSecurityException {
+		
+		byte[] salt = CryptoTools.generateSalt();
+		
+		return new UserAgent( id, CryptoTools.generateKeyPair(), passphrase, salt );		
+	}
+	
+	
+	
+	/**
 	 * Sets the state of the object from a string representation resulting from
 	 * a previous {@link #toXmlString} call.
 	 *
