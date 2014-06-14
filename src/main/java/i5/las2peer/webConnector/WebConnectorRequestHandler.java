@@ -16,33 +16,54 @@ import i5.las2peer.restMapper.data.Pair;
 //import rice.p2p.util.Base64;
 import i5.las2peer.restMapper.exceptions.NoMethodFoundException;
 import i5.las2peer.restMapper.exceptions.NotSupportedUriPathException;
-import i5.las2peer.security.*;
+import i5.las2peer.security.Agent;
+import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.security.Mediator;
+import i5.las2peer.security.PassphraseAgent;
+import i5.las2peer.security.UserAgent;
+import i5.las2peer.tools.CryptoTools;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
 
 import net.minidev.json.JSONObject;
+import rice.p2p.util.Base64;
 
-import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.SignedJWT;
-import com.nimbusds.oauth2.sdk.*;
-import com.nimbusds.oauth2.sdk.http.*;
-import com.nimbusds.oauth2.sdk.id.*;
+import com.nimbusds.oauth2.sdk.AuthorizationCode;
+import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
+import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.ResponseType;
+import com.nimbusds.oauth2.sdk.Scope;
+import com.nimbusds.oauth2.sdk.SerializeException;
+import com.nimbusds.oauth2.sdk.TokenErrorResponse;
+import com.nimbusds.oauth2.sdk.TokenRequest;
+import com.nimbusds.oauth2.sdk.TokenResponse;
+import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
+import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
+import com.nimbusds.oauth2.sdk.auth.Secret;
+import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import com.nimbusds.oauth2.sdk.token.RefreshToken;
-import com.nimbusds.oauth2.sdk.auth.*;
-import com.nimbusds.openid.connect.sdk.*;
+import com.nimbusds.openid.connect.sdk.AuthenticationErrorResponse;
+import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
+import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
+import com.nimbusds.openid.connect.sdk.AuthenticationResponseParser;
+import com.nimbusds.openid.connect.sdk.AuthenticationSuccessResponse;
+import com.nimbusds.openid.connect.sdk.Nonce;
+import com.nimbusds.openid.connect.sdk.OIDCAccessTokenResponse;
+import com.nimbusds.openid.connect.sdk.OIDCTokenResponseParser;
+import com.nimbusds.openid.connect.sdk.UserInfoErrorResponse;
+import com.nimbusds.openid.connect.sdk.UserInfoRequest;
+import com.nimbusds.openid.connect.sdk.UserInfoResponse;
+import com.nimbusds.openid.connect.sdk.UserInfoSuccessResponse;
 import com.nimbusds.openid.connect.sdk.claims.UserInfo;
-
-import rice.p2p.util.Base64;
 
 
 /**
@@ -83,8 +104,8 @@ public class WebConnectorRequestHandler implements RequestHandler {
 	public WebConnectorRequestHandler () throws URISyntaxException {		
 
 		authEndpointUri = new URI("http://137.226.58.15:9085/openid-connect-server-webapp/authorize/");
-		tokenEndpointUri = new URI("http://137.226.58.15:9085/openid-connect-server-webapp/token/");
-		userinfoEndpointUri = new URI("http://137.226.58.15:9085/openid-connect-server-webapp/userinfo/");
+		tokenEndpointUri = new URI("http://137.226.58.15:9085/openid-connect-server-webapp/token");
+		userinfoEndpointUri = new URI("http://137.226.58.15:9085/openid-connect-server-webapp/userinfo");
 		redirectURI = new URI("http://localhost:8080/oidc/redirect");
 
 		// Registered client ID, secret and redirect URI
@@ -423,12 +444,12 @@ public class WebConnectorRequestHandler implements RequestHandler {
 		}
 	}
 
-	public void handleOIDCLoginRequest(HttpRequest request, HttpResponse response){
+	private void handleOIDCLoginRequest(HttpRequest request, HttpResponse response){
 		try {
 			URI u = composeAuthzRequestURL();
 			response.setStatus(200);
 			response.setContentType(MediaType.TEXT_HTML);
-			response.println("<html><head><title>Learning Layers Open ID Connect - Login</title></head><body><div id='login' style='border: 1 pt solid black; border-radius: 5px;'><a href='" + u.toString() + "'><img src='http://learning-layers.eu/wp-content/themes/learninglayers/images/logo.png' />Login via Layers OpenID</a></div></body></html>");
+			response.println("<html><head><title>Learning Layers Open ID Connect - Login</title></head><body><h1>LAS2peer Login</h1><div id='login' style='border: 1 pt solid black; border-radius: 5px;'><a href='" + u.toString() + "'><img src='http://learning-layers.eu/wp-content/themes/learninglayers/images/logo.png' />Login via Layers Open ID Connect</a></div></body></html>");
 		} catch (Exception e) {
 			e.printStackTrace();
 			response.setStatus(500);
@@ -439,9 +460,10 @@ public class WebConnectorRequestHandler implements RequestHandler {
 	}
 
 	private void handleOIDCRedirectRequest(HttpRequest request, HttpResponse response){
-		System.out.println("Contacted OIDC Redirect Page");
+
 		response.setStatus(200);
 		response.setContentType(MediaType.TEXT_PLAIN);
+		response.println("Contacted OIDC Redirect Page");
 		// *** *** *** Process the authorisation response *** *** *** //
 
 		// Get the URL query string which contains the encoded 
@@ -513,6 +535,16 @@ public class WebConnectorRequestHandler implements RequestHandler {
 
 		try {
 			httpRequest = accessTokenRequest.toHTTPRequest();
+			response.println("Token Request: ");
+			response.println("Method: " + httpRequest.getMethod());
+			response.println("Auth Header: " + httpRequest.getAuthorization());
+			response.println("Query: " + httpRequest.getQuery());
+			String s = httpRequest.getQuery().split("&client_id")[0];
+			response.println("Modified Query: " + s );
+			response.println("Content Type: " + httpRequest.getContentType());
+			httpRequest.setQuery(s);
+
+
 
 		} catch (SerializeException e) {
 			response.setStatus(401);
@@ -554,7 +586,7 @@ public class WebConnectorRequestHandler implements RequestHandler {
 			// and return immediately
 			TokenErrorResponse tokenError = (TokenErrorResponse)tokenResponse;
 			response.setStatus(401);
-			
+
 			response.println("Token error: " + tokenError.getErrorObject() + " " + tokenError.getErrorObject().getDescription());
 			return;
 		}
@@ -564,6 +596,7 @@ public class WebConnectorRequestHandler implements RequestHandler {
 		BearerAccessToken accessToken = (BearerAccessToken)tokenSuccess.getAccessToken();
 		RefreshToken refreshToken = tokenSuccess.getRefreshToken();
 		SignedJWT idToken = (SignedJWT)tokenSuccess.getIDToken();
+
 
 		response.println("Token response:");
 		response.println("\tAccess token: " + accessToken.toJSONObject().toString());
@@ -577,15 +610,14 @@ public class WebConnectorRequestHandler implements RequestHandler {
 			response.println("ID token [raw]: " + idToken.getParsedString());
 			response.println("ID token JWS header: " + idToken.getHeader());
 
-			// Validate the ID token by checking its HMAC;
-			// Note that PayPal HMAC generation is probably incorrect,
-			// there's also a bug in the "exp" claim type
+
 			try {
-				MACVerifier hmacVerifier = new MACVerifier(clientSecret.getValue().getBytes());
 
-				final boolean valid = idToken.verify(hmacVerifier);
+				// Validate the ID token by checking its HMAC;
 
-				response.println("ID token is valid: " + valid);
+				//              MACVerifier hmacVerifier = new MACVerifier(clientSecret.getValue().getBytes());
+				//				final boolean valid = idToken.verify(hmacVerifier);
+				//				response.println("ID token is valid: " + valid);
 
 				JSONObject jsonObject = idToken.getJWTClaimsSet().toJSONObject();
 
@@ -643,12 +675,62 @@ public class WebConnectorRequestHandler implements RequestHandler {
 
 
 		try {
+			JSONObject ujson = userInfo.toJSONObject();
+
+			// important: mapping from OIDC id token to LAS2peer agent id
+			// use a hash of OIDC id token fields "sub" and "iss" 
+			JSONObject ijson = idToken.getJWTClaimsSet().toJSONObject();
+			
+			String sub = (String) ijson.get("sub");
+			String iss = (String) ijson.get("iss");
+			
+			long oidcAgentId = hash(iss+sub);
+
+			// lookup agent. if agent exists, fetch it and display information 
+			if(l2pNode.hasAgent(oidcAgentId)){
+				Agent a = l2pNode.getAgent(oidcAgentId);
+				if(a instanceof UserAgent){
+					response.println("OIDC user agent exists.");
+					UserAgent u = (UserAgent) a;
+					//u.unlockPrivateKey(sub);
+					response.println("ID: " + u.getLoginName());
+					response.println("Login name: " + u.getLoginName());
+					response.println("Email : " + u.getEmail());
+					
+				} else {
+					response.println("Error: found agent is not User Agent!");
+				}
+				
+			} 
+			// if agent does not exist, create new one
+			else {
+				// use sub field of userinfo
+				UserAgent oidcAgent = UserAgent.createUserAgent(oidcAgentId,sub);
+				oidcAgent.unlockPrivateKey(ujson.get("sub").toString());
+				oidcAgent.setEmail((String) ujson.get("email"));
+				oidcAgent.setLoginName((String) ujson.get("preferred_username"));
+				
+				l2pNode.storeAgent(oidcAgent);
+				response.println("Stored new OIDC agent.");
+			}
+			
 			response.println(userInfo.toJSONObject().toJSONString());
 
 		} catch (Exception e) {
 
 			response.println("Couldn't parse UserInfo JSON object: " + e.getMessage());
 		}
+	}
+
+	// helper function to create long hash from string
+	public static long hash(String string) {
+		long h = 1125899906842597L; // prime
+		int len = string.length();
+
+		for (int i = 0; i < len; i++) {
+			h = 31*h + string.charAt(i);
+		}
+		return h;
 	}
 
 	/**
