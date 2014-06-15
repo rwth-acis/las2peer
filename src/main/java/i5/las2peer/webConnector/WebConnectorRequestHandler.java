@@ -6,6 +6,7 @@ import i5.httpServer.RequestHandler;
 import i5.las2peer.execution.NoSuchServiceException;
 import i5.las2peer.execution.NoSuchServiceMethodException;
 import i5.las2peer.execution.ServiceInvocationException;
+import i5.las2peer.p2p.AgentAlreadyRegisteredException;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.TimeoutException;
@@ -17,15 +18,18 @@ import i5.las2peer.restMapper.data.Pair;
 import i5.las2peer.restMapper.exceptions.NoMethodFoundException;
 import i5.las2peer.restMapper.exceptions.NotSupportedUriPathException;
 import i5.las2peer.security.Agent;
+import i5.las2peer.security.AgentException;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.Mediator;
 import i5.las2peer.security.PassphraseAgent;
 import i5.las2peer.security.UserAgent;
+import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -47,6 +51,9 @@ import com.nimbusds.oauth2.sdk.TokenResponse;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
 import com.nimbusds.oauth2.sdk.auth.Secret;
+import com.nimbusds.oauth2.sdk.http.HTTPRequest;
+import com.nimbusds.oauth2.sdk.http.HTTPRequest.Method;
+import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
@@ -129,9 +136,11 @@ public class WebConnectorRequestHandler implements RequestHandler {
 	 * @param request
 	 * @param response
 	 * @return -1 if no successful login else userId
-	 * @throws UnsupportedEncodingException
+	 * @throws UnsupportedEncodingException 
+	 * @throws SerializeException 
+	 * @throws Exception 
 	 */
-	private PassphraseAgent authenticate (HttpRequest request, HttpResponse response) throws UnsupportedEncodingException
+	private PassphraseAgent authenticate (HttpRequest request, HttpResponse response) throws UnsupportedEncodingException, SerializeException
 	{
 
 		final int BASIC_PREFIX_LENGTH="BASIC ".length();
@@ -139,6 +148,8 @@ public class WebConnectorRequestHandler implements RequestHandler {
 		String username="";
 		String password="";
 
+		connector.defaultLoginUser = "adam";
+		connector.defaultLoginPassword = "adamspass";
 		//Check for authentication information in header
 		if(request.hasHeaderField(AUTHENTICATION_FIELD)
 				&&(request.getHeaderField(AUTHENTICATION_FIELD).length()>BASIC_PREFIX_LENGTH))
@@ -155,9 +166,112 @@ public class WebConnectorRequestHandler implements RequestHandler {
 
 			return login(username,password,request,response);
 
-		}//no information? check if there is a default account for login
+		} else if(request.getQueryString().contains("access_token=")){
+			String[] params = request.getQueryString().split("&");
+			String token = "";
+			for(int i=0;i<params.length; i++){
+				String[] keyval = params[i].split("=");
+				if(keyval[0].equals("access_token")){
+					token = keyval[1];
+				}
+			}
+
+			// now query userinfo endpoint
+
+			HTTPRequest hrq;
+			HTTPResponse hrs;
+
+			try {
+				hrq = new HTTPRequest(Method.GET,userinfoEndpointUri.toURL());
+				hrq.setAuthorization("Bearer "+token);
+
+				hrs = hrq.send();
+
+			} catch (MalformedURLException e) {
+				e.printStackTrace();
+				response.println("Unexpected authentication error: " + e.getMessage());
+				response.setStatus(500);
+				return null;
+			} catch (IOException e) {
+				e.printStackTrace();
+				response.println("Unexpected authentication error: " + e.getMessage());
+				response.setStatus(500);
+				return null;
+			}
+
+			UserInfoResponse userInfoResponse;
+
+			try {
+				userInfoResponse = UserInfoResponse.parse(hrs);
+			} catch (ParseException e) {
+				response.println("Couldn't parse UserInfo response: " + e.getMessage());
+				response.setStatus(500);
+				return null;
+			}
+
+
+			if (userInfoResponse instanceof UserInfoErrorResponse) {
+
+				UserInfoErrorResponse uier = (UserInfoErrorResponse) userInfoResponse;
+				response.println("Open ID Connect UserInfo request failed!");
+				//response.setStatus(401);
+				
+				response.setStatus(302);
+				response.setHeaderField("Location",composeAuthzRequestURL().toString());
+				//response.clearContent();
+				
+				return null;
+			}
+
+
+			UserInfo userInfo = ((UserInfoSuccessResponse)userInfoResponse).getUserInfo();
+
+			try {
+
+				JSONObject ujson = userInfo.toJSONObject();
+				//response.println("User Info: " + userInfo.toJSONObject());
+
+				String sub = (String) ujson.get("sub");
+				String mail = (String) ujson.get("mail");
+				String name = (String) ujson.get("name");
+
+				long oidcAgentId = hash(sub);
+				username = oidcAgentId+"";
+				password = sub;
+
+				PassphraseAgent pa;
+				try {
+					pa = (PassphraseAgent)l2pNode.getAgent(oidcAgentId);
+					pa.unlockPrivateKey(password);
+					return pa;
+				} catch (AgentNotKnownException e) {
+					UserAgent oidcAgent;
+					try {
+						oidcAgent = UserAgent.createUserAgent(oidcAgentId,sub);
+						oidcAgent.unlockPrivateKey(ujson.get("sub").toString());
+						oidcAgent.setEmail((String) ujson.get("email"));
+						oidcAgent.setLoginName((String) ujson.get("preferred_username"));
+
+						l2pNode.storeAgent(oidcAgent);
+						oidcAgent.unlockPrivateKey(password);
+						return oidcAgent;
+					} catch (Exception e1) {
+						return null;
+					} 
+				}
+
+			} catch (L2pSecurityException e) {
+				response.println(e.getMessage());
+				e.printStackTrace();
+			}
+			return null;
+
+		}
+
+		//no information? check if there is a default account for login
 		else if(connector.defaultLoginUser.length()>0)
 		{
+			response.println("Getting here:");
 			return login(connector.defaultLoginUser,connector.defaultLoginPassword,request,response);
 		}
 		else
@@ -594,6 +708,7 @@ public class WebConnectorRequestHandler implements RequestHandler {
 		OIDCAccessTokenResponse tokenSuccess = (OIDCAccessTokenResponse)tokenResponse;
 
 		BearerAccessToken accessToken = (BearerAccessToken)tokenSuccess.getAccessToken();
+		response.println("Bearer Access Token: " + accessToken.toJSONString());
 		RefreshToken refreshToken = tokenSuccess.getRefreshToken();
 		SignedJWT idToken = (SignedJWT)tokenSuccess.getIDToken();
 
@@ -634,10 +749,20 @@ public class WebConnectorRequestHandler implements RequestHandler {
 
 		// *** *** *** Make a UserInfo endpoint request *** *** *** //
 
+
+
+
 		// Append the access token to form actual request
 		UserInfoRequest userInfoRequest = new UserInfoRequest(userinfoEndpointUri, accessToken);
 
 		try {
+			HTTPRequest http = userInfoRequest.toHTTPRequest();
+			response.println("Userinfo Request: ");
+			response.println("Method: " + http.getMethod());
+			response.println("Authz: " + http.getAuthorization());
+			response.println("Query: " + http.getQuery());
+			response.println("Content Type: " + http.getContentType());
+
 			httpResponse = userInfoRequest.toHTTPRequest().send();
 
 		} catch (Exception e) {
@@ -680,10 +805,10 @@ public class WebConnectorRequestHandler implements RequestHandler {
 			// important: mapping from OIDC id token to LAS2peer agent id
 			// use a hash of OIDC id token fields "sub" and "iss" 
 			JSONObject ijson = idToken.getJWTClaimsSet().toJSONObject();
-			
+
 			String sub = (String) ijson.get("sub");
 			String iss = (String) ijson.get("iss");
-			
+
 			long oidcAgentId = hash(iss+sub);
 
 			// lookup agent. if agent exists, fetch it and display information 
@@ -696,11 +821,11 @@ public class WebConnectorRequestHandler implements RequestHandler {
 					response.println("ID: " + u.getLoginName());
 					response.println("Login name: " + u.getLoginName());
 					response.println("Email : " + u.getEmail());
-					
+
 				} else {
 					response.println("Error: found agent is not User Agent!");
 				}
-				
+
 			} 
 			// if agent does not exist, create new one
 			else {
@@ -709,11 +834,11 @@ public class WebConnectorRequestHandler implements RequestHandler {
 				oidcAgent.unlockPrivateKey(ujson.get("sub").toString());
 				oidcAgent.setEmail((String) ujson.get("email"));
 				oidcAgent.setLoginName((String) ujson.get("preferred_username"));
-				
+
 				l2pNode.storeAgent(oidcAgent);
 				response.println("Stored new OIDC agent.");
 			}
-			
+
 			response.println(userInfo.toJSONObject().toJSONString());
 
 		} catch (Exception e) {
@@ -912,8 +1037,7 @@ public class WebConnectorRequestHandler implements RequestHandler {
 		connector.logMessage ( logMessage );
 	}
 
-	private URI composeAuthzRequestURL()
-			throws Exception {
+	private URI composeAuthzRequestURL() throws SerializeException {
 
 		// Set the requested response_type (code, token and / or 
 		// id_token):
