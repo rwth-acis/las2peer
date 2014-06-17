@@ -70,6 +70,7 @@ public class WebConnector extends Connector
 
     protected String defaultLoginUser="";
     protected String defaultLoginPassword="";
+    protected String oidcProviders = "";
 
     protected String xmlPath;
 	

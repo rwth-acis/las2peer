@@ -84,6 +84,7 @@ public class WebConnectorTest {
 		connector.setSocketTimeout(10000);
 		connector.setLogStream(new PrintStream ( logStream));
 		connector.start ( node );
+		connector.oidcProviders = "http://137.226.58.15:9085/openid-connect-server-webapp";
         Thread.sleep(1000);
 		// eve is the anonymous agent!
 		testAgent = MockAgentFactory.getAdam();

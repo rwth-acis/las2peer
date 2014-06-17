@@ -6,7 +6,6 @@ import i5.httpServer.RequestHandler;
 import i5.las2peer.execution.NoSuchServiceException;
 import i5.las2peer.execution.NoSuchServiceMethodException;
 import i5.las2peer.execution.ServiceInvocationException;
-import i5.las2peer.p2p.AgentAlreadyRegisteredException;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.TimeoutException;
@@ -18,13 +17,10 @@ import i5.las2peer.restMapper.data.Pair;
 import i5.las2peer.restMapper.exceptions.NoMethodFoundException;
 import i5.las2peer.restMapper.exceptions.NotSupportedUriPathException;
 import i5.las2peer.security.Agent;
-import i5.las2peer.security.AgentException;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.Mediator;
 import i5.las2peer.security.PassphraseAgent;
 import i5.las2peer.security.UserAgent;
-import i5.las2peer.tools.CryptoException;
-import i5.las2peer.tools.CryptoTools;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -32,10 +28,13 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.Hashtable;
 
 import net.minidev.json.JSONObject;
+import net.minidev.json.JSONValue;
 import rice.p2p.util.Base64;
 
 import com.nimbusds.jwt.SignedJWT;
@@ -108,8 +107,8 @@ public class WebConnectorRequestHandler implements RequestHandler {
 	 * @throws URISyntaxException 
 	 *
 	 */
-	public WebConnectorRequestHandler () throws URISyntaxException {		
-
+	public WebConnectorRequestHandler () throws URISyntaxException {
+		
 		authEndpointUri = new URI("http://137.226.58.15:9085/openid-connect-server-webapp/authorize/");
 		tokenEndpointUri = new URI("http://137.226.58.15:9085/openid-connect-server-webapp/token");
 		userinfoEndpointUri = new URI("http://137.226.58.15:9085/openid-connect-server-webapp/userinfo");
@@ -148,8 +147,7 @@ public class WebConnectorRequestHandler implements RequestHandler {
 		String username="";
 		String password="";
 
-		connector.defaultLoginUser = "adam";
-		connector.defaultLoginPassword = "adamspass";
+		
 		//Check for authentication information in header
 		if(request.hasHeaderField(AUTHENTICATION_FIELD)
 				&&(request.getHeaderField(AUTHENTICATION_FIELD).length()>BASIC_PREFIX_LENGTH))
@@ -215,11 +213,11 @@ public class WebConnectorRequestHandler implements RequestHandler {
 				UserInfoErrorResponse uier = (UserInfoErrorResponse) userInfoResponse;
 				response.println("Open ID Connect UserInfo request failed!");
 				//response.setStatus(401);
-				
+
 				response.setStatus(302);
 				response.setHeaderField("Location",composeAuthzRequestURL().toString());
 				//response.clearContent();
-				
+
 				return null;
 			}
 
@@ -557,12 +555,58 @@ public class WebConnectorRequestHandler implements RequestHandler {
 			}
 		}
 	}
+	
+	/**
+	 * Fetches Open ID Connect Provider Configuration information for a list of providers.
+	 *   
+	 * @param providers String comma-separated list of Open ID Connect provider URLs
+	 * @return Hashtable<String, JSONObject> a hashtable of Open ID Connect providers, using their issuer URI as key
+	 * @throws net.minidev.json.parser.ParseException 
+	 * @throws IOException 
+	 */
+	private Hashtable<String,JSONObject> fetchOidcProvidersConfig(String providers) throws net.minidev.json.parser.ParseException, IOException{
+		
+		Hashtable<String, JSONObject> result = new Hashtable<>();
+		
+		// first split comma-separated list into tokens, each of them representing an OIDC provider URI.
+		String[] oidcps = providers.split(",");
+		
+		// iterate over all OIDC provider URIs.
+		for(int i = 0; i < oidcps.length; i++){
+			String p = oidcps[i];
+			
+			//send Open ID Provider Config request
+			//(cf. http://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig)
+			URL pConfigDocUri = new URL(p+"/.well-known/openid-configuration");
+			HTTPRequest pConfigRequest = new HTTPRequest(Method.GET, pConfigDocUri);
+			
+			// parse JSON result
+			String configStr = pConfigRequest.send().getContent();
+			JSONObject config = (JSONObject) JSONValue.parseWithException(configStr);
+			
+			// put JSON result in result table
+			result.put(p,config);
+		}
+		
+		return result;
+	}
 
 	private void handleOIDCLoginRequest(HttpRequest request, HttpResponse response){
+		
 		try {
+			
+			Hashtable<String, JSONObject> oidcProviders = fetchOidcProvidersConfig(connector.oidcProviders);
+			Enumeration<JSONObject> e = oidcProviders.elements();
+			
+			while(e.hasMoreElements()){
+				JSONObject pc = e.nextElement();
+				response.println(pc.toJSONString());
+			}
+			
 			URI u = composeAuthzRequestURL();
 			response.setStatus(200);
 			response.setContentType(MediaType.TEXT_HTML);
+			
 			response.println("<html><head><title>Learning Layers Open ID Connect - Login</title></head><body><h1>LAS2peer Login</h1><div id='login' style='border: 1 pt solid black; border-radius: 5px;'><a href='" + u.toString() + "'><img src='http://learning-layers.eu/wp-content/themes/learninglayers/images/logo.png' />Login via Layers Open ID Connect</a></div></body></html>");
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -580,6 +624,11 @@ public class WebConnectorRequestHandler implements RequestHandler {
 		response.println("Contacted OIDC Redirect Page");
 		// *** *** *** Process the authorisation response *** *** *** //
 
+		// first determine, from which OIDC server the authorisation response came
+		String remoteAddress = request.getHost();
+		response.println("Authz response origin: " + remoteAddress);
+		
+		
 		// Get the URL query string which contains the encoded 
 		// authorisation response
 		String queryString = request.getQueryString();
@@ -621,10 +670,10 @@ public class WebConnectorRequestHandler implements RequestHandler {
 		// Authentication success, retrieve the authorisation code
 		AuthenticationSuccessResponse authzSuccess = (AuthenticationSuccessResponse)authResponse;
 
-		response.println("Authorization success:");
-		response.println("\tAuthorization code: " + authzSuccess.getAuthorizationCode());
-		response.println("\tState: " + authzSuccess.getState() + "\n\n");
-		response.println("\tRedirection URI: " + authzSuccess.getRedirectionURI());
+//		response.println("Authorization success:");
+//		response.println("\tAuthorization code: " + authzSuccess.getAuthorizationCode());
+//		response.println("\tState: " + authzSuccess.getState() + "\n\n");
+//		response.println("\tRedirection URI: " + authzSuccess.getRedirectionURI());
 
 		AuthorizationCode code = authzSuccess.getAuthorizationCode();
 
@@ -655,7 +704,6 @@ public class WebConnectorRequestHandler implements RequestHandler {
 			response.println("Query: " + httpRequest.getQuery());
 			String s = httpRequest.getQuery().split("&client_id")[0];
 			response.println("Modified Query: " + s );
-			response.println("Content Type: " + httpRequest.getContentType());
 			httpRequest.setQuery(s);
 
 
@@ -730,9 +778,9 @@ public class WebConnectorRequestHandler implements RequestHandler {
 
 				// Validate the ID token by checking its HMAC;
 
-				//              MACVerifier hmacVerifier = new MACVerifier(clientSecret.getValue().getBytes());
-				//				final boolean valid = idToken.verify(hmacVerifier);
-				//				response.println("ID token is valid: " + valid);
+//				MACVerifier hmacVerifier = new MACVerifier(clientSecret.getValue().getBytes());
+//				final boolean valid = idToken.verify(hmacVerifier);
+//				response.println("ID token is valid: " + valid);
 
 				JSONObject jsonObject = idToken.getJWTClaimsSet().toJSONObject();
 
