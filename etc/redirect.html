@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h1>LAS2peer Open ID Connect</h1>
+
+<div style='font-weight: bold'>Authentication successful.</div> 
+
+<div>Your OIDC access token was stored in HTML5 local storage (las2peer_access) and is ready for use.</div>
+
+<div>The following link calls a LAS2peer test REST service using the access token. Try it! You should see the string "LAS2peerRules" in case of success.</div>
+<div><a href="http://localhost:8080/test1/LAS2peer/Rules?access_token=_ACCESSTOKEN_"><h3>Try it</h3></a></div>
+
+<script>
+if (typeof(Storage) != "undefined") {
+    localStorage.setItem("las2peer_access", "_ACCESSTOKEN_");
+    document.getElementById("token").innerHTML = localStorage.getItem("las2peer_access");
+} else {
+    document.getElementById("token").innerHTML = "Sorry, your browser does not support HTML5 Web Storage...";
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,8 @@
+{
+	"name":"Learning Layers",
+	"logo":"http:\/\/learning-layers.eu\/wp-content\/themes\/learninglayers\/images\/logo.png",
+	"endpoint":"http:\/\/137.226.58.15:9085\/openid-connect-server-webapp",
+	"client_secret":"clobC9RK79bp3gBwWhUNdOft0husFHDQb8S4EEaCclXanXRUuSb3EhvV41V6XOW4K-RKnCRJ-J8XS93RwS3SQg",
+	"client_id":"51dc0d91-57dd-4706-88b8-022808915ca0",
+    "redirect_uri":"http:\/\/localhost:8080\/oidc\/redirect"	
+}

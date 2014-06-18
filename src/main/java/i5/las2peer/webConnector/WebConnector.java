@@ -16,9 +16,19 @@ import i5.las2peer.webConnector.serviceManagement.ServiceRepositoryManager;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.PrintStream;
+import java.net.URL;
 import java.text.DateFormat;
 import java.util.Date;
+
+import com.nimbusds.oauth2.sdk.http.HTTPRequest;
+import com.nimbusds.oauth2.sdk.http.HTTPRequest.Method;
+
+import net.minidev.json.JSONObject;
+import net.minidev.json.JSONValue;
+import net.minidev.json.parser.JSONParser;
 
 
 
@@ -70,23 +80,22 @@ public class WebConnector extends Connector
 
     protected String defaultLoginUser="";
     protected String defaultLoginPassword="";
-    protected String oidcProviders = "";
 
     protected String xmlPath;
 	
 	private HttpServer http;
 	private HttpsServer https;
 
-	
 	private Node myNode = null;
-	
-	
+		
 	private final static String DEFAULT_LOGFILE = "./log/webConnector.log";
-	
 	
 	private PrintStream logStream = null;
 	private DateFormat dateFormat = DateFormat.getDateTimeInstance();
 	
+	// information on Open ID Connect Provider, including configuration, according
+	// to Open ID Connect Discovery (cf. http://openid.net/specs/openid-connect-discovery-1_0.html)
+	protected JSONObject oidcProvider;
 
 	//--
 	private PathTree tree=new PathTree();
@@ -103,6 +112,7 @@ public class WebConnector extends Connector
 	public WebConnector () throws Exception
     {
 		super.setFieldValues();
+		oidcProvider = fetchOidcProviderConfig("./etc/oidc.json");
         ServiceRepositoryManager.setTree(tree);
         ServiceRepositoryManager.setConnector(this);
 
@@ -436,6 +446,41 @@ public class WebConnector extends Connector
 	 */
 	boolean preferLocalServices () {
 		return preferLocalServices;
+	}
+	
+	/**
+	 * Fetches Open ID Connect Provider Configuration information for one provider.
+	 */
+	private JSONObject fetchOidcProviderConfig(String configFile) throws IOException, net.minidev.json.parser.ParseException {
+
+		JSONObject result = new JSONObject();
+
+
+		// read in OIDC provider config from local config file ./etc/oidc.json
+		JSONParser parser = new JSONParser();
+		Object obj = parser.parse(new FileReader(configFile));
+
+		if(!(obj instanceof JSONObject)){
+			throw new IllegalArgumentException("Invalid OIDC configuration in file " + configFile + "!");
+		}
+
+		result = (JSONObject) obj;
+
+		String ep = (String) result.get("endpoint");
+
+		//send Open ID Provider Config request
+		//(cf. http://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig)
+		URL pConfigDocUri = new URL(ep+"/.well-known/openid-configuration");
+		HTTPRequest pConfigRequest = new HTTPRequest(Method.GET, pConfigDocUri);
+
+		// parse JSON result
+		String configStr = pConfigRequest.send().getContent();
+		JSONObject config = (JSONObject) JSONValue.parseWithException(configStr);
+
+		// put JSON result in result table
+		result.put("config",config);
+
+		return result;
 	}
 	
 	
