@@ -577,7 +577,11 @@ public abstract class Node implements AgentStorage {
 			throw new IllegalStateException ("You can register agents only to running nodes!");
 		
 		if (htRegisteredReceivers.get(receiver.getResponsibleForAgentId()) != null)
-			throw new AgentAlreadyRegisteredException ("This agent is already running here!");
+        {
+			//throw new AgentAlreadyRegisteredException ("This agent is already running here!");
+            //why throw an exception here?
+            return;
+        }
 		
 		if ( (receiver instanceof Agent) ) {
 			// we have an agent
@@ -877,7 +881,7 @@ public abstract class Node implements AgentStorage {
 	 * 
 	 * @return	the requested agent
 	 * 
-	 * @throws AgentNotKownException
+	 * @throws AgentNotKnownException
 	 */
 	public abstract Agent getAgent ( long id ) throws AgentNotKnownException;
 	
