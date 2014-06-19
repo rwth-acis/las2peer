@@ -361,7 +361,7 @@ public class WebConnectorRequestHandler implements RequestHandler {
             //if(userAgent!=null)
 
                 //TODO check
-                //l2pNode.unregisterAgent(userAgent);
+                l2pNode.unregisterAgent(userAgent);
                 userAgent.lockPrivateKey();//don't know if really necessary
 
 
