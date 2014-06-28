@@ -9,7 +9,6 @@
     <dependency org="i5" name="las2peer" rev="0.2-SNAPSHOT" />
     <dependency org="i5" name="las2peer-rest-mapper" rev="0.2-SNAPSHOT"/>
 	
-	<dependency org="com.googlecode.json-simple" name="json-simple" rev="1.1" />
 	<dependency org="com.nimbusds" name="oauth2-oidc-sdk" rev="3.3" />
 	<dependency org="com.nimbusds" name="nimbus-jose-jwt" rev="2.26" />
 
