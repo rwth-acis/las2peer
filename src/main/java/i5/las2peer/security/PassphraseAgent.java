@@ -12,7 +12,7 @@ import javax.crypto.SecretKey;
 /**
  * Base class for pass phrase protected agents.
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public abstract class PassphraseAgent extends Agent {

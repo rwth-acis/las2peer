@@ -12,7 +12,7 @@ import java.util.Vector;
 /**
  * A simple command line client generating a group agent XML file.
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class GroupAgentGenerator {

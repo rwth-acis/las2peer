@@ -3,7 +3,7 @@ package i5.las2peer.execution;
 /**
  * Exception thrown on access to a result of a L2pThread, when the job is not done yet
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class NotFinishedException extends L2pServiceException {

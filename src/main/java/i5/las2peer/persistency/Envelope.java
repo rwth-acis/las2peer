@@ -41,7 +41,7 @@ import org.apache.commons.codec.binary.Base64;
  * The serialization of the content may be implemented via simple java serialization
  * or the {@link XmlAble} facilities of las2peer.
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public final class Envelope implements XmlAble, Cloneable {
@@ -49,7 +49,7 @@ public final class Envelope implements XmlAble, Cloneable {
 	/**
 	 * Type of the content inside the envelope.
 	 * 
-	 * @author Holger Jan&szlig;en
+	 * 
 	 *
 	 */
 	public enum ContentType { String, XmlAble, Serializable, Binary };

@@ -7,7 +7,7 @@ import i5.las2peer.execution.L2pServiceException;
 /**
  * A simple <i>Service</i> for testing failures in the constructor of a service.
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class NotCreatableService extends Service {

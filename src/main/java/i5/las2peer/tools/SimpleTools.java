@@ -6,7 +6,7 @@ import java.util.Random;
 /**
  * Collection of simple tools not large enough to form a separate class.
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class SimpleTools {

@@ -4,7 +4,7 @@ package i5.las2peer.persistency;
 /**
  * Base class for all exceptions concerning {@link Envelope}s.
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class EnvelopeException extends Exception {

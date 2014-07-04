@@ -9,7 +9,7 @@ import java.security.PublicKey;
  * 
  * Therefore a Mediator is needed at the foreign node.
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class UnlockNeededException extends L2pServiceException {

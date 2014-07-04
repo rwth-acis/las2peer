@@ -11,7 +11,7 @@ import rice.p2p.commonapi.NodeHandle;
  * 
  * This passphrase is encrypted for the destination node.
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class UnlockAgentMessage implements Message {

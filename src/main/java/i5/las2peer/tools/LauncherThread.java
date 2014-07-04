@@ -8,8 +8,8 @@ import java.io.IOException;
 /**
  * A simple thread handling one launcher task.
  * 
- * @author Holger Jan&szlig;en
- * @author Peter de Lange
+ * 
+ * 
  *
  */
 public class LauncherThread extends Thread {

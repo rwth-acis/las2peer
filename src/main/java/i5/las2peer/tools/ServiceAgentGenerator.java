@@ -9,7 +9,7 @@ import i5.las2peer.security.ServiceAgent;
  * Provided a passphrase, the tool will generate an XML representation of the
  * required agent and put it to standard out.
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class ServiceAgentGenerator {

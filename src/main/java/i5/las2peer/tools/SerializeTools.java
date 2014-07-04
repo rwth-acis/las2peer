@@ -15,7 +15,7 @@ import org.apache.commons.codec.binary.Base64;
 /**
  * <i>Static</i> class as collection of serialization and deserialization methods.
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class SerializeTools {

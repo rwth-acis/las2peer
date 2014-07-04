@@ -6,7 +6,7 @@ import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
 /**
  * thrown by the {@link L2pClassLoader} on access to a resource that is not registered
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class NotRegisteredException extends ClassLoaderException {

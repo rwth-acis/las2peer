@@ -65,7 +65,7 @@ import rice.p2p.commonapi.NodeHandle;
  * It should only be used for LAS2peer core development and is not meant for productive usage,
  * since some of these methods are not extensively tested and actively supported.
  *  
- * @author Peter de Lange
+ * 
  *
  */
 public class ExtendedTestLauncher {

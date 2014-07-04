@@ -6,7 +6,7 @@ import java.io.Serializable;
 /**
  * A simple serializable class storing just an integer value for demonstration and testing purposes.
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class SomeValue implements Serializable {

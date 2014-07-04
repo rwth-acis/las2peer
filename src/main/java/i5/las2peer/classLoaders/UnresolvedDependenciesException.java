@@ -7,7 +7,7 @@ import i5.las2peer.classLoaders.helpers.LibraryDependency;
  * exception thrown on attempts to load a library which dependencies could not be met
  * by the registered jar repositories
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class UnresolvedDependenciesException extends ClassLoaderException {

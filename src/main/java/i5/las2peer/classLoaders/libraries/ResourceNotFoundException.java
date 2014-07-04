@@ -6,7 +6,7 @@ import i5.las2peer.classLoaders.ClassLoaderException;
 /**
  * exception thrown on not found resources within a LoadedLibrary
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class ResourceNotFoundException extends ClassLoaderException {

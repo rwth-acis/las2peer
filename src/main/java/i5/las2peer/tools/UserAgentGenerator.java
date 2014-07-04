@@ -9,7 +9,7 @@ import i5.las2peer.security.UserAgent;
  * Provided a passphrase, the tool will generate an xml representation of the
  * required agent and put it to standard out.
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class UserAgentGenerator {

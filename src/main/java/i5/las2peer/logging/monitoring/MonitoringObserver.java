@@ -20,7 +20,7 @@ import i5.las2peer.tools.SerializationException;
  * This is the base class of the logging module of LAS2peer.
  * It sends the collected data to the "Monitoring Data Processing Service" via the LAS2peer message concept.
  * 
- * @author Peter de Lange
+ * 
  *
  */
 public class MonitoringObserver extends NodeObserver {

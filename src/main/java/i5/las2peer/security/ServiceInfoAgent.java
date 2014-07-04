@@ -18,7 +18,7 @@ import java.security.PublicKey;
 import org.apache.commons.codec.binary.Base64;
 
 /**
- * @author Alexander
+ * 
  */
 
 /**

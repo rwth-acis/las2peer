@@ -11,7 +11,7 @@ import rice.p2p.scribe.ScribeContent;
  * base class for content published to the pub/sub-facilities of the pastry library
  * (scribe)
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public abstract class L2pScribeContent implements ScribeContent {

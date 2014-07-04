@@ -30,8 +30,8 @@ import org.apache.commons.codec.binary.Base64;
  * An Agent is the basic acting entity in the LAS2peer network.
  * At the moment, an agent can represent a simple user, a group, a service or a monitoring agent.
  * 
- * @author Holger Jan&szlig;en
- * @author Peter de Lange
+ * 
+ * 
  *
  */
 public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {

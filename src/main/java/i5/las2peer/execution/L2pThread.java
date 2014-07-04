@@ -9,7 +9,7 @@ import java.io.Serializable;
  * a L2pThread is responsible for running a single {@link RMITask} inside a 
  * {@link i5.las2peer.p2p.Node}
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class L2pThread extends Thread {

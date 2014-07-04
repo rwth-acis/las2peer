@@ -28,7 +28,7 @@ import org.apache.commons.codec.binary.Base64;
  * A MonitoringAgent is responsible for sending monitoring information collected 
  * at the {@link i5.las2peer.logging.monitoring.MonitoringObserver}. It should only be used for this task.
  * 
- * @author Peter de Lange
+ * 
  *
  */
 public class MonitoringAgent extends PassphraseAgent {

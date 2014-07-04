@@ -4,7 +4,7 @@ package i5.las2peer.persistency;
 /**
  * Exception thrown, if the decoding has failed for some reason.
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class DecodingFailedException extends EnvelopeException {

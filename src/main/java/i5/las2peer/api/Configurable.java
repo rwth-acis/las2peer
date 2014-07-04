@@ -21,7 +21,7 @@ import java.util.Set;
  * This won't be done automatically, since subclasses may want to add some extra configuration 
  * behavior.
  *  
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public abstract class Configurable {

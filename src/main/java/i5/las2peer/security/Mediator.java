@@ -25,7 +25,7 @@ import java.util.Vector;
  * The second way to handle messages is to get pending messages from the Mediator directly via the provided methods.
  * Handling then has to be done via the calling entity (for example a service).
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class Mediator implements MessageReceiver {

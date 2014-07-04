@@ -8,7 +8,7 @@ import rice.p2p.commonapi.NodeHandle;
 /**
  *	a simple envelope for sending las2peer messages through the pastry network
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class MessageEnvelope implements Message {

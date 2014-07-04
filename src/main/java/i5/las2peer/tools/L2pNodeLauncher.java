@@ -52,8 +52,8 @@ import rice.p2p.commonapi.NodeHandle;
  * All methods to be executed can be stated via additional command line parameters to the
  * {@link #main} method.
  * 
- * @author Holger Jan&szlig;en
- * @author Peter de Lange
+ * 
+ * 
  *
  */
 public class L2pNodeLauncher {

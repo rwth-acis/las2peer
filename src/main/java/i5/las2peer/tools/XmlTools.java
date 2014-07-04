@@ -11,7 +11,7 @@ import java.lang.reflect.Modifier;
 /**
  * Simple <i>static</i> class collecting useful methods for XML (de-)serialization.
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class XmlTools {

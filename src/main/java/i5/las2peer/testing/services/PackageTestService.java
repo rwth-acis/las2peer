@@ -11,7 +11,7 @@ import java.io.IOException;
 /**
  * A simple test service for testing the classloader possibilities of the LAS2peer framework.
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class PackageTestService extends Service {

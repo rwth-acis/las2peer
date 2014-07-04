@@ -3,7 +3,7 @@ package i5.las2peer.p2p;
 /**
  * Exception thrown on access to artifacts which cannot be found in the net.
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class ArtifactNotFoundException extends Exception {

@@ -39,7 +39,7 @@ import org.junit.Before;
  * 
  * If you want to use any other directory, just override the method {@link #getStartupDir()}.
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public abstract class LocalServiceTestCase {

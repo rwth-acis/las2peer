@@ -3,7 +3,7 @@ package i5.las2peer.tools;
 /**
  * A simple thread waiting for a result.
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  * @param <T>
  */

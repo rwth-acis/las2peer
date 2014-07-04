@@ -17,7 +17,7 @@ import java.util.Set;
  * a LibraryClassLoader is responsible for loading classes from one library bundle, probably loaded 
  * via a {@link i5.las2peer.classLoaders.libraries.Repository}
  *  
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class LibraryClassLoader extends ClassLoader {

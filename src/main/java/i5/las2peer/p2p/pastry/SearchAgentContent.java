@@ -6,7 +6,7 @@ import rice.p2p.commonapi.NodeHandle;
  * A <i>content</i> to be published to an agent's scribe topic, if someone is looking for
  * running versions of this agent.
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class SearchAgentContent extends L2pScribeContent {

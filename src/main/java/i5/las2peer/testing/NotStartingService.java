@@ -8,7 +8,7 @@ import i5.las2peer.p2p.Node;
  * A simple service for testing a service which has problems in the 
  * notification method of node registering.
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class NotStartingService extends Service {

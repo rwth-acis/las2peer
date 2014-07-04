@@ -7,7 +7,7 @@ import java.io.Serializable;
  * a simple content class for a {@link Message} indicating a successful execution of
  * an remote invocation task
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class RMIResultContent implements Serializable {

@@ -25,7 +25,7 @@ import org.apache.commons.codec.binary.Base64;
 /**
  * An UserAgent represent a (End)user of the LAS2peer system.
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class UserAgent extends PassphraseAgent {

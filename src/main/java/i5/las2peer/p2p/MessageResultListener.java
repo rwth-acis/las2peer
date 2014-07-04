@@ -21,7 +21,7 @@ import java.util.Vector;
  * The <i>notify...</i> hook may be used to react directly to events concerning this listener, e.g. in
  * a closure like manner. 
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class MessageResultListener {
@@ -29,7 +29,7 @@ public class MessageResultListener {
 	/**
 	 * a simple message status flag
 	 * 
-	 * @author Holger Jan&szlig;en
+	 * 
 	 *
 	 */
 	public enum Status { WAITING, SUCCESS, EXCEPTION, TIMEOUT };

@@ -5,7 +5,7 @@ import i5.las2peer.security.L2pSecurityException;
 
 /**
  * A simple exception thrown on a forbidden attempt to overwrite an envelope.
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class OverwriteException extends L2pSecurityException {

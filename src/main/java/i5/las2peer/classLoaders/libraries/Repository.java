@@ -9,7 +9,7 @@ import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
  * a repository provides the {@link i5.las2peer.classLoaders.L2pClassLoader} with needed libraries (jars)
  * in form of {@link LoadedLibrary} implementations 
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public interface Repository {

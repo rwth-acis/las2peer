@@ -8,7 +8,7 @@ import rice.p2p.commonapi.Message;
  * A simple test message to be sent through the pastry network
  * will be removed later
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class PastryTestMessage implements Message {

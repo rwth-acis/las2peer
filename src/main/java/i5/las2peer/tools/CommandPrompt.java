@@ -17,7 +17,7 @@ import java.util.Hashtable;
  * A simple command line for executing commands, generating new instances
  * and handling local variables.
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class CommandPrompt {
@@ -25,7 +25,7 @@ public class CommandPrompt {
 	/**
 	 * Enumeration for different return status codes of executed lines.
 	 * 
-	 * @author Holger Jan&szlig;en
+	 * 
 	 *
 	 */
 	public enum ReturnStatus {

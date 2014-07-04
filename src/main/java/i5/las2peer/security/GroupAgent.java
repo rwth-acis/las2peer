@@ -35,7 +35,7 @@ import org.apache.commons.codec.binary.Base64;
  * each entitled agent (i.e. <i>member</i> of the group).
  * 
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class GroupAgent extends Agent {
@@ -139,7 +139,7 @@ public class GroupAgent extends Agent {
 			throw new L2pSecurityException("you have to unlock this group first!" );
 		
 		byte[] cryptedSecret = CryptoTools.encryptAsymmetric(symmetricGroupKey, a.getPublicKey());
-		htEncryptedKeyVersions.put( a.getId(), cryptedSecret);		
+		htEncryptedKeyVersions.put( a.getId(), cryptedSecret);
 	}
 	
 	/**

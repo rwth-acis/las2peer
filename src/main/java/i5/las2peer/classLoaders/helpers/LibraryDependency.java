@@ -4,7 +4,7 @@ package i5.las2peer.classLoaders.helpers;
 /**
  * a library dependency defines a library and a version range to match
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class LibraryDependency {

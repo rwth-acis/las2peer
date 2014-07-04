@@ -6,7 +6,7 @@ import java.util.Date;
 /**
  * a simple content for ping and pong message
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class PingPongContent implements Serializable {

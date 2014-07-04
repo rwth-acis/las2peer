@@ -5,7 +5,7 @@ import rice.p2p.commonapi.NodeHandle;
 /**
  * scripe content for a message, the an agent joined the net
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class AgentJoinedContent extends L2pScribeContent {

@@ -15,7 +15,7 @@ import java.io.PrintStream;
  * 
  * 
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class ColoredOutput {
@@ -27,7 +27,7 @@ public class ColoredOutput {
 	
 	/**
 	 * A color used by the {@link ColoredOutput} methods.
-	 * @author Holger Jan&szlig;en
+	 * 
 	 *
 	 */
 	public enum Color {

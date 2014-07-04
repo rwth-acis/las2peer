@@ -6,7 +6,7 @@ import java.io.Serializable;
 /**
  * a simple invocation task
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class RMITask implements Serializable {

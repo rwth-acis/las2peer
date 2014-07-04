@@ -3,7 +3,7 @@ package i5.las2peer.classLoaders;
 /**
  * base class for class loader exceptions in the las2peer package
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class ClassLoaderException extends Exception {

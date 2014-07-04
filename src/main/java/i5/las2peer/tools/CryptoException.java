@@ -4,7 +4,7 @@ package i5.las2peer.tools;
 /**
  * Exception for cryptografical problems.
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class CryptoException extends Exception {

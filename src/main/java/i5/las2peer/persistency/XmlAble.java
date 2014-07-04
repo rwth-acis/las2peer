@@ -19,7 +19,7 @@ package i5.las2peer.persistency;
  *  	This corresponds to the old XmlAble.</li>
  * </ol>
  * 
- * @author Holger Jan&szlig;en
+ * 
  * 
  */
 public interface XmlAble

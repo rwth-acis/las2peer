@@ -16,7 +16,7 @@ import java.util.Hashtable;
  * 
  * The main idea is to keep each service separate but load each needed library only once.
  *  
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class L2pClassLoader extends ClassLoader {

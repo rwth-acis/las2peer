@@ -33,7 +33,7 @@ import javax.crypto.spec.SecretKeySpec;
  * Simple <i>static</i> class collecting useful cryptographic methods end encapsulating 
  * the access to the underlying cryptografic library.
  *   
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class CryptoTools {

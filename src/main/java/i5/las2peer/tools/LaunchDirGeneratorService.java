@@ -12,7 +12,7 @@ import java.text.DecimalFormat;
  *  
  * The last node is always interactive.
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class LaunchDirGeneratorService {

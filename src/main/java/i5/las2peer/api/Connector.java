@@ -9,8 +9,8 @@ import i5.las2peer.p2p.Node;
  * 
  * All other 
  * 
- * @author Holger Jan&szlig;en
- * @author Peter de Lange
+ * 
+ * 
  *
  */
 public abstract class Connector extends Configurable {

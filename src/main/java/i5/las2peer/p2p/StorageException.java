@@ -4,7 +4,7 @@ package i5.las2peer.p2p;
 /**
  * Exception thrown on any problems with the p2p storage of {@link i5.las2peer.persistency.Envelope}s.
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class StorageException extends Exception {

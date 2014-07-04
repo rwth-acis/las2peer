@@ -5,7 +5,7 @@ import java.util.Hashtable;
 /**
  * A simple service for testing (R)MI and service start.
  * 
- * @author Holger Jan&szlig;en
+ * 
  * 
  */
 public class TestService extends Service {

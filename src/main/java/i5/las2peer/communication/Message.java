@@ -44,8 +44,8 @@ import rice.p2p.commonapi.NodeHandle;
  * the sending agent.
  * 
  * 
- * @author Holger Jan&szlig;en
- * @author Peter de Lange
+ * 
+ * 
  *
  */
 public class Message implements XmlAble {

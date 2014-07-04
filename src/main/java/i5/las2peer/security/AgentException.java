@@ -3,7 +3,7 @@ package i5.las2peer.security;
 /**
  * Basic exception thrown by agents on any problem.
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class AgentException extends Exception {

@@ -27,7 +27,7 @@ import java.util.Random;
  * 
  * TODO: uses loggers / observers 
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class LocalNode extends Node {

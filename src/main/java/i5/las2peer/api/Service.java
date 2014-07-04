@@ -96,7 +96,7 @@ import java.lang.reflect.Modifier;
  * of the {@link i5.las2peer.tools} package. There are e.g. some command line generators for XML helper files.  
  * 
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public abstract class Service extends Configurable {	

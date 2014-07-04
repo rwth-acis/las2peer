@@ -5,7 +5,7 @@ import i5.las2peer.classLoaders.ClassLoaderException;
 /**
  * exception thrown if a requested library cannot be found in a repository 
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class NotFoundException extends ClassLoaderException {

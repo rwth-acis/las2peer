@@ -10,7 +10,7 @@ import i5.las2peer.p2p.Node;
  * An interface for receiving messages in the p2p network.
  * Used by {@link Agent}s and {@link Mediator}s.
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public interface MessageReceiver {

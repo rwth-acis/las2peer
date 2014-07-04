@@ -11,7 +11,7 @@ import rice.Continuation;
 /**
  * A continuation for putting artifacts into the past p2p storage
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class PastPutContinuation implements Continuation<Boolean[] ,Exception>{

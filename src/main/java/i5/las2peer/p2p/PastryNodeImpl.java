@@ -64,7 +64,7 @@ import rice.persistence.StorageManagerImpl;
  * The package {@link i5.las2peer.p2p.pastry} provides all necessary helper classes
  * for the integration (and encapsulation) of the FreePastry library.
  *  
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class PastryNodeImpl extends Node {
@@ -83,7 +83,7 @@ public class PastryNodeImpl extends Node {
 	 * Storage mode for the pastry node &ndash; either use only memory or the filesystem
 	 * for stored artifacts.
 	 *  
-	 * @author Holger Jan&szlig;en
+	 * 
 	 *
 	 */
 	public enum STORAGE_MODE {

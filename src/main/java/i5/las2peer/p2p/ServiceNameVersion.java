@@ -3,7 +3,7 @@ package i5.las2peer.p2p;
 import java.io.Serializable;
 
 /**
- * @author Alexander
+ * 
  */
 public class ServiceNameVersion implements Serializable
 {

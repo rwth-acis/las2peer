@@ -9,7 +9,7 @@ import java.util.Hashtable;
 /**
  * A simple Hashtable based storage for agents.
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class BasicAgentStorage implements AgentStorage {

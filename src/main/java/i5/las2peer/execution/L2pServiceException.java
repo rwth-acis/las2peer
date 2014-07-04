@@ -5,7 +5,7 @@ import i5.las2peer.security.AgentException;
 
 /**
  * basic exception thrown on service (invocation) problems
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class L2pServiceException extends AgentException {

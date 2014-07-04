@@ -23,7 +23,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
- * @author Alexander
+ * 
  */
 public class ServiceInfoAgentTest
 {

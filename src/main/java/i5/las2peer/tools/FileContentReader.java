@@ -10,7 +10,7 @@ import java.io.InputStreamReader;
 /**
  * A simple reader for string contents of a file or input stream.
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class FileContentReader {

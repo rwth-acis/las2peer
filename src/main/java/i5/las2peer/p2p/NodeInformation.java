@@ -23,7 +23,7 @@ import java.util.Vector;
 /**
  * A NodeInformation gives basic information about a node.
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class NodeInformation implements XmlAble {

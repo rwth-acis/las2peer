@@ -3,7 +3,7 @@ package i5.las2peer.p2p;
 
 /**
  * A simple exception thrown on timeouts.
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class TimeoutException extends Exception {

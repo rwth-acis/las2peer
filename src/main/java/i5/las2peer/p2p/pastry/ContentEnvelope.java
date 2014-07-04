@@ -21,7 +21,7 @@ import rice.pastry.commonapi.PastryIdFactory;
  * On knowledge of the class of the contained data the user may use the <i>getContained...</i>
  * methods to get typed access. 
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class ContentEnvelope extends ContentHashPastContent {

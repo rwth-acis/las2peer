@@ -11,7 +11,7 @@ import rice.pastry.socket.SocketNodeHandle;
  * to log all interesting node events for a {@link i5.las2peer.p2p.Node}
  * (mainly {@link i5.las2peer.p2p.PastryNodeImpl}).
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public abstract class NodeObserver {
@@ -19,7 +19,7 @@ public abstract class NodeObserver {
 	/**
 	 * An enumeration element with all types of events.
 	 * 
-	 * @author Holger Jan&szlig;en
+	 * 
 	 * 
 	 */
 	public enum Event {

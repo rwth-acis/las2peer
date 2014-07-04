@@ -4,7 +4,7 @@ package i5.las2peer.testing;
 /**
  * A simple exception for testing, thrown inside the {@link TestService}.
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class MyOwnException extends Exception {

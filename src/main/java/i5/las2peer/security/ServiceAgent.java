@@ -45,7 +45,7 @@ import org.apache.commons.codec.binary.Base64;
  *  
  * // TODO: work on  LAS integration / RMI
  *  
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class ServiceAgent extends PassphraseAgent {
@@ -123,7 +123,7 @@ public class ServiceAgent extends PassphraseAgent {
 
 	@Override
 	public void receiveMessage(Message m, Context c ) throws MessageException {
-		try {	
+		try {
 			m.open(this, getRunningAtNode());
 			Object content = m.getContent();
 			

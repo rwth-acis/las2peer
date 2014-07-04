@@ -4,7 +4,7 @@ package i5.las2peer.tools;
 /**
  * Base class for exceptions indicating serialization problems.
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class SerializationException extends Exception {

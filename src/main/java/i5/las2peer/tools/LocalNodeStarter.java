@@ -24,7 +24,7 @@ import java.lang.reflect.Modifier;
  * 
  * After starting a given static method may be invoked (i.e. for testing purposes)
  *  
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class LocalNodeStarter {

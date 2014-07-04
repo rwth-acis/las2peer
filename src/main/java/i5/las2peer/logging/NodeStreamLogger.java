@@ -18,7 +18,7 @@ import java.util.Date;
  * This is useful, e.g. because on pastry nodes, the first event will occur before the id of the node is set 
  * (by the pastry implementation itself)
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class NodeStreamLogger extends NodeObserver {

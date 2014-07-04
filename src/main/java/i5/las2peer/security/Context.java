@@ -19,7 +19,7 @@ import java.util.Hashtable;
  * Each {@link i5.las2peer.execution.L2pThread} is bound to a context,
  * which is mainly determined by the executing agent.
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class Context implements AgentStorage {

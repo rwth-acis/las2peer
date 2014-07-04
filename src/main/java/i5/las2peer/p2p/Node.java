@@ -64,8 +64,8 @@ import rice.pastry.NodeHandle;
  * A Node represents one enclosed unit in the network hosting an arbitrary number of
  * agents willing to participate in the P2P networking.
  * 
- * @author Holger Jan&szlig;en
- * @author Peter de Lange
+ * 
+ * 
  */
 public abstract class Node implements AgentStorage {
 	
@@ -75,7 +75,7 @@ public abstract class Node implements AgentStorage {
 	/**
 	 * The Sending mode for outgoing messages.
 	 * 
-	 * @author Holger Jan&szlig;en
+	 * 
 	 *
 	 */
 	public enum SendMode { ANYCAST, BROADCAST };
@@ -83,7 +83,7 @@ public abstract class Node implements AgentStorage {
 	/**
 	 * Enum with the possible states of a node.
 	 * 
-	 * @author Holger Jan&szlig;en
+	 * 
 	 *
 	 */
 	public enum NodeStatus {

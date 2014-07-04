@@ -8,7 +8,7 @@ import java.util.Hashtable;
 
 /**
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class UserAgentList implements Serializable {

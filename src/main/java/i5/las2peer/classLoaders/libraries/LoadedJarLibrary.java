@@ -16,7 +16,7 @@ import java.util.jar.JarFile;
 /**
  * a loaded jar library implements a library on the basis of a standard jar file
  * 
- * @author Holger Jan&szlig;en
+ * 
  *
  */
 public class LoadedJarLibrary extends LoadedLibrary {

@@ -10,7 +10,7 @@ import java.io.Serializable;
  * An Array of instances of this class is send via a {@link i5.las2peer.communication.Message}
  * to the central monitoring node.
  * 
- * @author Peter de Lange
+ * 
  *
  */
 public class MonitoringMessage implements Serializable{
