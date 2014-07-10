@@ -45,7 +45,7 @@ import rice.pastry.NodeIdFactory;
 import rice.pastry.PastryNode;
 import rice.pastry.commonapi.PastryIdFactory;
 import rice.pastry.leafset.LeafSet;
-import rice.pastry.socket.SocketPastryNodeFactory;
+import rice.pastry.socket.internet.InternetPastryNodeFactory;
 import rice.pastry.standard.RandomNodeIdFactory;
 import rice.persistence.LRUCache;
 import rice.persistence.MemoryStorage;
@@ -370,8 +370,7 @@ public class PastryNodeImpl extends Node {
 			setStatus(NodeStatus.STARTING);
 
 			NodeIdFactory nidFactory = new RandomNodeIdFactory(pastryEnvironment);
-			SocketPastryNodeFactory factory = new SocketPastryNodeFactory(nidFactory, InetAddress.getLocalHost(),
-					pastryPort, pastryEnvironment);
+			InternetPastryNodeFactory factory = new InternetPastryNodeFactory(nidFactory, pastryPort, pastryEnvironment);
 			pastryNode = factory.newNode();
 
 			setupPastryApplications();
