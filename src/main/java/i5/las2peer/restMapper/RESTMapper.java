@@ -715,7 +715,9 @@ public class RESTMapper {
                     String[] paramNames = currentNode.listPathParameterNames();//it is a PathParam, so get all given names of it
                     for(String paramName : paramNames)
                     {
-                        parameterValues.put(paramName, anUriSplit); //map the value provided in the URI path to the stored parameter names
+                    	// the uri split is still URL encoded, so first decode
+                    	String uriValue = java.net.URLDecoder.decode(anUriSplit, "UTF-8");
+                        parameterValues.put(paramName, uriValue); //map the value provided in the URI path to the stored parameter names
                     }
 
                 }
