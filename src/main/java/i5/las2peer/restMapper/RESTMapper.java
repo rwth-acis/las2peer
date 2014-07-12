@@ -1114,6 +1114,7 @@ public class RESTMapper {
     {
         if(classMap.isEmpty())
         {
+        	classMap.put("void", void.class);
             classMap.put("int", int.class);
             classMap.put("float", float.class);
             classMap.put("byte", byte.class);
