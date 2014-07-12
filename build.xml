@@ -173,6 +173,12 @@
 		<jar jarfile="${export.jars}/las2peer-web-connector.jar">
 			<fileset dir="${tmp.classes}">
 			</fileset>
+			<manifest>
+				<attribute
+					name="Class-Path"
+					value="las2peer-rest-mapper-0.2-SNAPSHOT.jar"
+				/>
+			</manifest>
 		</jar>
 	</target>
 	
