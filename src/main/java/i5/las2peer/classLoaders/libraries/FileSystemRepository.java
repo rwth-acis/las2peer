@@ -223,7 +223,7 @@ public class FileSystemRepository implements Repository {
 	private void searchJars ( String directory ) {
 		File f = new File ( directory );
 		
-		if ( ! f.isDirectory() ) {
+		if ( ! f.exists() || ! f.isDirectory() ) {
 			// since this is a search function, stay friendly and don't throw an exception
 			System.err.println ( "Given path is not a directory: " + f.toString() );
 			return;
