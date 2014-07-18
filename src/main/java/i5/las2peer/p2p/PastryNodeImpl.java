@@ -68,7 +68,7 @@ public class PastryNodeImpl extends Node {
 	public static final int DEFAULT_PAST_STORAGE_DISCSIZE = 50 * 1024 * 1024;
 	private int pastStorageDiscSize = DEFAULT_PAST_STORAGE_DISCSIZE;
 
-	public static final int DEFAULT_MEMORY_CACHESIZE = 512 * 1024;
+	public static final int DEFAULT_MEMORY_CACHESIZE = 10 * 1024 * 1024;
 	private int pastMemoryCacheSize = DEFAULT_MEMORY_CACHESIZE;
 
 	public static final int DEFAULT_PAST_REPLICAS = 3;
@@ -369,6 +369,7 @@ public class PastryNodeImpl extends Node {
 		try {
 			setStatus(NodeStatus.STARTING);
 
+			// FIXME this shouldn't use a random node id in order to provide persistence
 			NodeIdFactory nidFactory = new RandomNodeIdFactory(pastryEnvironment);
 			InternetPastryNodeFactory factory = new InternetPastryNodeFactory(nidFactory, pastryPort, pastryEnvironment);
 			pastryNode = factory.newNode();
