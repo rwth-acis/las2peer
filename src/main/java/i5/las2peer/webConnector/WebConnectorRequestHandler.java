@@ -9,85 +9,42 @@ import i5.las2peer.execution.ServiceInvocationException;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.TimeoutException;
-import i5.las2peer.restMapper.MediaType;
 import i5.las2peer.restMapper.RESTMapper;
 import i5.las2peer.restMapper.data.InvocationData;
 import i5.las2peer.restMapper.data.Pair;
 //import rice.p2p.util.Base64;
 import i5.las2peer.restMapper.exceptions.NoMethodFoundException;
 import i5.las2peer.restMapper.exceptions.NotSupportedUriPathException;
-import i5.las2peer.security.Agent;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.Mediator;
 import i5.las2peer.security.PassphraseAgent;
 import i5.las2peer.security.UserAgent;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
-import java.lang.ProcessBuilder.Redirect;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Scanner;
 
-import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
-import net.minidev.json.JSONValue;
-import net.minidev.json.parser.JSONParser;
 import rice.p2p.util.Base64;
 
-import com.nimbusds.jwt.SignedJWT;
-import com.nimbusds.oauth2.sdk.AuthorizationCode;
-import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
 import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.ResponseType;
-import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.SerializeException;
-import com.nimbusds.oauth2.sdk.TokenErrorResponse;
-import com.nimbusds.oauth2.sdk.TokenRequest;
-import com.nimbusds.oauth2.sdk.TokenResponse;
-import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
-import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
-import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest.Method;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
-import com.nimbusds.oauth2.sdk.id.ClientID;
-import com.nimbusds.oauth2.sdk.id.State;
-import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
-import com.nimbusds.oauth2.sdk.token.RefreshToken;
-import com.nimbusds.openid.connect.sdk.AuthenticationErrorResponse;
-import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
-import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
-import com.nimbusds.openid.connect.sdk.AuthenticationResponseParser;
-import com.nimbusds.openid.connect.sdk.AuthenticationSuccessResponse;
-import com.nimbusds.openid.connect.sdk.Nonce;
-import com.nimbusds.openid.connect.sdk.OIDCAccessTokenResponse;
-import com.nimbusds.openid.connect.sdk.OIDCTokenResponseParser;
 import com.nimbusds.openid.connect.sdk.UserInfoErrorResponse;
-import com.nimbusds.openid.connect.sdk.UserInfoRequest;
 import com.nimbusds.openid.connect.sdk.UserInfoResponse;
 import com.nimbusds.openid.connect.sdk.UserInfoSuccessResponse;
 import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 
 
 /**
- * A HttpServer RequestHandler for handling requests to the LAS2peer Web connector.
+ * A HttpServer RequestHandler for handling requests to the LAS2peer Web Connector.
  * Each request will be distributed to its corresponding session.
- *
- * @author Holger Jan&szlig;en
- * @Author Alexander Ruppert
- * @author Dominik Renzel
- * 
  */
 
 
@@ -98,31 +55,12 @@ public class WebConnectorRequestHandler implements RequestHandler {
 	private WebConnector connector;
 	private Node l2pNode;
 
-	// some static Open ID Connect URIs for testing purposes
-	// should be rather configured via Web Connector properties
-
-	// URIs of OIDC server endpoints (authorization, token, userinfo)
-	//private URI authEndpointUri, tokenEndpointUri, userinfoEndpointUri;
-
-	// Registered client ID, secret and redirect URI
-	//private ClientID clientID;
-	//private Secret clientSecret;
-	//private URI redirectURI;
-
-
 	/**
 	 * Standard Constructor
 	 * @throws URISyntaxException 
 	 *
 	 */
 	public WebConnectorRequestHandler () throws URISyntaxException {
-
-		//authEndpointUri = new URI("http://137.226.58.15:9085/openid-connect-server-webapp/authorize/");
-		//tokenEndpointUri = new URI("http://137.226.58.15:9085/openid-connect-server-webapp/token");
-		//userinfoEndpointUri = new URI("http://137.226.58.15:9085/openid-connect-server-webapp/userinfo");
-		//redirectURI = new URI("http://localhost:8080/oidc/redirect");
-
-		// Registered client ID, secret and redirect URI
 
 	}
 
@@ -154,7 +92,8 @@ public class WebConnectorRequestHandler implements RequestHandler {
 		String password="";
 
 
-		//Check for authentication information in header
+		// Default authentication: 
+		// check for authentication information in header
 		if(request.hasHeaderField(AUTHENTICATION_FIELD)
 				&&(request.getHeaderField(AUTHENTICATION_FIELD).length()>BASIC_PREFIX_LENGTH))
 		{
@@ -170,7 +109,13 @@ public class WebConnectorRequestHandler implements RequestHandler {
 
 			return login(username,password,request,response);
 
-		} else if(request.getQueryString().contains("access_token=")){
+		} 
+		// OpenID Connect authentication:
+		// check for access token in query parameter
+		
+		// IMPORTANT NOTE: doing the same thing with authorization header and bearer token results in client-side 
+		//                 cross-domain errors despite correct config for CORS in LAS2peer Web Connector!
+		else if(request.getQueryString().contains("access_token=")){
 			String[] params = request.getQueryString().split("&");
 			String token = "";
 			for(int i=0;i<params.length; i++){
@@ -180,8 +125,8 @@ public class WebConnectorRequestHandler implements RequestHandler {
 				}
 			}
 
-			// now query userinfo endpoint
-
+			// send request to OpenID Connect user info endpoint to retrieve complete user information 
+			// in exchange for access token.
 			HTTPRequest hrq;
 			HTTPResponse hrs;
 
@@ -189,7 +134,8 @@ public class WebConnectorRequestHandler implements RequestHandler {
 				URI userinfoEndpointUri = new URI((String)((JSONObject) connector.oidcProvider.get("config")).get("userinfo_endpoint"));
 				hrq = new HTTPRequest(Method.GET,userinfoEndpointUri.toURL());
 				hrq.setAuthorization("Bearer "+token);
-
+				
+				//TODO: process all error cases that can happen (in particular invalid tokens)
 				hrs = hrq.send();
 
 			} catch (IOException|URISyntaxException e) {
@@ -199,8 +145,8 @@ public class WebConnectorRequestHandler implements RequestHandler {
 				return null;
 			}
 
+			// process response from OpenID Connect user info endpoint
 			UserInfoResponse userInfoResponse;
-
 			try {
 				userInfoResponse = UserInfoResponse.parse(hrs);
 			} catch (ParseException e) {
@@ -209,21 +155,18 @@ public class WebConnectorRequestHandler implements RequestHandler {
 				return null;
 			}
 
-
+			// failed request for OpenID Connect user info will result in no agent being returned.
 			if (userInfoResponse instanceof UserInfoErrorResponse) {
 
 				UserInfoErrorResponse uier = (UserInfoErrorResponse) userInfoResponse;
-				response.println("Open ID Connect UserInfo request failed!");
-				//response.setStatus(401);
-
-				response.setStatus(302);
-				response.setHeaderField("Location",composeAuthzRequestURL().toString());
-				//response.clearContent();
-
+				
+				response.println("Open ID Connect UserInfo request failed! Cause: " + uier.getErrorObject().getDescription());
+				response.setStatus(401);
+				
 				return null;
 			}
 
-
+			// In case of successful request, map OpenID Connect user info to intern
 			UserInfo userInfo = ((UserInfoSuccessResponse)userInfoResponse).getUserInfo();
 
 			try {
@@ -247,7 +190,11 @@ public class WebConnectorRequestHandler implements RequestHandler {
 				} catch (AgentNotKnownException e) {
 					UserAgent oidcAgent;
 					try {
+						// here, we choose the OpenID Connect 
+						// TODO: choose other scheme for generating agent password.
 						oidcAgent = UserAgent.createUserAgent(oidcAgentId,sub);
+						
+						
 						oidcAgent.unlockPrivateKey(ujson.get("sub").toString());
 						oidcAgent.setEmail((String) ujson.get("email"));
 						oidcAgent.setLoginName((String) ujson.get("preferred_username"));
@@ -262,10 +209,9 @@ public class WebConnectorRequestHandler implements RequestHandler {
 
 			} catch (L2pSecurityException e) {
 				response.println(e.getMessage());
+				response.setStatus(401);
 				e.printStackTrace();
 			}
-			return null;
-
 		}
 
 		//no information? check if there is a default account for login
@@ -305,11 +251,6 @@ public class WebConnectorRequestHandler implements RequestHandler {
                 throw new L2pSecurityException ("Agent is not passphrase protected!");*/
 
 			userAgent.unlockPrivateKey(password);
-
-			//connector.logMessage("Login: "+username);
-			//connector.logMessage("successful login");
-			// Thread.sleep(10); //TODO: find out how to avoid this 'hack'
-
 
 			return userAgent;
 
@@ -537,27 +478,16 @@ public class WebConnectorRequestHandler implements RequestHandler {
 		response.setHeaderField( "Server-Name", "LAS2peer" );
 		response.setContentType( "text/xml" );
 
-		// Process Open ID Connect login 
-		if(request.getMethod() == HttpRequest.METHOD_GET && request.getPath().equals("/oidc/login")){
-			handleOIDCLoginRequest(request, response);
+		PassphraseAgent userAgent;
+		if((userAgent=authenticate(request,response))!= null)
+		{
+			invoke(userAgent,request,response);
+			logout(userAgent);
 		}
 
-		// Process Open ID Connect redirect
-		else if(request.getMethod() == HttpRequest.METHOD_GET && request.getPath().equals("/oidc/redirect")){
-			handleOIDCRedirectRequest(request, response);
-		}
-
-		else{
-
-			PassphraseAgent userAgent;
-			if((userAgent=authenticate(request,response))!= null)
-			{
-				invoke(userAgent,request,response);
-				logout(userAgent);
-			}
-		}
 	}
 
+	/*
 	private void handleOIDCLoginRequest(HttpRequest request, HttpResponse response){
 
 		try {
@@ -593,6 +523,7 @@ public class WebConnectorRequestHandler implements RequestHandler {
 		}
 
 	}
+	
 
 	private void handleOIDCRedirectRequest(HttpRequest request, HttpResponse response){
 
@@ -669,10 +600,10 @@ public class WebConnectorRequestHandler implements RequestHandler {
 		// Authentication success, retrieve the authorisation code
 		AuthenticationSuccessResponse authzSuccess = (AuthenticationSuccessResponse)authResponse;
 
-//		response.println("Authorization success:");
-//		response.println("\tAuthorization code: " + authzSuccess.getAuthorizationCode());
-//		response.println("\tState: " + authzSuccess.getState());
-//		response.println("\tRedirection URI: " + authzSuccess.getRedirectionURI());
+		//		response.println("Authorization success:");
+		//		response.println("\tAuthorization code: " + authzSuccess.getAuthorizationCode());
+		//		response.println("\tState: " + authzSuccess.getState());
+		//		response.println("\tRedirection URI: " + authzSuccess.getRedirectionURI());
 
 		AuthorizationCode code = authzSuccess.getAuthorizationCode();
 
@@ -745,7 +676,7 @@ public class WebConnectorRequestHandler implements RequestHandler {
 			// The token response indicates an error, print it out
 			// and return immediately
 			TokenErrorResponse tokenError = (TokenErrorResponse)tokenResponse;
-			
+
 			response.setContentType(MediaType.TEXT_PLAIN);
 			response.setStatus(401);
 			response.println("Token error: " + tokenError.getErrorObject() + " " + tokenError.getErrorObject().getDescription());
@@ -758,25 +689,25 @@ public class WebConnectorRequestHandler implements RequestHandler {
 		RefreshToken refreshToken = tokenSuccess.getRefreshToken();
 		SignedJWT idToken = (SignedJWT)tokenSuccess.getIDToken();
 
-//		response.println("Token response:");
-//		response.println("\tAccess token: " + accessToken.toJSONObject().toString());
-//		response.println("\tRefresh token: " + refreshToken);
-//		response.println("\n\n");
-		
+		//		response.println("Token response:");
+		//		response.println("\tAccess token: " + accessToken.toJSONObject().toString());
+		//		response.println("\tRefresh token: " + refreshToken);
+		//		response.println("\n\n");
+
 		// as soon as tokens are available, construct response in form of an HTML document
 		// that writes accessToken to HTML5 local storage
 		String redirectHtmlFile = "./etc/redirect.html";
-		
+
 		try {
-			
+
 			String html = new Scanner(new File(redirectHtmlFile)).useDelimiter("\\A").next();
 			html = html.replaceAll("_ACCESSTOKEN_",accessToken.getValue());
-			
+
 			response.setStatus(200);
 			response.setContentType(MediaType.TEXT_HTML);
 			response.println(html);
 			return;
-			
+
 		} catch (FileNotFoundException e) {
 			response.setContentType(MediaType.TEXT_PLAIN);
 			response.setStatus(500);
@@ -914,6 +845,7 @@ public class WebConnectorRequestHandler implements RequestHandler {
 		//		}
 	}
 
+*/
 	// helper function to create long hash from string
 	public static long hash(String string) {
 		long h = 1125899906842597L; // prime
@@ -924,6 +856,7 @@ public class WebConnectorRequestHandler implements RequestHandler {
 		}
 		return h;
 	}
+	
 
 	/**
 	 * send a notification, that the requested service does not exists
@@ -1104,40 +1037,36 @@ public class WebConnectorRequestHandler implements RequestHandler {
 		connector.logMessage ( logMessage );
 	}
 
-	private URI composeAuthzRequestURL(){
-		return null;
-	}
-
-	private URI composeAuthzRequestURL(URI authEndpointUri, String clientId, URI redirectUri) throws SerializeException {
-
-		// Set the requested response_type (code, token and / or 
-		// id_token):
-		// Use CODE for authorisation code flow
-		// Use TOKEN for implicit flow
-		ResponseType rt = new ResponseType("code");
-
-		// Set the requested scope of access
-		Scope scope = new Scope("openid", "email", "profile");
-
-		// Generate random state value. It's used to link the
-		// authorisation response back to the original request, also to
-		// prevent replay attacks
-		State state = new State();
-
-		// Generate random nonce value.
-		Nonce nonce = new Nonce();
-
-		// Create the actual OIDC authorisation request object
-
-		ClientID clientID = new ClientID(clientId);
-
-		AuthenticationRequest authRequest = new AuthenticationRequest(authEndpointUri, rt, scope, clientID, redirectUri, state, nonce);
-
-		// Construct and output the final OIDC authorisation URL for
-		// redirect
-		return authRequest.toURI();
-
-	}
+//	private URI composeAuthzRequestURL(URI authEndpointUri, String clientId, URI redirectUri) throws SerializeException {
+//
+//		// Set the requested response_type (code, token and / or 
+//		// id_token):
+//		// Use CODE for authorisation code flow
+//		// Use TOKEN for implicit flow
+//		ResponseType rt = new ResponseType("code");
+//
+//		// Set the requested scope of access
+//		Scope scope = new Scope("openid", "email", "profile");
+//
+//		// Generate random state value. It's used to link the
+//		// authorisation response back to the original request, also to
+//		// prevent replay attacks
+//		State state = new State();
+//
+//		// Generate random nonce value.
+//		Nonce nonce = new Nonce();
+//
+//		// Create the actual OIDC authorisation request object
+//
+//		ClientID clientID = new ClientID(clientId);
+//
+//		AuthenticationRequest authRequest = new AuthenticationRequest(authEndpointUri, rt, scope, clientID, redirectUri, state, nonce);
+//
+//		// Construct and output the final OIDC authorisation URL for
+//		// redirect
+//		return authRequest.toURI();
+//
+//	}
 }
 
 
