@@ -131,7 +131,7 @@ public class WebConnectorRequestHandler implements RequestHandler {
 			HTTPResponse hrs;
 
 			try {
-				URI userinfoEndpointUri = new URI((String)((JSONObject) connector.oidcProvider.get("config")).get("userinfo_endpoint"));
+				URI userinfoEndpointUri = new URI((String)((JSONObject) connector.oidcProviderInfo.get("config")).get("userinfo_endpoint"));
 				hrq = new HTTPRequest(Method.GET,userinfoEndpointUri.toURL());
 				hrq.setAuthorization("Bearer "+token);
 				
