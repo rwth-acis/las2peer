@@ -1,5 +1,4 @@
 <ivysettings>
-
 	<property name="revision" value="SNAPSHOT" override="false"/>
     <settings defaultResolver="chain" />
     <resolvers>
