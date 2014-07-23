@@ -1,5 +1,6 @@
 /build
 /export
+/ssl
 /lib
 /.las2peer
 /ivy/ivy.jar
