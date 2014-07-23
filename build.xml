@@ -60,7 +60,7 @@
 
     <target name="get_deps" depends="install-ivy" description="--> resolve dependencies">
         <ivy:settings>
-            <credentials host="role.dbis.rwth-aachen.de:9911/archiva"  realm="Repository internal"/>
+            <credentials host="role.dbis.rwth-aachen.de:9911/archiva" realm="Repository internal"/>
         </ivy:settings>
         <ivy:retrieve type="jar"/>
     </target>
