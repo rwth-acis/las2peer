@@ -17,6 +17,8 @@ import i5.simpleXML.XMLSyntaxException;
 import java.io.Serializable;
 import java.security.KeyPair;
 import java.security.PublicKey;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Random;
@@ -147,8 +149,16 @@ public class GroupAgent extends Agent {
 	 * @return true, if the given agent is a member of this group
 	 */
 	public boolean isMember(Agent a) {
-		// only for opened groups?
-		return (htEncryptedKeyVersions.get(a.getId()) != null);
+		return isMember(a.getId());
+	}
+
+	/**
+	 * check, if the given agent is member of this group or any sub group
+	 * @param a
+	 * @return true, if the given agent is a member of this group
+	 */
+	public boolean isMemberRecursive(Agent a) {
+		return isMemberRecursive(a.getId());
 	}
 
 	/**
@@ -157,31 +167,102 @@ public class GroupAgent extends Agent {
 	 * @return true, if the given agent is a member if this group
 	 */
 	public boolean isMember(long id) {
+		// TODO only for opened groups?
 		return (htEncryptedKeyVersions.get(id) != null);
+	}
+
+	/**
+	 * check, if the given agent (id) is member of this group
+	 * @param id
+	 * @return true, if the given agent is a member if this group
+	 */
+	public boolean isMemberRecursive(long id) {
+		if (isMember(id) == true) {
+			return true;
+		}
+		for (Long memberId : htEncryptedKeyVersions.keySet()) {
+			try {
+				Agent agent = Context.getCurrent().getAgent(memberId);
+				if (agent instanceof GroupAgent) {
+					GroupAgent group = (GroupAgent) agent;
+					if (group.isMemberRecursive(id) == true) {
+						return true;
+					}
+				}
+			} catch (AgentNotKnownException e) {
+				Context.logError(this, "Can't get agent for id " + memberId);
+			}
+		}
+		return false;
 	}
 
 	/**
 	 * how many members does this group have
 	 * 
-	 * @return	the number of group members
+	 * @return the number of group members
 	 */
 	public int getSize() {
 		return htEncryptedKeyVersions.size();
 	}
 
 	/**
-	 * get an array with the ids of all group members
+	 * get the number of member this group and all sub groups have
 	 * 
-	 * @return	an array with the ids of all member agents
+	 * @return the total number of group members
+	 */
+	public int getSizeRecursive() {
+		int result = 0;
+		for (Long memberId : htEncryptedKeyVersions.keySet()) {
+			try {
+				Agent agent = Context.getCurrent().getAgent(memberId);
+				if (agent instanceof GroupAgent) {
+					GroupAgent group = (GroupAgent) agent;
+					// the group agent itself is not counted
+					result += group.getSizeRecursive();
+				} else {
+					result++;
+				}
+			} catch (AgentNotKnownException e) {
+				Context.logError(this, "Can't get agent for id " + memberId);
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * get an array with the ids of all direct group members without recursion
+	 * 
+	 * @return an array with the ids of all direct member agents
 	 */
 	public Long[] getMemberList() {
 		return htEncryptedKeyVersions.keySet().toArray(new Long[0]);
 	}
 
 	/**
+	 * get an array with the ids of all group members including recursion
+	 * 
+	 * @return an array with the ids of all member agents
+	 */
+	public Long[] getMemberListRecursive() {
+		ArrayList<Long> result = new ArrayList<Long>(htEncryptedKeyVersions.keySet());
+		for (Long id : result) {
+			try {
+				Agent agent = Context.getCurrent().getAgent(id);
+				if (agent instanceof GroupAgent) {
+					GroupAgent group = (GroupAgent) agent;
+					Collections.addAll(result, group.getMemberListRecursive());
+				}
+			} catch (AgentNotKnownException e) {
+				Context.logError(this, "Can't get agent for id " + id);
+			}
+		}
+		return result.toArray(new Long[0]);
+	}
+
+	/**
 	 * returns the Agent by whom the private Key of this Group has been unlocked
 	 * 
-	 * @return	the agent, who opened the private key of the group
+	 * @return the agent, who opened the private key of the group
 	 */
 	public Agent getOpeningAgent() {
 		return openedBy;
@@ -198,6 +279,16 @@ public class GroupAgent extends Agent {
 	}
 
 	/**
+	 * remove a member from this group and recursivly from all sub groups
+	 * 
+	 * @param a
+	 * @throws L2pSecurityException
+	 */
+	public void removeMemberRecursive(Agent a) throws L2pSecurityException {
+		removeMemberRecursive(a.getId());
+	}
+
+	/**
 	 * remove a member from this group 
 	 * 
 	 * @param id
@@ -208,8 +299,26 @@ public class GroupAgent extends Agent {
 			throw new L2pSecurityException("You have to unlock this agent first!");
 
 		htEncryptedKeyVersions.remove(id);
+		// FIXME switch SecretKey?
+	}
 
-		// todo: switch SecretKey?
+	public void removeMemberRecursive(long id) throws L2pSecurityException {
+		if (isLocked())
+			throw new L2pSecurityException("You have to unlock this agent first!");
+
+		htEncryptedKeyVersions.remove(id);
+		for (Long memberId : htEncryptedKeyVersions.keySet()) {
+			try {
+				Agent agent = Context.getCurrent().getAgent(memberId);
+				if (agent instanceof GroupAgent) {
+					GroupAgent group = (GroupAgent) agent;
+					group.removeMemberRecursive(id);
+				}
+			} catch (AgentNotKnownException e) {
+				Context.logError(this, "Can't get agent for id " + memberId);
+			}
+		}
+		// FIXME switch SecretKey?
 	}
 
 	@Override
@@ -252,7 +361,7 @@ public class GroupAgent extends Agent {
 	 * factory - create an instance of GroupAgent from its xml representation
 	 * 
 	 * @param xml
-	 * @return	a group agent 
+	 * @return a group agent 
 	 * @throws MalformedXMLException
 	 */
 	public static GroupAgent createFromXml(String xml) throws MalformedXMLException {
@@ -274,7 +383,7 @@ public class GroupAgent extends Agent {
 	 * factory - create an instance of GroupAgent based on a xml node
 	 * 
 	 * @param root
-	 * @return	a group agent
+	 * @return a group agent
 	 * @throws MalformedXMLException
 	 */
 	public static GroupAgent createFromXml(Element root) throws MalformedXMLException {
