@@ -36,9 +36,6 @@ import org.apache.commons.codec.binary.Base64;
  * The (symmetric) key to unlock the private key of the group is encrypted asymmetrically for
  * each entitled agent (i.e. <i>member</i> of the group).
  * 
- * 
- * 
- *
  */
 public class GroupAgent extends Agent {
 
@@ -299,7 +296,6 @@ public class GroupAgent extends Agent {
 			throw new L2pSecurityException("You have to unlock this agent first!");
 
 		htEncryptedKeyVersions.remove(id);
-		// FIXME switch SecretKey?
 	}
 
 	public void removeMemberRecursive(long id) throws L2pSecurityException {
@@ -318,7 +314,6 @@ public class GroupAgent extends Agent {
 				Context.logError(this, "Can't get agent for id " + memberId);
 			}
 		}
-		// FIXME switch SecretKey?
 	}
 
 	@Override
