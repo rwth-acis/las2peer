@@ -61,7 +61,6 @@ import rice.persistence.StorageManagerImpl;
  * 
  * The package {@link i5.las2peer.p2p.pastry} provides all necessary helper classes
  * for the integration (and encapsulation) of the FreePastry library.
- * 
  */
 public class PastryNodeImpl extends Node {
 
@@ -77,7 +76,6 @@ public class PastryNodeImpl extends Node {
 	/**
 	 * Storage mode for the pastry node &ndash; either use only memory or the filesystem
 	 * for stored artifacts.
-	 * 
 	 */
 	public enum STORAGE_MODE {
 		filesystem, memory
@@ -108,7 +106,7 @@ public class PastryNodeImpl extends Node {
 	 * create a node listening to the given port an 
 	 * trying to connect to the hosts given in the bootstrap string
 	 * The bootstrap string may be a comma separated lists of host possibly including
-	 * port information separated be a colon.
+	 * port information separated by a colon.
 	 * 
 	 * Leave the bootstrap empty or null to start a new ring
 	 * 
@@ -183,7 +181,6 @@ public class PastryNodeImpl extends Node {
 	 * @param mode
 	 * @param monitoringObserver
 	 * @param cl
-	 * 
 	 */
 	public PastryNodeImpl(int port, String bootstrap, STORAGE_MODE mode, boolean monitoringObserver, L2pClassLoader cl) {
 		super(cl, true, monitoringObserver);

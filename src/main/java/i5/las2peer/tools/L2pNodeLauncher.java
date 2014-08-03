@@ -689,10 +689,11 @@ public class L2pNodeLauncher {
 	 * @param cl the classloader to be used with this node
 	 */
 	private L2pNodeLauncher(int port, String bootstrap, boolean monitoringObserver, L2pClassLoader cl) {
-		if (System.getenv().containsKey("MEM_STORAGE"))
+		if (System.getenv().containsKey("MEM_STORAGE")) {
 			node = new PastryNodeImpl(port, bootstrap, STORAGE_MODE.memory, monitoringObserver, cl);
-		else
+		} else {
 			node = new PastryNodeImpl(port, bootstrap, STORAGE_MODE.filesystem, monitoringObserver, cl);
+		}
 
 		commandPrompt = new CommandPrompt(this);
 	}
