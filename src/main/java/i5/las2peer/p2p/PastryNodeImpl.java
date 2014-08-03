@@ -100,7 +100,7 @@ public class PastryNodeImpl extends Node {
 
 	private STORAGE_MODE mode = STORAGE_MODE.filesystem;
 
-	private String storagePath = ".las2peer";
+	private String storagePath = "node-storage";
 
 	private BasicAgentStorage locallyKnownAgents;
 
