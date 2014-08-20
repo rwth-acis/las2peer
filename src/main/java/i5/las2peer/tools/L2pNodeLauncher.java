@@ -53,6 +53,10 @@ import rice.p2p.commonapi.NodeHandle;
  */
 public class L2pNodeLauncher {
 
+	private static final String DEFAULT_SERVICE_DIRECTORY = "./service/";
+
+	private static final String DEFAULT_LOG_DIRECTORY = "./log/";
+
 	private CommandPrompt commandPrompt;
 
 	private static List<Connector> connectors = new ArrayList<Connector>();
@@ -752,8 +756,14 @@ public class L2pNodeLauncher {
 			launcher = new L2pNodeLauncher(port, bootstrap, false, cl);
 		}
 		try {
-			if (logDir != null)
-				launcher.setLogDir(logDir);
+			if (logDir != null) {
+				try {
+					logDir.mkdirs();
+					launcher.setLogDir(logDir);
+				} catch (Exception e) {
+					launcher.printMessage("Failed setting log directory to '" + logDir + "' " + e);
+				}
+			}
 			launcher.start();
 
 			for (int i = startWith; i < args.length; i++) {
@@ -863,8 +873,6 @@ public class L2pNodeLauncher {
 	 */
 	public static void main(String[] argv) throws InterruptedException, MalformedXMLException, IOException,
 			L2pSecurityException, EncodingFailedException, SerializationException, NodeException {
-		String logfileDirectoryString = "log";
-		String[] serviceDirectory = { "./service/" };
 		File logfileDirectory = new File(".");
 
 		//Help Message
@@ -880,6 +888,7 @@ public class L2pNodeLauncher {
 			argv = args;
 		}
 		//Sets the logfile directory
+		String logfileDirectoryString = DEFAULT_LOG_DIRECTORY;
 		if (argv[0].contains("log-directory=")) {
 			logfileDirectoryString = argv[0].substring(argv[0].indexOf("=") + 1);
 			String[] args = new String[argv.length - 1];
@@ -887,6 +896,7 @@ public class L2pNodeLauncher {
 			argv = args;
 		}
 		//Sets the service directory
+		String[] serviceDirectory = { DEFAULT_SERVICE_DIRECTORY };
 		if (argv[0].contains("service-directory=")) {
 			serviceDirectory[0] = argv[0].substring(argv[0].indexOf("="));
 			String[] args = new String[argv.length - 1];
@@ -899,7 +909,7 @@ public class L2pNodeLauncher {
 			String[] args = new String[argv.length - 1];
 			System.arraycopy(argv, 1, args, 0, args.length);
 			classloader = setupClassLoader(serviceDirectory);
-			logfileDirectory = new File("./" + logfileDirectoryString + "/");
+			logfileDirectory = new File(logfileDirectoryString);
 			L2pNodeLauncher launcher = launchSingle(args, logfileDirectory, classloader);
 
 			if (launcher.isFinished()) {
