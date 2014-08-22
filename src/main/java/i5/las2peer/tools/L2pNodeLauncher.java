@@ -692,11 +692,11 @@ public class L2pNodeLauncher {
 	 * @param monitoringObserver determines, if the monitoring-observer will be started at this node
 	 * @param cl the classloader to be used with this node
 	 */
-	private L2pNodeLauncher(int port, String bootstrap, boolean monitoringObserver, L2pClassLoader cl) {
+	private L2pNodeLauncher(int port, String bootstrap, boolean monitoringObserver, L2pClassLoader cl, Long nodeIdSeed) {
 		if (System.getenv().containsKey("MEM_STORAGE")) {
-			node = new PastryNodeImpl(port, bootstrap, STORAGE_MODE.memory, monitoringObserver, cl);
+			node = new PastryNodeImpl(port, bootstrap, STORAGE_MODE.memory, monitoringObserver, cl, nodeIdSeed);
 		} else {
-			node = new PastryNodeImpl(port, bootstrap, STORAGE_MODE.filesystem, monitoringObserver, cl);
+			node = new PastryNodeImpl(port, bootstrap, STORAGE_MODE.filesystem, monitoringObserver, cl, nodeIdSeed);
 		}
 
 		commandPrompt = new CommandPrompt(this);
@@ -744,17 +744,26 @@ public class L2pNodeLauncher {
 	 * @throws NodeException
 	 */
 	static L2pNodeLauncher launchSingle(String[] args, File logDir, L2pClassLoader cl) throws NodeException {
-		int port = Integer.parseInt(args[0].trim());
+		int port = Integer.parseInt(args[0]);
 		String bootstrap = args[1];
 		L2pNodeLauncher launcher;
-		int startWith = 2; //Check for observer flag
+		int startWith = 2; // Check for observer flag
+		boolean observer = false;
 		if (args.length > 3 && args[2].equals("startObserver")) {
-			launcher = new L2pNodeLauncher(port, bootstrap, true, cl);
+			observer = true;
 			startWith++;
 		}
-		else {
-			launcher = new L2pNodeLauncher(port, bootstrap, false, cl);
+		Long nodeIdSeed = null;
+		if (args.length > startWith + 1 && args[startWith].startsWith("nodeIdSeed=")) {
+			String seed = args[startWith].substring(args[startWith].indexOf("=") + 1);
+			try {
+				nodeIdSeed = Long.valueOf(seed);
+			} catch (NumberFormatException ex) {
+				System.out.println("Not a valid node id seed :" + seed);
+			}
+			startWith++;
 		}
+		launcher = new L2pNodeLauncher(port, bootstrap, observer, cl, nodeIdSeed);
 		try {
 			if (logDir != null) {
 				try {
@@ -813,20 +822,23 @@ public class L2pNodeLauncher {
 
 		System.out.println("\nStart Node:");
 		System.out.println("\t{optional: windows_shell} {optional: log-directory=..} {optional: service-directory=..}"
-				+ "\n\t -s [port] ['-'|bootstrap] {optional: startObserver} {method1} {method2} ...");
+				+ "\n\t -s [port] ['-'|bootstrap] {optional: startObserver} {optional: nodeIdSeed=..} {method1} {method2} ...");
 
 		System.out.println("\nWhere");
 		System.out
 				.println("\t- {windows_shell} disables the colored output (better readable for windows command line clients)\n");
-		System.out.println("\t- {log-directory=..} lets you choose the directory for log files (default: log)\n");
+		System.out.println("\t- {log-directory=..} lets you choose the directory for log files (default: "
+				+ DEFAULT_LOG_DIRECTORY + ")\n");
 		System.out
-				.println("\t- {service-directory=..} lets you choose the directory you added your services to (default: services)\n");
+				.println("\t- {service-directory=..} lets you choose the directory you added your services to (default: "
+						+ DEFAULT_SERVICE_DIRECTORY + ")\n");
 		System.out.println("\t- [port] specifies the port number of the node\n");
 		System.out.println("\t- '-' states, that a complete new LAS2peer network is to start");
 		System.out.println("\tor");
 		System.out
-				.println("\t- [bootstrap] gives a comma seperated list of [address:ip] pairs of bootstrap nodes to connect to\n");
-		System.out.println("\t- {startObserver} starts a monitoring observer at this node\n\n");
+				.println("\t- [bootstrap] requires a comma seperated list of [address:ip] pairs of bootstrap nodes to connect to\n");
+		System.out.println("\t- {startObserver} starts a monitoring observer at this node\n");
+		System.out.println("\t- {nodeIdSeed=..} generates the node id by using this seed to provide persistence\n\n");
 
 		System.out.println("\n\nThe following methods can be used in arbitrary order and number:");
 
@@ -873,21 +885,19 @@ public class L2pNodeLauncher {
 	 */
 	public static void main(String[] argv) throws InterruptedException, MalformedXMLException, IOException,
 			L2pSecurityException, EncodingFailedException, SerializationException, NodeException {
-		File logfileDirectory = new File(".");
-
-		//Help Message
+		// Help Message
 		if (argv.length < 2 || argv[0].equals("--help") || argv[0].equals("-h")) {
 			printHelp();
 			System.exit(1);
 		}
-		//Turn off colored output
+		// Turn off colored output
 		if (argv[0].equals("windows_shell")) {
 			ColoredOutput.allOff();
 			String[] args = new String[argv.length - 1];
 			System.arraycopy(argv, 1, args, 0, args.length);
 			argv = args;
 		}
-		//Sets the logfile directory
+		// Sets the logfile directory
 		String logfileDirectoryString = DEFAULT_LOG_DIRECTORY;
 		if (argv[0].contains("log-directory=")) {
 			logfileDirectoryString = argv[0].substring(argv[0].indexOf("=") + 1);
@@ -895,7 +905,7 @@ public class L2pNodeLauncher {
 			System.arraycopy(argv, 1, args, 0, args.length);
 			argv = args;
 		}
-		//Sets the service directory
+		// Sets the service directory
 		String[] serviceDirectory = { DEFAULT_SERVICE_DIRECTORY };
 		if (argv[0].contains("service-directory=")) {
 			serviceDirectory[0] = argv[0].substring(argv[0].indexOf("="));
@@ -904,12 +914,12 @@ public class L2pNodeLauncher {
 			argv = args;
 		}
 
-		//Launches the node
+		// Launches the node
 		if (argv[0].equals("-s")) {
 			String[] args = new String[argv.length - 1];
 			System.arraycopy(argv, 1, args, 0, args.length);
 			classloader = setupClassLoader(serviceDirectory);
-			logfileDirectory = new File(logfileDirectoryString);
+			File logfileDirectory = new File(logfileDirectoryString);
 			L2pNodeLauncher launcher = launchSingle(args, logfileDirectory, classloader);
 
 			if (launcher.isFinished()) {
@@ -921,8 +931,7 @@ public class L2pNodeLauncher {
 				} catch (ConnectorException e) {
 					e.printStackTrace();
 				}
-			}
-			else {
+			} else {
 				System.out.println("node has handled all commands -- keeping node open\n");
 				System.out.println("press Strg-C to exit\n");
 				try {
