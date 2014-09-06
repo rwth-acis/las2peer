@@ -16,7 +16,7 @@ import java.io.PrintStream;
 import static org.junit.Assert.*;
 
 /**
- * @author Alexander
+*
  */
 public class WebConnectorServiceInfoTest
 {

@@ -18,7 +18,7 @@ import org.apache.commons.codec.binary.Base64;
 //import rice.p2p.util.Base64;
 /**
  * Very simple client to communicate with the las2peer web connector
- * @author Alexander
+*
  *
  */
 public class MiniClient

@@ -16,30 +16,24 @@ import i5.las2peer.webConnector.serviceManagement.ServiceRepositoryManager;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URL;
 import java.text.DateFormat;
 import java.util.Date;
 
-import com.nimbusds.oauth2.sdk.http.HTTPRequest;
-import com.nimbusds.oauth2.sdk.http.HTTPRequest.Method;
-
 import net.minidev.json.JSONObject;
 import net.minidev.json.JSONValue;
-import net.minidev.json.parser.JSONParser;
+
+import com.nimbusds.oauth2.sdk.http.HTTPRequest;
+import com.nimbusds.oauth2.sdk.http.HTTPRequest.Method;
 
 
 
 /**
  * Starter class for registering the Web Connector at the LAS2peer server.
  *
- * @author Holger Jan&szlig;en
- * @author Alexander Ruppert
  */
-
-
 public class WebConnector extends Connector
 {
 	

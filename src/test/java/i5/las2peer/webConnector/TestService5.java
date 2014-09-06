@@ -9,7 +9,7 @@ import i5.las2peer.restMapper.annotations.Version;
 
 /**
  * Service to test the web connector
- * @author Alexander
+*
  *
  */
 @Version("0.2")

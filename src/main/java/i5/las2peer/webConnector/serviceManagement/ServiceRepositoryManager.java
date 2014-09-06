@@ -30,7 +30,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 /**
- * @author Alexander
+*
  */
 public class ServiceRepositoryManager
 {

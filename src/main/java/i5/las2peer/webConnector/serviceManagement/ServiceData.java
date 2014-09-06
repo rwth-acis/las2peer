@@ -3,7 +3,7 @@ package i5.las2peer.webConnector.serviceManagement;
 
 
 /**
- * @author Alexander
+*
  */
 public class ServiceData
 {
