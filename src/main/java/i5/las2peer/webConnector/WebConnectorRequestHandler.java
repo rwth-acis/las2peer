@@ -12,7 +12,7 @@ import i5.las2peer.p2p.TimeoutException;
 import i5.las2peer.restMapper.RESTMapper;
 import i5.las2peer.restMapper.data.InvocationData;
 import i5.las2peer.restMapper.data.Pair;
-//import rice.p2p.util.Base64;
+
 import i5.las2peer.restMapper.exceptions.NoMethodFoundException;
 import i5.las2peer.restMapper.exceptions.NotSupportedUriPathException;
 import i5.las2peer.security.L2pSecurityException;
@@ -464,6 +464,9 @@ public class WebConnectorRequestHandler implements RequestHandler {
 			//TODO check
 			//l2pNode.unregisterAgent(userAgent);
 			userAgent.lockPrivateKey();//don't know if really necessary
+                //TODO check
+                l2pNode.unregisterAgent(userAgent);
+                userAgent.lockPrivateKey();//don't know if really necessary
 
 
 		} catch (Exception e) {
