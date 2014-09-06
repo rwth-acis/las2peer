@@ -78,7 +78,7 @@ public class WebConnector extends Connector
 	public static final boolean DEFAULT_PREFER_LOCAL_SERVICES = true;
 	protected boolean preferLocalServices = DEFAULT_PREFER_LOCAL_SERVICES;
 
-	public static final String DEFAULT_OIDC_PROVIDER = "http://137.226.58.15:9085/oidc";
+	public static final String DEFAULT_OIDC_PROVIDER = "http://api.learning-layers.eu/o/oauth2";
 	protected String oidcProvider = DEFAULT_OIDC_PROVIDER;
 	
     protected String defaultLoginUser="";

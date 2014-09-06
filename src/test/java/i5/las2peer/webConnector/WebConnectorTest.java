@@ -115,6 +115,7 @@ public class WebConnectorTest {
 
 	}
 
+	/*
 	@Test
 	public void testKeepServerUp(){
 		try{
@@ -123,7 +124,7 @@ public class WebConnectorTest {
 			e.printStackTrace();
 		}
 
-	}
+	}*/
 
 	@Test
 	public void testNotMethodService() {
