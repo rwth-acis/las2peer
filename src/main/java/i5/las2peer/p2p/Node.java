@@ -1,5 +1,6 @@
 package i5.las2peer.p2p;
 
+import com.sun.management.OperatingSystemMXBean;
 import i5.las2peer.api.Service;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
@@ -45,15 +46,13 @@ import i5.las2peer.tools.SerializationException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.Serializable;
+import java.lang.management.ManagementFactory;
 import java.lang.reflect.InvocationTargetException;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Vector;
+import java.util.*;
 
 import rice.pastry.NodeHandle;
 
@@ -85,6 +84,11 @@ public abstract class Node implements AgentStorage {
 		CLOSING,
 		CLOSED
 	}
+
+	/**
+	 * For performance measurement (load balance)
+	 */
+	OperatingSystemMXBean osBean =(com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
 
 	/**
 	 * observers to be notified of all occurring events
@@ -532,7 +536,8 @@ public abstract class Node implements AgentStorage {
 	 * The Agent has to be unlocked before registration.
 	 * 
 	 * @param receiver
-	 * 
+	 *
+	 * @return true, if new entry was added, false if entry already existed
 	 * @throws AgentAlreadyRegisteredException the given agent is already registered to this node 
 	 * @throws L2pSecurityException the agent is not unlocked
 	 * @throws AgentException any problem with the agent itself (probably on calling {@link i5.las2peer.security.Agent#notifyRegistrationTo}
@@ -939,7 +944,6 @@ public abstract class Node implements AgentStorage {
 			AgentAlreadyRegisteredException, AgentException {
 		if (agent.isLocked())
 			throw new L2pSecurityException("you need to unlock the agent for mediation!");
-
 		MessageReceiver result = htRegisteredReceivers.get(agent.getId());
 
 		if (result != null && !(result instanceof Mediator))
@@ -1315,10 +1319,23 @@ public abstract class Node implements AgentStorage {
 			Serializable[] parameters) throws L2pSecurityException, ServiceInvocationException, InterruptedException,
 			TimeoutException, UnlockNeededException {
 		if (getStatus() != NodeStatus.RUNNING)
-			throw new IllegalStateException("you can invoce methods only on a running node!");
+			throw new IllegalStateException("you can invoke methods only on a running node!");
 		this.observerNotice(Event.RMI_SENT, this.getNodeId(), executing, null); //Do not log service class name (privacy..)
-		if (executing.isLocked())
+
+
+		NodeHandle targetNode=null;
+		try{
+			NodeHandle[] sia= ServiceInfoAgent.getNodes(serviceClass);
+			Random rand = new Random();
+			targetNode = sia[rand.nextInt(sia.length)];
+
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+		/*if (executing.isLocked()){
+			System.out.println(	"The executing agent has to be unlocked to call a RMI");
 			throw new L2pSecurityException("The executing agent has to be unlocked to call a RMI");
+		}*/
 
 		try {
 			Agent target = getServiceAgent(serviceClass);
@@ -1328,8 +1345,21 @@ public abstract class Node implements AgentStorage {
 				rmiMessage.setSendingNodeId((Long) getNodeId());
 			else
 				rmiMessage.setSendingNodeId((NodeHandle) getNodeId());
+			Message resultMessage;
+			if(targetNode!=null)
+			{
+				try
+				{
+					resultMessage = sendMessageAndWaitForAnswer(rmiMessage,targetNode);
+				}
+				catch(NodeNotFoundException nex)
+				{
+					resultMessage = sendMessageAndWaitForAnswer(rmiMessage);
+				}
+			}
+			else
+				resultMessage = sendMessageAndWaitForAnswer(rmiMessage);
 
-			Message resultMessage = sendMessageAndWaitForAnswer(rmiMessage);
 
 			resultMessage.open(executing, this);
 			Object resultContent = resultMessage.getContent();
@@ -1514,4 +1544,18 @@ public abstract class Node implements AgentStorage {
 		return hasAgent(ServiceAgent.serviceClass2Id(serviceClass));
 	}
 
+	/**
+	 * Gets the approximate CPU load of the JVM the Node is running on.
+	 * Correct value only available a few seconds after the start of the Node
+	 * @return value between 0 and 1
+	 */
+	public float getNodeCpuLoad()
+	{
+		float load = (float)osBean.getProcessCpuLoad()*Runtime.getRuntime().availableProcessors();
+		if(load<0f)
+			load=0f;
+		else if (load>1f)
+			load=1f;
+		return load;
+	}
 }

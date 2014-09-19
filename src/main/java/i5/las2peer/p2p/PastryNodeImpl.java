@@ -461,11 +461,11 @@ public class PastryNodeImpl extends Node {
 
 		synchronized (this) {
 			super.registerReceiver(receiver);
-
 			application.registerAgentTopic(receiver);
 
 			//Observer is called in superclass!
 		}
+
 	}
 
 	@Override

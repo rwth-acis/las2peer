@@ -16,6 +16,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 
 import org.apache.commons.codec.binary.Base64;
+import rice.pastry.NodeHandle;
 
 /**
  * 
@@ -315,7 +316,7 @@ public class ServiceInfoAgent extends PassphraseAgent
 
 
         ServiceInfoData data = getEnvelopeData();
-        data.addService(serviceAgent.getServiceClassName(), "1.0");//TODO: versions of services
+        data.addService(serviceAgent, node);//TODO: versions of services
         setEnvelopeData(data, node);
 
     }
@@ -330,7 +331,7 @@ public class ServiceInfoAgent extends PassphraseAgent
     {
 
         ServiceInfoData data = getEnvelopeData();
-        data.removeService(serviceAgent.getServiceClassName(), "1.0");//TODO: versions of services
+        data.removeService(serviceAgent,node);//TODO: versions of services
         setEnvelopeData(data, node);
     }
 
@@ -343,4 +344,10 @@ public class ServiceInfoAgent extends PassphraseAgent
         ServiceInfoData data = new ServiceInfoData();
         setEnvelopeData(data, node);
     }
+
+
+	public static NodeHandle[] getNodes(String service) throws EnvelopeException
+	{
+		return  getEnvelopeData().getServiceNodes(new ServiceNameVersion(service, "1.0").getNameVersion());
+	}
 }

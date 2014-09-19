@@ -20,6 +20,7 @@ import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.NodeNotFoundException;
 import i5.las2peer.persistency.EncodingFailedException;
+import i5.las2peer.persistency.EnvelopeException;
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
@@ -36,6 +37,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.KeyPair;
 import java.security.PublicKey;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.apache.commons.codec.binary.Base64;
 
@@ -55,7 +58,10 @@ public class ServiceAgent extends PassphraseAgent {
 	 * the name of the service class, this agent represents in the network
 	 */
 	private String sServiceClass;
-	
+
+	private boolean timerRunning=false;
+	private static Timer timer=new Timer();
+	private int timerIntervalSeconds = 10;
 	/**
 	 * instance of the service (if started at a node) 
 	 */
@@ -329,6 +335,8 @@ public class ServiceAgent extends PassphraseAgent {
 
         try
         {
+			timer.cancel();
+			timerRunning=false;
             ServiceInfoAgent agent = getServiceInfoAgent();
             agent.serviceRemoved(this,getRunningAtNode());
         }
@@ -368,8 +376,8 @@ public class ServiceAgent extends PassphraseAgent {
 
         try
         {
-            ServiceInfoAgent agent = getServiceInfoAgent();
-            agent.serviceAdded(this,getRunningAtNode());
+			startTimer();
+
         }
         catch(Exception e)
         {
@@ -379,6 +387,43 @@ public class ServiceAgent extends PassphraseAgent {
 
 
     }
+
+	private void executeTimer(Node node, ServiceInfoAgent finalAgent)
+	{
+		try
+		{
+			finalAgent.serviceAdded(this,node);
+		}
+
+		catch(Exception e)
+		{
+			//do nothing for now
+		}
+	}
+	private void startTimer() throws Exception
+	{
+
+		if(timerRunning)
+			return;
+		ServiceInfoAgent agent;
+		agent = getServiceInfoAgent();
+
+
+		final ServiceInfoAgent finalAgent = agent;
+		final Node finalNode=this.getRunningAtNode();
+		timerRunning=true;
+
+		timer.scheduleAtFixedRate(
+				new TimerTask()
+				{
+					public void run()
+					{
+						executeTimer(finalNode,finalAgent);
+					}
+				},
+				0,      // run first occurrence immediately
+				timerIntervalSeconds*1000);  // run every three seconds
+	}
 	
 	/**
 	 * notify this service agent, that it has been registered (for usage) at the given node

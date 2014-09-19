@@ -1,7 +1,13 @@
 package i5.las2peer.p2p;
 
+import i5.las2peer.security.ServiceAgent;
+import rice.pastry.NodeHandle;
+
 import java.io.Serializable;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 /**
  * 
@@ -15,7 +21,8 @@ public class ServiceInfoData implements Serializable
 
     private static final long serialVersionUID = -4423523057987069063L;
 
-    private HashMap<ServiceNameVersion,Integer> services = new HashMap<>();
+    private HashSet<String> services = new HashSet<String>();
+	private HashMap<String,ArrayList<NodeHandle>> availableNodes = new HashMap<String, ArrayList<NodeHandle>>();
 
     /**
      * Default constructor
@@ -33,46 +40,82 @@ public class ServiceInfoData implements Serializable
     {
 
         ServiceNameVersion[] result = new ServiceNameVersion[services.size()];
-        services.keySet().toArray(result);
+		String[] serv=new String[services.size()];
+        services.toArray(serv);
 
-        return result;
+		for (int i = 0; i < serv.length; i++){
+			String[] split=serv[i].split(ServiceNameVersion.SEPERATOR);
+			result[i] = new ServiceNameVersion(split[0],split[1]);
+
+		}
+
+		return result;
     }
 
-    /**
-     * Adds a service to the list
-     * @param serviceClassName
-     */
-    public void addService(String serviceClassName, String serviceVersion)
+	/**
+	 * Get a list of nodes a service is running on
+	 * @param serviceClassName
+	 * @return
+	 */
+	public NodeHandle[] getServiceNodes(String serviceClassName)
+	{
+
+
+		if(availableNodes.containsKey(serviceClassName))//keep number of registered services of this type
+		{
+			ArrayList<NodeHandle> nodes =availableNodes.get(serviceClassName);
+			return nodes.toArray(new NodeHandle[nodes.size()]);
+		}
+		else
+			return new NodeHandle[]{};
+	}
+
+	/**
+	 * Adds a new service to the list
+	 * @param serviceAgent
+	 * @param node
+	 */
+    public void addService(ServiceAgent serviceAgent, Node node)
     {
-        ServiceNameVersion name = new ServiceNameVersion(serviceClassName,serviceVersion);
-        if(!services.containsKey(name))//keep number of registered services of this type
+        ServiceNameVersion name = new ServiceNameVersion(serviceAgent.getServiceClassName(),"1.0");
+		NodeHandle id=(NodeHandle)node.getNodeId();
+
+		if(!services.contains(name.getNameVersion()))//keep number of registered services of this type
         {
-            services.put(name,1);
+            services.add(name.getNameVersion());
+			ArrayList<NodeHandle> nodes= new ArrayList<NodeHandle>();
+
+			nodes.add(id);
+			availableNodes.put(name.getNameVersion(), nodes);
         }
-        else
-        {
-            services.put(name,services.get(name)+1);
-        }
+		else if (availableNodes.containsKey(name.getNameVersion()))
+		{
+
+			if(!(availableNodes.get(name.getNameVersion()).contains(id)))
+			{
+				availableNodes.get(name.getNameVersion()).add(id);
+			}
+
+		}
 
     }
 
-    /**
-     * Removes a service from the list
-     * @param serviceClassName
-     */
-    public void removeService(String serviceClassName, String serviceVersion)
+	/**
+	 * Removes a service from the list
+	 * @param serviceAgent
+	 * @param node
+	 */
+    public void removeService(ServiceAgent serviceAgent, Node node)
     {
-        ServiceNameVersion name = new ServiceNameVersion(serviceClassName,serviceVersion);
-        if(services.containsKey(name))
+        ServiceNameVersion name = new ServiceNameVersion(serviceAgent.getServiceClassName(),"1.0");
+        if(services.contains(name.getNameVersion()))
         {
-            if(services.get(name)>1)
-            {
-                services.put(name,services.get(name)-1);
-            }
-            else
-            {
-                services.remove(name);
-            }
+			NodeHandle id= (NodeHandle) node.getNodeId();
+
+			availableNodes.get(name.getNameVersion()).remove(id);
+			if(availableNodes.get(name.getNameVersion()).size()<=0)
+				services.remove(name.getNameVersion());
+
         }
 
     }
