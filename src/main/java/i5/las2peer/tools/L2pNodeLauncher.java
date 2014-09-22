@@ -748,6 +748,7 @@ public class L2pNodeLauncher {
 		ArrayList<String> serviceDirectories = new ArrayList<>();
 		serviceDirectories.add(DEFAULT_SERVICE_DIRECTORY);
 		Long nodeIdSeed = null;
+		List<String> commands = new ArrayList<>();
 		// parse args
 		Iterator<String> itArg = args.iterator();
 		while (itArg.hasNext() == true) {
@@ -815,6 +816,8 @@ public class L2pNodeLauncher {
 					serviceDirectories.add(itArg.next());
 					itArg.remove();
 				}
+			} else {
+				commands.add(arg);
 			}
 		}
 		// check parameters
@@ -844,7 +847,7 @@ public class L2pNodeLauncher {
 		try {
 			launcher.start();
 
-			for (String command : args) {
+			for (String command : commands) {
 				System.out.println("Handling: '" + command + "'");
 				launcher.commandPrompt.handleLine(command);
 			}
