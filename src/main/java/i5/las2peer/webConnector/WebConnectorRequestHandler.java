@@ -217,7 +217,7 @@ public class WebConnectorRequestHandler implements RequestHandler {
 		//no information? check if there is a default account for login
 		else if(connector.defaultLoginUser.length()>0)
 		{
-			response.println("Getting here:");
+			response.print("");
 			return login(connector.defaultLoginUser,connector.defaultLoginPassword,request,response);
 		}
 		else
@@ -271,7 +271,6 @@ public class WebConnectorRequestHandler implements RequestHandler {
 	 * @return
 	 */
 	private boolean invoke(PassphraseAgent userAgent, HttpRequest request, HttpResponse response) {
-
 
 		response.setStatus(HttpResponse.STATUS_INTERNAL_SERVER_ERROR); //internal server error unless otherwise specified (errors might occur)
 		String[] requestSplit=request.getPath().split("/",2);
