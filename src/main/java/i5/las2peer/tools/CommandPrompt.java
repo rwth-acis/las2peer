@@ -336,7 +336,7 @@ public class CommandPrompt {
 				if ( hasMethodOfName)
 					throw new NoSuchMethodException ( "No signature of " + method + " on " + on.getClass().getSimpleName() + " matches the given parameters");
 				else
-					throw new NoSuchMethodException ( on.getClass().getSimpleName() + " has not method '" + method + "'");
+					throw new NoSuchMethodException ( on.getClass().getSimpleName() + " has no method '" + method + "'");
 			}
 				
 		}
