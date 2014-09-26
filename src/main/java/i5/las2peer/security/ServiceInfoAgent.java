@@ -11,9 +11,11 @@ import i5.las2peer.tools.CryptoTools;
 import i5.las2peer.tools.SerializationException;
 import i5.las2peer.tools.SerializeTools;
 
+import java.io.Serializable;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.util.ArrayList;
 
 import org.apache.commons.codec.binary.Base64;
 import rice.pastry.NodeHandle;
@@ -34,7 +36,9 @@ public class ServiceInfoAgent extends PassphraseAgent
     private static final String  SALT="sDNCXOTiYOyEAUwjzG3btQ==";
     private static final String DEFAULT_PASSPHRASE="pass";
     private static String passPhrase=DEFAULT_PASSPHRASE;
-    private static final String ENVELOPE_NAME="ServiceInfoDataStorage";
+    private static final String SERVICE_LIST_ENVELOPE_NAME ="ServiceInfoDataStorage";
+
+	private static final String SERVICE_NODE_LIST_PREFIX ="ServiceNodeListStorage_";
 
     private static ServiceInfoAgent agent=null;
     /**
@@ -114,14 +118,7 @@ public class ServiceInfoAgent extends PassphraseAgent
         return getServiceInfoAgent(passPhrase);
     }
 
-    /**
-     * Envelope which stores {@link i5.las2peer.p2p.ServiceInfoData} has a default name to find it later
-     * @return a String
-     */
-    private static String getEnvelopeName()
-    {
-        return ENVELOPE_NAME;
-    }
+
 
     /**
      * Returns an array of currently registered services
@@ -130,25 +127,25 @@ public class ServiceInfoAgent extends PassphraseAgent
      */
     public static ServiceNameVersion[] getServices() throws EnvelopeException
     {
-        return  getEnvelopeData().getServices();
+        return  ((ServiceList)getEnvelopeData(SERVICE_LIST_ENVELOPE_NAME, ServiceList.class)).getServices();
     }
 
 
     /**
-     * Reads {@link i5.las2peer.p2p.ServiceInfoData} from the Envelope
-     * @return {@link i5.las2peer.p2p.ServiceInfoData}
+     * Reads {@link i5.las2peer.p2p.ServiceList} from the Envelope
+     * @return {@link i5.las2peer.p2p.ServiceList}
      * @throws EnvelopeException
      */
-    private static ServiceInfoData getEnvelopeData() throws EnvelopeException
+    private static Serializable getEnvelopeData(String envelopeName, Class dataCls) throws EnvelopeException
     {
-        Envelope env=fetchEnvelope();
-        ServiceInfoData data=null;
+        Envelope env=fetchEnvelope(envelopeName,dataCls);
+		Serializable data=null;
         if(env==null)
             throw new EnvelopeException("Envelope could not be found, nor created!");
         try
         {
             env.open(getServiceInfoAgent());
-            data = env.getContent(ServiceInfoData.class);
+            data = env.getContent(dataCls);
             env.close();
 
         }
@@ -173,11 +170,11 @@ public class ServiceInfoAgent extends PassphraseAgent
     }
 
     /**
-     * UpdatesEnvelope with new {@link i5.las2peer.p2p.ServiceInfoData}
+     * UpdatesEnvelope with new {@link i5.las2peer.p2p.ServiceList}
      * @param data
      * @throws EnvelopeException
      */
-    private static void setEnvelopeData(ServiceInfoData data, Node node)
+    private static void setEnvelopeData(String envelopeName, Class dataCls, Serializable data, Node node)
             throws EnvelopeException, AgentException, L2pSecurityException
     {
         try
@@ -194,7 +191,7 @@ public class ServiceInfoAgent extends PassphraseAgent
         }
         agent.notifyRegistrationTo(node);
 
-        Envelope env=fetchEnvelope();
+        Envelope env=fetchEnvelope(envelopeName, dataCls);
 
         if(env==null)
             throw new EnvelopeException("Envelope could not be found, nor created!");
@@ -235,17 +232,17 @@ public class ServiceInfoAgent extends PassphraseAgent
      * Gets the Envelope from the Network
      * @return
      */
-    private static Envelope fetchEnvelope()
+    private static Envelope fetchEnvelope(String envelopeName, Class cls)
     {
         Envelope env;
         try
         {
 
-            env=Envelope.fetchClassIdEnvelope(getServiceInfoAgent(), ServiceInfoData.class, getEnvelopeName());
+            env=Envelope.fetchClassIdEnvelope(getServiceInfoAgent(), cls, envelopeName);
         }
         catch(Exception e)
         {
-            env=createNewEnvelope();
+            env=createNewEnvelope(envelopeName, cls);
         }
 
 
@@ -256,12 +253,12 @@ public class ServiceInfoAgent extends PassphraseAgent
      * Creates a new Envelope
      * @return
      */
-    private static Envelope createNewEnvelope()
+    private static Envelope createNewEnvelope(String envelopeName,Class cls)
     {
         try
         {
 
-            return Envelope.createClassIdEnvelope( new ServiceInfoData(), getEnvelopeName(), getServiceInfoAgent());
+            return Envelope.createClassIdEnvelope( cls.newInstance(), envelopeName, getServiceInfoAgent());
         }
         catch(Exception e)
         {
@@ -314,11 +311,18 @@ public class ServiceInfoAgent extends PassphraseAgent
     {
 
 
+		ServiceNameVersion servicenameVersion = new ServiceNameVersion(serviceAgent.getServiceClassName(),"1.0");
+        ServiceList data = (ServiceList)getEnvelopeData(SERVICE_LIST_ENVELOPE_NAME, ServiceList.class);
+        data.addService(servicenameVersion);//TODO: versions of services
+        setEnvelopeData(SERVICE_LIST_ENVELOPE_NAME, ServiceList.class, data, node);
 
-        ServiceInfoData data = getEnvelopeData();
-        data.addService(serviceAgent, node);//TODO: versions of services
-        setEnvelopeData(data, node);
 
+		String nodeEnvelope=SERVICE_NODE_LIST_PREFIX+servicenameVersion.getNameVersion();
+		ServiceNodeList nodesData = (ServiceNodeList)getEnvelopeData(nodeEnvelope, ServiceNodeList.class);
+
+
+		nodesData.addNode((NodeHandle) node.getNodeId());
+		setEnvelopeData(nodeEnvelope, ServiceNodeList.class, nodesData, node);
     }
 
     /**
@@ -329,25 +333,44 @@ public class ServiceInfoAgent extends PassphraseAgent
      */
     public void serviceRemoved(ServiceAgent serviceAgent, Node node) throws EnvelopeException, AgentException, L2pSecurityException
     {
+		ServiceNameVersion servicenameVersion = new ServiceNameVersion(serviceAgent.getServiceClassName(),"1.0");
 
-        ServiceInfoData data = getEnvelopeData();
-        data.removeService(serviceAgent,node);//TODO: versions of services
-        setEnvelopeData(data, node);
+		String nodeEnvelope=SERVICE_NODE_LIST_PREFIX+servicenameVersion.getNameVersion();
+		ServiceNodeList nodesData = (ServiceNodeList)getEnvelopeData(nodeEnvelope, ServiceNodeList.class);
+		boolean listIsEmpty=nodesData.removeNode((NodeHandle) node.getNodeId());
+		setEnvelopeData(nodeEnvelope, ServiceNodeList.class, nodesData, node);
+
+		if(listIsEmpty)
+		{
+			ServiceList data = (ServiceList)getEnvelopeData(SERVICE_LIST_ENVELOPE_NAME, ServiceList.class);
+			data.removeService(servicenameVersion);//TODO: versions of services
+			setEnvelopeData(SERVICE_LIST_ENVELOPE_NAME, ServiceList.class, data, node);
+		}
     }
 
     /**
-     * Resets the stored {@link i5.las2peer.p2p.ServiceInfoData}
+     * Resets the stored {@link i5.las2peer.p2p.ServiceList}
      * @throws EnvelopeException
      */
     public void resetData(Node node) throws EnvelopeException, AgentException, L2pSecurityException
     {
-        ServiceInfoData data = new ServiceInfoData();
-        setEnvelopeData(data, node);
+        ServiceList data = new ServiceList();
+		setEnvelopeData(SERVICE_LIST_ENVELOPE_NAME, ServiceList.class, data, node);
     }
 
 
-	public static NodeHandle[] getNodes(String service) throws EnvelopeException
+	public static ArrayList<NodeHandle> getNodes(String serviceName, String serviceVersion)
 	{
-		return  getEnvelopeData().getServiceNodes(new ServiceNameVersion(service, "1.0").getNameVersion());
+		String envelopeName=SERVICE_NODE_LIST_PREFIX+ServiceNameVersion.toString(serviceName, serviceVersion);
+		try{
+			ServiceNodeList nodesData = (ServiceNodeList)getEnvelopeData(envelopeName, ServiceNodeList.class);
+
+			return nodesData.getNodes();
+		}
+		catch(EnvelopeException e)
+		{
+			return null;
+		}
+
 	}
 }

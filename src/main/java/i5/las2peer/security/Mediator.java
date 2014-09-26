@@ -187,15 +187,17 @@ public class Mediator implements MessageReceiver {
 	 */
 	public Serializable invoke ( String service, String method, Serializable[] parameters, boolean preferLocal ) throws L2pSecurityException, InterruptedException, TimeoutException, ServiceInvocationException, UnlockNeededException {
 		//TODO
-		preferLocal=false;
-		if ( preferLocal && runningAt.hasService ( service ) )
+
+		boolean isBusy=runningAt.isBusy();
+		if ( preferLocal && !isBusy && runningAt.hasService ( service ) )
+		{
 			try {
 				return runningAt.invokeLocally(myAgent.getId(), service,  method, parameters);
 			} catch ( Exception e ) {
 				// just try globally
 				System.out.println ( "Local access to service " + service + " failed - trying globally");
 			}
-			
+		}
 		return runningAt.invokeGlobally(myAgent, service, method, parameters);
 
 

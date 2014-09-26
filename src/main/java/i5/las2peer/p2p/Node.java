@@ -1,6 +1,7 @@
 package i5.las2peer.p2p;
 
 import com.sun.management.OperatingSystemMXBean;
+
 import i5.las2peer.api.Service;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
@@ -88,7 +89,9 @@ public abstract class Node implements AgentStorage {
 	/**
 	 * For performance measurement (load balance)
 	 */
-	OperatingSystemMXBean osBean =(com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+	private OperatingSystemMXBean osBean =(com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+	public static final float CPU_LOAD_TRESHOLD=0.5f;//arbitrary value TODO: make it configurable
+	private NodeServiceCache nodeServiceCache;
 
 	/**
 	 * observers to be notified of all occurring events
@@ -186,6 +189,7 @@ public abstract class Node implements AgentStorage {
 			this.baseClassLoader = this.getClass().getClassLoader();
 
 		nodeKeyPair = CryptoTools.generateKeyPair();
+		nodeServiceCache=new NodeServiceCache(this,10);//TODO make time as setting
 	}
 
 	/**
@@ -1299,6 +1303,7 @@ public abstract class Node implements AgentStorage {
 		}
 	}
 
+	private int invockationDistributerIndex=0;
 	/**
 	 * Invokes a service method of the network.
 	 * 
@@ -1323,22 +1328,22 @@ public abstract class Node implements AgentStorage {
 		this.observerNotice(Event.RMI_SENT, this.getNodeId(), executing, null); //Do not log service class name (privacy..)
 
 
-		NodeHandle targetNode=null;
-		try{
-			NodeHandle[] sia= ServiceInfoAgent.getNodes(serviceClass);
-			Random rand = new Random();
-			targetNode = sia[rand.nextInt(sia.length)];
 
-		}catch (Exception e){
-			e.printStackTrace();
-		}
 		/*if (executing.isLocked()){
 			System.out.println(	"The executing agent has to be unlocked to call a RMI");
 			throw new L2pSecurityException("The executing agent has to be unlocked to call a RMI");
 		}*/
 
 		try {
-			Agent target = getServiceAgent(serviceClass);
+			//Agent target = getServiceAgent(serviceClass);
+			Agent target=null;
+
+			target= nodeServiceCache.getServiceAgent(serviceClass,"1.0");
+
+			if(target==null)
+				target = getServiceAgent(serviceClass);
+
+
 			Message rmiMessage = new Message(executing, target, new RMITask(serviceClass, serviceMethod, parameters));
 
 			if (this instanceof LocalNode)
@@ -1346,6 +1351,18 @@ public abstract class Node implements AgentStorage {
 			else
 				rmiMessage.setSendingNodeId((NodeHandle) getNodeId());
 			Message resultMessage;
+			NodeHandle targetNode = null;//=nodeServiceCache.getRandomServiceNode(serviceClass,"1.0");
+
+			ArrayList<NodeHandle> targetNodes = nodeServiceCache.getServiceNodes(serviceClass,"1.0");
+			if(targetNodes!=null && targetNodes.size()>0)
+			{
+				invockationDistributerIndex%=targetNodes.size();
+				targetNode=targetNodes.get(invockationDistributerIndex);
+				invockationDistributerIndex++;
+
+			}
+
+			//System.out.println(	"### nodecount: "+nodeServiceCache.getServiceNodes(serviceClass,"1.0").size());
 			if(targetNode!=null)
 			{
 				try
@@ -1354,6 +1371,7 @@ public abstract class Node implements AgentStorage {
 				}
 				catch(NodeNotFoundException nex)
 				{
+					nodeServiceCache.removeEntryNode(serviceClass,"1.0", targetNode);//remove so unavailable nodes will not be tries again
 					resultMessage = sendMessageAndWaitForAnswer(rmiMessage);
 				}
 			}
@@ -1546,16 +1564,24 @@ public abstract class Node implements AgentStorage {
 
 	/**
 	 * Gets the approximate CPU load of the JVM the Node is running on.
-	 * Correct value only available a few seconds after the start of the Node
-	 * @return value between 0 and 1
+	 * Correct value only available a few seconds after the start of the Node.
+	 * @return value between 0 and 1: CPU load of the JVM process * #cores
 	 */
 	public float getNodeCpuLoad()
 	{
+
 		float load = (float)osBean.getProcessCpuLoad()*Runtime.getRuntime().availableProcessors();
-		if(load<0f)
+
+		if(load<0.0f)
 			load=0f;
 		else if (load>1f)
-			load=1f;
+			load=1.0f;
+		System.out.println("===> CPU Load: "+load);
 		return load;
+	}
+
+	public boolean isBusy()
+	{
+		return (getNodeCpuLoad()>CPU_LOAD_TRESHOLD);
 	}
 }

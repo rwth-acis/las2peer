@@ -48,4 +48,14 @@ public class ServiceNameVersion implements Serializable
 	{
 		return nameVersion.hashCode();
 	}
+
+	@Override
+	public String toString()
+	{
+		return nameVersion;
+	}
+	public static String toString(String serviceName, String version)
+	{
+		return serviceName+SEPERATOR+version;
+	}
 }
