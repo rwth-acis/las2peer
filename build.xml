@@ -3,6 +3,7 @@
 	<property name="ivy.organisation" value="i5" />
 	<property name="ivy.module" value="las2peer" />
 	<property name="ivy.revision" value="0.3" />
+	<property name="ivy.build.number" value="0" />
 	<property name="ivy.deliver.revision" value="${ivy.revision}" />
 	<property name="ivy.pom.version" value="${ivy.revision}" />
 	
@@ -90,7 +91,7 @@
 
 	<target name="deploy-release" depends="jars" description="--> deploy release">
 
-		<property name="sn" value="${ivy.deliver.revision}-RELEASE" />
+		<property name="sn" value="${ivy.deliver.revision}.${ivy.build.number}" />
 		<local name="ivy.deliver.revision" />
 		<property name="ivy.deliver.revision" value="${sn}" />
 		<local name="ivy.pom.version" />
