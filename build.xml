@@ -90,6 +90,12 @@
 
 	<target name="deploy-release" depends="jars">
 
+		<property name="sn" value="${ivy.deliver.revision}-RELEASE" />
+		<local name="ivy.deliver.revision" />
+		<property name="ivy.deliver.revision" value="${sn}" />
+		<local name="ivy.pom.version" />
+		<property name="ivy.pom.version" value="${sn}" />
+
 		<ivy:makepom 
 			ivyfile="${ivy.dep.file}" 
 			pomfile="${export}/jars/${ivy.module}.pom" 
