@@ -19,14 +19,12 @@ import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.text.DateFormat;
 import java.util.Date;
-
+import java.util.HashMap;
 
 
 /**
  * Starter class for registering the Web Connector at the LAS2peer server.
  *
- * @author Holger Jan&szlig;en
- * @author Alexander Ruppert
  */
 
 
@@ -65,8 +63,11 @@ public class WebConnector extends Connector
 	public static final boolean DEFAULT_ENABLE_CROSS_ORIGIN_RESOURCE_SHARING = true;
 	protected boolean enableCrossOriginResourceSharing = DEFAULT_ENABLE_CROSS_ORIGIN_RESOURCE_SHARING;
 	
-	public static final boolean DEFAULT_PREFER_LOCAL_SERVICES = true;
+	public static final boolean DEFAULT_PREFER_LOCAL_SERVICES = false;
 	protected boolean preferLocalServices = DEFAULT_PREFER_LOCAL_SERVICES;
+
+	public static final int DEFAULT_SERVICE_REPOSITORY_UPDATE_INTERVAL_SECONDS = 300;
+	protected int serviceRepositoryUpdateIntervalSeconds = DEFAULT_SERVICE_REPOSITORY_UPDATE_INTERVAL_SECONDS;
 
     protected String defaultLoginUser="";
     protected String defaultLoginPassword="";
@@ -87,6 +88,7 @@ public class WebConnector extends Connector
 	private DateFormat dateFormat = DateFormat.getDateTimeInstance();
 	
 
+	private HashMap<Long, Integer> openUserRequests= new HashMap<>();
 	//--
 	private PathTree tree=new PathTree();
 	
@@ -257,7 +259,7 @@ public class WebConnector extends Connector
 		myNode = node;
         try
         {
-            ServiceRepositoryManager.start(myNode);
+            ServiceRepositoryManager.start(myNode, serviceRepositoryUpdateIntervalSeconds);
         }
         catch(Exception e)
         {
@@ -436,6 +438,10 @@ public class WebConnector extends Connector
 	boolean preferLocalServices () {
 		return preferLocalServices;
 	}
-	
-	
+
+	public HashMap<Long, Integer> getOpenUserRequests(){
+		return openUserRequests;
+	}
+
+
 }

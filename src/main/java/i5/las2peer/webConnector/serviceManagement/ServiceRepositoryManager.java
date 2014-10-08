@@ -139,20 +139,7 @@ public class ServiceRepositoryManager
 
                         }
                     }
-                                   /* catch(NoSuchServiceMethodException e)
-                                    {
-                                        //do nothing for now
-                                        System.out.println("#################");
-                                        System.out.println(e.getMessage());
-                                        System.out.println("#################");
-                                    }
-                                    catch(ServiceInvocationException e)
-                                    {
-                                        //do nothing for now
-                                        System.out.println("#################");
-                                        System.out.println(e.getMessage());
-                                        System.out.println("#################");
-                                    }*/
+
                     catch(Exception e)
                     {
                         //do nothing for now

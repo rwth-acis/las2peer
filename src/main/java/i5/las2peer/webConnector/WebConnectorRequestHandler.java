@@ -31,8 +31,6 @@ import rice.p2p.util.Base64;
  * A HttpServer RequestHandler for handling requests to the LAS2peer Web connector.
  * Each request will be distributed to its corresponding session.
  *
- * @author Holger Jan&szlig;en
- * @Author Alexander Ruppert
  * 
  */
 
@@ -124,21 +122,31 @@ public class WebConnectorRequestHandler implements RequestHandler {
                 userId = l2pNode.getAgentIdForLogin(username);
             }
 
+			//keep track of active requests
+			synchronized (this.connector)
+			{
+
+				if(this.connector.getOpenUserRequests().containsKey(userId))
+				{
+					Integer numReq = this.connector.getOpenUserRequests().get(userId);
+					this.connector.getOpenUserRequests().put(userId,numReq+1);
+					//System.out.println("### numreq " +numReq);
+				}
+				else
+				{
+					this.connector.getOpenUserRequests().put(userId,1);
+					//System.out.println("### numreq 0" );
+				}
+			}
             userAgent = (PassphraseAgent)l2pNode.getAgent(userId);
 
            /* if ( ! (userAgent instanceof PassphraseAgent ))
                 throw new L2pSecurityException ("Agent is not passphrase protected!");*/
 
-
-
-            userAgent.unlockPrivateKey(password);
-
+			userAgent.unlockPrivateKey(password);
 
 
 
-            //connector.logMessage("Login: "+username);
-            //connector.logMessage("successful login");
-           // Thread.sleep(10); //TODO: find out how to avoid this 'hack'
 
 
             return userAgent;
@@ -273,9 +281,7 @@ public class WebConnectorRequestHandler implements RequestHandler {
 			
 			Serializable result="";
 
-
-
-            Mediator mediator = l2pNode.getOrRegisterLocalMediator(userAgent);
+			Mediator mediator = l2pNode.getOrRegisterLocalMediator(userAgent);
 
 				boolean gotResult=false;
 
@@ -298,7 +304,6 @@ public class WebConnectorRequestHandler implements RequestHandler {
                 for (int i = 0; i < invocation.length; i++) {
 					try
 					{
-						
 						result= mediator.invoke(invocation[i].getServiceName(),invocation[i].getMethodName(), invocation[i].getParameters(), connector.preferLocalServices());// invoke service method
 						gotResult=true;
                         returnMIMEType=invocation[i].getMIME();
@@ -355,19 +360,63 @@ public class WebConnectorRequestHandler implements RequestHandler {
 	 */
 	private void logout(PassphraseAgent userAgent)
 	{
-		try {
+		long userId=userAgent.getId();
+
+
+		//synchronize across multiple threads
+		synchronized (this.connector)
+		{
+
+			if(this.connector.getOpenUserRequests().containsKey(userId))
+			{
+				Integer numReq = this.connector.getOpenUserRequests().get(userId);
+				if(numReq<=1)
+				{
+					this.connector.getOpenUserRequests().remove(userId);
+					try {
+						l2pNode.unregisterAgent(userAgent);
+						userAgent.lockPrivateKey();
+						//System.out.println("+++ logout");
+
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+
+				}
+				else
+				{
+					this.connector.getOpenUserRequests().put(userId,numReq-1);
+
+				}
+			}
+			else
+			{
+				try {
+					l2pNode.unregisterAgent(userAgent);
+					userAgent.lockPrivateKey();
+					//System.out.println("+++ logout");
+
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
+			}
+		}
+		//userAgent.lockPrivateKey(); //lock local copy again
+
+		/*try {
 
 
             //if(userAgent!=null)
 
                 //TODO check
-                l2pNode.unregisterAgent(userAgent);
-                userAgent.lockPrivateKey();//don't know if really necessary
+              //  l2pNode.unregisterAgent(userAgent);
+              //  userAgent.lockPrivateKey();//don't know if really necessary
 
 
 		} catch (Exception e) {
 			e.printStackTrace();
-		}
+		}*/
 	}
 	/**
 	 * Handles a request (login, invoke)
