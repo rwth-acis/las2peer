@@ -30,9 +30,7 @@ import net.minidev.json.JSONValue;
 
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest.Method;
-
-
-
+import net.minidev.json.parser.ParseException;
 
 /**
  * Starter class for registering the Web Connector at the LAS2peer server.
@@ -85,6 +83,7 @@ public class WebConnector extends Connector
 	protected String oidcProvider = DEFAULT_OIDC_PROVIDER;
 	
 
+
     protected String defaultLoginUser="";
     protected String defaultLoginPassword="";
 
@@ -120,7 +119,7 @@ public class WebConnector extends Connector
 	public WebConnector () throws Exception
     {
 		super.setFieldValues();
-		oidcProviderInfo = fetchOidcProviderConfig();
+
         ServiceRepositoryManager.setTree(tree);
         ServiceRepositoryManager.setConnector(this);
 
@@ -272,7 +271,12 @@ public class WebConnector extends Connector
 			} catch (FileNotFoundException e) {
 				throw new ConnectorException ( "cannot initialize standard log file at " + DEFAULT_LOGFILE, e);
 			}
-		
+
+		try{
+			oidcProviderInfo = fetchOidcProviderConfig();
+		}catch (Exception e){
+
+		}
 		myNode = node;
         try
         {
@@ -468,7 +472,7 @@ public class WebConnector extends Connector
 	 * Fetches Open ID Connect provider configuration, according to the OpenID Connect discovery specification
 	 * (cf. http://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig)
 	 */
-	private JSONObject fetchOidcProviderConfig() throws IOException, net.minidev.json.parser.ParseException {
+	private JSONObject fetchOidcProviderConfig() throws IOException{
 
 		JSONObject result = new JSONObject();
 
@@ -478,15 +482,26 @@ public class WebConnector extends Connector
 		HTTPRequest pConfigRequest = new HTTPRequest(Method.GET, pConfigDocUri);
 
 		// parse JSON result
-		String configStr = pConfigRequest.send().getContent();
-		JSONObject config = (JSONObject) JSONValue.parseWithException(configStr);
+		try{
+			String configStr = pConfigRequest.send().getContent();
+			JSONObject config = (JSONObject) JSONValue.parseWithException(configStr);
+			// put JSON result in result table
+			result.put("config",config);
+		}
+		catch (Exception e)
+		{
+			System.out.println("Could not retrieve a valid config from the oidcProvider!");
+			System.out.println("WebConnector will now run in OIDC agnostic mode.");
+			logError("Could not retrieve a valid config from the oidcProvider!");
 
-		// put JSON result in result table
-		result.put("config",config);
+			return null;
+		}
+
+
+
 
 		return result;
 	}
 	
 	
-
 }

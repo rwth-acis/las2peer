@@ -120,7 +120,7 @@ public class WebConnectorRequestHandler implements RequestHandler {
 		
 		// IMPORTANT NOTE: doing the same thing with authorization header and bearer token results in client-side 
 		//                 cross-domain errors despite correct config for CORS in LAS2peer Web Connector!
-		else if(request.getQueryString() != null && request.getQueryString().contains("access_token=")){
+		else if(connector.oidcProviderInfo!=null && request.getQueryString() != null && request.getQueryString().contains("access_token=")){
 			String[] params = request.getQueryString().split("&");
 			String token = "";
 			for(int i=0;i<params.length; i++){
