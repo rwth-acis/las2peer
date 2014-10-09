@@ -1,7 +1,7 @@
 <project name="las2peer-web-connector" default="jar" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
 	
 	<property name="ivy.organisation" value="i5" />
-	<property name="ivy.module" value="las2peer-web-connector" />
+	<property name="ivy.module" value="las2peer-web-connector-oidc" />
 	<property name="ivy.revision" value="0.2" />
 	<property name="ivy.deliver.revision" value="${ivy.revision}" />
 	<property name="ivy.pom.version" value="${ivy.revision}" />
@@ -60,7 +60,7 @@
 
     <target name="get_deps" depends="install-ivy" description="--> resolve dependencies">
         <ivy:settings>
-            <credentials host="role.dbis.rwth-aachen.de:9911/archiva"  realm="Repository internal"/>
+            <credentials host="role.dbis.rwth-aachen.de:9911/archiva" realm="Repository internal"/>
         </ivy:settings>
         <ivy:retrieve type="jar"/>
     </target>
@@ -170,7 +170,7 @@
 	<target name="compile_all" depends="compile_main, compile_junit" />	
 	
 	<target name="jar" depends="compile_all">
-		<jar jarfile="${export.jars}/las2peer-web-connector.jar">
+		<jar jarfile="${export.jars}/${ivy.module}.jar">
 			<fileset dir="${tmp.classes}">
 			</fileset>
 			<manifest>

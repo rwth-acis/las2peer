@@ -9,7 +9,7 @@ import i5.las2peer.restMapper.annotations.*;
 import i5.las2peer.restMapper.HttpResponse;
 /**
  * Service to test the web connector
- * @author Alexander
+*
  *
  */
 @Version("0.2")

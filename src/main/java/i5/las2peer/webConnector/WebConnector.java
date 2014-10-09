@@ -16,18 +16,28 @@ import i5.las2peer.webConnector.serviceManagement.ServiceRepositoryManager;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
+import java.net.URL;
 import java.text.DateFormat;
 import java.util.Date;
+
 import java.util.HashMap;
+
+
+import net.minidev.json.JSONObject;
+import net.minidev.json.JSONValue;
+
+import com.nimbusds.oauth2.sdk.http.HTTPRequest;
+import com.nimbusds.oauth2.sdk.http.HTTPRequest.Method;
+
+
 
 
 /**
  * Starter class for registering the Web Connector at the LAS2peer server.
  *
  */
-
-
 public class WebConnector extends Connector
 {
 	
@@ -66,8 +76,14 @@ public class WebConnector extends Connector
 	public static final boolean DEFAULT_PREFER_LOCAL_SERVICES = false;
 	protected boolean preferLocalServices = DEFAULT_PREFER_LOCAL_SERVICES;
 
+
 	public static final int DEFAULT_SERVICE_REPOSITORY_UPDATE_INTERVAL_SECONDS = 300;
 	protected int serviceRepositoryUpdateIntervalSeconds = DEFAULT_SERVICE_REPOSITORY_UPDATE_INTERVAL_SECONDS;
+
+
+	public static final String DEFAULT_OIDC_PROVIDER = "http://api.learning-layers.eu/o/oauth2";
+	protected String oidcProvider = DEFAULT_OIDC_PROVIDER;
+	
 
     protected String defaultLoginUser="";
     protected String defaultLoginPassword="";
@@ -77,16 +93,16 @@ public class WebConnector extends Connector
 	private HttpServer http;
 	private HttpsServer https;
 
-	
 	private Node myNode = null;
-	
-	
+		
 	private final static String DEFAULT_LOGFILE = "./log/webConnector.log";
-	
 	
 	private PrintStream logStream = null;
 	private DateFormat dateFormat = DateFormat.getDateTimeInstance();
 	
+	// information on Open ID Connect server, including configuration, according
+	// to Open ID Connect Discovery (cf. http://openid.net/specs/openid-connect-discovery-1_0.html)
+	protected JSONObject oidcProviderInfo;
 
 	private HashMap<Long, Integer> openUserRequests= new HashMap<>();
 	//--
@@ -104,6 +120,7 @@ public class WebConnector extends Connector
 	public WebConnector () throws Exception
     {
 		super.setFieldValues();
+		oidcProviderInfo = fetchOidcProviderConfig();
         ServiceRepositoryManager.setTree(tree);
         ServiceRepositoryManager.setConnector(this);
 
@@ -439,9 +456,37 @@ public class WebConnector extends Connector
 		return preferLocalServices;
 	}
 
+
 	public HashMap<Long, Integer> getOpenUserRequests(){
 		return openUserRequests;
 	}
 
+
+
+	
+	/**
+	 * Fetches Open ID Connect provider configuration, according to the OpenID Connect discovery specification
+	 * (cf. http://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig)
+	 */
+	private JSONObject fetchOidcProviderConfig() throws IOException, net.minidev.json.parser.ParseException {
+
+		JSONObject result = new JSONObject();
+
+		//send Open ID Provider Config request
+		//(cf. http://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig)
+		URL pConfigDocUri = new URL(oidcProvider.trim() +"/.well-known/openid-configuration");
+		HTTPRequest pConfigRequest = new HTTPRequest(Method.GET, pConfigDocUri);
+
+		// parse JSON result
+		String configStr = pConfigRequest.send().getContent();
+		JSONObject config = (JSONObject) JSONValue.parseWithException(configStr);
+
+		// put JSON result in result table
+		result.put("config",config);
+
+		return result;
+	}
+	
+	
 
 }

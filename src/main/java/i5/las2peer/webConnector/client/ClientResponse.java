@@ -2,9 +2,7 @@ package i5.las2peer.webConnector.client;
 
 import java.util.HashMap;
 
-/**
- * @author Alexander
- */
+
 public class ClientResponse
 {
 
