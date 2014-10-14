@@ -1,6 +1,5 @@
-#! /bin/sh
+#!/bin/bash
 
-mkdir -p ../log
 BASE="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../
 
 if [ ! -e "${BASE}export/jars/las2peer.jar" ]; then

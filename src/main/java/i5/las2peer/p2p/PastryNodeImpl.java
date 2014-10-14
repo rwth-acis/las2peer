@@ -30,6 +30,8 @@ import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.util.Collection;
 import java.util.Hashtable;
@@ -98,6 +100,8 @@ public class PastryNodeImpl extends Node {
 
 	private STORAGE_MODE mode = STORAGE_MODE.filesystem;
 
+	private Long nodeIdSeed;
+
 	private String storagePath = "node-storage";
 
 	private BasicAgentStorage locallyKnownAgents;
@@ -165,7 +169,7 @@ public class PastryNodeImpl extends Node {
 	 */
 	public PastryNodeImpl(int port, String bootstrap, STORAGE_MODE mode) {
 		super();
-		initialize(port, bootstrap, mode);
+		initialize(port, bootstrap, mode, null);
 	}
 
 	/**
@@ -181,10 +185,12 @@ public class PastryNodeImpl extends Node {
 	 * @param mode
 	 * @param monitoringObserver
 	 * @param cl
+	 * @param nodeIdSeed
 	 */
-	public PastryNodeImpl(int port, String bootstrap, STORAGE_MODE mode, boolean monitoringObserver, L2pClassLoader cl) {
+	public PastryNodeImpl(int port, String bootstrap, STORAGE_MODE mode, boolean monitoringObserver, L2pClassLoader cl,
+			Long nodeIdSeed) {
 		super(cl, true, monitoringObserver);
-		initialize(port, bootstrap, mode);
+		initialize(port, bootstrap, mode, nodeIdSeed);
 	}
 
 	/**
@@ -194,10 +200,11 @@ public class PastryNodeImpl extends Node {
 	 * @param bootstrap
 	 * @param mode
 	 */
-	private void initialize(int port, String bootstrap, STORAGE_MODE mode) {
+	private void initialize(int port, String bootstrap, STORAGE_MODE mode, Long nodeIdSeed) {
 		pastryPort = port;
 		this.bootStrap = bootstrap;
 		this.mode = mode;
+		this.nodeIdSeed = nodeIdSeed;
 
 		locallyKnownAgents = new BasicAgentStorage(this);
 
@@ -213,7 +220,7 @@ public class PastryNodeImpl extends Node {
 	 * @param bootstrap
 	 */
 	private void initialize(int port, String bootstrap) {
-		initialize(port, bootstrap, STORAGE_MODE.filesystem);
+		initialize(port, bootstrap, STORAGE_MODE.filesystem, null);
 	}
 
 	/**
@@ -222,7 +229,7 @@ public class PastryNodeImpl extends Node {
 	 * @param mode
 	 */
 	private void initialize(STORAGE_MODE mode) {
-		initialize(STANDARD_PORT, STANDARD_BOOTSTRAP, mode);
+		initialize(STANDARD_PORT, STANDARD_BOOTSTRAP, mode, null);
 	}
 
 	/**
@@ -366,8 +373,33 @@ public class PastryNodeImpl extends Node {
 		try {
 			setStatus(NodeStatus.STARTING);
 
-			// FIXME this shouldn't use a random node id in order to provide persistence
-			NodeIdFactory nidFactory = new RandomNodeIdFactory(pastryEnvironment);
+			NodeIdFactory nidFactory = null;
+			if (nodeIdSeed == null) {
+				nidFactory = new RandomNodeIdFactory(pastryEnvironment);
+			} else {
+				nidFactory = new NodeIdFactory() {
+					@Override
+					public rice.pastry.Id generateNodeId() {
+						// same method as in rice.pastry.standard.RandomNodeIdFactory but except using nodeIdSeed
+					    byte raw[] = new byte[8];
+					    long tmp = ++nodeIdSeed;
+					    for (int i = 0; i < 8; i++) {
+					      raw[i] = (byte) (tmp & 0xff);
+					      tmp >>= 8;
+					    }
+					    MessageDigest md = null;
+					    try {
+					      md = MessageDigest.getInstance("SHA");
+					    } catch (NoSuchAlgorithmException e) {
+					      throw new RuntimeException("No SHA support!",e);
+					    }
+					    md.update(raw);
+					    byte[] digest = md.digest();
+					    rice.pastry.Id nodeId = rice.pastry.Id.build(digest);
+					    return nodeId;
+					}
+				};
+			}
 			InternetPastryNodeFactory factory = new InternetPastryNodeFactory(nidFactory, pastryPort, pastryEnvironment);
 			pastryNode = factory.newNode();
 

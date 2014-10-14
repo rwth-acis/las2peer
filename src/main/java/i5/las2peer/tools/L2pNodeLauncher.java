@@ -53,11 +53,13 @@ import rice.p2p.commonapi.NodeHandle;
  */
 public class L2pNodeLauncher {
 
+	private static final String DEFAULT_SERVICE_DIRECTORY = "./service/";
+
+	private static final String DEFAULT_LOG_DIRECTORY = "./log/";
+
 	private CommandPrompt commandPrompt;
 
 	private static List<Connector> connectors = new ArrayList<Connector>();
-
-	private static L2pClassLoader classloader = null;
 
 	private boolean bFinished = false;
 
@@ -361,7 +363,7 @@ public class L2pNodeLauncher {
 	 */
 	private Connector loadConnector(String classname) throws ClassNotFoundException, InstantiationException,
 			IllegalAccessException {
-		Class<?> connectorClass = classloader.loadClass(classname);
+		Class<?> connectorClass = L2pNodeLauncher.class.getClassLoader().loadClass(classname);
 		Connector connector = (Connector) connectorClass.newInstance();
 		return connector;
 	}
@@ -688,11 +690,11 @@ public class L2pNodeLauncher {
 	 * @param monitoringObserver determines, if the monitoring-observer will be started at this node
 	 * @param cl the classloader to be used with this node
 	 */
-	private L2pNodeLauncher(int port, String bootstrap, boolean monitoringObserver, L2pClassLoader cl) {
+	private L2pNodeLauncher(int port, String bootstrap, boolean monitoringObserver, L2pClassLoader cl, Long nodeIdSeed) {
 		if (System.getenv().containsKey("MEM_STORAGE")) {
-			node = new PastryNodeImpl(port, bootstrap, STORAGE_MODE.memory, monitoringObserver, cl);
+			node = new PastryNodeImpl(port, bootstrap, STORAGE_MODE.memory, monitoringObserver, cl, nodeIdSeed);
 		} else {
-			node = new PastryNodeImpl(port, bootstrap, STORAGE_MODE.filesystem, monitoringObserver, cl);
+			node = new PastryNodeImpl(port, bootstrap, STORAGE_MODE.filesystem, monitoringObserver, cl, nodeIdSeed);
 		}
 
 		commandPrompt = new CommandPrompt(this);
@@ -736,35 +738,125 @@ public class L2pNodeLauncher {
 	 * Launches a single node.
 	 * 
 	 * @param args
-	 * @param logDir
 	 * @throws NodeException
 	 */
-	static L2pNodeLauncher launchSingle(String[] args, File logDir, L2pClassLoader cl) throws NodeException {
-		int port = Integer.parseInt(args[0].trim());
-		String bootstrap = args[1];
-		L2pNodeLauncher launcher;
-		int startWith = 2; //Check for observer flag
-		if (args.length > 3 && args[2].equals("startObserver")) {
-			launcher = new L2pNodeLauncher(port, bootstrap, true, cl);
-			startWith++;
+	public static L2pNodeLauncher launchSingle(Iterable<String> args) throws NodeException {
+		Integer port = null;
+		String bootstrap = null;
+		boolean observer = false;
+		String sLogDir = DEFAULT_LOG_DIRECTORY;
+		ArrayList<String> serviceDirectories = new ArrayList<>();
+		serviceDirectories.add(DEFAULT_SERVICE_DIRECTORY);
+		Long nodeIdSeed = null;
+		List<String> commands = new ArrayList<>();
+		// parse args
+		Iterator<String> itArg = args.iterator();
+		while (itArg.hasNext() == true) {
+			String arg = itArg.next();
+			itArg.remove();
+			String larg = arg.toLowerCase();
+			if (larg.equals("-p") == true || larg.equals("--port") == true) {
+				if (itArg.hasNext() == false) {
+					ColoredOutput.printlnYellow("ignored '" + arg + "', because port number expected after it");
+				} else {
+					String sPort = itArg.next();
+					try {
+						int p = Integer.valueOf(sPort);
+						// in case of an exception this structure doesn't override an already set port number
+						itArg.remove();
+						port = p;
+					} catch (NumberFormatException ex) {
+						ColoredOutput.printlnYellow("ignored '" + arg + "', because " + sPort + " is not an integer");
+					}
+				}
+			} else if (larg.equals("-b") == true || larg.equals("--bootstrap") == true) {
+				if (itArg.hasNext() == false) {
+					ColoredOutput.printlnYellow("ignored '" + arg
+							+ "', because comma separated bootstrap list expected after it");
+				} else {
+					String[] bsList = itArg.next().split(",");
+					for (String bs : bsList) {
+						if (bs.isEmpty() == false) {
+							if (bootstrap == null || bootstrap.isEmpty() == true) {
+								bootstrap = bs;
+							} else {
+								bootstrap += "," + bs;
+							}
+						}
+					}
+					itArg.remove();
+				}
+			} else if (larg.equals("-o") == true || larg.equals("--observer") == true) {
+				observer = true;
+			} else if (larg.equals("-l") == true || larg.equals("--log-directory") == true) {
+				if (itArg.hasNext() == false) {
+					ColoredOutput.printlnYellow("ignored '" + arg + "', because log directory expected after it");
+				} else {
+					sLogDir = itArg.next();
+					itArg.remove();
+				}
+			} else if (larg.equals("-n") == true || larg.equals("--node-id-seed") == true) {
+				if (itArg.hasNext() == false) {
+					ColoredOutput.printlnYellow("ignored '" + arg + "', because node id seed expected after it");
+				} else {
+					String sNodeId = itArg.next();
+					try {
+						long idSeed = Long.valueOf(sNodeId);
+						// in case of an exception this structure doesn't override an already set node id seed
+						itArg.remove();
+						nodeIdSeed = idSeed;
+					} catch (NumberFormatException ex) {
+						ColoredOutput.printlnYellow("ignored '" + arg + "', because " + sNodeId + " is not an integer");
+					}
+				}
+			} else if (larg.equals("-s") == true || larg.equals("--service-directory") == true) {
+				if (itArg.hasNext() == false) {
+					ColoredOutput.printlnYellow("ignored '" + arg + "', because service directory expected after it");
+				} else {
+					serviceDirectories.add(itArg.next());
+					itArg.remove();
+				}
+			} else {
+				commands.add(arg);
+			}
 		}
-		else {
-			launcher = new L2pNodeLauncher(port, bootstrap, false, cl);
+		// check parameters
+		if (port == null) {
+			ColoredOutput.printlnRed("no port number specified");
+			return null;
+		} else if (port < 1) {
+			ColoredOutput.printlnRed("invalid port number specified");
+			return null;
+		}
+		File logDir = null;
+		try {
+			logDir = new File(sLogDir);
+			logDir.mkdirs();
+		} catch (Exception ex) {
+			ColoredOutput.printlnYellow("couldn't use '" + sLogDir + "' as log directory." + ex);
+		}
+		if (logDir == null) {
+			ColoredOutput.printlnYellow("no log directory specified");
+		}
+		L2pClassLoader cl = setupClassLoader(serviceDirectories.toArray(new String[0]));
+		// instantiate launcher
+		L2pNodeLauncher launcher = new L2pNodeLauncher(port, bootstrap, observer, cl, nodeIdSeed);
+		if (logDir != null) {
+			launcher.setLogDir(logDir);
 		}
 		try {
-			if (logDir != null)
-				launcher.setLogDir(logDir);
 			launcher.start();
 
-			for (int i = startWith; i < args.length; i++) {
-				System.out.println("Handling: '" + args[i] + "'");
-				launcher.commandPrompt.handleLine(args[i]);
+			for (String command : commands) {
+				System.out.println("Handling: '" + command + "'");
+				launcher.commandPrompt.handleLine(command);
 			}
 
-			if (launcher.isFinished())
+			if (launcher.isFinished()) {
 				launcher.printMessage("All commands have been handled and shutdown has been called -> end!");
-			else
+			} else {
 				launcher.printMessage("All commands have been handled -- keeping node open!");
+			}
 		} catch (NodeException e) {
 			launcher.bFinished = true;
 			e.printStackTrace();
@@ -802,23 +894,28 @@ public class L2pNodeLauncher {
 		System.out.println("\t['--help'|'-h']");
 
 		System.out.println("\nStart Node:");
-		System.out.println("\t{optional: windows_shell} {optional: log-directory=..} {optional: service-directory=..}"
-				+ "\n\t -s [port] ['-'|bootstrap] {optional: startObserver} {method1} {method2} ...");
+		System.out
+				.println("\t{optional: --windows-shell|-ws} -p [port] {optional1} {optional2} {method1} {method2} ...");
 
-		System.out.println("\nWhere");
+		System.out.println("\nOptional arguments");
 		System.out
-				.println("\t- {windows_shell} disables the colored output (better readable for windows command line clients)\n");
-		System.out.println("\t- {log-directory=..} lets you choose the directory for log files (default: log)\n");
+				.println("\t--windows-shell|-w disables the colored output (better readable for windows command line clients)\n");
+		System.out.println("\t--log-directory|-l [directory] lets you choose the directory for log files (default: "
+				+ DEFAULT_LOG_DIRECTORY + ")\n");
 		System.out
-				.println("\t- {service-directory=..} lets you choose the directory you added your services to (default: services)\n");
-		System.out.println("\t- [port] specifies the port number of the node\n");
-		System.out.println("\t- '-' states, that a complete new LAS2peer network is to start");
+				.println("\t--service-directory|-s [directory] adds the directory you added your services to (default: "
+						+ DEFAULT_SERVICE_DIRECTORY
+						+ ") to the class loader. This argument can occur multiple times.\n");
+		System.out.println("\t--port|-p [port] specifies the port number of the node\n");
+		System.out.println("\tno bootstrap argument states, that a complete new LAS2peer network is to start");
 		System.out.println("\tor");
 		System.out
-				.println("\t- [bootstrap] gives a comma seperated list of [address:ip] pairs of bootstrap nodes to connect to\n");
-		System.out.println("\t- {startObserver} starts a monitoring observer at this node\n\n");
+				.println("\t--bootstrap|-b [host-list] requires a comma seperated list of [address:ip] pairs of bootstrap nodes to connect to. This argument can occur multiple times.\n");
+		System.out.println("\t--observer|-o starts a monitoring observer at this node\n");
+		System.out
+				.println("\t--node-id-seed|-n [long] generates the node id by using this seed to provide persistence\n");
 
-		System.out.println("\n\nThe following methods can be used in arbitrary order and number:");
+		System.out.println("The following methods can be used in arbitrary order and number:");
 
 		for (Method m : L2pNodeLauncher.class.getMethods()) {
 			if (Modifier.isPublic(m.getModifiers())
@@ -863,77 +960,51 @@ public class L2pNodeLauncher {
 	 */
 	public static void main(String[] argv) throws InterruptedException, MalformedXMLException, IOException,
 			L2pSecurityException, EncodingFailedException, SerializationException, NodeException {
-		String logfileDirectoryString = "log";
-		String[] serviceDirectory = { "./service/" };
-		File logfileDirectory = new File(".");
-
-		//Help Message
-		if (argv.length < 2 || argv[0].equals("--help") || argv[0].equals("-h")) {
-			printHelp();
-			System.exit(1);
-		}
-		//Turn off colored output
-		if (argv[0].equals("windows_shell")) {
-			ColoredOutput.allOff();
-			String[] args = new String[argv.length - 1];
-			System.arraycopy(argv, 1, args, 0, args.length);
-			argv = args;
-		}
-		//Sets the logfile directory
-		if (argv[0].contains("log-directory=")) {
-			logfileDirectoryString = argv[0].substring(argv[0].indexOf("=") + 1);
-			String[] args = new String[argv.length - 1];
-			System.arraycopy(argv, 1, args, 0, args.length);
-			argv = args;
-		}
-		//Sets the service directory
-		if (argv[0].contains("service-directory=")) {
-			serviceDirectory[0] = argv[0].substring(argv[0].indexOf("="));
-			String[] args = new String[argv.length - 1];
-			System.arraycopy(argv, 1, args, 0, args.length);
-			argv = args;
+		// parse command line parameter into list
+		List<String> instArgs = new ArrayList<>();
+		for (String arg : argv) {
+			String larg = arg.toLowerCase();
+			if (larg.equals("-h") == true || larg.equals("--help") == true) { // Help Message
+				printHelp();
+				System.exit(1);
+			} else if (larg.equals("-w") == true || larg.equals("--windows-shell") == true) { // turn off colored output
+				ColoredOutput.allOff();
+			} else { // node instance parameter
+				instArgs.add(arg);
+			}
 		}
 
-		//Launches the node
-		if (argv[0].equals("-s")) {
-			String[] args = new String[argv.length - 1];
-			System.arraycopy(argv, 1, args, 0, args.length);
-			classloader = setupClassLoader(serviceDirectory);
-			logfileDirectory = new File("./" + logfileDirectoryString + "/");
-			L2pNodeLauncher launcher = launchSingle(args, logfileDirectory, classloader);
+		// Launches the node
+		L2pNodeLauncher launcher = launchSingle(instArgs);
+		if (launcher == null) {
+			System.exit(2);
+		}
 
-			if (launcher.isFinished()) {
-				System.out.println("node has handled all commands and shut down!");
+		if (launcher.isFinished()) {
+			System.out.println("node has handled all commands and shut down!");
+			try {
+				Iterator<Connector> iterator = connectors.iterator();
+				while (iterator.hasNext())
+					iterator.next().stop();
+			} catch (ConnectorException e) {
+				e.printStackTrace();
+			}
+		} else {
+			System.out.println("node has handled all commands -- keeping node open\n");
+			System.out.println("press Strg-C to exit\n");
+			try {
+				while (true) {
+					Thread.sleep(5000);
+				}
+			} catch (InterruptedException e) {
 				try {
 					Iterator<Connector> iterator = connectors.iterator();
 					while (iterator.hasNext())
 						iterator.next().stop();
-				} catch (ConnectorException e) {
-					e.printStackTrace();
+				} catch (ConnectorException ce) {
+					ce.printStackTrace();
 				}
 			}
-			else {
-				System.out.println("node has handled all commands -- keeping node open\n");
-				System.out.println("press Strg-C to exit\n");
-				try {
-					while (true) {
-						Thread.sleep(5000);
-					}
-				} catch (InterruptedException e) {
-					try {
-						Iterator<Connector> iterator = connectors.iterator();
-						while (iterator.hasNext())
-							iterator.next().stop();
-					} catch (ConnectorException ce) {
-						ce.printStackTrace();
-					}
-				}
-			}
-		} else {
-			System.out.println(
-					"Please start a node with -s or use --help or -h"
-							+ "for further information.");
 		}
 	}
-
 }
