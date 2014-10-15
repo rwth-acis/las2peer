@@ -1,5 +1,5 @@
 <ivy-module version="2.0">
-  <info organisation="i5" module="las2peer-web-connector-oidc"/>
+  <info organisation="i5" module="las2peer-web-connector"/>
   <publications>
     <artifact type="pom" ext="pom" conf="default"/>
     <artifact type="jar" ext="jar" conf="default"/>
