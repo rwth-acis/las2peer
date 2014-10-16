@@ -6,7 +6,7 @@
   </publications>
   <dependencies>
     <dependency org="i5" name="i5-httpServer" rev="0.4"/>
-    <dependency org="i5" name="las2peer" rev="0.2-SNAPSHOT" />
+    <dependency org="i5" name="las2peer" rev="0.3-SNAPSHOT" />
     <dependency org="i5" name="las2peer-rest-mapper" rev="0.2-SNAPSHOT"/>
 	
 	<dependency org="com.nimbusds" name="oauth2-oidc-sdk" rev="3.3" />
