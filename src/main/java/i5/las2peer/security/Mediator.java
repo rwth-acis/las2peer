@@ -101,7 +101,7 @@ public class Mediator implements MessageReceiver {
 			//END
 			
 			
-		} catch (L2pSecurityException e) {
+	} catch (L2pSecurityException e) {
 			throw new MessageException ("Unable to open message because of security problems! ", e);
 		} catch (AgentNotKnownException e) {
 			throw new MessageException ("Sender unkown (since this is the receiver). Has the sending node gone offline? ", e);
@@ -186,15 +186,21 @@ public class Mediator implements MessageReceiver {
 	 * @throws UnlockNeededException
 	 */
 	public Serializable invoke ( String service, String method, Serializable[] parameters, boolean preferLocal ) throws L2pSecurityException, InterruptedException, TimeoutException, ServiceInvocationException, UnlockNeededException {
-		if ( preferLocal && runningAt.hasService ( service ) )
+		//TODO
+
+		boolean isBusy=runningAt.isBusy();
+		if ( preferLocal && !isBusy && runningAt.hasService ( service ) )
+		{
 			try {
 				return runningAt.invokeLocally(myAgent.getId(), service,  method, parameters);
 			} catch ( Exception e ) {
 				// just try globally
 				System.out.println ( "Local access to service " + service + " failed - trying globally");
 			}
-			
+		}
 		return runningAt.invokeGlobally(myAgent, service, method, parameters);
+
+
 	}
 
 
