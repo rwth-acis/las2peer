@@ -62,6 +62,8 @@ public class ServiceAgent extends PassphraseAgent {
 	private boolean timerRunning=false;
 	private static Timer timer=new Timer();
 	private int timerIntervalSeconds = 10;
+	private int timerRunTimes=0;
+	private int TIMER_RUN_TIMES_MAX=3;
 	/**
 	 * instance of the service (if started at a node) 
 	 */
@@ -327,6 +329,12 @@ public class ServiceAgent extends PassphraseAgent {
 		}		
 	}
 
+	private void stopTimer()
+	{
+		timer.cancel();
+		timerRunning=false;
+		timerRunTimes=0;
+	}
     /**
      * Notifies the {@link i5.las2peer.security.ServiceInfoAgent} about itself
      */
@@ -335,8 +343,7 @@ public class ServiceAgent extends PassphraseAgent {
 
         try
         {
-			timer.cancel();
-			timerRunning=false;
+			stopTimer();
             ServiceInfoAgent agent = getServiceInfoAgent();
             agent.serviceRemoved(this,getRunningAtNode());
         }
@@ -393,6 +400,11 @@ public class ServiceAgent extends PassphraseAgent {
 		try
 		{
 			finalAgent.serviceAdded(this,node);
+			timerRunTimes++;
+			if(timerRunning&&timerRunTimes>TIMER_RUN_TIMES_MAX)
+			{
+				stopTimer();
+			}
 		}
 
 		catch(Exception e)
@@ -405,6 +417,8 @@ public class ServiceAgent extends PassphraseAgent {
 
 		if(timerRunning)
 			return;
+
+		timer=new Timer();
 		ServiceInfoAgent agent;
 		agent = getServiceInfoAgent();
 
@@ -412,7 +426,7 @@ public class ServiceAgent extends PassphraseAgent {
 		final ServiceInfoAgent finalAgent = agent;
 		final Node finalNode=this.getRunningAtNode();
 		timerRunning=true;
-
+		timerRunTimes=0;
 		timer.scheduleAtFixedRate(
 				new TimerTask()
 				{
@@ -422,7 +436,7 @@ public class ServiceAgent extends PassphraseAgent {
 					}
 				},
 				0,      // run first occurrence immediately
-				timerIntervalSeconds*1000);  // run every three seconds
+				timerIntervalSeconds*1000);  // run every x seconds
 	}
 	
 	/**

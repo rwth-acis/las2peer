@@ -92,6 +92,7 @@ public abstract class Node implements AgentStorage {
 	private OperatingSystemMXBean osBean =(com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
 	public static final float CPU_LOAD_TRESHOLD=0.5f;//arbitrary value TODO: make it configurable
 	private NodeServiceCache nodeServiceCache;
+	private int nodeServiceCacheLifetime=10; //10s before cached node info becomes invalidated
 
 	/**
 	 * observers to be notified of all occurring events
@@ -189,7 +190,7 @@ public abstract class Node implements AgentStorage {
 			this.baseClassLoader = this.getClass().getClassLoader();
 
 		nodeKeyPair = CryptoTools.generateKeyPair();
-		nodeServiceCache=new NodeServiceCache(this,10);//TODO make time as setting
+		nodeServiceCache=new NodeServiceCache(this,nodeServiceCacheLifetime);//TODO make time as setting
 	}
 
 	/**
@@ -315,7 +316,7 @@ public abstract class Node implements AgentStorage {
 	 * @param sourceAgentId
 	 * @param remarks
 	 */
-	public void observerNotive(Event event, Object sourceNode, long sourceAgentId, String remarks) {
+	public void observerNotice(Event event, Object sourceNode, long sourceAgentId, String remarks) {
 		for (NodeObserver ob : observers)
 			ob.logEvent(event, sourceNode, sourceAgentId, remarks);
 	}
@@ -1303,7 +1304,7 @@ public abstract class Node implements AgentStorage {
 		}
 	}
 
-	private int invockationDistributerIndex=0;
+	private int invocationDistributerIndex =0;
 	/**
 	 * Invokes a service method of the network.
 	 * 
@@ -1356,9 +1357,11 @@ public abstract class Node implements AgentStorage {
 			ArrayList<NodeHandle> targetNodes = nodeServiceCache.getServiceNodes(serviceClass,"1.0");
 			if(targetNodes!=null && targetNodes.size()>0)
 			{
-				invockationDistributerIndex%=targetNodes.size();
-				targetNode=targetNodes.get(invockationDistributerIndex);
-				invockationDistributerIndex++;
+				invocationDistributerIndex %=targetNodes.size();
+				targetNode=targetNodes.get(invocationDistributerIndex);
+				invocationDistributerIndex++;
+				if(invocationDistributerIndex>=targetNodes.size())
+					invocationDistributerIndex=0;
 
 			}
 
