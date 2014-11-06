@@ -895,7 +895,7 @@ public class L2pNodeLauncher {
 
 		System.out.println("\nStart Node:");
 		System.out
-				.println("\t{optional: --windows-shell|-ws} -p [port] {optional1} {optional2} {method1} {method2} ...");
+				.println("\t{optional: --windows-shell|-w} -p [port] {optional1} {optional2} {method1} {method2} ...");
 
 		System.out.println("\nOptional arguments");
 		System.out

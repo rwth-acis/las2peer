@@ -1,7 +1,5 @@
 package i5.las2peer.p2p;
 
-import com.sun.management.OperatingSystemMXBean;
-
 import i5.las2peer.api.Service;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
@@ -53,9 +51,15 @@ import java.security.KeyPair;
 import java.security.PublicKey;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Vector;
 
 import rice.pastry.NodeHandle;
+
+import com.sun.management.OperatingSystemMXBean;
 
 /**
  * Base class for nodes in the LAS2peer environment.
@@ -89,10 +93,10 @@ public abstract class Node implements AgentStorage {
 	/**
 	 * For performance measurement (load balance)
 	 */
-	private OperatingSystemMXBean osBean =(com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
-	public static final float CPU_LOAD_TRESHOLD=0.5f;//arbitrary value TODO: make it configurable
+	private OperatingSystemMXBean osBean = (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+	public static final float CPU_LOAD_TRESHOLD = 0.5f;//arbitrary value TODO: make it configurable
 	private NodeServiceCache nodeServiceCache;
-	private int nodeServiceCacheLifetime=10; //10s before cached node info becomes invalidated
+	private int nodeServiceCacheLifetime = 10; //10s before cached node info becomes invalidated
 
 	/**
 	 * observers to be notified of all occurring events
@@ -190,7 +194,7 @@ public abstract class Node implements AgentStorage {
 			this.baseClassLoader = this.getClass().getClassLoader();
 
 		nodeKeyPair = CryptoTools.generateKeyPair();
-		nodeServiceCache=new NodeServiceCache(this,nodeServiceCacheLifetime);//TODO make time as setting
+		nodeServiceCache = new NodeServiceCache(this, nodeServiceCacheLifetime);//TODO make time as setting
 	}
 
 	/**
@@ -1304,7 +1308,8 @@ public abstract class Node implements AgentStorage {
 		}
 	}
 
-	private int invocationDistributerIndex =0;
+	private int invocationDistributerIndex = 0;
+
 	/**
 	 * Invokes a service method of the network.
 	 * 
@@ -1328,8 +1333,6 @@ public abstract class Node implements AgentStorage {
 			throw new IllegalStateException("you can invoke methods only on a running node!");
 		this.observerNotice(Event.RMI_SENT, this.getNodeId(), executing, null); //Do not log service class name (privacy..)
 
-
-
 		/*if (executing.isLocked()){
 			System.out.println(	"The executing agent has to be unlocked to call a RMI");
 			throw new L2pSecurityException("The executing agent has to be unlocked to call a RMI");
@@ -1337,13 +1340,12 @@ public abstract class Node implements AgentStorage {
 
 		try {
 			//Agent target = getServiceAgent(serviceClass);
-			Agent target=null;
+			Agent target = null;
 
-			target= nodeServiceCache.getServiceAgent(serviceClass,"1.0");
+			target = nodeServiceCache.getServiceAgent(serviceClass, "1.0");
 
-			if(target==null)
+			if (target == null)
 				target = getServiceAgent(serviceClass);
-
 
 			Message rmiMessage = new Message(executing, target, new RMITask(serviceClass, serviceMethod, parameters));
 
@@ -1354,33 +1356,31 @@ public abstract class Node implements AgentStorage {
 			Message resultMessage;
 			NodeHandle targetNode = null;//=nodeServiceCache.getRandomServiceNode(serviceClass,"1.0");
 
-			ArrayList<NodeHandle> targetNodes = nodeServiceCache.getServiceNodes(serviceClass,"1.0");
-			if(targetNodes!=null && targetNodes.size()>0)
+			ArrayList<NodeHandle> targetNodes = nodeServiceCache.getServiceNodes(serviceClass, "1.0");
+			if (targetNodes != null && targetNodes.size() > 0)
 			{
-				invocationDistributerIndex %=targetNodes.size();
-				targetNode=targetNodes.get(invocationDistributerIndex);
+				invocationDistributerIndex %= targetNodes.size();
+				targetNode = targetNodes.get(invocationDistributerIndex);
 				invocationDistributerIndex++;
-				if(invocationDistributerIndex>=targetNodes.size())
-					invocationDistributerIndex=0;
+				if (invocationDistributerIndex >= targetNodes.size())
+					invocationDistributerIndex = 0;
 
 			}
 
 			//System.out.println(	"### nodecount: "+nodeServiceCache.getServiceNodes(serviceClass,"1.0").size());
-			if(targetNode!=null)
+			if (targetNode != null)
 			{
 				try
 				{
-					resultMessage = sendMessageAndWaitForAnswer(rmiMessage,targetNode);
-				}
-				catch(NodeNotFoundException nex)
+					resultMessage = sendMessageAndWaitForAnswer(rmiMessage, targetNode);
+				} catch (NodeNotFoundException nex)
 				{
-					nodeServiceCache.removeEntryNode(serviceClass,"1.0", targetNode);//remove so unavailable nodes will not be tries again
+					nodeServiceCache.removeEntryNode(serviceClass, "1.0", targetNode);//remove so unavailable nodes will not be tries again
 					resultMessage = sendMessageAndWaitForAnswer(rmiMessage);
 				}
 			}
 			else
 				resultMessage = sendMessageAndWaitForAnswer(rmiMessage);
-
 
 			resultMessage.open(executing, this);
 			Object resultContent = resultMessage.getContent();
@@ -1570,21 +1570,20 @@ public abstract class Node implements AgentStorage {
 	 * Correct value only available a few seconds after the start of the Node.
 	 * @return value between 0 and 1: CPU load of the JVM process * #cores
 	 */
-	public float getNodeCpuLoad()
-	{
+	public float getNodeCpuLoad() {
 
-		float load = (float)osBean.getProcessCpuLoad()*Runtime.getRuntime().availableProcessors();
+		float load = (float) osBean.getProcessCpuLoad() * Runtime.getRuntime().availableProcessors();
 
-		if(load<0.0f)
-			load=0f;
-		else if (load>1f)
-			load=1.0f;
-		System.out.println("===> CPU Load: "+load);
+		if (load < 0.0f)
+			load = 0f;
+		else if (load > 1f)
+			load = 1.0f;
+		System.out.println("===> CPU Load: " + load);
 		return load;
 	}
 
-	public boolean isBusy()
-	{
-		return (getNodeCpuLoad()>CPU_LOAD_TRESHOLD);
+	public boolean isBusy() {
+		return (getNodeCpuLoad() > CPU_LOAD_TRESHOLD);
 	}
+
 }
