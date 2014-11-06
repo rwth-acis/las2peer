@@ -2,53 +2,56 @@ package i5.las2peer.tools;
 
 import i5.las2peer.security.UserAgent;
 
-
 /**
  * A simple command line tool creating a new agent.
  * 
  * Provided a passphrase, the tool will generate an xml representation of the
  * required agent and put it to standard out.
  * 
- * 
- *
  */
 public class UserAgentGenerator {
+
+	private static final int PW_MIN_LENGTH = 4;
 
 	/**
 	 * command line service agent generator
 	 * 
 	 * @param argv
 	 */
-	public static void main ( String argv[] ) {
-		if ( argv.length < 1 || argv[0].length() < 4 ) {
-			System.err.println ( SimpleTools.join(argv,  "/"));
-			System.err.println ("usage: java i5.las2peer.tools.UserAgentGenerator [passphrase] [login] [email]\n\n[login] and [email] are optional.\n");
+	public static void main(String argv[]) {
+		if (argv.length < 1) {
+			System.err.println(SimpleTools.join(argv, "/"));
+			System.err.println("usage: java i5.las2peer.tools.UserAgentGenerator [passphrase] [login] [email]\n");
+			System.err.println("\n[login] and [email] are optional.\n");
+			return;
+		} else if (argv[0].length() < PW_MIN_LENGTH) {
+			System.err.println("the password needs to be at least " + PW_MIN_LENGTH + " signs long, but only "
+					+ argv[0].length() + " given");
 			return;
 		}
-		
-		UserAgent agent = null;
+
 		try {
-			if ( argv[0].length() > 0 )
+			UserAgent agent = null;
+			if (argv[0].length() > 0)
 				agent = UserAgent.createUserAgent(argv[0]);
 			else {
-				System.err.println( "No passphrase is given!");
+				System.err.println("No passphrase is given!");
 				return;
 			}
-				
-			
-			if ( argv.length > 1  )  {
+
+			if (argv.length > 1) {
 				agent.unlockPrivateKey(argv[0]);
-				
-				if ( argv[1].length() > 0 )
-					agent.setLoginName( argv[1]);
-				
-				if ( argv.length > 2 && argv[2].length() > 0 )
+
+				if (argv[1].length() > 0)
+					agent.setLoginName(argv[1]);
+
+				if (argv.length > 2 && argv[2].length() > 0)
 					agent.setEmail(argv[2]);
 			}
-			System.out.print( agent.toXmlString());
+			System.out.print(agent.toXmlString());
 		} catch (Exception e) {
-			System.err.println ("unable to generate new agent: " + e);
-		}		
+			System.err.println("unable to generate new agent: " + e);
+		}
 	}
-	
+
 }
