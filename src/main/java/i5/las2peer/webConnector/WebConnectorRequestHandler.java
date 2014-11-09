@@ -45,11 +45,6 @@ import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 /**
  * A HttpServer RequestHandler for handling requests to the LAS2peer Web Connector.
  * Each request will be distributed to its corresponding session.
-<<<<<<< HEAD
- *
- * 
-=======
->>>>>>> origin/oidc
  */
 
 
@@ -194,6 +189,11 @@ public class WebConnectorRequestHandler implements RequestHandler {
 				try {
 					pa = (PassphraseAgent)l2pNode.getAgent(oidcAgentId);
 					pa.unlockPrivateKey(password);
+					if(pa instanceof UserAgent){
+						UserAgent ua = (UserAgent) pa;
+						ua.setUserData(ujson.toJSONString());
+						return ua;
+					}
 					return pa;
 				} catch (AgentNotKnownException e) {
 					UserAgent oidcAgent;
@@ -206,6 +206,7 @@ public class WebConnectorRequestHandler implements RequestHandler {
 						oidcAgent.unlockPrivateKey(ujson.get("sub").toString());
 						oidcAgent.setEmail((String) ujson.get("email"));
 						oidcAgent.setLoginName((String) ujson.get("preferred_username"));
+						oidcAgent.setUserData(ujson.toJSONString());
 
 						l2pNode.storeAgent(oidcAgent);
 						oidcAgent.unlockPrivateKey(password);
