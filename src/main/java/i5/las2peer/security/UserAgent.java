@@ -35,6 +35,8 @@ public class UserAgent extends PassphraseAgent {
 	
 	private String sEmail = null;
 	
+	private Object userData = null;
+	
 	/**
 	 * atm constructor for the MockAgent class, just don't know, how agent creation will take place later 
 	 * 
@@ -324,10 +326,8 @@ public class UserAgent extends PassphraseAgent {
 
 	@Override
 	public void notifyUnregister() {
-		// TODO Auto-generated method stub
-		
+		// TODO Auto-generated method stub	
 	}
-
 	
 	/**
 	 * get the email address assigned to this agent
@@ -344,6 +344,16 @@ public class UserAgent extends PassphraseAgent {
 	public boolean hasEmail () {
 		return sEmail != null;
 	}
+	
+	public Object getUserData(){
+		return this.userData;
+	}
+	
+	public void setUserData(Object u){
+		this.userData = u;
+	}
+	
+	
 	
 	
 	
