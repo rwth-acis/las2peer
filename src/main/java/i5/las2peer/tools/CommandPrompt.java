@@ -166,6 +166,10 @@ public class CommandPrompt {
 			}
 
 			String parameterString = value.substring(value.indexOf("(") + 1, value.lastIndexOf(")"));
+			if (parameterString.isEmpty()) {
+				// only parantheses with no arguments given
+				return new String[0];
+			}
 
 			String[] split = parameterString.trim().split("\\s*,\\s*");
 			Object[] result = new Object[split.length];

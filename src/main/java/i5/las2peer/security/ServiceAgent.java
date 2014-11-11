@@ -53,7 +53,7 @@ public class ServiceAgent extends PassphraseAgent {
 	private String sServiceClass;
 
 	private boolean timerRunning = false;
-	private static Timer timer = new Timer();
+	private Timer timer;
 	private int timerIntervalSeconds = 10;
 	private int timerRunTimes = 0;
 	private int TIMER_RUN_TIMES_MAX = 3;
@@ -326,7 +326,10 @@ public class ServiceAgent extends PassphraseAgent {
 	}
 
 	private void stopTimer() {
-		timer.cancel();
+		if (timer != null) {
+			timer.cancel();
+			timer = null;
+		}
 		timerRunning = false;
 		timerRunTimes = 0;
 	}
@@ -372,18 +375,6 @@ public class ServiceAgent extends PassphraseAgent {
 
 	}
 
-	private void executeTimer(Node finalNode, ServiceInfoAgent finalAgent) {
-		try {
-			finalAgent.serviceAdded(this, finalNode);
-			timerRunTimes++;
-			if (timerRunning && timerRunTimes > TIMER_RUN_TIMES_MAX) {
-				stopTimer();
-			}
-		} catch (Exception e) {
-			//do nothing for now
-		}
-	}
-
 	private void startTimer() throws Exception {
 		if (timerRunning)
 			return;
@@ -403,6 +394,18 @@ public class ServiceAgent extends PassphraseAgent {
 				},
 				0, // run first occurrence immediately
 				timerIntervalSeconds * 1000); // run every x seconds
+	}
+
+	private void executeTimer(Node finalNode, ServiceInfoAgent finalAgent) {
+		try {
+			finalAgent.serviceAdded(this, finalNode);
+			timerRunTimes++;
+			if (timerRunning && timerRunTimes > TIMER_RUN_TIMES_MAX) {
+				stopTimer();
+			}
+		} catch (Exception e) {
+			//do nothing for now
+		}
 	}
 
 	/**
