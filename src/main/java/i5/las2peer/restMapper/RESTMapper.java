@@ -191,14 +191,22 @@ public class RESTMapper {
 
 		// merge in class annotations 
 		Annotation[] classAnnotations=cl.getAnnotations();
-
+		
+		
 		String r = "";
 
 		JSONObject apiDocs = new JSONObject();
 
 		apiDocs.put("swaggerVersion", "1.2");
-		apiDocs.put("resourcePath", "/"+tlr);
+		
+		// strip off trailing slash
+		if(epUrl.endsWith("/")){
+			epUrl += epUrl.substring(0,epUrl.length()-1);
+		}
+		
 		apiDocs.put("basePath", epUrl);
+		
+		apiDocs.put("resourcePath", "/"+tlr);
 
 		if (cl.isAnnotationPresent(Version.class)){
 			apiDocs.put("apiVersion", ((Version) cl.getAnnotation(Version.class)).value());
