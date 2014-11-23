@@ -201,7 +201,7 @@ public class RESTMapper {
 		
 		// strip off trailing slash
 		if(epUrl.endsWith("/")){
-			epUrl += epUrl.substring(0,epUrl.length()-1);
+			epUrl = epUrl.substring(0,epUrl.length()-1);
 		}
 		
 		apiDocs.put("basePath", epUrl);
