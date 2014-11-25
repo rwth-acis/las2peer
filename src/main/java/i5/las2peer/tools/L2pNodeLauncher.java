@@ -581,17 +581,24 @@ public class L2pNodeLauncher {
 	}
 
 	/**
-	 * start a service with a known agent 
+	 * start a service with a known agent or generate a new agent for the service
 	 * 
 	 * @param serviceClass
 	 * @param agentPass
 	 * @throws L2pSecurityException 
 	 * @throws AgentException 
 	 * @throws AgentAlreadyRegisteredException 
+	 * @throws CryptoException 
 	 */
 	public void startService(String serviceClass, String agentPass) throws AgentNotKnownException,
-			L2pSecurityException, AgentAlreadyRegisteredException, AgentException {
-		ServiceAgent sa = node.getServiceAgent(serviceClass);
+			L2pSecurityException, AgentAlreadyRegisteredException, AgentException, CryptoException {
+		ServiceAgent sa = null;
+		try {
+			sa = node.getServiceAgent(serviceClass);
+		} catch (Exception e) {
+			ColoredOutput.println("Can't get service agent for " + serviceClass + ". Generating new instance...");
+			sa = ServiceAgent.generateNewAgent(serviceClass, agentPass);
+		}
 		sa.unlockPrivateKey(agentPass);
 		startService(sa);
 	}
