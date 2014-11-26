@@ -5,7 +5,12 @@
 		<artifact type="jar" ext="jar" conf="default"/>
 	</publications>
 	<dependencies>
+<<<<<<< HEAD
         <dependency org="junit" name="junit" rev="4.11"/>
 		<dependency org="com.googlecode.json-simple" name="json-simple" rev="1.1" />		
+=======
+        <dependency org="junit" name="junit" rev="4.11"/> 
+		<dependency org="com.googlecode.json-simple" name="json-simple" rev="1.1" />
+>>>>>>> 85fcd48e9f4b99d5db47294f0780e2fa8bd9d14c
     </dependencies>
 </ivy-module>
