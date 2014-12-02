@@ -339,7 +339,7 @@
 	
 	<!-- JUnit Testing -->
 	
-	<target name="junit" depends="junit_tests, junit_clean" />
+	<target name="junit" depends="junit_tests, junit_clean" description="-->execute all junit tests" />
 	
 	<target name="init_junit" depends="init_general">
 		<mkdir dir="${junit.report}" />

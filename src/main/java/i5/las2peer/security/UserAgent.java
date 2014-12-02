@@ -54,11 +54,11 @@ public class UserAgent extends PassphraseAgent {
 	 * 
 	 * @param id
 	 * @param pubKey
-	 * @param encodedPrivate
+	 * @param encryptedPrivate
 	 * @param salt
 	 */
-	protected UserAgent(long id, PublicKey pubKey, byte[] encodedPrivate, byte[] salt) {
-		super(id, pubKey, encodedPrivate, salt);
+	protected UserAgent(long id, PublicKey pubKey, byte[] encryptedPrivate, byte[] salt) {
+		super(id, pubKey, encryptedPrivate, salt);
 	}
 
 	/**
@@ -81,8 +81,8 @@ public class UserAgent extends PassphraseAgent {
 	 * select a login name for this agent
 	 * @param loginName
 	 * 
-	 * @throws L2pSecurityException 
-	 * @throws UserAgentException 
+	 * @throws L2pSecurityException
+	 * @throws UserAgentException
 	 */
 	public void setLoginName(String loginName) throws L2pSecurityException, UserAgentException {
 		if (this.isLocked())
@@ -128,9 +128,9 @@ public class UserAgent extends PassphraseAgent {
 	 * @throws L2pSecurityException When the user agent is still locked.
 	 */
 	public void setUserData(Serializable object) throws L2pSecurityException {
-		if (this.isLocked())
+		if (this.isLocked()) {
 			throw new L2pSecurityException("unlock needed first!");
-
+		}
 		this.userData = object;
 	}
 

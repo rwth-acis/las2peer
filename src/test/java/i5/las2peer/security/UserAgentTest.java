@@ -83,10 +83,12 @@ public class UserAgentTest {
 	@Test
 	public void testXml() throws NoSuchAlgorithmException, L2pSecurityException, MalformedXMLException, CryptoException, UserAgentException {
 		String passphrase = "a pass";
+		String email = "usera@example.org";
+		String userData = "This is the user data attachement.";
 		UserAgent a = UserAgent.createUserAgent(passphrase);
 		a.unlockPrivateKey(passphrase);
-		a.setEmail("usera@example.org");
-		a.setUserData("This is the user data attachement.");
+		a.setEmail(email);
+		a.setUserData(userData);
 
 		String xml = a.toXmlString();
 		System.out.println(xml);
@@ -94,8 +96,8 @@ public class UserAgentTest {
 		UserAgent b = UserAgent.createFromXml(xml);
 
 		assertEquals(a.getId(), b.getId());
-		assertEquals(a.getEmail(), b.getEmail());
-		assertEquals(a.getUserData(), b.getUserData());
+		assertEquals(email, b.getEmail());
+		assertEquals(userData, b.getUserData());
 	}
 
 	public void testLogin() throws CryptoException, L2pSecurityException, MalformedXMLException, UserAgentException {

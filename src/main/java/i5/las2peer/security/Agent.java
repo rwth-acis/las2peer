@@ -81,12 +81,12 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	 * 
 	 * @param id
 	 * @param publicKey
-	 * @param encodedPrivate
+	 * @param encryptedPrivate
 	 */
-	protected Agent ( long id, PublicKey publicKey, byte[] encodedPrivate ) {
+	protected Agent ( long id, PublicKey publicKey, byte[] encryptedPrivate ) {
 		this.id = id;
 		this.publicKey = publicKey;
-		this.baEncrypedPrivate = encodedPrivate.clone();
+		this.baEncrypedPrivate = encryptedPrivate.clone();
 		this.privateKey = null;
 	}
 	

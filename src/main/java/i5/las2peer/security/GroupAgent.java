@@ -41,6 +41,8 @@ public class GroupAgent extends Agent {
 
 	private SecretKey symmetricGroupKey = null;
 	private Agent openedBy = null;
+	private String name;
+	private Serializable userData;
 
 	/**
 	 * hashtable storing the encrypted versions of the group secret key
@@ -335,7 +337,7 @@ public class GroupAgent extends Agent {
 								+ "</keyentry>\n";
 			}
 
-			return "<las2peer:agent type=\"group\">\n"
+			StringBuffer result = new StringBuffer("<las2peer:agent type=\"group\">\n"
 					+ "\t<id>" + getId() + "</id>\n"
 					+ "\t<publickey encoding=\"base64\">"
 					+ SerializeTools.serializeToBase64(getPublicKey())
@@ -345,8 +347,18 @@ public class GroupAgent extends Agent {
 					+ "</privatekey>\n"
 					+ "\t<unlockKeys method=\"" + CryptoTools.getAsymmetricAlgorithm() + "\">\n"
 					+ keyList
-					+ "\t</unlockKeys>\n"
-					+ "</las2peer:agent>\n";
+					+ "\t</unlockKeys>\n");
+
+			if (name != null) {
+				result.append("<groupname>" + name + "</groupname>");
+			}
+			if (userData != null) {
+				result.append("<userdata>" + SerializeTools.serializeToBase64(userData) + "</userdata>");
+			}
+
+			result.append("</las2peer:agent>\n");
+
+			return result.toString();
 		} catch (SerializationException e) {
 			throw new RuntimeException("Serialization problems with keys");
 		}
@@ -383,25 +395,56 @@ public class GroupAgent extends Agent {
 	 */
 	public static GroupAgent createFromXml(Element root) throws MalformedXMLException {
 		try {
-			Element elId = root.getFirstChild();
-			Element pubKey = root.getChild(1);
-			Element privKey = root.getChild(2);
-			Element encryptedKeys = root.getChild(3);
+			Element elId = null;
+			Element pubKey = null;
+			Element privKey = null;
+			Element encryptedKeys = null;
+			Element groupname = null;
+			Element userdata = null;
 
-			if (!pubKey.getName().equals("publickey"))
+			Enumeration<Element> children = root.getChildren();
+			while (children.hasMoreElements()) {
+				Element next = children.nextElement();
+				String name = next.getName();
+				if (name.equals("id")) {
+					elId = next;
+				} else if (name.equals("publickey")) {
+					pubKey = next;
+				} else if (name.equals("privatekey")) {
+					privKey = next;
+				} else if (name.equals("unlockKeys")) {
+					encryptedKeys = next;
+				} else if (name.equals("groupname")) {
+					groupname = next;
+				} else if (name.equals("userdata")) {
+					userdata = next;
+				}
+			}
+
+			if (elId == null) {
+				throw new MalformedXMLException("element id expected");
+			}
+
+			if (pubKey == null) {
 				throw new MalformedXMLException("public key expected");
-			if (!pubKey.getAttribute("encoding").equals("base64"))
+			}
+			if (!pubKey.getAttribute("encoding").equals("base64")) {
 				throw new MalformedXMLException("base64 encoding expected");
+			}
 
-			if (!privKey.getName().equals("privatekey"))
+			if (privKey == null) {
 				throw new MalformedXMLException("private key expected");
-			if (!privKey.getAttribute("encrypted").equals(CryptoTools.getSymmetricAlgorithm()))
+			}
+			if (!privKey.getAttribute("encrypted").equals(CryptoTools.getSymmetricAlgorithm())) {
 				throw new MalformedXMLException(CryptoTools.getSymmetricAlgorithm() + " expected");
+			}
 
-			if (!encryptedKeys.getName().equals("unlockKeys"))
+			if (encryptedKeys == null) {
 				throw new MalformedXMLException("unlockKeys expected");
-			if (!encryptedKeys.getAttribute("method").equals(CryptoTools.getAsymmetricAlgorithm()))
+			}
+			if (!encryptedKeys.getAttribute("method").equals(CryptoTools.getAsymmetricAlgorithm())) {
 				throw new MalformedXMLException("base64 encoding expected");
+			}
 
 			long id = Long.parseLong(elId.getFirstChild().getText());
 			PublicKey publicKey = (PublicKey) SerializeTools.deserializeBase64(pubKey.getFirstChild().getText());
@@ -422,7 +465,19 @@ public class GroupAgent extends Agent {
 				byte[] content = Base64.decodeBase64(elKey.getFirstChild().getText());
 				htMemberKeys.put(agentId, content);
 			}
-			return new GroupAgent(id, publicKey, encPrivate, htMemberKeys);
+
+			GroupAgent result = new GroupAgent(id, publicKey, encPrivate, htMemberKeys);
+
+			// attach optional fields
+			if (groupname != null) {
+				result.name = groupname.getFirstChild().getText();
+			}
+			if (userdata != null) {
+				String base64UserData = userdata.getFirstChild().getText();
+				result.userData = SerializeTools.deserializeBase64(base64UserData);
+			}
+
+			return result;
 		} catch (XMLSyntaxException e) {
 			throw new MalformedXMLException("Error parsing xml string", e);
 		} catch (SerializationException e) {
@@ -511,6 +566,55 @@ public class GroupAgent extends Agent {
 	public void notifyUnregister() {
 		// TODO Auto-generated method stub
 
+	}
+
+	/**
+	 * Sets a name for this group(-agent)
+	 * 
+	 * @param groupname A name to be used for this group.
+	 * This is no identifier! May have duplicates.
+	 * @throws L2pSecurityException When the user agent is still locked.
+	 */
+	public void setName(String groupname) throws L2pSecurityException {
+		if (this.isLocked()) {
+			throw new L2pSecurityException("unlock needed first!");
+		}
+		this.name = groupname;
+	}
+
+	/**
+	 * Gets the name for this group.
+	 * 
+	 * @return Returns the group name or {@code null} if no name was assigned.
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * Attaches the given object directly to this agent. The
+	 * user data represent a field of this user agent and
+	 * should be used with small values (< 1MB) only.
+	 * Larger byte amounts could handicap the agent handling
+	 * inside the network.
+	 * 
+	 * @param object The user data object to be serialized and attached.
+	 * @throws L2pSecurityException When the user agent is still locked.
+	 */
+	public void setUserData(Serializable object) throws L2pSecurityException {
+		if (this.isLocked()) {
+			throw new L2pSecurityException("unlock needed first!");
+		}
+		this.userData = object;
+	}
+
+	/**
+	 * get the user data assigned to this agent
+	 * 
+	 * @return Returns the user data object
+	 */
+	public Serializable getUserData() {
+		return this.userData;
 	}
 
 }
