@@ -72,7 +72,7 @@ public class WebConnector extends Connector {
 	public static final int DEFAULT_SERVICE_REPOSITORY_UPDATE_INTERVAL_SECONDS = 300;
 	protected int serviceRepositoryUpdateIntervalSeconds = DEFAULT_SERVICE_REPOSITORY_UPDATE_INTERVAL_SECONDS;
 
-	public static final String DEFAULT_OIDC_PROVIDER = "http://api.learning-layers.eu/o/oauth2";
+	public static final String DEFAULT_OIDC_PROVIDER = "https://api.learning-layers.eu/o/oauth2";
 	protected String oidcProvider = DEFAULT_OIDC_PROVIDER;
 
 	protected String defaultLoginUser = "";
@@ -273,6 +273,7 @@ public class WebConnector extends Connector {
 		} catch (Exception e) {
 			// XXX logging?!
 		}
+		
 		myNode = node;
 		try {
 			ServiceRepositoryManager.start(myNode, serviceRepositoryUpdateIntervalSeconds);
@@ -470,7 +471,8 @@ public class WebConnector extends Connector {
 			// put JSON result in result table
 			result.put("config", config);
 		} catch (Exception e) {
-			System.out.println("Could not retrieve a valid config from the oidcProvider!");
+			System.out.println("OpenID Connect Provider " + oidcProvider.trim() + " unreachable!");
+			System.err.println("Make sure to set a correct OpenID Connect Provider URL in your las2peer Web Connector config!");
 			System.out.println("WebConnector will now run in OIDC agnostic mode.");
 			logError("Could not retrieve a valid config from the oidcProvider!");
 
