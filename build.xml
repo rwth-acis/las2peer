@@ -175,6 +175,9 @@
 			</fileset>
 			<fileset dir="xsd">
 			</fileset>
+			<manifest>
+				<attribute name="Class-Path" value="json-simple-1.1.jar"/>
+			</manifest>
 		</jar>
 	</target>
 	
