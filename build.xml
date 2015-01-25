@@ -268,7 +268,7 @@
 				<attribute name="Main-Class" value="i5.las2peer.tools.L2pNodeLauncher"/>
 				<attribute
 					name="Class-Path"
-					value="i5-simpleXML-0.2.jar commons-codec-1.7.jar FreePastry-2.1.jar xpp3-1.1.4c.jar"
+					value="i5-simpleXML-0.2.jar commons-codec-1.9.jar FreePastry-2.1.jar xpp3-1.1.4c.jar"
 				/>
 			</manifest>
 		</jar>
