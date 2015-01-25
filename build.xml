@@ -183,7 +183,7 @@
 			<manifest>
 				<attribute
 					name="Class-Path"
-					value="las2peer-rest-mapper-0.2-SNAPSHOT.jar i5-httpServer-0.4.jar"
+					value="las2peer-rest-mapper-0.3-SNAPSHOT.jar i5-httpServer-0.4.jar"
 				/>
 			</manifest>
 		</jar>
