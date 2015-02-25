@@ -1,8 +1,5 @@
 package i5.las2peer.webConnector;
 
-import i5.httpServer.HttpServer;
-import i5.httpServer.HttpsServer;
-import i5.httpServer.RequestHandler;
 import i5.las2peer.api.Connector;
 import i5.las2peer.api.ConnectorException;
 import i5.las2peer.logging.NodeObserver.Event;
@@ -13,20 +10,30 @@ import i5.las2peer.restMapper.data.PathTree;
 import i5.las2peer.security.Agent;
 import i5.las2peer.webConnector.serviceManagement.ServiceRepositoryManager;
 
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.InetSocketAddress;
 import java.net.URL;
+import java.security.GeneralSecurityException;
+import java.security.KeyStore;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.HashMap;
+
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
 
 import net.minidev.json.JSONObject;
 import net.minidev.json.JSONValue;
 
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest.Method;
+import com.sun.net.httpserver.HttpServer;
+import com.sun.net.httpserver.HttpsConfigurator;
+import com.sun.net.httpserver.HttpsServer;
 
 /**
  * Starter class for registering the Web Connector at the LAS2peer server.
@@ -95,14 +102,12 @@ public class WebConnector extends Connector {
 	protected JSONObject oidcProviderInfo;
 
 	private HashMap<Long, Integer> openUserRequests = new HashMap<>();
-	//--
 	private PathTree tree = new PathTree();
 
 	public PathTree getMappingTree() {
 		return tree;
 	}
 
-	//--
 	/**
 	 * create a new web connector instance. 	
 	 * @throws FileNotFoundException
@@ -273,7 +278,7 @@ public class WebConnector extends Connector {
 		} catch (Exception e) {
 			// XXX logging?!
 		}
-		
+
 		myNode = node;
 		try {
 			ServiceRepositoryManager.start(myNode, serviceRepositoryUpdateIntervalSeconds);
@@ -303,88 +308,51 @@ public class WebConnector extends Connector {
 	 * @throws ConnectorException
 	 */
 	private void runServer(boolean isHttps) throws ConnectorException {
-		if (isHttps) {
-			if (enableCrossOriginResourceSharing) {
-				https = new HttpsServer(sslKeystore, sslKeyPassword, WebConnectorRequestHandler.class.getName(),
-						httpsPort, crossOriginResourceDomain, crossOriginResourceMaxAge);
-			} else {
-				https = new HttpsServer(sslKeystore, sslKeyPassword, WebConnectorRequestHandler.class.getName(),
-						httpsPort);
-			}
-			https.setSocketTimeout(socketTimeout);
-			https.start();
-		} else {
-			// start the HTTP listener
-			if (enableCrossOriginResourceSharing) {
-				http = new HttpServer(WebConnectorRequestHandler.class.getName(), httpPort, crossOriginResourceDomain,
-						crossOriginResourceMaxAge);
-			} else {
-				http = new HttpServer(WebConnectorRequestHandler.class.getName(), httpPort);
-			}
-			http.setSocketTimeout(socketTimeout);
-			http.start();
-		}
-
-		RequestHandler handler;
-		do {
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
-				throw new ConnectorException("Startup has been interrupted!", e);
-			}
+		try {
 			if (isHttps) {
-				handler = https.getHandler();
+				https = HttpsServer.create(new InetSocketAddress(httpsPort), 0);
+				// apply ssl certificates and key
+				SSLContext sslContext = SSLContext.getInstance("TLS");
+				char[] keystorePassword = sslKeyPassword.toCharArray();
+				KeyStore ks = KeyStore.getInstance("JKS");
+				ks.load(new FileInputStream(sslKeystore), keystorePassword);
+				KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+				kmf.init(ks, keystorePassword);
+				sslContext.init(kmf.getKeyManagers(), null, null);
+				HttpsConfigurator configurator = new HttpsConfigurator(sslContext);
+				https.setHttpsConfigurator(configurator);
 			} else {
-				handler = http.getHandler();
+				http = HttpServer.create(new InetSocketAddress(httpPort), 0);
 			}
-		} while (handler == null);
-
-		((WebConnectorRequestHandler) handler).setConnector(this);
+		} catch (IOException e) {
+			throw new ConnectorException("Startup has been interrupted!", e);
+		} catch (GeneralSecurityException e) {
+			throw new ConnectorException("SSL encryption not possible!", e);
+		}
+		// TODO check is setSocketTimeout still required?
+//		httpServer.setSocketTimeout(socketTimeout);
+		WebConnectorRequestHandler handler = new WebConnectorRequestHandler(this);
 		if (isHttps) {
+			https.createContext("/", handler);
+			https.start();
 			logMessage("Web-Connector in HTTPS mode running on port " + httpsPort);
 		} else {
+			http.createContext("/", handler);
+			http.start();
 			logMessage("Web-Connector in HTTP mode running on port " + httpPort);
 		}
 	}
 
 	@Override
 	public void stop() throws ConnectorException {
-		// stop the listener
-		if (http != null) {
-			http.stopServer();
-		}
-
+		// stop the HTTP server
 		if (https != null) {
-			https.stopServer();
+			https.stop(0);
+		} else if (http != null) {
+			http.stop(0);
 		}
-
-		try {
-			if (http != null) {
-				http.join();
-				logMessage("Web-Connector in HTTP mode has been stopped");
-			}
-			if (https != null) {
-				https.join();
-				logMessage("Web-Connector in HTTPS mode has been stopped");
-			}
-		} catch (InterruptedException e) {
-			logError("Joining has been interrupted!");
-		}
+		logMessage("Web-Connector has been stopped");
 		this.myNode = null;
-	}
-
-	/**
-	 * send an interrupt to all sub servers
-	 * (mainly for hard test shutdown)
-	 */
-	public void interrupt() {
-		if (http != null) {
-			http.interrupt();
-		}
-		if (https != null) {
-			https.interrupt();
-		}
-		System.out.println("interrupted!");
 	}
 
 	/**
@@ -425,7 +393,7 @@ public class WebConnector extends Connector {
 				e.printStackTrace();
 			}
 			myNode.observerNotice(Event.CONNECTOR_REQUEST, myNode.getNodeId(), service, WEB_CONNECTOR + request);
-		} else { //Not a service call
+		} else { // Not a service call
 			myNode.observerNotice(Event.CONNECTOR_REQUEST, myNode.getNodeId(), WEB_CONNECTOR + request);
 		}
 	}
@@ -459,8 +427,8 @@ public class WebConnector extends Connector {
 	private JSONObject fetchOidcProviderConfig() throws IOException {
 		JSONObject result = new JSONObject();
 
-		//send Open ID Provider Config request
-		//(cf. http://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig)
+		// send Open ID Provider Config request
+		// (cf. http://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig)
 		URL pConfigDocUri = new URL(oidcProvider.trim() + "/.well-known/openid-configuration");
 		HTTPRequest pConfigRequest = new HTTPRequest(Method.GET, pConfigDocUri);
 
@@ -472,7 +440,8 @@ public class WebConnector extends Connector {
 			result.put("config", config);
 		} catch (Exception e) {
 			System.out.println("OpenID Connect Provider " + oidcProvider.trim() + " unreachable!");
-			System.err.println("Make sure to set a correct OpenID Connect Provider URL in your las2peer Web Connector config!");
+			System.err
+					.println("Make sure to set a correct OpenID Connect Provider URL in your las2peer Web Connector config!");
 			System.out.println("WebConnector will now run in OIDC agnostic mode.");
 			logError("Could not retrieve a valid config from the oidcProvider!");
 

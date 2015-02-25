@@ -1,8 +1,5 @@
 package i5.las2peer.webConnector;
 
-import i5.httpServer.HttpRequest;
-import i5.httpServer.HttpResponse;
-import i5.httpServer.RequestHandler;
 import i5.las2peer.execution.NoSuchServiceException;
 import i5.las2peer.execution.NoSuchServiceMethodException;
 import i5.las2peer.execution.ServiceInvocationException;
@@ -12,7 +9,6 @@ import i5.las2peer.p2p.TimeoutException;
 import i5.las2peer.restMapper.RESTMapper;
 import i5.las2peer.restMapper.data.InvocationData;
 import i5.las2peer.restMapper.data.Pair;
-
 import i5.las2peer.restMapper.exceptions.NoMethodFoundException;
 import i5.las2peer.restMapper.exceptions.NotSupportedUriPathException;
 import i5.las2peer.security.L2pSecurityException;
@@ -21,18 +17,22 @@ import i5.las2peer.security.PassphraseAgent;
 import i5.las2peer.security.UserAgent;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Enumeration;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Scanner;
+import java.util.Set;
 
 import net.minidev.json.JSONObject;
 import rice.p2p.util.Base64;
 
 import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.SerializeException;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest.Method;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
@@ -40,156 +40,184 @@ import com.nimbusds.openid.connect.sdk.UserInfoErrorResponse;
 import com.nimbusds.openid.connect.sdk.UserInfoResponse;
 import com.nimbusds.openid.connect.sdk.UserInfoSuccessResponse;
 import com.nimbusds.openid.connect.sdk.claims.UserInfo;
-
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
 
 /**
  * A HttpServer RequestHandler for handling requests to the LAS2peer Web Connector.
  * Each request will be distributed to its corresponding session.
  */
 
-
-
-public class WebConnectorRequestHandler implements RequestHandler {
+public class WebConnectorRequestHandler implements HttpHandler {
 
 	private static final String AUTHENTICATION_FIELD = "Authorization";
 	private WebConnector connector;
 	private Node l2pNode;
 
-	/**
-	 * Standard Constructor
-	 * @throws URISyntaxException 
-	 *
-	 */
-	public WebConnectorRequestHandler () throws URISyntaxException {
+	public static final int STATUS_CONTINUE = 100; // Continue (Http/1.1)
+	public static final int STATUS_SWITCHING = 101; // Switching Protocols (Http/1.1)
+	// 2XX ? Success
+	public static final int STATUS_OK = 200; // OK
+	public static final int STATUS_CREATED = 201; // Created
+	public static final int STATUS_ACCEPTED = 202; // Accepted
+	public static final int STATUS_NON_AUTH = 203; // Non-Authoritative Information (HTTP/1.1)
+	public static final int STATUS_NO_CONTENT = 204; // No Content
+	public static final int STATUS_RESET_CONTENT = 205; // Reset Content (HTTP/1.1)
+	public static final int STATUS_PARTIAL_CONTENT = 206; // Partial Content (HTTP/1.1)
+	// 3XX ? Redirection ? the requested document is to be found at some other location
+	public static final int STATUS_MULTIPLE_CHOICES = 300; // Multiple Choices (HTTP/1.1)
+	public static final int STATUS_MOVED_PERM = 301; // Moved Permanently
+	public static final int STATUS_FOUND = 302; // Found
+	public static final int STATUS_SEE_OTHER = 303; // See Other (HTTP/1.1)
+	public static final int STATUS_NOT_MODIFIED = 304; // Not Modified
+	public static final int STATUS_USE_PROXY = 305; // Use Proxy (HTTP/1.1)
+	public static final int STATUS_TEMP_REDIRECT = 307; // Temporary Redirect (HTTP/1.1)
+	// 4XX ? Error of the client - e.g. errornous requests
+	public static final int STATUS_BAD_REQUEST = 400; // Bad Request
+	public static final int STATUS_UNAUTHORIZED = 401; // Unauthorized
+	public static final int STATUS_PAYMENT_REQUIRED = 402; // Payment Required (Unused) (HTTP/1.1)
+	public static final int STATUS_FORBIDDEN = 403; // Forbidden
+	public static final int STATUS_NOT_FOUND = 404; // Not Found
+	public static final int STATUS_METHOD_NOT_ALLOWED = 405; // Method Not Allowed (HTTP/1.1)
+	public static final int STATUS_NOT_ACCEPTABLE = 406; // Not Acceptable (HTTP/1.1)
+	public static final int STATUS_PROXY_AUTH_REQUIRED = 407; // Proxy Authentication Required (HTTP/1.1)
+	public static final int STATUS_REQUEST_TIMEOUT = 408; // Request Timeout (HTTP/1.1)
+	public static final int STATUS_CONFLICT = 409; // Conflict (HTTP/1.1)
+	public static final int STATUS_GONE = 410; // Gone (HTTP/1.1)
+	public static final int STATUS_LENGTH_REQUIRED = 411; // Length Required (HTTP/1.1)
+	public static final int STATUS_PRECONDITION_FAILED = 412; // Precondition Failed (HTTP/1.1)
+	public static final int STATUS_REQUEST_ENTITY_TOO_LONG = 413; // Request Entity Too Long (HTTP/1.1)
+	public static final int STATUS_REQUEST_URI_TOO_LONG = 414; // Request-URI Too Long (HTTP/1.1)
+	public static final int STATUS_UNSUPPORTED_MEDIA_TYPE = 415; // Unsupported Media Type (HTTP/1.1)
+	public static final int STATUS_REQUEST_RANGE_NOT_SATISFIABLE = 416; // Requested Range Not Satisfiable (HTTP/1.1)
+	public static final int STATUS_EXPECTATION_FAILED = 417; // Expectation Failed (HTTP/1.1)
+	// 5XX ? Error of the server
+	public static final int STATUS_INTERNAL_SERVER_ERROR = 500; // Internal Server Error
+	public static final int STATUS_NOT_IMPLEMENTED = 501; // Not Implemented
+	public static final int STATUS_BAD_GATEWAY = 502; // Bad Gateway
+	public static final int STATUS_SERVICE_UNAVAILABLE = 503; // Service Unavailable
+	public static final int STATUS_GATEWAY_TIMEOUT = 504; // Gateway Timeout (HTTP/1.1)
+	public static final int STATUS_HTTP_VERSION_NOT_SUPPORTED = 505; // HTTP Version Not Supported (HTTP/1.1)
+	/** HTTP Status Messages **/
+	public static final String CODE_202_MESSAGE = "OK";
+	public static final String CODE_404_MESSAGE = "forbidden";
+	public static final String CODE_500_MESSAGE = "Internal Server Error";
 
+	public WebConnectorRequestHandler(WebConnector connector) {
+		this.connector = connector;
+		l2pNode = connector.getL2pNode();
 	}
-
 
 	/**
 	 * set the connector handling this request processor
 	 * @param connector
 	 */
-	public void setConnector ( WebConnector connector ) {
+	public void setConnector(WebConnector connector) {
 		this.connector = connector;
-		l2pNode = connector.getL2pNode();		
+		l2pNode = connector.getL2pNode();
 	}
 
 	/**
 	 * Logs in a las2peer user
+	 * 
 	 * @param request
 	 * @param response
 	 * @return -1 if no successful login else userId
 	 * @throws UnsupportedEncodingException 
-	 * @throws SerializeException 
-	 * @throws Exception 
 	 */
-	private PassphraseAgent authenticate (HttpRequest request, HttpResponse response) throws UnsupportedEncodingException, SerializeException
-	{
+	private PassphraseAgent authenticate(HttpExchange exchange) throws UnsupportedEncodingException {
+		final int BASIC_PREFIX_LENGTH = "BASIC ".length();
+		String userPass = "";
+		String username = "";
+		String password = "";
 
-		final int BASIC_PREFIX_LENGTH="BASIC ".length();
-		String userPass="";
-		String username="";
-		String password="";
-
-
-		// Default authentication: 
+		// Default authentication:
 		// check for authentication information in header
-		if(request.hasHeaderField(AUTHENTICATION_FIELD)
-				&&(request.getHeaderField(AUTHENTICATION_FIELD).length()>BASIC_PREFIX_LENGTH))
-		{
-			//looks like: Authentication Basic <Byte64(name:pass)>
-			userPass=request.getHeaderField(AUTHENTICATION_FIELD).substring(BASIC_PREFIX_LENGTH);
-			userPass=new String(Base64.decode(userPass), "UTF-8");
-			int separatorPos=userPass.indexOf(':');
+		if (exchange.getRequestHeaders().containsKey(AUTHENTICATION_FIELD)
+				&& (exchange.getRequestHeaders().getFirst(AUTHENTICATION_FIELD).length() > BASIC_PREFIX_LENGTH)) {
+			// looks like: Authentication Basic <Byte64(name:pass)>
+			userPass = exchange.getRequestHeaders().getFirst(AUTHENTICATION_FIELD).substring(BASIC_PREFIX_LENGTH);
+			userPass = new String(Base64.decode(userPass), "UTF-8");
+			int separatorPos = userPass.indexOf(':');
 
-			//get username and password
-			username=userPass.substring(0,separatorPos);
-			password=userPass.substring(separatorPos+1);
+			// get username and password
+			username = userPass.substring(0, separatorPos);
+			password = userPass.substring(separatorPos + 1);
 
-
-			return login(username,password,request,response);
-
-		} 
+			return login(username, password, exchange);
+		}
 		// OpenID Connect authentication:
 		// check for access token in query parameter
-		
-		// IMPORTANT NOTE: doing the same thing with authorization header and bearer token results in client-side 
-		//                 cross-domain errors despite correct config for CORS in LAS2peer Web Connector!
-		else if(connector.oidcProviderInfo!=null && request.getQueryString() != null && request.getQueryString().contains("access_token=")){
-			String[] params = request.getQueryString().split("&");
+
+		// IMPORTANT NOTE: doing the same thing with authorization header and bearer token results in client-side
+		// cross-domain errors despite correct config for CORS in LAS2peer Web Connector!
+		else if (connector.oidcProviderInfo != null && exchange.getRequestURI().getRawQuery() != null
+				&& exchange.getRequestURI().getRawQuery().contains("access_token=")) {
+			String[] params = exchange.getRequestURI().getRawQuery().split("&");
 			String token = "";
-			for(int i=0;i<params.length; i++){
+			for (int i = 0; i < params.length; i++) {
 				String[] keyval = params[i].split("=");
-				if(keyval[0].equals("access_token")){
+				if (keyval[0].equals("access_token")) {
 					token = keyval[1];
 				}
 			}
 
-			// send request to OpenID Connect user info endpoint to retrieve complete user information 
+			// send request to OpenID Connect user info endpoint to retrieve complete user information
 			// in exchange for access token.
 			HTTPRequest hrq;
 			HTTPResponse hrs;
 
 			try {
-				URI userinfoEndpointUri = new URI((String)((JSONObject) connector.oidcProviderInfo.get("config")).get("userinfo_endpoint"));
-				hrq = new HTTPRequest(Method.GET,userinfoEndpointUri.toURL());
-				hrq.setAuthorization("Bearer "+token);
-				
-				//TODO: process all error cases that can happen (in particular invalid tokens)
-				hrs = hrq.send();
+				URI userinfoEndpointUri = new URI(
+						(String) ((JSONObject) connector.oidcProviderInfo.get("config")).get("userinfo_endpoint"));
+				hrq = new HTTPRequest(Method.GET, userinfoEndpointUri.toURL());
+				hrq.setAuthorization("Bearer " + token);
 
-			} catch (IOException|URISyntaxException e) {
+				// TODO: process all error cases that can happen (in particular invalid tokens)
+				hrs = hrq.send();
+			} catch (IOException | URISyntaxException e) {
 				e.printStackTrace();
-				response.println("Unexpected authentication error: " + e.getMessage());
-				response.setStatus(500);
+				sendStringResponse(exchange, STATUS_INTERNAL_SERVER_ERROR,
+						"Unexpected authentication error: " + e.getMessage());
 				return null;
 			}
-
 
 			// process response from OpenID Connect user info endpoint
 			UserInfoResponse userInfoResponse;
 			try {
 				userInfoResponse = UserInfoResponse.parse(hrs);
 			} catch (ParseException e) {
-				response.println("Couldn't parse UserInfo response: " + e.getMessage());
-				response.setStatus(500);
+				sendStringResponse(exchange, STATUS_INTERNAL_SERVER_ERROR,
+						"Couldn't parse UserInfo response: " + e.getMessage());
 				return null;
 			}
 
-
 			// failed request for OpenID Connect user info will result in no agent being returned.
 			if (userInfoResponse instanceof UserInfoErrorResponse) {
-
-
 				UserInfoErrorResponse uier = (UserInfoErrorResponse) userInfoResponse;
-				
-				response.println("Open ID Connect UserInfo request failed! Cause: " + uier.getErrorObject().getDescription());
-				response.setStatus(401);
-				
+				sendStringResponse(exchange, STATUS_UNAUTHORIZED, "Open ID Connect UserInfo request failed! Cause: "
+						+ uier.getErrorObject().getDescription());
 				return null;
 			}
 
 			// In case of successful request, map OpenID Connect user info to intern
-			UserInfo userInfo = ((UserInfoSuccessResponse)userInfoResponse).getUserInfo();
+			UserInfo userInfo = ((UserInfoSuccessResponse) userInfoResponse).getUserInfo();
 
 			try {
-
 				JSONObject ujson = userInfo.toJSONObject();
-				//response.println("User Info: " + userInfo.toJSONObject());
+				// response.println("User Info: " + userInfo.toJSONObject());
 
 				String sub = (String) ujson.get("sub");
-				String mail = (String) ujson.get("mail");
-				String name = (String) ujson.get("name");
 
 				long oidcAgentId = hash(sub);
-				username = oidcAgentId+"";
+				username = oidcAgentId + "";
 				password = sub;
 
 				PassphraseAgent pa;
 				try {
-					pa = (PassphraseAgent)l2pNode.getAgent(oidcAgentId);
+					pa = (PassphraseAgent) l2pNode.getAgent(oidcAgentId);
 					pa.unlockPrivateKey(password);
-					if(pa instanceof UserAgent){
+					if (pa instanceof UserAgent) {
 						UserAgent ua = (UserAgent) pa;
 						ua.setUserData(ujson.toJSONString());
 						return ua;
@@ -198,11 +226,10 @@ public class WebConnectorRequestHandler implements RequestHandler {
 				} catch (AgentNotKnownException e) {
 					UserAgent oidcAgent;
 					try {
-						// here, we choose the OpenID Connect 
+						// here, we choose the OpenID Connect
 						// TODO: choose other scheme for generating agent password.
-						oidcAgent = UserAgent.createUserAgent(oidcAgentId,sub);
-						
-						
+						oidcAgent = UserAgent.createUserAgent(oidcAgentId, sub);
+
 						oidcAgent.unlockPrivateKey(ujson.get("sub").toString());
 						oidcAgent.setEmail((String) ujson.get("email"));
 						oidcAgent.setLoginName((String) ujson.get("preferred_username"));
@@ -213,726 +240,256 @@ public class WebConnectorRequestHandler implements RequestHandler {
 						return oidcAgent;
 					} catch (Exception e1) {
 						return null;
-					} 
+					}
 				}
-
 			} catch (L2pSecurityException e) {
-				response.println(e.getMessage());
-				response.setStatus(401);
 				e.printStackTrace();
+				sendStringResponse(exchange, STATUS_UNAUTHORIZED, e.getMessage());
 			}
 		}
-
-		//no information? check if there is a default account for login
-		else if(connector.defaultLoginUser.length()>0)
-		{
-			response.print("");
-			return login(connector.defaultLoginUser,connector.defaultLoginPassword,request,response);
-		}
-		else
-		{
-			sendUnauthorizedResponse(response, null, request.getRemoteAddress() + ": No Authentication provided!");
+		// no information? check if there is a default account for login
+		else if (connector.defaultLoginUser.length() > 0) {
+			return login(connector.defaultLoginUser, connector.defaultLoginPassword, exchange);
+		} else {
+			sendUnauthorizedResponse(exchange, null, exchange.getRemoteAddress() + ": No Authentication provided!");
 		}
 		return null;
 	}
 
-
-	private PassphraseAgent login(String username, String password, HttpRequest request, HttpResponse response)
-	{
-		try
-		{
-
+	private PassphraseAgent login(String username, String password, HttpExchange exchange) {
+		try {
 			long userId;
 			PassphraseAgent userAgent;
 
-			if ( username.matches ("-?[0-9].*") ) {//username is id?
+			if (username.matches("-?[0-9].*")) {// username is id?
 				try {
 					userId = Long.valueOf(username);
-				} catch ( NumberFormatException e ) {
-					throw new L2pSecurityException ("The given user does not contain a valid agent id!");
+				} catch (NumberFormatException e) {
+					throw new L2pSecurityException("The given user does not contain a valid agent id!");
 				}
-			} else {//username is string
+			} else {// username is string
 				userId = l2pNode.getAgentIdForLogin(username);
 			}
 
-			//keep track of active requests
-			synchronized (this.connector)
-			{
-
-				if(this.connector.getOpenUserRequests().containsKey(userId))
-				{
+			// keep track of active requests
+			synchronized (this.connector) {
+				if (this.connector.getOpenUserRequests().containsKey(userId)) {
 					Integer numReq = this.connector.getOpenUserRequests().get(userId);
-					this.connector.getOpenUserRequests().put(userId,numReq+1);
-					//System.out.println("### numreq " +numReq);
-				}
-				else
-				{
-					this.connector.getOpenUserRequests().put(userId,1);
-					//System.out.println("### numreq 0" );
+					this.connector.getOpenUserRequests().put(userId, numReq + 1);
+					// System.out.println("### numreq " +numReq);
+				} else {
+					this.connector.getOpenUserRequests().put(userId, 1);
+					// System.out.println("### numreq 0" );
 				}
 			}
-			userAgent = (PassphraseAgent)l2pNode.getAgent(userId);
+			userAgent = (PassphraseAgent) l2pNode.getAgent(userId);
 
 			/* if ( ! (userAgent instanceof PassphraseAgent ))
-                throw new L2pSecurityException ("Agent is not passphrase protected!");*/
-
+			    throw new L2pSecurityException ("Agent is not passphrase protected!");*/
 
 			userAgent.unlockPrivateKey(password);
 
 			return userAgent;
-
-		}catch (AgentNotKnownException e) {
-			sendUnauthorizedResponse(response, null, request.getRemoteAddress() + ": login denied for user " + username);
+		} catch (AgentNotKnownException e) {
+			sendUnauthorizedResponse(exchange, null, exchange.getRemoteAddress() + ": login denied for user "
+					+ username);
 		} catch (L2pSecurityException e) {
-			sendUnauthorizedResponse( response, null, request.getRemoteAddress() + ": unauth access - prob. login problems");
+			sendUnauthorizedResponse(exchange, null, exchange.getRemoteAddress()
+					+ ": unauth access - prob. login problems");
 		} catch (Exception e) {
-
-			sendUnauthorizedResponse(response, null, request.getRemoteAddress() + ": something went horribly wrong. Check your request for correctness.");
+			sendUnauthorizedResponse(exchange, null, exchange.getRemoteAddress()
+					+ ": something went horribly wrong. Check your request for correctness.");
 		}
 		return null;
 	}
+
 	/**
 	 * Delegates the request data to a service method, which then decides what to do with it (maps it internally)
+	 * 
 	 * @param request
 	 * @param response
 	 * @return
 	 */
-	private boolean invoke(PassphraseAgent userAgent, HttpRequest request, HttpResponse response) {
-
-		response.setStatus(HttpResponse.STATUS_INTERNAL_SERVER_ERROR); //internal server error unless otherwise specified (errors might occur)
-		String[] requestSplit=request.getPath().split("/",2);
+	private boolean invoke(PassphraseAgent userAgent, HttpExchange exchange) {
+		// internal server error unless otherwise specified (errors might occur)
+//		int responseCode = STATUS_INTERNAL_SERVER_ERROR;
+		String[] requestSplit = exchange.getRequestURI().getPath().split("/", 2);
 		// first: empty (string starts with '/')
 		// second: URI
-
-
-
-		String uri="";
-		String content="";
+		String uri = "";
 
 		try {
-
-
-
-			if(requestSplit.length>=2)
-			{
-				int varsstart=requestSplit[1].indexOf('?');
-				if(varsstart>0)
-					uri=requestSplit[1].substring(0,varsstart);
-				else
-					uri=requestSplit[1];
-			}
-
-			//http body
-			content=request.getContentString();
-
-			if(content==null)
-				content="";
-			//http method
-			int httpMethodInt=request.getMethod();
-			String httpMethod="get";
-
-			switch (httpMethodInt) 
-			{
-			case HttpRequest.METHOD_GET:
-				httpMethod="get";
-				break;
-			case HttpRequest.METHOD_HEAD:
-				httpMethod="head";
-				break;
-			case HttpRequest.METHOD_DELETE:
-				httpMethod="delete";
-				break;
-			case HttpRequest.METHOD_POST:
-				httpMethod="post";
-				break;
-			case HttpRequest.METHOD_PUT:
-				httpMethod="put";
-				break;
-			default:
-				break;
-			}
-
-			ArrayList<Pair<String>> variablesList=new ArrayList<Pair<String>>();
-			@SuppressWarnings("rawtypes")
-			Enumeration en = request.getGetVarNames();		
-
-			while(en.hasMoreElements())
-			{				
-				String param = (String) en.nextElement();
-				String val= request.getGetVar(param);
-				Pair<String> pair= new Pair<String>(param,val);	
-				variablesList.add(pair);				
-			}
-			@SuppressWarnings("unchecked")
-			Pair<String>[] variables=variablesList.toArray(new Pair[variablesList.size()]);
-
-			ArrayList<Pair<String>> headersList=new ArrayList<Pair<String>>();
-
-
-			en = request.getHeaderFieldNames();
-
-			String acceptHeader="*/*";
-			String contentTypeHeader="text/plain";
-			while(en.hasMoreElements())
-			{
-				String param = (String) en.nextElement();
-
-				String val= request.getHeaderField(param);
-				Pair<String> pair= new Pair<String>(param,val);
-				headersList.add(pair);
-
-				//fetch MIME types
-				if(param.equals("accept") && !val.trim().isEmpty())
-					acceptHeader=val.trim();
-				if(param.equals("content-type")&& !val.trim().isEmpty())
-				{
-					contentTypeHeader=val.trim();
-
+			if (requestSplit.length >= 2) {
+				int varsstart = requestSplit[1].indexOf('?');
+				if (varsstart > 0) {
+					uri = requestSplit[1].substring(0, varsstart);
+				} else {
+					uri = requestSplit[1];
 				}
-
 			}
 
+			// http body
+			InputStream is = exchange.getRequestBody();
+			java.util.Scanner s = new Scanner(is);
+			s.useDelimiter("\\A");
+			String content = s.hasNext() ? s.next() : "";
+			s.close();
 
+			// http method
+			String httpMethod = exchange.getRequestMethod();
+
+			// extract all get variables from the query
+			ArrayList<Pair<String>> variablesList = new ArrayList<Pair<String>>();
+			String query = exchange.getRequestURI().getQuery();
+			if (query != null) {
+				for (String param : query.split("&")) {
+					String pair[] = param.split("=");
+					if (pair.length > 1) {
+						variablesList.add(new Pair<String>(pair[0], pair[1]));
+					} else {
+						variablesList.add(new Pair<String>(pair[0], ""));
+					}
+				}
+			}
 			@SuppressWarnings("unchecked")
-			Pair<String>[] headers=headersList.toArray(new Pair[headersList.size()]);
+			Pair<String>[] variables = variablesList.toArray(new Pair[variablesList.size()]);
 
-			//connector.logMessage(httpMethod+" "+request.getUrl());
+			// extract all header fields from the query
+			ArrayList<Pair<String>> headersList = new ArrayList<Pair<String>>();
+			// default values
+			String acceptHeader = "*/*";
+			String contentTypeHeader = "text/plain";
+			Set<Entry<String, List<String>>> entries = exchange.getRequestHeaders().entrySet();
+			for (Entry<String, List<String>> entry : entries) {
+				String key = entry.getKey();
+				// TODO this only returns the first header value for this key
+				String value = entry.getValue().get(0).trim();
+				headersList.add(new Pair<String>(key, value));
+				// fetch MIME types
+				if (key.toLowerCase().equals("accept") && !value.isEmpty()) {
+					acceptHeader = value;
+				} else if (key.toLowerCase().equals("content-type") && !value.isEmpty()) {
+					contentTypeHeader = value;
+				}
+			}
+			@SuppressWarnings("unchecked")
+			Pair<String>[] headers = headersList.toArray(new Pair[headersList.size()]);
 
-			//Serializable[] parameters={httpMethod,restURI,variables,content};
-
-			Serializable result="";
-
+			Serializable result = "";
 			Mediator mediator = l2pNode.getOrRegisterLocalMediator(userAgent);
-
-			boolean gotResult=false;
-
-			String returnMIMEType="text/plain";
+			boolean gotResult = false;
+			String returnMIMEType = "text/plain";
 			StringBuilder warnings = new StringBuilder();
-			InvocationData[] invocation =RESTMapper.parse(this.connector.getMappingTree(), httpMethod, uri, variables, content,contentTypeHeader,acceptHeader,headers,warnings);
+			InvocationData[] invocation = RESTMapper.parse(this.connector.getMappingTree(), httpMethod, uri, variables,
+					content, contentTypeHeader, acceptHeader, headers, warnings);
 
-
-			if(invocation.length==0)
-			{
-				response.setStatus(404);
-				if(warnings.length()>0)
-				{
-					response.setContentType( "text/plain" );
-
-					response.println(warnings.toString().replaceAll("\n"," "));
+			if (invocation.length == 0) {
+				if (warnings.length() > 0) {
+					sendStringResponse(exchange, STATUS_NOT_FOUND, warnings.toString().replaceAll("\n", " "));
+				} else {
+					exchange.sendResponseHeaders(STATUS_NOT_FOUND, 0);
 				}
 				return false;
 			}
 
 			for (int i = 0; i < invocation.length; i++) {
-				try
-				{
-
-					result= mediator.invoke(invocation[i].getServiceName(),invocation[i].getMethodName(), invocation[i].getParameters(), connector.preferLocalServices());// invoke service method
-					gotResult=true;
-					returnMIMEType=invocation[i].getMIME();
+				try {
+					result = mediator.invoke(invocation[i].getServiceName(), invocation[i].getMethodName(),
+							invocation[i].getParameters(), connector.preferLocalServices());// invoke service method
+					gotResult = true;
+					returnMIMEType = invocation[i].getMIME();
 					break;
-
-
-				} catch ( NoSuchServiceException | TimeoutException e ) {
-
-					sendNoSuchService(request, response, invocation[i].getServiceName());
-
-				}
-				catch ( NoSuchServiceMethodException e ) {
-
-					sendNoSuchMethod(request, response);
-				} catch ( L2pSecurityException e ) {
-					sendSecurityProblems(request, response, e);					
-				} catch ( ServiceInvocationException e ) {
-
-					if ( e.getCause() == null ){
-						sendResultInterpretationProblems(request, response);
-					}else{
-						sendInvocationException(request, response, e);}
-				} catch ( InterruptedException e ) {
-					sendInvocationInterrupted(request, response);						
-
+				} catch (NoSuchServiceException | TimeoutException e) {
+					sendNoSuchService(exchange, invocation[i].getServiceName());
+				} catch (NoSuchServiceMethodException e) {
+					sendNoSuchMethod(exchange);
+				} catch (L2pSecurityException e) {
+					sendSecurityProblems(exchange, e);
+				} catch (ServiceInvocationException e) {
+					if (e.getCause() == null) {
+						sendResultInterpretationProblems(exchange);
+					} else {
+						sendInvocationException(exchange, e);
+					}
+				} catch (InterruptedException e) {
+					sendInvocationInterrupted(exchange);
 				}
 			}
 
-
-			if (gotResult)
-				sendInvocationSuccess ( result, returnMIMEType, response );
-
-
-
-			//}
+			if (gotResult) {
+				sendInvocationSuccess(result, returnMIMEType, exchange);
+			}
 			return true;
-
-		} catch ( NoMethodFoundException | NotSupportedUriPathException e ) {
-			sendNoSuchMethod(request, response);	
-		}
-		catch (Exception e){
-
-
-			// System.out.println(((UserAgent) userAgent).getLoginName());
-
-
-			//e.printStackTrace();
-			connector.logError("Error occured:" + request.getPath()+" "+e.getMessage() );
+		} catch (NoMethodFoundException | NotSupportedUriPathException e) {
+			sendNoSuchMethod(exchange);
+		} catch (Exception e) {
+			connector.logError("Error occured:" + exchange.getRequestURI().getPath() + " " + e.getMessage());
 		}
 		return false;
 	}
 
 	/**
-	 * Logs the user out	 
+	 * Logs the user out
+	 * 
 	 * @param userAgent
 	 */
-	private void logout(PassphraseAgent userAgent)
-	{
-		long userId=userAgent.getId();
+	private void logout(PassphraseAgent userAgent) {
+		long userId = userAgent.getId();
 
+		// synchronize across multiple threads
+		synchronized (this.connector) {
 
-		//synchronize across multiple threads
-		synchronized (this.connector)
-		{
-
-			if(this.connector.getOpenUserRequests().containsKey(userId))
-			{
+			if (this.connector.getOpenUserRequests().containsKey(userId)) {
 				Integer numReq = this.connector.getOpenUserRequests().get(userId);
-				if(numReq<=1)
-				{
+				if (numReq <= 1) {
 					this.connector.getOpenUserRequests().remove(userId);
 					try {
 						l2pNode.unregisterAgent(userAgent);
 						userAgent.lockPrivateKey();
-						//System.out.println("+++ logout");
+						// System.out.println("+++ logout");
 
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
-
+				} else {
+					this.connector.getOpenUserRequests().put(userId, numReq - 1);
 				}
-				else
-				{
-					this.connector.getOpenUserRequests().put(userId,numReq-1);
-
-				}
-			}
-			else
-			{
+			} else {
 				try {
 					l2pNode.unregisterAgent(userAgent);
 					userAgent.lockPrivateKey();
-					//System.out.println("+++ logout");
-
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-
 			}
 		}
-		//userAgent.lockPrivateKey(); //lock local copy again
-
-		/*try {
-
-
-			//if(userAgent!=null)
-
-			//TODO check
-			//l2pNode.unregisterAgent(userAgent);
-			userAgent.lockPrivateKey();//don't know if really necessary
-                //TODO check
-              //  l2pNode.unregisterAgent(userAgent);
-              //  userAgent.lockPrivateKey();//don't know if really necessary
-
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}*/
 	}
+
 	/**
 	 * Handles a request (login, invoke)
 	 */
 	@Override
-	public void processRequest(HttpRequest request, HttpResponse response) throws Exception {
-		response.setHeaderField( "Server-Name", "LAS2peer" );
-		response.setContentType( "text/xml" );
+	public void handle(HttpExchange exchange) throws IOException {
+		exchange.getResponseHeaders().set("Server-Name", "LAS2peer");
+		exchange.getResponseHeaders().set("content-type", "text/xml");
 
 		PassphraseAgent userAgent;
-		if((userAgent=authenticate(request,response))!= null)
-		{
-			invoke(userAgent,request,response);
+		if ((userAgent = authenticate(exchange)) != null) {
+			invoke(userAgent, exchange);
 			logout(userAgent);
 		}
-
 	}
 
-	/*
-	private void handleOIDCLoginRequest(HttpRequest request, HttpResponse response){
-
-		try {
-
-			// construct HTML response, presenting a login page to the user
-			String html = "<!doctype html>";
-			html += "<html>";
-			html += "  <head><title>LAS2peer Open ID Connect Logins</title></head>";
-			html += "  <body>\n    <h1>LAS2peer Login</h1>";
-
-			String name = (String) connector.oidcProvider.get("name");
-			String logoUri = (String) connector.oidcProvider.get("logo");
-			String clientId = (String) connector.oidcProvider.get("client_id");
-
-			JSONObject config = (JSONObject) connector.oidcProvider.get("config");
-
-			URI authEndpointUri = new URI((String) config.get("authorization_endpoint")); 
-			URI redirectUri = new URI((String) connector.oidcProvider.get("redirect_uri"));
-			URI authRequestURI = composeAuthzRequestURL(authEndpointUri, clientId, redirectUri);
-
-			html += "    <div class='login' style='border: 1 pt solid black;'><a href='" + authRequestURI + "'><img src='" + logoUri + "' height='100' />Login via " + name + "</a></div>";
-			html +="  </body>\n</html>";
-
-			// return response
-			response.setStatus(200);
-			response.setContentType(MediaType.TEXT_HTML);
-			response.println(html);
-		} catch (Exception e) {
-			e.printStackTrace();
-			response.setStatus(500);
-			response.setContentType(MediaType.TEXT_PLAIN);
-			response.println("Unexpected Error: " + e.getMessage());
-		}
-
-	}
-	
-
-	private void handleOIDCRedirectRequest(HttpRequest request, HttpResponse response){
-
-		JSONObject oidcProviderConfig = (JSONObject) connector.oidcProvider.get("config");
-
-		//response.println("OIDC Provider Configuration: " + oidcProviderConfig.toJSONString());
-
-		URI userinfoEndpointUri, tokenEndpointUri, clientRedirectUri;
-
-		try {
-			tokenEndpointUri = new URI((String) oidcProviderConfig.get("token_endpoint"));
-			//response.println("Token Endpoint: " + tokenEndpointUri);
-		} catch (URISyntaxException e1) {
-			throw new IllegalArgumentException("Invalid Token Endpoint URI " + oidcProviderConfig.get("token_endpoint"));
-		}
-
-		try {
-			userinfoEndpointUri = new URI((String) oidcProviderConfig.get("userinfo_endpoint"));
-			//response.println("Userinfo Endpoint: " + userinfoEndpointUri);
-
-		} catch (URISyntaxException e1) {
-			throw new IllegalArgumentException("Invalid Userinfo Endpoint URI " + oidcProviderConfig.get("userinfo_endpoint"));
-		}
-
-		try {
-			clientRedirectUri = new URI((String) connector.oidcProvider.get("redirect_uri"));
-			//response.println("Client Redirect URI: " + clientRedirectUri);
-
-		} catch (URISyntaxException e1) {
-			throw new IllegalArgumentException("Invalid Client Redirect URI " + connector.oidcProvider.get("redirect_uri"));
-		}
-
-
-		// *** *** *** Process the authorisation response *** *** *** //
-
-		// Get the URL query string which contains the encoded 
-		// authorisation response
-		String queryString = request.getQueryString();
-
-		if (queryString == null || queryString.trim().isEmpty()) {
-
-			response.println("Missing URL query string");
-			return;
-		}
-
-		// Parse the authentication response
-		AuthenticationResponse authResponse;
-
-		try {
-
-			URI redirectQuery = new URI(clientRedirectUri + "?" + queryString);
-			authResponse = AuthenticationResponseParser.parse(redirectQuery);
-
-		} catch (Exception e) {
-			response.setContentType(MediaType.TEXT_PLAIN);
-			response.setStatus(500);
-			response.println("Couldn't parse Open ID Connect authentication response: " + e.getMessage());
-			return;
-		}
-
-
-
-		if (authResponse instanceof AuthenticationErrorResponse) {
-
-			// The authorisation response indicates an error, print
-			// it and return immediately
-			AuthenticationErrorResponse authzError = (AuthenticationErrorResponse)authResponse;
-			response.setContentType(MediaType.TEXT_PLAIN);
-			response.setStatus(401);
-			response.println("Authentication error: " + authzError.getErrorObject());
-			return;
-		}
-
-		// Authentication success, retrieve the authorisation code
-		AuthenticationSuccessResponse authzSuccess = (AuthenticationSuccessResponse)authResponse;
-
-		//		response.println("Authorization success:");
-		//		response.println("\tAuthorization code: " + authzSuccess.getAuthorizationCode());
-		//		response.println("\tState: " + authzSuccess.getState());
-		//		response.println("\tRedirection URI: " + authzSuccess.getRedirectionURI());
-
-		AuthorizationCode code = authzSuccess.getAuthorizationCode();
-
-		if (code == null) {
-			response.setContentType(MediaType.TEXT_PLAIN);
-			response.setStatus(401);
-			response.println("Missing authorization code");
-			return;
-		}
-
-		// *** *** *** Make a token endpoint request *** *** *** //
-
-		//response.println("Sending access token request to " + tokenEndpointUri + "\n\n");
-
-		ClientID clientID = new ClientID((String) connector.oidcProvider.get("client_id"));
-		Secret clientSecret = new Secret((String) connector.oidcProvider.get("client_secret"));
-
-		//response.println("Client ID: " + clientID.getValue());
-		//response.println("Client Secret : " + clientSecret.getValue());
-
-		ClientAuthentication clientAuth = new ClientSecretBasic(clientID, clientSecret);
-
-		TokenRequest accessTokenRequest = new TokenRequest(
-				tokenEndpointUri,
-				clientAuth,
-				new AuthorizationCodeGrant(code, authzSuccess.getRedirectionURI(), clientID));
-
-		com.nimbusds.oauth2.sdk.http.HTTPRequest httpRequest;
-
-		try {
-			httpRequest = accessTokenRequest.toHTTPRequest();
-			// Modify request to become OIDC compliant: strip client ID query parameter. Not part of specification!
-			String s = httpRequest.getQuery().split("&client_id")[0];
-			httpRequest.setQuery(s);
-
-		} catch (SerializeException e) {
-			response.setContentType(MediaType.TEXT_PLAIN);
-			response.setStatus(401);
-			response.println("Couldn't create access token request: " + e.getMessage());
-			return;
-		}
-
-		com.nimbusds.oauth2.sdk.http.HTTPResponse httpResponse;
-
-		try {
-			httpResponse = httpRequest.send();
-
-		} catch (IOException e) {
-
-			// The URL request failed
-			response.setContentType(MediaType.TEXT_PLAIN);
-			response.setStatus(401);
-			response.println("Couldn't send HTTP request to token endpoint: " + e.getMessage());
-			return;
-		}
-
-		TokenResponse tokenResponse;
-
-		try {
-			tokenResponse = OIDCTokenResponseParser.parse(httpResponse);
-
-		} catch (Exception e) {
-			response.setStatus(401);
-			response.println("Couldn't parse token response: " + e.getMessage());
-			return;
-		}
-
-		if (tokenResponse instanceof TokenErrorResponse) {
-
-			// The token response indicates an error, print it out
-			// and return immediately
-			TokenErrorResponse tokenError = (TokenErrorResponse)tokenResponse;
-
-			response.setContentType(MediaType.TEXT_PLAIN);
-			response.setStatus(401);
-			response.println("Token error: " + tokenError.getErrorObject() + " " + tokenError.getErrorObject().getDescription());
-			return;
-		}
-
-		OIDCAccessTokenResponse tokenSuccess = (OIDCAccessTokenResponse)tokenResponse;
-
-		BearerAccessToken accessToken = (BearerAccessToken)tokenSuccess.getAccessToken();
-		RefreshToken refreshToken = tokenSuccess.getRefreshToken();
-		SignedJWT idToken = (SignedJWT)tokenSuccess.getIDToken();
-
-		//		response.println("Token response:");
-		//		response.println("\tAccess token: " + accessToken.toJSONObject().toString());
-		//		response.println("\tRefresh token: " + refreshToken);
-		//		response.println("\n\n");
-
-		// as soon as tokens are available, construct response in form of an HTML document
-		// that writes accessToken to HTML5 local storage
-		String redirectHtmlFile = "./etc/redirect.html";
-
-		try {
-
-			String html = new Scanner(new File(redirectHtmlFile)).useDelimiter("\\A").next();
-			html = html.replaceAll("_ACCESSTOKEN_",accessToken.getValue());
-
-			response.setStatus(200);
-			response.setContentType(MediaType.TEXT_HTML);
-			response.println(html);
-			return;
-
-		} catch (FileNotFoundException e) {
-			response.setContentType(MediaType.TEXT_PLAIN);
-			response.setStatus(500);
-			response.println("Could not find valid redirect page template at " + redirectHtmlFile);
-			return;
-		}
-
-		// 
-		//
-		//		// *** *** *** Process ID token which contains user auth information *** *** *** //
-		//		if (idToken != null) {
-		//
-		//			response.println("ID token [raw]: " + idToken.getParsedString());
-		//			response.println("ID token JWS header: " + idToken.getHeader());
-		//
-		//
-		//			try {
-		//
-		//				// Validate the ID token by checking its HMAC;
-		//
-		//				//				MACVerifier hmacVerifier = new MACVerifier(clientSecret.getValue().getBytes());
-		//				//				final boolean valid = idToken.verify(hmacVerifier);
-		//				//				response.println("ID token is valid: " + valid);
-		//
-		//				JSONObject jsonObject = idToken.getJWTClaimsSet().toJSONObject();
-		//
-		//				response.println("ID token [claims set]: \n" + jsonObject.toJSONString());
-		//				response.println("\n\n");
-		//
-		//			} catch (Exception e) {
-		//				response.setStatus(401);
-		//				response.println("Couldn't process ID token: " + e.getMessage());
-		//			}
-		//		}
-		//
-		//
-		//
-		//		// *** *** *** Make a UserInfo endpoint request *** *** *** //
-		//
-		//
-		//
-		//
-		//		// Append the access token to form actual request
-		//		UserInfoRequest userInfoRequest = new UserInfoRequest(userinfoEndpointUri, accessToken);
-		//
-		//		try {
-		//			HTTPRequest http = userInfoRequest.toHTTPRequest();
-		//			response.println("Userinfo Request: ");
-		//			response.println("Method: " + http.getMethod());
-		//			response.println("Authz: " + http.getAuthorization());
-		//			response.println("Query: " + http.getQuery());
-		//			response.println("Content Type: " + http.getContentType());
-		//
-		//			httpResponse = userInfoRequest.toHTTPRequest().send();
-		//
-		//		} catch (Exception e) {
-		//
-		//			// The URL request failed
-		//			response.setStatus(401);
-		//			response.println("Couldn't send HTTP request to UserInfo endpoint: " + e.getMessage());
-		//			return;
-		//		}
-		//
-		//
-		//		UserInfoResponse userInfoResponse;
-		//
-		//		try {
-		//			userInfoResponse = UserInfoResponse.parse(httpResponse);
-		//		} catch (ParseException e) {
-		//			response.setStatus(401);
-		//			response.println("Couldn't parse UserInfo response: " + e.getMessage());
-		//			return;
-		//		}
-		//
-		//
-		//		if (userInfoResponse instanceof UserInfoErrorResponse) {
-		//
-		//			response.setStatus(401);
-		//			response.println("UserInfo request failed");
-		//			return;
-		//		}
-		//
-		//
-		//		UserInfo userInfo = ((UserInfoSuccessResponse)userInfoResponse).getUserInfo();
-		//
-		//
-		//		response.println("UserInfo:");
-		//
-		//
-		//		try {
-		//			JSONObject ujson = userInfo.toJSONObject();
-		//
-		//			// important: mapping from OIDC id token to LAS2peer agent id
-		//			// use a hash of OIDC id token fields "sub" and "iss" 
-		//			JSONObject ijson = idToken.getJWTClaimsSet().toJSONObject();
-		//
-		//			String sub = (String) ijson.get("sub");
-		//			String iss = (String) ijson.get("iss");
-		//
-		//			long oidcAgentId = hash(iss+sub);
-		//
-		//			// lookup agent. if agent exists, fetch it and display information 
-		//			if(l2pNode.hasAgent(oidcAgentId)){
-		//				Agent a = l2pNode.getAgent(oidcAgentId);
-		//				if(a instanceof UserAgent){
-		//					response.println("OIDC user agent exists.");
-		//					UserAgent u = (UserAgent) a;
-		//					//u.unlockPrivateKey(sub);
-		//					response.println("ID: " + u.getLoginName());
-		//					response.println("Login name: " + u.getLoginName());
-		//					response.println("Email : " + u.getEmail());
-		//
-		//				} else {
-		//					response.println("Error: found agent is not User Agent!");
-		//				}
-		//
-		//			} 
-		//			// if agent does not exist, create new one
-		//			else {
-		//				// use sub field of userinfo
-		//				UserAgent oidcAgent = UserAgent.createUserAgent(oidcAgentId,sub);
-		//				oidcAgent.unlockPrivateKey(ujson.get("sub").toString());
-		//				oidcAgent.setEmail((String) ujson.get("email"));
-		//				oidcAgent.setLoginName((String) ujson.get("preferred_username"));
-		//
-		//				l2pNode.storeAgent(oidcAgent);
-		//				response.println("Stored new OIDC agent.");
-		//			}
-		//
-		//			response.println(userInfo.toJSONObject().toJSONString());
-		//
-		//		} catch (Exception e) {
-		//
-		//			response.println("Couldn't parse UserInfo JSON object: " + e.getMessage());
-		//		}
-	}
-
-*/
 	// helper function to create long hash from string
 	public static long hash(String string) {
 		long h = 1125899906842597L; // prime
 		int len = string.length();
 
 		for (int i = 0; i < len; i++) {
-			h = 31*h + string.charAt(i);
+			h = 31 * h + string.charAt(i);
 		}
 		return h;
 	}
-	
 
 	/**
 	 * send a notification, that the requested service does not exists
@@ -940,14 +497,10 @@ public class WebConnectorRequestHandler implements RequestHandler {
 	 * @param response
 	 * @param service
 	 */
-	private void sendNoSuchService(HttpRequest request, HttpResponse response,
-			String service) {
-		response.clearContent();
-		response.setStatus( HttpResponse.STATUS_SERVICE_UNAVAILABLE );
-		response.setContentType( "text/plain" );
-		response.println ( "The service you requested is not known to this server!" );
-
-		connector.logError ("Service not found: " +service);
+	private void sendNoSuchService(HttpExchange exchange, String service) {
+		connector.logError("Service not found: " + service);
+		sendStringResponse(exchange, STATUS_SERVICE_UNAVAILABLE,
+				"The service you requested is not known to this server!");
 	}
 
 	/**
@@ -955,12 +508,9 @@ public class WebConnectorRequestHandler implements RequestHandler {
 	 * @param request
 	 * @param response
 	 */
-	private void sendNoSuchMethod(HttpRequest request, HttpResponse response) {
-		response.clearContent();
-		response.setStatus( HttpResponse.STATUS_NOT_FOUND );
-		response.setContentType( "text/plain" );
-		response.println ( "The method you requested is not known to this service!" );
-		connector.logError("Invocation request " + request.getPath() + " for unknown service method");
+	private void sendNoSuchMethod(HttpExchange exchange) {
+		connector.logError("Invocation request " + exchange.getRequestURI().getPath() + " for unknown service method");
+		sendStringResponse(exchange, STATUS_NOT_FOUND, "The method you requested is not known to this service!");
 	}
 
 	/**
@@ -969,17 +519,14 @@ public class WebConnectorRequestHandler implements RequestHandler {
 	 * @param response
 	 * @param e
 	 */
-	private void sendSecurityProblems(HttpRequest request,
-			HttpResponse response, L2pSecurityException e) {
-		response.clearContent();
-		response.setStatus( HttpResponse.STATUS_FORBIDDEN );
-		response.setContentType( "text/plain" );
-		response.println ( "You don't have access to the method you requested" );
-		connector.logError("Security exception in invocation request " + request.getPath());
+	private void sendSecurityProblems(HttpExchange exchange, L2pSecurityException e) {
+		connector.logError("Security exception in invocation request " + exchange.getRequestURI().getPath());
+		sendStringResponse(exchange, STATUS_FORBIDDEN, "You don't have access to the method you requested");
 
-		if ( System.getProperty("http-connector.printSecException") != null
-				&& System.getProperty( "http-connector.printSecException").equals ( "true" ) )
+		if (System.getProperty("http-connector.printSecException") != null
+				&& System.getProperty("http-connector.printSecException").equals("true")) {
 			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -989,14 +536,10 @@ public class WebConnectorRequestHandler implements RequestHandler {
 	 * @param request
 	 * @param response
 	 */
-	private void sendResultInterpretationProblems(HttpRequest request,
-			HttpResponse response) {
+	private void sendResultInterpretationProblems(HttpExchange exchange) {
+		connector.logError("Exception while processing RMI: " + exchange.getRequestURI().getPath());
 		// result interpretation problems
-		response.clearContent();
-		response.setStatus( HttpResponse.STATUS_INTERNAL_SERVER_ERROR );
-		response.setContentType( "text/xml" );
-		response.println ("the result of the method call is not transferable!");
-		connector.logError("Exception while processing RMI: " + request.getPath());
+		sendStringResponse(exchange, STATUS_INTERNAL_SERVER_ERROR, "The result of the method call is not transferable!");
 	}
 
 	/**
@@ -1006,22 +549,16 @@ public class WebConnectorRequestHandler implements RequestHandler {
 	 * @param response
 	 * @param e
 	 */
-	private void sendInvocationException(HttpRequest request,
-			HttpResponse response, ServiceInvocationException e) {
+	private void sendInvocationException(HttpExchange exchange, ServiceInvocationException e) {
+		connector.logError("Exception while processing RMI: " + exchange.getRequestURI().getPath());
 		// internal exception in service method
-		response.clearContent();
-		response.setStatus( HttpResponse.STATUS_INTERNAL_SERVER_ERROR );
-		response.setContentType( "text/xml" );
-		connector.logError("Exception while processing RMI: " + request.getPath());
-
 		Object[] ret = new Object[4];
 		ret[0] = "Exception during RMI invocation!";
-
 		ret[1] = e.getCause().getCause().getClass().getCanonicalName();
 		ret[2] = e.getCause().getCause().getMessage();
 		ret[3] = e.getCause().getCause();
-		String code = ret[0]+"\n"+ret[1]+"\n"+ret[2]+"\n"+ret[3];
-		response.println ( code );
+		String code = ret[0] + "\n" + ret[1] + "\n" + ret[2] + "\n" + ret[3];
+		sendStringResponse(exchange, STATUS_INTERNAL_SERVER_ERROR, code);
 	}
 
 	/**
@@ -1030,14 +567,10 @@ public class WebConnectorRequestHandler implements RequestHandler {
 	 * @param request
 	 * @param response
 	 */
-	private void sendInvocationInterrupted(HttpRequest request,
-			HttpResponse response) {
-		response.clearContent();
-		response.setStatus (HttpResponse.STATUS_INTERNAL_SERVER_ERROR );
-		response.setContentType ( "text/plain");
-		response.println ( "The invoction has been interrupted!");
+	private void sendInvocationInterrupted(HttpExchange exchange) {
 		connector.logError("Invocation has been interrupted!");
-	}	
+		sendStringResponse(exchange, STATUS_INTERNAL_SERVER_ERROR, "The invoction has been interrupted!");
+	}
 
 	/**
 	 * 
@@ -1045,39 +578,37 @@ public class WebConnectorRequestHandler implements RequestHandler {
 	 * @param contentType
 	 * @param response
 	 */
-	private void sendInvocationSuccess ( Serializable result, String contentType, HttpResponse response  ) {
-		if ( result != null ) {
-			response.setContentType( contentType );
-			response.setStatus(200);
-			if(result instanceof i5.las2peer.restMapper.HttpResponse)
-			{
-
-				i5.las2peer.restMapper.HttpResponse res=(i5.las2peer.restMapper.HttpResponse)result;
-				Pair<String>[] headers= res.listHeaders();
-				for(Pair<String> header : headers)
-				{
-					response.setHeaderField(header.getOne(),header.getTwo());
-
-					if(header.getOne().toLowerCase().equals("content-type"))//speacial case because of the used http server lib
-					{
-						//response.clearContent();
-						response.setContentType(header.getTwo());
+	private void sendInvocationSuccess(Serializable result, String contentType, HttpExchange exchange) {
+		try {
+			if (result != null) {
+				String msg = null;
+				int statusCode = STATUS_OK;
+				exchange.getResponseHeaders().set("content-type", contentType);
+				if (result instanceof i5.las2peer.restMapper.HttpResponse) {
+					i5.las2peer.restMapper.HttpResponse res = (i5.las2peer.restMapper.HttpResponse) result;
+					Pair<String>[] headers = res.listHeaders();
+					for (Pair<String> header : headers) {
+						exchange.getResponseHeaders().set(header.getOne(), header.getTwo());
 					}
+					statusCode = res.getStatus();
+					msg = res.getResult();
+				} else {
+					msg = RESTMapper.castToString(result);
 				}
-				response.setStatus(res.getStatus() );
-				response.println ( res.getResult() );
-
+				if (msg != null) {
+					byte[] content = msg.getBytes();
+					exchange.sendResponseHeaders(statusCode, content.length);
+					OutputStream os = exchange.getResponseBody();
+					os.write(content);
+					os.close();
+				} else {
+					exchange.sendResponseHeaders(STATUS_NO_CONTENT, 0);
+				}
+			} else {
+				exchange.sendResponseHeaders(STATUS_NO_CONTENT, 0);
 			}
-			else
-			{
-				String resultCode =  (RESTMapper.castToString(result));
-				response.println ( resultCode );
-			}
-
-
-
-		} else {
-			response.setStatus(HttpResponse.STATUS_NO_CONTENT);
+		} catch (IOException e) {
+			connector.logMessage(e.getMessage());
 		}
 	}
 
@@ -1086,15 +617,18 @@ public class WebConnectorRequestHandler implements RequestHandler {
 	 * @param response
 	 * @param logMessage
 	 */
-	private void sendUnauthorizedResponse(HttpResponse response, String answerMessage,
-			String logMessage) {
-		response.clearContent();
-		response.setContentType( "text/plain" );
-		response.setHeaderField("WWW-Authenticate","Basic realm=\"LAS2peer WebConnector\"");
-		if ( answerMessage != null)
-			response.println ( answerMessage );
-		response.setStatus( HttpResponse.STATUS_UNAUTHORIZED );
-		connector.logMessage ( logMessage  );
+	private void sendUnauthorizedResponse(HttpExchange exchange, String answerMessage, String logMessage) {
+		connector.logMessage(logMessage);
+		exchange.getResponseHeaders().set("WWW-Authenticate", "Basic realm=\"LAS2peer WebConnector\"");
+		if (answerMessage != null) {
+			sendStringResponse(exchange, STATUS_UNAUTHORIZED, answerMessage);
+		} else {
+			try {
+				exchange.sendResponseHeaders(STATUS_UNAUTHORIZED, 0);
+			} catch (IOException e) {
+				connector.logMessage(e.getMessage());
+			}
+		}
 	}
 
 	/**
@@ -1104,46 +638,22 @@ public class WebConnectorRequestHandler implements RequestHandler {
 	 * @param answerMessage
 	 * @param logMessage
 	 */
-	private void sendInternalErrorResponse(HttpResponse response,
-			String answerMessage, String logMessage) {
-		response.clearContent();
-		response.setContentType( "text/plain" );
-		response.setStatus( HttpResponse.STATUS_INTERNAL_SERVER_ERROR );
-		response.println ( answerMessage );
-		connector.logMessage ( logMessage );
+	private void sendInternalErrorResponse(HttpExchange exchange, String answerMessage, String logMessage) {
+		connector.logMessage(logMessage);
+		sendStringResponse(exchange, STATUS_INTERNAL_SERVER_ERROR, answerMessage);
 	}
 
-//	private URI composeAuthzRequestURL(URI authEndpointUri, String clientId, URI redirectUri) throws SerializeException {
-//
-//		// Set the requested response_type (code, token and / or 
-//		// id_token):
-//		// Use CODE for authorisation code flow
-//		// Use TOKEN for implicit flow
-//		ResponseType rt = new ResponseType("code");
-//
-//		// Set the requested scope of access
-//		Scope scope = new Scope("openid", "email", "profile");
-//
-//		// Generate random state value. It's used to link the
-//		// authorisation response back to the original request, also to
-//		// prevent replay attacks
-//		State state = new State();
-//
-//		// Generate random nonce value.
-//		Nonce nonce = new Nonce();
-//
-//		// Create the actual OIDC authorisation request object
-//
-//		ClientID clientID = new ClientID(clientId);
-//
-//		AuthenticationRequest authRequest = new AuthenticationRequest(authEndpointUri, rt, scope, clientID, redirectUri, state, nonce);
-//
-//		// Construct and output the final OIDC authorisation URL for
-//		// redirect
-//		return authRequest.toURI();
-//
-//	}
+	private void sendStringResponse(HttpExchange exchange, int responseCode, String response) {
+		byte[] content = response.getBytes();
+		exchange.getResponseHeaders().set("content-type", "text/plain");
+		try {
+			exchange.sendResponseHeaders(responseCode, content.length);
+			OutputStream os = exchange.getResponseBody();
+			os.write(content);
+			os.close();
+		} catch (IOException e) {
+			connector.logMessage(e.getMessage());
+		}
+	}
+
 }
-
-
-

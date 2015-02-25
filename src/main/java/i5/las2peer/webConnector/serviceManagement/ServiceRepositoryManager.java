@@ -100,6 +100,7 @@ public class ServiceRepositoryManager {
 					try {
 						xml = (String) node.invokeGlobally(finalAgent, services[i].getName(), SERVICE_SELFINFO_METHOD,
 								new Serializable[] {});
+						System.out.println(services[i].getName()+" => "+xml);
 						try {
 							//tree.merge(RESTMapper.getMappingTree(xml));
 							ServiceData data = new ServiceData(services[i].getName(), services[i].getVersion(), true,
@@ -109,9 +110,11 @@ public class ServiceRepositoryManager {
 							addXML(new String[] { xml }); //for compatibility services: a service can also give XML definition to other services
 						} catch (Exception e) {
 							//do nothing for now
+							e.printStackTrace();
 						}
 					} catch (Exception e) {
 						//do nothing for now
+						e.printStackTrace();
 					}
 				} else if (!serviceRepository.get(internalServiceName).isActive()) { //enable not active services
 					serviceRepository.get(internalServiceName).enable();
@@ -123,6 +126,7 @@ public class ServiceRepositoryManager {
 			}
 		} catch (EnvelopeException e) {
 			//do nothing for now
+			e.printStackTrace();
 		}
 	}
 
