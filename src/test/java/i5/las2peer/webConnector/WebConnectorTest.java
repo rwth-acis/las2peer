@@ -187,6 +187,24 @@ public class WebConnectorTest {
 	}
 
 	@Test
+	public void testCrossOriginHeader() {
+		connector.updateServiceList();
+		MiniClient c = new MiniClient();
+		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
+		try {
+			c.setLogin(Long.toString(testAgent.getId()), testPass);
+
+			// this testcase should work for an unknown function, too
+			ClientResponse response = c.sendRequest("GET", "asdag", "");
+			assertEquals(connector.crossOriginResourceDomain, response.getHeader("Access-Control-Allow-Origin"));
+			assertEquals(String.valueOf(connector.crossOriginResourceMaxAge),
+					response.getHeader("Access-Control-Max-Age"));
+		} catch (Exception e) {
+			fail("Not existing service caused wrong exception");
+		}
+	}
+
+	@Test
 	@SuppressWarnings("unchecked")
 	public void testCalls() {
 		connector.updateServiceList();

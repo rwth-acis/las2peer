@@ -387,7 +387,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 				if (warnings.length() > 0) {
 					sendStringResponse(exchange, STATUS_NOT_FOUND, warnings.toString().replaceAll("\n", " "));
 				} else {
-					exchange.sendResponseHeaders(STATUS_NOT_FOUND, 0);
+					sendResponse(exchange, STATUS_NOT_FOUND, 0);
 				}
 				return false;
 			}
@@ -597,15 +597,15 @@ public class WebConnectorRequestHandler implements HttpHandler {
 				}
 				if (msg != null) {
 					byte[] content = msg.getBytes();
-					exchange.sendResponseHeaders(statusCode, content.length);
+					sendResponse(exchange, statusCode, content.length);
 					OutputStream os = exchange.getResponseBody();
 					os.write(content);
 					os.close();
 				} else {
-					exchange.sendResponseHeaders(STATUS_NO_CONTENT, 0);
+					sendResponse(exchange, STATUS_NO_CONTENT, 0);
 				}
 			} else {
-				exchange.sendResponseHeaders(STATUS_NO_CONTENT, 0);
+				sendResponse(exchange, STATUS_NO_CONTENT, 0);
 			}
 		} catch (IOException e) {
 			connector.logMessage(e.getMessage());
@@ -624,7 +624,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			sendStringResponse(exchange, STATUS_UNAUTHORIZED, answerMessage);
 		} else {
 			try {
-				exchange.sendResponseHeaders(STATUS_UNAUTHORIZED, 0);
+				sendResponse(exchange, STATUS_UNAUTHORIZED, 0);
 			} catch (IOException e) {
 				connector.logMessage(e.getMessage());
 			}
@@ -647,13 +647,23 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		byte[] content = response.getBytes();
 		exchange.getResponseHeaders().set("content-type", "text/plain");
 		try {
-			exchange.sendResponseHeaders(responseCode, content.length);
+			sendResponse(exchange, responseCode, content.length);
 			OutputStream os = exchange.getResponseBody();
 			os.write(content);
 			os.close();
 		} catch (IOException e) {
 			connector.logMessage(e.getMessage());
 		}
+	}
+
+	private void sendResponse(HttpExchange exchange, int responseCode, long contentLength) throws IOException {
+		// add configured headers
+		if (connector.enableCrossOriginResourceSharing) {
+			exchange.getResponseHeaders().add("Access-Control-Allow-Origin", connector.crossOriginResourceDomain);
+			exchange.getResponseHeaders().add("Access-Control-Max-Age",
+					String.valueOf(connector.crossOriginResourceMaxAge));
+		}
+		exchange.sendResponseHeaders(responseCode, contentLength);
 	}
 
 }
