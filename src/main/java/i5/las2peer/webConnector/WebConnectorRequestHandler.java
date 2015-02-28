@@ -388,6 +388,8 @@ public class WebConnectorRequestHandler implements HttpHandler {
 					sendStringResponse(exchange, STATUS_NOT_FOUND, warnings.toString().replaceAll("\n", " "));
 				} else {
 					sendResponse(exchange, STATUS_NOT_FOUND, 0);
+					// otherwise the client waits till the timeout for an answer
+					exchange.getResponseBody().close();
 				}
 				return false;
 			}
@@ -470,13 +472,23 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	 */
 	@Override
 	public void handle(HttpExchange exchange) throws IOException {
-		exchange.getResponseHeaders().set("Server-Name", "LAS2peer");
-		exchange.getResponseHeaders().set("content-type", "text/xml");
-
-		PassphraseAgent userAgent;
-		if ((userAgent = authenticate(exchange)) != null) {
-			invoke(userAgent, exchange);
-			logout(userAgent);
+		exchange.getResponseHeaders().set("Server-Name", "LAS2peer WebConnector");
+		// check for an OPTIONS request and auto answer it
+		// XXX this should become a default reply for OPTIONS-requests,
+		// but should be also be available to service developers
+		if (exchange.getRequestMethod().toLowerCase().equals("options")) {
+			// TODO set allow header
+			sendResponse(exchange, STATUS_OK, 0);
+			// otherwise the client waits till the timeout for an answer
+			exchange.getResponseBody().close();
+		} else {
+			PassphraseAgent userAgent;
+			if ((userAgent = authenticate(exchange)) != null) {
+				invoke(userAgent, exchange);
+				logout(userAgent);
+			}
+			// otherwise the client waits till the timeout for an answer, if an error occurred
+			exchange.getResponseBody().close();
 		}
 	}
 
@@ -625,6 +637,8 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		} else {
 			try {
 				sendResponse(exchange, STATUS_UNAUTHORIZED, 0);
+				// otherwise the client waits till the timeout for an answer
+				exchange.getResponseBody().close();
 			} catch (IOException e) {
 				connector.logMessage(e.getMessage());
 			}
