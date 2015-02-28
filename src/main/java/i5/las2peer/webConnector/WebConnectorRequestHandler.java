@@ -362,14 +362,14 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			Set<Entry<String, List<String>>> entries = exchange.getRequestHeaders().entrySet();
 			for (Entry<String, List<String>> entry : entries) {
 				String key = entry.getKey();
-				// TODO this only returns the first header value for this key
-				String value = entry.getValue().get(0).trim();
-				headersList.add(new Pair<String>(key, value));
-				// fetch MIME types
-				if (key.toLowerCase().equals("accept") && !value.isEmpty()) {
-					acceptHeader = value;
-				} else if (key.toLowerCase().equals("content-type") && !value.isEmpty()) {
-					contentTypeHeader = value;
+				for (String value : entry.getValue()) {
+					headersList.add(new Pair<String>(key, value));
+					// fetch MIME types
+					if (key.toLowerCase().equals("accept") && !value.isEmpty()) {
+						acceptHeader = value;
+					} else if (key.toLowerCase().equals("content-type") && !value.isEmpty()) {
+						contentTypeHeader = value;
+					}
 				}
 			}
 			@SuppressWarnings("unchecked")
@@ -477,7 +477,6 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		// XXX this should become a default reply for OPTIONS-requests,
 		// but should be also be available to service developers
 		if (exchange.getRequestMethod().toLowerCase().equals("options")) {
-			// TODO set allow header
 			sendResponse(exchange, STATUS_OK, 0);
 			// otherwise the client waits till the timeout for an answer
 			exchange.getResponseBody().close();
@@ -676,6 +675,11 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			exchange.getResponseHeaders().add("Access-Control-Allow-Origin", connector.crossOriginResourceDomain);
 			exchange.getResponseHeaders().add("Access-Control-Max-Age",
 					String.valueOf(connector.crossOriginResourceMaxAge));
+			// just reply all requested headers
+			String requestedHeaders = exchange.getResponseHeaders().getFirst("Access-Control-Request-Headers");
+			if (requestedHeaders != null)
+				exchange.getResponseHeaders().add("Access-Control-Allow-Headers", requestedHeaders);
+			exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS");
 		}
 		exchange.sendResponseHeaders(responseCode, contentLength);
 	}

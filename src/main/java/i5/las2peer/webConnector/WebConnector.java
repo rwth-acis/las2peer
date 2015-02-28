@@ -276,7 +276,7 @@ public class WebConnector extends Connector {
 		try {
 			oidcProviderInfo = fetchOidcProviderConfig();
 		} catch (Exception e) {
-			// XXX logging?!
+			logError("Could not fetch OIDC provider configuration "+e.getMessage());
 		}
 
 		myNode = node;
@@ -329,8 +329,6 @@ public class WebConnector extends Connector {
 		} catch (GeneralSecurityException e) {
 			throw new ConnectorException("SSL encryption not possible!", e);
 		}
-		// TODO check is setSocketTimeout still required?
-//		httpServer.setSocketTimeout(socketTimeout);
 		WebConnectorRequestHandler handler = new WebConnectorRequestHandler(this);
 		if (isHttps) {
 			https.createContext("/", handler);
