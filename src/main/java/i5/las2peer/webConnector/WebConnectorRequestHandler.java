@@ -676,7 +676,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			exchange.getResponseHeaders().add("Access-Control-Max-Age",
 					String.valueOf(connector.crossOriginResourceMaxAge));
 			// just reply all requested headers
-			String requestedHeaders = exchange.getResponseHeaders().getFirst("Access-Control-Request-Headers");
+			String requestedHeaders = exchange.getRequestHeaders().getFirst("Access-Control-Request-Headers");
 			if (requestedHeaders != null)
 				exchange.getResponseHeaders().add("Access-Control-Allow-Headers", requestedHeaders);
 			exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS");
