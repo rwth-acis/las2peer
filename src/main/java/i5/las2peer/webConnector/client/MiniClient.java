@@ -107,7 +107,7 @@ public class MiniClient {
 
 			connection.setUseCaches(false);
 			connection.setDoInput(true);
-			if (method.toUpperCase().equals("POST") || method.toUpperCase().equals("PUT"))
+			if (method.equalsIgnoreCase("POST") || method.equalsIgnoreCase("PUT"))
 			{
 				connection.setDoOutput(true);
 
@@ -169,7 +169,7 @@ public class MiniClient {
 						key = "head";
 					}
 
-					response.addHeader(key.trim().toLowerCase(), sb.toString().trim());
+					response.addHeader(key.trim(), sb.toString().trim());
 				}
 
 				rd.close();

@@ -35,10 +35,10 @@ public class ClientResponse
     }
     public void addHeader(String name, String value)
     {
-        headers.put(name.trim().toLowerCase(), value.trim());
+        headers.put(name.trim(), value.trim());
     }
     public String getHeader(String name)
     {
-        return headers.get(name.trim().toLowerCase());
+        return headers.get(name.trim());
     }
 }

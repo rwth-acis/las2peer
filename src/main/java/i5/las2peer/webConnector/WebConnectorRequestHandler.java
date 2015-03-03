@@ -40,6 +40,7 @@ import com.nimbusds.openid.connect.sdk.UserInfoErrorResponse;
 import com.nimbusds.openid.connect.sdk.UserInfoResponse;
 import com.nimbusds.openid.connect.sdk.UserInfoSuccessResponse;
 import com.nimbusds.openid.connect.sdk.claims.UserInfo;
+import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -157,7 +158,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			String token = "";
 			for (int i = 0; i < params.length; i++) {
 				String[] keyval = params[i].split("=");
-				if (keyval[0].equals("access_token")) {
+				if (keyval[0].equalsIgnoreCase("access_token")) {
 					token = keyval[1];
 				}
 			}
@@ -365,9 +366,9 @@ public class WebConnectorRequestHandler implements HttpHandler {
 				for (String value : entry.getValue()) {
 					headersList.add(new Pair<String>(key, value));
 					// fetch MIME types
-					if (key.toLowerCase().equals("accept") && !value.isEmpty()) {
+					if (key.equalsIgnoreCase("accept") && !value.isEmpty()) {
 						acceptHeader = value;
-					} else if (key.toLowerCase().equals("content-type") && !value.isEmpty()) {
+					} else if (key.equalsIgnoreCase("content-type") && !value.isEmpty()) {
 						contentTypeHeader = value;
 					}
 				}
@@ -476,7 +477,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		// check for an OPTIONS request and auto answer it
 		// XXX this should become a default reply for OPTIONS-requests,
 		// but should be also be available to service developers
-		if (exchange.getRequestMethod().toLowerCase().equals("options")) {
+		if (exchange.getRequestMethod().equalsIgnoreCase("options")) {
 			sendResponse(exchange, STATUS_OK, 0);
 			// otherwise the client waits till the timeout for an answer
 			exchange.getResponseBody().close();
@@ -671,15 +672,16 @@ public class WebConnectorRequestHandler implements HttpHandler {
 
 	private void sendResponse(HttpExchange exchange, int responseCode, long contentLength) throws IOException {
 		// add configured headers
+		Headers responseHeaders =  exchange.getResponseHeaders();
 		if (connector.enableCrossOriginResourceSharing) {
-			exchange.getResponseHeaders().add("Access-Control-Allow-Origin", connector.crossOriginResourceDomain);
-			exchange.getResponseHeaders().add("Access-Control-Max-Age",
+			responseHeaders.add("Access-Control-Allow-Origin", connector.crossOriginResourceDomain);
+			responseHeaders.add("Access-Control-Max-Age",
 					String.valueOf(connector.crossOriginResourceMaxAge));
 			// just reply all requested headers
 			String requestedHeaders = exchange.getRequestHeaders().getFirst("Access-Control-Request-Headers");
 			if (requestedHeaders != null)
-				exchange.getResponseHeaders().add("Access-Control-Allow-Headers", requestedHeaders);
-			exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS");
+				responseHeaders.add("Access-Control-Allow-Headers", requestedHeaders);
+			responseHeaders.add("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS");
 		}
 		exchange.sendResponseHeaders(responseCode, contentLength);
 	}
