@@ -61,9 +61,6 @@ public class WebConnector extends Connector {
 	public static final String DEFAULT_SSL_KEY_PASSWORD = "123456";
 	protected String sslKeyPassword = DEFAULT_SSL_KEY_PASSWORD;
 
-	public static final int DEFAULT_SOCKET_TIMEOUT = 60 * 1000; // 1 minute
-	protected int socketTimeout = DEFAULT_SOCKET_TIMEOUT;
-
 	public static final String DEFAULT_CROSS_ORIGIN_RESOURCE_DOMAIN = "*";
 	protected String crossOriginResourceDomain = DEFAULT_CROSS_ORIGIN_RESOURCE_DOMAIN;
 
@@ -202,12 +199,13 @@ public class WebConnector extends Connector {
 	}
 
 	/**
+	 * <b>This method is no longer supported and will be removed in the future.</b> 
 	 * set the socket timeout for the underlying http server
 	 * (only at configuration not during runtime)
 	 * @param timeoutInMs
 	 */
+	@Deprecated
 	public void setSocketTimeout(int timeoutInMs) {
-		socketTimeout = timeoutInMs;
 	}
 
 	/**
@@ -276,7 +274,7 @@ public class WebConnector extends Connector {
 		try {
 			oidcProviderInfo = fetchOidcProviderConfig();
 		} catch (Exception e) {
-			logError("Could not fetch OIDC provider configuration "+e.getMessage());
+			logError("Could not fetch OIDC provider configuration " + e.getMessage());
 		}
 
 		myNode = node;
@@ -403,7 +401,9 @@ public class WebConnector extends Connector {
 	 */
 	public void logError(String error) {
 		logStream.println(dateFormat.format(new Date()) + "\t Error: " + error);
-		myNode.observerNotice(Event.CONNECTOR_ERROR, myNode.getNodeId(), WEB_CONNECTOR + error);
+		if (myNode != null) {
+			myNode.observerNotice(Event.CONNECTOR_ERROR, myNode.getNodeId(), WEB_CONNECTOR + error);
+		}
 	}
 
 	/**
