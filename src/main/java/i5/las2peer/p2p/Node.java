@@ -1571,14 +1571,15 @@ public abstract class Node implements AgentStorage {
 	 * @return value between 0 and 1: CPU load of the JVM process * #cores
 	 */
 	public float getNodeCpuLoad() {
-
+		// TODO maybe this should be a division instead?
 		float load = (float) osBean.getProcessCpuLoad() * Runtime.getRuntime().availableProcessors();
 
-		if (load < 0.0f)
+		if (load < 0.0f) {
 			load = 0f;
-		else if (load > 1f)
+		} else if (load > 1f) {
 			load = 1.0f;
-		System.out.println("===> CPU Load: " + load);
+		}
+//		System.out.println("===> CPU Load: " + load);
 		return load;
 	}
 
