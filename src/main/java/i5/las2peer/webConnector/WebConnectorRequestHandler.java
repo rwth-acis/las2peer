@@ -32,6 +32,7 @@ import java.util.Set;
 import net.minidev.json.JSONObject;
 import rice.p2p.util.Base64;
 
+import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest.Method;
@@ -196,8 +197,12 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			// failed request for OpenID Connect user info will result in no agent being returned.
 			if (userInfoResponse instanceof UserInfoErrorResponse) {
 				UserInfoErrorResponse uier = (UserInfoErrorResponse) userInfoResponse;
-				sendStringResponse(exchange, STATUS_UNAUTHORIZED, "Open ID Connect UserInfo request failed! Cause: "
-						+ uier.getErrorObject().getDescription());
+				ErrorObject err = uier.getErrorObject();
+				String cause = "Session expired?";
+				if (err != null) {
+					cause = err.getDescription();
+				}
+				sendStringResponse(exchange, STATUS_UNAUTHORIZED, "Open ID Connect UserInfo request failed! Cause: " + cause);
 				return null;
 			}
 
