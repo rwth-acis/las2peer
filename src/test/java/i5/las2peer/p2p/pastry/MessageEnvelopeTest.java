@@ -19,45 +19,45 @@ import org.junit.Test;
 public class MessageEnvelopeTest {
 
 	@Test
-	public void testSimpleContent () throws SerializationException {
+	public void testSimpleContent() throws SerializationException {
 		String data = "some data to test";
-		
-		MessageEnvelope testee = new MessageEnvelope ( null, data );
-	
+
+		MessageEnvelope testee = new MessageEnvelope(null, data);
+
 		byte[] serialized = SerializeTools.serialize(testee);
-		MessageEnvelope andBack = (MessageEnvelope) SerializeTools.deserialize(serialized);
-		
-		assertEquals ( data, andBack.getContent());
-		
+		MessageEnvelope andBack = (MessageEnvelope) SerializeTools
+				.deserialize(serialized);
+
+		assertEquals(data, andBack.getContent());
 	}
-	
+
 	@Test
-	public void testFromMessage() throws NoSuchAlgorithmException, L2pSecurityException, CryptoException, EncodingFailedException, SerializationException, MalformedXMLException, AgentNotKnownException {
+	public void testFromMessage() throws NoSuchAlgorithmException,
+			L2pSecurityException, CryptoException, EncodingFailedException,
+			SerializationException, MalformedXMLException,
+			AgentNotKnownException {
 		UserAgent adam = UserAgent.createUserAgent("passa");
 		UserAgent eve = UserAgent.createUserAgent("passb");
-		
-		BasicAgentStorage storage = new BasicAgentStorage () ;
+
+		BasicAgentStorage storage = new BasicAgentStorage();
 		storage.registerAgents(adam, eve);
-		
+
 		adam.unlockPrivateKey("passa");
 		eve.unlockPrivateKey("passb");
-		
+
 		String data = "some data to test";
-		
-		Message m = new Message (adam, eve, data);
-		
-		MessageEnvelope testee = new MessageEnvelope (null, m);
 
-		
+		Message m = new Message(adam, eve, data);
+
+		MessageEnvelope testee = new MessageEnvelope(null, m);
+
 		byte[] serialized = SerializeTools.serialize(testee);
-		MessageEnvelope andBack = (MessageEnvelope) SerializeTools.deserialize(serialized);
+		MessageEnvelope andBack = (MessageEnvelope) SerializeTools
+				.deserialize(serialized);
 
-		
 		Message contained = andBack.getContainedMessage();
 		contained.open(eve, storage);
-		assertEquals ( data, contained.getContent());
+		assertEquals(data, contained.getContent());
 	}
-	
-
 
 }

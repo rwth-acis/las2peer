@@ -15,20 +15,22 @@ import org.junit.Test;
 public class ContentEnvelopeTest {
 
 	@Test
-	public void testSerialization() throws NoSuchAlgorithmException, L2pSecurityException, SerializationException, PastryStorageException, CryptoException {
+	public void testSerialization() throws NoSuchAlgorithmException,
+			L2pSecurityException, SerializationException,
+			PastryStorageException, CryptoException {
 		UserAgent adam = UserAgent.createUserAgent("passa");
 		adam.unlockPrivateKey("passa");
-		
-		ContentEnvelope testee = new ContentEnvelope ( adam );
-		
-		byte[] bytes = SerializeTools.serialize( testee );
-		
-		ContentEnvelope andBack = (ContentEnvelope) SerializeTools.deserialize( bytes);
-		
+
+		ContentEnvelope testee = new ContentEnvelope(adam);
+
+		byte[] bytes = SerializeTools.serialize(testee);
+
+		ContentEnvelope andBack = (ContentEnvelope) SerializeTools
+				.deserialize(bytes);
+
 		Agent contained = andBack.getContainedAgent();
-		
-		
-		assertEquals ( adam.getId(), contained.getId() );
+
+		assertEquals(adam.getId(), contained.getId());
 	}
 
 }
