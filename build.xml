@@ -2,7 +2,7 @@
 	
 	<property name="ivy.organisation" value="i5" />
 	<property name="ivy.module" value="las2peer-rest-mapper" />
-	<property name="ivy.revision" value="0.3" />
+	<property name="ivy.revision" value="0.4" />
 	<property name="ivy.deliver.revision" value="${ivy.revision}" />
 	<property name="ivy.pom.version" value="${ivy.revision}" />
 	
