@@ -23,6 +23,7 @@ import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -153,15 +154,36 @@ public class WebConnectorRequestHandler implements HttpHandler {
 
 		// IMPORTANT NOTE: doing the same thing with authorization header and bearer token results in client-side
 		// cross-domain errors despite correct config for CORS in LAS2peer Web Connector!
-		else if (connector.oidcProviderInfo != null && exchange.getRequestURI().getRawQuery() != null
+		else if (connector.oidcProviderInfos != null && exchange.getRequestURI().getRawQuery() != null
 				&& exchange.getRequestURI().getRawQuery().contains("access_token=")) {
 			String[] params = exchange.getRequestURI().getRawQuery().split("&");
 			String token = "";
+			String oidcProviderURI = connector.defaultOIDCProvider;
 			for (int i = 0; i < params.length; i++) {
 				String[] keyval = params[i].split("=");
 				if (keyval[0].equalsIgnoreCase("access_token")) {
 					token = keyval[1];
+				} else if (keyval[0].equalsIgnoreCase("oidc_provider")) {
+					oidcProviderURI = URLDecoder.decode(keyval[1], "UTF-8");
 				}
+			}
+
+			// validate given OIDC provider and get provider info
+			JSONObject oidcProviderInfo = null;
+			if (connector.oidcProviders.contains(oidcProviderURI) == false) {
+				sendInternalErrorResponse(
+						exchange,
+						"The given OIDC provider ("
+								+ oidcProviderURI
+								+ ") is not whitelisted! Please make sure the complete OIDC provider URI is added to the config.");
+				return null;
+			} else if (connector.oidcProviderInfos.get(oidcProviderURI) == null) {
+				sendInternalErrorResponse(exchange,
+						"The OIDC config is not known for the given provider (" + oidcProviderURI
+								+ ")! Please make sure the right URI is added to the config.");
+				return null;
+			} else {
+				oidcProviderInfo = connector.oidcProviderInfos.get(oidcProviderURI);
 			}
 
 			// send request to OpenID Connect user info endpoint to retrieve complete user information
@@ -171,7 +193,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 
 			try {
 				URI userinfoEndpointUri = new URI(
-						(String) ((JSONObject) connector.oidcProviderInfo.get("config")).get("userinfo_endpoint"));
+						(String) ((JSONObject) oidcProviderInfo.get("config")).get("userinfo_endpoint"));
 				hrq = new HTTPRequest(Method.GET, userinfoEndpointUri.toURL());
 				hrq.setAuthorization("Bearer " + token);
 
@@ -179,8 +201,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 				hrs = hrq.send();
 			} catch (IOException | URISyntaxException e) {
 				e.printStackTrace();
-				sendStringResponse(exchange, STATUS_INTERNAL_SERVER_ERROR,
-						"Unexpected authentication error: " + e.getMessage());
+				sendInternalErrorResponse(exchange, "Unexpected authentication error: " + e.getMessage());
 				return null;
 			}
 
@@ -189,8 +210,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			try {
 				userInfoResponse = UserInfoResponse.parse(hrs);
 			} catch (ParseException e) {
-				sendStringResponse(exchange, STATUS_INTERNAL_SERVER_ERROR,
-						"Couldn't parse UserInfo response: " + e.getMessage());
+				sendInternalErrorResponse(exchange, "Couldn't parse UserInfo response: " + e.getMessage());
 				return null;
 			}
 
@@ -202,7 +222,8 @@ public class WebConnectorRequestHandler implements HttpHandler {
 				if (err != null) {
 					cause = err.getDescription();
 				}
-				sendStringResponse(exchange, STATUS_UNAUTHORIZED, "Open ID Connect UserInfo request failed! Cause: " + cause);
+				sendStringResponse(exchange, STATUS_UNAUTHORIZED, "Open ID Connect UserInfo request failed! Cause: "
+						+ cause);
 				return null;
 			}
 
@@ -657,9 +678,9 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	 * @param answerMessage
 	 * @param logMessage
 	 */
-	private void sendInternalErrorResponse(HttpExchange exchange, String answerMessage, String logMessage) {
-		connector.logMessage(logMessage);
-		sendStringResponse(exchange, STATUS_INTERNAL_SERVER_ERROR, answerMessage);
+	private void sendInternalErrorResponse(HttpExchange exchange, String message) {
+		connector.logMessage(message);
+		sendStringResponse(exchange, STATUS_INTERNAL_SERVER_ERROR, message);
 	}
 
 	private void sendStringResponse(HttpExchange exchange, int responseCode, String response) {
@@ -677,7 +698,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 
 	private void sendResponse(HttpExchange exchange, int responseCode, long contentLength) throws IOException {
 		// add configured headers
-		Headers responseHeaders =  exchange.getResponseHeaders();
+		Headers responseHeaders = exchange.getResponseHeaders();
 		if (connector.enableCrossOriginResourceSharing) {
 			responseHeaders.add("Access-Control-Allow-Origin", connector.crossOriginResourceDomain);
 			responseHeaders.add("Access-Control-Max-Age",

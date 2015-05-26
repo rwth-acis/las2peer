@@ -20,8 +20,10 @@ import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -76,8 +78,12 @@ public class WebConnector extends Connector {
 	public static final int DEFAULT_SERVICE_REPOSITORY_UPDATE_INTERVAL_SECONDS = 300;
 	protected int serviceRepositoryUpdateIntervalSeconds = DEFAULT_SERVICE_REPOSITORY_UPDATE_INTERVAL_SECONDS;
 
-	public static final String DEFAULT_OIDC_PROVIDER = "https://api.learning-layers.eu/o/oauth2";
-	protected String oidcProvider = DEFAULT_OIDC_PROVIDER;
+	public static final String DEFAULT_DEFAULT_OIDC_PROVIDER = "https://api.learning-layers.eu/o/oauth2";
+	protected String defaultOIDCProvider = DEFAULT_DEFAULT_OIDC_PROVIDER;
+	protected ArrayList<String> oidcProviders = new ArrayList<String>();
+	{
+		oidcProviders.add(DEFAULT_DEFAULT_OIDC_PROVIDER);
+	}
 
 	protected String defaultLoginUser = "";
 	protected String defaultLoginPassword = "";
@@ -96,7 +102,7 @@ public class WebConnector extends Connector {
 
 	// information on Open ID Connect server, including configuration, according
 	// to Open ID Connect Discovery (cf. http://openid.net/specs/openid-connect-discovery-1_0.html)
-	protected JSONObject oidcProviderInfo;
+	protected Map<String, JSONObject> oidcProviderInfos = new HashMap<String, JSONObject>();
 
 	private HashMap<Long, Integer> openUserRequests = new HashMap<>();
 	private PathTree tree = new PathTree();
@@ -271,10 +277,19 @@ public class WebConnector extends Connector {
 			}
 		}
 
-		try {
-			oidcProviderInfo = fetchOidcProviderConfig();
-		} catch (Exception e) {
-			logError("Could not fetch OIDC provider configuration " + e.getMessage());
+		for (String uri : oidcProviders) {
+			try {
+				uri = uri.trim();
+				if (uri.endsWith("/")) {
+					uri = uri.substring(0, uri.length() - 1);
+				}
+				JSONObject info = fetchOidcProviderConfig(uri);
+				if (info != null) {
+					oidcProviderInfos.put(uri, info);
+				}
+			} catch (Exception e) {
+				logError("Could not fetch OIDC provider configuration " + e.getMessage());
+			}
 		}
 
 		myNode = node;
@@ -422,12 +437,12 @@ public class WebConnector extends Connector {
 	 * Fetches Open ID Connect provider configuration, according to the OpenID Connect discovery specification
 	 * (cf. http://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig)
 	 */
-	private JSONObject fetchOidcProviderConfig() throws IOException {
+	private JSONObject fetchOidcProviderConfig(String providerURI) throws IOException {
 		JSONObject result = new JSONObject();
 
 		// send Open ID Provider Config request
 		// (cf. http://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig)
-		URL pConfigDocUri = new URL(oidcProvider.trim() + "/.well-known/openid-configuration");
+		URL pConfigDocUri = new URL(providerURI + "/.well-known/openid-configuration");
 		HTTPRequest pConfigRequest = new HTTPRequest(Method.GET, pConfigDocUri);
 
 		// parse JSON result
@@ -437,11 +452,11 @@ public class WebConnector extends Connector {
 			// put JSON result in result table
 			result.put("config", config);
 		} catch (Exception e) {
-			System.out.println("OpenID Connect Provider " + oidcProvider.trim() + " unreachable!");
+			System.out.println("OpenID Connect Provider " + providerURI + " unreachable!");
 			System.err
 					.println("Make sure to set a correct OpenID Connect Provider URL in your las2peer Web Connector config!");
 			System.out.println("WebConnector will now run in OIDC agnostic mode.");
-			logError("Could not retrieve a valid config from the oidcProvider!");
+			logError("Could not retrieve a valid OIDC provider config from " + providerURI + "!");
 
 			return null;
 		}
