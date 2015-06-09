@@ -128,20 +128,21 @@ public class RESTMapper {
 	 * and should be annotated with {@link Version}}. For any resources to be listed, one corresponding method 
 	 * must be annotated with {@link Path} and {@link ResourceListApi}.
 	 * 
-	 * @param c Class subject class
+	 * @param cls Class subject class
 	 * @return HttpResponse a HTTP response transporting the resulting resource listing in its payload
 	 */
-	public static HttpResponse getSwaggerResourceListing(Class c) {
+	@SuppressWarnings("unchecked") 
+	public static HttpResponse getSwaggerResourceListing(Class<?> cls) {
 		// create resource listing to be returned
 		JSONObject resourceListing = new JSONObject();
 		resourceListing.put("swaggerVersion", "1.2");
 
 		// if ApiInfo annotation is not present, immediately return 404 response.
-		if (!c.isAnnotationPresent(ApiInfo.class)) {
+		if (!cls.isAnnotationPresent(ApiInfo.class)) {
 			HttpResponse r = new HttpResponse("Swagger resource listing not available. API info not defined.");
 			r.setStatus(404);
 		} else {
-			ApiInfo apiInfo = (ApiInfo) c.getAnnotation(ApiInfo.class);
+			ApiInfo apiInfo = (ApiInfo) cls.getAnnotation(ApiInfo.class);
 			JSONObject aio = new JSONObject();
 			aio.put("title", apiInfo.title());
 			aio.put("description", apiInfo.description());
@@ -153,14 +154,14 @@ public class RESTMapper {
 			resourceListing.put("info", aio);
 		}
 
-		if (c.isAnnotationPresent(Version.class)) {
-			resourceListing.put("apiVersion", ((Version) c.getAnnotation(Version.class)).value());
+		if (cls.isAnnotationPresent(Version.class)) {
+			resourceListing.put("apiVersion", ((Version) cls.getAnnotation(Version.class)).value());
 		}
 
 		// now build apis field from method annotations
 		JSONArray apis = new JSONArray();
 
-		for (Method m : c.getMethods()) {
+		for (Method m : cls.getMethods()) {
 
 			// only include in resource list item, if Path and ResourceListApi annotations are present.
 			if (m.isAnnotationPresent(Path.class) && m.isAnnotationPresent(ResourceListApi.class)) {
@@ -189,39 +190,29 @@ public class RESTMapper {
 	 * {@link GET},{@link PUT},{@link POST} or {@link DELETE} to be included. The method should also be annotated with
 	 * {@link Notes},{@link Produces} and {@link Consumes}, if appropriate.
 	 * 
-	 * @param cl Class subject class 
+	 * @param cls Class subject class 
 	 * @param tlr String path name of top-level resource
 	 * @param epUrl String endpoint URL
 	 * @return HttpResponse a HTTP response transporting the resulting API declaration in its payload
 	 */
-	public static HttpResponse getSwaggerApiDeclaration(Class cl, String tlr, String epUrl) {
+	@SuppressWarnings("unchecked")
+	public static HttpResponse getSwaggerApiDeclaration(Class<?> cls, String tlr, String epUrl) {
 		// merge in class annotations
-		Annotation[] classAnnotations = cl.getAnnotations();
-
-		String r = "";
-
 		JSONObject apiDocs = new JSONObject();
-
 		apiDocs.put("swaggerVersion", "1.2");
-
 		// strip off trailing slash
 		if (epUrl.endsWith("/")) {
 			epUrl = epUrl.substring(0, epUrl.length() - 1);
 		}
-
 		apiDocs.put("basePath", epUrl);
-
 		apiDocs.put("resourcePath", "/" + tlr);
 
-		if (cl.isAnnotationPresent(Version.class)) {
-			apiDocs.put("apiVersion", ((Version) cl.getAnnotation(Version.class)).value());
+		if (cls.isAnnotationPresent(Version.class)) {
+			apiDocs.put("apiVersion", ((Version) cls.getAnnotation(Version.class)).value());
 		}
-
 		Hashtable<String, JSONObject> apis = new Hashtable<String, JSONObject>();
-
 		// now process method information
-		for (Method method : cl.getMethods()) {
-
+		for (Method method : cls.getMethods()) {
 			// if method has no annotations, it does not qualify for Swagger API
 			if (method.getAnnotations().length == 0) {
 				continue;
@@ -342,14 +333,12 @@ public class RESTMapper {
 							// po.put("required",pp.required());
 
 						} else if (a instanceof ContentParam) {
-							ContentParam cp = ((ContentParam) a);
-
+							// ContentParam cp = ((ContentParam) a);
 							po.put("paramType", "body");
 							po.put("type", "string");
 							po.put("name", "body");
 							// po.put("description", cp.description());
 							po.put("required", true);
-
 						}
 
 						parameters.add(po);
