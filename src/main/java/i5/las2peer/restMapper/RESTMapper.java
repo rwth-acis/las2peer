@@ -1,7 +1,25 @@
 package i5.las2peer.restMapper;
-import i5.las2peer.restMapper.annotations.*;
-import i5.las2peer.restMapper.annotations.swagger.*;
 
+import i5.las2peer.restMapper.annotations.Consumes;
+import i5.las2peer.restMapper.annotations.ContentParam;
+import i5.las2peer.restMapper.annotations.DELETE;
+import i5.las2peer.restMapper.annotations.DefaultValue;
+import i5.las2peer.restMapper.annotations.GET;
+import i5.las2peer.restMapper.annotations.HeaderParam;
+import i5.las2peer.restMapper.annotations.HttpHeaders;
+import i5.las2peer.restMapper.annotations.POST;
+import i5.las2peer.restMapper.annotations.PUT;
+import i5.las2peer.restMapper.annotations.Path;
+import i5.las2peer.restMapper.annotations.PathParam;
+import i5.las2peer.restMapper.annotations.Produces;
+import i5.las2peer.restMapper.annotations.QueryParam;
+import i5.las2peer.restMapper.annotations.Version;
+import i5.las2peer.restMapper.annotations.swagger.ApiInfo;
+import i5.las2peer.restMapper.annotations.swagger.ApiResponse;
+import i5.las2peer.restMapper.annotations.swagger.ApiResponses;
+import i5.las2peer.restMapper.annotations.swagger.Notes;
+import i5.las2peer.restMapper.annotations.swagger.ResourceListApi;
+import i5.las2peer.restMapper.annotations.swagger.Summary;
 import i5.las2peer.restMapper.data.AcceptHeaderType;
 import i5.las2peer.restMapper.data.AcceptHeaderTypeComperator;
 import i5.las2peer.restMapper.data.InvocationData;
@@ -54,12 +72,9 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-
-
 /**
  * Maps REST requests to Methods
  * Very simple and only supports basic stuff (map paths and extract path parameters and map query parameters)
- * @author Alexander
  *
  */
 public class RESTMapper {
@@ -89,10 +104,10 @@ public class RESTMapper {
 	public static final String NAME_TAG = "name";
 	public static final String SERVICE_TAG = "service";
 	public static final String PATH_PARAM_BRACES = "{}";
-	public static final String HEADER_ANNOTATION ="header" ;
-	public static final String HEADERS_ANNOTATION ="headers" ;
+	public static final String HEADER_ANNOTATION = "header";
+	public static final String HEADERS_ANNOTATION = "headers";
 
-	private static final HashMap<String,Class<?>> classMap= new HashMap<String, Class<?>>();
+	private static final HashMap<String, Class<?>> classMap = new HashMap<String, Class<?>>();
 	public static final String XML = ".xml";
 	public static final String DEFAULT_MIME_SEPARATOR = ",";
 	public static final String CONSUMES_TAG = "consumes";
@@ -102,13 +117,10 @@ public class RESTMapper {
 	public static final String DEFAULT_MIME_PARAMETER_SEPARATOR = ";";
 	public static final String ACCEPT_ALL_MIME_TYPES = "*/*";
 
-
 	/**
 	 * default constructor
 	 */
-	public RESTMapper()
-	{
-
+	public RESTMapper() {
 	}
 
 	/**
@@ -119,19 +131,16 @@ public class RESTMapper {
 	 * @param c Class subject class
 	 * @return HttpResponse a HTTP response transporting the resulting resource listing in its payload
 	 */
-	public static HttpResponse getSwaggerResourceListing(Class c){
-
-		long start = System.currentTimeMillis();
-
+	public static HttpResponse getSwaggerResourceListing(Class c) {
 		// create resource listing to be returned
 		JSONObject resourceListing = new JSONObject();
 		resourceListing.put("swaggerVersion", "1.2");
 
 		// if ApiInfo annotation is not present, immediately return 404 response.
-		if (!c.isAnnotationPresent(ApiInfo.class)){
+		if (!c.isAnnotationPresent(ApiInfo.class)) {
 			HttpResponse r = new HttpResponse("Swagger resource listing not available. API info not defined.");
 			r.setStatus(404);
-		} else{
+		} else {
 			ApiInfo apiInfo = (ApiInfo) c.getAnnotation(ApiInfo.class);
 			JSONObject aio = new JSONObject();
 			aio.put("title", apiInfo.title());
@@ -144,34 +153,33 @@ public class RESTMapper {
 			resourceListing.put("info", aio);
 		}
 
-		if (c.isAnnotationPresent(Version.class)){
+		if (c.isAnnotationPresent(Version.class)) {
 			resourceListing.put("apiVersion", ((Version) c.getAnnotation(Version.class)).value());
 		}
 
 		// now build apis field from method annotations
 		JSONArray apis = new JSONArray();
 
-		for(Method m : c.getMethods()){
+		for (Method m : c.getMethods()) {
 
 			// only include in resource list item, if Path and ResourceListApi annotations are present.
-			if(m.isAnnotationPresent(Path.class) && m.isAnnotationPresent(ResourceListApi.class)){
+			if (m.isAnnotationPresent(Path.class) && m.isAnnotationPresent(ResourceListApi.class)) {
 				Path p = ((Path) m.getAnnotation(Path.class));
 				ResourceListApi a = ((ResourceListApi) m.getAnnotation(ResourceListApi.class));
 
 				JSONObject api = new JSONObject();
 
 				api.put("path", p.value());
-				api.put("description",a.description());
+				api.put("description", a.description());
 				apis.add(api);
 			}
 		}
 
-		resourceListing.put("apis",apis);
+		resourceListing.put("apis", apis);
 
 		HttpResponse r = new HttpResponse(resourceListing.toJSONString());
 		r.setStatus(200);
 		return r;
-
 	}
 
 	/**
@@ -186,64 +194,61 @@ public class RESTMapper {
 	 * @param epUrl String endpoint URL
 	 * @return HttpResponse a HTTP response transporting the resulting API declaration in its payload
 	 */
-	public static HttpResponse getSwaggerApiDeclaration(Class cl, String tlr, String epUrl)
-	{
+	public static HttpResponse getSwaggerApiDeclaration(Class cl, String tlr, String epUrl) {
+		// merge in class annotations
+		Annotation[] classAnnotations = cl.getAnnotations();
 
-		// merge in class annotations 
-		Annotation[] classAnnotations=cl.getAnnotations();
-		
-		
 		String r = "";
 
 		JSONObject apiDocs = new JSONObject();
 
 		apiDocs.put("swaggerVersion", "1.2");
-		
-		// strip off trailing slash
-		if(epUrl.endsWith("/")){
-			epUrl = epUrl.substring(0,epUrl.length()-1);
-		}
-		
-		apiDocs.put("basePath", epUrl);
-		
-		apiDocs.put("resourcePath", "/"+tlr);
 
-		if (cl.isAnnotationPresent(Version.class)){
+		// strip off trailing slash
+		if (epUrl.endsWith("/")) {
+			epUrl = epUrl.substring(0, epUrl.length() - 1);
+		}
+
+		apiDocs.put("basePath", epUrl);
+
+		apiDocs.put("resourcePath", "/" + tlr);
+
+		if (cl.isAnnotationPresent(Version.class)) {
 			apiDocs.put("apiVersion", ((Version) cl.getAnnotation(Version.class)).value());
 		}
 
-		Hashtable<String,JSONObject> apis = new Hashtable<String,JSONObject>();
+		Hashtable<String, JSONObject> apis = new Hashtable<String, JSONObject>();
 
 		// now process method information
 		for (Method method : cl.getMethods()) {
 
 			// if method has no annotations, it does not qualify for Swagger API
-			if(method.getAnnotations().length == 0){
+			if (method.getAnnotations().length == 0) {
 				continue;
 			}
 
 			// if method does not define Path annotation, it does not qualify for Swagger API
-			if(!method.isAnnotationPresent(Path.class)){
+			if (!method.isAnnotationPresent(Path.class)) {
 				continue;
 			} else {
 				String p = ((Path) method.getAnnotation(Path.class)).value();
 
 				// only consider methods with URI templates below the respective top-level resource
-				if(!p.startsWith(tlr)){
+				if (!p.startsWith(tlr)) {
 					continue;
 				}
 
 				JSONObject api;
 
-				if(!p.startsWith("/")){
-					p = "/"+p;
+				if (!p.startsWith("/")) {
+					p = "/" + p;
 				}
 
-				if(apis.containsKey(p)){
-					api = apis.get(p);	
+				if (apis.containsKey(p)) {
+					api = apis.get(p);
 				} else {
 					api = new JSONObject();
-					api.put("path",p);
+					api.put("path", p);
 					api.put("operations", new JSONArray());
 				}
 
@@ -255,95 +260,95 @@ public class RESTMapper {
 				operation.put("authorizations", new JSONObject());
 
 				// now extract method.
-				if(method.isAnnotationPresent(GET.class)){
-					operation.put("method","GET");
-				} else if (method.isAnnotationPresent(PUT.class)){
-					operation.put("method","PUT");
-				} else if (method.isAnnotationPresent(POST.class)){
-					operation.put("method","POST");
-				} else if (method.isAnnotationPresent(DELETE.class)){
-					operation.put("method","DELETE");
+				if (method.isAnnotationPresent(GET.class)) {
+					operation.put("method", "GET");
+				} else if (method.isAnnotationPresent(PUT.class)) {
+					operation.put("method", "PUT");
+				} else if (method.isAnnotationPresent(POST.class)) {
+					operation.put("method", "POST");
+				} else if (method.isAnnotationPresent(DELETE.class)) {
+					operation.put("method", "DELETE");
 				} else {
-					// if method does not define any HTTP method, it does not qualify for Swagger API 
+					// if method does not define any HTTP method, it does not qualify for Swagger API
 					continue;
 				}
 
 				// extract method summary
-				if(method.isAnnotationPresent(Summary.class)){
+				if (method.isAnnotationPresent(Summary.class)) {
 					String summary = ((Summary) method.getAnnotation(Summary.class)).value();
-					operation.put("summary",summary);
+					operation.put("summary", summary);
 				} else {
-					// if summary annotation is not available, method does not qualify for Swagger API. 
+					// if summary annotation is not available, method does not qualify for Swagger API.
 					continue;
 				}
-				
+
 				// extract consumed MIME types
-				if(method.isAnnotationPresent(Consumes.class)){
+				if (method.isAnnotationPresent(Consumes.class)) {
 					JSONArray cs = new JSONArray();
 
 					String[] cvals = ((Consumes) method.getAnnotation(Consumes.class)).value();
-					for(String v: cvals){
+					for (String v : cvals) {
 						cs.add(v);
 					}
-					operation.put("consumes",cs); 
+					operation.put("consumes", cs);
 				}
 
 				// extract produced MIME type
-				if(method.isAnnotationPresent(Produces.class)){
+				if (method.isAnnotationPresent(Produces.class)) {
 					JSONArray ps = new JSONArray();
 					String pval = ((Produces) method.getAnnotation(Produces.class)).value();
 					ps.add(pval);
-					operation.put("produces",ps); 
-				}
-				
-				// extract method notes
-				if(method.isAnnotationPresent(Notes.class)){
-					String notes = ((Notes) method.getAnnotation(Notes.class)).value();
-					operation.put("notes",notes);
+					operation.put("produces", ps);
 				}
 
-				// extract parameter annotations (path, query, header, content) 
+				// extract method notes
+				if (method.isAnnotationPresent(Notes.class)) {
+					String notes = ((Notes) method.getAnnotation(Notes.class)).value();
+					operation.put("notes", notes);
+				}
+
+				// extract parameter annotations (path, query, header, content)
 				JSONArray parameters = new JSONArray();
 				Annotation[][] parameterAnnotations = method.getParameterAnnotations();
 
-				for(int i=0;i<parameterAnnotations.length;i++){
-					for (int j=0;j<parameterAnnotations[i].length;j++){
+				for (int i = 0; i < parameterAnnotations.length; i++) {
+					for (int j = 0; j < parameterAnnotations[i].length; j++) {
 						Annotation a = parameterAnnotations[i][j];
 
 						JSONObject po = new JSONObject();
 
-						if(a instanceof QueryParam){
+						if (a instanceof QueryParam) {
 							QueryParam qp = ((QueryParam) a);
 							po.put("paramType", "query");
-							po.put("type","string");
+							po.put("type", "string");
 							po.put("name", qp.name());
-							//po.put("description", qp.description());
-							//po.put("required",qp.required());
+							// po.put("description", qp.description());
+							// po.put("required",qp.required());
 
-						} else if (a instanceof PathParam){
+						} else if (a instanceof PathParam) {
 							PathParam pp = ((PathParam) a);
 							po.put("paramType", "path");
-							po.put("type","string");
+							po.put("type", "string");
 							po.put("name", pp.value());
-							//po.put("description", pp.description());
-							//po.put("required",pp.required());
+							// po.put("description", pp.description());
+							// po.put("required",pp.required());
 
-						} else if (a instanceof HeaderParam){
+						} else if (a instanceof HeaderParam) {
 							HeaderParam hp = ((HeaderParam) a);
 							po.put("paramType", "header");
-							po.put("type","string");
+							po.put("type", "string");
 							po.put("name", hp.name());
-							//po.put("description", hp.description());
-							//po.put("required",pp.required());
+							// po.put("description", hp.description());
+							// po.put("required",pp.required());
 
-						} else if (a instanceof ContentParam){
+						} else if (a instanceof ContentParam) {
 							ContentParam cp = ((ContentParam) a);
 
 							po.put("paramType", "body");
-							po.put("type","string");
-							po.put("name","body");
-							//po.put("description", cp.description());
-							po.put("required",true);
+							po.put("type", "string");
+							po.put("name", "body");
+							// po.put("description", cp.description());
+							po.put("required", true);
 
 						}
 
@@ -351,18 +356,17 @@ public class RESTMapper {
 					}
 				}
 
-				operation.put("parameters",parameters);
+				operation.put("parameters", parameters);
 
 				// extract responses, including code and message
 				JSONArray responses = new JSONArray();
-				if(method.isAnnotationPresent(ApiResponses.class)){
-
+				if (method.isAnnotationPresent(ApiResponses.class)) {
 
 					ApiResponses ars = (ApiResponses) method.getAnnotation(ApiResponses.class);
-					for(ApiResponse ar: ars.value()){
+					for (ApiResponse ar : ars.value()) {
 						JSONObject response = new JSONObject();
 						response.put("code", ar.code());
-						response.put("message",ar.message());
+						response.put("message", ar.message());
 						responses.add(response);
 					}
 				}
@@ -378,7 +382,7 @@ public class RESTMapper {
 		// finally, add all individual APIs to API doc.
 		List<String> paths = new ArrayList<String>();
 		Enumeration<String> aep = apis.keys();
-		while(aep.hasMoreElements()){
+		while (aep.hasMoreElements()) {
 			String ne = aep.nextElement();
 			paths.add(ne);
 		}
@@ -388,7 +392,7 @@ public class RESTMapper {
 
 		JSONArray apisArr = new JSONArray();
 
-		for(String p: paths){
+		for (String p : paths) {
 			apisArr.add(apis.get(p));
 		}
 
@@ -406,8 +410,7 @@ public class RESTMapper {
 	 * @return XML file
 	 * @throws Exception
 	 */
-	public static String getMethodsAsXML(Class<?> cl) throws Exception
-	{
+	public static String getMethodsAsXML(Class<?> cl) throws Exception {
 		DocumentBuilderFactory dbFactory;
 		DocumentBuilder dBuilder;
 		Document doc;
@@ -416,186 +419,146 @@ public class RESTMapper {
 		Element methodsNode;
 
 		dBuilder = dbFactory.newDocumentBuilder();
-		doc=dBuilder.newDocument();
-		root=doc.createElement(SERVICE_TAG);
+		doc = dBuilder.newDocument();
+		root = doc.createElement(SERVICE_TAG);
 		root.setAttribute(NAME_TAG, cl.getName());
 
-		methodsNode=doc.createElement(METHODS_TAG);
+		methodsNode = doc.createElement(METHODS_TAG);
 		root.appendChild(methodsNode);
 		doc.appendChild(root);
 
-		//gather method and annotation information from class
-		Method[] methods = cl.getMethods();	
-		Annotation[] classAnnotations=cl.getAnnotations();
-		String version=DEFAULT_SERVICE_VERSION;
-		String pathPrefix="";
-		String[] consumesGlobal=new String[]{DEFAULT_CONSUMES_MIME_TYPE};
-		String producesGlobal= DEFAULT_PRODUCES_MIME_TYPE;
-		for(Annotation classAnnotation : classAnnotations)
-		{
-			if(classAnnotation instanceof Version)//get service version if available
-			{
+		// gather method and annotation information from class
+		Method[] methods = cl.getMethods();
+		Annotation[] classAnnotations = cl.getAnnotations();
+		String version = DEFAULT_SERVICE_VERSION;
+		String pathPrefix = "";
+		String[] consumesGlobal = new String[] { DEFAULT_CONSUMES_MIME_TYPE };
+		String producesGlobal = DEFAULT_PRODUCES_MIME_TYPE;
+		for (Annotation classAnnotation : classAnnotations) {
+			if (classAnnotation instanceof Version) { // get service version if available
 				version = ((Version) classAnnotation).value();
-			}
-			else if (classAnnotation instanceof Path)//path prefix is later applied to all @Path for methods
-			{
-				pathPrefix=((Path) classAnnotation).value();
-
-			}
-			else if (classAnnotation instanceof Consumes)//provides default @Consumes (which MIME to accept)
-			{
-				consumesGlobal=((Consumes) classAnnotation).value();
-
-			}
-			else if (classAnnotation instanceof Produces)//provides default @Produces (which MIME to expect)
-			{
-				producesGlobal=((Produces) classAnnotation).value();
-
+			} else if (classAnnotation instanceof Path) { // path prefix is later applied to all @Path for methods
+				pathPrefix = ((Path) classAnnotation).value();
+			} else if (classAnnotation instanceof Consumes) { // provides default @Consumes (which MIME to accept)
+				consumesGlobal = ((Consumes) classAnnotation).value();
+			} else if (classAnnotation instanceof Produces) { // provides default @Produces (which MIME to expect)
+				producesGlobal = ((Produces) classAnnotation).value();
 			}
 		}
 
-
-
-		pathPrefix=pathPrefix.trim();//ignore empty spaces
+		pathPrefix = pathPrefix.trim();// ignore empty spaces
 		pathPrefix = formatPath(pathPrefix);
 
 		root.setAttribute(VERSION_TAG, version);
 
-		if(!pathPrefix.isEmpty())
+		if (!pathPrefix.isEmpty()) {
 			root.setAttribute(PATH_TAG, pathPrefix);
+		}
 
-		root.setAttribute(PRODUCES_TAG,producesGlobal);
+		root.setAttribute(PRODUCES_TAG, producesGlobal);
 		root.setAttribute(CONSUMES_TAG, join(consumesGlobal, DEFAULT_MIME_SEPARATOR));
 
-		for (Method method : methods) { //create method information
-			Annotation[] annotations=method.getAnnotations();
-			Annotation[][] parameterAnnotations = method.getParameterAnnotations();	
+		for (Method method : methods) { // create method information
+			Annotation[] annotations = method.getAnnotations();
+			Annotation[][] parameterAnnotations = method.getParameterAnnotations();
 			String httpMethod = getHttpMethod(annotations);
 
-
-
-			//only valid method, if there is a http method and @Path annotation
-			if(httpMethod.isEmpty())
+			// only valid method, if there is a http method and @Path annotation
+			if (httpMethod.isEmpty()) {
 				continue;
+			}
 
-			if(method.getExceptionTypes().length>0)
-			{
-				String methodName=cl.getCanonicalName()+"."+  method.getName();
+			if (method.getExceptionTypes().length > 0) {
+				String methodName = cl.getCanonicalName() + "." + method.getName();
 				throw new MethodThrowsExceptionException(methodName);
 			}
 
-			String path=null;
-			if(method.isAnnotationPresent(Path.class))
-			{
-				path=formatPath(method.getAnnotation(Path.class).value());
+			String path = null;
+			if (method.isAnnotationPresent(Path.class)) {
+				path = formatPath(method.getAnnotation(Path.class).value());
+			} else if (!pathPrefix.isEmpty()) {
+				// TODO ???
+			} else {
+				// no path information given
+				continue;
 			}
-			else if(!pathPrefix.isEmpty())
-			{
 
-			}
-			else //no path information given
-			continue;
-
-
-
-
-
-
-			Element methodNode=doc.createElement(METHOD_TAG);
-
+			Element methodNode = doc.createElement(METHOD_TAG);
 
 			methodNode.setAttribute(NAME_TAG, method.getName());
 			methodNode.setAttribute(HTTP_METHOD_TAG, httpMethod);
-			if(path!=null&&!path.isEmpty())
+			if (path != null && !path.isEmpty())
 				methodNode.setAttribute(PATH_TAG, path);
 			methodNode.setAttribute(TYPE_TAG, (method.getReturnType().getName()));
 
-
-
 			String consumes;
-			if(httpMethod.equals(POST)||httpMethod.equals(PUT))//@consumes only for POST requests
-			{
-				if(method.isAnnotationPresent(Consumes.class))//local method @Consumes overrides global class @Consumes
-				{
-					consumes=join(method.getAnnotation(Consumes.class).value(), DEFAULT_MIME_SEPARATOR);
+			if (httpMethod.equals(POST) || httpMethod.equals(PUT)) { // @consumes only for POST requests
+				if (method.isAnnotationPresent(Consumes.class)) { // local method @Consumes overrides global class
+																	// @Consumes
+					consumes = join(method.getAnnotation(Consumes.class).value(), DEFAULT_MIME_SEPARATOR);
 					methodNode.setAttribute(CONSUMES_TAG, consumes.trim());
 				}
-
-
 			}
 			String produces;
-			if(method.isAnnotationPresent(Produces.class))//local method @Consumes overrides global class @Consumes
-			{
-				produces=method.getAnnotation(Produces.class).value();
+			if (method.isAnnotationPresent(Produces.class)) { // local method @Consumes overrides global class @Consumes
+				produces = method.getAnnotation(Produces.class).value();
 				methodNode.setAttribute(PRODUCES_TAG, produces.trim());
 			}
 
-
-
-			Element parameters =doc.createElement(PARAMTERS_TAG);
+			Element parameters = doc.createElement(PARAMTERS_TAG);
 			methodNode.appendChild(parameters);
 
-			//handle parameters
-			Class<?>[] parameterTypes = method.getParameterTypes();			
-			for (int i = 0; i < parameterAnnotations.length; i++) 
-			{//i:=parameterPos
-				Element parameter =doc.createElement(PARAMETER_TAG);
+			// handle parameters
+			Class<?>[] parameterTypes = method.getParameterTypes();
+			for (int i = 0; i < parameterAnnotations.length; i++) {
+				// i:=parameterPos
+				Element parameter = doc.createElement(PARAMETER_TAG);
 				parameter.setAttribute(INDEX_TAG, Integer.toString(i));
 				parameter.setAttribute(TYPE_TAG, (parameterTypes[i].getName()));
-				String parameterAnnotation=null;
-				String parameterName=null;
-				String parameterDefault=null;
+				String parameterAnnotation = null;
+				String parameterName = null;
+				String parameterDefault = null;
 
-				for (int j = 0; j < parameterAnnotations[i].length; j++) 
-				{//j:=AnnotationNr
-					Annotation ann=parameterAnnotations[i][j];
-					//check for parameter annotation type
-					if(ann instanceof PathParam)
-					{
-						String paramName=((PathParam) ann).value();
-						parameterAnnotation=PATH_ANNOTATION;
-						parameterName=paramName;
-					}	
-					else if(ann instanceof QueryParam)
-					{
-						String paramName=((QueryParam) ann).name();
-						parameterAnnotation=QUERY_ANNOTATION;
-						parameterName=paramName;
-						parameterDefault=((QueryParam) ann).defaultValue();
-					}
-					else if(ann instanceof ContentParam)
-					{
-						parameterAnnotation=CONTENT_ANNOTATION;
-						parameterName="";
-					}
-					else if(ann instanceof DefaultValue)
-					{
-						parameterDefault= ((DefaultValue) ann).value();
+				for (int j = 0; j < parameterAnnotations[i].length; j++) {
+					// j:=AnnotationNr
+					Annotation ann = parameterAnnotations[i][j];
+					// check for parameter annotation type
+					if (ann instanceof PathParam) {
+						String paramName = ((PathParam) ann).value();
+						parameterAnnotation = PATH_ANNOTATION;
+						parameterName = paramName;
+					} else if (ann instanceof QueryParam) {
+						String paramName = ((QueryParam) ann).name();
+						parameterAnnotation = QUERY_ANNOTATION;
+						parameterName = paramName;
+						parameterDefault = ((QueryParam) ann).defaultValue();
+					} else if (ann instanceof ContentParam) {
+						parameterAnnotation = CONTENT_ANNOTATION;
+						parameterName = "";
+					} else if (ann instanceof DefaultValue) {
+						parameterDefault = ((DefaultValue) ann).value();
 
-					}
-					else if(ann instanceof HeaderParam)
-					{
-						String paramName=((HeaderParam) ann).name();
-						parameterAnnotation=HEADER_ANNOTATION;
-						parameterName=paramName;
-						parameterDefault=((HeaderParam) ann).defaultValue();
+					} else if (ann instanceof HeaderParam) {
+						String paramName = ((HeaderParam) ann).name();
+						parameterAnnotation = HEADER_ANNOTATION;
+						parameterName = paramName;
+						parameterDefault = ((HeaderParam) ann).defaultValue();
 
-					}
-					else if(ann instanceof HttpHeaders)
-					{
-						parameterAnnotation=HEADERS_ANNOTATION;
-						parameterName="";
+					} else if (ann instanceof HttpHeaders) {
+						parameterAnnotation = HEADERS_ANNOTATION;
+						parameterName = "";
 
 					}
 
-					if(parameterAnnotation!=null)	//if a non-exposed parameter is used, works only if default value is provided
+					if (parameterAnnotation != null) // if a non-exposed parameter is used, works only if default value
+														// is provided
 						parameter.setAttribute(ANNOTATION_TAG, parameterAnnotation);
 
-					if(parameterName!=null) //not needed for content annotation or if non-exposed parameter is used
+					if (parameterName != null) // not needed for content annotation or if non-exposed parameter is used
 						parameter.setAttribute(NAME_TAG, parameterName);
 
-					//default value is optional
-					if(parameterDefault!=null)
+					// default value is optional
+					if (parameterDefault != null)
 						parameter.setAttribute(DEFAULT_TAG, parameterDefault);
 
 				}
@@ -603,7 +566,6 @@ public class RESTMapper {
 			}
 			methodsNode.appendChild(methodNode);
 		}
-
 
 		return XMLtoString(doc);
 	}
@@ -613,9 +575,8 @@ public class RESTMapper {
 	 * @param path
 	 * @return String formatted path
 	 */
-	private static String formatPath(String path)
-	{
-		path=path.replaceAll("(^/)|(/$)","");//remove trailing / for convenience
+	private static String formatPath(String path) {
+		path = path.replaceAll("(^/)|(/$)", "");// remove trailing / for convenience
 		return path;
 	}
 
@@ -625,46 +586,35 @@ public class RESTMapper {
 	 * @param match
 	 * @return int[] positions of matches
 	 */
-	private static Integer[] getOccurrences(String s, String match)
-	{
-		ArrayList<Integer> occurrences=new ArrayList<Integer>();
+	private static Integer[] getOccurrences(String s, String match) {
+		ArrayList<Integer> occurrences = new ArrayList<Integer>();
 		int index = s.indexOf(match);
 		while (index >= 0) {
 			occurrences.add(index);
 			index = s.indexOf(match, index + 1);
 		}
-		Integer[] result=new Integer[occurrences.size()];
+		Integer[] result = new Integer[occurrences.size()];
 		occurrences.toArray(result);
 		return result;
-
-
 	}
 
-	public static String mergeXMLs(String[] xmls) throws ParserConfigurationException
-	{
-
+	public static String mergeXMLs(String[] xmls) throws ParserConfigurationException {
 		DocumentBuilderFactory dbFactory;
 		DocumentBuilder dBuilder;
-		Document doc;		
-		dbFactory = DocumentBuilderFactory.newInstance();	
+		Document doc;
+		dbFactory = DocumentBuilderFactory.newInstance();
 		dBuilder = dbFactory.newDocumentBuilder();
-		doc=dBuilder.newDocument();
-		Element root=doc.createElement(SERVICES_TAG);
+		doc = dBuilder.newDocument();
+		Element root = doc.createElement(SERVICES_TAG);
 		doc.appendChild(root);
 
-		for(String xml : xmls)
-		{
-			try
-			{
+		for (String xml : xmls) {
+			try {
 				Document local = dBuilder.parse(new InputSource(new StringReader(xml)));
 				doc.getDocumentElement().appendChild(doc.importNode(local.getDocumentElement(), true));
-			}
-			catch(SAXException e)
-			{
+			} catch (SAXException e) {
 				e.printStackTrace();
-			}
-			catch(IOException e)
-			{
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
@@ -672,6 +622,7 @@ public class RESTMapper {
 		return XMLtoString(doc);
 
 	}
+
 	/**
 	 * creates a tree from the class data xml
 	 * the tree can then be used to map requests directly to the proper services and methods
@@ -679,9 +630,8 @@ public class RESTMapper {
 	 * @return tree structure for request mapping
 	 * @throws Exception
 	 */
-	public static PathTree getMappingTree(String xml) throws Exception
-	{
-		return getMappingTree(xml,false,new ValidationResult());
+	public static PathTree getMappingTree(String xml) throws Exception {
+		return getMappingTree(xml, false, new ValidationResult());
 	}
 
 	/**
@@ -693,20 +643,19 @@ public class RESTMapper {
 	 * @return tree structure for request mapping
 	 * @throws Exception
 	 */
-	public static PathTree getMappingTree(String xml, boolean validate, ValidationResult result) throws Exception
-	{
+	public static PathTree getMappingTree(String xml, boolean validate, ValidationResult result) throws Exception {
 		XPath _xPath = XPathFactory.newInstance().newXPath();
 		DocumentBuilderFactory dbFactory;
 		DocumentBuilder dBuilder;
-		Document doc;		
+		Document doc;
 		dbFactory = DocumentBuilderFactory.newInstance();
-		result.setValid(true); //assume everything is right
+		result.setValid(true); // assume everything is right
 
 		dBuilder = dbFactory.newDocumentBuilder();
-		doc=dBuilder.parse(new InputSource(new StringReader(xml)));
+		doc = dBuilder.parse(new InputSource(new StringReader(xml)));
 
-		PathTree rootTree=new PathTree();
-		PathNode root=rootTree.getRoot();
+		PathTree rootTree = new PathTree();
+		PathNode root = rootTree.getRoot();
 
 		// start tree with http methods
 		root.addChild(POST);
@@ -714,183 +663,167 @@ public class RESTMapper {
 		root.addChild(GET);
 		root.addChild(DELETE);
 
-		//for each service in the XML
-		NodeList serviceNodeList =(NodeList) _xPath.compile(".//" + SERVICE_TAG).evaluate(doc, XPathConstants.NODESET);
-		for (int i = 0; i < serviceNodeList.getLength(); i++) 
-		{
-			Element serviceNode =(Element)serviceNodeList.item(i);
-			String serviceName=serviceNode.getAttribute(NAME_TAG).trim();
-			String serviceVersion=serviceNode.getAttribute(VERSION_TAG).trim();
-			String servicePathPrefix="";
-			String[] serviceConsumes=new String[]{DEFAULT_CONSUMES_MIME_TYPE}; //if none is given, then allow everything as a Consume-Type
-			String serviceProduces=DEFAULT_PRODUCES_MIME_TYPE;
-			if(serviceNode.hasAttribute(PATH_TAG))
-			{
-				servicePathPrefix=serviceNode.getAttribute(PATH_TAG).trim();
+		// for each service in the XML
+		NodeList serviceNodeList = (NodeList) _xPath.compile(".//" + SERVICE_TAG).evaluate(doc, XPathConstants.NODESET);
+		for (int i = 0; i < serviceNodeList.getLength(); i++) {
+			Element serviceNode = (Element) serviceNodeList.item(i);
+			String serviceName = serviceNode.getAttribute(NAME_TAG).trim();
+			String serviceVersion = serviceNode.getAttribute(VERSION_TAG).trim();
+			String servicePathPrefix = "";
+			String[] serviceConsumes = new String[] { DEFAULT_CONSUMES_MIME_TYPE }; // if none is given, then allow
+																					// everything as a Consume-Type
+			String serviceProduces = DEFAULT_PRODUCES_MIME_TYPE;
+			if (serviceNode.hasAttribute(PATH_TAG)) {
+				servicePathPrefix = serviceNode.getAttribute(PATH_TAG).trim();
 			}
 
-			if(serviceNode.hasAttribute(CONSUMES_TAG))
-			{
-				serviceConsumes=serviceNode.getAttribute(CONSUMES_TAG).trim().split(DEFAULT_MIME_SEPARATOR);
+			if (serviceNode.hasAttribute(CONSUMES_TAG)) {
+				serviceConsumes = serviceNode.getAttribute(CONSUMES_TAG).trim().split(DEFAULT_MIME_SEPARATOR);
 			}
-			if(serviceNode.hasAttribute(PRODUCES_TAG))
-			{
-				serviceProduces=serviceNode.getAttribute(PRODUCES_TAG).trim();
+			if (serviceNode.hasAttribute(PRODUCES_TAG)) {
+				serviceProduces = serviceNode.getAttribute(PRODUCES_TAG).trim();
 			}
 
-			//for each method in a service
-			NodeList methodeNodeList =(NodeList) _xPath.compile(".//" + METHOD_TAG).evaluate(serviceNode, XPathConstants.NODESET);
-			for (int j = 0; j < methodeNodeList.getLength(); j++) 
-			{
-				Element methodNode =(Element)methodeNodeList.item(j);
-				String methodName=methodNode.getAttribute(NAME_TAG).trim();
-				String methodHttpMethod=methodNode.getAttribute(HTTP_METHOD_TAG).trim().toLowerCase();
-				String methodPath="";
+			// for each method in a service
+			NodeList methodeNodeList = (NodeList) _xPath.compile(".//" + METHOD_TAG).evaluate(serviceNode,
+					XPathConstants.NODESET);
+			for (int j = 0; j < methodeNodeList.getLength(); j++) {
+				Element methodNode = (Element) methodeNodeList.item(j);
+				String methodName = methodNode.getAttribute(NAME_TAG).trim();
+				String methodHttpMethod = methodNode.getAttribute(HTTP_METHOD_TAG).trim().toLowerCase();
+				String methodPath = "";
 
-				String methodType=methodNode.getAttribute(TYPE_TAG).trim();
+				String methodType = methodNode.getAttribute(TYPE_TAG).trim();
 				String[] consumes;
 				String produces;
-				if(methodNode.hasAttribute(PATH_TAG))
-				{
-					methodPath=methodNode.getAttribute(PATH_TAG).trim();
+				if (methodNode.hasAttribute(PATH_TAG)) {
+					methodPath = methodNode.getAttribute(PATH_TAG).trim();
 				}
-				if(methodNode.hasAttribute(CONSUMES_TAG))
-				{
-					consumes=methodNode.getAttribute(CONSUMES_TAG).trim().split(DEFAULT_MIME_SEPARATOR);
+				if (methodNode.hasAttribute(CONSUMES_TAG)) {
+					consumes = methodNode.getAttribute(CONSUMES_TAG).trim().split(DEFAULT_MIME_SEPARATOR);
+				} else {
+					consumes = serviceConsumes; // use global of service, if method has none
 				}
-				else
-					consumes=serviceConsumes; //use global of service, if method has none
 
-					if(methodNode.hasAttribute(PRODUCES_TAG))
-					{
-						produces=methodNode.getAttribute(PRODUCES_TAG).trim();
+				if (methodNode.hasAttribute(PRODUCES_TAG)) {
+					produces = methodNode.getAttribute(PRODUCES_TAG).trim();
+				} else
+					produces = serviceProduces; // use global of service, if method has none
+
+				if (!servicePathPrefix.isEmpty()) { // prepend class path prefix, if available
+					methodPath = String.format("%s/%s", formatPath(servicePathPrefix), methodPath);
+				}
+
+				// begin traversing tree, start from http method node
+				PathNode currentNode = root.getChild(methodHttpMethod);
+
+				// is there any path to traverse?
+				if (methodPath.length() > 0) {
+					// transform path in correct format
+					if (methodPath.startsWith("/")) {
+						methodPath = methodPath.substring(1);
 					}
-					else
-						produces=serviceProduces; //use global of service, if method has none
+					if (methodPath.endsWith("/")) {
+						methodPath = methodPath.substring(0, methodPath.length() - 1);
+					}
 
-					if(!servicePathPrefix.isEmpty())//prepend class path prefix, if available
-						methodPath= String.format("%s/%s", formatPath(servicePathPrefix), methodPath);
-
-					//begin traversing tree, start from http method node
-					PathNode currentNode=root.getChild(methodHttpMethod);
-
-					//is there any path to traverse?
-					if(methodPath.length()>0){
-
-						//transform path in correct format
-						if(methodPath.startsWith("/"))
-							methodPath=methodPath.substring(1);
-						if(methodPath.endsWith("/"))
-							methodPath=methodPath.substring(0,methodPath.length()-1);
-
-						if(validate)//is path annotation well formatted?
-						{
-
-							Integer[] braceOpen=getOccurrences(methodPath,"{");
-							Integer[] bracesClosed=getOccurrences(methodPath,"}");
-							if(bracesClosed.length!=braceOpen.length) //check if all { closed
-							{
-								result.setValid(false);
-								result.addMessage("Path " + methodPath + " of method " + methodName + " has unequal number of { and }");
-							}
-							else
-							{
-								//                            Integer[] allBraces=new Integer[braceOpen.length+bracesClosed.length];//check if no {{}}
-								//                            int u=0;
-								int lastClosed=-1;
-								for(int k = 0; k < braceOpen.length; k++)
-								{
-									if(!(braceOpen[k]<bracesClosed[k])||lastClosed>=braceOpen[k])
-									{
-										result.setValid(false);
-										result.addMessage("Path " + methodPath + " of method " + methodName + " has {} inside of {}");
-										break;
-									}
-									lastClosed=bracesClosed[k];
+					if (validate) {// is path annotation well formatted?
+						Integer[] braceOpen = getOccurrences(methodPath, "{");
+						Integer[] bracesClosed = getOccurrences(methodPath, "}");
+						if (bracesClosed.length != braceOpen.length) { // check if all { closed
+							result.setValid(false);
+							result.addMessage("Path " + methodPath + " of method " + methodName
+									+ " has unequal number of { and }");
+						} else {
+							// Integer[] allBraces=new Integer[braceOpen.length+bracesClosed.length];//check if no {{}}
+							// int u=0;
+							int lastClosed = -1;
+							for (int k = 0; k < braceOpen.length; k++) {
+								if (!(braceOpen[k] < bracesClosed[k]) || lastClosed >= braceOpen[k]) {
+									result.setValid(false);
+									result.addMessage("Path " + methodPath + " of method " + methodName
+											+ " has {} inside of {}");
+									break;
 								}
-
-
+								lastClosed = bracesClosed[k];
 							}
-						}
 
-						//for each URI path segment
-						String[] pathParts=methodPath.split("/");
-
-						for(String pathPart : pathParts)
-						{
-							//if it is a variable parameter in the path...
-							if(pathPart.startsWith(START_PATH_PARAMETER) && pathPart.endsWith(END_PATH_PARAMETER))//PathParams are in {}
-							{
-								currentNode.addChild(PATH_PARAM_BRACES); //add it as a child with {} as name (parameter node)
-								currentNode = currentNode.getChild(PATH_PARAM_BRACES); //and set is as the current node
-								//add the name of the parameter to a list, for later value mapping
-								currentNode.addPathParameterName(pathPart.substring(1, pathPart.length() - 1));
-							}
-							else
-							{
-								currentNode.addChild(pathPart); //text content of path as node name
-								currentNode = currentNode.getChild(pathPart);    //set new node as active node
-							}
 						}
 					}
-					//get parameter information from the method
-					NodeList parameterNodeList =
-							(NodeList) _xPath.compile(".//" + PARAMETER_TAG).evaluate(methodNode, XPathConstants.NODESET);
-					ParameterData[] parameters=new ParameterData[parameterNodeList.getLength()];
 
+					// for each URI path segment
+					String[] pathParts = methodPath.split("/");
 
-					for (int k = 0; k < parameterNodeList.getLength(); k++) 
-					{
-						Element parameter =(Element)parameterNodeList.item(k);
-
-						int parameterIndex=Integer.parseInt(parameter.getAttribute(INDEX_TAG));
-						String parameterType=parameter.getAttribute(TYPE_TAG);
-						//check of the optional attributes
-						String parameterAnnotation=null;					
-						if(parameter.hasAttribute(ANNOTATION_TAG))
-							parameterAnnotation=parameter.getAttribute(ANNOTATION_TAG).toLowerCase();
-						String parameterName=null;
-						if(parameter.hasAttribute(NAME_TAG))
-							parameterName=parameter.getAttribute(NAME_TAG);
-						String parameterDefault=null;
-						if(parameter.hasAttribute(DEFAULT_TAG))
-						{
-							parameterDefault=parameter.getAttribute(DEFAULT_TAG);
+					for (String pathPart : pathParts) {
+						// if it is a variable parameter in the path...
+						if (pathPart.startsWith(START_PATH_PARAMETER) && pathPart.endsWith(END_PATH_PARAMETER)) {
+							// PathParams are in {}
+							// add it as a child with {} as name (parameter node)
+							currentNode.addChild(PATH_PARAM_BRACES);
+							currentNode = currentNode.getChild(PATH_PARAM_BRACES); // and set is as the current node
+							// add the name of the parameter to a list, for later value mapping
+							currentNode.addPathParameterName(pathPart.substring(1, pathPart.length() - 1));
+						} else {
+							currentNode.addChild(pathPart); // text content of path as node name
+							currentNode = currentNode.getChild(pathPart); // set new node as active node
 						}
+					}
+				}
+				// get parameter information from the method
+				NodeList parameterNodeList =
+						(NodeList) _xPath.compile(".//" + PARAMETER_TAG).evaluate(methodNode, XPathConstants.NODESET);
+				ParameterData[] parameters = new ParameterData[parameterNodeList.getLength()];
 
-						if(validate&&parameterName!=null&&parameterAnnotation!=null&&parameterAnnotation.equals(PATH_ANNOTATION))
-						{
+				for (int k = 0; k < parameterNodeList.getLength(); k++) {
+					Element parameter = (Element) parameterNodeList.item(k);
 
-							int index=methodPath.indexOf("{"+parameterName+"}");
+					int parameterIndex = Integer.parseInt(parameter.getAttribute(INDEX_TAG));
+					String parameterType = parameter.getAttribute(TYPE_TAG);
+					// check of the optional attributes
+					String parameterAnnotation = null;
+					if (parameter.hasAttribute(ANNOTATION_TAG))
+						parameterAnnotation = parameter.getAttribute(ANNOTATION_TAG).toLowerCase();
+					String parameterName = null;
+					if (parameter.hasAttribute(NAME_TAG))
+						parameterName = parameter.getAttribute(NAME_TAG);
+					String parameterDefault = null;
+					if (parameter.hasAttribute(DEFAULT_TAG)) {
+						parameterDefault = parameter.getAttribute(DEFAULT_TAG);
+					}
 
-							if(index<=-1)
-							{
-								result.setValid(false);
-								result.addMessage("Path " + methodPath + " of method " + methodName + " lacks the parameter \"" + parameterName+"\"");
-							}
+					if (validate && parameterName != null && parameterAnnotation != null
+							&& parameterAnnotation.equals(PATH_ANNOTATION)) {
+
+						int index = methodPath.indexOf("{" + parameterName + "}");
+
+						if (index <= -1) {
+							result.setValid(false);
+							result.addMessage("Path " + methodPath + " of method " + methodName
+									+ " lacks the parameter \"" + parameterName + "\"");
 						}
+					}
 
-						//create array sorted by the occurrence of the parameter in the method declaration
-						parameters[parameterIndex]=
-								new ParameterData(parameterAnnotation, parameterIndex,
-										parameterName, parameterType, parameterDefault);
-					}
-					//currentNode is the node, where the URI path traversion stopped, so these paths are then mapped to this method
-					//since multiple methods can respond to a single path, a node can store a set of methods from different services
-					try
-					{
-						currentNode.addMethodData(new MethodData(serviceName, serviceVersion, methodName,methodType,consumes,produces,parameters));
-					}
-					catch(ConflictingMethodPathException e)
-					{//pass on handle later. Mostly 'merge' will be the problem anyway
-						throw e;
-					}
+					// create array sorted by the occurrence of the parameter in the method declaration
+					parameters[parameterIndex] =
+							new ParameterData(parameterAnnotation, parameterIndex,
+									parameterName, parameterType, parameterDefault);
+				}
+				// currentNode is the node, where the URI path traversion stopped, so these paths are then mapped to
+				// this method
+				// since multiple methods can respond to a single path, a node can store a set of methods from different
+				// services
+				try {
+					currentNode.addMethodData(new MethodData(serviceName, serviceVersion, methodName, methodType,
+							consumes, produces, parameters));
+				} catch (ConflictingMethodPathException e) { // pass on handle later. Mostly 'merge' will be the problem
+																// anyway
+					throw e;
+				}
 
 			}
 		}
 		return rootTree;
 	}
-
 
 	/**
 	 * gets the proper HTTP method from the used annotations
@@ -898,29 +831,20 @@ public class RESTMapper {
 	 * @return HTTP Method (put,post,get etc...)
 	 */
 	private static String getHttpMethod(Annotation[] annotations) {
-		String httpMethod="";
-		for (Annotation ann : annotations) 
-		{
-			if(ann instanceof POST)
-			{
-				httpMethod=POST;
-			}
-			else if(ann instanceof PUT)
-			{
-				httpMethod=PUT;
-			}
-			else if(ann instanceof GET)
-			{
-				httpMethod=GET;
-			}
-			else if(ann instanceof DELETE)
-			{
-				httpMethod=DELETE;
+		String httpMethod = "";
+		for (Annotation ann : annotations) {
+			if (ann instanceof POST) {
+				httpMethod = POST;
+			} else if (ann instanceof PUT) {
+				httpMethod = PUT;
+			} else if (ann instanceof GET) {
+				httpMethod = GET;
+			} else if (ann instanceof DELETE) {
+				httpMethod = DELETE;
 			}
 		}
 		return httpMethod;
 	}
-
 
 	/**
 	 * receives a request and tries to map it to an existing service and method
@@ -936,201 +860,164 @@ public class RESTMapper {
 	 * @return array of matching services and methods, parameter values are already pre-filled.
 	 * @throws Exception
 	 */
-	public static InvocationData[] parse(PathTree tree, String httpMethod, String uri, Pair<String>[] variables, String content, String contentType, String returnType, Pair<String>[] headers, StringBuilder warnings) throws Exception
-	{
-		httpMethod=httpMethod.toLowerCase(); //for robustness
+	public static InvocationData[] parse(PathTree tree, String httpMethod, String uri, Pair<String>[] variables,
+			String content, String contentType, String returnType, Pair<String>[] headers, StringBuilder warnings)
+			throws Exception {
+		httpMethod = httpMethod.toLowerCase(); // for robustness
 
-		if(!contentType.isEmpty())
-		{
-			int consumesParamSeparator=contentType.indexOf(";");
-			if(consumesParamSeparator>-1)
-			{
-				contentType=contentType.substring(0,consumesParamSeparator); //filter only first part (MIME Type)
+		if (!contentType.isEmpty()) {
+			int consumesParamSeparator = contentType.indexOf(";");
+			if (consumesParamSeparator > -1) {
+				contentType = contentType.substring(0, consumesParamSeparator); // filter only first part (MIME Type)
 			}
-			contentType=contentType.trim();
+			contentType = contentType.trim();
 		}
 
+		String[] returnTypes = getAcceptedTypes(returnType);
 
+		// map input values from uri path and variables to the proper method parameters
+		HashMap<String, String> parameterValues = new HashMap<String, String>();
 
+		if (uri.startsWith("/"))
+			uri = uri.substring(1);
 
-
-		String[] returnTypes=getAcceptedTypes(returnType);
-
-
-		//map input values from uri path and variables to the proper method parameters
-		HashMap<String,String> parameterValues=new HashMap<String,String> ();
-
-		if(uri.startsWith("/"))			
-			uri=uri.substring(1);
-
-		//start with creating a value mapping using the provided variables
-		for(Pair<String> variable : variables)
-		{
+		// start with creating a value mapping using the provided variables
+		for (Pair<String> variable : variables) {
 			parameterValues.put(variable.getOne(), variable.getTwo());
 		}
-		for(Pair<String> header : headers)
-		{
+		for (Pair<String> header : headers) {
 			parameterValues.put(header.getOne(), header.getTwo());
 		}
 
+		// begin traversing the tree from one of the http method nodes
+		PathNode currentNode = tree.getRoot().getChild(httpMethod);
 
-		//begin traversing the tree from one of the http method nodes
-		PathNode currentNode=tree.getRoot().getChild(httpMethod);
-
-		if(currentNode==null)//if not supported method
+		if (currentNode == null)// if not supported method
 			throw new NotSerializableException(httpMethod);
 
-		if(uri.trim().length()>0)//is there any URI path?
-		{
-			String[] uriSplit=uri.split("/");
-			for(String anUriSplit : uriSplit)
-			{
-				PathNode nextNode = currentNode.getChild(anUriSplit); //get child node with segment name
+		if (uri.trim().length() > 0) { // is there any URI path?
+			String[] uriSplit = uri.split("/");
+			for (String anUriSplit : uriSplit) {
+				PathNode nextNode = currentNode.getChild(anUriSplit); // get child node with segment name
 
-				if(nextNode == null)//maybe a PathParam?
-				{
+				if (nextNode == null) { // maybe a PathParam?
 					currentNode = currentNode.getChild(PATH_PARAM_BRACES);
-					if(currentNode == null)//is it a PathParam?
-					{
+					if (currentNode == null) { // is it a PathParam?
 						throw new NotSupportedUriPathException(httpMethod + " " + uri);
 					}
 
-					String[] paramNames = currentNode.listPathParameterNames();//it is a PathParam, so get all given names of it
-					for(String paramName : paramNames)
-					{
+					String[] paramNames = currentNode.listPathParameterNames();// it is a PathParam, so get all given
+																				// names of it
+					for (String paramName : paramNames) {
 						// the uri split is still URL encoded, so first decode
 						String uriValue = java.net.URLDecoder.decode(anUriSplit, "UTF-8");
-						parameterValues.put(paramName, uriValue); //map the value provided in the URI path to the stored parameter names
+						parameterValues.put(paramName, uriValue); // map the value provided in the URI path to the
+																	// stored parameter names
 					}
 
-				}
-				else
-				{
-					currentNode = nextNode; //continue in tree
+				} else {
+					currentNode = nextNode; // continue in tree
 				}
 			}
 		}
-		//so all segments of the URI where handled, current node must contain the correct method, if there is any
-		MethodData[] methodData=currentNode.listMethodData(); 
-		if(methodData==null || methodData.length==0)//no method mapped to the URI path?
-		{
-			throw new NoMethodFoundException(httpMethod+" "+uri);
+		// so all segments of the URI where handled, current node must contain the correct method, if there is any
+		MethodData[] methodData = currentNode.listMethodData();
+		if (methodData == null || methodData.length == 0) { // no method mapped to the URI path?
+			throw new NoMethodFoundException(httpMethod + " " + uri);
 		}
-		//create data needed to invoke the methods stored in this node
-		ArrayList<InvocationData> invocationData=new ArrayList<InvocationData>();
+		// create data needed to invoke the methods stored in this node
+		ArrayList<InvocationData> invocationData = new ArrayList<InvocationData>();
 
-		boolean consumesMIME=(httpMethod.equals(POST)||httpMethod.equals(PUT))&&!contentType.isEmpty();//important vor handling @Consumes
+		boolean consumesMIME = (httpMethod.equals(POST) || httpMethod.equals(PUT)) && !contentType.isEmpty();// important
+																												// vor
+																												// handling
+																												// @Consumes
 
-		ArrayList<String> notMatchingConsumesTypes=new ArrayList<String>();
+		ArrayList<String> notMatchingConsumesTypes = new ArrayList<String>();
 
-		ArrayList<String> notMatchingProducesTypes=new ArrayList<String>();
-		for(MethodData aMethodData : methodData)
-		{
-
-			if(consumesMIME)//is POST and has MIME Type
-			{
-				String[] methodConsumes=aMethodData.getConsumes();
-				boolean foundMatch=false;
+		ArrayList<String> notMatchingProducesTypes = new ArrayList<String>();
+		for (MethodData aMethodData : methodData) {
+			if (consumesMIME) { // is POST and has MIME Type
+				String[] methodConsumes = aMethodData.getConsumes();
+				boolean foundMatch = false;
 				StringBuilder sb = new StringBuilder();
-				for(String methodConsume : methodConsumes)
-				{
+				for (String methodConsume : methodConsumes) {
 					sb.append(methodConsume).append(("\n"));
 					int wildcardPos = methodConsume.indexOf("*");
 					String toMatch;
-					if(wildcardPos > -1)
-					{
-						toMatch = methodConsume.substring(0, wildcardPos); //filter only first part (MIME Type)
-					}
-					else
-					{
+					if (wildcardPos > -1) {
+						toMatch = methodConsume.substring(0, wildcardPos); // filter only first part (MIME Type)
+					} else {
 						toMatch = methodConsume;
 					}
 
-					if(contentType.startsWith(toMatch)) //found a match no need to check other allowed types
-					{
-						foundMatch=true;
+					if (contentType.startsWith(toMatch)) { // found a match no need to check other allowed types
+						foundMatch = true;
 						break;
 					}
 				}
 
-				if(!foundMatch)//method MIME Type does not match, skip method
-				{
+				if (!foundMatch) { // method MIME Type does not match, skip method
 					notMatchingConsumesTypes.add(sb.toString());
 					continue;
 				}
 			}
 
-			int matchLevel=0;
-			if(!returnTypes[0].equals(ACCEPT_ALL_MIME_TYPES))//client wants specific types
-			{
-				String produces=aMethodData.getProduces();
+			int matchLevel = 0;
+			if (!returnTypes[0].equals(ACCEPT_ALL_MIME_TYPES)) { // client wants specific types
+				String produces = aMethodData.getProduces();
 				StringBuilder sb = new StringBuilder();
-				for(int i = 0; i < returnTypes.length; i++)//find best match level (array is already sorted from best to worst)
-				{
-
-
+				for (int i = 0; i < returnTypes.length; i++) { // find best match level (array is already sorted from
+																// best to worst)
 					String type = returnTypes[i];
 					sb.append(produces).append(("\n"));
-					//System.out.println(type);
-					//System.out.println(produces);
+					// System.out.println(type);
+					// System.out.println(produces);
 
-					if(produces.matches(type))
-					{
+					if (produces.matches(type)) {
 
-						matchLevel=i+1;
-						break;//all after that are worse anyway
+						matchLevel = i + 1;
+						break;// all after that are worse anyway
 					}
 
 				}
-				if(matchLevel==0)//if level is 0, the returnType of the method does not match anything the client accepts -> skip method
-				{
+				if (matchLevel == 0) { // if level is 0, the returnType of the method does not match anything the client
+										// accepts -> skip method
 					notMatchingProducesTypes.add(sb.toString());
 					continue;
 				}
 			}
 
-
-
-
 			ParameterData[] parameters = aMethodData.getParameters();
 
-			Serializable[] values = new Serializable[parameters.length]; //web connector uses Serializable for invocation
+			Serializable[] values = new Serializable[parameters.length]; // web connector uses Serializable for
+																			// invocation
 			Class<?>[] types = new Class<?>[parameters.length];
 			boolean abort = false;
-			for(int j = 0; j < parameters.length; j++)
-			{
+			for (int j = 0; j < parameters.length; j++) {
 
 				ParameterData param = parameters[j];
 
-				if(param.getAnnotation() != null && param.getAnnotation().equals(CONTENT_ANNOTATION)) //if it's a content annotation
-				{
-					values[j] = (Serializable) RESTMapper.castToType(content, param.getType()); //fill it with the given content
+				if (param.getAnnotation() != null && param.getAnnotation().equals(CONTENT_ANNOTATION)) {
+					// if it's a content annotation
+					values[j] = (Serializable) RESTMapper.castToType(content, param.getType());
+					// fill it with the given content
 					types[j] = param.getType();
-
-				}
-				else if(param.getAnnotation() != null && param.getAnnotation().equals(HEADERS_ANNOTATION)) //if it's a content annotation
-				{
-
-					values[j] = (Serializable) RESTMapper.castToType(RESTMapper.mergeHeaders(headers), param.getType()); //fill it with the given headers
+				} else if (param.getAnnotation() != null && param.getAnnotation().equals(HEADERS_ANNOTATION)) {
+					// if it's a content annotation
+					// fill it with the given headers
+					values[j] = (Serializable) RESTMapper.castToType(RESTMapper.mergeHeaders(headers), param.getType());
 					types[j] = param.getType();
-
-				}
-				else
-				{
-					if(param.getName() != null && parameterValues.containsKey(param.getName()))//if parameter has a name (given by an annotation) and a value given
-					{
-						values[j] = (Serializable) RESTMapper.castToType(parameterValues.get(param.getName()), param.getType()); //use the created value mapping to assign a value
+				} else {
+					if (param.getName() != null && parameterValues.containsKey(param.getName())) {
+						// if parameter has a name (given by an annotation) and a value given
+						values[j] = (Serializable) RESTMapper.castToType(parameterValues.get(param.getName()),
+								param.getType()); // use the created value mapping to assign a value
 						types[j] = param.getType();
-
-					}
-					else if(param.hasDefaultValue())//if no name, then look for default value
-					{
+					} else if (param.hasDefaultValue()) { // if no name, then look for default value
 						values[j] = (Serializable) param.getDefaultValue();
 						types[j] = param.getType();
-					}
-					else //no value could be assigned to the parameter
-					{
-
+					} else { // no value could be assigned to the parameter
 						abort = true;
 						break;
 					}
@@ -1138,7 +1025,7 @@ public class RESTMapper {
 
 			}
 
-			if(!abort)//return only methods which can be invoked
+			if (!abort)// return only methods which can be invoked
 				invocationData.add(
 						new InvocationData(aMethodData.getServiceName(),
 								aMethodData.getServiceVersion(), aMethodData.getName(),
@@ -1147,27 +1034,27 @@ public class RESTMapper {
 
 		}
 
+		Collections.sort(invocationData, new InvocationDataComperator());// sort for better accept header matches
 
-		Collections.sort(invocationData,new InvocationDataComperator());//sort for better accept header matches
-
-		InvocationData[] result=new InvocationData[invocationData.size()];
+		InvocationData[] result = new InvocationData[invocationData.size()];
 		invocationData.toArray(result);
-		if (result.length==0)//nothing found?
-		{
-			if(notMatchingConsumesTypes.size()>0)//could not consume something?
-			{
-				warnings.append("Warning: There were methods at the given path: "+httpMethod+" "+uri+" , but none consumes the given MIME-Type: "+contentType+" Accepted types are:").append("\n");
-				for(int i = 0; i < notMatchingConsumesTypes.size(); i++)
-				{
+		if (result.length == 0) { // nothing found?
+			if (notMatchingConsumesTypes.size() > 0) { // could not consume something?
+				warnings.append(
+						"Warning: There were methods at the given path: " + httpMethod + " " + uri
+								+ " , but none consumes the given MIME-Type: " + contentType + " Accepted types are:")
+						.append("\n");
+				for (int i = 0; i < notMatchingConsumesTypes.size(); i++) {
 					warnings.append(notMatchingConsumesTypes.get(i));
 				}
 				warnings.append("--\n");
 			}
-			if(notMatchingProducesTypes.size()>0)//could not consume something?
-			{
-				warnings.append("Warning: There were methods at the given path: "+httpMethod+" "+uri+" , but none produces the accepted MIME-Type: "+returnType+" Produced types are:").append("\n");
-				for(int i = 0; i < notMatchingProducesTypes.size(); i++)
-				{
+			if (notMatchingProducesTypes.size() > 0) { // could not consume something?
+				warnings.append(
+						"Warning: There were methods at the given path: " + httpMethod + " " + uri
+								+ " , but none produces the accepted MIME-Type: " + returnType + " Produced types are:")
+						.append("\n");
+				for (int i = 0; i < notMatchingProducesTypes.size(); i++) {
 					warnings.append(notMatchingProducesTypes.get(i));
 				}
 				warnings.append("--\n");
@@ -1181,53 +1068,44 @@ public class RESTMapper {
 	 * @param returnType Accept Header string.
 	 * @return sorted array (by priority) of acceptable MIME Types
 	 */
-	protected static String[] getAcceptedTypes(String returnType)
-	{
-		if(returnType.isEmpty())
-			return new String[]{ACCEPT_ALL_MIME_TYPES};
+	protected static String[] getAcceptedTypes(String returnType) {
+		if (returnType.isEmpty())
+			return new String[] { ACCEPT_ALL_MIME_TYPES };
 
-		String[] returnTypeMediaRange=returnType.split(DEFAULT_MIME_SEPARATOR);
-		ArrayList<AcceptHeaderType> accepts= new ArrayList<AcceptHeaderType>();
-		for(int i = 0; i < returnTypeMediaRange.length; i++)
-		{
+		String[] returnTypeMediaRange = returnType.split(DEFAULT_MIME_SEPARATOR);
+		ArrayList<AcceptHeaderType> accepts = new ArrayList<AcceptHeaderType>();
+		for (int i = 0; i < returnTypeMediaRange.length; i++) {
 			String media = returnTypeMediaRange[i].trim();
-			int qvaluePos=media.indexOf(";q=");
-			float qvalue=1;
+			int qvaluePos = media.indexOf(";q=");
+			float qvalue = 1;
 
-			if(qvaluePos>-1)
-			{
-				try
-				{
-					qvalue=Float.parseFloat(media.substring(qvaluePos+3,media.length()));
-				}
-				catch(NumberFormatException e)
-				{
-					qvalue=1;
+			if (qvaluePos > -1) {
+				try {
+					qvalue = Float.parseFloat(media.substring(qvaluePos + 3, media.length()));
+				} catch (NumberFormatException e) {
+					qvalue = 1;
 				}
 
-				media=media.substring(0,qvaluePos);
+				media = media.substring(0, qvaluePos);
 
 			}
 
-			accepts.add(new AcceptHeaderType(media,qvalue));
+			accepts.add(new AcceptHeaderType(media, qvalue));
 
 		}
 		Collections.sort(accepts, new AcceptHeaderTypeComperator());
-		String[] result=new String[accepts.size()];
-		for(int i = 0; i < accepts.size(); i++)
-		{
-			result[i]=accepts.get(i).getType().replaceAll("[*]","\\\\w+");
+		String[] result = new String[accepts.size()];
+		for (int i = 0; i < accepts.size(); i++) {
+			result[i] = accepts.get(i).getType().replaceAll("[*]", "\\\\w+");
 
 		}
 
 		return result;
 	}
 
-	private static String mergeHeaders(Pair<String>[] headers)
-	{
+	private static String mergeHeaders(Pair<String>[] headers) {
 		StringBuilder sb = new StringBuilder();
-		for(Pair<String> header : headers)
-		{
+		for (Pair<String> header : headers) {
 			sb.append(String.format("%s: %s\n", header.getOne(), header.getTwo()));
 
 		}
@@ -1239,28 +1117,22 @@ public class RESTMapper {
 	 * @param doc XML document
 	 * @return readable XML
 	 */
-	public static String XMLtoString(Document doc)
-	{
-		if(doc!=null)
-		{			
-			try
-			{				
+	public static String XMLtoString(Document doc) {
+		if (doc != null) {
+			try {
 				Transformer t = TransformerFactory.newInstance().newTransformer();
 				StreamResult out = new StreamResult(new StringWriter());
-				t.setOutputProperty(OutputKeys.INDENT, "yes"); //pretty printing
+				t.setOutputProperty(OutputKeys.INDENT, "yes"); // pretty printing
 				t.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
 				t.setOutputProperty("{http://xml.apache.org/xalan}indent-amount", "2");
-				t.transform(new DOMSource(doc),out);
+				t.transform(new DOMSource(doc), out);
 				return out.getWriter().toString();
-			}
-			catch(Exception e)
-			{
+			} catch (Exception e) {
 				e.printStackTrace();
 				return "";
 			}
 
-		}
-		else
+		} else
 			return "";
 	}
 
@@ -1273,98 +1145,81 @@ public class RESTMapper {
 	 * @throws Exception
 	 */
 	public static Object castToType(String val, Class<?> class1) throws Exception {
-		//Byte		
-		if(class1.equals(Byte.class)||class1.equals(byte.class))
-		{			
+		// Byte
+		if (class1.equals(Byte.class) || class1.equals(byte.class)) {
 			return Byte.valueOf(val);
 		}
-		//Short		
-		if(class1.equals(Short.class)||class1.equals(short.class))
-		{			
+		// Short
+		if (class1.equals(Short.class) || class1.equals(short.class)) {
 			return Short.valueOf(val);
 		}
-		//Long		
-		if(class1.equals(Long.class)||class1.equals(long.class))
-		{			
+		// Long
+		if (class1.equals(Long.class) || class1.equals(long.class)) {
 			return Long.valueOf(val);
 		}
-		//Float		
-		if(class1.equals(Float.class)||class1.equals(float.class))
-		{			
+		// Float
+		if (class1.equals(Float.class) || class1.equals(float.class)) {
 			return Float.valueOf(val);
 		}
-		//Double		
-		if(class1.equals(Double.class)||class1.equals(double.class))
-		{			
+		// Double
+		if (class1.equals(Double.class) || class1.equals(double.class)) {
 			return Double.valueOf(val);
 		}
-		//Boolean		
-		if(class1.equals(Boolean.class)||class1.equals(boolean.class))
-		{			
+		// Boolean
+		if (class1.equals(Boolean.class) || class1.equals(boolean.class)) {
 			return Boolean.valueOf(val);
 		}
-		//Char		
-		if(class1.equals(Character.class)||class1.equals(char.class))
-		{			
+		// Char
+		if (class1.equals(Character.class) || class1.equals(char.class)) {
 			return val.charAt(0);
 		}
-		//Integer		
-		if(class1.equals(Integer.class)||class1.equals(int.class))
-		{			
+		// Integer
+		if (class1.equals(Integer.class) || class1.equals(int.class)) {
 			return Integer.valueOf(val);
 		}
-		//String
-		if(class1.equals(String.class))
-		{			
+		// String
+		if (class1.equals(String.class)) {
 			return val;
 		}
-		//not supported type
-		throw new Exception("Parameter Type: "+class1.getName() +"not supported!");
+		// not supported type
+		throw new Exception("Parameter Type: " + class1.getName() + "not supported!");
 
 	}
+
 	/**
 	 * Converts a methods return value to String
 	 * @param result value to cast to a String
 	 * @return String representation of Object
 	 */
 	public static String castToString(Object result) {
-		if(result instanceof String)
-		{
-			return (String)result;
+		if (result instanceof String) {
+			return (String) result;
 		}
-		if(result instanceof Integer)
-		{
+		if (result instanceof Integer) {
 			return Integer.toString((Integer) result);
 		}
-		if(result instanceof Byte)
-		{
+		if (result instanceof Byte) {
 			return Byte.toString((Byte) result);
 		}
-		if(result instanceof Short)
-		{
+		if (result instanceof Short) {
 			return Short.toString((Short) result);
 		}
-		if(result instanceof Long)
-		{
+		if (result instanceof Long) {
 			return Long.toString((Long) result);
 		}
-		if(result instanceof Float)
-		{
+		if (result instanceof Float) {
 			return Float.toString((Float) result);
 		}
-		if(result instanceof Double)
-		{
+		if (result instanceof Double) {
 			return Double.toString((Double) result);
 		}
-		if(result instanceof Boolean)
-		{
+		if (result instanceof Boolean) {
 			return Boolean.toString((Boolean) result);
 		}
-		if(result instanceof Character)
-		{
+		if (result instanceof Character) {
 			return Character.toString((Character) result);
 		}
-		return result.toString(); //desperate measures
+		return result.toString(); // desperate measures
 	}
 
 	/**
@@ -1375,16 +1230,12 @@ public class RESTMapper {
 	 * @return class type
 	 * @throws ClassNotFoundException
 	 */
-	public static Class<?> getClassType(String type) throws ClassNotFoundException
-	{
+	public static Class<?> getClassType(String type) throws ClassNotFoundException {
 		initClassmap();
-		Class<?> result=classMap.get(type);
-		if(result!=null)
-		{
+		Class<?> result = classMap.get(type);
+		if (result != null) {
 			return result;
-		}
-		else
-		{
+		} else {
 			return Class.forName(type);
 		}
 	}
@@ -1393,10 +1244,8 @@ public class RESTMapper {
 	 * Initializes the String to Class mapping HashSet (faster lookup than else if)
 	 * Needed to map String Notations of Types to actual primitive Types
 	 */
-	private static void initClassmap()
-	{
-		if(classMap.isEmpty())
-		{
+	private static void initClassmap() {
+		if (classMap.isEmpty()) {
 			classMap.put("void", void.class);
 			classMap.put("int", int.class);
 			classMap.put("float", float.class);
@@ -1417,16 +1266,14 @@ public class RESTMapper {
 	 * @return array of all found XML contents
 	 * @throws IOException
 	 */
-	public static String[] readAllXMLFromDir(String dir) throws IOException
-	{
+	public static String[] readAllXMLFromDir(String dir) throws IOException {
 		File folder = new File(dir);
 		ArrayList<File> files = new ArrayList<File>();
-		listFilesForFolder(folder, XML,files);
+		listFilesForFolder(folder, XML, files);
 
-		String[] xmls=new String[files.size()];
-		for(int i = 0; i < xmls.length; i++)
-		{
-			xmls[i]=getFile(files.get(i));
+		String[] xmls = new String[files.size()];
+		for (int i = 0; i < xmls.length; i++) {
+			xmls[i] = getFile(files.get(i));
 
 		}
 		return xmls;
@@ -1438,8 +1285,7 @@ public class RESTMapper {
 	 * @return content of file
 	 * @throws IOException
 	 */
-	public static String getFile(File file) throws IOException
-	{
+	public static String getFile(File file) throws IOException {
 		String content = null;
 		FileReader reader = null;
 		try {
@@ -1451,7 +1297,7 @@ public class RESTMapper {
 		}
 
 		finally {
-			if(reader!=null)
+			if (reader != null)
 				reader.close();
 		}
 
@@ -1464,17 +1310,14 @@ public class RESTMapper {
 	 * @param content what to write into the file
 	 * @throws IOException
 	 */
-	public static void writeFile(String file, String content) throws IOException
-	{
-		PrintWriter writer=null;
+	public static void writeFile(String file, String content) throws IOException {
+		PrintWriter writer = null;
 		try {
-			writer= new PrintWriter(file, "UTF-8");
+			writer = new PrintWriter(file, "UTF-8");
 			writer.write(content);
 
-		}
-		finally
-		{
-			if(writer!=null)
+		} finally {
+			if (writer != null)
 				writer.close();
 
 		}
@@ -1486,19 +1329,16 @@ public class RESTMapper {
 	 * @param type suffix, e.g. ".xml"
 	 * @param list reference to result array (stores all files found)
 	 */
-	private static void listFilesForFolder(final File folder,String type, ArrayList<File> list) throws IOException {
-		try
-		{
+	private static void listFilesForFolder(final File folder, String type, ArrayList<File> list) throws IOException {
+		try {
 			for (final File fileEntry : folder.listFiles()) {
 				if (fileEntry.isDirectory()) {
-					listFilesForFolder(fileEntry,type,list);
-				} else if (fileEntry.getName().toLowerCase().endsWith(type)){
+					listFilesForFolder(fileEntry, type, list);
+				} else if (fileEntry.getName().toLowerCase().endsWith(type)) {
 					list.add(fileEntry);
 				}
 			}
-		}
-		catch(Exception e)
-		{
+		} catch (Exception e) {
 			throw new IOException(e);
 		}
 	}
@@ -1509,20 +1349,20 @@ public class RESTMapper {
 	 * @param separator string to put between array elements
 	 * @return joined string containing all array elements
 	 */
-	protected static String join(String[] array, String separator)
-	{
-		if(array.length==0)
+	protected static String join(String[] array, String separator) {
+		if (array.length == 0) {
 			return "";
-		if(array.length==1)
+		}
+		if (array.length == 1) {
 			return array[0];
+		}
 
-		StringBuilder sb= new StringBuilder();
-		for(int i = 0; i < array.length-1; i++)
-		{
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < array.length - 1; i++) {
 			sb.append(array[i]).append(separator);
 		}
 
-		sb.append(array[array.length-1]);//convert patterns to regex expressions
+		sb.append(array[array.length - 1]); // convert patterns to regex expressions
 
 		return sb.toString();
 	}
