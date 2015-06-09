@@ -2,6 +2,8 @@ package i5.las2peer.security;
 
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
+import i5.las2peer.execution.L2pServiceException;
+import i5.las2peer.execution.NoSuchServiceException;
 import i5.las2peer.execution.ServiceInvocationException;
 import i5.las2peer.execution.UnlockNeededException;
 import i5.las2peer.logging.NodeObserver.Event;
@@ -186,20 +188,23 @@ public class Mediator implements MessageReceiver {
 	 * @throws UnlockNeededException
 	 */
 	public Serializable invoke ( String service, String method, Serializable[] parameters, boolean preferLocal ) throws L2pSecurityException, InterruptedException, TimeoutException, ServiceInvocationException, UnlockNeededException {
-		//TODO
 
 		boolean isBusy=runningAt.isBusy();
 		if ( preferLocal && !isBusy && runningAt.hasService ( service ) )
 		{
 			try {
 				return runningAt.invokeLocally(myAgent.getId(), service,  method, parameters);
-			} catch ( Exception e ) {
+			} catch ( NoSuchServiceException e ) {
 				// just try globally
 				System.out.println ( "Local access to service " + service + " failed - trying globally");
+				return runningAt.invokeGlobally(myAgent, service, method, parameters);
+			} catch (AgentNotKnownException e) {
+				throw new L2pSecurityException(e.getMessage());
+			} catch (L2pServiceException e) {
+				throw new ServiceInvocationException(e.getMessage());
 			}
 		}
-		return runningAt.invokeGlobally(myAgent, service, method, parameters);
-
+		return null;
 
 	}
 
