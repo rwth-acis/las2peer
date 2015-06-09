@@ -87,36 +87,40 @@ public class ServiceRepositoryManager {
 				Map.Entry<String, ServiceData> pairs = (Map.Entry<String, ServiceData>) it.next();
 				checkedServices.add((String) pairs.getKey());
 			}
-
-			// System.out.println("###");
-			for (int i = 0; i < services.length; i++) {
-				String internalServiceName = getInternalServiceName(services[i].getName(), services[i].getVersion());
-
-				//System.out.println(internalServiceName);
-
-				if (!serviceRepository.containsKey(internalServiceName)) { //new service
-					serviceRepository.put(internalServiceName, new ServiceData("a", "b", true, "c"));
-					String xml = "";
+			for (ServiceNameVersion currentService : services) {
+				String internalServiceName = getInternalServiceName(currentService.getName(),
+						currentService.getVersion());
+				if (!serviceRepository.containsKey(internalServiceName)) { // new service
+					// add dummy element to repo to avoid duplicate scanning
+					serviceRepository.put(internalServiceName,
+							new ServiceData(currentService.getName(), currentService.getVersion(), false, null));
 					try {
-						xml = (String) node.invokeGlobally(finalAgent, services[i].getName(), SERVICE_SELFINFO_METHOD,
+						String xml = (String) node.invokeGlobally(finalAgent, currentService.getName(),
+								SERVICE_SELFINFO_METHOD,
 								new Serializable[] {});
-						System.out.println(services[i].getName()+" => "+xml);
-						try {
-							//tree.merge(RESTMapper.getMappingTree(xml));
-							ServiceData data = new ServiceData(services[i].getName(), services[i].getVersion(), true,
-									xml);
-							serviceRepository.put(internalServiceName, data);
+						if (xml == null || xml.isEmpty()) {
+							System.err.println("Couldn't get xml mapping for " + currentService.getName()
+									+ "! Please see log for details!");
+						} else {
+							System.out.println(currentService.getName() + " => " + xml);
+							try {
+								// tree.merge(RESTMapper.getMappingTree(xml));
+								ServiceData data = new ServiceData(currentService.getName(),
+										currentService.getVersion(), true, xml);
+								serviceRepository.put(internalServiceName, data);
 
-							addXML(new String[] { xml }); //for compatibility services: a service can also give XML definition to other services
-						} catch (Exception e) {
-							//do nothing for now
-							e.printStackTrace();
+								addXML(new String[] { xml }); // for compatibility services: a service can also give XML
+																// definition to other services
+							} catch (Exception e) {
+								// do nothing for now
+								e.printStackTrace();
+							}
 						}
 					} catch (Exception e) {
-						//do nothing for now
+						// do nothing for now
 						e.printStackTrace();
 					}
-				} else if (!serviceRepository.get(internalServiceName).isActive()) { //enable not active services
+				} else if (!serviceRepository.get(internalServiceName).isActive()) { // enable not active services
 					serviceRepository.get(internalServiceName).enable();
 				}
 				checkedServices.remove(internalServiceName);
@@ -125,7 +129,7 @@ public class ServiceRepositoryManager {
 				serviceRepository.get(service).disable();
 			}
 		} catch (EnvelopeException e) {
-			//do nothing for now
+			// do nothing for now
 			e.printStackTrace();
 		}
 	}
@@ -178,7 +182,7 @@ public class ServiceRepositoryManager {
 				String serviceName = serviceNode.getAttribute(RESTMapper.NAME_TAG).trim();
 				String serviceVersion = serviceNode.getAttribute(RESTMapper.VERSION_TAG).trim();
 
-				//if tree.merge detects conflicts, output them as an error
+				// if tree.merge detects conflicts, output them as an error
 				String s = tree.merge(RESTMapper.getMappingTree(xml));
 				if (s.length() > 0) {
 					connector.logError(s);
