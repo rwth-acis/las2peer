@@ -23,5 +23,5 @@
 	<classpathentry kind="lib" path="lib/i5-simpleXML-0.2.jar"/>
 	<classpathentry kind="lib" path="lib/json-simple-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/xpp3-1.1.4c.jar"/>
-	<classpathentry kind="output" path="build/classes"/>
+	<classpathentry kind="output" path="output"/>
 </classpath>

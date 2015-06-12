@@ -10,3 +10,4 @@
 /.idea
 *.iml
 ivy.jar
+/output/
