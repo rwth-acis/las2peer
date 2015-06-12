@@ -1508,6 +1508,7 @@ public abstract class Node implements AgentStorage {
 
 		listener.waitForOneAnswer();
 
+		// TODO what happens if the answers timeouts? Throw TimeoutException?
 		return listener.getResults()[0];
 	}
 
