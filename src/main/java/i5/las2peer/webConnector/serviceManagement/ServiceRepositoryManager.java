@@ -102,7 +102,6 @@ public class ServiceRepositoryManager {
 							System.err.println("Couldn't get xml mapping for " + currentService.getName()
 									+ "! Please see log for details!");
 						} else {
-							System.out.println(currentService.getName() + " => " + xml);
 							try {
 								// tree.merge(RESTMapper.getMappingTree(xml));
 								ServiceData data = new ServiceData(currentService.getName(),
