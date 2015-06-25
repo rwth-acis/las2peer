@@ -54,6 +54,8 @@ import com.sun.net.httpserver.HttpHandler;
 public class WebConnectorRequestHandler implements HttpHandler {
 
 	private static final String AUTHENTICATION_FIELD = "Authorization";
+	private static final String ACCESS_TOKEN_KEY = "access_token";
+	private static final String OIDC_PROVIDER_KEY = "oidc_provider";
 	private WebConnector connector;
 	private Node l2pNode;
 
@@ -150,21 +152,28 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			return login(username, password, exchange);
 		}
 		// OpenID Connect authentication:
-		// check for access token in query parameter
+		// check for access token in query parameter and headers
 
 		// IMPORTANT NOTE: doing the same thing with authorization header and bearer token results in client-side
 		// cross-domain errors despite correct config for CORS in LAS2peer Web Connector!
-		else if (connector.oidcProviderInfos != null && exchange.getRequestURI().getRawQuery() != null
-				&& exchange.getRequestURI().getRawQuery().contains("access_token=")) {
-			String[] params = exchange.getRequestURI().getRawQuery().split("&");
+		else if (connector.oidcProviderInfos != null
+				&& ((exchange.getRequestURI().getRawQuery() != null && exchange.getRequestURI().getRawQuery()
+						.contains(ACCESS_TOKEN_KEY + "=")) || exchange.getRequestHeaders()
+						.containsKey(ACCESS_TOKEN_KEY))) {
 			String token = "";
 			String oidcProviderURI = connector.defaultOIDCProvider;
-			for (int i = 0; i < params.length; i++) {
-				String[] keyval = params[i].split("=");
-				if (keyval[0].equalsIgnoreCase("access_token")) {
-					token = keyval[1];
-				} else if (keyval[0].equalsIgnoreCase("oidc_provider")) {
-					oidcProviderURI = URLDecoder.decode(keyval[1], "UTF-8");
+			if (exchange.getRequestHeaders().containsKey(ACCESS_TOKEN_KEY)) { // get OIDC parameters from headers
+				token = exchange.getRequestHeaders().getFirst(ACCESS_TOKEN_KEY);
+				oidcProviderURI = URLDecoder.decode(exchange.getRequestHeaders().getFirst(OIDC_PROVIDER_KEY), "UTF-8");
+			} else { // get OIDC parameters from GET values
+				String[] params = exchange.getRequestURI().getRawQuery().split("&");
+				for (int i = 0; i < params.length; i++) {
+					String[] keyval = params[i].split("=");
+					if (keyval[0].equalsIgnoreCase(ACCESS_TOKEN_KEY)) {
+						token = keyval[1];
+					} else if (keyval[0].equalsIgnoreCase(OIDC_PROVIDER_KEY)) {
+						oidcProviderURI = URLDecoder.decode(keyval[1], "UTF-8");
+					}
 				}
 			}
 
