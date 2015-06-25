@@ -65,7 +65,6 @@ public class WebConnectorServiceInfoTest {
 		// start connector
 		logStream = new ByteArrayOutputStream();
 		connector = new WebConnector(true, HTTP_PORT, false, 1000, "./XMLCompatibility");
-		connector.setSocketTimeout(10000);
 		connector.setLogStream(new PrintStream(logStream));
 		connector.start(node);
 

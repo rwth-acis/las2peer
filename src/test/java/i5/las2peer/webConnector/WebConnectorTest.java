@@ -66,7 +66,6 @@ public class WebConnectorTest {
 
 		// start connector
 		connector = new WebConnector(true, HTTP_PORT, false, 1000, "./XMLCompatibility");
-		connector.setSocketTimeout(10000);
 		connector.setCrossOriginResourceDomain("*");
 		connector.setCrossOriginResourceSharing(true);
 		logStream = new ByteArrayOutputStream();

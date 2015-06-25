@@ -206,12 +206,13 @@ public class WebConnector extends Connector {
 
 	/**
 	 * <b>This method is no longer supported and will be removed in the future.</b> 
-	 * set the socket timeout for the underlying http server
+	 * Sets the socket timeout for the underlying http server
 	 * (only at configuration not during runtime)
 	 * @param timeoutInMs
 	 */
 	@Deprecated
 	public void setSocketTimeout(int timeoutInMs) {
+		logError("Socket timeouts are not supported anymore! This method is stub!");
 	}
 
 	/**
