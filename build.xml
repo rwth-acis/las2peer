@@ -1,85 +1,86 @@
 <project name="las2peer-rest-mapper" default="jar" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
-	
+
 	<property name="ivy.organisation" value="i5" />
 	<property name="ivy.module" value="las2peer-rest-mapper" />
 	<property name="ivy.revision" value="0.4" />
+	<property name="ivy.build.number" value="0" />
 	<property name="ivy.deliver.revision" value="${ivy.revision}" />
 	<property name="ivy.pom.version" value="${ivy.revision}" />
-	
+
 	<presetdef name="javac">
 		<javac includeantruntime="false" />
 	</presetdef>
-	
-    <property name="ivy.install.version" value="2.3.0" />
-    <property name="ivy.jar.dir" value="${basedir}/ivy" />
-    <property name="ivy.jar.file" value="${ivy.jar.dir}/ivy.jar" />
-    <property name="ivy.settings.file" value="${ivy.jar.dir}/ivysettings.xml" />
-    <property name="ivy.dep.file" value="${ivy.jar.dir}/ivy.xml" />
-	
+
+	<property name="ivy.install.version" value="2.3.0" />
+	<property name="ivy.jar.dir" value="${basedir}/ivy" />
+	<property name="ivy.jar.file" value="${ivy.jar.dir}/ivy.jar" />
+	<property name="ivy.settings.file" value="${ivy.jar.dir}/ivysettings.xml" />
+	<property name="ivy.dep.file" value="${ivy.jar.dir}/ivy.xml" />
+
 	<property name="src.main" location="src/main/java" />
 	<property name="src.junit" location="src/test/java" />
-	
+
 	<property name="tmp" location="tmp" />
-	
+
 	<property name="tmp.classes" location="${tmp}/classes" />
 	<property name="tmp.junit" location="${tmp}/test" />
-	
-    <property name="junit.report" location="${tmp}/test_reports" />
-	
+
+	<property name="junit.report" location="${tmp}/test_reports" />
+
 	<property name="export" location="export" />
 	<property name="export.jars" location="${export}/jars" />
 	<property name="export.doc" location="${export}/javadoc" />
-	
-    <property name="lib" location="lib" />
-	
+
+	<property name="lib" location="lib" />
+
 	<path id="libraries">
 		<fileset dir="${lib}">
-			<include name="**/*.jar"/>
-			<exclude name="junit-*.jar"/>
-			<exclude name="hamcrest-*.jar"/>
+			<include name="**/*.jar" />
+			<exclude name="junit-*.jar" />
+			<exclude name="hamcrest-*.jar" />
 		</fileset>
 	</path>
-	
+
 	<property name="lib.junit" location="${lib}/junit-4.11.jar:${lib}/hamcrest-core-1.3.jar" />
-	
-	
+
+
 	<!-- Download Dependencies (IVY) -->
-	
-    <target name="download-ivy" unless="skip.download">
-        <echo message="installing ivy..."/>
+
+	<target name="download-ivy" unless="skip.download">
+		<echo message="installing ivy..." />
         <get src="http://repo1.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar"
             dest="${ivy.jar.file}" usetimestamp="true"/>
-    </target>
+	</target>
 
-    <target name="install-ivy" depends="download-ivy" description="--> install ivy">
-        <path id="ivy.lib.path">
-            <fileset dir="${ivy.jar.dir}" includes="*.jar"/>
-        </path>
-        <taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" classpathref="ivy.lib.path"/>
-    </target>
+	<target name="install-ivy" depends="download-ivy" description="--> install ivy">
+		<path id="ivy.lib.path">
+			<fileset dir="${ivy.jar.dir}" includes="*.jar" />
+		</path>
+		<taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" classpathref="ivy.lib.path" />
+	</target>
 
-    <target name="get_deps" depends="install-ivy" description="--> resolve dependencies">
-        <ivy:settings>
-            <credentials host="role.dbis.rwth-aachen.de:9911/archiva"  realm="Repository internal"/>
-        </ivy:settings>
-        <ivy:retrieve type="jar"/>
-    </target>
-	
+	<target name="get_deps" depends="install-ivy" description="--> resolve dependencies">
+		<ivy:settings>
+			<credentials host="role.dbis.rwth-aachen.de:9911/archiva" realm="Repository internal" />
+		</ivy:settings>
+		<ivy:retrieve type="jar,bundle" />
+	</target>
+
 	<target name="deploy-snapshot" depends="jar, junit">
-		
+
 		<property name="sn" value="${ivy.deliver.revision}-SNAPSHOT" />
-		<local name="ivy.deliver.revision"/>
+		<local name="ivy.deliver.revision" />
 		<property name="ivy.deliver.revision" value="${sn}" />
-		<local name="ivy.pom.version"/>
+		<local name="ivy.pom.version" />
 		<property name="ivy.pom.version" value="${sn}" />
-		
+
 		<ivy:makepom 
 			ivyfile="${ivy.dep.file}" 
 			pomfile="${export}/jars/${ivy.module}.pom" 
 			artifactName="${ivy.module}"
 			artifactPackaging="jar"
 		/>
-	
+
 		<ivy:publish resolver="acis-snapshots"
 			publishivy="false"
 			overwrite="true"
@@ -90,7 +91,13 @@
 
 	</target>
 
-	<target name="deploy-release" depends="jar, junit">
+	<target name="deploy-release" depends="jar, junit" description="--> deploy release">
+
+		<property name="sn" value="${ivy.deliver.revision}.${ivy.build.number}" />
+		<local name="ivy.deliver.revision" />
+		<property name="ivy.deliver.revision" value="${sn}" />
+		<local name="ivy.pom.version" />
+		<property name="ivy.pom.version" value="${sn}" />
 
 		<ivy:makepom 
 			ivyfile="${ivy.dep.file}" 
@@ -108,32 +115,32 @@
 		</ivy:publish>
 
 	</target>
-	
-	
+
+
 	<!-- Initialization -->
-	
+
 	<target name="init_general">
-		<tstamp/>
+		<tstamp />
 		<mkdir dir="${tmp}" />
 		<mkdir dir="${export}" />
 	</target>
-	
+
 	<target name="init_compile" depends="init_general, get_deps">
 		<mkdir dir="${tmp.classes}" />
 		<mkdir dir="${tmp.junit}" />
 	</target>
-	
+
 	<target name="init_jars" depends="init_general">
 		<mkdir dir="${export.jars}" />
 	</target>
-	
+
 	<target name="init_doc" depends="init_general">
 		<mkdir dir="${export.doc}" />
 	</target>
-	
-	
+
+
 	<!-- Compilation -->
-	
+
 	<target name="compile_main" depends="init_compile">
 		<javac srcdir="${src.main}"
             destdir="${tmp.classes}"
@@ -143,11 +150,11 @@
 		/>
 		<copy todir="${tmp.classes}">
 			<fileset dir="${src.main}">
-                <include name="**/*.xml" />
+				<include name="**/*.xml" />
 			</fileset>
 		</copy>
 	</target>
-	
+
 	<target name="compile_junit" depends="init_compile, compile_main">
 		<javac srcdir="${src.junit}"
             destdir="${tmp.junit}"
@@ -158,13 +165,13 @@
 		/>
 		<copy todir="${tmp.junit}">
 			<fileset dir="${src.junit}">
-                <include name="**/*.xml" />
+				<include name="**/*.xml" />
 			</fileset>
 		</copy>
 	</target>
-	
-	<target name="compile_all" depends="compile_main, compile_junit" />	
-	
+
+	<target name="compile_all" depends="compile_main, compile_junit" />
+
 	<target name="jar" depends="compile_all">
 		<jar jarfile="${export.jars}/las2peer-rest-mapper.jar">
 			<fileset dir="${tmp.classes}">
@@ -172,11 +179,11 @@
 			<fileset dir="xsd">
 			</fileset>
 			<manifest>
-				<attribute name="Class-Path" value="json-simple-1.1.jar"/>
+				<attribute name="Class-Path" value="" />
 			</manifest>
 		</jar>
 	</target>
-	
+
 	<target name="java_doc" depends="init_doc">
         <javadoc destdir="${export.doc}"
 			author="true"
@@ -184,60 +191,60 @@
             use="true"
 			windowtitle="LAS2peer REST-Mapper Documentation"
             failonerror="yes"
-            encoding="utf8"
+            encoding="utf-8"
             classpath="${tmp.classes}"
             classpathref="libraries"
          >
-            <packageset dir="${src.main}" defaultexcludes="yes">
-                <include name="i5/las2peer/**" />
-            </packageset>
-        </javadoc>
+			<packageset dir="${src.main}" defaultexcludes="yes">
+				<include name="i5/las2peer/**" />
+			</packageset>
+		</javadoc>
 	</target>
-	
-	
+
+
 	<!-- Junit Testing -->
-	
+
 	<target name="junit" depends="junit_tests, junit_clean" />
-	
+
 	<target name="init_junit" depends="init_general">
 		<mkdir dir="${junit.report}" />
 		<mkdir dir="log" />
 	</target>
-	
+
 	<target name="junit_clean">
 		<delete dir="${tmp.junit}" />
 	</target>
-	
+
 	<target name="junit_tests" depends="init_junit, compile_all">
-        <junit fork="yes" haltonerror="yes" haltonfailure="yes" printsummary="yes">
-            <classpath>
-                <pathelement path="${tmp.classes}" />
-                <pathelement path="${tmp.junit}" />
-                <pathelement path="${lib.junit}" />
-                <path refid="libraries"/>
-            </classpath>
-            <formatter type="plain" />
-            <batchtest fork="yes" todir="${junit.report}">
-                <fileset dir="${tmp.junit}">
-                    <include name="**/*Test.class"/>
-                </fileset>
-            </batchtest>
-        </junit>
+		<junit fork="yes" haltonerror="yes" haltonfailure="yes" printsummary="yes">
+			<classpath>
+				<pathelement path="${tmp.classes}" />
+				<pathelement path="${tmp.junit}" />
+				<pathelement path="${lib.junit}" />
+				<path refid="libraries" />
+			</classpath>
+			<formatter type="plain" />
+			<batchtest fork="yes" todir="${junit.report}">
+				<fileset dir="${tmp.junit}">
+					<include name="**/*Test.class" />
+				</fileset>
+			</batchtest>
+		</junit>
 	</target>
-	
-	
+
+
 	<!-- Cleanup -->
-	
+
 	<target name="clean">
 		<delete dir="${tmp}" />
 		<delete dir="log" />
 	</target>
-	
+
 	<target name="clean_deps">
-        <delete dir="${lib}" />
+		<delete dir="${lib}" />
 	</target>
-	
-	
+
+
 	<target name="all" depends="jar, junit, java_doc, clean" />
-	
+
 </project>
