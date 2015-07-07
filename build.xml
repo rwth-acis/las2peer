@@ -52,7 +52,7 @@
             dest="${ivy.jar.file}" usetimestamp="true"/>
     </target>
 
-    <target name="install-ivy" depends="download-ivy" description="--> install ivy">
+    <target name="install-ivy" depends="download-ivy">
         <path id="ivy.lib.path">
             <fileset dir="${ivy.jar.dir}" includes="*.jar"/>
         </path>
@@ -63,7 +63,7 @@
         <ivy:settings>
             <credentials host="role.dbis.rwth-aachen.de:9911/archiva" realm="Repository internal"/>
         </ivy:settings>
-        <ivy:retrieve type="jar"/>
+        <ivy:retrieve type="jar, bundle"/>
     </target>
 	
 	<target name="deploy-snapshot" depends="jar" description="--> deploy as snapshot to archiva">
@@ -179,7 +179,7 @@
 			<manifest>
 				<attribute
 					name="Class-Path"
-					value="las2peer-rest-mapper-0.3-SNAPSHOT.jar i5-httpServer-0.4.jar"
+					value="las2peer-rest-mapper-0.4-SNAPSHOT.jar"
 				/>
 			</manifest>
 		</jar>
@@ -205,7 +205,7 @@
 	
 	<!-- Junit Testing -->
 	
-	<target name="junit" depends="junit_tests, junit_clean" />
+	<target name="junit" depends="junit_tests, junit_clean" description="--> junit" />
 	
 	<target name="init_junit" depends="init_general">
 		<mkdir dir="${junit.report}" />
