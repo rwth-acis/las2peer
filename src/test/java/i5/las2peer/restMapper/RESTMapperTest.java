@@ -58,8 +58,9 @@ public class RESTMapperTest {
 		InvocationData[] invocation = RESTMapper.parse(tree, httpMethod, uri, variables, content, contentType,
 				returnType, httpHeaders, warnings);
 		// if (warnings.length()>0) System.out.println(warnings.toString());
-		if (invocation.length == 0)
+		if (invocation.length == 0) {
 			throw new Exception("no method found for " + assertionMessage);
+		}
 		for (InvocationData anInvocation : invocation) {
 			Object[] parameters = anInvocation.getParameters();
 			Class<?>[] parameterTypes = anInvocation.getParameterTypes();
@@ -148,7 +149,7 @@ public class RESTMapperTest {
 	}
 
 	@SuppressWarnings("unchecked")
-	@Test(expected=Exception.class)
+	@Test(expected = Exception.class)
 	public void testA4_ex() throws Exception {
 		invokeMethod("post", "hi/b/", new Pair[] { new Pair<String>("d", "12"), new Pair<String>("e", "4") }, "",
 				new Pair[] {}, "a4_ex", "hi9");
@@ -215,7 +216,7 @@ public class RESTMapperTest {
 	public void testHeaders2() {
 		try {
 			invokeMethod("delete", "users/44/4", new Pair[] {}, "", new Pair[] { new Pair<String>("a", "12"),
-					new Pair<String>("b", "13") }, "Headers1", "44a: 12\nb: 13\n");
+					new Pair<String>("b", "13") }, "Headers2", "44a: 12\nb: 13\n");
 		} catch (Throwable e) {
 			e.printStackTrace();
 			fail(e.getMessage());
