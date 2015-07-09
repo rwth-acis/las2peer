@@ -1,25 +1,51 @@
 package i5.las2peer.restMapper;
 
-import i5.las2peer.restMapper.annotations.Consumes;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.NotSerializableException;
+import java.io.PrintWriter;
+import java.io.Serializable;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
 import i5.las2peer.restMapper.annotations.ContentParam;
-import i5.las2peer.restMapper.annotations.DELETE;
-import i5.las2peer.restMapper.annotations.DefaultValue;
-import i5.las2peer.restMapper.annotations.GET;
-import i5.las2peer.restMapper.annotations.HeaderParam;
 import i5.las2peer.restMapper.annotations.HttpHeaders;
-import i5.las2peer.restMapper.annotations.POST;
-import i5.las2peer.restMapper.annotations.PUT;
-import i5.las2peer.restMapper.annotations.Path;
-import i5.las2peer.restMapper.annotations.PathParam;
-import i5.las2peer.restMapper.annotations.Produces;
-import i5.las2peer.restMapper.annotations.QueryParam;
 import i5.las2peer.restMapper.annotations.Version;
-import i5.las2peer.restMapper.annotations.swagger.ApiInfo;
-import i5.las2peer.restMapper.annotations.swagger.ApiResponse;
-import i5.las2peer.restMapper.annotations.swagger.ApiResponses;
-import i5.las2peer.restMapper.annotations.swagger.Notes;
-import i5.las2peer.restMapper.annotations.swagger.ResourceListApi;
-import i5.las2peer.restMapper.annotations.swagger.Summary;
 import i5.las2peer.restMapper.data.AcceptHeaderType;
 import i5.las2peer.restMapper.data.AcceptHeaderTypeComperator;
 import i5.las2peer.restMapper.data.InvocationData;
@@ -34,43 +60,6 @@ import i5.las2peer.restMapper.exceptions.MethodThrowsExceptionException;
 import i5.las2peer.restMapper.exceptions.NoMethodFoundException;
 import i5.las2peer.restMapper.exceptions.NotSupportedUriPathException;
 import i5.las2peer.restMapper.tools.ValidationResult;
-
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.NotSerializableException;
-import java.io.PrintWriter;
-import java.io.Serializable;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.List;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathFactory;
-
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 /**
  * Maps REST requests to Methods
@@ -111,8 +100,8 @@ public class RESTMapper {
 	public static final String XML = ".xml";
 	public static final String DEFAULT_MIME_SEPARATOR = ",";
 	public static final String CONSUMES_TAG = "consumes";
-	public static final String DEFAULT_CONSUMES_MIME_TYPE = "*";
-	public static final String DEFAULT_PRODUCES_MIME_TYPE = "text/plain";
+	public static final String[] DEFAULT_CONSUMES_MIME_TYPE = new String[] { "*" };
+	public static final String[] DEFAULT_PRODUCES_MIME_TYPE = new String[] { "text/plain" };
 	public static final String PRODUCES_TAG = "produces";
 	public static final String DEFAULT_MIME_PARAMETER_SEPARATOR = ";";
 	public static final String ACCEPT_ALL_MIME_TYPES = "*/*";
@@ -121,275 +110,6 @@ public class RESTMapper {
 	 * default constructor
 	 */
 	public RESTMapper() {
-	}
-
-	/**
-	 * Returns a Swagger 1.2 resource listing for a given class. Class c must be annotated with {@link ApiInfo}} 
-	 * and should be annotated with {@link Version}}. For any resources to be listed, one corresponding method 
-	 * must be annotated with {@link Path} and {@link ResourceListApi}.
-	 * 
-	 * @param cls Class subject class
-	 * @return HttpResponse a HTTP response transporting the resulting resource listing in its payload
-	 */
-	@SuppressWarnings("unchecked") 
-	public static HttpResponse getSwaggerResourceListing(Class<?> cls) {
-		// create resource listing to be returned
-		JSONObject resourceListing = new JSONObject();
-		resourceListing.put("swaggerVersion", "1.2");
-
-		// if ApiInfo annotation is not present, immediately return 404 response.
-		if (!cls.isAnnotationPresent(ApiInfo.class)) {
-			HttpResponse r = new HttpResponse("Swagger resource listing not available. API info not defined.");
-			r.setStatus(404);
-		} else {
-			ApiInfo apiInfo = (ApiInfo) cls.getAnnotation(ApiInfo.class);
-			JSONObject aio = new JSONObject();
-			aio.put("title", apiInfo.title());
-			aio.put("description", apiInfo.description());
-			aio.put("contact", apiInfo.contact());
-			aio.put("termsOfServiceUrl", apiInfo.termsOfServiceUrl());
-			aio.put("license", apiInfo.license());
-			aio.put("licenseUrl", apiInfo.licenseUrl());
-
-			resourceListing.put("info", aio);
-		}
-
-		if (cls.isAnnotationPresent(Version.class)) {
-			resourceListing.put("apiVersion", ((Version) cls.getAnnotation(Version.class)).value());
-		}
-
-		// now build apis field from method annotations
-		JSONArray apis = new JSONArray();
-
-		for (Method m : cls.getMethods()) {
-
-			// only include in resource list item, if Path and ResourceListApi annotations are present.
-			if (m.isAnnotationPresent(Path.class) && m.isAnnotationPresent(ResourceListApi.class)) {
-				Path p = ((Path) m.getAnnotation(Path.class));
-				ResourceListApi a = ((ResourceListApi) m.getAnnotation(ResourceListApi.class));
-
-				JSONObject api = new JSONObject();
-
-				api.put("path", p.value());
-				api.put("description", a.description());
-				apis.add(api);
-			}
-		}
-
-		resourceListing.put("apis", apis);
-
-		HttpResponse r = new HttpResponse(resourceListing.toJSONString());
-		r.setStatus(200);
-		return r;
-	}
-
-	/**
-	 * Returns a Swagger 1.2 API declaration for a given class and a specific top level resource. 
-	 * Class c must contain at least one method in the direct or sub-context of tlr, given its {@link Path} annotation. 
-	 * Corresponding methods must be annotated with {@link Path}, {@link Summary} and a HTTP method with 
-	 * {@link GET},{@link PUT},{@link POST} or {@link DELETE} to be included. The method should also be annotated with
-	 * {@link Notes},{@link Produces} and {@link Consumes}, if appropriate.
-	 * 
-	 * @param cls Class subject class 
-	 * @param tlr String path name of top-level resource
-	 * @param epUrl String endpoint URL
-	 * @return HttpResponse a HTTP response transporting the resulting API declaration in its payload
-	 */
-	@SuppressWarnings("unchecked")
-	public static HttpResponse getSwaggerApiDeclaration(Class<?> cls, String tlr, String epUrl) {
-		// merge in class annotations
-		JSONObject apiDocs = new JSONObject();
-		apiDocs.put("swaggerVersion", "1.2");
-		// strip off trailing slash
-		if (epUrl.endsWith("/")) {
-			epUrl = epUrl.substring(0, epUrl.length() - 1);
-		}
-		apiDocs.put("basePath", epUrl);
-		apiDocs.put("resourcePath", "/" + tlr);
-
-		if (cls.isAnnotationPresent(Version.class)) {
-			apiDocs.put("apiVersion", ((Version) cls.getAnnotation(Version.class)).value());
-		}
-		Hashtable<String, JSONObject> apis = new Hashtable<String, JSONObject>();
-		// now process method information
-		for (Method method : cls.getMethods()) {
-			// if method has no annotations, it does not qualify for Swagger API
-			if (method.getAnnotations().length == 0) {
-				continue;
-			}
-
-			// if method does not define Path annotation, it does not qualify for Swagger API
-			if (!method.isAnnotationPresent(Path.class)) {
-				continue;
-			} else {
-				String p = ((Path) method.getAnnotation(Path.class)).value();
-
-				// only consider methods with URI templates below the respective top-level resource
-				if (!p.startsWith(tlr)) {
-					continue;
-				}
-
-				JSONObject api;
-
-				if (!p.startsWith("/")) {
-					p = "/" + p;
-				}
-
-				if (apis.containsKey(p)) {
-					api = apis.get(p);
-				} else {
-					api = new JSONObject();
-					api.put("path", p);
-					api.put("operations", new JSONArray());
-				}
-
-				JSONArray apiOperations = (JSONArray) api.get("operations");
-
-				JSONObject operation = new JSONObject();
-
-				operation.put("nickname", method.getName());
-				operation.put("authorizations", new JSONObject());
-
-				// now extract method.
-				if (method.isAnnotationPresent(GET.class)) {
-					operation.put("method", "GET");
-				} else if (method.isAnnotationPresent(PUT.class)) {
-					operation.put("method", "PUT");
-				} else if (method.isAnnotationPresent(POST.class)) {
-					operation.put("method", "POST");
-				} else if (method.isAnnotationPresent(DELETE.class)) {
-					operation.put("method", "DELETE");
-				} else {
-					// if method does not define any HTTP method, it does not qualify for Swagger API
-					continue;
-				}
-
-				// extract method summary
-				if (method.isAnnotationPresent(Summary.class)) {
-					String summary = ((Summary) method.getAnnotation(Summary.class)).value();
-					operation.put("summary", summary);
-				} else {
-					// if summary annotation is not available, method does not qualify for Swagger API.
-					continue;
-				}
-
-				// extract consumed MIME types
-				if (method.isAnnotationPresent(Consumes.class)) {
-					JSONArray cs = new JSONArray();
-
-					String[] cvals = ((Consumes) method.getAnnotation(Consumes.class)).value();
-					for (String v : cvals) {
-						cs.add(v);
-					}
-					operation.put("consumes", cs);
-				}
-
-				// extract produced MIME type
-				if (method.isAnnotationPresent(Produces.class)) {
-					JSONArray ps = new JSONArray();
-					String pval = ((Produces) method.getAnnotation(Produces.class)).value();
-					ps.add(pval);
-					operation.put("produces", ps);
-				}
-
-				// extract method notes
-				if (method.isAnnotationPresent(Notes.class)) {
-					String notes = ((Notes) method.getAnnotation(Notes.class)).value();
-					operation.put("notes", notes);
-				}
-
-				// extract parameter annotations (path, query, header, content)
-				JSONArray parameters = new JSONArray();
-				Annotation[][] parameterAnnotations = method.getParameterAnnotations();
-
-				for (int i = 0; i < parameterAnnotations.length; i++) {
-					for (int j = 0; j < parameterAnnotations[i].length; j++) {
-						Annotation a = parameterAnnotations[i][j];
-
-						JSONObject po = new JSONObject();
-
-						if (a instanceof QueryParam) {
-							QueryParam qp = ((QueryParam) a);
-							po.put("paramType", "query");
-							po.put("type", "string");
-							po.put("name", qp.name());
-							// po.put("description", qp.description());
-							// po.put("required",qp.required());
-
-						} else if (a instanceof PathParam) {
-							PathParam pp = ((PathParam) a);
-							po.put("paramType", "path");
-							po.put("type", "string");
-							po.put("name", pp.value());
-							// po.put("description", pp.description());
-							// po.put("required",pp.required());
-
-						} else if (a instanceof HeaderParam) {
-							HeaderParam hp = ((HeaderParam) a);
-							po.put("paramType", "header");
-							po.put("type", "string");
-							po.put("name", hp.name());
-							// po.put("description", hp.description());
-							// po.put("required",pp.required());
-
-						} else if (a instanceof ContentParam) {
-							// ContentParam cp = ((ContentParam) a);
-							po.put("paramType", "body");
-							po.put("type", "string");
-							po.put("name", "body");
-							// po.put("description", cp.description());
-							po.put("required", true);
-						}
-
-						parameters.add(po);
-					}
-				}
-
-				operation.put("parameters", parameters);
-
-				// extract responses, including code and message
-				JSONArray responses = new JSONArray();
-				if (method.isAnnotationPresent(ApiResponses.class)) {
-
-					ApiResponses ars = (ApiResponses) method.getAnnotation(ApiResponses.class);
-					for (ApiResponse ar : ars.value()) {
-						JSONObject response = new JSONObject();
-						response.put("code", ar.code());
-						response.put("message", ar.message());
-						responses.add(response);
-					}
-				}
-
-				operation.put("responseMessages", responses);
-
-				apiOperations.add(operation);
-				api.put("operations", apiOperations);
-				apis.put(p, api);
-			}
-		}
-
-		// finally, add all individual APIs to API doc.
-		List<String> paths = new ArrayList<String>();
-		Enumeration<String> aep = apis.keys();
-		while (aep.hasMoreElements()) {
-			String ne = aep.nextElement();
-			paths.add(ne);
-		}
-
-		// sort by api path
-		Collections.sort(paths);
-
-		JSONArray apisArr = new JSONArray();
-
-		for (String p : paths) {
-			apisArr.add(apis.get(p));
-		}
-
-		apiDocs.put("apis", apisArr);
-
-		HttpResponse result = new HttpResponse(apiDocs.toJSONString());
-		result.setStatus(200);
-		return result;
 	}
 
 	/**
@@ -421,8 +141,8 @@ public class RESTMapper {
 		Annotation[] classAnnotations = cl.getAnnotations();
 		String version = DEFAULT_SERVICE_VERSION;
 		String pathPrefix = "";
-		String[] consumesGlobal = new String[] { DEFAULT_CONSUMES_MIME_TYPE };
-		String producesGlobal = DEFAULT_PRODUCES_MIME_TYPE;
+		String[] consumesGlobal = DEFAULT_CONSUMES_MIME_TYPE;
+		String[] producesGlobal = DEFAULT_PRODUCES_MIME_TYPE;
 		for (Annotation classAnnotation : classAnnotations) {
 			if (classAnnotation instanceof Version) { // get service version if available
 				version = ((Version) classAnnotation).value();
@@ -444,7 +164,7 @@ public class RESTMapper {
 			root.setAttribute(PATH_TAG, pathPrefix);
 		}
 
-		root.setAttribute(PRODUCES_TAG, producesGlobal);
+		root.setAttribute(PRODUCES_TAG, join(producesGlobal, DEFAULT_MIME_SEPARATOR));
 		root.setAttribute(CONSUMES_TAG, join(consumesGlobal, DEFAULT_MIME_SEPARATOR));
 
 		for (Method method : methods) { // create method information
@@ -490,7 +210,7 @@ public class RESTMapper {
 			}
 			String produces;
 			if (method.isAnnotationPresent(Produces.class)) { // local method @Consumes overrides global class @Consumes
-				produces = method.getAnnotation(Produces.class).value();
+				produces = join(method.getAnnotation(Produces.class).value(), DEFAULT_MIME_SEPARATOR);
 				methodNode.setAttribute(PRODUCES_TAG, produces.trim());
 			}
 
@@ -517,26 +237,21 @@ public class RESTMapper {
 						parameterAnnotation = PATH_ANNOTATION;
 						parameterName = paramName;
 					} else if (ann instanceof QueryParam) {
-						String paramName = ((QueryParam) ann).name();
+						String paramName = ((QueryParam) ann).value();
 						parameterAnnotation = QUERY_ANNOTATION;
 						parameterName = paramName;
-						parameterDefault = ((QueryParam) ann).defaultValue();
 					} else if (ann instanceof ContentParam) {
 						parameterAnnotation = CONTENT_ANNOTATION;
 						parameterName = "";
 					} else if (ann instanceof DefaultValue) {
 						parameterDefault = ((DefaultValue) ann).value();
-
 					} else if (ann instanceof HeaderParam) {
-						String paramName = ((HeaderParam) ann).name();
+						String paramName = ((HeaderParam) ann).value();
 						parameterAnnotation = HEADER_ANNOTATION;
 						parameterName = paramName;
-						parameterDefault = ((HeaderParam) ann).defaultValue();
-
 					} else if (ann instanceof HttpHeaders) {
 						parameterAnnotation = HEADERS_ANNOTATION;
 						parameterName = "";
-
 					}
 
 					if (parameterAnnotation != null) // if a non-exposed parameter is used, works only if default value
@@ -659,9 +374,9 @@ public class RESTMapper {
 			String serviceName = serviceNode.getAttribute(NAME_TAG).trim();
 			String serviceVersion = serviceNode.getAttribute(VERSION_TAG).trim();
 			String servicePathPrefix = "";
-			String[] serviceConsumes = new String[] { DEFAULT_CONSUMES_MIME_TYPE }; // if none is given, then allow
-																					// everything as a Consume-Type
-			String serviceProduces = DEFAULT_PRODUCES_MIME_TYPE;
+			String[] serviceConsumes = DEFAULT_CONSUMES_MIME_TYPE; // if none is given, then allow
+																	// everything as a Consume-Type
+			String[] serviceProduces = DEFAULT_PRODUCES_MIME_TYPE;
 			if (serviceNode.hasAttribute(PATH_TAG)) {
 				servicePathPrefix = serviceNode.getAttribute(PATH_TAG).trim();
 			}
@@ -670,7 +385,7 @@ public class RESTMapper {
 				serviceConsumes = serviceNode.getAttribute(CONSUMES_TAG).trim().split(DEFAULT_MIME_SEPARATOR);
 			}
 			if (serviceNode.hasAttribute(PRODUCES_TAG)) {
-				serviceProduces = serviceNode.getAttribute(PRODUCES_TAG).trim();
+				serviceProduces = serviceNode.getAttribute(PRODUCES_TAG).trim().split(DEFAULT_MIME_SEPARATOR);
 			}
 
 			// for each method in a service
@@ -684,7 +399,7 @@ public class RESTMapper {
 
 				String methodType = methodNode.getAttribute(TYPE_TAG).trim();
 				String[] consumes;
-				String produces;
+				String[] produces;
 				if (methodNode.hasAttribute(PATH_TAG)) {
 					methodPath = methodNode.getAttribute(PATH_TAG).trim();
 				}
@@ -695,7 +410,7 @@ public class RESTMapper {
 				}
 
 				if (methodNode.hasAttribute(PRODUCES_TAG)) {
-					produces = methodNode.getAttribute(PRODUCES_TAG).trim();
+					produces = methodNode.getAttribute(PRODUCES_TAG).trim().split(DEFAULT_MIME_SEPARATOR);
 				} else
 					produces = serviceProduces; // use global of service, if method has none
 
@@ -759,8 +474,8 @@ public class RESTMapper {
 					}
 				}
 				// get parameter information from the method
-				NodeList parameterNodeList =
-						(NodeList) _xPath.compile(".//" + PARAMETER_TAG).evaluate(methodNode, XPathConstants.NODESET);
+				NodeList parameterNodeList = (NodeList) _xPath.compile(".//" + PARAMETER_TAG).evaluate(methodNode,
+						XPathConstants.NODESET);
 				ParameterData[] parameters = new ParameterData[parameterNodeList.getLength()];
 
 				for (int k = 0; k < parameterNodeList.getLength(); k++) {
@@ -793,9 +508,8 @@ public class RESTMapper {
 					}
 
 					// create array sorted by the occurrence of the parameter in the method declaration
-					parameters[parameterIndex] =
-							new ParameterData(parameterAnnotation, parameterIndex,
-									parameterName, parameterType, parameterDefault);
+					parameters[parameterIndex] = new ParameterData(parameterAnnotation, parameterIndex,
+							parameterName, parameterType, parameterDefault);
 				}
 				// currentNode is the node, where the URI path traversion stopped, so these paths are then mapped to
 				// this method
@@ -851,11 +565,11 @@ public class RESTMapper {
 	 */
 	public static InvocationData[] parse(PathTree tree, String httpMethod, String uri, Pair<String>[] variables,
 			String content, String contentType, String returnType, Pair<String>[] headers, StringBuilder warnings)
-			throws Exception {
+					throws Exception {
 		httpMethod = httpMethod.toLowerCase(); // for robustness
 
 		if (!contentType.isEmpty()) {
-			int consumesParamSeparator = contentType.indexOf(";");
+			int consumesParamSeparator = contentType.indexOf(DEFAULT_MIME_PARAMETER_SEPARATOR);
 			if (consumesParamSeparator > -1) {
 				contentType = contentType.substring(0, consumesParamSeparator); // filter only first part (MIME Type)
 			}
@@ -881,7 +595,7 @@ public class RESTMapper {
 		// begin traversing the tree from one of the http method nodes
 		PathNode currentNode = tree.getRoot().getChild(httpMethod);
 
-		if (currentNode == null)// if not supported method
+		if (currentNode == null) // if not supported method
 			throw new NotSerializableException(httpMethod);
 
 		if (uri.trim().length() > 0) { // is there any URI path?
@@ -917,10 +631,8 @@ public class RESTMapper {
 		// create data needed to invoke the methods stored in this node
 		ArrayList<InvocationData> invocationData = new ArrayList<InvocationData>();
 
-		boolean consumesMIME = (httpMethod.equals(POST) || httpMethod.equals(PUT)) && !contentType.isEmpty();// important
-																												// vor
-																												// handling
-																												// @Consumes
+		// important for handling @Consumes
+		boolean consumesMIME = (httpMethod.equals(POST) || httpMethod.equals(PUT)) && !contentType.isEmpty();
 
 		ArrayList<String> notMatchingConsumesTypes = new ArrayList<String>();
 
@@ -954,21 +666,20 @@ public class RESTMapper {
 
 			int matchLevel = 0;
 			if (!returnTypes[0].equals(ACCEPT_ALL_MIME_TYPES)) { // client wants specific types
-				String produces = aMethodData.getProduces();
 				StringBuilder sb = new StringBuilder();
-				for (int i = 0; i < returnTypes.length; i++) { // find best match level (array is already sorted from
-																// best to worst)
-					String type = returnTypes[i];
-					sb.append(produces).append(("\n"));
-					// System.out.println(type);
-					// System.out.println(produces);
-
-					if (produces.matches(type)) {
-
-						matchLevel = i + 1;
-						break;// all after that are worse anyway
+				for (String produces : aMethodData.getProduces()) {
+					for (int i = 0; i < returnTypes.length; i++) { // find best match level (array is already sorted
+																	// from best to worst)
+						String type = returnTypes[i];
+						sb.append(produces).append(("\n"));
+						if (produces.matches(type)) {
+							matchLevel = i + 1;
+							break;// all after that are worse anyway
+						}
 					}
-
+					if (matchLevel != 0) {
+						break;
+					}
 				}
 				if (matchLevel == 0) { // if level is 0, the returnType of the method does not match anything the client
 										// accepts -> skip method
@@ -1014,7 +725,7 @@ public class RESTMapper {
 
 			}
 
-			if (!abort)// return only methods which can be invoked
+			if (!abort) // return only methods which can be invoked
 				invocationData.add(
 						new InvocationData(aMethodData.getServiceName(),
 								aMethodData.getServiceVersion(), aMethodData.getName(),
@@ -1338,7 +1049,7 @@ public class RESTMapper {
 	 * @param separator string to put between array elements
 	 * @return joined string containing all array elements
 	 */
-	protected static String join(String[] array, String separator) {
+	public static String join(String[] array, String separator) {
 		if (array.length == 0) {
 			return "";
 		}
@@ -1355,4 +1066,5 @@ public class RESTMapper {
 
 		return sb.toString();
 	}
+
 }

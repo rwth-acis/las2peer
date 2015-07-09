@@ -4,16 +4,16 @@ import i5.las2peer.restMapper.RESTMapper;
 
 /**
  * Stores data for a parameter of a method
- * @author Alexander
  *
  */
 public class ParameterData {
 
-    private String annotation;
-    private int index;
-    private String name;
-    private Class<?> type;
-    private Object defaultValue;
+	private String annotation;
+	private int index;
+	private String name;
+	private Class<?> type;
+	private Object defaultValue;
+
 	/**
 	 * 
 	 * @return type of annotation used (e.g. path, content, query)
@@ -22,6 +22,7 @@ public class ParameterData {
 	{
 		return annotation;
 	}
+
 	/**
 	 * 
 	 * @return n-th position of parameter in method declaration
@@ -30,6 +31,7 @@ public class ParameterData {
 	{
 		return index;
 	}
+
 	/**
 	 * 
 	 * @return name of parameter used in annotation
@@ -38,6 +40,7 @@ public class ParameterData {
 	{
 		return name;
 	}
+
 	/**
 	 * 
 	 * @return type of parameter
@@ -46,6 +49,7 @@ public class ParameterData {
 	{
 		return type;
 	}
+
 	/**
 	 * 
 	 * @return default value for parameter, used if no value given
@@ -54,14 +58,16 @@ public class ParameterData {
 	{
 		return defaultValue;
 	}
+
 	/**
 	 * 
 	 * @return true, if a default value was set
 	 */
 	public boolean hasDefaultValue()
 	{
-		return defaultValue!=null;
+		return defaultValue != null;
 	}
+
 	/**
 	 * constructor
 	 * @param annotation  type of annotation used (e.g. path, content, query)
@@ -73,16 +79,16 @@ public class ParameterData {
 	 */
 	public ParameterData(String annotation, int index, String name, String type, String defaultValue) throws Exception
 	{
-		
-		this.annotation=annotation;
-		this.name=name;
-		this.index=index;		
-		this.type=RESTMapper.getClassType(type);
-		
-		if(defaultValue!=null)
-			this.defaultValue=RESTMapper.castToType(defaultValue, this.type);
-	
+		this.annotation = annotation;
+		this.name = name;
+		this.index = index;
+		this.type = RESTMapper.getClassType(type);
+
+		if (defaultValue != null) {
+			this.defaultValue = RESTMapper.castToType(defaultValue, this.type);
+		}
 	}
+
 	/**
 	 * constructor
 	 * @param annotation  type of annotation used (e.g. path, content, query)
@@ -92,9 +98,10 @@ public class ParameterData {
 	 * @param defaultValue default value for parameter, used if no value given
 	 * @throws Exception
 	 */
-	public ParameterData(String annotation, String index, String name, String type, String defaultValue) throws Exception
+	public ParameterData(String annotation, String index, String name, String type, String defaultValue)
+			throws Exception
 	{
-		this(annotation,Integer.parseInt(index),name,type,defaultValue);
+		this(annotation, Integer.parseInt(index), name, type, defaultValue);
 	}
 
 }
