@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
@@ -57,55 +58,6 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	private static final String OIDC_PROVIDER_KEY = "oidc_provider";
 	private WebConnector connector;
 	private Node l2pNode;
-
-	public static final int STATUS_CONTINUE = 100; // Continue (Http/1.1)
-	public static final int STATUS_SWITCHING = 101; // Switching Protocols (Http/1.1)
-	// 2XX ? Success
-	public static final int STATUS_OK = 200; // OK
-	public static final int STATUS_CREATED = 201; // Created
-	public static final int STATUS_ACCEPTED = 202; // Accepted
-	public static final int STATUS_NON_AUTH = 203; // Non-Authoritative Information (HTTP/1.1)
-	public static final int STATUS_NO_CONTENT = 204; // No Content
-	public static final int STATUS_RESET_CONTENT = 205; // Reset Content (HTTP/1.1)
-	public static final int STATUS_PARTIAL_CONTENT = 206; // Partial Content (HTTP/1.1)
-	// 3XX ? Redirection ? the requested document is to be found at some other location
-	public static final int STATUS_MULTIPLE_CHOICES = 300; // Multiple Choices (HTTP/1.1)
-	public static final int STATUS_MOVED_PERM = 301; // Moved Permanently
-	public static final int STATUS_FOUND = 302; // Found
-	public static final int STATUS_SEE_OTHER = 303; // See Other (HTTP/1.1)
-	public static final int STATUS_NOT_MODIFIED = 304; // Not Modified
-	public static final int STATUS_USE_PROXY = 305; // Use Proxy (HTTP/1.1)
-	public static final int STATUS_TEMP_REDIRECT = 307; // Temporary Redirect (HTTP/1.1)
-	// 4XX ? Error of the client - e.g. errornous requests
-	public static final int STATUS_BAD_REQUEST = 400; // Bad Request
-	public static final int STATUS_UNAUTHORIZED = 401; // Unauthorized
-	public static final int STATUS_PAYMENT_REQUIRED = 402; // Payment Required (Unused) (HTTP/1.1)
-	public static final int STATUS_FORBIDDEN = 403; // Forbidden
-	public static final int STATUS_NOT_FOUND = 404; // Not Found
-	public static final int STATUS_METHOD_NOT_ALLOWED = 405; // Method Not Allowed (HTTP/1.1)
-	public static final int STATUS_NOT_ACCEPTABLE = 406; // Not Acceptable (HTTP/1.1)
-	public static final int STATUS_PROXY_AUTH_REQUIRED = 407; // Proxy Authentication Required (HTTP/1.1)
-	public static final int STATUS_REQUEST_TIMEOUT = 408; // Request Timeout (HTTP/1.1)
-	public static final int STATUS_CONFLICT = 409; // Conflict (HTTP/1.1)
-	public static final int STATUS_GONE = 410; // Gone (HTTP/1.1)
-	public static final int STATUS_LENGTH_REQUIRED = 411; // Length Required (HTTP/1.1)
-	public static final int STATUS_PRECONDITION_FAILED = 412; // Precondition Failed (HTTP/1.1)
-	public static final int STATUS_REQUEST_ENTITY_TOO_LONG = 413; // Request Entity Too Long (HTTP/1.1)
-	public static final int STATUS_REQUEST_URI_TOO_LONG = 414; // Request-URI Too Long (HTTP/1.1)
-	public static final int STATUS_UNSUPPORTED_MEDIA_TYPE = 415; // Unsupported Media Type (HTTP/1.1)
-	public static final int STATUS_REQUEST_RANGE_NOT_SATISFIABLE = 416; // Requested Range Not Satisfiable (HTTP/1.1)
-	public static final int STATUS_EXPECTATION_FAILED = 417; // Expectation Failed (HTTP/1.1)
-	// 5XX ? Error of the server
-	public static final int STATUS_INTERNAL_SERVER_ERROR = 500; // Internal Server Error
-	public static final int STATUS_NOT_IMPLEMENTED = 501; // Not Implemented
-	public static final int STATUS_BAD_GATEWAY = 502; // Bad Gateway
-	public static final int STATUS_SERVICE_UNAVAILABLE = 503; // Service Unavailable
-	public static final int STATUS_GATEWAY_TIMEOUT = 504; // Gateway Timeout (HTTP/1.1)
-	public static final int STATUS_HTTP_VERSION_NOT_SUPPORTED = 505; // HTTP Version Not Supported (HTTP/1.1)
-	/** HTTP Status Messages **/
-	public static final String CODE_202_MESSAGE = "OK";
-	public static final String CODE_404_MESSAGE = "forbidden";
-	public static final String CODE_500_MESSAGE = "Internal Server Error";
 
 	public WebConnectorRequestHandler(WebConnector connector) {
 		this.connector = connector;
@@ -230,7 +182,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 				if (err != null) {
 					cause = err.getDescription();
 				}
-				sendStringResponse(exchange, STATUS_UNAUTHORIZED, "Open ID Connect UserInfo request failed! Cause: "
+				sendStringResponse(exchange, HttpURLConnection.HTTP_UNAUTHORIZED, "Open ID Connect UserInfo request failed! Cause: "
 						+ cause);
 				return null;
 			}
@@ -279,7 +231,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 				}
 			} catch (L2pSecurityException e) {
 				e.printStackTrace();
-				sendStringResponse(exchange, STATUS_UNAUTHORIZED, e.getMessage());
+				sendStringResponse(exchange, HttpURLConnection.HTTP_UNAUTHORIZED, e.getMessage());
 			}
 		}
 		// no information? check if there is a default account for login
@@ -420,9 +372,9 @@ public class WebConnectorRequestHandler implements HttpHandler {
 
 			if (invocation.length == 0) {
 				if (warnings.length() > 0) {
-					sendStringResponse(exchange, STATUS_NOT_FOUND, warnings.toString().replaceAll("\n", " "));
+					sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND, warnings.toString().replaceAll("\n", " "));
 				} else {
-					sendResponse(exchange, STATUS_NOT_FOUND, 0);
+					sendResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND, 0);
 					// otherwise the client waits till the timeout for an answer
 					exchange.getResponseBody().close();
 				}
@@ -512,7 +464,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		// XXX this should become a default reply for OPTIONS-requests,
 		// but should be also be available to service developers
 		if (exchange.getRequestMethod().equalsIgnoreCase("options")) {
-			sendResponse(exchange, STATUS_OK, 0);
+			sendResponse(exchange, HttpURLConnection.HTTP_OK, 0);
 			// otherwise the client waits till the timeout for an answer
 			exchange.getResponseBody().close();
 		} else {
@@ -545,7 +497,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	 */
 	private void sendNoSuchService(HttpExchange exchange, String service) {
 		connector.logError("Service not found: " + service);
-		sendStringResponse(exchange, STATUS_SERVICE_UNAVAILABLE,
+		sendStringResponse(exchange, HttpURLConnection.HTTP_UNAVAILABLE,
 				"The service you requested is not known to this server!");
 	}
 
@@ -556,7 +508,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	 */
 	private void sendNoSuchMethod(HttpExchange exchange) {
 		connector.logError("Invocation request " + exchange.getRequestURI().getPath() + " for unknown service method");
-		sendStringResponse(exchange, STATUS_NOT_FOUND, "The method you requested is not known to this service!");
+		sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND, "The method you requested is not known to this service!");
 	}
 
 	/**
@@ -567,7 +519,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	 */
 	private void sendSecurityProblems(HttpExchange exchange, L2pSecurityException e) {
 		connector.logError("Security exception in invocation request " + exchange.getRequestURI().getPath());
-		sendStringResponse(exchange, STATUS_FORBIDDEN, "You don't have access to the method you requested");
+		sendStringResponse(exchange, HttpURLConnection.HTTP_FORBIDDEN, "You don't have access to the method you requested");
 
 		if (System.getProperty("http-connector.printSecException") != null
 				&& System.getProperty("http-connector.printSecException").equals("true")) {
@@ -585,7 +537,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	private void sendResultInterpretationProblems(HttpExchange exchange) {
 		connector.logError("Exception while processing RMI: " + exchange.getRequestURI().getPath());
 		// result interpretation problems
-		sendStringResponse(exchange, STATUS_INTERNAL_SERVER_ERROR, "The result of the method call is not transferable!");
+		sendStringResponse(exchange, HttpURLConnection.HTTP_INTERNAL_ERROR, "The result of the method call is not transferable!");
 	}
 
 	/**
@@ -604,7 +556,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		ret[2] = e.getCause().getCause().getMessage();
 		ret[3] = e.getCause().getCause();
 		String code = ret[0] + "\n" + ret[1] + "\n" + ret[2] + "\n" + ret[3];
-		sendStringResponse(exchange, STATUS_INTERNAL_SERVER_ERROR, code);
+		sendStringResponse(exchange, HttpURLConnection.HTTP_INTERNAL_ERROR, code);
 	}
 
 	/**
@@ -615,7 +567,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	 */
 	private void sendInvocationInterrupted(HttpExchange exchange) {
 		connector.logError("Invocation has been interrupted!");
-		sendStringResponse(exchange, STATUS_INTERNAL_SERVER_ERROR, "The invoction has been interrupted!");
+		sendStringResponse(exchange, HttpURLConnection.HTTP_INTERNAL_ERROR, "The invoction has been interrupted!");
 	}
 
 	/**
@@ -628,7 +580,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		try {
 			if (result != null) {
 				String msg = null;
-				int statusCode = STATUS_OK;
+				int statusCode = HttpURLConnection.HTTP_OK;
 				exchange.getResponseHeaders().set("content-type", RESTMapper.join(contentType, RESTMapper.DEFAULT_MIME_SEPARATOR));
 				if (result instanceof i5.las2peer.restMapper.HttpResponse) {
 					i5.las2peer.restMapper.HttpResponse res = (i5.las2peer.restMapper.HttpResponse) result;
@@ -648,10 +600,10 @@ public class WebConnectorRequestHandler implements HttpHandler {
 					os.write(content);
 					os.close();
 				} else {
-					sendResponse(exchange, STATUS_NO_CONTENT, 0);
+					sendResponse(exchange, HttpURLConnection.HTTP_NO_CONTENT, 0);
 				}
 			} else {
-				sendResponse(exchange, STATUS_NO_CONTENT, 0);
+				sendResponse(exchange, HttpURLConnection.HTTP_NO_CONTENT, 0);
 			}
 		} catch (IOException e) {
 			connector.logMessage(e.getMessage());
@@ -667,10 +619,10 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		connector.logMessage(logMessage);
 		exchange.getResponseHeaders().set("WWW-Authenticate", "Basic realm=\"LAS2peer WebConnector\"");
 		if (answerMessage != null) {
-			sendStringResponse(exchange, STATUS_UNAUTHORIZED, answerMessage);
+			sendStringResponse(exchange, HttpURLConnection.HTTP_UNAUTHORIZED, answerMessage);
 		} else {
 			try {
-				sendResponse(exchange, STATUS_UNAUTHORIZED, 0);
+				sendResponse(exchange, HttpURLConnection.HTTP_UNAUTHORIZED, 0);
 				// otherwise the client waits till the timeout for an answer
 				exchange.getResponseBody().close();
 			} catch (IOException e) {
@@ -688,7 +640,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	 */
 	private void sendInternalErrorResponse(HttpExchange exchange, String message) {
 		connector.logMessage(message);
-		sendStringResponse(exchange, STATUS_INTERNAL_SERVER_ERROR, message);
+		sendStringResponse(exchange, HttpURLConnection.HTTP_INTERNAL_ERROR, message);
 	}
 
 	private void sendStringResponse(HttpExchange exchange, int responseCode, String response) {
