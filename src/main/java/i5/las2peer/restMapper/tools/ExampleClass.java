@@ -47,7 +47,7 @@ public class ExampleClass
 	@GET
 	@Path("/pages/{page}")
 	public String getPageContent(@PathParam("id") int id, @PathParam("page") int page,
-			@QueryParam(value = "fullpage") @DefaultValue(value = "false") boolean fullPage)
+			@QueryParam("fullpage") @DefaultValue("false") boolean fullPage)
 	{
 		return "Once upon a time...";
 	}
