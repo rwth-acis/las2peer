@@ -2,12 +2,6 @@ package i5.las2peer.webConnector;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import i5.las2peer.p2p.LocalNode;
-import i5.las2peer.security.ServiceAgent;
-import i5.las2peer.security.UserAgent;
-import i5.las2peer.testing.MockAgentFactory;
-import i5.las2peer.webConnector.client.ClientResponse;
-import i5.las2peer.webConnector.client.MiniClient;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -15,6 +9,13 @@ import java.io.PrintStream;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import i5.las2peer.p2p.LocalNode;
+import i5.las2peer.security.ServiceAgent;
+import i5.las2peer.security.UserAgent;
+import i5.las2peer.testing.MockAgentFactory;
+import i5.las2peer.webConnector.client.ClientResponse;
+import i5.las2peer.webConnector.client.MiniClient;
 
 public class WebConnectorServiceInfoTest {
 
@@ -70,8 +71,6 @@ public class WebConnectorServiceInfoTest {
 
 		// eve is the anonymous agent!
 		testAgent = MockAgentFactory.getAdam();
-		// avoid timing errors: wait for the repository manager to get all services, before invoking them
-		Thread.sleep(1000);
 	}
 
 	@AfterClass
@@ -93,17 +92,16 @@ public class WebConnectorServiceInfoTest {
 	public void testServices() {
 		connector.updateServiceList();
 		// avoid timing errors: wait for the repository manager to get all services, before invoking them
-//		try {
-//			System.out.println("waiting..");
-//			Thread.sleep(15000);
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//		}
+		try {
+			System.out.println("waiting...");
+			Thread.sleep(10000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 
 		MiniClient c = new MiniClient();
 		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 
-//		connector.updateServiceList();
 		// Calculator3, only known by XML in ./XMLCompatibility
 		try {
 			c.setLogin(Long.toString(testAgent.getId()), testPass);
@@ -113,7 +111,7 @@ public class WebConnectorServiceInfoTest {
 			fail(e.getMessage());
 		}
 
-		// Testservice1, only known by XML in ./XMLCompatibility AND getRESTMapping()
+		// TestService, only known by XML in ./XMLCompatibility AND getRESTMapping()
 		try {
 			c.setLogin(Long.toString(testAgent.getId()), testPass);
 			ClientResponse result = c.sendRequest("PUT", "add/7/6", "");

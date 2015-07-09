@@ -50,7 +50,7 @@ public class TestService extends Service
 	 * @return
 	 */
 	@GET
-	@Path("")
+	@Path("/")
 	public String login()
 	{
 		return "OK";
@@ -63,7 +63,7 @@ public class TestService extends Service
 	 * @return num1+num2
 	 */
 	@PUT
-	@Path("add/{number1}/{number2}")
+	@Path("/add/{number1}/{number2}")
 	public int add(@PathParam("number1") int num1, @PathParam("number2") int num2)
 	{
 		return num1 + num2;
@@ -76,7 +76,7 @@ public class TestService extends Service
 	 * @return num1-num2
 	 */
 	@POST
-	@Path("sub/{number1}/{number2}")
+	@Path("/sub/{number1}/{number2}")
 	public int subtract(@PathParam("number1") int num1, @PathParam("number2") int num2)
 	{
 		return num1 - num2;
@@ -89,7 +89,7 @@ public class TestService extends Service
 	 * @return num1/num2
 	 */
 	@DELETE
-	@Path("div/{number1}/{number2}")
+	@Path("/div/{number1}/{number2}")
 	public int divide(@PathParam("number1") int num1, @PathParam("number2") int num2)
 	{
 		return num1 / num2;
@@ -104,7 +104,7 @@ public class TestService extends Service
 	 * @return num1+num2+param1+param2
 	 */
 	@GET
-	@Path("do/{number1}/it/{number2}")
+	@Path("/do/{number1}/it/{number2}")
 	public int doIt(@PathParam("number1") int num1, @PathParam("number2") int num2,
 			@QueryParam(value = "param1") @DefaultValue("0") int param1,
 			@QueryParam(value = "param2") @DefaultValue("0") int param2)
@@ -121,7 +121,7 @@ public class TestService extends Service
 	 * @return num1-num2-param1-param2
 	 */
 	@GET
-	@Path("do/{number1}/it/{number2}/not")
+	@Path("/do/{number1}/it/{number2}/not")
 	public int doItNot(@PathParam("number1") int num1, @PathParam("number2") int num2,
 			@QueryParam(value = "param1") @DefaultValue("0") int param1,
 			@QueryParam(value = "param2") @DefaultValue("0") int param2)
@@ -138,7 +138,7 @@ public class TestService extends Service
 	 * @return num1*num2-param1*param2
 	 */
 	@GET
-	@Path("do/{number1}/this/{number2}/not")
+	@Path("/do/{number1}/this/{number2}/not")
 	public int doThisNot(@PathParam("number1") int num1, @PathParam("number2") int num2,
 			@QueryParam(value = "param1") @DefaultValue("0") int param1,
 			@QueryParam(value = "param2") @DefaultValue("0") int param2)
@@ -147,7 +147,7 @@ public class TestService extends Service
 	}
 
 	@GET
-	@Path("books/{id}/test")
+	@Path("/books/{id}/test")
 	public int doubleMethod1()
 	{
 		return 1;

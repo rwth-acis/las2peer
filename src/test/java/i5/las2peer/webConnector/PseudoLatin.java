@@ -12,7 +12,7 @@ public class PseudoLatin extends Service
 {
 
 	@POST
-	@Path("latin")
+	@Path("/latin")
 	public String latin(@ContentParam String text)
 	{
 		StringBuilder result = new StringBuilder();

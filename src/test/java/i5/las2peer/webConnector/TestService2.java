@@ -44,7 +44,7 @@ public class TestService2 extends Service
 	}
 
 	@POST
-	@Path("do/{a}/{b}")
+	@Path("/do/{a}/{b}")
 	public String concat(@PathParam("a") String a, @PathParam("b") String b,
 			@ContentParam String c)
 	{
@@ -52,7 +52,7 @@ public class TestService2 extends Service
 	}
 
 	@GET
-	@Path("userinfo")
+	@Path("/userinfo")
 	public String getUserInfo() {
 		if (this.getActiveAgent() instanceof UserAgent) {
 			UserAgent u = (UserAgent) this.getActiveAgent();

@@ -20,7 +20,7 @@ import javax.ws.rs.Produces;
  *
  */
 @Version("0.2")
-@Path("books/{id}")
+@Path("/books/{id}")
 @Consumes(MediaType.TEXT_PLAIN)
 @Produces(MediaType.TEXT_PLAIN)
 public class TestService4 extends Service
@@ -84,21 +84,21 @@ public class TestService4 extends Service
 	}
 
 	@GET
-	@Path("test")
+	@Path("/test")
 	public int doubleMethod1()
 	{
 		return 1;
 	}
 
 	@PUT
-	@Path("test2")
+	@Path("/test2")
 	public String putTest(@ContentParam String param)
 	{
 		return param;
 	}
 
 	@GET
-	@Path("test3")
+	@Path("/test3")
 	public HttpResponse errorTest()
 	{
 		HttpResponse response = new HttpResponse("hi", 500);

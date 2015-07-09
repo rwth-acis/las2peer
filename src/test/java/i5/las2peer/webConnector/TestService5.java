@@ -12,7 +12,7 @@ import javax.ws.rs.Path;
  *
  */
 @Version("0.2")
-@Path("exception")
+@Path("/exception")
 public class TestService5 extends Service
 {
 

@@ -13,14 +13,14 @@ public class Calculator1 extends Service
 {
 
 	@GET
-	@Path("add/{num1}/{num2}")
+	@Path("/add/{num1}/{num2}")
 	public float add(@PathParam("num1") float num1, @PathParam("num2") float num2)
 	{
 		return num1 + num2;
 	}
 
 	@GET
-	@Path("sub/{num1}/{num2}")
+	@Path("/sub/{num1}/{num2}")
 	public float subtract(@PathParam("num1") float num1, @PathParam("num2") float num2)
 	{
 		return num1 - num2;
