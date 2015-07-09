@@ -1,5 +1,32 @@
 package i5.las2peer.webConnector;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Scanner;
+import java.util.Set;
+
+import com.nimbusds.oauth2.sdk.ErrorObject;
+import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.http.HTTPRequest;
+import com.nimbusds.oauth2.sdk.http.HTTPRequest.Method;
+import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+import com.nimbusds.openid.connect.sdk.UserInfoErrorResponse;
+import com.nimbusds.openid.connect.sdk.UserInfoResponse;
+import com.nimbusds.openid.connect.sdk.UserInfoSuccessResponse;
+import com.nimbusds.openid.connect.sdk.claims.UserInfo;
+import com.sun.net.httpserver.Headers;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
+
 import i5.las2peer.execution.NoSuchServiceException;
 import i5.las2peer.execution.NoSuchServiceMethodException;
 import i5.las2peer.execution.ServiceInvocationException;
@@ -15,36 +42,8 @@ import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.Mediator;
 import i5.las2peer.security.PassphraseAgent;
 import i5.las2peer.security.UserAgent;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Scanner;
-import java.util.Set;
-
 import net.minidev.json.JSONObject;
 import rice.p2p.util.Base64;
-
-import com.nimbusds.oauth2.sdk.ErrorObject;
-import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.http.HTTPRequest;
-import com.nimbusds.oauth2.sdk.http.HTTPRequest.Method;
-import com.nimbusds.oauth2.sdk.http.HTTPResponse;
-import com.nimbusds.openid.connect.sdk.UserInfoErrorResponse;
-import com.nimbusds.openid.connect.sdk.UserInfoResponse;
-import com.nimbusds.openid.connect.sdk.UserInfoSuccessResponse;
-import com.nimbusds.openid.connect.sdk.claims.UserInfo;
-import com.sun.net.httpserver.Headers;
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 
 /**
  * A HttpServer RequestHandler for handling requests to the LAS2peer Web Connector.
@@ -414,7 +413,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			Serializable result = "";
 			Mediator mediator = l2pNode.getOrRegisterLocalMediator(userAgent);
 			boolean gotResult = false;
-			String returnMIMEType = "text/plain";
+			String[] returnMIMEType = RESTMapper.DEFAULT_PRODUCES_MIME_TYPE;
 			StringBuilder warnings = new StringBuilder();
 			InvocationData[] invocation = RESTMapper.parse(this.connector.getMappingTree(), httpMethod, uri, variables,
 					content, contentTypeHeader, acceptHeader, headers, warnings);
@@ -625,12 +624,12 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	 * @param contentType
 	 * @param response
 	 */
-	private void sendInvocationSuccess(Serializable result, String contentType, HttpExchange exchange) {
+	private void sendInvocationSuccess(Serializable result, String[] contentType, HttpExchange exchange) {
 		try {
 			if (result != null) {
 				String msg = null;
 				int statusCode = STATUS_OK;
-				exchange.getResponseHeaders().set("content-type", contentType);
+				exchange.getResponseHeaders().set("content-type", RESTMapper.join(contentType, RESTMapper.DEFAULT_MIME_SEPARATOR));
 				if (result instanceof i5.las2peer.restMapper.HttpResponse) {
 					i5.las2peer.restMapper.HttpResponse res = (i5.las2peer.restMapper.HttpResponse) result;
 					Pair<String>[] headers = res.listHeaders();

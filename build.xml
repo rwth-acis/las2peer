@@ -179,7 +179,7 @@
 			<manifest>
 				<attribute
 					name="Class-Path"
-					value="las2peer-rest-mapper-0.4-SNAPSHOT.jar"
+					value="jackson-core-2.4.2.jar jackson-databind-2.4.2.jar jsr311-api-1.1.1.jar swagger-annotations-1.5.0.jar swagger-core-1.5.0.jar swagger-jaxrs-1.5.0.jar swagger-models-1.5.0.jar"
 				/>
 			</manifest>
 		</jar>
@@ -241,7 +241,7 @@
 		<delete dir="log" />
 	</target>
 	
-	<target name="clean_deps">
+	<target name="clean_deps" description="--> remove all dependencies">
         <delete dir="${lib}" />
 	</target>
 	
