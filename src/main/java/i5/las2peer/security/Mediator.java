@@ -7,9 +7,6 @@ import java.util.Vector;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
 import i5.las2peer.execution.L2pServiceException;
-import i5.las2peer.execution.NoSuchServiceException;
-import i5.las2peer.execution.ServiceInvocationException;
-import i5.las2peer.execution.UnlockNeededException;
 import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.Node;
@@ -172,27 +169,26 @@ public class Mediator implements MessageReceiver {
 	 * @throws L2pSecurityException
 	 * @throws InterruptedException
 	 * @throws TimeoutException
-	 * @throws ServiceInvocationException
-	 * @throws UnlockNeededException
+	 * @throws L2pServiceException
+	 * @throws AgentNotKnownException
 	 */
 	public Serializable invoke(String service, String method, Serializable[] parameters, boolean preferLocal)
-			throws L2pSecurityException, InterruptedException, TimeoutException, ServiceInvocationException,
-			UnlockNeededException {
-		boolean isBusy = runningAt.isBusy();
-		if (preferLocal && !isBusy && runningAt.hasService(service)) {
-			try {
-				return runningAt.invokeLocally(myAgent.getId(), service, method, parameters);
-			} catch (NoSuchServiceException e) {
-				// just try globally
-				System.out.println("Local access to service " + service + " failed - trying globally");
+			throws L2pSecurityException, InterruptedException, TimeoutException, AgentNotKnownException,
+			L2pServiceException {
+		if (runningAt.hasService(service)) {
+			if (!preferLocal && runningAt.isBusy()) {
+				// local node is not prefered and busy so we try global
+				// this invocation may come back if there is no other node
 				return runningAt.invokeGlobally(myAgent, service, method, parameters);
-			} catch (AgentNotKnownException e) {
-				throw new L2pSecurityException(e.getMessage());
-			} catch (L2pServiceException e) {
-				throw new ServiceInvocationException(e.getMessage());
+			} else {
+				// local node is prefered or not busy and got the service
+				// this means there is no need to produce networking overhead
+				return runningAt.invokeLocally(myAgent.getId(), service, method, parameters);
 			}
+		} else {
+			// service is not known locally => invokeGlobally
+			return runningAt.invokeGlobally(myAgent, service, method, parameters);
 		}
-		return null;
 	}
 
 	/**
