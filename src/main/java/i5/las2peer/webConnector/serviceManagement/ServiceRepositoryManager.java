@@ -1,19 +1,9 @@
 package i5.las2peer.webConnector.serviceManagement;
 
-import i5.las2peer.p2p.Node;
-import i5.las2peer.p2p.ServiceNameVersion;
-import i5.las2peer.persistency.EnvelopeException;
-import i5.las2peer.restMapper.RESTMapper;
-import i5.las2peer.restMapper.data.PathTree;
-import i5.las2peer.security.ServiceInfoAgent;
-import i5.las2peer.webConnector.WebConnector;
-
 import java.io.Serializable;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -28,11 +18,18 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import i5.las2peer.p2p.Node;
+import i5.las2peer.p2p.ServiceNameVersion;
+import i5.las2peer.persistency.EnvelopeException;
+import i5.las2peer.restMapper.RESTMapper;
+import i5.las2peer.restMapper.data.PathTree;
+import i5.las2peer.security.ServiceInfoAgent;
+import i5.las2peer.webConnector.WebConnector;
+
 public class ServiceRepositoryManager {
 
 	private static ServiceRepositoryManager manager;
 	private static HashMap<String, ServiceData> serviceRepository = new HashMap<String, ServiceData>();
-	private static HashSet<String> checkedServices = new HashSet<>();
 	private static PathTree tree;
 	private static Timer timer = new Timer();
 	private static boolean timerRunning = false;
@@ -79,14 +76,16 @@ public class ServiceRepositoryManager {
 	}
 
 	private static void executeTimer(Node node, ServiceInfoAgent finalAgent) {
+		ServiceNameVersion[] services;
 		try {
-			ServiceNameVersion[] services = ServiceInfoAgent.getServices();
-			checkedServices.clear();
-			Iterator<Map.Entry<String, ServiceData>> it = serviceRepository.entrySet().iterator();
-			while (it.hasNext()) {
-				Map.Entry<String, ServiceData> pairs = (Map.Entry<String, ServiceData>) it.next();
-				checkedServices.add((String) pairs.getKey());
-			}
+			services = ServiceInfoAgent.getServices();
+		} catch (EnvelopeException e) {
+			// do nothing for now
+			e.printStackTrace();
+			return;
+		}
+		synchronized (serviceRepository) {
+			HashSet<String> checkedServices = new HashSet<>(serviceRepository.keySet());
 			for (ServiceNameVersion currentService : services) {
 				String internalServiceName = getInternalServiceName(currentService.getName(),
 						currentService.getVersion());
@@ -96,8 +95,7 @@ public class ServiceRepositoryManager {
 							new ServiceData(currentService.getName(), currentService.getVersion(), false, null));
 					try {
 						String xml = (String) node.invokeGlobally(finalAgent, currentService.getName(),
-								SERVICE_SELFINFO_METHOD,
-								new Serializable[] {});
+								SERVICE_SELFINFO_METHOD, new Serializable[] {});
 						if (xml == null || xml.isEmpty()) {
 							System.err.println("Couldn't get xml mapping for " + currentService.getName()
 									+ "! Please see log for details!");
@@ -117,7 +115,6 @@ public class ServiceRepositoryManager {
 						}
 					} catch (Exception e) {
 						// do nothing for now
-						e.printStackTrace();
 					}
 				} else if (!serviceRepository.get(internalServiceName).isActive()) { // enable not active services
 					serviceRepository.get(internalServiceName).enable();
@@ -127,9 +124,6 @@ public class ServiceRepositoryManager {
 			for (String service : checkedServices) {
 				serviceRepository.get(service).disable();
 			}
-		} catch (EnvelopeException e) {
-			// do nothing for now
-			e.printStackTrace();
 		}
 	}
 
