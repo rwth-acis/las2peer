@@ -21,8 +21,6 @@ If you use an Oracle Java version, you have to enable strong encryption by repla
 
 Policy files for strong encryption can be downloaded via Oracle:
 
-[JCE for Java 7](http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html "JCE-7")
-
 [JCE for Java 8](http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html "JCE-8")
 
 (If the unit-test "i5.las2peer.communication.MessageTest" runs successfully, you have enabled strong encryption correctly)
@@ -41,11 +39,13 @@ Unit Tests
 All JUnit tests are started with:  
     ```ant junit_tests```
 
-Reports can be found in ../tmp/reports afterwards.
+Reports can be found in ./tmp/test_reports afterwards.
 
 
-JavaDoc
+Javadoc
 ----------
 
 Simply build the standard java docs with:  
     ```ant java_doc```
+
+Javadoc can be found in ./export/javadoc afterwards.
