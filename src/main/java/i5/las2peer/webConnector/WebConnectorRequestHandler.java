@@ -10,11 +10,13 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.Set;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
@@ -33,7 +35,9 @@ import i5.las2peer.execution.NoSuchServiceMethodException;
 import i5.las2peer.execution.ServiceInvocationException;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.Node;
+import i5.las2peer.p2p.ServiceNameVersion;
 import i5.las2peer.p2p.TimeoutException;
+import i5.las2peer.persistency.EnvelopeException;
 import i5.las2peer.restMapper.RESTMapper;
 import i5.las2peer.restMapper.data.InvocationData;
 import i5.las2peer.restMapper.data.Pair;
@@ -42,13 +46,17 @@ import i5.las2peer.restMapper.exceptions.NotSupportedUriPathException;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.Mediator;
 import i5.las2peer.security.PassphraseAgent;
+import i5.las2peer.security.ServiceInfoAgent;
 import i5.las2peer.security.UserAgent;
+import io.swagger.jaxrs.Reader;
+import io.swagger.models.Swagger;
+import io.swagger.util.Json;
 import net.minidev.json.JSONObject;
 import rice.p2p.util.Base64;
 
 /**
- * A HttpServer RequestHandler for handling requests to the LAS2peer Web Connector.
- * Each request will be distributed to its corresponding session.
+ * A HttpServer RequestHandler for handling requests to the LAS2peer Web Connector. Each request will be distributed to
+ * its corresponding session.
  */
 
 public class WebConnectorRequestHandler implements HttpHandler {
@@ -66,6 +74,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 
 	/**
 	 * set the connector handling this request processor
+	 * 
 	 * @param connector
 	 */
 	public void setConnector(WebConnector connector) {
@@ -79,7 +88,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	 * @param request
 	 * @param response
 	 * @return -1 if no successful login else userId
-	 * @throws UnsupportedEncodingException 
+	 * @throws UnsupportedEncodingException
 	 */
 	private PassphraseAgent authenticate(HttpExchange exchange) throws UnsupportedEncodingException {
 		final int BASIC_PREFIX_LENGTH = "BASIC ".length();
@@ -238,6 +247,17 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			sendUnauthorizedResponse(exchange, null, exchange.getRemoteAddress() + ": No Authentication provided!");
 		}
 		return null;
+	}
+
+	// helper function to create long hash from string
+	public static long hash(String string) {
+		long h = 1125899906842597L; // prime
+		int len = string.length();
+
+		for (int i = 0; i < len; i++) {
+			h = 31 * h + string.charAt(i);
+		}
+		return h;
 	}
 
 	private PassphraseAgent login(String username, String password, HttpExchange exchange) {
@@ -460,36 +480,67 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	public void handle(HttpExchange exchange) throws IOException {
 		exchange.getResponseHeaders().set("Server-Name", "LAS2peer WebConnector");
 		// check for an OPTIONS request and auto answer it
-		// XXX this should become a default reply for OPTIONS-requests,
+		// TODO this should become a default reply for OPTIONS-requests,
 		// but should be also be available to service developers
 		if (exchange.getRequestMethod().equalsIgnoreCase("options")) {
 			sendResponse(exchange, HttpURLConnection.HTTP_OK, 0);
-			// otherwise the client waits till the timeout for an answer
-			exchange.getResponseBody().close();
+		} else if (exchange.getRequestMethod().equalsIgnoreCase("get")
+				&& exchange.getRequestURI().getPath().equalsIgnoreCase("/swagger.json")) {
+			// respond with swagger.json for all known services at this endpoint
+			handleSwagger(exchange);
 		} else {
 			PassphraseAgent userAgent;
 			if ((userAgent = authenticate(exchange)) != null) {
 				invoke(userAgent, exchange);
 				logout(userAgent);
 			}
-			// otherwise the client waits till the timeout for an answer, if an error occurred
-			exchange.getResponseBody().close();
 		}
+		// otherwise the client waits till the timeout for an answer
+		exchange.getResponseBody().close();
 	}
 
-	// helper function to create long hash from string
-	public static long hash(String string) {
-		long h = 1125899906842597L; // prime
-		int len = string.length();
-
-		for (int i = 0; i < len; i++) {
-			h = 31 * h + string.charAt(i);
+	/**
+	 * Returns the API documentation of all annotated local resources for purposes of Swagger documentation.
+	 * 
+	 * @param exchange The origin exchange request for the swagger listing.
+	 * @return HTTP code OK (200) with resource's documentation as String or an error code including String message.
+	 */
+	private void handleSwagger(HttpExchange exchange) {
+		try {
+			ClassLoader clsLoader = connector.getL2pNode().getBaseClassLoader();
+			ServiceNameVersion[] services = ServiceInfoAgent.getServices();
+			Set<Class<?>> serviceClasses = new HashSet<Class<?>>(services.length);
+			for (ServiceNameVersion snv : services) {
+				String clsname = snv.getName();
+				try {
+					Class<?> cls = clsLoader.loadClass(clsname);
+					serviceClasses.add(cls);
+				} catch (ClassNotFoundException e) {
+					connector.logError("Class not found " + clsname);
+				}
+			}
+			Swagger swagger = new Reader(new Swagger()).read(serviceClasses);
+			if (swagger == null) {
+				sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND,
+						"Swagger API declaration not available!");
+			}
+			// FIXME remove the following line as soon as the Swagger-UI issue is solved
+			// https://github.com/swagger-api/swagger-core/issues/1252
+			swagger.getDefinitions().clear();
+			try {
+				String json = Json.mapper().writeValueAsString(swagger);
+				sendStringResponse(exchange, HttpURLConnection.HTTP_OK, json);
+			} catch (JsonProcessingException e) {
+				sendInternalErrorResponse(exchange, e.getMessage());
+			}
+		} catch (EnvelopeException e) {
+			sendInternalErrorResponse(exchange, e.getMessage());
 		}
-		return h;
 	}
 
 	/**
 	 * send a notification, that the requested service does not exists
+	 * 
 	 * @param request
 	 * @param response
 	 * @param service
@@ -502,6 +553,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 
 	/**
 	 * send a notification, that the requested method does not exists at the requested service
+	 * 
 	 * @param request
 	 * @param response
 	 */
@@ -513,6 +565,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 
 	/**
 	 * send a notification, that security problems occurred during the requested service method
+	 * 
 	 * @param request
 	 * @param response
 	 * @param e
@@ -529,8 +582,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	}
 
 	/**
-	 * send a notification, that the result of the service invocation is
-	 * not transportable 
+	 * send a notification, that the result of the service invocation is not transportable
 	 * 
 	 * @param request
 	 * @param response
@@ -615,6 +667,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 
 	/**
 	 * send a message about an unauthorized request
+	 * 
 	 * @param response
 	 * @param logMessage
 	 */
@@ -668,8 +721,9 @@ public class WebConnectorRequestHandler implements HttpHandler {
 					String.valueOf(connector.crossOriginResourceMaxAge));
 			// just reply all requested headers
 			String requestedHeaders = exchange.getRequestHeaders().getFirst("Access-Control-Request-Headers");
-			if (requestedHeaders != null)
+			if (requestedHeaders != null) {
 				responseHeaders.add("Access-Control-Allow-Headers", requestedHeaders);
+			}
 			responseHeaders.add("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS");
 		}
 		exchange.sendResponseHeaders(responseCode, contentLength);
