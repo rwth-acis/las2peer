@@ -110,7 +110,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		else if (connector.oidcProviderInfos != null
 				&& ((exchange.getRequestURI().getRawQuery() != null && exchange.getRequestURI().getRawQuery()
 						.contains(ACCESS_TOKEN_KEY + "=")) || exchange.getRequestHeaders()
-						.containsKey(ACCESS_TOKEN_KEY))) {
+								.containsKey(ACCESS_TOKEN_KEY))) {
 			String token = "";
 			String oidcProviderURI = connector.defaultOIDCProvider;
 			if (exchange.getRequestHeaders().containsKey(ACCESS_TOKEN_KEY)) { // get OIDC parameters from headers
@@ -131,11 +131,8 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			// validate given OIDC provider and get provider info
 			JSONObject oidcProviderInfo = null;
 			if (connector.oidcProviders.contains(oidcProviderURI) == false) {
-				sendInternalErrorResponse(
-						exchange,
-						"The given OIDC provider ("
-								+ oidcProviderURI
-								+ ") is not whitelisted! Please make sure the complete OIDC provider URI is added to the config.");
+				sendInternalErrorResponse(exchange, "The given OIDC provider (" + oidcProviderURI
+						+ ") is not whitelisted! Please make sure the complete OIDC provider URI is added to the config.");
 				return null;
 			} else if (connector.oidcProviderInfos.get(oidcProviderURI) == null) {
 				sendInternalErrorResponse(exchange,
@@ -182,8 +179,8 @@ public class WebConnectorRequestHandler implements HttpHandler {
 				if (err != null) {
 					cause = err.getDescription();
 				}
-				sendStringResponse(exchange, HttpURLConnection.HTTP_UNAUTHORIZED, "Open ID Connect UserInfo request failed! Cause: "
-						+ cause);
+				sendStringResponse(exchange, HttpURLConnection.HTTP_UNAUTHORIZED,
+						"Open ID Connect UserInfo request failed! Cause: " + cause);
 				return null;
 			}
 
@@ -372,7 +369,8 @@ public class WebConnectorRequestHandler implements HttpHandler {
 
 			if (invocation.length == 0) {
 				if (warnings.length() > 0) {
-					sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND, warnings.toString().replaceAll("\n", " "));
+					sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND,
+							warnings.toString().replaceAll("\n", " "));
 				} else {
 					sendResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND, 0);
 					// otherwise the client waits till the timeout for an answer
@@ -381,15 +379,16 @@ public class WebConnectorRequestHandler implements HttpHandler {
 				return false;
 			}
 
-			for (int i = 0; i < invocation.length; i++) {
+			for (InvocationData inv : invocation) {
 				try {
-					result = mediator.invoke(invocation[i].getServiceName(), invocation[i].getMethodName(),
-							invocation[i].getParameters(), connector.preferLocalServices());// invoke service method
+					// invoke service method
+					result = mediator.invoke(inv.getServiceName(), inv.getMethodName(), inv.getParameters(),
+							connector.preferLocalServices());
 					gotResult = true;
-					returnMIMEType = invocation[i].getMIME();
+					returnMIMEType = inv.getMIME();
 					break;
 				} catch (NoSuchServiceException | TimeoutException e) {
-					sendNoSuchService(exchange, invocation[i].getServiceName());
+					sendNoSuchService(exchange, inv.getServiceName());
 				} catch (NoSuchServiceMethodException e) {
 					sendNoSuchMethod(exchange);
 				} catch (L2pSecurityException e) {
@@ -508,7 +507,8 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	 */
 	private void sendNoSuchMethod(HttpExchange exchange) {
 		connector.logError("Invocation request " + exchange.getRequestURI().getPath() + " for unknown service method");
-		sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND, "The method you requested is not known to this service!");
+		sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND,
+				"The method you requested is not known to this service!");
 	}
 
 	/**
@@ -519,7 +519,8 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	 */
 	private void sendSecurityProblems(HttpExchange exchange, L2pSecurityException e) {
 		connector.logError("Security exception in invocation request " + exchange.getRequestURI().getPath());
-		sendStringResponse(exchange, HttpURLConnection.HTTP_FORBIDDEN, "You don't have access to the method you requested");
+		sendStringResponse(exchange, HttpURLConnection.HTTP_FORBIDDEN,
+				"You don't have access to the method you requested");
 
 		if (System.getProperty("http-connector.printSecException") != null
 				&& System.getProperty("http-connector.printSecException").equals("true")) {
@@ -537,7 +538,8 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	private void sendResultInterpretationProblems(HttpExchange exchange) {
 		connector.logError("Exception while processing RMI: " + exchange.getRequestURI().getPath());
 		// result interpretation problems
-		sendStringResponse(exchange, HttpURLConnection.HTTP_INTERNAL_ERROR, "The result of the method call is not transferable!");
+		sendStringResponse(exchange, HttpURLConnection.HTTP_INTERNAL_ERROR,
+				"The result of the method call is not transferable!");
 	}
 
 	/**
@@ -581,7 +583,8 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			if (result != null) {
 				String msg = null;
 				int statusCode = HttpURLConnection.HTTP_OK;
-				exchange.getResponseHeaders().set("content-type", RESTMapper.join(contentType, RESTMapper.DEFAULT_MIME_SEPARATOR));
+				exchange.getResponseHeaders().set("content-type",
+						RESTMapper.join(contentType, RESTMapper.DEFAULT_MIME_SEPARATOR));
 				if (result instanceof i5.las2peer.restMapper.HttpResponse) {
 					i5.las2peer.restMapper.HttpResponse res = (i5.las2peer.restMapper.HttpResponse) result;
 					Pair<String>[] headers = res.listHeaders();
