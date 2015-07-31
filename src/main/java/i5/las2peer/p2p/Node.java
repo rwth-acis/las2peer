@@ -1,5 +1,22 @@
 package i5.las2peer.p2p;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.Serializable;
+import java.lang.management.ManagementFactory;
+import java.lang.reflect.InvocationTargetException;
+import java.security.KeyPair;
+import java.security.PublicKey;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Vector;
+
+import com.sun.management.OperatingSystemMXBean;
+
 import i5.las2peer.api.Service;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
@@ -41,25 +58,7 @@ import i5.las2peer.testing.MockAgentFactory;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
 import i5.las2peer.tools.SerializationException;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.Serializable;
-import java.lang.management.ManagementFactory;
-import java.lang.reflect.InvocationTargetException;
-import java.security.KeyPair;
-import java.security.PublicKey;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Vector;
-
 import rice.pastry.NodeHandle;
-
-import com.sun.management.OperatingSystemMXBean;
 
 /**
  * Base class for nodes in the LAS2peer environment.
@@ -213,6 +212,7 @@ public abstract class Node implements AgentStorage {
 	 */
 	private void initStandardLogfile() {
 		try {
+			new File("log").mkdir();
 			if (this instanceof LocalNode)
 				addObserver(new NodeStreamLogger("log/l2p_local_" + ((LocalNode) this).getNodeId() + ".log"));
 			else if (this instanceof PastryNodeImpl)
