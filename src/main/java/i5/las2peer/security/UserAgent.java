@@ -1,5 +1,12 @@
 package i5.las2peer.security;
 
+import java.io.Serializable;
+import java.security.KeyPair;
+import java.security.PublicKey;
+import java.util.Random;
+
+import org.apache.commons.codec.binary.Base64;
+
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
 import i5.las2peer.communication.PingPongContent;
@@ -14,13 +21,6 @@ import i5.las2peer.tools.SerializeTools;
 import i5.simpleXML.Element;
 import i5.simpleXML.Parser;
 import i5.simpleXML.XMLSyntaxException;
-
-import java.io.Serializable;
-import java.security.KeyPair;
-import java.security.PublicKey;
-import java.util.Random;
-
-import org.apache.commons.codec.binary.Base64;
 
 /**
  * An UserAgent represent a (End)user of the LAS2peer system.
@@ -120,7 +120,7 @@ public class UserAgent extends PassphraseAgent {
 	/**
 	 * Attaches the given object directly to this agent. The
 	 * user data represent a field of this user agent and
-	 * should be used with small values (< 1MB) only.
+	 * should be used with small values (&lt; 1MB) only.
 	 * Larger byte amounts could handicap the agent handling
 	 * inside the network.
 	 * 

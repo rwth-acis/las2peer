@@ -1,5 +1,18 @@
 package i5.las2peer.security;
 
+import java.io.Serializable;
+import java.security.KeyPair;
+import java.security.PublicKey;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Random;
+
+import javax.crypto.SecretKey;
+
+import org.apache.commons.codec.binary.Base64;
+
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
 import i5.las2peer.p2p.AgentNotKnownException;
@@ -14,27 +27,14 @@ import i5.simpleXML.Element;
 import i5.simpleXML.Parser;
 import i5.simpleXML.XMLSyntaxException;
 
-import java.io.Serializable;
-import java.security.KeyPair;
-import java.security.PublicKey;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Random;
-
-import javax.crypto.SecretKey;
-
-import org.apache.commons.codec.binary.Base64;
-
 /**
  * An agent representing a group of other agents.
  * 
- * The storage of the group information is stored encrypted in a similar manner to 
+ * The storage of the group information is stored encrypted in a similar manner to
  * {@link i5.las2peer.persistency.Envelope}:
  * 
- * The (symmetric) key to unlock the private key of the group is encrypted asymmetrically for
- * each entitled agent (i.e. <i>member</i> of the group).
+ * The (symmetric) key to unlock the private key of the group is encrypted asymmetrically for each entitled agent (i.e.
+ * <i>member</i> of the group).
  * 
  */
 public class GroupAgent extends Agent {
@@ -45,8 +45,7 @@ public class GroupAgent extends Agent {
 	private Serializable userData;
 
 	/**
-	 * hashtable storing the encrypted versions of the group secret key
-	 * for each member
+	 * hashtable storing the encrypted versions of the group secret key for each member
 	 */
 	private Hashtable<Long, byte[]> htEncryptedKeyVersions = new Hashtable<Long, byte[]>();
 
@@ -59,9 +58,9 @@ public class GroupAgent extends Agent {
 	}
 
 	/**
-	 * constructor for the {@link #createGroupAgent} factory
-	 * simply necessary, since the secret key has to be stated for the constructor of the superclass
-	 *  
+	 * constructor for the {@link #createGroupAgent} factory simply necessary, since the secret key has to be stated for
+	 * the constructor of the superclass
+	 * 
 	 * @param id
 	 * @param keys
 	 * @param secret
@@ -96,7 +95,8 @@ public class GroupAgent extends Agent {
 	}
 
 	/**
-	 * decrypt the secret key of this group for the given agent (which is hopefully a member) 
+	 * decrypt the secret key of this group for the given agent (which is hopefully a member)
+	 * 
 	 * @param agent
 	 * @throws SerializationException
 	 * @throws CryptoException
@@ -124,14 +124,14 @@ public class GroupAgent extends Agent {
 	}
 
 	/**
-	 * private version of adding members, mainly just for the constructor to
-	 * add members without unlocking the private key of the group
+	 * private version of adding members, mainly just for the constructor to add members without unlocking the private
+	 * key of the group
 	 * 
 	 * @param a
 	 * @param securityCheck
 	 * @throws L2pSecurityException
-	 * @throws SerializationException 
-	 * @throws CryptoException 
+	 * @throws SerializationException
+	 * @throws CryptoException
 	 */
 	private final void addMember(Agent a, boolean securityCheck) throws L2pSecurityException, CryptoException,
 			SerializationException {
@@ -144,6 +144,7 @@ public class GroupAgent extends Agent {
 
 	/**
 	 * check, if the given agent is member of this group
+	 * 
 	 * @param a
 	 * @return true, if the given agent is a member of this group
 	 */
@@ -153,6 +154,7 @@ public class GroupAgent extends Agent {
 
 	/**
 	 * check, if the given agent is member of this group or any sub group
+	 * 
 	 * @param a
 	 * @return true, if the given agent is a member of this group
 	 */
@@ -162,6 +164,7 @@ public class GroupAgent extends Agent {
 
 	/**
 	 * check, if the given agent (id) is member of this group
+	 * 
 	 * @param id
 	 * @return true, if the given agent is a member if this group
 	 */
@@ -172,6 +175,7 @@ public class GroupAgent extends Agent {
 
 	/**
 	 * check, if the given agent (id) is member of this group
+	 * 
 	 * @param id
 	 * @return true, if the given agent is a member if this group
 	 */
@@ -268,7 +272,7 @@ public class GroupAgent extends Agent {
 	}
 
 	/**
-	 * remove a member from this group 
+	 * remove a member from this group
 	 * 
 	 * @param a
 	 * @throws L2pSecurityException
@@ -288,7 +292,7 @@ public class GroupAgent extends Agent {
 	}
 
 	/**
-	 * remove a member from this group 
+	 * remove a member from this group
 	 * 
 	 * @param id
 	 * @throws L2pSecurityException
@@ -331,10 +335,9 @@ public class GroupAgent extends Agent {
 			String keyList = "";
 
 			for (Long id : htEncryptedKeyVersions.keySet()) {
-				keyList +=
-						"\t\t<keyentry forAgent=\"" + id + "\" encoding=\"base64\">"
-								+ Base64.encodeBase64String(htEncryptedKeyVersions.get(id))
-								+ "</keyentry>\n";
+				keyList += "\t\t<keyentry forAgent=\"" + id + "\" encoding=\"base64\">"
+						+ Base64.encodeBase64String(htEncryptedKeyVersions.get(id))
+						+ "</keyentry>\n";
 			}
 
 			StringBuffer result = new StringBuffer("<las2peer:agent type=\"group\">\n"
@@ -368,7 +371,7 @@ public class GroupAgent extends Agent {
 	 * factory - create an instance of GroupAgent from its xml representation
 	 * 
 	 * @param xml
-	 * @return a group agent 
+	 * @return a group agent
 	 * @throws MalformedXMLException
 	 */
 	public static GroupAgent createFromXml(String xml) throws MalformedXMLException {
@@ -571,8 +574,7 @@ public class GroupAgent extends Agent {
 	/**
 	 * Sets a name for this group(-agent)
 	 * 
-	 * @param groupname A name to be used for this group.
-	 * This is no identifier! May have duplicates.
+	 * @param groupname A name to be used for this group. This is no identifier! May have duplicates.
 	 * @throws L2pSecurityException When the user agent is still locked.
 	 */
 	public void setName(String groupname) throws L2pSecurityException {
@@ -592,11 +594,8 @@ public class GroupAgent extends Agent {
 	}
 
 	/**
-	 * Attaches the given object directly to this agent. The
-	 * user data represent a field of this user agent and
-	 * should be used with small values (< 1MB) only.
-	 * Larger byte amounts could handicap the agent handling
-	 * inside the network.
+	 * Attaches the given object directly to this agent. The user data represent a field of this user agent and should
+	 * be used with small values (&lt; 1MB) only. Larger byte amounts could handicap the agent handling inside the network.
 	 * 
 	 * @param object The user data object to be serialized and attached.
 	 * @throws L2pSecurityException When the user agent is still locked.
