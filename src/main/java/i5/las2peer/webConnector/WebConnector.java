@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executors;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -87,6 +88,9 @@ public class WebConnector extends Connector {
 
 	protected String defaultLoginUser = "";
 	protected String defaultLoginPassword = "";
+
+	public static final int DEFAULT_MAX_CONNECTIONS = 500;
+	protected int maxConnections = DEFAULT_MAX_CONNECTIONS;
 
 	protected String xmlPath;
 
@@ -334,7 +338,7 @@ public class WebConnector extends Connector {
 	private void runServer(boolean isHttps) throws ConnectorException {
 		try {
 			if (isHttps) {
-				https = HttpsServer.create(new InetSocketAddress(httpsPort), 0);
+				https = HttpsServer.create(new InetSocketAddress(httpsPort), maxConnections);
 				// apply ssl certificates and key
 				SSLContext sslContext = SSLContext.getInstance("TLS");
 				char[] keystorePassword = sslKeyPassword.toCharArray();
@@ -346,7 +350,7 @@ public class WebConnector extends Connector {
 				HttpsConfigurator configurator = new HttpsConfigurator(sslContext);
 				https.setHttpsConfigurator(configurator);
 			} else {
-				http = HttpServer.create(new InetSocketAddress(httpPort), 0);
+				http = HttpServer.create(new InetSocketAddress(httpPort), maxConnections);
 			}
 		} catch (IOException e) {
 			throw new ConnectorException("Startup has been interrupted!", e);
@@ -355,10 +359,12 @@ public class WebConnector extends Connector {
 		}
 		WebConnectorRequestHandler handler = new WebConnectorRequestHandler(this);
 		if (isHttps) {
+			https.setExecutor(Executors.newCachedThreadPool());
 			https.createContext("/", handler);
 			https.start();
 			logMessage("Web-Connector in HTTPS mode running on port " + httpsPort);
 		} else {
+			http.setExecutor(Executors.newCachedThreadPool());
 			http.createContext("/", handler);
 			http.start();
 			logMessage("Web-Connector in HTTP mode running on port " + httpPort);
