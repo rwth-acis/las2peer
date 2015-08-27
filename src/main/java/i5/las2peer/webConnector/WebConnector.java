@@ -1,15 +1,5 @@
 package i5.las2peer.webConnector;
 
-import i5.las2peer.api.Connector;
-import i5.las2peer.api.ConnectorException;
-import i5.las2peer.logging.NodeObserver.Event;
-import i5.las2peer.p2p.AgentNotKnownException;
-import i5.las2peer.p2p.Node;
-import i5.las2peer.restMapper.RESTMapper;
-import i5.las2peer.restMapper.data.PathTree;
-import i5.las2peer.security.Agent;
-import i5.las2peer.webConnector.serviceManagement.ServiceRepositoryManager;
-
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -28,14 +18,23 @@ import java.util.Map;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 
-import net.minidev.json.JSONObject;
-import net.minidev.json.JSONValue;
-
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest.Method;
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsServer;
+
+import i5.las2peer.api.Connector;
+import i5.las2peer.api.ConnectorException;
+import i5.las2peer.logging.NodeObserver.Event;
+import i5.las2peer.p2p.AgentNotKnownException;
+import i5.las2peer.p2p.Node;
+import i5.las2peer.restMapper.RESTMapper;
+import i5.las2peer.restMapper.data.PathTree;
+import i5.las2peer.security.Agent;
+import i5.las2peer.webConnector.serviceManagement.ServiceRepositoryManager;
+import net.minidev.json.JSONObject;
+import net.minidev.json.JSONValue;
 
 /**
  * Starter class for registering the Web Connector at the LAS2peer server.
@@ -81,6 +80,7 @@ public class WebConnector extends Connector {
 	public static final String DEFAULT_DEFAULT_OIDC_PROVIDER = "https://api.learning-layers.eu/o/oauth2";
 	protected String defaultOIDCProvider = DEFAULT_DEFAULT_OIDC_PROVIDER;
 	protected ArrayList<String> oidcProviders = new ArrayList<String>();
+
 	{
 		oidcProviders.add(DEFAULT_DEFAULT_OIDC_PROVIDER);
 	}
@@ -112,7 +112,8 @@ public class WebConnector extends Connector {
 	}
 
 	/**
-	 * create a new web connector instance. 	
+	 * create a new web connector instance.
+	 * 
 	 * @throws FileNotFoundException
 	 */
 	public WebConnector() throws Exception {
@@ -123,7 +124,8 @@ public class WebConnector extends Connector {
 	}
 
 	/**
-	 * create a new web connector instance. 	
+	 * create a new web connector instance.
+	 * 
 	 * @throws FileNotFoundException
 	 */
 	public WebConnector(boolean http, int httpPort, boolean https, int httpsPort) throws Exception {
@@ -137,8 +139,9 @@ public class WebConnector extends Connector {
 	}
 
 	/**
-	 * create a new web connector instance. 	
-	 * @throws Exception 
+	 * create a new web connector instance.
+	 * 
+	 * @throws Exception
 	 */
 	public WebConnector(boolean http, int httpPort, boolean https, int httpsPort, String xmlPath) throws Exception {
 		this();
@@ -196,6 +199,7 @@ public class WebConnector extends Connector {
 
 	/**
 	 * enables/disables HTTP/HTTPs
+	 * 
 	 * @param http enable HTTP
 	 * @param https enable HTTPS
 	 */
@@ -205,9 +209,9 @@ public class WebConnector extends Connector {
 	}
 
 	/**
-	 * <b>This method is no longer supported and will be removed in the future.</b> 
-	 * Sets the socket timeout for the underlying http server
-	 * (only at configuration not during runtime)
+	 * <b>This method is no longer supported and will be removed in the future.</b> Sets the socket timeout for the
+	 * underlying http server (only at configuration not during runtime)
+	 * 
 	 * @param timeoutInMs
 	 */
 	@Deprecated
@@ -226,6 +230,7 @@ public class WebConnector extends Connector {
 
 	/**
 	 * set the SSL key password
+	 * 
 	 * @param password
 	 */
 	public void setSslKeyPassword(String password) {
@@ -234,6 +239,7 @@ public class WebConnector extends Connector {
 
 	/**
 	 * set the location of the SSL keystore
+	 * 
 	 * @param keystore
 	 */
 	public void setSslKeystore(String keystore) {
@@ -242,6 +248,7 @@ public class WebConnector extends Connector {
 
 	/**
 	 * set the cross origin resource domain
+	 * 
 	 * @param cord
 	 */
 	public void setCrossOriginResourceDomain(String cord) {
@@ -249,7 +256,8 @@ public class WebConnector extends Connector {
 	}
 
 	/**
-	 * allow cross origin resource sharing 
+	 * allow cross origin resource sharing
+	 * 
 	 * @param enable
 	 */
 	public void setCrossOriginResourceSharing(boolean enable) {
@@ -258,6 +266,7 @@ public class WebConnector extends Connector {
 
 	/**
 	 * prefer local services
+	 * 
 	 * @param enable
 	 */
 	public void setPreferLocalServices(boolean enable) {
@@ -318,6 +327,7 @@ public class WebConnector extends Connector {
 
 	/**
 	 * Starts either HTTP server or HTTPS Server
+	 * 
 	 * @param isHttps true to run the HTTPS server, false to run the HTTP server
 	 * @throws ConnectorException
 	 */
@@ -370,7 +380,7 @@ public class WebConnector extends Connector {
 	/**
 	 * get the node, this connector is running at / for
 	 * 
-	 * @return	the Las2Peer node of this connector
+	 * @return the Las2Peer node of this connector
 	 */
 	public Node getL2pNode() {
 		return myNode;
@@ -424,7 +434,7 @@ public class WebConnector extends Connector {
 
 	/**
 	 * 
-	 * @return true, if local running versions of services are preferred before broadcasting 
+	 * @return true, if local running versions of services are preferred before broadcasting
 	 */
 	boolean preferLocalServices() {
 		return preferLocalServices;
@@ -435,8 +445,8 @@ public class WebConnector extends Connector {
 	}
 
 	/**
-	 * Fetches Open ID Connect provider configuration, according to the OpenID Connect discovery specification
-	 * (cf. http://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig)
+	 * Fetches Open ID Connect provider configuration, according to the OpenID Connect discovery specification (cf.
+	 * http://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig)
 	 */
 	private JSONObject fetchOidcProviderConfig(String providerURI) throws IOException {
 		JSONObject result = new JSONObject();
@@ -454,8 +464,8 @@ public class WebConnector extends Connector {
 			result.put("config", config);
 		} catch (Exception e) {
 			System.out.println("OpenID Connect Provider " + providerURI + " unreachable!");
-			System.err
-					.println("Make sure to set a correct OpenID Connect Provider URL in your las2peer Web Connector config!");
+			System.err.println(
+					"Make sure to set a correct OpenID Connect Provider URL in your las2peer Web Connector config!");
 			System.out.println("WebConnector will now run in OIDC agnostic mode.");
 			logError("Could not retrieve a valid OIDC provider config from " + providerURI + "!");
 
