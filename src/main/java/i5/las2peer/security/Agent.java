@@ -60,9 +60,9 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	 * @throws L2pSecurityException
 	 */
 	protected Agent(long id, KeyPair pair, SecretKey key) throws L2pSecurityException {
-		publicKey = pair.getPublic();
-		privateKey = pair.getPrivate();
 		this.id = id;
+		this.publicKey = pair.getPublic();
+		this.privateKey = pair.getPrivate();
 
 		encryptPrivateKey(key);
 		lockPrivateKey();
@@ -78,8 +78,8 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	protected Agent(long id, PublicKey publicKey, byte[] encryptedPrivate) {
 		this.id = id;
 		this.publicKey = publicKey;
-		this.baEncrypedPrivate = encryptedPrivate.clone();
 		this.privateKey = null;
+		this.baEncrypedPrivate = encryptedPrivate.clone();
 	}
 
 	/**
@@ -323,6 +323,17 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 		} catch (XMLSyntaxException e) {
 			throw new MalformedXMLException("Error parsing xml string", e);
 		}
+	}
+
+	@Override
+	public boolean equals(Object other) {
+		if (super.equals(other)) {
+			return true;
+		}
+		if (other == null || !other.getClass().isInstance(this)) {
+			return false;
+		}
+		return this.getId() == ((Agent) other).getId();
 	}
 
 }
