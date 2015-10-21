@@ -524,9 +524,6 @@ public class WebConnectorRequestHandler implements HttpHandler {
 				sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND,
 						"Swagger API declaration not available!");
 			}
-			// FIXME remove the following line as soon as the Swagger-UI issue is solved
-			// https://github.com/swagger-api/swagger-core/issues/1252
-			swagger.getDefinitions().clear();
 			try {
 				String json = Json.mapper().writeValueAsString(swagger);
 				sendStringResponse(exchange, HttpURLConnection.HTTP_OK, json);
