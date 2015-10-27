@@ -1,7 +1,11 @@
 package i5.las2peer.p2p;
 
+import java.security.PublicKey;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Random;
+
 import i5.las2peer.communication.Message;
-import i5.las2peer.p2p.pastry.PastryStorageException;
 import i5.las2peer.persistency.Envelope;
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.security.Agent;
@@ -13,17 +17,11 @@ import i5.las2peer.security.UserAgent;
 import i5.las2peer.tools.CryptoTools;
 import i5.las2peer.tools.TimerThread;
 
-import java.security.PublicKey;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Random;
-
 /**
- * Implementation of the abstract {@link Node} class mostly for testing purposes.
- * All data and agents will be stored in the same JVM, which may be used in JUnit test cases
- * or to launch a <i>local only</i> server for example.
+ * Implementation of the abstract {@link Node} class mostly for testing purposes. All data and agents will be stored in
+ * the same JVM, which may be used in JUnit test cases or to launch a <i>local only</i> server for example.
  * 
- * TODO: uses loggers / observers 
+ * TODO: uses loggers / observers
  */
 public class LocalNode extends Node {
 
@@ -50,7 +48,8 @@ public class LocalNode extends Node {
 
 	/**
 	 * get the id of this node
-	 * @return	id of this node
+	 * 
+	 * @return id of this node
 	 */
 	public Long getNodeId() {
 		return nodeId;
@@ -273,7 +272,7 @@ public class LocalNode extends Node {
 	/**
 	 * factory: launch a node
 	 * 
-	 * @return	a freshly started node
+	 * @return a freshly started node
 	 */
 	public static LocalNode launchNode() {
 		LocalNode result = newNode();
@@ -285,10 +284,9 @@ public class LocalNode extends Node {
 	 * factory: launch a node an register the given agent
 	 * 
 	 * @param a
-	 * @return	a freshly started node hosting the given agent
-	 * @throws L2pSecurityException 
-	 * @throws AgentException 
-	 * @throws PastryStorageException 
+	 * @return a freshly started node hosting the given agent
+	 * @throws L2pSecurityException
+	 * @throws AgentException
 	 */
 	public static LocalNode launchAgent(Agent a) throws L2pSecurityException, AgentException {
 		LocalNode result = launchNode();
@@ -309,7 +307,7 @@ public class LocalNode extends Node {
 	private static Hashtable<Long, Hashtable<Message, MessageResultListener>> htPendingMessages = new Hashtable<Long, Hashtable<Message, MessageResultListener>>();
 
 	/**
-	 * Hashtable with string representations of all known agents 
+	 * Hashtable with string representations of all known agents
 	 */
 	private static Hashtable<Long, String> htKnownAgents = new Hashtable<Long, String>();
 
@@ -326,6 +324,7 @@ public class LocalNode extends Node {
 
 	/**
 	 * remove a node from the central storage
+	 * 
 	 * @param node
 	 */
 	private static void unregisterNode(LocalNode node) {
@@ -336,8 +335,9 @@ public class LocalNode extends Node {
 
 	/**
 	 * get a node from the central storage
+	 * 
 	 * @param id
-	 * @return	the node with the given id 
+	 * @return the node with the given id
 	 */
 	public static LocalNode getNode(long id) {
 		synchronized (htLocalNodes) {
@@ -347,8 +347,9 @@ public class LocalNode extends Node {
 
 	/**
 	 * does the given node exist in the central storage?
+	 * 
 	 * @param id
-	 * @return	true, if a node of the given it is known to the registry
+	 * @return true, if a node of the given it is known to the registry
 	 */
 	public static boolean hasNode(long id) {
 		synchronized (htLocalNodes) {
@@ -389,7 +390,7 @@ public class LocalNode extends Node {
 	 * find the first node, where the given agent is registered to
 	 * 
 	 * @param agentId
-	 * @return	id of a node hosting the given agent
+	 * @return id of a node hosting the given agent
 	 * @throws AgentNotKnownException
 	 */
 	public static long findFirstNodeWithAgent(long agentId) throws AgentNotKnownException {
@@ -408,7 +409,7 @@ public class LocalNode extends Node {
 	 * get the ids of all nodes where the given agent is running
 	 * 
 	 * @param agentId
-	 * @return	array with all ids of nodes hosting the given agent
+	 * @return array with all ids of nodes hosting the given agent
 	 */
 	public static Long[] findAllNodesWithAgent(long agentId) {
 		synchronized (htLocalNodes) {
@@ -425,6 +426,7 @@ public class LocalNode extends Node {
 
 	/**
 	 * store messages for agents not known to this "network" of nodes
+	 * 
 	 * @param message
 	 * @param listener
 	 */
@@ -528,8 +530,7 @@ public class LocalNode extends Node {
 	}
 
 	/**
-	 * does the actual <i>sending</i> of a message in a separate thread with a configurable
-	 * delay
+	 * does the actual <i>sending</i> of a message in a separate thread with a configurable delay
 	 * 
 	 * @param nodeId
 	 * @param message
@@ -537,8 +538,8 @@ public class LocalNode extends Node {
 	 */
 	private static void localSendMessage(final long nodeId, final Message message) {
 
-		// it  is important to close the message her,
-		// since the recipient knows other versions of the involved agents 
+		// it is important to close the message her,
+		// since the recipient knows other versions of the involved agents
 		message.close();
 
 		new Thread(
