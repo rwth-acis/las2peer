@@ -114,6 +114,7 @@ public class UserAgent extends PassphraseAgent {
 
 		// TODO!!!!!!!
 		// duplicate check
+		// Verify email in Java according to Stack Overflow http://stackoverflow.com/questions/153716/verify-email-in-java
 		this.sEmail = email.toLowerCase();
 	}
 
