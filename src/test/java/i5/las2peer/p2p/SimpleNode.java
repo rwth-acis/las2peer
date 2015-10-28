@@ -1,13 +1,16 @@
 package i5.las2peer.p2p;
 
 import java.io.IOException;
-import java.net.*;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.Collection;
 import java.util.Vector;
 
 import rice.environment.Environment;
 import rice.p2p.commonapi.NodeHandle;
-import rice.pastry.*;
+import rice.pastry.NodeIdFactory;
+import rice.pastry.PastryNode;
+import rice.pastry.PastryNodeFactory;
 import rice.pastry.leafset.LeafSet;
 import rice.pastry.socket.SocketPastryNodeFactory;
 import rice.pastry.standard.RandomNodeIdFactory;
@@ -154,7 +157,7 @@ public class SimpleNode {
 	}
 
 	/**
-	 * Usage: java [-cp FreePastry-<version>.jar]
+	 * Usage: java [-cp FreePastry-&lt;version&gt;.jar]
 	 * rice.tutorial.lesson1.DistTutorial localbindport bootIP bootPort example
 	 * java rice.tutorial.DistTutorial 9001 pokey.cs.almamater.edu 9001
 	 */

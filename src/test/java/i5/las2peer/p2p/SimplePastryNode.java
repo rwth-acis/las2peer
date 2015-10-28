@@ -97,7 +97,7 @@ public class SimplePastryNode {
 
 	  /**
 	   * Usage: 
-	   * java [-cp FreePastry-<version>.jar] rice.tutorial.lesson3.DistTutorial localbindport bootIP bootPort
+	   * java [-cp FreePastry-&lt;version&gt;.jar] rice.tutorial.lesson3.DistTutorial localbindport bootIP bootPort
 	   * example java rice.tutorial.DistTutorial 9001 pokey.cs.almamater.edu 9001
 	   */
 	  public static void main(String[] args) throws Exception {

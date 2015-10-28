@@ -7,10 +7,6 @@
 	<property name="ivy.deliver.revision" value="${ivy.revision}" />
 	<property name="ivy.pom.version" value="${ivy.revision}" />
 	
-	<presetdef name="javac">
-		<javac includeantruntime="false" />
-	</presetdef>
-	
     <property name="ivy.install.version" value="2.3.0" />
     <property name="ivy.jar.dir" value="${basedir}/ivy" />
     <property name="ivy.jar.file" value="${ivy.jar.dir}/ivy.jar" />
@@ -36,10 +32,20 @@
 	<property name="export.doc" location="${export}/javadoc" />
 	<property name="export.junitdoc" location="${export}/junitdoc" />
 	
-	<property name="lib" location="lib" />
-	<property name="lib.cp"
-		location="${lib}/i5-simpleXML-0.2.jar:${lib}/commons-codec-1.7.jar:${lib}/FreePastry-2.1.jar:${lib}/junit-4.11.jar:${lib}/xpp3-1.1.4c.jar" />
-	<property name="lib.junit" location="${lib}/junit-4.11.jar:${lib}/hamcrest-core-1.3.jar" />
+	<property name="lib.dir" value="lib" />
+	<property name="lib.cp" location="${lib.dir}/i5-simpleXML-0.2.jar:${lib.dir}/commons-codec-1.10.jar:${lib.dir}/FreePastry-2.1.jar:${lib.dir}/junit-4.11.jar:${lib.dir}/xpp3-1.1.4c.jar" />
+	<property name="lib.junit" location="${lib.dir}/junit-4.11.jar:${lib.dir}/hamcrest-core-1.3.jar" />
+	
+	<property name="main-class" value="i5.las2peer.tools.L2pNodeLauncher" />
+	
+	<!-- external libraries classpath, we don't need sources and javadoc -->
+	<path id="classpath">
+		<fileset dir="${basedir}/">
+			<include name="${lib.dir}/*.jar" />
+			<exclude name="${lib.dir}/*sources.jar"/>
+			<exclude name="${lib.dir}/*javadoc.jar"/>
+		</fileset>
+	</path>
 	
 	
 	<!-- Download Dependencies (IVY) -->
@@ -50,21 +56,18 @@
 			dest="${ivy.jar.file}" usetimestamp="true"/>
     </target>
 	
-    <target name="install-ivy" depends="download-ivy" description="--> install ivy">
+    <target name="install-ivy" depends="download-ivy">
         <path id="ivy.lib.path">
             <fileset dir="${ivy.jar.dir}" includes="*.jar"/>
         </path>
         <taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" classpathref="ivy.lib.path"/>
     </target>
 	
-    <target name="get_deps" depends="install-ivy" description="--> resolve dependencies">
-        <ivy:settings>
-            <!-- <credentials host="role.dbis.rwth-aachen.de:9911/archiva"  realm="Repository internal" username="" passwd=""/> -->
-        </ivy:settings>
-        <ivy:retrieve type="jar"/>
+    <target name="get-deps" depends="install-ivy" description="--> resolve dependencies">
+        <ivy:retrieve type="jar, bundle"/>
     </target>
 	
-	<target name="deploy-snapshot" depends="get_deps,jars" description="--> deploy snapshot">
+	<target name="deploy-snapshot" depends="jars" description="--> deploy snapshot">
 		
 		<property name="sn" value="${ivy.deliver.revision}-SNAPSHOT" />
 		<local name="ivy.deliver.revision"/>
@@ -123,7 +126,7 @@
 		<mkdir dir="${export}" />
 	</target>
 	
-	<target name="init_compile" depends="init_general, get_deps">
+	<target name="init_compile" depends="init_general, get-deps">
 		<mkdir dir="${tmp.classes}" />
 		<mkdir dir="${tmp.junit}" />
 		<mkdir dir="${tmp.help1}" />
@@ -145,9 +148,10 @@
 	<target name="compile_main" depends="init_compile">
 		<javac srcdir="${src.main}"
 			destdir="${tmp.classes}"
-			classpath="${lib.cp}"
+			classpathref="classpath"
 			debug="on"
 			encoding="UTF-8"
+			includeantruntime="false"
 		/>
 		<copy todir="${tmp.classes}">
 			<fileset dir="${src.main}">
@@ -162,6 +166,7 @@
 			classpath="${lib.cp}:${tmp.classes}:${lib.junit}"
 			debug="on"
 			encoding="UTF-8"
+			includeantruntime="false"
 		/>
 		<copy todir="${tmp.junit}">
 			<fileset dir="${src.junit}">
@@ -176,6 +181,7 @@
 			classpath=""
 			debug="on"
 			encoding="UTF-8"
+			includeantruntime="false"
 		/>
 		<copy todir="${tmp.help1}">
 			<fileset dir="${src.help1}">
@@ -191,6 +197,7 @@
 			classpath=""
 			debug="on"
 			encoding="UTF-8"
+			includeantruntime="false"
 		/>
 		<copy todir="${tmp.help2}">
 			<fileset dir="${src.help2}">
@@ -260,16 +267,22 @@
 	<target name="junit_jars" depends="jar_test1-1.1, jar_test1-1.2, jar_test2-1.0" />
 	
 	<target name="main_jar" depends="compile_all">
+		<!-- constructs the external libraries classpath name -->
+		<pathconvert property="classpath.name" pathsep=" ">
+			<path refid="classpath" />
+			<mapper>
+				<chainedmapper>
+					<flattenmapper />
+				</chainedmapper>
+			</mapper>
+		</pathconvert>
 		<jar jarfile="${export.jars}/las2peer.jar">
 			<fileset dir="${tmp.classes}">
 				<exclude name="i5/las2peer/testing/services/**" />
 			</fileset>
 			<manifest>
-				<attribute name="Main-Class" value="i5.las2peer.tools.L2pNodeLauncher"/>
-				<attribute
-					name="Class-Path"
-					value="i5-simpleXML-0.2.jar commons-codec-1.9.jar FreePastry-2.1.jar xpp3-1.1.4c.jar"
-				/>
+				<attribute name="Main-Class" value="${main-class}"/>
+				<attribute name="Class-Path" value="${classpath.name}" />
 			</manifest>
 		</jar>
 	</target>
@@ -302,7 +315,7 @@
 	
 	<!-- Documentation -->
 	
-	<target name="docs" depends="java_doc, junit_doc" />
+	<target name="javadoc" depends="java_doc, junit_doc" description="--> javadoc"/>
 	
 	<target name="java_doc" depends="init_doc">
         <javadoc destdir="${export.doc}"
@@ -370,16 +383,13 @@
 	
 	<!-- Cleanup -->
 	
-	<target name="clean">
+	<target name="clean" description="--> clean">
 		<delete dir="${tmp}" />
-		<delete dir="log" />
-	</target>
-	
-	<target name="clean_deps">
-        <delete dir="${lib}" />
+		<delete dir="${export}" />
+		<delete dir="${lib.dir}" />
 	</target>
 	
 	
-	<target name="all" depends="jars, junit, docs, clean" />
+	<target name="all" depends="clean, jars, junit, javadoc" description="--> all" />
 	
 </project>
