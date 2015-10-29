@@ -7,10 +7,6 @@
 	<property name="ivy.deliver.revision" value="${ivy.revision}" />
 	<property name="ivy.pom.version" value="${ivy.revision}" />
 
-	<presetdef name="javac">
-		<javac includeantruntime="false" />
-	</presetdef>
-
 	<property name="ivy.install.version" value="2.3.0" />
 	<property name="ivy.jar.dir" value="${basedir}/ivy" />
 	<property name="ivy.jar.file" value="${ivy.jar.dir}/ivy.jar" />
@@ -31,13 +27,13 @@
 	<property name="export.jars" location="${export}/jars" />
 	<property name="export.doc" location="${export}/javadoc" />
 
-	<property name="lib" location="lib" />
+	<property name="lib" value="lib" />
 
 	<path id="libraries">
-		<fileset dir="${lib}">
-			<include name="**/*.jar" />
-			<exclude name="junit-*.jar" />
-			<exclude name="hamcrest-*.jar" />
+		<fileset dir="${basedir}/">
+			<include name="${lib}/*.jar" />
+			<exclude name="${lib}/junit-*.jar" />
+			<exclude name="${lib}/hamcrest-*.jar" />
 		</fileset>
 	</path>
 
@@ -148,6 +144,7 @@
             classpathref="libraries"
             debug="on"
             encoding="UTF-8"
+			includeantruntime="false"
 		/>
 		<copy todir="${tmp.classes}">
 			<fileset dir="${src.main}">
@@ -163,6 +160,7 @@
             classpathref="libraries"
             debug="on"
             encoding="UTF-8"
+			includeantruntime="false"
 		/>
 		<copy todir="${tmp.junit}">
 			<fileset dir="${src.junit}">
@@ -174,18 +172,27 @@
 	<target name="compile_all" depends="compile_main, compile_junit" />
 
 	<target name="jar" depends="clean, compile_all">
-		<jar jarfile="${export.jars}/las2peer-rest-mapper.jar">
+		<!-- constructs the external libraries classpath name -->
+		<pathconvert property="classpath.name" pathsep=" ">
+			<path refid="libraries" />
+			<mapper>
+				<chainedmapper>
+					<flattenmapper />
+				</chainedmapper>
+			</mapper>
+		</pathconvert>
+		<jar jarfile="${export.jars}/${ivy.module}.jar">
 			<fileset dir="${tmp.classes}">
 			</fileset>
 			<fileset dir="xsd">
 			</fileset>
 			<manifest>
-				<attribute name="Class-Path" value="swagger-annotations-1.5.0.jar jsr311-api-1.1.1.jar" />
+				<attribute name="Class-Path" value="${classpath.name}" />
 			</manifest>
 		</jar>
 	</target>
 
-	<target name="java_doc" depends="init_doc">
+	<target name="javadoc" depends="init_doc" description="--> generate Javadoc for this project" >
         <javadoc destdir="${export.doc}"
 			author="true"
 			version="true"
@@ -209,7 +216,6 @@
 
 	<target name="init_junit" depends="init_general">
 		<mkdir dir="${junit.report}" />
-		<mkdir dir="log" />
 	</target>
 
 	<target name="junit_clean">
@@ -236,16 +242,13 @@
 
 	<!-- Cleanup -->
 
-	<target name="clean">
+	<target name="clean" description="--> clean">
 		<delete dir="${tmp}" />
-		<delete dir="log" />
-	</target>
-
-	<target name="clean_deps" description="--> remove all dependencies">
+		<delete dir="${export}" />
 		<delete dir="${lib}" />
 	</target>
 
 
-	<target name="all" depends="jar, junit, java_doc, clean" />
+	<target name="all" depends="clean, jar, junit, javadoc" description="--> all" />
 
 </project>
