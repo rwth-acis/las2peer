@@ -1,5 +1,16 @@
 package i5.las2peer.security;
 
+import java.io.Serializable;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.security.KeyPair;
+import java.security.PublicKey;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import org.apache.commons.codec.binary.Base64;
+
 import i5.las2peer.api.Service;
 import i5.las2peer.classLoaders.ClassLoaderException;
 import i5.las2peer.classLoaders.L2pClassLoader;
@@ -30,17 +41,6 @@ import i5.simpleXML.Element;
 import i5.simpleXML.Parser;
 import i5.simpleXML.XMLSyntaxException;
 
-import java.io.Serializable;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.security.KeyPair;
-import java.security.PublicKey;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import org.apache.commons.codec.binary.Base64;
-
 /**
  * A service agent represents a service and its access rights in the LAS2peer setting.
  * 
@@ -58,7 +58,7 @@ public class ServiceAgent extends PassphraseAgent {
 	private int timerRunTimes = 0;
 	private int TIMER_RUN_TIMES_MAX = 3;
 	/**
-	 * instance of the service (if started at a node) 
+	 * instance of the service (if started at a node)
 	 */
 	private Service serviceInstance = null;
 
@@ -94,7 +94,7 @@ public class ServiceAgent extends PassphraseAgent {
 	/**
 	 * get the name of the service class, this service agent belongs to
 	 * 
-	 * @return	class name of the corresponding service
+	 * @return class name of the corresponding service
 	 */
 	public String getServiceClassName() {
 		return this.sServiceClass;
@@ -137,8 +137,8 @@ public class ServiceAgent extends PassphraseAgent {
 					thread.join();
 
 					if (thread.hasException()) {
-						//System.out.println ( "Exception: " + thread.getException());
-						//thread.getException().printStackTrace();
+						// System.out.println ( "Exception: " + thread.getException());
+						// thread.getException().printStackTrace();
 						if (thread.getException() instanceof InvocationTargetException
 								&& thread.getException().getCause() instanceof AgentLockedException) {
 							getRunningAtNode().observerNotice(Event.SERVICE_INVOCATION_FAILED, m.getSendingNodeId(),
@@ -225,14 +225,14 @@ public class ServiceAgent extends PassphraseAgent {
 
 	/**
 	 * create a completely new ServiceAgent for a given service class
-	 *  
-	 * @param forService	class name of the new service
-	 * @param passPhrase	a pass phrase for the private key of the agent
 	 * 
-	 * @return	a new ServiceAgent
+	 * @param forService class name of the new service
+	 * @param passPhrase a pass phrase for the private key of the agent
 	 * 
-	 * @throws CryptoException 
-	 * @throws L2pSecurityException 
+	 * @return a new ServiceAgent
+	 * 
+	 * @throws CryptoException
+	 * @throws L2pSecurityException
 	 */
 	public static ServiceAgent generateNewAgent(String forService, String passPhrase) throws CryptoException,
 			L2pSecurityException {
@@ -247,9 +247,9 @@ public class ServiceAgent extends PassphraseAgent {
 	/**
 	 * factory: create a new service agent from the given XML representation
 	 * 
-	 * @param xml	String containing XML information
+	 * @param xml String containing XML information
 	 * 
-	 * @return	a service agent
+	 * @return a service agent
 	 * 
 	 * @throws MalformedXMLException
 	 */
@@ -273,7 +273,7 @@ public class ServiceAgent extends PassphraseAgent {
 	 * 
 	 * @param root
 	 * 
-	 * @return	a service agent
+	 * @return a service agent
 	 * 
 	 * @throws MalformedXMLException
 	 */
@@ -343,13 +343,13 @@ public class ServiceAgent extends PassphraseAgent {
 			ServiceInfoAgent agent = getServiceInfoAgent();
 			agent.serviceRemoved(this, getRunningAtNode());
 		} catch (Exception e) {
-			//ignore for now
+			// ignore for now
 		}
 	}
 
 	/**
 	 * Registers and returns the {@link i5.las2peer.security.ServiceInfoAgent}
-
+	 * 
 	 * @return
 	 * @throws CryptoException
 	 * @throws L2pSecurityException
@@ -363,7 +363,8 @@ public class ServiceAgent extends PassphraseAgent {
 	}
 
 	/**
-	 * Notifies the {@link i5.las2peer.security.ServiceInfoAgent} about itself     *
+	 * Notifies the {@link i5.las2peer.security.ServiceInfoAgent} about itself *
+	 * 
 	 * @throws L2pServiceException
 	 */
 	public void serviceInfoAgentNotifyRegister() throws L2pServiceException {
@@ -404,7 +405,7 @@ public class ServiceAgent extends PassphraseAgent {
 				stopTimer();
 			}
 		} catch (Exception e) {
-			//do nothing for now
+			// do nothing for now
 		}
 	}
 
@@ -412,7 +413,7 @@ public class ServiceAgent extends PassphraseAgent {
 	 * notify this service agent, that it has been registered (for usage) at the given node
 	 * 
 	 * @param node
-	 * @throws L2pServiceException 
+	 * @throws L2pServiceException
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
@@ -421,7 +422,7 @@ public class ServiceAgent extends PassphraseAgent {
 		try {
 			ClassLoader cl = node.getBaseClassLoader();
 			if (cl instanceof L2pClassLoader) {
-				//System.out.println( "loading via L2pLoader!");
+				// System.out.println( "loading via L2pLoader!");
 				clServ = (Class<? extends Service>) ((L2pClassLoader) cl).getServiceClass(sServiceClass);
 			} else if (cl != null) {
 				clServ = (Class<? extends Service>) cl.loadClass(sServiceClass);
@@ -437,7 +438,7 @@ public class ServiceAgent extends PassphraseAgent {
 			// and the agent
 			super.notifyRegistrationTo(node);
 
-			//notify Service Info Agent
+			// notify Service Info Agent
 			serviceInfoAgentNotifyRegister();
 
 		} catch (ClassLoaderException e1) {
@@ -466,7 +467,7 @@ public class ServiceAgent extends PassphraseAgent {
 	 * 
 	 * @param serviceClassName
 	 * 
-	 * @return	(hashed) ID for the given service class 
+	 * @return (hashed) ID for the given service class
 	 */
 	public static long serviceClass2Id(String serviceClassName) {
 		return SimpleTools.longHash(serviceClassName);
@@ -474,27 +475,27 @@ public class ServiceAgent extends PassphraseAgent {
 
 	/**
 	 * is this (service) agent registered for running a service?
-	 *  
-	 * @return	true, if the agent is running at a Las2peer node
+	 * 
+	 * @return true, if the agent is running at a Las2peer node
 	 */
 	public boolean isRunning() {
 		return !isLocked() && serviceInstance != null;
 	}
 
 	/**
-	 * invoke a service method 
+	 * invoke a service method
 	 * 
 	 * @param method
 	 * @param parameters
 	 * 
-	 * @return	result of the method invocation 
+	 * @return result of the method invocation
 	 * 
-	 * @throws L2pSecurityException 
-	 * @throws InvocationTargetException 
-	 * @throws IllegalAccessException 
-	 * @throws NoSuchServiceMethodException 
-	 * @throws IllegalArgumentException 
-	 * @throws SecurityException 
+	 * @throws L2pSecurityException
+	 * @throws InvocationTargetException
+	 * @throws IllegalAccessException
+	 * @throws NoSuchServiceMethodException
+	 * @throws IllegalArgumentException
+	 * @throws SecurityException
 	 */
 	public Object invoke(String method, Object[] parameters) throws IllegalArgumentException,
 			NoSuchServiceMethodException, IllegalAccessException, InvocationTargetException, L2pSecurityException {
@@ -509,7 +510,7 @@ public class ServiceAgent extends PassphraseAgent {
 	 * 
 	 * @param task
 	 * 
-	 * @return	result of the method invocation
+	 * @return result of the method invocation
 	 * 
 	 * @throws L2pServiceException
 	 * @throws SecurityException
@@ -540,7 +541,7 @@ public class ServiceAgent extends PassphraseAgent {
 	/**
 	 * get the actual service instance bound to this agent
 	 * 
-	 * @return the instance of the curresponding service currently running at the las2peer node	
+	 * @return the instance of the curresponding service currently running at the las2peer node
 	 */
 	public Service getServiceInstance() {
 		return serviceInstance;

@@ -1,5 +1,19 @@
 package i5.las2peer.tools;
 
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import i5.las2peer.api.Connector;
 import i5.las2peer.api.ConnectorException;
 import i5.las2peer.classLoaders.L2pClassLoader;
@@ -28,28 +42,15 @@ import i5.las2peer.security.PassphraseAgent;
 import i5.las2peer.security.ServiceAgent;
 import i5.las2peer.security.UserAgent;
 import i5.las2peer.security.UserAgentList;
-
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.Serializable;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
+import i5.simpleXML.Element;
+import i5.simpleXML.Parser;
+import i5.simpleXML.XMLSyntaxException;
 import rice.p2p.commonapi.NodeHandle;
 
 /**
  * This class implements the LAS2peer node launcher functionalities.
  * 
- * All methods to be executed can be stated via additional command line parameters to the
- * {@link #main} method.
+ * All methods to be executed can be stated via additional command line parameters to the {@link #main} method.
  */
 public class L2pNodeLauncher {
 
@@ -76,8 +77,7 @@ public class L2pNodeLauncher {
 	private UserAgent currentUser;
 
 	/**
-	 * Get the envelope with the given id.
-	 * If the id is empty, the main user-list is returned.
+	 * Get the envelope with the given id. If the id is empty, the main user-list is returned.
 	 * 
 	 * @param id
 	 * 
@@ -97,8 +97,8 @@ public class L2pNodeLauncher {
 	 * Searches for the given agent in the LAS2peer network.
 	 * 
 	 * @param id
-	 * @return node handles 
-	 * @throws AgentNotKnownException 
+	 * @return node handles
+	 * @throws AgentNotKnownException
 	 */
 	public Object[] findAgent(String id) throws AgentNotKnownException {
 		long agentId = Long.parseLong(id);
@@ -126,11 +126,11 @@ public class L2pNodeLauncher {
 	}
 
 	/**
-	 * load passphrases from a simple text file where each line consists of
-	 * the filename of the agent's xml file and a passphrase separated by a ; 
-	 *  
+	 * load passphrases from a simple text file where each line consists of the filename of the agent's xml file and a
+	 * passphrase separated by a ;
+	 * 
 	 * @param filename
-	 * @return	hashtable containing agent file &gt;&gt; passphrase
+	 * @return hashtable containing agent file &gt;&gt; passphrase
 	 */
 	private Hashtable<String, String> loadPassphrases(String filename) {
 		Hashtable<String, String> result = new Hashtable<String, String>();
@@ -155,15 +155,14 @@ public class L2pNodeLauncher {
 	}
 
 	/**
-	 * Uploads the contents of the given directory to the global storage of the 
-	 * LAS2peer network.
+	 * Uploads the contents of the given directory to the global storage of the LAS2peer network.
 	 * 
-	 * Each contained .xml-file is used as an artifact or - in case the 
-	 * name of the file starts with <i>agent-</i> - as an agent to upload.
+	 * Each contained .xml-file is used as an artifact or - in case the name of the file starts with <i>agent-</i> - as
+	 * an agent to upload.
 	 *
-	 * If agents are to be uploaded, make sure, that the startup directory
-	 * contains a <i>passphrases.txt</i> file giving the passphrases for the agents.
-	 *   
+	 * If agents are to be uploaded, make sure, that the startup directory contains a <i>passphrases.txt</i> file giving
+	 * the passphrases for the agents.
+	 * 
 	 * @param directory
 	 */
 	public void uploadStartupDirectory(String directory) {
@@ -263,14 +262,13 @@ public class L2pNodeLauncher {
 	}
 
 	/**
-	 * Upload the contents of the <i>startup</i> sub directory to the global storage of the 
-	 * LAS2peer network.
+	 * Upload the contents of the <i>startup</i> sub directory to the global storage of the LAS2peer network.
 	 * 
-	 * Each contained .xml-file is used as an artifact or - in case the 
-	 * name of the file starts with <i>agent-</i> - as an agent to upload.
+	 * Each contained .xml-file is used as an artifact or - in case the name of the file starts with <i>agent-</i> - as
+	 * an agent to upload.
 	 * 
-	 * If agents are to be uploaded, make sure, that the startup directory
-	 * contains a <i>passphrases.txt</i> file giving the passphrases for the agents.  
+	 * If agents are to be uploaded, make sure, that the startup directory contains a <i>passphrases.txt</i> file giving
+	 * the passphrases for the agents.
 	 */
 	public void uploadStartupDirectory() {
 		uploadStartupDirectory("etc/startup");
@@ -369,13 +367,13 @@ public class L2pNodeLauncher {
 	}
 
 	/**
-	 * Try to register the user of the given id at the node and for later usage in this launcher,
-	 * i.e. for service method calls via {@link #invoke}.
+	 * Try to register the user of the given id at the node and for later usage in this launcher, i.e. for service
+	 * method calls via {@link #invoke}.
 	 * 
 	 * @param id id or login of the agent to load
 	 * @param passphrase passphrase to unlock the private key of the agent
 	 * 
-	 * @return	the registered agent
+	 * @return the registered agent
 	 */
 	public boolean registerUserAgent(String id, String passphrase) {
 		try {
@@ -415,8 +413,8 @@ public class L2pNodeLauncher {
 	/**
 	 * Register the given agent at the LAS2peer node and for later usage with {@link #invoke}.
 	 * 
-	 * If the private key of the agent is not unlocked and a pass phrase has been given, an attempt to 
-	 * unlock the key is started before registering.
+	 * If the private key of the agent is not unlocked and a pass phrase has been given, an attempt to unlock the key is
+	 * started before registering.
 	 * 
 	 * @param agent
 	 * @param passphrase
@@ -433,8 +431,7 @@ public class L2pNodeLauncher {
 		try {
 			node.registerReceiver(agent);
 
-		} catch (AgentAlreadyRegisteredException e)
-		{
+		} catch (AgentAlreadyRegisteredException e) {
 		}
 		currentUser = agent;
 	}
@@ -467,7 +464,8 @@ public class L2pNodeLauncher {
 	 * @param parameters pass an empty string if you want to call a method without parameters
 	 * @throws L2pServiceException any exception during service method invocation
 	 */
-	public Serializable invoke(String serviceClass, String serviceMethod, String parameters) throws L2pServiceException {
+	public Serializable invoke(String serviceClass, String serviceMethod, String parameters)
+			throws L2pServiceException {
 		if (parameters.equals(""))
 			return invoke(serviceClass, serviceMethod, new Serializable[0]);
 		String[] split = parameters.trim().split("-");
@@ -507,11 +505,11 @@ public class L2pNodeLauncher {
 	 * @return list of methods encapsulated in a ListMethodsContent
 	 * 
 	 * @throws L2pSecurityException
-	 * @throws AgentNotKnownException 
-	 * @throws InterruptedException 
-	 * @throws SerializationException 
-	 * @throws EncodingFailedException 
-	 * @throws TimeoutException 
+	 * @throws AgentNotKnownException
+	 * @throws InterruptedException
+	 * @throws SerializationException
+	 * @throws EncodingFailedException
+	 * @throws TimeoutException
 	 */
 	public ListMethodsContent getServiceMethods(String serviceName) throws L2pSecurityException,
 			AgentNotKnownException, InterruptedException, EncodingFailedException, SerializationException,
@@ -530,8 +528,8 @@ public class L2pNodeLauncher {
 	}
 
 	/**
-	 * Generate a new {@link i5.las2peer.security.ServiceAgent} instance for the given
-	 * service class and start an instance of this service at the current LAS2peer node.
+	 * Generate a new {@link i5.las2peer.security.ServiceAgent} instance for the given service class and start an
+	 * instance of this service at the current LAS2peer node.
 	 * 
 	 * @param serviceClass
 	 * 
@@ -562,6 +560,7 @@ public class L2pNodeLauncher {
 
 	/**
 	 * start a service defined by an XML file of the corresponding agent
+	 * 
 	 * @param file
 	 * @param passphrase
 	 * @return the service agent
@@ -585,10 +584,10 @@ public class L2pNodeLauncher {
 	 * 
 	 * @param serviceClass
 	 * @param agentPass
-	 * @throws L2pSecurityException 
-	 * @throws AgentException 
-	 * @throws AgentAlreadyRegisteredException 
-	 * @throws CryptoException 
+	 * @throws L2pSecurityException
+	 * @throws AgentException
+	 * @throws AgentAlreadyRegisteredException
+	 * @throws CryptoException
 	 */
 	public void startService(String serviceClass, String agentPass) throws AgentNotKnownException,
 			L2pSecurityException, AgentAlreadyRegisteredException, AgentException, CryptoException {
@@ -625,10 +624,10 @@ public class L2pNodeLauncher {
 	/**
 	 * load an agent from an XML file and return it for later usage
 	 * 
-	 * @param filename	name of the file to load
+	 * @param filename name of the file to load
 	 * 
-	 * @return	the loaded agent 
-	 * @throws AgentException 
+	 * @return the loaded agent
+	 * @throws AgentException
 	 */
 	public Agent loadAgentFromXml(String filename) throws AgentException {
 		try {
@@ -642,6 +641,7 @@ public class L2pNodeLauncher {
 
 	/**
 	 * try to unlock the private key of the given agent with the given pass phrase
+	 * 
 	 * @param agent
 	 * @param passphrase
 	 * @throws L2pSecurityException
@@ -651,19 +651,17 @@ public class L2pNodeLauncher {
 	}
 
 	/**
-	 * start interactive console mode
-	 * based on a {@link i5.las2peer.tools.CommandPrompt}
+	 * start interactive console mode based on a {@link i5.las2peer.tools.CommandPrompt}
 	 */
 	public void interactive() {
 		System.out
 				.println(
-				"Entering interactive mode for node "
-						+ this
-						+ "\n"
-						+ "-----------------------------------------------\n"
-						+ "Enter 'help' for further information of the console.\n"
-						+ "Use all public methods of the L2pNodeLauncher class for interaction with the P2P network.\n\n"
-				);
+						"Entering interactive mode for node "
+								+ this
+								+ "\n"
+								+ "-----------------------------------------------\n"
+								+ "Enter 'help' for further information of the console.\n"
+								+ "Use all public methods of the L2pNodeLauncher class for interaction with the P2P network.\n\n");
 
 		commandPrompt.startPrompt();
 
@@ -673,8 +671,8 @@ public class L2pNodeLauncher {
 	/**
 	 * get the information stored about the local Node
 	 * 
-	 * @return a node information 
-	 * @throws CryptoException 
+	 * @return a node information
+	 * @throws CryptoException
 	 */
 	public NodeInformation getLocalNodeInfo() throws CryptoException {
 		return node.getNodeInformation();
@@ -697,7 +695,8 @@ public class L2pNodeLauncher {
 	 * @param monitoringObserver determines, if the monitoring-observer will be started at this node
 	 * @param cl the classloader to be used with this node
 	 */
-	private L2pNodeLauncher(int port, String bootstrap, boolean monitoringObserver, L2pClassLoader cl, Long nodeIdSeed) {
+	private L2pNodeLauncher(int port, String bootstrap, boolean monitoringObserver, L2pClassLoader cl,
+			Long nodeIdSeed) {
 		if (System.getenv().containsKey("MEM_STORAGE")) {
 			node = new PastryNodeImpl(port, bootstrap, STORAGE_MODE.memory, monitoringObserver, cl, nodeIdSeed);
 		} else {
@@ -718,6 +717,7 @@ public class L2pNodeLauncher {
 
 	/**
 	 * actually start the node
+	 * 
 	 * @throws NodeException
 	 */
 	private void start() throws NodeException {
@@ -727,6 +727,7 @@ public class L2pNodeLauncher {
 
 	/**
 	 * Prints a (yellow) message to the console.
+	 * 
 	 * @param message
 	 */
 	private void printMessage(String message) {
@@ -735,6 +736,7 @@ public class L2pNodeLauncher {
 
 	/**
 	 * Prints a (red) warning message to the console.
+	 * 
 	 * @param message
 	 */
 	private void printWarning(String message) {
@@ -905,8 +907,8 @@ public class L2pNodeLauncher {
 				.println("\t{optional: --windows-shell|-w} -p [port] {optional1} {optional2} {method1} {method2} ...");
 
 		System.out.println("\nOptional arguments");
-		System.out
-				.println("\t--windows-shell|-w disables the colored output (better readable for windows command line clients)\n");
+		System.out.println(
+				"\t--windows-shell|-w disables the colored output (better readable for windows command line clients)\n");
 		System.out.println("\t--log-directory|-l [directory] lets you choose the directory for log files (default: "
 				+ DEFAULT_LOG_DIRECTORY + ")\n");
 		System.out
@@ -917,10 +919,12 @@ public class L2pNodeLauncher {
 		System.out.println("\tno bootstrap argument states, that a complete new LAS2peer network is to start");
 		System.out.println("\tor");
 		System.out
-				.println("\t--bootstrap|-b [host-list] requires a comma seperated list of [address:ip] pairs of bootstrap nodes to connect to. This argument can occur multiple times.\n");
+				.println(
+						"\t--bootstrap|-b [host-list] requires a comma seperated list of [address:ip] pairs of bootstrap nodes to connect to. This argument can occur multiple times.\n");
 		System.out.println("\t--observer|-o starts a monitoring observer at this node\n");
 		System.out
-				.println("\t--node-id-seed|-n [long] generates the node id by using this seed to provide persistence\n");
+				.println(
+						"\t--node-id-seed|-n [long] generates the node id by using this seed to provide persistence\n");
 
 		System.out.println("The following methods can be used in arbitrary order and number:");
 
@@ -945,11 +949,11 @@ public class L2pNodeLauncher {
 	/**
 	 * Main method for command line processing.
 	 * 
-	 * The method will start a node and try to invoke all command line parameters as
-	 * parameterless methods of this class.
+	 * The method will start a node and try to invoke all command line parameters as parameterless methods of this
+	 * class.
 	 * 
-	 * Hint: use "windows_shell" as the first command to turn off all colored output
-	 * (since this creates cryptic symbols in a Windows environment).
+	 * Hint: use "windows_shell" as the first command to turn off all colored output (since this creates cryptic symbols
+	 * in a Windows environment).
 	 * 
 	 * Hint: with "log-directory=.." you can set the logfile directory you want to use.
 	 * 
@@ -963,7 +967,7 @@ public class L2pNodeLauncher {
 	 * @throws L2pSecurityException
 	 * @throws EncodingFailedException
 	 * @throws SerializationException
-	 * @throws NodeException 
+	 * @throws NodeException
 	 */
 	public static void main(String[] argv) throws InterruptedException, MalformedXMLException, IOException,
 			L2pSecurityException, EncodingFailedException, SerializationException, NodeException {
