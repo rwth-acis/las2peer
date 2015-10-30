@@ -378,26 +378,34 @@ public class L2pClassLoader extends ClassLoader {
 	public Class<?> getServiceClass(String serviceClassName) throws ClassLoaderException, ClassNotFoundException {
 		String sPackage = getPackageName(serviceClassName);
 
-		Hashtable<LibraryVersion, BundleClassLoader> htVersions = registeredLoaders.get(sPackage);
-		if (htVersions == null || htVersions.size() == 0) {
-			registerService(serviceClassName);
-			htVersions = registeredLoaders.get(sPackage);
-		}
-
-		LibraryVersion version = null;
-		for (Enumeration<LibraryVersion> en = htVersions.keys(); en.hasMoreElements();) {
-			LibraryVersion v = en.nextElement();
-			if (version == null || v.isLargerThan(version))
-				version = v;
-		}
-
-		BundleClassLoader bcl = htVersions.get(version);
-
 		try {
-			return bcl.loadClass(serviceClassName);
-		} catch (ClassNotFoundException e) {
-			throw new LibraryNotFoundException(
-					"The library for " + serviceClassName + " could be loaded, but the class is not available!", e);
+			Hashtable<LibraryVersion, BundleClassLoader> htVersions = registeredLoaders.get(sPackage);
+			if (htVersions == null || htVersions.size() == 0) {
+				registerService(serviceClassName);
+				htVersions = registeredLoaders.get(sPackage);
+			}
+
+			LibraryVersion version = null;
+			for (Enumeration<LibraryVersion> en = htVersions.keys(); en.hasMoreElements();) {
+				LibraryVersion v = en.nextElement();
+				if (version == null || v.isLargerThan(version))
+					version = v;
+			}
+
+			BundleClassLoader bcl = htVersions.get(version);
+
+			try {
+				return bcl.loadClass(serviceClassName);
+			} catch (ClassNotFoundException e) {
+				throw new LibraryNotFoundException(
+						"The library for " + serviceClassName + " could be loaded, but the class is not available!", e);
+			}
+		} catch (LibraryNotFoundException e) {
+			// class could not be found in any registered library, try default classpath
+			// this is usually the case when executed within an IDE
+			System.err.println("No library found for " + serviceClassName
+					+ "! Trying default classpath! This should not happen in a productive environment.");
+			return this.getClass().getClassLoader().loadClass(serviceClassName);
 		}
 	}
 

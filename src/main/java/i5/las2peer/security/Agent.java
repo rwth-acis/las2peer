@@ -299,11 +299,30 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	 * @return an agent
 	 * 
 	 * @throws MalformedXMLException
+	 * @throws XMLSyntaxException
 	 */
 	public static Agent createFromXml(String xml) throws MalformedXMLException {
 		try {
-			Element root = Parser.parse(xml, false);
+			return createFromXml(Parser.parse(xml, false));
+		} catch (XMLSyntaxException e) {
+			throw new MalformedXMLException("Error parsing xml string", e);
+		}
+	}
 
+	/**
+	 * Factory: Create an agent from its XML representation.
+	 * 
+	 * Depending on the type attribute of the root node, the type will be a {@link UserAgent}, {@link GroupAgent},
+	 * {@link ServiceAgent}. Creation of {@link MonitoringAgent}s is not supported.
+	 * 
+	 * @param xml
+	 * 
+	 * @return an agent
+	 * 
+	 * @throws MalformedXMLException
+	 */
+	public static Agent createFromXml(Element root) throws MalformedXMLException {
+		try {
 			if (!root.getName().equals("agent"))
 				throw new MalformedXMLException("this is not an agent but a " + root.getName());
 

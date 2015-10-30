@@ -900,36 +900,28 @@ public final class Envelope implements XmlAble, Cloneable {
 	}
 
 	/**
-	 * sets the state of the object from a string representation resulting from a previous {@link #toXmlString} call.
-	 *
-	 * Usually, a standard constructor is used to get a fresh instance of the class and the set the complete state via
-	 * this method.
-	 *
-	 * @param xml a String
-	 *
-	 * @exception MalformedXMLException
-	 *
+	 * factory for generating an envelope from the given xml String representation
+	 * 
+	 * @param xml
+	 * @return envelope created from the given xml String serialization
+	 * 
+	 * @throws MalformedXMLException
 	 */
-	public void setStateFromXml(String xml) throws MalformedXMLException {
-		htEncryptedKeys = new Hashtable<Long, byte[]>();
-		htEncryptedGroupKeys = new Hashtable<Long, byte[]>();
-		baPlainData = baCipherData = null;
-		symmetricKey = null;
-
+	public static Envelope createFromXml(Element root) throws MalformedXMLException {
+		Envelope result = new Envelope();
 		try {
-			Element root = Parser.parse(xml, false);
 			if (!root.getName().equals("envelope"))
 				throw new MalformedXMLException("not an envelope");
 
 			if (!root.hasAttribute("id"))
 				throw new MalformedXMLException("id attribute expected!");
 			if (root.hasAttribute("blindOverwrite"))
-				bOverwriteBlindly = Boolean.valueOf(root.getAttribute("blindOverwrite"));
+				result.bOverwriteBlindly = Boolean.valueOf(root.getAttribute("blindOverwrite"));
 			if (root.hasAttribute("overwrite"))
-				bUpdateContent = Boolean.valueOf(root.getAttribute("update"));
+				result.bUpdateContent = Boolean.valueOf(root.getAttribute("update"));
 
-			id = Long.parseLong(root.getAttribute("id"));
-			loadedTimestamp = timestamp = Long.parseLong(root.getAttribute("lastchange"));
+			result.id = Long.parseLong(root.getAttribute("id"));
+			result.loadedTimestamp = result.timestamp = Long.parseLong(root.getAttribute("lastchange"));
 
 			Element content = root.getFirstChild();
 			if (!content.getName().equals("content"))
@@ -937,20 +929,20 @@ public final class Envelope implements XmlAble, Cloneable {
 			if (!content.getAttribute("encoding").equals("Base64"))
 				throw new MalformedXMLException("base 64 encoding of the content expected");
 
-			contentType = stringToType(content.getAttribute("type"));
+			result.contentType = stringToType(content.getAttribute("type"));
 			if (content.hasAttribute("class"))
 				try {
 					String classname = content.getAttribute("class");
 					if (classname.endsWith("[]"))
 						classname = classname.substring(0, classname.length() - 2);
 
-					clContentClass = Class.forName(classname);
+					result.clContentClass = Class.forName(classname);
 
 				} catch (ClassNotFoundException e) {
 					throw new MalformedXMLException("content class " + content.getAttribute("class") + " not found!");
 				}
 
-			baCipherData = Base64.decodeBase64(content.getFirstChild().getText());
+			result.baCipherData = Base64.decodeBase64(content.getFirstChild().getText());
 
 			Element keys = root.getChild(1);
 			if (!keys.getName().equals("keys"))
@@ -970,9 +962,9 @@ public final class Envelope implements XmlAble, Cloneable {
 				long id = Long.parseLong(key.getAttribute("id"));
 
 				if (key.hasAttribute("type") && key.getAttribute("type").equals("group"))
-					htEncryptedGroupKeys.put(id, Base64.decodeBase64(key.getFirstChild().getText()));
+					result.htEncryptedGroupKeys.put(id, Base64.decodeBase64(key.getFirstChild().getText()));
 				else
-					htEncryptedKeys.put(id, Base64.decodeBase64(key.getFirstChild().getText()));
+					result.htEncryptedKeys.put(id, Base64.decodeBase64(key.getFirstChild().getText()));
 			}
 
 			// signaturen
@@ -992,7 +984,7 @@ public final class Envelope implements XmlAble, Cloneable {
 						throw new MalformedXMLException("signature expected");
 
 					long id = Long.parseLong(sig.getAttribute("id"));
-					htSignatures.put(id, Base64.decodeBase64(sig.getFirstChild().getText()));
+					result.htSignatures.put(id, Base64.decodeBase64(sig.getFirstChild().getText()));
 				}
 			}
 
@@ -1001,8 +993,9 @@ public final class Envelope implements XmlAble, Cloneable {
 		}
 
 		// TODO signatures ?!?
-		// further xml checks?
+		// further XML checks?
 
+		return result;
 	}
 
 	/**
@@ -1040,17 +1033,19 @@ public final class Envelope implements XmlAble, Cloneable {
 	}
 
 	/**
-	 * factory for generating an envelope from the given xml representation
+	 * factory for generating an envelope from the given XML String representation
 	 * 
 	 * @param xml
-	 * @return envelope created from the given xml serialization
+	 * @return envelope created from the given XML String serialization
 	 * 
 	 * @throws MalformedXMLException
 	 */
 	public static Envelope createFromXml(String xml) throws MalformedXMLException {
-		Envelope result = new Envelope();
-		result.setStateFromXml(xml);
-		return result;
+		try {
+			return createFromXml(Parser.parse(xml, false));
+		} catch (XMLSyntaxException e) {
+			throw new MalformedXMLException("problems with parsing the xml document", e);
+		}
 	}
 
 	/**

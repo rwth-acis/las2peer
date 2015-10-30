@@ -141,7 +141,12 @@ public class L2pNodeLauncher {
 			try {
 				content = FileContentReader.read(file).split("\n");
 				for (String line : content) {
-					String[] split = line.trim().split(";", 2);
+					line = line.trim();
+					String[] split = line.split(";", 2);
+					if (split.length != 2) {
+						printWarning("Ignoring invalid passphrase line (" + line + ") in '" + filename + "'");
+						continue;
+					}
 					result.put(split[0], split[1]);
 				}
 			} catch (IOException e) {
@@ -172,49 +177,54 @@ public class L2pNodeLauncher {
 		Hashtable<String, String> htPassphrases = loadPassphrases(directory + "/passphrases.txt");
 		Map<Long, String> agentIdToXml = new HashMap<Long, String>();
 		List<GroupAgent> groupAgents = new LinkedList<GroupAgent>();
-		for (File xml : dir.listFiles(new FilenameFilter() {
+		for (File xmlFile : dir.listFiles(new FilenameFilter() {
 			@Override
 			public boolean accept(File dir, String name) {
 				return name.toLowerCase().endsWith(".xml");
 			}
 		})) {
 			try {
-				String content = FileContentReader.read(xml);
-				if (xml.getName().toLowerCase().startsWith("agent")) {
-					Agent agent = Agent.createFromXml(content);
-					agentIdToXml.put(agent.getId(), xml.getName());
+				Element xmlRoot = Parser.parse(xmlFile, false);
+				if (xmlRoot.getName().equalsIgnoreCase(Agent.class.getSimpleName())) {
+					Agent agent = Agent.createFromXml(xmlRoot);
+					agentIdToXml.put(agent.getId(), xmlFile.getName());
 					if (agent instanceof PassphraseAgent) {
-						String passphrase = htPassphrases.get(xml.getName());
+						String passphrase = htPassphrases.get(xmlFile.getName());
 						if (passphrase != null) {
 							((PassphraseAgent) agent).unlockPrivateKey(passphrase);
 						} else {
-							printWarning("\t- got no passphrase for agent from " + xml.getName());
+							printWarning("\t- got no passphrase for agent from " + xmlFile.getName());
 						}
 						node.storeAgent(agent);
-						printMessage("\t- stored agent from " + xml);
+						printMessage("\t- stored agent from " + xmlFile);
 					} else if (agent instanceof GroupAgent) {
 						GroupAgent ga = (GroupAgent) agent;
 						groupAgents.add(ga);
 					} else {
 						throw new IllegalArgumentException("Unknown agent type: " + agent.getClass());
 					}
-				} else {
-					Envelope e = Envelope.createFromXml(content);
+				} else if (xmlRoot.getName().equalsIgnoreCase(Envelope.class.getSimpleName())) {
+					Envelope e = Envelope.createFromXml(xmlRoot);
 					node.storeArtifact(e);
-					printMessage("\t- stored artifact from " + xml);
+					printMessage("\t- stored artifact from " + xmlFile);
+				} else {
+					printWarning(
+							"Ingoring unknown XML object (" + xmlRoot.getName() + ") in '" + xmlFile.toString() + "'!");
 				}
+			} catch (XMLSyntaxException e1) {
+				printWarning("Unable to parse XML contents of '" + xmlFile.toString() + "'!");
 			} catch (MalformedXMLException e) {
-				printWarning("unable to deserialize contents of " + xml.toString() + " into an XML envelope!");
+				printWarning("unable to deserialize contents of " + xmlFile.toString() + "!");
 			} catch (IOException e) {
-				printWarning("problems reading the contents of " + xml.toString() + ": " + e);
+				printWarning("problems reading the contents of " + xmlFile.toString() + ": " + e);
 			} catch (L2pSecurityException e) {
-				printWarning("error storing agent from " + xml.toString() + ": " + e);
+				printWarning("error storing agent from " + xmlFile.toString() + ": " + e);
 			} catch (AgentAlreadyRegisteredException e) {
-				printWarning("agent from " + xml.toString() + " already known at this node!");
+				printWarning("agent from " + xmlFile.toString() + " already known at this node!");
 			} catch (AgentException e) {
-				printWarning("unable to generate agent " + xml.toString() + "!");
+				printWarning("unable to generate agent " + xmlFile.toString() + "!");
 			} catch (StorageException e) {
-				printWarning("unable to store contents of " + xml.toString() + "!");
+				printWarning("unable to store contents of " + xmlFile.toString() + "!");
 			}
 		}
 		node.forceUserListUpdate();
