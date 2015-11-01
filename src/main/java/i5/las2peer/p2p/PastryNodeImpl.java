@@ -1,5 +1,21 @@
 package i5.las2peer.p2p;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.Serializable;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.util.Collection;
+import java.util.Hashtable;
+import java.util.Properties;
+import java.util.Vector;
+
 import i5.las2peer.classLoaders.L2pClassLoader;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
@@ -21,23 +37,6 @@ import i5.las2peer.security.MessageReceiver;
 import i5.las2peer.security.UserAgent;
 import i5.las2peer.tools.ColoredOutput;
 import i5.las2peer.tools.SerializationException;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.Serializable;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
-import java.util.Collection;
-import java.util.Hashtable;
-import java.util.Properties;
-import java.util.Vector;
-
 import rice.environment.Environment;
 import rice.p2p.commonapi.Id;
 import rice.p2p.commonapi.NodeHandle;
@@ -58,11 +57,10 @@ import rice.persistence.StorageManagerImpl;
 /**
  * A <a href="http://freepastry.org">FreePastry</a> implementation of a LAS2peer {@link Node}.
  * 
- * This class is the actual heart of the p2p based network of interacting nodes an agents in
- * the LAS2peer setting.
+ * This class is the actual heart of the p2p based network of interacting nodes an agents in the LAS2peer setting.
  * 
- * The package {@link i5.las2peer.p2p.pastry} provides all necessary helper classes
- * for the integration (and encapsulation) of the FreePastry library.
+ * The package {@link i5.las2peer.p2p.pastry} provides all necessary helper classes for the integration (and
+ * encapsulation) of the FreePastry library.
  */
 public class PastryNodeImpl extends Node {
 
@@ -76,8 +74,7 @@ public class PastryNodeImpl extends Node {
 	private int pastReplicas = DEFAULT_PAST_REPLICAS;
 
 	/**
-	 * Storage mode for the pastry node &ndash; either use only memory or the filesystem
-	 * for stored artifacts.
+	 * Storage mode for the pastry node &ndash; either use only memory or the filesystem for stored artifacts.
 	 */
 	public enum STORAGE_MODE {
 		filesystem, memory
@@ -107,10 +104,8 @@ public class PastryNodeImpl extends Node {
 	private BasicAgentStorage locallyKnownAgents;
 
 	/**
-	 * create a node listening to the given port an 
-	 * trying to connect to the hosts given in the bootstrap string
-	 * The bootstrap string may be a comma separated lists of host possibly including
-	 * port information separated by a colon.
+	 * create a node listening to the given port an trying to connect to the hosts given in the bootstrap string The
+	 * bootstrap string may be a comma separated lists of host possibly including port information separated by a colon.
 	 * 
 	 * Leave the bootstrap empty or null to start a new ring
 	 * 
@@ -124,8 +119,7 @@ public class PastryNodeImpl extends Node {
 	}
 
 	/**
-	 * create a standard node on localhost trying to connect
-	 * to the standard bootstrap
+	 * create a standard node on localhost trying to connect to the standard bootstrap
 	 * 
 	 * @throws UnknownHostException
 	 */
@@ -135,7 +129,7 @@ public class PastryNodeImpl extends Node {
 
 	/**
 	 * create a standard node on localhost trying to connect to the standard bootstrap
-	 *  
+	 * 
 	 * @param mode
 	 */
 	public PastryNodeImpl(STORAGE_MODE mode) {
@@ -145,10 +139,9 @@ public class PastryNodeImpl extends Node {
 	}
 
 	/**
-	 * create a node listening to the given port an 
-	 * trying to connect to the hosts given in the bootstrap string
-	 * The bootstrap string may be a comma separated lists of host possibly including
-	 * port information separated be a colon. Leave empty or null to start a new ring.
+	 * create a node listening to the given port an trying to connect to the hosts given in the bootstrap string The
+	 * bootstrap string may be a comma separated lists of host possibly including port information separated be a colon.
+	 * Leave empty or null to start a new ring.
 	 * 
 	 * @param port
 	 * @param bootstrap
@@ -158,10 +151,9 @@ public class PastryNodeImpl extends Node {
 	}
 
 	/**
-	 * create a node listening to the given port an 
-	 * trying to connect to the hosts given in the bootstrap string
-	 * The bootstrap string may be a comma separated lists of host possibly including
-	 * port information separated be a colon. Leave empty or null to start a new ring.
+	 * create a node listening to the given port an trying to connect to the hosts given in the bootstrap string The
+	 * bootstrap string may be a comma separated lists of host possibly including port information separated be a colon.
+	 * Leave empty or null to start a new ring.
 	 * 
 	 * @param port
 	 * @param bootstrap
@@ -173,13 +165,12 @@ public class PastryNodeImpl extends Node {
 	}
 
 	/**
-	 * create a node listening to the given port an 
-	 * trying to connect to the hosts given in the bootstrap string
-	 * The bootstrap string may be a comma separated lists of host possibly including
-	 * port information separated be a colon. Leave empty or null to start a new ring.
+	 * create a node listening to the given port an trying to connect to the hosts given in the bootstrap string The
+	 * bootstrap string may be a comma separated lists of host possibly including port information separated be a colon.
+	 * Leave empty or null to start a new ring.
 	 * 
 	 * The observer-flag determines, if the node will be available for monitoring.
-	 *  
+	 * 
 	 * @param port
 	 * @param bootstrap
 	 * @param mode
@@ -235,7 +226,7 @@ public class PastryNodeImpl extends Node {
 	/**
 	 * access to the underlying pastry node
 	 * 
-	 * @return	the pastry node representing this las2peer node
+	 * @return the pastry node representing this las2peer node
 	 */
 	public PastryNode getPastryNode() {
 		return pastryNode;
@@ -243,12 +234,13 @@ public class PastryNodeImpl extends Node {
 
 	/**
 	 * generate a collection of InetSocketAddresses from the given bootstrap string
-	 * @return	collection of InetSocketAddresses from the given bootstrap string
+	 * 
+	 * @return collection of InetSocketAddresses from the given bootstrap string
 	 */
 	private Collection<InetSocketAddress> getBootstrapAddresses() {
 		Vector<InetSocketAddress> result = new Vector<InetSocketAddress>();
 
-		if (bootStrap == null || bootStrap.equals(""))
+		if (bootStrap == null || bootStrap.isEmpty())
 			return result;
 
 		String[] addresses = bootStrap.split(",");
@@ -311,7 +303,7 @@ public class PastryNodeImpl extends Node {
 			properties.put("nat_network_prefixes", "127.0.0.1;10.;192.168.;");
 
 		if (!properties.containsKey("pastry_socket_known_network_address"))
-			//properties.put( "pastry_socket_known_network_address", "127.0.0.1");
+			// properties.put( "pastry_socket_known_network_address", "127.0.0.1");
 			if (!properties.containsKey("pastry_socket_known_network_address_port"))
 				properties.put("pastry_socket_known_network_address_port", "80");
 
@@ -338,11 +330,12 @@ public class PastryNodeImpl extends Node {
 	 * setup all pastry applications to run on this node
 	 * 
 	 * this will be
-	 * <ul><li>the application for message passing {@link NodeApplication}</li>
-	 * <li>a Past DHT storage from freepastry</li></ul>
+	 * <ul>
+	 * <li>the application for message passing {@link NodeApplication}</li>
+	 * <li>a Past DHT storage from freepastry</li>
+	 * </ul>
 	 * 
-	 * For the past DHT either a memory mode or a disk persistence mode are selected
-	 * based on {@link STORAGE_MODE}
+	 * For the past DHT either a memory mode or a disk persistence mode are selected based on {@link STORAGE_MODE}
 	 * 
 	 * @throws IOException
 	 */
@@ -381,26 +374,27 @@ public class PastryNodeImpl extends Node {
 					@Override
 					public rice.pastry.Id generateNodeId() {
 						// same method as in rice.pastry.standard.RandomNodeIdFactory but except using nodeIdSeed
-					    byte raw[] = new byte[8];
-					    long tmp = ++nodeIdSeed;
-					    for (int i = 0; i < 8; i++) {
-					      raw[i] = (byte) (tmp & 0xff);
-					      tmp >>= 8;
-					    }
-					    MessageDigest md = null;
-					    try {
-					      md = MessageDigest.getInstance("SHA");
-					    } catch (NoSuchAlgorithmException e) {
-					      throw new RuntimeException("No SHA support!",e);
-					    }
-					    md.update(raw);
-					    byte[] digest = md.digest();
-					    rice.pastry.Id nodeId = rice.pastry.Id.build(digest);
-					    return nodeId;
+						byte raw[] = new byte[8];
+						long tmp = ++nodeIdSeed;
+						for (int i = 0; i < 8; i++) {
+							raw[i] = (byte) (tmp & 0xff);
+							tmp >>= 8;
+						}
+						MessageDigest md = null;
+						try {
+							md = MessageDigest.getInstance("SHA");
+						} catch (NoSuchAlgorithmException e) {
+							throw new RuntimeException("No SHA support!", e);
+						}
+						md.update(raw);
+						byte[] digest = md.digest();
+						rice.pastry.Id nodeId = rice.pastry.Id.build(digest);
+						return nodeId;
 					}
 				};
 			}
-			InternetPastryNodeFactory factory = new InternetPastryNodeFactory(nidFactory, pastryPort, pastryEnvironment);
+			InternetPastryNodeFactory factory = new InternetPastryNodeFactory(nidFactory, pastryPort,
+					pastryEnvironment);
 			pastryNode = factory.newNode();
 
 			setupPastryApplications();
@@ -463,7 +457,7 @@ public class PastryNodeImpl extends Node {
 			super.registerReceiver(receiver);
 			application.registerAgentTopic(receiver);
 
-			//Observer is called in superclass!
+			// Observer is called in superclass!
 		}
 
 	}
@@ -495,7 +489,7 @@ public class PastryNodeImpl extends Node {
 		if (!(atNodeId instanceof NodeHandle)) {
 			String addition = "(null)";
 			if (atNodeId != null)
-				addition = "" + atNodeId.getClass();
+				addition = atNodeId.getClass().toString();
 			IllegalArgumentException e = new IllegalArgumentException(
 					"node id in pastry nets has to be a NodeHandle instance but is " + addition);
 			e.printStackTrace();
@@ -521,7 +515,7 @@ public class PastryNodeImpl extends Node {
 	@Override
 	public Envelope fetchArtifact(long id) throws ArtifactNotFoundException, StorageException {
 
-		observerNotice(Event.ARTIFACT_FETCH_STARTED, pastryNode, "" + id);
+		observerNotice(Event.ARTIFACT_FETCH_STARTED, pastryNode, Long.toString(id));
 
 		Id pastryId = ContentEnvelope.getPastEnvelopeId(id);
 
@@ -533,11 +527,11 @@ public class PastryNodeImpl extends Node {
 		try {
 			Envelope contentFromNet = continuation.getResultWaiting();
 
-			observerNotice(Event.ARTIFACT_RECEIVED, pastryNode, "" + id);
+			observerNotice(Event.ARTIFACT_RECEIVED, pastryNode, Long.toString(id));
 
 			return contentFromNet;
 		} catch (Exception e) {
-			observerNotice(Event.ARTIFACT_FETCH_FAILED, pastryNode, "" + id);
+			observerNotice(Event.ARTIFACT_FETCH_FAILED, pastryNode, Long.toString(id));
 			throw new StorageException("Unable to retrieve Artifact from past storage", e);
 		}
 	}
@@ -551,9 +545,9 @@ public class PastryNodeImpl extends Node {
 
 			stored.checkOverwrite(envelope);
 		} catch (ArtifactNotFoundException e) {
-			//OK, new artifact
+			// OK, new artifact
 		} catch (StorageException e) {
-			//Always thrown..
+			// Always thrown..
 		} catch (L2pSecurityException e) {
 			observerNotice(Event.ARTIFACT_OVERWRITE_FAILED, pastryNode, envelope.getId() + "");
 			throw e;
@@ -562,9 +556,9 @@ public class PastryNodeImpl extends Node {
 		PastPutContinuation conti = new PastPutContinuation();
 		pastStorage.insert(new ContentEnvelope(envelope), conti);
 
-		//System.out.println ( "back from insert call");
+		// System.out.println ( "back from insert call");
 		try {
-			//System.out.println ( "   now waiting for feedback...");
+			// System.out.println ( " now waiting for feedback...");
 			conti.waitForResult();
 			if (!conti.isSuccess()) {
 				observerNotice(Event.ARTIFACT_UPLOAD_FAILED, pastryNode,
@@ -600,10 +594,9 @@ public class PastryNodeImpl extends Node {
 	}
 
 	/**
-	 * provides access to the underlying pastry application
-	 * mostly for testing purposes
+	 * provides access to the underlying pastry application mostly for testing purposes
 	 * 
-	 * @return	the pastry node application of this pastry node
+	 * @return the pastry node application of this pastry node
 	 */
 	public NodeApplication getApplication() {
 		return application;
@@ -620,8 +613,8 @@ public class PastryNodeImpl extends Node {
 	 * @throws SerializationException
 	 * @throws MalformedXMLException
 	 * @throws IOException
-	 * @throws AgentNotKnownException 
-	 * @throws MessageException 
+	 * @throws AgentNotKnownException
+	 * @throws MessageException
 	 */
 	public void sendTestMessages(Agent from, Agent to) throws InterruptedException, EncodingFailedException,
 			L2pSecurityException, SerializationException, MalformedXMLException, IOException, AgentNotKnownException,
@@ -636,7 +629,7 @@ public class PastryNodeImpl extends Node {
 			LeafSet leafSet = pastryNode.getLeafSet();
 			ColoredOutput.printlnRed("LeafSet-Size: " + leafSet.cwSize());
 
-			// this is a typical loop to cover your leafset.  Note that if the leafset
+			// this is a typical loop to cover your leafset. Note that if the leafset
 			// overlaps, then duplicate nodes will be sent to twice
 			for (int i = -leafSet.ccwSize(); i <= leafSet.cwSize(); i++) {
 				if (i != 0) { // don't send to self
@@ -733,12 +726,12 @@ public class PastryNodeImpl extends Node {
 		if (agent.isLocked())
 			throw new L2pSecurityException("You have to unlock the agent before updating!");
 
-		//Agent stored = 
+		// Agent stored =
 		getAgent(agent.getId());
 
 		locallyKnownAgents.registerAgent(agent);
 
-		//TODO: compare agents for security check!
+		// TODO: compare agents for security check!
 
 		PastPutContinuation conti = new PastPutContinuation();
 		pastStorage.insert(new ContentEnvelope(agent), conti);
