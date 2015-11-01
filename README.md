@@ -2,4 +2,6 @@
 LAS2peer-WebConnector
 =====================
 
-A connector for LAS2peer that enables communication with a LAS2peer server in a RESTful way.
+[![Build Status](http://layers.dbis.rwth-aachen.de/jenkins/buildStatus/icon?job=las2peer Web Connector)](http://layers.dbis.rwth-aachen.de/jenkins/job/las2peer%20Web%20Connector/)
+
+A HTTP/HTTPS connector for LAS2peer that enables communication with a LAS2peer network in a RESTful way.
