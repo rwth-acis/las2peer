@@ -1,6 +1,6 @@
 ![LAS2peer](https://github.com/rwth-acis/LAS2peer/blob/master/img/logo/bitmap/las2peer-logo-128x128.png)
 
-LAS2peer is a Java-based server framework for developing and deploying services in a distributed Peer-to-Peer (P2P) environment. LAS2peer was developed by the Advanced Community Information Systems (ACIS) group at the Chair of Computer Science 5 (Information Systems & Databases), RWTH Aachen University, Germany. Its main focus lies on providing developers with a tool to easily develop and test their services and deploy them in a P2P network without having to rely on a centralized infrastructure.
+LAS2peer is a Java-based server framework for developing and deploying services in a distributed Peer-to-Peer (P2P) environment. LAS2peer was developed by the Advanced Community Information Systems (ACIS) group at the Chair of Computer Science 5 (Information Systems & Databases), RWTH Aachen University, Germany. It's main focus lies on providing developers with a tool to easily develop and test their services and deploy them in a P2P network without having to rely on a centralized infrastructure.
 
 Developers can develop and test their services locally and then deploy them on any machine that has joined the network. For communication between nodes, the FreePastry (http://www.freepastry.org/) library is used.
 
@@ -23,17 +23,19 @@ Policy files for strong encryption can be downloaded via Oracle:
 
 [JCE for Java 8](http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html "JCE-8")
 
-(If the unit-test "i5.las2peer.communication.MessageTest" runs successfully, you have enabled strong encryption correctly)
+(If the JUnit-test "i5.las2peer.communication.MessageTest" runs successfully, you have enabled strong encryption correctly)
 
 
 Building Instructions [![Build Status](http://layers.dbis.rwth-aachen.de/jenkins/buildStatus/icon?job=LAS2peer Core)](http://layers.dbis.rwth-aachen.de/jenkins/job/LAS2peer%20Core/)
 ----------------------
 
-For building simply run:  
-    ```ant compile_all```
+To build the LAS2peer jar file simply run default target:
+    ```ant```
+    or directly
+    ```ant jars```
 
 
-Unit Tests
+JUnit Tests
 -----------
 
 All JUnit tests are started with:  
@@ -45,7 +47,7 @@ Reports can be found in ./tmp/test_reports afterwards.
 Javadoc
 ----------
 
-Simply build the standard java docs with:  
-    ```ant java_doc```
+Simply build the standard Javadocs with:  
+    ```ant javadoc```
 
 Javadoc can be found in ./export/javadoc afterwards.
