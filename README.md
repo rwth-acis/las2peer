@@ -2,6 +2,8 @@
 LAS2peer-RESTMapper
 ======================
 
+[![Build Status](http://layers.dbis.rwth-aachen.de/jenkins/buildStatus/icon?job=las2peer REST Mapper)](http://layers.dbis.rwth-aachen.de/jenkins/job/las2peer%20REST%20Mapper/)
+
 Maps HTTP methods and URI patterns to service methods.
 
 Creates a XML based on annotations used in the service class.
