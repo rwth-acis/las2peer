@@ -1,8 +1,17 @@
 package i5.las2peer.security;
 
+import java.io.Serializable;
+import java.security.KeyPair;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.util.ArrayList;
+
+import org.apache.commons.codec.binary.Base64;
+
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
 import i5.las2peer.p2p.Node;
+import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.p2p.ServiceList;
 import i5.las2peer.p2p.ServiceNameVersion;
 import i5.las2peer.p2p.ServiceNodeList;
@@ -14,16 +23,8 @@ import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
 import i5.las2peer.tools.SerializationException;
 import i5.las2peer.tools.SerializeTools;
-
-import java.io.Serializable;
-import java.security.KeyPair;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.util.ArrayList;
-
-import org.apache.commons.codec.binary.Base64;
-
 import rice.pastry.NodeHandle;
+import rice.pastry.PastryNode;
 
 /**
  * 
@@ -260,17 +261,32 @@ public class ServiceInfoAgent extends PassphraseAgent {
 	 */
 	public void serviceAdded(ServiceAgent serviceAgent, Node node)
 			throws EnvelopeException, AgentException, L2pSecurityException {
-
+		System.out.println("Service added " + serviceAgent.getServiceClassName());
+		// FIXME versions of services
 		ServiceNameVersion servicenameVersion = new ServiceNameVersion(serviceAgent.getServiceClassName(), "1.0");
 		ServiceList data = (ServiceList) getEnvelopeData(SERVICE_LIST_ENVELOPE_NAME, ServiceList.class);
-		data.addService(servicenameVersion); // TODO versions of services
+		data.addService(servicenameVersion);
 		setEnvelopeData(SERVICE_LIST_ENVELOPE_NAME, ServiceList.class, data, node);
+		StringBuilder sb = new StringBuilder();
+		boolean first = true;
+		for (ServiceNameVersion s : data.getServices()) {
+			if (!first) {
+				sb.append(", ");
+			}
+			sb.append(s.getNameVersion());
+			first = false;
+		}
+		System.out.println("Current services: " + sb.toString());
 
 		String nodeEnvelope = SERVICE_NODE_LIST_PREFIX + servicenameVersion.getNameVersion();
 		ServiceNodeList nodesData = (ServiceNodeList) getEnvelopeData(nodeEnvelope, ServiceNodeList.class);
 
-		nodesData.addNode((NodeHandle) node.getNodeId());
-		setEnvelopeData(nodeEnvelope, ServiceNodeList.class, nodesData, node);
+		if (node instanceof PastryNodeImpl) {
+			// this part seems to be irrelevant for LocalNode implementations
+			PastryNode pNode = ((PastryNodeImpl) node).getPastryNode();
+			nodesData.addNode(pNode.getLocalHandle());
+			setEnvelopeData(nodeEnvelope, ServiceNodeList.class, nodesData, node);
+		}
 	}
 
 	/**
