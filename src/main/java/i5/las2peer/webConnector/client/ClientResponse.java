@@ -2,43 +2,40 @@ package i5.las2peer.webConnector.client;
 
 import java.util.HashMap;
 
+public class ClientResponse {
 
-public class ClientResponse
-{
+	String response = "";
+	HashMap<String, String> headers = new HashMap<>();
+	int httpCode;
 
+	public ClientResponse(int httpCode) {
+		this.httpCode = httpCode;
+	}
 
-    String response="";
-    HashMap<String,String> headers=new HashMap<>();
-    int httpCode;
+	public void setResponse(String response) {
+		this.response = response;
+	}
 
-    public ClientResponse(int httpCode)
-    {
-        this.httpCode = httpCode;
-    }
-    public void setResponse(String response)
-    {
-        this.response = response;
-    }
-    public String getResponse()
-    {
-        return response;
-    }
+	public String getResponse() {
+		return response;
+	}
 
-    public HashMap<String, String> getHeaders()
-    {
-        return headers;
-    }
+	public HashMap<String, String> getHeaders() {
+		return headers;
+	}
 
-    public int getHttpCode()
-    {
-        return httpCode;
-    }
-    public void addHeader(String name, String value)
-    {
-        headers.put(name.trim(), value.trim());
-    }
-    public String getHeader(String name)
-    {
-        return headers.get(name.trim());
-    }
+	public int getHttpCode() {
+		return httpCode;
+	}
+
+	public void addHeader(String name, String value) {
+		// HTTP headers are case insensitive
+		headers.put(name.toLowerCase(), value);
+	}
+
+	public String getHeader(String name) {
+		// HTTP headers are case insensitive
+		return headers.get(name.toLowerCase());
+	}
+
 }
