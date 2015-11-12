@@ -19,10 +19,10 @@ public class UserAgentTest {
 		UserAgent a = UserAgent.createUserAgent(passphrase);
 
 		try {
-			a.returnSecretKey(null); //not possible without unlocking the private key first
+			a.returnSecretKey(null); // not possible without unlocking the private key first
 			fail("SecurityException should have been thrown");
 		} catch (L2pSecurityException e) {
-			//Should be thrown
+			// Should be thrown
 		} catch (SerializationException e) {
 			fail("SecurityException should have been thrown");
 			e.printStackTrace();
@@ -35,10 +35,10 @@ public class UserAgentTest {
 		}
 
 		try {
-			a.returnSecretKey(null); //not possible without unlocking the private key first
+			a.returnSecretKey(null); // not possible without unlocking the private key first
 			fail("SecurityException should have been thrown");
 		} catch (L2pSecurityException e) {
-			//Should be thrown
+			// Should be thrown
 		} catch (SerializationException e) {
 			fail("SecurityException should have been thrown");
 			e.printStackTrace();
@@ -46,7 +46,7 @@ public class UserAgentTest {
 		a.unlockPrivateKey(passphrase);
 
 		try {
-			a.returnSecretKey(null); //should be possible now
+			a.returnSecretKey(null); // should be possible now
 		} catch (IllegalArgumentException e) {
 			// Well...empty byte array..but ok since no security exception is thrown
 		} catch (SerializationException e) {
@@ -81,7 +81,8 @@ public class UserAgentTest {
 	}
 
 	@Test
-	public void testXml() throws NoSuchAlgorithmException, L2pSecurityException, MalformedXMLException, CryptoException, UserAgentException {
+	public void testXml() throws NoSuchAlgorithmException, L2pSecurityException, MalformedXMLException, CryptoException,
+			UserAgentException {
 		String passphrase = "a pass";
 		String email = "usera@example.org";
 		String userData = "This is the user data attachement.";

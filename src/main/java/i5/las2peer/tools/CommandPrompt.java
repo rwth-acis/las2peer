@@ -13,8 +13,7 @@ import java.lang.reflect.Modifier;
 import java.util.Hashtable;
 
 /**
- * A simple command line for executing commands, generating new instances
- * and handling local variables.
+ * A simple command line for executing commands, generating new instances and handling local variables.
  * 
  */
 public class CommandPrompt {
@@ -24,13 +23,8 @@ public class CommandPrompt {
 	 * 
 	 */
 	public enum ReturnStatus {
-		OK_NOTHING_TO_DO(30),
-		OK_PROCEED(10),
-		OK_EXIT(0),
-		ERROR_PROCEED(20),
-		ERROR_EXIT(-10),
-		NOT_KNOWN_PROCEED(100),
-		NOT_KNOWN_EXIT(-100);
+		OK_NOTHING_TO_DO(30), OK_PROCEED(10), OK_EXIT(0), ERROR_PROCEED(20), ERROR_EXIT(-10), NOT_KNOWN_PROCEED(
+				100), NOT_KNOWN_EXIT(-100);
 
 		private int value;
 
@@ -100,7 +94,7 @@ public class CommandPrompt {
 	}
 
 	/**
-	 * create a new prompt bound to the given object 
+	 * create a new prompt bound to the given object
 	 * 
 	 * @param boundTo
 	 */
@@ -115,7 +109,7 @@ public class CommandPrompt {
 	 * handle an assignment command
 	 * 
 	 * @param line
-	 * @return	status code
+	 * @return status code
 	 */
 	public ReturnStatus handleAssignment(String line) {
 		String[] split = line.split("=", 2);
@@ -151,11 +145,11 @@ public class CommandPrompt {
 	/**
 	 * extract parameters enclosed in parentheses from the given string
 	 * 
-	 * simple strings will be interpreted as names of local variables and replaced with them, strings
-	 * enclosed in " or ' will be used as String values
+	 * simple strings will be interpreted as names of local variables and replaced with them, strings enclosed in " or '
+	 * will be used as String values
 	 * 
 	 * @param value
-	 * @return	array with parameter values
+	 * @return array with parameter values
 	 * @throws Exception
 	 */
 	private Object[] getParameters(String value) throws Exception {
@@ -190,11 +184,10 @@ public class CommandPrompt {
 	}
 
 	/**
-	 * handle a NEW command, e.g. try to create a new instance of the given class
-	 * with the possibly given parameters
+	 * handle a NEW command, e.g. try to create a new instance of the given class with the possibly given parameters
 	 * 
 	 * @param command
-	 * @return	result of the new instantiation
+	 * @return result of the new instantiation
 	 * @throws Exception
 	 */
 	public Object handleNew(String command) throws Exception {
@@ -256,12 +249,11 @@ public class CommandPrompt {
 	}
 
 	/**
-	 * handle a command, i.e. a static method or a class method of a local variable or the bound 
-	 * object
+	 * handle a command, i.e. a static method or a class method of a local variable or the bound object
 	 * 
 	 * @param command
-	 * @return	result of the invoked operation
-	 * @throws Exception 
+	 * @return result of the invoked operation
+	 * @throws Exception
 	 */
 	public Object handleCommand(String command) throws Exception {
 		Object[] parameters = getParameters(command);
@@ -290,12 +282,12 @@ public class CommandPrompt {
 	}
 
 	/**
-	 * execute a method 
+	 * execute a method
 	 * 
 	 * @param on
 	 * @param method
 	 * @param parameters
-	 * @return	result of the invoked operation
+	 * @return result of the invoked operation
 	 * @throws Exception
 	 * @throws NoSuchMethodException
 	 */
@@ -372,7 +364,7 @@ public class CommandPrompt {
 	 * @param className
 	 * @param method
 	 * @param parameters
-	 * @return	result of the static method invocation
+	 * @return result of the static method invocation
 	 * @throws Exception
 	 */
 	private Object executeStatic(String className, String method, Object[] parameters) throws Exception {
@@ -415,7 +407,7 @@ public class CommandPrompt {
 	 * handle a line of input
 	 * 
 	 * @param line
-	 * @return	return status code
+	 * @return return status code
 	 */
 	public ReturnStatus handleLine(String line) {
 		lineNumber++;
@@ -458,7 +450,7 @@ public class CommandPrompt {
 			}
 		}
 
-		if (status == ReturnStatus.NOT_KNOWN_PROCEED) //TODO this will never be reached
+		if (status == ReturnStatus.NOT_KNOWN_PROCEED) // TODO this will never be reached
 			ColoredOutput.printlnRed("   -> command '" + line + "' not known");
 
 		return status;
@@ -519,7 +511,7 @@ public class CommandPrompt {
 	 * 
 	 * @param line
 	 * 
-	 * @return	return status code
+	 * @return return status code
 	 */
 	public ReturnStatus handlePrint(String line) {
 		String[] split = line.trim().split("\\s+");
@@ -538,13 +530,12 @@ public class CommandPrompt {
 	}
 
 	/**
-	 * check, if the given line contains (starts with) a local command
-	 * and execute it.
+	 * check, if the given line contains (starts with) a local command and execute it.
 	 * 
 	 * 
 	 * @param line
 	 * 
-	 * @return	return status code
+	 * @return return status code
 	 */
 	public ReturnStatus localCommand(String line) {
 		String[] split = line.trim().split("\\s+");
@@ -628,7 +619,7 @@ public class CommandPrompt {
 
 		/*
 		Method[] methods = object.getClass().getMethods();
-
+		
 		Hashtable<String, HashSet<String[]>> htMethodnamesToParameters = new Hashtable<String, HashSet<String[]>> ();
 		for ( Method m: methods ) {
 			if ( ! Modifier.isPublic ( m.getModifiers()) || Modifier.isStatic(m.getModifiers()) )
@@ -729,7 +720,7 @@ public class CommandPrompt {
 	}
 
 	/**
-	 * print a simple prompt  and wait for input
+	 * print a simple prompt and wait for input
 	 * 
 	 * @return return status code
 	 */
@@ -754,7 +745,7 @@ public class CommandPrompt {
 	}
 
 	/**
-	 * loop through input and execution 
+	 * loop through input and execution
 	 */
 	public void startPrompt() {
 		ReturnStatus status = ReturnStatus.OK_PROCEED;
@@ -771,7 +762,7 @@ public class CommandPrompt {
 	 * 
 	 * @param argv
 	 * 
-	 * @throws ClassNotFoundException 
+	 * @throws ClassNotFoundException
 	 */
 	public static void main(String[] argv) throws ClassNotFoundException {
 		CommandPrompt prompt = new CommandPrompt();

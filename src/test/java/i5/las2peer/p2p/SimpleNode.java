@@ -20,63 +20,51 @@ public class SimpleNode {
 	/*******************************************************************************
 	 * "FreePastry" Peer-to-Peer Application Development Substrate
 	 * 
-	 * Copyright 2002-2007, Rice University. Copyright 2006-2007, Max Planck
-	 * Institute for Software Systems. All rights reserved.
+	 * Copyright 2002-2007, Rice University. Copyright 2006-2007, Max Planck Institute for Software Systems. All rights
+	 * reserved.
 	 * 
-	 * Redistribution and use in source and binary forms, with or without
-	 * modification, are permitted provided that the following conditions are
-	 * met:
+	 * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+	 * following conditions are met:
 	 * 
-	 * - Redistributions of source code must retain the above copyright notice,
-	 * this list of conditions and the following disclaimer.
+	 * - Redistributions of source code must retain the above copyright notice, this list of conditions and the
+	 * following disclaimer.
 	 * 
-	 * - Redistributions in binary form must reproduce the above copyright
-	 * notice, this list of conditions and the following disclaimer in the
-	 * documentation and/or other materials provided with the distribution.
+	 * - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the
+	 * following disclaimer in the documentation and/or other materials provided with the distribution.
 	 * 
-	 * - Neither the name of Rice University (RICE), Max Planck Institute for
-	 * Software Systems (MPI-SWS) nor the names of its contributors may be used
-	 * to endorse or promote products derived from this software without
-	 * specific prior written permission.
+	 * - Neither the name of Rice University (RICE), Max Planck Institute for Software Systems (MPI-SWS) nor the names
+	 * of its contributors may be used to endorse or promote products derived from this software without specific prior
+	 * written permission.
 	 * 
-	 * This software is provided by RICE, MPI-SWS and the contributors on an
-	 * "as is" basis, without any representations or warranties of any kind,
-	 * express or implied including, but not limited to, representations or
-	 * warranties of non-infringement, merchantability or fitness for a
-	 * particular purpose. In no event shall RICE, MPI-SWS or contributors be
-	 * liable for any direct, indirect, incidental, special, exemplary, or
-	 * consequential damages (including, but not limited to, procurement of
-	 * substitute goods or services; loss of use, data, or profits; or business
-	 * interruption) however caused and on any theory of liability, whether in
-	 * contract, strict liability, or tort (including negligence or otherwise)
-	 * arising in any way out of the use of this software, even if advised of
+	 * This software is provided by RICE, MPI-SWS and the contributors on an "as is" basis, without any representations
+	 * or warranties of any kind, express or implied including, but not limited to, representations or warranties of
+	 * non-infringement, merchantability or fitness for a particular purpose. In no event shall RICE, MPI-SWS or
+	 * contributors be liable for any direct, indirect, incidental, special, exemplary, or consequential damages
+	 * (including, but not limited to, procurement of substitute goods or services; loss of use, data, or profits; or
+	 * business interruption) however caused and on any theory of liability, whether in contract, strict liability, or
+	 * tort (including negligence or otherwise) arising in any way out of the use of this software, even if advised of
 	 * the possibility of such damage.
 	 *******************************************************************************/
 
 	private PastryNode node;
-	
+
 	private TestApp app;
-	
+
 	private Environment env;
-	
-	
+
 	/**
-	 * This constructor sets up a PastryNode. It will bootstrap to an existing
-	 * ring if it can find one at the specified location, otherwise it will
-	 * start a new ring.
+	 * This constructor sets up a PastryNode. It will bootstrap to an existing ring if it can find one at the specified
+	 * location, otherwise it will start a new ring.
 	 * 
-	 * @param bindport
-	 *            the local port to bind to
-	 * @param bootaddresses
-	 *            collection of socket addresses for bootstrap
-	 * @param env
-	 *            the environment for these nodes
+	 * @param bindport the local port to bind to
+	 * @param bootaddresses collection of socket addresses for bootstrap
+	 * @param env the environment for these nodes
 	 */
 	public SimpleNode(int bindport, Collection<InetSocketAddress> bootaddresses,
 			Environment env) throws Exception {
 
 		this.env = env;
-		
+
 		// Generate the NodeIds Randomly
 		NodeIdFactory nidFactory = new RandomNodeIdFactory(env);
 
@@ -111,12 +99,10 @@ public class SimpleNode {
 		System.out.println("Finished creating new node " + node);
 	}
 
-	
-	public PastryNode getNode() { return node; }
-	
-	
-	
-	
+	public PastryNode getNode() {
+		return node;
+	}
+
 	private static void failWithMessage(String message) {
 		System.out.println("Usage-Message...");
 
@@ -126,40 +112,38 @@ public class SimpleNode {
 	}
 
 	private void sendTestMessages() throws InterruptedException {
-		while ( true ) {
+		while (true) {
 			env.getTimeSource().sleep(10000);
-			System.out.println ( "---------------------------------------");
-			System.out.println ( "Sending new Messages");
-			
-			
-		    LeafSet leafSet = node.getLeafSet();
-		    System.out.println ( "LeafSet-Size: " + leafSet.cwSize());
-		    
-		    // this is a typical loop to cover your leafset.  Note that if the leafset
-		    // overlaps, then duplicate nodes will be sent to twice
-		    for (int i=-leafSet.ccwSize(); i<=leafSet.cwSize(); i++) {
-		      if (i != 0) { // don't send to self
-		        // select the item
-		        NodeHandle nh = leafSet.get(i);
-		        
-		        // send the message directly to the node
-		        System.out.println( "sending to " + i + " / " + nh );
-		        app.routeMyMsgDirect(nh);
-		        
-		        // wait a sec
-		        env.getTimeSource().sleep(1000);
-		      }
-		    }
-		    
-		    System.out.println( "---------------------------------------------");
+			System.out.println("---------------------------------------");
+			System.out.println("Sending new Messages");
+
+			LeafSet leafSet = node.getLeafSet();
+			System.out.println("LeafSet-Size: " + leafSet.cwSize());
+
+			// this is a typical loop to cover your leafset. Note that if the leafset
+			// overlaps, then duplicate nodes will be sent to twice
+			for (int i = -leafSet.ccwSize(); i <= leafSet.cwSize(); i++) {
+				if (i != 0) { // don't send to self
+					// select the item
+					NodeHandle nh = leafSet.get(i);
+
+					// send the message directly to the node
+					System.out.println("sending to " + i + " / " + nh);
+					app.routeMyMsgDirect(nh);
+
+					// wait a sec
+					env.getTimeSource().sleep(1000);
+				}
+			}
+
+			System.out.println("---------------------------------------------");
 		}
 
 	}
 
 	/**
-	 * Usage: java [-cp FreePastry-&lt;version&gt;.jar]
-	 * rice.tutorial.lesson1.DistTutorial localbindport bootIP bootPort example
-	 * java rice.tutorial.DistTutorial 9001 pokey.cs.almamater.edu 9001
+	 * Usage: java [-cp FreePastry-&lt;version&gt;.jar] rice.tutorial.lesson1.DistTutorial localbindport bootIP bootPort
+	 * example java rice.tutorial.DistTutorial 9001 pokey.cs.almamater.edu 9001
 	 */
 	public static void main(String[] args) throws Exception {
 		// Loads pastry settings

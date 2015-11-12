@@ -5,7 +5,6 @@ import java.util.Random;
 import rice.p2p.commonapi.Message;
 import rice.p2p.commonapi.NodeHandle;
 
-
 /**
  * A request message where the target node should try to unlock the given agent with the given passphrase.
  * 
@@ -16,19 +15,17 @@ import rice.p2p.commonapi.NodeHandle;
  */
 public class UnlockAgentMessage implements Message {
 
-	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 2335873629440223166L;
 
 	private long messageId;
-	
+
 	private NodeHandle sender;
 	private long agentId;
 	private byte[] encryptedPass;
-	
-	
+
 	/**
 	 * create a new message
 	 * 
@@ -40,7 +37,7 @@ public class UnlockAgentMessage implements Message {
 		this.sender = localHandle;
 		this.agentId = agentId;
 		this.encryptedPass = encPass;
-		
+
 		this.messageId = new Random().nextLong();
 	}
 
@@ -51,29 +48,31 @@ public class UnlockAgentMessage implements Message {
 	public NodeHandle getSendingNode() {
 		return sender;
 	}
-	
-	
+
 	/**
 	 * 
 	 * @return encrypted passphrase
 	 */
-	public byte[] getEncryptedPass () { return encryptedPass; }
-	
-	
+	public byte[] getEncryptedPass() {
+		return encryptedPass;
+	}
+
 	/**
 	 * 
 	 * @return id of the agent to unlock
 	 */
-	public long getAgentId () { return agentId; }
-	
-	
+	public long getAgentId() {
+		return agentId;
+	}
+
 	/**
 	 * 
 	 * @return the id of this message
 	 */
-	public long getMessageId () { return messageId; }
-	
-	
+	public long getMessageId() {
+		return messageId;
+	}
+
 	@Override
 	public int getPriority() {
 		// TODO Auto-generated method stub

@@ -1,6 +1,5 @@
 package i5.las2peer.api;
 
-
 /**
  * Basic exception for connectors.
  * 
@@ -16,20 +15,20 @@ public class ConnectorException extends Exception {
 
 	/**
 	 * create a new exception
+	 * 
 	 * @param message
 	 */
-	public ConnectorException ( String message ) {
-		super (message );
+	public ConnectorException(String message) {
+		super(message);
 	}
-	
-	
-	
+
 	/**
 	 * create a new exception
+	 * 
 	 * @param message
 	 * @param cause
 	 */
-	public ConnectorException ( String message, Throwable cause ) {
-		super ( message, cause);
+	public ConnectorException(String message, Throwable cause) {
+		super(message, cause);
 	}
 }

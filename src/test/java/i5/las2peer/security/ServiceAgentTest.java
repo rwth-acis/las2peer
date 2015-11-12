@@ -13,39 +13,39 @@ public class ServiceAgentTest {
 	@Test
 	public void testCreation() throws CryptoException, L2pSecurityException {
 		ServiceAgent testee = ServiceAgent.createServiceAgent(servicename, passphrase);
-	
-		assertEquals ( servicename, testee.getServiceClassName());
-		
-		assertTrue ( testee.isLocked());
+
+		assertEquals(servicename, testee.getServiceClassName());
+
+		assertTrue(testee.isLocked());
 
 		try {
 			testee.unlockPrivateKey("dummy");
-			fail ( "L2pSecurityException expected!");
+			fail("L2pSecurityException expected!");
 		} catch (L2pSecurityException e) {
 			// intended
-			assertTrue ( testee.isLocked());
+			assertTrue(testee.isLocked());
 		}
-		
+
 		testee.unlockPrivateKey(passphrase);
-		
-		assertFalse ( testee.isLocked());
+
+		assertFalse(testee.isLocked());
 	}
-	
+
 	@Test
 	public void testXmlAndBack() throws CryptoException, L2pSecurityException, MalformedXMLException {
-		ServiceAgent testee = ServiceAgent.createServiceAgent ( servicename, passphrase);
-		
+		ServiceAgent testee = ServiceAgent.createServiceAgent(servicename, passphrase);
+
 		String xml = testee.toXmlString();
-		
+
 		ServiceAgent andBack = ServiceAgent.createFromXml(xml);
-		
+
 		andBack.unlockPrivateKey(passphrase);
 	}
-	
+
 	@Test
-	public void testId () {
-		assertEquals ( ServiceAgent.serviceClass2Id(servicename), ServiceAgent.serviceClass2Id(servicename));
-		assertFalse ( ServiceAgent.serviceClass2Id(servicename) == ServiceAgent.serviceClass2Id(servicename + "x") );
+	public void testId() {
+		assertEquals(ServiceAgent.serviceClass2Id(servicename), ServiceAgent.serviceClass2Id(servicename));
+		assertFalse(ServiceAgent.serviceClass2Id(servicename) == ServiceAgent.serviceClass2Id(servicename + "x"));
 	}
 
 }

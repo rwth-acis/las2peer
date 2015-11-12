@@ -33,13 +33,13 @@ public class UserAgent extends PassphraseAgent {
 	private Serializable userData = null;
 
 	/**
-	 * atm constructor for the MockAgent class, just don't know, how agent creation will take place later 
+	 * atm constructor for the MockAgent class, just don't know, how agent creation will take place later
 	 * 
 	 * @param id
 	 * @param pair
 	 * @param passphrase
 	 * @throws L2pSecurityException
-	 * @throws CryptoException 
+	 * @throws CryptoException
 	 */
 	protected UserAgent(long id, KeyPair pair, String passphrase, byte[] salt) throws L2pSecurityException,
 			CryptoException {
@@ -63,6 +63,7 @@ public class UserAgent extends PassphraseAgent {
 
 	/**
 	 * get the login name stored for this user agent
+	 * 
 	 * @return the user login name
 	 */
 	public String getLoginName() {
@@ -71,6 +72,7 @@ public class UserAgent extends PassphraseAgent {
 
 	/**
 	 * has this user a login name
+	 * 
 	 * @return true, if a login name is assigned
 	 */
 	public boolean hasLogin() {
@@ -79,6 +81,7 @@ public class UserAgent extends PassphraseAgent {
 
 	/**
 	 * select a login name for this agent
+	 * 
 	 * @param loginName
 	 * 
 	 * @throws L2pSecurityException
@@ -101,9 +104,10 @@ public class UserAgent extends PassphraseAgent {
 
 	/**
 	 * select an email address to assign to this user agent
+	 * 
 	 * @param email
-	 * @throws L2pSecurityException 
-	 * @throws UserAgentException 
+	 * @throws L2pSecurityException
+	 * @throws UserAgentException
 	 */
 	public void setEmail(String email) throws L2pSecurityException, UserAgentException {
 		if (this.isLocked())
@@ -114,16 +118,15 @@ public class UserAgent extends PassphraseAgent {
 
 		// TODO!!!!!!!
 		// duplicate check
-		// Verify email in Java according to Stack Overflow http://stackoverflow.com/questions/153716/verify-email-in-java
+		// Verify email in Java according to Stack Overflow
+		// http://stackoverflow.com/questions/153716/verify-email-in-java
 		this.sEmail = email.toLowerCase();
 	}
 
 	/**
-	 * Attaches the given object directly to this agent. The
-	 * user data represent a field of this user agent and
-	 * should be used with small values (&lt; 1MB) only.
-	 * Larger byte amounts could handicap the agent handling
-	 * inside the network.
+	 * Attaches the given object directly to this agent. The user data represent a field of this user agent and should
+	 * be used with small values (&lt; 1MB) only. Larger byte amounts could handicap the agent handling inside the
+	 * network.
 	 * 
 	 * @param object The user data object to be serialized and attached.
 	 * @throws L2pSecurityException When the user agent is still locked.
@@ -148,8 +151,7 @@ public class UserAgent extends PassphraseAgent {
 							+ CryptoTools.getSymmetricKeygenMethod() + "\">\n"
 							+ "\t\t<salt encoding=\"base64\">" + Base64.encodeBase64String(getSalt()) + "</salt>\n"
 							+ "\t\t<data encoding=\"base64\">" + getEncodedPrivate() + "</data>\n"
-							+ "\t</privatekey>\n"
-					);
+							+ "\t</privatekey>\n");
 
 			if (sLoginName != null)
 				result.append("\t<login>" + sLoginName + "</login>\n");
@@ -168,16 +170,15 @@ public class UserAgent extends PassphraseAgent {
 	}
 
 	/**
-	 * sets the state of the object from a string representation resulting from
-	 * a previous {@link #toXmlString} call.
+	 * sets the state of the object from a string representation resulting from a previous {@link #toXmlString} call.
 	 *
-	 * Usually, a standard constructor is used to get a fresh instance of the
-	 * class and the set the complete state via this method.
+	 * Usually, a standard constructor is used to get a fresh instance of the class and the set the complete state via
+	 * this method.
 	 *
 	 *
-	 * @param    xml                 a  String
+	 * @param xml a String
 	 *
-	 * @exception   MalformedXMLException
+	 * @exception MalformedXMLException
 	 *
 	 */
 	public static UserAgent createFromXml(String xml) throws MalformedXMLException {
@@ -232,12 +233,11 @@ public class UserAgent extends PassphraseAgent {
 	}
 
 	/**
-	 * Sets the state of the object from a string representation resulting from
-	 * a previous {@link #toXmlString} call.
+	 * Sets the state of the object from a string representation resulting from a previous {@link #toXmlString} call.
 	 *
-	 * @param    root		parsed xml document
+	 * @param root parsed xml document
 	 *
-	 * @exception   MalformedXMLException
+	 * @exception MalformedXMLException
 	 *
 	 */
 	public static UserAgent createFromXml(Element root) throws MalformedXMLException {
@@ -342,11 +342,12 @@ public class UserAgent extends PassphraseAgent {
 
 	@Override
 	public void notifyUnregister() {
-		// TODO Auto-generated method stub	
+		// TODO Auto-generated method stub
 	}
 
 	/**
 	 * get the email address assigned to this agent
+	 * 
 	 * @return an email address
 	 */
 	public String getEmail() {
@@ -355,6 +356,7 @@ public class UserAgent extends PassphraseAgent {
 
 	/**
 	 * has this user a registered email address?
+	 * 
 	 * @return true, if an email address is assigned
 	 */
 	public boolean hasEmail() {

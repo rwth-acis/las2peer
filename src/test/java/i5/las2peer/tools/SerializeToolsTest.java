@@ -15,38 +15,38 @@ import org.junit.Test;
 public class SerializeToolsTest {
 
 	@Test
-	public void testKeySerializiation () throws NoSuchAlgorithmException, SerializationException, IOException {
-		KeyGenerator kg = KeyGenerator.getInstance( "AES");
+	public void testKeySerializiation() throws NoSuchAlgorithmException, SerializationException, IOException {
+		KeyGenerator kg = KeyGenerator.getInstance("AES");
 		kg.init(256);
-		
-		SecretKey k =  kg.generateKey();
-		
-		byte[] serialized = SerializeTools.serialize( k );
+
+		SecretKey k = kg.generateKey();
+
+		byte[] serialized = SerializeTools.serialize(k);
 		SecretKey dk = SerializeTools.deserializeKey(serialized);
-		
-		assertEquals ( k, dk);
+
+		assertEquals(k, dk);
 	}
-	
+
 	@Test
-	public void testSerialization () throws SerializationException, IOException {
+	public void testSerialization() throws SerializationException, IOException {
 		String testString = "ein kleiner Test";
-		
+
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		ObjectOutputStream oos = new ObjectOutputStream ( baos );
-		oos.writeObject( testString );
+		ObjectOutputStream oos = new ObjectOutputStream(baos);
+		oos.writeObject(testString);
 		oos.close();
-		byte[] noKey = baos.toByteArray(); 
-		
-		Object o = SerializeTools.deserialize( noKey );
-		assertEquals ( testString, o );
-		
+		byte[] noKey = baos.toByteArray();
+
+		Object o = SerializeTools.deserialize(noKey);
+		assertEquals(testString, o);
+
 		try {
 			SerializeTools.deserializeKey(noKey);
-			fail ( "SerializationException should have been thrown");
-		} catch ( SerializationException e ) {
+			fail("SerializationException should have been thrown");
+		} catch (SerializationException e) {
 			// that's intended
 		}
-		
+
 	}
 
 }

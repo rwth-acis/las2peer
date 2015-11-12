@@ -152,8 +152,8 @@ public class LibraryIdentifier implements Comparable<LibraryIdentifier> {
 	}
 
 	/**
-	 * implement {@code Comparable<LibraryDependency>} so that the L2pClassLoader may keep a (sorted) TreeMap of all registered
-	 * Libraries
+	 * implement {@code Comparable<LibraryDependency>} so that the L2pClassLoader may keep a (sorted) TreeMap of all
+	 * registered Libraries
 	 * 
 	 * @return comparison code
 	 */

@@ -1,6 +1,5 @@
 package i5.las2peer.classLoaders.libraries;
 
-
 import i5.las2peer.classLoaders.helpers.LibraryDependency;
 import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
 
@@ -12,7 +11,6 @@ import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-
 /**
  * a loaded jar library implements a library on the basis of a standard jar file
  * 
@@ -21,50 +19,47 @@ import java.util.jar.JarFile;
  */
 public class LoadedJarLibrary extends LoadedLibrary {
 
-
 	// name of the jar file
 	private String sJarFileName;
 
 	// internal jar file handler
 	private JarFile jfFile;
-	
-		
+
 	/**
-	 * create a new LodadJarLibrary 
+	 * create a new LodadJarLibrary
 	 * 
 	 * @param filename
 	 * @param ident
 	 * @param deps
 	 * @throws IOException
 	 */
-	public LoadedJarLibrary ( String filename, LibraryIdentifier ident, LibraryDependency[] deps ) throws IOException {
-		super ( ident, deps );
-		
+	public LoadedJarLibrary(String filename, LibraryIdentifier ident, LibraryDependency[] deps) throws IOException {
+		super(ident, deps);
+
 		sJarFileName = filename;
-		jfFile = new JarFile ( filename );
+		jfFile = new JarFile(filename);
 	}
-		
-	
+
 	@Override
 	public URL getResourceAsUrl(String name) throws ResourceNotFoundException {
-		JarEntry je = jfFile.getJarEntry ( name );
-		
-		if ( je == null)
-			throw new ResourceNotFoundException ( name, sJarFileName );
-		
+		JarEntry je = jfFile.getJarEntry(name);
+
+		if (je == null)
+			throw new ResourceNotFoundException(name, sJarFileName);
+
 		try {
-			return new URL ( "jar:file:" + this.sJarFileName + "!/"+ name );
+			return new URL("jar:file:" + this.sJarFileName + "!/" + name);
 		} catch (MalformedURLException e) {
 			// should not occur
 			e.printStackTrace();
 			return null;
 		}
-		
+
 	}
 
 	@Override
 	InputStream getResourceAsStream(String resourceName) throws ResourceNotFoundException {
-		URL url = getResourceAsUrl( resourceName );
+		URL url = getResourceAsUrl(resourceName);
 
 		try {
 			return url.openStream();
@@ -73,137 +68,124 @@ public class LoadedJarLibrary extends LoadedLibrary {
 		}
 	}
 
-	
 	/**
 	 * Returns all classes stored in the corresponding jar file.
 	 *
-	 * @return   a String[]		array with the class names (in . - notation )
+	 * @return a String[] array with the class names (in . - notation )
 	 *
 	 */
-	public String [] getContainedClasses () {
+	public String[] getContainedClasses() {
 		// compute size
 		int iSize = 0;
-		for ( Enumeration<JarEntry> entries = jfFile.entries(); entries.hasMoreElements(); ) {
-			if ( entries.nextElement().getName().endsWith( ".class" ) )
-				iSize ++;
+		for (Enumeration<JarEntry> entries = jfFile.entries(); entries.hasMoreElements();) {
+			if (entries.nextElement().getName().endsWith(".class"))
+				iSize++;
 		}
 
 		// compute array with class names
-		String[] asResult = new String [iSize];
+		String[] asResult = new String[iSize];
 		int i = 0;
-		for ( Enumeration<JarEntry> entries = jfFile.entries(); entries.hasMoreElements(); ) {
+		for (Enumeration<JarEntry> entries = jfFile.entries(); entries.hasMoreElements();) {
 			JarEntry entry = entries.nextElement();
-			if ( entry.getName().endsWith( ".class" ) ) {
-				asResult [i] = LoadedLibrary.resourceToClassName( entry.getName() );
+			if (entry.getName().endsWith(".class")) {
+				asResult[i] = LoadedLibrary.resourceToClassName(entry.getName());
 				i++;
 			}
 		}
 
 		return asResult;
 	}
-	
-	
+
 	/**
-	 * returns an array with names of resources (other than classes) contained
-	 * in the jar archive of this ClassLoader
+	 * returns an array with names of resources (other than classes) contained in the jar archive of this ClassLoader
 	 *
-	 * @return   a String[]
+	 * @return a String[]
 	 *
 	 */
-	public String[] getContainedResources () {
+	public String[] getContainedResources() {
 		// compute size
 		int iSize = 0;
-		for ( Enumeration<JarEntry> entries = jfFile.entries(); entries.hasMoreElements(); ) {
+		for (Enumeration<JarEntry> entries = jfFile.entries(); entries.hasMoreElements();) {
 			JarEntry entry = entries.nextElement();
-			if ( ! entry.getName().endsWith( ".class" )
-			   && ! entry.getName ().endsWith ("/" ) )
-				iSize ++;
+			if (!entry.getName().endsWith(".class")
+					&& !entry.getName().endsWith("/"))
+				iSize++;
 		}
 
 		// compute array with class names
-		String[] asResult = new String [iSize];
+		String[] asResult = new String[iSize];
 		int i = 0;
-		for ( Enumeration<JarEntry> entries = jfFile.entries(); entries.hasMoreElements(); ) {
+		for (Enumeration<JarEntry> entries = jfFile.entries(); entries.hasMoreElements();) {
 			JarEntry entry = entries.nextElement();
-			if ( ! entry.getName().endsWith( ".class" )
-			     && ! entry.getName().endsWith( "/" ) ) {
-				asResult [i] = entry.getName() ;
+			if (!entry.getName().endsWith(".class")
+					&& !entry.getName().endsWith("/")) {
+				asResult[i] = entry.getName();
 				i++;
 			}
 		}
 
 		return asResult;
 	}
-	
+
 	/**
 	 * Returns the name of the corresponding jar file.
 	 *
-	 * @return   a String
+	 * @return a String
 	 *
 	 */
-	public String getJarFileName () {
+	public String getJarFileName() {
 		return sJarFileName;
 	}
 
-
-
 	@Override
 	long getSizeOfResource(String resourceName) throws ResourceNotFoundException {
-		JarEntry je = jfFile.getJarEntry ( resourceName );
-		
-		if ( je == null )
-			throw new ResourceNotFoundException ( resourceName, sJarFileName );
-		
+		JarEntry je = jfFile.getJarEntry(resourceName);
+
+		if (je == null)
+			throw new ResourceNotFoundException(resourceName, sJarFileName);
+
 		return je.getSize();
 	}
-	
-	
-	
+
 	/**
-	 * factory: create a LoadedJarLibrary from a JAR file and the information
-	 * contained in its manifest
-	 *  
-	 * @param filename	filename of the jar file
+	 * factory: create a LoadedJarLibrary from a JAR file and the information contained in its manifest
+	 * 
+	 * @param filename filename of the jar file
 	 * 
 	 * @return a loaded jar library representing the given file
 	 * 
-	 * @throws IOException 
-	 * @throws IllegalArgumentException 
+	 * @throws IOException
+	 * @throws IllegalArgumentException
 	 */
-	public static LoadedJarLibrary createFromJar ( String filename ) throws IllegalArgumentException, IOException {
-		JarFile jfFile = new JarFile ( filename );
-		
+	public static LoadedJarLibrary createFromJar(String filename) throws IllegalArgumentException, IOException {
+		JarFile jfFile = new JarFile(filename);
+
 		String sImport = jfFile.getManifest().getMainAttributes().getValue("Import-Library");
 		String sName = jfFile.getManifest().getMainAttributes().getValue("Library-SymbolicName");
 		String sVersion = jfFile.getManifest().getMainAttributes().getValue("Library-Version");
-		
-		
+
 		// fill in version and name info from file name
-		if ( sName == null || sVersion == null ) {
-			String[] split = filename.substring(0, filename.length()-4).split("-");
-			if ( split.length == 3 ) {
+		if (sName == null || sVersion == null) {
+			String[] split = filename.substring(0, filename.length() - 4).split("-");
+			if (split.length == 3) {
 				// build included
-				if ( sVersion == null )
+				if (sVersion == null)
 					sVersion = split[1] + "-" + split[2];
-			} else if ( split.length == 2 ) {
-				if ( sVersion == null)
+			} else if (split.length == 2) {
+				if (sVersion == null)
 					sVersion = split[1];
-			} 
-			
-			if ( sName == null )
+			}
+
+			if (sName == null)
 				sName = split[0];
 		}
-		
 
 		jfFile.close();
-		return new LoadedJarLibrary ( 
-				filename, 
-				new LibraryIdentifier ( sName, sVersion), 
-				LibraryDependency.fromString(sImport)
-		);
-		
+		return new LoadedJarLibrary(
+				filename,
+				new LibraryIdentifier(sName, sVersion),
+				LibraryDependency.fromString(sImport));
+
 	}
 
-
-	
 }

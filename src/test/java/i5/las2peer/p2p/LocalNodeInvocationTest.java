@@ -23,61 +23,68 @@ public class LocalNodeInvocationTest {
 	public void reset() {
 		LocalNode.reset();
 	}
-	
-	@After 
-	public void clearThreads () {
+
+	@After
+	public void clearThreads() {
 		LocalNode.stopCleaner();
 	}
-	
+
 	@Test
-	public void testLocalInvocation() throws SecurityException, IllegalArgumentException, AgentNotKnownException, L2pSecurityException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InterruptedException, AgentAlreadyRegisteredException, MalformedXMLException, IOException, CryptoException, AgentException {		
+	public void testLocalInvocation()
+			throws SecurityException, IllegalArgumentException, AgentNotKnownException, L2pSecurityException,
+			NoSuchMethodException, IllegalAccessException, InvocationTargetException, InterruptedException,
+			AgentAlreadyRegisteredException, MalformedXMLException, IOException, CryptoException, AgentException {
 		LocalNode node = LocalNode.newNode();
 		UserAgent eve = MockAgentFactory.getEve();
-		
-		node.storeAgent ( eve );
-		
+
+		node.storeAgent(eve);
+
 		node.launch();
-		
+
 		ServiceAgent testServiceAgent = ServiceAgent.createServiceAgent("i5.las2peer.api.TestService", "a pass");
 		testServiceAgent.unlockPrivateKey("a pass");
 		node.registerReceiver(testServiceAgent);
-		
-		Object result = node.invokeLocally(eve.getId(), "i5.las2peer.api.TestService", "inc", new Serializable [] { new Integer ( 10)});
-		
-		assertEquals ( 12, result);
+
+		Object result = node.invokeLocally(eve.getId(), "i5.las2peer.api.TestService", "inc",
+				new Serializable[] { new Integer(10) });
+
+		assertEquals(12, result);
 	}
-	
+
 	@Test
-	public void testGlobalInvocation() throws SecurityException, IllegalArgumentException, AgentNotKnownException, L2pSecurityException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InterruptedException, AgentAlreadyRegisteredException, MalformedXMLException, IOException, CryptoException, AgentException, TimeoutException {		
+	public void testGlobalInvocation() throws SecurityException, IllegalArgumentException, AgentNotKnownException,
+			L2pSecurityException, NoSuchMethodException, IllegalAccessException, InvocationTargetException,
+			InterruptedException, AgentAlreadyRegisteredException, MalformedXMLException, IOException, CryptoException,
+			AgentException, TimeoutException {
 		LocalNode serviceNode = LocalNode.newNode();
 		UserAgent eve = MockAgentFactory.getEve();
-		
-		serviceNode.storeAgent ( eve );
+
+		serviceNode.storeAgent(eve);
 		serviceNode.launch();
-		
+
 		ServiceAgent testServiceAgent = ServiceAgent.createServiceAgent("i5.las2peer.api.TestService", "a pass");
 		testServiceAgent.unlockPrivateKey("a pass");
 		serviceNode.registerReceiver(testServiceAgent);
-		
-		LocalNode callerNode = LocalNode.launchNode ();
+
+		LocalNode callerNode = LocalNode.launchNode();
 		eve.unlockPrivateKey("evespass");
-				Object result = callerNode.invokeGlobally(eve, "i5.las2peer.api.TestService", "inc", new Serializable[]{ new Integer (12)}); 
-		
-		assertEquals ( 14, result);
+		Object result = callerNode.invokeGlobally(eve, "i5.las2peer.api.TestService", "inc",
+				new Serializable[] { new Integer(12) });
+
+		assertEquals(14, result);
 	}
-	
-	
-	
+
 	@Test
-	public void testSubinvocation ()  throws MalformedXMLException, IOException, L2pSecurityException, CryptoException, InterruptedException, AgentAlreadyRegisteredException, AgentException, TimeoutException {
+	public void testSubinvocation() throws MalformedXMLException, IOException, L2pSecurityException, CryptoException,
+			InterruptedException, AgentAlreadyRegisteredException, AgentException, TimeoutException {
 		LocalNode serviceNode1 = LocalNode.newNode();
 		LocalNode serviceNode2 = LocalNode.newNode();
 		UserAgent eve = MockAgentFactory.getEve();
 
-		serviceNode1.storeAgent ( eve );
+		serviceNode1.storeAgent(eve);
 		serviceNode1.launch();
 		serviceNode2.launch();
-		
+
 		ServiceAgent testServiceAgent = ServiceAgent.createServiceAgent("i5.las2peer.api.TestService", "a pass");
 		testServiceAgent.unlockPrivateKey("a pass");
 		serviceNode1.registerReceiver(testServiceAgent);
@@ -85,36 +92,35 @@ public class LocalNodeInvocationTest {
 		ServiceAgent testServiceAgent2 = ServiceAgent.createServiceAgent("i5.las2peer.api.TestService2", "a 2nd pass");
 		testServiceAgent2.unlockPrivateKey("a 2nd pass");
 		serviceNode2.registerReceiver(testServiceAgent2);
-		
-		
-		LocalNode callerNode = LocalNode.launchNode ();
+
+		LocalNode callerNode = LocalNode.launchNode();
 		eve.unlockPrivateKey("evespass");
-		Object result = callerNode.invokeGlobally(eve, "i5.las2peer.api.TestService2", "usingOther", new Serializable[] { new Integer (12) }); 
-		
-		assertEquals ( 14, result);
+		Object result = callerNode.invokeGlobally(eve, "i5.las2peer.api.TestService2", "usingOther",
+				new Serializable[] { new Integer(12) });
+
+		assertEquals(14, result);
 	}
-	
-	
-	@Test 
-	public void testSubinvocationFail () throws MalformedXMLException, IOException, L2pSecurityException, CryptoException, InterruptedException, AgentAlreadyRegisteredException, AgentException, TimeoutException {
+
+	@Test
+	public void testSubinvocationFail() throws MalformedXMLException, IOException, L2pSecurityException,
+			CryptoException, InterruptedException, AgentAlreadyRegisteredException, AgentException, TimeoutException {
 		LocalNode serviceNode2 = LocalNode.newNode();
 		UserAgent eve = MockAgentFactory.getEve();
 
-		serviceNode2.storeAgent ( eve );
+		serviceNode2.storeAgent(eve);
 		serviceNode2.launch();
-		
+
 		ServiceAgent testServiceAgent2 = ServiceAgent.createServiceAgent("i5.las2peer.api.TestService2", "a 2nd pass");
 		testServiceAgent2.unlockPrivateKey("a 2nd pass");
 		serviceNode2.registerReceiver(testServiceAgent2);
-		
-		
-		LocalNode callerNode = LocalNode.launchNode ();
+
+		LocalNode callerNode = LocalNode.launchNode();
 		eve.unlockPrivateKey("evespass");
-		Object result = callerNode.invokeGlobally(eve, "i5.las2peer.api.TestService2", "usingOther", new Serializable[] {new Integer (12)}); 
-		
-		assertEquals ( -200, result);
-		
+		Object result = callerNode.invokeGlobally(eve, "i5.las2peer.api.TestService2", "usingOther",
+				new Serializable[] { new Integer(12) });
+
+		assertEquals(-200, result);
+
 	}
-	
 
 }

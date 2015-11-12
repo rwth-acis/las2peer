@@ -1,10 +1,7 @@
 package i5.las2peer.execution;
 
-
-
 /**
- * a Service InvocationException is thrown when the invocation of a service
- * method leads to an internal exception
+ * a Service InvocationException is thrown when the invocation of a service method leads to an internal exception
  * 
  * 
  *
@@ -22,19 +19,17 @@ public class ServiceInvocationException extends L2pServiceException {
 	 * @param message
 	 * @param cause
 	 */
-	public ServiceInvocationException ( String message, Throwable cause ) {
-		super ( message, cause );
-	}
-	
-	/**
-	 * create a new exception indicating result interpretation problems
-	 * (no cause) 
-	 * @param message
-	 */
-	public ServiceInvocationException ( String message ) {
-		super ( message );
+	public ServiceInvocationException(String message, Throwable cause) {
+		super(message, cause);
 	}
 
-	
-	
+	/**
+	 * create a new exception indicating result interpretation problems (no cause)
+	 * 
+	 * @param message
+	 */
+	public ServiceInvocationException(String message) {
+		super(message);
+	}
+
 }

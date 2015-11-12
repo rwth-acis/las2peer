@@ -10,11 +10,11 @@ public class LocalNodeStarterTest {
 	public void test() {
 		String pack = "bla.xxx.awedw";
 		String cls = "daiwdw";
-		
+
 		String complete = pack + "." + cls;
-		
-		assertEquals ( pack, complete.substring(0, complete.lastIndexOf('.')) );
-		assertEquals ( cls, complete.substring(complete.lastIndexOf('.')+1) );
+
+		assertEquals(pack, complete.substring(0, complete.lastIndexOf('.')));
+		assertEquals(cls, complete.substring(complete.lastIndexOf('.') + 1));
 	}
 
 }

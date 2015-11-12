@@ -15,12 +15,14 @@ public class PingPongContent implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = -2353759617748130156L;
-	public long timestamp; 
-	
-	public PingPongContent () {
+	public long timestamp;
+
+	public PingPongContent() {
 		timestamp = new Date().getTime();
 	}
-	
-	public long getTimestamp () { return timestamp; }
-	
+
+	public long getTimestamp() {
+		return timestamp;
+	}
+
 }

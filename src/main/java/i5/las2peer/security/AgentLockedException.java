@@ -2,7 +2,6 @@ package i5.las2peer.security;
 
 public class AgentLockedException extends L2pSecurityException {
 
-
 	/**
 	 * 
 	 */

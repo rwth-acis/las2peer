@@ -6,18 +6,16 @@ import java.io.Serializable;
 
 /**
  * 
- * This class stores a message that was logged by the monitoring module of LAS2peer.
- * An Array of instances of this class is send via a {@link i5.las2peer.communication.Message}
- * to the central monitoring node.
+ * This class stores a message that was logged by the monitoring module of LAS2peer. An Array of instances of this class
+ * is send via a {@link i5.las2peer.communication.Message} to the central monitoring node.
  * 
  * 
  *
  */
-public class MonitoringMessage implements Serializable{
-	
-	
+public class MonitoringMessage implements Serializable {
+
 	private static final long serialVersionUID = -1481582785721621545L;
-	
+
 	private Long timestamp;
 	private Event event;
 	private String sourceNode;
@@ -25,8 +23,7 @@ public class MonitoringMessage implements Serializable{
 	private String destinationNode;
 	private Long destinationAgentId;
 	private String remarks;
-	
-	
+
 	/**
 	 * 
 	 * Constructor of a MonitoringMessage.
@@ -41,7 +38,7 @@ public class MonitoringMessage implements Serializable{
 	 * 
 	 */
 	public MonitoringMessage(Long timestamp, Event event, String sourceNode,
-			Long sourceAgentId, String destinationNode, Long destinationAgentId, String remarks){
+			Long sourceAgentId, String destinationNode, Long destinationAgentId, String remarks) {
 		this.timestamp = timestamp;
 		this.event = event;
 		this.sourceNode = sourceNode;
@@ -50,40 +47,33 @@ public class MonitoringMessage implements Serializable{
 		this.destinationAgentId = destinationAgentId;
 		this.remarks = remarks;
 	}
-	
-	
+
 	public Long getTimestamp() {
 		return timestamp;
 	}
-	
-	
+
 	public Event getEvent() {
 		return event;
 	}
-	
-	
+
 	public String getSourceNode() {
 		return sourceNode;
 	}
-	
-	
+
 	public Long getSourceAgentId() {
 		return sourceAgentId;
 	}
-	
+
 	public String getDestinationNode() {
 		return destinationNode;
 	}
-	
-	
+
 	public Long getDestinationAgentId() {
 		return destinationAgentId;
 	}
-	
-	
+
 	public String getRemarks() {
 		return remarks;
 	}
-	
-	
+
 }

@@ -18,8 +18,7 @@ public class LauncherThread extends Thread {
 	private boolean fail = false;
 
 	/**
-	 * create a new Launcher Thread starting a single node
-	 * defined by a single config file
+	 * create a new Launcher Thread starting a single node defined by a single config file
 	 * 
 	 * 
 	 * @param file
@@ -64,17 +63,16 @@ public class LauncherThread extends Thread {
 	/**
 	 * getter for the created launcher
 	 * 
-	 * @return	the assigned launcher
+	 * @return the assigned launcher
 	 */
 	public L2pNodeLauncher getLauncher() {
 		return launcher;
 	}
 
 	/**
-	 * is the assigned launcher finished?
-	 * i.e. has shutdown been called or an error occurred?  
+	 * is the assigned launcher finished? i.e. has shutdown been called or an error occurred?
 	 * 
-	 * @return	true, if the corresponding launcher is finished 
+	 * @return true, if the corresponding launcher is finished
 	 */
 	public boolean isFinished() {
 		if (fail)

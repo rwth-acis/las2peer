@@ -1,6 +1,5 @@
 package i5.las2peer.tools;
 
-
 /**
  * Exception for cryptografical problems.
  * 
@@ -19,19 +18,18 @@ public class CryptoException extends Exception {
 	 * 
 	 * @param message
 	 */
-	public CryptoException ( String message ) {
-		super ( message );
+	public CryptoException(String message) {
+		super(message);
 	}
-	
-	
+
 	/**
 	 * create a new exception
 	 * 
 	 * @param message
 	 * @param cause
 	 */
-	public CryptoException ( String message, Throwable cause) {
-		super ( message, cause );
+	public CryptoException(String message, Throwable cause) {
+		super(message, cause);
 	}
-	
+
 }

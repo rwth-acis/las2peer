@@ -256,7 +256,7 @@ public class ServiceAgent extends PassphraseAgent {
 				passphrase,
 				CryptoTools.generateSalt());
 	}
-	
+
 	/**
 	 * factory: create a new service agent from the given XML representation
 	 * 

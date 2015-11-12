@@ -14,12 +14,12 @@ public class AgentJoinedContent extends L2pScribeContent {
 	 * serialization id
 	 */
 	private static final long serialVersionUID = 311073208550954373L;
-	
+
 	private long agentId;
 
 	/**
-	 * create a new instance stating that the agent of the given id
-	 * has been loaded at the given node 
+	 * create a new instance stating that the agent of the given id has been loaded at the given node
+	 * 
 	 * @param from
 	 * @param agentId
 	 */
@@ -27,12 +27,14 @@ public class AgentJoinedContent extends L2pScribeContent {
 		super(from);
 		this.agentId = agentId;
 	}
-	
+
 	/**
 	 * get the id of the agent, which has joined the net
-	 * @return	an agent id
+	 * 
+	 * @return an agent id
 	 */
-	public long getAgentId () { return agentId; }
-	
+	public long getAgentId() {
+		return agentId;
+	}
 
 }

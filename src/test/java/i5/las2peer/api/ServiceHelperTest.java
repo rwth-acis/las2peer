@@ -9,8 +9,8 @@ public class ServiceHelperTest {
 	@Test
 	public void test() {
 		// TODO
-		
-		assertTrue ( true );
+
+		assertTrue(true);
 	}
 
 }

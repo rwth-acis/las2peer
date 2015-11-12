@@ -22,6 +22,7 @@ public class ServiceList implements Serializable {
 
 	/**
 	 * Returns an array with the names of all registered services
+	 * 
 	 * @return the service names
 	 */
 	public ServiceNameVersion[] getServices() {

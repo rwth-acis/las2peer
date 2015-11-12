@@ -2,7 +2,6 @@ package i5.las2peer.classLoaders.libraries;
 
 import i5.las2peer.classLoaders.ClassLoaderException;
 
-
 /**
  * exception thrown on not found resources within a LoadedLibrary
  * 
@@ -25,8 +24,7 @@ public class ResourceNotFoundException extends ClassLoaderException {
 	protected ResourceNotFoundException(String resource, String library) {
 		super("the resource '" + resource + "' could not be loaded from '" + library + "'");
 	}
-	
-	
+
 	/**
 	 * create a new exception
 	 * 

@@ -22,21 +22,18 @@ import java.util.Random;
 
 import org.apache.commons.codec.binary.Base64;
 
-
 /**
  * 
- * A MonitoringAgent is responsible for sending monitoring information collected 
- * at the {@link i5.las2peer.logging.monitoring.MonitoringObserver}. It should only be used for this task.
+ * A MonitoringAgent is responsible for sending monitoring information collected at the
+ * {@link i5.las2peer.logging.monitoring.MonitoringObserver}. It should only be used for this task.
  * 
  * 
  *
  */
 public class MonitoringAgent extends PassphraseAgent {
-	
-	
+
 	public static final String PROCESSING_SERVICE_ClASS_NAME = "i5.las2peer.services.monitoring.processing.MonitoringDataProcessingService";
-	
-	
+
 	/**
 	 * 
 	 * Creates a new MonitoringAgent.
@@ -48,11 +45,11 @@ public class MonitoringAgent extends PassphraseAgent {
 	 * @throws CryptoException
 	 * 
 	 */
-	protected MonitoringAgent ( long id, KeyPair pair, String passphrase, byte[] salt ) throws L2pSecurityException, CryptoException{
-		super ( id, pair, passphrase, salt );
+	protected MonitoringAgent(long id, KeyPair pair, String passphrase, byte[] salt)
+			throws L2pSecurityException, CryptoException {
+		super(id, pair, passphrase, salt);
 	}
-	
-	
+
 	/**
 	 * 
 	 * Creates a new MonitoringAgent with a locked private key.
@@ -65,11 +62,10 @@ public class MonitoringAgent extends PassphraseAgent {
 	 * @param salt
 	 * 
 	 */
-	protected MonitoringAgent ( long id, PublicKey pubKey, byte[] encodedPrivate, byte[] salt ) {
-		super ( id, pubKey, encodedPrivate, salt );
+	protected MonitoringAgent(long id, PublicKey pubKey, byte[] encodedPrivate, byte[] salt) {
+		super(id, pubKey, encodedPrivate, salt);
 	}
-	
-	
+
 	/**
 	 * 
 	 * Create a new MonitoringAgent protected by the given passphrase.
@@ -82,21 +78,19 @@ public class MonitoringAgent extends PassphraseAgent {
 	 * @throws L2pSecurityException
 	 * 
 	 */
-	public static MonitoringAgent createMonitoringAgent ( String passphrase ) throws CryptoException, L2pSecurityException {
+	public static MonitoringAgent createMonitoringAgent(String passphrase)
+			throws CryptoException, L2pSecurityException {
 		Random r = new Random();
 		return new MonitoringAgent(r.nextLong(), CryptoTools.generateKeyPair(), passphrase, CryptoTools.generateSalt());
-	}	
-	
-	
+	}
+
 	/**
 	 * 
-	 * This method is called by the node this agent is running at.
-	 * In this context, it is used to receive monitoring messages send by
-	 * the {@link i5.las2peer.logging.monitoring.MonitoringObserver}s
-	 * of the monitored nodes to the central processing service.
-	 * Every other type of communication (to agents not resided at the monitoring
-	 * node, other types of content than {@link i5.las2peer.logging.monitoring.MonitoringMessage}s
-	 * will result in an Exception.
+	 * This method is called by the node this agent is running at. In this context, it is used to receive monitoring
+	 * messages send by the {@link i5.las2peer.logging.monitoring.MonitoringObserver}s of the monitored nodes to the
+	 * central processing service. Every other type of communication (to agents not resided at the monitoring node,
+	 * other types of content than {@link i5.las2peer.logging.monitoring.MonitoringMessage}s will result in an
+	 * Exception.
 	 * 
 	 * @param message
 	 * @param context
@@ -107,18 +101,20 @@ public class MonitoringAgent extends PassphraseAgent {
 	@Override
 	public void receiveMessage(Message message, Context context) throws MessageException {
 		try {
-			//Test for instance
+			// Test for instance
 			message.open(this, getRunningAtNode());
 			Object content = message.getContent();
-			if ( content instanceof MonitoringMessage[]) {
-				Serializable[] parameters = {(Serializable) content};
+			if (content instanceof MonitoringMessage[]) {
+				Serializable[] parameters = { (Serializable) content };
 				try {
-					//Try to send the content of the message to the Processing Service
-					boolean success = (Boolean) getRunningAtNode().invokeLocally(getId(), PROCESSING_SERVICE_ClASS_NAME, "getMessages", parameters);
-					if(!success)
-						//TODO: Check for performance of message receiving
-						System.out.println("Monitoring: Something went wrong while invoking Processing Service to deliver a monitoring message!");
-				}catch(NoSuchServiceException e){
+					// Try to send the content of the message to the Processing Service
+					boolean success = (Boolean) getRunningAtNode().invokeLocally(getId(), PROCESSING_SERVICE_ClASS_NAME,
+							"getMessages", parameters);
+					if (!success)
+						// TODO: Check for performance of message receiving
+						System.out.println(
+								"Monitoring: Something went wrong while invoking Processing Service to deliver a monitoring message!");
+				} catch (NoSuchServiceException e) {
 					System.out.println("Monitoring: I am not the Processing Service!");
 				} catch (L2pServiceException e) {
 					System.out.println("Monitoring: Something went wrong while invoking Processing Service!");
@@ -128,16 +124,15 @@ public class MonitoringAgent extends PassphraseAgent {
 					e.printStackTrace();
 				}
 			} else {
-				throw new MessageException ("MonitoringAgents only receive monitoring messages!");
+				throw new MessageException("MonitoringAgents only receive monitoring messages!");
 			}
 		} catch (L2pSecurityException e) {
-			throw new MessageException ("Security problems handling the received message", e);
+			throw new MessageException("Security problems handling the received message", e);
 		} catch (AgentNotKnownException e) {
-			//Do nothing..("this" is not known..would be strange, eh?)
+			// Do nothing..("this" is not known..would be strange, eh?)
 		}
 	}
-	
-	
+
 	/**
 	 * Can be used to return a XML representation of the MonitoringAgent.
 	 * 
@@ -150,115 +145,110 @@ public class MonitoringAgent extends PassphraseAgent {
 		try {
 			StringBuffer result = new StringBuffer(
 					"<las2peer:agent type=\"monitoring\">\n"
-					+"\t<id>" + getId() + "</id>\n"
-					+"\t<publickey encoding=\"base64\">"
-					+ SerializeTools.serializeToBase64( getPublicKey() )
-					+"</publickey>\n"
-					+"\t<privatekey encrypted=\""+CryptoTools.getSymmetricAlgorithm() +"\" keygen=\""+CryptoTools.getSymmetricKeygenMethod()+"\">\n"
-					+"\t\t<salt encoding=\"base64\">" + Base64.encodeBase64String(getSalt()) + "</salt>\n"
-					+"\t\t<data encoding=\"base64\">" + getEncodedPrivate() + "</data>\n"
-					+"\t</privatekey>\n"
-			);
-			
-			result.append( "</las2peer:agent>\n" );
-			
+							+ "\t<id>" + getId() + "</id>\n"
+							+ "\t<publickey encoding=\"base64\">"
+							+ SerializeTools.serializeToBase64(getPublicKey())
+							+ "</publickey>\n"
+							+ "\t<privatekey encrypted=\"" + CryptoTools.getSymmetricAlgorithm() + "\" keygen=\""
+							+ CryptoTools.getSymmetricKeygenMethod() + "\">\n"
+							+ "\t\t<salt encoding=\"base64\">" + Base64.encodeBase64String(getSalt()) + "</salt>\n"
+							+ "\t\t<data encoding=\"base64\">" + getEncodedPrivate() + "</data>\n"
+							+ "\t</privatekey>\n");
+
+			result.append("</las2peer:agent>\n");
+
 			return result.toString();
 		} catch (SerializationException e) {
-			throw new RuntimeException ( "Serialization problems with keys");
+			throw new RuntimeException("Serialization problems with keys");
 		}
 	}
-	
-	
+
 	/**
 	 * 
-	 * Sets the state of the object from a string representation resulting from
-	 * a previous {@link #toXmlString} call.
+	 * Sets the state of the object from a string representation resulting from a previous {@link #toXmlString} call.
 	 *
-	 * Usually, a standard constructor is used to get a fresh instance of the
-	 * class and to set the complete state via this method.
+	 * Usually, a standard constructor is used to get a fresh instance of the class and to set the complete state via
+	 * this method.
 	 * 
 	 * @param xml a String
 	 * 
 	 * @exception MalformedXMLException
 	 * 
 	 */
-	public static MonitoringAgent createFromXml (String xml) throws MalformedXMLException {
+	public static MonitoringAgent createFromXml(String xml) throws MalformedXMLException {
 		try {
-			Element root = Parser.parse( xml, false);
-			if ( ! "monitoring".equals( root.getAttribute("type")))
+			Element root = Parser.parse(xml, false);
+			if (!"monitoring".equals(root.getAttribute("type")))
 				throw new MalformedXMLException("Monitoring agent expected");
-			if ( ! "agent".equals( root.getName()))
+			if (!"agent".equals(root.getName()))
 				throw new MalformedXMLException("Agent expeced");
-			return createFromXml ( root );
+			return createFromXml(root);
 		} catch (XMLSyntaxException e) {
 			throw new MalformedXMLException("Error parsing xml string", e);
 		}
 	}
-	
-	
+
 	/**
 	 * 
-	 * Sets the state of the object from a string representation resulting from
-	 * a previous {@link #toXmlString} call.
+	 * Sets the state of the object from a string representation resulting from a previous {@link #toXmlString} call.
 	 * 
 	 * @param root parsed XML document
 	 * 
 	 * @exception MalformedXMLException
 	 * 
-	 */	
-	public static MonitoringAgent createFromXml ( Element root ) throws MalformedXMLException {
+	 */
+	public static MonitoringAgent createFromXml(Element root) throws MalformedXMLException {
 		try {
 			Element elId = root.getFirstChild();
-			long id = Long.parseLong( elId.getFirstChild().getText());
-			
+			long id = Long.parseLong(elId.getFirstChild().getText());
+
 			Element pubKey = root.getChild(1);
-			if ( !pubKey.getName().equals( "publickey" ))
-				throw new MalformedXMLException("public key expected" );
-			if ( ! pubKey.getAttribute("encoding").equals( "base64"))
-				throw new MalformedXMLException("base64 encoding expected" );
-			
-			PublicKey publicKey = (PublicKey) SerializeTools.deserializeBase64 ( pubKey.getFirstChild().getText());
-			
-			Element privKey = root.getChild ( 2 );
-			if ( !privKey.getName().equals("privatekey"))
+			if (!pubKey.getName().equals("publickey"))
+				throw new MalformedXMLException("public key expected");
+			if (!pubKey.getAttribute("encoding").equals("base64"))
+				throw new MalformedXMLException("base64 encoding expected");
+
+			PublicKey publicKey = (PublicKey) SerializeTools.deserializeBase64(pubKey.getFirstChild().getText());
+
+			Element privKey = root.getChild(2);
+			if (!privKey.getName().equals("privatekey"))
 				throw new MalformedXMLException("private key expected");
-			if ( ! privKey.getAttribute("encrypted").equals( CryptoTools.getSymmetricAlgorithm() ))
+			if (!privKey.getAttribute("encrypted").equals(CryptoTools.getSymmetricAlgorithm()))
 				throw new MalformedXMLException(CryptoTools.getSymmetricAlgorithm() + " expected");
-			if ( ! privKey.getAttribute("keygen").equals( CryptoTools.getSymmetricKeygenMethod() ))
-				throw new MalformedXMLException(CryptoTools.getSymmetricKeygenMethod()  + " expected");
-			
-			Element elSalt= privKey.getFirstChild();
-			if ( !elSalt.getName().equals("salt"))
+			if (!privKey.getAttribute("keygen").equals(CryptoTools.getSymmetricKeygenMethod()))
+				throw new MalformedXMLException(CryptoTools.getSymmetricKeygenMethod() + " expected");
+
+			Element elSalt = privKey.getFirstChild();
+			if (!elSalt.getName().equals("salt"))
 				throw new MalformedXMLException("salt expected");
-			if ( ! elSalt.getAttribute("encoding").equals("base64"))
+			if (!elSalt.getAttribute("encoding").equals("base64"))
 				throw new MalformedXMLException("base64 encoding expected");
-			
-			byte[] salt = Base64.decodeBase64 (elSalt.getFirstChild().getText());
-			
+
+			byte[] salt = Base64.decodeBase64(elSalt.getFirstChild().getText());
+
 			Element data = privKey.getChild(1);
-			if ( !data.getName().equals( "data" ))
+			if (!data.getName().equals("data"))
 				throw new MalformedXMLException("data expected");
-			if ( ! data.getAttribute("encoding").equals("base64"))
+			if (!data.getAttribute("encoding").equals("base64"))
 				throw new MalformedXMLException("base64 encoding expected");
-			byte[] encPrivate = Base64.decodeBase64( data.getFirstChild().getText());
-			
-			MonitoringAgent result = new MonitoringAgent ( id, publicKey, encPrivate, salt );
-			
+			byte[] encPrivate = Base64.decodeBase64(data.getFirstChild().getText());
+
+			MonitoringAgent result = new MonitoringAgent(id, publicKey, encPrivate, salt);
+
 			return result;
 		} catch (XMLSyntaxException e) {
 			throw new MalformedXMLException("Error parsing XML string", e);
 		} catch (SerializationException e) {
-			throw new MalformedXMLException("Deserialization problems", e );
+			throw new MalformedXMLException("Deserialization problems", e);
 		}
 	}
-	
-	
+
 	/**
 	 * Does nothing.
 	 */
 	@Override
 	public void notifyUnregister() {
-		//well..do nothing for the moment.. (something necessary?)
+		// well..do nothing for the moment.. (something necessary?)
 	}
-	
+
 }

@@ -40,6 +40,7 @@ public class ServiceNodeList implements Serializable {
 
 	/**
 	 * Removes a node from the list.
+	 * 
 	 * @param handle
 	 * @return true, if new list is empty
 	 */

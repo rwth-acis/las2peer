@@ -14,24 +14,23 @@ import org.junit.Test;
 
 public class LocalServiceTestCaseTest extends LocalServiceTestCase {
 
-
 	@Test
 	public void test() throws NoSuchServiceException {
-		assertEquals ( TestService.class, getServiceClass() );
-		assertEquals ( TestService.class.getName(), getMyAgent().getServiceClassName() );
-		
-		assertTrue ( getNode().hasAgent(getMyAgent().getId()));
-		
-		assertEquals ( TestService.class, getServiceInstance().getClass()  );
+		assertEquals(TestService.class, getServiceClass());
+		assertEquals(TestService.class.getName(), getMyAgent().getServiceClassName());
+
+		assertTrue(getNode().hasAgent(getMyAgent().getId()));
+
+		assertEquals(TestService.class, getServiceInstance().getClass());
 	}
-	
+
 	@Test
-	public void testMockAgents () throws MalformedXMLException, IOException {
+	public void testMockAgents() throws MalformedXMLException, IOException {
 		Agent eve = MockAgentFactory.getEve();
 		getNode().hasAgent(eve.getId());
-		
-		assertTrue (  getNode().hasAgent( MockAgentFactory.getAdam().getId() ));
-		assertTrue ( getNode().hasAgent( MockAgentFactory.getAbel().getId()) );
+
+		assertTrue(getNode().hasAgent(MockAgentFactory.getAdam().getId()));
+		assertTrue(getNode().hasAgent(MockAgentFactory.getAbel().getId()));
 	}
 
 	@Override

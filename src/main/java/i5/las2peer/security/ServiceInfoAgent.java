@@ -31,7 +31,8 @@ import rice.pastry.PastryNode;
  */
 
 /**
- * This Agent is a public single instance agent for the solely purpose of keeping (loosely) track of all registered services in the network
+ * This Agent is a public single instance agent for the solely purpose of keeping (loosely) track of all registered
+ * services in the network
  */
 public class ServiceInfoAgent extends PassphraseAgent {
 
@@ -50,6 +51,7 @@ public class ServiceInfoAgent extends PassphraseAgent {
 
 	/**
 	 * Agent is public and has a default passphrase
+	 * 
 	 * @return the passphrase
 	 */
 	public static String getDefaultPassphrase() {
@@ -58,6 +60,7 @@ public class ServiceInfoAgent extends PassphraseAgent {
 
 	/**
 	 * default constructor
+	 * 
 	 * @param id
 	 * @param pair
 	 * @param passphrase
@@ -72,6 +75,7 @@ public class ServiceInfoAgent extends PassphraseAgent {
 
 	/**
 	 * default constructor
+	 * 
 	 * @param id
 	 * @param pubKey
 	 * @param encodedPrivate
@@ -83,6 +87,7 @@ public class ServiceInfoAgent extends PassphraseAgent {
 
 	/**
 	 * Retrieves the single agent instance
+	 * 
 	 * @param passphrase
 	 * @return a {@link ServiceInfoAgent}
 	 * @throws CryptoException
@@ -107,6 +112,7 @@ public class ServiceInfoAgent extends PassphraseAgent {
 
 	/**
 	 * Retrieves the single agent instance
+	 * 
 	 * @return a {@link ServiceInfoAgent}
 	 * @throws CryptoException
 	 * @throws L2pSecurityException
@@ -120,6 +126,7 @@ public class ServiceInfoAgent extends PassphraseAgent {
 
 	/**
 	 * Returns an array of currently registered services
+	 * 
 	 * @return an array of {@link i5.las2peer.p2p.ServiceNameVersion}s
 	 * @throws EnvelopeException
 	 */
@@ -129,10 +136,12 @@ public class ServiceInfoAgent extends PassphraseAgent {
 
 	/**
 	 * Reads {@link i5.las2peer.p2p.ServiceList} from the Envelope
+	 * 
 	 * @return {@link i5.las2peer.p2p.ServiceList}
 	 * @throws EnvelopeException
 	 */
-	private static Serializable getEnvelopeData(String envelopeName, Class<? extends Serializable> dataCls) throws EnvelopeException {
+	private static Serializable getEnvelopeData(String envelopeName, Class<? extends Serializable> dataCls)
+			throws EnvelopeException {
 		Envelope env = fetchEnvelope(envelopeName, dataCls);
 		Serializable data = null;
 		if (env == null)
@@ -155,6 +164,7 @@ public class ServiceInfoAgent extends PassphraseAgent {
 
 	/**
 	 * UpdatesEnvelope with new {@link i5.las2peer.p2p.ServiceList}
+	 * 
 	 * @param data
 	 * @throws EnvelopeException
 	 */
@@ -197,6 +207,7 @@ public class ServiceInfoAgent extends PassphraseAgent {
 
 	/**
 	 * Gets the Envelope from the Network
+	 * 
 	 * @return
 	 */
 	private static Envelope fetchEnvelope(String envelopeName, Class<?> cls) {
@@ -211,6 +222,7 @@ public class ServiceInfoAgent extends PassphraseAgent {
 
 	/**
 	 * Creates a new Envelope
+	 * 
 	 * @return
 	 */
 	private static Envelope createNewEnvelope(String envelopeName, Class<?> cls) {
@@ -242,8 +254,7 @@ public class ServiceInfoAgent extends PassphraseAgent {
 							+ CryptoTools.getSymmetricKeygenMethod() + "\">\n"
 							+ "\t\t<salt encoding=\"base64\">" + Base64.encodeBase64String(getSalt()) + "</salt>\n"
 							+ "\t\t<data encoding=\"base64\">" + getEncodedPrivate() + "</data>\n"
-							+ "\t</privatekey>\n"
-					);
+							+ "\t</privatekey>\n");
 
 			result.append("</las2peer:agent>\n");
 
@@ -254,8 +265,9 @@ public class ServiceInfoAgent extends PassphraseAgent {
 	}
 
 	/**
-	 * Called by {@link i5.las2peer.security.ServiceAgent} when it is registered to a node
-	 * Updates the contents of the internal Envelope
+	 * Called by {@link i5.las2peer.security.ServiceAgent} when it is registered to a node Updates the contents of the
+	 * internal Envelope
+	 * 
 	 * @param serviceAgent
 	 * @throws EnvelopeException
 	 */
@@ -290,8 +302,9 @@ public class ServiceInfoAgent extends PassphraseAgent {
 	}
 
 	/**
-	 * Called by {@link i5.las2peer.security.ServiceAgent} when it is unregistered from a node
-	 * Updates the contents of the internal Envelope
+	 * Called by {@link i5.las2peer.security.ServiceAgent} when it is unregistered from a node Updates the contents of
+	 * the internal Envelope
+	 * 
 	 * @param serviceAgent
 	 * @throws EnvelopeException
 	 */
@@ -313,6 +326,7 @@ public class ServiceInfoAgent extends PassphraseAgent {
 
 	/**
 	 * Resets the stored {@link i5.las2peer.p2p.ServiceList}
+	 * 
 	 * @throws EnvelopeException
 	 */
 	public void resetData(Node node) throws EnvelopeException, AgentException, L2pSecurityException {

@@ -3,7 +3,7 @@ package i5.las2peer.classLoaders.libraries;
 import i5.las2peer.classLoaders.ClassLoaderException;
 
 /**
- * exception thrown if a requested library cannot be found in a repository 
+ * exception thrown if a requested library cannot be found in a repository
  * 
  * 
  *
@@ -14,6 +14,7 @@ public class NotFoundException extends ClassLoaderException {
 
 	/**
 	 * create a new exception
+	 * 
 	 * @param message
 	 */
 	NotFoundException(String message) {
@@ -26,8 +27,8 @@ public class NotFoundException extends ClassLoaderException {
 	 * @param message
 	 * @param cause
 	 */
-	NotFoundException ( String message, Throwable cause ) {
-		super ( message, cause );
+	NotFoundException(String message, Throwable cause) {
+		super(message, cause);
 	}
-	
+
 }

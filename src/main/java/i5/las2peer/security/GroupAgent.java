@@ -595,7 +595,8 @@ public class GroupAgent extends Agent {
 
 	/**
 	 * Attaches the given object directly to this agent. The user data represent a field of this user agent and should
-	 * be used with small values (&lt; 1MB) only. Larger byte amounts could handicap the agent handling inside the network.
+	 * be used with small values (&lt; 1MB) only. Larger byte amounts could handicap the agent handling inside the
+	 * network.
 	 * 
 	 * @param object The user data object to be serialized and attached.
 	 * @throws L2pSecurityException When the user agent is still locked.

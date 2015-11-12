@@ -13,45 +13,42 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.security.NoSuchAlgorithmException;
 
-
-
 /**
  * Simple Factory class to load Agents from the nested XML files.
  * 
  * 
  *
  */
-public abstract class MockAgentFactory  {
-		
+public abstract class MockAgentFactory {
+
 	/**
 	 * get the contents of a text resource in the classpath
 	 * 
 	 * @param resourceName
 	 * 
 	 * @return contents of a resource as String
-	 * 	
+	 * 
 	 * @throws IOException
 	 */
-	public static String getContent ( String resourceName ) throws IOException {
+	public static String getContent(String resourceName) throws IOException {
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
 		StringBuffer result = new StringBuffer();
-				
+
 		InputStream is = loader.getResourceAsStream(resourceName);
-		BufferedReader reader = new BufferedReader ( new InputStreamReader ( is ) );
+		BufferedReader reader = new BufferedReader(new InputStreamReader(is));
 
 		String line = null;
-		while ((line = reader.readLine()) != null ) {
-			result.append ( line );
+		while ((line = reader.readLine()) != null) {
+			result.append(line);
 			result.append(System.getProperty("line.separator"));
 		}
-		
+
 		is.close();
-		
+
 		return result.toString();
 	}
-	
-	
+
 	/**
 	 * get eve-agent
 	 * 
@@ -60,10 +57,10 @@ public abstract class MockAgentFactory  {
 	 * @throws MalformedXMLException
 	 * @throws IOException
 	 */
-	public static UserAgent getEve () throws MalformedXMLException, IOException {		
-		return UserAgent.createFromXml( getContent ( "i5/las2peer/testing/eve.xml") );
+	public static UserAgent getEve() throws MalformedXMLException, IOException {
+		return UserAgent.createFromXml(getContent("i5/las2peer/testing/eve.xml"));
 	}
-	
+
 	/**
 	 * get adam agent
 	 * 
@@ -72,10 +69,10 @@ public abstract class MockAgentFactory  {
 	 * @throws MalformedXMLException
 	 * @throws IOException
 	 */
-	public static UserAgent getAdam () throws MalformedXMLException, IOException {
-		return UserAgent.createFromXml( getContent ( "i5/las2peer/testing/adam.xml") );		
+	public static UserAgent getAdam() throws MalformedXMLException, IOException {
+		return UserAgent.createFromXml(getContent("i5/las2peer/testing/adam.xml"));
 	}
-	
+
 	/**
 	 * get abel agent
 	 * 
@@ -84,10 +81,10 @@ public abstract class MockAgentFactory  {
 	 * @throws MalformedXMLException
 	 * @throws IOException
 	 */
-	public static UserAgent getAbel () throws MalformedXMLException, IOException {
-		return UserAgent.createFromXml( getContent ( "i5/las2peer/testing/abel.xml") );
+	public static UserAgent getAbel() throws MalformedXMLException, IOException {
+		return UserAgent.createFromXml(getContent("i5/las2peer/testing/abel.xml"));
 	}
-	
+
 	/**
 	 * get the anonymous agent
 	 * 
@@ -96,96 +93,91 @@ public abstract class MockAgentFactory  {
 	 * @throws MalformedXMLException
 	 * @throws IOException
 	 */
-	public static UserAgent getAnonymous () throws MalformedXMLException, IOException {
-		return UserAgent.createFromXml ( getContent ( "i5/las2peer/testing/anonymous.agent.xml"));
+	public static UserAgent getAnonymous() throws MalformedXMLException, IOException {
+		return UserAgent.createFromXml(getContent("i5/las2peer/testing/anonymous.agent.xml"));
 	}
-	
-	
+
 	/**
 	 * get ServiceAgent for <i>i5.las2peer.api.TestService</i>
 	 * 
 	 * The TestServices are placed in the JUnit source tree.
 	 * 
 	 * @return the ServiceAgent of the TestService
-	 * @throws IOException 
-	 * @throws MalformedXMLException 
+	 * @throws IOException
+	 * @throws MalformedXMLException
 	 */
-	public static ServiceAgent getTestService () throws MalformedXMLException, IOException {
-		return ServiceAgent.createFromXml( getContent ( "i5/las2peer/api/TestService.agent.xml" ));
+	public static ServiceAgent getTestService() throws MalformedXMLException, IOException {
+		return ServiceAgent.createFromXml(getContent("i5/las2peer/api/TestService.agent.xml"));
 	}
-	
-	public static ServiceAgent getCorrectTestService () throws MalformedXMLException, IOException {
-		return ServiceAgent.createFromXml( getContent ( "i5/las2peer/testing/TestService.agent.xml" ));
+
+	public static ServiceAgent getCorrectTestService() throws MalformedXMLException, IOException {
+		return ServiceAgent.createFromXml(getContent("i5/las2peer/testing/TestService.agent.xml"));
 	}
 
 	/**
 	 * get a group agent for group1 (containing adam, eve and abel)
 	 * 
 	 * @return a group
-	 *  
+	 * 
 	 * @throws MalformedXMLException
 	 * @throws IOException
 	 */
-	public static GroupAgent getGroup1 () throws MalformedXMLException, IOException {
-		return GroupAgent.createFromXml( getContent ( "i5/las2peer/testing/group1.xml" ));
+	public static GroupAgent getGroup1() throws MalformedXMLException, IOException {
+		return GroupAgent.createFromXml(getContent("i5/las2peer/testing/group1.xml"));
 	}
-	
+
 	/**
 	 * get a group agent for group2 (containing adam, eve and abel)
 	 * 
 	 * @return a group
-	 *  
+	 * 
 	 * @throws MalformedXMLException
 	 * @throws IOException
 	 */
-	public static GroupAgent getGroup2 () throws MalformedXMLException, IOException {
-		return GroupAgent.createFromXml( getContent ( "i5/las2peer/testing/group2.xml" ));
+	public static GroupAgent getGroup2() throws MalformedXMLException, IOException {
+		return GroupAgent.createFromXml(getContent("i5/las2peer/testing/group2.xml"));
 	}
-	
+
 	/**
 	 * get a group agent for group3 (containing adam, eve and abel)
 	 * 
 	 * @return a group
-	 *  
+	 * 
 	 * @throws MalformedXMLException
 	 * @throws IOException
 	 */
-	public static GroupAgent getGroup3 () throws MalformedXMLException, IOException {
-		return GroupAgent.createFromXml( getContent ( "i5/las2peer/testing/group3.xml" ));
+	public static GroupAgent getGroup3() throws MalformedXMLException, IOException {
+		return GroupAgent.createFromXml(getContent("i5/las2peer/testing/group3.xml"));
 	}
-	
+
 	/**
 	 * get a group agent for groupA (containing only adam and abel)
 	 * 
 	 * @return a group
-	 *  
+	 * 
 	 * @throws MalformedXMLException
 	 * @throws IOException
 	 */
-	public static GroupAgent getGroupA () throws MalformedXMLException, IOException {
-		return GroupAgent.createFromXml( getContent ( "i5/las2peer/testing/groupA.xml" ));
+	public static GroupAgent getGroupA() throws MalformedXMLException, IOException {
+		return GroupAgent.createFromXml(getContent("i5/las2peer/testing/groupA.xml"));
 	}
-	
-	
+
 	/**
 	 * get ServiceAgent for <i>i5.las2peer.api.TestService2</i>
 	 * 
 	 * The TestServices are placed in the JUnit source tree.
 	 * 
 	 * @return the ServiceAgent for TestService2
-	 * @throws IOException 
-	 * @throws MalformedXMLException 
+	 * @throws IOException
+	 * @throws MalformedXMLException
 	 */
-	public static ServiceAgent getTestService2 () throws MalformedXMLException, IOException {
-		return ServiceAgent.createFromXml( getContent ( "i5/las2peer/api/TestService2.agent.xml" ));
+	public static ServiceAgent getTestService2() throws MalformedXMLException, IOException {
+		return ServiceAgent.createFromXml(getContent("i5/las2peer/api/TestService2.agent.xml"));
 	}
-	
-	
-	
-		
+
 	/**
-	 * create an agent and print its xml representation to standard out 
-	 * the first command line argument will be used as passphrase
+	 * create an agent and print its xml representation to standard out the first command line argument will be used as
+	 * passphrase
 	 * 
 	 * @param argv
 	 * 
@@ -194,9 +186,10 @@ public abstract class MockAgentFactory  {
 	 * @throws CryptoException
 	 * @throws IOException
 	 */
-	public static void main ( String argv[]) throws NoSuchAlgorithmException, L2pSecurityException, CryptoException, IOException {
-		System.out.println ( UserAgent.createUserAgent ( argv[0]).toXmlString() );
-		//System.out.println( getContent( "i5/las2peer/security/eve.xml") );
+	public static void main(String argv[])
+			throws NoSuchAlgorithmException, L2pSecurityException, CryptoException, IOException {
+		System.out.println(UserAgent.createUserAgent(argv[0]).toXmlString());
+		// System.out.println( getContent( "i5/las2peer/security/eve.xml") );
 	}
-	
+
 }

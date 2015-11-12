@@ -7,18 +7,18 @@ package i5.las2peer.p2p;
  *
  */
 public class ArtifactNotFoundException extends Exception {
-	
+
 	/**
-	 * serialization id 
+	 * serialization id
 	 */
 	private static final long serialVersionUID = 1965222546030413764L;
 
-	public ArtifactNotFoundException ( String message ) {
-		super ( message );
+	public ArtifactNotFoundException(String message) {
+		super(message);
 	}
-	
-	public ArtifactNotFoundException ( long id ) {
-		this ( "artifact with id " + id + " could not be found!");
+
+	public ArtifactNotFoundException(long id) {
+		this("artifact with id " + id + " could not be found!");
 	}
-	
+
 }

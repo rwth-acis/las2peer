@@ -14,11 +14,12 @@ public class NotFinishedException extends L2pServiceException {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * create a new exception 
+	 * create a new exception
+	 * 
 	 * @param message
 	 */
-	public NotFinishedException ( String message ){
-		super ( message );
+	public NotFinishedException(String message) {
+		super(message);
 	}
-	
+
 }

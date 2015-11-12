@@ -2,7 +2,6 @@ package i5.las2peer.execution;
 
 import java.io.Serializable;
 
-
 /**
  * a simple invocation task
  * 
@@ -11,22 +10,17 @@ import java.io.Serializable;
  */
 public class RMITask implements Serializable {
 
-
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 6654217287828959042L;
 
+	private Serializable[] parameters;
 
-
-
-	private Serializable [] parameters;
-	
-	
 	private String methodName;
-	
+
 	private String serviceName;
-	
+
 	/**
 	 * create a new invocation task
 	 * 
@@ -34,19 +28,22 @@ public class RMITask implements Serializable {
 	 * @param methodName
 	 * @param parameters
 	 */
-	public RMITask ( String serviceName, String methodName, Serializable[] parameters) {
+	public RMITask(String serviceName, String methodName, Serializable[] parameters) {
 		this.serviceName = serviceName;
 		this.methodName = methodName;
 		this.parameters = parameters.clone();
 	}
 
-	
-	public String getServiceName () { return serviceName; }
-	
-	public String getMethodName () { return methodName; }
-	
-	public Serializable[] getParameters () { return parameters; }
-	
+	public String getServiceName() {
+		return serviceName;
+	}
 
-	
+	public String getMethodName() {
+		return methodName;
+	}
+
+	public Serializable[] getParameters() {
+		return parameters;
+	}
+
 }

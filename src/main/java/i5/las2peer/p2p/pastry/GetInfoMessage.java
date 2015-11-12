@@ -11,41 +11,40 @@ public class GetInfoMessage implements Message {
 	 * 
 	 */
 	private static final long serialVersionUID = 6642232699532550877L;
-	
+
 	private long randomId;
 
-	
 	private NodeHandle sendingNode;
-	
-	
+
 	/**
-	 * create a new 
+	 * create a new
+	 * 
 	 * @param sender
 	 */
-	public GetInfoMessage ( NodeHandle sender ) {
+	public GetInfoMessage(NodeHandle sender) {
 		this.sendingNode = sender;
-		
+
 		randomId = new Random().nextLong();
 	}
-	
-	
+
 	/**
 	 * get the sender of the information request
 	 * 
-	 * @return sending node of the request 
+	 * @return sending node of the request
 	 */
-	public NodeHandle getSender () {
+	public NodeHandle getSender() {
 		return sendingNode;
 	}
-	
-	
+
 	/**
 	 * a random id for answer collection
+	 * 
 	 * @return id of this message
 	 */
-	public long getId() { return randomId; }
-	
-	
+	public long getId() {
+		return randomId;
+	}
+
 	@Override
 	public int getPriority() {
 		// TODO Auto-generated method stub

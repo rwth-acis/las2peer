@@ -3,10 +3,8 @@ package i5.las2peer.p2p.pastry;
 import rice.p2p.commonapi.Id;
 import rice.p2p.commonapi.Message;
 
-
 /**
- * A simple test message to be sent through the pastry network
- * will be removed later
+ * A simple test message to be sent through the pastry network will be removed later
  * 
  * 
  *
@@ -44,8 +42,7 @@ public class PastryTestMessage implements Message {
 	}
 
 	/**
-	 * Use low priority to prevent interference with overlay maintenance
-	 * traffic.
+	 * Use low priority to prevent interference with overlay maintenance traffic.
 	 */
 	public int getPriority() {
 		return Message.LOW_PRIORITY;

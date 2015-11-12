@@ -9,21 +9,19 @@ import org.junit.Test;
 
 public class LocalServiceTestCaseTest2 extends LocalServiceTestCase {
 
-	
-	public final static String AGENT_XML_FILE="i5/las2peer/testing/TestServiceAgent.xml";
+	public final static String AGENT_XML_FILE = "i5/las2peer/testing/TestServiceAgent.xml";
 	public final static String AGENT_PASSPHRASE = "agentpass";
-	
 
 	@Test
 	public void test() throws NoSuchServiceException {
-		assertEquals ( TestService.class, getServiceClass() );
-		assertEquals ( TestService.class.getName(), getMyAgent().getServiceClassName() );
-		
-		assertTrue ( getNode().hasAgent(getMyAgent().getId()));
-		
-		assertEquals ( TestService.class, getServiceInstance().getClass() );
-		
-		assertEquals ( AGENT_PASSPHRASE, getAgentPassphrase());
+		assertEquals(TestService.class, getServiceClass());
+		assertEquals(TestService.class.getName(), getMyAgent().getServiceClassName());
+
+		assertTrue(getNode().hasAgent(getMyAgent().getId()));
+
+		assertEquals(TestService.class, getServiceInstance().getClass());
+
+		assertEquals(AGENT_PASSPHRASE, getAgentPassphrase());
 	}
 
 	@Override

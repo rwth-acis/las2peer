@@ -15,14 +15,13 @@ import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.tools.SerializationException;
 
 /**
- * A Mediator acts on behalf of an {@link PassphraseAgent}. This necessary e.g. for remote 
- * users logged in via a {@link i5.las2peer.api.Connector} to collect incoming messages from the
- * P2P network and transfer it to the connector.
+ * A Mediator acts on behalf of an {@link PassphraseAgent}. This necessary e.g. for remote users logged in via a
+ * {@link i5.las2peer.api.Connector} to collect incoming messages from the P2P network and transfer it to the connector.
  * <br>
- * Two ways for message handling are provided: Register a {@link MessageHandler} that will be called for each
- * received message. Multiple MessageHandlers are possible (for example for different message contents).
- * The second way to handle messages is to get pending messages from the Mediator directly via the provided methods.
- * Handling then has to be done via the calling entity (for example a service).
+ * Two ways for message handling are provided: Register a {@link MessageHandler} that will be called for each received
+ * message. Multiple MessageHandlers are possible (for example for different message contents). The second way to handle
+ * messages is to get pending messages from the Mediator directly via the provided methods. Handling then has to be done
+ * via the calling entity (for example a service).
  * 
  */
 public class Mediator implements MessageReceiver {
@@ -39,7 +38,7 @@ public class Mediator implements MessageReceiver {
 	 * Creates a new mediator.
 	 * 
 	 * @param a
-	 * @throws L2pSecurityException 
+	 * @throws L2pSecurityException
 	 */
 	public Mediator(Agent a) throws L2pSecurityException {
 		if (a.isLocked())
@@ -108,11 +107,10 @@ public class Mediator implements MessageReceiver {
 	}
 
 	/**
-	 * Method for message reception treatment.
-	 * Will call all registered {@link MessageHandler}s for message handling.
+	 * Method for message reception treatment. Will call all registered {@link MessageHandler}s for message handling.
 	 * 
-	 * A return value of true indicates, that the received message has been treated by a MessageHandler and
-	 * does not need further storage for later use (and will not be added to pending messages).
+	 * A return value of true indicates, that the received message has been treated by a MessageHandler and does not
+	 * need further storage for later use (and will not be added to pending messages).
 	 * 
 	 * @param message
 	 * @param context
@@ -203,8 +201,7 @@ public class Mediator implements MessageReceiver {
 	/**
 	 * Registers a MessageHandler for message processing.
 	 * 
-	 * Message handlers will be used for handling incoming messages in the order of 
-	 * registration.
+	 * Message handlers will be used for handling incoming messages in the order of registration.
 	 * 
 	 * @param handler
 	 */
