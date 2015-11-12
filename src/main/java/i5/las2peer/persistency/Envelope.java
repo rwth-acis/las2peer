@@ -31,7 +31,7 @@ import i5.simpleXML.XMLSyntaxException;
 // TODO: typed content?
 
 /**
- * An envelope provides a secure storage for any serializable content within the LAS2peer network.
+ * An envelope provides a secure storage for any {@link Serializable} content within the LAS2peer network.
  * 
  * The content will be encrypted symmetrically, the key for opening the envelope will be provided to all entitled
  * {@link i5.las2peer.security.Agent}s via asymmetrical encryption. All encrypted versions of the decryption key are
@@ -51,21 +51,21 @@ public final class Envelope implements XmlAble, Cloneable {
 		String, XmlAble, Serializable, Binary
 	};
 
-	private byte[] baCipherData = null;
-	private byte[] baPlainData = null;
+	private byte[] baCipherData;
+	private byte[] baPlainData;
 
-	private ContentType contentType = null;
-	private Class<?> clContentClass = null;
+	private ContentType contentType;
+	private Class<?> clContentClass;
 
-	private Agent openedBy = null;
+	private Agent openedBy;
 
-	private boolean bOpen = false;
+	private boolean bOpen;
 
 	/**
 	 * may this envelope be overwritten without knowledge of the previous version?
 	 * 
 	 */
-	private boolean bOverwriteBlindly = false;
+	private boolean bOverwriteBlindly;
 
 	/**
 	 * may the content of this envelope be overwritten by {@link #updateContent} or just via the object returned by
@@ -75,7 +75,7 @@ public final class Envelope implements XmlAble, Cloneable {
 	 */
 	private boolean bUpdateContent = true;
 
-	private long id = 0;
+	private long id;
 
 	/**
 	 * timestamp of the last change
@@ -90,22 +90,22 @@ public final class Envelope implements XmlAble, Cloneable {
 	/**
 	 * the key for the symmetric encryption / decryption of the contents
 	 */
-	private SecretKey symmetricKey = null;
+	private SecretKey symmetricKey;
 
 	/**
 	 * encrypted versions of the symmetric key for each agent with read permissions
 	 */
-	private Hashtable<Long, byte[]> htEncryptedKeys = new Hashtable<Long, byte[]>();
+	private final Hashtable<Long, byte[]> htEncryptedKeys = new Hashtable<>();
 
 	/**
 	 * encrypted versions of the symmetric key for each group agent with read permissions
 	 */
-	private Hashtable<Long, byte[]> htEncryptedGroupKeys = new Hashtable<Long, byte[]>();
+	private final Hashtable<Long, byte[]> htEncryptedGroupKeys = new Hashtable<>();
 
 	/**
 	 * hashtable with signatures for the content
 	 */
-	private Hashtable<Long, byte[]> htSignatures = new Hashtable<Long, byte[]>();
+	private final Hashtable<Long, byte[]> htSignatures = new Hashtable<>();
 
 	/**
 	 * storage for the content, if it is fetched via {@link #getContent}
@@ -171,7 +171,7 @@ public final class Envelope implements XmlAble, Cloneable {
 		try {
 			updateContent(content);
 		} catch (L2pSecurityException e) {
-			// should not occur, envelope is open by design
+			assert false : "should not occur, since the envelope is open by design";
 		}
 
 		close();
@@ -193,8 +193,8 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * @throws EncodingFailedException
 	 */
 	private void initOwners(Agent[] owners) throws EncodingFailedException {
-		htEncryptedKeys = new Hashtable<Long, byte[]>();
-		htEncryptedGroupKeys = new Hashtable<Long, byte[]>();
+		htEncryptedKeys.clear();
+		htEncryptedGroupKeys.clear();
 		for (Agent owner : owners) {
 			addReader(owner);
 		}
@@ -254,7 +254,7 @@ public final class Envelope implements XmlAble, Cloneable {
 		try {
 			updateContent(content);
 		} catch (L2pSecurityException e) {
-			// should not occur, envelope is open by design
+			assert false : "should not occur, since the envelope is open by design";
 		}
 
 		close();
@@ -298,7 +298,7 @@ public final class Envelope implements XmlAble, Cloneable {
 		try {
 			updateContent(content);
 		} catch (L2pSecurityException e) {
-			// should not occur, since the envelope is open by design
+			assert false : "should not occur, since the envelope is open by design";
 		}
 
 		close();
@@ -359,7 +359,7 @@ public final class Envelope implements XmlAble, Cloneable {
 		try {
 			updateContent(content);
 		} catch (L2pSecurityException e) {
-			// should not occur, since the envelope is open by design
+			assert false : "should not occur, since the envelope is open by design";
 		}
 
 		close();
@@ -455,8 +455,6 @@ public final class Envelope implements XmlAble, Cloneable {
 			throw new L2pSecurityException("Not inside a L2pThread!");
 
 		((L2pThread) current).getContext().openEnvelope(this);
-
-		// open ( ((L2pThread) current ).getContext().getMainAgent() );
 	}
 
 	/**
@@ -634,6 +632,8 @@ public final class Envelope implements XmlAble, Cloneable {
 	/**
 	 * checks, if this envelope contains a signature of the given agent
 	 * 
+	 * @param agent
+	 * 
 	 * @return true, if a signature for this agent exists
 	 */
 	public boolean isSignedBy(Agent agent) {
@@ -647,8 +647,8 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * 
 	 * @return true, if a signature for this agent exists
 	 */
-	private boolean isSignedBy(long agentId) {
-		return ((htSignatures.get(agentId)) != null);
+	public boolean isSignedBy(long agentId) {
+		return htSignatures.containsKey(agentId);
 	}
 
 	/**
@@ -785,7 +785,7 @@ public final class Envelope implements XmlAble, Cloneable {
 	}
 
 	/**
-	 * @return a xml (string) representation of this envelope
+	 * @return a XML (string) representation of this envelope
 	 */
 	public String toXmlString() {
 		if (baPlainData != null && baCipherData == null) {
@@ -1051,15 +1051,13 @@ public final class Envelope implements XmlAble, Cloneable {
 	/**
 	 * get a long id for a specific class/identifier combination
 	 * 
-	 * // TODO: handle hash collisions?! // possible: extend identifier with counter, if a collision occurs
-	 * 
 	 * @param cls
 	 * @param identifier
 	 * 
 	 * @return a (hash) ID for the given class using the given identifier
 	 */
-	public static long getClassEnvelopeId(String cls, String identifier) {
-		return SimpleTools.longHash("cls-" + cls + "-" + identifier);
+	public static long getClassEnvelopeId(Class<?> cls, String identifier) {
+		return getClassEnvelopeId(cls.getCanonicalName(), identifier);
 	}
 
 	/**
@@ -1072,8 +1070,8 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * 
 	 * @return a (hash) ID for the given class using the given identifier
 	 */
-	public static long getClassEnvelopeId(Class<?> cls, String identifier) {
-		return getClassEnvelopeId(cls.getCanonicalName(), identifier);
+	public static long getClassEnvelopeId(String cls, String identifier) {
+		return SimpleTools.longHash("cls-" + cls + "-" + identifier);
 	}
 
 	/**
@@ -1169,7 +1167,7 @@ public final class Envelope implements XmlAble, Cloneable {
 		if (agent.getRunningAtNode() != null)
 			return agent.getRunningAtNode().fetchArtifact(id);
 		else
-			throw new StorageException("Agent is not registered at any node");
+			throw new StorageException("This agent is not registered at any node");
 	}
 
 	/**
@@ -1263,7 +1261,7 @@ public final class Envelope implements XmlAble, Cloneable {
 	/**
 	 * get the timestamp of the last change (either before load or last update)
 	 * 
-	 * @return unix timestamp
+	 * @return UNIX timestamp
 	 */
 	public long getTimestamp() {
 		return timestamp;
