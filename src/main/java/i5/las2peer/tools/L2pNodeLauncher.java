@@ -717,15 +717,6 @@ public class L2pNodeLauncher {
 	}
 
 	/**
-	 * Sets the directory to write the logfile to.
-	 * 
-	 * @param logDir
-	 */
-	private void setLogDir(File logDir) {
-		node.setLogfilePrefix(logDir + "/l2p-node_");
-	}
-
-	/**
 	 * actually start the node
 	 * 
 	 * @throws NodeException
@@ -860,9 +851,7 @@ public class L2pNodeLauncher {
 		L2pClassLoader cl = setupClassLoader(serviceDirectories.toArray(new String[0]));
 		// instantiate launcher
 		L2pNodeLauncher launcher = new L2pNodeLauncher(port, bootstrap, observer, cl, nodeIdSeed);
-		if (logDir != null) {
-			launcher.setLogDir(logDir);
-		}
+		launcher.node.setLogfilePrefix(sLogDir);
 		try {
 			launcher.start();
 

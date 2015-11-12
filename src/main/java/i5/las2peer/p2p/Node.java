@@ -118,7 +118,7 @@ public abstract class Node implements AgentStorage {
 
 	private Hashtable<Long, MessageResultListener> htAnswerListeners = new Hashtable<Long, MessageResultListener>();
 
-	private String sLogFilePrefix;
+	private String sLogFilePrefix = "";
 
 	private final static String DEFAULT_INFORMATION_FILE = "etc/nodeInfo.xml";
 	private String sInformationFileName = DEFAULT_INFORMATION_FILE;
@@ -415,9 +415,10 @@ public abstract class Node implements AgentStorage {
 					try {
 						DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 						NodeHandle nh = (NodeHandle) getNodeId();
-						String filename = sLogFilePrefix + "_pastry_" + fmt.format(new Date()) + "_"
-								+ nh.getNodeId().toStringFull();
-						filename += ".log";
+						StringBuilder sbFilename = new StringBuilder();
+						sbFilename.append(sLogFilePrefix).append("l2p-node_").append(nh.getNodeId().toStringFull())
+								.append("_").append(fmt.format(new Date())).append(".log");
+						String filename = sbFilename.toString();
 						System.out.println("set logfile to " + filename);
 						((NodeStreamLogger) observer).setOutputFile(filename);
 					} catch (Exception e) {
@@ -441,6 +442,11 @@ public abstract class Node implements AgentStorage {
 	public void setLogfilePrefix(String prefix) {
 		if (getStatus() != NodeStatus.UNCONFIGURED && getStatus() != NodeStatus.CONFIGURED)
 			throw new IllegalStateException("You can set a logfile prefix only before startup!");
+
+		// TODO validate prefix, auto create log directory
+		if (prefix == null) {
+			prefix = "";
+		}
 
 		sLogFilePrefix = prefix;
 	}

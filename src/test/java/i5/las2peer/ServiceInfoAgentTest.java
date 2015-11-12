@@ -2,6 +2,13 @@ package i5.las2peer;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+
+import java.net.UnknownHostException;
+import java.util.Arrays;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.p2p.ServiceNameVersion;
@@ -11,12 +18,6 @@ import i5.las2peer.security.UserAgent;
 import i5.las2peer.tools.ColoredOutput;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.SerializationException;
-
-import java.net.UnknownHostException;
-import java.util.Arrays;
-
-import org.junit.BeforeClass;
-import org.junit.Test;
 
 public class ServiceInfoAgentTest {
 
@@ -39,7 +40,7 @@ public class ServiceInfoAgentTest {
 
 		// String host = getHostString();
 		nodes[0] = new PastryNodeImpl(START_PORT + 0, "");
-		nodes[0].setLogfilePrefix("log/l2p-node_");
+		nodes[0].setLogfilePrefix("log/");
 
 		/*
 		 * for(int i = 1; i < nodes.length; i++) { nodes[i]=new
