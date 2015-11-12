@@ -285,7 +285,7 @@ public class MessageTest {
 	public void testRMIMessage () throws MalformedXMLException, IOException, CryptoException, L2pSecurityException, EncodingFailedException, SerializationException, AgentNotKnownException {
 		BasicAgentStorage storage = new BasicAgentStorage ();
 		UserAgent eve = MockAgentFactory.getEve();
-		ServiceAgent service = ServiceAgent.generateNewAgent("i5.las2peer.api.TestService", "a pass");
+		ServiceAgent service = ServiceAgent.createServiceAgent("i5.las2peer.api.TestService", "a pass");
 		storage.registerAgents(eve, service);
 		
 		eve.unlockPrivateKey("evespass");

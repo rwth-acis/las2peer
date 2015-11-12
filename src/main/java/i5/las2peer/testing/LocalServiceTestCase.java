@@ -96,7 +96,7 @@ public abstract class LocalServiceTestCase {
 				throw new AgentException ( "This agent is not responsible for the testclass " + getServiceClass() + " but for " + agent.getServiceClassName());
 		} catch (NoSuchFieldException e) {
 			agentPassphrase = SimpleTools.createRandomString(10);		
-			return ServiceAgent.generateNewAgent(getServiceClass().getName(), agentPassphrase);			
+			return ServiceAgent.createServiceAgent(getServiceClass().getName(), agentPassphrase);			
 		} catch ( Exception e ) {
 			if ( e instanceof AgentException )
 				throw ( AgentException ) e;

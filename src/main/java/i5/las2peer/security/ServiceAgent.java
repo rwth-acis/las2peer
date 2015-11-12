@@ -224,26 +224,39 @@ public class ServiceAgent extends PassphraseAgent {
 	}
 
 	/**
-	 * create a completely new ServiceAgent for a given service class
+	 * Please use {@link ServiceAgent#createServiceAgent(String, String)} instead
 	 * 
-	 * @param forService class name of the new service
-	 * @param passPhrase a pass phrase for the private key of the agent
-	 * 
-	 * @return a new ServiceAgent
-	 * 
+	 * @param forService
+	 * @param passPhrase
+	 * @return
 	 * @throws CryptoException
 	 * @throws L2pSecurityException
 	 */
+	@Deprecated
 	public static ServiceAgent generateNewAgent(String forService, String passPhrase) throws CryptoException,
 			L2pSecurityException {
-		return new ServiceAgent(
-				serviceClass2Id(forService),
-				forService,
-				CryptoTools.generateKeyPair(),
-				passPhrase,
-				CryptoTools.generateSalt());
+		return createServiceAgent(forService, passPhrase);
 	}
 
+	/**
+	 * create a completely new ServiceAgent for a given service class
+	 * 
+	 * @param serviceClassName class name of the new service
+	 * @param passphrase a pass phrase for the private key of the agent
+	 * @return a new ServiceAgent
+	 * @throws CryptoException
+	 * @throws L2pSecurityException
+	 */
+	public static ServiceAgent createServiceAgent(String serviceClassName, String passphrase) throws CryptoException,
+			L2pSecurityException {
+		return new ServiceAgent(
+				serviceClass2Id(serviceClassName),
+				serviceClassName,
+				CryptoTools.generateKeyPair(),
+				passphrase,
+				CryptoTools.generateSalt());
+	}
+	
 	/**
 	 * factory: create a new service agent from the given XML representation
 	 * 

@@ -38,7 +38,7 @@ public class LocalNodeInvocationTest {
 		
 		node.launch();
 		
-		ServiceAgent testServiceAgent = ServiceAgent.generateNewAgent("i5.las2peer.api.TestService", "a pass");
+		ServiceAgent testServiceAgent = ServiceAgent.createServiceAgent("i5.las2peer.api.TestService", "a pass");
 		testServiceAgent.unlockPrivateKey("a pass");
 		node.registerReceiver(testServiceAgent);
 		
@@ -55,7 +55,7 @@ public class LocalNodeInvocationTest {
 		serviceNode.storeAgent ( eve );
 		serviceNode.launch();
 		
-		ServiceAgent testServiceAgent = ServiceAgent.generateNewAgent("i5.las2peer.api.TestService", "a pass");
+		ServiceAgent testServiceAgent = ServiceAgent.createServiceAgent("i5.las2peer.api.TestService", "a pass");
 		testServiceAgent.unlockPrivateKey("a pass");
 		serviceNode.registerReceiver(testServiceAgent);
 		
@@ -78,11 +78,11 @@ public class LocalNodeInvocationTest {
 		serviceNode1.launch();
 		serviceNode2.launch();
 		
-		ServiceAgent testServiceAgent = ServiceAgent.generateNewAgent("i5.las2peer.api.TestService", "a pass");
+		ServiceAgent testServiceAgent = ServiceAgent.createServiceAgent("i5.las2peer.api.TestService", "a pass");
 		testServiceAgent.unlockPrivateKey("a pass");
 		serviceNode1.registerReceiver(testServiceAgent);
 
-		ServiceAgent testServiceAgent2 = ServiceAgent.generateNewAgent("i5.las2peer.api.TestService2", "a 2nd pass");
+		ServiceAgent testServiceAgent2 = ServiceAgent.createServiceAgent("i5.las2peer.api.TestService2", "a 2nd pass");
 		testServiceAgent2.unlockPrivateKey("a 2nd pass");
 		serviceNode2.registerReceiver(testServiceAgent2);
 		
@@ -103,7 +103,7 @@ public class LocalNodeInvocationTest {
 		serviceNode2.storeAgent ( eve );
 		serviceNode2.launch();
 		
-		ServiceAgent testServiceAgent2 = ServiceAgent.generateNewAgent("i5.las2peer.api.TestService2", "a 2nd pass");
+		ServiceAgent testServiceAgent2 = ServiceAgent.createServiceAgent("i5.las2peer.api.TestService2", "a 2nd pass");
 		testServiceAgent2.unlockPrivateKey("a 2nd pass");
 		serviceNode2.registerReceiver(testServiceAgent2);
 		

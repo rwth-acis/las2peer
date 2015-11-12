@@ -29,7 +29,7 @@ public class ServiceAgentGenerator {
 		}
 
 		try {
-			ServiceAgent agent = ServiceAgent.generateNewAgent(argv[0], argv[1]);
+			ServiceAgent agent = ServiceAgent.createServiceAgent(argv[0], argv[1]);
 			System.out.print(agent.toXmlString());
 		} catch (Exception e) {
 			System.err.println("unable to generate new agent: " + e);

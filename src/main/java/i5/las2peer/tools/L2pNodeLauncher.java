@@ -551,7 +551,7 @@ public class L2pNodeLauncher {
 		try {
 			String passPhrase = SimpleTools.createRandomString(20);
 
-			ServiceAgent myAgent = ServiceAgent.generateNewAgent(serviceClass, passPhrase);
+			ServiceAgent myAgent = ServiceAgent.createServiceAgent(serviceClass, passPhrase);
 			myAgent.unlockPrivateKey(passPhrase);
 
 			startService(myAgent);
@@ -606,7 +606,7 @@ public class L2pNodeLauncher {
 			sa = node.getServiceAgent(serviceClass);
 		} catch (Exception e) {
 			ColoredOutput.println("Can't get service agent for " + serviceClass + ". Generating new instance...");
-			sa = ServiceAgent.generateNewAgent(serviceClass, agentPass);
+			sa = ServiceAgent.createServiceAgent(serviceClass, agentPass);
 		}
 		sa.unlockPrivateKey(agentPass);
 		startService(sa);

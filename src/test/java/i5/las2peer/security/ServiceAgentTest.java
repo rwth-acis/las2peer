@@ -12,7 +12,7 @@ public class ServiceAgentTest {
 
 	@Test
 	public void testCreation() throws CryptoException, L2pSecurityException {
-		ServiceAgent testee = ServiceAgent.generateNewAgent(servicename, passphrase);
+		ServiceAgent testee = ServiceAgent.createServiceAgent(servicename, passphrase);
 	
 		assertEquals ( servicename, testee.getServiceClassName());
 		
@@ -33,7 +33,7 @@ public class ServiceAgentTest {
 	
 	@Test
 	public void testXmlAndBack() throws CryptoException, L2pSecurityException, MalformedXMLException {
-		ServiceAgent testee = ServiceAgent.generateNewAgent ( servicename, passphrase);
+		ServiceAgent testee = ServiceAgent.createServiceAgent ( servicename, passphrase);
 		
 		String xml = testee.toXmlString();
 		
