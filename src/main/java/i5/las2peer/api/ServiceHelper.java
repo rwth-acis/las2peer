@@ -46,13 +46,8 @@ public abstract class ServiceHelper {
 	 */
 	@SuppressWarnings("rawtypes")
 	public static boolean isWrapperClass(Class c) {
-		return c.equals(Integer.class)
-				|| c.equals(Byte.class)
-				|| c.equals(Character.class)
-				|| c.equals(Boolean.class)
-				|| c.equals(Long.class)
-				|| c.equals(Float.class)
-				|| c.equals(Double.class);
+		return c.equals(Integer.class) || c.equals(Byte.class) || c.equals(Character.class) || c.equals(Boolean.class)
+				|| c.equals(Long.class) || c.equals(Float.class) || c.equals(Double.class);
 	}
 
 	/**

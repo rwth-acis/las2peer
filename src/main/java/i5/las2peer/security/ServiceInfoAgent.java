@@ -100,8 +100,9 @@ public class ServiceInfoAgent extends PassphraseAgent {
 		passPhrase = passphrase;
 		if (agent == null) {
 
-			agent = new ServiceInfoAgent(AGENT_ID, new KeyPair((PublicKey) SerializeTools.deserializeBase64(PUB_KEY),
-					(PrivateKey) SerializeTools.deserializeBase64(PRIV_KEY)),
+			agent = new ServiceInfoAgent(AGENT_ID,
+					new KeyPair((PublicKey) SerializeTools.deserializeBase64(PUB_KEY),
+							(PrivateKey) SerializeTools.deserializeBase64(PRIV_KEY)),
 					passphrase, Base64.decodeBase64(SALT));
 
 		}
@@ -244,17 +245,12 @@ public class ServiceInfoAgent extends PassphraseAgent {
 	@Override
 	public String toXmlString() {
 		try {
-			StringBuffer result = new StringBuffer(
-					"<las2peer:agent type=\"monitoring\">\n"
-							+ "\t<id>" + getId() + "</id>\n"
-							+ "\t<publickey encoding=\"base64\">"
-							+ SerializeTools.serializeToBase64(getPublicKey())
-							+ "</publickey>\n"
-							+ "\t<privatekey encrypted=\"" + CryptoTools.getSymmetricAlgorithm() + "\" keygen=\""
-							+ CryptoTools.getSymmetricKeygenMethod() + "\">\n"
-							+ "\t\t<salt encoding=\"base64\">" + Base64.encodeBase64String(getSalt()) + "</salt>\n"
-							+ "\t\t<data encoding=\"base64\">" + getEncodedPrivate() + "</data>\n"
-							+ "\t</privatekey>\n");
+			StringBuffer result = new StringBuffer("<las2peer:agent type=\"monitoring\">\n" + "\t<id>" + getId()
+					+ "</id>\n" + "\t<publickey encoding=\"base64\">" + SerializeTools.serializeToBase64(getPublicKey())
+					+ "</publickey>\n" + "\t<privatekey encrypted=\"" + CryptoTools.getSymmetricAlgorithm()
+					+ "\" keygen=\"" + CryptoTools.getSymmetricKeygenMethod() + "\">\n"
+					+ "\t\t<salt encoding=\"base64\">" + Base64.encodeBase64String(getSalt()) + "</salt>\n"
+					+ "\t\t<data encoding=\"base64\">" + getEncodedPrivate() + "</data>\n" + "\t</privatekey>\n");
 
 			result.append("</las2peer:agent>\n");
 
@@ -308,8 +304,8 @@ public class ServiceInfoAgent extends PassphraseAgent {
 	 * @param serviceAgent
 	 * @throws EnvelopeException
 	 */
-	public void serviceRemoved(ServiceAgent serviceAgent, Node node) throws EnvelopeException, AgentException,
-			L2pSecurityException {
+	public void serviceRemoved(ServiceAgent serviceAgent, Node node)
+			throws EnvelopeException, AgentException, L2pSecurityException {
 		ServiceNameVersion servicenameVersion = new ServiceNameVersion(serviceAgent.getServiceClassName(), "1.0");
 
 		String nodeEnvelope = SERVICE_NODE_LIST_PREFIX + servicenameVersion.getNameVersion();

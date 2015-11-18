@@ -15,8 +15,7 @@ import org.junit.Test;
 public class ContentEnvelopeTest {
 
 	@Test
-	public void testSerialization() throws NoSuchAlgorithmException,
-			L2pSecurityException, SerializationException,
+	public void testSerialization() throws NoSuchAlgorithmException, L2pSecurityException, SerializationException,
 			PastryStorageException, CryptoException {
 		UserAgent adam = UserAgent.createUserAgent("passa");
 		adam.unlockPrivateKey("passa");
@@ -25,8 +24,7 @@ public class ContentEnvelopeTest {
 
 		byte[] bytes = SerializeTools.serialize(testee);
 
-		ContentEnvelope andBack = (ContentEnvelope) SerializeTools
-				.deserialize(bytes);
+		ContentEnvelope andBack = (ContentEnvelope) SerializeTools.deserialize(bytes);
 
 		Agent contained = andBack.getContainedAgent();
 

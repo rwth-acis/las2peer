@@ -369,8 +369,8 @@ public class L2pNodeLauncher {
 	 * @throws InstantiationException
 	 * @throws IllegalAccessException
 	 */
-	private Connector loadConnector(String classname) throws ClassNotFoundException, InstantiationException,
-			IllegalAccessException {
+	private Connector loadConnector(String classname)
+			throws ClassNotFoundException, InstantiationException, IllegalAccessException {
 		Class<?> connectorClass = L2pNodeLauncher.class.getClassLoader().loadClass(classname);
 		Connector connector = (Connector) connectorClass.newInstance();
 		return connector;
@@ -415,8 +415,8 @@ public class L2pNodeLauncher {
 	 * @throws AgentAlreadyRegisteredException
 	 * @throws AgentException
 	 */
-	public void registerUserAgent(UserAgent agent) throws L2pSecurityException, AgentAlreadyRegisteredException,
-			AgentException {
+	public void registerUserAgent(UserAgent agent)
+			throws L2pSecurityException, AgentAlreadyRegisteredException, AgentException {
 		registerUserAgent(agent, null);
 	}
 
@@ -521,9 +521,8 @@ public class L2pNodeLauncher {
 	 * @throws EncodingFailedException
 	 * @throws TimeoutException
 	 */
-	public ListMethodsContent getServiceMethods(String serviceName) throws L2pSecurityException,
-			AgentNotKnownException, InterruptedException, EncodingFailedException, SerializationException,
-			TimeoutException {
+	public ListMethodsContent getServiceMethods(String serviceName) throws L2pSecurityException, AgentNotKnownException,
+			InterruptedException, EncodingFailedException, SerializationException, TimeoutException {
 		if (currentUser == null)
 			throw new IllegalStateException("please log in a valid user with registerUserAgent before!");
 
@@ -599,8 +598,8 @@ public class L2pNodeLauncher {
 	 * @throws AgentAlreadyRegisteredException
 	 * @throws CryptoException
 	 */
-	public void startService(String serviceClass, String agentPass) throws AgentNotKnownException,
-			L2pSecurityException, AgentAlreadyRegisteredException, AgentException, CryptoException {
+	public void startService(String serviceClass, String agentPass) throws AgentNotKnownException, L2pSecurityException,
+			AgentAlreadyRegisteredException, AgentException, CryptoException {
 		ServiceAgent sa = null;
 		try {
 			sa = node.getServiceAgent(serviceClass);
@@ -621,8 +620,8 @@ public class L2pNodeLauncher {
 	 * @throws L2pSecurityException
 	 * @throws AgentException
 	 */
-	public void startService(Agent serviceAgent) throws AgentAlreadyRegisteredException, L2pSecurityException,
-			AgentException {
+	public void startService(Agent serviceAgent)
+			throws AgentAlreadyRegisteredException, L2pSecurityException, AgentException {
 		if (!(serviceAgent instanceof ServiceAgent))
 			throw new IllegalArgumentException("given Agent is not a service agent!");
 		if (serviceAgent.isLocked())
@@ -664,14 +663,10 @@ public class L2pNodeLauncher {
 	 * start interactive console mode based on a {@link i5.las2peer.tools.CommandPrompt}
 	 */
 	public void interactive() {
-		System.out
-				.println(
-						"Entering interactive mode for node "
-								+ this
-								+ "\n"
-								+ "-----------------------------------------------\n"
-								+ "Enter 'help' for further information of the console.\n"
-								+ "Use all public methods of the L2pNodeLauncher class for interaction with the P2P network.\n\n");
+		System.out.println("Entering interactive mode for node " + this + "\n"
+				+ "-----------------------------------------------\n"
+				+ "Enter 'help' for further information of the console.\n"
+				+ "Use all public methods of the L2pNodeLauncher class for interaction with the P2P network.\n\n");
 
 		commandPrompt.startPrompt();
 
@@ -781,8 +776,8 @@ public class L2pNodeLauncher {
 				}
 			} else if (larg.equals("-b") == true || larg.equals("--bootstrap") == true) {
 				if (itArg.hasNext() == false) {
-					ColoredOutput.printlnYellow("ignored '" + arg
-							+ "', because comma separated bootstrap list expected after it");
+					ColoredOutput.printlnYellow(
+							"ignored '" + arg + "', because comma separated bootstrap list expected after it");
 				} else {
 					String[] bsList = itArg.next().split(",");
 					for (String bs : bsList) {
@@ -881,8 +876,8 @@ public class L2pNodeLauncher {
 	 * 
 	 */
 	private static L2pClassLoader setupClassLoader(String[] serviceDirectory) {
-		return new L2pClassLoader(
-				new FileSystemRepository(serviceDirectory, true), L2pNodeLauncher.class.getClassLoader());
+		return new L2pClassLoader(new FileSystemRepository(serviceDirectory, true),
+				L2pNodeLauncher.class.getClassLoader());
 	}
 
 	/**
@@ -917,19 +912,16 @@ public class L2pNodeLauncher {
 		System.out.println("\t--port|-p [port] specifies the port number of the node\n");
 		System.out.println("\tno bootstrap argument states, that a complete new LAS2peer network is to start");
 		System.out.println("\tor");
-		System.out
-				.println(
-						"\t--bootstrap|-b [host-list] requires a comma seperated list of [address:ip] pairs of bootstrap nodes to connect to. This argument can occur multiple times.\n");
+		System.out.println(
+				"\t--bootstrap|-b [host-list] requires a comma seperated list of [address:ip] pairs of bootstrap nodes to connect to. This argument can occur multiple times.\n");
 		System.out.println("\t--observer|-o starts a monitoring observer at this node\n");
-		System.out
-				.println(
-						"\t--node-id-seed|-n [long] generates the node id by using this seed to provide persistence\n");
+		System.out.println(
+				"\t--node-id-seed|-n [long] generates the node id by using this seed to provide persistence\n");
 
 		System.out.println("The following methods can be used in arbitrary order and number:");
 
 		for (Method m : L2pNodeLauncher.class.getMethods()) {
-			if (Modifier.isPublic(m.getModifiers())
-					&& !Modifier.isStatic(m.getModifiers())) {
+			if (Modifier.isPublic(m.getModifiers()) && !Modifier.isStatic(m.getModifiers())) {
 				System.out.print("\t- " + m.getName());
 				for (int i = 0; i < m.getParameterTypes().length; i++)
 					System.out.print(" " + m.getParameterTypes()[i].getName() + " ");

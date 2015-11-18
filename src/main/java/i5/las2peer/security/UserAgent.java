@@ -41,8 +41,8 @@ public class UserAgent extends PassphraseAgent {
 	 * @throws L2pSecurityException
 	 * @throws CryptoException
 	 */
-	protected UserAgent(long id, KeyPair pair, String passphrase, byte[] salt) throws L2pSecurityException,
-			CryptoException {
+	protected UserAgent(long id, KeyPair pair, String passphrase, byte[] salt)
+			throws L2pSecurityException, CryptoException {
 		super(id, pair, passphrase, salt);
 
 	}
@@ -141,17 +141,12 @@ public class UserAgent extends PassphraseAgent {
 	@Override
 	public String toXmlString() {
 		try {
-			StringBuffer result = new StringBuffer(
-					"<las2peer:agent type=\"user\">\n"
-							+ "\t<id>" + getId() + "</id>\n"
-							+ "\t<publickey encoding=\"base64\">"
-							+ SerializeTools.serializeToBase64(getPublicKey())
-							+ "</publickey>\n"
-							+ "\t<privatekey encrypted=\"" + CryptoTools.getSymmetricAlgorithm() + "\" keygen=\""
-							+ CryptoTools.getSymmetricKeygenMethod() + "\">\n"
-							+ "\t\t<salt encoding=\"base64\">" + Base64.encodeBase64String(getSalt()) + "</salt>\n"
-							+ "\t\t<data encoding=\"base64\">" + getEncodedPrivate() + "</data>\n"
-							+ "\t</privatekey>\n");
+			StringBuffer result = new StringBuffer("<las2peer:agent type=\"user\">\n" + "\t<id>" + getId() + "</id>\n"
+					+ "\t<publickey encoding=\"base64\">" + SerializeTools.serializeToBase64(getPublicKey())
+					+ "</publickey>\n" + "\t<privatekey encrypted=\"" + CryptoTools.getSymmetricAlgorithm()
+					+ "\" keygen=\"" + CryptoTools.getSymmetricKeygenMethod() + "\">\n"
+					+ "\t\t<salt encoding=\"base64\">" + Base64.encodeBase64String(getSalt()) + "</salt>\n"
+					+ "\t\t<data encoding=\"base64\">" + getEncodedPrivate() + "</data>\n" + "\t</privatekey>\n");
 
 			if (sLoginName != null)
 				result.append("\t<login>" + sLoginName + "</login>\n");

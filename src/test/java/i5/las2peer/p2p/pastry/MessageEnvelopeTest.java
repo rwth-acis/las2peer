@@ -25,17 +25,14 @@ public class MessageEnvelopeTest {
 		MessageEnvelope testee = new MessageEnvelope(null, data);
 
 		byte[] serialized = SerializeTools.serialize(testee);
-		MessageEnvelope andBack = (MessageEnvelope) SerializeTools
-				.deserialize(serialized);
+		MessageEnvelope andBack = (MessageEnvelope) SerializeTools.deserialize(serialized);
 
 		assertEquals(data, andBack.getContent());
 	}
 
 	@Test
-	public void testFromMessage() throws NoSuchAlgorithmException,
-			L2pSecurityException, CryptoException, EncodingFailedException,
-			SerializationException, MalformedXMLException,
-			AgentNotKnownException {
+	public void testFromMessage() throws NoSuchAlgorithmException, L2pSecurityException, CryptoException,
+			EncodingFailedException, SerializationException, MalformedXMLException, AgentNotKnownException {
 		UserAgent adam = UserAgent.createUserAgent("passa");
 		UserAgent eve = UserAgent.createUserAgent("passb");
 
@@ -52,8 +49,7 @@ public class MessageEnvelopeTest {
 		MessageEnvelope testee = new MessageEnvelope(null, m);
 
 		byte[] serialized = SerializeTools.serialize(testee);
-		MessageEnvelope andBack = (MessageEnvelope) SerializeTools
-				.deserialize(serialized);
+		MessageEnvelope andBack = (MessageEnvelope) SerializeTools.deserialize(serialized);
 
 		Message contained = andBack.getContainedMessage();
 		contained.open(eve, storage);

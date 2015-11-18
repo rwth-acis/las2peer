@@ -800,14 +800,12 @@ public final class Envelope implements XmlAble, Cloneable {
 		String encodedKeys = "\t<las2peer:keys encoding=\"base64\" encryption=\"" + CryptoTools.getAsymmetricAlgorithm()
 				+ "\">\n";
 		for (Long id : htEncryptedKeys.keySet()) {
-			encodedKeys += "\t\t<las2peer:key id=\"" + id + "\">"
-					+ Base64.encodeBase64String(htEncryptedKeys.get(id))
+			encodedKeys += "\t\t<las2peer:key id=\"" + id + "\">" + Base64.encodeBase64String(htEncryptedKeys.get(id))
 					+ "</las2peer:key>\n";
 		}
 		for (Long id : htEncryptedGroupKeys.keySet()) {
 			encodedKeys += "\t\t<las2peer:key id=\"" + id + "\" type=\"group\">"
-					+ Base64.encodeBase64String(htEncryptedGroupKeys.get(id))
-					+ "</las2peer:key>\n";
+					+ Base64.encodeBase64String(htEncryptedGroupKeys.get(id)) + "</las2peer:key>\n";
 		}
 		encodedKeys += "\t</las2peer:keys>\n";
 
@@ -821,21 +819,15 @@ public final class Envelope implements XmlAble, Cloneable {
 					+ "\">\n";
 			for (Long id : htSignatures.keySet()) {
 				signatures += "\t\t<las2peer:signature id=\"" + id + "\">"
-						+ Base64.encodeBase64String(htSignatures.get(id))
-						+ "</las2peer:signature>\n";
+						+ Base64.encodeBase64String(htSignatures.get(id)) + "</las2peer:signature>\n";
 			}
 			signatures += "\t</las2peer:signatures>\n";
 		}
 
-		return "<las2peer:envelope lastchange=\"" + timestamp + "\""
-				+ " id=\"" + id + "\" blindOverwrite=\"" + bOverwriteBlindly + "\""
-				+ " update=\"" + bUpdateContent + "\""
-				+ ">\n"
+		return "<las2peer:envelope lastchange=\"" + timestamp + "\"" + " id=\"" + id + "\" blindOverwrite=\""
+				+ bOverwriteBlindly + "\"" + " update=\"" + bUpdateContent + "\"" + ">\n"
 				+ "\t<las2peer:content encoding=\"Base64\" type=\"" + contentType.toString() + "\"" + classInfo + ">\n"
-				+ Base64.encodeBase64String(baCipherData)
-				+ "\t</las2peer:content>\n"
-				+ encodedKeys
-				+ signatures
+				+ Base64.encodeBase64String(baCipherData) + "\t</las2peer:content>\n" + encodedKeys + signatures
 				+ "</las2peer:envelope>\n";
 
 		// TODO: signatures?

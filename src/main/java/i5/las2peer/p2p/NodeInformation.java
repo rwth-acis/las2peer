@@ -232,13 +232,9 @@ public class NodeInformation implements XmlAble {
 						.append("</signature>\n");
 
 			if (nodeHandle != null)
-				result.append("\t<nodeHandle>\n")
-						.append("\t\t<plain><![CDATA[")
-						.append(nodeHandle.toString())
-						.append("]]></plain>\n")
-						.append("\t\t<serialized encoding=\"base64\">")
-						.append(SerializeTools.serializeToBase64(nodeHandle))
-						.append("</serialized>\n")
+				result.append("\t<nodeHandle>\n").append("\t\t<plain><![CDATA[").append(nodeHandle.toString())
+						.append("]]></plain>\n").append("\t\t<serialized encoding=\"base64\">")
+						.append(SerializeTools.serializeToBase64(nodeHandle)).append("</serialized>\n")
 						.append("\t</nodeHandle>\n");
 		} catch (SerializationException e) {
 			throw new RuntimeException("critical: should not occur!");

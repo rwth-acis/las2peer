@@ -32,16 +32,15 @@ public class MessageResultListenerTest {
 			}
 		};
 
-		new Thread(
-				new Runnable() {
-					public void run() {
-						try {
-							Thread.sleep(4000);
-							l.collectAnswer(new Message(eve, eve, "fertig"));
-						} catch (Exception e) {
-						}
-					}
-				}).start();
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					Thread.sleep(4000);
+					l.collectAnswer(new Message(eve, eve, "fertig"));
+				} catch (Exception e) {
+				}
+			}
+		}).start();
 
 		l.waitForOneAnswer();
 
@@ -121,18 +120,17 @@ public class MessageResultListenerTest {
 
 		testee.addRecipient();
 
-		new Thread(
-				new Runnable() {
-					public void run() {
-						try {
-							Thread.sleep(2000);
-							testee.collectAnswer(new Message(eve, eve, "fertig"));
-							Thread.sleep(2000);
-							testee.collectException(new Exception());
-						} catch (Exception e) {
-						}
-					}
-				}).start();
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					Thread.sleep(2000);
+					testee.collectAnswer(new Message(eve, eve, "fertig"));
+					Thread.sleep(2000);
+					testee.collectException(new Exception());
+				} catch (Exception e) {
+				}
+			}
+		}).start();
 
 		testee.waitForAllAnswers();
 

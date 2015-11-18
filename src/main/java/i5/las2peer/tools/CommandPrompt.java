@@ -23,8 +23,13 @@ public class CommandPrompt {
 	 * 
 	 */
 	public enum ReturnStatus {
-		OK_NOTHING_TO_DO(30), OK_PROCEED(10), OK_EXIT(0), ERROR_PROCEED(20), ERROR_EXIT(-10), NOT_KNOWN_PROCEED(
-				100), NOT_KNOWN_EXIT(-100);
+		OK_NOTHING_TO_DO(30),
+		OK_PROCEED(10),
+		OK_EXIT(0),
+		ERROR_PROCEED(20),
+		ERROR_EXIT(-10),
+		NOT_KNOWN_PROCEED(100),
+		NOT_KNOWN_EXIT(-100);
 
 		private int value;
 
@@ -313,8 +318,8 @@ public class CommandPrompt {
 
 			if (m == null) {
 				if (hasMethodOfName)
-					throw new NoSuchMethodException("No signature of " + method + " on "
-							+ on.getClass().getSimpleName() + " matches the given parameters");
+					throw new NoSuchMethodException("No signature of " + method + " on " + on.getClass().getSimpleName()
+							+ " matches the given parameters");
 				else
 					throw new NoSuchMethodException(on.getClass().getSimpleName() + " has no method '" + method + "'");
 			}
@@ -337,8 +342,7 @@ public class CommandPrompt {
 	 * @param types
 	 * @return true on a match
 	 */
-	private boolean methodMatches(Method method, String methodName,
-			Object[] parameters) {
+	private boolean methodMatches(Method method, String methodName, Object[] parameters) {
 
 		if (!method.getName().equals(methodName))
 			return false;
@@ -432,8 +436,8 @@ public class CommandPrompt {
 				status = ReturnStatus.ERROR_PROCEED;
 			} catch (InvocationTargetException e) {
 				ColoredOutput.printlnRed("  --> Exception in executed method!");
-				ColoredOutput.printlnRed("      " + e.getClass().getSimpleName() + " (" + e.getCause().getMessage()
-						+ ")");
+				ColoredOutput
+						.printlnRed("      " + e.getClass().getSimpleName() + " (" + e.getCause().getMessage() + ")");
 				ColoredOutput.println("      (print StackTrace with pst / printStackTrace)", Color.LightGrey);
 
 				lastCommandException = e.getCause();
@@ -494,8 +498,8 @@ public class CommandPrompt {
 		if (result == null)
 			System.out.println(" /null/");
 		else if (result.getClass().isArray()) {
-			System.out.println("Array (" + ((Object[]) result).length + ", " + result.getClass().getSimpleName()
-					+ ") :");
+			System.out
+					.println("Array (" + ((Object[]) result).length + ", " + result.getClass().getSimpleName() + ") :");
 
 			for (int i = 0; i < Math.min(10, ((Object[]) result).length); i++) {
 				System.out.print(tab);
@@ -679,41 +683,31 @@ public class CommandPrompt {
 	 * print a help message
 	 */
 	public void printHelp() {
-		System.out.println("Simple Java Command Line\n"
-				+ "------------------------\n"
-				+ "available commands:\n"
-				+ "\n"
+		System.out.println("Simple Java Command Line\n" + "------------------------\n" + "available commands:\n" + "\n"
 
 				+ "\thelp / ?\tprint this message\n\n"
 
-				+ "\tp(rint) [var1] [var2] ...\n"
-				+ "\t\t\tprint the contents of the given local variables\n\n"
+				+ "\tp(rint) [var1] [var2] ...\n" + "\t\t\tprint the contents of the given local variables\n\n"
 
 				+ "\tpackage\t[some.package.name]\n\n"
 				+ "\t\t\tuse the given package name as prefix for all Class relevant operations\n\n"
 
-				+ "\tbind [varname]\n"
-				+ "\t\t\tuse the given local variable as object for method calls\n\n"
+				+ "\tbind [varname]\n" + "\t\t\tuse the given local variable as object for method calls\n\n"
 
 				+ "\tl(ist)\n"
 				+ "\t\tprint all accessible methods of the bound object including their parameter list\n\n"
 
-				+ "\tprintStackTrace / pst\n"
-				+ "\t\tprint the stacktrace of the last caught exception\n\n"
+				+ "\tprintStackTrace / pst\n" + "\t\tprint the stacktrace of the last caught exception\n\n"
 
-				+ "\texit/quit/q\texit the console\n\n"
-				+ "\tnew [some.Class] ([param1], [param2], ...)\n"
+				+ "\texit/quit/q\texit the console\n\n" + "\tnew [some.Class] ([param1], [param2], ...)\n"
 				+ "\t\t\tcreate a new instance of [some.Class] using the given parameters for the constructor\n"
 				+ "\t\t\tthe parameters may be strings enclosed in ' or \" or local variables\n\n"
 				+ "\t[some.Static.method] ([param1], [param2], ...)\n"
 				+ "\t\t\tExecute a static method. If a package has been defined before, this package will be\n"
 				+ "\t\t\tused as prefix for the package of the class containing the static method\n"
-				+ "\t\t\tparameters mey be strings or local variables\n\n"
-				+ "\t[localVar].[method] ([param1], ...)\n"
-				+ "\t\t\texecute a method of a local varialble\n\n"
-				+ "\t[method] ([param1], ...)\n"
-				+ "\t\t\texecute a method on the bound object\n\n"
-				+ "\t[localVar] = ...\n"
+				+ "\t\t\tparameters mey be strings or local variables\n\n" + "\t[localVar].[method] ([param1], ...)\n"
+				+ "\t\t\texecute a method of a local varialble\n\n" + "\t[method] ([param1], ...)\n"
+				+ "\t\t\texecute a method on the bound object\n\n" + "\t[localVar] = ...\n"
 				+ "\t\t\tAssign a value to a local variable. Any command may like creating a new instance\n"
 				+ "\t\t\tor calling a static method may be used\n\n"
 				+ "Lines statring with // or # will be ignored\n\n");

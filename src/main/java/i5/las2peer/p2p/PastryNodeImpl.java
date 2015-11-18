@@ -408,8 +408,8 @@ public class PastryNodeImpl extends Node {
 
 					// abort if can't join
 					if (pastryNode.joinFailed()) {
-						throw new NodeException("Could not join the FreePastry ring.  Reason:"
-								+ pastryNode.joinFailedReason());
+						throw new NodeException(
+								"Could not join the FreePastry ring.  Reason:" + pastryNode.joinFailedReason());
 					}
 				}
 			}
@@ -450,8 +450,8 @@ public class PastryNodeImpl extends Node {
 	}
 
 	@Override
-	public void registerReceiver(MessageReceiver receiver) throws AgentAlreadyRegisteredException,
-			L2pSecurityException, AgentException {
+	public void registerReceiver(MessageReceiver receiver)
+			throws AgentAlreadyRegisteredException, L2pSecurityException, AgentException {
 
 		synchronized (this) {
 			super.registerReceiver(receiver);
@@ -616,9 +616,9 @@ public class PastryNodeImpl extends Node {
 	 * @throws AgentNotKnownException
 	 * @throws MessageException
 	 */
-	public void sendTestMessages(Agent from, Agent to) throws InterruptedException, EncodingFailedException,
-			L2pSecurityException, SerializationException, MalformedXMLException, IOException, AgentNotKnownException,
-			MessageException {
+	public void sendTestMessages(Agent from, Agent to)
+			throws InterruptedException, EncodingFailedException, L2pSecurityException, SerializationException,
+			MalformedXMLException, IOException, AgentNotKnownException, MessageException {
 		int counter = 0;
 
 		while (true) {
@@ -641,8 +641,8 @@ public class PastryNodeImpl extends Node {
 
 					counter++;
 					// TODO!!!!!
-					application.sendMessage(new MessageEnvelope(pastryNode.getLocalNodeHandle(), new Message(from, to,
-							"testnachricht: " + counter)), nh);
+					application.sendMessage(new MessageEnvelope(pastryNode.getLocalNodeHandle(),
+							new Message(from, to, "testnachricht: " + counter)), nh);
 
 					// wait a sec
 					pastryEnvironment.getTimeSource().sleep(1000);

@@ -144,11 +144,8 @@ public class TestService extends Service {
 	 * @return a String
 	 */
 	public String multipleArguments(int i, String s, long l, boolean b) {
-		return "The method has been called with the following arguments:\n"
-				+ "an Integer: " + i + "\n"
-				+ "a String: " + s + "\n"
-				+ "a long: " + l + "\n"
-				+ "a boolean: " + b + "\n";
+		return "The method has been called with the following arguments:\n" + "an Integer: " + i + "\n" + "a String: "
+				+ s + "\n" + "a long: " + l + "\n" + "a boolean: " + b + "\n";
 	}
 
 	/**
@@ -161,11 +158,8 @@ public class TestService extends Service {
 	 * @return a String
 	 */
 	public String multipleArguments2(Integer i, String s, Long l, Boolean b) {
-		return "The method has been called with the following arguments:\n"
-				+ "an Integer: " + i + "\n"
-				+ "a String: " + s + "\n"
-				+ "a long: " + l + "\n"
-				+ "a boolean: " + b + "\n";
+		return "The method has been called with the following arguments:\n" + "an Integer: " + i + "\n" + "a String: "
+				+ s + "\n" + "a long: " + l + "\n" + "a boolean: " + b + "\n";
 	}
 
 	/**

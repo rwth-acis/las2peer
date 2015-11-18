@@ -33,8 +33,7 @@ public class EnvelopeTest {
 	private static UserAgent eve, adam;
 
 	@Before
-	public void setUp() throws NoSuchAlgorithmException, L2pSecurityException,
-			CryptoException {
+	public void setUp() throws NoSuchAlgorithmException, L2pSecurityException, CryptoException {
 		adam = UserAgent.createUserAgent("adamspass");
 		eve = UserAgent.createUserAgent("evespass");
 		eve.unlockPrivateKey("evespass");
@@ -42,9 +41,8 @@ public class EnvelopeTest {
 	}
 
 	@Test
-	public void testStringContent() throws NoSuchAlgorithmException,
-			UnsupportedEncodingException, MalformedXMLException,
-			XMLSyntaxException, L2pSecurityException, EnvelopeException {
+	public void testStringContent() throws NoSuchAlgorithmException, UnsupportedEncodingException,
+			MalformedXMLException, XMLSyntaxException, L2pSecurityException, EnvelopeException {
 		if (eve == null)
 			throw new NullPointerException("Agents not initialized!");
 
@@ -84,8 +82,8 @@ public class EnvelopeTest {
 	}
 
 	@Test
-	public void testSerializable() throws L2pSecurityException,
-			EnvelopeException, MalformedXMLException, SerializationException {
+	public void testSerializable()
+			throws L2pSecurityException, EnvelopeException, MalformedXMLException, SerializationException {
 		String s = "Hallo";
 		int i = 100;
 		TestContent t = new TestContent(s, i);
@@ -107,9 +105,8 @@ public class EnvelopeTest {
 	}
 
 	@Test
-	public void testAgentRemoval() throws UnsupportedEncodingException,
-			EncodingFailedException, DecodingFailedException,
-			L2pSecurityException {
+	public void testAgentRemoval() throws UnsupportedEncodingException, EncodingFailedException,
+			DecodingFailedException, L2pSecurityException {
 		String content = "blabla";
 		Envelope testee = new Envelope(content, new Agent[] { eve });
 
@@ -142,8 +139,7 @@ public class EnvelopeTest {
 	}
 
 	@Test
-	public void testOpen() throws EncodingFailedException,
-			UnsupportedEncodingException, DecodingFailedException,
+	public void testOpen() throws EncodingFailedException, UnsupportedEncodingException, DecodingFailedException,
 			MalformedXMLException, L2pSecurityException {
 		String data = "darf's auch ein bisschen mehr sein?";
 
@@ -178,10 +174,8 @@ public class EnvelopeTest {
 	}
 
 	@Test
-	public void testSignatures() throws UnsupportedEncodingException,
-			EncodingFailedException, DecodingFailedException,
-			MalformedXMLException, VerificationFailedException,
-			L2pSecurityException {
+	public void testSignatures() throws UnsupportedEncodingException, EncodingFailedException, DecodingFailedException,
+			MalformedXMLException, VerificationFailedException, L2pSecurityException {
 		String content = "irgendwas sinnvolles";
 
 		Envelope testee = new Envelope(content, eve);
@@ -260,9 +254,8 @@ public class EnvelopeTest {
 	}
 
 	@Test
-	public void testOpeningAgent() throws UnsupportedEncodingException,
-			EncodingFailedException, DecodingFailedException,
-			L2pSecurityException {
+	public void testOpeningAgent() throws UnsupportedEncodingException, EncodingFailedException,
+			DecodingFailedException, L2pSecurityException {
 		String content = "Ja wass denn?!";
 
 		Envelope testee = new Envelope(content, eve);
@@ -282,8 +275,7 @@ public class EnvelopeTest {
 	}
 
 	@Test
-	public void testId() throws MalformedXMLException,
-			UnsupportedEncodingException, EncodingFailedException,
+	public void testId() throws MalformedXMLException, UnsupportedEncodingException, EncodingFailedException,
 			DecodingFailedException {
 		String content = "bla";
 		Envelope testee = new Envelope(content, eve);
@@ -321,12 +313,11 @@ public class EnvelopeTest {
 	}
 
 	@Test
-	public void testGroups() throws MalformedXMLException, IOException,
-			L2pSecurityException, SerializationException, CryptoException,
-			EnvelopeException {
+	public void testGroups() throws MalformedXMLException, IOException, L2pSecurityException, SerializationException,
+			CryptoException, EnvelopeException {
 
-		Agent[] owners = new Agent[] { MockAgentFactory.getEve(),
-				MockAgentFactory.getGroup1(), MockAgentFactory.getGroupA() };
+		Agent[] owners = new Agent[] { MockAgentFactory.getEve(), MockAgentFactory.getGroup1(),
+				MockAgentFactory.getGroupA() };
 		Envelope testee = new Envelope("a string", owners);
 
 		assertEquals(2, testee.getReaderGroups().length);
@@ -349,8 +340,8 @@ public class EnvelopeTest {
 	}
 
 	@Test
-	public void testArrayStorage() throws MalformedXMLException, IOException,
-			EnvelopeException, SerializationException, L2pSecurityException {
+	public void testArrayStorage()
+			throws MalformedXMLException, IOException, EnvelopeException, SerializationException, L2pSecurityException {
 		UserAgent eve = MockAgentFactory.getEve();
 
 		Random r = new Random();
@@ -378,21 +369,17 @@ public class EnvelopeTest {
 	}
 
 	@Test
-	public void testCheckOverwrite() throws L2pSecurityException,
-			EncodingFailedException, SerializationException,
-			InterruptedException, DecodingFailedException,
-			MalformedXMLException, IOException {
+	public void testCheckOverwrite() throws L2pSecurityException, EncodingFailedException, SerializationException,
+			InterruptedException, DecodingFailedException, MalformedXMLException, IOException {
 		UserAgent eve = MockAgentFactory.getEve();
 
-		Envelope test = Envelope.createClassIdEnvelope(new Long(100), "temp",
-				eve);
+		Envelope test = Envelope.createClassIdEnvelope(new Long(100), "temp", eve);
 		String xml = test.toXmlString();
 		test = Envelope.createFromXml(xml);
 
 		Thread.sleep(1000);
 
-		Envelope test2 = Envelope.createClassIdEnvelope(new Long(200), "temp",
-				eve);
+		Envelope test2 = Envelope.createClassIdEnvelope(new Long(200), "temp", eve);
 
 		assertFalse(test.getReferalTimestamp() == test2.getReferalTimestamp());
 
@@ -415,11 +402,10 @@ public class EnvelopeTest {
 	}
 
 	@Test
-	public void testLoadedTimestamp() throws EncodingFailedException,
-			SerializationException, MalformedXMLException, IOException {
+	public void testLoadedTimestamp()
+			throws EncodingFailedException, SerializationException, MalformedXMLException, IOException {
 		UserAgent eve = MockAgentFactory.getEve();
-		Envelope testee = Envelope.createClassIdEnvelope(new Long(100), "test",
-				eve);
+		Envelope testee = Envelope.createClassIdEnvelope(new Long(100), "test", eve);
 		long timestamp = testee.getTimestamp();
 
 		String xml = testee.toXmlString();
@@ -430,12 +416,10 @@ public class EnvelopeTest {
 	}
 
 	@Test
-	public void testUpdateSwitch() throws EnvelopeException,
-			MalformedXMLException, IOException, SerializationException,
-			L2pSecurityException {
+	public void testUpdateSwitch()
+			throws EnvelopeException, MalformedXMLException, IOException, SerializationException, L2pSecurityException {
 		UserAgent eve = MockAgentFactory.getEve();
-		Envelope testee = Envelope.createClassIdEnvelope(new StringBuffer(
-				"test"), "test", eve);
+		Envelope testee = Envelope.createClassIdEnvelope(new StringBuffer("test"), "test", eve);
 
 		try {
 			testee.updateContent(new DummyContent("test2"));
@@ -462,8 +446,7 @@ public class EnvelopeTest {
 
 		testee.getContent(DummyContent.class).append("-abc");
 
-		assertEquals("test3-abc", testee.getContent(DummyContent.class)
-				.toString());
+		assertEquals("test3-abc", testee.getContent(DummyContent.class).toString());
 	}
 
 }

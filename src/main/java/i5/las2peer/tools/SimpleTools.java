@@ -28,8 +28,7 @@ public class SimpleTools {
 	/**
 	 * set with available characters for random string generation via {@link #createRandomString}
 	 */
-	public static final String sRandomStringCharSet = "abcdefghijklmnopqrstuvwxyz"
-			+ "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	public static final String sRandomStringCharSet = "abcdefghijklmnopqrstuvwxyz" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 			+ "0123456789";
 
 	/**

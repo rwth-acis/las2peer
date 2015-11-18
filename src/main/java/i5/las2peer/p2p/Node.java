@@ -228,8 +228,8 @@ public abstract class Node implements AgentStorage {
 	 * @throws CryptoException
 	 * @throws SerializationException
 	 */
-	public void unlockRemoteAgent(long agentId, byte[] enctryptedPass) throws L2pSecurityException,
-			AgentNotKnownException, SerializationException, CryptoException {
+	public void unlockRemoteAgent(long agentId, byte[] enctryptedPass)
+			throws L2pSecurityException, AgentNotKnownException, SerializationException, CryptoException {
 
 		String passphrase = (String) CryptoTools.decryptAsymmetric(enctryptedPass, nodeKeyPair.getPrivate());
 
@@ -548,8 +548,8 @@ public abstract class Node implements AgentStorage {
 	 * @throws AgentException any problem with the agent itself (probably on calling
 	 *             {@link i5.las2peer.security.Agent#notifyRegistrationTo}
 	 */
-	public void registerReceiver(MessageReceiver receiver) throws AgentAlreadyRegisteredException,
-			L2pSecurityException, AgentException {
+	public void registerReceiver(MessageReceiver receiver)
+			throws AgentAlreadyRegisteredException, L2pSecurityException, AgentException {
 		if (getStatus() != NodeStatus.RUNNING)
 			throw new IllegalStateException("You can register agents only to running nodes!");
 
@@ -569,9 +569,8 @@ public abstract class Node implements AgentStorage {
 				try {
 					storeAgent(agent);
 				} catch (AgentAlreadyRegisteredException e) {
-					System.out
-							.println(
-									"Just for notice - not an error: tried to store an already known agent before registering");
+					System.out.println(
+							"Just for notice - not an error: tried to store an already known agent before registering");
 					// nothing to do
 				}
 
@@ -708,8 +707,8 @@ public abstract class Node implements AgentStorage {
 	 * @throws NodeNotFoundException
 	 * @throws L2pSecurityException
 	 */
-	public void sendResponse(Message message, Object atNodeId) throws AgentNotKnownException, NodeNotFoundException,
-			L2pSecurityException {
+	public void sendResponse(Message message, Object atNodeId)
+			throws AgentNotKnownException, NodeNotFoundException, L2pSecurityException {
 		sendMessage(message, atNodeId, null);
 	}
 
@@ -936,8 +935,8 @@ public abstract class Node implements AgentStorage {
 	 * @throws AgentException
 	 * @throws AgentAlreadyRegisteredException
 	 */
-	public Mediator getOrRegisterLocalMediator(Agent agent) throws AgentNotKnownException, L2pSecurityException,
-			AgentAlreadyRegisteredException, AgentException {
+	public Mediator getOrRegisterLocalMediator(Agent agent)
+			throws AgentNotKnownException, L2pSecurityException, AgentAlreadyRegisteredException, AgentException {
 		if (agent.isLocked())
 			throw new L2pSecurityException("you need to unlock the agent for mediation!");
 		MessageReceiver result = htRegisteredReceivers.get(agent.getId());
@@ -963,8 +962,8 @@ public abstract class Node implements AgentStorage {
 	 * @throws L2pSecurityException
 	 * @throws AgentException
 	 */
-	public abstract void storeAgent(Agent agent) throws AgentAlreadyRegisteredException, L2pSecurityException,
-			AgentException;
+	public abstract void storeAgent(Agent agent)
+			throws AgentAlreadyRegisteredException, L2pSecurityException, AgentException;
 
 	/**
 	 * Updates an existing agent of the network.
@@ -1074,8 +1073,8 @@ public abstract class Node implements AgentStorage {
 	 * @throws L2pSecurityException
 	 * @throws DecodingFailedException
 	 */
-	private void doStoreUserList() throws EncodingFailedException, StorageException, L2pSecurityException,
-			DecodingFailedException {
+	private void doStoreUserList()
+			throws EncodingFailedException, StorageException, L2pSecurityException, DecodingFailedException {
 		Agent anon = getAnonymous();
 		activeUserList.open(anon);
 
@@ -1222,8 +1221,8 @@ public abstract class Node implements AgentStorage {
 	 * @throws L2pServiceException
 	 */
 	public Serializable invokeLocally(long executingAgentId, String serviceClass, String method,
-			Serializable[] parameters) throws L2pSecurityException, AgentNotKnownException, InterruptedException,
-					L2pServiceException {
+			Serializable[] parameters)
+					throws L2pSecurityException, AgentNotKnownException, InterruptedException, L2pServiceException {
 		if (getStatus() != NodeStatus.RUNNING)
 			throw new IllegalStateException("You can invoke methods only on a running node!");
 
@@ -1375,9 +1374,7 @@ public abstract class Node implements AgentStorage {
 				// service method needed to unlock some envelope(s)
 				this.observerNotice(Event.RMI_FAILED, this.getNodeId(), executing,
 						"mediator needed at the target node"); // Do not log service class name (privacy..)
-				throw new UnlockNeededException(
-						"mediator needed at the target node",
-						resultMessage.getSendingNodeId(),
+				throw new UnlockNeededException("mediator needed at the target node", resultMessage.getSendingNodeId(),
 						((RMIUnlockContent) resultContent).getNodeKey());
 			} else if (resultContent instanceof RMIExceptionContent) {
 				Exception thrown = ((RMIExceptionContent) resultContent).getException();
@@ -1400,10 +1397,13 @@ public abstract class Node implements AgentStorage {
 																								// (privacy..)
 				return ((RMIResultContent) resultContent).getContent();
 			} else {
-				this.observerNotice(Event.RMI_FAILED, this.getNodeId(), executing, "Unknown RMI response type: "
-						+ resultContent.getClass().getCanonicalName()); // Do not log service class name (privacy..)
-				throw new ServiceInvocationException("Unknown RMI response type: "
-						+ resultContent.getClass().getCanonicalName());
+				this.observerNotice(Event.RMI_FAILED, this.getNodeId(), executing,
+						"Unknown RMI response type: " + resultContent.getClass().getCanonicalName()); // Do not log
+																										// service class
+																										// name
+																										// (privacy..)
+				throw new ServiceInvocationException(
+						"Unknown RMI response type: " + resultContent.getClass().getCanonicalName());
 			}
 		} catch (AgentNotKnownException e) {
 			this.observerNotice(Event.RMI_FAILED, this.getNodeId(), executing, e.toString()); // Do not log service
@@ -1445,8 +1445,8 @@ public abstract class Node implements AgentStorage {
 	public boolean handoverAnswer(Message answer) {
 		if (!answer.isResponse())
 			return false;
-		observerNotice(Event.MESSAGE_RECEIVED_ANSWER, answer.getSendingNodeId(), answer.getSenderId(),
-				this.getNodeId(), answer.getRecipientId(), "" + answer.getResponseToId());
+		observerNotice(Event.MESSAGE_RECEIVED_ANSWER, answer.getSendingNodeId(), answer.getSenderId(), this.getNodeId(),
+				answer.getRecipientId(), "" + answer.getResponseToId());
 
 		MessageResultListener listener = htAnswerListeners.get(answer.getResponseToId());
 		if (listener == null) {
@@ -1496,8 +1496,8 @@ public abstract class Node implements AgentStorage {
 	 * @throws L2pSecurityException
 	 * @throws InterruptedException
 	 */
-	public Message sendMessageAndWaitForAnswer(Message m, Object atNodeId) throws AgentNotKnownException,
-			NodeNotFoundException, L2pSecurityException, InterruptedException {
+	public Message sendMessageAndWaitForAnswer(Message m, Object atNodeId)
+			throws AgentNotKnownException, NodeNotFoundException, L2pSecurityException, InterruptedException {
 		long timeout = m.getTimeoutTs() - new Date().getTime();
 		MessageResultListener listener = new MessageResultListener(timeout);
 

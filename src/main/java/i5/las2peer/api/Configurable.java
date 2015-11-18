@@ -220,8 +220,7 @@ public abstract class Configurable {
 			}
 			try {
 				Field f = getClass().getDeclaredField(key);
-				if (!Modifier.isFinal(f.getModifiers())
-						&& !Modifier.isStatic(f.getModifiers())) {
+				if (!Modifier.isFinal(f.getModifiers()) && !Modifier.isStatic(f.getModifiers())) {
 					f.setAccessible(true);
 					setField(f, props.get(key));
 					System.out.println(

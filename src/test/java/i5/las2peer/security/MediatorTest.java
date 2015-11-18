@@ -26,8 +26,7 @@ public class MediatorTest {
 		private int accepted = 0;
 
 		@Override
-		public boolean handleMessage(Message message, Context context)
-				throws Exception {
+		public boolean handleMessage(Message message, Context context) throws Exception {
 			accepted++;
 			return true;
 		}
@@ -43,8 +42,7 @@ public class MediatorTest {
 		private int denied = 0;
 
 		@Override
-		public boolean handleMessage(Message message, Context context)
-				throws Exception {
+		public boolean handleMessage(Message message, Context context) throws Exception {
 			denied++;
 			return false;
 		}

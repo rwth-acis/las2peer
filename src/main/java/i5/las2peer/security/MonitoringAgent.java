@@ -143,17 +143,12 @@ public class MonitoringAgent extends PassphraseAgent {
 	@Override
 	public String toXmlString() {
 		try {
-			StringBuffer result = new StringBuffer(
-					"<las2peer:agent type=\"monitoring\">\n"
-							+ "\t<id>" + getId() + "</id>\n"
-							+ "\t<publickey encoding=\"base64\">"
-							+ SerializeTools.serializeToBase64(getPublicKey())
-							+ "</publickey>\n"
-							+ "\t<privatekey encrypted=\"" + CryptoTools.getSymmetricAlgorithm() + "\" keygen=\""
-							+ CryptoTools.getSymmetricKeygenMethod() + "\">\n"
-							+ "\t\t<salt encoding=\"base64\">" + Base64.encodeBase64String(getSalt()) + "</salt>\n"
-							+ "\t\t<data encoding=\"base64\">" + getEncodedPrivate() + "</data>\n"
-							+ "\t</privatekey>\n");
+			StringBuffer result = new StringBuffer("<las2peer:agent type=\"monitoring\">\n" + "\t<id>" + getId()
+					+ "</id>\n" + "\t<publickey encoding=\"base64\">" + SerializeTools.serializeToBase64(getPublicKey())
+					+ "</publickey>\n" + "\t<privatekey encrypted=\"" + CryptoTools.getSymmetricAlgorithm()
+					+ "\" keygen=\"" + CryptoTools.getSymmetricKeygenMethod() + "\">\n"
+					+ "\t\t<salt encoding=\"base64\">" + Base64.encodeBase64String(getSalt()) + "</salt>\n"
+					+ "\t\t<data encoding=\"base64\">" + getEncodedPrivate() + "</data>\n" + "\t</privatekey>\n");
 
 			result.append("</las2peer:agent>\n");
 

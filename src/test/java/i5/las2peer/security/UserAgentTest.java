@@ -129,8 +129,8 @@ public class UserAgentTest {
 	}
 
 	@Test
-	public void testEmailAndLogin() throws CryptoException, L2pSecurityException, MalformedXMLException,
-			UserAgentException {
+	public void testEmailAndLogin()
+			throws CryptoException, L2pSecurityException, MalformedXMLException, UserAgentException {
 		UserAgent a = UserAgent.createUserAgent("test");
 		a.unlockPrivateKey("test");
 

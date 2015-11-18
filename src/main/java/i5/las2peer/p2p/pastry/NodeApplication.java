@@ -98,11 +98,8 @@ public class NodeApplication implements Application, ScribeMultiClient {
 			// always subscribe to the root:
 			NodeHandle root = scribeClient.getRoot(agentTopic);
 
-			scribeClient.subscribe(
-					agentTopic,
-					this,
-					new AgentJoinedContent(getLocalHandle(), receiver.getResponsibleForAgentId()),
-					root);
+			scribeClient.subscribe(agentTopic, this,
+					new AgentJoinedContent(getLocalHandle(), receiver.getResponsibleForAgentId()), root);
 			l2pNode.observerNotice(Event.PASTRY_TOPIC_SUBSCRIPTION_SUCCESS, this.l2pNode.getNodeId(), receiver,
 					"" + agentTopic.getId());
 			/*
@@ -214,9 +211,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 			// just send a response
 			GetInfoMessage gim = (GetInfoMessage) pastMessage;
 			try {
-				InfoResponseMessage answer = new InfoResponseMessage(
-						gim.getId(),
-						getLocalHandle(),
+				InfoResponseMessage answer = new InfoResponseMessage(gim.getId(), getLocalHandle(),
 						l2pNode.getNodeInformation());
 
 				sendMessageDirectly(answer, gim.getSender());
@@ -433,10 +428,8 @@ public class NodeApplication implements Application, ScribeMultiClient {
 					// found the agent
 					// send message to searching node
 
-					endpoint.route(
-							null,
-							new SearchAnswerMessage(
-									((SearchAgentContent) content).getOrigin(),
+					endpoint.route(null,
+							new SearchAnswerMessage(((SearchAgentContent) content).getOrigin(),
 									this.l2pNode.getPastryNode().getLocalNodeHandle(),
 									((SearchAgentContent) content).getRandomId()),
 							((SearchAgentContent) content).getOrigin());
@@ -550,9 +543,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	 * @return the topic corresponding to the given agent
 	 */
 	private Topic getAgentTopic(long agentId) {
-		return new Topic(
-				new PastryIdFactory(l2pNode.getPastryNode().getEnvironment()),
-				getAgentTopicId(agentId));
+		return new Topic(new PastryIdFactory(l2pNode.getPastryNode().getEnvironment()), getAgentTopicId(agentId));
 	}
 
 	@Override
@@ -576,8 +567,8 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	 * @param nodeEncryptionKey
 	 * @throws L2pSecurityException
 	 */
-	public void unlockRemoteAgent(long agentId, String passphrase,
-			NodeHandle targetNode, PublicKey nodeEncryptionKey) throws L2pSecurityException {
+	public void unlockRemoteAgent(long agentId, String passphrase, NodeHandle targetNode, PublicKey nodeEncryptionKey)
+			throws L2pSecurityException {
 		if (targetNode == null || nodeEncryptionKey == null)
 			throw new NullPointerException("Whom should I send auth to?!");
 

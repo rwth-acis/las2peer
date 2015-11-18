@@ -34,8 +34,7 @@ public class ServiceInfoAgentTest {
 	}
 
 	@Test
-	public void test() throws UnknownHostException, SerializationException,
-			CryptoException {
+	public void test() throws UnknownHostException, SerializationException, CryptoException {
 		ColoredOutput.allOff();
 
 		// String host = getHostString();
@@ -62,14 +61,12 @@ public class ServiceInfoAgentTest {
 			PastryNodeImpl node = (PastryNodeImpl) nodes[0];
 
 			String testClass1 = "i5.las2peer.api.TestService";
-			ServiceAgent testService = ServiceAgent.createServiceAgent(
-					testClass1, "a pass");
+			ServiceAgent testService = ServiceAgent.createServiceAgent(testClass1, "a pass");
 			testService.unlockPrivateKey("a pass");
 			nodes[0].registerReceiver(testService);
 
 			String testClass2 = "i5.las2peer.api.TestService2";
-			ServiceAgent testService2 = ServiceAgent.createServiceAgent(
-					testClass2, "a pass");
+			ServiceAgent testService2 = ServiceAgent.createServiceAgent(testClass2, "a pass");
 			testService2.unlockPrivateKey("a pass");
 			nodes[0].registerReceiver(testService2);
 
@@ -84,9 +81,7 @@ public class ServiceInfoAgentTest {
 
 			Arrays.sort(serviceNames);
 
-			assertEquals(
-					"i5.las2peer.api.TestServicei5.las2peer.api.TestService2",
-					serviceNames[0] + serviceNames[1]);
+			assertEquals("i5.las2peer.api.TestServicei5.las2peer.api.TestService2", serviceNames[0] + serviceNames[1]);
 
 		} catch (Exception e) {
 			e.printStackTrace();

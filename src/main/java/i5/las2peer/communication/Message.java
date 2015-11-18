@@ -332,18 +332,10 @@ public class Message implements XmlAble {
 		if (responseToId != null)
 			response = " responseTo=\"" + responseToId + "\"";
 
-		return "<las2peer:messageContent"
-				+ " id=\"" + id + "\""
-				+ " sender=\"" + sender.getId() + "\""
-				+ " recipient=\"" + recipient.getId() + "\""
-				+ " class=\"" + content.getClass().getCanonicalName() + "\""
-				+ " type=\"" + typeAttr + "\""
-				+ " timestamp=\"" + timestampMs + "\""
-				+ " timeout=\"" + validMs + "\""
-				+ response
-				+ ">"
-				+ sContent
-				+ "</las2peer:messageContent>";
+		return "<las2peer:messageContent" + " id=\"" + id + "\"" + " sender=\"" + sender.getId() + "\""
+				+ " recipient=\"" + recipient.getId() + "\"" + " class=\"" + content.getClass().getCanonicalName()
+				+ "\"" + " type=\"" + typeAttr + "\"" + " timestamp=\"" + timestampMs + "\"" + " timeout=\"" + validMs
+				+ "\"" + response + ">" + sContent + "</las2peer:messageContent>";
 	}
 
 	/**
@@ -667,19 +659,14 @@ public class Message implements XmlAble {
 				}
 		}
 
-		return "<las2peer:message"
-				+ " id=\"" + id + "\""
-				+ response
-				+ " from=\"" + senderId + "\" to=\"" + recipientId + "\"" +
-				" generated=\"" + timestampMs + "\" timeout=\"" + validMs + "\">\n"
-				+ sending
+		return "<las2peer:message" + " id=\"" + id + "\"" + response + " from=\"" + senderId + "\" to=\"" + recipientId
+				+ "\"" + " generated=\"" + timestampMs + "\" timeout=\"" + validMs + "\">\n" + sending
 				+ "\t<content encryption=\"" + CryptoTools.getSymmetricAlgorithm() + "\" encoding=\"base64\">"
-				+ Base64.encodeBase64String(baEncryptedContent) + "</content>\n"
-				+ "\t<contentKey encryption=\"" + CryptoTools.getAsymmetricAlgorithm() + "\" encoding=\"base64\">"
+				+ Base64.encodeBase64String(baEncryptedContent) + "</content>\n" + "\t<contentKey encryption=\""
+				+ CryptoTools.getAsymmetricAlgorithm() + "\" encoding=\"base64\">"
 				+ Base64.encodeBase64String(baContentKey) + "</contentKey>\n"
 				+ "\t<signature encoding=\"base64\" method=\"" + CryptoTools.getSignatureMethod() + "\">"
-				+ Base64.encodeBase64String(baSignature) + "</signature>\n"
-				+ "</las2peer:message>\n";
+				+ Base64.encodeBase64String(baSignature) + "</signature>\n" + "</las2peer:message>\n";
 	}
 
 	/**

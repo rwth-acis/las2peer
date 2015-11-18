@@ -69,8 +69,8 @@ public class GroupAgent extends Agent {
 	 * @throws CryptoException
 	 * @throws SerializationException
 	 */
-	protected GroupAgent(long id, KeyPair keys, SecretKey secret, Agent[] members) throws L2pSecurityException,
-			CryptoException, SerializationException {
+	protected GroupAgent(long id, KeyPair keys, SecretKey secret, Agent[] members)
+			throws L2pSecurityException, CryptoException, SerializationException {
 		super(id, keys, secret);
 
 		symmetricGroupKey = secret;
@@ -133,8 +133,8 @@ public class GroupAgent extends Agent {
 	 * @throws SerializationException
 	 * @throws CryptoException
 	 */
-	private final void addMember(Agent a, boolean securityCheck) throws L2pSecurityException, CryptoException,
-			SerializationException {
+	private final void addMember(Agent a, boolean securityCheck)
+			throws L2pSecurityException, CryptoException, SerializationException {
 		if (securityCheck && isLocked())
 			throw new L2pSecurityException("you have to unlock this group first!");
 
@@ -336,20 +336,14 @@ public class GroupAgent extends Agent {
 
 			for (Long id : htEncryptedKeyVersions.keySet()) {
 				keyList += "\t\t<keyentry forAgent=\"" + id + "\" encoding=\"base64\">"
-						+ Base64.encodeBase64String(htEncryptedKeyVersions.get(id))
-						+ "</keyentry>\n";
+						+ Base64.encodeBase64String(htEncryptedKeyVersions.get(id)) + "</keyentry>\n";
 			}
 
-			StringBuffer result = new StringBuffer("<las2peer:agent type=\"group\">\n"
-					+ "\t<id>" + getId() + "</id>\n"
-					+ "\t<publickey encoding=\"base64\">"
-					+ SerializeTools.serializeToBase64(getPublicKey())
-					+ "</publickey>\n"
-					+ "\t<privatekey encoding=\"base64\" encrypted=\"" + CryptoTools.getSymmetricAlgorithm() + "\">"
-					+ getEncodedPrivate()
-					+ "</privatekey>\n"
-					+ "\t<unlockKeys method=\"" + CryptoTools.getAsymmetricAlgorithm() + "\">\n"
-					+ keyList
+			StringBuffer result = new StringBuffer("<las2peer:agent type=\"group\">\n" + "\t<id>" + getId() + "</id>\n"
+					+ "\t<publickey encoding=\"base64\">" + SerializeTools.serializeToBase64(getPublicKey())
+					+ "</publickey>\n" + "\t<privatekey encoding=\"base64\" encrypted=\""
+					+ CryptoTools.getSymmetricAlgorithm() + "\">" + getEncodedPrivate() + "</privatekey>\n"
+					+ "\t<unlockKeys method=\"" + CryptoTools.getAsymmetricAlgorithm() + "\">\n" + keyList
 					+ "\t</unlockKeys>\n");
 
 			if (name != null) {
@@ -500,8 +494,8 @@ public class GroupAgent extends Agent {
 	 * @throws CryptoException
 	 * @throws SerializationException
 	 */
-	public static GroupAgent createGroupAgent(Agent[] members) throws L2pSecurityException, CryptoException,
-			SerializationException {
+	public static GroupAgent createGroupAgent(Agent[] members)
+			throws L2pSecurityException, CryptoException, SerializationException {
 		Random r = new Random();
 		return new GroupAgent(r.nextLong(), CryptoTools.generateKeyPair(), CryptoTools.generateSymmetricKey(), members);
 	}

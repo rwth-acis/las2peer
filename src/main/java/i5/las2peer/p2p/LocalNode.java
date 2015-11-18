@@ -69,8 +69,8 @@ public class LocalNode extends Node {
 	}
 
 	@Override
-	public void registerReceiver(MessageReceiver receiver) throws AgentAlreadyRegisteredException,
-			L2pSecurityException, AgentException {
+	public void registerReceiver(MessageReceiver receiver)
+			throws AgentAlreadyRegisteredException, L2pSecurityException, AgentException {
 		super.registerReceiver(receiver);
 
 		deliverPendingMessages(receiver.getResponsibleForAgentId(), getNodeId());
@@ -242,12 +242,12 @@ public class LocalNode extends Node {
 	}
 
 	@Override
-	public void sendUnlockRequest(long agentId, String passphrase, Object targetNode,
-			PublicKey nodeEncryptionKey) throws L2pSecurityException {
+	public void sendUnlockRequest(long agentId, String passphrase, Object targetNode, PublicKey nodeEncryptionKey)
+			throws L2pSecurityException {
 
 		if (!(targetNode instanceof Long))
-			throw new IllegalArgumentException("node id is not a Long value but a " + targetNode.getClass().getName()
-					+ "(" + targetNode + ")");
+			throw new IllegalArgumentException(
+					"node id is not a Long value but a " + targetNode.getClass().getName() + "(" + targetNode + ")");
 
 		try {
 			byte[] encPass = CryptoTools.encryptAsymmetric(passphrase, nodeEncryptionKey);
@@ -542,25 +542,24 @@ public class LocalNode extends Node {
 		// since the recipient knows other versions of the involved agents
 		message.close();
 
-		new Thread(
-				new Runnable() {
-					public void run() {
-						Random r = new Random();
+		new Thread(new Runnable() {
+			public void run() {
+				Random r = new Random();
 
-						int wait = iMessageMinWait + r.nextInt(iMessageMaxWait - iMessageMinWait);
-						try {
-							Thread.sleep(wait);
-						} catch (InterruptedException e1) {
-						}
+				int wait = iMessageMinWait + r.nextInt(iMessageMaxWait - iMessageMinWait);
+				try {
+					Thread.sleep(wait);
+				} catch (InterruptedException e1) {
+				}
 
-						try {
-							getNode(nodeId).receiveMessage(message);
-						} catch (Exception e) {
-							System.out.println("problems at node " + nodeId);
-							throw new RuntimeException(e);
-						}
-					}
-				}).start();
+				try {
+					getNode(nodeId).receiveMessage(message);
+				} catch (Exception e) {
+					System.out.println("problems at node " + nodeId);
+					throw new RuntimeException(e);
+				}
+			}
+		}).start();
 	}
 
 }

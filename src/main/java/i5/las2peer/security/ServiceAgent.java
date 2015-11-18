@@ -103,16 +103,12 @@ public class ServiceAgent extends PassphraseAgent {
 	@Override
 	public String toXmlString() {
 		try {
-			return "<las2peer:agent type=\"service\" serviceclass=\"" + getServiceClassName() + "\">\n"
-					+ "\t<id>" + getId() + "</id>\n"
-					+ "\t<publickey encoding=\"base64\">"
-					+ SerializeTools.serializeToBase64(getPublicKey())
-					+ "</publickey>\n"
-					+ "\t<privatekey encrypted=\"" + CryptoTools.getSymmetricAlgorithm() + "\" keygen=\""
-					+ CryptoTools.getSymmetricKeygenMethod() + "\">\n"
-					+ "\t\t<salt encoding=\"base64\">" + Base64.encodeBase64String(getSalt()) + "</salt>\n"
-					+ "\t\t<data encoding=\"base64\">" + getEncodedPrivate() + "</data>\n"
-					+ "\t</privatekey>\n"
+			return "<las2peer:agent type=\"service\" serviceclass=\"" + getServiceClassName() + "\">\n" + "\t<id>"
+					+ getId() + "</id>\n" + "\t<publickey encoding=\"base64\">"
+					+ SerializeTools.serializeToBase64(getPublicKey()) + "</publickey>\n" + "\t<privatekey encrypted=\""
+					+ CryptoTools.getSymmetricAlgorithm() + "\" keygen=\"" + CryptoTools.getSymmetricKeygenMethod()
+					+ "\">\n" + "\t\t<salt encoding=\"base64\">" + Base64.encodeBase64String(getSalt()) + "</salt>\n"
+					+ "\t\t<data encoding=\"base64\">" + getEncodedPrivate() + "</data>\n" + "\t</privatekey>\n"
 					+ "</las2peer:agent>\n";
 		} catch (SerializationException e) {
 			throw new RuntimeException("Serialization problems with keys");
@@ -200,8 +196,9 @@ public class ServiceAgent extends PassphraseAgent {
 
 			e.printStackTrace();
 
-			throw new MessageException("security problems - " + m.getRecipient().getId() + " at node "
-					+ getRunningAtNode().getNodeId(), e);
+			throw new MessageException(
+					"security problems - " + m.getRecipient().getId() + " at node " + getRunningAtNode().getNodeId(),
+					e);
 
 		} catch (EncodingFailedException e) {
 			throw new MessageException("message problems", e);
@@ -233,8 +230,8 @@ public class ServiceAgent extends PassphraseAgent {
 	 * @throws L2pSecurityException
 	 */
 	@Deprecated
-	public static ServiceAgent generateNewAgent(String forService, String passPhrase) throws CryptoException,
-			L2pSecurityException {
+	public static ServiceAgent generateNewAgent(String forService, String passPhrase)
+			throws CryptoException, L2pSecurityException {
 		return createServiceAgent(forService, passPhrase);
 	}
 
@@ -247,14 +244,10 @@ public class ServiceAgent extends PassphraseAgent {
 	 * @throws CryptoException
 	 * @throws L2pSecurityException
 	 */
-	public static ServiceAgent createServiceAgent(String serviceClassName, String passphrase) throws CryptoException,
-			L2pSecurityException {
-		return new ServiceAgent(
-				serviceClass2Id(serviceClassName),
-				serviceClassName,
-				CryptoTools.generateKeyPair(),
-				passphrase,
-				CryptoTools.generateSalt());
+	public static ServiceAgent createServiceAgent(String serviceClassName, String passphrase)
+			throws CryptoException, L2pSecurityException {
+		return new ServiceAgent(serviceClass2Id(serviceClassName), serviceClassName, CryptoTools.generateKeyPair(),
+				passphrase, CryptoTools.generateSalt());
 	}
 
 	/**
@@ -369,8 +362,8 @@ public class ServiceAgent extends PassphraseAgent {
 	 * @throws SerializationException
 	 * @throws AgentException
 	 */
-	private ServiceInfoAgent getServiceInfoAgent() throws CryptoException, L2pSecurityException,
-			SerializationException, AgentException {
+	private ServiceInfoAgent getServiceInfoAgent()
+			throws CryptoException, L2pSecurityException, SerializationException, AgentException {
 		ServiceInfoAgent agent = ServiceInfoAgent.getServiceInfoAgent();
 		return agent;
 	}
@@ -400,13 +393,11 @@ public class ServiceAgent extends PassphraseAgent {
 		final Node finalNode = this.getRunningAtNode();
 		timerRunning = true;
 		timerRunTimes = 0;
-		timer.scheduleAtFixedRate(
-				new TimerTask() {
-					public void run() {
-						executeTimer(finalNode, finalAgent);
-					}
-				},
-				0, // run first occurrence immediately
+		timer.scheduleAtFixedRate(new TimerTask() {
+			public void run() {
+				executeTimer(finalNode, finalAgent);
+			}
+		}, 0, // run first occurrence immediately
 				timerIntervalSeconds * 1000); // run every x seconds
 	}
 
@@ -533,12 +524,12 @@ public class ServiceAgent extends PassphraseAgent {
 	 * @throws InvocationTargetException
 	 * @throws L2pSecurityException
 	 */
-	public Serializable handle(RMITask task) throws L2pServiceException, ServiceInvocationException, SecurityException,
-			IllegalArgumentException, NoSuchServiceMethodException, IllegalAccessException, InvocationTargetException,
-			L2pSecurityException {
+	public Serializable handle(RMITask task)
+			throws L2pServiceException, ServiceInvocationException, SecurityException, IllegalArgumentException,
+			NoSuchServiceMethodException, IllegalAccessException, InvocationTargetException, L2pSecurityException {
 		if (!getServiceClassName().equals(task.getServiceName()))
-			throw new L2pServiceException("Service is not matching requestes class!" + getServiceClassName() + "/"
-					+ task.getServiceName());
+			throw new L2pServiceException(
+					"Service is not matching requestes class!" + getServiceClassName() + "/" + task.getServiceName());
 
 		Object result = invoke(task.getMethodName(), task.getParameters());
 

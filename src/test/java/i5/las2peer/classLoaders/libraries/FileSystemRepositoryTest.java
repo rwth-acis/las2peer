@@ -25,17 +25,11 @@ public class FileSystemRepositoryTest {
 
 		Collection<String> foundJars = testee.getLibraryCollection();
 		assertEquals(3, foundJars.size());
-		assertTrue(foundJars.contains("test_stubs"
-				+ File.separator + "fstest"
-				+ File.separator + "dir1"
+		assertTrue(foundJars.contains("test_stubs" + File.separator + "fstest" + File.separator + "dir1"
 				+ File.separator + "some.test.Jar-2.1.1.jar"));
-		assertTrue(foundJars.contains("test_stubs"
-				+ File.separator + "fstest"
-				+ File.separator + "dir1"
+		assertTrue(foundJars.contains("test_stubs" + File.separator + "fstest" + File.separator + "dir1"
 				+ File.separator + "some.test.Jar-1.1.jar"));
-		assertTrue(foundJars.contains("test_stubs"
-				+ File.separator + "fstest"
-				+ File.separator + "dir1"
+		assertTrue(foundJars.contains("test_stubs" + File.separator + "fstest" + File.separator + "dir1"
 				+ File.separator + "anotherJar-1.0.jar"));
 
 		Collection<LibraryVersion> foundVersions = testee.getAvailableVersionSet("anotherJar");
@@ -55,23 +49,14 @@ public class FileSystemRepositoryTest {
 
 		Collection<String> foundJars = testee.getLibraryCollection();
 		assertEquals(4, foundJars.size());
-		assertTrue(foundJars.contains("test_stubs"
-				+ File.separator + "fstest"
-				+ File.separator + "dir1"
+		assertTrue(foundJars.contains("test_stubs" + File.separator + "fstest" + File.separator + "dir1"
 				+ File.separator + "some.test.Jar-2.1.1.jar"));
-		assertTrue(foundJars.contains("test_stubs"
-				+ File.separator + "fstest"
-				+ File.separator + "dir1"
+		assertTrue(foundJars.contains("test_stubs" + File.separator + "fstest" + File.separator + "dir1"
 				+ File.separator + "some.test.Jar-1.1.jar"));
-		assertTrue(foundJars.contains("test_stubs"
-				+ File.separator + "fstest"
-				+ File.separator + "dir1"
+		assertTrue(foundJars.contains("test_stubs" + File.separator + "fstest" + File.separator + "dir1"
 				+ File.separator + "anotherJar-1.0.jar"));
-		assertTrue(foundJars.contains("test_stubs"
-				+ File.separator + "fstest"
-				+ File.separator + "dir1"
-				+ File.separator + "subdir"
-				+ File.separator + "jarInSubDir-1.0.jar"));
+		assertTrue(foundJars.contains("test_stubs" + File.separator + "fstest" + File.separator + "dir1"
+				+ File.separator + "subdir" + File.separator + "jarInSubDir-1.0.jar"));
 
 		Collection<LibraryVersion> foundVersions = testee.getAvailableVersionSet("anotherJar");
 		assertEquals(1, foundVersions.size());
@@ -96,21 +81,13 @@ public class FileSystemRepositoryTest {
 
 		Collection<String> foundJars = testee.getLibraryCollection();
 		assertEquals(4, foundJars.size());
-		assertTrue(foundJars.contains("test_stubs"
-				+ File.separator + "fstest"
-				+ File.separator + "dir1"
+		assertTrue(foundJars.contains("test_stubs" + File.separator + "fstest" + File.separator + "dir1"
 				+ File.separator + "some.test.Jar-2.1.1.jar"));
-		assertTrue(foundJars.contains("test_stubs"
-				+ File.separator + "fstest"
-				+ File.separator + "dir1"
+		assertTrue(foundJars.contains("test_stubs" + File.separator + "fstest" + File.separator + "dir1"
 				+ File.separator + "some.test.Jar-1.1.jar"));
-		assertTrue(foundJars.contains("test_stubs"
-				+ File.separator + "fstest"
-				+ File.separator + "dir1"
+		assertTrue(foundJars.contains("test_stubs" + File.separator + "fstest" + File.separator + "dir1"
 				+ File.separator + "anotherJar-1.0.jar"));
-		assertTrue(foundJars.contains("test_stubs"
-				+ File.separator + "fstest"
-				+ File.separator + "dir2"
+		assertTrue(foundJars.contains("test_stubs" + File.separator + "fstest" + File.separator + "dir2"
 				+ File.separator + "in.second.dir-1.0.jar"));
 
 		Collection<LibraryVersion> foundVersions = testee.getAvailableVersionSet("anotherJar");

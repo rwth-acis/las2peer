@@ -60,8 +60,7 @@ public class SimpleNode {
 	 * @param bootaddresses collection of socket addresses for bootstrap
 	 * @param env the environment for these nodes
 	 */
-	public SimpleNode(int bindport, Collection<InetSocketAddress> bootaddresses,
-			Environment env) throws Exception {
+	public SimpleNode(int bindport, Collection<InetSocketAddress> bootaddresses, Environment env) throws Exception {
 
 		this.env = env;
 
@@ -70,8 +69,7 @@ public class SimpleNode {
 
 		// construct the PastryNodeFactory, this is how we use
 		// rice.pastry.socket
-		PastryNodeFactory factory = new SocketPastryNodeFactory(nidFactory,
-				bindport, env);
+		PastryNodeFactory factory = new SocketPastryNodeFactory(nidFactory, bindport, env);
 
 		// construct a node, but this does not cause it to boot
 		node = factory.newNode();
@@ -89,9 +87,7 @@ public class SimpleNode {
 
 				// abort if can't join
 				if (node.joinFailed()) {
-					throw new IOException(
-							"Could not join the FreePastry ring.  Reason:"
-									+ node.joinFailedReason());
+					throw new IOException("Could not join the FreePastry ring.  Reason:" + node.joinFailedReason());
 				}
 			}
 		}
@@ -173,13 +169,11 @@ public class SimpleNode {
 
 					String[] split = args[i].split(":");
 					if (split.length != 2)
-						failWithMessage("Unkown bootstrap format for: "
-								+ args[i]);
+						failWithMessage("Unkown bootstrap format for: " + args[i]);
 
 					InetAddress bootaddr = InetAddress.getByName(split[0]);
 					int bootport = Integer.parseInt(split[1]);
-					bootaddresses
-							.add(new InetSocketAddress(bootaddr, bootport));
+					bootaddresses.add(new InetSocketAddress(bootaddr, bootport));
 				} else if (args[i].equals("-t")) {
 					sendTestMessages = true;
 				} else
@@ -187,8 +181,7 @@ public class SimpleNode {
 			}
 
 			if (bootaddresses.size() == 0)
-				System.out
-						.println("No Bootstrap node given - Starting new Ring");
+				System.out.println("No Bootstrap node given - Starting new Ring");
 
 			// launch our node!
 			SimpleNode nodeTest = new SimpleNode(bindport, bootaddresses, env);

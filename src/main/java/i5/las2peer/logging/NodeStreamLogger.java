@@ -134,13 +134,11 @@ public class NodeStreamLogger extends NodeObserver {
 
 		printer.println(
 				"timestamp\tevent code\tsource node\tsource agent\tdestination node\tdestination agent\tadditional remarks\n"
-						+
-						"---------\t----------\t-----------\t------------\t-----------\t------------\t------------------");
+						+ "---------\t----------\t-----------\t------------\t-----------\t------------\t------------------");
 	}
 
 	@Override
-	protected void writeLog(Long timestamp, Event e,
-			String sourceNode, Long sourceAgentId, String destinationNode,
+	protected void writeLog(Long timestamp, Event e, String sourceNode, Long sourceAgentId, String destinationNode,
 			Long destinationAgentId, String remarks) {
 
 		if (isClosed)

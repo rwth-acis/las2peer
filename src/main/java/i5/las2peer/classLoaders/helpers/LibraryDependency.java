@@ -194,8 +194,7 @@ public class LibraryDependency {
 	 * @return true, if the given id fits this dependency
 	 */
 	public boolean fits(LibraryIdentifier id) {
-		return this.name.equals(id.getName())
-				&& this.fits(id.getVersion());
+		return this.name.equals(id.getName()) && this.fits(id.getVersion());
 	}
 
 	/**

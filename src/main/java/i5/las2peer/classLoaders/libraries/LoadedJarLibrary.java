@@ -107,8 +107,7 @@ public class LoadedJarLibrary extends LoadedLibrary {
 		int iSize = 0;
 		for (Enumeration<JarEntry> entries = jfFile.entries(); entries.hasMoreElements();) {
 			JarEntry entry = entries.nextElement();
-			if (!entry.getName().endsWith(".class")
-					&& !entry.getName().endsWith("/"))
+			if (!entry.getName().endsWith(".class") && !entry.getName().endsWith("/"))
 				iSize++;
 		}
 
@@ -117,8 +116,7 @@ public class LoadedJarLibrary extends LoadedLibrary {
 		int i = 0;
 		for (Enumeration<JarEntry> entries = jfFile.entries(); entries.hasMoreElements();) {
 			JarEntry entry = entries.nextElement();
-			if (!entry.getName().endsWith(".class")
-					&& !entry.getName().endsWith("/")) {
+			if (!entry.getName().endsWith(".class") && !entry.getName().endsWith("/")) {
 				asResult[i] = entry.getName();
 				i++;
 			}
@@ -181,9 +179,7 @@ public class LoadedJarLibrary extends LoadedLibrary {
 		}
 
 		jfFile.close();
-		return new LoadedJarLibrary(
-				filename,
-				new LibraryIdentifier(sName, sVersion),
+		return new LoadedJarLibrary(filename, new LibraryIdentifier(sName, sVersion),
 				LibraryDependency.fromString(sImport));
 
 	}

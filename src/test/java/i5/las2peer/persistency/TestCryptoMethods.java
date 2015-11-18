@@ -26,10 +26,8 @@ import org.junit.Test;
 public class TestCryptoMethods {
 
 	@Test
-	public void testSymmetric() throws NoSuchAlgorithmException,
-			NoSuchPaddingException, InvalidKeyException,
-			UnsupportedEncodingException, IllegalBlockSizeException,
-			BadPaddingException {
+	public void testSymmetric() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
+			UnsupportedEncodingException, IllegalBlockSizeException, BadPaddingException {
 
 		KeyGenerator kg = KeyGenerator.getInstance("AES");
 		kg.init(256);
@@ -61,10 +59,8 @@ public class TestCryptoMethods {
 	}
 
 	@Test
-	public void testAsymmetric() throws NoSuchAlgorithmException,
-			NoSuchPaddingException, InvalidKeyException,
-			UnsupportedEncodingException, IllegalBlockSizeException,
-			BadPaddingException {
+	public void testAsymmetric() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
+			UnsupportedEncodingException, IllegalBlockSizeException, BadPaddingException {
 		KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
 		kpg.initialize(2048);
 		KeyPair keyPair = kpg.genKeyPair();
@@ -95,9 +91,8 @@ public class TestCryptoMethods {
 	}
 
 	@Test
-	public void testSignature() throws InvalidKeyException,
-			NoSuchAlgorithmException, SignatureException,
-			UnsupportedEncodingException {
+	public void testSignature()
+			throws InvalidKeyException, NoSuchAlgorithmException, SignatureException, UnsupportedEncodingException {
 		KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
 		kpg.initialize(2048);
 		KeyPair keyPair = kpg.genKeyPair();

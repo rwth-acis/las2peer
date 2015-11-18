@@ -580,8 +580,8 @@ public class Context implements AgentStorage {
 			event = Event.SERVICE_CUSTOM_MESSAGE_99;
 			break;
 		}
-		getCurrent().getLocalNode().observerNotice(event, getCurrent().getLocalNode().getNodeId(),
-				serviceAgent, null, actingUser, from.getClass().getSimpleName() + ": " + message);
+		getCurrent().getLocalNode().observerNotice(event, getCurrent().getLocalNode().getNodeId(), serviceAgent, null,
+				actingUser, from.getClass().getSimpleName() + ": " + message);
 	}
 
 	/**
@@ -910,8 +910,8 @@ public class Context implements AgentStorage {
 			event = Event.SERVICE_CUSTOM_ERROR_99;
 			break;
 		}
-		getCurrent().getLocalNode().observerNotice(event, getCurrent().getLocalNode().getNodeId(),
-				serviceAgent, null, actingUser, from.getClass().getSimpleName() + ": " + message);
+		getCurrent().getLocalNode().observerNotice(event, getCurrent().getLocalNode().getNodeId(), serviceAgent, null,
+				actingUser, from.getClass().getSimpleName() + ": " + message);
 	}
 
 	/**

@@ -129,8 +129,7 @@ public class MonitoringObserver extends NodeObserver {
 	 *
 	 */
 	@Override
-	protected void writeLog(Long timestamp, Event event,
-			String sourceNode, Long sourceAgentId, String destinationNode,
+	protected void writeLog(Long timestamp, Event event, String sourceNode, Long sourceAgentId, String destinationNode,
 			Long destinationAgentId, String remarks) {
 		// Now this is a bit tricky..
 		// We get a "Node is Running" event, but we have to wait until the next event to be sure that
@@ -154,8 +153,8 @@ public class MonitoringObserver extends NodeObserver {
 				System.out.println("Monitoring: Problems with initializing Agents..");
 			}
 		}
-		monitoringMessages[messagesCount] = new MonitoringMessage(timestamp, event, sourceNode,
-				sourceAgentId, destinationNode, destinationAgentId, remarks);
+		monitoringMessages[messagesCount] = new MonitoringMessage(timestamp, event, sourceNode, sourceAgentId,
+				destinationNode, destinationAgentId, remarks);
 		messagesCount++;
 		// We can only send our last message if the node is closing, so we will have to assume that all services are
 		// shutdown

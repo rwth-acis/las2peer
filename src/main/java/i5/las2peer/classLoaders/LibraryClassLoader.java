@@ -122,8 +122,7 @@ public class LibraryClassLoader extends ClassLoader {
 	 * 
 	 * @throws ClassNotFoundException
 	 */
-	synchronized Class<?> loadClass(String name, boolean resolve, boolean lookUp)
-			throws ClassNotFoundException {
+	synchronized Class<?> loadClass(String name, boolean resolve, boolean lookUp) throws ClassNotFoundException {
 
 		Logger.logLoading(this, name, null, lookUp);
 

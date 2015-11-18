@@ -20,10 +20,8 @@ import org.junit.Test;
 public class PastContinuationTest {
 
 	@Test
-	public void testSimpleRetrieval() throws L2pSecurityException,
-			MalformedXMLException, IOException {
-		PastGetContinuation<Agent> testee = new PastGetContinuation<Agent>(
-				Agent.class, 20000);
+	public void testSimpleRetrieval() throws L2pSecurityException, MalformedXMLException, IOException {
+		PastGetContinuation<Agent> testee = new PastGetContinuation<Agent>(Agent.class, 20000);
 
 		assertFalse(testee.isFinished());
 		assertFalse(testee.hasException());
@@ -41,10 +39,8 @@ public class PastContinuationTest {
 	}
 
 	@Test
-	public void testCastException() throws MalformedXMLException, IOException,
-			L2pSecurityException {
-		PastGetContinuation<Envelope> testee = new PastGetContinuation<Envelope>(
-				Envelope.class, 20000);
+	public void testCastException() throws MalformedXMLException, IOException, L2pSecurityException {
+		PastGetContinuation<Envelope> testee = new PastGetContinuation<Envelope>(Envelope.class, 20000);
 
 		assertFalse(testee.isFinished());
 		assertFalse(testee.hasException());
@@ -66,8 +62,7 @@ public class PastContinuationTest {
 	@Test
 	public void testWaiting() throws Exception {
 
-		final PastGetContinuation<Agent> testee = new PastGetContinuation<Agent>(
-				Agent.class, 20000);
+		final PastGetContinuation<Agent> testee = new PastGetContinuation<Agent>(Agent.class, 20000);
 
 		new Thread(new Runnable() {
 
@@ -76,8 +71,7 @@ public class PastContinuationTest {
 				try {
 					Thread.sleep(3000);
 
-					testee.receiveResult(new ContentEnvelope(MockAgentFactory
-							.getEve()));
+					testee.receiveResult(new ContentEnvelope(MockAgentFactory.getEve()));
 				} catch (InterruptedException e) {
 				} catch (MalformedXMLException e) {
 				} catch (IOException e) {
@@ -98,8 +92,7 @@ public class PastContinuationTest {
 	@Test
 	public void testExceptionWaiting() throws Exception {
 
-		final PastGetContinuation<Agent> testee = new PastGetContinuation<Agent>(
-				Agent.class, 20000);
+		final PastGetContinuation<Agent> testee = new PastGetContinuation<Agent>(Agent.class, 20000);
 		final Exception testException = new Exception("a test");
 
 		new Thread(new Runnable() {

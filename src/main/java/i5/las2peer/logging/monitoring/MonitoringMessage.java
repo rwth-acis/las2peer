@@ -37,8 +37,8 @@ public class MonitoringMessage implements Serializable {
 	 * @param remarks
 	 * 
 	 */
-	public MonitoringMessage(Long timestamp, Event event, String sourceNode,
-			Long sourceAgentId, String destinationNode, Long destinationAgentId, String remarks) {
+	public MonitoringMessage(Long timestamp, Event event, String sourceNode, Long sourceAgentId, String destinationNode,
+			Long destinationAgentId, String remarks) {
 		this.timestamp = timestamp;
 		this.event = event;
 		this.sourceNode = sourceNode;

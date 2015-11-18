@@ -121,8 +121,7 @@ public class MessageResultListener {
 	 */
 	public synchronized boolean isFinished() {
 		synchronized (this) {
-			return (numberOfRecipients <= answers.size() + exceptions.size())
-					|| status == Status.TIMEOUT;
+			return (numberOfRecipients <= answers.size() + exceptions.size()) || status == Status.TIMEOUT;
 		}
 	}
 

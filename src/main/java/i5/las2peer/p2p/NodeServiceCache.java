@@ -101,8 +101,8 @@ public class NodeServiceCache {
 	private void updateServiceAgentNodeData(ServiceAgentNodeData serviceData)
 			throws AgentNotKnownException, EnvelopeException {
 		ServiceAgent agent = this.runningAt.getServiceAgent(serviceData.getServiceClass());
-		ArrayList<NodeHandle> nodes = ServiceInfoAgent
-				.getNodes(serviceData.getServiceClass(), serviceData.getVersion());
+		ArrayList<NodeHandle> nodes = ServiceInfoAgent.getNodes(serviceData.getServiceClass(),
+				serviceData.getVersion());
 		serviceData.setServiceAgent(agent);
 		serviceData.setNodes(nodes);
 		serviceData.setLastUpdateTime(System.currentTimeMillis() / 1000L);

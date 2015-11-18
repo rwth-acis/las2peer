@@ -28,10 +28,23 @@ public class ColoredOutput {
 	 *
 	 */
 	public enum Color {
-		Black(30), Red(31), Green(32), Brown(33), Blue(34), Magenta(35), Cyan(36), LightGrey(37),
+		Black(30),
+		Red(31),
+		Green(32),
+		Brown(33),
+		Blue(34),
+		Magenta(35),
+		Cyan(36),
+		LightGrey(37),
 
-		DarkGrey(1030), LightRed(1031), LightGreen(1032), Yellow(1033), LightBlue(1034), LightMagenta(1035), LightCyan(
-				1036), Wihte(1037);
+		DarkGrey(1030),
+		LightRed(1031),
+		LightGreen(1032),
+		Yellow(1033),
+		LightBlue(1034),
+		LightMagenta(1035),
+		LightCyan(1036),
+		Wihte(1037);
 
 		private int code;
 
@@ -433,23 +446,21 @@ public class ColoredOutput {
 	static {
 		String disabled = System.getenv().get("COLOR_DISABLED");
 
-		if (disabled != null &&
-				(disabled.equals("1") || disabled.toLowerCase().equals("true")))
+		if (disabled != null && (disabled.equals("1") || disabled.toLowerCase().equals("true")))
 			allOff();
 		else {
-			Runtime.getRuntime().addShutdownHook(
-					new Thread() {
-						public void run() {
-							ColoredOutput.reset();
-							if (!useStream.equals(System.out)) {
-								useStream(System.out);
-								ColoredOutput.reset();
-							}
+			Runtime.getRuntime().addShutdownHook(new Thread() {
+				public void run() {
+					ColoredOutput.reset();
+					if (!useStream.equals(System.out)) {
+						useStream(System.out);
+						ColoredOutput.reset();
+					}
 
-							// ColoredBash.resetBackground();
-							System.out.println();
-						}
-					});
+					// ColoredBash.resetBackground();
+					System.out.println();
+				}
+			});
 		}
 	}
 }
