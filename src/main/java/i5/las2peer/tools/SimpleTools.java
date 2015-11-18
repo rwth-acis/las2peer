@@ -81,7 +81,7 @@ public class SimpleTools {
 	public static String repeat(String string, int count) {
 		if (string == null)
 			return null;
-		else if (string.equals("") || count <= 0)
+		else if (string.isEmpty() || count <= 0)
 			return "";
 
 		StringBuffer result = new StringBuffer();

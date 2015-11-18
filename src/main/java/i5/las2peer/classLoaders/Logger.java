@@ -10,7 +10,7 @@ public class Logger {
 
 	static {
 		String logFile = System.getenv("CL_LOGFILE");
-		if (logFile != null && !logFile.equals("")) {
+		if (logFile != null && !logFile.isEmpty()) {
 			try {
 				logStream = new PrintStream(new FileOutputStream(logFile));
 

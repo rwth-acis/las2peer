@@ -256,7 +256,7 @@ public class LibraryDependency {
 	 * @return array of dependencies
 	 */
 	public static LibraryDependency[] fromString(String multiple) {
-		if (multiple == null || multiple.trim().equals(""))
+		if (multiple == null || multiple.trim().isEmpty())
 			return new LibraryDependency[0];
 
 		String[] split = multiple.trim().split(",");

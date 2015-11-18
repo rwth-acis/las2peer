@@ -210,7 +210,7 @@ public class CommandPrompt {
 			return createInstance(cls, parameters);
 		} catch (ClassNotFoundException e) {
 			System.out.println("   not found: " + cls);
-			if (packagePrefix != null && !packagePrefix.equals("")) {
+			if (packagePrefix != null && !packagePrefix.isEmpty()) {
 				return createInstance(packagePrefix + "." + cls, parameters);
 			} else
 				throw new ClassNotFoundException("class " + cls + " not found");
@@ -376,7 +376,7 @@ public class CommandPrompt {
 		Class<?> cls = null;
 
 		try {
-			if (packagePrefix != null && !packagePrefix.equals(""))
+			if (packagePrefix != null && !packagePrefix.isEmpty())
 				cls = Class.forName(packagePrefix + "." + className);
 		} catch (ClassNotFoundException e) {
 		}
@@ -721,14 +721,14 @@ public class CommandPrompt {
 	public ReturnStatus prompt() {
 		try {
 			System.out.print("" + lineNumber);
-			if (packagePrefix != null && !packagePrefix.equals(""))
+			if (packagePrefix != null && !packagePrefix.isEmpty())
 				System.out.print(" : " + packagePrefix);
 			if (boundTo != null)
 				System.out.print(" : " + boundTo);
 			System.out.print(" > ");
 			String read = input.readLine().trim();
 
-			if (!read.trim().equals(""))
+			if (!read.trim().isEmpty())
 				return handleLine(read);
 			else
 				return ReturnStatus.OK_PROCEED;

@@ -87,7 +87,7 @@ public class L2pNodeLauncher {
 	 * @throws NumberFormatException
 	 */
 	public String getEnvelope(String id) throws NumberFormatException, ArtifactNotFoundException, StorageException {
-		if (id == null || id.equals(""))
+		if (id == null || id.isEmpty())
 			id = "" + Envelope.getClassEnvelopeId(UserAgentList.class, "mainlist");
 
 		return node.fetchArtifact(Long.valueOf(id)).toXmlString();
@@ -476,7 +476,7 @@ public class L2pNodeLauncher {
 	 */
 	public Serializable invoke(String serviceClass, String serviceMethod, String parameters)
 			throws L2pServiceException {
-		if (parameters.equals(""))
+		if (parameters.isEmpty())
 			return invoke(serviceClass, serviceMethod, new Serializable[0]);
 		String[] split = parameters.trim().split("-");
 		return invoke(serviceClass, serviceMethod, (Serializable[]) split);
@@ -886,7 +886,7 @@ public class L2pNodeLauncher {
 	 * @param message a custom message that will be shown before the help message content
 	 */
 	public static void printHelp(String message) {
-		if (message != null && !message.equals(""))
+		if (message != null && !message.isEmpty())
 			System.out.println(message + "\n\n");
 
 		System.out.println("LAS2peer Node Launcher");
