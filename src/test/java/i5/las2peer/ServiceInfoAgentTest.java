@@ -39,7 +39,6 @@ public class ServiceInfoAgentTest {
 
 		// String host = getHostString();
 		nodes[0] = new PastryNodeImpl(START_PORT + 0, "");
-		nodes[0].setLogfilePrefix("log/");
 
 		/*
 		 * for(int i = 1; i < nodes.length; i++) { nodes[i]=new

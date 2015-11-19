@@ -19,11 +19,11 @@ import i5.las2peer.tools.SerializationException;
  * 
  * This is the base class of the logging module of LAS2peer. It sends the collected data to the
  * "Monitoring Data Processing Service" via the LAS2peer message concept.
- * 
+ *
  * 
  *
  */
-public class MonitoringObserver extends NodeObserver {
+public class MonitoringObserver implements NodeObserver {
 
 	private boolean readyForInitializing = false; // Is set to false as long as the node is not ready to initialize the
 													// monitoring agents.
@@ -129,7 +129,7 @@ public class MonitoringObserver extends NodeObserver {
 	 *
 	 */
 	@Override
-	protected void writeLog(Long timestamp, Event event, String sourceNode, Long sourceAgentId, String destinationNode,
+	public void log(Long timestamp, Event event, String sourceNode, Long sourceAgentId, String destinationNode,
 			Long destinationAgentId, String remarks) {
 		// Now this is a bit tricky..
 		// We get a "Node is Running" event, but we have to wait until the next event to be sure that

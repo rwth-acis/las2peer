@@ -834,20 +834,14 @@ public class L2pNodeLauncher {
 			ColoredOutput.printlnRed("invalid port number specified");
 			return null;
 		}
-		File logDir = null;
 		try {
-			logDir = new File(sLogDir);
-			logDir.mkdirs();
+			L2pLogger.setLogDirectory(sLogDir);
 		} catch (Exception ex) {
 			ColoredOutput.printlnYellow("couldn't use '" + sLogDir + "' as log directory." + ex);
-		}
-		if (logDir == null) {
-			ColoredOutput.printlnYellow("no log directory specified");
 		}
 		L2pClassLoader cl = setupClassLoader(serviceDirectories.toArray(new String[0]));
 		// instantiate launcher
 		L2pNodeLauncher launcher = new L2pNodeLauncher(port, bootstrap, observer, cl, nodeIdSeed);
-		launcher.node.setLogfilePrefix(sLogDir);
 		try {
 			launcher.start();
 

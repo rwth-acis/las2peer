@@ -1,19 +1,14 @@
 package i5.las2peer.logging;
 
-import java.util.Date;
-
-import rice.pastry.PastryNode;
-import rice.pastry.socket.SocketNodeHandle;
-
 /**
  * 
- * The NodeObserver is an abstract class providing all necessary methods to log all interesting node events for a
+ * The NodeObserver is an interface providing all necessary methods to monitor all interesting node events for a
  * {@link i5.las2peer.p2p.Node} (mainly {@link i5.las2peer.p2p.PastryNodeImpl}).
  * 
  * 
  *
  */
-public abstract class NodeObserver {
+public interface NodeObserver {
 
 	/**
 	 * An enumeration element with all types of events.
@@ -22,6 +17,7 @@ public abstract class NodeObserver {
 	 * 
 	 */
 	public enum Event {
+
 		NODE_CREATED(100),
 		NODE_SHUTDOWN(200),
 		NODE_STATUS_CHANGE(300),
@@ -332,109 +328,8 @@ public abstract class NodeObserver {
 	}
 
 	/**
-	 * Logs a node event.
-	 * 
-	 * @param event
-	 */
-	public void logEvent(Event event) {
-		log(event, null, null, null, null, null);
-	}
-
-	/**
-	 * Logs a node event.
-	 * 
-	 * @param event
-	 * @param remarks
-	 */
-	public void logEvent(Event event, String remarks) {
-		log(event, null, null, null, null, remarks);
-	}
-
-	/**
-	 * Logs a node event.
-	 * 
-	 * @param event
-	 * @param sourceNode
-	 * @param remarks
-	 */
-	public void logEvent(Event event, Object sourceNode, String remarks) {
-		log(event, sourceNode, null, null, null, remarks);
-	}
-
-	/**
-	 * Logs a node event.
-	 * 
-	 * @param event
-	 * @param sourceNode
-	 * @param sourceAgentId
-	 * @param remarks
-	 */
-	public void logEvent(Event event, Object sourceNode, Long sourceAgentId, String remarks) {
-		log(event, sourceNode, sourceAgentId, null, null, remarks);
-	}
-
-	/**
-	 * Logs a node event.
-	 * 
-	 * @param event
-	 * @param sourceNode
-	 * @param sourceAgentId
-	 * @param destinationNode
-	 * @param destinationAgentId
-	 * @param remarks
-	 */
-	public void logEvent(Event event, Object sourceNode, Long sourceAgentId, Object destinationNode,
-			Long destinationAgentId, String remarks) {
-		log(event, sourceNode, sourceAgentId, destinationNode, destinationAgentId, remarks);
-	}
-
-	/**
-	 * Derive a String representation for a node from the given identifier object. The type of the object depends on the
-	 * setting of the current node.
-	 * 
-	 * Tries to specify an ip address and a port for an actual p2p node ({@link i5.las2peer.p2p.PastryNodeImpl} or
-	 * {@link rice.pastry.NodeHandle}).
-	 * 
-	 * @param node
-	 * @return string representation for the given node object
-	 */
-	protected String getNodeRepresentation(Object node) {
-		if (node == null)
-			return null;
-		else if (node instanceof SocketNodeHandle) {
-			SocketNodeHandle nh = (SocketNodeHandle) node;
-			return nh.getId() + "/" + nh.getIdentifier();
-		} else if (node instanceof PastryNode) {
-			PastryNode pNode = (PastryNode) node;
-			return getNodeRepresentation(pNode.getLocalNodeHandle());
-		} else
-			return "" + node + " (" + node.getClass().getName() + ")";
-	}
-
-	/**
-	 * Writes a log entry.
-	 * 
-	 * @param event necessary
-	 * @param sourceNode an object representing some kind of node will be transferred to an node representation if
-	 *            possible (see {@link #getNodeRepresentation}) (can be null)
-	 * @param sourceAgentId the id of the source agent (can be null)
-	 * @param destinationNode (can be null)
-	 * @param destinationAgentId (can be null)
-	 * @param remarks (can be null)
-	 */
-	protected void log(Event event, Object sourceNode, Long sourceAgentId, Object destinationNode,
-			Long destinationAgentId, String remarks) {
-		long timestamp = new Date().getTime();
-		String sourceNodeRepresentation = getNodeRepresentation(sourceNode);
-		String destinationNodeRepresentation = getNodeRepresentation(destinationNode);
-
-		writeLog(timestamp, event, sourceNodeRepresentation, sourceAgentId, destinationNodeRepresentation,
-				destinationAgentId, remarks);
-	}
-
-	/**
-	 * This method has to be implemented by any (non abstract) deriving class. Each call represents one event to log by
-	 * this observer. All parameters except the time stamp and the event may be null.
+	 * Each call represents one event to log by this observer. All parameters except the time stamp and the event may be
+	 * null.
 	 * 
 	 * @param timestamp UNIX time stamp of the event
 	 * @param event the event to log
@@ -444,7 +339,7 @@ public abstract class NodeObserver {
 	 * @param destinationAgentId a destination (las2peer) agent of the event (e.g. message receiver)
 	 * @param remarks (optional) additional remarks
 	 */
-	protected abstract void writeLog(Long timestamp, Event event, String sourceNode, Long sourceAgentId,
-			String destinationNode, Long destinationAgentId, String remarks);
+	public void log(Long timestamp, Event event, String sourceNode, Long sourceAgentId, String destinationNode,
+			Long destinationAgentId, String remarks);
 
 }

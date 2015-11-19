@@ -1,14 +1,11 @@
 package i5.las2peer.p2p;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.Serializable;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.InvocationTargetException;
 import java.security.KeyPair;
 import java.security.PublicKey;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -30,9 +27,9 @@ import i5.las2peer.execution.NotFinishedException;
 import i5.las2peer.execution.RMITask;
 import i5.las2peer.execution.ServiceInvocationException;
 import i5.las2peer.execution.UnlockNeededException;
+import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.logging.NodeObserver;
 import i5.las2peer.logging.NodeObserver.Event;
-import i5.las2peer.logging.NodeStreamLogger;
 import i5.las2peer.logging.monitoring.MonitoringObserver;
 import i5.las2peer.p2p.pastry.PastryStorageException;
 import i5.las2peer.persistency.DecodingFailedException;
@@ -59,6 +56,8 @@ import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
 import i5.las2peer.tools.SerializationException;
 import rice.pastry.NodeHandle;
+import rice.pastry.PastryNode;
+import rice.pastry.socket.SocketNodeHandle;
 
 /**
  * Base class for nodes in the LAS2peer environment.
@@ -117,8 +116,6 @@ public abstract class Node implements AgentStorage {
 	private ClassLoader baseClassLoader = null;
 
 	private Hashtable<Long, MessageResultListener> htAnswerListeners = new Hashtable<Long, MessageResultListener>();
-
-	private String sLogFilePrefix = "";
 
 	private final static String DEFAULT_INFORMATION_FILE = "etc/nodeInfo.xml";
 	private String sInformationFileName = DEFAULT_INFORMATION_FILE;
@@ -206,18 +203,7 @@ public abstract class Node implements AgentStorage {
 	 * conflicts if running multiple nodes on the same machine.
 	 */
 	private void initStandardLogfile() {
-		try {
-			new File("log").mkdir();
-			if (this instanceof LocalNode)
-				addObserver(new NodeStreamLogger("log/l2p_local_" + ((LocalNode) this).getNodeId() + ".log"));
-			else if (this instanceof PastryNodeImpl)
-				addObserver(new NodeStreamLogger());
-			else
-				addObserver(new NodeStreamLogger("log/l2p_node.log"));
-		} catch (FileNotFoundException e) {
-			System.err.println("Error opening standard node log: " + e + "\n\n\n");
-			addObserver(new NodeStreamLogger(System.out));
-		}
+		addObserver(L2pLogger.INSTANCE);
 	}
 
 	/**
@@ -279,9 +265,8 @@ public abstract class Node implements AgentStorage {
 	 * @param service
 	 */
 	public void setServiceMonitoring(ServiceAgent service) {
-		for (NodeObserver ob : observers)
-			ob.logEvent(Event.SERVICE_ADD_TO_MONITORING, this.getNodeId(), service.getId(),
-					service.getServiceClassName());
+		observerNotice(Event.SERVICE_ADD_TO_MONITORING, this.getNodeId(), service.getId(), null, null,
+				service.getServiceClassName());
 	}
 
 	/**
@@ -291,8 +276,8 @@ public abstract class Node implements AgentStorage {
 	 * @param remarks
 	 */
 	public void observerNotice(Event event, String remarks) {
-		for (NodeObserver ob : observers)
-			ob.logEvent(event, remarks);
+		Long sourceAgentId = null; // otherwise calls are ambigious
+		observerNotice(event, null, sourceAgentId, null, null, remarks);
 	}
 
 	/**
@@ -303,8 +288,8 @@ public abstract class Node implements AgentStorage {
 	 * @param remarks
 	 */
 	public void observerNotice(Event event, Object sourceNode, String remarks) {
-		for (NodeObserver ob : observers)
-			ob.logEvent(event, sourceNode, remarks);
+		Long sourceAgentId = null; // otherwise calls are ambigious
+		observerNotice(event, sourceNode, sourceAgentId, null, null, remarks);
 	}
 
 	/**
@@ -316,8 +301,7 @@ public abstract class Node implements AgentStorage {
 	 * @param remarks
 	 */
 	public void observerNotice(Event event, Object sourceNode, long sourceAgentId, String remarks) {
-		for (NodeObserver ob : observers)
-			ob.logEvent(event, sourceNode, sourceAgentId, remarks);
+		observerNotice(event, sourceNode, sourceAgentId, null, null, remarks);
 	}
 
 	/**
@@ -332,8 +316,7 @@ public abstract class Node implements AgentStorage {
 		Long sourceAgentId = null;
 		if (sourceAgent != null)
 			sourceAgentId = sourceAgent.getResponsibleForAgentId();
-		for (NodeObserver ob : observers)
-			ob.logEvent(event, sourceNode, sourceAgentId, remarks);
+		observerNotice(event, sourceNode, sourceAgentId, null, null, remarks);
 	}
 
 	/**
@@ -354,8 +337,7 @@ public abstract class Node implements AgentStorage {
 		Long destinationAgentId = null;
 		if (destinationAgent != null)
 			destinationAgentId = destinationAgent.getId();
-		for (NodeObserver ob : observers)
-			ob.logEvent(event, sourceNode, sourceAgentId, destinationNode, destinationAgentId, remarks);
+		observerNotice(event, sourceNode, sourceAgentId, destinationNode, destinationAgentId, remarks);
 	}
 
 	/**
@@ -370,8 +352,35 @@ public abstract class Node implements AgentStorage {
 	 */
 	public void observerNotice(Event event, Object sourceNode, Long sourceAgentId, Object destinationNode,
 			Long destinationAgentId, String remarks) {
+		long timestamp = new Date().getTime();
+		String sourceNodeRepresentation = getNodeRepresentation(sourceNode);
+		String destinationNodeRepresentation = getNodeRepresentation(destinationNode);
 		for (NodeObserver ob : observers)
-			ob.logEvent(event, sourceNode, sourceAgentId, destinationNode, destinationAgentId, remarks);
+			ob.log(timestamp, event, sourceNodeRepresentation, sourceAgentId, destinationNodeRepresentation,
+					destinationAgentId, remarks);
+	}
+
+	/**
+	 * Derive a String representation for a node from the given identifier object. The type of the object depends on the
+	 * setting of the current node.
+	 * 
+	 * Tries to specify an ip address and a port for an actual p2p node ({@link i5.las2peer.p2p.PastryNodeImpl} or
+	 * {@link rice.pastry.NodeHandle}).
+	 * 
+	 * @param node
+	 * @return string representation for the given node object
+	 */
+	protected String getNodeRepresentation(Object node) {
+		if (node == null)
+			return null;
+		else if (node instanceof SocketNodeHandle) {
+			SocketNodeHandle nh = (SocketNodeHandle) node;
+			return nh.getId() + "/" + nh.getIdentifier();
+		} else if (node instanceof PastryNode) {
+			PastryNode pNode = (PastryNode) node;
+			return getNodeRepresentation(pNode.getLocalNodeHandle());
+		} else
+			return "" + node + " (" + node.getClass().getName() + ")";
 	}
 
 	/**
@@ -410,45 +419,12 @@ public abstract class Node implements AgentStorage {
 	protected void setStatus(NodeStatus newstatus) {
 		if (newstatus == NodeStatus.RUNNING && this instanceof PastryNodeImpl) {
 			observerNotice(Event.NODE_STATUS_CHANGE, this.getNodeId(), "" + newstatus);
-			for (NodeObserver observer : observers) {
-				if (observer instanceof NodeStreamLogger) {
-					try {
-						DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-						NodeHandle nh = (NodeHandle) getNodeId();
-						StringBuilder sbFilename = new StringBuilder();
-						sbFilename.append(sLogFilePrefix).append("l2p-node_").append(nh.getNodeId().toStringFull())
-								.append("_").append(fmt.format(new Date())).append(".log");
-						String filename = sbFilename.toString();
-						System.out.println("set logfile to " + filename);
-						((NodeStreamLogger) observer).setOutputFile(filename);
-					} catch (Exception e) {
-						System.out.println("error setting logfile: " + e);
-					}
-				}
-			}
 		} else if (newstatus == NodeStatus.CLOSING) {
 			observerNotice(Event.NODE_STATUS_CHANGE, this.getNodeId(), "" + newstatus);
 		} else {
 			observerNotice(Event.NODE_STATUS_CHANGE, "" + newstatus);
 		}
 		status = newstatus;
-	}
-
-	/**
-	 * Sets a prefix for a log file, if the node has not been started yet.
-	 * 
-	 * @param prefix
-	 */
-	public void setLogfilePrefix(String prefix) {
-		if (getStatus() != NodeStatus.UNCONFIGURED && getStatus() != NodeStatus.CONFIGURED)
-			throw new IllegalStateException("You can set a logfile prefix only before startup!");
-
-		// TODO validate prefix, auto create log directory
-		if (prefix == null) {
-			prefix = "";
-		}
-
-		sLogFilePrefix = prefix;
 	}
 
 	/**
@@ -1320,7 +1296,7 @@ public abstract class Node implements AgentStorage {
 		if (getStatus() != NodeStatus.RUNNING)
 			throw new IllegalStateException("you can invoke methods only on a running node!");
 		this.observerNotice(Event.RMI_SENT, this.getNodeId(), executing, null); // Do not log service class name
-																				// (privacy..)
+		// (privacy..)
 
 		/*if (executing.isLocked()){
 			System.out.println(	"The executing agent has to be unlocked to call a RMI");

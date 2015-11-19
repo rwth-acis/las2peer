@@ -1,14 +1,14 @@
 package i5.las2peer.logging;
 
+import java.io.IOException;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class LogTest {
 
-	private static final Logger logger = Logger.getLogger(LogTest.class.getName());
+	private static final L2pLogger logger = L2pLogger.INSTANCE;
 
 	@BeforeClass
 	public static void init() {
@@ -16,7 +16,7 @@ public class LogTest {
 	}
 
 	@Test
-	public void testOutput() {
+	public void testOutput() throws IOException {
 		logger.finest("silent start");
 		logger.info("here we go");
 		logger.warning("fatal error incoming");
@@ -33,11 +33,6 @@ public class LogTest {
 		logger.log(Level.SEVERE, null, new NullPointerException("layer 8 problem"));
 		logger.log(Level.SEVERE, "this is the worst!", new NullPointerException());
 		logger.log(Level.SEVERE, "this is the worst!", new NullPointerException("layer 8 problem"));
-		L2pLogger.setLogDirectory("log");
-		L2pLogger.setLogFilePrefix("testlog.log");
-		logger.severe("Does this even create directories?!");
-		L2pLogger.setLogDirectory("");
-		logger.severe("top level directory");
 	}
 
 }
