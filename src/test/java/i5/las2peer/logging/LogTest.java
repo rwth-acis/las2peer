@@ -33,6 +33,11 @@ public class LogTest {
 		logger.log(Level.SEVERE, null, new NullPointerException("layer 8 problem"));
 		logger.log(Level.SEVERE, "this is the worst!", new NullPointerException());
 		logger.log(Level.SEVERE, "this is the worst!", new NullPointerException("layer 8 problem"));
+		L2pLogger.setLogDirectory("log");
+		L2pLogger.setLogFilePrefix("testlog.log");
+		logger.severe("Does this even create directories?!");
+		L2pLogger.setLogDirectory("");
+		logger.severe("top level directory");
 	}
 
 }

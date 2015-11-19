@@ -1,5 +1,6 @@
 package i5.las2peer.logging;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
@@ -25,6 +26,8 @@ public final class L2pLogger {
 
 	private static final ConsoleHandler handlerConsole = new ConsoleHandler();
 	private static FileHandler handlerFile;
+	private static String strLogDir = "";
+	private static String strPattern;
 
 	static public void init() {
 		// TODO read properties file from ./etc/logging.properties file
@@ -46,24 +49,6 @@ public final class L2pLogger {
 		handlerConsole.setFormatter(new ConsoleFormatter());
 		INSTANCE.addHandler(handlerConsole);
 		updateLogLevel();
-		// file logging
-		// default level: FINEST
-		try {
-			// TODO auto create log dir
-			// FIXME set append to true
-			handlerFile = new FileHandler("log.txt", limitBytes, limitFiles, false);
-			try {
-				handlerFile.setEncoding("UTF-8");
-			} catch (SecurityException | UnsupportedEncodingException e) {
-				System.err.println("Fatal Error! Can't set file log encoding to UTF-8! Using default: "
-						+ handlerConsole.getEncoding());
-			}
-			handlerFile.setFormatter(new FileFormatter());
-			INSTANCE.addHandler(handlerFile);
-			updateLogLevel();
-		} catch (SecurityException | IOException e) {
-			System.err.println("Fatal Error! Can't init file logging! " + e.getMessage());
-		}
 	}
 
 	private static class ConsoleFormatter extends Formatter {
@@ -79,6 +64,69 @@ public final class L2pLogger {
 			return sb.toString();
 		}
 
+	}
+
+	/**
+	 * Sets the directory to store log files.
+	 * 
+	 * @param directory A directory path given as String. {@code null} is equal to "" and the class loader directory.
+	 */
+	public static void setLogDirectory(String directory) {
+		if (directory == null) {
+			strLogDir = "";
+		} else {
+			strLogDir = directory;
+			if (!strLogDir.endsWith(File.separator)) {
+				strLogDir = directory + File.separator;
+			}
+		}
+		updateLogFileHandler();
+	}
+
+	/**
+	 * Sets the prefix used to generate log files.
+	 * 
+	 * @param prefix If {@code null} is given, file logging will be disabled.
+	 */
+	public static void setLogFilePrefix(String prefix) {
+		strPattern = prefix;
+		updateLogFileHandler();
+	}
+
+	private static void updateLogFileHandler() {
+		Level oldLevel = null;
+		if (handlerFile != null) {
+			oldLevel = handlerFile.getLevel();
+			INSTANCE.removeHandler(handlerFile);
+			handlerFile = null;
+		}
+		if (strPattern == null) {
+			return;
+		}
+		try {
+			// auto create log dir
+			File logDir = new File(strLogDir);
+			if (logDir != null && !logDir.isDirectory() && !logDir.mkdirs()) {
+				throw new IOException("Can't create log directory! Invalid path '" + logDir.getPath() + "'");
+			}
+			// file logging
+			handlerFile = new FileHandler(strLogDir + strPattern, limitBytes, limitFiles, true);
+			try {
+				handlerFile.setEncoding("UTF-8");
+			} catch (SecurityException | UnsupportedEncodingException e) {
+				System.err.println("Fatal Error! Can't set file log encoding to UTF-8! Using default: "
+						+ handlerConsole.getEncoding());
+			}
+			handlerFile.setFormatter(new FileFormatter());
+			// default level: FINEST
+			if (oldLevel != null) {
+				handlerFile.setLevel(oldLevel);
+			}
+			INSTANCE.addHandler(handlerFile);
+			updateLogLevel();
+		} catch (SecurityException | IOException e) {
+			System.err.println("Fatal Error! Can't init file logging! " + e.getMessage());
+		}
 	}
 
 	private static class FileFormatter extends Formatter {
