@@ -2,6 +2,14 @@ package i5.las2peer.webConnector;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import i5.las2peer.p2p.LocalNode;
 import i5.las2peer.restMapper.MediaType;
 import i5.las2peer.restMapper.data.Pair;
@@ -10,13 +18,6 @@ import i5.las2peer.security.UserAgent;
 import i5.las2peer.testing.MockAgentFactory;
 import i5.las2peer.webConnector.client.ClientResponse;
 import i5.las2peer.webConnector.client.MiniClient;
-
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
 
 public class WebConnectorTest {
 
@@ -46,11 +47,11 @@ public class WebConnectorTest {
 		node.storeAgent(MockAgentFactory.getGroup1());
 		node.launch();
 
-		ServiceAgent testService = ServiceAgent.generateNewAgent(testServiceClass, "a pass");
-		ServiceAgent testService2 = ServiceAgent.generateNewAgent(testServiceClass2, "a pass");
-		ServiceAgent testService3 = ServiceAgent.generateNewAgent(testServiceClass3, "a pass");
-		ServiceAgent testService4 = ServiceAgent.generateNewAgent(testServiceClass4, "a pass");
-		ServiceAgent testService5 = ServiceAgent.generateNewAgent(testServiceClass5, "a pass");
+		ServiceAgent testService = ServiceAgent.createServiceAgent(testServiceClass, "a pass");
+		ServiceAgent testService2 = ServiceAgent.createServiceAgent(testServiceClass2, "a pass");
+		ServiceAgent testService3 = ServiceAgent.createServiceAgent(testServiceClass3, "a pass");
+		ServiceAgent testService4 = ServiceAgent.createServiceAgent(testServiceClass4, "a pass");
+		ServiceAgent testService5 = ServiceAgent.createServiceAgent(testServiceClass5, "a pass");
 
 		testService.unlockPrivateKey("a pass");
 		testService2.unlockPrivateKey("a pass");
@@ -193,7 +194,7 @@ public class WebConnectorTest {
 		try {
 			c.setLogin(Long.toString(testAgent.getId()), testPass);
 
-			// this testcase should work for an unknown function, too
+			// this test should work for an unknown function, too
 			ClientResponse response = c.sendRequest("GET", "asdag", "");
 			assertEquals(connector.crossOriginResourceDomain, response.getHeader("Access-Control-Allow-Origin"));
 			assertEquals(String.valueOf(connector.crossOriginResourceMaxAge),
@@ -207,13 +208,7 @@ public class WebConnectorTest {
 	@SuppressWarnings("unchecked")
 	public void testCalls() {
 		connector.updateServiceList();
-//		// avoid timing errors: wait for the repository manager to get all services, before invoking them
-//		try {
-//			System.out.println("waiting..");
-//			Thread.sleep(60000);
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//		}
+
 		MiniClient c = new MiniClient();
 		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 		// call all methods of the testService
