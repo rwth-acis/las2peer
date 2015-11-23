@@ -20,7 +20,7 @@ public class ColoredOutput {
 
 	private static PrintStream useStream = System.out;
 
-	private static boolean turnedOn = true;
+	private static boolean turnedOn = false;
 
 	/**
 	 * A color used by the {@link ColoredOutput} methods.
