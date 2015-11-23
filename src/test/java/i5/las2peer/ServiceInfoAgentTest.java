@@ -14,7 +14,6 @@ import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.p2p.ServiceNameVersion;
 import i5.las2peer.security.ServiceAgent;
 import i5.las2peer.security.ServiceInfoAgent;
-import i5.las2peer.security.UserAgent;
 import i5.las2peer.tools.ColoredOutput;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.SerializationException;
@@ -24,9 +23,9 @@ public class ServiceInfoAgentTest {
 	private static final int NODES_AMOUNT = 1;
 	public static final int START_PORT = 8000;
 	private static Node[] nodes = new Node[NODES_AMOUNT];
-	private static ServiceInfoAgent[] agents = new ServiceInfoAgent[NODES_AMOUNT];
-	private static UserAgent testAgent;
-	private static final String testPass = "adamspass";
+//	private static ServiceInfoAgent[] agents = new ServiceInfoAgent[NODES_AMOUNT];
+//	private static UserAgent testAgent;
+//	private static final String testPass = "adamspass";
 
 	@BeforeClass
 	public static void start() throws Exception {
@@ -41,10 +40,9 @@ public class ServiceInfoAgentTest {
 		nodes[0] = new PastryNodeImpl(START_PORT + 0, "");
 
 		/*
-		 * for(int i = 1; i < nodes.length; i++) { nodes[i]=new
-		 * PastryNodeImpl(START_PORT
-		 * +i,host+":"+Integer.toString(START_PORT+i-1));
-		 * nodes[i].setLogfilePrefix("log/l2p-node_"); }
+		 * for(int i = 1; i < nodes.length; i++) {
+		 * nodes[i]=new PastryNodeImpl(START_PORT+i,host+":"+Integer.toString(START_PORT+i-1));
+		 * }
 		 */
 
 		try {
@@ -57,7 +55,7 @@ public class ServiceInfoAgentTest {
 
 			}
 
-			PastryNodeImpl node = (PastryNodeImpl) nodes[0];
+//			PastryNodeImpl node = (PastryNodeImpl) nodes[0];
 
 			String testClass1 = "i5.las2peer.api.TestService";
 			ServiceAgent testService = ServiceAgent.createServiceAgent(testClass1, "a pass");
@@ -72,7 +70,7 @@ public class ServiceInfoAgentTest {
 			Thread.sleep(5000);
 			ServiceNameVersion[] services = ServiceInfoAgent.getServices();
 
-			String servicesString = "";
+//			String servicesString = "";
 			String[] serviceNames = new String[services.length];
 			for (int i = 0; i < services.length; i++) {
 				serviceNames[i] = services[i].getName();

@@ -839,7 +839,9 @@ public class L2pNodeLauncher {
 		} catch (Exception ex) {
 			ColoredOutput.printlnYellow("couldn't use '" + sLogDir + "' as log directory." + ex);
 		}
-		L2pClassLoader cl = setupClassLoader(serviceDirectories.toArray(new String[0]));
+		L2pClassLoader cl = new L2pClassLoader(
+				new FileSystemRepository(serviceDirectories.toArray(new String[0]), true),
+				L2pNodeLauncher.class.getClassLoader());
 		// instantiate launcher
 		L2pNodeLauncher launcher = new L2pNodeLauncher(port, bootstrap, observer, cl, nodeIdSeed);
 		try {
@@ -862,17 +864,6 @@ public class L2pNodeLauncher {
 		}
 
 		return launcher;
-	}
-
-	/**
-	 * Sets up the classloader.
-	 * 
-	 * @return a class loader looking into the given directories
-	 * 
-	 */
-	private static L2pClassLoader setupClassLoader(String[] serviceDirectory) {
-		return new L2pClassLoader(new FileSystemRepository(serviceDirectory, true),
-				L2pNodeLauncher.class.getClassLoader());
 	}
 
 	/**
