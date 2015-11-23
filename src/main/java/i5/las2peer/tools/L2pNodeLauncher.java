@@ -948,8 +948,6 @@ public class L2pNodeLauncher {
 	 */
 	public static void main(String[] argv) throws InterruptedException, MalformedXMLException, IOException,
 			L2pSecurityException, EncodingFailedException, SerializationException, NodeException {
-		// init logging
-		L2pLogger.init();
 		// parse command line parameter into list
 		List<String> instArgs = new ArrayList<>();
 		for (String arg : argv) {

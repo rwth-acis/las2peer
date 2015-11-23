@@ -3,17 +3,11 @@ package i5.las2peer.logging;
 import java.io.IOException;
 import java.util.logging.Level;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class LogTest {
 
 	private static final L2pLogger logger = L2pLogger.INSTANCE;
-
-	@BeforeClass
-	public static void init() {
-		L2pLogger.init();
-	}
 
 	@Test
 	public void testOutput() throws IOException {

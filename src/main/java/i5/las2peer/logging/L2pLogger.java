@@ -46,7 +46,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	/**
 	 * This method has to be called in the {@code main} class of any code the L2pLogger is used in.
 	 */
-	public static synchronized void init() {
+	static {
 		// if the logger is not added to the LogManager, the log files may not be closed correctly
 		LogManager.getLogManager().addLogger(INSTANCE);
 		// suppress default console logging
@@ -68,6 +68,12 @@ public final class L2pLogger extends Logger implements NodeObserver {
 		INSTANCE.addHandler(handlerConsole);
 		updateLogLevel();
 		// file logging
+		try {
+			createDir(DEFAULT_LOGDIR);
+		} catch (IOException e) {
+			System.err.println(
+					"Fatal Error! Can't create log directory '" + DEFAULT_LOGDIR + "'! File logging will not work!");
+		}
 		// default level: ALL
 		try {
 			setLogFilePrefix(DEFAULT_LOGFILE_PREFIX);
@@ -144,10 +150,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 			return;
 		}
 		// auto create log dir
-		File logDir = new File(strLogDir);
-		if (logDir != null && !strLogDir.isEmpty() && !logDir.isDirectory() && !logDir.mkdirs()) {
-			throw new IOException("Can't create log directory! Invalid path '" + logDir.getPath() + "'");
-		}
+		createDir(strLogDir);
 		// file logging
 		handlerFile = new FileHandler(strLogDir + strPattern, limitBytes, limitFiles, false);
 		try {
@@ -163,6 +166,19 @@ public final class L2pLogger extends Logger implements NodeObserver {
 		}
 		INSTANCE.addHandler(handlerFile);
 		updateLogLevel();
+	}
+
+	/**
+	 * This method ensures that the given directory is actually a directory and exists.
+	 * 
+	 * @param dir A path given as String for the desired directory
+	 * @throws IOException
+	 */
+	private static void createDir(String dir) throws IOException {
+		File fDir = new File(dir);
+		if (fDir != null && !dir.isEmpty() && !fDir.isDirectory() && !fDir.mkdirs()) {
+			throw new IOException("Can't create directory! Invalid path '" + fDir.getPath() + "'");
+		}
 	}
 
 	/**
