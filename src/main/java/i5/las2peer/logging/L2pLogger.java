@@ -31,13 +31,15 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	private static String encoding = DEFAULT_ENCODING;
 	public static final String DEFAULT_LOGDIR = "log/";
 	private static String strLogDir = DEFAULT_LOGDIR;
-	public static final String DEFAULT_LOGFILE_PREFIX = "console.log";
+	public static final String DEFAULT_LOGFILE_PREFIX = "las2peer.log";
 
 	// if this instance is not used, the L2pLogger may not be initialized!
 	public static L2pLogger INSTANCE = new L2pLogger("i5.logger", null);
 
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy MMM dd HH:mm:ss");
+	private static ConsoleFormatter consoleDefaultFormatter = new ConsoleFormatter();
 	private static final ConsoleHandler handlerConsole = new ConsoleHandler();
+	private static FileFormatter fileDefaultFormatter = new FileFormatter();
 	private static FileHandler handlerFile;
 	private static String strPattern;
 
@@ -62,7 +64,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 			System.err.println("Fatal Error! Can't set console log encoding to '" + encoding + "'! " + e
 					+ " Using default: " + handlerConsole.getEncoding());
 		}
-		handlerConsole.setFormatter(new ConsoleFormatter());
+		handlerConsole.setFormatter(consoleDefaultFormatter);
 		INSTANCE.addHandler(handlerConsole);
 		updateLogLevel();
 		// file logging
@@ -154,7 +156,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 			System.err.println("Fatal Error! Can't set file log encoding to '" + encoding + "'! " + e
 					+ " Using default: " + handlerConsole.getEncoding());
 		}
-		handlerFile.setFormatter(new FileFormatter());
+		handlerFile.setFormatter(fileDefaultFormatter);
 		// default level: FINEST
 		if (oldLevel != null) {
 			handlerFile.setLevel(oldLevel);
@@ -312,6 +314,24 @@ public final class L2pLogger extends Logger implements NodeObserver {
 			return "-\t";
 		else
 			return "" + o + "\t";
+	}
+
+	/**
+	 * This method returns the default {@link Formatter} currently used to format log output for console.
+	 * 
+	 * @return Returns the console formatter.
+	 */
+	public static Formatter getConsoleDefaultFormatter() {
+		return consoleDefaultFormatter;
+	}
+
+	/**
+	 * This method returns the default {@link Formatter} currently used to format log output for log files.
+	 * 
+	 * @return Returns the log file formatter.
+	 */
+	public static Formatter getFileDefaultFormatter() {
+		return fileDefaultFormatter;
 	}
 
 }
