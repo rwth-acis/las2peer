@@ -12,6 +12,7 @@
 	<classpathentry kind="lib" path="lib/jcip-annotations-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/json-smart-1.1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jsr311-api-1.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/junit-4.12.jar"/>
 	<classpathentry kind="lib" path="lib/lang-tag-1.4.jar"/>
 	<classpathentry kind="lib" path="lib/las2peer-0.5-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="lib/las2peer-rest-mapper-0.5-SNAPSHOT.jar"/>

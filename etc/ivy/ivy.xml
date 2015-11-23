@@ -8,6 +8,8 @@
     <dependency org="i5" name="las2peer" rev="0.5-SNAPSHOT" changing="true"/>
     <dependency org="i5" name="las2peer-rest-mapper" rev="0.5-SNAPSHOT" changing="true"/>
 	
+	<dependency org="junit" name="junit" rev="4.12" />
+	
 	<dependency org="com.nimbusds" name="oauth2-oidc-sdk" rev="3.3" />
 	<dependency org="com.nimbusds" name="nimbus-jose-jwt" rev="2.26" />
   </dependencies>

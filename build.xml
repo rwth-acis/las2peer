@@ -37,7 +37,7 @@
 		</fileset>
 	</path>
 
-	<property name="lib.junit" location="${lib}/junit-4.11.jar:${lib}/hamcrest-core-1.3.jar" />
+	<property name="lib.junit" location="${lib}/junit-4.12.jar:${lib}/hamcrest-core-1.3.jar" />
 
 
 	<!-- Download Dependencies (IVY) -->
