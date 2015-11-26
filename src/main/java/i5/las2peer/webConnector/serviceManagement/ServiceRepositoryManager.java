@@ -55,7 +55,7 @@ public class ServiceRepositoryManager {
 		startTimer(node);
 	}
 
-	public static void stop() throws Exception {
+	public static void stop() {
 		stopTimer();
 	}
 
@@ -64,11 +64,6 @@ public class ServiceRepositoryManager {
 			return false;
 		}
 		return serviceRepository.get(serviceName).isActive();
-	}
-
-	private static void stopTimer() throws Exception {
-		timer.cancel();
-		timerRunning = false;
 	}
 
 	public static void manualUpdate(final Node node) throws Exception {
@@ -145,6 +140,11 @@ public class ServiceRepositoryManager {
 				},
 				0, // run first occurrence immediately
 				timerIntervalSeconds * 1000); // run every x seconds
+	}
+
+	private static void stopTimer() {
+		timer.cancel();
+		timerRunning = false;
 	}
 
 	private static ServiceInfoAgent getServiceInfoAgent(Node node) throws Exception {
