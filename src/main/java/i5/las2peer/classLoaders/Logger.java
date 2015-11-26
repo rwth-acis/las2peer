@@ -4,7 +4,7 @@ import i5.las2peer.logging.L2pLogger;
 
 public class Logger {
 
-	private static final L2pLogger logger = L2pLogger.INSTANCE;
+	private static final L2pLogger logger = L2pLogger.getInstance(Logger.class.getName());
 
 	static {
 		String logFile = System.getenv("CL_LOGFILE");

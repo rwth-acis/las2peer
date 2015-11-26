@@ -203,7 +203,7 @@ public abstract class Node implements AgentStorage {
 	 * conflicts if running multiple nodes on the same machine.
 	 */
 	private void initStandardLogfile() {
-		addObserver(L2pLogger.INSTANCE);
+		addObserver(L2pLogger.getInstance(Node.class.getName()));
 	}
 
 	/**

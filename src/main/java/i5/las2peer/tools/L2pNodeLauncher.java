@@ -57,8 +57,6 @@ public class L2pNodeLauncher {
 
 	private static final String DEFAULT_SERVICE_DIRECTORY = "./service/";
 
-	private static final String DEFAULT_LOG_DIRECTORY = "./log/";
-
 	private CommandPrompt commandPrompt;
 
 	private static List<Connector> connectors = new ArrayList<Connector>();
@@ -750,7 +748,7 @@ public class L2pNodeLauncher {
 		Integer port = null;
 		String bootstrap = null;
 		boolean observer = false;
-		String sLogDir = DEFAULT_LOG_DIRECTORY;
+		String sLogDir = null;
 		ArrayList<String> serviceDirectories = new ArrayList<>();
 		serviceDirectories.add(DEFAULT_SERVICE_DIRECTORY);
 		Long nodeIdSeed = null;
@@ -835,7 +833,7 @@ public class L2pNodeLauncher {
 			return null;
 		}
 		try {
-			L2pLogger.setLogDirectory(sLogDir);
+			L2pLogger.setGlobalLogDirectory(sLogDir);
 		} catch (Exception ex) {
 			ColoredOutput.printlnYellow("couldn't use '" + sLogDir + "' as log directory." + ex);
 		}
@@ -890,7 +888,7 @@ public class L2pNodeLauncher {
 		System.out.println(
 				"\t--windows-shell|-w disables the colored output (better readable for windows command line clients)\n");
 		System.out.println("\t--log-directory|-l [directory] lets you choose the directory for log files (default: "
-				+ DEFAULT_LOG_DIRECTORY + ")\n");
+				+ L2pLogger.DEFAULT_LOG_DIRECTORY + ")\n");
 		System.out
 				.println("\t--service-directory|-s [directory] adds the directory you added your services to (default: "
 						+ DEFAULT_SERVICE_DIRECTORY

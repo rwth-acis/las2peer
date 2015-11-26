@@ -22,70 +22,76 @@ import i5.las2peer.security.Context;
 
 public final class L2pLogger extends Logger implements NodeObserver {
 
-	// any changes to these parameters require a restart
+	public static final String GLOBAL_NAME = "i5.las2peer"; // this name should be equal to the LAS2peer package name.
+
+	// default parameters
 	public static final int DEFAULT_LIMIT_BYTES = 1 * 1000 * 1000; // max 1 MB log file size
-	private static int limitBytes = DEFAULT_LIMIT_BYTES;
 	public static final int DEFAULT_LIMIT_FILES = 10; // max 10 log files in rotation
-	private static int limitFiles = DEFAULT_LIMIT_FILES;
 	public static final String DEFAULT_ENCODING = "UTF-8";
-	private static String encoding = DEFAULT_ENCODING;
-	public static final String DEFAULT_LOGDIR = "log/";
-	private static String strLogDir = DEFAULT_LOGDIR;
+	public static final String DEFAULT_LOG_DIRECTORY = "log/";
 	public static final String DEFAULT_LOGFILE_PREFIX = "las2peer.log";
+	public static final Level DEFAULT_CONSOLE_LEVEL = Level.INFO;
+	public static final Level DEFAULT_LOGFILE_LEVEL = Level.FINEST;
+	public static final Level DEFAULT_OBSERVER_LEVEL = Level.FINER;
+	public static final SimpleDateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat("yyyy MMM dd HH:mm:ss");
 
-	// if this instance is not used, the L2pLogger may not be initialized!
-	public static L2pLogger INSTANCE = new L2pLogger("i5.logger", null);
+	// instance parameters
+	private int limitBytes = DEFAULT_LIMIT_BYTES;
+	private int limitFiles = DEFAULT_LIMIT_FILES;
+	private String encoding = DEFAULT_ENCODING;
+	private String logDir = DEFAULT_LOG_DIRECTORY;
+	private String logfilePrefix; // default null => no file logging, only done by global instance
+	private Level consoleLevel = DEFAULT_CONSOLE_LEVEL;
+	private Level logfileLevel = DEFAULT_LOGFILE_LEVEL;
+	private Level observerLevel = DEFAULT_OBSERVER_LEVEL;
+	private SimpleDateFormat dateFormat = DEFAULT_DATE_FORMAT;
+	private ConsoleFormatter consoleFormatter = new ConsoleFormatter();
+	private LogfileFormatter logfileFormatter = new LogfileFormatter(this);
 
-	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy MMM dd HH:mm:ss");
-	private static ConsoleFormatter consoleDefaultFormatter = new ConsoleFormatter();
-	private static final ConsoleHandler handlerConsole = new ConsoleHandler();
-	private static FileFormatter fileDefaultFormatter = new FileFormatter();
-	private static FileHandler handlerFile;
-	private static String strPattern;
+	private ConsoleHandler handlerConsole;
+	private FileHandler handlerLogfile;
 
-	/**
-	 * This method has to be called in the {@code main} class of any code the L2pLogger is used in.
-	 */
+	// this is the global static instance, logging to default log file and console
+	private static final L2pLogger GLOBAL_INSTANCE = new L2pLogger(GLOBAL_NAME, null);
+
+	// initialize global static instance
 	static {
-		// if the logger is not added to the LogManager, the log files may not be closed correctly
-		LogManager.getLogManager().addLogger(INSTANCE);
-		// suppress default console logging
-		Logger rootLogger = Logger.getLogger("");
-		for (Handler handler : rootLogger.getHandlers()) {
-			if (handler instanceof ConsoleHandler) {
-				rootLogger.removeHandler(handler);
-			}
-		}
-		// console logging
-		// default level: INFO
+		// suppress Java native console logging
+		GLOBAL_INSTANCE.setUseParentHandlers(false);
+		// global console logging
+		GLOBAL_INSTANCE.handlerConsole = new ConsoleHandler();
+		GLOBAL_INSTANCE.handlerConsole.setLevel(GLOBAL_INSTANCE.consoleLevel);
 		try {
-			handlerConsole.setEncoding(encoding);
-		} catch (SecurityException | UnsupportedEncodingException e) {
-			System.err.println("Fatal Error! Can't set console log encoding to '" + encoding + "'! " + e
-					+ " Using default: " + handlerConsole.getEncoding());
+			GLOBAL_INSTANCE.handlerConsole.setEncoding(GLOBAL_INSTANCE.encoding);
+		} catch (UnsupportedEncodingException e) {
+			System.err.println("Fatal Error! Can't set console log encoding to '" + GLOBAL_INSTANCE.encoding + "'! " + e
+					+ " Using default: " + GLOBAL_INSTANCE.handlerConsole.getEncoding());
 		}
-		handlerConsole.setFormatter(consoleDefaultFormatter);
-		INSTANCE.addHandler(handlerConsole);
-		updateLogLevel();
-		// file logging
+		GLOBAL_INSTANCE.handlerConsole.setFormatter(GLOBAL_INSTANCE.consoleFormatter);
+		GLOBAL_INSTANCE.addHandler(GLOBAL_INSTANCE.handlerConsole);
+		// auto create log directory
 		try {
-			createDir(DEFAULT_LOGDIR);
+			createDir(GLOBAL_INSTANCE.logDir);
 		} catch (IOException e) {
-			System.err.println(
-					"Fatal Error! Can't create log directory '" + DEFAULT_LOGDIR + "'! File logging will not work!");
+			System.err.println("Fatal Error! Can't create log directory '" + GLOBAL_INSTANCE.logDir
+					+ "'! File logging is about to fail!");
 		}
-		// default level: ALL
+		// global file logging
 		try {
-			setLogFilePrefix(DEFAULT_LOGFILE_PREFIX);
+			GLOBAL_INSTANCE.setLogfilePrefix(DEFAULT_LOGFILE_PREFIX);
+			GLOBAL_INSTANCE.handlerLogfile.setLevel(GLOBAL_INSTANCE.logfileLevel);
 		} catch (IOException e) {
-			System.err.println("Fatal Error! Can't use logging prefix '" + strPattern + "'! File logging is disabled!");
+			System.err.println("Fatal Error! Can't use logging prefix '" + GLOBAL_INSTANCE.logfilePrefix
+					+ "'! File logging is disabled!");
 		}
+		// since this is the global instance, drop not logged messages
+		GLOBAL_INSTANCE.minimizeLogLevel();
 	}
 
 	/**
 	 * This is the formatter used for the console output.
 	 */
-	private static class ConsoleFormatter extends Formatter {
+	protected static class ConsoleFormatter extends Formatter {
 
 		@Override
 		public String format(LogRecord record) {
@@ -101,101 +107,26 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	}
 
 	/**
-	 * Sets the directory to store log files.
-	 * 
-	 * @param directory A directory path given as String. {@code null} is equal to "" and the class loader directory.
-	 * @throws IOException
-	 */
-	public static synchronized void setLogDirectory(String directory) throws IOException {
-		if (directory == null || directory.isEmpty()) {
-			strLogDir = "";
-		} else {
-			strLogDir = directory;
-			if (!strLogDir.endsWith(File.separator)) {
-				strLogDir = directory + File.separator;
-			}
-		}
-		updateLogFileHandler();
-	}
-
-	/**
-	 * Sets the prefix used to generate log files.
-	 * 
-	 * @param prefix If {@code null} is given, file logging will be disabled.
-	 * @throws IOException
-	 */
-	public static synchronized void setLogFilePrefix(String prefix) throws IOException {
-		if (prefix.equals(strPattern)) {
-			// already the same prefix
-			return;
-		}
-		strPattern = prefix;
-		updateLogFileHandler();
-	}
-
-	/**
-	 * This method must be called each time the log file target is changed.
-	 * 
-	 * @throws IOException
-	 */
-	private static synchronized void updateLogFileHandler() throws IOException {
-		Level oldLevel = null;
-		if (handlerFile != null) {
-			oldLevel = handlerFile.getLevel();
-			handlerFile.close();
-			INSTANCE.removeHandler(handlerFile);
-			handlerFile = null;
-		}
-		if (strPattern == null) {
-			return;
-		}
-		// auto create log dir
-		createDir(strLogDir);
-		// file logging
-		handlerFile = new FileHandler(strLogDir + strPattern, limitBytes, limitFiles, false);
-		try {
-			handlerFile.setEncoding(encoding);
-		} catch (SecurityException | UnsupportedEncodingException e) {
-			System.err.println("Fatal Error! Can't set file log encoding to '" + encoding + "'! " + e
-					+ " Using default: " + handlerConsole.getEncoding());
-		}
-		handlerFile.setFormatter(fileDefaultFormatter);
-		// default level: FINEST
-		if (oldLevel != null) {
-			handlerFile.setLevel(oldLevel);
-		}
-		INSTANCE.addHandler(handlerFile);
-		updateLogLevel();
-	}
-
-	/**
-	 * This method ensures that the given directory is actually a directory and exists.
-	 * 
-	 * @param dir A path given as String for the desired directory
-	 * @throws IOException
-	 */
-	private static void createDir(String dir) throws IOException {
-		File fDir = new File(dir);
-		if (fDir != null && !dir.isEmpty() && !fDir.isDirectory() && !fDir.mkdirs()) {
-			throw new IOException("Can't create directory! Invalid path '" + fDir.getPath() + "'");
-		}
-	}
-
-	/**
 	 * This is the formatter used for the log file output.
 	 */
-	private static class FileFormatter extends Formatter {
+	protected static class LogfileFormatter extends Formatter {
+
+		private final L2pLogger logger;
+
+		public LogfileFormatter(L2pLogger logger) {
+			this.logger = logger;
+		}
 
 		@Override
 		public String format(LogRecord record) {
 			StringBuilder sb = new StringBuilder();
 			// timestamp
-			sb.append(DATE_FORMAT.format(new Date(record.getMillis()))).append(" ");
+			sb.append(logger.dateFormat.format(new Date(record.getMillis()))).append(" ");
 			// level
 			sb.append(record.getLevel().getName()).append(" ");
 			// class and method name
 			sb.append(record.getSourceClassName());
-			if (INSTANCE.getLevel().intValue() >= Level.FINER.intValue()) { // print the method name, too
+			if (logger.getLevel().intValue() >= Level.FINER.intValue()) { // print the method name, too
 				sb.append("#").append(record.getSourceMethodName());
 			}
 			sb.append(": ");
@@ -209,34 +140,12 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	}
 
 	/**
-	 * Just calls the parent constructor.
-	 */
-	protected L2pLogger(String name, String resourceBundleName) {
-		super(name, resourceBundleName);
-	}
-
-	/**
-	 * Updates the loggers own log level and sets it to the minimal value of all assigned handlers.
-	 */
-	private static synchronized void updateLogLevel() {
-		// set overall level to minimal value
-		Level minLevel = handlerConsole.getLevel();
-		for (Handler handler : INSTANCE.getHandlers()) {
-			Level level = handler.getLevel();
-			if (level.intValue() < minLevel.intValue()) {
-				minLevel = level;
-			}
-		}
-		INSTANCE.setLevel(minLevel);
-	}
-
-	/**
 	 * Prints a stack trace as nicely as {@code Exception.printStackTrace()}
 	 * 
 	 * @param sb {@code StringBuilder} as output for the stack trace.
 	 * @param e A {@code Throwable} thats stack trace should be printed.
 	 */
-	private static void printStackTrace(StringBuilder sb, Throwable e) {
+	protected static void printStackTrace(StringBuilder sb, Throwable e) {
 		if (e != null) {
 			sb.append(e.toString()).append("\n");
 			for (StackTraceElement stack : e.getStackTrace()) {
@@ -246,13 +155,153 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	}
 
 	/**
+	 * Just calls the parent constructor and adds the new instance to the LogManager.
+	 * 
+	 * @param name A name for the logger. This should be a dot-separated name and should normally be based on the
+	 *            package name or class name of the subsystem, such as java.net or javax.swing. It may be null for
+	 *            anonymous Loggers.
+	 * @param resourceBundleName name of ResourceBundle to be used for localizing messages for this logger. May be null
+	 *            if none of the messages require localization.
+	 * @throws IllegalArgumentException If a logger with the given name is already registered.
+	 */
+	protected L2pLogger(String name, String resourceBundleName) throws IllegalArgumentException {
+		super(name, resourceBundleName);
+		// if the logger is not added to the LogManager, the log files may not be closed correctly
+		if (!LogManager.getLogManager().addLogger(this)) {
+			// a logger with that name is already registered
+			// therefore this instance is not added to the logger hierarchy and may only be used with caution
+			throw new IllegalArgumentException("A logger with that name is already registered!");
+		}
+		// by default the logger itself logs everything, level filtering is done by its handlers
+		setLevel(Level.ALL);
+	}
+
+	/**
+	 * Same as {@link #setLogDirectory(String)} for the global static instance.
+	 * 
+	 * @param directory A directory path given as String. {@code null} is equal to "" and the class loader directory.
+	 * @throws IOException
+	 */
+	public static void setGlobalLogDirectory(String directory) throws IOException {
+		GLOBAL_INSTANCE.setLogDirectory(directory);
+	}
+
+	/**
+	 * Sets the directory to store log files.
+	 * 
+	 * @param directory A directory path given as String. {@code null} is equal to "" and the class loader directory.
+	 * @throws IOException
+	 */
+	public synchronized void setLogDirectory(String directory) throws IOException {
+		if (directory == null || directory.isEmpty()) {
+			logDir = "";
+		} else {
+			logDir = directory;
+			if (!logDir.endsWith(File.separator)) {
+				logDir = directory + File.separator;
+			}
+		}
+		updateLogfileHandler();
+	}
+
+	/**
+	 * Same as {@link #setLogfilePrefix(String)} for global static instance.
+	 * 
+	 * @param prefix If {@code null} is given, file logging will be disabled.
+	 * @throws IOException
+	 */
+	public static void setGlobalLogfilePrefix(String prefix) throws IOException {
+		GLOBAL_INSTANCE.setLogfilePrefix(prefix);
+	}
+
+	/**
+	 * Sets the prefix used to generate log files.
+	 * 
+	 * @param prefix If {@code null} is given, file logging will be disabled.
+	 * @throws IOException
+	 */
+	public synchronized void setLogfilePrefix(String prefix) throws IOException {
+		if (prefix.equals(logfilePrefix)) {
+			// already the same prefix
+			return;
+		}
+		logfilePrefix = prefix;
+		updateLogfileHandler();
+	}
+
+	/**
+	 * This method must be called each time the log file target is changed.
+	 * 
+	 * @throws IOException
+	 */
+	private synchronized void updateLogfileHandler() throws IOException {
+		Level oldLevel = null;
+		if (handlerLogfile != null) {
+			oldLevel = handlerLogfile.getLevel();
+			handlerLogfile.close();
+			this.removeHandler(handlerLogfile);
+			handlerLogfile = null;
+		}
+		if (logfilePrefix == null) {
+			return;
+		}
+		// auto create log dir
+		createDir(logDir);
+		// file logging
+		handlerLogfile = new FileHandler(logDir + logfilePrefix, limitBytes, limitFiles, true);
+		try {
+			handlerLogfile.setEncoding(encoding);
+		} catch (SecurityException | UnsupportedEncodingException e) {
+			System.err.println("Fatal Error! Can't set file log encoding to '" + encoding + "'! " + e
+					+ " Using default: " + handlerConsole.getEncoding());
+		}
+		handlerLogfile.setFormatter(logfileFormatter);
+		// default level: FINEST
+		if (oldLevel != null) {
+			handlerLogfile.setLevel(oldLevel);
+		}
+		this.addHandler(handlerLogfile);
+	}
+
+	/**
+	 * This method ensures that the given directory is actually a directory and exists.
+	 * 
+	 * @param dir A path given as String for the desired directory
+	 * @throws IOException return null;
+	 */
+	private static void createDir(String dir) throws IOException {
+		File fDir = new File(dir);
+		if (fDir != null && !dir.isEmpty() && !fDir.isDirectory() && !fDir.mkdirs()) {
+			throw new IOException("Can't create directory! Invalid path '" + fDir.getPath() + "'");
+		}
+	}
+
+	/**
+	 * Same as {@link #setConsoleLevel(Level)} for the global static instance.
+	 * 
+	 * @param level The log level to set.
+	 */
+	public static void setGlobalConsoleLevel(Level level) {
+		GLOBAL_INSTANCE.setConsoleLevel(level);
+	}
+
+	/**
 	 * Sets the log level for the console output of this logger.
 	 * 
 	 * @param level The log level to set.
 	 */
-	public static synchronized void setConsoleLogLevel(Level level) {
-		handlerConsole.setLevel(level);
-		updateLogLevel();
+	public synchronized void setConsoleLevel(Level level) {
+		consoleLevel = level;
+		handlerConsole.setLevel(consoleLevel);
+	}
+
+	/**
+	 * Same as {@link #setLogfileLevel(Level)} for global static instance.
+	 * 
+	 * @param level The log level to set.
+	 */
+	public static void setGlobalLogfileLevel(Level level) {
+		GLOBAL_INSTANCE.setLogfileLevel(level);
 	}
 
 	/**
@@ -260,11 +309,29 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	 * 
 	 * @param level The log level to set.
 	 */
-	public static synchronized void setFileLogLevel(Level level) {
-		if (handlerFile != null) {
-			handlerFile.setLevel(level);
-			updateLogLevel();
+	public synchronized void setLogfileLevel(Level level) {
+		logfileLevel = level;
+		if (handlerLogfile != null) {
+			handlerLogfile.setLevel(logfileLevel);
 		}
+	}
+
+	/**
+	 * Updates the loggers own log level and sets it to the minimal value of all assigned handlers. This way the
+	 * performance is slightly improved, because the logger itself drops messages not suitable for assigned handlers.
+	 * Please pay attention that this will drop messages, that may be interesting for parent loggers or handlers, too.
+	 * Usually this method should be only used with the global instance.
+	 */
+	private synchronized void minimizeLogLevel() {
+		// set minimal level of all handlers and this logger instance
+		Level minLevel = Level.OFF;
+		for (Handler handler : getHandlers()) {
+			Level level = handler.getLevel();
+			if (level.intValue() < minLevel.intValue()) {
+				minLevel = level;
+			}
+		}
+		setLevel(minLevel);
 	}
 
 	/**
@@ -273,7 +340,11 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	@Override
 	public void log(LogRecord record) {
 		super.log(record);
-		// TODO check if it's a node context and write output to specific node log file
+//		Thread t = Thread.currentThread();
+//		if (t instanceof L2pThread) {
+//			// TODO write output to specific node log file, too
+//			Serializable nodeId = ((L2pThread) t).getContext().getLocalNode().getNodeId();
+//		}
 	}
 
 	/**
@@ -308,7 +379,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	@Override
 	public void log(Long timestamp, Event event, String sourceNode, Long sourceAgentId, String destinationNode,
 			Long destinationAgentId, String remarks) {
-		StringBuilder logLine = new StringBuilder(DATE_FORMAT.format(new Date(timestamp)) + "\t");
+		StringBuilder logLine = new StringBuilder(DEFAULT_DATE_FORMAT.format(new Date(timestamp)) + "\t");
 		logLine.append(event + " (" + event.getCode() + ")\t");
 		logLine.append(appendPart(sourceNode));
 		logLine.append(appendPart(sourceAgentId));
@@ -316,7 +387,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 		logLine.append(appendPart(destinationAgentId));
 		logLine.append(appendPart(remarks));
 		// with default levels this hides the output from console and only writes it to logfile
-		INSTANCE.log(Level.FINE, logLine.toString());
+		log(observerLevel, logLine.toString());
 	}
 
 	/**
@@ -337,8 +408,8 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	 * 
 	 * @return Returns the console formatter.
 	 */
-	public static Formatter getConsoleDefaultFormatter() {
-		return consoleDefaultFormatter;
+	public static Formatter getGlobalConsoleFormatter() {
+		return GLOBAL_INSTANCE.consoleFormatter;
 	}
 
 	/**
@@ -346,8 +417,36 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	 * 
 	 * @return Returns the log file formatter.
 	 */
-	public static Formatter getFileDefaultFormatter() {
-		return fileDefaultFormatter;
+	public static Formatter getGlobalLogfileFormatter() {
+		return GLOBAL_INSTANCE.logfileFormatter;
+	}
+
+	/**
+	 * This method is the recommended way to retrieve a L2pLogger instance.
+	 * 
+	 * @param name A name for the new logger instance. Should be the name of your current class by default. Like
+	 *            L2pLogger.class.getName()
+	 * @return Returns a L2pLogger instance for the given name.
+	 * @throws ClassCastException If someone overloaded the loggers instance by adding some other logger implementation
+	 *             with the same name. In this case you may use Java native method by calling
+	 *             {@link Logger#getLogger(String)}.
+	 */
+	public static L2pLogger getInstance(String name) throws ClassCastException {
+		if (name == null || name.isEmpty() || "i5.las2peer".equals(name) || !name.startsWith("i5.las2peer")) {
+			throw new IllegalArgumentException("Invalid logger name '" + name + "' given!");
+		}
+		L2pLogger result = null;
+		try {
+			result = new L2pLogger(name, null);
+			if (!LogManager.getLogManager().addLogger(result)) {
+				// the log manager already has a logger with that name
+				result = (L2pLogger) LogManager.getLogManager().getLogger(name);
+			}
+		} catch (IllegalArgumentException e) {
+			// a logger with that name is already registered
+			result = (L2pLogger) LogManager.getLogManager().getLogger(name);
+		}
+		return result;
 	}
 
 }
