@@ -213,8 +213,7 @@ public class WebConnector extends Connector {
 	}
 
 	/**
-	 * <b>This method is no longer supported and will be removed in the future.</b> Sets the socket timeout for the
-	 * underlying http server (only at configuration not during runtime)
+	 * @deprecated This method is no longer supported and will be removed in the future.
 	 * 
 	 * @param timeoutInMs
 	 */
@@ -373,6 +372,8 @@ public class WebConnector extends Connector {
 
 	@Override
 	public void stop() throws ConnectorException {
+		// stop the timer
+		ServiceRepositoryManager.stop();
 		// stop the HTTP server
 		if (https != null) {
 			https.stop(0);
