@@ -1,6 +1,10 @@
 package i5.las2peer.security;
 
+import java.util.Date;
+import java.util.Hashtable;
+
 import i5.las2peer.execution.L2pThread;
+import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.ArtifactNotFoundException;
@@ -10,9 +14,6 @@ import i5.las2peer.persistency.DecodingFailedException;
 import i5.las2peer.persistency.Envelope;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.SerializationException;
-
-import java.util.Date;
-import java.util.Hashtable;
 
 /**
  * Each {@link i5.las2peer.execution.L2pThread} is bound to a context, which is mainly determined by the executing
@@ -255,23 +256,29 @@ public class Context implements AgentStorage {
 	}
 
 	/**
-	 * Logs a message to the l2p system using the observers.
+	 * @deprecated Use {@link L2pLogger#logEvent(Object, Event.SERVICE_MESSAGE, String)} instead!<br/>
 	 * 
-	 * Since this method will/should only be used in an L2pThread, the message will come from a service or a helper, so
-	 * a SERVICE_MESSAGE is assumed. Then this message will not be monitored by the monitoring observer.
+	 *             Logs a message to the l2p system using the observers.
+	 * 
+	 *             Since this method will/should only be used in an L2pThread, the message will come from a service or a
+	 *             helper, so a SERVICE_MESSAGE is assumed. Then this message will not be monitored by the monitoring
+	 *             observer.
 	 * 
 	 * @param from the calling class
 	 * @param message
 	 */
+	@Deprecated
 	public static void logMessage(Object from, String message) {
 		getCurrent().getLocalNode().observerNotice(Event.SERVICE_MESSAGE, getCurrent().getLocalNode().getNodeId(),
 				from.getClass().getSimpleName() + ": " + message);
 	}
 
 	/**
-	 * Writes a log message. The given index (1-99) can be used to differentiate between different log messages. The
-	 * serviceAgent and actingUser can be set to null if not known. Then this message will not be monitored by the
-	 * monitoring observer.
+	 * @deprecated Use {@link L2pLogger#logEvent(Object, Event, String, Agent, Agent)} instead!<br/>
+	 * 
+	 *             Writes a log message. The given index (1-99) can be used to differentiate between different log
+	 *             messages. The serviceAgent and actingUser can be set to null if not known. Then this message will not
+	 *             be monitored by the monitoring observer.
 	 * 
 	 * @param from the calling class
 	 * @param index an index between 1 and 99
@@ -279,6 +286,7 @@ public class Context implements AgentStorage {
 	 * @param serviceAgent
 	 * @param actingUser
 	 */
+	@Deprecated
 	public static void logMessage(Object from, int index, String message, Agent serviceAgent, Agent actingUser) {
 		Event event = Event.SERVICE_MESSAGE; // Default
 		if (index >= 1 && index <= 99) {
@@ -289,23 +297,29 @@ public class Context implements AgentStorage {
 	}
 
 	/**
-	 * Logs an error message to the l2p system using the observers.
+	 * @deprecated Use {@link L2pLogger#logEvent(Object, Event.SERVICE_ERROR, String)} instead!<br/>
 	 * 
-	 * Since this method will/should only be used in an L2pThread, the message will come from a service or a helper, so
-	 * a SERVICE_MESSAGE is assumed. Then this message will not be monitored by the monitoring observer.
+	 *             Logs an error message to the l2p system using the observers.
+	 * 
+	 *             Since this method will/should only be used in an L2pThread, the message will come from a service or a
+	 *             helper, so a SERVICE_MESSAGE is assumed. Then this message will not be monitored by the monitoring
+	 *             observer.
 	 * 
 	 * @param from the calling class
 	 * @param message
 	 */
+	@Deprecated
 	public static void logError(Object from, String message) {
 		getCurrent().getLocalNode().observerNotice(Event.SERVICE_ERROR, getCurrent().getLocalNode().getNodeId(),
 				from.getClass().getSimpleName() + ": " + message);
 	}
 
 	/**
-	 * Writes an error message. The given index (1-99) can be used to differentiate between different log messages. The
-	 * serviceAgent and userAgent can be set to null if not known. Then this message will not be monitored by the
-	 * monitoring observer.
+	 * @deprecated Use {@link L2pLogger#logEvent(Object, Event, String, Agent, Agent)} instead!<br/>
+	 * 
+	 *             Writes an error message. The given index (1-99) can be used to differentiate between different log
+	 *             messages. The serviceAgent and userAgent can be set to null if not known. Then this message will not
+	 *             be monitored by the monitoring observer.
 	 * 
 	 * @param from the calling class
 	 * @param index an index between 1 and 99
@@ -313,6 +327,7 @@ public class Context implements AgentStorage {
 	 * @param serviceAgent
 	 * @param actingUser
 	 */
+	@Deprecated
 	public static void logError(Object from, int index, String message, Agent serviceAgent, Agent actingUser) {
 		Event event = Event.SERVICE_ERROR; // Default
 		if (index >= 1 && index <= 99) {

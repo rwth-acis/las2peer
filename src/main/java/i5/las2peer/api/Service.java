@@ -9,6 +9,7 @@ import i5.las2peer.execution.L2pServiceException;
 import i5.las2peer.execution.L2pThread;
 import i5.las2peer.execution.NoSuchServiceException;
 import i5.las2peer.execution.NoSuchServiceMethodException;
+import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.Node;
@@ -364,21 +365,28 @@ public abstract class Service extends Configurable {
 	}
 
 	/**
-	 * Writes a log message.
+	 * @deprecated Use {@link L2pLogger#logEvent(Event.SERVICE_MESSAGE, String)} instead!<br/>
+	 * 
+	 *             Writes a log message.
 	 * 
 	 * @param message
 	 */
+	@Deprecated
 	protected void logMessage(String message) {
 		logMessage(0, null, message);
 	}
 
 	/**
-	 * Writes a log message. The given index (1-99) can be used to differentiate between different log messages.
+	 * @deprecated Use {@link L2pLogger#logEvent(Event, Agent, String)} instead!<br/>
+	 * 
+	 *             Writes a log message. The given index (1-99) can be used to differentiate between different log
+	 *             messages.
 	 * 
 	 * @param index an index between 1 and 99
 	 * @param actingUser can be set to null if unknown / not desired
 	 * @param message
 	 */
+	@Deprecated
 	protected void logMessage(int index, Agent actingUser, String message) {
 		Event event = Event.SERVICE_MESSAGE; // Default
 		if (index >= 1 && index <= 99) {
@@ -394,21 +402,28 @@ public abstract class Service extends Configurable {
 	}
 
 	/**
-	 * Writes an error log message.
+	 * @deprecated Use {@link L2pLogger#logEvent(Event.SERVICE_ERROR, String)} instead!<br/>
+	 * 
+	 *             Writes an error log message.
 	 * 
 	 * @param message a custom message
 	 */
+	@Deprecated
 	protected void logError(String message) {
 		logError(0, null, message);
 	}
 
 	/**
-	 * Writes an error message. The given index (1-99) can be used to differentiate between different log messages.
+	 * @deprecated Use {@link L2pLogger#logEvent(Event, Agent, String)} instead!<br/>
+	 * 
+	 *             Writes an error message. The given index (1-99) can be used to differentiate between different log
+	 *             messages.
 	 * 
 	 * @param index an index between 1 and 99
 	 * @param actingUser can be set to null if unknown / not desired
 	 * @param message
 	 */
+	@Deprecated
 	protected void logError(int index, Agent actingUser, String message) {
 		Event event = Event.SERVICE_ERROR; // Default
 		if (index >= 1 && index <= 99) {
@@ -424,10 +439,13 @@ public abstract class Service extends Configurable {
 	}
 
 	/**
-	 * Writes an exception log message Additionally the stack trace is printed.
+	 * @deprecated Use {@link L2pLogger} instead!<br/>
+	 * 
+	 *             Writes an exception log message Additionally the stack trace is printed.
 	 * 
 	 * @param e an exception
 	 */
+	@Deprecated
 	protected void logError(Exception e) {
 		logError("Exception: " + e);
 		e.printStackTrace();

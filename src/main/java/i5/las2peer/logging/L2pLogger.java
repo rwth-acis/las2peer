@@ -348,29 +348,85 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	}
 
 	/**
+	 * Writes a log message. The given event can be used to differentiate between different log messages.
+	 * 
+	 * @param event used to differentiate between different log messages
+	 * @param message
+	 */
+	public static void logEvent(Event event, String message) {
+		logEvent(null, event, message, null, null);
+	}
+
+	/**
+	 * Writes a log message. The given event can be used to differentiate between different log messages.
+	 * 
+	 * @param event used to differentiate between different log messages
+	 * @param actingUser can be set to null if unknown / not desired
+	 * @param message
+	 */
+	public static void logEvent(Event event, Agent actingUser, String message) {
+		logEvent(null, event, message, null, actingUser);
+	}
+
+	/**
+	 * Logs a message to the l2p system using the observers.
+	 * 
+	 * Since this method will/should only be used in an L2pThread, the message will come from a service or a helper, so
+	 * a SERVICE_MESSAGE is assumed. Then this message will not be monitored by the monitoring observer.
+	 * 
+	 * @param from the calling class
+	 * @param event used to differentiate between different log messages
+	 * @param message
+	 */
+	public static void logEvent(Object from, Event event, String message) {
+		// FIXME according to Javadoc this is not monitored, makes no sense!
+		logEvent(from, event, message, null, null);
+	}
+
+	/**
 	 * Writes a log message. The given event can be used to differentiate between different log messages. The
 	 * serviceAgent and actingUser can be set to {@code null} if not known. Then this message will not be monitored by
 	 * the monitoring observer.
 	 * 
-	 * This method replaces {@link Context#logMessage(Object, int, String, Agent, Agent)}
-	 * {@link Context#logMessage(Object, String)} {@link Context#logError(Object, int, String, Agent, Agent)}
-	 * {@link Context#logError(Object, String)} {@link Service#logError(String message)}
+	 * This method replaces: {@link Context#logMessage(Object, int, String, Agent, Agent)},
+	 * {@link Context#logMessage(Object, String)}, {@link Context#logError(Object, int, String, Agent, Agent)},
+	 * {@link Context#logError(Object, String)}, {@link Service#logError(String message)}
 	 * 
 	 * @param from the calling class
-	 * @param event an event
+	 * @param event used to differentiate between different log messages
 	 * @param message
-	 * @param serviceAgent
-	 * @param actingUser
+	 * @param serviceAgent can be set to null if unknown / not desired
+	 * @param actingUser can be set to null if unknown / not desired
 	 */
 	public static void logEvent(Object from, Event event, String message, Agent serviceAgent, Agent actingUser) {
 		Thread t = Thread.currentThread();
 		if (t instanceof L2pThread) {
 			Node node = ((L2pThread) t).getContext().getLocalNode();
-			node.observerNotice(event, node.getNodeId(), serviceAgent, null, actingUser,
-					from.getClass().getSimpleName() + ": " + message);
+			logEvent(node, from, event, message, serviceAgent, actingUser);
 		} else {
 			throw new IllegalStateException("Not executed in a L2pThread environment!");
 		}
+	}
+
+	/**
+	 * Writes a log message. The given event can be used to differentiate between different log messages. The
+	 * serviceAgent and actingUser can be set to {@code null} if not known. Then this message will not be monitored by
+	 * the monitoring observer.
+	 * 
+	 * @param node
+	 * @param from the calling class
+	 * @param event used to differentiate between different log messages
+	 * @param message
+	 * @param serviceAgent can be set to null if unknown / not desired
+	 * @param actingUser can be set to null if unknown / not desired
+	 */
+	public static void logEvent(Node node, Object from, Event event, String message, Agent serviceAgent,
+			Agent actingUser) {
+		String msg = message;
+		if (from != null) {
+			msg = from.getClass().getSimpleName() + ": " + message;
+		}
+		node.observerNotice(event, node.getNodeId(), serviceAgent, null, actingUser, msg);
 	}
 
 	/**
