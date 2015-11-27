@@ -2,19 +2,19 @@ package i5.las2peer.webConnector;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
+import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
-import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.StreamHandler;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -27,6 +27,7 @@ import com.sun.net.httpserver.HttpsServer;
 
 import i5.las2peer.api.Connector;
 import i5.las2peer.api.ConnectorException;
+import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.Node;
@@ -99,10 +100,11 @@ public class WebConnector extends Connector {
 
 	private Node myNode = null;
 
-	private final static String DEFAULT_LOGFILE = "./log/webConnector.log";
+	private static final String DEFAULT_LOGFILE = "webConnector.log";
 
-	private PrintStream logStream = null;
-	private DateFormat dateFormat = DateFormat.getDateTimeInstance();
+	private final L2pLogger logger = L2pLogger.getInstance(WebConnector.class.getName());
+
+	private Handler logHandler = null;
 
 	// information on Open ID Connect server, including configuration, according
 	// to Open ID Connect Discovery (cf. http://openid.net/specs/openid-connect-discovery-1_0.html)
@@ -163,10 +165,10 @@ public class WebConnector extends Connector {
 	 * set the log file for this connector
 	 * 
 	 * @param filename
-	 * @throws FileNotFoundException
+	 * @throws IOException
 	 */
-	public void setLogFile(String filename) throws FileNotFoundException {
-		setLogStream(new PrintStream(new FileOutputStream(filename, true)));
+	public void setLogFile(String filename) throws IOException {
+		logger.setLogfilePrefix(filename);
 	}
 
 	/**
@@ -227,8 +229,22 @@ public class WebConnector extends Connector {
 	 * 
 	 * @param stream
 	 */
-	public void setLogStream(PrintStream stream) {
-		logStream = stream;
+	public void setLogStream(OutputStream stream) {
+		closeLogHandler();
+		logHandler = new StreamHandler(stream, L2pLogger.getGlobalConsoleFormatter());
+		logHandler.setLevel(Level.ALL);
+		logger.addHandler(logHandler);
+	}
+
+	/**
+	 * Closes an existing log handler instance, if it exists.
+	 */
+	private void closeLogHandler() {
+		if (logHandler != null) {
+			logger.removeHandler(logHandler);
+			logHandler.close();
+			logHandler = null;
+		}
 	}
 
 	/**
@@ -282,10 +298,10 @@ public class WebConnector extends Connector {
 			throw new ConnectorException("either the http connector of the https connector have to be started!");
 		}
 
-		if (logStream == null) {
+		if (logHandler == null) {
 			try {
 				setLogFile(DEFAULT_LOGFILE);
-			} catch (FileNotFoundException e) {
+			} catch (IOException e) {
 				throw new ConnectorException("cannot initialize standard log file at " + DEFAULT_LOGFILE, e);
 			}
 		}
@@ -399,8 +415,11 @@ public class WebConnector extends Connector {
 	 * @param message
 	 */
 	public void logMessage(String message) {
-		logStream.println(dateFormat.format(new Date()) + "\t" + message);
+		logger.fine(message);
 		myNode.observerNotice(Event.CONNECTOR_MESSAGE, myNode.getNodeId(), WEB_CONNECTOR + message);
+		if (logHandler != null) { // StreamHandler don't auto flush
+			logHandler.flush();
+		}
 	}
 
 	/**
@@ -409,8 +428,7 @@ public class WebConnector extends Connector {
 	 * @param request
 	 */
 	public void logRequest(String request) {
-		logStream.println(dateFormat.format(new Date()) + "\t Request:" + request);
-
+		logger.finer(request);
 		int lastServiceClassNamePosition = request.lastIndexOf("/");
 		if (lastServiceClassNamePosition > 0) {
 			String serviceClass = request.substring(1, lastServiceClassNamePosition);
@@ -425,6 +443,9 @@ public class WebConnector extends Connector {
 		} else { // Not a service call
 			myNode.observerNotice(Event.CONNECTOR_REQUEST, myNode.getNodeId(), WEB_CONNECTOR + request);
 		}
+		if (logHandler != null) { // StreamHandler don't auto flush
+			logHandler.flush();
+		}
 	}
 
 	/**
@@ -433,9 +454,12 @@ public class WebConnector extends Connector {
 	 * @param error
 	 */
 	public void logError(String error) {
-		logStream.println(dateFormat.format(new Date()) + "\t Error: " + error);
+		logger.severe(error);
 		if (myNode != null) {
 			myNode.observerNotice(Event.CONNECTOR_ERROR, myNode.getNodeId(), WEB_CONNECTOR + error);
+		}
+		if (logHandler != null) { // StreamHandler don't auto flush
+			logHandler.flush();
 		}
 	}
 
