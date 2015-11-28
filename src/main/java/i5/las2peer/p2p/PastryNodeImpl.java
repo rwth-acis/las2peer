@@ -26,7 +26,6 @@ import i5.las2peer.p2p.pastry.NodeApplication;
 import i5.las2peer.p2p.pastry.PastGetContinuation;
 import i5.las2peer.p2p.pastry.PastPutContinuation;
 import i5.las2peer.p2p.pastry.PastryStorageException;
-import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.persistency.Envelope;
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.security.Agent;
@@ -35,8 +34,6 @@ import i5.las2peer.security.BasicAgentStorage;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.MessageReceiver;
 import i5.las2peer.security.UserAgent;
-import i5.las2peer.tools.ColoredOutput;
-import i5.las2peer.tools.SerializationException;
 import rice.environment.Environment;
 import rice.p2p.commonapi.Id;
 import rice.p2p.commonapi.NodeHandle;
@@ -45,7 +42,6 @@ import rice.p2p.past.PastImpl;
 import rice.pastry.NodeIdFactory;
 import rice.pastry.PastryNode;
 import rice.pastry.commonapi.PastryIdFactory;
-import rice.pastry.leafset.LeafSet;
 import rice.pastry.socket.internet.InternetPastryNodeFactory;
 import rice.pastry.standard.RandomNodeIdFactory;
 import rice.persistence.LRUCache;
@@ -600,58 +596,6 @@ public class PastryNodeImpl extends Node {
 	 */
 	public NodeApplication getApplication() {
 		return application;
-	}
-
-	/**
-	 * simple testing method, will be removed later
-	 * 
-	 * @param from
-	 * @param to
-	 * @throws InterruptedException
-	 * @throws EncodingFailedException
-	 * @throws L2pSecurityException
-	 * @throws SerializationException
-	 * @throws MalformedXMLException
-	 * @throws IOException
-	 * @throws AgentNotKnownException
-	 * @throws MessageException
-	 */
-	public void sendTestMessages(Agent from, Agent to)
-			throws InterruptedException, EncodingFailedException, L2pSecurityException, SerializationException,
-			MalformedXMLException, IOException, AgentNotKnownException, MessageException {
-		int counter = 0;
-
-		while (true) {
-			pastryEnvironment.getTimeSource().sleep(10000);
-			ColoredOutput.printlnRed("---------------------------------------");
-			ColoredOutput.printlnRed("Sending new Messages");
-
-			LeafSet leafSet = pastryNode.getLeafSet();
-			ColoredOutput.printlnRed("LeafSet-Size: " + leafSet.cwSize());
-
-			// this is a typical loop to cover your leafset. Note that if the leafset
-			// overlaps, then duplicate nodes will be sent to twice
-			for (int i = -leafSet.ccwSize(); i <= leafSet.cwSize(); i++) {
-				if (i != 0) { // don't send to self
-					// select the item
-					NodeHandle nh = leafSet.get(i);
-
-					// send the message directly to the node
-					ColoredOutput.printlnRed("sending to " + i + " / " + nh);
-
-					counter++;
-					// TODO!!!!!
-					application.sendMessage(new MessageEnvelope(pastryNode.getLocalNodeHandle(),
-							new Message(from, to, "testnachricht: " + counter)), nh);
-
-					// wait a sec
-					pastryEnvironment.getTimeSource().sleep(1000);
-				}
-			}
-
-			ColoredOutput.printlnRed("---------------------------------------------");
-		}
-
 	}
 
 	@Override
