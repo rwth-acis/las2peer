@@ -269,7 +269,6 @@ public class ServiceInfoAgent extends PassphraseAgent {
 	 */
 	public void serviceAdded(ServiceAgent serviceAgent, Node node)
 			throws EnvelopeException, AgentException, L2pSecurityException {
-		System.out.println("Service added " + serviceAgent.getServiceClassName());
 		// FIXME versions of services
 		ServiceNameVersion servicenameVersion = new ServiceNameVersion(serviceAgent.getServiceClassName(), "1.0");
 		ServiceList data = (ServiceList) getEnvelopeData(SERVICE_LIST_ENVELOPE_NAME, ServiceList.class);
@@ -284,7 +283,6 @@ public class ServiceInfoAgent extends PassphraseAgent {
 			sb.append(s.getNameVersion());
 			first = false;
 		}
-		System.out.println("Current services: " + sb.toString());
 
 		String nodeEnvelope = SERVICE_NODE_LIST_PREFIX + servicenameVersion.getNameVersion();
 		ServiceNodeList nodesData = (ServiceNodeList) getEnvelopeData(nodeEnvelope, ServiceNodeList.class);
