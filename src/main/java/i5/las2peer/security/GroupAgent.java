@@ -15,6 +15,8 @@ import org.apache.commons.codec.binary.Base64;
 
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
+import i5.las2peer.logging.L2pLogger;
+import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.persistency.MalformedXMLException;
@@ -193,7 +195,7 @@ public class GroupAgent extends Agent {
 					}
 				}
 			} catch (AgentNotKnownException e) {
-				Context.logError(this, "Can't get agent for id " + memberId);
+				L2pLogger.logEvent(Event.SERVICE_ERROR, "Can't get agent for id " + memberId);
 			}
 		}
 		return false;
@@ -226,7 +228,7 @@ public class GroupAgent extends Agent {
 					result++;
 				}
 			} catch (AgentNotKnownException e) {
-				Context.logError(this, "Can't get agent for id " + memberId);
+				L2pLogger.logEvent(Event.SERVICE_ERROR, "Can't get agent for id " + memberId);
 			}
 		}
 		return result;
@@ -256,7 +258,7 @@ public class GroupAgent extends Agent {
 					Collections.addAll(result, group.getMemberListRecursive());
 				}
 			} catch (AgentNotKnownException e) {
-				Context.logError(this, "Can't get agent for id " + id);
+				L2pLogger.logEvent(Event.SERVICE_ERROR, "Can't get agent for id " + id);
 			}
 		}
 		return result.toArray(new Long[0]);
@@ -317,7 +319,7 @@ public class GroupAgent extends Agent {
 					group.removeMemberRecursive(id);
 				}
 			} catch (AgentNotKnownException e) {
-				Context.logError(this, "Can't get agent for id " + memberId);
+				L2pLogger.logEvent(Event.SERVICE_ERROR, "Can't get agent for id " + memberId);
 			}
 		}
 	}
@@ -508,12 +510,12 @@ public class GroupAgent extends Agent {
 			message.open(this, getRunningAtNode());
 			content = message.getContent();
 		} catch (AgentNotKnownException e1) {
-			Context.logError(this, e1.getMessage());
+			L2pLogger.logEvent(Event.SERVICE_ERROR, e1.getMessage());
 		} catch (L2pSecurityException e2) {
-			Context.logError(this, e2.getMessage());
+			L2pLogger.logEvent(Event.SERVICE_ERROR, e2.getMessage());
 		}
 		if (content == null) {
-			Context.logError(this, "The message content is null. Dropping message!");
+			L2pLogger.logEvent(Event.SERVICE_ERROR, "The message content is null. Dropping message!");
 			return;
 		}
 		Serializable contentSerializable = null;
@@ -532,10 +534,11 @@ public class GroupAgent extends Agent {
 			try {
 				member = getRunningAtNode().getAgent(memberId);
 			} catch (AgentNotKnownException e1) {
-				Context.logMessage(this, e1.getMessage());
+				L2pLogger.logEvent(Event.SERVICE_ERROR, e1.getMessage());
 			}
 			if (member == null) {
-				Context.logMessage(this, "No agent for group member " + memberId + " found! Skipping member.");
+				L2pLogger.logEvent(Event.SERVICE_ERROR,
+						"No agent for group member " + memberId + " found! Skipping member.");
 				continue;
 			}
 			try {
@@ -545,16 +548,16 @@ public class GroupAgent extends Agent {
 				} else if (contentXmlAble != null) {
 					msg = new Message(this, member, contentXmlAble);
 				} else {
-					Context.logError(this, "The message content is null. Dropping message!");
+					L2pLogger.logEvent(Event.SERVICE_ERROR, "The message content is null. Dropping message!");
 					return;
 				}
 				getRunningAtNode().sendMessage(msg, null);
 			} catch (EncodingFailedException e) {
-				Context.logError(this, e.getMessage());
+				L2pLogger.logEvent(Event.SERVICE_ERROR, e.getMessage());
 			} catch (L2pSecurityException e) {
-				Context.logError(this, e.getMessage());
+				L2pLogger.logEvent(Event.SERVICE_ERROR, e.getMessage());
 			} catch (SerializationException e) {
-				Context.logError(this, e.getMessage());
+				L2pLogger.logEvent(Event.SERVICE_ERROR, e.getMessage());
 			}
 		}
 	}
