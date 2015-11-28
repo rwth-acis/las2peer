@@ -2,6 +2,8 @@ package i5.las2peer.logging;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -140,17 +142,28 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	}
 
 	/**
-	 * Prints a stack trace as nicely as {@code Exception.printStackTrace()}
+	 * Prints a stack trace as nicely as {@code e.printStackTrace()}, but uses the logging system as output.
+	 * 
+	 * @param e A {@code Throwable} thats stack trace should be printed.
+	 */
+	public synchronized void printStackTrace(Throwable e) {
+		StringBuilder sb = new StringBuilder();
+		printStackTrace(sb, e);
+		severe(sb.toString().trim());
+	}
+
+	/**
+	 * Appends the stack trace for the given {@link Throwable} to the given {@link StringBuilder}.
 	 * 
 	 * @param sb {@code StringBuilder} as output for the stack trace.
-	 * @param e A {@code Throwable} thats stack trace should be printed.
+	 * @param e A {@code Throwable} which stack trace should be appended. If {@code null} given, nothing is appended.
 	 */
 	protected static void printStackTrace(StringBuilder sb, Throwable e) {
 		if (e != null) {
-			sb.append(e.toString()).append("\n");
-			for (StackTraceElement stack : e.getStackTrace()) {
-				sb.append("\t").append(stack.toString()).append("\n");
-			}
+			StringWriter sw = new StringWriter();
+			PrintWriter pw = new PrintWriter(sw);
+			e.printStackTrace(pw);
+			sb.append(sw.toString());
 		}
 	}
 

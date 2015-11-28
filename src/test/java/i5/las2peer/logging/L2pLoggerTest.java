@@ -13,7 +13,7 @@ public class L2pLoggerTest {
 
 	@Test
 	public void testParent() {
-		Logger logger = Logger.getLogger("i5.las2peer.logging.LogTest");
+		Logger logger = Logger.getLogger(L2pLoggerTest.class.getName());
 		Logger parent = logger.getParent();
 		assertNotNull(parent);
 		assertTrue(parent instanceof L2pLogger);
@@ -22,7 +22,7 @@ public class L2pLoggerTest {
 	@Test
 	public void testParent2() {
 		// actual logger name may be initialized by other tests
-		L2pLogger logger = L2pLogger.getInstance("i5.las2peer.logging.LogTest2");
+		L2pLogger logger = L2pLogger.getInstance(L2pLoggerTest.class.getName());
 		assertTrue(logger instanceof L2pLogger);
 		Logger parent = logger.getParent();
 		assertNotNull(parent);
@@ -31,7 +31,7 @@ public class L2pLoggerTest {
 
 	// TODO transform into actual test method
 	public static void main(String[] args) throws IOException {
-		L2pLogger logger = L2pLogger.getInstance("i5.las2peer.log.LogTest");
+		L2pLogger logger = L2pLogger.getInstance(L2pLoggerTest.class.getName());
 		logger.finest("silent start");
 		logger.info("here we go");
 		logger.warning("fatal error incoming");
@@ -42,7 +42,9 @@ public class L2pLoggerTest {
 		logger.fine("fine");
 		L2pLogger.setGlobalLogfileLevel(Level.INFO);
 		logger.finer("this goes directly to /dev/null");
+		logger.printStackTrace(new NullPointerException());
 		logger.log(Level.SEVERE, "this is the worst!", new NullPointerException("layer 8 problem"));
+		logger.info("I'm done here!");
 	}
 
 }
