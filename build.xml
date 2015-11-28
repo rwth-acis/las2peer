@@ -13,10 +13,12 @@
     <property name="ivy.settings.file" value="${ivy.jar.dir}/ivysettings.xml" />
     <property name="ivy.dep.file" value="${ivy.jar.dir}/ivy.xml" />
 	
-	<property name="src.main" location="src/main/java" />
-	<property name="src.junit" location="src/test/java" />
-	<property name="src.help1" location="src/test_help/java" />
-	<property name="src.help2" location="src/test_help2/java" />
+	<property name="src" location="src" />
+	
+	<property name="src.main" location="${src}/main/java" />
+	<property name="src.junit" location="${src}/test/java" />
+	<property name="src.help1" location="${src}/test_help/java" />
+	<property name="src.help2" location="${src}/test_help2/java" />
 	
 	<property name="tmp" location="tmp" />
 	
@@ -356,7 +358,6 @@
 	
 	<target name="init_junit" depends="init_general">
 		<mkdir dir="${junit.report}" />
-		<mkdir dir="log" />
 	</target>
 	
 	<target name="junit_clean">
@@ -380,6 +381,16 @@
         </junit>
 	</target>
 	
+	<target name="test_colored" depends="init_general">
+		<javac srcdir="${src}"
+			includes="**/ColoredOutput.java,**/TestColoredOutput.java"
+			destdir="${tmp}"
+			debug="on"
+			encoding="UTF-8"
+			includeantruntime="false" />
+		<echo message="Testing colored console output" />
+		<java classname="i5.las2peer.tools.TestColoredOutput" classpath="${tmp}" failonerror="true" />
+	</target>
 	
 	<!-- Cleanup -->
 	

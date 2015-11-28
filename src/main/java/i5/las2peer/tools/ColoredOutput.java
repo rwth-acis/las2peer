@@ -11,10 +11,6 @@ import java.io.PrintStream;
  * 
  * The other methods switch the format of later written Text via System.out.
  * 
- * 
- * 
- * 
- *
  */
 public class ColoredOutput {
 
@@ -22,11 +18,136 @@ public class ColoredOutput {
 
 	private static boolean turnedOn = false;
 
+	public interface ShellCode {
+		String getShellCode();
+	}
+
 	/**
-	 * A color used by the {@link ColoredOutput} methods.
-	 * 
-	 *
+	 * An enumeration of possible foreground (text) colors.
 	 */
+	public enum ForegroundColor implements ShellCode {
+		Default(39),
+		Black(30),
+		Red(31),
+		Green(32),
+		Yellow(33),
+		Blue(34),
+		Magenta(35),
+		Cyan(36),
+		LightGrey(37),
+		DarkGrey(90),
+		LightRed(91),
+		LightGreen(92),
+		LightYellow(93),
+		LightBlue(94),
+		LightMagenta(95),
+		LightCyan(96),
+		White(97);
+
+		private int code;
+
+		private ForegroundColor(int code) {
+			this.code = code;
+		}
+
+		public String getShellCode() {
+			return String.valueOf(code);
+		}
+	}
+
+	/**
+	 * An enumeration of possible background colors.
+	 */
+	public enum BackgroundColor implements ShellCode {
+		Default(49),
+		Black(40),
+		Red(41),
+		LightRed(101),
+		Green(42),
+		LightGreen(102),
+		Yellow(43),
+		LightYellow(103),
+		Blue(44),
+		LightBlue(104),
+		Magenta(45),
+		LightMagenta(105),
+		Cyan(46),
+		LightCyan(106),
+		LightGrey(47),
+		DarkGrey(100),
+		White(107);
+
+		private int code;
+
+		private BackgroundColor(int code) {
+			this.code = code;
+		}
+
+		public String getShellCode() {
+			return String.valueOf(code);
+		}
+	}
+
+	/**
+	 * An enumeration of possible text formatting options.
+	 */
+	public enum Formatting implements ShellCode {
+		ResetAll(0),
+		Bold(1),
+		Dim(2),
+		Underlined(3),
+		Blink(4),
+		Reverse(5),
+		Hidden(6),
+		ResetBold(21),
+		ResetDim(22),
+		ResetUnderlined(24),
+		ResetBlink(25),
+		ResetReverse(27),
+		ResetHidden(28);
+
+		private int code;
+
+		private Formatting(int code) {
+			this.code = code;
+		}
+
+		@Override
+		public String getShellCode() {
+			return String.valueOf(code);
+		}
+	}
+
+	/**
+	 * This method returns the String colored/formatted with the given shell codes.
+	 * 
+	 * @param input A {@link String} that should be colored/formatted.
+	 * @param codes A bunch of {@link ShellCode}s that should be applied on the {@code input} {@link String}.
+	 * @return Returns the colored/formatted String or the given {@code input} {@link String} if coloring ist disabled.
+	 */
+	public static String colorize(String input, ShellCode... codes) {
+		if (!turnedOn) {
+			return input;
+		}
+		StringBuilder sb = new StringBuilder("\033[");
+		boolean first = true;
+		for (ShellCode code : codes) {
+			if (!first) {
+				sb.append(";");
+			}
+			sb.append(code.getShellCode());
+			first = false;
+		}
+		sb.append("m").append(input).append("\033[0m");
+		return sb.toString();
+	}
+
+	/**
+	 * @deprecated Use {@link ForegroundColor} instead!<br/>
+	 * 
+	 *             A color used by the {@link ColoredOutput} methods.
+	 */
+	@Deprecated
 	public enum Color {
 		Black(30),
 		Red(31),
@@ -68,19 +189,25 @@ public class ColoredOutput {
 	}
 
 	/**
-	 * switch the stream to use for output
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} instead!<br/>
+	 * 
+	 *             switch the stream to use for output
 	 * 
 	 * @param stream
 	 */
+	@Deprecated
 	public static void useStream(PrintStream stream) {
 		useStream = stream;
 	}
 
 	/**
-	 * write a bash code
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} instead!<br/>
+	 * 
+	 *             write a bash code
 	 * 
 	 * @param code
 	 */
+	@Deprecated
 	public static void sendCode(int code) {
 		if (!turnedOn)
 			return;
@@ -89,10 +216,13 @@ public class ColoredOutput {
 	}
 
 	/**
-	 * write a color code to the shell
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} instead!<br/>
+	 * 
+	 *             write a color code to the shell
 	 * 
 	 * @param c
 	 */
+	@Deprecated
 	public static void sendCode(Color c) {
 		if (!turnedOn)
 			return;
@@ -104,10 +234,13 @@ public class ColoredOutput {
 	}
 
 	/**
-	 * write several bash codes at once
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} instead!<br/>
+	 * 
+	 *             write several bash codes at once
 	 * 
 	 * @param codes
 	 */
+	@Deprecated
 	public static void sendCode(int... codes) {
 		if (codes == null || codes.length == 0)
 			throw new IllegalArgumentException();
@@ -123,259 +256,400 @@ public class ColoredOutput {
 	}
 
 	/**
-	 * simple reset the console to standard (colors and shape)
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link Formatting#ResetAll} instead!
+	 *             <br/>
+	 * 
+	 *             simple reset the console to standard (colors and shape)
 	 */
+	@Deprecated
 	public static void reset() {
 		sendCode(0);
 	}
 
 	/**
-	 * write blining text
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link Formatting#Blink} instead!<br/>
+	 * 
+	 *             write blinking text
 	 */
+	@Deprecated
 	public static void blink() {
 		sendCode(5);
 	}
 
 	/**
-	 * turn off blinking text
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link Formatting#ResetBlink} instead!
+	 *             <br/>
+	 * 
+	 *             turn off blinking text
 	 */
+	@Deprecated
 	public static void noBlink() {
 		sendCode(25);
 	}
 
 	/**
-	 * write bold text
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link Formatting#Bold} instead!<br/>
+	 * 
+	 *             write bold text
 	 */
+	@Deprecated
 	public static void bold() {
 		sendCode(1);
 	}
 
 	/**
-	 * turn off bold text
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link Formatting#ResetBold} instead!
+	 *             <br/>
+	 * 
+	 *             turn off bold text
 	 */
+	@Deprecated
 	public static void noBold() {
 		sendCode(22);
 	}
 
 	/**
-	 * write underlined text
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link Formatting#Underlined} instead!
+	 *             <br/>
+	 * 
+	 *             write underlined text
 	 */
+	@Deprecated
 	public static void underline() {
 		sendCode(4);
 	}
 
 	/**
-	 * write inverted (swap back- and foreground color
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link Formatting#Reverse} instead!
+	 *             <br/>
+	 * 
+	 *             write inverted (swap back- and foreground color)
 	 */
+	@Deprecated
 	public static void inverted() {
 		sendCode(7);
 	}
 
 	/**
-	 * switch to black font color
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link ForegroundColor#Black} instead!
+	 *             <br/>
+	 * 
+	 *             switch to black font color
 	 */
+	@Deprecated
 	public static void fontBlack() {
 		sendCode(Color.Black);
 	}
 
 	/**
-	 * switch to red font color
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link ForegroundColor#Red} instead!
+	 *             <br/>
+	 * 
+	 *             switch to red font color
 	 */
+	@Deprecated
 	public static void fontRed() {
 		sendCode(Color.Red);
 	}
 
 	/**
-	 * switch to green font color
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link ForegroundColor#Green} instead!
+	 *             <br/>
+	 * 
+	 *             switch to green font color
 	 */
+	@Deprecated
 	public static void fontGreen() {
 		sendCode(Color.Green);
 	}
 
 	/**
-	 * switch to brown font color
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} another {@link ForegroundColor} instead!
+	 *             <br/>
+	 * 
+	 *             switch to brown font color
 	 */
+	@Deprecated
 	public static void fontBrown() {
 		sendCode(Color.Brown);
 	}
 
 	/**
-	 * switch to blue font color
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link ForegroundColor#Blue} instead!
+	 *             <br/>
+	 * 
+	 *             switch to blue font color
 	 */
+	@Deprecated
 	public static void fontBlue() {
 		sendCode(Color.Blue);
 	}
 
 	/**
-	 * switch to magenta font color
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link ForegroundColor#Magenta}
+	 *             instead! <br/>
+	 * 
+	 *             switch to magenta font color
 	 */
+	@Deprecated
 	public static void fontMagenta() {
 		sendCode(Color.Magenta);
 	}
 
 	/**
-	 * switch to cyan font color
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link ForegroundColor#Cyan} instead!
+	 *             <br/>
+	 * 
+	 *             switch to cyan font color
 	 */
+	@Deprecated
 	public static void fontCyan() {
 		sendCode(Color.Cyan);
 	}
 
 	/**
-	 * switch to light grey font color
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link ForegroundColor#LightGrey}
+	 *             instead! <br/>
+	 * 
+	 *             switch to light grey font color
 	 */
+	@Deprecated
 	public static void fontLightGrey() {
 		sendCode(Color.LightGrey);
 	}
 
 	/**
-	 * switch to dark grey font color
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link ForegroundColor#DarkGrey}
+	 *             instead! <br/>
+	 * 
+	 *             switch to dark grey font color
 	 */
+	@Deprecated
 	public static void fontDarkGrey() {
 		sendCode(Color.DarkGrey);
 	}
 
 	/**
-	 * switch to light red font color
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link ForegroundColor#LightRed}
+	 *             instead! <br/>
+	 * 
+	 *             switch to light red font color
 	 */
+	@Deprecated
 	public static void fontLightRed() {
 		sendCode(Color.LightRed);
 	}
 
 	/**
-	 * switch to light green font color
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link ForegroundColor#LightGreen}
+	 *             instead! <br/>
+	 * 
+	 *             switch to light green font color
 	 */
+	@Deprecated
 	public static void fontLightGreen() {
 		sendCode(Color.LightGreen);
 	}
 
 	/**
-	 * switch to yellow font color
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link ForegroundColor#Yellow} instead!
+	 *             <br/>
+	 * 
+	 *             switch to yellow font color
 	 */
+	@Deprecated
 	public static void fontYellow() {
 		sendCode(Color.Yellow);
 	}
 
 	/**
-	 * switch to light blue font color
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link ForegroundColor#LightBlue}
+	 *             instead! <br/>
+	 * 
+	 *             switch to light blue font color
 	 */
+	@Deprecated
 	public static void fontLightBlue() {
 		sendCode(Color.LightBlue);
 	}
 
 	/**
-	 * switch to light magenta font color
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link ForegroundColor#LightMagenta}
+	 *             instead! <br/>
+	 * 
+	 *             switch to light magenta font color
 	 */
+	@Deprecated
 	public static void fontLightMagenta() {
 		sendCode(Color.LightMagenta);
 	}
 
 	/**
-	 * switch to lighty cyan font color
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link ForegroundColor#LightCyan}
+	 *             instead! <br/>
+	 * 
+	 *             switch to lighty cyan font color
 	 */
+	@Deprecated
 	public static void fontLightCyan() {
 		sendCode(Color.LightCyan);
 	}
 
 	/**
-	 * switch to white font color
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link ForegroundColor#White} instead!
+	 *             <br/>
+	 * 
+	 *             switch to white font color
 	 */
+	@Deprecated
 	public static void fontWhite() {
 		sendCode(1, 37);
 	}
 
 	/**
-	 * reset to terminal default
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link ForegroundColor#Default}
+	 *             instead! <br/>
+	 * 
+	 *             reset to terminal default
 	 */
+	@Deprecated
 	public static void fontReset() {
 		sendCode(39);
 	}
 
 	/**
-	 * switch background to black
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link BackgroundColor#Black} instead!
+	 *             <br/>
+	 * 
+	 *             switch background to black
 	 */
+	@Deprecated
 	public static void backgroundBlack() {
 		sendCode(40);
 	}
 
 	/**
-	 * switch background to red
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link BackgroundColor#Red} instead!
+	 *             <br/>
+	 * 
+	 *             switch background to red
 	 */
+	@Deprecated
 	public static void backgroundRed() {
 		sendCode(41);
 	}
 
 	/**
-	 * switch background to green
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link BackgroundColor#Green} instead!
+	 *             <br/>
+	 * 
+	 *             switch background to green
 	 */
+	@Deprecated
 	public static void backgroundGreen() {
 		sendCode(42);
 	}
 
 	/**
-	 * switch background to yellow
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link BackgroundColor#Yellow} instead!
+	 *             <br/>
+	 * 
+	 *             switch background to yellow
 	 */
+	@Deprecated
 	public static void backgroundYellow() {
 		sendCode(43);
 	}
 
 	/**
-	 * switch background to blue
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link BackgroundColor#Blue} instead!
+	 *             <br/>
+	 * 
+	 *             switch background to blue
 	 */
+	@Deprecated
 	public static void backgroundBlue() {
 		sendCode(44);
 	}
 
 	/**
-	 * switch background to magenta
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link BackgroundColor#Magenta}
+	 *             instead! <br/>
+	 * 
+	 *             switch background to magenta
 	 */
+	@Deprecated
 	public static void backgroundMagenta() {
 		sendCode(45);
 	}
 
 	/**
-	 * switch background to cyan
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link BackgroundColor#Cyan} instead!
+	 *             <br/>
+	 * 
+	 *             switch background to cyan
 	 */
+	@Deprecated
 	public static void backgroundCyan() {
 		sendCode(46);
 	}
 
 	/**
-	 * switch background to white
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link BackgroundColor#White} instead!
+	 *             <br/>
+	 * 
+	 *             switch background to white
 	 */
+	@Deprecated
 	public static void backgroundWhite() {
 		sendCode(47);
 	}
 
 	/**
-	 * reset background to terminal default
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link BackgroundColor#Default}
+	 *             instead! <br/>
+	 * 
+	 *             reset background to terminal default
 	 */
+	@Deprecated
 	public static void resetBackground() {
 		sendCode(49);
 	}
 
 	/**
-	 * print a line of red text
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link ForegroundColor#Red} instead!
+	 *             <br/>
+	 * 
+	 *             print a line of red text
 	 * 
 	 * @param text
 	 */
+	@Deprecated
 	public static void printlnRed(String text) {
 		println(text, Color.Red);
 	}
 
 	/**
-	 * print a line of yellow text
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link ForegroundColor#Yellow} instead!
+	 *             <br/>
+	 * 
+	 *             print a line of yellow text
 	 * 
 	 * @param text
 	 */
+	@Deprecated
 	public static void printlnYellow(String text) {
 		println(text, Color.Yellow);
 	}
 
 	/**
-	 * print a line of bold text
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link Formatting#Bold} instead! <br/>
+	 * 
+	 *             print a line of bold text
 	 * 
 	 * @param text
 	 */
+	@Deprecated
 	public static void printlnBold(String text) {
 		bold();
 		println(text);
@@ -383,11 +657,15 @@ public class ColoredOutput {
 	}
 
 	/**
-	 * print a text in the given color
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with a {@link ForegroundColor} instead!
+	 *             <br/>
+	 * 
+	 *             print a text in the given color
 	 * 
 	 * @param text
 	 * @param color
 	 */
+	@Deprecated
 	public static void println(String text, Color color) {
 		sendCode(color);
 		println(text);
@@ -395,12 +673,16 @@ public class ColoredOutput {
 	}
 
 	/**
-	 * print some text in the given color to the given printstream
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with a {@link ForegroundColor} instead!
+	 *             <br/>
+	 * 
+	 *             print some text in the given color to the given printstream
 	 * 
 	 * @param text
 	 * @param color
 	 * @param stream
 	 */
+	@Deprecated
 	public static void println(String text, Color color, PrintStream stream) {
 		PrintStream old = useStream;
 		useStream(stream);
@@ -409,19 +691,25 @@ public class ColoredOutput {
 	}
 
 	/**
-	 * print some text followed by a newline to the selected print stream
+	 * @deprecated This method is deprecated and will be removed in the future!<br/>
+	 * 
+	 *             print some text followed by a newline to the selected print stream
 	 * 
 	 * @param text
 	 */
+	@Deprecated
 	public static void println(Object text) {
 		useStream.println(text);
 	}
 
 	/**
-	 * print some text to the selected printstream
+	 * @deprecated This method is deprecated and will be removed in the future!<br/>
+	 * 
+	 *             print some text to the selected printstream
 	 * 
 	 * @param text
 	 */
+	@Deprecated
 	public static void print(Object text) {
 		useStream.print(text);
 	}
@@ -440,27 +728,4 @@ public class ColoredOutput {
 		turnedOn = true;
 	}
 
-	/**
-	 * ensure that the console font is reseted at the end or the application
-	 */
-	static {
-		String disabled = System.getenv().get("COLOR_DISABLED");
-
-		if (disabled != null && (disabled.equals("1") || disabled.toLowerCase().equals("true")))
-			allOff();
-		else {
-			Runtime.getRuntime().addShutdownHook(new Thread() {
-				public void run() {
-					ColoredOutput.reset();
-					if (!useStream.equals(System.out)) {
-						useStream(System.out);
-						ColoredOutput.reset();
-					}
-
-					// ColoredBash.resetBackground();
-					System.out.println();
-				}
-			});
-		}
-	}
 }
