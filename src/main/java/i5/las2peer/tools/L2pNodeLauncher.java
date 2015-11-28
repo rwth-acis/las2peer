@@ -842,10 +842,12 @@ public class L2pNodeLauncher {
 			printError("invalid port number specified");
 			return null;
 		}
-		try {
-			L2pLogger.setGlobalLogDirectory(sLogDir);
-		} catch (Exception ex) {
-			printWarning("couldn't use '" + sLogDir + "' as log directory." + ex);
+		if (sLogDir != null) {
+			try {
+				L2pLogger.setGlobalLogDirectory(sLogDir);
+			} catch (Exception ex) {
+				printWarning("couldn't use '" + sLogDir + "' as log directory." + ex);
+			}
 		}
 		L2pClassLoader cl = new L2pClassLoader(
 				new FileSystemRepository(serviceDirectories.toArray(new String[0]), true),
