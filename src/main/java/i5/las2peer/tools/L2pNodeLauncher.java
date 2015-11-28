@@ -55,6 +55,9 @@ import rice.p2p.commonapi.NodeHandle;
  */
 public class L2pNodeLauncher {
 
+	// this is the main class and therefore the logger needs to be static
+	private static final L2pLogger logger = L2pLogger.getInstance(L2pNodeLauncher.class.getName());
+
 	private static final String DEFAULT_SERVICE_DIRECTORY = "./service/";
 
 	private CommandPrompt commandPrompt;
@@ -149,8 +152,8 @@ public class L2pNodeLauncher {
 					result.put(split[0], split[1]);
 				}
 			} catch (IOException e) {
-				printWarning("Error reading contents of " + filename + ": " + e);
-				e.printStackTrace();
+				printError("Error reading contents of " + filename + ": " + e);
+				logger.printStackTrace(e);
 				bFinished = true;
 			}
 		}
@@ -211,19 +214,19 @@ public class L2pNodeLauncher {
 							"Ingoring unknown XML object (" + xmlRoot.getName() + ") in '" + xmlFile.toString() + "'!");
 				}
 			} catch (XMLSyntaxException e1) {
-				printWarning("Unable to parse XML contents of '" + xmlFile.toString() + "'!");
+				printError("Unable to parse XML contents of '" + xmlFile.toString() + "'!");
 			} catch (MalformedXMLException e) {
-				printWarning("unable to deserialize contents of " + xmlFile.toString() + "!");
+				printError("unable to deserialize contents of " + xmlFile.toString() + "!");
 			} catch (IOException e) {
-				printWarning("problems reading the contents of " + xmlFile.toString() + ": " + e);
+				printError("problems reading the contents of " + xmlFile.toString() + ": " + e);
 			} catch (L2pSecurityException e) {
-				printWarning("error storing agent from " + xmlFile.toString() + ": " + e);
+				printError("error storing agent from " + xmlFile.toString() + ": " + e);
 			} catch (AgentAlreadyRegisteredException e) {
-				printWarning("agent from " + xmlFile.toString() + " already known at this node!");
+				printError("agent from " + xmlFile.toString() + " already known at this node!");
 			} catch (AgentException e) {
-				printWarning("unable to generate agent " + xmlFile.toString() + "!");
+				printError("unable to generate agent " + xmlFile.toString() + "!");
 			} catch (StorageException e) {
-				printWarning("unable to store contents of " + xmlFile.toString() + "!");
+				printError("unable to store contents of " + xmlFile.toString() + "!");
 			}
 		}
 		node.forceUserListUpdate();
@@ -234,22 +237,22 @@ public class L2pNodeLauncher {
 				try {
 					memberAgent = node.getAgent(memberId);
 				} catch (AgentNotKnownException e) {
-					printWarning("Can't get agent for group member " + memberId);
+					printError("Can't get agent for group member " + memberId);
 					continue;
 				}
 				if ((memberAgent instanceof PassphraseAgent) == false) {
-					printWarning("Unknown agent type to unlock, type: " + memberAgent.getClass().getName());
+					printError("Unknown agent type to unlock, type: " + memberAgent.getClass().getName());
 					continue;
 				}
 				PassphraseAgent memberPassAgent = (PassphraseAgent) memberAgent;
 				String xmlName = agentIdToXml.get(memberPassAgent.getId());
 				if (xmlName == null) {
-					printWarning("No known xml file for agent " + memberPassAgent.getId());
+					printError("No known xml file for agent " + memberPassAgent.getId());
 					continue;
 				}
 				String passphrase = htPassphrases.get(xmlName);
 				if (passphrase == null) {
-					printWarning("No known password for agent " + memberPassAgent.getId());
+					printError("No known password for agent " + memberPassAgent.getId());
 					continue;
 				}
 				try {
@@ -259,7 +262,7 @@ public class L2pNodeLauncher {
 					printMessage("\t- stored group agent from " + xmlName);
 					break;
 				} catch (Exception e) {
-					printWarning("Can't unlock group agent " + currentGroupAgent.getId() + " with member "
+					printError("Can't unlock group agent " + currentGroupAgent.getId() + " with member "
 							+ memberPassAgent.getId());
 					continue;
 				}
@@ -304,20 +307,19 @@ public class L2pNodeLauncher {
 	 */
 	public void startConnector(String connectorClass) {
 		try {
-
 			printMessage("Starting connector with class name: " + connectorClass + "!");
 			Connector connector = loadConnector(connectorClass);
 			connector.start(node);
 			connectors.add(connector);
 
 		} catch (ConnectorException e) {
-			printWarning(" --> Problems starting the connector: " + e);
+			printError(" --> Problems starting the connector: " + e);
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			logger.printStackTrace(e);
 		} catch (InstantiationException e) {
-			e.printStackTrace();
+			logger.printStackTrace(e);
 		} catch (IllegalAccessException e) {
-			e.printStackTrace();
+			logger.printStackTrace(e);
 		}
 	}
 
@@ -339,7 +341,6 @@ public class L2pNodeLauncher {
 	 * Stops a connector given by its classname.
 	 */
 	public void stopConnector(String connectorClass) {
-
 		Iterator<Connector> iterator = connectors.iterator();
 
 		while (iterator.hasNext()) {
@@ -351,11 +352,10 @@ public class L2pNodeLauncher {
 					return;
 				}
 			} catch (ConnectorException e) {
-				e.printStackTrace();
+				logger.printStackTrace(e);
 			}
 		}
 		printWarning("No connector with the given classname was started!");
-
 	}
 
 	/**
@@ -397,7 +397,7 @@ public class L2pNodeLauncher {
 
 			return true;
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.printStackTrace(e);
 			currentUser = null;
 			return false;
 		}
@@ -582,7 +582,7 @@ public class L2pNodeLauncher {
 			return sa;
 		} catch (Exception e) {
 			System.out.println("Starting service failed");
-			e.printStackTrace();
+			logger.printStackTrace(e);
 			throw e;
 		}
 	}
@@ -603,7 +603,7 @@ public class L2pNodeLauncher {
 		try {
 			sa = node.getServiceAgent(serviceClass);
 		} catch (Exception e) {
-			ColoredOutput.println("Can't get service agent for " + serviceClass + ". Generating new instance...");
+			logger.info("Can't get service agent for " + serviceClass + ". Generating new instance...");
 			sa = ServiceAgent.createServiceAgent(serviceClass, agentPass);
 		}
 		sa.unlockPrivateKey(agentPass);
@@ -721,21 +721,32 @@ public class L2pNodeLauncher {
 	}
 
 	/**
-	 * Prints a (yellow) message to the console.
+	 * Prints a message to the console.
 	 * 
 	 * @param message
 	 */
-	private void printMessage(String message) {
-		ColoredOutput.printlnYellow(message);
+	private static void printMessage(String message) {
+		logger.info(message);
 	}
 
 	/**
-	 * Prints a (red) warning message to the console.
+	 * Prints a (Yellow) warning message to the console.
 	 * 
 	 * @param message
 	 */
-	private void printWarning(String message) {
-		ColoredOutput.printlnRed(message);
+	private static void printWarning(String message) {
+		message = ColoredOutput.colorize(message, ColoredOutput.ForegroundColor.Yellow);
+		logger.warning(message);
+	}
+
+	/**
+	 * Prints a (Red) error message to the console.
+	 * 
+	 * @param message
+	 */
+	private static void printError(String message) {
+		message = ColoredOutput.colorize(message, ColoredOutput.ForegroundColor.Red);
+		logger.severe(message);
 	}
 
 	/**
@@ -761,7 +772,7 @@ public class L2pNodeLauncher {
 			String larg = arg.toLowerCase();
 			if (larg.equals("-p") == true || larg.equals("--port") == true) {
 				if (itArg.hasNext() == false) {
-					ColoredOutput.printlnYellow("ignored '" + arg + "', because port number expected after it");
+					printWarning("ignored '" + arg + "', because port number expected after it");
 				} else {
 					String sPort = itArg.next();
 					try {
@@ -770,13 +781,12 @@ public class L2pNodeLauncher {
 						itArg.remove();
 						port = p;
 					} catch (NumberFormatException ex) {
-						ColoredOutput.printlnYellow("ignored '" + arg + "', because " + sPort + " is not an integer");
+						printWarning("ignored '" + arg + "', because " + sPort + " is not an integer");
 					}
 				}
 			} else if (larg.equals("-b") == true || larg.equals("--bootstrap") == true) {
 				if (itArg.hasNext() == false) {
-					ColoredOutput.printlnYellow(
-							"ignored '" + arg + "', because comma separated bootstrap list expected after it");
+					printWarning("ignored '" + arg + "', because comma separated bootstrap list expected after it");
 				} else {
 					String[] bsList = itArg.next().split(",");
 					for (String bs : bsList) {
@@ -794,14 +804,14 @@ public class L2pNodeLauncher {
 				observer = true;
 			} else if (larg.equals("-l") == true || larg.equals("--log-directory") == true) {
 				if (itArg.hasNext() == false) {
-					ColoredOutput.printlnYellow("ignored '" + arg + "', because log directory expected after it");
+					printWarning("ignored '" + arg + "', because log directory expected after it");
 				} else {
 					sLogDir = itArg.next();
 					itArg.remove();
 				}
 			} else if (larg.equals("-n") == true || larg.equals("--node-id-seed") == true) {
 				if (itArg.hasNext() == false) {
-					ColoredOutput.printlnYellow("ignored '" + arg + "', because node id seed expected after it");
+					printWarning("ignored '" + arg + "', because node id seed expected after it");
 				} else {
 					String sNodeId = itArg.next();
 					try {
@@ -810,12 +820,12 @@ public class L2pNodeLauncher {
 						itArg.remove();
 						nodeIdSeed = idSeed;
 					} catch (NumberFormatException ex) {
-						ColoredOutput.printlnYellow("ignored '" + arg + "', because " + sNodeId + " is not an integer");
+						printWarning("ignored '" + arg + "', because " + sNodeId + " is not an integer");
 					}
 				}
 			} else if (larg.equals("-s") == true || larg.equals("--service-directory") == true) {
 				if (itArg.hasNext() == false) {
-					ColoredOutput.printlnYellow("ignored '" + arg + "', because service directory expected after it");
+					printWarning("ignored '" + arg + "', because service directory expected after it");
 				} else {
 					serviceDirectories.add(itArg.next());
 					itArg.remove();
@@ -826,16 +836,16 @@ public class L2pNodeLauncher {
 		}
 		// check parameters
 		if (port == null) {
-			ColoredOutput.printlnRed("no port number specified");
+			printError("no port number specified");
 			return null;
 		} else if (port < 1) {
-			ColoredOutput.printlnRed("invalid port number specified");
+			printError("invalid port number specified");
 			return null;
 		}
 		try {
 			L2pLogger.setGlobalLogDirectory(sLogDir);
 		} catch (Exception ex) {
-			ColoredOutput.printlnYellow("couldn't use '" + sLogDir + "' as log directory." + ex);
+			printWarning("couldn't use '" + sLogDir + "' as log directory." + ex);
 		}
 		L2pClassLoader cl = new L2pClassLoader(
 				new FileSystemRepository(serviceDirectories.toArray(new String[0]), true),
@@ -851,13 +861,13 @@ public class L2pNodeLauncher {
 			}
 
 			if (launcher.isFinished()) {
-				launcher.printMessage("All commands have been handled and shutdown has been called -> end!");
+				printMessage("All commands have been handled and shutdown has been called -> end!");
 			} else {
-				launcher.printMessage("All commands have been handled -- keeping node open!");
+				printMessage("All commands have been handled -- keeping node open!");
 			}
 		} catch (NodeException e) {
 			launcher.bFinished = true;
-			e.printStackTrace();
+			logger.printStackTrace(e);
 			throw e;
 		}
 
@@ -882,11 +892,10 @@ public class L2pNodeLauncher {
 
 		System.out.println("\nStart Node:");
 		System.out
-				.println("\t{optional: --windows-shell|-w} -p [port] {optional1} {optional2} {method1} {method2} ...");
+				.println("\t{optional: --colored-shell|-c} -p [port] {optional1} {optional2} {method1} {method2} ...");
 
 		System.out.println("\nOptional arguments");
-		System.out.println(
-				"\t--windows-shell|-w disables the colored output (better readable for windows command line clients)\n");
+		System.out.println("\t--colored-shell|-c enables colored output (better readable command line)\n");
 		System.out.println("\t--log-directory|-l [directory] lets you choose the directory for log files (default: "
 				+ L2pLogger.DEFAULT_LOG_DIRECTORY + ")\n");
 		System.out
@@ -927,9 +936,6 @@ public class L2pNodeLauncher {
 	 * The method will start a node and try to invoke all command line parameters as parameterless methods of this
 	 * class.
 	 * 
-	 * Hint: use "windows_shell" as the first command to turn off all colored output (since this creates cryptic symbols
-	 * in a Windows environment).
-	 * 
 	 * Hint: with "log-directory=.." you can set the logfile directory you want to use.
 	 * 
 	 * Hint: with "service-directory=.." you can set the directory your service jars are located at.
@@ -953,8 +959,10 @@ public class L2pNodeLauncher {
 			if (larg.equals("-h") == true || larg.equals("--help") == true) { // Help Message
 				printHelp();
 				System.exit(1);
-			} else if (larg.equals("-w") == true || larg.equals("--windows-shell") == true) { // turn off colored output
-				ColoredOutput.allOff();
+			} else if (larg.equals("-w") || larg.equals("--windows-shell")) {
+				printWarning("Ignoring obsolete argument '" + arg + ", because colored output is disabled by default.");
+			} else if (larg.equals("-c") == true || larg.equals("--colored-shell") == true) { // turn on colored output
+				ColoredOutput.allOn();
 			} else { // node instance parameter
 				instArgs.add(arg);
 			}
@@ -973,7 +981,7 @@ public class L2pNodeLauncher {
 				while (iterator.hasNext())
 					iterator.next().stop();
 			} catch (ConnectorException e) {
-				e.printStackTrace();
+				logger.printStackTrace(e);
 			}
 		} else {
 			System.out.println("node has handled all commands -- keeping node open\n");
@@ -988,7 +996,7 @@ public class L2pNodeLauncher {
 					while (iterator.hasNext())
 						iterator.next().stop();
 				} catch (ConnectorException ce) {
-					ce.printStackTrace();
+					logger.printStackTrace(ce);
 				}
 			}
 		}
