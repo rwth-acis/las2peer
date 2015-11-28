@@ -14,7 +14,6 @@ import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.p2p.ServiceNameVersion;
 import i5.las2peer.security.ServiceAgent;
 import i5.las2peer.security.ServiceInfoAgent;
-import i5.las2peer.tools.ColoredOutput;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.SerializationException;
 
@@ -34,8 +33,6 @@ public class ServiceInfoAgentTest {
 
 	@Test
 	public void test() throws UnknownHostException, SerializationException, CryptoException {
-		ColoredOutput.allOff();
-
 		// String host = getHostString();
 		nodes[0] = new PastryNodeImpl(START_PORT + 0, "");
 
