@@ -1,6 +1,14 @@
 package i5.las2peer.p2p.pastry;
 
+import java.security.PublicKey;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.logging.Level;
+
 import i5.las2peer.communication.MessageException;
+import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.NodeInformation;
@@ -10,17 +18,9 @@ import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.security.Agent;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.MessageReceiver;
-import i5.las2peer.tools.ColoredOutput;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
 import i5.las2peer.tools.WaiterThread;
-
-import java.security.PublicKey;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Hashtable;
-
 import rice.p2p.commonapi.Application;
 import rice.p2p.commonapi.Endpoint;
 import rice.p2p.commonapi.Id;
@@ -51,6 +51,8 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	public final static int SEARCH_SLEEP_TIME = 2500; // 2,5s
 	public final static long SEARCH_TIMEOUT = 10000; // 10 seconds
 	private static final int RESPONSE_WAIT_TIMEOUT = 10000; // 10 seconds
+
+	private final L2pLogger logger = L2pLogger.getInstance(NodeApplication.class.getName());
 
 	protected Endpoint endpoint;
 
@@ -92,8 +94,8 @@ public class NodeApplication implements Application, ScribeMultiClient {
 
 			htAgentTopics.put(receiver.getResponsibleForAgentId(), agentTopic);
 
-			ColoredOutput.printlnYellow("\t--> registering agent topic for " + receiver.getResponsibleForAgentId()
-					+ " (" + agentTopic.getId() + ")");
+			logger.info("\t--> registering agent topic for " + receiver.getResponsibleForAgentId() + " ("
+					+ agentTopic.getId() + ")");
 
 			// always subscribe to the root:
 			NodeHandle root = scribeClient.getRoot(agentTopic);
@@ -166,7 +168,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 
 	@Override
 	public void deliver(Id id, Message pastMessage) {
-		ColoredOutput.printlnYellow("\t<-- received message:" + pastMessage);
+		logger.info("\t<-- received message:" + pastMessage);
 
 		if (pastMessage instanceof MessageEnvelope) {
 			try {
@@ -206,7 +208,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 			if (pendingCollection != null)
 				pendingCollection.add(((SearchAnswerMessage) pastMessage).getSendingNode());
 			else
-				ColoredOutput.printlnRed("got a timed out response or response to a message not sent by me!");
+				logger.warning("got a timed out response or response to a message not sent by me!");
 		} else if (pastMessage instanceof GetInfoMessage) {
 			// just send a response
 			GetInfoMessage gim = (GetInfoMessage) pastMessage;
@@ -248,7 +250,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 			waiter.collectResult(uar);
 		} else {
 			l2pNode.observerNotice(Event.MESSAGE_RECEIVED, l2pNode.getNodeId(), null, "unkown message: " + pastMessage);
-			ColoredOutput.printlnYellow("\t<-- received unknown message: " + pastMessage);
+			logger.warning("\t<-- received unknown message: " + pastMessage);
 		}
 	}
 
@@ -270,7 +272,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	 * Called to route a message to the id
 	 */
 	public void routeMyMsg(Id id) {
-		ColoredOutput.printlnYellow("\t --> " + this + " sending to " + id);
+		logger.info("\t --> " + this + " sending to " + id);
 		Message msg = new PastryTestMessage(endpoint.getId(), id);
 		endpoint.route(id, msg, null);
 	}
@@ -279,7 +281,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	 * Called to directly send a message to the nh
 	 */
 	public void routeMyMsgDirect(NodeHandle nh) {
-		ColoredOutput.printlnYellow("\t --> " + this + " sending direct to " + nh);
+		logger.info("\t --> " + this + " sending direct to " + nh);
 
 		Message msg = new PastryTestMessage(endpoint.getId(), nh.getId());
 		endpoint.route(null, msg, nh);
@@ -301,7 +303,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 		l2pNode.observerNotice(Event.MESSAGE_SENDING, l2pNode.getPastryNode(), m.getContainedMessage().getSender(), to,
 				m.getContainedMessage().getRecipient(), "message: " + m);
 
-		ColoredOutput.printlnYellow("\t --> " + this + " sending (encapsulated) message directly to " + to);
+		logger.info("\t --> " + this + " sending (encapsulated) message directly to " + to);
 		endpoint.route(null, m, to);
 	}
 
@@ -421,7 +423,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	@Override
 	public void deliver(Topic topic, ScribeContent content) {
 		if (content instanceof SearchAgentContent) {
-			ColoredOutput.printlnYellow("\t\t<---got request for agent");
+			logger.info("\t\t<---got request for agent");
 
 			for (Long regId : htAgentTopics.keySet()) {
 				if (htAgentTopics.get(regId).equals(topic)) {
@@ -435,14 +437,14 @@ public class NodeApplication implements Application, ScribeMultiClient {
 							((SearchAgentContent) content).getOrigin());
 					// send return message
 
-					ColoredOutput.printlnYellow("\t\t---> found " + regId + " > response sent");
+					logger.info("\t\t---> found " + regId + " > response sent");
 					return;
 				}
 			}
 
-			ColoredOutput.printlnYellow("\t\t<--- subscribed but agent not found!!!!");
+			logger.severe("\t\t<--- subscribed but agent not found!!!!");
 		} else if (content instanceof AgentJoinedContent) {
-			ColoredOutput.printlnYellow(
+			logger.info(
 					"\t\t<--- got notification about agent joining: " + ((AgentJoinedContent) content).getAgentId());
 		} else if (content instanceof BroadcastMessageContent) {
 			final BroadcastMessageContent c = (BroadcastMessageContent) content;
@@ -451,27 +453,24 @@ public class NodeApplication implements Application, ScribeMultiClient {
 			new Thread(new Runnable() {
 				@Override
 				public void run() {
-
 					try {
 						l2pNode.receiveMessage(c.getMessage());
 					} catch (MalformedXMLException e) {
-						ColoredOutput.printlnRed("unable to open BroadcastMessageContent!");
+						logger.severe("unable to open BroadcastMessageContent!");
 					} catch (L2pSecurityException e) {
-						ColoredOutput.printlnRed("L2pSecurityException while handling received message!");
+						logger.severe("L2pSecurityException while handling received message!");
 					} catch (MessageException e) {
-						ColoredOutput.printlnRed("MessageException while handling received message!");
-						e.printStackTrace();
+						logger.log(Level.SEVERE, "MessageException while handling received message!", e);
 					} catch (AgentNotKnownException e) {
-						ColoredOutput.printlnRed("AgentNotKnown!?! - I shouldn't have gotten this message!");
+						logger.severe("AgentNotKnown!?! - I shouldn't have gotten this message!");
 					}
-
 				}
 
 			}).start();
 		} else {
 			l2pNode.observerNotice(Event.MESSAGE_RECEIVED_UNKNOWN, this.l2pNode.getNodeId(),
 					"got an unknown message of type " + content.getClass().getName());
-			ColoredOutput.printlnYellow("got unknown Scribe content of type " + content.getClass().getName());
+			logger.info("got unknown Scribe content of type " + content.getClass().getName());
 		}
 	}
 
