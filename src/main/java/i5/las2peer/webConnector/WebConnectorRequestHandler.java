@@ -432,8 +432,11 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			return true;
 		} catch (NoMethodFoundException | NotSupportedUriPathException e) {
 			sendNoSuchMethod(exchange);
+		} catch (NumberFormatException e) {
+			sendMalformedRequest(exchange,e.toString());
 		} catch (Exception e) {
 			connector.logError("Error occured:" + exchange.getRequestURI().getPath() + " " + e.getMessage());
+			sendInternalErrorResponse(exchange, e.toString());
 		}
 		return false;
 	}
@@ -534,6 +537,19 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		} catch (EnvelopeException e) {
 			sendInternalErrorResponse(exchange, e.getMessage());
 		}
+	}
+	
+	/**
+	 * send a notification, that the requested service does not exists
+	 * 
+	 * @param request
+	 * @param response
+	 * @param service
+	 */
+	private void sendMalformedRequest(HttpExchange exchange, String error) {
+		//connector.logError("Malformed request: " + error);
+		sendStringResponse(exchange, HttpURLConnection.HTTP_BAD_REQUEST,
+				"Malformed Request: wrong datatypes");
 	}
 
 	/**

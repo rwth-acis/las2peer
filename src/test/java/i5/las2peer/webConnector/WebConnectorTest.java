@@ -386,6 +386,20 @@ public class WebConnectorTest {
 			e.printStackTrace();
 			fail("Exception: " + e);
 		}
+		
+		// send string in PathParam where int is needed
+		try {
+			c.setLogin(Long.toString(testAgent.getId()), testPass);
+
+			ClientResponse result = c.sendRequest("POST", "books/evilString", "", new Pair[] {});
+
+			assertEquals(400, result.getHttpCode());
+			assertEquals(true, result.getResponse().contains("Malformed Request"));
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("Exception: " + e);
+		}
 	}
 
 }
