@@ -45,11 +45,11 @@ public class WebConnectorServiceInfoTest {
 		node.storeAgent(MockAgentFactory.getGroup1());
 		node.launch();
 
-		ServiceAgent testService = ServiceAgent.generateNewAgent(testServiceClass, "a pass");
-		ServiceAgent testService2 = ServiceAgent.generateNewAgent(testServiceClass2, "a pass");
-		ServiceAgent testService3 = ServiceAgent.generateNewAgent(testServiceClass3, "a pass");
-		ServiceAgent testService4 = ServiceAgent.generateNewAgent(testServiceClass4, "a pass");
-		ServiceAgent testService5 = ServiceAgent.generateNewAgent(testServiceClass5, "a pass");
+		ServiceAgent testService = ServiceAgent.createServiceAgent(testServiceClass, "a pass");
+		ServiceAgent testService2 = ServiceAgent.createServiceAgent(testServiceClass2, "a pass");
+		ServiceAgent testService3 = ServiceAgent.createServiceAgent(testServiceClass3, "a pass");
+		ServiceAgent testService4 = ServiceAgent.createServiceAgent(testServiceClass4, "a pass");
+		ServiceAgent testService5 = ServiceAgent.createServiceAgent(testServiceClass5, "a pass");
 
 		testService.unlockPrivateKey("a pass");
 		testService2.unlockPrivateKey("a pass");
