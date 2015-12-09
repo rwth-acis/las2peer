@@ -267,7 +267,8 @@ public class ServiceInfoAgent extends PassphraseAgent {
 	 * @param serviceAgent
 	 * @throws EnvelopeException
 	 */
-	public void serviceAdded(ServiceAgent serviceAgent, Node node)
+	// TODO "synchronized" is a workaroud for LAS-217
+	synchronized public void serviceAdded(ServiceAgent serviceAgent, Node node)
 			throws EnvelopeException, AgentException, L2pSecurityException {
 		// FIXME versions of services
 		ServiceNameVersion servicenameVersion = new ServiceNameVersion(serviceAgent.getServiceClassName(), "1.0");
@@ -302,7 +303,8 @@ public class ServiceInfoAgent extends PassphraseAgent {
 	 * @param serviceAgent
 	 * @throws EnvelopeException
 	 */
-	public void serviceRemoved(ServiceAgent serviceAgent, Node node)
+	// TODO "synchronized" is a workaroud for LAS-217
+	synchronized public void serviceRemoved(ServiceAgent serviceAgent, Node node)
 			throws EnvelopeException, AgentException, L2pSecurityException {
 		ServiceNameVersion servicenameVersion = new ServiceNameVersion(serviceAgent.getServiceClassName(), "1.0");
 
