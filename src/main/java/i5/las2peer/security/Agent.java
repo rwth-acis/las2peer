@@ -299,7 +299,6 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	 * @return an agent
 	 * 
 	 * @throws MalformedXMLException
-	 * @throws XMLSyntaxException
 	 */
 	public static Agent createFromXml(String xml) throws MalformedXMLException {
 		try {
@@ -315,10 +314,8 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	 * Depending on the type attribute of the root node, the type will be a {@link UserAgent}, {@link GroupAgent},
 	 * {@link ServiceAgent}. Creation of {@link MonitoringAgent}s is not supported.
 	 * 
-	 * @param xml
-	 * 
+	 * @param root
 	 * @return an agent
-	 * 
 	 * @throws MalformedXMLException
 	 */
 	public static Agent createFromXml(Element root) throws MalformedXMLException {

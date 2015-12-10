@@ -256,8 +256,8 @@ public class Context implements AgentStorage {
 	}
 
 	/**
-	 * @deprecated Use {@link L2pLogger#logEvent(Object, Event.SERVICE_MESSAGE, String)} instead!<br/>
-	 * 
+	 * @deprecated Use {@link L2pLogger#logEvent(Object, Event, String)} with {@link Event#SERVICE_MESSAGE} instead!
+	 *             <p>
 	 *             Logs a message to the l2p system using the observers.
 	 * 
 	 *             Since this method will/should only be used in an L2pThread, the message will come from a service or a
@@ -274,8 +274,8 @@ public class Context implements AgentStorage {
 	}
 
 	/**
-	 * @deprecated Use {@link L2pLogger#logEvent(Object, Event, String, Agent, Agent)} instead!<br/>
-	 * 
+	 * @deprecated Use {@link L2pLogger#logEvent(Object, Event, String, Agent, Agent)} instead!
+	 *             <p>
 	 *             Writes a log message. The given index (1-99) can be used to differentiate between different log
 	 *             messages. The serviceAgent and actingUser can be set to null if not known. Then this message will not
 	 *             be monitored by the monitoring observer.
@@ -297,8 +297,8 @@ public class Context implements AgentStorage {
 	}
 
 	/**
-	 * @deprecated Use {@link L2pLogger#logEvent(Object, Event.SERVICE_ERROR, String)} instead!<br/>
-	 * 
+	 * @deprecated Use {@link L2pLogger#logEvent(Object, Event, String)} with {@link Event#SERVICE_ERROR} instead!
+	 *             <p>
 	 *             Logs an error message to the l2p system using the observers.
 	 * 
 	 *             Since this method will/should only be used in an L2pThread, the message will come from a service or a
@@ -315,8 +315,8 @@ public class Context implements AgentStorage {
 	}
 
 	/**
-	 * @deprecated Use {@link L2pLogger#logEvent(Object, Event, String, Agent, Agent)} instead!<br/>
-	 * 
+	 * @deprecated Use {@link L2pLogger#logEvent(Object, Event, String, Agent, Agent)} instead!
+	 *             <p>
 	 *             Writes an error message. The given index (1-99) can be used to differentiate between different log
 	 *             messages. The serviceAgent and userAgent can be set to null if not known. Then this message will not
 	 *             be monitored by the monitoring observer.

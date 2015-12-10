@@ -31,19 +31,17 @@ import i5.simpleXML.XMLSyntaxException;
 // TODO: typed content?
 
 /**
- * An envelope provides a secure storage for any {@link Serializable} content
- * within the LAS2peer network.
+ * An envelope provides a secure storage for any {@link Serializable} content within the LAS2peer network.
  * 
- * The content will be encrypted symmetrically, the key for opening the envelope
- * will be provided to all entitled {@link i5.las2peer.security.Agent}s via
- * asymmetrical encryption. All encrypted versions of the decryption key are
+ * The content will be encrypted symmetrically, the key for opening the envelope will be provided to all entitled
+ * {@link i5.las2peer.security.Agent}s via asymmetrical encryption. All encrypted versions of the decryption key are
  * part of the envelope itself.
  * 
- * The serialization of the content may be implemented via simple java
- * serialization or the {@link XmlAble} facilities of las2peer.
+ * The serialization of the content may be implemented via simple java serialization or the {@link XmlAble} facilities
+ * of las2peer.
  * 
- * By adding a signature to an Agent gets writing access. If no signature is
- * given for an Envelope, every Agent who is a reader can write to the Envelope.
+ * By adding a signature to an Agent gets writing access. If no signature is given for an Envelope, every Agent who is a
+ * reader can write to the Envelope.
  * 
  */
 public final class Envelope implements XmlAble, Cloneable {
@@ -53,7 +51,10 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * 
 	 */
 	public enum ContentType {
-		String, XmlAble, Serializable, Binary
+		String,
+		XmlAble,
+		Serializable,
+		Binary
 	};
 
 	private byte[] baCipherData;
@@ -67,15 +68,14 @@ public final class Envelope implements XmlAble, Cloneable {
 	private boolean bOpen;
 
 	/**
-	 * may this envelope be overwritten without knowledge of the previous
-	 * version?
+	 * may this envelope be overwritten without knowledge of the previous version?
 	 * 
 	 */
 	private boolean bOverwriteBlindly;
 
 	/**
-	 * may the content of this envelope be overwritten by {@link #updateContent}
-	 * or just via the object returned by {@link #getContent}
+	 * may the content of this envelope be overwritten by {@link #updateContent} or just via the object returned by
+	 * {@link #getContent}
 	 * 
 	 * true indicates possibility of direct update
 	 */
@@ -99,14 +99,12 @@ public final class Envelope implements XmlAble, Cloneable {
 	private SecretKey symmetricKey;
 
 	/**
-	 * encrypted versions of the symmetric key for each agent with read
-	 * permissions
+	 * encrypted versions of the symmetric key for each agent with read permissions
 	 */
 	private final Hashtable<Long, byte[]> htEncryptedKeys = new Hashtable<>();
 
 	/**
-	 * encrypted versions of the symmetric key for each group agent with read
-	 * permissions
+	 * encrypted versions of the symmetric key for each group agent with read permissions
 	 */
 	private final Hashtable<Long, byte[]> htEncryptedGroupKeys = new Hashtable<>();
 
@@ -121,8 +119,8 @@ public final class Envelope implements XmlAble, Cloneable {
 	private Serializable contentStorage;
 
 	/**
-	 * base constructor for generating instances to be filled via
-	 * {@link fromXmlString} used by the factory {@link createFromXml}
+	 * base constructor for generating instances to be filled via {@link fromXmlString} used by the factory
+	 * {@link createFromXml}
 	 */
 	private Envelope() {
 		bOpen = false;
@@ -139,8 +137,7 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * @throws EncodingFailedException
 	 * @throws DecodingFailedException
 	 */
-	public Envelope(byte[] content, Agent reader)
-			throws EncodingFailedException, DecodingFailedException {
+	public Envelope(byte[] content, Agent reader) throws EncodingFailedException, DecodingFailedException {
 		this(content, new Agent[] { reader });
 	}
 
@@ -154,8 +151,7 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * 
 	 * @throws EncodingFailedException
 	 */
-	public Envelope(byte[] content, Agent[] readers)
-			throws EncodingFailedException {
+	public Envelope(byte[] content, Agent[] readers) throws EncodingFailedException {
 		this(content, readers, new Random().nextLong());
 	}
 
@@ -171,8 +167,7 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * @throws EncodingFailedException
 	 * @throws L2pSecurityException
 	 */
-	private Envelope(byte[] content, Agent[] readers, long id)
-			throws EncodingFailedException {
+	private Envelope(byte[] content, Agent[] readers, long id) throws EncodingFailedException {
 		this.id = id;
 		bOpen = true;
 
@@ -224,8 +219,7 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * @throws DecodingFailedException
 	 */
 	public Envelope(String content, Agent reader)
-			throws UnsupportedEncodingException, EncodingFailedException,
-			DecodingFailedException {
+			throws UnsupportedEncodingException, EncodingFailedException, DecodingFailedException {
 		this(content, new Agent[] { reader });
 	}
 
@@ -240,8 +234,7 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * @throws UnsupportedEncodingException
 	 * @throws EncodingFailedException
 	 */
-	public Envelope(String content, Agent[] readers)
-			throws UnsupportedEncodingException, EncodingFailedException {
+	public Envelope(String content, Agent[] readers) throws UnsupportedEncodingException, EncodingFailedException {
 		this(content, readers, new Random().nextLong());
 	}
 
@@ -284,8 +277,7 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * @throws UnsupportedEncodingException
 	 * @throws EncodingFailedException
 	 */
-	public Envelope(XmlAble content, Agent[] readers)
-			throws UnsupportedEncodingException, EncodingFailedException {
+	public Envelope(XmlAble content, Agent[] readers) throws UnsupportedEncodingException, EncodingFailedException {
 		this(content, readers, new Random().nextLong());
 	}
 
@@ -330,8 +322,7 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * @throws SerializationException
 	 * @throws DecodingFailedException
 	 */
-	public Envelope(Serializable content, Agent reader)
-			throws EnvelopeException, SerializationException {
+	public Envelope(Serializable content, Agent reader) throws EnvelopeException, SerializationException {
 		this(content, new Agent[] { reader });
 	}
 
@@ -346,8 +337,7 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * @throws EncodingFailedException
 	 * @throws SerializationException
 	 */
-	public Envelope(Serializable content, Agent[] readers)
-			throws EncodingFailedException, SerializationException {
+	public Envelope(Serializable content, Agent[] readers) throws EncodingFailedException, SerializationException {
 		this(content, readers, new Random().nextLong());
 	}
 
@@ -393,20 +383,16 @@ public final class Envelope implements XmlAble, Cloneable {
 	/**
 	 * May this envelope be overwritten by envelopes not knowing this state?
 	 * 
-	 * By default, blindly overwriting is turned off. In this case, another
-	 * envelope trying to replace this one, has to refer to the timestamp of
-	 * this envelope suggesting to be an updated version. Otherwise a
-	 * replacement will fail with an
-	 * {@link i5.las2peer.security.L2pSecurityException}.
+	 * By default, blindly overwriting is turned off. In this case, another envelope trying to replace this one, has to
+	 * refer to the timestamp of this envelope suggesting to be an updated version. Otherwise a replacement will fail
+	 * with an {@link i5.las2peer.security.L2pSecurityException}.
 	 * 
 	 * @param overwrite
 	 * @throws L2pSecurityException
 	 */
-	public void setOverWriteBlindly(boolean overwrite)
-			throws L2pSecurityException {
+	public void setOverWriteBlindly(boolean overwrite) throws L2pSecurityException {
 		if (!isOpen())
-			throw new L2pSecurityException(
-					"evenlope has to be openend before manipulation!");
+			throw new L2pSecurityException("evenlope has to be openend before manipulation!");
 
 		bOverwriteBlindly = overwrite;
 	}
@@ -437,8 +423,7 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * @throws DecodingFailedException
 	 * @throws L2pSecurityException
 	 */
-	public void open(Agent agent) throws DecodingFailedException,
-			L2pSecurityException {
+	public void open(Agent agent) throws DecodingFailedException, L2pSecurityException {
 		try {
 			byte[] encoded;
 			if (agent instanceof GroupAgent)
@@ -448,8 +433,7 @@ public final class Envelope implements XmlAble, Cloneable {
 
 			if (encoded == null) {
 				// System.out.println ( this.toXmlString() );
-				throw new L2pSecurityException("agent " + agent.getId()
-						+ " has no access to this object");
+				throw new L2pSecurityException("agent " + agent.getId() + " has no access to this object");
 			}
 
 			symmetricKey = (SecretKey) agent.returnSecretKey(encoded);
@@ -458,17 +442,14 @@ public final class Envelope implements XmlAble, Cloneable {
 			decryptData();
 			bOpen = true;
 		} catch (SerializationException e) {
-			throw new DecodingFailedException(
-					"unable to deserialize decoded symmetric key", e);
+			throw new DecodingFailedException("unable to deserialize decoded symmetric key", e);
 		} catch (CryptoException e) {
-			throw new DecodingFailedException(
-					"Crypto problems decoding symmetric key", e);
+			throw new DecodingFailedException("Crypto problems decoding symmetric key", e);
 		}
 	}
 
 	/**
-	 * tries to open the encryption inside a L2pThread and the corresponding
-	 * context
+	 * tries to open the encryption inside a L2pThread and the corresponding context
 	 * 
 	 * @throws L2pSecurityException
 	 * @throws DecodingFailedException
@@ -505,12 +486,10 @@ public final class Envelope implements XmlAble, Cloneable {
 			throw new NullPointerException("No data");
 
 		if (htEncryptedKeys.size() == 0 && htEncryptedGroupKeys.size() == 0)
-			throw new EncodingFailedException(
-					"The Envelope should be readable to at least one agent!");
+			throw new EncodingFailedException("The Envelope should be readable to at least one agent!");
 
 		try {
-			baCipherData = CryptoTools.encryptSymmetric(baPlainData,
-					symmetricKey);
+			baCipherData = CryptoTools.encryptSymmetric(baPlainData, symmetricKey);
 
 			baPlainData = null;
 			symmetricKey = null;
@@ -534,12 +513,10 @@ public final class Envelope implements XmlAble, Cloneable {
 			throw new NullPointerException("No encrypted data found!");
 
 		if (symmetricKey == null)
-			throw new DecodingFailedException(
-					"You need to open the envelope for an agent first!");
+			throw new DecodingFailedException("You need to open the envelope for an agent first!");
 
 		try {
-			baPlainData = CryptoTools.decryptSymmetric(baCipherData,
-					symmetricKey);
+			baPlainData = CryptoTools.decryptSymmetric(baCipherData, symmetricKey);
 			baCipherData = null;
 		} catch (CryptoException e) {
 			throw new DecodingFailedException("crypto problems!", e);
@@ -555,12 +532,10 @@ public final class Envelope implements XmlAble, Cloneable {
 	 */
 	public void addReader(Agent agent) throws EncodingFailedException {
 		if (symmetricKey == null)
-			throw new EncodingFailedException(
-					"Envelope has not been opened yet!");
+			throw new EncodingFailedException("Envelope has not been opened yet!");
 
 		try {
-			byte[] encodedKey = CryptoTools.encryptAsymmetric(symmetricKey,
-					agent.getPublicKey());
+			byte[] encodedKey = CryptoTools.encryptAsymmetric(symmetricKey, agent.getPublicKey());
 
 			if (agent instanceof GroupAgent)
 				htEncryptedGroupKeys.put(agent.getId(), encodedKey);
@@ -569,8 +544,7 @@ public final class Envelope implements XmlAble, Cloneable {
 		} catch (CryptoException e) {
 			throw new EncodingFailedException("crypto problems", e);
 		} catch (SerializationException e) {
-			throw new EncodingFailedException(
-					"unable to serialize symmetric key!", e);
+			throw new EncodingFailedException("unable to serialize symmetric key!", e);
 		}
 	}
 
@@ -583,8 +557,7 @@ public final class Envelope implements XmlAble, Cloneable {
 	 */
 	public void removeReader(Agent agent) throws L2pSecurityException {
 		if (!isOpen())
-			throw new L2pSecurityException(
-					"you have to open the envelope first!");
+			throw new L2pSecurityException("you have to open the envelope first!");
 
 		if (agent instanceof GroupAgent)
 			htEncryptedGroupKeys.remove(agent.getId());
@@ -593,9 +566,8 @@ public final class Envelope implements XmlAble, Cloneable {
 	}
 
 	/**
-	 * add a signature for the content. only agents that signed the Evnelope
-	 * have writing access. if no signature is given, every reader can write to
-	 * the envelope.
+	 * add a signature for the content. only agents that signed the Evnelope have writing access. if no signature is
+	 * given, every reader can write to the envelope.
 	 * 
 	 * @param agent
 	 * 
@@ -606,8 +578,7 @@ public final class Envelope implements XmlAble, Cloneable {
 			throw new IllegalStateException("This envelope is not open!");
 
 		if (!agent.equals(openedBy))
-			throw new IllegalStateException(
-					"The given agent has not opened this envelope!");
+			throw new IllegalStateException("The given agent has not opened this envelope!");
 
 		try {
 			byte[] signature = agent.signContent(baPlainData);
@@ -633,12 +604,10 @@ public final class Envelope implements XmlAble, Cloneable {
 			throw new IllegalStateException("This envelope is not open!");
 
 		if (!openedBy.equals(agent))
-			throw new EncodingFailedException(
-					"The given agent has not opened this envelope!");
+			throw new EncodingFailedException("The given agent has not opened this envelope!");
 
 		if (!isSignedBy(agent))
-			throw new EncodingFailedException(
-					"The given agent has not signed this envelope!");
+			throw new EncodingFailedException("The given agent has not signed this envelope!");
 
 		htSignatures.remove(agent.getId());
 	}
@@ -655,18 +624,15 @@ public final class Envelope implements XmlAble, Cloneable {
 			throw new IllegalStateException("This envelope is not open!");
 
 		if (!isSignedBy(agent))
-			throw new VerificationFailedException(
-					"the given agent has not signed this envelope!");
+			throw new VerificationFailedException("the given agent has not signed this envelope!");
 
 		byte[] signature = htSignatures.get(agent.getId());
 
 		try {
-			if (!CryptoTools.verifySignature(signature, baPlainData,
-					agent.getPublicKey()))
+			if (!CryptoTools.verifySignature(signature, baPlainData, agent.getPublicKey()))
 				throw new VerificationFailedException("Verification failed!!");
 		} catch (Exception e) {
-			throw new VerificationFailedException(
-					"Verification failed due to other exception", e);
+			throw new VerificationFailedException("Verification failed due to other exception", e);
 		}
 	}
 
@@ -702,13 +668,12 @@ public final class Envelope implements XmlAble, Cloneable {
 	}
 
 	/**
-	 * lock the content of this envelope, so that updates are only possible via
-	 * the object returned by {@link #getContent}
+	 * lock the content of this envelope, so that updates are only possible via the object returned by
+	 * {@link #getContent}
 	 */
 	public void lockContent() {
 		if (!contentType.equals(ContentType.Serializable))
-			throw new IllegalArgumentException(
-					"only envelopes containing serializable content may be locked!");
+			throw new IllegalArgumentException("only envelopes containing serializable content may be locked!");
 
 		bUpdateContent = false;
 	}
@@ -745,8 +710,7 @@ public final class Envelope implements XmlAble, Cloneable {
 		} catch (UnsupportedEncodingException e) {
 			return new String(content);
 		} catch (Exception e) {
-			throw new EnvelopeException(
-					"Coding problems with interpreting the content", e);
+			throw new EnvelopeException("Coding problems with interpreting the content", e);
 		}
 	}
 
@@ -765,8 +729,7 @@ public final class Envelope implements XmlAble, Cloneable {
 	}
 
 	/**
-	 * try to return the contents of the envelope as a real object which has
-	 * been serialized via XmlAble
+	 * try to return the contents of the envelope as a real object which has been serialized via XmlAble
 	 * 
 	 * @return content as XmlAble instance
 	 * 
@@ -779,8 +742,7 @@ public final class Envelope implements XmlAble, Cloneable {
 		try {
 			return XmlTools.createFromXml(getContentAsString(), clContentClass);
 		} catch (Exception e) {
-			throw new EnvelopeException(
-					"unable to create instance from xml content", e);
+			throw new EnvelopeException("unable to create instance from xml content", e);
 		}
 	}
 
@@ -794,8 +756,7 @@ public final class Envelope implements XmlAble, Cloneable {
 	}
 
 	/**
-	 * try to return the contents of the envelope as a real object which has
-	 * been serialized via standard serialization
+	 * try to return the contents of the envelope as a real object which has been serialized via standard serialization
 	 * 
 	 * @return deserialized content via standard java serialization
 	 * 
@@ -819,8 +780,7 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * @throws EnvelopeException
 	 */
 	@SuppressWarnings("unchecked")
-	public <T extends Serializable> T getContent(Class<T> cls)
-			throws EnvelopeException {
+	public <T extends Serializable> T getContent(Class<T> cls) throws EnvelopeException {
 		try {
 			if (contentStorage == null)
 				contentStorage = getContentAsSerializable();
@@ -840,51 +800,41 @@ public final class Envelope implements XmlAble, Cloneable {
 				close();
 			} catch (EncodingFailedException e) {
 				// TODO: exceptions for toXmlString!
-				throw new RuntimeException(
-						"problems with the encoding of the envelope contents!",
-						e);
+				throw new RuntimeException("problems with the encoding of the envelope contents!", e);
 			}
 		}
 
-		String encodedKeys = "\t<las2peer:keys encoding=\"base64\" encryption=\""
-				+ CryptoTools.getAsymmetricAlgorithm() + "\">\n";
+		String encodedKeys = "\t<las2peer:keys encoding=\"base64\" encryption=\"" + CryptoTools.getAsymmetricAlgorithm()
+				+ "\">\n";
 		for (Long id : htEncryptedKeys.keySet()) {
-			encodedKeys += "\t\t<las2peer:key id=\"" + id + "\">"
-					+ Base64.encodeBase64String(htEncryptedKeys.get(id))
+			encodedKeys += "\t\t<las2peer:key id=\"" + id + "\">" + Base64.encodeBase64String(htEncryptedKeys.get(id))
 					+ "</las2peer:key>\n";
 		}
 		for (Long id : htEncryptedGroupKeys.keySet()) {
-			encodedKeys += "\t\t<las2peer:key id=\"" + id
-					+ "\" type=\"group\">"
-					+ Base64.encodeBase64String(htEncryptedGroupKeys.get(id))
-					+ "</las2peer:key>\n";
+			encodedKeys += "\t\t<las2peer:key id=\"" + id + "\" type=\"group\">"
+					+ Base64.encodeBase64String(htEncryptedGroupKeys.get(id)) + "</las2peer:key>\n";
 		}
 		encodedKeys += "\t</las2peer:keys>\n";
 
 		String classInfo = "";
-		if (contentType == ContentType.XmlAble
-				|| contentType == ContentType.Serializable)
+		if (contentType == ContentType.XmlAble || contentType == ContentType.Serializable)
 			classInfo = " class=\"" + clContentClass.getCanonicalName() + "\"";
 
 		String signatures = "";
 		if (htSignatures.size() > 0) {
-			signatures = "\t<las2peer:signatures encoding=\"base64\" method=\""
-					+ CryptoTools.getSignatureMethod() + "\">\n";
+			signatures = "\t<las2peer:signatures encoding=\"base64\" method=\"" + CryptoTools.getSignatureMethod()
+					+ "\">\n";
 			for (Long id : htSignatures.keySet()) {
 				signatures += "\t\t<las2peer:signature id=\"" + id + "\">"
-						+ Base64.encodeBase64String(htSignatures.get(id))
-						+ "</las2peer:signature>\n";
+						+ Base64.encodeBase64String(htSignatures.get(id)) + "</las2peer:signature>\n";
 			}
 			signatures += "\t</las2peer:signatures>\n";
 		}
 
-		return "<las2peer:envelope lastchange=\"" + timestamp + "\"" + " id=\""
-				+ id + "\" blindOverwrite=\"" + bOverwriteBlindly + "\""
-				+ " update=\"" + bUpdateContent + "\"" + ">\n"
-				+ "\t<las2peer:content encoding=\"Base64\" type=\""
-				+ contentType.toString() + "\"" + classInfo + ">\n"
-				+ Base64.encodeBase64String(baCipherData)
-				+ "\t</las2peer:content>\n" + encodedKeys + signatures
+		return "<las2peer:envelope lastchange=\"" + timestamp + "\"" + " id=\"" + id + "\" blindOverwrite=\""
+				+ bOverwriteBlindly + "\"" + " update=\"" + bUpdateContent + "\"" + ">\n"
+				+ "\t<las2peer:content encoding=\"Base64\" type=\"" + contentType.toString() + "\"" + classInfo + ">\n"
+				+ Base64.encodeBase64String(baCipherData) + "\t</las2peer:content>\n" + encodedKeys + signatures
 				+ "</las2peer:envelope>\n";
 
 		// TODO: signatures?
@@ -892,8 +842,7 @@ public final class Envelope implements XmlAble, Cloneable {
 
 	/**
 	 * 
-	 * @return the agent that opened this envelop, null if the envelope is still
-	 *         closed
+	 * @return the agent that opened this envelop, null if the envelope is still closed
 	 */
 	public Agent getOpeningAgent() {
 		return openedBy;
@@ -920,8 +869,7 @@ public final class Envelope implements XmlAble, Cloneable {
 	 */
 	public void touch() throws L2pSecurityException {
 		if (!isOpen())
-			throw new L2pSecurityException(
-					"Envelope has to be opened before touching");
+			throw new L2pSecurityException("Envelope has to be opened before touching");
 
 		this.timestamp = new Date().getTime();
 	}
@@ -939,13 +887,11 @@ public final class Envelope implements XmlAble, Cloneable {
 	/**
 	 * stores this envelope to the persistent storage of Las2peer
 	 * 
-	 * @param agent
-	 *            one of the reader agents
+	 * @param agent one of the reader agents
 	 * @throws StorageException
 	 * @throws L2pSecurityException
 	 */
-	public void store(Agent agent) throws StorageException,
-			L2pSecurityException {
+	public void store(Agent agent) throws StorageException, L2pSecurityException {
 		if (agent.getRunningAtNode() != null) {
 			agent.getRunningAtNode().storeArtifact(this);
 		} else
@@ -953,16 +899,14 @@ public final class Envelope implements XmlAble, Cloneable {
 	}
 
 	/**
-	 * factory for generating an envelope from the given xml String
-	 * representation
+	 * factory for generating an envelope from the given xml String representation
 	 * 
-	 * @param xml
+	 * @param root
 	 * @return envelope created from the given xml String serialization
 	 * 
 	 * @throws MalformedXMLException
 	 */
-	public static Envelope createFromXml(Element root)
-			throws MalformedXMLException {
+	public static Envelope createFromXml(Element root) throws MalformedXMLException {
 		Envelope result = new Envelope();
 		try {
 			if (!root.getName().equals("envelope"))
@@ -971,69 +915,55 @@ public final class Envelope implements XmlAble, Cloneable {
 			if (!root.hasAttribute("id"))
 				throw new MalformedXMLException("id attribute expected!");
 			if (root.hasAttribute("blindOverwrite"))
-				result.bOverwriteBlindly = Boolean.valueOf(root
-						.getAttribute("blindOverwrite"));
+				result.bOverwriteBlindly = Boolean.valueOf(root.getAttribute("blindOverwrite"));
 			if (root.hasAttribute("overwrite"))
-				result.bUpdateContent = Boolean.valueOf(root
-						.getAttribute("update"));
+				result.bUpdateContent = Boolean.valueOf(root.getAttribute("update"));
 
 			result.id = Long.parseLong(root.getAttribute("id"));
-			result.loadedTimestamp = result.timestamp = Long.parseLong(root
-					.getAttribute("lastchange"));
+			result.loadedTimestamp = result.timestamp = Long.parseLong(root.getAttribute("lastchange"));
 
 			Element content = root.getFirstChild();
 			if (!content.getName().equals("content"))
 				throw new MalformedXMLException("envelope content expected");
 			if (!content.getAttribute("encoding").equals("Base64"))
-				throw new MalformedXMLException(
-						"base 64 encoding of the content expected");
+				throw new MalformedXMLException("base 64 encoding of the content expected");
 
 			result.contentType = stringToType(content.getAttribute("type"));
 			if (content.hasAttribute("class"))
 				try {
 					String classname = content.getAttribute("class");
 					if (classname.endsWith("[]"))
-						classname = classname.substring(0,
-								classname.length() - 2);
+						classname = classname.substring(0, classname.length() - 2);
 
 					result.clContentClass = Class.forName(classname);
 
 				} catch (ClassNotFoundException e) {
-					throw new MalformedXMLException("content class "
-							+ content.getAttribute("class") + " not found!");
+					throw new MalformedXMLException("content class " + content.getAttribute("class") + " not found!");
 				}
 
-			result.baCipherData = Base64.decodeBase64(content.getFirstChild()
-					.getText());
+			result.baCipherData = Base64.decodeBase64(content.getFirstChild().getText());
 
 			Element keys = root.getChild(1);
 			if (!keys.getName().equals("keys"))
 				throw new MalformedXMLException("not an envelope");
 			if (!keys.getAttribute("encoding").equals("base64"))
 				throw new MalformedXMLException(
-						"base 64 encoding of the content expected - got: "
-								+ keys.getAttribute("encoding"));
-			if (!keys.getAttribute("encryption").equals(
-					CryptoTools.getAsymmetricAlgorithm()))
+						"base 64 encoding of the content expected - got: " + keys.getAttribute("encoding"));
+			if (!keys.getAttribute("encryption").equals(CryptoTools.getAsymmetricAlgorithm()))
 				throw new MalformedXMLException(
-						CryptoTools.getAsymmetricAlgorithm()
-								+ " encryption of the content expected");
+						CryptoTools.getAsymmetricAlgorithm() + " encryption of the content expected");
 
-			for (Enumeration<Element> enKeys = keys.getChildren(); enKeys
-					.hasMoreElements();) {
+			for (Enumeration<Element> enKeys = keys.getChildren(); enKeys.hasMoreElements();) {
 				Element key = enKeys.nextElement();
 				if (!key.getName().equals("key"))
 					throw new MalformedXMLException("key expected");
 
 				long id = Long.parseLong(key.getAttribute("id"));
 
-				if (key.hasAttribute("type")
-						&& key.getAttribute("type").equals("group"))
-					result.htEncryptedGroupKeys.put(id,
-							Base64.decodeBase64(key.getFirstChild().getText()));
+				if (key.hasAttribute("type") && key.getAttribute("type").equals("group"))
+					result.htEncryptedGroupKeys.put(id, Base64.decodeBase64(key.getFirstChild().getText()));
 				else
-					result.htEncryptedKeys.put(id,
-							Base64.decodeBase64(key.getFirstChild().getText()));
+					result.htEncryptedKeys.put(id, Base64.decodeBase64(key.getFirstChild().getText()));
 			}
 
 			// signaturen
@@ -1043,29 +973,22 @@ public final class Envelope implements XmlAble, Cloneable {
 					throw new MalformedXMLException("signatures expected");
 				if (!signatures.getAttribute("encoding").equals("base64"))
 					throw new MalformedXMLException(
-							"base 64 encoding of the content expected - got: "
-									+ keys.getAttribute("encoding"));
-				if (!signatures.getAttribute("method").equals(
-						CryptoTools.getSignatureMethod()))
-					throw new MalformedXMLException(
-							CryptoTools.getSignatureMethod()
-									+ " expected as signature method");
+							"base 64 encoding of the content expected - got: " + keys.getAttribute("encoding"));
+				if (!signatures.getAttribute("method").equals(CryptoTools.getSignatureMethod()))
+					throw new MalformedXMLException(CryptoTools.getSignatureMethod() + " expected as signature method");
 
-				for (Enumeration<Element> enSigs = signatures.getChildren(); enSigs
-						.hasMoreElements();) {
+				for (Enumeration<Element> enSigs = signatures.getChildren(); enSigs.hasMoreElements();) {
 					Element sig = enSigs.nextElement();
 					if (!sig.getName().equals("signature"))
 						throw new MalformedXMLException("signature expected");
 
 					long id = Long.parseLong(sig.getAttribute("id"));
-					result.htSignatures.put(id,
-							Base64.decodeBase64(sig.getFirstChild().getText()));
+					result.htSignatures.put(id, Base64.decodeBase64(sig.getFirstChild().getText()));
 				}
 			}
 
 		} catch (XMLSyntaxException e) {
-			throw new MalformedXMLException(
-					"problems with parsing the xml document", e);
+			throw new MalformedXMLException("problems with parsing the xml document", e);
 		}
 
 		// TODO signatures ?!?
@@ -1109,21 +1032,18 @@ public final class Envelope implements XmlAble, Cloneable {
 	}
 
 	/**
-	 * factory for generating an envelope from the given XML String
-	 * representation
+	 * factory for generating an envelope from the given XML String representation
 	 * 
 	 * @param xml
 	 * @return envelope created from the given XML String serialization
 	 * 
 	 * @throws MalformedXMLException
 	 */
-	public static Envelope createFromXml(String xml)
-			throws MalformedXMLException {
+	public static Envelope createFromXml(String xml) throws MalformedXMLException {
 		try {
 			return createFromXml(Parser.parse(xml, false));
 		} catch (XMLSyntaxException e) {
-			throw new MalformedXMLException(
-					"problems with parsing the xml document", e);
+			throw new MalformedXMLException("problems with parsing the xml document", e);
 		}
 	}
 
@@ -1142,8 +1062,7 @@ public final class Envelope implements XmlAble, Cloneable {
 	/**
 	 * get a long id for a specific class/identifier combination
 	 * 
-	 * // TODO: handle hash collisions?! // possible: extend identifier with
-	 * counter, if a collision occurs
+	 * // TODO: handle hash collisions?! // possible: extend identifier with counter, if a collision occurs
 	 * 
 	 * @param cls
 	 * @param identifier
@@ -1155,8 +1074,7 @@ public final class Envelope implements XmlAble, Cloneable {
 	}
 
 	/**
-	 * factory: create an envelope with a definite id for the given class and
-	 * identifier string
+	 * factory: create an envelope with a definite id for the given class and identifier string
 	 * 
 	 * @param content
 	 * @param identifier
@@ -1168,29 +1086,22 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * @throws SerializationException
 	 * @throws UnsupportedEncodingException
 	 */
-	public static Envelope createClassIdEnvelope(Object content,
-			String identifier, Agent[] readers) throws EncodingFailedException,
-			SerializationException, UnsupportedEncodingException {
+	public static Envelope createClassIdEnvelope(Object content, String identifier, Agent[] readers)
+			throws EncodingFailedException, SerializationException, UnsupportedEncodingException {
 		if (content instanceof String)
-			return new Envelope((String) content, readers, getClassEnvelopeId(
-					content.getClass(), identifier));
+			return new Envelope((String) content, readers, getClassEnvelopeId(content.getClass(), identifier));
 		else if (content instanceof XmlAble)
-			return new Envelope((XmlAble) content, readers, getClassEnvelopeId(
-					content.getClass(), identifier));
+			return new Envelope((XmlAble) content, readers, getClassEnvelopeId(content.getClass(), identifier));
 		else if (content instanceof Serializable)
-			return new Envelope((Serializable) content, readers,
-					getClassEnvelopeId(content.getClass(), identifier));
+			return new Envelope((Serializable) content, readers, getClassEnvelopeId(content.getClass(), identifier));
 		else if (content instanceof byte[])
-			return new Envelope((byte[]) content, readers, getClassEnvelopeId(
-					content.getClass(), identifier));
+			return new Envelope((byte[]) content, readers, getClassEnvelopeId(content.getClass(), identifier));
 		else
-			throw new IllegalArgumentException(
-					"content has to be (xml) String, Serializable, XmlAble or byte[]");
+			throw new IllegalArgumentException("content has to be (xml) String, Serializable, XmlAble or byte[]");
 	}
 
 	/**
-	 * factory: create an envelope with a definite id for the given class and
-	 * identifier string
+	 * factory: create an envelope with a definite id for the given class and identifier string
 	 * 
 	 * @param content
 	 * @param identifier
@@ -1202,12 +1113,9 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * @throws EncodingFailedException
 	 * @throws UnsupportedEncodingException
 	 */
-	public static Envelope createClassIdEnvelope(Object content,
-			String identifier, Agent reader)
-			throws UnsupportedEncodingException, EncodingFailedException,
-			SerializationException {
-		return createClassIdEnvelope(content, identifier,
-				new Agent[] { reader });
+	public static Envelope createClassIdEnvelope(Object content, String identifier, Agent reader)
+			throws UnsupportedEncodingException, EncodingFailedException, SerializationException {
+		return createClassIdEnvelope(content, identifier, new Agent[] { reader });
 	}
 
 	/**
@@ -1220,8 +1128,7 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * @throws ArtifactNotFoundException
 	 * @throws StorageException
 	 */
-	public static Envelope fetch(long id) throws ArtifactNotFoundException,
-			StorageException {
+	public static Envelope fetch(long id) throws ArtifactNotFoundException, StorageException {
 		return Context.getCurrent().getStoredObject(id);
 	}
 
@@ -1230,10 +1137,8 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * 
 	 * Requires an active LAS2Peer @{link i5.las2peer.security.Context}.
 	 * 
-	 * @param cls
-	 *            type of the class
-	 * @param identifier
-	 *            an unique identifier for the envelope
+	 * @param cls type of the class
+	 * @param identifier an unique identifier for the envelope
 	 * @return an envelope
 	 * @throws ArtifactNotFoundException
 	 * @throws StorageException
@@ -1248,25 +1153,20 @@ public final class Envelope implements XmlAble, Cloneable {
 	 *
 	 * Requires an active LAS2Peer @{link i5.las2peer.security.Context}.
 	 * 
-	 * @param agent
-	 *            executing agent
-	 * @param cls
-	 *            type of the class
-	 * @param identifier
-	 *            an unique identifier for the envelope
+	 * @param agent executing agent
+	 * @param cls type of the class
+	 * @param identifier an unique identifier for the envelope
 	 * @return an envelope
 	 * @throws ArtifactNotFoundException
 	 * @throws StorageException
 	 */
-	public static Envelope fetchClassIdEnvelope(Agent agent, Class<?> cls,
-			String identifier) throws ArtifactNotFoundException,
-			StorageException {
+	public static Envelope fetchClassIdEnvelope(Agent agent, Class<?> cls, String identifier)
+			throws ArtifactNotFoundException, StorageException {
 		long id = Envelope.getClassEnvelopeId(cls, identifier);
 		if (agent.getRunningAtNode() != null)
 			return agent.getRunningAtNode().fetchArtifact(id);
 		else
-			throw new StorageException(
-					"This agent is not registered at any node");
+			throw new StorageException("This agent is not registered at any node");
 	}
 
 	/**
@@ -1279,11 +1179,9 @@ public final class Envelope implements XmlAble, Cloneable {
 	 */
 	public void updateContent(byte[] content) throws L2pSecurityException {
 		if (!isOpen())
-			throw new L2pSecurityException(
-					"You have to open the envelope before updating the content!");
+			throw new L2pSecurityException("You have to open the envelope before updating the content!");
 		if (!bUpdateContent)
-			throw new L2pSecurityException(
-					"Content my only be altered via the object retrieved by getContent!");
+			throw new L2pSecurityException("Content my only be altered via the object retrieved by getContent!");
 
 		baPlainData = content;
 		timestamp = new Date().getTime();
@@ -1301,8 +1199,7 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * @throws UnsupportedEncodingException
 	 * @throws L2pSecurityException
 	 */
-	public void updateContent(String content)
-			throws UnsupportedEncodingException, L2pSecurityException {
+	public void updateContent(String content) throws UnsupportedEncodingException, L2pSecurityException {
 		updateContent(content.getBytes("UTF-8"));
 		contentType = ContentType.String;
 	}
@@ -1314,8 +1211,7 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * @throws SerializationException
 	 * @throws L2pSecurityException
 	 */
-	public void updateContent(Serializable content)
-			throws L2pSecurityException, SerializationException {
+	public void updateContent(Serializable content) throws L2pSecurityException, SerializationException {
 		updateContent(SerializeTools.serialize(content));
 		contentType = ContentType.Serializable;
 		clContentClass = content.getClass();
@@ -1328,19 +1224,17 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * @throws L2pSecurityException
 	 * @throws UnsupportedEncodingException
 	 */
-	public void updateContent(XmlAble content)
-			throws UnsupportedEncodingException, L2pSecurityException {
+	public void updateContent(XmlAble content) throws UnsupportedEncodingException, L2pSecurityException {
 		updateContent(content.toXmlString());
 		contentType = ContentType.XmlAble;
 		clContentClass = content.getClass();
 	}
 
 	/**
-	 * check, if the current envelope may be overwritten by the given one. If
-	 * the current envelope is not signed, overwriting is permitted.
+	 * check, if the current envelope may be overwritten by the given one. If the current envelope is not signed,
+	 * overwriting is permitted.
 	 * 
-	 * Otherwise, the new envelope must contain at least one signature of the
-	 * signing agents if this envelope.
+	 * Otherwise, the new envelope must contain at least one signature of the signing agents if this envelope.
 	 * 
 	 * If overwriting is not allowed, a L2pSecurityException is thrown
 	 * 
@@ -1348,10 +1242,8 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * @throws L2pSecurityException
 	 */
 	public void checkOverwrite(Envelope envelope) throws L2pSecurityException {
-		if (!this.getOverwriteBlindly()
-				&& this.getReferalTimestamp() != envelope.getReferalTimestamp())
-			throw new OverwriteException(
-					"The new Envelope does not refer to this one!");
+		if (!this.getOverwriteBlindly() && this.getReferalTimestamp() != envelope.getReferalTimestamp())
+			throw new OverwriteException("The new Envelope does not refer to this one!");
 
 		if (this.htSignatures.size() == 0)
 			return;
@@ -1361,8 +1253,8 @@ public final class Envelope implements XmlAble, Cloneable {
 				return;
 		}
 
-		throw new L2pSecurityException("Check for Overwriting envelope "
-				+ getId() + " failed: No needed signature is provided!");
+		throw new L2pSecurityException(
+				"Check for Overwriting envelope " + getId() + " failed: No needed signature is provided!");
 	}
 
 	/**

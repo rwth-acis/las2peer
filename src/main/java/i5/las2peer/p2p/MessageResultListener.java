@@ -28,7 +28,10 @@ public class MessageResultListener {
 	 *
 	 */
 	public enum Status {
-		WAITING, SUCCESS, EXCEPTION, TIMEOUT
+		WAITING,
+		SUCCESS,
+		EXCEPTION,
+		TIMEOUT
 	};
 
 	// private int randomId = new Random().nextInt();

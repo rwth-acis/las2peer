@@ -74,14 +74,20 @@ public abstract class Node implements AgentStorage {
 	 * The Sending mode for outgoing messages.
 	 */
 	public enum SendMode {
-		ANYCAST, BROADCAST
+		ANYCAST,
+		BROADCAST
 	};
 
 	/**
 	 * Enum with the possible states of a node.
 	 */
 	public enum NodeStatus {
-		UNCONFIGURED, CONFIGURED, STARTING, RUNNING, CLOSING, CLOSED
+		UNCONFIGURED,
+		CONFIGURED,
+		STARTING,
+		RUNNING,
+		CLOSING,
+		CLOSED
 	}
 
 	/**

@@ -73,7 +73,8 @@ public class PastryNodeImpl extends Node {
 	 * Storage mode for the pastry node &ndash; either use only memory or the filesystem for stored artifacts.
 	 */
 	public enum STORAGE_MODE {
-		filesystem, memory
+		filesystem,
+		memory
 	}
 
 	public static final int STANDARD_PORT = 9901;

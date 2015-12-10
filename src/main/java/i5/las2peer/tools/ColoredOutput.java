@@ -143,8 +143,8 @@ public class ColoredOutput {
 	}
 
 	/**
-	 * @deprecated Use {@link ForegroundColor} instead!<br/>
-	 * 
+	 * @deprecated Use {@link ForegroundColor} instead!
+	 *             <p>
 	 *             A color used by the {@link ColoredOutput} methods.
 	 */
 	@Deprecated
@@ -189,8 +189,8 @@ public class ColoredOutput {
 	}
 
 	/**
-	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} instead!<br/>
-	 * 
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} instead!
+	 *             <p>
 	 *             switch the stream to use for output
 	 * 
 	 * @param stream
@@ -201,8 +201,8 @@ public class ColoredOutput {
 	}
 
 	/**
-	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} instead!<br/>
-	 * 
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} instead!
+	 *             <p>
 	 *             write a bash code
 	 * 
 	 * @param code
@@ -216,8 +216,8 @@ public class ColoredOutput {
 	}
 
 	/**
-	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} instead!<br/>
-	 * 
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} instead!
+	 *             <p>
 	 *             write a color code to the shell
 	 * 
 	 * @param c
@@ -234,8 +234,8 @@ public class ColoredOutput {
 	}
 
 	/**
-	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} instead!<br/>
-	 * 
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} instead!
+	 *             <p>
 	 *             write several bash codes at once
 	 * 
 	 * @param codes
@@ -257,8 +257,7 @@ public class ColoredOutput {
 
 	/**
 	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link Formatting#ResetAll} instead!
-	 *             <br/>
-	 * 
+	 *             <p>
 	 *             simple reset the console to standard (colors and shape)
 	 */
 	@Deprecated
@@ -267,8 +266,8 @@ public class ColoredOutput {
 	}
 
 	/**
-	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link Formatting#Blink} instead!<br/>
-	 * 
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link Formatting#Blink} instead!
+	 *             <p>
 	 *             write blinking text
 	 */
 	@Deprecated
@@ -278,8 +277,7 @@ public class ColoredOutput {
 
 	/**
 	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link Formatting#ResetBlink} instead!
-	 *             <br/>
-	 * 
+	 *             <p>
 	 *             turn off blinking text
 	 */
 	@Deprecated
@@ -288,8 +286,8 @@ public class ColoredOutput {
 	}
 
 	/**
-	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link Formatting#Bold} instead!<br/>
-	 * 
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link Formatting#Bold} instead!
+	 *             <p>
 	 *             write bold text
 	 */
 	@Deprecated
@@ -299,8 +297,7 @@ public class ColoredOutput {
 
 	/**
 	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link Formatting#ResetBold} instead!
-	 *             <br/>
-	 * 
+	 *             <p>
 	 *             turn off bold text
 	 */
 	@Deprecated
@@ -310,8 +307,7 @@ public class ColoredOutput {
 
 	/**
 	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link Formatting#Underlined} instead!
-	 *             <br/>
-	 * 
+	 *             <p>
 	 *             write underlined text
 	 */
 	@Deprecated
@@ -321,8 +317,7 @@ public class ColoredOutput {
 
 	/**
 	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link Formatting#Reverse} instead!
-	 *             <br/>
-	 * 
+	 *             <p>
 	 *             write inverted (swap back- and foreground color)
 	 */
 	@Deprecated
@@ -332,8 +327,7 @@ public class ColoredOutput {
 
 	/**
 	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link ForegroundColor#Black} instead!
-	 *             <br/>
-	 * 
+	 *             <p>
 	 *             switch to black font color
 	 */
 	@Deprecated
@@ -343,8 +337,7 @@ public class ColoredOutput {
 
 	/**
 	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link ForegroundColor#Red} instead!
-	 *             <br/>
-	 * 
+	 *             <p>
 	 *             switch to red font color
 	 */
 	@Deprecated
@@ -354,8 +347,7 @@ public class ColoredOutput {
 
 	/**
 	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link ForegroundColor#Green} instead!
-	 *             <br/>
-	 * 
+	 *             <p>
 	 *             switch to green font color
 	 */
 	@Deprecated
@@ -365,8 +357,7 @@ public class ColoredOutput {
 
 	/**
 	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} another {@link ForegroundColor} instead!
-	 *             <br/>
-	 * 
+	 *             <p>
 	 *             switch to brown font color
 	 */
 	@Deprecated
@@ -376,8 +367,7 @@ public class ColoredOutput {
 
 	/**
 	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link ForegroundColor#Blue} instead!
-	 *             <br/>
-	 * 
+	 *             <p>
 	 *             switch to blue font color
 	 */
 	@Deprecated
@@ -387,8 +377,8 @@ public class ColoredOutput {
 
 	/**
 	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link ForegroundColor#Magenta}
-	 *             instead! <br/>
-	 * 
+	 *             instead!
+	 *             <p>
 	 *             switch to magenta font color
 	 */
 	@Deprecated
@@ -398,8 +388,7 @@ public class ColoredOutput {
 
 	/**
 	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link ForegroundColor#Cyan} instead!
-	 *             <br/>
-	 * 
+	 *             <p>
 	 *             switch to cyan font color
 	 */
 	@Deprecated
@@ -409,8 +398,8 @@ public class ColoredOutput {
 
 	/**
 	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link ForegroundColor#LightGrey}
-	 *             instead! <br/>
-	 * 
+	 *             instead!
+	 *             <p>
 	 *             switch to light grey font color
 	 */
 	@Deprecated
@@ -420,8 +409,8 @@ public class ColoredOutput {
 
 	/**
 	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link ForegroundColor#DarkGrey}
-	 *             instead! <br/>
-	 * 
+	 *             instead!
+	 *             <p>
 	 *             switch to dark grey font color
 	 */
 	@Deprecated
@@ -431,8 +420,8 @@ public class ColoredOutput {
 
 	/**
 	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link ForegroundColor#LightRed}
-	 *             instead! <br/>
-	 * 
+	 *             instead!
+	 *             <p>
 	 *             switch to light red font color
 	 */
 	@Deprecated
@@ -442,8 +431,8 @@ public class ColoredOutput {
 
 	/**
 	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link ForegroundColor#LightGreen}
-	 *             instead! <br/>
-	 * 
+	 *             instead!
+	 *             <p>
 	 *             switch to light green font color
 	 */
 	@Deprecated
@@ -453,8 +442,7 @@ public class ColoredOutput {
 
 	/**
 	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link ForegroundColor#Yellow} instead!
-	 *             <br/>
-	 * 
+	 *             <p>
 	 *             switch to yellow font color
 	 */
 	@Deprecated
@@ -464,8 +452,8 @@ public class ColoredOutput {
 
 	/**
 	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link ForegroundColor#LightBlue}
-	 *             instead! <br/>
-	 * 
+	 *             instead!
+	 *             <p>
 	 *             switch to light blue font color
 	 */
 	@Deprecated
@@ -475,8 +463,8 @@ public class ColoredOutput {
 
 	/**
 	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link ForegroundColor#LightMagenta}
-	 *             instead! <br/>
-	 * 
+	 *             instead!
+	 *             <p>
 	 *             switch to light magenta font color
 	 */
 	@Deprecated
@@ -486,8 +474,8 @@ public class ColoredOutput {
 
 	/**
 	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link ForegroundColor#LightCyan}
-	 *             instead! <br/>
-	 * 
+	 *             instead!
+	 *             <p>
 	 *             switch to lighty cyan font color
 	 */
 	@Deprecated
@@ -497,8 +485,7 @@ public class ColoredOutput {
 
 	/**
 	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link ForegroundColor#White} instead!
-	 *             <br/>
-	 * 
+	 *             <p>
 	 *             switch to white font color
 	 */
 	@Deprecated
@@ -508,8 +495,8 @@ public class ColoredOutput {
 
 	/**
 	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link ForegroundColor#Default}
-	 *             instead! <br/>
-	 * 
+	 *             instead!
+	 *             <p>
 	 *             reset to terminal default
 	 */
 	@Deprecated
@@ -519,8 +506,7 @@ public class ColoredOutput {
 
 	/**
 	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link BackgroundColor#Black} instead!
-	 *             <br/>
-	 * 
+	 *             <p>
 	 *             switch background to black
 	 */
 	@Deprecated
@@ -530,8 +516,7 @@ public class ColoredOutput {
 
 	/**
 	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link BackgroundColor#Red} instead!
-	 *             <br/>
-	 * 
+	 *             <p>
 	 *             switch background to red
 	 */
 	@Deprecated
@@ -541,8 +526,7 @@ public class ColoredOutput {
 
 	/**
 	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link BackgroundColor#Green} instead!
-	 *             <br/>
-	 * 
+	 *             <p>
 	 *             switch background to green
 	 */
 	@Deprecated
@@ -552,8 +536,7 @@ public class ColoredOutput {
 
 	/**
 	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link BackgroundColor#Yellow} instead!
-	 *             <br/>
-	 * 
+	 *             <p>
 	 *             switch background to yellow
 	 */
 	@Deprecated
@@ -563,8 +546,7 @@ public class ColoredOutput {
 
 	/**
 	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link BackgroundColor#Blue} instead!
-	 *             <br/>
-	 * 
+	 *             <p>
 	 *             switch background to blue
 	 */
 	@Deprecated
@@ -574,8 +556,8 @@ public class ColoredOutput {
 
 	/**
 	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link BackgroundColor#Magenta}
-	 *             instead! <br/>
-	 * 
+	 *             instead!
+	 *             <p>
 	 *             switch background to magenta
 	 */
 	@Deprecated
@@ -585,8 +567,7 @@ public class ColoredOutput {
 
 	/**
 	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link BackgroundColor#Cyan} instead!
-	 *             <br/>
-	 * 
+	 *             <p>
 	 *             switch background to cyan
 	 */
 	@Deprecated
@@ -596,8 +577,7 @@ public class ColoredOutput {
 
 	/**
 	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link BackgroundColor#White} instead!
-	 *             <br/>
-	 * 
+	 *             <p>
 	 *             switch background to white
 	 */
 	@Deprecated
@@ -607,8 +587,8 @@ public class ColoredOutput {
 
 	/**
 	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link BackgroundColor#Default}
-	 *             instead! <br/>
-	 * 
+	 *             instead!
+	 *             <p>
 	 *             reset background to terminal default
 	 */
 	@Deprecated
@@ -618,8 +598,7 @@ public class ColoredOutput {
 
 	/**
 	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link ForegroundColor#Red} instead!
-	 *             <br/>
-	 * 
+	 *             <p>
 	 *             print a line of red text
 	 * 
 	 * @param text
@@ -631,8 +610,7 @@ public class ColoredOutput {
 
 	/**
 	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link ForegroundColor#Yellow} instead!
-	 *             <br/>
-	 * 
+	 *             <p>
 	 *             print a line of yellow text
 	 * 
 	 * @param text
@@ -643,8 +621,8 @@ public class ColoredOutput {
 	}
 
 	/**
-	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link Formatting#Bold} instead! <br/>
-	 * 
+	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with {@link Formatting#Bold} instead!
+	 *             <p>
 	 *             print a line of bold text
 	 * 
 	 * @param text
@@ -658,8 +636,7 @@ public class ColoredOutput {
 
 	/**
 	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with a {@link ForegroundColor} instead!
-	 *             <br/>
-	 * 
+	 *             <p>
 	 *             print a text in the given color
 	 * 
 	 * @param text
@@ -674,8 +651,7 @@ public class ColoredOutput {
 
 	/**
 	 * @deprecated Use {@link ColoredOutput#colorize(String, ShellCode...)} with a {@link ForegroundColor} instead!
-	 *             <br/>
-	 * 
+	 *             <p>
 	 *             print some text in the given color to the given printstream
 	 * 
 	 * @param text
@@ -691,8 +667,8 @@ public class ColoredOutput {
 	}
 
 	/**
-	 * @deprecated This method is deprecated and will be removed in the future!<br/>
-	 * 
+	 * @deprecated This method is deprecated and will be removed in the future!
+	 *             <p>
 	 *             print some text followed by a newline to the selected print stream
 	 * 
 	 * @param text
@@ -703,8 +679,8 @@ public class ColoredOutput {
 	}
 
 	/**
-	 * @deprecated This method is deprecated and will be removed in the future!<br/>
-	 * 
+	 * @deprecated This method is deprecated and will be removed in the future!
+	 *             <p>
 	 *             print some text to the selected printstream
 	 * 
 	 * @param text

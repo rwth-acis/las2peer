@@ -365,8 +365,8 @@ public abstract class Service extends Configurable {
 	}
 
 	/**
-	 * @deprecated Use {@link L2pLogger#logEvent(Event.SERVICE_MESSAGE, String)} instead!<br/>
-	 * 
+	 * @deprecated Use {@link L2pLogger#logEvent(Event, String)} with {@link Event#SERVICE_MESSAGE} instead!
+	 *             <p>
 	 *             Writes a log message.
 	 * 
 	 * @param message
@@ -377,8 +377,8 @@ public abstract class Service extends Configurable {
 	}
 
 	/**
-	 * @deprecated Use {@link L2pLogger#logEvent(Event, Agent, String)} instead!<br/>
-	 * 
+	 * @deprecated Use {@link L2pLogger#logEvent(Event, Agent, String)} instead!
+	 *             <p>
 	 *             Writes a log message. The given index (1-99) can be used to differentiate between different log
 	 *             messages.
 	 * 
@@ -402,8 +402,8 @@ public abstract class Service extends Configurable {
 	}
 
 	/**
-	 * @deprecated Use {@link L2pLogger#logEvent(Event.SERVICE_ERROR, String)} instead!<br/>
-	 * 
+	 * @deprecated Use {@link L2pLogger#logEvent(Event, String)} with {@link Event#SERVICE_ERROR} instead!
+	 *             <p>
 	 *             Writes an error log message.
 	 * 
 	 * @param message a custom message
@@ -414,8 +414,8 @@ public abstract class Service extends Configurable {
 	}
 
 	/**
-	 * @deprecated Use {@link L2pLogger#logEvent(Event, Agent, String)} instead!<br/>
-	 * 
+	 * @deprecated Use {@link L2pLogger#logEvent(Event, Agent, String)} instead!
+	 *             <p>
 	 *             Writes an error message. The given index (1-99) can be used to differentiate between different log
 	 *             messages.
 	 * 
@@ -439,8 +439,8 @@ public abstract class Service extends Configurable {
 	}
 
 	/**
-	 * @deprecated Use {@link L2pLogger} instead!<br/>
-	 * 
+	 * @deprecated Use {@link L2pLogger} instead!
+	 *             <p>
 	 *             Writes an exception log message Additionally the stack trace is printed.
 	 * 
 	 * @param e an exception
