@@ -3,6 +3,8 @@ package i5.las2peer.tools;
 import java.io.File;
 import java.io.IOException;
 
+import i5.las2peer.tools.ColoredOutput.ForegroundColor;
+
 /**
  * A simple thread handling one launcher task.
  */
@@ -39,7 +41,7 @@ public class LauncherThread extends Thread {
 			String content = FileContentReader.read(config);
 			String[] args = content.split("\r?\n");
 
-			ColoredOutput.printlnYellow("configuring node " + nodeCounter + " from file " + config);
+			System.out.println(ColoredOutput.colorize("configuring node " + nodeCounter + " from file " + config, ForegroundColor.Yellow));
 
 			// FIXME launch a node
 //			launcher = L2pNodeLauncher.launchSingle(args, logDir, null); //TODO Classloader
@@ -52,10 +54,10 @@ public class LauncherThread extends Thread {
 				}
 			}
 		} catch (IOException e) {
-			ColoredOutput.printlnRed("Error reading contents of file " + config + " - " + e);
+			System.out.println(ColoredOutput.colorize("Error reading contents of file " + config + " - " + e, ForegroundColor.Red));
 			fail = true;
 //		} catch (NodeException e) {
-//			ColoredOutput.printlnRed("Error launching node " + nodeCounter + ": " + e);
+//			System.out.println(ColoredOutput.colorize("Error launching node " + nodeCounter + ": " + e, ForegroundColor.Red));
 //			fail = true;
 		}
 	}

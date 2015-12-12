@@ -335,14 +335,14 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	public void childAdded(Topic topic, NodeHandle nh) {
 		l2pNode.observerNotice(Event.PASTRY_NEW_TOPIC_CHILD, nh, topic.toString());
 
-		// ColoredOutput.printlnYellow("child added to topic at this node");
+		// System.out.println(ColoredOutput.colorize("child added to topic at this node", ForegroundColor.Yellow));
 	}
 
 	@Override
 	public void childRemoved(Topic topic, NodeHandle nh) {
 		l2pNode.observerNotice(Event.PASTRY_REMOVED_TOPIC_CHILD, nh, topic.toString());
 
-		// ColoredOutput.printlnYellow("child removed to topic at this node");
+		// System.out.println(ColoredOutput.colorize("child removed to topic at this node", ForegroundColor.Yellow));
 	}
 
 	/**
@@ -476,13 +476,13 @@ public class NodeApplication implements Application, ScribeMultiClient {
 
 	@Override
 	public void subscribeFailed(Topic topic) {
-		// ColoredOutput.printlnYellow( "topic subscription failed!");
+		// System.out.println(ColoredOutput.colorize( "topic subscription failed!", ForegroundColor.Yellow));
 		l2pNode.observerNotice(Event.PASTRY_TOPIC_SUBSCRIPTION_FAILED, this.l2pNode.getNodeId(), "" + topic.toString());
 	}
 
 	@Override
 	public void subscribeFailed(Collection<Topic> topics) {
-		// ColoredOutput.printlnYellow( "topic subscription failed for collection of topics!");
+		// System.out.println(ColoredOutput.colorize( "topic subscription failed for collection of topics!", ForegroundColor.Yellow));
 		for (Topic t : topics)
 			subscribeFailed(t);
 	}
@@ -496,9 +496,9 @@ public class NodeApplication implements Application, ScribeMultiClient {
 			// System.out.println( "\tchildren: " + scribeClient.getChildren(t).length );
 		}
 
-		// ColoredOutput.printlnYellow( "\t\t<--sucessfully subscribed to topic collection");
+		// System.out.println(ColoredOutput.colorize( "\t\t<--sucessfully subscribed to topic collection", ForegroundColor.Yellow));
 		// for (Topic t: topics) {
-		// ColoredOutput.printlnYellow( "\t\t\t" + t.getId());
+		// System.out.println(ColoredOutput.colorize( "\t\t\t" + t.getId(), ForegroundColor.Yellow));
 		// }
 	}
 

@@ -1,8 +1,5 @@
 package i5.las2peer.tools;
 
-import i5.las2peer.communication.ListMethodsContent;
-import i5.las2peer.tools.ColoredOutput.Color;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -11,6 +8,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Hashtable;
+
+import i5.las2peer.communication.ListMethodsContent;
+import i5.las2peer.tools.ColoredOutput.ForegroundColor;
 
 /**
  * A simple command line for executing commands, generating new instances and handling local variables.
@@ -133,15 +133,16 @@ public class CommandPrompt {
 
 			htLocals.put(local, value);
 
-			ColoredOutput.println("   -> " + local + " set to '" + value + "'", Color.Green);
+			System.out.println(
+					ColoredOutput.colorize("   -> " + local + " set to '" + value + "'", ForegroundColor.Green));
 
 			return ReturnStatus.OK_PROCEED;
 		} catch (ClassNotFoundException e) {
-			ColoredOutput.printlnRed("  Class not found!");
+			System.out.println(ColoredOutput.colorize("  Class not found!", ForegroundColor.Red));
 		} catch (NoSuchMethodException e) {
-			ColoredOutput.printlnRed("  Method or Constructur not found!");
+			System.out.println(ColoredOutput.colorize("  Method or Constructur not found!", ForegroundColor.Red));
 		} catch (Exception e) {
-			ColoredOutput.printlnRed("  Error: " + e.getMessage());
+			System.out.println(ColoredOutput.colorize("  Error: " + e.getMessage(), ForegroundColor.Red));
 			e.printStackTrace();
 		}
 		return ReturnStatus.ERROR_PROCEED;
@@ -179,7 +180,7 @@ public class CommandPrompt {
 					result[i] = split[i].substring(1, split[i].length() - 1);
 				else {
 					result[i] = htLocals.get(split[i]);
-					ColoredOutput.println("  " + split[i] + ": " + result[i]);
+					System.out.println("  " + split[i] + ": " + result[i]);
 				}
 			}
 			return result;
@@ -280,7 +281,8 @@ public class CommandPrompt {
 			}
 		} else {
 			if (boundTo == null)
-				ColoredOutput.printlnRed("  bound is not set -> unable to execute methods on it!");
+				System.out.println(ColoredOutput.colorize("  bound is not set -> unable to execute methods on it!",
+						ForegroundColor.Red));
 
 			return executeMethod(boundTo, cmd, parameters);
 		}
@@ -327,7 +329,8 @@ public class CommandPrompt {
 		}
 
 		if (Modifier.isStatic(m.getModifiers())) {
-			ColoredOutput.printlnYellow("  warning: this method is static - executing anyway");
+			System.out.println(ColoredOutput.colorize("  warning: this method is static - executing anyway",
+					ForegroundColor.Yellow));
 			return executeStatic(on.getClass(), method, parameters);
 		} else
 			return m.invoke(on, parameters);
@@ -428,25 +431,30 @@ public class CommandPrompt {
 		if (status == ReturnStatus.NOT_KNOWN_PROCEED) {
 			try {
 				Object result = handleCommand(line);
-				ColoredOutput.println("  ok  ", Color.Green);
+				System.out.println(ColoredOutput.colorize("  ok  ", ForegroundColor.Green));
 				printResult("\tresult:", result);
 				status = ReturnStatus.OK_PROCEED;
 			} catch (NoSuchMethodException e) {
-				ColoredOutput.printlnRed(e.getMessage());
+				System.out.println(ColoredOutput.colorize(e.getMessage(), ForegroundColor.Red));
 				status = ReturnStatus.ERROR_PROCEED;
 			} catch (InvocationTargetException e) {
-				ColoredOutput.printlnRed("  --> Exception in executed method!");
-				ColoredOutput
-						.printlnRed("      " + e.getClass().getSimpleName() + " (" + e.getCause().getMessage() + ")");
-				ColoredOutput.println("      (print StackTrace with pst / printStackTrace)", Color.LightGrey);
+				System.out.println(ColoredOutput.colorize("  --> Exception in executed method!", ForegroundColor.Red));
+				System.out.println(ColoredOutput.colorize(
+						"      " + e.getClass().getSimpleName() + " (" + e.getCause().getMessage() + ")",
+						ForegroundColor.Red));
+				System.out.println(ColoredOutput.colorize("      (print StackTrace with pst / printStackTrace)",
+						ForegroundColor.LightGrey));
 
 				lastCommandException = e.getCause();
 				exceptionLine = line;
 				status = ReturnStatus.ERROR_PROCEED;
 			} catch (Exception e) {
-				ColoredOutput.printlnRed("  --> Exception during command execution!");
-				ColoredOutput.printlnRed("      " + e.getClass().getSimpleName() + " (" + e.getMessage() + ")");
-				ColoredOutput.println("      (print StackTrace with pst / printStackTrace)", Color.LightGrey);
+				System.out.println(
+						ColoredOutput.colorize("  --> Exception during command execution!", ForegroundColor.Red));
+				System.out.println(ColoredOutput.colorize(
+						"      " + e.getClass().getSimpleName() + " (" + e.getMessage() + ")", ForegroundColor.Red));
+				System.out.println(ColoredOutput.colorize("      (print StackTrace with pst / printStackTrace)",
+						ForegroundColor.LightGrey));
 
 				lastCommandException = e;
 				exceptionLine = line;
@@ -455,7 +463,7 @@ public class CommandPrompt {
 		}
 
 		if (status == ReturnStatus.NOT_KNOWN_PROCEED) // TODO this will never be reached
-			ColoredOutput.printlnRed("   -> command '" + line + "' not known");
+			System.out.println(ColoredOutput.colorize("   -> command '" + line + "' not known", ForegroundColor.Red));
 
 		return status;
 	}
@@ -480,7 +488,7 @@ public class CommandPrompt {
 			return;
 		} else {
 			System.out.print("exception in executed line: ");
-			ColoredOutput.printlnRed(exceptionLine + "\n");
+			System.out.println(ColoredOutput.colorize(exceptionLine + "\n", ForegroundColor.Red));
 			lastCommandException.printStackTrace(System.out);
 			System.out.println("\n\n");
 		}
@@ -524,12 +532,13 @@ public class CommandPrompt {
 		// [0] is 'print' itself
 		for (int i = 1; i < split.length; i++) {
 			if (htLocals.containsKey(split[i])) {
-				ColoredOutput.println("   " + split[i] + ": " + htLocals.get(split[i]) + " ("
+				System.out.println("   " + split[i] + ": " + htLocals.get(split[i]) + " ("
 						+ htLocals.get(split[i]).getClass().getCanonicalName() + ")");
 			} else
-				ColoredOutput.printlnRed("  --> local var '" + split[i] + "' not known");
+				System.out.println(
+						ColoredOutput.colorize("  --> local var '" + split[i] + "' not known", ForegroundColor.Red));
 		}
-		ColoredOutput.println("");
+		System.out.println("");
 		return status;
 	}
 
@@ -545,7 +554,7 @@ public class CommandPrompt {
 		String[] split = line.trim().split("\\s+");
 
 		if (split[0].trim().equals("quit") || split[0].trim().equals("exit") || split[0].trim().equals("q")) {
-			ColoredOutput.println(" -> Ok, normal exit! ");
+			System.out.println(" -> Ok, normal exit! ");
 			return ReturnStatus.OK_EXIT;
 		} else if (split[0].equals("print") || split[0].equals("p")) {
 			return handlePrint(line);
@@ -555,7 +564,7 @@ public class CommandPrompt {
 				return ReturnStatus.OK_PROCEED;
 			}
 			if (split.length != 2) {
-				ColoredOutput.printlnRed("  -> usage: bind [local var name]");
+				System.out.println(ColoredOutput.colorize("  -> usage: bind [local var name]", ForegroundColor.Red));
 				return ReturnStatus.ERROR_PROCEED;
 			}
 
@@ -563,14 +572,16 @@ public class CommandPrompt {
 				boundTo = htLocals.get(split[1]);
 				return ReturnStatus.OK_PROCEED;
 			} else {
-				ColoredOutput.printlnRed("  -> local var '" + split[1] + "' not known!");
+				System.out.println(
+						ColoredOutput.colorize("  -> local var '" + split[1] + "' not known!", ForegroundColor.Red));
 				return ReturnStatus.ERROR_PROCEED;
 			}
 		} else if (split[0].equals("package")) {
 			if (split.length == 1)
 				packagePrefix = "";
 			else if (split.length > 2) {
-				ColoredOutput.printlnRed("  -> usage: package [used package prefix]");
+				System.out.println(
+						ColoredOutput.colorize("  -> usage: package [used package prefix]", ForegroundColor.Red));
 				return ReturnStatus.ERROR_PROCEED;
 			} else
 				packagePrefix = split[1].trim();
@@ -578,7 +589,8 @@ public class CommandPrompt {
 			return ReturnStatus.OK_PROCEED;
 		} else if (split[0].equals("list") || split[0].equals("l")) {
 			if (boundTo == null) {
-				ColoredOutput.printlnRed("  -> I'm not bound to an instance, what should I list?");
+				System.out.println(ColoredOutput.colorize("  -> I'm not bound to an instance, what should I list?",
+						ForegroundColor.Red));
 				return ReturnStatus.ERROR_PROCEED;
 			} else {
 				printMethodsOfBound(boundTo);

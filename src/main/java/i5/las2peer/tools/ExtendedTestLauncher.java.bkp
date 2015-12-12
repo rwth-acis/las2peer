@@ -723,16 +723,16 @@ public class ExtendedTestLauncher {
 	public void searchTestService () {
 		try {
 			Agent test = node.getAgent( ServiceAgent.serviceClass2Id("i5.las2peer.api.TestService"));
-			ColoredOutput.printlnYellow( "got agent " + test.getId() + " (" + test.getClass()+")");
+			System.out.println(ColoredOutput.colorize( "got agent " + test.getId() + " (" + test.getClass()+")", ForegroundColor.Yellow));
 			
 			Object[] handles;
 			handles = node.findRegisteredAgent( node.getServiceAgent("i5.las2peer.api.TestService"), 1);
-			ColoredOutput.printlnYellow( "Found Nodes Hosting TestService:");
+			System.out.println(ColoredOutput.colorize( "Found Nodes Hosting TestService:", ForegroundColor.Yellow));
 			for ( Object o: handles )
 				ColoredOutput.printlnYellow ( "\t" + o);
 			
 		} catch (AgentNotKnownException e) {
-			ColoredOutput.printlnRed( "Exception while looking gor TestService: " + e);
+			System.out.println(ColoredOutput.colorize( "Exception while looking gor TestService: " + e, ForegroundColor.Red));
 		}
 	}
 	
@@ -1245,7 +1245,7 @@ public class ExtendedTestLauncher {
 	 * @param message
 	 */
 	private void printWarning ( String message ) {
-		ColoredOutput.printlnRed( nodeString() + message );
+		System.out.println(ColoredOutput.colorize( nodeString() + message , ForegroundColor.Red));
 	}
 	
 	
@@ -1413,10 +1413,10 @@ public class ExtendedTestLauncher {
 		File dir = new File ( dirname );
 		
 		final File logDir = getLogSubDir ();
-		ColoredOutput.printlnYellow("Using " + logDir + " as log directory!\n\n" );
+		System.out.println(ColoredOutput.colorize("Using " + logDir + " as log directory!\n\n" , ForegroundColor.Yellow));
 		
 		if ( ! dir.exists() || ! dir.isDirectory() ) {
-			ColoredOutput.printlnYellow("Config dir does not exist or is not a directory!" );
+			System.out.println(ColoredOutput.colorize("Config dir does not exist or is not a directory!" , ForegroundColor.Yellow));
 			return;
 		}
 		
@@ -1461,10 +1461,10 @@ public class ExtendedTestLauncher {
 				}
 			} while ( ! finished );
 		} catch (InterruptedException e) {
-			ColoredOutput.printlnRed("\n\nWaiting interrupted!");
+			System.out.println(ColoredOutput.colorize("\n\nWaiting interrupted!", ForegroundColor.Red));
 		}
 				
-		ColoredOutput.printlnYellow("\n\nall nodes seem to have finished - exiting!");
+		System.out.println(ColoredOutput.colorize("\n\nall nodes seem to have finished - exiting!", ForegroundColor.Yellow));
 		System.exit(0);
 	}
 	
