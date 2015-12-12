@@ -503,7 +503,7 @@ public class LocalNode extends Node {
 
 	public static void setPendingTimeOut(int newtimeout) {
 		lPendingTimeout = newtimeout;
-	};
+	}
 
 	public static int getMaxMessageWait() {
 		return iMessageMaxWait;

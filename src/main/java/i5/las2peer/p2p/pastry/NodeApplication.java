@@ -407,7 +407,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	 */
 	private NodeHandle getLocalHandle() {
 		return l2pNode.getPastryNode().getLocalNodeHandle();
-	};
+	}
 
 	/**
 	 * look for a running/registered version of an agent in the p2p net

@@ -55,7 +55,7 @@ public final class Envelope implements XmlAble, Cloneable {
 		XmlAble,
 		Serializable,
 		Binary
-	};
+	}
 
 	private byte[] baCipherData;
 	private byte[] baPlainData;

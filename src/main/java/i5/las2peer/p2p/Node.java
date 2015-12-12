@@ -76,7 +76,7 @@ public abstract class Node implements AgentStorage {
 	public enum SendMode {
 		ANYCAST,
 		BROADCAST
-	};
+	}
 
 	/**
 	 * Enum with the possible states of a node.
@@ -396,7 +396,7 @@ public abstract class Node implements AgentStorage {
 	 */
 	public NodeStatus getStatus() {
 		return status;
-	};
+	}
 
 	/**
 	 * Gets some kind of node identifier.
