@@ -98,9 +98,6 @@ public class Context implements AgentStorage {
 		if (groupAgents.containsKey(groupId))
 			return groupAgents.get(groupId);
 
-		// TODO: hierarchical groups
-		// insert here?
-
 		Agent agent = localNode.getAgent(groupId);
 
 		if (!(agent instanceof GroupAgent))
@@ -108,12 +105,41 @@ public class Context implements AgentStorage {
 
 		GroupAgent group = (GroupAgent) agent;
 
-		try {
-			group.unlockPrivateKey(this.getMainAgent());
-		} catch (SerializationException e) {
-			throw new L2pSecurityException("Unable to open group! - serialization problems", e);
-		} catch (CryptoException e) {
-			throw new L2pSecurityException("Unable to open group! - cryptographic problems", e);
+		if (group.isMember(this.getMainAgent())) {
+			try {
+				group.unlockPrivateKey(this.getMainAgent());
+			} catch (SerializationException | CryptoException e) {
+				throw new L2pSecurityException("Unable to open group!", e);
+			}
+		} else {
+			for (Long memberId : group.getMemberList()) {
+				try {
+					GroupAgent member = requestGroupAgent(memberId);
+					group.unlockPrivateKey(member);
+					break;
+				} catch (AgentNotKnownException e) {
+					L2pLogger.logEvent(Event.SERVICE_ERROR, e.getMessage());
+				} catch (Exception e) {
+					// do nothing
+				}
+			}
+		}
+		/*
+		else if (group.isMemberRecursive(this.getMainAgent())) { // TODO more efficient without using isMemberRecursive
+			for (Long memberId : group.getMemberList()) {
+				try {
+					GroupAgent member = requestGroupAgent(memberId);
+					group.unlockPrivateKey(member);
+					break;
+				}
+				catch(Exception e) {
+					// do nothing
+				}
+			}
+		}*/
+
+		if (group.isLocked()) {
+			throw new L2pSecurityException("Unable to open group!");
 		}
 
 		groupAgents.put(groupId, group);
@@ -352,27 +378,19 @@ public class Context implements AgentStorage {
 			envelope.open(agent);
 		} catch (L2pSecurityException e) {
 			for (long groupId : envelope.getReaderGroups()) {
+				GroupAgent group = null;
 				try {
-					GroupAgent group = groupAgents.get(groupId);
-
-					if (group == null) {
-						group = (GroupAgent) getLocalNode().getAgent(groupId);
-						if (group.isMember(getMainAgent())) {
-							group.unlockPrivateKey(getMainAgent());
-							groupAgents.put(groupId, group);
-						}
-					}
-
-					if (group != null) {
-						envelope.open(group);
-						return;
-					}
+					group = requestGroupAgent(groupId);
 				} catch (Exception e1) {
-					System.out.println("strange, no exception should occur here! - " + e1);
-					e1.printStackTrace();
+					// do nothing
+				}
+
+				if (group != null) {
+					envelope.open(group);
+					return;
 				}
 			}
-			throw e;
+			throw new L2pSecurityException("Envelope cannot be opened!", e);
 		}
 	}
 

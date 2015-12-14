@@ -4,9 +4,14 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 
+import i5.las2peer.p2p.AgentAlreadyRegisteredException;
 import i5.las2peer.p2p.LocalNode;
+import i5.las2peer.persistency.EncodingFailedException;
+import i5.las2peer.persistency.Envelope;
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.testing.MockAgentFactory;
+import i5.las2peer.tools.CryptoException;
+import i5.las2peer.tools.SerializationException;
 
 import org.junit.Test;
 
@@ -46,6 +51,105 @@ public class ContextTest {
 		Context testee = new Context(node, eve);
 
 		assertSame(eve, testee.getMainAgent());
+	}
+
+	@Test
+	public void testRequestGroupAgent()
+			throws MalformedXMLException, IOException, L2pSecurityException, CryptoException,
+			SerializationException, AgentException {
+		LocalNode node = LocalNode.newNode();
+
+		GroupAgent group1 = MockAgentFactory.getGroup1();
+		GroupAgent groupA = MockAgentFactory.getGroupA();
+		GroupAgent groupSuper = GroupAgent.createGroupAgent(new Agent[] { group1, groupA });
+		try {
+			node.storeAgent(group1);
+		} catch (AgentAlreadyRegisteredException e) {}
+		try {
+			node.storeAgent(groupA);
+		} catch (AgentAlreadyRegisteredException e) {}
+		node.storeAgent(groupSuper);
+
+		node.launch();
+
+		UserAgent eve = MockAgentFactory.getEve();
+		eve.unlockPrivateKey("evespass");
+
+		Context context = new Context(node, eve);
+
+		try {
+			GroupAgent a = context.requestGroupAgent(group1.getId());
+			assertEquals(a.getId(), group1.getId());
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("exception thrown: " + e);
+		}
+
+		try {
+			context.requestGroupAgent(groupA.getId());
+			fail("exception expected");
+		} catch (Exception e) {
+		}
+
+		try {
+			GroupAgent a = context.requestGroupAgent(groupSuper.getId());
+			assertEquals(a.getId(), groupSuper.getId());
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("exception thrown: " + e);
+		}
+	}
+	
+	@Test
+	public void testOpenEnvelope()
+			throws MalformedXMLException, IOException, L2pSecurityException, CryptoException,
+			SerializationException, AgentException, EncodingFailedException {
+		LocalNode node = LocalNode.newNode();
+
+		GroupAgent group1 = MockAgentFactory.getGroup1();
+		GroupAgent groupA = MockAgentFactory.getGroupA();
+		GroupAgent groupSuper = GroupAgent.createGroupAgent(new Agent[] { group1, groupA });
+		try {
+			node.storeAgent(group1);
+		} catch (AgentAlreadyRegisteredException e) {}
+		try {
+			node.storeAgent(groupA);
+		} catch (AgentAlreadyRegisteredException e) {}
+		node.storeAgent(groupSuper);
+
+		node.launch();
+		
+		UserAgent adam = MockAgentFactory.getAdam();
+		adam.unlockPrivateKey("adamspass");
+		UserAgent eve = MockAgentFactory.getEve();
+		eve.unlockPrivateKey("evespass");
+		
+		groupA.unlockPrivateKey(adam);
+		groupSuper.unlockPrivateKey(groupA);
+
+		Context context = new Context(node, eve);
+		
+		Envelope envelope1 = Envelope.createClassIdEnvelope("content", "id", groupSuper);
+		Envelope envelopeA = Envelope.createClassIdEnvelope("content", "id", groupA);
+		envelope1.close();
+		envelopeA.close();
+
+		try {
+			context.openEnvelope(envelope1);
+			assertTrue(envelope1.isOpen());
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("exception thrown: " + e);
+		}
+
+		try {
+			context.openEnvelope(envelopeA);
+			assertFalse(envelopeA.isOpen());
+			fail("exception expected");
+		} catch (Exception e) {
+		}
+		
+		node.shutDown();
 	}
 
 }
