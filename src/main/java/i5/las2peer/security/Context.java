@@ -124,19 +124,6 @@ public class Context implements AgentStorage {
 				}
 			}
 		}
-		/*
-		else if (group.isMemberRecursive(this.getMainAgent())) { // TODO more efficient without using isMemberRecursive
-			for (Long memberId : group.getMemberList()) {
-				try {
-					GroupAgent member = requestGroupAgent(memberId);
-					group.unlockPrivateKey(member);
-					break;
-				}
-				catch(Exception e) {
-					// do nothing
-				}
-			}
-		}*/
 
 		if (group.isLocked()) {
 			throw new L2pSecurityException("Unable to open group!");
