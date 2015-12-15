@@ -66,6 +66,8 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	private static final String AUTHENTICATION_FIELD = "Authorization";
 	private static final String ACCESS_TOKEN_KEY = "access_token";
 	private static final String OIDC_PROVIDER_KEY = "oidc_provider";
+	private static final int NO_RESPONSE_BODY = -1; // 0 means chunked transfer encoding, see
+													// https://docs.oracle.com/javase/8/docs/jre/api/net/httpserver/spec/com/sun/net/httpserver/HttpExchange.html#sendResponseHeaders-int-long-
 	private WebConnector connector;
 	private Node l2pNode;
 
@@ -394,7 +396,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 					sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND,
 							warnings.toString().replaceAll("\n", " "));
 				} else {
-					sendResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND, 0);
+					sendResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND, NO_RESPONSE_BODY);
 					// otherwise the client waits till the timeout for an answer
 					exchange.getResponseBody().close();
 				}
@@ -433,7 +435,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		} catch (NoMethodFoundException | NotSupportedUriPathException e) {
 			sendNoSuchMethod(exchange);
 		} catch (NumberFormatException e) {
-			sendMalformedRequest(exchange,e.toString());
+			sendMalformedRequest(exchange, e.toString());
 		} catch (Exception e) {
 			connector.logError("Error occured:" + exchange.getRequestURI().getPath() + " " + e.getMessage());
 			sendInternalErrorResponse(exchange, e.toString());
@@ -488,7 +490,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		// TODO this should become a default reply for OPTIONS-requests,
 		// but should be also be available to service developers
 		if (exchange.getRequestMethod().equalsIgnoreCase("options")) {
-			sendResponse(exchange, HttpURLConnection.HTTP_OK, 0);
+			sendResponse(exchange, HttpURLConnection.HTTP_OK, NO_RESPONSE_BODY);
 		} else if (exchange.getRequestMethod().equalsIgnoreCase("get")
 				&& exchange.getRequestURI().getPath().equalsIgnoreCase("/swagger.json")) {
 			// respond with swagger.json for all known services at this endpoint
@@ -538,7 +540,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			sendInternalErrorResponse(exchange, e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * send a notification, that the requested service does not exists
 	 * 
@@ -547,7 +549,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	 * @param service
 	 */
 	private void sendMalformedRequest(HttpExchange exchange, String error) {
-		//connector.logError("Malformed request: " + error);
+		// connector.logError("Malformed request: " + error);
 		sendStringResponse(exchange, HttpURLConnection.HTTP_BAD_REQUEST,
 				"Malformed Request: wrong datatypes");
 	}
@@ -669,10 +671,10 @@ public class WebConnectorRequestHandler implements HttpHandler {
 					os.write(content);
 					os.close();
 				} else {
-					sendResponse(exchange, HttpURLConnection.HTTP_NO_CONTENT, 0);
+					sendResponse(exchange, HttpURLConnection.HTTP_NO_CONTENT, NO_RESPONSE_BODY);
 				}
 			} else {
-				sendResponse(exchange, HttpURLConnection.HTTP_NO_CONTENT, 0);
+				sendResponse(exchange, HttpURLConnection.HTTP_NO_CONTENT, NO_RESPONSE_BODY);
 			}
 		} catch (IOException e) {
 			connector.logMessage(e.getMessage());
@@ -692,7 +694,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			sendStringResponse(exchange, HttpURLConnection.HTTP_UNAUTHORIZED, answerMessage);
 		} else {
 			try {
-				sendResponse(exchange, HttpURLConnection.HTTP_UNAUTHORIZED, 0);
+				sendResponse(exchange, HttpURLConnection.HTTP_UNAUTHORIZED, NO_RESPONSE_BODY);
 				// otherwise the client waits till the timeout for an answer
 				exchange.getResponseBody().close();
 			} catch (IOException e) {
