@@ -11,7 +11,7 @@ import rice.p2p.commonapi.RouteMessage;
 
 public class TestApp implements Application {
 
-	public final static String FREEPASTRY_APPLICATION_CODE = "i5.las2peer-node-application";
+	public static final String FREEPASTRY_APPLICATION_CODE = "i5.las2peer-node-application";
 
 	/**
 	 * The Endpoint represents the underlining node. By making calls on the Endpoint, it assures that the message will

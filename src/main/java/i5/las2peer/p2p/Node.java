@@ -124,7 +124,7 @@ public abstract class Node implements AgentStorage {
 
 	private Hashtable<Long, MessageResultListener> htAnswerListeners = new Hashtable<Long, MessageResultListener>();
 
-	private final static String DEFAULT_INFORMATION_FILE = "etc/nodeInfo.xml";
+	private static final String DEFAULT_INFORMATION_FILE = "etc/nodeInfo.xml";
 	private String sInformationFileName = DEFAULT_INFORMATION_FILE;
 
 	private KeyPair nodeKeyPair;

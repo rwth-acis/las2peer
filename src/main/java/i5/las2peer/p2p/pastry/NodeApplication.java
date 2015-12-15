@@ -45,11 +45,11 @@ import rice.pastry.commonapi.PastryIdFactory;
  */
 public class NodeApplication implements Application, ScribeMultiClient {
 
-	public final static String FREEPASTRY_APPLICATION_CODE = "i5.las2peer-node-application";
-	public final static String SCRIBE_APPLICATION_CODE = "i5.las2peer-agent-notification";
+	public static final String FREEPASTRY_APPLICATION_CODE = "i5.las2peer-node-application";
+	public static final String SCRIBE_APPLICATION_CODE = "i5.las2peer-agent-notification";
 
-	public final static int SEARCH_SLEEP_TIME = 2500; // 2,5s
-	public final static long SEARCH_TIMEOUT = 10000; // 10 seconds
+	public static final int SEARCH_SLEEP_TIME = 2500; // 2,5s
+	public static final long SEARCH_TIMEOUT = 10000; // 10 seconds
 	private static final int RESPONSE_WAIT_TIMEOUT = 10000; // 10 seconds
 
 	private final L2pLogger logger = L2pLogger.getInstance(NodeApplication.class.getName());

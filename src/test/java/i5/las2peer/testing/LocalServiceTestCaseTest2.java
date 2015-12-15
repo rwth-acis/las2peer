@@ -9,8 +9,8 @@ import org.junit.Test;
 
 public class LocalServiceTestCaseTest2 extends LocalServiceTestCase {
 
-	public final static String AGENT_XML_FILE = "i5/las2peer/testing/TestServiceAgent.xml";
-	public final static String AGENT_PASSPHRASE = "agentpass";
+	public static final String AGENT_XML_FILE = "i5/las2peer/testing/TestServiceAgent.xml";
+	public static final String AGENT_PASSPHRASE = "agentpass";
 
 	@Test
 	public void test() throws NoSuchServiceException {

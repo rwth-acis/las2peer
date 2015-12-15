@@ -7,8 +7,8 @@ import i5.las2peer.tools.CryptoException;
 import org.junit.Test;
 
 public class ServiceAgentTest {
-	private final static String servicename = "i5.las2peer.somePackage.AService";
-	private final static String passphrase = "a passphrase";
+	private static final String servicename = "i5.las2peer.somePackage.AService";
+	private static final String passphrase = "a passphrase";
 
 	@Test
 	public void testCreation() throws CryptoException, L2pSecurityException {
