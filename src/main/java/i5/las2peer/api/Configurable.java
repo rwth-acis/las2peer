@@ -74,8 +74,8 @@ public abstract class Configurable {
 	 * @param f
 	 * @param value
 	 *
-	 * @throws IllegalAccessException
-	 * @throws InstantiationException
+	 * @throws IllegalAccessException if this Field object is enforcing Java language access control and the underlying field is either inaccessible or final.
+	 * @throws InstantiationException if this Class represents an abstract class, an interface, an array.
 	 */
 	@SuppressWarnings("unchecked")
 	public void setField(Field f, String value) throws IllegalAccessException, InstantiationException {

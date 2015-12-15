@@ -3,7 +3,7 @@ package i5.las2peer.p2p.pastry;
 import rice.p2p.commonapi.NodeHandle;
 
 /**
- * scripe content for a message, the an agent joined the net
+ * Scribe content for a message, the an agent joined the net
  * 
  * 
  *

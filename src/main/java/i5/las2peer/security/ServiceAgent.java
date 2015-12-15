@@ -369,7 +369,7 @@ public class ServiceAgent extends PassphraseAgent {
 	}
 
 	/**
-	 * Notifies the {@link i5.las2peer.security.ServiceInfoAgent} about itself *
+	 * Notifies the {@link i5.las2peer.security.ServiceInfoAgent} about itself
 	 * 
 	 * @throws L2pServiceException
 	 */

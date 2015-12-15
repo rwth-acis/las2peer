@@ -32,6 +32,8 @@ public class TestApp implements Application {
 
 	/**
 	 * Called to route a message to the id
+	 * 
+	 * @param id The target id the message should be send to.
 	 */
 	public void routeMyMsg(Id id) {
 		System.out.println("\t" + this + " sending to " + id);
@@ -42,6 +44,8 @@ public class TestApp implements Application {
 
 	/**
 	 * Called to directly send a message to the nh
+	 * 
+	 * @param nh The node handle the message should be send to.
 	 */
 	public void routeMyMsgDirect(NodeHandle nh) {
 		System.out.println("\t" + this + " sending direct to " + nh);
