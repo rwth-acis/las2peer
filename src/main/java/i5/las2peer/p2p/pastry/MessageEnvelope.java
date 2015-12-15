@@ -7,19 +7,13 @@ import rice.p2p.commonapi.NodeHandle;
 /**
  * a simple envelope for sending las2peer messages through the pastry network
  * 
- * 
- *
  */
 public class MessageEnvelope implements Message {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -1930876529152356245L;
 
-	private String content;
-
-	private NodeHandle sendingNode;
+	private final NodeHandle sendingNode;
+	private final String content;
 
 	/**
 	 * create a message envelope with simple string content
@@ -28,8 +22,8 @@ public class MessageEnvelope implements Message {
 	 * @param content
 	 */
 	public MessageEnvelope(NodeHandle sendingNode, String content) {
-		this.content = content;
 		this.sendingNode = sendingNode;
+		this.content = content;
 	}
 
 	/**
@@ -39,17 +33,8 @@ public class MessageEnvelope implements Message {
 	 * @param content
 	 */
 	public MessageEnvelope(NodeHandle sendingNode, i5.las2peer.communication.Message content) {
-		this.content = content.toXmlString();
 		this.sendingNode = sendingNode;
-	}
-
-	/**
-	 * get the content string of this message
-	 * 
-	 * @return the contained data as String
-	 */
-	public String getContent() {
-		return content;
+		this.content = content.toXmlString();
 	}
 
 	/**
@@ -59,6 +44,15 @@ public class MessageEnvelope implements Message {
 	 */
 	public NodeHandle getSendingNode() {
 		return sendingNode;
+	}
+
+	/**
+	 * get the content string of this message
+	 * 
+	 * @return the contained data as String
+	 */
+	public String getContent() {
+		return content;
 	}
 
 	/**

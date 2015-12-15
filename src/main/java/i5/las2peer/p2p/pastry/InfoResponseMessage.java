@@ -7,21 +7,14 @@ import rice.p2p.commonapi.NodeHandle;
 /**
  * this message is sent from node to node as response to an {@link GetInfoMessage}
  * 
- * 
- *
  */
 public class InfoResponseMessage implements Message {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 6095970420776244161L;
 
-	private long responseTo;
-
-	private NodeHandle sender;
-
-	private String xmlContent = "hallo";
+	private final long responseTo;
+	private final NodeHandle sender;
+	private final String xmlContent;
 
 	/**
 	 * create a new message
@@ -33,7 +26,6 @@ public class InfoResponseMessage implements Message {
 	public InfoResponseMessage(long responseTo, NodeHandle sendingNode, String xmlContent) {
 		this.responseTo = responseTo;
 		this.sender = sendingNode;
-
 		this.xmlContent = xmlContent;
 	}
 

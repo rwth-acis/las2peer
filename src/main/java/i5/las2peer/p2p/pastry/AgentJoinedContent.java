@@ -5,17 +5,12 @@ import rice.p2p.commonapi.NodeHandle;
 /**
  * Scribe content for a message, the an agent joined the net
  * 
- * 
- *
  */
 public class AgentJoinedContent extends L2pScribeContent {
 
-	/**
-	 * serialization id
-	 */
 	private static final long serialVersionUID = 311073208550954373L;
 
-	private long agentId;
+	private final long agentId;
 
 	/**
 	 * create a new instance stating that the agent of the given id has been loaded at the given node

@@ -20,12 +20,10 @@ import rice.pastry.commonapi.PastryIdFactory;
  * On knowledge of the class of the contained data the user may use the <i>getContained...</i> methods to get typed
  * access.
  * 
- * 
- *
  */
 public class ContentEnvelope extends ContentHashPastContent {
 
-	// TODO: Environment / settings of pastry!
+	// TODO: use Environment / settings of pastry!
 	private static IdFactory idFactory = new PastryIdFactory(new Environment());
 
 	public enum TYPE {

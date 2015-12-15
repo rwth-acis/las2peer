@@ -1,26 +1,20 @@
 package i5.las2peer.p2p.pastry;
 
-import i5.las2peer.p2p.TimeoutException;
-
 import java.util.Date;
 import java.util.Vector;
 
+import i5.las2peer.p2p.TimeoutException;
 import rice.Continuation;
 
 /**
  * A continuation for putting artifacts into the past p2p storage
  * 
- * 
- *
  */
 public class PastPutContinuation implements Continuation<Boolean[], Exception> {
-
-	public static final int SLEEP_MS = 500;
 
 	public static final int MAX_WAIT = 10000;
 
 	private Vector<Exception> exceptions = new Vector<Exception>();
-
 	private int countSuccess = 0;
 	private int countFailures = 0;
 

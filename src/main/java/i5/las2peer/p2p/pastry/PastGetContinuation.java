@@ -1,9 +1,8 @@
 package i5.las2peer.p2p.pastry;
 
-import i5.las2peer.p2p.ArtifactNotFoundException;
-
 import java.util.Date;
 
+import i5.las2peer.p2p.ArtifactNotFoundException;
 import rice.Continuation;
 import rice.p2p.past.PastContent;
 
@@ -14,20 +13,9 @@ import rice.p2p.past.PastContent;
  * Continuation's state via {@link #isFinished()} or do a (non) blocking wait for the result via {@link #waitForResult}
  * or {@link #getResultWaiting}.
  * 
- * 
- *
  * @param <T>
  */
 public class PastGetContinuation<T> implements Continuation<PastContent, Exception> {
-
-	public static final int DEFAULT_SLEEP_MS = 500;
-
-	// private int randomId = new Random().nextInt();
-
-	/**
-	 * sleep interval in ms during "active" waiting for a result
-	 */
-	// private int sleepMs = DEFAULT_SLEEP_MS;
 
 	/**
 	 * the actual content

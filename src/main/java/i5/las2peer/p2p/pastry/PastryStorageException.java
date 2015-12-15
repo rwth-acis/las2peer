@@ -5,14 +5,9 @@ import i5.las2peer.p2p.StorageException;
 /**
  * Exception thrown on failures in the underlying pastry storage
  * 
- * 
- *
  */
 public class PastryStorageException extends StorageException {
 
-	/**
-	 * serialization id
-	 */
 	private static final long serialVersionUID = 3043090090067718209L;
 
 	/**

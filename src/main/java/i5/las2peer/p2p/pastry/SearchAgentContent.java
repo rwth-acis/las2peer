@@ -6,20 +6,15 @@ import rice.p2p.commonapi.NodeHandle;
  * A <i>content</i> to be published to an agent's scribe topic, if someone is looking for running versions of this
  * agent.
  * 
- * 
- *
  */
 public class SearchAgentContent extends L2pScribeContent {
+
+	private static final long serialVersionUID = 8073537449959759751L;
 
 	/**
 	 * the id of the agent to look for
 	 */
-	private long searchAgentId;
-
-	/**
-	 * serialization id
-	 */
-	private static final long serialVersionUID = 8073537449959759751L;
+	private final long searchAgentId;
 
 	/**
 	 * create a new search content looking for the agent of the given id, created at the given node (handle)
@@ -29,7 +24,6 @@ public class SearchAgentContent extends L2pScribeContent {
 	 */
 	public SearchAgentContent(NodeHandle from, long id) {
 		super(from);
-
 		searchAgentId = id;
 	}
 

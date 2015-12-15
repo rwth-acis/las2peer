@@ -4,14 +4,10 @@ import rice.p2p.commonapi.Message;
 
 public class UnlockAgentResponse implements Message {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -6417868965128084833L;
 
-	private Exception storedException = null;
-
-	private long responseToId;
+	private final Exception storedException;
+	private final long responseToId;
 
 	/**
 	 * create a new respone indicating success
@@ -19,7 +15,7 @@ public class UnlockAgentResponse implements Message {
 	 * @param responseTo
 	 */
 	public UnlockAgentResponse(long responseTo) {
-		responseToId = responseTo;
+		this(responseTo, null);
 	}
 
 	/**
@@ -29,7 +25,7 @@ public class UnlockAgentResponse implements Message {
 	 * @param e
 	 */
 	public UnlockAgentResponse(long responseTo, Exception e) {
-		this(responseTo);
+		responseToId = responseTo;
 		storedException = e;
 	}
 

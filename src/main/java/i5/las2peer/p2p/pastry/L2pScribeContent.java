@@ -9,20 +9,14 @@ import rice.p2p.scribe.ScribeContent;
 /**
  * base class for content published to the pub/sub-facilities of the pastry library (Scribe)
  * 
- * 
- *
  */
 public abstract class L2pScribeContent implements ScribeContent {
 
-	/**
-	 * serialization id
-	 */
 	private static final long serialVersionUID = -6701164615785435436L;
-	private NodeHandle from;
 
-	private long randomId;
-
-	private long timestamp;
+	private final NodeHandle from;
+	private final long randomId;
+	private final long timestamp;
 
 	/**
 	 * create a new scribe content created at the given node handle
@@ -31,9 +25,7 @@ public abstract class L2pScribeContent implements ScribeContent {
 	 */
 	public L2pScribeContent(NodeHandle from) {
 		this.from = from;
-
 		randomId = new Random().nextLong();
-
 		timestamp = new Date().getTime();
 	}
 
