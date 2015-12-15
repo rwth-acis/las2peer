@@ -1,16 +1,16 @@
 package i5.las2peer.tools;
 
+import java.io.IOException;
+import java.io.Serializable;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+
 import i5.las2peer.persistency.Envelope;
 import i5.las2peer.persistency.EnvelopeException;
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.security.Agent;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.PassphraseAgent;
-
-import java.io.IOException;
-import java.io.Serializable;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 
 /**
  * A simple command line tool for generating XML envelopes to the standard out.
@@ -131,12 +131,8 @@ public class EnvelopeGenerator {
 	private static Serializable createSerializable(String classname, String value)
 			throws ClassNotFoundException, SecurityException, NoSuchMethodException, IllegalArgumentException,
 			InstantiationException, IllegalAccessException, InvocationTargetException {
-		@SuppressWarnings("rawtypes")
-		Class cls = Class.forName(classname);
-
-		@SuppressWarnings({ "rawtypes", "unchecked" })
-		Constructor cons = cls.getConstructor(String.class);
-
+		Class<?> cls = Class.forName(classname);
+		Constructor<?> cons = cls.getConstructor(String.class);
 		return (Serializable) cons.newInstance(value);
 	}
 

@@ -205,10 +205,9 @@ public abstract class Service extends Configurable {
 	 * @throws i5.las2peer.execution.NoSuchServiceMethodException
 	 *
 	 */
-	@SuppressWarnings("rawtypes")
 	public Method searchMethod(String methodName, Object[] params)
 			throws L2pSecurityException, i5.las2peer.execution.NoSuchServiceMethodException {
-		Class[] acActualParamTypes = new Class[params.length];
+		Class<?>[] acActualParamTypes = new Class[params.length];
 		Class<? extends Service> thisClass = this.getClass();
 
 		for (int i = 0; i < params.length; i++) {
@@ -224,7 +223,7 @@ public abstract class Service extends Configurable {
 			for (Method toCheck : thisClass.getMethods()) {
 
 				if (toCheck.getName().equals(methodName)) {
-					Class[] acCheckParamTypes = toCheck.getParameterTypes();
+					Class<?>[] acCheckParamTypes = toCheck.getParameterTypes();
 					if (acCheckParamTypes.length == acActualParamTypes.length) {
 						boolean bPossible = true;
 						for (int i = 0; i < acActualParamTypes.length && bPossible; i++) {

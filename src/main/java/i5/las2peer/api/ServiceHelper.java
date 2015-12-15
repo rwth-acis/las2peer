@@ -16,8 +16,7 @@ public abstract class ServiceHelper {
 	 * @return a Class
 	 *
 	 */
-	@SuppressWarnings("rawtypes")
-	public static Class getWrapperClass(Class c) {
+	public static Class<?> getWrapperClass(Class<?> c) {
 		if (c.equals(int.class))
 			return Integer.class;
 		else if (c.equals(byte.class))
@@ -44,8 +43,7 @@ public abstract class ServiceHelper {
 	 * @return a boolean
 	 *
 	 */
-	@SuppressWarnings("rawtypes")
-	public static boolean isWrapperClass(Class c) {
+	public static boolean isWrapperClass(Class<?> c) {
 		return c.equals(Integer.class) || c.equals(Byte.class) || c.equals(Character.class) || c.equals(Boolean.class)
 				|| c.equals(Long.class) || c.equals(Float.class) || c.equals(Double.class);
 	}
@@ -58,9 +56,8 @@ public abstract class ServiceHelper {
 	 * 
 	 * @return true, if the first parameter class is a subclass of the second one
 	 */
-	@SuppressWarnings("rawtypes")
-	public static boolean isSubclass(Class subClass, Class superClass) {
-		Class walk = subClass;
+	public static boolean isSubclass(Class<?> subClass, Class<?> superClass) {
+		Class<?> walk = subClass;
 		while (walk != null) {
 			if (walk.equals(superClass))
 				return true;
@@ -77,8 +74,7 @@ public abstract class ServiceHelper {
 	 * @return a Class
 	 *
 	 */
-	@SuppressWarnings("rawtypes")
-	public static Class getUnwrappedClass(Class c) {
+	public static Class<?> getUnwrappedClass(Class<?> c) {
 		if (c.equals(Integer.class))
 			return int.class;
 		else if (c.equals(Byte.class))
