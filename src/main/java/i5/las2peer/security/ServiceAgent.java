@@ -403,6 +403,7 @@ public class ServiceAgent extends PassphraseAgent {
 
 	private void executeTimer(Node finalNode, ServiceInfoAgent finalAgent) {
 		try {
+			// TODO this is executed 3 times? even on successful registration?
 			finalAgent.serviceAdded(this, finalNode);
 			timerRunTimes++;
 			if (timerRunning && timerRunTimes > TIMER_RUN_TIMES_MAX) {
@@ -410,6 +411,7 @@ public class ServiceAgent extends PassphraseAgent {
 			}
 		} catch (Exception e) {
 			// do nothing for now
+			// TODO error handling
 		}
 	}
 

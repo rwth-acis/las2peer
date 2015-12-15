@@ -565,7 +565,6 @@ public class GroupAgent extends Agent {
 	@Override
 	public void notifyUnregister() {
 		// TODO Auto-generated method stub
-
 	}
 
 	/**

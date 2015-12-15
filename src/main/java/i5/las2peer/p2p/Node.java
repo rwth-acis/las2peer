@@ -98,6 +98,7 @@ public abstract class Node implements AgentStorage {
 	public static final double DEFAULT_CPU_LOAD_TRESHOLD = 0.5;
 	private double cpuLoadThreshold = DEFAULT_CPU_LOAD_TRESHOLD; // TODO: make it configurable
 	private NodeServiceCache nodeServiceCache;
+	// TODO make time as setting
 	private int nodeServiceCacheLifetime = 10; // 10s before cached node info becomes invalidated
 
 	/**
@@ -193,7 +194,7 @@ public abstract class Node implements AgentStorage {
 			this.baseClassLoader = this.getClass().getClassLoader();
 
 		nodeKeyPair = CryptoTools.generateKeyPair();
-		nodeServiceCache = new NodeServiceCache(this, nodeServiceCacheLifetime);// TODO make time as setting
+		nodeServiceCache = new NodeServiceCache(this, nodeServiceCacheLifetime);
 	}
 
 	/**

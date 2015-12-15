@@ -73,7 +73,7 @@ public class MessageEnvelope implements Message {
 
 	@Override
 	public int getPriority() {
-		// TODO Auto-generated method stub
+		// TODO message prioritization
 		return 0;
 	}
 

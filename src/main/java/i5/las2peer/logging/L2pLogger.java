@@ -99,7 +99,6 @@ public final class L2pLogger extends Logger implements NodeObserver {
 		public String format(LogRecord record) {
 			StringBuilder sb = new StringBuilder();
 			// actual message
-			// TODO colored output
 			sb.append(record.getMessage()).append("\n");
 			// stack trace
 			printStackTrace(sb, record.getThrown());
@@ -392,7 +391,6 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	 * @param message
 	 */
 	public static void logEvent(Object from, Event event, String message) {
-		// FIXME according to Javadoc this is not monitored, makes no sense!
 		logEvent(from, event, message, null, null);
 	}
 

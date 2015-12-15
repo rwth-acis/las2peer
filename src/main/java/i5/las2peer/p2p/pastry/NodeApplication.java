@@ -547,8 +547,6 @@ public class NodeApplication implements Application, ScribeMultiClient {
 
 	@Override
 	public boolean anycast(Topic topic, ScribeContent content) {
-		// deprecated?!?!
-
 		try {
 			deliver(topic, content);
 			return true;
