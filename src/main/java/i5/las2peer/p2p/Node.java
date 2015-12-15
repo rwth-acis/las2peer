@@ -95,7 +95,8 @@ public abstract class Node implements AgentStorage {
 	 */
 	private OperatingSystemMXBean osBean = (com.sun.management.OperatingSystemMXBean) ManagementFactory
 			.getOperatingSystemMXBean();
-	public static final float CPU_LOAD_TRESHOLD = 0.5f;// arbitrary value TODO: make it configurable
+	public static final double DEFAULT_CPU_LOAD_TRESHOLD = 0.5;
+	private double cpuLoadThreshold = DEFAULT_CPU_LOAD_TRESHOLD; // TODO: make it configurable
 	private NodeServiceCache nodeServiceCache;
 	private int nodeServiceCacheLifetime = 10; // 10s before cached node info becomes invalidated
 
@@ -1549,23 +1550,20 @@ public abstract class Node implements AgentStorage {
 	 * Gets the approximate CPU load of the JVM the Node is running on. Correct value only available a few seconds after
 	 * the start of the Node.
 	 * 
-	 * @return value between 0 and 1: CPU load of the JVM process * #cores
+	 * @return value between 0 and 1: CPU load of the JVM process running this node
 	 */
-	public float getNodeCpuLoad() {
-		// TODO maybe this should be a division instead?
-		float load = (float) osBean.getProcessCpuLoad() * Runtime.getRuntime().availableProcessors();
-
-		if (load < 0.0f) {
-			load = 0f;
-		} else if (load > 1f) {
-			load = 1.0f;
+	public double getNodeCpuLoad() {
+		double load = osBean.getProcessCpuLoad();
+		if (load < 0) { // no CPU load information are available
+			load = 0;
+		} else if (load > 1) {
+			load = 1;
 		}
-//		System.out.println("===> CPU Load: " + load);
 		return load;
 	}
 
 	public boolean isBusy() {
-		return (getNodeCpuLoad() > CPU_LOAD_TRESHOLD);
+		return (getNodeCpuLoad() > cpuLoadThreshold);
 	}
 
 }
