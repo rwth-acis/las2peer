@@ -55,8 +55,7 @@ public class UnlockAgentResponse implements Message {
 
 	@Override
 	public int getPriority() {
-		// TODO message prioritization
-		return 0;
+		return DEFAULT_PRIORITY;
 	}
 
 }
