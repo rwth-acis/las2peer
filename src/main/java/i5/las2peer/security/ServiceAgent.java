@@ -379,10 +379,9 @@ public class ServiceAgent extends PassphraseAgent {
 		} catch (Exception e) {
 			throw new L2pServiceException("Error creating ServiceInfoAgent", e);
 		}
-
 	}
 
-	private void startTimer() throws Exception {
+	private synchronized void startTimer() throws Exception {
 		if (timerRunning)
 			return;
 
