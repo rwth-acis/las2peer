@@ -11,7 +11,7 @@ import rice.p2p.commonapi.RouteMessage;
 
 public class TestApp implements Application {
 
-	public final static String FREEPASTRY_APPLICATION_CODE = "i5.las2peer-node-application";
+	public static final String FREEPASTRY_APPLICATION_CODE = "i5.las2peer-node-application";
 
 	/**
 	 * The Endpoint represents the underlining node. By making calls on the Endpoint, it assures that the message will
@@ -32,6 +32,8 @@ public class TestApp implements Application {
 
 	/**
 	 * Called to route a message to the id
+	 * 
+	 * @param id The target id the message should be send to.
 	 */
 	public void routeMyMsg(Id id) {
 		System.out.println("\t" + this + " sending to " + id);
@@ -42,6 +44,8 @@ public class TestApp implements Application {
 
 	/**
 	 * Called to directly send a message to the nh
+	 * 
+	 * @param nh The node handle the message should be send to.
 	 */
 	public void routeMyMsgDirect(NodeHandle nh) {
 		System.out.println("\t" + this + " sending direct to " + nh);

@@ -9,7 +9,6 @@ import i5.las2peer.execution.L2pServiceException;
 import i5.las2peer.execution.L2pThread;
 import i5.las2peer.execution.NoSuchServiceException;
 import i5.las2peer.execution.NoSuchServiceMethodException;
-import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.Node;
@@ -239,10 +238,9 @@ public abstract class Service extends Configurable {
 	 * @throws i5.las2peer.execution.NoSuchServiceMethodException
 	 *
 	 */
-	@SuppressWarnings("rawtypes")
 	public Method searchMethod(String methodName, Object[] params)
 			throws L2pSecurityException, i5.las2peer.execution.NoSuchServiceMethodException {
-		Class[] acActualParamTypes = new Class[params.length];
+		Class<?>[] acActualParamTypes = new Class[params.length];
 		Class<? extends Service> thisClass = this.getClass();
 
 		for (int i = 0; i < params.length; i++) {
@@ -258,7 +256,7 @@ public abstract class Service extends Configurable {
 			for (Method toCheck : thisClass.getMethods()) {
 
 				if (toCheck.getName().equals(methodName)) {
-					Class[] acCheckParamTypes = toCheck.getParameterTypes();
+					Class<?>[] acCheckParamTypes = toCheck.getParameterTypes();
 					if (acCheckParamTypes.length == acActualParamTypes.length) {
 						boolean bPossible = true;
 						for (int i = 0; i < acActualParamTypes.length && bPossible; i++) {
@@ -399,7 +397,7 @@ public abstract class Service extends Configurable {
 	}
 
 	/**
-	 * @deprecated Use {@link L2pLogger#logEvent(Event, String)} with {@link Event#SERVICE_MESSAGE} instead!
+	 * @deprecated Use {@link i5.las2peer.logging.L2pLogger#logEvent(Event, String)} with {@link Event#SERVICE_MESSAGE} instead!
 	 *             <p>
 	 *             Writes a log message.
 	 * 
@@ -411,7 +409,7 @@ public abstract class Service extends Configurable {
 	}
 
 	/**
-	 * @deprecated Use {@link L2pLogger#logEvent(Event, Agent, String)} instead!
+	 * @deprecated Use {@link i5.las2peer.logging.L2pLogger#logEvent(Event, Agent, String)} instead!
 	 *             <p>
 	 *             Writes a log message. The given index (1-99) can be used to differentiate between different log
 	 *             messages.
@@ -436,7 +434,7 @@ public abstract class Service extends Configurable {
 	}
 
 	/**
-	 * @deprecated Use {@link L2pLogger#logEvent(Event, String)} with {@link Event#SERVICE_ERROR} instead!
+	 * @deprecated Use {@link i5.las2peer.logging.L2pLogger#logEvent(Event, String)} with {@link Event#SERVICE_ERROR} instead!
 	 *             <p>
 	 *             Writes an error log message.
 	 * 
@@ -448,7 +446,7 @@ public abstract class Service extends Configurable {
 	}
 
 	/**
-	 * @deprecated Use {@link L2pLogger#logEvent(Event, Agent, String)} instead!
+	 * @deprecated Use {@link i5.las2peer.logging.L2pLogger#logEvent(Event, Agent, String)} instead!
 	 *             <p>
 	 *             Writes an error message. The given index (1-99) can be used to differentiate between different log
 	 *             messages.
@@ -473,7 +471,7 @@ public abstract class Service extends Configurable {
 	}
 
 	/**
-	 * @deprecated Use {@link L2pLogger} instead!
+	 * @deprecated Use {@link i5.las2peer.logging.L2pLogger} instead!
 	 *             <p>
 	 *             Writes an exception log message Additionally the stack trace is printed.
 	 * 

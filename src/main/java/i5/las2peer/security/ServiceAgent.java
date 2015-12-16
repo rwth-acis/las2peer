@@ -369,7 +369,7 @@ public class ServiceAgent extends PassphraseAgent {
 	}
 
 	/**
-	 * Notifies the {@link i5.las2peer.security.ServiceInfoAgent} about itself *
+	 * Notifies the {@link i5.las2peer.security.ServiceInfoAgent} about itself
 	 * 
 	 * @throws L2pServiceException
 	 */
@@ -379,10 +379,9 @@ public class ServiceAgent extends PassphraseAgent {
 		} catch (Exception e) {
 			throw new L2pServiceException("Error creating ServiceInfoAgent", e);
 		}
-
 	}
 
-	private void startTimer() throws Exception {
+	private synchronized void startTimer() throws Exception {
 		if (timerRunning)
 			return;
 
@@ -403,6 +402,7 @@ public class ServiceAgent extends PassphraseAgent {
 
 	private void executeTimer(Node finalNode, ServiceInfoAgent finalAgent) {
 		try {
+			// TODO this is executed 3 times? even on successful registration?
 			finalAgent.serviceAdded(this, finalNode);
 			timerRunTimes++;
 			if (timerRunning && timerRunTimes > TIMER_RUN_TIMES_MAX) {
@@ -410,6 +410,7 @@ public class ServiceAgent extends PassphraseAgent {
 			}
 		} catch (Exception e) {
 			// do nothing for now
+			// TODO error handling
 		}
 	}
 

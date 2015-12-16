@@ -7,14 +7,10 @@ import rice.p2p.commonapi.NodeHandle;
 
 public class GetInfoMessage implements Message {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 6642232699532550877L;
 
-	private long randomId;
-
-	private NodeHandle sendingNode;
+	private final NodeHandle sendingNode;
+	private final long randomId;
 
 	/**
 	 * create a new
@@ -23,7 +19,6 @@ public class GetInfoMessage implements Message {
 	 */
 	public GetInfoMessage(NodeHandle sender) {
 		this.sendingNode = sender;
-
 		randomId = new Random().nextLong();
 	}
 
@@ -47,8 +42,7 @@ public class GetInfoMessage implements Message {
 
 	@Override
 	public int getPriority() {
-		// TODO Auto-generated method stub
-		return 0;
+		return DEFAULT_PRIORITY;
 	}
 
 }

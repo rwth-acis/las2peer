@@ -1,9 +1,9 @@
 package i5.las2peer.security;
 
+import java.util.Hashtable;
+
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.Node;
-
-import java.util.Hashtable;
 
 /**
  * A simple Hashtable based storage for agents.
@@ -26,8 +26,7 @@ public class BasicAgentStorage implements AgentStorage {
 	public BasicAgentStorage(AgentStorage backupStorage) {
 		this.backupStorage = backupStorage;
 
-		// TODO
-		// maybe initialize tidy up thread
+		// TODO maybe initialize tidy up thread
 	}
 
 	/**

@@ -22,6 +22,7 @@ public class SimplePastryNode {
 	 * @param bindport the local port to bind to
 	 * @param bootaddress the IP:port of the node to boot from
 	 * @param env the environment for these nodes
+	 * @throws Exception If an error occurs.
 	 */
 	public SimplePastryNode(int bindport, InetSocketAddress bootaddress, Environment env) throws Exception {
 
@@ -93,6 +94,9 @@ public class SimplePastryNode {
 	/**
 	 * Usage: java [-cp FreePastry-&lt;version&gt;.jar] rice.tutorial.lesson3.DistTutorial localbindport bootIP bootPort
 	 * example java rice.tutorial.DistTutorial 9001 pokey.cs.almamater.edu 9001
+	 * 
+	 * @param args port_number bootaddress bootport
+	 * @throws Exception If an error occurs.
 	 */
 	public static void main(String[] args) throws Exception {
 		// Loads pastry settings

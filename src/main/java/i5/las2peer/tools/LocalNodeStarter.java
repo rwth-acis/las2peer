@@ -1,5 +1,11 @@
 package i5.las2peer.tools;
 
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+
 import i5.las2peer.p2p.AgentAlreadyRegisteredException;
 import i5.las2peer.p2p.LocalNode;
 import i5.las2peer.p2p.Node;
@@ -8,12 +14,6 @@ import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.security.Agent;
 import i5.las2peer.security.AgentException;
 import i5.las2peer.security.L2pSecurityException;
-
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 
 /**
  * Command line tool for starting a {@link i5.las2peer.p2p.LocalNode} and set up some artifacts from a directory
@@ -71,13 +71,11 @@ public class LocalNodeStarter {
 	 * @param method
 	 * @param node
 	 */
-	@SuppressWarnings("unchecked")
 	public static void invokeStatic(String method, LocalNode node) {
 		String sClass = method.substring(0, method.lastIndexOf('.'));
 		String sMethod = method.substring(method.lastIndexOf('.') + 1);
 
-		@SuppressWarnings("rawtypes")
-		Class cls;
+		Class<?> cls;
 		try {
 			cls = Class.forName(sClass);
 		} catch (Exception e) {

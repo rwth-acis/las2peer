@@ -6,8 +6,6 @@ import rice.p2p.commonapi.Message;
 /**
  * A simple test message to be sent through the pastry network will be removed later
  * 
- * 
- *
  */
 public class PastryTestMessage implements Message {
 
@@ -18,11 +16,11 @@ public class PastryTestMessage implements Message {
 	/**
 	 * Where the Message came from.
 	 */
-	private Id from;
+	private final Id from;
 	/**
 	 * Where the Message is going.
 	 */
-	private Id to;
+	private final Id to;
 
 	private int messageCounter;
 
@@ -47,4 +45,5 @@ public class PastryTestMessage implements Message {
 	public int getPriority() {
 		return Message.LOW_PRIORITY;
 	}
+
 }

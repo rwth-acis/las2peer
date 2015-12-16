@@ -7,24 +7,16 @@ import rice.p2p.commonapi.NodeHandle;
 /**
  * content class for messages to be broadcasted via the pastry ring
  * 
- * 
- *
  */
 public class BroadcastMessageContent extends L2pScribeContent {
 
-	private String xmlMessageContent = "";
-
-	private transient Message message = null;
-
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 5111771506510680578L;
 
+	private final String xmlMessageContent;
+	private final transient Message message;
+
 	public BroadcastMessageContent(NodeHandle fromNode, Message l2pMessage) {
-
 		super(fromNode);
-
 		xmlMessageContent = l2pMessage.toXmlString();
 		message = l2pMessage;
 	}
@@ -33,14 +25,14 @@ public class BroadcastMessageContent extends L2pScribeContent {
 	 * get the l2p message inside
 	 * 
 	 * @return the contained Las2peer message
-	 * 
 	 * @throws MalformedXMLException
 	 */
 	public Message getMessage() throws MalformedXMLException {
-		if (message == null)
-			message = Message.createFromXml(xmlMessageContent);
-
-		return message;
+		if (message == null) {
+			return Message.createFromXml(xmlMessageContent);
+		} else {
+			return message;
+		}
 	}
 
 }

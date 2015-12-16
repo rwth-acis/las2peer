@@ -10,21 +10,15 @@ import rice.p2p.commonapi.NodeHandle;
  * 
  * This passphrase is encrypted for the destination node.
  * 
- * 
- *
  */
 public class UnlockAgentMessage implements Message {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 2335873629440223166L;
 
-	private long messageId;
-
-	private NodeHandle sender;
-	private long agentId;
-	private byte[] encryptedPass;
+	private final NodeHandle sender;
+	private final long agentId;
+	private final byte[] encryptedPass;
+	private final long messageId;
 
 	/**
 	 * create a new message
@@ -75,8 +69,7 @@ public class UnlockAgentMessage implements Message {
 
 	@Override
 	public int getPriority() {
-		// TODO Auto-generated method stub
-		return 0;
+		return DEFAULT_PRIORITY;
 	}
 
 }

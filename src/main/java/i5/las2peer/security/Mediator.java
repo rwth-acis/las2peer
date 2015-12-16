@@ -230,7 +230,7 @@ public class Mediator implements MessageReceiver {
 	 * 
 	 * @return number of successfully removed message handlers
 	 */
-	public int unregisterMessageHandlerClass(@SuppressWarnings("rawtypes") Class cls) {
+	public int unregisterMessageHandlerClass(Class<?> cls) {
 		int result = 0;
 
 		Vector<MessageHandler> newHandlers = new Vector<MessageHandler>();
@@ -279,7 +279,7 @@ public class Mediator implements MessageReceiver {
 	 * @param cls
 	 * @return true, if this mediator has a message handler of the given class
 	 */
-	public boolean hasMessageHandlerClass(@SuppressWarnings("rawtypes") Class cls) {
+	public boolean hasMessageHandlerClass(Class<?> cls) {
 		for (MessageHandler handler : registeredHandlers)
 			if (cls.isInstance(handler))
 				return true;
