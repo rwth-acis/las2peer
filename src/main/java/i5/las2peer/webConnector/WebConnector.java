@@ -295,14 +295,14 @@ public class WebConnector extends Connector {
 	@Override
 	public void start(Node node) throws ConnectorException {
 		if (!startHttp && !startHttps) {
-			throw new ConnectorException("either the http connector of the https connector have to be started!");
+			throw new ConnectorException("Either the HTTP mode or the HTTPS mode have to be enabled!");
 		}
 
 		if (logHandler == null) {
 			try {
 				setLogFile(DEFAULT_LOGFILE);
 			} catch (IOException e) {
-				throw new ConnectorException("cannot initialize standard log file at " + DEFAULT_LOGFILE, e);
+				throw new ConnectorException("Cannot initialize standard log file at " + DEFAULT_LOGFILE, e);
 			}
 		}
 
