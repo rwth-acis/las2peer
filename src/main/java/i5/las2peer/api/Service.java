@@ -154,7 +154,9 @@ public abstract class Service extends Configurable {
 	public Object execute(String method, Object... parameters) throws NoSuchServiceMethodException,
 			IllegalArgumentException, IllegalAccessException, InvocationTargetException, L2pSecurityException {
 		Method m = searchMethod(method, parameters);
-
+		
+		// TODO check if mainagent is unlocked
+		
 		return m.invoke(this, parameters);
 	}
 
@@ -182,12 +184,44 @@ public abstract class Service extends Configurable {
 			throws L2pServiceException, SecurityException, IllegalArgumentException, AgentNotKnownException,
 			L2pSecurityException, NoSuchServiceMethodException, IllegalAccessException, InvocationTargetException,
 			InterruptedException, TimeoutException {
+		return this.invokeServiceMethod(false,service,method,parameters);
+	}
+	
+	/**
+	 * Invokes the method of any other service.
+	 * 
+	 * @param sendMainAgent if true, the mainAgent of the current Context is used for invocation; otherwise, the service agent is used
+	 * @param service the service class
+	 * @param method the service method
+	 * @param parameters list of parameters
+	 * @return the return value of the invoked method
+	 * @throws L2pServiceException
+	 * @throws SecurityException
+	 * @throws IllegalArgumentException
+	 * @throws AgentNotKnownException
+	 * @throws L2pSecurityException
+	 * @throws NoSuchServiceMethodException
+	 * @throws IllegalAccessException
+	 * @throws InvocationTargetException
+	 * @throws InterruptedException
+	 * @throws TimeoutException
+	 */
+	public Object invokeServiceMethod(boolean sendMainAgent, String service, String method, Serializable... parameters)
+			throws L2pServiceException, SecurityException, IllegalArgumentException, AgentNotKnownException,
+			L2pSecurityException, NoSuchServiceMethodException, IllegalAccessException, InvocationTargetException,
+			InterruptedException, TimeoutException {
 		// System.out.println ( "\t\t---> invoking Service Method " + service + "/" + method );
+		Agent callingAgent = null;
+		if (sendMainAgent)
+			callingAgent = getContext().getMainAgent();
+		else
+			callingAgent = getAgent();
+		
 		Object result = null;
 		if (getContext().getLocalNode().hasLocalAgent(ServiceAgent.serviceClass2Id(service)))
-			result = getContext().getLocalNode().invokeLocally(getAgent().getId(), service, method, parameters);
+			result = getContext().getLocalNode().invokeLocally(callingAgent.getId(), service, method, parameters);
 		else
-			result = getContext().getLocalNode().invokeGlobally(getAgent(), service, method, parameters);
+			result = getContext().getLocalNode().invokeGlobally(callingAgent, service, method, parameters);
 
 		return result;
 	}
@@ -325,7 +359,7 @@ public abstract class Service extends Configurable {
 	 * 
 	 * @return the L2pThread we're currently running in
 	 */
-	public final L2pThread getL2pThread() {
+	public final L2pThread getL2pThread() { // TODO remove public modifier to avoid illegal access
 		Thread t = Thread.currentThread();
 
 		if (!(t instanceof L2pThread))
@@ -450,31 +484,31 @@ public abstract class Service extends Configurable {
 		logError("Exception: " + e);
 		e.printStackTrace();
 	}
-
+	
 	/**
 	 * Gets the currently active l2p node (from the current thread context).
 	 * 
 	 * @return the currently active las2peer node
 	 */
-	protected Node getActiveNode() {
+	protected Node getActiveNode() { // TODO deprecate
 		return getL2pThread().getContext().getLocalNode();
 	}
-
+	
 	/**
 	 * Gets the currently active agent from the current thread context.
 	 * 
 	 * @return the agent currently executing the L2pThread we're in
 	 */
-	protected Agent getActiveAgent() {
+	protected Agent getActiveAgent() { // TODO deprecate
 		return getL2pThread().getContext().getMainAgent();
 	}
-
+	
 	/**
 	 * Access to this service agent. (security problem: just for internal use!)
 	 * 
 	 * @return the service agent responsible for this service
 	 */
-	protected ServiceAgent getMyAgent() {
+	protected ServiceAgent getMyAgent() { // TODO deprecate
 		return getL2pThread().getServiceAgent();
 	}
 
@@ -493,7 +527,7 @@ public abstract class Service extends Configurable {
 	 * @throws InterruptedException
 	 * @throws TimeoutException
 	 */
-	protected Serializable invokeInternally(String service, String method, Serializable[] parameters)
+	protected Serializable invokeInternally(String service, String method, Serializable[] parameters) // TODO deprecate
 			throws L2pServiceException, L2pSecurityException, AgentNotKnownException, InterruptedException,
 			TimeoutException {
 		try {
