@@ -59,8 +59,8 @@ import rice.p2p.util.Base64;
 /**
  * A HttpServer RequestHandler for handling requests to the LAS2peer Web Connector. Each request will be distributed to
  * its corresponding session.
+ * 
  */
-
 public class WebConnectorRequestHandler implements HttpHandler {
 
 	private static final String AUTHENTICATION_FIELD = "Authorization";
@@ -120,10 +120,9 @@ public class WebConnectorRequestHandler implements HttpHandler {
 
 		// IMPORTANT NOTE: doing the same thing with authorization header and bearer token results in client-side
 		// cross-domain errors despite correct config for CORS in LAS2peer Web Connector!
-		else if (connector.oidcProviderInfos != null
-				&& ((exchange.getRequestURI().getRawQuery() != null && exchange.getRequestURI().getRawQuery()
-						.contains(ACCESS_TOKEN_KEY + "=")) || exchange.getRequestHeaders()
-								.containsKey(ACCESS_TOKEN_KEY))) {
+		else if (connector.oidcProviderInfos != null && ((exchange.getRequestURI().getRawQuery() != null
+				&& exchange.getRequestURI().getRawQuery().contains(ACCESS_TOKEN_KEY + "="))
+				|| exchange.getRequestHeaders().containsKey(ACCESS_TOKEN_KEY))) {
 			String token = "";
 			String oidcProviderURI = connector.defaultOIDCProvider;
 			if (exchange.getRequestHeaders().containsKey(ACCESS_TOKEN_KEY)) { // get OIDC parameters from headers
@@ -148,9 +147,8 @@ public class WebConnectorRequestHandler implements HttpHandler {
 						+ ") is not whitelisted! Please make sure the complete OIDC provider URI is added to the config.");
 				return null;
 			} else if (connector.oidcProviderInfos.get(oidcProviderURI) == null) {
-				sendInternalErrorResponse(exchange,
-						"The OIDC config is not known for the given provider (" + oidcProviderURI
-								+ ")! Please make sure the right URI is added to the config.");
+				sendInternalErrorResponse(exchange, "The OIDC config is not known for the given provider ("
+						+ oidcProviderURI + ")! Please make sure the right URI is added to the config.");
 				return null;
 			} else {
 				oidcProviderInfo = connector.oidcProviderInfos.get(oidcProviderURI);
@@ -299,11 +297,11 @@ public class WebConnectorRequestHandler implements HttpHandler {
 
 			return userAgent;
 		} catch (AgentNotKnownException e) {
-			sendUnauthorizedResponse(exchange, null, exchange.getRemoteAddress() + ": login denied for user "
-					+ username);
+			sendUnauthorizedResponse(exchange, null,
+					exchange.getRemoteAddress() + ": login denied for user " + username);
 		} catch (L2pSecurityException e) {
-			sendUnauthorizedResponse(exchange, null, exchange.getRemoteAddress()
-					+ ": unauth access - prob. login problems");
+			sendUnauthorizedResponse(exchange, null,
+					exchange.getRemoteAddress() + ": unauth access - prob. login problems");
 		} catch (Exception e) {
 			sendUnauthorizedResponse(exchange, null, exchange.getRemoteAddress()
 					+ ": something went horribly wrong. Check your request for correctness.");
@@ -550,8 +548,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	 */
 	private void sendMalformedRequest(HttpExchange exchange, String error) {
 		// connector.logError("Malformed request: " + error);
-		sendStringResponse(exchange, HttpURLConnection.HTTP_BAD_REQUEST,
-				"Malformed Request: wrong datatypes");
+		sendStringResponse(exchange, HttpURLConnection.HTTP_BAD_REQUEST, "Malformed Request: wrong datatypes");
 	}
 
 	/**
@@ -733,8 +730,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		Headers responseHeaders = exchange.getResponseHeaders();
 		if (connector.enableCrossOriginResourceSharing) {
 			responseHeaders.add("Access-Control-Allow-Origin", connector.crossOriginResourceDomain);
-			responseHeaders.add("Access-Control-Max-Age",
-					String.valueOf(connector.crossOriginResourceMaxAge));
+			responseHeaders.add("Access-Control-Max-Age", String.valueOf(connector.crossOriginResourceMaxAge));
 			// just reply all requested headers
 			String requestedHeaders = exchange.getRequestHeaders().getFirst("Access-Control-Request-Headers");
 			if (requestedHeaders != null) {
