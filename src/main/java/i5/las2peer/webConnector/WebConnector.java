@@ -393,7 +393,8 @@ public class WebConnector extends Connector {
 		// stop the HTTP server
 		if (https != null) {
 			https.stop(0);
-		} else if (http != null) {
+		}
+		if (http != null) {
 			http.stop(0);
 		}
 		logMessage("Web-Connector has been stopped");
