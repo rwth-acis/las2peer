@@ -3,7 +3,6 @@ package i5.las2peer.restMapper;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.NotSerializableException;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringReader;
@@ -58,6 +57,7 @@ import i5.las2peer.restMapper.data.PathTree.PathNode;
 import i5.las2peer.restMapper.exceptions.ConflictingMethodPathException;
 import i5.las2peer.restMapper.exceptions.MethodThrowsExceptionException;
 import i5.las2peer.restMapper.exceptions.NoMethodFoundException;
+import i5.las2peer.restMapper.exceptions.NotSupportedHttpMethodException;
 import i5.las2peer.restMapper.exceptions.NotSupportedUriPathException;
 import i5.las2peer.restMapper.tools.ValidationResult;
 
@@ -566,7 +566,6 @@ public class RESTMapper {
 	public static InvocationData[] parse(PathTree tree, String httpMethod, String uri, Pair<String>[] variables,
 			String content, String contentType, String returnType, Pair<String>[] headers, StringBuilder warnings)
 					throws Exception {
-		httpMethod = httpMethod.toLowerCase(); // for robustness
 
 		if (!contentType.isEmpty()) {
 			int consumesParamSeparator = contentType.indexOf(DEFAULT_MIME_PARAMETER_SEPARATOR);
@@ -593,10 +592,11 @@ public class RESTMapper {
 		}
 
 		// begin traversing the tree from one of the http method nodes
-		PathNode currentNode = tree.getRoot().getChild(httpMethod);
+		PathNode currentNode = tree.getRoot().getChild(httpMethod.toLowerCase()); // for robustness
 
-		if (currentNode == null) // if not supported method
-			throw new NotSerializableException(httpMethod);
+		if (currentNode == null) { // if not supported method
+			throw new NotSupportedHttpMethodException(httpMethod);
+		}
 
 		if (uri.trim().length() > 0) { // is there any URI path?
 			String[] uriSplit = uri.split("/");
@@ -632,7 +632,7 @@ public class RESTMapper {
 		ArrayList<InvocationData> invocationData = new ArrayList<InvocationData>();
 
 		// important for handling @Consumes
-		boolean consumesMIME = (httpMethod.equals(POST) || httpMethod.equals(PUT)) && !contentType.isEmpty();
+		boolean consumesMIME = (httpMethod.equalsIgnoreCase(POST) || httpMethod.equalsIgnoreCase(PUT)) && !contentType.isEmpty();
 
 		ArrayList<String> notMatchingConsumesTypes = new ArrayList<String>();
 
