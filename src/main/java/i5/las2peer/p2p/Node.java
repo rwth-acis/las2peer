@@ -1233,10 +1233,14 @@ public abstract class Node implements AgentStorage {
 		if (thread.hasException()) {
 			Exception e = thread.getException();
 
-			if (e instanceof ServiceInvocationException)
+			if (e instanceof ServiceInvocationException) {
 				throw (ServiceInvocationException) e;
-			else
-				throw new ServiceInvocationException("Internal exception in service", thread.getException());
+			} else if ((e instanceof InvocationTargetException) && (e.getCause() instanceof L2pSecurityException)) {
+				// internal L2pSecurityException (like internal method access or unauthorizes object access)
+				throw new L2pSecurityException("internal securityException!", e.getCause());
+			} else {
+				throw new ServiceInvocationException("Internal exception in service", e);
+			}
 		}
 
 		try {
