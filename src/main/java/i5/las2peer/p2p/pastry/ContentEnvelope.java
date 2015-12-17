@@ -26,21 +26,10 @@ public class ContentEnvelope extends ContentHashPastContent {
 	// TODO: use Environment / settings of pastry!
 	private static IdFactory idFactory = new PastryIdFactory(new Environment());
 
-	public enum TYPE {
-		AGENT(50),
-		ENVELOPE(100),
-		UNKNOWN(-1);
-
-		public final byte value;
-
-		private TYPE(int value) {
-			this((byte) value);
-		}
-
-		private TYPE(byte value) {
-			this.value = value;
-		}
-	}
+	// enum types are not serialized correctly by Pastry
+	public final static byte TYPE_AGENT = 50;
+	public final static byte TYPE_ENVELOPE = 100;
+	public final static byte TYPE_UNKNOWN = -1;
 
 	private static final long serialVersionUID = -1949920691543117540L;
 
@@ -48,7 +37,7 @@ public class ContentEnvelope extends ContentHashPastContent {
 
 	private long timestamp;
 
-	private TYPE type = TYPE.UNKNOWN;
+	private byte type = TYPE_UNKNOWN;
 
 	/**
 	 * create a pastry envelope for the given agent
@@ -59,7 +48,7 @@ public class ContentEnvelope extends ContentHashPastContent {
 		super(getPastId(agent));
 
 		content = agent.toXmlString();
-		type = TYPE.AGENT;
+		type = TYPE_AGENT;
 
 		timestamp = new Date().getTime();
 	}
@@ -67,11 +56,12 @@ public class ContentEnvelope extends ContentHashPastContent {
 	/**
 	 * get the type constant of this envelope.
 	 * 
-	 * @see #TYPE
+	 * @see #TYPE_AGENT
+	 * @see #TYPE_ENVELOPE
 	 * @return the type
 	 */
 	public byte getType() {
-		return type.value;
+		return type;
 	}
 
 	/**
@@ -80,7 +70,7 @@ public class ContentEnvelope extends ContentHashPastContent {
 	 * @return true, if this envelope contains an agent.
 	 */
 	public boolean isAgent() {
-		return type == TYPE.AGENT;
+		return getType() == TYPE_AGENT;
 	}
 
 	/**
@@ -89,7 +79,7 @@ public class ContentEnvelope extends ContentHashPastContent {
 	 * @return false for unknown or agent envelopes
 	 */
 	public boolean isEnvelope() {
-		return type == TYPE.ENVELOPE;
+		return getType() == TYPE_ENVELOPE;
 	}
 
 	/**
@@ -100,7 +90,7 @@ public class ContentEnvelope extends ContentHashPastContent {
 	public ContentEnvelope(Envelope e) {
 		super(getPastId(e));
 
-		type = TYPE.ENVELOPE;
+		type = TYPE_ENVELOPE;
 		content = e.toXmlString();
 
 		timestamp = new Date().getTime();
@@ -113,7 +103,7 @@ public class ContentEnvelope extends ContentHashPastContent {
 	 * @throws PastryStorageException
 	 */
 	public Agent getContainedAgent() throws PastryStorageException {
-		if (type != TYPE.AGENT)
+		if (type != TYPE_AGENT)
 			throw new PastryStorageException("This is not an Agent!");
 
 		try {
@@ -131,7 +121,7 @@ public class ContentEnvelope extends ContentHashPastContent {
 	 * @throws PastryStorageException
 	 */
 	public Envelope getContainedEnvelope() throws PastryStorageException {
-		if (type != TYPE.ENVELOPE)
+		if (type != TYPE_ENVELOPE)
 			throw new PastryStorageException("This is not an envelope!");
 
 		try {
@@ -149,9 +139,9 @@ public class ContentEnvelope extends ContentHashPastContent {
 	 */
 	public Object getContainedObject() throws PastryStorageException {
 		switch (type) {
-		case AGENT:
+		case TYPE_AGENT:
 			return getContainedAgent();
-		case ENVELOPE:
+		case TYPE_ENVELOPE:
 			return getContainedEnvelope();
 		default:
 			throw new PastryStorageException("Unkown content type (" + type + ")!");
