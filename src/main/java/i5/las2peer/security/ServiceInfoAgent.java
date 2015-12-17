@@ -270,7 +270,7 @@ public class ServiceInfoAgent extends PassphraseAgent {
 	// TODO "synchronized" is a workaroud for LAS-217
 	synchronized public void serviceAdded(ServiceAgent serviceAgent, Node node)
 			throws EnvelopeException, AgentException, L2pSecurityException {
-		// FIXME versions of services
+		// TODO versions of services
 		ServiceNameVersion servicenameVersion = new ServiceNameVersion(serviceAgent.getServiceClassName(), "1.0");
 		ServiceList data = (ServiceList) getEnvelopeData(SERVICE_LIST_ENVELOPE_NAME, ServiceList.class);
 		data.addService(servicenameVersion);

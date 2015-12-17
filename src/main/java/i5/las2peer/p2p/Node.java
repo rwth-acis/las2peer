@@ -99,7 +99,7 @@ public abstract class Node implements AgentStorage {
 	private double cpuLoadThreshold = DEFAULT_CPU_LOAD_TRESHOLD; // TODO: make it configurable
 	private NodeServiceCache nodeServiceCache;
 	// TODO make time as setting
-	private int nodeServiceCacheLifetime = 10; // 10s before cached node info becomes invalidated
+	private int nodeServiceCacheLifetime = 10; // time before cached node info becomes invalidated
 
 	/**
 	 * observers to be notified of all occurring events
@@ -1303,34 +1303,36 @@ public abstract class Node implements AgentStorage {
 					TimeoutException, UnlockNeededException {
 		if (getStatus() != NodeStatus.RUNNING)
 			throw new IllegalStateException("you can invoke methods only on a running node!");
-		this.observerNotice(Event.RMI_SENT, this.getNodeId(), executing, null); // Do not log service class name
-		// (privacy..)
+		// Do not log service class name (privacy..)
+		this.observerNotice(Event.RMI_SENT, this.getNodeId(), executing, null);
 
+		// TODO disabled? reenable for more security?
 		/*if (executing.isLocked()){
 			System.out.println(	"The executing agent has to be unlocked to call a RMI");
 			throw new L2pSecurityException("The executing agent has to be unlocked to call a RMI");
 		}*/
 
 		try {
-			// Agent target = getServiceAgent(serviceClass);
-			Agent target = null;
-
-			target = nodeServiceCache.getServiceAgent(serviceClass, "1.0");
-
-			if (target == null)
+			// TODO versions of services
+			Agent target = nodeServiceCache.getServiceAgent(serviceClass, "1.0");
+			if (target == null) {
 				target = getServiceAgent(serviceClass);
+			}
 
 			Message rmiMessage = new Message(executing, target, new RMITask(serviceClass, serviceMethod, parameters));
 
-			if (this instanceof LocalNode)
+			if (this instanceof LocalNode) {
 				rmiMessage.setSendingNodeId((Long) getNodeId());
-			else
+			} else {
 				rmiMessage.setSendingNodeId((NodeHandle) getNodeId());
+			}
 			Message resultMessage;
 			NodeHandle targetNode = null;// =nodeServiceCache.getRandomServiceNode(serviceClass,"1.0");
 
+			// TODO versions of services
 			ArrayList<NodeHandle> targetNodes = nodeServiceCache.getServiceNodes(serviceClass, "1.0");
 			if (targetNodes != null && targetNodes.size() > 0) {
+				// TODO seems like round robin, should be replaced with a more generic node choose strategy
 				invocationDistributerIndex %= targetNodes.size();
 				targetNode = targetNodes.get(invocationDistributerIndex);
 				invocationDistributerIndex++;
@@ -1339,17 +1341,18 @@ public abstract class Node implements AgentStorage {
 
 			}
 
-			// System.out.println( "### nodecount: "+nodeServiceCache.getServiceNodes(serviceClass,"1.0").size());
 			if (targetNode != null) {
 				try {
 					resultMessage = sendMessageAndWaitForAnswer(rmiMessage, targetNode);
 				} catch (NodeNotFoundException nex) {
-					nodeServiceCache.removeEntryNode(serviceClass, "1.0", targetNode);// remove so unavailable nodes
-																						// will not be tries again
+					// remove so unavailable nodes will not be tried again
+					// TODO versions of services
+					nodeServiceCache.removeEntryNode(serviceClass, "1.0", targetNode);
 					resultMessage = sendMessageAndWaitForAnswer(rmiMessage);
 				}
-			} else
+			} else {
 				resultMessage = sendMessageAndWaitForAnswer(rmiMessage);
+			}
 
 			resultMessage.open(executing, this);
 			Object resultContent = resultMessage.getContent();
@@ -1362,10 +1365,8 @@ public abstract class Node implements AgentStorage {
 						((RMIUnlockContent) resultContent).getNodeKey());
 			} else if (resultContent instanceof RMIExceptionContent) {
 				Exception thrown = ((RMIExceptionContent) resultContent).getException();
-				this.observerNotice(Event.RMI_FAILED, this.getNodeId(), executing, thrown.toString()); // Do not log
-																										// service class
-																										// name
-																										// (privacy..)
+				// Do not log service class name (privacy..)
+				this.observerNotice(Event.RMI_FAILED, this.getNodeId(), executing, thrown.toString());
 				if (thrown instanceof ServiceInvocationException)
 					throw (ServiceInvocationException) thrown;
 				else if ((thrown instanceof InvocationTargetException)
@@ -1376,33 +1377,27 @@ public abstract class Node implements AgentStorage {
 					throw new ServiceInvocationException("remote exception at target node", thrown);
 
 			} else if (resultContent instanceof RMIResultContent) {
-				this.observerNotice(Event.RMI_SUCCESSFUL, this.getNodeId(), executing, null); // Do not log service
-																								// class name
-																								// (privacy..)
+				// Do not log service class name (privacy..)
+				this.observerNotice(Event.RMI_SUCCESSFUL, this.getNodeId(), executing, null);
 				return ((RMIResultContent) resultContent).getContent();
 			} else {
+				// Do not log service class name (privacy..)
 				this.observerNotice(Event.RMI_FAILED, this.getNodeId(), executing,
-						"Unknown RMI response type: " + resultContent.getClass().getCanonicalName()); // Do not log
-																										// service class
-																										// name
-																										// (privacy..)
+						"Unknown RMI response type: " + resultContent.getClass().getCanonicalName());
 				throw new ServiceInvocationException(
 						"Unknown RMI response type: " + resultContent.getClass().getCanonicalName());
 			}
 		} catch (AgentNotKnownException e) {
-			this.observerNotice(Event.RMI_FAILED, this.getNodeId(), executing, e.toString()); // Do not log service
-																								// class name
-																								// (privacy..)
+			// Do not log service class name (privacy..)
+			this.observerNotice(Event.RMI_FAILED, this.getNodeId(), executing, e.toString());
 			throw new NoSuchServiceException(serviceClass, e);
 		} catch (EncodingFailedException e) {
-			this.observerNotice(Event.RMI_FAILED, this.getNodeId(), executing, e.toString()); // Do not log service
-																								// class name
-																								// (privacy..)
+			// Do not log service class name (privacy..)
+			this.observerNotice(Event.RMI_FAILED, this.getNodeId(), executing, e.toString());
 			throw new ServiceInvocationException("message problems!", e);
 		} catch (SerializationException e) {
-			this.observerNotice(Event.RMI_FAILED, this.getNodeId(), executing, e.toString()); // Do not log service
-																								// class name
-																								// (privacy..)
+			// Do not log service class name (privacy..)
+			this.observerNotice(Event.RMI_FAILED, this.getNodeId(), executing, e.toString());
 			throw new ServiceInvocationException("message problems!", e);
 		}
 	}
