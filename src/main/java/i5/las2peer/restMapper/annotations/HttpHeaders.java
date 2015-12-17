@@ -6,7 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Binds all name value pairs of a HTTP header to a resource method parameter. The type T of the annotated parameter must be {@link java.lang.String}.
+ * Binds all name value pairs of a HTTP header to a resource method parameter. The type T of the annotated parameter
+ * must be {@link java.lang.String}.
  *
  */
 @Target(ElementType.PARAMETER)

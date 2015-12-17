@@ -62,8 +62,8 @@ import i5.las2peer.restMapper.exceptions.NotSupportedUriPathException;
 import i5.las2peer.restMapper.tools.ValidationResult;
 
 /**
- * Maps REST requests to Methods
- * Very simple and only supports basic stuff (map paths and extract path parameters and map query parameters)
+ * Maps REST requests to Methods Very simple and only supports basic stuff (map paths and extract path parameters and
+ * map query parameters)
  *
  */
 public class RESTMapper {
@@ -113,8 +113,9 @@ public class RESTMapper {
 	}
 
 	/**
-	 * accepts a (service) class and creates an XML file from it
-	 * containing all method/parameter information using annotations in the code
+	 * accepts a (service) class and creates an XML file from it containing all method/parameter information using
+	 * annotations in the code
+	 * 
 	 * @param cl class to extract information fromm
 	 * @return XML file
 	 * @throws Exception
@@ -276,6 +277,7 @@ public class RESTMapper {
 
 	/**
 	 * Formats path to the expected format
+	 * 
 	 * @param path
 	 * @return String formatted path
 	 */
@@ -286,6 +288,7 @@ public class RESTMapper {
 
 	/**
 	 * Returns all occurences of match in s as an integer array
+	 * 
 	 * @param s
 	 * @param match
 	 * @return int[] positions of matches
@@ -328,8 +331,9 @@ public class RESTMapper {
 	}
 
 	/**
-	 * creates a tree from the class data xml
-	 * the tree can then be used to map requests directly to the proper services and methods
+	 * creates a tree from the class data xml the tree can then be used to map requests directly to the proper services
+	 * and methods
+	 * 
 	 * @param xml XML containing service class information
 	 * @return tree structure for request mapping
 	 * @throws Exception
@@ -339,8 +343,9 @@ public class RESTMapper {
 	}
 
 	/**
-	 * creates a tree from the class data xml
-	 * the tree can then be used to map requests directly to the proper services and methods
+	 * creates a tree from the class data xml the tree can then be used to map requests directly to the proper services
+	 * and methods
+	 * 
 	 * @param xml XML containing service class information
 	 * @param validate if a path-annotation validation should be performed
 	 * @param result validation result, as reference parameter, if validate is true
@@ -445,8 +450,8 @@ public class RESTMapper {
 							for (int k = 0; k < braceOpen.length; k++) {
 								if (!(braceOpen[k] < bracesClosed[k]) || lastClosed >= braceOpen[k]) {
 									result.setValid(false);
-									result.addMessage("Path " + methodPath + " of method " + methodName
-											+ " has {} inside of {}");
+									result.addMessage(
+											"Path " + methodPath + " of method " + methodName + " has {} inside of {}");
 									break;
 								}
 								lastClosed = bracesClosed[k];
@@ -508,8 +513,8 @@ public class RESTMapper {
 					}
 
 					// create array sorted by the occurrence of the parameter in the method declaration
-					parameters[parameterIndex] = new ParameterData(parameterAnnotation, parameterIndex,
-							parameterName, parameterType, parameterDefault);
+					parameters[parameterIndex] = new ParameterData(parameterAnnotation, parameterIndex, parameterName,
+							parameterType, parameterDefault);
 				}
 				// currentNode is the node, where the URI path traversion stopped, so these paths are then mapped to
 				// this method
@@ -530,6 +535,7 @@ public class RESTMapper {
 
 	/**
 	 * gets the proper HTTP method from the used annotations
+	 * 
 	 * @param annotations array of annotations to look for HTTP-Method information
 	 * @return HTTP Method (put,post,get etc...)
 	 */
@@ -551,6 +557,7 @@ public class RESTMapper {
 
 	/**
 	 * receives a request and tries to map it to an existing service and method
+	 * 
 	 * @param tree structure to use for the mapping process
 	 * @param httpMethod HTTP method of the request
 	 * @param uri URI path of the request
@@ -632,7 +639,8 @@ public class RESTMapper {
 		ArrayList<InvocationData> invocationData = new ArrayList<InvocationData>();
 
 		// important for handling @Consumes
-		boolean consumesMIME = (httpMethod.equalsIgnoreCase(POST) || httpMethod.equalsIgnoreCase(PUT)) && !contentType.isEmpty();
+		boolean consumesMIME = (httpMethod.equalsIgnoreCase(POST) || httpMethod.equalsIgnoreCase(PUT))
+				&& !contentType.isEmpty();
 
 		ArrayList<String> notMatchingConsumesTypes = new ArrayList<String>();
 
@@ -726,11 +734,9 @@ public class RESTMapper {
 			}
 
 			if (!abort) // return only methods which can be invoked
-				invocationData.add(
-						new InvocationData(aMethodData.getServiceName(),
-								aMethodData.getServiceVersion(), aMethodData.getName(),
-								aMethodData.getType(), aMethodData.getProduces(),
-								matchLevel, values, types));
+				invocationData.add(new InvocationData(aMethodData.getServiceName(), aMethodData.getServiceVersion(),
+						aMethodData.getName(), aMethodData.getType(), aMethodData.getProduces(), matchLevel, values,
+						types));
 
 		}
 
@@ -740,9 +746,8 @@ public class RESTMapper {
 		invocationData.toArray(result);
 		if (result.length == 0) { // nothing found?
 			if (notMatchingConsumesTypes.size() > 0) { // could not consume something?
-				warnings.append(
-						"Warning: There were methods at the given path: " + httpMethod + " " + uri
-								+ " , but none consumes the given MIME-Type: " + contentType + " Accepted types are:")
+				warnings.append("Warning: There were methods at the given path: " + httpMethod + " " + uri
+						+ " , but none consumes the given MIME-Type: " + contentType + " Accepted types are:")
 						.append("\n");
 				for (int i = 0; i < notMatchingConsumesTypes.size(); i++) {
 					warnings.append(notMatchingConsumesTypes.get(i));
@@ -750,9 +755,8 @@ public class RESTMapper {
 				warnings.append("--\n");
 			}
 			if (notMatchingProducesTypes.size() > 0) { // could not consume something?
-				warnings.append(
-						"Warning: There were methods at the given path: " + httpMethod + " " + uri
-								+ " , but none produces the accepted MIME-Type: " + returnType + " Produced types are:")
+				warnings.append("Warning: There were methods at the given path: " + httpMethod + " " + uri
+						+ " , but none produces the accepted MIME-Type: " + returnType + " Produced types are:")
 						.append("\n");
 				for (int i = 0; i < notMatchingProducesTypes.size(); i++) {
 					warnings.append(notMatchingProducesTypes.get(i));
@@ -765,6 +769,7 @@ public class RESTMapper {
 
 	/**
 	 * Extracts all acceptable types from Accept Header value
+	 * 
 	 * @param returnType Accept Header string.
 	 * @return sorted array (by priority) of acceptable MIME Types
 	 */
@@ -814,6 +819,7 @@ public class RESTMapper {
 
 	/**
 	 * prints readable XML
+	 * 
 	 * @param doc XML document
 	 * @return readable XML
 	 */
@@ -837,8 +843,9 @@ public class RESTMapper {
 	}
 
 	/**
-	 * Casts received String values to appropriate types the method demands
-	 * Currently only supports Strings and primitive types
+	 * Casts received String values to appropriate types the method demands Currently only supports Strings and
+	 * primitive types
+	 * 
 	 * @param val String value to cast
 	 * @param class1 Type the parameter expects
 	 * @return returns the proper type as an Object
@@ -888,6 +895,7 @@ public class RESTMapper {
 
 	/**
 	 * Converts a methods return value to String
+	 * 
 	 * @param result value to cast to a String
 	 * @return String representation of Object
 	 */
@@ -923,9 +931,9 @@ public class RESTMapper {
 	}
 
 	/**
-	 * Gets the class type based on a string
-	 * needed because int.class.getName() can later not be found by the VM behavior
-	 * only Strings and primitive types are supported
+	 * Gets the class type based on a string needed because int.class.getName() can later not be found by the VM
+	 * behavior only Strings and primitive types are supported
+	 * 
 	 * @param type name of type given by .class.getName()
 	 * @return class type
 	 * @throws ClassNotFoundException
@@ -941,8 +949,8 @@ public class RESTMapper {
 	}
 
 	/**
-	 * Initializes the String to Class mapping HashSet (faster lookup than else if)
-	 * Needed to map String Notations of Types to actual primitive Types
+	 * Initializes the String to Class mapping HashSet (faster lookup than else if) Needed to map String Notations of
+	 * Types to actual primitive Types
 	 */
 	private static void initClassmap() {
 		if (classMap.isEmpty()) {
@@ -960,8 +968,8 @@ public class RESTMapper {
 	}
 
 	/**
-	 * Looks for all xml files in a directory and its subdirectories
-	 * Reads each file and puts them into a String array
+	 * Looks for all xml files in a directory and its subdirectories Reads each file and puts them into a String array
+	 * 
 	 * @param dir path to the directory
 	 * @return array of all found XML contents
 	 * @throws IOException
@@ -981,6 +989,7 @@ public class RESTMapper {
 
 	/**
 	 * Reads a given file
+	 * 
 	 * @param file file to read
 	 * @return content of file
 	 * @throws IOException
@@ -1006,6 +1015,7 @@ public class RESTMapper {
 
 	/**
 	 * Writes a string to a file
+	 * 
 	 * @param file file path
 	 * @param content what to write into the file
 	 * @throws IOException
@@ -1025,6 +1035,7 @@ public class RESTMapper {
 
 	/**
 	 * Lists all files matching the given type as suffix
+	 * 
 	 * @param folder parent folder from where to start looking
 	 * @param type suffix, e.g. ".xml"
 	 * @param list reference to result array (stores all files found)
@@ -1045,6 +1056,7 @@ public class RESTMapper {
 
 	/**
 	 * Joins elements of a string array
+	 * 
 	 * @param array array which elements to join
 	 * @param separator string to put between array elements
 	 * @return joined string containing all array elements

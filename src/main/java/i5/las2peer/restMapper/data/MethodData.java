@@ -18,6 +18,7 @@ public class MethodData {
 
 	/**
 	 * constructor
+	 * 
 	 * @param serviceName full class name of the service
 	 * @param serviceVersion version number of the service
 	 * @param name name of the method
@@ -26,15 +27,13 @@ public class MethodData {
 	 * @throws ClassNotFoundException
 	 */
 	public MethodData(String serviceName, String serviceVersion, String name, String type, String[] consumes,
-			String[] produces, ParameterData[] parameters) throws ClassNotFoundException
-	{
+			String[] produces, ParameterData[] parameters) throws ClassNotFoundException {
 		this.serviceName = serviceName;
 		this.serviceVersion = serviceVersion;
 		this.name = name;
 
 		this.type = RESTMapper.getClassType(type);
-		for (int i = 0; i < consumes.length; i++)
-		{
+		for (int i = 0; i < consumes.length; i++) {
 			consumes[i] = consumes[i].trim();// more robust
 		}
 		this.consumes = consumes;
@@ -47,11 +46,9 @@ public class MethodData {
 	}
 
 	/**
-	 * returns sercvie name + service version + method name
-	 * userful for e.g. HashMap keys
+	 * returns sercvie name + service version + method name userful for e.g. HashMap keys
 	 */
-	public String toString()
-	{
+	public String toString() {
 		return serviceName + serviceVersion + name;
 	}
 
@@ -59,8 +56,7 @@ public class MethodData {
 	 * 
 	 * @return method name
 	 */
-	public String getName()
-	{
+	public String getName() {
 		return name;
 	}
 
@@ -68,8 +64,7 @@ public class MethodData {
 	 * 
 	 * @return return type of method
 	 */
-	public Class<?> getType()
-	{
+	public Class<?> getType() {
 		return type;
 	}
 
@@ -77,8 +72,7 @@ public class MethodData {
 	 * 
 	 * @return full class name of service
 	 */
-	public String getServiceName()
-	{
+	public String getServiceName() {
 		return serviceName;
 	}
 
@@ -86,8 +80,7 @@ public class MethodData {
 	 * 
 	 * @return version of service
 	 */
-	public String getServiceVersion()
-	{
+	public String getServiceVersion() {
 		return serviceVersion;
 	}
 
@@ -95,8 +88,7 @@ public class MethodData {
 	 * 
 	 * @return array of parameter information
 	 */
-	public ParameterData[] getParameters()
-	{
+	public ParameterData[] getParameters() {
 		return parameters;
 	}
 
@@ -104,8 +96,7 @@ public class MethodData {
 	 *
 	 * @return array of accepted MIME-Types
 	 */
-	public String[] getConsumes()
-	{
+	public String[] getConsumes() {
 		return consumes;
 	}
 

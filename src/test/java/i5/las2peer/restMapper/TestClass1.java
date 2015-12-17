@@ -11,54 +11,50 @@ import javax.ws.rs.QueryParam;
 
 import i5.las2peer.restMapper.annotations.ContentParam;
 
-public class TestClass1
-{
+public class TestClass1 {
 
-	public TestClass1()
-	{
+	public TestClass1() {
 	}
 
 	@GET
 	@Path("/")
-	public boolean a1()
-	{
+	public boolean a1() {
 		return true;
 	}
 
 	@PUT
 	@Path("/users/{userid}")
-	public float a2(@PathParam("userid") int userID)
-	{
+	public float a2(@PathParam("userid") int userID) {
 		return userID * 0.1f;
 	}
 
 	@DELETE
 	@Path("/users/{userid}/products/{productID}/{likes}")
 	public String a3(@PathParam("userid") int userID, @PathParam("productID") short productID,
-			@PathParam("likes") boolean likes)
-	{
+			@PathParam("likes") boolean likes) {
 		return userID * productID + "" + likes + "";
 	}
 
 	@POST
 	@Path("/{a}/b/c")
-	public String a4(@PathParam("a") String a, @DefaultValue("5") @QueryParam(value = "d") int d,
-			@QueryParam(value = "e") @DefaultValue(value = "19") int e)
-	{
+	public String a4(@PathParam("a") String a, @DefaultValue("5") @QueryParam(
+			value = "d") int d,
+			@QueryParam(
+					value = "e") @DefaultValue(
+							value = "19") int e) {
 		return a + (d + e);
 	}
 
 	@GET
 	@Path("/a")
-	public String a5(@ContentParam() String a)
-	{
+	public String a5(@ContentParam() String a) {
 		return a + a;
 	}
 
 	@PUT
 	@Path("/{a}/{b}/{c}/{d}")
-	public String a6(@PathParam("a") String a, @PathParam("b") String b, @PathParam("c") String c, @PathParam("d") int d)
-	{
+	public String a6(@PathParam("a") String a, @PathParam("b") String b, @PathParam("c") String c,
+			@PathParam("d") int d) {
 		return a + b + c + d;
 	}
 

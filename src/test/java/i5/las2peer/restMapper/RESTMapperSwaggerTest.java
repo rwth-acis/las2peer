@@ -3,17 +3,18 @@ package i5.las2peer.restMapper;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import org.junit.Test;
+
 import io.swagger.jaxrs.Reader;
 import io.swagger.models.Swagger;
 import io.swagger.util.Json;
 
-import org.junit.Test;
-
 public class RESTMapperSwaggerTest {
 
 	/**
-	 * This testcase uses a Swagger annotated class to check if the annotations can get
-	 * parsed and printed as JSON String correctly.
+	 * This testcase uses a Swagger annotated class to check if the annotations can get parsed and printed as JSON
+	 * String correctly.
 	 */
 	@Test
 	public void testGetSwaggerJSON() {

@@ -2,14 +2,15 @@ package i5.las2peer.restMapper;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import i5.las2peer.restMapper.data.InvocationData;
-import i5.las2peer.restMapper.data.Pair;
-import i5.las2peer.restMapper.data.PathTree;
 
 import java.lang.reflect.Method;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import i5.las2peer.restMapper.data.InvocationData;
+import i5.las2peer.restMapper.data.Pair;
+import i5.las2peer.restMapper.data.PathTree;
 
 public class RESTMapperTest {
 
@@ -52,8 +53,8 @@ public class RESTMapperTest {
 	}
 
 	public void invokeMethod(String httpMethod, String uri, Pair<String>[] variables, String content,
-			String contentType, String returnType, Pair<String>[] httpHeaders, String assertionMessage, String assertion)
-			throws Exception {
+			String contentType, String returnType, Pair<String>[] httpHeaders, String assertionMessage,
+			String assertion) throws Exception {
 		StringBuilder warnings = new StringBuilder();
 		InvocationData[] invocation = RESTMapper.parse(tree, httpMethod, uri, variables, content, contentType,
 				returnType, httpHeaders, warnings);
@@ -82,7 +83,8 @@ public class RESTMapperTest {
 	}
 
 	public void invokeMethod(String httpMethod, String uri, Pair<String>[] variables, String content,
-			String contentType, Pair<String>[] httpHeaders, String assertionMessage, String assertion) throws Exception {
+			String contentType, Pair<String>[] httpHeaders, String assertionMessage, String assertion)
+					throws Exception {
 		invokeMethod(httpMethod, uri, variables, content, contentType, "", httpHeaders, assertionMessage, assertion);
 	}
 
@@ -149,7 +151,8 @@ public class RESTMapperTest {
 	}
 
 	@SuppressWarnings("unchecked")
-	@Test(expected = Exception.class)
+	@Test(
+			expected = Exception.class)
 	public void testA4_ex() throws Exception {
 		invokeMethod("post", "hi/b/", new Pair[] { new Pair<String>("d", "12"), new Pair<String>("e", "4") }, "",
 				new Pair[] {}, "a4_ex", "hi9");
@@ -215,8 +218,9 @@ public class RESTMapperTest {
 	@Test
 	public void testHeaders2() {
 		try {
-			invokeMethod("delete", "users/44/4", new Pair[] {}, "", new Pair[] { new Pair<String>("a", "12"),
-					new Pair<String>("b", "13") }, "Headers2", "44a: 12\nb: 13\n");
+			invokeMethod("delete", "users/44/4", new Pair[] {}, "",
+					new Pair[] { new Pair<String>("a", "12"), new Pair<String>("b", "13") }, "Headers2",
+					"44a: 12\nb: 13\n");
 		} catch (Throwable e) {
 			e.printStackTrace();
 			fail(e.getMessage());
@@ -251,7 +255,8 @@ public class RESTMapperTest {
 		try {
 			invokeMethod("post", "animals/3", new Pair[] {}, "", MediaType.TEXT_PLAIN, new Pair[] {}, "Consumes1", "6");
 			invokeMethod("post", "animals/3", new Pair[] {}, "", MediaType.TEXT_XML, new Pair[] {}, "Consumes1", "15");
-			invokeMethod("post", "animals/3", new Pair[] {}, "", MediaType.AUDIO_MPEG, new Pair[] {}, "Consumes1", "21");
+			invokeMethod("post", "animals/3", new Pair[] {}, "", MediaType.AUDIO_MPEG, new Pair[] {}, "Consumes1",
+					"21");
 		} catch (Throwable e) {
 			e.printStackTrace();
 			fail(e.getMessage());
@@ -270,10 +275,11 @@ public class RESTMapperTest {
 	}
 
 	@SuppressWarnings("unchecked")
-	@Test(expected = Exception.class)
+	@Test(
+			expected = Exception.class)
 	public void testConsumes3() throws Exception {
-		invokeMethod("post", "animals/3", new Pair[] {}, "", MediaType.APPLICATION_EDIFACT, new Pair[] {},
-				"Consumes3", "33");
+		invokeMethod("post", "animals/3", new Pair[] {}, "", MediaType.APPLICATION_EDIFACT, new Pair[] {}, "Consumes3",
+				"33");
 	}
 
 	@Test
@@ -305,7 +311,8 @@ public class RESTMapperTest {
 	}
 
 	@SuppressWarnings("unchecked")
-	@Test(expected = Exception.class)
+	@Test(
+			expected = Exception.class)
 	public void testProduces2() throws Exception {
 		invokeMethod("get", "books/4", new Pair[] {}, "", MediaType.VIDEO_AVI, "video/mp4,text/xml", new Pair[] {},
 				"Produces2", "4");

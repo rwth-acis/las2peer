@@ -18,8 +18,7 @@ public class ParameterData {
 	 * 
 	 * @return type of annotation used (e.g. path, content, query)
 	 */
-	public String getAnnotation()
-	{
+	public String getAnnotation() {
 		return annotation;
 	}
 
@@ -27,8 +26,7 @@ public class ParameterData {
 	 * 
 	 * @return n-th position of parameter in method declaration
 	 */
-	public int getIndex()
-	{
+	public int getIndex() {
 		return index;
 	}
 
@@ -36,8 +34,7 @@ public class ParameterData {
 	 * 
 	 * @return name of parameter used in annotation
 	 */
-	public String getName()
-	{
+	public String getName() {
 		return name;
 	}
 
@@ -45,8 +42,7 @@ public class ParameterData {
 	 * 
 	 * @return type of parameter
 	 */
-	public Class<?> getType()
-	{
+	public Class<?> getType() {
 		return type;
 	}
 
@@ -54,8 +50,7 @@ public class ParameterData {
 	 * 
 	 * @return default value for parameter, used if no value given
 	 */
-	public Object getDefaultValue()
-	{
+	public Object getDefaultValue() {
 		return defaultValue;
 	}
 
@@ -63,22 +58,21 @@ public class ParameterData {
 	 * 
 	 * @return true, if a default value was set
 	 */
-	public boolean hasDefaultValue()
-	{
+	public boolean hasDefaultValue() {
 		return defaultValue != null;
 	}
 
 	/**
 	 * constructor
-	 * @param annotation  type of annotation used (e.g. path, content, query)
+	 * 
+	 * @param annotation type of annotation used (e.g. path, content, query)
 	 * @param index n-th position of parameter in method declaration
 	 * @param name name of parameter used in annotation
 	 * @param type type of parameter
 	 * @param defaultValue default value for parameter, used if no value given
 	 * @throws Exception
 	 */
-	public ParameterData(String annotation, int index, String name, String type, String defaultValue) throws Exception
-	{
+	public ParameterData(String annotation, int index, String name, String type, String defaultValue) throws Exception {
 		this.annotation = annotation;
 		this.name = name;
 		this.index = index;
@@ -91,7 +85,8 @@ public class ParameterData {
 
 	/**
 	 * constructor
-	 * @param annotation  type of annotation used (e.g. path, content, query)
+	 * 
+	 * @param annotation type of annotation used (e.g. path, content, query)
 	 * @param index n-th position of parameter in method declaration
 	 * @param name name of parameter used in annotation
 	 * @param type type of parameter
@@ -99,8 +94,7 @@ public class ParameterData {
 	 * @throws Exception
 	 */
 	public ParameterData(String annotation, String index, String name, String type, String defaultValue)
-			throws Exception
-	{
+			throws Exception {
 		this(annotation, Integer.parseInt(index), name, type, defaultValue);
 	}
 

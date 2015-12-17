@@ -16,15 +16,14 @@ public class GeneralResponse implements Serializable {
 
 	/**
 	 * All responses should include some sort of response value
+	 * 
 	 * @param response value
 	 */
-	public GeneralResponse(String response)
-	{
+	public GeneralResponse(String response) {
 		setResult(response);
 	}
 
-	public GeneralResponse()
-	{
+	public GeneralResponse() {
 
 	}
 
@@ -32,8 +31,7 @@ public class GeneralResponse implements Serializable {
 	 *
 	 * @return result of the service method call
 	 */
-	public String getResult()
-	{
+	public String getResult() {
 		return result;
 	}
 
@@ -41,18 +39,17 @@ public class GeneralResponse implements Serializable {
 	 *
 	 * @param result value to store as result
 	 */
-	public void setResult(String result)
-	{
+	public void setResult(String result) {
 		this.result = result;
 	}
 
 	/**
-	 * Each response can have additional attributes, like headers, response codes etc.
-	 * Each attribute can be interpreted by the appropriate connector and ignored by other connectors
+	 * Each response can have additional attributes, like headers, response codes etc. Each attribute can be interpreted
+	 * by the appropriate connector and ignored by other connectors
+	 * 
 	 * @param attribute new attribute to add
 	 */
-	public void addAttribute(ResponseAttribute attribute)
-	{
+	public void addAttribute(ResponseAttribute attribute) {
 		attributes.add(attribute);
 	}
 
@@ -60,8 +57,7 @@ public class GeneralResponse implements Serializable {
 	 *
 	 * @return a list of all stored attributes
 	 */
-	public ArrayList<ResponseAttribute> getAttributes()
-	{
+	public ArrayList<ResponseAttribute> getAttributes() {
 		return attributes;
 	}
 
@@ -70,13 +66,10 @@ public class GeneralResponse implements Serializable {
 	 * @param targetConnector connector, that should accept a specific attribute
 	 * @return a list of attributes, that is accepted by targetConnector
 	 */
-	public ArrayList<ResponseAttribute> getAttributesByTargetConnector(String targetConnector)
-	{
+	public ArrayList<ResponseAttribute> getAttributesByTargetConnector(String targetConnector) {
 		ArrayList<ResponseAttribute> temp = new ArrayList<ResponseAttribute>();
-		for (ResponseAttribute attr : attributes)
-		{
-			if (attr.hasTargetConnector(targetConnector))
-			{
+		for (ResponseAttribute attr : attributes) {
+			if (attr.hasTargetConnector(targetConnector)) {
 				temp.add(attr);
 			}
 		}
@@ -89,8 +82,7 @@ public class GeneralResponse implements Serializable {
 	 * @param type type of an attribute
 	 * @return a list of attributes, that is accepted by targetConnector and has a certain type
 	 */
-	public ArrayList<ResponseAttribute> getAttributesByType(String targetConnector, String type)
-	{
+	public ArrayList<ResponseAttribute> getAttributesByType(String targetConnector, String type) {
 		return filterAttributesType(type, getAttributesByTargetConnector(targetConnector));
 	}
 
@@ -101,8 +93,7 @@ public class GeneralResponse implements Serializable {
 	 * @param name name of an attribute
 	 * @return a list of attributes, that is accepted by targetConnector and has a certain type and name
 	 */
-	public ArrayList<ResponseAttribute> getAttributesByTypeName(String targetConnector, String type, String name)
-	{
+	public ArrayList<ResponseAttribute> getAttributesByTypeName(String targetConnector, String type, String name) {
 		return filterAttributesName(name, getAttributesByType(targetConnector, type));
 	}
 
@@ -112,8 +103,7 @@ public class GeneralResponse implements Serializable {
 	 * @param name name of an attribute
 	 * @return a list of attributes, that is accepted by targetConnector and has a certain name
 	 */
-	public ArrayList<ResponseAttribute> getAttributesByName(String targetConnector, String name)
-	{
+	public ArrayList<ResponseAttribute> getAttributesByName(String targetConnector, String name) {
 		return filterAttributesName(name, getAttributesByTargetConnector(targetConnector));
 	}
 
@@ -124,8 +114,7 @@ public class GeneralResponse implements Serializable {
 	 * @param name name of an attribute
 	 * @return the first element, that is accepted by targetConnector and has a certain type and name
 	 */
-	public String getAttributeByTypeName(String targetConnector, String type, String name)
-	{
+	public String getAttributeByTypeName(String targetConnector, String type, String name) {
 		ArrayList<ResponseAttribute> result = getAttributesByTypeName(targetConnector, type, name);
 		if (result.size() > 0)
 			return result.get(0).getAttributeValue();
@@ -139,8 +128,7 @@ public class GeneralResponse implements Serializable {
 	 * @param name name of an attribute
 	 * @return the first element, that is accepted by targetConnector and has a certain name
 	 */
-	public String getAttributeByName(String targetConnector, String name)
-	{
+	public String getAttributeByName(String targetConnector, String name) {
 		ArrayList<ResponseAttribute> result = getAttributesByName(targetConnector, name);
 		if (result.size() > 0)
 			return result.get(0).getAttributeValue();
@@ -150,18 +138,16 @@ public class GeneralResponse implements Serializable {
 
 	/**
 	 * Filters a list of attributes by name
+	 * 
 	 * @param name name of the attribute
 	 * @param filter pre-filtered list
 	 * @return filtered attributes
 	 */
-	private ArrayList<ResponseAttribute> filterAttributesName(String name, ArrayList<ResponseAttribute> filter)
-	{
+	private ArrayList<ResponseAttribute> filterAttributesName(String name, ArrayList<ResponseAttribute> filter) {
 		ArrayList<ResponseAttribute> temp = new ArrayList<ResponseAttribute>();
-		for (ResponseAttribute attr : filter)
-		{
+		for (ResponseAttribute attr : filter) {
 			String searchPattern = name.trim().toLowerCase();
-			if (attr.getAttributeName().toLowerCase().equals(searchPattern))
-			{
+			if (attr.getAttributeName().toLowerCase().equals(searchPattern)) {
 				temp.add(attr);
 			}
 		}
@@ -170,18 +156,16 @@ public class GeneralResponse implements Serializable {
 
 	/**
 	 * Filters a list of attributes by type
+	 * 
 	 * @param type type of the attribute
 	 * @param filter pre-filtered list
 	 * @return filtered attributes
 	 */
-	private ArrayList<ResponseAttribute> filterAttributesType(String type, ArrayList<ResponseAttribute> filter)
-	{
+	private ArrayList<ResponseAttribute> filterAttributesType(String type, ArrayList<ResponseAttribute> filter) {
 		ArrayList<ResponseAttribute> temp = new ArrayList<ResponseAttribute>();
-		for (ResponseAttribute attr : filter)
-		{
+		for (ResponseAttribute attr : filter) {
 			String searchPattern = type.trim().toLowerCase();
-			if (attr.getAttributeType().toLowerCase().equals(searchPattern))
-			{
+			if (attr.getAttributeType().toLowerCase().equals(searchPattern)) {
 				temp.add(attr);
 			}
 		}

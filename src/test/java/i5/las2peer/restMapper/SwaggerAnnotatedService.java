@@ -36,13 +36,10 @@ import io.swagger.util.Json;
 				contact = @Contact(
 						name = "John Doe",
 						url = "provider.com",
-						email = "john.doe@provider.com"
-				),
+						email = "john.doe@provider.com") ,
 				license = @License(
 						name = "your software license name",
-						url = "http://your-software-license-url.com"
-				)
-		))
+						url = "http://your-software-license-url.com") ) )
 public class SwaggerAnnotatedService {
 
 	public SwaggerAnnotatedService() {
@@ -54,20 +51,23 @@ public class SwaggerAnnotatedService {
 	// //////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Simple function to validate a user login.
-	 * Basically it only serves as a "calling point" and does not really validate a user
-	 * (since this is done previously by LAS2peer itself, the user does not reach this method
-	 * if he or she is not authenticated).
+	 * Simple function to validate a user login. Basically it only serves as a "calling point" and does not really
+	 * validate a user (since this is done previously by LAS2peer itself, the user does not reach this method if he or
+	 * she is not authenticated).
 	 * 
 	 */
 	@GET
 	@Path("/validation")
 	@Produces(MediaType.TEXT_PLAIN)
-	@ApiResponses(value = {
-			@ApiResponse(code = HttpURLConnection.HTTP_OK, message = "Validation Confirmation"),
-			@ApiResponse(code = HttpURLConnection.HTTP_UNAUTHORIZED, message = "Unauthorized")
-	})
-	@ApiOperation(value = "User Validation",
+	@ApiResponses(
+			value = { @ApiResponse(
+					code = HttpURLConnection.HTTP_OK,
+					message = "Validation Confirmation"),
+					@ApiResponse(
+							code = HttpURLConnection.HTTP_UNAUTHORIZED,
+							message = "Unauthorized") })
+	@ApiOperation(
+			value = "User Validation",
 			notes = "Simple function to validate a user login.")
 	public HttpResponse validateLogin() {
 		// annotated method stub
@@ -83,38 +83,50 @@ public class SwaggerAnnotatedService {
 	@POST
 	@Path("/myResourcePath/{input}")
 	@Produces(MediaType.TEXT_PLAIN)
-	@ApiOperation(value = "Sample Resource",
+	@ApiOperation(
+			value = "Sample Resource",
 			notes = "Example method that returns a phrase containing the received input.")
-	@ApiResponses(value = {
-			@ApiResponse(code = HttpURLConnection.HTTP_OK, message = "Input Phrase"),
-			@ApiResponse(code = HttpURLConnection.HTTP_UNAUTHORIZED, message = "Unauthorized")
-	})
+	@ApiResponses(
+			value = { @ApiResponse(
+					code = HttpURLConnection.HTTP_OK,
+					message = "Input Phrase"),
+					@ApiResponse(
+							code = HttpURLConnection.HTTP_UNAUTHORIZED,
+							message = "Unauthorized") })
 	public HttpResponse exampleMethod(@PathParam("input") String myInput) {
 		// annotated method stub
 		return null;
 	}
 
 	/**
-	 * Example method that shows how to retrieve a user email address from a database 
-	 * and return an HTTP response including a JSON object.
+	 * Example method that shows how to retrieve a user email address from a database and return an HTTP response
+	 * including a JSON object.
 	 * 
-	 * WARNING: THIS METHOD IS ONLY FOR DEMONSTRATIONAL PURPOSES!!! 
-	 * IT WILL REQUIRE RESPECTIVE DATABASE TABLES IN THE BACKEND, WHICH DON'T EXIST IN THE TEMPLATE.
+	 * WARNING: THIS METHOD IS ONLY FOR DEMONSTRATIONAL PURPOSES!!! IT WILL REQUIRE RESPECTIVE DATABASE TABLES IN THE
+	 * BACKEND, WHICH DON'T EXIST IN THE TEMPLATE.
 	 * 
 	 */
 	@GET
 	@Path("/userEmail/{username}")
 	@Produces(MediaType.APPLICATION_JSON)
-	@ApiOperation(value = "Email Address Administration",
+	@ApiOperation(
+			value = "Email Address Administration",
 			notes = "Example method that retrieves a user email address from a database."
 					+ " WARNING: THIS METHOD IS ONLY FOR DEMONSTRATIONAL PURPOSES!!! "
 					+ "IT WILL REQUIRE RESPECTIVE DATABASE TABLES IN THE BACKEND, WHICH DON'T EXIST IN THE TEMPLATE.")
-	@ApiResponses(value = {
-			@ApiResponse(code = HttpURLConnection.HTTP_OK, message = "User Email"),
-			@ApiResponse(code = HttpURLConnection.HTTP_UNAUTHORIZED, message = "Unauthorized"),
-			@ApiResponse(code = HttpURLConnection.HTTP_NOT_FOUND, message = "User not found"),
-			@ApiResponse(code = 500, message = "Internal Server Error")
-	})
+	@ApiResponses(
+			value = { @ApiResponse(
+					code = HttpURLConnection.HTTP_OK,
+					message = "User Email"),
+					@ApiResponse(
+							code = HttpURLConnection.HTTP_UNAUTHORIZED,
+							message = "Unauthorized"),
+					@ApiResponse(
+							code = HttpURLConnection.HTTP_NOT_FOUND,
+							message = "User not found"),
+					@ApiResponse(
+							code = 500,
+							message = "Internal Server Error") })
 	public HttpResponse getUserEmail(@PathParam("username") String username) {
 		// annotated method stub
 		return null;
@@ -123,22 +135,28 @@ public class SwaggerAnnotatedService {
 	/**
 	 * Example method that shows how to change a user email address in a database.
 	 * 
-	 * WARNING: THIS METHOD IS ONLY FOR DEMONSTRATIONAL PURPOSES!!! 
-	 * IT WILL REQUIRE RESPECTIVE DATABASE TABLES IN THE BACKEND, WHICH DON'T EXIST IN THE TEMPLATE.
+	 * WARNING: THIS METHOD IS ONLY FOR DEMONSTRATIONAL PURPOSES!!! IT WILL REQUIRE RESPECTIVE DATABASE TABLES IN THE
+	 * BACKEND, WHICH DON'T EXIST IN THE TEMPLATE.
 	 * 
 	 */
 	@POST
 	@Path("/userEmail/{username}/{email}")
 	@Produces(MediaType.TEXT_PLAIN)
-	@ApiOperation(value = "Email Address Administration",
+	@ApiOperation(
+			value = "Email Address Administration",
 			notes = "Example method that changes a user email address in a database."
 					+ " WARNING: THIS METHOD IS ONLY FOR DEMONSTRATIONAL PURPOSES!!! "
 					+ "IT WILL REQUIRE RESPECTIVE DATABASE TABLES IN THE BACKEND, WHICH DON'T EXIST IN THE TEMPLATE.")
-	@ApiResponses(value = {
-			@ApiResponse(code = HttpURLConnection.HTTP_OK, message = "Update Confirmation"),
-			@ApiResponse(code = HttpURLConnection.HTTP_UNAUTHORIZED, message = "Unauthorized"),
-			@ApiResponse(code = 500, message = "Internal Server Error")
-	})
+	@ApiResponses(
+			value = { @ApiResponse(
+					code = HttpURLConnection.HTTP_OK,
+					message = "Update Confirmation"),
+					@ApiResponse(
+							code = HttpURLConnection.HTTP_UNAUTHORIZED,
+							message = "Unauthorized"),
+					@ApiResponse(
+							code = 500,
+							message = "Internal Server Error") })
 	public HttpResponse setUserEmail(@PathParam("username") String username, @PathParam("email") String email) {
 		// annotated method stub
 		return null;
@@ -149,12 +167,9 @@ public class SwaggerAnnotatedService {
 	// //////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Returns the API documentation for this annotated class
-	 * for purposes of the Swagger 2.0 documentation.
+	 * Returns the API documentation for this annotated class for purposes of the Swagger 2.0 documentation.
 	 * 
-	 * Note:
-	 * If you do not intend to use Swagger for the documentation
-	 * of your Service API, this method may be removed.
+	 * Note: If you do not intend to use Swagger for the documentation of your Service API, this method may be removed.
 	 * 
 	 * @return The resource's documentation.
 	 */

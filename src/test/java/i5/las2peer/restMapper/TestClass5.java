@@ -9,16 +9,13 @@ import javax.ws.rs.Produces;
 @Path("/books/{id}")
 @Consumes("text/plain")
 @Produces("text/plain")
-public class TestClass5
-{
+public class TestClass5 {
 
-	public TestClass5()
-	{
+	public TestClass5() {
 	}
 
 	@GET
-	public int b1(@PathParam("id") int id)
-	{
+	public int b1(@PathParam("id") int id) {
 		return id;
 	}
 

@@ -19,68 +19,63 @@ public class ResponseAttribute implements Serializable {
 	private String attributeValue = "";
 
 	/**
-	 * Attributes can have different custom types.
-	 * For example HTTP-Headers.
+	 * Attributes can have different custom types. For example HTTP-Headers.
+	 * 
 	 * @return type of the attribute
 	 */
-	public String getAttributeType()
-	{
+	public String getAttributeType() {
 		return attributeType;
 	}
 
 	/**
-	 * An attribute can be identified by a name.
-	 * Names do not need to be unique.
+	 * An attribute can be identified by a name. Names do not need to be unique.
+	 * 
 	 * @return name of the attribute
 	 */
-	public String getAttributeName()
-	{
+	public String getAttributeName() {
 		return attributeName;
 	}
 
 	/**
 	 * Each Attribute has a value.
+	 * 
 	 * @return value of an attribute
 	 */
-	public String getAttributeValue()
-	{
+	public String getAttributeValue() {
 		return attributeValue;
 	}
 
 	/**
 	 * Each attribute can specify the connectors, which should (be able) to process the attribute.
+	 * 
 	 * @return list of compatible connectors (the information is intended to)
 	 */
-	public ArrayList<String> getTargetConnectors()
-	{
+	public ArrayList<String> getTargetConnectors() {
 		return targetConnectors;
 	}
 
 	/**
 	 * Each attribute can specify the connectors, which should (be able) to process the attribute.
+	 * 
 	 * @param target new connector to add to the internal list
 	 */
-	public void addTargetConnector(String target)
-	{
+	public void addTargetConnector(String target) {
 		targetConnectors.add(target.trim().toLowerCase());
 	}
 
 	/**
 	 * Each attribute can specify the connectors, which should (be able) to process the attribute.
-	 * @param target the connector to check for
-	 *               use * to accept any connector
+	 * 
+	 * @param target the connector to check for use * to accept any connector
 	 * @return true, if target is one of the accepted connectors
 	 */
-	public boolean hasTargetConnector(String target)
-	{
+	public boolean hasTargetConnector(String target) {
 		String temp = target.trim().toLowerCase();
 		// Asterisk * for all connectors
 		if (temp.equals(ASTERISK))
 			return true;
-		for (String t : targetConnectors)
-		{
-			if (t.equals(temp))
-			{
+		for (String t : targetConnectors) {
+			if (t.equals(temp)) {
 				return true;
 			}
 		}
@@ -91,8 +86,7 @@ public class ResponseAttribute implements Serializable {
 	 *
 	 * @param attributeValue new value of the attribute
 	 */
-	public void setAttributeValue(String attributeValue)
-	{
+	public void setAttributeValue(String attributeValue) {
 		this.attributeValue = attributeValue;
 	}
 
@@ -101,8 +95,7 @@ public class ResponseAttribute implements Serializable {
 	 * @param name the name of the attribute
 	 * @param value the value of the attribute
 	 */
-	public ResponseAttribute(String name, String value)
-	{
+	public ResponseAttribute(String name, String value) {
 		attributeName = name.trim();
 		attributeValue = value.trim();
 	}
@@ -113,8 +106,7 @@ public class ResponseAttribute implements Serializable {
 	 * @param name the name of the attribute
 	 * @param value the value of the attribute
 	 */
-	public ResponseAttribute(String type, String name, String value)
-	{
+	public ResponseAttribute(String type, String name, String value) {
 		this(name, value);
 		attributeType = type.trim();
 
@@ -127,8 +119,7 @@ public class ResponseAttribute implements Serializable {
 	 * @param name the name of the attribute
 	 * @param value the value of the attribute
 	 */
-	public ResponseAttribute(String target, String type, String name, String value)
-	{
+	public ResponseAttribute(String target, String type, String name, String value) {
 		this(type, name, value);
 		targetConnectors.add(target.trim().toLowerCase());
 	}

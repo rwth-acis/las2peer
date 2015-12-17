@@ -18,7 +18,8 @@ public class InvocationData {
 	private String[] mime;
 
 	/**
-	 * constructor creating data object 
+	 * constructor creating data object
+	 * 
 	 * @param serviceName full class name of the service containing the method
 	 * @param serviceVersion version of the service
 	 * @param methodName name of the method to invoke
@@ -29,8 +30,7 @@ public class InvocationData {
 	 * @param parameterTypes array of the used parameter types
 	 */
 	public InvocationData(String serviceName, String serviceVersion, String methodName, Class<?> returnType,
-			String[] mime, int matchLevel, Serializable[] parameters, Class<?>[] parameterTypes)
-	{
+			String[] mime, int matchLevel, Serializable[] parameters, Class<?>[] parameterTypes) {
 		this.serviceName = serviceName;
 		this.serviceVersion = serviceVersion;
 		this.methodName = methodName;
@@ -45,8 +45,7 @@ public class InvocationData {
 	 *
 	 * @return the full class name of the service
 	 */
-	public String getServiceName()
-	{
+	public String getServiceName() {
 		return serviceName;
 	}
 
@@ -54,8 +53,7 @@ public class InvocationData {
 	 * 
 	 * @return the version of the service
 	 */
-	public String getServiceVersion()
-	{
+	public String getServiceVersion() {
 		return serviceVersion;
 	}
 
@@ -63,8 +61,7 @@ public class InvocationData {
 	 * 
 	 * @return the name of the method to invoke
 	 */
-	public String getMethodName()
-	{
+	public String getMethodName() {
 		return methodName;
 	}
 
@@ -72,8 +69,7 @@ public class InvocationData {
 	 * 
 	 * @return the return type of the method
 	 */
-	public Class<?> getReturnType()
-	{
+	public Class<?> getReturnType() {
 		return returnType;
 	}
 
@@ -81,8 +77,7 @@ public class InvocationData {
 	 * 
 	 * @return array of parameter values to use for invocation
 	 */
-	public Serializable[] getParameters()
-	{
+	public Serializable[] getParameters() {
 		return parameters;
 	}
 
@@ -90,8 +85,7 @@ public class InvocationData {
 	 * 
 	 * @return array of the used parameter types
 	 */
-	public Class<?>[] getParameterTypes()
-	{
+	public Class<?>[] getParameterTypes() {
 		return parameterTypes;
 	}
 
@@ -99,13 +93,11 @@ public class InvocationData {
 	 *
 	 * @return positve value, lower = better match for accept header
 	 */
-	public int getMatchLevel()
-	{
+	public int getMatchLevel() {
 		return matchLevel;
 	}
 
-	public String[] getMIME()
-	{
+	public String[] getMIME() {
 		return mime;
 	}
 }

@@ -19,12 +19,10 @@ import i5.las2peer.restMapper.annotations.ContentParam;
 @Path("/books/{id}{}")
 @Consumes("text/plain")
 @Produces("text/plain")
-public class ExampleClass
-{
+public class ExampleClass {
 
 	// example how to get the mapping, if a class object is available
-	public String getRESTMapping()
-	{
+	public String getRESTMapping() {
 		String result = "";
 		try {
 			result = RESTMapper.getMethodsAsXML(this.getClass());
@@ -38,8 +36,7 @@ public class ExampleClass
 	// simplest example
 	@GET
 	@Path("/pages")
-	public int getPageCount(@PathParam("id") int id)
-	{
+	public int getPageCount(@PathParam("id") int id) {
 		return 12;
 	}
 
@@ -47,8 +44,7 @@ public class ExampleClass
 	@GET
 	@Path("/pages/{page}")
 	public String getPageContent(@PathParam("id") int id, @PathParam("page") int page,
-			@QueryParam("fullpage") @DefaultValue("false") boolean fullPage)
-	{
+			@QueryParam("fullpage") @DefaultValue("false") boolean fullPage) {
 		return "Once upon a time...";
 	}
 
@@ -56,8 +52,7 @@ public class ExampleClass
 	@GET
 	@Path("/audiobooks/{audiobookname}")
 	@Produces("audio/ogg")
-	public String getAudioBookTrackOgg(@PathParam("id") int id, @PathParam("audiobookname") String name)
-	{
+	public String getAudioBookTrackOgg(@PathParam("id") int id, @PathParam("audiobookname") String name) {
 		return "encodedOgg";
 	}
 
@@ -65,16 +60,15 @@ public class ExampleClass
 	@GET
 	@Path("/audiobooks/{audiobookname}")
 	@Produces("audio/mp4")
-	public String getAudioBookTrackMp4(@PathParam("id") int id, @PathParam("audiobookname") String name)
-	{
+	public String getAudioBookTrackMp4(@PathParam("id") int id, @PathParam("audiobookname") String name) {
 		return "encodedMp4";
 	}
 
 	// usage of header parameters
 	@PUT
-	public boolean createNewBook(@PathParam("id") int id,
-			@HeaderParam(value = "User-Agent") @DefaultValue(value = "") String agent)
-	{
+	public boolean createNewBook(@PathParam("id") int id, @HeaderParam(
+			value = "User-Agent") @DefaultValue(
+					value = "") String agent) {
 		return true;
 	}
 
@@ -83,23 +77,20 @@ public class ExampleClass
 	@Path("/audiobooks/{audiobookname}")
 	@Consumes({ "audio/ogg", "audio/mpeg" })
 	public boolean addAudioBookTrack(@PathParam("id") int id, @PathParam("audiobookname") String name,
-			@ContentParam String content)
-	{
+			@ContentParam String content) {
 		return true;
 	}
 
 	// delete example
 	@DELETE
-	public boolean deleteBook(@PathParam("id") int id)
-	{
+	public boolean deleteBook(@PathParam("id") int id) {
 		return true;
 	}
 
 	// usage of HttpResponse, where response code and headers can be set.
 	@GET
 	@Path("/special")
-	public HttpResponse special(@PathParam("id") int id)
-	{
+	public HttpResponse special(@PathParam("id") int id) {
 		HttpResponse response = new HttpResponse("", 200);
 		response.setHeader("myheader", "myHeaderValue");
 		return response;
