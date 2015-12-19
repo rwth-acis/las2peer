@@ -13,9 +13,9 @@ public interface AgentStorage {
 	/**
 	 * get an agent from this storage
 	 * 
-	 * @param id
-	 * @return the agent stored here
-	 * @throws AgentNotKnownException
+	 * @param id the agent id
+	 * @return a new locked Agent instance
+	 * @throws AgentNotKnownException agent not found
 	 */
 	public Agent getAgent(long id) throws AgentNotKnownException;
 

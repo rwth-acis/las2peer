@@ -41,7 +41,7 @@ public class Context implements AgentStorage {
 	 * 
 	 * @throws L2pSecurityException
 	 */
-	public Context(Node localNode, Agent mainAgent) throws L2pSecurityException {
+	public Context(Node localNode, Agent mainAgent) throws L2pSecurityException { // TODO remove throw
 		this.agent = mainAgent;
 
 		// if ( agent.isLocked() )
@@ -132,6 +132,23 @@ public class Context implements AgentStorage {
 		groupAgents.put(groupId, group);
 
 		return group;
+	}
+	
+	/**
+	 * returns an unlocked instance of the requested Agent
+	 * 
+	 * @param agentId the requested agent
+	 * @return an unlocked agent instance
+	 * @throws AgentNotKnownException agent not found
+	 * @throws L2pSecurityException agent cannot be unlocked
+	 */
+	public Agent requestAgent(long agentId) throws AgentNotKnownException, L2pSecurityException {
+		if (agentId == getMainAgent().getId()) {
+			return getMainAgent();
+		}
+		else {
+			return requestGroupAgent(agentId);
+		}
 	}
 
 	/**
@@ -351,16 +368,33 @@ public class Context implements AgentStorage {
 	}
 
 	/**
-	 * Opens the given envelope using the agents of this context.
+	 * Opens the given envelope using the agents of this context. Prefers agents that signed the Envelope.
 	 * 
-	 * @param envelope
+	 * @param envelope the Envelope to unlock
 	 * @throws DecodingFailedException
-	 * @throws L2pSecurityException
+	 * @throws L2pSecurityException the MainAgent is not able to open the Envelope
 	 */
 	public void openEnvelope(Envelope envelope) throws DecodingFailedException, L2pSecurityException {
 		if (agent.isLocked())
 			throw new AgentLockedException();
+		
+		// try to unlock with signing agent
+		for (long groupId : envelope.getSigningAgents()) {
+			Agent agent = null;
+			try {
+				agent = requestAgent(groupId);
+			} catch (Exception e1) {
+				// do nothing
+			}
 
+			if (agent != null) {
+				envelope.open(agent);
+				return;
+			}
+		}
+		
+		
+		// return agent with read only access
 		try {
 			envelope.open(agent);
 		} catch (L2pSecurityException e) {
@@ -393,6 +427,28 @@ public class Context implements AgentStorage {
 			((PassphraseAgent) agent).unlockPrivateKey(passphrase);
 		else
 			throw new L2pSecurityException("this is not passphrase protected agent!");
+	}
+	
+	/**
+	 * returns true if the main agent is unlocked and can unlock the given agent
+	 * 
+	 * @param agentId an agent id
+	 * @return true if the main agent has access to the given agent, otherwise false
+	 * @throws AgentNotKnownException agent not found
+	 * @throws AgentLockedException main agent is locked
+	 */
+	public boolean hasAccess(long agentId) throws AgentNotKnownException, AgentLockedException {
+		if (getMainAgent().isLocked())
+			throw new AgentLockedException();
+		
+		if (agentId == getMainAgent().getId()) return true;
+		
+		Agent a = getAgent(agentId);
+		
+		if (a instanceof GroupAgent)
+			return ((GroupAgent)a).isMemberRecursive(getMainAgent());
+		
+		return false;
 	}
 
 }

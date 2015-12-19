@@ -754,6 +754,15 @@ public final class Envelope implements XmlAble, Cloneable {
 	public Long[] getReaderGroups() {
 		return htEncryptedGroupKeys.keySet().toArray(new Long[0]);
 	}
+	
+	/**
+	 * get a list with all agents that signed the Envelope
+	 * 
+	 * @return array with agent ids
+	 */
+	public Long[] getSigningAgents() {
+		return htSignatures.keySet().toArray(new Long[0]);
+	}
 
 	/**
 	 * try to return the contents of the envelope as a real object which has been serialized via standard serialization
