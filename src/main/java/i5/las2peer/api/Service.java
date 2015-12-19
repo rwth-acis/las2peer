@@ -154,7 +154,9 @@ public abstract class Service extends Configurable {
 			IllegalArgumentException, IllegalAccessException, InvocationTargetException, L2pSecurityException {
 		Method m = searchMethod(method, parameters);
 		
-		// TODO check if mainagent is unlocked
+		// TODO check somewhere that the main agent is really unlocked
+		//if (getContext().getMainAgent().isLocked())
+		//	throw new L2pSecurityException("Tried to execute service method with locked main agent!");
 		
 		return m.invoke(this, parameters);
 	}
@@ -357,7 +359,7 @@ public abstract class Service extends Configurable {
 	 * 
 	 * @return the L2pThread we're currently running in
 	 */
-	public final L2pThread getL2pThread() { // TODO remove public modifier to avoid illegal access
+	final L2pThread getL2pThread() {
 		Thread t = Thread.currentThread();
 
 		if (!(t instanceof L2pThread))
@@ -484,34 +486,47 @@ public abstract class Service extends Configurable {
 	}
 	
 	/**
+	 * Deprecated, use getContext().getLocalNode() instead!
+	 * 
 	 * Gets the currently active l2p node (from the current thread context).
 	 * 
 	 * @return the currently active las2peer node
 	 */
-	protected Node getActiveNode() { // TODO deprecate
+	@Deprecated
+	protected Node getActiveNode() {
 		return getL2pThread().getContext().getLocalNode();
 	}
 	
 	/**
+	 * Deprecated, use getContext().getMainAgent() instead!
+	 * 
 	 * Gets the currently active agent from the current thread context.
 	 * 
 	 * @return the agent currently executing the L2pThread we're in
 	 */
-	protected Agent getActiveAgent() { // TODO deprecate
+	@Deprecated
+	protected Agent getActiveAgent() {
 		return getL2pThread().getContext().getMainAgent();
 	}
 	
 	/**
+	 * Deprecated, use {@link #getAgent()} isntead!
+	 * 
 	 * Access to this service agent. (security problem: just for internal use!)
+	 * 
 	 * 
 	 * @return the service agent responsible for this service
 	 */
-	protected ServiceAgent getMyAgent() { // TODO deprecate
+	@Deprecated
+	protected ServiceAgent getMyAgent() {
 		return getL2pThread().getServiceAgent();
 	}
 
 	/**
+	 * 
+	 * Deprecated, use {@link #invokeServiceMethod(String, String, Serializable...)} instead.
 	 * Invokes a service method using the agent of this service as executing entity.
+	 * 
 	 * 
 	 * @param service
 	 * @param method
@@ -525,7 +540,8 @@ public abstract class Service extends Configurable {
 	 * @throws InterruptedException
 	 * @throws TimeoutException
 	 */
-	protected Serializable invokeInternally(String service, String method, Serializable[] parameters) // TODO deprecate
+	@Deprecated
+	protected Serializable invokeInternally(String service, String method, Serializable[] parameters)
 			throws L2pServiceException, L2pSecurityException, AgentNotKnownException, InterruptedException,
 			TimeoutException {
 		try {
