@@ -97,8 +97,7 @@ public class UserAgent extends PassphraseAgent {
 		if (loginName != null && !(loginName.matches("[a-zA-Z].*")))
 			throw new UserAgentException("please use a login name startung with a normal character (a-z or A-Z)");
 
-		// TODO!!!!!!!
-		// duplicate check
+		// TODO duplicate check!!!!!!!
 		this.sLoginName = loginName;
 	}
 
@@ -116,8 +115,7 @@ public class UserAgent extends PassphraseAgent {
 		if (email != null && !email.contains("@"))
 			throw new UserAgentException("This email address contains no @ character...");
 
-		// TODO!!!!!!!
-		// duplicate check
+		// TODO duplicate check!!!!!!!
 		// Verify email in Java according to Stack Overflow
 		// http://stackoverflow.com/questions/153716/verify-email-in-java
 		this.sEmail = email.toLowerCase();

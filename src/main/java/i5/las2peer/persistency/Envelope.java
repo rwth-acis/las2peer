@@ -975,7 +975,7 @@ public final class Envelope implements XmlAble, Cloneable {
 					result.htEncryptedKeys.put(id, Base64.decodeBase64(key.getFirstChild().getText()));
 			}
 
-			// signaturen
+			// signatures
 			if (root.getChildCount() > 2) {
 				Element signatures = root.getChild(2);
 				if (!signatures.getName().equals("signatures"))
@@ -999,9 +999,6 @@ public final class Envelope implements XmlAble, Cloneable {
 		} catch (XMLSyntaxException e) {
 			throw new MalformedXMLException("problems with parsing the xml document", e);
 		}
-
-		// TODO signatures ?!?
-		// further XML checks?
 
 		return result;
 	}
