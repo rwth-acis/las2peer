@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import i5.las2peer.p2p.AgentAlreadyRegisteredException;
 import i5.las2peer.p2p.LocalNode;
+import i5.las2peer.persistency.DecodingFailedException;
 import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.persistency.Envelope;
 import i5.las2peer.persistency.MalformedXMLException;
@@ -103,12 +104,13 @@ public class ContextTest {
 	@Test
 	public void testOpenEnvelope()
 			throws MalformedXMLException, IOException, L2pSecurityException, CryptoException,
-			SerializationException, AgentException, EncodingFailedException {
+			SerializationException, AgentException, EncodingFailedException, DecodingFailedException {
 		LocalNode node = LocalNode.newNode();
 
 		GroupAgent group1 = MockAgentFactory.getGroup1();
 		GroupAgent groupA = MockAgentFactory.getGroupA();
 		GroupAgent groupSuper = GroupAgent.createGroupAgent(new Agent[] { group1, groupA });
+		GroupAgent groupSuper2 = GroupAgent.createGroupAgent(new Agent[] { group1, groupA });
 		try {
 			node.storeAgent(group1);
 		} catch (AgentAlreadyRegisteredException e) {}
@@ -116,6 +118,7 @@ public class ContextTest {
 			node.storeAgent(groupA);
 		} catch (AgentAlreadyRegisteredException e) {}
 		node.storeAgent(groupSuper);
+		node.storeAgent(groupSuper2);
 
 		node.launch();
 		
@@ -126,17 +129,21 @@ public class ContextTest {
 		
 		groupA.unlockPrivateKey(adam);
 		groupSuper.unlockPrivateKey(groupA);
+		groupSuper2.unlockPrivateKey(groupA);
 
 		Context context = new Context(node, eve);
 		
-		Envelope envelope1 = Envelope.createClassIdEnvelope("content", "id", groupSuper);
+		Envelope envelope1 = Envelope.createClassIdEnvelope("content", "id", new Agent[] {groupSuper, groupSuper2});
 		Envelope envelopeA = Envelope.createClassIdEnvelope("content", "id", groupA);
+		envelope1.open(groupSuper2);
+		envelope1.addSignature(groupSuper2);
 		envelope1.close();
 		envelopeA.close();
 
 		try {
 			context.openEnvelope(envelope1);
 			assertTrue(envelope1.isOpen());
+			assertTrue(envelope1.getOpeningAgent().getId() == groupSuper2.getId()); // check if signing agent is preferred
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("exception thrown: " + e);
@@ -151,5 +158,4 @@ public class ContextTest {
 		
 		node.shutDown();
 	}
-
 }
