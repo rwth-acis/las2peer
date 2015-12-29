@@ -4,7 +4,7 @@ public class TestService2 extends Service {
 
 	public int usingOther(int i) {
 		try {
-			Object result = invokeServiceMethod("i5.las2peer.api.TestService", "inc", new Integer(i));
+			Object result = invokeInternally("i5.las2peer.api.TestService", "inc", new Integer(i));
 
 			if (result instanceof Integer)
 				return ((Integer) result).intValue();

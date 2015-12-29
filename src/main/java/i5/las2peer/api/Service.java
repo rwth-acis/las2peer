@@ -154,75 +154,74 @@ public abstract class Service extends Configurable {
 			IllegalArgumentException, IllegalAccessException, InvocationTargetException, L2pSecurityException {
 		Method m = searchMethod(method, parameters);
 		
-		// TODO check somewhere that the main agent is really unlocked
-		//if (getContext().getMainAgent().isLocked())
-		//	throw new L2pSecurityException("Tried to execute service method with locked main agent!");
-		
+		// TODO make sure that main agent is unlocked?
+
 		return m.invoke(this, parameters);
 	}
 
 	/**
-	 * Invokes the method of any other service (using the agent of the current service).
+	 * Invokes the method of any other service on behalf of the main agent, thus sending the main agent as executing
+	 * entity.
 	 * 
-	 * @param service
-	 * @param method
-	 * @param parameters
+	 * To use the service agent as executing entity, use {@link #invokeInternally(String, String, Serializable...)}
+	 * instead.
 	 * 
-	 * @return result of the method invocation
-	 * 
-	 * @throws InterruptedException
-	 * @throws InvocationTargetException
-	 * @throws IllegalAccessException
-	 * @throws NoSuchServiceMethodException
-	 * @throws L2pSecurityException
-	 * @throws AgentNotKnownException
-	 * @throws IllegalArgumentException
-	 * @throws SecurityException
-	 * @throws L2pServiceException
-	 * @throws TimeoutException
-	 */
-	public Object invokeServiceMethod(String service, String method, Serializable... parameters)
-			throws L2pServiceException, SecurityException, IllegalArgumentException, AgentNotKnownException,
-			L2pSecurityException, NoSuchServiceMethodException, IllegalAccessException, InvocationTargetException,
-			InterruptedException, TimeoutException {
-		return this.invokeServiceMethod(false,service,method,parameters);
-	}
-	
-	/**
-	 * Invokes the method of any other service.
-	 * 
-	 * @param sendMainAgent if true, the mainAgent of the current Context is used for invocation; otherwise, the service agent is used
 	 * @param service the service class
 	 * @param method the service method
 	 * @param parameters list of parameters
-	 * @return the return value of the invoked method
-	 * @throws L2pServiceException
-	 * @throws SecurityException
-	 * @throws IllegalArgumentException
+	 * 
+	 * @return result of the method invocation
+	 * 
 	 * @throws AgentNotKnownException
+	 * @throws L2pServiceException
 	 * @throws L2pSecurityException
-	 * @throws NoSuchServiceMethodException
-	 * @throws IllegalAccessException
-	 * @throws InvocationTargetException
+	 * @throws InterruptedException
+	 * @throws TimeoutException
+	 * 
+	 */
+	public Object invokeServiceMethod(String service, String method, Serializable... parameters)
+			throws AgentNotKnownException, L2pServiceException, L2pSecurityException, InterruptedException,
+			TimeoutException {
+		// System.out.println ( "\t\t---> invoking Service Method " + service + "/" + method );
+
+		Object result = null;
+		if (getContext().getLocalNode().hasLocalAgent(ServiceAgent.serviceClass2Id(service)))
+			result = getContext().getLocalNode().invokeLocally(getContext().getMainAgent().getId(), service, method,
+					parameters);
+		else
+			result = getContext().getLocalNode().invokeGlobally(getContext().getMainAgent(), service, method,
+					parameters);
+
+		return result;
+	}
+
+	/**
+	 * Invokes a service method using the agent of this service as executing entity.
+	 * 
+	 * To use the main agent as executing entity, use {@link #invokeServiceMethod(String, String, Serializable...)}
+	 * instead.
+	 * 
+	 * @param service the service class
+	 * @param method the service method
+	 * @param parameters list of parameters
+	 * 
+	 * @return result of the method invocation
+	 * 
+	 * @throws L2pServiceException
+	 * @throws L2pSecurityException
+	 * @throws AgentNotKnownException
 	 * @throws InterruptedException
 	 * @throws TimeoutException
 	 */
-	public Object invokeServiceMethod(boolean sendMainAgent, String service, String method, Serializable... parameters)
-			throws L2pServiceException, SecurityException, IllegalArgumentException, AgentNotKnownException,
-			L2pSecurityException, NoSuchServiceMethodException, IllegalAccessException, InvocationTargetException,
-			InterruptedException, TimeoutException {
-		// System.out.println ( "\t\t---> invoking Service Method " + service + "/" + method );
-		Agent callingAgent = null;
-		if (sendMainAgent)
-			callingAgent = getContext().getMainAgent();
-		else
-			callingAgent = getAgent();
-		
+	protected Object invokeInternally(String service, String method, Serializable... parameters)
+			throws AgentNotKnownException, L2pServiceException, L2pSecurityException, InterruptedException,
+			TimeoutException {
+
 		Object result = null;
 		if (getContext().getLocalNode().hasLocalAgent(ServiceAgent.serviceClass2Id(service)))
-			result = getContext().getLocalNode().invokeLocally(callingAgent.getId(), service, method, parameters);
+			result = getContext().getLocalNode().invokeLocally(getAgent().getId(), service, method, parameters);
 		else
-			result = getContext().getLocalNode().invokeGlobally(callingAgent, service, method, parameters);
+			result = getContext().getLocalNode().invokeGlobally(getAgent(), service, method, parameters);
 
 		return result;
 	}
@@ -240,8 +239,8 @@ public abstract class Service extends Configurable {
 	 * @throws i5.las2peer.execution.NoSuchServiceMethodException
 	 *
 	 */
-	public Method searchMethod(String methodName, Object[] params)
-			throws L2pSecurityException, i5.las2peer.execution.NoSuchServiceMethodException {
+	public Method searchMethod(String methodName, Object[] params) throws L2pSecurityException,
+			i5.las2peer.execution.NoSuchServiceMethodException {
 		Class<?>[] acActualParamTypes = new Class[params.length];
 		Class<? extends Service> thisClass = this.getClass();
 
@@ -264,8 +263,8 @@ public abstract class Service extends Configurable {
 						for (int i = 0; i < acActualParamTypes.length && bPossible; i++) {
 							if (!acCheckParamTypes[i].isInstance(params[i])) {
 								// param[i] is not an instance of the formal parameter type
-								if (!(acCheckParamTypes[i].isPrimitive()
-										&& ServiceHelper.getWrapperClass(acCheckParamTypes[i]).isInstance(params[i]))
+								if (!(acCheckParamTypes[i].isPrimitive() && ServiceHelper.getWrapperClass(
+										acCheckParamTypes[i]).isInstance(params[i]))
 										&& !(ServiceHelper.isWrapperClass(acCheckParamTypes[i]) && ServiceHelper
 												.getUnwrappedClass(acCheckParamTypes[i]).isInstance(params[i])))
 									// and not wrapped or unwrapped either! -> so not more possibilities to match!
@@ -359,7 +358,7 @@ public abstract class Service extends Configurable {
 	 * 
 	 * @return the L2pThread we're currently running in
 	 */
-	final L2pThread getL2pThread() {
+	private final L2pThread getL2pThread() {
 		Thread t = Thread.currentThread();
 
 		if (!(t instanceof L2pThread))
@@ -399,7 +398,8 @@ public abstract class Service extends Configurable {
 	}
 
 	/**
-	 * @deprecated Use {@link i5.las2peer.logging.L2pLogger#logEvent(Event, String)} with {@link Event#SERVICE_MESSAGE} instead!
+	 * @deprecated Use {@link i5.las2peer.logging.L2pLogger#logEvent(Event, String)} with {@link Event#SERVICE_MESSAGE}
+	 *             instead!
 	 *             <p>
 	 *             Writes a log message.
 	 * 
@@ -436,7 +436,8 @@ public abstract class Service extends Configurable {
 	}
 
 	/**
-	 * @deprecated Use {@link i5.las2peer.logging.L2pLogger#logEvent(Event, String)} with {@link Event#SERVICE_ERROR} instead!
+	 * @deprecated Use {@link i5.las2peer.logging.L2pLogger#logEvent(Event, String)} with {@link Event#SERVICE_ERROR}
+	 *             instead!
 	 *             <p>
 	 *             Writes an error log message.
 	 * 
@@ -484,7 +485,7 @@ public abstract class Service extends Configurable {
 		logError("Exception: " + e);
 		e.printStackTrace();
 	}
-	
+
 	/**
 	 * Deprecated, use getContext().getLocalNode() instead!
 	 * 
@@ -496,7 +497,7 @@ public abstract class Service extends Configurable {
 	protected Node getActiveNode() {
 		return getL2pThread().getContext().getLocalNode();
 	}
-	
+
 	/**
 	 * Deprecated, use getContext().getMainAgent() instead!
 	 * 
@@ -508,7 +509,7 @@ public abstract class Service extends Configurable {
 	protected Agent getActiveAgent() {
 		return getL2pThread().getContext().getMainAgent();
 	}
-	
+
 	/**
 	 * Deprecated, use {@link #getAgent()} isntead!
 	 * 
@@ -520,35 +521,6 @@ public abstract class Service extends Configurable {
 	@Deprecated
 	protected ServiceAgent getMyAgent() {
 		return getL2pThread().getServiceAgent();
-	}
-
-	/**
-	 * 
-	 * Deprecated, use {@link #invokeServiceMethod(String, String, Serializable...)} instead.
-	 * Invokes a service method using the agent of this service as executing entity.
-	 * 
-	 * 
-	 * @param service
-	 * @param method
-	 * @param parameters
-	 * 
-	 * @return result of the method invocation
-	 * 
-	 * @throws L2pServiceException
-	 * @throws L2pSecurityException
-	 * @throws AgentNotKnownException
-	 * @throws InterruptedException
-	 * @throws TimeoutException
-	 */
-	@Deprecated
-	protected Serializable invokeInternally(String service, String method, Serializable[] parameters)
-			throws L2pServiceException, L2pSecurityException, AgentNotKnownException, InterruptedException,
-			TimeoutException {
-		try {
-			return getActiveNode().invokeLocally(getMyAgent().getId(), service, method, parameters);
-		} catch (NoSuchServiceException e) {
-			return getActiveNode().invokeGlobally(getMyAgent(), service, method, parameters);
-		}
 	}
 
 }
