@@ -201,35 +201,34 @@ public class L2pClassLoader extends ClassLoader {
 	 */
 	private LoadedLibrary findLoadedLibrary(String name)
 			throws LibraryNotFoundException, UnresolvedDependenciesException {
-		// TODO: tidy up - allow missing version info in dependency!
-
-		// System.err.println( "looking for " + name + " in " + repositories.length + " repos");
-
+		// TODO versions of services - allow missing version info in dependency!
 		LoadedLibrary result = null;
-
-		UnresolvedDependenciesException ude = null;
-
-		for (int i = 0; i < repositories.length; i++) {
+		StringBuilder sb = new StringBuilder();
+		for (Repository repository : repositories) {
 			try {
-				LoadedLibrary temp = repositories[i].findLibrary(name);
-
+				LoadedLibrary temp = repository.findLibrary(name);
 				if (result == null
-						|| temp.getLibraryIdentifier().getVersion().isLargerThan(result.getIdentifier().getVersion()))
+						|| temp.getLibraryIdentifier().getVersion().isLargerThan(result.getIdentifier().getVersion())) {
 					result = temp;
+				}
 			} catch (LibraryNotFoundException e) {
+				// library not found in this repository, no problem we (may) have others
 			} catch (UnresolvedDependenciesException e) {
-				if (ude == null)
-					ude = e;
+				if (sb.length() != 0) {
+					sb.append(", ");
+				}
+				sb.append(e.getMessage());
 			}
 		}
-
 		if (result == null) {
-			if (ude != null)
-				throw ude;
-			else
+			if (sb.length() != 0) {
+				// the library was found at least in one repository, but dependencies could not be resolved
+				throw new UnresolvedDependenciesException("Dependency for library '" + name
+						+ "' could not be resolved in any repository! Details: " + sb.toString());
+			} else {
 				throw new LibraryNotFoundException(name);
+			}
 		}
-
 		return result;
 	}
 
