@@ -449,19 +449,30 @@ public class WebConnector extends Connector {
 		}
 	}
 
+
 	/**
-	 * Logs an error.
+	 * Logs an error with throwable.
 	 * 
-	 * @param error
+	 * @param message
+	 * @param throwable
 	 */
-	public void logError(String error) {
-		logger.severe(error);
+	public void logError(String message, Throwable throwable) {
+		logger.log(Level.SEVERE, message, throwable);
 		if (myNode != null) {
-			myNode.observerNotice(Event.CONNECTOR_ERROR, myNode.getNodeId(), WEB_CONNECTOR + error);
+			myNode.observerNotice(Event.CONNECTOR_ERROR, myNode.getNodeId(), WEB_CONNECTOR + message);
 		}
 		if (logHandler != null) { // StreamHandler don't auto flush
 			logHandler.flush();
 		}
+	}
+
+	/**
+	 * Logs an error.
+	 * 
+	 * @param message
+	 */
+	public void logError(String message) {
+		logError(message, null);
 	}
 
 	/**

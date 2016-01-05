@@ -16,7 +16,6 @@ import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.Set;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
@@ -39,7 +38,6 @@ import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.ServiceNameVersion;
 import i5.las2peer.p2p.TimeoutException;
-import i5.las2peer.persistency.EnvelopeException;
 import i5.las2peer.restMapper.RESTMapper;
 import i5.las2peer.restMapper.data.InvocationData;
 import i5.las2peer.restMapper.data.Pair;
@@ -68,6 +66,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	private static final String OIDC_PROVIDER_KEY = "oidc_provider";
 	private static final int NO_RESPONSE_BODY = -1; // 0 means chunked transfer encoding, see
 													// https://docs.oracle.com/javase/8/docs/jre/api/net/httpserver/spec/com/sun/net/httpserver/HttpExchange.html#sendResponseHeaders-int-long-
+
 	private WebConnector connector;
 	private Node l2pNode;
 
@@ -528,14 +527,11 @@ public class WebConnectorRequestHandler implements HttpHandler {
 				sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND,
 						"Swagger API declaration not available!");
 			}
-			try {
-				String json = Json.mapper().writeValueAsString(swagger);
-				sendStringResponse(exchange, HttpURLConnection.HTTP_OK, json);
-			} catch (JsonProcessingException e) {
-				sendInternalErrorResponse(exchange, e.getMessage());
-			}
-		} catch (EnvelopeException e) {
-			sendInternalErrorResponse(exchange, e.getMessage());
+			String json = Json.mapper().writeValueAsString(swagger);
+			sendStringResponse(exchange, HttpURLConnection.HTTP_OK, json);
+		} catch (Exception e) {
+			connector.logError("Exception while creating swagger.json output " + e.toString(), e);
+			sendInternalErrorResponse(exchange, e.toString());
 		}
 	}
 
