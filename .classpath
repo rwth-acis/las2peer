@@ -4,21 +4,18 @@
 	<classpathentry kind="src" path="src/main/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/activation-1.1.jar"/>
-	<classpathentry kind="lib" path="lib/bcprov-jdk15on-1.50.jar"/>
-	<classpathentry kind="lib" path="lib/commons-lang3-3.3.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jackson-core-2.4.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jackson-databind-2.4.5.jar"/>
 	<classpathentry kind="lib" path="lib/javax.servlet-api-3.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/jcip-annotations-1.0.jar"/>
-	<classpathentry kind="lib" path="lib/json-smart-1.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/json-smart-1.3.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jsr311-api-1.1.1.jar"/>
 	<classpathentry kind="lib" path="lib/junit-4.12.jar"/>
 	<classpathentry kind="lib" path="lib/lang-tag-1.4.jar"/>
 	<classpathentry kind="lib" path="lib/las2peer-0.5-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="lib/las2peer-rest-mapper-0.5-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="lib/mail-1.4.7.jar"/>
-	<classpathentry kind="lib" path="lib/nimbus-jose-jwt-2.26.jar"/>
-	<classpathentry kind="lib" path="lib/oauth2-oidc-sdk-3.3.jar"/>
+	<classpathentry kind="lib" path="lib/oauth2-oidc-sdk-4.17.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/swagger-annotations-1.5.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/swagger-core-1.5.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/swagger-jaxrs-1.5.4.jar"/>
