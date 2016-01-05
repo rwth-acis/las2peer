@@ -2,7 +2,6 @@ package i5.las2peer.classLoaders;
 
 import i5.las2peer.classLoaders.libraries.LoadedJarLibrary;
 import i5.las2peer.classLoaders.libraries.LoadedLibrary;
-import i5.las2peer.classLoaders.libraries.NotFoundException;
 import i5.las2peer.classLoaders.libraries.ResourceNotFoundException;
 
 import java.io.IOException;
@@ -69,7 +68,7 @@ public class LibraryClassLoader extends ClassLoader {
 	 * 
 	 * @param resourceName
 	 * @return contents of the resource
-	 * @throws NotFoundException
+	 * @throws ClassLoaderException
 	 * @throws IOException
 	 */
 	private byte[] getResourceContent(String resourceName) throws ClassLoaderException, IOException {
