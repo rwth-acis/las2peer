@@ -28,8 +28,6 @@ import i5.simpleXML.Element;
 import i5.simpleXML.Parser;
 import i5.simpleXML.XMLSyntaxException;
 
-// TODO: typed content?
-
 /**
  * An envelope provides a secure storage for any {@link Serializable} content within the LAS2peer network.
  * 
@@ -845,8 +843,6 @@ public final class Envelope implements XmlAble, Cloneable {
 				+ "\t<las2peer:content encoding=\"Base64\" type=\"" + contentType.toString() + "\"" + classInfo + ">\n"
 				+ Base64.encodeBase64String(baCipherData) + "\t</las2peer:content>\n" + encodedKeys + signatures
 				+ "</las2peer:envelope>\n";
-
-		// TODO: signatures?
 	}
 
 	/**
