@@ -286,8 +286,9 @@ public class L2pClassLoader extends ClassLoader {
 		String sPackage = getPackageName(serviceClassName);
 
 		Hashtable<LibraryVersion, BundleClassLoader> htBcls = registeredLoaders.get(sPackage);
-		if (htBcls != null && htBcls.size() > 0)
+		if (htBcls != null && htBcls.get(version) != null) {
 			return; // at least one version is already registered
+		}
 
 		LoadedLibrary lib = null;
 		for (int i = 0; i < repositories.length && lib == null; i++) {
