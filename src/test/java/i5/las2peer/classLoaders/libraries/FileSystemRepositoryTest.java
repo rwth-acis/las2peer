@@ -1,20 +1,19 @@
 package i5.las2peer.classLoaders.libraries;
 
-import static org.junit.Assert.*;
-
-import i5.las2peer.classLoaders.UnresolvedDependenciesException;
-import i5.las2peer.classLoaders.helpers.LibraryDependency;
-import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
-import i5.las2peer.classLoaders.helpers.LibraryVersion;
-import i5.las2peer.classLoaders.libraries.FileSystemRepository;
-import i5.las2peer.classLoaders.libraries.LoadedLibrary;
-import i5.las2peer.classLoaders.libraries.Repository;
-import i5.las2peer.classLoaders.libraries.NotFoundException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.util.Collection;
 
 import org.junit.Test;
+
+import i5.las2peer.classLoaders.LibraryNotFoundException;
+import i5.las2peer.classLoaders.UnresolvedDependenciesException;
+import i5.las2peer.classLoaders.helpers.LibraryDependency;
+import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
+import i5.las2peer.classLoaders.helpers.LibraryVersion;
 
 public class FileSystemRepositoryTest {
 
@@ -106,7 +105,7 @@ public class FileSystemRepositoryTest {
 	}
 
 	@Test
-	public void testLibrarySearch() throws NotFoundException, IllegalArgumentException {
+	public void testLibrarySearch() throws LibraryNotFoundException, IllegalArgumentException {
 		Repository testee = new FileSystemRepository("export" + File.separator + "jars" + File.separator);
 
 		testee.findLibrary(new LibraryIdentifier("i5.las2peer.classLoaders.testPackage1", "1.0"));
@@ -118,24 +117,24 @@ public class FileSystemRepositoryTest {
 
 		try {
 			testee.findMatchingLibrary(new LibraryDependency("i5.las2peer.classLoaders.testPackage1", "1.4", "2.0"));
-			fail("NotFoundException should have been thrown!");
-		} catch (NotFoundException e) {
+			fail(LibraryNotFoundException.class.getName() + " should have been thrown!");
+		} catch (LibraryNotFoundException e) {
 		}
 
 		try {
 			testee.findMatchingLibrary(new LibraryDependency("i5.las2peer.classLoaders.testPackage1", "0.1", "0.4.4"));
-			fail("NotFoundException should have been thrown!");
-		} catch (NotFoundException e) {
+			fail(LibraryNotFoundException.class.getName() + " should have been thrown!");
+		} catch (LibraryNotFoundException e) {
 		}
 
 		try {
 			testee.findMatchingLibrary(new LibraryDependency("tesadawodauiwd", "1.0", "2.0"));
-			fail("NotFoundException should have been thrown!");
-		} catch (NotFoundException e) {
+			fail(LibraryNotFoundException.class.getName() + " should have been thrown!");
+		} catch (LibraryNotFoundException e) {
 		}
 	}
 
-	public void testFindingLibrary() throws NotFoundException, UnresolvedDependenciesException {
+	public void testFindingLibrary() throws LibraryNotFoundException, UnresolvedDependenciesException {
 		Repository testee = new FileSystemRepository("export" + File.separator + "jars" + File.separator);
 
 		LoadedLibrary lib = testee.findLibrary("i5.las2peer.classLoaders.testPackage1");

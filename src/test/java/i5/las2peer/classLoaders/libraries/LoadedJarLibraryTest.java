@@ -10,6 +10,8 @@ import java.net.URL;
 
 import org.junit.Test;
 
+import i5.las2peer.classLoaders.LibraryNotFoundException;
+
 public class LoadedJarLibraryTest {
 
 	@Test
@@ -35,7 +37,7 @@ public class LoadedJarLibraryTest {
 	}
 
 	@Test
-	public void testStringGetter() throws IOException, NotFoundException, ResourceNotFoundException {
+	public void testStringGetter() throws IOException, LibraryNotFoundException, ResourceNotFoundException {
 		LoadedJarLibrary testee = LoadedJarLibrary
 				.createFromJar("export/jars/i5.las2peer.classLoaders.testPackage1-1.1.jar");
 		String test = testee.getResourceAsString("i5/las2peer/classLoaders/testPackage1/test.properties");
@@ -45,7 +47,7 @@ public class LoadedJarLibraryTest {
 	}
 
 	@Test
-	public void testFiles() throws IOException, NotFoundException, ResourceNotFoundException {
+	public void testFiles() throws IOException, LibraryNotFoundException, ResourceNotFoundException {
 		LoadedJarLibrary testee = LoadedJarLibrary
 				.createFromJar("export/jars/i5.las2peer.classLoaders.testPackage1-1.1.jar");
 
@@ -57,7 +59,7 @@ public class LoadedJarLibraryTest {
 	}
 
 	@Test
-	public void testBinaryContent() throws IOException, NotFoundException, ResourceNotFoundException {
+	public void testBinaryContent() throws IOException, LibraryNotFoundException, ResourceNotFoundException {
 		LoadedJarLibrary testee = LoadedJarLibrary
 				.createFromJar("export/jars/i5.las2peer.classLoaders.testPackage1-1.1.jar");
 		byte[] result = testee.getResourceAsBinary("i5/las2peer/classLoaders/testPackage1/test.properties");

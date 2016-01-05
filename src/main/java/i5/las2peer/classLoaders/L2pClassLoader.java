@@ -7,7 +7,6 @@ import i5.las2peer.classLoaders.helpers.LibraryDependency;
 import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
 import i5.las2peer.classLoaders.helpers.LibraryVersion;
 import i5.las2peer.classLoaders.libraries.LoadedLibrary;
-import i5.las2peer.classLoaders.libraries.NotFoundException;
 import i5.las2peer.classLoaders.libraries.Repository;
 
 /**
@@ -217,7 +216,7 @@ public class L2pClassLoader extends ClassLoader {
 				if (result == null
 						|| temp.getLibraryIdentifier().getVersion().isLargerThan(result.getIdentifier().getVersion()))
 					result = temp;
-			} catch (NotFoundException e) {
+			} catch (LibraryNotFoundException e) {
 			} catch (UnresolvedDependenciesException e) {
 				if (ude == null)
 					ude = e;
@@ -267,7 +266,7 @@ public class L2pClassLoader extends ClassLoader {
 				if (result == null
 						|| temp.getLibraryIdentifier().getVersion().isLargerThan(result.getIdentifier().getVersion()))
 					result = temp;
-			} catch (NotFoundException e) {
+			} catch (LibraryNotFoundException e) {
 			}
 		}
 
@@ -295,7 +294,7 @@ public class L2pClassLoader extends ClassLoader {
 		for (int i = 0; i < repositories.length && lib == null; i++) {
 			try {
 				lib = repositories[i].findLibrary(new LibraryIdentifier(sPackage, version));
-			} catch (NotFoundException e) {
+			} catch (LibraryNotFoundException e) {
 			}
 		}
 
@@ -381,7 +380,7 @@ public class L2pClassLoader extends ClassLoader {
 		try {
 			Hashtable<LibraryVersion, BundleClassLoader> htVersions = registeredLoaders.get(sPackage);
 			if (htVersions == null || htVersions.size() == 0) {
-				registerService(serviceClassName);
+				registerService(serviceClassName); // may throw a LibraryNotFoundException
 				htVersions = registeredLoaders.get(sPackage);
 			}
 

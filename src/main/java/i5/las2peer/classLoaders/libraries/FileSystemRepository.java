@@ -1,5 +1,6 @@
 package i5.las2peer.classLoaders.libraries;
 
+import i5.las2peer.classLoaders.LibraryNotFoundException;
 import i5.las2peer.classLoaders.UnresolvedDependenciesException;
 import i5.las2peer.classLoaders.helpers.LibraryDependency;
 import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
@@ -16,8 +17,6 @@ import java.util.Iterator;
 /**
  * implements a repository which loads all libraries from a given directory or from severeal ones. The search for
  * library files (jars) may be recursive.
- * 
- * 
  *
  */
 public class FileSystemRepository implements Repository {
@@ -72,14 +71,15 @@ public class FileSystemRepository implements Repository {
 	 * 
 	 * @param name
 	 * @return a LoadedLibrary for the requested library name
-	 * @throws NotFoundException
+	 * @throws LibraryNotFoundException
 	 * @throws UnresolvedDependenciesException
 	 */
-	public LoadedLibrary findLibrary(String name) throws NotFoundException, UnresolvedDependenciesException {
+	public LoadedLibrary findLibrary(String name) throws LibraryNotFoundException, UnresolvedDependenciesException {
 		Hashtable<LibraryVersion, String> htVersions = htFoundJars.get(name);
 		if (htVersions == null) {
 			System.err.println(this + " could not find " + name);
-			throw new NotFoundException(name);
+			throw new LibraryNotFoundException(
+					"library '" + name + "' package could not be found in the repositories!");
 		} else {
 			System.err.println(this + " has " + htVersions.size() + " versions of " + name);
 		}
@@ -98,7 +98,7 @@ public class FileSystemRepository implements Repository {
 			throw new UnresolvedDependenciesException(
 					"Somethings seems wrong with the dependency information of " + name + ": " + e.getMessage(), e);
 		} catch (Exception e) {
-			throw new NotFoundException("Error opening library jar " + htVersions.get(version), e);
+			throw new LibraryNotFoundException("Error opening library jar " + htVersions.get(version), e);
 		}
 	}
 
@@ -109,22 +109,25 @@ public class FileSystemRepository implements Repository {
 	 * 
 	 * @return a LoadedLibrary for the requested library identifier
 	 * 
-	 * @throws NotFoundException
+	 * @throws LibraryNotFoundException
 	 */
-	public LoadedLibrary findLibrary(LibraryIdentifier lib) throws NotFoundException {
+	public LoadedLibrary findLibrary(LibraryIdentifier lib) throws LibraryNotFoundException {
 		Hashtable<LibraryVersion, String> htVersions = htFoundJars.get(lib.getName());
 		if (htVersions == null)
-			throw new NotFoundException(lib.toString());
+			throw new LibraryNotFoundException(
+					"library '" + lib.toString() + "' package could not be found in the repositories!");
 
 		String jar = htVersions.get(lib.getVersion());
 
 		if (jar == null)
-			throw new NotFoundException(lib.toString());
+			throw new LibraryNotFoundException(
+					"library '" + lib.toString() + "' package could not be found in the repositories!");
 
 		try {
 			return LoadedJarLibrary.createFromJar(jar);
 		} catch (Exception e) {
-			throw new NotFoundException(lib.toString(), e);
+			throw new LibraryNotFoundException(
+					"library '" + lib.toString() + "' package could not be found in the repositories!", e);
 		}
 	}
 
@@ -133,13 +136,14 @@ public class FileSystemRepository implements Repository {
 	 * 
 	 * @param dep
 	 * @return a LoadedLibray matching the given library dependency
-	 * @throws NotFoundException
+	 * @throws LibraryNotFoundException
 	 */
-	public LoadedLibrary findMatchingLibrary(LibraryDependency dep) throws NotFoundException {
+	public LoadedLibrary findMatchingLibrary(LibraryDependency dep) throws LibraryNotFoundException {
 		// TODO: find better search solution: Search sorted and find always newest version
 		Hashtable<LibraryVersion, String> htVersions = htFoundJars.get(dep.getName());
 		if (htVersions == null)
-			throw new NotFoundException(dep.getName());
+			throw new LibraryNotFoundException(
+					"library '" + dep.getName() + "' package could not be found in the repositories!");
 
 		for (LibraryVersion version : htVersions.keySet()) {
 			if (dep.fits(version)) {
@@ -153,7 +157,8 @@ public class FileSystemRepository implements Repository {
 			// else System.out.println ( "--> does not fit");
 		}
 
-		throw new NotFoundException(dep.toString());
+		throw new LibraryNotFoundException(
+				"library '" + dep.toString() + "' package could not be found in the repositories!");
 	}
 
 	/**

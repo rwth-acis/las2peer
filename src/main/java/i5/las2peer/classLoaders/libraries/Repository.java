@@ -1,5 +1,6 @@
 package i5.las2peer.classLoaders.libraries;
 
+import i5.las2peer.classLoaders.LibraryNotFoundException;
 import i5.las2peer.classLoaders.UnresolvedDependenciesException;
 import i5.las2peer.classLoaders.helpers.LibraryDependency;
 import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
@@ -20,10 +21,10 @@ public interface Repository {
 	 * 
 	 * @return a loaded library for the given library name
 	 * 
-	 * @throws NotFoundException
+	 * @throws LibraryNotFoundException
 	 * @throws UnresolvedDependenciesException
 	 */
-	public LoadedLibrary findLibrary(String name) throws NotFoundException, UnresolvedDependenciesException;
+	public LoadedLibrary findLibrary(String name) throws LibraryNotFoundException, UnresolvedDependenciesException;
 
 	/**
 	 * get a library matching name and version of the given identifier
@@ -32,9 +33,9 @@ public interface Repository {
 	 * 
 	 * @return a loaded library for the given identifier
 	 * 
-	 * @throws NotFoundException
+	 * @throws LibraryNotFoundException
 	 */
-	public LoadedLibrary findLibrary(LibraryIdentifier lib) throws NotFoundException;
+	public LoadedLibrary findLibrary(LibraryIdentifier lib) throws LibraryNotFoundException;
 
 	/**
 	 * get the newest library matching the given library dependency (name and version range)
@@ -43,8 +44,8 @@ public interface Repository {
 	 * 
 	 * @return a loaded library matching the given dependency
 	 * 
-	 * @throws NotFoundException
+	 * @throws LibraryNotFoundException
 	 */
-	public LoadedLibrary findMatchingLibrary(LibraryDependency dep) throws NotFoundException;
+	public LoadedLibrary findMatchingLibrary(LibraryDependency dep) throws LibraryNotFoundException;
 
 }

@@ -1,10 +1,10 @@
 package i5.las2peer.classLoaders;
 
-import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
-
 import java.net.URL;
 import java.util.Iterator;
 import java.util.Set;
+
+import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
 
 /**
  * A BundleClassLoader is responsible of providing all classes for a main class / service via separate libraries.
@@ -270,7 +270,7 @@ public class BundleClassLoader extends ClassLoader {
 				try {
 					return libraryLoaders[i].getResource(resourceName, false);
 				} catch (Exception e) {
-					System.err.println("some other than NotFoundException: " + e);
+					System.err.println("some other than " + LibraryNotFoundException.class.getName() + ": " + e);
 				}
 			}
 		}
