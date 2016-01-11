@@ -12,10 +12,12 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.Set;
 
+import com.fasterxml.jackson.databind.util.JSONPObject;
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
@@ -49,7 +51,10 @@ import i5.las2peer.security.PassphraseAgent;
 import i5.las2peer.security.ServiceInfoAgent;
 import i5.las2peer.security.UserAgent;
 import io.swagger.jaxrs.Reader;
+import io.swagger.models.Operation;
+import io.swagger.models.Path;
 import io.swagger.models.Swagger;
+import io.swagger.models.auth.OAuth2Definition;
 import io.swagger.util.Json;
 import net.minidev.json.JSONObject;
 import rice.p2p.util.Base64;
@@ -94,7 +99,6 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	 * @throws UnsupportedEncodingException
 	 */
 	private PassphraseAgent authenticate(HttpExchange exchange) throws UnsupportedEncodingException {
-		final int BASIC_PREFIX_LENGTH = "BASIC ".length();
 		String userPass = "";
 		String username = "";
 		String password = "";
@@ -102,9 +106,9 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		// Default authentication:
 		// check for authentication information in header
 		if (exchange.getRequestHeaders().containsKey(AUTHENTICATION_FIELD)
-				&& (exchange.getRequestHeaders().getFirst(AUTHENTICATION_FIELD).length() > BASIC_PREFIX_LENGTH)) {
+				&& exchange.getRequestHeaders().getFirst(AUTHENTICATION_FIELD).toLowerCase().startsWith("basic ")) {
 			// looks like: Authentication Basic <Byte64(name:pass)>
-			userPass = exchange.getRequestHeaders().getFirst(AUTHENTICATION_FIELD).substring(BASIC_PREFIX_LENGTH);
+			userPass = exchange.getRequestHeaders().getFirst(AUTHENTICATION_FIELD).substring("BASIC ".length());
 			userPass = new String(Base64.decode(userPass), "UTF-8");
 			int separatorPos = userPass.indexOf(':');
 
@@ -116,17 +120,25 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		}
 		// OpenID Connect authentication:
 		// check for access token in query parameter and headers
-
-		// IMPORTANT NOTE: doing the same thing with authorization header and bearer token results in client-side
-		// cross-domain errors despite correct config for CORS in LAS2peer Web Connector!
-		else if (connector.oidcProviderInfos != null && ((exchange.getRequestURI().getRawQuery() != null
+		else if (connector.oidcProviderInfos != null
+				&& ( (exchange.getRequestURI().getRawQuery() != null
 				&& exchange.getRequestURI().getRawQuery().contains(ACCESS_TOKEN_KEY + "="))
-				|| exchange.getRequestHeaders().containsKey(ACCESS_TOKEN_KEY))) {
+						|| exchange.getRequestHeaders().containsKey(ACCESS_TOKEN_KEY) 
+				|| (exchange.getRequestHeaders().containsKey(AUTHENTICATION_FIELD)
+				&& exchange.getRequestHeaders().getFirst(AUTHENTICATION_FIELD).toLowerCase().startsWith("bearer ")) )) {
+			
+			
 			String token = "";
 			String oidcProviderURI = connector.defaultOIDCProvider;
 			if (exchange.getRequestHeaders().containsKey(ACCESS_TOKEN_KEY)) { // get OIDC parameters from headers
 				token = exchange.getRequestHeaders().getFirst(ACCESS_TOKEN_KEY);
-				oidcProviderURI = URLDecoder.decode(exchange.getRequestHeaders().getFirst(OIDC_PROVIDER_KEY), "UTF-8");
+				if (exchange.getRequestHeaders().containsKey(OIDC_PROVIDER_KEY))
+					oidcProviderURI = URLDecoder.decode(exchange.getRequestHeaders().getFirst(OIDC_PROVIDER_KEY), "UTF-8");
+			} else if (exchange.getRequestHeaders().containsKey(AUTHENTICATION_FIELD)
+					&& exchange.getRequestHeaders().getFirst(AUTHENTICATION_FIELD).toLowerCase().startsWith("bearer ")) { // get BEARER token from Authentication field
+				token = exchange.getRequestHeaders().getFirst(AUTHENTICATION_FIELD).substring("BEARER ".length());
+				if (exchange.getRequestHeaders().containsKey(OIDC_PROVIDER_KEY))
+					oidcProviderURI = URLDecoder.decode(exchange.getRequestHeaders().getFirst(OIDC_PROVIDER_KEY), "UTF-8");
 			} else { // get OIDC parameters from GET values
 				String[] params = exchange.getRequestURI().getRawQuery().split("&");
 				for (int i = 0; i < params.length; i++) {
@@ -527,8 +539,35 @@ public class WebConnectorRequestHandler implements HttpHandler {
 				sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND,
 						"Swagger API declaration not available!");
 			}
-			String json = Json.mapper().writeValueAsString(swagger);
-			sendStringResponse(exchange, HttpURLConnection.HTTP_OK, json);
+			else {
+				// OpenID Connect integration
+				if (connector.oidcProviderInfos != null && connector.defaultOIDCProvider!=null && !connector.defaultOIDCProvider.equals("")) {
+					// add security definition for default provider
+					JSONObject infos = connector.oidcProviderInfos.get(connector.defaultOIDCProvider);
+					OAuth2Definition scheme = new OAuth2Definition();
+					String authUrl = (String) ((JSONObject) infos.get("config")).get("authorization_endpoint");
+					scheme.implicit(authUrl);
+				    scheme.addScope("openid" , "Access Identity");
+				    scheme.addScope("email" , "Access E-Mail-Address");
+				    scheme.addScope("profile" , "Access Profile Data");
+
+				    swagger.addSecurityDefinition("defaultProvider", scheme);
+					
+					// add security requirements to operations
+					List<String> scopes = new ArrayList<String>();
+					scopes.add("openid");
+					scopes.add("email");
+					scopes.add("profile");
+					for(Path path : swagger.getPaths().values()) {
+						for (Operation operation : path.getOperations()) {
+							operation.addSecurity("defaultProvider", scopes);
+						}
+					}
+				}
+		        
+		        String json = Json.mapper().writeValueAsString(swagger);
+				sendStringResponse(exchange, HttpURLConnection.HTTP_OK, json);
+			}
 		} catch (Exception e) {
 			connector.logError("Exception while creating swagger.json output " + e.toString(), e);
 			sendInternalErrorResponse(exchange, e.toString());
@@ -732,6 +771,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			if (requestedHeaders != null) {
 				responseHeaders.add("Access-Control-Allow-Headers", requestedHeaders);
 			}
+			responseHeaders.add("Access-Control-Allow-Headers", "Authorization");
 			responseHeaders.add("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS");
 		}
 		exchange.sendResponseHeaders(responseCode, contentLength);
