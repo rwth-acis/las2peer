@@ -1,18 +1,19 @@
 package i5.las2peer.classLoaders.libraries;
 
+import java.io.File;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
+
 import i5.las2peer.classLoaders.LibraryNotFoundException;
 import i5.las2peer.classLoaders.UnresolvedDependenciesException;
 import i5.las2peer.classLoaders.helpers.LibraryDependency;
 import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
 import i5.las2peer.classLoaders.helpers.LibraryVersion;
 import i5.las2peer.tools.SimpleTools;
-
-import java.io.File;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
 
 /**
  * implements a repository which loads all libraries from a given directory or from severeal ones. The search for
@@ -21,7 +22,7 @@ import java.util.Iterator;
  */
 public class FileSystemRepository implements Repository {
 
-	private String[] directories;
+	private Iterable<String> directories;
 	private boolean recursive = false;
 	private Hashtable<String, Hashtable<LibraryVersion, String>> htFoundJars;
 
@@ -60,6 +61,16 @@ public class FileSystemRepository implements Repository {
 	 * @param recursive
 	 */
 	public FileSystemRepository(String[] directories, boolean recursive) {
+		this(Arrays.asList(directories), recursive);
+	}
+
+	/**
+	 * create a repository for the given directories
+	 * 
+	 * @param directories
+	 * @param recursive
+	 */
+	public FileSystemRepository(Iterable<String> directories, boolean recursive) {
 		this.directories = directories;
 		this.recursive = recursive;
 
@@ -222,8 +233,9 @@ public class FileSystemRepository implements Repository {
 	private void initJarList() {
 		htFoundJars = new Hashtable<String, Hashtable<LibraryVersion, String>>();
 
-		for (int i = 0; i < directories.length; i++)
-			searchJars(directories[i]);
+		for (String directory : directories) {
+			searchJars(directory);
+		}
 	}
 
 	/**

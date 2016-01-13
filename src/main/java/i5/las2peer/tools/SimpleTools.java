@@ -1,5 +1,6 @@
 package i5.las2peer.tools;
 
+import java.util.Arrays;
 import java.util.Random;
 
 /**
@@ -58,14 +59,33 @@ public class SimpleTools {
 	 * @return join string
 	 */
 	public static String join(Object[] objects, String glue) {
-		if (objects == null || objects.length == 0)
+		if (objects == null) {
 			return "";
+		}
+		return SimpleTools.join(Arrays.asList(objects), glue);
+	}
 
-		StringBuffer result = new StringBuffer(objects[0].toString());
-
-		for (int lauf = 1; lauf < objects.length; lauf++)
-			result.append(glue).append(objects[lauf].toString());
-
+	/**
+	 * a simple join method to concatenate String representations of the given objects
+	 * 
+	 * @param objects
+	 * @param glue
+	 * 
+	 * @return join string
+	 */
+	public static String join(Iterable<?> objects, String glue) {
+		if (objects == null) {
+			return "";
+		}
+		StringBuilder result = new StringBuilder();
+		boolean first = true;
+		for (Object obj : objects) {
+			if (!first) {
+				result.append(glue);
+			}
+			result.append(obj.toString());
+			first = false;
+		}
 		return result.toString();
 	}
 

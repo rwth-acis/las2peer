@@ -1,6 +1,7 @@
 package i5.las2peer.tools;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 
@@ -8,7 +9,7 @@ public class SimpleToolsTest {
 
 	@Test
 	public void testJoin() {
-		assertEquals("", SimpleTools.join(null, "abc"));
+		assertEquals("", SimpleTools.join((Object[]) null, "abc"));
 		assertEquals("", SimpleTools.join(new Object[0], "dkefde"));
 
 		assertEquals("a, b, c", SimpleTools.join(new Object[] { "a", 'b', "c" }, ", "));
