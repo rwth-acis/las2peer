@@ -17,7 +17,6 @@ import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.Set;
 
-import com.fasterxml.jackson.databind.util.JSONPObject;
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
@@ -121,24 +120,27 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		// OpenID Connect authentication:
 		// check for access token in query parameter and headers
 		else if (connector.oidcProviderInfos != null
-				&& ( (exchange.getRequestURI().getRawQuery() != null
-				&& exchange.getRequestURI().getRawQuery().contains(ACCESS_TOKEN_KEY + "="))
-						|| exchange.getRequestHeaders().containsKey(ACCESS_TOKEN_KEY) 
-				|| (exchange.getRequestHeaders().containsKey(AUTHENTICATION_FIELD)
-				&& exchange.getRequestHeaders().getFirst(AUTHENTICATION_FIELD).toLowerCase().startsWith("bearer ")) )) {
-			
-			
+				&& ((exchange.getRequestURI().getRawQuery() != null
+						&& exchange.getRequestURI().getRawQuery().contains(ACCESS_TOKEN_KEY + "="))
+						|| exchange.getRequestHeaders().containsKey(ACCESS_TOKEN_KEY)
+						|| (exchange.getRequestHeaders().containsKey(AUTHENTICATION_FIELD)
+								&& exchange.getRequestHeaders().getFirst(AUTHENTICATION_FIELD).toLowerCase()
+										.startsWith("bearer ")))) {
+
 			String token = "";
 			String oidcProviderURI = connector.defaultOIDCProvider;
 			if (exchange.getRequestHeaders().containsKey(ACCESS_TOKEN_KEY)) { // get OIDC parameters from headers
 				token = exchange.getRequestHeaders().getFirst(ACCESS_TOKEN_KEY);
 				if (exchange.getRequestHeaders().containsKey(OIDC_PROVIDER_KEY))
-					oidcProviderURI = URLDecoder.decode(exchange.getRequestHeaders().getFirst(OIDC_PROVIDER_KEY), "UTF-8");
-			} else if (exchange.getRequestHeaders().containsKey(AUTHENTICATION_FIELD)
-					&& exchange.getRequestHeaders().getFirst(AUTHENTICATION_FIELD).toLowerCase().startsWith("bearer ")) { // get BEARER token from Authentication field
+					oidcProviderURI = URLDecoder.decode(exchange.getRequestHeaders().getFirst(OIDC_PROVIDER_KEY),
+							"UTF-8");
+			} else if (exchange.getRequestHeaders().containsKey(AUTHENTICATION_FIELD) && exchange.getRequestHeaders()
+					.getFirst(AUTHENTICATION_FIELD).toLowerCase().startsWith("bearer ")) { // get BEARER token from
+																							// Authentication field
 				token = exchange.getRequestHeaders().getFirst(AUTHENTICATION_FIELD).substring("BEARER ".length());
 				if (exchange.getRequestHeaders().containsKey(OIDC_PROVIDER_KEY))
-					oidcProviderURI = URLDecoder.decode(exchange.getRequestHeaders().getFirst(OIDC_PROVIDER_KEY), "UTF-8");
+					oidcProviderURI = URLDecoder.decode(exchange.getRequestHeaders().getFirst(OIDC_PROVIDER_KEY),
+							"UTF-8");
 			} else { // get OIDC parameters from GET values
 				String[] params = exchange.getRequestURI().getRawQuery().split("&");
 				for (int i = 0; i < params.length; i++) {
@@ -538,34 +540,37 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			if (swagger == null) {
 				sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND,
 						"Swagger API declaration not available!");
-			}
-			else {
+			} else {
 				// OpenID Connect integration
-				if (connector.oidcProviderInfos != null && connector.defaultOIDCProvider!=null && !connector.defaultOIDCProvider.equals("")) {
+				if (connector.oidcProviderInfos != null && connector.defaultOIDCProvider != null
+						&& !connector.defaultOIDCProvider.isEmpty()) {
 					// add security definition for default provider
 					JSONObject infos = connector.oidcProviderInfos.get(connector.defaultOIDCProvider);
 					OAuth2Definition scheme = new OAuth2Definition();
 					String authUrl = (String) ((JSONObject) infos.get("config")).get("authorization_endpoint");
 					scheme.implicit(authUrl);
-				    scheme.addScope("openid" , "Access Identity");
-				    scheme.addScope("email" , "Access E-Mail-Address");
-				    scheme.addScope("profile" , "Access Profile Data");
+					scheme.addScope("openid", "Access Identity");
+					scheme.addScope("email", "Access E-Mail-Address");
+					scheme.addScope("profile", "Access Profile Data");
 
-				    swagger.addSecurityDefinition("defaultProvider", scheme);
-					
+					swagger.addSecurityDefinition("defaultProvider", scheme);
+
 					// add security requirements to operations
 					List<String> scopes = new ArrayList<String>();
 					scopes.add("openid");
 					scopes.add("email");
 					scopes.add("profile");
-					for(Path path : swagger.getPaths().values()) {
-						for (Operation operation : path.getOperations()) {
-							operation.addSecurity("defaultProvider", scopes);
+					Map<String, Path> paths = swagger.getPaths();
+					if (paths != null) {
+						for (Path path : paths.values()) {
+							for (Operation operation : path.getOperations()) {
+								operation.addSecurity("defaultProvider", scopes);
+							}
 						}
 					}
 				}
-		        
-		        String json = Json.mapper().writeValueAsString(swagger);
+
+				String json = Json.mapper().writeValueAsString(swagger);
 				sendStringResponse(exchange, HttpURLConnection.HTTP_OK, json);
 			}
 		} catch (Exception e) {
