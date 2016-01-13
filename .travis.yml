@@ -3,3 +3,4 @@ jdk:
 #- openjdk7
 - oraclejdk8
 script: "ant all"
+sudo: false
