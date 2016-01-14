@@ -14,6 +14,7 @@ import org.apache.commons.codec.binary.Base64;
 import i5.las2peer.api.Service;
 import i5.las2peer.classLoaders.ClassLoaderException;
 import i5.las2peer.classLoaders.L2pClassLoader;
+import i5.las2peer.classLoaders.LibraryNotFoundException;
 import i5.las2peer.communication.ListMethodsContent;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
@@ -427,12 +428,12 @@ public class ServiceAgent extends PassphraseAgent {
 		try {
 			ClassLoader cl = node.getBaseClassLoader();
 			if (cl instanceof L2pClassLoader) {
-				// System.out.println( "loading via L2pLoader!");
 				clServ = (Class<? extends Service>) ((L2pClassLoader) cl).getServiceClass(sServiceClass);
 			} else if (cl != null) {
 				clServ = (Class<? extends Service>) cl.loadClass(sServiceClass);
-			} else
+			} else {
 				clServ = (Class<? extends Service>) Class.forName(sServiceClass);
+			}
 
 			Constructor<? extends Service> cons = clServ.getConstructor(new Class<?>[0]);
 			serviceInstance = cons.newInstance();
