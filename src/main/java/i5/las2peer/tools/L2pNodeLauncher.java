@@ -696,16 +696,20 @@ public class L2pNodeLauncher {
 	 * 
 	 * @param port local port number to open
 	 * @param bootstrap comma separated list of bootstrap nodes to connect to or "-" for a new network
+	 * @param storageMode A {@link STORAGE_MODE} used by the local node instance for persistency.
 	 * @param monitoringObserver determines, if the monitoring-observer will be started at this node
 	 * @param cl the classloader to be used with this node
 	 */
-	private L2pNodeLauncher(int port, String bootstrap, boolean monitoringObserver, L2pClassLoader cl,
-			Long nodeIdSeed) {
-		if (System.getenv().containsKey("MEM_STORAGE")) {
-			node = new PastryNodeImpl(port, bootstrap, STORAGE_MODE.memory, monitoringObserver, cl, nodeIdSeed);
-		} else {
-			node = new PastryNodeImpl(port, bootstrap, STORAGE_MODE.filesystem, monitoringObserver, cl, nodeIdSeed);
+	private L2pNodeLauncher(int port, String bootstrap, STORAGE_MODE storageMode, boolean monitoringObserver,
+			L2pClassLoader cl, Long nodeIdSeed) {
+		if (storageMode == null) {
+			if (System.getenv().containsKey("MEM_STORAGE")) {
+				storageMode = STORAGE_MODE.memory;
+			} else {
+				storageMode = STORAGE_MODE.filesystem;
+			}
 		}
+		node = new PastryNodeImpl(port, bootstrap, storageMode, monitoringObserver, cl, nodeIdSeed);
 
 		commandPrompt = new CommandPrompt(this);
 	}
@@ -758,10 +762,11 @@ public class L2pNodeLauncher {
 	public static L2pNodeLauncher launchSingle(Iterable<String> args) throws NodeException {
 		Integer port = null;
 		String bootstrap = null;
+		// TODO add command line parameter for storage mode selection
+		STORAGE_MODE storageMode = null;
 		boolean observer = false;
 		String sLogDir = null;
-		ArrayList<String> serviceDirectories = new ArrayList<>();
-		serviceDirectories.add(DEFAULT_SERVICE_DIRECTORY);
+		ArrayList<String> serviceDirectories = null;
 		Long nodeIdSeed = null;
 		List<String> commands = new ArrayList<>();
 		// parse args
@@ -827,6 +832,9 @@ public class L2pNodeLauncher {
 				if (itArg.hasNext() == false) {
 					printWarning("ignored '" + arg + "', because service directory expected after it");
 				} else {
+					if (serviceDirectories == null) {
+						serviceDirectories = new ArrayList<>();
+					}
 					serviceDirectories.add(itArg.next());
 					itArg.remove();
 				}
@@ -842,6 +850,13 @@ public class L2pNodeLauncher {
 			printError("invalid port number specified");
 			return null;
 		}
+		return launchSingle(port, bootstrap, storageMode, observer, sLogDir, serviceDirectories, nodeIdSeed, commands);
+	}
+
+	public static L2pNodeLauncher launchSingle(int port, String bootstrap, STORAGE_MODE storageMode, boolean observer,
+			String sLogDir, Iterable<String> serviceDirectories, Long nodeIdSeed, Iterable<String> commands)
+					throws NodeException {
+		// check parameters
 		if (sLogDir != null) {
 			try {
 				L2pLogger.setGlobalLogDirectory(sLogDir);
@@ -849,11 +864,19 @@ public class L2pNodeLauncher {
 				printWarning("couldn't use '" + sLogDir + "' as log directory." + ex);
 			}
 		}
-		L2pClassLoader cl = new L2pClassLoader(
-				new FileSystemRepository(serviceDirectories.toArray(new String[0]), true),
-				L2pNodeLauncher.class.getClassLoader());
+		if (serviceDirectories == null) {
+			ArrayList<String> directories = new ArrayList<>();
+			directories.add(DEFAULT_SERVICE_DIRECTORY);
+			serviceDirectories = directories;
+		}
+		if (commands == null) {
+			commands = new ArrayList<>();
+		}
 		// instantiate launcher
-		L2pNodeLauncher launcher = new L2pNodeLauncher(port, bootstrap, observer, cl, nodeIdSeed);
+		L2pClassLoader cl = new L2pClassLoader(new FileSystemRepository(serviceDirectories, true),
+				L2pNodeLauncher.class.getClassLoader());
+		L2pNodeLauncher launcher = new L2pNodeLauncher(port, bootstrap, storageMode, observer, cl, nodeIdSeed);
+		// handle commands
 		try {
 			launcher.start();
 
