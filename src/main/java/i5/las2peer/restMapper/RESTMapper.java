@@ -592,10 +592,10 @@ public class RESTMapper {
 
 		// start with creating a value mapping using the provided variables
 		for (Pair<String> variable : variables) {
-			parameterValues.put(variable.getOne(), variable.getTwo());
+			parameterValues.put(variable.getOne().toLowerCase(), variable.getTwo());
 		}
 		for (Pair<String> header : headers) {
-			parameterValues.put(header.getOne(), header.getTwo());
+			parameterValues.put(header.getOne().toLowerCase(), header.getTwo());
 		}
 
 		// begin traversing the tree from one of the http method nodes
@@ -621,7 +621,7 @@ public class RESTMapper {
 					for (String paramName : paramNames) {
 						// the uri split is still URL encoded, so first decode
 						String uriValue = java.net.URLDecoder.decode(anUriSplit, "UTF-8");
-						parameterValues.put(paramName, uriValue); // map the value provided in the URI path to the
+						parameterValues.put(paramName.toLowerCase(), uriValue); // map the value provided in the URI path to the
 																	// stored parameter names
 					}
 
@@ -717,9 +717,9 @@ public class RESTMapper {
 					values[j] = (Serializable) RESTMapper.castToType(RESTMapper.mergeHeaders(headers), param.getType());
 					types[j] = param.getType();
 				} else {
-					if (param.getName() != null && parameterValues.containsKey(param.getName())) {
+					if (param.getName() != null && parameterValues.containsKey(param.getName().toLowerCase())) {
 						// if parameter has a name (given by an annotation) and a value given
-						values[j] = (Serializable) RESTMapper.castToType(parameterValues.get(param.getName()),
+						values[j] = (Serializable) RESTMapper.castToType(parameterValues.get(param.getName().toLowerCase()),
 								param.getType()); // use the created value mapping to assign a value
 						types[j] = param.getType();
 					} else if (param.hasDefaultValue()) { // if no name, then look for default value
