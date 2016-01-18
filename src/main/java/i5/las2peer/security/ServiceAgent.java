@@ -401,17 +401,18 @@ public class ServiceAgent extends PassphraseAgent {
 				timerIntervalSeconds * 1000); // run every x seconds
 	}
 
-	private void executeTimer(Node finalNode, ServiceInfoAgent finalAgent) {
+	private void executeTimer(Node finalNode, ServiceInfoAgent finalAgent) {		
 		try {
-			// TODO this is executed 3 times? even on successful registration?
 			finalAgent.serviceAdded(this, finalNode);
+			stopTimer(); // stop timer on success
+		} catch (Exception e) {
+			// limit to 3 attempts
 			timerRunTimes++;
 			if (timerRunning && timerRunTimes > TIMER_RUN_TIMES_MAX) {
+				// finally failed
 				stopTimer();
+				// TODO error handling
 			}
-		} catch (Exception e) {
-			// do nothing for now
-			// TODO error handling
 		}
 	}
 
