@@ -762,7 +762,6 @@ public class L2pNodeLauncher {
 	public static L2pNodeLauncher launchSingle(Iterable<String> args) throws NodeException {
 		Integer port = null;
 		String bootstrap = null;
-		// TODO add command line parameter for storage mode selection
 		STORAGE_MODE storageMode = null;
 		boolean observer = false;
 		String sLogDir = null;
@@ -836,6 +835,20 @@ public class L2pNodeLauncher {
 						serviceDirectories = new ArrayList<>();
 					}
 					serviceDirectories.add(itArg.next());
+					itArg.remove();
+				}
+			} else if (larg.equals("-m") == true || larg.equals("--storage-mode") == true) {
+				if (itArg.hasNext() == false) {
+					printWarning("ignored '" + arg + "', because storage mode expected after it");
+				} else {
+					String val = itArg.next();
+					if (val.equals("memory")) {
+						storageMode = STORAGE_MODE.memory;
+					} else if (val.equals("filesystem")) {
+						storageMode = STORAGE_MODE.filesystem;
+					} else {
+						printWarning("ignored '" + arg + "', because storage mode expected after it");
+					}
 					itArg.remove();
 				}
 			} else {
@@ -935,6 +948,8 @@ public class L2pNodeLauncher {
 		System.out.println("\t--observer|-o starts a monitoring observer at this node\n");
 		System.out.println(
 				"\t--node-id-seed|-n [long] generates the node id by using this seed to provide persistence\n");
+		System.out.println(
+				"\t--storage-mode|-m filesystem|memory sets Pastry's storage mode, defaults to filesystem\n");
 
 		System.out.println("The following methods can be used in arbitrary order and number:");
 
