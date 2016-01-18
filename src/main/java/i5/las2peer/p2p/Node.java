@@ -1352,7 +1352,7 @@ public abstract class Node implements AgentStorage {
 					// remove so unavailable nodes will not be tried again
 					// TODO versions of services
 					nodeServiceCache.removeEntryNode(serviceClass, "1.0", targetNode);
-					resultMessage = sendMessageAndWaitForAnswer(rmiMessage);
+					resultMessage = sendMessageAndWaitForAnswer(rmiMessage); // TODO why anycast and not try another node?!?
 				}
 			} else {
 				resultMessage = sendMessageAndWaitForAnswer(rmiMessage);
