@@ -1,5 +1,9 @@
 package i5.las2peer.persistency;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectStreamClass;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
@@ -752,7 +756,7 @@ public final class Envelope implements XmlAble, Cloneable {
 	public Long[] getReaderGroups() {
 		return htEncryptedGroupKeys.keySet().toArray(new Long[0]);
 	}
-	
+
 	/**
 	 * get a list with all agents that signed the Envelope
 	 * 
@@ -780,19 +784,52 @@ public final class Envelope implements XmlAble, Cloneable {
 	}
 
 	/**
-	 * for better accessibility of typed content
+	 * @deprecated Use {@link #getContent(ClassLoader, Class)} instead!
 	 * 
 	 * @param cls
 	 * @return the typed content of this envelope
 	 * @throws EnvelopeException
 	 */
-	@SuppressWarnings("unchecked")
+	@Deprecated
 	public <T extends Serializable> T getContent(Class<T> cls) throws EnvelopeException {
 		try {
 			if (contentStorage == null)
 				contentStorage = getContentAsSerializable();
 
-			return (T) contentStorage;
+			return cls.cast(contentStorage);
+		} catch (ClassCastException e) {
+			throw new EnvelopeException("content is not of class " + cls, e);
+		}
+	}
+
+	/**
+	 * for better accessibility of typed content
+	 * 
+	 * @param cls
+	 * @param classLoader
+	 * @return the typed content of this envelope
+	 * @throws EnvelopeException
+	 */
+	public <T extends Serializable> T getContent(ClassLoader classLoader, Class<T> cls) throws EnvelopeException {
+		if (contentStorage == null) {
+			byte[] bytes = getContentAsBinary();
+			ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+			try {
+				ObjectInputStream ois = new ObjectInputStream(bais) {
+					@Override
+					protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
+						return Class.forName(desc.getName(), false, classLoader);
+					}
+				};
+				contentStorage = (Serializable) ois.readObject();
+			} catch (IOException e) {
+				throw new EnvelopeException("IO problems", e);
+			} catch (ClassNotFoundException e) {
+				throw new EnvelopeException("Class not found ?!?!", e);
+			}
+		}
+		try {
+			return cls.cast(contentStorage);
 		} catch (ClassCastException e) {
 			throw new EnvelopeException("content is not of class " + cls, e);
 		}
@@ -934,17 +971,22 @@ public final class Envelope implements XmlAble, Cloneable {
 				throw new MalformedXMLException("base 64 encoding of the content expected");
 
 			result.contentType = stringToType(content.getAttribute("type"));
-			if (content.hasAttribute("class"))
-				try {
-					String classname = content.getAttribute("class");
-					if (classname.endsWith("[]"))
-						classname = classname.substring(0, classname.length() - 2);
-
-					result.clContentClass = Class.forName(classname);
-
-				} catch (ClassNotFoundException e) {
-					throw new MalformedXMLException("content class " + content.getAttribute("class") + " not found!");
-				}
+//			if (content.hasAttribute("class"))
+//				try {
+//					String classname = content.getAttribute("class");
+//					if (classname.endsWith("[]"))
+//						classname = classname.substring(0, classname.length() - 2);
+//
+//					// FIXME WIP
+//					// It's not possible to get the class at this point,
+//					// because this is not executed in a LAS2peer context
+//					// and therefore no version information or library context
+//					// is given
+//					result.clContentClass = Class.forName(classname);
+//
+//				} catch (ClassNotFoundException e) {
+//					throw new MalformedXMLException("content class " + content.getAttribute("class") + " not found!");
+//				}
 
 			result.baCipherData = Base64.decodeBase64(content.getFirstChild().getText());
 
