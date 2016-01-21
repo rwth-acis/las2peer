@@ -528,6 +528,10 @@ public class PastryNodeImpl extends Node {
 			observerNotice(Event.ARTIFACT_RECEIVED, pastryNode, Long.toString(id));
 
 			return contentFromNet;
+		} catch (ArtifactNotFoundException e) {
+			observerNotice(Event.ARTIFACT_FETCH_FAILED, pastryNode, Long.toString(id));
+			// transparent exception forwarding
+			throw e;
 		} catch (Exception e) {
 			observerNotice(Event.ARTIFACT_FETCH_FAILED, pastryNode, Long.toString(id));
 			throw new StorageException("Unable to retrieve Artifact from past storage", e);
