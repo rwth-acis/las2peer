@@ -372,39 +372,42 @@ public class L2pClassLoader extends ClassLoader {
 	 * @return class definition of the requested service
 	 * 
 	 * @throws ClassLoaderException
-	 * @throws ClassNotFoundException
 	 */
-	public Class<?> getServiceClass(String serviceClassName) throws ClassLoaderException, ClassNotFoundException {
+	public Class<?> getServiceClass(String serviceClassName) throws ClassLoaderException {
 		String sPackage = getPackageName(serviceClassName);
 
+		Hashtable<LibraryVersion, BundleClassLoader> htVersions = registeredLoaders.get(sPackage);
 		try {
-			Hashtable<LibraryVersion, BundleClassLoader> htVersions = registeredLoaders.get(sPackage);
 			if (htVersions == null || htVersions.size() == 0) {
-				registerService(serviceClassName); // may throw a LibraryNotFoundException
+				registerService(serviceClassName);
 				htVersions = registeredLoaders.get(sPackage);
-			}
-
-			LibraryVersion version = null;
-			for (Enumeration<LibraryVersion> en = htVersions.keys(); en.hasMoreElements();) {
-				LibraryVersion v = en.nextElement();
-				if (version == null || v.isLargerThan(version))
-					version = v;
-			}
-
-			BundleClassLoader bcl = htVersions.get(version);
-
-			try {
-				return bcl.loadClass(serviceClassName);
-			} catch (ClassNotFoundException e) {
-				throw new LibraryNotFoundException(
-						"The library for " + serviceClassName + " could be loaded, but the class is not available!", e);
 			}
 		} catch (LibraryNotFoundException e) {
 			// class could not be found in any registered library, try default classpath
 			// this is usually the case when executed within an IDE
 			System.err.println("No library found for " + serviceClassName
-					+ "! Trying default classpath! This should not happen in a productive environment.");
-			return this.getClass().getClassLoader().loadClass(serviceClassName);
+					+ "! Trying default classpath. This should not happen in a productive environment!");
+			try {
+				return this.getClass().getClassLoader().loadClass(serviceClassName);
+			} catch (ClassNotFoundException e2) {
+				throw new LibraryNotFoundException(e2);
+			}
+		}
+
+		LibraryVersion version = null;
+		for (Enumeration<LibraryVersion> en = htVersions.keys(); en.hasMoreElements();) {
+			LibraryVersion v = en.nextElement();
+			if (version == null || v.isLargerThan(version))
+				version = v;
+		}
+
+		BundleClassLoader bcl = htVersions.get(version);
+
+		try {
+			return bcl.loadClass(serviceClassName);
+		} catch (ClassNotFoundException e) {
+			throw new LibraryNotFoundException(
+					"The library for " + serviceClassName + " could be loaded, but the class is not available!", e);
 		}
 	}
 
@@ -424,9 +427,21 @@ public class L2pClassLoader extends ClassLoader {
 		String sPackage = getPackageName(serviceClassName);
 
 		Hashtable<LibraryVersion, BundleClassLoader> htVersions = registeredLoaders.get(sPackage);
-		if (htVersions == null || htVersions.get(version) == null) {
-			registerService(serviceClassName, version);
-			htVersions = registeredLoaders.get(sPackage);
+		try {
+			if (htVersions == null || htVersions.get(version) == null) {
+				registerService(serviceClassName, version);
+				htVersions = registeredLoaders.get(sPackage);
+			}
+		} catch (LibraryNotFoundException e) {
+			// class could not be found in any registered library, try default classpath
+			// this is usually the case when executed within an IDE
+			System.err.println("No library found for " + serviceClassName
+					+ "! Trying default classpath. This should not happen in a productive environment!");
+			try {
+				return this.getClass().getClassLoader().loadClass(serviceClassName);
+			} catch (ClassNotFoundException e2) {
+				throw new LibraryNotFoundException(e2);
+			}
 		}
 
 		BundleClassLoader bcl = htVersions.get(version);
