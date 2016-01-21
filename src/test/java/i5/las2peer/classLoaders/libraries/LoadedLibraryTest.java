@@ -1,7 +1,7 @@
 package i5.las2peer.classLoaders.libraries;
 
-import static org.junit.Assert.*;
-import i5.las2peer.classLoaders.libraries.LoadedLibrary;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import org.junit.Test;
 

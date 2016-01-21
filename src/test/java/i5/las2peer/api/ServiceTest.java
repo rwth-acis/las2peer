@@ -1,14 +1,15 @@
 package i5.las2peer.api;
 
-import static org.junit.Assert.*;
-
-import i5.las2peer.execution.NoSuchServiceMethodException;
-import i5.las2peer.security.L2pSecurityException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Hashtable;
 
 import org.junit.Test;
+
+import i5.las2peer.execution.NoSuchServiceMethodException;
+import i5.las2peer.security.L2pSecurityException;
 
 public class ServiceTest {
 

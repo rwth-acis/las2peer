@@ -1,5 +1,11 @@
 package i5.las2peer.p2p;
 
+import java.io.IOException;
+import java.io.Serializable;
+import java.security.PublicKey;
+import java.util.Enumeration;
+import java.util.Vector;
+
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.persistency.XmlAble;
 import i5.las2peer.security.L2pSecurityException;
@@ -12,12 +18,6 @@ import i5.las2peer.tools.SerializeTools;
 import i5.simpleXML.Element;
 import i5.simpleXML.Parser;
 import i5.simpleXML.XMLSyntaxException;
-
-import java.io.IOException;
-import java.io.Serializable;
-import java.security.PublicKey;
-import java.util.Enumeration;
-import java.util.Vector;
 
 /**
  * A NodeInformation gives basic information about a node.

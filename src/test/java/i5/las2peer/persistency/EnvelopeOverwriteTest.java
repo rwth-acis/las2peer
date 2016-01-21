@@ -2,6 +2,13 @@ package i5.las2peer.persistency;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+
+import org.junit.Before;
+import org.junit.Test;
+
 import i5.las2peer.p2p.ArtifactNotFoundException;
 import i5.las2peer.p2p.LocalNode;
 import i5.las2peer.p2p.StorageException;
@@ -11,12 +18,6 @@ import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.UserAgent;
 import i5.las2peer.testing.MockAgentFactory;
 import i5.las2peer.tools.SerializationException;
-
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-
-import org.junit.Before;
-import org.junit.Test;
 
 public class EnvelopeOverwriteTest {
 

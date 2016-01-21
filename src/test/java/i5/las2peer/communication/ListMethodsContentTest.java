@@ -1,10 +1,11 @@
 package i5.las2peer.communication;
 
-import static org.junit.Assert.*;
-import i5.las2peer.tools.SerializationException;
-import i5.las2peer.tools.SerializeTools;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
+
+import i5.las2peer.tools.SerializationException;
+import i5.las2peer.tools.SerializeTools;
 
 public class ListMethodsContentTest {
 

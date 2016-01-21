@@ -1,13 +1,6 @@
 package i5.las2peer.p2p;
 
 import static org.junit.Assert.assertEquals;
-import i5.las2peer.persistency.MalformedXMLException;
-import i5.las2peer.security.AgentException;
-import i5.las2peer.security.L2pSecurityException;
-import i5.las2peer.security.ServiceAgent;
-import i5.las2peer.security.UserAgent;
-import i5.las2peer.testing.MockAgentFactory;
-import i5.las2peer.tools.CryptoException;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -16,6 +9,14 @@ import java.lang.reflect.InvocationTargetException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import i5.las2peer.persistency.MalformedXMLException;
+import i5.las2peer.security.AgentException;
+import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.security.ServiceAgent;
+import i5.las2peer.security.UserAgent;
+import i5.las2peer.testing.MockAgentFactory;
+import i5.las2peer.tools.CryptoException;
 
 public class LocalNodeInvocationTest {
 

@@ -1,13 +1,14 @@
 package i5.las2peer.classLoaders;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import i5.las2peer.classLoaders.libraries.FileSystemRepository;
-
 import org.junit.Test;
+
+import i5.las2peer.classLoaders.libraries.FileSystemRepository;
 
 public class L2pClassLoaderTest {
 

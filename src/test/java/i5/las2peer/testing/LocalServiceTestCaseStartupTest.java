@@ -1,12 +1,12 @@
 package i5.las2peer.testing;
 
-import i5.las2peer.api.Service;
-import i5.las2peer.p2p.AgentNotKnownException;
-import i5.las2peer.persistency.MalformedXMLException;
-
 import java.io.IOException;
 
 import org.junit.Test;
+
+import i5.las2peer.api.Service;
+import i5.las2peer.p2p.AgentNotKnownException;
+import i5.las2peer.persistency.MalformedXMLException;
 
 public class LocalServiceTestCaseStartupTest extends LocalServiceTestCase {
 

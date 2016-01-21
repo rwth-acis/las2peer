@@ -1,8 +1,8 @@
 package i5.las2peer.logging.monitoring;
 
-import i5.las2peer.logging.NodeObserver.Event;
-
 import java.io.Serializable;
+
+import i5.las2peer.logging.NodeObserver.Event;
 
 /**
  * 

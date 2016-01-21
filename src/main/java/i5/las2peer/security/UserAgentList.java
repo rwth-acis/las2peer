@@ -1,9 +1,9 @@
 package i5.las2peer.security;
 
-import i5.las2peer.p2p.AgentNotKnownException;
-
 import java.io.Serializable;
 import java.util.Hashtable;
+
+import i5.las2peer.p2p.AgentNotKnownException;
 
 /**
  * 

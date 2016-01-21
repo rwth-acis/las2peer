@@ -1,16 +1,17 @@
 package i5.las2peer.p2p.pastry;
 
 import static org.junit.Assert.assertEquals;
+
+import java.security.NoSuchAlgorithmException;
+
+import org.junit.Test;
+
 import i5.las2peer.security.Agent;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.UserAgent;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.SerializationException;
 import i5.las2peer.tools.SerializeTools;
-
-import java.security.NoSuchAlgorithmException;
-
-import org.junit.Test;
 
 public class ContentEnvelopeTest {
 

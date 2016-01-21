@@ -1,10 +1,14 @@
 package i5.las2peer.security;
 
-import static org.junit.Assert.*;
-import i5.las2peer.persistency.MalformedXMLException;
-import i5.las2peer.tools.CryptoException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.junit.Test;
+
+import i5.las2peer.persistency.MalformedXMLException;
+import i5.las2peer.tools.CryptoException;
 
 public class ServiceAgentTest {
 	private static final String servicename = "i5.las2peer.somePackage.AService";

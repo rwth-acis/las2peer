@@ -1,5 +1,12 @@
 package i5.las2peer.security;
 
+import java.io.Serializable;
+import java.security.KeyPair;
+import java.security.PublicKey;
+import java.util.Random;
+
+import org.apache.commons.codec.binary.Base64;
+
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
 import i5.las2peer.execution.L2pServiceException;
@@ -14,13 +21,6 @@ import i5.las2peer.tools.SerializeTools;
 import i5.simpleXML.Element;
 import i5.simpleXML.Parser;
 import i5.simpleXML.XMLSyntaxException;
-
-import java.io.Serializable;
-import java.security.KeyPair;
-import java.security.PublicKey;
-import java.util.Random;
-
-import org.apache.commons.codec.binary.Base64;
 
 /**
  * 

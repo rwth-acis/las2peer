@@ -14,7 +14,6 @@ import org.apache.commons.codec.binary.Base64;
 import i5.las2peer.api.Service;
 import i5.las2peer.classLoaders.ClassLoaderException;
 import i5.las2peer.classLoaders.L2pClassLoader;
-import i5.las2peer.classLoaders.LibraryNotFoundException;
 import i5.las2peer.communication.ListMethodsContent;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;

@@ -1,10 +1,12 @@
 package i5.las2peer.p2p;
 
-import static org.junit.Assert.*;
-import i5.las2peer.persistency.MalformedXMLException;
-import i5.simpleXML.XMLSyntaxException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
+
+import i5.las2peer.persistency.MalformedXMLException;
+import i5.simpleXML.XMLSyntaxException;
 
 public class NodeInformationTest {
 

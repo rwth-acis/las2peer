@@ -1,13 +1,12 @@
 package i5.las2peer.p2p;
 
-import i5.las2peer.persistency.EnvelopeException;
-import i5.las2peer.security.ServiceAgent;
-import i5.las2peer.security.ServiceInfoAgent;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
+import i5.las2peer.persistency.EnvelopeException;
+import i5.las2peer.security.ServiceAgent;
+import i5.las2peer.security.ServiceInfoAgent;
 import rice.pastry.NodeHandle;
 
 /**

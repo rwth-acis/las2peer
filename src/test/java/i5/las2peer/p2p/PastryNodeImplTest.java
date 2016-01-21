@@ -1,6 +1,6 @@
 package i5.las2peer.p2p;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
 
 import org.junit.Test;
 

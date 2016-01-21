@@ -7,6 +7,16 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
+import java.util.HashSet;
+import java.util.Random;
+
+import org.junit.Before;
+import org.junit.Test;
+
 import i5.las2peer.security.Agent;
 import i5.las2peer.security.GroupAgent;
 import i5.las2peer.security.L2pSecurityException;
@@ -18,15 +28,6 @@ import i5.las2peer.tools.SimpleTools;
 import i5.simpleXML.Element;
 import i5.simpleXML.Parser;
 import i5.simpleXML.XMLSyntaxException;
-
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
-import java.util.HashSet;
-import java.util.Random;
-
-import org.junit.Before;
-import org.junit.Test;
 
 public class EnvelopeTest {
 

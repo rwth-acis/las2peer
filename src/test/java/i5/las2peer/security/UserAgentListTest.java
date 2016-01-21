@@ -1,10 +1,12 @@
 package i5.las2peer.security;
 
-import static org.junit.Assert.*;
-import i5.las2peer.p2p.AgentNotKnownException;
-import i5.las2peer.tools.CryptoException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import org.junit.Test;
+
+import i5.las2peer.p2p.AgentNotKnownException;
+import i5.las2peer.tools.CryptoException;
 
 public class UserAgentListTest {
 

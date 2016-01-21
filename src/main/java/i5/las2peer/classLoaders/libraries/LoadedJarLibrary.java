@@ -1,8 +1,5 @@
 package i5.las2peer.classLoaders.libraries;
 
-import i5.las2peer.classLoaders.helpers.LibraryDependency;
-import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -10,6 +7,9 @@ import java.net.URL;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+
+import i5.las2peer.classLoaders.helpers.LibraryDependency;
+import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
 
 /**
  * a loaded jar library implements a library on the basis of a standard jar file

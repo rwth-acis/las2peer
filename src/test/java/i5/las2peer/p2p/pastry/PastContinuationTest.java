@@ -6,16 +6,17 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import java.io.IOException;
+
+import org.junit.Test;
+
 import i5.las2peer.persistency.Envelope;
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.security.Agent;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.UserAgent;
 import i5.las2peer.testing.MockAgentFactory;
-
-import java.io.IOException;
-
-import org.junit.Test;
 
 public class PastContinuationTest {
 

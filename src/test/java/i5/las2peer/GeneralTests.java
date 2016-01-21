@@ -1,13 +1,12 @@
 package i5.las2peer;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
 import rice.environment.Environment;
 import rice.p2p.commonapi.Id;
 import rice.p2p.commonapi.IdFactory;
-
 import rice.pastry.commonapi.PastryIdFactory;
 
 public class GeneralTests {

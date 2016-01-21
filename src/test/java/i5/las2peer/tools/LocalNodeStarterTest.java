@@ -1,6 +1,6 @@
 package i5.las2peer.tools;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 

@@ -7,7 +7,6 @@ import java.lang.reflect.Modifier;
 
 import i5.las2peer.execution.L2pServiceException;
 import i5.las2peer.execution.L2pThread;
-import i5.las2peer.execution.NoSuchServiceException;
 import i5.las2peer.execution.NoSuchServiceMethodException;
 import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.p2p.AgentNotKnownException;

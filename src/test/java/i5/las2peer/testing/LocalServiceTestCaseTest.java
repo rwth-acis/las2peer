@@ -5,12 +5,12 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
+import org.junit.Test;
+
 import i5.las2peer.api.Service;
 import i5.las2peer.execution.NoSuchServiceException;
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.security.Agent;
-
-import org.junit.Test;
 
 public class LocalServiceTestCaseTest extends LocalServiceTestCase {
 

@@ -1,14 +1,14 @@
 package i5.las2peer.classLoaders.libraries;
 
-import i5.las2peer.classLoaders.helpers.LibraryDependency;
-import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.util.HashSet;
+
+import i5.las2peer.classLoaders.helpers.LibraryDependency;
+import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
 
 /**
  * a loaded library represents a library in the l2p classloader context

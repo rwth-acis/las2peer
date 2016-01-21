@@ -1,17 +1,17 @@
 package i5.las2peer.testing;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.security.NoSuchAlgorithmException;
+
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.security.GroupAgent;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.ServiceAgent;
 import i5.las2peer.security.UserAgent;
 import i5.las2peer.tools.CryptoException;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.security.NoSuchAlgorithmException;
 
 /**
  * Simple Factory class to load Agents from the nested XML files.

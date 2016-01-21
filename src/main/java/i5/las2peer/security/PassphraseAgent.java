@@ -1,12 +1,12 @@
 package i5.las2peer.security;
 
-import i5.las2peer.tools.CryptoException;
-import i5.las2peer.tools.CryptoTools;
-
 import java.security.KeyPair;
 import java.security.PublicKey;
 
 import javax.crypto.SecretKey;
+
+import i5.las2peer.tools.CryptoException;
+import i5.las2peer.tools.CryptoTools;
 
 /**
  * Base class for pass phrase protected agents.

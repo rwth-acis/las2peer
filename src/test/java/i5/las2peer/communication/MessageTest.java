@@ -7,6 +7,14 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.security.NoSuchAlgorithmException;
+import java.util.Date;
+
+import org.junit.Test;
+
 import i5.las2peer.execution.RMITask;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.persistency.EncodingFailedException;
@@ -19,13 +27,6 @@ import i5.las2peer.testing.MockAgentFactory;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.SerializationException;
 import i5.las2peer.tools.XmlTools;
-
-import java.io.IOException;
-import java.io.Serializable;
-import java.security.NoSuchAlgorithmException;
-import java.util.Date;
-
-import org.junit.Test;
 
 public class MessageTest {
 

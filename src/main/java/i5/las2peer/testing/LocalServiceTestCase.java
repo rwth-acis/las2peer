@@ -1,5 +1,13 @@
 package i5.las2peer.testing;
 
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.InputStream;
+import java.io.Serializable;
+
+import org.junit.After;
+import org.junit.Before;
+
 import i5.las2peer.api.Service;
 import i5.las2peer.execution.L2pServiceException;
 import i5.las2peer.execution.NoSuchServiceException;
@@ -13,14 +21,6 @@ import i5.las2peer.security.ServiceAgent;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.FileContentReader;
 import i5.las2peer.tools.SimpleTools;
-
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.InputStream;
-import java.io.Serializable;
-
-import org.junit.After;
-import org.junit.Before;
 
 /**
  * Helper class to implement JUnit-Test for services to be published in a LAS2peer environment.
