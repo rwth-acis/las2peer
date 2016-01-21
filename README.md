@@ -1,8 +1,11 @@
 ![LAS2peer](https://github.com/rwth-acis/LAS2peer/blob/master/img/logo/bitmap/las2peer-logo-128x128.png)
+
 LAS2peer-RESTMapper
 ======================
 
-[![Build Status](http://layers.dbis.rwth-aachen.de/jenkins/buildStatus/icon?job=las2peer REST Mapper)](http://layers.dbis.rwth-aachen.de/jenkins/job/las2peer%20REST%20Mapper/)
+Jenkins: [![Build Status](http://layers.dbis.rwth-aachen.de/jenkins/buildStatus/icon?job=las2peer REST Mapper)](http://layers.dbis.rwth-aachen.de/jenkins/job/las2peer%20REST%20Mapper/)
+
+Travis CI: [![Build Status](https://travis-ci.org/rwth-acis/LAS2peer-RESTMapper.svg?branch=master)](https://travis-ci.org/rwth-acis/LAS2peer-RESTMapper)
 
 Maps HTTP methods and URI patterns to service methods.
 
