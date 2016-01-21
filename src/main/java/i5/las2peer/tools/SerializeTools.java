@@ -32,7 +32,6 @@ public class SerializeTools {
 			ObjectOutputStream oos = new ObjectOutputStream(baos);
 			oos.writeObject(s);
 			oos.close();
-
 			return baos.toByteArray();
 		} catch (IOException e) {
 			throw new SerializationException("IO Exception!", e);
@@ -60,9 +59,7 @@ public class SerializeTools {
 	public static Serializable deserialize(byte[] bytes) throws SerializationException {
 		try {
 			ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-			ObjectInputStream ois;
-			ois = new ObjectInputStream(bais);
-
+			ObjectInputStream ois = new ObjectInputStream(bais);
 			return (Serializable) ois.readObject();
 		} catch (IOException e) {
 			throw new SerializationException("IO problems", e);
