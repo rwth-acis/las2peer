@@ -84,11 +84,11 @@ public abstract class LocalServiceTestCase {
 				agent = ServiceAgent.createFromXml(FileContentReader.read(getClass().getResourceAsStream(xml)));
 			}
 
-			if (agent.getServiceClassName().equals(getServiceClass().getName()))
+			if (agent.getServiceNameVersion().getName().equals(getServiceClass().getName()))
 				return agent;
 			else
 				throw new AgentException("This agent is not responsible for the testclass " + getServiceClass()
-						+ " but for " + agent.getServiceClassName());
+						+ " but for " + agent.getServiceNameVersion().getName());
 		} catch (NoSuchFieldException e) {
 			agentPassphrase = SimpleTools.createRandomString(10);
 			return ServiceAgent.createServiceAgent(getServiceClass().getName(), agentPassphrase);
@@ -165,7 +165,7 @@ public abstract class LocalServiceTestCase {
 	 * @return the running instance of the Service to test
 	 * @throws NoSuchServiceException
 	 */
-	protected Service getServiceInstance() throws NoSuchServiceException {
+	protected Service getServiceInstance() throws NoSuchServiceException { // TODO CHANGE use version!
 		return localNode.getLocalServiceInstance(getServiceClass());
 	}
 

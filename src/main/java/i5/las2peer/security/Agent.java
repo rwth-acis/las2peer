@@ -272,7 +272,7 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	public void notifyRegistrationTo(Node n) throws AgentException {
 		if (this instanceof ServiceAgent)
 			n.observerNotice(Event.SERVICE_STARTUP, n.getNodeId(), this,
-					"" + ((ServiceAgent) this).getServiceClassName());
+					"" + ((ServiceAgent) this).getServiceNameVersion());
 		runningAt = n;
 	}
 

@@ -134,6 +134,16 @@ public class ServiceInfoAgent extends PassphraseAgent {
 	public static ServiceNameVersion[] getServices() throws EnvelopeException {
 		return ((ServiceList) getEnvelopeData(SERVICE_LIST_ENVELOPE_NAME, ServiceList.class)).getServices();
 	}
+	
+	/**
+	 * Returns an array of currently registered service versions
+	 * 
+	 * @return an array of {@link i5.las2peer.p2p.ServiceNameVersion}s
+	 * @throws EnvelopeException
+	 */
+	public static String[] getServiceVersions(String serviceName) throws EnvelopeException {
+		return ((ServiceList) getEnvelopeData(SERVICE_LIST_ENVELOPE_NAME, ServiceList.class)).getVersions(serviceName);
+	}
 
 	/**
 	 * Reads {@link i5.las2peer.p2p.ServiceList} from the Envelope
@@ -270,8 +280,7 @@ public class ServiceInfoAgent extends PassphraseAgent {
 	// TODO "synchronized" is a workaroud for LAS-217
 	synchronized public void serviceAdded(ServiceAgent serviceAgent, Node node)
 			throws EnvelopeException, AgentException, L2pSecurityException {
-		// TODO versions of services
-		ServiceNameVersion servicenameVersion = new ServiceNameVersion(serviceAgent.getServiceClassName(), "1.0");
+		ServiceNameVersion servicenameVersion = serviceAgent.getServiceNameVersion();
 		ServiceList data = (ServiceList) getEnvelopeData(SERVICE_LIST_ENVELOPE_NAME, ServiceList.class);
 		data.addService(servicenameVersion);
 		setEnvelopeData(SERVICE_LIST_ENVELOPE_NAME, ServiceList.class, data, node);
@@ -306,7 +315,7 @@ public class ServiceInfoAgent extends PassphraseAgent {
 	// TODO "synchronized" is a workaroud for LAS-217
 	synchronized public void serviceRemoved(ServiceAgent serviceAgent, Node node)
 			throws EnvelopeException, AgentException, L2pSecurityException {
-		ServiceNameVersion servicenameVersion = new ServiceNameVersion(serviceAgent.getServiceClassName(), "1.0");
+		ServiceNameVersion servicenameVersion = serviceAgent.getServiceNameVersion();
 
 		String nodeEnvelope = SERVICE_NODE_LIST_PREFIX + servicenameVersion.getNameVersion();
 		ServiceNodeList nodesData = (ServiceNodeList) getEnvelopeData(nodeEnvelope, ServiceNodeList.class);

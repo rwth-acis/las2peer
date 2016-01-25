@@ -1,5 +1,7 @@
 package i5.las2peer.execution;
 
+import i5.las2peer.p2p.ServiceNameVersion;
+
 import java.io.Serializable;
 
 /**
@@ -19,7 +21,7 @@ public class RMITask implements Serializable {
 
 	private String methodName;
 
-	private String serviceName;
+	private ServiceNameVersion service;
 
 	/**
 	 * create a new invocation task
@@ -28,14 +30,14 @@ public class RMITask implements Serializable {
 	 * @param methodName
 	 * @param parameters
 	 */
-	public RMITask(String serviceName, String methodName, Serializable[] parameters) {
-		this.serviceName = serviceName;
+	public RMITask(ServiceNameVersion service, String methodName, Serializable[] parameters) {
+		this.service = service;
 		this.methodName = methodName;
 		this.parameters = parameters.clone();
 	}
 
-	public String getServiceName() {
-		return serviceName;
+	public ServiceNameVersion getServiceNameVersion() {
+		return service;
 	}
 
 	public String getMethodName() {

@@ -32,7 +32,7 @@ public class NodeInformation implements XmlAble {
 	private String adminEmail = null;
 	private String description = "A standard Las2Peer node -- no further information is provided.";
 
-	private String[] hostedServices = new String[0];
+	private ServiceNameVersion[] hostedServices = new ServiceNameVersion[0];
 
 	private PublicKey nodeKey;
 	private Serializable nodeHandle;
@@ -97,7 +97,7 @@ public class NodeInformation implements XmlAble {
 	 * 
 	 * @return array with service class names
 	 */
-	public String[] getHostedServices() {
+	public ServiceNameVersion[] getHostedServices() {
 		return hostedServices.clone();
 	}
 
@@ -107,10 +107,10 @@ public class NodeInformation implements XmlAble {
 	 * @param serviceAgents
 	 */
 	void setServices(ServiceAgent[] serviceAgents) {
-		hostedServices = new String[serviceAgents.length];
+		hostedServices = new ServiceNameVersion[serviceAgents.length];
 
-		for (int lauf = 0; lauf < hostedServices.length; lauf++) {
-			hostedServices[lauf] = serviceAgents[lauf].getServiceClassName();
+		for (int i = 0; i < hostedServices.length; i++) {
+			hostedServices[i] = serviceAgents[i].getServiceNameVersion();
 		}
 	}
 
@@ -216,8 +216,8 @@ public class NodeInformation implements XmlAble {
 		if (hostedServices != null && hostedServices.length > 0) {
 			result.append("\t<services>\n");
 
-			for (String service : hostedServices)
-				result.append("\t\t<serviceClass>").append(service).append("</serviceClass>\n");
+			for (ServiceNameVersion service : hostedServices)
+				result.append("\t\t<serviceClass>").append(service.toString()).append("</serviceClass>\n");
 
 			result.append("\t</services>\n");
 		}
@@ -337,7 +337,7 @@ public class NodeInformation implements XmlAble {
 						serviceClasses.add(service.getFirstChild().getText());
 					}
 
-					result.hostedServices = serviceClasses.toArray(new String[0]);
+					result.hostedServices = serviceClasses.toArray(new ServiceNameVersion[0]);
 				} else
 					throw new MalformedXMLException("unknown xml element: " + child.getName());
 

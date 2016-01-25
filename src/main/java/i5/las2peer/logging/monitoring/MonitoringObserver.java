@@ -1,6 +1,7 @@
 package i5.las2peer.logging.monitoring;
 
 import i5.las2peer.communication.Message;
+import i5.las2peer.execution.L2pServiceException;
 import i5.las2peer.execution.ServiceInvocationException;
 import i5.las2peer.execution.UnlockNeededException;
 import i5.las2peer.logging.NodeObserver;
@@ -88,7 +89,7 @@ public class MonitoringObserver implements NodeObserver {
 		try {
 			System.out.println("Monitoring: Trying to invoke Processing Service..");
 			String[] testParameters = { "Node " + registeredAt.getNodeId() + " registered observer!" };
-			long receivingAgentId = (Long) registeredAt.invokeGlobally(sendingAgent,
+			long receivingAgentId = (Long) registeredAt.invoke(sendingAgent,
 					"i5.las2peer.services.monitoring.processing.MonitoringDataProcessingService", "getReceivingAgentId",
 					testParameters);
 			try {
@@ -114,6 +115,14 @@ public class MonitoringObserver implements NodeObserver {
 			e.printStackTrace();
 			return false;
 		} catch (ServiceInvocationException e) {
+			System.out.println("Monitoring: Processing Service does not seem available! " + e);
+			e.printStackTrace();
+			return false;
+		} catch (AgentNotKnownException e) {
+			System.out.println("Monitoring: Processing Service does not seem available! " + e);
+			e.printStackTrace();
+			return false;
+		} catch (L2pServiceException e) {
 			System.out.println("Monitoring: Processing Service does not seem available! " + e);
 			e.printStackTrace();
 			return false;

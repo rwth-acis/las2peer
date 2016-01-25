@@ -125,6 +125,7 @@ public class L2pThread extends Thread {
 		return agent;
 	}
 
+	// TODO remove:
 	/**
 	 * TODO: how to handle sub invocations ?!?!?!
 	 * 

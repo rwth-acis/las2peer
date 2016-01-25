@@ -1,5 +1,6 @@
 package i5.las2peer.tools;
 
+import i5.las2peer.p2p.ServiceNameVersion;
 import i5.las2peer.security.ServiceAgent;
 
 /**
@@ -17,9 +18,9 @@ public class ServiceAgentGenerator {
 	 * 
 	 * @param argv
 	 */
-	public static void main(String argv[]) {
+	public static void main(String argv[]) { //TODO DOCUMENTATION
 		if (argv.length != 2) {
-			System.err.println("usage: java i5.las2peer.tools.ServiceAgentGenerator [service class] [passphrase]");
+			System.err.println("usage: java i5.las2peer.tools.ServiceAgentGenerator [service class]@[service version] [passphrase]");
 			return;
 		} else if (argv[0].length() < PW_MIN_LENGTH) {
 			System.err.println("the password needs to be at least " + PW_MIN_LENGTH + " signs long, but only "
@@ -28,7 +29,7 @@ public class ServiceAgentGenerator {
 		}
 
 		try {
-			ServiceAgent agent = ServiceAgent.createServiceAgent(argv[0], argv[1]);
+			ServiceAgent agent = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(argv[0]), argv[1]);
 			System.out.print(agent.toXmlString());
 		} catch (Exception e) {
 			System.err.println("unable to generate new agent: " + e);

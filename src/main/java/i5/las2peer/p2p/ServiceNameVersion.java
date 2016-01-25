@@ -18,36 +18,41 @@ public class ServiceNameVersion implements Serializable {
 	}
 
 	public String getNameVersion() {
-		return nameVersion;
+		return name + SEPERATOR + version;
 	}
 
 	private String name;
 	private String version;
 
-	private String nameVersion;
-
 	public ServiceNameVersion(String name, String version) {
 		this.name = name;
 		this.version = version;
-		nameVersion = name + SEPERATOR + version;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		return nameVersion.equals(obj);
+		return (name + SEPERATOR + version).equals(obj);
 	}
 
 	@Override
 	public int hashCode() {
-		return nameVersion.hashCode();
+		return (name + SEPERATOR + version).hashCode();
 	}
 
 	@Override
 	public String toString() {
-		return nameVersion;
+		return name + SEPERATOR + version;
 	}
 
 	public static String toString(String serviceName, String version) {
 		return serviceName + SEPERATOR + version;
+	}
+	
+	public static ServiceNameVersion fromString(String nameVersion) {
+		String[] a = nameVersion.split(SEPERATOR);
+		if (a.length>1)
+			return new ServiceNameVersion(a[0],a[1]);
+		else
+			return new ServiceNameVersion(a[0],"1.0"); // for compatibility
 	}
 }

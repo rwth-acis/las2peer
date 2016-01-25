@@ -13,6 +13,7 @@ import i5.las2peer.execution.L2pServiceException;
 import i5.las2peer.execution.NoSuchServiceException;
 import i5.las2peer.logging.monitoring.MonitoringMessage;
 import i5.las2peer.p2p.AgentNotKnownException;
+import i5.las2peer.p2p.TimeoutException;
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
@@ -108,8 +109,8 @@ public class MonitoringAgent extends PassphraseAgent {
 				Serializable[] parameters = { (Serializable) content };
 				try {
 					// Try to send the content of the message to the Processing Service
-					boolean success = (Boolean) getRunningAtNode().invokeLocally(getId(), PROCESSING_SERVICE_ClASS_NAME,
-							"getMessages", parameters);
+					boolean success = (Boolean) getRunningAtNode().invoke(this, PROCESSING_SERVICE_ClASS_NAME,
+							"getMessages", parameters, true);
 					if (!success)
 						// TODO: Check for performance of message receiving
 						System.out.println(
@@ -120,6 +121,9 @@ public class MonitoringAgent extends PassphraseAgent {
 					System.out.println("Monitoring: Something went wrong while invoking Processing Service!");
 					e.printStackTrace();
 				} catch (InterruptedException e) {
+					System.out.println("Monitoring: Something went wrong while invoking Processing Service!");
+					e.printStackTrace();
+				} catch (TimeoutException e) {
 					System.out.println("Monitoring: Something went wrong while invoking Processing Service!");
 					e.printStackTrace();
 				}

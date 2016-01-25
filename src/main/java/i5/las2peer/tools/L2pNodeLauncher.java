@@ -30,6 +30,7 @@ import i5.las2peer.p2p.NodeException;
 import i5.las2peer.p2p.NodeInformation;
 import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.p2p.PastryNodeImpl.STORAGE_MODE;
+import i5.las2peer.p2p.ServiceNameVersion;
 import i5.las2peer.p2p.StorageException;
 import i5.las2peer.p2p.TimeoutException;
 import i5.las2peer.persistency.EncodingFailedException;
@@ -53,7 +54,7 @@ import rice.p2p.commonapi.NodeHandle;
  * 
  * All methods to be executed can be stated via additional command line parameters to the {@link #main} method.
  */
-public class L2pNodeLauncher {
+public class L2pNodeLauncher { // TODO DOCUMENTATION versionen bei service parametern
 
 	// this is the main class and therefore the logger needs to be static
 	private static final L2pLogger logger = L2pLogger.getInstance(L2pNodeLauncher.class.getName());
@@ -114,8 +115,8 @@ public class L2pNodeLauncher {
 	 * @return node handles
 	 * @throws AgentNotKnownException
 	 */
-	public Object[] findService(String serviceClass) throws AgentNotKnownException {
-		Agent agent = node.getServiceAgent(serviceClass);
+	public Object[] findService(String serviceNameVersion) throws AgentNotKnownException {
+		Agent agent = node.getServiceAgent(ServiceNameVersion.fromString(serviceNameVersion));
 		return node.findRegisteredAgent(agent);
 	}
 
@@ -490,17 +491,13 @@ public class L2pNodeLauncher {
 	 * @param parameters
 	 * @throws L2pServiceException any exception during service method invocation
 	 */
-	private Serializable invoke(String serviceClass, String serviceMethod, Serializable... parameters)
+	private Serializable invoke(String serviceNameVersion, String serviceMethod, Serializable... parameters)
 			throws L2pServiceException {
 		if (currentUser == null)
 			throw new IllegalStateException("Please register a valid user with registerUserAgent before invoking!");
 
 		try {
-			try {
-				return node.invokeLocally(currentUser.getId(), serviceClass, serviceMethod, parameters);
-			} catch (NoSuchServiceException e) {
-				return node.invokeGlobally(currentUser, serviceClass, serviceMethod, parameters);
-			}
+			return node.invoke(currentUser, ServiceNameVersion.fromString(serviceNameVersion), serviceMethod, parameters);
 		} catch (Exception e) {
 			throw new L2pServiceException("Exception during service method invocation!", e);
 		}
@@ -520,12 +517,12 @@ public class L2pNodeLauncher {
 	 * @throws EncodingFailedException
 	 * @throws TimeoutException
 	 */
-	public ListMethodsContent getServiceMethods(String serviceName) throws L2pSecurityException, AgentNotKnownException,
+	public ListMethodsContent getServiceMethods(String serviceNameVersion) throws L2pSecurityException, AgentNotKnownException,
 			InterruptedException, EncodingFailedException, SerializationException, TimeoutException {
 		if (currentUser == null)
 			throw new IllegalStateException("please log in a valid user with registerUserAgent before!");
 
-		Agent receiver = node.getServiceAgent(serviceName);
+		Agent receiver = node.getServiceAgent(ServiceNameVersion.fromString(serviceNameVersion));
 		Message request = new Message(currentUser, receiver, (Serializable) new ListMethodsContent(), 30000);
 		request.setSendingNodeId((NodeHandle) node.getNodeId());
 
@@ -545,11 +542,11 @@ public class L2pNodeLauncher {
 	 *         already known.
 	 * @throws L2pServiceException
 	 */
-	public String startService(String serviceClass) throws L2pServiceException {
+	public String startService(String serviceNameVersion) throws L2pServiceException {
 		try {
 			String passPhrase = SimpleTools.createRandomString(20);
 
-			ServiceAgent myAgent = ServiceAgent.createServiceAgent(serviceClass, passPhrase);
+			ServiceAgent myAgent = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(serviceNameVersion), passPhrase);
 			myAgent.unlockPrivateKey(passPhrase);
 
 			startService(myAgent);
@@ -597,14 +594,14 @@ public class L2pNodeLauncher {
 	 * @throws AgentAlreadyRegisteredException
 	 * @throws CryptoException
 	 */
-	public void startService(String serviceClass, String agentPass) throws AgentNotKnownException, L2pSecurityException,
+	public void startService(String serviceNameVersion, String agentPass) throws AgentNotKnownException, L2pSecurityException,
 			AgentAlreadyRegisteredException, AgentException, CryptoException {
 		ServiceAgent sa = null;
 		try {
-			sa = node.getServiceAgent(serviceClass);
+			sa = node.getServiceAgent(ServiceNameVersion.fromString(serviceNameVersion));
 		} catch (Exception e) {
-			logger.info("Can't get service agent for " + serviceClass + ". Generating new instance...");
-			sa = ServiceAgent.createServiceAgent(serviceClass, agentPass);
+			logger.info("Can't get service agent for " + serviceNameVersion + ". Generating new instance...");
+			sa = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(serviceNameVersion), agentPass);
 		}
 		sa.unlockPrivateKey(agentPass);
 		startService(sa);

@@ -11,6 +11,7 @@ import i5.las2peer.execution.NoSuchServiceMethodException;
 import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.Node;
+import i5.las2peer.p2p.ServiceNameVersion;
 import i5.las2peer.p2p.TimeoutException;
 import i5.las2peer.security.Agent;
 import i5.las2peer.security.Context;
@@ -152,7 +153,7 @@ public abstract class Service extends Configurable {
 	public Object execute(String method, Object... parameters) throws NoSuchServiceMethodException,
 			IllegalArgumentException, IllegalAccessException, InvocationTargetException, L2pSecurityException {
 		Method m = searchMethod(method, parameters);
-		
+
 		// TODO make sure that main agent is unlocked?
 
 		return m.invoke(this, parameters);
@@ -181,17 +182,9 @@ public abstract class Service extends Configurable {
 	public Object invokeServiceMethod(String service, String method, Serializable... parameters)
 			throws AgentNotKnownException, L2pServiceException, L2pSecurityException, InterruptedException,
 			TimeoutException {
-		// System.out.println ( "\t\t---> invoking Service Method " + service + "/" + method );
 
-		Object result = null;
-		if (getContext().getLocalNode().hasLocalAgent(ServiceAgent.serviceClass2Id(service)))
-			result = getContext().getLocalNode().invokeLocally(getContext().getMainAgent().getId(), service, method,
-					parameters);
-		else
-			result = getContext().getLocalNode().invokeGlobally(getContext().getMainAgent(), service, method,
-					parameters);
-
-		return result;
+		return getContext().getLocalNode().invoke(getContext().getMainAgent(), ServiceNameVersion.fromString(service),
+				method, parameters);
 	}
 
 	/**
@@ -216,13 +209,8 @@ public abstract class Service extends Configurable {
 			throws AgentNotKnownException, L2pServiceException, L2pSecurityException, InterruptedException,
 			TimeoutException {
 
-		Object result = null;
-		if (getContext().getLocalNode().hasLocalAgent(ServiceAgent.serviceClass2Id(service)))
-			result = getContext().getLocalNode().invokeLocally(getAgent().getId(), service, method, parameters);
-		else
-			result = getContext().getLocalNode().invokeGlobally(getAgent(), service, method, parameters);
-
-		return result;
+		return getContext().getLocalNode().invoke(getAgent(), ServiceNameVersion.fromString(service), method,
+				parameters);
 	}
 
 	/**
@@ -340,7 +328,7 @@ public abstract class Service extends Configurable {
 	 * @throws AgentNotKnownException
 	 */
 	public final ServiceAgent getAgent() throws AgentNotKnownException {
-		return runningAt.getServiceAgent(this.getClass().getCanonicalName());
+		return getL2pThread().getServiceAgent();
 	}
 
 	/**
