@@ -215,8 +215,14 @@ public class ServiceAgent extends PassphraseAgent {
 	@Override
 	public void notifyUnregister() {
 		serviceInfoAgentNotifyUnregister();
-		serviceInstance.close();
-		serviceInstance = null;
+		if (serviceInstance != null) {
+			serviceInstance.close();
+			serviceInstance = null;
+		}
+		Node runningAt = getRunningAtNode();
+		if (runningAt != null) {
+			runningAt.observerNotice(Event.SERVICE_SHUTDOWN, runningAt.getNodeId(), this, getServiceClassName());
+		}
 		super.notifyUnregister();
 	}
 
@@ -349,7 +355,7 @@ public class ServiceAgent extends PassphraseAgent {
 			ServiceInfoAgent agent = getServiceInfoAgent();
 			agent.serviceRemoved(this, getRunningAtNode());
 		} catch (Exception e) {
-			// ignore for now
+			// XXX ignore for now
 		}
 	}
 
@@ -400,7 +406,7 @@ public class ServiceAgent extends PassphraseAgent {
 				timerIntervalSeconds * 1000); // run every x seconds
 	}
 
-	private void executeTimer(Node finalNode, ServiceInfoAgent finalAgent) {		
+	private void executeTimer(Node finalNode, ServiceInfoAgent finalAgent) {
 		try {
 			finalAgent.serviceAdded(this, finalNode);
 			stopTimer(); // stop timer on success
