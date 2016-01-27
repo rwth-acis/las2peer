@@ -31,7 +31,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import i5.las2peer.classLoaders.ClassLoaderException;
-import i5.las2peer.classLoaders.L2pClassLoader;
+import i5.las2peer.classLoaders.L2pClassManager;
 import i5.las2peer.execution.NoSuchServiceException;
 import i5.las2peer.execution.NoSuchServiceMethodException;
 import i5.las2peer.execution.ServiceInvocationException;
@@ -525,7 +525,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	 */
 	private void handleSwagger(HttpExchange exchange) {
 		try {
-			L2pClassLoader clsLoader = (L2pClassLoader) connector.getL2pNode().getBaseClassLoader();
+			L2pClassManager clsLoader = (L2pClassManager) connector.getL2pNode().getBaseClassLoader();
 			ServiceNameVersion[] services = ServiceInfoAgent.getServices();
 			Set<Class<?>> serviceClasses = new HashSet<Class<?>>(services.length);
 			for (ServiceNameVersion snv : services) {
