@@ -504,7 +504,7 @@ public abstract class Node implements AgentStorage {
 	/**
 	 * Stops the node.
 	 */
-	public void shutDown() {
+	public synchronized void shutDown() {
 		for (Long id : htRegisteredReceivers.keySet())
 			htRegisteredReceivers.get(id).notifyUnregister();
 		observerNotice(Event.NODE_SHUTDOWN, this.getNodeId(), null);
