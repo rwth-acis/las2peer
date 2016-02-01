@@ -18,7 +18,12 @@ import i5.las2peer.classLoaders.libraries.Repository;
  * 
  *
  */
-public class L2pClassLoader extends ClassLoader {
+public class L2pClassManager {
+	
+	/**
+	 * classloader to load the platform's classes (Java + las2peer core + Connectors)
+	 */
+	private ClassLoader platformLoader;
 
 	/**
 	 * repositories to load libraries from
@@ -28,31 +33,31 @@ public class L2pClassLoader extends ClassLoader {
 	/**
 	 * all registered main bundles (i.e. services) (name, version) => BundleClassLoader
 	 */
-	private Hashtable<String, Hashtable<LibraryVersion, BundleClassLoader>> registeredLoaders = new Hashtable<String, Hashtable<LibraryVersion, BundleClassLoader>>();
+	private Hashtable<String, Hashtable<LibraryVersion, BundleClassManager>> registeredLoaders = new Hashtable<String, Hashtable<LibraryVersion, BundleClassManager>>();
 
 	/**
 	 * all registered libraries name, version => LibraryClassLoader
 	 */
-	private Hashtable<String, Hashtable<LibraryVersion, LibraryClassLoader>> registeredLibraryClassLoaders = new Hashtable<String, Hashtable<LibraryVersion, LibraryClassLoader>>();
+	private Hashtable<String, Hashtable<LibraryVersion, LoadedLibraryCache>> registeredLibraries = new Hashtable<String, Hashtable<LibraryVersion, LoadedLibraryCache>>();
 
 	/**
 	 * create a new L2pClassLoader, which uses the given repository
 	 * 
 	 * @param repository
-	 * @param parentLoader
+	 * @param platformLoader
 	 */
-	public L2pClassLoader(Repository repository, ClassLoader parentLoader) {
-		this(new Repository[] { repository }, parentLoader);
+	public L2pClassManager(Repository repository, ClassLoader platformLoader) {
+		this(new Repository[] { repository }, platformLoader);
 	}
 
 	/**
 	 * create a new L2PClassLoader, which uses the given repositories
 	 * 
 	 * @param repositories
-	 * @param parentLoader
+	 * @param platformLoader
 	 */
-	public L2pClassLoader(Repository[] repositories, ClassLoader parentLoader) {
-		super(parentLoader);
+	public L2pClassManager(Repository[] repositories, ClassLoader platformLoader) {
+		this.platformLoader = platformLoader;
 
 		this.repositories = repositories;
 	}
@@ -67,7 +72,7 @@ public class L2pClassLoader extends ClassLoader {
 	public void registerService(String serviceClassName) throws ClassLoaderException {
 		String sPackage = getPackageName(serviceClassName);
 
-		Hashtable<LibraryVersion, BundleClassLoader> htBcls = registeredLoaders.get(sPackage);
+		Hashtable<LibraryVersion, BundleClassManager> htBcls = registeredLoaders.get(sPackage);
 		if (htBcls != null && htBcls.size() > 0)
 			return; // at least one version is already registered
 
@@ -76,27 +81,121 @@ public class L2pClassLoader extends ClassLoader {
 			throw new ClassLoaderException("Name mismatch: package library '" + sPackage + "' provides package '"
 					+ lib.getIdentifier().getName() + "'!");
 
-		registerLibrary(lib);
+		registerBundle(lib);
+	}
+	
+	/**
+	 * register a service using the given library version the package name of the service class is used a package name
+	 * 
+	 * @param serviceClassName
+	 * @param version
+	 * @throws ClassLoaderException
+	 */
+	public void registerService(String serviceClassName, LibraryVersion version) throws ClassLoaderException {
+		String sPackage = getPackageName(serviceClassName);
+
+		Hashtable<LibraryVersion, BundleClassManager> htBcls = registeredLoaders.get(sPackage);
+		if (htBcls != null && htBcls.get(version) != null) {
+			return; // at least one version is already registered
+		}
+
+		LoadedLibrary lib = null;
+		for (int i = 0; i < repositories.length && lib == null; i++) {
+			try {
+				lib = repositories[i].findLibrary(new LibraryIdentifier(sPackage, version));
+			} catch (LibraryNotFoundException e) {
+			}
+		}
+
+		if (lib == null)
+			throw new LibraryNotFoundException(sPackage);
+		if (!lib.getIdentifier().getName().equals(sPackage))
+			throw new ClassLoaderException("Name mismatch: package library '" + sPackage + "' provides package '"
+					+ lib.getIdentifier().getName() + "'!");
+
+		registerBundle(lib);
 	}
 
 	/**
-	 * register a library from the repository as a BundleClassLoader
+	 * remove a service with all versions from this class loader
+	 * 
+	 * @param serviceName
+	 */
+	// public void unregisterService ( String serviceClassName ) {
+	// }
+
+	/**
+	 * remove a service (bundle) from this class loader and remove all orphaned LibraryClassLoaders as well
+	 * 
+	 * @param serviceClassName
+	 * @param version
+	 * @throws NotRegisteredException
+	 */
+	public void unregisterService(String serviceClassName, String version) throws NotRegisteredException {
+		unregisterBundle(serviceClassName, version);
+	}
+
+	/**
+	 * create a bundle for the given library
 	 * 
 	 * @param lib
 	 * @throws UnresolvedDependenciesException
 	 */
-	private void registerLibrary(LoadedLibrary lib) throws UnresolvedDependenciesException {
-		LibraryClassLoader[] resolvedDeps = resolveDependencies(lib);
-
-		BundleClassLoader bcl = new BundleClassLoader(resolvedDeps);
-
-		Hashtable<LibraryVersion, BundleClassLoader> htBcls = registeredLoaders.get(lib.getIdentifier().getName());
-		if (htBcls == null) {
-			htBcls = new Hashtable<LibraryVersion, BundleClassLoader>();
-			registeredLoaders.put(lib.getIdentifier().getName(), htBcls);
+	private void registerBundle(LoadedLibrary lib) throws UnresolvedDependenciesException {
+		LoadedLibraryCache[] resolvedDeps = resolveDependencies(lib);
+		
+		// create bundle
+		BundleClassManager bcl = new BundleClassManager(platformLoader);
+		
+		// create LibraryClassLoaders 
+		LibraryClassLoader[] classLoaderDeps = new LibraryClassLoader[resolvedDeps.length];
+		for (int i = 0; i < resolvedDeps.length; i++) {
+			resolvedDeps[i].registerClassLoader(bcl);
+			classLoaderDeps[i] = new LibraryClassLoader(resolvedDeps[i].getLoadedLibrary(),bcl);
 		}
 
+		// init bundle
+		bcl.initLibraryLoaders(classLoaderDeps);
+
+		// register bundle
+		Hashtable<LibraryVersion, BundleClassManager> htBcls = registeredLoaders.get(lib.getIdentifier().getName());
+		if (htBcls == null) {
+			htBcls = new Hashtable<LibraryVersion, BundleClassManager>();
+			registeredLoaders.put(lib.getIdentifier().getName(), htBcls);
+		}
 		htBcls.put(lib.getLibraryIdentifier().getVersion(), bcl);
+	}
+	
+	/**
+	 * unregister a bundle
+	 * 
+	 * @param libraryName 
+	 * @param libraryVersion 
+	 * 
+	 * @throws NotRegisteredException
+	 */
+	private void unregisterBundle(String libraryName, String libraryVersion) throws NotRegisteredException {
+		String pkg = getPackageName(libraryName);
+
+		Hashtable<LibraryVersion, BundleClassManager> htVersions = registeredLoaders.get(pkg);
+		if (htVersions == null)
+			throw new NotRegisteredException(pkg, libraryVersion);
+
+		BundleClassManager bcl = htVersions.get(new LibraryVersion(libraryVersion));
+		if (bcl == null)
+			throw new NotRegisteredException(pkg, libraryVersion);
+
+		htVersions.remove(libraryVersion);
+		if (htVersions.size() == 0)
+			registeredLoaders.remove(pkg);
+
+		LibraryClassLoader[] subloaders = bcl.getLibraryLoaders();
+		for (int i = 0; i < subloaders.length; i++) {
+			LoadedLibraryCache cache = getRegisteredLoadedLibrary(subloaders[i].getLibrary());
+			cache.unregisterClassLoader(bcl);
+			if (!cache.isUsed())
+				removeLoadedLibrary(cache.getLoadedLibrary());
+		}
 	}
 
 	/**
@@ -109,83 +208,36 @@ public class L2pClassLoader extends ClassLoader {
 	 * @return array with library class loaders
 	 * @throws UnresolvedDependenciesException
 	 */
-	private LibraryClassLoader[] resolveDependencies(LoadedLibrary library) throws UnresolvedDependenciesException {
+	private LoadedLibraryCache[] resolveDependencies(LoadedLibrary library) throws UnresolvedDependenciesException {
 		LibraryDependency[] deps = library.getDependencies();
 
-		// TODO: merge dependencies recursively? - Probably not, since this would
-		// require prefetching of possibly not needed jars!
-		// which is not a good idea for the intended p2p environment
+		// TODO merge dependencies recursively OR implement lazy loading
 
 		LoadedLibrary[] libraries = new LoadedLibrary[deps.length + 1];
 		libraries[0] = library;
-		for (int i = 0; i < deps.length; i++)
-			try {
-				libraries[i + 1] = findLoadedLibrary(deps[i]);
-			} catch (LibraryNotFoundException e) {
-				throw new UnresolvedDependenciesException(library.getIdentifier().toString(), deps[i]);
+		for (int i = 0; i < deps.length; i++) {
+			LoadedLibraryCache cache = getRegisteredLoadedLibrary(libraries[i]);
+			if (cache != null)
+				libraries[i + 1] = getRegisteredLoadedLibrary(libraries[i]).getLoadedLibrary();
+		
+			if (libraries[i + 1] == null) {
+				try {
+					libraries[i + 1] = findLoadedLibrary(deps[i]);
+				} catch (LibraryNotFoundException e) {
+					throw new UnresolvedDependenciesException(library.getIdentifier().toString(), deps[i]);
+				}
 			}
-
+		}	
+		
 		// ok, now i'm sure that all dependencies can be resolved!
-		LibraryClassLoader[] result = new LibraryClassLoader[libraries.length];
+		LoadedLibraryCache[] result = new LoadedLibraryCache[libraries.length];
 		for (int i = 0; i < libraries.length; i++) {
-			result[i] = getLibraryClassLoader(libraries[i]);
+			result[i] = getRegisteredLoadedLibrary(libraries[i]);
 			if (result[i] == null)
 				result[i] = registerLoadedLibrary(libraries[i]);
 		}
 
 		return result;
-	}
-
-	/**
-	 * check, if the given library is already registered
-	 * 
-	 * @param library
-	 * @return true, if the given library is loaded an registered here
-	 */
-	/*private boolean isRegistered ( LoadedLibrary library ) {
-		return getLibraryClassLoader( library ) != null;
-	}
-	
-	/**
-	 * get a library class loader for the given loaded library
-	 * @param lib
-	 * @return the library class loader corresponding to the given library
-	 */
-	private LibraryClassLoader getLibraryClassLoader(LoadedLibrary lib) {
-		return getLibraryClassLoader(lib.getIdentifier());
-	}
-
-	/**
-	 * get a library class loader for the library given by the stated identifier
-	 * 
-	 * @param iden
-	 * @return the library class loader corresponding to the given library
-	 */
-	private LibraryClassLoader getLibraryClassLoader(LibraryIdentifier iden) {
-		Hashtable<LibraryVersion, LibraryClassLoader> htLoaders = registeredLibraryClassLoaders.get(iden.getName());
-		if (htLoaders == null)
-			return null;
-		else
-			return htLoaders.get(iden.getVersion());
-	}
-
-	/**
-	 * register a loaded library as a LibraryClassLoader
-	 * 
-	 * @param lib
-	 * @return a class loader for the given library
-	 */
-	private LibraryClassLoader registerLoadedLibrary(LoadedLibrary lib) {
-		LibraryClassLoader loader = new LibraryClassLoader(lib);
-		Hashtable<LibraryVersion, LibraryClassLoader> htLoaders = registeredLibraryClassLoaders
-				.get(lib.getIdentifier().getName());
-		if (htLoaders == null) {
-			htLoaders = new Hashtable<LibraryVersion, LibraryClassLoader>();
-			registeredLibraryClassLoaders.put(lib.getIdentifier().getName(), htLoaders);
-		}
-		htLoaders.put(lib.getIdentifier().getVersion(), loader);
-
-		return loader;
 	}
 
 	/**
@@ -233,22 +285,6 @@ public class L2pClassLoader extends ClassLoader {
 	}
 
 	/**
-	 * get a loaded library for the given name and version
-	 * 
-	 * @param name
-	 * @param version
-	 * 
-	 * @return a library representation for the given library name (and version)
-	 * 
-	 * @throws LibraryNotFoundException
-	 */
-	/*
-	private LoadedLibrary findLoadedLibrary ( String name, LibraryVersion version ) throws LibraryNotFoundException {
-		return findLoadedLibrary ( new LibraryDependency ( name, version ));
-	}
-	*/
-
-	/**
 	 * find a loaded library matching the given dependency
 	 * 
 	 * @param dep
@@ -274,92 +310,64 @@ public class L2pClassLoader extends ClassLoader {
 
 		return result;
 	}
-
+	
 	/**
-	 * register a service using the given library version the package name of the service class is used a package name
-	 * 
-	 * @param serviceClassName
-	 * @param version
-	 * @throws ClassLoaderException
+	 * get a library class loader for the given loaded library
+	 * @param lib
+	 * @return the library class loader corresponding to the given library
 	 */
-	public void registerService(String serviceClassName, LibraryVersion version) throws ClassLoaderException {
-		String sPackage = getPackageName(serviceClassName);
-
-		Hashtable<LibraryVersion, BundleClassLoader> htBcls = registeredLoaders.get(sPackage);
-		if (htBcls != null && htBcls.get(version) != null) {
-			return; // at least one version is already registered
-		}
-
-		LoadedLibrary lib = null;
-		for (int i = 0; i < repositories.length && lib == null; i++) {
-			try {
-				lib = repositories[i].findLibrary(new LibraryIdentifier(sPackage, version));
-			} catch (LibraryNotFoundException e) {
-			}
-		}
-
-		if (lib == null)
-			throw new LibraryNotFoundException(sPackage);
-		if (!lib.getIdentifier().getName().equals(sPackage))
-			throw new ClassLoaderException("Name mismatch: package library '" + sPackage + "' provides package '"
-					+ lib.getIdentifier().getName() + "'!");
-
-		registerLibrary(lib);
+	private LoadedLibraryCache getRegisteredLoadedLibrary(LoadedLibrary lib) {
+		return getRegisteredLoadedLibrary(lib.getIdentifier());
 	}
 
 	/**
-	 * remove a service with all versions from this class loader
+	 * get a library class loader for the library given by the stated identifier
 	 * 
-	 * @param serviceName
+	 * @param iden
+	 * @return the library class loader corresponding to the given library
 	 */
-	// public void unregisterService ( String serviceClassName ) {
-	// }
-
+	private LoadedLibraryCache getRegisteredLoadedLibrary(LibraryIdentifier iden) {
+		Hashtable<LibraryVersion, LoadedLibraryCache> htLoaders = registeredLibraries.get(iden.getName());
+		if (htLoaders == null)
+			return null;
+		else
+			return htLoaders.get(iden.getVersion());
+	}
+	
 	/**
-	 * remove a service (bundle) from this class loader and remove all orphaned LibraryClassLoaders as well
+	 * register a loaded library as a LibraryClassLoader
 	 * 
-	 * @param serviceClassName
-	 * @param version
-	 * @throws NotRegisteredException
+	 * @param lib
+	 * @return a class loader for the given library
 	 */
-	public void unregisterService(String serviceClassName, String version) throws NotRegisteredException {
-		String pkg = getPackageName(serviceClassName);
-
-		Hashtable<LibraryVersion, BundleClassLoader> htVersions = registeredLoaders.get(pkg);
-		if (htVersions == null)
-			throw new NotRegisteredException(pkg, version);
-
-		BundleClassLoader bcl = htVersions.get(new LibraryVersion(version));
-		if (bcl == null)
-			throw new NotRegisteredException(pkg, version);
-
-		htVersions.remove(version);
-		if (htVersions.size() == 0)
-			registeredLoaders.remove(pkg);
-
-		LibraryClassLoader[] subloaders = bcl.getLibraryLoaders();
-		for (int i = 0; i < subloaders.length; i++) {
-			subloaders[i].unregisterParentLopader(bcl);
-			if (!subloaders[i].hasParentLoaders())
-				removeLibraryLoader(subloaders[i]);
+	private LoadedLibraryCache registerLoadedLibrary(LoadedLibrary lib) {
+		LoadedLibraryCache loader = new LoadedLibraryCache(lib);
+		Hashtable<LibraryVersion, LoadedLibraryCache> htLoaders = registeredLibraries
+				.get(lib.getIdentifier().getName());
+		if (htLoaders == null) {
+			htLoaders = new Hashtable<LibraryVersion, LoadedLibraryCache>();
+			registeredLibraries.put(lib.getIdentifier().getName(), htLoaders);
 		}
+		htLoaders.put(lib.getIdentifier().getVersion(), loader);
+
+		return loader;
 	}
 
 	/**
-	 * remove a LibraryClassLoader from the registry
+	 * remove a LoadedLibrary from the registry
 	 * 
 	 * @param l
 	 * @throws NotRegisteredException
 	 */
-	private void removeLibraryLoader(LibraryClassLoader l) throws NotRegisteredException {
-		Hashtable<LibraryVersion, LibraryClassLoader> htVersions = registeredLibraryClassLoaders
-				.get(l.getLibrary().getIdentifier().getName());
+	private void removeLoadedLibrary(LoadedLibrary l) throws NotRegisteredException {
+		Hashtable<LibraryVersion, LoadedLibraryCache> htVersions = registeredLibraries
+				.get(l.getIdentifier().getName());
 		if (htVersions == null)
-			throw new NotRegisteredException(l.getLibrary().getIdentifier());
+			throw new NotRegisteredException(l.getIdentifier());
 
-		htVersions.remove(l.getLibrary().getIdentifier().getVersion());
+		htVersions.remove(l.getIdentifier().getVersion());
 		if (htVersions.size() == 0)
-			registeredLibraryClassLoaders.remove(l.getLibrary().getIdentifier().getName());
+			registeredLibraries.remove(l.getIdentifier().getName());
 	}
 
 	/**
@@ -376,7 +384,7 @@ public class L2pClassLoader extends ClassLoader {
 	public Class<?> getServiceClass(String serviceClassName) throws ClassLoaderException {
 		String sPackage = getPackageName(serviceClassName);
 
-		Hashtable<LibraryVersion, BundleClassLoader> htVersions = registeredLoaders.get(sPackage);
+		Hashtable<LibraryVersion, BundleClassManager> htVersions = registeredLoaders.get(sPackage);
 		try {
 			if (htVersions == null || htVersions.size() == 0) {
 				registerService(serviceClassName);
@@ -401,7 +409,7 @@ public class L2pClassLoader extends ClassLoader {
 				version = v;
 		}
 
-		BundleClassLoader bcl = htVersions.get(version);
+		BundleClassManager bcl = htVersions.get(version);
 
 		try {
 			return bcl.loadClass(serviceClassName);
@@ -426,7 +434,7 @@ public class L2pClassLoader extends ClassLoader {
 	public Class<?> getServiceClass(String serviceClassName, LibraryVersion version) throws ClassLoaderException {
 		String sPackage = getPackageName(serviceClassName);
 
-		Hashtable<LibraryVersion, BundleClassLoader> htVersions = registeredLoaders.get(sPackage);
+		Hashtable<LibraryVersion, BundleClassManager> htVersions = registeredLoaders.get(sPackage);
 		try {
 			if (htVersions == null || htVersions.get(version) == null) {
 				registerService(serviceClassName, version);
@@ -444,7 +452,7 @@ public class L2pClassLoader extends ClassLoader {
 			}
 		}
 
-		BundleClassLoader bcl = htVersions.get(version);
+		BundleClassManager bcl = htVersions.get(version);
 
 		try {
 			return bcl.loadClass(serviceClassName);
@@ -479,9 +487,9 @@ public class L2pClassLoader extends ClassLoader {
 	 */
 	int numberOfRegisteredLibraries() {
 		int result = 0;
-		for (Enumeration<String> names = registeredLibraryClassLoaders.keys(); names.hasMoreElements();) {
+		for (Enumeration<String> names = registeredLibraries.keys(); names.hasMoreElements();) {
 			String name = names.nextElement();
-			result += registeredLibraryClassLoaders.get(name).keySet().size();
+			result += registeredLibraries.get(name).keySet().size();
 		}
 
 		return result;

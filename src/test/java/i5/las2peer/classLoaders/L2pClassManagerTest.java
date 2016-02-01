@@ -1,7 +1,6 @@
 package i5.las2peer.classLoaders;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -10,14 +9,14 @@ import org.junit.Test;
 
 import i5.las2peer.classLoaders.libraries.FileSystemRepository;
 
-public class L2pClassLoaderTest {
+public class L2pClassManagerTest {
 
 	@Test
 	public void testPackageName() {
-		assertEquals("my.package", L2pClassLoader.getPackageName("my.package.Class"));
+		assertEquals("my.package", L2pClassManager.getPackageName("my.package.Class"));
 
 		try {
-			L2pClassLoader.getPackageName("teststring");
+			L2pClassManager.getPackageName("teststring");
 			fail("IllegalArgumentException should have been thrown");
 		} catch (IllegalArgumentException e) {
 		}
@@ -26,10 +25,12 @@ public class L2pClassLoaderTest {
 	@Test
 	public void testServiceClassLoading() throws ClassLoaderException, SecurityException, NoSuchMethodException,
 			IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-		L2pClassLoader testee = new L2pClassLoader(new FileSystemRepository("export/jars/"), null);
+		L2pClassManager testee = new L2pClassManager(new FileSystemRepository("export/jars/"), ClassLoader.getSystemClassLoader());
 
 		Class<?> cl = testee.getServiceClass("i5.las2peer.classLoaders.testPackage2.UsingCounter", "1.0");
-
+		
+		assertFalse(cl.getClassLoader().equals(ClassLoader.getSystemClassLoader()));
+		
 		Method m = cl.getDeclaredMethod("countCalls");
 		Object result = m.invoke(null);
 		result = m.invoke(null);
@@ -39,7 +40,7 @@ public class L2pClassLoaderTest {
 
 	@Test
 	public void testJarBehaviour() throws IllegalArgumentException, ClassLoaderException {
-		L2pClassLoader testee = new L2pClassLoader(new FileSystemRepository("export/jars/"), null);
+		L2pClassManager testee = new L2pClassManager(new FileSystemRepository("export/jars/"), ClassLoader.getSystemClassLoader());
 		testee.getServiceClass("i5.las2peer.classLoaders.testPackage2.UsingCounter", "1.0");
 
 		assertEquals(1, testee.numberOfRegisteredBundles());
@@ -50,5 +51,7 @@ public class L2pClassLoaderTest {
 		assertEquals(0, testee.numberOfRegisteredBundles());
 		assertEquals(0, testee.numberOfRegisteredLibraries());
 	}
+	
+	// TODO ADD test to test reusing of library caches
 
 }

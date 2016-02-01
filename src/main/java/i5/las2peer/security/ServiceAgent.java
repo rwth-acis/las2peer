@@ -13,7 +13,7 @@ import org.apache.commons.codec.binary.Base64;
 
 import i5.las2peer.api.Service;
 import i5.las2peer.classLoaders.ClassLoaderException;
-import i5.las2peer.classLoaders.L2pClassLoader;
+import i5.las2peer.classLoaders.L2pClassManager;
 import i5.las2peer.communication.ListMethodsContent;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
@@ -430,16 +430,10 @@ public class ServiceAgent extends PassphraseAgent {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void notifyRegistrationTo(Node node) throws L2pServiceException {
-		Class<? extends Service> clServ;
+		L2pClassManager cl = node.getBaseClassLoader();
+		
 		try {
-			ClassLoader cl = node.getBaseClassLoader();
-			if (cl instanceof L2pClassLoader) {
-				clServ = (Class<? extends Service>) ((L2pClassLoader) cl).getServiceClass(sServiceClass);
-			} else if (cl != null) {
-				clServ = (Class<? extends Service>) cl.loadClass(sServiceClass);
-			} else {
-				clServ = (Class<? extends Service>) Class.forName(sServiceClass);
-			}
+			Class<? extends Service> clServ = (Class<? extends Service>) ((L2pClassManager) cl).getServiceClass(sServiceClass);
 
 			Constructor<? extends Service> cons = clServ.getConstructor(new Class<?>[0]);
 			serviceInstance = cons.newInstance();
@@ -455,8 +449,6 @@ public class ServiceAgent extends PassphraseAgent {
 
 		} catch (ClassLoaderException e1) {
 			throw new L2pServiceException("Problems with the classloader", e1);
-		} catch (ClassNotFoundException e1) {
-			throw new L2pServiceException("Service class not found!", e1);
 		} catch (InstantiationException e1) {
 			throw new L2pServiceException("Consturctor failure while instantiating service", e1);
 		} catch (IllegalAccessException e1) {

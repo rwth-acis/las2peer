@@ -21,32 +21,32 @@ public class Logger {
 		}
 	}
 
-	static void logFinding(ClassLoader who, String classname, Boolean success) {
+	static void logFinding(Object who, String classname, Boolean success) {
 		String whoString = getWhoString(who);
 		logger.finer("f\t" + success + "\t" + whoString + "\t" + classname);
 	}
 
-	static void logMessage(ClassLoader who, String classname, String message) {
+	static void logMessage(Object who, String classname, String message) {
 		String whoString = getWhoString(who);
 		logger.finer("f\t" + "\t" + whoString + "\t" + classname + "\t" + message);
 	}
 
-	static void logLoading(ClassLoader who, String classname, Boolean success, Object add) {
+	static void logLoading(Object who, String classname, Boolean success, Object add) {
 		String whoString = getWhoString(who);
 		logger.finer("l\t" + success + "\t" + whoString + "\t" + classname + "\t" + add);
 	}
 
-	static void logSubLibrary(ClassLoader who, LibraryClassLoader libraryLoader) {
+	static void logSubLibrary(Object who, LibraryClassLoader libraryLoader) {
 		String whoString = getWhoString(who);
 		logger.finer("library load\t" + whoString + "\t" + libraryLoader.getLibrary().getIdentifier());
 	}
 
-	private static String getWhoString(ClassLoader cl) {
+	private static String getWhoString(Object cl) {
 		if (cl instanceof LibraryClassLoader) {
 			return "lcl" + "\t" + ((LibraryClassLoader) cl).getLibrary().getIdentifier();
-		} else if (cl instanceof BundleClassLoader) {
-			return "bcl" + "\t" + ((BundleClassLoader) cl).getMainLibraryIdentifier();
-		} else if (cl instanceof L2pClassLoader) {
+		} else if (cl instanceof BundleClassManager) {
+			return "bcl" + "\t" + ((BundleClassManager) cl).getMainLibraryIdentifier();
+		} else if (cl instanceof L2pClassManager) {
 			return "l2p-main" + "\t\t";
 		} else {
 			return "unkown";

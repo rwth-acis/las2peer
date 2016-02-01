@@ -16,7 +16,7 @@ import java.util.Map;
 
 import i5.las2peer.api.Connector;
 import i5.las2peer.api.ConnectorException;
-import i5.las2peer.classLoaders.L2pClassLoader;
+import i5.las2peer.classLoaders.L2pClassManager;
 import i5.las2peer.classLoaders.libraries.FileSystemRepository;
 import i5.las2peer.communication.ListMethodsContent;
 import i5.las2peer.communication.Message;
@@ -701,7 +701,7 @@ public class L2pNodeLauncher {
 	 * @param cl the classloader to be used with this node
 	 */
 	private L2pNodeLauncher(int port, String bootstrap, STORAGE_MODE storageMode, boolean monitoringObserver,
-			L2pClassLoader cl, Long nodeIdSeed) {
+			L2pClassManager cl, Long nodeIdSeed) {
 		if (storageMode == null) {
 			if (System.getenv().containsKey("MEM_STORAGE")) {
 				storageMode = STORAGE_MODE.memory;
@@ -886,7 +886,7 @@ public class L2pNodeLauncher {
 			commands = new ArrayList<>();
 		}
 		// instantiate launcher
-		L2pClassLoader cl = new L2pClassLoader(new FileSystemRepository(serviceDirectories, true),
+		L2pClassManager cl = new L2pClassManager(new FileSystemRepository(serviceDirectories, true),
 				L2pNodeLauncher.class.getClassLoader());
 		L2pNodeLauncher launcher = new L2pNodeLauncher(port, bootstrap, storageMode, observer, cl, nodeIdSeed);
 		// handle commands

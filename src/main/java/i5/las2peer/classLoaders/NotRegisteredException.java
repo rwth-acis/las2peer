@@ -3,7 +3,7 @@ package i5.las2peer.classLoaders;
 import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
 
 /**
- * thrown by the {@link L2pClassLoader} on access to a resource that is not registered
+ * thrown by the {@link L2pClassManager} on access to a resource that is not registered
  * 
  * 
  *

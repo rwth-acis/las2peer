@@ -12,159 +12,25 @@ import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
  * 
  *
  */
-public class BundleClassLoader extends ClassLoader {
-
-	private LibraryClassLoader[] libraryLoaders;
+public class BundleClassManager {
+	
+	/**
+	 * A class loader where to find classes if no libraryLoader has the class
+	 */
+	private ClassLoader parent;
 
 	/**
-	 * generate a new BundleClassLoader without a parent ClassLoader
-	 * 
-	 * constructor without parent loader just for unit testing, therefore only package viewable
-	 * 
-	 * @param loader
+	 * a list of libraries
 	 */
-	BundleClassLoader(LibraryClassLoader loader) {
-		super();
-
-		initLoaders(new LibraryClassLoader[] { loader });
-	}
-
+	private LibraryClassLoader[] libraryLoaders = new LibraryClassLoader[0];
+	
 	/**
-	 * generate a new BundleClassLoader without a parent ClassLoader
+	 * create a Bundle
 	 * 
-	 * constructor without parent loader just for unit testing, therefore only package viewable
-	 * 
-	 * @param lib
+	 * @param parent the fallback class loader
 	 */
-	BundleClassLoader(LibraryClassLoader[] loaders) {
-		super();
-
-		initLoaders(loaders);
-	}
-
-	/**
-	 * generate a new BundleClassLoader without a parent ClassLoader
-	 * 
-	 * constructor without parent loader just for unit testing, therefore only package viewable
-	 * 
-	 * @param mainLoader
-	 * @param depLoaders
-	 */
-	BundleClassLoader(LibraryClassLoader mainLoader, Set<LibraryClassLoader> depLoaders) {
-		super();
-
-		initLoaders(mainLoader, depLoaders);
-	}
-
-	/**
-	 * create a simple BundleClassLoader which uses only one library
-	 * 
-	 * @param parent
-	 * @param loader
-	 */
-	public BundleClassLoader(ClassLoader parent, LibraryClassLoader loader) {
-		super(parent);
-
-		libraryLoaders = new LibraryClassLoader[] { loader };
-
-		Logger.logSubLibrary(this, loader);
-	}
-
-	/**
-	 * create a BundleClassLoader for a bunch of libraries the first library of the given array is the main library of
-	 * this bundle
-	 * 
-	 * @param parent
-	 * @param loadersbs
-	 */
-	public BundleClassLoader(ClassLoader parent, LibraryClassLoader[] loadersbs) {
-		super(parent);
-
-		initLoaders(loadersbs);
-	}
-
-	/**
-	 * Create a new BundleClassLoader for a set of libraries and a specified main library It does not matter, if the
-	 * given set of libraries contains the main library.
-	 * 
-	 * @param parent
-	 * @param mainLoader
-	 * @param depLoaders
-	 */
-	public BundleClassLoader(ClassLoader parent, LibraryClassLoader mainLoader, Set<LibraryClassLoader> depLoaders) {
-		super(parent);
-		initLoaders(mainLoader, depLoaders);
-	}
-
-	/**
-	 * just for constructors: copy a given array of LibraryClassLoaders into this loader
-	 * 
-	 * @param loaders
-	 * 
-	 * @throws NullPointerException
-	 * @throws IllegalArgumentException
-	 */
-	private void initLoaders(LibraryClassLoader[] loaders) throws NullPointerException, IllegalArgumentException {
-		if (loaders == null)
-			throw new NullPointerException();
-		if (loaders.length == 0)
-			throw new IllegalArgumentException("You have to state at least one Library for a BundleClassLoader");
-
-		libraryLoaders = new LibraryClassLoader[loaders.length];
-		for (int i = 0; i < loaders.length; i++) {
-			libraryLoaders[i] = loaders[i];
-			Logger.logSubLibrary(this, loaders[i]);
-		}
-
-		notifyLoaders();
-	}
-
-	/**
-	 * just for constructors: init the array of loaded libraries from a given main library and a set of sub libraries
-	 * 
-	 * @param mainLoader
-	 * @param depLoaders
-	 * 
-	 * @throws NullPointerException
-	 */
-	private void initLoaders(LibraryClassLoader mainLoader, Set<LibraryClassLoader> depLoaders)
-			throws NullPointerException {
-		if (mainLoader == null)
-			throw new NullPointerException();
-
-		int size = 1;
-		if (depLoaders != null) {
-			size += depLoaders.size();
-
-			if (depLoaders.contains(mainLoader))
-				size--;
-		}
-
-		libraryLoaders = new LibraryClassLoader[size];
-		libraryLoaders[0] = mainLoader;
-
-		if (depLoaders != null) {
-			int i = 1;
-			Iterator<LibraryClassLoader> it = depLoaders.iterator();
-			while (it.hasNext()) {
-				LibraryClassLoader next = it.next();
-				if (!next.equals(mainLoader)) {
-					libraryLoaders[i] = it.next();
-					Logger.logSubLibrary(this, libraryLoaders[i]);
-					i++;
-				}
-			}
-		}
-
-		notifyLoaders();
-	}
-
-	/**
-	 * notify all registered LibraryClassLoaders of this BundleClassLoader
-	 */
-	private void notifyLoaders() {
-		for (int i = 0; i < libraryLoaders.length; i++)
-			libraryLoaders[i].registerParentLoader(this);
+	public BundleClassManager(ClassLoader parent) {
+		this.parent = parent;
 	}
 
 	/**
@@ -207,8 +73,6 @@ public class BundleClassLoader extends ClassLoader {
 			libraryLoaders[i] = temp[i];
 		for (int i = index; i < libraryLoaders.length; i++)
 			libraryLoaders[i] = temp[i + 1];
-
-		temp[index].unregisterParentLopader(this);
 	}
 
 	/**
@@ -222,8 +86,17 @@ public class BundleClassLoader extends ClassLoader {
 		for (int i = 0; i < temp.length; i++)
 			libraryLoaders[i] = temp[i];
 		libraryLoaders[libraryLoaders.length - 1] = loader;
-
-		loader.registerParentLoader(this);
+	}
+	
+	/**
+	 * init library loader with a list
+	 * 
+	 * Attention: overwrites existing loaders, only for initialization!
+	 * 
+	 * @param loaders
+	 */
+	public void initLibraryLoaders(LibraryClassLoader[] loaders) {
+		this.libraryLoaders = loaders;
 	}
 
 	/**
@@ -248,7 +121,6 @@ public class BundleClassLoader extends ClassLoader {
 		return result;
 	}
 
-	@Override
 	public URL getResource(String resourceName) {
 		// just delegate the resource loading to the first registered LibraryClassLoader
 		// via {@link findResource} all other child loaders will be asked as well
@@ -274,23 +146,24 @@ public class BundleClassLoader extends ClassLoader {
 				}
 			}
 		}
-
-		// ok, delegate to upper class?! - or the parent?
-		// parent findResource is not visible!
-		return super.findResource(resourceName);
+		
+		return parent.getResource(resourceName);
 	}
 
-	@Override
+	/**
+	 * Load a bundle class from the outside. The class will be resolved. 
+	 * 
+	 * Used to load the main service class.
+	 * 
+	 * @param className
+	 * @return
+	 * @throws ClassNotFoundException
+	 */
 	public Class<?> loadClass(String className) throws ClassNotFoundException {
-		// delegate class loading to the first registered LibraryClassLoader since
-		// the bundle class loader does no actual class loading itself.
-		//
-		// via loadClass ( String, boolean, LibraryClassLoader) all other child LibraryClassLoaders
-		// will be asked as well.
 		Logger.logLoading(this, className, null, null);
 
 		try {
-			Class<?> result = libraryLoaders[0].loadClass(className);
+			Class<?> result = libraryLoaders[0].loadClass(className, false);
 
 			Logger.logLoading(this, className, true, null);
 			return result;
@@ -306,16 +179,25 @@ public class BundleClassLoader extends ClassLoader {
 	 * The parameter for the child library is necessary to prevent loops of loadClass calls.
 	 * 
 	 * @param className
-	 * @param resolve
 	 * @param child
 	 * @return the loaded class
 	 * @throws ClassNotFoundException
 	 */
-	public Class<?> loadClass(String className, boolean resolve, LibraryClassLoader child)
+	protected Class<?> loadClass(String className, LibraryClassLoader child)
 			throws ClassNotFoundException {
 		Logger.logLoading(this, className, null,
 				"by child " + child.getLibrary().getIdentifier() + " - try " + libraryLoaders.length + " children");
 
+		// ask platform loader first
+		if (parent != null) {
+			try {
+				return parent.loadClass(className);
+			}
+			catch (ClassNotFoundException e) {
+			}
+		}
+		
+		// then ask child bundles
 		Class<?> result = null;
 		for (int i = 0; i < libraryLoaders.length; i++) {
 			if (libraryLoaders[i] != child) {
@@ -323,7 +205,7 @@ public class BundleClassLoader extends ClassLoader {
 						+ " - try child " + i + libraryLoaders[i].getLibrary().getIdentifier());
 
 				try {
-					result = libraryLoaders[i].loadClass(className, resolve, false);
+					result = libraryLoaders[i].loadClass(className, false, false);
 					if (result != null) {
 						Logger.logLoading(this, className, true, "by child" + child.getLibrary().getIdentifier());
 						return result;

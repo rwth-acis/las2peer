@@ -15,6 +15,8 @@ import java.util.Vector;
 import com.sun.management.OperatingSystemMXBean;
 
 import i5.las2peer.api.Service;
+import i5.las2peer.classLoaders.L2pClassManager;
+import i5.las2peer.classLoaders.libraries.Repository;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
 import i5.las2peer.communication.RMIExceptionContent;
@@ -121,7 +123,7 @@ public abstract class Node implements AgentStorage {
 	 */
 	private Hashtable<Long, MessageReceiver> htRegisteredReceivers = new Hashtable<Long, MessageReceiver>();
 
-	private ClassLoader baseClassLoader = null;
+	private L2pClassManager baseClassLoader = null;
 
 	private Hashtable<Long, MessageResultListener> htAnswerListeners = new Hashtable<Long, MessageResultListener>();
 
@@ -160,7 +162,7 @@ public abstract class Node implements AgentStorage {
 	/**
 	 * @param baseClassLoader
 	 */
-	public Node(ClassLoader baseClassLoader) {
+	public Node(L2pClassManager baseClassLoader) {
 		this(baseClassLoader, true);
 	}
 
@@ -168,7 +170,7 @@ public abstract class Node implements AgentStorage {
 	 * @param baseClassLoader
 	 * @param standardObserver
 	 */
-	public Node(ClassLoader baseClassLoader, boolean standardObserver) {
+	public Node(L2pClassManager baseClassLoader, boolean standardObserver) {
 		this(baseClassLoader, standardObserver, false);
 	}
 
@@ -180,7 +182,7 @@ public abstract class Node implements AgentStorage {
 	 * @param standardObserver
 	 * @param monitoringObserver
 	 */
-	public Node(ClassLoader baseClassLoader, boolean standardObserver, boolean monitoringObserver) {
+	public Node(L2pClassManager baseClassLoader, boolean standardObserver, boolean monitoringObserver) {
 		if (standardObserver) {
 			initStandardLogfile();
 		}
@@ -191,7 +193,7 @@ public abstract class Node implements AgentStorage {
 		this.baseClassLoader = baseClassLoader;
 
 		if (baseClassLoader == null)
-			this.baseClassLoader = this.getClass().getClassLoader();
+			this.baseClassLoader = new L2pClassManager(new Repository[0], this.getClass().getClassLoader());
 
 		nodeKeyPair = CryptoTools.generateKeyPair();
 		nodeServiceCache = new NodeServiceCache(this, nodeServiceCacheLifetime);
@@ -409,13 +411,13 @@ public abstract class Node implements AgentStorage {
 
 	/**
 	 * Gets the class loader, this node is bound to. In a <i>real</i> LAS2peer environment, this should refer to a
-	 * {@link i5.las2peer.classLoaders.L2pClassLoader}
+	 * {@link i5.las2peer.classLoaders.L2pClassManager}
 	 * 
 	 * Otherwise, the class loader of this Node class is used.
 	 * 
 	 * @return a class loader
 	 */
-	public ClassLoader getBaseClassLoader() {
+	public L2pClassManager getBaseClassLoader() {
 		return baseClassLoader;
 	}
 

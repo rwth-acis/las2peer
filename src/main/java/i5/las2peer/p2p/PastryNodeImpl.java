@@ -16,7 +16,7 @@ import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
 
-import i5.las2peer.classLoaders.L2pClassLoader;
+import i5.las2peer.classLoaders.L2pClassManager;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
 import i5.las2peer.logging.NodeObserver.Event;
@@ -110,7 +110,7 @@ public class PastryNodeImpl extends Node {
 	 * @param port
 	 * @param bootstrap
 	 */
-	public PastryNodeImpl(ClassLoader baseClassLoader, int port, String bootstrap) {
+	public PastryNodeImpl(L2pClassManager baseClassLoader, int port, String bootstrap) {
 		super(baseClassLoader);
 		initialize(port, bootstrap);
 	}
@@ -175,7 +175,7 @@ public class PastryNodeImpl extends Node {
 	 * @param cl
 	 * @param nodeIdSeed
 	 */
-	public PastryNodeImpl(int port, String bootstrap, STORAGE_MODE mode, boolean monitoringObserver, L2pClassLoader cl,
+	public PastryNodeImpl(int port, String bootstrap, STORAGE_MODE mode, boolean monitoringObserver, L2pClassManager cl,
 			Long nodeIdSeed) {
 		super(cl, true, monitoringObserver);
 		initialize(port, bootstrap, mode, nodeIdSeed);

@@ -2,11 +2,7 @@ package i5.las2peer.classLoaders;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
 
-import i5.las2peer.classLoaders.libraries.LoadedJarLibrary;
 import i5.las2peer.classLoaders.libraries.LoadedLibrary;
 import i5.las2peer.classLoaders.libraries.ResourceNotFoundException;
 
@@ -25,11 +21,9 @@ public class LibraryClassLoader extends ClassLoader {
 	private LoadedLibrary myLibrary = null;
 
 	/**
-	 * registered parents, may be multiple, especially for 3rd party libraries or exchange libraries
+	 * parent class loader
 	 */
-	// TODO: hm, hashset implementation leads to non-deterministic classloading calls to parents!!!
-	// especially of resources as well!!!
-	private Set<BundleClassLoader> parents = new HashSet<BundleClassLoader>();
+	private BundleClassManager parent;
 
 	/**
 	 * create a new class loader for a given library.
@@ -37,30 +31,10 @@ public class LibraryClassLoader extends ClassLoader {
 	 * @param lib
 	 * @param parent
 	 */
-	public LibraryClassLoader(LoadedLibrary lib, BundleClassLoader parent) {
-		this(lib);
-
-		parents.add(parent);
-	}
-
-	/**
-	 * create a new class loader for the given library
-	 * 
-	 * @param lib
-	 */
-	public LibraryClassLoader(LoadedLibrary lib) {
+	public LibraryClassLoader(LoadedLibrary lib, BundleClassManager parent) {
 		this.myLibrary = lib;
-	}
 
-	/**
-	 * create a LibraryClassLoader for the given Jar file
-	 * 
-	 * @param jarfile
-	 * @throws IOException
-	 * @throws IllegalArgumentException
-	 */
-	public LibraryClassLoader(String jarfile) throws IllegalArgumentException, IOException {
-		this.myLibrary = LoadedJarLibrary.createFromJar(jarfile);
+		this.parent = parent;
 	}
 
 	/**
@@ -75,14 +49,7 @@ public class LibraryClassLoader extends ClassLoader {
 		return myLibrary.getResourceAsBinary(resourceName);
 	}
 
-	/**
-	 * findClass is the only method that's actually needed for classloading this method will be called by loadClass, if
-	 * the class is not already loaded and cannot be found in the parent classloader.
-	 * 
-	 * @param className
-	 * @throws ClassNotFoundException
-	 */
-	public Class<?> findClassInternal(String className) throws ClassNotFoundException {
+	protected Class<?> findClass(String className) throws ClassNotFoundException {
 		byte[] binaryDefinition;
 		Logger.logFinding(this, className, null);
 
@@ -96,11 +63,6 @@ public class LibraryClassLoader extends ClassLoader {
 			Logger.logFinding(this, className, false);
 			throw new ClassNotFoundException("The class " + className + " could not be loaded by this classloader!", e);
 		}
-	}
-
-	public Class<?> findClass(String className) throws ClassNotFoundException {
-		Logger.logMessage(this, className, "external loading via findclass");
-		return loadClass(className, true);
 	}
 
 	@Override
@@ -121,33 +83,40 @@ public class LibraryClassLoader extends ClassLoader {
 	 * 
 	 * @throws ClassNotFoundException
 	 */
-	synchronized Class<?> loadClass(String name, boolean resolve, boolean lookUp) throws ClassNotFoundException {
-
+	protected synchronized Class<?> loadClass(String name, boolean resolve, boolean lookUp) throws ClassNotFoundException {
 		Logger.logLoading(this, name, null, lookUp);
-
-		// Then check if the class is already known
-		try {
-			return getSystemClassLoader().loadClass(name);
-		} catch (ClassNotFoundException e) {
-			// Class in not known
-		}
-
+		
 		// First, check if the class has already been loaded
 		Class<?> c = findLoadedClass(name);
 
+		// ask parent loader
+		if (c == null && lookUp && parent != null) {
+			try {
+				c = parent.loadClass(name, this);
+			}
+			catch (ClassNotFoundException e) {
+			}
+		}
+		else if (c == null && lookUp && parent == null){ // for test cases
+			try {
+				c = getSystemClassLoader().loadClass(name);
+			}
+			catch (ClassNotFoundException e) {
+			}
+		}
+		
+		// then look in this library
 		if (c == null) {
 			try {
-				return findClassInternal(name);
+				c = findClass(name);
 			} catch (ClassNotFoundException e) {
 				// class not found in this Library
 			}
 		}
 
-		if (c == null && lookUp) {
-			for (Iterator<BundleClassLoader> it = parents.iterator(); it.hasNext() && c == null;)
-				c = it.next().loadClass(name, resolve, this);
-		}
-
+		// resolve
+		// note that all classes need to be resolved here (even the ones loaded by another loader),
+		// because of the order classes are found (Platform, Bundle, Library)
 		if (resolve && c != null) {
 			resolveClass(c);
 		}
@@ -159,24 +128,6 @@ public class LibraryClassLoader extends ClassLoader {
 
 		Logger.logLoading(this, name, true, lookUp);
 		return c;
-	}
-
-	/**
-	 * register another parent bundle
-	 * 
-	 * @param parent
-	 */
-	void registerParentLoader(BundleClassLoader parent) {
-		parents.add(parent);
-	}
-
-	/**
-	 * unregister a parent bundle (e.g. if it is removed from the environment)
-	 * 
-	 * @param parent
-	 */
-	void unregisterParentLopader(BundleClassLoader parent) {
-		parents.remove(parent);
 	}
 
 	/**
@@ -203,14 +154,12 @@ public class LibraryClassLoader extends ClassLoader {
 		try {
 			return myLibrary.getResourceAsUrl(resourceName);
 		} catch (ResourceNotFoundException e) {
-			if (lookUp) {
-				for (Iterator<BundleClassLoader> p = parents.iterator(); p.hasNext();) {
-					URL result = p.next().findResource(resourceName, this);
-					if (result != null)
-						return result;
-				}
-
-				return super.getResource(resourceName);
+			if (lookUp && parent != null) {
+				URL result = parent.findResource(resourceName, this);
+				if (result != null)
+					return result;
+				else
+					return null;
 			} else
 				return null;
 		}
@@ -218,28 +167,12 @@ public class LibraryClassLoader extends ClassLoader {
 
 	/**
 	 * get the URL for a resource
+	 * @param resourceName 
+	 * @return 
 	 */
+	@Override
 	public URL getResource(String resourceName) {
 		return getResource(resourceName, true);
-	}
-
-	/**
-	 * is this LibraryClassLoader registered within some BundleClassLoaders?
-	 * 
-	 * @return true, if a parent class loader is registered to this library class loader
-	 */
-	public boolean hasParentLoaders() {
-		return parents.size() > 0;
-	}
-
-	/**
-	 * to how many BundleClassLoaders are registered to this LibraryClassLoader?
-	 * 
-	 * @return number of BundleClassLoaders using this LibraryClassLoader
-	 * 
-	 */
-	public int numberOfParentLoaders() {
-		return parents.size();
 	}
 
 }
