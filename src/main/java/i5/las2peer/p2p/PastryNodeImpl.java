@@ -340,7 +340,7 @@ public class PastryNodeImpl extends Node {
 	private void setupPastryApplications() throws IOException {
 		application = new NodeApplication(this);
 
-		PastryIdFactory idf = new rice.pastry.commonapi.PastryIdFactory(pastryEnvironment);
+		PastryIdFactory idf = new PastryIdFactory(pastryEnvironment);
 
 		Storage storage;
 		if (mode == STORAGE_MODE.filesystem) {
@@ -512,6 +512,9 @@ public class PastryNodeImpl extends Node {
 
 	@Override
 	public Envelope fetchArtifact(long id) throws ArtifactNotFoundException, StorageException {
+		if (getStatus() != NodeStatus.RUNNING) {
+			throw new IllegalStateException("You can fetch artifacts only from running nodes!");
+		}
 
 		observerNotice(Event.ARTIFACT_FETCH_STARTED, pastryNode, Long.toString(id));
 
@@ -540,7 +543,6 @@ public class PastryNodeImpl extends Node {
 
 	@Override
 	public void storeArtifact(Envelope envelope) throws StorageException, L2pSecurityException {
-
 		// check for overwriting
 		try {
 			Envelope stored = fetchArtifact(envelope.getId());
