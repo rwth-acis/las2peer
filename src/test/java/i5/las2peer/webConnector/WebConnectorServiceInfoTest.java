@@ -91,13 +91,6 @@ public class WebConnectorServiceInfoTest {
 	@Test
 	public void testServices() {
 		connector.updateServiceList();
-		// avoid timing errors: wait for the repository manager to get all services, before invoking them
-		try {
-			System.out.println("waiting...");
-			Thread.sleep(10000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 
 		MiniClient c = new MiniClient();
 		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
