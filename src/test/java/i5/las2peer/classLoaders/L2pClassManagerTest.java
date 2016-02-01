@@ -8,6 +8,7 @@ import java.lang.reflect.Method;
 import org.junit.Test;
 
 import i5.las2peer.classLoaders.libraries.FileSystemRepository;
+import i5.las2peer.classLoaders.libraries.LoadedLibrary;
 
 public class L2pClassManagerTest {
 
@@ -50,8 +51,28 @@ public class L2pClassManagerTest {
 
 		assertEquals(0, testee.numberOfRegisteredBundles());
 		assertEquals(0, testee.numberOfRegisteredLibraries());
+		
+		testee.getServiceClass("i5.las2peer.classLoaders.testPackage2.UsingCounter", "1.0");
+		testee.getServiceClass("i5.las2peer.classLoaders.testPackage1.CounterClass", "1.0");
+		testee.getServiceClass("i5.las2peer.classLoaders.testPackage1.CounterClass", "1.1");
+		
+		assertEquals(3, testee.numberOfRegisteredBundles());
+		assertEquals(3, testee.numberOfRegisteredLibraries());
 	}
 	
-	// TODO ADD test to test reusing of library caches
+	@Test
+	public void testMultipleServiceClassLoading() throws ClassLoaderException, SecurityException, NoSuchMethodException,
+			IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+		L2pClassManager testee = new L2pClassManager(new FileSystemRepository("export/jars/"), ClassLoader.getSystemClassLoader());
 
+		Class<?> cl1 = testee.getServiceClass("i5.las2peer.classLoaders.testPackage2.UsingCounter", "1.0");
+		Class<?> cl2 = testee.getServiceClass("i5.las2peer.classLoaders.testPackage2.UsingCounter", "1.0");
+		
+		assertFalse(cl1.getClassLoader().equals(ClassLoader.getSystemClassLoader()));
+		assertFalse(cl2.getClassLoader().equals(ClassLoader.getSystemClassLoader()));
+		
+		// check that CounterClass is the same
+		assertSame(cl1,cl2);
+	}
+	
 }

@@ -6,38 +6,81 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import i5.las2peer.classLoaders.libraries.LoadedJarLibrary;
 import i5.las2peer.classLoaders.libraries.LoadedLibrary;
 import i5.las2peer.classLoaders.libraries.ResourceNotFoundException;
 
-public class LoadedLibraryCache { // TODO TESTS
-	// TODO EINBAUEN
+public class LoadedLibraryCache {
 	
+	/**
+	 * loaded library that is cached
+	 */
 	private LoadedLibrary loadedLibrary;
 	
-	private Set<BundleClassManager> classLoaders = new HashSet<>();
+	/**
+	 * bundles using this cache
+	 */
+	private Set<BundleClassManager> bundles = new HashSet<>();
 	
+	/**
+	 * cached resources
+	 */
+	// TODO check benefit of resource caching
 	private Map<String,byte[]> resourceCache = new HashMap<>();  
 	
+	/**
+	 * create new cache for a library
+	 * 
+	 * @param loadedLibrary the LoadedLibrary that should be cached
+	 */
 	public LoadedLibraryCache(LoadedLibrary loadedLibrary) {
 		this.loadedLibrary = loadedLibrary;
 	}
 	
-	public void registerClassLoader(BundleClassManager classLoader) {
-		classLoaders.add(classLoader);
+	/**
+	 * register a bundle for using this cache
+	 * 
+	 * @param bundle
+	 */
+	public void registerBundle(BundleClassManager bundle) {
+		bundles.add(bundle);
 	}
 	
-	public void unregisterClassLoader(BundleClassManager classLoader) {
-		classLoaders.remove(classLoader);
+	/**
+	 * unregister a bundle
+	 * 
+	 * @param bundle
+	 */
+	public void unregisterBundle(BundleClassManager bundle) {
+		bundles.remove(bundle);
 	}
 	
+	/**
+	 * check if this cache is used
+	 * 
+	 * @return
+	 */
 	public boolean isUsed() {
-		return !classLoaders.isEmpty();
+		return !bundles.isEmpty();
 	}
 	
+	/**
+	 * get the cached library
+	 * 
+	 * @return
+	 */
 	public LoadedLibrary getLoadedLibrary() {
 		return loadedLibrary;
 	}
 	
+	/**
+	 * get a cached resource
+	 * 
+	 * @param resourceName
+	 * @return
+	 * @throws ResourceNotFoundException
+	 * @throws IOException
+	 */
 	public byte[] getCachedResourceAsBinary(String resourceName) throws ResourceNotFoundException, IOException {
 		if (resourceCache.containsKey(resourceName)) {
 			return resourceCache.get(resourceName);
@@ -49,4 +92,17 @@ public class LoadedLibraryCache { // TODO TESTS
 		}
 	}
 	
+	/**
+	 * convience method for junit tests
+	 * 
+	 * creates a new cache for a jar library
+	 * 
+	 * @param filename
+	 * @return
+	 * @throws IllegalArgumentException
+	 * @throws IOException
+	 */
+	protected static LoadedLibraryCache createFromJar(String filename) throws IllegalArgumentException, IOException {
+		return new LoadedLibraryCache(LoadedJarLibrary.createFromJar(filename));
+	}
 }

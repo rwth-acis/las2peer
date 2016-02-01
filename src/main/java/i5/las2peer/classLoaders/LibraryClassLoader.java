@@ -18,7 +18,7 @@ public class LibraryClassLoader extends ClassLoader {
 	/**
 	 * the library, this class loader is responsible for
 	 */
-	private LoadedLibrary myLibrary = null;
+	private LoadedLibraryCache myLibrary = null;
 
 	/**
 	 * parent class loader
@@ -31,7 +31,7 @@ public class LibraryClassLoader extends ClassLoader {
 	 * @param lib
 	 * @param parent
 	 */
-	public LibraryClassLoader(LoadedLibrary lib, BundleClassManager parent) {
+	public LibraryClassLoader(LoadedLibraryCache lib, BundleClassManager parent) {
 		this.myLibrary = lib;
 
 		this.parent = parent;
@@ -46,7 +46,7 @@ public class LibraryClassLoader extends ClassLoader {
 	 * @throws IOException
 	 */
 	private byte[] getResourceContent(String resourceName) throws ClassLoaderException, IOException {
-		return myLibrary.getResourceAsBinary(resourceName);
+		return myLibrary.getCachedResourceAsBinary(resourceName);
 	}
 
 	protected Class<?> findClass(String className) throws ClassNotFoundException {
@@ -136,7 +136,7 @@ public class LibraryClassLoader extends ClassLoader {
 	 * @return library linked to this classloader
 	 */
 	public LoadedLibrary getLibrary() {
-		return myLibrary;
+		return myLibrary.getLoadedLibrary();
 	}
 
 	/**
@@ -152,7 +152,7 @@ public class LibraryClassLoader extends ClassLoader {
 	 */
 	URL getResource(String resourceName, boolean lookUp) {
 		try {
-			return myLibrary.getResourceAsUrl(resourceName);
+			return myLibrary.getLoadedLibrary().getResourceAsUrl(resourceName);
 		} catch (ResourceNotFoundException e) {
 			if (lookUp && parent != null) {
 				URL result = parent.findResource(resourceName, this);

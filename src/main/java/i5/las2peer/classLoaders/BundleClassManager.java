@@ -1,8 +1,6 @@
 package i5.las2peer.classLoaders;
 
 import java.net.URL;
-import java.util.Iterator;
-import java.util.Set;
 
 import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
 
@@ -31,61 +29,6 @@ public class BundleClassManager {
 	 */
 	public BundleClassManager(ClassLoader parent) {
 		this.parent = parent;
-	}
-
-	/**
-	 * remove a library class loader from this bundle loader i.e. for hotplugging a new version
-	 * 
-	 * @param ident
-	 */
-	public void removeLibrary(LibraryIdentifier ident) {
-		boolean done = false;
-		for (int i = 0; i < this.libraryLoaders.length && !done; i++)
-			if (libraryLoaders[i].getLibrary().getIdentifier().equals(ident)) {
-				removeLibraryLoader(i);
-				done = true;
-			}
-	}
-
-	/**
-	 * remove a library class loader from this bundle loader i.e. for hotplugging a new version
-	 * 
-	 * @param loader
-	 */
-	public void removeLibraryLoader(LibraryClassLoader loader) {
-		boolean done = false;
-		for (int i = 0; i < this.libraryLoaders.length && !done; i++)
-			if (libraryLoaders[i].equals(loader)) {
-				removeLibraryLoader(i);
-				done = true;
-			}
-	}
-
-	/**
-	 * helper method for the other removeLibraryLoader methods the real removal takes place here
-	 * 
-	 * @param index
-	 */
-	private void removeLibraryLoader(int index) {
-		LibraryClassLoader[] temp = libraryLoaders;
-		libraryLoaders = new LibraryClassLoader[temp.length - 1];
-		for (int i = 0; i < index; i++)
-			libraryLoaders[i] = temp[i];
-		for (int i = index; i < libraryLoaders.length; i++)
-			libraryLoaders[i] = temp[i + 1];
-	}
-
-	/**
-	 * register a new LibraryClassLoader with this BundleClassLoader
-	 * 
-	 * @param loader
-	 */
-	public void registerLibraryLoader(LibraryClassLoader loader) {
-		LibraryClassLoader[] temp = libraryLoaders;
-		libraryLoaders = new LibraryClassLoader[temp.length + 1];
-		for (int i = 0; i < temp.length; i++)
-			libraryLoaders[i] = temp[i];
-		libraryLoaders[libraryLoaders.length - 1] = loader;
 	}
 	
 	/**

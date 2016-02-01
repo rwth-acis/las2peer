@@ -59,7 +59,7 @@ public abstract class LoadedLibrary {
 	 * generates a new CL with dependencies which may be used in class loading
 	 * 
 	 * @param lib identifier of the library bound to this ClassLoader
-	 * @param deps array with ClassLoaders this one may use for class loading
+	 * @param initialDependencies array with ClassLoaders this one may use for class loading
 	 */
 	LoadedLibrary(LibraryIdentifier lib, LibraryDependency[] initialDependencies) {
 		this(lib);

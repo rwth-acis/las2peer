@@ -1,8 +1,6 @@
 package i5.las2peer.classLoaders;
 
 import static org.junit.Assert.*;
-import i5.las2peer.classLoaders.libraries.LoadedJarLibrary;
-import i5.las2peer.classLoaders.libraries.LoadedLibrary;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -16,7 +14,7 @@ public class LibraryClassLoaderTest {
 
 	@Test
 	public void test() throws IllegalArgumentException, IOException {
-		LoadedLibrary lib = LoadedJarLibrary.createFromJar("export/jars/i5.las2peer.classLoaders.testPackage2-1.0.jar");
+		LoadedLibraryCache lib = LoadedLibraryCache.createFromJar("export/jars/i5.las2peer.classLoaders.testPackage2-1.0.jar");
 		LibraryClassLoader testee = new LibraryClassLoader(lib, null);
 
 		assertEquals("i5.las2peer.classLoaders.testPackage2", testee.getLibrary().getIdentifier().getName());
@@ -26,7 +24,7 @@ public class LibraryClassLoaderTest {
 	@Test
 	public void testClassLoading() throws IllegalArgumentException, IOException, ClassNotFoundException,
 			SecurityException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-		LoadedLibrary lib = LoadedJarLibrary.createFromJar("export/jars/i5.las2peer.classLoaders.testPackage1-1.0.jar");
+		LoadedLibraryCache lib = LoadedLibraryCache.createFromJar("export/jars/i5.las2peer.classLoaders.testPackage1-1.0.jar");
 		LibraryClassLoader testee = new LibraryClassLoader(lib, null);
 
 		Class<?> cl = testee.loadClass("i5.las2peer.classLoaders.testPackage1.CounterClass",false,false);
@@ -50,7 +48,7 @@ public class LibraryClassLoaderTest {
 
 	@Test
 	public void testResources() throws IllegalArgumentException, IOException {
-		LoadedLibrary lib = LoadedJarLibrary.createFromJar("export/jars/i5.las2peer.classLoaders.testPackage1-1.0.jar");
+		LoadedLibraryCache lib = LoadedLibraryCache.createFromJar("export/jars/i5.las2peer.classLoaders.testPackage1-1.0.jar");
 		LibraryClassLoader testee = new LibraryClassLoader(lib, null);
 
 		Properties properties = new Properties();
@@ -68,7 +66,7 @@ public class LibraryClassLoaderTest {
 
 	@Test
 	public void testLoaderBehaviour() throws ClassNotFoundException, IllegalArgumentException, IOException {
-		LoadedLibrary lib = LoadedJarLibrary.createFromJar("export/jars/i5.las2peer.classLoaders.testPackage1-1.0.jar");
+		LoadedLibraryCache lib = LoadedLibraryCache.createFromJar("export/jars/i5.las2peer.classLoaders.testPackage1-1.0.jar");
 		LibraryClassLoader testee1 = new LibraryClassLoader(lib, null);
 		LibraryClassLoader testee2 = new LibraryClassLoader(lib, null);
 

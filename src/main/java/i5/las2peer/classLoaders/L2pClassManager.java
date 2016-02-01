@@ -150,8 +150,8 @@ public class L2pClassManager {
 		// create LibraryClassLoaders 
 		LibraryClassLoader[] classLoaderDeps = new LibraryClassLoader[resolvedDeps.length];
 		for (int i = 0; i < resolvedDeps.length; i++) {
-			resolvedDeps[i].registerClassLoader(bcl);
-			classLoaderDeps[i] = new LibraryClassLoader(resolvedDeps[i].getLoadedLibrary(),bcl);
+			resolvedDeps[i].registerBundle(bcl);
+			classLoaderDeps[i] = new LibraryClassLoader(resolvedDeps[i],bcl);
 		}
 
 		// init bundle
@@ -192,7 +192,7 @@ public class L2pClassManager {
 		LibraryClassLoader[] subloaders = bcl.getLibraryLoaders();
 		for (int i = 0; i < subloaders.length; i++) {
 			LoadedLibraryCache cache = getRegisteredLoadedLibrary(subloaders[i].getLibrary());
-			cache.unregisterClassLoader(bcl);
+			cache.unregisterBundle(bcl);
 			if (!cache.isUsed())
 				removeLoadedLibrary(cache.getLoadedLibrary());
 		}
