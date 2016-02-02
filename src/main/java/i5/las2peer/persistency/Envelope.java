@@ -784,18 +784,17 @@ public final class Envelope implements XmlAble, Cloneable {
 	}
 
 	/**
-	 * @deprecated Use {@link #getContent(ClassLoader, Class)} instead!
+	 * Get the content as deserialized object. This method uses the same class loader as the calling class.
 	 * 
 	 * @param cls
 	 * @return the typed content of this envelope
 	 * @throws EnvelopeException
 	 */
-	@Deprecated
 	public <T extends Serializable> T getContent(Class<T> cls) throws EnvelopeException {
+		if (contentStorage == null) {
+			contentStorage = deserializeContent(getClass().getClassLoader());
+		}
 		try {
-			if (contentStorage == null)
-				contentStorage = getContentAsSerializable();
-
 			return cls.cast(contentStorage);
 		} catch (ClassCastException e) {
 			throw new EnvelopeException("content is not of class " + cls, e);
@@ -803,7 +802,7 @@ public final class Envelope implements XmlAble, Cloneable {
 	}
 
 	/**
-	 * for better accessibility of typed content
+	 * Get the content as deserialized object.
 	 * 
 	 * @param cls
 	 * @param classLoader
@@ -812,26 +811,30 @@ public final class Envelope implements XmlAble, Cloneable {
 	 */
 	public <T extends Serializable> T getContent(ClassLoader classLoader, Class<T> cls) throws EnvelopeException {
 		if (contentStorage == null) {
-			byte[] bytes = getContentAsBinary();
-			ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-			try {
-				ObjectInputStream ois = new ObjectInputStream(bais) {
-					@Override
-					protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
-						return Class.forName(desc.getName(), false, classLoader);
-					}
-				};
-				contentStorage = (Serializable) ois.readObject();
-			} catch (IOException e) {
-				throw new EnvelopeException("IO problems", e);
-			} catch (ClassNotFoundException e) {
-				throw new EnvelopeException("Class not found ?!?!", e);
-			}
+			contentStorage = deserializeContent(classLoader);
 		}
 		try {
 			return cls.cast(contentStorage);
 		} catch (ClassCastException e) {
 			throw new EnvelopeException("content is not of class " + cls, e);
+		}
+	}
+
+	private Serializable deserializeContent(ClassLoader classLoader) throws EnvelopeException {
+		byte[] bytes = getContentAsBinary();
+		ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+		try {
+			ObjectInputStream ois = new ObjectInputStream(bais) {
+				@Override
+				protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
+					return Class.forName(desc.getName(), false, classLoader);
+				}
+			};
+			return (Serializable) ois.readObject();
+		} catch (IOException e) {
+			throw new EnvelopeException("IO problems", e);
+		} catch (ClassNotFoundException e) {
+			throw new EnvelopeException("Class not found ?!?!", e);
 		}
 	}
 
