@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Random;
 
+import i5.las2peer.classLoaders.L2pClassManager;
+import i5.las2peer.classLoaders.libraries.FileSystemRepository;
 import i5.las2peer.communication.Message;
 import i5.las2peer.persistency.Envelope;
 import i5.las2peer.persistency.MalformedXMLException;
@@ -37,6 +39,21 @@ public class LocalNode extends Node {
 	 */
 	private LocalNode() {
 		super();
+
+		Random r = new Random();
+		nodeId = r.nextLong();
+
+		locallyKnownAgents = new BasicAgentStorage(this);
+
+		setStatus(NodeStatus.CONFIGURED);
+	}
+	
+	/**
+	 * create a LocalNode
+	 * @param classManager
+	 */
+	private LocalNode(L2pClassManager classManager) {
+		super(classManager);
 
 		Random r = new Random();
 		nodeId = r.nextLong();
@@ -267,6 +284,16 @@ public class LocalNode extends Node {
 	 */
 	public static LocalNode newNode() {
 		return new LocalNode();
+	}
+	
+	/**
+	 * create a LocalNode using a FileSystemRepository at the given location
+	 * 
+	 * @param fileSystemRepository a path to the service directory
+	 * @return
+	 */
+	public static LocalNode newNode(String fileSystemRepository) {
+		return new LocalNode(new L2pClassManager(new FileSystemRepository(fileSystemRepository), ClassLoader.getSystemClassLoader()));
 	}
 
 	/**

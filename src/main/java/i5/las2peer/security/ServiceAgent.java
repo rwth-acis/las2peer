@@ -215,6 +215,8 @@ public class ServiceAgent extends PassphraseAgent {
 
 	@Override
 	public void notifyUnregister() {
+		getRunningAtNode().getNodeServiceCache().unregisterLocalService(this);
+					
 		serviceInfoAgentNotifyUnregister();
 		if (serviceInstance != null) {
 			serviceInstance.close();
@@ -222,7 +224,7 @@ public class ServiceAgent extends PassphraseAgent {
 		}
 		Node runningAt = getRunningAtNode();
 		if (runningAt != null) {
-			runningAt.observerNotice(Event.SERVICE_SHUTDOWN, runningAt.getNodeId(), this, getServiceClassName());
+			runningAt.observerNotice(Event.SERVICE_SHUTDOWN, runningAt.getNodeId(), this, getServiceNameVersion().toString());
 		}
 		super.notifyUnregister();
 	}
@@ -446,6 +448,9 @@ public class ServiceAgent extends PassphraseAgent {
 
 			// notify Service Info Agent
 			serviceInfoAgentNotifyRegister();
+			
+			// notify Node
+			node.getNodeServiceCache().registerLocalService(this);
 
 		} catch (ClassLoaderException e1) {
 			throw new L2pServiceException("Problems with the classloader", e1);
@@ -469,7 +474,7 @@ public class ServiceAgent extends PassphraseAgent {
 	/**
 	 * just use a long hash value of the service class name as id for the agent
 	 * 
-	 * @param serviceClassName
+	 * @param service
 	 * 
 	 * @return (hashed) ID for the given service class
 	 */

@@ -324,7 +324,7 @@ public class ServiceInfoAgent extends PassphraseAgent {
 
 		if (listIsEmpty) {
 			ServiceList data = (ServiceList) getEnvelopeData(SERVICE_LIST_ENVELOPE_NAME, ServiceList.class);
-			data.removeService(servicenameVersion); // TODO versions of services
+			data.removeService(servicenameVersion);
 			setEnvelopeData(SERVICE_LIST_ENVELOPE_NAME, ServiceList.class, data, node);
 		}
 	}

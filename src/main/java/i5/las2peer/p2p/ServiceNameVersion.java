@@ -18,11 +18,11 @@ public class ServiceNameVersion implements Serializable {
 	}
 
 	public String getNameVersion() {
-		return name + SEPERATOR + version;
+		return toString(name,version);
 	}
 
 	private String name;
-	private String version;
+	private String version; // TODO use ServiceVersion here ?
 
 	public ServiceNameVersion(String name, String version) {
 		this.name = name;
@@ -31,21 +31,28 @@ public class ServiceNameVersion implements Serializable {
 
 	@Override
 	public boolean equals(Object obj) {
-		return (name + SEPERATOR + version).equals(obj);
+		if (obj instanceof ServiceNameVersion) {
+			return this.toString().equals(obj.toString());
+		}
+		
+		return this.toString().equals(obj);
 	}
 
 	@Override
 	public int hashCode() {
-		return (name + SEPERATOR + version).hashCode();
+		return this.toString().hashCode();
 	}
 
 	@Override
 	public String toString() {
-		return name + SEPERATOR + version;
+		return toString(name, version);
 	}
 
 	public static String toString(String serviceName, String version) {
-		return serviceName + SEPERATOR + version;
+		if (version != null)
+			return serviceName + SEPERATOR + version;
+		else
+			return serviceName;
 	}
 	
 	public static ServiceNameVersion fromString(String nameVersion) {
@@ -53,6 +60,6 @@ public class ServiceNameVersion implements Serializable {
 		if (a.length>1)
 			return new ServiceNameVersion(a[0],a[1]);
 		else
-			return new ServiceNameVersion(a[0],"1.0"); // for compatibility
+			return new ServiceNameVersion(a[0],null);
 	}
 }

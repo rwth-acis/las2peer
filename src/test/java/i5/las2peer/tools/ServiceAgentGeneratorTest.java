@@ -36,7 +36,7 @@ public class ServiceAgentGeneratorTest {
 
 	@Test
 	public void testMainNormal() {
-		String className = "a.test.package.WithAService";
+		String className = "a.test.package.WithAService@1.0";
 		ServiceAgentGenerator.main(new String[] { className, "mypass" });
 
 		assertEquals("", standardError.toString());

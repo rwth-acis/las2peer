@@ -177,10 +177,10 @@
 		</copy>
 	</target>
 	
-	<target name="compile_help1" depends="init_compile">
+	<target name="compile_help1" depends="init_compile, compile_main">
 		<javac srcdir="${src.help1}"
 			destdir="${tmp.help1}"
-			classpath=""
+			classpath="${lib.cp}:${tmp.classes}"
 			debug="on"
 			encoding="UTF-8"
 			includeantruntime="false"
@@ -193,10 +193,10 @@
 		</copy>
 	</target>
 	
-	<target name="compile_help2" depends="init_compile">
+	<target name="compile_help2" depends="init_compile, compile_main">
 		<javac srcdir="${src.help2}"
 			destdir="${tmp.help2}"
-			classpath=""
+			classpath="${lib.cp}:${tmp.classes}"
 			debug="on"
 			encoding="UTF-8"
 			includeantruntime="false"
@@ -265,8 +265,44 @@
 		</jar>
 	</target>
 	
+	<target name="jar_testService1-1.0" depends="init_jars, compile_help1">
+		<jar jarfile="${export.jars}/i5.las2peer.testServices.testPackage1-1.0.jar">
+			<fileset dir="${tmp.help1}">
+				<include name="i5/las2peer/testServices/testPackage1/**/*" />
+			</fileset>
+			<manifest>
+				<attribute name="Library-SymbolicName" value="i5.las2peer.testServices.testPackage1" />
+				<attribute name="Library-Version" value="1.0" />
+			</manifest>
+		</jar>
+	</target>
+	
+	<target name="jar_testService1-1.1" depends="init_jars, compile_help2">
+		<jar jarfile="${export.jars}/i5.las2peer.testServices.testPackage1-1.1.jar">
+			<fileset dir="${tmp.help2}">
+				<include name="i5/las2peer/testServices/testPackage1/**/*" />
+			</fileset>
+			<manifest>
+				<attribute name="Library-SymbolicName" value="i5.las2peer.testServices.testPackage1" />
+				<attribute name="Library-Version" value="1.1" />
+			</manifest>
+		</jar>
+	</target>
+	
+	<target name="jar_testService2-1.0" depends="init_jars, compile_help1">
+		<jar jarfile="${export.jars}/i5.las2peer.testServices.testPackage2-1.0.jar">
+			<fileset dir="${tmp.help1}">
+				<include name="i5/las2peer/testServices/testPackage2/**/*" />
+			</fileset>
+			<manifest>
+				<attribute name="Library-SymbolicName" value="i5.las2peer.testServices.testPackage2" />
+				<attribute name="Library-Version" value="1.0" />
+			</manifest>
+		</jar>
+	</target>
+	
 	<target name="jars" depends="main_jar, test_service_jar, test_service_helper_jar" />
-	<target name="junit_jars" depends="jar_test1-1.1, jar_test1-1.2, jar_test2-1.0" />
+	<target name="junit_jars" depends="jar_test1-1.1, jar_test1-1.2, jar_test2-1.0, jar_testService1-1.0, jar_testService1-1.1, jar_testService2-1.0" />
 	
 	<target name="main_jar" depends="compile_all">
 		<!-- constructs the external libraries classpath name -->

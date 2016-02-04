@@ -13,6 +13,7 @@ import i5.las2peer.execution.L2pServiceException;
 import i5.las2peer.execution.NoSuchServiceException;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.LocalNode;
+import i5.las2peer.p2p.ServiceNameVersion;
 import i5.las2peer.persistency.Envelope;
 import i5.las2peer.security.Agent;
 import i5.las2peer.security.AgentException;
@@ -91,7 +92,7 @@ public abstract class LocalServiceTestCase {
 						+ " but for " + agent.getServiceNameVersion().getName());
 		} catch (NoSuchFieldException e) {
 			agentPassphrase = SimpleTools.createRandomString(10);
-			return ServiceAgent.createServiceAgent(getServiceClass().getName(), agentPassphrase);
+			return ServiceAgent.createServiceAgent(new ServiceNameVersion(getServiceClass().getName(),getServiceVersion()), agentPassphrase);
 		} catch (Exception e) {
 			if (e instanceof AgentException)
 				throw (AgentException) e;
@@ -165,8 +166,8 @@ public abstract class LocalServiceTestCase {
 	 * @return the running instance of the Service to test
 	 * @throws NoSuchServiceException
 	 */
-	protected Service getServiceInstance() throws NoSuchServiceException { // TODO CHANGE use version!
-		return localNode.getLocalServiceInstance(getServiceClass());
+	protected Service getServiceInstance() throws NoSuchServiceException {
+		return this.getMyAgent().getServiceInstance();
 	}
 
 	/**
@@ -176,6 +177,14 @@ public abstract class LocalServiceTestCase {
 	 * @return the service class to be launched and tested
 	 */
 	public abstract Class<? extends Service> getServiceClass();
+	
+	/**
+	 * define a service version to test, this service will be started in a {@link i5.las2peer.p2p.LocalNode} before
+	 * starting the actual test
+	 * 
+	 * @return the service version to be launched and tested
+	 */
+	public abstract String getServiceVersion();
 
 	/**
 	 * invoke a method of the service to test
@@ -193,7 +202,7 @@ public abstract class LocalServiceTestCase {
 	 */
 	public Serializable invoke(long executing, String method, Serializable... parameters)
 			throws L2pServiceException, L2pSecurityException, AgentNotKnownException, InterruptedException {
-		return getNode().invokeLocally(executing, getServiceClass().getName(), method, parameters);
+		return getNode().invokeLocally(executing, getMyAgent().getServiceNameVersion(), method, parameters);
 	}
 
 	/**

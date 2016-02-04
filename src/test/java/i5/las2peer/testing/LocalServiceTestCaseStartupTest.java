@@ -25,4 +25,9 @@ public class LocalServiceTestCaseStartupTest extends LocalServiceTestCase {
 		return "testing/local_xml_startup";
 	}
 
+	@Override
+	public String getServiceVersion() {
+		return "1.0";
+	}
+
 }

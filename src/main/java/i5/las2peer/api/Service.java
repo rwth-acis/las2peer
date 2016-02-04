@@ -11,7 +11,6 @@ import i5.las2peer.execution.NoSuchServiceMethodException;
 import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.Node;
-import i5.las2peer.p2p.ServiceNameVersion;
 import i5.las2peer.p2p.TimeoutException;
 import i5.las2peer.security.Agent;
 import i5.las2peer.security.Context;
@@ -166,7 +165,9 @@ public abstract class Service extends Configurable {
 	 * To use the service agent as executing entity, use {@link #invokeInternally(String, String, Serializable...)}
 	 * instead.
 	 * 
-	 * @param service the service class
+	 * @param service The service class. A version may be specified (for example package.serviceClass@1.0.0-1 or package.serviceClass@1.0). 
+	 * 				The core tries to find an appropriate version (version 1.0.5 matches 1.0). If no version is specified,
+	 * 				the newest version is picked.
 	 * @param method the service method
 	 * @param parameters list of parameters
 	 * 
@@ -183,7 +184,7 @@ public abstract class Service extends Configurable {
 			throws AgentNotKnownException, L2pServiceException, L2pSecurityException, InterruptedException,
 			TimeoutException {
 
-		return getContext().getLocalNode().invoke(getContext().getMainAgent(), ServiceNameVersion.fromString(service),
+		return getContext().getLocalNode().invoke(getContext().getMainAgent(), service,
 				method, parameters);
 	}
 
@@ -193,7 +194,9 @@ public abstract class Service extends Configurable {
 	 * To use the main agent as executing entity, use {@link #invokeServiceMethod(String, String, Serializable...)}
 	 * instead.
 	 * 
-	 * @param service the service class
+	 * @param service The service class. A version may be specified (for example package.serviceClass@1.0.0-1 or package.serviceClass@1.0). 
+	 * 				The core tries to find an appropriate version (version 1.0.5 matches 1.0). If no version is specified,
+	 * 				the newest version is picked.
 	 * @param method the service method
 	 * @param parameters list of parameters
 	 * 
@@ -209,7 +212,7 @@ public abstract class Service extends Configurable {
 			throws AgentNotKnownException, L2pServiceException, L2pSecurityException, InterruptedException,
 			TimeoutException {
 
-		return getContext().getLocalNode().invoke(getAgent(), ServiceNameVersion.fromString(service), method,
+		return getContext().getLocalNode().invoke(getAgent(), service, method,
 				parameters);
 	}
 

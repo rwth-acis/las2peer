@@ -17,7 +17,7 @@ public class LocalServiceTestCaseTest extends LocalServiceTestCase {
 	@Test
 	public void test() throws NoSuchServiceException {
 		assertEquals(TestService.class, getServiceClass());
-		assertEquals(TestService.class.getName(), getMyAgent().getServiceClassName());
+		assertEquals(TestService.class.getName(), getMyAgent().getServiceNameVersion().getName());
 
 		assertTrue(getNode().hasAgent(getMyAgent().getId()));
 
@@ -36,6 +36,11 @@ public class LocalServiceTestCaseTest extends LocalServiceTestCase {
 	@Override
 	public Class<? extends Service> getServiceClass() {
 		return TestService.class;
+	}
+	
+	@Override
+	public String getServiceVersion() {
+		return "1.0";
 	}
 
 }

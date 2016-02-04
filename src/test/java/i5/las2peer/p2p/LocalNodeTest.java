@@ -295,7 +295,7 @@ public class LocalNodeTest {
 			AgentException, SecurityException, IllegalArgumentException, AgentNotKnownException, NoSuchMethodException,
 			IllegalAccessException, InvocationTargetException, InterruptedException {
 		String serviceClass = "i5.las2peer.api.TestService";
-		ServiceAgent testService = ServiceAgent.createServiceAgent(serviceClass, "a passphrase");
+		ServiceAgent testService = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(serviceClass+"@1.0"), "a passphrase");
 		testService.unlockPrivateKey("a passphrase");
 
 		LocalNode testee = LocalNode.launchNode();
@@ -307,7 +307,7 @@ public class LocalNodeTest {
 		testee.storeAgent(testService);
 		testee.registerReceiver(testService);
 
-		Serializable result = testee.invokeLocally(eve.getId(), serviceClass, "inc",
+		Serializable result = testee.invokeLocally(eve.getId(), ServiceNameVersion.fromString(serviceClass+"@1.0"), "inc",
 				new Serializable[] { new Integer(10) });
 
 		assertEquals(12, result);

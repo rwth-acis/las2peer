@@ -111,7 +111,7 @@ public class L2pNodeLauncher { // TODO DOCUMENTATION versionen bei service param
 	/**
 	 * Looks for the given service in the LAS2peer network.
 	 * 
-	 * @param serviceClass
+	 * @param serviceNameVersion Exact name and version, same syantax as in {@link #startService(String)}
 	 * @return node handles
 	 * @throws AgentNotKnownException
 	 */
@@ -340,6 +340,7 @@ public class L2pNodeLauncher { // TODO DOCUMENTATION versionen bei service param
 
 	/**
 	 * Stops a connector given by its classname.
+	 * @param connectorClass 
 	 */
 	public void stopConnector(String connectorClass) {
 		Iterator<Connector> iterator = connectors.iterator();
@@ -464,40 +465,44 @@ public class L2pNodeLauncher { // TODO DOCUMENTATION versionen bei service param
 	}
 
 	/**
-	 * Invokes a service method as the current agent.
+	 * Invokes a service method as the current agent, choosing an approptiate service version.
 	 * 
 	 * The arguments must be passed via ONE String separated by "-".
 	 * 
 	 * @see #registerUserAgent
 	 * 
-	 * @param serviceClass
+	 * @param serviceIdentifier
+	 * @param serviceMethod 
 	 * @param parameters pass an empty string if you want to call a method without parameters
+	 * @return 
 	 * @throws L2pServiceException any exception during service method invocation
 	 */
-	public Serializable invoke(String serviceClass, String serviceMethod, String parameters)
+	public Serializable invoke(String serviceIdentifier, String serviceMethod, String parameters)
 			throws L2pServiceException {
 		if (parameters.isEmpty())
-			return invoke(serviceClass, serviceMethod, new Serializable[0]);
+			return invoke(serviceIdentifier, serviceMethod, new Serializable[0]);
 		String[] split = parameters.trim().split("-");
-		return invoke(serviceClass, serviceMethod, (Serializable[]) split);
+		return invoke(serviceIdentifier, serviceMethod, (Serializable[]) split);
 	}
 
 	/**
-	 * Invokes a service method as the current agent.
+	 * Invokes a service method as the current agent, choosing an approptiate service version.
 	 * 
 	 * @see #registerUserAgent
 	 * 
-	 * @param serviceClass
+	 * @param serviceIdentifier 
+	 * @param serviceMethod 
 	 * @param parameters
+	 * @return 
 	 * @throws L2pServiceException any exception during service method invocation
 	 */
-	private Serializable invoke(String serviceNameVersion, String serviceMethod, Serializable... parameters)
+	private Serializable invoke(String serviceIdentifier, String serviceMethod, Serializable... parameters)
 			throws L2pServiceException {
 		if (currentUser == null)
 			throw new IllegalStateException("Please register a valid user with registerUserAgent before invoking!");
 
 		try {
-			return node.invoke(currentUser, ServiceNameVersion.fromString(serviceNameVersion), serviceMethod, parameters);
+			return node.invoke(currentUser, serviceIdentifier, serviceMethod, parameters);
 		} catch (Exception e) {
 			throw new L2pServiceException("Exception during service method invocation!", e);
 		}
@@ -506,7 +511,7 @@ public class L2pNodeLauncher { // TODO DOCUMENTATION versionen bei service param
 	/**
 	 * Returns a list of available methods for the given service class name.
 	 * 
-	 * @param serviceName
+	 * @param serviceNameVersion Exact service name and version, same syntax as in {@link #startService(String)}
 	 * 
 	 * @return list of methods encapsulated in a ListMethodsContent
 	 * 
@@ -536,7 +541,7 @@ public class L2pNodeLauncher { // TODO DOCUMENTATION versionen bei service param
 	 * Generate a new {@link i5.las2peer.security.ServiceAgent} instance for the given service class and start an
 	 * instance of this service at the current LAS2peer node.
 	 * 
-	 * @param serviceClass
+	 * @param serviceNameVersion Specify the service name and version to run: package.serviceClass@Version. Exact match required.
 	 * 
 	 * @return Returns the passphrase of the generated {@link i5.las2peer.security.ServiceAgent} or null if the agent is
 	 *         already known.
@@ -587,8 +592,9 @@ public class L2pNodeLauncher { // TODO DOCUMENTATION versionen bei service param
 	/**
 	 * start a service with a known agent or generate a new agent for the service
 	 * 
-	 * @param serviceClass
+	 * @param serviceNameVersion
 	 * @param agentPass
+	 * @throws AgentNotKnownException 
 	 * @throws L2pSecurityException
 	 * @throws AgentException
 	 * @throws AgentAlreadyRegisteredException
@@ -696,6 +702,7 @@ public class L2pNodeLauncher { // TODO DOCUMENTATION versionen bei service param
 	 * @param storageMode A {@link STORAGE_MODE} used by the local node instance for persistency.
 	 * @param monitoringObserver determines, if the monitoring-observer will be started at this node
 	 * @param cl the classloader to be used with this node
+	 * @param nodeIdSeed the seed to generate node ids from
 	 */
 	private L2pNodeLauncher(int port, String bootstrap, STORAGE_MODE storageMode, boolean monitoringObserver,
 			L2pClassManager cl, Long nodeIdSeed) {
@@ -754,6 +761,7 @@ public class L2pNodeLauncher { // TODO DOCUMENTATION versionen bei service param
 	 * Launches a single node.
 	 * 
 	 * @param args
+	 * @return the L2pNodeLauncher instance
 	 * @throws NodeException
 	 */
 	public static L2pNodeLauncher launchSingle(Iterable<String> args) throws NodeException {

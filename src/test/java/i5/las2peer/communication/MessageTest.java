@@ -17,6 +17,7 @@ import org.junit.Test;
 
 import i5.las2peer.execution.RMITask;
 import i5.las2peer.p2p.AgentNotKnownException;
+import i5.las2peer.p2p.ServiceNameVersion;
 import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.security.BasicAgentStorage;
@@ -272,12 +273,13 @@ public class MessageTest {
 			EncodingFailedException, SerializationException, AgentNotKnownException {
 		BasicAgentStorage storage = new BasicAgentStorage();
 		UserAgent eve = MockAgentFactory.getEve();
-		ServiceAgent service = ServiceAgent.createServiceAgent("i5.las2peer.api.TestService", "a pass");
+		 // class loading will be bypassed, so the version specified is not used
+		ServiceAgent service = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.0"), "a pass");
 		storage.registerAgents(eve, service);
 
 		eve.unlockPrivateKey("evespass");
 		Message m = new Message(eve, service,
-				new RMITask("i5.las2peer.api.TestService", "inc", new Serializable[] { new Integer(10) }));
+				new RMITask(ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.0"), "inc", new Serializable[] { new Integer(10) }));
 
 		String xml = m.toXmlString();
 
