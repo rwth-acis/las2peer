@@ -38,6 +38,7 @@ public class UserAgent extends PassphraseAgent {
 	 * @param id
 	 * @param pair
 	 * @param passphrase
+	 * @param salt 
 	 * @throws L2pSecurityException
 	 * @throws CryptoException
 	 */
@@ -170,6 +171,7 @@ public class UserAgent extends PassphraseAgent {
 	 *
 	 *
 	 * @param xml a String
+	 * @return 
 	 *
 	 * @exception MalformedXMLException
 	 *
@@ -229,6 +231,7 @@ public class UserAgent extends PassphraseAgent {
 	 * Sets the state of the object from a string representation resulting from a previous {@link #toXmlString} call.
 	 *
 	 * @param root parsed xml document
+	 * @return 
 	 *
 	 * @exception MalformedXMLException
 	 *

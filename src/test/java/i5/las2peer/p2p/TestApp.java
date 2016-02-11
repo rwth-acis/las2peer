@@ -56,6 +56,8 @@ public class TestApp implements Application {
 
 	/**
 	 * Called when we receive a message.
+	 * @param id 
+	 * @param message 
 	 */
 	public void deliver(Id id, Message message) {
 		System.out.println("\t\t\t" + this + " received " + message);
@@ -63,6 +65,8 @@ public class TestApp implements Application {
 
 	/**
 	 * Called when you hear about a new neighbor. Don't worry about this method for now.
+	 * @param handle 
+	 * @param joined 
 	 */
 	public void update(NodeHandle handle, boolean joined) {
 		System.out.println("\t\t\t\t new neighbour!: " + handle);
@@ -70,6 +74,8 @@ public class TestApp implements Application {
 
 	/**
 	 * Called a message travels along your path. Don't worry about this method for now.
+	 * @param message 
+	 * @return 
 	 */
 	public boolean forward(RouteMessage message) {
 		System.out.println("\t" + this + " forwarding message " + message);

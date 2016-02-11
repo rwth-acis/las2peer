@@ -484,6 +484,8 @@ public class Message implements XmlAble {
 	 * open the envelope, i.e. decrypt the content with the private key of the receiving agent
 	 * 
 	 * the private key has to be unlocked first!
+	 * @param unlockedRecipient 
+	 * @param storage 
 	 * 
 	 * 
 	 * @throws L2pSecurityException the private key of the receiver has to be unlocked for decryption

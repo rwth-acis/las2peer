@@ -186,7 +186,8 @@ public class PastryNodeImpl extends Node {
 	 * 
 	 * @param port
 	 * @param bootstrap
-	 * @param mode
+	 * @param mode Pastry storage mode
+	 * @param nodeIdSeed seed to generate node ids from
 	 */
 	private void initialize(int port, String bootstrap, STORAGE_MODE mode, Long nodeIdSeed) {
 		pastryPort = port;

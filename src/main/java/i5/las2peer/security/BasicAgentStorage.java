@@ -87,6 +87,7 @@ public class BasicAgentStorage implements AgentStorage {
 	 * 
 	 * @param id
 	 * @return an agent
+	 * @throws AgentNotKnownException 
 	 */
 	public Agent getAgent(long id) throws AgentNotKnownException {
 		Agent result = htRegistered.get(id);

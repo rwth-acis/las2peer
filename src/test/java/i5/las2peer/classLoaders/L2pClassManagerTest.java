@@ -8,7 +8,6 @@ import java.lang.reflect.Method;
 import org.junit.Test;
 
 import i5.las2peer.classLoaders.libraries.FileSystemRepository;
-import i5.las2peer.classLoaders.libraries.LoadedLibrary;
 
 public class L2pClassManagerTest {
 

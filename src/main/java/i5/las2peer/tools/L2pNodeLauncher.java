@@ -21,7 +21,6 @@ import i5.las2peer.classLoaders.libraries.FileSystemRepository;
 import i5.las2peer.communication.ListMethodsContent;
 import i5.las2peer.communication.Message;
 import i5.las2peer.execution.L2pServiceException;
-import i5.las2peer.execution.NoSuchServiceException;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.p2p.AgentAlreadyRegisteredException;
 import i5.las2peer.p2p.AgentNotKnownException;

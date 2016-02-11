@@ -50,6 +50,7 @@ public class MessageResultListener {
 
 	/**
 	 * simple constructor
+	 * @param timeoutMs 
 	 */
 	public MessageResultListener(long timeoutMs) {
 		startedAt = new Date().getTime();

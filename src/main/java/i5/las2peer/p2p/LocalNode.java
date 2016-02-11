@@ -473,6 +473,7 @@ public class LocalNode extends Node {
 	 * fetch all pending messages for the given agent
 	 * 
 	 * @param recipientId
+	 * @param nodeId 
 	 */
 	protected static void deliverPendingMessages(long recipientId, long nodeId) {
 

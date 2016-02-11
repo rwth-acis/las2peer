@@ -318,6 +318,7 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * 
 	 * @param content
 	 * @param reader
+	 * @throws EnvelopeException 
 	 * 
 	 * @throws EncodingFailedException
 	 * @throws SerializationException
@@ -700,6 +701,7 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * returns the contents of this envelope as string
 	 * 
 	 * @return content as string
+	 * @throws EnvelopeException 
 	 * 
 	 * @throws DecodingFailedException
 	 */
@@ -784,6 +786,7 @@ public final class Envelope implements XmlAble, Cloneable {
 
 	/**
 	 * Get the content as deserialized object. This method uses the same class loader as the calling class.
+	 * @param <T> 
 	 * 
 	 * @param cls
 	 * @return the typed content of this envelope
@@ -802,6 +805,7 @@ public final class Envelope implements XmlAble, Cloneable {
 
 	/**
 	 * Get the content as deserialized object.
+	 * @param <T> 
 	 * 
 	 * @param cls
 	 * @param classLoader
@@ -1047,6 +1051,7 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * get a locked copy of this agent
 	 * 
 	 * @return a locked clone of this envelope
+	 * @throws EnvelopeException 
 	 * @throws EncodingFailedException
 	 */
 	public final Envelope cloneLocked() throws EnvelopeException {

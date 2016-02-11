@@ -26,6 +26,7 @@ public abstract class PassphraseAgent extends Agent {
 	 * @param id
 	 * @param pair
 	 * @param passphrase
+	 * @param salt 
 	 * @throws L2pSecurityException
 	 * @throws CryptoException
 	 */

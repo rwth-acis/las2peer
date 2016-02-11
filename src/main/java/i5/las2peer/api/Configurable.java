@@ -205,6 +205,7 @@ public abstract class Configurable {
 	 * contains the value for the monitoring switch and sets it if so.
 	 * 
 	 * All fields mentioned in <i>except</i> will be left out.
+	 * @param except 
 	 *
 	 */
 	protected void setFieldValues(Set<String> except) {

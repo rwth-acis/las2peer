@@ -42,6 +42,7 @@ public class MonitoringAgent extends PassphraseAgent {
 	 * @param id
 	 * @param pair
 	 * @param passphrase
+	 * @param salt 
 	 * @throws L2pSecurityException
 	 * @throws CryptoException
 	 * 
@@ -170,6 +171,7 @@ public class MonitoringAgent extends PassphraseAgent {
 	 * this method.
 	 * 
 	 * @param xml a String
+	 * @return 
 	 * 
 	 * @exception MalformedXMLException
 	 * 
@@ -192,6 +194,7 @@ public class MonitoringAgent extends PassphraseAgent {
 	 * Sets the state of the object from a string representation resulting from a previous {@link #toXmlString} call.
 	 * 
 	 * @param root parsed XML document
+	 * @return 
 	 * 
 	 * @exception MalformedXMLException
 	 * 

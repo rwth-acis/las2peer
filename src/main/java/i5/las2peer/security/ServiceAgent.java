@@ -13,7 +13,6 @@ import org.apache.commons.codec.binary.Base64;
 
 import i5.las2peer.api.Service;
 import i5.las2peer.classLoaders.ClassLoaderException;
-import i5.las2peer.classLoaders.L2pClassManager;
 import i5.las2peer.communication.ListMethodsContent;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
@@ -67,6 +66,7 @@ public class ServiceAgent extends PassphraseAgent {
 	 * create a new service agent
 	 * 
 	 * @param id
+	 * @param service 
 	 * @param pair
 	 * @param passphrase
 	 * @param salt
@@ -83,6 +83,7 @@ public class ServiceAgent extends PassphraseAgent {
 	 * create a new service agent
 	 * 
 	 * @param id
+	 * @param service 
 	 * @param pubKey
 	 * @param encodedPrivate
 	 * @param salt
@@ -522,6 +523,7 @@ public class ServiceAgent extends PassphraseAgent {
 	 * @return result of the method invocation
 	 * 
 	 * @throws L2pServiceException
+	 * @throws ServiceInvocationException 
 	 * @throws SecurityException
 	 * @throws IllegalArgumentException
 	 * @throws NoSuchServiceMethodException

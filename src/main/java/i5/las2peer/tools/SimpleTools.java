@@ -15,6 +15,7 @@ public class SimpleTools {
 	 * get a long hash value from a given String
 	 * 
 	 * @param s
+	 * @return 
 	 */
 	public static long longHash(String s) {
 		long h = 1125899906842597L;

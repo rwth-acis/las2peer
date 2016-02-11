@@ -291,6 +291,7 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 	 * compares this version with any object
 	 * 
 	 * if the given object is a String, the string representation of this version is compared to the given string
+	 * @param o 
 	 * 
 	 * @return true, if the given object is a version and the same as this one
 	 */

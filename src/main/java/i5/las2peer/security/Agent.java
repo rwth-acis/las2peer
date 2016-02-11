@@ -175,6 +175,7 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	/**
 	 * Uses the {@link i5.las2peer.tools.CryptoTools} to decrypt the passed crypted content with the agent's private
 	 * key.
+	 * @param crypted 
 	 * 
 	 * @return a {@link javax.crypto.SecretKey} decrypted from the crypted input and the agent's private key
 	 * 
@@ -206,6 +207,7 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 
 	/**
 	 * Uses the {@link i5.las2peer.tools.CryptoTools} to sign the passed data with the agent's private key.
+	 * @param plainData 
 	 * 
 	 * @return a signed version of the input
 	 * 
@@ -233,6 +235,7 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	 * this agent.
 	 * 
 	 * @param message
+	 * @param c 
 	 * @throws MessageException
 	 */
 	public abstract void receiveMessage(Message message, Context c) throws MessageException;
