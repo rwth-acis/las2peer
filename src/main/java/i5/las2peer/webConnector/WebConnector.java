@@ -29,11 +29,9 @@ import i5.las2peer.api.Connector;
 import i5.las2peer.api.ConnectorException;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.logging.NodeObserver.Event;
-import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.restMapper.RESTMapper;
 import i5.las2peer.restMapper.data.PathTree;
-import i5.las2peer.security.Agent;
 import i5.las2peer.webConnector.serviceManagement.ServiceRepositoryManager;
 import net.minidev.json.JSONObject;
 import net.minidev.json.JSONValue;
@@ -119,6 +117,7 @@ public class WebConnector extends Connector {
 
 	/**
 	 * create a new web connector instance.
+	 * @throws Exception 
 	 * 
 	 * @throws FileNotFoundException
 	 */
@@ -131,6 +130,11 @@ public class WebConnector extends Connector {
 
 	/**
 	 * create a new web connector instance.
+	 * @param http 
+	 * @param httpPort 
+	 * @param https 
+	 * @param httpsPort 
+	 * @throws Exception 
 	 * 
 	 * @throws FileNotFoundException
 	 */
@@ -146,6 +150,11 @@ public class WebConnector extends Connector {
 
 	/**
 	 * create a new web connector instance.
+	 * @param http 
+	 * @param httpPort 
+	 * @param https 
+	 * @param httpsPort 
+	 * @param xmlPath 
 	 * 
 	 * @throws Exception
 	 */
@@ -491,6 +500,9 @@ public class WebConnector extends Connector {
 	/**
 	 * Fetches Open ID Connect provider configuration, according to the OpenID Connect discovery specification (cf.
 	 * http://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig)
+	 * @param providerURI 
+	 * @return 
+	 * @throws IOException 
 	 */
 	private JSONObject fetchOidcProviderConfig(String providerURI) throws IOException {
 		JSONObject result = new JSONObject();

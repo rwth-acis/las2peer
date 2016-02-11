@@ -30,6 +30,7 @@ public class TestService3 extends Service
 
 	/**
 	 * get all annotation and method data to allow mapping
+	 * @return 
 	 */
 
 	public String getRESTMapping()
