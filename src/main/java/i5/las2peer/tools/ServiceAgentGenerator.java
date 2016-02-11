@@ -18,7 +18,7 @@ public class ServiceAgentGenerator {
 	 * 
 	 * @param argv
 	 */
-	public static void main(String argv[]) { //TODO DOCUMENTATION
+	public static void main(String argv[]) {
 		if (argv.length != 2) {
 			System.err.println("usage: java i5.las2peer.tools.ServiceAgentGenerator [service class]@[service version] [passphrase]");
 			return;

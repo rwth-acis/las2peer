@@ -125,17 +125,4 @@ public class L2pThread extends Thread {
 		return agent;
 	}
 
-	// TODO remove:
-	/**
-	 * TODO: how to handle sub invocations ?!?!?!
-	 * 
-	 * @param service
-	 * @param method
-	 * @param parameters
-	 * @return invocation result
-	 */
-	public Serializable subInvoke(String service, String method, Serializable... parameters) {
-		throw new RuntimeException("Not yet implemented!");
-	}
-
 }

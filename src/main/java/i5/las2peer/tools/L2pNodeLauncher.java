@@ -54,7 +54,7 @@ import rice.p2p.commonapi.NodeHandle;
  * 
  * All methods to be executed can be stated via additional command line parameters to the {@link #main} method.
  */
-public class L2pNodeLauncher { // TODO DOCUMENTATION versionen bei service parametern
+public class L2pNodeLauncher {
 
 	// this is the main class and therefore the logger needs to be static
 	private static final L2pLogger logger = L2pLogger.getInstance(L2pNodeLauncher.class.getName());
