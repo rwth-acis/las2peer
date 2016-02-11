@@ -230,7 +230,7 @@ public class ServiceAgent extends PassphraseAgent {
 	}
 
 	/**
-	 * @deprecated Please use {@link ServiceAgent#createServiceAgent(String, String)} instead
+	 * @deprecated Please use {@link ServiceAgent#createServiceAgent(ServiceNameVersion, String)} instead
 	 * 
 	 * @param forService
 	 * @param passPhrase

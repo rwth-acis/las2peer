@@ -26,7 +26,7 @@ public class RMITask implements Serializable {
 	/**
 	 * create a new invocation task
 	 * 
-	 * @param serviceName
+	 * @param service
 	 * @param methodName
 	 * @param parameters
 	 */

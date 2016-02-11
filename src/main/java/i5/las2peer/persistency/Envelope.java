@@ -121,8 +121,8 @@ public final class Envelope implements XmlAble, Cloneable {
 	private Serializable contentStorage;
 
 	/**
-	 * base constructor for generating instances to be filled via {@link fromXmlString} used by the factory
-	 * {@link createFromXml}
+	 * base constructor for generating instances to be filled via {@link #createFromXml(Element)} used by the factory
+	 * {@link #createFromXml(String)}
 	 */
 	private Envelope() {
 		bOpen = false;
@@ -167,7 +167,6 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * @param id
 	 * 
 	 * @throws EncodingFailedException
-	 * @throws L2pSecurityException
 	 */
 	private Envelope(byte[] content, Agent[] readers, long id) throws EncodingFailedException {
 		this.id = id;

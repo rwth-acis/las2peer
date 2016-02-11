@@ -561,7 +561,6 @@ public class LocalNode extends Node {
 	 * 
 	 * @param nodeId
 	 * @param message
-	 * @param listener
 	 */
 	private static void localSendMessage(final long nodeId, final Message message) {
 

@@ -67,7 +67,7 @@ public class MonitoringObserver implements NodeObserver {
 	 * 
 	 * Helper method that is called after a node has been fully configured. It registers the monitoring agent
 	 * responsible for this node and tries to find the agent of the processing node by invoking the
-	 * {@link i5.las2peer.services.monitoring.processing.MonitoringDataProcessingService#getReceivingAgentId} method.
+	 * i5.las2peer.services.monitoring.processing.MonitoringDataProcessingService#getReceivingAgentId method.
 	 *
 	 * @return true, if successfully initialized
 	 */

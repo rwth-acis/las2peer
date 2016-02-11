@@ -342,7 +342,7 @@ public class CommandPrompt {
 	 * 
 	 * @param method
 	 * @param methodName
-	 * @param types
+	 * @param parameters
 	 * @return true on a match
 	 */
 	private boolean methodMatches(Method method, String methodName, Object[] parameters) {
