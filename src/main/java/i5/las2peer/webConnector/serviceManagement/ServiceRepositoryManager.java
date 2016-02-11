@@ -89,7 +89,7 @@ public class ServiceRepositoryManager {
 					serviceRepository.put(internalServiceName,
 							new ServiceData(currentService.getName(), currentService.getVersion(), false, null));
 					try {
-						String xml = (String) node.invokeGlobally(finalAgent, currentService.getName(),
+						String xml = (String) node.invokeGlobally(finalAgent, currentService,
 								SERVICE_SELFINFO_METHOD, new Serializable[] {});
 						if (xml == null || xml.isEmpty()) {
 							System.err.println("Couldn't get xml mapping for " + currentService.getName()

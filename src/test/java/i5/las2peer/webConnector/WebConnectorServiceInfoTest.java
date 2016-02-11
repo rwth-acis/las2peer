@@ -11,6 +11,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import i5.las2peer.p2p.LocalNode;
+import i5.las2peer.p2p.ServiceNameVersion;
 import i5.las2peer.security.ServiceAgent;
 import i5.las2peer.security.UserAgent;
 import i5.las2peer.testing.MockAgentFactory;
@@ -29,11 +30,11 @@ public class WebConnectorServiceInfoTest {
 	private static UserAgent testAgent;
 	private static final String testPass = "adamspass";
 
-	private static final String testServiceClass = "i5.las2peer.webConnector.TestService";
-	private static final String testServiceClass2 = "i5.las2peer.webConnector.TestService2";
-	private static final String testServiceClass3 = "i5.las2peer.webConnector.Calculator3";
-	private static final String testServiceClass4 = "i5.las2peer.webConnector.Calculator2CompatibilityService";
-	private static final String testServiceClass5 = "i5.las2peer.webConnector.Calculator2";
+	private static final String testServiceClass = "i5.las2peer.webConnector.TestService@0.1";
+	private static final String testServiceClass2 = "i5.las2peer.webConnector.TestService2@0.1";
+	private static final String testServiceClass3 = "i5.las2peer.webConnector.Calculator3@0.1";
+	private static final String testServiceClass4 = "i5.las2peer.webConnector.Calculator2CompatibilityService@0.1";
+	private static final String testServiceClass5 = "i5.las2peer.webConnector.Calculator2@0.1";
 
 	@BeforeClass
 	public static void startServer() throws Exception {
@@ -45,11 +46,11 @@ public class WebConnectorServiceInfoTest {
 		node.storeAgent(MockAgentFactory.getGroup1());
 		node.launch();
 
-		ServiceAgent testService = ServiceAgent.createServiceAgent(testServiceClass, "a pass");
-		ServiceAgent testService2 = ServiceAgent.createServiceAgent(testServiceClass2, "a pass");
-		ServiceAgent testService3 = ServiceAgent.createServiceAgent(testServiceClass3, "a pass");
-		ServiceAgent testService4 = ServiceAgent.createServiceAgent(testServiceClass4, "a pass");
-		ServiceAgent testService5 = ServiceAgent.createServiceAgent(testServiceClass5, "a pass");
+		ServiceAgent testService = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass), "a pass");
+		ServiceAgent testService2 = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass2), "a pass");
+		ServiceAgent testService3 = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass3), "a pass");
+		ServiceAgent testService4 = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass4), "a pass");
+		ServiceAgent testService5 = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass5), "a pass");
 
 		testService.unlockPrivateKey("a pass");
 		testService2.unlockPrivateKey("a pass");

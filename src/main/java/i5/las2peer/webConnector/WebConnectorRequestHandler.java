@@ -416,7 +416,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 
 			for (InvocationData inv : invocation) {
 				try {
-					// invoke service method
+					// invoke service method // TODO specify version?
 					result = mediator.invoke(inv.getServiceName(), inv.getMethodName(), inv.getParameters(),
 							connector.preferLocalServices());
 					gotResult = true;

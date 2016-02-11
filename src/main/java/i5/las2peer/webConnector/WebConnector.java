@@ -428,6 +428,7 @@ public class WebConnector extends Connector {
 	 * 
 	 * @param request
 	 */
+	/* commented out because lacking documentation of the request parameter and no calling methods thus impossbile to adapt to las2peer changes
 	public void logRequest(String request) {
 		logger.finer(request);
 		int lastServiceClassNamePosition = request.lastIndexOf("/");
@@ -448,7 +449,7 @@ public class WebConnector extends Connector {
 			logHandler.flush();
 		}
 	}
-
+	*/
 
 	/**
 	 * Logs an error with throwable.
