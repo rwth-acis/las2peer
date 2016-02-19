@@ -262,6 +262,24 @@ public class ServiceAgent extends PassphraseAgent {
 	}
 
 	/**
+	 * create a ServiceAgent for version 1.0
+	 * 
+	 * Can be used to generate ServiceAgent for jUnit tests, since in this
+	 * case las2peer loads classes using the default class loader and thus
+	 * does not require version information.
+	 * 
+	 * @param serviceName
+	 * @param passphrase
+	 * @return
+	 * @throws CryptoException
+	 * @throws L2pSecurityException
+	 */
+	public static ServiceAgent createServiceAgent(String serviceName, String passphrase)
+			throws CryptoException, L2pSecurityException {
+		return createServiceAgent(new ServiceNameVersion(serviceName,"1.0"),passphrase);
+	}
+	
+	/**
 	 * factory: create a new service agent from the given XML representation
 	 * 
 	 * @param xml String containing XML information
