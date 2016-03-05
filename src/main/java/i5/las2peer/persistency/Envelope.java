@@ -794,7 +794,7 @@ public final class Envelope implements XmlAble, Cloneable {
 	 */
 	public <T extends Serializable> T getContent(Class<T> cls) throws EnvelopeException {
 		if (contentStorage == null) {
-			contentStorage = deserializeContent(getClass().getClassLoader());
+			contentStorage = deserializeContent(cls.getClassLoader());
 		}
 		try {
 			return cls.cast(contentStorage);
