@@ -548,13 +548,21 @@ public class L2pNodeLauncher {
 	 */
 	public String startService(String serviceNameVersion) throws L2pServiceException {
 		try {
-			String passPhrase = SimpleTools.createRandomString(20);
+			ServiceNameVersion service = ServiceNameVersion.fromString(serviceNameVersion);
+			
+			if (service.getVersion() != null) {
+				String passPhrase = SimpleTools.createRandomString(20);
 
-			ServiceAgent myAgent = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(serviceNameVersion), passPhrase);
-			myAgent.unlockPrivateKey(passPhrase);
+				ServiceAgent myAgent = ServiceAgent.createServiceAgent(service, passPhrase);
+				myAgent.unlockPrivateKey(passPhrase);
 
-			startService(myAgent);
-			return passPhrase;
+				startService(myAgent);
+				return passPhrase;
+			}
+			else {
+				printMessage("You must specify an exact version of the service you want to start.");
+				return null;
+			}
 		} catch (AgentAlreadyRegisteredException e) {
 			printMessage("Agent already registered. Please use the existing instance.");
 			return null;
@@ -602,14 +610,21 @@ public class L2pNodeLauncher {
 	public void startService(String serviceNameVersion, String agentPass) throws AgentNotKnownException, L2pSecurityException,
 			AgentAlreadyRegisteredException, AgentException, CryptoException {
 		ServiceAgent sa = null;
-		try {
-			sa = node.getServiceAgent(ServiceNameVersion.fromString(serviceNameVersion));
-		} catch (Exception e) {
-			logger.info("Can't get service agent for " + serviceNameVersion + ". Generating new instance...");
-			sa = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(serviceNameVersion), agentPass);
+		ServiceNameVersion service = ServiceNameVersion.fromString(serviceNameVersion);
+		
+		if (service.getVersion() != null) {
+			try {
+				sa = node.getServiceAgent(service);
+			} catch (Exception e) {
+				logger.info("Can't get service agent for " + serviceNameVersion + ". Generating new instance...");
+				sa = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(serviceNameVersion), agentPass);
+			}
+			sa.unlockPrivateKey(agentPass);
+			startService(sa);
 		}
-		sa.unlockPrivateKey(agentPass);
-		startService(sa);
+		else {
+			printMessage("You must specify an exact version of the service you want to start.");
+		}
 	}
 
 	/**
