@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import i5.las2peer.p2p.AgentAlreadyRegisteredException;
 import i5.las2peer.p2p.LocalNode;
+import i5.las2peer.p2p.NodeException;
 import i5.las2peer.persistency.DecodingFailedException;
 import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.persistency.Envelope;
@@ -62,7 +63,7 @@ public class ContextTest {
 	@Test
 	public void testRequestGroupAgent()
 			throws MalformedXMLException, IOException, L2pSecurityException, CryptoException,
-			SerializationException, AgentException {
+			SerializationException, AgentException, NodeException {
 		LocalNode node = LocalNode.newNode();
 
 		GroupAgent group1 = MockAgentFactory.getGroup1();
@@ -109,7 +110,7 @@ public class ContextTest {
 	@Test
 	public void testOpenEnvelope()
 			throws MalformedXMLException, IOException, L2pSecurityException, CryptoException,
-			SerializationException, AgentException, EncodingFailedException, DecodingFailedException {
+			SerializationException, AgentException, EncodingFailedException, DecodingFailedException, NodeException {
 		LocalNode node = LocalNode.newNode();
 
 		GroupAgent group1 = MockAgentFactory.getGroup1();

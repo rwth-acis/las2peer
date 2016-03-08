@@ -36,7 +36,7 @@ public class LocalNodeInvocationTest {
 	public void testLocalInvocation()
 			throws SecurityException, IllegalArgumentException, AgentNotKnownException, L2pSecurityException,
 			NoSuchMethodException, IllegalAccessException, InvocationTargetException, InterruptedException,
-			AgentAlreadyRegisteredException, MalformedXMLException, IOException, CryptoException, AgentException {
+			AgentAlreadyRegisteredException, MalformedXMLException, IOException, CryptoException, AgentException, NodeException {
 		LocalNode node = LocalNode.newNode();
 		UserAgent eve = MockAgentFactory.getEve();
 
@@ -58,7 +58,7 @@ public class LocalNodeInvocationTest {
 	public void testGlobalInvocation() throws SecurityException, IllegalArgumentException, AgentNotKnownException,
 			L2pSecurityException, NoSuchMethodException, IllegalAccessException, InvocationTargetException,
 			InterruptedException, AgentAlreadyRegisteredException, MalformedXMLException, IOException, CryptoException,
-			AgentException, TimeoutException {
+			AgentException, TimeoutException, NodeException {
 		LocalNode serviceNode = LocalNode.newNode();
 		UserAgent eve = MockAgentFactory.getEve();
 
@@ -79,7 +79,7 @@ public class LocalNodeInvocationTest {
 
 	@Test
 	public void testSubinvocation() throws MalformedXMLException, IOException, L2pSecurityException, CryptoException,
-			InterruptedException, AgentAlreadyRegisteredException, AgentException, TimeoutException {
+			InterruptedException, AgentAlreadyRegisteredException, AgentException, TimeoutException, NodeException {
 		LocalNode serviceNode1 = LocalNode.newNode();
 		LocalNode serviceNode2 = LocalNode.newNode();
 		UserAgent eve = MockAgentFactory.getEve();
@@ -106,7 +106,7 @@ public class LocalNodeInvocationTest {
 
 	@Test
 	public void testSubinvocationFail() throws MalformedXMLException, IOException, L2pSecurityException,
-			CryptoException, InterruptedException, AgentAlreadyRegisteredException, AgentException, TimeoutException {
+			CryptoException, InterruptedException, AgentAlreadyRegisteredException, AgentException, TimeoutException, NodeException {
 		LocalNode serviceNode2 = LocalNode.newNode();
 		UserAgent eve = MockAgentFactory.getEve();
 
@@ -127,7 +127,7 @@ public class LocalNodeInvocationTest {
 	}
 	
 	@Test
-	public void testInvocation() throws MalformedXMLException, IOException, L2pSecurityException, AgentException, InterruptedException, TimeoutException, CryptoException {
+	public void testInvocation() throws MalformedXMLException, IOException, L2pSecurityException, AgentException, InterruptedException, TimeoutException, CryptoException, NodeException {
 		// start
 		LocalNode serviceNode1 = LocalNode.newNode("export/jars/");
 		LocalNode serviceNode2 = LocalNode.newNode("export/jars/");

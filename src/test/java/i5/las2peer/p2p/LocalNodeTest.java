@@ -272,7 +272,7 @@ public class LocalNodeTest {
 	}
 
 	@Test
-	public void testStartupAgents() throws L2pSecurityException, AgentException {
+	public void testStartupAgents() throws L2pSecurityException, AgentException, NodeException {
 
 		LocalNode testee = LocalNode.newNode();
 		testee.storeAgent(adam);

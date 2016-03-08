@@ -35,9 +35,9 @@ public class ServiceList implements Serializable {
 			while(it2.hasNext()) {
 				Entry<String, ServiceNameVersion> pair = it2.next();
 				result.add(pair.getValue());
-				it2.remove(); // avoids a ConcurrentModificationException
+				//it2.remove(); // avoids a ConcurrentModificationException // TODO make thread safe ?
 			}
-			it.remove(); // avoids a ConcurrentModificationException
+			//it.remove(); // avoids a ConcurrentModificationException
 		}
 		return result.toArray(new ServiceNameVersion[0]);
 	}

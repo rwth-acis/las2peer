@@ -45,7 +45,7 @@ public class NodeServiceCacheTest {
 	}
 	
 	@Test
-	public void testIntegration() throws CryptoException, L2pSecurityException, AgentAlreadyRegisteredException, AgentException {
+	public void testIntegration() throws CryptoException, L2pSecurityException, AgentAlreadyRegisteredException, AgentException, NodeException {
 		ServiceNameVersion serviceNameVersion = ServiceNameVersion.fromString("i5.las2peer.testServices.testPackage2.UsingService@1.0");
 		
 		LocalNode serviceNode = LocalNode.newNode("export/jars/");

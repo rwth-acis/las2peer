@@ -73,7 +73,7 @@ public class LocalNode extends Node {
 	}
 
 	@Override
-	public void launch() {
+	protected void launchSub() {
 		setStatus(NodeStatus.RUNNING);
 
 		registerNode(this);
@@ -303,7 +303,10 @@ public class LocalNode extends Node {
 	 */
 	public static LocalNode launchNode() {
 		LocalNode result = newNode();
-		result.launch();
+		try {
+			result.launch();
+		} catch (NodeException e) {
+		}
 		return result;
 	}
 

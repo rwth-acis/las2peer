@@ -505,7 +505,23 @@ public abstract class Node implements AgentStorage {
 	 * Starts this node.
 	 * @throws NodeException 
 	 */
-	public abstract void launch() throws NodeException;
+	protected abstract void launchSub() throws NodeException;
+	
+	/**
+	 * Starts this node.
+	 * @throws NodeException
+	 */
+	public final void launch() throws NodeException {
+		launchSub();
+		
+		// init ServiceInfoAgent
+		try {
+			this.registerReceiver(ServiceInfoAgent.getServiceInfoAgent());
+		} catch (L2pSecurityException | AgentException | CryptoException
+				| SerializationException e) {
+			throw new NodeException("error initializing ServiceInfoAgent",e);
+		}
+	}
 
 	/**
 	 * Stops the node.

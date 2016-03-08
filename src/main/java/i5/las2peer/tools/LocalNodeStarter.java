@@ -9,6 +9,7 @@ import java.lang.reflect.Modifier;
 import i5.las2peer.p2p.AgentAlreadyRegisteredException;
 import i5.las2peer.p2p.LocalNode;
 import i5.las2peer.p2p.Node;
+import i5.las2peer.p2p.NodeException;
 import i5.las2peer.persistency.Envelope;
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.security.Agent;
@@ -130,8 +131,9 @@ public class LocalNodeStarter {
 	 * 
 	 * @param argv
 	 * @throws InterruptedException
+	 * @throws NodeException 
 	 */
-	public static void main(String argv[]) throws InterruptedException {
+	public static void main(String argv[]) throws InterruptedException, NodeException {
 		if (argv.length < 1) {
 			System.err.println(
 					"Usage: java {-cp ...} i5.las2peer.tools.LocalNodeStarter [xml directory] {static method to invoke}");

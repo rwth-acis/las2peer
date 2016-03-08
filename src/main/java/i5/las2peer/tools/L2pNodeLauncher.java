@@ -34,6 +34,7 @@ import i5.las2peer.p2p.StorageException;
 import i5.las2peer.p2p.TimeoutException;
 import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.persistency.Envelope;
+import i5.las2peer.persistency.EnvelopeException;
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.security.Agent;
 import i5.las2peer.security.AgentException;
@@ -41,6 +42,7 @@ import i5.las2peer.security.GroupAgent;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.PassphraseAgent;
 import i5.las2peer.security.ServiceAgent;
+import i5.las2peer.security.ServiceInfoAgent;
 import i5.las2peer.security.UserAgent;
 import i5.las2peer.security.UserAgentList;
 import i5.simpleXML.Element;
@@ -706,6 +708,26 @@ public class L2pNodeLauncher {
 	 */
 	public String getNetInfo() {
 		return SimpleTools.join(node.getOtherKnownNodes(), "\n\t");
+	}
+		
+	/**
+	 * get a list of running services in the network
+	 * @return
+	 */
+	public String getNetworkServices() {
+		try {
+			String result="Services running in the Network:\n\n";
+			ServiceNameVersion[] services = ServiceInfoAgent.getServices();
+			
+			for (ServiceNameVersion service : services) {
+				result+=service.toString()+"\n";
+			}
+			
+			return result;
+		} catch (EnvelopeException e) {
+			e.printStackTrace();
+			return "An error occured.";
+		}
 	}
 
 	/**

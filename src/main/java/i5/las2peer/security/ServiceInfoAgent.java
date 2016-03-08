@@ -27,7 +27,7 @@ import rice.pastry.NodeHandle;
 import rice.pastry.PastryNode;
 
 /**
- * 
+ * TODO this should be replaced or at least rewritten, because of really bad code
  */
 
 /**
@@ -182,22 +182,17 @@ public class ServiceInfoAgent extends PassphraseAgent {
 	 * @param dataCls 
 	 * 
 	 * @param data
-	 * @param node 
 	 * @throws EnvelopeException
 	 * @throws AgentException 
 	 * @throws L2pSecurityException 
 	 */
-	private static void setEnvelopeData(String envelopeName, Class<?> dataCls, Serializable data, Node node)
+	private static void setEnvelopeData(String envelopeName, Class<?> dataCls, Serializable data)
 			throws EnvelopeException, AgentException, L2pSecurityException {
 		try {
 			getServiceInfoAgent(); // init (paranoia)
 		} catch (Exception e) {
 			// do nothing
 		}
-		if (!node.hasAgent(agent.getId())) {
-			node.registerReceiver(agent);
-		}
-		agent.notifyRegistrationTo(node);
 
 		Envelope env = fetchEnvelope(envelopeName, dataCls);
 
@@ -298,16 +293,7 @@ public class ServiceInfoAgent extends PassphraseAgent {
 		ServiceNameVersion servicenameVersion = serviceAgent.getServiceNameVersion();
 		ServiceList data = (ServiceList) getEnvelopeData(SERVICE_LIST_ENVELOPE_NAME, ServiceList.class);
 		data.addService(servicenameVersion);
-		setEnvelopeData(SERVICE_LIST_ENVELOPE_NAME, ServiceList.class, data, node);
-		StringBuilder sb = new StringBuilder();
-		boolean first = true;
-		for (ServiceNameVersion s : data.getServices()) {
-			if (!first) {
-				sb.append(", ");
-			}
-			sb.append(s.getNameVersion());
-			first = false;
-		}
+		setEnvelopeData(SERVICE_LIST_ENVELOPE_NAME, ServiceList.class, data);
 
 		String nodeEnvelope = SERVICE_NODE_LIST_PREFIX + servicenameVersion.getNameVersion();
 		ServiceNodeList nodesData = (ServiceNodeList) getEnvelopeData(nodeEnvelope, ServiceNodeList.class);
@@ -316,7 +302,7 @@ public class ServiceInfoAgent extends PassphraseAgent {
 			// this part seems to be irrelevant for LocalNode implementations
 			PastryNode pNode = ((PastryNodeImpl) node).getPastryNode();
 			nodesData.addNode(pNode.getLocalHandle());
-			setEnvelopeData(nodeEnvelope, ServiceNodeList.class, nodesData, node);
+			setEnvelopeData(nodeEnvelope, ServiceNodeList.class, nodesData);
 		}
 	}
 
@@ -338,12 +324,12 @@ public class ServiceInfoAgent extends PassphraseAgent {
 		String nodeEnvelope = SERVICE_NODE_LIST_PREFIX + servicenameVersion.getNameVersion();
 		ServiceNodeList nodesData = (ServiceNodeList) getEnvelopeData(nodeEnvelope, ServiceNodeList.class);
 		boolean listIsEmpty = nodesData.removeNode((NodeHandle) node.getNodeId());
-		setEnvelopeData(nodeEnvelope, ServiceNodeList.class, nodesData, node);
+		setEnvelopeData(nodeEnvelope, ServiceNodeList.class, nodesData);
 
 		if (listIsEmpty) {
 			ServiceList data = (ServiceList) getEnvelopeData(SERVICE_LIST_ENVELOPE_NAME, ServiceList.class);
 			data.removeService(servicenameVersion);
-			setEnvelopeData(SERVICE_LIST_ENVELOPE_NAME, ServiceList.class, data, node);
+			setEnvelopeData(SERVICE_LIST_ENVELOPE_NAME, ServiceList.class, data);
 		}
 	}
 
@@ -357,7 +343,7 @@ public class ServiceInfoAgent extends PassphraseAgent {
 	 */
 	public void resetData(Node node) throws EnvelopeException, AgentException, L2pSecurityException {
 		ServiceList data = new ServiceList();
-		setEnvelopeData(SERVICE_LIST_ENVELOPE_NAME, ServiceList.class, data, node);
+		setEnvelopeData(SERVICE_LIST_ENVELOPE_NAME, ServiceList.class, data);
 	}
 
 	public static ArrayList<NodeHandle> getNodes(String serviceName, String serviceVersion) {

@@ -360,7 +360,7 @@ public class PastryNodeImpl extends Node {
 	 * start this node
 	 */
 	@Override
-	public void launch() throws NodeException {
+	protected void launchSub() throws NodeException {
 
 		try {
 			setStatus(NodeStatus.STARTING);

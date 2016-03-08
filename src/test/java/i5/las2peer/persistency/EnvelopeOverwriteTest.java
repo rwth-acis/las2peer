@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import i5.las2peer.p2p.ArtifactNotFoundException;
 import i5.las2peer.p2p.LocalNode;
+import i5.las2peer.p2p.NodeException;
 import i5.las2peer.p2p.StorageException;
 import i5.las2peer.security.Agent;
 import i5.las2peer.security.AgentException;
@@ -26,7 +27,7 @@ public class EnvelopeOverwriteTest {
 	private UserAgent adam;
 
 	@Before
-	public void startServer() throws MalformedXMLException, IOException, AgentException, L2pSecurityException {
+	public void startServer() throws MalformedXMLException, IOException, AgentException, L2pSecurityException, NodeException {
 		LocalNode.reset();
 
 		node = LocalNode.newNode();
