@@ -1,0 +1,29 @@
+
+// Java directories
+
+grant {
+	permission java.io.FilePermission "${java.home}/-", "read";
+};
+
+// Linux system permissions
+
+grant {
+	permission java.io.FilePermission "/dev/random", "read";
+	permission java.io.FilePermission "/dev/urandom", "read";
+	permission java.io.FilePermission "/tmp", "read";
+};
+
+// FreePastry file permissions
+
+grant {
+	permission java.io.FilePermission "user.params", "read";
+	permission java.io.FilePermission "pastry.properties", "read";
+	permission java.io.FilePermission "etc/pastry.properties", "read";
+	permission java.io.FilePermission "config/pastry.properties", "read";
+	permission java.io.FilePermission "properties/pastry.properties", "read";
+};
+
+// LAS2peer file permissions
+grant {
+	permission java.io.FilePermission "log/*", "read";
+};
