@@ -552,19 +552,19 @@ public class L2pNodeLauncher {
 		try {
 			ServiceNameVersion service = ServiceNameVersion.fromString(serviceNameVersion);
 			
-			if (service.getVersion() != null) {
-				String passPhrase = SimpleTools.createRandomString(20);
-
-				ServiceAgent myAgent = ServiceAgent.createServiceAgent(service, passPhrase);
-				myAgent.unlockPrivateKey(passPhrase);
-
-				startService(myAgent);
-				return passPhrase;
+			if (service.getVersion() == null) {
+				printMessage("Warning: No version specified, trying version \"1.0\". Please specify "
+						+ "the exact version of the service you want to start.");
+				service = new ServiceNameVersion(service.getName(), "1.0");
 			}
-			else {
-				printMessage("You must specify an exact version of the service you want to start.");
-				return null;
-			}
+			
+			String passPhrase = SimpleTools.createRandomString(20);
+
+			ServiceAgent myAgent = ServiceAgent.createServiceAgent(service, passPhrase);
+			myAgent.unlockPrivateKey(passPhrase);
+
+			startService(myAgent);
+			return passPhrase;
 		} catch (AgentAlreadyRegisteredException e) {
 			printMessage("Agent already registered. Please use the existing instance.");
 			return null;
