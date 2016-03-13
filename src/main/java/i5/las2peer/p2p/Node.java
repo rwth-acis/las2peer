@@ -1118,8 +1118,10 @@ public abstract class Node implements AgentStorage {
 				loadUserList();
 
 			try {
-				activeUserList.getContent(UserAgentList.class).updateUser(agent);
-			} catch (EnvelopeException e) {
+				UserAgentList content = activeUserList.getContent(UserAgentList.class);
+				content.updateUser(agent);
+				activeUserList.updateContent(content);
+			} catch (EnvelopeException | L2pSecurityException | SerializationException e) {
 				observerNotice(Event.NODE_ERROR, "Envelope error while updating user list: " + e);
 			}
 
