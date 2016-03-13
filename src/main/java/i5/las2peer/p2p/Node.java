@@ -1319,10 +1319,14 @@ public abstract class Node implements AgentStorage {
 			throw new L2pSecurityException("The executing agent has to be unlocked to call a RMI");
 		}
 		
+		/*
 		ServiceAgent serviceAgent = nodeServiceCache.getServiceAgent(service);
 		if (serviceAgent == null)
 			throw new AgentNotKnownException("No ServiceAgent known for this service!");
-
+		*/
+		
+		ServiceAgent serviceAgent = getServiceAgent(service);
+		
 		try {
 			// TODO send credentials
 			Message rmiMessage = new Message(executing, serviceAgent, new RMITask(service, serviceMethod, parameters));
@@ -1335,6 +1339,7 @@ public abstract class Node implements AgentStorage {
 			Message resultMessage;
 			NodeHandle targetNode = null;// =nodeServiceCache.getRandomServiceNode(serviceClass,"1.0");
 
+			// TODO replace ServiceInfoAgent
 			ArrayList<NodeHandle> targetNodes = nodeServiceCache.getServiceNodes(service);
 			if (targetNodes != null && targetNodes.size() > 0) {
 				// TODO seems like round robin, should be replaced with a more generic node choose strategy
@@ -1346,13 +1351,13 @@ public abstract class Node implements AgentStorage {
 
 			}
 
-			if (targetNode != null) { // TODO use NodeServiceCache
+			if (targetNode != null) {
 				try {
 					resultMessage = sendMessageAndWaitForAnswer(rmiMessage, targetNode);
 				} catch (NodeNotFoundException nex) {
 					// remove so unavailable nodes will not be tried again
 					nodeServiceCache.removeServiceAgentEntryNode(service, targetNode);
-					resultMessage = sendMessageAndWaitForAnswer(rmiMessage); // TODO why anycast and not try another node?!?
+					resultMessage = sendMessageAndWaitForAnswer(rmiMessage);
 				}
 			} else {
 				resultMessage = sendMessageAndWaitForAnswer(rmiMessage);
@@ -1438,7 +1443,13 @@ public abstract class Node implements AgentStorage {
 			return invokeGlobally(executing, service, serviceMethod, parameters);
 		}
 		else {
-			throw new NoSuchServiceException(service.toString());
+			try {
+				// fallback (using exact match)
+				return invokeGlobally(executing, service, serviceMethod, parameters);
+			}
+			catch (AgentNotKnownException e) {
+				throw new NoSuchServiceException(service.toString());
+			}
 		}
 	}
 	
@@ -1499,7 +1510,13 @@ public abstract class Node implements AgentStorage {
 			return invokeGlobally(executing, new ServiceNameVersion(nameVersion.getName(), globalVersion.toString()), serviceMethod, parameters);
 		}
 		else {
-			throw new NoSuchServiceException(serviceString);
+			try {
+				// fallback (using exact match)
+				return invokeGlobally(executing, nameVersion, serviceMethod, parameters);
+			}
+			catch (AgentNotKnownException e) {
+				throw new NoSuchServiceException(serviceString);
+			}
 		}
 	}
 	
