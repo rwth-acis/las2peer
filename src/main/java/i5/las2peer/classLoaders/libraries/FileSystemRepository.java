@@ -7,6 +7,8 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import i5.las2peer.classLoaders.LibraryNotFoundException;
 import i5.las2peer.classLoaders.UnresolvedDependenciesException;
@@ -253,29 +255,28 @@ public class FileSystemRepository implements Repository {
 		}
 
 		File[] entries = f.listFiles();
+		
+		Pattern versionPattern = Pattern.compile("-[0-9]+(?:.[0-9]+(?:.[0-9]+)?)?(?:-[0-9]+)?$");
 
 		for (int i = 0; i < entries.length; i++) {
-
 			if (entries[i].isDirectory()) {
 				if (recursive)
 					searchJars(entries[i].toString());
 			} else if (entries[i].getPath().endsWith(".jar")) {
-				if (entries[i].getName().contains("-")) {
-					String[] split = entries[i].getName().substring(0, entries[i].getName().length() - 4).split("-", 2);
+				String file = entries[i].getName().substring(0, entries[i].getName().length() - 4);
+				Matcher m = versionPattern.matcher(file);
+				
+				if (m.find()) {
 					try {
-						LibraryVersion version = new LibraryVersion(split[1]);
-						registerJar(entries[i].getPath(), split[0], version);
+						String name = file.substring(0, m.start());
+						LibraryVersion version = new LibraryVersion(m.group().substring(1));
+						registerJar(entries[i].getPath(), name, version);
 					} catch (IllegalArgumentException e) {
-						// ok, version info not correct
-						// TODO: print warning about missing version info?
-
-						System.out.println("Error registering library " + entries[i] + ": " + e);
-
+						System.out.println("Notice: library " + entries[i] + " has no version info in it's name! - Won't be used!");
 					}
-				} else {
-					// TODO: print warning about missing version info?
-					// maybe depending on log level
-					System.out.println("library " + entries[i] + " has no version info in it's name! - Won't be used!");
+				}
+				else {
+					System.out.println("Notice: library " + entries[i] + " has no version info in it's name! - Won't be used!");
 				}
 			}
 		}

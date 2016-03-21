@@ -7,9 +7,12 @@ import java.net.URL;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import i5.las2peer.classLoaders.helpers.LibraryDependency;
 import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
+import i5.las2peer.classLoaders.helpers.LibraryVersion;
 
 /**
  * a loaded jar library implements a library on the basis of a standard jar file
@@ -164,18 +167,25 @@ public class LoadedJarLibrary extends LoadedLibrary {
 
 		// fill in version and name info from file name
 		if (sName == null || sVersion == null) {
-			String[] split = filename.substring(0, filename.length() - 4).split("-");
-			if (split.length == 3) {
-				// build included
-				if (sVersion == null)
-					sVersion = split[1] + "-" + split[2];
-			} else if (split.length == 2) {
-				if (sVersion == null)
-					sVersion = split[1];
-			}
+			String file = filename.substring(0, filename.length() - 4);
+			
+			Pattern versionPattern = Pattern.compile("-[0-9]+(?:.[0-9]+(?:.[0-9]+)?)?(?:-[0-9]+)?$");
+			Matcher m = versionPattern.matcher(file);
+			
+			if (m.find()) { // look for version information in filename
+				if (sVersion == null) {
+					sVersion = m.group().substring(1); 
+				}
 
-			if (sName == null)
-				sName = split[0];
+				if (sName == null) {
+					sName = file.substring(0, m.start());
+				}
+			}
+			else {
+				if (sName == null) {
+					sName = file;
+				}
+			}
 		}
 
 		jfFile.close();
