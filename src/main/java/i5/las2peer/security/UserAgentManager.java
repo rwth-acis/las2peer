@@ -29,7 +29,7 @@ public class UserAgentManager {
 	}
 	
 	/**
-	 * Stores credentials of an user agents to the network
+	 * Stores login name and email of an user agent to the network
 	 * 
 	 * @param agent an unlocked UserAgent
 	 * @throws DuplicateEmailException
@@ -78,7 +78,7 @@ public class UserAgentManager {
 	}
 	
 	/**
-	 * updates credentials of an user
+	 * updates login name and email of an user
 	 * @param agent
 	 * @throws AgentLockedException
 	 * @throws DuplicateEmailException 
