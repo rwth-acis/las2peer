@@ -24,7 +24,6 @@ import i5.las2peer.security.AgentException;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.ServiceAgent;
 import i5.las2peer.security.UserAgent;
-import i5.las2peer.security.UserAgentList;
 import i5.las2peer.testing.MockAgentFactory;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.SerializationException;
@@ -275,6 +274,7 @@ public class LocalNodeTest {
 	public void testStartupAgents() throws L2pSecurityException, AgentException, NodeException {
 
 		LocalNode testee = LocalNode.newNode();
+		adam.unlockPrivateKey("adamspass");
 		testee.storeAgent(adam);
 
 		testee.launch();
@@ -328,11 +328,11 @@ public class LocalNodeTest {
 		testee.storeAgent(a);
 		testee.storeAgent(b);
 
-		assertEquals(a.getId(), testee.getAgentIdForLogin("alpha"));
-		assertEquals(b.getId(), testee.getAgentIdForLogin("beta"));
+		assertEquals(a.getId(), testee.getUserManager().getAgentIdByLogin("alpha"));
+		assertEquals(b.getId(), testee.getUserManager().getAgentIdByLogin("beta"));
 
 		try {
-			testee.getAgentIdForLogin("bla");
+			testee.getUserManager().getAgentIdByLogin("bla");
 			fail("AgentNotKnownException expected");
 		} catch (AgentNotKnownException e) {
 			// corrects
@@ -344,8 +344,6 @@ public class LocalNodeTest {
 			throws L2pSecurityException, AgentException, CryptoException, ArtifactNotFoundException {
 		LocalNode testee1 = LocalNode.launchNode();
 
-		long id = Envelope.getClassEnvelopeId(UserAgentList.class, "mainlist");
-
 		for (int i = 0; i < 11; i++) {
 			UserAgent a = UserAgent.createUserAgent("pass" + i);
 			a.unlockPrivateKey("pass" + i);
@@ -353,15 +351,9 @@ public class LocalNodeTest {
 			testee1.storeAgent(a);
 		}
 
-		// check, that the user list is stored
-		testee1.fetchArtifact(id);
-
 		LocalNode testee2 = LocalNode.launchNode();
 
-		// check, that the user list is stored
-		testee2.fetchArtifact(id);
-
-		testee2.getAgentIdForLogin("login_2");
+		testee2.getUserManager().getAgentIdByLogin("login_2");
 	}
 
 }

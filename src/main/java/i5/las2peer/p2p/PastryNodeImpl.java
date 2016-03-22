@@ -664,7 +664,7 @@ public class PastryNodeImpl extends Node {
 			}
 
 			if (agent instanceof UserAgent)
-				updateUserAgentList((UserAgent) agent);
+				getUserManager().registerUserAgent((UserAgent) agent);
 
 			observerNotice(Event.AGENT_UPLOAD_SUCCESS, pastryNode, agent, "");
 		} catch (InterruptedException e) {
@@ -695,7 +695,7 @@ public class PastryNodeImpl extends Node {
 				throw new PastryStorageException("error storing update");
 
 			if (agent instanceof UserAgent)
-				updateUserAgentList((UserAgent) agent);
+				getUserManager().updateUserAgent((UserAgent) agent);
 		} catch (InterruptedException e) {
 			throw new PastryStorageException("interrupted", e);
 		}
