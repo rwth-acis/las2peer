@@ -114,6 +114,11 @@ public abstract class Service extends Configurable {
 	 * The node this service is currently running at.
 	 */
 	private Node runningAt = null;
+	
+	/**
+	 * The service agent responsible for this service.
+	 */
+	private ServiceAgent agent = null;
 
 	/**
 	 * Executes a service method.
@@ -165,6 +170,8 @@ public abstract class Service extends Configurable {
 	 * To use the service agent as executing entity, use {@link #invokeInternally(String, String, Serializable...)}
 	 * instead.
 	 * 
+	 * Needs an active {@link Context}!
+	 * 
 	 * @param service The service class. A version may be specified (for example package.serviceClass@1.0.0-1 or package.serviceClass@1.0). 
 	 * 				The core tries to find an appropriate version (version 1.0.5 matches 1.0). If no version is specified,
 	 * 				the newest version is picked.
@@ -193,6 +200,8 @@ public abstract class Service extends Configurable {
 	 * 
 	 * To use the main agent as executing entity, use {@link #invokeServiceMethod(String, String, Serializable...)}
 	 * instead.
+	 * 
+	 * Needs an active {@link Context}!
 	 * 
 	 * @param service The service class. A version may be specified (for example package.serviceClass@1.0.0-1 or package.serviceClass@1.0). 
 	 * 				The core tries to find an appropriate version (version 1.0.5 matches 1.0). If no version is specified,
@@ -331,11 +340,15 @@ public abstract class Service extends Configurable {
 	 * @throws AgentNotKnownException
 	 */
 	public final ServiceAgent getAgent() throws AgentNotKnownException {
-		return getL2pThread().getServiceAgent();
+		if (this.agent == null)
+			throw new AgentNotKnownException("This Service has not been started yet!");
+		return this.agent;
 	}
 
 	/**
 	 * Gets the current execution context.
+	 * 
+	 * Needs an active {@link Context}!
 	 * 
 	 * @return the context we're currently running in
 	 */
@@ -345,6 +358,8 @@ public abstract class Service extends Configurable {
 
 	/**
 	 * Gets the current l2p thread.
+	 * 
+	 * Needs an active {@link Context}!
 	 * 
 	 * @return the L2pThread we're currently running in
 	 */
@@ -363,10 +378,12 @@ public abstract class Service extends Configurable {
 	 * simple startup hook that may be overwritten in subclasses
 	 * 
 	 * @param node
+	 * @param agent 
 	 * @throws L2pServiceException
 	 */
-	public void launchedAt(Node node) throws L2pServiceException {
-		runningAt = node;
+	public void launchedAt(Node node, ServiceAgent agent) throws L2pServiceException {
+		this.runningAt = node;
+		this.agent = agent;
 		if (super.monitor) {
 			try {
 				runningAt.setServiceMonitoring(getAgent());
