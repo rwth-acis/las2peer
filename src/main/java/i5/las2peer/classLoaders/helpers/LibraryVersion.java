@@ -63,7 +63,6 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 			} else
 				this.sub = null;
 		} catch (NumberFormatException e) {
-			e.printStackTrace();
 			throw new IllegalArgumentException("The given string contains invalid number representations: " + version,
 					e);
 		}
