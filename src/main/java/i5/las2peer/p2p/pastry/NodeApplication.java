@@ -270,6 +270,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 
 	/**
 	 * Called to route a message to the id
+	 * @param id 
 	 */
 	public void routeMyMsg(Id id) {
 		logger.info("\t --> " + this + " sending to " + id);
@@ -279,6 +280,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 
 	/**
 	 * Called to directly send a message to the nh
+	 * @param nh 
 	 */
 	public void routeMyMsgDirect(NodeHandle nh) {
 		logger.info("\t --> " + this + " sending direct to " + nh);

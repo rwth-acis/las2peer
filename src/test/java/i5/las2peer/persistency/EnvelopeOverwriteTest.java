@@ -35,7 +35,11 @@ public class EnvelopeOverwriteTest {
 		eve = (UserAgent) MockAgentFactory.getEve();
 		adam = (UserAgent) MockAgentFactory.getAdam();
 		Agent abel = MockAgentFactory.getAbel();
-
+		
+		eve.unlockPrivateKey("evespass");
+		adam.unlockPrivateKey("adamspass");
+		((UserAgent)abel).unlockPrivateKey("abelspass");
+		
 		node.storeAgent(eve);
 		node.storeAgent(adam);
 		node.storeAgent(abel);

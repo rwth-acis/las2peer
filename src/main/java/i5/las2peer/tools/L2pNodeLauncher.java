@@ -44,7 +44,6 @@ import i5.las2peer.security.PassphraseAgent;
 import i5.las2peer.security.ServiceAgent;
 import i5.las2peer.security.ServiceInfoAgent;
 import i5.las2peer.security.UserAgent;
-import i5.las2peer.security.UserAgentList;
 import i5.simpleXML.Element;
 import i5.simpleXML.Parser;
 import i5.simpleXML.XMLSyntaxException;
@@ -81,7 +80,7 @@ public class L2pNodeLauncher {
 	private UserAgent currentUser;
 
 	/**
-	 * Get the envelope with the given id. If the id is empty, the main user-list is returned.
+	 * Get the envelope with the given id
 	 * 
 	 * @param id
 	 * 
@@ -91,9 +90,6 @@ public class L2pNodeLauncher {
 	 * @throws NumberFormatException
 	 */
 	public String getEnvelope(String id) throws NumberFormatException, ArtifactNotFoundException, StorageException {
-		if (id == null || id.isEmpty())
-			id = "" + Envelope.getClassEnvelopeId(UserAgentList.class, "mainlist");
-
 		return node.fetchArtifact(Long.valueOf(id)).toXmlString();
 	}
 
@@ -231,7 +227,6 @@ public class L2pNodeLauncher {
 				printError("unable to store contents of " + xmlFile.toString() + "!");
 			}
 		}
-		node.forceUserListUpdate();
 		// wait till all user agents are added from startup directory to unlock group agents
 		for (GroupAgent currentGroupAgent : groupAgents) {
 			for (Long memberId : currentGroupAgent.getMemberList()) {
@@ -392,7 +387,7 @@ public class L2pNodeLauncher {
 			if (id.matches("-?[0-9].*"))
 				currentUser = (UserAgent) node.getAgent(Long.valueOf(id));
 			else
-				currentUser = (UserAgent) node.getAgent(node.getAgentIdForLogin(id));
+				currentUser = (UserAgent) node.getAgent(node.getUserManager().getAgentIdByLogin(id));
 
 			currentUser.unlockPrivateKey(passphrase);
 
@@ -552,19 +547,19 @@ public class L2pNodeLauncher {
 		try {
 			ServiceNameVersion service = ServiceNameVersion.fromString(serviceNameVersion);
 			
-			if (service.getVersion() != null) {
-				String passPhrase = SimpleTools.createRandomString(20);
-
-				ServiceAgent myAgent = ServiceAgent.createServiceAgent(service, passPhrase);
-				myAgent.unlockPrivateKey(passPhrase);
-
-				startService(myAgent);
-				return passPhrase;
+			if (service.getVersion() == null) {
+				printMessage("Warning: No version specified, trying version \"1.0\". Please specify "
+						+ "the exact version of the service you want to start.");
+				service = new ServiceNameVersion(service.getName(), "1.0");
 			}
-			else {
-				printMessage("You must specify an exact version of the service you want to start.");
-				return null;
-			}
+			
+			String passPhrase = SimpleTools.createRandomString(20);
+
+			ServiceAgent myAgent = ServiceAgent.createServiceAgent(service, passPhrase);
+			myAgent.unlockPrivateKey(passPhrase);
+
+			startService(myAgent);
+			return passPhrase;
 		} catch (AgentAlreadyRegisteredException e) {
 			printMessage("Agent already registered. Please use the existing instance.");
 			return null;

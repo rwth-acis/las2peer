@@ -3,10 +3,13 @@ package i5.las2peer.classLoaders.libraries;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import i5.las2peer.classLoaders.LibraryNotFoundException;
 import i5.las2peer.classLoaders.UnresolvedDependenciesException;
@@ -150,13 +153,15 @@ public class FileSystemRepository implements Repository {
 	 * @throws LibraryNotFoundException
 	 */
 	public LoadedLibrary findMatchingLibrary(LibraryDependency dep) throws LibraryNotFoundException {
-		// TODO: find better search solution: Search sorted and find always newest version
 		Hashtable<LibraryVersion, String> htVersions = htFoundJars.get(dep.getName());
 		if (htVersions == null)
 			throw new LibraryNotFoundException(
 					"library '" + dep.getName() + "' package could not be found in the repositories!");
+		
+		LibraryVersion[] available = htVersions.keySet().toArray(new LibraryVersion[0]);
+		Arrays.sort(available, Comparator.comparing( (LibraryVersion s) -> s ).reversed());
 
-		for (LibraryVersion version : htVersions.keySet()) {
+		for (LibraryVersion version : available) {
 			if (dep.fits(version)) {
 				try {
 					return LoadedJarLibrary.createFromJar(htVersions.get(version));
@@ -165,7 +170,6 @@ public class FileSystemRepository implements Repository {
 					e.printStackTrace();
 				}
 			}
-			// else System.out.println ( "--> does not fit");
 		}
 
 		throw new LibraryNotFoundException(
@@ -253,29 +257,28 @@ public class FileSystemRepository implements Repository {
 		}
 
 		File[] entries = f.listFiles();
+		
+		Pattern versionPattern = Pattern.compile("-[0-9]+(?:.[0-9]+(?:.[0-9]+)?)?(?:-[0-9]+)?$");
 
 		for (int i = 0; i < entries.length; i++) {
-
 			if (entries[i].isDirectory()) {
 				if (recursive)
 					searchJars(entries[i].toString());
 			} else if (entries[i].getPath().endsWith(".jar")) {
-				if (entries[i].getName().contains("-")) {
-					String[] split = entries[i].getName().substring(0, entries[i].getName().length() - 4).split("-", 2);
+				String file = entries[i].getName().substring(0, entries[i].getName().length() - 4);
+				Matcher m = versionPattern.matcher(file);
+				
+				if (m.find()) {
 					try {
-						LibraryVersion version = new LibraryVersion(split[1]);
-						registerJar(entries[i].getPath(), split[0], version);
+						String name = file.substring(0, m.start());
+						LibraryVersion version = new LibraryVersion(m.group().substring(1));
+						registerJar(entries[i].getPath(), name, version);
 					} catch (IllegalArgumentException e) {
-						// ok, version info not correct
-						// TODO: print warning about missing version info?
-
-						System.out.println("Error registering library " + entries[i] + ": " + e);
-
+						System.out.println("Notice: library " + entries[i] + " has no version info in it's name! - Won't be used!");
 					}
-				} else {
-					// TODO: print warning about missing version info?
-					// maybe depending on log level
-					System.out.println("library " + entries[i] + " has no version info in it's name! - Won't be used!");
+				}
+				else {
+					System.out.println("Notice: library " + entries[i] + " has no version info in it's name! - Won't be used!");
 				}
 			}
 		}

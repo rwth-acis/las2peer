@@ -206,7 +206,7 @@ public class LocalNode extends Node {
 			htKnownAgents.put(agent.getId(), agent.toXmlString());
 
 			if (agent instanceof UserAgent)
-				updateUserAgentList((UserAgent) agent);
+				getUserManager().registerUserAgent((UserAgent) agent);
 		}
 	}
 
@@ -234,7 +234,7 @@ public class LocalNode extends Node {
 			htKnownAgents.put(agent.getId(), agent.toXmlString());
 
 			if (agent instanceof UserAgent)
-				updateUserAgentList((UserAgent) agent);
+				getUserManager().updateUserAgent((UserAgent) agent);
 		}
 	}
 
