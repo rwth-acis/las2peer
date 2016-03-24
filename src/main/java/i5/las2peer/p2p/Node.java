@@ -35,16 +35,12 @@ import i5.las2peer.logging.NodeObserver;
 import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.logging.monitoring.MonitoringObserver;
 import i5.las2peer.p2p.pastry.PastryStorageException;
-import i5.las2peer.persistency.DecodingFailedException;
 import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.persistency.Envelope;
-import i5.las2peer.persistency.EnvelopeException;
 import i5.las2peer.security.Agent;
 import i5.las2peer.security.AgentException;
 import i5.las2peer.security.AgentStorage;
 import i5.las2peer.security.Context;
-import i5.las2peer.security.DuplicateEmailException;
-import i5.las2peer.security.DuplicateLoginNameException;
 import i5.las2peer.security.GroupAgent;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.Mediator;
@@ -70,8 +66,6 @@ import rice.pastry.socket.SocketNodeHandle;
  * 
  */
 public abstract class Node implements AgentStorage {
-
-	private static final String MAINLIST_ID = "mainlist";
 
 	/**
 	 * The Sending mode for outgoing messages.

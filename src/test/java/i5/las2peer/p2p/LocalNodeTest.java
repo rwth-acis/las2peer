@@ -18,7 +18,6 @@ import org.junit.Test;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.PingPongContent;
 import i5.las2peer.persistency.EncodingFailedException;
-import i5.las2peer.persistency.Envelope;
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.security.AgentException;
 import i5.las2peer.security.L2pSecurityException;
