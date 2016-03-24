@@ -1201,8 +1201,6 @@ public final class Envelope implements XmlAble, Cloneable {
 
 	/**
 	 * Get a previously stored envelope from the p2p network.
-	 *
-	 * Requires an active LAS2Peer @{link i5.las2peer.security.Context}.
 	 * 
 	 * @param agent executing agent
 	 * @param cls type of the class

@@ -40,6 +40,7 @@ public class LocalNodeInvocationTest {
 		LocalNode node = LocalNode.newNode();
 		UserAgent eve = MockAgentFactory.getEve();
 
+		eve.unlockPrivateKey("evespass");
 		node.storeAgent(eve);
 
 		node.launch();
@@ -62,6 +63,7 @@ public class LocalNodeInvocationTest {
 		LocalNode serviceNode = LocalNode.newNode();
 		UserAgent eve = MockAgentFactory.getEve();
 
+		eve.unlockPrivateKey("evespass");
 		serviceNode.storeAgent(eve);
 		serviceNode.launch();
 
@@ -70,7 +72,6 @@ public class LocalNodeInvocationTest {
 		serviceNode.registerReceiver(testServiceAgent);
 
 		LocalNode callerNode = LocalNode.launchNode();
-		eve.unlockPrivateKey("evespass");
 		Object result = callerNode.invokeGlobally(eve, ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.0"), "inc",
 				new Serializable[] { new Integer(12) });
 
@@ -83,7 +84,8 @@ public class LocalNodeInvocationTest {
 		LocalNode serviceNode1 = LocalNode.newNode();
 		LocalNode serviceNode2 = LocalNode.newNode();
 		UserAgent eve = MockAgentFactory.getEve();
-
+		
+		eve.unlockPrivateKey("evespass");
 		serviceNode1.storeAgent(eve);
 		serviceNode1.launch();
 		serviceNode2.launch();
@@ -97,7 +99,6 @@ public class LocalNodeInvocationTest {
 		serviceNode2.registerReceiver(testServiceAgent2);
 
 		LocalNode callerNode = LocalNode.launchNode();
-		eve.unlockPrivateKey("evespass");
 		Object result = callerNode.invokeGlobally(eve, ServiceNameVersion.fromString("i5.las2peer.api.TestService2@1.0"), "usingOther",
 				new Serializable[] { new Integer(12) });
 
@@ -110,6 +111,7 @@ public class LocalNodeInvocationTest {
 		LocalNode serviceNode2 = LocalNode.newNode();
 		UserAgent eve = MockAgentFactory.getEve();
 
+		eve.unlockPrivateKey("evespass");
 		serviceNode2.storeAgent(eve);
 		serviceNode2.launch();
 
@@ -118,7 +120,6 @@ public class LocalNodeInvocationTest {
 		serviceNode2.registerReceiver(testServiceAgent2);
 
 		LocalNode callerNode = LocalNode.launchNode();
-		eve.unlockPrivateKey("evespass");
 		Object result = callerNode.invokeGlobally(eve, ServiceNameVersion.fromString("i5.las2peer.api.TestService2@1.0"), "usingOther",
 				new Serializable[] { new Integer(12) });
 
@@ -132,7 +133,8 @@ public class LocalNodeInvocationTest {
 		LocalNode serviceNode1 = LocalNode.newNode("export/jars/");
 		LocalNode serviceNode2 = LocalNode.newNode("export/jars/");
 		UserAgent eve = MockAgentFactory.getEve();
-
+		
+		eve.unlockPrivateKey("evespass");
 		serviceNode1.storeAgent(eve);
 		serviceNode1.launch();
 		serviceNode2.launch();
@@ -150,7 +152,6 @@ public class LocalNodeInvocationTest {
 		serviceNode2.registerReceiver(serviceAgent2);
 
 		LocalNode callerNode = LocalNode.launchNode();
-		eve.unlockPrivateKey("evespass");
 				
 		// specify exact version
 		Object result = callerNode.invoke(eve, ServiceNameVersion.fromString("i5.las2peer.testServices.testPackage1.TestService@1.0"), "getVersion", new Serializable[] {});

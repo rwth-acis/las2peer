@@ -3,6 +3,7 @@ package i5.las2peer.classLoaders.libraries;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -152,13 +153,15 @@ public class FileSystemRepository implements Repository {
 	 * @throws LibraryNotFoundException
 	 */
 	public LoadedLibrary findMatchingLibrary(LibraryDependency dep) throws LibraryNotFoundException {
-		// TODO: find better search solution: Search sorted and find always newest version
 		Hashtable<LibraryVersion, String> htVersions = htFoundJars.get(dep.getName());
 		if (htVersions == null)
 			throw new LibraryNotFoundException(
 					"library '" + dep.getName() + "' package could not be found in the repositories!");
+		
+		LibraryVersion[] available = htVersions.keySet().toArray(new LibraryVersion[0]);
+		Arrays.sort(available, Comparator.comparing( (LibraryVersion s) -> s ).reversed());
 
-		for (LibraryVersion version : htVersions.keySet()) {
+		for (LibraryVersion version : available) {
 			if (dep.fits(version)) {
 				try {
 					return LoadedJarLibrary.createFromJar(htVersions.get(version));
@@ -167,7 +170,6 @@ public class FileSystemRepository implements Repository {
 					e.printStackTrace();
 				}
 			}
-			// else System.out.println ( "--> does not fit");
 		}
 
 		throw new LibraryNotFoundException(

@@ -12,7 +12,6 @@ import java.util.regex.Pattern;
 
 import i5.las2peer.classLoaders.helpers.LibraryDependency;
 import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
-import i5.las2peer.classLoaders.helpers.LibraryVersion;
 
 /**
  * a loaded jar library implements a library on the basis of a standard jar file

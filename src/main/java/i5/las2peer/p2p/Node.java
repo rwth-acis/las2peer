@@ -35,16 +35,12 @@ import i5.las2peer.logging.NodeObserver;
 import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.logging.monitoring.MonitoringObserver;
 import i5.las2peer.p2p.pastry.PastryStorageException;
-import i5.las2peer.persistency.DecodingFailedException;
 import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.persistency.Envelope;
-import i5.las2peer.persistency.EnvelopeException;
 import i5.las2peer.security.Agent;
 import i5.las2peer.security.AgentException;
 import i5.las2peer.security.AgentStorage;
 import i5.las2peer.security.Context;
-import i5.las2peer.security.DuplicateEmailException;
-import i5.las2peer.security.DuplicateLoginNameException;
 import i5.las2peer.security.GroupAgent;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.Mediator;
@@ -53,7 +49,7 @@ import i5.las2peer.security.MonitoringAgent;
 import i5.las2peer.security.ServiceAgent;
 import i5.las2peer.security.ServiceInfoAgent;
 import i5.las2peer.security.UserAgent;
-import i5.las2peer.security.UserAgentList;
+import i5.las2peer.security.UserAgentManager;
 import i5.las2peer.testing.MockAgentFactory;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
@@ -70,8 +66,6 @@ import rice.pastry.socket.SocketNodeHandle;
  * 
  */
 public abstract class Node implements AgentStorage {
-
-	private static final String MAINLIST_ID = "mainlist";
 
 	/**
 	 * The Sending mode for outgoing messages.
@@ -134,14 +128,9 @@ public abstract class Node implements AgentStorage {
 	private KeyPair nodeKeyPair;
 
 	/**
-	 * the list of users containing email an login name tables
+	 * maps names and emails to UserAgents
 	 */
-	private Envelope activeUserList = null;
-
-	/**
-	 * a set of updates on user Agents to perform, if an update storage of {@link #activeUserList} fails
-	 */
-	private HashSet<UserAgent> hsUserUpdates = new HashSet<UserAgent>();
+	private UserAgentManager userManager;
 
 	/**
 	 * Creates a new node, if the standardObserver flag is true, an observer logging all events to a simple plain text
@@ -198,6 +187,8 @@ public abstract class Node implements AgentStorage {
 
 		nodeKeyPair = CryptoTools.generateKeyPair();
 		nodeServiceCache = new NodeServiceCache(this, nodeServiceCacheLifetime);
+		
+		userManager = new UserAgentManager(this);
 	}
 
 	/**
@@ -770,7 +761,7 @@ public abstract class Node implements AgentStorage {
 	 * 
 	 * @param envelope
 	 * @throws StorageException
-	 * @throws L2pSecurityException
+	 * @throws L2pSecurityException if an Envelope cannot be overwritten
 	 * 
 	 */
 	public abstract void storeArtifact(Envelope envelope) throws StorageException, L2pSecurityException;
@@ -1016,125 +1007,15 @@ public abstract class Node implements AgentStorage {
 
 		return result;
 	}
-
+	
 	/**
-	 * Loads the central user list from the backend.
+	 * returns the manager responsible for user management
+	 * @return this node's user manager
 	 */
-	private void loadUserList() {
-		Agent owner = getAnonymous();
-		boolean bLoadedOrCreated = false;
-		try {
-			try {
-				activeUserList = fetchArtifact(Envelope.getClassEnvelopeId(UserAgentList.class, MAINLIST_ID));
-				activeUserList.open(owner);
-				bLoadedOrCreated = true;
-			} catch (Exception e) {
-				if (activeUserList == null) {
-					activeUserList = Envelope.createClassIdEnvelope(new UserAgentList(), MAINLIST_ID, owner);
-					activeUserList.open(owner);
-					activeUserList.setOverWriteBlindly(false);
-					activeUserList.lockContent();
-					bLoadedOrCreated = true;
-				}
-			}
-
-			if (bLoadedOrCreated && hsUserUpdates.size() > 0) {
-				for (UserAgent agent : hsUserUpdates)
-					activeUserList.getContent(UserAgentList.class).updateUser(agent);
-				doStoreUserList();
-			}
-		} catch (Exception e) {
-			observerNotice(Event.NODE_ERROR, "Error updating the user registration list: " + e.toString());
-			e.printStackTrace();
-		}
+	public UserAgentManager getUserManager() {
+		return userManager;
 	}
-
-	/**
-	 * Stores the current list. If the storage fails e.g. due to a failed up-to-date-check of the current user list, the
-	 * storage is attempted a second time.
-	 */
-	private void storeUserList() {
-		synchronized (hsUserUpdates) {
-			try {
-				doStoreUserList();
-				loadUserList();
-			} catch (Exception e) {
-				e.printStackTrace();
-
-				// one retry because of actuality problems:
-				loadUserList();
-				try {
-					doStoreUserList();
-					loadUserList();
-				} catch (Exception e1) {
-					observerNotice(Event.NODE_ERROR, "Error storing new User List: " + e.toString());
-				}
-			}
-		}
-	}
-
-	/**
-	 * The actual backend storage procedure.
-	 * 
-	 * @throws EncodingFailedException
-	 * @throws StorageException
-	 * @throws L2pSecurityException
-	 * @throws DecodingFailedException
-	 */
-	private void doStoreUserList()
-			throws EncodingFailedException, StorageException, L2pSecurityException, DecodingFailedException {
-		Agent anon = getAnonymous();
-		activeUserList.open(anon);
-
-		activeUserList.addSignature(anon);
-		activeUserList.close();
-		storeArtifact(activeUserList);
-		activeUserList.open(anon);
-
-		// ok, all changes are stored
-		hsUserUpdates.clear();
-	}
-
-	/**
-	 * Forces the node to publish all changes on the userlist.
-	 */
-	public void forceUserListUpdate() {
-		if (hsUserUpdates.size() > 0)
-			storeUserList();
-	}
-
-	/**
-	 * Update the registry of login and mail addresses of known / stored user agents on an {@link #updateAgent(Agent)}
-	 * or {@link #storeAgent(Agent)} action.
-	 * 
-	 * @param agent
-	 * @throws DuplicateEmailException
-	 * @throws DuplicateLoginNameException
-	 */
-	protected void updateUserAgentList(UserAgent agent) throws DuplicateEmailException, DuplicateLoginNameException {
-
-		synchronized (hsUserUpdates) {
-			if (activeUserList == null)
-				loadUserList();
-
-			try {
-				UserAgentList content = activeUserList.getContent(UserAgentList.class);
-				content.updateUser(agent);
-				activeUserList.updateContent(content);
-			} catch (EnvelopeException | L2pSecurityException | SerializationException e) {
-				observerNotice(Event.NODE_ERROR, "Envelope error while updating user list: " + e);
-			}
-
-			synchronized (hsUserUpdates) {
-				hsUserUpdates.add(agent);
-
-				if (hsUserUpdates.size() > 10) {
-					storeUserList();
-				}
-			}
-		}
-	}
-
+	
 	/**
 	 * Gets an id for the user for the given login name.
 	 * 
@@ -1143,27 +1024,7 @@ public abstract class Node implements AgentStorage {
 	 * @throws AgentNotKnownException
 	 */
 	public long getAgentIdForLogin(String login) throws AgentNotKnownException {
-		if (activeUserList == null) {
-			loadUserList();
-		}
-
-		if (activeUserList == null)
-			throw new AgentNotKnownException("No agents known!");
-
-		try {
-			return activeUserList.getContent(UserAgentList.class).getLoginId(login);
-		} catch (AgentNotKnownException e) {
-			// retry once
-			loadUserList();
-
-			try {
-				return activeUserList.getContent(UserAgentList.class).getLoginId(login);
-			} catch (EnvelopeException e1) {
-				throw e;
-			}
-		} catch (EnvelopeException e) {
-			throw new AgentNotKnownException("Envelope Problems with user list!", e);
-		}
+		return userManager.getAgentIdByLogin(login);
 	}
 
 	/**
@@ -1174,19 +1035,7 @@ public abstract class Node implements AgentStorage {
 	 * @throws AgentNotKnownException
 	 */
 	public long getAgentIdForEmail(String email) throws AgentNotKnownException {
-		if (activeUserList == null)
-			loadUserList();
-
-		if (activeUserList == null)
-			throw new AgentNotKnownException("No agents known!");
-
-		try {
-			return activeUserList.getContent(UserAgentList.class).getLoginId(email);
-		} catch (AgentNotKnownException e) {
-			throw e;
-		} catch (EnvelopeException e) {
-			throw new AgentNotKnownException("Evelope Problems with user list!", e);
-		}
+		return userManager.getAgentIdByEmail(email);
 	}
 
 	/**
