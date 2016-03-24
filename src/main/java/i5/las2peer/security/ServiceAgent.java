@@ -460,7 +460,7 @@ public class ServiceAgent extends PassphraseAgent {
 			serviceInstance = cons.newInstance();
 
 			// notify the service, that it has been launched
-			serviceInstance.launchedAt(node);
+			serviceInstance.launchedAt(node, this);
 
 			// and the agent
 			super.notifyRegistrationTo(node);
