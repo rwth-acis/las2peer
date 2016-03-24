@@ -67,15 +67,15 @@ public class UserAgentManagerTest {
 
 		UserAgent a = UserAgent.createUserAgent("pass");
 		a.unlockPrivateKey("pass");
-		a.setEmail("email@");
+		a.setEmail("email@example.com");
 
 		node.storeAgent(a);
 
-		assertEquals(a.getId(), l.getAgentIdByEmail("email@"));
+		assertEquals(a.getId(), l.getAgentIdByEmail("email@example.com"));
 
 		UserAgent b = UserAgent.createUserAgent("pass");
 		b.unlockPrivateKey("pass");
-		b.setEmail("email@");
+		b.setEmail("email@example.com");
 		try {
 			node.storeAgent(b);
 			fail("DuplicateEmailException expected");
@@ -83,7 +83,7 @@ public class UserAgentManagerTest {
 			// intended
 		}
 
-		b.setEmail("EMAIL@");
+		b.setEmail("EMAIL@example.com");
 		try {
 			node.updateAgent(b);
 			fail("DuplicateEmailException expected");
@@ -91,14 +91,14 @@ public class UserAgentManagerTest {
 			// intended
 		}
 
-		b.setEmail("email2@");
+		b.setEmail("email2@example.com");
 		node.updateAgent(b);
-		assertEquals(b.getId(), l.getAgentIdByEmail("email2@"));
+		assertEquals(b.getId(), l.getAgentIdByEmail("email2@example.com"));
 
-		b.setEmail("email3@");
+		b.setEmail("email3@example.com");
 		node.updateAgent(b);
-		assertEquals(b.getId(), l.getAgentIdByEmail("email3@"));
-		assertEquals(b.getId(), l.getAgentIdByEmail("EMAIL3@"));
+		assertEquals(b.getId(), l.getAgentIdByEmail("email3@example.com"));
+		assertEquals(b.getId(), l.getAgentIdByEmail("EMAIL3@example.com"));
 
 		try {
 			l.getAgentIdByEmail("fdewfue");
