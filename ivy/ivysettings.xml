@@ -8,4 +8,12 @@
 		<ibiblio name="acis-snapshots" m2compatible="true" root="http://role.dbis.rwth-aachen.de:9911/archiva/repository/snapshots/"/>
 		</chain>
 	</resolvers>
+	
+	<property name="archiva.host" value="role.dbis.rwth-aachen.de:9911" override="false"/>
+    <property name="archiva.realm" value="Repository Archiva Managed internal Repository" override="false"/>
+    <property name="archiva.user" value="user"/>
+    <property name="archiva.pass" value="pass"/>
+    <properties environment="env"/>
+    <include file="${env.CREDENTIALS_FILE}" optional="true"/>
+    <credentials host="${archiva.host}" realm="${archiva.realm}" username="${archiva.user}" passwd="${archiva.pass}"/>
 </ivysettings>
