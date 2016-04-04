@@ -1,6 +1,6 @@
-![LAS2peer](https://github.com/rwth-acis/LAS2peer/blob/master/img/logo/bitmap/las2peer-logo-128x128.png)
+![las2peer](https://github.com/rwth-acis/LAS2peer/blob/master/img/logo/bitmap/las2peer-logo-128x128.png)
 
-LAS2peer is a Java-based server framework for developing and deploying services in a distributed Peer-to-Peer (P2P) environment. LAS2peer was developed by the Advanced Community Information Systems (ACIS) group at the Chair of Computer Science 5 (Information Systems & Databases), RWTH Aachen University, Germany. It's main focus lies on providing developers with a tool to easily develop and test their services and deploy them in a P2P network without having to rely on a centralized infrastructure.
+las2peer is a Java-based server framework for developing and deploying services in a distributed Peer-to-Peer (P2P) environment. las2peer was developed by the Advanced Community Information Systems (ACIS) group at the Chair of Computer Science 5 (Information Systems & Databases), RWTH Aachen University, Germany. It's main focus lies on providing developers with a tool to easily develop and test their services and deploy them in a P2P network without having to rely on a centralized infrastructure.
 
 Developers can develop and test their services locally and then deploy them on any machine that has joined the network. For communication between nodes, the FreePastry (http://www.freepastry.org/) library is used.
 
@@ -8,15 +8,15 @@ Currently, connection to the outside is realized via the [HTTP-Connector](https:
 
 Service Development
 -----------------------
-This project contains LAS2peer itself. To develop a service for LAS2peer, please use the 
-[LAS2Peer Template Project](https://github.com/rwth-acis/LAS2peer-Template-Project/) and follow the instructions of the project's ReadMe.  
+This project contains las2peer itself. To develop a service for las2peer, please use the 
+[las2peer Template Project](https://github.com/rwth-acis/LAS2peer-Template-Project/) and follow the instructions of the project's ReadMe.  
 
-If you want to learn more about LAS2peer, please visit the [LAS2peer Template Project's Wiki Page](https://github.com/rwth-acis/LAS2peer-Template-Project/wiki).
+If you want to learn more about las2peer, please visit the [las2peer Template Project's Wiki Page](https://github.com/rwth-acis/LAS2peer-Template-Project/wiki).
 
 Preparations
 -----------------------
 
-LAS2peer depends on strong encryption enabled in its Java Runtime Environment (JRE).
+las2peer depends on strong encryption enabled in its Java Runtime Environment (JRE).
 If you use an Oracle Java version, you have to enable strong encryption by replacing a set of policy files in subdirectory ./lib/security/ of your JRE installation.
 
 Policy files for strong encryption can be downloaded via Oracle:
@@ -29,7 +29,7 @@ Policy files for strong encryption can be downloaded via Oracle:
 Building Instructions
 ----------------------
 
-To build the LAS2peer jar file simply run default target:
+To build the las2peer jar file simply run default target:
     ```ant```
     or directly
     ```ant jars```
