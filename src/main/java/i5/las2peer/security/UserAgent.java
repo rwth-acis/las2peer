@@ -99,7 +99,7 @@ public class UserAgent extends PassphraseAgent {
 		if (loginName != null && !(loginName.matches("[a-zA-Z].*")))
 			throw new UserAgentException("please use a login name startung with a normal character (a-z or A-Z)");
 
-		// TODO duplicate check!!!!!!!
+		// duplicate check is performed when storing/updating an UserAgent in a Node
 		this.sLoginName = loginName;
 	}
 
@@ -122,7 +122,7 @@ public class UserAgent extends PassphraseAgent {
 		if (email != null && !email.contains("@") && !rfc2822.matcher(email).matches())
 			throw new UserAgentException("Invalid e-mail address");
 
-		// TODO duplicate check!!!!!!!
+		// duplicate check is performed when storing/updating an UserAgent in a Node
 		this.sEmail = email.toLowerCase();
 	}
 
@@ -342,7 +342,7 @@ public class UserAgent extends PassphraseAgent {
 
 	@Override
 	public void notifyUnregister() {
-		// TODO Auto-generated method stub
+		// do nothing
 	}
 
 	/**

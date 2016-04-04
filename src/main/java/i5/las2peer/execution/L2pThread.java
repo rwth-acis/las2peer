@@ -117,9 +117,6 @@ public class L2pThread extends Thread {
 	/**
 	 * access to the agent registered at the L2pNode
 	 * 
-	 * TODO: question: what's more secure? Give access to the service Agent or provide an invokeInternally method here?
-	 * - Probably the latter one.
-	 * 
 	 * @return the ServiceAgent responsible for the service requested via the invocation task
 	 */
 	public ServiceAgent getServiceAgent() {
