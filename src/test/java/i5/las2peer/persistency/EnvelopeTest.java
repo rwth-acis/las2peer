@@ -43,7 +43,7 @@ public class EnvelopeTest {
 
 	@Test
 	public void testStringContent() throws NoSuchAlgorithmException, UnsupportedEncodingException,
-			MalformedXMLException, XMLSyntaxException, L2pSecurityException, EnvelopeException {
+			MalformedXMLException, XMLSyntaxException, L2pSecurityException, EnvelopeException, SerializationException {
 		if (eve == null)
 			throw new NullPointerException("Agents not initialized!");
 
@@ -141,7 +141,7 @@ public class EnvelopeTest {
 
 	@Test
 	public void testOpen() throws EncodingFailedException, UnsupportedEncodingException, DecodingFailedException,
-			MalformedXMLException, L2pSecurityException {
+			MalformedXMLException, L2pSecurityException, SerializationException {
 		String data = "darf's auch ein bisschen mehr sein?";
 
 		Envelope testee = new Envelope(data, adam);
@@ -176,7 +176,7 @@ public class EnvelopeTest {
 
 	@Test
 	public void testSignatures() throws UnsupportedEncodingException, EncodingFailedException, DecodingFailedException,
-			MalformedXMLException, VerificationFailedException, L2pSecurityException {
+			MalformedXMLException, VerificationFailedException, L2pSecurityException, SerializationException {
 		String content = "irgendwas sinnvolles";
 
 		Envelope testee = new Envelope(content, eve);
@@ -277,7 +277,7 @@ public class EnvelopeTest {
 
 	@Test
 	public void testId() throws MalformedXMLException, UnsupportedEncodingException, EncodingFailedException,
-			DecodingFailedException {
+			DecodingFailedException, SerializationException {
 		String content = "bla";
 		Envelope testee = new Envelope(content, eve);
 		String xml = testee.toXmlString();

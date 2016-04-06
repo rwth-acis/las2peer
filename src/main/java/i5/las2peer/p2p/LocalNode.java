@@ -17,6 +17,7 @@ import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.MessageReceiver;
 import i5.las2peer.security.UserAgent;
 import i5.las2peer.tools.CryptoTools;
+import i5.las2peer.tools.SerializationException;
 import i5.las2peer.tools.TimerThread;
 
 /**
@@ -200,10 +201,17 @@ public class LocalNode extends Node {
 
 			if (htKnownAgents.get(agent.getId()) != null)
 				throw new AgentAlreadyRegisteredException("Agent " + agent.getId() + " already in storage");
+			
+			String agentXml = null;
+			try {
+				agentXml = agent.toXmlString();
+			} catch (SerializationException e) {
+				throw new AgentException("Serialization failed!", e);
+			}
 
 			locallyKnownAgents.registerAgent(agent);
 
-			htKnownAgents.put(agent.getId(), agent.toXmlString());
+			htKnownAgents.put(agent.getId(), agentXml);
 
 			if (agent instanceof UserAgent)
 				getUserManager().registerUserAgent((UserAgent) agent);
@@ -229,9 +237,16 @@ public class LocalNode extends Node {
 			// use hash value of private key instead
 
 			// this is verifyable on each local node
+			
+			String agentXml = null;
+			try {
+				agentXml = agent.toXmlString();
+			} catch (SerializationException e) {
+				throw new AgentException("Serialization failed!", e);
+			}
 
 			locallyKnownAgents.registerAgent(agent);
-			htKnownAgents.put(agent.getId(), agent.toXmlString());
+			htKnownAgents.put(agent.getId(), agentXml);
 
 			if (agent instanceof UserAgent)
 				getUserManager().updateUserAgent((UserAgent) agent);

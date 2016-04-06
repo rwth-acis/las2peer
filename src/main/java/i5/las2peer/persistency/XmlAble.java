@@ -1,5 +1,7 @@
 package i5.las2peer.persistency;
 
+import i5.las2peer.tools.SerializationException;
+
 /**
  * The old XmlAble interface enforced an setStateFromXmlMethod.
  * 
@@ -24,7 +26,8 @@ public interface XmlAble {
 	 *
 	 *
 	 * @return a XML String representation
+	 * @throws SerializationException 
 	 */
-	public String toXmlString();
+	public String toXmlString() throws SerializationException;
 
 }
