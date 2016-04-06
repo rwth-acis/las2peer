@@ -40,6 +40,7 @@ import i5.las2peer.security.Agent;
 import i5.las2peer.security.AgentException;
 import i5.las2peer.security.GroupAgent;
 import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.security.L2pSecurityManager;
 import i5.las2peer.security.PassphraseAgent;
 import i5.las2peer.security.ServiceAgent;
 import i5.las2peer.security.ServiceInfoAgent;
@@ -1033,9 +1034,7 @@ public class L2pNodeLauncher {
 	 */
 	public static void main(String[] argv) throws InterruptedException, MalformedXMLException, IOException,
 			L2pSecurityException, EncodingFailedException, SerializationException, NodeException {
-//		// FIXME WIP sandbox
-//		System.setProperty("java.security.policy", "las2peer.policy");
-//		System.setSecurityManager(new L2pSecurityManager());
+		System.setSecurityManager(new L2pSecurityManager());
 		// parse command line parameter into list
 		List<String> instArgs = new ArrayList<>();
 		for (String arg : argv) {
