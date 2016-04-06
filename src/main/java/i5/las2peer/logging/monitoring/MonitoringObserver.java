@@ -89,8 +89,8 @@ public class MonitoringObserver implements NodeObserver {
 		try {
 			System.out.println("Monitoring: Trying to invoke Processing Service..");
 			String[] testParameters = { "Node " + registeredAt.getNodeId() + " registered observer!" };
-			long receivingAgentId = (Long) registeredAt.invoke(sendingAgent,
-					"i5.las2peer.services.monitoring.processing.MonitoringDataProcessingService", "getReceivingAgentId",
+			long receivingAgentId = (Long) registeredAt.invoke(sendingAgent, // TODO workaround: remove specified version hwne ServiceInfoAgent is replaced
+					"i5.las2peer.services.monitoring.processing.MonitoringDataProcessingService@0.1", "getReceivingAgentId",
 					testParameters);
 			try {
 				receivingAgent = (MonitoringAgent) registeredAt.getAgent(receivingAgentId);

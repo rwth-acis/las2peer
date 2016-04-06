@@ -19,6 +19,7 @@ import i5.las2peer.security.Agent;
 import i5.las2peer.security.AgentException;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.ServiceAgent;
+import i5.las2peer.security.UserAgent;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.FileContentReader;
 import i5.las2peer.tools.SimpleTools;
@@ -113,10 +114,16 @@ public abstract class LocalServiceTestCase {
 		agent.unlockPrivateKey(agentPassphrase);
 
 		localNode = LocalNode.newNode();
-
-		localNode.storeAgent(MockAgentFactory.getEve());
-		localNode.storeAgent(MockAgentFactory.getAbel());
-		localNode.storeAgent(MockAgentFactory.getAdam());
+		
+		UserAgent eve = MockAgentFactory.getEve();
+		eve.unlockPrivateKey("evespass");
+		localNode.storeAgent(eve);
+		UserAgent abel = MockAgentFactory.getAbel();
+		abel.unlockPrivateKey("abelspass");
+		localNode.storeAgent(abel);
+		UserAgent adam = MockAgentFactory.getAdam();
+		adam.unlockPrivateKey("adamspass");
+		localNode.storeAgent(adam);
 
 		loadStartupDir();
 

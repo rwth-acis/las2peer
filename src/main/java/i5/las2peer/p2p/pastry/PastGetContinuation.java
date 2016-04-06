@@ -45,6 +45,7 @@ public class PastGetContinuation<T> implements Continuation<PastContent, Excepti
 	 * create a new contiuation for retrieval of an artifact of the given type from the past(ry) backend
 	 * 
 	 * @param genericClass reference to the class of the expected result
+	 * @param timeout 
 	 */
 	public PastGetContinuation(Class<T> genericClass, int timeout) {
 		this.genericClass = genericClass;
@@ -55,6 +56,7 @@ public class PastGetContinuation<T> implements Continuation<PastContent, Excepti
 	 * create a new continuation for retrieval of an artifact of the given type from the past(ry) backend
 	 * 
 	 * @param genericClass
+	 * @param timeout 
 	 * @param aMessage
 	 */
 	public PastGetContinuation(Class<T> genericClass, int timeout, String aMessage) {

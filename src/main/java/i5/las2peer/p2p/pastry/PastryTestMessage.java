@@ -26,6 +26,8 @@ public class PastryTestMessage implements Message {
 
 	/**
 	 * Constructor.
+	 * @param from 
+	 * @param to 
 	 */
 	public PastryTestMessage(Id from, Id to) {
 		counter++;
@@ -41,6 +43,7 @@ public class PastryTestMessage implements Message {
 
 	/**
 	 * Use low priority to prevent interference with overlay maintenance traffic.
+	 * @return 
 	 */
 	public int getPriority() {
 		return Message.LOW_PRIORITY;

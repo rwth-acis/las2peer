@@ -111,7 +111,7 @@ public class FileSystemRepositoryTest {
 		testee.findLibrary(new LibraryIdentifier("i5.las2peer.classLoaders.testPackage1", "1.0"));
 
 		LoadedLibrary lib = testee
-				.findMatchingLibrary(new LibraryDependency("i5.las2peer.classLoaders.testPackage1", "1.1", "2.0"));
+				.findMatchingLibrary(new LibraryDependency("i5.las2peer.classLoaders.testPackage1", "1.0", "2.0"));
 		assertEquals("i5.las2peer.classLoaders.testPackage1", lib.getIdentifier().getName());
 		assertEquals("1.1", lib.getIdentifier().getVersion().toString());
 

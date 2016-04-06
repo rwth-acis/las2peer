@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.Random;
+import java.util.regex.Pattern;
 
 import org.apache.commons.codec.binary.Base64;
 
@@ -112,13 +113,16 @@ public class UserAgent extends PassphraseAgent {
 	public void setEmail(String email) throws L2pSecurityException, UserAgentException {
 		if (this.isLocked())
 			throw new L2pSecurityException("unlock needed first!");
+		
+		// http://stackoverflow.com/questions/153716/verify-email-in-java
+		Pattern rfc2822 = Pattern.compile(
+				"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$"
+		);
 
-		if (email != null && !email.contains("@"))
-			throw new UserAgentException("This email address contains no @ character...");
+		if (email != null && !email.contains("@") && !rfc2822.matcher(email).matches())
+			throw new UserAgentException("Invalid e-mail address");
 
 		// TODO duplicate check!!!!!!!
-		// Verify email in Java according to Stack Overflow
-		// http://stackoverflow.com/questions/153716/verify-email-in-java
 		this.sEmail = email.toLowerCase();
 	}
 

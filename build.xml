@@ -1,4 +1,6 @@
 <project name="LAS2peer" default="jars" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
+
+	<property environment="env"/>
 	
 	<property name="ivy.organisation" value="i5" />
 	<property name="ivy.module" value="las2peer" />
@@ -7,7 +9,11 @@
 	<property name="ivy.deliver.revision" value="${ivy.revision}" />
 	<property name="ivy.pom.version" value="${ivy.revision}" />
 	
-    <property name="ivy.install.version" value="2.3.0" />
+	<condition property="ivy.las2peer.version" value="${ivy.revision}.${ivy.build.number}" else="${ivy.revision}-SNAPSHOT">
+		<isset property="env.LAS2PEER_RELEASE" />
+	</condition>
+	
+    <property name="ivy.install.version" value="2.4.0" />
     <property name="ivy.jar.dir" value="${basedir}/ivy" />
     <property name="ivy.jar.file" value="${ivy.jar.dir}/ivy.jar" />
     <property name="ivy.settings.file" value="${ivy.jar.dir}/ivysettings.xml" />
