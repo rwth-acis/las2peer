@@ -34,6 +34,7 @@ import i5.las2peer.security.BasicAgentStorage;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.MessageReceiver;
 import i5.las2peer.security.UserAgent;
+import i5.las2peer.tools.SerializationException;
 import rice.environment.Environment;
 import rice.p2p.commonapi.Id;
 import rice.p2p.commonapi.NodeHandle;
@@ -559,11 +560,9 @@ public class PastryNodeImpl extends Node {
 		}
 
 		PastPutContinuation conti = new PastPutContinuation();
-		pastStorage.insert(new ContentEnvelope(envelope), conti);
-
-		// System.out.println ( "back from insert call");
+		
 		try {
-			// System.out.println ( " now waiting for feedback...");
+			pastStorage.insert(new ContentEnvelope(envelope), conti);
 			conti.waitForResult();
 			if (!conti.isSuccess()) {
 				observerNotice(Event.ARTIFACT_UPLOAD_FAILED, pastryNode,
@@ -576,6 +575,8 @@ public class PastryNodeImpl extends Node {
 
 		} catch (InterruptedException e) {
 			throw new PastryStorageException("Storage has been interrupted", e);
+		} catch (SerializationException e) {
+			throw new StorageException("Serializing the Envelope failed", e);
 		}
 
 		observerNotice(Event.ARTIFACT_ADDED, pastryNode, envelope.getId() + "");
@@ -653,9 +654,8 @@ public class PastryNodeImpl extends Node {
 
 		PastPutContinuation conti = new PastPutContinuation();
 
-		pastStorage.insert(new ContentEnvelope(agent), conti);
-
 		try {
+			pastStorage.insert(new ContentEnvelope(agent), conti);
 			conti.waitForResult();
 			if (!conti.isSuccess()) {
 				observerNotice(Event.AGENT_UPLOAD_FAILED, pastryNode, agent, "Storage error for agent!");
@@ -667,7 +667,7 @@ public class PastryNodeImpl extends Node {
 				getUserManager().registerUserAgent((UserAgent) agent);
 
 			observerNotice(Event.AGENT_UPLOAD_SUCCESS, pastryNode, agent, "");
-		} catch (InterruptedException e) {
+		} catch (InterruptedException | SerializationException e) {
 			locallyKnownAgents.unregisterAgent(agent);
 			observerNotice(Event.AGENT_UPLOAD_FAILED, pastryNode, agent, "Got interrupted!");
 			throw new AgentException("Storage has been interrupted", e);
@@ -687,9 +687,9 @@ public class PastryNodeImpl extends Node {
 		// TODO: compare agents for security check!
 
 		PastPutContinuation conti = new PastPutContinuation();
-		pastStorage.insert(new ContentEnvelope(agent), conti);
 
 		try {
+			pastStorage.insert(new ContentEnvelope(agent), conti);
 			conti.waitForResult();
 			if (!conti.isSuccess())
 				throw new PastryStorageException("error storing update");
@@ -698,6 +698,8 @@ public class PastryNodeImpl extends Node {
 				getUserManager().updateUserAgent((UserAgent) agent);
 		} catch (InterruptedException e) {
 			throw new PastryStorageException("interrupted", e);
+		} catch (SerializationException e) {
+			throw new AgentException("Storage has been interrupted", e);
 		}
 	}
 

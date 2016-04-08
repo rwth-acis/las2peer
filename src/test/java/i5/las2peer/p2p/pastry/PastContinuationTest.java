@@ -17,11 +17,12 @@ import i5.las2peer.security.Agent;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.UserAgent;
 import i5.las2peer.testing.MockAgentFactory;
+import i5.las2peer.tools.SerializationException;
 
 public class PastContinuationTest {
 
 	@Test
-	public void testSimpleRetrieval() throws L2pSecurityException, MalformedXMLException, IOException {
+	public void testSimpleRetrieval() throws L2pSecurityException, MalformedXMLException, IOException, SerializationException {
 		PastGetContinuation<Agent> testee = new PastGetContinuation<Agent>(Agent.class, 20000);
 
 		assertFalse(testee.isFinished());
@@ -40,7 +41,7 @@ public class PastContinuationTest {
 	}
 
 	@Test
-	public void testCastException() throws MalformedXMLException, IOException, L2pSecurityException {
+	public void testCastException() throws MalformedXMLException, IOException, L2pSecurityException, SerializationException {
 		PastGetContinuation<Envelope> testee = new PastGetContinuation<Envelope>(Envelope.class, 20000);
 
 		assertFalse(testee.isFinished());
@@ -76,6 +77,7 @@ public class PastContinuationTest {
 				} catch (InterruptedException e) {
 				} catch (MalformedXMLException e) {
 				} catch (IOException e) {
+				} catch (SerializationException e) {
 				}
 			}
 

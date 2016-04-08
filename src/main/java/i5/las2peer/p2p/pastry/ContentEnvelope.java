@@ -6,6 +6,7 @@ import i5.las2peer.persistency.Envelope;
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.security.Agent;
 import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.tools.SerializationException;
 import rice.environment.Environment;
 import rice.p2p.commonapi.Id;
 import rice.p2p.commonapi.IdFactory;
@@ -43,8 +44,9 @@ public class ContentEnvelope extends ContentHashPastContent {
 	 * create a pastry envelope for the given agent
 	 * 
 	 * @param agent
+	 * @throws SerializationException 
 	 */
-	public ContentEnvelope(Agent agent) {
+	public ContentEnvelope(Agent agent) throws SerializationException {
 		super(getPastId(agent));
 
 		content = agent.toXmlString();
@@ -86,8 +88,9 @@ public class ContentEnvelope extends ContentHashPastContent {
 	 * create a pastry envelope for the given las2peer envelope
 	 * 
 	 * @param e
+	 * @throws SerializationException 
 	 */
-	public ContentEnvelope(Envelope e) {
+	public ContentEnvelope(Envelope e) throws SerializationException {
 		super(getPastId(e));
 
 		type = TYPE_ENVELOPE;

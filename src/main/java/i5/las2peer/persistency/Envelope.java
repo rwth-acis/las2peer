@@ -306,6 +306,8 @@ public final class Envelope implements XmlAble, Cloneable {
 			updateContent(content);
 		} catch (L2pSecurityException e) {
 			assert false : "should not occur, since the envelope is open by design";
+		} catch (SerializationException e) {
+			throw new EncodingFailedException("Serializing Content failed", e);
 		}
 
 		close();
@@ -843,14 +845,14 @@ public final class Envelope implements XmlAble, Cloneable {
 
 	/**
 	 * @return a XML (string) representation of this envelope
+	 * @throws SerializationException 
 	 */
-	public String toXmlString() {
+	public String toXmlString() throws SerializationException {
 		if (baPlainData != null && baCipherData == null) {
 			try {
 				close();
 			} catch (EncodingFailedException e) {
-				// TODO: exceptions for toXmlString!
-				throw new RuntimeException("problems with the encoding of the envelope contents!", e);
+				throw new SerializationException("problems with the encoding of the envelope contents!", e);
 			}
 		}
 
@@ -1272,8 +1274,9 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * @param content
 	 * @throws L2pSecurityException
 	 * @throws UnsupportedEncodingException
+	 * @throws SerializationException 
 	 */
-	public void updateContent(XmlAble content) throws UnsupportedEncodingException, L2pSecurityException {
+	public void updateContent(XmlAble content) throws UnsupportedEncodingException, L2pSecurityException, SerializationException {
 		updateContent(content.toXmlString());
 		contentType = ContentType.XmlAble;
 		clContentClass = content.getClass();

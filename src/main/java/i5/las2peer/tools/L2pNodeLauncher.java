@@ -88,8 +88,9 @@ public class L2pNodeLauncher {
 	 * @throws StorageException
 	 * @throws ArtifactNotFoundException
 	 * @throws NumberFormatException
+	 * @throws SerializationException 
 	 */
-	public String getEnvelope(String id) throws NumberFormatException, ArtifactNotFoundException, StorageException {
+	public String getEnvelope(String id) throws NumberFormatException, ArtifactNotFoundException, StorageException, SerializationException {
 		return node.fetchArtifact(Long.valueOf(id)).toXmlString();
 	}
 
