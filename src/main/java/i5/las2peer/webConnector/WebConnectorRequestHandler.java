@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -220,6 +221,15 @@ public class WebConnectorRequestHandler implements HttpHandler {
 				long oidcAgentId = hash(sub);
 				username = oidcAgentId + "";
 				password = sub;
+				
+				synchronized (this.connector) {
+					if (this.connector.getOpenUserRequests().containsKey(oidcAgentId)) {
+						Integer numReq = this.connector.getOpenUserRequests().get(oidcAgentId);
+						this.connector.getOpenUserRequests().put(oidcAgentId, numReq + 1);
+					} else {
+						this.connector.getOpenUserRequests().put(oidcAgentId, 1);
+					}
+				}
 
 				PassphraseAgent pa;
 				try {
@@ -295,10 +305,8 @@ public class WebConnectorRequestHandler implements HttpHandler {
 				if (this.connector.getOpenUserRequests().containsKey(userId)) {
 					Integer numReq = this.connector.getOpenUserRequests().get(userId);
 					this.connector.getOpenUserRequests().put(userId, numReq + 1);
-					// System.out.println("### numreq " +numReq);
 				} else {
 					this.connector.getOpenUserRequests().put(userId, 1);
-					// System.out.println("### numreq 0" );
 				}
 			}
 			userAgent = (PassphraseAgent) l2pNode.getAgent(userId);
