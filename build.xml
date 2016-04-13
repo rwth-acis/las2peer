@@ -106,8 +106,9 @@
 			ivyfile="${ivy.dep.file}" 
 			pomfile="${export}/jars/${ivy.module}.pom" 
 			artifactName="${ivy.module}"
-			artifactPackaging="jar"
-		/>
+			artifactPackaging="jar">
+			<mapping conf="*" scope="compile" />
+		</ivy:makepom>
 
 		<ivy:publish resolver="acis-internal"
 			publishivy="false"
