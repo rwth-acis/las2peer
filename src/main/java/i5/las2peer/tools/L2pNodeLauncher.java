@@ -525,7 +525,7 @@ public class L2pNodeLauncher {
 			throw new IllegalStateException("please log in a valid user with registerUserAgent before!");
 
 		Agent receiver = node.getServiceAgent(ServiceNameVersion.fromString(serviceNameVersion));
-		Message request = new Message(currentUser, receiver, (Serializable) new ListMethodsContent(), 30000);
+		Message request = new Message(currentUser, receiver, (Serializable) new ListMethodsContent());
 		request.setSendingNodeId((NodeHandle) node.getNodeId());
 
 		Message response = node.sendMessageAndWaitForAnswer(request);
