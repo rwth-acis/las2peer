@@ -31,8 +31,7 @@ public class ServiceRepositoryManager {
 	private static ServiceRepositoryManager manager;
 	private static HashMap<String, ServiceData> serviceRepository = new HashMap<String, ServiceData>();
 	private static PathTree tree;
-	private static Timer timer = new Timer();
-	private static boolean timerRunning = false;
+	private static Timer timer;
 	private static final int DEFAULT_TIMER_INTERVAL_SECONDS = 300;
 	private static int timerIntervalSeconds = DEFAULT_TIMER_INTERVAL_SECONDS;
 
@@ -123,15 +122,16 @@ public class ServiceRepositoryManager {
 	}
 
 	private static void startTimer(final Node node) throws Exception {
-		if (timerRunning) {
+		if (timer != null) {
+			// timer is already running
 			return;
 		}
 		ServiceInfoAgent agent;
 		agent = getServiceInfoAgent(node);
 
 		final ServiceInfoAgent finalAgent = agent;
-		timerRunning = true;
 
+		timer = new Timer();
 		timer.scheduleAtFixedRate(
 				new TimerTask() {
 					public void run() {
@@ -143,8 +143,10 @@ public class ServiceRepositoryManager {
 	}
 
 	private static void stopTimer() {
-		timer.cancel();
-		timerRunning = false;
+		if (timer != null) {
+			timer.cancel();
+		}
+		timer = null;
 	}
 
 	private static ServiceInfoAgent getServiceInfoAgent(Node node) throws Exception {
