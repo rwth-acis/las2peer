@@ -3,11 +3,12 @@ package i5.las2peer.security;
 import static org.junit.Assert.fail;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
+import java.net.ServerSocket;
 
 import i5.las2peer.api.Service;
 
@@ -30,6 +31,7 @@ public class MaliciousService extends Service {
 	 */
 	public void readFile() {
 		try {
+			// XXX check some file on Windows systems, too
 			BufferedReader bReader = new BufferedReader(new FileReader("/etc/shadow"));
 			System.out.println(bReader.readLine());
 			bReader.close();
@@ -51,9 +53,9 @@ public class MaliciousService extends Service {
 				// just try some other test methods inside a new thread
 				// this thread is not an instance of L2pThread
 				try {
+					// XXX check some file on Windows systems, too
 					BufferedReader bReader = new BufferedReader(new FileReader("/etc/hostname"));
 					bReader.close();
-					// XXX check a file on Windows systems, too?
 					fail("SecurityException expected");
 				} catch (SecurityException e) {
 					// expected
@@ -71,25 +73,54 @@ public class MaliciousService extends Service {
 	}
 
 	/**
-	 * @see SandboxTest#testReflection()
+	 * @see SandboxTest#testClassPath()
 	 */
-	public void reflection() {
+	public void changeClassPath() {
+		System.setProperty("java.class.path", "/etc");
+	}
+
+	/**
+	 * @see SandboxTest#testPolicyProperty()
+	 */
+	public void changePolicyProperty() {
+		System.setProperty("java.security.policy", "");
+	}
+
+	/**
+	 * @see SandboxTest#testPolicyFile()
+	 */
+	public void overwritePolicyFile() {
 		try {
-			Field modifiersField = Field.class.getDeclaredField("modifiers");
-			modifiersField.setAccessible(true);
-			Field f = L2pSecurityManager.class.getDeclaredField("REFLECTION_TEST_VAR");
-			modifiersField.setInt(f, f.getModifiers() & ~Modifier.FINAL);
-			f.setAccessible(true);
-			f.set(null, "changed");
-			System.out.println(L2pSecurityManager.REFLECTION_TEST_VAR);
-			if (L2pSecurityManager.REFLECTION_TEST_VAR.equals("changed")) {
-				fail("This should not happen!");
-			}
-		} catch (SecurityException e) {
-			// expected, just forward it to JUnit
-			throw e;
-		} catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
+			BufferedWriter bWriter = new BufferedWriter(new FileWriter("las2peer.policy"));
+			bWriter.write("permission java.security.AllPermission;");
+			bWriter.close();
+		} catch (IOException e) {
 			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * @see SandboxTest#testPolicyProperty()
+	 */
+	public void blockPorts() {
+		ServerSocket sock1 = null;
+		ServerSocket sock2 = null;
+		try {
+			sock1 = new ServerSocket(80);
+			sock2 = new ServerSocket(443);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (sock1 != null) {
+					sock1.close();
+				}
+				if (sock2 != null) {
+					sock2.close();
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 

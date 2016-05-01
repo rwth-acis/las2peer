@@ -113,28 +113,99 @@ public class SandboxTest {
 		// the necessary fail() call is placed earlier
 	}
 
-	// TODO reflection is still dangerous
-//	/**
-//	 * In this test case the malicious service tries to overwrite a L2pSecurityManager member variable
-//	 */
-//	@Test
-//	public void testReflection() {
-//		try {
-//			node.invoke(service, MaliciousService.class.getName(), "reflection", new Serializable[0]);
-//		} catch (Exception e) {
-//			// get the root cause exception
-//			Throwable cause = e;
-//			while (cause.getCause() != null) {
-//				cause = cause.getCause();
-//			}
-//			if (cause instanceof SecurityException) {
-//				// expected
-//				System.out.println(cause.toString());
-//				return;
-//			}
-//			e.printStackTrace();
-//		}
-//		fail("SecurityException expected!");
-//	}
+	/**
+	 * In this test case the malicious service tries to modify the whitelisted system property java.class.path in order
+	 * to whitelist some more directories.
+	 */
+	@Test
+	public void testClassPath() {
+		try {
+			node.invoke(service, MaliciousService.class.getName(), "changeClassPath", new Serializable[0]);
+		} catch (Exception e) {
+			// get the root cause exception
+			Throwable cause = e;
+			while (cause.getCause() != null) {
+				cause = cause.getCause();
+			}
+			if (cause instanceof SecurityException) {
+				// expected
+				System.out.println(cause.toString());
+				return;
+			}
+			e.printStackTrace();
+		}
+		fail("SecurityException expected!");
+	}
+
+	/**
+	 * In this test case the malicious service tries to change the system property java.security.policy to an empty file
+	 * in order to disable all policy file checks.
+	 */
+	@Test
+	public void testPolicyProperty() {
+		try {
+			node.invoke(service, MaliciousService.class.getName(), "changePolicyProperty", new Serializable[0]);
+		} catch (Exception e) {
+			// get the root cause exception
+			Throwable cause = e;
+			while (cause.getCause() != null) {
+				cause = cause.getCause();
+			}
+			if (cause instanceof SecurityException) {
+				// expected
+				System.out.println(cause.toString());
+				return;
+			}
+			e.printStackTrace();
+		}
+		fail("SecurityException expected!");
+	}
+
+	/**
+	 * In this test case the malicious service tries to replace the policy file by moving another file over it.
+	 */
+	@Test
+	public void testPolicyFile() {
+		try {
+			node.invoke(service, MaliciousService.class.getName(), "overwritePolicyFile", new Serializable[0]);
+		} catch (Exception e) {
+			// get the root cause exception
+			Throwable cause = e;
+			while (cause.getCause() != null) {
+				cause = cause.getCause();
+			}
+			if (cause instanceof SecurityException) {
+				// expected
+				System.out.println(cause.toString());
+				return;
+			}
+			e.printStackTrace();
+		}
+		fail("SecurityException expected!");
+	}
+
+	/**
+	 * In this test case the malicious service tries to open (block) ports in order to prevent other system services
+	 * from execution.
+	 */
+	@Test
+	public void testBlockingPorts() {
+		try {
+			node.invoke(service, MaliciousService.class.getName(), "blockPorts", new Serializable[0]);
+		} catch (Exception e) {
+			// get the root cause exception
+			Throwable cause = e;
+			while (cause.getCause() != null) {
+				cause = cause.getCause();
+			}
+			if (cause instanceof SecurityException) {
+				// expected
+				System.out.println(cause.toString());
+				return;
+			}
+			e.printStackTrace();
+		}
+		fail("SecurityException expected!");
+	}
 
 }
