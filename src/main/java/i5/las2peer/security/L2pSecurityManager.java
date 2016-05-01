@@ -45,6 +45,10 @@ public class L2pSecurityManager extends SecurityManager {
 					return;
 				}
 			}
+			// allow write to junitvmwatcher*.properties
+			if (perm.getName().toLowerCase().matches("^.*junitvmwatcher[0-9]+.properties$")) {
+				return;
+			}
 			// check policy file
 			try {
 				super.checkPermission(perm);
