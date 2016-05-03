@@ -17,7 +17,7 @@ public class L2pSecurityManager extends SecurityManager {
 	// reminder: reflection makes member variables unsafe
 
 	public L2pSecurityManager() {
-		System.setProperty("java.security.policy", "las2peer.policy");
+		System.setProperty("java.security.policy", "etc/las2peer.policy");
 		// TODO check if the policy file exists, otherwise extract it from jar
 	}
 
