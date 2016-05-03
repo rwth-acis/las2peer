@@ -377,7 +377,14 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	 * @param message
 	 */
 	public static void logEvent(Event event, Agent actingUser, String message) {
-		logEvent(null, event, message, null, actingUser);
+		Thread t = Thread.currentThread();
+		if (t instanceof L2pThread) {
+			// Logging custom service messages requires a serviceAgent
+			Agent serviceAgent = ((L2pThread) t).getServiceAgent();
+			logEvent(null, event, message, serviceAgent, actingUser);
+		} else {
+			throw new IllegalStateException("Not executed in a L2pThread environment!");
+		}
 	}
 
 	/**
