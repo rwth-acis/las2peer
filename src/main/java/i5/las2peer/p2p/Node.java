@@ -46,8 +46,10 @@ import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.Mediator;
 import i5.las2peer.security.MessageReceiver;
 import i5.las2peer.security.MonitoringAgent;
+import i5.las2peer.security.PassphraseAgent;
 import i5.las2peer.security.ServiceAgent;
 import i5.las2peer.security.ServiceInfoAgent;
+import i5.las2peer.security.UnlockAgentCall;
 import i5.las2peer.security.UserAgent;
 import i5.las2peer.security.UserAgentManager;
 import i5.las2peer.testing.MockAgentFactory;
@@ -207,43 +209,6 @@ public abstract class Node implements AgentStorage {
 	private void initStandardLogfile() {
 		addObserver(L2pLogger.getInstance(Node.class.getName()));
 	}
-
-	/**
-	 * Handles a request from the (p2p) net to unlock the private key of a remote Agent.
-	 * @param agentId 
-	 * @param enctryptedPass 
-	 * 
-	 * @throws L2pSecurityException
-	 * @throws AgentNotKnownException
-	 * @throws CryptoException
-	 * @throws SerializationException
-	 */
-	public void unlockRemoteAgent(long agentId, byte[] enctryptedPass)
-			throws L2pSecurityException, AgentNotKnownException, SerializationException, CryptoException {
-
-		String passphrase = (String) CryptoTools.decryptAsymmetric(enctryptedPass, nodeKeyPair.getPrivate());
-
-		Context context = getAgentContext(agentId);
-
-		if (!context.getMainAgent().isLocked())
-			return;
-
-		context.unlockMainAgent(passphrase);
-
-		observerNotice(Event.AGENT_UNLOCKED, this.getNodeId(), agentId, null, (Long) null, "");
-	}
-
-	/**
-	 * Sends a request to unlock the agent's private key to the target node.
-	 * 
-	 * @param agentId
-	 * @param passphrase
-	 * @param targetNode
-	 * @param nodeEncryptionKey
-	 * @throws L2pSecurityException
-	 */
-	public abstract void sendUnlockRequest(long agentId, String passphrase, Object targetNode,
-			PublicKey nodeEncryptionKey) throws L2pSecurityException;
 
 	/**
 	 * Adds an observer to this node.
@@ -1177,8 +1142,14 @@ public abstract class Node implements AgentStorage {
 		ServiceAgent serviceAgent = getServiceAgent(service);
 		
 		try {
-			// TODO send credentials
-			Message rmiMessage = new Message(executing, serviceAgent, new RMITask(service, serviceMethod, parameters));
+			Serializable msg;
+			if (executing instanceof PassphraseAgent) {
+				msg = new UnlockAgentCall(new RMITask(service, serviceMethod, parameters), ((PassphraseAgent)executing).getPassphrase());
+			}
+			else {
+				msg = new RMITask(service, serviceMethod, parameters);
+			}
+			Message rmiMessage = new Message(executing, serviceAgent, msg);
 
 			if (this instanceof LocalNode) {
 				rmiMessage.setSendingNodeId((Long) getNodeId());
@@ -1218,8 +1189,8 @@ public abstract class Node implements AgentStorage {
 			if (resultContent instanceof RMIUnlockContent) {
 				// service method needed to unlock some envelope(s)
 				this.observerNotice(Event.RMI_FAILED, this.getNodeId(), executing,
-						"mediator needed at the target node"); // Do not log service class name (privacy..)
-				throw new UnlockNeededException("mediator needed at the target node", resultMessage.getSendingNodeId(),
+						"unlocked agent needed at the target node"); // Do not log service class name (privacy..)
+				throw new UnlockNeededException("unlocked agent needed at the target node", resultMessage.getSendingNodeId(),
 						((RMIUnlockContent) resultContent).getNodeKey());
 			} else if (resultContent instanceof RMIExceptionContent) {
 				Exception thrown = ((RMIExceptionContent) resultContent).getException();

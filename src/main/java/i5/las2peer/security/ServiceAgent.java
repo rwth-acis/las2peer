@@ -122,6 +122,12 @@ public class ServiceAgent extends PassphraseAgent {
 		try {
 			m.open(this, getRunningAtNode());
 			Object content = m.getContent();
+			
+			// unlock context agent
+			if (content instanceof UnlockAgentCall) {
+				c.unlockMainAgent(((UnlockAgentCall) content).getPassphrase());
+				content = ((UnlockAgentCall) content).getContent();
+			}
 
 			if (content instanceof RMITask) {
 				getRunningAtNode().observerNotice(Event.SERVICE_INVOCATION, m.getSendingNodeId(), m.getSender(),

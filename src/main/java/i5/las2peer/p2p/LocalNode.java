@@ -273,24 +273,6 @@ public class LocalNode extends Node {
 		}
 	}
 
-	@Override
-	public void sendUnlockRequest(long agentId, String passphrase, Object targetNode, PublicKey nodeEncryptionKey)
-			throws L2pSecurityException {
-
-		if (!(targetNode instanceof Long))
-			throw new IllegalArgumentException(
-					"node id is not a Long value but a " + targetNode.getClass().getName() + "(" + targetNode + ")");
-
-		try {
-			byte[] encPass = CryptoTools.encryptAsymmetric(passphrase, nodeEncryptionKey);
-			getNode((Long) targetNode).unlockRemoteAgent(agentId, encPass);
-
-		} catch (Exception e) {
-			throw new L2pSecurityException("unable to unlock agent at node " + targetNode);
-		}
-
-	}
-
 	/************************** factories ***************************************/
 
 	/**

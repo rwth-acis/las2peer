@@ -729,18 +729,4 @@ public class PastryNodeImpl extends Node {
 		return application.getNodeInformation((NodeHandle) nodeId);
 	}
 
-	@Override
-	public void sendUnlockRequest(long agentId, String passphrase, Object targetNode, PublicKey nodeEncryptionKey)
-			throws L2pSecurityException {
-		try {
-			application.unlockRemoteAgent(agentId, passphrase, (NodeHandle) targetNode, nodeEncryptionKey);
-			observerNotice(Event.AGENT_UNLOCKED, pastryNode, agentId, targetNode, (Long) null,
-					"Agent unlocked at target node!");
-		} catch (L2pSecurityException e) {
-			observerNotice(Event.AGENT_UNLOCK_FAILED, pastryNode, agentId, targetNode, (Long) null,
-					"Unlocking of agent failed!");
-			throw e;
-		}
-	}
-
 }

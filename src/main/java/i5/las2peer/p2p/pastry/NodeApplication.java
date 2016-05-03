@@ -1,6 +1,5 @@
 package i5.las2peer.p2p.pastry;
 
-import java.security.PublicKey;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -19,7 +18,6 @@ import i5.las2peer.security.Agent;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.MessageReceiver;
 import i5.las2peer.tools.CryptoException;
-import i5.las2peer.tools.CryptoTools;
 import i5.las2peer.tools.WaiterThread;
 import rice.p2p.commonapi.Application;
 import rice.p2p.commonapi.Endpoint;
@@ -220,17 +218,6 @@ public class NodeApplication implements Application, ScribeMultiClient {
 			} catch (CryptoException e) {
 				throw new RuntimeException("Critical - I'm not able to create my own Node Information!");
 			}
-		} else if (pastMessage instanceof UnlockAgentMessage) {
-			UnlockAgentMessage uam = (UnlockAgentMessage) pastMessage;
-
-			UnlockAgentResponse response;
-			try {
-				l2pNode.unlockRemoteAgent(uam.getAgentId(), uam.getEncryptedPass());
-				response = new UnlockAgentResponse(uam.getMessageId());
-			} catch (Exception e) {
-				response = new UnlockAgentResponse(uam.getMessageId(), e);
-			}
-			sendMessageDirectly(response, uam.getSendingNode());
 		} else if (pastMessage instanceof InfoResponseMessage) {
 			InfoResponseMessage irm = (InfoResponseMessage) pastMessage;
 
@@ -243,11 +230,6 @@ public class NodeApplication implements Application, ScribeMultiClient {
 						"Got an answer for Information request " + irm.getResponseToId() + "from " + irm.getSender());
 				waiter.collectResult(irm);
 			}
-		} else if (pastMessage instanceof UnlockAgentResponse) {
-			UnlockAgentResponse uar = (UnlockAgentResponse) pastMessage;
-
-			WaiterThread<Message> waiter = appMessageWaiters.get(uar.getOriginalMessageId());
-			waiter.collectResult(uar);
 		} else {
 			l2pNode.observerNotice(Event.MESSAGE_RECEIVED, l2pNode.getNodeId(), null, "unkown message: " + pastMessage);
 			logger.warning("\t<-- received unknown message: " + pastMessage);
@@ -555,53 +537,6 @@ public class NodeApplication implements Application, ScribeMultiClient {
 		} catch (Exception e) {
 			return false;
 		}
-	}
-
-	/**
-	 * send a request to a foreign node to unlock the private key of an agent
-	 * 
-	 * @param agentId
-	 * @param passphrase
-	 * @param targetNode
-	 * @param nodeEncryptionKey
-	 * @throws L2pSecurityException
-	 */
-	public void unlockRemoteAgent(long agentId, String passphrase, NodeHandle targetNode, PublicKey nodeEncryptionKey)
-			throws L2pSecurityException {
-		if (targetNode == null || nodeEncryptionKey == null)
-			throw new NullPointerException("Whom should I send auth to?!");
-
-		byte[] encPass;
-		try {
-			encPass = CryptoTools.encryptAsymmetric(passphrase, nodeEncryptionKey);
-		} catch (Exception e) {
-			throw new L2pSecurityException("unable to encrypt passphrase!", e);
-		}
-
-		UnlockAgentMessage uam = new UnlockAgentMessage(getLocalHandle(), agentId, encPass);
-		long messageId = uam.getMessageId();
-
-		sendMessageDirectly(uam, targetNode);
-
-		try {
-			WaiterThread<Message> waiter = new WaiterThread<Message>(RESPONSE_WAIT_TIMEOUT);
-			appMessageWaiters.put(messageId, waiter);
-			waiter.start();
-			waiter.join();
-
-			if (waiter.hasResult()) {
-				UnlockAgentResponse irm = (UnlockAgentResponse) waiter.getResult();
-				if (irm.hasException())
-					throw new L2pSecurityException("got an exception from remote node!", irm.getException());
-			} else
-				throw new L2pSecurityException("timeout");
-		} catch (InterruptedException e) {
-			throw new L2pSecurityException("Interrupted while waiting for answer");
-		} finally {
-			// remove the waiter to prevent memory holes
-			appMessageWaiters.remove(messageId);
-		}
-
 	}
 
 }

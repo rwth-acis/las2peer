@@ -19,6 +19,11 @@ public abstract class PassphraseAgent extends Agent {
 	 * random salt for the encryption of the private key (necessary for generating a strong key from a given passphrase)
 	 */
 	private byte[] salt;
+	
+	/**
+	 * current passphrase
+	 */
+	private String passphrase;
 
 	/**
 	 * atm constructor for the MockAgent class, just don't know, how agent creation will take place later
@@ -35,6 +40,8 @@ public abstract class PassphraseAgent extends Agent {
 		super(id, pair, CryptoTools.generateKeyForPassphrase(passphrase, salt));
 
 		this.salt = salt.clone();
+		
+		this.passphrase = null;
 
 		// done in consturctor of superclass
 		// lockPrivateKey();
@@ -66,6 +73,7 @@ public abstract class PassphraseAgent extends Agent {
 		try {
 			SecretKey key = CryptoTools.generateKeyForPassphrase(passphrase, salt);
 			super.unlockPrivateKey(key);
+			this.passphrase = passphrase;
 		} catch (CryptoException e) {
 			throw new L2pSecurityException("unable to create key from passphrase", e);
 		}
@@ -106,6 +114,24 @@ public abstract class PassphraseAgent extends Agent {
 			throw new L2pSecurityException("You have to unlock the key first!");
 
 		encryptPrivateKey(passphrase);
+	}
+	
+	@Override
+	public void lockPrivateKey() {
+		super.lockPrivateKey();
+		this.passphrase = null;
+	}
+	
+	/**
+	 * get the current passphrase
+	 * @return
+	 * @throws L2pSecurityException 
+	 */
+	public String getPassphrase() throws L2pSecurityException {
+		if (isLocked())
+			throw new L2pSecurityException("You have to unlock the key first!");
+		
+		return this.passphrase;
 	}
 
 }

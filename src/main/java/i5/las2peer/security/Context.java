@@ -41,11 +41,8 @@ public class Context implements AgentStorage {
 	 * 
 	 * @throws L2pSecurityException
 	 */
-	public Context(Node localNode, Agent mainAgent) throws L2pSecurityException { // TODO remove throw
+	public Context(Node localNode, Agent mainAgent) throws L2pSecurityException {
 		this.agent = mainAgent;
-
-		// if ( agent.isLocked() )
-		// throw new L2pSecurityException ("Agent needs to be unlocked!");
 
 		this.localNode = localNode;
 
