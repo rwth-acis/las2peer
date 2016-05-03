@@ -215,6 +215,8 @@ public class SandboxTest {
 	@Test
 	public void testAccessGranted() {
 		try {
+			new File("lib/").canRead();
+			new File("service/").canRead();
 			new File("etc/").canRead();
 			new File("config/").canRead();
 			new File("properties/").canRead();

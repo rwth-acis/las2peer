@@ -18,6 +18,8 @@ grant {
     permission java.io.FilePermission "config${/}-", "read";
     permission java.io.FilePermission "properties", "read";
     permission java.io.FilePermission "properties${/}-", "read";
+    permission java.io.FilePermission "lib", "read";
+    permission java.io.FilePermission "lib${/}-", "read";
     permission java.io.FilePermission "service", "read";
     permission java.io.FilePermission "service${/}-", "read";
 
