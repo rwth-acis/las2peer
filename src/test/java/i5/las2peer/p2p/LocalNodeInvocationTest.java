@@ -49,7 +49,7 @@ public class LocalNodeInvocationTest {
 		testServiceAgent.unlockPrivateKey("a pass");
 		node.registerReceiver(testServiceAgent);
 
-		Object result = node.invokeLocally(eve.getId(), ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.0"), "inc",
+		Object result = node.invokeLocally(eve, ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.0"), "inc",
 				new Serializable[] { new Integer(10) });
 
 		assertEquals(12, result);

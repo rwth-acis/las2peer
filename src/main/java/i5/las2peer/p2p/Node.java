@@ -1032,7 +1032,7 @@ public abstract class Node implements AgentStorage {
 	/**
 	 * Invokes a service method of a local running service agent.
 	 * 
-	 * @param executingAgentId
+	 * @param executing
 	 * @param service 
 	 * @param method
 	 * @param parameters
@@ -1044,23 +1044,27 @@ public abstract class Node implements AgentStorage {
 	 * @throws InterruptedException
 	 * @throws L2pServiceException
 	 */
-	public Serializable invokeLocally(long executingAgentId, ServiceNameVersion service, String method,
+	public Serializable invokeLocally(Agent executing, ServiceNameVersion service, String method,
 			Serializable[] parameters)
 					throws L2pSecurityException, AgentNotKnownException, InterruptedException, L2pServiceException {
 		
 		if (getStatus() != NodeStatus.RUNNING)
 			throw new IllegalStateException("You can invoke methods only on a running node!");
+		
+		if (executing.isLocked()) {
+			throw new L2pSecurityException("The executing agent has to be unlocked to call a RMI");
+		}
 
+		// get local service agent
 		ServiceAgent serviceAgent = nodeServiceCache.getLocalServiceAgent(service);
 		if (serviceAgent == null)
 			throw new AgentNotKnownException("No ServiceAgent known for this service!");
+		
+		// execute
 		RMITask task = new RMITask(service, method, parameters);
-		Context context = getAgentContext(executingAgentId);
-
+		Context context = getAgentContext(executing);
 		L2pThread thread = new L2pThread(serviceAgent, task, context);
-
 		thread.start();
-
 		thread.join();
 
 		if (thread.hasException()) {
@@ -1082,6 +1086,13 @@ public abstract class Node implements AgentStorage {
 			// should not occur, since we joined before
 			throw new L2pServiceException("Interrupted service execution?!", e);
 		}
+	}
+	
+	@Deprecated
+	public Serializable invokeLocally(long executingAgentId, ServiceNameVersion service, String method,
+			Serializable[] parameters)
+					throws L2pSecurityException, AgentNotKnownException, InterruptedException, L2pServiceException {
+		return invokeLocally(getAgentContext(executingAgentId).getMainAgent(),service,method,parameters);
 	}
 
 	/**
@@ -1257,7 +1268,7 @@ public abstract class Node implements AgentStorage {
 		List<NodeHandle> nodes = nodeServiceCache.getServiceNodes(service);
 		
 		if (localServiceAgent != null && (!isBusy() || nodes.size()==1 || preferLocal || serviceAgent == null) ) {
-			return invokeLocally(executing.getId(), service, serviceMethod, parameters);
+			return invokeLocally(executing, service, serviceMethod, parameters);
 		}
 		else if (serviceAgent != null) {
 			return invokeGlobally(executing, service, serviceMethod, parameters);
@@ -1324,7 +1335,7 @@ public abstract class Node implements AgentStorage {
 		
 		// invoke
 		if (localServiceAgent != null && (!isBusy() || nodes.size()==1 || preferLocal || serviceAgent == null) ) {
-			return invokeLocally(executing.getId(), new ServiceNameVersion(nameVersion.getName(), localVersion.toString()), serviceMethod, parameters);
+			return invokeLocally(executing, new ServiceNameVersion(nameVersion.getName(), localVersion.toString()), serviceMethod, parameters);
 		}
 		else if (serviceAgent != null) {
 			return invokeGlobally(executing, new ServiceNameVersion(nameVersion.getName(), globalVersion.toString()), serviceMethod, parameters);

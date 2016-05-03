@@ -207,6 +207,12 @@ public abstract class LocalServiceTestCase {
 	 * @throws AgentNotKnownException
 	 * @throws InterruptedException
 	 */
+	public Serializable invoke(Agent executing, String method, Serializable... parameters)
+			throws L2pServiceException, L2pSecurityException, AgentNotKnownException, InterruptedException {
+		return getNode().invokeLocally(executing, getMyAgent().getServiceNameVersion(), method, parameters);
+	}
+	
+	@Deprecated
 	public Serializable invoke(long executing, String method, Serializable... parameters)
 			throws L2pServiceException, L2pSecurityException, AgentNotKnownException, InterruptedException {
 		return getNode().invokeLocally(executing, getMyAgent().getServiceNameVersion(), method, parameters);
