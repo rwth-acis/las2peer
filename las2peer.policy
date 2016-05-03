@@ -40,13 +40,11 @@ grant {
 grant {
     permission java.io.FilePermission "/dev/random", "read";
     permission java.io.FilePermission "/dev/urandom", "read";
-    permission java.io.FilePermission "/tmp", "read";
 };
-
-// TODO add Windows system paths, too
 
 // pastry permissions
 grant {
+    permission java.io.FilePermission "${java.io.tmpdir}", "read";
     permission java.io.FilePermission "user.params", "read";
 };
 

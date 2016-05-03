@@ -2,7 +2,9 @@ package i5.las2peer.security;
 
 import java.io.File;
 import java.io.FilePermission;
+import java.io.UnsupportedEncodingException;
 import java.net.SocketPermission;
+import java.net.URLDecoder;
 import java.security.Permission;
 import java.util.PropertyPermission;
 
@@ -23,13 +25,13 @@ public class L2pSecurityManager extends SecurityManager {
 	public void checkPermission(Permission perm) {
 		if (perm instanceof FilePermission) {
 			// block access to las2peer.policy file
-			if (perm.getName().contains("las2peer.policy")) {
+			if (perm.getName().toLowerCase().contains("las2peer.policy")) {
 				logger.warning("Blocked permission " + perm);
 				throw new SecurityException("Policy file access restricted!");
 			}
 			// allow read on java.home
-			String javaHome = System.getProperty("java.home").toLowerCase();
-			if (perm.getName().toLowerCase().startsWith(javaHome)) {
+			String javaHome = normalizePath(System.getProperty("java.home"));
+			if (normalizePath(perm.getName()).startsWith(javaHome)) {
 				return;
 			}
 			// allow read on java.class.path
@@ -37,11 +39,11 @@ public class L2pSecurityManager extends SecurityManager {
 			String pathSeparator = System.getProperty("path.separator");
 			String[] clsSplit = javaClassPath.split(pathSeparator);
 			for (String path : clsSplit) {
-				int ind = path.lastIndexOf(File.separator);
-				if (ind != -1) {
-					path = path.substring(0, ind);
+				path = normalizePath(path);
+				if (path.endsWith(File.separator)) {
+					path = path.substring(0, -1);
 				}
-				if (perm.getName().startsWith(path)) {
+				if (normalizePath(perm.getName()).startsWith(path)) {
 					return;
 				}
 			}
@@ -85,6 +87,15 @@ public class L2pSecurityManager extends SecurityManager {
 				logger.warning("Blocked permission " + perm);
 				throw new SecurityException("SecurityManager already set!");
 			}
+		}
+	}
+
+	private String normalizePath(String path) {
+		try {
+			return URLDecoder.decode(new File(path).getAbsolutePath(), "UTF-8").toLowerCase();
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			return path;
 		}
 	}
 
