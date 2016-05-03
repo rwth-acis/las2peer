@@ -2,6 +2,7 @@ package i5.las2peer.security;
 
 import static org.junit.Assert.fail;
 
+import java.io.File;
 import java.io.Serializable;
 
 import org.junit.After;
@@ -206,6 +207,25 @@ public class SandboxTest {
 			e.printStackTrace();
 		}
 		fail("SecurityException expected!");
+	}
+
+	/**
+	 * In this test case the access to files and directories is tested, which should be whitelisted in the sandbox.
+	 */
+	@Test
+	public void testAccessGranted() {
+		try {
+			new File("etc/").canRead();
+			new File("config/").canRead();
+			new File("properties/").canRead();
+			new File("service/").canRead();
+			new File("log/").canRead();
+			new File("node-storage/").canRead();
+			new File("user.params").canRead();
+		} catch (SecurityException e) {
+			e.printStackTrace();
+			fail("No SecurityException expected!");
+		}
 	}
 
 }
