@@ -2,11 +2,16 @@ package i5.las2peer.security;
 
 import java.io.File;
 import java.io.FilePermission;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.SocketPermission;
 import java.net.URLDecoder;
+import java.nio.file.CopyOption;
+import java.nio.file.Files;
 import java.security.Permission;
 import java.util.PropertyPermission;
+import java.util.logging.Level;
 
 import i5.las2peer.logging.L2pLogger;
 
@@ -17,8 +22,22 @@ public class L2pSecurityManager extends SecurityManager {
 	// reminder: reflection makes member variables unsafe
 
 	public L2pSecurityManager() {
+		// check if local policy file exists, otherwise extract it from jar
+		if (!new File("etc/las2peer.policy").exists()) {
+			logger.info("Policy file not found. Extracting default policy file from jar...");
+			InputStream fromJar = this.getClass().getResourceAsStream("/las2peer.policy");
+			if (fromJar != null) {
+				try {
+					Files.copy(fromJar, new File("etc/las2peer.policy").toPath(), new CopyOption[] {});
+				} catch (IOException e) {
+					logger.log(Level.SEVERE, "Problems creating policy file! Sandboxing probably not working!", e);
+					logger.printStackTrace(e);
+				}
+			} else {
+				logger.severe("Fatal Error! No local policy file and no file in jar! Sandboxing WILL NOT WORK!");
+			}
+		}
 		System.setProperty("java.security.policy", "etc/las2peer.policy");
-		// TODO check if the policy file exists, otherwise extract it from jar
 	}
 
 	@Override
