@@ -58,6 +58,7 @@ public class Context implements AgentStorage {
 	 * 
 	 * @throws L2pSecurityException
 	 */
+	// TODO is this used anywhere?
 	public Context(Node localNode, Agent mainAgent, Object remoteNodeReference) throws L2pSecurityException {
 		this(localNode, mainAgent);
 		this.remoteNodeReference = remoteNodeReference;

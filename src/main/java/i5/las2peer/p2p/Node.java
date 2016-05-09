@@ -10,7 +10,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.Vector;
 
 import com.sun.management.OperatingSystemMXBean;
@@ -99,7 +104,9 @@ public abstract class Node implements AgentStorage {
 	private NodeServiceCache nodeServiceCache;
 	// TODO make time as setting
 	private int nodeServiceCacheLifetime = 10; // time before cached node info becomes invalidated
-
+	private int tidyUpTimerInterval = 60;
+	private int agentContextLifetime = 60;
+	
 	/**
 	 * observers to be notified of all occurring events
 	 */
@@ -109,6 +116,12 @@ public abstract class Node implements AgentStorage {
 	 * contexts for local method invocation
 	 */
 	private Hashtable<Long, Context> htLocalExecutionContexts = new Hashtable<Long, Context>();
+	
+
+	/**
+	 * Timer to tidy up hashtables etc (Contexts)
+	 */
+	private Timer tidyUpTimer;
 
 	/**
 	 * status of this node
@@ -477,12 +490,16 @@ public abstract class Node implements AgentStorage {
 				| SerializationException e) {
 			throw new NodeException("error initializing ServiceInfoAgent",e);
 		}
+		
+		startTidyUpTimer();
 	}
 
 	/**
 	 * Stops the node.
 	 */
 	public synchronized void shutDown() {
+		stopTidyUpTimer();
+		
 		Long[] receivers = htRegisteredReceivers.keySet().toArray(new Long[0]); // avoid ConcurrentModificationEception
 		for (Long id : receivers)
 			htRegisteredReceivers.get(id).notifyUnregister();
@@ -1498,6 +1515,8 @@ public abstract class Node implements AgentStorage {
 			result = new Context(this, agent);
 			htLocalExecutionContexts.put(agentId, result);
 		}
+		
+		result.touch();
 
 		return result;
 	}
@@ -1519,6 +1538,8 @@ public abstract class Node implements AgentStorage {
 			}
 			htLocalExecutionContexts.put(agent.getId(), result);
 		}
+		
+		result.touch();
 
 		return result;
 	}
@@ -1560,6 +1581,50 @@ public abstract class Node implements AgentStorage {
 
 	public boolean isBusy() {
 		return (getNodeCpuLoad() > cpuLoadThreshold);
+	}
+	
+	// Tidy up Timer
+	
+	/**
+	 * starts the tidy up timer
+	 */
+	private void startTidyUpTimer() {
+		if (tidyUpTimer != null)
+			return;
+		tidyUpTimer = new Timer();
+		tidyUpTimer.scheduleAtFixedRate(new TimerTask() {
+			public void run() {
+				runTidyUpTimer();
+			}
+		}, 0, tidyUpTimerInterval * 1000);
+	}
+	
+	/**
+	 * stops the tidy up timer
+	 */
+	private void stopTidyUpTimer() {
+		if (tidyUpTimer != null) {
+			tidyUpTimer.cancel();
+			tidyUpTimer = null;
+		}
+	}
+	
+	/**
+	 * executed by the tidy up timer, currently it does:
+	 * 
+	 * * Deleting old {@link Context} objects from {@link #htLocalExecutionContexts}
+	 */
+	protected void runTidyUpTimer() {
+		Set<Entry<Long, Context>> s = htLocalExecutionContexts.entrySet();
+		synchronized(htLocalExecutionContexts) {
+		    Iterator<Entry<Long, Context>> i = s.iterator();
+		    while (i.hasNext()) {
+		    	Entry<Long, Context> e = i.next();
+		    	if (e.getValue().getLastUsageTimestamp() <= new Date().getTime() - agentContextLifetime*1000) {
+		    		i.remove();
+		    	}
+		    }
+		}
 	}
 
 }
