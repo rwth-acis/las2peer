@@ -215,6 +215,14 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			try {
 				JSONObject ujson = userInfo.toJSONObject();
 				// response.println("User Info: " + userInfo.toJSONObject());
+				
+				if (!ujson.containsKey("sub") || !ujson.containsKey("email")
+						|| !ujson.containsKey("preferred_username")) {
+					sendStringResponse(exchange,
+							HttpURLConnection.HTTP_FORBIDDEN,
+							"Could not get provider information. Please check your scopes.");
+					return null;
+				}
 
 				String sub = (String) ujson.get("sub");
 
@@ -257,6 +265,8 @@ public class WebConnectorRequestHandler implements HttpHandler {
 						oidcAgent.unlockPrivateKey(password);
 						return oidcAgent;
 					} catch (Exception e1) {
+						e1.printStackTrace();
+						sendStringResponse(exchange, HttpURLConnection.HTTP_INTERNAL_ERROR, e.getMessage());
 						return null;
 					}
 				}
