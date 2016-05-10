@@ -1284,7 +1284,7 @@ public abstract class Node implements AgentStorage {
 		ServiceAgent serviceAgent = nodeServiceCache.getServiceAgent(service);
 		List<NodeHandle> nodes = nodeServiceCache.getServiceNodes(service);
 		
-		if (localServiceAgent != null && (!isBusy() || nodes.size()==1 || preferLocal || serviceAgent == null) ) {
+		if (localServiceAgent != null && (!isBusy() || (nodes != null && nodes.size() == 1) || preferLocal || serviceAgent == null) ) {
 			return invokeLocally(executing, service, serviceMethod, parameters);
 		}
 		else if (serviceAgent != null) {
@@ -1351,10 +1351,10 @@ public abstract class Node implements AgentStorage {
 		}
 		
 		// invoke
-		if (localServiceAgent != null && (!isBusy() || nodes.size()==1 || preferLocal || serviceAgent == null) ) {
+		if (localServiceAgent != null && (!isBusy() || (nodes != null && nodes.size() == 1) || preferLocal || serviceAgent == null) ) {
 			return invokeLocally(executing, new ServiceNameVersion(nameVersion.getName(), localVersion.toString()), serviceMethod, parameters);
 		}
-		else if (serviceAgent != null) {
+		else if (serviceAgent != null && globalVersion != null) {
 			return invokeGlobally(executing, new ServiceNameVersion(nameVersion.getName(), globalVersion.toString()), serviceMethod, parameters);
 		}
 		else {
