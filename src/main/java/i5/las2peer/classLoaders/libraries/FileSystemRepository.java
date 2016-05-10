@@ -28,6 +28,7 @@ public class FileSystemRepository implements Repository {
 	private Iterable<String> directories;
 	private boolean recursive = false;
 	private Hashtable<String, Hashtable<LibraryVersion, String>> htFoundJars;
+	private long lastModified = 0;
 
 	/**
 	 * create a repository for the given directory, non-recursive
@@ -77,7 +78,7 @@ public class FileSystemRepository implements Repository {
 		this.directories = directories;
 		this.recursive = recursive;
 
-		initJarList();
+		updateRepository();
 	}
 
 	/**
@@ -89,6 +90,8 @@ public class FileSystemRepository implements Repository {
 	 * @throws UnresolvedDependenciesException
 	 */
 	public LoadedLibrary findLibrary(String name) throws LibraryNotFoundException, UnresolvedDependenciesException {
+		updateRepository();
+		
 		Hashtable<LibraryVersion, String> htVersions = htFoundJars.get(name);
 		if (htVersions == null) {
 			System.err.println(this + " could not find " + name);
@@ -126,6 +129,8 @@ public class FileSystemRepository implements Repository {
 	 * @throws LibraryNotFoundException
 	 */
 	public LoadedLibrary findLibrary(LibraryIdentifier lib) throws LibraryNotFoundException {
+		updateRepository();
+		
 		Hashtable<LibraryVersion, String> htVersions = htFoundJars.get(lib.getName());
 		if (htVersions == null)
 			throw new LibraryNotFoundException(
@@ -153,6 +158,8 @@ public class FileSystemRepository implements Repository {
 	 * @throws LibraryNotFoundException
 	 */
 	public LoadedLibrary findMatchingLibrary(LibraryDependency dep) throws LibraryNotFoundException {
+		updateRepository();
+		
 		Hashtable<LibraryVersion, String> htVersions = htFoundJars.get(dep.getName());
 		if (htVersions == null)
 			throw new LibraryNotFoundException(
@@ -229,6 +236,52 @@ public class FileSystemRepository implements Repository {
 		}
 
 		return hsTemp;
+	}
+	
+	/**
+	 * helper method to get the last modification date of a directory
+	 * @param dir 
+	 * @return 
+	 * */
+	private long getLastModified(File dir) {
+	    File[] files = dir.listFiles();
+	    if (files == null || files.length == 0) {
+	        return 0;
+	    }
+
+	    long lastModified = files[0].lastModified();
+	    for (int i = 1; i < files.length; i++) {
+	    	if (files[i].isDirectory() && recursive) {
+	    		long ll = getLastModified(files[i]);
+	    		if (lastModified < ll) {
+	    			lastModified = files[i].lastModified();
+	    		}
+	    	}
+	    	else {
+	    		if (lastModified < files[i].lastModified()) {
+	    			lastModified = files[i].lastModified();
+	 	       	}
+	    	}
+	    }
+	    return lastModified;
+	}
+	
+	/**
+	 * checks if there were changes made in the folder and re-reads repositories if so
+	 */
+	private void updateRepository() {
+		long currentLastModified = 0;
+		for (String directory : directories) {
+			long ll = getLastModified(new File(directory));
+			if (currentLastModified < ll) {
+				currentLastModified = ll;
+			}
+		}
+		
+		if (lastModified < currentLastModified) {
+			lastModified = currentLastModified;
+			initJarList();
+		}
 	}
 
 	/**

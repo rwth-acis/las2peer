@@ -643,6 +643,20 @@ public class L2pNodeLauncher {
 
 		node.registerReceiver(serviceAgent);
 	}
+	
+	/**
+	 * stop the given service
+	 * 
+	 * needs name and version
+	 * 
+	 * @param serviceNameVersion
+	 * @throws AgentNotKnownException
+	 */
+	public void stopService(String serviceNameVersion) throws AgentNotKnownException {
+		ServiceNameVersion service = ServiceNameVersion.fromString(serviceNameVersion);
+		ServiceAgent agent = node.getServiceAgent(service);
+		node.unregisterAgent(agent);
+	}
 
 	/**
 	 * load an agent from an XML file and return it for later usage
