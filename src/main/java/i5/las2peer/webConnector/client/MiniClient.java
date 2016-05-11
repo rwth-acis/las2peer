@@ -17,7 +17,7 @@ import i5.las2peer.restMapper.data.Pair;
 
 /**
  * Very simple client to communicate with the las2peer web connector
-*
+ *
  *
  */
 public class MiniClient {
@@ -27,6 +27,7 @@ public class MiniClient {
 
 	/**
 	 * set address and port
+	 * 
 	 * @param address address of the server
 	 * @param port if 0 no port is appended to the address
 	 */
@@ -39,6 +40,7 @@ public class MiniClient {
 
 	/**
 	 * set login data
+	 * 
 	 * @param username
 	 * @param password
 	 * @throws UnsupportedEncodingException
@@ -50,6 +52,7 @@ public class MiniClient {
 
 	/**
 	 * send request to server
+	 * 
 	 * @param method POST, GET, DELETE, PUT
 	 * @param uri REST-URI (server address excluded)
 	 * @param content if POST is used information can be embedded here
@@ -57,7 +60,7 @@ public class MiniClient {
 	 * @param accept value of Accept Header
 	 * @param headers headers for HTTP request
 	 * @return returns server response
-	
+	 * 
 	 */
 	public ClientResponse sendRequest(String method, String uri, String content, String contentType, String accept,
 			Pair<String>[] headers) {
@@ -159,12 +162,13 @@ public class MiniClient {
 
 	/**
 	 * send request to server
+	 * 
 	 * @param method POST, GET, DELETE, PUT
 	 * @param uri REST-URI (server address excluded)
 	 * @param content if POST is used information can be embedded here
 	 * @param headers headers for HTTP request
 	 * @return returns server response
-	
+	 * 
 	 */
 	public ClientResponse sendRequest(String method, String uri, String content, Pair<String>[] headers) {
 		return sendRequest(method, uri, content, "text/plain", "*/*", headers);
@@ -172,11 +176,12 @@ public class MiniClient {
 
 	/**
 	 * send request to server
+	 * 
 	 * @param method POST, GET, DELETE, PUT
 	 * @param uri REST-URI (server address excluded)
 	 * @param content if POST is used information can be embedded here
 	 * @return returns server response
-	
+	 * 
 	 */
 	@SuppressWarnings("unchecked")
 	public ClientResponse sendRequest(String method, String uri, String content) {

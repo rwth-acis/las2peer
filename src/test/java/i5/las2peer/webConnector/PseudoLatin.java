@@ -8,13 +8,11 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 
 @Version("0.2")
-public class PseudoLatin extends Service
-{
+public class PseudoLatin extends Service {
 
 	@POST
 	@Path("/latin")
-	public String latin(@ContentParam String text)
-	{
+	public String latin(@ContentParam String text) {
 		StringBuilder result = new StringBuilder();
 		String[] parts = text.split(" ");
 

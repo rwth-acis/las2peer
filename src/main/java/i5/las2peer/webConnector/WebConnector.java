@@ -117,7 +117,8 @@ public class WebConnector extends Connector {
 
 	/**
 	 * create a new web connector instance.
-	 * @throws Exception 
+	 * 
+	 * @throws Exception
 	 * 
 	 * @throws FileNotFoundException
 	 */
@@ -130,11 +131,12 @@ public class WebConnector extends Connector {
 
 	/**
 	 * create a new web connector instance.
-	 * @param http 
-	 * @param httpPort 
-	 * @param https 
-	 * @param httpsPort 
-	 * @throws Exception 
+	 * 
+	 * @param http
+	 * @param httpPort
+	 * @param https
+	 * @param httpsPort
+	 * @throws Exception
 	 * 
 	 * @throws FileNotFoundException
 	 */
@@ -150,11 +152,12 @@ public class WebConnector extends Connector {
 
 	/**
 	 * create a new web connector instance.
-	 * @param http 
-	 * @param httpPort 
-	 * @param https 
-	 * @param httpsPort 
-	 * @param xmlPath 
+	 * 
+	 * @param http
+	 * @param httpPort
+	 * @param https
+	 * @param httpsPort
+	 * @param xmlPath
 	 * 
 	 * @throws Exception
 	 */
@@ -500,9 +503,10 @@ public class WebConnector extends Connector {
 	/**
 	 * Fetches Open ID Connect provider configuration, according to the OpenID Connect discovery specification (cf.
 	 * http://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig)
-	 * @param providerURI 
-	 * @return 
-	 * @throws IOException 
+	 * 
+	 * @param providerURI
+	 * @return
+	 * @throws IOException
 	 */
 	private JSONObject fetchOidcProviderConfig(String providerURI) throws IOException {
 		JSONObject result = new JSONObject();

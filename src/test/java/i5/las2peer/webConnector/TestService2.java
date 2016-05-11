@@ -17,24 +17,22 @@ import i5.las2peer.security.UserAgent;
  *
  */
 @Version("0.2")
-public class TestService2 extends Service
-{
+public class TestService2 extends Service {
 
 	/**
 	 * constructor, initializes RESTMapper
 	 */
-	public TestService2()
-	{
+	public TestService2() {
 
 	}
 
 	/**
 	 * get all annotation and method data to allow mapping
-	 * @return 
+	 * 
+	 * @return
 	 */
 
-	public String getRESTMapping()
-	{
+	public String getRESTMapping() {
 		String result = "";
 		try {
 			result = RESTMapper.getMethodsAsXML(this.getClass());
@@ -47,9 +45,7 @@ public class TestService2 extends Service
 
 	@POST
 	@Path("/do/{a}/{b}")
-	public String concat(@PathParam("a") String a, @PathParam("b") String b,
-			@ContentParam String c)
-	{
+	public String concat(@PathParam("a") String a, @PathParam("b") String b, @ContentParam String c) {
 		return a + b + c;
 	}
 

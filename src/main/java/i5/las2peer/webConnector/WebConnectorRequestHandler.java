@@ -92,7 +92,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	/**
 	 * Logs in a las2peer user
 	 * 
-	 * @param exchange 
+	 * @param exchange
 	 * 
 	 * @return -1 if no successful login else userId
 	 * @throws UnsupportedEncodingException
@@ -214,11 +214,10 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			try {
 				JSONObject ujson = userInfo.toJSONObject();
 				// response.println("User Info: " + userInfo.toJSONObject());
-				
+
 				if (!ujson.containsKey("sub") || !ujson.containsKey("email")
 						|| !ujson.containsKey("preferred_username")) {
-					sendStringResponse(exchange,
-							HttpURLConnection.HTTP_FORBIDDEN,
+					sendStringResponse(exchange, HttpURLConnection.HTTP_FORBIDDEN,
 							"Could not get provider information. Please check your scopes.");
 					return null;
 				}
@@ -228,7 +227,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 				long oidcAgentId = hash(sub);
 				username = oidcAgentId + "";
 				password = sub;
-				
+
 				synchronized (this.connector) {
 					if (this.connector.getOpenUserRequests().containsKey(oidcAgentId)) {
 						Integer numReq = this.connector.getOpenUserRequests().get(oidcAgentId);
@@ -342,8 +341,8 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	/**
 	 * Delegates the request data to a service method, which then decides what to do with it (maps it internally)
 	 * 
-	 * @param userAgent 
-	 * @param exchange 
+	 * @param userAgent
+	 * @param exchange
 	 * 
 	 * @return
 	 */
@@ -598,8 +597,9 @@ public class WebConnectorRequestHandler implements HttpHandler {
 
 	/**
 	 * send a notification, that the requested service does not exists
-	 * @param exchange 
-	 * @param error 
+	 * 
+	 * @param exchange
+	 * @param error
 	 */
 	private void sendMalformedRequest(HttpExchange exchange, String error) {
 		// connector.logError("Malformed request: " + error);
@@ -608,8 +608,9 @@ public class WebConnectorRequestHandler implements HttpHandler {
 
 	/**
 	 * send a notification, that the requested service does not exists
-	 * @param exchange 
-	 * @param service 
+	 * 
+	 * @param exchange
+	 * @param service
 	 */
 	private void sendNoSuchService(HttpExchange exchange, String service) {
 		connector.logError("Service not found: " + service);
@@ -620,7 +621,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	/**
 	 * send a notification, that the requested method does not exists at the requested service
 	 * 
-	 * @param exchange 
+	 * @param exchange
 	 */
 	private void sendNoSuchMethod(HttpExchange exchange) {
 		connector.logError("Invocation request " + exchange.getRequestURI().getPath() + " for unknown service method");
@@ -631,7 +632,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	/**
 	 * send a notification, that security problems occurred during the requested service method
 	 * 
-	 * @param exchange 
+	 * @param exchange
 	 * @param e
 	 */
 	private void sendSecurityProblems(HttpExchange exchange, L2pSecurityException e) {
@@ -648,7 +649,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	/**
 	 * send a notification, that the result of the service invocation is not transportable
 	 * 
-	 * @param exchange 
+	 * @param exchange
 	 */
 	private void sendResultInterpretationProblems(HttpExchange exchange) {
 		connector.logError("Exception while processing RMI: " + exchange.getRequestURI().getPath());
@@ -729,8 +730,8 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	/**
 	 * send a message about an unauthorized request
 	 * 
-	 * @param exchange 
-	 * @param answerMessage 
+	 * @param exchange
+	 * @param answerMessage
 	 * @param logMessage
 	 */
 	private void sendUnauthorizedResponse(HttpExchange exchange, String answerMessage, String logMessage) {
@@ -752,8 +753,8 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	/**
 	 * send a response that an internal error occurred
 	 * 
-	 * @param exchange 
-	 * @param message 
+	 * @param exchange
+	 * @param message
 	 */
 	private void sendInternalErrorResponse(HttpExchange exchange, String message) {
 		connector.logMessage(message);

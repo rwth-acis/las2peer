@@ -88,8 +88,8 @@ public class ServiceRepositoryManager {
 					serviceRepository.put(internalServiceName,
 							new ServiceData(currentService.getName(), currentService.getVersion(), false, null));
 					try {
-						String xml = (String) node.invokeGlobally(finalAgent, currentService,
-								SERVICE_SELFINFO_METHOD, new Serializable[] {});
+						String xml = (String) node.invokeGlobally(finalAgent, currentService, SERVICE_SELFINFO_METHOD,
+								new Serializable[] {});
 						if (xml == null || xml.isEmpty()) {
 							System.err.println("Couldn't get xml mapping for " + currentService.getName()
 									+ "! Please see log for details!");
@@ -132,13 +132,11 @@ public class ServiceRepositoryManager {
 		final ServiceInfoAgent finalAgent = agent;
 
 		timer = new Timer();
-		timer.scheduleAtFixedRate(
-				new TimerTask() {
-					public void run() {
-						executeTimer(node, finalAgent);
-					}
-				},
-				0, // run first occurrence immediately
+		timer.scheduleAtFixedRate(new TimerTask() {
+			public void run() {
+				executeTimer(node, finalAgent);
+			}
+		}, 0, // run first occurrence immediately
 				timerIntervalSeconds * 1000); // run every x seconds
 	}
 
