@@ -270,12 +270,18 @@ public class PastryNodeImpl extends Node {
 	private void setupPastryEnvironment() {
 		pastryEnvironment = new Environment();
 
-		String[] configFiles = new String[] { "pastry.properties", "etc/pastry.properties", "config/pastry.properties",
+		String[] configFiles = new String[] { "etc/pastry.properties", "config/pastry.properties",
 				"properties/pastry.properties" };
 		String found = null;
-		for (int i = 0; i < configFiles.length && found == null; i++) {
-			if (new File(configFiles[i]).exists())
-				found = configFiles[i];
+		for (String filename : configFiles) {
+			try {
+				if (new File(filename).exists()) {
+					found = filename;
+					break;
+				}
+			} catch (Exception e) {
+				// XXX logging
+			}
 		}
 
 		Hashtable<String, String> properties = new Hashtable<String, String>();
