@@ -415,7 +415,7 @@
                 <pathelement path="${lib.cp}" />
                 <pathelement path="${lib.junit}" />
             </classpath>
-            <formatter type="plain" />
+            <formatter type="plain" usefile="false" />
             <batchtest fork="yes" todir="${junit.report}">
                 <fileset dir="${tmp.junit}">
                     <include name="**/*Test.class"/>
