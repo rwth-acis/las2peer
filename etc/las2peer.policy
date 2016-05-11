@@ -26,8 +26,8 @@ grant {
     // las2peer file write permissions
     permission java.io.FilePermission "log", "read, write";
     permission java.io.FilePermission "log${/}-", "read, write";
-    permission java.io.FilePermission "node-storage", "read, write";
-    permission java.io.FilePermission "node-storage${/}-", "read, write";
+    permission java.io.FilePermission "node-storage", "read, write, delete";
+    permission java.io.FilePermission "node-storage${/}-", "read, write, delete";
 
     // las2peer network permissions
     // allow local ports from 8000 to 9999 to be used as server ports
