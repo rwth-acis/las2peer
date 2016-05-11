@@ -20,6 +20,9 @@ public class SandboxTest {
 
 	@BeforeClass
 	public static void initSecurityManager() {
+		// print some important system properties
+		System.out.println(System.getProperty("java.home"));
+		System.out.println(System.getProperty("java.class.path"));
 		System.setSecurityManager(new L2pSecurityManager());
 	}
 
@@ -39,7 +42,9 @@ public class SandboxTest {
 
 	@After
 	public void stopNetwork() {
-		node.shutDown();
+		if (node != null) {
+			node.shutDown();
+		}
 	}
 
 	/**
