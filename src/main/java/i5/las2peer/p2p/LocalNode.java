@@ -1,6 +1,5 @@
 package i5.las2peer.p2p;
 
-import java.security.PublicKey;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Random;
@@ -16,7 +15,6 @@ import i5.las2peer.security.BasicAgentStorage;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.MessageReceiver;
 import i5.las2peer.security.UserAgent;
-import i5.las2peer.tools.CryptoTools;
 import i5.las2peer.tools.SerializationException;
 import i5.las2peer.tools.TimerThread;
 
