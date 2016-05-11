@@ -310,7 +310,7 @@ public class PastryNodeImpl extends Node {
 		if (!properties.containsKey("pastry_socket_known_network_address"))
 			// properties.put( "pastry_socket_known_network_address", "127.0.0.1");
 			if (!properties.containsKey("pastry_socket_known_network_address_port"))
-				properties.put("pastry_socket_known_network_address_port", "80");
+			properties.put("pastry_socket_known_network_address_port", "80");
 
 		// remarks: you need an network accessible host/port combination, even, if you want to start a new ring!!
 		// for offline testing, you need to run some kind of port reachable server!
@@ -565,7 +565,7 @@ public class PastryNodeImpl extends Node {
 		}
 
 		PastPutContinuation conti = new PastPutContinuation();
-		
+
 		try {
 			pastStorage.insert(new ContentEnvelope(envelope), conti);
 			conti.waitForResult();
