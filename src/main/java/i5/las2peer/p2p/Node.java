@@ -594,31 +594,47 @@ public abstract class Node implements AgentStorage {
 	}
 
 	/**
-	 * Unregisters an agent from this node.
+	 * Unregisters a MessageReceiver from this node.
+	 * 
+	 * @param receiver
+	 * @throws AgentNotKnownException The given MessageReceiver is not registered to this node
+	 */
+	public void unregisterReceiver(MessageReceiver receiver) throws AgentNotKnownException {
+		long agentId = receiver.getResponsibleForAgentId();
+		unregisterReceiver(agentId);
+	}
+
+	private void unregisterReceiver(long agentId) throws AgentNotKnownException {
+		if (htRegisteredReceivers.get(agentId) == null) {
+			throw new AgentNotKnownException(agentId);
+		}
+		observerNotice(Event.AGENT_REMOVED, getNodeId(), agentId, "");
+		htRegisteredReceivers.remove(agentId).notifyUnregister();
+	}
+
+	/**
+	 * @deprecated Use {@link Node#unregisterReceiver(MessageReceiver)} instead!
+	 * 
+	 *             Unregisters an agent from this node.
 	 * 
 	 * @param agent
 	 * @throws AgentNotKnownException the agent is not registered to this node
 	 */
 	public void unregisterAgent(Agent agent) throws AgentNotKnownException {
-		unregisterAgent(agent.getId());
+		unregisterReceiver(agent);
 	}
 
 	/**
-	 * Is an instance of the given agent running at this node?
+	 * @deprecated Use {@link Node#unregisterReceiver(MessageReceiver)} instead!
+	 * 
+	 *             Is an instance of the given agent running at this node?
 	 * 
 	 * @param agentId
 	 * @throws AgentNotKnownException
 	 */
 	public void unregisterAgent(long agentId) throws AgentNotKnownException {
-
-		if (htRegisteredReceivers.get(agentId) == null)
-			throw new AgentNotKnownException(agentId);
-
-		observerNotice(Event.AGENT_REMOVED, this.getNodeId(), getAgent(agentId), "");
-
-		htRegisteredReceivers.get(agentId).notifyUnregister();
-
-		htRegisteredReceivers.remove(agentId);
+		// when removed, merge both unregisterReceiver methods into one public
+		unregisterReceiver(agentId);
 	}
 
 	/**

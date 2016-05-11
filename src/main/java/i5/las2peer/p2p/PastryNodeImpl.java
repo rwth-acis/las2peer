@@ -468,6 +468,17 @@ public class PastryNodeImpl extends Node {
 	}
 
 	@Override
+	public void unregisterReceiver(MessageReceiver receiver) throws AgentNotKnownException {
+		synchronized (this) {
+			application.unregisterAgentTopic(receiver.getResponsibleForAgentId());
+			super.unregisterReceiver(receiver);
+		}
+	}
+
+	/**
+	 * @deprecated Use {@link PastryNodeImpl#unregisterReceiver(MessageReceiver)} instead!
+	 */
+	@Override
 	public void unregisterAgent(long id) throws AgentNotKnownException {
 		synchronized (this) {
 			application.unregisterAgentTopic(id);
