@@ -1045,6 +1045,14 @@ public class L2pNodeLauncher {
 	public static void main(String[] argv) throws InterruptedException, MalformedXMLException, IOException,
 			L2pSecurityException, EncodingFailedException, SerializationException, NodeException {
 		System.setSecurityManager(new L2pSecurityManager());
+		// self test encryption environment
+		try {
+			CryptoTools.encryptSymmetric("las2peer rulez!".getBytes(), CryptoTools.generateSymmetricKey());
+		} catch (CryptoException e) {
+			throw new L2pSecurityException(
+					"Fatal Error! Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy Files are not installed!",
+					e);
+		}
 		// parse command line parameter into list
 		List<String> instArgs = new ArrayList<>();
 		for (String arg : argv) {
