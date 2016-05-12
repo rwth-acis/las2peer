@@ -1,7 +1,6 @@
 package i5.las2peer.webConnector;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
@@ -119,14 +118,9 @@ public class WebConnector extends Connector {
 	 * create a new web connector instance.
 	 * 
 	 * @throws Exception
-	 * 
-	 * @throws FileNotFoundException
 	 */
 	public WebConnector() throws Exception {
-		super.setFieldValues();
-
-		ServiceRepositoryManager.setTree(tree);
-		ServiceRepositoryManager.setConnector(this);
+		this(DEFAULT_START_HTTP, DEFAULT_HTTP_PORT, DEFAULT_START_HTTPS, DEFAULT_HTTPS_PORT);
 	}
 
 	/**
@@ -137,17 +131,9 @@ public class WebConnector extends Connector {
 	 * @param https
 	 * @param httpsPort
 	 * @throws Exception
-	 * 
-	 * @throws FileNotFoundException
 	 */
 	public WebConnector(boolean http, int httpPort, boolean https, int httpsPort) throws Exception {
-		this();
-		enableHttpHttps(http, https);
-		setHttpPort(httpPort);
-		setHttpsPort(httpsPort);
-		if (this.xmlPath != null && !this.xmlPath.trim().isEmpty()) {
-			ServiceRepositoryManager.addXML(RESTMapper.readAllXMLFromDir(xmlPath));
-		}
+		this(http, httpPort, https, httpsPort, null);
 	}
 
 	/**
@@ -158,16 +144,14 @@ public class WebConnector extends Connector {
 	 * @param https
 	 * @param httpsPort
 	 * @param xmlPath
-	 * 
 	 * @throws Exception
 	 */
 	public WebConnector(boolean http, int httpPort, boolean https, int httpsPort, String xmlPath) throws Exception {
-		this();
+		super.setFieldValues();
 		enableHttpHttps(http, https);
 		setHttpPort(httpPort);
 		setHttpsPort(httpsPort);
 		this.xmlPath = xmlPath;
-
 		if (this.xmlPath != null && !this.xmlPath.trim().isEmpty()) {
 			ServiceRepositoryManager.addXML(RESTMapper.readAllXMLFromDir(xmlPath));
 		}
