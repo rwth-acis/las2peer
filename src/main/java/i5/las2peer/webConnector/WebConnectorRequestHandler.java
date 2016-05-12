@@ -487,7 +487,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 				if (numReq <= 1) {
 					this.connector.getOpenUserRequests().remove(userId);
 					try {
-						l2pNode.unregisterAgent(userAgent);
+						l2pNode.unregisterReceiver(userAgent);
 						userAgent.lockPrivateKey();
 						// System.out.println("+++ logout");
 
@@ -499,7 +499,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 				}
 			} else {
 				try {
-					l2pNode.unregisterAgent(userAgent);
+					l2pNode.unregisterReceiver(userAgent);
 					userAgent.lockPrivateKey();
 				} catch (Exception e) {
 					e.printStackTrace();
