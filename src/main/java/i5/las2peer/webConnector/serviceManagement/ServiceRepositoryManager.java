@@ -18,6 +18,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.ServiceNameVersion;
 import i5.las2peer.persistency.EnvelopeException;
@@ -27,6 +28,8 @@ import i5.las2peer.security.ServiceInfoAgent;
 import i5.las2peer.webConnector.WebConnector;
 
 public class ServiceRepositoryManager {
+
+	private static final L2pLogger logger = L2pLogger.getInstance(ServiceRepositoryManager.class.getName());
 
 	private static ServiceRepositoryManager manager;
 	private static HashMap<String, ServiceData> serviceRepository = new HashMap<String, ServiceData>();
@@ -78,12 +81,15 @@ public class ServiceRepositoryManager {
 			e.printStackTrace();
 			return;
 		}
+		logger.info("found " + services.length + " services on the network");
 		synchronized (serviceRepository) {
 			HashSet<String> checkedServices = new HashSet<>(serviceRepository.keySet());
 			for (ServiceNameVersion currentService : services) {
+				logger.info("handling service " + currentService.getNameVersion());
 				String internalServiceName = getInternalServiceName(currentService.getName(),
 						currentService.getVersion());
 				if (!serviceRepository.containsKey(internalServiceName)) { // new service
+					logger.info("adding new service " + internalServiceName);
 					// add dummy element to repo to avoid duplicate scanning
 					serviceRepository.put(internalServiceName,
 							new ServiceData(currentService.getName(), currentService.getVersion(), false, null));
@@ -100,6 +106,7 @@ public class ServiceRepositoryManager {
 										currentService.getVersion(), true, xml);
 								serviceRepository.put(internalServiceName, data);
 
+								logger.info("adding xml for " + internalServiceName);
 								addXML(new String[] { xml }); // for compatibility services: a service can also give XML
 																// definition to other services
 							} catch (Exception e) {
@@ -109,13 +116,16 @@ public class ServiceRepositoryManager {
 						}
 					} catch (Exception e) {
 						// do nothing for now
+						e.printStackTrace();
 					}
 				} else if (!serviceRepository.get(internalServiceName).isActive()) { // enable not active services
+					logger.info(internalServiceName + " is enabled again");
 					serviceRepository.get(internalServiceName).enable();
 				}
 				checkedServices.remove(internalServiceName);
 			}
 			for (String service : checkedServices) {
+				logger.info(service + " is disabled, because it seems not active anymore");
 				serviceRepository.get(service).disable();
 			}
 		}
