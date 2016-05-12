@@ -620,6 +620,7 @@ public abstract class Node implements AgentStorage {
 	 * @param agent
 	 * @throws AgentNotKnownException the agent is not registered to this node
 	 */
+	@Deprecated
 	public void unregisterAgent(Agent agent) throws AgentNotKnownException {
 		unregisterReceiver(agent);
 	}
@@ -632,6 +633,7 @@ public abstract class Node implements AgentStorage {
 	 * @param agentId
 	 * @throws AgentNotKnownException
 	 */
+	@Deprecated
 	public void unregisterAgent(long agentId) throws AgentNotKnownException {
 		// when removed, merge both unregisterReceiver methods into one public
 		unregisterReceiver(agentId);
