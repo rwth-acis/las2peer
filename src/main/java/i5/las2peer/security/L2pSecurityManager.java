@@ -57,12 +57,13 @@ public class L2pSecurityManager extends SecurityManager {
 			String javaClassPath = System.getProperty("java.class.path");
 			String pathSeparator = System.getProperty("path.separator");
 			String[] clsSplit = javaClassPath.split(pathSeparator);
+			String normPermPath = normalizePath(perm.getName());
 			for (String path : clsSplit) {
 				path = normalizePath(path);
 				if (path.endsWith(File.separator)) {
 					path = path.substring(0, -1);
 				}
-				if (normalizePath(perm.getName()).startsWith(path)) {
+				if (normPermPath.startsWith(path)) {
 					return;
 				}
 			}
