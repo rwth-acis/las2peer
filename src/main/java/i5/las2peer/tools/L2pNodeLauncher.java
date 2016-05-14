@@ -622,7 +622,7 @@ public class L2pNodeLauncher {
 			startService(sa);
 		}
 		else {
-			printMessage("You must specify an exact version of the service you want to start.");
+			printError("You must specify an exact version of the service you want to start.");
 		}
 	}
 
