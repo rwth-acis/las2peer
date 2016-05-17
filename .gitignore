@@ -1,13 +1,16 @@
-/build
+# inherited from las2peer core project
+/output
 /export
-/ssl
-/lib
+/node-storage
 /.las2peer
-/ivy/ivy.jar
-/log
 /tmp
+/log
+/lib
+ivy.jar
+/service
 /out
 /.idea
 *.iml
-ivy.jar
-/output/
+# specific for this project
+/etc/las2peer.policy
+/ssl
