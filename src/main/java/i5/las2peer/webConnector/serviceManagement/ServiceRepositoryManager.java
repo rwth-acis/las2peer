@@ -26,9 +26,10 @@ import i5.las2peer.persistency.EnvelopeException;
 import i5.las2peer.restMapper.RESTMapper;
 import i5.las2peer.restMapper.data.PathTree;
 import i5.las2peer.security.ServiceInfoAgent;
-import i5.las2peer.webConnector.WebConnector;
 
 public class ServiceRepositoryManager {
+
+	public static final String SERVICE_SELFINFO_METHOD = "getRESTMapping";
 
 	private static final L2pLogger logger = L2pLogger.getInstance(ServiceRepositoryManager.class.getName());
 
@@ -39,8 +40,6 @@ public class ServiceRepositoryManager {
 	private static final int DEFAULT_TIMER_INTERVAL_SECONDS = 300;
 	private static int timerIntervalSeconds = DEFAULT_TIMER_INTERVAL_SECONDS;
 
-	public static final String SERVICE_SELFINFO_METHOD = "getRESTMapping";
-	private static WebConnector connector;
 
 	public static ServiceRepositoryManager getManager() {
 		if (manager == null) {
@@ -140,15 +139,12 @@ public class ServiceRepositoryManager {
 			// timer is already running
 			return;
 		}
-		ServiceInfoAgent agent;
-		agent = getServiceInfoAgent(node);
-
-		final ServiceInfoAgent finalAgent = agent;
+		final ServiceInfoAgent agent = getServiceInfoAgent(node);
 
 		timer = new Timer();
 		timer.scheduleAtFixedRate(new TimerTask() {
 			public void run() {
-				executeTimer(node, finalAgent);
+				executeTimer(node, agent);
 			}
 		}, 0, // run first occurrence immediately
 				timerIntervalSeconds * 1000); // run every x seconds
@@ -192,7 +188,7 @@ public class ServiceRepositoryManager {
 				// if tree.merge detects conflicts, output them as an error
 				String s = tree.merge(RESTMapper.getMappingTree(xml));
 				if (s.length() > 0) {
-					connector.logError(s);
+					logger.severe(s);
 				}
 
 				Document d = dBuilder.newDocument();
@@ -211,16 +207,8 @@ public class ServiceRepositoryManager {
 		return serviceRepository.get(getInternalServiceName(serviceName, serviceVersion));
 	}
 
-	public static void setTree(PathTree tree) {
-		ServiceRepositoryManager.tree = tree;
-	}
-
-	public static void setConnector(WebConnector connector) {
-		ServiceRepositoryManager.connector = connector;
-	}
-
-	public static WebConnector getConnector() {
-		return connector;
+	public PathTree getTree() {
+		return tree;
 	}
 
 }

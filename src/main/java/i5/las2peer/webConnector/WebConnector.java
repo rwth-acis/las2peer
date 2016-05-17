@@ -108,11 +108,6 @@ public class WebConnector extends Connector {
 	protected Map<String, JSONObject> oidcProviderInfos = new HashMap<String, JSONObject>();
 
 	private HashMap<Long, Integer> openUserRequests = new HashMap<>();
-	private PathTree tree = new PathTree();
-
-	public PathTree getMappingTree() {
-		return tree;
-	}
 
 	/**
 	 * create a new web connector instance.
