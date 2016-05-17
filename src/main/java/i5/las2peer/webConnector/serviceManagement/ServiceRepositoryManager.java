@@ -84,7 +84,7 @@ public class ServiceRepositoryManager {
 					logger.info("adding new service " + internalServiceName);
 					// add dummy element to repo to avoid duplicate scanning
 					serviceRepository.put(internalServiceName,
-							new ServiceData(currentService.getName(), currentService.getVersion(), false, null));
+							new ServiceData(currentService.getName(), currentService.getVersion(), true, null));
 					try {
 						String xml = (String) node.invokeGlobally(finalAgent, currentService, SERVICE_SELFINFO_METHOD,
 								new Serializable[] {});
