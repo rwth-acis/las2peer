@@ -318,17 +318,16 @@ public class WebConnector extends Connector {
 		}
 
 		myNode = node;
+		if (startHttp) {
+			createServer(false);
+		}
+		if (startHttps) {
+			createServer(true);
+		}
 		try {
 			ServiceRepositoryManager.start(myNode, serviceRepositoryUpdateIntervalSeconds);
 		} catch (Exception e) {
 			logError("Could not start ServiceRepositoryManager: " + e.getMessage());
-		}
-		if (startHttp) {
-			runServer(false);
-		}
-
-		if (startHttps) {
-			runServer(true);
 		}
 	}
 
@@ -346,7 +345,7 @@ public class WebConnector extends Connector {
 	 * @param isHttps true to run the HTTPS server, false to run the HTTP server
 	 * @throws ConnectorException
 	 */
-	private void runServer(boolean isHttps) throws ConnectorException {
+	private void createServer(boolean isHttps) throws ConnectorException {
 		try {
 			if (isHttps) {
 				https = HttpsServer.create(new InetSocketAddress(httpsPort), maxConnections);
