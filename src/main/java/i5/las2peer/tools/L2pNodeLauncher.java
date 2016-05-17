@@ -313,6 +313,7 @@ public class L2pNodeLauncher {
 
 		} catch (ConnectorException e) {
 			printError(" --> Problems starting the connector: " + e);
+			logger.printStackTrace(e);
 		} catch (ClassNotFoundException e) {
 			logger.printStackTrace(e);
 		} catch (InstantiationException e) {
