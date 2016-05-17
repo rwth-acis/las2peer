@@ -205,7 +205,7 @@ public abstract class Configurable {
 	 * contains the value for the monitoring switch and sets it if so.
 	 * 
 	 * All fields mentioned in <i>except</i> will be left out.
-	 * @param except 
+	 * @param except
 	 *
 	 */
 	protected void setFieldValues(Set<String> except) {
@@ -246,11 +246,17 @@ public abstract class Configurable {
 	 */
 	private String findPropertyFile() {
 		String filename = getClass().getName() + ".properties";
-		String[] testDirs = new String[] { "./", "config/", "etc/", "properties/" };
+		String[] testDirs = new String[] { "config/", "etc/", "properties/" };
 
-		for (String dir : testDirs)
-			if (new File(dir + filename).exists())
-				return dir + filename;
+		for (String dir : testDirs) {
+			try {
+				if (new File(dir + filename).exists()) {
+					return dir + filename;
+				}
+			} catch (Exception e) {
+				// XXX logging
+			}
+		}
 
 		return null;
 	}

@@ -1,6 +1,5 @@
 package i5.las2peer.p2p;
 
-import java.security.PublicKey;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Random;
@@ -16,7 +15,6 @@ import i5.las2peer.security.BasicAgentStorage;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.MessageReceiver;
 import i5.las2peer.security.UserAgent;
-import i5.las2peer.tools.CryptoTools;
 import i5.las2peer.tools.SerializationException;
 import i5.las2peer.tools.TimerThread;
 
@@ -271,24 +269,6 @@ public class LocalNode extends Node {
 		} catch (Exception e) {
 			throw new NodeNotFoundException("Node with id " + nodeId + " not found");
 		}
-	}
-
-	@Override
-	public void sendUnlockRequest(long agentId, String passphrase, Object targetNode, PublicKey nodeEncryptionKey)
-			throws L2pSecurityException {
-
-		if (!(targetNode instanceof Long))
-			throw new IllegalArgumentException(
-					"node id is not a Long value but a " + targetNode.getClass().getName() + "(" + targetNode + ")");
-
-		try {
-			byte[] encPass = CryptoTools.encryptAsymmetric(passphrase, nodeEncryptionKey);
-			getNode((Long) targetNode).unlockRemoteAgent(agentId, encPass);
-
-		} catch (Exception e) {
-			throw new L2pSecurityException("unable to unlock agent at node " + targetNode);
-		}
-
 	}
 
 	/************************** factories ***************************************/

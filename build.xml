@@ -5,7 +5,7 @@
 	<property name="ivy.organisation" value="i5" />
 	<property name="ivy.module" value="las2peer" />
 	<property name="ivy.revision" value="0.5" />
-	<property name="ivy.build.number" value="1" />
+	<property name="ivy.build.number" value="2" />
 	<property name="ivy.deliver.revision" value="${ivy.revision}" />
 	<property name="ivy.pom.version" value="${ivy.revision}" />
 	
@@ -324,6 +324,7 @@
 			<fileset dir="${tmp.classes}">
 				<exclude name="i5/las2peer/testing/services/**" />
 			</fileset>
+			<fileset file="etc/las2peer.policy" />
 			<manifest>
 				<attribute name="Main-Class" value="${main-class}"/>
 				<attribute name="Class-Path" value="${classpath.name}" />
@@ -414,10 +415,12 @@
                 <pathelement path="${lib.cp}" />
                 <pathelement path="${lib.junit}" />
             </classpath>
-            <formatter type="plain" />
+            <formatter type="plain" usefile="false" />
+        	<formatter type="plain" />
             <batchtest fork="yes" todir="${junit.report}">
                 <fileset dir="${tmp.junit}">
                     <include name="**/*Test.class"/>
+                    <exclude name="**/SandboxTest.class"/>
                 </fileset>
             </batchtest>
         </junit>

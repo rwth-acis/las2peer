@@ -10,7 +10,6 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Properties;
@@ -270,12 +269,18 @@ public class PastryNodeImpl extends Node {
 	private void setupPastryEnvironment() {
 		pastryEnvironment = new Environment();
 
-		String[] configFiles = new String[] { "pastry.properties", "etc/pastry.properties", "config/pastry.properties",
+		String[] configFiles = new String[] { "etc/pastry.properties", "config/pastry.properties",
 				"properties/pastry.properties" };
 		String found = null;
-		for (int i = 0; i < configFiles.length && found == null; i++) {
-			if (new File(configFiles[i]).exists())
-				found = configFiles[i];
+		for (String filename : configFiles) {
+			try {
+				if (new File(filename).exists()) {
+					found = filename;
+					break;
+				}
+			} catch (Exception e) {
+				// XXX logging
+			}
 		}
 
 		Hashtable<String, String> properties = new Hashtable<String, String>();
@@ -305,7 +310,7 @@ public class PastryNodeImpl extends Node {
 		if (!properties.containsKey("pastry_socket_known_network_address"))
 			// properties.put( "pastry_socket_known_network_address", "127.0.0.1");
 			if (!properties.containsKey("pastry_socket_known_network_address_port"))
-				properties.put("pastry_socket_known_network_address_port", "80");
+			properties.put("pastry_socket_known_network_address_port", "80");
 
 		// remarks: you need an network accessible host/port combination, even, if you want to start a new ring!!
 		// for offline testing, you need to run some kind of port reachable server!
@@ -463,6 +468,17 @@ public class PastryNodeImpl extends Node {
 	}
 
 	@Override
+	public void unregisterReceiver(MessageReceiver receiver) throws AgentNotKnownException {
+		synchronized (this) {
+			application.unregisterAgentTopic(receiver.getResponsibleForAgentId());
+			super.unregisterReceiver(receiver);
+		}
+	}
+
+	/**
+	 * @deprecated Use {@link PastryNodeImpl#unregisterReceiver(MessageReceiver)} instead!
+	 */
+	@Override
 	public void unregisterAgent(long id) throws AgentNotKnownException {
 		synchronized (this) {
 			application.unregisterAgentTopic(id);
@@ -560,7 +576,7 @@ public class PastryNodeImpl extends Node {
 		}
 
 		PastPutContinuation conti = new PastPutContinuation();
-		
+
 		try {
 			pastStorage.insert(new ContentEnvelope(envelope), conti);
 			conti.waitForResult();
@@ -727,20 +743,6 @@ public class PastryNodeImpl extends Node {
 			throw new NodeNotFoundException("Given node id is not a pastry Node Handle!");
 
 		return application.getNodeInformation((NodeHandle) nodeId);
-	}
-
-	@Override
-	public void sendUnlockRequest(long agentId, String passphrase, Object targetNode, PublicKey nodeEncryptionKey)
-			throws L2pSecurityException {
-		try {
-			application.unlockRemoteAgent(agentId, passphrase, (NodeHandle) targetNode, nodeEncryptionKey);
-			observerNotice(Event.AGENT_UNLOCKED, pastryNode, agentId, targetNode, (Long) null,
-					"Agent unlocked at target node!");
-		} catch (L2pSecurityException e) {
-			observerNotice(Event.AGENT_UNLOCK_FAILED, pastryNode, agentId, targetNode, (Long) null,
-					"Unlocking of agent failed!");
-			throw e;
-		}
 	}
 
 }

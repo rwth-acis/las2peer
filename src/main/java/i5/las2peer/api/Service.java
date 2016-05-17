@@ -158,8 +158,6 @@ public abstract class Service extends Configurable {
 			IllegalArgumentException, IllegalAccessException, InvocationTargetException, L2pSecurityException {
 		Method m = searchMethod(method, parameters);
 
-		// TODO make sure that main agent is unlocked?
-
 		return m.invoke(this, parameters);
 	}
 

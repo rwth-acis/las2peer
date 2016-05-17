@@ -393,7 +393,7 @@ public class L2pClassManager {
 		} catch (LibraryNotFoundException e) {
 			// class could not be found in any registered library, try default classpath
 			// this is usually the case when executed within an IDE
-			System.err.println("No library found for " + serviceClassName
+			System.err.println("Warning! No library (jar) found for " + serviceClassName
 					+ "! Trying default classpath. This should not happen in a productive environment!");
 			try {
 				return this.getClass().getClassLoader().loadClass(serviceClassName);

@@ -40,6 +40,7 @@ import i5.las2peer.security.Agent;
 import i5.las2peer.security.AgentException;
 import i5.las2peer.security.GroupAgent;
 import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.security.L2pSecurityManager;
 import i5.las2peer.security.PassphraseAgent;
 import i5.las2peer.security.ServiceAgent;
 import i5.las2peer.security.ServiceInfoAgent;
@@ -312,6 +313,7 @@ public class L2pNodeLauncher {
 
 		} catch (ConnectorException e) {
 			printError(" --> Problems starting the connector: " + e);
+			logger.printStackTrace(e);
 		} catch (ClassNotFoundException e) {
 			logger.printStackTrace(e);
 		} catch (InstantiationException e) {
@@ -454,7 +456,7 @@ public class L2pNodeLauncher {
 			return;
 
 		try {
-			node.unregisterAgent(currentUser);
+			node.unregisterReceiver(currentUser);
 		} catch (AgentNotKnownException e) {
 		}
 
@@ -525,7 +527,7 @@ public class L2pNodeLauncher {
 			throw new IllegalStateException("please log in a valid user with registerUserAgent before!");
 
 		Agent receiver = node.getServiceAgent(ServiceNameVersion.fromString(serviceNameVersion));
-		Message request = new Message(currentUser, receiver, (Serializable) new ListMethodsContent(), 30000);
+		Message request = new Message(currentUser, receiver, (Serializable) new ListMethodsContent());
 		request.setSendingNodeId((NodeHandle) node.getNodeId());
 
 		Message response = node.sendMessageAndWaitForAnswer(request);
@@ -621,7 +623,7 @@ public class L2pNodeLauncher {
 			startService(sa);
 		}
 		else {
-			printMessage("You must specify an exact version of the service you want to start.");
+			printError("You must specify an exact version of the service you want to start.");
 		}
 	}
 
@@ -642,6 +644,20 @@ public class L2pNodeLauncher {
 			throw new IllegalStateException("You have to unlock the agent before starting the corresponding service!");
 
 		node.registerReceiver(serviceAgent);
+	}
+	
+	/**
+	 * stop the given service
+	 * 
+	 * needs name and version
+	 * 
+	 * @param serviceNameVersion
+	 * @throws AgentNotKnownException
+	 */
+	public void stopService(String serviceNameVersion) throws AgentNotKnownException {
+		ServiceNameVersion service = ServiceNameVersion.fromString(serviceNameVersion);
+		ServiceAgent agent = node.getServiceAgent(service);
+		node.unregisterReceiver(agent);
 	}
 
 	/**
@@ -1029,6 +1045,15 @@ public class L2pNodeLauncher {
 	 */
 	public static void main(String[] argv) throws InterruptedException, MalformedXMLException, IOException,
 			L2pSecurityException, EncodingFailedException, SerializationException, NodeException {
+		System.setSecurityManager(new L2pSecurityManager());
+		// self test encryption environment
+		try {
+			CryptoTools.encryptSymmetric("las2peer rulez!".getBytes(), CryptoTools.generateSymmetricKey());
+		} catch (CryptoException e) {
+			throw new L2pSecurityException(
+					"Fatal Error! Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy Files are not installed!",
+					e);
+		}
 		// parse command line parameter into list
 		List<String> instArgs = new ArrayList<>();
 		for (String arg : argv) {

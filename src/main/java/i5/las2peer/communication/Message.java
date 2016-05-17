@@ -43,7 +43,7 @@ import rice.p2p.commonapi.NodeHandle;
  */
 public class Message implements XmlAble {
 
-	public static final long DEFAULT_TIMEOUT = 3600 * 1000; // 1 hour
+	public static final long DEFAULT_TIMEOUT = 30 * 1000; // 30 seconds
 
 	/**
 	 * sender of the message
@@ -86,14 +86,14 @@ public class Message implements XmlAble {
 	private byte[] baContentKey;
 
 	/**
-	 * time stamp of the message generation
+	 * timestamp of the message generation
 	 */
 	private long timestampMs;
 
 	/**
-	 * how long in milliseconds is this message valid (time stamp of timeout is time stamp + validMs)
+	 * how long in milliseconds is this message valid (timestamp of timeout is timestamp + validMs)
 	 */
-	private long validMs = DEFAULT_TIMEOUT;
+	private long validMs;
 
 	/**
 	 * a simple message id for reference, i.e. answer messages
@@ -613,7 +613,7 @@ public class Message implements XmlAble {
 	}
 
 	/**
-	 * @return time stamp of message creation as Date object
+	 * @return timestamp of message creation as Date object
 	 */
 	public Date getTimestampDate() {
 		return new Date(timestampMs);

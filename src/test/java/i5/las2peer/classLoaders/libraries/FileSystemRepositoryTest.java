@@ -141,5 +141,22 @@ public class FileSystemRepositoryTest {
 		assertEquals("1.1", lib.getIdentifier().getVersion().toString());
 
 	}
+	
+	@Test
+	public void testGetLastModified() throws InterruptedException {		
+		File f = new File("export" + File.separator + "jars" + File.separator);
+		
+		long date1 = FileSystemRepository.getLastModified(f, true);
+		assertTrue(date1 > 0);
+		
+		Thread.sleep(2000);
+		new File("export" + File.separator + "jars" + File.separator + "i5.las2peer.classLoaders.testPackage1-1.0.jar").setLastModified(System.currentTimeMillis());
+		
+		long date2 = FileSystemRepository.getLastModified(f, true);
+		assertTrue(date1 < date2);
+		
+		long date3 = FileSystemRepository.getLastModified(f, true);
+		assertTrue(date2 == date3);
+	}
 
 }

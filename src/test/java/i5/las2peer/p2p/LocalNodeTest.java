@@ -301,12 +301,12 @@ public class LocalNodeTest {
 
 		eve.unlockPrivateKey("evespass");
 		testee.storeAgent(eve);
-		eve.lockPrivateKey();
+		//eve.lockPrivateKey();
 
 		testee.storeAgent(testService);
 		testee.registerReceiver(testService);
 
-		Serializable result = testee.invokeLocally(eve.getId(), ServiceNameVersion.fromString(serviceClass+"@1.0"), "inc",
+		Serializable result = testee.invokeLocally(eve, ServiceNameVersion.fromString(serviceClass+"@1.0"), "inc",
 				new Serializable[] { new Integer(10) });
 
 		assertEquals(12, result);
