@@ -108,6 +108,7 @@ public class WebConnector extends Connector {
 	protected Map<String, JSONObject> oidcProviderInfos = new HashMap<String, JSONObject>();
 
 	private HashMap<Long, Integer> openUserRequests = new HashMap<>();
+	private ServiceRepositoryManager serviceRepositoryManager = new ServiceRepositoryManager();
 
 	/**
 	 * create a new web connector instance.
@@ -148,7 +149,7 @@ public class WebConnector extends Connector {
 		setHttpsPort(httpsPort);
 		this.xmlPath = xmlPath;
 		if (this.xmlPath != null && !this.xmlPath.trim().isEmpty()) {
-			ServiceRepositoryManager.addXML(RESTMapper.readAllXMLFromDir(xmlPath));
+			serviceRepositoryManager.addXML(RESTMapper.readAllXMLFromDir(xmlPath));
 		}
 	}
 
@@ -320,7 +321,7 @@ public class WebConnector extends Connector {
 			createServer(true);
 		}
 		try {
-			ServiceRepositoryManager.start(myNode, serviceRepositoryUpdateIntervalSeconds);
+			serviceRepositoryManager.start(myNode, serviceRepositoryUpdateIntervalSeconds);
 		} catch (Exception e) {
 			logError("Could not start ServiceRepositoryManager: " + e.getMessage());
 		}
@@ -328,10 +329,14 @@ public class WebConnector extends Connector {
 
 	public void updateServiceList() {
 		try {
-			ServiceRepositoryManager.manualUpdate(this.myNode);
+			serviceRepositoryManager.manualUpdate(this.myNode);
 		} catch (Exception e) {
 			logError("Could not update services: " + e.getMessage());
 		}
+	}
+
+	public PathTree getMappingTree() {
+		return serviceRepositoryManager.getTree();
 	}
 
 	/**
@@ -379,7 +384,7 @@ public class WebConnector extends Connector {
 	@Override
 	public void stop() throws ConnectorException {
 		// stop the timer
-		ServiceRepositoryManager.stop();
+		serviceRepositoryManager.stop();
 		// stop the HTTP server
 		if (https != null) {
 			https.stop(0);

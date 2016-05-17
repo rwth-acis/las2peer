@@ -33,46 +33,38 @@ public class ServiceRepositoryManager {
 
 	private static final L2pLogger logger = L2pLogger.getInstance(ServiceRepositoryManager.class.getName());
 
-	private static ServiceRepositoryManager manager;
-	private static HashMap<String, ServiceData> serviceRepository = new HashMap<String, ServiceData>();
-	private static PathTree tree;
-	private static Timer timer;
 	private static final int DEFAULT_TIMER_INTERVAL_SECONDS = 300;
 	private static int timerIntervalSeconds = DEFAULT_TIMER_INTERVAL_SECONDS;
 
+	private HashMap<String, ServiceData> serviceRepository = new HashMap<String, ServiceData>();
+	private PathTree tree = new PathTree();
+	private Timer timer;
 
-	public static ServiceRepositoryManager getManager() {
-		if (manager == null) {
-			manager = new ServiceRepositoryManager();
-		}
-		return manager;
+	public void start(Node node) throws Exception {
+		start(node, DEFAULT_TIMER_INTERVAL_SECONDS);
 	}
 
-	public static void start(Node node) throws Exception {
-		startTimer(node);
-	}
-
-	public static void start(Node node, int timerIntervalSeconds) throws Exception {
+	public void start(Node node, int timerIntervalSeconds) throws Exception {
 		ServiceRepositoryManager.timerIntervalSeconds = timerIntervalSeconds;
 		startTimer(node);
 	}
 
-	public static void stop() {
+	public void stop() {
 		stopTimer();
 	}
 
-	public static boolean hasService(String serviceName) {
+	public boolean hasService(String serviceName) {
 		if (!serviceRepository.containsKey(serviceName)) {
 			return false;
 		}
 		return serviceRepository.get(serviceName).isActive();
 	}
 
-	public static void manualUpdate(final Node node) throws Exception {
+	public void manualUpdate(final Node node) throws Exception {
 		executeTimer(node, getServiceInfoAgent(node));
 	}
 
-	private static void executeTimer(Node node, ServiceInfoAgent finalAgent) {
+	private void executeTimer(Node node, ServiceInfoAgent finalAgent) {
 		ServiceNameVersion[] services;
 		try {
 			services = ServiceInfoAgent.getServices();
@@ -134,7 +126,7 @@ public class ServiceRepositoryManager {
 		}
 	}
 
-	private static void startTimer(final Node node) throws Exception {
+	private void startTimer(final Node node) throws Exception {
 		if (timer != null) {
 			// timer is already running
 			return;
@@ -150,14 +142,14 @@ public class ServiceRepositoryManager {
 				timerIntervalSeconds * 1000); // run every x seconds
 	}
 
-	private static void stopTimer() {
+	private void stopTimer() {
 		if (timer != null) {
 			timer.cancel();
 		}
 		timer = null;
 	}
 
-	private static ServiceInfoAgent getServiceInfoAgent(Node node) throws Exception {
+	private ServiceInfoAgent getServiceInfoAgent(Node node) throws Exception {
 		ServiceInfoAgent agent;
 		try {
 			agent = ServiceInfoAgent.getServiceInfoAgent(ServiceInfoAgent.getDefaultPassphrase());
@@ -172,7 +164,7 @@ public class ServiceRepositoryManager {
 		return agent;
 	}
 
-	public static void addXML(String[] xmls) throws Exception {
+	public void addXML(String[] xmls) throws Exception {
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 		XPath xPath = XPathFactory.newInstance().newXPath();
@@ -199,11 +191,11 @@ public class ServiceRepositoryManager {
 		}
 	}
 
-	private static String getInternalServiceName(String serviceName, String serviceVersion) {
+	private String getInternalServiceName(String serviceName, String serviceVersion) {
 		return String.format("%s@%s", serviceName, serviceVersion);
 	}
 
-	public static ServiceData getService(String serviceName, String serviceVersion) {
+	public ServiceData getService(String serviceName, String serviceVersion) {
 		return serviceRepository.get(getInternalServiceName(serviceName, serviceVersion));
 	}
 
