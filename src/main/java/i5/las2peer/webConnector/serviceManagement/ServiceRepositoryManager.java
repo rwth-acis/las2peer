@@ -18,6 +18,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import i5.las2peer.execution.NoSuchServiceMethodException;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.ServiceNameVersion;
@@ -114,6 +115,9 @@ public class ServiceRepositoryManager {
 								e.printStackTrace();
 							}
 						}
+					} catch (NoSuchServiceMethodException e) {
+						// expected, service doesn't provide a REST mapping
+						logger.info("service " + internalServiceName + " doesn't provide a REST mapping");
 					} catch (Exception e) {
 						// do nothing for now
 						e.printStackTrace();
