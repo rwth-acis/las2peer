@@ -78,7 +78,7 @@ public class FileSystemRepository implements Repository {
 		this.directories = directories;
 		this.recursive = recursive;
 
-		updateRepository();
+		updateRepository(true);
 	}
 
 	/**
@@ -90,7 +90,7 @@ public class FileSystemRepository implements Repository {
 	 * @throws UnresolvedDependenciesException
 	 */
 	public LoadedLibrary findLibrary(String name) throws LibraryNotFoundException, UnresolvedDependenciesException {
-		updateRepository();
+		updateRepository(false);
 		
 		Hashtable<LibraryVersion, String> htVersions = htFoundJars.get(name);
 		if (htVersions == null) {
@@ -129,7 +129,7 @@ public class FileSystemRepository implements Repository {
 	 * @throws LibraryNotFoundException
 	 */
 	public LoadedLibrary findLibrary(LibraryIdentifier lib) throws LibraryNotFoundException {
-		updateRepository();
+		updateRepository(false);
 		
 		Hashtable<LibraryVersion, String> htVersions = htFoundJars.get(lib.getName());
 		if (htVersions == null)
@@ -158,7 +158,7 @@ public class FileSystemRepository implements Repository {
 	 * @throws LibraryNotFoundException
 	 */
 	public LoadedLibrary findMatchingLibrary(LibraryDependency dep) throws LibraryNotFoundException {
-		updateRepository();
+		updateRepository(false);
 		
 		Hashtable<LibraryVersion, String> htVersions = htFoundJars.get(dep.getName());
 		if (htVersions == null)
@@ -241,25 +241,26 @@ public class FileSystemRepository implements Repository {
 	/**
 	 * helper method to get the last modification date of a directory
 	 * @param dir 
+	 * @param recursive 
 	 * @return 
 	 * */
-	private long getLastModified(File dir) {
+	public static long getLastModified(File dir, boolean recursive) {
 	    File[] files = dir.listFiles();
 	    if (files == null || files.length == 0) {
-	        return 0;
+	        return dir.lastModified();
 	    }
 
-	    long lastModified = files[0].lastModified();
-	    for (int i = 1; i < files.length; i++) {
-	    	if (files[i].isDirectory() && recursive) {
-	    		long ll = getLastModified(files[i]);
+	    long lastModified = 0;
+	    for (File f : files) {
+	    	if (f.isDirectory() && recursive) {
+	    		long ll = getLastModified(f, recursive);
 	    		if (lastModified < ll) {
-	    			lastModified = files[i].lastModified();
+	    			lastModified = ll;
 	    		}
 	    	}
 	    	else {
-	    		if (lastModified < files[i].lastModified()) {
-	    			lastModified = files[i].lastModified();
+	    		if (lastModified < f.lastModified()) {
+	    			lastModified = f.lastModified();
 	 	       	}
 	    	}
 	    }
@@ -268,17 +269,18 @@ public class FileSystemRepository implements Repository {
 	
 	/**
 	 * checks if there were changes made in the folder and re-reads repositories if so
+	 * @param force if true, the repository will be updated independent from last modification
 	 */
-	private void updateRepository() {
+	private void updateRepository(boolean force) {
 		long currentLastModified = 0;
 		for (String directory : directories) {
-			long ll = getLastModified(new File(directory));
+			long ll = getLastModified(new File(directory), recursive);
 			if (currentLastModified < ll) {
 				currentLastModified = ll;
 			}
 		}
 		
-		if (lastModified < currentLastModified) {
+		if (lastModified < currentLastModified || force) {
 			lastModified = currentLastModified;
 			initJarList();
 		}
