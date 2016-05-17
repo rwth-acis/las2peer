@@ -1,12 +1,12 @@
 /output
 /export
 /node-storage
+/.las2peer
 /tmp
 /log
 /lib
-/ivy/ivy.jar
+ivy.jar
 /service
 /out
 /.idea
 *.iml
-/.las2peer
