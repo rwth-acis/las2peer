@@ -5,11 +5,9 @@ import i5.las2peer.restMapper.RESTMapper;
 import i5.las2peer.restMapper.annotations.Version;
 
 @Version("0.1")
-public class Calculator2CompatibilityService extends Service
-{
+public class Calculator2CompatibilityService extends Service {
 
-	public String getRESTMapping()
-	{
+	public String getRESTMapping() {
 		String result = "";
 		try {
 			result = RESTMapper.mergeXMLs(RESTMapper.readAllXMLFromDir("./XMLCompatibility2"));

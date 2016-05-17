@@ -1,7 +1,6 @@
 package i5.las2peer.webConnector;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
@@ -109,64 +108,48 @@ public class WebConnector extends Connector {
 	protected Map<String, JSONObject> oidcProviderInfos = new HashMap<String, JSONObject>();
 
 	private HashMap<Long, Integer> openUserRequests = new HashMap<>();
-	private PathTree tree = new PathTree();
-
-	public PathTree getMappingTree() {
-		return tree;
-	}
+	private ServiceRepositoryManager serviceRepositoryManager = new ServiceRepositoryManager();
 
 	/**
 	 * create a new web connector instance.
-	 * @throws Exception 
-	 * 
-	 * @throws FileNotFoundException
-	 */
-	public WebConnector() throws Exception {
-		super.setFieldValues();
-
-		ServiceRepositoryManager.setTree(tree);
-		ServiceRepositoryManager.setConnector(this);
-	}
-
-	/**
-	 * create a new web connector instance.
-	 * @param http 
-	 * @param httpPort 
-	 * @param https 
-	 * @param httpsPort 
-	 * @throws Exception 
-	 * 
-	 * @throws FileNotFoundException
-	 */
-	public WebConnector(boolean http, int httpPort, boolean https, int httpsPort) throws Exception {
-		this();
-		enableHttpHttps(http, https);
-		setHttpPort(httpPort);
-		setHttpsPort(httpsPort);
-		if (this.xmlPath != null && !this.xmlPath.trim().isEmpty()) {
-			ServiceRepositoryManager.addXML(RESTMapper.readAllXMLFromDir(xmlPath));
-		}
-	}
-
-	/**
-	 * create a new web connector instance.
-	 * @param http 
-	 * @param httpPort 
-	 * @param https 
-	 * @param httpsPort 
-	 * @param xmlPath 
 	 * 
 	 * @throws Exception
 	 */
+	public WebConnector() throws Exception {
+		this(DEFAULT_START_HTTP, DEFAULT_HTTP_PORT, DEFAULT_START_HTTPS, DEFAULT_HTTPS_PORT);
+	}
+
+	/**
+	 * create a new web connector instance.
+	 * 
+	 * @param http
+	 * @param httpPort
+	 * @param https
+	 * @param httpsPort
+	 * @throws Exception
+	 */
+	public WebConnector(boolean http, int httpPort, boolean https, int httpsPort) throws Exception {
+		this(http, httpPort, https, httpsPort, null);
+	}
+
+	/**
+	 * create a new web connector instance.
+	 * 
+	 * @param http
+	 * @param httpPort
+	 * @param https
+	 * @param httpsPort
+	 * @param xmlPath
+	 * @throws Exception
+	 */
 	public WebConnector(boolean http, int httpPort, boolean https, int httpsPort, String xmlPath) throws Exception {
-		this();
+		super.setFieldValues();
 		enableHttpHttps(http, https);
 		setHttpPort(httpPort);
 		setHttpsPort(httpsPort);
 		this.xmlPath = xmlPath;
-
 		if (this.xmlPath != null && !this.xmlPath.trim().isEmpty()) {
-			ServiceRepositoryManager.addXML(RESTMapper.readAllXMLFromDir(xmlPath));
+			serviceRepositoryManager.addXML(RESTMapper.readAllXMLFromDir(xmlPath));
 		}
 	}
 
@@ -331,26 +314,29 @@ public class WebConnector extends Connector {
 		}
 
 		myNode = node;
+		if (startHttp) {
+			createServer(false);
+		}
+		if (startHttps) {
+			createServer(true);
+		}
 		try {
-			ServiceRepositoryManager.start(myNode, serviceRepositoryUpdateIntervalSeconds);
+			serviceRepositoryManager.start(myNode, serviceRepositoryUpdateIntervalSeconds);
 		} catch (Exception e) {
 			logError("Could not start ServiceRepositoryManager: " + e.getMessage());
-		}
-		if (startHttp) {
-			runServer(false);
-		}
-
-		if (startHttps) {
-			runServer(true);
 		}
 	}
 
 	public void updateServiceList() {
 		try {
-			ServiceRepositoryManager.manualUpdate(this.myNode);
+			serviceRepositoryManager.manualUpdate(this.myNode);
 		} catch (Exception e) {
 			logError("Could not update services: " + e.getMessage());
 		}
+	}
+
+	public PathTree getMappingTree() {
+		return serviceRepositoryManager.getTree();
 	}
 
 	/**
@@ -359,7 +345,7 @@ public class WebConnector extends Connector {
 	 * @param isHttps true to run the HTTPS server, false to run the HTTP server
 	 * @throws ConnectorException
 	 */
-	private void runServer(boolean isHttps) throws ConnectorException {
+	private void createServer(boolean isHttps) throws ConnectorException {
 		try {
 			if (isHttps) {
 				https = HttpsServer.create(new InetSocketAddress(httpsPort), maxConnections);
@@ -398,7 +384,7 @@ public class WebConnector extends Connector {
 	@Override
 	public void stop() throws ConnectorException {
 		// stop the timer
-		ServiceRepositoryManager.stop();
+		serviceRepositoryManager.stop();
 		// stop the HTTP server
 		if (https != null) {
 			https.stop(0);
@@ -500,9 +486,10 @@ public class WebConnector extends Connector {
 	/**
 	 * Fetches Open ID Connect provider configuration, according to the OpenID Connect discovery specification (cf.
 	 * http://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig)
-	 * @param providerURI 
-	 * @return 
-	 * @throws IOException 
+	 * 
+	 * @param providerURI
+	 * @return
+	 * @throws IOException
 	 */
 	private JSONObject fetchOidcProviderConfig(String providerURI) throws IOException {
 		JSONObject result = new JSONObject();

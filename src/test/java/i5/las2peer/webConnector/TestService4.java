@@ -23,24 +23,22 @@ import javax.ws.rs.Produces;
 @Path("/books/{id}")
 @Consumes(MediaType.TEXT_PLAIN)
 @Produces(MediaType.TEXT_PLAIN)
-public class TestService4 extends Service
-{
+public class TestService4 extends Service {
 
 	/**
 	 * constructor
 	 */
-	public TestService4()
-	{
+	public TestService4() {
 
 	}
 
 	/**
 	 * get all annotation and method data to allow mapping
-	 * @return 
+	 * 
+	 * @return
 	 */
 
-	public String getRESTMapping()
-	{
+	public String getRESTMapping() {
 		String result = "";
 		try {
 			result = RESTMapper.getMethodsAsXML(this.getClass());
@@ -52,56 +50,48 @@ public class TestService4 extends Service
 	}
 
 	@POST
-	public int a1(@PathParam("id") int id)
-	{
+	public int a1(@PathParam("id") int id) {
 		return id;
 	}
 
 	@POST
 	@Consumes({ "audio/ogg", "audio/mpeg" })
-	public int a2(@PathParam("id") int id)
-	{
+	public int a2(@PathParam("id") int id) {
 		return id * 7;
 	}
 
 	@GET
-	public int b1(@PathParam("id") int id)
-	{
+	public int b1(@PathParam("id") int id) {
 		return id;
 	}
 
 	@GET
 	@Produces("audio/ogg")
-	public int b2(@PathParam("id") int id)
-	{
+	public int b2(@PathParam("id") int id) {
 		return id * 2;
 	}
 
 	@GET
 	@Produces("audio/mp4")
-	public int b3(@PathParam("id") int id)
-	{
+	public int b3(@PathParam("id") int id) {
 		return id * 3;
 	}
 
 	@GET
 	@Path("/test")
-	public int doubleMethod1()
-	{
+	public int doubleMethod1() {
 		return 1;
 	}
 
 	@PUT
 	@Path("/test2")
-	public String putTest(@ContentParam String param)
-	{
+	public String putTest(@ContentParam String param) {
 		return param;
 	}
 
 	@GET
 	@Path("/test3")
-	public HttpResponse errorTest()
-	{
+	public HttpResponse errorTest() {
 		HttpResponse response = new HttpResponse("hi", 500);
 		return response;
 	}

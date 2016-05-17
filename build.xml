@@ -5,7 +5,7 @@
 	<property name="ivy.organisation" value="i5" />
 	<property name="ivy.module" value="las2peer-web-connector" />
 	<property name="ivy.revision" value="0.5" />
-	<property name="ivy.build.number" value="0" />
+	<property name="ivy.build.number" value="2" />
 	<property name="ivy.deliver.revision" value="${ivy.revision}" />
 	<property name="ivy.pom.version" value="${ivy.revision}" />
 	

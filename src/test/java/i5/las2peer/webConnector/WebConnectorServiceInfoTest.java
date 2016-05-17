@@ -48,7 +48,7 @@ public class WebConnectorServiceInfoTest {
 		abel.unlockPrivateKey("abelspass");
 		GroupAgent group1 = MockAgentFactory.getGroup1();
 		group1.unlockPrivateKey(adam);
-		
+
 		// start Node
 		node = LocalNode.newNode();
 		node.storeAgent(eve);
@@ -57,11 +57,16 @@ public class WebConnectorServiceInfoTest {
 		node.storeAgent(group1);
 		node.launch();
 
-		ServiceAgent testService = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass), "a pass");
-		ServiceAgent testService2 = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass2), "a pass");
-		ServiceAgent testService3 = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass3), "a pass");
-		ServiceAgent testService4 = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass4), "a pass");
-		ServiceAgent testService5 = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass5), "a pass");
+		ServiceAgent testService = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass),
+				"a pass");
+		ServiceAgent testService2 = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass2),
+				"a pass");
+		ServiceAgent testService3 = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass3),
+				"a pass");
+		ServiceAgent testService4 = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass4),
+				"a pass");
+		ServiceAgent testService5 = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass5),
+				"a pass");
 
 		testService.unlockPrivateKey("a pass");
 		testService2.unlockPrivateKey("a pass");

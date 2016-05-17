@@ -17,24 +17,22 @@ import javax.ws.rs.PathParam;
  *
  */
 @Version("0.2")
-public class TestService3 extends Service
-{
+public class TestService3 extends Service {
 
 	/**
 	 * constructor
 	 */
-	public TestService3()
-	{
+	public TestService3() {
 
 	}
 
 	/**
 	 * get all annotation and method data to allow mapping
-	 * @return 
+	 * 
+	 * @return
 	 */
 
-	public String getRESTMapping()
-	{
+	public String getRESTMapping() {
 		String result = "";
 		try {
 			result = RESTMapper.getMethodsAsXML(this.getClass());
@@ -47,9 +45,8 @@ public class TestService3 extends Service
 
 	@GET
 	@Path("/test1/{a}/{b}")
-	public HttpResponse test1(@PathParam("a") String a, @PathParam("b") String b,
-			@HeaderParam(value = "c") @DefaultValue("") String c, @HttpHeaders String headers)
-	{
+	public HttpResponse test1(@PathParam("a") String a, @PathParam("b") String b, @HeaderParam(
+			value = "c") @DefaultValue("") String c, @HttpHeaders String headers) {
 		String result = a + b + c;
 		HttpResponse response = new HttpResponse(result, 200);
 		response.setHeader("hi", "ho");
@@ -60,8 +57,7 @@ public class TestService3 extends Service
 
 	@GET
 	@Path("/test2/{a}/{b}")
-	public HttpResponse test2()
-	{
+	public HttpResponse test2() {
 		String result = "5";
 		HttpResponse response = new HttpResponse(result, 412);
 

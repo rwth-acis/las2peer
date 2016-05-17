@@ -13,43 +13,36 @@ import javax.ws.rs.Path;
  */
 @Version("0.2")
 @Path("/exception")
-public class TestService5 extends Service
-{
+public class TestService5 extends Service {
 
 	/**
 	 * constructor
 	 */
-	public TestService5()
-	{
+	public TestService5() {
 
 	}
 
 	/**
 	 * get all annotation and method data to allow mapping
-	 * @return 
+	 * 
+	 * @return
 	 */
 
-	public String getRESTMapping()
-	{
+	public String getRESTMapping() {
 		String result = "";
 		try {
 			result = RESTMapper.getMethodsAsXML(this.getClass());
 		} catch (Exception e) {
 
-			result = "<service name=\"i5.las2peer.webConnector.TestService5\" version=\"0.1\">" +
-					"<methods>" +
-					"<method httpMethod=\"get\" name=\"b4\" path=\"exception\" type=\"int\">" +
-					"<parameters/>" +
-					"</method>" +
-					"</methods>" +
-					"</service>";
+			result = "<service name=\"i5.las2peer.webConnector.TestService5\" version=\"0.1\">" + "<methods>"
+					+ "<method httpMethod=\"get\" name=\"b4\" path=\"exception\" type=\"int\">" + "<parameters/>"
+					+ "</method>" + "</methods>" + "</service>";
 		}
 		return result;
 	}
 
 	@GET
-	public int b4() throws Exception
-	{
+	public int b4() throws Exception {
 		throw new Exception();
 	}
 

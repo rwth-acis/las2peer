@@ -50,7 +50,7 @@ public class WebConnectorTest {
 		abel.unlockPrivateKey("abelspass");
 		GroupAgent group1 = MockAgentFactory.getGroup1();
 		group1.unlockPrivateKey(adam);
-		
+
 		// start Node
 		node = LocalNode.newNode();
 		node.storeAgent(eve);
@@ -59,11 +59,16 @@ public class WebConnectorTest {
 		node.storeAgent(group1);
 		node.launch();
 
-		ServiceAgent testService = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass), "a pass");
-		ServiceAgent testService2 = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass2), "a pass");
-		ServiceAgent testService3 = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass3), "a pass");
-		ServiceAgent testService4 = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass4), "a pass");
-		ServiceAgent testService5 = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass5), "a pass");
+		ServiceAgent testService = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass),
+				"a pass");
+		ServiceAgent testService2 = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass2),
+				"a pass");
+		ServiceAgent testService3 = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass3),
+				"a pass");
+		ServiceAgent testService4 = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass4),
+				"a pass");
+		ServiceAgent testService5 = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass5),
+				"a pass");
 
 		testService.unlockPrivateKey("a pass");
 		testService2.unlockPrivateKey("a pass");
@@ -298,8 +303,8 @@ public class WebConnectorTest {
 		// TestService3
 		try {
 			c.setLogin(Long.toString(testAgent.getId()), testPass);
-			ClientResponse result = c.sendRequest("GET", "test1/1/2", "", new Pair[] { new Pair<>("c", "5"),
-					new Pair<>("e", "4") });
+			ClientResponse result = c.sendRequest("GET", "test1/1/2", "",
+					new Pair[] { new Pair<>("c", "5"), new Pair<>("e", "4") });
 			assertEquals("125", result.getResponse().trim());
 			assertEquals("ho", result.getHeader("hi"));
 			assertEquals("text/plain", result.getHeader("Content-Type"));
@@ -365,8 +370,8 @@ public class WebConnectorTest {
 		try {
 			c.setLogin(Long.toString(testAgent.getId()), testPass);
 
-			ClientResponse result = c
-					.sendRequest("PUT", "books/8/test2", "hi", MediaType.TEXT_PLAIN, "", new Pair[] {});
+			ClientResponse result = c.sendRequest("PUT", "books/8/test2", "hi", MediaType.TEXT_PLAIN, "",
+					new Pair[] {});
 			assertEquals("hi", result.getResponse().trim());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -398,7 +403,7 @@ public class WebConnectorTest {
 			e.printStackTrace();
 			fail("Exception: " + e);
 		}
-		
+
 		// send string in PathParam where int is needed
 		try {
 			c.setLogin(Long.toString(testAgent.getId()), testPass);
