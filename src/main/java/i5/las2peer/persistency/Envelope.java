@@ -67,8 +67,6 @@ public final class Envelope implements XmlAble, Cloneable {
 
 	private Agent openedBy;
 
-	private boolean bOpen;
-
 	/**
 	 * may this envelope be overwritten without knowledge of the previous version?
 	 * 
@@ -125,7 +123,6 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * {@link #createFromXml(String)}
 	 */
 	private Envelope() {
-		bOpen = false;
 	}
 
 	/**
@@ -170,7 +167,6 @@ public final class Envelope implements XmlAble, Cloneable {
 	 */
 	private Envelope(byte[] content, Agent[] readers, long id) throws EncodingFailedException {
 		this.id = id;
-		bOpen = true;
 
 		initKey();
 		initReaders(readers);
@@ -253,7 +249,6 @@ public final class Envelope implements XmlAble, Cloneable {
 	private Envelope(String content, Agent[] readers, long id)
 			throws UnsupportedEncodingException, EncodingFailedException {
 		this.id = id;
-		bOpen = true;
 
 		initKey();
 		initReaders(readers);
@@ -298,7 +293,7 @@ public final class Envelope implements XmlAble, Cloneable {
 	private Envelope(XmlAble content, Agent[] readers, long id)
 			throws UnsupportedEncodingException, EncodingFailedException {
 		this.id = id;
-		this.bOpen = true;
+
 		initKey();
 		initReaders(readers);
 
@@ -361,7 +356,6 @@ public final class Envelope implements XmlAble, Cloneable {
 	private Envelope(Serializable content, Agent[] readers, long id)
 			throws EncodingFailedException, SerializationException {
 		this.id = id;
-		this.bOpen = true;
 
 		initKey();
 		initReaders(readers);
@@ -444,7 +438,6 @@ public final class Envelope implements XmlAble, Cloneable {
 			openedBy = agent;
 
 			decryptData();
-			bOpen = true;
 		} catch (SerializationException e) {
 			throw new DecodingFailedException("unable to deserialize decoded symmetric key", e);
 		} catch (CryptoException e) {
@@ -498,7 +491,6 @@ public final class Envelope implements XmlAble, Cloneable {
 			baPlainData = null;
 			symmetricKey = null;
 			openedBy = null;
-			bOpen = false;
 		} catch (CryptoException e) {
 			throw new EncodingFailedException("crypto problems", e);
 		}
@@ -902,7 +894,7 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * @return true, if this envelope is open
 	 */
 	public boolean isOpen() {
-		return bOpen;
+		return symmetricKey != null;
 	}
 
 	/**
