@@ -204,7 +204,7 @@
 			author="true"
 			version="true"
             use="true"
-			windowtitle="LAS2peer REST-Mapper Documentation"
+			windowtitle="las2peer RESTMapper Documentation"
             failonerror="yes"
             encoding="utf-8"
             classpath="${tmp.classes}"
