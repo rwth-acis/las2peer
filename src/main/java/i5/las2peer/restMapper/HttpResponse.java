@@ -71,7 +71,10 @@ public class HttpResponse extends GeneralResponse {
 		} else {
 			getAttributesByTypeName(WEBCONNECTOR, HTTP_HEADER, header).get(0).setAttributeValue(value);
 		}
+	}
 
+	public String getHeader(String header) {
+		return getAttributeByTypeName(WEBCONNECTOR, HTTP_HEADER, header);
 	}
 
 	public void removeHeader(String header) {
