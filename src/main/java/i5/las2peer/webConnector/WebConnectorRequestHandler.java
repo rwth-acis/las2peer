@@ -301,15 +301,19 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		try {
 			long userId;
 			PassphraseAgent userAgent;
-
-			if (username.matches("-?[0-9].*")) {// username is id?
-				try {
-					userId = Long.valueOf(username);
-				} catch (NumberFormatException e) {
-					throw new L2pSecurityException("The given user does not contain a valid agent id!");
+			if (username.equals("anonymous")) { // TODO this if branch should be removed, after LAS-280 is resolved
+				userAgent = (PassphraseAgent) l2pNode.getAnonymous();
+				userId = userAgent.getId();
+			} else {
+				if (username.matches("-?[0-9].*")) {// username is id?
+					try {
+						userId = Long.valueOf(username);
+					} catch (NumberFormatException e) {
+						throw new L2pSecurityException("The given user does not contain a valid agent id!");
+					}
+				} else {// username is string
+					userId = l2pNode.getAgentIdForLogin(username);
 				}
-			} else {// username is string
-				userId = l2pNode.getAgentIdForLogin(username);
 			}
 
 			// keep track of active requests
