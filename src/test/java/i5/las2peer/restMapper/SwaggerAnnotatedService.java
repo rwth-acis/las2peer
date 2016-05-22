@@ -29,9 +29,9 @@ import io.swagger.util.Json;
 @Api
 @SwaggerDefinition(
 		info = @Info(
-				title = "LAS2peer Template Service",
+				title = "las2peer Template Service",
 				version = "0.1",
-				description = "A LAS2peer Template Service for demonstration purposes.",
+				description = "A las2peer Template Service for demonstration purposes.",
 				termsOfService = "http://your-terms-of-service-url.com",
 				contact = @Contact(
 						name = "John Doe",
@@ -52,7 +52,7 @@ public class SwaggerAnnotatedService {
 
 	/**
 	 * Simple function to validate a user login. Basically it only serves as a "calling point" and does not really
-	 * validate a user (since this is done previously by LAS2peer itself, the user does not reach this method if he or
+	 * validate a user (since this is done previously by las2peer itself, the user does not reach this method if he or
 	 * she is not authenticated).
 	 * 
 	 */

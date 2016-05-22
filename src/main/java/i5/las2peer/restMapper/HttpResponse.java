@@ -20,9 +20,10 @@ public class HttpResponse extends GeneralResponse {
 	 * constructor
 	 * 
 	 * @param result string returned as method response
+	 * @param status http status code
 	 */
-	public HttpResponse(String result) {
-		super(result);
+	public HttpResponse(String result, int status) {
+		this(result.getBytes(), status);
 	}
 
 	/**
@@ -31,9 +32,28 @@ public class HttpResponse extends GeneralResponse {
 	 * @param result string returned as method response
 	 * @param status http status code
 	 */
-	public HttpResponse(String result, int status) {
+	public HttpResponse(byte[] result, int status) {
 		this(result);
 		setStatus(status);
+	}
+
+	/**
+	 * constructor
+	 * 
+	 * @param result string returned as method response
+	 */
+	public HttpResponse(String result) {
+		this(result.getBytes());
+	}
+
+	/**
+	 * constructor
+	 * 
+	 * @param result data returned from method invocation
+	 */
+	public HttpResponse(byte[] result) {
+		super();
+		setResultRaw(result);
 	}
 
 	public void setStatus(int status) {

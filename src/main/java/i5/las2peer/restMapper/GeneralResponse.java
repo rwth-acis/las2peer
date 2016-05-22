@@ -1,6 +1,7 @@
 package i5.las2peer.restMapper;
 
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 /**
@@ -12,7 +13,7 @@ public class GeneralResponse implements Serializable {
 	private static final long serialVersionUID = 1478553738935879786L;
 
 	private ArrayList<ResponseAttribute> attributes = new ArrayList<ResponseAttribute>();
-	private String result = "";
+	private byte[] result = {};
 
 	/**
 	 * All responses should include some sort of response value
@@ -32,6 +33,18 @@ public class GeneralResponse implements Serializable {
 	 * @return result of the service method call
 	 */
 	public String getResult() {
+		try {
+			return new String(result, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			return new String(result);
+		}
+	}
+
+	/**
+	 * 
+	 * @return Returns the raw serialized result data
+	 */
+	public byte[] getResultRaw() {
 		return result;
 	}
 
@@ -40,6 +53,14 @@ public class GeneralResponse implements Serializable {
 	 * @param result value to store as result
 	 */
 	public void setResult(String result) {
+		setResultRaw(result.getBytes());
+	}
+
+	/**
+	 * 
+	 * @param result data to store as result
+	 */
+	public void setResultRaw(byte[] result) { // Swagger doens't allow two methods with same signature
 		this.result = result;
 	}
 
