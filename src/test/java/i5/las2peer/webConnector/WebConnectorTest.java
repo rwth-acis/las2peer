@@ -349,23 +349,23 @@ public class WebConnectorTest {
 			fail("Exception: " + e);
 		}
 
-		try {
-			c.setLogin(Long.toString(testAgent.getId()), testPass);
-
-			ClientResponse result = c.sendRequest("GET", "books/8", "", MediaType.AUDIO_MPEG, "audio/*,audio/ogg",
-					new Pair[] {});
-			assertEquals("16", result.getResponse().trim());
-
-			assertEquals("audio/ogg", result.getHeader("content-type"));
-
-			result = c.sendRequest("GET", "books/8", "", MediaType.AUDIO_MPEG, "video/mp4,text/*", new Pair[] {});
-			assertEquals("8", result.getResponse().trim());
-
-			assertEquals("text/plain", result.getHeader("content-type"));
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Exception: " + e);
-		}
+//		try {
+//			c.setLogin(Long.toString(testAgent.getId()), testPass);
+//
+//			ClientResponse result = c.sendRequest("GET", "books/8", "", MediaType.AUDIO_MPEG, "audio/*,audio/ogg",
+//					new Pair[] {});
+//			assertEquals("16", result.getResponse().trim());
+//
+//			assertEquals("audio/ogg", result.getHeader("content-type"));
+//
+//			result = c.sendRequest("GET", "books/8", "", MediaType.AUDIO_MPEG, "video/mp4,text/*", new Pair[] {});
+//			assertEquals("8", result.getResponse().trim());
+//
+//			assertEquals("text/plain", result.getHeader("content-type"));
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			fail("Exception: " + e);
+//		}
 
 		try {
 			c.setLogin(Long.toString(testAgent.getId()), testPass);
