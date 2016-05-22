@@ -411,7 +411,7 @@ public class WebConnector extends Connector {
 	 * @param message
 	 */
 	public void logMessage(String message) {
-		logger.fine(message);
+		logger.info(message);
 		myNode.observerNotice(Event.CONNECTOR_MESSAGE, myNode.getNodeId(), WEB_CONNECTOR + message);
 		if (logHandler != null) { // StreamHandler don't auto flush
 			logHandler.flush();
