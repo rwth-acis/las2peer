@@ -705,6 +705,16 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			if (result != null) {
 				byte[] responseBody = null;
 				int statusCode = HttpURLConnection.HTTP_OK;
+				// check if the client only accepts textual results
+				boolean txtOnly = false;
+				for (String type : contentType) {
+					if (type.startsWith("text/")) {
+						txtOnly = true;
+					} else {
+						txtOnly = false;
+						break;
+					}
+				}
 				exchange.getResponseHeaders().set("content-type",
 						RESTMapper.join(contentType, RESTMapper.DEFAULT_MIME_SEPARATOR));
 				if (result instanceof HttpResponse) {
@@ -715,6 +725,9 @@ public class WebConnectorRequestHandler implements HttpHandler {
 					}
 					statusCode = res.getStatus();
 					responseBody = res.getResultRaw();
+				} else if (txtOnly) {
+					// client expects only text, make it happen
+					responseBody = result.toString().getBytes();
 				} else {
 					// serialize result into byte array to get response body length
 					ByteArrayOutputStream bos = new ByteArrayOutputStream();
