@@ -65,8 +65,8 @@ public class HttpResponse extends GeneralResponse {
 	}
 
 	public void setHeader(String header, String value) {
-		// not yet set
 		if (getAttributeByTypeName(WEBCONNECTOR, HTTP_HEADER, header) == null) {
+			// not yet set
 			addAttribute(new ResponseAttribute(WEBCONNECTOR, HTTP_HEADER, header, value));
 		} else {
 			getAttributesByTypeName(WEBCONNECTOR, HTTP_HEADER, header).get(0).setAttributeValue(value);
@@ -79,7 +79,6 @@ public class HttpResponse extends GeneralResponse {
 		if (temp.size() > 0) {
 			getAttributes().remove(temp.get(0));
 		}
-
 	}
 
 	public Pair<String>[] listHeaders() {
