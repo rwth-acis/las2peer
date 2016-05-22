@@ -1,7 +1,10 @@
 package i5.las2peer.webConnector;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
@@ -39,6 +42,7 @@ import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.ServiceNameVersion;
 import i5.las2peer.p2p.TimeoutException;
+import i5.las2peer.restMapper.HttpResponse;
 import i5.las2peer.restMapper.RESTMapper;
 import i5.las2peer.restMapper.data.InvocationData;
 import i5.las2peer.restMapper.data.Pair;
@@ -695,26 +699,45 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	private void sendInvocationSuccess(Serializable result, String[] contentType, HttpExchange exchange) {
 		try {
 			if (result != null) {
-				String msg = null;
+				byte[] responseBody = null;
 				int statusCode = HttpURLConnection.HTTP_OK;
 				exchange.getResponseHeaders().set("content-type",
 						RESTMapper.join(contentType, RESTMapper.DEFAULT_MIME_SEPARATOR));
-				if (result instanceof i5.las2peer.restMapper.HttpResponse) {
-					i5.las2peer.restMapper.HttpResponse res = (i5.las2peer.restMapper.HttpResponse) result;
+				if (result instanceof HttpResponse) {
+					HttpResponse res = (HttpResponse) result;
 					Pair<String>[] headers = res.listHeaders();
 					for (Pair<String> header : headers) {
 						exchange.getResponseHeaders().set(header.getOne(), header.getTwo());
 					}
 					statusCode = res.getStatus();
-					msg = res.getResult();
+					responseBody = res.getResultRaw();
 				} else {
-					msg = RESTMapper.castToString(result);
+					// serialize result into byte array to get response body length
+					ByteArrayOutputStream bos = new ByteArrayOutputStream();
+					ObjectOutput out = null;
+					try {
+						out = new ObjectOutputStream(bos);
+						out.writeObject(result);
+						responseBody = bos.toByteArray();
+					} finally {
+						try {
+							if (out != null) {
+								out.close();
+							}
+						} catch (IOException ex) {
+							// ignore close exception
+						}
+						try {
+							bos.close();
+						} catch (IOException ex) {
+							// ignore close exception
+						}
+					}
 				}
-				if (msg != null) {
-					byte[] content = msg.getBytes();
-					sendResponse(exchange, statusCode, content.length);
+				if (responseBody != null) {
+					sendResponse(exchange, statusCode, responseBody.length);
 					OutputStream os = exchange.getResponseBody();
-					os.write(content);
+					os.write(responseBody);
 					os.close();
 				} else {
 					sendResponse(exchange, HttpURLConnection.HTTP_NO_CONTENT, NO_RESPONSE_BODY);
