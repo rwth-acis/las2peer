@@ -46,6 +46,7 @@ public class ServiceRepositoryManager {
 
 	public void start(Node node, int timerIntervalSeconds) throws Exception {
 		ServiceRepositoryManager.timerIntervalSeconds = timerIntervalSeconds;
+		manualUpdate(node);
 		startTimer(node);
 	}
 
@@ -138,7 +139,7 @@ public class ServiceRepositoryManager {
 			public void run() {
 				executeTimer(node, agent);
 			}
-		}, 0, // run first occurrence immediately
+		}, timerIntervalSeconds * 1000, // initial execution is triggered by start method
 				timerIntervalSeconds * 1000); // run every x seconds
 	}
 
