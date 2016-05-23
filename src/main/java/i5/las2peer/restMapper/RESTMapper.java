@@ -201,17 +201,15 @@ public class RESTMapper {
 				methodNode.setAttribute(PATH_TAG, path);
 			methodNode.setAttribute(TYPE_TAG, (method.getReturnType().getName()));
 
-			String consumes;
 			if (httpMethod.equals(POST) || httpMethod.equals(PUT)) { // @consumes only for POST requests
 				if (method.isAnnotationPresent(Consumes.class)) { // local method @Consumes overrides global class
 																	// @Consumes
-					consumes = join(method.getAnnotation(Consumes.class).value(), DEFAULT_MIME_SEPARATOR);
+					String consumes = join(method.getAnnotation(Consumes.class).value(), DEFAULT_MIME_SEPARATOR);
 					methodNode.setAttribute(CONSUMES_TAG, consumes.trim());
 				}
 			}
-			String produces;
 			if (method.isAnnotationPresent(Produces.class)) { // local method @Consumes overrides global class @Consumes
-				produces = join(method.getAnnotation(Produces.class).value(), DEFAULT_MIME_SEPARATOR);
+				String produces = join(method.getAnnotation(Produces.class).value(), DEFAULT_MIME_SEPARATOR);
 				methodNode.setAttribute(PRODUCES_TAG, produces.trim());
 			}
 
@@ -572,7 +570,7 @@ public class RESTMapper {
 	 */
 	public static InvocationData[] parse(PathTree tree, String httpMethod, String uri, Pair<String>[] variables,
 			String content, String contentType, String returnType, Pair<String>[] headers, StringBuilder warnings)
-					throws Exception {
+			throws Exception {
 
 		if (!contentType.isEmpty()) {
 			int consumesParamSeparator = contentType.indexOf(DEFAULT_MIME_PARAMETER_SEPARATOR);
@@ -621,8 +619,8 @@ public class RESTMapper {
 					for (String paramName : paramNames) {
 						// the uri split is still URL encoded, so first decode
 						String uriValue = java.net.URLDecoder.decode(anUriSplit, "UTF-8");
-						parameterValues.put(paramName.toLowerCase(), uriValue); // map the value provided in the URI path to the
-																	// stored parameter names
+						// map the value provided in the URI path to the stored parameter names
+						parameterValues.put(paramName.toLowerCase(), uriValue);
 					}
 
 				} else {
@@ -719,8 +717,9 @@ public class RESTMapper {
 				} else {
 					if (param.getName() != null && parameterValues.containsKey(param.getName().toLowerCase())) {
 						// if parameter has a name (given by an annotation) and a value given
-						values[j] = (Serializable) RESTMapper.castToType(parameterValues.get(param.getName().toLowerCase()),
-								param.getType()); // use the created value mapping to assign a value
+						// use the created value mapping to assign a value
+						values[j] = (Serializable) RESTMapper
+								.castToType(parameterValues.get(param.getName().toLowerCase()), param.getType());
 						types[j] = param.getType();
 					} else if (param.hasDefaultValue()) { // if no name, then look for default value
 						values[j] = (Serializable) param.getDefaultValue();
