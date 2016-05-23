@@ -773,9 +773,9 @@ public class RESTMapper {
 	 * @return sorted array (by priority) of acceptable MIME Types
 	 */
 	protected static String[] getAcceptedTypes(String returnType) {
-		if (returnType.isEmpty())
+		if (returnType.isEmpty() || ACCEPT_ALL_MIME_TYPES.equals(returnType)) {
 			return new String[] { ACCEPT_ALL_MIME_TYPES };
-
+		}
 		String[] returnTypeMediaRange = returnType.split(DEFAULT_MIME_SEPARATOR);
 		ArrayList<AcceptHeaderType> accepts = new ArrayList<AcceptHeaderType>();
 		for (int i = 0; i < returnTypeMediaRange.length; i++) {
