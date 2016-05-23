@@ -60,7 +60,9 @@ public class ResponseAttribute implements Serializable {
 	 * @param target new connector to add to the internal list
 	 */
 	public void addTargetConnector(String target) {
-		targetConnectors.add(target.trim().toLowerCase());
+		if (target != null) {
+			targetConnectors.add(target.trim().toLowerCase());
+		}
 	}
 
 	/**
@@ -96,7 +98,13 @@ public class ResponseAttribute implements Serializable {
 	 * @param value the value of the attribute
 	 */
 	public ResponseAttribute(String name, String value) {
+		if (name == null) {
+			name = "";
+		}
 		attributeName = name.trim();
+		if (value == null) {
+			value = "";
+		}
 		attributeValue = value.trim();
 	}
 
@@ -108,6 +116,9 @@ public class ResponseAttribute implements Serializable {
 	 */
 	public ResponseAttribute(String type, String name, String value) {
 		this(name, value);
+		if (type == null) {
+			type = "";
+		}
 		attributeType = type.trim();
 
 	}
@@ -121,7 +132,7 @@ public class ResponseAttribute implements Serializable {
 	 */
 	public ResponseAttribute(String target, String type, String name, String value) {
 		this(type, name, value);
-		targetConnectors.add(target.trim().toLowerCase());
+		addTargetConnector(target);
 	}
 
 }
