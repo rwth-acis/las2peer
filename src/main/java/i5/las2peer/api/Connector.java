@@ -10,12 +10,19 @@ import i5.las2peer.p2p.Node;
 public abstract class Connector extends Configurable {
 
 	/**
+	 * 
+	 * A connector has to have a mandatory reference to the node it is running at.
+	 * 
+	 */
+	Node runningAt;
+
+	/**
 	 * Start a connector at the given node.
 	 * 
-	 * @param node A parent node to start this connector instance at.
+	 * @param runningAt A parent node to start this connector instance at.
 	 * @throws ConnectorException If an error occurs.
 	 */
-	public abstract void start(Node node) throws ConnectorException;
+	public abstract void start(Node runningAt) throws ConnectorException;
 
 	/**
 	 * Stops the connector.
