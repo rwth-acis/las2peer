@@ -796,7 +796,7 @@ public class RESTMapper {
 		Collections.sort(accepts, new AcceptHeaderTypeComperator());
 		ArrayList<String> resultList = new ArrayList<>();
 		for (AcceptHeaderType acc : accepts) {
-			String type = acc.getType().replaceAll("[*]", "\\\\w+");
+			String type = acc.getType().replaceAll("[*]", ".*");
 			resultList.add(type);
 		}
 		return resultList.toArray(new String[] {});
