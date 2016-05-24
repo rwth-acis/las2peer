@@ -777,9 +777,9 @@ public class RESTMapper {
 			return new String[] { ACCEPT_ALL_MIME_TYPES };
 		}
 		String[] returnTypeMediaRange = returnType.split(DEFAULT_MIME_SEPARATOR);
-		ArrayList<AcceptHeaderType> accepts = new ArrayList<AcceptHeaderType>();
-		for (int i = 0; i < returnTypeMediaRange.length; i++) {
-			String media = returnTypeMediaRange[i].trim();
+		ArrayList<AcceptHeaderType> accepts = new ArrayList<>();
+		for (String media : returnTypeMediaRange) {
+			media = media.trim();
 			int qvaluePos = media.indexOf(";q=");
 			float qvalue = 1;
 
@@ -789,22 +789,17 @@ public class RESTMapper {
 				} catch (NumberFormatException e) {
 					qvalue = 1;
 				}
-
 				media = media.substring(0, qvaluePos);
-
 			}
-
 			accepts.add(new AcceptHeaderType(media, qvalue));
-
 		}
 		Collections.sort(accepts, new AcceptHeaderTypeComperator());
-		String[] result = new String[accepts.size()];
-		for (int i = 0; i < accepts.size(); i++) {
-			result[i] = accepts.get(i).getType().replaceAll("[*]", "\\\\w+");
-
+		ArrayList<String> resultList = new ArrayList<>();
+		for (AcceptHeaderType acc : accepts) {
+			String type = acc.getType().replaceAll("[*]", "\\\\w+");
+			resultList.add(type);
 		}
-
-		return result;
+		return resultList.toArray(new String[] {});
 	}
 
 	private static String mergeHeaders(Pair<String>[] headers) {
