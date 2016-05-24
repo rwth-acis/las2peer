@@ -707,7 +707,8 @@ public class RESTMapper {
 
 				if (param.getAnnotation() != null && param.getAnnotation().equals(CONTENT_ANNOTATION)) {
 					// if it's a content annotation
-					if (contentType.isEmpty() || contentType.startsWith("text/")) {
+					if ((contentType.isEmpty() || contentType.startsWith("text/"))
+							&& !param.getType().equals(byte[].class)) {
 						// map content value to String
 						values[j] = (Serializable) RESTMapper.castToType(new String(rawContent, StandardCharsets.UTF_8),
 								param.getType());
