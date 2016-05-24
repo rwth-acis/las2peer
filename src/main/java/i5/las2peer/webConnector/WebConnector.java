@@ -116,7 +116,7 @@ public class WebConnector extends Connector {
 	 * @throws Exception
 	 */
 	public WebConnector() throws Exception {
-		this(DEFAULT_START_HTTP, DEFAULT_HTTP_PORT, DEFAULT_START_HTTPS, DEFAULT_HTTPS_PORT);
+		super.setFieldValues();
 	}
 
 	/**
@@ -129,7 +129,13 @@ public class WebConnector extends Connector {
 	 * @throws Exception
 	 */
 	public WebConnector(boolean http, int httpPort, boolean https, int httpsPort) throws Exception {
-		this(http, httpPort, https, httpsPort, null);
+		this();
+		enableHttpHttps(http, https);
+		setHttpPort(httpPort);
+		setHttpsPort(httpsPort);
+		if (this.xmlPath != null && !this.xmlPath.trim().isEmpty()) {
+			serviceRepositoryManager.addXML(RESTMapper.readAllXMLFromDir(xmlPath));
+		}
 	}
 
 	/**
@@ -143,7 +149,7 @@ public class WebConnector extends Connector {
 	 * @throws Exception
 	 */
 	public WebConnector(boolean http, int httpPort, boolean https, int httpsPort, String xmlPath) throws Exception {
-		super.setFieldValues();
+		this();
 		enableHttpHttps(http, https);
 		setHttpPort(httpPort);
 		setHttpsPort(httpsPort);
