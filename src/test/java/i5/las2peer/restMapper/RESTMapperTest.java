@@ -56,8 +56,8 @@ public class RESTMapperTest {
 			String contentType, String returnType, Pair<String>[] httpHeaders, String assertionMessage,
 			String assertion) throws Exception {
 		StringBuilder warnings = new StringBuilder();
-		InvocationData[] invocation = RESTMapper.parse(tree, httpMethod, uri, variables, content, contentType,
-				returnType, httpHeaders, warnings);
+		InvocationData[] invocation = RESTMapper.parse(tree, httpMethod, uri, variables, content.getBytes(),
+				contentType, returnType, httpHeaders, warnings);
 		// if (warnings.length()>0) System.out.println(warnings.toString());
 		if (invocation.length == 0) {
 			throw new Exception("no method found for " + assertionMessage);

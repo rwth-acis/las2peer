@@ -9,6 +9,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -560,7 +561,7 @@ public class RESTMapper {
 	 * @param httpMethod HTTP method of the request
 	 * @param uri URI path of the request
 	 * @param variables array of parameter/value pairs of the request (query variables)
-	 * @param content content of the HTTP body
+	 * @param rawContent content of the HTTP body as binary format
 	 * @param contentType MIME-type of the data sent in the POST/PUT request
 	 * @param returnType Accept HTTP Header
 	 * @param headers headers given by the client
@@ -569,7 +570,7 @@ public class RESTMapper {
 	 * @throws Exception
 	 */
 	public static InvocationData[] parse(PathTree tree, String httpMethod, String uri, Pair<String>[] variables,
-			String content, String contentType, String returnType, Pair<String>[] headers, StringBuilder warnings)
+			byte[] rawContent, String contentType, String returnType, Pair<String>[] headers, StringBuilder warnings)
 			throws Exception {
 
 		if (!contentType.isEmpty()) {
@@ -706,7 +707,13 @@ public class RESTMapper {
 
 				if (param.getAnnotation() != null && param.getAnnotation().equals(CONTENT_ANNOTATION)) {
 					// if it's a content annotation
-					values[j] = (Serializable) RESTMapper.castToType(content, param.getType());
+					if (contentType.isEmpty() || contentType.startsWith("text/")) {
+						// map content value to String
+						values[j] = (Serializable) RESTMapper.castToType(new String(rawContent, StandardCharsets.UTF_8),
+								param.getType());
+					} else {
+						values[j] = rawContent;
+					}
 					// fill it with the given content
 					types[j] = param.getType();
 				} else if (param.getAnnotation() != null && param.getAnnotation().equals(HEADERS_ANNOTATION)) {
