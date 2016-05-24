@@ -17,7 +17,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Scanner;
 import java.util.Set;
 
 import com.nimbusds.oauth2.sdk.ErrorObject;
@@ -301,7 +300,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		try {
 			long userId;
 			PassphraseAgent userAgent;
-			
+
 			if (username.matches("-?[0-9].*")) {// username is id?
 				try {
 					userId = Long.valueOf(username);
@@ -370,10 +369,14 @@ public class WebConnectorRequestHandler implements HttpHandler {
 
 			// http body
 			InputStream is = exchange.getRequestBody();
-			java.util.Scanner s = new Scanner(is);
-			s.useDelimiter("\\A");
-			String content = s.hasNext() ? s.next() : "";
-			s.close();
+			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+		    int nRead;
+		    byte[] data = new byte[4096];
+		    while ((nRead = is.read(data, 0, data.length)) != -1) {
+		        buffer.write(data, 0, nRead);
+		    }
+		    buffer.flush();
+		    byte[] rawContent = buffer.toByteArray();
 
 			// http method
 			String httpMethod = exchange.getRequestMethod();
@@ -421,7 +424,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			String[] returnMIMEType = RESTMapper.DEFAULT_PRODUCES_MIME_TYPE;
 			StringBuilder warnings = new StringBuilder();
 			InvocationData[] invocation = RESTMapper.parse(this.connector.getMappingTree(), httpMethod, uri, variables,
-					content, contentTypeHeader, acceptHeader, headers, warnings);
+					rawContent, contentTypeHeader, acceptHeader, headers, warnings);
 
 			if (invocation.length == 0) {
 				if (warnings.length() > 0) {
