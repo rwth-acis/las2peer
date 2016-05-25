@@ -100,7 +100,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	 * @return -1 if no successful login else userId
 	 * @throws UnsupportedEncodingException
 	 */
-	private PassphraseAgent authenticate(HttpExchange exchange) throws UnsupportedEncodingException {
+	private synchronized PassphraseAgent authenticate(HttpExchange exchange) throws UnsupportedEncodingException {
 		String userPass = "";
 		String username = "";
 		String password = "";
