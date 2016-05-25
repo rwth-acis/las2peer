@@ -671,7 +671,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	 * @param e
 	 */
 	private void sendInvocationException(HttpExchange exchange, ServiceInvocationException e) {
-		connector.logError("Exception while processing RMI: " + exchange.getRequestURI().getPath());
+		connector.logError("Exception while processing RMI: " + exchange.getRequestURI().getPath(), e);
 		// internal exception in service method
 		Object[] ret = new Object[4];
 		ret[0] = "Exception during RMI invocation!";
