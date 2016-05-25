@@ -240,9 +240,8 @@ public class WebConnectorRequestHandler implements HttpHandler {
 					}
 				}
 
-				PassphraseAgent pa;
 				try {
-					pa = (PassphraseAgent) l2pNode.getAgent(oidcAgentId);
+					PassphraseAgent pa = (PassphraseAgent) l2pNode.getAgent(oidcAgentId);
 					pa.unlockPrivateKey(password);
 					if (pa instanceof UserAgent) {
 						UserAgent ua = (UserAgent) pa;
@@ -370,13 +369,13 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			// http body
 			InputStream is = exchange.getRequestBody();
 			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-		    int nRead;
-		    byte[] data = new byte[4096];
-		    while ((nRead = is.read(data, 0, data.length)) != -1) {
-		        buffer.write(data, 0, nRead);
-		    }
-		    buffer.flush();
-		    byte[] rawContent = buffer.toByteArray();
+			int nRead;
+			byte[] data = new byte[4096];
+			while ((nRead = is.read(data, 0, data.length)) != -1) {
+				buffer.write(data, 0, nRead);
+			}
+			buffer.flush();
+			byte[] rawContent = buffer.toByteArray();
 
 			// http method
 			String httpMethod = exchange.getRequestMethod();
