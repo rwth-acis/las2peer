@@ -1060,7 +1060,33 @@ public class L2pNodeLauncher {
 		}
 		// parse command line parameter into list
 		List<String> instArgs = new ArrayList<>();
+		// a command can have brackets with spaces inside, which is split by arg parsing falsely
+		List<String> argvJoined = new ArrayList<>();
+		String joined = "";
 		for (String arg : argv) {
+			int opening = arg.length() - arg.replace("(", "").length(); // nice way to count opening brackets
+			int closing = arg.length() - arg.replace(")", "").length();
+			if (opening == closing && joined.isEmpty()) {
+				// just an argument
+				argvJoined.add(arg);
+			} else {
+				// previous arg was unbalanced, attach this arg
+				joined += arg;
+				int openingJoined = joined.length() - joined.replace("(", "").length();
+				int closingJoined = joined.length() - joined.replace(")", "").length();
+				if (openingJoined == closingJoined) {
+					// now its balanced
+					argvJoined.add(joined);
+					joined = "";
+				} else if (openingJoined < closingJoined) {
+					throw new IllegalArgumentException("command \"" + joined + "\" has too many closing brackets!");
+				} // needs more args to balance
+			}
+		}
+		if (!joined.isEmpty()) {
+			throw new IllegalArgumentException("command \"" + joined + "\" has too many opening brackets!");
+		}
+		for (String arg : argvJoined) {
 			String larg = arg.toLowerCase();
 			if (larg.equals("-h") == true || larg.equals("--help") == true) { // Help Message
 				printHelp();
