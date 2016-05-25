@@ -32,8 +32,8 @@ grant {
     permission java.io.FilePermission "service${/}-", "read";
 
     // las2peer file write permissions
-    permission java.io.FilePermission "log", "read, write";
-    permission java.io.FilePermission "log${/}-", "read, write";
+    permission java.io.FilePermission "log", "read, write, delete";
+    permission java.io.FilePermission "log${/}-", "read, write, delete";
     permission java.io.FilePermission "node-storage", "read, write, delete";
     permission java.io.FilePermission "node-storage${/}-", "read, write, delete";
 
