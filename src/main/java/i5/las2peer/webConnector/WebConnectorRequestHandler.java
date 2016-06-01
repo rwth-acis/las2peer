@@ -17,7 +17,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Scanner;
 import java.util.Set;
 
 import com.nimbusds.oauth2.sdk.ErrorObject;
@@ -101,7 +100,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	 * @return -1 if no successful login else userId
 	 * @throws UnsupportedEncodingException
 	 */
-	private PassphraseAgent authenticate(HttpExchange exchange) throws UnsupportedEncodingException {
+	private synchronized PassphraseAgent authenticate(HttpExchange exchange) throws UnsupportedEncodingException {
 		String userPass = "";
 		String username = "";
 		String password = "";
@@ -241,9 +240,8 @@ public class WebConnectorRequestHandler implements HttpHandler {
 					}
 				}
 
-				PassphraseAgent pa;
 				try {
-					pa = (PassphraseAgent) l2pNode.getAgent(oidcAgentId);
+					PassphraseAgent pa = (PassphraseAgent) l2pNode.getAgent(oidcAgentId);
 					pa.unlockPrivateKey(password);
 					if (pa instanceof UserAgent) {
 						UserAgent ua = (UserAgent) pa;
@@ -370,10 +368,14 @@ public class WebConnectorRequestHandler implements HttpHandler {
 
 			// http body
 			InputStream is = exchange.getRequestBody();
-			java.util.Scanner s = new Scanner(is);
-			s.useDelimiter("\\A");
-			String content = s.hasNext() ? s.next() : "";
-			s.close();
+			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+			int nRead;
+			byte[] data = new byte[4096];
+			while ((nRead = is.read(data, 0, data.length)) != -1) {
+				buffer.write(data, 0, nRead);
+			}
+			buffer.flush();
+			byte[] rawContent = buffer.toByteArray();
 
 			// http method
 			String httpMethod = exchange.getRequestMethod();
@@ -421,7 +423,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			String[] returnMIMEType = RESTMapper.DEFAULT_PRODUCES_MIME_TYPE;
 			StringBuilder warnings = new StringBuilder();
 			InvocationData[] invocation = RESTMapper.parse(this.connector.getMappingTree(), httpMethod, uri, variables,
-					content, contentTypeHeader, acceptHeader, headers, warnings);
+					rawContent, contentTypeHeader, acceptHeader, headers, warnings);
 
 			if (invocation.length == 0) {
 				if (warnings.length() > 0) {
@@ -669,7 +671,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	 * @param e
 	 */
 	private void sendInvocationException(HttpExchange exchange, ServiceInvocationException e) {
-		connector.logError("Exception while processing RMI: " + exchange.getRequestURI().getPath());
+		connector.logError("Exception while processing RMI: " + exchange.getRequestURI().getPath(), e);
 		// internal exception in service method
 		Object[] ret = new Object[4];
 		ret[0] = "Exception during RMI invocation!";
@@ -701,6 +703,16 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			if (result != null) {
 				byte[] responseBody = null;
 				int statusCode = HttpURLConnection.HTTP_OK;
+				// check if the client only accepts textual results
+				boolean txtOnly = false;
+				for (String type : contentType) {
+					if (type.startsWith("text/")) {
+						txtOnly = true;
+					} else {
+						txtOnly = false;
+						break;
+					}
+				}
 				exchange.getResponseHeaders().set("content-type",
 						RESTMapper.join(contentType, RESTMapper.DEFAULT_MIME_SEPARATOR));
 				if (result instanceof HttpResponse) {
@@ -711,6 +723,9 @@ public class WebConnectorRequestHandler implements HttpHandler {
 					}
 					statusCode = res.getStatus();
 					responseBody = res.getResultRaw();
+				} else if (txtOnly) {
+					// client expects only text, make it happen
+					responseBody = result.toString().getBytes();
 				} else {
 					// serialize result into byte array to get response body length
 					ByteArrayOutputStream bos = new ByteArrayOutputStream();
