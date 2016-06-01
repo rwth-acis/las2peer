@@ -89,9 +89,10 @@ public class L2pNodeLauncher {
 	 * @throws StorageException
 	 * @throws ArtifactNotFoundException
 	 * @throws NumberFormatException
-	 * @throws SerializationException 
+	 * @throws SerializationException
 	 */
-	public String getEnvelope(String id) throws NumberFormatException, ArtifactNotFoundException, StorageException, SerializationException {
+	public String getEnvelope(String id)
+			throws NumberFormatException, ArtifactNotFoundException, StorageException, SerializationException {
 		return node.fetchArtifact(Long.valueOf(id)).toXmlString();
 	}
 
@@ -339,7 +340,8 @@ public class L2pNodeLauncher {
 
 	/**
 	 * Stops a connector given by its classname.
-	 * @param connectorClass 
+	 * 
+	 * @param connectorClass
 	 */
 	public void stopConnector(String connectorClass) {
 		Iterator<Connector> iterator = connectors.iterator();
@@ -471,9 +473,9 @@ public class L2pNodeLauncher {
 	 * @see #registerUserAgent
 	 * 
 	 * @param serviceIdentifier
-	 * @param serviceMethod 
+	 * @param serviceMethod
 	 * @param parameters pass an empty string if you want to call a method without parameters
-	 * @return 
+	 * @return
 	 * @throws L2pServiceException any exception during service method invocation
 	 */
 	public Serializable invoke(String serviceIdentifier, String serviceMethod, String parameters)
@@ -489,10 +491,10 @@ public class L2pNodeLauncher {
 	 * 
 	 * @see #registerUserAgent
 	 * 
-	 * @param serviceIdentifier 
-	 * @param serviceMethod 
+	 * @param serviceIdentifier
+	 * @param serviceMethod
 	 * @param parameters
-	 * @return 
+	 * @return
 	 * @throws L2pServiceException any exception during service method invocation
 	 */
 	private Serializable invoke(String serviceIdentifier, String serviceMethod, Serializable... parameters)
@@ -521,8 +523,9 @@ public class L2pNodeLauncher {
 	 * @throws EncodingFailedException
 	 * @throws TimeoutException
 	 */
-	public ListMethodsContent getServiceMethods(String serviceNameVersion) throws L2pSecurityException, AgentNotKnownException,
-			InterruptedException, EncodingFailedException, SerializationException, TimeoutException {
+	public ListMethodsContent getServiceMethods(String serviceNameVersion)
+			throws L2pSecurityException, AgentNotKnownException, InterruptedException, EncodingFailedException,
+			SerializationException, TimeoutException {
 		if (currentUser == null)
 			throw new IllegalStateException("please log in a valid user with registerUserAgent before!");
 
@@ -540,7 +543,8 @@ public class L2pNodeLauncher {
 	 * Generate a new {@link i5.las2peer.security.ServiceAgent} instance for the given service class and start an
 	 * instance of this service at the current LAS2peer node.
 	 * 
-	 * @param serviceNameVersion Specify the service name and version to run: package.serviceClass@Version. Exact match required.
+	 * @param serviceNameVersion Specify the service name and version to run: package.serviceClass@Version. Exact match
+	 *            required.
 	 * 
 	 * @return Returns the passphrase of the generated {@link i5.las2peer.security.ServiceAgent} or null if the agent is
 	 *         already known.
@@ -549,13 +553,13 @@ public class L2pNodeLauncher {
 	public String startService(String serviceNameVersion) throws L2pServiceException {
 		try {
 			ServiceNameVersion service = ServiceNameVersion.fromString(serviceNameVersion);
-			
+
 			if (service.getVersion() == null) {
 				printMessage("Warning: No version specified, trying version \"1.0\". Please specify "
 						+ "the exact version of the service you want to start.");
 				service = new ServiceNameVersion(service.getName(), "1.0");
 			}
-			
+
 			String passPhrase = SimpleTools.createRandomString(20);
 
 			ServiceAgent myAgent = ServiceAgent.createServiceAgent(service, passPhrase);
@@ -601,17 +605,17 @@ public class L2pNodeLauncher {
 	 * 
 	 * @param serviceNameVersion
 	 * @param agentPass
-	 * @throws AgentNotKnownException 
+	 * @throws AgentNotKnownException
 	 * @throws L2pSecurityException
 	 * @throws AgentException
 	 * @throws AgentAlreadyRegisteredException
 	 * @throws CryptoException
 	 */
-	public void startService(String serviceNameVersion, String agentPass) throws AgentNotKnownException, L2pSecurityException,
-			AgentAlreadyRegisteredException, AgentException, CryptoException {
+	public void startService(String serviceNameVersion, String agentPass) throws AgentNotKnownException,
+			L2pSecurityException, AgentAlreadyRegisteredException, AgentException, CryptoException {
 		ServiceAgent sa = null;
 		ServiceNameVersion service = ServiceNameVersion.fromString(serviceNameVersion);
-		
+
 		if (service.getVersion() != null) {
 			try {
 				sa = node.getServiceAgent(service);
@@ -621,8 +625,7 @@ public class L2pNodeLauncher {
 			}
 			sa.unlockPrivateKey(agentPass);
 			startService(sa);
-		}
-		else {
+		} else {
 			printError("You must specify an exact version of the service you want to start.");
 		}
 	}
@@ -645,7 +648,7 @@ public class L2pNodeLauncher {
 
 		node.registerReceiver(serviceAgent);
 	}
-	
+
 	/**
 	 * stop the given service
 	 * 
@@ -721,20 +724,21 @@ public class L2pNodeLauncher {
 	public String getNetInfo() {
 		return SimpleTools.join(node.getOtherKnownNodes(), "\n\t");
 	}
-		
+
 	/**
 	 * get a list of running services in the network
+	 * 
 	 * @return
 	 */
 	public String getNetworkServices() {
 		try {
-			String result="Services running in the Network:\n\n";
+			String result = "Services running in the Network:\n\n";
 			ServiceNameVersion[] services = ServiceInfoAgent.getServices();
-			
+
 			for (ServiceNameVersion service : services) {
-				result+=service.toString()+"\n";
+				result += service.toString() + "\n";
 			}
-			
+
 			return result;
 		} catch (EnvelopeException e) {
 			e.printStackTrace();
@@ -921,7 +925,7 @@ public class L2pNodeLauncher {
 
 	public static L2pNodeLauncher launchSingle(int port, String bootstrap, STORAGE_MODE storageMode, boolean observer,
 			String sLogDir, Iterable<String> serviceDirectories, Long nodeIdSeed, Iterable<String> commands)
-					throws NodeException {
+			throws NodeException {
 		// check parameters
 		if (sLogDir != null) {
 			try {
@@ -1001,8 +1005,8 @@ public class L2pNodeLauncher {
 		System.out.println("\t--observer|-o starts a monitoring observer at this node\n");
 		System.out.println(
 				"\t--node-id-seed|-n [long] generates the node id by using this seed to provide persistence\n");
-		System.out.println(
-				"\t--storage-mode|-m filesystem|memory sets Pastry's storage mode, defaults to filesystem\n");
+		System.out
+				.println("\t--storage-mode|-m filesystem|memory sets Pastry's storage mode, defaults to filesystem\n");
 
 		System.out.println("The following methods can be used in arbitrary order and number:");
 
@@ -1056,7 +1060,33 @@ public class L2pNodeLauncher {
 		}
 		// parse command line parameter into list
 		List<String> instArgs = new ArrayList<>();
+		// a command can have brackets with spaces inside, which is split by arg parsing falsely
+		List<String> argvJoined = new ArrayList<>();
+		String joined = "";
 		for (String arg : argv) {
+			int opening = arg.length() - arg.replace("(", "").length(); // nice way to count opening brackets
+			int closing = arg.length() - arg.replace(")", "").length();
+			if (opening == closing && joined.isEmpty()) {
+				// just an argument
+				argvJoined.add(arg);
+			} else {
+				// previous arg was unbalanced, attach this arg
+				joined += arg;
+				int openingJoined = joined.length() - joined.replace("(", "").length();
+				int closingJoined = joined.length() - joined.replace(")", "").length();
+				if (openingJoined == closingJoined) {
+					// now its balanced
+					argvJoined.add(joined);
+					joined = "";
+				} else if (openingJoined < closingJoined) {
+					throw new IllegalArgumentException("command \"" + joined + "\" has too many closing brackets!");
+				} // needs more args to balance
+			}
+		}
+		if (!joined.isEmpty()) {
+			throw new IllegalArgumentException("command \"" + joined + "\" has too many opening brackets!");
+		}
+		for (String arg : argvJoined) {
 			String larg = arg.toLowerCase();
 			if (larg.equals("-h") == true || larg.equals("--help") == true) { // Help Message
 				printHelp();

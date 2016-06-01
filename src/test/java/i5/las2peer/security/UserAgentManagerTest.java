@@ -107,5 +107,12 @@ public class UserAgentManagerTest {
 			// indended
 		}
 	}
+	
+	@Test
+	public void testAnonymous() throws AgentNotKnownException {
+		Node node = LocalNode.launchNode();
+		long a = node.getAgentIdForLogin("anonymous");
+		assertEquals(a, node.getAnonymous().getId());
+	}
 
 }

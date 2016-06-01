@@ -10,3 +10,6 @@ ivy.jar
 /out
 /.idea
 *.iml
+/.DS_Store
+.settings/org.eclipse.jdt.core.prefs
+.settings/org.eclipse.jdt.ui.prefs

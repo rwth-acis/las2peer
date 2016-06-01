@@ -490,6 +490,9 @@ public abstract class Node implements AgentStorage {
 		} catch (L2pSecurityException | AgentException | CryptoException | SerializationException e) {
 			throw new NodeException("error initializing ServiceInfoAgent", e);
 		}
+		
+		// store anonymous if not stored yet
+		getAnonymous();
 
 		startTidyUpTimer();
 	}
