@@ -51,7 +51,11 @@ import i5.simpleXML.XMLSyntaxException;
 import rice.p2p.commonapi.NodeHandle;
 
 /**
- * This class implements the LAS2peer node launcher functionalities.
+ * las2peer node launcher
+ * 
+ * It is the main tool for service developers / node maintainers to start their services, upload agents to the network
+ * and to test their service methods directly in the p2p network. The launcher both supports the start of a new network
+ * as well as starting a node that connects to an already existing network via a bootstrap.
  * 
  * All methods to be executed can be stated via additional command line parameters to the {@link #main} method.
  */
