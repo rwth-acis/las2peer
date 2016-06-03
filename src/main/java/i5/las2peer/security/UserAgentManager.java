@@ -1,7 +1,5 @@
 package i5.las2peer.security;
 
-import java.io.UnsupportedEncodingException;
-
 import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.ArtifactNotFoundException;
@@ -55,8 +53,7 @@ public class UserAgentManager {
 				envName.close();
 			} catch (L2pSecurityException e) {
 				throw new DuplicateLoginNameException();
-			} catch (UnsupportedEncodingException | EncodingFailedException | SerializationException | StorageException
-					| DecodingFailedException e) {
+			} catch (EncodingFailedException | SerializationException | StorageException | DecodingFailedException e) {
 				node.observerNotice(Event.NODE_ERROR, "Envelope error while updating user list: " + e);
 			}
 		}
@@ -73,8 +70,7 @@ public class UserAgentManager {
 				envMail.close();
 			} catch (L2pSecurityException e) {
 				throw new DuplicateEmailException();
-			} catch (UnsupportedEncodingException | EncodingFailedException | SerializationException | StorageException
-					| DecodingFailedException e) {
+			} catch (EncodingFailedException | SerializationException | StorageException | DecodingFailedException e) {
 				node.observerNotice(Event.NODE_ERROR, "Envelope error while updating user list: " + e);
 			}
 		}

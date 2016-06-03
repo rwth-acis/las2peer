@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectStreamClass;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -211,12 +211,11 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * @param content
 	 * @param reader
 	 * 
-	 * @throws UnsupportedEncodingException
 	 * @throws EncodingFailedException
 	 * @throws DecodingFailedException
 	 */
 	public Envelope(String content, Agent reader)
-			throws UnsupportedEncodingException, EncodingFailedException, DecodingFailedException {
+			throws EncodingFailedException, DecodingFailedException {
 		this(content, new Agent[] { reader });
 	}
 
@@ -228,10 +227,9 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * @param content
 	 * @param readers
 	 * 
-	 * @throws UnsupportedEncodingException
 	 * @throws EncodingFailedException
 	 */
-	public Envelope(String content, Agent[] readers) throws UnsupportedEncodingException, EncodingFailedException {
+	public Envelope(String content, Agent[] readers) throws EncodingFailedException {
 		this(content, readers, new Random().nextLong());
 	}
 
@@ -243,11 +241,10 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * @param content
 	 * @param readers
 	 * @param id
-	 * @throws UnsupportedEncodingException
 	 * @throws EncodingFailedException
 	 */
 	private Envelope(String content, Agent[] readers, long id)
-			throws UnsupportedEncodingException, EncodingFailedException {
+			throws EncodingFailedException {
 		this.id = id;
 
 		initKey();
@@ -270,10 +267,9 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * @param content
 	 * @param readers
 	 * 
-	 * @throws UnsupportedEncodingException
 	 * @throws EncodingFailedException
 	 */
-	public Envelope(XmlAble content, Agent[] readers) throws UnsupportedEncodingException, EncodingFailedException {
+	public Envelope(XmlAble content, Agent[] readers) throws EncodingFailedException {
 		this(content, readers, new Random().nextLong());
 	}
 
@@ -288,10 +284,9 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * @param readers
 	 * @param id
 	 * @throws EncodingFailedException
-	 * @throws UnsupportedEncodingException
 	 */
 	private Envelope(XmlAble content, Agent[] readers, long id)
-			throws UnsupportedEncodingException, EncodingFailedException {
+			throws EncodingFailedException {
 		this.id = id;
 
 		initKey();
@@ -703,9 +698,7 @@ public final class Envelope implements XmlAble, Cloneable {
 		byte[] content = null;
 		try {
 			content = getContentAsBinary();
-			return new String(content, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			return new String(content);
+			return new String(content, StandardCharsets.UTF_8);
 		} catch (Exception e) {
 			throw new EnvelopeException("Coding problems with interpreting the content", e);
 		}
@@ -1129,10 +1122,9 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * 
 	 * @throws EncodingFailedException
 	 * @throws SerializationException
-	 * @throws UnsupportedEncodingException
 	 */
 	public static Envelope createClassIdEnvelope(Object content, String identifier, Agent[] readers)
-			throws EncodingFailedException, SerializationException, UnsupportedEncodingException {
+			throws EncodingFailedException, SerializationException {
 		if (content instanceof String)
 			return new Envelope((String) content, readers, getClassEnvelopeId(content.getClass(), identifier));
 		else if (content instanceof XmlAble)
@@ -1156,10 +1148,9 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * 
 	 * @throws SerializationException
 	 * @throws EncodingFailedException
-	 * @throws UnsupportedEncodingException
 	 */
 	public static Envelope createClassIdEnvelope(Object content, String identifier, Agent reader)
-			throws UnsupportedEncodingException, EncodingFailedException, SerializationException {
+			throws EncodingFailedException, SerializationException {
 		return createClassIdEnvelope(content, identifier, new Agent[] { reader });
 	}
 
@@ -1239,11 +1230,10 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * 
 	 * @param content
 	 * 
-	 * @throws UnsupportedEncodingException
 	 * @throws L2pSecurityException
 	 */
-	public void updateContent(String content) throws UnsupportedEncodingException, L2pSecurityException {
-		updateContent(content.getBytes("UTF-8"));
+	public void updateContent(String content) throws L2pSecurityException {
+		updateContent(content.getBytes(StandardCharsets.UTF_8));
 		contentType = ContentType.String;
 	}
 
@@ -1265,10 +1255,9 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * 
 	 * @param content
 	 * @throws L2pSecurityException
-	 * @throws UnsupportedEncodingException
 	 * @throws SerializationException 
 	 */
-	public void updateContent(XmlAble content) throws UnsupportedEncodingException, L2pSecurityException, SerializationException {
+	public void updateContent(XmlAble content) throws L2pSecurityException, SerializationException {
 		updateContent(content.toXmlString());
 		contentType = ContentType.XmlAble;
 		clContentClass = content.getClass();
