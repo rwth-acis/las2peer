@@ -630,13 +630,35 @@ public abstract class Node implements AgentStorage {
 		// TODO SIA test
 	}
 
-	public void registerReceiverToTopic() {
+	public void registerReceiverToTopic(MessageReceiver receiver, Long topic) {
+		synchronized (mapListenerTopics) {
+			synchronized (mapTopicListeners) {
+				if (mapListenerTopics.get(receiver.getResponsibleForAgentId()).contains(topic))
+					return;
+
+				mapListenerTopics.get(receiver.getResponsibleForAgentId()).add(topic);
+				mapTopicListeners.get(topic).add(receiver);
+
+				// TODO scribe
+			}
+		}
 		// TODO SIA register to tpoic
 		// TODO SIA pastry + local impl
 		// TODO SIA test
 	}
 
-	public void unregisterReceiverFromTopic() {
+	public void unregisterReceiverFromTopic(MessageReceiver receiver, Long topic) {
+		synchronized (mapListenerTopics) {
+			synchronized (mapTopicListeners) {
+				if (!mapListenerTopics.get(receiver.getResponsibleForAgentId()).contains(topic))
+					return;
+
+				mapListenerTopics.get(receiver.getResponsibleForAgentId()).remove(topic);
+				mapTopicListeners.get(topic).remove(receiver);
+
+				// TODO scribe
+			}
+		}
 		// TODO SIA unregsiter from topic
 		// TODO SIA pastry + local impl
 		// TODO SIA test

@@ -1,20 +1,5 @@
 package i5.las2peer.persistency;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectStreamClass;
-import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Random;
-
-import javax.crypto.SecretKey;
-
-import org.apache.commons.codec.binary.Base64;
-
 import i5.las2peer.execution.L2pThread;
 import i5.las2peer.p2p.ArtifactNotFoundException;
 import i5.las2peer.p2p.StorageException;
@@ -31,6 +16,21 @@ import i5.las2peer.tools.XmlTools;
 import i5.simpleXML.Element;
 import i5.simpleXML.Parser;
 import i5.simpleXML.XMLSyntaxException;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectStreamClass;
+import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Random;
+
+import javax.crypto.SecretKey;
+
+import org.apache.commons.codec.binary.Base64;
 
 /**
  * An envelope provides a secure storage for any {@link Serializable} content within the LAS2peer network.
@@ -214,8 +214,7 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * @throws EncodingFailedException
 	 * @throws DecodingFailedException
 	 */
-	public Envelope(String content, Agent reader)
-			throws EncodingFailedException, DecodingFailedException {
+	public Envelope(String content, Agent reader) throws EncodingFailedException, DecodingFailedException {
 		this(content, new Agent[] { reader });
 	}
 
@@ -243,8 +242,7 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * @param id
 	 * @throws EncodingFailedException
 	 */
-	private Envelope(String content, Agent[] readers, long id)
-			throws EncodingFailedException {
+	private Envelope(String content, Agent[] readers, long id) throws EncodingFailedException {
 		this.id = id;
 
 		initKey();
@@ -285,8 +283,7 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * @param id
 	 * @throws EncodingFailedException
 	 */
-	private Envelope(XmlAble content, Agent[] readers, long id)
-			throws EncodingFailedException {
+	private Envelope(XmlAble content, Agent[] readers, long id) throws EncodingFailedException {
 		this.id = id;
 
 		initKey();
@@ -310,7 +307,7 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * 
 	 * @param content
 	 * @param reader
-	 * @throws EnvelopeException 
+	 * @throws EnvelopeException
 	 * 
 	 * @throws EncodingFailedException
 	 * @throws SerializationException
@@ -348,8 +345,8 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * @throws EncodingFailedException
 	 * @throws SerializationException
 	 */
-	private Envelope(Serializable content, Agent[] readers, long id)
-			throws EncodingFailedException, SerializationException {
+	private Envelope(Serializable content, Agent[] readers, long id) throws EncodingFailedException,
+			SerializationException {
 		this.id = id;
 
 		initKey();
@@ -429,7 +426,7 @@ public final class Envelope implements XmlAble, Cloneable {
 				throw new L2pSecurityException("agent " + agent.getId() + " has no access to this object");
 			}
 
-			symmetricKey = (SecretKey) agent.returnSecretKey(encoded);
+			symmetricKey = agent.returnSecretKey(encoded);
 			openedBy = agent;
 
 			decryptData();
@@ -554,6 +551,21 @@ public final class Envelope implements XmlAble, Cloneable {
 			htEncryptedGroupKeys.remove(agent.getId());
 		else
 			htEncryptedKeys.remove(agent.getId());
+	}
+
+	/**
+	 * checks if an agent is reader
+	 * 
+	 * Attention: only direct reading access will be checked, no access gained via group memberships
+	 * 
+	 * @param agent agent to check
+	 * @return true if and only if the given agent is a reader
+	 */
+	public boolean hasReader(Agent agent) {
+		if (agent instanceof GroupAgent)
+			return htEncryptedGroupKeys.containsKey(agent.getId());
+		else
+			return htEncryptedKeys.containsKey(agent.getId());
 	}
 
 	/**
@@ -690,7 +702,7 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * returns the contents of this envelope as string
 	 * 
 	 * @return content as string
-	 * @throws EnvelopeException 
+	 * @throws EnvelopeException
 	 * 
 	 * @throws DecodingFailedException
 	 */
@@ -737,6 +749,15 @@ public final class Envelope implements XmlAble, Cloneable {
 	}
 
 	/**
+	 * get a list with all ids of non-group agents entitled to read this envelope
+	 * 
+	 * @return array with all agent ids
+	 */
+	public Long[] getReader() {
+		return htEncryptedKeys.keySet().toArray(new Long[0]);
+	}
+
+	/**
 	 * get a list with all ids of groups entitled to read this envelope
 	 * 
 	 * @return array with group agent ids
@@ -773,7 +794,8 @@ public final class Envelope implements XmlAble, Cloneable {
 
 	/**
 	 * Get the content as deserialized object. This method uses the same class loader as the calling class.
-	 * @param <T> 
+	 * 
+	 * @param <T>
 	 * 
 	 * @param cls
 	 * @return the typed content of this envelope
@@ -792,7 +814,8 @@ public final class Envelope implements XmlAble, Cloneable {
 
 	/**
 	 * Get the content as deserialized object.
-	 * @param <T> 
+	 * 
+	 * @param <T>
 	 * 
 	 * @param cls
 	 * @param classLoader
@@ -830,8 +853,9 @@ public final class Envelope implements XmlAble, Cloneable {
 
 	/**
 	 * @return a XML (string) representation of this envelope
-	 * @throws SerializationException 
+	 * @throws SerializationException
 	 */
+	@Override
 	public String toXmlString() throws SerializationException {
 		if (baPlainData != null && baCipherData == null) {
 			try {
@@ -841,8 +865,8 @@ public final class Envelope implements XmlAble, Cloneable {
 			}
 		}
 
-		String encodedKeys = "\t<las2peer:keys encoding=\"base64\" encryption=\"" + CryptoTools.getAsymmetricAlgorithm()
-				+ "\">\n";
+		String encodedKeys = "\t<las2peer:keys encoding=\"base64\" encryption=\""
+				+ CryptoTools.getAsymmetricAlgorithm() + "\">\n";
 		for (Long id : htEncryptedKeys.keySet()) {
 			encodedKeys += "\t\t<las2peer:key id=\"" + id + "\">" + Base64.encodeBase64String(htEncryptedKeys.get(id))
 					+ "</las2peer:key>\n";
@@ -987,11 +1011,11 @@ public final class Envelope implements XmlAble, Cloneable {
 			if (!keys.getName().equals("keys"))
 				throw new MalformedXMLException("not an envelope");
 			if (!keys.getAttribute("encoding").equals("base64"))
-				throw new MalformedXMLException(
-						"base 64 encoding of the content expected - got: " + keys.getAttribute("encoding"));
+				throw new MalformedXMLException("base 64 encoding of the content expected - got: "
+						+ keys.getAttribute("encoding"));
 			if (!keys.getAttribute("encryption").equals(CryptoTools.getAsymmetricAlgorithm()))
-				throw new MalformedXMLException(
-						CryptoTools.getAsymmetricAlgorithm() + " encryption of the content expected");
+				throw new MalformedXMLException(CryptoTools.getAsymmetricAlgorithm()
+						+ " encryption of the content expected");
 
 			for (Enumeration<Element> enKeys = keys.getChildren(); enKeys.hasMoreElements();) {
 				Element key = enKeys.nextElement();
@@ -1012,8 +1036,8 @@ public final class Envelope implements XmlAble, Cloneable {
 				if (!signatures.getName().equals("signatures"))
 					throw new MalformedXMLException("signatures expected");
 				if (!signatures.getAttribute("encoding").equals("base64"))
-					throw new MalformedXMLException(
-							"base 64 encoding of the content expected - got: " + keys.getAttribute("encoding"));
+					throw new MalformedXMLException("base 64 encoding of the content expected - got: "
+							+ keys.getAttribute("encoding"));
 				if (!signatures.getAttribute("method").equals(CryptoTools.getSignatureMethod()))
 					throw new MalformedXMLException(CryptoTools.getSignatureMethod() + " expected as signature method");
 
@@ -1038,7 +1062,7 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * get a locked copy of this agent
 	 * 
 	 * @return a locked clone of this envelope
-	 * @throws EnvelopeException 
+	 * @throws EnvelopeException
 	 * @throws EncodingFailedException
 	 */
 	public final Envelope cloneLocked() throws EnvelopeException {
@@ -1179,8 +1203,8 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * @throws ArtifactNotFoundException
 	 * @throws StorageException
 	 */
-	public static Envelope fetchClassIdEnvelope(Class<?> cls, String identifier)
-			throws ArtifactNotFoundException, StorageException {
+	public static Envelope fetchClassIdEnvelope(Class<?> cls, String identifier) throws ArtifactNotFoundException,
+			StorageException {
 		return Context.getCurrent().getStoredObject(cls, identifier);
 	}
 
@@ -1255,7 +1279,7 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * 
 	 * @param content
 	 * @throws L2pSecurityException
-	 * @throws SerializationException 
+	 * @throws SerializationException
 	 */
 	public void updateContent(XmlAble content) throws L2pSecurityException, SerializationException {
 		updateContent(content.toXmlString());
@@ -1286,8 +1310,8 @@ public final class Envelope implements XmlAble, Cloneable {
 				return;
 		}
 
-		throw new L2pSecurityException(
-				"Check for Overwriting envelope " + getId() + " failed: No needed signature is provided!");
+		throw new L2pSecurityException("Check for Overwriting envelope " + getId()
+				+ " failed: No needed signature is provided!");
 	}
 
 	/**
