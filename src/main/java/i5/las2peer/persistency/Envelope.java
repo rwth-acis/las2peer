@@ -563,9 +563,9 @@ public final class Envelope implements XmlAble, Cloneable {
 	 */
 	public boolean hasReader(Agent agent) {
 		if (agent instanceof GroupAgent)
-			return htEncryptedGroupKeys.contains(agent.getId());
+			return htEncryptedGroupKeys.containsKey(agent.getId());
 		else
-			return htEncryptedKeys.contains(agent.getId());
+			return htEncryptedKeys.containsKey(agent.getId());
 	}
 
 	/**
