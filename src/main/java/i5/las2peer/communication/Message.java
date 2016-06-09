@@ -1,18 +1,5 @@
 package i5.las2peer.communication;
 
-import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.Signature;
-import java.security.SignatureException;
-import java.util.Date;
-import java.util.Random;
-
-import javax.crypto.SecretKey;
-
-import org.apache.commons.codec.binary.Base64;
-
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.persistency.MalformedXMLException;
@@ -28,6 +15,20 @@ import i5.las2peer.tools.XmlTools;
 import i5.simpleXML.Element;
 import i5.simpleXML.Parser;
 import i5.simpleXML.XMLSyntaxException;
+
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.util.Date;
+import java.util.Random;
+
+import javax.crypto.SecretKey;
+
+import org.apache.commons.codec.binary.Base64;
+
 import rice.p2p.commonapi.NodeHandle;
 
 /**
@@ -42,6 +43,8 @@ import rice.p2p.commonapi.NodeHandle;
  * 
  */
 public class Message implements XmlAble {
+
+	// TODO SIA add topic as receiver
 
 	public static final long DEFAULT_TIMEOUT = 30 * 1000; // 30 seconds
 
@@ -126,8 +129,8 @@ public class Message implements XmlAble {
 	 * @throws SerializationException
 	 * 
 	 */
-	public Message(Agent from, Agent to, Serializable data)
-			throws EncodingFailedException, L2pSecurityException, SerializationException {
+	public Message(Agent from, Agent to, Serializable data) throws EncodingFailedException, L2pSecurityException,
+			SerializationException {
 		this(from, to, data, DEFAULT_TIMEOUT);
 	}
 
@@ -143,8 +146,8 @@ public class Message implements XmlAble {
 	 * @throws L2pSecurityException the private key of the sender is not accessible for signing
 	 * @throws SerializationException
 	 */
-	public Message(Agent from, Agent to, Serializable data, long timeOutMs)
-			throws EncodingFailedException, L2pSecurityException, SerializationException {
+	public Message(Agent from, Agent to, Serializable data, long timeOutMs) throws EncodingFailedException,
+			L2pSecurityException, SerializationException {
 		if (from == null || to == null)
 			throw new IllegalArgumentException("null not allowed as sender or recipient!");
 		sender = from;
@@ -176,8 +179,8 @@ public class Message implements XmlAble {
 	 * @throws L2pSecurityException the private key of the sender is not accessible for signing
 	 * @throws SerializationException
 	 */
-	public Message(Agent from, Agent to, XmlAble data)
-			throws EncodingFailedException, L2pSecurityException, SerializationException {
+	public Message(Agent from, Agent to, XmlAble data) throws EncodingFailedException, L2pSecurityException,
+			SerializationException {
 		this(from, to, data, DEFAULT_TIMEOUT);
 	}
 
@@ -193,8 +196,8 @@ public class Message implements XmlAble {
 	 * @throws L2pSecurityException the private key of the sender is not accessible for signing
 	 * @throws SerializationException
 	 */
-	public Message(Agent from, Agent to, XmlAble data, long timeoutMs)
-			throws EncodingFailedException, L2pSecurityException, SerializationException {
+	public Message(Agent from, Agent to, XmlAble data, long timeoutMs) throws EncodingFailedException,
+			L2pSecurityException, SerializationException {
 		sender = from;
 		senderId = from.getId();
 		recipient = to;
@@ -234,8 +237,8 @@ public class Message implements XmlAble {
 	 * @throws L2pSecurityException the private key of the sender is not accessible for signing
 	 * @throws SerializationException
 	 */
-	public Message(Message responseTo, XmlAble data, long timeoutMs)
-			throws EncodingFailedException, L2pSecurityException, SerializationException {
+	public Message(Message responseTo, XmlAble data, long timeoutMs) throws EncodingFailedException,
+			L2pSecurityException, SerializationException {
 		if (!responseTo.isOpen())
 			throw new IllegalStateException("the original message has to be open to create a response to it!");
 
@@ -261,8 +264,8 @@ public class Message implements XmlAble {
 	 * @throws L2pSecurityException the private key of the sender is not accessible for signing
 	 * @throws EncodingFailedException
 	 */
-	public Message(Message responseTo, XmlAble data)
-			throws EncodingFailedException, L2pSecurityException, SerializationException {
+	public Message(Message responseTo, XmlAble data) throws EncodingFailedException, L2pSecurityException,
+			SerializationException {
 		this(responseTo, data, DEFAULT_TIMEOUT);
 	}
 
@@ -277,8 +280,8 @@ public class Message implements XmlAble {
 	 * @throws L2pSecurityException the private key of the sender is not accessible for signing
 	 * @throws SerializationException
 	 */
-	public Message(Message responseTo, Serializable data, long timeoutMs)
-			throws EncodingFailedException, L2pSecurityException, SerializationException {
+	public Message(Message responseTo, Serializable data, long timeoutMs) throws EncodingFailedException,
+			L2pSecurityException, SerializationException {
 		if (!responseTo.isOpen())
 			throw new IllegalStateException("the original message has to be open to create a response to it!");
 
@@ -304,8 +307,8 @@ public class Message implements XmlAble {
 	 * @throws L2pSecurityException the private key of the sender is not accessible for signing
 	 * @throws SerializationException
 	 */
-	public Message(Message responseTo, Serializable data)
-			throws EncodingFailedException, L2pSecurityException, SerializationException {
+	public Message(Message responseTo, Serializable data) throws EncodingFailedException, L2pSecurityException,
+			SerializationException {
 		this(responseTo, data, DEFAULT_TIMEOUT);
 	}
 
@@ -484,15 +487,15 @@ public class Message implements XmlAble {
 	 * open the envelope, i.e. decrypt the content with the private key of the receiving agent
 	 * 
 	 * the private key has to be unlocked first!
-	 * @param unlockedRecipient 
-	 * @param storage 
+	 * 
+	 * @param unlockedRecipient
+	 * @param storage
 	 * 
 	 * 
 	 * @throws L2pSecurityException the private key of the receiver has to be unlocked for decryption
 	 * @throws AgentNotKnownException
 	 */
-	public void open(Agent unlockedRecipient, AgentStorage storage)
-			throws L2pSecurityException, AgentNotKnownException {
+	public void open(Agent unlockedRecipient, AgentStorage storage) throws L2pSecurityException, AgentNotKnownException {
 		if (isOpen())
 			return;
 
