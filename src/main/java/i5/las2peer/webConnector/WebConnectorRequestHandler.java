@@ -97,7 +97,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	 * 
 	 * @param exchange
 	 * 
-	 * @return -1 if no successful login else userId
+	 * @return null if no successful login else agent id
 	 * @throws UnsupportedEncodingException
 	 */
 	private synchronized PassphraseAgent authenticate(HttpExchange exchange) throws UnsupportedEncodingException {
