@@ -59,6 +59,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Vector;
 
@@ -138,7 +139,7 @@ public abstract class Node implements AgentStorage {
 	/**
 	 * map with all topics and their listeners
 	 */
-	private HashMap<Long, TreeSet<MessageReceiver>> mapTopicListeners = new HashMap<Long, TreeSet<MessageReceiver>>();
+	private HashMap<Long, TreeMap<Long, MessageReceiver>> mapTopicListeners = new HashMap<Long, TreeMap<Long, MessageReceiver>>();
 	/**
 	 * other direction of {@link #mapTopicListeners}
 	 */
@@ -620,48 +621,83 @@ public abstract class Node implements AgentStorage {
 	}
 
 	private void unregisterReceiver(long agentId) throws AgentNotKnownException {
-		if (htRegisteredReceivers.get(agentId) == null) {
+		if (!htRegisteredReceivers.containsKey(agentId)) {
 			throw new AgentNotKnownException(agentId);
 		}
 		observerNotice(Event.AGENT_REMOVED, getNodeId(), agentId, "");
 		htRegisteredReceivers.remove(agentId).notifyUnregister();
 
-		// TODO SIA unregister from all topics
-		// TODO SIA test
-	}
-
-	public void registerReceiverToTopic(MessageReceiver receiver, Long topic) {
-		synchronized (mapListenerTopics) {
-			synchronized (mapTopicListeners) {
-				if (mapListenerTopics.get(receiver.getResponsibleForAgentId()).contains(topic))
-					return;
-
-				mapListenerTopics.get(receiver.getResponsibleForAgentId()).add(topic);
-				mapTopicListeners.get(topic).add(receiver);
-
-				// TODO scribe
+		// unregister from topics
+		if (mapListenerTopics.containsKey(agentId)) {
+			Long[] topics = mapListenerTopics.get(agentId).toArray(new Long[0]);
+			for (long topic : topics) {
+				unregisterReceiverFromTopic(agentId, topic);
 			}
 		}
-		// TODO SIA register to tpoic
-		// TODO SIA pastry + local impl
-		// TODO SIA test
 	}
 
-	public void unregisterReceiverFromTopic(MessageReceiver receiver, Long topic) {
+	/**
+	 * register a receiver to a topic
+	 * 
+	 * @param receiver
+	 * @param topic
+	 * @throws AgentNotKnownException
+	 */
+	public void registerReceiverToTopic(MessageReceiver receiver, long topic) throws AgentNotKnownException {
+		if (!htRegisteredReceivers.containsKey(receiver.getResponsibleForAgentId()))
+			throw new AgentNotKnownException(receiver.getResponsibleForAgentId());
+
 		synchronized (mapListenerTopics) {
 			synchronized (mapTopicListeners) {
-				if (!mapListenerTopics.get(receiver.getResponsibleForAgentId()).contains(topic))
-					return;
+				if (mapListenerTopics.get(receiver.getResponsibleForAgentId()) == null)
+					mapListenerTopics.put(receiver.getResponsibleForAgentId(), new TreeSet<>());
 
-				mapListenerTopics.get(receiver.getResponsibleForAgentId()).remove(topic);
-				mapTopicListeners.get(topic).remove(receiver);
-
-				// TODO scribe
+				if (mapListenerTopics.get(receiver.getResponsibleForAgentId()).add(topic)) {
+					if (mapTopicListeners.get(topic) == null)
+						mapTopicListeners.put(topic, new TreeMap<>());
+					mapTopicListeners.get(topic).put(receiver.getResponsibleForAgentId(), receiver);
+				}
 			}
 		}
-		// TODO SIA unregsiter from topic
-		// TODO SIA pastry + local impl
-		// TODO SIA test
+	}
+
+	/**
+	 * unregister a receiver from a topic
+	 * 
+	 * @param receiver
+	 * @param topic
+	 * @throws NodeException
+	 */
+	public void unregisterReceiverFromTopic(MessageReceiver receiver, long topic) throws NodeException {
+		unregisterReceiverFromTopic(receiver.getResponsibleForAgentId(), topic);
+	}
+
+	private void unregisterReceiverFromTopic(long receiverId, long topic) {
+		synchronized (mapListenerTopics) {
+			synchronized (mapTopicListeners) {
+				if (!mapListenerTopics.containsKey(receiverId) || !mapListenerTopics.get(receiverId).contains(topic))
+					return;
+
+				mapListenerTopics.get(receiverId).remove(topic);
+				if (mapListenerTopics.get(receiverId).size() == 0)
+					mapListenerTopics.remove(receiverId);
+
+				mapTopicListeners.get(topic).remove(receiverId);
+				if (mapTopicListeners.get(topic).size() == 0)
+					mapTopicListeners.remove(topic);
+
+			}
+		}
+	}
+
+	/**
+	 * checks if a receiver is registered to the topic
+	 * 
+	 * @param topic
+	 * @return
+	 */
+	protected boolean hasTopic(long topic) {
+		return mapTopicListeners.containsKey(topic);
 	}
 
 	/**
@@ -788,12 +824,38 @@ public abstract class Node implements AgentStorage {
 			observerNotice(Event.MESSAGE_RECEIVED, null, message.getSenderId(), this.getNodeId(),
 					message.getRecipientId(), message.getId() + "");
 		}
-		MessageReceiver receiver = htRegisteredReceivers.get(message.getRecipientId());
 
-		if (receiver == null)
-			throw new AgentNotKnownException(message.getRecipientId());
+		if (!message.isTopic()) {
+			MessageReceiver receiver = htRegisteredReceivers.get(message.getRecipientId());
 
-		receiver.receiveMessage(message, getAgentContext(message.getSenderId()));
+			if (receiver == null)
+				throw new AgentNotKnownException(message.getRecipientId());
+
+			receiver.receiveMessage(message, getAgentContext(message.getSenderId()));
+		} else {
+			TreeMap<Long, MessageReceiver> map = mapTopicListeners.get(message.getTopicId());
+
+			if (map == null)
+				throw new MessageException("No receiver registered for this topic!");
+
+			try {
+				synchronized (map) {
+					for (MessageReceiver receiver : map.values()) {
+						Message msg = message;
+						if (map.size() > 1) {
+							msg = msg.clone();
+						}
+
+						msg.setRecipientId(receiver.getResponsibleForAgentId());
+
+						receiver.receiveMessage(msg, getAgentContext(message.getSenderId()));
+					}
+				}
+			} catch (CloneNotSupportedException e) {
+				throw new MessageException("Cloning failed", e);
+			}
+		}
+
 	}
 
 	/**
@@ -1569,6 +1631,37 @@ public abstract class Node implements AgentStorage {
 
 		// TODO what happens if the answers timeouts? Throw TimeoutException?
 		return listener.getResults()[0];
+	}
+
+	/**
+	 * Sends a message and wait for answer messages
+	 * 
+	 * Uses a broadcast
+	 * 
+	 * @param m
+	 * @param recipientCount expected number of answers
+	 * @return
+	 * @throws InterruptedException
+	 * @throws TimeoutException
+	 */
+	public Message[] sendMessageAndCollectAnswers(Message m, int recipientCount) throws InterruptedException,
+			TimeoutException {
+		long timeout = m.getTimeoutTs() - new Date().getTime();
+		MessageResultListener listener = new MessageResultListener(timeout);
+		listener.addRecipients(recipientCount);
+
+		sendMessage(m, listener, SendMode.BROADCAST);
+
+		listener.waitForAllAnswers();
+
+		Message[] results = listener.getResults();
+
+		if (results.length > 0)
+			return results;
+		else
+			throw new TimeoutException();
+
+		// TODO SIA make faster?
 	}
 
 	/**
