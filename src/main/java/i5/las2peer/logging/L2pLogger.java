@@ -495,10 +495,23 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	}
 
 	/**
-	 * This method is the recommended way to retrieve a L2pLogger instance.
+	 * This method is used to retrieve a L2pLogger instance.
+	 *
+	 * @param cls Should be the class this instance is used with.
+	 * @return Returns a L2pLogger instance for the given class.
+	 * @throws ClassCastException If someone overloaded the loggers instance by adding some other logger implementation
+	 *             with the same name. In this case you may use Java native method by calling
+	 *             {@link Logger#getLogger(String)}.
+	 */
+	public static L2pLogger getInstance(Class<?> cls) throws ClassCastException {
+		return getInstance(cls.getCanonicalName());
+	}
+
+	/**
+	 * This method is used to retrieve a L2pLogger instance.
 	 *
 	 * @param name A name for the new logger instance. Should be the name of your current class by default. Like
-	 *            L2pLogger.class.getName()
+	 *            L2pLogger.class.getCanonicalName()
 	 * @return Returns a L2pLogger instance for the given name.
 	 * @throws ClassCastException If someone overloaded the loggers instance by adding some other logger implementation
 	 *             with the same name. In this case you may use Java native method by calling
