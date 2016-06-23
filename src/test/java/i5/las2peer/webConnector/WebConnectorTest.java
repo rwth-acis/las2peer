@@ -111,7 +111,6 @@ public class WebConnectorTest {
 
 	@Test
 	public void testNotMethodService() {
-		connector.updateServiceList();
 		MiniClient c = new MiniClient();
 		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 		try {
@@ -126,7 +125,6 @@ public class WebConnectorTest {
 
 	@Test
 	public void testLogin() {
-		connector.updateServiceList();
 		MiniClient c = new MiniClient();
 		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 
@@ -190,7 +188,6 @@ public class WebConnectorTest {
 
 	@Test
 	public void testExceptions() {
-		connector.updateServiceList();
 		MiniClient c = new MiniClient();
 		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 		try {
@@ -205,7 +202,6 @@ public class WebConnectorTest {
 
 	@Test
 	public void testCrossOriginHeader() {
-		connector.updateServiceList();
 		MiniClient c = new MiniClient();
 		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 		try {
@@ -224,8 +220,6 @@ public class WebConnectorTest {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void testCalls() {
-		connector.updateServiceList();
-
 		MiniClient c = new MiniClient();
 		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 		// call all methods of the testService
