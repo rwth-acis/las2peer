@@ -506,7 +506,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	 *             {@link Logger#getLogger(String)}.
 	 */
 	public static L2pLogger getInstance(String name) throws ClassCastException {
-		if (name == null || name.isEmpty() || "i5.las2peer".equals(name) || !name.startsWith("i5.las2peer")) {
+		if (name == null || name.isEmpty() || "i5.las2peer".equals(name)) {
 			throw new IllegalArgumentException("Invalid logger name '" + name + "' given!");
 		}
 		L2pLogger result = null;
