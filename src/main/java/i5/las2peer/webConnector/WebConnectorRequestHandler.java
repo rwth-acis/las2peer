@@ -373,6 +373,11 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			byte[] data = new byte[4096];
 			while ((nRead = is.read(data, 0, data.length)) != -1) {
 				buffer.write(data, 0, nRead);
+				if (buffer.size() >= connector.maxRequestBodySize) {
+					sendStringResponse(exchange, HttpURLConnection.HTTP_ENTITY_TOO_LARGE,
+							"Given request body exceeds limit of " + connector.maxRequestBodySize + " bytes");
+					return false;
+				}
 			}
 			buffer.flush();
 			byte[] rawContent = buffer.toByteArray();

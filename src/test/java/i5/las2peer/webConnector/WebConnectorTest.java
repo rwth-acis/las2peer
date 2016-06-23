@@ -5,6 +5,9 @@ import static org.junit.Assert.fail;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.net.HttpURLConnection;
+import java.util.Base64;
+import java.util.Random;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -407,6 +410,25 @@ public class WebConnectorTest {
 			assertEquals(400, result.getHttpCode());
 			assertEquals(true, result.getResponse().contains("Malformed Request"));
 
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("Exception: " + e);
+		}
+	}
+
+	@Test
+	public void testUploadLimit() {
+		MiniClient c = new MiniClient();
+		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
+		try {
+			c.setLogin(Long.toString(testAgent.getId()), testPass);
+
+			byte[] testContent = new byte[WebConnector.DEFAULT_MAX_REQUEST_BODY_SIZE];
+			new Random().nextBytes(testContent);
+			String base64 = Base64.getEncoder().encodeToString(testContent);
+			// same as post call in testCalls
+			ClientResponse result = c.sendRequest("POST", "sub/5/6", base64);
+			assertEquals(HttpURLConnection.HTTP_ENTITY_TOO_LARGE, result.getHttpCode());
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("Exception: " + e);
