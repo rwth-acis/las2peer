@@ -3,6 +3,7 @@ package i5.las2peer.security;
 import java.util.Hashtable;
 
 import i5.las2peer.p2p.AgentNotKnownException;
+import i5.las2peer.p2p.Node;
 
 /**
  * A simple Hashtable based storage for agents.

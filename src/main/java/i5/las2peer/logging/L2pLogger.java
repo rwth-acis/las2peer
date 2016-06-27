@@ -16,9 +16,11 @@ import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
+import i5.las2peer.api.Service;
 import i5.las2peer.execution.L2pThread;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.security.Agent;
+import i5.las2peer.security.Context;
 
 public final class L2pLogger extends Logger implements NodeObserver {
 
