@@ -253,7 +253,7 @@ public class Message implements XmlAble, Cloneable {
 
 		timestampMs = new Date().getTime();
 
-		id = new Random().nextLong();
+		// id = new Random().nextLong();
 
 		finalizeConstructor();
 	}

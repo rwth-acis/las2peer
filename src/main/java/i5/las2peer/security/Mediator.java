@@ -6,7 +6,6 @@ import i5.las2peer.execution.L2pServiceException;
 import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.Node;
-import i5.las2peer.p2p.ServiceNameVersion;
 import i5.las2peer.p2p.TimeoutException;
 import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.tools.SerializationException;
@@ -159,7 +158,6 @@ public class Mediator implements MessageReceiver {
 	 * @param service
 	 * @param method
 	 * @param parameters
-	 * @param preferLocal if a local running service should be preferred
 	 * 
 	 * @return result of the method invocation
 	 * 
@@ -169,35 +167,10 @@ public class Mediator implements MessageReceiver {
 	 * @throws L2pServiceException
 	 * @throws AgentNotKnownException
 	 */
-	public Serializable invoke(String service, String method, Serializable[] parameters, boolean preferLocal)
-			throws L2pSecurityException, InterruptedException, TimeoutException, AgentNotKnownException,
-			L2pServiceException {
+	public Serializable invoke(String service, String method, Serializable[] parameters) throws L2pSecurityException,
+			InterruptedException, TimeoutException, AgentNotKnownException, L2pServiceException {
 
-		return runningAt.invoke(myAgent, service, method, parameters, preferLocal);
-	}
-
-	/**
-	 * Invokes a service method (in the network) for the mediated agent.
-	 * 
-	 * @param service
-	 * @param version
-	 * @param method
-	 * @param parameters
-	 * @param preferLocal if a local running service should be preferred
-	 * 
-	 * @return result of the method invocation
-	 * 
-	 * @throws L2pSecurityException
-	 * @throws InterruptedException
-	 * @throws TimeoutException
-	 * @throws AgentNotKnownException
-	 * @throws L2pServiceException
-	 */
-	public Serializable invoke(String service, String version, String method, Serializable[] parameters,
-			boolean preferLocal) throws L2pSecurityException, InterruptedException, TimeoutException,
-			AgentNotKnownException, L2pServiceException {
-
-		return runningAt.invoke(myAgent, new ServiceNameVersion(service, version), method, parameters, preferLocal);
+		return runningAt.invoke(myAgent, service, method, parameters);
 	}
 
 	/**

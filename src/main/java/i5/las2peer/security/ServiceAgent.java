@@ -1,16 +1,5 @@
 package i5.las2peer.security;
 
-import java.io.Serializable;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.security.KeyPair;
-import java.security.PublicKey;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import org.apache.commons.codec.binary.Base64;
-
 import i5.las2peer.api.Service;
 import i5.las2peer.classLoaders.ClassLoaderException;
 import i5.las2peer.communication.ListMethodsContent;
@@ -19,6 +8,7 @@ import i5.las2peer.communication.MessageException;
 import i5.las2peer.communication.RMIExceptionContent;
 import i5.las2peer.communication.RMIResultContent;
 import i5.las2peer.communication.RMIUnlockContent;
+import i5.las2peer.communication.ServiceDiscoveryContent;
 import i5.las2peer.execution.L2pServiceException;
 import i5.las2peer.execution.L2pThread;
 import i5.las2peer.execution.NoSuchServiceMethodException;
@@ -40,6 +30,17 @@ import i5.las2peer.tools.SimpleTools;
 import i5.simpleXML.Element;
 import i5.simpleXML.Parser;
 import i5.simpleXML.XMLSyntaxException;
+
+import java.io.Serializable;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.security.KeyPair;
+import java.security.PublicKey;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import org.apache.commons.codec.binary.Base64;
 
 /**
  * A service agent represents a service and its access rights in the LAS2peer setting.
@@ -66,7 +67,7 @@ public class ServiceAgent extends PassphraseAgent {
 	 * create a new service agent
 	 * 
 	 * @param id
-	 * @param service 
+	 * @param service
 	 * @param pair
 	 * @param passphrase
 	 * @param salt
@@ -83,7 +84,7 @@ public class ServiceAgent extends PassphraseAgent {
 	 * create a new service agent
 	 * 
 	 * @param id
-	 * @param service 
+	 * @param service
 	 * @param pubKey
 	 * @param encodedPrivate
 	 * @param salt
@@ -105,13 +106,13 @@ public class ServiceAgent extends PassphraseAgent {
 	@Override
 	public String toXmlString() {
 		try {
-			return "<las2peer:agent type=\"service\" serviceclass=\"" + getServiceNameVersion().toString() + "\">\n" + "\t<id>"
-					+ getId() + "</id>\n" + "\t<publickey encoding=\"base64\">"
-					+ SerializeTools.serializeToBase64(getPublicKey()) + "</publickey>\n" + "\t<privatekey encrypted=\""
-					+ CryptoTools.getSymmetricAlgorithm() + "\" keygen=\"" + CryptoTools.getSymmetricKeygenMethod()
-					+ "\">\n" + "\t\t<salt encoding=\"base64\">" + Base64.encodeBase64String(getSalt()) + "</salt>\n"
-					+ "\t\t<data encoding=\"base64\">" + getEncodedPrivate() + "</data>\n" + "\t</privatekey>\n"
-					+ "</las2peer:agent>\n";
+			return "<las2peer:agent type=\"service\" serviceclass=\"" + getServiceNameVersion().toString() + "\">\n"
+					+ "\t<id>" + getId() + "</id>\n" + "\t<publickey encoding=\"base64\">"
+					+ SerializeTools.serializeToBase64(getPublicKey()) + "</publickey>\n"
+					+ "\t<privatekey encrypted=\"" + CryptoTools.getSymmetricAlgorithm() + "\" keygen=\""
+					+ CryptoTools.getSymmetricKeygenMethod() + "\">\n" + "\t\t<salt encoding=\"base64\">"
+					+ Base64.encodeBase64String(getSalt()) + "</salt>\n" + "\t\t<data encoding=\"base64\">"
+					+ getEncodedPrivate() + "</data>\n" + "\t</privatekey>\n" + "</las2peer:agent>\n";
 		} catch (SerializationException e) {
 			throw new RuntimeException("Serialization problems with keys");
 		}
@@ -122,7 +123,7 @@ public class ServiceAgent extends PassphraseAgent {
 		try {
 			m.open(this, getRunningAtNode());
 			Object content = m.getContent();
-			
+
 			// unlock context agent
 			if (content instanceof UnlockAgentCall) {
 				c.unlockMainAgent(((UnlockAgentCall) content).getPassphrase());
@@ -183,17 +184,28 @@ public class ServiceAgent extends PassphraseAgent {
 				if (m.getSendingNodeId() == null)
 					throw new L2pServiceException("If no sendind node is given - where should I send the answer to?!");
 
-				System.out.println("received request: " + m.toXmlString());
-				System.out.println("received: " + content);
-				System.out.println("sender: " + m.getSendingNodeId());
-
 				ListMethodsContent responseContent = new ListMethodsContent(false);
 				for (Method method : getServiceInstance().getClass().getMethods())
 					responseContent.addMethod(method);
 				responseContent.finalize();
 
-				Message response = new Message(m, (Serializable) responseContent);
+				Message response = new Message(m, responseContent);
 				getRunningAtNode().sendResponse(response, m.getSendingNodeId());
+			} else if (content instanceof ServiceDiscoveryContent) {
+				if (!((ServiceDiscoveryContent) content).isRequest())
+					throw new L2pServiceException("Got a ServiceDiscovery response - can't handle it!");
+				if (m.getSendingNodeId() == null)
+					throw new L2pServiceException("If no sendind node is given - where should I send the answer to?!");
+
+				// only answer if requirements are met
+				if (((ServiceDiscoveryContent) content).accepts(this.getServiceNameVersion())) {
+					ServiceDiscoveryContent result = new ServiceDiscoveryContent(this.getId(),
+							this.getServiceNameVersion());
+
+					Message response = new Message(m, result);
+					getRunningAtNode().sendResponse(response, m.getSendingNodeId());
+				}
+
 			} else
 				throw new L2pServiceException("I don't know what to do with a message content of type "
 						+ content.getClass().getCanonicalName());
@@ -204,9 +216,8 @@ public class ServiceAgent extends PassphraseAgent {
 
 			e.printStackTrace();
 
-			throw new MessageException(
-					"security problems - " + m.getRecipient().getId() + " at node " + getRunningAtNode().getNodeId(),
-					e);
+			throw new MessageException("security problems - " + m.getRecipient().getId() + " at node "
+					+ getRunningAtNode().getNodeId(), e);
 
 		} catch (EncodingFailedException e) {
 			throw new MessageException("message problems", e);
@@ -223,7 +234,7 @@ public class ServiceAgent extends PassphraseAgent {
 	@Override
 	public void notifyUnregister() {
 		getRunningAtNode().getNodeServiceCache().unregisterLocalService(this);
-					
+
 		serviceInfoAgentNotifyUnregister();
 		if (serviceInstance != null) {
 			serviceInstance.close();
@@ -231,7 +242,8 @@ public class ServiceAgent extends PassphraseAgent {
 		}
 		Node runningAt = getRunningAtNode();
 		if (runningAt != null) {
-			runningAt.observerNotice(Event.SERVICE_SHUTDOWN, runningAt.getNodeId(), this, getServiceNameVersion().toString());
+			runningAt.observerNotice(Event.SERVICE_SHUTDOWN, runningAt.getNodeId(), this, getServiceNameVersion()
+					.toString());
 		}
 		super.notifyUnregister();
 	}
@@ -246,9 +258,9 @@ public class ServiceAgent extends PassphraseAgent {
 	 * @throws L2pSecurityException
 	 */
 	@Deprecated
-	public static ServiceAgent generateNewAgent(String forService, String passPhrase)
-			throws CryptoException, L2pSecurityException {
-		return createServiceAgent(new ServiceNameVersion(forService,"1.0"), passPhrase);
+	public static ServiceAgent generateNewAgent(String forService, String passPhrase) throws CryptoException,
+			L2pSecurityException {
+		return createServiceAgent(new ServiceNameVersion(forService, "1.0"), passPhrase);
 	}
 
 	/**
@@ -262,17 +274,16 @@ public class ServiceAgent extends PassphraseAgent {
 	 */
 	public static ServiceAgent createServiceAgent(ServiceNameVersion service, String passphrase)
 			throws CryptoException, L2pSecurityException {
-		
-		return new ServiceAgent(serviceClass2Id(service), service, CryptoTools.generateKeyPair(),
-				passphrase, CryptoTools.generateSalt());
+
+		return new ServiceAgent(serviceClass2Id(service), service, CryptoTools.generateKeyPair(), passphrase,
+				CryptoTools.generateSalt());
 	}
 
 	/**
 	 * create a ServiceAgent for version 1.0
 	 * 
-	 * Can be used to generate ServiceAgent for jUnit tests, since in this
-	 * case las2peer loads classes using the default class loader and thus
-	 * does not require version information.
+	 * Can be used to generate ServiceAgent for jUnit tests, since in this case las2peer loads classes using the default
+	 * class loader and thus does not require version information.
 	 * 
 	 * @param serviceName
 	 * @param passphrase
@@ -280,11 +291,11 @@ public class ServiceAgent extends PassphraseAgent {
 	 * @throws CryptoException
 	 * @throws L2pSecurityException
 	 */
-	public static ServiceAgent createServiceAgent(String serviceName, String passphrase)
-			throws CryptoException, L2pSecurityException {
-		return createServiceAgent(new ServiceNameVersion(serviceName,"1.0"),passphrase);
+	public static ServiceAgent createServiceAgent(String serviceName, String passphrase) throws CryptoException,
+			L2pSecurityException {
+		return createServiceAgent(new ServiceNameVersion(serviceName, "1.0"), passphrase);
 	}
-	
+
 	/**
 	 * factory: create a new service agent from the given XML representation
 	 * 
@@ -397,8 +408,8 @@ public class ServiceAgent extends PassphraseAgent {
 	 * @throws SerializationException
 	 * @throws AgentException
 	 */
-	private ServiceInfoAgent getServiceInfoAgent()
-			throws CryptoException, L2pSecurityException, SerializationException, AgentException {
+	private ServiceInfoAgent getServiceInfoAgent() throws CryptoException, L2pSecurityException,
+			SerializationException, AgentException {
 		ServiceInfoAgent agent = ServiceInfoAgent.getServiceInfoAgent();
 		return agent;
 	}
@@ -428,6 +439,7 @@ public class ServiceAgent extends PassphraseAgent {
 		timerRunning = true;
 		timerRunTimes = 0;
 		timer.scheduleAtFixedRate(new TimerTask() {
+			@Override
 			public void run() {
 				executeTimer(finalNode, finalAgent);
 			}
@@ -460,7 +472,8 @@ public class ServiceAgent extends PassphraseAgent {
 	@Override
 	public void notifyRegistrationTo(Node node) throws L2pServiceException {
 		try {
-			Class<? extends Service> clServ = (Class<? extends Service>) node.getBaseClassLoader().getServiceClass(sService.getName(),sService.getVersion());
+			Class<? extends Service> clServ = (Class<? extends Service>) node.getBaseClassLoader().getServiceClass(
+					sService.getName(), sService.getVersion().toString());
 
 			Constructor<? extends Service> cons = clServ.getConstructor(new Class<?>[0]);
 			serviceInstance = cons.newInstance();
@@ -473,9 +486,12 @@ public class ServiceAgent extends PassphraseAgent {
 
 			// notify Service Info Agent
 			serviceInfoAgentNotifyRegister();
-			
+
 			// notify Node
 			node.getNodeServiceCache().registerLocalService(this);
+
+			// subscribe to service topic
+			node.registerReceiverToTopic(this, serviceNameToTopicId(this.getServiceNameVersion().getName()));
 
 		} catch (ClassLoaderException e1) {
 			throw new L2pServiceException("Problems with the classloader", e1);
@@ -505,6 +521,16 @@ public class ServiceAgent extends PassphraseAgent {
 	 */
 	public static long serviceClass2Id(ServiceNameVersion service) {
 		return SimpleTools.longHash(service.toString());
+	}
+
+	/**
+	 * returns the service topic id for the given service name
+	 * 
+	 * @param service
+	 * @return
+	 */
+	public static long serviceNameToTopicId(String service) {
+		return SimpleTools.longHash(service);
 	}
 
 	/**
@@ -547,7 +573,7 @@ public class ServiceAgent extends PassphraseAgent {
 	 * @return result of the method invocation
 	 * 
 	 * @throws L2pServiceException
-	 * @throws ServiceInvocationException 
+	 * @throws ServiceInvocationException
 	 * @throws SecurityException
 	 * @throws IllegalArgumentException
 	 * @throws NoSuchServiceMethodException
@@ -555,12 +581,12 @@ public class ServiceAgent extends PassphraseAgent {
 	 * @throws InvocationTargetException
 	 * @throws L2pSecurityException
 	 */
-	public Serializable handle(RMITask task)
-			throws L2pServiceException, ServiceInvocationException, SecurityException, IllegalArgumentException,
-			NoSuchServiceMethodException, IllegalAccessException, InvocationTargetException, L2pSecurityException {
+	public Serializable handle(RMITask task) throws L2pServiceException, ServiceInvocationException, SecurityException,
+			IllegalArgumentException, NoSuchServiceMethodException, IllegalAccessException, InvocationTargetException,
+			L2pSecurityException {
 		if (!getServiceNameVersion().equals(task.getServiceNameVersion()))
-			throw new L2pServiceException(
-					"Service is not matching requestes class!" + getServiceNameVersion() + "/" + task.getServiceNameVersion());
+			throw new L2pServiceException("Service is not matching requestes class!" + getServiceNameVersion() + "/"
+					+ task.getServiceNameVersion());
 
 		Object result = invoke(task.getMethodName(), task.getParameters());
 

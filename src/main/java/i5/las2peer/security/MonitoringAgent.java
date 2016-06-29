@@ -1,19 +1,11 @@
 package i5.las2peer.security;
 
-import java.io.Serializable;
-import java.security.KeyPair;
-import java.security.PublicKey;
-import java.util.Random;
-
-import org.apache.commons.codec.binary.Base64;
-
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
 import i5.las2peer.execution.L2pServiceException;
 import i5.las2peer.execution.NoSuchServiceException;
 import i5.las2peer.logging.monitoring.MonitoringMessage;
 import i5.las2peer.p2p.AgentNotKnownException;
-import i5.las2peer.p2p.TimeoutException;
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
@@ -22,6 +14,13 @@ import i5.las2peer.tools.SerializeTools;
 import i5.simpleXML.Element;
 import i5.simpleXML.Parser;
 import i5.simpleXML.XMLSyntaxException;
+
+import java.io.Serializable;
+import java.security.KeyPair;
+import java.security.PublicKey;
+import java.util.Random;
+
+import org.apache.commons.codec.binary.Base64;
 
 /**
  * 
@@ -42,13 +41,13 @@ public class MonitoringAgent extends PassphraseAgent {
 	 * @param id
 	 * @param pair
 	 * @param passphrase
-	 * @param salt 
+	 * @param salt
 	 * @throws L2pSecurityException
 	 * @throws CryptoException
 	 * 
 	 */
-	protected MonitoringAgent(long id, KeyPair pair, String passphrase, byte[] salt)
-			throws L2pSecurityException, CryptoException {
+	protected MonitoringAgent(long id, KeyPair pair, String passphrase, byte[] salt) throws L2pSecurityException,
+			CryptoException {
 		super(id, pair, passphrase, salt);
 	}
 
@@ -80,8 +79,7 @@ public class MonitoringAgent extends PassphraseAgent {
 	 * @throws L2pSecurityException
 	 * 
 	 */
-	public static MonitoringAgent createMonitoringAgent(String passphrase)
-			throws CryptoException, L2pSecurityException {
+	public static MonitoringAgent createMonitoringAgent(String passphrase) throws CryptoException, L2pSecurityException {
 		Random r = new Random();
 		return new MonitoringAgent(r.nextLong(), CryptoTools.generateKeyPair(), passphrase, CryptoTools.generateSalt());
 	}
@@ -111,20 +109,17 @@ public class MonitoringAgent extends PassphraseAgent {
 				try {
 					// Try to send the content of the message to the Processing Service
 					boolean success = (Boolean) getRunningAtNode().invoke(this, PROCESSING_SERVICE_ClASS_NAME,
-							"getMessages", parameters, true);
+							"getMessages", parameters);
 					if (!success)
 						// TODO: Check for performance of message receiving
-						System.out.println(
-								"Monitoring: Something went wrong while invoking Processing Service to deliver a monitoring message!");
+						System.out
+								.println("Monitoring: Something went wrong while invoking Processing Service to deliver a monitoring message!");
 				} catch (NoSuchServiceException e) {
 					System.out.println("Monitoring: I am not the Processing Service!");
 				} catch (L2pServiceException e) {
 					System.out.println("Monitoring: Something went wrong while invoking Processing Service!");
 					e.printStackTrace();
 				} catch (InterruptedException e) {
-					System.out.println("Monitoring: Something went wrong while invoking Processing Service!");
-					e.printStackTrace();
-				} catch (TimeoutException e) {
 					System.out.println("Monitoring: Something went wrong while invoking Processing Service!");
 					e.printStackTrace();
 				}
@@ -149,11 +144,12 @@ public class MonitoringAgent extends PassphraseAgent {
 	public String toXmlString() {
 		try {
 			StringBuffer result = new StringBuffer("<las2peer:agent type=\"monitoring\">\n" + "\t<id>" + getId()
-					+ "</id>\n" + "\t<publickey encoding=\"base64\">" + SerializeTools.serializeToBase64(getPublicKey())
-					+ "</publickey>\n" + "\t<privatekey encrypted=\"" + CryptoTools.getSymmetricAlgorithm()
-					+ "\" keygen=\"" + CryptoTools.getSymmetricKeygenMethod() + "\">\n"
-					+ "\t\t<salt encoding=\"base64\">" + Base64.encodeBase64String(getSalt()) + "</salt>\n"
-					+ "\t\t<data encoding=\"base64\">" + getEncodedPrivate() + "</data>\n" + "\t</privatekey>\n");
+					+ "</id>\n" + "\t<publickey encoding=\"base64\">"
+					+ SerializeTools.serializeToBase64(getPublicKey()) + "</publickey>\n"
+					+ "\t<privatekey encrypted=\"" + CryptoTools.getSymmetricAlgorithm() + "\" keygen=\""
+					+ CryptoTools.getSymmetricKeygenMethod() + "\">\n" + "\t\t<salt encoding=\"base64\">"
+					+ Base64.encodeBase64String(getSalt()) + "</salt>\n" + "\t\t<data encoding=\"base64\">"
+					+ getEncodedPrivate() + "</data>\n" + "\t</privatekey>\n");
 
 			result.append("</las2peer:agent>\n");
 
@@ -171,7 +167,7 @@ public class MonitoringAgent extends PassphraseAgent {
 	 * this method.
 	 * 
 	 * @param xml a String
-	 * @return 
+	 * @return
 	 * 
 	 * @exception MalformedXMLException
 	 * 
@@ -194,7 +190,7 @@ public class MonitoringAgent extends PassphraseAgent {
 	 * Sets the state of the object from a string representation resulting from a previous {@link #toXmlString} call.
 	 * 
 	 * @param root parsed XML document
-	 * @return 
+	 * @return
 	 * 
 	 * @exception MalformedXMLException
 	 * 

@@ -1,9 +1,9 @@
 package i5.las2peer.p2p;
 
+import i5.las2peer.communication.Message;
+
 import java.util.Date;
 import java.util.Vector;
-
-import i5.las2peer.communication.Message;
 
 /**
  * A MessageResultListener is a simple collector for one result of a message sending operation in a {@link Node}. The
@@ -50,7 +50,8 @@ public class MessageResultListener {
 
 	/**
 	 * simple constructor
-	 * @param timeoutMs 
+	 * 
+	 * @param timeoutMs
 	 */
 	public MessageResultListener(long timeoutMs) {
 		startedAt = new Date().getTime();
@@ -194,7 +195,7 @@ public class MessageResultListener {
 	/**
 	 * default non blocking timer for waiting
 	 */
-	public static final int DEFAULT_TIMER = 1000; // 1 second
+	public static final int DEFAULT_TIMER = 500; // 500 ms
 
 	/**
 	 * sleep until a result has been received

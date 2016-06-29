@@ -48,13 +48,11 @@ import java.lang.management.ManagementFactory;
 import java.lang.reflect.InvocationTargetException;
 import java.security.KeyPair;
 import java.security.PublicKey;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Timer;
@@ -108,6 +106,7 @@ public abstract class Node implements AgentStorage {
 	private NodeServiceCache nodeServiceCache;
 	// TODO make time as setting
 	private int nodeServiceCacheLifetime = 10; // time before cached node info becomes invalidated
+	private int nodeServiceCacheResultCount = 3; // number of service instances to be collected from the network
 	private int tidyUpTimerInterval = 60;
 	private int agentContextLifetime = 60;
 
@@ -213,7 +212,7 @@ public abstract class Node implements AgentStorage {
 			this.baseClassLoader = new L2pClassManager(new Repository[0], this.getClass().getClassLoader());
 
 		nodeKeyPair = CryptoTools.generateKeyPair();
-		nodeServiceCache = new NodeServiceCache(this, nodeServiceCacheLifetime);
+		nodeServiceCache = new NodeServiceCache(this, nodeServiceCacheLifetime, nodeServiceCacheResultCount);
 
 		userManager = new UserAgentManager(this);
 	}
@@ -1181,21 +1180,125 @@ public abstract class Node implements AgentStorage {
 	}
 
 	/**
-	 * Invokes a service method of a local running service agent.
+	 * invoke a service in the network
 	 * 
 	 * @param executing
 	 * @param service
 	 * @param method
 	 * @param parameters
-	 * 
-	 * @return result of the method invocation
-	 * 
-	 * @throws AgentNotKnownException cannot find the executing agent
+	 * @return
 	 * @throws L2pSecurityException
+	 * @throws AgentNotKnownException
+	 * @throws L2pServiceException
+	 * @throws InterruptedException
+	 */
+	public Serializable invoke(Agent executing, String service, String method, Serializable[] parameters)
+			throws L2pSecurityException, AgentNotKnownException, L2pServiceException, InterruptedException {
+		return invoke(executing, ServiceNameVersion.fromString(service), method, parameters, false, false);
+	}
+
+	/**
+	 * invoke a service in the network (choosing an appropriate version)
+	 * 
+	 * @param executing
+	 * @param service
+	 * @param method
+	 * @param parameters
+	 * @return
+	 * @throws L2pSecurityException
+	 * @throws AgentNotKnownException
+	 * @throws L2pServiceException
+	 * @throws InterruptedException
+	 */
+	public Serializable invoke(Agent executing, ServiceNameVersion service, String method, Serializable[] parameters)
+			throws L2pSecurityException, AgentNotKnownException, L2pServiceException, InterruptedException {
+		return invoke(executing, service, method, parameters, false, false);
+	}
+
+	/**
+	 * invoke a service in the network or locally
+	 * 
+	 * @param executing
+	 * @param service
+	 * @param method
+	 * @param parameters
+	 * @param exactVersion
+	 * @return
+	 * @throws L2pSecurityException
+	 * @throws AgentNotKnownException
+	 * @throws L2pServiceException
+	 * @throws InterruptedException
+	 */
+	public Serializable invoke(Agent executing, ServiceNameVersion service, String method, Serializable[] parameters,
+			boolean exactVersion) throws L2pSecurityException, AgentNotKnownException, L2pServiceException,
+			InterruptedException {
+		return invoke(executing, service, method, parameters, exactVersion, false);
+	}
+
+	/**
+	 * invoke a service method
+	 * 
+	 * @param executing the executing agent
+	 * @param service service to be invoked
+	 * @param method service method
+	 * @param parameters invocation parameters
+	 * @param exactVersion if true, an exact version match is required, otherwise, an appropriate version will be
+	 *            choosen
+	 * @param localOnly if true, only locally running services are executed
+	 * @return invocation result
+	 * @throws L2pSecurityException
+	 * @throws AgentNotKnownException
+	 * @throws L2pServiceException
+	 * @throws InterruptedException
+	 */
+	public Serializable invoke(Agent executing, ServiceNameVersion service, String method, Serializable[] parameters,
+			boolean exactVersion, boolean localOnly) throws L2pSecurityException, AgentNotKnownException,
+			L2pServiceException, InterruptedException {
+
+		if (getStatus() != NodeStatus.RUNNING)
+			throw new IllegalStateException("You can invoke methods only on a running node!");
+
+		if (executing.isLocked()) {
+			throw new L2pSecurityException("The executing agent has to be unlocked to call a RMI");
+		}
+
+		NodeServiceCache.ServiceInstance instance = this.nodeServiceCache.getServiceAgentInstance(service,
+				exactVersion, localOnly, executing);
+
+		while (instance != null) {
+			if (instance.local()) {
+				return invokeLocally(executing, instance.getServiceAgent(), method, parameters);
+			} else {
+				try {
+					return invokeGlobally(executing, instance.getServiceAgentId(), instance.getNodeId(), method,
+							parameters);
+				} catch (NodeNotFoundException | TimeoutException e) {
+					nodeServiceCache.removeGlobalServiceInstance(instance);
+					instance = this.nodeServiceCache.getServiceAgentInstance(service, exactVersion, localOnly,
+							executing);
+				}
+			}
+		}
+
+		throw new IllegalStateException();
+	}
+
+	/**
+	 * invokes a locally running service agent
+	 * 
+	 * preferably, use {@link #invoke(Agent, ServiceNameVersion, String, Serializable[], boolean, boolean)}
+	 * 
+	 * @param executing the executing agent
+	 * @param serviceAgent the service agent that should be invoked (must run on this node)
+	 * @param method service method
+	 * @param parameters method parameters
+	 * @return incovation result
+	 * @throws L2pSecurityException
+	 * @throws AgentNotKnownException
 	 * @throws InterruptedException
 	 * @throws L2pServiceException
 	 */
-	public Serializable invokeLocally(Agent executing, ServiceNameVersion service, String method,
+	public Serializable invokeLocally(Agent executing, ServiceAgent serviceAgent, String method,
 			Serializable[] parameters) throws L2pSecurityException, AgentNotKnownException, InterruptedException,
 			L2pServiceException {
 
@@ -1206,13 +1309,12 @@ public abstract class Node implements AgentStorage {
 			throw new L2pSecurityException("The executing agent has to be unlocked to call a RMI");
 		}
 
-		// get local service agent
-		ServiceAgent serviceAgent = nodeServiceCache.getLocalServiceAgent(service);
-		if (serviceAgent == null)
-			throw new AgentNotKnownException("No ServiceAgent known for this service!");
+		// check if local service agent
+		if (!hasLocalAgent(serviceAgent))
+			throw new AgentNotKnownException("This ServiceAgent is not known locally!");
 
 		// execute
-		RMITask task = new RMITask(service, method, parameters);
+		RMITask task = new RMITask(serviceAgent.getServiceNameVersion(), method, parameters);
 		Context context = getAgentContext(executing);
 		L2pThread thread = new L2pThread(serviceAgent, task, context);
 		thread.start();
@@ -1239,52 +1341,28 @@ public abstract class Node implements AgentStorage {
 		}
 	}
 
-	@Deprecated
-	public Serializable invokeLocally(long executingAgentId, ServiceNameVersion service, String method,
-			Serializable[] parameters) throws L2pSecurityException, AgentNotKnownException, InterruptedException,
-			L2pServiceException {
-		return invokeLocally(getAgentContext(executingAgentId).getMainAgent(), service, method, parameters);
-	}
-
 	/**
-	 * Tries to get an instance of the given class as a registered service of this node.
+	 * invokes a service instance in the network
 	 * 
-	 * @param service
+	 * preferably, use {@link #invoke(Agent, ServiceNameVersion, String, Serializable[], boolean, boolean)}
 	 * 
-	 * @return the instance of the given service class running at this node
-	 * @throws NoSuchServiceException
-	 */
-	public Service getLocalServiceInstance(ServiceNameVersion service) throws NoSuchServiceException {
-		try {
-			ServiceAgent agent = (ServiceAgent) getLocalAgent(ServiceAgent.serviceClass2Id(service));
-			return agent.getServiceInstance();
-		} catch (Exception e) {
-			throw new NoSuchServiceException(service.toString());
-		}
-	}
-
-	private int invocationDistributerIndex = 0;
-
-	/**
-	 * Invokes a service method of the network.
-	 * 
-	 * @param executing
-	 * @param service
-	 * @param serviceMethod
-	 * @param parameters
-	 * 
-	 * @return result of the method invocation
-	 * 
+	 * @param executing teh executing agent
+	 * @param serviceAgentId the id of the service agent
+	 * @param nodeId id of the node running the agent (may be null)
+	 * @param method service method
+	 * @param parameters method parameters
+	 * @return invocation result
 	 * @throws L2pSecurityException
-	 * @throws ServiceInvocationException several reasons -- see subclasses
+	 * @throws ServiceInvocationException
 	 * @throws InterruptedException
 	 * @throws TimeoutException
 	 * @throws UnlockNeededException
 	 * @throws AgentNotKnownException
+	 * @throws NodeNotFoundException
 	 */
-	public Serializable invokeGlobally(Agent executing, ServiceNameVersion service, String serviceMethod,
+	public Serializable invokeGlobally(Agent executing, long serviceAgentId, Object nodeId, String method,
 			Serializable[] parameters) throws L2pSecurityException, ServiceInvocationException, InterruptedException,
-			TimeoutException, UnlockNeededException, AgentNotKnownException {
+			TimeoutException, UnlockNeededException, AgentNotKnownException, NodeNotFoundException {
 
 		if (getStatus() != NodeStatus.RUNNING)
 			throw new IllegalStateException("You can invoke methods only on a running node!");
@@ -1296,21 +1374,20 @@ public abstract class Node implements AgentStorage {
 			throw new L2pSecurityException("The executing agent has to be unlocked to call a RMI");
 		}
 
-		/*
-		ServiceAgent serviceAgent = nodeServiceCache.getServiceAgent(service);
-		if (serviceAgent == null)
-			throw new AgentNotKnownException("No ServiceAgent known for this service!");
-		*/
-
-		ServiceAgent serviceAgent = getServiceAgent(service);
+		ServiceAgent serviceAgent;
+		try {
+			serviceAgent = (ServiceAgent) getAgent(serviceAgentId);
+		} catch (ClassCastException e) {
+			throw new AgentNotKnownException("This is not a service agent!", e);
+		}
 
 		try {
 			Serializable msg;
 			if (executing instanceof PassphraseAgent) {
-				msg = new UnlockAgentCall(new RMITask(service, serviceMethod, parameters),
+				msg = new UnlockAgentCall(new RMITask(serviceAgent.getServiceNameVersion(), method, parameters),
 						((PassphraseAgent) executing).getPassphrase());
 			} else {
-				msg = new RMITask(service, serviceMethod, parameters);
+				msg = new RMITask(serviceAgent.getServiceNameVersion(), method, parameters);
 			}
 			Message rmiMessage = new Message(executing, serviceAgent, msg);
 
@@ -1320,27 +1397,12 @@ public abstract class Node implements AgentStorage {
 				rmiMessage.setSendingNodeId((NodeHandle) getNodeId());
 			}
 			Message resultMessage;
-			NodeHandle targetNode = null;// =nodeServiceCache.getRandomServiceNode(serviceClass,"1.0");
 
-			// TODO replace ServiceInfoAgent
-			ArrayList<NodeHandle> targetNodes = nodeServiceCache.getServiceNodes(service);
-			if (targetNodes != null && targetNodes.size() > 0) {
-				// TODO seems like round robin, should be replaced with a more generic node choose strategy
-				invocationDistributerIndex %= targetNodes.size();
-				targetNode = targetNodes.get(invocationDistributerIndex);
-				invocationDistributerIndex++;
-				if (invocationDistributerIndex >= targetNodes.size())
-					invocationDistributerIndex = 0;
-
-			}
-
-			if (targetNode != null) {
+			if (nodeId != null) {
 				try {
-					resultMessage = sendMessageAndWaitForAnswer(rmiMessage, targetNode);
+					resultMessage = sendMessageAndWaitForAnswer(rmiMessage, nodeId);
 				} catch (NodeNotFoundException nex) {
-					// remove so unavailable nodes will not be tried again
-					nodeServiceCache.removeServiceAgentEntryNode(service, targetNode);
-					resultMessage = sendMessageAndWaitForAnswer(rmiMessage);
+					throw nex;
 				}
 			} else {
 				resultMessage = sendMessageAndWaitForAnswer(rmiMessage);
@@ -1382,7 +1444,7 @@ public abstract class Node implements AgentStorage {
 		} catch (AgentNotKnownException e) {
 			// Do not log service class name (privacy..)
 			this.observerNotice(Event.RMI_FAILED, this.getNodeId(), executing, e.toString());
-			throw new NoSuchServiceException(service.getNameVersion(), e);
+			throw new NoSuchServiceException(serviceAgent.getServiceNameVersion().toString(), e);
 		} catch (EncodingFailedException e) {
 			// Do not log service class name (privacy..)
 			this.observerNotice(Event.RMI_FAILED, this.getNodeId(), executing, e.toString());
@@ -1395,156 +1457,20 @@ public abstract class Node implements AgentStorage {
 	}
 
 	/**
-	 * invoke a specific service version in the network
+	 * Tries to get an instance of the given class as a registered service of this node.
 	 * 
-	 * @param executing the executing agent
-	 * @param service the service version to execute
-	 * @param serviceMethod the method to execute
-	 * @param parameters method parameters
-	 * @param preferLocal turn off load balancing to prefer locally running services
-	 * @return the invocation result
-	 * @throws AgentNotKnownException
-	 * @throws L2pServiceException
-	 * @throws L2pSecurityException
-	 * @throws InterruptedException
-	 * @throws TimeoutException
-	 */
-	public Serializable invoke(Agent executing, ServiceNameVersion service, String serviceMethod,
-			Serializable[] parameters, boolean preferLocal) throws AgentNotKnownException, L2pServiceException,
-			L2pSecurityException, InterruptedException, TimeoutException {
-
-		if (getStatus() != NodeStatus.RUNNING)
-			throw new IllegalStateException("You can invoke methods only on a running node!");
-
-		ServiceAgent localServiceAgent = nodeServiceCache.getLocalServiceAgent(service);
-		ServiceAgent serviceAgent = nodeServiceCache.getServiceAgent(service);
-		List<NodeHandle> nodes = nodeServiceCache.getServiceNodes(service);
-
-		if (localServiceAgent != null
-				&& (!isBusy() || (nodes != null && nodes.size() == 1) || preferLocal || serviceAgent == null)) {
-			return invokeLocally(executing, service, serviceMethod, parameters);
-		} else if (serviceAgent != null) {
-			return invokeGlobally(executing, service, serviceMethod, parameters);
-		} else {
-			try {
-				// fallback (using exact match)
-				return invokeGlobally(executing, service, serviceMethod, parameters);
-			} catch (AgentNotKnownException e) {
-				throw new NoSuchServiceException(service.toString());
-			}
-		}
-	}
-
-	/**
-	 * invoke a service in the network, chooses appropriate version
-	 * 
-	 * @param executing
-	 * @param serviceString The service class to execute. A version can be specified using "...@major.minor.sub-build",
-	 *            the closest version will be picked. If no version is specified, the newest version will be choosen.
-	 * @param serviceMethod
-	 * @param parameters
-	 * @param preferLocal
-	 * @return
-	 * @throws AgentNotKnownException
-	 * @throws L2pServiceException
-	 * @throws L2pSecurityException
-	 * @throws InterruptedException
-	 * @throws TimeoutException
-	 */
-	public Serializable invoke(Agent executing, String serviceString, String serviceMethod, Serializable[] parameters,
-			boolean preferLocal) throws AgentNotKnownException, L2pServiceException, L2pSecurityException,
-			InterruptedException, TimeoutException {
-
-		if (getStatus() != NodeStatus.RUNNING)
-			throw new IllegalStateException("You can invoke methods only on a running node!");
-
-		ServiceNameVersion nameVersion = ServiceNameVersion.fromString(serviceString);
-		ServiceVersion requestedVersion = new ServiceVersion(nameVersion.getVersion());
-
-		// get local information
-		ServiceVersion[] localVersions = nodeServiceCache.getLocalVersions(nameVersion.getName());
-		ServiceVersion localVersion = null;
-		ServiceAgent localServiceAgent = null;
-		if (localVersions != null) {
-			localVersion = requestedVersion.chooseFittingVersion(localVersions);
-			if (localVersion != null) {
-				localServiceAgent = nodeServiceCache.getLocalServiceAgent(nameVersion.getName(), localVersion);
-			}
-		}
-
-		// get global information
-		ServiceVersion[] globalVersions = nodeServiceCache.getVersions(nameVersion.getName());
-		ServiceVersion globalVersion = null;
-		ServiceAgent serviceAgent = null;
-		List<NodeHandle> nodes = null;
-		if (globalVersions != null) {
-			globalVersion = requestedVersion.chooseFittingVersion(globalVersions);
-			if (globalVersion != null) {
-				serviceAgent = nodeServiceCache.getServiceAgent(nameVersion.getName(), globalVersion.toString());
-				nodes = nodeServiceCache.getServiceNodes(nameVersion.getName(), globalVersion.toString());
-			}
-		}
-
-		// invoke
-		if (localServiceAgent != null
-				&& (!isBusy() || (nodes != null && nodes.size() == 1) || preferLocal || serviceAgent == null)) {
-			return invokeLocally(executing, new ServiceNameVersion(nameVersion.getName(), localVersion.toString()),
-					serviceMethod, parameters);
-		} else if (serviceAgent != null && globalVersion != null) {
-			return invokeGlobally(executing, new ServiceNameVersion(nameVersion.getName(), globalVersion.toString()),
-					serviceMethod, parameters);
-		} else {
-			try {
-				// fallback (using exact match)
-				return invokeGlobally(executing, nameVersion, serviceMethod, parameters);
-			} catch (AgentNotKnownException e) {
-				throw new NoSuchServiceException(serviceString);
-			}
-		}
-	}
-
-	/**
-	 * invokes a specific version of a service in the network, using load balancing (thus not preferring locally running
-	 * services)
-	 * 
-	 * @param executing
 	 * @param service
-	 * @param serviceMethod
-	 * @param parameters
-	 * @return
-	 * @throws AgentNotKnownException
-	 * @throws L2pServiceException
-	 * @throws L2pSecurityException
-	 * @throws InterruptedException
-	 * @throws TimeoutException
-	 */
-	public Serializable invoke(Agent executing, ServiceNameVersion service, String serviceMethod,
-			Serializable[] parameters) throws AgentNotKnownException, L2pServiceException, L2pSecurityException,
-			InterruptedException, TimeoutException {
-
-		return invoke(executing, service, serviceMethod, parameters, false);
-	}
-
-	/**
-	 * invokes a service in the network, using load balancing (thus not preferring locally running services)
 	 * 
-	 * @param executing
-	 * @param service The service class to execute. A version can be specified using "...@major.minor.sub-build", the
-	 *            closest version will be picked. If no version is specified, the newest version will be choosen.
-	 * @param serviceMethod
-	 * @param parameters
-	 * @return
-	 * @throws AgentNotKnownException
-	 * @throws L2pServiceException
-	 * @throws L2pSecurityException
-	 * @throws InterruptedException
-	 * @throws TimeoutException
+	 * @return the instance of the given service class running at this node
+	 * @throws NoSuchServiceException
 	 */
-	public Serializable invoke(Agent executing, String service, String serviceMethod, Serializable[] parameters)
-			throws AgentNotKnownException, L2pServiceException, L2pSecurityException, InterruptedException,
-			TimeoutException {
-
-		return invoke(executing, service, serviceMethod, parameters, false);
+	public Service getLocalServiceInstance(ServiceNameVersion service) throws NoSuchServiceException {
+		try {
+			ServiceAgent agent = (ServiceAgent) getLocalAgent(ServiceAgent.serviceClass2Id(service));
+			return agent.getServiceInstance();
+		} catch (Exception e) {
+			throw new NoSuchServiceException(service.toString());
+		}
 	}
 
 	/**
@@ -1644,6 +1570,7 @@ public abstract class Node implements AgentStorage {
 	 * @throws InterruptedException
 	 * @throws TimeoutException
 	 */
+	// TODO SIA do not wait that long after first result is collected
 	public Message[] sendMessageAndCollectAnswers(Message m, int recipientCount) throws InterruptedException,
 			TimeoutException {
 		long timeout = m.getTimeoutTs() - new Date().getTime();
@@ -1660,8 +1587,6 @@ public abstract class Node implements AgentStorage {
 			return results;
 		else
 			throw new TimeoutException();
-
-		// TODO SIA make faster?
 	}
 
 	/**

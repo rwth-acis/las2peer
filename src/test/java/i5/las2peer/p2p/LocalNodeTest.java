@@ -396,9 +396,14 @@ public class LocalNodeTest {
 		assertTrue(received3.getSenderId() == adam.getId());
 		assertTrue(received3.getTopicId() == 1);
 
+		// cehck if open
+		assertTrue(received1.isOpen());
+		assertTrue(received2.isOpen());
+		assertTrue(received3.isOpen());
+
 		// open
-		received2.open(abel, node1);
-		assertEquals(received2.getContent(), "some content");
+		// received2.open(abel, node1);
+		// assertEquals(received2.getContent(), "some content");
 
 		// answer
 		// a mediator always sends an answer...
@@ -473,8 +478,7 @@ public class LocalNodeTest {
 		testee.storeAgent(testService);
 		testee.registerReceiver(testService);
 
-		Serializable result = testee.invokeLocally(eve, ServiceNameVersion.fromString(serviceClass + "@1.0"), "inc",
-				new Serializable[] { new Integer(10) });
+		Serializable result = testee.invokeLocally(eve, testService, "inc", new Serializable[] { new Integer(10) });
 
 		assertEquals(12, result);
 	}
