@@ -7,13 +7,13 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
 
 import i5.las2peer.restMapper.data.Pair;
+import i5.las2peer.webConnector.WebConnector;
 
 /**
  * Very simple client to communicate with the las2peer web connector
@@ -64,7 +64,11 @@ public class MiniClient {
 	 */
 	public ClientResponse sendRequest(String method, String uri, String content, String contentType, String accept,
 			Pair<String>[] headers) {
-		System.out.println("Request: " + method + " URI: " + uri + " Content: " + content + " Content-type: "
+		String strContent = "[too big " + Integer.toString(content.length()) + " bytes]";
+		if (content.length() < WebConnector.DEFAULT_MAX_REQUEST_BODY_SIZE) {
+			strContent = content;
+		}
+		System.out.println("Request: " + method + " URI: " + uri + " Content: " + strContent + " Content-type: "
 				+ contentType + " accept: " + accept + " headers: " + headers.length);
 		HttpURLConnection connection = null;
 		ClientResponse response;
@@ -126,9 +130,7 @@ public class MiniClient {
 
 			Map<String, List<String>> responseMap = connection.getHeaderFields();
 			StringBuilder sb = new StringBuilder();
-			for (Iterator<String> iterator = responseMap.keySet().iterator(); iterator.hasNext();) {
-				String key = iterator.next();
-
+			for (String key : responseMap.keySet()) {
 				sb.setLength(0);
 
 				List<String> values = responseMap.get(key);

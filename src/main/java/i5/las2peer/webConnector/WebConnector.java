@@ -90,6 +90,9 @@ public class WebConnector extends Connector {
 	public static final int DEFAULT_MAX_CONNECTIONS = 500;
 	protected int maxConnections = DEFAULT_MAX_CONNECTIONS;
 
+	public static final int DEFAULT_MAX_REQUEST_BODY_SIZE = 10 * 1000 * 1000; // = 10 MB
+	protected int maxRequestBodySize = DEFAULT_MAX_REQUEST_BODY_SIZE;
+
 	protected String xmlPath;
 
 	private HttpServer http;
