@@ -36,14 +36,32 @@ public class NodeServiceCache {
 		this.waitForResults = resultCount;
 	}
 
+	public void setWaitForResults(int c) {
+		this.waitForResults = c;
+	}
+
+	public void setLifeTimeSeconds(int c) {
+		this.lifeTimeSeconds = c;
+	}
+
+	/**
+	 * clears the global cache (needed for units tests)
+	 */
+	public void clear() {
+		this.globalServices.clear();
+	}
+
 	/**
 	 * returns a service agent instance. whenever possible, a local version is preferred.
+	 * 
+	 * it returns the newest version "available", where "available" does not refer to the network but to the set of
+	 * service instances matching other parameters (node load, response time, ...)
 	 * 
 	 * @param service the requested service
 	 * @param exact forces an exact version match
 	 * @param localOnly only look for local services
 	 * @param acting an acting agent invoking the service
-	 * @return
+	 * @return any service agent matching the requirements
 	 * @throws AgentNotKnownException
 	 */
 	public ServiceInstance getServiceAgentInstance(ServiceNameVersion service, boolean exact, boolean localOnly,
@@ -239,7 +257,7 @@ public class NodeServiceCache {
 			long i = 1;
 			for (Message res : results) {
 				try {
-					res.open(acting, runningAt); // TODO SIA exception: message is signed for another sender
+					res.open(acting, runningAt);
 				} catch (Exception e) {
 					continue;
 				}

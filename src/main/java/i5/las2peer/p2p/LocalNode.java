@@ -631,7 +631,7 @@ public class LocalNode extends Node {
 				}
 
 				try {
-					getNode(nodeId).receiveMessage(message);
+					getNode(nodeId).receiveMessage(message.clone());
 				} catch (Exception e) {
 					System.out.println("problems at node " + nodeId);
 					throw new RuntimeException(e);
