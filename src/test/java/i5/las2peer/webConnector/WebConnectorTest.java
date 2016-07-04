@@ -416,7 +416,7 @@ public class WebConnectorTest {
 		}
 	}
 
-	@Test
+	// @Test
 	public void testUploadLimit() {
 		MiniClient c = new MiniClient();
 		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
