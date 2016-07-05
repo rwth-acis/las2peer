@@ -165,12 +165,12 @@ public class LocalNodeInvocationTest {
 		// specify exact version
 		Object result = callerNode.invoke(eve,
 				ServiceNameVersion.fromString("i5.las2peer.testServices.testPackage1.TestService@1.0"), "getVersion",
-				new Serializable[] {});
+				new Serializable[] {}, true);
 		assertEquals(100, result);
 
 		result = callerNode.invoke(eve,
 				ServiceNameVersion.fromString("i5.las2peer.testServices.testPackage1.TestService@1.1"), "getVersion",
-				new Serializable[] {});
+				new Serializable[] {}, true);
 		assertEquals(110, result);
 
 		// use newest version
@@ -194,8 +194,9 @@ public class LocalNodeInvocationTest {
 		// fail on non-existent version
 		boolean failed = false;
 		try {
-			result = callerNode.invoke(eve, "i5.las2peer.testServices.testPackage1.TestService@2.0", "getVersion",
-					new Serializable[] {});
+			result = callerNode.invoke(eve,
+					ServiceNameVersion.fromString("i5.las2peer.testServices.testPackage1.TestService@2.0"),
+					"getVersion", new Serializable[] {}, true);
 		} catch (NoSuchServiceException e) {
 			failed = true;
 		}

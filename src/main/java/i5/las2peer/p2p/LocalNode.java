@@ -571,7 +571,7 @@ public class LocalNode extends Node {
 
 	private static final long DEFAULT_PENDING_TIMEOUT = 20000; // 20 seconds
 	private static final int DEFAULT_MESSAGE_MIN_WAIT = 500;
-	private static final int DEFAULT_MESSAGE_MAX_WAIT = 3000;
+	private static final int DEFAULT_MESSAGE_MAX_WAIT = 1000;
 
 	private static final int iMessageMinWait = DEFAULT_MESSAGE_MIN_WAIT;
 	private static final int iMessageMaxWait = DEFAULT_MESSAGE_MAX_WAIT;

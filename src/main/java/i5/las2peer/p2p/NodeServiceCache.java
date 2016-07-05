@@ -29,6 +29,7 @@ public class NodeServiceCache {
 
 	private long lifeTimeSeconds = 30;
 	private int waitForResults = 3;
+	private int timeoutMs = 2000;
 
 	public NodeServiceCache(Node parent, long lifeTime, int resultCount) {
 		this.runningAt = parent;
@@ -124,6 +125,8 @@ public class NodeServiceCache {
 
 	private ServiceInstance getBestGlobalInstanceFitsVersion(String name, ServiceVersion version) {
 		synchronized (globalServices) {
+			ServiceInstance result = null;
+
 			if (globalServices.containsKey(name)) {
 				SortedMap<ServiceVersion, SortedSet<ServiceInstance>> versions = globalServices.get(name);
 				Iterator<Map.Entry<ServiceVersion, SortedSet<ServiceInstance>>> it_versions = versions.entrySet()
@@ -137,7 +140,8 @@ public class NodeServiceCache {
 						while (it_instances.hasNext()) {
 							ServiceInstance i = it_instances.next();
 							if (!i.outdated()) {
-								return i;
+								if (result == null)
+									result = i;
 							} else {
 								it_instances.remove();
 							}
@@ -151,19 +155,22 @@ public class NodeServiceCache {
 					globalServices.remove(name);
 			}
 
-			return null;
+			return result;
 		}
 	}
 
 	private ServiceInstance getBestGlobalInstanceOfVersion(String name, ServiceVersion version) {
 		synchronized (globalServices) {
+			ServiceInstance result = null;
+
 			if (globalServices.containsKey(name) && globalServices.get(name).containsKey(version)) {
 				SortedSet<ServiceInstance> instances = globalServices.get(name).get(version);
 				Iterator<ServiceInstance> it_instances = instances.iterator();
 				while (it_instances.hasNext()) {
 					ServiceInstance i = it_instances.next();
 					if (!i.outdated()) {
-						return i;
+						if (result == null)
+							result = i;
 					} else {
 						it_instances.remove();
 					}
@@ -175,7 +182,7 @@ public class NodeServiceCache {
 					globalServices.remove(name);
 			}
 
-			return null;
+			return result;
 		}
 	}
 
@@ -249,7 +256,8 @@ public class NodeServiceCache {
 			AgentNotKnownException {
 
 		Message m = new Message(acting, ServiceAgent.serviceNameToTopicId(service.getName()),
-				new ServiceDiscoveryContent(service, exact));
+				new ServiceDiscoveryContent(service, exact), timeoutMs);
+		m.setSendingNodeId(runningAt.getNodeId());
 		Message[] results = runningAt.sendMessageAndCollectAnswers(m, waitForResults);
 
 		if (results.length > 0) {

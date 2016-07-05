@@ -109,6 +109,7 @@ public abstract class Node implements AgentStorage {
 	private int nodeServiceCacheResultCount = 3; // number of service instances to be collected from the network
 	private int tidyUpTimerInterval = 60;
 	private int agentContextLifetime = 60;
+	private int invocationRetryCount = 3;
 
 	/**
 	 * observers to be notified of all occurring events
@@ -1262,10 +1263,18 @@ public abstract class Node implements AgentStorage {
 			throw new L2pSecurityException("The executing agent has to be unlocked to call a RMI");
 		}
 
-		NodeServiceCache.ServiceInstance instance = this.nodeServiceCache.getServiceAgentInstance(service,
-				exactVersion, localOnly, executing);
+		int retry = invocationRetryCount;
+		while (retry > 0) {
+			retry--;
 
-		while (instance != null) {
+			NodeServiceCache.ServiceInstance instance;
+
+			try {
+				instance = this.nodeServiceCache.getServiceAgentInstance(service, exactVersion, localOnly, executing);
+			} catch (AgentNotKnownException e) {
+				throw new NoSuchServiceException(service.toString(), e);
+			}
+
 			if (instance.local()) {
 				return invokeLocally(executing, instance.getServiceAgent(), method, parameters);
 			} else {
@@ -1274,8 +1283,8 @@ public abstract class Node implements AgentStorage {
 							parameters);
 				} catch (NodeNotFoundException | TimeoutException e) {
 					nodeServiceCache.removeGlobalServiceInstance(instance);
-					instance = this.nodeServiceCache.getServiceAgentInstance(service, exactVersion, localOnly,
-							executing);
+					if (retry == 0)
+						throw new L2pServiceException("Cannot reach service.", e);
 				}
 			}
 		}
@@ -1545,9 +1554,10 @@ public abstract class Node implements AgentStorage {
 	 * @throws NodeNotFoundException
 	 * @throws L2pSecurityException
 	 * @throws InterruptedException
+	 * @throws TimeoutException
 	 */
 	public Message sendMessageAndWaitForAnswer(Message m, Object atNodeId) throws AgentNotKnownException,
-			NodeNotFoundException, L2pSecurityException, InterruptedException {
+			NodeNotFoundException, L2pSecurityException, InterruptedException, TimeoutException {
 		long timeout = m.getTimeoutTs() - new Date().getTime();
 		MessageResultListener listener = new MessageResultListener(timeout);
 
@@ -1555,7 +1565,9 @@ public abstract class Node implements AgentStorage {
 
 		listener.waitForOneAnswer();
 
-		// TODO what happens if the answers timeouts? Throw TimeoutException?
+		if (listener.getResults().length == 0)
+			throw new TimeoutException("No answer received!");
+
 		return listener.getResults()[0];
 	}
 
@@ -1570,23 +1582,22 @@ public abstract class Node implements AgentStorage {
 	 * @throws InterruptedException
 	 * @throws TimeoutException
 	 */
-	// TODO SIA do not wait that long after first result is collected
 	public Message[] sendMessageAndCollectAnswers(Message m, int recipientCount) throws InterruptedException,
 			TimeoutException {
 		long timeout = m.getTimeoutTs() - new Date().getTime();
-		MessageResultListener listener = new MessageResultListener(timeout);
+		MessageResultListener listener = new MessageResultListener(timeout, timeout / 4);
 		listener.addRecipients(recipientCount);
 
 		sendMessage(m, listener, SendMode.BROADCAST);
 
-		listener.waitForAllAnswers();
+		listener.waitForAllAnswers(false);
 
 		Message[] results = listener.getResults();
 
 		if (results.length > 0)
 			return results;
 		else
-			throw new TimeoutException();
+			throw new TimeoutException("No answer received!");
 	}
 
 	/**

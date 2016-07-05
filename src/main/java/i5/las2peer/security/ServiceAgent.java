@@ -203,6 +203,7 @@ public class ServiceAgent extends PassphraseAgent {
 							this.getServiceNameVersion());
 
 					Message response = new Message(m, result);
+					response.setSendingNodeId(getRunningAtNode().getNodeId());
 					getRunningAtNode().sendResponse(response, m.getSendingNodeId());
 				}
 
