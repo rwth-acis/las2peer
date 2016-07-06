@@ -98,23 +98,18 @@ public class MiniClient {
 				wr.writeBytes(content);
 				wr.close();
 			}
-			int code = connection.getResponseCode();
-
-			response = new ClientResponse(code);
 
 			// Get Response
-			InputStream is = null;
-			try {
-				is = connection.getErrorStream();
-			} catch (Exception e) {
-				// do nothing
-			}
+			int code = connection.getResponseCode();
+			response = new ClientResponse(code);
 
+			InputStream is = connection.getErrorStream();
 			try {
 				is = connection.getInputStream();
 			} catch (Exception e) {
-				// do nothing
+				e.printStackTrace();
 			}
+
 			if (is == null) {
 				return response;
 			}
