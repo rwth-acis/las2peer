@@ -107,7 +107,7 @@ public class MiniClient {
 			try {
 				is = connection.getInputStream();
 			} catch (Exception e) {
-				e.printStackTrace();
+				// XXX logging
 			}
 
 			if (is == null) {
