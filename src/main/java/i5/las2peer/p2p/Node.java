@@ -1,6 +1,5 @@
 package i5.las2peer.p2p;
 
-import i5.las2peer.api.Service;
 import i5.las2peer.classLoaders.L2pClassManager;
 import i5.las2peer.classLoaders.libraries.Repository;
 import i5.las2peer.communication.Message;
@@ -19,6 +18,7 @@ import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.logging.NodeObserver;
 import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.logging.monitoring.MonitoringObserver;
+import i5.las2peer.p2p.NodeServiceCache.ServiceInstance;
 import i5.las2peer.p2p.pastry.PastryStorageException;
 import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.persistency.Envelope;
@@ -1072,7 +1072,7 @@ public abstract class Node implements AgentStorage {
 	 * 
 	 * @param agent
 	 * 
-	 * @throws AgentAlreadyRegisteredException
+	 * @throws AgentAlreadyRegisteredException if the agent is already registered
 	 * @throws L2pSecurityException
 	 * @throws AgentException
 	 */
@@ -1155,29 +1155,26 @@ public abstract class Node implements AgentStorage {
 	}
 
 	/**
-	 * Gets the agent representing the given service class.
+	 * Gets an currently running agent executing the given service.
 	 * 
-	 * prefer using a locally registered agent
+	 * Prefer using a locally registered agent.
 	 * 
 	 * @param service
+	 * @param acting
 	 * @return the ServiceAgent responsible for the given service class
 	 * @throws AgentNotKnownException
 	 */
-	public ServiceAgent getServiceAgent(ServiceNameVersion service) throws AgentNotKnownException {
-		long agentId = ServiceAgent.serviceClass2Id(service);
-
-		Agent result;
-		try {
-			result = getLocalAgent(agentId);
-		} catch (AgentNotKnownException e) {
-			result = getAgent(agentId);
+	public ServiceAgent getServiceAgent(ServiceNameVersion service, Agent acting) throws AgentNotKnownException {
+		ServiceInstance inst = nodeServiceCache.getServiceAgentInstance(service, true, false, acting);
+		if (inst.local()) {
+			return inst.getServiceAgent();
+		} else {
+			Agent result = getAgent(inst.getServiceAgentId());
+			if (result == null || !(result instanceof ServiceAgent)) {
+				throw new AgentNotKnownException("The corresponding agent is not a ServiceAgent!?");
+			}
+			return (ServiceAgent) result;
 		}
-
-		if (result == null || !(result instanceof ServiceAgent)) {
-			throw new AgentNotKnownException("The corresponding agent is not a ServiceAgent!?");
-		}
-
-		return (ServiceAgent) result;
 	}
 
 	/**
@@ -1473,10 +1470,9 @@ public abstract class Node implements AgentStorage {
 	 * @return the instance of the given service class running at this node
 	 * @throws NoSuchServiceException
 	 */
-	public Service getLocalServiceInstance(ServiceNameVersion service) throws NoSuchServiceException {
+	public ServiceAgent getLocalServiceAgent(ServiceNameVersion service) throws NoSuchServiceException {
 		try {
-			ServiceAgent agent = (ServiceAgent) getLocalAgent(ServiceAgent.serviceClass2Id(service));
-			return agent.getServiceInstance();
+			return nodeServiceCache.getLocalService(service);
 		} catch (Exception e) {
 			throw new NoSuchServiceException(service.toString());
 		}
@@ -1655,7 +1651,13 @@ public abstract class Node implements AgentStorage {
 	 * @return true, if this node as an instance of the given service running
 	 */
 	public boolean hasService(ServiceNameVersion service) {
-		return hasAgent(ServiceAgent.serviceClass2Id(service));
+		// return hasAgent(ServiceAgent.serviceClass2Id(service));
+		try {
+			nodeServiceCache.getLocalService(service);
+			return true;
+		} catch (AgentNotKnownException e) {
+			return false;
+		}
 	}
 
 	/**

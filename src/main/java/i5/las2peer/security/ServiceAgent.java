@@ -37,6 +37,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.KeyPair;
 import java.security.PublicKey;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -267,6 +268,8 @@ public class ServiceAgent extends PassphraseAgent {
 	/**
 	 * create a completely new ServiceAgent for a given service class
 	 * 
+	 * the id will be generated randomly
+	 * 
 	 * @param service class name of the new service
 	 * @param passphrase a pass phrase for the private key of the agent
 	 * @return a new ServiceAgent
@@ -276,7 +279,12 @@ public class ServiceAgent extends PassphraseAgent {
 	public static ServiceAgent createServiceAgent(ServiceNameVersion service, String passphrase)
 			throws CryptoException, L2pSecurityException {
 
-		return new ServiceAgent(serviceClass2Id(service), service, CryptoTools.generateKeyPair(), passphrase,
+		if (service.getVersion().toString().equals("*"))
+			throw new IllegalArgumentException("You must specify a version!");
+
+		Random r = new Random();
+
+		return new ServiceAgent(r.nextLong(), service, CryptoTools.generateKeyPair(), passphrase,
 				CryptoTools.generateSalt());
 	}
 
@@ -292,6 +300,7 @@ public class ServiceAgent extends PassphraseAgent {
 	 * @throws CryptoException
 	 * @throws L2pSecurityException
 	 */
+	@Deprecated
 	public static ServiceAgent createServiceAgent(String serviceName, String passphrase) throws CryptoException,
 			L2pSecurityException {
 		return createServiceAgent(new ServiceNameVersion(serviceName, "1.0"), passphrase);
@@ -511,17 +520,6 @@ public class ServiceAgent extends PassphraseAgent {
 		} catch (InvocationTargetException e) {
 			throw new L2pServiceException("Exception in service constructor", e.getCause());
 		}
-	}
-
-	/**
-	 * just use a long hash value of the service class name as id for the agent
-	 * 
-	 * @param service
-	 * 
-	 * @return (hashed) ID for the given service class
-	 */
-	public static long serviceClass2Id(ServiceNameVersion service) {
-		return SimpleTools.longHash(service.toString());
 	}
 
 	/**

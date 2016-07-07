@@ -60,14 +60,6 @@ public class ServiceAgentTest {
 	}
 
 	@Test
-	public void testId() {
-		assertEquals(ServiceAgent.serviceClass2Id(ServiceNameVersion.fromString(servicename + "@" + serviceversion)),
-				ServiceAgent.serviceClass2Id(ServiceNameVersion.fromString(servicename + "@" + serviceversion)));
-		assertFalse(ServiceAgent.serviceClass2Id(ServiceNameVersion.fromString(servicename + "@" + serviceversion)) == ServiceAgent
-				.serviceClass2Id(ServiceNameVersion.fromString(servicename + "x" + "@" + serviceversion)));
-	}
-
-	@Test
 	public void testServiceDiscovery() throws CryptoException, L2pSecurityException, AgentAlreadyRegisteredException,
 			AgentException, MalformedXMLException, IOException, EncodingFailedException, SerializationException,
 			InterruptedException, TimeoutException {
