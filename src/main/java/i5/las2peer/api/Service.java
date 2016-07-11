@@ -115,7 +115,7 @@ public abstract class Service extends Configurable {
 	 * The node this service is currently running at.
 	 */
 	private Node runningAt = null;
-	
+
 	/**
 	 * The service agent responsible for this service.
 	 */
@@ -124,7 +124,7 @@ public abstract class Service extends Configurable {
 	/**
 	 * Executes a service method.
 	 * 
-	 * @param method
+	 * @param method the service method
 	 * 
 	 * @return result of the method invocation
 	 * 
@@ -143,7 +143,7 @@ public abstract class Service extends Configurable {
 	/**
 	 * Executes a service method.
 	 * 
-	 * @param method
+	 * @param method the service method
 	 * @param parameters
 	 * 
 	 * @return result of the method invocation
@@ -171,9 +171,9 @@ public abstract class Service extends Configurable {
 	 * 
 	 * Needs an active {@link Context}!
 	 * 
-	 * @param service The service class. A version may be specified (for example package.serviceClass@1.0.0-1 or package.serviceClass@1.0). 
-	 * 				The core tries to find an appropriate version (version 1.0.5 matches 1.0). If no version is specified,
-	 * 				the newest version is picked.
+	 * @param service The service class. A version may be specified (for example package.serviceClass@1.0.0-1 or
+	 *            package.serviceClass@1.0). The core tries to find an appropriate version (version 1.0.5 matches 1.0).
+	 *            If no version is specified, the newest version is picked.
 	 * @param method the service method
 	 * @param parameters list of parameters
 	 * 
@@ -190,8 +190,7 @@ public abstract class Service extends Configurable {
 			throws AgentNotKnownException, L2pServiceException, L2pSecurityException, InterruptedException,
 			TimeoutException {
 
-		return getContext().getLocalNode().invoke(getContext().getMainAgent(), service,
-				method, parameters);
+		return getContext().getLocalNode().invoke(getContext().getMainAgent(), service, method, parameters);
 	}
 
 	/**
@@ -202,9 +201,9 @@ public abstract class Service extends Configurable {
 	 * 
 	 * Needs an active {@link Context}!
 	 * 
-	 * @param service The service class. A version may be specified (for example package.serviceClass@1.0.0-1 or package.serviceClass@1.0). 
-	 * 				The core tries to find an appropriate version (version 1.0.5 matches 1.0). If no version is specified,
-	 * 				the newest version is picked.
+	 * @param service The service class. A version may be specified (for example package.serviceClass@1.0.0-1 or
+	 *            package.serviceClass@1.0). The core tries to find an appropriate version (version 1.0.5 matches 1.0).
+	 *            If no version is specified, the newest version is picked.
 	 * @param method the service method
 	 * @param parameters list of parameters
 	 * 
@@ -220,15 +219,13 @@ public abstract class Service extends Configurable {
 			throws AgentNotKnownException, L2pServiceException, L2pSecurityException, InterruptedException,
 			TimeoutException {
 
-		return getContext().getLocalNode().invoke(getAgent(), service, method,
-				parameters);
+		return getContext().getLocalNode().invoke(getAgent(), service, method, parameters);
 	}
 
 	/**
 	 * Searches the service method fitting to the given parameter classes.
 	 *
-	 *
-	 * @param methodName
+	 * @param methodName the service method
 	 * @param params
 	 *
 	 * @return a Method
@@ -237,8 +234,8 @@ public abstract class Service extends Configurable {
 	 * @throws i5.las2peer.execution.NoSuchServiceMethodException
 	 *
 	 */
-	public Method searchMethod(String methodName, Object[] params) throws L2pSecurityException,
-			i5.las2peer.execution.NoSuchServiceMethodException {
+	public Method searchMethod(String methodName, Object[] params)
+			throws L2pSecurityException, i5.las2peer.execution.NoSuchServiceMethodException {
 		Class<?>[] acActualParamTypes = new Class[params.length];
 		Class<? extends Service> thisClass = this.getClass();
 
@@ -261,12 +258,13 @@ public abstract class Service extends Configurable {
 						for (int i = 0; i < acActualParamTypes.length && bPossible; i++) {
 							if (!acCheckParamTypes[i].isInstance(params[i])) {
 								// param[i] is not an instance of the formal parameter type
-								if (!(acCheckParamTypes[i].isPrimitive() && ServiceHelper.getWrapperClass(
-										acCheckParamTypes[i]).isInstance(params[i]))
+								if (!(acCheckParamTypes[i].isPrimitive()
+										&& ServiceHelper.getWrapperClass(acCheckParamTypes[i]).isInstance(params[i]))
 										&& !(ServiceHelper.isWrapperClass(acCheckParamTypes[i]) && ServiceHelper
-												.getUnwrappedClass(acCheckParamTypes[i]).isInstance(params[i])))
+												.getUnwrappedClass(acCheckParamTypes[i]).isInstance(params[i]))) {
 									// and not wrapped or unwrapped either! -> so not more possibilities to match!
 									bPossible = false;
+								}
 							}
 							// else is possible! -> check next param
 						} // for ( all formal parameters)
@@ -295,21 +293,24 @@ public abstract class Service extends Configurable {
 										found = toCheck;
 									} // something to do with wrappers?
 								}
-							} else
+							} else {
 								found = toCheck;
+							}
 						}
 					} // if ( parameter length matches)
 				} // if ( method name fits )
 			} // for (all known methods)
 		}
 
-		if (found == null)
+		if (found == null) {
 			throw new NoSuchServiceMethodException(this.getClass().getCanonicalName(), methodName,
 					getParameterString(params));
+		}
 
-		if (Modifier.isStatic(found.getModifiers()))
+		if (Modifier.isStatic(found.getModifiers())) {
 			throw new NoSuchServiceMethodException(this.getClass().getCanonicalName(), methodName,
 					getParameterString(params));
+		}
 
 		return found;
 	} // searchMethod
@@ -323,10 +324,12 @@ public abstract class Service extends Configurable {
 	 */
 	public static String getParameterString(Object[] params) {
 		StringBuffer result = new StringBuffer("(");
-		for (int i = 0; i < params.length - 1; i++)
+		for (int i = 0; i < params.length - 1; i++) {
 			result.append(params[i].getClass().getCanonicalName()).append(", ");
-		if (params.length > 0)
+		}
+		if (params.length > 0) {
 			result.append(params[params.length - 1].getClass().getCanonicalName());
+		}
 		result.append(")");
 		return result.toString();
 	}
@@ -339,8 +342,9 @@ public abstract class Service extends Configurable {
 	 * @throws AgentNotKnownException
 	 */
 	public final ServiceAgent getAgent() throws AgentNotKnownException {
-		if (this.agent == null)
+		if (this.agent == null) {
 			throw new AgentNotKnownException("This Service has not been started yet!");
+		}
 		return this.agent;
 	}
 
@@ -365,8 +369,9 @@ public abstract class Service extends Configurable {
 	private final L2pThread getL2pThread() {
 		Thread t = Thread.currentThread();
 
-		if (!(t instanceof L2pThread))
+		if (!(t instanceof L2pThread)) {
 			throw new IllegalStateException("Not executed in a L2pThread environment!");
+		}
 
 		return (L2pThread) t;
 	}
@@ -377,7 +382,7 @@ public abstract class Service extends Configurable {
 	 * simple startup hook that may be overwritten in subclasses
 	 * 
 	 * @param node
-	 * @param agent 
+	 * @param agent
 	 * @throws L2pServiceException
 	 */
 	public void launchedAt(Node node, ServiceAgent agent) throws L2pServiceException {
@@ -404,8 +409,7 @@ public abstract class Service extends Configurable {
 	}
 
 	/**
-	 * @deprecated Use {@link L2pLogger#logEvent(Event, String)} with {@link Event#SERVICE_MESSAGE}
-	 *             instead!
+	 * @deprecated Use {@link L2pLogger#logEvent(Event, String)} with {@link Event#SERVICE_MESSAGE} instead!
 	 *             <p>
 	 *             Writes a log message.
 	 * 
@@ -442,8 +446,7 @@ public abstract class Service extends Configurable {
 	}
 
 	/**
-	 * @deprecated Use {@link L2pLogger#logEvent(Event, String)} with {@link Event#SERVICE_ERROR}
-	 *             instead!
+	 * @deprecated Use {@link L2pLogger#logEvent(Event, String)} with {@link Event#SERVICE_ERROR} instead!
 	 *             <p>
 	 *             Writes an error log message.
 	 * 

@@ -92,9 +92,8 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	/**
 	 * Unlocks the private key.
 	 * 
-	 * @param key
-	 * 
-	 * @throws L2pSecurityException
+	 * @param key A key that is used to unlock the agents private key.
+	 * @throws L2pSecurityException If an issue with the given key occurs.
 	 */
 	public void unlockPrivateKey(SecretKey key) throws L2pSecurityException {
 		try {
@@ -109,12 +108,13 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	/**
 	 * Encrypts the private key into a byte array with strong encryption based on a passphrase. to unlock the key
 	 * 
-	 * @param key
-	 * @throws L2pSecurityException
+	 * @param key A key that is used to encrypt the agents private key.
+	 * @throws L2pSecurityException If an issue with the given key occurs.
 	 */
 	public void encryptPrivateKey(SecretKey key) throws L2pSecurityException {
-		if (isLocked())
+		if (isLocked()) {
 			throw new L2pSecurityException("You have to unlock the key first!");
+		}
 
 		try {
 			baEncrypedPrivate = CryptoTools.encryptSymmetric(privateKey, key);
@@ -167,20 +167,21 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	 * @throws L2pSecurityException the private key has not been unlocked yet
 	 */
 	private PrivateKey getPrivateKey() throws L2pSecurityException {
-		if (privateKey == null)
+		if (privateKey == null) {
 			throw new L2pSecurityException("You have to unlock the key using a passphrase first!");
+		}
 		return privateKey;
 	}
 
 	/**
 	 * Uses the {@link i5.las2peer.tools.CryptoTools} to decrypt the passed crypted content with the agent's private
 	 * key.
-	 * @param crypted 
 	 * 
-	 * @return a {@link javax.crypto.SecretKey} decrypted from the crypted input and the agent's private key
+	 * @param crypted The encrypted content that is decrypted using the agents private key.
+	 * @return Returns a {@link javax.crypto.SecretKey} decrypted from the crypted input and the agent's private key
 	 * 
 	 * @throws L2pSecurityException the private key has not been unlocked yet
-	 * @throws CryptoException
+	 * @throws CryptoException If an issue occurs with decryption.
 	 * @throws SerializationException
 	 */
 	public SecretKey returnSecretKey(byte[] crypted)
@@ -207,7 +208,8 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 
 	/**
 	 * Uses the {@link i5.las2peer.tools.CryptoTools} to sign the passed data with the agent's private key.
-	 * @param plainData 
+	 * 
+	 * @param plainData
 	 * 
 	 * @return a signed version of the input
 	 * 
@@ -235,9 +237,10 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	 * this agent.
 	 * 
 	 * @param message
-	 * @param c 
+	 * @param c
 	 * @throws MessageException
 	 */
+	@Override
 	public abstract void receiveMessage(Message message, Context c) throws MessageException;
 
 	/**
@@ -257,6 +260,7 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	 * Notifies this agent of unregistering from a node.
 	 * 
 	 */
+	@Override
 	public void notifyUnregister() {
 		runningAt = null;
 	}
@@ -272,10 +276,12 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	 * @throws AgentException
 	 * 
 	 */
+	@Override
 	public void notifyRegistrationTo(Node n) throws AgentException {
-		if (this instanceof ServiceAgent)
+		if (this instanceof ServiceAgent) {
 			n.observerNotice(Event.SERVICE_STARTUP, n.getNodeId(), this,
 					"" + ((ServiceAgent) this).getServiceNameVersion());
+		}
 		runningAt = n;
 	}
 
@@ -320,21 +326,23 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	 */
 	public static Agent createFromXml(Element root) throws MalformedXMLException {
 		try {
-			if (!root.getName().equals("agent"))
+			if (!root.getName().equals("agent")) {
 				throw new MalformedXMLException("this is not an agent but a " + root.getName());
+			}
 
 			String type = root.getAttribute("type");
 
-			if ("user".equals(type))
+			if ("user".equals(type)) {
 				return UserAgent.createFromXml(root);
-			else if ("group".equals(type))
+			} else if ("group".equals(type)) {
 				return GroupAgent.createFromXml(root);
-			else if ("service".equals(type))
+			} else if ("service".equals(type)) {
 				return ServiceAgent.createFromXml(root);
-			else if ("monitoring".equals(type))
+			} else if ("monitoring".equals(type)) {
 				return MonitoringAgent.createFromXml(root);
-			else
+			} else {
 				throw new MalformedXMLException("Unknown agent type: " + type);
+			}
 
 		} catch (XMLSyntaxException e) {
 			throw new MalformedXMLException("Error parsing xml string", e);
