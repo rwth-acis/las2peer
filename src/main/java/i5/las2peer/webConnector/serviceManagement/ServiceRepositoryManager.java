@@ -1,5 +1,14 @@
 package i5.las2peer.webConnector.serviceManagement;
 
+import i5.las2peer.execution.NoSuchServiceMethodException;
+import i5.las2peer.logging.L2pLogger;
+import i5.las2peer.p2p.Node;
+import i5.las2peer.p2p.ServiceNameVersion;
+import i5.las2peer.persistency.EnvelopeException;
+import i5.las2peer.restMapper.RESTMapper;
+import i5.las2peer.restMapper.data.PathTree;
+import i5.las2peer.security.ServiceInfoAgent;
+
 import java.io.Serializable;
 import java.io.StringReader;
 import java.util.HashMap;
@@ -17,15 +26,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
-
-import i5.las2peer.execution.NoSuchServiceMethodException;
-import i5.las2peer.logging.L2pLogger;
-import i5.las2peer.p2p.Node;
-import i5.las2peer.p2p.ServiceNameVersion;
-import i5.las2peer.persistency.EnvelopeException;
-import i5.las2peer.restMapper.RESTMapper;
-import i5.las2peer.restMapper.data.PathTree;
-import i5.las2peer.security.ServiceInfoAgent;
 
 public class ServiceRepositoryManager {
 
@@ -79,15 +79,15 @@ public class ServiceRepositoryManager {
 			HashSet<String> checkedServices = new HashSet<>(serviceRepository.keySet());
 			for (ServiceNameVersion currentService : services) {
 				logger.info("handling service " + currentService.getNameVersion());
-				String internalServiceName = getInternalServiceName(currentService.getName(),
-						currentService.getVersion());
+				String internalServiceName = getInternalServiceName(currentService.getName(), currentService
+						.getVersion().toString());
 				if (!serviceRepository.containsKey(internalServiceName)) { // new service
 					logger.info("adding new service " + internalServiceName);
 					// add dummy element to repo to avoid duplicate scanning
-					serviceRepository.put(internalServiceName,
-							new ServiceData(currentService.getName(), currentService.getVersion(), true, null));
+					serviceRepository.put(internalServiceName, new ServiceData(currentService.getName(), currentService
+							.getVersion().toString(), true, null));
 					try {
-						String xml = (String) node.invokeGlobally(finalAgent, currentService, SERVICE_SELFINFO_METHOD,
+						String xml = (String) node.invoke(finalAgent, currentService, SERVICE_SELFINFO_METHOD,
 								new Serializable[] {});
 						if (xml == null || xml.isEmpty()) {
 							System.err.println("Couldn't get xml mapping for " + currentService.getName()
@@ -95,8 +95,8 @@ public class ServiceRepositoryManager {
 						} else {
 							try {
 								// tree.merge(RESTMapper.getMappingTree(xml));
-								ServiceData data = new ServiceData(currentService.getName(),
-										currentService.getVersion(), true, xml);
+								ServiceData data = new ServiceData(currentService.getName(), currentService
+										.getVersion().toString(), true, xml);
 								serviceRepository.put(internalServiceName, data);
 
 								logger.info("adding xml for " + internalServiceName);
@@ -136,6 +136,7 @@ public class ServiceRepositoryManager {
 
 		timer = new Timer();
 		timer.scheduleAtFixedRate(new TimerTask() {
+			@Override
 			public void run() {
 				executeTimer(node, agent);
 			}
