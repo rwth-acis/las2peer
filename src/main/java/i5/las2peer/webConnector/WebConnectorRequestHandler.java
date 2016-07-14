@@ -490,7 +490,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		} catch (NumberFormatException e) {
 			sendMalformedRequest(exchange, e.toString());
 		} catch (Exception e) {
-			connector.logError("Error occured:" + exchange.getRequestURI().getPath() + " " + e.getMessage());
+			connector.logError("Error occured:" + exchange.getRequestURI().getPath() + " " + e.getMessage(), e);
 			sendInternalErrorResponse(exchange, e.toString());
 		}
 		return false;
