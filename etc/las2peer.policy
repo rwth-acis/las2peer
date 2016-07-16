@@ -11,7 +11,7 @@ grant {
 };
 
 // example: This entry gives read and write access to a local directory called 'localdir'
-//     in your LAS2peer installation directory.
+//     in your las2peer installation directory.
 //grant {
 //    permission java.io.FilePermission "localdir", "read, write"; // the directory itself
 //    permission java.io.FilePermission "localdir${/}-", "read, write"; // all files and subdirectories inside

@@ -6,7 +6,7 @@ import i5.las2peer.logging.NodeObserver.Event;
 
 /**
  * 
- * This class stores a message that was logged by the monitoring module of LAS2peer. An Array of instances of this class
+ * This class stores a message that was logged by the monitoring module of las2peer. An Array of instances of this class
  * is send via a {@link i5.las2peer.communication.Message} to the central monitoring node.
  * 
  * 

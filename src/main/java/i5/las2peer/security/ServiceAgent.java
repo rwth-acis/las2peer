@@ -42,7 +42,7 @@ import i5.simpleXML.Parser;
 import i5.simpleXML.XMLSyntaxException;
 
 /**
- * A service agent represents a service and its access rights in the LAS2peer setting.
+ * A service agent represents a service and its access rights in the las2peer setting.
  * 
  */
 public class ServiceAgent extends PassphraseAgent {

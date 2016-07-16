@@ -33,7 +33,7 @@ import i5.simpleXML.Parser;
 import i5.simpleXML.XMLSyntaxException;
 
 /**
- * An envelope provides a secure storage for any {@link Serializable} content within the LAS2peer network.
+ * An envelope provides a secure storage for any {@link Serializable} content within the las2peer network.
  * 
  * The content will be encrypted symmetrically, the key for opening the envelope will be provided to all entitled
  * {@link i5.las2peer.security.Agent}s via asymmetrical encryption. All encrypted versions of the decryption key are
@@ -996,7 +996,7 @@ public final class Envelope implements XmlAble, Cloneable {
 //
 //					// FIXME WIP
 //					// It's not possible to get the class at this point,
-//					// because this is not executed in a LAS2peer context
+//					// because this is not executed in a las2peer context
 //					// and therefore no version information or library context
 //					// is given
 //					result.clContentClass = Class.forName(classname);

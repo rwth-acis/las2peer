@@ -19,13 +19,13 @@ import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.ServiceAgent;
 
 /**
- * Base class for services to be hosted within the LAS2peer network.
+ * Base class for services to be hosted within the las2peer network.
  * 
  * <h2>Basic Implementation Hints</h2>
  * 
  * <p>
  * To implement a service simply derive this API class an implement the intended functionality. If parameters and
- * results are to be transported via the LAS2peer network use types implementing the {@link java.io.Serializable}
+ * results are to be transported via the las2peer network use types implementing the {@link java.io.Serializable}
  * interface.
  * 
  * <p>
@@ -34,12 +34,12 @@ import i5.las2peer.security.ServiceAgent;
  * implementation.
  * 
  * <p>
- * Please be aware, that only one instance of the service is instantiated at a LAS2peer node. There are no per user
+ * Please be aware, that only one instance of the service is instantiated at a las2peer node. There are no per user
  * instantiations as in former LAS server implementations. To access the current user, just use the helper methods of
  * this abstract class like {@link #getActiveAgent()}.
  * 
  * <p>
- * If you want to access the current user agent, the LAS2peer node or logging from outside your service class, e.g. in
+ * If you want to access the current user agent, the las2peer node or logging from outside your service class, e.g. in
  * helper classes or the like, you can make use of the {@link i5.las2peer.security.Context} class, especially of the
  * static {@link i5.las2peer.security.Context#getCurrent} method.
  * 
@@ -63,7 +63,7 @@ import i5.las2peer.security.ServiceAgent;
  * 
  * <p>
  * For own helper and 3rd party libraries, you can use any arbitrary library name consisting of alpha-numerical
- * characters. For Jars archives providing a LAS2peer service please use the package name of the service as library name
+ * characters. For Jars archives providing a las2peer service please use the package name of the service as library name
  * and name for the jar archive.
  * 
  * <p>
@@ -89,7 +89,7 @@ import i5.las2peer.security.ServiceAgent;
  * <h2>(JUnit-)Testing</h2>
  * 
  * <p>
- * For unit testing of your service within a LAS2peer setting, you can use the prepared (abstract) class
+ * For unit testing of your service within a las2peer setting, you can use the prepared (abstract) class
  * {@link i5.las2peer.testing.LocalServiceTestCase} to derive your test case from. <br>
  * This class starts a {@link i5.las2peer.p2p.LocalNode} running your service to test on each test case.
  * 
@@ -97,7 +97,7 @@ import i5.las2peer.security.ServiceAgent;
  * 
  * <p>
  * To start a node hosting your service, you can use the methods of the class {@link i5.las2peer.tools.L2pNodeLauncher},
- * which is the main method of the LAS2peer-archive library as well.
+ * which is the main method of the las2peer-archive library as well.
  * 
  * <h2>Further Tools</h2>
  * 

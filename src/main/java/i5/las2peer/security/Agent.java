@@ -26,7 +26,7 @@ import i5.simpleXML.Parser;
 import i5.simpleXML.XMLSyntaxException;
 
 /**
- * An Agent is the basic acting entity in the LAS2peer network. At the moment, an agent can represent a simple user, a
+ * An Agent is the basic acting entity in the las2peer network. At the moment, an agent can represent a simple user, a
  * group, a service or a monitoring agent.
  * 
  */

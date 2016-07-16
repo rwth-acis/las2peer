@@ -8,7 +8,7 @@ import i5.las2peer.testing.services.helperClasses.SomeValue;
 import i5.las2peer.tools.FileContentReader;
 
 /**
- * A simple test service for testing the classloader possibilities of the LAS2peer framework.
+ * A simple test service for testing the classloader possibilities of the las2peer framework.
  * 
  * 
  *

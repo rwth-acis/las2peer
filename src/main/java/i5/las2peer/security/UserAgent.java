@@ -24,7 +24,7 @@ import i5.simpleXML.Parser;
 import i5.simpleXML.XMLSyntaxException;
 
 /**
- * An UserAgent represent a (End)user of the LAS2peer system.
+ * An UserAgent represent a (End)user of the las2peer system.
  * 
  */
 public class UserAgent extends PassphraseAgent {

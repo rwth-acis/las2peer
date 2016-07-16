@@ -16,7 +16,7 @@ import rice.p2p.past.PastException;
 import rice.pastry.commonapi.PastryIdFactory;
 
 /**
- * A simple envelope for LAS2peer data to be stored in the p2p network.
+ * A simple envelope for las2peer data to be stored in the p2p network.
  * 
  * On knowledge of the class of the contained data the user may use the <i>getContained...</i> methods to get typed
  * access.

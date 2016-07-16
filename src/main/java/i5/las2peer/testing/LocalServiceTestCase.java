@@ -25,7 +25,7 @@ import i5.las2peer.tools.FileContentReader;
 import i5.las2peer.tools.SimpleTools;
 
 /**
- * Helper class to implement JUnit-Test for services to be published in a LAS2peer environment.
+ * Helper class to implement JUnit-Test for services to be published in a las2peer environment.
  * 
  * As standard, for each Test a new agent (coming along with a new encryption key pair and an own passphrase) is
  * generated. If you want to use a specific agent, you can define the static Strings AGENT_XML_FILE and AGENT_PASSPHRASE
@@ -53,7 +53,7 @@ public abstract class LocalServiceTestCase {
 	private String agentPassphrase = null;
 
 	/**
-	 * This method creates the ServiceAgent to use with the LAS2peer node to run the service to test.
+	 * This method creates the ServiceAgent to use with the las2peer node to run the service to test.
 	 * 
 	 * First it is tested, if the actual test case defines the constants AGENT_XML_FILE and AGENT_PASSPHRASE. If so,
 	 * this information is used to load the ServiceAgent.

@@ -18,8 +18,8 @@ import i5.las2peer.tools.SerializationException;
 
 /**
  * 
- * This is the base class of the logging module of LAS2peer. It sends the collected data to the
- * "Monitoring Data Processing Service" via the LAS2peer message concept.
+ * This is the base class of the logging module of las2peer. It sends the collected data to the
+ * "Monitoring Data Processing Service" via the las2peer message concept.
  *
  * 
  *
@@ -190,10 +190,10 @@ public class MonitoringObserver implements NodeObserver {
 	 */
 	private void sendMessages() {
 		try {
-			Message LAS2peerMessage = new Message(sendingAgent, receivingAgent, monitoringMessages);
+			Message las2peerMessage = new Message(sendingAgent, receivingAgent, monitoringMessages);
 			messageResultListener = new MessageResultListener(2000); // unused
-			registeredAt.sendMessage(LAS2peerMessage, messageResultListener);
-			System.out.println("Monitoring: message " + LAS2peerMessage.getId() + " send!");
+			registeredAt.sendMessage(las2peerMessage, messageResultListener);
+			System.out.println("Monitoring: message " + las2peerMessage.getId() + " send!");
 		} catch (L2pSecurityException e) {
 			e.printStackTrace();
 		} catch (EncodingFailedException e) {

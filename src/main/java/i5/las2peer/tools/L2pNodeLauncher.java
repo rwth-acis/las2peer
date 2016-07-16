@@ -101,7 +101,7 @@ public class L2pNodeLauncher {
 	}
 
 	/**
-	 * Searches for the given agent in the LAS2peer network.
+	 * Searches for the given agent in the las2peer network.
 	 * 
 	 * @param id
 	 * @return node handles
@@ -113,7 +113,7 @@ public class L2pNodeLauncher {
 	}
 
 	/**
-	 * Looks for the given service in the LAS2peer network.
+	 * Looks for the given service in the las2peer network.
 	 * 
 	 * @param serviceNameVersion Exact name and version, same syantax as in {@link #startService(String)}
 	 * @return node handles
@@ -167,7 +167,7 @@ public class L2pNodeLauncher {
 	}
 
 	/**
-	 * Uploads the contents of the given directory to the global storage of the LAS2peer network.
+	 * Uploads the contents of the given directory to the global storage of the las2peer network.
 	 * 
 	 * Each contained .xml-file is used as an artifact or - in case the name of the file starts with <i>agent-</i> - as
 	 * an agent to upload.
@@ -278,7 +278,7 @@ public class L2pNodeLauncher {
 	}
 
 	/**
-	 * Upload the contents of the <i>startup</i> sub directory to the global storage of the LAS2peer network.
+	 * Upload the contents of the <i>startup</i> sub directory to the global storage of the las2peer network.
 	 * 
 	 * Each contained .xml-file is used as an artifact or - in case the name of the file starts with <i>agent-</i> - as
 	 * an agent to upload.
@@ -411,7 +411,7 @@ public class L2pNodeLauncher {
 	}
 
 	/**
-	 * Register the given agent at the LAS2peer node and for later usage with {@link #invoke}.
+	 * Register the given agent at the las2peer node and for later usage with {@link #invoke}.
 	 * 
 	 * Make sure, that the private key of the agent is unlocked before registering
 	 * 
@@ -427,7 +427,7 @@ public class L2pNodeLauncher {
 	}
 
 	/**
-	 * Register the given agent at the LAS2peer node and for later usage with {@link #invoke}.
+	 * Register the given agent at the las2peer node and for later usage with {@link #invoke}.
 	 * 
 	 * If the private key of the agent is not unlocked and a pass phrase has been given, an attempt to unlock the key is
 	 * started before registering.
@@ -453,7 +453,7 @@ public class L2pNodeLauncher {
 	}
 
 	/**
-	 * Unregister the current user from the LAS2peer node and from this launcher.
+	 * Unregister the current user from the las2peer node and from this launcher.
 	 * 
 	 * @see #registerUserAgent
 	 */
@@ -545,7 +545,7 @@ public class L2pNodeLauncher {
 
 	/**
 	 * Generate a new {@link i5.las2peer.security.ServiceAgent} instance for the given service class and start an
-	 * instance of this service at the current LAS2peer node.
+	 * instance of this service at the current las2peer node.
 	 * 
 	 * @param serviceNameVersion Specify the service name and version to run: package.serviceClass@Version. Exact match
 	 *            required.
@@ -982,7 +982,7 @@ public class L2pNodeLauncher {
 		if (message != null && !message.isEmpty())
 			System.out.println(message + "\n\n");
 
-		System.out.println("LAS2peer Node Launcher");
+		System.out.println("las2peer Node Launcher");
 		System.out.println("----------------------\n");
 		System.out.println("Usage:\n");
 
@@ -1002,7 +1002,7 @@ public class L2pNodeLauncher {
 						+ DEFAULT_SERVICE_DIRECTORY
 						+ ") to the class loader. This argument can occur multiple times.\n");
 		System.out.println("\t--port|-p [port] specifies the port number of the node\n");
-		System.out.println("\tno bootstrap argument states, that a complete new LAS2peer network is to start");
+		System.out.println("\tno bootstrap argument states, that a complete new las2peer network is to start");
 		System.out.println("\tor");
 		System.out.println(
 				"\t--bootstrap|-b [host-list] requires a comma seperated list of [address:ip] pairs of bootstrap nodes to connect to. This argument can occur multiple times.\n");

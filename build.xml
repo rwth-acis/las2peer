@@ -1,4 +1,4 @@
-<project name="LAS2peer" default="jars" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
+<project name="las2peer" default="jars" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
 
 	<property environment="env"/>
 	
@@ -367,7 +367,7 @@
 			author="true"
 			version="true"
 			use="true"
-			windowtitle="LAS2peer Documentation"
+			windowtitle="las2peer Documentation"
 			failonerror="yes"
 			encoding="utf8"
 			classpath="${lib.cp}:${tmp.classes}"
@@ -383,7 +383,7 @@
 			author="true"
 			version="true"
 			use="true"
-			windowtitle="LAS2peer Unit Test Documentation"
+			windowtitle="las2peer Unit Test Documentation"
 			failonerror="yes"
 			encoding="utf8"
 			classpath="${lib.cp}:${tmp.classes}"

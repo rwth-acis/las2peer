@@ -66,7 +66,7 @@ import rice.pastry.PastryNode;
 import rice.pastry.socket.SocketNodeHandle;
 
 /**
- * Base class for nodes in the LAS2peer environment.
+ * Base class for nodes in the las2peer environment.
  * 
  * A Node represents one enclosed unit in the network hosting an arbitrary number of agents willing to participate in
  * the P2P networking.
@@ -387,7 +387,7 @@ public abstract class Node implements AgentStorage {
 	public abstract Serializable getNodeId();
 
 	/**
-	 * Gets the class loader, this node is bound to. In a <i>real</i> LAS2peer environment, this should refer to a
+	 * Gets the class loader, this node is bound to. In a <i>real</i> las2peer environment, this should refer to a
 	 * {@link i5.las2peer.classLoaders.L2pClassManager}
 	 * 
 	 * Otherwise, the class loader of this Node class is used.

@@ -24,7 +24,7 @@ import i5.las2peer.security.Context;
 
 public final class L2pLogger extends Logger implements NodeObserver {
 
-	public static final String GLOBAL_NAME = "i5.las2peer"; // this name should be equal to the LAS2peer package name.
+	public static final String GLOBAL_NAME = "i5.las2peer"; // this name should be equal to the las2peer package name.
 
 	// default parameters
 	public static final int DEFAULT_LIMIT_BYTES = 1 * 1000 * 1000; // max 1 MB log file size
