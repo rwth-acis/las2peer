@@ -7,7 +7,7 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.logging.ConsoleHandler;
+import java.util.logging.ErrorManager;
 import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
@@ -15,12 +15,11 @@ import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
+import java.util.logging.StreamHandler;
 
-import i5.las2peer.api.Service;
 import i5.las2peer.execution.L2pThread;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.security.Agent;
-import i5.las2peer.security.Context;
 
 public final class L2pLogger extends Logger implements NodeObserver {
 
@@ -88,6 +87,25 @@ public final class L2pLogger extends Logger implements NodeObserver {
 		}
 		// since this is the global instance, drop not logged messages
 		GLOBAL_INSTANCE.minimizeLogLevel();
+	}
+
+	protected static class ConsoleHandler extends StreamHandler {
+
+		@Override
+		public void publish(LogRecord record) {
+			try {
+				int level = record.getLevel().intValue();
+				String message = getFormatter().format(record);
+				if (level >= Level.WARNING.intValue()) {
+					System.err.write(message.getBytes());
+				} else if (level >= getLevel().intValue()) {
+					System.out.write(message.getBytes());
+				}
+			} catch (Exception exception) {
+				reportError(null, exception, ErrorManager.FORMAT_FAILURE);
+			}
+		}
+
 	}
 
 	/**
