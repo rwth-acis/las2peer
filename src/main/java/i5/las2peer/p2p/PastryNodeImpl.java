@@ -464,6 +464,7 @@ public class PastryNodeImpl extends Node {
 
 		super.shutDown();
 		pastryNode.destroy();
+		pastryEnvironment.destroy();
 		this.setStatus(NodeStatus.CLOSED);
 	}
 
