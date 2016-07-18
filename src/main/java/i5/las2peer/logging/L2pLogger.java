@@ -424,9 +424,11 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	 * serviceAgent and actingUser can be set to {@code null} if not known. Then this message will not be monitored by
 	 * the monitoring observer.
 	 *
-	 * This method replaces: {@link Context#logMessage(Object, int, String, Agent, Agent)},
-	 * {@link Context#logMessage(Object, String)}, {@link Context#logError(Object, int, String, Agent, Agent)},
-	 * {@link Context#logError(Object, String)}, {@link Service#logError(String message)}
+	 * This method replaces: {@link i5.las2peer.security.Context#logMessage(Object, int, String, Agent, Agent)},
+	 * {@link i5.las2peer.security.Context#logMessage(Object, String)},
+	 * {@link i5.las2peer.security.Context#logError(Object, int, String, Agent, Agent)},
+	 * {@link i5.las2peer.security.Context#logError(Object, String)},
+	 * {@link i5.las2peer.api.Service#logError(String message)}
 	 *
 	 * @param from the calling class
 	 * @param event used to differentiate between different log messages
