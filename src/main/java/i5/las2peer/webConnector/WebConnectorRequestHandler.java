@@ -1,37 +1,5 @@
 package i5.las2peer.webConnector;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import com.nimbusds.oauth2.sdk.ErrorObject;
-import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.http.HTTPRequest;
-import com.nimbusds.oauth2.sdk.http.HTTPRequest.Method;
-import com.nimbusds.oauth2.sdk.http.HTTPResponse;
-import com.nimbusds.openid.connect.sdk.UserInfoErrorResponse;
-import com.nimbusds.openid.connect.sdk.UserInfoResponse;
-import com.nimbusds.openid.connect.sdk.UserInfoSuccessResponse;
-import com.nimbusds.openid.connect.sdk.claims.UserInfo;
-import com.sun.net.httpserver.Headers;
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
-
 import i5.las2peer.classLoaders.ClassLoaderException;
 import i5.las2peer.classLoaders.L2pClassManager;
 import i5.las2peer.execution.NoSuchServiceException;
@@ -58,8 +26,41 @@ import io.swagger.models.Path;
 import io.swagger.models.Swagger;
 import io.swagger.models.auth.OAuth2Definition;
 import io.swagger.util.Json;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
 import net.minidev.json.JSONObject;
 import rice.p2p.util.Base64;
+
+import com.nimbusds.oauth2.sdk.ErrorObject;
+import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.http.HTTPRequest;
+import com.nimbusds.oauth2.sdk.http.HTTPRequest.Method;
+import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+import com.nimbusds.openid.connect.sdk.UserInfoErrorResponse;
+import com.nimbusds.openid.connect.sdk.UserInfoResponse;
+import com.nimbusds.openid.connect.sdk.UserInfoSuccessResponse;
+import com.nimbusds.openid.connect.sdk.claims.UserInfo;
+import com.sun.net.httpserver.Headers;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
 
 /**
  * A HttpServer RequestHandler for handling requests to the LAS2peer Web Connector. Each request will be distributed to
@@ -123,12 +124,11 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		// OpenID Connect authentication:
 		// check for access token in query parameter and headers
 		else if (connector.oidcProviderInfos != null
-				&& ((exchange.getRequestURI().getRawQuery() != null
-						&& exchange.getRequestURI().getRawQuery().contains(ACCESS_TOKEN_KEY + "="))
-						|| exchange.getRequestHeaders().containsKey(ACCESS_TOKEN_KEY)
-						|| (exchange.getRequestHeaders().containsKey(AUTHENTICATION_FIELD)
-								&& exchange.getRequestHeaders().getFirst(AUTHENTICATION_FIELD).toLowerCase()
-										.startsWith("bearer ")))) {
+				&& ((exchange.getRequestURI().getRawQuery() != null && exchange.getRequestURI().getRawQuery()
+						.contains(ACCESS_TOKEN_KEY + "="))
+						|| exchange.getRequestHeaders().containsKey(ACCESS_TOKEN_KEY) || (exchange.getRequestHeaders()
+						.containsKey(AUTHENTICATION_FIELD) && exchange.getRequestHeaders()
+						.getFirst(AUTHENTICATION_FIELD).toLowerCase().startsWith("bearer ")))) {
 
 			String token = "";
 			String oidcProviderURI = connector.defaultOIDCProvider;
@@ -137,9 +137,13 @@ public class WebConnectorRequestHandler implements HttpHandler {
 				if (exchange.getRequestHeaders().containsKey(OIDC_PROVIDER_KEY))
 					oidcProviderURI = URLDecoder.decode(exchange.getRequestHeaders().getFirst(OIDC_PROVIDER_KEY),
 							"UTF-8");
-			} else if (exchange.getRequestHeaders().containsKey(AUTHENTICATION_FIELD) && exchange.getRequestHeaders()
-					.getFirst(AUTHENTICATION_FIELD).toLowerCase().startsWith("bearer ")) { // get BEARER token from
-																							// Authentication field
+			} else if (exchange.getRequestHeaders().containsKey(AUTHENTICATION_FIELD)
+					&& exchange.getRequestHeaders().getFirst(AUTHENTICATION_FIELD).toLowerCase().startsWith("bearer ")) { // get
+																															// BEARER
+																															// token
+																															// from
+																															// Authentication
+																															// field
 				token = exchange.getRequestHeaders().getFirst(AUTHENTICATION_FIELD).substring("BEARER ".length());
 				if (exchange.getRequestHeaders().containsKey(OIDC_PROVIDER_KEY))
 					oidcProviderURI = URLDecoder.decode(exchange.getRequestHeaders().getFirst(OIDC_PROVIDER_KEY),
@@ -159,8 +163,11 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			// validate given OIDC provider and get provider info
 			JSONObject oidcProviderInfo = null;
 			if (connector.oidcProviders.contains(oidcProviderURI) == false) {
-				sendInternalErrorResponse(exchange, "The given OIDC provider (" + oidcProviderURI
-						+ ") is not whitelisted! Please make sure the complete OIDC provider URI is added to the config.");
+				sendInternalErrorResponse(
+						exchange,
+						"The given OIDC provider ("
+								+ oidcProviderURI
+								+ ") is not whitelisted! Please make sure the complete OIDC provider URI is added to the config.");
 				return null;
 			} else if (connector.oidcProviderInfos.get(oidcProviderURI) == null) {
 				sendInternalErrorResponse(exchange, "The OIDC config is not known for the given provider ("
@@ -328,11 +335,11 @@ public class WebConnectorRequestHandler implements HttpHandler {
 
 			return userAgent;
 		} catch (AgentNotKnownException e) {
-			sendUnauthorizedResponse(exchange, null,
-					exchange.getRemoteAddress() + ": login denied for user " + username);
+			sendUnauthorizedResponse(exchange, null, exchange.getRemoteAddress() + ": login denied for user "
+					+ username);
 		} catch (L2pSecurityException e) {
-			sendUnauthorizedResponse(exchange, null,
-					exchange.getRemoteAddress() + ": unauth access - prob. login problems");
+			sendUnauthorizedResponse(exchange, null, exchange.getRemoteAddress()
+					+ ": unauth access - prob. login problems");
 		} catch (Exception e) {
 			sendUnauthorizedResponse(exchange, null, exchange.getRemoteAddress()
 					+ ": something went horribly wrong. Check your request for correctness.");
@@ -371,15 +378,22 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 			int nRead;
 			byte[] data = new byte[4096];
+			boolean overflow = false;
 			while ((nRead = is.read(data, 0, data.length)) != -1) {
-				buffer.write(data, 0, nRead);
-				if (buffer.size() >= connector.maxRequestBodySize) {
-					sendStringResponse(exchange, HttpURLConnection.HTTP_ENTITY_TOO_LARGE,
-							"Given request body exceeds limit of " + connector.maxRequestBodySize + " bytes");
-					return false;
+				if (buffer.size() < connector.maxRequestBodySize - data.length) {
+					// still space left in local buffer
+					buffer.write(data, 0, nRead);
+				} else {
+					overflow = true;
+					// no break allowed otherwise the client gets an exception (like connection closed)
+					// so we have to read all given content
 				}
 			}
-			buffer.flush();
+			if (overflow) {
+				sendStringResponse(exchange, HttpURLConnection.HTTP_ENTITY_TOO_LARGE,
+						"Given request body exceeds limit of " + connector.maxRequestBodySize + " bytes");
+				return false;
+			}
 			byte[] rawContent = buffer.toByteArray();
 
 			// http method
@@ -476,7 +490,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		} catch (NumberFormatException e) {
 			sendMalformedRequest(exchange, e.toString());
 		} catch (Exception e) {
-			connector.logError("Error occured:" + exchange.getRequestURI().getPath() + " " + e.getMessage());
+			connector.logError("Error occured:" + exchange.getRequestURI().getPath() + " " + e.getMessage(), e);
 			sendInternalErrorResponse(exchange, e.toString());
 		}
 		return false;
@@ -552,7 +566,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	 */
 	private void handleSwagger(HttpExchange exchange) {
 		try {
-			L2pClassManager clsLoader = (L2pClassManager) connector.getL2pNode().getBaseClassLoader();
+			L2pClassManager clsLoader = connector.getL2pNode().getBaseClassLoader();
 			ServiceNameVersion[] services = ServiceInfoAgent.getServices();
 			Set<Class<?>> serviceClasses = new HashSet<Class<?>>(services.length);
 			for (ServiceNameVersion snv : services) {
@@ -565,8 +579,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			}
 			Swagger swagger = new Reader(new Swagger()).read(serviceClasses);
 			if (swagger == null) {
-				sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND,
-						"Swagger API declaration not available!");
+				sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND, "Swagger API declaration not available!");
 			} else {
 				// OpenID Connect integration
 				if (connector.oidcProviderInfos != null && connector.defaultOIDCProvider != null
@@ -719,7 +732,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 					}
 				}
 				exchange.getResponseHeaders().set("content-type",
-						RESTMapper.join(contentType, RESTMapper.DEFAULT_MIME_SEPARATOR));
+						RESTMapper.join(contentType, RESTMapper.DEFAULT_MIME_SEPARATOR) + "; charset=utf-8");
 				if (result instanceof HttpResponse) {
 					HttpResponse res = (HttpResponse) result;
 					Pair<String>[] headers = res.listHeaders();
