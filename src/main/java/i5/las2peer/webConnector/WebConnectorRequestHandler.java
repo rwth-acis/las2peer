@@ -8,17 +8,19 @@ import i5.las2peer.execution.ServiceInvocationException;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.ServiceNameVersion;
+import i5.las2peer.p2p.ServiceNotFoundException;
+import i5.las2peer.p2p.ServiceVersion;
 import i5.las2peer.p2p.TimeoutException;
 import i5.las2peer.restMapper.HttpResponse;
 import i5.las2peer.restMapper.RESTMapper;
 import i5.las2peer.restMapper.data.InvocationData;
 import i5.las2peer.restMapper.data.Pair;
+import i5.las2peer.restMapper.data.PathTree;
 import i5.las2peer.restMapper.exceptions.NoMethodFoundException;
 import i5.las2peer.restMapper.exceptions.NotSupportedUriPathException;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.Mediator;
 import i5.las2peer.security.PassphraseAgent;
-import i5.las2peer.security.ServiceInfoAgent;
 import i5.las2peer.security.UserAgent;
 import io.swagger.jaxrs.Reader;
 import io.swagger.models.Operation;
@@ -40,7 +42,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -436,35 +437,71 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			@SuppressWarnings("unchecked")
 			Pair<String>[] headers = headersList.toArray(new Pair[headersList.size()]);
 
+			// extract service information from uri
+			if (uri.startsWith("/"))
+				uri = uri.substring(1);
+			String[] uriSplit = uri.split("/");
+			String serviceName;
+			ServiceNameVersion requiredService;
+
+			try {
+				serviceName = l2pNode.getServiceAliasManager().getServiceNameByAlias(uriSplit[0]);
+			} catch (ServiceNotFoundException e1) {
+				throw new NoSuchServiceException(uriSplit[0], e1);
+			}
+
+			try {
+				if (uriSplit.length > 1) {
+					requiredService = new ServiceNameVersion(serviceName, uriSplit[1].substring(1));
+
+					// remove version info from URI
+					uri = uriSplit[0];
+					for (int i = 2; i < uriSplit.length; i++)
+						uri += "/" + uriSplit[i];
+				} else {
+					requiredService = new ServiceNameVersion(serviceName, "*");
+				}
+			} catch (IllegalArgumentException e) {
+				requiredService = new ServiceNameVersion(serviceName, "*");
+			}
+
+			// invoke
 			Serializable result = "";
 			Mediator mediator = l2pNode.getOrRegisterLocalMediator(userAgent);
 			boolean gotResult = false;
 			String[] returnMIMEType = RESTMapper.DEFAULT_PRODUCES_MIME_TYPE;
 			StringBuilder warnings = new StringBuilder();
-			InvocationData[] invocation = RESTMapper.parse(this.connector.getMappingTree(), httpMethod, uri, variables,
-					rawContent, contentTypeHeader, acceptHeader, headers, warnings);
+			PathTree tree;
+			try {
+				tree = connector.getServiceRepositoryManager().getServiceTree(requiredService, userAgent,
+						connector.onlyLocalServices());
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new NoSuchServiceException(requiredService.toString(), e);
+			}
+			InvocationData[] invocation = RESTMapper.parse(tree, httpMethod, uri, variables, rawContent,
+					contentTypeHeader, acceptHeader, headers, warnings);
 
 			if (invocation.length == 0) {
 				if (warnings.length() > 0) {
 					sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND,
 							warnings.toString().replaceAll("\n", " "));
 				} else {
-					sendResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND, NO_RESPONSE_BODY);
-					// otherwise the client waits till the timeout for an answer
-					exchange.getResponseBody().close();
+					sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND, "could not match REST mapping");
 				}
 				return false;
 			}
 
 			for (InvocationData inv : invocation) {
 				try {
-					// invoke service method // TODO specify version?
-					result = mediator.invoke(inv.getServiceName(), inv.getMethodName(), inv.getParameters());
+					// invoke service method
+					result = mediator.invoke(requiredService.toString(), inv.getMethodName(), inv.getParameters(),
+							connector.onlyLocalServices());
 					gotResult = true;
 					returnMIMEType = inv.getMIME();
 					break;
 				} catch (NoSuchServiceException | TimeoutException e) {
-					sendNoSuchService(exchange, inv.getServiceName());
+					sendNoSuchService(exchange, requiredService.toString());
 				} catch (NoSuchServiceMethodException e) {
 					sendNoSuchMethod(exchange);
 				} catch (L2pSecurityException e) {
@@ -486,6 +523,8 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			return true;
 		} catch (NoMethodFoundException | NotSupportedUriPathException e) {
 			sendNoSuchMethod(exchange);
+		} catch (NoSuchServiceException e) {
+			sendNoSuchService(exchange, e.toString());
 		} catch (NumberFormatException e) {
 			sendMalformedRequest(exchange, e.toString());
 		} catch (Exception e) {
@@ -544,7 +583,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		if (exchange.getRequestMethod().equalsIgnoreCase("options")) {
 			sendResponse(exchange, HttpURLConnection.HTTP_OK, NO_RESPONSE_BODY);
 		} else if (exchange.getRequestMethod().equalsIgnoreCase("get")
-				&& exchange.getRequestURI().getPath().equalsIgnoreCase("/swagger.json")) {
+				&& exchange.getRequestURI().getPath().toString().endsWith("/swagger.json")) {
 			// respond with swagger.json for all known services at this endpoint
 			handleSwagger(exchange);
 		} else {
@@ -564,19 +603,58 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	 * @param exchange The origin exchange request for the swagger listing.
 	 */
 	private void handleSwagger(HttpExchange exchange) {
+		// extract service alias from path
+		String[] uriSplit = exchange.getRequestURI().getPath().split("/");
+		String serviceName;
+		ServiceVersion serviceVersion;
+
+		if (uriSplit.length == 3) {
+			if (!uriSplit[2].equals("swagger.json")) {
+				sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND, "Invalid Path!");
+				return;
+			}
+
+			serviceVersion = null;
+		} else if (uriSplit.length == 4) {
+			if (!uriSplit[3].equals("swagger.json")) {
+				sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND, "Invalid Path!");
+				return;
+			}
+
+			try {
+				serviceVersion = new ServiceVersion(uriSplit[2].substring(1));
+			} catch (IllegalArgumentException e) {
+				sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND, "Invalid version information!");
+				return;
+			}
+		} else {
+			sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND, "Invalid Path!");
+			return;
+		}
+
+		try {
+			serviceName = l2pNode.getServiceAliasManager().getServiceNameByAlias(uriSplit[1]);
+		} catch (ServiceNotFoundException e1) {
+			sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND, "Could not find any service for this path!");
+			return;
+		}
+
 		try {
 			L2pClassManager clsLoader = connector.getL2pNode().getBaseClassLoader();
-			ServiceNameVersion[] services = ServiceInfoAgent.getServices();
-			Set<Class<?>> serviceClasses = new HashSet<Class<?>>(services.length);
-			for (ServiceNameVersion snv : services) {
-				try {
-					Class<?> cls = clsLoader.getServiceClass(snv.getName(), snv.getVersion().toString());
-					serviceClasses.add(cls);
-				} catch (IllegalArgumentException | ClassLoaderException e) {
-					connector.logError("Class '" + snv + "' not found " + e);
+			Class<?> serviceClass;
+			try {
+				if (serviceVersion == null) {
+					serviceClass = clsLoader.getServiceClass(serviceName);
+				} else {
+					serviceClass = clsLoader.getServiceClass(serviceName, serviceVersion.toString());
 				}
+			} catch (IllegalArgumentException | ClassLoaderException e) {
+				sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND,
+						"Swagger works only for locally running services!");
+				return;
 			}
-			Swagger swagger = new Reader(new Swagger()).read(serviceClasses);
+			System.out.println(serviceClass);
+			Swagger swagger = new Reader(new Swagger()).read(serviceClass);
 			if (swagger == null) {
 				sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND, "Swagger API declaration not available!");
 			} else {

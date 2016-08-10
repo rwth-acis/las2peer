@@ -1,10 +1,8 @@
 package i5.las2peer.webConnector;
 
-import i5.las2peer.api.Service;
 import i5.las2peer.restMapper.HttpResponse;
-import i5.las2peer.restMapper.RESTMapper;
+import i5.las2peer.restMapper.RESTService;
 import i5.las2peer.restMapper.annotations.HttpHeaders;
-import i5.las2peer.restMapper.annotations.Version;
 
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -16,31 +14,14 @@ import javax.ws.rs.PathParam;
  * Service to test the web connector
  *
  */
-@Version("0.2")
-public class TestService3 extends Service {
+@Path("service3")
+public class TestService3 extends RESTService {
 
 	/**
 	 * constructor
 	 */
 	public TestService3() {
 
-	}
-
-	/**
-	 * get all annotation and method data to allow mapping
-	 * 
-	 * @return
-	 */
-
-	public String getRESTMapping() {
-		String result = "";
-		try {
-			result = RESTMapper.getMethodsAsXML(this.getClass());
-		} catch (Exception e) {
-
-			e.printStackTrace();
-		}
-		return result;
 	}
 
 	@GET

@@ -1,8 +1,6 @@
 package i5.las2peer.webConnector;
 
-import i5.las2peer.api.Service;
-import i5.las2peer.restMapper.RESTMapper;
-import i5.las2peer.restMapper.annotations.Version;
+import i5.las2peer.restMapper.RESTService;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -11,9 +9,8 @@ import javax.ws.rs.Path;
  * Service to test the web connector
  *
  */
-@Version("0.2")
 @Path("/exception")
-public class TestService5 extends Service {
+public class TestService5 extends RESTService {
 
 	/**
 	 * constructor
@@ -22,28 +19,9 @@ public class TestService5 extends Service {
 
 	}
 
-	/**
-	 * get all annotation and method data to allow mapping
-	 * 
-	 * @return
-	 */
-
-	public String getRESTMapping() {
-		String result = "";
-		try {
-			result = RESTMapper.getMethodsAsXML(this.getClass());
-		} catch (Exception e) {
-
-			result = "<service name=\"i5.las2peer.webConnector.TestService5\" version=\"0.1\">" + "<methods>"
-					+ "<method httpMethod=\"get\" name=\"b4\" path=\"exception\" type=\"int\">" + "<parameters/>"
-					+ "</method>" + "</methods>" + "</service>";
-		}
-		return result;
-	}
-
 	@GET
-	public int b4() throws Exception {
-		throw new Exception();
+	public int b4() {
+		throw new IllegalArgumentException();
 	}
 
 }

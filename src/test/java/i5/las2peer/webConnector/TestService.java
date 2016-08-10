@@ -1,8 +1,7 @@
 package i5.las2peer.webConnector;
 
-import i5.las2peer.api.Service;
-import i5.las2peer.restMapper.RESTMapper;
-import i5.las2peer.restMapper.annotations.Version;
+import i5.las2peer.restMapper.RESTService;
+import io.swagger.annotations.Api;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -17,31 +16,15 @@ import javax.ws.rs.QueryParam;
  * Service to test the web connector
  *
  */
-@Version("0.2")
-public class TestService extends Service {
+@Api
+@Path("service1")
+public class TestService extends RESTService {
 
 	/**
 	 * constructor, initializes RESTMapper
 	 */
 	public TestService() {
 
-	}
-
-	/**
-	 * get all annotation and method data to allow mapping
-	 * 
-	 * @return
-	 */
-
-	public String getRESTMapping() {
-		String result = "";
-		try {
-			result = RESTMapper.getMethodsAsXML(this.getClass());
-		} catch (Exception e) {
-
-			e.printStackTrace();
-		}
-		return result;
 	}
 
 	/**
@@ -106,9 +89,8 @@ public class TestService extends Service {
 	@GET
 	@Path("/do/{number1}/it/{number2}")
 	public int doIt(@PathParam("number1") int num1, @PathParam("number2") int num2, @QueryParam(
-			value = "param1") @DefaultValue("0") int param1,
-			@QueryParam(
-					value = "param2") @DefaultValue("0") int param2) {
+			value = "param1") @DefaultValue("0") int param1, @QueryParam(
+			value = "param2") @DefaultValue("0") int param2) {
 		return num1 + num2 + param1 + param2;
 	}
 
@@ -124,9 +106,8 @@ public class TestService extends Service {
 	@GET
 	@Path("/do/{number1}/it/{number2}/not")
 	public int doItNot(@PathParam("number1") int num1, @PathParam("number2") int num2, @QueryParam(
-			value = "param1") @DefaultValue("0") int param1,
-			@QueryParam(
-					value = "param2") @DefaultValue("0") int param2) {
+			value = "param1") @DefaultValue("0") int param1, @QueryParam(
+			value = "param2") @DefaultValue("0") int param2) {
 		return num1 - num2 - param1 - param2;
 	}
 
@@ -142,9 +123,8 @@ public class TestService extends Service {
 	@GET
 	@Path("/do/{number1}/this/{number2}/not")
 	public int doThisNot(@PathParam("number1") int num1, @PathParam("number2") int num2, @QueryParam(
-			value = "param1") @DefaultValue("0") int param1,
-			@QueryParam(
-					value = "param2") @DefaultValue("0") int param2) {
+			value = "param1") @DefaultValue("0") int param1, @QueryParam(
+			value = "param2") @DefaultValue("0") int param2) {
 		return num1 * num2 - param1 * param2;
 	}
 

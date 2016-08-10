@@ -1,15 +1,7 @@
 package i5.las2peer.webConnector;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
 import i5.las2peer.p2p.LocalNode;
 import i5.las2peer.p2p.ServiceNameVersion;
 import i5.las2peer.security.GroupAgent;
@@ -18,6 +10,13 @@ import i5.las2peer.security.UserAgent;
 import i5.las2peer.testing.MockAgentFactory;
 import i5.las2peer.webConnector.client.ClientResponse;
 import i5.las2peer.webConnector.client.MiniClient;
+
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 public class WebConnectorServiceInfoTest {
 
@@ -31,11 +30,12 @@ public class WebConnectorServiceInfoTest {
 	private static UserAgent testAgent;
 	private static final String testPass = "adamspass";
 
-	private static final String testServiceClass = "i5.las2peer.webConnector.TestService@0.1";
-	private static final String testServiceClass2 = "i5.las2peer.webConnector.TestService2@0.1";
-	private static final String testServiceClass3 = "i5.las2peer.webConnector.Calculator3@0.1";
-	private static final String testServiceClass4 = "i5.las2peer.webConnector.Calculator2CompatibilityService@0.1";
-	private static final String testServiceClass5 = "i5.las2peer.webConnector.Calculator2@0.1";
+	private static final String testServiceClass = "i5.las2peer.webConnector.TestVersionService@1";
+	private static final String testServiceClass2 = "i5.las2peer.webConnector.TestVersionService@2.0";
+	private static final String testServiceClass3 = "i5.las2peer.webConnector.TestVersionService@2.1";
+	private static final String testServiceClass4 = "i5.las2peer.webConnector.TestVersionService@2.2.0-1";
+	private static final String testServiceClass5 = "i5.las2peer.webConnector.TestVersionService@2.2.0-2";
+	private static final String testServiceClass6 = "i5.las2peer.webConnector.TestServiceMissingPath@1";
 
 	@BeforeClass
 	public static void startServer() throws Exception {
@@ -67,22 +67,26 @@ public class WebConnectorServiceInfoTest {
 				"a pass");
 		ServiceAgent testService5 = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass5),
 				"a pass");
+		ServiceAgent testService6 = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass6),
+				"a pass");
 
 		testService.unlockPrivateKey("a pass");
 		testService2.unlockPrivateKey("a pass");
 		testService3.unlockPrivateKey("a pass");
 		testService4.unlockPrivateKey("a pass");
 		testService5.unlockPrivateKey("a pass");
+		testService6.unlockPrivateKey("a pass");
 
 		node.registerReceiver(testService);
 		node.registerReceiver(testService2);
 		node.registerReceiver(testService3);
 		node.registerReceiver(testService4);
 		node.registerReceiver(testService5);
+		node.registerReceiver(testService6); // should not throw an error
 
 		// start connector
 		logStream = new ByteArrayOutputStream();
-		connector = new WebConnector(true, HTTP_PORT, false, 1000, "./XMLCompatibility");
+		connector = new WebConnector(true, HTTP_PORT, false, 1000);
 		connector.setLogStream(new PrintStream(logStream));
 		connector.start(node);
 
@@ -106,42 +110,44 @@ public class WebConnectorServiceInfoTest {
 	}
 
 	@Test
-	public void testServices() {
-		connector.updateServiceList();
-
+	public void testVersions() {
 		MiniClient c = new MiniClient();
 		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 
-		// Calculator3, only known by XML in ./XMLCompatibility
+		// without version
 		try {
 			c.setLogin(Long.toString(testAgent.getId()), testPass);
-			ClientResponse result = c.sendRequest("GET", "5/add/6", "");
-			assertEquals("11.0", result.getResponse().trim());
+			ClientResponse result = c.sendRequest("GET", "version/test", "");
+			assertTrue(result.getResponse().trim().startsWith("2"));
 		} catch (Exception e) {
 			fail(e.getMessage());
 		}
 
-		// TestService, only known by XML in ./XMLCompatibility AND getRESTMapping()
+		// unambiguous version
 		try {
 			c.setLogin(Long.toString(testAgent.getId()), testPass);
-			ClientResponse result = c.sendRequest("PUT", "add/7/6", "");
-			assertEquals("13", result.getResponse().trim());
+			ClientResponse result = c.sendRequest("GET", "version/v1/test", "");
+			assertTrue(result.getResponse().trim().equals("1"));
 		} catch (Exception e) {
 			fail(e.getMessage());
 		}
-		// Calculator2 only indirectly known by Calculator2CompatibilityService
+
+		node.getNodeServiceCache().clear();
+
+		// ambiguous version
 		try {
 			c.setLogin(Long.toString(testAgent.getId()), testPass);
-			ClientResponse result = c.sendRequest("GET", "mul/7/6", "");
-			assertEquals("42.0", result.getResponse().trim());
+			ClientResponse result = c.sendRequest("GET", "version/v2/test", "");
+			assertTrue(result.getResponse().trim().startsWith("2.2"));
 		} catch (Exception e) {
 			fail(e.getMessage());
 		}
-		// TestService2, only known by getRESTMapping()
+
+		// exact version
 		try {
 			c.setLogin(Long.toString(testAgent.getId()), testPass);
-			ClientResponse result = c.sendRequest("POST", "do/h/i", "!");
-			assertEquals("hi!", result.getResponse().trim());
+			ClientResponse result = c.sendRequest("GET", "version/v2.2.0-1/test", "");
+			assertTrue(result.getResponse().trim().equals("2.2.0-1"));
 		} catch (Exception e) {
 			fail(e.getMessage());
 		}

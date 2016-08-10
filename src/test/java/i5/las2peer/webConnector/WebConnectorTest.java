@@ -1,18 +1,8 @@
 package i5.las2peer.webConnector;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.net.HttpURLConnection;
-import java.util.Base64;
-import java.util.Random;
-
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
 import i5.las2peer.p2p.LocalNode;
 import i5.las2peer.p2p.ServiceNameVersion;
 import i5.las2peer.restMapper.MediaType;
@@ -23,6 +13,16 @@ import i5.las2peer.security.UserAgent;
 import i5.las2peer.testing.MockAgentFactory;
 import i5.las2peer.webConnector.client.ClientResponse;
 import i5.las2peer.webConnector.client.MiniClient;
+
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.net.HttpURLConnection;
+import java.util.Base64;
+import java.util.Random;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 public class WebConnectorTest {
 
@@ -86,7 +86,7 @@ public class WebConnectorTest {
 		node.registerReceiver(testService5);
 
 		// start connector
-		connector = new WebConnector(true, HTTP_PORT, false, 1000, "./XMLCompatibility");
+		connector = new WebConnector(true, HTTP_PORT, false, 1000);
 		connector.setCrossOriginResourceDomain("*");
 		connector.setCrossOriginResourceSharing(true);
 		logStream = new ByteArrayOutputStream();
@@ -119,7 +119,7 @@ public class WebConnectorTest {
 		try {
 			c.setLogin(Long.toString(testAgent.getId()), testPass);
 
-			ClientResponse response = c.sendRequest("GET", "asdag", "");
+			ClientResponse response = c.sendRequest("GET", "service1/asdag", "");
 			assertEquals(404, response.getHttpCode());
 		} catch (Exception e) {
 			fail("Not existing service caused wrong exception");
@@ -134,7 +134,7 @@ public class WebConnectorTest {
 		// correct, id based
 		try {
 			c.setLogin(Long.toString(testAgent.getId()), testPass);
-			ClientResponse result = c.sendRequest("get", "", "");
+			ClientResponse result = c.sendRequest("get", "service1", "");
 			assertEquals("OK", result.getResponse().trim());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -145,7 +145,7 @@ public class WebConnectorTest {
 		try {
 			c.setLogin("adam", testPass);
 
-			ClientResponse result = c.sendRequest("GET", "", "");
+			ClientResponse result = c.sendRequest("GET", "service1", "");
 			assertEquals("OK", result.getResponse().trim());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -156,7 +156,7 @@ public class WebConnectorTest {
 		try {
 			c.setLogin(Long.toString(testAgent.getId()), "aaaaaaaaaaaaa");
 
-			ClientResponse result = c.sendRequest("GET", "", "");
+			ClientResponse result = c.sendRequest("GET", "service1", "");
 			assertEquals(401, result.getHttpCode());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -166,7 +166,7 @@ public class WebConnectorTest {
 		try {
 			c.setLogin(Long.toString(65464), "aaaaaaaaaaaaa");
 
-			ClientResponse result = c.sendRequest("GET", "", "");
+			ClientResponse result = c.sendRequest("GET", "service1", "");
 			assertEquals(401, result.getHttpCode());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -181,7 +181,7 @@ public class WebConnectorTest {
 			c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 			c.setLogin(Long.toString(65464), "aaaaaaaaaaaaa");
 
-			ClientResponse result = c.sendRequest("GET", "", "");
+			ClientResponse result = c.sendRequest("GET", "service1", "");
 			assertEquals(401, result.getHttpCode());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -230,7 +230,7 @@ public class WebConnectorTest {
 		try {
 			c.setLogin(Long.toString(testAgent.getId()), testPass);
 
-			ClientResponse result = c.sendRequest("PUT", "add/5/6", "");
+			ClientResponse result = c.sendRequest("PUT", "service1/add/5/6", "");
 			assertEquals("11", result.getResponse().trim());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -240,7 +240,7 @@ public class WebConnectorTest {
 		try {
 			c.setLogin(Long.toString(testAgent.getId()), testPass);
 
-			ClientResponse result = c.sendRequest("POST", "sub/5/6", "");
+			ClientResponse result = c.sendRequest("POST", "service1/sub/5/6", "");
 			assertEquals("-1", result.getResponse().trim());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -250,7 +250,7 @@ public class WebConnectorTest {
 		try {
 			c.setLogin(Long.toString(testAgent.getId()), testPass);
 
-			ClientResponse result = c.sendRequest("DELETE", "div/12/6", "");
+			ClientResponse result = c.sendRequest("DELETE", "service1/div/12/6", "");
 			assertEquals("2", result.getResponse().trim());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -260,7 +260,7 @@ public class WebConnectorTest {
 		try {
 			c.setLogin(Long.toString(testAgent.getId()), testPass);
 
-			ClientResponse result = c.sendRequest("GET", "do/2/it/3?param1=4&param2=5", "");
+			ClientResponse result = c.sendRequest("GET", "service1/do/2/it/3?param1=4&param2=5", "");
 			assertEquals("14", result.getResponse().trim());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -270,7 +270,7 @@ public class WebConnectorTest {
 		try {
 			c.setLogin(Long.toString(testAgent.getId()), testPass);
 
-			ClientResponse result = c.sendRequest("GET", "do/2/it/3/not?param1=4&param2=5", "");
+			ClientResponse result = c.sendRequest("GET", "service1/do/2/it/3/not?param1=4&param2=5", "");
 			assertEquals("-10", result.getResponse().trim());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -280,7 +280,7 @@ public class WebConnectorTest {
 		try {
 			c.setLogin(Long.toString(testAgent.getId()), testPass);
 
-			ClientResponse result = c.sendRequest("GET", "do/2/this/3/not?param1=4&param2=5", "");
+			ClientResponse result = c.sendRequest("GET", "service1/do/2/this/3/not?param1=4&param2=5", "");
 			assertEquals("-14", result.getResponse().trim());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -290,7 +290,7 @@ public class WebConnectorTest {
 		// TestService2
 		try {
 			c.setLogin(Long.toString(testAgent.getId()), testPass);
-			ClientResponse result = c.sendRequest("POST", "do/a/b", "c");
+			ClientResponse result = c.sendRequest("POST", "service2/do/a/b", "c");
 			assertEquals("abc", result.getResponse().trim());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -300,8 +300,8 @@ public class WebConnectorTest {
 		// TestService3
 		try {
 			c.setLogin(Long.toString(testAgent.getId()), testPass);
-			ClientResponse result = c.sendRequest("GET", "test1/1/2", "",
-					new Pair[] { new Pair<>("c", "5"), new Pair<>("e", "4") });
+			ClientResponse result = c.sendRequest("GET", "service3/test1/1/2", "", new Pair[] { new Pair<>("c", "5"),
+					new Pair<>("e", "4") });
 			assertEquals("125", result.getResponse().trim());
 			assertEquals("ho", result.getHeader("hi"));
 			assertEquals("text/plain", result.getHeader("Content-Type"));
@@ -313,7 +313,7 @@ public class WebConnectorTest {
 		try {
 			c.setLogin(Long.toString(testAgent.getId()), testPass);
 
-			ClientResponse result = c.sendRequest("GET", "test2/1/2", "", new Pair[] {});
+			ClientResponse result = c.sendRequest("GET", "service3/test2/1/2", "", new Pair[] {});
 			assertEquals(412, result.getHttpCode());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -367,8 +367,8 @@ public class WebConnectorTest {
 		try {
 			c.setLogin(Long.toString(testAgent.getId()), testPass);
 
-			ClientResponse result = c.sendRequest("PUT", "books/8/test2", "hi", MediaType.TEXT_PLAIN, "",
-					new Pair[] {});
+			ClientResponse result = c
+					.sendRequest("PUT", "books/8/test2", "hi", MediaType.TEXT_PLAIN, "", new Pair[] {});
 			assertEquals("hi", result.getResponse().trim());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -410,6 +410,22 @@ public class WebConnectorTest {
 			assertEquals(400, result.getHttpCode());
 			assertEquals(true, result.getResponse().contains("Malformed Request"));
 
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("Exception: " + e);
+		}
+	}
+
+	@Test
+	public void testSwagger() {
+		MiniClient c = new MiniClient();
+		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
+
+		try {
+			c.setLogin(Long.toString(testAgent.getId()), testPass);
+
+			ClientResponse result = c.sendRequest("GET", "service1/swagger.json", "");
+			assertTrue(result.getResponse().trim().contains("/div/{number1}/{number2}"));
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("Exception: " + e);

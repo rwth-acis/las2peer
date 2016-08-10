@@ -14,13 +14,12 @@ import javax.ws.rs.PathParam;
  * Service to test the web connector
  *
  */
-@Path("service2")
-public class TestService2 extends RESTService {
+public class TestServiceMissingPath extends RESTService {
 
 	/**
 	 * constructor, initializes RESTMapper
 	 */
-	public TestService2() {
+	public TestServiceMissingPath() {
 
 	}
 

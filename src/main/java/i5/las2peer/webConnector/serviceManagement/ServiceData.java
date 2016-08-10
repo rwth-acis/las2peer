@@ -1,41 +1,34 @@
 package i5.las2peer.webConnector.serviceManagement;
 
+import i5.las2peer.p2p.ServiceNameVersion;
+import i5.las2peer.restMapper.RESTMapper;
+import i5.las2peer.restMapper.data.PathTree;
+
 public class ServiceData {
+	private ServiceNameVersion service;
+	private PathTree tree;
+	private long lastAccess;
 
-	private String serviceName;
-	private String serviceVersion;
-	private boolean isActive;
-	private String xml;
-
-	public ServiceData(String serviceName, String serviceVersion, boolean isActive, String xml) {
-		this.serviceName = serviceName;
-		this.serviceVersion = serviceVersion;
-		this.isActive = isActive;
-		this.xml = xml;
+	public ServiceData(ServiceNameVersion service, String xml) throws Exception {
+		this.service = service;
+		this.tree = RESTMapper.getMappingTree(xml);
+		touch();
 	}
 
-	public String getServiceName() {
-		return serviceName;
+	public ServiceNameVersion getService() {
+		return service;
 	}
 
-	public String getServiceVersion() {
-		return serviceVersion;
+	public PathTree getTree() {
+		return tree;
 	}
 
-	public boolean isActive() {
-		return isActive;
+	public void touch() {
+		lastAccess = System.currentTimeMillis();
 	}
 
-	public String getXml() {
-		return xml;
-	}
-
-	public void enable() {
-		isActive = true;
-	}
-
-	public void disable() {
-		isActive = false;
+	public long lastAccess() {
+		return lastAccess;
 	}
 
 }
