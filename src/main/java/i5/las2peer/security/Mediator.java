@@ -6,6 +6,7 @@ import i5.las2peer.execution.L2pServiceException;
 import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.Node;
+import i5.las2peer.p2p.ServiceNameVersion;
 import i5.las2peer.p2p.TimeoutException;
 import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.tools.SerializationException;
@@ -155,9 +156,10 @@ public class Mediator implements MessageReceiver {
 	/**
 	 * Invokes a service method (in the network) for the mediated agent.
 	 * 
-	 * @param service
-	 * @param method
-	 * @param parameters
+	 * @param service the service to invoke
+	 * @param method method to invoke
+	 * @param parameters list of method parameters
+	 * @param localOnly if true, only services on this node are invoked
 	 * 
 	 * @return result of the method invocation
 	 * 
@@ -167,10 +169,11 @@ public class Mediator implements MessageReceiver {
 	 * @throws L2pServiceException
 	 * @throws AgentNotKnownException
 	 */
-	public Serializable invoke(String service, String method, Serializable[] parameters) throws L2pSecurityException,
-			InterruptedException, TimeoutException, AgentNotKnownException, L2pServiceException {
+	public Serializable invoke(String service, String method, Serializable[] parameters, boolean localOnly)
+			throws L2pSecurityException, InterruptedException, TimeoutException, AgentNotKnownException,
+			L2pServiceException {
 
-		return runningAt.invoke(myAgent, service, method, parameters);
+		return runningAt.invoke(myAgent, ServiceNameVersion.fromString(service), method, parameters, false, localOnly);
 	}
 
 	/**

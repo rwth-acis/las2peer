@@ -33,7 +33,6 @@ import i5.las2peer.security.MessageReceiver;
 import i5.las2peer.security.MonitoringAgent;
 import i5.las2peer.security.PassphraseAgent;
 import i5.las2peer.security.ServiceAgent;
-import i5.las2peer.security.ServiceInfoAgent;
 import i5.las2peer.security.UnlockAgentCall;
 import i5.las2peer.security.UserAgent;
 import i5.las2peer.security.UserAgentManager;
@@ -160,6 +159,11 @@ public abstract class Node implements AgentStorage {
 	private UserAgentManager userManager;
 
 	/**
+	 * maps service alias to service names
+	 */
+	private ServiceAliasManager aliasManager;
+
+	/**
 	 * Creates a new node, if the standardObserver flag is true, an observer logging all events to a simple plain text
 	 * log file will be generated. If not, no observer will be used at startup.
 	 * 
@@ -216,6 +220,7 @@ public abstract class Node implements AgentStorage {
 		nodeServiceCache = new NodeServiceCache(this, nodeServiceCacheLifetime, nodeServiceCacheResultCount);
 
 		userManager = new UserAgentManager(this);
+		aliasManager = new ServiceAliasManager(this);
 	}
 
 	/**
@@ -497,13 +502,6 @@ public abstract class Node implements AgentStorage {
 	public final void launch() throws NodeException {
 		launchSub();
 
-		// init ServiceInfoAgent
-		try {
-			this.registerReceiver(ServiceInfoAgent.getServiceInfoAgent());
-		} catch (L2pSecurityException | AgentException | CryptoException | SerializationException e) {
-			throw new NodeException("error initializing ServiceInfoAgent", e);
-		}
-
 		// store anonymous if not stored yet
 		getAnonymous();
 
@@ -583,8 +581,6 @@ public abstract class Node implements AgentStorage {
 				observerNotice(Event.AGENT_REGISTERED, this.getNodeId(), agent, "GroupAgent");
 			} else if (agent instanceof MonitoringAgent) {
 				observerNotice(Event.AGENT_REGISTERED, this.getNodeId(), agent, "MonitoringAgent");
-			} else if (agent instanceof ServiceInfoAgent) {
-				observerNotice(Event.AGENT_REGISTERED, this.getNodeId(), agent, "ServiceInfoAgent");
 			}
 		} else {
 			// ok, we have a mediator
@@ -1152,6 +1148,15 @@ public abstract class Node implements AgentStorage {
 	 */
 	public long getAgentIdForEmail(String email) throws AgentNotKnownException {
 		return userManager.getAgentIdByEmail(email);
+	}
+
+	/**
+	 * get the manager responsible for the mapping from service alias to service names
+	 * 
+	 * @return
+	 */
+	public ServiceAliasManager getServiceAliasManager() {
+		return aliasManager;
 	}
 
 	/**

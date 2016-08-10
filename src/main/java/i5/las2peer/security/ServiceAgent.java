@@ -38,8 +38,6 @@ import java.lang.reflect.Method;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import org.apache.commons.codec.binary.Base64;
 
@@ -54,11 +52,6 @@ public class ServiceAgent extends PassphraseAgent {
 	 */
 	private ServiceNameVersion sService;
 
-	private boolean timerRunning = false;
-	private Timer timer;
-	private int timerIntervalSeconds = 10;
-	private int timerRunTimes = 0;
-	private int TIMER_RUN_TIMES_MAX = 3;
 	/**
 	 * instance of the service (if started at a node)
 	 */
@@ -237,7 +230,6 @@ public class ServiceAgent extends PassphraseAgent {
 	public void notifyUnregister() {
 		getRunningAtNode().getNodeServiceCache().unregisterLocalService(this);
 
-		serviceInfoAgentNotifyUnregister();
 		if (serviceInstance != null) {
 			serviceInstance.close();
 			serviceInstance = null;
@@ -387,91 +379,6 @@ public class ServiceAgent extends PassphraseAgent {
 		}
 	}
 
-	private void stopTimer() {
-		if (timer != null) {
-			timer.cancel();
-			timer = null;
-		}
-		timerRunning = false;
-		timerRunTimes = 0;
-	}
-
-	/**
-	 * Notifies the {@link i5.las2peer.security.ServiceInfoAgent} about itself
-	 */
-	private void serviceInfoAgentNotifyUnregister() {
-		try {
-			stopTimer();
-			ServiceInfoAgent agent = getServiceInfoAgent();
-			agent.serviceRemoved(this, getRunningAtNode());
-		} catch (Exception e) {
-			// XXX ignore for now
-		}
-	}
-
-	/**
-	 * Registers and returns the {@link i5.las2peer.security.ServiceInfoAgent}
-	 * 
-	 * @return
-	 * @throws CryptoException
-	 * @throws L2pSecurityException
-	 * @throws SerializationException
-	 * @throws AgentException
-	 */
-	private ServiceInfoAgent getServiceInfoAgent() throws CryptoException, L2pSecurityException,
-			SerializationException, AgentException {
-		ServiceInfoAgent agent = ServiceInfoAgent.getServiceInfoAgent();
-		return agent;
-	}
-
-	/**
-	 * Notifies the {@link i5.las2peer.security.ServiceInfoAgent} about itself
-	 * 
-	 * @throws L2pServiceException
-	 */
-	public void serviceInfoAgentNotifyRegister() throws L2pServiceException {
-		try {
-			startTimer();
-		} catch (Exception e) {
-			throw new L2pServiceException("Error creating ServiceInfoAgent", e);
-		}
-	}
-
-	private synchronized void startTimer() throws Exception {
-		if (timerRunning)
-			return;
-
-		timer = new Timer();
-		ServiceInfoAgent agent = getServiceInfoAgent();
-
-		final ServiceInfoAgent finalAgent = agent;
-		final Node finalNode = this.getRunningAtNode();
-		timerRunning = true;
-		timerRunTimes = 0;
-		timer.scheduleAtFixedRate(new TimerTask() {
-			@Override
-			public void run() {
-				executeTimer(finalNode, finalAgent);
-			}
-		}, 0, // run first occurrence immediately
-				timerIntervalSeconds * 1000); // run every x seconds
-	}
-
-	private void executeTimer(Node finalNode, ServiceInfoAgent finalAgent) {
-		try {
-			finalAgent.serviceAdded(this, finalNode);
-			stopTimer(); // stop timer on success
-		} catch (Exception e) {
-			// limit to 3 attempts
-			timerRunTimes++;
-			if (timerRunning && timerRunTimes > TIMER_RUN_TIMES_MAX) {
-				// finally failed
-				stopTimer();
-				// TODO error handling
-			}
-		}
-	}
-
 	/**
 	 * notify this service agent, that it has been registered (for usage) at the given node
 	 * 
@@ -493,9 +400,6 @@ public class ServiceAgent extends PassphraseAgent {
 
 			// and the agent
 			super.notifyRegistrationTo(node);
-
-			// notify Service Info Agent
-			serviceInfoAgentNotifyRegister();
 
 			// notify Node
 			node.getNodeServiceCache().registerLocalService(this);
