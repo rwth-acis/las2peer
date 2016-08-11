@@ -72,7 +72,6 @@ public class ServiceVersion implements Comparable<ServiceVersion>, Serializable 
 				} else
 					this.sub = null;
 			} catch (NumberFormatException e) {
-				e.printStackTrace();
 				throw new IllegalArgumentException("The given string contains invalid number representations: "
 						+ version, e);
 			}

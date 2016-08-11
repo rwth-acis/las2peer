@@ -604,9 +604,8 @@ public class L2pNodeLauncher {
 			Files.write(file.toPath(), a.toXmlString().getBytes());
 
 			// save passphrase
-			Files.write(Paths.get(DEFAULT_SERVICE_AGENT_DIRECTORY + "passphrases.txt"),
-					(serviceNameVersion + ".xml;" + defaultPass).getBytes(), StandardOpenOption.CREATE,
-					StandardOpenOption.APPEND);
+			Files.write(Paths.get(DEFAULT_SERVICE_AGENT_DIRECTORY + "passphrases.txt"), (serviceNameVersion + ".xml;"
+					+ defaultPass + "\n").getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
 		}
 
 		// get passphrase from file
@@ -697,8 +696,6 @@ public class L2pNodeLauncher {
 				Document doc = dBuilder.parse(new InputSource(new StringReader(xml)));
 
 				String alias = doc.getDocumentElement().getAttribute("path").split("/")[0];
-
-				System.out.println(alias); // TODO SIA testen
 
 				node.getServiceAliasManager().registerServiceAlias(agent, alias);
 			}

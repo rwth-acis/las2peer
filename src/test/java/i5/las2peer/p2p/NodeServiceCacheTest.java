@@ -21,7 +21,9 @@ public class NodeServiceCacheTest {
 
 	@Test
 	public void testLocalServices() throws CryptoException, L2pSecurityException, AgentNotKnownException {
-		NodeServiceCache cache = new NodeServiceCache(null, 0, 0);
+		Node node = LocalNode.launchNode();
+
+		NodeServiceCache cache = new NodeServiceCache(node, 0, 0);
 
 		ServiceNameVersion service1 = ServiceNameVersion.fromString("test.service@1.0.5-12");
 		ServiceAgent agent1 = ServiceAgent.createServiceAgent(service1, "test");

@@ -67,12 +67,15 @@ public class NodeServiceCache {
 	 */
 	public ServiceInstance getServiceAgentInstance(ServiceNameVersion service, boolean exact, boolean localOnly,
 			Agent acting) throws AgentNotKnownException {
+
+		ServiceInstance local = null, global = null;
+
 		// search locally
 		if (exact) {
 			synchronized (localServices) {
 				if (localServices.containsKey(service.getName())
 						&& localServices.get(service.getName()).containsKey(service.getVersion())) {
-					return localServices.get(service.getName()).get(service.getVersion());
+					local = localServices.get(service.getName()).get(service.getVersion());
 				}
 			}
 		} else {
@@ -80,7 +83,8 @@ public class NodeServiceCache {
 				if (localServices.containsKey(service.getName())) {
 					for (Map.Entry<ServiceVersion, ServiceInstance> e : localServices.get(service.getName()).entrySet()) {
 						if (e.getKey().fits(service.getVersion())) {
-							return e.getValue();
+							local = e.getValue();
+							break;
 						}
 					}
 				}
@@ -88,36 +92,44 @@ public class NodeServiceCache {
 		}
 
 		// search globally
-		if (!localOnly) {
+		if (!localOnly && (local == null || runningAt.isBusy())) {
 			if (exact) {
 				ServiceInstance instance = getBestGlobalInstanceOfVersion(service.getName(), service.getVersion());
 				if (instance != null)
-					return instance;
+					global = instance;
 
 				try {
 					update(service, true, acting);
 				} catch (Exception e) {
-					throw new AgentNotKnownException("Could not retrieve service information from the network.", e);
+					if (local == null)
+						throw new AgentNotKnownException("Could not retrieve service information from the network.", e);
 				}
 
 				instance = getBestGlobalInstanceOfVersion(service.getName(), service.getVersion());
 				if (instance != null)
-					return instance;
+					global = instance;
 			} else {
 				ServiceInstance instance = getBestGlobalInstanceFitsVersion(service.getName(), service.getVersion());
 				if (instance != null)
-					return instance;
+					global = instance;
 
 				try {
 					update(service, false, acting);
 				} catch (Exception e) {
-					throw new AgentNotKnownException("Could not retrieve service information from the network.", e);
+					if (local == null)
+						throw new AgentNotKnownException("Could not retrieve service information from the network.", e);
 				}
 
 				instance = getBestGlobalInstanceFitsVersion(service.getName(), service.getVersion());
 				if (instance != null)
-					return instance;
+					global = instance;
 			}
+		}
+
+		if (local != null && (!runningAt.isBusy() || global == null)) {
+			return local;
+		} else if (global != null) {
+			return global;
 		}
 
 		throw new AgentNotKnownException("Could not find any agent for this service on the network!");
