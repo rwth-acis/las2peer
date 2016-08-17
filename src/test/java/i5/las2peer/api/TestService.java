@@ -63,4 +63,9 @@ public class TestService extends Service {
 		return testString2;
 	}
 
+	@Override
+	public String getAlias() {
+		return "test";
+	}
+
 }

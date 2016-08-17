@@ -1,10 +1,5 @@
 package i5.las2peer.api;
 
-import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-
 import i5.las2peer.execution.L2pServiceException;
 import i5.las2peer.execution.L2pThread;
 import i5.las2peer.execution.NoSuchServiceMethodException;
@@ -16,6 +11,11 @@ import i5.las2peer.security.Agent;
 import i5.las2peer.security.Context;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.ServiceAgent;
+
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 /**
  * Base class for services to be hosted within the LAS2peer network.
@@ -114,7 +114,7 @@ public abstract class Service extends Configurable {
 	 * The node this service is currently running at.
 	 */
 	private Node runningAt = null;
-	
+
 	/**
 	 * The service agent responsible for this service.
 	 */
@@ -170,9 +170,9 @@ public abstract class Service extends Configurable {
 	 * 
 	 * Needs an active {@link Context}!
 	 * 
-	 * @param service The service class. A version may be specified (for example package.serviceClass@1.0.0-1 or package.serviceClass@1.0). 
-	 * 				The core tries to find an appropriate version (version 1.0.5 matches 1.0). If no version is specified,
-	 * 				the newest version is picked.
+	 * @param service The service class. A version may be specified (for example package.serviceClass@1.0.0-1 or
+	 *            package.serviceClass@1.0). The core tries to find an appropriate version (version 1.0.5 matches 1.0).
+	 *            If no version is specified, the newest version is picked.
 	 * @param method the service method
 	 * @param parameters list of parameters
 	 * 
@@ -189,8 +189,7 @@ public abstract class Service extends Configurable {
 			throws AgentNotKnownException, L2pServiceException, L2pSecurityException, InterruptedException,
 			TimeoutException {
 
-		return getContext().getLocalNode().invoke(getContext().getMainAgent(), service,
-				method, parameters);
+		return getContext().getLocalNode().invoke(getContext().getMainAgent(), service, method, parameters);
 	}
 
 	/**
@@ -201,9 +200,9 @@ public abstract class Service extends Configurable {
 	 * 
 	 * Needs an active {@link Context}!
 	 * 
-	 * @param service The service class. A version may be specified (for example package.serviceClass@1.0.0-1 or package.serviceClass@1.0). 
-	 * 				The core tries to find an appropriate version (version 1.0.5 matches 1.0). If no version is specified,
-	 * 				the newest version is picked.
+	 * @param service The service class. A version may be specified (for example package.serviceClass@1.0.0-1 or
+	 *            package.serviceClass@1.0). The core tries to find an appropriate version (version 1.0.5 matches 1.0).
+	 *            If no version is specified, the newest version is picked.
 	 * @param method the service method
 	 * @param parameters list of parameters
 	 * 
@@ -219,8 +218,7 @@ public abstract class Service extends Configurable {
 			throws AgentNotKnownException, L2pServiceException, L2pSecurityException, InterruptedException,
 			TimeoutException {
 
-		return getContext().getLocalNode().invoke(getAgent(), service, method,
-				parameters);
+		return getContext().getLocalNode().invoke(getAgent(), service, method, parameters);
 	}
 
 	/**
@@ -376,7 +374,7 @@ public abstract class Service extends Configurable {
 	 * simple startup hook that may be overwritten in subclasses
 	 * 
 	 * @param node
-	 * @param agent 
+	 * @param agent
 	 * @throws L2pServiceException
 	 */
 	public void launchedAt(Node node, ServiceAgent agent) throws L2pServiceException {
@@ -400,6 +398,15 @@ public abstract class Service extends Configurable {
 	public void close() {
 		System.out.println("Service " + this.getClass().getCanonicalName() + " has been stopped!");
 		runningAt = null;
+	}
+
+	/**
+	 * Should return the service alias, which is registered on service start.
+	 * 
+	 * @return the alias, or null if no alias should be registered
+	 */
+	public String getAlias() {
+		return null;
 	}
 
 	/**

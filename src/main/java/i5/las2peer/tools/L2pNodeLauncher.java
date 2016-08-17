@@ -38,7 +38,6 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.Serializable;
-import java.io.StringReader;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
@@ -51,12 +50,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
 
 import rice.p2p.commonapi.NodeHandle;
 
@@ -660,8 +653,6 @@ public class L2pNodeLauncher {
 			throw new IllegalStateException("You have to unlock the agent before starting the corresponding service!");
 
 		node.registerReceiver(serviceAgent);
-
-		registerServiceAlias((ServiceAgent) serviceAgent);
 	}
 
 	/**
@@ -676,32 +667,6 @@ public class L2pNodeLauncher {
 	public void stopService(String serviceNameVersion) throws AgentNotKnownException, NoSuchServiceException {
 		ServiceAgent agent = node.getLocalServiceAgent(ServiceNameVersion.fromString(serviceNameVersion));
 		node.unregisterReceiver(agent);
-	}
-
-	/**
-	 * registers a service alias parsed from XML mapping
-	 * 
-	 * @param agent
-	 */
-	public void registerServiceAlias(ServiceAgent agent) {
-		try {
-			String xml = (String) node.invokeLocally(agent, agent, "getRESTMapping", new Serializable[] {});
-			if (xml == null || xml.isEmpty()) {
-				throw new Exception("No XML mapping received");
-			} else {
-				DocumentBuilderFactory dbFactory;
-				DocumentBuilder dBuilder;
-				dbFactory = DocumentBuilderFactory.newInstance();
-				dBuilder = dbFactory.newDocumentBuilder();
-				Document doc = dBuilder.parse(new InputSource(new StringReader(xml)));
-
-				String alias = doc.getDocumentElement().getAttribute("path").split("/")[0];
-
-				node.getServiceAliasManager().registerServiceAlias(agent, alias);
-			}
-		} catch (Exception e) {
-			System.out.println("Registering service alias failed: " + e.getMessage());
-		}
 	}
 
 	/**

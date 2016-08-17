@@ -135,6 +135,7 @@ public class LocalNodeInvocationTest {
 	@Test
 	public void testInvocation() throws MalformedXMLException, IOException, L2pSecurityException, AgentException,
 			InterruptedException, TimeoutException, CryptoException, NodeException {
+
 		// start
 		LocalNode serviceNode1 = LocalNode.newNode("export/jars/");
 		LocalNode serviceNode2 = LocalNode.newNode("export/jars/");

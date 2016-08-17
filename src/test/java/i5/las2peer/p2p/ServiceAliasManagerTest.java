@@ -2,13 +2,20 @@ package i5.las2peer.p2p;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import i5.las2peer.security.AgentException;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.ServiceAgent;
 import i5.las2peer.tools.CryptoException;
 
+import org.junit.Before;
 import org.junit.Test;
 
 public class ServiceAliasManagerTest {
+	@Before
+	public void reset() {
+		LocalNode.reset();
+	}
+
 	@Test
 	public void test() throws CryptoException, L2pSecurityException, DuplicateServiceAliasException,
 			ServiceNotFoundException {
@@ -39,5 +46,18 @@ public class ServiceAliasManagerTest {
 			fail("DuplicateServiceAliasException expected");
 		} catch (DuplicateServiceAliasException e) {
 		}
+	}
+
+	@Test
+	public void testIntegration() throws CryptoException, L2pSecurityException, AgentAlreadyRegisteredException,
+			AgentException, ServiceNotFoundException {
+		LocalNode node = LocalNode.launchNode();
+		ServiceAgent agentA = ServiceAgent.createServiceAgent(
+				ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.0"), "asdf");
+		agentA.unlockPrivateKey("asdf");
+		node.registerReceiver(agentA);
+
+		// regular creation
+		assertEquals(node.getServiceAliasManager().getServiceNameByAlias("test"), "i5.las2peer.api.TestService");
 	}
 }
