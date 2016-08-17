@@ -1,8 +1,9 @@
 package i5.las2peer.classLoaders;
 
-import java.net.URL;
-
 import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
+import i5.las2peer.classLoaders.libraries.ResourceNotFoundException;
+
+import java.net.URL;
 
 /**
  * A BundleClassLoader is responsible of providing all classes for a main class / service via separate libraries.
@@ -11,7 +12,7 @@ import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
  *
  */
 public class BundleClassManager {
-	
+
 	/**
 	 * A class loader where to find classes if no libraryLoader has the class
 	 */
@@ -21,7 +22,7 @@ public class BundleClassManager {
 	 * a list of libraries
 	 */
 	private LibraryClassLoader[] libraryLoaders = new LibraryClassLoader[0];
-	
+
 	/**
 	 * create a Bundle
 	 * 
@@ -30,7 +31,7 @@ public class BundleClassManager {
 	public BundleClassManager(ClassLoader parent) {
 		this.parent = parent;
 	}
-	
+
 	/**
 	 * init library loader with a list
 	 * 
@@ -80,21 +81,23 @@ public class BundleClassManager {
 	 * @return an URL
 	 */
 	public URL findResource(String resourceName, LibraryClassLoader calledFromChild) {
+		Logger.logGetResource(this, resourceName, null, null);
+
 		for (int i = 0; i < libraryLoaders.length; i++) {
 			if (libraryLoaders[i] != calledFromChild) {
 				try {
 					return libraryLoaders[i].getResource(resourceName, false);
 				} catch (Exception e) {
-					System.err.println("some other than " + LibraryNotFoundException.class.getName() + ": " + e);
+					System.err.println("some other than " + ResourceNotFoundException.class.getName() + ": " + e);
 				}
 			}
 		}
-		
+
 		return parent.getResource(resourceName);
 	}
 
 	/**
-	 * Load a bundle class from the outside. The class will be resolved. 
+	 * Load a bundle class from the outside. The class will be resolved.
 	 * 
 	 * Used to load the main service class.
 	 * 
@@ -126,20 +129,18 @@ public class BundleClassManager {
 	 * @return the loaded class
 	 * @throws ClassNotFoundException
 	 */
-	protected Class<?> loadClass(String className, LibraryClassLoader child)
-			throws ClassNotFoundException {
-		Logger.logLoading(this, className, null,
-				"by child " + child.getLibrary().getIdentifier() + " - try " + libraryLoaders.length + " children");
+	protected Class<?> loadClass(String className, LibraryClassLoader child) throws ClassNotFoundException {
+		Logger.logLoading(this, className, null, "by child " + child.getLibrary().getIdentifier() + " - try "
+				+ libraryLoaders.length + " children");
 
 		// ask platform loader first
 		if (parent != null) {
 			try {
 				return parent.loadClass(className);
-			}
-			catch (ClassNotFoundException e) {
+			} catch (ClassNotFoundException e) {
 			}
 		}
-		
+
 		// then ask child bundles
 		Class<?> result = null;
 		for (int i = 0; i < libraryLoaders.length; i++) {
