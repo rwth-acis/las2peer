@@ -435,25 +435,25 @@ public class CommandPrompt {
 				printResult("\tresult:", result);
 				status = ReturnStatus.OK_PROCEED;
 			} catch (NoSuchMethodException e) {
-				System.out.println(ColoredOutput.colorize(e.getMessage(), ForegroundColor.Red));
+				System.err.println(ColoredOutput.colorize(e.toString(), ForegroundColor.Red));
 				status = ReturnStatus.ERROR_PROCEED;
 			} catch (InvocationTargetException e) {
-				System.out.println(ColoredOutput.colorize("  --> Exception in executed method!", ForegroundColor.Red));
-				System.out.println(ColoredOutput.colorize(
+				System.err.println(ColoredOutput.colorize("  --> Exception in executed method!", ForegroundColor.Red));
+				System.err.println(ColoredOutput.colorize(
 						"      " + e.getClass().getSimpleName() + " (" + e.getCause().getMessage() + ")",
 						ForegroundColor.Red));
-				System.out.println(ColoredOutput.colorize("      (print StackTrace with pst / printStackTrace)",
+				System.err.println(ColoredOutput.colorize("      (print StackTrace with pst / printStackTrace)",
 						ForegroundColor.LightGrey));
 
 				lastCommandException = e.getCause();
 				exceptionLine = line;
 				status = ReturnStatus.ERROR_PROCEED;
 			} catch (Exception e) {
-				System.out.println(
+				System.err.println(
 						ColoredOutput.colorize("  --> Exception during command execution!", ForegroundColor.Red));
-				System.out.println(ColoredOutput.colorize(
+				System.err.println(ColoredOutput.colorize(
 						"      " + e.getClass().getSimpleName() + " (" + e.getMessage() + ")", ForegroundColor.Red));
-				System.out.println(ColoredOutput.colorize("      (print StackTrace with pst / printStackTrace)",
+				System.err.println(ColoredOutput.colorize("      (print StackTrace with pst / printStackTrace)",
 						ForegroundColor.LightGrey));
 
 				lastCommandException = e;
