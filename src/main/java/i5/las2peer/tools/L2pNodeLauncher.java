@@ -68,8 +68,8 @@ public class L2pNodeLauncher {
 	private static final L2pLogger logger = L2pLogger.getInstance(L2pNodeLauncher.class.getName());
 
 	private static final String DEFAULT_SERVICE_DIRECTORY = "./service/";
-
-	private static final String DEFAULT_SERVICE_AGENT_DIRECTORY = "./etc/serviceagents/";
+	private static final String DEFAULT_STARTUP_DIRECTORY = "etc/startup/";
+	private static final String DEFAULT_SERVICE_AGENT_DIRECTORY = "etc/startup/";
 
 	private CommandPrompt commandPrompt;
 
@@ -299,7 +299,7 @@ public class L2pNodeLauncher {
 	 * the passphrases for the agents.
 	 */
 	public void uploadStartupDirectory() {
-		uploadStartupDirectory("etc/startup");
+		uploadStartupDirectory(DEFAULT_STARTUP_DIRECTORY);
 	}
 
 	/**
