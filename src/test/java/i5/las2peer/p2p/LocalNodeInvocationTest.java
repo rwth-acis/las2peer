@@ -20,11 +20,15 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class LocalNodeInvocationTest {
+public class LocalNodeInvocationTest { // TODO SIA random fails...
 
 	@Before
 	public void reset() {
 		LocalNode.reset();
+
+		// make results determinant
+		LocalNode.setMinMessageWait(100);
+		LocalNode.setMaxMessageWait(100);
 	}
 
 	@After

@@ -387,7 +387,7 @@ public abstract class Service extends Configurable {
 				e.printStackTrace();
 			}
 		}
-		System.out.println("Service " + this.getClass().getCanonicalName() + " has been started!");
+		System.out.println("Service " + this.agent.getServiceNameVersion() + " has been started!");
 	}
 
 	/**
@@ -396,7 +396,7 @@ public abstract class Service extends Configurable {
 	 * simple shutdown hook to be overwritten in subclasses
 	 */
 	public void close() {
-		System.out.println("Service " + this.getClass().getCanonicalName() + " has been stopped!");
+		System.out.println("Service " + this.agent.getServiceNameVersion() + " has been stopped!");
 		runningAt = null;
 	}
 

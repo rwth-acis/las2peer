@@ -424,6 +424,10 @@ public class LocalNode extends Node {
 		htKnownAgents = new Hashtable<Long, String>();
 		htLocalNodes = new Hashtable<Long, LocalNode>();
 
+		iMessageMinWait = DEFAULT_MESSAGE_MIN_WAIT;
+		iMessageMaxWait = DEFAULT_MESSAGE_MAX_WAIT;
+		lPendingTimeout = DEFAULT_PENDING_TIMEOUT;
+
 		stopCleaner();
 
 		startPendingTimer();
@@ -571,10 +575,10 @@ public class LocalNode extends Node {
 
 	private static final long DEFAULT_PENDING_TIMEOUT = 20000; // 20 seconds
 	private static final int DEFAULT_MESSAGE_MIN_WAIT = 500;
-	private static final int DEFAULT_MESSAGE_MAX_WAIT = 1000;
+	private static final int DEFAULT_MESSAGE_MAX_WAIT = 550;
 
-	private static final int iMessageMinWait = DEFAULT_MESSAGE_MIN_WAIT;
-	private static final int iMessageMaxWait = DEFAULT_MESSAGE_MAX_WAIT;
+	private static int iMessageMinWait = DEFAULT_MESSAGE_MIN_WAIT;
+	private static int iMessageMaxWait = DEFAULT_MESSAGE_MAX_WAIT;
 	private static long lPendingTimeout = DEFAULT_PENDING_TIMEOUT;
 
 	private static TimerThread pendingTimer = null;
@@ -583,8 +587,20 @@ public class LocalNode extends Node {
 		lPendingTimeout = newtimeout;
 	}
 
+	public static int getMinMessageWait() {
+		return iMessageMinWait;
+	}
+
 	public static int getMaxMessageWait() {
 		return iMessageMaxWait;
+	}
+
+	public static void setMinMessageWait(int time) {
+		iMessageMinWait = time;
+	}
+
+	public static void setMaxMessageWait(int time) {
+		iMessageMaxWait = time;
 	}
 
 	static {
@@ -624,7 +640,7 @@ public class LocalNode extends Node {
 			public void run() {
 				Random r = new Random();
 
-				int wait = iMessageMinWait + r.nextInt(iMessageMaxWait - iMessageMinWait);
+				int wait = iMessageMinWait + r.nextInt(iMessageMaxWait - iMessageMinWait + 1);
 				try {
 					Thread.sleep(wait);
 				} catch (InterruptedException e1) {
