@@ -173,10 +173,10 @@ public class Mediator implements MessageReceiver {
 	public Serializable invoke(String service, String method, Serializable[] parameters, boolean preferLocal)
 			throws L2pSecurityException, InterruptedException, TimeoutException, AgentNotKnownException,
 			L2pServiceException {
-		
+
 		return runningAt.invoke(myAgent, service, method, parameters, preferLocal);
 	}
-	
+
 	/**
 	 * Invokes a service method (in the network) for the mediated agent.
 	 * 
@@ -194,11 +194,11 @@ public class Mediator implements MessageReceiver {
 	 * @throws AgentNotKnownException
 	 * @throws L2pServiceException
 	 */
-	public Serializable invoke(String service, String version, String method, Serializable[] parameters, boolean preferLocal)
-			throws L2pSecurityException, InterruptedException, TimeoutException, AgentNotKnownException,
-			L2pServiceException {
-		
-		return runningAt.invoke(myAgent, new ServiceNameVersion(service,version), method, parameters, preferLocal);
+	public Serializable invoke(String service, String version, String method, Serializable[] parameters,
+			boolean preferLocal) throws L2pSecurityException, InterruptedException, TimeoutException,
+			AgentNotKnownException, L2pServiceException {
+
+		return runningAt.invoke(myAgent, new ServiceNameVersion(service, version), method, parameters, preferLocal);
 	}
 
 	/**

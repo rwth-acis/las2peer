@@ -142,6 +142,7 @@ public class MediatorTest {
 		final HashSet<String> got = new HashSet<String>();
 
 		Mediator testee = new Mediator(eve) {
+			@Override
 			public boolean workOnMessage(Message message, Context c) {
 				try {
 					if (message.getContent() instanceof String) {

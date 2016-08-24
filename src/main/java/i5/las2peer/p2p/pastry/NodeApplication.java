@@ -252,7 +252,8 @@ public class NodeApplication implements Application, ScribeMultiClient {
 
 	/**
 	 * Called to route a message to the id
-	 * @param id 
+	 * 
+	 * @param id
 	 */
 	public void routeMyMsg(Id id) {
 		logger.info("\t --> " + this + " sending to " + id);
@@ -262,7 +263,8 @@ public class NodeApplication implements Application, ScribeMultiClient {
 
 	/**
 	 * Called to directly send a message to the nh
-	 * @param nh 
+	 * 
+	 * @param nh
 	 */
 	public void routeMyMsgDirect(NodeHandle nh) {
 		logger.info("\t --> " + this + " sending direct to " + nh);
@@ -466,7 +468,8 @@ public class NodeApplication implements Application, ScribeMultiClient {
 
 	@Override
 	public void subscribeFailed(Collection<Topic> topics) {
-		// System.out.println(ColoredOutput.colorize( "topic subscription failed for collection of topics!", ForegroundColor.Yellow));
+		// System.out.println(ColoredOutput.colorize( "topic subscription failed for collection of topics!",
+		// ForegroundColor.Yellow));
 		for (Topic t : topics)
 			subscribeFailed(t);
 	}
@@ -480,7 +483,8 @@ public class NodeApplication implements Application, ScribeMultiClient {
 			// System.out.println( "\tchildren: " + scribeClient.getChildren(t).length );
 		}
 
-		// System.out.println(ColoredOutput.colorize( "\t\t<--sucessfully subscribed to topic collection", ForegroundColor.Yellow));
+		// System.out.println(ColoredOutput.colorize( "\t\t<--sucessfully subscribed to topic collection",
+		// ForegroundColor.Yellow));
 		// for (Topic t: topics) {
 		// System.out.println(ColoredOutput.colorize( "\t\t\t" + t.getId(), ForegroundColor.Yellow));
 		// }

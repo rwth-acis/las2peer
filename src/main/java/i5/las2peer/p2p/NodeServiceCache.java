@@ -13,10 +13,10 @@ import rice.pastry.NodeHandle;
 /**
  * Caching class to manage the knowledge of a node about existing services
  */
-public class NodeServiceCache {	
-	
+public class NodeServiceCache {
+
 	private final Node runningAt;
-	
+
 	private Hashtable<String, Hashtable<ServiceVersion, ServiceAgent>> localServiceVersions = new Hashtable<>();
 
 	private long lifeTimeSeconds = 10;
@@ -27,9 +27,9 @@ public class NodeServiceCache {
 		this.runningAt = parent;
 		this.lifeTimeSeconds = lifeTime;
 	}
-	
+
 	public ServiceAgent getServiceAgent(String name, String version) {
-		return getServiceAgent(new ServiceNameVersion(name,version));
+		return getServiceAgent(new ServiceNameVersion(name, version));
 	}
 
 	public ServiceAgent getServiceAgent(ServiceNameVersion service) {
@@ -41,13 +41,13 @@ public class NodeServiceCache {
 			return null;
 		}
 	}
-	
+
 	private ServiceAgentNodeData getServiceAgentNodeData(ServiceNameVersion service) {
 		return serviceAgentNodeData.get(service.toString());
 	}
-	
+
 	public ArrayList<NodeHandle> getServiceNodes(String name, String version) {
-		return getServiceNodes(new ServiceNameVersion(name,version));
+		return getServiceNodes(new ServiceNameVersion(name, version));
 	}
 
 	public ArrayList<NodeHandle> getServiceNodes(ServiceNameVersion service) {
@@ -94,12 +94,13 @@ public class NodeServiceCache {
 	private void updateServiceAgentNodeData(ServiceAgentNodeData serviceData)
 			throws AgentNotKnownException, EnvelopeException {
 		ServiceAgent agent = this.runningAt.getServiceAgent(serviceData.getService());
-		ArrayList<NodeHandle> nodes = ServiceInfoAgent.getNodes(serviceData.getService().getName(),serviceData.getService().getVersion());
+		ArrayList<NodeHandle> nodes = ServiceInfoAgent.getNodes(serviceData.getService().getName(),
+				serviceData.getService().getVersion());
 		serviceData.setServiceAgent(agent);
 		serviceData.setNodes(nodes);
 		serviceData.setLastUpdateTime(System.currentTimeMillis() / 1000L);
 	}
-	
+
 	private ServiceVersionData update(String serviceName) {
 		ServiceVersionData serviceData = serviceVersions.get(serviceName);
 		if (serviceData == null) {
@@ -148,64 +149,66 @@ public class NodeServiceCache {
 			serviceData.removeNode(handle);
 		}
 	}
-	
+
 	public ServiceVersion[] getVersions(String serviceName) {
 		ServiceVersionData data = update(serviceName);
-		
-		if (data==null)
+
+		if (data == null)
 			return null;
-		
+
 		return data.getVersions();
 	}
-	
+
 	// local services
-	
+
 	public void registerLocalService(ServiceAgent agent) {
 		ServiceNameVersion serviceNameVersion = agent.getServiceNameVersion();
 		ServiceVersion serviceVersion = new ServiceVersion(serviceNameVersion.getVersion());
-		
-		Hashtable<ServiceVersion,ServiceAgent> versions = localServiceVersions.get(serviceNameVersion.getName());
+
+		Hashtable<ServiceVersion, ServiceAgent> versions = localServiceVersions.get(serviceNameVersion.getName());
 		if (versions == null) {
 			versions = new Hashtable<>();
 			localServiceVersions.put(serviceNameVersion.getName(), versions);
 		}
-		
+
 		if (!versions.containsKey(serviceVersion)) {
 			versions.put(serviceVersion, agent);
-		}
-		else if (versions.get(serviceVersion) != agent) {
-			throw new IllegalStateException("Another ServiceAgent running the same Service is present on this Node - something went wrong!");
+		} else if (versions.get(serviceVersion) != agent) {
+			throw new IllegalStateException(
+					"Another ServiceAgent running the same Service is present on this Node - something went wrong!");
 		}
 	}
-	
+
 	public ServiceAgent getLocalServiceAgent(String name, ServiceVersion version) {
-		Hashtable<ServiceVersion,ServiceAgent> versions = localServiceVersions.get(name);
+		Hashtable<ServiceVersion, ServiceAgent> versions = localServiceVersions.get(name);
 		if (versions == null)
 			return null;
 		else
 			return versions.get(version);
 	}
-	
+
 	public ServiceAgent getLocalServiceAgent(ServiceNameVersion service) {
-		return getLocalServiceAgent(service.getName(),new ServiceVersion(service.getVersion()));
+		return getLocalServiceAgent(service.getName(), new ServiceVersion(service.getVersion()));
 	}
-	
+
 	public ServiceVersion[] getLocalVersions(String serviceName) {
-		Hashtable<ServiceVersion,ServiceAgent> versions = localServiceVersions.get(serviceName);
+		Hashtable<ServiceVersion, ServiceAgent> versions = localServiceVersions.get(serviceName);
 		if (versions == null)
 			return null;
 		else
 			return versions.keySet().toArray(new ServiceVersion[0]);
 	}
-	
+
 	public void unregisterLocalService(ServiceAgent agent) {
 		ServiceNameVersion serviceNameVersion = agent.getServiceNameVersion();
-		
-		Hashtable<ServiceVersion,ServiceAgent> versions = localServiceVersions.get(serviceNameVersion.getName());
-		if (versions == null) return;
+
+		Hashtable<ServiceVersion, ServiceAgent> versions = localServiceVersions.get(serviceNameVersion.getName());
+		if (versions == null)
+			return;
 		ServiceVersion serviceVersion = new ServiceVersion(serviceNameVersion.getVersion());
 		if (versions.get(serviceVersion) != agent) {
-			throw new IllegalStateException("Another ServiceAgent running the same Service is present on this Node - something went wrong!");
+			throw new IllegalStateException(
+					"Another ServiceAgent running the same Service is present on this Node - something went wrong!");
 		}
 		versions.remove(serviceVersion);
 		if (versions.size() == 0)
@@ -256,35 +259,35 @@ public class NodeServiceCache {
 			nodes.remove(handle);
 		}
 	}
-	
+
 	public class ServiceVersionData {
 		private long lastUpdateTime;
 		private Set<ServiceVersion> versions = new HashSet<ServiceVersion>();
 		private String serviceName;
-		
+
 		public ServiceVersionData(String name) {
 			this.serviceName = name;
 			this.lastUpdateTime = System.currentTimeMillis() / 1000L;
 		}
-		
+
 		public String getServiceName() {
 			return this.serviceName;
 		}
-		
+
 		public void setVersions(String[] versions) {
 			Set<ServiceVersion> set = new HashSet<ServiceVersion>();
-			
+
 			for (String v : versions) {
 				set.add(new ServiceVersion(v));
 			}
-			
+
 			this.versions = set;
 		}
-		
+
 		public ServiceVersion[] getVersions() {
 			return this.versions.toArray(new ServiceVersion[0]);
 		}
-		
+
 		public long getLastUpdateTime() {
 			return lastUpdateTime;
 		}

@@ -61,9 +61,8 @@ public class ContextTest {
 	}
 
 	@Test
-	public void testRequestGroupAgent()
-			throws MalformedXMLException, IOException, L2pSecurityException, CryptoException,
-			SerializationException, AgentException, NodeException {
+	public void testRequestGroupAgent() throws MalformedXMLException, IOException, L2pSecurityException,
+			CryptoException, SerializationException, AgentException, NodeException {
 		LocalNode node = LocalNode.newNode();
 
 		GroupAgent group1 = MockAgentFactory.getGroup1();
@@ -71,10 +70,12 @@ public class ContextTest {
 		GroupAgent groupSuper = GroupAgent.createGroupAgent(new Agent[] { group1, groupA });
 		try {
 			node.storeAgent(group1);
-		} catch (AgentAlreadyRegisteredException e) {}
+		} catch (AgentAlreadyRegisteredException e) {
+		}
 		try {
 			node.storeAgent(groupA);
-		} catch (AgentAlreadyRegisteredException e) {}
+		} catch (AgentAlreadyRegisteredException e) {
+		}
 		node.storeAgent(groupSuper);
 
 		node.launch();
@@ -106,10 +107,9 @@ public class ContextTest {
 			fail("exception thrown: " + e);
 		}
 	}
-	
+
 	@Test
-	public void testOpenEnvelope()
-			throws MalformedXMLException, IOException, L2pSecurityException, CryptoException,
+	public void testOpenEnvelope() throws MalformedXMLException, IOException, L2pSecurityException, CryptoException,
 			SerializationException, AgentException, EncodingFailedException, DecodingFailedException, NodeException {
 		LocalNode node = LocalNode.newNode();
 
@@ -119,27 +119,29 @@ public class ContextTest {
 		GroupAgent groupSuper2 = GroupAgent.createGroupAgent(new Agent[] { group1, groupA });
 		try {
 			node.storeAgent(group1);
-		} catch (AgentAlreadyRegisteredException e) {}
+		} catch (AgentAlreadyRegisteredException e) {
+		}
 		try {
 			node.storeAgent(groupA);
-		} catch (AgentAlreadyRegisteredException e) {}
+		} catch (AgentAlreadyRegisteredException e) {
+		}
 		node.storeAgent(groupSuper);
 		node.storeAgent(groupSuper2);
 
 		node.launch();
-		
+
 		UserAgent adam = MockAgentFactory.getAdam();
 		adam.unlockPrivateKey("adamspass");
 		UserAgent eve = MockAgentFactory.getEve();
 		eve.unlockPrivateKey("evespass");
-		
+
 		groupA.unlockPrivateKey(adam);
 		groupSuper.unlockPrivateKey(groupA);
 		groupSuper2.unlockPrivateKey(groupA);
 
 		Context context = new Context(node, eve);
-		
-		Envelope envelope1 = Envelope.createClassIdEnvelope("content", "id", new Agent[] {groupSuper, groupSuper2});
+
+		Envelope envelope1 = Envelope.createClassIdEnvelope("content", "id", new Agent[] { groupSuper, groupSuper2 });
 		Envelope envelopeA = Envelope.createClassIdEnvelope("content", "id", groupA);
 		envelope1.open(groupSuper2);
 		envelope1.addSignature(groupSuper2);
@@ -149,7 +151,8 @@ public class ContextTest {
 		try {
 			context.openEnvelope(envelope1);
 			assertTrue(envelope1.isOpen());
-			assertTrue(envelope1.getOpeningAgent().getId() == groupSuper2.getId()); // check if signing agent is preferred
+			assertTrue(envelope1.getOpeningAgent().getId() == groupSuper2.getId()); // check if signing agent is
+																					// preferred
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("exception thrown: " + e);
@@ -161,7 +164,7 @@ public class ContextTest {
 			fail("exception expected");
 		} catch (Exception e) {
 		}
-		
+
 		node.shutDown();
 	}
 }

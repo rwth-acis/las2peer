@@ -345,8 +345,8 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * @throws EncodingFailedException
 	 * @throws SerializationException
 	 */
-	private Envelope(Serializable content, Agent[] readers, long id) throws EncodingFailedException,
-			SerializationException {
+	private Envelope(Serializable content, Agent[] readers, long id)
+			throws EncodingFailedException, SerializationException {
 		this.id = id;
 
 		initKey();
@@ -865,8 +865,8 @@ public final class Envelope implements XmlAble, Cloneable {
 			}
 		}
 
-		String encodedKeys = "\t<las2peer:keys encoding=\"base64\" encryption=\""
-				+ CryptoTools.getAsymmetricAlgorithm() + "\">\n";
+		String encodedKeys = "\t<las2peer:keys encoding=\"base64\" encryption=\"" + CryptoTools.getAsymmetricAlgorithm()
+				+ "\">\n";
 		for (Long id : htEncryptedKeys.keySet()) {
 			encodedKeys += "\t\t<las2peer:key id=\"" + id + "\">" + Base64.encodeBase64String(htEncryptedKeys.get(id))
 					+ "</las2peer:key>\n";
@@ -1011,11 +1011,11 @@ public final class Envelope implements XmlAble, Cloneable {
 			if (!keys.getName().equals("keys"))
 				throw new MalformedXMLException("not an envelope");
 			if (!keys.getAttribute("encoding").equals("base64"))
-				throw new MalformedXMLException("base 64 encoding of the content expected - got: "
-						+ keys.getAttribute("encoding"));
+				throw new MalformedXMLException(
+						"base 64 encoding of the content expected - got: " + keys.getAttribute("encoding"));
 			if (!keys.getAttribute("encryption").equals(CryptoTools.getAsymmetricAlgorithm()))
-				throw new MalformedXMLException(CryptoTools.getAsymmetricAlgorithm()
-						+ " encryption of the content expected");
+				throw new MalformedXMLException(
+						CryptoTools.getAsymmetricAlgorithm() + " encryption of the content expected");
 
 			for (Enumeration<Element> enKeys = keys.getChildren(); enKeys.hasMoreElements();) {
 				Element key = enKeys.nextElement();
@@ -1036,8 +1036,8 @@ public final class Envelope implements XmlAble, Cloneable {
 				if (!signatures.getName().equals("signatures"))
 					throw new MalformedXMLException("signatures expected");
 				if (!signatures.getAttribute("encoding").equals("base64"))
-					throw new MalformedXMLException("base 64 encoding of the content expected - got: "
-							+ keys.getAttribute("encoding"));
+					throw new MalformedXMLException(
+							"base 64 encoding of the content expected - got: " + keys.getAttribute("encoding"));
 				if (!signatures.getAttribute("method").equals(CryptoTools.getSignatureMethod()))
 					throw new MalformedXMLException(CryptoTools.getSignatureMethod() + " expected as signature method");
 
@@ -1203,8 +1203,8 @@ public final class Envelope implements XmlAble, Cloneable {
 	 * @throws ArtifactNotFoundException
 	 * @throws StorageException
 	 */
-	public static Envelope fetchClassIdEnvelope(Class<?> cls, String identifier) throws ArtifactNotFoundException,
-			StorageException {
+	public static Envelope fetchClassIdEnvelope(Class<?> cls, String identifier)
+			throws ArtifactNotFoundException, StorageException {
 		return Context.getCurrent().getStoredObject(cls, identifier);
 	}
 
@@ -1310,8 +1310,8 @@ public final class Envelope implements XmlAble, Cloneable {
 				return;
 		}
 
-		throw new L2pSecurityException("Check for Overwriting envelope " + getId()
-				+ " failed: No needed signature is provided!");
+		throw new L2pSecurityException(
+				"Check for Overwriting envelope " + getId() + " failed: No needed signature is provided!");
 	}
 
 	/**

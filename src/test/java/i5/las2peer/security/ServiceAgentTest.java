@@ -18,9 +18,10 @@ public class ServiceAgentTest {
 
 	@Test
 	public void testCreation() throws CryptoException, L2pSecurityException {
-		ServiceAgent testee = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(servicename+"@"+serviceversion), passphrase);
+		ServiceAgent testee = ServiceAgent
+				.createServiceAgent(ServiceNameVersion.fromString(servicename + "@" + serviceversion), passphrase);
 
-		assertEquals(servicename+"@"+serviceversion, testee.getServiceNameVersion().toString());
+		assertEquals(servicename + "@" + serviceversion, testee.getServiceNameVersion().toString());
 
 		assertTrue(testee.isLocked());
 
@@ -39,7 +40,8 @@ public class ServiceAgentTest {
 
 	@Test
 	public void testXmlAndBack() throws CryptoException, L2pSecurityException, MalformedXMLException {
-		ServiceAgent testee = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(servicename+"@"+serviceversion), passphrase);
+		ServiceAgent testee = ServiceAgent
+				.createServiceAgent(ServiceNameVersion.fromString(servicename + "@" + serviceversion), passphrase);
 
 		String xml = testee.toXmlString();
 
@@ -50,8 +52,11 @@ public class ServiceAgentTest {
 
 	@Test
 	public void testId() {
-		assertEquals(ServiceAgent.serviceClass2Id(ServiceNameVersion.fromString(servicename+"@"+serviceversion)), ServiceAgent.serviceClass2Id(ServiceNameVersion.fromString(servicename+"@"+serviceversion)));
-		assertFalse(ServiceAgent.serviceClass2Id(ServiceNameVersion.fromString(servicename+"@"+serviceversion)) == ServiceAgent.serviceClass2Id(ServiceNameVersion.fromString(servicename + "x" +"@"+serviceversion)));
+		assertEquals(ServiceAgent.serviceClass2Id(ServiceNameVersion.fromString(servicename + "@" + serviceversion)),
+				ServiceAgent.serviceClass2Id(ServiceNameVersion.fromString(servicename + "@" + serviceversion)));
+		assertFalse(ServiceAgent
+				.serviceClass2Id(ServiceNameVersion.fromString(servicename + "@" + serviceversion)) == ServiceAgent
+						.serviceClass2Id(ServiceNameVersion.fromString(servicename + "x" + "@" + serviceversion)));
 	}
 
 }

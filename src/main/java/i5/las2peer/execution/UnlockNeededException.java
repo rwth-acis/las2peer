@@ -24,7 +24,7 @@ public class UnlockNeededException extends L2pServiceException {
 	 * 
 	 * @param message
 	 * @param remoteNode
-	 * @param nodeKey 
+	 * @param nodeKey
 	 */
 	public UnlockNeededException(String message, Object remoteNode, PublicKey nodeKey) {
 		super(message);

@@ -39,7 +39,7 @@ public class UserAgent extends PassphraseAgent {
 	 * @param id
 	 * @param pair
 	 * @param passphrase
-	 * @param salt 
+	 * @param salt
 	 * @throws L2pSecurityException
 	 * @throws CryptoException
 	 */
@@ -113,11 +113,10 @@ public class UserAgent extends PassphraseAgent {
 	public void setEmail(String email) throws L2pSecurityException, UserAgentException {
 		if (this.isLocked())
 			throw new L2pSecurityException("unlock needed first!");
-		
+
 		// http://stackoverflow.com/questions/153716/verify-email-in-java
 		Pattern rfc2822 = Pattern.compile(
-				"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$"
-		);
+				"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$");
 
 		if (email != null && !email.contains("@") && !rfc2822.matcher(email).matches())
 			throw new UserAgentException("Invalid e-mail address");
@@ -175,7 +174,7 @@ public class UserAgent extends PassphraseAgent {
 	 *
 	 *
 	 * @param xml a String
-	 * @return 
+	 * @return
 	 *
 	 * @exception MalformedXMLException
 	 *
@@ -235,7 +234,7 @@ public class UserAgent extends PassphraseAgent {
 	 * Sets the state of the object from a string representation resulting from a previous {@link #toXmlString} call.
 	 *
 	 * @param root parsed xml document
-	 * @return 
+	 * @return
 	 *
 	 * @exception MalformedXMLException
 	 *

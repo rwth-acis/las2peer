@@ -89,9 +89,10 @@ public class FileSystemRepository implements Repository {
 	 * @throws LibraryNotFoundException
 	 * @throws UnresolvedDependenciesException
 	 */
+	@Override
 	public LoadedLibrary findLibrary(String name) throws LibraryNotFoundException, UnresolvedDependenciesException {
 		updateRepository(false);
-		
+
 		Hashtable<LibraryVersion, String> htVersions = htFoundJars.get(name);
 		if (htVersions == null) {
 			System.err.println(this + " could not find " + name);
@@ -128,9 +129,10 @@ public class FileSystemRepository implements Repository {
 	 * 
 	 * @throws LibraryNotFoundException
 	 */
+	@Override
 	public LoadedLibrary findLibrary(LibraryIdentifier lib) throws LibraryNotFoundException {
 		updateRepository(false);
-		
+
 		Hashtable<LibraryVersion, String> htVersions = htFoundJars.get(lib.getName());
 		if (htVersions == null)
 			throw new LibraryNotFoundException(
@@ -157,16 +159,17 @@ public class FileSystemRepository implements Repository {
 	 * @return a LoadedLibray matching the given library dependency
 	 * @throws LibraryNotFoundException
 	 */
+	@Override
 	public LoadedLibrary findMatchingLibrary(LibraryDependency dep) throws LibraryNotFoundException {
 		updateRepository(false);
-		
+
 		Hashtable<LibraryVersion, String> htVersions = htFoundJars.get(dep.getName());
 		if (htVersions == null)
 			throw new LibraryNotFoundException(
 					"library '" + dep.getName() + "' package could not be found in the repositories!");
-		
+
 		LibraryVersion[] available = htVersions.keySet().toArray(new LibraryVersion[0]);
-		Arrays.sort(available, Comparator.comparing( (LibraryVersion s) -> s ).reversed());
+		Arrays.sort(available, Comparator.comparing((LibraryVersion s) -> s).reversed());
 
 		for (LibraryVersion version : available) {
 			if (dep.fits(version)) {
@@ -237,38 +240,39 @@ public class FileSystemRepository implements Repository {
 
 		return hsTemp;
 	}
-	
+
 	/**
 	 * helper method to get the last modification date of a directory
-	 * @param dir 
-	 * @param recursive 
-	 * @return 
-	 * */
+	 * 
+	 * @param dir
+	 * @param recursive
+	 * @return
+	 */
 	public static long getLastModified(File dir, boolean recursive) {
-	    File[] files = dir.listFiles();
-	    if (files == null || files.length == 0) {
-	        return dir.lastModified();
-	    }
+		File[] files = dir.listFiles();
+		if (files == null || files.length == 0) {
+			return dir.lastModified();
+		}
 
-	    long lastModified = 0;
-	    for (File f : files) {
-	    	if (f.isDirectory() && recursive) {
-	    		long ll = getLastModified(f, recursive);
-	    		if (lastModified < ll) {
-	    			lastModified = ll;
-	    		}
-	    	}
-	    	else {
-	    		if (lastModified < f.lastModified()) {
-	    			lastModified = f.lastModified();
-	 	       	}
-	    	}
-	    }
-	    return lastModified;
+		long lastModified = 0;
+		for (File f : files) {
+			if (f.isDirectory() && recursive) {
+				long ll = getLastModified(f, recursive);
+				if (lastModified < ll) {
+					lastModified = ll;
+				}
+			} else {
+				if (lastModified < f.lastModified()) {
+					lastModified = f.lastModified();
+				}
+			}
+		}
+		return lastModified;
 	}
-	
+
 	/**
 	 * checks if there were changes made in the folder and re-reads repositories if so
+	 * 
 	 * @param force if true, the repository will be updated independent from last modification
 	 */
 	private void updateRepository(boolean force) {
@@ -279,7 +283,7 @@ public class FileSystemRepository implements Repository {
 				currentLastModified = ll;
 			}
 		}
-		
+
 		if (lastModified < currentLastModified || force) {
 			lastModified = currentLastModified;
 			initJarList();
@@ -312,7 +316,7 @@ public class FileSystemRepository implements Repository {
 		}
 
 		File[] entries = f.listFiles();
-		
+
 		Pattern versionPattern = Pattern.compile("-[0-9]+(?:.[0-9]+(?:.[0-9]+)?)?(?:-[0-9]+)?$");
 
 		for (int i = 0; i < entries.length; i++) {
@@ -322,18 +326,19 @@ public class FileSystemRepository implements Repository {
 			} else if (entries[i].getPath().endsWith(".jar")) {
 				String file = entries[i].getName().substring(0, entries[i].getName().length() - 4);
 				Matcher m = versionPattern.matcher(file);
-				
+
 				if (m.find()) {
 					try {
 						String name = file.substring(0, m.start());
 						LibraryVersion version = new LibraryVersion(m.group().substring(1));
 						registerJar(entries[i].getPath(), name, version);
 					} catch (IllegalArgumentException e) {
-						System.out.println("Notice: library " + entries[i] + " has no version info in it's name! - Won't be used!");
+						System.out.println("Notice: library " + entries[i]
+								+ " has no version info in it's name! - Won't be used!");
 					}
-				}
-				else {
-					System.out.println("Notice: library " + entries[i] + " has no version info in it's name! - Won't be used!");
+				} else {
+					System.out.println(
+							"Notice: library " + entries[i] + " has no version info in it's name! - Won't be used!");
 				}
 			}
 		}
@@ -358,6 +363,7 @@ public class FileSystemRepository implements Repository {
 	/**
 	 * @return a simple string representation of this object
 	 */
+	@Override
 	public String toString() {
 		return "FS-Repository at " + SimpleTools.join(directories, ":");
 	}

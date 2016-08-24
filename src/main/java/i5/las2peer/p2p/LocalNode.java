@@ -46,9 +46,10 @@ public class LocalNode extends Node {
 
 		setStatus(NodeStatus.CONFIGURED);
 	}
-	
+
 	/**
 	 * create a LocalNode
+	 * 
 	 * @param classManager
 	 */
 	private LocalNode(L2pClassManager classManager) {
@@ -67,6 +68,7 @@ public class LocalNode extends Node {
 	 * 
 	 * @return id of this node
 	 */
+	@Override
 	public Long getNodeId() {
 		return nodeId;
 	}
@@ -199,7 +201,7 @@ public class LocalNode extends Node {
 
 			if (htKnownAgents.get(agent.getId()) != null)
 				throw new AgentAlreadyRegisteredException("Agent " + agent.getId() + " already in storage");
-			
+
 			String agentXml = null;
 			try {
 				agentXml = agent.toXmlString();
@@ -235,7 +237,7 @@ public class LocalNode extends Node {
 			// use hash value of private key instead
 
 			// this is verifyable on each local node
-			
+
 			String agentXml = null;
 			try {
 				agentXml = agent.toXmlString();
@@ -280,7 +282,7 @@ public class LocalNode extends Node {
 	public static LocalNode newNode() {
 		return new LocalNode();
 	}
-	
+
 	/**
 	 * create a LocalNode using a FileSystemRepository at the given location
 	 * 
@@ -288,7 +290,8 @@ public class LocalNode extends Node {
 	 * @return
 	 */
 	public static LocalNode newNode(String fileSystemRepository) {
-		return new LocalNode(new L2pClassManager(new FileSystemRepository(fileSystemRepository), ClassLoader.getSystemClassLoader()));
+		return new LocalNode(new L2pClassManager(new FileSystemRepository(fileSystemRepository),
+				ClassLoader.getSystemClassLoader()));
 	}
 
 	/**
@@ -471,7 +474,7 @@ public class LocalNode extends Node {
 	 * fetch all pending messages for the given agent
 	 * 
 	 * @param recipientId
-	 * @param nodeId 
+	 * @param nodeId
 	 */
 	protected static void deliverPendingMessages(long recipientId, long nodeId) {
 
@@ -568,6 +571,7 @@ public class LocalNode extends Node {
 		message.close();
 
 		new Thread(new Runnable() {
+			@Override
 			public void run() {
 				Random r = new Random();
 

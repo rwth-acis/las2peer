@@ -10,7 +10,7 @@ public class AgentLockedException extends L2pSecurityException {
 	public AgentLockedException() {
 		super("the main agent of this thread is locked - please unlock to open envelopes!");
 	}
-	
+
 	public AgentLockedException(String err) {
 		super(err);
 	}

@@ -37,6 +37,7 @@ public class WaiterThread<T> extends Thread {
 	/**
 	 * the main waiting method
 	 */
+	@Override
 	public void run() {
 		try {
 			synchronized (this) {

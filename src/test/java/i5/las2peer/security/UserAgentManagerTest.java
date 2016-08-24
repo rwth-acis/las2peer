@@ -15,14 +15,15 @@ import i5.las2peer.tools.CryptoException;
 public class UserAgentManagerTest {
 
 	@Test
-	public void testLogin() throws L2pSecurityException, CryptoException, AgentAlreadyRegisteredException, AgentException, PastryStorageException {
+	public void testLogin() throws L2pSecurityException, CryptoException, AgentAlreadyRegisteredException,
+			AgentException, PastryStorageException {
 		Node node = LocalNode.launchNode();
 		UserAgentManager l = node.getUserManager();
 
 		UserAgent a = UserAgent.createUserAgent("pass");
 		a.unlockPrivateKey("pass");
 		a.setLoginName("login");
-		
+
 		node.storeAgent(a);
 
 		assertEquals(a.getId(), l.getAgentIdByLogin("login"));
@@ -107,7 +108,7 @@ public class UserAgentManagerTest {
 			// indended
 		}
 	}
-	
+
 	@Test
 	public void testAnonymous() throws AgentNotKnownException {
 		Node node = LocalNode.launchNode();

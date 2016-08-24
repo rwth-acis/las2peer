@@ -26,7 +26,7 @@ public interface XmlAble {
 	 *
 	 *
 	 * @return a XML String representation
-	 * @throws SerializationException 
+	 * @throws SerializationException
 	 */
 	public String toXmlString() throws SerializationException;
 

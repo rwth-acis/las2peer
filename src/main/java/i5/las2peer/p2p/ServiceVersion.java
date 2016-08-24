@@ -36,30 +36,30 @@ public class ServiceVersion implements Comparable<ServiceVersion> {
 					split = version.split("-");
 					if (split.length != 2)
 						throw new IllegalArgumentException("Syntax Error: more than one - in version string");
-	
+
 					this.build = Integer.valueOf(split[1]);
 					version = split[0];
-	
+
 					if (this.build < 0)
 						throw new IllegalArgumentException("Negative version numbers are not allowed!");
 				}
-	
+
 				split = version.split("\\.");
 				if (split.length > 3)
 					throw new IllegalArgumentException(
 							"Syntax Error: too many version numbers, a maximum of three is allowed");
-	
+
 				this.major = Integer.valueOf(split[0]);
 				if (this.major < 0)
 					throw new IllegalArgumentException("Negative version numbers are not allowed!");
-	
+
 				if (split.length > 1) {
 					this.minor = Integer.valueOf(split[1]);
 					if (this.minor < 0)
 						throw new IllegalArgumentException("Negative version numbers are not allowed!");
 				} else
 					this.minor = null;
-	
+
 				if (split.length > 2) {
 					this.sub = Integer.valueOf(split[2]);
 					if (this.sub < 0)
@@ -68,8 +68,8 @@ public class ServiceVersion implements Comparable<ServiceVersion> {
 					this.sub = null;
 			} catch (NumberFormatException e) {
 				e.printStackTrace();
-				throw new IllegalArgumentException("The given string contains invalid number representations: " + version,
-						e);
+				throw new IllegalArgumentException(
+						"The given string contains invalid number representations: " + version, e);
 			}
 		}
 	}
@@ -251,15 +251,17 @@ public class ServiceVersion implements Comparable<ServiceVersion> {
 	 * compares this version with any object
 	 * 
 	 * if the given object is a String, the string representation of this version is compared to the given string
-	 * @param o 
+	 * 
+	 * @param o
 	 * 
 	 * @return true, if the given object is a version and the same as this one
 	 */
+	@Override
 	public boolean equals(Object o) {
 		if (o instanceof ServiceVersion)
 			return this.equals((ServiceVersion) o);
 		else if (o instanceof String)
-			return this.toString().equals((String) o);
+			return this.toString().equals(o);
 		else
 			return super.equals(o);
 	}
@@ -269,6 +271,7 @@ public class ServiceVersion implements Comparable<ServiceVersion> {
 	 * 
 	 * @return a hash code as int
 	 */
+	@Override
 	public int hashCode() {
 		return (this.toString()).hashCode();
 	}
@@ -318,6 +321,7 @@ public class ServiceVersion implements Comparable<ServiceVersion> {
 	/**
 	 * @return a String representation of this version
 	 */
+	@Override
 	public String toString() {
 		String result = "" + major;
 		if (minor != null) {
@@ -347,7 +351,7 @@ public class ServiceVersion implements Comparable<ServiceVersion> {
 		else
 			return 1;
 	}
-	
+
 	/**
 	 * checks if this version "fits" to the required version
 	 * 
@@ -361,25 +365,25 @@ public class ServiceVersion implements Comparable<ServiceVersion> {
 			return true;
 		if (required.major != this.major)
 			return false;
-		
+
 		if (required.minor == null)
 			return true;
 		if (required.minor != this.minor)
 			return false;
-		
+
 		if (required.sub == null)
 			return true;
 		if (required.sub != this.sub)
 			return false;
-		
+
 		if (required.build == null)
 			return true;
 		if (required.build != this.build)
 			return false;
-		
+
 		return true;
 	}
-	
+
 	/**
 	 * returns the newest ServiceVersion from all available ServiceVersions that fits this version
 	 * 
@@ -389,14 +393,14 @@ public class ServiceVersion implements Comparable<ServiceVersion> {
 	public ServiceVersion chooseFittingVersion(ServiceVersion[] available) {
 		if (available.length == 0)
 			return null;
-		
-		Arrays.sort(available, Comparator.comparing( (ServiceVersion s) -> s ).reversed());
-				
+
+		Arrays.sort(available, Comparator.comparing((ServiceVersion s) -> s).reversed());
+
 		for (ServiceVersion s : available) {
 			if (s.fits(this))
 				return s;
 		}
-		
+
 		return null;
 	}
 

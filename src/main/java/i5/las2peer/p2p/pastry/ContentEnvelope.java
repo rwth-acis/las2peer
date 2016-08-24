@@ -44,7 +44,7 @@ public class ContentEnvelope extends ContentHashPastContent {
 	 * create a pastry envelope for the given agent
 	 * 
 	 * @param agent
-	 * @throws SerializationException 
+	 * @throws SerializationException
 	 */
 	public ContentEnvelope(Agent agent) throws SerializationException {
 		super(getPastId(agent));
@@ -88,7 +88,7 @@ public class ContentEnvelope extends ContentHashPastContent {
 	 * create a pastry envelope for the given las2peer envelope
 	 * 
 	 * @param e
-	 * @throws SerializationException 
+	 * @throws SerializationException
 	 */
 	public ContentEnvelope(Envelope e) throws SerializationException {
 		super(getPastId(e));

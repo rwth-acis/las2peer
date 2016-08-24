@@ -23,7 +23,8 @@ public interface AgentStorage {
 	 * does this storage know the requested agent?
 	 * 
 	 * Does not refer to the backup storage if applicable
-	 * @param id 
+	 * 
+	 * @param id
 	 * 
 	 * @return true, if this storage knows an agent of the given id
 	 */

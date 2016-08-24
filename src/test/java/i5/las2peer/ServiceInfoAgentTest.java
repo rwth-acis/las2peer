@@ -55,12 +55,14 @@ public class ServiceInfoAgentTest {
 //			PastryNodeImpl node = (PastryNodeImpl) nodes[0];
 
 			String testClass1 = "i5.las2peer.api.TestService@1.0";
-			ServiceAgent testService = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testClass1), "a pass");
+			ServiceAgent testService = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testClass1),
+					"a pass");
 			testService.unlockPrivateKey("a pass");
 			nodes[0].registerReceiver(testService);
 
 			String testClass2 = "i5.las2peer.api.TestService2@1.0";
-			ServiceAgent testService2 = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testClass2), "a pass");
+			ServiceAgent testService2 = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testClass2),
+					"a pass");
 			testService2.unlockPrivateKey("a pass");
 			nodes[0].registerReceiver(testService2);
 

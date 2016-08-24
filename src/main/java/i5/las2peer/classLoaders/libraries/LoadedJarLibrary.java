@@ -167,20 +167,19 @@ public class LoadedJarLibrary extends LoadedLibrary {
 		// fill in version and name info from file name
 		if (sName == null || sVersion == null) {
 			String file = filename.substring(0, filename.length() - 4);
-			
+
 			Pattern versionPattern = Pattern.compile("-[0-9]+(?:.[0-9]+(?:.[0-9]+)?)?(?:-[0-9]+)?$");
 			Matcher m = versionPattern.matcher(file);
-			
+
 			if (m.find()) { // look for version information in filename
 				if (sVersion == null) {
-					sVersion = m.group().substring(1); 
+					sVersion = m.group().substring(1);
 				}
 
 				if (sName == null) {
 					sName = file.substring(0, m.start());
 				}
-			}
-			else {
+			} else {
 				if (sName == null) {
 					sName = file;
 				}

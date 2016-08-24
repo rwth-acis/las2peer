@@ -18,8 +18,8 @@ import i5.las2peer.tools.SerializationException;
 
 /**
  * 
- * This is the base class of the logging module of las2peer. It sends the collected data to the
- * "Monitoring Data Processing Service" via the las2peer message concept.
+ * This is the base class of the logging module of las2peer. It sends the collected data to the "Monitoring Data
+ * Processing Service" via the las2peer message concept.
  *
  * 
  *
@@ -89,9 +89,11 @@ public class MonitoringObserver implements NodeObserver {
 		try {
 			System.out.println("Monitoring: Trying to invoke Processing Service..");
 			String[] testParameters = { "Node " + registeredAt.getNodeId() + " registered observer!" };
-			long receivingAgentId = (Long) registeredAt.invoke(sendingAgent, // TODO workaround: remove specified version when ServiceInfoAgent is replaced
-					"i5.las2peer.services.monitoring.processing.MonitoringDataProcessingService@0.1", "getReceivingAgentId",
-					testParameters);
+			long receivingAgentId = (Long) registeredAt.invoke(sendingAgent, // TODO workaround: remove specified
+																				// version when ServiceInfoAgent is
+																				// replaced
+					"i5.las2peer.services.monitoring.processing.MonitoringDataProcessingService@0.1",
+					"getReceivingAgentId", testParameters);
 			try {
 				receivingAgent = (MonitoringAgent) registeredAt.getAgent(receivingAgentId);
 				System.out.println("Monitoring: Fetched receiving MonitoringAgent: " + receivingAgent.getId());

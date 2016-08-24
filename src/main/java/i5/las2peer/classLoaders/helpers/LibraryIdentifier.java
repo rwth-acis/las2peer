@@ -75,6 +75,7 @@ public class LibraryIdentifier implements Comparable<LibraryIdentifier> {
 	/**
 	 * @return a string representation of this identifier
 	 */
+	@Override
 	public String toString() {
 		return name + ";version=\"" + version.toString() + "\"";
 	}
@@ -102,7 +103,7 @@ public class LibraryIdentifier implements Comparable<LibraryIdentifier> {
 		if (o instanceof LibraryIdentifier)
 			return this.equals((LibraryIdentifier) o);
 		else if (o instanceof String)
-			return this.toString().equals((String) o);
+			return this.toString().equals(o);
 		else
 			return false;
 	}

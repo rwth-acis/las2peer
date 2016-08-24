@@ -20,7 +20,8 @@ public class ServiceAgentGenerator {
 	 */
 	public static void main(String argv[]) {
 		if (argv.length != 2) {
-			System.err.println("usage: java i5.las2peer.tools.ServiceAgentGenerator [service class]@[service version] [passphrase]");
+			System.err.println(
+					"usage: java i5.las2peer.tools.ServiceAgentGenerator [service class]@[service version] [passphrase]");
 			return;
 		} else if (argv[0].length() < PW_MIN_LENGTH) {
 			System.err.println("the password needs to be at least " + PW_MIN_LENGTH + " signs long, but only "

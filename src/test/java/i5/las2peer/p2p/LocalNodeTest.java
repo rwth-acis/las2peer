@@ -77,6 +77,7 @@ public class LocalNodeTest {
 
 		testVariable = false;
 		MessageResultListener listener = new MessageResultListener(10000) {
+			@Override
 			public void notifySuccess() {
 				LocalNodeTest.testVariable = true;
 			}
@@ -134,6 +135,7 @@ public class LocalNodeTest {
 
 		LocalNode testee1 = LocalNode.launchAgent(adam);
 		MessageResultListener l = new MessageResultListener(2000) {
+			@Override
 			public void notifyTimeout() {
 				LocalNodeTest.testVariable = true;
 			}
@@ -173,6 +175,7 @@ public class LocalNodeTest {
 		assertEquals(2, LocalNode.findAllNodesWithAgent(eve.getId()).length);
 
 		MessageResultListener l = new MessageResultListener(10000) {
+			@Override
 			public void notifySuccess() {
 				synchronized (this) {
 					System.out.println("result retrieved");
@@ -294,19 +297,20 @@ public class LocalNodeTest {
 			AgentException, SecurityException, IllegalArgumentException, AgentNotKnownException, NoSuchMethodException,
 			IllegalAccessException, InvocationTargetException, InterruptedException {
 		String serviceClass = "i5.las2peer.api.TestService";
-		ServiceAgent testService = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(serviceClass+"@1.0"), "a passphrase");
+		ServiceAgent testService = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(serviceClass + "@1.0"),
+				"a passphrase");
 		testService.unlockPrivateKey("a passphrase");
 
 		LocalNode testee = LocalNode.launchNode();
 
 		eve.unlockPrivateKey("evespass");
 		testee.storeAgent(eve);
-		//eve.lockPrivateKey();
+		// eve.lockPrivateKey();
 
 		testee.storeAgent(testService);
 		testee.registerReceiver(testService);
 
-		Serializable result = testee.invokeLocally(eve, ServiceNameVersion.fromString(serviceClass+"@1.0"), "inc",
+		Serializable result = testee.invokeLocally(eve, ServiceNameVersion.fromString(serviceClass + "@1.0"), "inc",
 				new Serializable[] { new Integer(10) });
 
 		assertEquals(12, result);

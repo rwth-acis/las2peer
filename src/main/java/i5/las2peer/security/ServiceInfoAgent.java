@@ -134,9 +134,10 @@ public class ServiceInfoAgent extends PassphraseAgent {
 	public static ServiceNameVersion[] getServices() throws EnvelopeException {
 		return ((ServiceList) getEnvelopeData(SERVICE_LIST_ENVELOPE_NAME, ServiceList.class)).getServices();
 	}
-	
+
 	/**
 	 * Returns an array of currently registered service versions
+	 * 
 	 * @param serviceName service's main class
 	 * 
 	 * @return an array of {@link i5.las2peer.p2p.ServiceNameVersion}s
@@ -148,8 +149,9 @@ public class ServiceInfoAgent extends PassphraseAgent {
 
 	/**
 	 * Reads {@link i5.las2peer.p2p.ServiceList} from the Envelope
-	 * @param envelopeName 
-	 * @param dataCls 
+	 * 
+	 * @param envelopeName
+	 * @param dataCls
 	 * 
 	 * @return {@link i5.las2peer.p2p.ServiceList}
 	 * @throws EnvelopeException
@@ -178,13 +180,14 @@ public class ServiceInfoAgent extends PassphraseAgent {
 
 	/**
 	 * UpdatesEnvelope with new {@link i5.las2peer.p2p.ServiceList}
-	 * @param envelopeName 
-	 * @param dataCls 
+	 * 
+	 * @param envelopeName
+	 * @param dataCls
 	 * 
 	 * @param data
 	 * @throws EnvelopeException
-	 * @throws AgentException 
-	 * @throws L2pSecurityException 
+	 * @throws AgentException
+	 * @throws L2pSecurityException
 	 */
 	private static void setEnvelopeData(String envelopeName, Class<?> dataCls, Serializable data)
 			throws EnvelopeException, AgentException, L2pSecurityException {
@@ -221,8 +224,9 @@ public class ServiceInfoAgent extends PassphraseAgent {
 
 	/**
 	 * Gets the Envelope from the Network
-	 * @param envelopeName 
-	 * @param cls 
+	 * 
+	 * @param envelopeName
+	 * @param cls
 	 * 
 	 * @return
 	 */
@@ -238,8 +242,9 @@ public class ServiceInfoAgent extends PassphraseAgent {
 
 	/**
 	 * Creates a new Envelope
-	 * @param envelopeName 
-	 * @param cls 
+	 * 
+	 * @param envelopeName
+	 * @param cls
 	 * 
 	 * @return
 	 */
@@ -282,10 +287,10 @@ public class ServiceInfoAgent extends PassphraseAgent {
 	 * internal Envelope
 	 * 
 	 * @param serviceAgent
-	 * @param node 
+	 * @param node
 	 * @throws EnvelopeException
-	 * @throws AgentException 
-	 * @throws L2pSecurityException 
+	 * @throws AgentException
+	 * @throws L2pSecurityException
 	 */
 	// TODO "synchronized" is a workaroud for LAS-217
 	synchronized public void serviceAdded(ServiceAgent serviceAgent, Node node)
@@ -311,10 +316,10 @@ public class ServiceInfoAgent extends PassphraseAgent {
 	 * the internal Envelope
 	 * 
 	 * @param serviceAgent
-	 * @param node 
+	 * @param node
 	 * @throws EnvelopeException
-	 * @throws AgentException 
-	 * @throws L2pSecurityException 
+	 * @throws AgentException
+	 * @throws L2pSecurityException
 	 */
 	// TODO "synchronized" is a workaroud for LAS-217
 	synchronized public void serviceRemoved(ServiceAgent serviceAgent, Node node)
@@ -335,11 +340,12 @@ public class ServiceInfoAgent extends PassphraseAgent {
 
 	/**
 	 * Resets the stored {@link i5.las2peer.p2p.ServiceList}
-	 * @param node 
+	 * 
+	 * @param node
 	 * 
 	 * @throws EnvelopeException
-	 * @throws AgentException 
-	 * @throws L2pSecurityException 
+	 * @throws AgentException
+	 * @throws L2pSecurityException
 	 */
 	public void resetData(Node node) throws EnvelopeException, AgentException, L2pSecurityException {
 		ServiceList data = new ServiceList();

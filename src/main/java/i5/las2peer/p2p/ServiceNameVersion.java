@@ -18,7 +18,7 @@ public class ServiceNameVersion implements Serializable {
 	}
 
 	public String getNameVersion() {
-		return toString(name,version);
+		return toString(name, version);
 	}
 
 	private String name;
@@ -34,7 +34,7 @@ public class ServiceNameVersion implements Serializable {
 		if (obj instanceof ServiceNameVersion) {
 			return this.toString().equals(obj.toString());
 		}
-		
+
 		return this.toString().equals(obj);
 	}
 
@@ -54,12 +54,12 @@ public class ServiceNameVersion implements Serializable {
 		else
 			return serviceName;
 	}
-	
+
 	public static ServiceNameVersion fromString(String nameVersion) {
 		String[] a = nameVersion.split(SEPERATOR);
-		if (a.length>1)
-			return new ServiceNameVersion(a[0],a[1]);
+		if (a.length > 1)
+			return new ServiceNameVersion(a[0], a[1]);
 		else
-			return new ServiceNameVersion(a[0],null);
+			return new ServiceNameVersion(a[0], null);
 	}
 }

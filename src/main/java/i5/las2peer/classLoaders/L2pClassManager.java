@@ -19,7 +19,7 @@ import i5.las2peer.classLoaders.libraries.Repository;
  *
  */
 public class L2pClassManager {
-	
+
 	/**
 	 * classloader to load the platform's classes (Java + las2peer core + Connectors)
 	 */
@@ -83,7 +83,7 @@ public class L2pClassManager {
 
 		registerBundle(lib);
 	}
-	
+
 	/**
 	 * register a service using the given library version the package name of the service class is used a package name
 	 * 
@@ -143,15 +143,15 @@ public class L2pClassManager {
 	 */
 	private void registerBundle(LoadedLibrary lib) throws UnresolvedDependenciesException {
 		LoadedLibraryCache[] resolvedDeps = resolveDependencies(lib);
-		
+
 		// create bundle
 		BundleClassManager bcl = new BundleClassManager(platformLoader);
-		
-		// create LibraryClassLoaders 
+
+		// create LibraryClassLoaders
 		LibraryClassLoader[] classLoaderDeps = new LibraryClassLoader[resolvedDeps.length];
 		for (int i = 0; i < resolvedDeps.length; i++) {
 			resolvedDeps[i].registerBundle(bcl);
-			classLoaderDeps[i] = new LibraryClassLoader(resolvedDeps[i],bcl);
+			classLoaderDeps[i] = new LibraryClassLoader(resolvedDeps[i], bcl);
 		}
 
 		// init bundle
@@ -165,12 +165,12 @@ public class L2pClassManager {
 		}
 		htBcls.put(lib.getLibraryIdentifier().getVersion(), bcl);
 	}
-	
+
 	/**
 	 * unregister a bundle
 	 * 
-	 * @param libraryName 
-	 * @param libraryVersion 
+	 * @param libraryName
+	 * @param libraryVersion
 	 * 
 	 * @throws NotRegisteredException
 	 */
@@ -219,7 +219,7 @@ public class L2pClassManager {
 			LoadedLibraryCache cache = getRegisteredLoadedLibrary(libraries[i]);
 			if (cache != null)
 				libraries[i + 1] = getRegisteredLoadedLibrary(libraries[i]).getLoadedLibrary();
-		
+
 			if (libraries[i + 1] == null) {
 				try {
 					libraries[i + 1] = findLoadedLibrary(deps[i]);
@@ -227,8 +227,8 @@ public class L2pClassManager {
 					throw new UnresolvedDependenciesException(library.getIdentifier().toString(), deps[i]);
 				}
 			}
-		}	
-		
+		}
+
 		// ok, now i'm sure that all dependencies can be resolved!
 		LoadedLibraryCache[] result = new LoadedLibraryCache[libraries.length];
 		for (int i = 0; i < libraries.length; i++) {
@@ -310,9 +310,10 @@ public class L2pClassManager {
 
 		return result;
 	}
-	
+
 	/**
 	 * get a library class loader for the given loaded library
+	 * 
 	 * @param lib
 	 * @return the library class loader corresponding to the given library
 	 */
@@ -333,7 +334,7 @@ public class L2pClassManager {
 		else
 			return htLoaders.get(iden.getVersion());
 	}
-	
+
 	/**
 	 * register a loaded library as a LibraryClassLoader
 	 * 
@@ -360,8 +361,7 @@ public class L2pClassManager {
 	 * @throws NotRegisteredException
 	 */
 	private void removeLoadedLibrary(LoadedLibrary l) throws NotRegisteredException {
-		Hashtable<LibraryVersion, LoadedLibraryCache> htVersions = registeredLibraries
-				.get(l.getIdentifier().getName());
+		Hashtable<LibraryVersion, LoadedLibraryCache> htVersions = registeredLibraries.get(l.getIdentifier().getName());
 		if (htVersions == null)
 			throw new NotRegisteredException(l.getIdentifier());
 

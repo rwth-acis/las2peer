@@ -273,13 +273,15 @@ public class MessageTest {
 			EncodingFailedException, SerializationException, AgentNotKnownException {
 		BasicAgentStorage storage = new BasicAgentStorage();
 		UserAgent eve = MockAgentFactory.getEve();
-		 // class loading will be bypassed, so the version specified is not used
-		ServiceAgent service = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.0"), "a pass");
+		// class loading will be bypassed, so the version specified is not used
+		ServiceAgent service = ServiceAgent
+				.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.0"), "a pass");
 		storage.registerAgents(eve, service);
 
 		eve.unlockPrivateKey("evespass");
 		Message m = new Message(eve, service,
-				new RMITask(ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.0"), "inc", new Serializable[] { new Integer(10) }));
+				new RMITask(ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.0"), "inc",
+						new Serializable[] { new Integer(10) }));
 
 		String xml = m.toXmlString();
 

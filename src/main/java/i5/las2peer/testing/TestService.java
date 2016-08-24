@@ -272,7 +272,7 @@ public class TestService extends Service {
 	 */
 	public void storeEnvelopeString(String s)
 			throws UnsupportedEncodingException, EncodingFailedException, DecodingFailedException {
-		cache = new Envelope((String) s, getContext().getMainAgent());
+		cache = new Envelope(s, getContext().getMainAgent());
 		cache.close();
 	}
 

@@ -25,7 +25,7 @@ public class L2pThread extends Thread {
 	/**
 	 * create a new L2pThread
 	 * 
-	 * @param agent 
+	 * @param agent
 	 * @param task
 	 * @param context
 	 */
@@ -56,6 +56,7 @@ public class L2pThread extends Thread {
 	/**
 	 * the actual work
 	 */
+	@Override
 	public void run() {
 		try {
 			result = agent.handle(task);

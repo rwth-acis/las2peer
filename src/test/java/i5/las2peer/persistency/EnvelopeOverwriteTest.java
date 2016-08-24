@@ -27,19 +27,20 @@ public class EnvelopeOverwriteTest {
 	private UserAgent adam;
 
 	@Before
-	public void startServer() throws MalformedXMLException, IOException, AgentException, L2pSecurityException, NodeException {
+	public void startServer()
+			throws MalformedXMLException, IOException, AgentException, L2pSecurityException, NodeException {
 		LocalNode.reset();
 
 		node = LocalNode.newNode();
 
-		eve = (UserAgent) MockAgentFactory.getEve();
-		adam = (UserAgent) MockAgentFactory.getAdam();
+		eve = MockAgentFactory.getEve();
+		adam = MockAgentFactory.getAdam();
 		Agent abel = MockAgentFactory.getAbel();
-		
+
 		eve.unlockPrivateKey("evespass");
 		adam.unlockPrivateKey("adamspass");
-		((UserAgent)abel).unlockPrivateKey("abelspass");
-		
+		((UserAgent) abel).unlockPrivateKey("abelspass");
+
 		node.storeAgent(eve);
 		node.storeAgent(adam);
 		node.storeAgent(abel);

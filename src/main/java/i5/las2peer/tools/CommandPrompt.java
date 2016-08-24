@@ -235,7 +235,7 @@ public class CommandPrompt {
 		Class<?>[] types = getParameterTypes(parameters);
 
 		Constructor<?> constr = cls.getConstructor(types);
-		return constr.newInstance((Object[]) parameters);
+		return constr.newInstance(parameters);
 	}
 
 	/**

@@ -32,22 +32,23 @@ public class ServiceList implements Serializable {
 		while (it.hasNext()) {
 			Entry<String, HashMap<String, ServiceNameVersion>> versions = it.next();
 			Iterator<Entry<String, ServiceNameVersion>> it2 = versions.getValue().entrySet().iterator();
-			while(it2.hasNext()) {
+			while (it2.hasNext()) {
 				Entry<String, ServiceNameVersion> pair = it2.next();
 				result.add(pair.getValue());
 			}
 		}
 		return result.toArray(new ServiceNameVersion[0]);
 	}
-	
+
 	/**
 	 * Returns an array with versions of the given servie name
+	 * 
 	 * @param serviceName the service's name
 	 * 
-	 * @return 
+	 * @return
 	 */
 	public String[] getVersions(String serviceName) {
-		HashMap<String,ServiceNameVersion> versions = services.get(serviceName);
+		HashMap<String, ServiceNameVersion> versions = services.get(serviceName);
 		if (versions == null)
 			return new String[0];
 		else {
@@ -57,13 +58,14 @@ public class ServiceList implements Serializable {
 
 	/**
 	 * Adds a new service to the list
+	 * 
 	 * @param serviceNameVersion the service version to add
 	 */
 	public void addService(ServiceNameVersion serviceNameVersion) {
-		HashMap<String,ServiceNameVersion> versions = services.get(serviceNameVersion.getName());
+		HashMap<String, ServiceNameVersion> versions = services.get(serviceNameVersion.getName());
 		if (versions == null) {
-			versions = new HashMap<String,ServiceNameVersion>();
-			services.put(serviceNameVersion.getName(),versions);
+			versions = new HashMap<String, ServiceNameVersion>();
+			services.put(serviceNameVersion.getName(), versions);
 		}
 
 		if (!versions.containsKey(serviceNameVersion.getVersion())) {
@@ -73,15 +75,16 @@ public class ServiceList implements Serializable {
 
 	/**
 	 * Removes a service from the list
+	 * 
 	 * @param serviceNameVersion the service version to remove
 	 */
 	public void removeService(ServiceNameVersion serviceNameVersion) {
-		HashMap<String,ServiceNameVersion> versions = services.get(serviceNameVersion.getName());
+		HashMap<String, ServiceNameVersion> versions = services.get(serviceNameVersion.getName());
 		if (versions != null) {
 			if (versions.containsKey(serviceNameVersion.getVersion())) {
 				versions.remove(serviceNameVersion.getVersion());
 			}
-			
+
 			if (versions.size() == 0) {
 				services.remove(serviceNameVersion.getName());
 			}

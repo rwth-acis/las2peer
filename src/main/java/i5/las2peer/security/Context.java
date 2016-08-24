@@ -131,7 +131,7 @@ public class Context implements AgentStorage {
 
 		return group;
 	}
-	
+
 	/**
 	 * returns an unlocked instance of the requested Agent
 	 * 
@@ -143,8 +143,7 @@ public class Context implements AgentStorage {
 	public Agent requestAgent(long agentId) throws AgentNotKnownException, L2pSecurityException {
 		if (agentId == getMainAgent().getId()) {
 			return getMainAgent();
-		}
-		else {
+		} else {
 			return requestGroupAgent(agentId);
 		}
 	}
@@ -251,6 +250,7 @@ public class Context implements AgentStorage {
 	 * 
 	 * @throws AgentNotKnownException
 	 */
+	@Override
 	public Agent getAgent(long id) throws AgentNotKnownException {
 		if (id == agent.getId())
 			return agent;
@@ -375,7 +375,7 @@ public class Context implements AgentStorage {
 	public void openEnvelope(Envelope envelope) throws DecodingFailedException, L2pSecurityException {
 		if (agent.isLocked())
 			throw new AgentLockedException();
-		
+
 		// try to unlock with signing agent
 		for (long groupId : envelope.getSigningAgents()) {
 			Agent agent = null;
@@ -390,8 +390,7 @@ public class Context implements AgentStorage {
 				return;
 			}
 		}
-		
-		
+
 		// return agent with read only access
 		try {
 			envelope.open(agent);
@@ -426,7 +425,7 @@ public class Context implements AgentStorage {
 		else
 			throw new L2pSecurityException("this is not passphrase protected agent!");
 	}
-	
+
 	/**
 	 * returns true if the main agent is unlocked and can unlock the given agent
 	 * 
@@ -438,14 +437,15 @@ public class Context implements AgentStorage {
 	public boolean hasAccess(long agentId) throws AgentNotKnownException, AgentLockedException {
 		if (getMainAgent().isLocked())
 			throw new AgentLockedException();
-		
-		if (agentId == getMainAgent().getId()) return true;
-		
+
+		if (agentId == getMainAgent().getId())
+			return true;
+
 		Agent a = getAgent(agentId);
-		
+
 		if (a instanceof GroupAgent)
-			return ((GroupAgent)a).isMemberRecursive(getMainAgent());
-		
+			return ((GroupAgent) a).isMemberRecursive(getMainAgent());
+
 		return false;
 	}
 

@@ -1,9 +1,9 @@
 package i5.las2peer.classLoaders;
 
+import java.net.URL;
+
 import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
 import i5.las2peer.classLoaders.libraries.ResourceNotFoundException;
-
-import java.net.URL;
 
 /**
  * A BundleClassLoader is responsible of providing all classes for a main class / service via separate libraries.
@@ -130,8 +130,8 @@ public class BundleClassManager {
 	 * @throws ClassNotFoundException
 	 */
 	protected Class<?> loadClass(String className, LibraryClassLoader child) throws ClassNotFoundException {
-		Logger.logLoading(this, className, null, "by child " + child.getLibrary().getIdentifier() + " - try "
-				+ libraryLoaders.length + " children");
+		Logger.logLoading(this, className, null,
+				"by child " + child.getLibrary().getIdentifier() + " - try " + libraryLoaders.length + " children");
 
 		// ask platform loader first
 		if (parent != null) {

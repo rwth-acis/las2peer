@@ -93,7 +93,8 @@ public abstract class LocalServiceTestCase {
 						+ " but for " + agent.getServiceNameVersion().getName());
 		} catch (NoSuchFieldException e) {
 			agentPassphrase = SimpleTools.createRandomString(10);
-			return ServiceAgent.createServiceAgent(new ServiceNameVersion(getServiceClass().getName(),getServiceVersion()), agentPassphrase);
+			return ServiceAgent.createServiceAgent(
+					new ServiceNameVersion(getServiceClass().getName(), getServiceVersion()), agentPassphrase);
 		} catch (Exception e) {
 			if (e instanceof AgentException)
 				throw (AgentException) e;
@@ -114,7 +115,7 @@ public abstract class LocalServiceTestCase {
 		agent.unlockPrivateKey(agentPassphrase);
 
 		localNode = LocalNode.newNode();
-		
+
 		UserAgent eve = MockAgentFactory.getEve();
 		eve.unlockPrivateKey("evespass");
 		localNode.storeAgent(eve);
@@ -184,7 +185,7 @@ public abstract class LocalServiceTestCase {
 	 * @return the service class to be launched and tested
 	 */
 	public abstract Class<? extends Service> getServiceClass();
-	
+
 	/**
 	 * define a service version to test, this service will be started in a {@link i5.las2peer.p2p.LocalNode} before
 	 * starting the actual test
@@ -211,7 +212,7 @@ public abstract class LocalServiceTestCase {
 			throws L2pServiceException, L2pSecurityException, AgentNotKnownException, InterruptedException {
 		return getNode().invokeLocally(executing, getMyAgent().getServiceNameVersion(), method, parameters);
 	}
-	
+
 	@Deprecated
 	public Serializable invoke(long executing, String method, Serializable... parameters)
 			throws L2pServiceException, L2pSecurityException, AgentNotKnownException, InterruptedException {

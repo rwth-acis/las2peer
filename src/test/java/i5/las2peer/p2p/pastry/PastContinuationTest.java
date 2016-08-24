@@ -22,7 +22,8 @@ import i5.las2peer.tools.SerializationException;
 public class PastContinuationTest {
 
 	@Test
-	public void testSimpleRetrieval() throws L2pSecurityException, MalformedXMLException, IOException, SerializationException {
+	public void testSimpleRetrieval()
+			throws L2pSecurityException, MalformedXMLException, IOException, SerializationException {
 		PastGetContinuation<Agent> testee = new PastGetContinuation<Agent>(Agent.class, 20000);
 
 		assertFalse(testee.isFinished());
@@ -41,7 +42,8 @@ public class PastContinuationTest {
 	}
 
 	@Test
-	public void testCastException() throws MalformedXMLException, IOException, L2pSecurityException, SerializationException {
+	public void testCastException()
+			throws MalformedXMLException, IOException, L2pSecurityException, SerializationException {
 		PastGetContinuation<Envelope> testee = new PastGetContinuation<Envelope>(Envelope.class, 20000);
 
 		assertFalse(testee.isFinished());

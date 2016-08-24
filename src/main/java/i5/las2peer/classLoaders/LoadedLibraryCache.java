@@ -11,23 +11,23 @@ import i5.las2peer.classLoaders.libraries.LoadedLibrary;
 import i5.las2peer.classLoaders.libraries.ResourceNotFoundException;
 
 public class LoadedLibraryCache {
-	
+
 	/**
 	 * loaded library that is cached
 	 */
 	private LoadedLibrary loadedLibrary;
-	
+
 	/**
 	 * bundles using this cache
 	 */
 	private Set<BundleClassManager> bundles = new HashSet<>();
-	
+
 	/**
 	 * cached resources
 	 */
 	// TODO check benefit of resource caching
-	private Map<String,byte[]> resourceCache = new HashMap<>();  
-	
+	private Map<String, byte[]> resourceCache = new HashMap<>();
+
 	/**
 	 * create new cache for a library
 	 * 
@@ -36,7 +36,7 @@ public class LoadedLibraryCache {
 	public LoadedLibraryCache(LoadedLibrary loadedLibrary) {
 		this.loadedLibrary = loadedLibrary;
 	}
-	
+
 	/**
 	 * register a bundle for using this cache
 	 * 
@@ -45,7 +45,7 @@ public class LoadedLibraryCache {
 	public void registerBundle(BundleClassManager bundle) {
 		bundles.add(bundle);
 	}
-	
+
 	/**
 	 * unregister a bundle
 	 * 
@@ -54,7 +54,7 @@ public class LoadedLibraryCache {
 	public void unregisterBundle(BundleClassManager bundle) {
 		bundles.remove(bundle);
 	}
-	
+
 	/**
 	 * check if this cache is used
 	 * 
@@ -63,7 +63,7 @@ public class LoadedLibraryCache {
 	public boolean isUsed() {
 		return !bundles.isEmpty();
 	}
-	
+
 	/**
 	 * get the cached library
 	 * 
@@ -72,7 +72,7 @@ public class LoadedLibraryCache {
 	public LoadedLibrary getLoadedLibrary() {
 		return loadedLibrary;
 	}
-	
+
 	/**
 	 * get a cached resource
 	 * 
@@ -84,14 +84,13 @@ public class LoadedLibraryCache {
 	public byte[] getCachedResourceAsBinary(String resourceName) throws ResourceNotFoundException, IOException {
 		if (resourceCache.containsKey(resourceName)) {
 			return resourceCache.get(resourceName);
-		}
-		else {
+		} else {
 			byte[] resource = loadedLibrary.getResourceAsBinary(resourceName);
 			resourceCache.put(resourceName, resource);
 			return resource;
 		}
 	}
-	
+
 	/**
 	 * convience method for junit tests
 	 * 
