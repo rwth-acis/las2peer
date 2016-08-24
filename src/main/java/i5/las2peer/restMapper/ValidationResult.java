@@ -1,8 +1,5 @@
-package i5.las2peer.restMapper.tools;
+package i5.las2peer.restMapper;
 
-/**
- * @author Alexander
- */
 public class ValidationResult {
 	private boolean isValid = false;
 	private String message = "";

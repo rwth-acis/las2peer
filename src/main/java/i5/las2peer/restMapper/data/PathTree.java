@@ -2,14 +2,10 @@ package i5.las2peer.restMapper.data;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
-
-import i5.las2peer.restMapper.exceptions.ConflictingMethodPathException;
 
 /**
  * Data structure to store method and service data allows mapping of http method and uri to actual services and methods
  * 
- * @author Alexander
  *
  */
 public class PathTree {
@@ -20,61 +16,6 @@ public class PathTree {
 	 */
 	public PathTree() {
 		_root = new PathNode();
-
-	}
-
-	/**
-	 * merges the current tree with another the current tree then contains both data
-	 * 
-	 * @param tree PathTree to import
-	 */
-	public String merge(PathTree tree) {
-		PathNode currentLeft = getRoot();
-		PathNode currentRight = tree.getRoot();
-		StringBuilder sb = new StringBuilder();
-		merge(currentLeft, currentRight, sb);
-		return sb.toString();
-
-	}
-
-	/**
-	 * merges two nodes
-	 * 
-	 * @param self node of the consumer tree
-	 * @param other node of the giver tree
-	 */
-	@SuppressWarnings("rawtypes")
-	private void merge(PathNode self, PathNode other, StringBuilder sb) {
-
-		for (Map.Entry node : other.getMethodData().entrySet()) {
-			String key = (String) node.getKey();
-			MethodData value = (MethodData) node.getValue();
-			if (!self.getMethodData().containsKey(key))// copy all method data
-			{
-				try {
-					self.addMethodData(value);
-				} catch (ConflictingMethodPathException e) {
-					sb.append(e.getMessage()).append("\n");
-				}
-			}
-		}
-		String[] parameterNames = other.listPathParameterNames();
-		for (String parameterName : parameterNames) {
-			self.addPathParameterName(parameterName);
-		}
-
-		for (Map.Entry node : other.getChildren().entrySet()) { // for each child
-			String key = (String) node.getKey();
-			PathNode value = (PathNode) node.getValue();
-
-			if (!self.getChildren().containsKey(key))// append children
-			{
-				self.addChild(key, value); // no recursion needed, since each subchild is new to self
-
-			} else {
-				merge(self.getChildren().get(key), value, sb); // if both have the same child, recursive call
-			}
-		}
 
 	}
 
@@ -119,18 +60,8 @@ public class PathTree {
 		 * 
 		 * @param md method data to add
 		 */
-		public void addMethodData(MethodData md) throws ConflictingMethodPathException {
-			// only if empty or if same service name, as already existing
-			if (data.size() == 0
-					|| (md.getServiceName().equals(data.entrySet().iterator().next().getValue().getServiceName()))) {
-
-				data.put(md.toString(), md);
-			} else {
-				MethodData old = data.entrySet().iterator().next().getValue();
-				throw new ConflictingMethodPathException(md.getServiceName() + "." + md.getName(),
-						old.getServiceName() + "." + old.getName());
-			}
-
+		public void addMethodData(MethodData md) {
+			data.put(md.toString(), md);
 		}
 
 		/**
@@ -219,16 +150,6 @@ public class PathTree {
 		public PathNode() {
 			children = new HashMap<String, PathNode>();
 		}
-		/**
-		 * constructor, initializes with a new method
-		 * 
-		 * @param md method to add to the PathNode
-		 */
-		/*public PathNode(MethodData md)
-		{			
-			this();
-			addMethodData(md);
-		}*/
 
 	}
 }

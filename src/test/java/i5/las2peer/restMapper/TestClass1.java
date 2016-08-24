@@ -1,5 +1,7 @@
 package i5.las2peer.restMapper;
 
+import i5.las2peer.restMapper.annotations.ContentParam;
+
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -9,8 +11,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
-import i5.las2peer.restMapper.annotations.ContentParam;
-
+@Path("service1")
 public class TestClass1 {
 
 	public TestClass1() {
@@ -38,10 +39,9 @@ public class TestClass1 {
 	@POST
 	@Path("/{a}/b/c")
 	public String a4(@PathParam("a") String a, @DefaultValue("5") @QueryParam(
-			value = "d") int d,
-			@QueryParam(
-					value = "e") @DefaultValue(
-							value = "19") int e) {
+			value = "d") int d, @QueryParam(
+			value = "e") @DefaultValue(
+			value = "19") int e) {
 		return a + (d + e);
 	}
 
@@ -53,8 +53,7 @@ public class TestClass1 {
 
 	@PUT
 	@Path("/{a}/{b}/{c}/{d}")
-	public String a6(@PathParam("a") String a, @PathParam("b") String b, @PathParam("c") String c,
-			@PathParam("d") int d) {
+	public String a6(@PathParam("a") String a, @PathParam("b") String b, @PathParam("c") String c, @PathParam("d") int d) {
 		return a + b + c + d;
 	}
 

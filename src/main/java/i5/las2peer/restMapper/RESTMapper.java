@@ -1,5 +1,21 @@
 package i5.las2peer.restMapper;
 
+import i5.las2peer.restMapper.annotations.ContentParam;
+import i5.las2peer.restMapper.annotations.HttpHeaders;
+import i5.las2peer.restMapper.data.AcceptHeaderType;
+import i5.las2peer.restMapper.data.AcceptHeaderTypeComperator;
+import i5.las2peer.restMapper.data.InvocationData;
+import i5.las2peer.restMapper.data.InvocationDataComperator;
+import i5.las2peer.restMapper.data.MethodData;
+import i5.las2peer.restMapper.data.Pair;
+import i5.las2peer.restMapper.data.ParameterData;
+import i5.las2peer.restMapper.data.PathTree;
+import i5.las2peer.restMapper.data.PathTree.PathNode;
+import i5.las2peer.restMapper.exceptions.MethodThrowsExceptionException;
+import i5.las2peer.restMapper.exceptions.NoMethodFoundException;
+import i5.las2peer.restMapper.exceptions.NotSupportedHttpMethodException;
+import i5.las2peer.restMapper.exceptions.NotSupportedUriPathException;
+
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -27,7 +43,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
@@ -41,30 +56,13 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
-import i5.las2peer.restMapper.annotations.ContentParam;
-import i5.las2peer.restMapper.annotations.HttpHeaders;
-import i5.las2peer.restMapper.annotations.Version;
-import i5.las2peer.restMapper.data.AcceptHeaderType;
-import i5.las2peer.restMapper.data.AcceptHeaderTypeComperator;
-import i5.las2peer.restMapper.data.InvocationData;
-import i5.las2peer.restMapper.data.InvocationDataComperator;
-import i5.las2peer.restMapper.data.MethodData;
-import i5.las2peer.restMapper.data.Pair;
-import i5.las2peer.restMapper.data.ParameterData;
-import i5.las2peer.restMapper.data.PathTree;
-import i5.las2peer.restMapper.data.PathTree.PathNode;
-import i5.las2peer.restMapper.exceptions.ConflictingMethodPathException;
-import i5.las2peer.restMapper.exceptions.MethodThrowsExceptionException;
-import i5.las2peer.restMapper.exceptions.NoMethodFoundException;
-import i5.las2peer.restMapper.exceptions.NotSupportedHttpMethodException;
-import i5.las2peer.restMapper.exceptions.NotSupportedUriPathException;
-import i5.las2peer.restMapper.tools.ValidationResult;
 
 /**
  * Maps REST requests to Methods Very simple and only supports basic stuff (map paths and extract path parameters and
  * map query parameters)
+ * 
+ * A note for future developers: The REST Mapper should go away from defining custom annotationsand classes, creating
+ * XML files and parsing them itself. This stuff can be done using JAX-RS and Swagger.
  *
  */
 public class RESTMapper {
@@ -88,8 +86,6 @@ public class RESTMapper {
 	public static final String PATH_TAG = PATH_ANNOTATION;
 	public static final String HTTP_METHOD_TAG = "httpMethod";
 	public static final String METHOD_TAG = "method";
-	public static final String VERSION_TAG = "version";
-	public static final String DEFAULT_SERVICE_VERSION = "1.0";
 	public static final String METHODS_TAG = "methods";
 	public static final String NAME_TAG = "name";
 	public static final String SERVICE_TAG = "service";
@@ -132,7 +128,6 @@ public class RESTMapper {
 		dBuilder = dbFactory.newDocumentBuilder();
 		doc = dBuilder.newDocument();
 		root = doc.createElement(SERVICE_TAG);
-		root.setAttribute(NAME_TAG, cl.getName());
 
 		methodsNode = doc.createElement(METHODS_TAG);
 		root.appendChild(methodsNode);
@@ -141,14 +136,11 @@ public class RESTMapper {
 		// gather method and annotation information from class
 		Method[] methods = cl.getMethods();
 		Annotation[] classAnnotations = cl.getAnnotations();
-		String version = DEFAULT_SERVICE_VERSION;
 		String pathPrefix = "";
 		String[] consumesGlobal = DEFAULT_CONSUMES_MIME_TYPE;
 		String[] producesGlobal = DEFAULT_PRODUCES_MIME_TYPE;
 		for (Annotation classAnnotation : classAnnotations) {
-			if (classAnnotation instanceof Version) { // get service version if available
-				version = ((Version) classAnnotation).value();
-			} else if (classAnnotation instanceof Path) { // path prefix is later applied to all @Path for methods
+			if (classAnnotation instanceof Path) { // path prefix is later applied to all @Path for methods
 				pathPrefix = ((Path) classAnnotation).value();
 			} else if (classAnnotation instanceof Consumes) { // provides default @Consumes (which MIME to accept)
 				consumesGlobal = ((Consumes) classAnnotation).value();
@@ -160,11 +152,11 @@ public class RESTMapper {
 		pathPrefix = pathPrefix.trim();// ignore empty spaces
 		pathPrefix = formatPath(pathPrefix);
 
-		root.setAttribute(VERSION_TAG, version);
-
-		if (!pathPrefix.isEmpty()) {
-			root.setAttribute(PATH_TAG, pathPrefix);
+		if (pathPrefix.isEmpty()) {
+			throw new Exception("Path annotation for service class is required!");
 		}
+
+		root.setAttribute(PATH_TAG, pathPrefix);
 
 		root.setAttribute(PRODUCES_TAG, join(producesGlobal, DEFAULT_MIME_SEPARATOR));
 		root.setAttribute(CONSUMES_TAG, join(consumesGlobal, DEFAULT_MIME_SEPARATOR));
@@ -187,11 +179,6 @@ public class RESTMapper {
 			String path = null;
 			if (method.isAnnotationPresent(Path.class)) {
 				path = formatPath(method.getAnnotation(Path.class).value());
-			} else if (!pathPrefix.isEmpty()) {
-				// TODO ???
-			} else {
-				// no path information given
-				continue;
 			}
 
 			Element methodNode = doc.createElement(METHOD_TAG);
@@ -275,6 +262,38 @@ public class RESTMapper {
 	}
 
 	/**
+	 * gets the first path fragment of the service
+	 * 
+	 * @param cl service class
+	 * @return first path fragment
+	 * @throws Exception if no path exists
+	 */
+	public static String getFirstPathFragment(Class<?> cl) throws Exception {
+		String pathPrefix = null;
+		for (Annotation classAnnotation : cl.getAnnotations()) {
+			if (classAnnotation instanceof Path) {
+				pathPrefix = ((Path) classAnnotation).value();
+			}
+		}
+
+		if (pathPrefix == null)
+			throw new Exception("Path annotation for service class is required!");
+
+		pathPrefix = pathPrefix.trim();
+		pathPrefix = formatPath(pathPrefix);
+
+		if (pathPrefix.indexOf("/") != -1) {
+			pathPrefix = pathPrefix.substring(0, pathPrefix.indexOf("/"));
+		}
+
+		if (pathPrefix.length() == 0) {
+			throw new Exception("Path annotation for service class is required!");
+		}
+
+		return pathPrefix;
+	}
+
+	/**
 	 * Formats path to the expected format
 	 * 
 	 * @param path
@@ -302,31 +321,6 @@ public class RESTMapper {
 		Integer[] result = new Integer[occurrences.size()];
 		occurrences.toArray(result);
 		return result;
-	}
-
-	public static String mergeXMLs(String[] xmls) throws ParserConfigurationException {
-		DocumentBuilderFactory dbFactory;
-		DocumentBuilder dBuilder;
-		Document doc;
-		dbFactory = DocumentBuilderFactory.newInstance();
-		dBuilder = dbFactory.newDocumentBuilder();
-		doc = dBuilder.newDocument();
-		Element root = doc.createElement(SERVICES_TAG);
-		doc.appendChild(root);
-
-		for (String xml : xmls) {
-			try {
-				Document local = dBuilder.parse(new InputSource(new StringReader(xml)));
-				doc.getDocumentElement().appendChild(doc.importNode(local.getDocumentElement(), true));
-			} catch (SAXException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		doc.getDocumentElement().normalize();
-		return XMLtoString(doc);
-
 	}
 
 	/**
@@ -375,15 +369,11 @@ public class RESTMapper {
 		NodeList serviceNodeList = (NodeList) _xPath.compile(".//" + SERVICE_TAG).evaluate(doc, XPathConstants.NODESET);
 		for (int i = 0; i < serviceNodeList.getLength(); i++) {
 			Element serviceNode = (Element) serviceNodeList.item(i);
-			String serviceName = serviceNode.getAttribute(NAME_TAG).trim();
-			String serviceVersion = serviceNode.getAttribute(VERSION_TAG).trim();
 			String servicePathPrefix = "";
 			String[] serviceConsumes = DEFAULT_CONSUMES_MIME_TYPE; // if none is given, then allow
 																	// everything as a Consume-Type
 			String[] serviceProduces = DEFAULT_PRODUCES_MIME_TYPE;
-			if (serviceNode.hasAttribute(PATH_TAG)) {
-				servicePathPrefix = serviceNode.getAttribute(PATH_TAG).trim();
-			}
+			servicePathPrefix = serviceNode.getAttribute(PATH_TAG).trim();
 
 			if (serviceNode.hasAttribute(CONSUMES_TAG)) {
 				serviceConsumes = serviceNode.getAttribute(CONSUMES_TAG).trim().split(DEFAULT_MIME_SEPARATOR);
@@ -449,8 +439,8 @@ public class RESTMapper {
 							for (int k = 0; k < braceOpen.length; k++) {
 								if (!(braceOpen[k] < bracesClosed[k]) || lastClosed >= braceOpen[k]) {
 									result.setValid(false);
-									result.addMessage(
-											"Path " + methodPath + " of method " + methodName + " has {} inside of {}");
+									result.addMessage("Path " + methodPath + " of method " + methodName
+											+ " has {} inside of {}");
 									break;
 								}
 								lastClosed = bracesClosed[k];
@@ -517,16 +507,7 @@ public class RESTMapper {
 				}
 				// currentNode is the node, where the URI path traversion stopped, so these paths are then mapped to
 				// this method
-				// since multiple methods can respond to a single path, a node can store a set of methods from different
-				// services
-				try {
-					currentNode.addMethodData(new MethodData(serviceName, serviceVersion, methodName, methodType,
-							consumes, produces, parameters));
-				} catch (ConflictingMethodPathException e) { // pass on handle later. Mostly 'merge' will be the problem
-																// anyway
-					throw e;
-				}
-
+				currentNode.addMethodData(new MethodData(methodName, methodType, consumes, produces, parameters));
 			}
 		}
 		return rootTree;
@@ -708,12 +689,11 @@ public class RESTMapper {
 				if (param.getAnnotation() != null && param.getAnnotation().equals(CONTENT_ANNOTATION)) {
 					// if it's a content annotation
 					if ((contentType.isEmpty() || contentType.startsWith("text/")
-							|| contentType.equalsIgnoreCase(MediaType.APPLICATION_JSON)
-							|| contentType.equals(MediaType.APPLICATION_JAVASCRIPT))
-							&& !param.getType().equals(byte[].class)) {
+							|| contentType.equalsIgnoreCase(MediaType.APPLICATION_JSON) || contentType
+								.equals(MediaType.APPLICATION_JAVASCRIPT)) && !param.getType().equals(byte[].class)) {
 						// map content value to String
-						values[j] = (Serializable) RESTMapper.castToType(new String(rawContent, StandardCharsets.UTF_8),
-								param.getType());
+						values[j] = (Serializable) RESTMapper.castToType(
+								new String(rawContent, StandardCharsets.UTF_8), param.getType());
 					} else {
 						values[j] = rawContent;
 					}
@@ -728,8 +708,8 @@ public class RESTMapper {
 					if (param.getName() != null && parameterValues.containsKey(param.getName().toLowerCase())) {
 						// if parameter has a name (given by an annotation) and a value given
 						// use the created value mapping to assign a value
-						values[j] = (Serializable) RESTMapper
-								.castToType(parameterValues.get(param.getName().toLowerCase()), param.getType());
+						values[j] = (Serializable) RESTMapper.castToType(
+								parameterValues.get(param.getName().toLowerCase()), param.getType());
 						types[j] = param.getType();
 					} else if (param.hasDefaultValue()) { // if no name, then look for default value
 						values[j] = (Serializable) param.getDefaultValue();
@@ -743,9 +723,8 @@ public class RESTMapper {
 			}
 
 			if (!abort) // return only methods which can be invoked
-				invocationData.add(new InvocationData(aMethodData.getServiceName(), aMethodData.getServiceVersion(),
-						aMethodData.getName(), aMethodData.getType(), aMethodData.getProduces(), matchLevel, values,
-						types));
+				invocationData.add(new InvocationData(aMethodData.getName(), aMethodData.getType(), aMethodData
+						.getProduces(), matchLevel, values, types));
 
 		}
 
@@ -755,8 +734,9 @@ public class RESTMapper {
 		invocationData.toArray(result);
 		if (result.length == 0) { // nothing found?
 			if (notMatchingConsumesTypes.size() > 0) { // could not consume something?
-				warnings.append("Warning: There were methods at the given path: " + httpMethod + " " + uri
-						+ " , but none consumes the given MIME-Type: " + contentType + " Accepted types are:")
+				warnings.append(
+						"Warning: There were methods at the given path: " + httpMethod + " " + uri
+								+ " , but none consumes the given MIME-Type: " + contentType + " Accepted types are:")
 						.append("\n");
 				for (int i = 0; i < notMatchingConsumesTypes.size(); i++) {
 					warnings.append(notMatchingConsumesTypes.get(i));
@@ -764,8 +744,9 @@ public class RESTMapper {
 				warnings.append("--\n");
 			}
 			if (notMatchingProducesTypes.size() > 0) { // could not consume something?
-				warnings.append("Warning: There were methods at the given path: " + httpMethod + " " + uri
-						+ " , but none produces the accepted MIME-Type: " + returnType + " Produced types are:")
+				warnings.append(
+						"Warning: There were methods at the given path: " + httpMethod + " " + uri
+								+ " , but none produces the accepted MIME-Type: " + returnType + " Produced types are:")
 						.append("\n");
 				for (int i = 0; i < notMatchingProducesTypes.size(); i++) {
 					warnings.append(notMatchingProducesTypes.get(i));
@@ -1043,6 +1024,7 @@ public class RESTMapper {
 	 * @param folder parent folder from where to start looking
 	 * @param type suffix, e.g. ".xml"
 	 * @param list reference to result array (stores all files found)
+	 * @throws IOException
 	 */
 	private static void listFilesForFolder(final File folder, String type, ArrayList<File> list) throws IOException {
 		try {
