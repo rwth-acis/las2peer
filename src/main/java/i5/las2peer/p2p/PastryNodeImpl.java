@@ -490,7 +490,7 @@ public class PastryNodeImpl extends Node {
 			super.unregisterReceiverFromTopic(receiver, topic);
 
 			if (!super.hasTopic(topic)) {
-				application.unregisterTopic(topic);
+				application.unregisterTopic(topic); // TODO SIA debug, wird ggf nicht aufgerufen
 			}
 		}
 	}
