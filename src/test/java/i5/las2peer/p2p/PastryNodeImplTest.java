@@ -97,7 +97,7 @@ public class PastryNodeImplTest {
 	@Test
 	public void testTopics() throws AgentNotKnownException, AgentAlreadyRegisteredException, L2pSecurityException,
 			AgentException, EncodingFailedException, SerializationException, InterruptedException, NodeException {
-		// TODO SIA fails for some reason -.-
+
 		// register
 		node[0].registerReceiverToTopic(node[0].getOrRegisterLocalMediator(agents[1]), 123);
 		node[0].registerReceiverToTopic(node[0].getOrRegisterLocalMediator(agents[2]), 123);
