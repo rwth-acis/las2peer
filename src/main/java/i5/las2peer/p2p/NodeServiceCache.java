@@ -95,17 +95,18 @@ public class NodeServiceCache {
 		if (!localOnly && (local == null || runningAt.isBusy())) {
 			if (exact) {
 				ServiceInstance instance = getBestGlobalInstanceOfVersion(service.getName(), service.getVersion());
-				if (instance != null)
-					global = instance;
 
-				try {
-					update(service, true, acting);
-				} catch (Exception e) {
-					if (local == null)
-						throw new AgentNotKnownException("Could not retrieve service information from the network.", e);
+				if (instance == null) {
+					try {
+						update(service, true, acting);
+					} catch (Exception e) {
+						if (local == null)
+							throw new AgentNotKnownException(
+									"Could not retrieve service information from the network.", e);
+					}
+					instance = getBestGlobalInstanceOfVersion(service.getName(), service.getVersion());
 				}
 
-				instance = getBestGlobalInstanceOfVersion(service.getName(), service.getVersion());
 				if (instance != null)
 					global = instance;
 			} else {
@@ -113,14 +114,17 @@ public class NodeServiceCache {
 				if (instance != null)
 					global = instance;
 
-				try {
-					update(service, false, acting);
-				} catch (Exception e) {
-					if (local == null)
-						throw new AgentNotKnownException("Could not retrieve service information from the network.", e);
+				if (instance == null) {
+					try {
+						update(service, false, acting);
+					} catch (Exception e) {
+						if (local == null)
+							throw new AgentNotKnownException(
+									"Could not retrieve service information from the network.", e);
+					}
+					instance = getBestGlobalInstanceFitsVersion(service.getName(), service.getVersion());
 				}
 
-				instance = getBestGlobalInstanceFitsVersion(service.getName(), service.getVersion());
 				if (instance != null)
 					global = instance;
 			}

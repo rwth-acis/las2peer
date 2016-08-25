@@ -65,6 +65,7 @@ public class LocalNodeInvocationTest {
 			InterruptedException, AgentAlreadyRegisteredException, MalformedXMLException, IOException, CryptoException,
 			AgentException, TimeoutException, NodeException, NodeNotFoundException {
 		LocalNode serviceNode = LocalNode.newNode();
+		serviceNode.getNodeServiceCache().setWaitForResults(3);
 		UserAgent eve = MockAgentFactory.getEve();
 
 		eve.unlockPrivateKey("evespass");

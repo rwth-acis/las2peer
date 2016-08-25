@@ -104,7 +104,8 @@ public abstract class Node implements AgentStorage {
 	private double cpuLoadThreshold = DEFAULT_CPU_LOAD_TRESHOLD; // TODO: make it configurable
 	private NodeServiceCache nodeServiceCache;
 	// TODO make time as setting
-	private int nodeServiceCacheLifetime = 10; // time before cached node info becomes invalidated
+	// should be lowered in future, currently services don't change often
+	private int nodeServiceCacheLifetime = 60; // time before cached node info becomes invalidated
 	private int nodeServiceCacheResultCount = 3; // number of service instances to be collected from the network
 	private int tidyUpTimerInterval = 60;
 	private int agentContextLifetime = 60;
