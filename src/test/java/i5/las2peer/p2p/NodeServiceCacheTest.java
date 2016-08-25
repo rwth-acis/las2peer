@@ -103,7 +103,7 @@ public class NodeServiceCacheTest {
 
 	@Test
 	public void testGlobalServices() throws CryptoException, L2pSecurityException, AgentAlreadyRegisteredException,
-			AgentException, CloneNotSupportedException, MalformedXMLException, IOException {
+			AgentException, CloneNotSupportedException, MalformedXMLException, IOException, NodeException {
 		// Attention when chaning NodeServiceCache parameters
 		// You may have to adjust these results afterwards since this may influence the selected versions
 

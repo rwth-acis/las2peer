@@ -482,7 +482,7 @@ public class PastryNodeImpl extends Node {
 	}
 
 	@Override
-	public void unregisterReceiver(MessageReceiver receiver) throws AgentNotKnownException {
+	public void unregisterReceiver(MessageReceiver receiver) throws AgentNotKnownException, NodeException {
 		synchronized (this) {
 			application.unregisterAgentTopic(receiver.getResponsibleForAgentId());
 			super.unregisterReceiver(receiver);
@@ -503,7 +503,7 @@ public class PastryNodeImpl extends Node {
 			super.unregisterReceiverFromTopic(receiver, topic);
 
 			if (!super.hasTopic(topic)) {
-				application.unregisterTopic(topic); // TODO SIA debug, wird ggf nicht aufgerufen
+				application.unregisterTopic(topic);
 			}
 		}
 	}

@@ -475,7 +475,7 @@ public class L2pNodeLauncher {
 
 		try {
 			node.unregisterReceiver(currentUser);
-		} catch (AgentNotKnownException e) {
+		} catch (AgentNotKnownException | NodeException e) {
 		}
 
 		currentUser = null;
@@ -663,8 +663,10 @@ public class L2pNodeLauncher {
 	 * @param serviceNameVersion
 	 * @throws AgentNotKnownException
 	 * @throws NoSuchServiceException
+	 * @throws NodeException
 	 */
-	public void stopService(String serviceNameVersion) throws AgentNotKnownException, NoSuchServiceException {
+	public void stopService(String serviceNameVersion) throws AgentNotKnownException, NoSuchServiceException,
+			NodeException {
 		ServiceAgent agent = node.getLocalServiceAgent(ServiceNameVersion.fromString(serviceNameVersion));
 		node.unregisterReceiver(agent);
 	}

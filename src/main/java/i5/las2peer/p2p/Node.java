@@ -621,12 +621,21 @@ public abstract class Node implements AgentStorage {
 	/**
 	 * Unregisters a MessageReceiver from this node.
 	 * 
-	 * @param receiver
+	 * @param receiver the receiver to unregister
 	 * @throws AgentNotKnownException The given MessageReceiver is not registered to this node
+	 * @throws NodeException error in underlying layer
 	 */
-	public void unregisterReceiver(MessageReceiver receiver) throws AgentNotKnownException {
+	public void unregisterReceiver(MessageReceiver receiver) throws AgentNotKnownException, NodeException {
 		long agentId = receiver.getResponsibleForAgentId();
 		unregisterReceiver(agentId);
+
+		// unregister from topics
+		if (mapListenerTopics.containsKey(agentId)) {
+			Long[] topics = mapListenerTopics.get(agentId).toArray(new Long[0]);
+			for (long topic : topics) {
+				unregisterReceiverFromTopic(receiver, topic);
+			}
+		}
 	}
 
 	private void unregisterReceiver(long agentId) throws AgentNotKnownException {
@@ -635,21 +644,13 @@ public abstract class Node implements AgentStorage {
 		}
 		observerNotice(Event.AGENT_REMOVED, getNodeId(), agentId, "");
 		htRegisteredReceivers.remove(agentId).notifyUnregister();
-
-		// unregister from topics
-		if (mapListenerTopics.containsKey(agentId)) {
-			Long[] topics = mapListenerTopics.get(agentId).toArray(new Long[0]);
-			for (long topic : topics) {
-				unregisterReceiverFromTopic(agentId, topic);
-			}
-		}
 	}
 
 	/**
 	 * register a receiver to a topic
 	 * 
-	 * @param receiver
-	 * @param topic
+	 * @param receiver the MessageReceiver
+	 * @param topic the topic id
 	 * @throws AgentNotKnownException
 	 */
 	public void registerReceiverToTopic(MessageReceiver receiver, long topic) throws AgentNotKnownException {
@@ -673,8 +674,8 @@ public abstract class Node implements AgentStorage {
 	/**
 	 * unregister a receiver from a topic
 	 * 
-	 * @param receiver
-	 * @param topic
+	 * @param receiver the recevier
+	 * @param topic the topic id
 	 * @throws NodeException
 	 */
 	public void unregisterReceiverFromTopic(MessageReceiver receiver, long topic) throws NodeException {
@@ -702,8 +703,8 @@ public abstract class Node implements AgentStorage {
 	/**
 	 * checks if a receiver is registered to the topic
 	 * 
-	 * @param topic
-	 * @return
+	 * @param topic topic id
+	 * @return true if someone is registered to the topic
 	 */
 	protected boolean hasTopic(long topic) {
 		return mapTopicListeners.containsKey(topic);
@@ -716,9 +717,10 @@ public abstract class Node implements AgentStorage {
 	 * 
 	 * @param agent
 	 * @throws AgentNotKnownException the agent is not registered to this node
+	 * @throws NodeException
 	 */
 	@Deprecated
-	public void unregisterAgent(Agent agent) throws AgentNotKnownException {
+	public void unregisterAgent(Agent agent) throws AgentNotKnownException, NodeException {
 		unregisterReceiver(agent);
 	}
 
