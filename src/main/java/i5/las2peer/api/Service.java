@@ -3,6 +3,7 @@ package i5.las2peer.api;
 import i5.las2peer.execution.L2pServiceException;
 import i5.las2peer.execution.L2pThread;
 import i5.las2peer.execution.NoSuchServiceMethodException;
+import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.Node;
@@ -18,13 +19,13 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 /**
- * Base class for services to be hosted within the LAS2peer network.
+ * Base class for services to be hosted within the las2peer network.
  * 
  * <h2>Basic Implementation Hints</h2>
  * 
  * <p>
  * To implement a service simply derive this API class an implement the intended functionality. If parameters and
- * results are to be transported via the LAS2peer network use types implementing the {@link java.io.Serializable}
+ * results are to be transported via the las2peer network use types implementing the {@link java.io.Serializable}
  * interface.
  * 
  * <p>
@@ -33,12 +34,12 @@ import java.lang.reflect.Modifier;
  * implementation.
  * 
  * <p>
- * Please be aware, that only one instance of the service is instantiated at a LAS2peer node. There are no per user
+ * Please be aware, that only one instance of the service is instantiated at a las2peer node. There are no per user
  * instantiations as in former LAS server implementations. To access the current user, just use the helper methods of
  * this abstract class like {@link #getActiveAgent()}.
  * 
  * <p>
- * If you want to access the current user agent, the LAS2peer node or logging from outside your service class, e.g. in
+ * If you want to access the current user agent, the las2peer node or logging from outside your service class, e.g. in
  * helper classes or the like, you can make use of the {@link i5.las2peer.security.Context} class, especially of the
  * static {@link i5.las2peer.security.Context#getCurrent} method.
  * 
@@ -62,7 +63,7 @@ import java.lang.reflect.Modifier;
  * 
  * <p>
  * For own helper and 3rd party libraries, you can use any arbitrary library name consisting of alpha-numerical
- * characters. For Jars archives providing a LAS2peer service please use the package name of the service as library name
+ * characters. For Jars archives providing a las2peer service please use the package name of the service as library name
  * and name for the jar archive.
  * 
  * <p>
@@ -88,7 +89,7 @@ import java.lang.reflect.Modifier;
  * <h2>(JUnit-)Testing</h2>
  * 
  * <p>
- * For unit testing of your service within a LAS2peer setting, you can use the prepared (abstract) class
+ * For unit testing of your service within a las2peer setting, you can use the prepared (abstract) class
  * {@link i5.las2peer.testing.LocalServiceTestCase} to derive your test case from. <br>
  * This class starts a {@link i5.las2peer.p2p.LocalNode} running your service to test on each test case.
  * 
@@ -96,7 +97,7 @@ import java.lang.reflect.Modifier;
  * 
  * <p>
  * To start a node hosting your service, you can use the methods of the class {@link i5.las2peer.tools.L2pNodeLauncher},
- * which is the main method of the LAS2peer-archive library as well.
+ * which is the main method of the las2peer-archive library as well.
  * 
  * <h2>Further Tools</h2>
  * 
@@ -123,7 +124,7 @@ public abstract class Service extends Configurable {
 	/**
 	 * Executes a service method.
 	 * 
-	 * @param method
+	 * @param method the service method
 	 * 
 	 * @return result of the method invocation
 	 * 
@@ -142,7 +143,7 @@ public abstract class Service extends Configurable {
 	/**
 	 * Executes a service method.
 	 * 
-	 * @param method
+	 * @param method the service method
 	 * @param parameters
 	 * 
 	 * @return result of the method invocation
@@ -224,8 +225,7 @@ public abstract class Service extends Configurable {
 	/**
 	 * Searches the service method fitting to the given parameter classes.
 	 *
-	 *
-	 * @param methodName
+	 * @param methodName the service method
 	 * @param params
 	 *
 	 * @return a Method
@@ -261,9 +261,10 @@ public abstract class Service extends Configurable {
 								if (!(acCheckParamTypes[i].isPrimitive() && ServiceHelper.getWrapperClass(
 										acCheckParamTypes[i]).isInstance(params[i]))
 										&& !(ServiceHelper.isWrapperClass(acCheckParamTypes[i]) && ServiceHelper
-												.getUnwrappedClass(acCheckParamTypes[i]).isInstance(params[i])))
+												.getUnwrappedClass(acCheckParamTypes[i]).isInstance(params[i]))) {
 									// and not wrapped or unwrapped either! -> so not more possibilities to match!
 									bPossible = false;
+								}
 							}
 							// else is possible! -> check next param
 						} // for ( all formal parameters)
@@ -292,21 +293,24 @@ public abstract class Service extends Configurable {
 										found = toCheck;
 									} // something to do with wrappers?
 								}
-							} else
+							} else {
 								found = toCheck;
+							}
 						}
 					} // if ( parameter length matches)
 				} // if ( method name fits )
 			} // for (all known methods)
 		}
 
-		if (found == null)
+		if (found == null) {
 			throw new NoSuchServiceMethodException(this.getClass().getCanonicalName(), methodName,
 					getParameterString(params));
+		}
 
-		if (Modifier.isStatic(found.getModifiers()))
+		if (Modifier.isStatic(found.getModifiers())) {
 			throw new NoSuchServiceMethodException(this.getClass().getCanonicalName(), methodName,
 					getParameterString(params));
+		}
 
 		return found;
 	} // searchMethod
@@ -320,10 +324,12 @@ public abstract class Service extends Configurable {
 	 */
 	public static String getParameterString(Object[] params) {
 		StringBuffer result = new StringBuffer("(");
-		for (int i = 0; i < params.length - 1; i++)
+		for (int i = 0; i < params.length - 1; i++) {
 			result.append(params[i].getClass().getCanonicalName()).append(", ");
-		if (params.length > 0)
+		}
+		if (params.length > 0) {
 			result.append(params[params.length - 1].getClass().getCanonicalName());
+		}
 		result.append(")");
 		return result.toString();
 	}
@@ -336,8 +342,9 @@ public abstract class Service extends Configurable {
 	 * @throws AgentNotKnownException
 	 */
 	public final ServiceAgent getAgent() throws AgentNotKnownException {
-		if (this.agent == null)
+		if (this.agent == null) {
 			throw new AgentNotKnownException("This Service has not been started yet!");
+		}
 		return this.agent;
 	}
 
@@ -362,8 +369,9 @@ public abstract class Service extends Configurable {
 	private final L2pThread getL2pThread() {
 		Thread t = Thread.currentThread();
 
-		if (!(t instanceof L2pThread))
+		if (!(t instanceof L2pThread)) {
 			throw new IllegalStateException("Not executed in a L2pThread environment!");
+		}
 
 		return (L2pThread) t;
 	}
@@ -410,8 +418,8 @@ public abstract class Service extends Configurable {
 	}
 
 	/**
-	 * @deprecated Use {@link i5.las2peer.logging.L2pLogger#logEvent(Event, String)} with {@link Event#SERVICE_MESSAGE}
-	 *             instead!
+	 * 
+	 * @deprecated Use {@link L2pLogger#logEvent(Event, String)} with {@link Event#SERVICE_MESSAGE} instead!
 	 *             <p>
 	 *             Writes a log message.
 	 * 
@@ -423,7 +431,7 @@ public abstract class Service extends Configurable {
 	}
 
 	/**
-	 * @deprecated Use {@link i5.las2peer.logging.L2pLogger#logEvent(Event, Agent, String)} instead!
+	 * @deprecated Use {@link L2pLogger#logEvent(Event, Agent, String)} instead!
 	 *             <p>
 	 *             Writes a log message. The given index (1-99) can be used to differentiate between different log
 	 *             messages.
@@ -448,8 +456,7 @@ public abstract class Service extends Configurable {
 	}
 
 	/**
-	 * @deprecated Use {@link i5.las2peer.logging.L2pLogger#logEvent(Event, String)} with {@link Event#SERVICE_ERROR}
-	 *             instead!
+	 * @deprecated Use {@link L2pLogger#logEvent(Event, String)} with {@link Event#SERVICE_ERROR} instead!
 	 *             <p>
 	 *             Writes an error log message.
 	 * 
@@ -461,7 +468,7 @@ public abstract class Service extends Configurable {
 	}
 
 	/**
-	 * @deprecated Use {@link i5.las2peer.logging.L2pLogger#logEvent(Event, Agent, String)} instead!
+	 * @deprecated Use {@link L2pLogger#logEvent(Event, Agent, String)} instead!
 	 *             <p>
 	 *             Writes an error message. The given index (1-99) can be used to differentiate between different log
 	 *             messages.
@@ -486,7 +493,7 @@ public abstract class Service extends Configurable {
 	}
 
 	/**
-	 * @deprecated Use {@link i5.las2peer.logging.L2pLogger} instead!
+	 * @deprecated Use {@link L2pLogger} instead!
 	 *             <p>
 	 *             Writes an exception log message Additionally the stack trace is printed.
 	 * 

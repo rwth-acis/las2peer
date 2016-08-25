@@ -7,7 +7,7 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.logging.ConsoleHandler;
+import java.util.logging.ErrorManager;
 import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
@@ -15,16 +15,15 @@ import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
+import java.util.logging.StreamHandler;
 
-import i5.las2peer.api.Service;
 import i5.las2peer.execution.L2pThread;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.security.Agent;
-import i5.las2peer.security.Context;
 
 public final class L2pLogger extends Logger implements NodeObserver {
 
-	public static final String GLOBAL_NAME = "i5.las2peer"; // this name should be equal to the LAS2peer package name.
+	public static final String GLOBAL_NAME = "i5.las2peer"; // this name should be equal to the las2peer package name.
 
 	// default parameters
 	public static final int DEFAULT_LIMIT_BYTES = 1 * 1000 * 1000; // max 1 MB log file size
@@ -90,6 +89,25 @@ public final class L2pLogger extends Logger implements NodeObserver {
 		GLOBAL_INSTANCE.minimizeLogLevel();
 	}
 
+	protected static class ConsoleHandler extends StreamHandler {
+
+		@Override
+		public void publish(LogRecord record) {
+			try {
+				int level = record.getLevel().intValue();
+				String message = getFormatter().format(record);
+				if (level >= Level.WARNING.intValue()) {
+					System.err.write(message.getBytes());
+				} else if (level >= getLevel().intValue()) {
+					System.out.write(message.getBytes());
+				}
+			} catch (Exception exception) {
+				reportError(null, exception, ErrorManager.FORMAT_FAILURE);
+			}
+		}
+
+	}
+
 	/**
 	 * This is the formatter used for the console output.
 	 */
@@ -142,7 +160,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 
 	/**
 	 * Prints a stack trace as nicely as {@code e.printStackTrace()}, but uses the logging system as output.
-	 * 
+	 *
 	 * @param e A {@code Throwable} thats stack trace should be printed.
 	 */
 	public synchronized void printStackTrace(Throwable e) {
@@ -153,7 +171,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 
 	/**
 	 * Appends the stack trace for the given {@link Throwable} to the given {@link StringBuilder}.
-	 * 
+	 *
 	 * @param sb {@code StringBuilder} as output for the stack trace.
 	 * @param e A {@code Throwable} which stack trace should be appended. If {@code null} given, nothing is appended.
 	 */
@@ -168,7 +186,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 
 	/**
 	 * Just calls the parent constructor and adds the new instance to the LogManager.
-	 * 
+	 *
 	 * @param name A name for the logger. This should be a dot-separated name and should normally be based on the
 	 *            package name or class name of the subsystem, such as java.net or javax.swing. It may be null for
 	 *            anonymous Loggers.
@@ -190,7 +208,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 
 	/**
 	 * Same as {@link #setLogDirectory(String)} for the global static instance.
-	 * 
+	 *
 	 * @param directory A directory path given as String. {@code null} is equal to "" and the class loader directory.
 	 * @throws IOException
 	 */
@@ -200,7 +218,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 
 	/**
 	 * Sets the directory to store log files.
-	 * 
+	 *
 	 * @param directory A directory path given as String. {@code null} is equal to "" and the class loader directory.
 	 * @throws IOException
 	 */
@@ -218,7 +236,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 
 	/**
 	 * Same as {@link #setLogfilePrefix(String)} for global static instance.
-	 * 
+	 *
 	 * @param prefix If {@code null} is given, file logging will be disabled.
 	 * @throws IOException
 	 */
@@ -228,7 +246,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 
 	/**
 	 * Sets the prefix used to generate log files.
-	 * 
+	 *
 	 * @param prefix If {@code null} is given, file logging will be disabled.
 	 * @throws IOException
 	 */
@@ -243,7 +261,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 
 	/**
 	 * This method must be called each time the log file target is changed.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	private synchronized void updateLogfileHandler() throws IOException {
@@ -277,7 +295,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 
 	/**
 	 * This method ensures that the given directory is actually a directory and exists.
-	 * 
+	 *
 	 * @param dir A path given as String for the desired directory
 	 * @throws IOException return null;
 	 */
@@ -290,7 +308,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 
 	/**
 	 * Same as {@link #setConsoleLevel(Level)} for the global static instance.
-	 * 
+	 *
 	 * @param level The log level to set.
 	 */
 	public static void setGlobalConsoleLevel(Level level) {
@@ -299,7 +317,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 
 	/**
 	 * Sets the log level for the console output of this logger.
-	 * 
+	 *
 	 * @param level The log level to set.
 	 */
 	public synchronized void setConsoleLevel(Level level) {
@@ -309,7 +327,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 
 	/**
 	 * Same as {@link #setLogfileLevel(Level)} for global static instance.
-	 * 
+	 *
 	 * @param level The log level to set.
 	 */
 	public static void setGlobalLogfileLevel(Level level) {
@@ -318,7 +336,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 
 	/**
 	 * Sets the log level for the log files used in this logger.
-	 * 
+	 *
 	 * @param level The log level to set.
 	 */
 	public synchronized void setLogfileLevel(Level level) {
@@ -361,7 +379,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 
 	/**
 	 * Writes a log message. The given event can be used to differentiate between different log messages.
-	 * 
+	 *
 	 * @param event used to differentiate between different log messages
 	 * @param message
 	 */
@@ -371,7 +389,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 
 	/**
 	 * Writes a log message. The given event can be used to differentiate between different log messages.
-	 * 
+	 *
 	 * @param event used to differentiate between different log messages
 	 * @param actingUser can be set to null if unknown / not desired
 	 * @param message
@@ -389,10 +407,10 @@ public final class L2pLogger extends Logger implements NodeObserver {
 
 	/**
 	 * Logs a message to the l2p system using the observers.
-	 * 
+	 *
 	 * Since this method will/should only be used in an L2pThread, the message will come from a service or a helper, so
 	 * a SERVICE_MESSAGE is assumed. Then this message will not be monitored by the monitoring observer.
-	 * 
+	 *
 	 * @param from the calling class
 	 * @param event used to differentiate between different log messages
 	 * @param message
@@ -405,11 +423,13 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	 * Writes a log message. The given event can be used to differentiate between different log messages. The
 	 * serviceAgent and actingUser can be set to {@code null} if not known. Then this message will not be monitored by
 	 * the monitoring observer.
-	 * 
-	 * This method replaces: {@link Context#logMessage(Object, int, String, Agent, Agent)},
-	 * {@link Context#logMessage(Object, String)}, {@link Context#logError(Object, int, String, Agent, Agent)},
-	 * {@link Context#logError(Object, String)}, {@link Service#logError(String message)}
-	 * 
+	 *
+	 * This method replaces: {@link i5.las2peer.security.Context#logMessage(Object, int, String, Agent, Agent)},
+	 * {@link i5.las2peer.security.Context#logMessage(Object, String)},
+	 * {@link i5.las2peer.security.Context#logError(Object, int, String, Agent, Agent)},
+	 * {@link i5.las2peer.security.Context#logError(Object, String)},
+	 * {@link i5.las2peer.api.Service#logError(String message)}
+	 *
 	 * @param from the calling class
 	 * @param event used to differentiate between different log messages
 	 * @param message
@@ -430,7 +450,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	 * Writes a log message. The given event can be used to differentiate between different log messages. The
 	 * serviceAgent and actingUser can be set to {@code null} if not known. Then this message will not be monitored by
 	 * the monitoring observer.
-	 * 
+	 *
 	 * @param node
 	 * @param from the calling class
 	 * @param event used to differentiate between different log messages
@@ -466,20 +486,21 @@ public final class L2pLogger extends Logger implements NodeObserver {
 
 	/**
 	 * Simple method for one log line entry. Null will be printed as "-". All values will be followed by a tab char.
-	 * 
+	 *
 	 * @param o
 	 * @return a string
 	 */
 	private static String appendPart(Object o) {
-		if (o == null)
+		if (o == null) {
 			return "-\t";
-		else
+		} else {
 			return "" + o + "\t";
+		}
 	}
 
 	/**
 	 * This method returns the default {@link Formatter} currently used to format log output for console.
-	 * 
+	 *
 	 * @return Returns the console formatter.
 	 */
 	public static Formatter getGlobalConsoleFormatter() {
@@ -488,7 +509,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 
 	/**
 	 * This method returns the default {@link Formatter} currently used to format log output for log files.
-	 * 
+	 *
 	 * @return Returns the log file formatter.
 	 */
 	public static Formatter getGlobalLogfileFormatter() {
@@ -496,17 +517,30 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	}
 
 	/**
-	 * This method is the recommended way to retrieve a L2pLogger instance.
-	 * 
+	 * This method is used to retrieve a L2pLogger instance.
+	 *
+	 * @param cls Should be the class this instance is used with.
+	 * @return Returns a L2pLogger instance for the given class.
+	 * @throws ClassCastException If someone overloaded the loggers instance by adding some other logger implementation
+	 *             with the same name. In this case you may use Java native method by calling
+	 *             {@link Logger#getLogger(String)}.
+	 */
+	public static L2pLogger getInstance(Class<?> cls) throws ClassCastException {
+		return getInstance(cls.getCanonicalName());
+	}
+
+	/**
+	 * This method is used to retrieve a L2pLogger instance.
+	 *
 	 * @param name A name for the new logger instance. Should be the name of your current class by default. Like
-	 *            L2pLogger.class.getName()
+	 *            L2pLogger.class.getCanonicalName()
 	 * @return Returns a L2pLogger instance for the given name.
 	 * @throws ClassCastException If someone overloaded the loggers instance by adding some other logger implementation
 	 *             with the same name. In this case you may use Java native method by calling
 	 *             {@link Logger#getLogger(String)}.
 	 */
 	public static L2pLogger getInstance(String name) throws ClassCastException {
-		if (name == null || name.isEmpty() || "i5.las2peer".equals(name) || !name.startsWith("i5.las2peer")) {
+		if (name == null || name.isEmpty() || "i5.las2peer".equals(name)) {
 			throw new IllegalArgumentException("Invalid logger name '" + name + "' given!");
 		}
 		L2pLogger result = null;

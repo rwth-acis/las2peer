@@ -1,7 +1,7 @@
 package i5.las2peer.security;
 
 /**
- * Base class for all security related exceptions in the LAS2peer setting.
+ * Base class for all security related exceptions in the las2peer setting.
  * 
  * 
  *

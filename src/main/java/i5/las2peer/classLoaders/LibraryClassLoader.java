@@ -1,10 +1,10 @@
 package i5.las2peer.classLoaders;
 
-import java.io.IOException;
-import java.net.URL;
-
 import i5.las2peer.classLoaders.libraries.LoadedLibrary;
 import i5.las2peer.classLoaders.libraries.ResourceNotFoundException;
+
+import java.io.IOException;
+import java.net.URL;
 
 /**
  * a LibraryClassLoader is responsible for loading classes from one library bundle, probably loaded via a
@@ -49,6 +49,7 @@ public class LibraryClassLoader extends ClassLoader {
 		return myLibrary.getCachedResourceAsBinary(resourceName);
 	}
 
+	@Override
 	protected Class<?> findClass(String className) throws ClassNotFoundException {
 		byte[] binaryDefinition;
 		Logger.logFinding(this, className, null);
@@ -57,6 +58,14 @@ public class LibraryClassLoader extends ClassLoader {
 			binaryDefinition = getResourceContent(LoadedLibrary.classToResourceName(className));
 
 			Logger.logFinding(this, className, true);
+
+			// define package
+			// Don't know why this is neccessary, Java's docs are not sufficient.
+			// Implementing custom class loaders is a mess...
+			String packageName = className.substring(0, className.lastIndexOf('.'));
+			if (getPackage(packageName) == null) {
+				definePackage(packageName, null, null, null, null, null, null, null);
+			}
 
 			return defineClass(className, binaryDefinition, 0, binaryDefinition.length);
 		} catch (Exception e) {
@@ -83,9 +92,10 @@ public class LibraryClassLoader extends ClassLoader {
 	 * 
 	 * @throws ClassNotFoundException
 	 */
-	protected synchronized Class<?> loadClass(String name, boolean resolve, boolean lookUp) throws ClassNotFoundException {
+	protected synchronized Class<?> loadClass(String name, boolean resolve, boolean lookUp)
+			throws ClassNotFoundException {
 		Logger.logLoading(this, name, null, lookUp);
-		
+
 		// First, check if the class has already been loaded
 		Class<?> c = findLoadedClass(name);
 
@@ -93,18 +103,15 @@ public class LibraryClassLoader extends ClassLoader {
 		if (c == null && lookUp && parent != null) {
 			try {
 				c = parent.loadClass(name, this);
+			} catch (ClassNotFoundException e) {
 			}
-			catch (ClassNotFoundException e) {
-			}
-		}
-		else if (c == null && lookUp && parent == null){ // for test cases
+		} else if (c == null && lookUp && parent == null) { // for test cases
 			try {
 				c = getSystemClassLoader().loadClass(name);
-			}
-			catch (ClassNotFoundException e) {
+			} catch (ClassNotFoundException e) {
 			}
 		}
-		
+
 		// then look in this library
 		if (c == null) {
 			try {
@@ -151,24 +158,41 @@ public class LibraryClassLoader extends ClassLoader {
 	 * @return the resource
 	 */
 	URL getResource(String resourceName, boolean lookUp) {
+		Logger.logGetResource(this, resourceName, null, lookUp);
+
+		URL res;
+
 		try {
-			return myLibrary.getLoadedLibrary().getResourceAsUrl(resourceName);
+			res = myLibrary.getLoadedLibrary().getResourceAsUrl(resourceName);
 		} catch (ResourceNotFoundException e) {
 			if (lookUp && parent != null) {
 				URL result = parent.findResource(resourceName, this);
-				if (result != null)
+				if (result != null) {
 					return result;
-				else
+				} else {
+					Logger.logGetResource(this, resourceName, false, null);
 					return null;
-			} else
+				}
+
+			} else {
+				Logger.logGetResource(this, resourceName, false, null);
 				return null;
+			}
+		}
+
+		if (res != null) {
+			Logger.logGetResource(this, resourceName, true, null);
+			return res;
+		} else {
+			return null;
 		}
 	}
 
 	/**
 	 * get the URL for a resource
-	 * @param resourceName 
-	 * @return 
+	 * 
+	 * @param resourceName
+	 * @return
 	 */
 	@Override
 	public URL getResource(String resourceName) {

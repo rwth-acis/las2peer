@@ -1,11 +1,11 @@
-<project name="LAS2peer" default="jars" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
+<project name="las2peer" default="jars" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
 
 	<property environment="env"/>
 	
 	<property name="ivy.organisation" value="i5" />
 	<property name="ivy.module" value="las2peer" />
 	<property name="ivy.revision" value="0.5" />
-	<property name="ivy.build.number" value="3" />
+	<property name="ivy.build.number" value="6" />
 	<property name="ivy.deliver.revision" value="${ivy.revision}" />
 	<property name="ivy.pom.version" value="${ivy.revision}" />
 	
@@ -367,7 +367,7 @@
 			author="true"
 			version="true"
 			use="true"
-			windowtitle="LAS2peer Documentation"
+			windowtitle="las2peer Documentation"
 			failonerror="yes"
 			encoding="utf8"
 			classpath="${lib.cp}:${tmp.classes}"
@@ -383,7 +383,7 @@
 			author="true"
 			version="true"
 			use="true"
-			windowtitle="LAS2peer Unit Test Documentation"
+			windowtitle="las2peer Unit Test Documentation"
 			failonerror="yes"
 			encoding="utf8"
 			classpath="${lib.cp}:${tmp.classes}"

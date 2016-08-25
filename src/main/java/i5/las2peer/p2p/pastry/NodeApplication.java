@@ -38,7 +38,7 @@ import rice.pastry.commonapi.PastryIdFactory;
  * The NodeApplication implements the interface for message based interaction with the pastry p2p network.
  * 
  * In particular, message sending and retrieval, artifact storage via past and publish/subscribe via scribe are used to
- * provide the LAS2peer node (and agent) communication.
+ * provide the las2peer node (and agent) communication.
  * 
  * 
  *
@@ -210,7 +210,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 
 				// Is already done in Node-Classes
 //				l2pNode.observerNotice( Event.MESSAGE_RECEIVED, ((MessageEnvelope) pastMessage).getSendingNode(),
-//						m.getSender(), l2pNode.getPastryNode(), m.getRecipient(), "Got an envelope for a LAS2peer message!" );
+//						m.getSender(), l2pNode.getPastryNode(), m.getRecipient(), "Got an envelope for a las2peer message!" );
 
 				// hmmmm, is the problem here??
 				new Thread(new Runnable() {

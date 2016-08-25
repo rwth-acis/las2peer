@@ -268,9 +268,9 @@ public class Context implements AgentStorage {
 	}
 
 	/**
-	 * Gets the current LAS2peer context.
+	 * Gets the current las2peer context.
 	 * 
-	 * @throws IllegalStateException called not in a LAS2peer execution thread
+	 * @throws IllegalStateException called not in a las2peer execution thread
 	 * 
 	 * @return the current context
 	 */

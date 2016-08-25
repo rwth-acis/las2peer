@@ -52,9 +52,9 @@ import rice.persistence.Storage;
 import rice.persistence.StorageManagerImpl;
 
 /**
- * A <a href="http://freepastry.org">FreePastry</a> implementation of a LAS2peer {@link Node}.
+ * A <a href="http://freepastry.org">FreePastry</a> implementation of a las2peer {@link Node}.
  * 
- * This class is the actual heart of the p2p based network of interacting nodes an agents in the LAS2peer setting.
+ * This class is the actual heart of the p2p based network of interacting nodes an agents in the las2peer setting.
  * 
  * The package {@link i5.las2peer.p2p.pastry} provides all necessary helper classes for the integration (and
  * encapsulation) of the FreePastry library.
@@ -239,25 +239,28 @@ public class PastryNodeImpl extends Node {
 	private Collection<InetSocketAddress> getBootstrapAddresses() {
 		Vector<InetSocketAddress> result = new Vector<InetSocketAddress>();
 
-		if (bootStrap == null || bootStrap.isEmpty())
+		if (bootStrap == null || bootStrap.isEmpty()) {
 			return result;
+		}
 
 		String[] addresses = bootStrap.split(",");
 		for (String address : addresses) {
 			String[] hostAndPort = address.split(":");
 			int port = STANDARD_PORT;
 
-			if (hostAndPort.length == 2)
+			if (hostAndPort.length == 2) {
 				port = Integer.parseInt(hostAndPort[1]);
+			}
 
 			try {
 				result.add(new InetSocketAddress(InetAddress.getByName(hostAndPort[0]), port));
 			} catch (UnknownHostException e) {
 				// TODO this should be handled earlier
-				if (address.equals("-"))
+				if (address.equals("-")) {
 					System.out.println("Starting new network..");
-				else
+				} else {
 					System.err.println("Cannot resolve address for: " + address + "\n Starting new network..");
+				}
 			}
 		}
 
@@ -291,33 +294,41 @@ public class PastryNodeImpl extends Node {
 				Properties props = new Properties();
 				props.load(new FileInputStream(found));
 
-				for (Object propname : props.keySet())
+				for (Object propname : props.keySet()) {
 					properties.put((String) propname, (String) props.get(propname));
+				}
 			} catch (FileNotFoundException e) {
 				System.err.println("Unable to open property file " + found);
 			} catch (IOException e) {
 				System.err.println("Error opening property file " + found + ": " + e.getMessage());
 			}
-		} else
+		} else {
 			System.out.println("No pastry property file found - using default values");
+		}
 
-		if (!properties.containsKey("nat_search_policy"))
+		if (!properties.containsKey("nat_search_policy")) {
 			properties.put("nat_search_policy", "never");
-		if (!properties.containsKey("firewall_test_policy"))
+		}
+		if (!properties.containsKey("firewall_test_policy")) {
 			properties.put("firewall_test_policy", "never");
-		if (!properties.containsKey("nat_network_prefixes"))
+		}
+		if (!properties.containsKey("nat_network_prefixes")) {
 			properties.put("nat_network_prefixes", "127.0.0.1;10.;192.168.;");
+		}
 
-		if (!properties.containsKey("pastry_socket_known_network_address"))
+		if (!properties.containsKey("pastry_socket_known_network_address")) {
 			// properties.put( "pastry_socket_known_network_address", "127.0.0.1");
-			if (!properties.containsKey("pastry_socket_known_network_address_port"))
+			if (!properties.containsKey("pastry_socket_known_network_address_port")) {
 				properties.put("pastry_socket_known_network_address_port", "80");
+			}
+		}
 
 		// remarks: you need an network accessible host/port combination, even, if you want to start a new ring!!
 		// for offline testing, you need to run some kind of port reachable server!
 
-		if (!properties.containsKey("nat_search_policy"))
+		if (!properties.containsKey("nat_search_policy")) {
 			properties.put("nat_search_policy", "never");
+		}
 
 		// check for building a new ring
 		/* if ( "NEW".equals ( bootStrap) ) {
@@ -354,8 +365,9 @@ public class PastryNodeImpl extends Node {
 		if (mode == STORAGE_MODE.filesystem) {
 			String storageDirectory = storagePath + File.separator + "node_" + pastryNode.getId().hashCode();
 			storage = new PersistentStorage(idf, storageDirectory, pastStorageDiscSize, pastryNode.getEnvironment());
-		} else
+		} else {
 			storage = new MemoryStorage(idf);
+		}
 
 		LRUCache cache = new LRUCache(new MemoryStorage(idf), pastMemoryCacheSize, pastryEnvironment);
 
@@ -452,6 +464,7 @@ public class PastryNodeImpl extends Node {
 
 		super.shutDown();
 		pastryNode.destroy();
+		pastryEnvironment.destroy();
 		this.setStatus(NodeStatus.CLOSED);
 	}
 
@@ -525,8 +538,9 @@ public class PastryNodeImpl extends Node {
 
 		if (!(atNodeId instanceof NodeHandle)) {
 			String addition = "(null)";
-			if (atNodeId != null)
+			if (atNodeId != null) {
 				addition = atNodeId.getClass().toString();
+			}
 			IllegalArgumentException e = new IllegalArgumentException(
 					"node id in pastry nets has to be a NodeHandle instance but is " + addition);
 			e.printStackTrace();
@@ -603,10 +617,11 @@ public class PastryNodeImpl extends Node {
 			if (!conti.isSuccess()) {
 				observerNotice(Event.ARTIFACT_UPLOAD_FAILED, pastryNode,
 						"Storage error for Artifact " + envelope.getId());
-				if (conti.hasException())
+				if (conti.hasException()) {
 					throw new PastryStorageException("Error storing update", conti.getExceptions()[0]);
-				else
+				} else {
 					throw new PastryStorageException("Error storing update");
+				}
 			}
 
 		} catch (InterruptedException e) {
@@ -672,10 +687,12 @@ public class PastryNodeImpl extends Node {
 
 	@Override
 	public void storeAgent(Agent agent) throws L2pSecurityException, AgentException {
-		if (agent.isLocked())
+		if (agent.isLocked()) {
 			throw new L2pSecurityException("You have to unlock the agent before storage!");
-		if (locallyKnownAgents.hasAgent(agent.getId()))
+		}
+		if (locallyKnownAgents.hasAgent(agent.getId())) {
 			throw new AgentAlreadyRegisteredException("This agent is already known locally!");
+		}
 
 		observerNotice(Event.AGENT_UPLOAD_STARTED, pastryNode, agent, "");
 
@@ -699,8 +716,9 @@ public class PastryNodeImpl extends Node {
 				throw new AgentException("Storage problems", new PastryStorageException("error storing update"));
 			}
 
-			if (agent instanceof UserAgent)
+			if (agent instanceof UserAgent) {
 				getUserManager().registerUserAgent((UserAgent) agent);
+			}
 
 			observerNotice(Event.AGENT_UPLOAD_SUCCESS, pastryNode, agent, "");
 		} catch (InterruptedException | SerializationException e) {
@@ -712,8 +730,9 @@ public class PastryNodeImpl extends Node {
 
 	@Override
 	public void updateAgent(Agent agent) throws AgentException, L2pSecurityException, PastryStorageException {
-		if (agent.isLocked())
+		if (agent.isLocked()) {
 			throw new L2pSecurityException("You have to unlock the agent before updating!");
+		}
 
 		// Agent stored =
 		getAgent(agent.getId());
@@ -727,11 +746,13 @@ public class PastryNodeImpl extends Node {
 		try {
 			pastStorage.insert(new ContentEnvelope(agent), conti);
 			conti.waitForResult();
-			if (!conti.isSuccess())
+			if (!conti.isSuccess()) {
 				throw new PastryStorageException("error storing update");
+			}
 
-			if (agent instanceof UserAgent)
+			if (agent instanceof UserAgent) {
 				getUserManager().updateUserAgent((UserAgent) agent);
+			}
 		} catch (InterruptedException e) {
 			throw new PastryStorageException("interrupted", e);
 		} catch (SerializationException e) {
@@ -746,10 +767,11 @@ public class PastryNodeImpl extends Node {
 	 */
 	@Override
 	public Serializable getNodeId() {
-		if (pastryNode == null)
+		if (pastryNode == null) {
 			return null;
-		else
+		} else {
 			return pastryNode.getLocalNodeHandle();
+		}
 	}
 
 	@Override
@@ -760,8 +782,9 @@ public class PastryNodeImpl extends Node {
 	@Override
 	public NodeInformation getNodeInformation(Object nodeId) throws NodeNotFoundException {
 
-		if (!(nodeId instanceof NodeHandle))
+		if (!(nodeId instanceof NodeHandle)) {
 			throw new NodeNotFoundException("Given node id is not a pastry Node Handle!");
+		}
 
 		return application.getNodeInformation((NodeHandle) nodeId);
 	}

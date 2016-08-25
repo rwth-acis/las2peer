@@ -1,5 +1,20 @@
 package i5.las2peer.persistency;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectStreamClass;
+import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Random;
+
+import javax.crypto.SecretKey;
+
+import org.apache.commons.codec.binary.Base64;
+
 import i5.las2peer.execution.L2pThread;
 import i5.las2peer.p2p.ArtifactNotFoundException;
 import i5.las2peer.p2p.StorageException;
@@ -17,23 +32,8 @@ import i5.simpleXML.Element;
 import i5.simpleXML.Parser;
 import i5.simpleXML.XMLSyntaxException;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectStreamClass;
-import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Random;
-
-import javax.crypto.SecretKey;
-
-import org.apache.commons.codec.binary.Base64;
-
 /**
- * An envelope provides a secure storage for any {@link Serializable} content within the LAS2peer network.
+ * An envelope provides a secure storage for any {@link Serializable} content within the las2peer network.
  * 
  * The content will be encrypted symmetrically, the key for opening the envelope will be provided to all entitled
  * {@link i5.las2peer.security.Agent}s via asymmetrical encryption. All encrypted versions of the decryption key are
@@ -996,7 +996,7 @@ public final class Envelope implements XmlAble, Cloneable {
 //
 //					// FIXME WIP
 //					// It's not possible to get the class at this point,
-//					// because this is not executed in a LAS2peer context
+//					// because this is not executed in a las2peer context
 //					// and therefore no version information or library context
 //					// is given
 //					result.clContentClass = Class.forName(classname);

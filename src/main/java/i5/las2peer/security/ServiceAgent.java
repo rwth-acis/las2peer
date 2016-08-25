@@ -43,7 +43,7 @@ import java.util.Random;
 import org.apache.commons.codec.binary.Base64;
 
 /**
- * A service agent represents a service and its access rights in the LAS2peer setting.
+ * A service agent represents a service and its access rights in the las2peer setting.
  * 
  */
 public class ServiceAgent extends PassphraseAgent {

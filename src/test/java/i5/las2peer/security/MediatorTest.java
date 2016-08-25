@@ -18,7 +18,7 @@ import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.testing.MockAgentFactory;
 import i5.las2peer.tools.SerializationException;
 
-//NOTE: Answering each message is disabled in testing mode (since there exists no real LAS2peer context here).
+//NOTE: Answering each message is disabled in testing mode (since there exists no real las2peer context here).
 //Also refer to the Mediator implementation for more information.
 public class MediatorTest {
 

@@ -67,7 +67,7 @@ import rice.pastry.socket.SocketNodeHandle;
 import com.sun.management.OperatingSystemMXBean;
 
 /**
- * Base class for nodes in the LAS2peer environment.
+ * Base class for nodes in the las2peer environment.
  * 
  * A Node represents one enclosed unit in the network hosting an arbitrary number of agents willing to participate in
  * the P2P networking.
@@ -214,8 +214,9 @@ public abstract class Node implements AgentStorage {
 
 		this.baseClassLoader = baseClassLoader;
 
-		if (baseClassLoader == null)
+		if (baseClassLoader == null) {
 			this.baseClassLoader = new L2pClassManager(new Repository[0], this.getClass().getClassLoader());
+		}
 
 		nodeKeyPair = CryptoTools.generateKeyPair();
 		nodeServiceCache = new NodeServiceCache(this, nodeServiceCacheLifetime, nodeServiceCacheResultCount);
@@ -314,8 +315,9 @@ public abstract class Node implements AgentStorage {
 	 */
 	public void observerNotice(Event event, Object sourceNode, MessageReceiver sourceAgent, String remarks) {
 		Long sourceAgentId = null;
-		if (sourceAgent != null)
+		if (sourceAgent != null) {
 			sourceAgentId = sourceAgent.getResponsibleForAgentId();
+		}
 		observerNotice(event, sourceNode, sourceAgentId, null, null, remarks);
 	}
 
@@ -332,11 +334,13 @@ public abstract class Node implements AgentStorage {
 	public void observerNotice(Event event, Object sourceNode, Agent sourceAgent, Object destinationNode,
 			Agent destinationAgent, String remarks) {
 		Long sourceAgentId = null;
-		if (sourceAgent != null)
+		if (sourceAgent != null) {
 			sourceAgentId = sourceAgent.getId();
+		}
 		Long destinationAgentId = null;
-		if (destinationAgent != null)
+		if (destinationAgent != null) {
 			destinationAgentId = destinationAgent.getId();
+		}
 		observerNotice(event, sourceNode, sourceAgentId, destinationNode, destinationAgentId, remarks);
 	}
 
@@ -355,9 +359,10 @@ public abstract class Node implements AgentStorage {
 		long timestamp = new Date().getTime();
 		String sourceNodeRepresentation = getNodeRepresentation(sourceNode);
 		String destinationNodeRepresentation = getNodeRepresentation(destinationNode);
-		for (NodeObserver ob : observers)
+		for (NodeObserver ob : observers) {
 			ob.log(timestamp, event, sourceNodeRepresentation, sourceAgentId, destinationNodeRepresentation,
 					destinationAgentId, remarks);
+		}
 	}
 
 	/**
@@ -371,16 +376,17 @@ public abstract class Node implements AgentStorage {
 	 * @return string representation for the given node object
 	 */
 	protected String getNodeRepresentation(Object node) {
-		if (node == null)
+		if (node == null) {
 			return null;
-		else if (node instanceof SocketNodeHandle) {
+		} else if (node instanceof SocketNodeHandle) {
 			SocketNodeHandle nh = (SocketNodeHandle) node;
 			return nh.getId() + "/" + nh.getIdentifier();
 		} else if (node instanceof PastryNode) {
 			PastryNode pNode = (PastryNode) node;
 			return getNodeRepresentation(pNode.getLocalNodeHandle());
-		} else
+		} else {
 			return "" + node + " (" + node.getClass().getName() + ")";
+		}
 	}
 
 	/**
@@ -400,7 +406,7 @@ public abstract class Node implements AgentStorage {
 	public abstract Serializable getNodeId();
 
 	/**
-	 * Gets the class loader, this node is bound to. In a <i>real</i> LAS2peer environment, this should refer to a
+	 * Gets the class loader, this node is bound to. In a <i>real</i> las2peer environment, this should refer to a
 	 * {@link i5.las2peer.classLoaders.L2pClassManager}
 	 * 
 	 * Otherwise, the class loader of this Node class is used.
@@ -443,8 +449,9 @@ public abstract class Node implements AgentStorage {
 	 * @param filename
 	 */
 	public void setInformationFilename(String filename) {
-		if (new File(filename).exists())
+		if (new File(filename).exists()) {
 			sInformationFileName = filename;
+		}
 	}
 
 	/**
@@ -457,8 +464,9 @@ public abstract class Node implements AgentStorage {
 		NodeInformation result = new NodeInformation(getRegisteredServices());
 
 		try {
-			if (sInformationFileName != null && new File(sInformationFileName).exists())
+			if (sInformationFileName != null && new File(sInformationFileName).exists()) {
 				result = NodeInformation.createFromXmlFile(sInformationFileName, getRegisteredServices());
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -516,8 +524,9 @@ public abstract class Node implements AgentStorage {
 		stopTidyUpTimer();
 
 		Long[] receivers = htRegisteredReceivers.keySet().toArray(new Long[0]); // avoid ConcurrentModificationEception
-		for (Long id : receivers)
+		for (Long id : receivers) {
 			htRegisteredReceivers.get(id).notifyUnregister();
+		}
 		observerNotice(Event.NODE_SHUTDOWN, this.getNodeId(), null);
 		for (NodeObserver observer : observers) {
 			if (observer instanceof MonitoringObserver) {
@@ -545,8 +554,9 @@ public abstract class Node implements AgentStorage {
 	 */
 	public void registerReceiver(MessageReceiver receiver) throws AgentAlreadyRegisteredException,
 			L2pSecurityException, AgentException {
-		if (getStatus() != NodeStatus.RUNNING)
+		if (getStatus() != NodeStatus.RUNNING) {
 			throw new IllegalStateException("You can register agents only to running nodes!");
+		}
 
 		if (htRegisteredReceivers.get(receiver.getResponsibleForAgentId()) != null) {
 			// throw new AgentAlreadyRegisteredException ("This agent is already running here!");
@@ -557,10 +567,11 @@ public abstract class Node implements AgentStorage {
 		if ((receiver instanceof Agent)) {
 			// we have an agent
 			Agent agent = (Agent) receiver;
-			if (agent.isLocked())
+			if (agent.isLocked()) {
 				throw new L2pSecurityException("An agent has to be unlocked for registering at a node");
+			}
 
-			if (!knowsAgentLocally(agent.getId()))
+			if (!knowsAgentLocally(agent.getId())) {
 				try {
 					storeAgent(agent);
 				} catch (AgentAlreadyRegisteredException e) {
@@ -568,6 +579,7 @@ public abstract class Node implements AgentStorage {
 							.println("Just for notice - not an error: tried to store an already known agent before registering");
 					// nothing to do
 				}
+			}
 
 			try {
 				// ensure (unlocked) context
@@ -809,9 +821,11 @@ public abstract class Node implements AgentStorage {
 	 * @throws L2pSecurityException
 	 */
 	public void receiveMessage(Message message) throws AgentNotKnownException, MessageException, L2pSecurityException {
-		if (message.isResponse())
-			if (handoverAnswer(message))
+		if (message.isResponse()) {
+			if (handoverAnswer(message)) {
 				return;
+			}
+		}
 
 		// Since this field is not always available
 		if (message.getSendingNodeId() != null) {
@@ -852,7 +866,6 @@ public abstract class Node implements AgentStorage {
 				throw new MessageException("Cloning failed", e);
 			}
 		}
-
 	}
 
 	/**
@@ -992,13 +1005,15 @@ public abstract class Node implements AgentStorage {
 	public Agent getLocalAgent(long id) throws AgentNotKnownException {
 		MessageReceiver result = htRegisteredReceivers.get(id);
 
-		if (result == null)
+		if (result == null) {
 			throw new AgentNotKnownException("The given agent agent is not registered to this node");
+		}
 
-		if (result instanceof Agent)
+		if (result instanceof Agent) {
 			return (Agent) result;
-		else
+		} else {
 			throw new AgentNotKnownException("The requested Agent is only known as a Mediator here!");
+		}
 	}
 
 	/**
@@ -1010,8 +1025,9 @@ public abstract class Node implements AgentStorage {
 		Vector<UserAgent> result = new Vector<UserAgent>();
 
 		for (MessageReceiver rec : htRegisteredReceivers.values()) {
-			if (rec instanceof UserAgent)
+			if (rec instanceof UserAgent) {
 				result.add((UserAgent) rec);
+			}
 		}
 
 		return result.toArray(new UserAgent[0]);
@@ -1026,8 +1042,9 @@ public abstract class Node implements AgentStorage {
 		Vector<ServiceAgent> result = new Vector<ServiceAgent>();
 
 		for (MessageReceiver rec : htRegisteredReceivers.values()) {
-			if (rec instanceof ServiceAgent)
+			if (rec instanceof ServiceAgent) {
 				result.add((ServiceAgent) rec);
+			}
 		}
 
 		return result.toArray(new ServiceAgent[0]);
@@ -1048,12 +1065,14 @@ public abstract class Node implements AgentStorage {
 	 */
 	public Mediator getOrRegisterLocalMediator(Agent agent) throws AgentNotKnownException, L2pSecurityException,
 			AgentAlreadyRegisteredException, AgentException {
-		if (agent.isLocked())
+		if (agent.isLocked()) {
 			throw new L2pSecurityException("you need to unlock the agent for mediation!");
+		}
 		MessageReceiver result = htRegisteredReceivers.get(agent.getId());
 
-		if (result != null && !(result instanceof Mediator))
+		if (result != null && !(result instanceof Mediator)) {
 			throw new AgentNotKnownException("The requested Agent is registered directly at this node!");
+		}
 
 		if (result == null) {
 			getAgentContext(agent);
@@ -1314,16 +1333,18 @@ public abstract class Node implements AgentStorage {
 			Serializable[] parameters) throws L2pSecurityException, AgentNotKnownException, InterruptedException,
 			L2pServiceException {
 
-		if (getStatus() != NodeStatus.RUNNING)
+		if (getStatus() != NodeStatus.RUNNING) {
 			throw new IllegalStateException("You can invoke methods only on a running node!");
+		}
 
 		if (executing.isLocked()) {
 			throw new L2pSecurityException("The executing agent has to be unlocked to call a RMI");
 		}
 
 		// check if local service agent
-		if (!hasLocalAgent(serviceAgent))
+		if (!hasLocalAgent(serviceAgent)) {
 			throw new AgentNotKnownException("This ServiceAgent is not known locally!");
+		}
 
 		// execute
 		RMITask task = new RMITask(serviceAgent.getServiceNameVersion(), method, parameters);
@@ -1376,8 +1397,9 @@ public abstract class Node implements AgentStorage {
 			Serializable[] parameters) throws L2pSecurityException, ServiceInvocationException, InterruptedException,
 			TimeoutException, UnlockNeededException, AgentNotKnownException, NodeNotFoundException {
 
-		if (getStatus() != NodeStatus.RUNNING)
+		if (getStatus() != NodeStatus.RUNNING) {
 			throw new IllegalStateException("You can invoke methods only on a running node!");
+		}
 
 		// Do not log service class name (privacy..)
 		this.observerNotice(Event.RMI_SENT, this.getNodeId(), executing, null);
@@ -1433,14 +1455,15 @@ public abstract class Node implements AgentStorage {
 				Exception thrown = ((RMIExceptionContent) resultContent).getException();
 				// Do not log service class name (privacy..)
 				this.observerNotice(Event.RMI_FAILED, this.getNodeId(), executing, thrown.toString());
-				if (thrown instanceof ServiceInvocationException)
+				if (thrown instanceof ServiceInvocationException) {
 					throw (ServiceInvocationException) thrown;
-				else if ((thrown instanceof InvocationTargetException)
+				} else if ((thrown instanceof InvocationTargetException)
 						&& (thrown.getCause() instanceof L2pSecurityException)) {
 					// internal L2pSecurityException (like internal method access or unauthorizes object access)
 					throw new L2pSecurityException("internal securityException!", thrown.getCause());
-				} else
+				} else {
 					throw new ServiceInvocationException("remote exception at target node", thrown);
+				}
 
 			} else if (resultContent instanceof RMIResultContent) {
 				// Do not log service class name (privacy..)
@@ -1491,8 +1514,9 @@ public abstract class Node implements AgentStorage {
 	 * @param listener
 	 */
 	public void registerAnswerListener(long messageId, MessageResultListener listener) {
-		if (listener == null)
+		if (listener == null) {
 			return;
+		}
 		htAnswerListeners.put(messageId, listener);
 	}
 
@@ -1504,8 +1528,10 @@ public abstract class Node implements AgentStorage {
 	 * @return true, if a listener for this answer was notified
 	 */
 	public boolean handoverAnswer(Message answer) {
-		if (!answer.isResponse())
+		if (!answer.isResponse()) {
 			return false;
+		}
+
 		observerNotice(Event.MESSAGE_RECEIVED_ANSWER, answer.getSendingNodeId(), answer.getSenderId(),
 				this.getNodeId(), answer.getRecipientId(), "" + answer.getResponseToId());
 
@@ -1538,10 +1564,11 @@ public abstract class Node implements AgentStorage {
 
 		listener.waitForOneAnswer();
 
-		if (listener.isSuccess())
+		if (listener.isSuccess()) {
 			return listener.getResults()[0];
-		else
+		} else {
 			throw new TimeoutException();
+		}
 	}
 
 	/**
@@ -1701,8 +1728,9 @@ public abstract class Node implements AgentStorage {
 	 * starts the tidy up timer
 	 */
 	private void startTidyUpTimer() {
-		if (tidyUpTimer != null)
+		if (tidyUpTimer != null) {
 			return;
+		}
 		tidyUpTimer = new Timer();
 		tidyUpTimer.scheduleAtFixedRate(new TimerTask() {
 			@Override

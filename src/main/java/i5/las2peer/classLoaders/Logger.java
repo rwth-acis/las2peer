@@ -10,8 +10,7 @@ public class Logger {
 		String logFile = System.getenv("CL_LOGFILE");
 		if (logFile != null && !logFile.isEmpty()) {
 			// TODO use a dedicated log file for classloading
-			logger.warning(
-					"Dedicated class loader log file is specified, but currently not implemented! Please see default log file for log output.");
+			logger.warning("Dedicated class loader log file is specified, but currently not implemented! Please see default log file for log output.");
 //			try {
 //				logStream = new PrintStream(new FileOutputStream(logFile));
 //				System.out.println("Logging classloading to " + logFile);
@@ -51,6 +50,11 @@ public class Logger {
 		} else {
 			return "unkown";
 		}
+	}
+
+	static void logGetResource(Object who, String resourceName, Boolean success, Boolean lookUp) {
+		String whoString = getWhoString(who);
+		logger.finer("l\t" + success + "\t" + whoString + "\t" + resourceName + "\t" + lookUp);
 	}
 
 }

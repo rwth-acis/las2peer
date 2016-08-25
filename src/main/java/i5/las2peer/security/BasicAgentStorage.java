@@ -7,8 +7,8 @@ import i5.las2peer.p2p.Node;
 
 /**
  * A simple Hashtable based storage for agents.
- * 
- * 
+ *
+ *
  *
  */
 public class BasicAgentStorage implements AgentStorage {
@@ -20,7 +20,7 @@ public class BasicAgentStorage implements AgentStorage {
 	/**
 	 * create a basic agent storage with a backupStorage to use, if a requested agent is not stored here (i.e. a
 	 * {@link Node} to look for the requested agent in the whole network
-	 * 
+	 *
 	 * @param backupStorage
 	 */
 	public BasicAgentStorage(AgentStorage backupStorage) {
@@ -38,9 +38,9 @@ public class BasicAgentStorage implements AgentStorage {
 
 	/**
 	 * register an agent for later use
-	 * 
+	 *
 	 * use a locked copy to store
-	 * 
+	 *
 	 * @param agent
 	 */
 	public void registerAgent(Agent agent) {
@@ -56,17 +56,18 @@ public class BasicAgentStorage implements AgentStorage {
 
 	/**
 	 * register multiple agents to this storage
-	 * 
+	 *
 	 * @param agents
 	 */
 	public void registerAgents(Agent... agents) {
-		for (Agent a : agents)
+		for (Agent a : agents) {
 			registerAgent(a);
+		}
 	}
 
 	/**
 	 * remove an agent from this storage
-	 * 
+	 *
 	 * @param agent
 	 */
 	public void unregisterAgent(Agent agent) {
@@ -75,7 +76,7 @@ public class BasicAgentStorage implements AgentStorage {
 
 	/**
 	 * remove an agent from this storage
-	 * 
+	 *
 	 * @param id
 	 */
 	public void unregisterAgent(long id) {
@@ -84,25 +85,28 @@ public class BasicAgentStorage implements AgentStorage {
 
 	/**
 	 * get the agent for the given id
-	 * 
+	 *
 	 * @param id
 	 * @return an agent
-	 * @throws AgentNotKnownException 
+	 * @throws AgentNotKnownException
 	 */
+	@Override
 	public Agent getAgent(long id) throws AgentNotKnownException {
 		Agent result = htRegistered.get(id);
 
-		if (result != null)
+		if (result != null) {
 			try {
 				return result.cloneLocked();
 			} catch (CloneNotSupportedException e) {
 				throw new AgentNotKnownException(id, e);
 			}
+		}
 
 		if (backupStorage != null) {
 			return backupStorage.getAgent(id);
-		} else
+		} else {
 			throw new AgentNotKnownException(id);
+		}
 	}
 
 	@Override
