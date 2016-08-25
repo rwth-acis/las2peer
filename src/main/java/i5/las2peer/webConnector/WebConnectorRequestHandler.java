@@ -528,7 +528,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		} catch (NumberFormatException e) {
 			sendMalformedRequest(exchange, e.toString());
 		} catch (Exception e) {
-			connector.logError("Error occured:" + exchange.getRequestURI().getPath() + " " + e.getMessage());
+			connector.logError("Error occured:" + exchange.getRequestURI().getPath() + " " + e.getMessage(), e);
 			sendInternalErrorResponse(exchange, e.toString());
 		}
 		return false;
@@ -647,13 +647,13 @@ public class WebConnectorRequestHandler implements HttpHandler {
 					serviceClass = clsLoader.getServiceClass(serviceName);
 				} else {
 					serviceClass = clsLoader.getServiceClass(serviceName, serviceVersion.toString());
+
 				}
 			} catch (IllegalArgumentException | ClassLoaderException e) {
 				sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND,
 						"Swagger works only for locally running services!");
 				return;
 			}
-			System.out.println(serviceClass);
 			Swagger swagger = new Reader(new Swagger()).read(serviceClass);
 			if (swagger == null) {
 				sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND, "Swagger API declaration not available!");
@@ -809,7 +809,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 					}
 				}
 				exchange.getResponseHeaders().set("content-type",
-						RESTMapper.join(contentType, RESTMapper.DEFAULT_MIME_SEPARATOR));
+						RESTMapper.join(contentType, RESTMapper.DEFAULT_MIME_SEPARATOR) + "; charset=utf-8");
 				if (result instanceof HttpResponse) {
 					HttpResponse res = (HttpResponse) result;
 					Pair<String>[] headers = res.listHeaders();
