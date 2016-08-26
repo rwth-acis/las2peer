@@ -1,5 +1,12 @@
 package i5.las2peer.webConnector;
 
+import i5.las2peer.api.Connector;
+import i5.las2peer.api.ConnectorException;
+import i5.las2peer.logging.L2pLogger;
+import i5.las2peer.logging.NodeObserver.Event;
+import i5.las2peer.p2p.Node;
+import i5.las2peer.webConnector.serviceManagement.ServiceMappingManager;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -18,22 +25,14 @@ import java.util.logging.StreamHandler;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 
+import net.minidev.json.JSONObject;
+import net.minidev.json.JSONValue;
+
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest.Method;
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsServer;
-
-import i5.las2peer.api.Connector;
-import i5.las2peer.api.ConnectorException;
-import i5.las2peer.logging.L2pLogger;
-import i5.las2peer.logging.NodeObserver.Event;
-import i5.las2peer.p2p.Node;
-import i5.las2peer.restMapper.RESTMapper;
-import i5.las2peer.restMapper.data.PathTree;
-import i5.las2peer.webConnector.serviceManagement.ServiceRepositoryManager;
-import net.minidev.json.JSONObject;
-import net.minidev.json.JSONValue;
 
 /**
  * Starter class for registering the Web Connector at the LAS2peer server.
@@ -70,8 +69,8 @@ public class WebConnector extends Connector {
 	public static final boolean DEFAULT_ENABLE_CROSS_ORIGIN_RESOURCE_SHARING = true;
 	protected boolean enableCrossOriginResourceSharing = DEFAULT_ENABLE_CROSS_ORIGIN_RESOURCE_SHARING;
 
-	public static final boolean DEFAULT_PREFER_LOCAL_SERVICES = false;
-	protected boolean preferLocalServices = DEFAULT_PREFER_LOCAL_SERVICES;
+	public static final boolean DEFAULT_ONLY_LOCAL_SERVICES = false;
+	protected boolean onlyLocalServices = DEFAULT_ONLY_LOCAL_SERVICES;
 
 	public static final int DEFAULT_SERVICE_REPOSITORY_UPDATE_INTERVAL_SECONDS = 300;
 	protected int serviceRepositoryUpdateIntervalSeconds = DEFAULT_SERVICE_REPOSITORY_UPDATE_INTERVAL_SECONDS;
@@ -93,8 +92,6 @@ public class WebConnector extends Connector {
 	public static final int DEFAULT_MAX_REQUEST_BODY_SIZE = 10 * 1000 * 1000; // = 10 MB
 	protected int maxRequestBodySize = DEFAULT_MAX_REQUEST_BODY_SIZE;
 
-	protected String xmlPath;
-
 	private HttpServer http;
 	private HttpsServer https;
 
@@ -111,7 +108,7 @@ public class WebConnector extends Connector {
 	protected Map<String, JSONObject> oidcProviderInfos = new HashMap<String, JSONObject>();
 
 	private HashMap<Long, Integer> openUserRequests = new HashMap<>();
-	private ServiceRepositoryManager serviceRepositoryManager = new ServiceRepositoryManager();
+	private ServiceMappingManager serviceRepositoryManager = null;
 
 	/**
 	 * create a new web connector instance.
@@ -136,30 +133,6 @@ public class WebConnector extends Connector {
 		enableHttpHttps(http, https);
 		setHttpPort(httpPort);
 		setHttpsPort(httpsPort);
-		if (this.xmlPath != null && !this.xmlPath.trim().isEmpty()) {
-			serviceRepositoryManager.addXML(RESTMapper.readAllXMLFromDir(xmlPath));
-		}
-	}
-
-	/**
-	 * create a new web connector instance.
-	 * 
-	 * @param http
-	 * @param httpPort
-	 * @param https
-	 * @param httpsPort
-	 * @param xmlPath
-	 * @throws Exception
-	 */
-	public WebConnector(boolean http, int httpPort, boolean https, int httpsPort, String xmlPath) throws Exception {
-		this();
-		enableHttpHttps(http, https);
-		setHttpPort(httpPort);
-		setHttpsPort(httpsPort);
-		this.xmlPath = xmlPath;
-		if (this.xmlPath != null && !this.xmlPath.trim().isEmpty()) {
-			serviceRepositoryManager.addXML(RESTMapper.readAllXMLFromDir(xmlPath));
-		}
 	}
 
 	/**
@@ -290,7 +263,7 @@ public class WebConnector extends Connector {
 	 * @param enable
 	 */
 	public void setPreferLocalServices(boolean enable) {
-		preferLocalServices = enable;
+		onlyLocalServices = enable;
 	}
 
 	@Override
@@ -323,29 +296,13 @@ public class WebConnector extends Connector {
 		}
 
 		myNode = node;
+		serviceRepositoryManager = new ServiceMappingManager(node);
 		if (startHttp) {
 			createServer(false);
 		}
 		if (startHttps) {
 			createServer(true);
 		}
-		try {
-			serviceRepositoryManager.start(myNode, serviceRepositoryUpdateIntervalSeconds);
-		} catch (Exception e) {
-			logError("Could not start ServiceRepositoryManager: " + e.getMessage());
-		}
-	}
-
-	public void updateServiceList() {
-		try {
-			serviceRepositoryManager.manualUpdate(this.myNode);
-		} catch (Exception e) {
-			logError("Could not update services: " + e.getMessage());
-		}
-	}
-
-	public PathTree getMappingTree() {
-		return serviceRepositoryManager.getTree();
 	}
 
 	/**
@@ -392,8 +349,6 @@ public class WebConnector extends Connector {
 
 	@Override
 	public void stop() throws ConnectorException {
-		// stop the timer
-		serviceRepositoryManager.stop();
 		// stop the HTTP server
 		if (https != null) {
 			https.stop(0);
@@ -403,6 +358,7 @@ public class WebConnector extends Connector {
 		}
 		logMessage("Web-Connector has been stopped");
 		this.myNode = null;
+		this.serviceRepositoryManager = null;
 	}
 
 	/**
@@ -412,6 +368,14 @@ public class WebConnector extends Connector {
 	 */
 	public Node getL2pNode() {
 		return myNode;
+	}
+
+	/**
+	 * 
+	 * @return the service repository manager (if node started)
+	 */
+	public ServiceMappingManager getServiceRepositoryManager() {
+		return serviceRepositoryManager;
 	}
 
 	/**
@@ -484,8 +448,8 @@ public class WebConnector extends Connector {
 	 * 
 	 * @return true, if local running versions of services are preferred before broadcasting
 	 */
-	boolean preferLocalServices() {
-		return preferLocalServices;
+	boolean onlyLocalServices() {
+		return onlyLocalServices;
 	}
 
 	public HashMap<Long, Integer> getOpenUserRequests() {
@@ -516,8 +480,8 @@ public class WebConnector extends Connector {
 			result.put("config", config);
 		} catch (Exception e) {
 			System.out.println("OpenID Connect Provider " + providerURI + " unreachable!");
-			System.err.println(
-					"Make sure to set a correct OpenID Connect Provider URL in your las2peer Web Connector config!");
+			System.err
+					.println("Make sure to set a correct OpenID Connect Provider URL in your las2peer Web Connector config!");
 			System.out.println("WebConnector will now run in OIDC agnostic mode.");
 			logError("Could not retrieve a valid OIDC provider config from " + providerURI + "!");
 
