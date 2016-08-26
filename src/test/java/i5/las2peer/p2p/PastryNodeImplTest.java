@@ -58,7 +58,7 @@ public class PastryNodeImplTest {
 
 	@Before
 	public void setUp() throws NodeException, CryptoException, L2pSecurityException, AgentException,
-			UnknownHostException, SocketException {
+			UnknownHostException, SocketException, InterruptedException {
 		int port = PORT;
 
 		String ip = getIp();
@@ -75,6 +75,8 @@ public class PastryNodeImplTest {
 			port++;
 		}
 
+		Thread.sleep(1000);
+
 		// register agents
 		for (int nodeId = 0; nodeId < NODE_COUNT; nodeId++) {
 			for (int agentId = 0; agentId < AGENTS_PER_NODE_COUNT; agentId++) {
@@ -85,6 +87,8 @@ public class PastryNodeImplTest {
 				agents[nodeId * AGENTS_PER_NODE_COUNT + agentId] = a;
 			}
 		}
+
+		Thread.sleep(1000);
 	}
 
 	@After
@@ -109,7 +113,7 @@ public class PastryNodeImplTest {
 		// send
 		Message msg = new Message(agents[0], 123, "topic");
 		node[0].sendMessage(msg, null);
-		Thread.sleep(2000);
+		Thread.sleep(5000);
 		assertTrue(node[0].getOrRegisterLocalMediator(agents[1]).getNextMessage().getContent().equals("topic"));
 		assertTrue(node[0].getOrRegisterLocalMediator(agents[2]).getNextMessage().getContent().equals("topic"));
 		assertTrue(node[1].getOrRegisterLocalMediator(agents[5]).getNextMessage().getContent().equals("topic"));
@@ -125,7 +129,7 @@ public class PastryNodeImplTest {
 		// send
 		Message msg2 = new Message(agents[0], 123, "topic");
 		node[0].sendMessage(msg2, null);
-		Thread.sleep(2000);
+		Thread.sleep(5000);
 		assertTrue(node[0].getOrRegisterLocalMediator(agents[1]).getNextMessage().getContent().equals("topic"));
 		assertTrue(node[0].getOrRegisterLocalMediator(agents[2]).getNextMessage().getContent().equals("topic"));
 		assertTrue(node[1].getOrRegisterLocalMediator(agents[5]).getNextMessage().getContent().equals("topic"));
