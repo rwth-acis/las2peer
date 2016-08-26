@@ -1,17 +1,5 @@
 package i5.las2peer.restMapper;
 
-import java.net.HttpURLConnection;
-
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-
-import i5.las2peer.restMapper.annotations.Version;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -24,8 +12,18 @@ import io.swagger.jaxrs.Reader;
 import io.swagger.models.Swagger;
 import io.swagger.util.Json;
 
+import java.net.HttpURLConnection;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 @Path("/example")
-@Version("0.1") // this annotation is used by the XML mapper
 @Api
 @SwaggerDefinition(
 		info = @Info(
@@ -36,10 +34,10 @@ import io.swagger.util.Json;
 				contact = @Contact(
 						name = "John Doe",
 						url = "provider.com",
-						email = "john.doe@provider.com") ,
+						email = "john.doe@provider.com"),
 				license = @License(
 						name = "your software license name",
-						url = "http://your-software-license-url.com") ) )
+						url = "http://your-software-license-url.com")))
 public class SwaggerAnnotatedService {
 
 	public SwaggerAnnotatedService() {
@@ -62,10 +60,9 @@ public class SwaggerAnnotatedService {
 	@ApiResponses(
 			value = { @ApiResponse(
 					code = HttpURLConnection.HTTP_OK,
-					message = "Validation Confirmation"),
-					@ApiResponse(
-							code = HttpURLConnection.HTTP_UNAUTHORIZED,
-							message = "Unauthorized") })
+					message = "Validation Confirmation"), @ApiResponse(
+					code = HttpURLConnection.HTTP_UNAUTHORIZED,
+					message = "Unauthorized") })
 	@ApiOperation(
 			value = "User Validation",
 			notes = "Simple function to validate a user login.")
@@ -89,10 +86,9 @@ public class SwaggerAnnotatedService {
 	@ApiResponses(
 			value = { @ApiResponse(
 					code = HttpURLConnection.HTTP_OK,
-					message = "Input Phrase"),
-					@ApiResponse(
-							code = HttpURLConnection.HTTP_UNAUTHORIZED,
-							message = "Unauthorized") })
+					message = "Input Phrase"), @ApiResponse(
+					code = HttpURLConnection.HTTP_UNAUTHORIZED,
+					message = "Unauthorized") })
 	public HttpResponse exampleMethod(@PathParam("input") String myInput) {
 		// annotated method stub
 		return null;
@@ -117,16 +113,13 @@ public class SwaggerAnnotatedService {
 	@ApiResponses(
 			value = { @ApiResponse(
 					code = HttpURLConnection.HTTP_OK,
-					message = "User Email"),
-					@ApiResponse(
-							code = HttpURLConnection.HTTP_UNAUTHORIZED,
-							message = "Unauthorized"),
-					@ApiResponse(
-							code = HttpURLConnection.HTTP_NOT_FOUND,
-							message = "User not found"),
-					@ApiResponse(
-							code = 500,
-							message = "Internal Server Error") })
+					message = "User Email"), @ApiResponse(
+					code = HttpURLConnection.HTTP_UNAUTHORIZED,
+					message = "Unauthorized"), @ApiResponse(
+					code = HttpURLConnection.HTTP_NOT_FOUND,
+					message = "User not found"), @ApiResponse(
+					code = 500,
+					message = "Internal Server Error") })
 	public HttpResponse getUserEmail(@PathParam("username") String username) {
 		// annotated method stub
 		return null;
@@ -150,13 +143,11 @@ public class SwaggerAnnotatedService {
 	@ApiResponses(
 			value = { @ApiResponse(
 					code = HttpURLConnection.HTTP_OK,
-					message = "Update Confirmation"),
-					@ApiResponse(
-							code = HttpURLConnection.HTTP_UNAUTHORIZED,
-							message = "Unauthorized"),
-					@ApiResponse(
-							code = 500,
-							message = "Internal Server Error") })
+					message = "Update Confirmation"), @ApiResponse(
+					code = HttpURLConnection.HTTP_UNAUTHORIZED,
+					message = "Unauthorized"), @ApiResponse(
+					code = 500,
+					message = "Internal Server Error") })
 	public HttpResponse setUserEmail(@PathParam("username") String username, @PathParam("email") String email) {
 		// annotated method stub
 		return null;

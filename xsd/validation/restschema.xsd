@@ -12,10 +12,8 @@
 
     	</sequence>
     	<attribute name="consumes" type="string" use="optional"></attribute>
-    	<attribute name="name" type="string" use="required"></attribute>
-    	<attribute name="path" type="string" use="optional"></attribute>    	
+    	<attribute name="path" type="string" use="required"></attribute>    	
     	<attribute name="produces" type="string" use="optional"></attribute>
-    	<attribute name="version" type="string" use="required"></attribute>
     </complexType>
 
     <complexType name="servicesType">

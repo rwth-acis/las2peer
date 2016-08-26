@@ -5,6 +5,7 @@
 		<artifact type="jar" ext="jar" conf="default" />
 	</publications>
 	<dependencies>
+		<dependency org="i5" name="las2peer" rev="${ivy.las2peer.version}" changing="true"/>
 		<dependency org="junit" name="junit" rev="4.11" />
 		<dependency org="io.swagger" name="swagger-jaxrs" rev="1.5.4" />
 	</dependencies>

@@ -7,6 +7,10 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
+@Deprecated
+/**
+ * Not used anymore, can be safely removed!
+ */
 public @interface Version {
 	String value();
 }

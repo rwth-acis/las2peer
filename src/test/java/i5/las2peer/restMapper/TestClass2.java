@@ -1,5 +1,7 @@
 package i5.las2peer.restMapper;
 
+import i5.las2peer.restMapper.annotations.HttpHeaders;
+
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.HeaderParam;
@@ -7,8 +9,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 
-import i5.las2peer.restMapper.annotations.HttpHeaders;
-
+@Path("service2")
 public class TestClass2 {
 
 	public TestClass2() {
@@ -31,10 +32,9 @@ public class TestClass2 {
 	@Path("/users/{a}")
 	public String b3(@PathParam("a") int userID, @HeaderParam(
 			value = "productID") @DefaultValue(
-					value = "0") short productID,
-			@HeaderParam(
-					value = "price") @DefaultValue(
-							value = "0") float price) {
+			value = "0") short productID, @HeaderParam(
+			value = "price") @DefaultValue(
+			value = "0") float price) {
 		return userID * productID + "" + price + "";
 	}
 

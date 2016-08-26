@@ -8,8 +8,6 @@ import i5.las2peer.restMapper.RESTMapper;
  */
 public class MethodData {
 
-	private String serviceName = "";
-	private String serviceVersion = "";
 	private String name = "";
 	private String[] consumes;
 	private String[] produces;
@@ -19,17 +17,15 @@ public class MethodData {
 	/**
 	 * constructor
 	 * 
-	 * @param serviceName full class name of the service
-	 * @param serviceVersion version number of the service
 	 * @param name name of the method
 	 * @param type return type of the method
+	 * @param consumes
+	 * @param produces
 	 * @param parameters array of method parameter information
 	 * @throws ClassNotFoundException
 	 */
-	public MethodData(String serviceName, String serviceVersion, String name, String type, String[] consumes,
-			String[] produces, ParameterData[] parameters) throws ClassNotFoundException {
-		this.serviceName = serviceName;
-		this.serviceVersion = serviceVersion;
+	public MethodData(String name, String type, String[] consumes, String[] produces, ParameterData[] parameters)
+			throws ClassNotFoundException {
 		this.name = name;
 
 		this.type = RESTMapper.getClassType(type);
@@ -46,10 +42,11 @@ public class MethodData {
 	}
 
 	/**
-	 * returns sercvie name + service version + method name userful for e.g. HashMap keys
+	 * returns method name useful for e.g. HashMap keys
 	 */
+	@Override
 	public String toString() {
-		return serviceName + serviceVersion + name;
+		return name;
 	}
 
 	/**
@@ -66,22 +63,6 @@ public class MethodData {
 	 */
 	public Class<?> getType() {
 		return type;
-	}
-
-	/**
-	 * 
-	 * @return full class name of service
-	 */
-	public String getServiceName() {
-		return serviceName;
-	}
-
-	/**
-	 * 
-	 * @return version of service
-	 */
-	public String getServiceVersion() {
-		return serviceVersion;
 	}
 
 	/**
