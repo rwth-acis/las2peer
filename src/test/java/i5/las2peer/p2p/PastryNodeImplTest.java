@@ -50,6 +50,8 @@ public class PastryNodeImplTest {
 
 	}
 
+	// disabled, because it does not work in Jenkins...
+
 	/*
 		@Before
 		public void setUp() throws NodeException, CryptoException, L2pSecurityException, AgentException,
