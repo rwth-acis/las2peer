@@ -1,10 +1,5 @@
 package i5.las2peer.api;
 
-import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-
 import i5.las2peer.execution.L2pServiceException;
 import i5.las2peer.execution.L2pThread;
 import i5.las2peer.execution.NoSuchServiceMethodException;
@@ -17,6 +12,11 @@ import i5.las2peer.security.Agent;
 import i5.las2peer.security.Context;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.ServiceAgent;
+
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 /**
  * Base class for services to be hosted within the las2peer network.
@@ -234,8 +234,8 @@ public abstract class Service extends Configurable {
 	 * @throws i5.las2peer.execution.NoSuchServiceMethodException
 	 *
 	 */
-	public Method searchMethod(String methodName, Object[] params)
-			throws L2pSecurityException, i5.las2peer.execution.NoSuchServiceMethodException {
+	public Method searchMethod(String methodName, Object[] params) throws L2pSecurityException,
+			i5.las2peer.execution.NoSuchServiceMethodException {
 		Class<?>[] acActualParamTypes = new Class[params.length];
 		Class<? extends Service> thisClass = this.getClass();
 
@@ -258,8 +258,8 @@ public abstract class Service extends Configurable {
 						for (int i = 0; i < acActualParamTypes.length && bPossible; i++) {
 							if (!acCheckParamTypes[i].isInstance(params[i])) {
 								// param[i] is not an instance of the formal parameter type
-								if (!(acCheckParamTypes[i].isPrimitive()
-										&& ServiceHelper.getWrapperClass(acCheckParamTypes[i]).isInstance(params[i]))
+								if (!(acCheckParamTypes[i].isPrimitive() && ServiceHelper.getWrapperClass(
+										acCheckParamTypes[i]).isInstance(params[i]))
 										&& !(ServiceHelper.isWrapperClass(acCheckParamTypes[i]) && ServiceHelper
 												.getUnwrappedClass(acCheckParamTypes[i]).isInstance(params[i]))) {
 									// and not wrapped or unwrapped either! -> so not more possibilities to match!
@@ -395,7 +395,7 @@ public abstract class Service extends Configurable {
 				e.printStackTrace();
 			}
 		}
-		System.out.println("Service " + this.getClass().getCanonicalName() + " has been started!");
+		System.out.println("Service " + this.agent.getServiceNameVersion() + " has been started!");
 	}
 
 	/**
@@ -404,11 +404,21 @@ public abstract class Service extends Configurable {
 	 * simple shutdown hook to be overwritten in subclasses
 	 */
 	public void close() {
-		System.out.println("Service " + this.getClass().getCanonicalName() + " has been stopped!");
+		System.out.println("Service " + this.agent.getServiceNameVersion() + " has been stopped!");
 		runningAt = null;
 	}
 
 	/**
+	 * Should return the service alias, which is registered on service start.
+	 * 
+	 * @return the alias, or null if no alias should be registered
+	 */
+	public String getAlias() {
+		return null;
+	}
+
+	/**
+	 * 
 	 * @deprecated Use {@link L2pLogger#logEvent(Event, String)} with {@link Event#SERVICE_MESSAGE} instead!
 	 *             <p>
 	 *             Writes a log message.

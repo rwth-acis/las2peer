@@ -1,12 +1,9 @@
 package i5.las2peer.p2p;
 
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Random;
-
 import i5.las2peer.classLoaders.L2pClassManager;
 import i5.las2peer.classLoaders.libraries.FileSystemRepository;
 import i5.las2peer.communication.Message;
+import i5.las2peer.communication.MessageException;
 import i5.las2peer.persistency.Envelope;
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.security.Agent;
@@ -17,6 +14,10 @@ import i5.las2peer.security.MessageReceiver;
 import i5.las2peer.security.UserAgent;
 import i5.las2peer.tools.SerializationException;
 import i5.las2peer.tools.TimerThread;
+
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Random;
 
 /**
  * Implementation of the abstract {@link Node} class mostly for testing purposes. All data and agents will be stored in
@@ -46,9 +47,10 @@ public class LocalNode extends Node {
 
 		setStatus(NodeStatus.CONFIGURED);
 	}
-	
+
 	/**
 	 * create a LocalNode
+	 * 
 	 * @param classManager
 	 */
 	private LocalNode(L2pClassManager classManager) {
@@ -67,6 +69,7 @@ public class LocalNode extends Node {
 	 * 
 	 * @return id of this node
 	 */
+	@Override
 	public Long getNodeId() {
 		return nodeId;
 	}
@@ -85,8 +88,8 @@ public class LocalNode extends Node {
 	}
 
 	@Override
-	public void registerReceiver(MessageReceiver receiver)
-			throws AgentAlreadyRegisteredException, L2pSecurityException, AgentException {
+	public void registerReceiver(MessageReceiver receiver) throws AgentAlreadyRegisteredException,
+			L2pSecurityException, AgentException {
 		super.registerReceiver(receiver);
 
 		deliverPendingMessages(receiver.getResponsibleForAgentId(), getNodeId());
@@ -100,20 +103,47 @@ public class LocalNode extends Node {
 		try {
 			switch (mode) {
 			case ANYCAST:
-				localSendMessage(findFirstNodeWithAgent(message.getRecipientId()), message);
+				if (!message.isTopic()) {
+					localSendMessage(findFirstNodeWithAgent(message.getRecipientId()), message);
+				} else {
+					Long[] ids = findAllNodesWithTopic(message.getTopicId());
+
+					if (ids.length == 0) {
+						listener.collectException(new MessageException("No agent listening to topic "
+								+ message.getTopicId()));
+					} else {
+						localSendMessage(ids[0], message);
+					}
+				}
 
 				break;
 			case BROADCAST:
-				Long[] ids = findAllNodesWithAgent(message.getRecipientId());
+				if (!message.isTopic()) {
+					Long[] ids = findAllNodesWithAgent(message.getRecipientId());
 
-				if (ids.length == 0) {
-					listener.collectException(new AgentNotKnownException(message.getRecipientId()));
-				} else {
-					listener.addRecipients(ids.length - 1);
-					for (long id : ids) {
-						localSendMessage(id, message);
+					if (ids.length == 0) {
+						listener.collectException(new AgentNotKnownException(message.getRecipientId()));
+					} else {
+						listener.addRecipients(ids.length - 1);
+						for (long id : ids) {
+							localSendMessage(id, message);
+						}
 					}
+				} else {
+					Long[] ids = findAllNodesWithTopic(message.getTopicId());
+
+					if (ids.length == 0) {
+						listener.collectException(new MessageException("No agent listening to topic "
+								+ message.getTopicId()));
+					} else {
+						listener.addRecipients(ids.length - 1);
+						for (long id : ids) {
+							localSendMessage(id, message);
+						}
+					}
+
 				}
+
 			}
 		} catch (AgentNotKnownException e) {
 			storeMessage(message, listener);
@@ -129,9 +159,11 @@ public class LocalNode extends Node {
 			throw new IllegalArgumentException("a node id for a LocalNode has to be a Long!");
 
 		if (!hasNode((Long) atNodeId)) {
-			listener.collectException(new NodeNotFoundException((Long) atNodeId));
+			if (listener != null)
+				listener.collectException(new NodeNotFoundException((Long) atNodeId));
 		} else {
-			registerAnswerListener(message.getId(), listener);
+			if (listener != null)
+				registerAnswerListener(message.getId(), listener);
 			localSendMessage((Long) atNodeId, message);
 		}
 	}
@@ -199,7 +231,7 @@ public class LocalNode extends Node {
 
 			if (htKnownAgents.get(agent.getId()) != null)
 				throw new AgentAlreadyRegisteredException("Agent " + agent.getId() + " already in storage");
-			
+
 			String agentXml = null;
 			try {
 				agentXml = agent.toXmlString();
@@ -235,7 +267,7 @@ public class LocalNode extends Node {
 			// use hash value of private key instead
 
 			// this is verifyable on each local node
-			
+
 			String agentXml = null;
 			try {
 				agentXml = agent.toXmlString();
@@ -280,7 +312,7 @@ public class LocalNode extends Node {
 	public static LocalNode newNode() {
 		return new LocalNode();
 	}
-	
+
 	/**
 	 * create a LocalNode using a FileSystemRepository at the given location
 	 * 
@@ -288,7 +320,8 @@ public class LocalNode extends Node {
 	 * @return
 	 */
 	public static LocalNode newNode(String fileSystemRepository) {
-		return new LocalNode(new L2pClassManager(new FileSystemRepository(fileSystemRepository), ClassLoader.getSystemClassLoader()));
+		return new LocalNode(new L2pClassManager(new FileSystemRepository(fileSystemRepository),
+				ClassLoader.getSystemClassLoader()));
 	}
 
 	/**
@@ -391,6 +424,10 @@ public class LocalNode extends Node {
 		htKnownAgents = new Hashtable<Long, String>();
 		htLocalNodes = new Hashtable<Long, LocalNode>();
 
+		iMessageMinWait = DEFAULT_MESSAGE_MIN_WAIT;
+		iMessageMaxWait = DEFAULT_MESSAGE_MAX_WAIT;
+		lPendingTimeout = DEFAULT_PENDING_TIMEOUT;
+
 		stopCleaner();
 
 		startPendingTimer();
@@ -450,6 +487,25 @@ public class LocalNode extends Node {
 	}
 
 	/**
+	 * get the ids of all nodes where agents listening to the given topic are running
+	 * 
+	 * @param topicId
+	 * @return
+	 */
+	public static Long[] findAllNodesWithTopic(long topicId) {
+		synchronized (htLocalNodes) {
+			HashSet<Long> hsResult = new HashSet<Long>();
+
+			for (long nodeId : htLocalNodes.keySet()) {
+				if (htLocalNodes.get(nodeId).hasTopic(topicId))
+					hsResult.add(nodeId);
+			}
+
+			return hsResult.toArray(new Long[0]);
+		}
+	}
+
+	/**
 	 * store messages for agents not known to this "network" of nodes
 	 * 
 	 * @param message
@@ -471,7 +527,7 @@ public class LocalNode extends Node {
 	 * fetch all pending messages for the given agent
 	 * 
 	 * @param recipientId
-	 * @param nodeId 
+	 * @param nodeId
 	 */
 	protected static void deliverPendingMessages(long recipientId, long nodeId) {
 
@@ -519,10 +575,10 @@ public class LocalNode extends Node {
 
 	private static final long DEFAULT_PENDING_TIMEOUT = 20000; // 20 seconds
 	private static final int DEFAULT_MESSAGE_MIN_WAIT = 500;
-	private static final int DEFAULT_MESSAGE_MAX_WAIT = 3000;
+	private static final int DEFAULT_MESSAGE_MAX_WAIT = 550;
 
-	private static final int iMessageMinWait = DEFAULT_MESSAGE_MIN_WAIT;
-	private static final int iMessageMaxWait = DEFAULT_MESSAGE_MAX_WAIT;
+	private static int iMessageMinWait = DEFAULT_MESSAGE_MIN_WAIT;
+	private static int iMessageMaxWait = DEFAULT_MESSAGE_MAX_WAIT;
 	private static long lPendingTimeout = DEFAULT_PENDING_TIMEOUT;
 
 	private static TimerThread pendingTimer = null;
@@ -531,8 +587,20 @@ public class LocalNode extends Node {
 		lPendingTimeout = newtimeout;
 	}
 
+	public static int getMinMessageWait() {
+		return iMessageMinWait;
+	}
+
 	public static int getMaxMessageWait() {
 		return iMessageMaxWait;
+	}
+
+	public static void setMinMessageWait(int time) {
+		iMessageMinWait = time;
+	}
+
+	public static void setMaxMessageWait(int time) {
+		iMessageMaxWait = time;
 	}
 
 	static {
@@ -568,17 +636,18 @@ public class LocalNode extends Node {
 		message.close();
 
 		new Thread(new Runnable() {
+			@Override
 			public void run() {
 				Random r = new Random();
 
-				int wait = iMessageMinWait + r.nextInt(iMessageMaxWait - iMessageMinWait);
+				int wait = iMessageMinWait + r.nextInt(iMessageMaxWait - iMessageMinWait + 1);
 				try {
 					Thread.sleep(wait);
 				} catch (InterruptedException e1) {
 				}
 
 				try {
-					getNode(nodeId).receiveMessage(message);
+					getNode(nodeId).receiveMessage(message.clone());
 				} catch (Exception e) {
 					System.out.println("problems at node " + nodeId);
 					throw new RuntimeException(e);

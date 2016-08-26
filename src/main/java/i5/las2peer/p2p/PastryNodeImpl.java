@@ -1,20 +1,5 @@
 package i5.las2peer.p2p;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.Serializable;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Collection;
-import java.util.Hashtable;
-import java.util.Properties;
-import java.util.Vector;
-
 import i5.las2peer.classLoaders.L2pClassManager;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
@@ -34,6 +19,22 @@ import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.MessageReceiver;
 import i5.las2peer.security.UserAgent;
 import i5.las2peer.tools.SerializationException;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.Serializable;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Collection;
+import java.util.Hashtable;
+import java.util.Properties;
+import java.util.Vector;
+
 import rice.environment.Environment;
 import rice.p2p.commonapi.Id;
 import rice.p2p.commonapi.NodeHandle;
@@ -175,8 +176,8 @@ public class PastryNodeImpl extends Node {
 	 * @param cl
 	 * @param nodeIdSeed
 	 */
-	public PastryNodeImpl(int port, String bootstrap, STORAGE_MODE mode, boolean monitoringObserver, L2pClassManager cl,
-			Long nodeIdSeed) {
+	public PastryNodeImpl(int port, String bootstrap, STORAGE_MODE mode, boolean monitoringObserver,
+			L2pClassManager cl, Long nodeIdSeed) {
 		super(cl, true, monitoringObserver);
 		initialize(port, bootstrap, mode, nodeIdSeed);
 	}
@@ -410,8 +411,7 @@ public class PastryNodeImpl extends Node {
 					}
 				};
 			}
-			InternetPastryNodeFactory factory = new InternetPastryNodeFactory(nidFactory, pastryPort,
-					pastryEnvironment);
+			InternetPastryNodeFactory factory = new InternetPastryNodeFactory(nidFactory, pastryPort, pastryEnvironment);
 			pastryNode = factory.newNode();
 
 			setupPastryApplications();
@@ -425,8 +425,8 @@ public class PastryNodeImpl extends Node {
 
 					// abort if can't join
 					if (pastryNode.joinFailed()) {
-						throw new NodeException(
-								"Could not join the FreePastry ring.  Reason:" + pastryNode.joinFailedReason());
+						throw new NodeException("Could not join the FreePastry ring.  Reason:"
+								+ pastryNode.joinFailedReason());
 					}
 				}
 			}
@@ -469,8 +469,8 @@ public class PastryNodeImpl extends Node {
 	}
 
 	@Override
-	public void registerReceiver(MessageReceiver receiver)
-			throws AgentAlreadyRegisteredException, L2pSecurityException, AgentException {
+	public void registerReceiver(MessageReceiver receiver) throws AgentAlreadyRegisteredException,
+			L2pSecurityException, AgentException {
 
 		synchronized (this) {
 			super.registerReceiver(receiver);
@@ -482,10 +482,29 @@ public class PastryNodeImpl extends Node {
 	}
 
 	@Override
-	public void unregisterReceiver(MessageReceiver receiver) throws AgentNotKnownException {
+	public void unregisterReceiver(MessageReceiver receiver) throws AgentNotKnownException, NodeException {
 		synchronized (this) {
 			application.unregisterAgentTopic(receiver.getResponsibleForAgentId());
 			super.unregisterReceiver(receiver);
+		}
+	}
+
+	@Override
+	public void registerReceiverToTopic(MessageReceiver receiver, long topic) throws AgentNotKnownException {
+		synchronized (this) {
+			super.registerReceiverToTopic(receiver, topic);
+			application.registerTopic(topic);
+		}
+	}
+
+	@Override
+	public void unregisterReceiverFromTopic(MessageReceiver receiver, long topic) throws NodeException {
+		synchronized (this) {
+			super.unregisterReceiverFromTopic(receiver, topic);
+
+			if (!super.hasTopic(topic)) {
+				application.unregisterTopic(topic);
+			}
 		}
 	}
 
@@ -528,8 +547,7 @@ public class PastryNodeImpl extends Node {
 			throw e;
 		}
 
-		observerNotice(Event.MESSAGE_SENDING, pastryNode, message.getSenderId(), atNodeId, message.getRecipientId(),
-				"");
+		observerNotice(Event.MESSAGE_SENDING, pastryNode, message.getSenderId(), atNodeId, message.getRecipientId(), "");
 
 		registerAnswerListener(message.getId(), listener);
 

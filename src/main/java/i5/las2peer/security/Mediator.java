@@ -1,9 +1,5 @@
 package i5.las2peer.security;
 
-import java.io.Serializable;
-import java.util.LinkedList;
-import java.util.Vector;
-
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
 import i5.las2peer.execution.L2pServiceException;
@@ -15,10 +11,13 @@ import i5.las2peer.p2p.TimeoutException;
 import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.tools.SerializationException;
 
+import java.io.Serializable;
+import java.util.LinkedList;
+import java.util.Vector;
+
 /**
  * A Mediator acts on behalf of an {@link PassphraseAgent}. This necessary e.g. for remote users logged in via a
- * {@link i5.las2peer.api.Connector} to collect incoming messages from the P2P network and transfer it to the connector.
- * <br>
+ * {@link i5.las2peer.api.Connector} to collect incoming messages from the P2P network and transfer it to the connector. <br>
  * Two ways for message handling are provided: Register a {@link MessageHandler} that will be called for each received
  * message. Multiple MessageHandlers are possible (for example for different message contents). The second way to handle
  * messages is to get pending messages from the Mediator directly via the provided methods. Handling then has to be done
@@ -81,8 +80,8 @@ public class Mediator implements MessageReceiver {
 			// START
 			// This part enables message answering for all messages that were sent to an (UserAgent) mediator.
 			// Disable this section to reduce network traffic
-			if (getMyNode() != null) { // This line is needed to allow the tests to work (since they do not have a
-										// node..)
+			if (getMyNode() != null && !message.getContent().equals("thank you")) { // make tests work and avoid endless
+																					// responses
 				try {
 					Message response = new Message(message, "thank you");
 					response.setSendingNodeId(getMyNode().getNodeId());
@@ -157,10 +156,10 @@ public class Mediator implements MessageReceiver {
 	/**
 	 * Invokes a service method (in the network) for the mediated agent.
 	 * 
-	 * @param service
-	 * @param method
-	 * @param parameters
-	 * @param preferLocal if a local running service should be preferred
+	 * @param service the service to invoke
+	 * @param method method to invoke
+	 * @param parameters list of method parameters
+	 * @param localOnly if true, only services on this node are invoked
 	 * 
 	 * @return result of the method invocation
 	 * 
@@ -170,35 +169,11 @@ public class Mediator implements MessageReceiver {
 	 * @throws L2pServiceException
 	 * @throws AgentNotKnownException
 	 */
-	public Serializable invoke(String service, String method, Serializable[] parameters, boolean preferLocal)
+	public Serializable invoke(String service, String method, Serializable[] parameters, boolean localOnly)
 			throws L2pSecurityException, InterruptedException, TimeoutException, AgentNotKnownException,
 			L2pServiceException {
-		
-		return runningAt.invoke(myAgent, service, method, parameters, preferLocal);
-	}
-	
-	/**
-	 * Invokes a service method (in the network) for the mediated agent.
-	 * 
-	 * @param service
-	 * @param version
-	 * @param method
-	 * @param parameters
-	 * @param preferLocal if a local running service should be preferred
-	 * 
-	 * @return result of the method invocation
-	 * 
-	 * @throws L2pSecurityException
-	 * @throws InterruptedException
-	 * @throws TimeoutException
-	 * @throws AgentNotKnownException
-	 * @throws L2pServiceException
-	 */
-	public Serializable invoke(String service, String version, String method, Serializable[] parameters, boolean preferLocal)
-			throws L2pSecurityException, InterruptedException, TimeoutException, AgentNotKnownException,
-			L2pServiceException {
-		
-		return runningAt.invoke(myAgent, new ServiceNameVersion(service,version), method, parameters, preferLocal);
+
+		return runningAt.invoke(myAgent, ServiceNameVersion.fromString(service), method, parameters, false, localOnly);
 	}
 
 	/**

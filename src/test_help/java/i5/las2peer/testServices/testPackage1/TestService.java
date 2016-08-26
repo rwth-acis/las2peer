@@ -6,4 +6,8 @@ public class TestService extends Service {
 	public int getVersion() {
 		return 100;
 	}
+
+	public static int getVersionStatic() {
+		return 100;
+	}
 }
