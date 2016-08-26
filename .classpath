@@ -32,6 +32,6 @@
 	<classpathentry kind="lib" path="lib/swagger-jaxrs-1.5.4.jar"/>
 	<classpathentry kind="lib" path="lib/swagger-models-1.5.4.jar"/>
 	<classpathentry kind="lib" path="lib/validation-api-1.1.0.Final.jar"/>
-	<classpathentry kind="lib" path="lib/las2peer-0.5-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/las2peer-0.6-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path="output"/>
 </classpath>
