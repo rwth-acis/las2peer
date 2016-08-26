@@ -9,6 +9,8 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
 
+import org.junit.Test;
+
 public class PastryNodeImplTest {
 	public final int NODE_COUNT = 5;
 	public final int AGENTS_PER_NODE_COUNT = 5;
@@ -42,6 +44,12 @@ public class PastryNodeImplTest {
 
 		return Inet4Address.getLocalHost().getHostAddress();
 	}
+
+	@Test
+	public void doNothing() {
+
+	}
+
 	/*
 		@Before
 		public void setUp() throws NodeException, CryptoException, L2pSecurityException, AgentException,
