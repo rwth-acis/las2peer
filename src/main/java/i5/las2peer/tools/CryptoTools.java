@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Serializable;
 import java.security.InvalidKeyException;
+import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
@@ -15,6 +16,10 @@ import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Arrays;
+import java.util.Base64;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -26,6 +31,8 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.interfaces.PBEKey;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
+
+import i5.las2peer.persistency.VerificationFailedException;
 
 /**
  * Simple <i>static</i> class collecting useful cryptographic methods end encapsulating the access to the underlying
@@ -377,19 +384,19 @@ public class CryptoTools {
 	 * 
 	 * @throws CryptoException If an issue occurs with the given key or selected algorithm.
 	 */
-	public static boolean verifySignature(byte[] signature, byte[] content, PublicKey key) throws CryptoException {
+	public static boolean verifySignature(byte[] signature, byte[] content, PublicKey key)
+			throws VerificationFailedException {
 		try {
 			Signature sig = Signature.getInstance(getSignatureMethod());
 			sig.initVerify(key);
 			sig.update(content);
-
 			return sig.verify(signature);
 		} catch (InvalidKeyException e) {
-			throw new CryptoException("key problems", e);
+			throw new VerificationFailedException("key problems", e);
 		} catch (NoSuchAlgorithmException e) {
-			throw new CryptoException("Algorithm problems", e);
+			throw new VerificationFailedException("Algorithm problems", e);
 		} catch (SignatureException e) {
-			throw new CryptoException("Signature problems", e);
+			throw new VerificationFailedException("Signature problems", e);
 		}
 	}
 
@@ -461,6 +468,53 @@ public class CryptoTools {
 	public static byte[] encryptSymmetric(Serializable plainData, SecretKey key)
 			throws CryptoException, SerializationException {
 		return encryptSymmetric(SerializeTools.serialize(plainData), key);
+	}
+
+	public static PrivateKey privateKeyToString(String key64) throws CryptoException {
+		byte[] clear = Base64.getDecoder().decode(key64);
+		PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(clear);
+		try {
+			KeyFactory fact = KeyFactory.getInstance("DSA");
+			PrivateKey priv = fact.generatePrivate(keySpec);
+			Arrays.fill(clear, (byte) 0);
+			return priv;
+		} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+			throw new CryptoException("Could not read private key from given base64 string", e);
+		}
+	}
+
+	public static PublicKey stringToPublicKey(String stored) throws CryptoException {
+		byte[] data = Base64.getDecoder().decode(stored);
+		X509EncodedKeySpec spec = new X509EncodedKeySpec(data);
+		try {
+			KeyFactory fact = KeyFactory.getInstance("DSA");
+			return fact.generatePublic(spec);
+		} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+			throw new CryptoException("Could not read public key from given base64 string", e);
+		}
+	}
+
+	public static String privateKeyToString(PrivateKey priv) throws CryptoException {
+		try {
+			KeyFactory fact = KeyFactory.getInstance("DSA");
+			PKCS8EncodedKeySpec spec = fact.getKeySpec(priv, PKCS8EncodedKeySpec.class);
+			byte[] packed = spec.getEncoded();
+			String key64 = Base64.getEncoder().encodeToString(packed);
+			Arrays.fill(packed, (byte) 0);
+			return key64;
+		} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+			throw new CryptoException("Could not convert private key into base64 string", e);
+		}
+	}
+
+	public static String publicKeyToString(PublicKey publ) throws CryptoException {
+		try {
+			KeyFactory fact = KeyFactory.getInstance("DSA");
+			X509EncodedKeySpec spec = fact.getKeySpec(publ, X509EncodedKeySpec.class);
+			return Base64.getEncoder().encodeToString(spec.getEncoded());
+		} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+			throw new CryptoException("Could not convert public key into base64 string", e);
+		}
 	}
 
 	/*** statics **** */

@@ -184,7 +184,7 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	 * @throws CryptoException If an issue occurs with decryption.
 	 * @throws SerializationException
 	 */
-	public SecretKey returnSecretKey(byte[] crypted)
+	public SecretKey decryptSymmetricKey(byte[] crypted)
 			throws L2pSecurityException, SerializationException, CryptoException {
 		SecretKey symmetricGroupKey = (SecretKey) CryptoTools.decryptAsymmetric(crypted, this.getPrivateKey());
 		return symmetricGroupKey;

@@ -77,29 +77,32 @@ public abstract class LocalServiceTestCase {
 			agentPassphrase = (String) cls.getField("AGENT_PASSPHRASE").get(null);
 
 			File test = new File(xml);
-			if (test.exists() && test.isFile())
+			if (test.exists() && test.isFile()) {
 				agent = ServiceAgent.createFromXml(FileContentReader.read(xml));
-			else {
+			} else {
 				InputStream is = getClass().getResourceAsStream(xml);
-				if (is == null)
+				if (is == null) {
 					throw new AgentException("Neither file nor classpath resource wuth name " + xml + " exists!");
+				}
 				agent = ServiceAgent.createFromXml(FileContentReader.read(getClass().getResourceAsStream(xml)));
 			}
 
-			if (agent.getServiceNameVersion().getName().equals(getServiceClass().getName()))
+			if (agent.getServiceNameVersion().getName().equals(getServiceClass().getName())) {
 				return agent;
-			else
+			} else {
 				throw new AgentException("This agent is not responsible for the testclass " + getServiceClass()
 						+ " but for " + agent.getServiceNameVersion().getName());
+			}
 		} catch (NoSuchFieldException e) {
 			agentPassphrase = SimpleTools.createRandomString(10);
 			return ServiceAgent.createServiceAgent(
 					new ServiceNameVersion(getServiceClass().getName(), getServiceVersion()), agentPassphrase);
 		} catch (Exception e) {
-			if (e instanceof AgentException)
+			if (e instanceof AgentException) {
 				throw (AgentException) e;
-			else
+			} else {
 				throw new AgentException("Unable to load Agent XML file", e);
+			}
 		}
 	}
 
@@ -246,10 +249,12 @@ public abstract class LocalServiceTestCase {
 					System.out.println("loaded " + xml + " as agent");
 				} else if (content.contains("<las2peer:envelope")) {
 					Envelope envelope = Envelope.createFromXml(content);
+					// TODO fix upload Envelope from startup directory
 					localNode.storeArtifact(envelope);
 					System.out.println("loaded " + xml + " as envelope");
-				} else
+				} else {
 					System.out.println("Don't known what to do with contents of " + xml);
+				}
 			} catch (Exception e) {
 				System.out.println("File " + xml + " caused an Exception - ignoring");
 				e.printStackTrace();

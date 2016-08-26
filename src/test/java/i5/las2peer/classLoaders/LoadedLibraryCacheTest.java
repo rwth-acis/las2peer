@@ -1,12 +1,15 @@
 package i5.las2peer.classLoaders;
 
-import static org.junit.Assert.*;
-import i5.las2peer.classLoaders.libraries.LoadedLibrary;
-import i5.las2peer.classLoaders.libraries.ResourceNotFoundException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
 import org.junit.Test;
+
+import i5.las2peer.classLoaders.libraries.LoadedLibrary;
+import i5.las2peer.classLoaders.libraries.ResourceNotFoundException;
 
 public class LoadedLibraryCacheTest {
 

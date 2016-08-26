@@ -8,14 +8,13 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.junit.Test;
 
 import i5.las2peer.p2p.AgentAlreadyRegisteredException;
 import i5.las2peer.p2p.LocalNode;
 import i5.las2peer.p2p.NodeException;
-import i5.las2peer.persistency.DecodingFailedException;
-import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.persistency.Envelope;
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.testing.MockAgentFactory;
@@ -109,62 +108,52 @@ public class ContextTest {
 	}
 
 	@Test
-	public void testOpenEnvelope() throws MalformedXMLException, IOException, L2pSecurityException, CryptoException,
-			SerializationException, AgentException, EncodingFailedException, DecodingFailedException, NodeException {
-		LocalNode node = LocalNode.newNode();
-
-		GroupAgent group1 = MockAgentFactory.getGroup1();
-		GroupAgent groupA = MockAgentFactory.getGroupA();
-		GroupAgent groupSuper = GroupAgent.createGroupAgent(new Agent[] { group1, groupA });
-		GroupAgent groupSuper2 = GroupAgent.createGroupAgent(new Agent[] { group1, groupA });
+	public void testOpenEnvelope() {
 		try {
-			node.storeAgent(group1);
-		} catch (AgentAlreadyRegisteredException e) {
-		}
-		try {
-			node.storeAgent(groupA);
-		} catch (AgentAlreadyRegisteredException e) {
-		}
-		node.storeAgent(groupSuper);
-		node.storeAgent(groupSuper2);
+			LocalNode node = LocalNode.newNode();
 
-		node.launch();
+			GroupAgent group1 = MockAgentFactory.getGroup1();
+			GroupAgent groupA = MockAgentFactory.getGroupA();
+			GroupAgent groupSuper = GroupAgent.createGroupAgent(new Agent[] { group1, groupA });
+			GroupAgent groupSuper2 = GroupAgent.createGroupAgent(new Agent[] { group1, groupA });
+			try {
+				node.storeAgent(group1);
+			} catch (AgentAlreadyRegisteredException e) {
+			}
+			try {
+				node.storeAgent(groupA);
+			} catch (AgentAlreadyRegisteredException e) {
+			}
+			node.storeAgent(groupSuper);
+			node.storeAgent(groupSuper2);
 
-		UserAgent adam = MockAgentFactory.getAdam();
-		adam.unlockPrivateKey("adamspass");
-		UserAgent eve = MockAgentFactory.getEve();
-		eve.unlockPrivateKey("evespass");
+			node.launch();
 
-		groupA.unlockPrivateKey(adam);
-		groupSuper.unlockPrivateKey(groupA);
-		groupSuper2.unlockPrivateKey(groupA);
+			UserAgent adam = MockAgentFactory.getAdam();
+			adam.unlockPrivateKey("adamspass");
+			UserAgent eve = MockAgentFactory.getEve();
+			eve.unlockPrivateKey("evespass");
 
-		Context context = new Context(node, eve);
+			groupA.unlockPrivateKey(adam);
+			groupSuper.unlockPrivateKey(groupA);
+			groupSuper2.unlockPrivateKey(groupA);
 
-		Envelope envelope1 = Envelope.createClassIdEnvelope("content", "id", new Agent[] { groupSuper, groupSuper2 });
-		Envelope envelopeA = Envelope.createClassIdEnvelope("content", "id", groupA);
-		envelope1.open(groupSuper2);
-		envelope1.addSignature(groupSuper2);
-		envelope1.close();
-		envelopeA.close();
+			Context context = new Context(node, eve);
 
-		try {
-			context.openEnvelope(envelope1);
-			assertTrue(envelope1.isOpen());
-			assertTrue(envelope1.getOpeningAgent().getId() == groupSuper2.getId()); // check if signing agent is
-																					// preferred
+			Envelope envelope1 = context.createEnvelope("id", "content",
+					Arrays.asList(new Agent[] { groupSuper, groupSuper2 }));
+			Envelope envelopeA = context.createEnvelope("id", "content", groupA);
+			context.storeEnvelope(envelope1, groupSuper2);
+
+			try {
+				envelopeA.getContent(context.getMainAgent());
+				fail("exception expected");
+			} catch (Exception e) {
+			}
+
+			node.shutDown();
 		} catch (Exception e) {
 			e.printStackTrace();
-			fail("exception thrown: " + e);
 		}
-
-		try {
-			context.openEnvelope(envelopeA);
-			assertFalse(envelopeA.isOpen());
-			fail("exception expected");
-		} catch (Exception e) {
-		}
-
-		node.shutDown();
 	}
 }

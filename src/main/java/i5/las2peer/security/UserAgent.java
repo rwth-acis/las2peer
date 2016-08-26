@@ -90,14 +90,17 @@ public class UserAgent extends PassphraseAgent {
 	 * @throws UserAgentException
 	 */
 	public void setLoginName(String loginName) throws L2pSecurityException, UserAgentException {
-		if (this.isLocked())
+		if (this.isLocked()) {
 			throw new L2pSecurityException("unlock needed first!");
+		}
 
-		if (loginName != null && loginName.length() < 4)
+		if (loginName != null && loginName.length() < 4) {
 			throw new UserAgentException("please use a login name longer than three characters!");
+		}
 
-		if (loginName != null && !(loginName.matches("[a-zA-Z].*")))
+		if (loginName != null && !(loginName.matches("[a-zA-Z].*"))) {
 			throw new UserAgentException("please use a login name startung with a normal character (a-z or A-Z)");
+		}
 
 		// duplicate check is performed when storing/updating an UserAgent in a Node
 		this.sLoginName = loginName;
@@ -111,15 +114,17 @@ public class UserAgent extends PassphraseAgent {
 	 * @throws UserAgentException
 	 */
 	public void setEmail(String email) throws L2pSecurityException, UserAgentException {
-		if (this.isLocked())
+		if (this.isLocked()) {
 			throw new L2pSecurityException("unlock needed first!");
+		}
 
 		// http://stackoverflow.com/questions/153716/verify-email-in-java
 		Pattern rfc2822 = Pattern.compile(
 				"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$");
 
-		if (email != null && !email.contains("@") && !rfc2822.matcher(email).matches())
+		if (email != null && !email.contains("@") && !rfc2822.matcher(email).matches()) {
 			throw new UserAgentException("Invalid e-mail address");
+		}
 
 		// duplicate check is performed when storing/updating an UserAgent in a Node
 		this.sEmail = email.toLowerCase();
@@ -150,10 +155,12 @@ public class UserAgent extends PassphraseAgent {
 					+ "\t\t<salt encoding=\"base64\">" + Base64.encodeBase64String(getSalt()) + "</salt>\n"
 					+ "\t\t<data encoding=\"base64\">" + getEncodedPrivate() + "</data>\n" + "\t</privatekey>\n");
 
-			if (sLoginName != null)
+			if (sLoginName != null) {
 				result.append("\t<login>" + sLoginName + "</login>\n");
-			if (sEmail != null)
+			}
+			if (sEmail != null) {
 				result.append("\t<email>" + sEmail + "</email>\n");
+			}
 			if (userData != null) {
 				result.append("\t<userdata>" + SerializeTools.serializeToBase64(userData) + "</userdata>\n");
 			}
@@ -183,11 +190,13 @@ public class UserAgent extends PassphraseAgent {
 		try {
 			Element root = Parser.parse(xml, false);
 
-			if (!"user".equals(root.getAttribute("type")))
+			if (!"user".equals(root.getAttribute("type"))) {
 				throw new MalformedXMLException("user agent expected");
+			}
 
-			if (!"agent".equals(root.getName()))
+			if (!"agent".equals(root.getName())) {
 				throw new MalformedXMLException("agent expected");
+			}
 			return createFromXml(root);
 		} catch (XMLSyntaxException e) {
 			throw new MalformedXMLException("Error parsing xml string", e);
@@ -245,34 +254,43 @@ public class UserAgent extends PassphraseAgent {
 			long id = Long.parseLong(elId.getFirstChild().getText());
 
 			Element pubKey = root.getChild(1);
-			if (!pubKey.getName().equals("publickey"))
+			if (!pubKey.getName().equals("publickey")) {
 				throw new MalformedXMLException("public key expected");
-			if (!pubKey.getAttribute("encoding").equals("base64"))
+			}
+			if (!pubKey.getAttribute("encoding").equals("base64")) {
 				throw new MalformedXMLException("base64 encoding expected");
+			}
 
 			PublicKey publicKey = (PublicKey) SerializeTools.deserializeBase64(pubKey.getFirstChild().getText());
 
 			Element privKey = root.getChild(2);
-			if (!privKey.getName().equals("privatekey"))
+			if (!privKey.getName().equals("privatekey")) {
 				throw new MalformedXMLException("private key expected");
-			if (!privKey.getAttribute("encrypted").equals(CryptoTools.getSymmetricAlgorithm()))
+			}
+			if (!privKey.getAttribute("encrypted").equals(CryptoTools.getSymmetricAlgorithm())) {
 				throw new MalformedXMLException(CryptoTools.getSymmetricAlgorithm() + " expected");
-			if (!privKey.getAttribute("keygen").equals(CryptoTools.getSymmetricKeygenMethod()))
+			}
+			if (!privKey.getAttribute("keygen").equals(CryptoTools.getSymmetricKeygenMethod())) {
 				throw new MalformedXMLException(CryptoTools.getSymmetricKeygenMethod() + " expected");
+			}
 
 			Element elSalt = privKey.getFirstChild();
-			if (!elSalt.getName().equals("salt"))
+			if (!elSalt.getName().equals("salt")) {
 				throw new MalformedXMLException("salt expected");
-			if (!elSalt.getAttribute("encoding").equals("base64"))
+			}
+			if (!elSalt.getAttribute("encoding").equals("base64")) {
 				throw new MalformedXMLException("base64 encoding expected");
+			}
 
 			byte[] salt = Base64.decodeBase64(elSalt.getFirstChild().getText());
 
 			Element data = privKey.getChild(1);
-			if (!data.getName().equals("data"))
+			if (!data.getName().equals("data")) {
 				throw new MalformedXMLException("data expected");
-			if (!data.getAttribute("encoding").equals("base64"))
+			}
+			if (!data.getAttribute("encoding").equals("base64")) {
 				throw new MalformedXMLException("base64 encoding expected");
+			}
 			byte[] encPrivate = Base64.decodeBase64(data.getFirstChild().getText());
 
 			UserAgent result = new UserAgent(id, publicKey, encPrivate, salt);
@@ -336,7 +354,6 @@ public class UserAgent extends PassphraseAgent {
 		} catch (NodeNotFoundException e) {
 			// just fire and forget
 		}
-
 	}
 
 	@Override

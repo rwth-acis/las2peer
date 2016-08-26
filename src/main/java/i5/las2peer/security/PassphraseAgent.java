@@ -10,11 +10,9 @@ import i5.las2peer.tools.CryptoTools;
 
 /**
  * Base class for pass phrase protected agents.
- * 
- * 
- *
  */
 public abstract class PassphraseAgent extends Agent {
+
 	/**
 	 * random salt for the encryption of the private key (necessary for generating a strong key from a given passphrase)
 	 */
@@ -59,7 +57,6 @@ public abstract class PassphraseAgent extends Agent {
 	 */
 	protected PassphraseAgent(long id, PublicKey pubKey, byte[] encodedPrivate, byte[] salt) {
 		super(id, pubKey, encodedPrivate);
-
 		this.salt = salt.clone();
 	}
 
@@ -110,9 +107,9 @@ public abstract class PassphraseAgent extends Agent {
 	 * @throws L2pSecurityException
 	 */
 	public void changePassphrase(String passphrase) throws L2pSecurityException {
-		if (isLocked())
+		if (isLocked()) {
 			throw new L2pSecurityException("You have to unlock the key first!");
-
+		}
 		encryptPrivateKey(passphrase);
 	}
 
@@ -129,9 +126,9 @@ public abstract class PassphraseAgent extends Agent {
 	 * @throws L2pSecurityException
 	 */
 	public String getPassphrase() throws L2pSecurityException {
-		if (isLocked())
+		if (isLocked()) {
 			throw new L2pSecurityException("You have to unlock the key first!");
-
+		}
 		return this.passphrase;
 	}
 

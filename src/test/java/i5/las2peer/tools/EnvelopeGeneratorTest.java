@@ -49,9 +49,8 @@ public class EnvelopeGeneratorTest {
 
 		UserAgent eve = MockAgentFactory.getEve();
 		eve.unlockPrivateKey("evespass");
-		test.open(eve);
 
-		Integer content = (Integer) test.getContentAsSerializable();
+		Integer content = (Integer) test.getContent(eve);
 
 		assertEquals(102, content.intValue());
 	}

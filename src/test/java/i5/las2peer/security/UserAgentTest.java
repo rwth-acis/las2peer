@@ -20,7 +20,7 @@ public class UserAgentTest {
 		UserAgent a = UserAgent.createUserAgent(passphrase);
 
 		try {
-			a.returnSecretKey(null); // not possible without unlocking the private key first
+			a.decryptSymmetricKey(null); // not possible without unlocking the private key first
 			fail("SecurityException should have been thrown");
 		} catch (L2pSecurityException e) {
 			// Should be thrown
@@ -36,7 +36,7 @@ public class UserAgentTest {
 		}
 
 		try {
-			a.returnSecretKey(null); // not possible without unlocking the private key first
+			a.decryptSymmetricKey(null); // not possible without unlocking the private key first
 			fail("SecurityException should have been thrown");
 		} catch (L2pSecurityException e) {
 			// Should be thrown
@@ -47,7 +47,7 @@ public class UserAgentTest {
 		a.unlockPrivateKey(passphrase);
 
 		try {
-			a.returnSecretKey(null); // should be possible now
+			a.decryptSymmetricKey(null); // should be possible now
 		} catch (IllegalArgumentException e) {
 			// Well...empty byte array..but ok since no security exception is thrown
 		} catch (SerializationException e) {
@@ -172,7 +172,7 @@ public class UserAgentTest {
 			a.setEmail("afduaewd");
 			fail("Exception expected");
 		} catch (UserAgentException e) {
-			// assertTrue(e.getMessage().contains("@"));
+			//assertTrue(e.getMessage().contains("@"));
 		}
 	}
 

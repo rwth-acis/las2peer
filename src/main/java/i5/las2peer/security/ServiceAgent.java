@@ -173,30 +173,35 @@ public class ServiceAgent extends PassphraseAgent {
 							m.getSender(), getRunningAtNode().getNodeId(), this, "Exception: " + e);
 				}
 
-				if (m.getSendingNodeId() == null)
+				if (m.getSendingNodeId() == null) {
 					System.out.println("Node sender is null - where to send the answer to!?!?");
+				}
 
 				getRunningAtNode().sendResponse(response, m.getSendingNodeId());
 			} else if (content instanceof ListMethodsContent) {
-				if (!((ListMethodsContent) content).isRequest())
+				if (!((ListMethodsContent) content).isRequest()) {
 					throw new L2pServiceException("I don't know what to do with a response for a ListMethods request!");
-				if (m.getSendingNodeId() == null)
+				}
+				if (m.getSendingNodeId() == null) {
 					throw new L2pServiceException("If no sendind node is given - where should I send the answer to?!");
+				}
 
 				System.out.println("received request: " + m.toXmlString());
 				System.out.println("received: " + content);
 				System.out.println("sender: " + m.getSendingNodeId());
 
 				ListMethodsContent responseContent = new ListMethodsContent(false);
-				for (Method method : getServiceInstance().getClass().getMethods())
+				for (Method method : getServiceInstance().getClass().getMethods()) {
 					responseContent.addMethod(method);
+				}
 				responseContent.finalize();
 
 				Message response = new Message(m, responseContent);
 				getRunningAtNode().sendResponse(response, m.getSendingNodeId());
-			} else
+			} else {
 				throw new L2pServiceException("I don't know what to do with a message content of type "
 						+ content.getClass().getCanonicalName());
+			}
 		} catch (L2pServiceException e) {
 			throw new MessageException("service problems", e);
 		} catch (L2pSecurityException e) {
@@ -298,10 +303,12 @@ public class ServiceAgent extends PassphraseAgent {
 		try {
 			Element root = Parser.parse(xml, false);
 
-			if (!"service".equals(root.getAttribute("type")))
+			if (!"service".equals(root.getAttribute("type"))) {
 				throw new MalformedXMLException("service agent expeced");
-			if (!"agent".equals(root.getName()))
+			}
+			if (!"agent".equals(root.getName())) {
 				throw new MalformedXMLException("agent expected");
+			}
 
 			return createFromXml(root);
 		} catch (XMLSyntaxException e) {
@@ -321,41 +328,51 @@ public class ServiceAgent extends PassphraseAgent {
 	public static ServiceAgent createFromXml(Element root) throws MalformedXMLException {
 		try {
 			Element elId = root.getFirstChild();
-			if (!root.hasAttribute("serviceclass"))
+			if (!root.hasAttribute("serviceclass")) {
 				throw new MalformedXMLException("serviceclass attribute expected!");
+			}
 			ServiceNameVersion service = ServiceNameVersion.fromString(root.getAttribute("serviceclass"));
 
 			long id = Long.parseLong(elId.getFirstChild().getText());
 
 			Element pubKey = root.getChild(1);
-			if (!pubKey.getName().equals("publickey"))
+			if (!pubKey.getName().equals("publickey")) {
 				throw new MalformedXMLException("public key expected");
-			if (!pubKey.getAttribute("encoding").equals("base64"))
+			}
+			if (!pubKey.getAttribute("encoding").equals("base64")) {
 				throw new MalformedXMLException("base64 encoding expected");
+			}
 
 			PublicKey publicKey = (PublicKey) SerializeTools.deserializeBase64(pubKey.getFirstChild().getText());
 
 			Element privKey = root.getChild(2);
-			if (!privKey.getName().equals("privatekey"))
+			if (!privKey.getName().equals("privatekey")) {
 				throw new MalformedXMLException("private key expected");
-			if (!privKey.getAttribute("encrypted").equals(CryptoTools.getSymmetricAlgorithm()))
+			}
+			if (!privKey.getAttribute("encrypted").equals(CryptoTools.getSymmetricAlgorithm())) {
 				throw new MalformedXMLException(CryptoTools.getSymmetricAlgorithm() + " expected");
-			if (!privKey.getAttribute("keygen").equals(CryptoTools.getSymmetricKeygenMethod()))
+			}
+			if (!privKey.getAttribute("keygen").equals(CryptoTools.getSymmetricKeygenMethod())) {
 				throw new MalformedXMLException(CryptoTools.getSymmetricKeygenMethod() + " expected");
+			}
 
 			Element elSalt = privKey.getFirstChild();
-			if (!elSalt.getName().equals("salt"))
+			if (!elSalt.getName().equals("salt")) {
 				throw new MalformedXMLException("salt expected");
-			if (!elSalt.getAttribute("encoding").equals("base64"))
+			}
+			if (!elSalt.getAttribute("encoding").equals("base64")) {
 				throw new MalformedXMLException("base64 encoding expected");
+			}
 
 			byte[] salt = Base64.decodeBase64(elSalt.getFirstChild().getText());
 
 			Element data = privKey.getChild(1);
-			if (!data.getName().equals("data"))
+			if (!data.getName().equals("data")) {
 				throw new MalformedXMLException("data expected");
-			if (!data.getAttribute("encoding").equals("base64"))
+			}
+			if (!data.getAttribute("encoding").equals("base64")) {
 				throw new MalformedXMLException("base64 encoding expected");
+			}
 			byte[] encPrivate = Base64.decodeBase64(data.getFirstChild().getText());
 
 			return new ServiceAgent(id, service, publicKey, encPrivate, salt);
@@ -417,8 +434,9 @@ public class ServiceAgent extends PassphraseAgent {
 	}
 
 	private synchronized void startTimer() throws Exception {
-		if (timerRunning)
+		if (timerRunning) {
 			return;
+		}
 
 		timer = new Timer();
 		ServiceInfoAgent agent = getServiceInfoAgent();
@@ -441,6 +459,8 @@ public class ServiceAgent extends PassphraseAgent {
 			finalAgent.serviceAdded(this, finalNode);
 			stopTimer(); // stop timer on success
 		} catch (Exception e) {
+			// XXX logging
+			e.printStackTrace();
 			// limit to 3 attempts
 			timerRunTimes++;
 			if (timerRunning && timerRunTimes > TIMER_RUN_TIMES_MAX) {
@@ -535,8 +555,9 @@ public class ServiceAgent extends PassphraseAgent {
 	 */
 	public Object invoke(String method, Object[] parameters) throws IllegalArgumentException,
 			NoSuchServiceMethodException, IllegalAccessException, InvocationTargetException, L2pSecurityException {
-		if (!isRunning())
+		if (!isRunning()) {
 			throw new IllegalStateException("This agent instance does not handle a started service!");
+		}
 
 		return serviceInstance.execute(method, parameters);
 	}
@@ -560,17 +581,20 @@ public class ServiceAgent extends PassphraseAgent {
 	public Serializable handle(RMITask task)
 			throws L2pServiceException, ServiceInvocationException, SecurityException, IllegalArgumentException,
 			NoSuchServiceMethodException, IllegalAccessException, InvocationTargetException, L2pSecurityException {
-		if (!getServiceNameVersion().equals(task.getServiceNameVersion()))
+		if (!getServiceNameVersion().equals(task.getServiceNameVersion())) {
 			throw new L2pServiceException("Service is not matching requestes class!" + getServiceNameVersion() + "/"
 					+ task.getServiceNameVersion());
+		}
 
 		Object result = invoke(task.getMethodName(), task.getParameters());
 
-		if (result == null)
+		if (result == null) {
 			return null;
+		}
 
-		if (!(result instanceof Serializable))
+		if (!(result instanceof Serializable)) {
 			throw new ServiceInvocationException("Result is not serializable! " + result.getClass() + " / " + result);
+		}
 
 		return (Serializable) result;
 	}

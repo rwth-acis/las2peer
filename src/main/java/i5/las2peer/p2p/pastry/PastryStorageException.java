@@ -1,6 +1,6 @@
 package i5.las2peer.p2p.pastry;
 
-import i5.las2peer.p2p.StorageException;
+import i5.las2peer.api.exceptions.StorageException;
 
 /**
  * Exception thrown on failures in the underlying pastry storage

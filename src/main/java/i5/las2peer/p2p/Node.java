@@ -21,6 +21,9 @@ import java.util.Vector;
 import com.sun.management.OperatingSystemMXBean;
 
 import i5.las2peer.api.Service;
+import i5.las2peer.api.exceptions.EnvelopeAlreadyExistsException;
+import i5.las2peer.api.exceptions.EnvelopeNotFoundException;
+import i5.las2peer.api.exceptions.StorageException;
 import i5.las2peer.classLoaders.L2pClassManager;
 import i5.las2peer.classLoaders.libraries.Repository;
 import i5.las2peer.communication.Message;
@@ -39,9 +42,9 @@ import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.logging.NodeObserver;
 import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.logging.monitoring.MonitoringObserver;
-import i5.las2peer.p2p.pastry.PastryStorageException;
 import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.persistency.Envelope;
+import i5.las2peer.persistency.NodeStorageInterface;
 import i5.las2peer.security.Agent;
 import i5.las2peer.security.AgentException;
 import i5.las2peer.security.AgentStorage;
@@ -72,7 +75,7 @@ import rice.pastry.socket.SocketNodeHandle;
  * the P2P networking.
  * 
  */
-public abstract class Node implements AgentStorage {
+public abstract class Node implements AgentStorage, NodeStorageInterface {
 
 	/**
 	 * The Sending mode for outgoing messages.
@@ -628,7 +631,7 @@ public abstract class Node implements AgentStorage {
 	}
 
 	/**
-	 * @deprecated Use {@link Node#unregisterReceiver(MessageReceiver)} instead!
+	 * @deprecated Use {@link Node#unregisterReceiver(MessageReceiver)} instead
 	 * 
 	 *             Unregisters an agent from this node.
 	 * 
@@ -641,7 +644,7 @@ public abstract class Node implements AgentStorage {
 	}
 
 	/**
-	 * @deprecated Use {@link Node#unregisterReceiver(MessageReceiver)} instead!
+	 * @deprecated Use {@link Node#unregisterReceiver(MessageReceiver)} instead
 	 * 
 	 *             Is an instance of the given agent running at this node?
 	 * 
@@ -763,37 +766,55 @@ public abstract class Node implements AgentStorage {
 	}
 
 	/**
-	 * Gets an artifact from the p2p storage.
+	 * @deprecated Use {@link #fetchEnvelope(String)} instead
+	 * 
+	 *             Gets an artifact from the p2p storage.
 	 * 
 	 * @param id
-	 * 
 	 * @return the envelope containing the requested artifact
-	 * 
-	 * @throws ArtifactNotFoundException
+	 * @throws EnvelopeNotFoundException
 	 * @throws StorageException
 	 */
-	public abstract Envelope fetchArtifact(long id) throws ArtifactNotFoundException, StorageException;
+	@Deprecated
+	public abstract Envelope fetchArtifact(long id) throws EnvelopeNotFoundException, StorageException;
 
 	/**
-	 * Stores an artifact to the p2p storage.
+	 * @deprecated Use {@link #fetchEnvelope(String)} instead
+	 * 
+	 *             Gets an artifact from the p2p storage.
+	 * 
+	 * @param identifier
+	 * @return the envelope containing the requested artifact
+	 * @throws EnvelopeNotFoundException
+	 * @throws StorageException
+	 */
+	@Deprecated
+	public abstract Envelope fetchArtifact(String identifier) throws EnvelopeNotFoundException, StorageException;
+
+	/**
+	 * @deprecated Use {@link #storeEnvelope(Envelope, Agent)} instead
+	 * 
+	 *             Stores an artifact to the p2p storage.
 	 * 
 	 * @param envelope
 	 * @throws StorageException
-	 * @throws L2pSecurityException if an Envelope cannot be overwritten
-	 * 
 	 */
-	public abstract void storeArtifact(Envelope envelope) throws StorageException, L2pSecurityException;
+	@Deprecated
+	public abstract void storeArtifact(Envelope envelope) throws EnvelopeAlreadyExistsException, StorageException;
 
 	/**
-	 * Removes an artifact from the p2p storage. <i>NOTE: This is not possible with a FreePastry backend!</i>
+	 * @deprecated Use {@link #removeEnvelope(String)} instead
+	 * 
+	 *             Removes an artifact from the p2p storage. <i>NOTE: This is not possible with a FreePastry
+	 *             backend!</i>
 	 * 
 	 * @param id
 	 * @param signature
-	 * 
-	 * @throws ArtifactNotFoundException
+	 * @throws EnvelopeNotFoundException
 	 * @throws StorageException
 	 */
-	public abstract void removeArtifact(long id, byte[] signature) throws ArtifactNotFoundException, StorageException;
+	@Deprecated
+	public abstract void removeArtifact(long id, byte[] signature) throws EnvelopeNotFoundException, StorageException;
 
 	/**
 	 * Searches the nodes for registered Versions of the given Agent. Returns an array of objects identifying the nodes
@@ -851,9 +872,7 @@ public abstract class Node implements AgentStorage {
 	 * for another one!
 	 * 
 	 * @param id
-	 * 
 	 * @return the requested agent
-	 * 
 	 * @throws AgentNotKnownException
 	 */
 	@Override
@@ -980,9 +999,7 @@ public abstract class Node implements AgentStorage {
 	/**
 	 * Stores a new Agent to the network.
 	 * 
-	 * @param agent
-	 * 
-	 * @throws AgentAlreadyRegisteredException
+	 * @param agent s * @throws AgentAlreadyRegisteredException
 	 * @throws L2pSecurityException
 	 * @throws AgentException
 	 */
@@ -993,12 +1010,11 @@ public abstract class Node implements AgentStorage {
 	 * Updates an existing agent of the network.
 	 * 
 	 * @param agent
-	 * 
 	 * @throws AgentException
 	 * @throws L2pSecurityException
 	 * @throws PastryStorageException
 	 */
-	public abstract void updateAgent(Agent agent) throws AgentException, L2pSecurityException, PastryStorageException;
+	public abstract void updateAgent(Agent agent) throws AgentException, L2pSecurityException, StorageException;
 
 	private Agent anonymousAgent = null;
 

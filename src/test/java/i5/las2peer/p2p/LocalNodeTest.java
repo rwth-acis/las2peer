@@ -15,6 +15,7 @@ import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
 
+import i5.las2peer.api.exceptions.EnvelopeNotFoundException;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.PingPongContent;
 import i5.las2peer.persistency.EncodingFailedException;
@@ -344,7 +345,7 @@ public class LocalNodeTest {
 
 	@Test
 	public void testUserRegDistribution()
-			throws L2pSecurityException, AgentException, CryptoException, ArtifactNotFoundException {
+			throws L2pSecurityException, AgentException, CryptoException, EnvelopeNotFoundException {
 		LocalNode testee1 = LocalNode.launchNode();
 
 		for (int i = 0; i < 11; i++) {

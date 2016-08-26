@@ -8,6 +8,8 @@ import java.util.ArrayList;
 
 import org.apache.commons.codec.binary.Base64;
 
+import i5.las2peer.api.exceptions.EnvelopeNotFoundException;
+import i5.las2peer.api.exceptions.StorageException;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
 import i5.las2peer.p2p.Node;
@@ -15,8 +17,6 @@ import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.p2p.ServiceList;
 import i5.las2peer.p2p.ServiceNameVersion;
 import i5.las2peer.p2p.ServiceNodeList;
-import i5.las2peer.p2p.StorageException;
-import i5.las2peer.persistency.DecodingFailedException;
 import i5.las2peer.persistency.Envelope;
 import i5.las2peer.persistency.EnvelopeException;
 import i5.las2peer.tools.CryptoException;
@@ -96,18 +96,16 @@ public class ServiceInfoAgent extends PassphraseAgent {
 	 */
 	public static ServiceInfoAgent getServiceInfoAgent(String passphrase)
 			throws CryptoException, L2pSecurityException, SerializationException {
-
 		passPhrase = passphrase;
 		if (agent == null) {
-
 			agent = new ServiceInfoAgent(AGENT_ID,
 					new KeyPair((PublicKey) SerializeTools.deserializeBase64(PUB_KEY),
 							(PrivateKey) SerializeTools.deserializeBase64(PRIV_KEY)),
 					passphrase, Base64.decodeBase64(SALT));
-
 		}
-		if (agent.isLocked())
+		if (agent.isLocked()) {
 			agent.unlockPrivateKey(passPhrase);
+		}
 		return agent;
 	}
 
@@ -121,7 +119,6 @@ public class ServiceInfoAgent extends PassphraseAgent {
 	 */
 	public static ServiceInfoAgent getServiceInfoAgent()
 			throws CryptoException, L2pSecurityException, SerializationException {
-
 		return getServiceInfoAgent(passPhrase);
 	}
 
@@ -160,14 +157,11 @@ public class ServiceInfoAgent extends PassphraseAgent {
 			throws EnvelopeException {
 		Envelope env = fetchEnvelope(envelopeName, dataCls);
 		Serializable data = null;
-		if (env == null)
+		if (env == null) {
 			throw new EnvelopeException("Envelope could not be found, nor created!");
+		}
 		try {
-			env.open(getServiceInfoAgent());
-			data = env.getContent(dataCls);
-			env.close();
-		} catch (DecodingFailedException e) {
-			throw new EnvelopeException("Envelope could not be decoded!", e);
+			data = env.getContent(getServiceInfoAgent());
 		} catch (L2pSecurityException e) {
 			throw new EnvelopeException("Security Exception", e);
 		} catch (SerializationException e) {
@@ -183,35 +177,26 @@ public class ServiceInfoAgent extends PassphraseAgent {
 	 * 
 	 * @param envelopeName
 	 * @param dataCls
-	 * 
 	 * @param data
 	 * @throws EnvelopeException
 	 * @throws AgentException
 	 * @throws L2pSecurityException
 	 */
-	private static void setEnvelopeData(String envelopeName, Class<?> dataCls, Serializable data)
+	private static void setEnvelopeData(String envelopeName, Class<? extends Serializable> dataCls, Serializable data)
 			throws EnvelopeException, AgentException, L2pSecurityException {
 		try {
 			getServiceInfoAgent(); // init (paranoia)
 		} catch (Exception e) {
 			// do nothing
 		}
-
 		Envelope env = fetchEnvelope(envelopeName, dataCls);
-
-		if (env == null)
+		if (env == null) {
 			throw new EnvelopeException("Envelope could not be found, nor created!");
+		}
 		try {
-			env.open(getServiceInfoAgent());
-			env.updateContent(data);
-			env.setOverWriteBlindly(true);
-			env.store(agent);
-			env.close();
-
-		} catch (DecodingFailedException e) {
-			throw new EnvelopeException("Envelope could not be decoded", e);
-		} catch (L2pSecurityException e) {
-			throw new EnvelopeException("Security Exception", e);
+			Envelope toStore = getServiceInfoAgent().getRunningAtNode().createEnvelope(env, data,
+					getServiceInfoAgent());
+			getServiceInfoAgent().getRunningAtNode().storeEnvelope(toStore, agent);
 		} catch (SerializationException e) {
 			throw new EnvelopeException("Data could not be serialized", e);
 		} catch (StorageException e) {
@@ -219,7 +204,6 @@ public class ServiceInfoAgent extends PassphraseAgent {
 		} catch (CryptoException e) {
 			throw new EnvelopeException("Crypto Execption", e);
 		}
-
 	}
 
 	/**
@@ -230,33 +214,28 @@ public class ServiceInfoAgent extends PassphraseAgent {
 	 * 
 	 * @return
 	 */
-	private static Envelope fetchEnvelope(String envelopeName, Class<?> cls) {
+	private static Envelope fetchEnvelope(String envelopeName, Class<? extends Serializable> cls) {
 		Envelope env = null;
 		try {
-			env = Envelope.fetchClassIdEnvelope(getServiceInfoAgent(), cls, envelopeName);
-		} catch (Exception e) {
-			env = createNewEnvelope(envelopeName, cls);
-		}
-		return env;
-	}
-
-	/**
-	 * Creates a new Envelope
-	 * 
-	 * @param envelopeName
-	 * @param cls
-	 * 
-	 * @return
-	 */
-	private static Envelope createNewEnvelope(String envelopeName, Class<?> cls) {
-		try {
-
-			return Envelope.createClassIdEnvelope(cls.newInstance(), envelopeName, getServiceInfoAgent());
-		} catch (Exception e) {
+			try {
+				env = getServiceInfoAgent().getRunningAtNode().fetchEnvelope(envelopeName);
+			} catch (CryptoException | L2pSecurityException | SerializationException e) {
+				// XXX error handling
+				e.printStackTrace();
+			}
+		} catch (EnvelopeNotFoundException e) {
+			try {
+				env = agent.getRunningAtNode().createEnvelope(envelopeName, cls.newInstance(), getServiceInfoAgent());
+			} catch (IllegalArgumentException | SerializationException | CryptoException | L2pSecurityException
+					| InstantiationException | IllegalAccessException e1) {
+				// XXX error handling
+				e.printStackTrace();
+			}
+		} catch (StorageException e) {
+			// XXX error handling
 			e.printStackTrace();
 		}
-
-		return null;
+		return env;
 	}
 
 	@Override

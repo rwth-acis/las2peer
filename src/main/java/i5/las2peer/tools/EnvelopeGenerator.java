@@ -4,19 +4,19 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
+import java.util.Random;
 
+import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.persistency.Envelope;
-import i5.las2peer.persistency.EnvelopeException;
 import i5.las2peer.persistency.MalformedXMLException;
+import i5.las2peer.persistency.SharedStorage.STORAGE_MODE;
 import i5.las2peer.security.Agent;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.PassphraseAgent;
 
 /**
  * A simple command line tool for generating XML envelopes to the standard out.
- * 
- * 
- *
  */
 public class EnvelopeGenerator {
 
@@ -73,16 +73,13 @@ public class EnvelopeGenerator {
 			usage();
 			return;
 		}
-
 		try {
 			PassphraseAgent owner = loadAgent(argv[0]);
-
 			owner.unlockPrivateKey(argv[1]);
-
 			Serializable temp = createSerializable(argv[2], argv[3]);
-
-			Envelope env = new Envelope(temp, owner);
-
+			PastryNodeImpl dummyNode = new PastryNodeImpl(14571, null, STORAGE_MODE.MEMORY, false, null, null);
+			Envelope env = dummyNode.createEnvelope(Long.toString(new Random().nextLong()), temp,
+					Arrays.asList(new Agent[] { owner }));
 			System.out.println(env.toXmlString());
 		} catch (SecurityException e) {
 			usage("Unable to call constructor of nested class: " + e);
@@ -104,12 +101,11 @@ public class EnvelopeGenerator {
 			usage("access problems with constructor of target class");
 		} catch (InvocationTargetException e) {
 			usage("invocation problems with constructor of target class!");
-		} catch (EnvelopeException e) {
+		} catch (CryptoException e) {
 			usage("envelope problems while generating xml output: " + e);
 		} catch (SerializationException e) {
 			usage("unable to serialize content into envelope!");
 		}
-
 	}
 
 	/**

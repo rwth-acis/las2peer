@@ -1,14 +1,12 @@
 package i5.las2peer.security;
 
+import i5.las2peer.api.exceptions.EnvelopeAlreadyExistsException;
+import i5.las2peer.api.exceptions.StorageException;
 import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.p2p.AgentNotKnownException;
-import i5.las2peer.p2p.ArtifactNotFoundException;
 import i5.las2peer.p2p.Node;
-import i5.las2peer.p2p.StorageException;
-import i5.las2peer.persistency.DecodingFailedException;
-import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.persistency.Envelope;
-import i5.las2peer.persistency.EnvelopeException;
+import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.SerializationException;
 
 /**
@@ -36,41 +34,33 @@ public class UserAgentManager {
 	 */
 	public void registerUserAgent(UserAgent agent)
 			throws DuplicateEmailException, DuplicateLoginNameException, AgentLockedException {
-		if (agent.isLocked())
+		if (agent.isLocked()) {
 			throw new AgentLockedException("Only unlocked Agents can be registered!");
-
+		}
 		Long content = agent.getId();
-
 		if (agent.hasLogin()) {
 			try {
-				Envelope envName = Envelope.createClassIdEnvelope(content,
-						PREFIX_USER_NAME + agent.getLoginName().toLowerCase(), agent);
-				envName.open(agent);
-				envName.setOverWriteBlindly(true);
-				envName.addReader(node.getAnonymous());
-				envName.addSignature(agent);
-				node.storeArtifact(envName);
-				envName.close();
-			} catch (L2pSecurityException e) {
+				// FIXME No Context! Not executed in a L2pThread environment!
+//				Envelope envName = Context.getCurrent()
+//						.createUnencryptedEnvelope(PREFIX_USER_NAME + agent.getLoginName().toLowerCase(), content);
+				Envelope envName = node.createUnencryptedEnvelope(PREFIX_USER_NAME + agent.getLoginName().toLowerCase(),
+						content);
+				node.storeEnvelope(envName, agent);
+			} catch (EnvelopeAlreadyExistsException e) {
 				throw new DuplicateLoginNameException();
-			} catch (EncodingFailedException | SerializationException | StorageException | DecodingFailedException e) {
+			} catch (SerializationException | CryptoException | StorageException e) {
 				node.observerNotice(Event.NODE_ERROR, "Envelope error while updating user list: " + e);
 			}
 		}
 
 		if (agent.hasEmail()) {
 			try {
-				Envelope envMail = Envelope.createClassIdEnvelope(content,
-						PREFIX_USER_MAIL + agent.getEmail().toLowerCase(), agent);
-				envMail.open(agent);
-				envMail.setOverWriteBlindly(true);
-				envMail.addReader(node.getAnonymous());
-				envMail.addSignature(agent);
-				node.storeArtifact(envMail);
-				envMail.close();
-			} catch (L2pSecurityException e) {
+				Envelope envMail = Context.getCurrent()
+						.createUnencryptedEnvelope(PREFIX_USER_MAIL + agent.getEmail().toLowerCase(), content);
+				node.storeEnvelope(envMail, agent);
+			} catch (EnvelopeAlreadyExistsException e) {
 				throw new DuplicateEmailException();
-			} catch (EncodingFailedException | SerializationException | StorageException | DecodingFailedException e) {
+			} catch (SerializationException | CryptoException | StorageException e) {
 				node.observerNotice(Event.NODE_ERROR, "Envelope error while updating user list: " + e);
 			}
 		}
@@ -98,15 +88,12 @@ public class UserAgentManager {
 	 */
 	public long getAgentIdByLogin(String name) throws AgentNotKnownException {
 		try {
-			Envelope env = node
-					.fetchArtifact(Envelope.getClassEnvelopeId(Long.class, PREFIX_USER_NAME + name.toLowerCase()));
-			env.open(node.getAnonymous());
-			Long content = env.getContent(Long.class);
-			env.close();
-
-			return content;
-		} catch (StorageException | ArtifactNotFoundException | EnvelopeException | L2pSecurityException e) {
+			Envelope env = Context.getCurrent().fetchEnvelope(PREFIX_USER_NAME + name.toLowerCase());
+			return (Long) env.getContent();
+		} catch (StorageException e) {
 			throw new AgentNotKnownException("Username not found!", e);
+		} catch (SerializationException | CryptoException e) {
+			throw new AgentNotKnownException("Could not read agent id from storage");
 		}
 	}
 
@@ -119,15 +106,12 @@ public class UserAgentManager {
 	 */
 	public long getAgentIdByEmail(String email) throws AgentNotKnownException {
 		try {
-			Envelope env = node
-					.fetchArtifact(Envelope.getClassEnvelopeId(Long.class, PREFIX_USER_MAIL + email.toLowerCase()));
-			env.open(node.getAnonymous());
-			Long content = env.getContent(Long.class);
-			env.close();
-
-			return content;
-		} catch (StorageException | ArtifactNotFoundException | EnvelopeException | L2pSecurityException e) {
+			Envelope env = Context.getCurrent().fetchEnvelope(PREFIX_USER_MAIL + email.toLowerCase());
+			return (Long) env.getContent();
+		} catch (StorageException e) {
 			throw new AgentNotKnownException("Email not found!", e);
+		} catch (SerializationException | CryptoException e) {
+			throw new AgentNotKnownException("Could not read email from storage");
 		}
 	}
 }

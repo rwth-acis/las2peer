@@ -1,453 +1,615 @@
 package i5.las2peer.persistency;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
-import java.util.HashSet;
+import java.io.Serializable;
+import java.security.PublicKey;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 
+import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestName;
 
+import i5.las2peer.api.StorageCollisionHandler;
+import i5.las2peer.api.StorageEnvelopeHandler;
+import i5.las2peer.api.StorageExceptionHandler;
+import i5.las2peer.api.StorageStoreResultHandler;
+import i5.las2peer.api.exceptions.EnvelopeAlreadyExistsException;
+import i5.las2peer.api.exceptions.EnvelopeNotFoundException;
+import i5.las2peer.api.exceptions.StopMergingException;
+import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.security.Agent;
-import i5.las2peer.security.GroupAgent;
-import i5.las2peer.security.L2pSecurityException;
-import i5.las2peer.security.UserAgent;
 import i5.las2peer.testing.MockAgentFactory;
-import i5.las2peer.tools.CryptoException;
-import i5.las2peer.tools.SerializationException;
-import i5.las2peer.tools.SimpleTools;
-import i5.simpleXML.Element;
-import i5.simpleXML.Parser;
-import i5.simpleXML.XMLSyntaxException;
+import i5.las2peer.testing.TestSuite;
 
 public class EnvelopeTest {
 
-	private static UserAgent eve, adam;
+	private ArrayList<PastryNodeImpl> nodes;
+	private long testStart;
+	private boolean asyncTestState;
+	private int testUpdateContent;
+
+	private static class ExceptionHandler implements StorageExceptionHandler {
+		@Override
+		public void onException(Exception e) {
+			e.printStackTrace();
+			Assert.fail(e.toString());
+		}
+	}
+
+	private static final ExceptionHandler storageExceptionHandler = new ExceptionHandler();
+
+	@Rule
+	public TestName name = new TestName();
 
 	@Before
-	public void setUp() throws NoSuchAlgorithmException, L2pSecurityException, CryptoException {
-		adam = UserAgent.createUserAgent("adamspass");
-		eve = UserAgent.createUserAgent("evespass");
-		eve.unlockPrivateKey("evespass");
-		adam.unlockPrivateKey("adamspass");
+	public void startNetwork() {
+		testStart = System.currentTimeMillis();
+		try {
+			// start test node
+			nodes = TestSuite.launchNetwork(3);
+			System.out.println("Test network started");
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail(e.getMessage());
+		}
+		asyncTestState = false;
+	}
+
+	@After
+	public void stopNetwork() {
+		if (nodes != null) {
+			for (PastryNodeImpl node : nodes) {
+				node.shutDown();
+			}
+			nodes = null;
+		}
+		long testStop = System.currentTimeMillis();
+		System.out.println(name.getMethodName() + " took " + (testStop - testStart) + "ms");
 	}
 
 	@Test
-	public void testStringContent() throws NoSuchAlgorithmException, UnsupportedEncodingException,
-			MalformedXMLException, XMLSyntaxException, L2pSecurityException, EnvelopeException, SerializationException {
-		if (eve == null)
-			throw new NullPointerException("Agents not initialized!");
-
-		String content = "Dies ist ein String!";
-
-		Envelope testee = new Envelope(content, eve);
-
-		String xml = testee.toXmlString();
-		// TODO: assertions for xml String
-		// at least allow parsing!
-		@SuppressWarnings("unused")
-		Element testXml = Parser.parse(xml);
-
-		System.out.println("simple String");
-		System.out.println(xml);
-
-		Envelope andBack = Envelope.createFromXml(xml);
-
-		try {
-			andBack.open(adam);
-			fail("adam should not be able to open this envelope!");
-		} catch (L2pSecurityException e) {
-			// that's correct
-		}
-
-		try {
-			andBack.getContentAsBinary();
-			fail("DecodingFailedException should have been thrown - envelope has not been obend yet!");
-		} catch (DecodingFailedException e) {
-			// that's correct
-		}
-
-		andBack.open(eve);
-
-		String contentBack = andBack.getContentAsString();
-		assertEquals(content, contentBack);
+	public void testStartStopNetwork() {
+		System.out.println("Just for timing comparison ...");
 	}
 
 	@Test
-	public void testSerializable()
-			throws L2pSecurityException, EnvelopeException, MalformedXMLException, SerializationException {
-		String s = "Hallo";
-		int i = 100;
-		TestContent t = new TestContent(s, i);
-
-		Envelope testee = new Envelope(t, eve);
-
-		String xml = testee.toXmlString();
-
-		Envelope andBack = Envelope.createFromXml(xml);
-
-		andBack.open(eve);
-		TestContent c = (TestContent) andBack.getContentAsSerializable();
-
-		assertEquals(t.getString(), c.getString());
-		assertEquals(t.getInt(), c.getInt());
-
-		System.out.println("Serializable");
-		System.out.println(xml);
-	}
-
-	@Test
-	public void testAgentRemoval() throws UnsupportedEncodingException, EncodingFailedException,
-			DecodingFailedException, L2pSecurityException {
-		String content = "blabla";
-		Envelope testee = new Envelope(content, new Agent[] { eve });
-
-		testee.close();
-		assertNull(testee.getOpeningAgent());
-
+	public void testStoreAndFetch() {
 		try {
-			testee.open(adam);
-			fail("adam should not be able to open this envelope!");
-		} catch (L2pSecurityException e) {
-			// that's correct
-		}
-
-		testee.open(eve);
-		assertEquals(eve, testee.getOpeningAgent());
-		testee.addReader(adam);
-		testee.removeReader(eve);
-
-		testee.close();
-
-		try {
-			testee.open(eve);
-			fail("eve should not be able to open this envelope anymore!");
-		} catch (L2pSecurityException e) {
-			// that's correct
-		}
-
-		testee.open(adam);
-		assertEquals(adam, testee.getOpeningAgent());
-	}
-
-	@Test
-	public void testOpen() throws EncodingFailedException, UnsupportedEncodingException, DecodingFailedException,
-			MalformedXMLException, L2pSecurityException, SerializationException {
-		String data = "darf's auch ein bisschen mehr sein?";
-
-		Envelope testee = new Envelope(data, adam);
-		assertFalse(testee.isOpen());
-		assertTrue(testee.isClosed());
-
-		testee.open(adam);
-		assertFalse(testee.isClosed());
-		assertTrue(testee.isOpen());
-
-		String xml = testee.toXmlString();
-		try {
-			testee.open(eve);
-			fail("eve should not be able to open this envelope!");
-		} catch (L2pSecurityException e) {
-		}
-		assertFalse(testee.isOpen());
-		assertTrue(testee.isClosed());
-
-		testee.open(adam);
-		assertTrue(testee.isOpen());
-		assertFalse(testee.isClosed());
-
-		Envelope fromXml = Envelope.createFromXml(xml);
-		assertFalse(fromXml.isOpen());
-		assertTrue(fromXml.isClosed());
-
-		testee = new Envelope(data, new Agent[] { adam, eve });
-		assertFalse(testee.isOpen());
-		assertNull(testee.getOpeningAgent());
-	}
-
-	@Test
-	public void testSignatures() throws UnsupportedEncodingException, EncodingFailedException, DecodingFailedException,
-			MalformedXMLException, VerificationFailedException, L2pSecurityException, SerializationException {
-		String content = "irgendwas sinnvolles";
-
-		Envelope testee = new Envelope(content, eve);
-		testee.open(eve);
-		try {
-			testee.addSignature(adam);
-			fail("adam is not a reader and should not be able to sign the envelope");
-		} catch (IllegalStateException e) {
-		}
-
-		testee = new Envelope(content, new Agent[] { eve, adam });
-		testee.open(eve);
-		try {
-			testee.addSignature(adam);
-			fail("IllegalStateException expected");
-		} catch (IllegalStateException e) {
-		}
-
-		testee.open(adam);
-		try {
-			testee.addSignature(eve);
-			fail("eve has not opened this envelope and should not be able to sign the contents");
-		} catch (IllegalStateException e) {
-		}
-
-		testee.addSignature(adam);
-		assertTrue(testee.isSignedBy(adam));
-		testee.close();
-		assertTrue(testee.isSignedBy(adam));
-
-		try {
-			testee.verifySignature(adam);
-			fail("IllegalStateException should have been thrown");
-		} catch (IllegalStateException e) {
-		}
-
-		testee.open(eve);
-		assertTrue(testee.isOpen());
-		testee.addSignature(eve);
-		String xml = testee.toXmlString();
-
-		testee.open(eve);
-		assertTrue(testee.isOpen());
-
-		try {
-			testee.removeSignature(adam);
-			fail("adam has not opened this envelope and should not be able to remove his signature");
-		} catch (EncodingFailedException e) {
-		}
-		testee.removeSignature(eve);
-		assertFalse(testee.isSignedBy(eve));
-		assertTrue(testee.isSignedBy(adam));
-
-		try {
-			testee.verifySignature(eve);
-			fail("verification for eve should fail");
-		} catch (VerificationFailedException e) {
-		}
-
-		System.out.println(xml);
-
-		Envelope fromXml = Envelope.createFromXml(xml);
-		assertTrue(fromXml.isSignedBy(eve));
-		assertTrue(fromXml.isSignedBy(adam));
-
-		try {
-			fromXml.verifySignature(adam);
-			fail("IllegalStateException should have been thrown!");
-		} catch (IllegalStateException e) {
-		}
-
-		fromXml.open(eve);
-
-		assertTrue(fromXml.isSignedBy(eve));
-		assertTrue(fromXml.isSignedBy(adam));
-	}
-
-	@Test
-	public void testOpeningAgent() throws UnsupportedEncodingException, EncodingFailedException,
-			DecodingFailedException, L2pSecurityException {
-		String content = "Ja wass denn?!";
-
-		Envelope testee = new Envelope(content, eve);
-		assertFalse(testee.isOpen());
-		testee.open(eve);
-
-		assertTrue(testee.isOpen());
-		assertSame(eve, testee.getOpeningAgent());
-		testee.close();
-		assertNull(testee.getOpeningAgent());
-
-		testee = new Envelope(content, new Agent[] { eve, adam });
-		assertTrue(testee.isClosed());
-		assertNull(testee.getOpeningAgent());
-		testee.open(adam);
-		assertSame(adam, testee.getOpeningAgent());
-	}
-
-	@Test
-	public void testId() throws MalformedXMLException, UnsupportedEncodingException, EncodingFailedException,
-			DecodingFailedException, SerializationException {
-		String content = "bla";
-		Envelope testee = new Envelope(content, eve);
-		String xml = testee.toXmlString();
-
-		Envelope fromXml = Envelope.createFromXml(xml);
-		assertEquals(testee.getId(), fromXml.getId());
-
-		assertTrue(testee.getId() != 0);
-	}
-
-	@Test
-	public void testUniqueClassIds() {
-		HashSet<Long> hsStored = new HashSet<Long>();
-		HashSet<String> hsKeys = new HashSet<String>();
-
-		for (int i = 0; i < 500; i++) {
-			String key;
-			do {
-				key = SimpleTools.createRandomString(10);
-			} while (hsKeys.contains(key));
-			hsKeys.add(key);
-
-			long id1 = Envelope.getClassEnvelopeId("a class", key);
-			long id2 = Envelope.getClassEnvelopeId("a 2nd class", key);
-
-			assertFalse(hsStored.contains(id1));
-			assertFalse(hsStored.contains(id2));
-			hsStored.add(id1);
-			hsStored.add(id2);
-
-			for (int j = 0; j < 20; j++)
-				assertEquals(id1, Envelope.getClassEnvelopeId("a class", key));
+			PastryNodeImpl node1 = nodes.get(0);
+			// create envelope to store in the shared network storage
+			Agent smith = MockAgentFactory.getAdam();
+			Envelope envelope1 = node1.createUnencryptedEnvelope("test", "Hello World!");
+			// upload envelope
+			node1.storeEnvelopeAsync(envelope1, smith, new StorageStoreResultHandler() {
+				@Override
+				public void onResult(Serializable serializable, int successfulOperations) {
+					System.out.println(
+							"Successfully stored artifact " + serializable + " " + successfulOperations + " times");
+					// fetch envelope again
+					System.out.println("Fetching artifact ...");
+					node1.fetchEnvelopeAsync("test", new StorageEnvelopeHandler() {
+						@Override
+						public void onEnvelopeReceived(Envelope envelope) {
+							try {
+								String content = (String) envelope.getContent();
+								System.out.println("Envelope content is '" + content + "'");
+								asyncTestState = true;
+							} catch (Exception e) {
+								Assert.fail(e.toString());
+								return;
+							}
+						}
+					}, storageExceptionHandler);
+				}
+			}, null, storageExceptionHandler);
+			// wait till the envelope was fetched
+			System.out.println("Waiting ...");
+			for (int n = 1; n <= 100; n++) {
+				if (asyncTestState) {
+					return;
+				}
+				Thread.sleep(100);
+			}
+			Assert.fail();
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail(e.toString());
 		}
 	}
 
 	@Test
-	public void testGroups() throws MalformedXMLException, IOException, L2pSecurityException, SerializationException,
-			CryptoException, EnvelopeException {
-
-		Agent[] owners = new Agent[] { MockAgentFactory.getEve(), MockAgentFactory.getGroup1(),
-				MockAgentFactory.getGroupA() };
-		Envelope testee = new Envelope("a string", owners);
-
-		assertEquals(2, testee.getReaderGroups().length);
-
-		String xml = testee.toXmlString();
-
-		System.out.println(xml);
-
-		Envelope andBack = Envelope.createFromXml(xml);
-		assertEquals(2, testee.getReaderGroups().length);
-
-		GroupAgent g = MockAgentFactory.getGroup1();
-		UserAgent adam = MockAgentFactory.getAdam();
-		adam.unlockPrivateKey("adamspass");
-		g.unlockPrivateKey(adam);
-
-		andBack.open(g);
-
-		assertEquals("a string", andBack.getContentAsString());
+	public void testStoreAndFetchBig1() {
+		testStoreAndFetchBig(100000);
 	}
 
 	@Test
-	public void testArrayStorage()
-			throws MalformedXMLException, IOException, EnvelopeException, SerializationException, L2pSecurityException {
-		UserAgent eve = MockAgentFactory.getEve();
+	public void testStoreAndFetchBig2() {
+		testStoreAndFetchBig(400000);
+	}
 
-		Random r = new Random();
-		Long[] data = new Long[r.nextInt(80) + 10];
+	@Test
+	public void testStoreAndFetchBig3() {
+		testStoreAndFetchBig(990000); // = ~1 MB
+	}
 
-		for (int i = 0; i < data.length; i++)
-			data[i] = r.nextLong();
+	@Test
+	public void testStoreAndFetchBig4() {
+		testStoreAndFetchBig(2300000);
+	}
 
-		Envelope test = new Envelope(data, eve);
+	@Test
+	public void testStoreAndFetchBig5() {
+		testStoreAndFetchBig(4900000); // = ~5 MB
+	}
 
-		String xml = test.toXmlString();
+	private void testStoreAndFetchBig(int datasize) {
+		try {
+			PastryNodeImpl node1 = nodes.get(0);
+			// create envelope to store in the shared network storage
+			Agent smith = MockAgentFactory.getAdam();
+			byte[] testContent = new byte[datasize];
+			// generate random data
+			new Random().nextBytes(testContent);
+			Envelope envelope1 = node1.createUnencryptedEnvelope("test", testContent);
+			// upload envelope
+			long startStore = System.currentTimeMillis();
+			node1.storeEnvelopeAsync(envelope1, smith, new StorageStoreResultHandler() {
+				@Override
+				public void onResult(Serializable serializable, int successfulOperations) {
+					long stopTime = System.currentTimeMillis();
+					long storeTime = stopTime - startStore;
+					System.out.println("Successfully stored artifact " + successfulOperations + " times");
+					System.out.println("Stored " + testContent.length / 1000.f + " kB in " + storeTime + " ms, speed "
+							+ testContent.length / storeTime + " kB/s");
+					// fetch envelope again
+					System.out.println("Fetching artifact ...");
+					node1.fetchEnvelopeAsync("test", new StorageEnvelopeHandler() {
+						@Override
+						public void onEnvelopeReceived(Envelope envelope) {
+							try {
+								byte[] content = (byte[]) envelope.getContent();
+								Assert.assertArrayEquals(testContent, content);
+								asyncTestState = true;
+							} catch (Exception e) {
+								Assert.fail(e.toString());
+								return;
+							}
+						}
+					}, storageExceptionHandler);
+				}
+			}, null, storageExceptionHandler);
+			// wait till the envelope was fetched
+			System.out.println("Waiting ...");
+			for (int n = 1; n <= 100; n++) {
+				if (asyncTestState) {
+					return;
+				}
+				Thread.sleep(400);
+			}
+			Assert.fail("Unexpected result");
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail(e.toString());
+		}
+	}
 
-		Envelope andBack = Envelope.createFromXml(xml);
+	/**
+	 * test collision (Envelope with same identifier + version)
+	 */
+	@Test
+	public void testCollisionWithSingleMerge() {
+		try {
+			PastryNodeImpl node1 = nodes.get(0);
+			// create envelope to store in the shared network storage
+			Agent smith = MockAgentFactory.getAdam();
+			Envelope envelope1 = node1.createUnencryptedEnvelope("test", "Hello World 1!");
+			Envelope envelope2 = node1.createUnencryptedEnvelope("test", "Hello World 2!");
+			// upload envelope
+			node1.storeEnvelopeAsync(envelope1, smith, new StorageStoreResultHandler() {
+				@Override
+				public void onResult(Serializable serializable, int successfulOperations) {
+					System.out.println("Successfully stored artifact " + successfulOperations + " times");
+					// store another envelope with the same identifier and version as before
+					// => expect collision
+					node1.storeEnvelopeAsync(envelope2, smith, new StorageStoreResultHandler() {
+						@Override
+						public void onResult(Serializable serializable, int successfulOperations) {
+							if (successfulOperations > 0) {
+								System.out.println("Successfully stored artifact " + successfulOperations + " times");
+								// fetch envelope again
+								System.out.println("Fetching artifact ...");
+								node1.fetchEnvelopeAsync("test", new StorageEnvelopeHandler() {
+									@Override
+									public void onEnvelopeReceived(Envelope envelope) {
+										try {
+											Assert.assertEquals(envelope.getVersion(), 2);
+											String content = (String) envelope.getContent();
+											System.out.println("Envelope content is '" + content + "'");
+											asyncTestState = true;
+										} catch (Exception e) {
+											Assert.fail(e.toString());
+											return;
+										}
+									}
+								}, storageExceptionHandler);
+							} else {
+								Assert.fail("Merging failed!");
+							}
+						}
+					}, new StorageCollisionHandler() {
+						@Override
+						public Serializable onCollision(Envelope toStore, Envelope inNetwork, long numberOfCollisions)
+								throws StopMergingException {
+							if (numberOfCollisions > 100) {
+								throw new StopMergingException(
+										"Merging failed, too many (" + numberOfCollisions + ") collisions!",
+										numberOfCollisions);
+							}
+							// we return the "merged" version of both envelopes
+							// usually there one should put more effort into merging
+							try {
+								String result = inNetwork.getContent() + " " + toStore.getContent();
+								return result;
+							} catch (Exception e) {
+								Assert.fail(e.toString());
+								return "";
+							}
+						}
 
-		eve.unlockPrivateKey("evespass");
-		andBack.open(eve);
+						@Override
+						public List<PublicKey> mergeReaders(HashMap<PublicKey, byte[]> toStoreReaders,
+								HashMap<PublicKey, byte[]> inNetworkReaders) {
+							ArrayList<PublicKey> merged = new ArrayList<>();
+							merged.addAll(toStoreReaders.keySet());
+							merged.addAll(inNetworkReaders.keySet());
+							return merged;
+						}
+					}, storageExceptionHandler);
+				}
+			}, null, storageExceptionHandler);
+			// wait for the collision
+			System.out.println("Waiting ...");
+			for (int n = 1; n <= 100; n++) {
+				if (asyncTestState) {
+					return;
+				}
+				Thread.sleep(100);
+			}
+			Assert.fail("No collision occurred!");
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail(e.toString());
+		}
+	}
 
-		Long[] data2 = andBack.getContent(Long[].class);
+	/**
+	 * test without collision manager
+	 */
+	@Test
+	public void testCollisionWithoutCollisionManager() {
+		try {
+			PastryNodeImpl node1 = nodes.get(0);
+			// create envelope to store in the shared network storage
+			Agent smith = MockAgentFactory.getAdam();
+			Envelope envelope1 = node1.createUnencryptedEnvelope("test", "Hello World 1!");
+			Envelope envelope2 = node1.createUnencryptedEnvelope("test", "Hello World 2!");
+			// upload envelope
+			node1.storeEnvelopeAsync(envelope1, smith, new StorageStoreResultHandler() {
+				@Override
+				public void onResult(Serializable serializable, int successfulOperations) {
+					System.out.println("Successfully stored artifact " + successfulOperations + " times");
+					// store another envelope with the same identifier and version as before
+					// => expect collision
+					node1.storeEnvelopeAsync(envelope2, smith, new StorageStoreResultHandler() {
+						@Override
+						public void onResult(Serializable serializable, int successfulOperations) {
+							Assert.fail("Exception expected!");
+						}
+					}, null, new StorageExceptionHandler() {
+						@Override
+						public void onException(Exception e) {
+							if (e instanceof EnvelopeAlreadyExistsException) {
+								System.out.println("Expected exception '" + e.toString() + "' received.");
+								asyncTestState = true;
+							} else {
+								storageExceptionHandler.onException(e);
+							}
+						}
+					});
+				}
+			}, null, storageExceptionHandler);
+			// wait for the collision
+			System.out.println("Waiting ...");
+			for (int n = 1; n <= 100; n++) {
+				if (asyncTestState) {
+					return;
+				}
+				Thread.sleep(100);
+			}
+			Assert.fail("No collision occurred!");
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail(e.toString());
+		}
+	}
 
-		assertNotNull(data2);
-		assertEquals(data.length, data2.length);
-		for (int i = 0; i < data.length; i++) {
-			assertEquals(data[i], data2[i]);
+	/**
+	 * test with merging cancelation
+	 */
+	@Test
+	public void testCollisionWithMergeCancelation() {
+		try {
+			PastryNodeImpl node1 = nodes.get(0);
+			// create envelope to store in the shared network storage
+			Agent smith = MockAgentFactory.getAdam();
+			Envelope envelope1 = node1.createUnencryptedEnvelope("test", "Hello World 1!");
+			Envelope envelope2 = node1.createUnencryptedEnvelope("test", "Hello World 2!");
+			// upload envelope
+			node1.storeEnvelopeAsync(envelope1, smith, new StorageStoreResultHandler() {
+				@Override
+				public void onResult(Serializable serializable, int successfulOperations) {
+					System.out.println("Successfully stored artifact " + successfulOperations + " times");
+					// store another envelope with the same identifier and version as before
+					// => expect collision
+					node1.storeEnvelopeAsync(envelope2, smith, new StorageStoreResultHandler() {
+						@Override
+						public void onResult(Serializable serializable, int successfulOperations) {
+							Assert.fail("Exception expected!");
+						}
+					}, new StorageCollisionHandler() {
+						@Override
+						public String onCollision(Envelope toStore, Envelope inNetwork, long numberOfCollisions)
+								throws StopMergingException {
+							throw new StopMergingException();
+						}
+
+						@Override
+						public List<PublicKey> mergeReaders(HashMap<PublicKey, byte[]> toStoreReaders,
+								HashMap<PublicKey, byte[]> inNetworkReaders) {
+							return new ArrayList<>();
+						}
+					}, new StorageExceptionHandler() {
+						@Override
+						public void onException(Exception e) {
+							if (e instanceof StopMergingException) {
+								System.out.println("Expected exception '" + e.toString() + "' received.");
+								asyncTestState = true;
+							} else {
+								storageExceptionHandler.onException(e);
+							}
+						}
+					});
+				}
+			}, null, storageExceptionHandler);
+			// wait for the collision
+			System.out.println("Waiting ...");
+			for (int n = 1; n <= 100; n++) {
+				if (asyncTestState) {
+					return;
+				}
+				Thread.sleep(100);
+			}
+			Assert.fail("No collision occurred!");
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail(e.toString());
+		}
+	}
+
+	/**
+	 * test (250 times) update content of envelope
+	 */
+	@Test
+	public void testUpdateContent() {
+		try {
+			testUpdateContent = 0;
+			final long updateCycles = 250;
+			final int cycleDelay = 20; // ms, Pastry needs min 10 ms
+			PastryNodeImpl node1 = nodes.get(0);
+			try {
+				Agent smith = MockAgentFactory.getAdam();
+				Envelope first = node1.createUnencryptedEnvelope("test", "First Version");
+				// upload envelope
+				node1.storeEnvelopeAsync(first, smith, new StorageStoreResultHandler() {
+					@Override
+					public void onResult(Serializable serializable, int successfulOperations) {
+						System.out.println("Successfully stored artifact " + successfulOperations + " times");
+						Envelope result = first;
+						try {
+							for (int n = 1; n <= updateCycles; n++) {
+								final int num = n;
+								result = node1.createUnencryptedEnvelope(result, "Hello World " + num + "!");
+								final Envelope toStore = result;
+								node1.storeEnvelopeAsync(toStore, smith, new StorageStoreResultHandler() {
+									@Override
+									public void onResult(Serializable serializable, int successfulOperations) {
+										System.out.println(
+												"Successfully stored artifact " + successfulOperations + " times");
+										// fetch envelope again
+										System.out.println("Fetching artifact ...");
+										node1.fetchEnvelopeAsync(toStore.getIdentifier(), new StorageEnvelopeHandler() {
+											@Override
+											public void onEnvelopeReceived(Envelope envelope) {
+												try {
+													Assert.assertEquals(envelope.getVersion(), toStore.getVersion());
+													String content = (String) envelope.getContent();
+													System.out.println("Envelope content is '" + content + "'");
+													testUpdateContent++;
+												} catch (Exception e) {
+													Assert.fail(e.toString());
+													return;
+												}
+											}
+										}, storageExceptionHandler);
+									}
+								}, null, storageExceptionHandler);
+								try {
+									Thread.sleep(cycleDelay);
+								} catch (InterruptedException e) {
+									e.printStackTrace();
+									Assert.fail(e.getMessage());
+								}
+							}
+						} catch (Exception e) {
+							Assert.fail(e.toString());
+							return;
+						}
+					}
+				}, null, storageExceptionHandler);
+			} catch (Exception e) {
+				Assert.fail(e.toString());
+				return;
+			}
+			// wait for all operations
+			System.out.println("Waiting ...");
+			for (int n = 1; n <= updateCycles / 5; n++) {
+				if (testUpdateContent == updateCycles) {
+					break;
+				}
+				Thread.sleep(cycleDelay * 10);
+			}
+			// after updating the envelope many times, we try to fetch it again without version information
+			final long startLookup = System.currentTimeMillis();
+			node1.fetchEnvelopeAsync("test", new StorageEnvelopeHandler() {
+				@Override
+				public void onEnvelopeReceived(Envelope result) {
+					long stopLookup = System.currentTimeMillis();
+					System.out.println("Received " + result.toString() + " in " + (stopLookup - startLookup) + "ms");
+					testUpdateContent++;
+				}
+			}, storageExceptionHandler);
+			// wait for all operations
+			System.out.println("Waiting ...");
+			for (int n = 1; n <= updateCycles / 5; n++) {
+				if (testUpdateContent == updateCycles + 1) {
+					return;
+				}
+				Thread.sleep(cycleDelay * 10);
+			}
+			node1.fetchEnvelopeAsync("test", new StorageEnvelopeHandler() {
+				@Override
+				public void onEnvelopeReceived(Envelope result) {
+					long stopLookup = System.currentTimeMillis();
+					System.out.println("Received " + result.toString() + " in " + (stopLookup - startLookup) + "ms");
+					testUpdateContent++;
+				}
+			}, storageExceptionHandler);
+			// wait for all operations
+			System.out.println("Waiting ...");
+			for (int n = 1; n <= updateCycles / 5; n++) {
+				if (testUpdateContent == updateCycles) {
+					return;
+				}
+				Thread.sleep(cycleDelay * 10);
+			}
+			Assert.fail("Unexpected result (" + testUpdateContent + ")!");
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail(e.toString());
 		}
 	}
 
 	@Test
-	public void testCheckOverwrite() throws L2pSecurityException, EncodingFailedException, SerializationException,
-			InterruptedException, DecodingFailedException, MalformedXMLException, IOException {
-		UserAgent eve = MockAgentFactory.getEve();
-
-		Envelope test = Envelope.createClassIdEnvelope(new Long(100), "temp", eve);
-		String xml = test.toXmlString();
-		test = Envelope.createFromXml(xml);
-
-		Thread.sleep(1000);
-
-		Envelope test2 = Envelope.createClassIdEnvelope(new Long(200), "temp", eve);
-
-		assertFalse(test.getReferalTimestamp() == test2.getReferalTimestamp());
-
+	public void testFetchNonExisting() {
 		try {
-			test.checkOverwrite(test2);
-			fail("OverwriteException expected");
-		} catch (OverwriteException e) {
+			PastryNodeImpl node1 = nodes.get(0);
+			// fetch envelope again
+			System.out.println("Fetching artifact ...");
+			node1.fetchEnvelopeAsync("testtesttest", new StorageEnvelopeHandler() {
+				@Override
+				public void onEnvelopeReceived(Envelope envelope) {
+					Assert.fail("Unexpected result (" + envelope.toString() + ")!");
+				}
+			}, new StorageExceptionHandler() {
+				@Override
+				public void onException(Exception e) {
+					if (e instanceof EnvelopeNotFoundException) {
+						// expected exception
+						System.out.println("Expected exception '" + e.toString() + "' received.");
+						asyncTestState = true;
+					} else {
+						Assert.fail("Unexpected exception (" + e.toString() + ")!");
+					}
+				}
+			});
+			// wait till the envelope was fetched
+			System.out.println("Waiting ...");
+			for (int n = 1; n <= 100; n++) {
+				if (asyncTestState) {
+					return;
+				}
+				Thread.sleep(100);
+			}
+			Assert.fail("Exception expected!");
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail(e.toString());
 		}
-		try {
-			test2.checkOverwrite(test);
-			fail("OverwriteException expected");
-		} catch (OverwriteException e) {
-		}
-
-		eve.unlockPrivateKey("evespass");
-		test.open(eve);
-		test.setOverWriteBlindly(true);
-
-		test.checkOverwrite(test2);
 	}
 
 	@Test
-	public void testLoadedTimestamp()
-			throws EncodingFailedException, SerializationException, MalformedXMLException, IOException {
-		UserAgent eve = MockAgentFactory.getEve();
-		Envelope testee = Envelope.createClassIdEnvelope(new Long(100), "test", eve);
-		long timestamp = testee.getTimestamp();
-
-		String xml = testee.toXmlString();
-
-		testee = Envelope.createFromXml(xml);
-
-		assertEquals(timestamp, testee.getReferalTimestamp());
-	}
-
-	@Test
-	public void testUpdateSwitch()
-			throws EnvelopeException, MalformedXMLException, IOException, SerializationException, L2pSecurityException {
-		UserAgent eve = MockAgentFactory.getEve();
-		Envelope testee = Envelope.createClassIdEnvelope(new StringBuffer("test"), "test", eve);
-
+	public void testChangeContentType() {
 		try {
-			testee.updateContent(new DummyContent("test2"));
-			fail("L2pSecurityException expected (not opened)");
-		} catch (L2pSecurityException e) {
-			// intended
+			PastryNodeImpl node1 = nodes.get(0);
+			// create envelope to store in the shared network storage
+			Agent smith = MockAgentFactory.getAdam();
+			Envelope envelope1 = node1.createUnencryptedEnvelope("test", "Hello World!");
+			// upload envelope
+			node1.storeEnvelopeAsync(envelope1, smith, new StorageStoreResultHandler() {
+				@Override
+				public void onResult(Serializable serializable, int successfulOperations) {
+					System.out.println(
+							"Successfully stored artifact " + serializable + " " + successfulOperations + " times");
+					try {
+						// create envelope to store in the shared network storage
+						Envelope envelope2 = node1.createUnencryptedEnvelope(envelope1, 14526339);
+						// upload envelope
+						node1.storeEnvelopeAsync(envelope2, smith, new StorageStoreResultHandler() {
+							@Override
+							public void onResult(Serializable serializable, int successfulOperations) {
+								System.out.println("Successfully stored artifact " + serializable + " "
+										+ successfulOperations + " times");
+								// fetch envelope again
+								System.out.println("Fetching artifact ...");
+								node1.fetchEnvelopeAsync("test", new StorageEnvelopeHandler() {
+									@Override
+									public void onEnvelopeReceived(Envelope envelope) {
+										try {
+											Integer content = (Integer) envelope.getContent();
+											System.out.println("Envelope content is '" + content + "'");
+											asyncTestState = true;
+										} catch (Exception e) {
+											Assert.fail(e.toString());
+											return;
+										}
+									}
+								}, storageExceptionHandler);
+							}
+						}, null, storageExceptionHandler);
+					} catch (Exception e) {
+						Assert.fail(e.toString());
+						return;
+					}
+				}
+			}, null, storageExceptionHandler);
+			// wait till the envelope was fetched
+			System.out.println("Waiting ...");
+			for (int n = 1; n <= 100; n++) {
+				if (asyncTestState) {
+					return;
+				}
+				Thread.sleep(100);
+			}
+			Assert.fail();
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail(e.toString());
 		}
-
-		eve.unlockPrivateKey("evespass");
-		testee.open(eve);
-
-		testee.updateContent(new DummyContent("test3"));
-
-		assertEquals("test3", testee.getContent(DummyContent.class).toString());
-
-		testee.lockContent();
-
-		try {
-			testee.updateContent(new DummyContent("test4"));
-			fail("L2pSecurityException expected (overwrite disabled)");
-		} catch (L2pSecurityException e) {
-			// intended
-		}
-
-		testee.getContent(DummyContent.class).append("-abc");
-
-		assertEquals("test3-abc", testee.getContent(DummyContent.class).toString());
 	}
 
 }
