@@ -89,6 +89,9 @@ public class WebConnector extends Connector {
 	public static final int DEFAULT_MAX_CONNECTIONS = 500;
 	protected int maxConnections = DEFAULT_MAX_CONNECTIONS;
 
+	public static final int DEFAULT_MAX_THREADS = 10;
+	protected int maxThreads = DEFAULT_MAX_THREADS;
+
 	public static final int DEFAULT_MAX_REQUEST_BODY_SIZE = 10 * 1000 * 1000; // = 10 MB
 	protected int maxRequestBodySize = DEFAULT_MAX_REQUEST_BODY_SIZE;
 
@@ -108,6 +111,7 @@ public class WebConnector extends Connector {
 	protected Map<String, JSONObject> oidcProviderInfos = new HashMap<String, JSONObject>();
 
 	private HashMap<Long, Integer> openUserRequests = new HashMap<>();
+	private Object lockOidc = new Object();
 	private ServiceMappingManager serviceRepositoryManager = null;
 
 	/**
@@ -337,11 +341,13 @@ public class WebConnector extends Connector {
 		if (isHttps) {
 			https.setExecutor(Executors.newCachedThreadPool());
 			https.createContext("/", handler);
+			https.setExecutor(Executors.newFixedThreadPool(maxThreads));
 			https.start();
 			logMessage("Web-Connector in HTTPS mode running on port " + httpsPort);
 		} else {
 			http.setExecutor(Executors.newCachedThreadPool());
 			http.createContext("/", handler);
+			http.setExecutor(Executors.newFixedThreadPool(maxThreads));
 			http.start();
 			logMessage("Web-Connector in HTTP mode running on port " + httpPort);
 		}
@@ -454,6 +460,10 @@ public class WebConnector extends Connector {
 
 	public HashMap<Long, Integer> getOpenUserRequests() {
 		return openUserRequests;
+	}
+
+	public Object getLockOidc() {
+		return lockOidc;
 	}
 
 	/**

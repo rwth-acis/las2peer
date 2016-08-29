@@ -21,7 +21,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/swagger-models-1.5.4.jar"/>
 	<classpathentry kind="lib" path="lib/commons-io-2.4.jar"/>
 	<classpathentry kind="lib" path="lib/commons-lang3-3.3.2.jar"/>
-	<classpathentry kind="lib" path="lib/las2peer-0.6-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/las2peer-0.6-SNAPSHOT.jar" sourcepath="/LAS2peer"/>
 	<classpathentry kind="lib" path="lib/las2peer-rest-mapper-0.6-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path="output"/>
 </classpath>
