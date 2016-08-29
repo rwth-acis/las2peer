@@ -143,6 +143,15 @@ public class Mediator implements MessageReceiver {
 		return myAgent.getId();
 	}
 
+	/**
+	 * returns the mediated agent
+	 * 
+	 * @return
+	 */
+	public Agent getAgent() {
+		return myAgent;
+	}
+
 	@Override
 	public void notifyRegistrationTo(Node node) {
 		runningAt = node;
