@@ -22,7 +22,7 @@ import i5.las2peer.api.exceptions.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.exceptions.EnvelopeNotFoundException;
 import i5.las2peer.api.exceptions.StopMergingException;
 import i5.las2peer.p2p.PastryNodeImpl;
-import i5.las2peer.security.Agent;
+import i5.las2peer.security.UserAgent;
 import i5.las2peer.testing.MockAgentFactory;
 import i5.las2peer.testing.TestSuite;
 
@@ -82,7 +82,8 @@ public class EnvelopeTest {
 		try {
 			PastryNodeImpl node1 = nodes.get(0);
 			// create envelope to store in the shared network storage
-			Agent smith = MockAgentFactory.getAdam();
+			UserAgent smith = MockAgentFactory.getAdam();
+			smith.unlockPrivateKey("adamspass");
 			Envelope envelope1 = node1.createUnencryptedEnvelope("test", "Hello World!");
 			// upload envelope
 			node1.storeEnvelopeAsync(envelope1, smith, new StorageStoreResultHandler() {
@@ -151,7 +152,8 @@ public class EnvelopeTest {
 		try {
 			PastryNodeImpl node1 = nodes.get(0);
 			// create envelope to store in the shared network storage
-			Agent smith = MockAgentFactory.getAdam();
+			UserAgent smith = MockAgentFactory.getAdam();
+			smith.unlockPrivateKey("adamspass");
 			byte[] testContent = new byte[datasize];
 			// generate random data
 			new Random().nextBytes(testContent);
@@ -206,7 +208,8 @@ public class EnvelopeTest {
 		try {
 			PastryNodeImpl node1 = nodes.get(0);
 			// create envelope to store in the shared network storage
-			Agent smith = MockAgentFactory.getAdam();
+			UserAgent smith = MockAgentFactory.getAdam();
+			smith.unlockPrivateKey("adamspass");
 			Envelope envelope1 = node1.createUnencryptedEnvelope("test", "Hello World 1!");
 			Envelope envelope2 = node1.createUnencryptedEnvelope("test", "Hello World 2!");
 			// upload envelope
@@ -295,7 +298,8 @@ public class EnvelopeTest {
 		try {
 			PastryNodeImpl node1 = nodes.get(0);
 			// create envelope to store in the shared network storage
-			Agent smith = MockAgentFactory.getAdam();
+			UserAgent smith = MockAgentFactory.getAdam();
+			smith.unlockPrivateKey("adamspass");
 			Envelope envelope1 = node1.createUnencryptedEnvelope("test", "Hello World 1!");
 			Envelope envelope2 = node1.createUnencryptedEnvelope("test", "Hello World 2!");
 			// upload envelope
@@ -346,7 +350,8 @@ public class EnvelopeTest {
 		try {
 			PastryNodeImpl node1 = nodes.get(0);
 			// create envelope to store in the shared network storage
-			Agent smith = MockAgentFactory.getAdam();
+			UserAgent smith = MockAgentFactory.getAdam();
+			smith.unlockPrivateKey("adamspass");
 			Envelope envelope1 = node1.createUnencryptedEnvelope("test", "Hello World 1!");
 			Envelope envelope2 = node1.createUnencryptedEnvelope("test", "Hello World 2!");
 			// upload envelope
@@ -557,7 +562,8 @@ public class EnvelopeTest {
 		try {
 			PastryNodeImpl node1 = nodes.get(0);
 			// create envelope to store in the shared network storage
-			Agent smith = MockAgentFactory.getAdam();
+			UserAgent smith = MockAgentFactory.getAdam();
+			smith.unlockPrivateKey("adamspass");
 			Envelope envelope1 = node1.createUnencryptedEnvelope("test", "Hello World!");
 			// upload envelope
 			node1.storeEnvelopeAsync(envelope1, smith, new StorageStoreResultHandler() {
