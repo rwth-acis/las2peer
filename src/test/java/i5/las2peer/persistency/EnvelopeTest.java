@@ -31,7 +31,6 @@ public class EnvelopeTest {
 	private ArrayList<PastryNodeImpl> nodes;
 	private long testStart;
 	private boolean asyncTestState;
-	private int testUpdateContent;
 
 	private static class ExceptionHandler implements StorageExceptionHandler {
 		@Override
@@ -412,107 +411,20 @@ public class EnvelopeTest {
 	@Test
 	public void testUpdateContent() {
 		try {
-			testUpdateContent = 0;
-			final long updateCycles = 250;
-			final int cycleDelay = 20; // ms, Pastry needs min 10 ms
+			// FIXME store and fetch an envelope for 250 times
 			PastryNodeImpl node1 = nodes.get(0);
-			try {
-				Agent smith = MockAgentFactory.getAdam();
-				Envelope first = node1.createUnencryptedEnvelope("test", "First Version");
-				// upload envelope
-				node1.storeEnvelopeAsync(first, smith, new StorageStoreResultHandler() {
-					@Override
-					public void onResult(Serializable serializable, int successfulOperations) {
-						System.out.println("Successfully stored artifact " + successfulOperations + " times");
-						Envelope result = first;
-						try {
-							for (int n = 1; n <= updateCycles; n++) {
-								final int num = n;
-								result = node1.createUnencryptedEnvelope(result, "Hello World " + num + "!");
-								final Envelope toStore = result;
-								node1.storeEnvelopeAsync(toStore, smith, new StorageStoreResultHandler() {
-									@Override
-									public void onResult(Serializable serializable, int successfulOperations) {
-										System.out.println(
-												"Successfully stored artifact " + successfulOperations + " times");
-										// fetch envelope again
-										System.out.println("Fetching artifact ...");
-										node1.fetchEnvelopeAsync(toStore.getIdentifier(), new StorageEnvelopeHandler() {
-											@Override
-											public void onEnvelopeReceived(Envelope envelope) {
-												try {
-													Assert.assertEquals(envelope.getVersion(), toStore.getVersion());
-													String content = (String) envelope.getContent();
-													System.out.println("Envelope content is '" + content + "'");
-													testUpdateContent++;
-												} catch (Exception e) {
-													Assert.fail(e.toString());
-													return;
-												}
-											}
-										}, storageExceptionHandler);
-									}
-								}, null, storageExceptionHandler);
-								try {
-									Thread.sleep(cycleDelay);
-								} catch (InterruptedException e) {
-									e.printStackTrace();
-									Assert.fail(e.getMessage());
-								}
-							}
-						} catch (Exception e) {
-							Assert.fail(e.toString());
-							return;
-						}
-					}
-				}, null, storageExceptionHandler);
-			} catch (Exception e) {
-				Assert.fail(e.toString());
-				return;
+			UserAgent smith = MockAgentFactory.getAdam();
+			smith.unlockPrivateKey("adamspass");
+			Envelope updated = node1.createUnencryptedEnvelope("test", "envelope version number 1");
+			node1.storeEnvelope(updated, smith);
+			for (int c = 2; c <= 250; c++) {
+				updated = node1.createUnencryptedEnvelope(updated, "envelope version number " + c);
+				node1.storeEnvelope(updated, smith);
+				Envelope fetched = node1.fetchEnvelope(updated.getIdentifier());
+				Assert.assertEquals(updated.getIdentifier(), fetched.getIdentifier());
+				Assert.assertEquals(updated.getVersion(), fetched.getVersion());
+				Assert.assertEquals(updated.getContent(), fetched.getContent());
 			}
-			// wait for all operations
-			System.out.println("Waiting ...");
-			for (int n = 1; n <= updateCycles / 5; n++) {
-				if (testUpdateContent == updateCycles) {
-					break;
-				}
-				Thread.sleep(cycleDelay * 10);
-			}
-			// after updating the envelope many times, we try to fetch it again without version information
-			final long startLookup = System.currentTimeMillis();
-			node1.fetchEnvelopeAsync("test", new StorageEnvelopeHandler() {
-				@Override
-				public void onEnvelopeReceived(Envelope result) {
-					long stopLookup = System.currentTimeMillis();
-					System.out.println("Received " + result.toString() + " in " + (stopLookup - startLookup) + "ms");
-					testUpdateContent++;
-				}
-			}, storageExceptionHandler);
-			// wait for all operations
-			System.out.println("Waiting ...");
-			for (int n = 1; n <= updateCycles / 5; n++) {
-				if (testUpdateContent == updateCycles + 1) {
-					return;
-				}
-				Thread.sleep(cycleDelay * 10);
-			}
-			node1.fetchEnvelopeAsync("test", new StorageEnvelopeHandler() {
-				@Override
-				public void onEnvelopeReceived(Envelope result) {
-					long stopLookup = System.currentTimeMillis();
-					System.out.println("Received " + result.toString() + " in " + (stopLookup - startLookup) + "ms");
-					testUpdateContent++;
-				}
-			}, storageExceptionHandler);
-			// wait for all operations
-			System.out.println("Waiting ...");
-			for (int n = 1; n <= updateCycles / 5; n++) {
-				if (testUpdateContent == updateCycles) {
-					return;
-				}
-				Thread.sleep(cycleDelay * 10);
-			}
-			Assert.fail("Unexpected result (" + testUpdateContent + ")!");
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail(e.toString());
