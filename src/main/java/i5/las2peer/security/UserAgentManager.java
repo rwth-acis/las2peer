@@ -40,9 +40,6 @@ public class UserAgentManager {
 		Long content = agent.getId();
 		if (agent.hasLogin()) {
 			try {
-				// FIXME No Context! Not executed in a L2pThread environment!
-//				Envelope envName = Context.getCurrent()
-//						.createUnencryptedEnvelope(PREFIX_USER_NAME + agent.getLoginName().toLowerCase(), content);
 				Envelope envName = node.createUnencryptedEnvelope(PREFIX_USER_NAME + agent.getLoginName().toLowerCase(),
 						content);
 				node.storeEnvelope(envName, agent);
@@ -55,8 +52,8 @@ public class UserAgentManager {
 
 		if (agent.hasEmail()) {
 			try {
-				Envelope envMail = Context.getCurrent()
-						.createUnencryptedEnvelope(PREFIX_USER_MAIL + agent.getEmail().toLowerCase(), content);
+				Envelope envMail = node.createUnencryptedEnvelope(PREFIX_USER_MAIL + agent.getEmail().toLowerCase(),
+						content);
 				node.storeEnvelope(envMail, agent);
 			} catch (EnvelopeAlreadyExistsException e) {
 				throw new DuplicateEmailException();
@@ -88,7 +85,7 @@ public class UserAgentManager {
 	 */
 	public long getAgentIdByLogin(String name) throws AgentNotKnownException {
 		try {
-			Envelope env = Context.getCurrent().fetchEnvelope(PREFIX_USER_NAME + name.toLowerCase());
+			Envelope env = node.fetchEnvelope(PREFIX_USER_NAME + name.toLowerCase());
 			return (Long) env.getContent();
 		} catch (StorageException e) {
 			throw new AgentNotKnownException("Username not found!", e);
@@ -106,7 +103,7 @@ public class UserAgentManager {
 	 */
 	public long getAgentIdByEmail(String email) throws AgentNotKnownException {
 		try {
-			Envelope env = Context.getCurrent().fetchEnvelope(PREFIX_USER_MAIL + email.toLowerCase());
+			Envelope env = node.fetchEnvelope(PREFIX_USER_MAIL + email.toLowerCase());
 			return (Long) env.getContent();
 		} catch (StorageException e) {
 			throw new AgentNotKnownException("Email not found!", e);
