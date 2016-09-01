@@ -16,7 +16,7 @@ import i5.las2peer.persistency.Envelope;
 public class StoreProcessHelper implements StorageStoreResultHandler, StorageCollisionHandler, StorageExceptionHandler {
 
 	private Exception exception;
-	private Integer successfulOperations = -1;
+	private int successfulOperations = -1;
 
 	@Override
 	public void onResult(Serializable serializable, int successfulOperations) {
@@ -52,7 +52,7 @@ public class StoreProcessHelper implements StorageStoreResultHandler, StorageCol
 		}
 	}
 
-	public Integer getResult() throws Exception {
+	public int getResult() throws Exception {
 		synchronized (this) {
 			if (exception != null) {
 				throw exception;

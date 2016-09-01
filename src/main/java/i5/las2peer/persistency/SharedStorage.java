@@ -145,7 +145,7 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 		long startWait = System.nanoTime();
 		while (System.nanoTime() - startWait < timeoutMs * 1000000) {
 			try {
-				if (resultHelper.getResult() != null) {
+				if (resultHelper.getResult() >= 0) {
 					return;
 				}
 			} catch (Exception e) {
