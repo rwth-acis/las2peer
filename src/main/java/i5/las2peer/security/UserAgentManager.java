@@ -1,6 +1,7 @@
 package i5.las2peer.security;
 
 import i5.las2peer.api.exceptions.EnvelopeAlreadyExistsException;
+import i5.las2peer.api.exceptions.EnvelopeNotFoundException;
 import i5.las2peer.api.exceptions.StorageException;
 import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.p2p.AgentNotKnownException;
@@ -40,8 +41,14 @@ public class UserAgentManager {
 		Long content = agent.getId();
 		if (agent.hasLogin()) {
 			try {
-				Envelope envName = node.createUnencryptedEnvelope(PREFIX_USER_NAME + agent.getLoginName().toLowerCase(),
-						content);
+				String identifier = PREFIX_USER_NAME + agent.getLoginName().toLowerCase();
+				Envelope envName = null;
+				try {
+					Envelope stored = node.fetchEnvelope(identifier);
+					envName = node.createUnencryptedEnvelope(stored, content);
+				} catch (EnvelopeNotFoundException e) {
+					envName = node.createUnencryptedEnvelope(identifier, content);
+				}
 				node.storeEnvelope(envName, agent);
 			} catch (EnvelopeAlreadyExistsException e) {
 				throw new DuplicateLoginNameException();
@@ -52,8 +59,13 @@ public class UserAgentManager {
 
 		if (agent.hasEmail()) {
 			try {
-				Envelope envMail = node.createUnencryptedEnvelope(PREFIX_USER_MAIL + agent.getEmail().toLowerCase(),
-						content);
+				String identifier = PREFIX_USER_MAIL + agent.getEmail().toLowerCase();
+				Envelope envMail = null;
+				try {
+					envMail = node.fetchEnvelope(identifier);
+				} catch (EnvelopeNotFoundException e) {
+					envMail = node.createUnencryptedEnvelope(identifier, content);
+				}
 				node.storeEnvelope(envMail, agent);
 			} catch (EnvelopeAlreadyExistsException e) {
 				throw new DuplicateEmailException();
