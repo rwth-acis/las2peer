@@ -114,7 +114,6 @@ public class Mediator implements MessageReceiver {
 	 * 
 	 * @param message
 	 * @param context
-	 * 
 	 * @return true, if a message had been treated successfully
 	 */
 	public boolean workOnMessage(Message message, Context context) {
@@ -161,9 +160,7 @@ public class Mediator implements MessageReceiver {
 	 * @param method
 	 * @param parameters
 	 * @param preferLocal if a local running service should be preferred
-	 * 
 	 * @return result of the method invocation
-	 * 
 	 * @throws L2pSecurityException
 	 * @throws InterruptedException
 	 * @throws TimeoutException
@@ -185,9 +182,7 @@ public class Mediator implements MessageReceiver {
 	 * @param method
 	 * @param parameters
 	 * @param preferLocal if a local running service should be preferred
-	 * 
 	 * @return result of the method invocation
-	 * 
 	 * @throws L2pSecurityException
 	 * @throws InterruptedException
 	 * @throws TimeoutException
@@ -240,7 +235,6 @@ public class Mediator implements MessageReceiver {
 	 * Unregisters all handlers of the given class.
 	 * 
 	 * @param cls
-	 * 
 	 * @return number of successfully removed message handlers
 	 */
 	public int unregisterMessageHandlerClass(Class<?> cls) {
@@ -263,7 +257,6 @@ public class Mediator implements MessageReceiver {
 	 * Unregisters all handlers of the given class.
 	 * 
 	 * @param classname
-	 * 
 	 * @return number of successfully removed message handlers
 	 */
 	public int unregisterMessageHandlerClass(String classname) {
@@ -279,7 +272,6 @@ public class Mediator implements MessageReceiver {
 	 * Is the given message handler registered at this mediator?
 	 * 
 	 * @param handler
-	 * 
 	 * @return true, if at least one message handler is registered to this mediator
 	 */
 	public boolean hasMessageHandler(MessageHandler handler) {

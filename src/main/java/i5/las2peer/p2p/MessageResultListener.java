@@ -210,7 +210,6 @@ public class MessageResultListener {
 	 * sleep until a result has been received.
 	 * 
 	 * @param sleepTimeMs how long to sleep between checks
-	 * 
 	 * @throws InterruptedException
 	 */
 	public void waitForOneAnswer(int sleepTimeMs) throws InterruptedException {

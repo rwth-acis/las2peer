@@ -53,7 +53,6 @@ public abstract class ServiceHelper {
 	 * 
 	 * @param subClass
 	 * @param superClass
-	 * 
 	 * @return true, if the first parameter class is a subclass of the second one
 	 */
 	public static boolean isSubclass(Class<?> subClass, Class<?> superClass) {

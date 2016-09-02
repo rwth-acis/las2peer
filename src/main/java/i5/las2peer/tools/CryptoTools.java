@@ -132,9 +132,7 @@ public class CryptoTools {
 	 * 
 	 * @param passphrase The secret that is used to generate the key.
 	 * @param salt A salt that is used with the given passphrase.
-	 * 
 	 * @return a symmetric key for the given passphrase
-	 * 
 	 * @throws CryptoException If the selected algorithm does not exist or an issue with the given key occurs.
 	 */
 	public static SecretKey generateKeyForPassphrase(String passphrase, byte[] salt) throws CryptoException {
@@ -158,9 +156,7 @@ public class CryptoTools {
 	 * @param object The data that is encrypted.
 	 * @param passphrase The secret that is used to encrypt the given data.
 	 * @param salt A salt that is used with the given passphrase.
-	 * 
 	 * @return encrypted content
-	 * 
 	 * @throws CryptoException If an issue occurs with encryption.
 	 * @throws SerializationException If an issue occurs with deserializing the given data.
 	 */
@@ -192,9 +188,7 @@ public class CryptoTools {
 	 * @param content The data that is decrypted.
 	 * @param salt A salt that is used with the given passphrase.
 	 * @param passphrase The secret that is used to decrypt the given data.
-	 * 
 	 * @return decrypted and deserialized content
-	 * 
 	 * @throws CryptoException If an issue occurs with decryption.
 	 * @throws SerializationException If an issue occurs with deserializing the given data.
 	 */
@@ -224,7 +218,6 @@ public class CryptoTools {
 	 * generate a random salt
 	 * 
 	 * @return a random salt for later use
-	 * 
 	 * @throws CryptoException If the selected salt algorithm does not exist.
 	 * 
 	 */
@@ -245,9 +238,7 @@ public class CryptoTools {
 	 * 
 	 * @param data The encrypted data that is decrypted.
 	 * @param key The key that is used to decrypt the given data.
-	 * 
 	 * @return decrypted and deserialized content as java object
-	 * 
 	 * @throws SerializationException If an issue occurs with deserializing the given data.
 	 * @throws CryptoException If an decryption issue occurs.
 	 */
@@ -278,9 +269,7 @@ public class CryptoTools {
 	 * 
 	 * @param baCipherData The encrypted data that is decrypted.
 	 * @param key The key that is used to decrypt the given data.
-	 * 
 	 * @return decrypted content as byte array
-	 * 
 	 * @throws CryptoException If an issue occurs with decryption.
 	 */
 	public static byte[] decryptSymmetric(byte[] baCipherData, SecretKey key) throws CryptoException {
@@ -306,9 +295,7 @@ public class CryptoTools {
 	 * 
 	 * @param content The object that is encrypted.
 	 * @param key The key that is used to encrypt the given object.
-	 * 
 	 * @return encrypted content as byte array
-	 * 
 	 * @throws CryptoException If an issue occurs with encryption.
 	 * @throws SerializationException If an issue occurs with deserializing the given data.
 	 */
@@ -322,9 +309,7 @@ public class CryptoTools {
 	 * 
 	 * @param content The object that is encrypted.
 	 * @param key The key that is used to encrypt the given object.
-	 * 
 	 * @return encrypted content as byte array
-	 * 
 	 * @throws CryptoException If an issue occurs with encryption.
 	 */
 	public static byte[] encryptAsymmetric(byte[] content, PublicKey key) throws CryptoException {
@@ -351,9 +336,7 @@ public class CryptoTools {
 	 * 
 	 * @param content The content that is signed with the given key.
 	 * @param key The key that is used to sign the given content.
-	 * 
 	 * @return signature as byte array
-	 * 
 	 * @throws CryptoException If an issue occurs with the given key or selected algorithm.
 	 */
 	public static byte[] signContent(byte[] content, PrivateKey key) throws CryptoException {
@@ -379,9 +362,7 @@ public class CryptoTools {
 	 * @param signature The (possibly malicious) signature that is attached to the content.
 	 * @param content The (possibly malicious) content that is verified.
 	 * @param key The key that is verfied as the trusted signer.
-	 * 
 	 * @return true, if verification is successful
-	 * 
 	 * @throws VerificationFailedException If an issue occurs with the given key or selected algorithm.
 	 */
 	public static boolean verifySignature(byte[] signature, byte[] content, PublicKey key)
@@ -430,9 +411,7 @@ public class CryptoTools {
 	 * 
 	 * @param baPlainData The data that is encrypted.
 	 * @param symmetricKey The key that is used to encrypt the given data.
-	 * 
 	 * @return encrypted content as byte array
-	 * 
 	 * @throws CryptoException If an issue occurs with encryption.
 	 */
 	public static byte[] encryptSymmetric(byte[] baPlainData, SecretKey symmetricKey) throws CryptoException {
@@ -459,9 +438,7 @@ public class CryptoTools {
 	 * 
 	 * @param plainData The data that is encrypted.
 	 * @param key The key that is used to encrypt the given data.
-	 * 
 	 * @return encrypted content as byte array
-	 * 
 	 * @throws CryptoException If an issue occurs with encryption.
 	 * @throws SerializationException If an issue occurs with deserializing the given data.
 	 */

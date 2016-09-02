@@ -88,7 +88,6 @@ public class L2pNodeLauncher {
 	 * Get the envelope with the given id
 	 * 
 	 * @param id
-	 * 
 	 * @return the XML-representation of an envelope as a String
 	 * @throws StorageException
 	 * @throws EnvelopeNotFoundException
@@ -372,7 +371,6 @@ public class L2pNodeLauncher {
 	 * 
 	 * @param classname
 	 * @return the loaded connector
-	 * 
 	 * @throws ClassNotFoundException
 	 * @throws InstantiationException
 	 * @throws IllegalAccessException
@@ -390,7 +388,6 @@ public class L2pNodeLauncher {
 	 * 
 	 * @param id id or login of the agent to load
 	 * @param passphrase passphrase to unlock the private key of the agent
-	 * 
 	 * @return the registered agent
 	 */
 	public boolean registerUserAgent(String id, String passphrase) {
@@ -419,7 +416,6 @@ public class L2pNodeLauncher {
 	 * Make sure, that the private key of the agent is unlocked before registering
 	 * 
 	 * @param agent
-	 * 
 	 * @throws L2pSecurityException
 	 * @throws AgentAlreadyRegisteredException
 	 * @throws AgentException
@@ -437,7 +433,6 @@ public class L2pNodeLauncher {
 	 * 
 	 * @param agent
 	 * @param passphrase
-	 * 
 	 * @throws L2pSecurityException
 	 * @throws AgentAlreadyRegisteredException
 	 * @throws AgentException
@@ -481,7 +476,6 @@ public class L2pNodeLauncher {
 	 * The arguments must be passed via ONE String separated by "-".
 	 * 
 	 * @see #registerUserAgent
-	 * 
 	 * @param serviceIdentifier
 	 * @param serviceMethod
 	 * @param parameters pass an empty string if you want to call a method without parameters
@@ -501,7 +495,6 @@ public class L2pNodeLauncher {
 	 * Invokes a service method as the current agent, choosing an approptiate service version.
 	 * 
 	 * @see #registerUserAgent
-	 * 
 	 * @param serviceIdentifier
 	 * @param serviceMethod
 	 * @param parameters
@@ -525,9 +518,7 @@ public class L2pNodeLauncher {
 	 * Returns a list of available methods for the given service class name.
 	 * 
 	 * @param serviceNameVersion Exact service name and version, same syntax as in {@link #startService(String)}
-	 * 
 	 * @return list of methods encapsulated in a ListMethodsContent
-	 * 
 	 * @throws L2pSecurityException
 	 * @throws AgentNotKnownException
 	 * @throws InterruptedException
@@ -648,7 +639,6 @@ public class L2pNodeLauncher {
 	 * start the service defined by the given (Service-)Agent
 	 * 
 	 * @param serviceAgent
-	 * 
 	 * @throws AgentAlreadyRegisteredException
 	 * @throws L2pSecurityException
 	 * @throws AgentException
@@ -683,7 +673,6 @@ public class L2pNodeLauncher {
 	 * load an agent from an XML file and return it for later usage
 	 * 
 	 * @param filename name of the file to load
-	 * 
 	 * @return the loaded agent
 	 * @throws AgentException
 	 */
@@ -1056,7 +1045,6 @@ public class L2pNodeLauncher {
 	 * Hint: with "service-directory=.." you can set the directory your service jars are located at.
 	 * 
 	 * @param argv
-	 * 
 	 * @throws InterruptedException
 	 * @throws MalformedXMLException
 	 * @throws IOException

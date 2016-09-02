@@ -124,9 +124,7 @@ public class FileSystemRepository implements Repository {
 	 * get a library matching name and version of the given identifier
 	 * 
 	 * @param lib
-	 * 
 	 * @return a LoadedLibrary for the requested library identifier
-	 * 
 	 * @throws LibraryNotFoundException
 	 */
 	@Override

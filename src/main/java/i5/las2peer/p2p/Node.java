@@ -42,6 +42,7 @@ import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.logging.NodeObserver;
 import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.logging.monitoring.MonitoringObserver;
+import i5.las2peer.p2p.pastry.PastryStorageException;
 import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.persistency.Envelope;
 import i5.las2peer.persistency.NodeStorageInterface;
@@ -153,7 +154,7 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	 * Creates a new node, if the standardObserver flag is true, an observer logging all events to a simple plain text
 	 * log file will be generated. If not, no observer will be used at startup.
 	 * 
-	 * @param standardObserver
+	 * @param standardObserver If true, the node uses the default logger.
 	 */
 	public Node(boolean standardObserver) {
 		this(null, standardObserver);
@@ -167,15 +168,15 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	}
 
 	/**
-	 * @param baseClassLoader
+	 * @param baseClassLoader A default class loader used by this node.
 	 */
 	public Node(L2pClassManager baseClassLoader) {
 		this(baseClassLoader, true);
 	}
 
 	/**
-	 * @param baseClassLoader
-	 * @param standardObserver
+	 * @param baseClassLoader A default class loader used by this node.
+	 * @param standardObserver If true, the node uses the default logger.
 	 */
 	public Node(L2pClassManager baseClassLoader, boolean standardObserver) {
 		this(baseClassLoader, standardObserver, false);
@@ -185,9 +186,9 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	 * Generates a new Node with the given baseClassLoader. The Observer-flags determine, which observers will be
 	 * registered at startup.
 	 * 
-	 * @param baseClassLoader
-	 * @param standardObserver
-	 * @param monitoringObserver
+	 * @param baseClassLoader A default class loader used by this node.
+	 * @param standardObserver If true, the node uses the default logger.
+	 * @param monitoringObserver If true, the monitoring is enabled for this node.
 	 */
 	public Node(L2pClassManager baseClassLoader, boolean standardObserver, boolean monitoringObserver) {
 		if (standardObserver) {
@@ -220,7 +221,7 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 
 	/**
 	 * Creates an observer for a standard log-file. The name of the log-file will contain the id of the node to prevent
-	 * conflicts if running multiple nodes on the same machine.
+	 * The event for this notification. conflicts if running multiple nodes on the same machine.
 	 */
 	private void initStandardLogfile() {
 		addObserver(L2pLogger.getInstance(Node.class.getName()));
@@ -229,7 +230,7 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	/**
 	 * Adds an observer to this node.
 	 * 
-	 * @param observer
+	 * @param observer The observer that should be notified.
 	 */
 	public void addObserver(NodeObserver observer) {
 		observers.add(observer);
@@ -238,7 +239,7 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	/**
 	 * Removes an observer from this node.
 	 * 
-	 * @param observer
+	 * @param observer The observer that should be removed.
 	 */
 	public void removeObserver(NodeObserver observer) {
 		observers.remove(observer);
@@ -247,7 +248,7 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	/**
 	 * Enables the service monitoring for the requested Service.
 	 * 
-	 * @param service
+	 * @param service The service that should be monitored.
 	 */
 	public void setServiceMonitoring(ServiceAgent service) {
 		observerNotice(Event.SERVICE_ADD_TO_MONITORING, this.getNodeId(), service.getId(), null, null,
@@ -257,8 +258,8 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	/**
 	 * Logs an event to all observers.
 	 * 
-	 * @param event
-	 * @param remarks
+	 * @param event The event for this notification.
+	 * @param remarks Some free text note or description about this event.
 	 */
 	public void observerNotice(Event event, String remarks) {
 		Long sourceAgentId = null; // otherwise calls are ambigious
@@ -268,9 +269,9 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	/**
 	 * Logs an event to all observers.
 	 * 
-	 * @param event
+	 * @param event The event for this notification.
 	 * @param sourceNode
-	 * @param remarks
+	 * @param remarks Some free text note or description about this event.
 	 */
 	public void observerNotice(Event event, Object sourceNode, String remarks) {
 		Long sourceAgentId = null; // otherwise calls are ambigious
@@ -280,10 +281,10 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	/**
 	 * Logs an event to all observers.
 	 * 
-	 * @param event
+	 * @param event The event for this notification.
 	 * @param sourceNode
 	 * @param sourceAgentId
-	 * @param remarks
+	 * @param remarks Some free text note or description about this event.
 	 */
 	public void observerNotice(Event event, Object sourceNode, long sourceAgentId, String remarks) {
 		observerNotice(event, sourceNode, sourceAgentId, null, null, remarks);
@@ -292,10 +293,10 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	/**
 	 * Logs an event to all observers.
 	 * 
-	 * @param event
+	 * @param event The event for this notification.
 	 * @param sourceNode
 	 * @param sourceAgent
-	 * @param remarks
+	 * @param remarks Some free text note or description about this event.
 	 */
 	public void observerNotice(Event event, Object sourceNode, MessageReceiver sourceAgent, String remarks) {
 		Long sourceAgentId = null;
@@ -308,12 +309,12 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	/**
 	 * Logs an event to all observers.
 	 * 
-	 * @param event
+	 * @param event The event for this notification.
 	 * @param sourceNode
 	 * @param sourceAgent
 	 * @param destinationNode
 	 * @param destinationAgent
-	 * @param remarks
+	 * @param remarks Some free text note or description about this event.
 	 */
 	public void observerNotice(Event event, Object sourceNode, Agent sourceAgent, Object destinationNode,
 			Agent destinationAgent, String remarks) {
@@ -331,12 +332,12 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	/**
 	 * Logs an event to all observers.
 	 * 
-	 * @param event
+	 * @param event The event for this notification.
 	 * @param sourceNode
 	 * @param sourceAgentId
 	 * @param destinationNode
 	 * @param destinationAgentId
-	 * @param remarks
+	 * @param remarks Some free text note or description about this event.
 	 */
 	public void observerNotice(Event event, Object sourceNode, Long sourceAgentId, Object destinationNode,
 			Long destinationAgentId, String remarks) {
@@ -356,7 +357,7 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	 * Tries to specify an ip address and a port for an actual p2p node ({@link i5.las2peer.p2p.PastryNodeImpl} or
 	 * {@link rice.pastry.NodeHandle}).
 	 * 
-	 * @param node
+	 * @param node The node that should be represented.
 	 * @return string representation for the given node object
 	 */
 	protected String getNodeRepresentation(Object node) {
@@ -404,7 +405,7 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	/**
 	 * Sets the status of this node.
 	 * 
-	 * @param newstatus
+	 * @param newstatus The new status for this node.
 	 */
 	protected void setStatus(NodeStatus newstatus) {
 		if (newstatus == NodeStatus.RUNNING && this instanceof PastryNodeImpl) {
@@ -430,7 +431,7 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	/**
 	 * Sets the nodes information filename.
 	 * 
-	 * @param filename
+	 * @param filename The filename for the information file.
 	 */
 	public void setInformationFilename(String filename) {
 		if (new File(filename).exists()) {
@@ -442,7 +443,7 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	 * Gets information about this node including all registered service classes.
 	 * 
 	 * @return node information
-	 * @throws CryptoException
+	 * @throws CryptoException If an issue occurs with the given key or selected algorithm.
 	 */
 	public NodeInformation getNodeInformation() throws CryptoException {
 		NodeInformation result = new NodeInformation(getRegisteredServices());
@@ -467,7 +468,6 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	 * Gets information about a distant node.
 	 * 
 	 * @param nodeId
-	 * 
 	 * @return information about the node
 	 * @throws NodeNotFoundException
 	 */
@@ -706,7 +706,6 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	 * @param message
 	 * @param atNodeId
 	 * @param listener a listener for getting the result separately
-	 * 
 	 * @throws AgentNotKnownException
 	 * @throws NodeNotFoundException
 	 * @throws L2pSecurityException
@@ -719,7 +718,6 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	 * 
 	 * @param message
 	 * @param atNodeId
-	 * 
 	 * @throws AgentNotKnownException
 	 * @throws NodeNotFoundException
 	 * @throws L2pSecurityException
@@ -736,7 +734,6 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	 * Make sure, that the {@link #baseClassLoader} method is used for answer messages.
 	 * 
 	 * @param message
-	 * 
 	 * @throws AgentNotKnownException the designated recipient is not known at this node
 	 * @throws MessageException
 	 * @throws L2pSecurityException
@@ -823,7 +820,6 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	 * @param agentId id of the agent to look for
 	 * @param hintOfExpectedCount a hint for the expected number of results (e.g. to wait for)
 	 * @return array with the IDs of nodes, where the given agent is registered
-	 * 
 	 * @throws AgentNotKnownException
 	 */
 	public abstract Object[] findRegisteredAgent(long agentId, int hintOfExpectedCount) throws AgentNotKnownException;
@@ -911,7 +907,6 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	 * Gets a local registered agent by its id.
 	 * 
 	 * @param id
-	 * 
 	 * @return the agent registered to this node
 	 * @throws AgentNotKnownException
 	 */
@@ -968,9 +963,7 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	 * Gets a local registered mediator for the given agent id. If no mediator exists, registers a new one to this node.
 	 * 
 	 * @param agent
-	 * 
 	 * @return the mediator for the given agent
-	 * 
 	 * @throws AgentNotKnownException
 	 * @throws L2pSecurityException
 	 * @throws AgentException
@@ -1113,9 +1106,7 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	 * @param service
 	 * @param method
 	 * @param parameters
-	 * 
 	 * @return result of the method invocation
-	 * 
 	 * @throws AgentNotKnownException cannot find the executing agent
 	 * @throws L2pSecurityException
 	 * @throws InterruptedException
@@ -1178,7 +1169,6 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	 * Tries to get an instance of the given class as a registered service of this node.
 	 * 
 	 * @param service
-	 * 
 	 * @return the instance of the given service class running at this node
 	 * @throws NoSuchServiceException
 	 */
@@ -1200,9 +1190,7 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	 * @param service
 	 * @param serviceMethod
 	 * @param parameters
-	 * 
 	 * @return result of the method invocation
-	 * 
 	 * @throws L2pSecurityException
 	 * @throws ServiceInvocationException several reasons -- see subclasses
 	 * @throws InterruptedException
@@ -1497,7 +1485,6 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	 * Hands over an answer message to the corresponding listener.
 	 * 
 	 * @param answer
-	 * 
 	 * @return true, if a listener for this answer was notified
 	 */
 	public boolean handoverAnswer(Message answer) {
@@ -1522,9 +1509,7 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	 * Sends a message and wait for one answer message.
 	 * 
 	 * @param m
-	 * 
 	 * @return a (possible) response message
-	 * 
 	 * @throws InterruptedException
 	 * @throws TimeoutException
 	 */
@@ -1548,9 +1533,7 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	 * 
 	 * @param m
 	 * @param atNodeId
-	 * 
 	 * @return a response message
-	 * 
 	 * @throws AgentNotKnownException
 	 * @throws NodeNotFoundException
 	 * @throws L2pSecurityException
@@ -1574,9 +1557,7 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	 * for later use.
 	 * 
 	 * @param agentId
-	 * 
 	 * @return the context for the given agent
-	 * 
 	 * @throws L2pSecurityException
 	 * @throws AgentNotKnownException
 	 */
@@ -1598,7 +1579,6 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	 * Gets a (possibly fresh) context for the given agent.
 	 * 
 	 * @param agent
-	 * 
 	 * @return a context
 	 */
 	protected Context getAgentContext(Agent agent) {

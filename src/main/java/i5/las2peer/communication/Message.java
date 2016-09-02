@@ -120,7 +120,6 @@ public class Message implements XmlAble {
 	 * @param from
 	 * @param to
 	 * @param data
-	 * 
 	 * @throws EncodingFailedException
 	 * @throws L2pSecurityException the private key of the sender is not accessible for signing
 	 * @throws SerializationException
@@ -138,7 +137,6 @@ public class Message implements XmlAble {
 	 * @param to
 	 * @param data
 	 * @param timeOutMs timeout for the validity of the new message
-	 * 
 	 * @throws EncodingFailedException
 	 * @throws L2pSecurityException the private key of the sender is not accessible for signing
 	 * @throws SerializationException
@@ -172,7 +170,6 @@ public class Message implements XmlAble {
 	 * @param from
 	 * @param to
 	 * @param data
-	 * 
 	 * @throws EncodingFailedException
 	 * @throws L2pSecurityException the private key of the sender is not accessible for signing
 	 * @throws SerializationException
@@ -189,7 +186,6 @@ public class Message implements XmlAble {
 	 * @param to
 	 * @param data
 	 * @param timeoutMs timeout for the validity of the new message
-	 * 
 	 * @throws EncodingFailedException
 	 * @throws L2pSecurityException the private key of the sender is not accessible for signing
 	 * @throws SerializationException
@@ -230,7 +226,6 @@ public class Message implements XmlAble {
 	 * @param responseTo
 	 * @param data
 	 * @param timeoutMs timeout for the validity of the new message
-	 * 
 	 * @throws EncodingFailedException
 	 * @throws L2pSecurityException the private key of the sender is not accessible for signing
 	 * @throws SerializationException
@@ -258,7 +253,6 @@ public class Message implements XmlAble {
 	 * 
 	 * @param responseTo
 	 * @param data
-	 * 
 	 * @throws SerializationException
 	 * @throws L2pSecurityException the private key of the sender is not accessible for signing
 	 * @throws EncodingFailedException
@@ -274,7 +268,6 @@ public class Message implements XmlAble {
 	 * @param responseTo
 	 * @param data
 	 * @param timeoutMs
-	 * 
 	 * @throws EncodingFailedException
 	 * @throws L2pSecurityException the private key of the sender is not accessible for signing
 	 * @throws SerializationException
@@ -461,7 +454,6 @@ public class Message implements XmlAble {
 	 * get the content of this message may be Serializable or XmlAble
 	 * 
 	 * @return actual content of the message
-	 * 
 	 * @throws L2pSecurityException the message (envelope) has to be opened (decrypted) first
 	 */
 	public Object getContent() throws L2pSecurityException {
@@ -837,9 +829,7 @@ public class Message implements XmlAble {
 	 * factory: create a message from an XML document
 	 * 
 	 * @param xml
-	 * 
 	 * @return a message generated from the given XML document
-	 * 
 	 * @throws MalformedXMLException
 	 */
 	public static Message createFromXml(String xml) throws MalformedXMLException {

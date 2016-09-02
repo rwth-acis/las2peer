@@ -251,9 +251,7 @@ public class ServiceVersion implements Comparable<ServiceVersion> {
 	 * 
 	 * @param smaller
 	 * @param larger
-	 * 
 	 * @return true, if this version is between the two given ones
-	 * 
 	 * @throws IllegalArgumentException
 	 */
 	public boolean isBetween(String smaller, String larger) {
@@ -276,7 +274,6 @@ public class ServiceVersion implements Comparable<ServiceVersion> {
 	 * if the given object is a String, the string representation of this version is compared to the given string
 	 * 
 	 * @param o
-	 * 
 	 * @return true, if the given object is a version and the same as this one
 	 */
 	@Override

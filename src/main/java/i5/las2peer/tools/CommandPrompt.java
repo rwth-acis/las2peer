@@ -522,7 +522,6 @@ public class CommandPrompt {
 	 * print the value of all given local variables
 	 * 
 	 * @param line
-	 * 
 	 * @return return status code
 	 */
 	public ReturnStatus handlePrint(String line) {
@@ -547,7 +546,6 @@ public class CommandPrompt {
 	 * 
 	 * 
 	 * @param line
-	 * 
 	 * @return return status code
 	 */
 	public ReturnStatus localCommand(String line) {
@@ -767,7 +765,6 @@ public class CommandPrompt {
 	 * start a command line
 	 * 
 	 * @param argv
-	 * 
 	 * @throws ClassNotFoundException
 	 */
 	public static void main(String[] argv) throws ClassNotFoundException {

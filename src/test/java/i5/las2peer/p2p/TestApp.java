@@ -57,8 +57,8 @@ public class TestApp implements Application {
 	/**
 	 * Called when we receive a message.
 	 * 
-	 * @param id
-	 * @param message
+	 * @param id {@inheritDoc}
+	 * @param message {@inheritDoc}
 	 */
 	@Override
 	public void deliver(Id id, Message message) {
@@ -68,8 +68,8 @@ public class TestApp implements Application {
 	/**
 	 * Called when you hear about a new neighbor. Don't worry about this method for now.
 	 * 
-	 * @param handle
-	 * @param joined
+	 * @param handle {@inheritDoc}
+	 * @param joined {@inheritDoc}
 	 */
 	@Override
 	public void update(NodeHandle handle, boolean joined) {
@@ -79,8 +79,8 @@ public class TestApp implements Application {
 	/**
 	 * Called a message travels along your path. Don't worry about this method for now.
 	 * 
-	 * @param message
-	 * @return
+	 * @param message {@inheritDoc}
+	 * @return {@inheritDoc}
 	 */
 	@Override
 	public boolean forward(RouteMessage message) {

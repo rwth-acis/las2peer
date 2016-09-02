@@ -151,9 +151,7 @@ public class LoadedJarLibrary extends LoadedLibrary {
 	 * factory: create a LoadedJarLibrary from a JAR file and the information contained in its manifest
 	 * 
 	 * @param filename filename of the jar file
-	 * 
 	 * @return a loaded jar library representing the given file
-	 * 
 	 * @throws IOException
 	 * @throws IllegalArgumentException
 	 */

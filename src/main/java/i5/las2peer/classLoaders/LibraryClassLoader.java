@@ -87,9 +87,7 @@ public class LibraryClassLoader extends ClassLoader {
 	 * @param name
 	 * @param resolve
 	 * @param lookUp
-	 * 
 	 * @return class definition of the requested class
-	 * 
 	 * @throws ClassNotFoundException
 	 */
 	protected synchronized Class<?> loadClass(String name, boolean resolve, boolean lookUp)

@@ -64,7 +64,6 @@ public abstract class LocalServiceTestCase {
 	 * service to test.
 	 * 
 	 * @return the service agent either created or loaded
-	 * 
 	 * @throws CryptoException
 	 * @throws L2pSecurityException
 	 * @throws AgentException
@@ -203,9 +202,7 @@ public abstract class LocalServiceTestCase {
 	 * @param executing
 	 * @param method
 	 * @param parameters
-	 * 
 	 * @return result of the invocation
-	 * 
 	 * @throws L2pServiceException
 	 * @throws L2pSecurityException
 	 * @throws AgentNotKnownException

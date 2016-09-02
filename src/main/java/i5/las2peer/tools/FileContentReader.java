@@ -19,9 +19,7 @@ public class FileContentReader {
 	 * get the contents of a file as String
 	 * 
 	 * @param filename
-	 * 
 	 * @return contents of the given file as String
-	 * 
 	 * @throws IOException
 	 */
 	public static String read(String filename) throws IOException {
@@ -32,9 +30,7 @@ public class FileContentReader {
 	 * get the contents of a file as String
 	 * 
 	 * @param file
-	 * 
 	 * @return contents of the given file as String
-	 * 
 	 * @throws IOException
 	 */
 	public static String read(File file) throws IOException {
@@ -48,9 +44,7 @@ public class FileContentReader {
 	 * read the content of a Stream and return it as String
 	 * 
 	 * @param is
-	 * 
 	 * @return contents of the given Stream as String
-	 * 
 	 * @throws IOException
 	 */
 	public static String read(InputStream is) throws IOException {

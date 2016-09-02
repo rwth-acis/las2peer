@@ -15,7 +15,7 @@ public class BasicAgentStorage implements AgentStorage {
 
 	/**
 	 * create a basic agent storage with a backupStorage to use, if a requested agent is not stored here (i.e. a
-	 * {@link Node} to look for the requested agent in the whole network
+	 * {@link i5.las2peer.p2p.Node} to look for the requested agent in the whole network
 	 *
 	 * @param backupStorage
 	 */

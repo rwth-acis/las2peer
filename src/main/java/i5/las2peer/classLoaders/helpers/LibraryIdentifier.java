@@ -95,7 +95,6 @@ public class LibraryIdentifier implements Comparable<LibraryIdentifier> {
 	 * is compared to the given string
 	 * 
 	 * @param o
-	 * 
 	 * @return true, if the given object is an identifier and is the same as this
 	 */
 	@Override
@@ -113,7 +112,6 @@ public class LibraryIdentifier implements Comparable<LibraryIdentifier> {
 	 * 
 	 * @param min
 	 * @param max
-	 * 
 	 * @return true, if this version is included in the given range
 	 */
 	public boolean matchesRange(LibraryVersion min, LibraryVersion max) {
@@ -125,7 +123,6 @@ public class LibraryIdentifier implements Comparable<LibraryIdentifier> {
 	 * 
 	 * @param min
 	 * @param max
-	 * 
 	 * @return true, if this version is included in the given range
 	 */
 	public boolean matchesRange(String min, String max) {

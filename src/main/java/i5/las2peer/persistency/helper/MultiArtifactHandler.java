@@ -24,9 +24,8 @@ public class MultiArtifactHandler implements StorageArtifactHandler, StorageExce
 	 * Initiates this lookup result collection with the given first part. The number of parts is retrieved from the
 	 * given first part.
 	 *
-	 * @param idFactory A pastry id factory to generate an id for this envelope.
-	 * @param firstPart The first part of this fetch operation.
-	 * @param envelopeHandler The envelope handler that should be called on success.
+	 * @param numberOfParts The number of artifacts that must be retrieved to consider a full set.
+	 * @param partsHandler The result handler that gets all retrieved parts as a list.
 	 * @param exceptionHandler The exception handler that should be called, if an exception occurs.
 	 */
 	public MultiArtifactHandler(int numberOfParts, StoragePartsHandler partsHandler,

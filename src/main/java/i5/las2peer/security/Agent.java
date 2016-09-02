@@ -179,7 +179,6 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	 * 
 	 * @param crypted The encrypted content that is decrypted using the agents private key.
 	 * @return Returns a {@link javax.crypto.SecretKey} decrypted from the crypted input and the agent's private key
-	 * 
 	 * @throws L2pSecurityException the private key has not been unlocked yet
 	 * @throws CryptoException If an issue occurs with decryption.
 	 * @throws SerializationException
@@ -195,7 +194,6 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	 * initializes the object for signing with the agent's private key.
 	 * 
 	 * @return a {@link Signature java.security.Signature}
-	 * 
 	 * @throws L2pSecurityException the private key has not been unlocked yet
 	 * @throws InvalidKeyException
 	 * @throws NoSuchAlgorithmException
@@ -210,9 +208,7 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	 * Uses the {@link i5.las2peer.tools.CryptoTools} to sign the passed data with the agent's private key.
 	 * 
 	 * @param plainData
-	 * 
 	 * @return a signed version of the input
-	 * 
 	 * @throws L2pSecurityException the private key has not been unlocked yet
 	 * @throws CryptoException
 	 */
@@ -272,7 +268,6 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	 * <i>Make sure, overriding methods do a call of this method!</i>
 	 * 
 	 * @param n
-	 * 
 	 * @throws AgentException
 	 * 
 	 */
@@ -301,9 +296,7 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	 * {@link ServiceAgent}. Creation of {@link MonitoringAgent}s is not supported.
 	 * 
 	 * @param xml
-	 * 
 	 * @return an agent
-	 * 
 	 * @throws MalformedXMLException
 	 */
 	public static Agent createFromXml(String xml) throws MalformedXMLException {

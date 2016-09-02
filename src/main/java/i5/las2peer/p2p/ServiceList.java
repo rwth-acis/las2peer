@@ -44,7 +44,6 @@ public class ServiceList implements Serializable {
 	 * Returns an array with versions of the given servie name
 	 * 
 	 * @param serviceName the service's name
-	 * 
 	 * @return
 	 */
 	public String[] getVersions(String serviceName) {

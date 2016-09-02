@@ -43,7 +43,6 @@ public class Context implements AgentStorage, ContextStorageInterface {
 	 * 
 	 * @param mainAgent
 	 * @param localNode
-	 * 
 	 * @throws L2pSecurityException
 	 */
 	public Context(Node localNode, Agent mainAgent) throws L2pSecurityException {
@@ -60,7 +59,6 @@ public class Context implements AgentStorage, ContextStorageInterface {
 	 * @param localNode
 	 * @param mainAgent
 	 * @param remoteNodeReference
-	 * 
 	 * @throws L2pSecurityException
 	 */
 	// TODO is this used anywhere?
@@ -91,9 +89,7 @@ public class Context implements AgentStorage, ContextStorageInterface {
 	 * Tries to open the given id for this context.
 	 * 
 	 * @param groupId
-	 * 
 	 * @return the unlocked GroupAgent of the given id
-	 * 
 	 * @throws AgentNotKnownException
 	 * @throws L2pSecurityException
 	 */
@@ -392,7 +388,6 @@ public class Context implements AgentStorage, ContextStorageInterface {
 	 * Tries to unlock the private key of the main agent.
 	 * 
 	 * @param passphrase
-	 * 
 	 * @throws L2pSecurityException
 	 */
 	public void unlockMainAgent(String passphrase) throws L2pSecurityException {

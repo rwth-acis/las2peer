@@ -20,9 +20,7 @@ public class XmlTools {
 	 * 
 	 * @param xml
 	 * @param classname
-	 * 
 	 * @return deserialized object
-	 * 
 	 * @throws MalformedXMLException
 	 * @throws SerializationException
 	 * @throws ClassNotFoundException
@@ -39,9 +37,7 @@ public class XmlTools {
 	 * 
 	 * @param xml
 	 * @param c
-	 * 
 	 * @return deserialized object
-	 * 
 	 * @throws MalformedXMLException
 	 * @throws SerializationException
 	 */

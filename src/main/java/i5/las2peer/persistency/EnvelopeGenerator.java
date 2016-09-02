@@ -43,9 +43,7 @@ public class EnvelopeGenerator {
 	 * Loads an agent from the given XML file name.
 	 * 
 	 * @param filename
-	 * 
 	 * @return a PassphraseAgent
-	 * 
 	 * @throws IOException
 	 * @throws MalformedXMLException
 	 */
@@ -111,9 +109,7 @@ public class EnvelopeGenerator {
 	 * 
 	 * @param classname
 	 * @param value
-	 * 
 	 * @return a serializable
-	 * 
 	 * @throws ClassNotFoundException
 	 * @throws SecurityException
 	 * @throws NoSuchMethodException

@@ -77,7 +77,6 @@ public class BundleClassManager {
 	 *
 	 * @param resourceName
 	 * @param calledFromChild
-	 * 
 	 * @return an URL
 	 */
 	public URL findResource(String resourceName, LibraryClassLoader calledFromChild) {

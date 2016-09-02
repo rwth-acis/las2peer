@@ -42,7 +42,6 @@ public interface MessageReceiver {
 	 * Called by a {@link i5.las2peer.p2p.Node} on registering a MessageReceiver to the network.
 	 * 
 	 * @param node the node this receiver has been registered to
-	 * 
 	 * @throws AgentException
 	 * 
 	 */

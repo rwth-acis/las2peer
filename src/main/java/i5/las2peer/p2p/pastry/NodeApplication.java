@@ -135,7 +135,6 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	 * get information about a foreign node
 	 * 
 	 * @param nodeHandle
-	 * 
 	 * @return node information
 	 * @throws NodeNotFoundException
 	 */
@@ -278,7 +277,6 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	 * 
 	 * @param m
 	 * @param to
-	 * 
 	 * @throws MalformedXMLException
 	 * @throws L2pSecurityException
 	 * @throws AgentNotKnownException
@@ -341,7 +339,6 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	 * 
 	 * @param agentId
 	 * @param expectedAnswers
-	 * 
 	 * @return a collections of node handles where the requested agent is registered to
 	 */
 	public Collection<NodeHandle> searchAgent(long agentId, int expectedAnswers) {
@@ -399,7 +396,6 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	 * look for a running/registered version of an agent in the p2p net
 	 * 
 	 * @param agentId
-	 * 
 	 * @return a collection of node handles running the requested agent
 	 */
 	public Collection<NodeHandle> searchAgent(long agentId) {
@@ -494,7 +490,6 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	 * generate an id string for topic corresponding to a l2p agent
 	 * 
 	 * @param agent
-	 * 
 	 * @return a topic identifier for the agent to subscribe to
 	 */
 	public static String getAgentTopicId(Agent agent) {
@@ -505,7 +500,6 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	 * generate an id string for topic corresponding to a l2p agent
 	 * 
 	 * @param id
-	 * 
 	 * @return a topic identifier for the agent to subscribe to
 	 */
 	public static String getAgentTopicId(long id) {
@@ -516,7 +510,6 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	 * create a Scribe topic for the given message receiver (the underlying agent resp.)
 	 * 
 	 * @param receiver
-	 * 
 	 * @return the topic corresponding to the given message receiver
 	 */
 	private Topic getAgentTopic(MessageReceiver receiver) {

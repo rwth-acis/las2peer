@@ -21,9 +21,6 @@ import i5.simpleXML.XMLSyntaxException;
 
 /**
  * A NodeInformation gives basic information about a node.
- * 
- * 
- *
  */
 public class NodeInformation implements XmlAble {
 
@@ -267,9 +264,7 @@ public class NodeInformation implements XmlAble {
 	 * factory: create a NodeInformation instance from a XML file
 	 * 
 	 * @param filename
-	 * 
 	 * @return the node information contained in the given XML file
-	 * 
 	 * @throws MalformedXMLException
 	 * @throws IOException
 	 * @throws XMLSyntaxException
@@ -284,7 +279,6 @@ public class NodeInformation implements XmlAble {
 	 * 
 	 * @param filename
 	 * @param serviceAgents
-	 * 
 	 * @return a node information
 	 * 
 	 * 
@@ -304,9 +298,7 @@ public class NodeInformation implements XmlAble {
 	 * factory create a node information instance from an XML string
 	 * 
 	 * @param xml
-	 * 
 	 * @return node information contained in the given XML string
-	 * 
 	 * @throws MalformedXMLException
 	 * @throws XMLSyntaxException
 	 */

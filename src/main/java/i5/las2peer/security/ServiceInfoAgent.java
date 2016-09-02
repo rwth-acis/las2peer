@@ -136,7 +136,6 @@ public class ServiceInfoAgent extends PassphraseAgent {
 	 * Returns an array of currently registered service versions
 	 * 
 	 * @param serviceName service's main class
-	 * 
 	 * @return an array of {@link i5.las2peer.p2p.ServiceNameVersion}s
 	 * @throws EnvelopeException
 	 */
@@ -149,7 +148,6 @@ public class ServiceInfoAgent extends PassphraseAgent {
 	 * 
 	 * @param envelopeName
 	 * @param dataCls
-	 * 
 	 * @return {@link i5.las2peer.p2p.ServiceList}
 	 * @throws EnvelopeException
 	 */
@@ -211,7 +209,6 @@ public class ServiceInfoAgent extends PassphraseAgent {
 	 * 
 	 * @param envelopeName
 	 * @param cls
-	 * 
 	 * @return
 	 */
 	private static Envelope fetchEnvelope(String envelopeName, Class<? extends Serializable> cls) {
@@ -321,7 +318,6 @@ public class ServiceInfoAgent extends PassphraseAgent {
 	 * Resets the stored {@link i5.las2peer.p2p.ServiceList}
 	 * 
 	 * @param node
-	 * 
 	 * @throws EnvelopeException
 	 * @throws AgentException
 	 * @throws L2pSecurityException

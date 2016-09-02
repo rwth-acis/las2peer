@@ -8,6 +8,7 @@ import java.lang.reflect.Modifier;
 import i5.las2peer.execution.L2pServiceException;
 import i5.las2peer.execution.L2pThread;
 import i5.las2peer.execution.NoSuchServiceMethodException;
+import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.Node;
@@ -103,10 +104,6 @@ import i5.las2peer.security.ServiceAgent;
  * <p>
  * For further tools like (testing) envelope XML file generators or the like, have a look into the classes of the
  * {@link i5.las2peer.tools} package. There are e.g. some command line generators for XML helper files.
- * 
- * 
- * 
- *
  */
 public abstract class Service extends Configurable {
 
@@ -124,9 +121,7 @@ public abstract class Service extends Configurable {
 	 * Executes a service method.
 	 * 
 	 * @param method the service method
-	 * 
 	 * @return result of the method invocation
-	 * 
 	 * @throws SecurityException
 	 * @throws NoSuchServiceMethodException
 	 * @throws IllegalArgumentException
@@ -144,9 +139,7 @@ public abstract class Service extends Configurable {
 	 * 
 	 * @param method the service method
 	 * @param parameters
-	 * 
 	 * @return result of the method invocation
-	 * 
 	 * @throws SecurityException
 	 * @throws NoSuchServiceMethodException
 	 * @throws IllegalArgumentException
@@ -175,9 +168,7 @@ public abstract class Service extends Configurable {
 	 *            If no version is specified, the newest version is picked.
 	 * @param method the service method
 	 * @param parameters list of parameters
-	 * 
 	 * @return result of the method invocation
-	 * 
 	 * @throws AgentNotKnownException
 	 * @throws L2pServiceException
 	 * @throws L2pSecurityException
@@ -205,9 +196,7 @@ public abstract class Service extends Configurable {
 	 *            If no version is specified, the newest version is picked.
 	 * @param method the service method
 	 * @param parameters list of parameters
-	 * 
 	 * @return result of the method invocation
-	 * 
 	 * @throws L2pServiceException
 	 * @throws L2pSecurityException
 	 * @throws AgentNotKnownException
@@ -318,7 +307,6 @@ public abstract class Service extends Configurable {
 	 * Creates a string with all classes from an array of parameters.
 	 * 
 	 * @param params
-	 * 
 	 * @return a string describing a parameter list for the given actual parameters
 	 */
 	public static String getParameterString(Object[] params) {
@@ -337,7 +325,6 @@ public abstract class Service extends Configurable {
 	 * Gets the agent corresponding to this service.
 	 * 
 	 * @return the agent responsible for this service
-	 * 
 	 * @throws AgentNotKnownException
 	 */
 	public final ServiceAgent getAgent() throws AgentNotKnownException {

@@ -7,7 +7,8 @@ import i5.las2peer.persistency.Envelope;
  * This class is used in the collision handling process. It counts the number of collisions (merging attempts) and helps
  * finding a reasonable limit to terminate the merging process.
  *
- * To terminate the merging process a {@link StorageCollisionHandler} should throw an {@link StopMergingException}.
+ * To terminate the merging process a {@link i5.las2peer.api.StorageCollisionHandler} should throw an
+ * {@link StopMergingException}.
  *
  */
 public class MergeCounter {

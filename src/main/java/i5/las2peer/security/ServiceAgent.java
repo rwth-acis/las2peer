@@ -244,7 +244,6 @@ public class ServiceAgent extends PassphraseAgent {
 
 	/**
 	 * @deprecated Please use {@link ServiceAgent#createServiceAgent(ServiceNameVersion, String)} instead
-	 * 
 	 * @param forService
 	 * @param passPhrase
 	 * @return
@@ -294,9 +293,7 @@ public class ServiceAgent extends PassphraseAgent {
 	 * factory: create a new service agent from the given XML representation
 	 * 
 	 * @param xml String containing XML information
-	 * 
 	 * @return a service agent
-	 * 
 	 * @throws MalformedXMLException
 	 */
 	public static ServiceAgent createFromXml(String xml) throws MalformedXMLException {
@@ -320,9 +317,7 @@ public class ServiceAgent extends PassphraseAgent {
 	 * factory: create a service agent from the given xml representation
 	 * 
 	 * @param root
-	 * 
 	 * @return a service agent
-	 * 
 	 * @throws MalformedXMLException
 	 */
 	public static ServiceAgent createFromXml(Element root) throws MalformedXMLException {
@@ -522,7 +517,6 @@ public class ServiceAgent extends PassphraseAgent {
 	 * just use a long hash value of the service class name as id for the agent
 	 * 
 	 * @param service
-	 * 
 	 * @return (hashed) ID for the given service class
 	 */
 	public static long serviceClass2Id(ServiceNameVersion service) {
@@ -543,9 +537,7 @@ public class ServiceAgent extends PassphraseAgent {
 	 * 
 	 * @param method
 	 * @param parameters
-	 * 
 	 * @return result of the method invocation
-	 * 
 	 * @throws L2pSecurityException
 	 * @throws InvocationTargetException
 	 * @throws IllegalAccessException
@@ -566,9 +558,7 @@ public class ServiceAgent extends PassphraseAgent {
 	 * execute a RMITask
 	 * 
 	 * @param task
-	 * 
 	 * @return result of the method invocation
-	 * 
 	 * @throws L2pServiceException
 	 * @throws ServiceInvocationException
 	 * @throws SecurityException

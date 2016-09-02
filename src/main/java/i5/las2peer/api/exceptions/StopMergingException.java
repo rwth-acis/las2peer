@@ -1,7 +1,8 @@
 package i5.las2peer.api.exceptions;
 
 /**
- * This exception should be thrown by a {@link StorageCollisionHandler} if there should be no further merging attempt.
+ * This exception should be thrown by a {@link i5.las2peer.api.StorageCollisionHandler} if there should be no further
+ * merging attempt.
  */
 public class StopMergingException extends Exception {
 

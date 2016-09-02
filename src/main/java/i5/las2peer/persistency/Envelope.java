@@ -191,7 +191,6 @@ public class Envelope implements Serializable, XmlAble {
 	 * 
 	 * @param root
 	 * @return envelope created from the given XML String serialization
-	 * 
 	 * @throws MalformedXMLException
 	 */
 	public static Envelope createFromXml(Element root) throws MalformedXMLException {
@@ -254,7 +253,6 @@ public class Envelope implements Serializable, XmlAble {
 	 * 
 	 * @param xml
 	 * @return envelope created from the given XML String serialization
-	 * 
 	 * @throws MalformedXMLException
 	 */
 	public static Envelope createFromXml(String xml) throws MalformedXMLException {

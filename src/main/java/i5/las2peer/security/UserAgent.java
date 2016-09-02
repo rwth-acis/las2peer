@@ -85,7 +85,6 @@ public class UserAgent extends PassphraseAgent {
 	 * select a login name for this agent
 	 * 
 	 * @param loginName
-	 * 
 	 * @throws L2pSecurityException
 	 * @throws UserAgentException
 	 */
@@ -207,9 +206,7 @@ public class UserAgent extends PassphraseAgent {
 	 * Create a new UserAgent protected by the given passphrase.
 	 * 
 	 * @param passphrase passphrase for the secret key of the new user
-	 * 
 	 * @return a new UserAgent
-	 * 
 	 * @throws CryptoException
 	 * @throws L2pSecurityException
 	 */
@@ -226,9 +223,7 @@ public class UserAgent extends PassphraseAgent {
 	 * 
 	 * @param id agent id of new user
 	 * @param passphrase passphrase for the secret key of the new user
-	 * 
 	 * @return a new UserAgent
-	 * 
 	 * @throws CryptoException
 	 * @throws L2pSecurityException
 	 */

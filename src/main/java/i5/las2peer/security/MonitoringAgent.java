@@ -73,9 +73,7 @@ public class MonitoringAgent extends PassphraseAgent {
 	 * Create a new MonitoringAgent protected by the given passphrase.
 	 * 
 	 * @param passphrase passphrase for the secret key of the new agent
-	 * 
 	 * @return a new UserAgent
-	 * 
 	 * @throws CryptoException
 	 * @throws L2pSecurityException
 	 * 
@@ -96,7 +94,6 @@ public class MonitoringAgent extends PassphraseAgent {
 	 * 
 	 * @param message
 	 * @param context
-	 * 
 	 * @throws MessageException
 	 * 
 	 */
@@ -142,7 +139,6 @@ public class MonitoringAgent extends PassphraseAgent {
 	 * Can be used to return a XML representation of the MonitoringAgent.
 	 * 
 	 * @return a XML representation of the MonitoringAgent
-	 * 
 	 * @throws RuntimeException thrown, if problems with the serialization came up
 	 */
 	@Override
@@ -172,7 +168,6 @@ public class MonitoringAgent extends PassphraseAgent {
 	 * 
 	 * @param xml a String
 	 * @return
-	 * 
 	 * @exception MalformedXMLException
 	 * 
 	 */
@@ -195,7 +190,6 @@ public class MonitoringAgent extends PassphraseAgent {
 	 * 
 	 * @param root parsed XML document
 	 * @return
-	 * 
 	 * @exception MalformedXMLException
 	 * 
 	 */

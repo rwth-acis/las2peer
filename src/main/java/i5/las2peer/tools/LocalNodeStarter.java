@@ -32,7 +32,6 @@ public class LocalNodeStarter {
 	 * start a local node and load all artifact files of the given directory into the node
 	 * 
 	 * @param node
-	 * 
 	 * @param artifactDirectory
 	 */
 	public static void configureNode(LocalNode node, String artifactDirectory) {

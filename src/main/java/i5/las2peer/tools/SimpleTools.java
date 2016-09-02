@@ -37,7 +37,6 @@ public class SimpleTools {
 	 * create a random string of the given length with the possible characters from {@link #sRandomStringCharSet}
 	 * 
 	 * @param length
-	 * 
 	 * @return a random string
 	 */
 	public static String createRandomString(int length) {
@@ -56,7 +55,6 @@ public class SimpleTools {
 	 * 
 	 * @param objects
 	 * @param glue
-	 * 
 	 * @return join string
 	 */
 	public static String join(Object[] objects, String glue) {
@@ -71,7 +69,6 @@ public class SimpleTools {
 	 * 
 	 * @param objects
 	 * @param glue
-	 * 
 	 * @return join string
 	 */
 	public static String join(Iterable<?> objects, String glue) {
@@ -95,7 +92,6 @@ public class SimpleTools {
 	 * 
 	 * @param string
 	 * @param count
-	 * 
 	 * @return concatenated string
 	 * 
 	 */
@@ -117,7 +113,6 @@ public class SimpleTools {
 	 * 
 	 * @param o
 	 * @param count
-	 * 
 	 * @return concatenated string
 	 */
 	public static String repeat(Object o, int count) {

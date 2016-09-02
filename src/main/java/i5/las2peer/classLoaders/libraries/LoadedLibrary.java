@@ -107,9 +107,7 @@ public abstract class LoadedLibrary {
 	 * for class and resource loading: get the URL for the specified resource
 	 * 
 	 * @param name
-	 * 
 	 * @return a URL for the requested ressource
-	 * 
 	 * @throws ResourceNotFoundException the given resource does not exists in this library
 	 */
 	public abstract URL getResourceAsUrl(String name) throws ResourceNotFoundException;
@@ -118,9 +116,7 @@ public abstract class LoadedLibrary {
 	 * for class and resource loading: get the specified resource as an InputStream
 	 * 
 	 * @param resourceName
-	 * 
 	 * @return an InputStream for the requested resource
-	 * 
 	 * @throws ResourceNotFoundException the given resource does not exists in this library
 	 */
 	abstract InputStream getResourceAsStream(String resourceName) throws ResourceNotFoundException;
@@ -138,9 +134,7 @@ public abstract class LoadedLibrary {
 	 * get the contents of a resource as a String
 	 * 
 	 * @param resourceName
-	 * 
 	 * @return content of the given resource as string
-	 * 
 	 * @throws IOException
 	 * @throws ResourceNotFoundException the given resource does not exists in this library
 	 */
