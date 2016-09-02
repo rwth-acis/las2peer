@@ -362,7 +362,7 @@
 	
 	<target name="javadoc" depends="java_doc, junit_doc" description="--> javadoc"/>
 	
-	<target name="java_doc" depends="init_doc">
+	<target name="java_doc" depends="init_doc, compile_main">
         <javadoc destdir="${export.doc}"
 			author="true"
 			version="true"
@@ -378,7 +378,7 @@
         </javadoc>
 	</target>
 
-	<target name="junit_doc" depends="init_doc">
+	<target name="junit_doc" depends="init_doc, compile_junit">
         <javadoc destdir="${export.junitdoc}"
 			author="true"
 			version="true"
