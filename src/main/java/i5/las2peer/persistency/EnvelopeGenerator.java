@@ -1,4 +1,4 @@
-package i5.las2peer.tools;
+package i5.las2peer.persistency;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -7,13 +7,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Random;
 
-import i5.las2peer.p2p.PastryNodeImpl;
-import i5.las2peer.persistency.Envelope;
-import i5.las2peer.persistency.MalformedXMLException;
-import i5.las2peer.persistency.SharedStorage.STORAGE_MODE;
 import i5.las2peer.security.Agent;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.PassphraseAgent;
+import i5.las2peer.tools.CryptoException;
+import i5.las2peer.tools.FileContentReader;
+import i5.las2peer.tools.SerializationException;
 
 /**
  * A simple command line tool for generating XML envelopes to the standard out.
@@ -77,8 +76,7 @@ public class EnvelopeGenerator {
 			PassphraseAgent owner = loadAgent(argv[0]);
 			owner.unlockPrivateKey(argv[1]);
 			Serializable temp = createSerializable(argv[2], argv[3]);
-			PastryNodeImpl dummyNode = new PastryNodeImpl(14571, null, STORAGE_MODE.MEMORY, false, null, null);
-			Envelope env = dummyNode.createEnvelope(Long.toString(new Random().nextLong()), temp,
+			Envelope env = new Envelope(Long.toString(new Random().nextLong()), temp,
 					Arrays.asList(new Agent[] { owner }));
 			System.out.println(env.toXmlString());
 		} catch (SecurityException e) {

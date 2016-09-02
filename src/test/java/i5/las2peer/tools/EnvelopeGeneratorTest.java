@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import i5.las2peer.persistency.DecodingFailedException;
 import i5.las2peer.persistency.Envelope;
+import i5.las2peer.persistency.EnvelopeGenerator;
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.UserAgent;
