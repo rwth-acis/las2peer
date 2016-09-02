@@ -382,7 +382,7 @@ public class CryptoTools {
 	 * 
 	 * @return true, if verification is successful
 	 * 
-	 * @throws CryptoException If an issue occurs with the given key or selected algorithm.
+	 * @throws VerificationFailedException If an issue occurs with the given key or selected algorithm.
 	 */
 	public static boolean verifySignature(byte[] signature, byte[] content, PublicKey key)
 			throws VerificationFailedException {
@@ -474,7 +474,7 @@ public class CryptoTools {
 		byte[] clear = Base64.getDecoder().decode(key64);
 		PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(clear);
 		try {
-			KeyFactory fact = KeyFactory.getInstance("DSA");
+			KeyFactory fact = KeyFactory.getInstance(asymmetricAlgorithm);
 			PrivateKey priv = fact.generatePrivate(keySpec);
 			Arrays.fill(clear, (byte) 0);
 			return priv;
@@ -487,7 +487,7 @@ public class CryptoTools {
 		byte[] data = Base64.getDecoder().decode(stored);
 		X509EncodedKeySpec spec = new X509EncodedKeySpec(data);
 		try {
-			KeyFactory fact = KeyFactory.getInstance("DSA");
+			KeyFactory fact = KeyFactory.getInstance(asymmetricAlgorithm);
 			return fact.generatePublic(spec);
 		} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
 			throw new CryptoException("Could not read public key from given base64 string", e);
@@ -496,7 +496,7 @@ public class CryptoTools {
 
 	public static String privateKeyToString(PrivateKey priv) throws CryptoException {
 		try {
-			KeyFactory fact = KeyFactory.getInstance("DSA");
+			KeyFactory fact = KeyFactory.getInstance(asymmetricAlgorithm);
 			PKCS8EncodedKeySpec spec = fact.getKeySpec(priv, PKCS8EncodedKeySpec.class);
 			byte[] packed = spec.getEncoded();
 			String key64 = Base64.getEncoder().encodeToString(packed);
@@ -509,7 +509,7 @@ public class CryptoTools {
 
 	public static String publicKeyToString(PublicKey publ) throws CryptoException {
 		try {
-			KeyFactory fact = KeyFactory.getInstance("DSA");
+			KeyFactory fact = KeyFactory.getInstance(asymmetricAlgorithm);
 			X509EncodedKeySpec spec = fact.getKeySpec(publ, X509EncodedKeySpec.class);
 			return Base64.getEncoder().encodeToString(spec.getEncoded());
 		} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
