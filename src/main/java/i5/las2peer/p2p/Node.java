@@ -42,7 +42,6 @@ import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.logging.NodeObserver;
 import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.logging.monitoring.MonitoringObserver;
-import i5.las2peer.p2p.pastry.PastryStorageException;
 import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.persistency.Envelope;
 import i5.las2peer.persistency.NodeStorageInterface;
@@ -1005,7 +1004,7 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	 * @param agent
 	 * @throws AgentException
 	 * @throws L2pSecurityException
-	 * @throws PastryStorageException
+	 * @throws StorageException
 	 */
 	public abstract void updateAgent(Agent agent) throws AgentException, L2pSecurityException, StorageException;
 
