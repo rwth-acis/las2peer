@@ -10,6 +10,7 @@ import i5.las2peer.api.StorageCollisionHandler;
 import i5.las2peer.api.StorageEnvelopeHandler;
 import i5.las2peer.api.StorageExceptionHandler;
 import i5.las2peer.api.StorageStoreResultHandler;
+import i5.las2peer.api.exceptions.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.exceptions.EnvelopeNotFoundException;
 import i5.las2peer.api.exceptions.StopMergingException;
 import i5.las2peer.api.exceptions.StorageException;
@@ -47,6 +48,10 @@ public class LocalStorage implements L2pStorageInterface {
 
 	@Override
 	public void storeEnvelope(Envelope envelope, Agent author, long timeoutMs) throws StorageException {
+		Envelope stored = storedEnvelopes.get(envelope.getIdentifier());
+		if (stored != null && envelope.getVersion() == stored.getVersion()) {
+			throw new EnvelopeAlreadyExistsException("Duplicate envelope identifier");
+		}
 		storedEnvelopes.put(envelope.getIdentifier(), envelope);
 	}
 
