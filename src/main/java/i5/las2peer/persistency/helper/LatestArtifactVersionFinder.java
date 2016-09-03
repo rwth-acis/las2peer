@@ -7,7 +7,7 @@ import java.util.concurrent.ExecutorService;
 import i5.las2peer.api.StorageExceptionHandler;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.persistency.Envelope;
-import i5.las2peer.persistency.MetadataEnvelope;
+import i5.las2peer.persistency.MetadataArtifact;
 import i5.las2peer.persistency.StorageLookupHandler;
 import i5.las2peer.persistency.pastry.PastLookupContinuation;
 import rice.p2p.commonapi.Id;
@@ -107,8 +107,8 @@ public class LatestArtifactVersionFinder implements Runnable, StorageLookupHandl
 
 	private void requestLookup(long version) {
 		currentVersion = version;
-		Id checkId = MetadataEnvelope.buildMetadataId(artifactIdFactory, identifier, currentVersion);
-		logger.info("Looking for artifact with identifier '" + identifier + "' and version " + currentVersion
+		Id checkId = MetadataArtifact.buildMetadataId(artifactIdFactory, identifier, currentVersion);
+		logger.info("Looking for metadata envelope with identifier '" + identifier + "' and version " + currentVersion
 				+ " at id " + checkId.toStringFull() + " ...");
 		pastStorage.lookupHandles(checkId, maxHandles, new PastLookupContinuation(threadpool, this, this));
 	}

@@ -9,13 +9,13 @@ import i5.las2peer.tools.CryptoTools;
 import rice.p2p.commonapi.Id;
 import rice.p2p.past.ContentHashPastContent;
 import rice.p2p.past.PastContent;
-import rice.pastry.commonapi.PastryIdFactory;
+import rice.p2p.past.PastException;
 
 /**
  * A network artifact is a bunch of arbitrary data in the shared storage. It is signed to help detect manipulations.
  * Note that this signature is self signed, one has to check if the used key is in a list of trusted keys.
  */
-public class NetworkArtifact extends ContentHashPastContent implements PastContent {
+public abstract class NetworkArtifact extends ContentHashPastContent {
 
 	public static final int MAX_SIZE = 500 * 1000; // = 500 KB
 
@@ -28,7 +28,7 @@ public class NetworkArtifact extends ContentHashPastContent implements PastConte
 	private final PublicKey key;
 	private final byte[] keySignature;
 
-	public NetworkArtifact(Id id, int partIndex, byte[] content, Agent author)
+	protected NetworkArtifact(Id id, int partIndex, byte[] content, Agent author)
 			throws CryptoException, L2pSecurityException {
 		super(id);
 		int size = content.length;
@@ -68,20 +68,29 @@ public class NetworkArtifact extends ContentHashPastContent implements PastConte
 		CryptoTools.verifySignature(keySignature, key.getEncoded(), key);
 	}
 
-	public static Id buildArtifactId(PastryIdFactory idFactory, String identifier, long version) {
-		return buildArtifactId(idFactory, identifier, 0, version);
+	public boolean hasSameAuthor(NetworkArtifact other) {
+		if (this == other) {
+			return true;
+		} else if (other == null) {
+			return false;
+		} else {
+			return this.key.equals(other.key);
+		}
 	}
 
-	public static Id buildArtifactId(PastryIdFactory idFactory, String identifier, int part, long version) {
-		return idFactory.buildId(getVersionPartIdentifier(identifier, part, version).getBytes());
+	@Override
+	public PastContent checkInsert(Id id, PastContent existingContent) throws PastException {
+		try {
+			this.verify();
+		} catch (VerificationFailedException e) {
+			throw new PastException(e.toString());
+		}
+		return super.checkInsert(id, existingContent);
 	}
 
-	public static String getVersionIdentifier(String identifier, long version) {
-		return getVersionPartIdentifier(identifier, 0, version);
-	}
-
-	public static String getVersionPartIdentifier(String identifier, int part, long version) {
-		return identifier + "?" + part + "#" + version;
+	@Override
+	public String toString() {
+		return getId().toStringFull();
 	}
 
 }

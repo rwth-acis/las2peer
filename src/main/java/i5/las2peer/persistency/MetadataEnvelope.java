@@ -2,9 +2,6 @@ package i5.las2peer.persistency;
 
 import java.io.Serializable;
 
-import rice.p2p.commonapi.Id;
-import rice.pastry.commonapi.PastryIdFactory;
-
 public class MetadataEnvelope implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -31,12 +28,9 @@ public class MetadataEnvelope implements Serializable {
 		return numOfEnvelopeParts;
 	}
 
-	public static Id buildMetadataId(PastryIdFactory idFactory, Envelope envelope) {
-		return buildMetadataId(idFactory, envelope.getIdentifier(), envelope.getVersion());
-	}
-
-	public static Id buildMetadataId(PastryIdFactory idFactory, String identifier, long version) {
-		return idFactory.buildId("metadata-" + identifier + "#" + version);
+	@Override
+	public String toString() {
+		return MetadataArtifact.getMetadataIdentifier(envelopeIdentifier, envelopeVersion);
 	}
 
 }

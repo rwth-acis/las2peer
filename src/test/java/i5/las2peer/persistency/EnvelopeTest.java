@@ -21,6 +21,7 @@ import i5.las2peer.api.StorageStoreResultHandler;
 import i5.las2peer.api.exceptions.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.exceptions.EnvelopeNotFoundException;
 import i5.las2peer.api.exceptions.StopMergingException;
+import i5.las2peer.api.exceptions.StorageException;
 import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.security.UserAgent;
 import i5.las2peer.testing.MockAgentFactory;
@@ -411,7 +412,6 @@ public class EnvelopeTest {
 	@Test
 	public void testUpdateContent() {
 		try {
-			// FIXME store and fetch an envelope for 250 times
 			PastryNodeImpl node1 = nodes.get(0);
 			UserAgent smith = MockAgentFactory.getAdam();
 			smith.unlockPrivateKey("adamspass");
@@ -478,52 +478,36 @@ public class EnvelopeTest {
 			smith.unlockPrivateKey("adamspass");
 			Envelope envelope1 = node1.createUnencryptedEnvelope("test", "Hello World!");
 			// upload envelope
-			node1.storeEnvelopeAsync(envelope1, smith, new StorageStoreResultHandler() {
-				@Override
-				public void onResult(Serializable serializable, int successfulOperations) {
-					System.out.println(
-							"Successfully stored artifact " + serializable + " " + successfulOperations + " times");
-					try {
-						// create envelope to store in the shared network storage
-						Envelope envelope2 = node1.createUnencryptedEnvelope(envelope1, 14526339);
-						// upload envelope
-						node1.storeEnvelopeAsync(envelope2, smith, new StorageStoreResultHandler() {
-							@Override
-							public void onResult(Serializable serializable, int successfulOperations) {
-								System.out.println("Successfully stored artifact " + serializable + " "
-										+ successfulOperations + " times");
-								// fetch envelope again
-								System.out.println("Fetching artifact ...");
-								node1.fetchEnvelopeAsync("test", new StorageEnvelopeHandler() {
-									@Override
-									public void onEnvelopeReceived(Envelope envelope) {
-										try {
-											Integer content = (Integer) envelope.getContent();
-											System.out.println("Envelope content is '" + content + "'");
-											asyncTestState = true;
-										} catch (Exception e) {
-											Assert.fail(e.toString());
-											return;
-										}
-									}
-								}, storageExceptionHandler);
-							}
-						}, null, storageExceptionHandler);
-					} catch (Exception e) {
-						Assert.fail(e.toString());
-						return;
-					}
-				}
-			}, null, storageExceptionHandler);
-			// wait till the envelope was fetched
-			System.out.println("Waiting ...");
-			for (int n = 1; n <= 100; n++) {
-				if (asyncTestState) {
-					return;
-				}
-				Thread.sleep(100);
+			node1.storeEnvelope(envelope1, smith);
+			// change content type to integer
+			Envelope envelope2 = node1.createUnencryptedEnvelope(envelope1, 123456789);
+			node1.storeEnvelope(envelope2, smith);
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail(e.toString());
+		}
+	}
+
+	@Test
+	public void testContentLocking() {
+		try {
+			PastryNodeImpl node1 = nodes.get(0);
+			UserAgent smith = MockAgentFactory.getAdam();
+			smith.unlockPrivateKey("adamspass");
+			final String testContent = "envelope of smith";
+			Envelope original = node1.createUnencryptedEnvelope("test", testContent);
+			node1.storeEnvelope(original, smith);
+			UserAgent neo = MockAgentFactory.getEve();
+			neo.unlockPrivateKey("evespass");
+			Envelope overwritten = node1.createUnencryptedEnvelope(original, "envelope of neo");
+			try {
+				node1.storeEnvelope(overwritten, neo);
+				Assert.fail(StorageException.class.getName() + " expected");
+			} catch (StorageException e) {
+				// expected store failed exception, already exists
 			}
-			Assert.fail();
+			Envelope stored = node1.fetchEnvelope("test");
+			Assert.assertEquals(testContent, stored.getContent());
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail(e.toString());
