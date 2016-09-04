@@ -41,7 +41,7 @@ public class TestSuite {
 	/**
 	 * self test
 	 * 
-	 * @param args
+	 * @param args ignored
 	 */
 	public static void main(String[] args) {
 		try {

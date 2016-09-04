@@ -479,10 +479,29 @@ public class PastryNodeImpl extends Node {
 	}
 
 	@Override
-	public void unregisterReceiver(MessageReceiver receiver) throws AgentNotKnownException {
+	public void unregisterReceiver(MessageReceiver receiver) throws AgentNotKnownException, NodeException {
 		synchronized (this) {
 			application.unregisterAgentTopic(receiver.getResponsibleForAgentId());
 			super.unregisterReceiver(receiver);
+		}
+	}
+
+	@Override
+	public void registerReceiverToTopic(MessageReceiver receiver, long topic) throws AgentNotKnownException {
+		synchronized (this) {
+			super.registerReceiverToTopic(receiver, topic);
+			application.registerTopic(topic);
+		}
+	}
+
+	@Override
+	public void unregisterReceiverFromTopic(MessageReceiver receiver, long topic) throws NodeException {
+		synchronized (this) {
+			super.unregisterReceiverFromTopic(receiver, topic);
+
+			if (!super.hasTopic(topic)) {
+				application.unregisterTopic(topic);
+			}
 		}
 	}
 

@@ -2,13 +2,10 @@ package i5.las2peer.logging.monitoring;
 
 import i5.las2peer.communication.Message;
 import i5.las2peer.execution.L2pServiceException;
-import i5.las2peer.execution.ServiceInvocationException;
-import i5.las2peer.execution.UnlockNeededException;
 import i5.las2peer.logging.NodeObserver;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.MessageResultListener;
 import i5.las2peer.p2p.Node;
-import i5.las2peer.p2p.TimeoutException;
 import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.security.AgentException;
 import i5.las2peer.security.L2pSecurityException;
@@ -50,8 +47,9 @@ public class MonitoringObserver implements NodeObserver {
 	 */
 	public MonitoringObserver(int messageCache, Node registeredAt) {
 		this.registeredAt = registeredAt;
-		if (messageCache < 50)
+		if (messageCache < 50) {
 			messageCache = 50; // Minimum cache to give the observer enough time to initialize before first sending
+		}
 		this.monitoringMessages = new MonitoringMessage[messageCache];
 		this.messagesCount = 0;
 		try {
@@ -89,42 +87,16 @@ public class MonitoringObserver implements NodeObserver {
 		try {
 			System.out.println("Monitoring: Trying to invoke Processing Service..");
 			String[] testParameters = { "Node " + registeredAt.getNodeId() + " registered observer!" };
-			long receivingAgentId = (Long) registeredAt.invoke(sendingAgent, // TODO workaround: remove specified
-																				// version when ServiceInfoAgent is
-																				// replaced
-					"i5.las2peer.services.monitoring.processing.MonitoringDataProcessingService@0.1",
-					"getReceivingAgentId", testParameters);
+			long receivingAgentId = (Long) registeredAt.invoke(sendingAgent,
+					"i5.las2peer.services.monitoring.processing.MonitoringDataProcessingService", "getReceivingAgentId",
+					testParameters);
 			try {
 				receivingAgent = (MonitoringAgent) registeredAt.getAgent(receivingAgentId);
 				System.out.println("Monitoring: Fetched receiving MonitoringAgent: " + receivingAgent.getId());
 			} catch (AgentNotKnownException e) {
 				e.printStackTrace();
 			}
-		} catch (UnlockNeededException e) {
-			System.out.println("Monitoring: Processing Service does not seem available! " + e);
-			e.printStackTrace();
-			return false;
-		} catch (L2pSecurityException e) {
-			System.out.println("Monitoring: Processing Service does not seem available! " + e);
-			e.printStackTrace();
-			return false;
-		} catch (InterruptedException e) {
-			System.out.println("Monitoring: Processing Service does not seem available! " + e);
-			e.printStackTrace();
-			return false;
-		} catch (TimeoutException e) {
-			System.out.println("Monitoring: Processing Service does not seem available! " + e);
-			e.printStackTrace();
-			return false;
-		} catch (ServiceInvocationException e) {
-			System.out.println("Monitoring: Processing Service does not seem available! " + e);
-			e.printStackTrace();
-			return false;
-		} catch (AgentNotKnownException e) {
-			System.out.println("Monitoring: Processing Service does not seem available! " + e);
-			e.printStackTrace();
-			return false;
-		} catch (L2pServiceException e) {
+		} catch (AgentNotKnownException | L2pServiceException | L2pSecurityException | InterruptedException e) {
 			System.out.println("Monitoring: Processing Service does not seem available! " + e);
 			e.printStackTrace();
 			return false;
@@ -153,8 +125,9 @@ public class MonitoringObserver implements NodeObserver {
 		if (event == Event.NODE_STATUS_CHANGE && remarks.equals("RUNNING")) {
 			readyForInitializing = true;
 		}
-		if (sourceNode == null)
+		if (sourceNode == null) {
 			return; // We do not log events without a source node into a database with different sources;-)
+		}
 		if (messagesCount >= monitoringMessages.length) {
 			if (initializedDone) {
 				messagesCount = 0;

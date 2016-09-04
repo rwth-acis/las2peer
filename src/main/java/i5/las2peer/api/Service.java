@@ -380,7 +380,7 @@ public abstract class Service extends Configurable {
 				e.printStackTrace();
 			}
 		}
-		System.out.println("Service " + this.getClass().getCanonicalName() + " has been started!");
+		System.out.println("Service " + this.agent.getServiceNameVersion() + " has been started!");
 	}
 
 	/**
@@ -389,11 +389,21 @@ public abstract class Service extends Configurable {
 	 * simple shutdown hook to be overwritten in subclasses
 	 */
 	public void close() {
-		System.out.println("Service " + this.getClass().getCanonicalName() + " has been stopped!");
+		System.out.println("Service " + this.agent.getServiceNameVersion() + " has been stopped!");
 		runningAt = null;
 	}
 
 	/**
+	 * Should return the service alias, which is registered on service start.
+	 * 
+	 * @return the alias, or null if no alias should be registered
+	 */
+	public String getAlias() {
+		return null;
+	}
+
+	/**
+	 * 
 	 * @deprecated Use {@link i5.las2peer.logging.L2pLogger#logEvent(Event, String)} with {@link Event#SERVICE_MESSAGE}
 	 *             instead!
 	 *             <p>

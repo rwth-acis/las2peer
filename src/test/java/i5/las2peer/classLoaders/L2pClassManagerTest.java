@@ -40,6 +40,13 @@ public class L2pClassManagerTest {
 		result = m.invoke(null);
 
 		assertEquals(-2, ((Integer) result).intValue());
+
+		Class<?> cl1 = testee.getServiceClass("i5.las2peer.testServices.testPackage1.TestService", "1.0");
+		Class<?> cl2 = testee.getServiceClass("i5.las2peer.testServices.testPackage1.TestService", "1.1");
+		Method m1 = cl1.getDeclaredMethod("getVersionStatic");
+		Method m2 = cl2.getDeclaredMethod("getVersionStatic");
+		assertEquals(m1.invoke(null), 100);
+		assertEquals(m2.invoke(null), 110);
 	}
 
 	@Test

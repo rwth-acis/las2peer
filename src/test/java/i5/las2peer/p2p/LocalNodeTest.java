@@ -18,10 +18,12 @@ import org.junit.Test;
 import i5.las2peer.api.exceptions.ArtifactNotFoundException;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.PingPongContent;
+import i5.las2peer.p2p.Node.SendMode;
 import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.security.AgentException;
 import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.security.Mediator;
 import i5.las2peer.security.ServiceAgent;
 import i5.las2peer.security.UserAgent;
 import i5.las2peer.testing.MockAgentFactory;
@@ -274,6 +276,173 @@ public class LocalNodeTest {
 	}
 
 	@Test
+	public void testRegisteringTopics() throws L2pSecurityException, AgentException, NodeException {
+		// start node
+		adam.unlockPrivateKey("adamspass");
+		abel.unlockPrivateKey("abelspass");
+		eve.unlockPrivateKey("evespass");
+		LocalNode testee = LocalNode.launchNode();
+		testee.storeAgent(adam);
+		testee.storeAgent(abel);
+		testee.storeAgent(eve);
+
+		// test registering to topic without being registered to the node
+		try {
+			testee.registerReceiverToTopic(adam, 1);
+			fail("AgentNotKnownException expected");
+		} catch (AgentNotKnownException e) {
+		}
+
+		// test unregsiter without being registered
+		testee.unregisterReceiverFromTopic(adam, 1);
+
+		// register agents
+		testee.registerReceiver(adam);
+		testee.registerReceiver(abel);
+		testee.registerReceiver(eve);
+
+		// test register
+		assertFalse(testee.hasTopic(1));
+		testee.registerReceiverToTopic(adam, 1);
+		assertTrue(testee.hasTopic(1));
+
+		// test register to another topic
+		testee.registerReceiverToTopic(adam, 2);
+		testee.registerReceiverToTopic(adam, 3);
+		assertTrue(testee.hasTopic(2));
+		assertTrue(testee.hasTopic(3));
+
+		// test register another agent to same topic
+		testee.registerReceiverToTopic(abel, 1);
+		testee.registerReceiverToTopic(eve, 1);
+		testee.registerReceiverToTopic(eve, 2);
+
+		// unregister from topic - topic should be removed
+		testee.unregisterReceiverFromTopic(adam, 3);
+		assertFalse(testee.hasTopic(3));
+
+		// unregister from topic - should not be removed
+		testee.unregisterReceiverFromTopic(eve, 2);
+		assertTrue(testee.hasTopic(2));
+
+		// unregister agent - one topic should be removed
+		testee.unregisterReceiver(adam);
+		assertTrue(testee.hasTopic(1));
+		assertFalse(testee.hasTopic(2));
+
+		// test unregsiter without being registered - again
+		testee.unregisterReceiverFromTopic(adam, 1);
+		assertTrue(testee.hasTopic(1));
+
+		// unregister agent - nothing should happen
+		testee.unregisterReceiver(eve);
+		assertTrue(testee.hasTopic(1));
+
+		// unregister agent - remove topic
+		testee.unregisterReceiver(abel);
+		assertFalse(testee.hasTopic(1));
+
+		// test unregsiter without being registered - again
+		testee.unregisterReceiverFromTopic(adam, 1);
+
+	}
+
+	@Test
+	public void testSendAndReceiveTopics() throws L2pSecurityException, AgentException, EncodingFailedException,
+			SerializationException, InterruptedException, TimeoutException {
+		// start node
+		adam.unlockPrivateKey("adamspass");
+		abel.unlockPrivateKey("abelspass");
+		eve.unlockPrivateKey("evespass");
+		LocalNode node1 = LocalNode.launchNode();
+		LocalNode node2 = LocalNode.launchNode();
+		node1.storeAgent(adam);
+		node1.storeAgent(abel);
+		node1.storeAgent(eve);
+
+		// register receiver to topics
+		Mediator mAdam = node1.getOrRegisterLocalMediator(adam);
+		Mediator mAbel = node1.getOrRegisterLocalMediator(abel);
+		Mediator mEve = node2.getOrRegisterLocalMediator(eve);
+		node1.registerReceiverToTopic(mAdam, 1);
+		node1.registerReceiverToTopic(mAbel, 1);
+		node2.registerReceiverToTopic(mEve, 1);
+
+		// send msg to unknown topic
+		Message noreceiver = new Message(adam, 2, "some content");
+		MessageResultListener lst1 = new MessageResultListener(1000);
+		node1.sendMessage(noreceiver, lst1, SendMode.BROADCAST);
+
+		// send message
+		Message sent = new Message(adam, 1, "some content");
+		MessageResultListener lst = new MessageResultListener(1000);
+		node1.sendMessage(sent, lst, SendMode.BROADCAST);
+
+		// wait until messages are sent
+		Thread.sleep(4000);
+
+		// receive
+		Message received1 = mAdam.getNextMessage();
+		Message received2 = mAbel.getNextMessage();
+		Message received3 = mEve.getNextMessage();
+
+		// messages should be cloned
+		assertTrue(received1 != null && received2 != null && received3 != null);
+		assertTrue(received1 != received2);
+
+		// check if receiver is set correctly
+		assertTrue(received1.getRecipientId() == adam.getId());
+		assertTrue(received2.getRecipientId() == abel.getId());
+		assertTrue(received3.getRecipientId() == eve.getId());
+
+		assertTrue(received3.getSenderId() == adam.getId());
+		assertTrue(received3.getTopicId() == 1);
+
+		// cehck if open
+		assertTrue(received1.isOpen());
+		assertTrue(received2.isOpen());
+		assertTrue(received3.isOpen());
+
+		// open
+		// received2.open(abel, node1);
+		// assertEquals(received2.getContent(), "some content");
+
+		// answer
+		// a mediator always sends an answer...
+		Message msg = new Message(adam, 1, "some content");
+		Message answer = node1.sendMessageAndWaitForAnswer(msg);
+
+		assertTrue(answer.getResponseToId() == msg.getId());
+	}
+
+	@Test
+	public void testCollectMessags() throws L2pSecurityException, AgentException, EncodingFailedException,
+			SerializationException, InterruptedException, TimeoutException {
+		// start node
+		adam.unlockPrivateKey("adamspass");
+		abel.unlockPrivateKey("abelspass");
+		eve.unlockPrivateKey("evespass");
+		LocalNode node1 = LocalNode.launchNode();
+		LocalNode node2 = LocalNode.launchNode();
+		node1.storeAgent(adam);
+		node1.storeAgent(abel);
+		node1.storeAgent(eve);
+
+		// register receiver to topics
+		Mediator mAdam = node1.getOrRegisterLocalMediator(adam);
+		Mediator mAbel = node1.getOrRegisterLocalMediator(abel);
+		Mediator mEve = node2.getOrRegisterLocalMediator(eve);
+		node1.registerReceiverToTopic(mAdam, 1);
+		node1.registerReceiverToTopic(mAbel, 1);
+		node2.registerReceiverToTopic(mEve, 1);
+
+		// collect answers
+		Message msg1 = new Message(adam, 1, "collect...", 20000);
+		Message[] answers = node1.sendMessageAndCollectAnswers(msg1, 5);
+		assertTrue(answers.length == 3);
+	}
+
+	@Test
 	public void testStartupAgents() throws L2pSecurityException, AgentException, NodeException {
 
 		LocalNode testee = LocalNode.newNode();
@@ -311,8 +480,7 @@ public class LocalNodeTest {
 		testee.storeAgent(testService);
 		testee.registerReceiver(testService);
 
-		Serializable result = testee.invokeLocally(eve, ServiceNameVersion.fromString(serviceClass + "@1.0"), "inc",
-				new Serializable[] { new Integer(10) });
+		Serializable result = testee.invokeLocally(eve, testService, "inc", new Serializable[] { new Integer(10) });
 
 		assertEquals(12, result);
 	}

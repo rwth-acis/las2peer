@@ -6,8 +6,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.KeyPair;
 import java.security.PublicKey;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.Random;
 
 import org.apache.commons.codec.binary.Base64;
 
@@ -19,6 +18,7 @@ import i5.las2peer.communication.MessageException;
 import i5.las2peer.communication.RMIExceptionContent;
 import i5.las2peer.communication.RMIResultContent;
 import i5.las2peer.communication.RMIUnlockContent;
+import i5.las2peer.communication.ServiceDiscoveryContent;
 import i5.las2peer.execution.L2pServiceException;
 import i5.las2peer.execution.L2pThread;
 import i5.las2peer.execution.NoSuchServiceMethodException;
@@ -27,6 +27,7 @@ import i5.las2peer.execution.RMITask;
 import i5.las2peer.execution.ServiceInvocationException;
 import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.p2p.AgentNotKnownException;
+import i5.las2peer.p2p.DuplicateServiceAliasException;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.NodeNotFoundException;
 import i5.las2peer.p2p.ServiceNameVersion;
@@ -52,11 +53,6 @@ public class ServiceAgent extends PassphraseAgent {
 	 */
 	private ServiceNameVersion sService;
 
-	private boolean timerRunning = false;
-	private Timer timer;
-	private int timerIntervalSeconds = 10;
-	private int timerRunTimes = 0;
-	private int TIMER_RUN_TIMES_MAX = 3;
 	/**
 	 * instance of the service (if started at a node)
 	 */
@@ -186,10 +182,6 @@ public class ServiceAgent extends PassphraseAgent {
 					throw new L2pServiceException("If no sendind node is given - where should I send the answer to?!");
 				}
 
-				System.out.println("received request: " + m.toXmlString());
-				System.out.println("received: " + content);
-				System.out.println("sender: " + m.getSendingNodeId());
-
 				ListMethodsContent responseContent = new ListMethodsContent(false);
 				for (Method method : getServiceInstance().getClass().getMethods()) {
 					responseContent.addMethod(method);
@@ -198,6 +190,24 @@ public class ServiceAgent extends PassphraseAgent {
 
 				Message response = new Message(m, responseContent);
 				getRunningAtNode().sendResponse(response, m.getSendingNodeId());
+			} else if (content instanceof ServiceDiscoveryContent) {
+				if (!((ServiceDiscoveryContent) content).isRequest()) {
+					throw new L2pServiceException("Got a ServiceDiscovery response - can't handle it!");
+				}
+				if (m.getSendingNodeId() == null) {
+					throw new L2pServiceException("If no sendind node is given - where should I send the answer to?!");
+				}
+
+				// only answer if requirements are met
+				if (((ServiceDiscoveryContent) content).accepts(this.getServiceNameVersion())) {
+					ServiceDiscoveryContent result = new ServiceDiscoveryContent(this.getId(),
+							this.getServiceNameVersion());
+
+					Message response = new Message(m, result);
+					response.setSendingNodeId(getRunningAtNode().getNodeId());
+					getRunningAtNode().sendResponse(response, m.getSendingNodeId());
+				}
+
 			} else {
 				throw new L2pServiceException("I don't know what to do with a message content of type "
 						+ content.getClass().getCanonicalName());
@@ -229,7 +239,6 @@ public class ServiceAgent extends PassphraseAgent {
 	public void notifyUnregister() {
 		getRunningAtNode().getNodeServiceCache().unregisterLocalService(this);
 
-		serviceInfoAgentNotifyUnregister();
 		if (serviceInstance != null) {
 			serviceInstance.close();
 			serviceInstance = null;
@@ -259,6 +268,8 @@ public class ServiceAgent extends PassphraseAgent {
 	/**
 	 * create a completely new ServiceAgent for a given service class
 	 * 
+	 * the id will be generated randomly
+	 * 
 	 * @param service class name of the new service
 	 * @param passphrase a pass phrase for the private key of the agent
 	 * @return a new ServiceAgent
@@ -268,7 +279,13 @@ public class ServiceAgent extends PassphraseAgent {
 	public static ServiceAgent createServiceAgent(ServiceNameVersion service, String passphrase)
 			throws CryptoException, L2pSecurityException {
 
-		return new ServiceAgent(serviceClass2Id(service), service, CryptoTools.generateKeyPair(), passphrase,
+		if (service.getVersion().toString().equals("*")) {
+			throw new IllegalArgumentException("You must specify a version!");
+		}
+
+		Random r = new Random();
+
+		return new ServiceAgent(r.nextLong(), service, CryptoTools.generateKeyPair(), passphrase,
 				CryptoTools.generateSalt());
 	}
 
@@ -284,6 +301,7 @@ public class ServiceAgent extends PassphraseAgent {
 	 * @throws CryptoException
 	 * @throws L2pSecurityException
 	 */
+	@Deprecated
 	public static ServiceAgent createServiceAgent(String serviceName, String passphrase)
 			throws CryptoException, L2pSecurityException {
 		return createServiceAgent(new ServiceNameVersion(serviceName, "1.0"), passphrase);
@@ -378,94 +396,6 @@ public class ServiceAgent extends PassphraseAgent {
 		}
 	}
 
-	private void stopTimer() {
-		if (timer != null) {
-			timer.cancel();
-			timer = null;
-		}
-		timerRunning = false;
-		timerRunTimes = 0;
-	}
-
-	/**
-	 * Notifies the {@link i5.las2peer.security.ServiceInfoAgent} about itself
-	 */
-	private void serviceInfoAgentNotifyUnregister() {
-		try {
-			stopTimer();
-			ServiceInfoAgent agent = getServiceInfoAgent();
-			agent.serviceRemoved(this, getRunningAtNode());
-		} catch (Exception e) {
-			// XXX ignore for now
-		}
-	}
-
-	/**
-	 * Registers and returns the {@link i5.las2peer.security.ServiceInfoAgent}
-	 * 
-	 * @return
-	 * @throws CryptoException
-	 * @throws L2pSecurityException
-	 * @throws SerializationException
-	 * @throws AgentException
-	 */
-	private ServiceInfoAgent getServiceInfoAgent()
-			throws CryptoException, L2pSecurityException, SerializationException, AgentException {
-		ServiceInfoAgent agent = ServiceInfoAgent.getServiceInfoAgent();
-		return agent;
-	}
-
-	/**
-	 * Notifies the {@link i5.las2peer.security.ServiceInfoAgent} about itself
-	 * 
-	 * @throws L2pServiceException
-	 */
-	public void serviceInfoAgentNotifyRegister() throws L2pServiceException {
-		try {
-			startTimer();
-		} catch (Exception e) {
-			throw new L2pServiceException("Error creating ServiceInfoAgent", e);
-		}
-	}
-
-	private synchronized void startTimer() throws Exception {
-		if (timerRunning) {
-			return;
-		}
-
-		timer = new Timer();
-		ServiceInfoAgent agent = getServiceInfoAgent();
-
-		final ServiceInfoAgent finalAgent = agent;
-		final Node finalNode = this.getRunningAtNode();
-		timerRunning = true;
-		timerRunTimes = 0;
-		timer.scheduleAtFixedRate(new TimerTask() {
-			@Override
-			public void run() {
-				executeTimer(finalNode, finalAgent);
-			}
-		}, 0, // run first occurrence immediately
-				timerIntervalSeconds * 1000); // run every x seconds
-	}
-
-	private void executeTimer(Node finalNode, ServiceInfoAgent finalAgent) {
-		try {
-			finalAgent.serviceAdded(this, finalNode);
-			stopTimer(); // stop timer on success
-		} catch (Exception e) {
-			// XXX logging
-			e.printStackTrace();
-			// limit to 3 attempts
-			timerRunTimes++;
-			if (timerRunning && timerRunTimes > TIMER_RUN_TIMES_MAX) {
-				// finally failed
-				stopTimer();
-				// TODO error handling
-			}
-		}
-	}
-
 	/**
 	 * notify this service agent, that it has been registered (for usage) at the given node
 	 * 
@@ -477,7 +407,7 @@ public class ServiceAgent extends PassphraseAgent {
 	public void notifyRegistrationTo(Node node) throws L2pServiceException {
 		try {
 			Class<? extends Service> clServ = (Class<? extends Service>) node.getBaseClassLoader()
-					.getServiceClass(sService.getName(), sService.getVersion());
+					.getServiceClass(sService.getName(), sService.getVersion().toString());
 
 			Constructor<? extends Service> cons = clServ.getConstructor(new Class<?>[0]);
 			serviceInstance = cons.newInstance();
@@ -488,11 +418,23 @@ public class ServiceAgent extends PassphraseAgent {
 			// and the agent
 			super.notifyRegistrationTo(node);
 
-			// notify Service Info Agent
-			serviceInfoAgentNotifyRegister();
-
 			// notify Node
 			node.getNodeServiceCache().registerLocalService(this);
+
+			// subscribe to service topic
+			node.registerReceiverToTopic(this, serviceNameToTopicId(this.getServiceNameVersion().getName()));
+
+			// register the service alias
+			String alias = serviceInstance.getAlias();
+			if (alias != null) {
+				try {
+					node.getServiceAliasManager().registerServiceAlias(this, alias);
+				} catch (AgentLockedException e) {
+					throw new L2pServiceException("Service alias could not be registered!", e);
+				} catch (DuplicateServiceAliasException e) {
+					throw new L2pServiceException("Service alias is already used by anther service!", e);
+				}
+			}
 
 		} catch (ClassLoaderException e1) {
 			throw new L2pServiceException("Problems with the classloader", e1);
@@ -514,13 +456,13 @@ public class ServiceAgent extends PassphraseAgent {
 	}
 
 	/**
-	 * just use a long hash value of the service class name as id for the agent
+	 * returns the service topic id for the given service name
 	 * 
 	 * @param service
-	 * @return (hashed) ID for the given service class
+	 * @return
 	 */
-	public static long serviceClass2Id(ServiceNameVersion service) {
-		return SimpleTools.longHash(service.toString());
+	public static long serviceNameToTopicId(String service) {
+		return SimpleTools.longHash(service);
 	}
 
 	/**

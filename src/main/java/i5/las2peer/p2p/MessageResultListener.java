@@ -1,9 +1,9 @@
 package i5.las2peer.p2p;
 
+import i5.las2peer.communication.Message;
+
 import java.util.Date;
 import java.util.Vector;
-
-import i5.las2peer.communication.Message;
 
 /**
  * A MessageResultListener is a simple collector for one result of a message sending operation in a {@link Node}. The
@@ -44,7 +44,15 @@ public class MessageResultListener {
 
 	private long startedAt;
 
+	/**
+	 * the timeout for messages
+	 */
 	private long timeoutMs;
+
+	/**
+	 * timeout after the first result was received
+	 */
+	private long timeoutMoreMs = 100;
 
 	private boolean inWaitMethod = false;
 
@@ -56,6 +64,18 @@ public class MessageResultListener {
 	public MessageResultListener(long timeoutMs) {
 		startedAt = new Date().getTime();
 		this.timeoutMs = timeoutMs;
+	}
+
+	/**
+	 * simple contructor
+	 * 
+	 * @param timeoutMs
+	 * @param timeoutMoreMs
+	 */
+	public MessageResultListener(long timeoutMs, long timeoutMoreMs) {
+		startedAt = new Date().getTime();
+		this.timeoutMs = timeoutMs;
+		this.timeoutMoreMs = timeoutMoreMs;
 	}
 
 	/**
@@ -195,7 +215,7 @@ public class MessageResultListener {
 	/**
 	 * default non blocking timer for waiting
 	 */
-	public static final int DEFAULT_TIMER = 1000; // 1 second
+	public static final int DEFAULT_TIMER = 500; // 500 ms
 
 	/**
 	 * sleep until a result has been received
@@ -240,6 +260,15 @@ public class MessageResultListener {
 	 * @throws InterruptedException
 	 */
 	public void waitForAllAnswers() throws InterruptedException {
+		waitForAllAnswers(true);
+	}
+
+	/**
+	 * 
+	 * @param waitForAll waits for all results if false, otherwise
+	 * @throws InterruptedException
+	 */
+	public void waitForAllAnswers(boolean waitForAll) throws InterruptedException {
 		synchronized (this) {
 			inWaitMethod = true;
 			try {
@@ -248,7 +277,8 @@ public class MessageResultListener {
 				do {
 					wait(timeoutMs - (now - startedAt));
 					now = new Date().getTime();
-				} while ((now - startedAt) < timeoutMs && !isFinished());
+				} while ((now - startedAt) < timeoutMs
+						&& (waitForAll || answers.size() == 0 || (now - startedAt) < timeoutMoreMs || !isFinished()));
 			} finally {
 				if (exceptions.size() == 00 && answers.size() == 0) {
 					status = Status.TIMEOUT;
