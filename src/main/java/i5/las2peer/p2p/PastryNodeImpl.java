@@ -88,7 +88,7 @@ public class PastryNodeImpl extends Node {
 	 * 
 	 * @param baseClassLoader
 	 * @param port
-	 * @param bootstrap
+	 * @param bootstrap A bootstrap address that should be used, like hostname:port.
 	 */
 	public PastryNodeImpl(L2pClassManager baseClassLoader, int port, String bootstrap) {
 		super(baseClassLoader);
@@ -121,7 +121,7 @@ public class PastryNodeImpl extends Node {
 	 * Leave empty or null to start a new ring.
 	 * 
 	 * @param port
-	 * @param bootstrap
+	 * @param bootstrap A bootstrap address that should be used, like hostname:port.
 	 */
 	public PastryNodeImpl(int port, String bootstrap) {
 		this(port, bootstrap, STORAGE_MODE.FILESYSTEM);
@@ -133,7 +133,7 @@ public class PastryNodeImpl extends Node {
 	 * Leave empty or null to start a new ring.
 	 * 
 	 * @param port
-	 * @param bootstrap
+	 * @param bootstrap A bootstrap address that should be used, like hostname:port.
 	 * @param mode
 	 */
 	public PastryNodeImpl(int port, String bootstrap, STORAGE_MODE mode) {
@@ -149,7 +149,7 @@ public class PastryNodeImpl extends Node {
 	 * The observer-flag determines, if the node will be available for monitoring.
 	 * 
 	 * @param port
-	 * @param bootstrap
+	 * @param bootstrap A bootstrap address that should be used, like hostname:port.
 	 * @param mode
 	 * @param monitoringObserver
 	 * @param cl
@@ -165,7 +165,7 @@ public class PastryNodeImpl extends Node {
 	 * This constructor can be used to spawn debug nodes. The node is not persistent, listens ONLY to the loopback
 	 * address and chooses the port itself. Use {@link #getPort()} to receive the actual port number.
 	 * 
-	 * @param bootstrap
+	 * @param bootstrap A bootstrap address that should be used, like hostname:port.
 	 */
 	public PastryNodeImpl(String bootstrap) {
 		super(null, true, false);
@@ -177,7 +177,7 @@ public class PastryNodeImpl extends Node {
 	 * local initialization for constructors
 	 * 
 	 * @param port
-	 * @param bootstrap
+	 * @param bootstrap A bootstrap address that should be used, like hostname:port.
 	 * @param mode Pastry storage mode
 	 * @param nodeIdSeed seed to generate node ids from
 	 */
@@ -197,8 +197,8 @@ public class PastryNodeImpl extends Node {
 	/**
 	 * local initialization for constructors
 	 * 
-	 * @param port
-	 * @param bootstrap
+	 * @param port The port that should be used by this node.
+	 * @param bootstrap A bootstrap address that should be used, like hostname:port.
 	 */
 	private void initialize(int port, String bootstrap) {
 		initialize(port, bootstrap, STORAGE_MODE.FILESYSTEM, null);
