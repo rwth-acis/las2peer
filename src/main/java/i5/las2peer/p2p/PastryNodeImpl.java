@@ -70,19 +70,14 @@ public class PastryNodeImpl extends Node {
 
 	private int pastryPort = STANDARD_PORT;
 	private String bootStrap = STANDARD_BOOTSTRAP;
-
+	private boolean useLoopback = false; // bind the node to the loopback address
 	private ExecutorService threadpool; // gather all threads in node object to minimize idle threads
 	private Environment pastryEnvironment;
 	private PastryNode pastryNode;
-
 	private NodeApplication application;
-
 	private SharedStorage pastStorage;
-
 	private STORAGE_MODE mode = STORAGE_MODE.FILESYSTEM;
-
 	private Long nodeIdSeed;
-
 	private BasicAgentStorage locallyKnownAgents;
 
 	/**
@@ -164,6 +159,18 @@ public class PastryNodeImpl extends Node {
 			Long nodeIdSeed) {
 		super(cl, true, monitoringObserver);
 		initialize(port, bootstrap, mode, nodeIdSeed);
+	}
+
+	/**
+	 * This constructor can be used to spawn debug nodes. The node is not persistent, listens ONLY to the loopback
+	 * address and chooses the port itself. Use {@link #getPort()} to receive the actual port number.
+	 * 
+	 * @param bootstrap
+	 */
+	public PastryNodeImpl(String bootstrap) {
+		super(null, true, false);
+		useLoopback = true;
+		initialize(14570, bootstrap, STORAGE_MODE.MEMORY, null);
 	}
 
 	/**
@@ -299,6 +306,9 @@ public class PastryNodeImpl extends Node {
 		if (!properties.containsKey("nat_network_prefixes")) {
 			properties.put("nat_network_prefixes", "127.0.0.1;10.;192.168.;");
 		}
+		if (useLoopback) {
+			properties.put("allow_loopback_address", "1");
+		}
 
 		if (!properties.containsKey("pastry_socket_known_network_address")) {
 			// properties.put( "pastry_socket_known_network_address", "127.0.0.1");
@@ -382,8 +392,12 @@ public class PastryNodeImpl extends Node {
 					}
 				};
 			}
-			InternetPastryNodeFactory factory = new InternetPastryNodeFactory(nidFactory, pastryPort,
-					pastryEnvironment);
+			InetAddress bindAddress = null;
+			if (useLoopback) {
+				bindAddress = InetAddress.getLocalHost();
+			}
+			InternetPastryNodeFactory factory = new InternetPastryNodeFactory(nidFactory, bindAddress, pastryPort,
+					pastryEnvironment, null, null, null);
 			pastryNode = factory.newNode();
 
 			setupPastryApplications();
@@ -651,6 +665,10 @@ public class PastryNodeImpl extends Node {
 		} else {
 			return pastryNode.getLocalNodeHandle();
 		}
+	}
+
+	public int getPort() {
+		return pastryPort;
 	}
 
 	@Override
