@@ -258,7 +258,7 @@ public class TestService extends Service {
 		if (cache == null) {
 			return "nothing stored!";
 		}
-		String result = (String) cache.getContent();
+		String result = (String) cache.getContent(Context.getCurrent().getMainAgent());
 		return result;
 	}
 
