@@ -768,7 +768,7 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	 * 
 	 * @param id
 	 * @return the envelope containing the requested artifact
-	 * @throws EnvelopeNotFoundException
+	 * @throws ArtifactNotFoundException
 	 * @throws StorageException
 	 */
 	@Deprecated
@@ -781,7 +781,7 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	 * 
 	 * @param identifier
 	 * @return the envelope containing the requested artifact
-	 * @throws EnvelopeNotFoundException
+	 * @throws ArtifactNotFoundException
 	 * @throws StorageException
 	 */
 	@Deprecated
@@ -806,7 +806,7 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	 * 
 	 * @param id
 	 * @param signature
-	 * @throws EnvelopeNotFoundException
+	 * @throws ArtifactNotFoundException
 	 * @throws StorageException
 	 */
 	@Deprecated

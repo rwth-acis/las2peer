@@ -90,7 +90,7 @@ public class L2pNodeLauncher {
 	 * @param id
 	 * @return the XML-representation of an envelope as a String
 	 * @throws StorageException
-	 * @throws EnvelopeNotFoundException
+	 * @throws ArtifactNotFoundException
 	 * @throws NumberFormatException
 	 * @throws SerializationException
 	 */

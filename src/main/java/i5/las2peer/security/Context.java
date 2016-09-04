@@ -158,7 +158,7 @@ public class Context implements AgentStorage, ContextStorageInterface {
 	 * 
 	 * @param id
 	 * @return envelope containing the requested data
-	 * @throws EnvelopeNotFoundException
+	 * @throws ArtifactNotFoundException
 	 * @throws StorageException
 	 */
 	@Deprecated
@@ -175,7 +175,7 @@ public class Context implements AgentStorage, ContextStorageInterface {
 	 * @param cls
 	 * @param identifier
 	 * @return envelope containing the requested data
-	 * @throws EnvelopeNotFoundException
+	 * @throws ArtifactNotFoundException
 	 * @throws StorageException
 	 */
 	@Deprecated
@@ -193,7 +193,7 @@ public class Context implements AgentStorage, ContextStorageInterface {
 	 * @param className
 	 * @param identifier
 	 * @return envelope containing the requested data
-	 * @throws EnvelopeNotFoundException
+	 * @throws ArtifactNotFoundException
 	 * @throws StorageException
 	 */
 	@Deprecated
