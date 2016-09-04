@@ -1,5 +1,6 @@
 package i5.las2peer.testing;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 
 import i5.las2peer.p2p.PastryNodeImpl;
@@ -9,6 +10,8 @@ import i5.las2peer.p2p.PastryNodeImpl;
  *
  */
 public class TestSuite {
+
+	private static final int bootstrapPort = 14570;
 
 	/**
 	 * This method starts a network consisting of the given number of nodes.
@@ -20,19 +23,40 @@ public class TestSuite {
 	public static ArrayList<PastryNodeImpl> launchNetwork(int numOfNodes) throws Exception {
 		ArrayList<PastryNodeImpl> result = new ArrayList<>();
 		// launch bootstrap node
-		PastryNodeImpl bootstrapNode = new PastryNodeImpl("");
+		PastryNodeImpl bootstrapNode = new PastryNodeImpl("", bootstrapPort);
 		bootstrapNode.launch();
-		final int bootstrapPort = bootstrapNode.getPort();
 		result.add(bootstrapNode);
 		System.out.println("bootstrap node launched with id " + bootstrapNode.getNodeId());
 		// add more nodes
 		for (int num = 1; num <= numOfNodes - 1; num++) {
-			PastryNodeImpl node2 = new PastryNodeImpl("localhost:" + bootstrapPort);
+			PastryNodeImpl node2 = new PastryNodeImpl(InetAddress.getLocalHost().getHostAddress() + ":" + bootstrapPort,
+					bootstrapPort + num);
 			node2.launch();
 			result.add(node2);
 			System.out.println("network node launched with id " + bootstrapNode.getNodeId());
 		}
 		return result;
+	}
+
+	/**
+	 * self test
+	 * 
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		try {
+			System.out.println("starting network");
+			ArrayList<PastryNodeImpl> nodes = launchNetwork(5);
+			System.out.println("network start complete");
+			Thread.sleep(1000);
+			System.out.println("shutting down network");
+			for (PastryNodeImpl node : nodes) {
+				node.shutDown();
+			}
+			System.out.println("self test complete");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 }
