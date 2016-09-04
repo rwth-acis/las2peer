@@ -624,8 +624,9 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	 * 
 	 * @param receiver the receiver to unregister
 	 * @throws AgentNotKnownException The given MessageReceiver is not registered to this node
+	 * @throws NodeException error in underlying layer
 	 */
-	public void unregisterReceiver(MessageReceiver receiver) throws AgentNotKnownException {
+	public void unregisterReceiver(MessageReceiver receiver) throws AgentNotKnownException, NodeException {
 		long agentId = receiver.getResponsibleForAgentId();
 		unregisterReceiver(agentId);
 
@@ -679,8 +680,9 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	 * 
 	 * @param receiver the recevier
 	 * @param topic the topic id
+	 * @throws NodeException
 	 */
-	public void unregisterReceiverFromTopic(MessageReceiver receiver, long topic) {
+	public void unregisterReceiverFromTopic(MessageReceiver receiver, long topic) throws NodeException {
 		unregisterReceiverFromTopic(receiver.getResponsibleForAgentId(), topic);
 	}
 
