@@ -163,14 +163,14 @@ public class PastryNodeImpl extends Node {
 
 	/**
 	 * This constructor can be used to spawn debug nodes. The node is not persistent, listens ONLY to the loopback
-	 * address and chooses the port itself. Use {@link #getPort()} to receive the actual port number.
+	 * address.
 	 * 
 	 * @param bootstrap A bootstrap address that should be used, like hostname:port.
 	 */
-	public PastryNodeImpl(String bootstrap) {
+	public PastryNodeImpl(String bootstrap, int port) {
 		super(null, true, false);
 		useLoopback = true;
-		initialize(14570, bootstrap, STORAGE_MODE.MEMORY, null);
+		initialize(port, bootstrap, STORAGE_MODE.MEMORY, null);
 	}
 
 	/**
@@ -451,7 +451,8 @@ public class PastryNodeImpl extends Node {
 		this.setStatus(NodeStatus.CLOSING);
 		super.shutDown();
 		if (threadpool != null) {
-			// TODO destroy pending jobs first, because they miss the node the most
+			// destroy pending jobs first, because they miss the node the most
+			threadpool.shutdownNow();
 		}
 		if (pastryNode != null) {
 			pastryNode.destroy();
