@@ -299,7 +299,7 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 				return;
 			}
 			try {
-				Thread.sleep(10);
+				Thread.sleep(1);
 			} catch (InterruptedException e) {
 				if (exceptionHandler != null) {
 					exceptionHandler.onException(e);
