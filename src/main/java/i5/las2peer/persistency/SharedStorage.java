@@ -20,8 +20,8 @@ import i5.las2peer.api.StorageCollisionHandler;
 import i5.las2peer.api.StorageEnvelopeHandler;
 import i5.las2peer.api.StorageExceptionHandler;
 import i5.las2peer.api.StorageStoreResultHandler;
-import i5.las2peer.api.exceptions.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.exceptions.ArtifactNotFoundException;
+import i5.las2peer.api.exceptions.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.exceptions.StopMergingException;
 import i5.las2peer.api.exceptions.StorageException;
 import i5.las2peer.logging.L2pLogger;
@@ -340,11 +340,13 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 	}
 
 	@Override
-	public Envelope fetchEnvelope(String identifier, long timeoutMs) throws StorageException {
+	public Envelope fetchEnvelope(String identifier, long timeoutMs)
+			throws ArtifactNotFoundException, StorageException {
 		return fetchEnvelope(identifier, Envelope.LATEST_VERSION, timeoutMs);
 	}
 
-	public Envelope fetchEnvelope(String identifier, long version, long timeoutMs) throws StorageException {
+	public Envelope fetchEnvelope(String identifier, long version, long timeoutMs)
+			throws ArtifactNotFoundException, StorageException {
 		if (timeoutMs < 0) {
 			throw new IllegalArgumentException("Timeout must be greater or equal to zero");
 		}

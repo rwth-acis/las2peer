@@ -690,7 +690,7 @@ public class PastryNodeImpl extends Node {
 	}
 
 	@Override
-	public Envelope fetchEnvelope(String identifier) throws StorageException {
+	public Envelope fetchEnvelope(String identifier) throws ArtifactNotFoundException, StorageException {
 		return fetchEnvelope(identifier, ARTIFACT_GET_TIMEOUT);
 	}
 
@@ -766,7 +766,8 @@ public class PastryNodeImpl extends Node {
 	}
 
 	@Override
-	public Envelope fetchEnvelope(String identifier, long timeoutMs) throws StorageException {
+	public Envelope fetchEnvelope(String identifier, long timeoutMs)
+			throws ArtifactNotFoundException, StorageException {
 		if (pastStorage == null) {
 			throw new IllegalStateException(
 					"Past storage not initialized! You can fetch artifacts only from running nodes!");
