@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 import org.apache.commons.codec.binary.Base64;
 
-import i5.las2peer.api.exceptions.EnvelopeNotFoundException;
+import i5.las2peer.api.exceptions.ArtifactNotFoundException;
 import i5.las2peer.api.exceptions.StorageException;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
@@ -220,7 +220,7 @@ public class ServiceInfoAgent extends PassphraseAgent {
 				// XXX error handling
 				e.printStackTrace();
 			}
-		} catch (EnvelopeNotFoundException e) {
+		} catch (ArtifactNotFoundException e) {
 			try {
 				env = agent.getRunningAtNode().createEnvelope(envelopeName, cls.newInstance(), getServiceInfoAgent());
 			} catch (IllegalArgumentException | SerializationException | CryptoException | L2pSecurityException

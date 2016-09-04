@@ -23,7 +23,7 @@ import i5.las2peer.api.StorageCollisionHandler;
 import i5.las2peer.api.StorageEnvelopeHandler;
 import i5.las2peer.api.StorageExceptionHandler;
 import i5.las2peer.api.StorageStoreResultHandler;
-import i5.las2peer.api.exceptions.EnvelopeNotFoundException;
+import i5.las2peer.api.exceptions.ArtifactNotFoundException;
 import i5.las2peer.api.exceptions.StorageException;
 import i5.las2peer.classLoaders.L2pClassManager;
 import i5.las2peer.communication.Message;
@@ -544,7 +544,7 @@ public class PastryNodeImpl extends Node {
 	 */
 	@Deprecated
 	@Override
-	public Envelope fetchArtifact(long id) throws EnvelopeNotFoundException, StorageException {
+	public Envelope fetchArtifact(long id) throws ArtifactNotFoundException, StorageException {
 		return fetchEnvelope(Long.toString(id));
 	}
 
@@ -553,7 +553,7 @@ public class PastryNodeImpl extends Node {
 	 */
 	@Deprecated
 	@Override
-	public Envelope fetchArtifact(String identifier) throws EnvelopeNotFoundException, StorageException {
+	public Envelope fetchArtifact(String identifier) throws ArtifactNotFoundException, StorageException {
 		return fetchEnvelope(identifier);
 	}
 
@@ -571,7 +571,7 @@ public class PastryNodeImpl extends Node {
 	 */
 	@Deprecated
 	@Override
-	public void removeArtifact(long id, byte[] signature) throws EnvelopeNotFoundException, StorageException {
+	public void removeArtifact(long id, byte[] signature) throws ArtifactNotFoundException, StorageException {
 		removeEnvelope(Long.toString(id));
 	}
 
@@ -776,7 +776,7 @@ public class PastryNodeImpl extends Node {
 			Envelope contentFromNet = pastStorage.fetchEnvelope(identifier, timeoutMs);
 			observerNotice(Event.ARTIFACT_RECEIVED, pastryNode, identifier);
 			return contentFromNet;
-		} catch (EnvelopeNotFoundException e) {
+		} catch (ArtifactNotFoundException e) {
 			observerNotice(Event.ARTIFACT_FETCH_FAILED, pastryNode, identifier);
 			throw e; // transparent exception forwarding
 		} catch (Exception e) {
@@ -812,7 +812,7 @@ public class PastryNodeImpl extends Node {
 	}
 
 	@Override
-	public void removeEnvelope(String identifier) throws EnvelopeNotFoundException, StorageException {
+	public void removeEnvelope(String identifier) throws ArtifactNotFoundException, StorageException {
 		pastStorage.removeEnvelope(identifier);
 	}
 

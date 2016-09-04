@@ -1,7 +1,7 @@
 package i5.las2peer.security;
 
 import i5.las2peer.api.exceptions.EnvelopeAlreadyExistsException;
-import i5.las2peer.api.exceptions.EnvelopeNotFoundException;
+import i5.las2peer.api.exceptions.ArtifactNotFoundException;
 import i5.las2peer.api.exceptions.StorageException;
 import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.p2p.AgentNotKnownException;
@@ -46,7 +46,7 @@ public class UserAgentManager {
 				try {
 					Envelope stored = node.fetchEnvelope(identifier);
 					envName = node.createUnencryptedEnvelope(stored, content);
-				} catch (EnvelopeNotFoundException e) {
+				} catch (ArtifactNotFoundException e) {
 					envName = node.createUnencryptedEnvelope(identifier, content);
 				}
 				node.storeEnvelope(envName, agent);
@@ -63,7 +63,7 @@ public class UserAgentManager {
 				Envelope envMail = null;
 				try {
 					envMail = node.fetchEnvelope(identifier);
-				} catch (EnvelopeNotFoundException e) {
+				} catch (ArtifactNotFoundException e) {
 					envMail = node.createUnencryptedEnvelope(identifier, content);
 				}
 				node.storeEnvelope(envMail, agent);

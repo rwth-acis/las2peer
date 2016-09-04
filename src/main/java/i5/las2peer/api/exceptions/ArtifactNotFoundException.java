@@ -1,10 +1,10 @@
 package i5.las2peer.api.exceptions;
 
 /**
- * This exception is thrown if an envelope was not found in the networks DHT.
+ * This exception is thrown if an artifact was not found in the networks DHT.
  *
  */
-public class EnvelopeNotFoundException extends StorageException {
+public class ArtifactNotFoundException extends StorageException {
 
 	private static final long serialVersionUID = 1L;
 
@@ -13,7 +13,7 @@ public class EnvelopeNotFoundException extends StorageException {
 	 *
 	 * @param message A message that describes the error.
 	 */
-	public EnvelopeNotFoundException(String message) {
+	public ArtifactNotFoundException(String message) {
 		super(message);
 	}
 
@@ -23,7 +23,7 @@ public class EnvelopeNotFoundException extends StorageException {
 	 *
 	 * @param cause An other exception that caused this one.
 	 */
-	public EnvelopeNotFoundException(Throwable cause) {
+	public ArtifactNotFoundException(Throwable cause) {
 		super(cause);
 	}
 
@@ -33,7 +33,7 @@ public class EnvelopeNotFoundException extends StorageException {
 	 * @param message A message that describes the error.
 	 * @param cause An other exception that caused this one.
 	 */
-	public EnvelopeNotFoundException(String message, Throwable cause) {
+	public ArtifactNotFoundException(String message, Throwable cause) {
 		super(message, cause);
 	}
 

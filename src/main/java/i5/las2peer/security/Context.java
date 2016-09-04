@@ -10,7 +10,7 @@ import i5.las2peer.api.StorageCollisionHandler;
 import i5.las2peer.api.StorageEnvelopeHandler;
 import i5.las2peer.api.StorageExceptionHandler;
 import i5.las2peer.api.StorageStoreResultHandler;
-import i5.las2peer.api.exceptions.EnvelopeNotFoundException;
+import i5.las2peer.api.exceptions.ArtifactNotFoundException;
 import i5.las2peer.api.exceptions.StorageException;
 import i5.las2peer.execution.L2pThread;
 import i5.las2peer.logging.L2pLogger;
@@ -162,7 +162,7 @@ public class Context implements AgentStorage, ContextStorageInterface {
 	 * @throws StorageException
 	 */
 	@Deprecated
-	public Envelope getStoredObject(long id) throws EnvelopeNotFoundException, StorageException {
+	public Envelope getStoredObject(long id) throws ArtifactNotFoundException, StorageException {
 		return fetchEnvelope(Long.toString(id));
 	}
 
@@ -180,7 +180,7 @@ public class Context implements AgentStorage, ContextStorageInterface {
 	 */
 	@Deprecated
 	public Envelope getStoredObject(Class<?> cls, String identifier)
-			throws EnvelopeNotFoundException, StorageException {
+			throws ArtifactNotFoundException, StorageException {
 		return fetchEnvelope(cls.getCanonicalName() + "-" + identifier);
 	}
 
@@ -198,7 +198,7 @@ public class Context implements AgentStorage, ContextStorageInterface {
 	 */
 	@Deprecated
 	public Envelope getStoredObject(String className, String identifier)
-			throws EnvelopeNotFoundException, StorageException {
+			throws ArtifactNotFoundException, StorageException {
 		return fetchEnvelope(className + "-" + identifier);
 	}
 
@@ -515,7 +515,7 @@ public class Context implements AgentStorage, ContextStorageInterface {
 	}
 
 	@Override
-	public void removeEnvelope(String identifier) throws EnvelopeNotFoundException, StorageException {
+	public void removeEnvelope(String identifier) throws ArtifactNotFoundException, StorageException {
 		localNode.removeEnvelope(identifier);
 	}
 

@@ -12,7 +12,7 @@ import i5.las2peer.api.StorageEnvelopeHandler;
 import i5.las2peer.api.StorageExceptionHandler;
 import i5.las2peer.api.StorageStoreResultHandler;
 import i5.las2peer.api.exceptions.EnvelopeAlreadyExistsException;
-import i5.las2peer.api.exceptions.EnvelopeNotFoundException;
+import i5.las2peer.api.exceptions.ArtifactNotFoundException;
 import i5.las2peer.api.exceptions.StorageException;
 import i5.las2peer.classLoaders.L2pClassManager;
 import i5.las2peer.classLoaders.libraries.FileSystemRepository;
@@ -157,7 +157,7 @@ public class LocalNode extends Node {
 	 */
 	@Deprecated
 	@Override
-	public Envelope fetchArtifact(long id) throws EnvelopeNotFoundException, StorageException {
+	public Envelope fetchArtifact(long id) throws ArtifactNotFoundException, StorageException {
 		return fetchEnvelope(Long.toString(id));
 	}
 
@@ -175,7 +175,7 @@ public class LocalNode extends Node {
 	 */
 	@Deprecated
 	@Override
-	public void removeArtifact(long id, byte[] signature) throws EnvelopeNotFoundException, StorageException {
+	public void removeArtifact(long id, byte[] signature) throws ArtifactNotFoundException, StorageException {
 		storage.removeEnvelope(Long.toString(id));
 	}
 
@@ -676,7 +676,7 @@ public class LocalNode extends Node {
 
 	@Override
 	public Envelope fetchEnvelope(String identifier, long timeoutMs)
-			throws EnvelopeNotFoundException, StorageException {
+			throws ArtifactNotFoundException, StorageException {
 		return storage.fetchEnvelope(identifier, timeoutMs);
 	}
 
@@ -687,12 +687,12 @@ public class LocalNode extends Node {
 	}
 
 	@Override
-	public void removeEnvelope(String identifier) throws EnvelopeNotFoundException, StorageException {
+	public void removeEnvelope(String identifier) throws ArtifactNotFoundException, StorageException {
 		storage.removeEnvelope(identifier);
 	}
 
 	@Override
-	public Envelope fetchArtifact(String identifier) throws EnvelopeNotFoundException, StorageException {
+	public Envelope fetchArtifact(String identifier) throws ArtifactNotFoundException, StorageException {
 		// XXX make configurable
 		return storage.fetchEnvelope(identifier, 10000);
 	}

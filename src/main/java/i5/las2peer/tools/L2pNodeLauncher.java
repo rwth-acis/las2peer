@@ -16,7 +16,7 @@ import java.util.Map;
 
 import i5.las2peer.api.Connector;
 import i5.las2peer.api.ConnectorException;
-import i5.las2peer.api.exceptions.EnvelopeNotFoundException;
+import i5.las2peer.api.exceptions.ArtifactNotFoundException;
 import i5.las2peer.api.exceptions.StorageException;
 import i5.las2peer.classLoaders.L2pClassManager;
 import i5.las2peer.classLoaders.libraries.FileSystemRepository;
@@ -95,7 +95,7 @@ public class L2pNodeLauncher {
 	 * @throws SerializationException
 	 */
 	public String getEnvelope(String id)
-			throws NumberFormatException, EnvelopeNotFoundException, StorageException, SerializationException {
+			throws NumberFormatException, ArtifactNotFoundException, StorageException, SerializationException {
 		return node.fetchEnvelope(id).toXmlString();
 	}
 

@@ -19,7 +19,7 @@ import i5.las2peer.api.StorageEnvelopeHandler;
 import i5.las2peer.api.StorageExceptionHandler;
 import i5.las2peer.api.StorageStoreResultHandler;
 import i5.las2peer.api.exceptions.EnvelopeAlreadyExistsException;
-import i5.las2peer.api.exceptions.EnvelopeNotFoundException;
+import i5.las2peer.api.exceptions.ArtifactNotFoundException;
 import i5.las2peer.api.exceptions.StopMergingException;
 import i5.las2peer.api.exceptions.StorageException;
 import i5.las2peer.p2p.PastryNodeImpl;
@@ -445,7 +445,7 @@ public class EnvelopeTest {
 			}, new StorageExceptionHandler() {
 				@Override
 				public void onException(Exception e) {
-					if (e instanceof EnvelopeNotFoundException) {
+					if (e instanceof ArtifactNotFoundException) {
 						// expected exception
 						System.out.println("Expected exception '" + e.toString() + "' received.");
 						asyncTestState = true;

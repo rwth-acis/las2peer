@@ -21,7 +21,7 @@ import i5.las2peer.api.StorageEnvelopeHandler;
 import i5.las2peer.api.StorageExceptionHandler;
 import i5.las2peer.api.StorageStoreResultHandler;
 import i5.las2peer.api.exceptions.EnvelopeAlreadyExistsException;
-import i5.las2peer.api.exceptions.EnvelopeNotFoundException;
+import i5.las2peer.api.exceptions.ArtifactNotFoundException;
 import i5.las2peer.api.exceptions.StopMergingException;
 import i5.las2peer.api.exceptions.StorageException;
 import i5.las2peer.logging.L2pLogger;
@@ -412,7 +412,7 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 					} else {
 						// not found
 						if (exceptionHandler != null) {
-							exceptionHandler.onException(new EnvelopeNotFoundException(
+							exceptionHandler.onException(new ArtifactNotFoundException(
 									"no version found for identifier '" + identifier + "'"));
 						}
 					}
@@ -432,7 +432,7 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 								// not found
 								if (exceptionHandler != null) {
 									exceptionHandler
-											.onException(new EnvelopeNotFoundException("Envelope with identifier '"
+											.onException(new ArtifactNotFoundException("Envelope with identifier '"
 													+ identifier + "' and version " + version + " ("
 													+ checkId.toStringFull() + ") not found in shared storage!"));
 								}
@@ -497,7 +497,7 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 						logger.info("Got " + handles.size() + " past handles for part (" + part + ") of '" + identifier
 								+ "'");
 						if (handles.size() < 1) {
-							artifactHandler.onException(new EnvelopeNotFoundException(
+							artifactHandler.onException(new ArtifactNotFoundException(
 									"Part (" + part + ") of '" + identifier + "' with id (" + checkId.toStringFull()
 											+ ") not found in shared storage!"));
 						} else {
@@ -600,7 +600,7 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 	}
 
 	@Override
-	public void removeEnvelope(String identifier) throws EnvelopeNotFoundException, StorageException {
+	public void removeEnvelope(String identifier) throws ArtifactNotFoundException, StorageException {
 		throw new StorageException("Delete not implemented in Past!");
 	}
 

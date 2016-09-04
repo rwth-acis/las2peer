@@ -8,7 +8,7 @@ import i5.las2peer.api.StorageEnvelopeHandler;
 import i5.las2peer.api.StorageExceptionHandler;
 import i5.las2peer.api.StorageStoreResultHandler;
 import i5.las2peer.api.exceptions.EnvelopeAlreadyExistsException;
-import i5.las2peer.api.exceptions.EnvelopeNotFoundException;
+import i5.las2peer.api.exceptions.ArtifactNotFoundException;
 import i5.las2peer.api.exceptions.StorageException;
 import i5.las2peer.security.Agent;
 import i5.las2peer.tools.CryptoException;
@@ -34,11 +34,11 @@ public interface L2pStorageInterface {
 	public void storeEnvelopeAsync(Envelope envelope, Agent author, StorageStoreResultHandler resultHandler,
 			StorageCollisionHandler collisionHandler, StorageExceptionHandler exceptionHandler);
 
-	public Envelope fetchEnvelope(String identifier, long timeoutMs) throws EnvelopeNotFoundException, StorageException;
+	public Envelope fetchEnvelope(String identifier, long timeoutMs) throws ArtifactNotFoundException, StorageException;
 
 	public void fetchEnvelopeAsync(String identifier, StorageEnvelopeHandler envelopeHandler,
 			StorageExceptionHandler exceptionHandler);
 
-	public void removeEnvelope(String identifier) throws EnvelopeNotFoundException, StorageException;
+	public void removeEnvelope(String identifier) throws ArtifactNotFoundException, StorageException;
 
 }

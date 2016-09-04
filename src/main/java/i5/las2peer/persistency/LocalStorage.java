@@ -11,7 +11,7 @@ import i5.las2peer.api.StorageEnvelopeHandler;
 import i5.las2peer.api.StorageExceptionHandler;
 import i5.las2peer.api.StorageStoreResultHandler;
 import i5.las2peer.api.exceptions.EnvelopeAlreadyExistsException;
-import i5.las2peer.api.exceptions.EnvelopeNotFoundException;
+import i5.las2peer.api.exceptions.ArtifactNotFoundException;
 import i5.las2peer.api.exceptions.StopMergingException;
 import i5.las2peer.api.exceptions.StorageException;
 import i5.las2peer.security.Agent;
@@ -99,7 +99,7 @@ public class LocalStorage implements L2pStorageInterface {
 	public Envelope fetchEnvelope(String identifier, long timeoutMs) throws StorageException {
 		Envelope inStorage = storedEnvelopes.get(identifier);
 		if (inStorage == null) {
-			throw new EnvelopeNotFoundException(identifier);
+			throw new ArtifactNotFoundException(identifier);
 		} else {
 			return inStorage;
 		}
@@ -111,7 +111,7 @@ public class LocalStorage implements L2pStorageInterface {
 		Envelope inStorage = storedEnvelopes.get(identifier);
 		if (inStorage == null) {
 			if (exceptionHandler != null) {
-				exceptionHandler.onException(new EnvelopeNotFoundException(identifier));
+				exceptionHandler.onException(new ArtifactNotFoundException(identifier));
 			}
 		} else {
 			if (envelopeHandler != null) {
@@ -124,7 +124,7 @@ public class LocalStorage implements L2pStorageInterface {
 	public void removeEnvelope(String identifier) throws StorageException {
 		Envelope inStorage = storedEnvelopes.remove(identifier);
 		if (inStorage == null) {
-			throw new EnvelopeNotFoundException(identifier);
+			throw new ArtifactNotFoundException(identifier);
 		}
 	}
 

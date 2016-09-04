@@ -22,7 +22,7 @@ import com.sun.management.OperatingSystemMXBean;
 
 import i5.las2peer.api.Service;
 import i5.las2peer.api.exceptions.EnvelopeAlreadyExistsException;
-import i5.las2peer.api.exceptions.EnvelopeNotFoundException;
+import i5.las2peer.api.exceptions.ArtifactNotFoundException;
 import i5.las2peer.api.exceptions.StorageException;
 import i5.las2peer.classLoaders.L2pClassManager;
 import i5.las2peer.classLoaders.libraries.Repository;
@@ -772,7 +772,7 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	 * @throws StorageException
 	 */
 	@Deprecated
-	public abstract Envelope fetchArtifact(long id) throws EnvelopeNotFoundException, StorageException;
+	public abstract Envelope fetchArtifact(long id) throws ArtifactNotFoundException, StorageException;
 
 	/**
 	 * @deprecated Use {@link #fetchEnvelope(String)} instead
@@ -785,7 +785,7 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	 * @throws StorageException
 	 */
 	@Deprecated
-	public abstract Envelope fetchArtifact(String identifier) throws EnvelopeNotFoundException, StorageException;
+	public abstract Envelope fetchArtifact(String identifier) throws ArtifactNotFoundException, StorageException;
 
 	/**
 	 * @deprecated Use {@link #storeEnvelope(Envelope, Agent)} instead
@@ -810,7 +810,7 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	 * @throws StorageException
 	 */
 	@Deprecated
-	public abstract void removeArtifact(long id, byte[] signature) throws EnvelopeNotFoundException, StorageException;
+	public abstract void removeArtifact(long id, byte[] signature) throws ArtifactNotFoundException, StorageException;
 
 	/**
 	 * Searches the nodes for registered Versions of the given Agent. Returns an array of objects identifying the nodes
