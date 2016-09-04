@@ -2,6 +2,7 @@ package i5.las2peer.persistency;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -72,7 +73,7 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 	public static final int DEFAULT_MAXIMUM_CACHE_SIZE = 200 * 1024 * 1024; // 200 MB
 	private int maximumCacheSize = DEFAULT_MAXIMUM_CACHE_SIZE;
 
-	public static final String DEFAULT_STORAGE_ROOT_DIR = "node-storage/";
+	public static final String DEFAULT_STORAGE_ROOT_DIR = "node-storage" + File.separator;
 	private String storageRootDir = DEFAULT_STORAGE_ROOT_DIR;
 
 	public static final long DEFAULT_MAXIMUM_STORAGE_SIZE = 1000 * 1024 * 1024; // 1 GB
@@ -92,9 +93,12 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 		if (storageMode == STORAGE_MODE.MEMORY) {
 			storage = new MemoryStorage(pastIdFactory);
 		} else if (storageMode == STORAGE_MODE.FILESYSTEM) {
+			if (!storageRootDir.endsWith(File.separator)) {
+				storageRootDir += File.separator;
+			}
 			try {
-				storage = new PersistentStorage(pastIdFactory, storageRootDir, maximumStorageSize,
-						node.getEnvironment());
+				storage = new PersistentStorage(pastIdFactory, storageRootDir + "node_" + node.getId().toStringFull(),
+						maximumStorageSize, node.getEnvironment());
 			} catch (IOException e) {
 				throw new StorageException("Could not initialize persistent storage!", e);
 			}
