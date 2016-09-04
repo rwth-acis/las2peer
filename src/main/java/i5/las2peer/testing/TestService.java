@@ -8,6 +8,7 @@ import i5.las2peer.api.Service;
 import i5.las2peer.persistency.Envelope;
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.security.Context;
+import i5.las2peer.security.GroupAgent;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.SerializationException;
@@ -284,11 +285,14 @@ public class TestService extends Service {
 	 * @throws SerializationException
 	 * @throws CryptoException
 	 */
-	public String getGroupEnvelopeString() throws L2pSecurityException, CryptoException, SerializationException {
+	public String getGroupEnvelopeString()
+			throws L2pSecurityException, CryptoException, SerializationException, MalformedXMLException, IOException {
 		if (groupCache == null) {
 			return "nothing stored";
 		}
-		String result = (String) groupCache.getContent();
+		GroupAgent group = MockAgentFactory.getGroup1();
+		group.unlockPrivateKey(Context.getCurrent().getMainAgent());
+		String result = (String) groupCache.getContent(group);
 		return result;
 	}
 
