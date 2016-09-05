@@ -1,11 +1,5 @@
 package i5.las2peer.security;
 
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Hashtable;
-import java.util.List;
-
 import i5.las2peer.api.StorageCollisionHandler;
 import i5.las2peer.api.StorageEnvelopeHandler;
 import i5.las2peer.api.StorageExceptionHandler;
@@ -23,6 +17,12 @@ import i5.las2peer.persistency.Envelope;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.SerializationException;
 
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Hashtable;
+import java.util.List;
+
 /**
  * Each {@link i5.las2peer.execution.L2pThread} is bound to a context, which is mainly determined by the executing
  * agent.
@@ -30,7 +30,6 @@ import i5.las2peer.tools.SerializationException;
 public class Context implements AgentStorage, ContextStorageInterface {
 
 	private Agent agent;
-	private Object remoteNodeReference = null;
 
 	private Hashtable<Long, GroupAgent> groupAgents = new Hashtable<Long, GroupAgent>();
 
@@ -51,20 +50,6 @@ public class Context implements AgentStorage, ContextStorageInterface {
 		this.localNode = localNode;
 
 		touch();
-	}
-
-	/**
-	 * Creates a new (remote) context.
-	 * 
-	 * @param localNode
-	 * @param mainAgent
-	 * @param remoteNodeReference
-	 * @throws L2pSecurityException
-	 */
-	// TODO is this used anywhere?
-	public Context(Node localNode, Agent mainAgent, Object remoteNodeReference) throws L2pSecurityException {
-		this(localNode, mainAgent);
-		this.remoteNodeReference = remoteNodeReference;
 	}
 
 	/**
@@ -179,8 +164,7 @@ public class Context implements AgentStorage, ContextStorageInterface {
 	 * @throws StorageException
 	 */
 	@Deprecated
-	public Envelope getStoredObject(Class<?> cls, String identifier)
-			throws ArtifactNotFoundException, StorageException {
+	public Envelope getStoredObject(Class<?> cls, String identifier) throws ArtifactNotFoundException, StorageException {
 		return fetchEnvelope(cls.getCanonicalName() + "-" + identifier);
 	}
 
@@ -197,27 +181,9 @@ public class Context implements AgentStorage, ContextStorageInterface {
 	 * @throws StorageException
 	 */
 	@Deprecated
-	public Envelope getStoredObject(String className, String identifier)
-			throws ArtifactNotFoundException, StorageException {
+	public Envelope getStoredObject(String className, String identifier) throws ArtifactNotFoundException,
+			StorageException {
 		return fetchEnvelope(className + "-" + identifier);
-	}
-
-	/**
-	 * Returns the reference object to the executing node.
-	 * 
-	 * @return the (possibly remote) node trying to execute something at this (local) node
-	 */
-	public Object getNodeReference() {
-		return remoteNodeReference;
-	}
-
-	/**
-	 * Refers this context to a local executing agent or a remote one?
-	 * 
-	 * @return true, if the request is started locally and not via the P2P network
-	 */
-	public boolean isLocal() {
-		return remoteNodeReference == null;
 	}
 
 	/**
@@ -459,8 +425,8 @@ public class Context implements AgentStorage, ContextStorageInterface {
 	}
 
 	@Override
-	public Envelope createUnencryptedEnvelope(String identifier, Serializable content)
-			throws IllegalArgumentException, SerializationException, CryptoException {
+	public Envelope createUnencryptedEnvelope(String identifier, Serializable content) throws IllegalArgumentException,
+			SerializationException, CryptoException {
 		return localNode.createUnencryptedEnvelope(identifier, content);
 	}
 
@@ -493,14 +459,14 @@ public class Context implements AgentStorage, ContextStorageInterface {
 	}
 
 	@Override
-	public Envelope createEnvelope(String identifier, Serializable content)
-			throws IllegalArgumentException, SerializationException, CryptoException {
+	public Envelope createEnvelope(String identifier, Serializable content) throws IllegalArgumentException,
+			SerializationException, CryptoException {
 		return localNode.createEnvelope(identifier, content, Arrays.asList(new Agent[] { getMainAgent() }));
 	}
 
 	@Override
-	public Envelope createEnvelope(Envelope previousVersion, Serializable content)
-			throws IllegalArgumentException, SerializationException, CryptoException {
+	public Envelope createEnvelope(Envelope previousVersion, Serializable content) throws IllegalArgumentException,
+			SerializationException, CryptoException {
 		return localNode.createEnvelope(previousVersion, content, Arrays.asList(new Agent[] { getMainAgent() }));
 	}
 

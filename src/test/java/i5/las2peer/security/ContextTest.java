@@ -1,17 +1,8 @@
 package i5.las2peer.security;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
-import java.io.IOException;
-import java.util.Arrays;
-
-import org.junit.Test;
-
 import i5.las2peer.p2p.AgentAlreadyRegisteredException;
 import i5.las2peer.p2p.LocalNode;
 import i5.las2peer.p2p.NodeException;
@@ -21,24 +12,12 @@ import i5.las2peer.testing.MockAgentFactory;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.SerializationException;
 
+import java.io.IOException;
+import java.util.Arrays;
+
+import org.junit.Test;
+
 public class ContextTest {
-
-	@Test
-	public void testLocal() throws L2pSecurityException, MalformedXMLException, IOException {
-		LocalNode node = LocalNode.launchNode();
-
-		UserAgent eve = MockAgentFactory.getEve();
-		eve.unlockPrivateKey("evespass");
-
-		Context testee = new Context(node, eve);
-		assertTrue(testee.isLocal());
-		assertNull(testee.getNodeReference());
-
-		testee = new Context(node, eve, 10);
-		assertFalse(testee.isLocal());
-
-		assertEquals(10, testee.getNodeReference());
-	}
 
 	// @Test
 	public void testCreation() throws L2pSecurityException, MalformedXMLException, IOException {
