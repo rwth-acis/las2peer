@@ -278,7 +278,7 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 				byte[] rawPart = Arrays.copyOfRange(serialized, offset, offset + partsize);
 				NetworkArtifact toStore = new EnvelopeArtifact(artifactIdFactory, identifier, part, rawPart, author);
 				logger.info("Storing part " + part + " for envelope " + envelope + " with id "
-						+ toStore.getId().toStringFull() + " at " + (System.currentTimeMillis() % 100000));
+						+ toStore.getId().toStringFull());
 				pastStorage.insert(toStore, new PastInsertContinuation(threadpool, multiResult, multiResult, toStore));
 				offset += partsize;
 			}
@@ -320,7 +320,7 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 			NetworkArtifact metadataArtifact = new MetadataArtifact(artifactIdFactory, identifier, version,
 					SerializeTools.serialize(metadataEnvelope), author);
 			logger.info("Storing metadata for envelope " + metadataEnvelope.toString() + " with id "
-					+ metadataArtifact.getId().toStringFull() + " at " + (System.currentTimeMillis() % 100000));
+					+ metadataArtifact.getId().toStringFull());
 			pastStorage.insert(metadataArtifact,
 					new PastInsertContinuation(threadpool, new StorageStoreResultHandler() {
 						@Override
