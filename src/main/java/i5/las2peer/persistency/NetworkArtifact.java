@@ -1,6 +1,11 @@
 package i5.las2peer.persistency;
 
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Arrays;
 
 import i5.las2peer.security.Agent;
 import i5.las2peer.security.L2pSecurityException;
@@ -25,7 +30,7 @@ public abstract class NetworkArtifact extends ContentHashPastContent {
 	// TODO test different content types, String seems the fastest, also check BASE64, Serializable, byte[]
 	private final byte[] content;
 	private final byte[] signature;
-	private final PublicKey key;
+	private final byte[] encodedAuthorKey; // the PublicKey class contains enum and can't be serialized by Java
 	private final byte[] keySignature;
 
 	protected NetworkArtifact(Id id, int partIndex, byte[] content, Agent author)
@@ -39,8 +44,8 @@ public abstract class NetworkArtifact extends ContentHashPastContent {
 		this.partIndex = partIndex;
 		this.content = content;
 		this.signature = author.signContent(content);
-		this.key = author.getPublicKey();
-		this.keySignature = author.signContent(key.getEncoded());
+		this.encodedAuthorKey = author.getPublicKey().getEncoded();
+		this.keySignature = author.signContent(encodedAuthorKey);
 	}
 
 	public int getPartIndex() {
@@ -53,19 +58,21 @@ public abstract class NetworkArtifact extends ContentHashPastContent {
 	}
 
 	public PublicKey getAuthorPublicKey() throws VerificationFailedException {
-		verifyAuthorKey();
-		return key;
+		try {
+			PublicKey decoded = KeyFactory.getInstance(CryptoTools.getAsymmetricAlgorithm())
+					.generatePublic(new X509EncodedKeySpec(encodedAuthorKey));
+			CryptoTools.verifySignature(keySignature, encodedAuthorKey, decoded);
+			return decoded;
+		} catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
+			throw new VerificationFailedException("Decoding authors public key failed!", e);
+		}
 	}
 
 	public void verify() throws VerificationFailedException {
-		// first we verify the contained public key is correct
-		verifyAuthorKey();
+		// first we decode and verify the contained public key is correct
+		PublicKey authorPublicKey = getAuthorPublicKey();
 		// after we verify the actual content is correct
-		CryptoTools.verifySignature(signature, content, key);
-	}
-
-	private void verifyAuthorKey() throws VerificationFailedException {
-		CryptoTools.verifySignature(keySignature, key.getEncoded(), key);
+		CryptoTools.verifySignature(signature, content, authorPublicKey);
 	}
 
 	public boolean hasSameAuthor(NetworkArtifact other) {
@@ -74,7 +81,7 @@ public abstract class NetworkArtifact extends ContentHashPastContent {
 		} else if (other == null) {
 			return false;
 		} else {
-			return this.key.equals(other.key);
+			return Arrays.equals(encodedAuthorKey, other.encodedAuthorKey);
 		}
 	}
 
