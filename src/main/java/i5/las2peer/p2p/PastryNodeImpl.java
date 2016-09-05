@@ -87,7 +87,7 @@ public class PastryNodeImpl extends Node {
 	 * Leave the bootstrap empty or null to start a new ring
 	 * 
 	 * @param baseClassLoader
-	 * @param port
+	 * @param port A port number the PastryNode should listen to for network communication.
 	 * @param bootstrap A bootstrap address that should be used, like hostname:port.
 	 */
 	public PastryNodeImpl(L2pClassManager baseClassLoader, int port, String bootstrap) {
@@ -120,7 +120,7 @@ public class PastryNodeImpl extends Node {
 	 * bootstrap string may be a comma separated lists of host possibly including port information separated be a colon.
 	 * Leave empty or null to start a new ring.
 	 * 
-	 * @param port
+	 * @param port A port number the PastryNode should listen to for network communication.
 	 * @param bootstrap A bootstrap address that should be used, like hostname:port.
 	 */
 	public PastryNodeImpl(int port, String bootstrap) {
@@ -132,7 +132,7 @@ public class PastryNodeImpl extends Node {
 	 * bootstrap string may be a comma separated lists of host possibly including port information separated be a colon.
 	 * Leave empty or null to start a new ring.
 	 * 
-	 * @param port
+	 * @param port A port number the PastryNode should listen to for network communication.
 	 * @param bootstrap A bootstrap address that should be used, like hostname:port.
 	 * @param mode
 	 */
@@ -148,7 +148,7 @@ public class PastryNodeImpl extends Node {
 	 * 
 	 * The observer-flag determines, if the node will be available for monitoring.
 	 * 
-	 * @param port
+	 * @param port A port number the PastryNode should listen to for network communication.
 	 * @param bootstrap A bootstrap address that should be used, like hostname:port.
 	 * @param mode
 	 * @param monitoringObserver
@@ -162,23 +162,24 @@ public class PastryNodeImpl extends Node {
 	}
 
 	/**
-	 * This constructor can be used to spawn debug nodes. The node is not persistent, listens ONLY to the loopback
-	 * address.
+	 * This constructor can be used to spawn debug nodes. The node listens ONLY to the loopback address.
 	 * 
 	 * @param bootstrap A bootstrap address that should be used, like hostname:port.
+	 * @param port A port number the PastryNode should listen to for network communication.
+	 * @param storageMode Past storage mode
 	 */
-	public PastryNodeImpl(String bootstrap, int port) {
+	public PastryNodeImpl(String bootstrap, int port, STORAGE_MODE storageMode) {
 		super(null, true, false);
 		useLoopback = true;
-		initialize(port, bootstrap, STORAGE_MODE.MEMORY, null);
+		initialize(port, bootstrap, storageMode, null);
 	}
 
 	/**
 	 * local initialization for constructors
 	 * 
-	 * @param port
+	 * @param port A port number the PastryNode should listen to for network communication.
 	 * @param bootstrap A bootstrap address that should be used, like hostname:port.
-	 * @param mode Pastry storage mode
+	 * @param mode Past storage mode
 	 * @param nodeIdSeed seed to generate node ids from
 	 */
 	private void initialize(int port, String bootstrap, STORAGE_MODE mode, Long nodeIdSeed) {
