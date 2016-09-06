@@ -23,6 +23,22 @@ public class L2pThread extends Thread {
 	private boolean bFinished = false;
 
 	/**
+	 * Gets the current las2peer context.
+	 * 
+	 * @throws IllegalStateException called not in a las2peer execution thread
+	 * @return the current context
+	 */
+	public static L2pThread getCurrent() {
+		Thread t = Thread.currentThread();
+
+		if (!(t instanceof L2pThread)) {
+			throw new IllegalStateException("Not executed in a L2pThread environment!");
+		}
+
+		return (L2pThread) t;
+	}
+
+	/**
 	 * create a new L2pThread
 	 * 
 	 * @param agent
@@ -100,9 +116,9 @@ public class L2pThread extends Thread {
 	 * @throws NotFinishedException
 	 */
 	public Serializable getResult() throws NotFinishedException {
-		if (!isFinished())
+		if (!isFinished()) {
 			throw new NotFinishedException("Job not Finished yet");
-
+		}
 		return result;
 	}
 
