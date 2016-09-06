@@ -29,8 +29,9 @@ public class StoreProcessHelper implements StorageStoreResultHandler, StorageCol
 	public Serializable onCollision(Envelope toStore, Envelope inNetwork, long numberOfCollisions)
 			throws StopMergingException {
 		synchronized (this) {
-			exception = new EnvelopeAlreadyExistsException(
-					"Envelope with this version already exists in network! Use a collision handler or increment version.");
+			exception = new EnvelopeAlreadyExistsException("Envelope '" + toStore.getIdentifier() + "' with version ("
+					+ toStore.getVersion()
+					+ ") already exists in network! Use a collision handler or fetch latest version before storing.");
 			// stop merging process
 			throw new StopMergingException();
 		}
