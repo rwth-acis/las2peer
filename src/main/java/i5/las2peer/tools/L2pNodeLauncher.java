@@ -706,8 +706,8 @@ public class L2pNodeLauncher {
 	 * start interactive console mode based on a {@link i5.las2peer.tools.CommandPrompt}
 	 */
 	public void interactive() {
-		System.out.println("Entering interactive mode for node " + this + "\n"
-				+ "-----------------------------------------------\n"
+		System.out.println("Entering interactive mode for node " + this.getNode().getPastryNode().getId().toStringFull()
+				+ "\n" + "-----------------------------------------------\n"
 				+ "Enter 'help' for further information of the console.\n"
 				+ "Use all public methods of the L2pNodeLauncher class for interaction with the P2P network.\n\n");
 
