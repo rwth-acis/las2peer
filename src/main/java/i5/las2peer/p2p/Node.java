@@ -1173,7 +1173,7 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	 * @return agent id
 	 * @throws AgentNotKnownException
 	 */
-	public long getAgentIdForLogin(String login) throws AgentNotKnownException {
+	public long getAgentIdForLogin(String login) throws AgentNotKnownException, L2pSecurityException {
 		return userManager.getAgentIdByLogin(login);
 	}
 
@@ -1184,7 +1184,7 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	 * @return agent id
 	 * @throws AgentNotKnownException
 	 */
-	public long getAgentIdForEmail(String email) throws AgentNotKnownException {
+	public long getAgentIdForEmail(String email) throws AgentNotKnownException, L2pSecurityException {
 		return userManager.getAgentIdByEmail(email);
 	}
 

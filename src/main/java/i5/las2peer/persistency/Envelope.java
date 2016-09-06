@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 import javax.crypto.SecretKey;
 
 import i5.las2peer.security.Agent;
+import i5.las2peer.security.Context;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
@@ -138,9 +139,9 @@ public class Envelope implements Serializable, XmlAble {
 		return readerKeys;
 	}
 
-	public Serializable getContent() throws CryptoException, SerializationException {
+	public Serializable getContent() throws CryptoException, L2pSecurityException, SerializationException {
 		if (isEncrypted()) {
-			throw new CryptoException("encrypted content, but no agent to decrypt");
+			return getContent(Context.getCurrent().getMainAgent());
 		} else {
 			return SerializeTools.deserialize(rawContent);
 		}

@@ -1,7 +1,7 @@
 package i5.las2peer.security;
 
-import i5.las2peer.api.exceptions.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.exceptions.ArtifactNotFoundException;
+import i5.las2peer.api.exceptions.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.exceptions.StorageException;
 import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.p2p.AgentNotKnownException;
@@ -95,7 +95,7 @@ public class UserAgentManager {
 	 * @return
 	 * @throws AgentNotKnownException
 	 */
-	public long getAgentIdByLogin(String name) throws AgentNotKnownException {
+	public long getAgentIdByLogin(String name) throws AgentNotKnownException, L2pSecurityException {
 		try {
 			Envelope env = node.fetchEnvelope(PREFIX_USER_NAME + name.toLowerCase());
 			return (Long) env.getContent();
@@ -113,7 +113,7 @@ public class UserAgentManager {
 	 * @return
 	 * @throws AgentNotKnownException
 	 */
-	public long getAgentIdByEmail(String email) throws AgentNotKnownException {
+	public long getAgentIdByEmail(String email) throws AgentNotKnownException, L2pSecurityException {
 		try {
 			Envelope env = node.fetchEnvelope(PREFIX_USER_MAIL + email.toLowerCase());
 			return (Long) env.getContent();
