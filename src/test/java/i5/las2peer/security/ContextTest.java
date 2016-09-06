@@ -3,6 +3,11 @@ package i5.las2peer.security;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
+
+import java.io.IOException;
+
+import org.junit.Test;
+
 import i5.las2peer.p2p.AgentAlreadyRegisteredException;
 import i5.las2peer.p2p.LocalNode;
 import i5.las2peer.p2p.NodeException;
@@ -11,11 +16,6 @@ import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.testing.MockAgentFactory;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.SerializationException;
-
-import java.io.IOException;
-import java.util.Arrays;
-
-import org.junit.Test;
 
 public class ContextTest {
 
@@ -119,8 +119,7 @@ public class ContextTest {
 
 			Context context = new Context(node, eve);
 
-			Envelope envelope1 = context.createEnvelope("id", "content",
-					Arrays.asList(new Agent[] { groupSuper, groupSuper2 }));
+			Envelope envelope1 = context.createEnvelope("id", "content", groupSuper, groupSuper2);
 			Envelope envelopeA = context.createEnvelope("id", "content", groupA);
 			context.storeEnvelope(envelope1, groupSuper2);
 

@@ -10,7 +10,6 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.List;
@@ -716,9 +715,9 @@ public class PastryNodeImpl extends Node {
 	}
 
 	@Override
-	public Envelope createEnvelope(String identifier, Serializable content, Agent reader)
+	public Envelope createEnvelope(String identifier, Serializable content, Agent... reader)
 			throws IllegalArgumentException, SerializationException, CryptoException {
-		return createEnvelope(identifier, content, Arrays.asList(new Agent[] { reader }));
+		return createEnvelope(identifier, content, reader);
 	}
 
 	@Override
@@ -728,9 +727,9 @@ public class PastryNodeImpl extends Node {
 	}
 
 	@Override
-	public Envelope createEnvelope(Envelope previousVersion, Serializable content, Agent reader)
+	public Envelope createEnvelope(Envelope previousVersion, Serializable content, Agent... reader)
 			throws IllegalArgumentException, SerializationException, CryptoException {
-		return createEnvelope(previousVersion, content, Arrays.asList(new Agent[] { reader }));
+		return createEnvelope(previousVersion, content, reader);
 	}
 
 	@Override

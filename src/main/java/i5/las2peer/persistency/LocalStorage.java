@@ -3,6 +3,7 @@ package i5.las2peer.persistency;
 import java.io.Serializable;
 import java.security.PublicKey;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -10,8 +11,8 @@ import i5.las2peer.api.StorageCollisionHandler;
 import i5.las2peer.api.StorageEnvelopeHandler;
 import i5.las2peer.api.StorageExceptionHandler;
 import i5.las2peer.api.StorageStoreResultHandler;
-import i5.las2peer.api.exceptions.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.exceptions.ArtifactNotFoundException;
+import i5.las2peer.api.exceptions.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.exceptions.StopMergingException;
 import i5.las2peer.api.exceptions.StorageException;
 import i5.las2peer.security.Agent;
@@ -23,9 +24,21 @@ public class LocalStorage implements L2pStorageInterface {
 	private final ConcurrentHashMap<String, Envelope> storedEnvelopes = new ConcurrentHashMap<>();
 
 	@Override
+	public Envelope createEnvelope(String identifier, Serializable content, Agent... readers)
+			throws IllegalArgumentException, SerializationException, CryptoException {
+		return new Envelope(identifier, content, Arrays.asList(readers));
+	}
+
+	@Override
 	public Envelope createEnvelope(String identifier, Serializable content, List<Agent> readers)
 			throws IllegalArgumentException, SerializationException, CryptoException {
 		return new Envelope(identifier, content, readers);
+	}
+
+	@Override
+	public Envelope createEnvelope(Envelope previousVersion, Serializable content, Agent... readers)
+			throws IllegalArgumentException, SerializationException, CryptoException {
+		return new Envelope(previousVersion, content, Arrays.asList(readers));
 	}
 
 	@Override

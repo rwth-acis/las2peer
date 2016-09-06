@@ -7,8 +7,8 @@ import i5.las2peer.api.StorageCollisionHandler;
 import i5.las2peer.api.StorageEnvelopeHandler;
 import i5.las2peer.api.StorageExceptionHandler;
 import i5.las2peer.api.StorageStoreResultHandler;
-import i5.las2peer.api.exceptions.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.exceptions.ArtifactNotFoundException;
+import i5.las2peer.api.exceptions.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.exceptions.StorageException;
 import i5.las2peer.security.Agent;
 import i5.las2peer.tools.CryptoException;
@@ -16,7 +16,13 @@ import i5.las2peer.tools.SerializationException;
 
 public interface L2pStorageInterface {
 
+	public Envelope createEnvelope(String identifier, Serializable content, Agent... readers)
+			throws IllegalArgumentException, SerializationException, CryptoException;
+
 	public Envelope createEnvelope(String identifier, Serializable content, List<Agent> readers)
+			throws IllegalArgumentException, SerializationException, CryptoException;
+
+	public Envelope createEnvelope(Envelope previousVersion, Serializable content, Agent... readers)
 			throws IllegalArgumentException, SerializationException, CryptoException;
 
 	public Envelope createEnvelope(Envelope previousVersion, Serializable content, List<Agent> readers)

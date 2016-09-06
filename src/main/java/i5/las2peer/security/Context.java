@@ -1,5 +1,11 @@
 package i5.las2peer.security;
 
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Hashtable;
+import java.util.List;
+
 import i5.las2peer.api.StorageCollisionHandler;
 import i5.las2peer.api.StorageEnvelopeHandler;
 import i5.las2peer.api.StorageExceptionHandler;
@@ -16,12 +22,6 @@ import i5.las2peer.persistency.DecodingFailedException;
 import i5.las2peer.persistency.Envelope;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.SerializationException;
-
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Hashtable;
-import java.util.List;
 
 /**
  * Each {@link i5.las2peer.execution.L2pThread} is bound to a context, which is mainly determined by the executing
@@ -164,7 +164,8 @@ public class Context implements AgentStorage, ContextStorageInterface {
 	 * @throws StorageException
 	 */
 	@Deprecated
-	public Envelope getStoredObject(Class<?> cls, String identifier) throws ArtifactNotFoundException, StorageException {
+	public Envelope getStoredObject(Class<?> cls, String identifier)
+			throws ArtifactNotFoundException, StorageException {
 		return fetchEnvelope(cls.getCanonicalName() + "-" + identifier);
 	}
 
@@ -181,8 +182,8 @@ public class Context implements AgentStorage, ContextStorageInterface {
 	 * @throws StorageException
 	 */
 	@Deprecated
-	public Envelope getStoredObject(String className, String identifier) throws ArtifactNotFoundException,
-			StorageException {
+	public Envelope getStoredObject(String className, String identifier)
+			throws ArtifactNotFoundException, StorageException {
 		return fetchEnvelope(className + "-" + identifier);
 	}
 
@@ -401,7 +402,7 @@ public class Context implements AgentStorage, ContextStorageInterface {
 	}
 
 	@Override
-	public Envelope createEnvelope(String identifier, Serializable content, Agent reader)
+	public Envelope createEnvelope(String identifier, Serializable content, Agent... reader)
 			throws IllegalArgumentException, SerializationException, CryptoException {
 		return localNode.createEnvelope(identifier, content, reader);
 	}
@@ -413,7 +414,7 @@ public class Context implements AgentStorage, ContextStorageInterface {
 	}
 
 	@Override
-	public Envelope createEnvelope(Envelope previousVersion, Serializable content, Agent reader)
+	public Envelope createEnvelope(Envelope previousVersion, Serializable content, Agent... reader)
 			throws IllegalArgumentException, SerializationException, CryptoException {
 		return localNode.createEnvelope(previousVersion, content, reader);
 	}
@@ -425,8 +426,8 @@ public class Context implements AgentStorage, ContextStorageInterface {
 	}
 
 	@Override
-	public Envelope createUnencryptedEnvelope(String identifier, Serializable content) throws IllegalArgumentException,
-			SerializationException, CryptoException {
+	public Envelope createUnencryptedEnvelope(String identifier, Serializable content)
+			throws IllegalArgumentException, SerializationException, CryptoException {
 		return localNode.createUnencryptedEnvelope(identifier, content);
 	}
 
@@ -459,14 +460,14 @@ public class Context implements AgentStorage, ContextStorageInterface {
 	}
 
 	@Override
-	public Envelope createEnvelope(String identifier, Serializable content) throws IllegalArgumentException,
-			SerializationException, CryptoException {
+	public Envelope createEnvelope(String identifier, Serializable content)
+			throws IllegalArgumentException, SerializationException, CryptoException {
 		return localNode.createEnvelope(identifier, content, Arrays.asList(new Agent[] { getMainAgent() }));
 	}
 
 	@Override
-	public Envelope createEnvelope(Envelope previousVersion, Serializable content) throws IllegalArgumentException,
-			SerializationException, CryptoException {
+	public Envelope createEnvelope(Envelope previousVersion, Serializable content)
+			throws IllegalArgumentException, SerializationException, CryptoException {
 		return localNode.createEnvelope(previousVersion, content, Arrays.asList(new Agent[] { getMainAgent() }));
 	}
 

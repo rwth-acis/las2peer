@@ -1,7 +1,6 @@
 package i5.las2peer.p2p;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
@@ -683,15 +682,15 @@ public class LocalNode extends Node {
 	}
 
 	@Override
-	public Envelope createEnvelope(String identifier, Serializable content, Agent reader)
+	public Envelope createEnvelope(String identifier, Serializable content, Agent... reader)
 			throws IllegalArgumentException, SerializationException, CryptoException {
-		return storage.createEnvelope(identifier, content, Arrays.asList(new Agent[] { reader }));
+		return storage.createEnvelope(identifier, content, reader);
 	}
 
 	@Override
-	public Envelope createEnvelope(Envelope previousVersion, Serializable content, Agent reader)
+	public Envelope createEnvelope(Envelope previousVersion, Serializable content, Agent... reader)
 			throws IllegalArgumentException, SerializationException, CryptoException {
-		return storage.createEnvelope(previousVersion, content, Arrays.asList(new Agent[] { reader }));
+		return storage.createEnvelope(previousVersion, content, reader);
 	}
 
 	@Override

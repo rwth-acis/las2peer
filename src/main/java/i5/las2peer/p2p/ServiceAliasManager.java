@@ -1,11 +1,8 @@
 package i5.las2peer.p2p;
 
-import java.util.Arrays;
-
 import i5.las2peer.api.exceptions.StorageException;
 import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.persistency.Envelope;
-import i5.las2peer.security.Agent;
 import i5.las2peer.security.AgentLockedException;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.ServiceAgent;
@@ -52,8 +49,8 @@ public class ServiceAliasManager {
 		} catch (ServiceNotFoundException e) {
 			// if no mapping exists, ignore and continue with creating a new mapping
 			try {
-				Envelope envName = node.createEnvelope(PREFIX + alias.toLowerCase(), content,
-						Arrays.asList(new Agent[] { agent, node.getAnonymous() }));
+				Envelope envName = node.createEnvelope(PREFIX + alias.toLowerCase(), content, agent,
+						node.getAnonymous());
 				node.storeEnvelope(envName, agent);
 			} catch (SerializationException | StorageException | IllegalArgumentException | CryptoException e2) {
 				node.observerNotice(Event.NODE_ERROR, "Envelope error while updating user list: " + e2);
