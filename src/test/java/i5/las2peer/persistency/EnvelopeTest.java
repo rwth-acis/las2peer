@@ -18,8 +18,8 @@ import i5.las2peer.api.StorageCollisionHandler;
 import i5.las2peer.api.StorageEnvelopeHandler;
 import i5.las2peer.api.StorageExceptionHandler;
 import i5.las2peer.api.StorageStoreResultHandler;
-import i5.las2peer.api.exceptions.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.exceptions.ArtifactNotFoundException;
+import i5.las2peer.api.exceptions.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.exceptions.StopMergingException;
 import i5.las2peer.api.exceptions.StorageException;
 import i5.las2peer.p2p.PastryNodeImpl;
@@ -30,7 +30,6 @@ import i5.las2peer.testing.TestSuite;
 public class EnvelopeTest {
 
 	private ArrayList<PastryNodeImpl> nodes;
-	private long testStart;
 	private boolean asyncTestState;
 
 	private static class ExceptionHandler implements StorageExceptionHandler {
@@ -48,7 +47,6 @@ public class EnvelopeTest {
 
 	@Before
 	public void startNetwork() {
-		testStart = System.currentTimeMillis();
 		try {
 			// start test node
 			nodes = TestSuite.launchNetwork(3);
@@ -68,13 +66,11 @@ public class EnvelopeTest {
 			}
 			nodes = null;
 		}
-		long testStop = System.currentTimeMillis();
-		System.out.println(name.getMethodName() + " took " + (testStop - testStart) + "ms");
 	}
 
 	@Test
 	public void testStartStopNetwork() {
-		System.out.println("Just for timing comparison ...");
+		// just as time reference ...
 	}
 
 	@Test
