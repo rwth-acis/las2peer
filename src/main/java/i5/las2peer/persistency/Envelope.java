@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 
 import javax.crypto.SecretKey;
 
+import i5.las2peer.execution.L2pThread;
 import i5.las2peer.security.Agent;
 import i5.las2peer.security.Context;
 import i5.las2peer.security.L2pSecurityException;
@@ -143,7 +144,13 @@ public class Envelope implements Serializable, XmlAble {
 		if (isEncrypted()) {
 			return getContent(Context.getCurrent().getMainAgent());
 		} else {
-			return SerializeTools.deserialize(rawContent);
+			ClassLoader clsLoader = null;
+			try {
+				clsLoader = L2pThread.getServiceClassLoader();
+			} catch (IllegalStateException e) {
+				// XXX logging
+			}
+			return SerializeTools.deserialize(rawContent, clsLoader);
 		}
 	}
 
@@ -159,7 +166,13 @@ public class Envelope implements Serializable, XmlAble {
 		} else {
 			decrypted = rawContent;
 		}
-		return SerializeTools.deserialize(decrypted);
+		ClassLoader clsLoader = null;
+		try {
+			clsLoader = L2pThread.getServiceClassLoader();
+		} catch (IllegalStateException e) {
+			// XXX logging
+		}
+		return SerializeTools.deserialize(decrypted, clsLoader);
 	}
 
 	/**
