@@ -5,16 +5,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
-import java.io.IOException;
-import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.security.NoSuchAlgorithmException;
-import java.util.Date;
-
-import org.junit.Before;
-import org.junit.Test;
-
 import i5.las2peer.api.exceptions.ArtifactNotFoundException;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.PingPongContent;
@@ -30,6 +20,15 @@ import i5.las2peer.testing.MockAgentFactory;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.SerializationException;
 
+import java.io.IOException;
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Date;
+
+import org.junit.Before;
+import org.junit.Test;
+
 public class LocalNodeTest {
 
 	private UserAgent eve;
@@ -39,8 +38,8 @@ public class LocalNodeTest {
 	private static int counter;
 
 	@Before
-	public void setUp()
-			throws NoSuchAlgorithmException, L2pSecurityException, CryptoException, MalformedXMLException, IOException {
+	public void setUp() throws NoSuchAlgorithmException, L2pSecurityException, CryptoException, MalformedXMLException,
+			IOException {
 		LocalNode.reset();
 
 		eve = MockAgentFactory.getEve();
@@ -361,9 +360,12 @@ public class LocalNodeTest {
 		node1.storeAgent(eve);
 
 		// register receiver to topics
-		Mediator mAdam = node1.getOrRegisterLocalMediator(adam);
-		Mediator mAbel = node1.getOrRegisterLocalMediator(abel);
-		Mediator mEve = node2.getOrRegisterLocalMediator(eve);
+		Mediator mAdam = node1.createMediatorForAgent(adam);
+		Mediator mAbel = node1.createMediatorForAgent(abel);
+		Mediator mEve = node2.createMediatorForAgent(eve);
+		node1.registerReceiver(mAdam);
+		node1.registerReceiver(mAbel);
+		node2.registerReceiver(mEve);
 		node1.registerReceiverToTopic(mAdam, 1);
 		node1.registerReceiverToTopic(mAbel, 1);
 		node2.registerReceiverToTopic(mEve, 1);
@@ -429,9 +431,12 @@ public class LocalNodeTest {
 		node1.storeAgent(eve);
 
 		// register receiver to topics
-		Mediator mAdam = node1.getOrRegisterLocalMediator(adam);
-		Mediator mAbel = node1.getOrRegisterLocalMediator(abel);
-		Mediator mEve = node2.getOrRegisterLocalMediator(eve);
+		Mediator mAdam = node1.createMediatorForAgent(adam);
+		Mediator mAbel = node1.createMediatorForAgent(abel);
+		Mediator mEve = node2.createMediatorForAgent(eve);
+		node1.registerReceiver(mAdam);
+		node1.registerReceiver(mAbel);
+		node2.registerReceiver(mEve);
 		node1.registerReceiverToTopic(mAdam, 1);
 		node1.registerReceiverToTopic(mAbel, 1);
 		node2.registerReceiverToTopic(mEve, 1);
@@ -467,8 +472,8 @@ public class LocalNodeTest {
 			AgentException, SecurityException, IllegalArgumentException, AgentNotKnownException, NoSuchMethodException,
 			IllegalAccessException, InvocationTargetException, InterruptedException {
 		String serviceClass = "i5.las2peer.api.TestService";
-		ServiceAgent testService = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(serviceClass + "@1.0"),
-				"a passphrase");
+		ServiceAgent testService = ServiceAgent.createServiceAgent(
+				ServiceNameVersion.fromString(serviceClass + "@1.0"), "a passphrase");
 		testService.unlockPrivateKey("a passphrase");
 
 		LocalNode testee = LocalNode.launchNode();
@@ -512,8 +517,8 @@ public class LocalNodeTest {
 	}
 
 	@Test
-	public void testUserRegDistribution()
-			throws L2pSecurityException, AgentException, CryptoException, ArtifactNotFoundException {
+	public void testUserRegDistribution() throws L2pSecurityException, AgentException, CryptoException,
+			ArtifactNotFoundException {
 		LocalNode testee1 = LocalNode.launchNode();
 
 		for (int i = 0; i < 11; i++) {
