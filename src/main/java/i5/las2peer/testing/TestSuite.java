@@ -64,8 +64,8 @@ public class TestSuite {
 
 	public static PastryNodeImpl addNode(int port, int bootstrapPort, STORAGE_MODE storageMode, Long nodeIdSeed)
 			throws Exception {
-		PastryNodeImpl node = new PastryNodeImpl(InetAddress.getLocalHost().getHostAddress() + ":" + bootstrapPort,
-				storageMode, TEST_STORAGE_DIR, nodeIdSeed);
+		PastryNodeImpl node = new PastryNodeImpl(InetAddress.getLoopbackAddress() + ":" + bootstrapPort, storageMode,
+				TEST_STORAGE_DIR, nodeIdSeed);
 		node.launch();
 		return node;
 	}
@@ -73,6 +73,7 @@ public class TestSuite {
 	public static void wipeTestStorage() throws IOException {
 		// delete old test-storage data
 		try {
+			System.out.println("wiping " + TEST_STORAGE_DIR);
 			Path directory = Paths.get(TEST_STORAGE_DIR);
 			Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
 				@Override
@@ -87,7 +88,6 @@ public class TestSuite {
 					return FileVisitResult.CONTINUE;
 				}
 			});
-			System.out.println("wiped " + TEST_STORAGE_DIR);
 		} catch (NoSuchFileException e) {
 			// no test data to delete
 		}
