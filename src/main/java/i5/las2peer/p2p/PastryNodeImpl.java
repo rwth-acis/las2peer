@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.ServerSocket;
 import java.net.UnknownHostException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -65,82 +66,23 @@ public class PastryNodeImpl extends Node {
 	private static final int ARTIFACT_GET_TIMEOUT = 10000;
 	private static final int ARTIFACT_STORE_TIMEOUT = 10000;
 
+	private InetAddress pastryBindAddress = null; // null = detect internet address
+
 	public static final int STANDARD_PORT = 9901;
 	private int pastryPort = STANDARD_PORT;
 
 	public static final String STANDARD_BOOTSTRAP = "localhost:9900,localhost:9999";
 	private String bootStrap = STANDARD_BOOTSTRAP;
 
-	private boolean useLoopback = false; // bind the node to the loopback address
 	private ExecutorService threadpool; // gather all threads in node object to minimize idle threads
 	private Environment pastryEnvironment;
 	private PastryNode pastryNode;
 	private NodeApplication application;
 	private SharedStorage pastStorage;
 	private STORAGE_MODE mode = STORAGE_MODE.FILESYSTEM;
+	private String storageDir; // null = default choosen by SharedStorage
 	private Long nodeIdSeed;
 	private BasicAgentStorage locallyKnownAgents;
-
-	/**
-	 * create a node listening to the given port an trying to connect to the hosts given in the bootstrap string The
-	 * bootstrap string may be a comma separated lists of host possibly including port information separated by a colon.
-	 * 
-	 * Leave the bootstrap empty or null to start a new ring
-	 * 
-	 * @param baseClassLoader
-	 * @param port A port number the PastryNode should listen to for network communication.
-	 * @param bootstrap A bootstrap address that should be used, like hostname:port.
-	 */
-	public PastryNodeImpl(L2pClassManager baseClassLoader, int port, String bootstrap) {
-		super(baseClassLoader);
-		initialize(port, bootstrap);
-	}
-
-	/**
-	 * create a standard node on localhost trying to connect to the standard bootstrap
-	 * 
-	 * @throws UnknownHostException
-	 */
-	public PastryNodeImpl() throws UnknownHostException {
-		this(STORAGE_MODE.FILESYSTEM);
-	}
-
-	/**
-	 * create a standard node on localhost trying to connect to the standard bootstrap
-	 * 
-	 * @param mode
-	 */
-	public PastryNodeImpl(STORAGE_MODE mode) {
-		super();
-
-		initialize(mode);
-	}
-
-	/**
-	 * create a node listening to the given port an trying to connect to the hosts given in the bootstrap string The
-	 * bootstrap string may be a comma separated lists of host possibly including port information separated be a colon.
-	 * Leave empty or null to start a new ring.
-	 * 
-	 * @param port A port number the PastryNode should listen to for network communication.
-	 * @param bootstrap A bootstrap address that should be used, like hostname:port.
-	 */
-	public PastryNodeImpl(int port, String bootstrap) {
-		this(port, bootstrap, STORAGE_MODE.FILESYSTEM);
-	}
-
-	/**
-	 * create a node listening to the given port an trying to connect to the hosts given in the bootstrap string The
-	 * bootstrap string may be a comma separated lists of host possibly including port information separated be a colon.
-	 * Leave empty or null to start a new ring.
-	 * 
-	 * @param port A port number the PastryNode should listen to for network communication.
-	 * @param bootstrap A bootstrap address that should be used, like hostname:port.
-	 * @param mode
-	 */
-	public PastryNodeImpl(int port, String bootstrap, STORAGE_MODE mode) {
-		super();
-		initialize(port, bootstrap, mode, null);
-	}
 
 	/**
 	 * create a node listening to the given port an trying to connect to the hosts given in the bootstrap string The
@@ -156,108 +98,40 @@ public class PastryNodeImpl extends Node {
 	 * @param cl
 	 * @param nodeIdSeed
 	 */
-	public PastryNodeImpl(int port, String bootstrap, STORAGE_MODE mode, boolean monitoringObserver, L2pClassManager cl,
-			Long nodeIdSeed) {
-		super(cl, true, monitoringObserver);
-		initialize(port, bootstrap, mode, nodeIdSeed);
-	}
-
-	/**
-	 * This constructor can be used to spawn debug nodes. The node listens ONLY to the loopback address.
-	 * 
-	 * @param bootstrap A bootstrap address that should be used, like hostname:port.
-	 * @param port A port number the PastryNode should listen to for network communication.
-	 * @param storageMode Past storage mode
-	 */
-	public PastryNodeImpl(String bootstrap, int port, STORAGE_MODE storageMode) {
-		super(null, true, false);
-		useLoopback = true;
-		initialize(port, bootstrap, storageMode, null);
-	}
-
-	/**
-	 * local initialization for constructors
-	 * 
-	 * @param port A port number the PastryNode should listen to for network communication.
-	 * @param bootstrap A bootstrap address that should be used, like hostname:port.
-	 * @param mode Past storage mode
-	 * @param nodeIdSeed seed to generate node ids from
-	 */
-	private void initialize(int port, String bootstrap, STORAGE_MODE mode, Long nodeIdSeed) {
+	public PastryNodeImpl(L2pClassManager classLoader, boolean useMonitoringObserver, int port, String bootstrap,
+			STORAGE_MODE storageMode, Long nodeIdSeed) {
+		super(classLoader, true, useMonitoringObserver);
 		pastryPort = port;
 		this.bootStrap = bootstrap;
-		this.mode = mode;
+		this.mode = storageMode;
+		this.storageDir = null; // null = SharedStorage choses directory
 		this.nodeIdSeed = nodeIdSeed;
-
 		locallyKnownAgents = new BasicAgentStorage(this);
-
 		setupPastryEnvironment();
-
 		this.setStatus(NodeStatus.CONFIGURED);
 	}
 
 	/**
-	 * local initialization for constructors
-	 * 
-	 * @param port The port that should be used by this node.
-	 * @param bootstrap A bootstrap address that should be used, like hostname:port.
+	 * Debug Node Mode, don't use it by hand use TestSuite
 	 */
-	private void initialize(int port, String bootstrap) {
-		initialize(port, bootstrap, STORAGE_MODE.FILESYSTEM, null);
-	}
-
-	/**
-	 * local initialization for constructors
-	 * 
-	 * @param mode
-	 */
-	private void initialize(STORAGE_MODE mode) {
-		initialize(STANDARD_PORT, STANDARD_BOOTSTRAP, mode, null);
-	}
-
-	/**
-	 * access to the underlying pastry node
-	 * 
-	 * @return the pastry node representing this las2peer node
-	 */
-	public PastryNode getPastryNode() {
-		return pastryNode;
-	}
-
-	/**
-	 * generate a collection of InetSocketAddresses from the given bootstrap string
-	 * 
-	 * @return collection of InetSocketAddresses from the given bootstrap string
-	 */
-	private Collection<InetSocketAddress> getBootstrapAddresses() {
-		Vector<InetSocketAddress> result = new Vector<InetSocketAddress>();
-
-		if (bootStrap == null || bootStrap.isEmpty()) {
-			return result;
+	public PastryNodeImpl(String bootstrap, STORAGE_MODE storageMode, String storageDir, long nodeIdSeed) {
+		super(null, true, false);
+		pastryBindAddress = InetAddress.getLoopbackAddress();
+		// use system defined port
+		try {
+			ServerSocket tmpSocket = new ServerSocket(0);
+			tmpSocket.close();
+			pastryPort = tmpSocket.getLocalPort();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
-
-		String[] addresses = bootStrap.split(",");
-		for (String address : addresses) {
-			String[] hostAndPort = address.split(":");
-			int port = STANDARD_PORT;
-
-			if (hostAndPort.length == 2) {
-				port = Integer.parseInt(hostAndPort[1]);
-			}
-
-			try {
-				result.add(new InetSocketAddress(InetAddress.getByName(hostAndPort[0]), port));
-			} catch (UnknownHostException e) {
-				// TODO this should be handled earlier
-				if (address.equals("-")) {
-					System.out.println("Starting new network..");
-				} else {
-					System.err.println("Cannot resolve address for: " + address + "\n Starting new network..");
-				}
-			}
-		}
-
-		return result;
+		this.bootStrap = bootstrap;
+		this.mode = storageMode;
+		this.storageDir = storageDir;
+		this.nodeIdSeed = nodeIdSeed;
+		locallyKnownAgents = new BasicAgentStorage(this);
+		setupPastryEnvironment();
+		this.setStatus(NodeStatus.CONFIGURED);
 	}
 
 	/**
@@ -305,7 +179,7 @@ public class PastryNodeImpl extends Node {
 		if (!properties.containsKey("nat_network_prefixes")) {
 			properties.put("nat_network_prefixes", "127.0.0.1;10.;192.168.;");
 		}
-		if (useLoopback) {
+		if (pastryBindAddress != null && pastryBindAddress.isLoopbackAddress()) {
 			properties.put("allow_loopback_address", "1");
 		}
 		if (!properties.containsKey("pastry_socket_known_network_address")) {
@@ -324,6 +198,51 @@ public class PastryNodeImpl extends Node {
 	}
 
 	/**
+	 * access to the underlying pastry node
+	 * 
+	 * @return the pastry node representing this las2peer node
+	 */
+	public PastryNode getPastryNode() {
+		return pastryNode;
+	}
+
+	/**
+	 * generate a collection of InetSocketAddresses from the given bootstrap string
+	 * 
+	 * @return collection of InetSocketAddresses from the given bootstrap string
+	 */
+	private Collection<InetSocketAddress> getBootstrapAddresses() {
+		Vector<InetSocketAddress> result = new Vector<>();
+
+		if (bootStrap == null || bootStrap.isEmpty()) {
+			return result;
+		}
+
+		String[] addresses = bootStrap.split(",");
+		for (String address : addresses) {
+			String[] hostAndPort = address.split(":");
+			int port = STANDARD_PORT;
+
+			if (hostAndPort.length == 2) {
+				port = Integer.parseInt(hostAndPort[1]);
+			}
+
+			try {
+				result.add(new InetSocketAddress(InetAddress.getByName(hostAndPort[0]), port));
+			} catch (UnknownHostException e) {
+				// TODO this should be handled earlier
+				if (address.equals("-")) {
+					System.out.println("Starting new network..");
+				} else {
+					System.err.println("Cannot resolve address for: " + address + "\n Starting new network..");
+				}
+			}
+		}
+
+		return result;
+	}
+
+	/**
 	 * Setup all pastry applications to run on this node.
 	 * 
 	 * This will be
@@ -339,7 +258,7 @@ public class PastryNodeImpl extends Node {
 	private void setupPastryApplications() throws StorageException {
 		threadpool = Executors.newCachedThreadPool();
 		application = new NodeApplication(this);
-		pastStorage = new SharedStorage(pastryNode, mode, threadpool);
+		pastStorage = new SharedStorage(pastryNode, mode, threadpool, storageDir);
 	}
 
 	/**
@@ -378,11 +297,7 @@ public class PastryNodeImpl extends Node {
 					}
 				};
 			}
-			InetAddress bindAddress = null;
-			if (useLoopback) {
-				bindAddress = InetAddress.getLocalHost();
-			}
-			InternetPastryNodeFactory factory = new InternetPastryNodeFactory(nidFactory, bindAddress, pastryPort,
+			InternetPastryNodeFactory factory = new InternetPastryNodeFactory(nidFactory, pastryBindAddress, pastryPort,
 					pastryEnvironment, null, null, null);
 			pastryNode = factory.newNode();
 

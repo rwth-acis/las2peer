@@ -87,12 +87,16 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 	private final ExecutorService threadpool;
 	private final ConcurrentHashMap<String, Long> versionCache;
 
-	public SharedStorage(Node node, STORAGE_MODE storageMode, ExecutorService threadpool) throws StorageException {
+	public SharedStorage(Node node, STORAGE_MODE storageMode, ExecutorService threadpool, String storageDir)
+			throws StorageException {
 		IdFactory pastIdFactory = new PastryIdFactory(node.getEnvironment());
 		Storage storage;
 		if (storageMode == STORAGE_MODE.MEMORY) {
 			storage = new MemoryStorage(pastIdFactory);
 		} else if (storageMode == STORAGE_MODE.FILESYSTEM) {
+			if (storageDir != null) {
+				storageRootDir = storageDir;
+			}
 			if (!storageRootDir.endsWith(File.separator)) {
 				storageRootDir += File.separator;
 			}

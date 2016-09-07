@@ -11,7 +11,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import i5.las2peer.p2p.PastryNodeImpl;
-import i5.las2peer.persistency.SharedStorage.STORAGE_MODE;
+import i5.las2peer.testing.TestSuite;
 
 public class SandboxTest {
 
@@ -29,7 +29,7 @@ public class SandboxTest {
 	@Before
 	public void startNetwork() {
 		try {
-			node = new PastryNodeImpl(14501, null, STORAGE_MODE.MEMORY);
+			node = TestSuite.launchNetwork(1).get(0);
 			node.launch();
 			service = ServiceAgent.createServiceAgent(MaliciousService.class.getName(), "testpasswd");
 			service.unlockPrivateKey("testpasswd");

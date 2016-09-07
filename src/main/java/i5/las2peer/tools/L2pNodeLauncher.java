@@ -754,7 +754,7 @@ public class L2pNodeLauncher {
 				storageMode = STORAGE_MODE.FILESYSTEM;
 			}
 		}
-		node = new PastryNodeImpl(port, bootstrap, storageMode, monitoringObserver, cl, nodeIdSeed);
+		node = new PastryNodeImpl(cl, monitoringObserver, port, bootstrap, storageMode, nodeIdSeed);
 
 		commandPrompt = new CommandPrompt(this);
 	}
