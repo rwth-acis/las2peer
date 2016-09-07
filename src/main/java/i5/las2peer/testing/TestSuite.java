@@ -33,18 +33,21 @@ public class TestSuite {
 	 * @throws Exception If an error occurs.
 	 */
 	public static ArrayList<PastryNodeImpl> launchNetwork(int numOfNodes) throws Exception {
-		return launchNetwork(numOfNodes, STORAGE_MODE.MEMORY);
+		return launchNetwork(numOfNodes, STORAGE_MODE.MEMORY, false);
 	}
 
+	// FIXME javadoc
 	/**
 	 * This method starts a network consisting of the given number of nodes.
 	 *
-	 * @param numOfNodes The number of nodes that should be in the network.
 	 * @return Returns a list with all nodes from the network.
 	 * @throws Exception If an error occurs.
 	 */
-	public static ArrayList<PastryNodeImpl> launchNetwork(int numOfNodes, STORAGE_MODE storageMode) throws Exception {
-		wipeTestStorage();
+	public static ArrayList<PastryNodeImpl> launchNetwork(int numOfNodes, STORAGE_MODE storageMode, boolean wipeData)
+			throws Exception {
+		if (wipeData) {
+			wipeTestStorage();
+		}
 		ArrayList<PastryNodeImpl> result = new ArrayList<>();
 		// launch bootstrap node
 		PastryNodeImpl bootstrapNode = new PastryNodeImpl(null, storageMode, TEST_STORAGE_DIR, 0L);
@@ -55,17 +58,18 @@ public class TestSuite {
 		System.out.println("bootstrap node launched with id " + bootstrapNode.getNodeId());
 		// add more nodes
 		for (int num = 1; num <= numOfNodes - 1; num++) {
-			PastryNodeImpl node2 = addNode(bootstrapPort + num, bootstrapPort, storageMode, (long) num);
+			PastryNodeImpl node2 = addNode(bootstrapPort, storageMode, (long) num);
 			result.add(node2);
 			System.out.println("network node launched with id " + bootstrapNode.getNodeId());
 		}
 		return result;
 	}
 
-	public static PastryNodeImpl addNode(int port, int bootstrapPort, STORAGE_MODE storageMode, Long nodeIdSeed)
+	public static PastryNodeImpl addNode(int bootstrapPort, STORAGE_MODE storageMode, Long nodeIdSeed)
 			throws Exception {
-		PastryNodeImpl node = new PastryNodeImpl(InetAddress.getLoopbackAddress() + ":" + bootstrapPort, storageMode,
-				TEST_STORAGE_DIR, nodeIdSeed);
+		PastryNodeImpl node = new PastryNodeImpl(
+				InetAddress.getLoopbackAddress().getHostAddress() + ":" + bootstrapPort, storageMode, TEST_STORAGE_DIR,
+				nodeIdSeed);
 		node.launch();
 		return node;
 	}
