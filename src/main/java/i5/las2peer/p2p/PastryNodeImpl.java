@@ -85,18 +85,17 @@ public class PastryNodeImpl extends Node {
 	private BasicAgentStorage locallyKnownAgents;
 
 	/**
-	 * create a node listening to the given port an trying to connect to the hosts given in the bootstrap string The
-	 * bootstrap string may be a comma separated lists of host possibly including port information separated be a colon.
-	 * Leave empty or null to start a new ring.
+	 * This is the regular constructor used by the {@link i5.las2peer.tools.L2pNodeLauncher}. Its parameters can be set
+	 * to start a new network or join an existing Pastry ring.
 	 * 
-	 * The observer-flag determines, if the node will be available for monitoring.
-	 * 
-	 * @param classLoader
-	 * @param useMonitoringObserver
+	 * @param classLoader A class loader that is used by the node.
+	 * @param useMonitoringObserver If true, the node sends monitoring information to the monitoring service.
 	 * @param port A port number the PastryNode should listen to for network communication.
-	 * @param bootstrap A bootstrap address that should be used, like hostname:port.
+	 * @param bootstrap A bootstrap address that should be used, like hostname:port or <code>null</code> to start a new
+	 *            network.
 	 * @param storageMode A storage mode to be used by this node, see {@link SharedStorage.STORAGE_MODE}.
-	 * @param nodeIdSeed A node id (random) seed to enforce a specific node id.
+	 * @param nodeIdSeed A node id (random) seed to enforce a specific node id. If <code>null</code>, the node id will
+	 *            be random.
 	 */
 	public PastryNodeImpl(L2pClassManager classLoader, boolean useMonitoringObserver, int port, String bootstrap,
 			STORAGE_MODE storageMode, Long nodeIdSeed) {
@@ -115,13 +114,15 @@ public class PastryNodeImpl extends Node {
 	 * This constructor is mainly used by the {@link i5.las2peer.testing.TestSuite} and sets all parameters for
 	 * debugging and testing operation mode.
 	 * 
-	 * @param bootstrap A bootstrap address that should be used, like hostname:port.
+	 * @param bootstrap A bootstrap address that should be used, like hostname:port or <code>null</code> to start a new
+	 *            network.
 	 * @param storageMode A storage mode to be used by this node, see {@link SharedStorage.STORAGE_MODE}.
 	 * @param storageDir A directory to persist data to. Only considered in persistent storage mode, but overwrites
 	 *            {@link SharedStorage} configurations.
-	 * @param nodeIdSeed A node id (random) seed to enforce a specific node id.
+	 * @param nodeIdSeed A node id (random) seed to enforce a specific node id. If <code>null</code>, the node id will
+	 *            be random.
 	 */
-	public PastryNodeImpl(String bootstrap, STORAGE_MODE storageMode, String storageDir, long nodeIdSeed) {
+	public PastryNodeImpl(String bootstrap, STORAGE_MODE storageMode, String storageDir, Long nodeIdSeed) {
 		super(null, true, false);
 		pastryBindAddress = InetAddress.getLoopbackAddress();
 		// use system defined port
