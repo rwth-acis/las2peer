@@ -181,6 +181,7 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 				throw new StorageException(e);
 			}
 		}
+		throw new StorageException("store operation timed out");
 	}
 
 	@Override
