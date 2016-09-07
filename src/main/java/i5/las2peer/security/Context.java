@@ -31,7 +31,7 @@ public class Context implements AgentStorage, ContextStorageInterface {
 
 	private Agent agent;
 
-	private Hashtable<Long, GroupAgent> groupAgents = new Hashtable<Long, GroupAgent>();
+	private Hashtable<Long, GroupAgent> groupAgents = new Hashtable<>();
 
 	private Node localNode;
 
@@ -246,13 +246,7 @@ public class Context implements AgentStorage, ContextStorageInterface {
 	 * @return the current context
 	 */
 	public static Context getCurrent() {
-		Thread t = Thread.currentThread();
-
-		if (!(t instanceof L2pThread)) {
-			throw new IllegalStateException("Not executed in a L2pThread environment!");
-		}
-
-		return ((L2pThread) t).getContext();
+		return L2pThread.getCurrent().getContext();
 	}
 
 	/**

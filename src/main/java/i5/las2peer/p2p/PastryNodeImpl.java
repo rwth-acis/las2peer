@@ -60,15 +60,17 @@ import rice.pastry.standard.RandomNodeIdFactory;
  */
 public class PastryNodeImpl extends Node {
 
-	public static final int STANDARD_PORT = 9901;
-	public static final String STANDARD_BOOTSTRAP = "localhost:9900,localhost:9999";
 	private static final int AGENT_GET_TIMEOUT = 10000;
 	private static final int AGENT_STORE_TIMEOUT = 10000;
 	private static final int ARTIFACT_GET_TIMEOUT = 10000;
 	private static final int ARTIFACT_STORE_TIMEOUT = 10000;
 
+	public static final int STANDARD_PORT = 9901;
 	private int pastryPort = STANDARD_PORT;
+
+	public static final String STANDARD_BOOTSTRAP = "localhost:9900,localhost:9999";
 	private String bootStrap = STANDARD_BOOTSTRAP;
+
 	private boolean useLoopback = false; // bind the node to the loopback address
 	private ExecutorService threadpool; // gather all threads in node object to minimize idle threads
 	private Environment pastryEnvironment;
@@ -263,7 +265,6 @@ public class PastryNodeImpl extends Node {
 	 */
 	private void setupPastryEnvironment() {
 		pastryEnvironment = new Environment();
-
 		String[] configFiles = new String[] { "etc/pastry.properties", "config/pastry.properties",
 				"properties/pastry.properties" };
 		String found = null;
@@ -277,8 +278,7 @@ public class PastryNodeImpl extends Node {
 				// XXX logging
 			}
 		}
-
-		Hashtable<String, String> properties = new Hashtable<String, String>();
+		Hashtable<String, String> properties = new Hashtable<>();
 		if (found != null) {
 			System.out.println("Using pastry property file " + found);
 			try {
@@ -296,7 +296,6 @@ public class PastryNodeImpl extends Node {
 		} else {
 			System.out.println("No pastry property file found - using default values");
 		}
-
 		if (!properties.containsKey("nat_search_policy")) {
 			properties.put("nat_search_policy", "never");
 		}
@@ -309,30 +308,17 @@ public class PastryNodeImpl extends Node {
 		if (useLoopback) {
 			properties.put("allow_loopback_address", "1");
 		}
-
 		if (!properties.containsKey("pastry_socket_known_network_address")) {
-			// properties.put( "pastry_socket_known_network_address", "127.0.0.1");
 			if (!properties.containsKey("pastry_socket_known_network_address_port")) {
 				properties.put("pastry_socket_known_network_address_port", "80");
 			}
 		}
-
-		// remarks: you need an network accessible host/port combination, even, if you want to start a new ring!!
-		// for offline testing, you need to run some kind of port reachable server!
-
 		if (!properties.containsKey("nat_search_policy")) {
 			properties.put("nat_search_policy", "never");
 		}
-
-		// check for building a new ring
-		/* if ( "NEW".equals ( bootStrap) ) {
-			properties.put( "pastry_socket_known_network_address", "");
-			properties.put( "pastry_socket_known_network_address_port", ""+pastryPort);
-		} */
-
 		for (String prop : properties.keySet()) {
 			pastryEnvironment.getParameters().setString(prop, properties.get(prop));
-
+			// XXX logging
 			System.out.println("setting: " + prop + ": '" + properties.get(prop) + "'");
 		}
 	}

@@ -72,7 +72,7 @@ public class L2pNodeLauncher {
 
 	private CommandPrompt commandPrompt;
 
-	private static List<Connector> connectors = new ArrayList<Connector>();
+	private static List<Connector> connectors = new ArrayList<>();
 
 	private boolean bFinished = false;
 
@@ -151,7 +151,7 @@ public class L2pNodeLauncher {
 	 * @return hashtable containing agent file &gt;&gt; passphrase
 	 */
 	private Hashtable<String, String> loadPassphrases(String filename) {
-		Hashtable<String, String> result = new Hashtable<String, String>();
+		Hashtable<String, String> result = new Hashtable<>();
 
 		File file = new File(filename);
 		if (file.isFile()) {
@@ -194,8 +194,8 @@ public class L2pNodeLauncher {
 			throw new IllegalArgumentException(directory + " is not a directory!");
 		}
 		Hashtable<String, String> htPassphrases = loadPassphrases(directory + "/passphrases.txt");
-		Map<Long, String> agentIdToXml = new HashMap<Long, String>();
-		List<GroupAgent> groupAgents = new LinkedList<GroupAgent>();
+		Map<Long, String> agentIdToXml = new HashMap<>();
+		List<GroupAgent> groupAgents = new LinkedList<>();
 		for (File xmlFile : dir.listFiles(new FilenameFilter() {
 			@Override
 			public boolean accept(File dir, String name) {
