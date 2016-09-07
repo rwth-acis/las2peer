@@ -91,12 +91,12 @@ public class PastryNodeImpl extends Node {
 	 * 
 	 * The observer-flag determines, if the node will be available for monitoring.
 	 * 
+	 * @param classLoader
+	 * @param useMonitoringObserver
 	 * @param port A port number the PastryNode should listen to for network communication.
 	 * @param bootstrap A bootstrap address that should be used, like hostname:port.
-	 * @param mode
-	 * @param monitoringObserver
-	 * @param cl
-	 * @param nodeIdSeed
+	 * @param storageMode A storage mode to be used by this node, see {@link SharedStorage.STORAGE_MODE}.
+	 * @param nodeIdSeed A node id (random) seed to enforce a specific node id.
 	 */
 	public PastryNodeImpl(L2pClassManager classLoader, boolean useMonitoringObserver, int port, String bootstrap,
 			STORAGE_MODE storageMode, Long nodeIdSeed) {
@@ -112,7 +112,14 @@ public class PastryNodeImpl extends Node {
 	}
 
 	/**
-	 * Debug Node Mode, don't use it by hand use TestSuite
+	 * This constructor is mainly used by the {@link i5.las2peer.testing.TestSuite} and sets all parameters for
+	 * debugging and testing operation mode.
+	 * 
+	 * @param bootstrap A bootstrap address that should be used, like hostname:port.
+	 * @param storageMode A storage mode to be used by this node, see {@link SharedStorage.STORAGE_MODE}.
+	 * @param storageDir A directory to persist data to. Only considered in persistent storage mode, but overwrites
+	 *            {@link SharedStorage} configurations.
+	 * @param nodeIdSeed A node id (random) seed to enforce a specific node id.
 	 */
 	public PastryNodeImpl(String bootstrap, STORAGE_MODE storageMode, String storageDir, long nodeIdSeed) {
 		super(null, true, false);

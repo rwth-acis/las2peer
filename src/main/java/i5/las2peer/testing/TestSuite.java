@@ -25,8 +25,9 @@ public class TestSuite {
 	public static final String TEST_STORAGE_DIR = "tmp/test-storage/";
 
 	/**
-	 * This method starts a network consisting of the given number of nodes. The nodes should be used for testing only
-	 * and do NOT persist data in the filesystem.
+	 * This method starts a network consisting of the given number of nodes. The nodes should be used for testing only,
+	 * because they are listening only on the loopback address and their ports are choosen by the operating system.
+	 * Furthermore this method uses a non persistent storage mode for each node.
 	 *
 	 * @param numOfNodes The number of nodes that should be in the network.
 	 * @return Returns a list with all nodes from the network.
@@ -36,10 +37,13 @@ public class TestSuite {
 		return launchNetwork(numOfNodes, STORAGE_MODE.MEMORY, false);
 	}
 
-	// FIXME javadoc
 	/**
-	 * This method starts a network consisting of the given number of nodes.
+	 * This method starts a network consisting of the given number of nodes. The nodes should be used for testing only,
+	 * because they are listening only on the loopback address and their ports are choosen by the operating system.
 	 *
+	 * @param numOfNodes The number of nodes that should be in the network.
+	 * @param storageMode A storage mode used by the nodes in the network.
+	 * @param wipeData If true the test storage directory is wiped before launching the network.
 	 * @return Returns a list with all nodes from the network.
 	 * @throws Exception If an error occurs.
 	 */
