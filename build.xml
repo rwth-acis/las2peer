@@ -55,6 +55,11 @@
 		</fileset>
 	</path>
 	
+	<taskdef resource="net/sf/antcontrib/antcontrib.properties">
+		<classpath>
+			<pathelement location="${ivy.jar.dir}/ant-contrib.jar"/>
+		</classpath>
+	</taskdef>
 	
 	<!-- Download Dependencies (IVY) -->
 	
@@ -397,6 +402,36 @@
 	
 	<!-- JUnit Testing -->
 	
+	<target name="execute.test">
+
+	  <!-- we need to have relative path -->
+	  <pathconvert property="test.source.relative">
+	    <fileset file="${test.source.absolute}" />
+	    <map from="${src.junit}/" to="" />
+	  </pathconvert>
+
+	  <!-- run one particular test -->
+	  <junit fork="yes" haltonerror="yes" haltonfailure="yes" printsummary="yes">
+
+	    <classpath>
+	    	<pathelement path="${tmp.classes}" />
+            <pathelement path="${tmp.junit}" />
+            <pathelement path="${lib.cp}" />
+            <pathelement path="${lib.junit}" />
+	    </classpath>
+
+	  	<formatter type="plain" usefile="false" />
+	  	<formatter type="plain" />
+
+	    <batchtest todir="${junit.report}">
+	      <fileset dir="${src.junit}">
+	        <filename name="${test.source.relative}" />
+	      </fileset>
+	    </batchtest>
+	  </junit>
+
+	</target>
+	
 	<target name="junit" depends="junit_tests, junit_clean" description="-->execute all junit tests" />
 	
 	<target name="init_junit" depends="init_general">
@@ -408,22 +443,21 @@
 	</target>
 	
 	<target name="junit_tests" depends="init_junit, junit_jars, compile_all">
-        <junit fork="yes" haltonerror="yes" haltonfailure="yes" printsummary="yes">
-            <classpath>
-                <pathelement path="${tmp.classes}" />
-                <pathelement path="${tmp.junit}" />
-                <pathelement path="${lib.cp}" />
-                <pathelement path="${lib.junit}" />
-            </classpath>
-            <formatter type="plain" usefile="false" />
-        	<formatter type="plain" />
-            <batchtest fork="yes" todir="${junit.report}">
-                <fileset dir="${tmp.junit}">
-                    <include name="**/*Test.class"/>
-                    <exclude name="**/SandboxTest.class"/>
-                </fileset>
-            </batchtest>
-        </junit>
+		<foreach
+			target="execute.test"
+			maxthreads="9"
+			inheritall="true"
+			inheritrefs="true"
+			parallel="true"
+			param="test.source.absolute">
+			  <path>
+			    <fileset dir="${src.junit}">
+			      <include name="**/*Test.java"/>
+				  <exclude name="**/SandboxTest.java"/>
+			      <exclude name="**/ReplicationTest.java"/>
+			    </fileset>
+			  </path>
+		</foreach>
 	</target>
 	
 	<target name="test_colored" depends="init_general">
