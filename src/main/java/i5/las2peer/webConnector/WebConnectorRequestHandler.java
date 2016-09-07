@@ -18,7 +18,6 @@ import i5.las2peer.restMapper.data.Pair;
 import i5.las2peer.restMapper.data.PathTree;
 import i5.las2peer.restMapper.exceptions.NoMethodFoundException;
 import i5.las2peer.restMapper.exceptions.NotSupportedUriPathException;
-import i5.las2peer.security.AgentException;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.Mediator;
 import i5.las2peer.security.PassphraseAgent;
@@ -84,6 +83,32 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	public WebConnectorRequestHandler(WebConnector connector) {
 		this.connector = connector;
 		l2pNode = connector.getL2pNode();
+	}
+
+	/**
+	 * Handles a request (login, invoke)
+	 */
+	@Override
+	public void handle(HttpExchange exchange) throws IOException {
+		exchange.getResponseHeaders().set("Server-Name", "las2peer WebConnector");
+
+		if (exchange.getRequestMethod().equalsIgnoreCase("options")) {
+			// check for an OPTIONS request and auto answer it
+			// TODO this should become a default reply for OPTIONS-requests,
+			// but should be also be available to service developers
+			sendResponse(exchange, HttpURLConnection.HTTP_OK, NO_RESPONSE_BODY);
+		} else if (exchange.getRequestMethod().equalsIgnoreCase("get")
+				&& exchange.getRequestURI().getPath().toString().endsWith("/swagger.json")) {
+			// respond with swagger.json for the given service
+			handleSwagger(exchange);
+		} else {
+			PassphraseAgent userAgent;
+			if ((userAgent = authenticate(exchange)) != null) {
+				invoke(userAgent, exchange);
+			}
+		}
+		// otherwise the client waits till the timeout for an answer
+		exchange.getResponseBody().close();
 	}
 
 	/**
@@ -295,7 +320,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	}
 
 	// helper function to create long hash from string
-	public static long hash(String string) {
+	private static long hash(String string) {
 		long h = 1125899906842597L; // prime
 		int len = string.length();
 
@@ -305,36 +330,15 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		return h;
 	}
 
-	private Mediator login(PassphraseAgent agent, HttpExchange exchange) {
-		// keep track of active requests
-		// TODO add this functionality to mediators in core (across multiple connectors)
-		synchronized (this.connector.getOpenUserRequests()) {
-			if (this.connector.getOpenUserRequests().containsKey(agent.getId())) {
-				Integer numReq = this.connector.getOpenUserRequests().get(agent.getId());
-				this.connector.getOpenUserRequests().put(agent.getId(), numReq + 1);
-			} else {
-				this.connector.getOpenUserRequests().put(agent.getId(), 1);
-			}
-		}
-
-		try {
-			return l2pNode.getOrRegisterLocalMediator(agent);
-		} catch (L2pSecurityException | AgentException e) {
-			connector.logError("Error occured:" + exchange.getRequestURI().getPath() + " " + e.getMessage(), e);
-			sendInternalErrorResponse(exchange, e.toString());
-			return null;
-		}
-	}
-
 	/**
 	 * Delegates the request data to a service method, which then decides what to do with it (maps it internally)
 	 * 
-	 * @param mediator
+	 * @param agent
 	 * @param exchange
 	 * 
 	 * @return
 	 */
-	private boolean invoke(Mediator mediator, HttpExchange exchange) {
+	private boolean invoke(PassphraseAgent agent, HttpExchange exchange) {
 		String[] requestSplit = exchange.getRequestURI().getPath().split("/", 2);
 		// first: empty (string starts with '/')
 		// second: URI
@@ -448,7 +452,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			StringBuilder warnings = new StringBuilder();
 			PathTree tree;
 			try {
-				tree = connector.getServiceRepositoryManager().getServiceTree(requiredService, mediator.getAgent(),
+				tree = connector.getServiceRepositoryManager().getServiceTree(requiredService, agent,
 						connector.onlyLocalServices());
 			} catch (Exception e) {
 				throw new NoSuchServiceException(requiredService.toString(), e);
@@ -469,6 +473,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			for (InvocationData inv : invocation) {
 				try {
 					// invoke service method
+					Mediator mediator = l2pNode.createMediatorForAgent(agent);
 					result = mediator.invoke(requiredService.toString(), inv.getMethodName(), inv.getParameters(),
 							connector.onlyLocalServices());
 					gotResult = true;
@@ -506,66 +511,6 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			sendInternalErrorResponse(exchange, e.toString());
 		}
 		return false;
-	}
-
-	/**
-	 * Logs the user out
-	 * 
-	 * @param mediator
-	 */
-	private void logout(Mediator mediator) {
-		long userId = mediator.getResponsibleForAgentId();
-
-		synchronized (this.connector.getOpenUserRequests()) {
-			if (this.connector.getOpenUserRequests().containsKey(userId)) {
-				Integer numReq = this.connector.getOpenUserRequests().get(userId);
-				if (numReq <= 1) {
-					this.connector.getOpenUserRequests().remove(userId);
-				} else {
-					this.connector.getOpenUserRequests().put(userId, numReq - 1);
-				}
-			}
-
-			if (!this.connector.getOpenUserRequests().containsKey(userId)) {
-				try {
-					l2pNode.unregisterReceiver(mediator);
-				} catch (AgentNotKnownException e) {
-					// do nothing
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}
-	}
-
-	/**
-	 * Handles a request (login, invoke)
-	 */
-	@Override
-	public void handle(HttpExchange exchange) throws IOException {
-		exchange.getResponseHeaders().set("Server-Name", "las2peer WebConnector");
-
-		if (exchange.getRequestMethod().equalsIgnoreCase("options")) {
-			// check for an OPTIONS request and auto answer it
-			// TODO this should become a default reply for OPTIONS-requests,
-			// but should be also be available to service developers
-			sendResponse(exchange, HttpURLConnection.HTTP_OK, NO_RESPONSE_BODY);
-		} else if (exchange.getRequestMethod().equalsIgnoreCase("get")
-				&& exchange.getRequestURI().getPath().toString().endsWith("/swagger.json")) {
-			// respond with swagger.json for the given service
-			handleSwagger(exchange);
-		} else {
-			PassphraseAgent userAgent;
-			if ((userAgent = authenticate(exchange)) != null) {
-				Mediator mediator = login(userAgent, exchange);
-				if (mediator != null) {
-					invoke(mediator, exchange);
-					logout(mediator);
-				}
-			}
-		}
-		// otherwise the client waits till the timeout for an answer
-		exchange.getResponseBody().close();
 	}
 
 	/**

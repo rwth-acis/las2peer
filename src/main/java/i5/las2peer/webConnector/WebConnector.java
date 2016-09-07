@@ -72,9 +72,6 @@ public class WebConnector extends Connector {
 	public static final boolean DEFAULT_ONLY_LOCAL_SERVICES = false;
 	protected boolean onlyLocalServices = DEFAULT_ONLY_LOCAL_SERVICES;
 
-	public static final int DEFAULT_SERVICE_REPOSITORY_UPDATE_INTERVAL_SECONDS = 300;
-	protected int serviceRepositoryUpdateIntervalSeconds = DEFAULT_SERVICE_REPOSITORY_UPDATE_INTERVAL_SECONDS;
-
 	public static final String DEFAULT_DEFAULT_OIDC_PROVIDER = "https://api.learning-layers.eu/o/oauth2";
 	protected String defaultOIDCProvider = DEFAULT_DEFAULT_OIDC_PROVIDER;
 	protected ArrayList<String> oidcProviders = new ArrayList<String>();
@@ -110,7 +107,6 @@ public class WebConnector extends Connector {
 	// to Open ID Connect Discovery (cf. http://openid.net/specs/openid-connect-discovery-1_0.html)
 	protected Map<String, JSONObject> oidcProviderInfos = new HashMap<String, JSONObject>();
 
-	private HashMap<Long, Integer> openUserRequests = new HashMap<>();
 	private Object lockOidc = new Object();
 	private ServiceMappingManager serviceRepositoryManager = null;
 
@@ -456,10 +452,6 @@ public class WebConnector extends Connector {
 	 */
 	boolean onlyLocalServices() {
 		return onlyLocalServices;
-	}
-
-	public HashMap<Long, Integer> getOpenUserRequests() {
-		return openUserRequests;
 	}
 
 	public Object getLockOidc() {
