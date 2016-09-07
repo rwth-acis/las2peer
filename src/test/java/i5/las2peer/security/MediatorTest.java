@@ -4,12 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
-import java.io.IOException;
-import java.util.HashSet;
-
-import org.junit.Test;
-
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
 import i5.las2peer.p2p.AgentNotKnownException;
@@ -17,6 +11,11 @@ import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.testing.MockAgentFactory;
 import i5.las2peer.tools.SerializationException;
+
+import java.io.IOException;
+import java.util.HashSet;
+
+import org.junit.Test;
 
 //NOTE: Answering each message is disabled in testing mode (since there exists no real las2peer context here).
 //Also refer to the Mediator implementation for more information.
@@ -60,14 +59,14 @@ public class MediatorTest {
 		UserAgent eve = MockAgentFactory.getEve();
 
 		try {
-			new Mediator(eve);
+			new Mediator(null, eve);
 			fail("L2pSecurityException expected");
 		} catch (L2pSecurityException e) {
 			// that's expected!
 		}
 
 		eve.unlockPrivateKey("evespass");
-		Mediator testee = new Mediator(eve);
+		Mediator testee = new Mediator(null, eve);
 
 		assertEquals(eve.getId(), testee.getResponsibleForAgentId());
 
@@ -79,7 +78,7 @@ public class MediatorTest {
 			EncodingFailedException, SerializationException, MalformedXMLException, IOException {
 		UserAgent eve = MockAgentFactory.getEve();
 		eve.unlockPrivateKey("evespass");
-		Mediator testee = new Mediator(eve);
+		Mediator testee = new Mediator(null, eve);
 
 		assertFalse(testee.hasMessages());
 		assertEquals(0, testee.getNumberOfWaiting());
@@ -120,7 +119,7 @@ public class MediatorTest {
 		eve.unlockPrivateKey("evespass");
 		UserAgent adam = MockAgentFactory.getAdam();
 		adam.unlockPrivateKey("adamspass");
-		Mediator testee = new Mediator(eve);
+		Mediator testee = new Mediator(null, eve);
 
 		Message m = new Message(eve, adam, "a message");
 
@@ -141,7 +140,8 @@ public class MediatorTest {
 
 		final HashSet<String> got = new HashSet<String>();
 
-		Mediator testee = new Mediator(eve) {
+		Mediator testee = new Mediator(null, eve) {
+			@Override
 			public boolean workOnMessage(Message message, Context c) {
 				try {
 					if (message.getContent() instanceof String) {
@@ -178,7 +178,7 @@ public class MediatorTest {
 		eve.unlockPrivateKey("evespass");
 		Context c = new Context(null, eve);
 
-		Mediator testee = new Mediator(eve);
+		Mediator testee = new Mediator(null, eve);
 
 		MessageAcceptor acceptor = new MessageAcceptor();
 		testee.registerMessageHandler(acceptor);
@@ -206,7 +206,7 @@ public class MediatorTest {
 		eve.unlockPrivateKey("evespass");
 		Context c = new Context(null, eve);
 
-		Mediator testee = new Mediator(eve);
+		Mediator testee = new Mediator(null, eve);
 
 		MessageDenier denier = new MessageDenier();
 		assertFalse(testee.hasMessageHandlerClass(MessageDenier.class));
