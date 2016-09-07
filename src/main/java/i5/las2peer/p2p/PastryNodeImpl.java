@@ -626,7 +626,7 @@ public class PastryNodeImpl extends Node {
 	@Override
 	public Envelope createEnvelope(String identifier, Serializable content, Agent... reader)
 			throws IllegalArgumentException, SerializationException, CryptoException {
-		return createEnvelope(identifier, content, reader);
+		return pastStorage.createEnvelope(identifier, content, reader);
 	}
 
 	@Override
@@ -638,7 +638,7 @@ public class PastryNodeImpl extends Node {
 	@Override
 	public Envelope createEnvelope(Envelope previousVersion, Serializable content, Agent... reader)
 			throws IllegalArgumentException, SerializationException, CryptoException {
-		return createEnvelope(previousVersion, content, reader);
+		return pastStorage.createEnvelope(previousVersion, content, reader);
 	}
 
 	@Override
