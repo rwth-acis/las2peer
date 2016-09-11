@@ -1,7 +1,6 @@
 package i5.las2peer.security;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
@@ -456,13 +455,13 @@ public class Context implements AgentStorage, ContextStorageInterface {
 	@Override
 	public Envelope createEnvelope(String identifier, Serializable content)
 			throws IllegalArgumentException, SerializationException, CryptoException {
-		return localNode.createEnvelope(identifier, content, Arrays.asList(new Agent[] { getMainAgent() }));
+		return localNode.createEnvelope(identifier, content, getMainAgent());
 	}
 
 	@Override
 	public Envelope createEnvelope(Envelope previousVersion, Serializable content)
 			throws IllegalArgumentException, SerializationException, CryptoException {
-		return localNode.createEnvelope(previousVersion, content, Arrays.asList(new Agent[] { getMainAgent() }));
+		return localNode.createEnvelope(previousVersion, content, getMainAgent());
 	}
 
 	@Override
