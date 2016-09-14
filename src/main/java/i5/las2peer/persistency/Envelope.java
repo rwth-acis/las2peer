@@ -13,6 +13,7 @@ import javax.crypto.SecretKey;
 
 import i5.las2peer.execution.L2pThread;
 import i5.las2peer.p2p.AgentNotKnownException;
+import i5.las2peer.p2p.Node;
 import i5.las2peer.security.Agent;
 import i5.las2peer.security.Context;
 import i5.las2peer.security.GroupAgent;
@@ -172,7 +173,16 @@ public class Envelope implements Serializable, XmlAble {
 			// fetch all groups
 			for (Long groupId : readerGroupIds) {
 				try {
-					Agent agent = reader.getRunningAtNode().getAgent(groupId);
+					Agent agent = null;
+					try {
+						agent = Context.getCurrent().getAgent(groupId);
+					} catch (IllegalStateException e) {
+						Node node = reader.getRunningAtNode();
+						if (node == null) {
+							throw new IllegalStateException("Neither context nor node known");
+						}
+						agent = reader.getRunningAtNode().getAgent(groupId);
+					}
 					if (agent instanceof GroupAgent) {
 						GroupAgent group = (GroupAgent) agent;
 						byte[] encryptedReaderKey = readerKeys.get(group.getPublicKey());
