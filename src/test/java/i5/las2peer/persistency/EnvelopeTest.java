@@ -23,6 +23,7 @@ import i5.las2peer.api.exceptions.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.exceptions.StopMergingException;
 import i5.las2peer.api.exceptions.StorageException;
 import i5.las2peer.p2p.PastryNodeImpl;
+import i5.las2peer.security.GroupAgent;
 import i5.las2peer.security.UserAgent;
 import i5.las2peer.testing.MockAgentFactory;
 import i5.las2peer.testing.TestSuite;
@@ -504,6 +505,30 @@ public class EnvelopeTest {
 			}
 			Envelope stored = node1.fetchEnvelope("test");
 			Assert.assertEquals(testContent, stored.getContent());
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail(e.toString());
+		}
+	}
+
+	@Test
+	public void testReadWithGroup() {
+		try {
+			PastryNodeImpl node1 = nodes.get(0);
+			UserAgent smith = MockAgentFactory.getAdam();
+			smith.unlockPrivateKey("adamspass");
+			GroupAgent group1 = MockAgentFactory.getGroup1();
+			Assert.assertTrue(group1.isMember(smith));
+			group1.unlockPrivateKey(smith);
+			node1.storeAgent(group1);
+			node1.registerReceiver(smith);
+			final String testContent = "envelope of smith";
+			Envelope groupEnv = node1.createEnvelope("test", testContent, group1);
+			node1.storeEnvelope(groupEnv, group1);
+			PastryNodeImpl node2 = nodes.get(1);
+			Envelope fetchedEnv = node2.fetchEnvelope("test");
+			String content = (String) fetchedEnv.getContent(smith);
+			Assert.assertEquals(testContent, content);
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail(e.toString());
