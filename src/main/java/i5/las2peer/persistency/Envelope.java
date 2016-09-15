@@ -1,19 +1,7 @@
 package i5.las2peer.persistency;
 
-import java.io.Serializable;
-import java.security.PublicKey;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map.Entry;
-
-import javax.crypto.SecretKey;
-
 import i5.las2peer.execution.L2pThread;
 import i5.las2peer.p2p.AgentNotKnownException;
-import i5.las2peer.p2p.Node;
 import i5.las2peer.security.Agent;
 import i5.las2peer.security.Context;
 import i5.las2peer.security.GroupAgent;
@@ -25,6 +13,17 @@ import i5.las2peer.tools.SerializeTools;
 import i5.simpleXML.Element;
 import i5.simpleXML.Parser;
 import i5.simpleXML.XMLSyntaxException;
+
+import java.io.Serializable;
+import java.security.PublicKey;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
+
+import javax.crypto.SecretKey;
 
 public class Envelope implements Serializable, XmlAble {
 
@@ -69,8 +68,8 @@ public class Envelope implements Serializable, XmlAble {
 		this.rawContent = rawContent;
 	}
 
-	protected Envelope(String identifier, Serializable content, List<?> readers)
-			throws IllegalArgumentException, SerializationException, CryptoException {
+	protected Envelope(String identifier, Serializable content, List<?> readers) throws IllegalArgumentException,
+			SerializationException, CryptoException {
 		this(identifier, START_VERSION, content, readers);
 	}
 
@@ -89,8 +88,8 @@ public class Envelope implements Serializable, XmlAble {
 		}
 		this.identifier = identifier;
 		if (version > MAX_UPDATE_CYCLES) {
-			throw new IllegalArgumentException(
-					"Version number (" + version + ") is too high, max is " + MAX_UPDATE_CYCLES);
+			throw new IllegalArgumentException("Version number (" + version + ") is too high, max is "
+					+ MAX_UPDATE_CYCLES);
 		}
 		this.version = version;
 		readerKeys = new HashMap<>();
@@ -153,65 +152,51 @@ public class Envelope implements Serializable, XmlAble {
 	}
 
 	public Serializable getContent() throws CryptoException, L2pSecurityException, SerializationException {
-		if (isEncrypted()) {
-			return getContent(Context.getCurrent().getMainAgent());
-		} else {
-			ClassLoader clsLoader = null;
-			try {
-				clsLoader = L2pThread.getServiceClassLoader();
-			} catch (IllegalStateException e) {
-				// XXX logging
-			}
-			return SerializeTools.deserialize(rawContent, clsLoader);
-		}
-	}
-
-	public Serializable getContent(Agent reader) throws CryptoException, L2pSecurityException, SerializationException {
-		byte[] decrypted = null;
-		if (isEncrypted()) {
-			SecretKey decryptedReaderKey = null;
-			// fetch all groups
+		try {
+			return getContentWithAgent(Context.getCurrent().getMainAgent());
+		} catch (CryptoException | L2pSecurityException ex) {
+			System.err.println("TRYING GROUPS");
+			ex.printStackTrace();
+			// try groups instead
+			GroupAgent groupAgent = null;
 			for (Long groupId : readerGroupIds) {
 				try {
-					Agent agent = null;
-					try {
-						agent = Context.getCurrent().getAgent(groupId);
-					} catch (IllegalStateException e) {
-						Node node = reader.getRunningAtNode();
-						if (node == null) {
-							throw new IllegalStateException("Neither context nor node known");
-						}
-						agent = reader.getRunningAtNode().getAgent(groupId);
-					}
-					if (agent instanceof GroupAgent) {
-						GroupAgent group = (GroupAgent) agent;
-						byte[] encryptedReaderKey = readerKeys.get(group.getPublicKey());
-						if (encryptedReaderKey != null && group.isMember(reader)) {
-							// use group to decrypt content
-							group.unlockPrivateKey(reader);
-							decryptedReaderKey = group.decryptSymmetricKey(encryptedReaderKey);
-							break;
-						}
-					} else {
-						// XXX error logging
-					}
-				} catch (AgentNotKnownException e) {
+					groupAgent = Context.getCurrent().requestGroupAgent(groupId);
+					break;
+				} catch (AgentNotKnownException | L2pSecurityException e) {
+					System.err.println("TRIED GROUP");
+					e.printStackTrace();
 					// XXX error logging
 				}
 			}
-			if (decryptedReaderKey == null) {
-				// no group matched
-				byte[] encryptedReaderKey = readerKeys.get(reader.getPublicKey());
-				if (encryptedReaderKey == null) {
-					throw new CryptoException("given reader has no read permission");
-				}
-				decryptedReaderKey = reader.decryptSymmetricKey(encryptedReaderKey);
+
+			if (groupAgent != null) {
+				return getContentWithAgent(groupAgent);
 			}
+		}
+
+		throw new CryptoException("given reader has no read permission");
+	}
+
+	public Serializable getContent(Agent reader) throws CryptoException, L2pSecurityException, SerializationException {
+		return getContentWithAgent(reader);
+	}
+
+	private Serializable getContentWithAgent(Agent reader) throws CryptoException, L2pSecurityException,
+			SerializationException {
+		byte[] decrypted = null;
+		if (isEncrypted()) {
+			byte[] encryptedReaderKey = readerKeys.get(reader.getPublicKey());
+			if (encryptedReaderKey == null) {
+				throw new CryptoException("given reader has no read permission");
+			}
+			SecretKey decryptedReaderKey = reader.decryptSymmetricKey(encryptedReaderKey);
 			// decrypt content
 			decrypted = CryptoTools.decryptSymmetric(rawContent, decryptedReaderKey);
 		} else {
 			decrypted = rawContent;
 		}
+
 		ClassLoader clsLoader = null;
 		try {
 			clsLoader = L2pThread.getServiceClassLoader();
@@ -229,10 +214,10 @@ public class Envelope implements Serializable, XmlAble {
 	public String toXmlString() throws SerializationException {
 		StringBuilder result = new StringBuilder();
 		result.append("<las2peer:envelope identifier=\"" + identifier + "\" version=\"" + version + "\">\n");
-		result.append("\t<las2peer:content encoding=\"Base64\">").append(Base64.getEncoder().encodeToString(rawContent))
-				.append("</las2peer:content>\n");
-		result.append(
-				"\t<las2peer:keys encoding=\"base64\" encryption=\"" + CryptoTools.getAsymmetricAlgorithm() + "\">\n");
+		result.append("\t<las2peer:content encoding=\"Base64\">")
+				.append(Base64.getEncoder().encodeToString(rawContent)).append("</las2peer:content>\n");
+		result.append("\t<las2peer:keys encoding=\"base64\" encryption=\"" + CryptoTools.getAsymmetricAlgorithm()
+				+ "\">\n");
 		for (Entry<PublicKey, byte[]> readerKey : readerKeys.entrySet()) {
 			try {
 				result.append("\t\t<las2peer:key public=\"" + CryptoTools.publicKeyToString(readerKey.getKey()) + "\">"
@@ -286,12 +271,12 @@ public class Envelope implements Serializable, XmlAble {
 				throw new MalformedXMLException("not an envelope");
 			}
 			if (!keys.getAttribute("encoding").equals("base64")) {
-				throw new MalformedXMLException(
-						"base 64 encoding of the content expected - got: " + keys.getAttribute("encoding"));
+				throw new MalformedXMLException("base 64 encoding of the content expected - got: "
+						+ keys.getAttribute("encoding"));
 			}
 			if (!keys.getAttribute("encryption").equals(CryptoTools.getAsymmetricAlgorithm())) {
-				throw new MalformedXMLException(
-						CryptoTools.getAsymmetricAlgorithm() + " encryption of the content expected");
+				throw new MalformedXMLException(CryptoTools.getAsymmetricAlgorithm()
+						+ " encryption of the content expected");
 			}
 			// reader keys
 			HashMap<PublicKey, byte[]> readerKeys = new HashMap<>();
