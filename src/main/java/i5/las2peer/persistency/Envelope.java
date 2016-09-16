@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -73,12 +74,17 @@ public class Envelope implements Serializable, XmlAble {
 		this(identifier, START_VERSION, content, readers);
 	}
 
-	protected Envelope(Envelope previousVersion, Serializable content, List<?> readers)
+	protected Envelope(Envelope previousVersion, Serializable content)
+			throws IllegalArgumentException, SerializationException, CryptoException {
+		this(previousVersion, content, previousVersion.getReaderKeys().keySet());
+	}
+
+	protected Envelope(Envelope previousVersion, Serializable content, Collection<?> readers)
 			throws IllegalArgumentException, SerializationException, CryptoException {
 		this(previousVersion.getIdentifier(), previousVersion.getVersion() + 1, content, readers);
 	}
 
-	protected Envelope(String identifier, long version, Serializable content, List<?> readers)
+	protected Envelope(String identifier, long version, Serializable content, Collection<?> readers)
 			throws IllegalArgumentException, SerializationException, CryptoException {
 		if (identifier == null) {
 			throw new IllegalArgumentException("The identifier must not be null");

@@ -22,6 +22,9 @@ public interface L2pStorageInterface {
 	public Envelope createEnvelope(String identifier, Serializable content, List<Agent> readers)
 			throws IllegalArgumentException, SerializationException, CryptoException;
 
+	public Envelope createEnvelope(Envelope previousVersion, Serializable content)
+			throws IllegalArgumentException, SerializationException, CryptoException;
+
 	public Envelope createEnvelope(Envelope previousVersion, Serializable content, Agent... readers)
 			throws IllegalArgumentException, SerializationException, CryptoException;
 

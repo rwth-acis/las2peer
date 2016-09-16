@@ -132,6 +132,12 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 	}
 
 	@Override
+	public Envelope createEnvelope(Envelope previousVersion, Serializable content)
+			throws IllegalArgumentException, SerializationException, CryptoException {
+		return new Envelope(previousVersion, content);
+	}
+
+	@Override
 	public Envelope createEnvelope(Envelope previousVersion, Serializable content, Agent... readers)
 			throws IllegalArgumentException, SerializationException, CryptoException {
 		return new Envelope(previousVersion, content, Arrays.asList(readers));

@@ -688,6 +688,12 @@ public class LocalNode extends Node {
 	}
 
 	@Override
+	public Envelope createEnvelope(Envelope previousVersion, Serializable content)
+			throws IllegalArgumentException, SerializationException, CryptoException {
+		return storage.createEnvelope(previousVersion, content);
+	}
+
+	@Override
 	public Envelope createEnvelope(Envelope previousVersion, Serializable content, Agent... reader)
 			throws IllegalArgumentException, SerializationException, CryptoException {
 		return storage.createEnvelope(previousVersion, content, reader);
