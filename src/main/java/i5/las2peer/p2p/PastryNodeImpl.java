@@ -1,5 +1,24 @@
 package i5.las2peer.p2p;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.Serializable;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.UnknownHostException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Collection;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Properties;
+import java.util.Vector;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import i5.las2peer.api.StorageCollisionHandler;
 import i5.las2peer.api.StorageEnvelopeHandler;
 import i5.las2peer.api.StorageExceptionHandler;
@@ -25,26 +44,6 @@ import i5.las2peer.security.MessageReceiver;
 import i5.las2peer.security.UserAgent;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.SerializationException;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.Serializable;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.UnknownHostException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Collection;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Properties;
-import java.util.Vector;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import rice.environment.Environment;
 import rice.p2p.commonapi.NodeHandle;
 import rice.pastry.NodeIdFactory;
@@ -308,8 +307,8 @@ public class PastryNodeImpl extends Node {
 					}
 				};
 			}
-			InternetPastryNodeFactory factory = new InternetPastryNodeFactory(nidFactory, pastryBindAddress,
-					pastryPort, pastryEnvironment, null, null, null);
+			InternetPastryNodeFactory factory = new InternetPastryNodeFactory(nidFactory, pastryBindAddress, pastryPort,
+					pastryEnvironment, null, null, null);
 			pastryNode = factory.newNode();
 
 			setupPastryApplications();
@@ -323,8 +322,8 @@ public class PastryNodeImpl extends Node {
 
 					// abort if can't join
 					if (pastryNode.joinFailed()) {
-						throw new NodeException("Could not join the FreePastry ring.  Reason:"
-								+ pastryNode.joinFailedReason());
+						throw new NodeException(
+								"Could not join the FreePastry ring.  Reason:" + pastryNode.joinFailedReason());
 					}
 				}
 			}
@@ -378,8 +377,8 @@ public class PastryNodeImpl extends Node {
 	}
 
 	@Override
-	public void registerReceiver(MessageReceiver receiver) throws AgentAlreadyRegisteredException,
-			L2pSecurityException, AgentException {
+	public void registerReceiver(MessageReceiver receiver)
+			throws AgentAlreadyRegisteredException, L2pSecurityException, AgentException {
 
 		synchronized (this) {
 			super.registerReceiver(receiver);
@@ -455,7 +454,8 @@ public class PastryNodeImpl extends Node {
 			throw e;
 		}
 
-		observerNotice(Event.MESSAGE_SENDING, pastryNode, message.getSenderId(), atNodeId, message.getRecipientId(), "");
+		observerNotice(Event.MESSAGE_SENDING, pastryNode, message.getSenderId(), atNodeId, message.getRecipientId(),
+				"");
 
 		registerAnswerListener(message.getId(), listener);
 
@@ -650,8 +650,8 @@ public class PastryNodeImpl extends Node {
 	}
 
 	@Override
-	public Envelope createUnencryptedEnvelope(String identifier, Serializable content) throws IllegalArgumentException,
-			SerializationException, CryptoException {
+	public Envelope createUnencryptedEnvelope(String identifier, Serializable content)
+			throws IllegalArgumentException, SerializationException, CryptoException {
 		return pastStorage.createUnencryptedEnvelope(identifier, content);
 	}
 
@@ -697,7 +697,8 @@ public class PastryNodeImpl extends Node {
 	}
 
 	@Override
-	public Envelope fetchEnvelope(String identifier, long timeoutMs) throws ArtifactNotFoundException, StorageException {
+	public Envelope fetchEnvelope(String identifier, long timeoutMs)
+			throws ArtifactNotFoundException, StorageException {
 		if (pastStorage == null) {
 			throw new IllegalStateException(
 					"Past storage not initialized! You can fetch artifacts only from running nodes!");
