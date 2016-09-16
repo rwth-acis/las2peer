@@ -561,8 +561,15 @@ public class PastryNodeImpl extends Node {
 		}
 		locallyKnownAgents.registerAgent(agent);
 		try {
-			Envelope agentEnvelope = pastStorage.createUnencryptedEnvelope(Envelope.getAgentIdentifier(agent.getId()),
-					agent.toXmlString());
+			Envelope agentEnvelope = null;
+			try {
+				agentEnvelope = pastStorage.fetchEnvelope(Envelope.getAgentIdentifier(agent.getId()),
+						AGENT_GET_TIMEOUT);
+				agentEnvelope = pastStorage.createUnencryptedEnvelope(agentEnvelope, agentEnvelope.toXmlString());
+			} catch (ArtifactNotFoundException e) {
+				agentEnvelope = pastStorage.createUnencryptedEnvelope(Envelope.getAgentIdentifier(agent.getId()),
+						agent.toXmlString());
+			}
 			pastStorage.storeEnvelope(agentEnvelope, agent, AGENT_STORE_TIMEOUT);
 			if (agent instanceof UserAgent) {
 				getUserManager().registerUserAgent((UserAgent) agent);
