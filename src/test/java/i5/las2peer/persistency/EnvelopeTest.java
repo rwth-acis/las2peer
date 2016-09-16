@@ -511,6 +511,7 @@ public class EnvelopeTest {
 		}
 	}
 
+	// TODO Test disabled no Context in Unit tests available
 //	@Test
 	public void testReadWithGroup() {
 		try {
