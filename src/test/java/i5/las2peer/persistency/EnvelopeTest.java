@@ -511,8 +511,7 @@ public class EnvelopeTest {
 		}
 	}
 
-	// TODO Test disabled no Context in Unit tests available
-//	@Test
+	@Test
 	public void testReadWithGroup() {
 		try {
 			PastryNodeImpl node1 = nodes.get(0);
