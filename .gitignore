@@ -14,3 +14,4 @@ ivy.jar
 .settings/org.eclipse.jdt.core.prefs
 .settings/org.eclipse.jdt.ui.prefs
 /junitvmwatcher*.properties
+/junit*.properties
