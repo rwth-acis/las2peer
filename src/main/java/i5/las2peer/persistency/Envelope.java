@@ -13,7 +13,6 @@ import javax.crypto.SecretKey;
 
 import i5.las2peer.execution.L2pThread;
 import i5.las2peer.p2p.AgentNotKnownException;
-import i5.las2peer.p2p.Node;
 import i5.las2peer.security.Agent;
 import i5.las2peer.security.Context;
 import i5.las2peer.security.GroupAgent;
@@ -153,65 +152,46 @@ public class Envelope implements Serializable, XmlAble {
 	}
 
 	public Serializable getContent() throws CryptoException, L2pSecurityException, SerializationException {
-		if (isEncrypted()) {
+		try {
 			return getContent(Context.getCurrent().getMainAgent());
-		} else {
-			ClassLoader clsLoader = null;
-			try {
-				clsLoader = L2pThread.getServiceClassLoader();
-			} catch (IllegalStateException e) {
-				// XXX logging
+		} catch (CryptoException | L2pSecurityException ex) {
+			System.err.println("TRYING GROUPS");
+			ex.printStackTrace();
+			// try groups instead
+			GroupAgent groupAgent = null;
+			for (Long groupId : readerGroupIds) {
+				try {
+					groupAgent = Context.getCurrent().requestGroupAgent(groupId);
+					break;
+				} catch (AgentNotKnownException | L2pSecurityException e) {
+					System.err.println("TRIED GROUP");
+					e.printStackTrace();
+					// XXX error logging
+				}
 			}
-			return SerializeTools.deserialize(rawContent, clsLoader);
+
+			if (groupAgent != null) {
+				return getContent(groupAgent);
+			}
 		}
+
+		throw new CryptoException("given reader has no read permission");
 	}
 
 	public Serializable getContent(Agent reader) throws CryptoException, L2pSecurityException, SerializationException {
 		byte[] decrypted = null;
 		if (isEncrypted()) {
-			SecretKey decryptedReaderKey = null;
-			// fetch all groups
-			for (Long groupId : readerGroupIds) {
-				try {
-					Agent agent = null;
-					try {
-						agent = Context.getCurrent().getAgent(groupId);
-					} catch (IllegalStateException e) {
-						Node node = reader.getRunningAtNode();
-						if (node == null) {
-							throw new IllegalStateException("Neither context nor node known");
-						}
-						agent = reader.getRunningAtNode().getAgent(groupId);
-					}
-					if (agent instanceof GroupAgent) {
-						GroupAgent group = (GroupAgent) agent;
-						byte[] encryptedReaderKey = readerKeys.get(group.getPublicKey());
-						if (encryptedReaderKey != null && group.isMember(reader)) {
-							// use group to decrypt content
-							group.unlockPrivateKey(reader);
-							decryptedReaderKey = group.decryptSymmetricKey(encryptedReaderKey);
-							break;
-						}
-					} else {
-						// XXX error logging
-					}
-				} catch (AgentNotKnownException e) {
-					// XXX error logging
-				}
+			byte[] encryptedReaderKey = readerKeys.get(reader.getPublicKey());
+			if (encryptedReaderKey == null) {
+				throw new CryptoException("given reader has no read permission");
 			}
-			if (decryptedReaderKey == null) {
-				// no group matched
-				byte[] encryptedReaderKey = readerKeys.get(reader.getPublicKey());
-				if (encryptedReaderKey == null) {
-					throw new CryptoException("given reader has no read permission");
-				}
-				decryptedReaderKey = reader.decryptSymmetricKey(encryptedReaderKey);
-			}
+			SecretKey decryptedReaderKey = reader.decryptSymmetricKey(encryptedReaderKey);
 			// decrypt content
 			decrypted = CryptoTools.decryptSymmetric(rawContent, decryptedReaderKey);
 		} else {
 			decrypted = rawContent;
 		}
+
 		ClassLoader clsLoader = null;
 		try {
 			clsLoader = L2pThread.getServiceClassLoader();
