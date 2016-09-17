@@ -207,16 +207,10 @@ public class L2pClassManager {
 		LoadedLibrary[] libraries = new LoadedLibrary[deps.length + 1];
 		libraries[0] = library;
 		for (int i = 0; i < deps.length; i++) {
-			LoadedLibraryCache cache = getRegisteredLoadedLibrary(libraries[i]);
-			if (cache != null)
-				libraries[i + 1] = getRegisteredLoadedLibrary(libraries[i]).getLoadedLibrary();
-
-			if (libraries[i + 1] == null) {
-				try {
-					libraries[i + 1] = findLoadedLibrary(deps[i]);
-				} catch (LibraryNotFoundException e) {
-					throw new UnresolvedDependenciesException(library.getIdentifier().toString(), deps[i]);
-				}
+			try {
+				libraries[i + 1] = findLoadedLibrary(deps[i]);
+			} catch (LibraryNotFoundException e) {
+				throw new UnresolvedDependenciesException(library.getIdentifier().toString(), deps[i]);
 			}
 		}
 
