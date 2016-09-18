@@ -1,10 +1,10 @@
 package i5.las2peer.classLoaders;
 
-import i5.las2peer.classLoaders.libraries.LoadedLibrary;
-import i5.las2peer.classLoaders.libraries.ResourceNotFoundException;
-
 import java.io.IOException;
 import java.net.URL;
+
+import i5.las2peer.classLoaders.libraries.LoadedLibrary;
+import i5.las2peer.classLoaders.libraries.ResourceNotFoundException;
 
 /**
  * a LibraryClassLoader is responsible for loading classes from one library bundle, probably loaded via a
@@ -87,9 +87,7 @@ public class LibraryClassLoader extends ClassLoader {
 	 * @param name
 	 * @param resolve
 	 * @param lookUp
-	 * 
 	 * @return class definition of the requested class
-	 * 
 	 * @throws ClassNotFoundException
 	 */
 	protected synchronized Class<?> loadClass(String name, boolean resolve, boolean lookUp)

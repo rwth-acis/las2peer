@@ -13,3 +13,5 @@ ivy.jar
 /.DS_Store
 .settings/org.eclipse.jdt.core.prefs
 .settings/org.eclipse.jdt.ui.prefs
+/junitvmwatcher*.properties
+/junit*.properties

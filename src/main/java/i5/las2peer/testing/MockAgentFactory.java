@@ -15,9 +15,6 @@ import i5.las2peer.tools.CryptoException;
 
 /**
  * Simple Factory class to load Agents from the nested XML files.
- * 
- * 
- *
  */
 public abstract class MockAgentFactory {
 
@@ -25,9 +22,7 @@ public abstract class MockAgentFactory {
 	 * get the contents of a text resource in the classpath
 	 * 
 	 * @param resourceName
-	 * 
 	 * @return contents of a resource as String
-	 * 
 	 * @throws IOException
 	 */
 	public static String getContent(String resourceName) throws IOException {
@@ -53,7 +48,6 @@ public abstract class MockAgentFactory {
 	 * get eve-agent
 	 * 
 	 * @return the user agent of eve
-	 * 
 	 * @throws MalformedXMLException
 	 * @throws IOException
 	 */
@@ -62,10 +56,9 @@ public abstract class MockAgentFactory {
 	}
 
 	/**
-	 * get adam agent
+	 * get Adam agent
 	 * 
-	 * @return the user agent of adam
-	 * 
+	 * @return the user agent of Adam
 	 * @throws MalformedXMLException
 	 * @throws IOException
 	 */
@@ -74,10 +67,9 @@ public abstract class MockAgentFactory {
 	}
 
 	/**
-	 * get abel agent
+	 * get Abel agent
 	 * 
-	 * @return the user agent of abel
-	 * 
+	 * @return the user agent of Abel
 	 * @throws MalformedXMLException
 	 * @throws IOException
 	 */
@@ -89,7 +81,6 @@ public abstract class MockAgentFactory {
 	 * get the anonymous agent
 	 * 
 	 * @return the user agent to be used for anonymous access
-	 * 
 	 * @throws MalformedXMLException
 	 * @throws IOException
 	 */
@@ -115,10 +106,9 @@ public abstract class MockAgentFactory {
 	}
 
 	/**
-	 * get a group agent for group1 (containing adam, eve and abel)
+	 * get a group agent for group1 (containing Adam, eve and Abel)
 	 * 
 	 * @return a group
-	 * 
 	 * @throws MalformedXMLException
 	 * @throws IOException
 	 */
@@ -127,10 +117,9 @@ public abstract class MockAgentFactory {
 	}
 
 	/**
-	 * get a group agent for group2 (containing adam, eve and abel)
+	 * get a group agent for group2 (containing Adam, eve and Abel)
 	 * 
 	 * @return a group
-	 * 
 	 * @throws MalformedXMLException
 	 * @throws IOException
 	 */
@@ -139,10 +128,9 @@ public abstract class MockAgentFactory {
 	}
 
 	/**
-	 * get a group agent for group3 (containing adam, eve and abel)
+	 * get a group agent for group3 (containing Adam, eve and Abel)
 	 * 
 	 * @return a group
-	 * 
 	 * @throws MalformedXMLException
 	 * @throws IOException
 	 */
@@ -151,10 +139,9 @@ public abstract class MockAgentFactory {
 	}
 
 	/**
-	 * get a group agent for groupA (containing only adam and abel)
+	 * get a group agent for groupA (containing only Adam and Abel)
 	 * 
 	 * @return a group
-	 * 
 	 * @throws MalformedXMLException
 	 * @throws IOException
 	 */
@@ -180,7 +167,6 @@ public abstract class MockAgentFactory {
 	 * passphrase
 	 * 
 	 * @param argv
-	 * 
 	 * @throws NoSuchAlgorithmException
 	 * @throws L2pSecurityException
 	 * @throws CryptoException
@@ -189,7 +175,6 @@ public abstract class MockAgentFactory {
 	public static void main(String argv[])
 			throws NoSuchAlgorithmException, L2pSecurityException, CryptoException, IOException {
 		System.out.println(UserAgent.createUserAgent(argv[0]).toXmlString());
-		// System.out.println( getContent( "i5/las2peer/security/eve.xml") );
 	}
 
 }

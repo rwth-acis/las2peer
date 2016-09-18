@@ -1,20 +1,33 @@
 package i5.las2peer.p2p;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Random;
 
+import i5.las2peer.api.StorageCollisionHandler;
+import i5.las2peer.api.StorageEnvelopeHandler;
+import i5.las2peer.api.StorageExceptionHandler;
+import i5.las2peer.api.StorageStoreResultHandler;
+import i5.las2peer.api.exceptions.ArtifactNotFoundException;
+import i5.las2peer.api.exceptions.EnvelopeAlreadyExistsException;
+import i5.las2peer.api.exceptions.StorageException;
 import i5.las2peer.classLoaders.L2pClassManager;
 import i5.las2peer.classLoaders.libraries.FileSystemRepository;
 import i5.las2peer.communication.Message;
+import i5.las2peer.communication.MessageException;
 import i5.las2peer.persistency.Envelope;
+import i5.las2peer.persistency.LocalStorage;
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.security.Agent;
 import i5.las2peer.security.AgentException;
 import i5.las2peer.security.BasicAgentStorage;
+import i5.las2peer.security.Context;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.MessageReceiver;
 import i5.las2peer.security.UserAgent;
+import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.SerializationException;
 import i5.las2peer.tools.TimerThread;
 
@@ -46,9 +59,10 @@ public class LocalNode extends Node {
 
 		setStatus(NodeStatus.CONFIGURED);
 	}
-	
+
 	/**
 	 * create a LocalNode
+	 * 
 	 * @param classManager
 	 */
 	private LocalNode(L2pClassManager classManager) {
@@ -67,6 +81,7 @@ public class LocalNode extends Node {
 	 * 
 	 * @return id of this node
 	 */
+	@Override
 	public Long getNodeId() {
 		return nodeId;
 	}
@@ -100,20 +115,47 @@ public class LocalNode extends Node {
 		try {
 			switch (mode) {
 			case ANYCAST:
-				localSendMessage(findFirstNodeWithAgent(message.getRecipientId()), message);
+				if (!message.isTopic()) {
+					localSendMessage(findFirstNodeWithAgent(message.getRecipientId()), message);
+				} else {
+					Long[] ids = findAllNodesWithTopic(message.getTopicId());
+
+					if (ids.length == 0) {
+						listener.collectException(
+								new MessageException("No agent listening to topic " + message.getTopicId()));
+					} else {
+						localSendMessage(ids[0], message);
+					}
+				}
 
 				break;
 			case BROADCAST:
-				Long[] ids = findAllNodesWithAgent(message.getRecipientId());
+				if (!message.isTopic()) {
+					Long[] ids = findAllNodesWithAgent(message.getRecipientId());
 
-				if (ids.length == 0) {
-					listener.collectException(new AgentNotKnownException(message.getRecipientId()));
-				} else {
-					listener.addRecipients(ids.length - 1);
-					for (long id : ids) {
-						localSendMessage(id, message);
+					if (ids.length == 0) {
+						listener.collectException(new AgentNotKnownException(message.getRecipientId()));
+					} else {
+						listener.addRecipients(ids.length - 1);
+						for (long id : ids) {
+							localSendMessage(id, message);
+						}
 					}
+				} else {
+					Long[] ids = findAllNodesWithTopic(message.getTopicId());
+
+					if (ids.length == 0) {
+						listener.collectException(
+								new MessageException("No agent listening to topic " + message.getTopicId()));
+					} else {
+						listener.addRecipients(ids.length - 1);
+						for (long id : ids) {
+							localSendMessage(id, message);
+						}
+					}
+
 				}
+
 			}
 		} catch (AgentNotKnownException e) {
 			storeMessage(message, listener);
@@ -125,43 +167,47 @@ public class LocalNode extends Node {
 			throws AgentNotKnownException, NodeNotFoundException {
 		message.setSendingNodeId(this.getNodeId());
 
-		if (!(atNodeId instanceof Long))
+		if (!(atNodeId instanceof Long)) {
 			throw new IllegalArgumentException("a node id for a LocalNode has to be a Long!");
+		}
 
 		if (!hasNode((Long) atNodeId)) {
-			listener.collectException(new NodeNotFoundException((Long) atNodeId));
+			if (listener != null) {
+				listener.collectException(new NodeNotFoundException((Long) atNodeId));
+			}
 		} else {
-			registerAnswerListener(message.getId(), listener);
+			if (listener != null) {
+				registerAnswerListener(message.getId(), listener);
+			}
 			localSendMessage((Long) atNodeId, message);
 		}
 	}
 
+	/**
+	 * @deprecated Use {@link #fetchEnvelope(String)} instead
+	 */
+	@Deprecated
 	@Override
-	public Envelope fetchArtifact(long id) throws ArtifactNotFoundException {
-		if (htStoredArtifacts.get(id) == null)
-			throw new ArtifactNotFoundException(id);
-		return htStoredArtifacts.get(id);
+	public Envelope fetchArtifact(long id) throws ArtifactNotFoundException, StorageException {
+		return fetchEnvelope(Long.toString(id));
 	}
 
+	/**
+	 * @deprecated Use {@link #storeEnvelope(Envelope, Agent)} instead
+	 */
+	@Deprecated
 	@Override
-	public void storeArtifact(Envelope envelope) throws L2pSecurityException {
-
-		try {
-			Envelope stored = fetchArtifact(envelope.getId());
-			stored.checkOverwrite(envelope);
-		} catch (ArtifactNotFoundException e) {
-			// ok, new artifact
-		}
-
-		htStoredArtifacts.put(envelope.getId(), envelope);
+	public void storeArtifact(Envelope envelope) throws EnvelopeAlreadyExistsException, StorageException {
+		storage.storeEnvelope(envelope, Context.getCurrent().getMainAgent(), 0);
 	}
 
+	/**
+	 * @deprecated Use {@link #removeEnvelope(String)} instead
+	 */
+	@Deprecated
 	@Override
-	public void removeArtifact(long id, byte[] signature) throws ArtifactNotFoundException {
-		if (htStoredArtifacts.get(id) == null)
-			throw new ArtifactNotFoundException(id);
-
-		htStoredArtifacts.remove(id);
+	public void removeArtifact(long id, byte[] signature) throws ArtifactNotFoundException, StorageException {
+		storage.removeEnvelope(Long.toString(id));
 	}
 
 	@Override
@@ -171,13 +217,14 @@ public class LocalNode extends Node {
 
 	@Override
 	public Agent getAgent(long id) throws AgentNotKnownException {
-		if (locallyKnownAgents.hasAgent(id))
+		if (locallyKnownAgents.hasAgent(id)) {
 			return locallyKnownAgents.getAgent(id);
-		else {
+		} else {
 			synchronized (htKnownAgents) {
 				String xml = htKnownAgents.get(id);
-				if (xml == null)
+				if (xml == null) {
 					throw new AgentNotKnownException(id);
+				}
 
 				try {
 					Agent result = Agent.createFromXml(xml);
@@ -194,12 +241,14 @@ public class LocalNode extends Node {
 	public void storeAgent(Agent agent) throws L2pSecurityException, AgentException {
 		synchronized (htKnownAgents) {
 			// only accept unlocked agents at startup
-			if (agent.isLocked() && getStatus() == NodeStatus.RUNNING)
+			if (agent.isLocked() && getStatus() == NodeStatus.RUNNING) {
 				throw new L2pSecurityException("Only unlocked agents may be updated during runtime!");
+			}
 
-			if (htKnownAgents.get(agent.getId()) != null)
+			if (htKnownAgents.get(agent.getId()) != null) {
 				throw new AgentAlreadyRegisteredException("Agent " + agent.getId() + " already in storage");
-			
+			}
+
 			String agentXml = null;
 			try {
 				agentXml = agent.toXmlString();
@@ -211,19 +260,22 @@ public class LocalNode extends Node {
 
 			htKnownAgents.put(agent.getId(), agentXml);
 
-			if (agent instanceof UserAgent)
+			if (agent instanceof UserAgent) {
 				getUserManager().registerUserAgent((UserAgent) agent);
+			}
 		}
 	}
 
 	@Override
 	public void updateAgent(Agent agent) throws AgentException, L2pSecurityException {
-		if (agent.isLocked())
+		if (agent.isLocked()) {
 			throw new L2pSecurityException("Only unlocked agents may be updated!");
+		}
 
 		synchronized (htKnownAgents) {
-			if (htKnownAgents.get(agent.getId()) == null)
+			if (htKnownAgents.get(agent.getId()) == null) {
 				throw new AgentNotKnownException(agent.getId());
+			}
 
 			// TODO: verify, that it is the same agent!!! (e.g. the same private key)
 			// idea: encrypt to stored agent
@@ -235,7 +287,7 @@ public class LocalNode extends Node {
 			// use hash value of private key instead
 
 			// this is verifyable on each local node
-			
+
 			String agentXml = null;
 			try {
 				agentXml = agent.toXmlString();
@@ -246,8 +298,9 @@ public class LocalNode extends Node {
 			locallyKnownAgents.registerAgent(agent);
 			htKnownAgents.put(agent.getId(), agentXml);
 
-			if (agent instanceof UserAgent)
+			if (agent instanceof UserAgent) {
 				getUserManager().updateUserAgent((UserAgent) agent);
+			}
 		}
 	}
 
@@ -280,7 +333,7 @@ public class LocalNode extends Node {
 	public static LocalNode newNode() {
 		return new LocalNode();
 	}
-	
+
 	/**
 	 * create a LocalNode using a FileSystemRepository at the given location
 	 * 
@@ -288,7 +341,8 @@ public class LocalNode extends Node {
 	 * @return
 	 */
 	public static LocalNode newNode(String fileSystemRepository) {
-		return new LocalNode(new L2pClassManager(new FileSystemRepository(fileSystemRepository), ClassLoader.getSystemClassLoader()));
+		return new LocalNode(new L2pClassManager(new FileSystemRepository(fileSystemRepository),
+				ClassLoader.getSystemClassLoader()));
 	}
 
 	/**
@@ -327,7 +381,7 @@ public class LocalNode extends Node {
 
 	private static Hashtable<Long, LocalNode> htLocalNodes = new Hashtable<Long, LocalNode>();
 
-	private static Hashtable<Long, Envelope> htStoredArtifacts = new Hashtable<Long, Envelope>();
+	private static LocalStorage storage = new LocalStorage();
 
 	private static Hashtable<Long, Hashtable<Message, MessageResultListener>> htPendingMessages = new Hashtable<Long, Hashtable<Message, MessageResultListener>>();
 
@@ -387,9 +441,13 @@ public class LocalNode extends Node {
 	 */
 	public static void reset() {
 		htPendingMessages = new Hashtable<Long, Hashtable<Message, MessageResultListener>>();
-		htStoredArtifacts = new Hashtable<Long, Envelope>();
+		storage = new LocalStorage();
 		htKnownAgents = new Hashtable<Long, String>();
 		htLocalNodes = new Hashtable<Long, LocalNode>();
+
+		iMessageMinWait = DEFAULT_MESSAGE_MIN_WAIT;
+		iMessageMaxWait = DEFAULT_MESSAGE_MAX_WAIT;
+		lPendingTimeout = DEFAULT_PENDING_TIMEOUT;
 
 		stopCleaner();
 
@@ -422,8 +480,9 @@ public class LocalNode extends Node {
 		synchronized (htLocalNodes) {
 
 			for (long nodeId : htLocalNodes.keySet()) {
-				if (htLocalNodes.get(nodeId).hasLocalAgent(agentId))
+				if (htLocalNodes.get(nodeId).hasLocalAgent(agentId)) {
 					return nodeId;
+				}
 			}
 
 			throw new AgentNotKnownException(agentId);
@@ -441,8 +500,29 @@ public class LocalNode extends Node {
 			HashSet<Long> hsResult = new HashSet<Long>();
 
 			for (long nodeId : htLocalNodes.keySet()) {
-				if (htLocalNodes.get(nodeId).hasLocalAgent(agentId))
+				if (htLocalNodes.get(nodeId).hasLocalAgent(agentId)) {
 					hsResult.add(nodeId);
+				}
+			}
+
+			return hsResult.toArray(new Long[0]);
+		}
+	}
+
+	/**
+	 * get the ids of all nodes where agents listening to the given topic are running
+	 * 
+	 * @param topicId
+	 * @return
+	 */
+	public static Long[] findAllNodesWithTopic(long topicId) {
+		synchronized (htLocalNodes) {
+			HashSet<Long> hsResult = new HashSet<Long>();
+
+			for (long nodeId : htLocalNodes.keySet()) {
+				if (htLocalNodes.get(nodeId).hasTopic(topicId)) {
+					hsResult.add(nodeId);
+				}
 			}
 
 			return hsResult.toArray(new Long[0]);
@@ -471,7 +551,7 @@ public class LocalNode extends Node {
 	 * fetch all pending messages for the given agent
 	 * 
 	 * @param recipientId
-	 * @param nodeId 
+	 * @param nodeId
 	 */
 	protected static void deliverPendingMessages(long recipientId, long nodeId) {
 
@@ -511,18 +591,19 @@ public class LocalNode extends Node {
 				}
 
 				// remove agent entry, if empty
-				if (agentMessages.size() == 0)
+				if (agentMessages.size() == 0) {
 					htPendingMessages.remove(agentId);
+				}
 			}
 		}
 	}
 
 	private static final long DEFAULT_PENDING_TIMEOUT = 20000; // 20 seconds
 	private static final int DEFAULT_MESSAGE_MIN_WAIT = 500;
-	private static final int DEFAULT_MESSAGE_MAX_WAIT = 3000;
+	private static final int DEFAULT_MESSAGE_MAX_WAIT = 550;
 
-	private static final int iMessageMinWait = DEFAULT_MESSAGE_MIN_WAIT;
-	private static final int iMessageMaxWait = DEFAULT_MESSAGE_MAX_WAIT;
+	private static int iMessageMinWait = DEFAULT_MESSAGE_MIN_WAIT;
+	private static int iMessageMaxWait = DEFAULT_MESSAGE_MAX_WAIT;
 	private static long lPendingTimeout = DEFAULT_PENDING_TIMEOUT;
 
 	private static TimerThread pendingTimer = null;
@@ -531,8 +612,20 @@ public class LocalNode extends Node {
 		lPendingTimeout = newtimeout;
 	}
 
+	public static int getMinMessageWait() {
+		return iMessageMinWait;
+	}
+
 	public static int getMaxMessageWait() {
 		return iMessageMaxWait;
+	}
+
+	public static void setMinMessageWait(int time) {
+		iMessageMinWait = time;
+	}
+
+	public static void setMaxMessageWait(int time) {
+		iMessageMaxWait = time;
 	}
 
 	static {
@@ -568,23 +661,113 @@ public class LocalNode extends Node {
 		message.close();
 
 		new Thread(new Runnable() {
+			@Override
 			public void run() {
 				Random r = new Random();
 
-				int wait = iMessageMinWait + r.nextInt(iMessageMaxWait - iMessageMinWait);
+				int wait = iMessageMinWait + r.nextInt(iMessageMaxWait - iMessageMinWait + 1);
 				try {
 					Thread.sleep(wait);
 				} catch (InterruptedException e1) {
 				}
 
 				try {
-					getNode(nodeId).receiveMessage(message);
+					getNode(nodeId).receiveMessage(message.clone());
 				} catch (Exception e) {
 					System.out.println("problems at node " + nodeId);
 					throw new RuntimeException(e);
 				}
 			}
 		}).start();
+	}
+
+	@Override
+	public Envelope createEnvelope(String identifier, Serializable content, Agent... reader)
+			throws IllegalArgumentException, SerializationException, CryptoException {
+		return storage.createEnvelope(identifier, content, reader);
+	}
+
+	@Override
+	public Envelope createEnvelope(Envelope previousVersion, Serializable content)
+			throws IllegalArgumentException, SerializationException, CryptoException {
+		return storage.createEnvelope(previousVersion, content);
+	}
+
+	@Override
+	public Envelope createEnvelope(Envelope previousVersion, Serializable content, Agent... reader)
+			throws IllegalArgumentException, SerializationException, CryptoException {
+		return storage.createEnvelope(previousVersion, content, reader);
+	}
+
+	@Override
+	public void storeEnvelope(Envelope envelope, Agent author) throws StorageException {
+		// XXX make configurable
+		storage.storeEnvelope(envelope, author, 10000);
+	}
+
+	@Override
+	public Envelope fetchEnvelope(String identifier) throws StorageException {
+		// XXX make configurable
+		return storage.fetchEnvelope(identifier, 10000);
+	}
+
+	@Override
+	public Envelope createEnvelope(String identifier, Serializable content, List<Agent> readers)
+			throws IllegalArgumentException, SerializationException, CryptoException {
+		return storage.createEnvelope(identifier, content, readers);
+	}
+
+	@Override
+	public Envelope createEnvelope(Envelope previousVersion, Serializable content, List<Agent> readers)
+			throws IllegalArgumentException, SerializationException, CryptoException {
+		return storage.createEnvelope(previousVersion, content, readers);
+	}
+
+	@Override
+	public Envelope createUnencryptedEnvelope(String identifier, Serializable content)
+			throws IllegalArgumentException, SerializationException, CryptoException {
+		return storage.createUnencryptedEnvelope(identifier, content);
+	}
+
+	@Override
+	public Envelope createUnencryptedEnvelope(Envelope previousVersion, Serializable content)
+			throws IllegalArgumentException, SerializationException, CryptoException {
+		return storage.createUnencryptedEnvelope(previousVersion, content);
+	}
+
+	@Override
+	public void storeEnvelope(Envelope envelope, Agent author, long timeoutMs)
+			throws EnvelopeAlreadyExistsException, StorageException {
+		storage.storeEnvelope(envelope, author, timeoutMs);
+	}
+
+	@Override
+	public void storeEnvelopeAsync(Envelope envelope, Agent author, StorageStoreResultHandler resultHandler,
+			StorageCollisionHandler collisionHandler, StorageExceptionHandler exceptionHandler) {
+		storage.storeEnvelopeAsync(envelope, author, resultHandler, collisionHandler, exceptionHandler);
+	}
+
+	@Override
+	public Envelope fetchEnvelope(String identifier, long timeoutMs)
+			throws ArtifactNotFoundException, StorageException {
+		return storage.fetchEnvelope(identifier, timeoutMs);
+	}
+
+	@Override
+	public void fetchEnvelopeAsync(String identifier, StorageEnvelopeHandler envelopeHandler,
+			StorageExceptionHandler exceptionHandler) {
+		storage.fetchEnvelopeAsync(identifier, envelopeHandler, exceptionHandler);
+	}
+
+	@Override
+	public void removeEnvelope(String identifier) throws ArtifactNotFoundException, StorageException {
+		storage.removeEnvelope(identifier);
+	}
+
+	@Override
+	public Envelope fetchArtifact(String identifier) throws ArtifactNotFoundException, StorageException {
+		// XXX make configurable
+		return storage.fetchEnvelope(identifier, 10000);
 	}
 
 }

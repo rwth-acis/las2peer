@@ -1,16 +1,17 @@
 package i5.las2peer.testing;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.Hashtable;
+import java.util.Random;
 
 import i5.las2peer.api.Service;
-import i5.las2peer.persistency.DecodingFailedException;
-import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.persistency.Envelope;
-import i5.las2peer.persistency.EnvelopeException;
 import i5.las2peer.persistency.MalformedXMLException;
+import i5.las2peer.security.Context;
+import i5.las2peer.security.GroupAgent;
 import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.tools.CryptoException;
+import i5.las2peer.tools.SerializationException;
 
 /**
  * Simple test service for connectors to have a service with methods to call.
@@ -27,7 +28,6 @@ public class TestService extends Service {
 	 */
 	public int counter() {
 		iCounter++;
-
 		return iCounter;
 	}
 
@@ -85,8 +85,9 @@ public class TestService extends Service {
 	public long byteAdder(byte[] bytes) {
 		long result = 0;
 
-		for (int i = 0; i < bytes.length; i++)
-			result += bytes[i];
+		for (byte b : bytes) {
+			result += b;
+		}
 
 		return result;
 	}
@@ -121,8 +122,9 @@ public class TestService extends Service {
 	public String[] stringArrayReturner(String[] ar) {
 		String[] asResult = new String[ar.length];
 
-		for (int i = 0; i < asResult.length; i++)
+		for (int i = 0; i < asResult.length; i++) {
 			asResult[asResult.length - i - 1] = ar[i];
+		}
 
 		return asResult;
 	}
@@ -178,12 +180,14 @@ public class TestService extends Service {
 	 * @return a String
 	 */
 	public String concatStrings(String[] strings) {
-		if (strings == null)
+		if (strings == null) {
 			return "";
+		}
 
 		StringBuffer buffer = new StringBuffer();
-		for (int i = 0; i < strings.length; i++)
-			buffer.append(strings[i]);
+		for (String string : strings) {
+			buffer.append(string);
+		}
 
 		return buffer.toString();
 	}
@@ -247,18 +251,15 @@ public class TestService extends Service {
 	 * test for envelopes: store a string in an envelope
 	 * 
 	 * @return previously stored string
-	 * @throws EnvelopeException
 	 * @throws L2pSecurityException
+	 * @throws CryptoException
+	 * @throws SerializationException
 	 */
-	public String getEnvelopeString() throws EnvelopeException, L2pSecurityException {
-		if (cache == null)
+	public String getEnvelopeString() throws L2pSecurityException, CryptoException, SerializationException {
+		if (cache == null) {
 			return "nothing stored!";
-
-		cache.open();
-
-		String result = cache.getContentAsString();
-		cache.close();
-
+		}
+		String result = (String) cache.getContent(Context.getCurrent().getMainAgent());
 		return result;
 	}
 
@@ -266,14 +267,12 @@ public class TestService extends Service {
 	 * test for envelopes: get stored String
 	 * 
 	 * @param s
-	 * @throws UnsupportedEncodingException
-	 * @throws EncodingFailedException
-	 * @throws DecodingFailedException
+	 * @throws IllegalArgumentException
+	 * @throws SerializationException
+	 * @throws CryptoException
 	 */
-	public void storeEnvelopeString(String s)
-			throws UnsupportedEncodingException, EncodingFailedException, DecodingFailedException {
-		cache = new Envelope((String) s, getContext().getMainAgent());
-		cache.close();
+	public void storeEnvelopeString(String s) throws IllegalArgumentException, SerializationException, CryptoException {
+		cache = Context.getCurrent().createEnvelope(Long.toString(new Random().nextLong()), s);
 	}
 
 	private Envelope groupCache = null;
@@ -283,16 +282,17 @@ public class TestService extends Service {
 	 * 
 	 * @return a simple stored string
 	 * @throws L2pSecurityException
-	 * @throws EnvelopeException
+	 * @throws SerializationException
+	 * @throws CryptoException
 	 */
-	public String getGroupEnvelopeString() throws L2pSecurityException, EnvelopeException {
-		if (groupCache == null)
+	public String getGroupEnvelopeString()
+			throws L2pSecurityException, CryptoException, SerializationException, MalformedXMLException, IOException {
+		if (groupCache == null) {
 			return "nothing stored";
-
-		groupCache.open();
-		String result = groupCache.getContentAsString();
-		groupCache.close();
-
+		}
+		GroupAgent group = MockAgentFactory.getGroup1();
+		group.unlockPrivateKey(Context.getCurrent().getMainAgent());
+		String result = (String) groupCache.getContent(group);
 		return result;
 	}
 
@@ -300,16 +300,16 @@ public class TestService extends Service {
 	 * store a simple string encrypted for the group
 	 * 
 	 * @param store a string to store for the group
-	 * @throws EncodingFailedException
-	 * @throws IOException
+	 * @throws IllegalArgumentException
+	 * @throws SerializationException
+	 * @throws CryptoException
 	 * @throws MalformedXMLException
-	 * @throws DecodingFailedException
-	 * @throws UnsupportedEncodingException
+	 * @throws IOException
 	 */
-	public void storeGroupEnvelopeString(String store) throws EncodingFailedException, UnsupportedEncodingException,
-			DecodingFailedException, MalformedXMLException, IOException {
-		groupCache = new Envelope(store, MockAgentFactory.getGroup1());
-		groupCache.close();
+	public void storeGroupEnvelopeString(String store) throws IllegalArgumentException, SerializationException,
+			CryptoException, MalformedXMLException, IOException {
+		groupCache = Context.getCurrent().createEnvelope(Long.toString(new Random().nextLong()), store,
+				MockAgentFactory.getGroup1());
 	}
 
 }

@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.ObjectStreamClass;
 import java.io.Serializable;
 
 import javax.crypto.SecretKey;
@@ -57,9 +58,35 @@ public class SerializeTools {
 	 * @throws SerializationException
 	 */
 	public static Serializable deserialize(byte[] bytes) throws SerializationException {
+		return deserialize(bytes, null);
+	}
+
+	/**
+	 * deserialize a single Object from a byte array
+	 * 
+	 * @param bytes
+	 * @param clsLoader
+	 * @return deseriaized object
+	 * @throws SerializationException
+	 */
+	public static Serializable deserialize(byte[] bytes, ClassLoader clsLoader) throws SerializationException {
 		try {
 			ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-			ObjectInputStream ois = new ObjectInputStream(bais);
+			ObjectInputStream ois = new ObjectInputStream(bais) {
+				@Override
+				protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
+					if (clsLoader != null) {
+						String name = desc.getName();
+						try {
+							return Class.forName(name, false, clsLoader);
+						} catch (ClassNotFoundException ex) {
+							return super.resolveClass(desc);
+						}
+					} else {
+						return super.resolveClass(desc);
+					}
+				}
+			};
 			return (Serializable) ois.readObject();
 		} catch (IOException e) {
 			throw new SerializationException("IO problems", e);

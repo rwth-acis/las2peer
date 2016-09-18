@@ -28,7 +28,6 @@ public class PackageTestService extends Service {
 	 * return a value of a class placed in the used library
 	 * 
 	 * @param aValue
-	 * 
 	 * @return a test value, containing the negative version of the parameter
 	 */
 	public SomeValue getValue(int aValue) {

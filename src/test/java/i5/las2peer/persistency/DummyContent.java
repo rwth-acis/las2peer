@@ -20,6 +20,7 @@ public class DummyContent implements Serializable {
 		return contained.toString();
 	}
 
+	@Override
 	public String toString() {
 		return getContent();
 	}

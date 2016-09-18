@@ -50,6 +50,7 @@ public class ColoredOutput {
 			this.code = code;
 		}
 
+		@Override
 		public String getShellCode() {
 			return String.valueOf(code);
 		}
@@ -83,6 +84,7 @@ public class ColoredOutput {
 			this.code = code;
 		}
 
+		@Override
 		public String getShellCode() {
 			return String.valueOf(code);
 		}

@@ -183,8 +183,8 @@ public class MessageTest {
 		assertEquals(a.getId(), m.getSender().getId());
 		assertEquals(b.getId(), m.getRecipient().getId());
 
-		assertEquals(m.getRecipientId(), testee.getSenderId());
-		assertEquals(m.getSenderId(), testee.getRecipientId());
+		assertTrue(m.getRecipientId() == testee.getSenderId());
+		assertTrue(m.getSenderId() == testee.getRecipientId());
 
 		assertNotNull(testee.getResponseToId());
 		assertEquals(m.getId(), testee.getResponseToId().longValue());
@@ -199,7 +199,7 @@ public class MessageTest {
 
 		Message andBack = Message.createFromXml(xml);
 
-		assertEquals(a.getId(), andBack.getRecipientId());
+		assertTrue(a.getId() == andBack.getRecipientId());
 		assertEquals(b.getId(), andBack.getSenderId());
 		assertEquals(m.getId(), andBack.getResponseToId().longValue());
 
@@ -235,7 +235,7 @@ public class MessageTest {
 		Message andBack = Message.createFromXml(xml);
 
 		assertEquals(m.getSender().getId(), andBack.getSenderId());
-		assertEquals(m.getRecipient().getId(), andBack.getRecipientId());
+		assertTrue(m.getRecipient().getId() == andBack.getRecipientId());
 
 		andBack.open(b, storage);
 		assertEquals(m.getContent(), andBack.getContent());
@@ -257,7 +257,7 @@ public class MessageTest {
 		Message testee = new Message(a, b, "some content");
 		assertNull(testee.getSender());
 		assertNull(testee.getRecipient());
-		assertEquals(b.getId(), testee.getRecipientId());
+		assertTrue(b.getId() == testee.getRecipientId());
 		assertEquals(a.getId(), testee.getSenderId());
 
 		b.unlockPrivateKey("passb");
@@ -273,13 +273,15 @@ public class MessageTest {
 			EncodingFailedException, SerializationException, AgentNotKnownException {
 		BasicAgentStorage storage = new BasicAgentStorage();
 		UserAgent eve = MockAgentFactory.getEve();
-		 // class loading will be bypassed, so the version specified is not used
-		ServiceAgent service = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.0"), "a pass");
+		// class loading will be bypassed, so the version specified is not used
+		ServiceAgent service = ServiceAgent
+				.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.0"), "a pass");
 		storage.registerAgents(eve, service);
 
 		eve.unlockPrivateKey("evespass");
 		Message m = new Message(eve, service,
-				new RMITask(ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.0"), "inc", new Serializable[] { new Integer(10) }));
+				new RMITask(ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.0"), "inc",
+						new Serializable[] { new Integer(10) }));
 
 		String xml = m.toXmlString();
 
@@ -327,6 +329,46 @@ public class MessageTest {
 		System.out.println(xml);
 		System.out.println("------ / XML message output ------");
 
+	}
+
+	@Test
+	public void testTopicMessage() throws CryptoException, L2pSecurityException, EncodingFailedException,
+			SerializationException, MalformedXMLException, AgentNotKnownException, CloneNotSupportedException {
+		UserAgent a = UserAgent.createUserAgent("passa");
+		UserAgent b = UserAgent.createUserAgent("passb");
+
+		BasicAgentStorage storage = new BasicAgentStorage();
+		storage.registerAgents(a, b);
+
+		a.unlockPrivateKey("passa");
+		b.unlockPrivateKey("passb");
+
+		// constructor
+		Message m = new Message(a, 123L, "some content");
+		assertEquals(m.getRecipientId(), null);
+		assertTrue(m.isTopic());
+
+		// serialization
+		Message m2 = Message.createFromXml(m.toXmlString());
+		assertEquals(m.getSenderId(), m2.getSenderId());
+		assertEquals(m2.getRecipientId(), null);
+		assertTrue(m2.isTopic());
+
+		// open
+		m2.open(b, storage);
+		assertEquals(m2.getSender(), a);
+		assertTrue(m2.isOpen());
+		assertEquals(m2.getContent(), "some content");
+
+		// close
+		m2.close();
+		assertFalse(m2.isOpen());
+
+		// clone
+		Message m3 = m2.clone();
+		m3.open(b, storage);
+		assertFalse(m2.isOpen());
+		assertTrue(m3.isOpen());
 	}
 
 }

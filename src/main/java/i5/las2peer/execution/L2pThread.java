@@ -13,9 +13,9 @@ import i5.las2peer.security.ServiceAgent;
  */
 public class L2pThread extends Thread {
 
-	private Context context;
-	private RMITask task;
-	private ServiceAgent agent;
+	final private Context context;
+	final private RMITask task;
+	final private ServiceAgent agent;
 
 	private Serializable result = null;
 	private Exception exception = null;
@@ -23,9 +23,34 @@ public class L2pThread extends Thread {
 	private boolean bFinished = false;
 
 	/**
+	 * Gets the current las2peer context.
+	 * 
+	 * @throws IllegalStateException called not in a las2peer execution thread
+	 * @return the current context
+	 */
+	public static L2pThread getCurrent() {
+		Thread t = Thread.currentThread();
+
+		if (!(t instanceof L2pThread)) {
+			throw new IllegalStateException("Not executed in a L2pThread environment!");
+		}
+
+		return (L2pThread) t;
+	}
+
+	/**
+	 * Returns the class loader used by the service executed in this thread.
+	 * 
+	 * @return Returns the class loader instance.
+	 */
+	public static ClassLoader getServiceClassLoader() {
+		return getCurrent().agent.getClass().getClassLoader();
+	}
+
+	/**
 	 * create a new L2pThread
 	 * 
-	 * @param agent 
+	 * @param agent
 	 * @param task
 	 * @param context
 	 */
@@ -56,6 +81,7 @@ public class L2pThread extends Thread {
 	/**
 	 * the actual work
 	 */
+	@Override
 	public void run() {
 		try {
 			result = agent.handle(task);
@@ -99,9 +125,9 @@ public class L2pThread extends Thread {
 	 * @throws NotFinishedException
 	 */
 	public Serializable getResult() throws NotFinishedException {
-		if (!isFinished())
+		if (!isFinished()) {
 			throw new NotFinishedException("Job not Finished yet");
-
+		}
 		return result;
 	}
 

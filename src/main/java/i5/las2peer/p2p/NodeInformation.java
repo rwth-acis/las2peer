@@ -7,10 +7,10 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import i5.las2peer.persistency.MalformedXMLException;
+import i5.las2peer.persistency.VerificationFailedException;
 import i5.las2peer.persistency.XmlAble;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.ServiceAgent;
-import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
 import i5.las2peer.tools.FileContentReader;
 import i5.las2peer.tools.SerializationException;
@@ -21,9 +21,6 @@ import i5.simpleXML.XMLSyntaxException;
 
 /**
  * A NodeInformation gives basic information about a node.
- * 
- * 
- *
  */
 public class NodeInformation implements XmlAble {
 
@@ -147,16 +144,19 @@ public class NodeInformation implements XmlAble {
 	 * @throws L2pSecurityException
 	 */
 	public void verifySignature() throws L2pSecurityException {
-		if (signature == null)
+		if (signature == null) {
 			throw new L2pSecurityException("No Signature!");
+		}
 
-		if (nodeKey == null)
+		if (nodeKey == null) {
 			throw new L2pSecurityException("No node key!");
+		}
 
 		try {
-			if (!CryptoTools.verifySignature(signature, getSignatureContent(), nodeKey))
+			if (!CryptoTools.verifySignature(signature, getSignatureContent(), nodeKey)) {
 				throw new L2pSecurityException("signaure faulty!");
-		} catch (CryptoException e) {
+			}
+		} catch (VerificationFailedException e) {
 			throw new L2pSecurityException("unable to verify signature", e);
 		}
 	}
@@ -202,40 +202,47 @@ public class NodeInformation implements XmlAble {
 	public String toXmlString() {
 		StringBuffer result = new StringBuffer("<las2peerNode>\n");
 
-		if (organization != null)
+		if (organization != null) {
 			result.append("\t<organization>").append(organization).append("</organization>\n");
+		}
 
-		if (adminName != null)
+		if (adminName != null) {
 			result.append("\t<adminName>").append(adminName).append("</adminName>\n");
+		}
 
-		if (adminEmail != null)
+		if (adminEmail != null) {
 			result.append("\t<adminEmail>").append(adminEmail).append("</adminEmail>\n");
+		}
 
 		result.append("\t<description>").append(description).append("</description>\n");
 
 		if (hostedServices != null && hostedServices.length > 0) {
 			result.append("\t<services>\n");
 
-			for (ServiceNameVersion service : hostedServices)
+			for (ServiceNameVersion service : hostedServices) {
 				result.append("\t\t<serviceClass>").append(service.toString()).append("</serviceClass>\n");
+			}
 
 			result.append("\t</services>\n");
 		}
 
 		try {
-			if (nodeKey != null)
+			if (nodeKey != null) {
 				result.append("\t<nodeKey encoding=\"base64\">").append(SerializeTools.serializeToBase64(nodeKey))
 						.append("</nodeKey>\n");
+			}
 
-			if (signature != null)
+			if (signature != null) {
 				result.append("\t<signature encoding=\"base64\">").append(SerializeTools.serializeToBase64(signature))
 						.append("</signature>\n");
+			}
 
-			if (nodeHandle != null)
+			if (nodeHandle != null) {
 				result.append("\t<nodeHandle>\n").append("\t\t<plain><![CDATA[").append(nodeHandle.toString())
 						.append("]]></plain>\n").append("\t\t<serialized encoding=\"base64\">")
 						.append(SerializeTools.serializeToBase64(nodeHandle)).append("</serialized>\n")
 						.append("\t</nodeHandle>\n");
+			}
 		} catch (SerializationException e) {
 			throw new RuntimeException("critical: should not occur!");
 		}
@@ -257,9 +264,7 @@ public class NodeInformation implements XmlAble {
 	 * factory: create a NodeInformation instance from a XML file
 	 * 
 	 * @param filename
-	 * 
 	 * @return the node information contained in the given XML file
-	 * 
 	 * @throws MalformedXMLException
 	 * @throws IOException
 	 * @throws XMLSyntaxException
@@ -274,7 +279,6 @@ public class NodeInformation implements XmlAble {
 	 * 
 	 * @param filename
 	 * @param serviceAgents
-	 * 
 	 * @return a node information
 	 * 
 	 * 
@@ -294,16 +298,15 @@ public class NodeInformation implements XmlAble {
 	 * factory create a node information instance from an XML string
 	 * 
 	 * @param xml
-	 * 
 	 * @return node information contained in the given XML string
-	 * 
 	 * @throws MalformedXMLException
 	 * @throws XMLSyntaxException
 	 */
 	public static NodeInformation createFromXml(String xml) throws MalformedXMLException, XMLSyntaxException {
 		Element root = Parser.parse(xml, false);
-		if (!root.getName().equals("las2peerNode"))
+		if (!root.getName().equals("las2peerNode")) {
 			throw new MalformedXMLException("not a node information but a " + root.getName());
+		}
 
 		NodeInformation result = new NodeInformation();
 
@@ -312,34 +315,36 @@ public class NodeInformation implements XmlAble {
 			while (children.hasMoreElements()) {
 				Element child = children.nextElement();
 
-				if (child.getName().equals("adminName"))
+				if (child.getName().equals("adminName")) {
 					result.adminName = child.getFirstChild().getText();
-				else if (child.getName().equals("adminEmail"))
+				} else if (child.getName().equals("adminEmail")) {
 					result.adminEmail = child.getFirstChild().getText();
-				else if (child.getName().equals("organization"))
+				} else if (child.getName().equals("organization")) {
 					result.organization = child.getFirstChild().getText();
-				else if (child.getName().equals("description"))
+				} else if (child.getName().equals("description")) {
 					result.description = child.getFirstChild().getText();
-				else if (child.getName().equals("nodeHandle"))
+				} else if (child.getName().equals("nodeHandle")) {
 					result.nodeHandle = SerializeTools.deserializeBase64(child.getChild(1).getFirstChild().getText());
-				else if (child.getName().equals("nodeKey"))
+				} else if (child.getName().equals("nodeKey")) {
 					result.nodeKey = (PublicKey) SerializeTools.deserializeBase64(child.getFirstChild().getText());
-				else if (child.getName().equals("signature"))
+				} else if (child.getName().equals("signature")) {
 					result.signature = (byte[]) SerializeTools.deserializeBase64(child.getFirstChild().getText());
-				else if (child.getName().equals("services")) {
+				} else if (child.getName().equals("services")) {
 					Vector<String> serviceClasses = new Vector<String>();
 
 					Enumeration<Element> services = child.getChildren();
 					while (services.hasMoreElements()) {
 						Element service = services.nextElement();
-						if (!service.getName().equals("serviceClass"))
+						if (!service.getName().equals("serviceClass")) {
 							throw new MalformedXMLException(service + " is not a service class element");
+						}
 						serviceClasses.add(service.getFirstChild().getText());
 					}
 
 					result.hostedServices = serviceClasses.toArray(new ServiceNameVersion[0]);
-				} else
+				} else {
 					throw new MalformedXMLException("unknown xml element: " + child.getName());
+				}
 
 			}
 		} catch (SerializationException e) {

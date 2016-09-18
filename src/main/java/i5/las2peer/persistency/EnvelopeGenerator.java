@@ -1,22 +1,21 @@
-package i5.las2peer.tools;
+package i5.las2peer.persistency;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
+import java.util.Random;
 
-import i5.las2peer.persistency.Envelope;
-import i5.las2peer.persistency.EnvelopeException;
-import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.security.Agent;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.PassphraseAgent;
+import i5.las2peer.tools.CryptoException;
+import i5.las2peer.tools.FileContentReader;
+import i5.las2peer.tools.SerializationException;
 
 /**
  * A simple command line tool for generating XML envelopes to the standard out.
- * 
- * 
- *
  */
 public class EnvelopeGenerator {
 
@@ -44,9 +43,7 @@ public class EnvelopeGenerator {
 	 * Loads an agent from the given XML file name.
 	 * 
 	 * @param filename
-	 * 
 	 * @return a PassphraseAgent
-	 * 
 	 * @throws IOException
 	 * @throws MalformedXMLException
 	 */
@@ -73,16 +70,12 @@ public class EnvelopeGenerator {
 			usage();
 			return;
 		}
-
 		try {
 			PassphraseAgent owner = loadAgent(argv[0]);
-
 			owner.unlockPrivateKey(argv[1]);
-
 			Serializable temp = createSerializable(argv[2], argv[3]);
-
-			Envelope env = new Envelope(temp, owner);
-
+			Envelope env = new Envelope(Long.toString(new Random().nextLong()), temp,
+					Arrays.asList(new Agent[] { owner }));
 			System.out.println(env.toXmlString());
 		} catch (SecurityException e) {
 			usage("Unable to call constructor of nested class: " + e);
@@ -104,12 +97,11 @@ public class EnvelopeGenerator {
 			usage("access problems with constructor of target class");
 		} catch (InvocationTargetException e) {
 			usage("invocation problems with constructor of target class!");
-		} catch (EnvelopeException e) {
+		} catch (CryptoException e) {
 			usage("envelope problems while generating xml output: " + e);
 		} catch (SerializationException e) {
 			usage("unable to serialize content into envelope!");
 		}
-
 	}
 
 	/**
@@ -117,9 +109,7 @@ public class EnvelopeGenerator {
 	 * 
 	 * @param classname
 	 * @param value
-	 * 
 	 * @return a serializable
-	 * 
 	 * @throws ClassNotFoundException
 	 * @throws SecurityException
 	 * @throws NoSuchMethodException

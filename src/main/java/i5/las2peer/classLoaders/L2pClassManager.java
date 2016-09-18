@@ -1,13 +1,13 @@
 package i5.las2peer.classLoaders;
 
-import java.util.Enumeration;
-import java.util.Hashtable;
-
 import i5.las2peer.classLoaders.helpers.LibraryDependency;
 import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
 import i5.las2peer.classLoaders.helpers.LibraryVersion;
 import i5.las2peer.classLoaders.libraries.LoadedLibrary;
 import i5.las2peer.classLoaders.libraries.Repository;
+
+import java.util.Enumeration;
+import java.util.Hashtable;
 
 /**
  * The main class for loading classes in the las2peer environment. This ClassLoader handles library registering and
@@ -19,7 +19,7 @@ import i5.las2peer.classLoaders.libraries.Repository;
  *
  */
 public class L2pClassManager {
-	
+
 	/**
 	 * classloader to load the platform's classes (Java + las2peer core + Connectors)
 	 */
@@ -36,7 +36,7 @@ public class L2pClassManager {
 	private Hashtable<String, Hashtable<LibraryVersion, BundleClassManager>> registeredLoaders = new Hashtable<String, Hashtable<LibraryVersion, BundleClassManager>>();
 
 	/**
-	 * all registered libraries name, version => LibraryClassLoader
+	 * all registered libraries name, version => LoadedLibraryCache
 	 */
 	private Hashtable<String, Hashtable<LibraryVersion, LoadedLibraryCache>> registeredLibraries = new Hashtable<String, Hashtable<LibraryVersion, LoadedLibraryCache>>();
 
@@ -83,7 +83,7 @@ public class L2pClassManager {
 
 		registerBundle(lib);
 	}
-	
+
 	/**
 	 * register a service using the given library version the package name of the service class is used a package name
 	 * 
@@ -96,7 +96,7 @@ public class L2pClassManager {
 
 		Hashtable<LibraryVersion, BundleClassManager> htBcls = registeredLoaders.get(sPackage);
 		if (htBcls != null && htBcls.get(version) != null) {
-			return; // at least one version is already registered
+			return;
 		}
 
 		LoadedLibrary lib = null;
@@ -117,14 +117,6 @@ public class L2pClassManager {
 	}
 
 	/**
-	 * remove a service with all versions from this class loader
-	 * 
-	 * @param serviceName
-	 */
-	// public void unregisterService ( String serviceClassName ) {
-	// }
-
-	/**
 	 * remove a service (bundle) from this class loader and remove all orphaned LibraryClassLoaders as well
 	 * 
 	 * @param serviceClassName
@@ -143,15 +135,15 @@ public class L2pClassManager {
 	 */
 	private void registerBundle(LoadedLibrary lib) throws UnresolvedDependenciesException {
 		LoadedLibraryCache[] resolvedDeps = resolveDependencies(lib);
-		
+
 		// create bundle
 		BundleClassManager bcl = new BundleClassManager(platformLoader);
-		
-		// create LibraryClassLoaders 
+
+		// create LibraryClassLoaders
 		LibraryClassLoader[] classLoaderDeps = new LibraryClassLoader[resolvedDeps.length];
 		for (int i = 0; i < resolvedDeps.length; i++) {
 			resolvedDeps[i].registerBundle(bcl);
-			classLoaderDeps[i] = new LibraryClassLoader(resolvedDeps[i],bcl);
+			classLoaderDeps[i] = new LibraryClassLoader(resolvedDeps[i], bcl);
 		}
 
 		// init bundle
@@ -165,13 +157,12 @@ public class L2pClassManager {
 		}
 		htBcls.put(lib.getLibraryIdentifier().getVersion(), bcl);
 	}
-	
+
 	/**
 	 * unregister a bundle
 	 * 
-	 * @param libraryName 
-	 * @param libraryVersion 
-	 * 
+	 * @param libraryName
+	 * @param libraryVersion
 	 * @throws NotRegisteredException
 	 */
 	private void unregisterBundle(String libraryName, String libraryVersion) throws NotRegisteredException {
@@ -216,19 +207,13 @@ public class L2pClassManager {
 		LoadedLibrary[] libraries = new LoadedLibrary[deps.length + 1];
 		libraries[0] = library;
 		for (int i = 0; i < deps.length; i++) {
-			LoadedLibraryCache cache = getRegisteredLoadedLibrary(libraries[i]);
-			if (cache != null)
-				libraries[i + 1] = getRegisteredLoadedLibrary(libraries[i]).getLoadedLibrary();
-		
-			if (libraries[i + 1] == null) {
-				try {
-					libraries[i + 1] = findLoadedLibrary(deps[i]);
-				} catch (LibraryNotFoundException e) {
-					throw new UnresolvedDependenciesException(library.getIdentifier().toString(), deps[i]);
-				}
+			try {
+				libraries[i + 1] = findLoadedLibrary(deps[i]);
+			} catch (LibraryNotFoundException e) {
+				throw new UnresolvedDependenciesException(library.getIdentifier().toString(), deps[i]);
 			}
-		}	
-		
+		}
+
 		// ok, now i'm sure that all dependencies can be resolved!
 		LoadedLibraryCache[] result = new LoadedLibraryCache[libraries.length];
 		for (int i = 0; i < libraries.length; i++) {
@@ -244,15 +229,13 @@ public class L2pClassManager {
 	 * get the newest loaded library for the given (package) name
 	 * 
 	 * @param name
-	 * 
 	 * @return a library representation for the given package name
-	 * 
 	 * @throws LibraryNotFoundException library could not be found in the repositories
 	 * @throws UnresolvedDependenciesException problems resolving the dependency information stated in the libraries
 	 *             manifest
 	 */
-	private LoadedLibrary findLoadedLibrary(String name)
-			throws LibraryNotFoundException, UnresolvedDependenciesException {
+	private LoadedLibrary findLoadedLibrary(String name) throws LibraryNotFoundException,
+			UnresolvedDependenciesException {
 		// TODO versions of services - allow missing version info in dependency!
 		LoadedLibrary result = null;
 		StringBuilder sb = new StringBuilder();
@@ -288,9 +271,7 @@ public class L2pClassManager {
 	 * find a loaded library matching the given dependency
 	 * 
 	 * @param dep
-	 * 
 	 * @return a library representation fitting the given dependency
-	 * 
 	 * @throws LibraryNotFoundException
 	 */
 	private LoadedLibrary findLoadedLibrary(LibraryDependency dep) throws LibraryNotFoundException {
@@ -310,9 +291,10 @@ public class L2pClassManager {
 
 		return result;
 	}
-	
+
 	/**
 	 * get a library class loader for the given loaded library
+	 * 
 	 * @param lib
 	 * @return the library class loader corresponding to the given library
 	 */
@@ -333,7 +315,7 @@ public class L2pClassManager {
 		else
 			return htLoaders.get(iden.getVersion());
 	}
-	
+
 	/**
 	 * register a loaded library as a LibraryClassLoader
 	 * 
@@ -360,8 +342,7 @@ public class L2pClassManager {
 	 * @throws NotRegisteredException
 	 */
 	private void removeLoadedLibrary(LoadedLibrary l) throws NotRegisteredException {
-		Hashtable<LibraryVersion, LoadedLibraryCache> htVersions = registeredLibraries
-				.get(l.getIdentifier().getName());
+		Hashtable<LibraryVersion, LoadedLibraryCache> htVersions = registeredLibraries.get(l.getIdentifier().getName());
 		if (htVersions == null)
 			throw new NotRegisteredException(l.getIdentifier());
 
@@ -376,9 +357,7 @@ public class L2pClassManager {
 	 * a service has to be provided in a bundle of the package containing the service
 	 * 
 	 * @param serviceClassName
-	 * 
 	 * @return class definition of the requested service
-	 * 
 	 * @throws ClassLoaderException
 	 */
 	public Class<?> getServiceClass(String serviceClassName) throws ClassLoaderException {
@@ -414,8 +393,8 @@ public class L2pClassManager {
 		try {
 			return bcl.loadClass(serviceClassName);
 		} catch (ClassNotFoundException e) {
-			throw new LibraryNotFoundException(
-					"The library for " + serviceClassName + " could be loaded, but the class is not available!", e);
+			throw new LibraryNotFoundException("The library for " + serviceClassName
+					+ " could be loaded, but the class is not available!", e);
 		}
 	}
 
@@ -426,9 +405,7 @@ public class L2pClassManager {
 	 * 
 	 * @param serviceClassName
 	 * @param version
-	 * 
 	 * @return a class definition of the requested service
-	 * 
 	 * @throws ClassLoaderException
 	 */
 	public Class<?> getServiceClass(String serviceClassName, LibraryVersion version) throws ClassLoaderException {
@@ -457,8 +434,8 @@ public class L2pClassManager {
 		try {
 			return bcl.loadClass(serviceClassName);
 		} catch (ClassNotFoundException e) {
-			throw new LibraryNotFoundException(
-					"The library for " + serviceClassName + " could be loaded, but the class is not available!", e);
+			throw new LibraryNotFoundException("The library for " + serviceClassName
+					+ " could be loaded, but the class is not available!", e);
 		}
 	}
 
@@ -469,14 +446,12 @@ public class L2pClassManager {
 	 * 
 	 * @param serviceClassName name of the requested service
 	 * @param version string specifying the requested version of the service, resp. its library
-	 * 
 	 * @return class definition of the requested service
-	 * 
 	 * @throws IllegalArgumentException
 	 * @throws ClassLoaderException
 	 */
-	public Class<?> getServiceClass(String serviceClassName, String version)
-			throws IllegalArgumentException, ClassLoaderException {
+	public Class<?> getServiceClass(String serviceClassName, String version) throws IllegalArgumentException,
+			ClassLoaderException {
 		return getServiceClass(serviceClassName, new LibraryVersion(version));
 	}
 

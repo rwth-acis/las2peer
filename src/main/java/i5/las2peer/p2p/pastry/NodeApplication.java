@@ -1,15 +1,10 @@
 package i5.las2peer.p2p.pastry;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.logging.Level;
-
 import i5.las2peer.communication.MessageException;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.p2p.AgentNotKnownException;
+import i5.las2peer.p2p.NodeException;
 import i5.las2peer.p2p.NodeInformation;
 import i5.las2peer.p2p.NodeNotFoundException;
 import i5.las2peer.p2p.PastryNodeImpl;
@@ -19,6 +14,13 @@ import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.MessageReceiver;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.WaiterThread;
+
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.logging.Level;
+
 import rice.p2p.commonapi.Application;
 import rice.p2p.commonapi.Endpoint;
 import rice.p2p.commonapi.Id;
@@ -60,6 +62,8 @@ public class NodeApplication implements Application, ScribeMultiClient {
 
 	private Hashtable<Long, Topic> htAgentTopics = new Hashtable<Long, Topic>();
 
+	private Hashtable<Long, Topic> htTopics = new Hashtable<Long, Topic>();
+
 	private Hashtable<Long, HashSet<NodeHandle>> htPendingAgentSearches = new Hashtable<Long, HashSet<NodeHandle>>();
 
 	private Hashtable<Long, WaiterThread<Message>> appMessageWaiters = new Hashtable<Long, WaiterThread<Message>>();
@@ -100,8 +104,8 @@ public class NodeApplication implements Application, ScribeMultiClient {
 
 			scribeClient.subscribe(agentTopic, this,
 					new AgentJoinedContent(getLocalHandle(), receiver.getResponsibleForAgentId()), root);
-			l2pNode.observerNotice(Event.PASTRY_TOPIC_SUBSCRIPTION_SUCCESS, this.l2pNode.getNodeId(), receiver,
-					"" + agentTopic.getId());
+			l2pNode.observerNotice(Event.PASTRY_TOPIC_SUBSCRIPTION_SUCCESS, this.l2pNode.getNodeId(), receiver, ""
+					+ agentTopic.getId());
 			/*
 			System.out.println( "children of agent topic: " + scribeClient.numChildren(getAgentTopic(receiver)) );
 			for ( NodeHandle nh: scribeClient.getChildrenOfTopic(getAgentTopic ( receiver ))) 
@@ -131,11 +135,42 @@ public class NodeApplication implements Application, ScribeMultiClient {
 
 	}
 
+	public void registerTopic(long id) {
+		synchronized (htTopics) {
+			if (htTopics.get(id) != null)
+				return;
+
+			Topic topic = getTopic(id);
+
+			htTopics.put(id, topic);
+
+			logger.info("\t--> registering topic " + topic.getId() + ")");
+
+			scribeClient.subscribe(topic, this);
+			l2pNode.observerNotice(Event.PASTRY_TOPIC_SUBSCRIPTION_SUCCESS, this.l2pNode.getNodeId(), null,
+					"" + topic.getId());
+		}
+	}
+
+	public void unregisterTopic(long id) throws NodeException {
+		synchronized (htTopics) {
+
+			Topic topic = htTopics.get(id);
+
+			if (topic == null)
+				throw new NodeException("topic not found");
+
+			scribeClient.unsubscribe(topic, this);
+			htTopics.remove(id);
+
+		}
+
+	}
+
 	/**
 	 * get information about a foreign node
 	 * 
 	 * @param nodeHandle
-	 * 
 	 * @return node information
 	 * @throws NodeNotFoundException
 	 */
@@ -200,8 +235,8 @@ public class NodeApplication implements Application, ScribeMultiClient {
 					(Long) null, "");
 
 			// just store the sending node handle
-			HashSet<NodeHandle> pendingCollection = htPendingAgentSearches
-					.get(((SearchAnswerMessage) pastMessage).getRequestMessageId());
+			HashSet<NodeHandle> pendingCollection = htPendingAgentSearches.get(((SearchAnswerMessage) pastMessage)
+					.getRequestMessageId());
 
 			if (pendingCollection != null)
 				pendingCollection.add(((SearchAnswerMessage) pastMessage).getSendingNode());
@@ -252,7 +287,8 @@ public class NodeApplication implements Application, ScribeMultiClient {
 
 	/**
 	 * Called to route a message to the id
-	 * @param id 
+	 * 
+	 * @param id
 	 */
 	public void routeMyMsg(Id id) {
 		logger.info("\t --> " + this + " sending to " + id);
@@ -262,7 +298,8 @@ public class NodeApplication implements Application, ScribeMultiClient {
 
 	/**
 	 * Called to directly send a message to the nh
-	 * @param nh 
+	 * 
+	 * @param nh
 	 */
 	public void routeMyMsgDirect(NodeHandle nh) {
 		logger.info("\t --> " + this + " sending direct to " + nh);
@@ -276,14 +313,13 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	 * 
 	 * @param m
 	 * @param to
-	 * 
 	 * @throws MalformedXMLException
 	 * @throws L2pSecurityException
 	 * @throws AgentNotKnownException
 	 * @throws MessageException
 	 */
-	public void sendMessage(MessageEnvelope m, NodeHandle to)
-			throws MalformedXMLException, L2pSecurityException, AgentNotKnownException, MessageException {
+	public void sendMessage(MessageEnvelope m, NodeHandle to) throws MalformedXMLException, L2pSecurityException,
+			AgentNotKnownException, MessageException {
 		l2pNode.observerNotice(Event.MESSAGE_SENDING, l2pNode.getPastryNode(), m.getContainedMessage().getSender(), to,
 				m.getContainedMessage().getRecipient(), "message: " + m);
 
@@ -311,8 +347,13 @@ public class NodeApplication implements Application, ScribeMultiClient {
 
 		System.out.println(" --> sending Message " + l2pMessage.getId());
 
-		scribeClient.publish(getAgentTopic(l2pMessage.getRecipientId()), content);
-		// scribeClient.anycast( getAgentTopic ( l2pMessage.getRecipientId() ), content );
+		if (!l2pMessage.isTopic()) {
+			scribeClient.publish(getAgentTopic(l2pMessage.getRecipientId()), content);
+			// scribeClient.anycast( getAgentTopic ( l2pMessage.getRecipientId() ), content );
+		} else {
+			scribeClient.publish(getTopic(l2pMessage.getTopicId()), content);
+		}
+
 	}
 
 	@Override
@@ -339,7 +380,6 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	 * 
 	 * @param agentId
 	 * @param expectedAnswers
-	 * 
 	 * @return a collections of node handles where the requested agent is registered to
 	 */
 	public Collection<NodeHandle> searchAgent(long agentId, int expectedAnswers) {
@@ -354,8 +394,8 @@ public class NodeApplication implements Application, ScribeMultiClient {
 		for (NodeHandle nh : scribeClient.getChildrenOfTopic(getAgentTopic(agentId)))
 			System.out.println("Child in search: " + nh);
 
-		l2pNode.observerNotice(Event.AGENT_SEARCH_STARTED, this.l2pNode.getNodeId(), agentId, null, (Long) null,
-				"(" + expectedAnswers + ") - topic: " + getAgentTopic(agentId));
+		l2pNode.observerNotice(Event.AGENT_SEARCH_STARTED, this.l2pNode.getNodeId(), agentId, null, (Long) null, "("
+				+ expectedAnswers + ") - topic: " + getAgentTopic(agentId));
 
 		SearchAgentContent search = new SearchAgentContent(getLocalHandle(), agentId);
 		HashSet<NodeHandle> resultSet = new HashSet<NodeHandle>();
@@ -378,8 +418,8 @@ public class NodeApplication implements Application, ScribeMultiClient {
 
 		htPendingAgentSearches.remove(search.getRandomId());
 
-		l2pNode.observerNotice(Event.AGENT_SEARCH_FINISHED, this.l2pNode.getNodeId(), agentId, null, (Long) null,
-				"" + resultSet.size());
+		l2pNode.observerNotice(Event.AGENT_SEARCH_FINISHED, this.l2pNode.getNodeId(), agentId, null, (Long) null, ""
+				+ resultSet.size());
 
 		return resultSet;
 	}
@@ -397,7 +437,6 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	 * look for a running/registered version of an agent in the p2p net
 	 * 
 	 * @param agentId
-	 * 
 	 * @return a collection of node handles running the requested agent
 	 */
 	public Collection<NodeHandle> searchAgent(long agentId) {
@@ -414,10 +453,10 @@ public class NodeApplication implements Application, ScribeMultiClient {
 					// found the agent
 					// send message to searching node
 
-					endpoint.route(null,
-							new SearchAnswerMessage(((SearchAgentContent) content).getOrigin(),
-									this.l2pNode.getPastryNode().getLocalNodeHandle(),
-									((SearchAgentContent) content).getRandomId()),
+					endpoint.route(
+							null,
+							new SearchAnswerMessage(((SearchAgentContent) content).getOrigin(), this.l2pNode
+									.getPastryNode().getLocalNodeHandle(), ((SearchAgentContent) content).getRandomId()),
 							((SearchAgentContent) content).getOrigin());
 					// send return message
 
@@ -428,8 +467,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 
 			logger.severe("\t\t<--- subscribed but agent not found!!!!");
 		} else if (content instanceof AgentJoinedContent) {
-			logger.info(
-					"\t\t<--- got notification about agent joining: " + ((AgentJoinedContent) content).getAgentId());
+			logger.info("\t\t<--- got notification about agent joining: " + ((AgentJoinedContent) content).getAgentId());
 		} else if (content instanceof BroadcastMessageContent) {
 			final BroadcastMessageContent c = (BroadcastMessageContent) content;
 
@@ -466,7 +504,8 @@ public class NodeApplication implements Application, ScribeMultiClient {
 
 	@Override
 	public void subscribeFailed(Collection<Topic> topics) {
-		// System.out.println(ColoredOutput.colorize( "topic subscription failed for collection of topics!", ForegroundColor.Yellow));
+		// System.out.println(ColoredOutput.colorize( "topic subscription failed for collection of topics!",
+		// ForegroundColor.Yellow));
 		for (Topic t : topics)
 			subscribeFailed(t);
 	}
@@ -480,7 +519,8 @@ public class NodeApplication implements Application, ScribeMultiClient {
 			// System.out.println( "\tchildren: " + scribeClient.getChildren(t).length );
 		}
 
-		// System.out.println(ColoredOutput.colorize( "\t\t<--sucessfully subscribed to topic collection", ForegroundColor.Yellow));
+		// System.out.println(ColoredOutput.colorize( "\t\t<--sucessfully subscribed to topic collection",
+		// ForegroundColor.Yellow));
 		// for (Topic t: topics) {
 		// System.out.println(ColoredOutput.colorize( "\t\t\t" + t.getId(), ForegroundColor.Yellow));
 		// }
@@ -490,7 +530,6 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	 * generate an id string for topic corresponding to a l2p agent
 	 * 
 	 * @param agent
-	 * 
 	 * @return a topic identifier for the agent to subscribe to
 	 */
 	public static String getAgentTopicId(Agent agent) {
@@ -501,7 +540,6 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	 * generate an id string for topic corresponding to a l2p agent
 	 * 
 	 * @param id
-	 * 
 	 * @return a topic identifier for the agent to subscribe to
 	 */
 	public static String getAgentTopicId(long id) {
@@ -512,7 +550,6 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	 * create a Scribe topic for the given message receiver (the underlying agent resp.)
 	 * 
 	 * @param receiver
-	 * 
 	 * @return the topic corresponding to the given message receiver
 	 */
 	private Topic getAgentTopic(MessageReceiver receiver) {
@@ -527,6 +564,16 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	 */
 	private Topic getAgentTopic(long agentId) {
 		return new Topic(new PastryIdFactory(l2pNode.getPastryNode().getEnvironment()), getAgentTopicId(agentId));
+	}
+
+	/**
+	 * create a Scribe topic for the given topic
+	 * 
+	 * @param topicId
+	 * @return
+	 */
+	private Topic getTopic(long topicId) {
+		return new Topic(new PastryIdFactory(l2pNode.getPastryNode().getEnvironment()), topicId + "");
 	}
 
 	@Override

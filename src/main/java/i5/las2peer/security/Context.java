@@ -1,15 +1,22 @@
 package i5.las2peer.security;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Hashtable;
+import java.util.List;
 
+import i5.las2peer.api.StorageCollisionHandler;
+import i5.las2peer.api.StorageEnvelopeHandler;
+import i5.las2peer.api.StorageExceptionHandler;
+import i5.las2peer.api.StorageStoreResultHandler;
+import i5.las2peer.api.exceptions.ArtifactNotFoundException;
+import i5.las2peer.api.exceptions.StorageException;
 import i5.las2peer.execution.L2pThread;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.p2p.AgentNotKnownException;
-import i5.las2peer.p2p.ArtifactNotFoundException;
 import i5.las2peer.p2p.Node;
-import i5.las2peer.p2p.StorageException;
+import i5.las2peer.persistency.ContextStorageInterface;
 import i5.las2peer.persistency.DecodingFailedException;
 import i5.las2peer.persistency.Envelope;
 import i5.las2peer.tools.CryptoException;
@@ -18,16 +25,12 @@ import i5.las2peer.tools.SerializationException;
 /**
  * Each {@link i5.las2peer.execution.L2pThread} is bound to a context, which is mainly determined by the executing
  * agent.
- * 
- * 
- *
  */
-public class Context implements AgentStorage {
+public class Context implements AgentStorage, ContextStorageInterface {
 
 	private Agent agent;
-	private Object remoteNodeReference = null;
 
-	private Hashtable<Long, GroupAgent> groupAgents = new Hashtable<Long, GroupAgent>();
+	private Hashtable<Long, GroupAgent> groupAgents = new Hashtable<>();
 
 	private Node localNode;
 
@@ -38,7 +41,6 @@ public class Context implements AgentStorage {
 	 * 
 	 * @param mainAgent
 	 * @param localNode
-	 * 
 	 * @throws L2pSecurityException
 	 */
 	public Context(Node localNode, Agent mainAgent) throws L2pSecurityException {
@@ -47,21 +49,6 @@ public class Context implements AgentStorage {
 		this.localNode = localNode;
 
 		touch();
-	}
-
-	/**
-	 * Creates a new (remote) context.
-	 * 
-	 * @param localNode
-	 * @param mainAgent
-	 * @param remoteNodeReference
-	 * 
-	 * @throws L2pSecurityException
-	 */
-	// TODO is this used anywhere?
-	public Context(Node localNode, Agent mainAgent, Object remoteNodeReference) throws L2pSecurityException {
-		this(localNode, mainAgent);
-		this.remoteNodeReference = remoteNodeReference;
 	}
 
 	/**
@@ -86,20 +73,20 @@ public class Context implements AgentStorage {
 	 * Tries to open the given id for this context.
 	 * 
 	 * @param groupId
-	 * 
 	 * @return the unlocked GroupAgent of the given id
-	 * 
 	 * @throws AgentNotKnownException
 	 * @throws L2pSecurityException
 	 */
 	public GroupAgent requestGroupAgent(long groupId) throws AgentNotKnownException, L2pSecurityException {
-		if (groupAgents.containsKey(groupId))
+		if (groupAgents.containsKey(groupId)) {
 			return groupAgents.get(groupId);
+		}
 
 		Agent agent = localNode.getAgent(groupId);
 
-		if (!(agent instanceof GroupAgent))
+		if (!(agent instanceof GroupAgent)) {
 			throw new AgentNotKnownException("Agent " + groupId + " is not a group agent!");
+		}
 
 		GroupAgent group = (GroupAgent) agent;
 
@@ -131,7 +118,7 @@ public class Context implements AgentStorage {
 
 		return group;
 	}
-	
+
 	/**
 	 * returns an unlocked instance of the requested Agent
 	 * 
@@ -143,77 +130,60 @@ public class Context implements AgentStorage {
 	public Agent requestAgent(long agentId) throws AgentNotKnownException, L2pSecurityException {
 		if (agentId == getMainAgent().getId()) {
 			return getMainAgent();
-		}
-		else {
+		} else {
 			return requestGroupAgent(agentId);
 		}
 	}
 
 	/**
-	 * Gets a stored envelope from the p2p network.
+	 * @deprecated Use {@link #fetchEnvelope(String)} instead.
+	 * 
+	 *             Gets a stored envelope from the p2p network.
 	 * 
 	 * @param id
-	 * 
 	 * @return envelope containing the requested data
-	 * 
 	 * @throws ArtifactNotFoundException
 	 * @throws StorageException
 	 */
+	@Deprecated
 	public Envelope getStoredObject(long id) throws ArtifactNotFoundException, StorageException {
-		return localNode.fetchArtifact(id);
+		return fetchEnvelope(Long.toString(id));
 	}
 
 	/**
-	 * Gets a stored envelope from the p2p network. The envelope will be identified by the stored class and an arbitrary
-	 * identifier selected by the using service(s).
+	 * @deprecated Use {@link #fetchEnvelope(String)} instead
+	 * 
+	 *             Gets a stored envelope from the p2p network. The envelope will be identified by the stored class and
+	 *             an arbitrary identifier selected by the using service(s).
 	 * 
 	 * @param cls
 	 * @param identifier
-	 * 
 	 * @return envelope containing the requested data
-	 * 
 	 * @throws ArtifactNotFoundException
 	 * @throws StorageException
 	 */
+	@Deprecated
 	public Envelope getStoredObject(Class<?> cls, String identifier)
 			throws ArtifactNotFoundException, StorageException {
-		long id = Envelope.getClassEnvelopeId(cls, identifier);
-		return getStoredObject(id);
+		return fetchEnvelope(cls.getCanonicalName() + "-" + identifier);
 	}
 
 	/**
-	 * Gets a stored envelope from the p2p network. The envelope will be identified by the stored class and an arbitrary
-	 * identifier selected by the using service(s).
+	 * @deprecated Use {@link #fetchEnvelope(String)} instead
+	 * 
+	 *             Gets a stored envelope from the p2p network. The envelope will be identified by the stored class and
+	 *             an arbitrary identifier selected by the using service(s).
 	 * 
 	 * @param className
 	 * @param identifier
-	 * 
 	 * @return envelope containing the requested data
-	 * 
 	 * @throws ArtifactNotFoundException
 	 * @throws StorageException
 	 */
+	@Deprecated
 	public Envelope getStoredObject(String className, String identifier)
 			throws ArtifactNotFoundException, StorageException {
-		return getStoredObject(Envelope.getClassEnvelopeId(className, identifier));
-	}
-
-	/**
-	 * Returns the reference object to the executing node.
-	 * 
-	 * @return the (possibly remote) node trying to execute something at this (local) node
-	 */
-	public Object getNodeReference() {
-		return remoteNodeReference;
-	}
-
-	/**
-	 * Refers this context to a local executing agent or a remote one?
-	 * 
-	 * @return true, if the request is started locally and not via the P2P network
-	 */
-	public boolean isLocal() {
-		return remoteNodeReference == null;
+		return fetchEnvelope(className + "-" + identifier);
 	}
 
 	/**
@@ -246,18 +216,19 @@ public class Context implements AgentStorage {
 	 * for opening a received {@link i5.las2peer.communication.Message}.
 	 * 
 	 * @param id
-	 * 
 	 * @return get the agent of the given id
-	 * 
 	 * @throws AgentNotKnownException
 	 */
+	@Override
 	public Agent getAgent(long id) throws AgentNotKnownException {
-		if (id == agent.getId())
+		if (id == agent.getId()) {
 			return agent;
+		}
 
 		Agent result;
-		if ((result = groupAgents.get(id)) != null)
+		if ((result = groupAgents.get(id)) != null) {
 			return result;
+		}
 
 		return localNode.getAgent(id);
 	}
@@ -271,16 +242,10 @@ public class Context implements AgentStorage {
 	 * Gets the current las2peer context.
 	 * 
 	 * @throws IllegalStateException called not in a las2peer execution thread
-	 * 
 	 * @return the current context
 	 */
 	public static Context getCurrent() {
-		Thread t = Thread.currentThread();
-
-		if (!(t instanceof L2pThread))
-			throw new IllegalStateException("Not executed in a L2pThread environment!");
-
-		return ((L2pThread) t).getContext();
+		return L2pThread.getCurrent().getContext();
 	}
 
 	/**
@@ -366,67 +331,33 @@ public class Context implements AgentStorage {
 	}
 
 	/**
-	 * Opens the given envelope using the agents of this context. Prefers agents that signed the Envelope.
+	 * @deprecated Use {@link i5.las2peer.persistency.Envelope#getContent()}
+	 * 
+	 *             This method is stub and will be removed soon.
 	 * 
 	 * @param envelope the Envelope to unlock
 	 * @throws DecodingFailedException
 	 * @throws L2pSecurityException the MainAgent is not able to open the Envelope
 	 */
+	@Deprecated
 	public void openEnvelope(Envelope envelope) throws DecodingFailedException, L2pSecurityException {
-		if (agent.isLocked())
-			throw new AgentLockedException();
-		
-		// try to unlock with signing agent
-		for (long groupId : envelope.getSigningAgents()) {
-			Agent agent = null;
-			try {
-				agent = requestAgent(groupId);
-			} catch (Exception e1) {
-				// do nothing
-			}
-
-			if (agent != null) {
-				envelope.open(agent);
-				return;
-			}
-		}
-		
-		
-		// return agent with read only access
-		try {
-			envelope.open(agent);
-		} catch (L2pSecurityException e) {
-			for (long groupId : envelope.getReaderGroups()) {
-				GroupAgent group = null;
-				try {
-					group = requestGroupAgent(groupId);
-				} catch (Exception e1) {
-					// do nothing
-				}
-
-				if (group != null) {
-					envelope.open(group);
-					return;
-				}
-			}
-			throw new L2pSecurityException("Envelope cannot be opened!", e);
-		}
+		// method stub
 	}
 
 	/**
 	 * Tries to unlock the private key of the main agent.
 	 * 
 	 * @param passphrase
-	 * 
 	 * @throws L2pSecurityException
 	 */
 	public void unlockMainAgent(String passphrase) throws L2pSecurityException {
-		if (agent instanceof PassphraseAgent)
+		if (agent instanceof PassphraseAgent) {
 			((PassphraseAgent) agent).unlockPrivateKey(passphrase);
-		else
+		} else {
 			throw new L2pSecurityException("this is not passphrase protected agent!");
+		}
 	}
-	
+
 	/**
 	 * returns true if the main agent is unlocked and can unlock the given agent
 	 * 
@@ -436,17 +367,116 @@ public class Context implements AgentStorage {
 	 * @throws AgentLockedException main agent is locked
 	 */
 	public boolean hasAccess(long agentId) throws AgentNotKnownException, AgentLockedException {
-		if (getMainAgent().isLocked())
+		if (getMainAgent().isLocked()) {
 			throw new AgentLockedException();
-		
-		if (agentId == getMainAgent().getId()) return true;
-		
+		}
+
+		if (agentId == getMainAgent().getId()) {
+			return true;
+		}
+
 		Agent a = getAgent(agentId);
-		
-		if (a instanceof GroupAgent)
-			return ((GroupAgent)a).isMemberRecursive(getMainAgent());
-		
+
+		if (a instanceof GroupAgent) {
+			return ((GroupAgent) a).isMemberRecursive(getMainAgent());
+		}
+
 		return false;
+	}
+
+	@Override
+	public void storeEnvelope(Envelope envelope, Agent author) throws StorageException {
+		localNode.storeEnvelope(envelope, author);
+	}
+
+	@Override
+	public Envelope fetchEnvelope(String identifier) throws StorageException {
+		return localNode.fetchEnvelope(identifier);
+	}
+
+	@Override
+	public Envelope createEnvelope(String identifier, Serializable content, Agent... reader)
+			throws IllegalArgumentException, SerializationException, CryptoException {
+		return localNode.createEnvelope(identifier, content, reader);
+	}
+
+	@Override
+	public Envelope createEnvelope(String identifier, Serializable content, List<Agent> readers)
+			throws IllegalArgumentException, SerializationException, CryptoException {
+		return localNode.createEnvelope(identifier, content, readers);
+	}
+
+	@Override
+	public Envelope createEnvelope(Envelope previousVersion, Serializable content, Agent... reader)
+			throws IllegalArgumentException, SerializationException, CryptoException {
+		return localNode.createEnvelope(previousVersion, content, reader);
+	}
+
+	@Override
+	public Envelope createEnvelope(Envelope previousVersion, Serializable content, List<Agent> readers)
+			throws IllegalArgumentException, SerializationException, CryptoException {
+		return localNode.createEnvelope(previousVersion, content, readers);
+	}
+
+	@Override
+	public Envelope createUnencryptedEnvelope(String identifier, Serializable content)
+			throws IllegalArgumentException, SerializationException, CryptoException {
+		return localNode.createUnencryptedEnvelope(identifier, content);
+	}
+
+	@Override
+	public Envelope createUnencryptedEnvelope(Envelope previousVersion, Serializable content)
+			throws IllegalArgumentException, SerializationException, CryptoException {
+		return localNode.createUnencryptedEnvelope(previousVersion, content);
+	}
+
+	@Override
+	public void storeEnvelope(Envelope envelope, Agent author, long timeoutMs) throws StorageException {
+		localNode.storeEnvelope(envelope, author, timeoutMs);
+	}
+
+	@Override
+	public void storeEnvelopeAsync(Envelope envelope, Agent author, StorageStoreResultHandler resultHandler,
+			StorageCollisionHandler collisionHandler, StorageExceptionHandler exceptionHandler) {
+		localNode.storeEnvelopeAsync(envelope, author, resultHandler, collisionHandler, exceptionHandler);
+	}
+
+	@Override
+	public Envelope fetchEnvelope(String identifier, long timeoutMs) throws StorageException {
+		return localNode.fetchEnvelope(identifier, timeoutMs);
+	}
+
+	@Override
+	public void fetchEnvelopeAsync(String identifier, StorageEnvelopeHandler envelopeHandler,
+			StorageExceptionHandler exceptionHandler) {
+		localNode.fetchEnvelopeAsync(identifier, envelopeHandler, exceptionHandler);
+	}
+
+	@Override
+	public Envelope createEnvelope(String identifier, Serializable content)
+			throws IllegalArgumentException, SerializationException, CryptoException {
+		return localNode.createEnvelope(identifier, content, getMainAgent());
+	}
+
+	@Override
+	public Envelope createEnvelope(Envelope previousVersion, Serializable content)
+			throws IllegalArgumentException, SerializationException, CryptoException {
+		return localNode.createEnvelope(previousVersion, content, getMainAgent());
+	}
+
+	@Override
+	public void storeEnvelope(Envelope envelope) throws StorageException {
+		localNode.storeEnvelope(envelope, getMainAgent());
+	}
+
+	@Override
+	public void storeEnvelope(Envelope envelope, long timeoutMs) throws StorageException {
+		localNode.storeEnvelope(envelope, getMainAgent(), timeoutMs);
+	}
+
+	@Override
+	public void removeEnvelope(String identifier) throws ArtifactNotFoundException, StorageException {
+		localNode.removeEnvelope(identifier);
 	}
 
 }

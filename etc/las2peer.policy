@@ -22,6 +22,7 @@ grant {
     // las2peer file read permissions
     permission java.io.FilePermission "etc", "read";
     permission java.io.FilePermission "etc${/}-", "read";
+    permission java.io.FilePermission "etc/startup${/}-", "read, write";
     permission java.io.FilePermission "config", "read";
     permission java.io.FilePermission "config${/}-", "read";
     permission java.io.FilePermission "properties", "read";

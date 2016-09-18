@@ -64,7 +64,6 @@ public abstract class LocalServiceTestCase {
 	 * service to test.
 	 * 
 	 * @return the service agent either created or loaded
-	 * 
 	 * @throws CryptoException
 	 * @throws L2pSecurityException
 	 * @throws AgentException
@@ -77,28 +76,32 @@ public abstract class LocalServiceTestCase {
 			agentPassphrase = (String) cls.getField("AGENT_PASSPHRASE").get(null);
 
 			File test = new File(xml);
-			if (test.exists() && test.isFile())
+			if (test.exists() && test.isFile()) {
 				agent = ServiceAgent.createFromXml(FileContentReader.read(xml));
-			else {
+			} else {
 				InputStream is = getClass().getResourceAsStream(xml);
-				if (is == null)
+				if (is == null) {
 					throw new AgentException("Neither file nor classpath resource wuth name " + xml + " exists!");
+				}
 				agent = ServiceAgent.createFromXml(FileContentReader.read(getClass().getResourceAsStream(xml)));
 			}
 
-			if (agent.getServiceNameVersion().getName().equals(getServiceClass().getName()))
+			if (agent.getServiceNameVersion().getName().equals(getServiceClass().getName())) {
 				return agent;
-			else
+			} else {
 				throw new AgentException("This agent is not responsible for the testclass " + getServiceClass()
 						+ " but for " + agent.getServiceNameVersion().getName());
+			}
 		} catch (NoSuchFieldException e) {
 			agentPassphrase = SimpleTools.createRandomString(10);
-			return ServiceAgent.createServiceAgent(new ServiceNameVersion(getServiceClass().getName(),getServiceVersion()), agentPassphrase);
+			return ServiceAgent.createServiceAgent(
+					new ServiceNameVersion(getServiceClass().getName(), getServiceVersion()), agentPassphrase);
 		} catch (Exception e) {
-			if (e instanceof AgentException)
+			if (e instanceof AgentException) {
 				throw (AgentException) e;
-			else
+			} else {
 				throw new AgentException("Unable to load Agent XML file", e);
+			}
 		}
 	}
 
@@ -114,7 +117,7 @@ public abstract class LocalServiceTestCase {
 		agent.unlockPrivateKey(agentPassphrase);
 
 		localNode = LocalNode.newNode();
-		
+
 		UserAgent eve = MockAgentFactory.getEve();
 		eve.unlockPrivateKey("evespass");
 		localNode.storeAgent(eve);
@@ -184,7 +187,7 @@ public abstract class LocalServiceTestCase {
 	 * @return the service class to be launched and tested
 	 */
 	public abstract Class<? extends Service> getServiceClass();
-	
+
 	/**
 	 * define a service version to test, this service will be started in a {@link i5.las2peer.p2p.LocalNode} before
 	 * starting the actual test
@@ -199,9 +202,7 @@ public abstract class LocalServiceTestCase {
 	 * @param executing
 	 * @param method
 	 * @param parameters
-	 * 
 	 * @return result of the invocation
-	 * 
 	 * @throws L2pServiceException
 	 * @throws L2pSecurityException
 	 * @throws AgentNotKnownException
@@ -209,13 +210,7 @@ public abstract class LocalServiceTestCase {
 	 */
 	public Serializable invoke(Agent executing, String method, Serializable... parameters)
 			throws L2pServiceException, L2pSecurityException, AgentNotKnownException, InterruptedException {
-		return getNode().invokeLocally(executing, getMyAgent().getServiceNameVersion(), method, parameters);
-	}
-	
-	@Deprecated
-	public Serializable invoke(long executing, String method, Serializable... parameters)
-			throws L2pServiceException, L2pSecurityException, AgentNotKnownException, InterruptedException {
-		return getNode().invokeLocally(executing, getMyAgent().getServiceNameVersion(), method, parameters);
+		return getNode().invokeLocally(executing, getMyAgent(), method, parameters);
 	}
 
 	/**
@@ -245,10 +240,12 @@ public abstract class LocalServiceTestCase {
 					System.out.println("loaded " + xml + " as agent");
 				} else if (content.contains("<las2peer:envelope")) {
 					Envelope envelope = Envelope.createFromXml(content);
+					// TODO fix upload Envelope from startup directory
 					localNode.storeArtifact(envelope);
 					System.out.println("loaded " + xml + " as envelope");
-				} else
+				} else {
 					System.out.println("Don't known what to do with contents of " + xml);
+				}
 			} catch (Exception e) {
 				System.out.println("File " + xml + " caused an Exception - ignoring");
 				e.printStackTrace();

@@ -4,8 +4,8 @@
 	
 	<property name="ivy.organisation" value="i5" />
 	<property name="ivy.module" value="las2peer" />
-	<property name="ivy.revision" value="0.5" />
-	<property name="ivy.build.number" value="7" />
+	<property name="ivy.revision" value="0.6" />
+	<property name="ivy.build.number" value="0" />
 	<property name="ivy.deliver.revision" value="${ivy.revision}" />
 	<property name="ivy.pom.version" value="${ivy.revision}" />
 	
@@ -55,6 +55,11 @@
 		</fileset>
 	</path>
 	
+	<taskdef resource="net/sf/antcontrib/antcontrib.properties">
+		<classpath>
+			<pathelement location="${ivy.jar.dir}/ant-contrib.jar"/>
+		</classpath>
+	</taskdef>
 	
 	<!-- Download Dependencies (IVY) -->
 	
@@ -362,7 +367,7 @@
 	
 	<target name="javadoc" depends="java_doc, junit_doc" description="--> javadoc"/>
 	
-	<target name="java_doc" depends="init_doc">
+	<target name="java_doc" depends="init_doc, compile_main">
         <javadoc destdir="${export.doc}"
 			author="true"
 			version="true"
@@ -378,7 +383,7 @@
         </javadoc>
 	</target>
 
-	<target name="junit_doc" depends="init_doc">
+	<target name="junit_doc" depends="init_doc, compile_junit">
         <javadoc destdir="${export.junitdoc}"
 			author="true"
 			version="true"
@@ -397,6 +402,36 @@
 	
 	<!-- JUnit Testing -->
 	
+	<target name="execute.test">
+
+	  <!-- we need to have relative path -->
+	  <pathconvert property="test.source.relative">
+	    <fileset file="${test.source.absolute}" />
+	    <map from="${src.junit}/" to="" />
+	  </pathconvert>
+
+	  <!-- run one particular test -->
+	  <junit fork="yes" haltonerror="yes" haltonfailure="yes" printsummary="yes">
+
+	    <classpath>
+	    	<pathelement path="${tmp.classes}" />
+            <pathelement path="${tmp.junit}" />
+            <pathelement path="${lib.cp}" />
+            <pathelement path="${lib.junit}" />
+	    </classpath>
+
+	  	<formatter type="plain" usefile="false" />
+	  	<formatter type="plain" />
+
+	    <batchtest todir="${junit.report}">
+	      <fileset dir="${src.junit}">
+	        <filename name="${test.source.relative}" />
+	      </fileset>
+	    </batchtest>
+	  </junit>
+
+	</target>
+	
 	<target name="junit" depends="junit_tests, junit_clean" description="-->execute all junit tests" />
 	
 	<target name="init_junit" depends="init_general">
@@ -408,22 +443,21 @@
 	</target>
 	
 	<target name="junit_tests" depends="init_junit, junit_jars, compile_all">
-        <junit fork="yes" haltonerror="yes" haltonfailure="yes" printsummary="yes">
-            <classpath>
-                <pathelement path="${tmp.classes}" />
-                <pathelement path="${tmp.junit}" />
-                <pathelement path="${lib.cp}" />
-                <pathelement path="${lib.junit}" />
-            </classpath>
-            <formatter type="plain" usefile="false" />
-        	<formatter type="plain" />
-            <batchtest fork="yes" todir="${junit.report}">
-                <fileset dir="${tmp.junit}">
-                    <include name="**/*Test.class"/>
-                    <exclude name="**/SandboxTest.class"/>
-                </fileset>
-            </batchtest>
-        </junit>
+		<foreach
+			target="execute.test"
+			maxthreads="9"
+			inheritall="true"
+			inheritrefs="true"
+			parallel="true"
+			param="test.source.absolute">
+			  <path>
+			    <fileset dir="${src.junit}">
+			      <include name="**/*Test.java"/>
+				  <exclude name="**/SandboxTest.java"/>
+			      <exclude name="**/ReplicationTest.java"/>
+			    </fileset>
+			  </path>
+		</foreach>
 	</target>
 	
 	<target name="test_colored" depends="init_general">

@@ -87,6 +87,7 @@ public class ListMethodsContent implements Serializable {
 	/**
 	 * close this response for adding methods
 	 */
+	@Override
 	public void finalize() {
 		bFinalized = true;
 	}

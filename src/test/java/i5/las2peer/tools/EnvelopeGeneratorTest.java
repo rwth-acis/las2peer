@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import i5.las2peer.persistency.DecodingFailedException;
 import i5.las2peer.persistency.Envelope;
+import i5.las2peer.persistency.EnvelopeGenerator;
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.UserAgent;
@@ -49,9 +50,8 @@ public class EnvelopeGeneratorTest {
 
 		UserAgent eve = MockAgentFactory.getEve();
 		eve.unlockPrivateKey("evespass");
-		test.open(eve);
 
-		Integer content = (Integer) test.getContentAsSerializable();
+		Integer content = (Integer) test.getContent(eve);
 
 		assertEquals(102, content.intValue());
 	}

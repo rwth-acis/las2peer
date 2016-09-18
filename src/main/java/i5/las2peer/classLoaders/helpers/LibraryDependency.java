@@ -225,6 +225,7 @@ public class LibraryDependency {
 	/**
 	 * @return string representation of this dependency
 	 */
+	@Override
 	public String toString() {
 		String result = name + ";version=\"";
 		if (min.equals(max))

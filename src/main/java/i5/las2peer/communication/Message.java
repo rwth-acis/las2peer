@@ -1,7 +1,7 @@
 package i5.las2peer.communication;
 
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Signature;
@@ -40,8 +40,11 @@ import rice.p2p.commonapi.NodeHandle;
  * 
  * Therefore, it is necessary, that the generating Thread has access to the private key of the sending agent.
  * 
+ * When specifiying a topic, the message will be sent to all agents listening to the topic. Since these agents are not
+ * known, the message will not be encrypted.
+ * 
  */
-public class Message implements XmlAble {
+public class Message implements XmlAble, Cloneable {
 
 	public static final long DEFAULT_TIMEOUT = 30 * 1000; // 30 seconds
 
@@ -63,7 +66,12 @@ public class Message implements XmlAble {
 	/**
 	 * id of the receiving agent
 	 */
-	private long recipientId;
+	private Long recipientId = null;
+
+	/**
+	 * id of the receiving topic
+	 */
+	private Long topicId = null;
 
 	/**
 	 * message content (if opened)
@@ -120,7 +128,6 @@ public class Message implements XmlAble {
 	 * @param from
 	 * @param to
 	 * @param data
-	 * 
 	 * @throws EncodingFailedException
 	 * @throws L2pSecurityException the private key of the sender is not accessible for signing
 	 * @throws SerializationException
@@ -138,15 +145,15 @@ public class Message implements XmlAble {
 	 * @param to
 	 * @param data
 	 * @param timeOutMs timeout for the validity of the new message
-	 * 
 	 * @throws EncodingFailedException
 	 * @throws L2pSecurityException the private key of the sender is not accessible for signing
 	 * @throws SerializationException
 	 */
 	public Message(Agent from, Agent to, Serializable data, long timeOutMs)
 			throws EncodingFailedException, L2pSecurityException, SerializationException {
-		if (from == null || to == null)
+		if (from == null || to == null) {
 			throw new IllegalArgumentException("null not allowed as sender or recipient!");
+		}
 		sender = from;
 		senderId = from.getId();
 		recipient = to;
@@ -171,7 +178,6 @@ public class Message implements XmlAble {
 	 * @param from
 	 * @param to
 	 * @param data
-	 * 
 	 * @throws EncodingFailedException
 	 * @throws L2pSecurityException the private key of the sender is not accessible for signing
 	 * @throws SerializationException
@@ -188,7 +194,6 @@ public class Message implements XmlAble {
 	 * @param to
 	 * @param data
 	 * @param timeoutMs timeout for the validity of the new message
-	 * 
 	 * @throws EncodingFailedException
 	 * @throws L2pSecurityException the private key of the sender is not accessible for signing
 	 * @throws SerializationException
@@ -206,6 +211,51 @@ public class Message implements XmlAble {
 	}
 
 	/**
+	 * create a new message to a topic with default timeout
+	 * 
+	 * @param from
+	 * @param topic
+	 * @param data
+	 * @throws EncodingFailedException
+	 * @throws L2pSecurityException
+	 * @throws SerializationException
+	 */
+	public Message(Agent from, long topic, Serializable data)
+			throws EncodingFailedException, L2pSecurityException, SerializationException {
+		this(from, topic, data, DEFAULT_TIMEOUT);
+	}
+
+	/**
+	 * create a new message to all agents listening on the given topic
+	 * 
+	 * @param from
+	 * @param topic
+	 * @param data
+	 * @param timeoutMs
+	 * @throws EncodingFailedException
+	 * @throws L2pSecurityException
+	 * @throws SerializationException
+	 */
+	public Message(Agent from, long topic, Serializable data, long timeoutMs)
+			throws EncodingFailedException, L2pSecurityException, SerializationException {
+		if (from == null) {
+			throw new IllegalArgumentException("null not allowed as sender!");
+		}
+
+		sender = from;
+		senderId = from.getId();
+		topicId = topic;
+		content = data;
+		validMs = timeoutMs;
+
+		timestampMs = new Date().getTime();
+
+		// id = new Random().nextLong();
+
+		finalizeConstructor();
+	}
+
+	/**
 	 * common to all constructors
 	 * 
 	 * @throws EncodingFailedException
@@ -216,7 +266,11 @@ public class Message implements XmlAble {
 		timestampMs = new Date().getTime();
 		id = new Random().nextLong();
 
-		encryptContent();
+		if (!isTopic()) {
+			encryptContent();
+		} else {
+			baEncryptedContent = getContentString().getBytes(StandardCharsets.UTF_8);
+		}
 
 		signContent();
 
@@ -229,15 +283,19 @@ public class Message implements XmlAble {
 	 * @param responseTo
 	 * @param data
 	 * @param timeoutMs timeout for the validity of the new message
-	 * 
 	 * @throws EncodingFailedException
 	 * @throws L2pSecurityException the private key of the sender is not accessible for signing
 	 * @throws SerializationException
 	 */
 	public Message(Message responseTo, XmlAble data, long timeoutMs)
 			throws EncodingFailedException, L2pSecurityException, SerializationException {
-		if (!responseTo.isOpen())
+		if (!responseTo.isOpen()) {
 			throw new IllegalStateException("the original message has to be open to create a response to it!");
+		}
+
+		if (responseTo.getRecipient() == null) {
+			throw new IllegalStateException("the original message has to have an recipient attached");
+		}
 
 		sender = responseTo.getRecipient();
 		senderId = responseTo.getRecipientId();
@@ -256,7 +314,6 @@ public class Message implements XmlAble {
 	 * 
 	 * @param responseTo
 	 * @param data
-	 * 
 	 * @throws SerializationException
 	 * @throws L2pSecurityException the private key of the sender is not accessible for signing
 	 * @throws EncodingFailedException
@@ -272,15 +329,19 @@ public class Message implements XmlAble {
 	 * @param responseTo
 	 * @param data
 	 * @param timeoutMs
-	 * 
 	 * @throws EncodingFailedException
 	 * @throws L2pSecurityException the private key of the sender is not accessible for signing
 	 * @throws SerializationException
 	 */
 	public Message(Message responseTo, Serializable data, long timeoutMs)
 			throws EncodingFailedException, L2pSecurityException, SerializationException {
-		if (!responseTo.isOpen())
+		if (!responseTo.isOpen()) {
 			throw new IllegalStateException("the original message has to be open to create a response to it!");
+		}
+
+		if (responseTo.getRecipient() == null) {
+			throw new IllegalStateException("the original message has to have an recipient attached");
+		}
 
 		sender = responseTo.getRecipient();
 		senderId = responseTo.getRecipientId();
@@ -328,14 +389,21 @@ public class Message implements XmlAble {
 			sContent = Base64.encodeBase64String(SerializeTools.serialize((Serializable) content));
 		}
 
-		String response = "";
-		if (responseToId != null)
-			response = " responseTo=\"" + responseToId + "\"";
+		String attrs = "";
+		if (responseToId != null) {
+			attrs += " responseTo=\"" + responseToId + "\"";
+		}
 
-		return "<las2peer:messageContent" + " id=\"" + id + "\"" + " sender=\"" + sender.getId() + "\""
-				+ " recipient=\"" + recipient.getId() + "\"" + " class=\"" + content.getClass().getCanonicalName()
-				+ "\"" + " type=\"" + typeAttr + "\"" + " timestamp=\"" + timestampMs + "\"" + " timeout=\"" + validMs
-				+ "\"" + response + ">" + sContent + "</las2peer:messageContent>";
+		if (!isTopic()) {
+			attrs += " recipient=\"" + recipient.getId() + "\"";
+		} else {
+			attrs += " topic=\"" + topicId + "\"";
+		}
+
+		return "<las2peer:messageContent" + " id=\"" + id + "\"" + " sender=\"" + sender.getId() + "\"" + " class=\""
+				+ content.getClass().getCanonicalName() + "\"" + " type=\"" + typeAttr + "\"" + " timestamp=\""
+				+ timestampMs + "\"" + " timeout=\"" + validMs + "\"" + attrs + ">" + sContent
+				+ "</las2peer:messageContent>";
 	}
 
 	/**
@@ -344,16 +412,19 @@ public class Message implements XmlAble {
 	 * @throws EncodingFailedException
 	 */
 	private void encryptContent() throws EncodingFailedException {
+		if (recipient == null) {
+			return;
+		}
+
 		try {
 			SecretKey contentKey = CryptoTools.generateSymmetricKey();
 			baContentKey = CryptoTools.encryptAsymmetric(contentKey, recipient.getPublicKey());
 
 			String contentString = getContentString();
-			baEncryptedContent = CryptoTools.encryptSymmetric(contentString.getBytes("UTF-8"), contentKey);
+			baEncryptedContent = CryptoTools.encryptSymmetric(contentString.getBytes(StandardCharsets.UTF_8),
+					contentKey);
 		} catch (SerializationException e) {
 			throw new EncodingFailedException("serialization problems with encryption", e);
-		} catch (UnsupportedEncodingException e) {
-			throw new EncodingFailedException("utf8 encoding problmes with xml string", e);
 		} catch (CryptoException e) {
 			throw new EncodingFailedException("unable to encrypt the secret message key", e);
 		}
@@ -368,7 +439,7 @@ public class Message implements XmlAble {
 	 */
 	private void signContent() throws L2pSecurityException, SerializationException, EncodingFailedException {
 		try {
-			byte[] contentBytes = getContentString().getBytes("UTF-8");
+			byte[] contentBytes = getContentString().getBytes(StandardCharsets.UTF_8);
 
 			Signature sig = sender.createSignature();
 			sig.update(contentBytes);
@@ -380,8 +451,6 @@ public class Message implements XmlAble {
 			throw new EncodingFailedException("Algorithm problems", e);
 		} catch (SignatureException e) {
 			throw new EncodingFailedException("Signature problems", e);
-		} catch (UnsupportedEncodingException e) {
-			throw new EncodingFailedException("UTF8 encoding problems with content", e);
 		}
 	}
 
@@ -421,8 +490,26 @@ public class Message implements XmlAble {
 	 * 
 	 * @return id of the receiving agent
 	 */
-	public long getRecipientId() {
+	public Long getRecipientId() {
 		return recipientId;
+	}
+
+	/**
+	 * get the id of the receiving topic
+	 * 
+	 * @return
+	 */
+	public Long getTopicId() {
+		return topicId;
+	}
+
+	/**
+	 * check if this message is sent to a topic
+	 * 
+	 * @return
+	 */
+	public boolean isTopic() {
+		return topicId != null;
 	}
 
 	/**
@@ -439,8 +526,9 @@ public class Message implements XmlAble {
 	 * @return id of the message, this one is a response to
 	 */
 	public Long getResponseToId() {
-		if (responseToId == null)
+		if (responseToId == null) {
 			return null;
+		}
 		return new Long(responseToId);
 	}
 
@@ -456,12 +544,12 @@ public class Message implements XmlAble {
 	 * get the content of this message may be Serializable or XmlAble
 	 * 
 	 * @return actual content of the message
-	 * 
 	 * @throws L2pSecurityException the message (envelope) has to be opened (decrypted) first
 	 */
 	public Object getContent() throws L2pSecurityException {
-		if (!isOpen())
+		if (!isOpen()) {
 			throw new L2pSecurityException("You have to open the envelope first!");
+		}
 
 		return content;
 	}
@@ -484,8 +572,9 @@ public class Message implements XmlAble {
 	 * open the envelope, i.e. decrypt the content with the private key of the receiving agent
 	 * 
 	 * the private key has to be unlocked first!
-	 * @param unlockedRecipient 
-	 * @param storage 
+	 * 
+	 * @param unlockedRecipient
+	 * @param storage
 	 * 
 	 * 
 	 * @throws L2pSecurityException the private key of the receiver has to be unlocked for decryption
@@ -493,52 +582,78 @@ public class Message implements XmlAble {
 	 */
 	public void open(Agent unlockedRecipient, AgentStorage storage)
 			throws L2pSecurityException, AgentNotKnownException {
-		if (isOpen())
+		if (isOpen()) {
 			return;
+		}
 
 		sender = storage.getAgent(senderId);
 
-		if (unlockedRecipient != null && unlockedRecipient.getId() == recipientId)
-			recipient = unlockedRecipient;
-		else
-			recipient = storage.getAgent(recipientId);
+		if (recipientId != null) { // topic messages are not encrypted
+			if (unlockedRecipient != null && unlockedRecipient.getId() == recipientId) {
+				recipient = unlockedRecipient;
+			} else {
+				recipient = storage.getAgent(recipientId);
+			}
 
-		if (recipient.isLocked())
-			throw new L2pSecurityException("private key of recipient is locked!");
+			if (recipient.isLocked()) {
+				throw new L2pSecurityException("private key of recipient is locked!");
+			}
+		}
 
 		Element root = null;
 		try {
-			SecretKey contentKey = recipient.returnSecretKey(baContentKey);
+			String contentString;
 
-			String contentString = new String(CryptoTools.decryptSymmetric(baEncryptedContent, contentKey), "UTF-8");
+			if (!isTopic()) {
+				SecretKey contentKey = recipient.decryptSymmetricKey(baContentKey);
+				contentString = new String(CryptoTools.decryptSymmetric(baEncryptedContent, contentKey),
+						StandardCharsets.UTF_8);
+			} else { // topics are not encrypted
+				contentString = new String(baEncryptedContent, StandardCharsets.UTF_8);
+			}
 
 			root = Parser.parse(contentString, false);
 
-			if (!root.hasAttribute("sender"))
+			if (!root.hasAttribute("sender")) {
 				throw new L2pSecurityException("content block needs sender attribute!");
-			if (!root.hasAttribute("recipient"))
-				throw new L2pSecurityException("content block needs recipient attribute!");
-			if (!root.hasAttribute("timestamp"))
+			}
+			if (!root.hasAttribute("recipient") && !root.hasAttribute("topic")) {
+				throw new L2pSecurityException("content block needs recipient or topic attribute!");
+			}
+			if (!root.hasAttribute("timestamp")) {
 				throw new L2pSecurityException("content block needs timestamp attribute!");
-			if (!root.hasAttribute("timeout"))
+			}
+			if (!root.hasAttribute("timeout")) {
 				throw new L2pSecurityException("content block needs timeout attribute!");
-			if (!root.hasAttribute("id"))
+			}
+			if (!root.hasAttribute("id")) {
 				throw new L2pSecurityException("content block needs id attribute!");
+			}
 
-			if (Long.parseLong(root.getAttribute("sender")) != (sender.getId()))
+			if (Long.parseLong(root.getAttribute("sender")) != (sender.getId())) {
 				throw new L2pSecurityException("message is signed for another sender!!");
-			if (Long.parseLong(root.getAttribute("recipient")) != (recipient.getId()))
+			}
+			if (root.hasAttribute("recipient")
+					&& (recipient == null || Long.parseLong(root.getAttribute("recipient")) != (recipient.getId()))) {
 				throw new L2pSecurityException("message is signed for another recipient!!");
-			if (Long.parseLong(root.getAttribute("timestamp")) != timestampMs)
+			}
+			if (root.hasAttribute("topic") && Long.parseLong(root.getAttribute("topic")) != (topicId)) {
+				throw new L2pSecurityException("message is signed for another topic!!");
+			}
+			if (Long.parseLong(root.getAttribute("timestamp")) != timestampMs) {
 				throw new L2pSecurityException("message is signed for another timestamp!!");
-			if (Long.parseLong(root.getAttribute("timeout")) != validMs)
+			}
+			if (Long.parseLong(root.getAttribute("timeout")) != validMs) {
 				throw new L2pSecurityException("message is signed for another timeout value!!");
-			if (Long.parseLong(root.getAttribute("id")) != id)
+			}
+			if (Long.parseLong(root.getAttribute("id")) != id) {
 				throw new L2pSecurityException("message is signed for another id!");
+			}
 
 			if ((root.hasAttribute("responseTo") || responseToId != null)
-					&& !responseToId.equals(Long.parseLong(root.getAttribute("responseTo"))))
+					&& !responseToId.equals(Long.parseLong(root.getAttribute("responseTo")))) {
 				throw new L2pSecurityException("message is signed as response to another message!");
+			}
 
 			if (root.getAttribute("type").equals("Serializable")) {
 				content = SerializeTools.deserialize(Base64.decodeBase64(root.getFirstChild().getText()));
@@ -555,9 +670,10 @@ public class Message implements XmlAble {
 			throw new L2pSecurityException("content class missing with decryption!", e);
 		} catch (MalformedXMLException e) {
 			throw new L2pSecurityException("xml syntax problems with decryption!", e);
-		} catch (UnsupportedEncodingException e) {
-			throw new L2pSecurityException("string encoding problems while opening the message content", e);
 		}
+
+		// verify signature
+		verifySignature();
 	}
 
 	/**
@@ -568,14 +684,15 @@ public class Message implements XmlAble {
 	public void verifySignature() throws L2pSecurityException {
 		Signature sig;
 		try {
-			byte[] contentBytes = getContentString().getBytes("UTF-8");
+			byte[] contentBytes = getContentString().getBytes(StandardCharsets.UTF_8);
 
 			sig = Signature.getInstance(CryptoTools.getSignatureMethod());
 			sig.initVerify(sender.getPublicKey());
 			sig.update(contentBytes);
 
-			if (!sig.verify(baSignature))
+			if (!sig.verify(baSignature)) {
 				throw new L2pSecurityException("Signature invalid!");
+			}
 		} catch (InvalidKeyException e) {
 			throw new L2pSecurityException("unable to verify signature: key problems", e);
 		} catch (NoSuchAlgorithmException e) {
@@ -584,8 +701,6 @@ public class Message implements XmlAble {
 			throw new L2pSecurityException("unable to verify signature: signature problems", e);
 		} catch (SerializationException e) {
 			throw new L2pSecurityException("unable to verify signature: serialization problems", e);
-		} catch (UnsupportedEncodingException e) {
-			throw new L2pSecurityException("unable to verify signature: utf8 encodung problems", e);
 		}
 	}
 
@@ -648,26 +763,37 @@ public class Message implements XmlAble {
 	@Override
 	public String toXmlString() {
 		String response = "";
-		if (responseToId != null)
+		if (responseToId != null) {
 			response = " responseTo=\"" + responseToId + "\"";
+		}
 
 		String sending = "";
 		if (sendingNodeId != null) {
-			if (sendingNodeId instanceof Long || sendingNodeId instanceof NodeHandle)
+			if (sendingNodeId instanceof Long || sendingNodeId instanceof NodeHandle) {
 				try {
 					sending = "\t<sendingNode encoding=\"base64\">" + SerializeTools.serializeToBase64(sendingNodeId)
 							+ "</sendingNode>\n";
 				} catch (SerializationException e) {
 				}
+			}
 		}
 
-		return "<las2peer:message" + " id=\"" + id + "\"" + response + " from=\"" + senderId + "\" to=\"" + recipientId
-				+ "\"" + " generated=\"" + timestampMs + "\" timeout=\"" + validMs + "\">\n" + sending
-				+ "\t<content encryption=\"" + CryptoTools.getSymmetricAlgorithm() + "\" encoding=\"base64\">"
-				+ Base64.encodeBase64String(baEncryptedContent) + "</content>\n" + "\t<contentKey encryption=\""
-				+ CryptoTools.getAsymmetricAlgorithm() + "\" encoding=\"base64\">"
-				+ Base64.encodeBase64String(baContentKey) + "</contentKey>\n"
-				+ "\t<signature encoding=\"base64\" method=\"" + CryptoTools.getSignatureMethod() + "\">"
+		String receiver;
+		String contentKey = "";
+		String encryption = "";
+		if (!isTopic()) {
+			receiver = "to=\"" + recipientId + "\"";
+			encryption = " encryption=\"" + CryptoTools.getSymmetricAlgorithm() + "\"";
+			contentKey = "\t<contentKey encryption=\"" + CryptoTools.getAsymmetricAlgorithm()
+					+ "\" encoding=\"base64\">" + Base64.encodeBase64String(baContentKey) + "</contentKey>\n";
+		} else {
+			receiver = "topic=\"" + topicId + "\"";
+		}
+
+		return "<las2peer:message" + " id=\"" + id + "\"" + response + " from=\"" + senderId + "\" " + receiver
+				+ " generated=\"" + timestampMs + "\" timeout=\"" + validMs + "\">\n" + sending + "\t<content"
+				+ encryption + " encoding=\"base64\">" + Base64.encodeBase64String(baEncryptedContent) + "</content>\n"
+				+ contentKey + "\t<signature encoding=\"base64\" method=\"" + CryptoTools.getSignatureMethod() + "\">"
 				+ Base64.encodeBase64String(baSignature) + "</signature>\n" + "</las2peer:message>\n";
 	}
 
@@ -680,66 +806,90 @@ public class Message implements XmlAble {
 	public void setStateFromXml(String xml) throws MalformedXMLException {
 		try {
 			Element root = Parser.parse(xml);
-			int currentSub = 0;
 
-			Element sending = root.getFirstChild();
-			if (sending.getName().equals("sendingNode")) {
-				currentSub++;
-				if (!"base64".equals(sending.getAttribute("encoding")))
+			Element sending = null;
+			if (root.getChildren("sendingNode").hasMoreElements()) {
+				sending = root.getChildren("sendingNode").nextElement();
+				if (!"base64".equals(sending.getAttribute("encoding"))) {
 					throw new MalformedXMLException("base64 encoding of sending node expected!");
+				}
 				sendingNodeId = SerializeTools.deserializeBase64(sending.getFirstChild().getText());
-			} else
-				sending = null;
+			}
 
-			Element content = root.getChild(currentSub);
-			currentSub++;
-			Element contentKey = root.getChild(currentSub);
-			currentSub++;
-			Element signature = root.getChild(currentSub);
-			currentSub++;
-
-			if (!root.getName().equals("message"))
+			if (!root.getName().equals("message")) {
 				throw new MalformedXMLException("message expected!");
-			if (!content.getName().equals("content"))
+			}
+			Element content;
+			if (root.getChildren("content").hasMoreElements()) {
+				content = root.getChildren("content").nextElement();
+			} else {
 				throw new MalformedXMLException("content expected!");
-			if (!contentKey.getName().equals("contentKey"))
-				throw new MalformedXMLException("contentKey expected!");
-			if (!signature.getName().equals("signature"))
-				throw new MalformedXMLException("signature expected");
+			}
 
-			if (!root.hasAttribute("from"))
+			Element contentKey = null;
+			if (root.getChildren("contentKey").hasMoreElements()) {
+				contentKey = root.getChildren("contentKey").nextElement();
+			}
+
+			Element signature;
+			if (root.getChildren("signature").hasMoreElements()) {
+				signature = root.getChildren("signature").nextElement();
+			} else {
+				throw new MalformedXMLException("signature expected!");
+			}
+
+			if (!root.hasAttribute("from")) {
 				throw new MalformedXMLException("needed from attribute missing!");
-			if (!root.hasAttribute("to"))
-				throw new MalformedXMLException("needed to attribute missing!");
-			if (!root.hasAttribute("generated"))
+			}
+			if (!root.hasAttribute("to") && !root.hasAttribute("topic")) {
+				throw new MalformedXMLException("needed to or topic attribute missing!");
+			}
+			if (!root.hasAttribute("topic") && contentKey == null) {
+				throw new MalformedXMLException("content key missing!");
+			}
+			if (!root.hasAttribute("generated")) {
 				throw new MalformedXMLException("needed generated attribute missing!");
-			if (!root.hasAttribute("timeout"))
+			}
+			if (!root.hasAttribute("timeout")) {
 				throw new MalformedXMLException("needed timeout attribute missing!");
-			if (!root.hasAttribute("id"))
+			}
+			if (!root.hasAttribute("id")) {
 				throw new MalformedXMLException("needed id attribute missing!");
+			}
 
-			if (!content.getAttribute("encoding").equals("base64"))
+			if (!content.getAttribute("encoding").equals("base64")) {
 				throw new MalformedXMLException("base64 encoding expected");
-			if (!contentKey.getAttribute("encoding").equals("base64"))
+			}
+			if (contentKey != null && !contentKey.getAttribute("encoding").equals("base64")) {
 				throw new MalformedXMLException("base64 encoding expected");
-			if (!signature.getAttribute("encoding").equals("base64"))
+			}
+			if (!signature.getAttribute("encoding").equals("base64")) {
 				throw new MalformedXMLException("base64 encoding expected");
+			}
 
 			senderId = Long.parseLong(root.getAttribute("from"));
-			recipientId = Long.parseLong(root.getAttribute("to"));
+			if (root.hasAttribute("to")) {
+				recipientId = Long.parseLong(root.getAttribute("to"));
+			}
+			if (root.hasAttribute("topic")) {
+				topicId = Long.parseLong(root.getAttribute("topic"));
+			}
 			// sender = AgentStorage.getAgent( Long.parseLong(root.getAttribute ( "from")));
 			// recipient = AgentStorage.getAgent( Long.parseLong(root.getAttribute ( "to")));
 
 			baEncryptedContent = Base64.decodeBase64(content.getFirstChild().getText());
 			baSignature = Base64.decodeBase64(signature.getFirstChild().getText());
-			baContentKey = Base64.decodeBase64(contentKey.getFirstChild().getText());
+			if (contentKey != null) {
+				baContentKey = Base64.decodeBase64(contentKey.getFirstChild().getText());
+			}
 
 			timestampMs = Long.parseLong(root.getAttribute("generated"));
 			validMs = Long.parseLong(root.getAttribute("timeout"));
 			id = Long.parseLong(root.getAttribute("id"));
 
-			if (root.hasAttribute("responseTo"))
+			if (root.hasAttribute("responseTo")) {
 				responseToId = Long.parseLong(root.getAttribute("responseTo"));
+			}
 
 			content = null;
 		} catch (NumberFormatException e) {
@@ -770,17 +920,27 @@ public class Message implements XmlAble {
 	}
 
 	/**
+	 * set the id of the recipient (used by the node when receiving messages from topics)
+	 * 
+	 * @param id
+	 */
+	public void setRecipientId(Long id) {
+		recipientId = id;
+	}
+
+	/**
 	 * set the id of the node sending this message
 	 * 
 	 * @param id
 	 */
 	public void setSendingNodeId(Object id) {
-		if (id instanceof NodeHandle)
+		if (id instanceof NodeHandle) {
 			setSendingNodeId((NodeHandle) id);
-		else if (id instanceof Long)
+		} else if (id instanceof Long) {
 			setSendingNodeId((Long) id);
-		else
+		} else {
 			throw new IllegalArgumentException("Illegal Node Id class " + id.getClass().getName());
+		}
 	}
 
 	/**
@@ -797,15 +957,18 @@ public class Message implements XmlAble {
 	 * factory: create a message from an XML document
 	 * 
 	 * @param xml
-	 * 
 	 * @return a message generated from the given XML document
-	 * 
 	 * @throws MalformedXMLException
 	 */
 	public static Message createFromXml(String xml) throws MalformedXMLException {
 		Message result = new Message();
 		result.setStateFromXml(xml);
 		return result;
+	}
+
+	@Override
+	public Message clone() throws CloneNotSupportedException {
+		return (Message) super.clone();
 	}
 
 }

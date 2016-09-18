@@ -8,7 +8,6 @@ import java.lang.reflect.Modifier;
 import i5.las2peer.execution.L2pServiceException;
 import i5.las2peer.execution.L2pThread;
 import i5.las2peer.execution.NoSuchServiceMethodException;
-import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.Node;
@@ -104,10 +103,6 @@ import i5.las2peer.security.ServiceAgent;
  * <p>
  * For further tools like (testing) envelope XML file generators or the like, have a look into the classes of the
  * {@link i5.las2peer.tools} package. There are e.g. some command line generators for XML helper files.
- * 
- * 
- * 
- *
  */
 public abstract class Service extends Configurable {
 
@@ -125,9 +120,7 @@ public abstract class Service extends Configurable {
 	 * Executes a service method.
 	 * 
 	 * @param method the service method
-	 * 
 	 * @return result of the method invocation
-	 * 
 	 * @throws SecurityException
 	 * @throws NoSuchServiceMethodException
 	 * @throws IllegalArgumentException
@@ -145,9 +138,7 @@ public abstract class Service extends Configurable {
 	 * 
 	 * @param method the service method
 	 * @param parameters
-	 * 
 	 * @return result of the method invocation
-	 * 
 	 * @throws SecurityException
 	 * @throws NoSuchServiceMethodException
 	 * @throws IllegalArgumentException
@@ -176,9 +167,7 @@ public abstract class Service extends Configurable {
 	 *            If no version is specified, the newest version is picked.
 	 * @param method the service method
 	 * @param parameters list of parameters
-	 * 
 	 * @return result of the method invocation
-	 * 
 	 * @throws AgentNotKnownException
 	 * @throws L2pServiceException
 	 * @throws L2pSecurityException
@@ -206,9 +195,7 @@ public abstract class Service extends Configurable {
 	 *            If no version is specified, the newest version is picked.
 	 * @param method the service method
 	 * @param parameters list of parameters
-	 * 
 	 * @return result of the method invocation
-	 * 
 	 * @throws L2pServiceException
 	 * @throws L2pSecurityException
 	 * @throws AgentNotKnownException
@@ -319,7 +306,6 @@ public abstract class Service extends Configurable {
 	 * Creates a string with all classes from an array of parameters.
 	 * 
 	 * @param params
-	 * 
 	 * @return a string describing a parameter list for the given actual parameters
 	 */
 	public static String getParameterString(Object[] params) {
@@ -338,7 +324,6 @@ public abstract class Service extends Configurable {
 	 * Gets the agent corresponding to this service.
 	 * 
 	 * @return the agent responsible for this service
-	 * 
 	 * @throws AgentNotKnownException
 	 */
 	public final ServiceAgent getAgent() throws AgentNotKnownException {
@@ -395,7 +380,7 @@ public abstract class Service extends Configurable {
 				e.printStackTrace();
 			}
 		}
-		System.out.println("Service " + this.getClass().getCanonicalName() + " has been started!");
+		System.out.println("Service " + this.agent.getServiceNameVersion() + " has been started!");
 	}
 
 	/**
@@ -404,12 +389,23 @@ public abstract class Service extends Configurable {
 	 * simple shutdown hook to be overwritten in subclasses
 	 */
 	public void close() {
-		System.out.println("Service " + this.getClass().getCanonicalName() + " has been stopped!");
+		System.out.println("Service " + this.agent.getServiceNameVersion() + " has been stopped!");
 		runningAt = null;
 	}
 
 	/**
-	 * @deprecated Use {@link L2pLogger#logEvent(Event, String)} with {@link Event#SERVICE_MESSAGE} instead!
+	 * Should return the service alias, which is registered on service start.
+	 * 
+	 * @return the alias, or null if no alias should be registered
+	 */
+	public String getAlias() {
+		return null;
+	}
+
+	/**
+	 * 
+	 * @deprecated Use {@link i5.las2peer.logging.L2pLogger#logEvent(Event, String)} with {@link Event#SERVICE_MESSAGE}
+	 *             instead!
 	 *             <p>
 	 *             Writes a log message.
 	 * 
@@ -421,7 +417,7 @@ public abstract class Service extends Configurable {
 	}
 
 	/**
-	 * @deprecated Use {@link L2pLogger#logEvent(Event, Agent, String)} instead!
+	 * @deprecated Use {@link i5.las2peer.logging.L2pLogger#logEvent(Event, Agent, String)} instead!
 	 *             <p>
 	 *             Writes a log message. The given index (1-99) can be used to differentiate between different log
 	 *             messages.
@@ -446,7 +442,8 @@ public abstract class Service extends Configurable {
 	}
 
 	/**
-	 * @deprecated Use {@link L2pLogger#logEvent(Event, String)} with {@link Event#SERVICE_ERROR} instead!
+	 * @deprecated Use {@link i5.las2peer.logging.L2pLogger#logEvent(Event, String)} with {@link Event#SERVICE_ERROR}
+	 *             instead!
 	 *             <p>
 	 *             Writes an error log message.
 	 * 
@@ -458,7 +455,7 @@ public abstract class Service extends Configurable {
 	}
 
 	/**
-	 * @deprecated Use {@link L2pLogger#logEvent(Event, Agent, String)} instead!
+	 * @deprecated Use {@link i5.las2peer.logging.L2pLogger#logEvent(Event, Agent, String)} instead!
 	 *             <p>
 	 *             Writes an error message. The given index (1-99) can be used to differentiate between different log
 	 *             messages.
@@ -483,7 +480,7 @@ public abstract class Service extends Configurable {
 	}
 
 	/**
-	 * @deprecated Use {@link L2pLogger} instead!
+	 * @deprecated Use {@link i5.las2peer.logging.L2pLogger} instead!
 	 *             <p>
 	 *             Writes an exception log message Additionally the stack trace is printed.
 	 * 

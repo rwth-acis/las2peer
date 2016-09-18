@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Serializable;
 import java.security.InvalidKeyException;
+import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
@@ -15,6 +16,10 @@ import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Arrays;
+import java.util.Base64;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -26,6 +31,8 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.interfaces.PBEKey;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
+
+import i5.las2peer.persistency.VerificationFailedException;
 
 /**
  * Simple <i>static</i> class collecting useful cryptographic methods end encapsulating the access to the underlying
@@ -125,9 +132,7 @@ public class CryptoTools {
 	 * 
 	 * @param passphrase The secret that is used to generate the key.
 	 * @param salt A salt that is used with the given passphrase.
-	 * 
 	 * @return a symmetric key for the given passphrase
-	 * 
 	 * @throws CryptoException If the selected algorithm does not exist or an issue with the given key occurs.
 	 */
 	public static SecretKey generateKeyForPassphrase(String passphrase, byte[] salt) throws CryptoException {
@@ -151,9 +156,7 @@ public class CryptoTools {
 	 * @param object The data that is encrypted.
 	 * @param passphrase The secret that is used to encrypt the given data.
 	 * @param salt A salt that is used with the given passphrase.
-	 * 
 	 * @return encrypted content
-	 * 
 	 * @throws CryptoException If an issue occurs with encryption.
 	 * @throws SerializationException If an issue occurs with deserializing the given data.
 	 */
@@ -185,9 +188,7 @@ public class CryptoTools {
 	 * @param content The data that is decrypted.
 	 * @param salt A salt that is used with the given passphrase.
 	 * @param passphrase The secret that is used to decrypt the given data.
-	 * 
 	 * @return decrypted and deserialized content
-	 * 
 	 * @throws CryptoException If an issue occurs with decryption.
 	 * @throws SerializationException If an issue occurs with deserializing the given data.
 	 */
@@ -217,7 +218,6 @@ public class CryptoTools {
 	 * generate a random salt
 	 * 
 	 * @return a random salt for later use
-	 * 
 	 * @throws CryptoException If the selected salt algorithm does not exist.
 	 * 
 	 */
@@ -238,9 +238,7 @@ public class CryptoTools {
 	 * 
 	 * @param data The encrypted data that is decrypted.
 	 * @param key The key that is used to decrypt the given data.
-	 * 
 	 * @return decrypted and deserialized content as java object
-	 * 
 	 * @throws SerializationException If an issue occurs with deserializing the given data.
 	 * @throws CryptoException If an decryption issue occurs.
 	 */
@@ -271,9 +269,7 @@ public class CryptoTools {
 	 * 
 	 * @param baCipherData The encrypted data that is decrypted.
 	 * @param key The key that is used to decrypt the given data.
-	 * 
 	 * @return decrypted content as byte array
-	 * 
 	 * @throws CryptoException If an issue occurs with decryption.
 	 */
 	public static byte[] decryptSymmetric(byte[] baCipherData, SecretKey key) throws CryptoException {
@@ -299,9 +295,7 @@ public class CryptoTools {
 	 * 
 	 * @param content The object that is encrypted.
 	 * @param key The key that is used to encrypt the given object.
-	 * 
 	 * @return encrypted content as byte array
-	 * 
 	 * @throws CryptoException If an issue occurs with encryption.
 	 * @throws SerializationException If an issue occurs with deserializing the given data.
 	 */
@@ -315,9 +309,7 @@ public class CryptoTools {
 	 * 
 	 * @param content The object that is encrypted.
 	 * @param key The key that is used to encrypt the given object.
-	 * 
 	 * @return encrypted content as byte array
-	 * 
 	 * @throws CryptoException If an issue occurs with encryption.
 	 */
 	public static byte[] encryptAsymmetric(byte[] content, PublicKey key) throws CryptoException {
@@ -344,9 +336,7 @@ public class CryptoTools {
 	 * 
 	 * @param content The content that is signed with the given key.
 	 * @param key The key that is used to sign the given content.
-	 * 
 	 * @return signature as byte array
-	 * 
 	 * @throws CryptoException If an issue occurs with the given key or selected algorithm.
 	 */
 	public static byte[] signContent(byte[] content, PrivateKey key) throws CryptoException {
@@ -372,24 +362,22 @@ public class CryptoTools {
 	 * @param signature The (possibly malicious) signature that is attached to the content.
 	 * @param content The (possibly malicious) content that is verified.
 	 * @param key The key that is verfied as the trusted signer.
-	 * 
 	 * @return true, if verification is successful
-	 * 
-	 * @throws CryptoException If an issue occurs with the given key or selected algorithm.
+	 * @throws VerificationFailedException If an issue occurs with the given key or selected algorithm.
 	 */
-	public static boolean verifySignature(byte[] signature, byte[] content, PublicKey key) throws CryptoException {
+	public static boolean verifySignature(byte[] signature, byte[] content, PublicKey key)
+			throws VerificationFailedException {
 		try {
 			Signature sig = Signature.getInstance(getSignatureMethod());
 			sig.initVerify(key);
 			sig.update(content);
-
 			return sig.verify(signature);
 		} catch (InvalidKeyException e) {
-			throw new CryptoException("key problems", e);
+			throw new VerificationFailedException("key problems", e);
 		} catch (NoSuchAlgorithmException e) {
-			throw new CryptoException("Algorithm problems", e);
+			throw new VerificationFailedException("Algorithm problems", e);
 		} catch (SignatureException e) {
-			throw new CryptoException("Signature problems", e);
+			throw new VerificationFailedException("Signature problems", e);
 		}
 	}
 
@@ -423,9 +411,7 @@ public class CryptoTools {
 	 * 
 	 * @param baPlainData The data that is encrypted.
 	 * @param symmetricKey The key that is used to encrypt the given data.
-	 * 
 	 * @return encrypted content as byte array
-	 * 
 	 * @throws CryptoException If an issue occurs with encryption.
 	 */
 	public static byte[] encryptSymmetric(byte[] baPlainData, SecretKey symmetricKey) throws CryptoException {
@@ -452,15 +438,60 @@ public class CryptoTools {
 	 * 
 	 * @param plainData The data that is encrypted.
 	 * @param key The key that is used to encrypt the given data.
-	 * 
 	 * @return encrypted content as byte array
-	 * 
 	 * @throws CryptoException If an issue occurs with encryption.
 	 * @throws SerializationException If an issue occurs with deserializing the given data.
 	 */
 	public static byte[] encryptSymmetric(Serializable plainData, SecretKey key)
 			throws CryptoException, SerializationException {
 		return encryptSymmetric(SerializeTools.serialize(plainData), key);
+	}
+
+	public static PrivateKey privateKeyToString(String key64) throws CryptoException {
+		byte[] clear = Base64.getDecoder().decode(key64);
+		PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(clear);
+		try {
+			KeyFactory fact = KeyFactory.getInstance(asymmetricAlgorithm);
+			PrivateKey priv = fact.generatePrivate(keySpec);
+			Arrays.fill(clear, (byte) 0);
+			return priv;
+		} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+			throw new CryptoException("Could not read private key from given base64 string", e);
+		}
+	}
+
+	public static PublicKey stringToPublicKey(String stored) throws CryptoException {
+		byte[] data = Base64.getDecoder().decode(stored);
+		X509EncodedKeySpec spec = new X509EncodedKeySpec(data);
+		try {
+			KeyFactory fact = KeyFactory.getInstance(asymmetricAlgorithm);
+			return fact.generatePublic(spec);
+		} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+			throw new CryptoException("Could not read public key from given base64 string", e);
+		}
+	}
+
+	public static String privateKeyToString(PrivateKey priv) throws CryptoException {
+		try {
+			KeyFactory fact = KeyFactory.getInstance(asymmetricAlgorithm);
+			PKCS8EncodedKeySpec spec = fact.getKeySpec(priv, PKCS8EncodedKeySpec.class);
+			byte[] packed = spec.getEncoded();
+			String key64 = Base64.getEncoder().encodeToString(packed);
+			Arrays.fill(packed, (byte) 0);
+			return key64;
+		} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+			throw new CryptoException("Could not convert private key into base64 string", e);
+		}
+	}
+
+	public static String publicKeyToString(PublicKey publ) throws CryptoException {
+		try {
+			KeyFactory fact = KeyFactory.getInstance(asymmetricAlgorithm);
+			X509EncodedKeySpec spec = fact.getKeySpec(publ, X509EncodedKeySpec.class);
+			return Base64.getEncoder().encodeToString(spec.getEncoded());
+		} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+			throw new CryptoException("Could not convert public key into base64 string", e);
+		}
 	}
 
 	/*** statics **** */

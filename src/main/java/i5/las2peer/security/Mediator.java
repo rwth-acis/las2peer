@@ -1,9 +1,5 @@
 package i5.las2peer.security;
 
-import java.io.Serializable;
-import java.util.LinkedList;
-import java.util.Vector;
-
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
 import i5.las2peer.execution.L2pServiceException;
@@ -15,10 +11,13 @@ import i5.las2peer.p2p.TimeoutException;
 import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.tools.SerializationException;
 
+import java.io.Serializable;
+import java.util.LinkedList;
+import java.util.Vector;
+
 /**
  * A Mediator acts on behalf of an {@link PassphraseAgent}. This necessary e.g. for remote users logged in via a
- * {@link i5.las2peer.api.Connector} to collect incoming messages from the P2P network and transfer it to the connector.
- * <br>
+ * {@link i5.las2peer.api.Connector} to collect incoming messages from the P2P network and transfer it to the connector. <br>
  * Two ways for message handling are provided: Register a {@link MessageHandler} that will be called for each received
  * message. Multiple MessageHandlers are possible (for example for different message contents). The second way to handle
  * messages is to get pending messages from the Mediator directly via the provided methods. Handling then has to be done
@@ -30,22 +29,29 @@ public class Mediator implements MessageReceiver {
 	private LinkedList<Message> pending = new LinkedList<Message>();
 
 	private Agent myAgent;
+	private Node runningAt;
 
-	private Node runningAt = null;
+	/**
+	 * indicates if this mediator is registered as MessageReceiver at the {@link #runningAt} Node
+	 */
+	private boolean isRegistered = false;
 
 	private Vector<MessageHandler> registeredHandlers = new Vector<MessageHandler>();
 
 	/**
 	 * Creates a new mediator.
 	 * 
-	 * @param a
+	 * @param n the node
+	 * @param a the agent
 	 * @throws L2pSecurityException
 	 */
-	public Mediator(Agent a) throws L2pSecurityException {
-		if (a.isLocked())
+	public Mediator(Node n, Agent a) throws L2pSecurityException {
+		if (a.isLocked()) {
 			throw new L2pSecurityException("You need to unlock the private key of the agent for mediating.");
+		}
 
 		myAgent = a;
+		runningAt = n;
 	}
 
 	/**
@@ -72,8 +78,9 @@ public class Mediator implements MessageReceiver {
 
 	@Override
 	public void receiveMessage(Message message, Context c) throws MessageException {
-		if (message.getRecipientId() != myAgent.getId())
+		if (message.getRecipientId() != myAgent.getId()) {
 			throw new MessageException("I'm not responsible for the receiver (something went very wrong)!");
+		}
 
 		try {
 			message.open(myAgent, c);
@@ -81,8 +88,8 @@ public class Mediator implements MessageReceiver {
 			// START
 			// This part enables message answering for all messages that were sent to an (UserAgent) mediator.
 			// Disable this section to reduce network traffic
-			if (getMyNode() != null) { // This line is needed to allow the tests to work (since they do not have a
-										// node..)
+			if (getMyNode() != null && !message.getContent().equals("thank you")) { // make tests work and avoid endless
+																					// responses
 				try {
 					Message response = new Message(message, "thank you");
 					response.setSendingNodeId(getMyNode().getNodeId());
@@ -102,8 +109,9 @@ public class Mediator implements MessageReceiver {
 					"Sender unkown (since this is the receiver). Has the sending node gone offline? ", e);
 		}
 
-		if (!workOnMessage(message, c))
+		if (!workOnMessage(message, c)) {
 			pending.add(message);
+		}
 	}
 
 	/**
@@ -114,14 +122,14 @@ public class Mediator implements MessageReceiver {
 	 * 
 	 * @param message
 	 * @param context
-	 * 
 	 * @return true, if a message had been treated successfully
 	 */
 	public boolean workOnMessage(Message message, Context context) {
 		for (int i = 0; i < registeredHandlers.size(); i++) {
 			try {
-				if (registeredHandlers.get(i).handleMessage(message, context))
+				if (registeredHandlers.get(i).handleMessage(message, context)) {
 					return true;
+				}
 			} catch (Exception e) {
 				runningAt.observerNotice(Event.MESSAGE_FAILED, runningAt.getNodeId(), this,
 						"Exception in MessageHandler " + registeredHandlers.get(i) + ": " + e);
@@ -139,66 +147,59 @@ public class Mediator implements MessageReceiver {
 		return runningAt;
 	}
 
+	/**
+	 * @return true if this mediator is registered as MessageReceiver at the node
+	 */
+	public boolean isRegistered() {
+		return this.isRegistered;
+	}
+
 	@Override
 	public long getResponsibleForAgentId() {
 		return myAgent.getId();
 	}
 
+	/**
+	 * returns the mediated agent
+	 * 
+	 * @return
+	 */
+	public Agent getAgent() {
+		return myAgent;
+	}
+
 	@Override
 	public void notifyRegistrationTo(Node node) {
-		runningAt = node;
+		if (node != runningAt)
+			throw new IllegalStateException("The mediator has not been created at this node.");
+
+		this.isRegistered = true;
 	}
 
 	@Override
 	public void notifyUnregister() {
-		runningAt = null;
+		this.isRegistered = false;
 	}
 
 	/**
 	 * Invokes a service method (in the network) for the mediated agent.
 	 * 
-	 * @param service
-	 * @param method
-	 * @param parameters
-	 * @param preferLocal if a local running service should be preferred
-	 * 
+	 * @param service the service to invoke
+	 * @param method method to invoke
+	 * @param parameters list of method parameters
+	 * @param localOnly if true, only services on this node are invoked
 	 * @return result of the method invocation
-	 * 
 	 * @throws L2pSecurityException
 	 * @throws InterruptedException
 	 * @throws TimeoutException
 	 * @throws L2pServiceException
 	 * @throws AgentNotKnownException
 	 */
-	public Serializable invoke(String service, String method, Serializable[] parameters, boolean preferLocal)
+	public Serializable invoke(String service, String method, Serializable[] parameters, boolean localOnly)
 			throws L2pSecurityException, InterruptedException, TimeoutException, AgentNotKnownException,
 			L2pServiceException {
-		
-		return runningAt.invoke(myAgent, service, method, parameters, preferLocal);
-	}
-	
-	/**
-	 * Invokes a service method (in the network) for the mediated agent.
-	 * 
-	 * @param service
-	 * @param version
-	 * @param method
-	 * @param parameters
-	 * @param preferLocal if a local running service should be preferred
-	 * 
-	 * @return result of the method invocation
-	 * 
-	 * @throws L2pSecurityException
-	 * @throws InterruptedException
-	 * @throws TimeoutException
-	 * @throws AgentNotKnownException
-	 * @throws L2pServiceException
-	 */
-	public Serializable invoke(String service, String version, String method, Serializable[] parameters, boolean preferLocal)
-			throws L2pSecurityException, InterruptedException, TimeoutException, AgentNotKnownException,
-			L2pServiceException {
-		
-		return runningAt.invoke(myAgent, new ServiceNameVersion(service,version), method, parameters, preferLocal);
+
+		return runningAt.invoke(myAgent, ServiceNameVersion.fromString(service), method, parameters, false, localOnly);
 	}
 
 	/**
@@ -218,11 +219,13 @@ public class Mediator implements MessageReceiver {
 	 * @param handler
 	 */
 	public void registerMessageHandler(MessageHandler handler) {
-		if (handler == null)
+		if (handler == null) {
 			throw new NullPointerException();
+		}
 
-		if (registeredHandlers.contains(handler))
+		if (registeredHandlers.contains(handler)) {
 			return;
+		}
 
 		registeredHandlers.add(handler);
 	}
@@ -240,7 +243,6 @@ public class Mediator implements MessageReceiver {
 	 * Unregisters all handlers of the given class.
 	 * 
 	 * @param cls
-	 * 
 	 * @return number of successfully removed message handlers
 	 */
 	public int unregisterMessageHandlerClass(Class<?> cls) {
@@ -248,11 +250,13 @@ public class Mediator implements MessageReceiver {
 
 		Vector<MessageHandler> newHandlers = new Vector<MessageHandler>();
 
-		for (int i = 0; i < registeredHandlers.size(); i++)
+		for (int i = 0; i < registeredHandlers.size(); i++) {
 			if (!cls.isInstance(registeredHandlers.get(i))) {
 				newHandlers.add(registeredHandlers.get(i));
-			} else
+			} else {
 				result++;
+			}
+		}
 
 		registeredHandlers = newHandlers;
 
@@ -263,7 +267,6 @@ public class Mediator implements MessageReceiver {
 	 * Unregisters all handlers of the given class.
 	 * 
 	 * @param classname
-	 * 
 	 * @return number of successfully removed message handlers
 	 */
 	public int unregisterMessageHandlerClass(String classname) {
@@ -279,7 +282,6 @@ public class Mediator implements MessageReceiver {
 	 * Is the given message handler registered at this mediator?
 	 * 
 	 * @param handler
-	 * 
 	 * @return true, if at least one message handler is registered to this mediator
 	 */
 	public boolean hasMessageHandler(MessageHandler handler) {
@@ -293,9 +295,11 @@ public class Mediator implements MessageReceiver {
 	 * @return true, if this mediator has a message handler of the given class
 	 */
 	public boolean hasMessageHandlerClass(Class<?> cls) {
-		for (MessageHandler handler : registeredHandlers)
-			if (cls.isInstance(handler))
+		for (MessageHandler handler : registeredHandlers) {
+			if (cls.isInstance(handler)) {
 				return true;
+			}
+		}
 
 		return false;
 	}

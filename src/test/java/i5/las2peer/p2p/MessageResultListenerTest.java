@@ -34,6 +34,7 @@ public class MessageResultListenerTest {
 		};
 
 		new Thread(new Runnable() {
+			@Override
 			public void run() {
 				try {
 					Thread.sleep(4000);
@@ -56,9 +57,11 @@ public class MessageResultListenerTest {
 		test = false;
 
 		final MessageResultListener testee = new MessageResultListener(1500) {
+			@Override
 			public void notifySuccess() {
 			}
 
+			@Override
 			public void notifyTimeout() {
 				MessageResultListenerTest.test = true;
 			}
@@ -80,9 +83,11 @@ public class MessageResultListenerTest {
 		test = false;
 
 		final MessageResultListener testee = new MessageResultListener(2000) {
+			@Override
 			public void notifySuccess() {
 			}
 
+			@Override
 			public void notifyException(Exception e) {
 				MessageResultListenerTest.test = true;
 			}
@@ -110,10 +115,12 @@ public class MessageResultListenerTest {
 		test = test2 = false;
 
 		final MessageResultListener testee = new MessageResultListener(10000) {
+			@Override
 			public void notifySuccess() {
 				MessageResultListenerTest.test2 = true;
 			}
 
+			@Override
 			public void notifyException(Exception e) {
 				MessageResultListenerTest.test = true;
 			}
@@ -122,6 +129,7 @@ public class MessageResultListenerTest {
 		testee.addRecipient();
 
 		new Thread(new Runnable() {
+			@Override
 			public void run() {
 				try {
 					Thread.sleep(2000);

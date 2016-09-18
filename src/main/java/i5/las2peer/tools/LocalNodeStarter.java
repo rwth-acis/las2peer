@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import i5.las2peer.api.exceptions.StorageException;
 import i5.las2peer.p2p.AgentAlreadyRegisteredException;
 import i5.las2peer.p2p.LocalNode;
 import i5.las2peer.p2p.Node;
@@ -29,8 +30,8 @@ public class LocalNodeStarter {
 
 	/**
 	 * start a local node and load all artifact files of the given directory into the node
-	 * @param node 
 	 * 
+	 * @param node
 	 * @param artifactDirectory
 	 */
 	public static void configureNode(LocalNode node, String artifactDirectory) {
@@ -43,13 +44,13 @@ public class LocalNodeStarter {
 		})) {
 			try {
 				String content = FileContentReader.read(xml);
-
 				if (xml.getName().toLowerCase().startsWith("agent")) {
 					Agent a = Agent.createFromXml(content);
 					node.storeAgent(a);
 					System.err.println("loaded agent from " + xml);
 				} else {
 					Envelope e = Envelope.createFromXml(content);
+					// TODO fix upload Envelope from startup directory
 					node.storeArtifact(e);
 					System.err.println("loaded artifact from " + xml);
 				}
@@ -59,6 +60,8 @@ public class LocalNodeStarter {
 				System.err.println("problems reading the contents of " + xml.toString() + ": " + e);
 			} catch (L2pSecurityException e) {
 				System.err.println("error storing agent from " + xml.toString() + ": " + e);
+			} catch (StorageException e) {
+				System.err.println("error storing object from " + xml.toString() + ": " + e);
 			} catch (AgentAlreadyRegisteredException e) {
 				System.err.println("agent from " + xml.toString() + " already known at this node!");
 			} catch (AgentException e) {
@@ -88,16 +91,18 @@ public class LocalNodeStarter {
 		Method m = null;
 		try {
 			m = cls.getMethod(sMethod, LocalNode.class);
-			if (!Modifier.isStatic(m.getModifiers()))
+			if (!Modifier.isStatic(m.getModifiers())) {
 				m = null;
+			}
 		} catch (Exception e) {
 		}
 
 		if (m == null) {
 			try {
 				m = cls.getMethod(sMethod, Node.class);
-				if (!Modifier.isStatic(m.getModifiers()))
+				if (!Modifier.isStatic(m.getModifiers())) {
 					m = null;
+				}
 			} catch (Exception e) {
 			}
 		}
@@ -105,8 +110,9 @@ public class LocalNodeStarter {
 		if (m == null) {
 			try {
 				m = cls.getMethod(sMethod);
-				if (!Modifier.isStatic(m.getModifiers()))
+				if (!Modifier.isStatic(m.getModifiers())) {
 					m = null;
+				}
 			} catch (Exception e) {
 			}
 		}
@@ -117,10 +123,11 @@ public class LocalNodeStarter {
 		}
 
 		try {
-			if (m.getParameterTypes().length == 1)
+			if (m.getParameterTypes().length == 1) {
 				m.invoke(null, node);
-			else
+			} else {
 				m.invoke(null);
+			}
 		} catch (Exception e) {
 			System.out.println("Error invokin requested method: " + e);
 		}
@@ -131,7 +138,7 @@ public class LocalNodeStarter {
 	 * 
 	 * @param argv
 	 * @throws InterruptedException
-	 * @throws NodeException 
+	 * @throws NodeException
 	 */
 	public static void main(String argv[]) throws InterruptedException, NodeException {
 		if (argv.length < 1) {

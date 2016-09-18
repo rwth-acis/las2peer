@@ -267,9 +267,7 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 	 * 
 	 * @param smaller
 	 * @param larger
-	 * 
 	 * @return true, if this version is between the two given ones
-	 * 
 	 * @throws IllegalArgumentException
 	 */
 	public boolean isBetween(String smaller, String larger) {
@@ -290,15 +288,16 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 	 * compares this version with any object
 	 * 
 	 * if the given object is a String, the string representation of this version is compared to the given string
-	 * @param o 
 	 * 
+	 * @param o
 	 * @return true, if the given object is a version and the same as this one
 	 */
+	@Override
 	public boolean equals(Object o) {
 		if (o instanceof LibraryVersion)
 			return this.equals((LibraryVersion) o);
 		else if (o instanceof String)
-			return this.toString().equals((String) o);
+			return this.toString().equals(o);
 		else
 			return super.equals(o);
 	}
@@ -308,6 +307,7 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 	 * 
 	 * @return a hash code as int
 	 */
+	@Override
 	public int hashCode() {
 		return (this.toString()).hashCode();
 	}
@@ -357,6 +357,7 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 	/**
 	 * @return a String representation of this version
 	 */
+	@Override
 	public String toString() {
 		String result = "" + major;
 		if (minor != null) {
