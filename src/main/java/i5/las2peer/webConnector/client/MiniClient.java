@@ -1,5 +1,8 @@
 package i5.las2peer.webConnector.client;
 
+import i5.las2peer.restMapper.data.Pair;
+import i5.las2peer.webConnector.WebConnector;
+
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStream;
@@ -12,14 +15,12 @@ import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
 
-import i5.las2peer.restMapper.data.Pair;
-import i5.las2peer.webConnector.WebConnector;
-
 /**
  * Very simple client to communicate with the las2peer web connector
  *
  *
  */
+// TODO JS deprecate and use alternative ?!?
 public class MiniClient {
 
 	private String authorization;

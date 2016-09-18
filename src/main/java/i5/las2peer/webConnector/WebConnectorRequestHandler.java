@@ -3,19 +3,15 @@ package i5.las2peer.webConnector;
 import i5.las2peer.classLoaders.ClassLoaderException;
 import i5.las2peer.classLoaders.L2pClassManager;
 import i5.las2peer.execution.NoSuchServiceException;
-import i5.las2peer.execution.NoSuchServiceMethodException;
 import i5.las2peer.execution.ServiceInvocationException;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.ServiceNameVersion;
 import i5.las2peer.p2p.ServiceNotFoundException;
 import i5.las2peer.p2p.ServiceVersion;
-import i5.las2peer.p2p.TimeoutException;
 import i5.las2peer.restMapper.HttpResponse;
 import i5.las2peer.restMapper.RESTMapper;
-import i5.las2peer.restMapper.data.InvocationData;
 import i5.las2peer.restMapper.data.Pair;
-import i5.las2peer.restMapper.data.PathTree;
 import i5.las2peer.restMapper.exceptions.NoMethodFoundException;
 import i5.las2peer.restMapper.exceptions.NotSupportedUriPathException;
 import i5.las2peer.security.L2pSecurityException;
@@ -31,7 +27,6 @@ import io.swagger.util.Json;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
@@ -45,14 +40,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import net.minidev.json.JSONObject;
 import rice.p2p.util.Base64;
 
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest.Method;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
@@ -96,6 +90,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			// check for an OPTIONS request and auto answer it
 			// TODO this should become a default reply for OPTIONS-requests,
 			// but should be also be available to service developers
+			// TODO JS remove this case?
 			sendResponse(exchange, HttpURLConnection.HTTP_OK, NO_RESPONSE_BODY);
 		} else if (exchange.getRequestMethod().equalsIgnoreCase("get")
 				&& exchange.getRequestURI().getPath().toString().endsWith("/swagger.json")) {
@@ -339,12 +334,14 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	 * @return
 	 */
 	private boolean invoke(PassphraseAgent agent, HttpExchange exchange) {
-		String[] requestSplit = exchange.getRequestURI().getPath().split("/", 2);
-		// first: empty (string starts with '/')
-		// second: URI
-		String uri = "";
-
 		try {
+			// TODO JS refactor, extract path fragment and version in own method :
+
+			String[] requestSplit = exchange.getRequestURI().getPath().split("/", 2);
+			// first: empty (string starts with '/')
+			// second: URI
+			String uri = "";
+
 			if (requestSplit.length >= 2) {
 				int varsstart = requestSplit[1].indexOf('?');
 				if (varsstart > 0) {
@@ -353,69 +350,6 @@ public class WebConnectorRequestHandler implements HttpHandler {
 					uri = requestSplit[1];
 				}
 			}
-
-			// http body
-			InputStream is = exchange.getRequestBody();
-			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-			int nRead;
-			byte[] data = new byte[4096];
-			boolean overflow = false;
-			while ((nRead = is.read(data, 0, data.length)) != -1) {
-				if (buffer.size() < connector.maxRequestBodySize - data.length) {
-					// still space left in local buffer
-					buffer.write(data, 0, nRead);
-				} else {
-					overflow = true;
-					// no break allowed otherwise the client gets an exception (like connection closed)
-					// so we have to read all given content
-				}
-			}
-			if (overflow) {
-				sendStringResponse(exchange, HttpURLConnection.HTTP_ENTITY_TOO_LARGE,
-						"Given request body exceeds limit of " + connector.maxRequestBodySize + " bytes");
-				return false;
-			}
-			byte[] rawContent = buffer.toByteArray();
-
-			// http method
-			String httpMethod = exchange.getRequestMethod();
-
-			// extract all get variables from the query
-			ArrayList<Pair<String>> variablesList = new ArrayList<Pair<String>>();
-			String query = exchange.getRequestURI().getQuery();
-			if (query != null) {
-				for (String param : query.split("&")) {
-					String pair[] = param.split("=");
-					if (pair.length > 1) {
-						variablesList.add(new Pair<String>(pair[0], pair[1]));
-					} else {
-						variablesList.add(new Pair<String>(pair[0], ""));
-					}
-				}
-			}
-			@SuppressWarnings("unchecked")
-			Pair<String>[] variables = variablesList.toArray(new Pair[variablesList.size()]);
-
-			// extract all header fields from the query
-			ArrayList<Pair<String>> headersList = new ArrayList<Pair<String>>();
-			// default values
-			String acceptHeader = "*/*";
-			String contentTypeHeader = "text/plain";
-			Set<Entry<String, List<String>>> entries = exchange.getRequestHeaders().entrySet();
-			for (Entry<String, List<String>> entry : entries) {
-				String key = entry.getKey();
-				for (String value : entry.getValue()) {
-					headersList.add(new Pair<String>(key, value));
-					// fetch MIME types
-					if (key.equalsIgnoreCase("accept") && !value.isEmpty()) {
-						acceptHeader = value;
-					} else if (key.equalsIgnoreCase("content-type") && !value.isEmpty()) {
-						contentTypeHeader = value;
-					}
-				}
-			}
-			@SuppressWarnings("unchecked")
-			Pair<String>[] headers = headersList.toArray(new Pair[headersList.size()]);
 
 			// extract service information from uri
 			if (uri.startsWith("/"))
@@ -446,59 +380,12 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			}
 
 			// invoke
-			Serializable result = "";
-			boolean gotResult = false;
-			String[] returnMIMEType = RESTMapper.DEFAULT_PRODUCES_MIME_TYPE;
-			StringBuilder warnings = new StringBuilder();
-			PathTree tree;
-			try {
-				tree = connector.getServiceRepositoryManager().getServiceTree(requiredService, agent,
-						connector.onlyLocalServices());
-			} catch (Exception e) {
-				throw new NoSuchServiceException(requiredService.toString(), e);
-			}
-			InvocationData[] invocation = RESTMapper.parse(tree, httpMethod, uri, variables, rawContent,
-					contentTypeHeader, acceptHeader, headers, warnings);
+			// TODO JS extract params for jersey
 
-			if (invocation.length == 0) {
-				if (warnings.length() > 0) {
-					sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND,
-							warnings.toString().replaceAll("\n", " "));
-				} else {
-					sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND, "could not match REST mapping");
-				}
-				return false;
-			}
+			Mediator mediator = l2pNode.createMediatorForAgent(agent);
+			ResponseType result = mediator.invoke(requiredService.toString(), "handle", params,
+					connector.onlyLocalServices());
 
-			for (InvocationData inv : invocation) {
-				try {
-					// invoke service method
-					Mediator mediator = l2pNode.createMediatorForAgent(agent);
-					result = mediator.invoke(requiredService.toString(), inv.getMethodName(), inv.getParameters(),
-							connector.onlyLocalServices());
-					gotResult = true;
-					returnMIMEType = inv.getMIME();
-					break;
-				} catch (NoSuchServiceException | TimeoutException e) {
-					sendNoSuchService(exchange, requiredService.toString());
-				} catch (NoSuchServiceMethodException e) {
-					sendNoSuchMethod(exchange);
-				} catch (L2pSecurityException e) {
-					sendSecurityProblems(exchange, e);
-				} catch (ServiceInvocationException e) {
-					if (e.getCause() == null) {
-						sendResultInterpretationProblems(exchange);
-					} else {
-						sendInvocationException(exchange, e);
-					}
-				} catch (InterruptedException e) {
-					sendInvocationInterrupted(exchange);
-				}
-			}
-
-			if (gotResult) {
-				sendInvocationSuccess(result, returnMIMEType, exchange);
-			}
 			return true;
 		} catch (NoMethodFoundException | NotSupportedUriPathException e) {
 			sendNoSuchMethod(exchange);
@@ -518,7 +405,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	 * 
 	 * @param exchange The origin exchange request for the swagger listing.
 	 */
-	private void handleSwagger(HttpExchange exchange) {
+	private void handleSwagger(HttpExchange exchange) { // TODO USE METHOD CALL
 		// extract service alias from path
 		String[] uriSplit = exchange.getRequestURI().getPath().split("/");
 		String serviceName;
