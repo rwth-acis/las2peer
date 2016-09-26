@@ -1,19 +1,5 @@
 package i5.las2peer.persistency;
 
-import java.io.Serializable;
-import java.security.PublicKey;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
-
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestName;
-
 import i5.las2peer.api.StorageCollisionHandler;
 import i5.las2peer.api.StorageEnvelopeHandler;
 import i5.las2peer.api.StorageExceptionHandler;
@@ -27,6 +13,20 @@ import i5.las2peer.security.GroupAgent;
 import i5.las2peer.security.UserAgent;
 import i5.las2peer.testing.MockAgentFactory;
 import i5.las2peer.testing.TestSuite;
+
+import java.io.Serializable;
+import java.security.PublicKey;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Random;
+
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TestName;
 
 public class EnvelopeTest {
 
@@ -86,8 +86,8 @@ public class EnvelopeTest {
 			node1.storeEnvelopeAsync(envelope1, smith, new StorageStoreResultHandler() {
 				@Override
 				public void onResult(Serializable serializable, int successfulOperations) {
-					System.out.println(
-							"Successfully stored artifact " + serializable + " " + successfulOperations + " times");
+					System.out.println("Successfully stored artifact " + serializable + " " + successfulOperations
+							+ " times");
 					// fetch envelope again
 					System.out.println("Fetching artifact ...");
 					node1.fetchEnvelopeAsync("test", new StorageEnvelopeHandler() {
@@ -246,9 +246,8 @@ public class EnvelopeTest {
 						public Serializable onCollision(Envelope toStore, Envelope inNetwork, long numberOfCollisions)
 								throws StopMergingException {
 							if (numberOfCollisions > 100) {
-								throw new StopMergingException(
-										"Merging failed, too many (" + numberOfCollisions + ") collisions!",
-										numberOfCollisions);
+								throw new StopMergingException("Merging failed, too many (" + numberOfCollisions
+										+ ") collisions!", numberOfCollisions);
 							}
 							// we return the "merged" version of both envelopes
 							// usually there one should put more effort into merging
@@ -527,7 +526,7 @@ public class EnvelopeTest {
 			node1.storeEnvelope(groupEnv, group1);
 			PastryNodeImpl node2 = nodes.get(1);
 			Envelope fetchedEnv = node2.fetchEnvelope("test");
-			String content = (String) fetchedEnv.getContent(smith);
+			String content = (String) fetchedEnv.getContent(smith, node1);
 			Assert.assertEquals(testContent, content);
 		} catch (Exception e) {
 			e.printStackTrace();

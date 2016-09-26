@@ -1,18 +1,5 @@
 package i5.las2peer.security;
 
-import java.io.Serializable;
-import java.security.KeyPair;
-import java.security.PublicKey;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Random;
-
-import javax.crypto.SecretKey;
-
-import org.apache.commons.codec.binary.Base64;
-
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
 import i5.las2peer.logging.L2pLogger;
@@ -28,6 +15,19 @@ import i5.las2peer.tools.SerializeTools;
 import i5.simpleXML.Element;
 import i5.simpleXML.Parser;
 import i5.simpleXML.XMLSyntaxException;
+
+import java.io.Serializable;
+import java.security.KeyPair;
+import java.security.PublicKey;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Random;
+
+import javax.crypto.SecretKey;
+
+import org.apache.commons.codec.binary.Base64;
 
 /**
  * An agent representing a group of other agents.
@@ -71,8 +71,8 @@ public class GroupAgent extends Agent {
 	 * @throws CryptoException
 	 * @throws SerializationException
 	 */
-	protected GroupAgent(long id, KeyPair keys, SecretKey secret, Agent[] members)
-			throws L2pSecurityException, CryptoException, SerializationException {
+	protected GroupAgent(long id, KeyPair keys, SecretKey secret, Agent[] members) throws L2pSecurityException,
+			CryptoException, SerializationException {
 		super(id, keys, secret);
 
 		symmetricGroupKey = secret;
@@ -97,6 +97,37 @@ public class GroupAgent extends Agent {
 	}
 
 	/**
+	 * unlock the GroupAgent using transitive memberships
+	 * 
+	 * @param agentStorage to load the agents from
+	 * @param agent
+	 * @throws L2pSecurityException
+	 * @throws SerializationException
+	 * @throws CryptoException
+	 */
+	public void unlockPrivateKeyRecursive(Agent agent, AgentStorage agentStorage) throws L2pSecurityException,
+			SerializationException, CryptoException {
+		if (isMember(agent)) {
+			unlockPrivateKey(agent);
+			return;
+		} else {
+			for (Long memberId : htEncryptedKeyVersions.keySet()) {
+				try {
+					Agent member = agentStorage.getAgent(memberId);
+					if (member instanceof GroupAgent) {
+						((GroupAgent) member).unlockPrivateKeyRecursive(agent, agentStorage);
+						unlockPrivateKey(member);
+						return;
+					}
+				} catch (AgentNotKnownException | L2pSecurityException | SerializationException | CryptoException e) {
+				}
+			}
+		}
+
+		throw new L2pSecurityException("The given agent has no access to this group!");
+	}
+
+	/**
 	 * decrypt the secret key of this group for the given agent (which is hopefully a member)
 	 * 
 	 * @param agent
@@ -110,7 +141,7 @@ public class GroupAgent extends Agent {
 		if (crypted == null)
 			throw new L2pSecurityException("the given agent is not listed as a group member!");
 
-		symmetricGroupKey = (SecretKey) agent.decryptSymmetricKey(crypted);
+		symmetricGroupKey = agent.decryptSymmetricKey(crypted);
 	}
 
 	/**
@@ -135,8 +166,8 @@ public class GroupAgent extends Agent {
 	 * @throws SerializationException
 	 * @throws CryptoException
 	 */
-	private final void addMember(Agent a, boolean securityCheck)
-			throws L2pSecurityException, CryptoException, SerializationException {
+	private final void addMember(Agent a, boolean securityCheck) throws L2pSecurityException, CryptoException,
+			SerializationException {
 		if (securityCheck && isLocked())
 			throw new L2pSecurityException("you have to unlock this group first!");
 
@@ -496,8 +527,8 @@ public class GroupAgent extends Agent {
 	 * @throws CryptoException
 	 * @throws SerializationException
 	 */
-	public static GroupAgent createGroupAgent(Agent[] members)
-			throws L2pSecurityException, CryptoException, SerializationException {
+	public static GroupAgent createGroupAgent(Agent[] members) throws L2pSecurityException, CryptoException,
+			SerializationException {
 		Random r = new Random();
 		return new GroupAgent(r.nextLong(), CryptoTools.generateKeyPair(), CryptoTools.generateSymmetricKey(), members);
 	}
@@ -537,8 +568,8 @@ public class GroupAgent extends Agent {
 				L2pLogger.logEvent(Event.SERVICE_ERROR, e1.getMessage());
 			}
 			if (member == null) {
-				L2pLogger.logEvent(Event.SERVICE_ERROR,
-						"No agent for group member " + memberId + " found! Skipping member.");
+				L2pLogger.logEvent(Event.SERVICE_ERROR, "No agent for group member " + memberId
+						+ " found! Skipping member.");
 				continue;
 			}
 			try {
