@@ -11,6 +11,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import i5.las2peer.p2p.PastryNodeImpl;
+import i5.las2peer.p2p.ServiceNameVersion;
 import i5.las2peer.testing.TestSuite;
 
 public class SandboxTest {
@@ -31,7 +32,8 @@ public class SandboxTest {
 		try {
 			node = TestSuite.launchNetwork(1).get(0);
 			node.launch();
-			service = ServiceAgent.createServiceAgent(MaliciousService.class.getName(), "testpasswd");
+			service = ServiceAgent.createServiceAgent(new ServiceNameVersion(MaliciousService.class.getName(), "1.0"),
+					"testpasswd");
 			service.unlockPrivateKey("testpasswd");
 			node.registerReceiver(service);
 		} catch (Exception e) {
