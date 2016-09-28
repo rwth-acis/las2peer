@@ -9,7 +9,8 @@ public interface NodeStorageInterface extends L2pStorageInterface {
 	/**
 	 * Stores the given Envelope in the network. The content is signed with the key from the given author. If an
 	 * exception occurs its wrapped as StorageException. With this method collisions are handled by throwing an
-	 * {@link EnvelopeAlreadyExistsException}. This method uses the default timeout defined by the acting node.
+	 * {@link i5.las2peer.api.exceptions.EnvelopeAlreadyExistsException}. This method uses the default timeout defined
+	 * by the acting node.
 	 * 
 	 * @param envelope The Envelope to store in the network.
 	 * @param author The author that is used to sign the content.
