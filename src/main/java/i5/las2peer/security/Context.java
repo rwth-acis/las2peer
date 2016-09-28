@@ -461,7 +461,7 @@ public class Context implements AgentStorage, ContextStorageInterface {
 	@Override
 	public Envelope createEnvelope(Envelope previousVersion, Serializable content)
 			throws IllegalArgumentException, SerializationException, CryptoException {
-		return localNode.createEnvelope(previousVersion, content, getMainAgent());
+		return localNode.createEnvelope(previousVersion, content);
 	}
 
 	@Override
