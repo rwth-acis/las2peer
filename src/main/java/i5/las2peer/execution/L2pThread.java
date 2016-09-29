@@ -44,7 +44,7 @@ public class L2pThread extends Thread {
 	 * @return Returns the class loader instance.
 	 */
 	public static ClassLoader getServiceClassLoader() {
-		return getCurrent().agent.getClass().getClassLoader();
+		return getCurrent().agent.getServiceInstance().getClass().getClassLoader();
 	}
 
 	/**
