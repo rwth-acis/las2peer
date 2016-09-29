@@ -9,10 +9,12 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.logging.Level;
 
 import javax.crypto.SecretKey;
 
 import i5.las2peer.execution.L2pThread;
+import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.security.Agent;
 import i5.las2peer.security.AgentStorage;
@@ -28,6 +30,8 @@ import i5.simpleXML.Parser;
 import i5.simpleXML.XMLSyntaxException;
 
 public class Envelope implements Serializable, XmlAble {
+
+	private static final L2pLogger logger = L2pLogger.getInstance(Envelope.class);
 
 	/**
 	 * freshly created local instance, can be considered as {@code null}
@@ -210,7 +214,7 @@ public class Envelope implements Serializable, XmlAble {
 			try {
 				clsLoader = L2pThread.getServiceClassLoader();
 			} catch (IllegalStateException e) {
-				// XXX logging
+				logger.log(Level.FINER, "Could not get service class loader" + e.toString());
 			}
 			return SerializeTools.deserialize(rawContent, clsLoader);
 		}
@@ -244,10 +248,10 @@ public class Envelope implements Serializable, XmlAble {
 							break;
 						}
 					} else {
-						// XXX error logging
+						logger.log(Level.WARNING, "Non GroupAgent listed as reader group");
 					}
 				} catch (AgentNotKnownException | L2pSecurityException | CryptoException | SerializationException e) {
-					// XXX error logging
+					logger.log(Level.WARNING, "Issue with envelope reader", e);
 				}
 			}
 			if (decryptedReaderKey == null) {
@@ -267,7 +271,7 @@ public class Envelope implements Serializable, XmlAble {
 		try {
 			clsLoader = L2pThread.getServiceClassLoader();
 		} catch (IllegalStateException e) {
-			// XXX logging
+			logger.log(Level.FINER, "Could not get service class loader" + e.toString());
 		}
 		return SerializeTools.deserialize(decrypted, clsLoader);
 	}
