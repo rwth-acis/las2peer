@@ -199,7 +199,6 @@ public class Envelope implements Serializable, XmlAble {
 	}
 
 	public HashMap<PublicKey, byte[]> getReaderKeys() {
-		// XXX return a shallow copy? Would a malicious action on this list have any impacts?
 		return readerKeys;
 	}
 
