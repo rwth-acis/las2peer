@@ -6,7 +6,6 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Base64;
@@ -41,9 +40,8 @@ public class MiniClient {
 	 * 
 	 * @param username
 	 * @param password
-	 * @throws UnsupportedEncodingException
 	 */
-	public void setLogin(String username, String password) throws UnsupportedEncodingException {
+	public void setLogin(String username, String password) {
 		authorization = username + ":" + password;
 		authorization = Base64.getEncoder().encodeToString(authorization.getBytes());
 	}
