@@ -81,7 +81,7 @@
 			pomfile="${export}/jars/${ivy.module}.pom" 
 			artifactName="${ivy.module}"
 			artifactPackaging="jar">
-			<mapping conf="*" scope="compile" />
+			<mapping conf="default" scope="compile" />
 		</ivy:makepom>
 
 		<ivy:publish resolver="acis-snapshots"
@@ -107,7 +107,7 @@
 			pomfile="${export}/jars/${ivy.module}.pom" 
 			artifactName="${ivy.module}"
 			artifactPackaging="jar">
-			<mapping conf="*" scope="compile" />
+			<mapping conf="default" scope="compile" />
 		</ivy:makepom>
 
 		<ivy:publish resolver="acis-internal"
