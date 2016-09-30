@@ -7,9 +7,7 @@
   <dependencies>
     <dependency org="i5" name="las2peer" rev="${ivy.las2peer.version}" changing="true"/>
     <dependency org="i5" name="las2peer-rest-mapper" rev="${ivy.las2peer.version}" changing="true"/>
-	
 	<dependency org="junit" name="junit" rev="4.12" />
-	
 	<dependency org="com.nimbusds" name="oauth2-oidc-sdk" rev="4.17" />
   </dependencies>
 </ivy-module>

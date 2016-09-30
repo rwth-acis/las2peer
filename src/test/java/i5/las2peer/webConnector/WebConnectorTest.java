@@ -1,23 +1,28 @@
 package i5.las2peer.webConnector;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import i5.las2peer.p2p.LocalNode;
 import i5.las2peer.p2p.ServiceNameVersion;
-import i5.las2peer.restMapper.MediaType;
-import i5.las2peer.restMapper.data.Pair;
 import i5.las2peer.security.GroupAgent;
 import i5.las2peer.security.ServiceAgent;
 import i5.las2peer.security.UserAgent;
 import i5.las2peer.testing.MockAgentFactory;
 import i5.las2peer.webConnector.client.ClientResponse;
 import i5.las2peer.webConnector.client.MiniClient;
+import i5.las2peer.webConnector.services.TestClassLoaderService;
+import i5.las2peer.webConnector.services.TestSecurityContextService;
+import i5.las2peer.webConnector.services.TestService;
+import i5.las2peer.webConnector.services.TestSwaggerService;
+import i5.las2peer.webConnector.services.TestVersionService;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.net.HttpURLConnection;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.Random;
 
 import org.junit.AfterClass;
@@ -36,11 +41,11 @@ public class WebConnectorTest {
 	private static UserAgent testAgent;
 	private static final String testPass = "adamspass";
 
-	private static final String testServiceClass = "i5.las2peer.webConnector.TestService@0.1";
-	private static final String testServiceClass2 = "i5.las2peer.webConnector.TestService2@0.1";
-	private static final String testServiceClass3 = "i5.las2peer.webConnector.TestService3@0.1";
-	private static final String testServiceClass4 = "i5.las2peer.webConnector.TestService4@0.1";
-	private static final String testServiceClass5 = "i5.las2peer.webConnector.TestService5@0.1";
+	private static final String testServiceClass1 = TestSecurityContextService.class.getName() + "@1.0";
+	private static final String testServiceClass2 = TestSwaggerService.class.getName() + "@1.0";
+	private static final String testServiceClass3 = TestVersionService.class.getName() + "@1.0";
+	private static final String testServiceClass4 = TestService.class.getName() + "@1.0";
+	private static final String testServiceClass5 = TestClassLoaderService.class.getName() + "@1.0";
 
 	@BeforeClass
 	public static void startServer() throws Exception {
@@ -49,6 +54,7 @@ public class WebConnectorTest {
 		eve.unlockPrivateKey("evespass");
 		UserAgent adam = MockAgentFactory.getAdam();
 		adam.unlockPrivateKey("adamspass");
+		adam.setLoginName("adam");
 		UserAgent abel = MockAgentFactory.getAbel();
 		abel.unlockPrivateKey("abelspass");
 		GroupAgent group1 = MockAgentFactory.getGroup1();
@@ -62,7 +68,7 @@ public class WebConnectorTest {
 		node.storeAgent(group1);
 		node.launch();
 
-		ServiceAgent testService = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass),
+		ServiceAgent testService1 = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass1),
 				"a pass");
 		ServiceAgent testService2 = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass2),
 				"a pass");
@@ -73,13 +79,13 @@ public class WebConnectorTest {
 		ServiceAgent testService5 = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass5),
 				"a pass");
 
-		testService.unlockPrivateKey("a pass");
+		testService1.unlockPrivateKey("a pass");
 		testService2.unlockPrivateKey("a pass");
 		testService3.unlockPrivateKey("a pass");
 		testService4.unlockPrivateKey("a pass");
 		testService5.unlockPrivateKey("a pass");
 
-		node.registerReceiver(testService);
+		node.registerReceiver(testService1);
 		node.registerReceiver(testService2);
 		node.registerReceiver(testService3);
 		node.registerReceiver(testService4);
@@ -93,8 +99,7 @@ public class WebConnectorTest {
 		connector.setLogStream(new PrintStream(logStream));
 		connector.start(node);
 
-		// eve is the anonymous agent!
-		testAgent = MockAgentFactory.getAdam();
+		testAgent = adam;
 	}
 
 	@AfterClass
@@ -134,7 +139,7 @@ public class WebConnectorTest {
 		// correct, id based
 		try {
 			c.setLogin(Long.toString(testAgent.getId()), testPass);
-			ClientResponse result = c.sendRequest("get", "service1", "");
+			ClientResponse result = c.sendRequest("get", "test", "");
 			assertEquals("OK", result.getResponse().trim());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -145,7 +150,7 @@ public class WebConnectorTest {
 		try {
 			c.setLogin("adam", testPass);
 
-			ClientResponse result = c.sendRequest("GET", "service1", "");
+			ClientResponse result = c.sendRequest("GET", "test", "");
 			assertEquals("OK", result.getResponse().trim());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -156,7 +161,7 @@ public class WebConnectorTest {
 		try {
 			c.setLogin(Long.toString(testAgent.getId()), "aaaaaaaaaaaaa");
 
-			ClientResponse result = c.sendRequest("GET", "service1", "");
+			ClientResponse result = c.sendRequest("GET", "test", "");
 			assertEquals(401, result.getHttpCode());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -166,7 +171,7 @@ public class WebConnectorTest {
 		try {
 			c.setLogin(Long.toString(65464), "aaaaaaaaaaaaa");
 
-			ClientResponse result = c.sendRequest("GET", "service1", "");
+			ClientResponse result = c.sendRequest("GET", "test", "");
 			assertEquals(401, result.getHttpCode());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -181,7 +186,7 @@ public class WebConnectorTest {
 			c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 			c.setLogin(Long.toString(65464), "aaaaaaaaaaaaa");
 
-			ClientResponse result = c.sendRequest("GET", "service1", "");
+			ClientResponse result = c.sendRequest("GET", "test", "");
 			assertEquals(401, result.getHttpCode());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -194,8 +199,13 @@ public class WebConnectorTest {
 		MiniClient c = new MiniClient();
 		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 		try {
+			// unknown service
 			c.setLogin(Long.toString(testAgent.getId()), testPass);
-			ClientResponse result = c.sendRequest("GET", "exception", "");
+			ClientResponse result = c.sendRequest("GET", "doesNotExist", "");
+			assertEquals(404, result.getHttpCode());
+
+			// exception in invocation
+			result = c.sendRequest("GET", "test/exception", "");
 			assertEquals(500, result.getHttpCode());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -221,195 +231,18 @@ public class WebConnectorTest {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
-	public void testCalls() {
+	public void testPath() {
 		MiniClient c = new MiniClient();
 		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
-		// call all methods of the testService
 
 		try {
 			c.setLogin(Long.toString(testAgent.getId()), testPass);
 
-			ClientResponse result = c.sendRequest("PUT", "service1/add/5/6", "");
-			assertEquals("11", result.getResponse().trim());
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Exception: " + e);
-		}
+			ClientResponse result = c.sendRequest("GET", "version/path", "");
+			assertTrue(result.getResponse().trim().endsWith("version/"));
 
-		try {
-			c.setLogin(Long.toString(testAgent.getId()), testPass);
-
-			ClientResponse result = c.sendRequest("POST", "service1/sub/5/6", "");
-			assertEquals("-1", result.getResponse().trim());
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Exception: " + e);
-		}
-
-		try {
-			c.setLogin(Long.toString(testAgent.getId()), testPass);
-
-			ClientResponse result = c.sendRequest("DELETE", "service1/div/12/6", "");
-			assertEquals("2", result.getResponse().trim());
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Exception: " + e);
-		}
-
-		try {
-			c.setLogin(Long.toString(testAgent.getId()), testPass);
-
-			ClientResponse result = c.sendRequest("GET", "service1/do/2/it/3?param1=4&param2=5", "");
-			assertEquals("14", result.getResponse().trim());
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Exception: " + e);
-		}
-
-		try {
-			c.setLogin(Long.toString(testAgent.getId()), testPass);
-
-			ClientResponse result = c.sendRequest("GET", "service1/do/2/it/3/not?param1=4&param2=5", "");
-			assertEquals("-10", result.getResponse().trim());
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Exception: " + e);
-		}
-
-		try {
-			c.setLogin(Long.toString(testAgent.getId()), testPass);
-
-			ClientResponse result = c.sendRequest("GET", "service1/do/2/this/3/not?param1=4&param2=5", "");
-			assertEquals("-14", result.getResponse().trim());
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Exception: " + e);
-		}
-
-		// TestService2
-		try {
-			c.setLogin(Long.toString(testAgent.getId()), testPass);
-			ClientResponse result = c.sendRequest("POST", "service2/do/a/b", "c");
-			assertEquals("abc", result.getResponse().trim());
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Exception: " + e);
-		}
-
-		// TestService3
-		try {
-			c.setLogin(Long.toString(testAgent.getId()), testPass);
-			ClientResponse result = c.sendRequest("GET", "service3/test1/1/2", "", new Pair[] { new Pair<>("c", "5"),
-					new Pair<>("e", "4") });
-			assertEquals("125", result.getResponse().trim());
-			assertEquals("ho", result.getHeader("hi"));
-			assertEquals("text/plain", result.getHeader("Content-Type"));
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Exception: " + e);
-		}
-
-		try {
-			c.setLogin(Long.toString(testAgent.getId()), testPass);
-
-			ClientResponse result = c.sendRequest("GET", "service3/test2/1/2", "", new Pair[] {});
-			assertEquals(412, result.getHttpCode());
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Exception: " + e);
-		}
-
-		try {
-			c.setLogin(Long.toString(testAgent.getId()), testPass);
-
-			ClientResponse result = c.sendRequest("POST", "books/8", "", MediaType.TEXT_PLAIN, "", new Pair[] {});
-			assertEquals("8", result.getResponse().trim());
-
-			result = c.sendRequest("POST", "books/8", "", MediaType.AUDIO_MPEG, "", new Pair[] {});
-			assertEquals("56", result.getResponse().trim());
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Exception: " + e);
-		}
-
-		try {
-			c.setLogin(Long.toString(testAgent.getId()), testPass);
-
-			ClientResponse result = c.sendRequest("POST", "books/8", "", MediaType.TEXT_PLAIN, "", new Pair[] {});
-			assertEquals("8", result.getResponse().trim());
-
-			result = c.sendRequest("POST", "books/8", "", MediaType.AUDIO_MPEG, "", new Pair[] {});
-			assertEquals("56", result.getResponse().trim());
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Exception: " + e);
-		}
-
-//		try {
-//			c.setLogin(Long.toString(testAgent.getId()), testPass);
-//
-//			ClientResponse result = c.sendRequest("GET", "books/8", "", MediaType.AUDIO_MPEG, "audio/*,audio/ogg",
-//					new Pair[] {});
-//			assertEquals("16", result.getResponse().trim());
-//
-//			assertEquals("audio/ogg", result.getHeader("content-type"));
-//
-//			result = c.sendRequest("GET", "books/8", "", MediaType.AUDIO_MPEG, "video/mp4,text/*", new Pair[] {});
-//			assertEquals("8", result.getResponse().trim());
-//
-//			assertEquals("text/plain", result.getHeader("content-type"));
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			fail("Exception: " + e);
-//		}
-
-		try {
-			c.setLogin(Long.toString(testAgent.getId()), testPass);
-
-			ClientResponse result = c
-					.sendRequest("PUT", "books/8/test2", "hi", MediaType.TEXT_PLAIN, "", new Pair[] {});
-			assertEquals("hi", result.getResponse().trim());
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Exception: " + e);
-		}
-
-		// check for warning if incorrect MIME-Type is given
-		try {
-			c.setLogin(Long.toString(testAgent.getId()), testPass);
-
-			ClientResponse result = c.sendRequest("POST", "books/8", "", MediaType.VIDEO_AVI, "hjgf", new Pair[] {});
-			assertEquals(404, result.getHttpCode());
-			assertEquals(true, result.getResponse().length() > 0);
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Exception: " + e);
-		}
-
-		// check for ErrorStream
-		try {
-			c.setLogin(Long.toString(testAgent.getId()), testPass);
-
-			ClientResponse result = c.sendRequest("GET", "books/a/test3", "", new Pair[] {});
-
-			assertEquals(500, result.getHttpCode());
-			assertEquals(true, result.getResponse().length() > 0);
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Exception: " + e);
-		}
-
-		// send string in PathParam where int is needed
-		try {
-			c.setLogin(Long.toString(testAgent.getId()), testPass);
-
-			ClientResponse result = c.sendRequest("POST", "books/evilString", "", new Pair[] {});
-
-			assertEquals(400, result.getHttpCode());
-			assertEquals(true, result.getResponse().contains("Malformed Request"));
-
+			result = c.sendRequest("GET", "version/v1/path", "");
+			assertTrue(result.getResponse().trim().endsWith("version/v1/"));
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("Exception: " + e);
@@ -423,9 +256,47 @@ public class WebConnectorTest {
 
 		try {
 			c.setLogin(Long.toString(testAgent.getId()), testPass);
+			ClientResponse result = c.sendRequest("GET", "swaggertest/swagger.json", "");
 
-			ClientResponse result = c.sendRequest("GET", "service1/swagger.json", "");
-			assertTrue(result.getResponse().trim().contains("/div/{number1}/{number2}"));
+			assertTrue(result.getResponse().trim().contains("createSomething"));
+			assertTrue(result.getResponse().trim().contains("subresource/content"));
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("Exception: " + e);
+		}
+	}
+
+	@Test
+	public void testResponseCode() {
+		MiniClient c = new MiniClient();
+		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
+
+		try {
+			c.setLogin(Long.toString(testAgent.getId()), testPass);
+
+			ClientResponse result = c.sendRequest("PUT", "swaggertest/create/notfound", "");
+			assertEquals(404, result.getHttpCode());
+
+			result = c.sendRequest("PUT", "swaggertest/create/asdf", "");
+			assertEquals(200, result.getHttpCode());
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("Exception: " + e);
+		}
+	}
+
+	@Test
+	public void testSubresource() {
+		MiniClient c = new MiniClient();
+		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
+
+		try {
+			c.setLogin(Long.toString(testAgent.getId()), testPass);
+
+			ClientResponse result = c.sendRequest("GET", "swaggertest/subresource/content", "");
+			assertEquals(200, result.getHttpCode());
+			assertEquals("test", result.getResponse().trim());
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("Exception: " + e);
@@ -442,8 +313,7 @@ public class WebConnectorTest {
 			byte[] testContent = new byte[WebConnector.DEFAULT_MAX_REQUEST_BODY_SIZE];
 			new Random().nextBytes(testContent);
 			String base64 = Base64.getEncoder().encodeToString(testContent);
-			// same as post call in testCalls
-			ClientResponse result = c.sendRequest("POST", "sub/5/6", base64);
+			ClientResponse result = c.sendRequest("POST", "test", base64);
 			assertEquals(HttpURLConnection.HTTP_ENTITY_TOO_LARGE, result.getHttpCode());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -451,4 +321,124 @@ public class WebConnectorTest {
 		}
 	}
 
+	@Test
+	public void testSecurityContextIntegration() {
+		MiniClient c = new MiniClient();
+		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
+		try {
+			// unauthenticated request
+			c.setLogin(Long.toString(node.getAnonymous().getId()), "anonymous");
+			ClientResponse result = c.sendRequest("GET", "security/name", "");
+			System.out.println("RESPONSE: " + result.getResponse());
+			assertEquals("no principal", result.getResponse().trim());
+			assertEquals(403, result.getHttpCode());
+			result = c.sendRequest("GET", "security/authenticated", "");
+			assertEquals(403, result.getHttpCode());
+			result = c.sendRequest("GET", "security/anonymous", "");
+			assertEquals(200, result.getHttpCode());
+
+			// authenticated request
+			c.setLogin(Long.toString(testAgent.getId()), testPass);
+			result = c.sendRequest("GET", "security/name", "");
+			assertEquals(200, result.getHttpCode());
+			assertEquals("adam", result.getResponse().trim());
+			result = c.sendRequest("GET", "security/authenticated", "");
+			assertEquals(200, result.getHttpCode());
+			result = c.sendRequest("GET", "security/anonymous", "");
+			assertEquals(200, result.getHttpCode());
+			result = c.sendRequest("GET", "security/bot", "");
+			assertEquals(403, result.getHttpCode());
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("Exception: " + e);
+		}
+	}
+
+	@Test
+	public void testClassLoading() {
+		MiniClient c = new MiniClient();
+		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
+		try {
+			c.setLogin(Long.toString(testAgent.getId()), testPass);
+			ClientResponse result = c.sendRequest("GET", "classloader/test", "");
+			assertEquals(200, result.getHttpCode());
+			assertEquals("OK", result.getResponse().trim());
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("Exception: " + e);
+		}
+	}
+
+	@Test
+	public void testEmptyResponse() {
+		MiniClient c = new MiniClient();
+		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
+		try {
+			c.setLogin(Long.toString(testAgent.getId()), testPass);
+			ClientResponse result = c.sendRequest("GET", "test/empty", "");
+			assertEquals(200, result.getHttpCode());
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("Exception: " + e);
+		}
+	}
+
+	@Test
+	public void testAuthParamSanitization() {
+		MiniClient c = new MiniClient();
+		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
+		try {
+			c.setLogin(Long.toString(testAgent.getId()), testPass);
+
+			// test auth params in GET
+			ClientResponse result = c.sendRequest("GET", "test/requesturi?param1=sadf&access_token=secret", "");
+			assertEquals(200, result.getHttpCode());
+			assertTrue(result.getResponse().contains("param1"));
+			assertFalse(result.getResponse().contains("secret"));
+			assertFalse(result.getResponse().contains("access_token"));
+
+			// test auth params in header
+			HashMap<String, String> headers = new HashMap<>();
+			headers.put("param1", "asdf");
+			result = c.sendRequest("GET", "test/headers", "", headers);
+			assertEquals(200, result.getHttpCode());
+			assertTrue(result.getResponse().toLowerCase().contains("param1"));
+			assertFalse(result.getResponse().toLowerCase().contains("authorization"));
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("Exception: " + e);
+		}
+	}
+
+	@Test
+	public void testEncoding() {
+		MiniClient c = new MiniClient();
+		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
+		try {
+			c.setLogin(Long.toString(testAgent.getId()), testPass);
+			ClientResponse result = c.sendRequest("GET", "test/encoding", "");
+			assertEquals(200, result.getHttpCode());
+			assertTrue(result.getResponse().contains("☺"));
+			assertTrue(result.getHeaders().get("content-type").contains("charset=utf-8"));
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("Exception: " + e);
+		}
+	}
+
+	@Test
+	public void testBody() {
+		MiniClient c = new MiniClient();
+		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
+		try {
+			String body = "This is a test.";
+			c.setLogin(Long.toString(testAgent.getId()), testPass);
+			ClientResponse result = c.sendRequest("POST", "test/body", body);
+			assertEquals(200, result.getHttpCode());
+			assertTrue(result.getResponse().trim().equals(body));
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("Exception: " + e);
+		}
+	}
 }
