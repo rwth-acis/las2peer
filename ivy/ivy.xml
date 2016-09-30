@@ -10,6 +10,7 @@
 		<dependency org="io.swagger" name="swagger-jersey2-jaxrs" rev="1.5.10" conf="default->compile"/>
 		<dependency org="org.glassfish.jersey.core" name="jersey-server" rev="2.23.2" conf="default->compile"/>
 		<dependency org="org.glassfish.jersey.core" name="jersey-common" rev="2.23.2" conf="default->compile"/>
+		<dependency org="org.glassfish.jersey.media" name="jersey-media-moxy" rev="2.23.2" conf="default->compile"/>
 		<dependency org="javax.ws.rs" name="javax.ws.rs-api" rev="2.0.1" conf="default->compile"/>
 	</dependencies>
 </ivy-module>
