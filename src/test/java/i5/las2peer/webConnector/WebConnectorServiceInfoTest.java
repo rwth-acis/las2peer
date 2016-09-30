@@ -10,6 +10,8 @@ import i5.las2peer.security.UserAgent;
 import i5.las2peer.testing.MockAgentFactory;
 import i5.las2peer.webConnector.client.ClientResponse;
 import i5.las2peer.webConnector.client.MiniClient;
+import i5.las2peer.webConnector.services.TestMissingPathService;
+import i5.las2peer.webConnector.services.TestVersionService;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -30,12 +32,12 @@ public class WebConnectorServiceInfoTest {
 	private static UserAgent testAgent;
 	private static final String testPass = "adamspass";
 
-	private static final String testServiceClass = "i5.las2peer.webConnector.TestVersionService@1";
-	private static final String testServiceClass2 = "i5.las2peer.webConnector.TestVersionService@2.0";
-	private static final String testServiceClass3 = "i5.las2peer.webConnector.TestVersionService@2.1";
-	private static final String testServiceClass4 = "i5.las2peer.webConnector.TestVersionService@2.2.0-1";
-	private static final String testServiceClass5 = "i5.las2peer.webConnector.TestVersionService@2.2.0-2";
-	private static final String testServiceClass6 = "i5.las2peer.webConnector.TestServiceMissingPath@1";
+	private static final String testServiceClass1 = TestVersionService.class.getName() + "@1";
+	private static final String testServiceClass2 = TestVersionService.class.getName() + "@2.0";
+	private static final String testServiceClass3 = TestVersionService.class.getName() + "@2.1";
+	private static final String testServiceClass4 = TestVersionService.class.getName() + "@2.2.0-1";
+	private static final String testServiceClass5 = TestVersionService.class.getName() + "@2.2.0-2";
+	private static final String testServiceClass6 = TestMissingPathService.class.getName() + "@1";
 
 	@BeforeClass
 	public static void startServer() throws Exception {
@@ -57,7 +59,7 @@ public class WebConnectorServiceInfoTest {
 		node.storeAgent(group1);
 		node.launch();
 
-		ServiceAgent testService = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass),
+		ServiceAgent testService1 = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass1),
 				"a pass");
 		ServiceAgent testService2 = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass2),
 				"a pass");
@@ -70,14 +72,14 @@ public class WebConnectorServiceInfoTest {
 		ServiceAgent testService6 = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass6),
 				"a pass");
 
-		testService.unlockPrivateKey("a pass");
+		testService1.unlockPrivateKey("a pass");
 		testService2.unlockPrivateKey("a pass");
 		testService3.unlockPrivateKey("a pass");
 		testService4.unlockPrivateKey("a pass");
 		testService5.unlockPrivateKey("a pass");
 		testService6.unlockPrivateKey("a pass");
 
-		node.registerReceiver(testService);
+		node.registerReceiver(testService1);
 		node.registerReceiver(testService2);
 		node.registerReceiver(testService3);
 		node.registerReceiver(testService4);

@@ -5,7 +5,6 @@ import i5.las2peer.api.ConnectorException;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.p2p.Node;
-import i5.las2peer.webConnector.serviceManagement.ServiceMappingManager;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -35,7 +34,7 @@ import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsServer;
 
 /**
- * Starter class for registering the Web Connector at the LAS2peer server.
+ * Starter class for registering the Web Connector at the las2peer server.
  *
  */
 public class WebConnector extends Connector {
@@ -108,7 +107,6 @@ public class WebConnector extends Connector {
 	protected Map<String, JSONObject> oidcProviderInfos = new HashMap<String, JSONObject>();
 
 	private Object lockOidc = new Object();
-	private ServiceMappingManager serviceRepositoryManager = null;
 
 	/**
 	 * create a new web connector instance.
@@ -296,7 +294,6 @@ public class WebConnector extends Connector {
 		}
 
 		myNode = node;
-		serviceRepositoryManager = new ServiceMappingManager(node);
 		if (startHttp) {
 			createServer(false);
 		}
@@ -360,7 +357,6 @@ public class WebConnector extends Connector {
 		}
 		logMessage("Web-Connector has been stopped");
 		this.myNode = null;
-		this.serviceRepositoryManager = null;
 	}
 
 	/**
@@ -370,14 +366,6 @@ public class WebConnector extends Connector {
 	 */
 	public Node getL2pNode() {
 		return myNode;
-	}
-
-	/**
-	 * 
-	 * @return the service repository manager (if node started)
-	 */
-	public ServiceMappingManager getServiceRepositoryManager() {
-		return serviceRepositoryManager;
 	}
 
 	/**
@@ -392,34 +380,6 @@ public class WebConnector extends Connector {
 			logHandler.flush();
 		}
 	}
-
-	/**
-	 * Logs a request.
-	 * 
-	 * @param request
-	 */
-	/* commented out because lacking documentation of the request parameter and no calling methods thus impossbile to adapt to las2peer changes
-	public void logRequest(String request) {
-		logger.finer(request);
-		int lastServiceClassNamePosition = request.lastIndexOf("/");
-		if (lastServiceClassNamePosition > 0) {
-			String serviceClass = request.substring(1, lastServiceClassNamePosition);
-			Agent service = null;
-			try {
-				service = myNode.getServiceAgent(serviceClass);
-			} catch (AgentNotKnownException e) {
-				// Should be known..
-				e.printStackTrace();
-			}
-			myNode.observerNotice(Event.CONNECTOR_REQUEST, myNode.getNodeId(), service, WEB_CONNECTOR + request);
-		} else { // Not a service call
-			myNode.observerNotice(Event.CONNECTOR_REQUEST, myNode.getNodeId(), WEB_CONNECTOR + request);
-		}
-		if (logHandler != null) { // StreamHandler don't auto flush
-			logHandler.flush();
-		}
-	}
-	*/
 
 	/**
 	 * Logs an error with throwable.
