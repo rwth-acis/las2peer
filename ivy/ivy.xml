@@ -5,8 +5,8 @@
 		<artifact type="jar" ext="jar" conf="default" />
 	</publications>
 	<dependencies>
-		<dependency org="i5" name="las2peer" rev="${ivy.las2peer.version}" changing="true"/>
-		<dependency org="junit" name="junit" rev="4.11" />
+		<dependency org="i5" name="las2peer" rev="${ivy.las2peer.version}" changing="true" conf="default->default"/>
+		<dependency org="junit" name="junit" rev="4.11" conf="default->default" />
 		<dependency org="io.swagger" name="swagger-jersey2-jaxrs" rev="1.5.10" conf="default->compile"/>
 		<dependency org="org.glassfish.jersey.core" name="jersey-server" rev="2.23.2" conf="default->compile"/>
 		<dependency org="org.glassfish.jersey.core" name="jersey-common" rev="2.23.2" conf="default->compile"/>
