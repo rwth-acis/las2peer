@@ -191,8 +191,6 @@
 		<jar jarfile="${export.jars}/${ivy.module}.jar">
 			<fileset dir="${tmp.classes}">
 			</fileset>
-			<fileset dir="xsd">
-			</fileset>
 			<manifest>
 				<attribute name="Class-Path" value="${classpath.name}" />
 			</manifest>
