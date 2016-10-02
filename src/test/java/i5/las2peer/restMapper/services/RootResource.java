@@ -6,6 +6,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 @Api
@@ -23,5 +24,12 @@ public class RootResource {
 	@Produces("text/plain")
 	public String getUri(@Context UriInfo ui) {
 		return ui.getAbsolutePath().toString();
+	}
+
+	@GET
+	@Path("json")
+	@Produces(MediaType.APPLICATION_JSON)
+	public TestBean getJson() {
+		return new TestBean("myTestBean");
 	}
 }

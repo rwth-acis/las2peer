@@ -68,4 +68,12 @@ public class RESTServiceTest {
 		assertEquals("Hello World!", new String(response.getBody()));
 	}
 
+	@Test
+	public void testJson() throws URISyntaxException {
+		RESTResponse response = invoke(testee, "GET", "json", "");
+
+		assertEquals(200, response.getHttpCode());
+		assertTrue(new String(response.getBody()).contains("myTestBean"));
+	}
+
 }
