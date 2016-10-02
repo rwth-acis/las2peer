@@ -25,7 +25,7 @@ public class TestService extends RESTService {
 	@Path("/")
 	public static class Resource {
 		@GET
-		@Path("/")
+		@Path("/ok")
 		public String getOk() {
 			return "OK";
 		}

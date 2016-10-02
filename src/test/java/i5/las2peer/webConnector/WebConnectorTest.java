@@ -139,7 +139,7 @@ public class WebConnectorTest {
 		// correct, id based
 		try {
 			c.setLogin(Long.toString(testAgent.getId()), testPass);
-			ClientResponse result = c.sendRequest("get", "test", "");
+			ClientResponse result = c.sendRequest("get", "test/ok", "");
 			assertEquals("OK", result.getResponse().trim());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -150,7 +150,7 @@ public class WebConnectorTest {
 		try {
 			c.setLogin("adam", testPass);
 
-			ClientResponse result = c.sendRequest("GET", "test", "");
+			ClientResponse result = c.sendRequest("GET", "test/ok", "");
 			assertEquals("OK", result.getResponse().trim());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -161,7 +161,7 @@ public class WebConnectorTest {
 		try {
 			c.setLogin(Long.toString(testAgent.getId()), "aaaaaaaaaaaaa");
 
-			ClientResponse result = c.sendRequest("GET", "test", "");
+			ClientResponse result = c.sendRequest("GET", "test/ok", "");
 			assertEquals(401, result.getHttpCode());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -171,7 +171,7 @@ public class WebConnectorTest {
 		try {
 			c.setLogin(Long.toString(65464), "aaaaaaaaaaaaa");
 
-			ClientResponse result = c.sendRequest("GET", "test", "");
+			ClientResponse result = c.sendRequest("GET", "test/ok", "");
 			assertEquals(401, result.getHttpCode());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -186,7 +186,7 @@ public class WebConnectorTest {
 			c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 			c.setLogin(Long.toString(65464), "aaaaaaaaaaaaa");
 
-			ClientResponse result = c.sendRequest("GET", "test", "");
+			ClientResponse result = c.sendRequest("GET", "test/ok", "");
 			assertEquals(401, result.getHttpCode());
 		} catch (Exception e) {
 			e.printStackTrace();
