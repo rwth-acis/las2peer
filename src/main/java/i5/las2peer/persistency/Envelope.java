@@ -18,7 +18,7 @@ import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.security.Agent;
 import i5.las2peer.security.AgentStorage;
-import i5.las2peer.security.Context;
+import i5.las2peer.security.AgentContext;
 import i5.las2peer.security.GroupAgent;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.tools.CryptoException;
@@ -208,7 +208,7 @@ public class Envelope implements Serializable, XmlAble {
 
 	public Serializable getContent() throws CryptoException, L2pSecurityException, SerializationException {
 		if (isEncrypted()) {
-			return getContent(Context.getCurrent().getMainAgent());
+			return getContent(AgentContext.getCurrent().getMainAgent());
 		} else {
 			ClassLoader clsLoader = null;
 			try {
@@ -222,7 +222,7 @@ public class Envelope implements Serializable, XmlAble {
 
 	public Serializable getContent(Agent reader) throws CryptoException, L2pSecurityException, SerializationException {
 		try {
-			return getContent(reader, Context.getCurrent().getLocalNode());
+			return getContent(reader, AgentContext.getCurrent().getLocalNode());
 		} catch (IllegalStateException e) {
 			return getContent(reader, reader.getRunningAtNode());
 		}

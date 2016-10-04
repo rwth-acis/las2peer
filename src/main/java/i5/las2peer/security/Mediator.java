@@ -77,7 +77,7 @@ public class Mediator implements MessageReceiver {
 	}
 
 	@Override
-	public void receiveMessage(Message message, Context c) throws MessageException {
+	public void receiveMessage(Message message, AgentContext c) throws MessageException {
 		if (message.getRecipientId() != myAgent.getId()) {
 			throw new MessageException("I'm not responsible for the receiver (something went very wrong)!");
 		}
@@ -124,7 +124,7 @@ public class Mediator implements MessageReceiver {
 	 * @param context
 	 * @return true, if a message had been treated successfully
 	 */
-	public boolean workOnMessage(Message message, Context context) {
+	public boolean workOnMessage(Message message, AgentContext context) {
 		for (int i = 0; i < registeredHandlers.size(); i++) {
 			try {
 				if (registeredHandlers.get(i).handleMessage(message, context)) {

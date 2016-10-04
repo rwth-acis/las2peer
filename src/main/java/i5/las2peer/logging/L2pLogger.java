@@ -424,10 +424,10 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	 * serviceAgent and actingUser can be set to {@code null} if not known. Then this message will not be monitored by
 	 * the monitoring observer.
 	 *
-	 * This method replaces: {@link i5.las2peer.security.Context#logMessage(Object, int, String, Agent, Agent)},
-	 * {@link i5.las2peer.security.Context#logMessage(Object, String)},
-	 * {@link i5.las2peer.security.Context#logError(Object, int, String, Agent, Agent)},
-	 * {@link i5.las2peer.security.Context#logError(Object, String)},
+	 * This method replaces: {@link i5.las2peer.security.AgentContext#logMessage(Object, int, String, Agent, Agent)},
+	 * {@link i5.las2peer.security.AgentContext#logMessage(Object, String)},
+	 * {@link i5.las2peer.security.AgentContext#logError(Object, int, String, Agent, Agent)},
+	 * {@link i5.las2peer.security.AgentContext#logError(Object, String)},
 	 * {@link i5.las2peer.api.Service#logError(String message)}
 	 *
 	 * @param from the calling class
@@ -439,7 +439,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	public static void logEvent(Object from, Event event, String message, Agent serviceAgent, Agent actingUser) {
 		Thread t = Thread.currentThread();
 		if (t instanceof L2pThread) {
-			Node node = ((L2pThread) t).getContext().getLocalNode();
+			Node node = ((L2pThread) t).getCallerContext().getLocalNode();
 			logEvent(node, from, event, message, serviceAgent, actingUser);
 		} else {
 			throw new IllegalStateException("Not executed in a L2pThread environment!");

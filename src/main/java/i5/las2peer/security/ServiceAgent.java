@@ -114,7 +114,7 @@ public class ServiceAgent extends PassphraseAgent {
 	}
 
 	@Override
-	public void receiveMessage(Message m, Context c) throws MessageException {
+	public void receiveMessage(Message m, AgentContext c) throws MessageException {
 		try {
 			m.open(this, getRunningAtNode());
 			Object content = m.getContent();

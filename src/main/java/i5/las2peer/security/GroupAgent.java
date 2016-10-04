@@ -218,7 +218,7 @@ public class GroupAgent extends Agent {
 		}
 		for (Long memberId : htEncryptedKeyVersions.keySet()) {
 			try {
-				Agent agent = Context.getCurrent().getAgent(memberId);
+				Agent agent = AgentContext.getCurrent().getAgent(memberId);
 				if (agent instanceof GroupAgent) {
 					GroupAgent group = (GroupAgent) agent;
 					if (group.isMemberRecursive(id) == true) {
@@ -250,7 +250,7 @@ public class GroupAgent extends Agent {
 		int result = 0;
 		for (Long memberId : htEncryptedKeyVersions.keySet()) {
 			try {
-				Agent agent = Context.getCurrent().getAgent(memberId);
+				Agent agent = AgentContext.getCurrent().getAgent(memberId);
 				if (agent instanceof GroupAgent) {
 					GroupAgent group = (GroupAgent) agent;
 					// the group agent itself is not counted
@@ -283,7 +283,7 @@ public class GroupAgent extends Agent {
 		ArrayList<Long> result = new ArrayList<Long>(htEncryptedKeyVersions.keySet());
 		for (Long id : result) {
 			try {
-				Agent agent = Context.getCurrent().getAgent(id);
+				Agent agent = AgentContext.getCurrent().getAgent(id);
 				if (agent instanceof GroupAgent) {
 					GroupAgent group = (GroupAgent) agent;
 					Collections.addAll(result, group.getMemberListRecursive());
@@ -344,7 +344,7 @@ public class GroupAgent extends Agent {
 		htEncryptedKeyVersions.remove(id);
 		for (Long memberId : htEncryptedKeyVersions.keySet()) {
 			try {
-				Agent agent = Context.getCurrent().getAgent(memberId);
+				Agent agent = AgentContext.getCurrent().getAgent(memberId);
 				if (agent instanceof GroupAgent) {
 					GroupAgent group = (GroupAgent) agent;
 					group.removeMemberRecursive(id);
@@ -534,7 +534,7 @@ public class GroupAgent extends Agent {
 	}
 
 	@Override
-	public void receiveMessage(Message message, Context context) throws MessageException {
+	public void receiveMessage(Message message, AgentContext context) throws MessageException {
 		// extract content from message
 		Object content = null;
 		try {

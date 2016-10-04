@@ -7,7 +7,7 @@ import java.util.Random;
 import i5.las2peer.api.Service;
 import i5.las2peer.persistency.Envelope;
 import i5.las2peer.persistency.MalformedXMLException;
-import i5.las2peer.security.Context;
+import i5.las2peer.security.AgentContext;
 import i5.las2peer.security.GroupAgent;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.tools.CryptoException;
@@ -259,7 +259,7 @@ public class TestService extends Service {
 		if (cache == null) {
 			return "nothing stored!";
 		}
-		String result = (String) cache.getContent(Context.getCurrent().getMainAgent());
+		String result = (String) cache.getContent(AgentContext.getCurrent().getMainAgent());
 		return result;
 	}
 
@@ -272,7 +272,7 @@ public class TestService extends Service {
 	 * @throws CryptoException
 	 */
 	public void storeEnvelopeString(String s) throws IllegalArgumentException, SerializationException, CryptoException {
-		cache = Context.getCurrent().createEnvelope(Long.toString(new Random().nextLong()), s);
+		cache = AgentContext.getCurrent().createEnvelope(Long.toString(new Random().nextLong()), s);
 	}
 
 	private Envelope groupCache = null;
@@ -291,7 +291,7 @@ public class TestService extends Service {
 			return "nothing stored";
 		}
 		GroupAgent group = MockAgentFactory.getGroup1();
-		group.unlockPrivateKey(Context.getCurrent().getMainAgent());
+		group.unlockPrivateKey(AgentContext.getCurrent().getMainAgent());
 		String result = (String) groupCache.getContent(group);
 		return result;
 	}
@@ -308,7 +308,7 @@ public class TestService extends Service {
 	 */
 	public void storeGroupEnvelopeString(String store) throws IllegalArgumentException, SerializationException,
 			CryptoException, MalformedXMLException, IOException {
-		groupCache = Context.getCurrent().createEnvelope(Long.toString(new Random().nextLong()), store,
+		groupCache = AgentContext.getCurrent().createEnvelope(Long.toString(new Random().nextLong()), store,
 				MockAgentFactory.getGroup1());
 	}
 

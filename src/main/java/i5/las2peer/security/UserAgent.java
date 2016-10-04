@@ -322,7 +322,7 @@ public class UserAgent extends PassphraseAgent {
 	}
 
 	@Override
-	public void receiveMessage(Message message, Context context) throws MessageException {
+	public void receiveMessage(Message message, AgentContext context) throws MessageException {
 		try {
 			message.open(this, getRunningAtNode());
 			Object content = message.getContent();

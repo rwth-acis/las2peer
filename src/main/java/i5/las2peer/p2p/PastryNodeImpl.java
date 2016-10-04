@@ -38,7 +38,7 @@ import i5.las2peer.persistency.SharedStorage.STORAGE_MODE;
 import i5.las2peer.security.Agent;
 import i5.las2peer.security.AgentException;
 import i5.las2peer.security.BasicAgentStorage;
-import i5.las2peer.security.Context;
+import i5.las2peer.security.AgentContext;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.MessageReceiver;
 import i5.las2peer.security.UserAgent;
@@ -494,7 +494,7 @@ public class PastryNodeImpl extends Node {
 	@Deprecated
 	@Override
 	public void storeArtifact(Envelope envelope) throws StorageException {
-		storeEnvelope(envelope, Context.getCurrent().getMainAgent());
+		storeEnvelope(envelope, AgentContext.getCurrent().getMainAgent());
 	}
 
 	/**

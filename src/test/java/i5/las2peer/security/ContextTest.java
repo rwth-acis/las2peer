@@ -27,13 +27,13 @@ public class ContextTest {
 		LocalNode node = LocalNode.launchNode();
 		UserAgent eve = MockAgentFactory.getEve();
 		try {
-			new Context(node, eve);
+			new AgentContext(node, eve);
 			fail("L2pSecurityException expected");
 		} catch (L2pSecurityException e) {
 		}
 
 		eve.unlockPrivateKey("evespass");
-		Context testee = new Context(node, eve);
+		AgentContext testee = new AgentContext(node, eve);
 
 		assertSame(eve, testee.getMainAgent());
 	}
@@ -61,7 +61,7 @@ public class ContextTest {
 		UserAgent eve = MockAgentFactory.getEve();
 		eve.unlockPrivateKey("evespass");
 
-		Context context = new Context(node, eve);
+		AgentContext context = new AgentContext(node, eve);
 
 		try {
 			GroupAgent a = context.requestGroupAgent(group1.getId());
@@ -117,7 +117,7 @@ public class ContextTest {
 			groupSuper.unlockPrivateKey(groupA);
 			groupSuper2.unlockPrivateKey(groupA);
 
-			Context context = new Context(node, eve);
+			AgentContext context = new AgentContext(node, eve);
 
 			Envelope envelope1 = context.createEnvelope("id", "content", groupSuper, groupSuper2);
 			Envelope envelopeA = context.createEnvelope("id", "content", groupA);

@@ -23,7 +23,7 @@ public interface MessageReceiver {
 	 * @throws MessageException
 	 * 
 	 */
-	public void receiveMessage(Message message, Context c) throws MessageException;
+	public void receiveMessage(Message message, AgentContext c) throws MessageException;
 
 	/**
 	 * 

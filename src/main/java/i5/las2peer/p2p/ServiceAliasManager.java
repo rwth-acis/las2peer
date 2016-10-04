@@ -46,7 +46,7 @@ public class ServiceAliasManager {
 			} else {
 				return; // otherwise we're done
 			}
-		} catch (ServiceNotFoundException e) {
+		} catch (AliasNotFoundException e) {
 			// if no mapping exists, ignore and continue with creating a new mapping
 			try {
 				Envelope envName = node.createEnvelope(PREFIX + alias.toLowerCase(), content, agent,
@@ -63,15 +63,15 @@ public class ServiceAliasManager {
 	 * 
 	 * @param alias
 	 * @return
-	 * @throws ServiceNotFoundException
+	 * @throws AliasNotFoundException
 	 */
-	public String getServiceNameByAlias(String alias) throws ServiceNotFoundException {
+	public String getServiceNameByAlias(String alias) throws AliasNotFoundException {
 		try {
 			Envelope env = node.fetchEnvelope(PREFIX + alias.toLowerCase());
 			String content = (String) env.getContent(node.getAnonymous());
 			return content;
 		} catch (StorageException | CryptoException | L2pSecurityException | SerializationException e) {
-			throw new ServiceNotFoundException("Alias not found!", e);
+			throw new AliasNotFoundException("Alias not found!", e);
 		}
 	}
 }
