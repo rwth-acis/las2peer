@@ -4,9 +4,9 @@ import i5.las2peer.execution.L2pServiceException;
 import i5.las2peer.execution.ServiceInvocationException;
 import i5.las2peer.p2p.AgentAlreadyRegisteredException;
 import i5.las2peer.p2p.AgentNotKnownException;
+import i5.las2peer.p2p.AliasNotFoundException;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.ServiceNameVersion;
-import i5.las2peer.p2p.ServiceNotFoundException;
 import i5.las2peer.p2p.ServiceVersion;
 import i5.las2peer.p2p.TimeoutException;
 import i5.las2peer.restMapper.RESTResponse;
@@ -317,7 +317,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		String serviceName;
 		try {
 			serviceName = l2pNode.getServiceAliasManager().getServiceNameByAlias(pathSplit[1]);
-		} catch (ServiceNotFoundException e1) {
+		} catch (AliasNotFoundException e1) {
 			sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND, "Service alias " + pathSplit[1]
 					+ " is not known.");
 			return false;
