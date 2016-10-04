@@ -16,8 +16,8 @@ import i5.las2peer.p2p.Node;
 import i5.las2peer.persistency.DecodingFailedException;
 import i5.las2peer.persistency.Envelope;
 import i5.las2peer.security.Agent;
-import i5.las2peer.security.AgentLockedException;
 import i5.las2peer.security.AgentContext;
+import i5.las2peer.security.AgentLockedException;
 import i5.las2peer.security.GroupAgent;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.ServiceAgent;
@@ -212,7 +212,7 @@ public class L2pThread extends Thread implements Context {
 
 	@Override
 	public Node getLocalNode() {
-		return this.getLocalNode();
+		return callerContext.getLocalNode();
 	}
 
 	@Override
