@@ -1,9 +1,9 @@
 package i5.las2peer.restMapper;
 
+import i5.las2peer.api.Context;
 import i5.las2peer.api.Service;
 import i5.las2peer.restMapper.annotations.ServicePath;
 import i5.las2peer.security.Agent;
-import i5.las2peer.security.Context;
 import i5.las2peer.security.UserAgent;
 import io.swagger.jaxrs.Reader;
 import io.swagger.models.Swagger;
