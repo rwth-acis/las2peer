@@ -346,7 +346,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			basePath += pathSplit[2] + "/";
 		}
 
-		// invoke
+		// create mediator
 		Mediator mediator;
 		try {
 			mediator = l2pNode.createMediatorForAgent(agent);
@@ -358,7 +358,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 
 		if (exchange.getRequestMethod().equalsIgnoreCase("get")
 				&& exchange.getRequestURI().getPath().toString().equals(basePath + "swagger.json")) {
-			return invokeSwagger(exchange, mediator, requiredService);
+			return invokeSwagger(exchange, mediator, requiredService, basePath);
 		} else {
 			return invokeRestService(exchange, mediator, requiredService, basePath);
 		}
@@ -476,8 +476,10 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		return buffer.toByteArray();
 	}
 
-	private boolean invokeSwagger(HttpExchange exchange, Mediator mediator, ServiceNameVersion requiredService) {
+	private boolean invokeSwagger(HttpExchange exchange, Mediator mediator, ServiceNameVersion requiredService,
+			String basePath) {
 
+		// get definitions
 		Serializable result = callServiceMethod(exchange, mediator, requiredService, "getSwagger",
 				new Serializable[] {});
 		if (result == null) {
@@ -489,6 +491,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			return false;
 		}
 
+		// deserialize Swagger
 		Swagger swagger;
 		try {
 			swagger = Json.mapper().reader(Swagger.class).readValue((String) result);
@@ -496,6 +499,9 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND, "Swagger API declaration not available!");
 			return false;
 		}
+
+		// modify Swagger
+		swagger.setBasePath(basePath);
 
 		// OpenID Connect integration
 		if (connector.oidcProviderInfos != null && connector.defaultOIDCProvider != null
@@ -526,6 +532,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			}
 		}
 
+		// serialize Swagger
 		String json;
 		try {
 			json = Json.mapper().writeValueAsString(swagger);
