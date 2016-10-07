@@ -3,21 +3,22 @@ package i5.las2peer.security;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import i5.las2peer.api.security.AgentAccessDeniedException;
+import i5.las2peer.persistency.MalformedXMLException;
+import i5.las2peer.tools.CryptoException;
+import i5.las2peer.tools.SerializationException;
 
 import java.security.NoSuchAlgorithmException;
 
 import org.junit.Test;
 
-import i5.las2peer.persistency.MalformedXMLException;
-import i5.las2peer.tools.CryptoException;
-import i5.las2peer.tools.SerializationException;
-
 public class UserAgentTest {
 
 	@Test
-	public void testUnlocking() throws NoSuchAlgorithmException, L2pSecurityException, CryptoException {
+	public void testUnlocking() throws NoSuchAlgorithmException, CryptoException, AgentAccessDeniedException,
+			L2pSecurityException {
 		String passphrase = "A passphrase to unlock";
-		UserAgent a = UserAgent.createUserAgent(passphrase);
+		UserAgentImpl a = UserAgentImpl.createUserAgent(passphrase);
 
 		try {
 			a.decryptSymmetricKey(null); // not possible without unlocking the private key first
@@ -30,9 +31,9 @@ public class UserAgentTest {
 		}
 
 		try {
-			a.unlockPrivateKey("bad passphrase");
+			a.unlock("bad passphrase");
 			fail("SecurityException should have been thrown");
-		} catch (L2pSecurityException e) {
+		} catch (AgentAccessDeniedException e) {
 		}
 
 		try {
@@ -44,7 +45,7 @@ public class UserAgentTest {
 			fail("SecurityException should have been thrown");
 			e.printStackTrace();
 		}
-		a.unlockPrivateKey(passphrase);
+		a.unlock(passphrase);
 
 		try {
 			a.decryptSymmetricKey(null); // should be possible now
@@ -57,9 +58,10 @@ public class UserAgentTest {
 	}
 
 	@Test
-	public void testPassphraseChange() throws NoSuchAlgorithmException, L2pSecurityException, CryptoException {
+	public void testPassphraseChange() throws NoSuchAlgorithmException, L2pSecurityException, CryptoException,
+			AgentAccessDeniedException {
 		String passphrase = "a passphrase";
-		UserAgent a = UserAgent.createUserAgent(passphrase);
+		UserAgentImpl a = UserAgentImpl.createUserAgent(passphrase);
 
 		String sndPass = "ein anderes Passphrase";
 		try {
@@ -67,89 +69,91 @@ public class UserAgentTest {
 			fail("SecurityException expected");
 		} catch (L2pSecurityException e) {
 		}
-		a.unlockPrivateKey(passphrase);
+		a.unlock(passphrase);
 
 		a.changePassphrase(sndPass);
 		a.lockPrivateKey();
 
 		try {
-			a.unlockPrivateKey(passphrase);
+			a.unlock(passphrase);
 			fail("SecurityException expected");
-		} catch (L2pSecurityException e) {
+		} catch (AgentAccessDeniedException e) {
 		}
 
-		a.unlockPrivateKey(sndPass);
+		a.unlock(sndPass);
 	}
 
 	@Test
-	public void testXml() throws NoSuchAlgorithmException, L2pSecurityException, MalformedXMLException, CryptoException,
-			UserAgentException {
+	public void testXml() throws NoSuchAlgorithmException, L2pSecurityException, MalformedXMLException,
+			CryptoException, UserAgentException, AgentAccessDeniedException {
 		String passphrase = "a pass";
 		String email = "usera@example.org";
 		String userData = "This is the user data attachement.";
-		UserAgent a = UserAgent.createUserAgent(passphrase);
-		a.unlockPrivateKey(passphrase);
+		UserAgentImpl a = UserAgentImpl.createUserAgent(passphrase);
+		a.unlock(passphrase);
 		a.setEmail(email);
 		a.setUserData(userData);
 
 		String xml = a.toXmlString();
 		System.out.println(xml);
 
-		UserAgent b = UserAgent.createFromXml(xml);
+		UserAgentImpl b = UserAgentImpl.createFromXml(xml);
 
 		assertEquals(a.getSafeId(), b.getSafeId());
 		assertEquals(email, b.getEmail());
 		assertEquals(userData, b.getUserData());
 	}
 
-	public void testLogin() throws CryptoException, L2pSecurityException, MalformedXMLException, UserAgentException {
-		UserAgent a = UserAgent.createUserAgent("test");
-		a.unlockPrivateKey("test");
+	public void testLogin() throws CryptoException, L2pSecurityException, MalformedXMLException, UserAgentException,
+			AgentAccessDeniedException {
+		UserAgentImpl a = UserAgentImpl.createUserAgent("test");
+		a.unlock("test");
 
 		a.setLoginName("login");
 
 		String xml = a.toXmlString();
 
-		UserAgent andBack = UserAgent.createFromXml(xml);
+		UserAgentImpl andBack = UserAgentImpl.createFromXml(xml);
 
 		assertEquals("login", andBack.getLoginName());
 	}
 
 	@Test
-	public void testEmail() throws CryptoException, L2pSecurityException, MalformedXMLException, UserAgentException {
-		UserAgent a = UserAgent.createUserAgent("test");
-		a.unlockPrivateKey("test");
+	public void testEmail() throws CryptoException, L2pSecurityException, MalformedXMLException, UserAgentException,
+			AgentAccessDeniedException {
+		UserAgentImpl a = UserAgentImpl.createUserAgent("test");
+		a.unlock("test");
 
 		a.setEmail("test@bla");
 
 		String xml = a.toXmlString();
 
-		UserAgent andBack = UserAgent.createFromXml(xml);
+		UserAgentImpl andBack = UserAgentImpl.createFromXml(xml);
 
 		assertEquals("test@bla", andBack.getEmail());
 	}
 
 	@Test
-	public void testEmailAndLogin()
-			throws CryptoException, L2pSecurityException, MalformedXMLException, UserAgentException {
-		UserAgent a = UserAgent.createUserAgent("test");
-		a.unlockPrivateKey("test");
+	public void testEmailAndLogin() throws CryptoException, L2pSecurityException, MalformedXMLException,
+			UserAgentException, AgentAccessDeniedException {
+		UserAgentImpl a = UserAgentImpl.createUserAgent("test");
+		a.unlock("test");
 
 		a.setEmail("test@bla");
 		a.setLoginName("login");
 
 		String xml = a.toXmlString();
 
-		UserAgent andBack = UserAgent.createFromXml(xml);
+		UserAgentImpl andBack = UserAgentImpl.createFromXml(xml);
 
 		assertEquals("test@bla", andBack.getEmail());
 		assertEquals("login", andBack.getLoginName());
 	}
 
 	@Test
-	public void testLoginExceptions() throws L2pSecurityException, CryptoException {
-		UserAgent a = UserAgent.createUserAgent("test");
-		a.unlockPrivateKey("test");
+	public void testLoginExceptions() throws L2pSecurityException, CryptoException, AgentAccessDeniedException {
+		UserAgentImpl a = UserAgentImpl.createUserAgent("test");
+		a.unlock("test");
 
 		try {
 			a.setLoginName("12323");
@@ -164,9 +168,9 @@ public class UserAgentTest {
 	}
 
 	@Test
-	public void testEmailExceptions() throws L2pSecurityException, CryptoException {
-		UserAgent a = UserAgent.createUserAgent("test");
-		a.unlockPrivateKey("test");
+	public void testEmailExceptions() throws L2pSecurityException, CryptoException, AgentAccessDeniedException {
+		UserAgentImpl a = UserAgentImpl.createUserAgent("test");
+		a.unlock("test");
 
 		try {
 			a.setEmail("afduaewd");

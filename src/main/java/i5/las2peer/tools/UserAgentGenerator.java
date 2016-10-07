@@ -1,6 +1,6 @@
 package i5.las2peer.tools;
 
-import i5.las2peer.security.UserAgent;
+import i5.las2peer.security.UserAgentImpl;
 
 /**
  * A simple command line tool creating a new agent.
@@ -30,16 +30,16 @@ public class UserAgentGenerator {
 		}
 
 		try {
-			UserAgent agent = null;
+			UserAgentImpl agent = null;
 			if (argv[0].length() > 0)
-				agent = UserAgent.createUserAgent(argv[0]);
+				agent = UserAgentImpl.createUserAgent(argv[0]);
 			else {
 				System.err.println("No passphrase is given!");
 				return;
 			}
 
 			if (argv.length > 1) {
-				agent.unlockPrivateKey(argv[0]);
+				agent.unlock(argv[0]);
 
 				if (argv[1].length() > 0)
 					agent.setLoginName(argv[1]);

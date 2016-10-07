@@ -1,16 +1,16 @@
 package i5.las2peer.persistency.helper;
 
-import i5.las2peer.api.StorageEnvelopeHandler;
-import i5.las2peer.api.StorageExceptionHandler;
-import i5.las2peer.persistency.Envelope;
+import i5.las2peer.persistency.EnvelopeVersion;
+import i5.las2peer.persistency.StorageEnvelopeHandler;
+import i5.las2peer.persistency.StorageExceptionHandler;
 
 public class FetchProcessHelper implements StorageEnvelopeHandler, StorageExceptionHandler {
 
 	private Exception exception;
-	private Envelope result;
+	private EnvelopeVersion result;
 
 	@Override
-	public void onEnvelopeReceived(Envelope result) {
+	public void onEnvelopeReceived(EnvelopeVersion result) {
 		synchronized (this) {
 			this.result = result;
 		}
@@ -25,7 +25,7 @@ public class FetchProcessHelper implements StorageEnvelopeHandler, StorageExcept
 		}
 	}
 
-	public Envelope getResult() throws Exception {
+	public EnvelopeVersion getResult() throws Exception {
 		synchronized (this) {
 			if (exception != null) {
 				throw exception;

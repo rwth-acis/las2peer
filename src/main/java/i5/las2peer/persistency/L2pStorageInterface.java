@@ -1,16 +1,13 @@
 package i5.las2peer.persistency;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.List;
 
-import i5.las2peer.api.StorageCollisionHandler;
-import i5.las2peer.api.StorageEnvelopeHandler;
-import i5.las2peer.api.StorageExceptionHandler;
-import i5.las2peer.api.StorageStoreResultHandler;
-import i5.las2peer.api.exceptions.ArtifactNotFoundException;
-import i5.las2peer.api.exceptions.EnvelopeAlreadyExistsException;
-import i5.las2peer.api.exceptions.StorageException;
-import i5.las2peer.security.Agent;
+import i5.las2peer.api.persistency.EnvelopeNotFoundException;
+import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
+import i5.las2peer.api.persistency.EnvelopeException;
+import i5.las2peer.security.AgentImpl;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.SerializationException;
 
@@ -28,7 +25,7 @@ public interface L2pStorageInterface {
 	 * @throws SerializationException If a problem occurs with object serialization.
 	 * @throws CryptoException If an cryptographic issue occurs.
 	 */
-	public Envelope createEnvelope(String identifier, Serializable content, Agent... readers)
+	public EnvelopeVersion createEnvelope(String identifier, Serializable content, AgentImpl... readers)
 			throws IllegalArgumentException, SerializationException, CryptoException;
 
 	/**
@@ -43,7 +40,7 @@ public interface L2pStorageInterface {
 	 * @throws SerializationException If a problem occurs with object serialization.
 	 * @throws CryptoException If an cryptographic issue occurs.
 	 */
-	public Envelope createEnvelope(String identifier, Serializable content, List<Agent> readers)
+	public EnvelopeVersion createEnvelope(String identifier, Serializable content, Collection<?> readers)
 			throws IllegalArgumentException, SerializationException, CryptoException;
 
 	/**
@@ -58,7 +55,7 @@ public interface L2pStorageInterface {
 	 * @throws SerializationException If a problem occurs with object serialization.
 	 * @throws CryptoException If an cryptographic issue occurs.
 	 */
-	public Envelope createEnvelope(Envelope previousVersion, Serializable content)
+	public EnvelopeVersion createEnvelope(EnvelopeVersion previousVersion, Serializable content)
 			throws IllegalArgumentException, SerializationException, CryptoException;
 
 	/**
@@ -73,7 +70,7 @@ public interface L2pStorageInterface {
 	 * @throws SerializationException If a problem occurs with object serialization.
 	 * @throws CryptoException If an cryptographic issue occurs.
 	 */
-	public Envelope createEnvelope(Envelope previousVersion, Serializable content, Agent... readers)
+	public EnvelopeVersion createEnvelope(EnvelopeVersion previousVersion, Serializable content, AgentImpl... readers)
 			throws IllegalArgumentException, SerializationException, CryptoException;
 
 	/**
@@ -88,7 +85,7 @@ public interface L2pStorageInterface {
 	 * @throws SerializationException If a problem occurs with object serialization.
 	 * @throws CryptoException If an cryptographic issue occurs.
 	 */
-	public Envelope createEnvelope(Envelope previousVersion, Serializable content, List<Agent> readers)
+	public EnvelopeVersion createEnvelope(EnvelopeVersion previousVersion, Serializable content, Collection<?> readers)
 			throws IllegalArgumentException, SerializationException, CryptoException;
 
 	/**
@@ -102,7 +99,7 @@ public interface L2pStorageInterface {
 	 * @throws SerializationException If a problem occurs with object serialization.
 	 * @throws CryptoException If an cryptographic issue occurs.
 	 */
-	public Envelope createUnencryptedEnvelope(String identifier, Serializable content)
+	public EnvelopeVersion createUnencryptedEnvelope(String identifier, Serializable content)
 			throws IllegalArgumentException, SerializationException, CryptoException;
 
 	/**
@@ -116,7 +113,7 @@ public interface L2pStorageInterface {
 	 * @throws SerializationException If a problem occurs with object serialization.
 	 * @throws CryptoException If an cryptographic issue occurs.
 	 */
-	public Envelope createUnencryptedEnvelope(Envelope previousVersion, Serializable content)
+	public EnvelopeVersion createUnencryptedEnvelope(EnvelopeVersion previousVersion, Serializable content)
 			throws IllegalArgumentException, SerializationException, CryptoException;
 
 	/**
@@ -126,13 +123,13 @@ public interface L2pStorageInterface {
 	 * 
 	 * @param Envelope The Envelope to store in the network.
 	 * @param author The author that is used to sign the content.
-	 * @param timeoutMs A timeout after that an {@link StorageException} is thrown.
+	 * @param timeoutMs A timeout after that an {@link EnvelopeException} is thrown.
 	 * @throws EnvelopeAlreadyExistsException If an Envelope with the given identifier and version is already known in
 	 *             the network.
-	 * @throws StorageException If an issue with the storage occurs.
+	 * @throws EnvelopeException If an issue with the storage occurs.
 	 */
-	public void storeEnvelope(Envelope Envelope, Agent author, long timeoutMs)
-			throws EnvelopeAlreadyExistsException, StorageException;
+	public void storeEnvelope(EnvelopeVersion Envelope, AgentImpl author, long timeoutMs)
+			throws EnvelopeAlreadyExistsException, EnvelopeException;
 
 	/**
 	 * Stores the given Envelope in the network. The content is signed with the key from the given author. If an
@@ -146,19 +143,19 @@ public interface L2pStorageInterface {
 	 *            already exists.
 	 * @param exceptionHandler An exception handler that is called, if an exception occurs.
 	 */
-	public void storeEnvelopeAsync(Envelope Envelope, Agent author, StorageStoreResultHandler resultHandler,
+	public void storeEnvelopeAsync(EnvelopeVersion Envelope, AgentImpl author, StorageStoreResultHandler resultHandler,
 			StorageCollisionHandler collisionHandler, StorageExceptionHandler exceptionHandler);
 
 	/**
 	 * Fetches the latest version for the given identifier from the network.
 	 * 
 	 * @param identifier An unique identifier for the Envelope.
-	 * @param timeoutMs A timeout after that an {@link StorageException} is thrown.
+	 * @param timeoutMs A timeout after that an {@link EnvelopeException} is thrown.
 	 * @return Returns the fetched Envelope from the network.
-	 * @throws ArtifactNotFoundException If no envelope or any part of it was not found in the network.
-	 * @throws StorageException If an issue with the storage occurs.
+	 * @throws EnvelopeNotFoundException If no envelope or any part of it was not found in the network.
+	 * @throws EnvelopeException If an issue with the storage occurs.
 	 */
-	public Envelope fetchEnvelope(String identifier, long timeoutMs) throws ArtifactNotFoundException, StorageException;
+	public EnvelopeVersion fetchEnvelope(String identifier, long timeoutMs) throws EnvelopeNotFoundException, EnvelopeException;
 
 	/**
 	 * Fetches the latest version for the given identifier from the network.
@@ -174,9 +171,9 @@ public interface L2pStorageInterface {
 	 * Removes the envelope with the given identifier from the network.
 	 * 
 	 * @param identifier An unique identifier for the Envelope.
-	 * @throws ArtifactNotFoundException If no envelope or any part of it was not found in the network.
-	 * @throws StorageException If an issue with the storage occurs.
+	 * @throws EnvelopeNotFoundException If no envelope or any part of it was not found in the network.
+	 * @throws EnvelopeException If an issue with the storage occurs.
 	 */
-	public void removeEnvelope(String identifier) throws ArtifactNotFoundException, StorageException;
+	public void removeEnvelope(String identifier) throws EnvelopeNotFoundException, EnvelopeException;
 
 }

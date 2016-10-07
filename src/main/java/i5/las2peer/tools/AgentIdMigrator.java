@@ -1,5 +1,8 @@
 package i5.las2peer.tools;
 
+import i5.las2peer.persistency.MalformedXMLException;
+import i5.las2peer.security.AgentImpl;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -8,13 +11,10 @@ import java.security.PublicKey;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Element;
 
-import i5.las2peer.persistency.MalformedXMLException;
-import i5.las2peer.security.Agent;
-
 public class AgentIdMigrator {
 
-	public static void main(String[] args)
-			throws MalformedXMLException, DOMException, SerializationException, IOException {
+	public static void main(String[] args) throws MalformedXMLException, DOMException, SerializationException,
+			IOException {
 		if (args.length < 1) {
 			System.out.println("Usage: agent-filename.xml [agent-filename.xml...]");
 			System.exit(1);
@@ -26,12 +26,12 @@ public class AgentIdMigrator {
 		}
 	}
 
-	public static void migrateAgentXMLFile(String xmlFilename)
-			throws MalformedXMLException, DOMException, SerializationException, IOException {
+	public static void migrateAgentXMLFile(String xmlFilename) throws MalformedXMLException, DOMException,
+			SerializationException, IOException {
 		System.out.println("Migrating XML file: " + xmlFilename);
 		Element root = XmlTools.getRootElement(new File(xmlFilename), "las2peer:agent");
 		replaceAgentId(root);
-		Agent migratedAgent = Agent.createFromXml(root);
+		AgentImpl migratedAgent = AgentImpl.createFromXml(root);
 		String migratedXMLStr = migratedAgent.toXmlString();
 		FileWriter fw = new FileWriter(xmlFilename);
 		fw.write(migratedXMLStr);

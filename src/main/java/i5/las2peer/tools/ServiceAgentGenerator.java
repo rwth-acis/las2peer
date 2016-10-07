@@ -1,7 +1,7 @@
 package i5.las2peer.tools;
 
-import i5.las2peer.p2p.ServiceNameVersion;
-import i5.las2peer.security.ServiceAgent;
+import i5.las2peer.api.p2p.ServiceNameVersion;
+import i5.las2peer.security.ServiceAgentImpl;
 
 /**
  * A simple command line tool creating a service agent for the given service class.
@@ -30,7 +30,7 @@ public class ServiceAgentGenerator {
 		}
 
 		try {
-			ServiceAgent agent = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(argv[0]), argv[1]);
+			ServiceAgentImpl agent = ServiceAgentImpl.createServiceAgent(ServiceNameVersion.fromString(argv[0]), argv[1]);
 			System.out.print(agent.toXmlString());
 		} catch (Exception e) {
 			System.err.println("unable to generate new agent: " + e);

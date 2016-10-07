@@ -1,15 +1,15 @@
 package i5.las2peer.security;
 
-import java.util.Hashtable;
-
 import i5.las2peer.p2p.AgentNotKnownException;
+
+import java.util.Hashtable;
 
 /**
  * A simple Hashtable based storage for agents.
  */
 public class BasicAgentStorage implements AgentStorage {
 
-	private Hashtable<String, Agent> htRegistered = new Hashtable<>();
+	private Hashtable<String, AgentImpl> htRegistered = new Hashtable<>();
 
 	private AgentStorage backupStorage;
 
@@ -39,9 +39,9 @@ public class BasicAgentStorage implements AgentStorage {
 	 *
 	 * @param agent
 	 */
-	public void registerAgent(Agent agent) {
+	public void registerAgent(AgentImpl agent) {
 		try {
-			Agent register = agent.cloneLocked();
+			AgentImpl register = agent.cloneLocked();
 
 			htRegistered.put(register.getSafeId(), register);
 		} catch (CloneNotSupportedException e) {
@@ -55,8 +55,8 @@ public class BasicAgentStorage implements AgentStorage {
 	 *
 	 * @param agents
 	 */
-	public void registerAgents(Agent... agents) {
-		for (Agent a : agents) {
+	public void registerAgents(AgentImpl... agents) {
+		for (AgentImpl a : agents) {
 			registerAgent(a);
 		}
 	}
@@ -66,7 +66,7 @@ public class BasicAgentStorage implements AgentStorage {
 	 *
 	 * @param agent
 	 */
-	public void unregisterAgent(Agent agent) {
+	public void unregisterAgent(AgentImpl agent) {
 		htRegistered.remove(agent.getSafeId());
 	}
 
@@ -87,8 +87,8 @@ public class BasicAgentStorage implements AgentStorage {
 	 * @throws AgentNotKnownException
 	 */
 	@Override
-	public Agent getAgent(String id) throws AgentNotKnownException {
-		Agent result = htRegistered.get(id);
+	public AgentImpl getAgent(String id) throws AgentNotKnownException {
+		AgentImpl result = htRegistered.get(id);
 
 		if (result != null) {
 			try {

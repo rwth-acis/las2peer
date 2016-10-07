@@ -2,12 +2,11 @@ package i5.las2peer.testing;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import i5.las2peer.api.Service;
+import i5.las2peer.security.AgentImpl;
 
 import org.junit.Assert;
 import org.junit.Test;
-
-import i5.las2peer.api.Service;
-import i5.las2peer.security.Agent;
 
 public class LocalServiceTestCaseTest extends LocalServiceTestCase {
 
@@ -29,7 +28,7 @@ public class LocalServiceTestCaseTest extends LocalServiceTestCase {
 	@Test
 	public void testMockAgents() {
 		try {
-			Agent eve = MockAgentFactory.getEve();
+			AgentImpl eve = MockAgentFactory.getEve();
 			getNode().hasAgent(eve.getSafeId());
 
 			assertTrue(getNode().hasAgent(MockAgentFactory.getAdam().getSafeId()));

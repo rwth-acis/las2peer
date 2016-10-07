@@ -1,12 +1,12 @@
 package i5.las2peer.classLoaders.libraries;
 
-import i5.las2peer.api.exceptions.StorageException;
+import i5.las2peer.api.persistency.EnvelopeException;
 import i5.las2peer.classLoaders.LibraryNotFoundException;
 import i5.las2peer.classLoaders.UnresolvedDependenciesException;
 import i5.las2peer.classLoaders.helpers.LibraryDependency;
 import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
 import i5.las2peer.logging.L2pLogger;
-import i5.las2peer.persistency.Envelope;
+import i5.las2peer.persistency.EnvelopeVersion;
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.persistency.NodeStorageInterface;
 import i5.las2peer.security.L2pSecurityException;
@@ -72,14 +72,14 @@ public class SharedStorageRepository implements Repository {
 	private LoadedLibrary fetchLibraryInformation(String libName) throws LibraryNotFoundException {
 		try {
 			String libEnvId = getLibraryEnvelopeIdentifier(libName);
-			Envelope fetched = storage.fetchEnvelope(libEnvId, FETCH_LIB_TIMEOUT);
+			EnvelopeVersion fetched = storage.fetchEnvelope(libEnvId, FETCH_LIB_TIMEOUT);
 			String xmlStr = (String) fetched.getContent();
 			return LoadedNetworkLibrary.createFromXml(storage, xmlStr);
-		} catch (StorageException e) {
+		} catch (EnvelopeException e) {
 			throw new LibraryNotFoundException("Could not fetch library '" + libName + "' information from network", e);
 		} catch (CryptoException | L2pSecurityException | SerializationException e) {
-			throw new LibraryNotFoundException(
-					"Could not read library '" + libName + "' information from network envelope", e);
+			throw new LibraryNotFoundException("Could not read library '" + libName
+					+ "' information from network envelope", e);
 		} catch (MalformedXMLException e) {
 			throw new LibraryNotFoundException("Could not read library '" + libName + "' xml representation", e);
 		}

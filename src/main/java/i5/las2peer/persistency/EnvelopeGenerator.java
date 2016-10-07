@@ -1,18 +1,18 @@
 package i5.las2peer.persistency;
 
+import i5.las2peer.api.security.AgentAccessDeniedException;
+import i5.las2peer.security.AgentImpl;
+import i5.las2peer.security.PassphraseAgentImpl;
+import i5.las2peer.tools.CryptoException;
+import i5.las2peer.tools.FileContentReader;
+import i5.las2peer.tools.SerializationException;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Random;
-
-import i5.las2peer.security.Agent;
-import i5.las2peer.security.L2pSecurityException;
-import i5.las2peer.security.PassphraseAgent;
-import i5.las2peer.tools.CryptoException;
-import i5.las2peer.tools.FileContentReader;
-import i5.las2peer.tools.SerializationException;
 
 /**
  * A simple command line tool for generating XML envelopes to the standard out.
@@ -32,8 +32,8 @@ public class EnvelopeGenerator {
 	 * @param message additional information
 	 */
 	public static void usage(String message) {
-		System.err.println(
-				"Usage: java [-cp ...] i5.las2peer.tools.EnvelopeGenerator [xml agent file] [agent passphrase] [nested class name] [String constructor value]");
+		System.err
+				.println("Usage: java [-cp ...] i5.las2peer.tools.EnvelopeGenerator [xml agent file] [agent passphrase] [nested class name] [String constructor value]");
 		if (message != null) {
 			System.err.println("\n" + message);
 		}
@@ -47,8 +47,8 @@ public class EnvelopeGenerator {
 	 * @throws IOException
 	 * @throws MalformedXMLException
 	 */
-	public static PassphraseAgent loadAgent(String filename) throws MalformedXMLException, IOException {
-		return (PassphraseAgent) Agent.createFromXml(FileContentReader.read(filename));
+	public static PassphraseAgentImpl loadAgent(String filename) throws MalformedXMLException, IOException {
+		return (PassphraseAgentImpl) AgentImpl.createFromXml(FileContentReader.read(filename));
 	}
 
 	/**
@@ -71,11 +71,11 @@ public class EnvelopeGenerator {
 			return;
 		}
 		try {
-			PassphraseAgent owner = loadAgent(argv[0]);
-			owner.unlockPrivateKey(argv[1]);
+			PassphraseAgentImpl owner = loadAgent(argv[0]);
+			owner.unlock(argv[1]);
 			Serializable temp = createSerializable(argv[2], argv[3]);
-			Envelope env = new Envelope(Long.toString(new Random().nextLong()), temp,
-					Arrays.asList(new Agent[] { owner }));
+			EnvelopeVersion env = new EnvelopeVersion(Long.toString(new Random().nextLong()), temp,
+					Arrays.asList(new AgentImpl[] { owner }));
 			System.out.println(env.toXmlString());
 		} catch (SecurityException e) {
 			usage("Unable to call constructor of nested class: " + e);
@@ -85,7 +85,7 @@ public class EnvelopeGenerator {
 			usage("malformed agent XML file");
 		} catch (IOException e) {
 			usage("unable to read contents of given agent file (" + argv[0] + ")");
-		} catch (L2pSecurityException e) {
+		} catch (AgentAccessDeniedException e) {
 			usage("unable to unlock agent!");
 		} catch (ClassNotFoundException e) {
 			usage("content class does not exist!");
@@ -118,9 +118,9 @@ public class EnvelopeGenerator {
 	 * @throws IllegalAccessException
 	 * @throws InvocationTargetException
 	 */
-	private static Serializable createSerializable(String classname, String value)
-			throws ClassNotFoundException, SecurityException, NoSuchMethodException, IllegalArgumentException,
-			InstantiationException, IllegalAccessException, InvocationTargetException {
+	private static Serializable createSerializable(String classname, String value) throws ClassNotFoundException,
+			SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException,
+			IllegalAccessException, InvocationTargetException {
 		Class<?> cls = Class.forName(classname);
 		Constructor<?> cons = cls.getConstructor(String.class);
 		return (Serializable) cons.newInstance(value);

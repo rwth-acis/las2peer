@@ -14,7 +14,7 @@ public interface AgentStorage {
 	 * @return a new locked Agent instance
 	 * @throws AgentNotKnownException agent not found
 	 */
-	public Agent getAgent(String id) throws AgentNotKnownException;
+	public AgentImpl getAgent(String id) throws AgentNotKnownException;
 
 	/**
 	 * does this storage know the requested agent?

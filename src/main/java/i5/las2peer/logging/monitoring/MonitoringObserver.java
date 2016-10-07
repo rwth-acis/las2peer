@@ -1,7 +1,9 @@
 package i5.las2peer.logging.monitoring;
 
+import i5.las2peer.api.execution.ServiceInvocationException;
+import i5.las2peer.api.logging.MonitoringEvent;
+import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.communication.Message;
-import i5.las2peer.execution.L2pServiceException;
 import i5.las2peer.logging.NodeObserver;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.MessageResultListener;
@@ -9,6 +11,7 @@ import i5.las2peer.p2p.Node;
 import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.security.AgentException;
 import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.security.L2pServiceException;
 import i5.las2peer.security.MonitoringAgent;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.SerializationException;
@@ -73,12 +76,12 @@ public class MonitoringObserver implements NodeObserver {
 	 */
 	private boolean initializeAgents() {
 		try {
-			sendingAgent.unlockPrivateKey("sendingAgentPass");
+			sendingAgent.unlock("sendingAgentPass");
 			registeredAt.storeAgent(sendingAgent);
 			registeredAt.registerReceiver(sendingAgent);
 			System.out.println("Monitoring: Registered MonitoringAgent: " + sendingAgent.getSafeId());
 
-		} catch (AgentException e) {
+		} catch (AgentException | AgentAccessDeniedException e) {
 			System.out.println("Monitoring: Problems registering MonitoringAgent!" + e);
 			e.printStackTrace();
 		} catch (L2pSecurityException e) {
@@ -97,7 +100,8 @@ public class MonitoringObserver implements NodeObserver {
 			} catch (AgentNotKnownException e) {
 				e.printStackTrace();
 			}
-		} catch (AgentNotKnownException | L2pServiceException | L2pSecurityException | InterruptedException e) {
+		} catch (AgentNotKnownException | L2pServiceException | L2pSecurityException | InterruptedException
+				| ServiceInvocationException e) {
 			System.out.println("Monitoring: Processing Service does not seem available! " + e);
 			e.printStackTrace();
 			return false;
@@ -113,8 +117,8 @@ public class MonitoringObserver implements NodeObserver {
 	 *
 	 */
 	@Override
-	public void log(Long timestamp, Event event, String sourceNode, String sourceAgentId, String destinationNode,
-			String destinationAgentId, String remarks) {
+	public void log(Long timestamp, MonitoringEvent event, String sourceNode, String sourceAgentId,
+			String destinationNode, String destinationAgentId, String remarks) {
 		// Now this is a bit tricky..
 		// We get a "Node is Running" event, but we have to wait until the next event to be sure that
 		// the method that called the "Running" event has terminated, otherwise our request will crash this startup
@@ -123,7 +127,7 @@ public class MonitoringObserver implements NodeObserver {
 			readyForInitializing = false; // "Nearly" atomic, enough in this case;-)
 			initializedDone = initializeAgents();
 		}
-		if (event == Event.NODE_STATUS_CHANGE && remarks.equals("RUNNING")) {
+		if (event == MonitoringEvent.NODE_STATUS_CHANGE && remarks.equals("RUNNING")) {
 			readyForInitializing = true;
 		}
 		if (sourceNode == null) {
@@ -144,7 +148,7 @@ public class MonitoringObserver implements NodeObserver {
 		// We can only send our last message if the node is closing, so we will have to assume that all services are
 		// shutdown
 		// when a node is closed (seems to be a fair bet)
-		if (event == Event.NODE_SHUTDOWN) {
+		if (event == MonitoringEvent.NODE_SHUTDOWN) {
 			if (initializedDone) {
 				// To remove "old" messages since they are not overwritten
 				int counter = messagesCount;

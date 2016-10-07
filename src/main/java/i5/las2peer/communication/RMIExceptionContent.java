@@ -14,13 +14,13 @@ public class RMIExceptionContent implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = -3811848605195392152L;
-	private Exception exception;
+	private Throwable exception;
 
-	public RMIExceptionContent(Exception content) {
+	public RMIExceptionContent(Throwable content) {
 		exception = content;
 	}
 
-	public Exception getException() {
+	public Throwable getException() {
 		return exception;
 	}
 

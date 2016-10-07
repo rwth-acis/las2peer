@@ -1,5 +1,14 @@
 package i5.las2peer.persistency;
 
+import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
+import i5.las2peer.api.persistency.EnvelopeException;
+import i5.las2peer.api.persistency.EnvelopeNotFoundException;
+import i5.las2peer.p2p.PastryNodeImpl;
+import i5.las2peer.security.GroupAgentImpl;
+import i5.las2peer.security.UserAgentImpl;
+import i5.las2peer.testing.MockAgentFactory;
+import i5.las2peer.testing.TestSuite;
+
 import java.io.Serializable;
 import java.security.PublicKey;
 import java.util.ArrayList;
@@ -13,20 +22,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
-
-import i5.las2peer.api.StorageCollisionHandler;
-import i5.las2peer.api.StorageEnvelopeHandler;
-import i5.las2peer.api.StorageExceptionHandler;
-import i5.las2peer.api.StorageStoreResultHandler;
-import i5.las2peer.api.exceptions.ArtifactNotFoundException;
-import i5.las2peer.api.exceptions.EnvelopeAlreadyExistsException;
-import i5.las2peer.api.exceptions.StopMergingException;
-import i5.las2peer.api.exceptions.StorageException;
-import i5.las2peer.p2p.PastryNodeImpl;
-import i5.las2peer.security.GroupAgent;
-import i5.las2peer.security.UserAgent;
-import i5.las2peer.testing.MockAgentFactory;
-import i5.las2peer.testing.TestSuite;
 
 public class EnvelopeTest {
 
@@ -79,20 +74,20 @@ public class EnvelopeTest {
 		try {
 			PastryNodeImpl node1 = nodes.get(0);
 			// create envelope to store in the shared network storage
-			UserAgent smith = MockAgentFactory.getAdam();
-			smith.unlockPrivateKey("adamspass");
-			Envelope envelope1 = node1.createUnencryptedEnvelope("test", "Hello World!");
+			UserAgentImpl smith = MockAgentFactory.getAdam();
+			smith.unlock("adamspass");
+			EnvelopeVersion envelope1 = node1.createUnencryptedEnvelope("test", "Hello World!");
 			// upload envelope
 			node1.storeEnvelopeAsync(envelope1, smith, new StorageStoreResultHandler() {
 				@Override
 				public void onResult(Serializable serializable, int successfulOperations) {
-					System.out.println(
-							"Successfully stored artifact " + serializable + " " + successfulOperations + " times");
+					System.out.println("Successfully stored artifact " + serializable + " " + successfulOperations
+							+ " times");
 					// fetch envelope again
 					System.out.println("Fetching artifact ...");
 					node1.fetchEnvelopeAsync("test", new StorageEnvelopeHandler() {
 						@Override
-						public void onEnvelopeReceived(Envelope envelope) {
+						public void onEnvelopeReceived(EnvelopeVersion envelope) {
 							try {
 								String content = (String) envelope.getContent();
 								System.out.println("Envelope content is '" + content + "'");
@@ -149,12 +144,12 @@ public class EnvelopeTest {
 		try {
 			PastryNodeImpl node1 = nodes.get(0);
 			// create envelope to store in the shared network storage
-			UserAgent smith = MockAgentFactory.getAdam();
-			smith.unlockPrivateKey("adamspass");
+			UserAgentImpl smith = MockAgentFactory.getAdam();
+			smith.unlock("adamspass");
 			byte[] testContent = new byte[datasize];
 			// generate random data
 			new Random().nextBytes(testContent);
-			Envelope envelope1 = node1.createUnencryptedEnvelope("test", testContent);
+			EnvelopeVersion envelope1 = node1.createUnencryptedEnvelope("test", testContent);
 			// upload envelope
 			long startStore = System.currentTimeMillis();
 			node1.storeEnvelopeAsync(envelope1, smith, new StorageStoreResultHandler() {
@@ -169,7 +164,7 @@ public class EnvelopeTest {
 					System.out.println("Fetching artifact ...");
 					node1.fetchEnvelopeAsync("test", new StorageEnvelopeHandler() {
 						@Override
-						public void onEnvelopeReceived(Envelope envelope) {
+						public void onEnvelopeReceived(EnvelopeVersion envelope) {
 							try {
 								byte[] content = (byte[]) envelope.getContent();
 								Assert.assertArrayEquals(testContent, content);
@@ -206,10 +201,10 @@ public class EnvelopeTest {
 		try {
 			PastryNodeImpl node1 = nodes.get(0);
 			// create envelope to store in the shared network storage
-			UserAgent smith = MockAgentFactory.getAdam();
-			smith.unlockPrivateKey("adamspass");
-			Envelope envelope1 = node1.createUnencryptedEnvelope("test", "Hello World 1!");
-			Envelope envelope2 = node1.createUnencryptedEnvelope("test", "Hello World 2!");
+			UserAgentImpl smith = MockAgentFactory.getAdam();
+			smith.unlock("adamspass");
+			EnvelopeVersion envelope1 = node1.createUnencryptedEnvelope("test", "Hello World 1!");
+			EnvelopeVersion envelope2 = node1.createUnencryptedEnvelope("test", "Hello World 2!");
 			// upload envelope
 			node1.storeEnvelopeAsync(envelope1, smith, new StorageStoreResultHandler() {
 				@Override
@@ -226,7 +221,7 @@ public class EnvelopeTest {
 								System.out.println("Fetching artifact ...");
 								node1.fetchEnvelopeAsync("test", new StorageEnvelopeHandler() {
 									@Override
-									public void onEnvelopeReceived(Envelope envelope) {
+									public void onEnvelopeReceived(EnvelopeVersion envelope) {
 										try {
 											Assert.assertEquals(envelope.getVersion(), 2);
 											String content = (String) envelope.getContent();
@@ -244,12 +239,11 @@ public class EnvelopeTest {
 						}
 					}, new StorageCollisionHandler() {
 						@Override
-						public Serializable onCollision(Envelope toStore, Envelope inNetwork, long numberOfCollisions)
-								throws StopMergingException {
+						public Serializable onCollision(EnvelopeVersion toStore, EnvelopeVersion inNetwork,
+								long numberOfCollisions) throws StopMergingException {
 							if (numberOfCollisions > 100) {
-								throw new StopMergingException(
-										"Merging failed, too many (" + numberOfCollisions + ") collisions!",
-										numberOfCollisions);
+								throw new StopMergingException("Merging failed, too many (" + numberOfCollisions
+										+ ") collisions!", numberOfCollisions);
 							}
 							// we return the "merged" version of both envelopes
 							// usually there one should put more effort into merging
@@ -304,10 +298,10 @@ public class EnvelopeTest {
 		try {
 			PastryNodeImpl node1 = nodes.get(0);
 			// create envelope to store in the shared network storage
-			UserAgent smith = MockAgentFactory.getAdam();
-			smith.unlockPrivateKey("adamspass");
-			Envelope envelope1 = node1.createUnencryptedEnvelope("test", "Hello World 1!");
-			Envelope envelope2 = node1.createUnencryptedEnvelope("test", "Hello World 2!");
+			UserAgentImpl smith = MockAgentFactory.getAdam();
+			smith.unlock("adamspass");
+			EnvelopeVersion envelope1 = node1.createUnencryptedEnvelope("test", "Hello World 1!");
+			EnvelopeVersion envelope2 = node1.createUnencryptedEnvelope("test", "Hello World 2!");
 			// upload first envelope
 			node1.storeEnvelopeAsync(envelope1, smith, new StorageStoreResultHandler() {
 				@Override
@@ -361,10 +355,10 @@ public class EnvelopeTest {
 		try {
 			PastryNodeImpl node1 = nodes.get(0);
 			// create envelope to store in the shared network storage
-			UserAgent smith = MockAgentFactory.getAdam();
-			smith.unlockPrivateKey("adamspass");
-			Envelope envelope1 = node1.createUnencryptedEnvelope("test", "Hello World 1!");
-			Envelope envelope2 = node1.createUnencryptedEnvelope("test", "Hello World 2!");
+			UserAgentImpl smith = MockAgentFactory.getAdam();
+			smith.unlock("adamspass");
+			EnvelopeVersion envelope1 = node1.createUnencryptedEnvelope("test", "Hello World 1!");
+			EnvelopeVersion envelope2 = node1.createUnencryptedEnvelope("test", "Hello World 2!");
 			// upload envelope
 			node1.storeEnvelopeAsync(envelope1, smith, new StorageStoreResultHandler() {
 				@Override
@@ -379,8 +373,8 @@ public class EnvelopeTest {
 						}
 					}, new StorageCollisionHandler() {
 						@Override
-						public String onCollision(Envelope toStore, Envelope inNetwork, long numberOfCollisions)
-								throws StopMergingException {
+						public String onCollision(EnvelopeVersion toStore, EnvelopeVersion inNetwork,
+								long numberOfCollisions) throws StopMergingException {
 							throw new StopMergingException();
 						}
 
@@ -429,14 +423,14 @@ public class EnvelopeTest {
 	public void testUpdateContent() {
 		try {
 			PastryNodeImpl node1 = nodes.get(0);
-			UserAgent smith = MockAgentFactory.getAdam();
-			smith.unlockPrivateKey("adamspass");
-			Envelope updated = node1.createUnencryptedEnvelope("test", "envelope version number 1");
+			UserAgentImpl smith = MockAgentFactory.getAdam();
+			smith.unlock("adamspass");
+			EnvelopeVersion updated = node1.createUnencryptedEnvelope("test", "envelope version number 1");
 			node1.storeEnvelope(updated, smith);
 			for (int c = 2; c <= 250; c++) {
 				updated = node1.createUnencryptedEnvelope(updated, "envelope version number " + c);
 				node1.storeEnvelope(updated, smith);
-				Envelope fetched = node1.fetchEnvelope(updated.getIdentifier());
+				EnvelopeVersion fetched = node1.fetchEnvelope(updated.getIdentifier());
 				Assert.assertEquals(updated.getIdentifier(), fetched.getIdentifier());
 				Assert.assertEquals(updated.getVersion(), fetched.getVersion());
 				Assert.assertEquals(updated.getContent(), fetched.getContent());
@@ -455,13 +449,13 @@ public class EnvelopeTest {
 			System.out.println("Fetching artifact ...");
 			node1.fetchEnvelopeAsync("testtesttest", new StorageEnvelopeHandler() {
 				@Override
-				public void onEnvelopeReceived(Envelope envelope) {
+				public void onEnvelopeReceived(EnvelopeVersion envelope) {
 					Assert.fail("Unexpected result (" + envelope.toString() + ")!");
 				}
 			}, new StorageExceptionHandler() {
 				@Override
 				public void onException(Exception e) {
-					if (e instanceof ArtifactNotFoundException) {
+					if (e instanceof EnvelopeNotFoundException) {
 						// expected exception
 						System.out.println("Expected exception '" + e.toString() + "' received.");
 						asyncTestState = true;
@@ -490,13 +484,13 @@ public class EnvelopeTest {
 		try {
 			PastryNodeImpl node1 = nodes.get(0);
 			// create envelope to store in the shared network storage
-			UserAgent smith = MockAgentFactory.getAdam();
-			smith.unlockPrivateKey("adamspass");
-			Envelope envelope1 = node1.createUnencryptedEnvelope("test", "Hello World!");
+			UserAgentImpl smith = MockAgentFactory.getAdam();
+			smith.unlock("adamspass");
+			EnvelopeVersion envelope1 = node1.createUnencryptedEnvelope("test", "Hello World!");
 			// upload envelope
 			node1.storeEnvelope(envelope1, smith);
 			// change content type to integer
-			Envelope envelope2 = node1.createUnencryptedEnvelope(envelope1, 123456789);
+			EnvelopeVersion envelope2 = node1.createUnencryptedEnvelope(envelope1, 123456789);
 			node1.storeEnvelope(envelope2, smith);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -508,21 +502,21 @@ public class EnvelopeTest {
 	public void testContentLocking() {
 		try {
 			PastryNodeImpl node1 = nodes.get(0);
-			UserAgent smith = MockAgentFactory.getAdam();
-			smith.unlockPrivateKey("adamspass");
+			UserAgentImpl smith = MockAgentFactory.getAdam();
+			smith.unlock("adamspass");
 			final String testContent = "envelope of smith";
-			Envelope original = node1.createUnencryptedEnvelope("test", testContent);
+			EnvelopeVersion original = node1.createUnencryptedEnvelope("test", testContent);
 			node1.storeEnvelope(original, smith);
-			UserAgent neo = MockAgentFactory.getEve();
-			neo.unlockPrivateKey("evespass");
-			Envelope overwritten = node1.createUnencryptedEnvelope(original, "envelope of neo");
+			UserAgentImpl neo = MockAgentFactory.getEve();
+			neo.unlock("evespass");
+			EnvelopeVersion overwritten = node1.createUnencryptedEnvelope(original, "envelope of neo");
 			try {
 				node1.storeEnvelope(overwritten, neo);
-				Assert.fail(StorageException.class.getName() + " expected");
-			} catch (StorageException e) {
+				Assert.fail(EnvelopeException.class.getName() + " expected");
+			} catch (EnvelopeException e) {
 				// expected store failed exception, already exists
 			}
-			Envelope stored = node1.fetchEnvelope("test");
+			EnvelopeVersion stored = node1.fetchEnvelope("test");
 			Assert.assertEquals(testContent, stored.getContent());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -535,34 +529,34 @@ public class EnvelopeTest {
 		try {
 			// Agent Smith (member of group1) stores an envelope
 			PastryNodeImpl node1 = nodes.get(0);
-			UserAgent smith = MockAgentFactory.getAdam();
-			smith.unlockPrivateKey("adamspass");
+			UserAgentImpl smith = MockAgentFactory.getAdam();
+			smith.unlock("adamspass");
 			smith.notifyRegistrationTo(node1); // workaround for missing context during tests
 			// Agent Neo (member group1, too) reads the stored envelope
-			UserAgent neo = MockAgentFactory.getEve();
-			neo.unlockPrivateKey("evespass");
+			UserAgentImpl neo = MockAgentFactory.getEve();
+			neo.unlock("evespass");
 			neo.notifyRegistrationTo(node1); // workaround for missing context during tests
-			GroupAgent group1 = MockAgentFactory.getGroup1();
+			GroupAgentImpl group1 = MockAgentFactory.getGroup1();
 			Assert.assertTrue(group1.isMember(smith));
 			Assert.assertTrue(group1.isMember(neo));
-			group1.unlockPrivateKey(smith);
+			group1.unlock(smith);
 			node1.storeAgent(group1);
 			final String testContent = "content from smith";
-			Envelope groupEnv = node1.createEnvelope("test", testContent, group1);
+			EnvelopeVersion groupEnv = node1.createEnvelope("test", testContent, group1);
 			node1.storeEnvelope(groupEnv, smith);
 			// Agent Neo (same group) reads the envelope
 			PastryNodeImpl node2 = nodes.get(1);
-			Envelope fetchedEnv = node2.fetchEnvelope("test");
+			EnvelopeVersion fetchedEnv = node2.fetchEnvelope("test");
 			String content = (String) fetchedEnv.getContent(neo, node2);
 			Assert.assertEquals(testContent, content);
 			Assert.assertEquals(groupEnv.getReaderGroupIds(), fetchedEnv.getReaderGroupIds());
 			// Agent Smith updates the envelope
 			final String testContent2 = "content from Smith 2";
-			Envelope groupEnv2 = node1.createEnvelope(groupEnv, testContent2);
+			EnvelopeVersion groupEnv2 = node1.createEnvelope(groupEnv, testContent2);
 			Assert.assertEquals(fetchedEnv.getReaderGroupIds(), groupEnv2.getReaderGroupIds());
 			node1.storeEnvelope(groupEnv2, smith);
 			// Agent Neo reads the content again
-			Envelope fetchedEnv2 = node2.fetchEnvelope("test");
+			EnvelopeVersion fetchedEnv2 = node2.fetchEnvelope("test");
 			String content2 = (String) fetchedEnv2.getContent(neo, node2);
 			Assert.assertEquals(testContent2, content2);
 			Assert.assertEquals(groupEnv2.getReaderGroupIds(), fetchedEnv2.getReaderGroupIds());
@@ -577,32 +571,32 @@ public class EnvelopeTest {
 		try {
 			// Agent Smith (member of group1) stores an envelope owned by group1
 			PastryNodeImpl node1 = nodes.get(0);
-			UserAgent smith = MockAgentFactory.getAdam();
-			smith.unlockPrivateKey("adamspass");
+			UserAgentImpl smith = MockAgentFactory.getAdam();
+			smith.unlock("adamspass");
 			smith.notifyRegistrationTo(node1); // workaround for missing context during tests
 			// Agent Neo (member group1, too) reads the stored envelope
-			UserAgent neo = MockAgentFactory.getEve();
-			neo.unlockPrivateKey("evespass");
+			UserAgentImpl neo = MockAgentFactory.getEve();
+			neo.unlock("evespass");
 			neo.notifyRegistrationTo(node1); // workaround for missing context during tests
-			GroupAgent group1 = MockAgentFactory.getGroup1();
+			GroupAgentImpl group1 = MockAgentFactory.getGroup1();
 			Assert.assertTrue(group1.isMember(smith));
 			Assert.assertTrue(group1.isMember(neo));
-			group1.unlockPrivateKey(smith);
+			group1.unlock(smith);
 			node1.storeAgent(group1);
 			final String testContent = "content from smith";
-			Envelope groupEnv = node1.createEnvelope("test", testContent);
+			EnvelopeVersion groupEnv = node1.createEnvelope("test", testContent);
 			node1.storeEnvelope(groupEnv, group1);
 			// Agent Neo (same group) reads the envelope ...
 			PastryNodeImpl node2 = nodes.get(1);
-			Envelope fetchedEnv = node2.fetchEnvelope("test");
+			EnvelopeVersion fetchedEnv = node2.fetchEnvelope("test");
 			String content = (String) fetchedEnv.getContent(neo, node2);
 			Assert.assertEquals(testContent, content);
 			// ... and updates it.
 			final String testContent2 = "content from neo";
-			Envelope updated = node2.createEnvelope(fetchedEnv, testContent2);
+			EnvelopeVersion updated = node2.createEnvelope(fetchedEnv, testContent2);
 			node2.storeEnvelope(updated, group1);
 			// Agent Smith reads content from Neo
-			Envelope fetched2 = node1.fetchEnvelope("test");
+			EnvelopeVersion fetched2 = node1.fetchEnvelope("test");
 			String content2 = (String) fetched2.getContent(smith, node1);
 			Assert.assertEquals(testContent2, content2);
 		} catch (Exception e) {

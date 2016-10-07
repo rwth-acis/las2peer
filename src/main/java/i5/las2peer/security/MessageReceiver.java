@@ -6,7 +6,7 @@ import i5.las2peer.p2p.Node;
 
 /**
  * 
- * An interface for receiving messages in the p2p network. Used by {@link Agent}s and {@link Mediator}s.
+ * An interface for receiving messages in the p2p network. Used by {@link AgentImpl}s and {@link Mediator}s.
  * 
  * 
  *
@@ -30,7 +30,7 @@ public interface MessageReceiver {
 	 * In case a {@link Mediator} implements this interface, this method will return the id of the agent, this mediator
 	 * is responsible for.
 	 * 
-	 * Otherwise it will just return the {@link Agent}s id.
+	 * Otherwise it will just return the {@link AgentImpl}s id.
 	 * 
 	 * @return id of the agent, this receiver is responsible for
 	 * 

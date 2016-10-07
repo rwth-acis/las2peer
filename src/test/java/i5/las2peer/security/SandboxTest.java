@@ -1,6 +1,10 @@
 package i5.las2peer.security;
 
 import static org.junit.Assert.fail;
+import i5.las2peer.api.p2p.ServiceNameVersion;
+import i5.las2peer.p2p.PastryNodeImpl;
+import i5.las2peer.sandbox.L2pSecurityManager;
+import i5.las2peer.testing.TestSuite;
 
 import java.io.File;
 import java.io.Serializable;
@@ -10,14 +14,10 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import i5.las2peer.p2p.PastryNodeImpl;
-import i5.las2peer.p2p.ServiceNameVersion;
-import i5.las2peer.testing.TestSuite;
-
 public class SandboxTest {
 
 	private PastryNodeImpl node;
-	private ServiceAgent service;
+	private ServiceAgentImpl service;
 
 	@BeforeClass
 	public static void initSecurityManager() {
@@ -32,9 +32,9 @@ public class SandboxTest {
 		try {
 			node = TestSuite.launchNetwork(1).get(0);
 			node.launch();
-			service = ServiceAgent.createServiceAgent(new ServiceNameVersion(MaliciousService.class.getName(), "1.0"),
-					"testpasswd");
-			service.unlockPrivateKey("testpasswd");
+			service = ServiceAgentImpl.createServiceAgent(new ServiceNameVersion(MaliciousService.class.getName(),
+					"1.0"), "testpasswd");
+			service.unlock("testpasswd");
 			node.registerReceiver(service);
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -1,5 +1,21 @@
 package i5.las2peer.testing;
 
+import i5.las2peer.api.Service;
+import i5.las2peer.api.execution.ServiceInvocationException;
+import i5.las2peer.api.execution.ServiceNotFoundException;
+import i5.las2peer.api.p2p.ServiceNameVersion;
+import i5.las2peer.p2p.AgentNotKnownException;
+import i5.las2peer.p2p.LocalNode;
+import i5.las2peer.security.AgentException;
+import i5.las2peer.security.AgentImpl;
+import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.security.L2pServiceException;
+import i5.las2peer.security.ServiceAgentImpl;
+import i5.las2peer.security.UserAgentImpl;
+import i5.las2peer.tools.CryptoException;
+import i5.las2peer.tools.FileContentReader;
+import i5.las2peer.tools.SimpleTools;
+
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.InputStream;
@@ -7,21 +23,6 @@ import java.io.Serializable;
 
 import org.junit.After;
 import org.junit.Before;
-
-import i5.las2peer.api.Service;
-import i5.las2peer.execution.L2pServiceException;
-import i5.las2peer.execution.NoSuchServiceException;
-import i5.las2peer.p2p.AgentNotKnownException;
-import i5.las2peer.p2p.LocalNode;
-import i5.las2peer.p2p.ServiceNameVersion;
-import i5.las2peer.security.Agent;
-import i5.las2peer.security.AgentException;
-import i5.las2peer.security.L2pSecurityException;
-import i5.las2peer.security.ServiceAgent;
-import i5.las2peer.security.UserAgent;
-import i5.las2peer.tools.CryptoException;
-import i5.las2peer.tools.FileContentReader;
-import i5.las2peer.tools.SimpleTools;
 
 /**
  * Helper class to implement JUnit-Test for services to be published in a las2peer environment.
@@ -47,7 +48,7 @@ public abstract class LocalServiceTestCase {
 
 	private LocalNode localNode;
 
-	private ServiceAgent agent;
+	private ServiceAgentImpl agent;
 
 	private String agentPassphrase = null;
 
@@ -67,7 +68,7 @@ public abstract class LocalServiceTestCase {
 	 * @throws L2pSecurityException
 	 * @throws AgentException
 	 */
-	public ServiceAgent createServiceAgent() throws CryptoException, L2pSecurityException, AgentException {
+	public ServiceAgentImpl createServiceAgent() throws CryptoException, L2pSecurityException, AgentException {
 		Class<? extends LocalServiceTestCase> cls = getClass();
 
 		try {
@@ -76,13 +77,13 @@ public abstract class LocalServiceTestCase {
 
 			File test = new File(xml);
 			if (test.exists() && test.isFile()) {
-				agent = ServiceAgent.createFromXml(FileContentReader.read(xml));
+				agent = ServiceAgentImpl.createFromXml(FileContentReader.read(xml));
 			} else {
 				InputStream is = getClass().getResourceAsStream(xml);
 				if (is == null) {
 					throw new AgentException("Neither file nor classpath resource wuth name " + xml + " exists!");
 				}
-				agent = ServiceAgent.createFromXml(FileContentReader.read(getClass().getResourceAsStream(xml)));
+				agent = ServiceAgentImpl.createFromXml(FileContentReader.read(getClass().getResourceAsStream(xml)));
 			}
 
 			if (agent.getServiceNameVersion().getName().equals(getServiceClass().getName())) {
@@ -93,8 +94,8 @@ public abstract class LocalServiceTestCase {
 			}
 		} catch (NoSuchFieldException e) {
 			agentPassphrase = SimpleTools.createRandomString(10);
-			return ServiceAgent.createServiceAgent(
-					new ServiceNameVersion(getServiceClass().getName(), getServiceVersion()), agentPassphrase);
+			return ServiceAgentImpl.createServiceAgent(new ServiceNameVersion(getServiceClass().getName(),
+					getServiceVersion()), agentPassphrase);
 		} catch (Exception e) {
 			if (e instanceof AgentException) {
 				throw (AgentException) e;
@@ -113,18 +114,18 @@ public abstract class LocalServiceTestCase {
 	public void startServer() throws Exception {
 		agent = createServiceAgent();
 
-		agent.unlockPrivateKey(agentPassphrase);
+		agent.unlock(agentPassphrase);
 
 		localNode = LocalNode.newNode();
 
-		UserAgent eve = MockAgentFactory.getEve();
-		eve.unlockPrivateKey("evespass");
+		UserAgentImpl eve = MockAgentFactory.getEve();
+		eve.unlock("evespass");
 		localNode.storeAgent(eve);
-		UserAgent abel = MockAgentFactory.getAbel();
-		abel.unlockPrivateKey("abelspass");
+		UserAgentImpl abel = MockAgentFactory.getAbel();
+		abel.unlock("abelspass");
 		localNode.storeAgent(abel);
-		UserAgent adam = MockAgentFactory.getAdam();
-		adam.unlockPrivateKey("adamspass");
+		UserAgentImpl adam = MockAgentFactory.getAdam();
+		adam.unlock("adamspass");
 		localNode.storeAgent(adam);
 
 		loadStartupDir();
@@ -157,7 +158,7 @@ public abstract class LocalServiceTestCase {
 	 * 
 	 * @return the ServiceAgent responsible for the Service to be tested
 	 */
-	public ServiceAgent getMyAgent() {
+	public ServiceAgentImpl getMyAgent() {
 		return agent;
 	}
 
@@ -173,9 +174,9 @@ public abstract class LocalServiceTestCase {
 	 * shortcut for getting the actual instance of the service class to test
 	 * 
 	 * @return the running instance of the Service to test
-	 * @throws NoSuchServiceException
+	 * @throws ServiceNotFoundException
 	 */
-	protected Service getServiceInstance() throws NoSuchServiceException {
+	protected Service getServiceInstance() throws ServiceNotFoundException {
 		return this.getMyAgent().getServiceInstance();
 	}
 
@@ -206,9 +207,11 @@ public abstract class LocalServiceTestCase {
 	 * @throws L2pSecurityException
 	 * @throws AgentNotKnownException
 	 * @throws InterruptedException
+	 * @throws ServiceInvocationException
 	 */
-	public Serializable invoke(Agent executing, String method, Serializable... parameters)
-			throws L2pServiceException, L2pSecurityException, AgentNotKnownException, InterruptedException {
+	public Serializable invoke(AgentImpl executing, String method, Serializable... parameters)
+			throws L2pServiceException, L2pSecurityException, AgentNotKnownException, InterruptedException,
+			ServiceInvocationException {
 		return getNode().invokeLocally(executing, getMyAgent(), method, parameters);
 	}
 
@@ -234,7 +237,7 @@ public abstract class LocalServiceTestCase {
 				String content = FileContentReader.read(xml);
 
 				if (content.contains("<las2peer:agent")) {
-					Agent agent = Agent.createFromXml(content);
+					AgentImpl agent = AgentImpl.createFromXml(content);
 					localNode.storeAgent(agent);
 					System.out.println("loaded " + xml + " as agent");
 				} else {

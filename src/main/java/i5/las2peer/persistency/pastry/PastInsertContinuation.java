@@ -3,8 +3,8 @@ package i5.las2peer.persistency.pastry;
 import java.io.Serializable;
 import java.util.concurrent.ExecutorService;
 
-import i5.las2peer.api.StorageExceptionHandler;
-import i5.las2peer.api.StorageStoreResultHandler;
+import i5.las2peer.persistency.StorageExceptionHandler;
+import i5.las2peer.persistency.StorageStoreResultHandler;
 import rice.Continuation;
 
 /**

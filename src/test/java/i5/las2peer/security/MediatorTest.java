@@ -4,15 +4,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import i5.las2peer.communication.Message;
+import i5.las2peer.communication.MessageException;
+import i5.las2peer.testing.MockAgentFactory;
 
 import java.util.HashSet;
 
 import org.junit.Assert;
 import org.junit.Test;
-
-import i5.las2peer.communication.Message;
-import i5.las2peer.communication.MessageException;
-import i5.las2peer.testing.MockAgentFactory;
 
 //NOTE: Answering each message is disabled in testing mode (since there exists no real las2peer context here).
 //Also refer to the Mediator implementation for more information.
@@ -53,7 +52,7 @@ public class MediatorTest {
 	@Test
 	public void testConstructor() {
 		try {
-			UserAgent eve = MockAgentFactory.getEve();
+			UserAgentImpl eve = MockAgentFactory.getEve();
 
 			try {
 				new Mediator(null, eve);
@@ -62,7 +61,7 @@ public class MediatorTest {
 				// that's expected!
 			}
 
-			eve.unlockPrivateKey("evespass");
+			eve.unlock("evespass");
 			Mediator testee = new Mediator(null, eve);
 
 			assertEquals(eve.getSafeId(), testee.getResponsibleForAgentSafeId());
@@ -77,8 +76,8 @@ public class MediatorTest {
 	@Test
 	public void testMessages() {
 		try {
-			UserAgent eve = MockAgentFactory.getEve();
-			eve.unlockPrivateKey("evespass");
+			UserAgentImpl eve = MockAgentFactory.getEve();
+			eve.unlock("evespass");
 			Mediator testee = new Mediator(null, eve);
 
 			assertFalse(testee.hasMessages());
@@ -120,10 +119,10 @@ public class MediatorTest {
 	@Test
 	public void testWrongRecipient() {
 		try {
-			UserAgent eve = MockAgentFactory.getEve();
-			eve.unlockPrivateKey("evespass");
-			UserAgent adam = MockAgentFactory.getAdam();
-			adam.unlockPrivateKey("adamspass");
+			UserAgentImpl eve = MockAgentFactory.getEve();
+			eve.unlock("evespass");
+			UserAgentImpl adam = MockAgentFactory.getAdam();
+			adam.unlock("adamspass");
 			Mediator testee = new Mediator(null, eve);
 
 			Message m = new Message(eve, adam, "a message");
@@ -144,8 +143,8 @@ public class MediatorTest {
 	@Test
 	public void testReceiverHook() {
 		try {
-			UserAgent eve = MockAgentFactory.getEve();
-			eve.unlockPrivateKey("evespass");
+			UserAgentImpl eve = MockAgentFactory.getEve();
+			eve.unlock("evespass");
 
 			final HashSet<String> got = new HashSet<>();
 
@@ -188,8 +187,8 @@ public class MediatorTest {
 	@Test
 	public void testHandlersAcceptBeforeDeny() {
 		try {
-			UserAgent eve = MockAgentFactory.getEve();
-			eve.unlockPrivateKey("evespass");
+			UserAgentImpl eve = MockAgentFactory.getEve();
+			eve.unlock("evespass");
 			AgentContext c = new AgentContext(null, eve);
 
 			Mediator testee = new Mediator(null, eve);
@@ -220,8 +219,8 @@ public class MediatorTest {
 	@Test
 	public void testHandlersDenyBeforeAccept() {
 		try {
-			UserAgent eve = MockAgentFactory.getEve();
-			eve.unlockPrivateKey("evespass");
+			UserAgentImpl eve = MockAgentFactory.getEve();
+			eve.unlock("evespass");
 			AgentContext c = new AgentContext(null, eve);
 
 			Mediator testee = new Mediator(null, eve);

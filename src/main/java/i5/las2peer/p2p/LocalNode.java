@@ -1,34 +1,35 @@
 package i5.las2peer.p2p;
 
-import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Random;
-
-import i5.las2peer.api.StorageCollisionHandler;
-import i5.las2peer.api.StorageEnvelopeHandler;
-import i5.las2peer.api.StorageExceptionHandler;
-import i5.las2peer.api.StorageStoreResultHandler;
-import i5.las2peer.api.exceptions.ArtifactNotFoundException;
-import i5.las2peer.api.exceptions.EnvelopeAlreadyExistsException;
-import i5.las2peer.api.exceptions.StorageException;
+import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
+import i5.las2peer.api.persistency.EnvelopeException;
+import i5.las2peer.api.persistency.EnvelopeNotFoundException;
 import i5.las2peer.classLoaders.L2pClassManager;
 import i5.las2peer.classLoaders.libraries.FileSystemRepository;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
-import i5.las2peer.persistency.Envelope;
+import i5.las2peer.persistency.EnvelopeVersion;
 import i5.las2peer.persistency.LocalStorage;
 import i5.las2peer.persistency.MalformedXMLException;
-import i5.las2peer.security.Agent;
+import i5.las2peer.persistency.StorageCollisionHandler;
+import i5.las2peer.persistency.StorageEnvelopeHandler;
+import i5.las2peer.persistency.StorageExceptionHandler;
+import i5.las2peer.persistency.StorageStoreResultHandler;
 import i5.las2peer.security.AgentContext;
 import i5.las2peer.security.AgentException;
+import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.MessageReceiver;
-import i5.las2peer.security.UserAgent;
+import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.SerializationException;
 import i5.las2peer.tools.TimerThread;
+
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Random;
 
 /**
  * Implementation of the abstract {@link Node} class mostly for testing purposes. All data and agents will be stored in
@@ -93,14 +94,14 @@ public class LocalNode extends Node {
 	}
 
 	@Override
-	public void registerReceiver(MessageReceiver receiver)
-			throws AgentAlreadyRegisteredException, L2pSecurityException, AgentException {
+	public void registerReceiver(MessageReceiver receiver) throws AgentAlreadyRegisteredException,
+			L2pSecurityException, AgentException {
 		super.registerReceiver(receiver);
 
-		if (receiver instanceof Agent) {
-			Agent agent = (Agent) receiver;
+		if (receiver instanceof AgentImpl) {
+			AgentImpl agent = (AgentImpl) receiver;
 			try {
-				htKnownAgents.put(((Agent) receiver).getSafeId(), agent.toXmlString());
+				htKnownAgents.put(((AgentImpl) receiver).getSafeId(), agent.toXmlString());
 			} catch (SerializationException e) {
 				throw new AgentException("Could not register agent reciever", e);
 			}
@@ -133,8 +134,8 @@ public class LocalNode extends Node {
 					Long[] ids = findAllNodesWithTopic(message.getTopicId());
 
 					if (ids.length == 0) {
-						listener.collectException(
-								new MessageException("No agent listening to topic " + message.getTopicId()));
+						listener.collectException(new MessageException("No agent listening to topic "
+								+ message.getTopicId()));
 					} else {
 						localSendMessage(ids[0], message);
 					}
@@ -157,8 +158,8 @@ public class LocalNode extends Node {
 					Long[] ids = findAllNodesWithTopic(message.getTopicId());
 
 					if (ids.length == 0) {
-						listener.collectException(
-								new MessageException("No agent listening to topic " + message.getTopicId()));
+						listener.collectException(new MessageException("No agent listening to topic "
+								+ message.getTopicId()));
 					} else {
 						listener.addRecipients(ids.length - 1);
 						for (long id : ids) {
@@ -200,16 +201,16 @@ public class LocalNode extends Node {
 	 */
 	@Deprecated
 	@Override
-	public Envelope fetchArtifact(long id) throws ArtifactNotFoundException, StorageException {
+	public EnvelopeVersion fetchArtifact(long id) throws EnvelopeNotFoundException, EnvelopeException {
 		return fetchEnvelope(Long.toString(id));
 	}
 
 	/**
-	 * @deprecated Use {@link #storeEnvelope(Envelope, Agent)} instead
+	 * @deprecated Use {@link #storeEnvelope(EnvelopeVersion, AgentImpl)} instead
 	 */
 	@Deprecated
 	@Override
-	public void storeArtifact(Envelope envelope) throws EnvelopeAlreadyExistsException, StorageException {
+	public void storeArtifact(EnvelopeVersion envelope) throws EnvelopeAlreadyExistsException, EnvelopeException {
 		storage.storeEnvelope(envelope, AgentContext.getCurrent().getMainAgent(), 0);
 	}
 
@@ -218,7 +219,7 @@ public class LocalNode extends Node {
 	 */
 	@Deprecated
 	@Override
-	public void removeArtifact(long id, byte[] signature) throws ArtifactNotFoundException, StorageException {
+	public void removeArtifact(long id, byte[] signature) throws EnvelopeNotFoundException, EnvelopeException {
 		storage.removeEnvelope(Long.toString(id));
 	}
 
@@ -228,10 +229,10 @@ public class LocalNode extends Node {
 	}
 
 	@Override
-	public Agent getAgent(String id) throws AgentNotKnownException {
-		Agent anonymous = getAnonymous();
-		if (id.equalsIgnoreCase(anonymous.getSafeId())) { // TODO use isAnonymous, special ID or Classing for
-															// identification
+	public AgentImpl getAgent(String id) throws AgentNotKnownException {
+		AgentImpl anonymous = getAnonymous();
+		if (id.equalsIgnoreCase(anonymous.getSafeId())) {
+			// TODO use isAnonymous, special ID or Classing for identification
 			return anonymous;
 		} else {
 			synchronized (htKnownAgents) {
@@ -241,7 +242,7 @@ public class LocalNode extends Node {
 				}
 
 				try {
-					return Agent.createFromXml(xml);
+					return AgentImpl.createFromXml(xml);
 				} catch (MalformedXMLException e) {
 					throw new AgentNotKnownException("XML problems with storage!", e);
 				}
@@ -250,7 +251,7 @@ public class LocalNode extends Node {
 	}
 
 	@Override
-	public void storeAgent(Agent agent) throws L2pSecurityException, AgentException {
+	public void storeAgent(AgentImpl agent) throws L2pSecurityException, AgentException {
 		synchronized (htKnownAgents) {
 			// only accept unlocked agents at startup
 			if (agent.isLocked() && getStatus() == NodeStatus.RUNNING) {
@@ -270,14 +271,14 @@ public class LocalNode extends Node {
 
 			htKnownAgents.put(agent.getSafeId(), agentXml);
 
-			if (agent instanceof UserAgent) {
-				getUserManager().registerUserAgent((UserAgent) agent);
+			if (agent instanceof UserAgentImpl) {
+				getUserManager().registerUserAgent((UserAgentImpl) agent);
 			}
 		}
 	}
 
 	@Override
-	public void updateAgent(Agent agent) throws AgentException, L2pSecurityException {
+	public void updateAgent(AgentImpl agent) throws AgentException, L2pSecurityException {
 		if (agent.isLocked()) {
 			throw new L2pSecurityException("Only unlocked agents may be updated!");
 		}
@@ -307,8 +308,8 @@ public class LocalNode extends Node {
 
 			htKnownAgents.put(agent.getSafeId(), agentXml);
 
-			if (agent instanceof UserAgent) {
-				getUserManager().updateUserAgent((UserAgent) agent);
+			if (agent instanceof UserAgentImpl) {
+				getUserManager().updateUserAgent((UserAgentImpl) agent);
 			}
 		}
 	}
@@ -371,7 +372,7 @@ public class LocalNode extends Node {
 	 * @throws L2pSecurityException
 	 * @throws AgentException
 	 */
-	public static LocalNode launchAgent(Agent a) throws L2pSecurityException, AgentException {
+	public static LocalNode launchAgent(AgentImpl a) throws L2pSecurityException, AgentException {
 		LocalNode result = launchNode();
 		try {
 			result.registerReceiver(a);
@@ -686,74 +687,74 @@ public class LocalNode extends Node {
 	}
 
 	@Override
-	public Envelope createEnvelope(String identifier, Serializable content, Agent... reader)
+	public EnvelopeVersion createEnvelope(String identifier, Serializable content, AgentImpl... reader)
 			throws IllegalArgumentException, SerializationException, CryptoException {
 		return storage.createEnvelope(identifier, content, reader);
 	}
 
 	@Override
-	public Envelope createEnvelope(Envelope previousVersion, Serializable content)
+	public EnvelopeVersion createEnvelope(EnvelopeVersion previousVersion, Serializable content)
 			throws IllegalArgumentException, SerializationException, CryptoException {
 		return storage.createEnvelope(previousVersion, content);
 	}
 
 	@Override
-	public Envelope createEnvelope(Envelope previousVersion, Serializable content, Agent... reader)
+	public EnvelopeVersion createEnvelope(EnvelopeVersion previousVersion, Serializable content, AgentImpl... reader)
 			throws IllegalArgumentException, SerializationException, CryptoException {
 		return storage.createEnvelope(previousVersion, content, reader);
 	}
 
 	@Override
-	public void storeEnvelope(Envelope envelope, Agent author) throws StorageException {
+	public void storeEnvelope(EnvelopeVersion envelope, AgentImpl author) throws EnvelopeException {
 		// XXX make configurable
 		storage.storeEnvelope(envelope, author, 10000);
 	}
 
 	@Override
-	public Envelope fetchEnvelope(String identifier) throws StorageException {
+	public EnvelopeVersion fetchEnvelope(String identifier) throws EnvelopeException {
 		// XXX make configurable
 		return storage.fetchEnvelope(identifier, 10000);
 	}
 
 	@Override
-	public Envelope createEnvelope(String identifier, Serializable content, List<Agent> readers)
+	public EnvelopeVersion createEnvelope(String identifier, Serializable content, Collection<?> readers)
 			throws IllegalArgumentException, SerializationException, CryptoException {
 		return storage.createEnvelope(identifier, content, readers);
 	}
 
 	@Override
-	public Envelope createEnvelope(Envelope previousVersion, Serializable content, List<Agent> readers)
+	public EnvelopeVersion createEnvelope(EnvelopeVersion previousVersion, Serializable content, Collection<?> readers)
 			throws IllegalArgumentException, SerializationException, CryptoException {
 		return storage.createEnvelope(previousVersion, content, readers);
 	}
 
 	@Override
-	public Envelope createUnencryptedEnvelope(String identifier, Serializable content)
+	public EnvelopeVersion createUnencryptedEnvelope(String identifier, Serializable content)
 			throws IllegalArgumentException, SerializationException, CryptoException {
 		return storage.createUnencryptedEnvelope(identifier, content);
 	}
 
 	@Override
-	public Envelope createUnencryptedEnvelope(Envelope previousVersion, Serializable content)
+	public EnvelopeVersion createUnencryptedEnvelope(EnvelopeVersion previousVersion, Serializable content)
 			throws IllegalArgumentException, SerializationException, CryptoException {
 		return storage.createUnencryptedEnvelope(previousVersion, content);
 	}
 
 	@Override
-	public void storeEnvelope(Envelope envelope, Agent author, long timeoutMs)
-			throws EnvelopeAlreadyExistsException, StorageException {
+	public void storeEnvelope(EnvelopeVersion envelope, AgentImpl author, long timeoutMs)
+			throws EnvelopeAlreadyExistsException, EnvelopeException {
 		storage.storeEnvelope(envelope, author, timeoutMs);
 	}
 
 	@Override
-	public void storeEnvelopeAsync(Envelope envelope, Agent author, StorageStoreResultHandler resultHandler,
+	public void storeEnvelopeAsync(EnvelopeVersion envelope, AgentImpl author, StorageStoreResultHandler resultHandler,
 			StorageCollisionHandler collisionHandler, StorageExceptionHandler exceptionHandler) {
 		storage.storeEnvelopeAsync(envelope, author, resultHandler, collisionHandler, exceptionHandler);
 	}
 
 	@Override
-	public Envelope fetchEnvelope(String identifier, long timeoutMs)
-			throws ArtifactNotFoundException, StorageException {
+	public EnvelopeVersion fetchEnvelope(String identifier, long timeoutMs) throws EnvelopeNotFoundException,
+			EnvelopeException {
 		return storage.fetchEnvelope(identifier, timeoutMs);
 	}
 
@@ -764,12 +765,12 @@ public class LocalNode extends Node {
 	}
 
 	@Override
-	public void removeEnvelope(String identifier) throws ArtifactNotFoundException, StorageException {
+	public void removeEnvelope(String identifier) throws EnvelopeNotFoundException, EnvelopeException {
 		storage.removeEnvelope(identifier);
 	}
 
 	@Override
-	public Envelope fetchArtifact(String identifier) throws ArtifactNotFoundException, StorageException {
+	public EnvelopeVersion fetchArtifact(String identifier) throws EnvelopeNotFoundException, EnvelopeException {
 		// XXX make configurable
 		return storage.fetchEnvelope(identifier, 10000);
 	}

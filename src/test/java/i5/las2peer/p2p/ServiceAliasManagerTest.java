@@ -2,14 +2,15 @@ package i5.las2peer.p2p;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import i5.las2peer.api.p2p.ServiceNameVersion;
+import i5.las2peer.api.security.AgentAccessDeniedException;
+import i5.las2peer.security.AgentException;
+import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.security.ServiceAgentImpl;
+import i5.las2peer.tools.CryptoException;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import i5.las2peer.security.AgentException;
-import i5.las2peer.security.L2pSecurityException;
-import i5.las2peer.security.ServiceAgent;
-import i5.las2peer.tools.CryptoException;
 
 public class ServiceAliasManagerTest {
 	@Before
@@ -19,16 +20,20 @@ public class ServiceAliasManagerTest {
 
 	@Test
 	public void testDuplication() throws CryptoException, L2pSecurityException, AliasConflictException,
-			AliasNotFoundException {
+			AliasNotFoundException, AgentAccessDeniedException {
 		LocalNode node = LocalNode.launchNode();
-		ServiceAgent agentA = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString("serviceA@1.0"), "asdf");
-		agentA.unlockPrivateKey("asdf");
-		ServiceAgent agentB = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString("serviceB@1.0"), "asdf");
-		agentB.unlockPrivateKey("asdf");
-		ServiceAgent agentA2 = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString("serviceA@1.0"), "asdf");
-		agentA2.unlockPrivateKey("asdf");
-		ServiceAgent agentC = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString("serviceC@1.0"), "asdf");
-		agentC.unlockPrivateKey("asdf");
+		ServiceAgentImpl agentA = ServiceAgentImpl.createServiceAgent(ServiceNameVersion.fromString("serviceA@1.0"),
+				"asdf");
+		agentA.unlock("asdf");
+		ServiceAgentImpl agentB = ServiceAgentImpl.createServiceAgent(ServiceNameVersion.fromString("serviceB@1.0"),
+				"asdf");
+		agentB.unlock("asdf");
+		ServiceAgentImpl agentA2 = ServiceAgentImpl.createServiceAgent(ServiceNameVersion.fromString("serviceA@1.0"),
+				"asdf");
+		agentA2.unlock("asdf");
+		ServiceAgentImpl agentC = ServiceAgentImpl.createServiceAgent(ServiceNameVersion.fromString("serviceC@1.0"),
+				"asdf");
+		agentC.unlock("asdf");
 
 		// regular creation
 		node.getServiceAliasManager().registerServiceAlias(agentA, "aliasA");
@@ -51,16 +56,20 @@ public class ServiceAliasManagerTest {
 
 	@Test
 	public void testRegistering() throws CryptoException, L2pSecurityException, AliasConflictException,
-			AliasNotFoundException {
+			AliasNotFoundException, AgentAccessDeniedException {
 		LocalNode node = LocalNode.launchNode();
-		ServiceAgent agentA = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString("serviceA@1.0"), "asdf");
-		agentA.unlockPrivateKey("asdf");
-		ServiceAgent agentB = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString("serviceB@1.0"), "asdf");
-		agentB.unlockPrivateKey("asdf");
-		ServiceAgent agentC = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString("serviceC@1.0"), "asdf");
-		agentC.unlockPrivateKey("asdf");
-		ServiceAgent agentD = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString("serviceD@1.0"), "asdf");
-		agentD.unlockPrivateKey("asdf");
+		ServiceAgentImpl agentA = ServiceAgentImpl.createServiceAgent(ServiceNameVersion.fromString("serviceA@1.0"),
+				"asdf");
+		agentA.unlock("asdf");
+		ServiceAgentImpl agentB = ServiceAgentImpl.createServiceAgent(ServiceNameVersion.fromString("serviceB@1.0"),
+				"asdf");
+		agentB.unlock("asdf");
+		ServiceAgentImpl agentC = ServiceAgentImpl.createServiceAgent(ServiceNameVersion.fromString("serviceC@1.0"),
+				"asdf");
+		agentC.unlock("asdf");
+		ServiceAgentImpl agentD = ServiceAgentImpl.createServiceAgent(ServiceNameVersion.fromString("serviceD@1.0"),
+				"asdf");
+		agentD.unlock("asdf");
 
 		// regular creation
 		node.getServiceAliasManager().registerServiceAlias(agentA, "prefix/prefix/aliasA");
@@ -89,16 +98,20 @@ public class ServiceAliasManagerTest {
 
 	@Test
 	public void testResolve() throws CryptoException, L2pSecurityException, AliasConflictException,
-			AliasNotFoundException {
+			AliasNotFoundException, AgentAccessDeniedException {
 		LocalNode node = LocalNode.launchNode();
-		ServiceAgent agentA = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString("serviceA@1.0"), "asdf");
-		agentA.unlockPrivateKey("asdf");
-		ServiceAgent agentB = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString("serviceB@1.0"), "asdf");
-		agentB.unlockPrivateKey("asdf");
-		ServiceAgent agentC = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString("serviceC@1.0"), "asdf");
-		agentC.unlockPrivateKey("asdf");
-		ServiceAgent agentD = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString("serviceD@1.0"), "asdf");
-		agentD.unlockPrivateKey("asdf");
+		ServiceAgentImpl agentA = ServiceAgentImpl.createServiceAgent(ServiceNameVersion.fromString("serviceA@1.0"),
+				"asdf");
+		agentA.unlock("asdf");
+		ServiceAgentImpl agentB = ServiceAgentImpl.createServiceAgent(ServiceNameVersion.fromString("serviceB@1.0"),
+				"asdf");
+		agentB.unlock("asdf");
+		ServiceAgentImpl agentC = ServiceAgentImpl.createServiceAgent(ServiceNameVersion.fromString("serviceC@1.0"),
+				"asdf");
+		agentC.unlock("asdf");
+		ServiceAgentImpl agentD = ServiceAgentImpl.createServiceAgent(ServiceNameVersion.fromString("serviceD@1.0"),
+				"asdf");
+		agentD.unlock("asdf");
 
 		// register
 		node.getServiceAliasManager().registerServiceAlias(agentA, "prefix/prefix/aliasA");
@@ -140,11 +153,11 @@ public class ServiceAliasManagerTest {
 
 	@Test
 	public void testIntegration() throws CryptoException, L2pSecurityException, AgentAlreadyRegisteredException,
-			AgentException, AliasNotFoundException {
+			AgentException, AliasNotFoundException, AgentAccessDeniedException {
 		LocalNode node = LocalNode.launchNode();
-		ServiceAgent agentA = ServiceAgent.createServiceAgent(
+		ServiceAgentImpl agentA = ServiceAgentImpl.createServiceAgent(
 				ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.0"), "asdf");
-		agentA.unlockPrivateKey("asdf");
+		agentA.unlock("asdf");
 		node.registerReceiver(agentA);
 
 		// regular creation

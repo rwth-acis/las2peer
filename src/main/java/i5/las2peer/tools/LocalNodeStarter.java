@@ -11,7 +11,7 @@ import i5.las2peer.p2p.LocalNode;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.NodeException;
 import i5.las2peer.persistency.MalformedXMLException;
-import i5.las2peer.security.Agent;
+import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.AgentException;
 import i5.las2peer.security.L2pSecurityException;
 
@@ -43,7 +43,7 @@ public class LocalNodeStarter {
 			try {
 				String content = FileContentReader.read(xml);
 				if (xml.getName().toLowerCase().startsWith("agent")) {
-					Agent a = Agent.createFromXml(content);
+					AgentImpl a = AgentImpl.createFromXml(content);
 					node.storeAgent(a);
 					System.err.println("loaded agent from " + xml);
 				}

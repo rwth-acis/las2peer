@@ -1,8 +1,8 @@
 package i5.las2peer.execution;
 
-import java.io.Serializable;
+import i5.las2peer.api.p2p.ServiceNameVersion;
 
-import i5.las2peer.p2p.ServiceNameVersion;
+import java.io.Serializable;
 
 /**
  * a simple invocation task
@@ -12,9 +12,6 @@ import i5.las2peer.p2p.ServiceNameVersion;
  */
 public class RMITask implements Serializable {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 6654217287828959042L;
 
 	private Serializable[] parameters;

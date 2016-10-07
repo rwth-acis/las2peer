@@ -11,12 +11,14 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import i5.las2peer.api.p2p.ServiceNameVersion;
+import i5.las2peer.api.p2p.ServiceVersion;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.ServiceDiscoveryContent;
 import i5.las2peer.persistency.EncodingFailedException;
-import i5.las2peer.security.Agent;
+import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.L2pSecurityException;
-import i5.las2peer.security.ServiceAgent;
+import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.tools.SerializationException;
 
 /**
@@ -68,7 +70,7 @@ public class NodeServiceCache {
 	 * @throws AgentNotKnownException
 	 */
 	public ServiceInstance getServiceAgentInstance(ServiceNameVersion service, boolean exact, boolean localOnly,
-			Agent acting) throws AgentNotKnownException {
+			AgentImpl acting) throws AgentNotKnownException {
 
 		ServiceInstance local = null, global = null;
 
@@ -281,11 +283,11 @@ public class NodeServiceCache {
 	 * @throws TimeoutException
 	 * @throws AgentNotKnownException
 	 */
-	private boolean update(ServiceNameVersion service, boolean exact, Agent acting)
+	private boolean update(ServiceNameVersion service, boolean exact, AgentImpl acting)
 			throws EncodingFailedException, L2pSecurityException, SerializationException, InterruptedException,
 			TimeoutException, AgentNotKnownException {
 
-		Message m = new Message(acting, ServiceAgent.serviceNameToTopicId(service.getName()),
+		Message m = new Message(acting, ServiceAgentImpl.serviceNameToTopicId(service.getName()),
 				new ServiceDiscoveryContent(service, exact), timeoutMs);
 		m.setSendingNodeId(runningAt.getNodeId());
 		Message[] results = runningAt.sendMessageAndCollectAnswers(m, waitForResults);
@@ -331,7 +333,7 @@ public class NodeServiceCache {
 	 * 
 	 * @param agent
 	 */
-	public void registerLocalService(ServiceAgent agent) {
+	public void registerLocalService(ServiceAgentImpl agent) {
 		synchronized (localServices) {
 			ServiceNameVersion service = agent.getServiceNameVersion();
 
@@ -355,7 +357,7 @@ public class NodeServiceCache {
 	 * 
 	 * @param agent
 	 */
-	public void unregisterLocalService(ServiceAgent agent) {
+	public void unregisterLocalService(ServiceAgentImpl agent) {
 		synchronized (localServices) {
 			ServiceNameVersion service = agent.getServiceNameVersion();
 
@@ -384,7 +386,7 @@ public class NodeServiceCache {
 	 * @return
 	 * @throws AgentNotKnownException
 	 */
-	public ServiceAgent getLocalService(ServiceNameVersion service) throws AgentNotKnownException {
+	public ServiceAgentImpl getLocalService(ServiceNameVersion service) throws AgentNotKnownException {
 		synchronized (localServices) {
 			Map<ServiceVersion, ServiceInstance> versions = localServices.get(service.getName());
 			if (versions == null) {
@@ -430,7 +432,7 @@ public class NodeServiceCache {
 
 		private boolean isLocal;
 
-		private ServiceAgent agent;
+		private ServiceAgentImpl agent;
 
 		String serviceAgentId;
 		Object nodeId;
@@ -442,7 +444,7 @@ public class NodeServiceCache {
 		 * 
 		 * @param agent
 		 */
-		public ServiceInstance(ServiceAgent agent) {
+		public ServiceInstance(ServiceAgentImpl agent) {
 			this.isLocal = true;
 			this.agent = agent;
 			this.service = agent.getServiceNameVersion();
@@ -512,7 +514,7 @@ public class NodeServiceCache {
 			return isLocal;
 		}
 
-		public ServiceAgent getServiceAgent() {
+		public ServiceAgentImpl getServiceAgent() {
 			return agent;
 		}
 

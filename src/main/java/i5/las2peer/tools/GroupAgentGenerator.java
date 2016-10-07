@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.Vector;
 
 import i5.las2peer.persistency.MalformedXMLException;
-import i5.las2peer.security.Agent;
-import i5.las2peer.security.GroupAgent;
+import i5.las2peer.security.AgentImpl;
+import i5.las2peer.security.GroupAgentImpl;
 import i5.las2peer.security.L2pSecurityException;
 
 /**
@@ -33,14 +33,14 @@ public class GroupAgentGenerator {
 			System.exit(0);
 		}
 
-		Vector<Agent> agents = new Vector<Agent>();
+		Vector<AgentImpl> agents = new Vector<AgentImpl>();
 
 		for (String file : argv) {
-			Agent a = Agent.createFromXml(FileContentReader.read(file));
+			AgentImpl a = AgentImpl.createFromXml(FileContentReader.read(file));
 			agents.add(a);
 		}
 
-		GroupAgent result = GroupAgent.createGroupAgent(agents.toArray(new Agent[0]));
+		GroupAgentImpl result = GroupAgentImpl.createGroupAgent(agents.toArray(new AgentImpl[0]));
 
 		System.out.println(result.toXmlString());
 	}

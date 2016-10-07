@@ -1,8 +1,8 @@
 package i5.las2peer.logging.monitoring;
 
-import java.io.Serializable;
+import i5.las2peer.api.logging.MonitoringEvent;
 
-import i5.las2peer.logging.NodeObserver.Event;
+import java.io.Serializable;
 
 /**
  * 
@@ -17,7 +17,7 @@ public class MonitoringMessage implements Serializable {
 	private static final long serialVersionUID = -1481582785721621545L;
 
 	private Long timestamp;
-	private Event event;
+	private MonitoringEvent event;
 	private String sourceNode;
 	private String sourceAgentId;
 	private String destinationNode;
@@ -37,7 +37,7 @@ public class MonitoringMessage implements Serializable {
 	 * @param remarks
 	 * 
 	 */
-	public MonitoringMessage(Long timestamp, Event event, String sourceNode, String sourceAgentId,
+	public MonitoringMessage(Long timestamp, MonitoringEvent event, String sourceNode, String sourceAgentId,
 			String destinationNode, String destinationAgentId, String remarks) {
 		this.timestamp = timestamp;
 		this.event = event;
@@ -52,7 +52,7 @@ public class MonitoringMessage implements Serializable {
 		return timestamp;
 	}
 
-	public Event getEvent() {
+	public MonitoringEvent getEvent() {
 		return event;
 	}
 

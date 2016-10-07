@@ -4,71 +4,67 @@ import java.io.Serializable;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import i5.las2peer.api.StorageCollisionHandler;
-import i5.las2peer.api.StorageEnvelopeHandler;
-import i5.las2peer.api.StorageExceptionHandler;
-import i5.las2peer.api.StorageStoreResultHandler;
-import i5.las2peer.api.exceptions.ArtifactNotFoundException;
-import i5.las2peer.api.exceptions.EnvelopeAlreadyExistsException;
-import i5.las2peer.api.exceptions.StopMergingException;
-import i5.las2peer.api.exceptions.StorageException;
-import i5.las2peer.security.Agent;
+import i5.las2peer.api.persistency.EnvelopeNotFoundException;
+import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
+import i5.las2peer.api.persistency.EnvelopeException;
+import i5.las2peer.security.AgentImpl;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.SerializationException;
 
 public class LocalStorage implements L2pStorageInterface {
 
-	private final ConcurrentHashMap<String, Envelope> storedEnvelopes = new ConcurrentHashMap<>();
+	private final ConcurrentHashMap<String, EnvelopeVersion> storedEnvelopes = new ConcurrentHashMap<>();
 
 	@Override
-	public Envelope createEnvelope(String identifier, Serializable content, Agent... readers)
+	public EnvelopeVersion createEnvelope(String identifier, Serializable content, AgentImpl... readers)
 			throws IllegalArgumentException, SerializationException, CryptoException {
-		return new Envelope(identifier, content, Arrays.asList(readers));
+		return new EnvelopeVersion(identifier, content, Arrays.asList(readers));
 	}
 
 	@Override
-	public Envelope createEnvelope(String identifier, Serializable content, List<Agent> readers)
+	public EnvelopeVersion createEnvelope(String identifier, Serializable content, Collection<?> readers)
 			throws IllegalArgumentException, SerializationException, CryptoException {
-		return new Envelope(identifier, content, readers);
+		return new EnvelopeVersion(identifier, content, readers);
 	}
 
 	@Override
-	public Envelope createEnvelope(Envelope previousVersion, Serializable content)
+	public EnvelopeVersion createEnvelope(EnvelopeVersion previousVersion, Serializable content)
 			throws IllegalArgumentException, SerializationException, CryptoException {
-		return new Envelope(previousVersion, content);
+		return new EnvelopeVersion(previousVersion, content);
 	}
 
 	@Override
-	public Envelope createEnvelope(Envelope previousVersion, Serializable content, Agent... readers)
+	public EnvelopeVersion createEnvelope(EnvelopeVersion previousVersion, Serializable content, AgentImpl... readers)
 			throws IllegalArgumentException, SerializationException, CryptoException {
-		return new Envelope(previousVersion, content, Arrays.asList(readers));
+		return new EnvelopeVersion(previousVersion, content, Arrays.asList(readers));
 	}
 
 	@Override
-	public Envelope createEnvelope(Envelope previousVersion, Serializable content, List<Agent> readers)
+	public EnvelopeVersion createEnvelope(EnvelopeVersion previousVersion, Serializable content, Collection<?> readers)
 			throws IllegalArgumentException, SerializationException, CryptoException {
-		return new Envelope(previousVersion, content, readers);
+		return new EnvelopeVersion(previousVersion, content, readers);
 	}
 
 	@Override
-	public Envelope createUnencryptedEnvelope(String identifier, Serializable content)
+	public EnvelopeVersion createUnencryptedEnvelope(String identifier, Serializable content)
 			throws IllegalArgumentException, SerializationException, CryptoException {
-		return new Envelope(identifier, content, new ArrayList<>());
+		return new EnvelopeVersion(identifier, content, new ArrayList<>());
 	}
 
 	@Override
-	public Envelope createUnencryptedEnvelope(Envelope previousVersion, Serializable content)
+	public EnvelopeVersion createUnencryptedEnvelope(EnvelopeVersion previousVersion, Serializable content)
 			throws IllegalArgumentException, SerializationException, CryptoException {
-		return new Envelope(previousVersion, content, new ArrayList<>());
+		return new EnvelopeVersion(previousVersion, content, new ArrayList<>());
 	}
 
 	@Override
-	public void storeEnvelope(Envelope envelope, Agent author, long timeoutMs) throws StorageException {
-		Envelope stored = storedEnvelopes.get(envelope.getIdentifier());
+	public void storeEnvelope(EnvelopeVersion envelope, AgentImpl author, long timeoutMs) throws EnvelopeException {
+		EnvelopeVersion stored = storedEnvelopes.get(envelope.getIdentifier());
 		if (stored != null && envelope.getVersion() == stored.getVersion()) {
 			throw new EnvelopeAlreadyExistsException("Duplicate envelope identifier");
 		}
@@ -76,11 +72,11 @@ public class LocalStorage implements L2pStorageInterface {
 	}
 
 	@Override
-	public void storeEnvelopeAsync(Envelope envelope, Agent author, StorageStoreResultHandler resultHandler,
+	public void storeEnvelopeAsync(EnvelopeVersion envelope, AgentImpl author, StorageStoreResultHandler resultHandler,
 			StorageCollisionHandler collisionHandler, StorageExceptionHandler exceptionHandler) {
-		Envelope toStore = envelope;
+		EnvelopeVersion toStore = envelope;
 		// check for collision
-		Envelope inStorage = storedEnvelopes.get(envelope.getIdentifier());
+		EnvelopeVersion inStorage = storedEnvelopes.get(envelope.getIdentifier());
 		if (inStorage != null) {
 			if (collisionHandler != null) {
 				try {
@@ -91,7 +87,7 @@ public class LocalStorage implements L2pStorageInterface {
 					Set<String> mergedGroups = collisionHandler.mergeGroups(envelope.getReaderGroupIds(),
 							inStorage.getReaderGroupIds());
 					try {
-						toStore = new Envelope(envelope.getIdentifier(), mergedVersion, mergedContent, mergedReaders,
+						toStore = new EnvelopeVersion(envelope.getIdentifier(), mergedVersion, mergedContent, mergedReaders,
 								mergedGroups);
 					} catch (IllegalArgumentException | SerializationException | CryptoException e) {
 						if (exceptionHandler != null) {
@@ -119,10 +115,10 @@ public class LocalStorage implements L2pStorageInterface {
 	}
 
 	@Override
-	public Envelope fetchEnvelope(String identifier, long timeoutMs) throws StorageException {
-		Envelope inStorage = storedEnvelopes.get(identifier);
+	public EnvelopeVersion fetchEnvelope(String identifier, long timeoutMs) throws EnvelopeException {
+		EnvelopeVersion inStorage = storedEnvelopes.get(identifier);
 		if (inStorage == null) {
-			throw new ArtifactNotFoundException(identifier);
+			throw new EnvelopeNotFoundException(identifier);
 		} else {
 			return inStorage;
 		}
@@ -131,10 +127,10 @@ public class LocalStorage implements L2pStorageInterface {
 	@Override
 	public void fetchEnvelopeAsync(String identifier, StorageEnvelopeHandler envelopeHandler,
 			StorageExceptionHandler exceptionHandler) {
-		Envelope inStorage = storedEnvelopes.get(identifier);
+		EnvelopeVersion inStorage = storedEnvelopes.get(identifier);
 		if (inStorage == null) {
 			if (exceptionHandler != null) {
-				exceptionHandler.onException(new ArtifactNotFoundException(identifier));
+				exceptionHandler.onException(new EnvelopeNotFoundException(identifier));
 			}
 		} else {
 			if (envelopeHandler != null) {
@@ -144,10 +140,10 @@ public class LocalStorage implements L2pStorageInterface {
 	}
 
 	@Override
-	public void removeEnvelope(String identifier) throws StorageException {
-		Envelope inStorage = storedEnvelopes.remove(identifier);
+	public void removeEnvelope(String identifier) throws EnvelopeException {
+		EnvelopeVersion inStorage = storedEnvelopes.remove(identifier);
 		if (inStorage == null) {
-			throw new ArtifactNotFoundException(identifier);
+			throw new EnvelopeNotFoundException(identifier);
 		}
 	}
 

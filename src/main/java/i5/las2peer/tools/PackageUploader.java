@@ -1,23 +1,23 @@
 package i5.las2peer.tools;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.logging.Level;
-
-import i5.las2peer.api.exceptions.EnvelopeAlreadyExistsException;
-import i5.las2peer.api.exceptions.StorageException;
+import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
+import i5.las2peer.api.persistency.EnvelopeException;
+import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.classLoaders.helpers.LibraryDependency;
 import i5.las2peer.classLoaders.libraries.LoadedJarLibrary;
 import i5.las2peer.classLoaders.libraries.LoadedNetworkLibrary;
 import i5.las2peer.classLoaders.libraries.ResourceNotFoundException;
 import i5.las2peer.classLoaders.libraries.SharedStorageRepository;
 import i5.las2peer.logging.L2pLogger;
-import i5.las2peer.persistency.Envelope;
+import i5.las2peer.persistency.EnvelopeVersion;
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.persistency.NodeStorageInterface;
-import i5.las2peer.security.Agent;
-import i5.las2peer.security.L2pSecurityException;
-import i5.las2peer.security.PassphraseAgent;
+import i5.las2peer.security.AgentImpl;
+import i5.las2peer.security.PassphraseAgentImpl;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.logging.Level;
 
 public class PackageUploader {
 
@@ -37,7 +37,7 @@ public class PackageUploader {
 	public static void uploadServicePackage(NodeStorageInterface node, String serviceJarFile,
 			String developerAgentXMLFile, String developerPassword) throws ServicePackageException {
 		// early verify the developer agent to avoid needless heavy duty jar parsing
-		Agent devAgent = unlockDeveloperAgent(developerAgentXMLFile, developerPassword);
+		AgentImpl devAgent = unlockDeveloperAgent(developerAgentXMLFile, developerPassword);
 		try {
 			// XXX better upload or check for dependencies before uploading actual service jar?
 			// publish service jar first
@@ -57,25 +57,26 @@ public class PackageUploader {
 		}
 	}
 
-	private static Agent unlockDeveloperAgent(String agentXMLFile, String developerPassword)
+	private static AgentImpl unlockDeveloperAgent(String agentXMLFile, String developerPassword)
 			throws ServicePackageException {
 		try {
 			// read agent from given XML file
-			Agent agent = Agent.createFromXml(new File(agentXMLFile));
-			if (!(agent instanceof PassphraseAgent)) {
-				throw new ServicePackageException("Developer agent of type '" + PassphraseAgent.class.getCanonicalName()
-						+ "' expected got '" + agent.getClass().getCanonicalName() + "' instead!");
+			AgentImpl agent = AgentImpl.createFromXml(new File(agentXMLFile));
+			if (!(agent instanceof PassphraseAgentImpl)) {
+				throw new ServicePackageException("Developer agent of type '"
+						+ PassphraseAgentImpl.class.getCanonicalName() + "' expected got '"
+						+ agent.getClass().getCanonicalName() + "' instead!");
 			}
 			// unlock agent (verify password)
-			PassphraseAgent devAgent = (PassphraseAgent) agent;
-			devAgent.unlockPrivateKey(developerPassword);
+			PassphraseAgentImpl devAgent = (PassphraseAgentImpl) agent;
+			devAgent.unlock(developerPassword);
 			return devAgent;
-		} catch (MalformedXMLException | L2pSecurityException e) {
+		} catch (MalformedXMLException | AgentAccessDeniedException e) {
 			throw new ServicePackageException(e);
 		}
 	}
 
-	private static LoadedNetworkLibrary publishLibrary(String jarFilename, NodeStorageInterface node, Agent devAgent)
+	private static LoadedNetworkLibrary publishLibrary(String jarFilename, NodeStorageInterface node, AgentImpl devAgent)
 			throws ServicePackageException, EnvelopeAlreadyExistsException {
 		try {
 			// read jar as jar library
@@ -87,13 +88,13 @@ public class PackageUploader {
 			// upload network library as XML representation
 			String libEnvId = SharedStorageRepository.getLibraryEnvelopeIdentifier(netLib.getIdentifier());
 			String xmlNetLib = netLib.toXmlString();
-			Envelope libEnv = node.createUnencryptedEnvelope(libEnvId, xmlNetLib);
+			EnvelopeVersion libEnv = node.createUnencryptedEnvelope(libEnvId, xmlNetLib);
 			node.storeEnvelope(libEnv, devAgent);
 			// upload all files from the jar library
 			for (String filename : jarLib.getContainedFiles()) {
 				byte[] fileRaw = jarLib.getResourceAsBinary(filename);
 				String fileEnvId = SharedStorageRepository.getFileEnvelopeIdentifier(netLib.getIdentifier(), filename);
-				Envelope fileEnv = node.createUnencryptedEnvelope(fileEnvId, fileRaw);
+				EnvelopeVersion fileEnv = node.createUnencryptedEnvelope(fileEnvId, fileRaw);
 				try {
 					node.storeEnvelope(fileEnv, devAgent);
 				} catch (EnvelopeAlreadyExistsException e) {
@@ -103,7 +104,7 @@ public class PackageUploader {
 			return netLib;
 		} catch (EnvelopeAlreadyExistsException e) {
 			throw e; // is handled in calling function
-		} catch (IllegalArgumentException | IOException | SerializationException | CryptoException | StorageException
+		} catch (IllegalArgumentException | IOException | SerializationException | CryptoException | EnvelopeException
 				| ResourceNotFoundException e) {
 			throw new ServicePackageException("Could not publish network library from jar '" + jarFilename + "'", e);
 		}

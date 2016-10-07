@@ -3,17 +3,17 @@ package i5.las2peer.p2p;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-
-import org.junit.Test;
-
+import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.communication.Message;
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.security.BasicAgentStorage;
 import i5.las2peer.security.L2pSecurityException;
-import i5.las2peer.security.UserAgent;
+import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.testing.MockAgentFactory;
+
+import java.io.IOException;
+
+import org.junit.Test;
 
 public class MessageResultListenerTest {
 
@@ -22,9 +22,10 @@ public class MessageResultListenerTest {
 	}
 
 	@Test
-	public void test() throws InterruptedException, MalformedXMLException, IOException, L2pSecurityException {
-		final UserAgent eve = MockAgentFactory.getEve();
-		eve.unlockPrivateKey("evespass");
+	public void test() throws InterruptedException, MalformedXMLException, IOException, L2pSecurityException,
+			AgentAccessDeniedException {
+		final UserAgentImpl eve = MockAgentFactory.getEve();
+		eve.unlock("evespass");
 
 		final MessageResultListener l = new MessageResultListener(10000) {
 			@Override
@@ -106,9 +107,9 @@ public class MessageResultListenerTest {
 
 	@Test
 	public void testMultiple() throws InterruptedException, MalformedXMLException, IOException, L2pSecurityException,
-			AgentNotKnownException {
-		final UserAgent eve = MockAgentFactory.getEve();
-		eve.unlockPrivateKey("evespass");
+			AgentNotKnownException, AgentAccessDeniedException {
+		final UserAgentImpl eve = MockAgentFactory.getEve();
+		eve.unlock("evespass");
 		BasicAgentStorage storage = new BasicAgentStorage();
 		storage.registerAgent(eve);
 

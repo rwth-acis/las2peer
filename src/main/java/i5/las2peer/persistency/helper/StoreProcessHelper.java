@@ -5,12 +5,12 @@ import java.security.PublicKey;
 import java.util.HashSet;
 import java.util.Set;
 
-import i5.las2peer.api.StorageCollisionHandler;
-import i5.las2peer.api.StorageExceptionHandler;
-import i5.las2peer.api.StorageStoreResultHandler;
-import i5.las2peer.api.exceptions.EnvelopeAlreadyExistsException;
-import i5.las2peer.api.exceptions.StopMergingException;
-import i5.las2peer.persistency.Envelope;
+import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
+import i5.las2peer.persistency.EnvelopeVersion;
+import i5.las2peer.persistency.StopMergingException;
+import i5.las2peer.persistency.StorageCollisionHandler;
+import i5.las2peer.persistency.StorageExceptionHandler;
+import i5.las2peer.persistency.StorageStoreResultHandler;
 
 public class StoreProcessHelper implements StorageStoreResultHandler, StorageCollisionHandler, StorageExceptionHandler {
 
@@ -25,7 +25,7 @@ public class StoreProcessHelper implements StorageStoreResultHandler, StorageCol
 	}
 
 	@Override
-	public Serializable onCollision(Envelope toStore, Envelope inNetwork, long numberOfCollisions)
+	public Serializable onCollision(EnvelopeVersion toStore, EnvelopeVersion inNetwork, long numberOfCollisions)
 			throws StopMergingException {
 		synchronized (this) {
 			exception = new EnvelopeAlreadyExistsException("Envelope '" + toStore.getIdentifier() + "' with version ("

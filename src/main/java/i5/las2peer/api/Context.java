@@ -1,25 +1,28 @@
 package i5.las2peer.api;
 
-import java.io.Serializable;
-import java.util.List;
+import i5.las2peer.api.execution.InternalServiceException;
+import i5.las2peer.api.execution.ServiceNotAvailableException;
+import i5.las2peer.api.execution.ServiceNotFoundException;
+import i5.las2peer.api.logging.MonitoringEvent;
+import i5.las2peer.api.p2p.ServiceNameVersion;
+import i5.las2peer.api.persistency.Envelope;
+import i5.las2peer.api.persistency.EnvelopeAccessDeniedException;
+import i5.las2peer.api.persistency.EnvelopeCollisionHandler;
+import i5.las2peer.api.persistency.EnvelopeNotFoundException;
+import i5.las2peer.api.persistency.EnvelopeOperationFailedException;
+import i5.las2peer.api.security.Agent;
+import i5.las2peer.api.security.AgentAccessDeniedException;
+import i5.las2peer.api.security.AgentAlreadyExistsException;
+import i5.las2peer.api.security.AgentNotFoundException;
+import i5.las2peer.api.security.AgentOperationFailedException;
+import i5.las2peer.api.security.GroupAgent;
+import i5.las2peer.api.security.ServiceAgent;
+import i5.las2peer.api.security.UserAgent;
+import i5.las2peer.execution.ServiceThread;
 
-import i5.las2peer.api.exceptions.ArtifactNotFoundException;
-import i5.las2peer.api.exceptions.RemoteServiceException;
-import i5.las2peer.api.exceptions.ServiceNotAvailableException;
-import i5.las2peer.api.exceptions.ServiceNotFoundException;
-import i5.las2peer.api.exceptions.StorageException;
-import i5.las2peer.execution.L2pThread;
-import i5.las2peer.p2p.AgentNotKnownException;
-import i5.las2peer.p2p.Node;
-import i5.las2peer.persistency.DecodingFailedException;
-import i5.las2peer.persistency.Envelope;
-import i5.las2peer.security.Agent;
-import i5.las2peer.security.AgentLockedException;
-import i5.las2peer.security.GroupAgent;
-import i5.las2peer.security.L2pSecurityException;
-import i5.las2peer.security.ServiceAgent;
-import i5.las2peer.tools.CryptoException;
-import i5.las2peer.tools.SerializationException;
+import java.io.Serializable;
+import java.util.concurrent.ExecutorService;
+import java.util.logging.Logger;
 
 /**
  * Provides access to the context of the current call.
@@ -27,114 +30,7 @@ import i5.las2peer.tools.SerializationException;
  */
 public interface Context {
 
-	// old Context methods, to be replaced:
-
-	/**
-	 * @return the executing service agent.
-	 */
-	public ServiceAgent getServiceAgent();
-
-	/**
-	 * @return the current service.
-	 */
-	public Service getService();
-
-	/**
-	 * @return the calling agent.
-	 */
-	public Agent getMainAgent();
-
-	/**
-	 * Gets all group agents, which have been unlocked in this context.
-	 * 
-	 * @return all (unlocked) group agents of this context
-	 */
-	@Deprecated
-	public GroupAgent[] getGroupAgents();
-
-	/**
-	 * Tries to open the given id for this context.
-	 * 
-	 * @param groupId
-	 * @return the unlocked GroupAgent of the given id
-	 * @throws AgentNotKnownException
-	 * @throws L2pSecurityException
-	 */
-	public GroupAgent requestGroupAgent(String groupId) throws AgentNotKnownException, L2pSecurityException;
-
-	/**
-	 * returns an unlocked instance of the requested Agent
-	 * 
-	 * @param agentId the requested agent
-	 * @return an unlocked agent instance
-	 * @throws AgentNotKnownException agent not found
-	 * @throws L2pSecurityException agent cannot be unlocked
-	 */
-	public Agent requestAgent(String agentId) throws AgentNotKnownException, L2pSecurityException;
-
-	/**
-	 * @deprecated Use {@link #fetchEnvelope(String)} instead.
-	 * 
-	 *             Gets a stored envelope from the p2p network.
-	 * 
-	 * @param id
-	 * @return envelope containing the requested data
-	 * @throws ArtifactNotFoundException
-	 * @throws StorageException
-	 */
-	@Deprecated
-	public Envelope getStoredObject(long id) throws ArtifactNotFoundException, StorageException;
-
-	/**
-	 * @deprecated Use {@link #fetchEnvelope(String)} instead
-	 * 
-	 *             Gets a stored envelope from the p2p network. The envelope will be identified by the stored class and
-	 *             an arbitrary identifier selected by the using service(s).
-	 * 
-	 * @param cls
-	 * @param identifier
-	 * @return envelope containing the requested data
-	 * @throws ArtifactNotFoundException
-	 * @throws StorageException
-	 */
-	@Deprecated
-	public Envelope getStoredObject(Class<?> cls, String identifier) throws ArtifactNotFoundException, StorageException;
-
-	/**
-	 * @deprecated Use {@link #fetchEnvelope(String)} instead
-	 * 
-	 *             Gets a stored envelope from the p2p network. The envelope will be identified by the stored class and
-	 *             an arbitrary identifier selected by the using service(s).
-	 * 
-	 * @param className
-	 * @param identifier
-	 * @return envelope containing the requested data
-	 * @throws ArtifactNotFoundException
-	 * @throws StorageException
-	 */
-	@Deprecated
-	public Envelope getStoredObject(String className, String identifier)
-			throws ArtifactNotFoundException, StorageException;
-
-	/**
-	 * Gives access to the local node.
-	 * 
-	 * @return the local P2P node
-	 */
-	public Node getLocalNode();
-
-	/**
-	 * Returns agents that are unlocked in this context first. E.g. necessary for opening a received
-	 * {@link i5.las2peer.communication.Message}.
-	 * 
-	 * @param id
-	 * @return get the agent of the given id
-	 * @throws AgentNotKnownException
-	 */
-	public Agent getAgent(String id) throws AgentNotKnownException;
-
-	@Deprecated
-	public boolean hasAgent(String id);
+	// get Context
 
 	/**
 	 * Gets the current las2peer context.
@@ -143,76 +39,259 @@ public interface Context {
 	 * @return the current context
 	 */
 	public static Context getCurrent() {
-		return L2pThread.getCurrent();
+		return ServiceThread.getCurrentContext();
 	}
 
 	/**
-	 * @deprecated Use {@link i5.las2peer.persistency.Envelope#getContent()}
+	 * Gets the current las2peer context.
 	 * 
-	 *             This method is stub and will be removed soon.
-	 * 
-	 * @param envelope the Envelope to unlock
-	 * @throws DecodingFailedException
-	 * @throws L2pSecurityException the MainAgent is not able to open the Envelope
+	 * @throws IllegalStateException called not in a las2peer execution thread
+	 * @return the current context
 	 */
-	@Deprecated
-	public void openEnvelope(Envelope envelope) throws DecodingFailedException, L2pSecurityException;
+	public static Context get() {
+		return getCurrent();
+	}
+
+	// get Service
 
 	/**
-	 * returns true if the main agent is unlocked and can unlock the given agent
+	 * Get the current service.
 	 * 
-	 * @param agentId an agent id
-	 * @return true if the main agent has access to the given agent, otherwise false
-	 * @throws AgentNotKnownException agent not found
-	 * @throws AgentLockedException main agent is locked
+	 * @return the current service
 	 */
-	public boolean hasAccess(String agentId) throws AgentNotKnownException, AgentLockedException;
+	public Service getService();
+
+	/**
+	 * Get the current service, avoiding casting.
+	 * 
+	 * @param <T> type of the service
+	 * @param serviceType service class
+	 * @return the current service
+	 */
+	public <T extends Service> T getService(Class<T> serviceType);
+
+	// Agents
+
+	/**
+	 * Get the main agent of this context. In most cases, this is the user.
+	 * 
+	 * @return the calling agent.
+	 */
+	public Agent getMainAgent();
+
+	/**
+	 * Get the current service agent responsible for executing the service.
+	 * 
+	 * @return the executing service agent.
+	 */
+	public ServiceAgent getServiceAgent();
+
+	/**
+	 * Creates a new UserAgent.
+	 * 
+	 * @param passphrase the passphrase to protect the newly generated agent
+	 * @return A new unlocked UserAgent which is not stored to the network yet.
+	 * @throws AgentOperationFailedException if an error occurred on the node.
+	 */
+	public UserAgent createUserAgent(String passphrase) throws AgentOperationFailedException;
+
+	/**
+	 * Creates a new GroupAgent.
+	 * 
+	 * @param members Initial member list
+	 * @return A new unlocked GroupAgent which is not stored to the network yet.
+	 * @throws AgentOperationFailedException If an error occurred on the node.
+	 */
+	public GroupAgent createGroupAgent(Agent[] members) throws AgentOperationFailedException;
+
+	/**
+	 * Fetches an agent from the network and trys to unlock it using the specified agent.
+	 * 
+	 * @param agentId The id of the agent to fetch.
+	 * @param using The agent used to unlock the fetched agent.
+	 * @return An unlocked instance of the requested agent.
+	 * @throws AgentAccessDeniedException If the given agent cannot access hte fetched agent.
+	 * @throws AgentNotFoundException If the specified agent cannot be found.
+	 * @throws AgentOperationFailedException If an error occurred on the node.
+	 */
+	public Agent requestAgent(String agentId, Agent using) throws AgentAccessDeniedException, AgentNotFoundException,
+			AgentOperationFailedException;
+
+	/**
+	 * Requests an agent from the network using the calling (main) agent.
+	 * 
+	 * @param agentId The id of the agent to fetch.
+	 * @return An unlocked instance of the requested agent.
+	 * @throws AgentAccessDeniedException If the main agent cannot access hte fetched agent.
+	 * @throws AgentNotFoundException If the specified agent cannot be found.
+	 * @throws AgentOperationFailedException If an error occurred on the node.
+	 */
+	public Agent requestAgent(String agentId) throws AgentAccessDeniedException, AgentNotFoundException,
+			AgentOperationFailedException;
+
+	/**
+	 * Fetches an agent from the network.
+	 * 
+	 * @param agentId The id of the agent to fetch.
+	 * @return A probably locked instance of the specified agent.
+	 * @throws AgentNotFoundException If the specified agent cannot be found.
+	 * @throws AgentOperationFailedException If an error occurred on the node.
+	 */
+	public Agent fetchAgent(String agentId) throws AgentNotFoundException, AgentOperationFailedException;
+
+	/**
+	 * Stores and/or updates an agent to the network.
+	 * 
+	 * @param agent The agent to store.
+	 * @throws AgentAccessDeniedException If the agent cannot be overridden due to access restrictions.
+	 * @throws AgentAlreadyExistsException If another agent already exists.
+	 * @throws AgentOperationFailedException If an error occurred on the node.
+	 */
+	public void storeAgent(Agent agent) throws AgentAccessDeniedException, AgentAlreadyExistsException,
+			AgentOperationFailedException;
+
+	/**
+	 * Checks if the agent specified by using is able to unlock the agent agentId. This also includes recursive
+	 * unlocking.
+	 * 
+	 * @param agentId The agent to be checked.
+	 * @param using The agent to unlock.
+	 * @return true If using is able to unlock agentId.
+	 * @throws AgentNotFoundException If the agent specified by agentId does not exist.
+	 * @throws AgentOperationFailedException If an error occurred on the node.
+	 */
+	boolean hasAccess(String agentId, Agent using) throws AgentNotFoundException, AgentOperationFailedException;
+
+	/**
+	 * Checks if the main agent is able to unlock the agent agentId. This also includes recursive unlocking.
+	 * 
+	 * @param agentId The agent to be checked.
+	 * @return true If the main agent is able to unlock the given agent.
+	 * @throws AgentNotFoundException If the agent specified by agentId does not exist.
+	 * @throws AgentOperationFailedException If an error occurred on the node.
+	 */
+	boolean hasAccess(String agentId) throws AgentNotFoundException, AgentOperationFailedException;
 
 	// Envelopes
 
-	public void storeEnvelope(Envelope envelope, Agent author) throws StorageException;
+	/**
+	 * Requests an envelope from the network. This means fetching and decrypting it using the specified agent.
+	 * 
+	 * @param identifier Identifier of the envelope.
+	 * @param using Agentu sing to open the envelope.
+	 * @return An opened envelope.
+	 * @throws EnvelopeAccessDeniedException If the given agent is not able to access the envelope.
+	 * @throws EnvelopeNotFoundException If the envelope doesn not exist.
+	 * @throws EnvelopeOperationFailedException If an error occurred in the node or network.
+	 */
+	public Envelope requestEnvelope(String identifier, Agent using) throws EnvelopeAccessDeniedException,
+			EnvelopeNotFoundException, EnvelopeOperationFailedException;
 
-	public Envelope fetchEnvelope(String identifier) throws StorageException;
+	/**
+	 * Requests an envelope from the network. This means fetching and decrypting it using the current main agent.
+	 * 
+	 * @param identifier Identifier of the envelope.
+	 * @return An opened envelope.
+	 * @throws EnvelopeAccessDeniedException If the given agent is not able to access the envelope.
+	 * @throws EnvelopeNotFoundException If the envelope doesn not exist.
+	 * @throws EnvelopeOperationFailedException If an error occurred at the node or in the network.
+	 */
+	public Envelope requestEnvelope(String identifier) throws EnvelopeAccessDeniedException, EnvelopeNotFoundException,
+			EnvelopeOperationFailedException;
 
-	public Envelope createEnvelope(String identifier, Serializable content, Agent... reader)
-			throws IllegalArgumentException, SerializationException, CryptoException;
+	/**
+	 * Stores the envelope to the network and signs it with the specified agent.
+	 * 
+	 * @param env The envelope to store.
+	 * @param using The agent to be used to sign the envelope.
+	 * @throws EnvelopeAccessDeniedException If the specified agent is not allowed to write to the envelope.
+	 * @throws EnvelopeOperationFailedException If an error occurred at the node or in the network.
+	 */
+	public void storeEnvelope(Envelope env, Agent using) throws EnvelopeAccessDeniedException,
+			EnvelopeOperationFailedException;
 
-	public Envelope createEnvelope(String identifier, Serializable content, List<Agent> readers)
-			throws IllegalArgumentException, SerializationException, CryptoException;
+	/**
+	 * Stores the envelope to the network and signs it with the current main agent.
+	 * 
+	 * @param env The envelope to store.
+	 * @throws EnvelopeAccessDeniedException If the specified agent is not allowed to write to the envelope.
+	 * @throws EnvelopeOperationFailedException If an error occurred at the node or in the network.
+	 */
+	public void storeEnvelope(Envelope env) throws EnvelopeAccessDeniedException, EnvelopeOperationFailedException;
 
-	public Envelope createEnvelope(Envelope previousVersion, Serializable content, Agent... reader)
-			throws IllegalArgumentException, SerializationException, CryptoException;
+	/**
+	 * Stores the envelope to the network and signs it with the specified agent.
+	 * 
+	 * @param env The envelope to store.
+	 * @param handler An handler to resolve storage conflict (e.g. the envelope has been updated in the meantime).
+	 * @param using The agent to be used to sign the envelope (and must have signed the envelope or must have access to
+	 *            the signing agent if there are previous versions).
+	 * @throws EnvelopeAccessDeniedException If the specified agent is not allowed to write to the envelope.
+	 * @throws EnvelopeOperationFailedException If an error occurred at the node or in the network.
+	 */
+	public void storeEnvelope(Envelope env, EnvelopeCollisionHandler handler, Agent using)
+			throws EnvelopeAccessDeniedException, EnvelopeOperationFailedException;
 
-	public Envelope createEnvelope(Envelope previousVersion, Serializable content, List<Agent> readers)
-			throws IllegalArgumentException, SerializationException, CryptoException;
+	/**
+	 * Stores the envelope to the network and signs it with the current main agent.
+	 * 
+	 * @param env The envelope to store.
+	 * @param handler An handler to resolve storage conflict (e.g. the envelope has been updated in the meantime).
+	 * @throws EnvelopeAccessDeniedException If the specified agent is not allowed to write to the envelope.
+	 * @throws EnvelopeOperationFailedException If an error occurred at the node or in the network.
+	 */
+	public void storeEnvelope(Envelope env, EnvelopeCollisionHandler handler) throws EnvelopeAccessDeniedException,
+			EnvelopeOperationFailedException;
 
-	public Envelope createUnencryptedEnvelope(String identifier, Serializable content)
-			throws IllegalArgumentException, SerializationException, CryptoException;
+	/**
+	 * Reclaims the envelope using the specified agent.
+	 * 
+	 * A reclaim operation marks the envelope as deleted and indicates that the envelope is no longer needed anymore
+	 * (e.g. can be deleted by other nodes). However, it is not guaranteed that the envelope will be deleted since the
+	 * nature of a p2p network.
+	 * 
+	 * @param identifier The identifier of the envelope.
+	 * @param using The agent that has signed the envelope or an agent that has access to the signing agent.
+	 * @throws EnvelopeAccessDeniedException If the agent has not signed the envelope.
+	 * @throws EnvelopeNotFoundException If the envelope does not exist.
+	 * @throws EnvelopeOperationFailedException If an error occurred at the node or in the network.
+	 */
+	public void reclaimEnvelope(String identifier, Agent using) throws EnvelopeAccessDeniedException,
+			EnvelopeNotFoundException, EnvelopeOperationFailedException;
 
-	public Envelope createUnencryptedEnvelope(Envelope previousVersion, Serializable content)
-			throws IllegalArgumentException, SerializationException, CryptoException;
+	/**
+	 * Reclaims the envelope using the current main agent agent.
+	 * 
+	 * A reclaim operation marks the envelope as deleted and indicates that the envelope is no longer needed anymore
+	 * (e.g. can be deleted by other nodes). However, it is not guaranteed that the envelope will be deleted since the
+	 * nature of a p2p network.
+	 * 
+	 * @param identifier The identifier of the envelope.
+	 * @throws EnvelopeAccessDeniedException If the agent has not signed the envelope.
+	 * @throws EnvelopeNotFoundException If the envelope does not exist.
+	 * @throws EnvelopeOperationFailedException If an error occurred at the node or in the network.
+	 */
+	public void reclaimEnvelope(String identifier) throws EnvelopeAccessDeniedException, EnvelopeNotFoundException,
+			EnvelopeOperationFailedException;
 
-	public void storeEnvelope(Envelope envelope, Agent author, long timeoutMs) throws StorageException;
+	/**
+	 * Creates a new envelope with the given agent as signing agent and first reader.
+	 * 
+	 * @param identifier Identifier of the envelope.
+	 * @param using Signing agent (owner) of the envelope.
+	 * @return An envelope that is not stored to the network yet.
+	 * @throws EnvelopeOperationFailedException If an error occurred at the node or in the network.
+	 */
+	public Envelope createEnvelope(String identifier, Agent using) throws EnvelopeOperationFailedException;
 
-	public void storeEnvelopeAsync(Envelope envelope, Agent author, StorageStoreResultHandler resultHandler,
-			StorageCollisionHandler collisionHandler, StorageExceptionHandler exceptionHandler);
-
-	public Envelope fetchEnvelope(String identifier, long timeoutMs) throws StorageException;
-
-	public void fetchEnvelopeAsync(String identifier, StorageEnvelopeHandler envelopeHandler,
-			StorageExceptionHandler exceptionHandler);
-
-	public Envelope createEnvelope(String identifier, Serializable content)
-			throws IllegalArgumentException, SerializationException, CryptoException;
-
-	public Envelope createEnvelope(Envelope previousVersion, Serializable content)
-			throws IllegalArgumentException, SerializationException, CryptoException;
-
-	public void storeEnvelope(Envelope envelope) throws StorageException;
-
-	public void storeEnvelope(Envelope envelope, long timeoutMs) throws StorageException;
-
-	public void removeEnvelope(String identifier) throws ArtifactNotFoundException, StorageException;
+	/**
+	 * Creates a new envelope with the current main agent as signing agent and first reader.
+	 * 
+	 * @param identifier Identifier of the envelope.
+	 * @return An envelope that is not stored to the network yet.
+	 * @throws EnvelopeOperationFailedException If an error occurred at the node or in the network.
+	 */
+	public Envelope createEnvelope(String identifier) throws EnvelopeOperationFailedException;
 
 	// RMI
 
@@ -228,10 +307,27 @@ public interface Context {
 	 * @return The invocation result.
 	 * @throws ServiceNotFoundException If the service is not known to the network.
 	 * @throws ServiceNotAvailableException If the service is temporarily not available.
-	 * @throws RemoteServiceException If the remote service throws an exception.
+	 * @throws InternalServiceException If the remote service throws an exception.
 	 */
 	public Serializable invoke(String service, String method, Serializable... parameters)
-			throws ServiceNotFoundException, ServiceNotAvailableException, RemoteServiceException;
+			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException;
+
+	/**
+	 * Invokes the method of any other service on behalf of the main agent, thus sending the main agent as calling
+	 * agent.
+	 * 
+	 * @param service The service class. A version may be specified (for example package.serviceClass@1.0.0-1 or
+	 *            package.serviceClass@1.0). The core tries to find an appropriate version (version 1.0.5 matches 1.0).
+	 *            If no version is specified, the newest version is picked.
+	 * @param method The service method.
+	 * @param parameters The parameters list.
+	 * @return The invocation result.
+	 * @throws ServiceNotFoundException If the service is not known to the network.
+	 * @throws ServiceNotAvailableException If the service is temporarily not available.
+	 * @throws InternalServiceException If the remote service throws an exception.
+	 */
+	public Serializable invoke(ServiceNameVersion service, String method, Serializable... parameters)
+			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException;
 
 	/**
 	 * Invokes a service method using the agent of this service as calling agent.
@@ -244,9 +340,99 @@ public interface Context {
 	 * @return The invocation result.
 	 * @throws ServiceNotFoundException If the service is not known to the network.
 	 * @throws ServiceNotAvailableException If the service is temporarily not available.
-	 * @throws RemoteServiceException If the remote service throws an exception.
+	 * @throws InternalServiceException If the remote service throws an exception.
 	 */
 	public Serializable invokeInternally(String service, String method, Serializable... parameters)
-			throws ServiceNotFoundException, ServiceNotAvailableException, RemoteServiceException;
+			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException;
+
+	/**
+	 * Invokes a service method using the agent of this service as calling agent.
+	 * 
+	 * @param service The service class. A version may be specified (for example package.serviceClass@1.0.0-1 or
+	 *            package.serviceClass@1.0). The core tries to find an appropriate version (version 1.0.5 matches 1.0).
+	 *            If no version is specified, the newest version is picked.
+	 * @param method The service method.
+	 * @param parameters The parameters list.
+	 * @return The invocation result.
+	 * @throws ServiceNotFoundException If the service is not known to the network.
+	 * @throws ServiceNotAvailableException If the service is temporarily not available.
+	 * @throws InternalServiceException If the remote service throws an exception.
+	 */
+	public Serializable invokeInternally(ServiceNameVersion service, String method, Serializable... parameters)
+			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException;
+
+	// Execution
+
+	/**
+	 * Gets the executor for this service.
+	 * 
+	 * Async tasks should be handeld using this executor. They can access the current context.
+	 * 
+	 * @return The executor responsible for the current service call.
+	 */
+	public ExecutorService getExecutor();
+
+	// Logging
+
+	/**
+	 * Gets the logger for the given class.
+	 * @param cls A class.
+	 * 
+	 * @return The logging instance for the current service.
+	 */
+	public Logger getLogger(Class<?> cls);
+
+	// Monitoring
+
+	/**
+	 * Writes a log message. The given event can be used to differentiate between different log messages.
+	 *
+	 * @param event used to differentiate between different log messages
+	 * @param message a message
+	 */
+	public void monitorEvent(MonitoringEvent event, String message);
+
+	/**
+	 * Writes a log message. The given event can be used to differentiate between different log messages.
+	 *
+	 * @param event used to differentiate between different log messages
+	 * @param actingUser can be set to null if unknown / not desired
+	 * @param message a message
+	 */
+	public void monitorEvent(MonitoringEvent event, String message, Agent actingUser);
+
+	/**
+	 * Logs a message to the l2p system using the observers.
+	 *
+	 * Since this method will/should only be used in an L2pThread, the message will come from a service or a helper, so
+	 * a SERVICE_MESSAGE is assumed. Then this message will not be monitored by the monitoring observer.
+	 *
+	 * @param from the calling class
+	 * @param event used to differentiate between different log messages
+	 * @param message a message
+	 */
+	public void monitorEvent(Object from, MonitoringEvent event, String message);
+
+	/**
+	 * Writes a log message. The given event can be used to differentiate between different log messages. The
+	 * serviceAgent and actingUser can be set to {@code null} if not known. Then this message will not be monitored by
+	 * the monitoring observer.
+	 *
+	 * @param from the calling class
+	 * @param event used to differentiate between different log messages
+	 * @param message a message
+	 * @param serviceAgent can be set to null if unknown / not desired
+	 * @param actingUser can be set to null if unknown / not desired
+	 */
+	public void monitorEvent(Object from, MonitoringEvent event, String message, Agent serviceAgent, Agent actingUser);
+
+	// Class loading
+
+	/**
+	 * Gets the class loader responsible for loading the current service.
+	 * 
+	 * @return The current service class loader.
+	 */
+	public ClassLoader getServiceClassLoader();
 
 }

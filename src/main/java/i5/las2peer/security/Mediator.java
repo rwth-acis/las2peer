@@ -1,24 +1,23 @@
 package i5.las2peer.security;
 
+import i5.las2peer.api.execution.ServiceInvocationException;
+import i5.las2peer.api.logging.MonitoringEvent;
+import i5.las2peer.api.p2p.ServiceNameVersion;
+import i5.las2peer.communication.Message;
+import i5.las2peer.communication.MessageException;
+import i5.las2peer.p2p.AgentNotKnownException;
+import i5.las2peer.p2p.Node;
+import i5.las2peer.persistency.EncodingFailedException;
+import i5.las2peer.tools.SerializationException;
+
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.Vector;
 
-import i5.las2peer.communication.Message;
-import i5.las2peer.communication.MessageException;
-import i5.las2peer.execution.L2pServiceException;
-import i5.las2peer.logging.NodeObserver.Event;
-import i5.las2peer.p2p.AgentNotKnownException;
-import i5.las2peer.p2p.Node;
-import i5.las2peer.p2p.ServiceNameVersion;
-import i5.las2peer.p2p.TimeoutException;
-import i5.las2peer.persistency.EncodingFailedException;
-import i5.las2peer.tools.SerializationException;
-
 /**
- * A Mediator acts on behalf of an {@link PassphraseAgent}. This necessary e.g. for remote users logged in via a
- * {@link i5.las2peer.api.Connector} to collect incoming messages from the P2P network and transfer it to the connector.
- * <br>
+ * A Mediator acts on behalf of an {@link PassphraseAgentImpl}. This necessary e.g. for remote users logged in via a
+ * {@link i5.las2peer.connectors.Connector} to collect incoming messages from the P2P network and transfer it to the
+ * connector. <br>
  * Two ways for message handling are provided: Register a {@link MessageHandler} that will be called for each received
  * message. Multiple MessageHandlers are possible (for example for different message contents). The second way to handle
  * messages is to get pending messages from the Mediator directly via the provided methods. Handling then has to be done
@@ -29,7 +28,7 @@ public class Mediator implements MessageReceiver {
 
 	private LinkedList<Message> pending = new LinkedList<>();
 
-	private Agent myAgent;
+	private AgentImpl myAgent;
 	private Node runningAt;
 
 	/**
@@ -46,7 +45,7 @@ public class Mediator implements MessageReceiver {
 	 * @param a the agent
 	 * @throws L2pSecurityException
 	 */
-	public Mediator(Node n, Agent a) throws L2pSecurityException {
+	public Mediator(Node n, AgentImpl a) throws L2pSecurityException {
 		if (a.isLocked()) {
 			throw new L2pSecurityException("You need to unlock the private key of the agent for mediating.");
 		}
@@ -132,7 +131,7 @@ public class Mediator implements MessageReceiver {
 					return true;
 				}
 			} catch (Exception e) {
-				runningAt.observerNotice(Event.MESSAGE_FAILED, runningAt.getNodeId(), this,
+				runningAt.observerNotice(MonitoringEvent.MESSAGE_FAILED, runningAt.getNodeId(), this,
 						"Exception in MessageHandler " + registeredHandlers.get(i) + ": " + e);
 			}
 		}
@@ -165,7 +164,7 @@ public class Mediator implements MessageReceiver {
 	 * 
 	 * @return
 	 */
-	public Agent getAgent() {
+	public AgentImpl getAgent() {
 		return myAgent;
 	}
 
@@ -192,14 +191,10 @@ public class Mediator implements MessageReceiver {
 	 * @param localOnly if true, only services on this node are invoked
 	 * @return result of the method invocation
 	 * @throws L2pSecurityException
-	 * @throws InterruptedException
-	 * @throws TimeoutException
-	 * @throws L2pServiceException
-	 * @throws AgentNotKnownException
+	 * @throws ServiceInvocationException
 	 */
 	public Serializable invoke(String service, String method, Serializable[] parameters, boolean localOnly)
-			throws L2pSecurityException, InterruptedException, TimeoutException, AgentNotKnownException,
-			L2pServiceException {
+			throws L2pSecurityException, ServiceInvocationException {
 
 		return runningAt.invoke(myAgent, ServiceNameVersion.fromString(service), method, parameters, false, localOnly);
 	}

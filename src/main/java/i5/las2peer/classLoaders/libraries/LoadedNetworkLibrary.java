@@ -1,5 +1,19 @@
 package i5.las2peer.classLoaders.libraries;
 
+import i5.las2peer.api.persistency.EnvelopeException;
+import i5.las2peer.api.persistency.EnvelopeNotFoundException;
+import i5.las2peer.classLoaders.helpers.LibraryDependency;
+import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
+import i5.las2peer.classLoaders.helpers.LibraryVersion;
+import i5.las2peer.persistency.EnvelopeVersion;
+import i5.las2peer.persistency.MalformedXMLException;
+import i5.las2peer.persistency.NodeStorageInterface;
+import i5.las2peer.persistency.XmlAble;
+import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.tools.CryptoException;
+import i5.las2peer.tools.SerializationException;
+import i5.las2peer.tools.XmlTools;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,20 +22,6 @@ import java.util.ArrayList;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-
-import i5.las2peer.api.exceptions.ArtifactNotFoundException;
-import i5.las2peer.api.exceptions.StorageException;
-import i5.las2peer.classLoaders.helpers.LibraryDependency;
-import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
-import i5.las2peer.classLoaders.helpers.LibraryVersion;
-import i5.las2peer.persistency.Envelope;
-import i5.las2peer.persistency.MalformedXMLException;
-import i5.las2peer.persistency.NodeStorageInterface;
-import i5.las2peer.persistency.XmlAble;
-import i5.las2peer.security.L2pSecurityException;
-import i5.las2peer.tools.CryptoException;
-import i5.las2peer.tools.SerializationException;
-import i5.las2peer.tools.XmlTools;
 
 /**
  * This class is stored as meta information in the network and represents a network library. All getter refer to
@@ -69,11 +69,11 @@ public class LoadedNetworkLibrary extends LoadedLibrary implements XmlAble {
 	public byte[] getResourceAsBinary(String resourceName) throws IOException, ResourceNotFoundException {
 		String clsEnvId = SharedStorageRepository.getFileEnvelopeIdentifier(this.getIdentifier(), resourceName);
 		try {
-			Envelope clsEnv = node.fetchEnvelope(clsEnvId);
+			EnvelopeVersion clsEnv = node.fetchEnvelope(clsEnvId);
 			return (byte[]) clsEnv.getContent();
-		} catch (ArtifactNotFoundException e) {
+		} catch (EnvelopeNotFoundException e) {
 			throw new ResourceNotFoundException(resourceName, getIdentifier().toString(), e);
-		} catch (StorageException | SerializationException | L2pSecurityException | CryptoException e) {
+		} catch (EnvelopeException | SerializationException | L2pSecurityException | CryptoException e) {
 			throw new IOException("Could not read class from envelope", e);
 		}
 	}

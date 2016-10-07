@@ -1,31 +1,9 @@
 package i5.las2peer.persistency;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
-import java.security.PublicKey;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-
-import i5.las2peer.api.Configurable;
-import i5.las2peer.api.StorageCollisionHandler;
-import i5.las2peer.api.StorageEnvelopeHandler;
-import i5.las2peer.api.StorageExceptionHandler;
-import i5.las2peer.api.StorageStoreResultHandler;
-import i5.las2peer.api.exceptions.ArtifactNotFoundException;
-import i5.las2peer.api.exceptions.EnvelopeAlreadyExistsException;
-import i5.las2peer.api.exceptions.StopMergingException;
-import i5.las2peer.api.exceptions.StorageException;
+import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
+import i5.las2peer.api.persistency.EnvelopeException;
+import i5.las2peer.api.persistency.EnvelopeNotFoundException;
+import i5.las2peer.helper.Configurable;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.persistency.helper.ArtifactPartComparator;
 import i5.las2peer.persistency.helper.FetchProcessHelper;
@@ -37,10 +15,29 @@ import i5.las2peer.persistency.helper.StoreProcessHelper;
 import i5.las2peer.persistency.pastry.PastFetchContinuation;
 import i5.las2peer.persistency.pastry.PastInsertContinuation;
 import i5.las2peer.persistency.pastry.PastLookupContinuation;
-import i5.las2peer.security.Agent;
+import i5.las2peer.security.AgentImpl;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.SerializationException;
 import i5.las2peer.tools.SerializeTools;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.security.PublicKey;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+
 import rice.p2p.commonapi.Id;
 import rice.p2p.commonapi.IdFactory;
 import rice.p2p.commonapi.Node;
@@ -88,7 +85,7 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 	private final ConcurrentHashMap<String, Long> versionCache;
 
 	public SharedStorage(Node node, STORAGE_MODE storageMode, ExecutorService threadpool, String storageDir)
-			throws StorageException {
+			throws EnvelopeException {
 		IdFactory pastIdFactory = new PastryIdFactory(node.getEnvironment());
 		Storage storage;
 		if (storageMode == STORAGE_MODE.MEMORY) {
@@ -108,10 +105,10 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 				long timediff = System.currentTimeMillis() - start;
 				logger.info("storage ready, loading took " + timediff + "ms");
 			} catch (IOException e) {
-				throw new StorageException("Could not initialize persistent storage!", e);
+				throw new EnvelopeException("Could not initialize persistent storage!", e);
 			}
 		} else {
-			throw new StorageException("Unexpected storage mode '" + storageMode + "'");
+			throw new EnvelopeException("Unexpected storage mode '" + storageMode + "'");
 		}
 		Cache cache = new LRUCache(storage, maximumCacheSize, node.getEnvironment());
 		StorageManagerImpl manager = new StorageManagerImpl(pastIdFactory, storage, cache);
@@ -123,11 +120,11 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 	}
 
 	private void lookupHandles(Id id, StorageLookupHandler lookupHandler, StorageExceptionHandler exceptionHandler) {
-		pastStorage.lookupHandles(id, numOfReplicas + 1,
-				new PastLookupContinuation(threadpool, lookupHandler, exceptionHandler));
+		pastStorage.lookupHandles(id, numOfReplicas + 1, new PastLookupContinuation(threadpool, lookupHandler,
+				exceptionHandler));
 	}
 
-	private void waitForStoreResult(StoreProcessHelper resultHelper, long timeoutMs) throws StorageException {
+	private void waitForStoreResult(StoreProcessHelper resultHelper, long timeoutMs) throws EnvelopeException {
 		long startWait = System.currentTimeMillis();
 		while (System.currentTimeMillis() - startWait < timeoutMs) {
 			try {
@@ -135,59 +132,59 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 					return;
 				}
 				Thread.sleep(1);
-			} catch (StorageException e) {
+			} catch (EnvelopeException e) {
 				throw e;
 			} catch (Exception e) {
-				throw new StorageException(e);
+				throw new EnvelopeException(e);
 			}
 		}
-		throw new StorageException("store operation timed out");
+		throw new EnvelopeException("store operation timed out");
 	}
 
 	@Override
-	public Envelope createEnvelope(String identifier, Serializable content, Agent... readers)
+	public EnvelopeVersion createEnvelope(String identifier, Serializable content, AgentImpl... readers)
 			throws IllegalArgumentException, SerializationException, CryptoException {
-		return new Envelope(identifier, content, Arrays.asList(readers));
+		return new EnvelopeVersion(identifier, content, Arrays.asList(readers));
 	}
 
 	@Override
-	public Envelope createEnvelope(String identifier, Serializable content, List<Agent> readers)
+	public EnvelopeVersion createEnvelope(String identifier, Serializable content, Collection<?> readers)
 			throws IllegalArgumentException, SerializationException, CryptoException {
-		return new Envelope(identifier, content, readers);
+		return new EnvelopeVersion(identifier, content, readers);
 	}
 
 	@Override
-	public Envelope createEnvelope(Envelope previousVersion, Serializable content)
+	public EnvelopeVersion createEnvelope(EnvelopeVersion previousVersion, Serializable content)
 			throws IllegalArgumentException, SerializationException, CryptoException {
-		return new Envelope(previousVersion, content);
+		return new EnvelopeVersion(previousVersion, content);
 	}
 
 	@Override
-	public Envelope createEnvelope(Envelope previousVersion, Serializable content, Agent... readers)
+	public EnvelopeVersion createEnvelope(EnvelopeVersion previousVersion, Serializable content, AgentImpl... readers)
 			throws IllegalArgumentException, SerializationException, CryptoException {
-		return new Envelope(previousVersion, content, Arrays.asList(readers));
+		return new EnvelopeVersion(previousVersion, content, Arrays.asList(readers));
 	}
 
 	@Override
-	public Envelope createEnvelope(Envelope previousVersion, Serializable content, List<Agent> readers)
+	public EnvelopeVersion createEnvelope(EnvelopeVersion previousVersion, Serializable content, Collection<?> readers)
 			throws IllegalArgumentException, SerializationException, CryptoException {
-		return new Envelope(previousVersion, content, readers);
+		return new EnvelopeVersion(previousVersion, content, readers);
 	}
 
 	@Override
-	public Envelope createUnencryptedEnvelope(String identifier, Serializable content)
+	public EnvelopeVersion createUnencryptedEnvelope(String identifier, Serializable content)
 			throws IllegalArgumentException, SerializationException, CryptoException {
-		return new Envelope(identifier, content, new ArrayList<Agent>());
+		return new EnvelopeVersion(identifier, content, new ArrayList<AgentImpl>());
 	}
 
 	@Override
-	public Envelope createUnencryptedEnvelope(Envelope previousVersion, Serializable content)
+	public EnvelopeVersion createUnencryptedEnvelope(EnvelopeVersion previousVersion, Serializable content)
 			throws IllegalArgumentException, SerializationException, CryptoException {
-		return new Envelope(previousVersion, content, new ArrayList<Agent>());
+		return new EnvelopeVersion(previousVersion, content, new ArrayList<AgentImpl>());
 	}
 
 	@Override
-	public void storeEnvelope(Envelope envelope, Agent author, long timeoutMs) throws StorageException {
+	public void storeEnvelope(EnvelopeVersion envelope, AgentImpl author, long timeoutMs) throws EnvelopeException {
 		if (timeoutMs < 0) {
 			throw new IllegalArgumentException("Timeout must be greater or equal to zero");
 		}
@@ -197,7 +194,7 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 	}
 
 	@Override
-	public void storeEnvelopeAsync(Envelope envelope, Agent author, StorageStoreResultHandler resultHandler,
+	public void storeEnvelopeAsync(EnvelopeVersion envelope, AgentImpl author, StorageStoreResultHandler resultHandler,
 			StorageCollisionHandler collisionHandler, StorageExceptionHandler exceptionHandler) {
 		logger.info("Storing envelope " + envelope + " ...");
 		// insert envelope into DHT
@@ -205,9 +202,9 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 		storeEnvelopeAsync(envelope, author, resultHandler, collisionHandler, exceptionHandler, mergeCounter);
 	}
 
-	private void storeEnvelopeAsync(Envelope envelope, Agent author, StorageStoreResultHandler resultHandler,
-			StorageCollisionHandler collisionHandler, StorageExceptionHandler exceptionHandler,
-			MergeCounter mergeCounter) {
+	private void storeEnvelopeAsync(EnvelopeVersion envelope, AgentImpl author,
+			StorageStoreResultHandler resultHandler, StorageCollisionHandler collisionHandler,
+			StorageExceptionHandler exceptionHandler, MergeCounter mergeCounter) {
 		// check for collision to offer merging
 		threadpool.execute(new Runnable() {
 			@Override
@@ -232,13 +229,14 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 		});
 	}
 
-	private void handleCollision(Envelope envelope, Agent author, ArrayList<PastContentHandle> metadataHandles,
-			StorageStoreResultHandler resultHandler, StorageCollisionHandler collisionHandler,
-			StorageExceptionHandler exceptionHandler, MergeCounter mergeCounter) {
+	private void handleCollision(EnvelopeVersion envelope, AgentImpl author,
+			ArrayList<PastContentHandle> metadataHandles, StorageStoreResultHandler resultHandler,
+			StorageCollisionHandler collisionHandler, StorageExceptionHandler exceptionHandler,
+			MergeCounter mergeCounter) {
 		if (collisionHandler != null) {
 			fetchWithMetadata(metadataHandles, new StorageEnvelopeHandler() {
 				@Override
-				public void onEnvelopeReceived(Envelope inNetwork) {
+				public void onEnvelopeReceived(EnvelopeVersion inNetwork) {
 					try {
 						Serializable mergedContent = collisionHandler.onCollision(envelope, inNetwork,
 								mergeCounter.value());
@@ -247,33 +245,32 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 								inNetwork.getReaderKeys().keySet());
 						Set<String> mergedGroups = collisionHandler.mergeGroups(envelope.getReaderGroupIds(),
 								inNetwork.getReaderGroupIds());
-						Envelope mergedEnv = new Envelope(envelope.getIdentifier(), mergedVersion, mergedContent,
-								mergedReaders, mergedGroups);
+						EnvelopeVersion mergedEnv = new EnvelopeVersion(envelope.getIdentifier(), mergedVersion,
+								mergedContent, mergedReaders, mergedGroups);
 						logger.info("Merged envelope (collisions: " + mergeCounter.value() + ") from network "
 								+ inNetwork.toString() + " with local copy " + envelope.toString()
 								+ " to merged version " + mergedEnv.toString());
 						mergeCounter.increase();
 						storeEnvelopeAsync(mergedEnv, author, resultHandler, collisionHandler, exceptionHandler,
 								mergeCounter);
-					} catch (StopMergingException | IllegalArgumentException | SerializationException
-							| CryptoException e) {
+					} catch (StopMergingException | IllegalArgumentException | SerializationException | CryptoException e) {
 						exceptionHandler.onException(e);
 					}
 				}
 			}, exceptionHandler);
 		} else if (exceptionHandler != null) {
-			exceptionHandler.onException(
-					new EnvelopeAlreadyExistsException("Duplicate DHT entry for envelope " + envelope.toString()));
+			exceptionHandler.onException(new EnvelopeAlreadyExistsException("Duplicate DHT entry for envelope "
+					+ envelope.toString()));
 		}
 	}
 
-	private void insertEnvelope(Envelope envelope, Agent author, StorageStoreResultHandler resultHandler,
+	private void insertEnvelope(EnvelopeVersion envelope, AgentImpl author, StorageStoreResultHandler resultHandler,
 			StorageExceptionHandler exceptionHandler) {
 		final long version = envelope.getVersion();
 		if (version < 1) { // just to be sure
 			if (exceptionHandler != null) {
-				exceptionHandler.onException(
-						new IllegalArgumentException("Version number (" + version + ") must be higher than zero"));
+				exceptionHandler.onException(new IllegalArgumentException("Version number (" + version
+						+ ") must be higher than zero"));
 			}
 			return;
 		}
@@ -324,7 +321,7 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 			if (System.currentTimeMillis() - insertStart >= asyncInsertOperationTimeout) {
 				// this point means the network layer did not receive positive or negative feedback
 				if (exceptionHandler != null) {
-					exceptionHandler.onException(new StorageException("Network communication timeout"));
+					exceptionHandler.onException(new EnvelopeException("Network communication timeout"));
 				}
 				return;
 			}
@@ -351,8 +348,8 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 					SerializeTools.serialize(metadataEnvelope), author);
 			logger.info("Storing metadata for envelope " + metadataEnvelope.toString() + " with id "
 					+ metadataArtifact.getId().toStringFull());
-			pastStorage.insert(metadataArtifact,
-					new PastInsertContinuation(threadpool, new StorageStoreResultHandler() {
+			pastStorage.insert(metadataArtifact, new PastInsertContinuation(threadpool,
+					new StorageStoreResultHandler() {
 						@Override
 						public void onResult(Serializable envelope, int successfulOperations) {
 							// all done - call actual user defined result handlers
@@ -375,13 +372,13 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 	}
 
 	@Override
-	public Envelope fetchEnvelope(String identifier, long timeoutMs)
-			throws ArtifactNotFoundException, StorageException {
-		return fetchEnvelope(identifier, Envelope.LATEST_VERSION, timeoutMs);
+	public EnvelopeVersion fetchEnvelope(String identifier, long timeoutMs) throws EnvelopeNotFoundException,
+			EnvelopeException {
+		return fetchEnvelope(identifier, EnvelopeVersion.LATEST_VERSION, timeoutMs);
 	}
 
-	public Envelope fetchEnvelope(String identifier, long version, long timeoutMs)
-			throws ArtifactNotFoundException, StorageException {
+	public EnvelopeVersion fetchEnvelope(String identifier, long version, long timeoutMs)
+			throws EnvelopeNotFoundException, EnvelopeException {
 		if (timeoutMs < 0) {
 			throw new IllegalArgumentException("Timeout must be greater or equal to zero");
 		}
@@ -390,24 +387,24 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 		long startWait = System.currentTimeMillis();
 		while (System.currentTimeMillis() - startWait < timeoutMs) {
 			try {
-				Envelope result = resultHelper.getResult();
+				EnvelopeVersion result = resultHelper.getResult();
 				if (result != null) {
 					return result;
 				}
 				Thread.sleep(1);
-			} catch (StorageException e) {
+			} catch (EnvelopeException e) {
 				throw e;
 			} catch (Exception e) {
-				throw new StorageException(e);
+				throw new EnvelopeException(e);
 			}
 		}
-		throw new StorageException("Fetch operation time out");
+		throw new EnvelopeException("Fetch operation time out");
 	}
 
 	@Override
 	public void fetchEnvelopeAsync(String identifier, StorageEnvelopeHandler envelopeHandler,
 			StorageExceptionHandler exceptionHandler) {
-		fetchEnvelopeAsync(identifier, Envelope.LATEST_VERSION, envelopeHandler, exceptionHandler);
+		fetchEnvelopeAsync(identifier, EnvelopeVersion.LATEST_VERSION, envelopeHandler, exceptionHandler);
 	}
 
 	public void fetchEnvelopeAsync(String identifier, long version, StorageEnvelopeHandler envelopeHandler,
@@ -420,11 +417,11 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 			return;
 		}
 		// get handles for first part of the desired version
-		if (version == Envelope.LATEST_VERSION) {
+		if (version == EnvelopeVersion.LATEST_VERSION) {
 			// retrieve the latest version from the network
 			Long startVersion = versionCache.get(identifier);
 			if (startVersion == null) {
-				startVersion = Envelope.START_VERSION;
+				startVersion = EnvelopeVersion.START_VERSION;
 			}
 			logger.info("Starting latest version lookup for " + identifier + " at " + startVersion);
 			threadpool.execute(new LatestArtifactVersionFinder(identifier, startVersion, new StorageLookupHandler() {
@@ -433,7 +430,7 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 					if (metadataHandles.size() > 0) {
 						fetchWithMetadata(metadataHandles, new StorageEnvelopeHandler() {
 							@Override
-							public void onEnvelopeReceived(Envelope result) {
+							public void onEnvelopeReceived(EnvelopeVersion result) {
 								// this handler-in-the-middle updates the version cache,
 								// before returning the result to the actual envelope handler
 								versionCache.put(result.getIdentifier(), result.getVersion());
@@ -443,7 +440,7 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 					} else {
 						// not found
 						if (exceptionHandler != null) {
-							exceptionHandler.onException(new ArtifactNotFoundException(
+							exceptionHandler.onException(new EnvelopeNotFoundException(
 									"no version found for identifier '" + identifier + "'"));
 						}
 					}
@@ -460,9 +457,9 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 					} else {
 						// not found
 						if (exceptionHandler != null) {
-							exceptionHandler.onException(new ArtifactNotFoundException(
-									"Envelope with identifier '" + identifier + "' and version " + version + " ("
-											+ checkId.toStringFull() + ") not found in shared storage!"));
+							exceptionHandler.onException(new EnvelopeNotFoundException("Envelope with identifier '"
+									+ identifier + "' and version " + version + " (" + checkId.toStringFull()
+									+ ") not found in shared storage!"));
 						}
 					}
 				}
@@ -471,8 +468,8 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 		}
 	}
 
-	private void fetchWithMetadata(ArrayList<PastContentHandle> metadataHandles, StorageEnvelopeHandler envelopeHandler,
-			StorageExceptionHandler exceptionHandler) {
+	private void fetchWithMetadata(ArrayList<PastContentHandle> metadataHandles,
+			StorageEnvelopeHandler envelopeHandler, StorageExceptionHandler exceptionHandler) {
 		fetchFromHandles(metadataHandles, new StorageArtifactHandler() {
 			@Override
 			public void onReceive(NetworkArtifact artifact) {
@@ -487,9 +484,9 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 									@Override
 									public void onPartsReceived(ArrayList<NetworkArtifact> parts) {
 										try {
-											Envelope result = buildFromParts(artifactIdFactory, metadata, parts);
+											EnvelopeVersion result = buildFromParts(artifactIdFactory, metadata, parts);
 											envelopeHandler.onEnvelopeReceived(result);
-										} catch (IllegalArgumentException | StorageException e) {
+										} catch (IllegalArgumentException | EnvelopeException e) {
 											if (exceptionHandler != null) {
 												exceptionHandler.onException(e);
 											}
@@ -501,9 +498,9 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 									artifactHandler);
 						}
 					} else if (exceptionHandler != null) {
-						exceptionHandler.onException(
-								new StorageException("expected " + MetadataEnvelope.class.getCanonicalName()
-										+ " but got " + received.getClass().getCanonicalName() + " instead"));
+						exceptionHandler.onException(new EnvelopeException("expected "
+								+ MetadataEnvelope.class.getCanonicalName() + " but got "
+								+ received.getClass().getCanonicalName() + " instead"));
 					}
 				} catch (SerializationException | VerificationFailedException e) {
 					if (exceptionHandler != null) {
@@ -523,7 +520,7 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 			public void onLookup(ArrayList<PastContentHandle> handles) {
 				logger.info("Got " + handles.size() + " past handles for part (" + part + ") of '" + identifier + "'");
 				if (handles.size() < 1) {
-					artifactHandler.onException(new ArtifactNotFoundException("Part (" + part + ") of '" + identifier
+					artifactHandler.onException(new EnvelopeNotFoundException("Part (" + part + ") of '" + identifier
 							+ "' with id (" + checkId.toStringFull() + ") not found in shared storage!"));
 				} else {
 					fetchFromHandles(handles, artifactHandler, artifactHandler);
@@ -543,16 +540,16 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 		pastStorage.fetch(bestHandle, new PastFetchContinuation(threadpool, artifactHandler, exceptionHandler));
 	}
 
-	private static Envelope buildFromParts(PastryIdFactory artifactIdFactory, MetadataEnvelope metadata,
-			ArrayList<NetworkArtifact> artifacts) throws IllegalArgumentException, StorageException {
+	private static EnvelopeVersion buildFromParts(PastryIdFactory artifactIdFactory, MetadataEnvelope metadata,
+			ArrayList<NetworkArtifact> artifacts) throws IllegalArgumentException, EnvelopeException {
 		if (artifacts == null || artifacts.isEmpty()) {
-			throw new StorageException("No parts to build from");
+			throw new EnvelopeException("No parts to build from");
 		}
 		// order parts
 		Collections.sort(artifacts, ArtifactPartComparator.INSTANCE);
 		try {
 			String envelopeIdentifier = null;
-			long envelopeVersion = Envelope.NULL_VERSION;
+			long envelopeVersion = EnvelopeVersion.NULL_VERSION;
 			int lastPartIndex = -1;
 			int numberOfParts = 0;
 			// concat raw byte arrays
@@ -563,39 +560,39 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 				// check identifier
 				String artifactIdentifier = metadata.getEnvelopeIdentifier();
 				if (artifactIdentifier == null) {
-					throw new StorageException("Artifact identifier must not be null");
+					throw new EnvelopeException("Artifact identifier must not be null");
 				} else if (envelopeIdentifier == null) {
 					envelopeIdentifier = artifactIdentifier;
 				} else if (!artifactIdentifier.equals(metadata.getEnvelopeIdentifier())) {
-					throw new StorageException("Aritfact identifier (" + artifactIdentifier
+					throw new EnvelopeException("Aritfact identifier (" + artifactIdentifier
 							+ ") did not match envelope identifier (" + envelopeIdentifier + ")");
 				}
 				// check version
 				long artifactVersion = metadata.getEnvelopeVersion();
-				if (artifactVersion < Envelope.START_VERSION) {
-					throw new StorageException(
-							"Artifact version (" + artifactVersion + ") must be bigger than " + Envelope.START_VERSION);
-				} else if (envelopeVersion == Envelope.NULL_VERSION) {
+				if (artifactVersion < EnvelopeVersion.START_VERSION) {
+					throw new EnvelopeException("Artifact version (" + artifactVersion + ") must be bigger than "
+							+ EnvelopeVersion.START_VERSION);
+				} else if (envelopeVersion == EnvelopeVersion.NULL_VERSION) {
 					envelopeVersion = artifactVersion;
 				} else if (envelopeVersion != artifactVersion) {
-					throw new StorageException("Not matching versions for artifact (" + artifactVersion
+					throw new EnvelopeException("Not matching versions for artifact (" + artifactVersion
 							+ ") and envelope (" + envelopeVersion + ")");
 				}
 				// check part index
 				int partIndex = artifact.getPartIndex();
 				if (partIndex > lastPartIndex + 1) {
-					throw new StorageException("Artifacts not sorted or missing part! Got " + partIndex + " instead of "
-							+ (lastPartIndex + 1));
+					throw new EnvelopeException("Artifacts not sorted or missing part! Got " + partIndex
+							+ " instead of " + (lastPartIndex + 1));
 				}
 				lastPartIndex++;
 				// check number of parts
 				int parts = metadata.getEnvelopeNumOfParts();
 				if (parts < 1) {
-					throw new StorageException("Number of parts given is to low " + parts);
+					throw new EnvelopeException("Number of parts given is to low " + parts);
 				} else if (numberOfParts == 0) {
 					numberOfParts = parts;
 				} else if (numberOfParts != parts) {
-					throw new StorageException("Number of parts from artifact (" + numberOfParts
+					throw new EnvelopeException("Number of parts from artifact (" + numberOfParts
 							+ ") did not match with envelope parts number (" + parts + ")");
 				}
 				try {
@@ -605,7 +602,7 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 						baos.write(rawContent);
 					}
 				} catch (VerificationFailedException e) {
-					throw new StorageException("Could not retrieve content from part", e);
+					throw new EnvelopeException("Could not retrieve content from part", e);
 				}
 			}
 			byte[] bytes = baos.toByteArray();
@@ -613,22 +610,22 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 			ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
 			ObjectInputStream ois = new ObjectInputStream(bais);
 			Object obj = ois.readObject();
-			Envelope result;
-			if (obj instanceof Envelope) {
-				result = (Envelope) obj;
+			EnvelopeVersion result;
+			if (obj instanceof EnvelopeVersion) {
+				result = (EnvelopeVersion) obj;
 			} else {
-				throw new StorageException("expected class " + Envelope.class.getCanonicalName() + " but got "
+				throw new EnvelopeException("expected class " + EnvelopeVersion.class.getCanonicalName() + " but got "
 						+ obj.getClass().getCanonicalName() + " instead");
 			}
 			return result;
 		} catch (IOException | ClassNotFoundException | ClassCastException | IllegalArgumentException e) {
-			throw new StorageException("Building envelope from parts failed!", e);
+			throw new EnvelopeException("Building envelope from parts failed!", e);
 		}
 	}
 
 	@Override
-	public void removeEnvelope(String identifier) throws ArtifactNotFoundException, StorageException {
-		throw new StorageException("Delete not implemented in Past!");
+	public void removeEnvelope(String identifier) throws EnvelopeNotFoundException, EnvelopeException {
+		throw new EnvelopeException("Delete not implemented in Past!");
 	}
 
 }

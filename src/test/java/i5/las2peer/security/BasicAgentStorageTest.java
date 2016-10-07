@@ -3,11 +3,10 @@ package i5.las2peer.security;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
+import i5.las2peer.testing.MockAgentFactory;
 
 import org.junit.Assert;
 import org.junit.Test;
-
-import i5.las2peer.testing.MockAgentFactory;
 
 public class BasicAgentStorageTest {
 
@@ -15,9 +14,9 @@ public class BasicAgentStorageTest {
 	public void testStorage() {
 		try {
 			BasicAgentStorage testee = new BasicAgentStorage();
-			UserAgent eve = MockAgentFactory.getEve();
+			UserAgentImpl eve = MockAgentFactory.getEve();
 
-			eve.unlockPrivateKey("evespass");
+			eve.unlock("evespass");
 
 			assertFalse(testee.hasAgent(eve.getSafeId()));
 			testee.registerAgent(eve);
@@ -28,10 +27,10 @@ public class BasicAgentStorageTest {
 
 			assertFalse(eve.isLocked());
 
-			Agent eve2 = testee.getAgent(eve.getSafeId());
+			UserAgentImpl eve2 = (UserAgentImpl) testee.getAgent(eve.getSafeId());
 			assertTrue(eve2.isLocked());
 
-			((UserAgent) eve2).unlockPrivateKey("evespass");
+			eve2.unlock("evespass");
 			assertFalse(eve2.isLocked());
 
 			assertTrue(testee.getAgent(eve.getSafeId()).isLocked());

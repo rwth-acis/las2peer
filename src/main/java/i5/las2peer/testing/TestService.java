@@ -1,17 +1,20 @@
 package i5.las2peer.testing;
 
+import i5.las2peer.api.Context;
+import i5.las2peer.api.Service;
+import i5.las2peer.api.persistency.Envelope;
+import i5.las2peer.api.persistency.EnvelopeAccessDeniedException;
+import i5.las2peer.api.persistency.EnvelopeNotFoundException;
+import i5.las2peer.api.persistency.EnvelopeOperationFailedException;
+import i5.las2peer.api.security.AgentAccessDeniedException;
+import i5.las2peer.api.security.AgentAlreadyExistsException;
+import i5.las2peer.api.security.AgentOperationFailedException;
+import i5.las2peer.persistency.MalformedXMLException;
+import i5.las2peer.security.L2pSecurityException;
+
 import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Random;
-
-import i5.las2peer.api.Service;
-import i5.las2peer.persistency.Envelope;
-import i5.las2peer.persistency.MalformedXMLException;
-import i5.las2peer.security.AgentContext;
-import i5.las2peer.security.GroupAgent;
-import i5.las2peer.security.L2pSecurityException;
-import i5.las2peer.tools.CryptoException;
-import i5.las2peer.tools.SerializationException;
 
 /**
  * Simple test service for connectors to have a service with methods to call.
@@ -245,21 +248,22 @@ public class TestService extends Service {
 		return getProperties();
 	}
 
-	private Envelope cache = null;
+	private String envelopeId = null;
 
 	/**
 	 * test for envelopes: store a string in an envelope
 	 * 
 	 * @return previously stored string
-	 * @throws L2pSecurityException
-	 * @throws CryptoException
-	 * @throws SerializationException
+	 * @throws EnvelopeOperationFailedException
+	 * @throws EnvelopeNotFoundException
+	 * @throws EnvelopeAccessDeniedException
 	 */
-	public String getEnvelopeString() throws L2pSecurityException, CryptoException, SerializationException {
-		if (cache == null) {
+	public String getEnvelopeString() throws EnvelopeAccessDeniedException, EnvelopeNotFoundException,
+			EnvelopeOperationFailedException {
+		if (envelopeId == null) {
 			return "nothing stored!";
 		}
-		String result = (String) cache.getContent(AgentContext.getCurrent().getMainAgent());
+		String result = (String) Context.get().requestEnvelope(envelopeId).getContent();
 		return result;
 	}
 
@@ -268,31 +272,32 @@ public class TestService extends Service {
 	 * 
 	 * @param s
 	 * @throws IllegalArgumentException
-	 * @throws SerializationException
-	 * @throws CryptoException
+	 * @throws EnvelopeOperationFailedException
+	 * @throws EnvelopeAccessDeniedException
 	 */
-	public void storeEnvelopeString(String s) throws IllegalArgumentException, SerializationException, CryptoException {
-		cache = AgentContext.getCurrent().createEnvelope(Long.toString(new Random().nextLong()), s);
+	public void storeEnvelopeString(String s) throws EnvelopeOperationFailedException, EnvelopeAccessDeniedException {
+		Envelope env = Context.getCurrent().createEnvelope(Long.toString(new Random().nextLong()));
+		env.setContent(s);
+		Context.get().storeEnvelope(env);
+		envelopeId = env.getIdentifier();
 	}
 
-	private Envelope groupCache = null;
+	private String groupEnvelopeId;
 
 	/**
 	 * get a string stored for the Group1
 	 * 
 	 * @return a simple stored string
-	 * @throws L2pSecurityException
-	 * @throws SerializationException
-	 * @throws CryptoException
+	 * @throws EnvelopeOperationFailedException
+	 * @throws EnvelopeNotFoundException
+	 * @throws EnvelopeAccessDeniedException
 	 */
-	public String getGroupEnvelopeString()
-			throws L2pSecurityException, CryptoException, SerializationException, MalformedXMLException, IOException {
-		if (groupCache == null) {
+	public String getGroupEnvelopeString() throws EnvelopeAccessDeniedException, EnvelopeNotFoundException,
+			EnvelopeOperationFailedException {
+		if (groupEnvelopeId == null) {
 			return "nothing stored";
 		}
-		GroupAgent group = MockAgentFactory.getGroup1();
-		group.unlockPrivateKey(AgentContext.getCurrent().getMainAgent());
-		String result = (String) groupCache.getContent(group);
+		String result = (String) Context.get().requestEnvelope(groupEnvelopeId).getContent();
 		return result;
 	}
 
@@ -300,16 +305,21 @@ public class TestService extends Service {
 	 * store a simple string encrypted for the group
 	 * 
 	 * @param store a string to store for the group
-	 * @throws IllegalArgumentException
-	 * @throws SerializationException
-	 * @throws CryptoException
-	 * @throws MalformedXMLException
+	 * @throws EnvelopeOperationFailedException
+	 * @throws EnvelopeAccessDeniedException
 	 * @throws IOException
+	 * @throws MalformedXMLException
+	 * @throws AgentOperationFailedException
+	 * @throws AgentAlreadyExistsException
+	 * @throws AgentAccessDeniedException
 	 */
-	public void storeGroupEnvelopeString(String store) throws IllegalArgumentException, SerializationException,
-			CryptoException, MalformedXMLException, IOException {
-		groupCache = AgentContext.getCurrent().createEnvelope(Long.toString(new Random().nextLong()), store,
-				MockAgentFactory.getGroup1());
+	public void storeGroupEnvelopeString(String store) throws EnvelopeAccessDeniedException,
+			EnvelopeOperationFailedException, AgentAccessDeniedException, AgentAlreadyExistsException,
+			AgentOperationFailedException, MalformedXMLException, IOException {
+		Context.get().storeAgent(MockAgentFactory.getGroup1());
+		Envelope env = Context.get().createEnvelope(Long.toString(new Random().nextLong()));
+		env.setContent(store);
+		Context.get().storeEnvelope(env);
+		groupEnvelopeId = env.getIdentifier();
 	}
-
 }

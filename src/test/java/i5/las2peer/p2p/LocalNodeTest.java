@@ -5,6 +5,19 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import i5.las2peer.api.p2p.ServiceNameVersion;
+import i5.las2peer.api.security.AgentAccessDeniedException;
+import i5.las2peer.api.security.AgentException;
+import i5.las2peer.communication.Message;
+import i5.las2peer.communication.PingPongContent;
+import i5.las2peer.p2p.Node.SendMode;
+import i5.las2peer.persistency.EncodingFailedException;
+import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.security.Mediator;
+import i5.las2peer.security.ServiceAgentImpl;
+import i5.las2peer.security.UserAgentImpl;
+import i5.las2peer.testing.MockAgentFactory;
+import i5.las2peer.tools.SerializationException;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -13,20 +26,11 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import i5.las2peer.communication.Message;
-import i5.las2peer.communication.PingPongContent;
-import i5.las2peer.p2p.Node.SendMode;
-import i5.las2peer.security.L2pSecurityException;
-import i5.las2peer.security.Mediator;
-import i5.las2peer.security.ServiceAgent;
-import i5.las2peer.security.UserAgent;
-import i5.las2peer.testing.MockAgentFactory;
-
 public class LocalNodeTest {
 
-	private UserAgent eve;
-	private UserAgent adam;
-	private UserAgent abel;
+	private UserAgentImpl eve;
+	private UserAgentImpl adam;
+	private UserAgentImpl abel;
 
 	private static int counter;
 
@@ -50,174 +54,155 @@ public class LocalNodeTest {
 	private static boolean testVariable;
 
 	@Test
-	public void test() {
+	public void test() throws EncodingFailedException, L2pSecurityException, SerializationException,
+			InterruptedException, AgentException, AgentAccessDeniedException, i5.las2peer.security.AgentException {
+		System.out.println("start: " + new Date());
+
+		LocalNode testee = LocalNode.launchNode();
+
 		try {
-			System.out.println("start: " + new Date());
+			testee.registerReceiver(eve);
+			fail("L2pSecurityException expected");
+		} catch (L2pSecurityException e) {
+		}
+		eve.unlock("evespass");
+		adam.unlock("adamspass");
 
-			LocalNode testee = LocalNode.launchNode();
+		testee.registerReceiver(eve);
+		testee.registerReceiver(adam);
 
-			try {
-				testee.registerReceiver(eve);
-				fail("L2pSecurityException expected");
-			} catch (L2pSecurityException e) {
+		assertFalse(eve.isLocked());
+		assertFalse(adam.isLocked());
+
+		System.out.println("check1: " + new Date());
+
+		testVariable = false;
+		MessageResultListener listener = new MessageResultListener(10000) {
+			@Override
+			public void notifySuccess() {
+				LocalNodeTest.testVariable = true;
 			}
 
-			eve.unlockPrivateKey("evespass");
-			adam.unlockPrivateKey("adamspass");
+		};
 
-			testee.registerReceiver(eve);
-			testee.registerReceiver(adam);
+		PingPongContent c = new PingPongContent();
+		Message m = new Message(adam, eve, c);
 
-			assertFalse(eve.isLocked());
-			assertFalse(adam.isLocked());
+		testee.sendMessage(m, listener);
 
-			System.out.println("check1: " + new Date());
+		listener.waitForAllAnswers();
 
-			testVariable = false;
-			MessageResultListener listener = new MessageResultListener(10000) {
-				@Override
-				public void notifySuccess() {
-					LocalNodeTest.testVariable = true;
-				}
+		assertFalse(listener.isTimedOut());
+		assertFalse(listener.hasException());
+		assertTrue(listener.isSuccess());
+		assertTrue(listener.isFinished());
 
-			};
-
-			PingPongContent c = new PingPongContent();
-			Message m = new Message(adam, eve, c);
-
-			testee.sendMessage(m, listener);
-
-			listener.waitForAllAnswers();
-
-			assertFalse(listener.isTimedOut());
-			assertFalse(listener.hasException());
-			assertTrue(listener.isSuccess());
-			assertTrue(listener.isFinished());
-
-			Message answer = listener.getResults()[0];
-			answer.open(adam, testee);
-			assertTrue(c.getTimestamp() < ((PingPongContent) answer.getContent()).getTimestamp());
-			assertTrue(testVariable);
-		} catch (Exception e) {
-			e.printStackTrace();
-			Assert.fail(e.toString());
-		}
+		Message answer = listener.getResults()[0];
+		answer.open(adam, testee);
+		assertTrue(c.getTimestamp() < ((PingPongContent) answer.getContent()).getTimestamp());
+		assertTrue(testVariable);
 	}
 
 	@Test
-	public void testTwoNodes() {
-		try {
-			adam.unlockPrivateKey("adamspass");
-			eve.unlockPrivateKey("evespass");
+	public void testTwoNodes() throws L2pSecurityException, EncodingFailedException, SerializationException,
+			InterruptedException, AgentException, AgentAccessDeniedException, i5.las2peer.security.AgentException {
+		adam.unlock("adamspass");
+		eve.unlock("evespass");
 
-			// launch to nodes with one agent each
-			LocalNode testee1 = LocalNode.launchAgent(adam);
-			LocalNode.launchAgent(eve);
+		// launch to nodes with one agent each
+		LocalNode testee1 = LocalNode.launchAgent(adam);
+		LocalNode.launchAgent(eve);
 
-			assertTrue(LocalNode.findAllNodesWithAgent(adam.getSafeId()).length > 0);
-			assertTrue(LocalNode.findAllNodesWithAgent(eve.getSafeId()).length > 0);
+		assertTrue(LocalNode.findAllNodesWithAgent(adam.getSafeId()).length > 0);
+		assertTrue(LocalNode.findAllNodesWithAgent(eve.getSafeId()).length > 0);
 
-			MessageResultListener l = new MessageResultListener(10000);
-			Message m = new Message(adam, eve, new PingPongContent());
+		MessageResultListener l = new MessageResultListener(10000);
+		Message m = new Message(adam, eve, new PingPongContent());
 
-			testee1.sendMessage(m, l);
+		testee1.sendMessage(m, l);
 
-			l.waitForAllAnswers();
+		l.waitForAllAnswers();
 
-			assertEquals(1, l.getNumberOfExpectedResults());
-			assertTrue(l.isFinished());
-			assertTrue(l.isSuccess());
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			Assert.fail(e.toString());
-		}
+		assertEquals(1, l.getNumberOfExpectedResults());
+		assertTrue(l.isFinished());
+		assertTrue(l.isSuccess());
 	}
 
 	@Test
-	public void testTimeout() {
-		try {
-			adam.unlockPrivateKey("adamspass");
+	public void testTimeout() throws EncodingFailedException, L2pSecurityException, SerializationException,
+			InterruptedException, AgentException, AgentAccessDeniedException, i5.las2peer.security.AgentException {
+		adam.unlock("adamspass");
 
-			LocalNode testee1 = LocalNode.launchAgent(adam);
-			MessageResultListener l = new MessageResultListener(2000) {
-				@Override
-				public void notifyTimeout() {
-					LocalNodeTest.testVariable = true;
-				}
-			};
-			Message m = new Message(adam, eve, new PingPongContent(), 1000);
+		LocalNode testee1 = LocalNode.launchAgent(adam);
+		MessageResultListener l = new MessageResultListener(2000) {
+			@Override
+			public void notifyTimeout() {
+				LocalNodeTest.testVariable = true;
+			}
+		};
+		Message m = new Message(adam, eve, new PingPongContent(), 1000);
 
-			LocalNode.setPendingTimeOut(1000);
+		LocalNode.setPendingTimeOut(1000);
 
-			testee1.sendMessage(m, l);
+		testee1.sendMessage(m, l);
 
-			Thread.sleep(30000);
+		Thread.sleep(30000);
 
-			assertFalse(l.isSuccess());
-			assertTrue(l.isTimedOut());
-			assertEquals(0, l.getResults().length);
-			assertTrue(testVariable);
-		} catch (Exception e) {
-			e.printStackTrace();
-			Assert.fail(e.toString());
-		}
+		assertFalse(l.isSuccess());
+		assertTrue(l.isTimedOut());
+		assertEquals(0, l.getResults().length);
+		assertTrue(testVariable);
 	}
 
 	@Test
-	public void testBroadcast() {
-		try {
-			adam.unlockPrivateKey("adamspass");
-			eve.unlockPrivateKey("evespass");
+	public void testBroadcast() throws EncodingFailedException, L2pSecurityException, SerializationException,
+			InterruptedException, AgentException, AgentAccessDeniedException, i5.las2peer.security.AgentException {
+		adam.unlock("adamspass");
+		eve.unlock("evespass");
 
-			// launch three nodes with one agent each
-			LocalNode testee1 = LocalNode.launchAgent(adam);
-			LocalNode hosting1 = LocalNode.launchAgent(eve);
-			assertEquals(1, LocalNode.findAllNodesWithAgent(eve.getSafeId()).length);
+		// launch three nodes with one agent each
+		LocalNode testee1 = LocalNode.launchAgent(adam);
+		LocalNode hosting1 = LocalNode.launchAgent(eve);
+		assertEquals(1, LocalNode.findAllNodesWithAgent(eve.getSafeId()).length);
 
-			LocalNode hosting2 = LocalNode.launchAgent(eve);
+		LocalNode hosting2 = LocalNode.launchAgent(eve);
 
-			assertTrue(hosting1.hasLocalAgent(eve));
-			assertTrue(hosting2.hasLocalAgent(eve));
+		assertTrue(hosting1.hasLocalAgent(eve));
+		assertTrue(hosting2.hasLocalAgent(eve));
 
-			assertNotSame(hosting1.getAgent(eve.getSafeId()), hosting2.getAgent(eve.getSafeId()));
+		assertNotSame(hosting1.getAgent(eve.getSafeId()), hosting2.getAgent(eve.getSafeId()));
 
-			assertEquals(2, LocalNode.findAllNodesWithAgent(eve.getSafeId()).length);
+		assertEquals(2, LocalNode.findAllNodesWithAgent(eve.getSafeId()).length);
 
-			MessageResultListener l = new MessageResultListener(10000) {
-				@Override
-				public void notifySuccess() {
-					synchronized (this) {
-						System.out.println("result retrieved");
-						LocalNodeTest.counter++;
-					}
+		MessageResultListener l = new MessageResultListener(10000) {
+			@Override
+			public void notifySuccess() {
+				synchronized (this) {
+					System.out.println("result retrieved");
+					LocalNodeTest.counter++;
 				}
-			};
-			// l.addRecipient();
-			assertEquals(1, l.getNumberOfExpectedResults());
+			}
+		};
+		// l.addRecipient();
+		assertEquals(1, l.getNumberOfExpectedResults());
 
-			Message m = new Message(adam, eve, new PingPongContent());
-			testee1.sendMessage(m, l, Node.SendMode.BROADCAST);
-			assertEquals(2, l.getNumberOfExpectedResults());
+		Message m = new Message(adam, eve, new PingPongContent());
+		testee1.sendMessage(m, l, Node.SendMode.BROADCAST);
+		assertEquals(2, l.getNumberOfExpectedResults());
 
-			l.waitForAllAnswers();
+		l.waitForAllAnswers();
 
-			assertEquals(2, l.getNumberOfResults());
-			assertEquals(counter, 2);
-			assertTrue(l.isSuccess());
-			assertTrue(l.isFinished());
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			Assert.fail(e.toString());
-		}
+		assertEquals(2, l.getNumberOfResults());
+		assertEquals(counter, 2);
+		assertTrue(l.isSuccess());
+		assertTrue(l.isFinished());
 	}
 
 	@Test
 	public void testPending() {
 		try {
-			adam.unlockPrivateKey("adamspass");
-			eve.unlockPrivateKey("evespass");
+			adam.unlock("adamspass");
+			eve.unlock("evespass");
 
 			LocalNode testee = LocalNode.launchAgent(adam);
 
@@ -253,7 +238,7 @@ public class LocalNodeTest {
 	@Test
 	public void testRegisteringAgents() {
 		try {
-			adam.unlockPrivateKey("adamspass");
+			adam.unlock("adamspass");
 
 			LocalNode testee = LocalNode.launchAgent(adam);
 
@@ -269,12 +254,12 @@ public class LocalNodeTest {
 			} catch (AgentAlreadyRegisteredException e) {
 			}
 
-			abel.unlockPrivateKey("abelspass");
+			abel.unlock("abelspass");
 			testee.storeAgent(abel);
 
 			LocalNode testee2 = LocalNode.launchNode();
 
-			UserAgent retrieve = (UserAgent) testee2.getAgent(abel.getSafeId());
+			UserAgentImpl retrieve = (UserAgentImpl) testee2.getAgent(abel.getSafeId());
 			assertTrue(retrieve.isLocked());
 
 			try {
@@ -283,7 +268,7 @@ public class LocalNodeTest {
 			} catch (L2pSecurityException e) {
 			}
 
-			retrieve.unlockPrivateKey("abelspass");
+			retrieve.unlock("abelspass");
 			testee2.updateAgent(retrieve);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -295,9 +280,9 @@ public class LocalNodeTest {
 	public void testRegisteringTopics() {
 		try {
 			// start node
-			adam.unlockPrivateKey("adamspass");
-			abel.unlockPrivateKey("abelspass");
-			eve.unlockPrivateKey("evespass");
+			adam.unlock("adamspass");
+			abel.unlock("abelspass");
+			eve.unlock("evespass");
 			LocalNode testee = LocalNode.launchNode();
 			testee.storeAgent(adam);
 			testee.storeAgent(abel);
@@ -372,9 +357,9 @@ public class LocalNodeTest {
 	public void testSendAndReceiveTopics() {
 		try {
 			// start node
-			adam.unlockPrivateKey("adamspass");
-			abel.unlockPrivateKey("abelspass");
-			eve.unlockPrivateKey("evespass");
+			adam.unlock("adamspass");
+			abel.unlock("abelspass");
+			eve.unlock("evespass");
 			LocalNode node1 = LocalNode.launchNode();
 			LocalNode node2 = LocalNode.launchNode();
 			node1.storeAgent(adam);
@@ -447,9 +432,9 @@ public class LocalNodeTest {
 	public void testCollectMessags() {
 		try {
 			// start node
-			adam.unlockPrivateKey("adamspass");
-			abel.unlockPrivateKey("abelspass");
-			eve.unlockPrivateKey("evespass");
+			adam.unlock("adamspass");
+			abel.unlock("abelspass");
+			eve.unlock("evespass");
 			LocalNode node1 = LocalNode.launchNode();
 			LocalNode node2 = LocalNode.launchNode();
 			node1.storeAgent(adam);
@@ -482,7 +467,7 @@ public class LocalNodeTest {
 		try {
 
 			LocalNode testee = LocalNode.newNode();
-			adam.unlockPrivateKey("adamspass");
+			adam.unlock("adamspass");
 			testee.storeAgent(adam);
 
 			testee.launch();
@@ -494,7 +479,7 @@ public class LocalNodeTest {
 				// ok
 			}
 
-			abel.unlockPrivateKey("abelspass");
+			abel.unlock("abelspass");
 			testee.storeAgent(abel);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -506,13 +491,13 @@ public class LocalNodeTest {
 	public void testSimpleInvocation() {
 		try {
 			String serviceClass = "i5.las2peer.api.TestService";
-			ServiceAgent testService = ServiceAgent
-					.createServiceAgent(ServiceNameVersion.fromString(serviceClass + "@1.0"), "a passphrase");
-			testService.unlockPrivateKey("a passphrase");
+			ServiceAgentImpl testService = ServiceAgentImpl.createServiceAgent(
+					ServiceNameVersion.fromString(serviceClass + "@1.0"), "a passphrase");
+			testService.unlock("a passphrase");
 
 			LocalNode testee = LocalNode.launchNode();
 
-			eve.unlockPrivateKey("evespass");
+			eve.unlock("evespass");
 			testee.storeAgent(eve);
 
 			testee.storeAgent(testService);
@@ -530,12 +515,11 @@ public class LocalNodeTest {
 	@Test
 	public void testUserRegistry() {
 		try {
-			UserAgent a = UserAgent.createUserAgent("a");
-			UserAgent b = UserAgent.createUserAgent("b");
+			UserAgentImpl a = UserAgentImpl.createUserAgent("a");
+			UserAgentImpl b = UserAgentImpl.createUserAgent("b");
 
-			a.unlockPrivateKey("a");
-			b.unlockPrivateKey("b");
-
+			a.unlock("a");
+			b.unlock("b");
 			a.setLoginName("alpha");
 			b.setLoginName("beta");
 
@@ -564,8 +548,8 @@ public class LocalNodeTest {
 			LocalNode testee1 = LocalNode.launchNode();
 
 			for (int i = 0; i < 11; i++) {
-				UserAgent a = UserAgent.createUserAgent("pass" + i);
-				a.unlockPrivateKey("pass" + i);
+				UserAgentImpl a = UserAgentImpl.createUserAgent("pass" + i);
+				a.unlock("pass" + i);
 				a.setLoginName("login_" + i);
 				testee1.storeAgent(a);
 			}

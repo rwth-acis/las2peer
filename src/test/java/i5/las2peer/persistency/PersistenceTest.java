@@ -1,5 +1,11 @@
 package i5.las2peer.persistency;
 
+import i5.las2peer.p2p.PastryNodeImpl;
+import i5.las2peer.persistency.SharedStorage.STORAGE_MODE;
+import i5.las2peer.security.UserAgentImpl;
+import i5.las2peer.testing.MockAgentFactory;
+import i5.las2peer.testing.TestSuite;
+
 import java.util.ArrayList;
 
 import org.junit.After;
@@ -7,12 +13,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import i5.las2peer.p2p.PastryNodeImpl;
-import i5.las2peer.persistency.SharedStorage.STORAGE_MODE;
-import i5.las2peer.security.UserAgent;
-import i5.las2peer.testing.MockAgentFactory;
-import i5.las2peer.testing.TestSuite;
 
 public class PersistenceTest {
 
@@ -45,9 +45,9 @@ public class PersistenceTest {
 		try {
 			// start network and write data into shared storage
 			PastryNodeImpl node1 = nodes.get(0);
-			Envelope before = node1.createUnencryptedEnvelope("test", "This is las2peer!");
-			UserAgent smith = MockAgentFactory.getAdam();
-			smith.unlockPrivateKey("adamspass");
+			EnvelopeVersion before = node1.createUnencryptedEnvelope("test", "This is las2peer!");
+			UserAgentImpl smith = MockAgentFactory.getAdam();
+			smith.unlock("adamspass");
 			node1.storeEnvelope(before, smith);
 			// shutdown network
 			stopNetwork();
@@ -56,7 +56,7 @@ public class PersistenceTest {
 			nodes = TestSuite.launchNetwork(3, STORAGE_MODE.FILESYSTEM, false);
 			System.out.println("test network restarted");
 			node1 = nodes.get(0);
-			Envelope after = node1.fetchEnvelope("test");
+			EnvelopeVersion after = node1.fetchEnvelope("test");
 			Assert.assertEquals(before.getContent(), after.getContent());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -70,15 +70,15 @@ public class PersistenceTest {
 		try {
 			// start network and write data into shared storage
 			PastryNodeImpl node1 = nodes.get(0);
-			Envelope env = node1.createUnencryptedEnvelope("test", "This is las2peer!");
-			UserAgent smith = MockAgentFactory.getAdam();
-			smith.unlockPrivateKey("adamspass");
+			EnvelopeVersion env = node1.createUnencryptedEnvelope("test", "This is las2peer!");
+			UserAgentImpl smith = MockAgentFactory.getAdam();
+			smith.unlock("adamspass");
 			node1.storeEnvelope(env, smith);
 			// shutdown node 2
 			PastryNodeImpl node2 = nodes.remove(1);
 			node2.shutDown();
 			// update envelope
-			Envelope updated = node1.createUnencryptedEnvelope(env, "This is las2peer again!");
+			EnvelopeVersion updated = node1.createUnencryptedEnvelope(env, "This is las2peer again!");
 			long start = System.currentTimeMillis();
 			node1.storeEnvelope(updated, smith);
 			long stop = System.currentTimeMillis();
@@ -87,7 +87,7 @@ public class PersistenceTest {
 			node2 = TestSuite.addNode(node1.getPort(), STORAGE_MODE.FILESYSTEM, 1L);
 			nodes.set(1, node2);
 			// read data
-			Envelope fetched = node2.fetchEnvelope("test");
+			EnvelopeVersion fetched = node2.fetchEnvelope("test");
 			Assert.assertEquals(updated.getContent(), fetched.getContent());
 			/*
 			 * The test output should also end with the following lines:

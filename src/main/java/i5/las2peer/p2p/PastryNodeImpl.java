@@ -1,5 +1,32 @@
 package i5.las2peer.p2p;
 
+import i5.las2peer.api.logging.MonitoringEvent;
+import i5.las2peer.api.persistency.EnvelopeException;
+import i5.las2peer.api.persistency.EnvelopeNotFoundException;
+import i5.las2peer.classLoaders.L2pClassManager;
+import i5.las2peer.classLoaders.libraries.SharedStorageRepository;
+import i5.las2peer.communication.Message;
+import i5.las2peer.communication.MessageException;
+import i5.las2peer.logging.L2pLogger;
+import i5.las2peer.p2p.pastry.MessageEnvelope;
+import i5.las2peer.p2p.pastry.NodeApplication;
+import i5.las2peer.persistency.EnvelopeVersion;
+import i5.las2peer.persistency.MalformedXMLException;
+import i5.las2peer.persistency.SharedStorage;
+import i5.las2peer.persistency.SharedStorage.STORAGE_MODE;
+import i5.las2peer.persistency.StorageCollisionHandler;
+import i5.las2peer.persistency.StorageEnvelopeHandler;
+import i5.las2peer.persistency.StorageExceptionHandler;
+import i5.las2peer.persistency.StorageStoreResultHandler;
+import i5.las2peer.security.AgentContext;
+import i5.las2peer.security.AgentException;
+import i5.las2peer.security.AgentImpl;
+import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.security.MessageReceiver;
+import i5.las2peer.security.UserAgentImpl;
+import i5.las2peer.tools.CryptoException;
+import i5.las2peer.tools.SerializationException;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -20,32 +47,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 
-import i5.las2peer.api.StorageCollisionHandler;
-import i5.las2peer.api.StorageEnvelopeHandler;
-import i5.las2peer.api.StorageExceptionHandler;
-import i5.las2peer.api.StorageStoreResultHandler;
-import i5.las2peer.api.exceptions.ArtifactNotFoundException;
-import i5.las2peer.api.exceptions.StorageException;
-import i5.las2peer.classLoaders.L2pClassManager;
-import i5.las2peer.classLoaders.libraries.SharedStorageRepository;
-import i5.las2peer.communication.Message;
-import i5.las2peer.communication.MessageException;
-import i5.las2peer.logging.L2pLogger;
-import i5.las2peer.logging.NodeObserver.Event;
-import i5.las2peer.p2p.pastry.MessageEnvelope;
-import i5.las2peer.p2p.pastry.NodeApplication;
-import i5.las2peer.persistency.Envelope;
-import i5.las2peer.persistency.MalformedXMLException;
-import i5.las2peer.persistency.SharedStorage;
-import i5.las2peer.persistency.SharedStorage.STORAGE_MODE;
-import i5.las2peer.security.Agent;
-import i5.las2peer.security.AgentContext;
-import i5.las2peer.security.AgentException;
-import i5.las2peer.security.L2pSecurityException;
-import i5.las2peer.security.MessageReceiver;
-import i5.las2peer.security.UserAgent;
-import i5.las2peer.tools.CryptoException;
-import i5.las2peer.tools.SerializationException;
 import rice.environment.Environment;
 import rice.p2p.commonapi.NodeHandle;
 import rice.pastry.NodeIdFactory;
@@ -218,9 +219,9 @@ public class PastryNodeImpl extends Node {
 	 * 
 	 * For the past DHT either a memory mode or a disk persistence mode are selected based on {@link STORAGE_MODE}
 	 * 
-	 * @throws StorageException
+	 * @throws EnvelopeException
 	 */
-	private void setupPastryApplications() throws StorageException {
+	private void setupPastryApplications() throws EnvelopeException {
 		threadpool = Executors.newCachedThreadPool();
 		application = new NodeApplication(this);
 		pastStorage = new SharedStorage(pastryNode, mode, threadpool, storageDir);
@@ -265,8 +266,8 @@ public class PastryNodeImpl extends Node {
 					}
 				};
 			}
-			InternetPastryNodeFactory factory = new InternetPastryNodeFactory(nidFactory, pastryBindAddress, pastryPort,
-					pastryEnvironment, null, null, null);
+			InternetPastryNodeFactory factory = new InternetPastryNodeFactory(nidFactory, pastryBindAddress,
+					pastryPort, pastryEnvironment, null, null, null);
 			pastryNode = factory.newNode();
 
 			setupPastryApplications();
@@ -280,8 +281,8 @@ public class PastryNodeImpl extends Node {
 
 					// abort if can't join
 					if (pastryNode.joinFailed()) {
-						throw new NodeException(
-								"Could not join the FreePastry ring.  Reason:" + pastryNode.joinFailedReason());
+						throw new NodeException("Could not join the FreePastry ring.  Reason:"
+								+ pastryNode.joinFailedReason());
 					}
 				}
 			}
@@ -292,7 +293,7 @@ public class PastryNodeImpl extends Node {
 
 		} catch (IOException e) {
 			throw new NodeException("IOException while joining pastry ring", e);
-		} catch (StorageException e) {
+		} catch (EnvelopeException e) {
 			throw new NodeException("Shared storage exception while joining pastry ring", e);
 		} catch (InterruptedException e) {
 			throw new NodeException("Interrupted while joining pastry ring!", e);
@@ -400,8 +401,8 @@ public class PastryNodeImpl extends Node {
 	}
 
 	@Override
-	public void registerReceiver(MessageReceiver receiver)
-			throws AgentAlreadyRegisteredException, L2pSecurityException, AgentException {
+	public void registerReceiver(MessageReceiver receiver) throws AgentAlreadyRegisteredException,
+			L2pSecurityException, AgentException {
 
 		synchronized (this) {
 			super.registerReceiver(receiver);
@@ -442,8 +443,8 @@ public class PastryNodeImpl extends Node {
 	@Override
 	public void sendMessage(Message message, MessageResultListener listener, SendMode mode) {
 		// TODO: use mode?!?!
-		observerNotice(Event.MESSAGE_SENDING, pastryNode, message.getSenderId(), null, message.getRecipientId(),
-				"broadcasting");
+		observerNotice(MonitoringEvent.MESSAGE_SENDING, pastryNode, message.getSenderId(), null,
+				message.getRecipientId(), "broadcasting");
 
 		registerAnswerListener(message.getId(), listener);
 
@@ -465,8 +466,8 @@ public class PastryNodeImpl extends Node {
 			throw e;
 		}
 
-		observerNotice(Event.MESSAGE_SENDING, pastryNode, message.getSenderId(), atNodeId, message.getRecipientId(),
-				"");
+		observerNotice(MonitoringEvent.MESSAGE_SENDING, pastryNode, message.getSenderId(), atNodeId,
+				message.getRecipientId(), "");
 
 		registerAnswerListener(message.getId(), listener);
 
@@ -474,12 +475,12 @@ public class PastryNodeImpl extends Node {
 			application.sendMessage(new MessageEnvelope(pastryNode.getLocalHandle(), message), (NodeHandle) atNodeId);
 		} catch (MalformedXMLException e) {
 			logger.log(Level.SEVERE, "Can't read message XML", e);
-			observerNotice(Event.MESSAGE_FAILED, pastryNode, message.getSenderId(), atNodeId, message.getRecipientId(),
-					"XML exception!");
+			observerNotice(MonitoringEvent.MESSAGE_FAILED, pastryNode, message.getSenderId(), atNodeId,
+					message.getRecipientId(), "XML exception!");
 		} catch (MessageException e) {
 			logger.log(Level.SEVERE, "Could not send message", e);
-			observerNotice(Event.MESSAGE_FAILED, pastryNode, message.getSenderId(), atNodeId, message.getRecipientId(),
-					"Message exception!");
+			observerNotice(MonitoringEvent.MESSAGE_FAILED, pastryNode, message.getSenderId(), atNodeId,
+					message.getRecipientId(), "Message exception!");
 		}
 	}
 
@@ -488,7 +489,7 @@ public class PastryNodeImpl extends Node {
 	 */
 	@Deprecated
 	@Override
-	public Envelope fetchArtifact(long id) throws ArtifactNotFoundException, StorageException {
+	public EnvelopeVersion fetchArtifact(long id) throws EnvelopeNotFoundException, EnvelopeException {
 		return fetchEnvelope(Long.toString(id));
 	}
 
@@ -497,16 +498,16 @@ public class PastryNodeImpl extends Node {
 	 */
 	@Deprecated
 	@Override
-	public Envelope fetchArtifact(String identifier) throws ArtifactNotFoundException, StorageException {
+	public EnvelopeVersion fetchArtifact(String identifier) throws EnvelopeNotFoundException, EnvelopeException {
 		return fetchEnvelope(identifier);
 	}
 
 	/**
-	 * @deprecated Use {@link #storeEnvelope(Envelope, Agent)} instead
+	 * @deprecated Use {@link #storeEnvelope(EnvelopeVersion, AgentImpl)} instead
 	 */
 	@Deprecated
 	@Override
-	public void storeArtifact(Envelope envelope) throws StorageException {
+	public void storeArtifact(EnvelopeVersion envelope) throws EnvelopeException {
 		storeEnvelope(envelope, AgentContext.getCurrent().getMainAgent());
 	}
 
@@ -515,13 +516,13 @@ public class PastryNodeImpl extends Node {
 	 */
 	@Deprecated
 	@Override
-	public void removeArtifact(long id, byte[] signature) throws ArtifactNotFoundException, StorageException {
+	public void removeArtifact(long id, byte[] signature) throws EnvelopeNotFoundException, EnvelopeException {
 		removeEnvelope(Long.toString(id));
 	}
 
 	@Override
 	public Object[] findRegisteredAgent(String agentId, int hintOfExpectedCount) throws AgentNotKnownException {
-		observerNotice(Event.AGENT_SEARCH_STARTED, pastryNode, agentId, null, (String) null, "");
+		observerNotice(MonitoringEvent.AGENT_SEARCH_STARTED, pastryNode, agentId, null, (String) null, "");
 		return application.searchAgent(agentId, hintOfExpectedCount).toArray();
 	}
 
@@ -535,62 +536,63 @@ public class PastryNodeImpl extends Node {
 	}
 
 	@Override
-	public Agent getAgent(String id) throws AgentNotKnownException {
+	public AgentImpl getAgent(String id) throws AgentNotKnownException {
 		// no caching here, because agents may have changed in the network
-		observerNotice(Event.AGENT_GET_STARTED, pastryNode, id, null, (String) null, "");
+		observerNotice(MonitoringEvent.AGENT_GET_STARTED, pastryNode, id, null, (String) null, "");
 		try {
-			Agent agentFromNet = null;
-			Agent anonymous = getAnonymous();
+			AgentImpl agentFromNet = null;
+			AgentImpl anonymous = getAnonymous();
 			// TODO use isAnonymous, special ID or Classing for identification
 			if (id.equalsIgnoreCase(anonymous.getSafeId())) {
 				agentFromNet = anonymous;
 			} else {
-				Envelope agentEnvelope = pastStorage.fetchEnvelope(Envelope.getAgentIdentifier(id), AGENT_GET_TIMEOUT);
-				agentFromNet = Agent.createFromXml((String) agentEnvelope.getContent());
+				EnvelopeVersion agentEnvelope = pastStorage.fetchEnvelope(EnvelopeVersion.getAgentIdentifier(id),
+						AGENT_GET_TIMEOUT);
+				agentFromNet = AgentImpl.createFromXml((String) agentEnvelope.getContent());
 			}
-			observerNotice(Event.AGENT_GET_SUCCESS, pastryNode, id, null, (String) null, "");
+			observerNotice(MonitoringEvent.AGENT_GET_SUCCESS, pastryNode, id, null, (String) null, "");
 			return agentFromNet;
 		} catch (Exception e) {
-			observerNotice(Event.AGENT_GET_FAILED, pastryNode, id, null, (String) null, "");
+			observerNotice(MonitoringEvent.AGENT_GET_FAILED, pastryNode, id, null, (String) null, "");
 			throw new AgentNotKnownException("Unable to retrieve Agent " + id + " from past storage", e);
 		}
 	}
 
 	@Override
-	public void storeAgent(Agent agent) throws L2pSecurityException, AgentException {
+	public void storeAgent(AgentImpl agent) throws L2pSecurityException, AgentException {
 		if (agent.isLocked()) {
 			throw new L2pSecurityException("You have to unlock the agent before storage!");
 			// because the agent has to sign itself
 		}
 		// TODO check if anonymous should be stored and deny
-		observerNotice(Event.AGENT_UPLOAD_STARTED, pastryNode, agent, "");
+		observerNotice(MonitoringEvent.AGENT_UPLOAD_STARTED, pastryNode, agent, "");
 		try {
-			Envelope agentEnvelope = null;
+			EnvelopeVersion agentEnvelope = null;
 			try {
-				agentEnvelope = pastStorage.fetchEnvelope(Envelope.getAgentIdentifier(agent.getSafeId()),
+				agentEnvelope = pastStorage.fetchEnvelope(EnvelopeVersion.getAgentIdentifier(agent.getSafeId()),
 						AGENT_GET_TIMEOUT);
 				agentEnvelope = pastStorage.createUnencryptedEnvelope(agentEnvelope, agent.toXmlString());
-			} catch (ArtifactNotFoundException e) {
-				agentEnvelope = pastStorage.createUnencryptedEnvelope(Envelope.getAgentIdentifier(agent.getSafeId()),
-						agent.toXmlString());
+			} catch (EnvelopeNotFoundException e) {
+				agentEnvelope = pastStorage.createUnencryptedEnvelope(
+						EnvelopeVersion.getAgentIdentifier(agent.getSafeId()), agent.toXmlString());
 			}
 			pastStorage.storeEnvelope(agentEnvelope, agent, AGENT_STORE_TIMEOUT);
-			if (agent instanceof UserAgent) {
-				getUserManager().registerUserAgent((UserAgent) agent);
+			if (agent instanceof UserAgentImpl) {
+				getUserManager().registerUserAgent((UserAgentImpl) agent);
 			}
-			observerNotice(Event.AGENT_UPLOAD_SUCCESS, pastryNode, agent, "");
-		} catch (CryptoException | SerializationException | StorageException e) {
-			observerNotice(Event.AGENT_UPLOAD_FAILED, pastryNode, agent, "Got interrupted!");
+			observerNotice(MonitoringEvent.AGENT_UPLOAD_SUCCESS, pastryNode, agent, "");
+		} catch (CryptoException | SerializationException | EnvelopeException e) {
+			observerNotice(MonitoringEvent.AGENT_UPLOAD_FAILED, pastryNode, agent, "Got interrupted!");
 			throw new AgentException("Storage has been interrupted", e);
 		}
 	}
 
 	/**
-	 * @deprecated Use {@link #storeAgent(Agent)} instead
+	 * @deprecated Use {@link #storeAgent(AgentImpl)} instead
 	 */
 	@Deprecated
 	@Override
-	public void updateAgent(Agent agent) throws AgentException, L2pSecurityException, StorageException {
+	public void updateAgent(AgentImpl agent) throws AgentException, L2pSecurityException, EnvelopeException {
 		storeAgent(agent);
 	}
 
@@ -626,76 +628,76 @@ public class PastryNodeImpl extends Node {
 	}
 
 	@Override
-	public void storeEnvelope(Envelope envelope, Agent author) throws StorageException {
+	public void storeEnvelope(EnvelopeVersion envelope, AgentImpl author) throws EnvelopeException {
 		storeEnvelope(envelope, author, ARTIFACT_STORE_TIMEOUT);
 	}
 
 	@Override
-	public Envelope fetchEnvelope(String identifier) throws ArtifactNotFoundException, StorageException {
+	public EnvelopeVersion fetchEnvelope(String identifier) throws EnvelopeNotFoundException, EnvelopeException {
 		return fetchEnvelope(identifier, ARTIFACT_GET_TIMEOUT);
 	}
 
 	@Override
-	public Envelope createEnvelope(String identifier, Serializable content, Agent... reader)
+	public EnvelopeVersion createEnvelope(String identifier, Serializable content, AgentImpl... reader)
 			throws IllegalArgumentException, SerializationException, CryptoException {
 		return pastStorage.createEnvelope(identifier, content, reader);
 	}
 
 	@Override
-	public Envelope createEnvelope(String identifier, Serializable content, List<Agent> readers)
+	public EnvelopeVersion createEnvelope(String identifier, Serializable content, Collection<?> readers)
 			throws IllegalArgumentException, SerializationException, CryptoException {
 		return pastStorage.createEnvelope(identifier, content, readers);
 	}
 
 	@Override
-	public Envelope createEnvelope(Envelope previousVersion, Serializable content)
+	public EnvelopeVersion createEnvelope(EnvelopeVersion previousVersion, Serializable content)
 			throws IllegalArgumentException, SerializationException, CryptoException {
 		return pastStorage.createEnvelope(previousVersion, content);
 	}
 
 	@Override
-	public Envelope createEnvelope(Envelope previousVersion, Serializable content, Agent... reader)
+	public EnvelopeVersion createEnvelope(EnvelopeVersion previousVersion, Serializable content, AgentImpl... reader)
 			throws IllegalArgumentException, SerializationException, CryptoException {
 		return pastStorage.createEnvelope(previousVersion, content, reader);
 	}
 
 	@Override
-	public Envelope createEnvelope(Envelope previousVersion, Serializable content, List<Agent> readers)
+	public EnvelopeVersion createEnvelope(EnvelopeVersion previousVersion, Serializable content, Collection<?> readers)
 			throws IllegalArgumentException, SerializationException, CryptoException {
 		return pastStorage.createEnvelope(previousVersion, content, readers);
 	}
 
 	@Override
-	public Envelope createUnencryptedEnvelope(String identifier, Serializable content)
+	public EnvelopeVersion createUnencryptedEnvelope(String identifier, Serializable content)
 			throws IllegalArgumentException, SerializationException, CryptoException {
 		return pastStorage.createUnencryptedEnvelope(identifier, content);
 	}
 
 	@Override
-	public Envelope createUnencryptedEnvelope(Envelope previousVersion, Serializable content)
+	public EnvelopeVersion createUnencryptedEnvelope(EnvelopeVersion previousVersion, Serializable content)
 			throws IllegalArgumentException, SerializationException, CryptoException {
 		return pastStorage.createUnencryptedEnvelope(previousVersion, content);
 	}
 
 	@Override
-	public void storeEnvelope(Envelope envelope, Agent author, long timeoutMs) throws StorageException {
+	public void storeEnvelope(EnvelopeVersion envelope, AgentImpl author, long timeoutMs) throws EnvelopeException {
 		try {
 			pastStorage.storeEnvelope(envelope, author, timeoutMs);
-		} catch (StorageException e) {
-			observerNotice(Event.ARTIFACT_UPLOAD_FAILED, pastryNode,
+		} catch (EnvelopeException e) {
+			observerNotice(MonitoringEvent.ARTIFACT_UPLOAD_FAILED, pastryNode,
 					"Storage error for Artifact " + envelope.getIdentifier());
 			throw e; // transparent exception forwarding
 		}
-		observerNotice(Event.ARTIFACT_ADDED, pastryNode, envelope.getIdentifier());
+		observerNotice(MonitoringEvent.ARTIFACT_ADDED, pastryNode, envelope.getIdentifier());
 	}
 
 	@Override
-	public void storeEnvelopeAsync(Envelope envelope, Agent author, StorageStoreResultHandler resultHandler,
+	public void storeEnvelopeAsync(EnvelopeVersion envelope, AgentImpl author, StorageStoreResultHandler resultHandler,
 			StorageCollisionHandler collisionHandler, StorageExceptionHandler exceptionHandler) {
 		pastStorage.storeEnvelopeAsync(envelope, author, new StorageStoreResultHandler() {
 			@Override
 			public void onResult(Serializable serializable, int successfulOperations) {
-				observerNotice(Event.ARTIFACT_ADDED, pastryNode, envelope.getIdentifier());
+				observerNotice(MonitoringEvent.ARTIFACT_ADDED, pastryNode, envelope.getIdentifier());
 				if (resultHandler != null) {
 					resultHandler.onResult(serializable, successfulOperations);
 				}
@@ -703,8 +705,8 @@ public class PastryNodeImpl extends Node {
 		}, collisionHandler, new StorageExceptionHandler() {
 			@Override
 			public void onException(Exception e) {
-				observerNotice(Event.ARTIFACT_UPLOAD_FAILED, pastryNode,
-						"Storage error for Artifact " + envelope.getIdentifier());
+				observerNotice(MonitoringEvent.ARTIFACT_UPLOAD_FAILED, pastryNode, "Storage error for Artifact "
+						+ envelope.getIdentifier());
 				if (exceptionHandler != null) {
 					exceptionHandler.onException(e);
 				}
@@ -713,23 +715,23 @@ public class PastryNodeImpl extends Node {
 	}
 
 	@Override
-	public Envelope fetchEnvelope(String identifier, long timeoutMs)
-			throws ArtifactNotFoundException, StorageException {
+	public EnvelopeVersion fetchEnvelope(String identifier, long timeoutMs) throws EnvelopeNotFoundException,
+			EnvelopeException {
 		if (pastStorage == null) {
 			throw new IllegalStateException(
 					"Past storage not initialized! You can fetch artifacts only from running nodes!");
 		}
-		observerNotice(Event.ARTIFACT_FETCH_STARTED, pastryNode, identifier);
+		observerNotice(MonitoringEvent.ARTIFACT_FETCH_STARTED, pastryNode, identifier);
 		try {
-			Envelope contentFromNet = pastStorage.fetchEnvelope(identifier, timeoutMs);
-			observerNotice(Event.ARTIFACT_RECEIVED, pastryNode, identifier);
+			EnvelopeVersion contentFromNet = pastStorage.fetchEnvelope(identifier, timeoutMs);
+			observerNotice(MonitoringEvent.ARTIFACT_RECEIVED, pastryNode, identifier);
 			return contentFromNet;
-		} catch (ArtifactNotFoundException e) {
-			observerNotice(Event.ARTIFACT_FETCH_FAILED, pastryNode, identifier);
+		} catch (EnvelopeNotFoundException e) {
+			observerNotice(MonitoringEvent.ARTIFACT_FETCH_FAILED, pastryNode, identifier);
 			throw e; // transparent exception forwarding
 		} catch (Exception e) {
-			observerNotice(Event.ARTIFACT_FETCH_FAILED, pastryNode, identifier);
-			throw new StorageException("Unable to retrieve Artifact from past storage", e);
+			observerNotice(MonitoringEvent.ARTIFACT_FETCH_FAILED, pastryNode, identifier);
+			throw new EnvelopeException("Unable to retrieve Artifact from past storage", e);
 		}
 	}
 
@@ -739,11 +741,11 @@ public class PastryNodeImpl extends Node {
 		if (getStatus() != NodeStatus.RUNNING) {
 			throw new IllegalStateException("You can fetch artifacts only from running nodes!");
 		}
-		observerNotice(Event.ARTIFACT_FETCH_STARTED, pastryNode, identifier);
+		observerNotice(MonitoringEvent.ARTIFACT_FETCH_STARTED, pastryNode, identifier);
 		pastStorage.fetchEnvelopeAsync(identifier, new StorageEnvelopeHandler() {
 			@Override
-			public void onEnvelopeReceived(Envelope result) {
-				observerNotice(Event.ARTIFACT_RECEIVED, pastryNode, identifier);
+			public void onEnvelopeReceived(EnvelopeVersion result) {
+				observerNotice(MonitoringEvent.ARTIFACT_RECEIVED, pastryNode, identifier);
 				if (envelopeHandler != null) {
 					envelopeHandler.onEnvelopeReceived(result);
 				}
@@ -751,7 +753,7 @@ public class PastryNodeImpl extends Node {
 		}, new StorageExceptionHandler() {
 			@Override
 			public void onException(Exception e) {
-				observerNotice(Event.ARTIFACT_FETCH_FAILED, pastryNode, identifier);
+				observerNotice(MonitoringEvent.ARTIFACT_FETCH_FAILED, pastryNode, identifier);
 				if (exceptionHandler != null) {
 					exceptionHandler.onException(e);
 				}
@@ -760,7 +762,7 @@ public class PastryNodeImpl extends Node {
 	}
 
 	@Override
-	public void removeEnvelope(String identifier) throws ArtifactNotFoundException, StorageException {
+	public void removeEnvelope(String identifier) throws EnvelopeNotFoundException, EnvelopeException {
 		pastStorage.removeEnvelope(identifier);
 	}
 

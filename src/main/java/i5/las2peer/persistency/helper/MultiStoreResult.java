@@ -3,9 +3,9 @@ package i5.las2peer.persistency.helper;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import i5.las2peer.api.StorageExceptionHandler;
-import i5.las2peer.api.StorageStoreResultHandler;
-import i5.las2peer.api.exceptions.StorageException;
+import i5.las2peer.api.persistency.EnvelopeException;
+import i5.las2peer.persistency.StorageExceptionHandler;
+import i5.las2peer.persistency.StorageStoreResultHandler;
 
 /**
  * This class is used to handle the multiple store results generated from a parted artifact insert. It provides the
@@ -41,7 +41,7 @@ public class MultiStoreResult implements StorageStoreResultHandler, StorageExcep
 			}
 			if (minSuccessfulOperations < 1) {
 				failed = true; // if one part fails, we're busted
-				exception = new StorageException("Artifact part insert failed!");
+				exception = new EnvelopeException("Artifact part insert failed!");
 			}
 		}
 	}

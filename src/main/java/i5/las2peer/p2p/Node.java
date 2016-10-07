@@ -1,5 +1,48 @@
 package i5.las2peer.p2p;
 
+import i5.las2peer.api.execution.ServiceInvocationException;
+import i5.las2peer.api.execution.ServiceNotAvailableException;
+import i5.las2peer.api.execution.ServiceNotFoundException;
+import i5.las2peer.api.logging.MonitoringEvent;
+import i5.las2peer.api.p2p.ServiceNameVersion;
+import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
+import i5.las2peer.api.persistency.EnvelopeException;
+import i5.las2peer.api.persistency.EnvelopeNotFoundException;
+import i5.las2peer.classLoaders.L2pClassManager;
+import i5.las2peer.classLoaders.libraries.Repository;
+import i5.las2peer.communication.Message;
+import i5.las2peer.communication.MessageException;
+import i5.las2peer.communication.RMIExceptionContent;
+import i5.las2peer.communication.RMIResultContent;
+import i5.las2peer.execution.RMITask;
+import i5.las2peer.helper.Configurable;
+import i5.las2peer.logging.L2pLogger;
+import i5.las2peer.logging.NodeObserver;
+import i5.las2peer.logging.monitoring.MonitoringObserver;
+import i5.las2peer.p2p.NodeServiceCache.ServiceInstance;
+import i5.las2peer.persistency.EncodingFailedException;
+import i5.las2peer.persistency.EnvelopeVersion;
+import i5.las2peer.persistency.NodeStorageInterface;
+import i5.las2peer.security.AgentContext;
+import i5.las2peer.security.AgentException;
+import i5.las2peer.security.AgentImpl;
+import i5.las2peer.security.AgentStorage;
+import i5.las2peer.security.GroupAgentImpl;
+import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.security.L2pServiceException;
+import i5.las2peer.security.Mediator;
+import i5.las2peer.security.MessageReceiver;
+import i5.las2peer.security.MonitoringAgent;
+import i5.las2peer.security.PassphraseAgentImpl;
+import i5.las2peer.security.ServiceAgentImpl;
+import i5.las2peer.security.UnlockAgentCall;
+import i5.las2peer.security.UserAgentImpl;
+import i5.las2peer.security.UserAgentManager;
+import i5.las2peer.testing.MockAgentFactory;
+import i5.las2peer.tools.CryptoException;
+import i5.las2peer.tools.CryptoTools;
+import i5.las2peer.tools.SerializationException;
+
 import java.io.File;
 import java.io.Serializable;
 import java.lang.management.ManagementFactory;
@@ -17,53 +60,11 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Vector;
 
-import com.sun.management.OperatingSystemMXBean;
-
-import i5.las2peer.api.Configurable;
-import i5.las2peer.api.exceptions.ArtifactNotFoundException;
-import i5.las2peer.api.exceptions.EnvelopeAlreadyExistsException;
-import i5.las2peer.api.exceptions.StorageException;
-import i5.las2peer.classLoaders.L2pClassManager;
-import i5.las2peer.classLoaders.libraries.Repository;
-import i5.las2peer.communication.Message;
-import i5.las2peer.communication.MessageException;
-import i5.las2peer.communication.RMIExceptionContent;
-import i5.las2peer.communication.RMIResultContent;
-import i5.las2peer.execution.L2pServiceException;
-import i5.las2peer.execution.L2pThread;
-import i5.las2peer.execution.NoSuchServiceException;
-import i5.las2peer.execution.NotFinishedException;
-import i5.las2peer.execution.RMITask;
-import i5.las2peer.execution.ServiceInvocationException;
-import i5.las2peer.logging.L2pLogger;
-import i5.las2peer.logging.NodeObserver;
-import i5.las2peer.logging.NodeObserver.Event;
-import i5.las2peer.logging.monitoring.MonitoringObserver;
-import i5.las2peer.p2p.NodeServiceCache.ServiceInstance;
-import i5.las2peer.persistency.EncodingFailedException;
-import i5.las2peer.persistency.Envelope;
-import i5.las2peer.persistency.NodeStorageInterface;
-import i5.las2peer.security.Agent;
-import i5.las2peer.security.AgentContext;
-import i5.las2peer.security.AgentException;
-import i5.las2peer.security.AgentStorage;
-import i5.las2peer.security.GroupAgent;
-import i5.las2peer.security.L2pSecurityException;
-import i5.las2peer.security.Mediator;
-import i5.las2peer.security.MessageReceiver;
-import i5.las2peer.security.MonitoringAgent;
-import i5.las2peer.security.PassphraseAgent;
-import i5.las2peer.security.ServiceAgent;
-import i5.las2peer.security.UnlockAgentCall;
-import i5.las2peer.security.UserAgent;
-import i5.las2peer.security.UserAgentManager;
-import i5.las2peer.testing.MockAgentFactory;
-import i5.las2peer.tools.CryptoException;
-import i5.las2peer.tools.CryptoTools;
-import i5.las2peer.tools.SerializationException;
 import rice.pastry.NodeHandle;
 import rice.pastry.PastryNode;
 import rice.pastry.socket.SocketNodeHandle;
+
+import com.sun.management.OperatingSystemMXBean;
 
 /**
  * Base class for nodes in the las2peer environment.
@@ -294,8 +295,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * 
 	 * @param service The service that should be monitored.
 	 */
-	public void setServiceMonitoring(ServiceAgent service) {
-		observerNotice(Event.SERVICE_ADD_TO_MONITORING, this.getNodeId(), service.getSafeId(), null, null,
+	public void setServiceMonitoring(ServiceAgentImpl service) {
+		observerNotice(MonitoringEvent.SERVICE_ADD_TO_MONITORING, this.getNodeId(), service.getSafeId(), null, null,
 				service.getServiceNameVersion().toString());
 	}
 
@@ -305,7 +306,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param event The event for this notification.
 	 * @param remarks Some free text note or description about this event.
 	 */
-	public void observerNotice(Event event, String remarks) {
+	public void observerNotice(MonitoringEvent event, String remarks) {
+		Long sourceAgentId = null; // otherwise calls are ambigious
 		observerNotice(event, null, (String) null, null, null, remarks);
 	}
 
@@ -316,7 +318,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param sourceNode
 	 * @param remarks Some free text note or description about this event.
 	 */
-	public void observerNotice(Event event, Object sourceNode, String remarks) {
+	public void observerNotice(MonitoringEvent event, Object sourceNode, String remarks) {
 		observerNotice(event, sourceNode, (String) null, null, null, remarks);
 	}
 
@@ -328,7 +330,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param sourceAgentId
 	 * @param remarks Some free text note or description about this event.
 	 */
-	public void observerNotice(Event event, Object sourceNode, String sourceAgentId, String remarks) {
+	public void observerNotice(MonitoringEvent event, Object sourceNode, String sourceAgentId, String remarks) {
 		observerNotice(event, sourceNode, sourceAgentId, null, null, remarks);
 	}
 
@@ -340,7 +342,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param sourceAgent
 	 * @param remarks Some free text note or description about this event.
 	 */
-	public void observerNotice(Event event, Object sourceNode, MessageReceiver sourceAgent, String remarks) {
+	public void observerNotice(MonitoringEvent event, Object sourceNode, MessageReceiver sourceAgent, String remarks) {
 		String sourceAgentId = null;
 		if (sourceAgent != null) {
 			sourceAgentId = sourceAgent.getResponsibleForAgentSafeId();
@@ -358,8 +360,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param destinationAgent
 	 * @param remarks Some free text note or description about this event.
 	 */
-	public void observerNotice(Event event, Object sourceNode, Agent sourceAgent, Object destinationNode,
-			Agent destinationAgent, String remarks) {
+	public void observerNotice(MonitoringEvent event, Object sourceNode, AgentImpl sourceAgent, Object destinationNode,
+			AgentImpl destinationAgent, String remarks) {
 		String sourceAgentId = null;
 		if (sourceAgent != null) {
 			sourceAgentId = sourceAgent.getSafeId();
@@ -381,7 +383,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param destinationAgentId
 	 * @param remarks Some free text note or description about this event.
 	 */
-	public void observerNotice(Event event, Object sourceNode, String sourceAgentId, Object destinationNode,
+	public void observerNotice(MonitoringEvent event, Object sourceNode, String sourceAgentId, Object destinationNode,
 			String destinationAgentId, String remarks) {
 		long timestamp = new Date().getTime();
 		String sourceNodeRepresentation = getNodeRepresentation(sourceNode);
@@ -451,11 +453,11 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 */
 	protected void setStatus(NodeStatus newstatus) {
 		if (newstatus == NodeStatus.RUNNING && this instanceof PastryNodeImpl) {
-			observerNotice(Event.NODE_STATUS_CHANGE, this.getNodeId(), "" + newstatus);
+			observerNotice(MonitoringEvent.NODE_STATUS_CHANGE, this.getNodeId(), "" + newstatus);
 		} else if (newstatus == NodeStatus.CLOSING) {
-			observerNotice(Event.NODE_STATUS_CHANGE, this.getNodeId(), "" + newstatus);
+			observerNotice(MonitoringEvent.NODE_STATUS_CHANGE, this.getNodeId(), "" + newstatus);
 		} else {
-			observerNotice(Event.NODE_STATUS_CHANGE, "" + newstatus);
+			observerNotice(MonitoringEvent.NODE_STATUS_CHANGE, "" + newstatus);
 		}
 		status = newstatus;
 	}
@@ -554,7 +556,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 		for (String id : receivers) {
 			htRegisteredReceivers.get(id).notifyUnregister();
 		}
-		observerNotice(Event.NODE_SHUTDOWN, this.getNodeId(), null);
+		observerNotice(MonitoringEvent.NODE_SHUTDOWN, this.getNodeId(), null);
 		for (NodeObserver observer : observers) {
 			if (observer instanceof MonitoringObserver) {
 				try {
@@ -577,10 +579,10 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @throws AgentAlreadyRegisteredException the given agent is already registered to this node
 	 * @throws L2pSecurityException the agent is not unlocked
 	 * @throws AgentException any problem with the agent itself (probably on calling
-	 *             {@link i5.las2peer.security.Agent#notifyRegistrationTo}
+	 *             {@link i5.las2peer.security.AgentImpl#notifyRegistrationTo}
 	 */
-	public void registerReceiver(MessageReceiver receiver)
-			throws AgentAlreadyRegisteredException, L2pSecurityException, AgentException {
+	public void registerReceiver(MessageReceiver receiver) throws AgentAlreadyRegisteredException,
+			L2pSecurityException, AgentException {
 
 		// TODO allow multiple mediators registered at the same time for one agent to avoid conflicts between connectors
 
@@ -594,30 +596,30 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 					"Another instance of this agent (or mediator) is already registered here!");
 		}
 
-		if ((receiver instanceof Agent)) {
+		if ((receiver instanceof AgentImpl)) {
 			// we have an agent
-			Agent agent = (Agent) receiver;
+			AgentImpl agent = (AgentImpl) receiver;
 			if (agent.isLocked()) {
 				throw new L2pSecurityException("An agent has to be unlocked for registering at a node");
 			}
 
 			try {
 				// ensure (unlocked) context
-				getAgentContext((Agent) receiver);
+				getAgentContext((AgentImpl) receiver);
 			} catch (Exception e) {
 			}
-			if (agent instanceof UserAgent) {
-				observerNotice(Event.AGENT_REGISTERED, this.getNodeId(), agent, "UserAgent");
-			} else if (agent instanceof ServiceAgent) {
-				observerNotice(Event.AGENT_REGISTERED, this.getNodeId(), agent, "ServiceAgent");
-			} else if (agent instanceof GroupAgent) {
-				observerNotice(Event.AGENT_REGISTERED, this.getNodeId(), agent, "GroupAgent");
+			if (agent instanceof UserAgentImpl) {
+				observerNotice(MonitoringEvent.AGENT_REGISTERED, this.getNodeId(), agent, "UserAgent");
+			} else if (agent instanceof ServiceAgentImpl) {
+				observerNotice(MonitoringEvent.AGENT_REGISTERED, this.getNodeId(), agent, "ServiceAgent");
+			} else if (agent instanceof GroupAgentImpl) {
+				observerNotice(MonitoringEvent.AGENT_REGISTERED, this.getNodeId(), agent, "GroupAgent");
 			} else if (agent instanceof MonitoringAgent) {
-				observerNotice(Event.AGENT_REGISTERED, this.getNodeId(), agent, "MonitoringAgent");
+				observerNotice(MonitoringEvent.AGENT_REGISTERED, this.getNodeId(), agent, "MonitoringAgent");
 			}
 		} else {
 			// ok, we have a mediator
-			observerNotice(Event.AGENT_REGISTERED, this.getNodeId(), receiver, "Mediator");
+			observerNotice(MonitoringEvent.AGENT_REGISTERED, this.getNodeId(), receiver, "Mediator");
 		}
 
 		htRegisteredReceivers.put(receiver.getResponsibleForAgentSafeId(), receiver);
@@ -625,12 +627,12 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 		try {
 			receiver.notifyRegistrationTo(this);
 		} catch (AgentException e) {
-			observerNotice(Event.AGENT_LOAD_FAILED, this, receiver, e.toString());
+			observerNotice(MonitoringEvent.AGENT_LOAD_FAILED, this, receiver, e.toString());
 
 			htRegisteredReceivers.remove(receiver.getResponsibleForAgentSafeId());
 			throw e;
 		} catch (Exception e) {
-			observerNotice(Event.AGENT_LOAD_FAILED, this, receiver, e.toString());
+			observerNotice(MonitoringEvent.AGENT_LOAD_FAILED, this, receiver, e.toString());
 
 			htRegisteredReceivers.remove(receiver.getResponsibleForAgentSafeId());
 			throw new AgentException("problems notifying agent of registration", e);
@@ -662,7 +664,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 		if (!htRegisteredReceivers.containsKey(agentId)) {
 			throw new AgentNotKnownException(agentId);
 		}
-		observerNotice(Event.AGENT_REMOVED, getNodeId(), agentId, "");
+		observerNotice(MonitoringEvent.AGENT_REMOVED, getNodeId(), agentId, "");
 		htRegisteredReceivers.remove(agentId).notifyUnregister();
 	}
 
@@ -742,7 +744,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param agent
 	 * @return true, if the given agent is running at this node
 	 */
-	public boolean hasLocalAgent(Agent agent) {
+	public boolean hasLocalAgent(AgentImpl agent) {
 		return hasLocalAgent(agent.getSafeId());
 	}
 
@@ -801,8 +803,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @throws NodeNotFoundException
 	 * @throws L2pSecurityException
 	 */
-	public void sendResponse(Message message, Object atNodeId)
-			throws AgentNotKnownException, NodeNotFoundException, L2pSecurityException {
+	public void sendResponse(Message message, Object atNodeId) throws AgentNotKnownException, NodeNotFoundException,
+			L2pSecurityException {
 		sendMessage(message, atNodeId, null);
 	}
 
@@ -826,10 +828,10 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 
 		// Since this field is not always available
 		if (message.getSendingNodeId() != null) {
-			observerNotice(Event.MESSAGE_RECEIVED, message.getSendingNodeId(), message.getSenderId(), this.getNodeId(),
-					message.getRecipientId(), message.getId() + "");
+			observerNotice(MonitoringEvent.MESSAGE_RECEIVED, message.getSendingNodeId(), message.getSenderId(),
+					this.getNodeId(), message.getRecipientId(), message.getId() + "");
 		} else {
-			observerNotice(Event.MESSAGE_RECEIVED, null, message.getSenderId(), this.getNodeId(),
+			observerNotice(MonitoringEvent.MESSAGE_RECEIVED, null, message.getSenderId(), this.getNodeId(),
 					message.getRecipientId(), message.getId() + "");
 		}
 
@@ -874,11 +876,11 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * 
 	 * @param id
 	 * @return the envelope containing the requested artifact
-	 * @throws ArtifactNotFoundException
-	 * @throws StorageException
+	 * @throws EnvelopeNotFoundException
+	 * @throws EnvelopeException
 	 */
 	@Deprecated
-	public abstract Envelope fetchArtifact(long id) throws ArtifactNotFoundException, StorageException;
+	public abstract EnvelopeVersion fetchArtifact(long id) throws EnvelopeNotFoundException, EnvelopeException;
 
 	/**
 	 * @deprecated Use {@link #fetchEnvelope(String)} instead
@@ -887,22 +889,24 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * 
 	 * @param identifier
 	 * @return the envelope containing the requested artifact
-	 * @throws ArtifactNotFoundException
-	 * @throws StorageException
+	 * @throws EnvelopeNotFoundException
+	 * @throws EnvelopeException
 	 */
 	@Deprecated
-	public abstract Envelope fetchArtifact(String identifier) throws ArtifactNotFoundException, StorageException;
+	public abstract EnvelopeVersion fetchArtifact(String identifier) throws EnvelopeNotFoundException,
+			EnvelopeException;
 
 	/**
-	 * @deprecated Use {@link #storeEnvelope(Envelope, Agent)} instead
+	 * @deprecated Use {@link #storeEnvelope(EnvelopeVersion, AgentImpl)} instead
 	 * 
 	 *             Stores an artifact to the p2p storage.
 	 * 
 	 * @param envelope
-	 * @throws StorageException
+	 * @throws EnvelopeException
 	 */
 	@Deprecated
-	public abstract void storeArtifact(Envelope envelope) throws EnvelopeAlreadyExistsException, StorageException;
+	public abstract void storeArtifact(EnvelopeVersion envelope) throws EnvelopeAlreadyExistsException,
+			EnvelopeException;
 
 	/**
 	 * @deprecated Use {@link #removeEnvelope(String)} instead
@@ -912,11 +916,11 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * 
 	 * @param id
 	 * @param signature
-	 * @throws ArtifactNotFoundException
-	 * @throws StorageException
+	 * @throws EnvelopeNotFoundException
+	 * @throws EnvelopeException
 	 */
 	@Deprecated
-	public abstract void removeArtifact(long id, byte[] signature) throws ArtifactNotFoundException, StorageException;
+	public abstract void removeArtifact(long id, byte[] signature) throws EnvelopeNotFoundException, EnvelopeException;
 
 	/**
 	 * Searches the nodes for registered Versions of the given Agent. Returns an array of objects identifying the nodes
@@ -937,7 +941,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @return array with the IDs of nodes, where the given agent is registered
 	 * @throws AgentNotKnownException
 	 */
-	public Object[] findRegisteredAgent(Agent agent) throws AgentNotKnownException {
+	public Object[] findRegisteredAgent(AgentImpl agent) throws AgentNotKnownException {
 		return findRegisteredAgent(agent.getSafeId());
 	}
 
@@ -962,7 +966,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @return array with the IDs of nodes, where the given agent is registered
 	 * @throws AgentNotKnownException
 	 */
-	public Object[] findRegisteredAgent(Agent agent, int hintOfExpectedCount) throws AgentNotKnownException {
+
+	public Object[] findRegisteredAgent(AgentImpl agent, int hintOfExpectedCount) throws AgentNotKnownException {
 		return findRegisteredAgent(agent.getSafeId(), hintOfExpectedCount);
 	}
 
@@ -977,7 +982,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @throws AgentNotKnownException
 	 */
 	@Override
-	public abstract Agent getAgent(String id) throws AgentNotKnownException;
+	public abstract AgentImpl getAgent(String id) throws AgentNotKnownException;
 
 	/**
 	 * Does this node know an agent with the given id?
@@ -1006,52 +1011,52 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @return the agent registered to this node
 	 * @throws AgentNotKnownException
 	 */
-	public Agent getLocalAgent(long id) throws AgentNotKnownException {
+	public AgentImpl getLocalAgent(long id) throws AgentNotKnownException {
 		MessageReceiver result = htRegisteredReceivers.get(id);
 
 		if (result == null) {
 			throw new AgentNotKnownException("The given agent agent is not registered to this node");
 		}
 
-		if (result instanceof Agent) {
-			return (Agent) result;
+		if (result instanceof AgentImpl) {
+			return (AgentImpl) result;
 		} else {
 			throw new AgentNotKnownException("The requested Agent is only known as a Mediator here!");
 		}
 	}
 
 	/**
-	 * Gets an array with all {@link i5.las2peer.security.UserAgent}s registered at this node.
+	 * Gets an array with all {@link i5.las2peer.security.UserAgentImpl}s registered at this node.
 	 * 
 	 * @return all local registered UserAgents
 	 */
-	public UserAgent[] getRegisteredAgents() {
-		Vector<UserAgent> result = new Vector<>();
+	public UserAgentImpl[] getRegisteredAgents() {
+		Vector<UserAgentImpl> result = new Vector<>();
 
 		for (MessageReceiver rec : htRegisteredReceivers.values()) {
-			if (rec instanceof UserAgent) {
-				result.add((UserAgent) rec);
+			if (rec instanceof UserAgentImpl) {
+				result.add((UserAgentImpl) rec);
 			}
 		}
 
-		return result.toArray(new UserAgent[0]);
+		return result.toArray(new UserAgentImpl[0]);
 	}
 
 	/**
-	 * Gets an array with all {@link i5.las2peer.security.ServiceAgent}s registered at this node.
+	 * Gets an array with all {@link i5.las2peer.security.ServiceAgentImpl}s registered at this node.
 	 * 
 	 * @return all local registered ServiceAgents
 	 */
-	public ServiceAgent[] getRegisteredServices() {
-		Vector<ServiceAgent> result = new Vector<>();
+	public ServiceAgentImpl[] getRegisteredServices() {
+		Vector<ServiceAgentImpl> result = new Vector<>();
 
 		for (MessageReceiver rec : htRegisteredReceivers.values()) {
-			if (rec instanceof ServiceAgent) {
-				result.add((ServiceAgent) rec);
+			if (rec instanceof ServiceAgentImpl) {
+				result.add((ServiceAgentImpl) rec);
 			}
 		}
 
-		return result.toArray(new ServiceAgent[0]);
+		return result.toArray(new ServiceAgentImpl[0]);
 
 	}
 
@@ -1064,8 +1069,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @throws L2pSecurityException
 	 * @throws AgentAlreadyRegisteredException
 	 */
-	public Mediator createMediatorForAgent(Agent agent)
-			throws AgentNotKnownException, L2pSecurityException, AgentAlreadyRegisteredException {
+	public Mediator createMediatorForAgent(AgentImpl agent) throws AgentNotKnownException, L2pSecurityException,
+			AgentAlreadyRegisteredException {
 		if (agent.isLocked()) {
 			throw new L2pSecurityException("You need to unlock the agent for mediation!");
 		}
@@ -1090,8 +1095,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @throws L2pSecurityException
 	 * @throws AgentException
 	 */
-	public abstract void storeAgent(Agent agent)
-			throws AgentAlreadyRegisteredException, L2pSecurityException, AgentException;
+	public abstract void storeAgent(AgentImpl agent) throws AgentAlreadyRegisteredException, L2pSecurityException,
+			AgentException;
 
 	/**
 	 * Updates an existing agent of the network.
@@ -1099,31 +1104,31 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param agent
 	 * @throws AgentException
 	 * @throws L2pSecurityException
-	 * @throws StorageException
+	 * @throws EnvelopeException
 	 */
-	public abstract void updateAgent(Agent agent) throws AgentException, L2pSecurityException, StorageException;
+	public abstract void updateAgent(AgentImpl agent) throws AgentException, L2pSecurityException, EnvelopeException;
 
-	private Agent anonymousAgent = null;
+	private AgentImpl anonymousAgent = null;
 
 	/**
 	 * get an agent to use, if no <i>real</i> agent is available
 	 * 
 	 * @return a generic anonymous agent
 	 */
-	public Agent getAnonymous() {
+	public AgentImpl getAnonymous() {
 		if (anonymousAgent == null) {
 			try {
 				anonymousAgent = MockAgentFactory.getAnonymous();
-				((UserAgent) anonymousAgent).unlockPrivateKey("anonymous");
+				((UserAgentImpl) anonymousAgent).unlock("anonymous");
 			} catch (Exception e1) {
 				throw new RuntimeException("No anonymous agent could be initialized!?!", e1);
 			}
 		}
 
-		Agent result;
+		AgentImpl result;
 		try {
 			result = anonymousAgent.cloneLocked();
-			((UserAgent) result).unlockPrivateKey("anonymous");
+			((UserAgentImpl) result).unlock("anonymous");
 		} catch (Exception e) {
 			throw new RuntimeException("Strange - should not happen...");
 		}
@@ -1181,16 +1186,16 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @return the ServiceAgent responsible for the given service class
 	 * @throws AgentNotKnownException
 	 */
-	public ServiceAgent getServiceAgent(ServiceNameVersion service, Agent acting) throws AgentNotKnownException {
+	public ServiceAgentImpl getServiceAgent(ServiceNameVersion service, AgentImpl acting) throws AgentNotKnownException {
 		ServiceInstance inst = nodeServiceCache.getServiceAgentInstance(service, true, false, acting);
 		if (inst.local()) {
 			return inst.getServiceAgent();
 		} else {
-			Agent result = getAgent(inst.getServiceAgentId());
-			if (result == null || !(result instanceof ServiceAgent)) {
+			AgentImpl result = getAgent(inst.getServiceAgentId());
+			if (result == null || !(result instanceof ServiceAgentImpl)) {
 				throw new AgentNotKnownException("The corresponding agent is not a ServiceAgent!?");
 			}
-			return (ServiceAgent) result;
+			return (ServiceAgentImpl) result;
 		}
 	}
 
@@ -1206,9 +1211,11 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @throws AgentNotKnownException
 	 * @throws L2pServiceException
 	 * @throws InterruptedException
+	 * @throws ServiceInvocationException
 	 */
-	public Serializable invoke(Agent executing, String service, String method, Serializable[] parameters)
-			throws L2pSecurityException, AgentNotKnownException, L2pServiceException, InterruptedException {
+	public Serializable invoke(AgentImpl executing, String service, String method, Serializable[] parameters)
+			throws L2pSecurityException, AgentNotKnownException, L2pServiceException, InterruptedException,
+			ServiceInvocationException {
 		return invoke(executing, ServiceNameVersion.fromString(service), method, parameters, false, false);
 	}
 
@@ -1220,13 +1227,15 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param method
 	 * @param parameters
 	 * @return
+	 * @throws ServiceInvocationException
 	 * @throws L2pSecurityException
 	 * @throws AgentNotKnownException
 	 * @throws L2pServiceException
 	 * @throws InterruptedException
 	 */
-	public Serializable invoke(Agent executing, ServiceNameVersion service, String method, Serializable[] parameters)
-			throws L2pSecurityException, AgentNotKnownException, L2pServiceException, InterruptedException {
+	public Serializable invoke(AgentImpl executing, ServiceNameVersion service, String method, Serializable[] parameters)
+			throws AgentNotKnownException, L2pServiceException, L2pSecurityException, InterruptedException,
+			ServiceInvocationException {
 		return invoke(executing, service, method, parameters, false, false);
 	}
 
@@ -1239,14 +1248,15 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param parameters
 	 * @param exactVersion
 	 * @return
-	 * @throws L2pSecurityException
-	 * @throws AgentNotKnownException
-	 * @throws L2pServiceException
+	 * @throws ServiceInvocationException
 	 * @throws InterruptedException
+	 * @throws L2pSecurityException
+	 * @throws L2pServiceException
+	 * @throws AgentNotKnownException
 	 */
-	public Serializable invoke(Agent executing, ServiceNameVersion service, String method, Serializable[] parameters,
-			boolean exactVersion)
-			throws L2pSecurityException, AgentNotKnownException, L2pServiceException, InterruptedException {
+	public Serializable invoke(AgentImpl executing, ServiceNameVersion service, String method,
+			Serializable[] parameters, boolean exactVersion) throws AgentNotKnownException, L2pServiceException,
+			L2pSecurityException, InterruptedException, ServiceInvocationException {
 		return invoke(executing, service, method, parameters, exactVersion, false);
 	}
 
@@ -1262,13 +1272,11 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param localOnly if true, only locally running services are executed
 	 * @return invocation result
 	 * @throws L2pSecurityException
-	 * @throws AgentNotKnownException
-	 * @throws L2pServiceException
-	 * @throws InterruptedException
+	 * @throws ServiceInvocationException
 	 */
-	public Serializable invoke(Agent executing, ServiceNameVersion service, String method, Serializable[] parameters,
-			boolean exactVersion, boolean localOnly)
-			throws L2pSecurityException, AgentNotKnownException, L2pServiceException, InterruptedException {
+	public Serializable invoke(AgentImpl executing, ServiceNameVersion service, String method,
+			Serializable[] parameters, boolean exactVersion, boolean localOnly) throws L2pSecurityException,
+			ServiceInvocationException {
 
 		if (getStatus() != NodeStatus.RUNNING) {
 			throw new IllegalStateException("You can invoke methods only on a running node!");
@@ -1287,7 +1295,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 			try {
 				instance = this.nodeServiceCache.getServiceAgentInstance(service, exactVersion, localOnly, executing);
 			} catch (AgentNotKnownException e) {
-				throw new NoSuchServiceException(service.toString(), e);
+				throw new ServiceNotFoundException(service.toString(), e);
 			}
 
 			if (instance.local()) {
@@ -1296,10 +1304,10 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 				try {
 					return invokeGlobally(executing, instance.getServiceAgentId(), instance.getNodeId(), method,
 							parameters);
-				} catch (NodeNotFoundException | TimeoutException e) {
+				} catch (ServiceNotAvailableException e) {
 					nodeServiceCache.removeGlobalServiceInstance(instance);
 					if (retry == 0) {
-						throw new L2pServiceException("Cannot reach service.", e);
+						throw new ServiceNotAvailableException("Cannot reach service.", e);
 					}
 				}
 			}
@@ -1311,7 +1319,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	/**
 	 * invokes a locally running service agent
 	 * 
-	 * preferably, use {@link #invoke(Agent, ServiceNameVersion, String, Serializable[], boolean, boolean)}
+	 * preferably, use {@link #invoke(AgentImpl, ServiceNameVersion, String, Serializable[], boolean, boolean)}
 	 * 
 	 * @param executing the executing agent
 	 * @param serviceAgent the service agent that should be invoked (must run on this node)
@@ -1319,13 +1327,10 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param parameters method parameters
 	 * @return incovation result
 	 * @throws L2pSecurityException
-	 * @throws AgentNotKnownException
-	 * @throws InterruptedException
-	 * @throws L2pServiceException
+	 * @throws ServiceInvocationException
 	 */
-	public Serializable invokeLocally(Agent executing, ServiceAgent serviceAgent, String method,
-			Serializable[] parameters)
-			throws L2pSecurityException, AgentNotKnownException, InterruptedException, L2pServiceException {
+	public Serializable invokeLocally(AgentImpl executing, ServiceAgentImpl serviceAgent, String method,
+			Serializable[] parameters) throws L2pSecurityException, ServiceInvocationException {
 
 		if (getStatus() != NodeStatus.RUNNING) {
 			throw new IllegalStateException("You can invoke methods only on a running node!");
@@ -1337,41 +1342,20 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 
 		// check if local service agent
 		if (!hasLocalAgent(serviceAgent)) {
-			throw new AgentNotKnownException("This ServiceAgent is not known locally!");
+			throw new ServiceNotFoundException("This ServiceAgent is not known locally!");
 		}
 
 		// execute
 		RMITask task = new RMITask(serviceAgent.getServiceNameVersion(), method, parameters);
 		AgentContext context = getAgentContext(executing);
-		L2pThread thread = new L2pThread(serviceAgent, task, context);
-		thread.start();
-		thread.join();
 
-		if (thread.hasException()) {
-			Exception e = thread.getException();
-
-			if (e instanceof ServiceInvocationException) {
-				throw (ServiceInvocationException) e;
-			} else if ((e instanceof InvocationTargetException) && (e.getCause() instanceof L2pSecurityException)) {
-				// internal L2pSecurityException (like internal method access or unauthorizes object access)
-				throw new L2pSecurityException("internal securityException!", e.getCause());
-			} else {
-				throw new ServiceInvocationException("Internal exception in service", e);
-			}
-		}
-
-		try {
-			return thread.getResult();
-		} catch (NotFinishedException e) {
-			// should not occur, since we joined before
-			throw new L2pServiceException("Interrupted service execution?!", e);
-		}
+		return serviceAgent.handle(task, context);
 	}
 
 	/**
 	 * invokes a service instance in the network
 	 * 
-	 * preferably, use {@link #invoke(Agent, ServiceNameVersion, String, Serializable[], boolean, boolean)}
+	 * preferably, use {@link #invoke(AgentImpl, ServiceNameVersion, String, Serializable[], boolean, boolean)}
 	 * 
 	 * @param executing teh executing agent
 	 * @param serviceAgentId the id of the service agent
@@ -1381,38 +1365,33 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @return invocation result
 	 * @throws L2pSecurityException
 	 * @throws ServiceInvocationException
-	 * @throws InterruptedException
-	 * @throws TimeoutException
-	 * @throws AgentNotKnownException
-	 * @throws NodeNotFoundException
 	 */
-	public Serializable invokeGlobally(Agent executing, String serviceAgentId, Object nodeId, String method,
-			Serializable[] parameters) throws L2pSecurityException, ServiceInvocationException, InterruptedException,
-			TimeoutException, AgentNotKnownException, NodeNotFoundException {
+	public Serializable invokeGlobally(AgentImpl executing, String serviceAgentId, Object nodeId, String method,
+			Serializable[] parameters) throws L2pSecurityException, ServiceInvocationException {
 
 		if (getStatus() != NodeStatus.RUNNING) {
 			throw new IllegalStateException("You can invoke methods only on a running node!");
 		}
 
 		// Do not log service class name (privacy..)
-		this.observerNotice(Event.RMI_SENT, this.getNodeId(), executing, null);
+		this.observerNotice(MonitoringEvent.RMI_SENT, this.getNodeId(), executing, null);
 
 		if (executing.isLocked()) {
 			throw new L2pSecurityException("The executing agent has to be unlocked to call a RMI");
 		}
 
-		ServiceAgent serviceAgent;
+		ServiceAgentImpl serviceAgent;
 		try {
-			serviceAgent = (ServiceAgent) getAgent(serviceAgentId);
-		} catch (ClassCastException e) {
-			throw new AgentNotKnownException("This is not a service agent!", e);
+			serviceAgent = (ServiceAgentImpl) getAgent(serviceAgentId);
+		} catch (AgentNotKnownException | ClassCastException e) {
+			throw new ServiceNotFoundException("This is not a service agent!", e);
 		}
 
 		try {
 			Serializable msg;
-			if (executing instanceof PassphraseAgent) {
+			if (executing instanceof PassphraseAgentImpl) {
 				msg = new UnlockAgentCall(new RMITask(serviceAgent.getServiceNameVersion(), method, parameters),
-						((PassphraseAgent) executing).getPassphrase());
+						((PassphraseAgentImpl) executing).getPassphrase());
 			} else {
 				msg = new RMITask(serviceAgent.getServiceNameVersion(), method, parameters);
 			}
@@ -1429,7 +1408,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 				try {
 					resultMessage = sendMessageAndWaitForAnswer(rmiMessage, nodeId);
 				} catch (NodeNotFoundException nex) {
-					throw nex;
+					throw new ServiceNotAvailableException("Cannot reach node!", nex);
 				}
 			} else {
 				resultMessage = sendMessageAndWaitForAnswer(rmiMessage);
@@ -1439,9 +1418,9 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 			Object resultContent = resultMessage.getContent();
 
 			if (resultContent instanceof RMIExceptionContent) {
-				Exception thrown = ((RMIExceptionContent) resultContent).getException();
+				Throwable thrown = ((RMIExceptionContent) resultContent).getException();
 				// Do not log service class name (privacy..)
-				this.observerNotice(Event.RMI_FAILED, this.getNodeId(), executing, thrown.toString());
+				this.observerNotice(MonitoringEvent.RMI_FAILED, this.getNodeId(), executing, thrown.toString());
 				if (thrown instanceof ServiceInvocationException) {
 					throw (ServiceInvocationException) thrown;
 				} else if ((thrown instanceof InvocationTargetException)
@@ -1454,26 +1433,30 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 
 			} else if (resultContent instanceof RMIResultContent) {
 				// Do not log service class name (privacy..)
-				this.observerNotice(Event.RMI_SUCCESSFUL, this.getNodeId(), executing, null);
+				this.observerNotice(MonitoringEvent.RMI_SUCCESSFUL, this.getNodeId(), executing, null);
 				return ((RMIResultContent) resultContent).getContent();
 			} else {
 				// Do not log service class name (privacy..)
-				this.observerNotice(Event.RMI_FAILED, this.getNodeId(), executing,
+				this.observerNotice(MonitoringEvent.RMI_FAILED, this.getNodeId(), executing,
 						"Unknown RMI response type: " + resultContent.getClass().getCanonicalName());
-				throw new ServiceInvocationException(
-						"Unknown RMI response type: " + resultContent.getClass().getCanonicalName());
+				throw new ServiceInvocationException("Unknown RMI response type: "
+						+ resultContent.getClass().getCanonicalName());
 			}
+		} catch (TimeoutException | InterruptedException e) {
+			// Do not log service class name (privacy..)
+			this.observerNotice(MonitoringEvent.RMI_FAILED, this.getNodeId(), executing, e.toString());
+			throw new ServiceNotAvailableException("Service does not respond", e);
 		} catch (AgentNotKnownException e) {
 			// Do not log service class name (privacy..)
-			this.observerNotice(Event.RMI_FAILED, this.getNodeId(), executing, e.toString());
-			throw new NoSuchServiceException(serviceAgent.getServiceNameVersion().toString(), e);
+			this.observerNotice(MonitoringEvent.RMI_FAILED, this.getNodeId(), executing, e.toString());
+			throw new ServiceNotFoundException(serviceAgent.getServiceNameVersion().toString(), e);
 		} catch (EncodingFailedException e) {
 			// Do not log service class name (privacy..)
-			this.observerNotice(Event.RMI_FAILED, this.getNodeId(), executing, e.toString());
+			this.observerNotice(MonitoringEvent.RMI_FAILED, this.getNodeId(), executing, e.toString());
 			throw new ServiceInvocationException("message problems!", e);
 		} catch (SerializationException e) {
 			// Do not log service class name (privacy..)
-			this.observerNotice(Event.RMI_FAILED, this.getNodeId(), executing, e.toString());
+			this.observerNotice(MonitoringEvent.RMI_FAILED, this.getNodeId(), executing, e.toString());
 			throw new ServiceInvocationException("message problems!", e);
 		}
 	}
@@ -1484,13 +1467,13 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param service
 	 * 
 	 * @return the instance of the given service class running at this node
-	 * @throws NoSuchServiceException
+	 * @throws ServiceNotFoundException
 	 */
-	public ServiceAgent getLocalServiceAgent(ServiceNameVersion service) throws NoSuchServiceException {
+	public ServiceAgentImpl getLocalServiceAgent(ServiceNameVersion service) throws ServiceNotFoundException {
 		try {
 			return nodeServiceCache.getLocalService(service);
 		} catch (Exception e) {
-			throw new NoSuchServiceException(service.toString());
+			throw new ServiceNotFoundException(service.toString());
 		}
 	}
 
@@ -1518,8 +1501,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 			return false;
 		}
 
-		observerNotice(Event.MESSAGE_RECEIVED_ANSWER, answer.getSendingNodeId(), answer.getSenderId(), this.getNodeId(),
-				answer.getRecipientId(), "" + answer.getResponseToId());
+		observerNotice(MonitoringEvent.MESSAGE_RECEIVED_ANSWER, answer.getSendingNodeId(), answer.getSenderId(),
+				this.getNodeId(), answer.getRecipientId(), "" + answer.getResponseToId());
 
 		MessageResultListener listener = htAnswerListeners.get(answer.getResponseToId());
 		if (listener == null) {
@@ -1594,8 +1577,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @throws InterruptedException
 	 * @throws TimeoutException
 	 */
-	public Message[] sendMessageAndCollectAnswers(Message m, int recipientCount)
-			throws InterruptedException, TimeoutException {
+	public Message[] sendMessageAndCollectAnswers(Message m, int recipientCount) throws InterruptedException,
+			TimeoutException {
 		long timeout = m.getTimeoutTs() - new Date().getTime();
 		MessageResultListener listener = new MessageResultListener(timeout, timeout / 4);
 		listener.addRecipients(recipientCount);
@@ -1622,11 +1605,12 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @throws L2pSecurityException
 	 * @throws AgentNotKnownException
 	 */
-	protected AgentContext getAgentContext(String agentId) throws L2pSecurityException, AgentNotKnownException {
+	public AgentContext getAgentContext(String agentId) throws L2pSecurityException, AgentNotKnownException {
+
 		AgentContext result = htLocalExecutionContexts.get(agentId);
 
 		if (result == null) {
-			Agent agent = getAgent(agentId);
+			AgentImpl agent = getAgent(agentId);
 			result = new AgentContext(this, agent);
 			htLocalExecutionContexts.put(agentId, result);
 		}
@@ -1642,14 +1626,11 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param agent
 	 * @return a context
 	 */
-	protected AgentContext getAgentContext(Agent agent) {
+	public AgentContext getAgentContext(AgentImpl agent) {
 		AgentContext result = htLocalExecutionContexts.get(agent.getSafeId());
 
 		if (result == null || (result.getMainAgent().isLocked() && !agent.isLocked())) {
-			try {
-				result = new AgentContext(this, agent);
-			} catch (L2pSecurityException e) {
-			}
+			result = new AgentContext(this, agent);
 			htLocalExecutionContexts.put(agent.getSafeId(), result);
 		}
 

@@ -1,60 +1,12 @@
 package i5.las2peer.api;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Hashtable;
 
 import org.junit.Test;
 
-import i5.las2peer.execution.NoSuchServiceMethodException;
-import i5.las2peer.security.L2pSecurityException;
-
 public class ServiceTest {
-
-	@Test
-	public void testInvocation() throws SecurityException, IllegalArgumentException, NoSuchMethodException,
-			IllegalAccessException, InvocationTargetException, L2pSecurityException, NoSuchServiceMethodException {
-
-		TestService testee = new TestService();
-		assertEquals(10, testee.execute("getInt"));
-
-		assertEquals(4, testee.execute("inc", 2));
-
-		assertEquals(4, testee.execute("inc", new Integer(2)));
-	}
-
-	@Test
-	public void testSubclassParam() throws SecurityException, IllegalArgumentException, NoSuchMethodException,
-			IllegalAccessException, InvocationTargetException, L2pSecurityException, NoSuchServiceMethodException {
-		TestService testee = new TestService();
-
-		assertEquals("testnachricht", testee.execute("subclass", new SecurityException("testnachricht")));
-	}
-
-	@Test
-	public void testExceptions() throws SecurityException, IllegalArgumentException, NoSuchMethodException,
-			IllegalAccessException, InvocationTargetException, L2pSecurityException, NoSuchServiceMethodException {
-		TestService testee = new TestService();
-
-		try {
-			testee.execute("privateMethod");
-			fail("NoSuchServiceMethodException expected");
-		} catch (NoSuchServiceMethodException e) {
-		}
-
-		try {
-			testee.execute("protectedMethod");
-			fail("NoSuchMethodException expected");
-		} catch (NoSuchServiceMethodException e) {
-		}
-		try {
-			testee.execute("staticMethod");
-			fail("NoSuchServiceMethodException expected");
-		} catch (NoSuchServiceMethodException e) {
-		}
-	}
 
 	@Test
 	public void propertyFileTest() {

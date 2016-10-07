@@ -1,5 +1,12 @@
 package i5.las2peer.logging;
 
+import i5.las2peer.api.Context;
+import i5.las2peer.api.logging.MonitoringEvent;
+import i5.las2peer.execution.ServiceThread;
+import i5.las2peer.p2p.Node;
+import i5.las2peer.security.AgentImpl;
+import i5.las2peer.security.ServiceAgentImpl;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -16,10 +23,6 @@ import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import java.util.logging.StreamHandler;
-
-import i5.las2peer.execution.L2pThread;
-import i5.las2peer.p2p.Node;
-import i5.las2peer.security.Agent;
 
 public final class L2pLogger extends Logger implements NodeObserver {
 
@@ -65,8 +68,8 @@ public final class L2pLogger extends Logger implements NodeObserver {
 		try {
 			GLOBAL_INSTANCE.handlerConsole.setEncoding(GLOBAL_INSTANCE.encoding);
 		} catch (UnsupportedEncodingException e) {
-			System.err.println("Fatal Error! Can't set console log encoding to '" + GLOBAL_INSTANCE.encoding + "'! " + e
-					+ " Using default: " + GLOBAL_INSTANCE.handlerConsole.getEncoding());
+			System.err.println("Fatal Error! Can't set console log encoding to '" + GLOBAL_INSTANCE.encoding + "'! "
+					+ e + " Using default: " + GLOBAL_INSTANCE.handlerConsole.getEncoding());
 		}
 		GLOBAL_INSTANCE.handlerConsole.setFormatter(GLOBAL_INSTANCE.consoleFormatter);
 		GLOBAL_INSTANCE.addHandler(GLOBAL_INSTANCE.handlerConsole);
@@ -383,7 +386,8 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	 * @param event used to differentiate between different log messages
 	 * @param message
 	 */
-	public static void logEvent(Event event, String message) {
+	@Deprecated
+	public static void logEvent(MonitoringEvent event, String message) {
 		logEvent(null, event, message, null, null);
 	}
 
@@ -394,15 +398,9 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	 * @param actingUser can be set to null if unknown / not desired
 	 * @param message
 	 */
-	public static void logEvent(Event event, Agent actingUser, String message) {
-		Thread t = Thread.currentThread();
-		if (t instanceof L2pThread) {
-			// Logging custom service messages requires a serviceAgent
-			Agent serviceAgent = ((L2pThread) t).getServiceAgent();
-			logEvent(null, event, message, serviceAgent, actingUser);
-		} else {
-			throw new IllegalStateException("Not executed in a L2pThread environment!");
-		}
+	@Deprecated
+	public static void logEvent(MonitoringEvent event, AgentImpl actingUser, String message) {
+		logEvent(null, event, message, (ServiceAgentImpl) Context.get().getServiceAgent(), actingUser);
 	}
 
 	/**
@@ -415,7 +413,8 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	 * @param event used to differentiate between different log messages
 	 * @param message
 	 */
-	public static void logEvent(Object from, Event event, String message) {
+	@Deprecated
+	public static void logEvent(Object from, MonitoringEvent event, String message) {
 		logEvent(from, event, message, null, null);
 	}
 
@@ -424,26 +423,17 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	 * serviceAgent and actingUser can be set to {@code null} if not known. Then this message will not be monitored by
 	 * the monitoring observer.
 	 *
-	 * This method replaces: {@link i5.las2peer.security.AgentContext#logMessage(Object, int, String, Agent, Agent)},
-	 * {@link i5.las2peer.security.AgentContext#logMessage(Object, String)},
-	 * {@link i5.las2peer.security.AgentContext#logError(Object, int, String, Agent, Agent)},
-	 * {@link i5.las2peer.security.AgentContext#logError(Object, String)},
-	 * {@link i5.las2peer.api.Service#logError(String message)}
-	 *
 	 * @param from the calling class
 	 * @param event used to differentiate between different log messages
 	 * @param message
 	 * @param serviceAgent can be set to null if unknown / not desired
 	 * @param actingUser can be set to null if unknown / not desired
 	 */
-	public static void logEvent(Object from, Event event, String message, Agent serviceAgent, Agent actingUser) {
-		Thread t = Thread.currentThread();
-		if (t instanceof L2pThread) {
-			Node node = ((L2pThread) t).getCallerContext().getLocalNode();
-			logEvent(node, from, event, message, serviceAgent, actingUser);
-		} else {
-			throw new IllegalStateException("Not executed in a L2pThread environment!");
-		}
+	@Deprecated
+	public static void logEvent(Object from, MonitoringEvent event, String message, AgentImpl serviceAgent,
+			AgentImpl actingUser) {
+		logEvent(ServiceThread.getCurrentContext().getCallerContext().getLocalNode(), from, event, message,
+				serviceAgent, actingUser);
 	}
 
 	/**
@@ -458,8 +448,9 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	 * @param serviceAgent can be set to null if unknown / not desired
 	 * @param actingUser can be set to null if unknown / not desired
 	 */
-	public static void logEvent(Node node, Object from, Event event, String message, Agent serviceAgent,
-			Agent actingUser) {
+	@Deprecated
+	public static void logEvent(Node node, Object from, MonitoringEvent event, String message, AgentImpl serviceAgent,
+			AgentImpl actingUser) {
 		String msg = message;
 		if (from != null) {
 			msg = from.getClass().getSimpleName() + ": " + message;
@@ -471,8 +462,8 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void log(Long timestamp, Event event, String sourceNode, String sourceAgentId, String destinationNode,
-			String destinationAgentId, String remarks) {
+	public void log(Long timestamp, MonitoringEvent event, String sourceNode, String sourceAgentId,
+			String destinationNode, String destinationAgentId, String remarks) {
 		StringBuilder logLine = new StringBuilder(DEFAULT_DATE_FORMAT.format(new Date(timestamp)) + "\t");
 		logLine.append(event + " (" + event.getCode() + ")\t");
 		logLine.append(appendPart(sourceNode));

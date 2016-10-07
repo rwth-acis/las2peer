@@ -2,7 +2,7 @@ package i5.las2peer.communication;
 
 import java.io.Serializable;
 
-import i5.las2peer.p2p.ServiceNameVersion;
+import i5.las2peer.api.p2p.ServiceNameVersion;
 
 public class ServiceDiscoveryContent implements Serializable {
 	/**

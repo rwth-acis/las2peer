@@ -2,9 +2,9 @@ package i5.las2peer.persistency.helper;
 
 import java.util.ArrayList;
 
-import i5.las2peer.api.StorageExceptionHandler;
 import i5.las2peer.persistency.NetworkArtifact;
 import i5.las2peer.persistency.StorageArtifactHandler;
+import i5.las2peer.persistency.StorageExceptionHandler;
 import i5.las2peer.persistency.StoragePartsHandler;
 
 /**

@@ -7,7 +7,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 
-import i5.las2peer.security.Agent;
+import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
@@ -33,7 +33,7 @@ public abstract class NetworkArtifact extends ContentHashPastContent {
 	private final byte[] encodedAuthorKey; // the PublicKey class contains enum and can't be serialized by Java
 	private final byte[] keySignature;
 
-	protected NetworkArtifact(Id id, int partIndex, byte[] content, Agent author)
+	protected NetworkArtifact(Id id, int partIndex, byte[] content, AgentImpl author)
 			throws CryptoException, L2pSecurityException {
 		super(id);
 		int size = content.length;

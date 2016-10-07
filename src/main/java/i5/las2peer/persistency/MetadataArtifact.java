@@ -1,6 +1,6 @@
 package i5.las2peer.persistency;
 
-import i5.las2peer.security.Agent;
+import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.tools.CryptoException;
 import rice.p2p.commonapi.Id;
@@ -10,7 +10,7 @@ public class MetadataArtifact extends NetworkArtifact {
 
 	private static final long serialVersionUID = 1L;
 
-	public MetadataArtifact(PastryIdFactory idFactory, String identifier, long version, byte[] serialize, Agent author)
+	public MetadataArtifact(PastryIdFactory idFactory, String identifier, long version, byte[] serialize, AgentImpl author)
 			throws CryptoException, L2pSecurityException {
 		super(buildMetadataId(idFactory, identifier, version), 0, serialize, author);
 	}

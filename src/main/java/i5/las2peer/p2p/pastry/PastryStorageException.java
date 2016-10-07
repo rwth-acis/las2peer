@@ -1,12 +1,12 @@
 package i5.las2peer.p2p.pastry;
 
-import i5.las2peer.api.exceptions.StorageException;
+import i5.las2peer.api.persistency.EnvelopeException;
 
 /**
  * Exception thrown on failures in the underlying pastry storage
  * 
  */
-public class PastryStorageException extends StorageException {
+public class PastryStorageException extends EnvelopeException {
 
 	private static final long serialVersionUID = 3043090090067718209L;
 

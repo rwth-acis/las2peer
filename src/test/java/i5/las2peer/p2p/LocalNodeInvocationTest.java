@@ -2,6 +2,13 @@ package i5.las2peer.p2p;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import i5.las2peer.api.execution.ServiceInvocationException;
+import i5.las2peer.api.execution.ServiceNotFoundException;
+import i5.las2peer.api.p2p.ServiceNameVersion;
+import i5.las2peer.execution.ServiceHelper;
+import i5.las2peer.security.ServiceAgentImpl;
+import i5.las2peer.security.UserAgentImpl;
+import i5.las2peer.testing.MockAgentFactory;
 
 import java.io.Serializable;
 
@@ -9,12 +16,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import i5.las2peer.execution.NoSuchServiceException;
-import i5.las2peer.execution.ServiceInvocationException;
-import i5.las2peer.security.ServiceAgent;
-import i5.las2peer.security.UserAgent;
-import i5.las2peer.testing.MockAgentFactory;
 
 public class LocalNodeInvocationTest {
 
@@ -36,16 +37,16 @@ public class LocalNodeInvocationTest {
 	public void testLocalInvocation() {
 		try {
 			LocalNode node = LocalNode.newNode();
-			UserAgent eve = MockAgentFactory.getEve();
+			UserAgentImpl eve = MockAgentFactory.getEve();
 
-			eve.unlockPrivateKey("evespass");
+			eve.unlock("evespass");
 			node.storeAgent(eve);
 
 			node.launch();
 
-			ServiceAgent testServiceAgent = ServiceAgent
-					.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.0"), "a pass");
-			testServiceAgent.unlockPrivateKey("a pass");
+			ServiceAgentImpl testServiceAgent = ServiceAgentImpl.createServiceAgent(
+					ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.0"), "a pass");
+			testServiceAgent.unlock("a pass");
 			node.registerReceiver(testServiceAgent);
 
 			Object result = node.invokeLocally(eve, testServiceAgent, "inc", new Serializable[] { new Integer(10) });
@@ -62,20 +63,20 @@ public class LocalNodeInvocationTest {
 		try {
 			LocalNode serviceNode = LocalNode.newNode();
 			serviceNode.getNodeServiceCache().setWaitForResults(3);
-			UserAgent eve = MockAgentFactory.getEve();
+			UserAgentImpl eve = MockAgentFactory.getEve();
 
-			eve.unlockPrivateKey("evespass");
+			eve.unlock("evespass");
 			serviceNode.storeAgent(eve);
 			serviceNode.launch();
 
-			ServiceAgent testServiceAgent = ServiceAgent
-					.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.0"), "a pass");
-			testServiceAgent.unlockPrivateKey("a pass");
+			ServiceAgentImpl testServiceAgent = ServiceAgentImpl.createServiceAgent(
+					ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.0"), "a pass");
+			testServiceAgent.unlock("a pass");
 			serviceNode.registerReceiver(testServiceAgent);
 
 			LocalNode callerNode = LocalNode.launchNode();
-			Object result = callerNode.invokeGlobally(eve, testServiceAgent.getSafeId(),
-					testServiceAgent.getRunningAtNode().getNodeId(), "inc", new Serializable[] { new Integer(12) });
+			Object result = callerNode.invokeGlobally(eve, testServiceAgent.getSafeId(), testServiceAgent
+					.getRunningAtNode().getNodeId(), "inc", new Serializable[] { new Integer(12) });
 
 			assertEquals(14, result);
 		} catch (Exception e) {
@@ -89,21 +90,21 @@ public class LocalNodeInvocationTest {
 		try {
 			LocalNode serviceNode1 = LocalNode.newNode();
 			LocalNode serviceNode2 = LocalNode.newNode();
-			UserAgent eve = MockAgentFactory.getEve();
+			UserAgentImpl eve = MockAgentFactory.getEve();
 
-			eve.unlockPrivateKey("evespass");
+			eve.unlock("evespass");
 			serviceNode1.storeAgent(eve);
 			serviceNode1.launch();
 			serviceNode2.launch();
 
-			ServiceAgent testServiceAgent = ServiceAgent
-					.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.0"), "a pass");
-			testServiceAgent.unlockPrivateKey("a pass");
+			ServiceAgentImpl testServiceAgent = ServiceAgentImpl.createServiceAgent(
+					ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.0"), "a pass");
+			testServiceAgent.unlock("a pass");
 			serviceNode1.registerReceiver(testServiceAgent);
 
-			ServiceAgent testServiceAgent2 = ServiceAgent.createServiceAgent(
+			ServiceAgentImpl testServiceAgent2 = ServiceAgentImpl.createServiceAgent(
 					ServiceNameVersion.fromString("i5.las2peer.api.TestService2@1.0"), "a 2nd pass");
-			testServiceAgent2.unlockPrivateKey("a 2nd pass");
+			testServiceAgent2.unlock("a 2nd pass");
 			serviceNode2.registerReceiver(testServiceAgent2);
 
 			LocalNode callerNode = LocalNode.launchNode();
@@ -121,15 +122,15 @@ public class LocalNodeInvocationTest {
 	public void testSubinvocationFail() {
 		try {
 			LocalNode serviceNode2 = LocalNode.newNode();
-			UserAgent eve = MockAgentFactory.getEve();
+			UserAgentImpl eve = MockAgentFactory.getEve();
 
-			eve.unlockPrivateKey("evespass");
+			eve.unlock("evespass");
 			serviceNode2.storeAgent(eve);
 			serviceNode2.launch();
 
-			ServiceAgent testServiceAgent2 = ServiceAgent.createServiceAgent(
+			ServiceAgentImpl testServiceAgent2 = ServiceAgentImpl.createServiceAgent(
 					ServiceNameVersion.fromString("i5.las2peer.api.TestService2@1.0"), "a 2nd pass");
-			testServiceAgent2.unlockPrivateKey("a 2nd pass");
+			testServiceAgent2.unlock("a 2nd pass");
 			serviceNode2.registerReceiver(testServiceAgent2);
 
 			LocalNode callerNode = LocalNode.launchNode();
@@ -149,28 +150,28 @@ public class LocalNodeInvocationTest {
 			// start
 			LocalNode serviceNode1 = LocalNode.newNode("export/jars/");
 			LocalNode serviceNode2 = LocalNode.newNode("export/jars/");
-			UserAgent eve = MockAgentFactory.getEve();
+			UserAgentImpl eve = MockAgentFactory.getEve();
 
-			eve.unlockPrivateKey("evespass");
+			eve.unlock("evespass");
 			serviceNode1.storeAgent(eve);
 			serviceNode1.launch();
 			serviceNode2.launch();
 
-			ServiceAgent usingAgent = ServiceAgent.createServiceAgent(
+			ServiceAgentImpl usingAgent = ServiceAgentImpl.createServiceAgent(
 					ServiceNameVersion.fromString("i5.las2peer.testServices.testPackage2.UsingService@1.0"), "a pass");
-			usingAgent.unlockPrivateKey("a pass");
+			usingAgent.unlock("a pass");
 			serviceNode1.registerReceiver(usingAgent);
 
-			ServiceAgent serviceAgent1 = ServiceAgent.createServiceAgent(
+			ServiceAgentImpl serviceAgent1 = ServiceAgentImpl.createServiceAgent(
 					ServiceNameVersion.fromString("i5.las2peer.testServices.testPackage1.TestService@1.0"), "a pass");
-			serviceAgent1.unlockPrivateKey("a pass");
+			serviceAgent1.unlock("a pass");
 			serviceNode2.registerReceiver(serviceAgent1);
 
-			ServiceAgent serviceAgent2 = ServiceAgent.createServiceAgent(
+			ServiceAgentImpl serviceAgent2 = ServiceAgentImpl.createServiceAgent(
 					ServiceNameVersion.fromString("i5.las2peer.testServices.testPackage1.TestService@1.1"), "a pass");
-			serviceAgent2.unlockPrivateKey("a pass");
+			serviceAgent2.unlock("a pass");
 			serviceNode2.registerReceiver(serviceAgent2);
-
+			
 			LocalNode callerNode = LocalNode.launchNode();
 
 			// specify exact version
@@ -208,7 +209,7 @@ public class LocalNodeInvocationTest {
 				result = callerNode.invoke(eve,
 						ServiceNameVersion.fromString("i5.las2peer.testServices.testPackage1.TestService@2.0"),
 						"getVersion", new Serializable[] {}, true);
-			} catch (NoSuchServiceException e) {
+			} catch (ServiceNotFoundException e) {
 				failed = true;
 			}
 			assertTrue(failed);

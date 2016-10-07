@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 
-import i5.las2peer.api.StorageExceptionHandler;
 import i5.las2peer.logging.L2pLogger;
-import i5.las2peer.persistency.Envelope;
+import i5.las2peer.persistency.EnvelopeVersion;
 import i5.las2peer.persistency.MetadataArtifact;
+import i5.las2peer.persistency.StorageExceptionHandler;
 import i5.las2peer.persistency.StorageLookupHandler;
 import i5.las2peer.persistency.pastry.PastLookupContinuation;
 import rice.p2p.commonapi.Id;
@@ -51,15 +51,15 @@ public class LatestArtifactVersionFinder implements Runnable, StorageLookupHandl
 	public LatestArtifactVersionFinder(String identifier, long startVersion, StorageLookupHandler nodeLookupHandler,
 			PastryIdFactory artifactIdFactory, Past pastStorage, int maxHandles, ExecutorService threadpool) {
 		this.identifier = identifier;
-		this.startVersion = Math.max(startVersion, Envelope.START_VERSION);
+		this.startVersion = Math.max(startVersion, EnvelopeVersion.START_VERSION);
 		this.nodeLookupHandler = nodeLookupHandler;
 		this.artifactIdFactory = artifactIdFactory;
 		this.pastStorage = pastStorage;
 		this.maxHandles = maxHandles;
 		this.threadpool = threadpool;
 		currentOffset = 1;
-		unknownVersion = Envelope.NULL_VERSION;
-		latestVersion = Envelope.NULL_VERSION;
+		unknownVersion = EnvelopeVersion.NULL_VERSION;
+		latestVersion = EnvelopeVersion.NULL_VERSION;
 		versionToHandle = new HashMap<>();
 	}
 
@@ -70,7 +70,7 @@ public class LatestArtifactVersionFinder implements Runnable, StorageLookupHandl
 		versionToHandle.put(currentVersion, metadataHandles);
 		if (metadataHandles.size() > 0) {
 			latestVersion = currentVersion;
-			if (unknownVersion == Envelope.NULL_VERSION) {
+			if (unknownVersion == EnvelopeVersion.NULL_VERSION) {
 				// yet all lookups worked well
 				requestLookup(startVersion + currentOffset);
 				currentOffset *= 2;
@@ -81,7 +81,7 @@ public class LatestArtifactVersionFinder implements Runnable, StorageLookupHandl
 				// this lookup worked but some before failed
 				requestLookup(currentVersion + (unknownVersion - currentVersion) / 2);
 			}
-		} else if (currentVersion == Envelope.START_VERSION) {
+		} else if (currentVersion == EnvelopeVersion.START_VERSION) {
 			// if no version found return to callback with empty list
 			nodeLookupHandler.onLookup(metadataHandles);
 		} else if (latestVersion == currentVersion - 1) {

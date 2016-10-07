@@ -1,10 +1,11 @@
 package i5.las2peer.p2p;
 
+import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.persistency.VerificationFailedException;
 import i5.las2peer.persistency.XmlAble;
 import i5.las2peer.security.L2pSecurityException;
-import i5.las2peer.security.ServiceAgent;
+import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.tools.CryptoTools;
 import i5.las2peer.tools.FileContentReader;
 import i5.las2peer.tools.SerializationException;
@@ -48,7 +49,7 @@ public class NodeInformation implements XmlAble {
 	 * 
 	 * @param hostedServiceAgents
 	 */
-	public NodeInformation(ServiceAgent[] hostedServiceAgents) {
+	public NodeInformation(ServiceAgentImpl[] hostedServiceAgents) {
 		this();
 
 		setServices(hostedServiceAgents);
@@ -104,7 +105,7 @@ public class NodeInformation implements XmlAble {
 	 * 
 	 * @param serviceAgents
 	 */
-	void setServices(ServiceAgent[] serviceAgents) {
+	void setServices(ServiceAgentImpl[] serviceAgents) {
 		hostedServices = new ServiceNameVersion[serviceAgents.length];
 
 		for (int i = 0; i < hostedServices.length; i++) {
@@ -284,7 +285,7 @@ public class NodeInformation implements XmlAble {
 	 * @throws MalformedXMLException
 	 * @throws IOException
 	 */
-	public static NodeInformation createFromXmlFile(String filename, ServiceAgent[] serviceAgents)
+	public static NodeInformation createFromXmlFile(String filename, ServiceAgentImpl[] serviceAgents)
 			throws MalformedXMLException, IOException {
 		NodeInformation result = createFromXmlFile(filename);
 		result.setServices(serviceAgents);

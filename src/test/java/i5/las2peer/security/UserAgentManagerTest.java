@@ -2,12 +2,11 @@ package i5.las2peer.security;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-
-import org.junit.Test;
-
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.LocalNode;
 import i5.las2peer.p2p.Node;
+
+import org.junit.Test;
 
 public class UserAgentManagerTest {
 
@@ -17,16 +16,16 @@ public class UserAgentManagerTest {
 			Node node = LocalNode.launchNode();
 			UserAgentManager l = node.getUserManager();
 
-			UserAgent a = UserAgent.createUserAgent("pass");
-			a.unlockPrivateKey("pass");
+			UserAgentImpl a = UserAgentImpl.createUserAgent("pass");
+			a.unlock("pass");
 			a.setLoginName("login");
 
 			node.storeAgent(a);
 
 			assertEquals(a.getSafeId(), l.getAgentIdByLogin("login"));
 
-			UserAgent b = UserAgent.createUserAgent("pass");
-			b.unlockPrivateKey("pass");
+			UserAgentImpl b = UserAgentImpl.createUserAgent("pass");
+			b.unlock("pass");
 			b.setLoginName("login");
 
 			try {
@@ -71,16 +70,16 @@ public class UserAgentManagerTest {
 			Node node = LocalNode.launchNode();
 			UserAgentManager l = node.getUserManager();
 
-			UserAgent a = UserAgent.createUserAgent("pass");
-			a.unlockPrivateKey("pass");
+			UserAgentImpl a = UserAgentImpl.createUserAgent("pass");
+			a.unlock("pass");
 			a.setEmail("email@example.com");
 
 			node.storeAgent(a);
 
 			assertEquals(a.getSafeId(), l.getAgentIdByEmail("email@example.com"));
 
-			UserAgent b = UserAgent.createUserAgent("pass");
-			b.unlockPrivateKey("pass");
+			UserAgentImpl b = UserAgentImpl.createUserAgent("pass");
+			b.unlock("pass");
 			b.setEmail("email@example.com");
 			try {
 				node.storeAgent(b);

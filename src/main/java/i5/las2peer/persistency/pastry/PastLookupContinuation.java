@@ -3,7 +3,7 @@ package i5.las2peer.persistency.pastry;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 
-import i5.las2peer.api.StorageExceptionHandler;
+import i5.las2peer.persistency.StorageExceptionHandler;
 import i5.las2peer.persistency.StorageLookupHandler;
 import rice.Continuation;
 import rice.p2p.past.PastContentHandle;

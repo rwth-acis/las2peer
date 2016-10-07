@@ -7,10 +7,10 @@ import java.io.InputStreamReader;
 import java.security.NoSuchAlgorithmException;
 
 import i5.las2peer.persistency.MalformedXMLException;
-import i5.las2peer.security.GroupAgent;
+import i5.las2peer.security.GroupAgentImpl;
 import i5.las2peer.security.L2pSecurityException;
-import i5.las2peer.security.ServiceAgent;
-import i5.las2peer.security.UserAgent;
+import i5.las2peer.security.ServiceAgentImpl;
+import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.tools.CryptoException;
 
 /**
@@ -46,8 +46,8 @@ public abstract class MockAgentFactory {
 	 * @throws MalformedXMLException
 	 * @throws IOException
 	 */
-	public static UserAgent getEve() throws MalformedXMLException, IOException {
-		return UserAgent.createFromXml(getContent("i5/las2peer/testing/eve.xml"));
+	public static UserAgentImpl getEve() throws MalformedXMLException, IOException {
+		return UserAgentImpl.createFromXml(getContent("i5/las2peer/testing/eve.xml"));
 	}
 
 	/**
@@ -57,8 +57,8 @@ public abstract class MockAgentFactory {
 	 * @throws MalformedXMLException
 	 * @throws IOException
 	 */
-	public static UserAgent getAdam() throws MalformedXMLException, IOException {
-		return UserAgent.createFromXml(getContent("i5/las2peer/testing/adam.xml"));
+	public static UserAgentImpl getAdam() throws MalformedXMLException, IOException {
+		return UserAgentImpl.createFromXml(getContent("i5/las2peer/testing/adam.xml"));
 	}
 
 	/**
@@ -68,8 +68,8 @@ public abstract class MockAgentFactory {
 	 * @throws MalformedXMLException
 	 * @throws IOException
 	 */
-	public static UserAgent getAbel() throws MalformedXMLException, IOException {
-		return UserAgent.createFromXml(getContent("i5/las2peer/testing/abel.xml"));
+	public static UserAgentImpl getAbel() throws MalformedXMLException, IOException {
+		return UserAgentImpl.createFromXml(getContent("i5/las2peer/testing/abel.xml"));
 	}
 
 	/**
@@ -79,8 +79,8 @@ public abstract class MockAgentFactory {
 	 * @throws MalformedXMLException
 	 * @throws IOException
 	 */
-	public static UserAgent getAnonymous() throws MalformedXMLException, IOException {
-		return UserAgent.createFromXml(getContent("i5/las2peer/testing/anonymous.agent.xml"));
+	public static UserAgentImpl getAnonymous() throws MalformedXMLException, IOException {
+		return UserAgentImpl.createFromXml(getContent("i5/las2peer/testing/anonymous.agent.xml"));
 	}
 
 	/**
@@ -92,12 +92,12 @@ public abstract class MockAgentFactory {
 	 * @throws IOException
 	 * @throws MalformedXMLException
 	 */
-	public static ServiceAgent getTestService() throws MalformedXMLException, IOException {
-		return ServiceAgent.createFromXml(getContent("i5/las2peer/api/TestService.agent.xml"));
+	public static ServiceAgentImpl getTestService() throws MalformedXMLException, IOException {
+		return ServiceAgentImpl.createFromXml(getContent("i5/las2peer/api/TestService.agent.xml"));
 	}
 
-	public static ServiceAgent getCorrectTestService() throws MalformedXMLException, IOException {
-		return ServiceAgent.createFromXml(getContent("i5/las2peer/testing/TestService.agent.xml"));
+	public static ServiceAgentImpl getCorrectTestService() throws MalformedXMLException, IOException {
+		return ServiceAgentImpl.createFromXml(getContent("i5/las2peer/testing/TestService.agent.xml"));
 	}
 
 	/**
@@ -107,8 +107,8 @@ public abstract class MockAgentFactory {
 	 * @throws MalformedXMLException
 	 * @throws IOException
 	 */
-	public static GroupAgent getGroup1() throws MalformedXMLException, IOException {
-		return GroupAgent.createFromXml(getContent("i5/las2peer/testing/group1.xml"));
+	public static GroupAgentImpl getGroup1() throws MalformedXMLException, IOException {
+		return GroupAgentImpl.createFromXml(getContent("i5/las2peer/testing/group1.xml"));
 	}
 
 	/**
@@ -118,8 +118,8 @@ public abstract class MockAgentFactory {
 	 * @throws MalformedXMLException
 	 * @throws IOException
 	 */
-	public static GroupAgent getGroup2() throws MalformedXMLException, IOException {
-		return GroupAgent.createFromXml(getContent("i5/las2peer/testing/group2.xml"));
+	public static GroupAgentImpl getGroup2() throws MalformedXMLException, IOException {
+		return GroupAgentImpl.createFromXml(getContent("i5/las2peer/testing/group2.xml"));
 	}
 
 	/**
@@ -129,8 +129,8 @@ public abstract class MockAgentFactory {
 	 * @throws MalformedXMLException
 	 * @throws IOException
 	 */
-	public static GroupAgent getGroup3() throws MalformedXMLException, IOException {
-		return GroupAgent.createFromXml(getContent("i5/las2peer/testing/group3.xml"));
+	public static GroupAgentImpl getGroup3() throws MalformedXMLException, IOException {
+		return GroupAgentImpl.createFromXml(getContent("i5/las2peer/testing/group3.xml"));
 	}
 
 	/**
@@ -140,8 +140,8 @@ public abstract class MockAgentFactory {
 	 * @throws MalformedXMLException
 	 * @throws IOException
 	 */
-	public static GroupAgent getGroupA() throws MalformedXMLException, IOException {
-		return GroupAgent.createFromXml(getContent("i5/las2peer/testing/groupA.xml"));
+	public static GroupAgentImpl getGroupA() throws MalformedXMLException, IOException {
+		return GroupAgentImpl.createFromXml(getContent("i5/las2peer/testing/groupA.xml"));
 	}
 
 	/**
@@ -153,8 +153,8 @@ public abstract class MockAgentFactory {
 	 * @throws IOException
 	 * @throws MalformedXMLException
 	 */
-	public static ServiceAgent getTestService2() throws MalformedXMLException, IOException {
-		return ServiceAgent.createFromXml(getContent("i5/las2peer/api/TestService2.agent.xml"));
+	public static ServiceAgentImpl getTestService2() throws MalformedXMLException, IOException {
+		return ServiceAgentImpl.createFromXml(getContent("i5/las2peer/api/TestService2.agent.xml"));
 	}
 
 	/**
@@ -169,7 +169,7 @@ public abstract class MockAgentFactory {
 	 */
 	public static void main(String argv[])
 			throws NoSuchAlgorithmException, L2pSecurityException, CryptoException, IOException {
-		System.out.println(UserAgent.createUserAgent(argv[0]).toXmlString());
+		System.out.println(UserAgentImpl.createUserAgent(argv[0]).toXmlString());
 	}
 
 }

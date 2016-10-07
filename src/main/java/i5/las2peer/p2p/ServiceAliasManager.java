@@ -1,18 +1,18 @@
 package i5.las2peer.p2p;
 
+import i5.las2peer.api.persistency.EnvelopeException;
+import i5.las2peer.api.persistency.EnvelopeNotFoundException;
+import i5.las2peer.persistency.EnvelopeVersion;
+import i5.las2peer.security.AgentImpl;
+import i5.las2peer.security.AgentLockedException;
+import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.security.ServiceAgentImpl;
+import i5.las2peer.tools.CryptoException;
+import i5.las2peer.tools.SerializationException;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import i5.las2peer.api.exceptions.ArtifactNotFoundException;
-import i5.las2peer.api.exceptions.StorageException;
-import i5.las2peer.persistency.Envelope;
-import i5.las2peer.security.Agent;
-import i5.las2peer.security.AgentLockedException;
-import i5.las2peer.security.L2pSecurityException;
-import i5.las2peer.security.ServiceAgent;
-import i5.las2peer.tools.CryptoException;
-import i5.las2peer.tools.SerializationException;
 
 /**
  * Responsible for mapping service aliases to service names and resolving paths to service names.
@@ -59,8 +59,8 @@ public class ServiceAliasManager {
 	 * @throws AgentLockedException if the service agent is locked
 	 * @throws AliasConflictException if a conflict occurs (a prefix or whole alias is already registered)
 	 */
-	public void registerServiceAlias(ServiceAgent agent, String alias)
-			throws AgentLockedException, AliasConflictException {
+	public void registerServiceAlias(ServiceAgentImpl agent, String alias) throws AgentLockedException,
+			AliasConflictException {
 
 		if (agent.isLocked()) {
 			throw new AgentLockedException("Only unlocked Agents can be registered!");
@@ -88,7 +88,7 @@ public class ServiceAliasManager {
 			} else {
 				return; // otherwise we're done
 			}
-		} catch (StorageException | CryptoException | L2pSecurityException | SerializationException e) {
+		} catch (EnvelopeException | CryptoException | L2pSecurityException | SerializationException e) {
 			// alias can be registered
 		}
 
@@ -106,7 +106,7 @@ public class ServiceAliasManager {
 			String currentEntry = null;
 			try {
 				currentEntry = getEntry(currentKey);
-			} catch (StorageException | CryptoException | L2pSecurityException | SerializationException e) {
+			} catch (EnvelopeException | CryptoException | L2pSecurityException | SerializationException e) {
 			}
 
 			if (currentEntry != null && !currentEntry.equals(BLANK)) {
@@ -114,7 +114,7 @@ public class ServiceAliasManager {
 			} else if (currentEntry == null) {
 				try {
 					createEntry(agent, currentKey, BLANK);
-				} catch (IllegalArgumentException | StorageException | SerializationException | CryptoException e) {
+				} catch (IllegalArgumentException | EnvelopeException | SerializationException | CryptoException e) {
 					throw new AliasConflictException("Storage error.", e);
 				}
 			}
@@ -127,7 +127,7 @@ public class ServiceAliasManager {
 		// register alias
 		try {
 			createEntry(agent, alias, serviceName);
-		} catch (IllegalArgumentException | StorageException | SerializationException | CryptoException e) {
+		} catch (IllegalArgumentException | EnvelopeException | SerializationException | CryptoException e) {
 			throw new AliasConflictException("Storage error.", e);
 		}
 	}
@@ -155,7 +155,7 @@ public class ServiceAliasManager {
 			String currentEntry = null;
 			try {
 				currentEntry = getEntry(currentKey);
-			} catch (StorageException | CryptoException | L2pSecurityException | SerializationException e) {
+			} catch (EnvelopeException | CryptoException | L2pSecurityException | SerializationException e) {
 				throw new AliasNotFoundException("Path does not exist.", e);
 			}
 
@@ -183,16 +183,16 @@ public class ServiceAliasManager {
 		return pathSplit;
 	}
 
-	private String getEntry(String key) throws ArtifactNotFoundException, StorageException, CryptoException,
+	private String getEntry(String key) throws EnvelopeNotFoundException, EnvelopeException, CryptoException,
 			L2pSecurityException, SerializationException {
-		Envelope env = node.fetchEnvelope(PREFIX + key);
+		EnvelopeVersion env = node.fetchEnvelope(PREFIX + key);
 		String content = (String) env.getContent(node.getAnonymous());
 		return content;
 	}
 
-	private void createEntry(Agent agent, String key, String value)
-			throws StorageException, IllegalArgumentException, SerializationException, CryptoException {
-		Envelope envName = node.createEnvelope(PREFIX + key.toLowerCase(), value, agent, node.getAnonymous());
+	private void createEntry(AgentImpl agent, String key, String value) throws EnvelopeException,
+			IllegalArgumentException, SerializationException, CryptoException {
+		EnvelopeVersion envName = node.createEnvelope(PREFIX + key.toLowerCase(), value, agent, node.getAnonymous());
 		node.storeEnvelope(envName, agent);
 	}
 }
