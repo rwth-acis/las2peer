@@ -311,6 +311,10 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	private boolean invoke(PassphraseAgent agent, HttpExchange exchange) {
 		// extract service information from uri
 		String requestPath = exchange.getRequestURI().getPath();
+		if (requestPath.equalsIgnoreCase("/")) {
+			sendStringResponse(exchange, HttpURLConnection.HTTP_OK, "Welcome to las2peer!");
+			return true;
+		}
 		String[] pathSplit = requestPath.split("/");
 
 		// resolve service name
