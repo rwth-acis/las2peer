@@ -116,8 +116,8 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			return authenticateNamePassword(connector.defaultLoginUser, connector.defaultLoginPassword, exchange);
 		} else {
 			sendUnauthorizedResponse(exchange, null, exchange.getRemoteAddress() + ": No Authentication provided!");
+			return null;
 		}
-		return null;
 	}
 
 	private PassphraseAgent authenticateBasic(HttpExchange exchange) {
