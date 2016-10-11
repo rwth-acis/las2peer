@@ -1,24 +1,5 @@
 package i5.las2peer.webConnector;
 
-import i5.las2peer.execution.ServiceInvocationException;
-import i5.las2peer.p2p.AgentAlreadyRegisteredException;
-import i5.las2peer.p2p.AgentNotKnownException;
-import i5.las2peer.p2p.AliasNotFoundException;
-import i5.las2peer.p2p.Node;
-import i5.las2peer.p2p.ServiceNameVersion;
-import i5.las2peer.p2p.ServiceVersion;
-import i5.las2peer.p2p.TimeoutException;
-import i5.las2peer.restMapper.RESTResponse;
-import i5.las2peer.security.L2pSecurityException;
-import i5.las2peer.security.Mediator;
-import i5.las2peer.security.PassphraseAgent;
-import i5.las2peer.security.UserAgent;
-import io.swagger.models.Operation;
-import io.swagger.models.Path;
-import io.swagger.models.Swagger;
-import io.swagger.models.auth.OAuth2Definition;
-import io.swagger.util.Json;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,8 +22,6 @@ import java.util.Map.Entry;
 
 import javax.ws.rs.core.UriBuilder;
 
-import net.minidev.json.JSONObject;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -57,6 +36,26 @@ import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpsExchange;
+
+import i5.las2peer.execution.ServiceInvocationException;
+import i5.las2peer.p2p.AgentAlreadyRegisteredException;
+import i5.las2peer.p2p.AgentNotKnownException;
+import i5.las2peer.p2p.AliasNotFoundException;
+import i5.las2peer.p2p.Node;
+import i5.las2peer.p2p.ServiceNameVersion;
+import i5.las2peer.p2p.ServiceVersion;
+import i5.las2peer.p2p.TimeoutException;
+import i5.las2peer.restMapper.RESTResponse;
+import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.security.Mediator;
+import i5.las2peer.security.PassphraseAgent;
+import i5.las2peer.security.UserAgent;
+import io.swagger.models.Operation;
+import io.swagger.models.Path;
+import io.swagger.models.Swagger;
+import io.swagger.models.auth.OAuth2Definition;
+import io.swagger.util.Json;
+import net.minidev.json.JSONObject;
 
 /**
  * A HttpServer RequestHandler for handling requests to the las2peer Web Connector. Each request will be distributed to
@@ -102,11 +101,10 @@ public class WebConnectorRequestHandler implements HttpHandler {
 				&& exchange.getRequestHeaders().getFirst(AUTHENTICATION_FIELD).toLowerCase().startsWith("basic ")) {
 			// basic authentication
 			return authenticateBasic(exchange);
-		} else if (connector.oidcProviderInfos != null
-				&& ((exchange.getRequestURI().getRawQuery() != null && exchange.getRequestURI().getRawQuery()
-						.contains(ACCESS_TOKEN_KEY + "="))
-						|| exchange.getRequestHeaders().containsKey(ACCESS_TOKEN_KEY) || (exchange.getRequestHeaders()
-						.containsKey(AUTHENTICATION_FIELD) && exchange.getRequestHeaders()
+		} else if (connector.oidcProviderInfos != null && ((exchange.getRequestURI().getRawQuery() != null
+				&& exchange.getRequestURI().getRawQuery().contains(ACCESS_TOKEN_KEY + "="))
+				|| exchange.getRequestHeaders().containsKey(ACCESS_TOKEN_KEY)
+				|| (exchange.getRequestHeaders().containsKey(AUTHENTICATION_FIELD) && exchange.getRequestHeaders()
 						.getFirst(AUTHENTICATION_FIELD).toLowerCase().startsWith("bearer ")))) {
 			// openid connect
 			return authenticateOIDC(exchange);
@@ -288,8 +286,8 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		} catch (AgentNotKnownException e) {
 			sendUnauthorizedResponse(exchange, null, exchange.getRemoteAddress() + ": user " + username + " not found");
 		} catch (L2pSecurityException e) {
-			sendUnauthorizedResponse(exchange, null, exchange.getRemoteAddress() + ": passphrase invalid for user "
-					+ username);
+			sendUnauthorizedResponse(exchange, null,
+					exchange.getRemoteAddress() + ": passphrase invalid for user " + username);
 		} catch (Exception e) {
 			sendUnauthorizedResponse(exchange, null, exchange.getRemoteAddress()
 					+ ": something went horribly wrong. Check your request for correctness.");
@@ -323,8 +321,8 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		try {
 			serviceName = l2pNode.getServiceAliasManager().getServiceNameByAlias(pathSplit[1]);
 		} catch (AliasNotFoundException e1) {
-			sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND, "Service alias " + pathSplit[1]
-					+ " is not known.");
+			sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND,
+					"Service alias " + pathSplit[1] + " is not known.");
 			return false;
 		}
 
@@ -557,7 +555,8 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		try {
 			result = mediator.invoke(service.toString(), method, params, connector.onlyLocalServices());
 		} catch (AgentNotKnownException | TimeoutException e) {
-			sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND, "No service found matching " + service + ".");
+			sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND,
+					"No service found matching " + service + ".");
 		} catch (ServiceInvocationException e) {
 			sendInvocationException(exchange, e);
 		} catch (Exception e) {
