@@ -111,6 +111,8 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		} else if (connector.defaultLoginUser.length() > 0) {
 			// anonymous login
 			return authenticateNamePassword(connector.defaultLoginUser, connector.defaultLoginPassword, exchange);
+		} else if (exchange.getRequestMethod().equalsIgnoreCase("options")) {
+			return authenticateNamePassword("anonymous", "anonymous", exchange);
 		} else {
 			sendUnauthorizedResponse(exchange, null, exchange.getRemoteAddress() + ": No Authentication provided!");
 			return null;
