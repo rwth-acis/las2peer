@@ -17,8 +17,8 @@ import i5.las2peer.execution.L2pThread;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.security.Agent;
-import i5.las2peer.security.AgentStorage;
 import i5.las2peer.security.AgentContext;
+import i5.las2peer.security.AgentStorage;
 import i5.las2peer.security.GroupAgent;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.tools.CryptoException;
@@ -258,7 +258,7 @@ public class Envelope implements Serializable, XmlAble {
 				// no group matched
 				byte[] encryptedReaderKey = readerKeys.get(reader.getPublicKey());
 				if (encryptedReaderKey == null) {
-					throw new CryptoException("given reader has no read permission");
+					throw new CryptoException("Agent (" + reader.getId() + ") has no read permission");
 				}
 				decryptedReaderKey = reader.decryptSymmetricKey(encryptedReaderKey);
 			}
