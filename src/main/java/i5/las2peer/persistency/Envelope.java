@@ -2,11 +2,11 @@ package i5.las2peer.persistency;
 
 import java.io.Serializable;
 import java.security.PublicKey;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.logging.Level;
@@ -61,12 +61,12 @@ public class Envelope implements Serializable, XmlAble {
 	private final String identifier;
 	private final long version;
 	private final HashMap<PublicKey, byte[]> readerKeys;
-	private final ArrayList<Long> readerGroupIds;
+	private final HashSet<Long> readerGroupIds;
 	private final byte[] rawContent;
 
 	// just for the XML factory method
 	private Envelope(String identifier, long version, HashMap<PublicKey, byte[]> readerKeys,
-			ArrayList<Long> readerGroupIds, byte[] rawContent) {
+			HashSet<Long> readerGroupIds, byte[] rawContent) {
 		this.identifier = identifier;
 		this.version = version;
 		this.readerKeys = readerKeys;
@@ -149,7 +149,7 @@ public class Envelope implements Serializable, XmlAble {
 		}
 		this.version = version;
 		readerKeys = new HashMap<>();
-		readerGroupIds = new ArrayList<>();
+		readerGroupIds = new HashSet<>();
 		if (readers != null && !readers.isEmpty()) {
 			// we have a non empty set of readers, lets encrypt!
 			SecretKey contentKey = CryptoTools.generateSymmetricKey();
@@ -370,7 +370,7 @@ public class Envelope implements Serializable, XmlAble {
 			if (!groups.getName().equals("groups")) {
 				throw new MalformedXMLException("groups tag expected");
 			}
-			ArrayList<Long> readerGroupIds = new ArrayList<>();
+			HashSet<Long> readerGroupIds = new HashSet<>();
 			for (Enumeration<Element> enGroups = groups.getChildren(); enGroups.hasMoreElements();) {
 				Element group = enGroups.nextElement();
 				if (!group.getName().equals("group")) {
