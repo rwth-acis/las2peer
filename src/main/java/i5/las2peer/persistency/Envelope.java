@@ -91,7 +91,7 @@ public class Envelope implements Serializable, XmlAble {
 	}
 
 	/**
-	 * Creates an continous version instance for the given Envelope. This method copies the reader list from the
+	 * Creates an continuous version instance for the given Envelope. This method copies the reader list from the
 	 * previous envelope instance.
 	 * 
 	 * @param previousVersion The previous version of the envelope that should be updated.
@@ -107,7 +107,7 @@ public class Envelope implements Serializable, XmlAble {
 	}
 
 	/**
-	 * Creates an continous version instance for the given Envelope.
+	 * Creates an continuous version instance for the given Envelope.
 	 * 
 	 * @param previousVersion The previous version of the envelope that should be updated.
 	 * @param content The updated content that should be stored.
