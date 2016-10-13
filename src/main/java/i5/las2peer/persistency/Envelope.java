@@ -7,8 +7,8 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.logging.Level;
 
 import javax.crypto.SecretKey;
@@ -85,9 +85,9 @@ public class Envelope implements Serializable, XmlAble {
 	 * @throws SerializationException If a problem occurs with object serialization.
 	 * @throws CryptoException If an cryptographic issue occurs.
 	 */
-	protected Envelope(String identifier, Serializable content, List<?> readers)
+	protected Envelope(String identifier, Serializable content, Collection<Agent> readers)
 			throws IllegalArgumentException, SerializationException, CryptoException {
-		this(identifier, START_VERSION, content, readers);
+		this(identifier, START_VERSION, content, readers, new HashSet<>());
 	}
 
 	/**
@@ -103,7 +103,8 @@ public class Envelope implements Serializable, XmlAble {
 	 */
 	protected Envelope(Envelope previousVersion, Serializable content)
 			throws IllegalArgumentException, SerializationException, CryptoException {
-		this(previousVersion, content, previousVersion.getReaderKeys().keySet());
+		this(previousVersion.getIdentifier(), previousVersion.getVersion() + 1, content,
+				previousVersion.readerKeys.keySet(), previousVersion.readerGroupIds);
 	}
 
 	/**
@@ -117,9 +118,9 @@ public class Envelope implements Serializable, XmlAble {
 	 * @throws SerializationException If a problem occurs with object serialization.
 	 * @throws CryptoException If an cryptographic issue occurs.
 	 */
-	protected Envelope(Envelope previousVersion, Serializable content, Collection<?> readers)
+	protected Envelope(Envelope previousVersion, Serializable content, Collection<Agent> readers)
 			throws IllegalArgumentException, SerializationException, CryptoException {
-		this(previousVersion.getIdentifier(), previousVersion.getVersion() + 1, content, readers);
+		this(previousVersion.getIdentifier(), previousVersion.getVersion() + 1, content, readers, new HashSet<>());
 	}
 
 	/**
@@ -129,13 +130,14 @@ public class Envelope implements Serializable, XmlAble {
 	 * @param version The version number for this envelope.
 	 * @param content The actual content that should be stored.
 	 * @param readers An arbitrary number of Agents, who are allowed to read the content.
+	 * @param readerGroups A set of group agent id's with read access.
 	 * @throws IllegalArgumentException If the given identifier is null, the version number is below the start version
 	 *             number or too high.
 	 * @throws SerializationException If a problem occurs with object serialization.
 	 * @throws CryptoException If an cryptographic issue occurs.
 	 */
-	protected Envelope(String identifier, long version, Serializable content, Collection<?> readers)
-			throws IllegalArgumentException, SerializationException, CryptoException {
+	protected Envelope(String identifier, long version, Serializable content, Collection<?> readers,
+			Set<Long> readerGroups) throws IllegalArgumentException, SerializationException, CryptoException {
 		if (identifier == null) {
 			throw new IllegalArgumentException("The identifier must not be null");
 		}
@@ -149,7 +151,7 @@ public class Envelope implements Serializable, XmlAble {
 		}
 		this.version = version;
 		readerKeys = new HashMap<>();
-		readerGroupIds = new HashSet<>();
+		readerGroupIds = new HashSet<>(readerGroups);
 		if (readers != null && !readers.isEmpty()) {
 			// we have a non empty set of readers, lets encrypt!
 			SecretKey contentKey = CryptoTools.generateSymmetricKey();
@@ -204,6 +206,11 @@ public class Envelope implements Serializable, XmlAble {
 
 	public HashMap<PublicKey, byte[]> getReaderKeys() {
 		return readerKeys;
+	}
+
+	public Set<Long> getReaderGroupIds() {
+		// return shallow copy to avoid manipulation
+		return new HashSet<>(readerGroupIds);
 	}
 
 	public Serializable getContent() throws CryptoException, L2pSecurityException, SerializationException {

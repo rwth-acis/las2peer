@@ -2,8 +2,7 @@ package i5.las2peer.api;
 
 import java.io.Serializable;
 import java.security.PublicKey;
-import java.util.HashMap;
-import java.util.List;
+import java.util.Set;
 
 import i5.las2peer.api.exceptions.StopMergingException;
 import i5.las2peer.persistency.Envelope;
@@ -26,7 +25,8 @@ public interface StorageCollisionHandler {
 	public Serializable onCollision(Envelope toStore, Envelope inNetwork, long numberOfCollisions)
 			throws StopMergingException;
 
-	public List<PublicKey> mergeReaders(HashMap<PublicKey, byte[]> toStoreReaders,
-			HashMap<PublicKey, byte[]> inNetworkReaders);
+	public Set<PublicKey> mergeReaders(Set<PublicKey> toStoreReaders, Set<PublicKey> inNetworkReaders);
+
+	public Set<Long> mergeGroups(Set<Long> toStoreGroups, Set<Long> inNetworkGroups);
 
 }
