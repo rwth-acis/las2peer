@@ -110,7 +110,7 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 		} else {
 			throw new StorageException("Unexpected storage mode '" + storageMode + "'");
 		}
-		// on the other nobody likes outdated data
+		// on the other nobody likes out-dated data
 		Cache cache = new LRUCache(storage, maximumCacheSize, node.getEnvironment());
 		StorageManagerImpl manager = new StorageManagerImpl(pastIdFactory, storage, cache);
 		pastStorage = new PastImpl(node, manager, numOfReplicas, "i5.las2peer.enterprise.storage",
