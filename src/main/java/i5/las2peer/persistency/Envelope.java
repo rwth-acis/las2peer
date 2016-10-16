@@ -229,18 +229,9 @@ public class Envelope implements Serializable, XmlAble {
 
 	public Serializable getContent(Agent reader) throws CryptoException, L2pSecurityException, SerializationException {
 		try {
-			try {
-				return getContent(AgentContext.getCurrent().getLocalNode().getAnonymous(),
-						AgentContext.getCurrent().getLocalNode());
-			} catch (CryptoException | L2pSecurityException | SerializationException e) {
-				return getContent(reader, AgentContext.getCurrent().getLocalNode());
-			}
+			return getContent(reader, AgentContext.getCurrent().getLocalNode());
 		} catch (IllegalStateException e) {
-			try {
-				return getContent(reader.getRunningAtNode().getAnonymous(), reader.getRunningAtNode());
-			} catch (CryptoException | L2pSecurityException | SerializationException e2) {
-				return getContent(reader, reader.getRunningAtNode());
-			}
+			return getContent(reader, reader.getRunningAtNode());
 		}
 	}
 

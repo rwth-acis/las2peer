@@ -605,24 +605,4 @@ public class EnvelopeTest {
 		}
 	}
 
-	/**
-	 * test read with anonymous
-	 */
-	@Test
-	public void testReadWithAnonymous() {
-		try {
-			PastryNodeImpl node1 = nodes.get(0);
-			UserAgent smith = MockAgentFactory.getAdam();
-			smith.unlockPrivateKey("adamspass");
-			smith.notifyRegistrationTo(node1);
-			final String testContent = "encrypted with anonymous reader";
-			Envelope toStore = node1.createEnvelope("test", testContent, node1.getAnonymous());
-			String decryptedContent = (String) toStore.getContent(smith);
-			Assert.assertEquals(testContent, decryptedContent);
-		} catch (Exception e) {
-			e.printStackTrace();
-			Assert.fail(e.toString());
-		}
-	}
-
 }
