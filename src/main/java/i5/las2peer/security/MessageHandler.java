@@ -19,6 +19,6 @@ public interface MessageHandler {
 	 * @return true, if the received message has been handled and can be removed
 	 * @throws Exception 
 	 */
-	public boolean handleMessage(Message message, Context context) throws Exception;
+	public boolean handleMessage(Message message, AgentContext context) throws Exception;
 
 }

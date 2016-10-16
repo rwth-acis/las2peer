@@ -26,7 +26,7 @@ public class MediatorTest {
 		private int accepted = 0;
 
 		@Override
-		public boolean handleMessage(Message message, Context context) throws Exception {
+		public boolean handleMessage(Message message, AgentContext context) throws Exception {
 			accepted++;
 			return true;
 		}
@@ -42,7 +42,7 @@ public class MediatorTest {
 		private int denied = 0;
 
 		@Override
-		public boolean handleMessage(Message message, Context context) throws Exception {
+		public boolean handleMessage(Message message, AgentContext context) throws Exception {
 			denied++;
 			return false;
 		}
@@ -83,7 +83,7 @@ public class MediatorTest {
 		assertFalse(testee.hasMessages());
 		assertEquals(0, testee.getNumberOfWaiting());
 
-		Context c = new Context(null, eve);
+		AgentContext c = new AgentContext(null, eve);
 
 		String content1 = "some content";
 		String content2 = "a 2nd message";
@@ -142,7 +142,7 @@ public class MediatorTest {
 
 		Mediator testee = new Mediator(null, eve) {
 			@Override
-			public boolean workOnMessage(Message message, Context c) {
+			public boolean workOnMessage(Message message, AgentContext c) {
 				try {
 					if (message.getContent() instanceof String) {
 						got.add((String) message.getContent());
@@ -154,7 +154,7 @@ public class MediatorTest {
 				}
 			}
 		};
-		Context c = new Context(null, eve);
+		AgentContext c = new AgentContext(null, eve);
 
 		testee.receiveMessage(new Message(eve, eve, 100), c);
 
@@ -176,7 +176,7 @@ public class MediatorTest {
 			SerializationException, MalformedXMLException, IOException {
 		UserAgent eve = MockAgentFactory.getEve();
 		eve.unlockPrivateKey("evespass");
-		Context c = new Context(null, eve);
+		AgentContext c = new AgentContext(null, eve);
 
 		Mediator testee = new Mediator(null, eve);
 
@@ -204,7 +204,7 @@ public class MediatorTest {
 			SerializationException, MalformedXMLException, IOException {
 		UserAgent eve = MockAgentFactory.getEve();
 		eve.unlockPrivateKey("evespass");
-		Context c = new Context(null, eve);
+		AgentContext c = new AgentContext(null, eve);
 
 		Mediator testee = new Mediator(null, eve);
 

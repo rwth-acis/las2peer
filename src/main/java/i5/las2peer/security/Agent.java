@@ -237,7 +237,7 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	 * @throws MessageException
 	 */
 	@Override
-	public abstract void receiveMessage(Message message, Context c) throws MessageException;
+	public abstract void receiveMessage(Message message, AgentContext c) throws MessageException;
 
 	/**
 	 * Gets a locked copy of this agent.

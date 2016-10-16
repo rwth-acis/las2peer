@@ -36,9 +36,9 @@ import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.persistency.SharedStorage;
 import i5.las2peer.persistency.SharedStorage.STORAGE_MODE;
 import i5.las2peer.security.Agent;
+import i5.las2peer.security.AgentContext;
 import i5.las2peer.security.AgentException;
 import i5.las2peer.security.BasicAgentStorage;
-import i5.las2peer.security.Context;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.MessageReceiver;
 import i5.las2peer.security.UserAgent;
@@ -66,7 +66,7 @@ public class PastryNodeImpl extends Node {
 	private static final int ARTIFACT_GET_TIMEOUT = 10000;
 	private static final int ARTIFACT_STORE_TIMEOUT = 10000;
 
-	private InetAddress pastryBindAddress = null; // null = detect internet address
+	private InetAddress pastryBindAddress = null; // null = detect Internet address
 
 	public static final int STANDARD_PORT = 9901;
 	private int pastryPort = STANDARD_PORT;
@@ -104,7 +104,7 @@ public class PastryNodeImpl extends Node {
 		pastryPort = port;
 		this.bootStrap = bootstrap;
 		this.mode = storageMode;
-		this.storageDir = null; // null = SharedStorage choses directory
+		this.storageDir = null; // null = SharedStorage chooses directory
 		this.nodeIdSeed = nodeIdSeed;
 		locallyKnownAgents = new BasicAgentStorage(this);
 		setupPastryEnvironment();
@@ -494,7 +494,7 @@ public class PastryNodeImpl extends Node {
 	@Deprecated
 	@Override
 	public void storeArtifact(Envelope envelope) throws StorageException {
-		storeEnvelope(envelope, Context.getCurrent().getMainAgent());
+		storeEnvelope(envelope, AgentContext.getCurrent().getMainAgent());
 	}
 
 	/**

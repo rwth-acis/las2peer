@@ -1,10 +1,5 @@
 package i5.las2peer.api;
 
-import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-
 import i5.las2peer.execution.L2pServiceException;
 import i5.las2peer.execution.L2pThread;
 import i5.las2peer.execution.NoSuchServiceMethodException;
@@ -13,9 +8,14 @@ import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.TimeoutException;
 import i5.las2peer.security.Agent;
-import i5.las2peer.security.Context;
+import i5.las2peer.security.AgentContext;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.ServiceAgent;
+
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 /**
  * Base class for services to be hosted within the las2peer network.
@@ -39,8 +39,8 @@ import i5.las2peer.security.ServiceAgent;
  * 
  * <p>
  * If you want to access the current user agent, the las2peer node or logging from outside your service class, e.g. in
- * helper classes or the like, you can make use of the {@link i5.las2peer.security.Context} class, especially of the
- * static {@link i5.las2peer.security.Context#getCurrent} method.
+ * helper classes or the like, you can make use of the {@link i5.las2peer.security.AgentContext} class, especially of
+ * the static {@link i5.las2peer.security.AgentContext#getCurrent} method.
  * 
  * <h2>Runtime Configuration</h2>
  * 
@@ -160,7 +160,7 @@ public abstract class Service extends Configurable {
 	 * To use the service agent as executing entity, use {@link #invokeInternally(String, String, Serializable...)}
 	 * instead.
 	 * 
-	 * Needs an active {@link Context}!
+	 * Needs an active {@link AgentContext}!
 	 * 
 	 * @param service The service class. A version may be specified (for example package.serviceClass@1.0.0-1 or
 	 *            package.serviceClass@1.0). The core tries to find an appropriate version (version 1.0.5 matches 1.0).
@@ -188,7 +188,7 @@ public abstract class Service extends Configurable {
 	 * To use the main agent as executing entity, use {@link #invokeServiceMethod(String, String, Serializable...)}
 	 * instead.
 	 * 
-	 * Needs an active {@link Context}!
+	 * Needs an active {@link AgentContext}!
 	 * 
 	 * @param service The service class. A version may be specified (for example package.serviceClass@1.0.0-1 or
 	 *            package.serviceClass@1.0). The core tries to find an appropriate version (version 1.0.5 matches 1.0).
@@ -221,8 +221,8 @@ public abstract class Service extends Configurable {
 	 * @throws i5.las2peer.execution.NoSuchServiceMethodException
 	 *
 	 */
-	public Method searchMethod(String methodName, Object[] params)
-			throws L2pSecurityException, i5.las2peer.execution.NoSuchServiceMethodException {
+	public Method searchMethod(String methodName, Object[] params) throws L2pSecurityException,
+			i5.las2peer.execution.NoSuchServiceMethodException {
 		Class<?>[] acActualParamTypes = new Class[params.length];
 		Class<? extends Service> thisClass = this.getClass();
 
@@ -245,8 +245,8 @@ public abstract class Service extends Configurable {
 						for (int i = 0; i < acActualParamTypes.length && bPossible; i++) {
 							if (!acCheckParamTypes[i].isInstance(params[i])) {
 								// param[i] is not an instance of the formal parameter type
-								if (!(acCheckParamTypes[i].isPrimitive()
-										&& ServiceHelper.getWrapperClass(acCheckParamTypes[i]).isInstance(params[i]))
+								if (!(acCheckParamTypes[i].isPrimitive() && ServiceHelper.getWrapperClass(
+										acCheckParamTypes[i]).isInstance(params[i]))
 										&& !(ServiceHelper.isWrapperClass(acCheckParamTypes[i]) && ServiceHelper
 												.getUnwrappedClass(acCheckParamTypes[i]).isInstance(params[i]))) {
 									// and not wrapped or unwrapped either! -> so not more possibilities to match!
@@ -336,18 +336,18 @@ public abstract class Service extends Configurable {
 	/**
 	 * Gets the current execution context.
 	 * 
-	 * Needs an active {@link Context}!
+	 * Needs an active {@link AgentContext}!
 	 * 
 	 * @return the context we're currently running in
 	 */
 	public final Context getContext() {
-		return getL2pThread().getContext();
+		return getL2pThread();
 	}
 
 	/**
 	 * Gets the current l2p thread.
 	 * 
-	 * Needs an active {@link Context}!
+	 * Needs an active {@link AgentContext}!
 	 * 
 	 * @return the L2pThread we're currently running in
 	 */
@@ -501,7 +501,7 @@ public abstract class Service extends Configurable {
 	 */
 	@Deprecated
 	protected Node getActiveNode() {
-		return getL2pThread().getContext().getLocalNode();
+		return getL2pThread().getCallerContext().getLocalNode();
 	}
 
 	/**
@@ -513,7 +513,7 @@ public abstract class Service extends Configurable {
 	 */
 	@Deprecated
 	protected Agent getActiveAgent() {
-		return getL2pThread().getContext().getMainAgent();
+		return getL2pThread().getCallerContext().getMainAgent();
 	}
 
 	/**

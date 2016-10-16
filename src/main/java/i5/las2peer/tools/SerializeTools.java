@@ -91,7 +91,6 @@ public class SerializeTools {
 		} catch (IOException e) {
 			throw new SerializationException("IO problems", e);
 		} catch (ClassNotFoundException e) {
-			// should not occur since the SecretKey class should be known here
 			throw new SerializationException("Class not found ?!?!", e);
 		}
 	}

@@ -97,7 +97,7 @@ public class MonitoringAgent extends PassphraseAgent {
 	 * 
 	 */
 	@Override
-	public void receiveMessage(Message message, Context context) throws MessageException {
+	public void receiveMessage(Message message, AgentContext context) throws MessageException {
 		try {
 			// Test for instance
 			message.open(this, getRunningAtNode());

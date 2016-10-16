@@ -5,6 +5,7 @@ import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import i5.las2peer.api.StorageCollisionHandler;
@@ -83,12 +84,15 @@ public class LocalStorage implements L2pStorageInterface {
 		if (inStorage != null) {
 			if (collisionHandler != null) {
 				try {
-					long version = Math.max(envelope.getVersion(), inStorage.getVersion()) + 1;
-					Serializable merged = collisionHandler.onCollision(envelope, inStorage, 1);
-					List<PublicKey> mergedReaders = collisionHandler.mergeReaders(envelope.getReaderKeys(),
-							inStorage.getReaderKeys());
+					long mergedVersion = Math.max(envelope.getVersion(), inStorage.getVersion()) + 1;
+					Serializable mergedContent = collisionHandler.onCollision(envelope, inStorage, 1);
+					Set<PublicKey> mergedReaders = collisionHandler.mergeReaders(envelope.getReaderKeys().keySet(),
+							inStorage.getReaderKeys().keySet());
+					Set<Long> mergedGroups = collisionHandler.mergeGroups(envelope.getReaderGroupIds(),
+							inStorage.getReaderGroupIds());
 					try {
-						toStore = new Envelope(envelope.getIdentifier(), version, merged, mergedReaders);
+						toStore = new Envelope(envelope.getIdentifier(), mergedVersion, mergedContent, mergedReaders,
+								mergedGroups);
 					} catch (IllegalArgumentException | SerializationException | CryptoException e) {
 						if (exceptionHandler != null) {
 							exceptionHandler.onException(e);

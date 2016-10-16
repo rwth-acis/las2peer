@@ -18,7 +18,7 @@ public class ServiceAliasManagerTest {
 
 	@Test
 	public void test() throws CryptoException, L2pSecurityException, DuplicateServiceAliasException,
-			ServiceNotFoundException {
+			AliasNotFoundException {
 		LocalNode node = LocalNode.launchNode();
 		ServiceAgent agentA = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString("serviceA@1.0"), "asdf");
 		agentA.unlockPrivateKey("asdf");
@@ -50,7 +50,7 @@ public class ServiceAliasManagerTest {
 
 	@Test
 	public void testIntegration() throws CryptoException, L2pSecurityException, AgentAlreadyRegisteredException,
-			AgentException, ServiceNotFoundException {
+			AgentException, AliasNotFoundException {
 		LocalNode node = LocalNode.launchNode();
 		ServiceAgent agentA = ServiceAgent.createServiceAgent(
 				ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.0"), "asdf");

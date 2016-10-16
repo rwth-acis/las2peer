@@ -2,21 +2,23 @@ package i5.las2peer.persistency;
 
 import java.io.Serializable;
 import java.security.PublicKey;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.logging.Level;
 
 import javax.crypto.SecretKey;
 
 import i5.las2peer.execution.L2pThread;
+import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.p2p.AgentNotKnownException;
-import i5.las2peer.p2p.Node;
 import i5.las2peer.security.Agent;
-import i5.las2peer.security.Context;
+import i5.las2peer.security.AgentContext;
+import i5.las2peer.security.AgentStorage;
 import i5.las2peer.security.GroupAgent;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.tools.CryptoException;
@@ -28,6 +30,8 @@ import i5.simpleXML.Parser;
 import i5.simpleXML.XMLSyntaxException;
 
 public class Envelope implements Serializable, XmlAble {
+
+	private static final L2pLogger logger = L2pLogger.getInstance(Envelope.class);
 
 	/**
 	 * freshly created local instance, can be considered as {@code null}
@@ -57,12 +61,12 @@ public class Envelope implements Serializable, XmlAble {
 	private final String identifier;
 	private final long version;
 	private final HashMap<PublicKey, byte[]> readerKeys;
-	private final ArrayList<Long> readerGroupIds;
+	private final HashSet<Long> readerGroupIds;
 	private final byte[] rawContent;
 
 	// just for the XML factory method
 	private Envelope(String identifier, long version, HashMap<PublicKey, byte[]> readerKeys,
-			ArrayList<Long> readerGroupIds, byte[] rawContent) {
+			HashSet<Long> readerGroupIds, byte[] rawContent) {
 		this.identifier = identifier;
 		this.version = version;
 		this.readerKeys = readerKeys;
@@ -70,23 +74,70 @@ public class Envelope implements Serializable, XmlAble {
 		this.rawContent = rawContent;
 	}
 
-	protected Envelope(String identifier, Serializable content, List<?> readers)
+	/**
+	 * Creates a new version of an Envelope. The envelope uses by default the start version number.
+	 * 
+	 * @param identifier An unique identifier for the envelope.
+	 * @param content The updated content that should be stored.
+	 * @param readers An arbitrary number of Agents, who are allowed to read the content.
+	 * @throws IllegalArgumentException If the given identifier is null, the version number is below the start version
+	 *             number or too high.
+	 * @throws SerializationException If a problem occurs with object serialization.
+	 * @throws CryptoException If an cryptographic issue occurs.
+	 */
+	protected Envelope(String identifier, Serializable content, Collection<Agent> readers)
 			throws IllegalArgumentException, SerializationException, CryptoException {
-		this(identifier, START_VERSION, content, readers);
+		this(identifier, START_VERSION, content, readers, new HashSet<>());
 	}
 
+	/**
+	 * Creates an continuous version instance for the given Envelope. This method copies the reader list from the
+	 * previous envelope instance.
+	 * 
+	 * @param previousVersion The previous version of the envelope that should be updated.
+	 * @param content The updated content that should be stored.
+	 * @throws IllegalArgumentException If the given identifier is null, the version number is below the start version
+	 *             number or too high.
+	 * @throws SerializationException If a problem occurs with object serialization.
+	 * @throws CryptoException If an cryptographic issue occurs.
+	 */
 	protected Envelope(Envelope previousVersion, Serializable content)
 			throws IllegalArgumentException, SerializationException, CryptoException {
-		this(previousVersion, content, previousVersion.getReaderKeys().keySet());
+		this(previousVersion.getIdentifier(), previousVersion.getVersion() + 1, content,
+				previousVersion.readerKeys.keySet(), previousVersion.readerGroupIds);
 	}
 
-	protected Envelope(Envelope previousVersion, Serializable content, Collection<?> readers)
+	/**
+	 * Creates an continuous version instance for the given Envelope.
+	 * 
+	 * @param previousVersion The previous version of the envelope that should be updated.
+	 * @param content The updated content that should be stored.
+	 * @param readers An arbitrary number of Agents, who are allowed to read the content.
+	 * @throws IllegalArgumentException If the given identifier is null, the version number is below the start version
+	 *             number or too high.
+	 * @throws SerializationException If a problem occurs with object serialization.
+	 * @throws CryptoException If an cryptographic issue occurs.
+	 */
+	protected Envelope(Envelope previousVersion, Serializable content, Collection<Agent> readers)
 			throws IllegalArgumentException, SerializationException, CryptoException {
-		this(previousVersion.getIdentifier(), previousVersion.getVersion() + 1, content, readers);
+		this(previousVersion.getIdentifier(), previousVersion.getVersion() + 1, content, readers, new HashSet<>());
 	}
 
-	protected Envelope(String identifier, long version, Serializable content, Collection<?> readers)
-			throws IllegalArgumentException, SerializationException, CryptoException {
+	/**
+	 * Creates an envelope with the given identifier, version, content and readable by the given reader list.
+	 * 
+	 * @param identifier An unique identifier for the envelope.
+	 * @param version The version number for this envelope.
+	 * @param content The actual content that should be stored.
+	 * @param readers An arbitrary number of Agents, who are allowed to read the content.
+	 * @param readerGroups A set of group agent id's with read access.
+	 * @throws IllegalArgumentException If the given identifier is null, the version number is below the start version
+	 *             number or too high.
+	 * @throws SerializationException If a problem occurs with object serialization.
+	 * @throws CryptoException If an cryptographic issue occurs.
+	 */
+	protected Envelope(String identifier, long version, Serializable content, Collection<?> readers,
+			Set<Long> readerGroups) throws IllegalArgumentException, SerializationException, CryptoException {
 		if (identifier == null) {
 			throw new IllegalArgumentException("The identifier must not be null");
 		}
@@ -100,7 +151,7 @@ public class Envelope implements Serializable, XmlAble {
 		}
 		this.version = version;
 		readerKeys = new HashMap<>();
-		readerGroupIds = new ArrayList<>();
+		readerGroupIds = new HashSet<>(readerGroups);
 		if (readers != null && !readers.isEmpty()) {
 			// we have a non empty set of readers, lets encrypt!
 			SecretKey contentKey = CryptoTools.generateSymmetricKey();
@@ -154,62 +205,67 @@ public class Envelope implements Serializable, XmlAble {
 	}
 
 	public HashMap<PublicKey, byte[]> getReaderKeys() {
-		// XXX return a shallow copy? Would a malicious action on this list have any impacts?
 		return readerKeys;
+	}
+
+	public Set<Long> getReaderGroupIds() {
+		// return shallow copy to avoid manipulation
+		return new HashSet<>(readerGroupIds);
 	}
 
 	public Serializable getContent() throws CryptoException, L2pSecurityException, SerializationException {
 		if (isEncrypted()) {
-			return getContent(Context.getCurrent().getMainAgent());
+			return getContent(AgentContext.getCurrent().getMainAgent());
 		} else {
 			ClassLoader clsLoader = null;
 			try {
 				clsLoader = L2pThread.getServiceClassLoader();
 			} catch (IllegalStateException e) {
-				// XXX logging
+				logger.log(Level.FINER, "Could not get service class loader" + e.toString());
 			}
 			return SerializeTools.deserialize(rawContent, clsLoader);
 		}
 	}
 
 	public Serializable getContent(Agent reader) throws CryptoException, L2pSecurityException, SerializationException {
+		try {
+			return getContent(reader, AgentContext.getCurrent().getLocalNode());
+		} catch (IllegalStateException e) {
+			return getContent(reader, reader.getRunningAtNode());
+		}
+	}
+
+	public Serializable getContent(Agent reader, AgentStorage agentStorage)
+			throws CryptoException, L2pSecurityException, SerializationException {
 		byte[] decrypted = null;
 		if (isEncrypted()) {
 			SecretKey decryptedReaderKey = null;
 			// fetch all groups
 			for (Long groupId : readerGroupIds) {
 				try {
-					Agent agent = null;
-					try {
-						agent = Context.getCurrent().getAgent(groupId);
-					} catch (IllegalStateException e) {
-						Node node = reader.getRunningAtNode();
-						if (node == null) {
-							throw new IllegalStateException("Neither context nor node known");
-						}
-						agent = reader.getRunningAtNode().getAgent(groupId);
-					}
+					Agent agent = agentStorage.getAgent(groupId);
+
 					if (agent instanceof GroupAgent) {
 						GroupAgent group = (GroupAgent) agent;
 						byte[] encryptedReaderKey = readerKeys.get(group.getPublicKey());
-						if (encryptedReaderKey != null && group.isMember(reader)) {
+						if (encryptedReaderKey != null) {
 							// use group to decrypt content
-							group.unlockPrivateKey(reader);
+							group.unlockPrivateKeyRecursive(reader, agentStorage);
 							decryptedReaderKey = group.decryptSymmetricKey(encryptedReaderKey);
 							break;
 						}
 					} else {
-						// XXX error logging
+						logger.log(Level.WARNING, "Non GroupAgent listed as reader group");
 					}
-				} catch (AgentNotKnownException e) {
-					// XXX error logging
+				} catch (AgentNotKnownException | L2pSecurityException | CryptoException | SerializationException e) {
+					logger.log(Level.WARNING, "Issue with envelope reader", e);
 				}
 			}
 			if (decryptedReaderKey == null) {
 				// no group matched
 				byte[] encryptedReaderKey = readerKeys.get(reader.getPublicKey());
 				if (encryptedReaderKey == null) {
-					throw new CryptoException("given reader has no read permission");
+					throw new CryptoException("Agent (" + reader.getId() + ") has no read permission");
 				}
 				decryptedReaderKey = reader.decryptSymmetricKey(encryptedReaderKey);
 			}
@@ -222,7 +278,7 @@ public class Envelope implements Serializable, XmlAble {
 		try {
 			clsLoader = L2pThread.getServiceClassLoader();
 		} catch (IllegalStateException e) {
-			// XXX logging
+			logger.log(Level.FINER, "Could not get service class loader" + e.toString());
 		}
 		return SerializeTools.deserialize(decrypted, clsLoader);
 	}
@@ -321,7 +377,7 @@ public class Envelope implements Serializable, XmlAble {
 			if (!groups.getName().equals("groups")) {
 				throw new MalformedXMLException("groups tag expected");
 			}
-			ArrayList<Long> readerGroupIds = new ArrayList<>();
+			HashSet<Long> readerGroupIds = new HashSet<>();
 			for (Enumeration<Element> enGroups = groups.getChildren(); enGroups.hasMoreElements();) {
 				Element group = enGroups.nextElement();
 				if (!group.getName().equals("group")) {

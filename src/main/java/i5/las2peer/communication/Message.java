@@ -557,7 +557,7 @@ public class Message implements XmlAble, Cloneable {
 	/**
 	 * open the envelope, i.e. decrypt the content with the private key of the receiving agent
 	 * 
-	 * The storage has to know an unlocked version of the recipient agent! (i.e. a {@link i5.las2peer.security.Context}
+	 * The storage has to know an unlocked version of the recipient agent! (i.e. a {@link i5.las2peer.security.AgentContext}
 	 * bound to him.
 	 * 
 	 * @param storage

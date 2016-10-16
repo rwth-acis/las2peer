@@ -7,7 +7,7 @@ import javax.crypto.SecretKey;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
 import i5.las2peer.security.Agent;
-import i5.las2peer.security.Context;
+import i5.las2peer.security.AgentContext;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.tools.SerializationException;
 
@@ -23,7 +23,7 @@ public class TestAgent extends Agent {
 	}
 
 	@Override
-	public void receiveMessage(Message message, Context c) throws MessageException {
+	public void receiveMessage(Message message, AgentContext c) throws MessageException {
 		throw new MessageException("got a message");
 	}
 

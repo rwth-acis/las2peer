@@ -23,10 +23,10 @@ import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.SerializationException;
 
 /**
- * Each {@link i5.las2peer.execution.L2pThread} is bound to a context, which is mainly determined by the executing
+ * Each {@link i5.las2peer.execution.L2pThread} is bound to a context, which is determined by the executing
  * agent.
  */
-public class Context implements AgentStorage, ContextStorageInterface {
+public class AgentContext implements AgentStorage, ContextStorageInterface {
 
 	private Agent agent;
 
@@ -43,7 +43,7 @@ public class Context implements AgentStorage, ContextStorageInterface {
 	 * @param localNode
 	 * @throws L2pSecurityException
 	 */
-	public Context(Node localNode, Agent mainAgent) throws L2pSecurityException {
+	public AgentContext(Node localNode, Agent mainAgent) throws L2pSecurityException {
 		this.agent = mainAgent;
 
 		this.localNode = localNode;
@@ -244,8 +244,8 @@ public class Context implements AgentStorage, ContextStorageInterface {
 	 * @throws IllegalStateException called not in a las2peer execution thread
 	 * @return the current context
 	 */
-	public static Context getCurrent() {
-		return L2pThread.getCurrent().getContext();
+	public static AgentContext getCurrent() {
+		return L2pThread.getCurrent().getCallerContext();
 	}
 
 	/**
@@ -461,7 +461,7 @@ public class Context implements AgentStorage, ContextStorageInterface {
 	@Override
 	public Envelope createEnvelope(Envelope previousVersion, Serializable content)
 			throws IllegalArgumentException, SerializationException, CryptoException {
-		return localNode.createEnvelope(previousVersion, content, getMainAgent());
+		return localNode.createEnvelope(previousVersion, content);
 	}
 
 	@Override

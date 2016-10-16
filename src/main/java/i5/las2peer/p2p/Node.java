@@ -49,7 +49,7 @@ import i5.las2peer.persistency.NodeStorageInterface;
 import i5.las2peer.security.Agent;
 import i5.las2peer.security.AgentException;
 import i5.las2peer.security.AgentStorage;
-import i5.las2peer.security.Context;
+import i5.las2peer.security.AgentContext;
 import i5.las2peer.security.GroupAgent;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.Mediator;
@@ -121,7 +121,7 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	/**
 	 * contexts for local method invocation
 	 */
-	private Hashtable<Long, Context> htLocalExecutionContexts = new Hashtable<Long, Context>();
+	private Hashtable<Long, AgentContext> htLocalExecutionContexts = new Hashtable<Long, AgentContext>();
 
 	/**
 	 * Timer to tidy up hashtables etc (Contexts)
@@ -1368,7 +1368,7 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 
 		// execute
 		RMITask task = new RMITask(serviceAgent.getServiceNameVersion(), method, parameters);
-		Context context = getAgentContext(executing);
+		AgentContext context = getAgentContext(executing);
 		L2pThread thread = new L2pThread(serviceAgent, task, context);
 		thread.start();
 		thread.join();
@@ -1655,12 +1655,12 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	 * @throws L2pSecurityException
 	 * @throws AgentNotKnownException
 	 */
-	protected Context getAgentContext(long agentId) throws L2pSecurityException, AgentNotKnownException {
-		Context result = htLocalExecutionContexts.get(agentId);
+	protected AgentContext getAgentContext(long agentId) throws L2pSecurityException, AgentNotKnownException {
+		AgentContext result = htLocalExecutionContexts.get(agentId);
 
 		if (result == null) {
 			Agent agent = getAgent(agentId);
-			result = new Context(this, agent);
+			result = new AgentContext(this, agent);
 			htLocalExecutionContexts.put(agentId, result);
 		}
 
@@ -1675,12 +1675,12 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	 * @param agent
 	 * @return a context
 	 */
-	protected Context getAgentContext(Agent agent) {
-		Context result = htLocalExecutionContexts.get(agent.getId());
+	protected AgentContext getAgentContext(Agent agent) {
+		AgentContext result = htLocalExecutionContexts.get(agent.getId());
 
 		if (result == null || (result.getMainAgent().isLocked() && !agent.isLocked())) {
 			try {
-				result = new Context(this, agent);
+				result = new AgentContext(this, agent);
 			} catch (L2pSecurityException e) {
 			}
 			htLocalExecutionContexts.put(agent.getId(), result);
@@ -1767,14 +1767,14 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	/**
 	 * executed by the tidy up timer, currently it does:
 	 * 
-	 * * Deleting old {@link Context} objects from {@link #htLocalExecutionContexts}
+	 * * Deleting old {@link AgentContext} objects from {@link #htLocalExecutionContexts}
 	 */
 	protected void runTidyUpTimer() {
-		Set<Entry<Long, Context>> s = htLocalExecutionContexts.entrySet();
+		Set<Entry<Long, AgentContext>> s = htLocalExecutionContexts.entrySet();
 		synchronized (htLocalExecutionContexts) {
-			Iterator<Entry<Long, Context>> i = s.iterator();
+			Iterator<Entry<Long, AgentContext>> i = s.iterator();
 			while (i.hasNext()) {
-				Entry<Long, Context> e = i.next();
+				Entry<Long, AgentContext> e = i.next();
 				if (e.getValue().getLastUsageTimestamp() <= new Date().getTime() - agentContextLifetime * 1000) {
 					i.remove();
 				}

@@ -6,8 +6,6 @@ import java.security.PublicKey;
  * Exception thrown in a global invocation, if the remote service tries to open an envelope and is not able to do this,
  * because the private key of the executing agent is not unlocked.
  * 
- * Therefore a Mediator is needed at the foreign node.
- * 
  * 
  *
  */

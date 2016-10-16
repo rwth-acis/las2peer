@@ -23,6 +23,8 @@ import i5.las2peer.tools.SerializationException;
  */
 public class MonitoringObserver implements NodeObserver {
 
+	public static final String DATA_PROCESSING_SERVICE = "i5.las2peer.services.mobsos.dataProcessing.MonitoringDataProcessingService";
+
 	private boolean readyForInitializing = false; // Is set to false as long as the node is not ready to initialize the
 													// monitoring agents.
 	private boolean initializedDone = false; // Used to determine, if the initialization process has finished.
@@ -87,9 +89,8 @@ public class MonitoringObserver implements NodeObserver {
 		try {
 			System.out.println("Monitoring: Trying to invoke Processing Service..");
 			String[] testParameters = { "Node " + registeredAt.getNodeId() + " registered observer!" };
-			long receivingAgentId = (Long) registeredAt.invoke(sendingAgent,
-					"i5.las2peer.services.monitoring.processing.MonitoringDataProcessingService", "getReceivingAgentId",
-					testParameters);
+			long receivingAgentId = (Long) registeredAt.invoke(sendingAgent, DATA_PROCESSING_SERVICE,
+					"getReceivingAgentId", testParameters);
 			try {
 				receivingAgent = (MonitoringAgent) registeredAt.getAgent(receivingAgentId);
 				System.out.println("Monitoring: Fetched receiving MonitoringAgent: " + receivingAgent.getId());
