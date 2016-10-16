@@ -27,7 +27,7 @@ import i5.las2peer.execution.RMITask;
 import i5.las2peer.execution.ServiceInvocationException;
 import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.p2p.AgentNotKnownException;
-import i5.las2peer.p2p.DuplicateServiceAliasException;
+import i5.las2peer.p2p.AliasConflictException;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.NodeNotFoundException;
 import i5.las2peer.p2p.ServiceNameVersion;
@@ -431,7 +431,7 @@ public class ServiceAgent extends PassphraseAgent {
 					node.getServiceAliasManager().registerServiceAlias(this, alias);
 				} catch (AgentLockedException e) {
 					throw new L2pServiceException("Service alias could not be registered!", e);
-				} catch (DuplicateServiceAliasException e) {
+				} catch (AliasConflictException e) {
 					throw new L2pServiceException("Service alias is already used by anther service!", e);
 				}
 			}
