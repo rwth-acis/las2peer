@@ -87,9 +87,13 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	public void handle(HttpExchange exchange) throws IOException {
 		exchange.getResponseHeaders().set("Server-Name", "las2peer WebConnector");
 
-		PassphraseAgent userAgent;
-		if ((userAgent = authenticate(exchange)) != null) {
-			invoke(userAgent, exchange);
+		try {
+			PassphraseAgent userAgent;
+			if ((userAgent = authenticate(exchange)) != null) {
+				invoke(userAgent, exchange);
+			}
+		} catch (Exception e) {
+			sendUnexpectedErrorResponse(exchange, e.toString(), e);
 		}
 
 		// otherwise the client waits till the timeout for an answer
@@ -614,7 +618,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 
 	private void sendUnexpectedErrorResponse(HttpExchange exchange, String message, Throwable e) {
 		connector.logError("Internal Server Error: " + message, e);
-		sendStringResponse(exchange, HttpURLConnection.HTTP_INTERNAL_ERROR, "Internal Server Error");
+		sendStringResponse(exchange, HttpURLConnection.HTTP_INTERNAL_ERROR, message);
 	}
 
 	private void sendStringResponse(HttpExchange exchange, int responseCode, String response) {
