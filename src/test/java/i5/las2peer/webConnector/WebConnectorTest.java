@@ -13,6 +13,7 @@ import i5.las2peer.testing.MockAgentFactory;
 import i5.las2peer.webConnector.client.ClientResponse;
 import i5.las2peer.webConnector.client.MiniClient;
 import i5.las2peer.webConnector.services.TestClassLoaderService;
+import i5.las2peer.webConnector.services.TestDeepPathService;
 import i5.las2peer.webConnector.services.TestSecurityContextService;
 import i5.las2peer.webConnector.services.TestService;
 import i5.las2peer.webConnector.services.TestSwaggerService;
@@ -46,6 +47,7 @@ public class WebConnectorTest {
 	private static final String testServiceClass3 = TestVersionService.class.getName() + "@1.0";
 	private static final String testServiceClass4 = TestService.class.getName() + "@1.0";
 	private static final String testServiceClass5 = TestClassLoaderService.class.getName() + "@1.0";
+	private static final String testServiceClass6 = TestDeepPathService.class.getName() + "@1.0";
 
 	@BeforeClass
 	public static void startServer() throws Exception {
@@ -78,18 +80,22 @@ public class WebConnectorTest {
 				"a pass");
 		ServiceAgent testService5 = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass5),
 				"a pass");
+		ServiceAgent testService6 = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass6),
+				"a pass");
 
 		testService1.unlockPrivateKey("a pass");
 		testService2.unlockPrivateKey("a pass");
 		testService3.unlockPrivateKey("a pass");
 		testService4.unlockPrivateKey("a pass");
 		testService5.unlockPrivateKey("a pass");
+		testService6.unlockPrivateKey("a pass");
 
 		node.registerReceiver(testService1);
 		node.registerReceiver(testService2);
 		node.registerReceiver(testService3);
 		node.registerReceiver(testService4);
 		node.registerReceiver(testService5);
+		node.registerReceiver(testService6);
 
 		// start connector
 		connector = new WebConnector(true, HTTP_PORT, false, 1000);
@@ -434,6 +440,27 @@ public class WebConnectorTest {
 			String body = "This is a test.";
 			c.setLogin(Long.toString(testAgent.getId()), testPass);
 			ClientResponse result = c.sendRequest("POST", "test/body", body);
+			assertEquals(200, result.getHttpCode());
+			assertTrue(result.getResponse().trim().equals(body));
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("Exception: " + e);
+		}
+	}
+
+	@Test
+	public void testPathResolve() {
+		MiniClient c = new MiniClient();
+		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
+		try {
+			// TODO REturnten base path überprüfen!!
+			c.setLogin(Long.toString(testAgent.getId()), testPass);
+			ClientResponse result = c.sendRequest("GET", "deep/path/test", body);
+			assertEquals(200, result.getHttpCode());
+			assertTrue(result.getResponse().trim().equals(body));
+
+			c.setLogin(Long.toString(testAgent.getId()), testPass);
+			ClientResponse result = c.sendRequest("GET", "deep/path/v1/test", body);
 			assertEquals(200, result.getHttpCode());
 			assertTrue(result.getResponse().trim().equals(body));
 		} catch (Exception e) {
