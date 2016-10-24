@@ -31,8 +31,8 @@ public class ServiceAliasManager {
 	 * @throws AgentLockedException
 	 * @throws DuplicateServiceAliasException
 	 */
-	public void registerServiceAlias(ServiceAgent agent, String alias)
-			throws AgentLockedException, DuplicateServiceAliasException {
+	public void registerServiceAlias(ServiceAgent agent, String alias) throws AgentLockedException,
+			DuplicateServiceAliasException {
 		if (agent.isLocked()) {
 			throw new AgentLockedException("Only unlocked Agents can be registered!");
 		}
@@ -68,7 +68,7 @@ public class ServiceAliasManager {
 	public String getServiceNameByAlias(String alias) throws AliasNotFoundException {
 		try {
 			Envelope env = node.fetchEnvelope(PREFIX + alias.toLowerCase());
-			String content = (String) env.getContent(node.getAnonymous());
+			String content = (String) env.getContent(node.getAnonymous(), node);
 			return content;
 		} catch (StorageException | CryptoException | L2pSecurityException | SerializationException e) {
 			throw new AliasNotFoundException("Alias not found!", e);
