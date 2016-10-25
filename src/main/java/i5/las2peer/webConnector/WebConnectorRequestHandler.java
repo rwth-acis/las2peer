@@ -97,7 +97,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			 * leading to an "Invalid Signature!" exception at the remote node 
 			 */
 			if (exchange.getRequestMethod().equalsIgnoreCase("options")) {
-				sendResponse(exchange, HttpURLConnection.HTTP_OK, NO_RESPONSE_BODY);
+				sendResponseHeaders(exchange, HttpURLConnection.HTTP_OK, NO_RESPONSE_BODY);
 			} else {
 				PassphraseAgent userAgent;
 				if ((userAgent = authenticate(exchange)) != null) {
@@ -603,7 +603,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	private void sendRESTResponse(HttpExchange exchange, RESTResponse result) {
 		exchange.getResponseHeaders().putAll(result.getHeaders());
 		try {
-			sendResponse(exchange, result.getHttpCode(), getResponseLength(result.getBody().length));
+			sendResponseHeaders(exchange, result.getHttpCode(), getResponseLength(result.getBody().length));
 			OutputStream os = exchange.getResponseBody();
 			os.write(result.getBody());
 			os.close();
@@ -619,7 +619,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			sendStringResponse(exchange, HttpURLConnection.HTTP_UNAUTHORIZED, answerMessage);
 		} else {
 			try {
-				sendResponse(exchange, HttpURLConnection.HTTP_UNAUTHORIZED, NO_RESPONSE_BODY);
+				sendResponseHeaders(exchange, HttpURLConnection.HTTP_UNAUTHORIZED, NO_RESPONSE_BODY);
 				// otherwise the client waits till the timeout for an answer
 				exchange.getResponseBody().close();
 			} catch (IOException e) {
@@ -637,7 +637,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		byte[] content = response.getBytes();
 		exchange.getResponseHeaders().set("content-type", "text/plain");
 		try {
-			sendResponse(exchange, responseCode, content.length);
+			sendResponseHeaders(exchange, responseCode, content.length);
 			OutputStream os = exchange.getResponseBody();
 			os.write(content);
 			os.close();
@@ -646,7 +646,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		}
 	}
 
-	private void sendResponse(HttpExchange exchange, int responseCode, long contentLength) throws IOException {
+	private void sendResponseHeaders(HttpExchange exchange, int responseCode, long contentLength) throws IOException {
 		// add configured headers
 		Headers responseHeaders = exchange.getResponseHeaders();
 		if (connector.enableCrossOriginResourceSharing) {
