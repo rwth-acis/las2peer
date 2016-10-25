@@ -605,7 +605,9 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		try {
 			sendResponseHeaders(exchange, result.getHttpCode(), getResponseLength(result.getBody().length));
 			OutputStream os = exchange.getResponseBody();
-			os.write(result.getBody());
+			if (result.getBody().length > 0) {
+				os.write(result.getBody());
+			}
 			os.close();
 		} catch (IOException e) {
 			connector.logError("Sending REST response (Code: " + result.getHttpCode() + ") failed!", e);
