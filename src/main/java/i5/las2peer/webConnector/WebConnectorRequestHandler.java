@@ -608,7 +608,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			os.write(result.getBody());
 			os.close();
 		} catch (IOException e) {
-			connector.logMessage(e.getMessage());
+			connector.logError("Sending REST response (Code: " + result.getHttpCode() + ") failed!", e);
 		}
 	}
 
