@@ -5,7 +5,6 @@ import i5.las2peer.p2p.AgentAlreadyRegisteredException;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.AliasNotFoundException;
 import i5.las2peer.p2p.Node;
-import i5.las2peer.p2p.ServiceAliasManager.AliasResolveResponse;
 import i5.las2peer.p2p.ServiceNameVersion;
 import i5.las2peer.p2p.ServiceVersion;
 import i5.las2peer.p2p.TimeoutException;
@@ -90,9 +89,21 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		exchange.getResponseHeaders().set("Server-Name", "las2peer WebConnector");
 
 		try {
-			PassphraseAgent userAgent;
-			if ((userAgent = authenticate(exchange)) != null) {
-				invoke(userAgent, exchange);
+			// TODO workaround
+			/*
+			 * authentication fails if header "Access-Control-Request-Headers:access_token" (in an OPTIONS request)
+			 * is set:
+			 * 
+			 * the WebConnector tries to auth via OIDC (and not anonymous; why?) and creates an invalid agent,
+			 * leading to an "Invalid Signature!" exception at the remote node 
+			 */
+			if (exchange.getRequestMethod().equalsIgnoreCase("options")) {
+				sendResponseHeaders(exchange, HttpURLConnection.HTTP_OK, NO_RESPONSE_BODY);
+			} else {
+				PassphraseAgent userAgent;
+				if ((userAgent = authenticate(exchange)) != null) {
+					invoke(userAgent, exchange);
+				}
 			}
 		} catch (Exception e) {
 			sendUnexpectedErrorResponse(exchange, e.toString(), e);
@@ -341,7 +352,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		// get service version
 		ServiceVersion serviceVersion;
 		boolean versionSpecified = false;
-		if (pathSplit.length > serviceAliasLength) {
+		if (pathSplit.length > serviceAliasLength && pathSplit[serviceAliasLength].startsWith("v")) {
 			try {
 				serviceVersion = new ServiceVersion(pathSplit[serviceAliasLength].substring(1));
 				versionSpecified = true;
@@ -601,12 +612,14 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	private void sendRESTResponse(HttpExchange exchange, RESTResponse result) {
 		exchange.getResponseHeaders().putAll(result.getHeaders());
 		try {
-			sendResponse(exchange, result.getHttpCode(), getResponseLength(result.getBody().length));
+			sendResponseHeaders(exchange, result.getHttpCode(), getResponseLength(result.getBody().length));
 			OutputStream os = exchange.getResponseBody();
-			os.write(result.getBody());
+			if (result.getBody().length > 0) {
+				os.write(result.getBody());
+			}
 			os.close();
 		} catch (IOException e) {
-			connector.logMessage(e.getMessage());
+			connector.logError("Sending REST response (Code: " + result.getHttpCode() + ") failed!", e);
 		}
 	}
 
@@ -617,7 +630,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			sendStringResponse(exchange, HttpURLConnection.HTTP_UNAUTHORIZED, answerMessage);
 		} else {
 			try {
-				sendResponse(exchange, HttpURLConnection.HTTP_UNAUTHORIZED, NO_RESPONSE_BODY);
+				sendResponseHeaders(exchange, HttpURLConnection.HTTP_UNAUTHORIZED, NO_RESPONSE_BODY);
 				// otherwise the client waits till the timeout for an answer
 				exchange.getResponseBody().close();
 			} catch (IOException e) {
@@ -635,7 +648,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		byte[] content = response.getBytes();
 		exchange.getResponseHeaders().set("content-type", "text/plain");
 		try {
-			sendResponse(exchange, responseCode, content.length);
+			sendResponseHeaders(exchange, responseCode, content.length);
 			OutputStream os = exchange.getResponseBody();
 			os.write(content);
 			os.close();
@@ -644,7 +657,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		}
 	}
 
-	private void sendResponse(HttpExchange exchange, int responseCode, long contentLength) throws IOException {
+	private void sendResponseHeaders(HttpExchange exchange, int responseCode, long contentLength) throws IOException {
 		// add configured headers
 		Headers responseHeaders = exchange.getResponseHeaders();
 		if (connector.enableCrossOriginResourceSharing) {

@@ -1,7 +1,5 @@
 package i5.las2peer.webConnector.client;
 
-import i5.las2peer.webConnector.WebConnector;
-
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStream;
@@ -12,6 +10,8 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import i5.las2peer.webConnector.WebConnector;
 
 /**
  * Very simple client to communicate with the las2peer web connector
@@ -85,7 +85,6 @@ public class MiniClient {
 			}
 
 			connection.setUseCaches(false);
-			connection.setDoInput(true);
 			if (method.equalsIgnoreCase("POST") || method.equalsIgnoreCase("PUT")) {
 				connection.setDoOutput(true);
 
