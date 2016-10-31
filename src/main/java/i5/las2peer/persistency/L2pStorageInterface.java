@@ -47,7 +47,7 @@ public interface L2pStorageInterface {
 			throws IllegalArgumentException, SerializationException, CryptoException;
 
 	/**
-	 * Creates an continous version instance for the given Envelope. This method copies the reader list from the
+	 * Creates an continuous version instance for the given Envelope. This method copies the reader list from the
 	 * previous Envelope instance.
 	 * 
 	 * @param previousVersion The previous version of the Envelope that should be updated.
@@ -62,7 +62,7 @@ public interface L2pStorageInterface {
 			throws IllegalArgumentException, SerializationException, CryptoException;
 
 	/**
-	 * Creates an continous version instance for the given Envelope.
+	 * Creates an continuous version instance for the given Envelope.
 	 * 
 	 * @param previousVersion The previous version of the Envelope that should be updated.
 	 * @param content The updated content that should be stored.

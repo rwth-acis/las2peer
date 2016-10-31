@@ -1,5 +1,19 @@
 package i5.las2peer.persistency;
 
+import java.io.Serializable;
+import java.security.PublicKey;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Random;
+import java.util.Set;
+
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TestName;
+
 import i5.las2peer.api.StorageCollisionHandler;
 import i5.las2peer.api.StorageEnvelopeHandler;
 import i5.las2peer.api.StorageExceptionHandler;
@@ -13,20 +27,6 @@ import i5.las2peer.security.GroupAgent;
 import i5.las2peer.security.UserAgent;
 import i5.las2peer.testing.MockAgentFactory;
 import i5.las2peer.testing.TestSuite;
-
-import java.io.Serializable;
-import java.security.PublicKey;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
-
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestName;
 
 public class EnvelopeTest {
 
@@ -86,8 +86,8 @@ public class EnvelopeTest {
 			node1.storeEnvelopeAsync(envelope1, smith, new StorageStoreResultHandler() {
 				@Override
 				public void onResult(Serializable serializable, int successfulOperations) {
-					System.out.println("Successfully stored artifact " + serializable + " " + successfulOperations
-							+ " times");
+					System.out.println(
+							"Successfully stored artifact " + serializable + " " + successfulOperations + " times");
 					// fetch envelope again
 					System.out.println("Fetching artifact ...");
 					node1.fetchEnvelopeAsync("test", new StorageEnvelopeHandler() {
@@ -246,8 +246,9 @@ public class EnvelopeTest {
 						public Serializable onCollision(Envelope toStore, Envelope inNetwork, long numberOfCollisions)
 								throws StopMergingException {
 							if (numberOfCollisions > 100) {
-								throw new StopMergingException("Merging failed, too many (" + numberOfCollisions
-										+ ") collisions!", numberOfCollisions);
+								throw new StopMergingException(
+										"Merging failed, too many (" + numberOfCollisions + ") collisions!",
+										numberOfCollisions);
 							}
 							// we return the "merged" version of both envelopes
 							// usually there one should put more effort into merging
@@ -261,11 +262,19 @@ public class EnvelopeTest {
 						}
 
 						@Override
-						public List<PublicKey> mergeReaders(HashMap<PublicKey, byte[]> toStoreReaders,
-								HashMap<PublicKey, byte[]> inNetworkReaders) {
-							ArrayList<PublicKey> merged = new ArrayList<>();
-							merged.addAll(toStoreReaders.keySet());
-							merged.addAll(inNetworkReaders.keySet());
+						public Set<PublicKey> mergeReaders(Set<PublicKey> toStoreReaders,
+								Set<PublicKey> inNetworkReaders) {
+							HashSet<PublicKey> merged = new HashSet<>();
+							merged.addAll(toStoreReaders);
+							merged.addAll(inNetworkReaders);
+							return merged;
+						}
+
+						@Override
+						public Set<Long> mergeGroups(Set<Long> toStoreGroups, Set<Long> inNetworkGroups) {
+							HashSet<Long> merged = new HashSet<>();
+							merged.addAll(toStoreGroups);
+							merged.addAll(inNetworkGroups);
 							return merged;
 						}
 					}, storageExceptionHandler);
@@ -370,9 +379,14 @@ public class EnvelopeTest {
 						}
 
 						@Override
-						public List<PublicKey> mergeReaders(HashMap<PublicKey, byte[]> toStoreReaders,
-								HashMap<PublicKey, byte[]> inNetworkReaders) {
-							return new ArrayList<>();
+						public Set<PublicKey> mergeReaders(Set<PublicKey> toStoreReaders,
+								Set<PublicKey> inNetworkReaders) {
+							return new HashSet<>();
+						}
+
+						@Override
+						public Set<Long> mergeGroups(Set<Long> toStoreGroups, Set<Long> inNetworkGroups) {
+							return new HashSet<>();
 						}
 					}, new StorageExceptionHandler() {
 						@Override
@@ -513,21 +527,78 @@ public class EnvelopeTest {
 	@Test
 	public void testReadWithGroup() {
 		try {
+			// Agent Smith (member of group1) stores an envelope
 			PastryNodeImpl node1 = nodes.get(0);
 			UserAgent smith = MockAgentFactory.getAdam();
 			smith.unlockPrivateKey("adamspass");
+			smith.notifyRegistrationTo(node1); // workaround for missing context during tests
+			// Agent Neo (member group1, too) reads the stored envelope
+			UserAgent neo = MockAgentFactory.getEve();
+			neo.unlockPrivateKey("evespass");
+			neo.notifyRegistrationTo(node1); // workaround for missing context during tests
 			GroupAgent group1 = MockAgentFactory.getGroup1();
 			Assert.assertTrue(group1.isMember(smith));
+			Assert.assertTrue(group1.isMember(neo));
 			group1.unlockPrivateKey(smith);
 			node1.storeAgent(group1);
-			node1.registerReceiver(smith);
-			final String testContent = "envelope of smith";
+			final String testContent = "content from smith";
 			Envelope groupEnv = node1.createEnvelope("test", testContent, group1);
-			node1.storeEnvelope(groupEnv, group1);
+			node1.storeEnvelope(groupEnv, smith);
+			// Agent Neo (same group) reads the envelope
 			PastryNodeImpl node2 = nodes.get(1);
 			Envelope fetchedEnv = node2.fetchEnvelope("test");
-			String content = (String) fetchedEnv.getContent(smith, node1);
+			String content = (String) fetchedEnv.getContent(neo, node2);
 			Assert.assertEquals(testContent, content);
+			Assert.assertEquals(groupEnv.getReaderGroupIds(), fetchedEnv.getReaderGroupIds());
+			// Agent Smith updates the envelope
+			final String testContent2 = "content from Smith 2";
+			Envelope groupEnv2 = node1.createEnvelope(groupEnv, testContent2);
+			Assert.assertEquals(fetchedEnv.getReaderGroupIds(), groupEnv2.getReaderGroupIds());
+			node1.storeEnvelope(groupEnv2, smith);
+			// Agent Neo reads the content again
+			Envelope fetchedEnv2 = node2.fetchEnvelope("test");
+			String content2 = (String) fetchedEnv2.getContent(neo, node2);
+			Assert.assertEquals(testContent2, content2);
+			Assert.assertEquals(groupEnv2.getReaderGroupIds(), fetchedEnv2.getReaderGroupIds());
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail(e.toString());
+		}
+	}
+
+	@Test
+	public void testWriteWithGroup() {
+		try {
+			// Agent Smith (member of group1) stores an envelope owned by group1
+			PastryNodeImpl node1 = nodes.get(0);
+			UserAgent smith = MockAgentFactory.getAdam();
+			smith.unlockPrivateKey("adamspass");
+			smith.notifyRegistrationTo(node1); // workaround for missing context during tests
+			// Agent Neo (member group1, too) reads the stored envelope
+			UserAgent neo = MockAgentFactory.getEve();
+			neo.unlockPrivateKey("evespass");
+			neo.notifyRegistrationTo(node1); // workaround for missing context during tests
+			GroupAgent group1 = MockAgentFactory.getGroup1();
+			Assert.assertTrue(group1.isMember(smith));
+			Assert.assertTrue(group1.isMember(neo));
+			group1.unlockPrivateKey(smith);
+			node1.storeAgent(group1);
+			final String testContent = "content from smith";
+			Envelope groupEnv = node1.createEnvelope("test", testContent);
+			node1.storeEnvelope(groupEnv, group1);
+			// Agent Neo (same group) reads the envelope ...
+			PastryNodeImpl node2 = nodes.get(1);
+			Envelope fetchedEnv = node2.fetchEnvelope("test");
+			String content = (String) fetchedEnv.getContent(neo, node2);
+			Assert.assertEquals(testContent, content);
+			// ... and updates it.
+			final String testContent2 = "content from neo";
+			Envelope updated = node2.createEnvelope(fetchedEnv, testContent2);
+			node2.storeEnvelope(updated, group1);
+			// Agent Smith reads content from Neo
+			Envelope fetched2 = node1.fetchEnvelope("test");
+			String content2 = (String) fetched2.getContent(smith, node1);
+			Assert.assertEquals(testContent2, content2);
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail(e.toString());

@@ -2,9 +2,8 @@ package i5.las2peer.persistency.helper;
 
 import java.io.Serializable;
 import java.security.PublicKey;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import i5.las2peer.api.StorageCollisionHandler;
 import i5.las2peer.api.StorageExceptionHandler;
@@ -38,10 +37,15 @@ public class StoreProcessHelper implements StorageStoreResultHandler, StorageCol
 	}
 
 	@Override
-	public List<PublicKey> mergeReaders(HashMap<PublicKey, byte[]> toStoreReaders,
-			HashMap<PublicKey, byte[]> inNetworkReaders) {
-		// nothing to merge here in store operations there should be nothing to merge
-		return new ArrayList<>();
+	public Set<PublicKey> mergeReaders(Set<PublicKey> toStoreReaders, Set<PublicKey> inNetworkReaders) {
+		// nothing to merge here in usual store operations there should be nothing to merge
+		return new HashSet<>();
+	}
+
+	@Override
+	public Set<Long> mergeGroups(Set<Long> toStoreGroups, Set<Long> inNetworkGroups) {
+		// nothing to merge here in usual store operations there should be nothing to merge
+		return new HashSet<>();
 	}
 
 	@Override

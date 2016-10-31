@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
@@ -109,7 +110,7 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 		} else {
 			throw new StorageException("Unexpected storage mode '" + storageMode + "'");
 		}
-		// on the other nobody likes outdated data
+		// on the other nobody likes out-dated data
 		Cache cache = new LRUCache(storage, maximumCacheSize, node.getEnvironment());
 		StorageManagerImpl manager = new StorageManagerImpl(pastIdFactory, storage, cache);
 		pastStorage = new PastImpl(node, manager, numOfReplicas, "i5.las2peer.enterprise.storage",
@@ -235,18 +236,20 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 				@Override
 				public void onEnvelopeReceived(Envelope inNetwork) {
 					try {
-						Serializable mergedObj = collisionHandler.onCollision(envelope, inNetwork,
+						Serializable mergedContent = collisionHandler.onCollision(envelope, inNetwork,
 								mergeCounter.value());
 						long mergedVersion = Math.max(envelope.getVersion(), inNetwork.getVersion()) + 1;
-						List<PublicKey> mergedReaders = collisionHandler.mergeReaders(envelope.getReaderKeys(),
-								inNetwork.getReaderKeys());
-						Envelope merged = new Envelope(envelope.getIdentifier(), mergedVersion, mergedObj,
-								mergedReaders);
+						Set<PublicKey> mergedReaders = collisionHandler.mergeReaders(envelope.getReaderKeys().keySet(),
+								inNetwork.getReaderKeys().keySet());
+						Set<Long> mergedGroups = collisionHandler.mergeGroups(envelope.getReaderGroupIds(),
+								inNetwork.getReaderGroupIds());
+						Envelope mergedEnv = new Envelope(envelope.getIdentifier(), mergedVersion, mergedContent,
+								mergedReaders, mergedGroups);
 						logger.info("Merged envelope (collisions: " + mergeCounter.value() + ") from network "
 								+ inNetwork.toString() + " with local copy " + envelope.toString()
-								+ " to merged version " + merged.toString());
+								+ " to merged version " + mergedEnv.toString());
 						mergeCounter.increase();
-						storeEnvelopeAsync(merged, author, resultHandler, collisionHandler, exceptionHandler,
+						storeEnvelopeAsync(mergedEnv, author, resultHandler, collisionHandler, exceptionHandler,
 								mergeCounter);
 					} catch (StopMergingException | IllegalArgumentException | SerializationException
 							| CryptoException e) {

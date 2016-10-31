@@ -58,6 +58,7 @@ public class ServiceAliasManager {
 	 */
 	public void registerServiceAlias(ServiceAgent agent, String alias) throws AgentLockedException,
 			AliasConflictException {
+
 		if (agent.isLocked()) {
 			throw new AgentLockedException("Only unlocked Agents can be registered!");
 		}
