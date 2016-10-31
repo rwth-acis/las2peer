@@ -453,16 +453,23 @@ public class WebConnectorTest {
 		MiniClient c = new MiniClient();
 		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 		try {
-			// TODO REturnten base path überprüfen!!
 			c.setLogin(Long.toString(testAgent.getId()), testPass);
-			ClientResponse result = c.sendRequest("GET", "deep/path/test", body);
-			assertEquals(200, result.getHttpCode());
-			assertTrue(result.getResponse().trim().equals(body));
 
-			c.setLogin(Long.toString(testAgent.getId()), testPass);
-			ClientResponse result = c.sendRequest("GET", "deep/path/v1/test", body);
+			ClientResponse result = c.sendRequest("GET", "deep/path/test", "");
 			assertEquals(200, result.getHttpCode());
-			assertTrue(result.getResponse().trim().equals(body));
+			assertTrue(result.getResponse().trim().endsWith("deep/path/"));
+
+			result = c.sendRequest("GET", "deep/path/v1/test", "");
+			assertEquals(200, result.getHttpCode());
+			assertTrue(result.getResponse().trim().endsWith("deep/path/v1/"));
+
+			result = c.sendRequest("GET", "deep/path", "");
+			assertEquals(200, result.getHttpCode());
+			assertTrue(result.getResponse().trim().endsWith("deep/path/"));
+
+			result = c.sendRequest("GET", "deep/path/v1", "");
+			assertEquals(200, result.getHttpCode());
+			assertTrue(result.getResponse().trim().endsWith("deep/path/v1/"));
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("Exception: " + e);

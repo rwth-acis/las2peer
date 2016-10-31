@@ -5,6 +5,7 @@ import i5.las2peer.p2p.AgentAlreadyRegisteredException;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.AliasNotFoundException;
 import i5.las2peer.p2p.Node;
+import i5.las2peer.p2p.ServiceAliasManager.AliasResolveResponse;
 import i5.las2peer.p2p.ServiceNameVersion;
 import i5.las2peer.p2p.ServiceVersion;
 import i5.las2peer.p2p.TimeoutException;
@@ -334,7 +335,10 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			sendStringResponse(exchange, HttpURLConnection.HTTP_OK, "Welcome to las2peer!");
 			return true;
 		}
-		String[] pathSplit = requestPath.split("/");
+
+		// split path
+		ArrayList<String> pathSplit = new ArrayList<String>(Arrays.asList(requestPath.split("/")));
+		pathSplit.removeIf(item -> item == null || "".equals(item));
 
 		// resolve service name
 		String serviceName;
@@ -352,9 +356,9 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		// get service version
 		ServiceVersion serviceVersion;
 		boolean versionSpecified = false;
-		if (pathSplit.length > serviceAliasLength && pathSplit[serviceAliasLength].startsWith("v")) {
+		if (pathSplit.size() > serviceAliasLength && pathSplit.get(serviceAliasLength).startsWith("v")) {
 			try {
-				serviceVersion = new ServiceVersion(pathSplit[serviceAliasLength].substring(1));
+				serviceVersion = new ServiceVersion(pathSplit.get(serviceAliasLength).substring(1));
 				versionSpecified = true;
 			} catch (IllegalArgumentException e) {
 				serviceVersion = new ServiceVersion("*");
@@ -369,13 +373,11 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		// construct base path
 		String basePath = "/";
 		for (int i = 0; i < serviceAliasLength; i++) {
-			basePath += pathSplit[1] + "/";
+			basePath += pathSplit.get(i) + "/";
 		}
 		if (versionSpecified) {
-			basePath += pathSplit[serviceAliasLength] + "/";
+			basePath += pathSplit.get(serviceAliasLength) + "/";
 		}
-
-		// TODO TEST path resolve ....
 
 		// create mediator
 		Mediator mediator;
