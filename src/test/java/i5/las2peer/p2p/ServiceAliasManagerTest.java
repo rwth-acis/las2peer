@@ -129,6 +129,12 @@ public class ServiceAliasManagerTest {
 				"serviceC");
 		assertEquals(node.getServiceAliasManager().resolvePathToServiceName("prefix/aliasC/asdf/rtzh")
 				.getNumMatchedParts(), 2);
+
+		// resolve with empty path parts
+		assertEquals(node.getServiceAliasManager().resolvePathToServiceName("//prefix//aliasC//asdf//rtzh//")
+				.getServiceName(), "serviceC");
+		assertEquals(node.getServiceAliasManager().resolvePathToServiceName("//prefix//aliasC//asdf//rtzh//")
+				.getNumMatchedParts(), 2);
 	}
 
 	@Test

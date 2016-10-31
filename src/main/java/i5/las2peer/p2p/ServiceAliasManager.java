@@ -10,14 +10,15 @@ import i5.las2peer.security.ServiceAgent;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.SerializationException;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Responsible for mapping service aliases to service names and resolving paths to service names.
  *
  */
 public class ServiceAliasManager {
-
-	// TODO WEBCONNECTOR
-	// TODO DOCS
 
 	private static final String PREFIX = "SERVICE_ALIAS-";
 	private static final int MAX_PATH_LEVEL = 10;
@@ -51,6 +52,8 @@ public class ServiceAliasManager {
 	/**
 	 * Registers the service alias of the given service.
 	 * 
+	 * Note that a service alias cannot be a prefix of another service alias.
+	 * 
 	 * @param agent an unlocked service agent
 	 * @param alias an alias, optionally seperated by {@link #SEPERATOR} and not deeper than {@link #MAX_PATH_LEVEL}.
 	 * @throws AgentLockedException if the service agent is locked
@@ -71,9 +74,9 @@ public class ServiceAliasManager {
 		String serviceName = agent.getServiceNameVersion().getName();
 
 		// preprocess path
-		alias = preprocessPath(alias);
-		String[] split = alias.split(SEPERATOR);
-		if (split.length > MAX_PATH_LEVEL) {
+		List<String> split = splitPath(alias);
+		alias = String.join(SEPERATOR, split);
+		if (split.size() > MAX_PATH_LEVEL) {
 			new AliasConflictException("Alias is too long.");
 		}
 
@@ -92,12 +95,12 @@ public class ServiceAliasManager {
 		// register prefixes as BLANK
 		int level = 0;
 		String currentKey = null;
-		while (level < split.length - 1) {
+		while (level < split.size() - 1) {
 			// construct key
 			if (currentKey == null) {
-				currentKey = split[level];
+				currentKey = split.get(level);
 			} else {
-				currentKey += SEPERATOR + split[level];
+				currentKey += SEPERATOR + split.get(level);
 			}
 
 			String currentEntry = null;
@@ -137,17 +140,16 @@ public class ServiceAliasManager {
 	 * @throws AliasNotFoundException if the path cannot be resolves to a service name
 	 */
 	public AliasResolveResponse resolvePathToServiceName(String path) throws AliasNotFoundException {
-		path = preprocessPath(path);
-		String[] split = path.split(SEPERATOR);
+		List<String> split = splitPath(path);
 
 		int level = 0;
 		String currentKey = null;
-		while (level < split.length && level < MAX_PATH_LEVEL) {
+		while (level < split.size() && level < MAX_PATH_LEVEL) {
 			// construct key
 			if (currentKey == null) {
-				currentKey = split[level];
+				currentKey = split.get(level);
 			} else {
-				currentKey += SEPERATOR + split[level];
+				currentKey += SEPERATOR + split.get(level);
 			}
 
 			String currentEntry = null;
@@ -172,15 +174,13 @@ public class ServiceAliasManager {
 		throw new AliasNotFoundException("Given path does not fit any alias.");
 	}
 
-	private String preprocessPath(String path) {
+	private List<String> splitPath(String path) {
 		path = path.toLowerCase().trim();
-		while (path.startsWith(SEPERATOR)) {
-			path = path.substring(1);
-		}
-		while (path.endsWith(SEPERATOR)) {
-			path = path.substring(0, path.length() - 2);
-		}
-		return path;
+
+		ArrayList<String> pathSplit = new ArrayList<String>(Arrays.asList(path.split(SEPERATOR)));
+		pathSplit.removeIf(item -> item == null || "".equals(item));
+
+		return pathSplit;
 	}
 
 	private String getEntry(String key) throws ArtifactNotFoundException, StorageException, CryptoException,
