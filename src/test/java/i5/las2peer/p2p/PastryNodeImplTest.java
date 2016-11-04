@@ -1,5 +1,8 @@
 package i5.las2peer.p2p;
 
+import i5.las2peer.security.UserAgent;
+import i5.las2peer.testing.TestSuite;
+
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -9,9 +12,6 @@ import java.util.Enumeration;
 
 import org.junit.Assert;
 import org.junit.Test;
-
-import i5.las2peer.security.UserAgent;
-import i5.las2peer.testing.TestSuite;
 
 public class PastryNodeImplTest {
 	public final int NODE_COUNT = 5;
@@ -53,7 +53,7 @@ public class PastryNodeImplTest {
 
 	}
 
-	// disabled, because it does not work in Jenkins...
+	// TODO disabled, because it does not work in Jenkins...
 
 	/*
 		@Before
