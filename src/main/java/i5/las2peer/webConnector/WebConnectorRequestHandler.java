@@ -90,14 +90,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		exchange.getResponseHeaders().set("Server-Name", "las2peer WebConnector");
 
 		try {
-			// TODO workaround
-			/*
-			 * authentication fails if header "Access-Control-Request-Headers:access_token" (in an OPTIONS request)
-			 * is set:
-			 * 
-			 * the WebConnector tries to auth via OIDC (and not anonymous; why?) and creates an invalid agent,
-			 * leading to an "Invalid Signature!" exception at the remote node 
-			 */
+			// TODO workaround (should be removed, options request should be handled as any other request)
 			if (exchange.getRequestMethod().equalsIgnoreCase("options")) {
 				sendResponseHeaders(exchange, HttpURLConnection.HTTP_OK, NO_RESPONSE_BODY);
 			} else {
@@ -329,8 +322,9 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	}
 
 	private boolean invoke(PassphraseAgent agent, HttpExchange exchange) {
-		// extract service information from uri
 		String requestPath = exchange.getRequestURI().getPath();
+
+		// welcome page
 		if (requestPath.equalsIgnoreCase("/")) {
 			sendStringResponse(exchange, HttpURLConnection.HTTP_OK, "Welcome to las2peer!");
 			return true;
