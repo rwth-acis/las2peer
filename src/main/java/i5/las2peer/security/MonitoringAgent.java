@@ -32,7 +32,7 @@ import i5.simpleXML.XMLSyntaxException;
  */
 public class MonitoringAgent extends PassphraseAgent {
 
-	public static final String PROCESSING_SERVICE_ClASS_NAME = "i5.las2peer.services.monitoring.processing.MonitoringDataProcessingService";
+	public static final String PROCESSING_SERVICE_CLASS_NAME = "i5.las2peer.services.mobsos.dataProcessing.MonitoringDataProcessingService";
 
 	/**
 	 * 
@@ -106,7 +106,7 @@ public class MonitoringAgent extends PassphraseAgent {
 				Serializable[] parameters = { (Serializable) content };
 				try {
 					// Try to send the content of the message to the Processing Service
-					boolean success = (Boolean) getRunningAtNode().invoke(this, PROCESSING_SERVICE_ClASS_NAME,
+					boolean success = (Boolean) getRunningAtNode().invoke(this, PROCESSING_SERVICE_CLASS_NAME,
 							"getMessages", parameters);
 					if (!success) {
 						// TODO: Check for performance of message receiving
