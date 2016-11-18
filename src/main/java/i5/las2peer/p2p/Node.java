@@ -1137,15 +1137,10 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	public Agent getAnonymous() {
 		if (anonymousAgent == null) {
 			try {
-				anonymousAgent = getAgent(MockAgentFactory.getAnonymous().getId());
-			} catch (Exception e) {
-				try {
-					anonymousAgent = MockAgentFactory.getAnonymous();
-					((UserAgent) anonymousAgent).unlockPrivateKey("anonymous");
-					storeAgent(anonymousAgent);
-				} catch (Exception e1) {
-					throw new RuntimeException("No anonymous agent could be initialized!?!", e1);
-				}
+				anonymousAgent = MockAgentFactory.getAnonymous();
+				((UserAgent) anonymousAgent).unlockPrivateKey("anonymous");
+			} catch (Exception e1) {
+				throw new RuntimeException("No anonymous agent could be initialized!?!", e1);
 			}
 		}
 
