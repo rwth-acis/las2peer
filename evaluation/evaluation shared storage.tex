@@ -1,0 +1,67 @@
+\documentclass{article}
+\usepackage{pgfplots}
+\usepackage{filecontents}
+
+
+\begin{document}
+\title{Evaluation of las2peer shared storage}
+\author{Thomas Cuj\'{e}}
+
+\maketitle
+
+Test Environment
+\begin{itemize}
+\item Single Host
+\item CPU: Intel(R) Core(TM) i5-3570K CPU @ 3.40GHz
+\item RAM: 12GB @ 1600
+\item network size: 30 Nodes
+\item storage mode: MEMORY, to reduce effects of (disk) IO delay
+\item replication factor: 5, means actual 6 copies of each artifact stored in the network
+\item all operations performed on randomly selected nodes
+\item except for write performance data, all methods use very small envelopes with only a few bytes content
+\end{itemize}
+
+
+\begin{figure}
+\begin{tikzpicture}
+\begin{axis}[width=16cm, height=16cm, xmin = 1, xmax = 10, ymin = 0, ymax = 1100, ylabel=kB / s]
+\addplot table [x=x, y=kbpersecond, col sep=comma] {data/results_size_100.csv};
+\addplot table [x=x, y=kbpersecond, col sep=comma] {data/results_size_200.csv};
+\addplot table [x=x, y=kbpersecond, col sep=comma] {data/results_size_500.csv};
+\addplot table [x=x, y=kbpersecond, col sep=comma] {data/results_size_1000.csv};
+\addplot table [x=x, y=kbpersecond, col sep=comma] {data/results_size_2000.csv};
+\addplot table [x=x, y=kbpersecond, col sep=comma] {data/results_size_5000.csv};
+\legend{100 kB,200 kB,500 kB,1000 kB,2000 kB,5000 kB}
+\end{axis}
+\end{tikzpicture}
+\caption{write speed correlated with content size on random identifiers}
+\end{figure}
+
+
+\begin{figure}
+\begin{tikzpicture}
+\begin{axis}[width=16cm, height=16cm, xmin = 0, xmax = 100, ymin = 0, ymax = 500, ylabel=ms]
+\addplot table [x=x, y=ms, col sep=comma] {data/results_parallel_10.csv};
+\addplot table [x=x, y=ms, col sep=comma] {data/results_parallel_20.csv};
+\addplot table [x=x, y=ms, col sep=comma] {data/results_parallel_50.csv};
+\addplot table [x=x, y=ms, col sep=comma] {data/results_parallel_100.csv};
+\legend{10 threads,20 threads,50 threads,100 threads}
+\end{axis}
+\end{tikzpicture}
+\caption{number of threads with parallel writes to random identifiers}
+\end{figure}
+
+
+\begin{figure}
+\begin{tikzpicture}
+\begin{axis}[width=16cm, height=16cm, xmin = 0, xmax = 1000, ymin = 0, ylabel=ms]
+\addplot table [x=x, y=fetchms, col sep=comma] {data/results_store_1000.csv};
+\addplot table [x=x, y=writems, col sep=comma] {data/results_store_1000.csv};
+\legend{fetch,write}
+\end{axis}
+\end{tikzpicture}
+\caption{fetch and write operation time correlated with update content iteration on same identifier}
+\end{figure}
+
+
+\end{document}
