@@ -38,7 +38,6 @@ import i5.las2peer.persistency.SharedStorage.STORAGE_MODE;
 import i5.las2peer.security.Agent;
 import i5.las2peer.security.AgentContext;
 import i5.las2peer.security.AgentException;
-import i5.las2peer.security.BasicAgentStorage;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.MessageReceiver;
 import i5.las2peer.security.UserAgent;
@@ -82,7 +81,6 @@ public class PastryNodeImpl extends Node {
 	private STORAGE_MODE mode = STORAGE_MODE.FILESYSTEM;
 	private String storageDir; // null = default choosen by SharedStorage
 	private Long nodeIdSeed;
-	private BasicAgentStorage locallyKnownAgents;
 
 	/**
 	 * This is the regular constructor used by the {@link i5.las2peer.tools.L2pNodeLauncher}. Its parameters can be set
@@ -106,7 +104,6 @@ public class PastryNodeImpl extends Node {
 		this.mode = storageMode;
 		this.storageDir = null; // null = SharedStorage chooses directory
 		this.nodeIdSeed = nodeIdSeed;
-		locallyKnownAgents = new BasicAgentStorage(this);
 		setupPastryEnvironment();
 		this.setStatus(NodeStatus.CONFIGURED);
 	}
@@ -139,7 +136,6 @@ public class PastryNodeImpl extends Node {
 		this.mode = storageMode;
 		this.storageDir = storageDir;
 		this.nodeIdSeed = nodeIdSeed;
-		locallyKnownAgents = new BasicAgentStorage(this);
 		setupPastryEnvironment();
 		this.setStatus(NodeStatus.CONFIGURED);
 	}
@@ -512,11 +508,6 @@ public class PastryNodeImpl extends Node {
 		return application.searchAgent(agentId, hintOfExpectedCount).toArray();
 	}
 
-	@Override
-	public boolean knowsAgentLocally(long agentId) {
-		return locallyKnownAgents.hasAgent(agentId);
-	}
-
 	/**
 	 * provides access to the underlying pastry application mostly for testing purposes
 	 * 
@@ -528,19 +519,21 @@ public class PastryNodeImpl extends Node {
 
 	@Override
 	public Agent getAgent(long id) throws AgentNotKnownException {
-		if (!locallyKnownAgents.hasAgent(id)) {
+		if (locallyKnownAgents.hasAgent(id)) {
+			return locallyKnownAgents.getAgent(id);
+		} else {
 			observerNotice(Event.AGENT_GET_STARTED, pastryNode, id, null, (Long) null, "");
 			try {
 				Envelope agentEnvelope = pastStorage.fetchEnvelope(Envelope.getAgentIdentifier(id), AGENT_GET_TIMEOUT);
 				Agent agentFromNet = Agent.createFromXml((String) agentEnvelope.getContent());
 				observerNotice(Event.AGENT_GET_SUCCESS, pastryNode, id, null, (Long) null, "");
 				locallyKnownAgents.registerAgent(agentFromNet);
+				return agentFromNet;
 			} catch (Exception e) {
 				observerNotice(Event.AGENT_GET_FAILED, pastryNode, id, null, (Long) null, "");
 				throw new AgentNotKnownException("Unable to retrieve Agent " + id + " from past storage", e);
 			}
 		}
-		return locallyKnownAgents.getAgent(id);
 	}
 
 	@Override
@@ -565,7 +558,7 @@ public class PastryNodeImpl extends Node {
 			try {
 				agentEnvelope = pastStorage.fetchEnvelope(Envelope.getAgentIdentifier(agent.getId()),
 						AGENT_GET_TIMEOUT);
-				agentEnvelope = pastStorage.createUnencryptedEnvelope(agentEnvelope, agentEnvelope.toXmlString());
+				agentEnvelope = pastStorage.createUnencryptedEnvelope(agentEnvelope, agent.toXmlString());
 			} catch (ArtifactNotFoundException e) {
 				agentEnvelope = pastStorage.createUnencryptedEnvelope(Envelope.getAgentIdentifier(agent.getId()),
 						agent.toXmlString());
