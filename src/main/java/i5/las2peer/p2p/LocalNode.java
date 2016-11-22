@@ -21,9 +21,8 @@ import i5.las2peer.persistency.Envelope;
 import i5.las2peer.persistency.LocalStorage;
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.security.Agent;
-import i5.las2peer.security.AgentException;
-import i5.las2peer.security.BasicAgentStorage;
 import i5.las2peer.security.AgentContext;
+import i5.las2peer.security.AgentException;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.MessageReceiver;
 import i5.las2peer.security.UserAgent;
@@ -39,8 +38,6 @@ import i5.las2peer.tools.TimerThread;
  */
 public class LocalNode extends Node {
 
-	private BasicAgentStorage locallyKnownAgents;
-
 	/**
 	 * an id for this node
 	 */
@@ -55,8 +52,6 @@ public class LocalNode extends Node {
 		Random r = new Random();
 		nodeId = r.nextLong();
 
-		locallyKnownAgents = new BasicAgentStorage(this);
-
 		setStatus(NodeStatus.CONFIGURED);
 	}
 
@@ -70,8 +65,6 @@ public class LocalNode extends Node {
 
 		Random r = new Random();
 		nodeId = r.nextLong();
-
-		locallyKnownAgents = new BasicAgentStorage(this);
 
 		setStatus(NodeStatus.CONFIGURED);
 	}
@@ -302,11 +295,6 @@ public class LocalNode extends Node {
 				getUserManager().updateUserAgent((UserAgent) agent);
 			}
 		}
-	}
-
-	@Override
-	public boolean knowsAgentLocally(long agentId) {
-		return locallyKnownAgents.hasAgent(agentId);
 	}
 
 	@Override

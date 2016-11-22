@@ -96,6 +96,9 @@ public class UserAgentManager {
 	 * @throws AgentNotKnownException
 	 */
 	public long getAgentIdByLogin(String name) throws AgentNotKnownException, L2pSecurityException {
+		if (name.equalsIgnoreCase("anonymous")) {
+			return node.getAnonymous().getId();
+		}
 		try {
 			Envelope env = node.fetchEnvelope(PREFIX_USER_NAME + name.toLowerCase());
 			return (Long) env.getContent();
