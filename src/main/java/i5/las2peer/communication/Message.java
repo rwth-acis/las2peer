@@ -40,7 +40,7 @@ import rice.p2p.commonapi.NodeHandle;
  * 
  * Therefore, it is necessary, that the generating Thread has access to the private key of the sending agent.
  * 
- * When specifiying a topic, the message will be sent to all agents listening to the topic. Since these agents are not
+ * When specifying a topic, the message will be sent to all agents listening to the topic. Since these agents are not
  * known, the message will not be encrypted.
  * 
  */
@@ -557,8 +557,8 @@ public class Message implements XmlAble, Cloneable {
 	/**
 	 * open the envelope, i.e. decrypt the content with the private key of the receiving agent
 	 * 
-	 * The storage has to know an unlocked version of the recipient agent! (i.e. a {@link i5.las2peer.security.AgentContext}
-	 * bound to him.
+	 * The storage has to know an unlocked version of the recipient agent! (i.e. a
+	 * {@link i5.las2peer.security.AgentContext} bound to him.
 	 * 
 	 * @param storage
 	 * @throws L2pSecurityException

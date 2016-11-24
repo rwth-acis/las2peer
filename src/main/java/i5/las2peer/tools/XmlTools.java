@@ -44,21 +44,24 @@ public class XmlTools {
 	public static XmlAble createFromXml(String xml, Class<?> c) throws MalformedXMLException, SerializationException {
 		try {
 			Method createFromXml = c.getDeclaredMethod("createFromXml", String.class);
-			if (Modifier.isStatic(createFromXml.getModifiers()))
+			if (Modifier.isStatic(createFromXml.getModifiers())) {
 				return (XmlAble) createFromXml.invoke(null, xml);
+			}
 		} catch (Exception e1) {
-			if (e1 instanceof MalformedXMLException)
+			if (e1 instanceof MalformedXMLException) {
 				throw (MalformedXMLException) e1;
-			// just try next idea
+				// just try next idea
+			}
 		}
 
 		try {
 			Constructor<?> constr = c.getDeclaredConstructor(String.class);
 			return (XmlAble) constr.newInstance(xml);
 		} catch (Exception e) {
-			if (e instanceof MalformedXMLException)
+			if (e instanceof MalformedXMLException) {
 				throw (MalformedXMLException) e;
-			// again just the next one
+				// again just the next one
+			}
 		}
 
 		try {
@@ -68,8 +71,9 @@ public class XmlTools {
 
 			return result;
 		} catch (Exception e) {
-			if (e instanceof MalformedXMLException)
+			if (e instanceof MalformedXMLException) {
 				throw (MalformedXMLException) e;
+			}
 		}
 
 		throw new SerializationException("unable to generate a new instance for the given xml: " + xml);

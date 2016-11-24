@@ -1,5 +1,22 @@
 package i5.las2peer.tools;
 
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import i5.las2peer.api.Connector;
 import i5.las2peer.api.ConnectorException;
 import i5.las2peer.api.exceptions.ArtifactNotFoundException;
@@ -33,24 +50,6 @@ import i5.las2peer.security.UserAgent;
 import i5.simpleXML.Element;
 import i5.simpleXML.Parser;
 import i5.simpleXML.XMLSyntaxException;
-
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.Serializable;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
 import rice.p2p.commonapi.NodeHandle;
 
 /**
@@ -99,8 +98,8 @@ public class L2pNodeLauncher {
 	 * @throws NumberFormatException
 	 * @throws SerializationException
 	 */
-	public String getEnvelope(String id) throws NumberFormatException, ArtifactNotFoundException, StorageException,
-			SerializationException {
+	public String getEnvelope(String id)
+			throws NumberFormatException, ArtifactNotFoundException, StorageException, SerializationException {
 		return node.fetchEnvelope(id).toXmlString();
 	}
 
@@ -229,8 +228,8 @@ public class L2pNodeLauncher {
 					node.storeArtifact(e);
 					printMessage("\t- stored artifact from " + xmlFile);
 				} else {
-					printWarning("Ingoring unknown XML object (" + xmlRoot.getName() + ") in '" + xmlFile.toString()
-							+ "'!");
+					printWarning(
+							"Ingoring unknown XML object (" + xmlRoot.getName() + ") in '" + xmlFile.toString() + "'!");
 				}
 			} catch (XMLSyntaxException e1) {
 				printError("Unable to parse XML contents of '" + xmlFile.toString() + "'!");
@@ -388,8 +387,8 @@ public class L2pNodeLauncher {
 	 * @throws InstantiationException
 	 * @throws IllegalAccessException
 	 */
-	private Connector loadConnector(String classname) throws ClassNotFoundException, InstantiationException,
-			IllegalAccessException {
+	private Connector loadConnector(String classname)
+			throws ClassNotFoundException, InstantiationException, IllegalAccessException {
 		Class<?> connectorClass = L2pNodeLauncher.class.getClassLoader().loadClass(classname);
 		Connector connector = (Connector) connectorClass.newInstance();
 		return connector;
@@ -433,8 +432,8 @@ public class L2pNodeLauncher {
 	 * @throws AgentAlreadyRegisteredException
 	 * @throws AgentException
 	 */
-	public void registerUserAgent(UserAgent agent) throws L2pSecurityException, AgentAlreadyRegisteredException,
-			AgentException {
+	public void registerUserAgent(UserAgent agent)
+			throws L2pSecurityException, AgentAlreadyRegisteredException, AgentException {
 		registerUserAgent(agent, null);
 	}
 
@@ -539,9 +538,9 @@ public class L2pNodeLauncher {
 	 * @throws EncodingFailedException
 	 * @throws TimeoutException
 	 */
-	public ListMethodsContent getServiceMethods(String serviceNameVersion) throws L2pSecurityException,
-			AgentNotKnownException, InterruptedException, EncodingFailedException, SerializationException,
-			TimeoutException {
+	public ListMethodsContent getServiceMethods(String serviceNameVersion)
+			throws L2pSecurityException, AgentNotKnownException, InterruptedException, EncodingFailedException,
+			SerializationException, TimeoutException {
 		if (currentUser == null) {
 			throw new IllegalStateException("please log in a valid user with registerUserAgent before!");
 		}
@@ -598,8 +597,9 @@ public class L2pNodeLauncher {
 			Files.write(file.toPath(), a.toXmlString().getBytes());
 
 			// save passphrase
-			Files.write(Paths.get(DEFAULT_SERVICE_AGENT_DIRECTORY + "passphrases.txt"), ("\n" + serviceNameVersion
-					+ ".xml;" + defaultPass).getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+			Files.write(Paths.get(DEFAULT_SERVICE_AGENT_DIRECTORY + "passphrases.txt"),
+					("\n" + serviceNameVersion + ".xml;" + defaultPass).getBytes(), StandardOpenOption.CREATE,
+					StandardOpenOption.APPEND);
 		}
 
 		// get passphrase from file
@@ -645,8 +645,8 @@ public class L2pNodeLauncher {
 	 * @throws L2pSecurityException
 	 * @throws AgentException
 	 */
-	public void startService(Agent serviceAgent) throws AgentAlreadyRegisteredException, L2pSecurityException,
-			AgentException {
+	public void startService(Agent serviceAgent)
+			throws AgentAlreadyRegisteredException, L2pSecurityException, AgentException {
 		if (!(serviceAgent instanceof ServiceAgent)) {
 			throw new IllegalArgumentException("given Agent is not a service agent!");
 
@@ -668,8 +668,8 @@ public class L2pNodeLauncher {
 	 * @throws NoSuchServiceException
 	 * @throws NodeException
 	 */
-	public void stopService(String serviceNameVersion) throws AgentNotKnownException, NoSuchServiceException,
-			NodeException {
+	public void stopService(String serviceNameVersion)
+			throws AgentNotKnownException, NoSuchServiceException, NodeException {
 		ServiceAgent agent = node.getLocalServiceAgent(ServiceNameVersion.fromString(serviceNameVersion));
 		node.unregisterReceiver(agent);
 	}
@@ -706,9 +706,8 @@ public class L2pNodeLauncher {
 	 * start interactive console mode based on a {@link i5.las2peer.tools.CommandPrompt}
 	 */
 	public void interactive() {
-		System.out.println("Entering interactive mode for node "
-				+ this.getNode().getPastryNode().getId().toStringFull() + "\n"
-				+ "-----------------------------------------------\n"
+		System.out.println("Entering interactive mode for node " + this.getNode().getPastryNode().getId().toStringFull()
+				+ "\n" + "-----------------------------------------------\n"
 				+ "Enter 'help' for further information of the console.\n"
 				+ "Use all public methods of the L2pNodeLauncher class for interaction with the P2P network.\n\n");
 
@@ -991,11 +990,11 @@ public class L2pNodeLauncher {
 		System.out.println("\t--port|-p [port] specifies the port number of the node\n");
 		System.out.println("\tno bootstrap argument states, that a complete new las2peer network is to start");
 		System.out.println("\tor");
-		System.out
-				.println("\t--bootstrap|-b [host-list] requires a comma seperated list of [address:ip] pairs of bootstrap nodes to connect to. This argument can occur multiple times.\n");
+		System.out.println(
+				"\t--bootstrap|-b [host-list] requires a comma seperated list of [address:ip] pairs of bootstrap nodes to connect to. This argument can occur multiple times.\n");
 		System.out.println("\t--observer|-o starts a monitoring observer at this node\n");
-		System.out
-				.println("\t--node-id-seed|-n [long] generates the node id by using this seed to provide persistence\n");
+		System.out.println(
+				"\t--node-id-seed|-n [long] generates the node id by using this seed to provide persistence\n");
 		System.out
 				.println("\t--storage-mode|-m filesystem|memory sets Pastry's storage mode, defaults to filesystem\n");
 
