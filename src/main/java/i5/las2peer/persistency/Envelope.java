@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.security.PublicKey;
 import java.util.Base64;
 import java.util.Collection;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map.Entry;
@@ -12,6 +11,10 @@ import java.util.Set;
 import java.util.logging.Level;
 
 import javax.crypto.SecretKey;
+
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import i5.las2peer.execution.L2pThread;
 import i5.las2peer.logging.L2pLogger;
@@ -25,9 +28,7 @@ import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
 import i5.las2peer.tools.SerializationException;
 import i5.las2peer.tools.SerializeTools;
-import i5.simpleXML.Element;
-import i5.simpleXML.Parser;
-import i5.simpleXML.XMLSyntaxException;
+import i5.las2peer.tools.XmlTools;
 
 public class Envelope implements Serializable, XmlAble {
 
@@ -318,81 +319,78 @@ public class Envelope implements Serializable, XmlAble {
 	/**
 	 * factory for generating an envelope from the given XML String representation
 	 * 
-	 * @param root
+	 * @param rootElement
 	 * @return envelope created from the given XML String serialization
 	 * @throws MalformedXMLException
 	 */
-	public static Envelope createFromXml(Element root) throws MalformedXMLException {
-		try {
-			if (!root.getName().equals("envelope")) {
-				throw new MalformedXMLException("not an envelope");
-			}
-			if (!root.hasAttribute("identifier")) {
-				throw new MalformedXMLException("identifier attribute expected!");
-			}
-			if (!root.hasAttribute("version")) {
-				throw new MalformedXMLException("version attribute expected!");
-			}
-			String identifier = root.getAttribute("identifier");
-			long version = Long.parseLong(root.getAttribute("version"));
-			Element content = root.getFirstChild();
-			if (!content.getName().equals("content")) {
-				throw new MalformedXMLException("envelope content expected");
-			}
-			if (!content.getAttribute("encoding").equals("Base64")) {
-				throw new MalformedXMLException("base 64 encoding of the content expected");
-			}
-			byte[] rawContent = Base64.getDecoder().decode(content.getFirstChild().getText());
-			Element keys = root.getChild(1);
-			if (!keys.getName().equals("keys")) {
-				throw new MalformedXMLException("not an envelope");
-			}
-			if (!keys.getAttribute("encoding").equals("base64")) {
-				throw new MalformedXMLException(
-						"base 64 encoding of the content expected - got: " + keys.getAttribute("encoding"));
-			}
-			if (!keys.getAttribute("encryption").equals(CryptoTools.getAsymmetricAlgorithm())) {
-				throw new MalformedXMLException(
-						CryptoTools.getAsymmetricAlgorithm() + " encryption of the content expected");
-			}
-			// reader keys
-			HashMap<PublicKey, byte[]> readerKeys = new HashMap<>();
-			for (Enumeration<Element> enKeys = keys.getChildren(); enKeys.hasMoreElements();) {
-				Element key = enKeys.nextElement();
-				if (!key.getName().equals("key")) {
-					throw new MalformedXMLException("key expected");
-				}
-				String strPublicKey = key.getAttribute("public");
-				try {
-					PublicKey publicKey = CryptoTools.stringToPublicKey(strPublicKey);
-					byte[] encryptedReaderKey = Base64.getDecoder().decode(key.getFirstChild().getText());
-					readerKeys.put(publicKey, encryptedReaderKey);
-				} catch (CryptoException e) {
-					throw new MalformedXMLException("Could not convert string to public key", e);
-				}
-
-			}
-			// groups
-			Element groups = root.getChild(2);
-			if (!groups.getName().equals("groups")) {
-				throw new MalformedXMLException("groups tag expected");
-			}
-			HashSet<Long> readerGroupIds = new HashSet<>();
-			for (Enumeration<Element> enGroups = groups.getChildren(); enGroups.hasMoreElements();) {
-				Element group = enGroups.nextElement();
-				if (!group.getName().equals("group")) {
-					throw new MalformedXMLException("group expected");
-				}
-				if (!group.hasAttribute("id")) {
-					throw new MalformedXMLException("group id expected");
-				}
-				long groupId = Long.valueOf(group.getAttribute("id"));
-				readerGroupIds.add(groupId);
-			}
-			return new Envelope(identifier, version, readerKeys, readerGroupIds, rawContent);
-		} catch (XMLSyntaxException e) {
-			throw new MalformedXMLException("problems with parsing the XML document", e);
+	public static Envelope createFromXml(Element rootElement) throws MalformedXMLException {
+		if (!rootElement.hasAttribute("identifier")) {
+			throw new MalformedXMLException("identifier attribute expected!");
 		}
+		String identifier = rootElement.getAttribute("identifier");
+		if (!rootElement.hasAttribute("version")) {
+			throw new MalformedXMLException("version attribute expected!");
+		}
+		long version = Long.parseLong(rootElement.getAttribute("version"));
+		// read content from XML
+		Element content = XmlTools.getSingularElement(rootElement, "las2peer:content");
+		if (!content.getAttribute("encoding").equals("Base64")) {
+			throw new MalformedXMLException("base 64 encoding of the content expected");
+		}
+		byte[] rawContent = Base64.getDecoder().decode(content.getTextContent());
+		// read reader keys from XML
+		Element keys = XmlTools.getSingularElement(rootElement, "las2peer:keys");
+		if (!keys.getAttribute("encoding").equalsIgnoreCase("base64")) {
+			throw new MalformedXMLException(
+					"base 64 encoding of the content expected - got: " + keys.getAttribute("encoding"));
+		}
+		if (!keys.getAttribute("encryption").equalsIgnoreCase(CryptoTools.getAsymmetricAlgorithm())) {
+			throw new MalformedXMLException(
+					CryptoTools.getAsymmetricAlgorithm() + " encryption of the content expected");
+		}
+		HashMap<PublicKey, byte[]> readerKeys = new HashMap<>();
+		NodeList enKeys = keys.getChildNodes();
+		for (int n = 0; n < enKeys.getLength(); n++) {
+			Node node = enKeys.item(n);
+			if (node.getNodeType() != Node.ELEMENT_NODE) {
+				// XXX logging
+				continue;
+			}
+			Element key = (Element) node;
+			if (!key.getNodeName().equals("las2peer:key")) {
+				throw new MalformedXMLException("key expected");
+			}
+			String strPublicKey = key.getAttribute("public");
+			try {
+				PublicKey publicKey = CryptoTools.stringToPublicKey(strPublicKey);
+				byte[] encryptedReaderKey = Base64.getDecoder().decode(key.getFirstChild().getTextContent());
+				readerKeys.put(publicKey, encryptedReaderKey);
+			} catch (CryptoException e) {
+				throw new MalformedXMLException("Could not convert string to public key", e);
+			}
+
+		}
+		// groups
+		Element groups = XmlTools.getSingularElement(rootElement, "las2peer:groups");
+		HashSet<Long> readerGroupIds = new HashSet<>();
+		NodeList enGroups = groups.getChildNodes();
+		for (int n = 0; n < enGroups.getLength(); n++) {
+			Node node = enKeys.item(n);
+			if (node.getNodeType() != Node.ELEMENT_NODE) {
+				// XXX logging
+				continue;
+			}
+			Element group = (Element) node;
+			if (!group.getNodeName().equals("las2peer:group")) {
+				throw new MalformedXMLException("group expected");
+			}
+			if (!group.hasAttribute("id")) {
+				throw new MalformedXMLException("group id expected");
+			}
+			long groupId = Long.valueOf(group.getAttribute("id"));
+			readerGroupIds.add(groupId);
+		}
+		return new Envelope(identifier, version, readerKeys, readerGroupIds, rawContent);
 	}
 
 	/**
@@ -403,11 +401,7 @@ public class Envelope implements Serializable, XmlAble {
 	 * @throws MalformedXMLException
 	 */
 	public static Envelope createFromXml(String xml) throws MalformedXMLException {
-		try {
-			return createFromXml(Parser.parse(xml, false));
-		} catch (XMLSyntaxException e) {
-			throw new MalformedXMLException("problems with parsing the xml document", e);
-		}
+		return createFromXml(XmlTools.getRootElement(xml, "las2peer:envelope"));
 	}
 
 }

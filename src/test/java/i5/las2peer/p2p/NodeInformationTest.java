@@ -6,12 +6,11 @@ import static org.junit.Assert.assertNull;
 import org.junit.Test;
 
 import i5.las2peer.persistency.MalformedXMLException;
-import i5.simpleXML.XMLSyntaxException;
 
 public class NodeInformationTest {
 
 	@Test
-	public void testXmlAndBack() throws XMLSyntaxException, MalformedXMLException {
+	public void testXmlAndBack() throws MalformedXMLException {
 
 		NodeInformation testee = NodeInformation.createFromXml(
 				"<las2peerNode><adminEmail>test@bla.com</adminEmail><adminName>Steven</adminName><description>some desc</description></las2peerNode>");

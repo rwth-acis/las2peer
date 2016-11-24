@@ -7,6 +7,7 @@ import java.util.Random;
 import java.util.regex.Pattern;
 
 import org.apache.commons.codec.binary.Base64;
+import org.w3c.dom.Element;
 
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
@@ -19,9 +20,7 @@ import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
 import i5.las2peer.tools.SerializationException;
 import i5.las2peer.tools.SerializeTools;
-import i5.simpleXML.Element;
-import i5.simpleXML.Parser;
-import i5.simpleXML.XMLSyntaxException;
+import i5.las2peer.tools.XmlTools;
 
 /**
  * An UserAgent represent a (End)user of the las2peer system.
@@ -186,20 +185,7 @@ public class UserAgent extends PassphraseAgent {
 	 *
 	 */
 	public static UserAgent createFromXml(String xml) throws MalformedXMLException {
-		try {
-			Element root = Parser.parse(xml, false);
-
-			if (!"user".equals(root.getAttribute("type"))) {
-				throw new MalformedXMLException("user agent expected");
-			}
-
-			if (!"agent".equals(root.getName())) {
-				throw new MalformedXMLException("agent expected");
-			}
-			return createFromXml(root);
-		} catch (XMLSyntaxException e) {
-			throw new MalformedXMLException("Error parsing xml string", e);
-		}
+		return createFromXml(XmlTools.getRootElement(xml, "las2peer:agent"));
 	}
 
 	/**
@@ -237,7 +223,7 @@ public class UserAgent extends PassphraseAgent {
 	/**
 	 * Sets the state of the object from a string representation resulting from a previous {@link #toXmlString} call.
 	 *
-	 * @param root parsed xml document
+	 * @param root parsed XML document
 	 * @return
 	 *
 	 * @exception MalformedXMLException
@@ -245,77 +231,57 @@ public class UserAgent extends PassphraseAgent {
 	 */
 	public static UserAgent createFromXml(Element root) throws MalformedXMLException {
 		try {
-			Element elId = root.getFirstChild();
-			long id = Long.parseLong(elId.getFirstChild().getText());
-
-			Element pubKey = root.getChild(1);
-			if (!pubKey.getName().equals("publickey")) {
-				throw new MalformedXMLException("public key expected");
-			}
+			// read id field from XML
+			Element elId = XmlTools.getSingularElement(root, "id");
+			long id = Long.parseLong(elId.getTextContent());
+			// read public key from XML
+			Element pubKey = XmlTools.getSingularElement(root, "publickey");
 			if (!pubKey.getAttribute("encoding").equals("base64")) {
 				throw new MalformedXMLException("base64 encoding expected");
 			}
-
-			PublicKey publicKey = (PublicKey) SerializeTools.deserializeBase64(pubKey.getFirstChild().getText());
-
-			Element privKey = root.getChild(2);
-			if (!privKey.getName().equals("privatekey")) {
-				throw new MalformedXMLException("private key expected");
-			}
+			PublicKey publicKey = (PublicKey) SerializeTools.deserializeBase64(pubKey.getTextContent());
+			// read private key from XML
+			Element privKey = XmlTools.getSingularElement(root, "privatekey");
 			if (!privKey.getAttribute("encrypted").equals(CryptoTools.getSymmetricAlgorithm())) {
 				throw new MalformedXMLException(CryptoTools.getSymmetricAlgorithm() + " expected");
 			}
 			if (!privKey.getAttribute("keygen").equals(CryptoTools.getSymmetricKeygenMethod())) {
 				throw new MalformedXMLException(CryptoTools.getSymmetricKeygenMethod() + " expected");
 			}
-
-			Element elSalt = privKey.getFirstChild();
-			if (!elSalt.getName().equals("salt")) {
-				throw new MalformedXMLException("salt expected");
-			}
+			Element dataPrivate = XmlTools.getSingularElement(privKey, "data");
+			byte[] encPrivate = Base64.decodeBase64(dataPrivate.getTextContent());
+			// read salt from XML
+			Element elSalt = XmlTools.getSingularElement(root, "salt");
 			if (!elSalt.getAttribute("encoding").equals("base64")) {
 				throw new MalformedXMLException("base64 encoding expected");
 			}
+			byte[] salt = Base64.decodeBase64(elSalt.getTextContent());
 
-			byte[] salt = Base64.decodeBase64(elSalt.getFirstChild().getText());
-
-			Element data = privKey.getChild(1);
-			if (!data.getName().equals("data")) {
-				throw new MalformedXMLException("data expected");
-			}
-			if (!data.getAttribute("encoding").equals("base64")) {
-				throw new MalformedXMLException("base64 encoding expected");
-			}
-			byte[] encPrivate = Base64.decodeBase64(data.getFirstChild().getText());
-
+			// required fields complete, create result
 			UserAgent result = new UserAgent(id, publicKey, encPrivate, salt);
 
-			int cnt = 3;
-			Element login = root.getChild(cnt);
-			if (login != null && login.getName().equals("login")) {
-				result.sLoginName = login.getFirstChild().getText();
-				cnt++;
-			}
+			// read and set optional fields
 
-			Element email = root.getChild(cnt);
+			// optional login name
+			Element login = XmlTools.getOptionalElement(root, "login");
+			if (login != null) {
+				result.sLoginName = login.getTextContent();
+			}
+			// optional email address
+			Element email = XmlTools.getOptionalElement(root, "email");
 			if (email != null) {
-				if (!email.getName().equals("email")) {
-					throw new MalformedXMLException("email or login element expected!");
-				}
-				result.sEmail = email.getFirstChild().getText();
-				cnt++;
+				result.sEmail = email.getTextContent();
 			}
-
-			Element xmlUserData = root.getChild(cnt);
-			if (xmlUserData != null && xmlUserData.getName().equals("userdata")) {
-				String base64UserData = xmlUserData.getFirstChild().getText();
-				result.userData = SerializeTools.deserializeBase64(base64UserData);
-				cnt++;
+			// optional user data
+			Element userdata = XmlTools.getOptionalElement(root, "userdata");
+			if (userdata != null) {
+				if (!userdata.getAttribute("encoding").equals("base64")) {
+					throw new MalformedXMLException("base64 encoding expected");
+				}
+				result.userData = SerializeTools.deserializeBase64(userdata.getTextContent());
 			}
 
 			return result;
-		} catch (XMLSyntaxException e) {
-			throw new MalformedXMLException("Error parsing xml string", e);
 		} catch (SerializationException e) {
 			throw new MalformedXMLException("Deserialization problems", e);
 		}

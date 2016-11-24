@@ -5,13 +5,14 @@ import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Random;
 
 import javax.crypto.SecretKey;
 
 import org.apache.commons.codec.binary.Base64;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
@@ -25,9 +26,7 @@ import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
 import i5.las2peer.tools.SerializationException;
 import i5.las2peer.tools.SerializeTools;
-import i5.simpleXML.Element;
-import i5.simpleXML.Parser;
-import i5.simpleXML.XMLSyntaxException;
+import i5.las2peer.tools.XmlTools;
 
 /**
  * An agent representing a group of other agents.
@@ -400,31 +399,18 @@ public class GroupAgent extends Agent {
 	}
 
 	/**
-	 * factory - create an instance of GroupAgent from its xml representation
+	 * factory - create an instance of GroupAgent from its XML representation
 	 * 
 	 * @param xml
 	 * @return a group agent
 	 * @throws MalformedXMLException
 	 */
 	public static GroupAgent createFromXml(String xml) throws MalformedXMLException {
-		try {
-			Element root = Parser.parse(xml, false);
-
-			if (!"group".equals(root.getAttribute("type"))) {
-				throw new MalformedXMLException("group agent expeced");
-			}
-			if (!"agent".equals(root.getName())) {
-				throw new MalformedXMLException("agent expected");
-			}
-
-			return createFromXml(root);
-		} catch (XMLSyntaxException e) {
-			throw new MalformedXMLException("Error parsing xml string", e);
-		}
+		return createFromXml(XmlTools.getRootElement(xml, "las2peer:agent"));
 	}
 
 	/**
-	 * factory - create an instance of GroupAgent based on a xml node
+	 * factory - create an instance of GroupAgent based on a XML node
 	 * 
 	 * @param root
 	 * @return a group agent
@@ -432,68 +418,36 @@ public class GroupAgent extends Agent {
 	 */
 	public static GroupAgent createFromXml(Element root) throws MalformedXMLException {
 		try {
-			Element elId = null;
-			Element pubKey = null;
-			Element privKey = null;
-			Element encryptedKeys = null;
-			Element groupname = null;
-			Element userdata = null;
-
-			Enumeration<Element> children = root.getChildren();
-			while (children.hasMoreElements()) {
-				Element next = children.nextElement();
-				String name = next.getName();
-				if (name.equals("id")) {
-					elId = next;
-				} else if (name.equals("publickey")) {
-					pubKey = next;
-				} else if (name.equals("privatekey")) {
-					privKey = next;
-				} else if (name.equals("unlockKeys")) {
-					encryptedKeys = next;
-				} else if (name.equals("groupname")) {
-					groupname = next;
-				} else if (name.equals("userdata")) {
-					userdata = next;
-				}
-			}
-
-			if (elId == null) {
-				throw new MalformedXMLException("element id expected");
-			}
-
-			if (pubKey == null) {
-				throw new MalformedXMLException("public key expected");
-			}
+			// read id field from XML
+			Element elId = XmlTools.getSingularElement(root, "id");
+			long id = Long.parseLong(elId.getTextContent());
+			// read public key from XML
+			Element pubKey = XmlTools.getSingularElement(root, "publickey");
 			if (!pubKey.getAttribute("encoding").equals("base64")) {
 				throw new MalformedXMLException("base64 encoding expected");
 			}
-
-			if (privKey == null) {
-				throw new MalformedXMLException("private key expected");
-			}
+			PublicKey publicKey = (PublicKey) SerializeTools.deserializeBase64(pubKey.getTextContent());
+			// read private key from XML
+			Element privKey = XmlTools.getSingularElement(root, "privatekey");
 			if (!privKey.getAttribute("encrypted").equals(CryptoTools.getSymmetricAlgorithm())) {
 				throw new MalformedXMLException(CryptoTools.getSymmetricAlgorithm() + " expected");
 			}
-
-			if (encryptedKeys == null) {
-				throw new MalformedXMLException("unlockKeys expected");
-			}
+			byte[] encPrivate = Base64.decodeBase64(privKey.getTextContent());
+			// read member keys from XML
+			Element encryptedKeys = XmlTools.getSingularElement(root, "unlockKeys");
 			if (!encryptedKeys.getAttribute("method").equals(CryptoTools.getAsymmetricAlgorithm())) {
 				throw new MalformedXMLException("base64 encoding expected");
 			}
-
-			long id = Long.parseLong(elId.getFirstChild().getText());
-			PublicKey publicKey = (PublicKey) SerializeTools.deserializeBase64(pubKey.getFirstChild().getText());
-			byte[] encPrivate = Base64.decodeBase64(privKey.getFirstChild().getText());
-
 			Hashtable<Long, byte[]> htMemberKeys = new Hashtable<Long, byte[]>();
-			for (Enumeration<Element> enKeys = encryptedKeys.getChildren(); enKeys.hasMoreElements();) {
-				Element elKey = enKeys.nextElement();
-
-				if (!elKey.getName().equals("keyentry")) {
-					throw new MalformedXMLException("unlockKeys expected");
+			NodeList enGroups = encryptedKeys.getElementsByTagName("keyentry");
+			for (int n = 0; n < enGroups.getLength(); n++) {
+				org.w3c.dom.Node node = enGroups.item(n);
+				short nodeType = node.getNodeType();
+				if (nodeType != org.w3c.dom.Node.ELEMENT_NODE) {
+					throw new MalformedXMLException(
+							"Node type (" + nodeType + ") is not type element (" + org.w3c.dom.Node.ELEMENT_NODE + ")");
 				}
+				Element elKey = (Element) node;
 				if (!elKey.hasAttribute("forAgent")) {
 					throw new MalformedXMLException("forAgent attribute expected");
 				}
@@ -502,30 +456,27 @@ public class GroupAgent extends Agent {
 				}
 
 				long agentId = Long.parseLong(elKey.getAttribute("forAgent"));
-				byte[] content = Base64.decodeBase64(elKey.getFirstChild().getText());
+				byte[] content = Base64.decodeBase64(elKey.getTextContent());
 				htMemberKeys.put(agentId, content);
 			}
-
 			GroupAgent result = new GroupAgent(id, publicKey, encPrivate, htMemberKeys);
 
-			// attach optional fields
+			// read and set optional fields
+			Element groupname = XmlTools.getOptionalElement(root, "groupname");
 			if (groupname != null) {
-				result.name = groupname.getFirstChild().getText();
+				result.name = groupname.getTextContent();
 			}
+			Element userdata = XmlTools.getOptionalElement(root, "userdata");
 			if (userdata != null) {
-				String base64UserData = userdata.getFirstChild().getText();
-				result.userData = SerializeTools.deserializeBase64(base64UserData);
+				result.userData = SerializeTools.deserializeBase64(userdata.getTextContent());
 			}
 
 			return result;
-		} catch (XMLSyntaxException e) {
-			throw new MalformedXMLException("Error parsing xml string", e);
 		} catch (SerializationException e) {
 			throw new MalformedXMLException("Deserialization problems", e);
 		} catch (L2pSecurityException e) {
 			throw new MalformedXMLException("Security Problems creating an agent from the xml string", e);
 		}
-
 	}
 
 	/**
