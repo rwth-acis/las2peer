@@ -600,6 +600,9 @@ public class CommandPrompt {
 		} else if (split[0].equals("?") || split[0].equals("help")) {
 			printHelp();
 			return ReturnStatus.OK_PROCEED;
+		} else if (split[0].equals("v") || split[0].equals("version")) {
+			printVersion();
+			return ReturnStatus.OK_PROCEED;
 		}
 
 		return ReturnStatus.NOT_KNOWN_PROCEED;
@@ -697,6 +700,8 @@ public class CommandPrompt {
 
 				+ "\thelp / ?\tprint this message\n\n"
 
+				+ "\tversion / ?\tv returns the las2peer version running on this node.\n\n"
+
 				+ "\tp(rint) [var1] [var2] ...\n" + "\t\t\tprint the contents of the given local variables\n\n"
 
 				+ "\tpackage\t[some.package.name]\n\n"
@@ -721,6 +726,15 @@ public class CommandPrompt {
 				+ "\t\t\tAssign a value to a local variable. Any command may like creating a new instance\n"
 				+ "\t\t\tor calling a static method may be used\n\n"
 				+ "Lines statring with // or # will be ignored\n\n");
+	}
+
+	/**
+	 * Prints the las2peer version.
+	 */
+	public void printVersion() {
+		Package p = L2pNodeLauncher.class.getPackage();
+		String version = p.getImplementationVersion();
+		System.out.println("las2peer version \"" + version + "\"");
 	}
 
 	/**

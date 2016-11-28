@@ -989,6 +989,9 @@ public class L2pNodeLauncher {
 		System.out.println("Help Message:");
 		System.out.println("\t['--help'|'-h']");
 
+		System.out.println("las2peer version:");
+		System.out.println("\t['--version'|'-v']");
+
 		System.out.println("\nStart Node:");
 		System.out
 				.println("\t{optional: --colored-shell|-c} -p [port] {optional1} {optional2} {method1} {method2} ...");
@@ -1030,6 +1033,15 @@ public class L2pNodeLauncher {
 	 */
 	public static void printHelp() {
 		printHelp(null);
+	}
+
+	/**
+	 * Prints the las2peer version.
+	 */
+	public static void printVersion() {
+		Package p = L2pNodeLauncher.class.getPackage();
+		String version = p.getImplementationVersion();
+		System.out.println("las2peer version \"" + version + "\"");
 	}
 
 	/**
@@ -1095,8 +1107,12 @@ public class L2pNodeLauncher {
 			if (larg.equals("-h") == true || larg.equals("--help") == true) { // Help Message
 				printHelp();
 				System.exit(1);
+			} else if (larg.equals("-v") || larg.equals("--version")) {
+				printVersion();
+				System.exit(1);
 			} else if (larg.equals("-w") || larg.equals("--windows-shell")) {
-				printWarning("Ignoring obsolete argument '" + arg + ", because colored output is disabled by default.");
+				printWarning(
+						"Ignoring obsolete argument '" + arg + "', because colored output is disabled by default.");
 			} else if (larg.equals("-c") == true || larg.equals("--colored-shell") == true) { // turn on colored output
 				ColoredOutput.allOn();
 			} else { // node instance parameter
