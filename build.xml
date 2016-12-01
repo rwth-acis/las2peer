@@ -446,21 +446,21 @@
 	</target>
 	
 	<target name="junit_tests" depends="init_junit, junit_jars, compile_all">
-		<foreach
-			target="execute.test"
-			maxthreads="9"
-			inheritall="true"
-			inheritrefs="true"
-			parallel="true"
-			param="test.source.absolute">
-			  <path>
-			    <fileset dir="${src.junit}">
-			      <include name="**/*Test.java"/>
-				  <exclude name="**/SandboxTest.java"/>
-			      <exclude name="**/ReplicationTest.java"/>
-			    </fileset>
-			  </path>
-		</foreach>
+		<for threadCount="9" parallel="true" param="test.source.absolute">
+			<path>
+				<fileset dir="${src.junit}">
+					<include name="**/*Test.java"/>
+					<exclude name="**/SandboxTest.java"/>
+					<exclude name="**/ReplicationTest.java"/>
+				</fileset>
+			</path>
+			<sequential>
+				<antcall target="execute.test" inheritall="true">
+					<param name="target" value="build" />
+					<param name="test.source.absolute" value="@{test.source.absolute}" />
+				</antcall>
+			</sequential>
+		</for>
 	</target>
 	
 	<target name="test_colored" depends="init_general">
