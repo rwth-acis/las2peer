@@ -160,7 +160,8 @@ public class UserAgent extends PassphraseAgent {
 				result.append("\t<email>" + sEmail + "</email>\n");
 			}
 			if (userData != null) {
-				result.append("\t<userdata>" + SerializeTools.serializeToBase64(userData) + "</userdata>\n");
+				result.append("\t<userdata encoding=\"base64\">" + SerializeTools.serializeToBase64(userData)
+						+ "</userdata>\n");
 			}
 
 			result.append("</las2peer:agent>\n");
