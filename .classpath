@@ -7,7 +7,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/FreePastry-2.1.1.jar" sourcepath="/FreePastry"/>
 	<classpathentry kind="lib" path="lib/hamcrest-core-1.3.jar"/>
 	<classpathentry kind="lib" path="lib/jaxp-api-1.4.5.jar"/>
-	<classpathentry kind="lib" path="lib/junit-4.11.jar"/>
+	<classpathentry kind="lib" path="lib/junit-4.12.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/xpp3-1.1.4c.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="output"/>
