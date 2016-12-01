@@ -6,9 +6,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.KeyPair;
 import java.security.PublicKey;
+import java.util.Base64;
 import java.util.Random;
 
-import org.apache.commons.codec.binary.Base64;
 import org.w3c.dom.Element;
 
 import i5.las2peer.api.Service;
@@ -104,9 +104,9 @@ public class ServiceAgent extends PassphraseAgent {
 					+ "\t<id>" + getId() + "</id>\n" + "\t<publickey encoding=\"base64\">"
 					+ SerializeTools.serializeToBase64(getPublicKey()) + "</publickey>\n" + "\t<privatekey encrypted=\""
 					+ CryptoTools.getSymmetricAlgorithm() + "\" keygen=\"" + CryptoTools.getSymmetricKeygenMethod()
-					+ "\">\n" + "\t\t<salt encoding=\"base64\">" + Base64.encodeBase64String(getSalt()) + "</salt>\n"
-					+ "\t\t<data encoding=\"base64\">" + getEncodedPrivate() + "</data>\n" + "\t</privatekey>\n"
-					+ "</las2peer:agent>\n";
+					+ "\">\n" + "\t\t<salt encoding=\"base64\">" + Base64.getEncoder().encodeToString(getSalt())
+					+ "</salt>\n" + "\t\t<data encoding=\"base64\">" + getEncodedPrivate() + "</data>\n"
+					+ "\t</privatekey>\n" + "</las2peer:agent>\n";
 		} catch (SerializationException e) {
 			throw new RuntimeException("Serialization problems with keys");
 		}
@@ -354,13 +354,13 @@ public class ServiceAgent extends PassphraseAgent {
 				throw new MalformedXMLException("base64 encoding expected");
 			}
 
-			byte[] salt = Base64.decodeBase64(elSalt.getTextContent());
+			byte[] salt = Base64.getDecoder().decode(elSalt.getTextContent());
 			// read data from XML
 			Element data = XmlTools.getSingularElement(rootElement, "data");
 			if (!data.getAttribute("encoding").equals("base64")) {
 				throw new MalformedXMLException("base64 encoding expected");
 			}
-			byte[] encPrivate = Base64.decodeBase64(data.getTextContent());
+			byte[] encPrivate = Base64.getDecoder().decode(data.getTextContent());
 
 			return new ServiceAgent(id, service, publicKey, encPrivate, salt);
 		} catch (SerializationException e) {

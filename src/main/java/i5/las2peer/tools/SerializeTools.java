@@ -7,10 +7,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
 import java.io.Serializable;
+import java.util.Base64;
 
 import javax.crypto.SecretKey;
-
-import org.apache.commons.codec.binary.Base64;
 
 /**
  * <i>Static</i> class as collection of serialization and deserialization methods.
@@ -47,7 +46,7 @@ public class SerializeTools {
 	 * @throws SerializationException
 	 */
 	public static String serializeToBase64(Serializable s) throws SerializationException {
-		return Base64.encodeBase64String(serialize(s));
+		return Base64.getEncoder().encodeToString(serialize(s));
 	}
 
 	/**
@@ -103,7 +102,7 @@ public class SerializeTools {
 	 * @throws SerializationException
 	 */
 	public static Serializable deserializeBase64(String base64) throws SerializationException {
-		return deserialize(Base64.decodeBase64(base64));
+		return deserialize(Base64.getDecoder().decode(base64));
 	}
 
 	/**

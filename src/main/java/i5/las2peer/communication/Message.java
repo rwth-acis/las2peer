@@ -8,6 +8,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Signature;
 import java.security.SignatureException;
+import java.util.Base64;
 import java.util.Date;
 import java.util.Random;
 
@@ -16,7 +17,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.commons.codec.binary.Base64;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -391,7 +391,7 @@ public class Message implements XmlAble, Cloneable {
 			sContent = ((XmlAble) content).toXmlString();
 		} else {
 			typeAttr = "Serializable";
-			sContent = Base64.encodeBase64String(SerializeTools.serialize((Serializable) content));
+			sContent = Base64.getEncoder().encodeToString(SerializeTools.serialize((Serializable) content));
 		}
 
 		String attrs = "";
@@ -663,7 +663,7 @@ public class Message implements XmlAble, Cloneable {
 			}
 
 			if (root.getAttribute("type").equals("Serializable")) {
-				content = SerializeTools.deserialize(Base64.decodeBase64(root.getTextContent()));
+				content = SerializeTools.deserializeBase64(root.getTextContent());
 			} else {
 				content = XmlTools.createFromXml(root.getFirstChild().toString(), root.getAttribute("class"));
 			}
@@ -790,16 +790,17 @@ public class Message implements XmlAble, Cloneable {
 			receiver = "to=\"" + recipientId + "\"";
 			encryption = " encryption=\"" + CryptoTools.getSymmetricAlgorithm() + "\"";
 			contentKey = "\t<contentKey encryption=\"" + CryptoTools.getAsymmetricAlgorithm()
-					+ "\" encoding=\"base64\">" + Base64.encodeBase64String(baContentKey) + "</contentKey>\n";
+					+ "\" encoding=\"base64\">" + Base64.getEncoder().encodeToString(baContentKey) + "</contentKey>\n";
 		} else {
 			receiver = "topic=\"" + topicId + "\"";
 		}
 
 		return "<las2peer:message" + " id=\"" + id + "\"" + response + " from=\"" + senderId + "\" " + receiver
 				+ " generated=\"" + timestampMs + "\" timeout=\"" + validMs + "\">\n" + sending + "\t<content"
-				+ encryption + " encoding=\"base64\">" + Base64.encodeBase64String(baEncryptedContent) + "</content>\n"
-				+ contentKey + "\t<signature encoding=\"base64\" method=\"" + CryptoTools.getSignatureMethod() + "\">"
-				+ Base64.encodeBase64String(baSignature) + "</signature>\n" + "</las2peer:message>\n";
+				+ encryption + " encoding=\"base64\">" + Base64.getEncoder().encodeToString(baEncryptedContent)
+				+ "</content>\n" + contentKey + "\t<signature encoding=\"base64\" method=\""
+				+ CryptoTools.getSignatureMethod() + "\">" + Base64.getEncoder().encodeToString(baSignature)
+				+ "</signature>\n" + "</las2peer:message>\n";
 	}
 
 	/**
@@ -863,10 +864,10 @@ public class Message implements XmlAble, Cloneable {
 			// sender = AgentStorage.getAgent( Long.parseLong(root.getAttribute ( "from")));
 			// recipient = AgentStorage.getAgent( Long.parseLong(root.getAttribute ( "to")));
 
-			baEncryptedContent = Base64.decodeBase64(content.getTextContent());
-			baSignature = Base64.decodeBase64(signature.getTextContent());
+			baEncryptedContent = Base64.getDecoder().decode(content.getTextContent());
+			baSignature = Base64.getDecoder().decode(signature.getTextContent());
 			if (contentKey != null) {
-				baContentKey = Base64.decodeBase64(contentKey.getTextContent());
+				baContentKey = Base64.getDecoder().decode(contentKey.getTextContent());
 			}
 
 			timestampMs = Long.parseLong(root.getAttribute("generated"));

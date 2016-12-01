@@ -3,10 +3,10 @@ package i5.las2peer.security;
 import java.io.Serializable;
 import java.security.KeyPair;
 import java.security.PublicKey;
+import java.util.Base64;
 import java.util.Random;
 import java.util.regex.Pattern;
 
-import org.apache.commons.codec.binary.Base64;
 import org.w3c.dom.Element;
 
 import i5.las2peer.communication.Message;
@@ -150,7 +150,7 @@ public class UserAgent extends PassphraseAgent {
 					+ "\t<publickey encoding=\"base64\">" + SerializeTools.serializeToBase64(getPublicKey())
 					+ "</publickey>\n" + "\t<privatekey encrypted=\"" + CryptoTools.getSymmetricAlgorithm()
 					+ "\" keygen=\"" + CryptoTools.getSymmetricKeygenMethod() + "\">\n"
-					+ "\t\t<salt encoding=\"base64\">" + Base64.encodeBase64String(getSalt()) + "</salt>\n"
+					+ "\t\t<salt encoding=\"base64\">" + Base64.getEncoder().encodeToString(getSalt()) + "</salt>\n"
 					+ "\t\t<data encoding=\"base64\">" + getEncodedPrivate() + "</data>\n" + "\t</privatekey>\n");
 
 			if (sLoginName != null) {
@@ -250,13 +250,13 @@ public class UserAgent extends PassphraseAgent {
 				throw new MalformedXMLException(CryptoTools.getSymmetricKeygenMethod() + " expected");
 			}
 			Element dataPrivate = XmlTools.getSingularElement(privKey, "data");
-			byte[] encPrivate = Base64.decodeBase64(dataPrivate.getTextContent());
+			byte[] encPrivate = Base64.getDecoder().decode(dataPrivate.getTextContent());
 			// read salt from XML
 			Element elSalt = XmlTools.getSingularElement(root, "salt");
 			if (!elSalt.getAttribute("encoding").equals("base64")) {
 				throw new MalformedXMLException("base64 encoding expected");
 			}
-			byte[] salt = Base64.decodeBase64(elSalt.getTextContent());
+			byte[] salt = Base64.getDecoder().decode(elSalt.getTextContent());
 
 			// required fields complete, create result
 			UserAgent result = new UserAgent(id, publicKey, encPrivate, salt);

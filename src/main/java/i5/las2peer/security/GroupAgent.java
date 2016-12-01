@@ -4,13 +4,13 @@ import java.io.Serializable;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Random;
 
 import javax.crypto.SecretKey;
 
-import org.apache.commons.codec.binary.Base64;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -373,7 +373,7 @@ public class GroupAgent extends Agent {
 
 			for (Long id : htEncryptedKeyVersions.keySet()) {
 				keyList += "\t\t<keyentry forAgent=\"" + id + "\" encoding=\"base64\">"
-						+ Base64.encodeBase64String(htEncryptedKeyVersions.get(id)) + "</keyentry>\n";
+						+ Base64.getEncoder().encodeToString(htEncryptedKeyVersions.get(id)) + "</keyentry>\n";
 			}
 
 			StringBuffer result = new StringBuffer("<las2peer:agent type=\"group\">\n" + "\t<id>" + getId() + "</id>\n"
@@ -432,7 +432,7 @@ public class GroupAgent extends Agent {
 			if (!privKey.getAttribute("encrypted").equals(CryptoTools.getSymmetricAlgorithm())) {
 				throw new MalformedXMLException(CryptoTools.getSymmetricAlgorithm() + " expected");
 			}
-			byte[] encPrivate = Base64.decodeBase64(privKey.getTextContent());
+			byte[] encPrivate = Base64.getDecoder().decode(privKey.getTextContent());
 			// read member keys from XML
 			Element encryptedKeys = XmlTools.getSingularElement(root, "unlockKeys");
 			if (!encryptedKeys.getAttribute("method").equals(CryptoTools.getAsymmetricAlgorithm())) {
@@ -456,7 +456,7 @@ public class GroupAgent extends Agent {
 				}
 
 				long agentId = Long.parseLong(elKey.getAttribute("forAgent"));
-				byte[] content = Base64.decodeBase64(elKey.getTextContent());
+				byte[] content = Base64.getDecoder().decode(elKey.getTextContent());
 				htMemberKeys.put(agentId, content);
 			}
 			GroupAgent result = new GroupAgent(id, publicKey, encPrivate, htMemberKeys);

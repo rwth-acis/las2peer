@@ -6,10 +6,10 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
+import java.util.Base64;
 
 import javax.crypto.SecretKey;
 
-import org.apache.commons.codec.binary.Base64;
 import org.w3c.dom.Element;
 
 import i5.las2peer.communication.Message;
@@ -224,7 +224,7 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	 * @return encoded version or the private key
 	 */
 	protected String getEncodedPrivate() {
-		return Base64.encodeBase64String(baEncrypedPrivate);
+		return Base64.getEncoder().encodeToString(baEncrypedPrivate);
 	}
 
 	/**
