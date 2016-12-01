@@ -1,15 +1,15 @@
 <ivy-module version="2.0">
-    <info organisation="i5" module="las2peer"/>
+	<info organisation="i5" module="las2peer" />
 	<publications>
-		<artifact type="pom" ext="pom" conf="default"/>
-		<artifact type="jar" ext="jar" conf="default"/>
+		<artifact type="pom" ext="pom" conf="default" />
+		<artifact type="jar" ext="jar" conf="default" />
 	</publications>
 
-    <dependencies>
-        <dependency org="commons-codec" name="commons-codec" rev="1.10" />
-        <dependency org="xpp3" name="xpp3" rev="1.1.4c" />
-        <dependency org="junit" name="junit" rev="4.11" />
-        <dependency org="javax.xml.parsers" name="jaxp-api" rev="1.4.5"/>
-        <dependency org="FreePastry" name="FreePastry" rev="2.1.1" />
-    </dependencies>
+	<dependencies>
+		<dependency org="commons-codec" name="commons-codec" rev="1.10" />
+		<dependency org="xpp3" name="xpp3" rev="1.1.4c" />
+		<dependency org="junit" name="junit" rev="4.11" />
+		<dependency org="javax.xml.parsers" name="jaxp-api" rev="1.4.5" />
+		<dependency org="FreePastry" name="FreePastry" rev="2.1.1" />
+	</dependencies>
 </ivy-module>
