@@ -333,6 +333,8 @@
 				<attribute name="Implementation-Vendor" value="${ivy.organisation}"/>
 			</manifest>
 		</jar>
+		<!-- create snapshot file -->
+		<copy file="${export.jars}/las2peer.jar" tofile="${export.jars}/las2peer-${ivy.las2peer.version}.jar"/>
 	</target>
 	
 	<target name="test_service_jar" depends="compile_main">
