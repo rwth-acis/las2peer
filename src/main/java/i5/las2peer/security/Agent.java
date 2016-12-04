@@ -1,5 +1,6 @@
 package i5.las2peer.security;
 
+import java.io.File;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
@@ -286,6 +287,20 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	 */
 	public Node getRunningAtNode() {
 		return runningAt;
+	}
+
+	/**
+	 * Factory: Create an agent from its XML file representation.
+	 * 
+	 * Depending on the type attribute of the root node, the type will be a {@link UserAgent}, {@link GroupAgent},
+	 * {@link ServiceAgent}. Creation of {@link MonitoringAgent}s is not supported.
+	 * 
+	 * @param xmlFile
+	 * @return an agent
+	 * @throws MalformedXMLException
+	 */
+	public static Agent createFromXml(File xmlFile) throws MalformedXMLException {
+		return createFromXml(XmlTools.getRootElement(xmlFile, "las2peer:agent"));
 	}
 
 	/**

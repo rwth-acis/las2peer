@@ -17,8 +17,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.w3c.dom.Element;
-
 import i5.las2peer.api.Connector;
 import i5.las2peer.api.ConnectorException;
 import i5.las2peer.api.exceptions.ArtifactNotFoundException;
@@ -202,8 +200,7 @@ public class L2pNodeLauncher {
 		})) {
 			try {
 				// maybe an agent?
-				Element agentRoot = XmlTools.getRootElement(xmlFile, "agent");
-				Agent agent = Agent.createFromXml(agentRoot);
+				Agent agent = Agent.createFromXml(xmlFile);
 				agentIdToXml.put(agent.getId(), xmlFile.getName());
 				if (agent instanceof PassphraseAgent) {
 					String passphrase = htPassphrases.get(xmlFile.getName());
