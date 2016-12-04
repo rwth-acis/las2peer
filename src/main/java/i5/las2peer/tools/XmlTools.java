@@ -1,6 +1,7 @@
 package i5.las2peer.tools;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -105,27 +106,60 @@ public class XmlTools {
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 			Document doc = dBuilder.parse(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)));
-			doc.getDocumentElement().normalize();
-			NodeList nList = doc.getElementsByTagName(rootElementName);
-			int len = nList.getLength();
-			if (len != 1) {
-				throw new MalformedXMLException(
-						"Exactly one element '" + rootElementName + "' per XML document expected! Found: " + len);
-			}
-			org.w3c.dom.Node rootNode = nList.item(0);
-			String rootNodeName = rootNode.getNodeName();
-			if (!rootNodeName.equalsIgnoreCase(rootElementName)) {
-				throw new MalformedXMLException("This is not an " + rootElementName + " but a " + rootNodeName);
-			}
-			short rootNodeType = rootNode.getNodeType();
-			if (rootNodeType != org.w3c.dom.Node.ELEMENT_NODE) {
-				throw new MalformedXMLException("Root node type (" + rootNodeType + ") is not type element ("
-						+ org.w3c.dom.Node.ELEMENT_NODE + ")");
-			}
-			return (Element) rootNode;
+			return getRootElement(doc, rootElementName);
 		} catch (ParserConfigurationException | IOException | SAXException e) {
 			throw new MalformedXMLException("Error parsing xml string", e);
 		}
+	}
+
+	/**
+	 * Gets the root element from the given file containing only ONE XML representation and throws an exception if the
+	 * name does not match with the given name.
+	 * 
+	 * @param xmlFile The file containing one XML representation that should be parsed.
+	 * @param rootElementName The tag name of the root element. CASE SENSITIVE
+	 * @return Returns the root element with the given tag name.
+	 * @throws MalformedXMLException If the root element does not have the given name or multiple root elements exist.
+	 */
+	public static Element getRootElement(File xmlFile, String rootElementName) throws MalformedXMLException {
+		try {
+			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+			Document doc = dBuilder.parse(xmlFile);
+			return getRootElement(doc, rootElementName);
+		} catch (ParserConfigurationException | IOException | SAXException e) {
+			throw new MalformedXMLException("Error parsing xml string", e);
+		}
+	}
+
+	/**
+	 * Gets the root element from the given document type containing only ONE XML representation and throws an exception
+	 * if the name does not match with the given name.
+	 * 
+	 * @param document The document type containing one XML representation that should be parsed.
+	 * @param rootElementName The tag name of the root element. CASE SENSITIVE
+	 * @return Returns the root element with the given tag name.
+	 * @throws MalformedXMLException If the root element does not have the given name or multiple root elements exist.
+	 */
+	public static Element getRootElement(Document document, String rootElementName) throws MalformedXMLException {
+		document.getDocumentElement().normalize();
+		NodeList nList = document.getElementsByTagName(rootElementName);
+		int len = nList.getLength();
+		if (len != 1) {
+			throw new MalformedXMLException(
+					"Exactly one element '" + rootElementName + "' per XML document expected! Found: " + len);
+		}
+		org.w3c.dom.Node rootNode = nList.item(0);
+		String rootNodeName = rootNode.getNodeName();
+		if (!rootNodeName.equalsIgnoreCase(rootElementName)) {
+			throw new MalformedXMLException("This is not an " + rootElementName + " but a " + rootNodeName);
+		}
+		short rootNodeType = rootNode.getNodeType();
+		if (rootNodeType != org.w3c.dom.Node.ELEMENT_NODE) {
+			throw new MalformedXMLException("Root node type (" + rootNodeType + ") is not type element ("
+					+ org.w3c.dom.Node.ELEMENT_NODE + ")");
+		}
+		return (Element) rootNode;
 	}
 
 	/**

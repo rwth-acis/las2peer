@@ -17,14 +17,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 import i5.las2peer.api.Connector;
 import i5.las2peer.api.ConnectorException;
@@ -45,7 +38,6 @@ import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.p2p.ServiceNameVersion;
 import i5.las2peer.p2p.TimeoutException;
 import i5.las2peer.persistency.EncodingFailedException;
-import i5.las2peer.persistency.Envelope;
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.persistency.SharedStorage.STORAGE_MODE;
 import i5.las2peer.security.Agent;
@@ -209,56 +201,33 @@ public class L2pNodeLauncher {
 			}
 		})) {
 			try {
-				DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-				DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-				Document doc = dBuilder.parse(xmlFile);
-				doc.getDocumentElement().normalize();
-				NodeList nList = doc.getElementsByTagName("agent");
-				for (int temp = 0; temp < nList.getLength();) {
-					Element rootElement = (Element) nList.item(temp);
-					String rootNodeName = rootElement.getNodeName();
-					if (rootNodeName.equalsIgnoreCase(Agent.class.getSimpleName())) {
-						Agent agent = Agent.createFromXml(rootElement);
-						agentIdToXml.put(agent.getId(), xmlFile.getName());
-						if (agent instanceof PassphraseAgent) {
-							String passphrase = htPassphrases.get(xmlFile.getName());
-							if (passphrase != null) {
-								((PassphraseAgent) agent).unlockPrivateKey(passphrase);
-							} else {
-								printWarning("\t- got no passphrase for agent from " + xmlFile.getName());
-							}
-							node.storeAgent(agent);
-							printMessage("\t- stored agent from " + xmlFile);
-						} else if (agent instanceof GroupAgent) {
-							GroupAgent ga = (GroupAgent) agent;
-							groupAgents.add(ga);
-						} else {
-							throw new IllegalArgumentException("Unknown agent type: " + agent.getClass());
-						}
-					} else if (rootNodeName.equalsIgnoreCase(Envelope.class.getSimpleName())) {
-						Envelope e = Envelope.createFromXml(rootElement);
-						// TODO fix upload Envelope from startup directory
-						node.storeArtifact(e);
-						printMessage("\t- stored artifact from " + xmlFile);
+				// maybe an agent?
+				Element agentRoot = XmlTools.getRootElement(xmlFile, "agent");
+				Agent agent = Agent.createFromXml(agentRoot);
+				agentIdToXml.put(agent.getId(), xmlFile.getName());
+				if (agent instanceof PassphraseAgent) {
+					String passphrase = htPassphrases.get(xmlFile.getName());
+					if (passphrase != null) {
+						((PassphraseAgent) agent).unlockPrivateKey(passphrase);
 					} else {
-						printWarning(
-								"Ingoring unknown XML object (" + rootNodeName + ") in '" + xmlFile.toString() + "'!");
+						printWarning("\t- got no passphrase for agent from " + xmlFile.getName());
 					}
+					node.storeAgent(agent);
+					printMessage("\t- stored agent from " + xmlFile);
+				} else if (agent instanceof GroupAgent) {
+					GroupAgent ga = (GroupAgent) agent;
+					groupAgents.add(ga);
+				} else {
+					throw new IllegalArgumentException("Unknown agent type: " + agent.getClass());
 				}
-			} catch (ParserConfigurationException | SAXException e1) {
-				printError("Unable to parse XML contents of '" + xmlFile.toString() + "'!");
 			} catch (MalformedXMLException e) {
 				printError("unable to deserialize contents of " + xmlFile.toString() + "!");
-			} catch (IOException e) {
-				printError("problems reading the contents of " + xmlFile.toString() + ": " + e);
 			} catch (L2pSecurityException e) {
 				printError("error storing agent from " + xmlFile.toString() + ": " + e);
 			} catch (AgentAlreadyRegisteredException e) {
 				printError("agent from " + xmlFile.toString() + " already known at this node!");
 			} catch (AgentException e) {
 				printError("unable to generate agent " + xmlFile.toString() + "!");
-			} catch (StorageException e) {
-				printError("unable to store contents of " + xmlFile.toString() + "!");
 			}
 		}
 		// wait till all user agents are added from startup directory to unlock group agents
