@@ -742,8 +742,6 @@ public class L2pNodeLauncher {
 	private L2pNodeLauncher(L2pClassManager cl, Integer port, String bootstrap) {
 		node = new PastryNodeImpl(cl, port, bootstrap, STORAGE_MODE.MEMORY, null, null);
 		commandPrompt = new CommandPrompt(this);
-		// FIXME package loader initialization
-		uploader = new PackageUploader();
 	}
 
 	/**
