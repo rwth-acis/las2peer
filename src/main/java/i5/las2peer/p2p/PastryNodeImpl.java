@@ -122,15 +122,24 @@ public class PastryNodeImpl extends Node {
 	 *            be random.
 	 */
 	public PastryNodeImpl(String bootstrap, STORAGE_MODE storageMode, String storageDir, Long nodeIdSeed) {
-		super(null, true, false);
+		this(null, null, bootstrap, storageMode, storageDir, nodeIdSeed);
+	}
+
+	public PastryNodeImpl(L2pClassManager classManager, Integer port, String bootstrap, STORAGE_MODE storageMode,
+			String storageDir, Long nodeIdSeed) {
+		super(classManager, true, false);
 		pastryBindAddress = InetAddress.getLoopbackAddress();
-		// use system defined port
-		try {
-			ServerSocket tmpSocket = new ServerSocket(0);
-			tmpSocket.close();
-			pastryPort = tmpSocket.getLocalPort();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
+		if (port == null) {
+			// use system defined port
+			try {
+				ServerSocket tmpSocket = new ServerSocket(0);
+				tmpSocket.close();
+				pastryPort = tmpSocket.getLocalPort();
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		} else {
+			pastryPort = port;
 		}
 		this.bootStrap = bootstrap;
 		this.mode = storageMode;

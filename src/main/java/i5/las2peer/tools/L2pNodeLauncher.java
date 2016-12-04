@@ -739,6 +739,13 @@ public class L2pNodeLauncher {
 		commandPrompt = new CommandPrompt(this);
 	}
 
+	private L2pNodeLauncher(L2pClassManager cl, Integer port, String bootstrap) {
+		node = new PastryNodeImpl(cl, port, bootstrap, STORAGE_MODE.MEMORY, null, null);
+		commandPrompt = new CommandPrompt(this);
+		// FIXME package loader initialization
+		uploader = new PackageUploader();
+	}
+
 	/**
 	 * actually start the node
 	 * 
@@ -786,6 +793,7 @@ public class L2pNodeLauncher {
 	 * @throws NodeException
 	 */
 	public static L2pNodeLauncher launchSingle(Iterable<String> args) throws NodeException {
+		boolean debugMode = false;
 		Integer port = null;
 		String bootstrap = null;
 		STORAGE_MODE storageMode = null;
@@ -800,7 +808,9 @@ public class L2pNodeLauncher {
 			String arg = itArg.next();
 			itArg.remove();
 			String larg = arg.toLowerCase();
-			if (larg.equals("-p") == true || larg.equals("--port") == true) {
+			if (larg.equals("-debug") || larg.equals("--debug")) {
+				debugMode = true;
+			} else if (larg.equals("-p") == true || larg.equals("--port") == true) {
 				if (itArg.hasNext() == false) {
 					printWarning("ignored '" + arg + "', because port number expected after it");
 				} else {
@@ -881,15 +891,21 @@ public class L2pNodeLauncher {
 				commands.add(arg);
 			}
 		}
-		// check parameters
-		if (port == null) {
-			printError("no port number specified");
-			return null;
-		} else if (port < 1) {
-			printError("invalid port number specified");
-			return null;
+		// check parameters and launch node
+		if (debugMode) {
+			System.err.println("WARNING! Launching node in DEBUG mode! THIS NODE IS NON PERSISTENT!");
+			return launchDebug(port, bootstrap, sLogDir, serviceDirectories, commands);
+		} else {
+			if (port == null) {
+				printError("no port number specified");
+				return null;
+			} else if (port < 1) {
+				printError("invalid port number specified");
+				return null;
+			}
+			return launchSingle(port, bootstrap, storageMode, observer, sLogDir, serviceDirectories, nodeIdSeed,
+					commands);
 		}
-		return launchSingle(port, bootstrap, storageMode, observer, sLogDir, serviceDirectories, nodeIdSeed, commands);
 	}
 
 	public static L2pNodeLauncher launchSingle(int port, String bootstrap, STORAGE_MODE storageMode, boolean observer,
@@ -915,6 +931,51 @@ public class L2pNodeLauncher {
 		L2pClassManager cl = new L2pClassManager(new FileSystemRepository(serviceDirectories, true),
 				L2pNodeLauncher.class.getClassLoader());
 		L2pNodeLauncher launcher = new L2pNodeLauncher(port, bootstrap, storageMode, observer, cl, nodeIdSeed);
+		// handle commands
+		try {
+			launcher.start();
+
+			for (String command : commands) {
+				System.out.println("Handling: '" + command + "'");
+				launcher.commandPrompt.handleLine(command);
+			}
+
+			if (launcher.isFinished()) {
+				printMessage("All commands have been handled and shutdown has been called -> end!");
+			} else {
+				printMessage("All commands have been handled -- keeping node open!");
+			}
+		} catch (NodeException e) {
+			launcher.bFinished = true;
+			logger.printStackTrace(e);
+			throw e;
+		}
+
+		return launcher;
+	}
+
+	private static L2pNodeLauncher launchDebug(Integer port, String boostrap, String sLogDir,
+			Iterable<String> serviceDirectories, Iterable<String> commands) throws NodeException {
+		// check parameters
+		if (sLogDir != null) {
+			try {
+				L2pLogger.setGlobalLogDirectory(sLogDir);
+			} catch (Exception ex) {
+				printWarning("couldn't use '" + sLogDir + "' as log directory." + ex);
+			}
+		}
+		if (serviceDirectories == null) {
+			ArrayList<String> directories = new ArrayList<>();
+			directories.add(DEFAULT_SERVICE_DIRECTORY);
+			serviceDirectories = directories;
+		}
+		if (commands == null) {
+			commands = new ArrayList<>();
+		}
+		// instantiate launcher
+		L2pClassManager cl = new L2pClassManager(new FileSystemRepository(serviceDirectories, true),
+				L2pNodeLauncher.class.getClassLoader());
+		L2pNodeLauncher launcher = new L2pNodeLauncher(cl, port, boostrap);
 		// handle commands
 		try {
 			launcher.start();
