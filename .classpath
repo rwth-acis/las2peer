@@ -5,7 +5,6 @@
 	<classpathentry kind="lib" path="lib/activation-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/annotations-2.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/aopalliance-repackaged-2.5.0-b05.jar"/>
-	<classpathentry kind="lib" path="lib/commons-codec-1.10.jar"/>
 	<classpathentry kind="lib" path="lib/commons-io-2.4.jar"/>
 	<classpathentry kind="lib" path="lib/commons-lang3-3.3.2.jar"/>
 	<classpathentry kind="lib" path="lib/FreePastry-2.1.1.jar"/>
@@ -14,7 +13,6 @@
 	<classpathentry kind="lib" path="lib/hk2-api-2.5.0-b05.jar"/>
 	<classpathentry kind="lib" path="lib/hk2-locator-2.5.0-b05.jar"/>
 	<classpathentry kind="lib" path="lib/hk2-utils-2.5.0-b05.jar"/>
-	<classpathentry kind="lib" path="lib/i5-simpleXML-0.2.jar"/>
 	<classpathentry kind="lib" path="lib/jackson-annotations-2.5.4.jar"/>
 	<classpathentry kind="lib" path="lib/jackson-core-2.5.4.jar"/>
 	<classpathentry kind="lib" path="lib/jackson-databind-2.5.4.jar"/>
