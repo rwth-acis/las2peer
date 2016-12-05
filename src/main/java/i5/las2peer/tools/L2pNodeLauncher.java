@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
@@ -577,9 +578,13 @@ public class L2pNodeLauncher {
 			Files.write(file.toPath(), a.toXmlString().getBytes());
 
 			// save passphrase
-			Files.write(Paths.get(DEFAULT_SERVICE_AGENT_DIRECTORY + "passphrases.txt"),
-					("\n" + serviceNameVersion + ".xml;" + defaultPass).getBytes(), StandardOpenOption.CREATE,
-					StandardOpenOption.APPEND);
+			Path passphrasesPath = Paths.get(DEFAULT_SERVICE_AGENT_DIRECTORY + "passphrases.txt");
+			String passphraseLine = serviceNameVersion + ".xml;" + defaultPass;
+			try {
+				Files.write(passphrasesPath, ("\n" + passphraseLine).getBytes(), StandardOpenOption.APPEND);
+			} catch (NoSuchFileException e) {
+				Files.write(passphrasesPath, passphraseLine.getBytes(), StandardOpenOption.CREATE);
+			}
 		}
 
 		// get passphrase from file
