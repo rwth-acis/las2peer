@@ -210,22 +210,17 @@ public class LocalNode extends Node {
 
 	@Override
 	public Agent getAgent(long id) throws AgentNotKnownException {
-		if (locallyKnownAgents.hasAgent(id)) {
-			return locallyKnownAgents.getAgent(id);
-		} else {
-			synchronized (htKnownAgents) {
-				String xml = htKnownAgents.get(id);
-				if (xml == null) {
-					throw new AgentNotKnownException(id);
-				}
-
-				try {
-					Agent result = Agent.createFromXml(xml);
-					locallyKnownAgents.registerAgent(result);
-					return result;
-				} catch (MalformedXMLException e) {
-					throw new AgentNotKnownException("XML problems with storage!", e);
-				}
+		synchronized (htKnownAgents) {
+			String xml = htKnownAgents.get(id);
+			if (xml == null) {
+				throw new AgentNotKnownException(id);
+			}
+			try {
+				Agent result = Agent.createFromXml(xml);
+				locallyKnownAgents.registerAgent(result);
+				return result;
+			} catch (MalformedXMLException e) {
+				throw new AgentNotKnownException("XML problems with storage!", e);
 			}
 		}
 	}
