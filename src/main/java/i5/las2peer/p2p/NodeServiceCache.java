@@ -295,10 +295,12 @@ public class NodeServiceCache {
 				try {
 					res.open(acting, runningAt);
 				} catch (Exception e) {
+					// XXX logging
 					continue;
 				}
 
 				if (!(res.getContent() instanceof ServiceDiscoveryContent)) {
+					// XXX logging
 					continue;
 				}
 

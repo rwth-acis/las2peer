@@ -18,6 +18,7 @@ import java.util.Properties;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
 
 import i5.las2peer.api.StorageCollisionHandler;
 import i5.las2peer.api.StorageEnvelopeHandler;
@@ -28,6 +29,7 @@ import i5.las2peer.api.exceptions.StorageException;
 import i5.las2peer.classLoaders.L2pClassManager;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
+import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.p2p.pastry.MessageEnvelope;
 import i5.las2peer.p2p.pastry.NodeApplication;
@@ -59,6 +61,8 @@ import rice.pastry.standard.RandomNodeIdFactory;
  * encapsulation) of the FreePastry library.
  */
 public class PastryNodeImpl extends Node {
+
+	private static final L2pLogger logger = L2pLogger.getInstance(PastryNodeImpl.class);
 
 	private static final int AGENT_GET_TIMEOUT = 10000;
 	private static final int AGENT_STORE_TIMEOUT = 10000;
@@ -164,7 +168,7 @@ public class PastryNodeImpl extends Node {
 					break;
 				}
 			} catch (Exception e) {
-				// XXX logging
+				logger.log(Level.FINER, "Exception while checking for config file '" + filename + "'", e);
 			}
 		}
 		Hashtable<String, String> properties = new Hashtable<>();
@@ -207,8 +211,7 @@ public class PastryNodeImpl extends Node {
 		}
 		for (String prop : properties.keySet()) {
 			pastryEnvironment.getParameters().setString(prop, properties.get(prop));
-			// XXX logging
-			System.out.println("setting: " + prop + ": '" + properties.get(prop) + "'");
+			logger.info("setting: " + prop + ": '" + properties.get(prop) + "'");
 		}
 	}
 
@@ -467,9 +470,11 @@ public class PastryNodeImpl extends Node {
 		try {
 			application.sendMessage(new MessageEnvelope(pastryNode.getLocalHandle(), message), (NodeHandle) atNodeId);
 		} catch (MalformedXMLException e) {
+			logger.log(Level.SEVERE, "Can't read message XML", e);
 			observerNotice(Event.MESSAGE_FAILED, pastryNode, message.getSenderId(), atNodeId, message.getRecipientId(),
 					"XML exception!");
 		} catch (MessageException e) {
+			logger.log(Level.SEVERE, "Could not send message", e);
 			observerNotice(Event.MESSAGE_FAILED, pastryNode, message.getSenderId(), atNodeId, message.getRecipientId(),
 					"Message exception!");
 		}
