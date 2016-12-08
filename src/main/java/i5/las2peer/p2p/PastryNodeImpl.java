@@ -201,6 +201,9 @@ public class PastryNodeImpl extends Node {
 		if (pastryBindAddress != null && pastryBindAddress.isLoopbackAddress()) {
 			properties.put("allow_loopback_address", "1");
 		}
+		if (!properties.containsKey("p2p_past_messageTimeout")) {
+			properties.put("p2p_past_messageTimeout", "120000");
+		}
 		if (!properties.containsKey("pastry_socket_known_network_address")) {
 			if (!properties.containsKey("pastry_socket_known_network_address_port")) {
 				properties.put("pastry_socket_known_network_address_port", "80");
