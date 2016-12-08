@@ -184,11 +184,12 @@ public class EnvelopeTest {
 			}, null, storageExceptionHandler);
 			// wait till the envelope was fetched
 			System.out.println("Waiting ...");
-			for (int n = 1; n <= 100; n++) {
+			long timeout = System.currentTimeMillis() + 120000000L; // two minutes timeout
+			while (System.currentTimeMillis() < timeout) {
 				if (asyncTestState) {
 					return;
 				}
-				Thread.sleep(400);
+				Thread.sleep(200);
 			}
 			Assert.fail("Unexpected result");
 		} catch (Exception e) {
