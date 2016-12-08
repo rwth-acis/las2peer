@@ -320,12 +320,14 @@ public class EnvelopeTest {
 							Assert.fail("Exception expected!");
 						}
 					}, null, new StorageExceptionHandler() {
+						private boolean testComplete = false;
+
 						@Override
 						public void onException(Exception e) {
 							if (e instanceof EnvelopeAlreadyExistsException) {
 								System.out.println("Expected exception '" + e.toString() + "' received.");
-								asyncTestState = true;
-							} else if (!asyncTestState) { // test yet incomplete
+								testComplete = true;
+							} else if (!testComplete) { // test yet incomplete
 								storageExceptionHandler.onException(e);
 							}
 						}
