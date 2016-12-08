@@ -324,12 +324,14 @@ public class EnvelopeTest {
 
 						@Override
 						public void onException(Exception e) {
-							if (e instanceof EnvelopeAlreadyExistsException) {
-								System.out.println("Expected exception '" + e.toString() + "' received.");
-								testComplete = true;
-								asyncTestState = true;
-							} else if (!testComplete) { // test yet incomplete
-								storageExceptionHandler.onException(e);
+							synchronized (this) {
+								if (e instanceof EnvelopeAlreadyExistsException) {
+									System.out.println("Expected exception '" + e.toString() + "' received.");
+									testComplete = true;
+									asyncTestState = true;
+								} else if (!testComplete) { // test yet incomplete
+									storageExceptionHandler.onException(e);
+								}
 							}
 						}
 					});
