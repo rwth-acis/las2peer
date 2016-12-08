@@ -307,7 +307,7 @@ public class EnvelopeTest {
 			smith.unlockPrivateKey("adamspass");
 			Envelope envelope1 = node1.createUnencryptedEnvelope("test", "Hello World 1!");
 			Envelope envelope2 = node1.createUnencryptedEnvelope("test", "Hello World 2!");
-			// upload envelope
+			// upload first envelope
 			node1.storeEnvelopeAsync(envelope1, smith, new StorageStoreResultHandler() {
 				@Override
 				public void onResult(Serializable serializable, int successfulOperations) {
@@ -325,7 +325,7 @@ public class EnvelopeTest {
 							if (e instanceof EnvelopeAlreadyExistsException) {
 								System.out.println("Expected exception '" + e.toString() + "' received.");
 								asyncTestState = true;
-							} else {
+							} else if (!asyncTestState) { // test yet incomplete
 								storageExceptionHandler.onException(e);
 							}
 						}
