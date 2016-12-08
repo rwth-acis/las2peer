@@ -528,16 +528,20 @@ public class PastryNodeImpl extends Node {
 
 	@Override
 	public Agent getAgent(long id) throws AgentNotKnownException {
-		observerNotice(Event.AGENT_GET_STARTED, pastryNode, id, null, (Long) null, "");
-		try {
-			Envelope agentEnvelope = pastStorage.fetchEnvelope(Envelope.getAgentIdentifier(id), AGENT_GET_TIMEOUT);
-			Agent agentFromNet = Agent.createFromXml((String) agentEnvelope.getContent());
-			observerNotice(Event.AGENT_GET_SUCCESS, pastryNode, id, null, (Long) null, "");
-			locallyKnownAgents.registerAgent(agentFromNet);
-			return agentFromNet;
-		} catch (Exception e) {
-			observerNotice(Event.AGENT_GET_FAILED, pastryNode, id, null, (Long) null, "");
-			throw new AgentNotKnownException("Unable to retrieve Agent " + id + " from past storage", e);
+		if (locallyKnownAgents.hasAgent(id)) {
+			return locallyKnownAgents.getAgent(id);
+		} else {
+			observerNotice(Event.AGENT_GET_STARTED, pastryNode, id, null, (Long) null, "");
+			try {
+				Envelope agentEnvelope = pastStorage.fetchEnvelope(Envelope.getAgentIdentifier(id), AGENT_GET_TIMEOUT);
+				Agent agentFromNet = Agent.createFromXml((String) agentEnvelope.getContent());
+				observerNotice(Event.AGENT_GET_SUCCESS, pastryNode, id, null, (Long) null, "");
+				locallyKnownAgents.registerAgent(agentFromNet);
+				return agentFromNet;
+			} catch (Exception e) {
+				observerNotice(Event.AGENT_GET_FAILED, pastryNode, id, null, (Long) null, "");
+				throw new AgentNotKnownException("Unable to retrieve Agent " + id + " from past storage", e);
+			}
 		}
 	}
 
