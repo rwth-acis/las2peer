@@ -97,8 +97,27 @@ public class LocalNode extends Node {
 			throws AgentAlreadyRegisteredException, L2pSecurityException, AgentException {
 		super.registerReceiver(receiver);
 
+		if (receiver instanceof Agent) {
+			Agent agent = (Agent) receiver;
+			try {
+				htKnownAgents.put(((Agent) receiver).getId(), agent.toXmlString());
+			} catch (SerializationException e) {
+				throw new AgentException("Could not register agent reciever", e);
+			}
+		}
+
 		deliverPendingMessages(receiver.getResponsibleForAgentId(), getNodeId());
 	}
+
+	// TODO this code should be here or not?
+//	@Override
+//	public void unregisterReceiver(MessageReceiver receiver) throws AgentNotKnownException, NodeException {
+//		super.unregisterReceiver(receiver);
+//		if (receiver instanceof Agent) {
+//			Agent agent = (Agent) receiver;
+//			htKnownAgents.remove(agent.getId());
+//		}
+//	}
 
 	@Override
 	public void sendMessage(Message message, MessageResultListener listener, SendMode mode) {
@@ -210,8 +229,9 @@ public class LocalNode extends Node {
 
 	@Override
 	public Agent getAgent(long id) throws AgentNotKnownException {
-		if (locallyKnownAgents.hasAgent(id)) {
-			return locallyKnownAgents.getAgent(id);
+		Agent anonymous = getAnonymous();
+		if (id == anonymous.getId()) { // TODO use isAnonymous, special ID or Classing for identification
+			return anonymous;
 		} else {
 			synchronized (htKnownAgents) {
 				String xml = htKnownAgents.get(id);
@@ -220,9 +240,7 @@ public class LocalNode extends Node {
 				}
 
 				try {
-					Agent result = Agent.createFromXml(xml);
-					locallyKnownAgents.registerAgent(result);
-					return result;
+					return Agent.createFromXml(xml);
 				} catch (MalformedXMLException e) {
 					throw new AgentNotKnownException("XML problems with storage!", e);
 				}
@@ -248,8 +266,6 @@ public class LocalNode extends Node {
 			} catch (SerializationException e) {
 				throw new AgentException("Serialization failed!", e);
 			}
-
-			locallyKnownAgents.registerAgent(agent);
 
 			htKnownAgents.put(agent.getId(), agentXml);
 
@@ -288,7 +304,6 @@ public class LocalNode extends Node {
 				throw new AgentException("Serialization failed!", e);
 			}
 
-			locallyKnownAgents.registerAgent(agent);
 			htKnownAgents.put(agent.getId(), agentXml);
 
 			if (agent instanceof UserAgent) {

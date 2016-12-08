@@ -528,20 +528,22 @@ public class PastryNodeImpl extends Node {
 
 	@Override
 	public Agent getAgent(long id) throws AgentNotKnownException {
-		if (locallyKnownAgents.hasAgent(id)) {
-			return locallyKnownAgents.getAgent(id);
-		} else {
-			observerNotice(Event.AGENT_GET_STARTED, pastryNode, id, null, (Long) null, "");
-			try {
+		// no caching here, because agents may have changed in the network
+		observerNotice(Event.AGENT_GET_STARTED, pastryNode, id, null, (Long) null, "");
+		try {
+			Agent agentFromNet = null;
+			Agent anonymous = getAnonymous();
+			if (id == anonymous.getId()) { // TODO use isAnonymous, special ID or Classing for identification
+				agentFromNet = anonymous;
+			} else {
 				Envelope agentEnvelope = pastStorage.fetchEnvelope(Envelope.getAgentIdentifier(id), AGENT_GET_TIMEOUT);
-				Agent agentFromNet = Agent.createFromXml((String) agentEnvelope.getContent());
-				observerNotice(Event.AGENT_GET_SUCCESS, pastryNode, id, null, (Long) null, "");
-				locallyKnownAgents.registerAgent(agentFromNet);
-				return agentFromNet;
-			} catch (Exception e) {
-				observerNotice(Event.AGENT_GET_FAILED, pastryNode, id, null, (Long) null, "");
-				throw new AgentNotKnownException("Unable to retrieve Agent " + id + " from past storage", e);
+				agentFromNet = Agent.createFromXml((String) agentEnvelope.getContent());
 			}
+			observerNotice(Event.AGENT_GET_SUCCESS, pastryNode, id, null, (Long) null, "");
+			return agentFromNet;
+		} catch (Exception e) {
+			observerNotice(Event.AGENT_GET_FAILED, pastryNode, id, null, (Long) null, "");
+			throw new AgentNotKnownException("Unable to retrieve Agent " + id + " from past storage", e);
 		}
 	}
 
@@ -551,8 +553,8 @@ public class PastryNodeImpl extends Node {
 			throw new L2pSecurityException("You have to unlock the agent before storage!");
 			// because the agent has to sign itself
 		}
+		// TODO check if anonymous should be stored and deny
 		observerNotice(Event.AGENT_UPLOAD_STARTED, pastryNode, agent, "");
-		locallyKnownAgents.registerAgent(agent);
 		try {
 			Envelope agentEnvelope = null;
 			try {
@@ -569,7 +571,6 @@ public class PastryNodeImpl extends Node {
 			}
 			observerNotice(Event.AGENT_UPLOAD_SUCCESS, pastryNode, agent, "");
 		} catch (CryptoException | SerializationException | StorageException e) {
-			locallyKnownAgents.unregisterAgent(agent);
 			observerNotice(Event.AGENT_UPLOAD_FAILED, pastryNode, agent, "Got interrupted!");
 			throw new AgentException("Storage has been interrupted", e);
 		}
