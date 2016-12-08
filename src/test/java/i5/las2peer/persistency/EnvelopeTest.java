@@ -327,6 +327,7 @@ public class EnvelopeTest {
 							if (e instanceof EnvelopeAlreadyExistsException) {
 								System.out.println("Expected exception '" + e.toString() + "' received.");
 								testComplete = true;
+								asyncTestState = true;
 							} else if (!testComplete) { // test yet incomplete
 								storageExceptionHandler.onException(e);
 							}
