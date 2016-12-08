@@ -33,7 +33,7 @@ public class EnvelopeTest {
 	private ArrayList<PastryNodeImpl> nodes;
 	private boolean asyncTestState;
 
-	private static class ExceptionHandler implements StorageExceptionHandler {
+	private class ExceptionHandler implements StorageExceptionHandler {
 		@Override
 		public void onException(Exception e) {
 			e.printStackTrace();
@@ -41,7 +41,7 @@ public class EnvelopeTest {
 		}
 	}
 
-	private static final ExceptionHandler storageExceptionHandler = new ExceptionHandler();
+	private final ExceptionHandler storageExceptionHandler = new ExceptionHandler();
 
 	@Rule
 	public TestName name = new TestName();
