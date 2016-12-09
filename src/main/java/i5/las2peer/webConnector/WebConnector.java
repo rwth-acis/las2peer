@@ -5,6 +5,7 @@ import i5.las2peer.api.ConnectorException;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.logging.NodeObserver.Event;
 import i5.las2peer.p2p.Node;
+import i5.las2peer.webConnector.util.NameLock;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -106,7 +107,7 @@ public class WebConnector extends Connector {
 	// to Open ID Connect Discovery (cf. http://openid.net/specs/openid-connect-discovery-1_0.html)
 	protected Map<String, JSONObject> oidcProviderInfos = new HashMap<String, JSONObject>();
 
-	private Object lockOidc = new Object();
+	private NameLock lockOidc = new NameLock();
 
 	/**
 	 * create a new web connector instance.
@@ -414,7 +415,7 @@ public class WebConnector extends Connector {
 		return onlyLocalServices;
 	}
 
-	public Object getLockOidc() {
+	public NameLock getLockOidc() {
 		return lockOidc;
 	}
 
