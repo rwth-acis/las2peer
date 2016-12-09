@@ -276,7 +276,8 @@ public class UserAgent extends PassphraseAgent {
 			// optional user data
 			Element userdata = XmlTools.getOptionalElement(root, "userdata");
 			if (userdata != null) {
-				if (!userdata.getAttribute("encoding").equals("base64")) {
+				if (userdata.hasAttribute("encoding")
+						&& !userdata.getAttribute("encoding").equalsIgnoreCase("base64")) {
 					throw new MalformedXMLException("base64 encoding expected");
 				}
 				result.userData = SerializeTools.deserializeBase64(userdata.getTextContent());
