@@ -90,14 +90,9 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		exchange.getResponseHeaders().set("Server-Name", "las2peer WebConnector");
 
 		try {
-			// TODO workaround (should be removed, options request should be handled as any other request)
-			if (exchange.getRequestMethod().equalsIgnoreCase("options")) {
-				sendResponseHeaders(exchange, HttpURLConnection.HTTP_OK, NO_RESPONSE_BODY);
-			} else {
-				PassphraseAgent userAgent;
-				if ((userAgent = authenticate(exchange)) != null) {
-					invoke(userAgent, exchange);
-				}
+			PassphraseAgent userAgent;
+			if ((userAgent = authenticate(exchange)) != null) {
+				invoke(userAgent, exchange);
 			}
 		} catch (Exception e) {
 			sendUnexpectedErrorResponse(exchange, e.toString(), e);
