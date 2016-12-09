@@ -1,5 +1,7 @@
 package i5.las2peer.webConnector;
 
+import i5.las2peer.execution.NoSuchServiceException;
+import i5.las2peer.execution.NoSuchServiceMethodException;
 import i5.las2peer.execution.ServiceInvocationException;
 import i5.las2peer.p2p.AgentAlreadyRegisteredException;
 import i5.las2peer.p2p.AgentNotKnownException;
@@ -582,7 +584,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		Serializable result = null;
 		try {
 			result = mediator.invoke(service.toString(), method, params, connector.onlyLocalServices());
-		} catch (AgentNotKnownException | TimeoutException e) {
+		} catch (AgentNotKnownException | TimeoutException | NoSuchServiceException | NoSuchServiceMethodException e) {
 			connector.logError("No service found matching " + service + ".", e);
 			sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND, "No service found matching " + service + ".");
 		} catch (ServiceInvocationException e) {
@@ -600,14 +602,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 
 	private void sendInvocationException(HttpExchange exchange, ServiceInvocationException e) {
 		connector.logError("Exception while processing RMI: " + exchange.getRequestURI().getPath(), e);
-		// internal exception in service method
-		Object[] ret = new Object[4];
-		ret[0] = "Exception during RMI invocation!";
-		ret[1] = e.getCause().getCause().getClass().getCanonicalName();
-		ret[2] = e.getCause().getCause().getMessage();
-		ret[3] = e.getCause().getCause();
-		String code = ret[0] + "\n" + ret[1] + "\n" + ret[2] + "\n" + ret[3];
-		sendStringResponse(exchange, HttpURLConnection.HTTP_INTERNAL_ERROR, code);
+		sendStringResponse(exchange, HttpURLConnection.HTTP_INTERNAL_ERROR, "Exception during RMI invocation!");
 	}
 
 	private void sendRESTResponse(HttpExchange exchange, RESTResponse result) {
