@@ -2,7 +2,9 @@ package i5.las2peer.tools;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Level;
 
+import i5.las2peer.api.exceptions.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.exceptions.StorageException;
 import i5.las2peer.classLoaders.helpers.LibraryDependency;
 import i5.las2peer.classLoaders.libraries.LoadedJarLibrary;
@@ -36,16 +38,22 @@ public class PackageUploader {
 			String developerAgentXMLFile, String developerPassword) throws ServicePackageException {
 		// early verify the developer agent to avoid needless heavy duty jar parsing
 		Agent devAgent = unlockDeveloperAgent(developerAgentXMLFile, developerPassword);
-		// XXX better upload or check for dependencies before uploading actual service jar?
-		// publish service jar first
-		LoadedNetworkLibrary netLib = publishLibrary(serviceJarFile, node, devAgent);
-		// upload all dependencies
-		String serviceJarDirectory = new File(serviceJarFile).getParent();
-		for (LibraryDependency dependency : netLib.getDependencies()) {
-			// XXX what if max version of dependency jar not found?
-			String depJarFilename = serviceJarDirectory + File.separator + dependency.getName() + "-"
-					+ dependency.getMax() + ".jar";
-			publishLibrary(depJarFilename, node, devAgent);
+		try {
+			// XXX better upload or check for dependencies before uploading actual service jar?
+			// publish service jar first
+			LoadedNetworkLibrary netLib = publishLibrary(serviceJarFile, node, devAgent);
+			// upload all dependencies
+			String serviceJarDirectory = new File(serviceJarFile).getParent();
+			for (LibraryDependency dependency : netLib.getDependencies()) {
+				// XXX what if max version of dependency jar not found?
+				String depJarFilename = serviceJarDirectory + File.separator + dependency.getName() + "-"
+						+ dependency.getMax() + ".jar";
+				publishLibrary(depJarFilename, node, devAgent);
+			}
+		} catch (EnvelopeAlreadyExistsException e) {
+			logger.log(Level.SEVERE,
+					"Service package upload failed! Version is already known in the network. To update increase version number");
+			return;
 		}
 	}
 
@@ -68,7 +76,7 @@ public class PackageUploader {
 	}
 
 	private static LoadedNetworkLibrary publishLibrary(String jarFilename, NodeStorageInterface node, Agent devAgent)
-			throws ServicePackageException {
+			throws ServicePackageException, EnvelopeAlreadyExistsException {
 		try {
 			// read jar as jar library
 			LoadedJarLibrary jarLib = LoadedJarLibrary.createFromJar(jarFilename);
@@ -86,9 +94,15 @@ public class PackageUploader {
 				byte[] fileRaw = jarLib.getResourceAsBinary(filename);
 				String fileEnvId = SharedStorageRepository.getFileEnvelopeIdentifier(netLib.getIdentifier(), filename);
 				Envelope fileEnv = node.createUnencryptedEnvelope(fileEnvId, fileRaw);
-				node.storeEnvelope(fileEnv, devAgent);
+				try {
+					node.storeEnvelope(fileEnv, devAgent);
+				} catch (EnvelopeAlreadyExistsException e) {
+					logger.info("The file '" + fileEnvId + "' already exists in network and is not republished");
+				}
 			}
 			return netLib;
+		} catch (EnvelopeAlreadyExistsException e) {
+			throw e; // is handled in calling function
 		} catch (IllegalArgumentException | IOException | SerializationException | CryptoException | StorageException
 				| ResourceNotFoundException e) {
 			throw new ServicePackageException("Could not publish network library from jar '" + jarFilename + "'", e);
