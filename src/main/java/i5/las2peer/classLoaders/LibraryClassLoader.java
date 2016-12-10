@@ -116,6 +116,7 @@ public class LibraryClassLoader extends ClassLoader {
 				c = findClass(name);
 			} catch (ClassNotFoundException e) {
 				// class not found in this Library
+				// XXX logging
 			}
 		}
 
