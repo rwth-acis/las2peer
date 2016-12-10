@@ -12,6 +12,7 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.Signature;
 import java.security.SignatureException;
+import java.util.Base64;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -20,7 +21,6 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 
-import org.apache.commons.codec.binary.Base64;
 import org.junit.Test;
 
 public class TestCryptoMethods {
@@ -121,9 +121,9 @@ public class TestCryptoMethods {
 		String testMessage = "Dies ist eine längere Nachricht, die ich gerne in Base64 encodieren möchte.";
 		byte[] bytes = testMessage.getBytes("UTF-8");
 
-		String encoded = Base64.encodeBase64String(bytes);
+		String encoded = Base64.getEncoder().encodeToString(bytes);
 
-		byte[] decoded = Base64.decodeBase64(encoded);
+		byte[] decoded = Base64.getDecoder().decode(encoded);
 
 		String decodedMessage = new String(decoded, "UTF-8");
 

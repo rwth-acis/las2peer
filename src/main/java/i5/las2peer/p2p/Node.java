@@ -50,7 +50,6 @@ import i5.las2peer.security.Agent;
 import i5.las2peer.security.AgentContext;
 import i5.las2peer.security.AgentException;
 import i5.las2peer.security.AgentStorage;
-import i5.las2peer.security.BasicAgentStorage;
 import i5.las2peer.security.GroupAgent;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.Mediator;
@@ -158,7 +157,6 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	private String sInformationFileName = DEFAULT_INFORMATION_FILE;
 
 	private KeyPair nodeKeyPair;
-	protected BasicAgentStorage locallyKnownAgents;
 
 	/**
 	 * maps names and emails to UserAgents
@@ -226,8 +224,6 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 
 		nodeKeyPair = CryptoTools.generateKeyPair();
 		nodeServiceCache = new NodeServiceCache(this, nodeServiceCacheLifetime, nodeServiceCacheResultCount);
-		locallyKnownAgents = new BasicAgentStorage(this);
-		locallyKnownAgents.registerAgent(getAnonymous());
 
 		userManager = new UserAgentManager(this);
 		aliasManager = new ServiceAliasManager(this);
@@ -579,16 +575,6 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 			Agent agent = (Agent) receiver;
 			if (agent.isLocked()) {
 				throw new L2pSecurityException("An agent has to be unlocked for registering at a node");
-			}
-
-			if (!knowsAgentLocally(agent.getId())) {
-				try {
-					storeAgent(agent);
-				} catch (AgentAlreadyRegisteredException e) {
-					System.out.println(
-							"Just for notice - not an error: tried to store an already known agent before registering");
-					// nothing to do
-				}
 			}
 
 			try {
@@ -1016,16 +1002,6 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 		} catch (AgentNotKnownException e) {
 			return false;
 		}
-	}
-
-	/**
-	 * Checks, if an agent of the given id is known locally.
-	 * 
-	 * @param agentId
-	 * @return true, if this agent is (already) known here at this node
-	 */
-	public boolean knowsAgentLocally(long agentId) {
-		return locallyKnownAgents.hasAgent(agentId);
 	}
 
 	/**

@@ -1,15 +1,17 @@
 package i5.las2peer.security;
 
+import java.io.File;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
+import java.util.Base64;
 
 import javax.crypto.SecretKey;
 
-import org.apache.commons.codec.binary.Base64;
+import org.w3c.dom.Element;
 
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
@@ -21,9 +23,7 @@ import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
 import i5.las2peer.tools.SerializationException;
 import i5.las2peer.tools.SerializeTools;
-import i5.simpleXML.Element;
-import i5.simpleXML.Parser;
-import i5.simpleXML.XMLSyntaxException;
+import i5.las2peer.tools.XmlTools;
 
 /**
  * An Agent is the basic acting entity in the las2peer network. At the moment, an agent can represent a simple user, a
@@ -225,7 +225,7 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	 * @return encoded version or the private key
 	 */
 	protected String getEncodedPrivate() {
-		return Base64.encodeBase64String(baEncrypedPrivate);
+		return Base64.getEncoder().encodeToString(baEncrypedPrivate);
 	}
 
 	/**
@@ -290,6 +290,20 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	}
 
 	/**
+	 * Factory: Create an agent from its XML file representation.
+	 * 
+	 * Depending on the type attribute of the root node, the type will be a {@link UserAgent}, {@link GroupAgent},
+	 * {@link ServiceAgent}. Creation of {@link MonitoringAgent}s is not supported.
+	 * 
+	 * @param xmlFile
+	 * @return an agent
+	 * @throws MalformedXMLException
+	 */
+	public static Agent createFromXml(File xmlFile) throws MalformedXMLException {
+		return createFromXml(XmlTools.getRootElement(xmlFile, "las2peer:agent"));
+	}
+
+	/**
 	 * Factory: Create an agent from its XML string representation.
 	 * 
 	 * Depending on the type attribute of the root node, the type will be a {@link UserAgent}, {@link GroupAgent},
@@ -300,11 +314,7 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	 * @throws MalformedXMLException
 	 */
 	public static Agent createFromXml(String xml) throws MalformedXMLException {
-		try {
-			return createFromXml(Parser.parse(xml, false));
-		} catch (XMLSyntaxException e) {
-			throw new MalformedXMLException("Error parsing xml string", e);
-		}
+		return createFromXml(XmlTools.getRootElement(xml, "las2peer:agent"));
 	}
 
 	/**
@@ -313,32 +323,22 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	 * Depending on the type attribute of the root node, the type will be a {@link UserAgent}, {@link GroupAgent},
 	 * {@link ServiceAgent}. Creation of {@link MonitoringAgent}s is not supported.
 	 * 
-	 * @param root
+	 * @param rootElement
 	 * @return an agent
 	 * @throws MalformedXMLException
 	 */
-	public static Agent createFromXml(Element root) throws MalformedXMLException {
-		try {
-			if (!root.getName().equals("agent")) {
-				throw new MalformedXMLException("this is not an agent but a " + root.getName());
-			}
-
-			String type = root.getAttribute("type");
-
-			if ("user".equals(type)) {
-				return UserAgent.createFromXml(root);
-			} else if ("group".equals(type)) {
-				return GroupAgent.createFromXml(root);
-			} else if ("service".equals(type)) {
-				return ServiceAgent.createFromXml(root);
-			} else if ("monitoring".equals(type)) {
-				return MonitoringAgent.createFromXml(root);
-			} else {
-				throw new MalformedXMLException("Unknown agent type: " + type);
-			}
-
-		} catch (XMLSyntaxException e) {
-			throw new MalformedXMLException("Error parsing xml string", e);
+	public static Agent createFromXml(Element rootElement) throws MalformedXMLException {
+		String type = rootElement.getAttribute("type");
+		if ("user".equalsIgnoreCase(type)) {
+			return UserAgent.createFromXml(rootElement);
+		} else if ("group".equalsIgnoreCase(type)) {
+			return GroupAgent.createFromXml(rootElement);
+		} else if ("service".equalsIgnoreCase(type)) {
+			return ServiceAgent.createFromXml(rootElement);
+		} else if ("monitoring".equalsIgnoreCase(type)) {
+			return MonitoringAgent.createFromXml(rootElement);
+		} else {
+			throw new MalformedXMLException("Unknown agent type: " + type);
 		}
 	}
 

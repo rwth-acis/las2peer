@@ -3,8 +3,11 @@ package i5.las2peer.p2p;
 import java.io.IOException;
 import java.io.Serializable;
 import java.security.PublicKey;
-import java.util.Enumeration;
 import java.util.Vector;
+
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.persistency.VerificationFailedException;
@@ -15,9 +18,7 @@ import i5.las2peer.tools.CryptoTools;
 import i5.las2peer.tools.FileContentReader;
 import i5.las2peer.tools.SerializationException;
 import i5.las2peer.tools.SerializeTools;
-import i5.simpleXML.Element;
-import i5.simpleXML.Parser;
-import i5.simpleXML.XMLSyntaxException;
+import i5.las2peer.tools.XmlTools;
 
 /**
  * A NodeInformation gives basic information about a node.
@@ -267,10 +268,8 @@ public class NodeInformation implements XmlAble {
 	 * @return the node information contained in the given XML file
 	 * @throws MalformedXMLException
 	 * @throws IOException
-	 * @throws XMLSyntaxException
 	 */
-	public static NodeInformation createFromXmlFile(String filename)
-			throws MalformedXMLException, IOException, XMLSyntaxException {
+	public static NodeInformation createFromXmlFile(String filename) throws MalformedXMLException, IOException {
 		return createFromXml(FileContentReader.read(filename));
 	}
 
@@ -282,12 +281,11 @@ public class NodeInformation implements XmlAble {
 	 * @return a node information
 	 * 
 	 * 
-	 * @throws XMLSyntaxException
 	 * @throws MalformedXMLException
 	 * @throws IOException
 	 */
 	public static NodeInformation createFromXmlFile(String filename, ServiceAgent[] serviceAgents)
-			throws XMLSyntaxException, MalformedXMLException, IOException {
+			throws MalformedXMLException, IOException {
 		NodeInformation result = createFromXmlFile(filename);
 		result.setServices(serviceAgents);
 
@@ -300,50 +298,56 @@ public class NodeInformation implements XmlAble {
 	 * @param xml
 	 * @return node information contained in the given XML string
 	 * @throws MalformedXMLException
-	 * @throws XMLSyntaxException
 	 */
-	public static NodeInformation createFromXml(String xml) throws MalformedXMLException, XMLSyntaxException {
-		Element root = Parser.parse(xml, false);
-		if (!root.getName().equals("las2peerNode")) {
-			throw new MalformedXMLException("not a node information but a " + root.getName());
-		}
+	public static NodeInformation createFromXml(String xml) throws MalformedXMLException {
+		Element root = XmlTools.getRootElement(xml, "las2peerNode");
 
 		NodeInformation result = new NodeInformation();
 
 		try {
-			Enumeration<Element> children = root.getChildren();
-			while (children.hasMoreElements()) {
-				Element child = children.nextElement();
+			NodeList children = root.getChildNodes();
+			for (int c = 0; c < children.getLength(); c++) {
+				Node node = children.item(c);
+				if (node.getNodeType() != Node.ELEMENT_NODE) {
+					// XXX logging
+					continue;
+				}
+				Element child = (Element) node;
 
-				if (child.getName().equals("adminName")) {
-					result.adminName = child.getFirstChild().getText();
-				} else if (child.getName().equals("adminEmail")) {
-					result.adminEmail = child.getFirstChild().getText();
-				} else if (child.getName().equals("organization")) {
-					result.organization = child.getFirstChild().getText();
-				} else if (child.getName().equals("description")) {
-					result.description = child.getFirstChild().getText();
-				} else if (child.getName().equals("nodeHandle")) {
-					result.nodeHandle = SerializeTools.deserializeBase64(child.getChild(1).getFirstChild().getText());
-				} else if (child.getName().equals("nodeKey")) {
-					result.nodeKey = (PublicKey) SerializeTools.deserializeBase64(child.getFirstChild().getText());
-				} else if (child.getName().equals("signature")) {
-					result.signature = (byte[]) SerializeTools.deserializeBase64(child.getFirstChild().getText());
-				} else if (child.getName().equals("services")) {
+				if (child.getTagName().equals("adminName")) {
+					result.adminName = child.getTextContent();
+				} else if (child.getTagName().equals("adminEmail")) {
+					result.adminEmail = child.getTextContent();
+				} else if (child.getTagName().equals("organization")) {
+					result.organization = child.getTextContent();
+				} else if (child.getTagName().equals("description")) {
+					result.description = child.getTextContent();
+				} else if (child.getTagName().equals("nodeHandle")) {
+					Element serializedNodeHandle = XmlTools.getSingularElement(child, "serialized");
+					result.nodeHandle = SerializeTools.deserializeBase64(serializedNodeHandle.getTextContent());
+				} else if (child.getTagName().equals("nodeKey")) {
+					result.nodeKey = (PublicKey) SerializeTools.deserializeBase64(child.getTextContent());
+				} else if (child.getTagName().equals("signature")) {
+					result.signature = (byte[]) SerializeTools.deserializeBase64(child.getTextContent());
+				} else if (child.getTagName().equals("services")) {
 					Vector<String> serviceClasses = new Vector<String>();
-
-					Enumeration<Element> services = child.getChildren();
-					while (services.hasMoreElements()) {
-						Element service = services.nextElement();
-						if (!service.getName().equals("serviceClass")) {
+					NodeList services = child.getChildNodes();
+					for (int s = 0; s < services.getLength(); s++) {
+						Node serviceNode = services.item(s);
+						if (node.getNodeType() != Node.ELEMENT_NODE) {
+							// XXX logging
+							continue;
+						}
+						Element service = (Element) serviceNode;
+						if (!service.getTagName().equals("serviceClass")) {
 							throw new MalformedXMLException(service + " is not a service class element");
 						}
-						serviceClasses.add(service.getFirstChild().getText());
+						serviceClasses.add(service.getTextContent());
 					}
 
 					result.hostedServices = serviceClasses.toArray(new ServiceNameVersion[0]);
 				} else {
-					throw new MalformedXMLException("unknown xml element: " + child.getName());
+					throw new MalformedXMLException("unknown xml element: " + child.getTagName());
 				}
 
 			}

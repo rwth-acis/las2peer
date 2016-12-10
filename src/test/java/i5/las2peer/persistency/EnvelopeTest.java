@@ -33,7 +33,7 @@ public class EnvelopeTest {
 	private ArrayList<PastryNodeImpl> nodes;
 	private boolean asyncTestState;
 
-	private static class ExceptionHandler implements StorageExceptionHandler {
+	private class ExceptionHandler implements StorageExceptionHandler {
 		@Override
 		public void onException(Exception e) {
 			e.printStackTrace();
@@ -41,7 +41,7 @@ public class EnvelopeTest {
 		}
 	}
 
-	private static final ExceptionHandler storageExceptionHandler = new ExceptionHandler();
+	private final ExceptionHandler storageExceptionHandler = new ExceptionHandler();
 
 	@Rule
 	public TestName name = new TestName();
@@ -184,11 +184,12 @@ public class EnvelopeTest {
 			}, null, storageExceptionHandler);
 			// wait till the envelope was fetched
 			System.out.println("Waiting ...");
-			for (int n = 1; n <= 100; n++) {
+			long timeout = System.currentTimeMillis() + 120000000L; // two minutes timeout
+			while (System.currentTimeMillis() < timeout) {
 				if (asyncTestState) {
 					return;
 				}
-				Thread.sleep(400);
+				Thread.sleep(200);
 			}
 			Assert.fail("Unexpected result");
 		} catch (Exception e) {
@@ -307,7 +308,7 @@ public class EnvelopeTest {
 			smith.unlockPrivateKey("adamspass");
 			Envelope envelope1 = node1.createUnencryptedEnvelope("test", "Hello World 1!");
 			Envelope envelope2 = node1.createUnencryptedEnvelope("test", "Hello World 2!");
-			// upload envelope
+			// upload first envelope
 			node1.storeEnvelopeAsync(envelope1, smith, new StorageStoreResultHandler() {
 				@Override
 				public void onResult(Serializable serializable, int successfulOperations) {
@@ -320,13 +321,18 @@ public class EnvelopeTest {
 							Assert.fail("Exception expected!");
 						}
 					}, null, new StorageExceptionHandler() {
+						private boolean testComplete = false;
+
 						@Override
 						public void onException(Exception e) {
-							if (e instanceof EnvelopeAlreadyExistsException) {
-								System.out.println("Expected exception '" + e.toString() + "' received.");
-								asyncTestState = true;
-							} else {
-								storageExceptionHandler.onException(e);
+							synchronized (this) {
+								if (e instanceof EnvelopeAlreadyExistsException) {
+									System.out.println("Expected exception '" + e.toString() + "' received.");
+									testComplete = true;
+									asyncTestState = true;
+								} else if (!testComplete) { // test yet incomplete
+									storageExceptionHandler.onException(e);
+								}
 							}
 						}
 					});

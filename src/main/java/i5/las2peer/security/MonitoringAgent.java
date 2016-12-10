@@ -3,9 +3,10 @@ package i5.las2peer.security;
 import java.io.Serializable;
 import java.security.KeyPair;
 import java.security.PublicKey;
+import java.util.Base64;
 import java.util.Random;
 
-import org.apache.commons.codec.binary.Base64;
+import org.w3c.dom.Element;
 
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
@@ -18,9 +19,7 @@ import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
 import i5.las2peer.tools.SerializationException;
 import i5.las2peer.tools.SerializeTools;
-import i5.simpleXML.Element;
-import i5.simpleXML.Parser;
-import i5.simpleXML.XMLSyntaxException;
+import i5.las2peer.tools.XmlTools;
 
 /**
  * 
@@ -145,7 +144,7 @@ public class MonitoringAgent extends PassphraseAgent {
 					+ "</id>\n" + "\t<publickey encoding=\"base64\">" + SerializeTools.serializeToBase64(getPublicKey())
 					+ "</publickey>\n" + "\t<privatekey encrypted=\"" + CryptoTools.getSymmetricAlgorithm()
 					+ "\" keygen=\"" + CryptoTools.getSymmetricKeygenMethod() + "\">\n"
-					+ "\t\t<salt encoding=\"base64\">" + Base64.encodeBase64String(getSalt()) + "</salt>\n"
+					+ "\t\t<salt encoding=\"base64\">" + Base64.getEncoder().encodeToString(getSalt()) + "</salt>\n"
 					+ "\t\t<data encoding=\"base64\">" + getEncodedPrivate() + "</data>\n" + "\t</privatekey>\n");
 
 			result.append("</las2peer:agent>\n");
@@ -169,79 +168,53 @@ public class MonitoringAgent extends PassphraseAgent {
 	 * 
 	 */
 	public static MonitoringAgent createFromXml(String xml) throws MalformedXMLException {
-		try {
-			Element root = Parser.parse(xml, false);
-			if (!"monitoring".equals(root.getAttribute("type"))) {
-				throw new MalformedXMLException("Monitoring agent expected");
-			}
-			if (!"agent".equals(root.getName())) {
-				throw new MalformedXMLException("Agent expeced");
-			}
-			return createFromXml(root);
-		} catch (XMLSyntaxException e) {
-			throw new MalformedXMLException("Error parsing xml string", e);
-		}
+		return createFromXml(XmlTools.getRootElement(xml, "las2peer:agent"));
 	}
 
 	/**
 	 * 
 	 * Sets the state of the object from a string representation resulting from a previous {@link #toXmlString} call.
 	 * 
-	 * @param root parsed XML document
+	 * @param rootElement parsed XML document
 	 * @return
 	 * @exception MalformedXMLException
 	 * 
 	 */
-	public static MonitoringAgent createFromXml(Element root) throws MalformedXMLException {
+	public static MonitoringAgent createFromXml(Element rootElement) throws MalformedXMLException {
 		try {
-			Element elId = root.getFirstChild();
-			long id = Long.parseLong(elId.getFirstChild().getText());
-
-			Element pubKey = root.getChild(1);
-			if (!pubKey.getName().equals("publickey")) {
-				throw new MalformedXMLException("public key expected");
-			}
+			// read id from XML
+			Element elId = XmlTools.getSingularElement(rootElement, "id");
+			long id = Long.parseLong(elId.getTextContent());
+			// read public key from XML
+			Element pubKey = XmlTools.getSingularElement(rootElement, "publickey");
 			if (!pubKey.getAttribute("encoding").equals("base64")) {
 				throw new MalformedXMLException("base64 encoding expected");
 			}
-
-			PublicKey publicKey = (PublicKey) SerializeTools.deserializeBase64(pubKey.getFirstChild().getText());
-
-			Element privKey = root.getChild(2);
-			if (!privKey.getName().equals("privatekey")) {
-				throw new MalformedXMLException("private key expected");
-			}
+			PublicKey publicKey = (PublicKey) SerializeTools.deserializeBase64(pubKey.getTextContent());
+			// read private key from XML
+			Element privKey = XmlTools.getSingularElement(rootElement, "privatekey");
 			if (!privKey.getAttribute("encrypted").equals(CryptoTools.getSymmetricAlgorithm())) {
 				throw new MalformedXMLException(CryptoTools.getSymmetricAlgorithm() + " expected");
 			}
 			if (!privKey.getAttribute("keygen").equals(CryptoTools.getSymmetricKeygenMethod())) {
 				throw new MalformedXMLException(CryptoTools.getSymmetricKeygenMethod() + " expected");
 			}
-
-			Element elSalt = privKey.getFirstChild();
-			if (!elSalt.getName().equals("salt")) {
-				throw new MalformedXMLException("salt expected");
-			}
+			// read salt from XML
+			Element elSalt = XmlTools.getSingularElement(rootElement, "salt");
 			if (!elSalt.getAttribute("encoding").equals("base64")) {
 				throw new MalformedXMLException("base64 encoding expected");
 			}
-
-			byte[] salt = Base64.decodeBase64(elSalt.getFirstChild().getText());
-
-			Element data = privKey.getChild(1);
-			if (!data.getName().equals("data")) {
-				throw new MalformedXMLException("data expected");
-			}
+			byte[] salt = Base64.getDecoder().decode(elSalt.getTextContent());
+			// read data from XML
+			Element data = XmlTools.getSingularElement(rootElement, "data");
 			if (!data.getAttribute("encoding").equals("base64")) {
 				throw new MalformedXMLException("base64 encoding expected");
 			}
-			byte[] encPrivate = Base64.decodeBase64(data.getFirstChild().getText());
+			byte[] encPrivate = Base64.getDecoder().decode(data.getTextContent());
 
 			MonitoringAgent result = new MonitoringAgent(id, publicKey, encPrivate, salt);
 
 			return result;
-		} catch (XMLSyntaxException e) {
-			throw new MalformedXMLException("Error parsing XML string", e);
 		} catch (SerializationException e) {
 			throw new MalformedXMLException("Deserialization problems", e);
 		}

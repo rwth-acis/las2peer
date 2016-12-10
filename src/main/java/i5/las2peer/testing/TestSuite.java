@@ -62,9 +62,9 @@ public class TestSuite {
 		System.out.println("bootstrap node launched with id " + bootstrapNode.getNodeId());
 		// add more nodes
 		for (int num = 1; num <= numOfNodes - 1; num++) {
-			PastryNodeImpl node2 = addNode(bootstrapPort, storageMode, (long) num);
-			result.add(node2);
-			System.out.println("network node launched with id " + bootstrapNode.getNodeId());
+			PastryNodeImpl node = addNode(bootstrapPort, storageMode, (long) num);
+			result.add(node);
+			System.out.println("network node launched with id " + node.getNodeId());
 		}
 		return result;
 	}
