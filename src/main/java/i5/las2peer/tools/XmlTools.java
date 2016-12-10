@@ -212,4 +212,12 @@ public class XmlTools {
 		}
 	}
 
+	public static String escapeString(String str) {
+		return str.replace("&", "&amp;").replace("'", "&apos;").replace("<", "&lt;").replace(">", "&gt;");
+	}
+
+	public static String escapeAttributeValue(String attribute) {
+		return escapeString(attribute).replace("\"", "&quot;");
+	}
+
 }
