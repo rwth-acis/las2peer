@@ -102,15 +102,18 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 				storageRootDir += File.separator;
 			}
 			try {
+				logger.info("loading persistent storage...");
+				long start = System.currentTimeMillis();
 				storage = new PersistentStorage(pastIdFactory, storageRootDir + "node_" + node.getId().toStringFull(),
 						maximumStorageSize, node.getEnvironment());
+				long timediff = System.currentTimeMillis() - start;
+				logger.info("storage ready, loading took " + timediff + "ms");
 			} catch (IOException e) {
 				throw new StorageException("Could not initialize persistent storage!", e);
 			}
 		} else {
 			throw new StorageException("Unexpected storage mode '" + storageMode + "'");
 		}
-		// on the other nobody likes out-dated data
 		Cache cache = new LRUCache(storage, maximumCacheSize, node.getEnvironment());
 		StorageManagerImpl manager = new StorageManagerImpl(pastIdFactory, storage, cache);
 		pastStorage = new PastImpl(node, manager, numOfReplicas, "i5.las2peer.enterprise.storage",
