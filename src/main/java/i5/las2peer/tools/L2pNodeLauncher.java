@@ -286,6 +286,18 @@ public class L2pNodeLauncher {
 	}
 
 	/**
+	 * Uploads the service jar file and its dependencies into the shared storage to be used for network class loading.
+	 * 
+	 * @param serviceJarFile The service jar file that should be uploaded.
+	 * @param developerAgentXMLFile The XML file of the developers agent.
+	 * @param developerPassword The password for the developer agent.
+	 */
+	public void uploadServicePackage(String serviceJarFile, String developerAgentXMLFile, String developerPassword)
+			throws ServicePackageException {
+		PackageUploader.uploadServicePackage(node, serviceJarFile, developerAgentXMLFile, developerPassword);
+	}
+
+	/**
 	 * Starts the HTTP connector.
 	 */
 	public void startHttpConnector() {
