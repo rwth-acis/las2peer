@@ -9,6 +9,7 @@ import i5.las2peer.classLoaders.helpers.LibraryDependency;
 import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
 import i5.las2peer.classLoaders.helpers.LibraryVersion;
 import i5.las2peer.classLoaders.libraries.LoadedLibrary;
+import i5.las2peer.classLoaders.libraries.Repository;
 
 /**
  * The main class for loading classes in the las2peer environment. This ClassLoader handles library registering and
@@ -29,7 +30,7 @@ public class L2pClassManager {
 	/**
 	 * repositories to load libraries from
 	 */
-	private Repository[] repositories;
+	private ArrayList<Repository> repositories;
 
 	/**
 	 * all registered main bundles (i.e. services) (name, version) => BundleClassLoader
@@ -60,7 +61,7 @@ public class L2pClassManager {
 	public L2pClassManager(Repository[] repositories, ClassLoader platformLoader) {
 		this.platformLoader = platformLoader;
 
-		this.repositories = repositories;
+		this.repositories = new ArrayList<>(Arrays.asList(repositories));
 	}
 
 	/**
@@ -103,9 +104,9 @@ public class L2pClassManager {
 		}
 
 		LoadedLibrary lib = null;
-		for (int i = 0; i < repositories.length && lib == null; i++) {
+		for (int i = 0; i < repositories.size() && lib == null; i++) {
 			try {
-				lib = repositories[i].findLibrary(new LibraryIdentifier(sPackage, version));
+				lib = repositories.get(i).findLibrary(new LibraryIdentifier(sPackage, version));
 			} catch (LibraryNotFoundException e) {
 			}
 		}
@@ -286,9 +287,9 @@ public class L2pClassManager {
 	 */
 	private LoadedLibrary findLoadedLibrary(LibraryDependency dep) throws LibraryNotFoundException {
 		LoadedLibrary result = null;
-		for (int i = 0; i < repositories.length; i++) {
+		for (int i = 0; i < repositories.size(); i++) {
 			try {
-				LoadedLibrary temp = repositories[i].findMatchingLibrary(dep);
+				LoadedLibrary temp = repositories.get(i).findMatchingLibrary(dep);
 				if (result == null
 						|| temp.getLibraryIdentifier().getVersion().isLargerThan(result.getIdentifier().getVersion())) {
 					result = temp;
@@ -515,5 +516,12 @@ public class L2pClassManager {
 
 		return className.substring(0, className.lastIndexOf('.'));
 	}
+
+	public void addRepository(Repository repository) {
+		repositories.add(repository);
+	}
+
+	// TODO add method to remove repository
+	// What about already loaded libraries and classes from that repository?
 
 }
