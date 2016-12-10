@@ -14,6 +14,24 @@ public class LibraryIdentifier implements Comparable<LibraryIdentifier> {
 	private String name;
 	private LibraryVersion version;
 
+	public static LibraryIdentifier fromFilename(String filename) {
+		String fileNameWithOutExt = new File(filename).getName().replaceFirst("[.][^.]+$", "");
+
+		Pattern versionPattern = Pattern.compile("-[0-9]+(?:.[0-9]+(?:.[0-9]+)?)?(?:-[0-9]+)?$");
+		Matcher m = versionPattern.matcher(fileNameWithOutExt);
+
+		String sName = null;
+		String sVersion = null;
+		if (m.find()) { // look for version information in filename
+			sName = fileNameWithOutExt.substring(0, m.start());
+			sVersion = m.group().substring(1);
+			return new LibraryIdentifier(sName, sVersion);
+		} else {
+			sName = fileNameWithOutExt;
+			return new LibraryIdentifier(sName, (LibraryVersion) null);
+		}
+	}
+
 	/**
 	 * generate a new LibraryIdentifier from its string representation
 	 * 
