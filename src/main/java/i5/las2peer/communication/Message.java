@@ -1,18 +1,5 @@
 package i5.las2peer.communication;
 
-import i5.las2peer.p2p.AgentNotKnownException;
-import i5.las2peer.persistency.EncodingFailedException;
-import i5.las2peer.persistency.MalformedXMLException;
-import i5.las2peer.persistency.XmlAble;
-import i5.las2peer.security.Agent;
-import i5.las2peer.security.AgentStorage;
-import i5.las2peer.security.L2pSecurityException;
-import i5.las2peer.tools.CryptoException;
-import i5.las2peer.tools.CryptoTools;
-import i5.las2peer.tools.SerializationException;
-import i5.las2peer.tools.SerializeTools;
-import i5.las2peer.tools.XmlTools;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.Serializable;
@@ -34,6 +21,18 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
+import i5.las2peer.p2p.AgentNotKnownException;
+import i5.las2peer.persistency.EncodingFailedException;
+import i5.las2peer.persistency.MalformedXMLException;
+import i5.las2peer.persistency.XmlAble;
+import i5.las2peer.security.Agent;
+import i5.las2peer.security.AgentStorage;
+import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.tools.CryptoException;
+import i5.las2peer.tools.CryptoTools;
+import i5.las2peer.tools.SerializationException;
+import i5.las2peer.tools.SerializeTools;
+import i5.las2peer.tools.XmlTools;
 import rice.p2p.commonapi.NodeHandle;
 
 /**
