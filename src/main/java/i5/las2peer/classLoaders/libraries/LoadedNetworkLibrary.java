@@ -1,5 +1,6 @@
 package i5.las2peer.classLoaders.libraries;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -39,24 +40,29 @@ public class LoadedNetworkLibrary extends LoadedLibrary implements XmlAble {
 	}
 
 	@Override
-	public URL getResourceAsUrl(String name) throws ResourceNotFoundException {
-		// TODO load resource as byte array from network
-		// TODO create urlstreamhandler for byte array stream
-		// TODO return url to this urlstreamhandler
+	public URL getResourceAsUrl(String resourceName) throws ResourceNotFoundException {
+		// TODO implement get resource as URL in network library
 		throw new NotImplementedException();
 	}
 
 	@Override
 	InputStream getResourceAsStream(String resourceName) throws ResourceNotFoundException {
-		// TODO load resource as byte array from network
-		// TODO return stream to this byte array
-		throw new NotImplementedException();
+		try {
+			byte[] bytes = getResourceAsBinary(resourceName);
+			ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+			return bais;
+		} catch (IOException e) {
+			throw new ResourceNotFoundException(resourceName, getIdentifier().toString(), e);
+		}
 	}
 
 	@Override
 	long getSizeOfResource(String resourceName) throws ResourceNotFoundException {
-		// TODO read size from internal meta information
-		throw new NotImplementedException();
+		try {
+			return getResourceAsBinary(resourceName).length;
+		} catch (IOException e) {
+			throw new ResourceNotFoundException(resourceName, getIdentifier().toString(), e);
+		}
 	}
 
 	@Override
