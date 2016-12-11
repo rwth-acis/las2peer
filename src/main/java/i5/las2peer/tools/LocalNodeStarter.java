@@ -6,12 +6,10 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import i5.las2peer.api.exceptions.StorageException;
 import i5.las2peer.p2p.AgentAlreadyRegisteredException;
 import i5.las2peer.p2p.LocalNode;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.NodeException;
-import i5.las2peer.persistency.Envelope;
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.security.Agent;
 import i5.las2peer.security.AgentException;
@@ -48,11 +46,6 @@ public class LocalNodeStarter {
 					Agent a = Agent.createFromXml(content);
 					node.storeAgent(a);
 					System.err.println("loaded agent from " + xml);
-				} else {
-					Envelope e = Envelope.createFromXml(content);
-					// TODO fix upload Envelope from startup directory
-					node.storeArtifact(e);
-					System.err.println("loaded artifact from " + xml);
 				}
 			} catch (MalformedXMLException e) {
 				System.err.println("unable to deserialize contents of " + xml.toString() + " into an XML envelope!");
@@ -60,8 +53,6 @@ public class LocalNodeStarter {
 				System.err.println("problems reading the contents of " + xml.toString() + ": " + e);
 			} catch (L2pSecurityException e) {
 				System.err.println("error storing agent from " + xml.toString() + ": " + e);
-			} catch (StorageException e) {
-				System.err.println("error storing object from " + xml.toString() + ": " + e);
 			} catch (AgentAlreadyRegisteredException e) {
 				System.err.println("agent from " + xml.toString() + " already known at this node!");
 			} catch (AgentException e) {

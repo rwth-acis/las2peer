@@ -5,6 +5,16 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Date;
+
+import org.junit.Before;
+import org.junit.Test;
+
 import i5.las2peer.api.exceptions.ArtifactNotFoundException;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.PingPongContent;
@@ -19,15 +29,6 @@ import i5.las2peer.security.UserAgent;
 import i5.las2peer.testing.MockAgentFactory;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.SerializationException;
-
-import java.io.IOException;
-import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.security.NoSuchAlgorithmException;
-import java.util.Date;
-
-import org.junit.Before;
-import org.junit.Test;
 
 public class LocalNodeTest {
 

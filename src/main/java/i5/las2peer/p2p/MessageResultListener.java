@@ -1,9 +1,9 @@
 package i5.las2peer.p2p;
 
-import i5.las2peer.communication.Message;
-
 import java.util.Date;
 import java.util.Vector;
+
+import i5.las2peer.communication.Message;
 
 /**
  * A MessageResultListener is a simple collector for one result of a message sending operation in a {@link Node}. The

@@ -1,5 +1,9 @@
 package i5.las2peer.security;
 
+import java.io.Serializable;
+import java.util.LinkedList;
+import java.util.Vector;
+
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
 import i5.las2peer.execution.L2pServiceException;
@@ -10,10 +14,6 @@ import i5.las2peer.p2p.ServiceNameVersion;
 import i5.las2peer.p2p.TimeoutException;
 import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.tools.SerializationException;
-
-import java.io.Serializable;
-import java.util.LinkedList;
-import java.util.Vector;
 
 /**
  * A Mediator acts on behalf of an {@link PassphraseAgent}. This necessary e.g. for remote users logged in via a
