@@ -128,9 +128,9 @@ public class L2pNodeLauncher {
 	 * 
 	 * @param serviceNameVersion Exact name and version, same syantax as in {@link #startService(String)}
 	 * @return node handles
-	 * @throws AgentNotKnownException
+	 * @throws AgentException
 	 */
-	public Object[] findService(String serviceNameVersion) throws AgentNotKnownException {
+	public Object[] findService(String serviceNameVersion) throws AgentException {
 		if (currentUser == null) {
 			throw new IllegalStateException("Please register a valid user with registerUserAgent before invoking!");
 		}
@@ -244,7 +244,7 @@ public class L2pNodeLauncher {
 				Agent memberAgent = null;
 				try {
 					memberAgent = node.getAgent(memberId);
-				} catch (AgentNotKnownException e) {
+				} catch (AgentException e) {
 					printErrorWithStacktrace("Can't get agent for group member " + memberId, e);
 					continue;
 				}
@@ -527,15 +527,14 @@ public class L2pNodeLauncher {
 	 * @param serviceNameVersion Exact service name and version, same syntax as in {@link #startService(String)}
 	 * @return list of methods encapsulated in a ListMethodsContent
 	 * @throws L2pSecurityException
-	 * @throws AgentNotKnownException
+	 * @throws AgentException
 	 * @throws InterruptedException
 	 * @throws SerializationException
 	 * @throws EncodingFailedException
 	 * @throws TimeoutException
 	 */
-	public ListMethodsContent getServiceMethods(String serviceNameVersion)
-			throws L2pSecurityException, AgentNotKnownException, InterruptedException, EncodingFailedException,
-			SerializationException, TimeoutException {
+	public ListMethodsContent getServiceMethods(String serviceNameVersion) throws L2pSecurityException, AgentException,
+			InterruptedException, EncodingFailedException, SerializationException, TimeoutException {
 		if (currentUser == null) {
 			throw new IllegalStateException("please log in a valid user with registerUserAgent before!");
 		}

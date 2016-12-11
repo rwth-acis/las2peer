@@ -416,7 +416,7 @@ public class PastryNodeImpl extends Node {
 
 	@Override
 	public void sendMessage(Message message, Object atNodeId, MessageResultListener listener)
-			throws AgentNotKnownException, NodeNotFoundException, L2pSecurityException {
+			throws NodeNotFoundException {
 
 		if (!(atNodeId instanceof NodeHandle)) {
 			String addition = "(null)";
@@ -499,7 +499,7 @@ public class PastryNodeImpl extends Node {
 	}
 
 	@Override
-	public Agent getAgent(String id) throws AgentNotKnownException {
+	public Agent getAgent(String id) throws AgentNotKnownException, AgentException {
 		// no caching here, because agents may have changed in the network
 		observerNotice(Event.AGENT_GET_STARTED, pastryNode, id, null, (String) null, "");
 		try {
@@ -514,9 +514,13 @@ public class PastryNodeImpl extends Node {
 			}
 			observerNotice(Event.AGENT_GET_SUCCESS, pastryNode, id, null, (String) null, "");
 			return agentFromNet;
-		} catch (Exception e) {
+		} catch (ArtifactNotFoundException e) {
 			observerNotice(Event.AGENT_GET_FAILED, pastryNode, id, null, (String) null, "");
-			throw new AgentNotKnownException("Unable to retrieve Agent " + id + " from past storage", e);
+			throw new AgentNotKnownException("Agent " + id + " not found in storage", e);
+		} catch (StorageException | MalformedXMLException | SerializationException | L2pSecurityException
+				| CryptoException e) {
+			observerNotice(Event.AGENT_GET_FAILED, pastryNode, id, null, (String) null, "");
+			throw new AgentException("Unable to retrieve Agent " + id + " from past storage", e);
 		}
 	}
 

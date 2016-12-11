@@ -177,7 +177,7 @@ public class LocalNode extends Node {
 
 	@Override
 	public void sendMessage(Message message, Object atNodeId, MessageResultListener listener)
-			throws AgentNotKnownException, NodeNotFoundException {
+			throws NodeNotFoundException {
 		message.setSendingNodeId(this.getNodeId());
 
 		if (!(atNodeId instanceof Long)) {

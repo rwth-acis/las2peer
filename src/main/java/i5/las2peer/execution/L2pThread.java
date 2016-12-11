@@ -20,6 +20,7 @@ import i5.las2peer.persistency.DecodingFailedException;
 import i5.las2peer.persistency.Envelope;
 import i5.las2peer.security.Agent;
 import i5.las2peer.security.AgentContext;
+import i5.las2peer.security.AgentException;
 import i5.las2peer.security.AgentLockedException;
 import i5.las2peer.security.GroupAgent;
 import i5.las2peer.security.L2pSecurityException;
@@ -185,12 +186,13 @@ public class L2pThread extends Thread implements Context {
 	}
 
 	@Override
-	public GroupAgent requestGroupAgent(String groupId) throws AgentNotKnownException, L2pSecurityException {
+	public GroupAgent requestGroupAgent(String groupId)
+			throws AgentNotKnownException, AgentException, L2pSecurityException {
 		return callerContext.requestGroupAgent(groupId);
 	}
 
 	@Override
-	public Agent requestAgent(String agentId) throws AgentNotKnownException, L2pSecurityException {
+	public Agent requestAgent(String agentId) throws AgentNotKnownException, AgentException, L2pSecurityException {
 		return callerContext.requestAgent(agentId);
 	}
 
@@ -217,7 +219,7 @@ public class L2pThread extends Thread implements Context {
 	}
 
 	@Override
-	public Agent getAgent(String id) throws AgentNotKnownException {
+	public Agent getAgent(String id) throws AgentNotKnownException, AgentException {
 		return callerContext.getAgent(id);
 	}
 
@@ -232,7 +234,7 @@ public class L2pThread extends Thread implements Context {
 	}
 
 	@Override
-	public boolean hasAccess(String agentId) throws AgentNotKnownException, AgentLockedException {
+	public boolean hasAccess(String agentId) throws AgentNotKnownException, AgentException, AgentLockedException {
 		return callerContext.hasAccess(agentId);
 	}
 
@@ -359,7 +361,9 @@ public class L2pThread extends Thread implements Context {
 		} catch (L2pServiceException | InterruptedException e) {
 			throw new RemoteServiceException("The service seems not to be available.", e);
 		} catch (L2pSecurityException e) {
-			throw new IllegalStateException("Agent should be unlocked, but it isn't.");
+			throw new ServiceNotAvailableException("Agent should be unlocked, but it isn't.", e);
+		} catch (AgentException e) {
+			throw new ServiceNotAvailableException("Agent is not available", e);
 		}
 	}
 

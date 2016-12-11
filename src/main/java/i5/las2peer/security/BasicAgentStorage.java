@@ -79,15 +79,8 @@ public class BasicAgentStorage implements AgentStorage {
 		htRegistered.remove(id);
 	}
 
-	/**
-	 * get the agent for the given id
-	 *
-	 * @param id
-	 * @return an agent
-	 * @throws AgentNotKnownException
-	 */
 	@Override
-	public Agent getAgent(String id) throws AgentNotKnownException {
+	public Agent getAgent(String id) throws AgentNotKnownException, AgentException {
 		Agent result = htRegistered.get(id);
 
 		if (result != null) {

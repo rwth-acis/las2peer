@@ -1,18 +1,5 @@
 package i5.las2peer.communication;
 
-import i5.las2peer.p2p.AgentNotKnownException;
-import i5.las2peer.persistency.EncodingFailedException;
-import i5.las2peer.persistency.MalformedXMLException;
-import i5.las2peer.persistency.XmlAble;
-import i5.las2peer.security.Agent;
-import i5.las2peer.security.AgentStorage;
-import i5.las2peer.security.L2pSecurityException;
-import i5.las2peer.tools.CryptoException;
-import i5.las2peer.tools.CryptoTools;
-import i5.las2peer.tools.SerializationException;
-import i5.las2peer.tools.SerializeTools;
-import i5.las2peer.tools.XmlTools;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.Serializable;
@@ -34,6 +21,18 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
+import i5.las2peer.persistency.EncodingFailedException;
+import i5.las2peer.persistency.MalformedXMLException;
+import i5.las2peer.persistency.XmlAble;
+import i5.las2peer.security.Agent;
+import i5.las2peer.security.AgentException;
+import i5.las2peer.security.AgentStorage;
+import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.tools.CryptoException;
+import i5.las2peer.tools.CryptoTools;
+import i5.las2peer.tools.SerializationException;
+import i5.las2peer.tools.SerializeTools;
+import i5.las2peer.tools.XmlTools;
 import rice.p2p.commonapi.NodeHandle;
 
 /**
@@ -572,9 +571,9 @@ public class Message implements XmlAble, Cloneable {
 	 * 
 	 * @param storage
 	 * @throws L2pSecurityException
-	 * @throws AgentNotKnownException
+	 * @throws AgentException If an issue with the sender agent occurs
 	 */
-	public void open(AgentStorage storage) throws L2pSecurityException, AgentNotKnownException {
+	public void open(AgentStorage storage) throws L2pSecurityException, AgentException {
 		open(null, storage);
 	}
 
@@ -588,10 +587,9 @@ public class Message implements XmlAble, Cloneable {
 	 * 
 	 * 
 	 * @throws L2pSecurityException the private key of the receiver has to be unlocked for decryption
-	 * @throws AgentNotKnownException
+	 * @throws AgentException If an issue with the sender agent occurs
 	 */
-	public void open(Agent unlockedRecipient, AgentStorage storage)
-			throws L2pSecurityException, AgentNotKnownException {
+	public void open(Agent unlockedRecipient, AgentStorage storage) throws L2pSecurityException, AgentException {
 		if (isOpen()) {
 			return;
 		}

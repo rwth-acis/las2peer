@@ -124,6 +124,8 @@ public class MonitoringAgent extends PassphraseAgent {
 			throw new MessageException("Security problems handling the received message", e);
 		} catch (AgentNotKnownException e) {
 			// Do nothing..("this" is not known..would be strange, eh?)
+		} catch (AgentException e) {
+			throw new MessageException("Could not read the sender agent", e);
 		}
 	}
 

@@ -14,6 +14,7 @@ import i5.las2peer.p2p.Node;
 import i5.las2peer.persistency.DecodingFailedException;
 import i5.las2peer.persistency.Envelope;
 import i5.las2peer.security.Agent;
+import i5.las2peer.security.AgentException;
 import i5.las2peer.security.AgentLockedException;
 import i5.las2peer.security.GroupAgent;
 import i5.las2peer.security.L2pSecurityException;
@@ -57,20 +58,23 @@ public interface Context {
 	 * 
 	 * @param groupId
 	 * @return the unlocked GroupAgent of the given id
-	 * @throws AgentNotKnownException
+	 * @throws AgentNotKnownException If the agent is not found
+	 * @throws AgentException If any other issue with the agent occurs, e. g. XML not readable
 	 * @throws L2pSecurityException
 	 */
-	public GroupAgent requestGroupAgent(String groupId) throws AgentNotKnownException, L2pSecurityException;
+	public GroupAgent requestGroupAgent(String groupId)
+			throws AgentNotKnownException, AgentException, L2pSecurityException;
 
 	/**
 	 * returns an unlocked instance of the requested Agent
 	 * 
 	 * @param agentId the requested agent
 	 * @return an unlocked agent instance
-	 * @throws AgentNotKnownException agent not found
+	 * @throws AgentNotKnownException If the agent is not found
+	 * @throws AgentException If any other issue with the agent occurs, e. g. XML not readable
 	 * @throws L2pSecurityException agent cannot be unlocked
 	 */
-	public Agent requestAgent(String agentId) throws AgentNotKnownException, L2pSecurityException;
+	public Agent requestAgent(String agentId) throws AgentNotKnownException, AgentException, L2pSecurityException;
 
 	/**
 	 * @deprecated Use {@link #fetchEnvelope(String)} instead.
@@ -129,9 +133,10 @@ public interface Context {
 	 * 
 	 * @param id
 	 * @return get the agent of the given id
-	 * @throws AgentNotKnownException
+	 * @throws AgentNotKnownException If the agent is not found
+	 * @throws AgentException If any other issue with the agent occurs, e. g. XML not readable
 	 */
-	public Agent getAgent(String id) throws AgentNotKnownException;
+	public Agent getAgent(String id) throws AgentNotKnownException, AgentException;
 
 	@Deprecated
 	public boolean hasAgent(String id);
@@ -163,10 +168,11 @@ public interface Context {
 	 * 
 	 * @param agentId an agent id
 	 * @return true if the main agent has access to the given agent, otherwise false
-	 * @throws AgentNotKnownException agent not found
+	 * @throws AgentNotKnownException If the agent is not found
+	 * @throws AgentException If any other issue with the agent occurs, e. g. XML not readable
 	 * @throws AgentLockedException main agent is locked
 	 */
-	public boolean hasAccess(String agentId) throws AgentNotKnownException, AgentLockedException;
+	public boolean hasAccess(String agentId) throws AgentNotKnownException, AgentException, AgentLockedException;
 
 	// Envelopes
 

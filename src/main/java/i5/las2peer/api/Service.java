@@ -9,6 +9,7 @@ import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.TimeoutException;
 import i5.las2peer.security.Agent;
 import i5.las2peer.security.AgentContext;
+import i5.las2peer.security.AgentException;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.ServiceAgent;
 
@@ -174,16 +175,15 @@ public abstract class Service extends Configurable {
 	 * @param method the service method
 	 * @param parameters list of parameters
 	 * @return result of the method invocation
-	 * @throws AgentNotKnownException
 	 * @throws L2pServiceException
+	 * @throws AgentException If any issue with the agent occurs
 	 * @throws L2pSecurityException
 	 * @throws InterruptedException
 	 * @throws TimeoutException
 	 * 
 	 */
 	public Object invokeServiceMethod(String service, String method, Serializable... parameters)
-			throws AgentNotKnownException, L2pServiceException, L2pSecurityException, InterruptedException,
-			TimeoutException {
+			throws L2pServiceException, AgentException, L2pSecurityException, InterruptedException, TimeoutException {
 
 		return getContext().getLocalNode().invoke(getContext().getMainAgent(), service, method, parameters);
 	}
@@ -203,14 +203,13 @@ public abstract class Service extends Configurable {
 	 * @param parameters list of parameters
 	 * @return result of the method invocation
 	 * @throws L2pServiceException
+	 * @throws AgentException If any issue with the agent occurs
 	 * @throws L2pSecurityException
-	 * @throws AgentNotKnownException
 	 * @throws InterruptedException
 	 * @throws TimeoutException
 	 */
 	protected Object invokeInternally(String service, String method, Serializable... parameters)
-			throws AgentNotKnownException, L2pServiceException, L2pSecurityException, InterruptedException,
-			TimeoutException {
+			throws L2pServiceException, AgentException, L2pSecurityException, InterruptedException, TimeoutException {
 
 		return getContext().getLocalNode().invoke(getAgent(), service, method, parameters);
 	}

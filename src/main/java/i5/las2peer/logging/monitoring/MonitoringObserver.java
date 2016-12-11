@@ -1,7 +1,6 @@
 package i5.las2peer.logging.monitoring;
 
 import i5.las2peer.communication.Message;
-import i5.las2peer.execution.L2pServiceException;
 import i5.las2peer.logging.NodeObserver;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.MessageResultListener;
@@ -97,7 +96,7 @@ public class MonitoringObserver implements NodeObserver {
 			} catch (AgentNotKnownException e) {
 				e.printStackTrace();
 			}
-		} catch (AgentNotKnownException | L2pServiceException | L2pSecurityException | InterruptedException e) {
+		} catch (AgentException | L2pSecurityException | InterruptedException e) {
 			System.out.println("Monitoring: Processing Service does not seem available! " + e);
 			e.printStackTrace();
 			return false;

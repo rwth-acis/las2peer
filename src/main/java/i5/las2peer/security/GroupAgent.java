@@ -17,7 +17,6 @@ import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.logging.NodeObserver.Event;
-import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.persistency.XmlAble;
@@ -117,7 +116,8 @@ public class GroupAgent extends Agent {
 						unlockPrivateKey(member);
 						return;
 					}
-				} catch (AgentNotKnownException | L2pSecurityException | SerializationException | CryptoException e) {
+				} catch (AgentException | L2pSecurityException | SerializationException | CryptoException e) {
+					// XXX logging
 				}
 			}
 		}
@@ -225,7 +225,7 @@ public class GroupAgent extends Agent {
 						return true;
 					}
 				}
-			} catch (AgentNotKnownException e) {
+			} catch (AgentException e) {
 				L2pLogger.logEvent(Event.SERVICE_ERROR, "Can't get agent for id " + memberId);
 			}
 		}
@@ -258,7 +258,7 @@ public class GroupAgent extends Agent {
 				} else {
 					result++;
 				}
-			} catch (AgentNotKnownException e) {
+			} catch (AgentException e) {
 				L2pLogger.logEvent(Event.SERVICE_ERROR, "Can't get agent for id " + memberId);
 			}
 		}
@@ -288,7 +288,7 @@ public class GroupAgent extends Agent {
 					GroupAgent group = (GroupAgent) agent;
 					Collections.addAll(result, group.getMemberListRecursive());
 				}
-			} catch (AgentNotKnownException e) {
+			} catch (AgentException e) {
 				L2pLogger.logEvent(Event.SERVICE_ERROR, "Can't get agent for id " + id);
 			}
 		}
@@ -351,7 +351,7 @@ public class GroupAgent extends Agent {
 					GroupAgent group = (GroupAgent) agent;
 					group.removeMemberRecursive(id);
 				}
-			} catch (AgentNotKnownException e) {
+			} catch (AgentException e) {
 				L2pLogger.logEvent(Event.SERVICE_ERROR, "Can't get agent for id " + memberId);
 			}
 		}
@@ -501,7 +501,7 @@ public class GroupAgent extends Agent {
 		try {
 			message.open(this, getRunningAtNode());
 			content = message.getContent();
-		} catch (AgentNotKnownException e1) {
+		} catch (AgentException e1) {
 			L2pLogger.logEvent(Event.SERVICE_ERROR, e1.getMessage());
 		} catch (L2pSecurityException e2) {
 			L2pLogger.logEvent(Event.SERVICE_ERROR, e2.getMessage());
@@ -525,12 +525,11 @@ public class GroupAgent extends Agent {
 			Agent member = null;
 			try {
 				member = getRunningAtNode().getAgent(memberId);
-			} catch (AgentNotKnownException e1) {
+			} catch (AgentException e1) {
 				L2pLogger.logEvent(Event.SERVICE_ERROR, e1.getMessage());
 			}
 			if (member == null) {
-				L2pLogger.logEvent(Event.SERVICE_ERROR,
-						"No agent for group member " + memberId + " found! Skipping member.");
+				L2pLogger.logEvent(Event.SERVICE_ERROR, "No agent for group member " + memberId + "! Skipping member.");
 				continue;
 			}
 			try {
