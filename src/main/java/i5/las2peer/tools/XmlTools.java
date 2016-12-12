@@ -1,11 +1,10 @@
 package i5.las2peer.tools;
 
+import i5.las2peer.persistency.MalformedXMLException;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -17,9 +16,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import i5.las2peer.persistency.MalformedXMLException;
-import i5.las2peer.persistency.XmlAble;
-
 /**
  * Simple <i>static</i> class collecting useful methods for XML (de-)serialization.
  * 
@@ -27,70 +23,6 @@ import i5.las2peer.persistency.XmlAble;
  *
  */
 public class XmlTools {
-
-	/**
-	 * create an XmlAble java object from its xml representation
-	 * 
-	 * @param xml
-	 * @param classname
-	 * @return deserialized object
-	 * @throws MalformedXMLException
-	 * @throws SerializationException
-	 * @throws ClassNotFoundException
-	 */
-	public static XmlAble createFromXml(String xml, String classname)
-			throws MalformedXMLException, SerializationException, ClassNotFoundException {
-		Class<?> c = Class.forName(classname);
-		return createFromXml(xml, c);
-	}
-
-	/**
-	 * this method goes through the three possible standard deserialization methods defined in {@link XmlAble} to try to
-	 * deserialize an XmlString into an instance of the given class
-	 * 
-	 * @param xml
-	 * @param c
-	 * @return deserialized object
-	 * @throws MalformedXMLException
-	 * @throws SerializationException
-	 */
-	public static XmlAble createFromXml(String xml, Class<?> c) throws MalformedXMLException, SerializationException {
-		try {
-			Method createFromXml = c.getDeclaredMethod("createFromXml", String.class);
-			if (Modifier.isStatic(createFromXml.getModifiers())) {
-				return (XmlAble) createFromXml.invoke(null, xml);
-			}
-		} catch (Exception e1) {
-			if (e1 instanceof MalformedXMLException) {
-				throw (MalformedXMLException) e1;
-				// just try next idea
-			}
-		}
-
-		try {
-			Constructor<?> constr = c.getDeclaredConstructor(String.class);
-			return (XmlAble) constr.newInstance(xml);
-		} catch (Exception e) {
-			if (e instanceof MalformedXMLException) {
-				throw (MalformedXMLException) e;
-				// again just the next one
-			}
-		}
-
-		try {
-			Method setState = c.getMethod("setStateFromXml", String.class);
-			XmlAble result = (XmlAble) c.newInstance();
-			setState.invoke(result, xml);
-
-			return result;
-		} catch (Exception e) {
-			if (e instanceof MalformedXMLException) {
-				throw (MalformedXMLException) e;
-			}
-		}
-
-		throw new SerializationException("unable to generate a new instance for the given xml: " + xml);
-	}
 
 	/**
 	 * Gets the root element from the given XML String and throws an exception if the name does not match with the given
@@ -146,8 +78,8 @@ public class XmlTools {
 		NodeList nList = document.getElementsByTagName(rootElementName);
 		int len = nList.getLength();
 		if (len != 1) {
-			throw new MalformedXMLException(
-					"Exactly one element '" + rootElementName + "' per XML document expected! Found: " + len);
+			throw new MalformedXMLException("Exactly one element '" + rootElementName
+					+ "' per XML document expected! Found: " + len);
 		}
 		org.w3c.dom.Node rootNode = nList.item(0);
 		String rootNodeName = rootNode.getNodeName();
@@ -179,8 +111,8 @@ public class XmlTools {
 		org.w3c.dom.Node firstNode = nodeList.item(0);
 		short nodeType = firstNode.getNodeType();
 		if (nodeType != org.w3c.dom.Node.ELEMENT_NODE) {
-			throw new MalformedXMLException(
-					"Node type (" + nodeType + ") is not type element (" + org.w3c.dom.Node.ELEMENT_NODE + ")");
+			throw new MalformedXMLException("Node type (" + nodeType + ") is not type element ("
+					+ org.w3c.dom.Node.ELEMENT_NODE + ")");
 		}
 		return (Element) firstNode;
 	}
@@ -202,8 +134,8 @@ public class XmlTools {
 			org.w3c.dom.Node firstNode = nodeList.item(0);
 			short nodeType = firstNode.getNodeType();
 			if (nodeType != org.w3c.dom.Node.ELEMENT_NODE) {
-				throw new MalformedXMLException(
-						"Node type (" + nodeType + ") is not type element (" + org.w3c.dom.Node.ELEMENT_NODE + ")");
+				throw new MalformedXMLException("Node type (" + nodeType + ") is not type element ("
+						+ org.w3c.dom.Node.ELEMENT_NODE + ")");
 			}
 			return (Element) firstNode;
 		} else {

@@ -665,7 +665,7 @@ public class Message implements XmlAble, Cloneable {
 			if (root.getAttribute("type").equals("Serializable")) {
 				content = SerializeTools.deserializeBase64(root.getTextContent());
 			} else {
-				content = XmlTools.createFromXml(root.getFirstChild().toString(), root.getAttribute("class"));
+				content = XmlAble.createFromXml(root.getFirstChild().toString(), root.getAttribute("class"));
 			}
 		} catch (CryptoException e) {
 			throw new L2pSecurityException("Crypto-Problems: Unable to open message content", e);
