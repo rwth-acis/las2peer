@@ -18,6 +18,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 import i5.las2peer.api.Connector;
 import i5.las2peer.api.ConnectorException;
@@ -608,17 +609,22 @@ public class L2pNodeLauncher {
 	 */
 	public ServiceAgent startServiceXml(String file, String passphrase) throws Exception {
 		try {
-			ServiceAgent sa = ServiceAgent.createFromXml(FileContentReader.read(file));
-			sa.unlockPrivateKey(passphrase);
+			ServiceAgent xmlAgent = ServiceAgent.createFromXml(FileContentReader.read(file));
+			ServiceAgent serviceAgent;
 			try {
-				node.storeAgent(sa);
-			} catch (AgentAlreadyRegisteredException e) {
+				// check if the agent is already known to the network
+				serviceAgent = (ServiceAgent) node.getAgent(xmlAgent.getId());
+				serviceAgent.unlockPrivateKey(passphrase);
+			} catch (AgentNotKnownException e) {
+				xmlAgent.unlockPrivateKey(passphrase);
+				node.storeAgent(xmlAgent);
+				logger.info("ServiceAgent was not known in network. Published it");
+				serviceAgent = xmlAgent;
 			}
-			startService(sa);
-			return sa;
+			startService(serviceAgent);
+			return serviceAgent;
 		} catch (Exception e) {
-			System.out.println("Starting service failed");
-			logger.printStackTrace(e);
+			logger.log(Level.SEVERE, "Starting service failed", e);
 			throw e;
 		}
 	}

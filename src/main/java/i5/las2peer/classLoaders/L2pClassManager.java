@@ -1,13 +1,15 @@
 package i5.las2peer.classLoaders;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.Hashtable;
+
 import i5.las2peer.classLoaders.helpers.LibraryDependency;
 import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
 import i5.las2peer.classLoaders.helpers.LibraryVersion;
 import i5.las2peer.classLoaders.libraries.LoadedLibrary;
 import i5.las2peer.classLoaders.libraries.Repository;
-
-import java.util.Enumeration;
-import java.util.Hashtable;
 
 /**
  * The main class for loading classes in the las2peer environment. This ClassLoader handles library registering and
@@ -28,7 +30,7 @@ public class L2pClassManager {
 	/**
 	 * repositories to load libraries from
 	 */
-	private Repository[] repositories;
+	private ArrayList<Repository> repositories;
 
 	/**
 	 * all registered main bundles (i.e. services) (name, version) => BundleClassLoader
@@ -59,7 +61,7 @@ public class L2pClassManager {
 	public L2pClassManager(Repository[] repositories, ClassLoader platformLoader) {
 		this.platformLoader = platformLoader;
 
-		this.repositories = repositories;
+		this.repositories = new ArrayList<>(Arrays.asList(repositories));
 	}
 
 	/**
@@ -73,13 +75,15 @@ public class L2pClassManager {
 		String sPackage = getPackageName(serviceClassName);
 
 		Hashtable<LibraryVersion, BundleClassManager> htBcls = registeredLoaders.get(sPackage);
-		if (htBcls != null && htBcls.size() > 0)
+		if (htBcls != null && htBcls.size() > 0) {
 			return; // at least one version is already registered
+		}
 
 		LoadedLibrary lib = findLoadedLibrary(sPackage);
-		if (!lib.getIdentifier().getName().equals(sPackage))
+		if (!lib.getIdentifier().getName().equals(sPackage)) {
 			throw new ClassLoaderException("Name mismatch: package library '" + sPackage + "' provides package '"
 					+ lib.getIdentifier().getName() + "'!");
+		}
 
 		registerBundle(lib);
 	}
@@ -100,18 +104,20 @@ public class L2pClassManager {
 		}
 
 		LoadedLibrary lib = null;
-		for (int i = 0; i < repositories.length && lib == null; i++) {
+		for (int i = 0; i < repositories.size() && lib == null; i++) {
 			try {
-				lib = repositories[i].findLibrary(new LibraryIdentifier(sPackage, version));
+				lib = repositories.get(i).findLibrary(new LibraryIdentifier(sPackage, version));
 			} catch (LibraryNotFoundException e) {
 			}
 		}
 
-		if (lib == null)
+		if (lib == null) {
 			throw new LibraryNotFoundException(sPackage);
-		if (!lib.getIdentifier().getName().equals(sPackage))
+		}
+		if (!lib.getIdentifier().getName().equals(sPackage)) {
 			throw new ClassLoaderException("Name mismatch: package library '" + sPackage + "' provides package '"
 					+ lib.getIdentifier().getName() + "'!");
+		}
 
 		registerBundle(lib);
 	}
@@ -169,23 +175,27 @@ public class L2pClassManager {
 		String pkg = getPackageName(libraryName);
 
 		Hashtable<LibraryVersion, BundleClassManager> htVersions = registeredLoaders.get(pkg);
-		if (htVersions == null)
+		if (htVersions == null) {
 			throw new NotRegisteredException(pkg, libraryVersion);
+		}
 
 		BundleClassManager bcl = htVersions.get(new LibraryVersion(libraryVersion));
-		if (bcl == null)
+		if (bcl == null) {
 			throw new NotRegisteredException(pkg, libraryVersion);
+		}
 
 		htVersions.remove(libraryVersion);
-		if (htVersions.size() == 0)
+		if (htVersions.size() == 0) {
 			registeredLoaders.remove(pkg);
+		}
 
 		LibraryClassLoader[] subloaders = bcl.getLibraryLoaders();
-		for (int i = 0; i < subloaders.length; i++) {
-			LoadedLibraryCache cache = getRegisteredLoadedLibrary(subloaders[i].getLibrary());
+		for (LibraryClassLoader subloader : subloaders) {
+			LoadedLibraryCache cache = getRegisteredLoadedLibrary(subloader.getLibrary());
 			cache.unregisterBundle(bcl);
-			if (!cache.isUsed())
+			if (!cache.isUsed()) {
 				removeLoadedLibrary(cache.getLoadedLibrary());
+			}
 		}
 	}
 
@@ -218,8 +228,9 @@ public class L2pClassManager {
 		LoadedLibraryCache[] result = new LoadedLibraryCache[libraries.length];
 		for (int i = 0; i < libraries.length; i++) {
 			result[i] = getRegisteredLoadedLibrary(libraries[i]);
-			if (result[i] == null)
+			if (result[i] == null) {
 				result[i] = registerLoadedLibrary(libraries[i]);
+			}
 		}
 
 		return result;
@@ -234,8 +245,8 @@ public class L2pClassManager {
 	 * @throws UnresolvedDependenciesException problems resolving the dependency information stated in the libraries
 	 *             manifest
 	 */
-	private LoadedLibrary findLoadedLibrary(String name) throws LibraryNotFoundException,
-			UnresolvedDependenciesException {
+	private LoadedLibrary findLoadedLibrary(String name)
+			throws LibraryNotFoundException, UnresolvedDependenciesException {
 		// TODO versions of services - allow missing version info in dependency!
 		LoadedLibrary result = null;
 		StringBuilder sb = new StringBuilder();
@@ -276,18 +287,20 @@ public class L2pClassManager {
 	 */
 	private LoadedLibrary findLoadedLibrary(LibraryDependency dep) throws LibraryNotFoundException {
 		LoadedLibrary result = null;
-		for (int i = 0; i < repositories.length; i++) {
+		for (int i = 0; i < repositories.size(); i++) {
 			try {
-				LoadedLibrary temp = repositories[i].findMatchingLibrary(dep);
+				LoadedLibrary temp = repositories.get(i).findMatchingLibrary(dep);
 				if (result == null
-						|| temp.getLibraryIdentifier().getVersion().isLargerThan(result.getIdentifier().getVersion()))
+						|| temp.getLibraryIdentifier().getVersion().isLargerThan(result.getIdentifier().getVersion())) {
 					result = temp;
+				}
 			} catch (LibraryNotFoundException e) {
 			}
 		}
 
-		if (result == null)
+		if (result == null) {
 			throw new LibraryNotFoundException(dep.getName());
+		}
 
 		return result;
 	}
@@ -310,10 +323,11 @@ public class L2pClassManager {
 	 */
 	private LoadedLibraryCache getRegisteredLoadedLibrary(LibraryIdentifier iden) {
 		Hashtable<LibraryVersion, LoadedLibraryCache> htLoaders = registeredLibraries.get(iden.getName());
-		if (htLoaders == null)
+		if (htLoaders == null) {
 			return null;
-		else
+		} else {
 			return htLoaders.get(iden.getVersion());
+		}
 	}
 
 	/**
@@ -343,12 +357,14 @@ public class L2pClassManager {
 	 */
 	private void removeLoadedLibrary(LoadedLibrary l) throws NotRegisteredException {
 		Hashtable<LibraryVersion, LoadedLibraryCache> htVersions = registeredLibraries.get(l.getIdentifier().getName());
-		if (htVersions == null)
+		if (htVersions == null) {
 			throw new NotRegisteredException(l.getIdentifier());
+		}
 
 		htVersions.remove(l.getIdentifier().getVersion());
-		if (htVersions.size() == 0)
+		if (htVersions.size() == 0) {
 			registeredLibraries.remove(l.getIdentifier().getName());
+		}
 	}
 
 	/**
@@ -384,8 +400,9 @@ public class L2pClassManager {
 		LibraryVersion version = null;
 		for (Enumeration<LibraryVersion> en = htVersions.keys(); en.hasMoreElements();) {
 			LibraryVersion v = en.nextElement();
-			if (version == null || v.isLargerThan(version))
+			if (version == null || v.isLargerThan(version)) {
 				version = v;
+			}
 		}
 
 		BundleClassManager bcl = htVersions.get(version);
@@ -393,8 +410,8 @@ public class L2pClassManager {
 		try {
 			return bcl.loadClass(serviceClassName);
 		} catch (ClassNotFoundException e) {
-			throw new LibraryNotFoundException("The library for " + serviceClassName
-					+ " could be loaded, but the class is not available!", e);
+			throw new LibraryNotFoundException(
+					"The library for " + serviceClassName + " could be loaded, but the class is not available!", e);
 		}
 	}
 
@@ -434,8 +451,8 @@ public class L2pClassManager {
 		try {
 			return bcl.loadClass(serviceClassName);
 		} catch (ClassNotFoundException e) {
-			throw new LibraryNotFoundException("The library for " + serviceClassName
-					+ " could be loaded, but the class is not available!", e);
+			throw new LibraryNotFoundException(
+					"The library for " + serviceClassName + " could be loaded, but the class is not available!", e);
 		}
 	}
 
@@ -450,8 +467,8 @@ public class L2pClassManager {
 	 * @throws IllegalArgumentException
 	 * @throws ClassLoaderException
 	 */
-	public Class<?> getServiceClass(String serviceClassName, String version) throws IllegalArgumentException,
-			ClassLoaderException {
+	public Class<?> getServiceClass(String serviceClassName, String version)
+			throws IllegalArgumentException, ClassLoaderException {
 		return getServiceClass(serviceClassName, new LibraryVersion(version));
 	}
 
@@ -493,10 +510,18 @@ public class L2pClassManager {
 	 * @return the package name of a complete class name
 	 */
 	public static final String getPackageName(String className) {
-		if (className.indexOf('.') < 0)
+		if (className.indexOf('.') < 0) {
 			throw new IllegalArgumentException("this class is not contained in a package!");
+		}
 
 		return className.substring(0, className.lastIndexOf('.'));
 	}
+
+	public void addRepository(Repository repository) {
+		repositories.add(repository);
+	}
+
+	// TODO add method to remove repository
+	// What about already loaded libraries and classes from that repository?
 
 }

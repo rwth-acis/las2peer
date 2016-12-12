@@ -7,8 +7,6 @@ import java.net.URL;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import i5.las2peer.classLoaders.helpers.LibraryDependency;
 import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
@@ -46,8 +44,9 @@ public class LoadedJarLibrary extends LoadedLibrary {
 	public URL getResourceAsUrl(String name) throws ResourceNotFoundException {
 		JarEntry je = jfFile.getJarEntry(name);
 
-		if (je == null)
+		if (je == null) {
 			throw new ResourceNotFoundException(name, sJarFileName);
+		}
 
 		try {
 			return new URL("jar:file:" + this.sJarFileName + "!/" + name);
@@ -80,8 +79,9 @@ public class LoadedJarLibrary extends LoadedLibrary {
 		// compute size
 		int iSize = 0;
 		for (Enumeration<JarEntry> entries = jfFile.entries(); entries.hasMoreElements();) {
-			if (entries.nextElement().getName().endsWith(".class"))
+			if (entries.nextElement().getName().endsWith(".class")) {
 				iSize++;
+			}
 		}
 
 		// compute array with class names
@@ -109,8 +109,9 @@ public class LoadedJarLibrary extends LoadedLibrary {
 		int iSize = 0;
 		for (Enumeration<JarEntry> entries = jfFile.entries(); entries.hasMoreElements();) {
 			JarEntry entry = entries.nextElement();
-			if (!entry.getName().endsWith(".class") && !entry.getName().endsWith("/"))
+			if (!entry.getName().endsWith(".class") && !entry.getName().endsWith("/")) {
 				iSize++;
+			}
 		}
 
 		// compute array with class names
@@ -141,8 +142,9 @@ public class LoadedJarLibrary extends LoadedLibrary {
 	long getSizeOfResource(String resourceName) throws ResourceNotFoundException {
 		JarEntry je = jfFile.getJarEntry(resourceName);
 
-		if (je == null)
+		if (je == null) {
 			throw new ResourceNotFoundException(resourceName, sJarFileName);
+		}
 
 		return je.getSize();
 	}
@@ -164,23 +166,12 @@ public class LoadedJarLibrary extends LoadedLibrary {
 
 		// fill in version and name info from file name
 		if (sName == null || sVersion == null) {
-			String file = filename.substring(0, filename.length() - 4);
-
-			Pattern versionPattern = Pattern.compile("-[0-9]+(?:.[0-9]+(?:.[0-9]+)?)?(?:-[0-9]+)?$");
-			Matcher m = versionPattern.matcher(file);
-
-			if (m.find()) { // look for version information in filename
-				if (sVersion == null) {
-					sVersion = m.group().substring(1);
-				}
-
-				if (sName == null) {
-					sName = file.substring(0, m.start());
-				}
-			} else {
-				if (sName == null) {
-					sName = file;
-				}
+			LibraryIdentifier tmpId = LibraryIdentifier.fromFilename(filename);
+			if (sName == null) {
+				sName = tmpId.getName();
+			}
+			if (sVersion == null) {
+				sVersion = tmpId.getVersion().toString();
 			}
 		}
 
