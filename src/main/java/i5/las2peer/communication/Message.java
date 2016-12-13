@@ -1,5 +1,18 @@
 package i5.las2peer.communication;
 
+import i5.las2peer.p2p.AgentNotKnownException;
+import i5.las2peer.persistency.EncodingFailedException;
+import i5.las2peer.persistency.MalformedXMLException;
+import i5.las2peer.persistency.XmlAble;
+import i5.las2peer.security.Agent;
+import i5.las2peer.security.AgentStorage;
+import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.tools.CryptoException;
+import i5.las2peer.tools.CryptoTools;
+import i5.las2peer.tools.SerializationException;
+import i5.las2peer.tools.SerializeTools;
+import i5.las2peer.tools.XmlTools;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.Serializable;
@@ -21,18 +34,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
-import i5.las2peer.p2p.AgentNotKnownException;
-import i5.las2peer.persistency.EncodingFailedException;
-import i5.las2peer.persistency.MalformedXMLException;
-import i5.las2peer.persistency.XmlAble;
-import i5.las2peer.security.Agent;
-import i5.las2peer.security.AgentStorage;
-import i5.las2peer.security.L2pSecurityException;
-import i5.las2peer.tools.CryptoException;
-import i5.las2peer.tools.CryptoTools;
-import i5.las2peer.tools.SerializationException;
-import i5.las2peer.tools.SerializeTools;
-import i5.las2peer.tools.XmlTools;
 import rice.p2p.commonapi.NodeHandle;
 
 /**
@@ -695,10 +696,14 @@ public class Message implements XmlAble, Cloneable {
 			sig.update(contentBytes);
 
 			if (!sig.verify(baSignature)) {
-				System.out.println("---------------------");
-				System.out.println("Signature invalid. Please report the output text to LAS-353.");
 				System.out.println("--------------------- [BEGIN] ---------------------");
+				System.out.println("Signature invalid. Please report the following output to LAS-353.");
+				System.out.println("--------------------- [Message XML] ---------------------");
 				System.out.println(this.toXmlString()); // TODO LAS-353 logging; remove when resolved
+				System.out.println("--------------------- [Decrypted content] ---------------------");
+				System.out.println(contentBytes);
+				System.out.println("--------------------- [Sender public key] ---------------------");
+				System.out.println(sender.getPublicKey());
 				System.out.println("--------------------- [END] ---------------------");
 				throw new L2pSecurityException("Signature invalid!");
 			}
