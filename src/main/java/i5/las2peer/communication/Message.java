@@ -700,8 +700,8 @@ public class Message implements XmlAble, Cloneable {
 				System.out.println("Signature invalid. Please report the following output to LAS-353.");
 				System.out.println("--------------------- [Message XML] ---------------------");
 				System.out.println(this.toXmlString()); // TODO LAS-353 logging; remove when resolved
-				System.out.println("--------------------- [Decrypted content] ---------------------");
-				System.out.println(contentBytes);
+				System.out.println("--------------------- [Decrypted content (as String)] ---------------------");
+				System.out.println(getContentString());
 				System.out.println("--------------------- [Sender public key] ---------------------");
 				System.out.println(sender.getPublicKey());
 				System.out.println("--------------------- [END] ---------------------");
