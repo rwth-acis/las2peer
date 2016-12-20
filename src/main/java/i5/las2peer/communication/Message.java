@@ -93,6 +93,11 @@ public class Message implements XmlAble, Cloneable {
 	private byte[] baEncryptedContent;
 
 	/**
+	 * raw decrypted content of the message
+	 */
+	private byte[] baDecryptedContent;
+
+	/**
 	 * signature of the message content
 	 */
 	private byte[] baSignature;
@@ -278,7 +283,8 @@ public class Message implements XmlAble, Cloneable {
 		if (!isTopic()) {
 			encryptContent();
 		} else {
-			baEncryptedContent = getContentString().getBytes(StandardCharsets.UTF_8);
+			baDecryptedContent = getContentString().getBytes(StandardCharsets.UTF_8);
+			baEncryptedContent = baDecryptedContent;
 		}
 
 		signContent();
@@ -430,8 +436,8 @@ public class Message implements XmlAble, Cloneable {
 			baContentKey = CryptoTools.encryptAsymmetric(contentKey, recipient.getPublicKey());
 
 			String contentString = getContentString();
-			baEncryptedContent = CryptoTools.encryptSymmetric(contentString.getBytes(StandardCharsets.UTF_8),
-					contentKey);
+			baDecryptedContent = contentString.getBytes(StandardCharsets.UTF_8);
+			baEncryptedContent = CryptoTools.encryptSymmetric(baDecryptedContent, contentKey);
 		} catch (SerializationException e) {
 			throw new EncodingFailedException("serialization problems with encryption", e);
 		} catch (CryptoException e) {
@@ -448,10 +454,8 @@ public class Message implements XmlAble, Cloneable {
 	 */
 	private void signContent() throws L2pSecurityException, SerializationException, EncodingFailedException {
 		try {
-			byte[] contentBytes = getContentString().getBytes(StandardCharsets.UTF_8);
-
 			Signature sig = sender.createSignature();
-			sig.update(contentBytes);
+			sig.update(baDecryptedContent);
 
 			baSignature = sig.sign();
 		} catch (InvalidKeyException e) {
@@ -609,18 +613,16 @@ public class Message implements XmlAble, Cloneable {
 		}
 
 		try {
-			byte[] rawContent;
-
 			if (!isTopic()) {
 				SecretKey contentKey = recipient.decryptSymmetricKey(baContentKey);
-				rawContent = CryptoTools.decryptSymmetric(baEncryptedContent, contentKey);
+				baDecryptedContent = CryptoTools.decryptSymmetric(baEncryptedContent, contentKey);
 			} else { // topics are not encrypted
-				rawContent = baEncryptedContent;
+				baDecryptedContent = baEncryptedContent;
 			}
 
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-			Document doc = dBuilder.parse(new ByteArrayInputStream(rawContent));
+			Document doc = dBuilder.parse(new ByteArrayInputStream(baDecryptedContent));
 			doc.getDocumentElement().normalize();
 			Element root = doc.getDocumentElement();
 
@@ -692,11 +694,9 @@ public class Message implements XmlAble, Cloneable {
 	public void verifySignature() throws L2pSecurityException {
 		Signature sig;
 		try {
-			byte[] contentBytes = getContentString().getBytes(StandardCharsets.UTF_8);
-
 			sig = Signature.getInstance(CryptoTools.getSignatureMethod());
 			sig.initVerify(sender.getPublicKey());
-			sig.update(contentBytes);
+			sig.update(baDecryptedContent);
 
 			if (!sig.verify(baSignature)) {
 				String log = ""; // TODO LAS-353 logging; remove when resolved
@@ -706,6 +706,9 @@ public class Message implements XmlAble, Cloneable {
 				log += this.toXmlString() + "\n";
 				log += "--------------------- [Decrypted content (as String)] ---------------------" + "\n";
 				log += getContentString() + "\n";
+				log += "--------------------- [Decrypted content (as Base64 encoded byte array)] ---------------------"
+						+ "\n";
+				log += Base64.getEncoder().encodeToString(baDecryptedContent) + "\n";
 				log += "--------------------- [Sender PublicKey] ---------------------" + "\n";
 				log += sender.getPublicKey() + "\n";
 				log += "--------------------- [Sender Agent] ---------------------" + "\n";
@@ -736,6 +739,7 @@ public class Message implements XmlAble, Cloneable {
 		content = null;
 		sender = null;
 		recipient = null;
+		baDecryptedContent = null;
 	}
 
 	/**
