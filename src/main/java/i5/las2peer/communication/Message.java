@@ -696,12 +696,21 @@ public class Message implements XmlAble, Cloneable {
 		try {
 			sig = Signature.getInstance(CryptoTools.getSignatureMethod());
 			sig.initVerify(sender.getPublicKey());
-			sig.update(baDecryptedContent);
+			sig.update(this.getContentString().getBytes(StandardCharsets.UTF_8));
+			// baDecryptedContent
 
 			if (!sig.verify(baSignature)) {
+				// test again with received decrypted content
+				sig = Signature.getInstance(CryptoTools.getSignatureMethod());
+				sig.initVerify(sender.getPublicKey());
+				sig.update(baDecryptedContent);
+
 				String log = ""; // TODO LAS-353 logging; remove when resolved
 				log += "--------------------- [BEGIN] ---------------------" + "\n";
 				log += "Signature invalid. Please report the following output to LAS-353." + "\n";
+				log += "--------------------- [Results] ---------------------" + "\n";
+				log += "verify getContentString().getBytes(StandardCharsets.UTF_8): false, verify baDecryptedContent: "
+						+ sig.verify(baSignature) + "\n";
 				log += "--------------------- [Message XML] ---------------------" + "\n";
 				log += this.toXmlString() + "\n";
 				log += "--------------------- [Decrypted content (as String)] ---------------------" + "\n";
