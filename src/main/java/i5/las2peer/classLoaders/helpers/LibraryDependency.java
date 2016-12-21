@@ -85,46 +85,53 @@ public class LibraryDependency {
 		String versionInfo = null;
 
 		for (int i = 1; i < split.length; i++) {
-			if (split[i].startsWith("version="))
+			if (split[i].startsWith("version=")) {
 				versionInfo = split[i].substring(8);
-			else if (split[i].equals("resolution:=\"optional\""))
+			} else if (split[i].equals("resolution:=\"optional\"")) {
 				this.optional = true;
-			else
+			} else {
 				throw new IllegalArgumentException("unkown declaration '" + split[i] + "' for library " + name);
+			}
 		}
 
-		if (versionInfo == null)
+		if (versionInfo == null) {
 			throw new IllegalArgumentException("version info missing for library " + name);
+		}
 
 		versionInfo = versionInfo.trim();
-		if (versionInfo.charAt(0) != '"' || versionInfo.charAt(versionInfo.length() - 1) != '"')
+		if (versionInfo.charAt(0) != '"' || versionInfo.charAt(versionInfo.length() - 1) != '"') {
 			throw new IllegalArgumentException("version info (" + name + ") has to be enclosed in quotes!");
+		}
 
 		versionInfo = versionInfo.substring(1, versionInfo.length() - 1);
 
 		if (versionInfo.charAt(0) == '(') {
 			minIncluded = false;
 			versionInfo = versionInfo.substring(1);
-		} else if (versionInfo.charAt(0) == '[')
+		} else if (versionInfo.charAt(0) == '[') {
 			versionInfo = versionInfo.substring(1);
+		}
 
 		if (versionInfo.charAt(versionInfo.length() - 1) == ')') {
 			maxIncluded = false;
 			versionInfo = versionInfo.substring(0, versionInfo.length() - 1);
-		} else if (versionInfo.charAt(versionInfo.length() - 1) == ']')
+		} else if (versionInfo.charAt(versionInfo.length() - 1) == ']') {
 			versionInfo = versionInfo.substring(0, versionInfo.length() - 1);
+		}
 
 		split = versionInfo.split(",");
 		if (split.length == 1) {
 			min = max = new LibraryVersion(split[0]);
 
-			if (!minIncluded || !maxIncluded)
+			if (!minIncluded || !maxIncluded) {
 				throw new IllegalArgumentException("this dependency cannot be matched!");
+			}
 		} else if (split.length == 2) {
 			min = new LibraryVersion(split[0]);
 			max = new LibraryVersion(split[1]);
-		} else
+		} else {
 			throw new IllegalArgumentException("version info not correct");
+		}
 	}
 
 	/**
@@ -204,10 +211,12 @@ public class LibraryDependency {
 	 * @return true, if the given version fits this dependency
 	 */
 	public boolean fits(LibraryVersion version) {
-		if (!this.isMinIncluded() && version.equals(this.getMin()))
+		if (!this.isMinIncluded() && version.equals(this.getMin())) {
 			return false;
-		if (!this.isMaxIncluded() && version.equals(this.getMax()))
+		}
+		if (!this.isMaxIncluded() && version.equals(this.getMax())) {
 			return false;
+		}
 
 		return version.isBetween(this.getMin(), this.getMax());
 	}
@@ -228,24 +237,27 @@ public class LibraryDependency {
 	@Override
 	public String toString() {
 		String result = name + ";version=\"";
-		if (min.equals(max))
+		if (min.equals(max)) {
 			result += min.toString() + "\"";
-		else {
-			if (minIncluded)
+		} else {
+			if (minIncluded) {
 				result += "[";
-			else
+			} else {
 				result += "(";
+			}
 			result += min.toString() + "," + max.toString();
 
-			if (maxIncluded)
+			if (maxIncluded) {
 				result += "]";
-			else
+			} else {
 				result += ")";
+			}
 			result += "\"";
 		}
 
-		if (optional)
+		if (optional) {
 			result += ";resolution:=\"optional\"";
+		}
 
 		return result;
 	}
@@ -257,8 +269,9 @@ public class LibraryDependency {
 	 * @return array of dependencies
 	 */
 	public static LibraryDependency[] fromString(String multiple) {
-		if (multiple == null || multiple.trim().isEmpty())
+		if (multiple == null || multiple.trim().isEmpty()) {
 			return new LibraryDependency[0];
+		}
 
 		String[] split = multiple.trim().split(",");
 

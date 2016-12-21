@@ -1,5 +1,8 @@
 package i5.las2peer.api;
 
+import java.io.Serializable;
+import java.util.List;
+
 import i5.las2peer.api.exceptions.ArtifactNotFoundException;
 import i5.las2peer.api.exceptions.RemoteServiceException;
 import i5.las2peer.api.exceptions.ServiceNotAvailableException;
@@ -17,9 +20,6 @@ import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.ServiceAgent;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.SerializationException;
-
-import java.io.Serializable;
-import java.util.List;
 
 /**
  * Provides access to the context of the current call.

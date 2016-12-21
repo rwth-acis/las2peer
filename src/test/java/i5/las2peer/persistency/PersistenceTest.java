@@ -73,7 +73,7 @@ public class PersistenceTest {
 		}
 	}
 
-	// FIXME WIP
+	// TODO test currently not working because of LAS-359, time to join the network is too high
 //	@Test
 //	public void testVersioning() {
 //		try {

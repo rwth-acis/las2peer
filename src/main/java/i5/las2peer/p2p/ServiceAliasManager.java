@@ -1,5 +1,9 @@
 package i5.las2peer.p2p;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import i5.las2peer.api.exceptions.ArtifactNotFoundException;
 import i5.las2peer.api.exceptions.StorageException;
 import i5.las2peer.persistency.Envelope;
@@ -9,10 +13,6 @@ import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.ServiceAgent;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.SerializationException;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Responsible for mapping service aliases to service names and resolving paths to service names.

@@ -1,5 +1,9 @@
 package i5.las2peer.classLoaders.helpers;
 
+import java.io.File;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * a basic class managing a library identifier of the format name-number where number fits the format of
  * {@link LibraryVersion}
@@ -8,7 +12,25 @@ package i5.las2peer.classLoaders.helpers;
 public class LibraryIdentifier implements Comparable<LibraryIdentifier> {
 
 	private String name;
-	private LibraryVersion version = null;
+	private LibraryVersion version;
+
+	public static LibraryIdentifier fromFilename(String filename) {
+		String fileNameWithOutExt = new File(filename).getName().replaceFirst("[.][^.]+$", "");
+
+		Pattern versionPattern = Pattern.compile("-[0-9]+(?:.[0-9]+(?:.[0-9]+)?)?(?:-[0-9]+)?$");
+		Matcher m = versionPattern.matcher(fileNameWithOutExt);
+
+		String sName = null;
+		String sVersion = null;
+		if (m.find()) { // look for version information in filename
+			sName = fileNameWithOutExt.substring(0, m.start());
+			sVersion = m.group().substring(1);
+			return new LibraryIdentifier(sName, sVersion);
+		} else {
+			sName = fileNameWithOutExt;
+			return new LibraryIdentifier(sName, (LibraryVersion) null);
+		}
+	}
 
 	/**
 	 * generate a new LibraryIdentifier from its string representation
@@ -18,11 +40,13 @@ public class LibraryIdentifier implements Comparable<LibraryIdentifier> {
 	 */
 	public LibraryIdentifier(String name) throws IllegalArgumentException {
 		int index = name.indexOf(";version=\"");
-		if (index == -1)
+		if (index == -1) {
 			throw new IllegalArgumentException("String does not include version info");
+		}
 
-		if (name.charAt(name.length() - 1) != '"')
+		if (name.charAt(name.length() - 1) != '"') {
 			throw new IllegalArgumentException("Version info not in qoutes!");
+		}
 
 		this.name = name.substring(0, index);
 		String versionInfo = name.substring(index + 10, name.length() - 1);
@@ -41,8 +65,9 @@ public class LibraryIdentifier implements Comparable<LibraryIdentifier> {
 		if (version != null) {
 			this.name = name;
 			this.version = new LibraryVersion(version);
-		} else
+		} else {
 			throw new IllegalArgumentException("null given as version information");
+		}
 	}
 
 	/**
@@ -99,12 +124,13 @@ public class LibraryIdentifier implements Comparable<LibraryIdentifier> {
 	 */
 	@Override
 	public boolean equals(Object o) {
-		if (o instanceof LibraryIdentifier)
+		if (o instanceof LibraryIdentifier) {
 			return this.equals((LibraryIdentifier) o);
-		else if (o instanceof String)
+		} else if (o instanceof String) {
 			return this.toString().equals(o);
-		else
+		} else {
 			return false;
+		}
 	}
 
 	/**
@@ -157,10 +183,11 @@ public class LibraryIdentifier implements Comparable<LibraryIdentifier> {
 	 */
 	@Override
 	public int compareTo(LibraryIdentifier other) {
-		if (this.getName().equals(other.getName()))
+		if (this.getName().equals(other.getName())) {
 			return this.getVersion().compareTo(other.getVersion());
-		else
+		} else {
 			return this.getName().compareTo(other.getName());
+		}
 	}
 
 }

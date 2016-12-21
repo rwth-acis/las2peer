@@ -3,8 +3,8 @@ package i5.las2peer.classLoaders.libraries;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 
 import i5.las2peer.classLoaders.helpers.LibraryDependency;
@@ -89,8 +89,8 @@ public abstract class LoadedLibrary {
 	 */
 	void setResolvedDependencies(LoadedLibrary[] libs) {
 		resolvedDependencies = new HashSet<LoadedLibrary>();
-		for (int i = 0; i < libs.length; i++) {
-			resolvedDependencies.add(libs[i]);
+		for (LoadedLibrary lib : libs) {
+			resolvedDependencies.add(lib);
 		}
 	}
 
@@ -141,13 +141,7 @@ public abstract class LoadedLibrary {
 	public String getResourceAsString(String resourceName) throws IOException, ResourceNotFoundException {
 		InputStream is = getResourceAsStream(resourceName);
 
-		InputStreamReader input;
-		try {
-			input = new InputStreamReader(is, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			// should not occur!
-			throw new IOException("UTF-8 not supported!", e);
-		}
+		InputStreamReader input = new InputStreamReader(is, StandardCharsets.UTF_8);
 
 		final int READ_SIZE = 5000;
 		final char[] buffer = new char[READ_SIZE];
@@ -171,8 +165,9 @@ public abstract class LoadedLibrary {
 		InputStream input = getResourceAsStream(resourceName);
 		long size = getSizeOfResource(resourceName);
 
-		if (size > Integer.MAX_VALUE)
+		if (size > Integer.MAX_VALUE) {
 			throw new IOException("the requested resoure is too large to fit into a byte array!");
+		}
 
 		byte[] result = new byte[(int) size];
 
@@ -186,8 +181,9 @@ public abstract class LoadedLibrary {
 			alreadyRead += iRead;
 		} while (iRead > 0 && alreadyRead < size);
 
-		if (alreadyRead != size)
+		if (alreadyRead != size) {
 			throw new IOException("Error reading class contents (size mismatch)!");
+		}
 
 		return result;
 	}
@@ -222,8 +218,9 @@ public abstract class LoadedLibrary {
 	 *
 	 */
 	public static String resourceToClassName(String entryName) {
-		if (!entryName.endsWith(".class"))
+		if (!entryName.endsWith(".class")) {
 			throw new IllegalArgumentException("This is not a class file!");
+		}
 
 		return entryName.replace('/', '.').substring(0, entryName.length() - 6);
 	}

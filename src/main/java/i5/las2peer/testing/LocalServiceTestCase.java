@@ -14,7 +14,6 @@ import i5.las2peer.execution.NoSuchServiceException;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.LocalNode;
 import i5.las2peer.p2p.ServiceNameVersion;
-import i5.las2peer.persistency.Envelope;
 import i5.las2peer.security.Agent;
 import i5.las2peer.security.AgentException;
 import i5.las2peer.security.L2pSecurityException;
@@ -238,11 +237,6 @@ public abstract class LocalServiceTestCase {
 					Agent agent = Agent.createFromXml(content);
 					localNode.storeAgent(agent);
 					System.out.println("loaded " + xml + " as agent");
-				} else if (content.contains("<las2peer:envelope")) {
-					Envelope envelope = Envelope.createFromXml(content);
-					// TODO fix upload Envelope from startup directory
-					localNode.storeArtifact(envelope);
-					System.out.println("loaded " + xml + " as envelope");
 				} else {
 					System.out.println("Don't known what to do with contents of " + xml);
 				}

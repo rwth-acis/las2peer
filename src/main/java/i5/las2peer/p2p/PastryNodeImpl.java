@@ -550,10 +550,6 @@ public class PastryNodeImpl extends Node {
 			observerNotice(Event.AGENT_GET_SUCCESS, pastryNode, id, null, (Long) null, "");
 			return agentFromNet;
 		} catch (Exception e) {
-			// TODO bad exception handling
-			// actually ArtifactNotFoundException is the only one that should cause an AgentNotKnownException here
-			// maybe the interface should be changed to throw an AgentException instead
-			logger.log(Level.WARNING, "Unable to retrieve Agent " + id + " from past storage", e);
 			observerNotice(Event.AGENT_GET_FAILED, pastryNode, id, null, (Long) null, "");
 			throw new AgentNotKnownException("Unable to retrieve Agent " + id + " from past storage", e);
 		}
