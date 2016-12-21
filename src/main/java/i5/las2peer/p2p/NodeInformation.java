@@ -1,14 +1,5 @@
 package i5.las2peer.p2p;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.security.PublicKey;
-import java.util.Vector;
-
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.persistency.VerificationFailedException;
 import i5.las2peer.persistency.XmlAble;
@@ -20,6 +11,15 @@ import i5.las2peer.tools.SerializationException;
 import i5.las2peer.tools.SerializeTools;
 import i5.las2peer.tools.XmlTools;
 
+import java.io.IOException;
+import java.io.Serializable;
+import java.security.PublicKey;
+import java.util.Vector;
+
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 /**
  * A NodeInformation gives basic information about a node.
  */
@@ -28,7 +28,7 @@ public class NodeInformation implements XmlAble {
 	private String organization = null;
 	private String adminName = null;
 	private String adminEmail = null;
-	private String description = "A standard Las2Peer node -- no further information is provided.";
+	private String description = "A standard las2peer node -- no further information is provided.";
 
 	private ServiceNameVersion[] hostedServices = new ServiceNameVersion[0];
 
@@ -365,8 +365,8 @@ public class NodeInformation implements XmlAble {
 	 */
 	public static void main(String argv[]) {
 		if (argv.length < 4) {
-			System.out.println(
-					"Usage: java i5.las2peer.p2p.NodeInformation adminName adminEmail organization description");
+			System.out
+					.println("Usage: java i5.las2peer.p2p.NodeInformation adminName adminEmail organization description");
 			System.exit(0);
 		}
 
