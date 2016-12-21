@@ -26,8 +26,10 @@ public class NameLock {
 	}
 
 	public void lock(String key) {
-		ReentrantLock lock = activeLocks.putIfAbsent(key, new ReentrantLock());
-		lock.lock(); // TODO possible npe
+		ReentrantLock lock = new ReentrantLock();
+		ReentrantLock previous = activeLocks.putIfAbsent(key, lock);
+		lock = (previous != null) ? previous : lock;
+		lock.lock();
 	}
 
 	public void unlock(String key) {
