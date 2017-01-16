@@ -26,12 +26,6 @@ import java.util.Set;
 public abstract class Configurable {
 
 	/**
-	 * Used to determine, if this service should be monitored. Can be overwritten by service configuration file.
-	 * Deactivated per default.
-	 */
-	protected boolean monitor = false;
-
-	/**
 	 * Tries to find a (service) class specific property file
 	 *
 	 * The following dirs will be checked:
@@ -226,20 +220,16 @@ public abstract class Configurable {
 		Hashtable<String, String> props = getProperties();
 
 		for (String key : props.keySet()) {
-			if (key.equals("monitor")) {
-				this.monitor = Boolean.parseBoolean(props.get(key));
-				continue;
-			}
 			if ((except != null && except.contains(key))) {
 				continue;
 			}
 			try {
-				Field f = getClass().getDeclaredField(key);
+				Field f = getField(getClass(), key);
 				if (!Modifier.isFinal(f.getModifiers()) && !Modifier.isStatic(f.getModifiers())) {
 					f.setAccessible(true);
 					setField(f, props.get(key));
-					System.out.println(
-							"Class: " + getClass().getSimpleName() + " using: " + key + " -> " + props.get(key));
+					System.out.println("Class: " + getClass().getSimpleName() + " using: " + key + " -> "
+							+ props.get(key));
 				}
 			} catch (NoSuchFieldException e) {
 				System.err.println("field not found: " + key);
@@ -251,6 +241,29 @@ public abstract class Configurable {
 			}
 		}
 
+	}
+
+	/**
+	 * Looks recursively in all superclasses for a field.
+	 * 
+	 * @param cls The class.
+	 * @param key Key of he field.
+	 * @return A declared field.
+	 * @throws NoSuchFieldException See {@link Class#getDeclaredField}
+	 * @throws SecurityException See {@link Class#getDeclaredField}
+	 */
+	private Field getField(Class<?> cls, String key) throws NoSuchFieldException, SecurityException {
+		try {
+			return cls.getDeclaredField(key);
+		} catch (NoSuchFieldException | SecurityException e) {
+			if (cls.getSuperclass() != null) {
+				try {
+					return getField(cls.getSuperclass(), key);
+				} catch (Exception e2) {
+				}
+			}
+			throw e;
+		}
 	}
 
 	/**
