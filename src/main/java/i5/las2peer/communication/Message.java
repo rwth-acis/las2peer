@@ -1,6 +1,5 @@
 package i5.las2peer.communication;
 
-import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.persistency.MalformedXMLException;
@@ -8,7 +7,6 @@ import i5.las2peer.persistency.XmlAble;
 import i5.las2peer.security.Agent;
 import i5.las2peer.security.AgentStorage;
 import i5.las2peer.security.L2pSecurityException;
-import i5.las2peer.security.PassphraseAgent;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
 import i5.las2peer.tools.SerializationException;
@@ -26,7 +24,6 @@ import java.security.SignatureException;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Random;
-import java.util.logging.Level;
 
 import javax.crypto.SecretKey;
 import javax.xml.parsers.DocumentBuilder;
@@ -699,34 +696,6 @@ public class Message implements XmlAble, Cloneable {
 			sig.update(baDecryptedContent);
 
 			if (!sig.verify(baSignature)) {
-				// test again
-				sig = Signature.getInstance(CryptoTools.getSignatureMethod());
-				sig.initVerify(sender.getPublicKey());
-				sig.update(this.getContentString().getBytes(StandardCharsets.UTF_8));
-
-				String log = ""; // TODO LAS-353 logging; remove when resolved
-				log += "--------------------- [BEGIN] ---------------------" + "\n";
-				log += "Signature invalid. Please report the following output to LAS-353." + "\n";
-				log += "--------------------- [Results] ---------------------" + "\n";
-				log += "verify getContentString().getBytes(StandardCharsets.UTF_8): " + sig.verify(baSignature)
-						+ ", verify baDecryptedContent: false\n";
-				log += "--------------------- [Message XML] ---------------------" + "\n";
-				log += this.toXmlString() + "\n";
-				log += "--------------------- [Decrypted content (as String)] ---------------------" + "\n";
-				log += getContentString() + "\n";
-				log += "--------------------- [Decrypted content (as Base64 encoded byte array)] ---------------------"
-						+ "\n";
-				log += Base64.getEncoder().encodeToString(baDecryptedContent) + "\n";
-				log += "--------------------- [Sender PublicKey] ---------------------" + "\n";
-				log += sender.getPublicKey() + "\n";
-				log += "--------------------- [Sender Agent] ---------------------" + "\n";
-				log += this.getSender().toXmlString() + "\n";
-				log += "--------------------- [Receiver Agent] ---------------------" + "\n";
-				log += this.getRecipient().toXmlString() + "\n";
-				log += "--------------------- [Receiver Agent Passphrase] ---------------------" + "\n";
-				log += ((PassphraseAgent) this.getRecipient()).getPassphrase() + "\n";
-				log += "--------------------- [END] ---------------------" + "\n";
-				L2pLogger.getInstance(Message.class).log(Level.SEVERE, log);
 				throw new L2pSecurityException("Signature invalid!");
 			}
 		} catch (InvalidKeyException e) {
@@ -735,8 +704,6 @@ public class Message implements XmlAble, Cloneable {
 			throw new L2pSecurityException("unable to verify signature: algorithm problems", e);
 		} catch (SignatureException e) {
 			throw new L2pSecurityException("unable to verify signature: signature problems", e);
-		} catch (SerializationException e) {
-			throw new L2pSecurityException("unable to verify signature: serialization problems", e);
 		}
 	}
 
