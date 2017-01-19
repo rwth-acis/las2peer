@@ -1,5 +1,6 @@
 package i5.las2peer.p2p;
 
+import i5.las2peer.api.Configurable;
 import i5.las2peer.api.exceptions.ArtifactNotFoundException;
 import i5.las2peer.api.exceptions.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.exceptions.StorageException;
@@ -74,7 +75,7 @@ import com.sun.management.OperatingSystemMXBean;
  * the P2P networking.
  * 
  */
-public abstract class Node implements AgentStorage, NodeStorageInterface {
+public abstract class Node extends Configurable implements AgentStorage, NodeStorageInterface {
 
 	/**
 	 * The Sending mode for outgoing messages.
@@ -104,15 +105,41 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 
 	private NodeServiceCache nodeServiceCache;
 
-	// TODO make node parameters configurable:
 	public static final double DEFAULT_CPU_LOAD_TRESHOLD = 0.5;
+	/**
+	 * cpu load threshold to determine whether the node is considered busy
+	 */
 	private double cpuLoadThreshold = DEFAULT_CPU_LOAD_TRESHOLD;
-	// should be lowered in future, currently services don't change often:
-	private int nodeServiceCacheLifetime = 60; // time before cached node info becomes invalidated
-	private int nodeServiceCacheResultCount = 3; // number of service instances to be collected from the network
-	private int tidyUpTimerInterval = 60;
-	private int agentContextLifetime = 60;
-	private int invocationRetryCount = 3;
+
+	public static final int DEFAULT_NODE_SERVICE_CACHE_LIFETIME = 60;
+	/**
+	 * time before cached service information becomes invalidated
+	 */
+	private int nodeServiceCacheLifetime = DEFAULT_NODE_SERVICE_CACHE_LIFETIME;
+
+	public static final int DEFAULT_NODE_SERVICE_CACHE_RESULT_COUNT = 3;
+	/**
+	 * number of service answers collected during service discovery
+	 */
+	private int nodeServiceCacheResultCount = DEFAULT_NODE_SERVICE_CACHE_RESULT_COUNT;
+
+	public static final int DEFAULT_TIDY_UP_TIMER_INTERVAL = 60;
+	/**
+	 * frequency of the tidy up timer
+	 */
+	private int tidyUpTimerInterval = DEFAULT_TIDY_UP_TIMER_INTERVAL;
+
+	public static final int DEFAULT_AGENT_CONTEXT_LIFETIME = 60;
+	/**
+	 * period of time after which an agent context will be available for deletion
+	 */
+	private int agentContextLifetime = DEFAULT_AGENT_CONTEXT_LIFETIME;
+
+	public static final int DEFAULT_INVOCATION_RETRY_COUNT = 3;
+	/**
+	 * number of retries if an RMI fails
+	 */
+	private int invocationRetryCount = DEFAULT_INVOCATION_RETRY_COUNT;
 
 	/**
 	 * observers to be notified of all occurring events
@@ -208,6 +235,8 @@ public abstract class Node implements AgentStorage, NodeStorageInterface {
 	 * @param monitoringObserver If true, the monitoring is enabled for this node.
 	 */
 	public Node(L2pClassManager baseClassLoader, boolean standardObserver, boolean monitoringObserver) {
+		setFieldValues();
+
 		if (standardObserver) {
 			initStandardLogfile();
 		}
