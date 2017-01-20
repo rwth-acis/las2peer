@@ -59,8 +59,8 @@ public class ServiceAliasManager {
 	 * @throws AgentLockedException if the service agent is locked
 	 * @throws AliasConflictException if a conflict occurs (a prefix or whole alias is already registered)
 	 */
-	public void registerServiceAlias(ServiceAgent agent, String alias) throws AgentLockedException,
-			AliasConflictException {
+	public void registerServiceAlias(ServiceAgent agent, String alias)
+			throws AgentLockedException, AliasConflictException {
 
 		if (agent.isLocked()) {
 			throw new AgentLockedException("Only unlocked Agents can be registered!");
@@ -190,8 +190,8 @@ public class ServiceAliasManager {
 		return content;
 	}
 
-	private void createEntry(Agent agent, String key, String value) throws StorageException, IllegalArgumentException,
-			SerializationException, CryptoException {
+	private void createEntry(Agent agent, String key, String value)
+			throws StorageException, IllegalArgumentException, SerializationException, CryptoException {
 		Envelope envName = node.createEnvelope(PREFIX + key.toLowerCase(), value, agent, node.getAnonymous());
 		node.storeEnvelope(envName, agent);
 	}

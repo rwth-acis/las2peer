@@ -276,7 +276,6 @@ public class ServiceAgent extends PassphraseAgent {
 	 */
 	public static ServiceAgent createServiceAgent(ServiceNameVersion service, String passphrase)
 			throws CryptoException, L2pSecurityException {
-
 		if (service.getVersion().toString().equals("*")) {
 			throw new IllegalArgumentException("You must specify a version!");
 		}

@@ -28,8 +28,8 @@ public class ServiceAgentTest {
 
 	@Test
 	public void testCreation() throws CryptoException, L2pSecurityException {
-		ServiceAgent testee = ServiceAgent.createServiceAgent(
-				ServiceNameVersion.fromString(servicename + "@" + serviceversion), passphrase);
+		ServiceAgent testee = ServiceAgent
+				.createServiceAgent(ServiceNameVersion.fromString(servicename + "@" + serviceversion), passphrase);
 
 		assertEquals(servicename + "@" + serviceversion, testee.getServiceNameVersion().toString());
 
@@ -50,8 +50,8 @@ public class ServiceAgentTest {
 
 	@Test
 	public void testXmlAndBack() throws CryptoException, L2pSecurityException, MalformedXMLException {
-		ServiceAgent testee = ServiceAgent.createServiceAgent(
-				ServiceNameVersion.fromString(servicename + "@" + serviceversion), passphrase);
+		ServiceAgent testee = ServiceAgent
+				.createServiceAgent(ServiceNameVersion.fromString(servicename + "@" + serviceversion), passphrase);
 
 		String xml = testee.toXmlString();
 
@@ -68,23 +68,23 @@ public class ServiceAgentTest {
 		// start node
 		LocalNode node = LocalNode.launchNode();
 
-		ServiceAgent testServiceAgent0 = ServiceAgent.createServiceAgent(
-				ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.0"), "a pass");
+		ServiceAgent testServiceAgent0 = ServiceAgent
+				.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.0"), "a pass");
 		testServiceAgent0.unlockPrivateKey("a pass");
 		node.registerReceiver(testServiceAgent0);
 
-		ServiceAgent testServiceAgent1 = ServiceAgent.createServiceAgent(
-				ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.1"), "a pass");
+		ServiceAgent testServiceAgent1 = ServiceAgent
+				.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.1"), "a pass");
 		testServiceAgent1.unlockPrivateKey("a pass");
 		node.registerReceiver(testServiceAgent1);
 
-		ServiceAgent testServiceAgent2 = ServiceAgent.createServiceAgent(
-				ServiceNameVersion.fromString("i5.las2peer.api.TestService@2.0"), "a pass");
+		ServiceAgent testServiceAgent2 = ServiceAgent
+				.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@2.0"), "a pass");
 		testServiceAgent2.unlockPrivateKey("a pass");
 		node.registerReceiver(testServiceAgent2);
 
-		ServiceAgent testServiceAgent3 = ServiceAgent.createServiceAgent(
-				ServiceNameVersion.fromString("i5.las2peer.api.TestService2@1.0"), "a pass");
+		ServiceAgent testServiceAgent3 = ServiceAgent
+				.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService2@1.0"), "a pass");
 		testServiceAgent3.unlockPrivateKey("a pass");
 		node.registerReceiver(testServiceAgent3);
 

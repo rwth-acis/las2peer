@@ -89,10 +89,11 @@ public class ServiceDiscoveryContent implements Serializable {
 	 * @return
 	 */
 	public boolean accepts(ServiceNameVersion service) {
-		if (this.exact)
+		if (this.exact) {
 			return this.service.equals(service);
-		else
+		} else {
 			return service.fits(this.service);
+		}
 	}
 
 }

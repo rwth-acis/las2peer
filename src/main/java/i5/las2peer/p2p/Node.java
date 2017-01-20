@@ -570,7 +570,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 				break;
 			}
 		}
-		htRegisteredReceivers = new Hashtable<Long, MessageReceiver>();
+		htRegisteredReceivers = new Hashtable<>();
 	}
 
 	/**
@@ -1023,7 +1023,6 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	public boolean hasAgent(long id) {
 		// Since an request for this agent is probable after this check, it makes sense
 		// to try to load it into this node and decide afterwards
-
 		try {
 			getAgent(id);
 			return true;
@@ -1059,7 +1058,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @return all local registered UserAgents
 	 */
 	public UserAgent[] getRegisteredAgents() {
-		Vector<UserAgent> result = new Vector<UserAgent>();
+		Vector<UserAgent> result = new Vector<>();
 
 		for (MessageReceiver rec : htRegisteredReceivers.values()) {
 			if (rec instanceof UserAgent) {
@@ -1076,7 +1075,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @return all local registered ServiceAgents
 	 */
 	public ServiceAgent[] getRegisteredServices() {
-		Vector<ServiceAgent> result = new Vector<ServiceAgent>();
+		Vector<ServiceAgent> result = new Vector<>();
 
 		for (MessageReceiver rec : htRegisteredReceivers.values()) {
 			if (rec instanceof ServiceAgent) {

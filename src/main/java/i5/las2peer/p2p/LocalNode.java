@@ -382,7 +382,7 @@ public class LocalNode extends Node {
 
 	/****************************** static *****************************************/
 
-	private static Hashtable<Long, LocalNode> htLocalNodes = new Hashtable<Long, LocalNode>();
+	private static Hashtable<Long, LocalNode> htLocalNodes = new Hashtable<>();
 
 	private static LocalStorage storage = new LocalStorage();
 
@@ -443,10 +443,10 @@ public class LocalNode extends Node {
 	 * do a complete restart of all nodes, artifacts and messages
 	 */
 	public static void reset() {
-		htPendingMessages = new Hashtable<Long, Hashtable<Message, MessageResultListener>>();
+		htPendingMessages = new Hashtable<>();
 		storage = new LocalStorage();
-		htKnownAgents = new Hashtable<Long, String>();
-		htLocalNodes = new Hashtable<Long, LocalNode>();
+		htKnownAgents = new Hashtable<>();
+		htLocalNodes = new Hashtable<>();
 
 		iMessageMinWait = DEFAULT_MESSAGE_MIN_WAIT;
 		iMessageMaxWait = DEFAULT_MESSAGE_MAX_WAIT;
@@ -500,7 +500,7 @@ public class LocalNode extends Node {
 	 */
 	public static Long[] findAllNodesWithAgent(long agentId) {
 		synchronized (htLocalNodes) {
-			HashSet<Long> hsResult = new HashSet<Long>();
+			HashSet<Long> hsResult = new HashSet<>();
 
 			for (long nodeId : htLocalNodes.keySet()) {
 				if (htLocalNodes.get(nodeId).hasLocalAgent(agentId)) {
@@ -520,7 +520,7 @@ public class LocalNode extends Node {
 	 */
 	public static Long[] findAllNodesWithTopic(long topicId) {
 		synchronized (htLocalNodes) {
-			HashSet<Long> hsResult = new HashSet<Long>();
+			HashSet<Long> hsResult = new HashSet<>();
 
 			for (long nodeId : htLocalNodes.keySet()) {
 				if (htLocalNodes.get(nodeId).hasTopic(topicId)) {
@@ -542,7 +542,7 @@ public class LocalNode extends Node {
 		synchronized (htPendingMessages) {
 			Hashtable<Message, MessageResultListener> pending = htPendingMessages.get(message.getRecipientId());
 			if (pending == null) {
-				pending = new Hashtable<Message, MessageResultListener>();
+				pending = new Hashtable<>();
 				htPendingMessages.put(message.getRecipientId(), pending);
 			}
 

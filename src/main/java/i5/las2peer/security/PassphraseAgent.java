@@ -41,7 +41,7 @@ public abstract class PassphraseAgent extends Agent {
 
 		this.passphrase = null;
 
-		// done in consturctor of superclass
+		// done in constructor of superclass
 		// lockPrivateKey();
 	}
 

@@ -23,8 +23,7 @@ import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.SerializationException;
 
 /**
- * Each {@link i5.las2peer.execution.L2pThread} is bound to a context, which is determined by the executing
- * agent.
+ * Each {@link i5.las2peer.execution.L2pThread} is bound to a context, which is determined by the executing agent.
  */
 public class AgentContext implements AgentStorage, ContextStorageInterface {
 

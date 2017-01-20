@@ -61,11 +61,11 @@ public class NodeApplication implements Application, ScribeMultiClient {
 
 	private Hashtable<Long, Topic> htAgentTopics = new Hashtable<Long, Topic>();
 
-	private Hashtable<Long, Topic> htTopics = new Hashtable<Long, Topic>();
+	private Hashtable<Long, Topic> htTopics = new Hashtable<>();
 
-	private Hashtable<Long, HashSet<NodeHandle>> htPendingAgentSearches = new Hashtable<Long, HashSet<NodeHandle>>();
+	private Hashtable<Long, HashSet<NodeHandle>> htPendingAgentSearches = new Hashtable<>();
 
-	private Hashtable<Long, WaiterThread<Message>> appMessageWaiters = new Hashtable<Long, WaiterThread<Message>>();
+	private Hashtable<Long, WaiterThread<Message>> appMessageWaiters = new Hashtable<>();
 
 	/**
 	 * create a pastry application for the given node
@@ -124,8 +124,9 @@ public class NodeApplication implements Application, ScribeMultiClient {
 
 			Topic agentTopic = htAgentTopics.get(id);
 
-			if (agentTopic == null)
+			if (agentTopic == null) {
 				throw new AgentNotKnownException("an agent with id " + id + " is not registered at this node");
+			}
 
 			scribeClient.unsubscribe(agentTopic, this);
 			htAgentTopics.remove(id);
@@ -136,8 +137,9 @@ public class NodeApplication implements Application, ScribeMultiClient {
 
 	public void registerTopic(long id) {
 		synchronized (htTopics) {
-			if (htTopics.get(id) != null)
+			if (htTopics.get(id) != null) {
 				return;
+			}
 
 			Topic topic = getTopic(id);
 
@@ -156,8 +158,9 @@ public class NodeApplication implements Application, ScribeMultiClient {
 
 			Topic topic = htTopics.get(id);
 
-			if (topic == null)
+			if (topic == null) {
 				throw new NodeException("topic not found");
+			}
 
 			scribeClient.unsubscribe(topic, this);
 			htTopics.remove(id);
@@ -180,7 +183,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 		sendMessageDirectly(gim, nodeHandle);
 
 		try {
-			WaiterThread<Message> waiter = new WaiterThread<Message>(RESPONSE_WAIT_TIMEOUT);
+			WaiterThread<Message> waiter = new WaiterThread<>(RESPONSE_WAIT_TIMEOUT);
 			appMessageWaiters.put(messageId, waiter);
 			waiter.start();
 			waiter.join();
@@ -188,8 +191,9 @@ public class NodeApplication implements Application, ScribeMultiClient {
 			if (waiter.hasResult()) {
 				InfoResponseMessage irm = (InfoResponseMessage) waiter.getResult();
 				return irm.getInfoContent();
-			} else
+			} else {
 				throw new NodeNotFoundException("Timeout waiting for information answer");
+			}
 		} catch (InterruptedException e) {
 			throw new NodeNotFoundException("Interrupted while waiting for answer");
 		} finally {
@@ -234,13 +238,14 @@ public class NodeApplication implements Application, ScribeMultiClient {
 					(Long) null, "");
 
 			// just store the sending node handle
-			HashSet<NodeHandle> pendingCollection = htPendingAgentSearches.get(((SearchAnswerMessage) pastMessage)
-					.getRequestMessageId());
+			HashSet<NodeHandle> pendingCollection = htPendingAgentSearches
+					.get(((SearchAnswerMessage) pastMessage).getRequestMessageId());
 
-			if (pendingCollection != null)
+			if (pendingCollection != null) {
 				pendingCollection.add(((SearchAnswerMessage) pastMessage).getSendingNode());
-			else
+			} else {
 				logger.warning("got a timed out response or response to a message not sent by me!");
+			}
 		} else if (pastMessage instanceof GetInfoMessage) {
 			// just send a response
 			GetInfoMessage gim = (GetInfoMessage) pastMessage;
@@ -256,16 +261,17 @@ public class NodeApplication implements Application, ScribeMultiClient {
 			InfoResponseMessage irm = (InfoResponseMessage) pastMessage;
 
 			WaiterThread<Message> waiter = appMessageWaiters.get(irm.getResponseToId());
-			if (waiter == null)
+			if (waiter == null) {
 				l2pNode.observerNotice(Event.MESSAGE_FAILED, l2pNode.getNodeId(), (MessageReceiver) null,
 						"Got an answer to an information request I do not know from " + irm.getSender());
-			else {
+			} else {
 				l2pNode.observerNotice(Event.MESSAGE_RECEIVED, l2pNode.getNodeId(), (MessageReceiver) null,
 						"Got an answer for Information request " + irm.getResponseToId() + "from " + irm.getSender());
 				waiter.collectResult(irm);
 			}
 		} else {
-			l2pNode.observerNotice(Event.MESSAGE_RECEIVED, l2pNode.getNodeId(), null, "unkown message: " + pastMessage);
+			l2pNode.observerNotice(Event.MESSAGE_RECEIVED, l2pNode.getNodeId(), null,
+					"unkown message: " + pastMessage);
 			logger.warning("\t<-- received unknown message: " + pastMessage);
 		}
 	}
@@ -317,8 +323,8 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	 * @throws AgentNotKnownException
 	 * @throws MessageException
 	 */
-	public void sendMessage(MessageEnvelope m, NodeHandle to) throws MalformedXMLException, L2pSecurityException,
-			AgentNotKnownException, MessageException {
+	public void sendMessage(MessageEnvelope m, NodeHandle to)
+			throws MalformedXMLException, L2pSecurityException, AgentNotKnownException, MessageException {
 		l2pNode.observerNotice(Event.MESSAGE_SENDING, l2pNode.getPastryNode(), m.getContainedMessage().getSender(), to,
 				m.getContainedMessage().getRecipient(), "message: " + m);
 
@@ -390,14 +396,15 @@ public class NodeApplication implements Application, ScribeMultiClient {
 		System.out.println("parent: " + scribeClient.getParent(agentTopic));
 		// System.out.println( "children: " + scribeClient.getChildren(agentTopic).length );
 
-		for (NodeHandle nh : scribeClient.getChildrenOfTopic(getAgentTopic(agentId)))
+		for (NodeHandle nh : scribeClient.getChildrenOfTopic(getAgentTopic(agentId))) {
 			System.out.println("Child in search: " + nh);
+		}
 
 		l2pNode.observerNotice(Event.AGENT_SEARCH_STARTED, this.l2pNode.getNodeId(), agentId, null, (Long) null, "("
 				+ expectedAnswers + ") - topic: " + getAgentTopic(agentId));
 
 		SearchAgentContent search = new SearchAgentContent(getLocalHandle(), agentId);
-		HashSet<NodeHandle> resultSet = new HashSet<NodeHandle>();
+		HashSet<NodeHandle> resultSet = new HashSet<>();
 		htPendingAgentSearches.put(search.getRandomId(), resultSet);
 
 		// publish a message to search the agent registers
@@ -407,13 +414,14 @@ public class NodeApplication implements Application, ScribeMultiClient {
 		long timeout = new Date().getTime() + SEARCH_TIMEOUT;
 
 		// todo: use a waiterThread here
-		while (new Date().getTime() <= timeout && resultSet.size() < expectedAnswers)
+		while (new Date().getTime() <= timeout && resultSet.size() < expectedAnswers) {
 			try {
 				System.out.println("\t\t waiting for agent-search (" + agentId + ") - "
 						+ (-new Date().getTime() + timeout) / 1000 + "s left");
 				Thread.sleep(SEARCH_SLEEP_TIME);
 			} catch (InterruptedException e) {
 			}
+		}
 
 		htPendingAgentSearches.remove(search.getRandomId());
 
@@ -452,10 +460,10 @@ public class NodeApplication implements Application, ScribeMultiClient {
 					// found the agent
 					// send message to searching node
 
-					endpoint.route(
-							null,
-							new SearchAnswerMessage(((SearchAgentContent) content).getOrigin(), this.l2pNode
-									.getPastryNode().getLocalNodeHandle(), ((SearchAgentContent) content).getRandomId()),
+					endpoint.route(null,
+							new SearchAnswerMessage(((SearchAgentContent) content).getOrigin(),
+									this.l2pNode.getPastryNode().getLocalNodeHandle(),
+									((SearchAgentContent) content).getRandomId()),
 							((SearchAgentContent) content).getOrigin());
 					// send return message
 
@@ -466,7 +474,8 @@ public class NodeApplication implements Application, ScribeMultiClient {
 
 			logger.severe("\t\t<--- subscribed but agent not found!!!!");
 		} else if (content instanceof AgentJoinedContent) {
-			logger.info("\t\t<--- got notification about agent joining: " + ((AgentJoinedContent) content).getAgentId());
+			logger.info(
+					"\t\t<--- got notification about agent joining: " + ((AgentJoinedContent) content).getAgentId());
 		} else if (content instanceof BroadcastMessageContent) {
 			final BroadcastMessageContent c = (BroadcastMessageContent) content;
 
@@ -505,8 +514,9 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	public void subscribeFailed(Collection<Topic> topics) {
 		// System.out.println(ColoredOutput.colorize( "topic subscription failed for collection of topics!",
 		// ForegroundColor.Yellow));
-		for (Topic t : topics)
+		for (Topic t : topics) {
 			subscribeFailed(t);
+		}
 	}
 
 	@Override

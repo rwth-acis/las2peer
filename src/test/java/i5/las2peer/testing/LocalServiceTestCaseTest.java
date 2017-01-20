@@ -37,7 +37,7 @@ public class LocalServiceTestCaseTest extends LocalServiceTestCase {
 	public Class<? extends Service> getServiceClass() {
 		return TestService.class;
 	}
-	
+
 	@Override
 	public String getServiceVersion() {
 		return "1.0";

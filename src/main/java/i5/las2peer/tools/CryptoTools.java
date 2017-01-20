@@ -460,8 +460,8 @@ public class CryptoTools {
 		}
 	}
 
-	public static PublicKey stringToPublicKey(String stored) throws CryptoException {
-		byte[] data = Base64.getDecoder().decode(stored);
+	public static PublicKey stringToPublicKey(String base64) throws CryptoException {
+		byte[] data = Base64.getDecoder().decode(base64);
 		X509EncodedKeySpec spec = new X509EncodedKeySpec(data);
 		try {
 			KeyFactory fact = KeyFactory.getInstance(asymmetricAlgorithm);
