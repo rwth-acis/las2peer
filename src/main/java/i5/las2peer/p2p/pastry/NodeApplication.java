@@ -59,7 +59,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 
 	private Scribe scribeClient;
 
-	private Hashtable<Long, Topic> htAgentTopics = new Hashtable<Long, Topic>();
+	private Hashtable<String, Topic> htAgentTopics = new Hashtable<>();
 
 	private Hashtable<Long, Topic> htTopics = new Hashtable<>();
 
@@ -88,23 +88,24 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	 */
 	public void registerAgentTopic(MessageReceiver receiver) {
 		synchronized (htAgentTopics) {
-			if (htAgentTopics.get(receiver.getResponsibleForAgentId()) != null)
+			if (htAgentTopics.get(receiver.getResponsibleForAgentSafeId()) != null) {
 				return;
+			}
 
 			Topic agentTopic = getAgentTopic(receiver);
 
-			htAgentTopics.put(receiver.getResponsibleForAgentId(), agentTopic);
+			htAgentTopics.put(receiver.getResponsibleForAgentSafeId(), agentTopic);
 
-			logger.info("\t--> registering agent topic for " + receiver.getResponsibleForAgentId() + " ("
+			logger.info("\t--> registering agent topic for " + receiver.getResponsibleForAgentSafeId() + " ("
 					+ agentTopic.getId() + ")");
 
 			// always subscribe to the root:
 			NodeHandle root = scribeClient.getRoot(agentTopic);
 
 			scribeClient.subscribe(agentTopic, this,
-					new AgentJoinedContent(getLocalHandle(), receiver.getResponsibleForAgentId()), root);
-			l2pNode.observerNotice(Event.PASTRY_TOPIC_SUBSCRIPTION_SUCCESS, this.l2pNode.getNodeId(), receiver, ""
-					+ agentTopic.getId());
+					new AgentJoinedContent(getLocalHandle(), receiver.getResponsibleForAgentSafeId()), root);
+			l2pNode.observerNotice(Event.PASTRY_TOPIC_SUBSCRIPTION_SUCCESS, this.l2pNode.getNodeId(), receiver,
+					"" + agentTopic.getId());
 			/*
 			System.out.println( "children of agent topic: " + scribeClient.numChildren(getAgentTopic(receiver)) );
 			for ( NodeHandle nh: scribeClient.getChildrenOfTopic(getAgentTopic ( receiver ))) 
@@ -119,7 +120,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	 * @param id
 	 * @throws AgentNotKnownException
 	 */
-	public void unregisterAgentTopic(long id) throws AgentNotKnownException {
+	public void unregisterAgentTopic(String id) throws AgentNotKnownException {
 		synchronized (htAgentTopics) {
 
 			Topic agentTopic = htAgentTopics.get(id);
@@ -148,7 +149,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 			logger.info("\t--> registering topic " + topic.getId() + ")");
 
 			scribeClient.subscribe(topic, this);
-			l2pNode.observerNotice(Event.PASTRY_TOPIC_SUBSCRIPTION_SUCCESS, this.l2pNode.getNodeId(), null,
+			l2pNode.observerNotice(Event.PASTRY_TOPIC_SUBSCRIPTION_SUCCESS, this.l2pNode.getNodeId(), (String) null,
 					"" + topic.getId());
 		}
 	}
@@ -234,8 +235,8 @@ public class NodeApplication implements Application, ScribeMultiClient {
 		} else if (pastMessage instanceof SearchAnswerMessage) {
 			// k, got an answer for my own search
 			l2pNode.observerNotice(Event.AGENT_SEARCH_ANSWER_RECEIVED,
-					((SearchAnswerMessage) pastMessage).getSendingNode(), (Long) null, l2pNode.getPastryNode(),
-					(Long) null, "");
+					((SearchAnswerMessage) pastMessage).getSendingNode(), (String) null, l2pNode.getPastryNode(),
+					(String) null, "");
 
 			// just store the sending node handle
 			HashSet<NodeHandle> pendingCollection = htPendingAgentSearches
@@ -270,7 +271,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 				waiter.collectResult(irm);
 			}
 		} else {
-			l2pNode.observerNotice(Event.MESSAGE_RECEIVED, l2pNode.getNodeId(), null,
+			l2pNode.observerNotice(Event.MESSAGE_RECEIVED, l2pNode.getNodeId(), (String) null,
 					"unkown message: " + pastMessage);
 			logger.warning("\t<-- received unknown message: " + pastMessage);
 		}
@@ -278,9 +279,8 @@ public class NodeApplication implements Application, ScribeMultiClient {
 
 	@Override
 	public boolean forward(RouteMessage pastMessage) {
-		l2pNode.observerNotice(Event.MESSAGE_FORWARDING, l2pNode.getNodeId(), (Long) null,
-				pastMessage.getDestinationId(), (Long) null, "" + pastMessage);
-
+		l2pNode.observerNotice(Event.MESSAGE_FORWARDING, l2pNode.getNodeId(), (String) null,
+				pastMessage.getDestinationId(), (String) null, "" + pastMessage);
 		return true;
 	}
 
@@ -387,7 +387,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	 * @param expectedAnswers
 	 * @return a collections of node handles where the requested agent is registered to
 	 */
-	public Collection<NodeHandle> searchAgent(long agentId, int expectedAnswers) {
+	public Collection<NodeHandle> searchAgent(String agentId, int expectedAnswers) {
 
 		Topic agentTopic = getAgentTopic(agentId);
 
@@ -400,8 +400,8 @@ public class NodeApplication implements Application, ScribeMultiClient {
 			System.out.println("Child in search: " + nh);
 		}
 
-		l2pNode.observerNotice(Event.AGENT_SEARCH_STARTED, this.l2pNode.getNodeId(), agentId, null, (Long) null, "("
-				+ expectedAnswers + ") - topic: " + getAgentTopic(agentId));
+		l2pNode.observerNotice(Event.AGENT_SEARCH_STARTED, this.l2pNode.getNodeId(), agentId, null, (String) null,
+				"(" + expectedAnswers + ") - topic: " + getAgentTopic(agentId));
 
 		SearchAgentContent search = new SearchAgentContent(getLocalHandle(), agentId);
 		HashSet<NodeHandle> resultSet = new HashSet<>();
@@ -425,8 +425,8 @@ public class NodeApplication implements Application, ScribeMultiClient {
 
 		htPendingAgentSearches.remove(search.getRandomId());
 
-		l2pNode.observerNotice(Event.AGENT_SEARCH_FINISHED, this.l2pNode.getNodeId(), agentId, null, (Long) null, ""
-				+ resultSet.size());
+		l2pNode.observerNotice(Event.AGENT_SEARCH_FINISHED, this.l2pNode.getNodeId(), agentId, null, (String) null,
+				"" + resultSet.size());
 
 		return resultSet;
 	}
@@ -446,7 +446,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	 * @param agentId
 	 * @return a collection of node handles running the requested agent
 	 */
-	public Collection<NodeHandle> searchAgent(long agentId) {
+	public Collection<NodeHandle> searchAgent(String agentId) {
 		return searchAgent(agentId, 1);
 	}
 
@@ -455,7 +455,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 		if (content instanceof SearchAgentContent) {
 			logger.info("\t\t<---got request for agent");
 
-			for (Long regId : htAgentTopics.keySet()) {
+			for (String regId : htAgentTopics.keySet()) {
 				if (htAgentTopics.get(regId).equals(topic)) {
 					// found the agent
 					// send message to searching node
@@ -542,7 +542,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	 * @return a topic identifier for the agent to subscribe to
 	 */
 	public static String getAgentTopicId(Agent agent) {
-		return getAgentTopicId(agent.getId());
+		return getAgentTopicId(agent.getSafeId());
 	}
 
 	/**
@@ -551,7 +551,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	 * @param id
 	 * @return a topic identifier for the agent to subscribe to
 	 */
-	public static String getAgentTopicId(long id) {
+	public static String getAgentTopicId(String id) {
 		return "agent-" + id;
 	}
 
@@ -562,7 +562,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	 * @return the topic corresponding to the given message receiver
 	 */
 	private Topic getAgentTopic(MessageReceiver receiver) {
-		return getAgentTopic(receiver.getResponsibleForAgentId());
+		return getAgentTopic(receiver.getResponsibleForAgentSafeId());
 	}
 
 	/**
@@ -571,7 +571,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	 * @param agentId
 	 * @return the topic corresponding to the given agent
 	 */
-	private Topic getAgentTopic(long agentId) {
+	private Topic getAgentTopic(String agentId) {
 		return new Topic(new PastryIdFactory(l2pNode.getPastryNode().getEnvironment()), getAgentTopicId(agentId));
 	}
 

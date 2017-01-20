@@ -26,16 +26,15 @@ public abstract class PassphraseAgent extends Agent {
 	/**
 	 * atm constructor for the MockAgent class, just don't know, how agent creation will take place later
 	 * 
-	 * @param id
 	 * @param pair
 	 * @param passphrase
 	 * @param salt
 	 * @throws L2pSecurityException
 	 * @throws CryptoException
 	 */
-	protected PassphraseAgent(long id, KeyPair pair, String passphrase, byte[] salt)
+	protected PassphraseAgent(KeyPair pair, String passphrase, byte[] salt)
 			throws L2pSecurityException, CryptoException {
-		super(id, pair, CryptoTools.generateKeyForPassphrase(passphrase, salt));
+		super(pair, CryptoTools.generateKeyForPassphrase(passphrase, salt));
 
 		this.salt = salt.clone();
 
@@ -50,13 +49,12 @@ public abstract class PassphraseAgent extends Agent {
 	 * 
 	 * used within {@link #createFromXml}
 	 * 
-	 * @param id
 	 * @param pubKey
 	 * @param encodedPrivate
 	 * @param salt
 	 */
-	protected PassphraseAgent(long id, PublicKey pubKey, byte[] encodedPrivate, byte[] salt) {
-		super(id, pubKey, encodedPrivate);
+	protected PassphraseAgent(PublicKey pubKey, byte[] encodedPrivate, byte[] salt) {
+		super(pubKey, encodedPrivate);
 		this.salt = salt.clone();
 	}
 

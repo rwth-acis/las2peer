@@ -62,7 +62,7 @@ public class Message implements XmlAble, Cloneable {
 	/**
 	 * id of the sending agent
 	 */
-	private long senderId;
+	private String senderId;
 
 	/**
 	 * recipient of the message
@@ -72,7 +72,7 @@ public class Message implements XmlAble, Cloneable {
 	/**
 	 * id of the receiving agent
 	 */
-	private Long recipientId = null;
+	private String recipientId = null;
 
 	/**
 	 * id of the receiving topic
@@ -166,9 +166,9 @@ public class Message implements XmlAble, Cloneable {
 			throw new IllegalArgumentException("null not allowed as sender or recipient!");
 		}
 		sender = from;
-		senderId = from.getId();
+		senderId = from.getSafeId();
 		recipient = to;
-		recipientId = to.getId();
+		recipientId = to.getSafeId();
 		content = data;
 
 		timestampMs = new Date().getTime();
@@ -212,9 +212,9 @@ public class Message implements XmlAble, Cloneable {
 	public Message(Agent from, Agent to, XmlAble data, long timeoutMs)
 			throws EncodingFailedException, L2pSecurityException, SerializationException {
 		sender = from;
-		senderId = from.getId();
+		senderId = from.getSafeId();
 		recipient = to;
-		recipientId = to.getId();
+		recipientId = to.getSafeId();
 		content = data;
 		validMs = timeoutMs;
 
@@ -254,7 +254,7 @@ public class Message implements XmlAble, Cloneable {
 		}
 
 		sender = from;
-		senderId = from.getId();
+		senderId = from.getSafeId();
 		topicId = topic;
 		content = data;
 		validMs = timeoutMs;
@@ -407,14 +407,14 @@ public class Message implements XmlAble, Cloneable {
 		}
 
 		if (!isTopic()) {
-			attrs += " recipient=\"" + recipient.getId() + "\"";
+			attrs += " recipient=\"" + recipient.getSafeId() + "\"";
 		} else {
 			attrs += " topic=\"" + topicId + "\"";
 		}
 
-		return "<las2peer:messageContent" + " id=\"" + id + "\"" + " sender=\"" + sender.getId() + "\"" + " class=\""
-				+ content.getClass().getCanonicalName() + "\"" + " type=\"" + typeAttr + "\"" + " timestamp=\""
-				+ timestampMs + "\"" + " timeout=\"" + validMs + "\"" + attrs + ">" + sContent
+		return "<las2peer:messageContent" + " id=\"" + id + "\"" + " sender=\"" + sender.getSafeId() + "\""
+				+ " class=\"" + content.getClass().getCanonicalName() + "\"" + " type=\"" + typeAttr + "\""
+				+ " timestamp=\"" + timestampMs + "\"" + " timeout=\"" + validMs + "\"" + attrs + ">" + sContent
 				+ "</las2peer:messageContent>";
 	}
 
@@ -480,7 +480,7 @@ public class Message implements XmlAble, Cloneable {
 	 * 
 	 * @return id of the sending agent
 	 */
-	public long getSenderId() {
+	public String getSenderId() {
 		return senderId;
 	}
 
@@ -500,7 +500,7 @@ public class Message implements XmlAble, Cloneable {
 	 * 
 	 * @return id of the receiving agent
 	 */
-	public Long getRecipientId() {
+	public String getRecipientId() {
 		return recipientId;
 	}
 
@@ -599,7 +599,7 @@ public class Message implements XmlAble, Cloneable {
 		sender = storage.getAgent(senderId);
 
 		if (recipientId != null) { // topic messages are not encrypted
-			if (unlockedRecipient != null && unlockedRecipient.getId() == recipientId) {
+			if (unlockedRecipient != null && unlockedRecipient.getSafeId().equalsIgnoreCase(recipientId)) {
 				recipient = unlockedRecipient;
 			} else {
 				recipient = storage.getAgent(recipientId);
@@ -640,11 +640,11 @@ public class Message implements XmlAble, Cloneable {
 				throw new L2pSecurityException("content block needs id attribute!");
 			}
 
-			if (Long.parseLong(root.getAttribute("sender")) != (sender.getId())) {
+			if (!root.getAttribute("sender").equalsIgnoreCase(sender.getSafeId())) {
 				throw new L2pSecurityException("message is signed for another sender!!");
 			}
 			if (root.hasAttribute("recipient")
-					&& (recipient == null || Long.parseLong(root.getAttribute("recipient")) != (recipient.getId()))) {
+					&& (recipient == null || !root.getAttribute("recipient").equalsIgnoreCase(recipient.getSafeId()))) {
 				throw new L2pSecurityException("message is signed for another recipient!!");
 			}
 			if (root.hasAttribute("topic") && Long.parseLong(root.getAttribute("topic")) != (topicId)) {
@@ -854,9 +854,9 @@ public class Message implements XmlAble, Cloneable {
 				throw new MalformedXMLException("base64 encoding expected");
 			}
 
-			senderId = Long.parseLong(root.getAttribute("from"));
+			senderId = root.getAttribute("from");
 			if (root.hasAttribute("to")) {
-				recipientId = Long.parseLong(root.getAttribute("to"));
+				recipientId = root.getAttribute("to");
 			}
 			if (root.hasAttribute("topic")) {
 				topicId = Long.parseLong(root.getAttribute("topic"));
@@ -907,7 +907,7 @@ public class Message implements XmlAble, Cloneable {
 	 * 
 	 * @param id
 	 */
-	public void setRecipientId(Long id) {
+	public void setRecipientId(String id) {
 		recipientId = id;
 	}
 

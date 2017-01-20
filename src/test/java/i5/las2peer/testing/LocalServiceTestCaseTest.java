@@ -19,7 +19,7 @@ public class LocalServiceTestCaseTest extends LocalServiceTestCase {
 		assertEquals(TestService.class, getServiceClass());
 		assertEquals(TestService.class.getName(), getMyAgent().getServiceNameVersion().getName());
 
-		assertTrue(getNode().hasAgent(getMyAgent().getId()));
+		assertTrue(getNode().hasAgent(getMyAgent().getSafeId()));
 
 		assertEquals(TestService.class, getServiceInstance().getClass());
 	}
@@ -27,10 +27,10 @@ public class LocalServiceTestCaseTest extends LocalServiceTestCase {
 	@Test
 	public void testMockAgents() throws MalformedXMLException, IOException {
 		Agent eve = MockAgentFactory.getEve();
-		getNode().hasAgent(eve.getId());
+		getNode().hasAgent(eve.getSafeId());
 
-		assertTrue(getNode().hasAgent(MockAgentFactory.getAdam().getId()));
-		assertTrue(getNode().hasAgent(MockAgentFactory.getAbel().getId()));
+		assertTrue(getNode().hasAgent(MockAgentFactory.getAdam().getSafeId()));
+		assertTrue(getNode().hasAgent(MockAgentFactory.getAbel().getSafeId()));
 	}
 
 	@Override

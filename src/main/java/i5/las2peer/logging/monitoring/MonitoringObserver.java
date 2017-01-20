@@ -76,7 +76,7 @@ public class MonitoringObserver implements NodeObserver {
 			sendingAgent.unlockPrivateKey("sendingAgentPass");
 			registeredAt.storeAgent(sendingAgent);
 			registeredAt.registerReceiver(sendingAgent);
-			System.out.println("Monitoring: Registered MonitoringAgent: " + sendingAgent.getId());
+			System.out.println("Monitoring: Registered MonitoringAgent: " + sendingAgent.getSafeId());
 
 		} catch (AgentException e) {
 			System.out.println("Monitoring: Problems registering MonitoringAgent!" + e);
@@ -89,11 +89,11 @@ public class MonitoringObserver implements NodeObserver {
 		try {
 			System.out.println("Monitoring: Trying to invoke Processing Service..");
 			String[] testParameters = { "Node " + registeredAt.getNodeId() + " registered observer!" };
-			long receivingAgentId = (Long) registeredAt.invoke(sendingAgent, DATA_PROCESSING_SERVICE,
+			String receivingAgentId = (String) registeredAt.invoke(sendingAgent, DATA_PROCESSING_SERVICE,
 					"getReceivingAgentId", testParameters);
 			try {
 				receivingAgent = (MonitoringAgent) registeredAt.getAgent(receivingAgentId);
-				System.out.println("Monitoring: Fetched receiving MonitoringAgent: " + receivingAgent.getId());
+				System.out.println("Monitoring: Fetched receiving MonitoringAgent: " + receivingAgent.getSafeId());
 			} catch (AgentNotKnownException e) {
 				e.printStackTrace();
 			}
@@ -113,8 +113,8 @@ public class MonitoringObserver implements NodeObserver {
 	 *
 	 */
 	@Override
-	public void log(Long timestamp, Event event, String sourceNode, Long sourceAgentId, String destinationNode,
-			Long destinationAgentId, String remarks) {
+	public void log(Long timestamp, Event event, String sourceNode, String sourceAgentId, String destinationNode,
+			String destinationAgentId, String remarks) {
 		// Now this is a bit tricky..
 		// We get a "Node is Running" event, but we have to wait until the next event to be sure that
 		// the method that called the "Running" event has terminated, otherwise our request will crash this startup

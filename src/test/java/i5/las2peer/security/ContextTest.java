@@ -64,22 +64,22 @@ public class ContextTest {
 		AgentContext context = new AgentContext(node, eve);
 
 		try {
-			GroupAgent a = context.requestGroupAgent(group1.getId());
-			assertEquals(a.getId(), group1.getId());
+			GroupAgent a = context.requestGroupAgent(group1.getSafeId());
+			assertEquals(a.getSafeId(), group1.getSafeId());
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("exception thrown: " + e);
 		}
 
 		try {
-			context.requestGroupAgent(groupA.getId());
+			context.requestGroupAgent(groupA.getSafeId());
 			fail("exception expected");
 		} catch (Exception e) {
 		}
 
 		try {
-			GroupAgent a = context.requestGroupAgent(groupSuper.getId());
-			assertEquals(a.getId(), groupSuper.getId());
+			GroupAgent a = context.requestGroupAgent(groupSuper.getSafeId());
+			assertEquals(a.getSafeId(), groupSuper.getSafeId());
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("exception thrown: " + e);

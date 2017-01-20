@@ -32,8 +32,6 @@ import i5.las2peer.tools.XmlTools;
  */
 public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 
-	private long id;
-
 	/**
 	 * encrypted private key
 	 */
@@ -54,13 +52,11 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	/**
 	 * Creates a new agent.
 	 * 
-	 * @param id
 	 * @param pair
 	 * @param key
 	 * @throws L2pSecurityException
 	 */
-	protected Agent(long id, KeyPair pair, SecretKey key) throws L2pSecurityException {
-		this.id = id;
+	protected Agent(KeyPair pair, SecretKey key) throws L2pSecurityException {
 		this.publicKey = pair.getPublic();
 		this.privateKey = pair.getPrivate();
 
@@ -71,12 +67,10 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	/**
 	 * Creates a new agent.
 	 * 
-	 * @param id
 	 * @param publicKey
 	 * @param encryptedPrivate
 	 */
-	protected Agent(long id, PublicKey publicKey, byte[] encryptedPrivate) {
-		this.id = id;
+	protected Agent(PublicKey publicKey, byte[] encryptedPrivate) {
 		this.publicKey = publicKey;
 		this.privateKey = null;
 		this.baEncrypedPrivate = encryptedPrivate.clone();
@@ -133,13 +127,8 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 		return privateKey == null;
 	}
 
-	/**
-	 * Returns the id of this agent.
-	 * 
-	 * @return id of the agent
-	 */
-	public long getId() {
-		return id;
+	public String getSafeId() {
+		return CryptoTools.publicKeyToSHA512(getPublicKey());
 	}
 
 	/**
@@ -149,8 +138,8 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 	 * @return id of the agent
 	 */
 	@Override
-	public long getResponsibleForAgentId() {
-		return getId();
+	public String getResponsibleForAgentSafeId() {
+		return getSafeId();
 	}
 
 	/**
@@ -350,7 +339,7 @@ public abstract class Agent implements XmlAble, Cloneable, MessageReceiver {
 		if (other == null || !other.getClass().isInstance(this)) {
 			return false;
 		}
-		return this.getId() == ((Agent) other).getId();
+		return this.getSafeId().equalsIgnoreCase(((Agent) other).getSafeId());
 	}
 
 }

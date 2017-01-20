@@ -29,7 +29,7 @@ public class AgentContext implements AgentStorage, ContextStorageInterface {
 
 	private Agent agent;
 
-	private Hashtable<Long, GroupAgent> groupAgents = new Hashtable<>();
+	private Hashtable<String, GroupAgent> groupAgents = new Hashtable<>();
 
 	private Node localNode;
 
@@ -76,7 +76,7 @@ public class AgentContext implements AgentStorage, ContextStorageInterface {
 	 * @throws AgentNotKnownException
 	 * @throws L2pSecurityException
 	 */
-	public GroupAgent requestGroupAgent(long groupId) throws AgentNotKnownException, L2pSecurityException {
+	public GroupAgent requestGroupAgent(String groupId) throws AgentNotKnownException, L2pSecurityException {
 		if (groupAgents.containsKey(groupId)) {
 			return groupAgents.get(groupId);
 		}
@@ -96,7 +96,7 @@ public class AgentContext implements AgentStorage, ContextStorageInterface {
 				throw new L2pSecurityException("Unable to open group!", e);
 			}
 		} else {
-			for (Long memberId : group.getMemberList()) {
+			for (String memberId : group.getMemberList()) {
 				try {
 					GroupAgent member = requestGroupAgent(memberId);
 					group.unlockPrivateKey(member);
@@ -126,8 +126,8 @@ public class AgentContext implements AgentStorage, ContextStorageInterface {
 	 * @throws AgentNotKnownException agent not found
 	 * @throws L2pSecurityException agent cannot be unlocked
 	 */
-	public Agent requestAgent(long agentId) throws AgentNotKnownException, L2pSecurityException {
-		if (agentId == getMainAgent().getId()) {
+	public Agent requestAgent(String agentId) throws AgentNotKnownException, L2pSecurityException {
+		if (agentId.equalsIgnoreCase(getMainAgent().getSafeId())) {
 			return getMainAgent();
 		} else {
 			return requestGroupAgent(agentId);
@@ -219,8 +219,8 @@ public class AgentContext implements AgentStorage, ContextStorageInterface {
 	 * @throws AgentNotKnownException
 	 */
 	@Override
-	public Agent getAgent(long id) throws AgentNotKnownException {
-		if (id == agent.getId()) {
+	public Agent getAgent(String id) throws AgentNotKnownException {
+		if (id.equalsIgnoreCase(agent.getSafeId())) {
 			return agent;
 		}
 
@@ -233,8 +233,8 @@ public class AgentContext implements AgentStorage, ContextStorageInterface {
 	}
 
 	@Override
-	public boolean hasAgent(long id) {
-		return id == agent.getId() || groupAgents.containsKey(id);
+	public boolean hasAgent(String id) {
+		return id.equalsIgnoreCase(agent.getSafeId()) || groupAgents.containsKey(id);
 	}
 
 	/**
@@ -365,12 +365,12 @@ public class AgentContext implements AgentStorage, ContextStorageInterface {
 	 * @throws AgentNotKnownException agent not found
 	 * @throws AgentLockedException main agent is locked
 	 */
-	public boolean hasAccess(long agentId) throws AgentNotKnownException, AgentLockedException {
+	public boolean hasAccess(String agentId) throws AgentNotKnownException, AgentLockedException {
 		if (getMainAgent().isLocked()) {
 			throw new AgentLockedException();
 		}
 
-		if (agentId == getMainAgent().getId()) {
+		if (agentId.equalsIgnoreCase(getMainAgent().getSafeId())) {
 			return true;
 		}
 

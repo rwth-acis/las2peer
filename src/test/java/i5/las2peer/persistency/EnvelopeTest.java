@@ -272,8 +272,8 @@ public class EnvelopeTest {
 						}
 
 						@Override
-						public Set<Long> mergeGroups(Set<Long> toStoreGroups, Set<Long> inNetworkGroups) {
-							HashSet<Long> merged = new HashSet<>();
+						public Set<String> mergeGroups(Set<String> toStoreGroups, Set<String> inNetworkGroups) {
+							HashSet<String> merged = new HashSet<>();
 							merged.addAll(toStoreGroups);
 							merged.addAll(inNetworkGroups);
 							return merged;
@@ -391,7 +391,7 @@ public class EnvelopeTest {
 						}
 
 						@Override
-						public Set<Long> mergeGroups(Set<Long> toStoreGroups, Set<Long> inNetworkGroups) {
+						public Set<String> mergeGroups(Set<String> toStoreGroups, Set<String> inNetworkGroups) {
 							return new HashSet<>();
 						}
 					}, new StorageExceptionHandler() {

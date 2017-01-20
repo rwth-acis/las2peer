@@ -9,6 +9,7 @@ import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -494,6 +495,26 @@ public class CryptoTools {
 			return Base64.getEncoder().encodeToString(spec.getEncoded());
 		} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
 			throw new CryptoException("Could not convert public key into base64 string", e);
+		}
+	}
+
+	public static String publicKeyToSHA512(PublicKey publicKey) {
+		try {
+			// this must be cryptographically safe, SHA1 is not enough!
+			MessageDigest md = MessageDigest.getInstance("SHA-512");
+			md.update(publicKey.getEncoded());
+			byte[] hash = md.digest();
+			StringBuffer hexString = new StringBuffer();
+			for (byte element : hash) {
+				String hex = Integer.toHexString(0xff & element);
+				if (hex.length() == 1) {
+					hexString.append('0');
+				}
+				hexString.append(hex);
+			}
+			return hexString.toString();
+		} catch (NoSuchAlgorithmException e) {
+			throw new RuntimeException(e);
 		}
 	}
 

@@ -406,7 +406,7 @@ public class PastryNodeImpl extends Node {
 	@Override
 	public void unregisterReceiver(MessageReceiver receiver) throws AgentNotKnownException, NodeException {
 		synchronized (this) {
-			application.unregisterAgentTopic(receiver.getResponsibleForAgentId());
+			application.unregisterAgentTopic(receiver.getResponsibleForAgentSafeId());
 			super.unregisterReceiver(receiver);
 		}
 	}
@@ -427,18 +427,6 @@ public class PastryNodeImpl extends Node {
 			if (!super.hasTopic(topic)) {
 				application.unregisterTopic(topic);
 			}
-		}
-	}
-
-	/**
-	 * @deprecated Use {@link PastryNodeImpl#unregisterReceiver(MessageReceiver)} instead!
-	 */
-	@Deprecated
-	@Override
-	public void unregisterAgent(long id) throws AgentNotKnownException {
-		synchronized (this) {
-			application.unregisterAgentTopic(id);
-			super.unregisterAgent(id);
 		}
 	}
 
@@ -523,8 +511,8 @@ public class PastryNodeImpl extends Node {
 	}
 
 	@Override
-	public Object[] findRegisteredAgent(long agentId, int hintOfExpectedCount) throws AgentNotKnownException {
-		observerNotice(Event.AGENT_SEARCH_STARTED, pastryNode, agentId, null, (Long) null, "");
+	public Object[] findRegisteredAgent(String agentId, int hintOfExpectedCount) throws AgentNotKnownException {
+		observerNotice(Event.AGENT_SEARCH_STARTED, pastryNode, agentId, null, (String) null, "");
 		return application.searchAgent(agentId, hintOfExpectedCount).toArray();
 	}
 
@@ -538,22 +526,23 @@ public class PastryNodeImpl extends Node {
 	}
 
 	@Override
-	public Agent getAgent(long id) throws AgentNotKnownException {
+	public Agent getAgent(String id) throws AgentNotKnownException {
 		// no caching here, because agents may have changed in the network
-		observerNotice(Event.AGENT_GET_STARTED, pastryNode, id, null, (Long) null, "");
+		observerNotice(Event.AGENT_GET_STARTED, pastryNode, id, null, (String) null, "");
 		try {
 			Agent agentFromNet = null;
 			Agent anonymous = getAnonymous();
-			if (id == anonymous.getId()) { // TODO use isAnonymous, special ID or Classing for identification
+			// TODO use isAnonymous, special ID or Classing for identification
+			if (id.equalsIgnoreCase(anonymous.getSafeId())) {
 				agentFromNet = anonymous;
 			} else {
 				Envelope agentEnvelope = pastStorage.fetchEnvelope(Envelope.getAgentIdentifier(id), AGENT_GET_TIMEOUT);
 				agentFromNet = Agent.createFromXml((String) agentEnvelope.getContent());
 			}
-			observerNotice(Event.AGENT_GET_SUCCESS, pastryNode, id, null, (Long) null, "");
+			observerNotice(Event.AGENT_GET_SUCCESS, pastryNode, id, null, (String) null, "");
 			return agentFromNet;
 		} catch (Exception e) {
-			observerNotice(Event.AGENT_GET_FAILED, pastryNode, id, null, (Long) null, "");
+			observerNotice(Event.AGENT_GET_FAILED, pastryNode, id, null, (String) null, "");
 			throw new AgentNotKnownException("Unable to retrieve Agent " + id + " from past storage", e);
 		}
 	}
@@ -569,11 +558,11 @@ public class PastryNodeImpl extends Node {
 		try {
 			Envelope agentEnvelope = null;
 			try {
-				agentEnvelope = pastStorage.fetchEnvelope(Envelope.getAgentIdentifier(agent.getId()),
+				agentEnvelope = pastStorage.fetchEnvelope(Envelope.getAgentIdentifier(agent.getSafeId()),
 						AGENT_GET_TIMEOUT);
 				agentEnvelope = pastStorage.createUnencryptedEnvelope(agentEnvelope, agent.toXmlString());
 			} catch (ArtifactNotFoundException e) {
-				agentEnvelope = pastStorage.createUnencryptedEnvelope(Envelope.getAgentIdentifier(agent.getId()),
+				agentEnvelope = pastStorage.createUnencryptedEnvelope(Envelope.getAgentIdentifier(agent.getSafeId()),
 						agent.toXmlString());
 			}
 			pastStorage.storeEnvelope(agentEnvelope, agent, AGENT_STORE_TIMEOUT);

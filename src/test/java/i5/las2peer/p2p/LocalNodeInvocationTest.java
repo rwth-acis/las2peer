@@ -79,7 +79,7 @@ public class LocalNodeInvocationTest {
 		serviceNode.registerReceiver(testServiceAgent);
 
 		LocalNode callerNode = LocalNode.launchNode();
-		Object result = callerNode.invokeGlobally(eve, testServiceAgent.getId(),
+		Object result = callerNode.invokeGlobally(eve, testServiceAgent.getSafeId(),
 				testServiceAgent.getRunningAtNode().getNodeId(), "inc", new Serializable[] { new Integer(12) });
 
 		assertEquals(14, result);

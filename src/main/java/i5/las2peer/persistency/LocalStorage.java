@@ -88,7 +88,7 @@ public class LocalStorage implements L2pStorageInterface {
 					Serializable mergedContent = collisionHandler.onCollision(envelope, inStorage, 1);
 					Set<PublicKey> mergedReaders = collisionHandler.mergeReaders(envelope.getReaderKeys().keySet(),
 							inStorage.getReaderKeys().keySet());
-					Set<Long> mergedGroups = collisionHandler.mergeGroups(envelope.getReaderGroupIds(),
+					Set<String> mergedGroups = collisionHandler.mergeGroups(envelope.getReaderGroupIds(),
 							inStorage.getReaderGroupIds());
 					try {
 						toStore = new Envelope(envelope.getIdentifier(), mergedVersion, mergedContent, mergedReaders,

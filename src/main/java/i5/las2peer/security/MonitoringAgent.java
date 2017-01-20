@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.Base64;
-import java.util.Random;
 
 import org.w3c.dom.Element;
 
@@ -37,7 +36,6 @@ public class MonitoringAgent extends PassphraseAgent {
 	 * 
 	 * Creates a new MonitoringAgent.
 	 * 
-	 * @param id
 	 * @param pair
 	 * @param passphrase
 	 * @param salt
@@ -45,9 +43,9 @@ public class MonitoringAgent extends PassphraseAgent {
 	 * @throws CryptoException
 	 * 
 	 */
-	protected MonitoringAgent(long id, KeyPair pair, String passphrase, byte[] salt)
+	protected MonitoringAgent(KeyPair pair, String passphrase, byte[] salt)
 			throws L2pSecurityException, CryptoException {
-		super(id, pair, passphrase, salt);
+		super(pair, passphrase, salt);
 	}
 
 	/**
@@ -56,14 +54,13 @@ public class MonitoringAgent extends PassphraseAgent {
 	 * 
 	 * Used within {@link #createFromXml}.
 	 * 
-	 * @param id
 	 * @param pubKey
 	 * @param encodedPrivate
 	 * @param salt
 	 * 
 	 */
-	protected MonitoringAgent(long id, PublicKey pubKey, byte[] encodedPrivate, byte[] salt) {
-		super(id, pubKey, encodedPrivate, salt);
+	protected MonitoringAgent(PublicKey pubKey, byte[] encodedPrivate, byte[] salt) {
+		super(pubKey, encodedPrivate, salt);
 	}
 
 	/**
@@ -78,8 +75,7 @@ public class MonitoringAgent extends PassphraseAgent {
 	 */
 	public static MonitoringAgent createMonitoringAgent(String passphrase)
 			throws CryptoException, L2pSecurityException {
-		Random r = new Random();
-		return new MonitoringAgent(r.nextLong(), CryptoTools.generateKeyPair(), passphrase, CryptoTools.generateSalt());
+		return new MonitoringAgent(CryptoTools.generateKeyPair(), passphrase, CryptoTools.generateSalt());
 	}
 
 	/**
@@ -140,7 +136,7 @@ public class MonitoringAgent extends PassphraseAgent {
 	@Override
 	public String toXmlString() {
 		try {
-			StringBuffer result = new StringBuffer("<las2peer:agent type=\"monitoring\">\n" + "\t<id>" + getId()
+			StringBuffer result = new StringBuffer("<las2peer:agent type=\"monitoring\">\n" + "\t<id>" + getSafeId()
 					+ "</id>\n" + "\t<publickey encoding=\"base64\">" + SerializeTools.serializeToBase64(getPublicKey())
 					+ "</publickey>\n" + "\t<privatekey encrypted=\"" + CryptoTools.getSymmetricAlgorithm()
 					+ "\" keygen=\"" + CryptoTools.getSymmetricKeygenMethod() + "\">\n"
@@ -184,13 +180,16 @@ public class MonitoringAgent extends PassphraseAgent {
 		try {
 			// read id from XML
 			Element elId = XmlTools.getSingularElement(rootElement, "id");
-			long id = Long.parseLong(elId.getTextContent());
+			String id = elId.getTextContent();
 			// read public key from XML
 			Element pubKey = XmlTools.getSingularElement(rootElement, "publickey");
 			if (!pubKey.getAttribute("encoding").equals("base64")) {
 				throw new MalformedXMLException("base64 encoding expected");
 			}
 			PublicKey publicKey = (PublicKey) SerializeTools.deserializeBase64(pubKey.getTextContent());
+			if (!id.equalsIgnoreCase(CryptoTools.publicKeyToSHA512(publicKey))) {
+				throw new MalformedXMLException("id does not match with public key");
+			}
 			// read private key from XML
 			Element privKey = XmlTools.getSingularElement(rootElement, "privatekey");
 			if (!privKey.getAttribute("encrypted").equals(CryptoTools.getSymmetricAlgorithm())) {
@@ -212,7 +211,7 @@ public class MonitoringAgent extends PassphraseAgent {
 			}
 			byte[] encPrivate = Base64.getDecoder().decode(data.getTextContent());
 
-			MonitoringAgent result = new MonitoringAgent(id, publicKey, encPrivate, salt);
+			MonitoringAgent result = new MonitoringAgent(publicKey, encPrivate, salt);
 
 			return result;
 		} catch (SerializationException e) {

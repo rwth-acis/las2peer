@@ -22,22 +22,22 @@ public class BasicAgentStorageTest {
 
 		eve.unlockPrivateKey("evespass");
 
-		assertFalse(testee.hasAgent(eve.getId()));
+		assertFalse(testee.hasAgent(eve.getSafeId()));
 		testee.registerAgent(eve);
 
-		assertTrue(testee.hasAgent(eve.getId()));
+		assertTrue(testee.hasAgent(eve.getSafeId()));
 
-		assertNotSame(eve, testee.getAgent(eve.getId()));
+		assertNotSame(eve, testee.getAgent(eve.getSafeId()));
 
 		assertFalse(eve.isLocked());
 
-		Agent eve2 = testee.getAgent(eve.getId());
+		Agent eve2 = testee.getAgent(eve.getSafeId());
 		assertTrue(eve2.isLocked());
 
 		((UserAgent) eve2).unlockPrivateKey("evespass");
 		assertFalse(eve2.isLocked());
 
-		assertTrue(testee.getAgent(eve.getId()).isLocked());
+		assertTrue(testee.getAgent(eve.getSafeId()).isLocked());
 	}
 
 }

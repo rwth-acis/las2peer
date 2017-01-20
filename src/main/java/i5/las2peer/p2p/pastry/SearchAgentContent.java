@@ -14,7 +14,7 @@ public class SearchAgentContent extends L2pScribeContent {
 	/**
 	 * the id of the agent to look for
 	 */
-	private final long searchAgentId;
+	private final String searchAgentId;
 
 	/**
 	 * create a new search content looking for the agent of the given id, created at the given node (handle)
@@ -22,7 +22,7 @@ public class SearchAgentContent extends L2pScribeContent {
 	 * @param from
 	 * @param id
 	 */
-	public SearchAgentContent(NodeHandle from, long id) {
+	public SearchAgentContent(NodeHandle from, String id) {
 		super(from);
 		searchAgentId = id;
 	}
@@ -32,7 +32,7 @@ public class SearchAgentContent extends L2pScribeContent {
 	 * 
 	 * @return id of the requested agent
 	 */
-	public long getAgentId() {
+	public String getAgentId() {
 		return searchAgentId;
 	}
 

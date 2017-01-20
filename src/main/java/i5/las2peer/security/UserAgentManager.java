@@ -38,16 +38,16 @@ public class UserAgentManager {
 		if (agent.isLocked()) {
 			throw new AgentLockedException("Only unlocked Agents can be registered!");
 		}
-		Long content = agent.getId();
+		String agentId = agent.getSafeId();
 		if (agent.hasLogin()) {
 			try {
 				String identifier = PREFIX_USER_NAME + agent.getLoginName().toLowerCase();
 				Envelope envName = null;
 				try {
 					Envelope stored = node.fetchEnvelope(identifier);
-					envName = node.createUnencryptedEnvelope(stored, content);
+					envName = node.createUnencryptedEnvelope(stored, agentId);
 				} catch (ArtifactNotFoundException e) {
-					envName = node.createUnencryptedEnvelope(identifier, content);
+					envName = node.createUnencryptedEnvelope(identifier, agentId);
 				}
 				node.storeEnvelope(envName, agent);
 			} catch (EnvelopeAlreadyExistsException e) {
@@ -64,7 +64,7 @@ public class UserAgentManager {
 				try {
 					envMail = node.fetchEnvelope(identifier);
 				} catch (ArtifactNotFoundException e) {
-					envMail = node.createUnencryptedEnvelope(identifier, content);
+					envMail = node.createUnencryptedEnvelope(identifier, agentId);
 				}
 				node.storeEnvelope(envMail, agent);
 			} catch (EnvelopeAlreadyExistsException e) {
@@ -95,13 +95,13 @@ public class UserAgentManager {
 	 * @return
 	 * @throws AgentNotKnownException
 	 */
-	public long getAgentIdByLogin(String name) throws AgentNotKnownException, L2pSecurityException {
+	public String getAgentIdByLogin(String name) throws AgentNotKnownException, L2pSecurityException {
 		if (name.equalsIgnoreCase("anonymous")) {
-			return node.getAnonymous().getId();
+			return node.getAnonymous().getSafeId();
 		}
 		try {
 			Envelope env = node.fetchEnvelope(PREFIX_USER_NAME + name.toLowerCase());
-			return (Long) env.getContent();
+			return (String) env.getContent();
 		} catch (StorageException e) {
 			throw new AgentNotKnownException("Username not found!", e);
 		} catch (SerializationException | CryptoException e) {
@@ -116,10 +116,10 @@ public class UserAgentManager {
 	 * @return
 	 * @throws AgentNotKnownException
 	 */
-	public long getAgentIdByEmail(String email) throws AgentNotKnownException, L2pSecurityException {
+	public String getAgentIdByEmail(String email) throws AgentNotKnownException, L2pSecurityException {
 		try {
 			Envelope env = node.fetchEnvelope(PREFIX_USER_MAIL + email.toLowerCase());
-			return (Long) env.getContent();
+			return (String) env.getContent();
 		} catch (StorageException e) {
 			throw new AgentNotKnownException("Email not found!", e);
 		} catch (SerializationException | CryptoException e) {

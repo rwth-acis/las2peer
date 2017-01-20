@@ -27,6 +27,6 @@ public interface StorageCollisionHandler {
 
 	public Set<PublicKey> mergeReaders(Set<PublicKey> toStoreReaders, Set<PublicKey> inNetworkReaders);
 
-	public Set<Long> mergeGroups(Set<Long> toStoreGroups, Set<Long> inNetworkGroups);
+	public Set<String> mergeGroups(Set<String> toStoreGroups, Set<String> inNetworkGroups);
 
 }

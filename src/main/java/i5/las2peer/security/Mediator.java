@@ -79,7 +79,7 @@ public class Mediator implements MessageReceiver {
 
 	@Override
 	public void receiveMessage(Message message, AgentContext c) throws MessageException {
-		if (message.getRecipientId() != myAgent.getId()) {
+		if (!message.getRecipientId().equalsIgnoreCase(myAgent.getSafeId())) {
 			throw new MessageException("I'm not responsible for the receiver (something went very wrong)!");
 		}
 
@@ -156,8 +156,8 @@ public class Mediator implements MessageReceiver {
 	}
 
 	@Override
-	public long getResponsibleForAgentId() {
-		return myAgent.getId();
+	public String getResponsibleForAgentSafeId() {
+		return myAgent.getSafeId();
 	}
 
 	/**

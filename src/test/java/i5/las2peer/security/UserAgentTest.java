@@ -97,7 +97,7 @@ public class UserAgentTest {
 
 		UserAgent b = UserAgent.createFromXml(xml);
 
-		assertEquals(a.getId(), b.getId());
+		assertEquals(a.getSafeId(), b.getSafeId());
 		assertEquals(email, b.getEmail());
 		assertEquals(userData, b.getUserData());
 	}

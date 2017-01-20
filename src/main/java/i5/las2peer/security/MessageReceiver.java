@@ -35,7 +35,7 @@ public interface MessageReceiver {
 	 * @return id of the agent, this receiver is responsible for
 	 * 
 	 */
-	public long getResponsibleForAgentId();
+	public String getResponsibleForAgentSafeId();
 
 	/**
 	 * 

@@ -39,8 +39,8 @@ public class LocalNodeTest {
 	private static int counter;
 
 	@Before
-	public void setUp() throws NoSuchAlgorithmException, L2pSecurityException, CryptoException, MalformedXMLException,
-			IOException {
+	public void setUp()
+			throws NoSuchAlgorithmException, L2pSecurityException, CryptoException, MalformedXMLException, IOException {
 		LocalNode.reset();
 
 		eve = MockAgentFactory.getEve();
@@ -115,8 +115,8 @@ public class LocalNodeTest {
 		LocalNode testee1 = LocalNode.launchAgent(adam);
 		LocalNode.launchAgent(eve);
 
-		assertTrue(LocalNode.findAllNodesWithAgent(adam.getId()).length > 0);
-		assertTrue(LocalNode.findAllNodesWithAgent(eve.getId()).length > 0);
+		assertTrue(LocalNode.findAllNodesWithAgent(adam.getSafeId()).length > 0);
+		assertTrue(LocalNode.findAllNodesWithAgent(eve.getSafeId()).length > 0);
 
 		MessageResultListener l = new MessageResultListener(10000);
 		Message m = new Message(adam, eve, new PingPongContent());
@@ -166,16 +166,16 @@ public class LocalNodeTest {
 		// launch three nodes with one agent each
 		LocalNode testee1 = LocalNode.launchAgent(adam);
 		LocalNode hosting1 = LocalNode.launchAgent(eve);
-		assertEquals(1, LocalNode.findAllNodesWithAgent(eve.getId()).length);
+		assertEquals(1, LocalNode.findAllNodesWithAgent(eve.getSafeId()).length);
 
 		LocalNode hosting2 = LocalNode.launchAgent(eve);
 
 		assertTrue(hosting1.hasLocalAgent(eve));
 		assertTrue(hosting2.hasLocalAgent(eve));
 
-		assertNotSame(hosting1.getAgent(eve.getId()), hosting2.getAgent(eve.getId()));
+		assertNotSame(hosting1.getAgent(eve.getSafeId()), hosting2.getAgent(eve.getSafeId()));
 
-		assertEquals(2, LocalNode.findAllNodesWithAgent(eve.getId()).length);
+		assertEquals(2, LocalNode.findAllNodesWithAgent(eve.getSafeId()).length);
 
 		MessageResultListener l = new MessageResultListener(10000) {
 			@Override
@@ -262,7 +262,7 @@ public class LocalNodeTest {
 
 		LocalNode testee2 = LocalNode.launchNode();
 
-		UserAgent retrieve = (UserAgent) testee2.getAgent(abel.getId());
+		UserAgent retrieve = (UserAgent) testee2.getAgent(abel.getSafeId());
 		assertTrue(retrieve.isLocked());
 
 		try {
@@ -394,11 +394,11 @@ public class LocalNodeTest {
 		assertTrue(received1 != received2);
 
 		// check if receiver is set correctly
-		assertTrue(received1.getRecipientId() == adam.getId());
-		assertTrue(received2.getRecipientId() == abel.getId());
-		assertTrue(received3.getRecipientId() == eve.getId());
+		assertTrue(received1.getRecipientId().equalsIgnoreCase(adam.getSafeId()));
+		assertTrue(received2.getRecipientId().equalsIgnoreCase(abel.getSafeId()));
+		assertTrue(received3.getRecipientId().equalsIgnoreCase(eve.getSafeId()));
 
-		assertTrue(received3.getSenderId() == adam.getId());
+		assertTrue(received3.getSenderId().equalsIgnoreCase(adam.getSafeId()));
 		assertTrue(received3.getTopicId() == 1);
 
 		// cehck if open
@@ -473,8 +473,8 @@ public class LocalNodeTest {
 			AgentException, SecurityException, IllegalArgumentException, AgentNotKnownException, NoSuchMethodException,
 			IllegalAccessException, InvocationTargetException, InterruptedException {
 		String serviceClass = "i5.las2peer.api.TestService";
-		ServiceAgent testService = ServiceAgent.createServiceAgent(
-				ServiceNameVersion.fromString(serviceClass + "@1.0"), "a passphrase");
+		ServiceAgent testService = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(serviceClass + "@1.0"),
+				"a passphrase");
 		testService.unlockPrivateKey("a passphrase");
 
 		LocalNode testee = LocalNode.launchNode();
@@ -506,8 +506,8 @@ public class LocalNodeTest {
 		testee.storeAgent(a);
 		testee.storeAgent(b);
 
-		assertEquals(a.getId(), testee.getUserManager().getAgentIdByLogin("alpha"));
-		assertEquals(b.getId(), testee.getUserManager().getAgentIdByLogin("beta"));
+		assertEquals(a.getSafeId(), testee.getUserManager().getAgentIdByLogin("alpha"));
+		assertEquals(b.getSafeId(), testee.getUserManager().getAgentIdByLogin("beta"));
 
 		try {
 			testee.getUserManager().getAgentIdByLogin("bla");
@@ -518,8 +518,8 @@ public class LocalNodeTest {
 	}
 
 	@Test
-	public void testUserRegDistribution() throws L2pSecurityException, AgentException, CryptoException,
-			ArtifactNotFoundException {
+	public void testUserRegDistribution()
+			throws L2pSecurityException, AgentException, CryptoException, ArtifactNotFoundException {
 		LocalNode testee1 = LocalNode.launchNode();
 
 		for (int i = 0; i < 11; i++) {

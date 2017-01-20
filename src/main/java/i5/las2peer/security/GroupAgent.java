@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Hashtable;
-import java.util.Random;
 
 import javax.crypto.SecretKey;
 
@@ -48,21 +47,20 @@ public class GroupAgent extends Agent {
 	/**
 	 * hashtable storing the encrypted versions of the group secret key for each member
 	 */
-	private Hashtable<Long, byte[]> htEncryptedKeyVersions = new Hashtable<Long, byte[]>();
+	private Hashtable<String, byte[]> htEncryptedKeyVersions = new Hashtable<>();
 
 	@SuppressWarnings("unchecked")
-	protected GroupAgent(long id, PublicKey pubKey, byte[] encryptedPrivate, Hashtable<Long, byte[]> htEncryptedKeys)
+	protected GroupAgent(PublicKey pubKey, byte[] encryptedPrivate, Hashtable<String, byte[]> htEncryptedKeys)
 			throws L2pSecurityException {
-		super(id, pubKey, encryptedPrivate);
+		super(pubKey, encryptedPrivate);
 
-		htEncryptedKeyVersions = (Hashtable<Long, byte[]>) htEncryptedKeys.clone();
+		htEncryptedKeyVersions = (Hashtable<String, byte[]>) htEncryptedKeys.clone();
 	}
 
 	/**
 	 * constructor for the {@link #createGroupAgent} factory simply necessary, since the secret key has to be stated for
 	 * the constructor of the superclass
 	 * 
-	 * @param id
 	 * @param keys
 	 * @param secret
 	 * @param members
@@ -70,9 +68,9 @@ public class GroupAgent extends Agent {
 	 * @throws CryptoException
 	 * @throws SerializationException
 	 */
-	protected GroupAgent(long id, KeyPair keys, SecretKey secret, Agent[] members)
+	protected GroupAgent(KeyPair keys, SecretKey secret, Agent[] members)
 			throws L2pSecurityException, CryptoException, SerializationException {
-		super(id, keys, secret);
+		super(keys, secret);
 
 		symmetricGroupKey = secret;
 		for (Agent a : members) {
@@ -111,7 +109,7 @@ public class GroupAgent extends Agent {
 			unlockPrivateKey(agent);
 			return;
 		} else {
-			for (Long memberId : htEncryptedKeyVersions.keySet()) {
+			for (String memberId : htEncryptedKeyVersions.keySet()) {
 				try {
 					Agent member = agentStorage.getAgent(memberId);
 					if (member instanceof GroupAgent) {
@@ -136,7 +134,7 @@ public class GroupAgent extends Agent {
 	 * @throws L2pSecurityException
 	 */
 	private void decryptSecretKey(Agent agent) throws SerializationException, CryptoException, L2pSecurityException {
-		byte[] crypted = htEncryptedKeyVersions.get(agent.getId());
+		byte[] crypted = htEncryptedKeyVersions.get(agent.getSafeId());
 
 		if (crypted == null) {
 			throw new L2pSecurityException("the given agent is not listed as a group member!");
@@ -174,7 +172,7 @@ public class GroupAgent extends Agent {
 		}
 
 		byte[] cryptedSecret = CryptoTools.encryptAsymmetric(symmetricGroupKey, a.getPublicKey());
-		htEncryptedKeyVersions.put(a.getId(), cryptedSecret);
+		htEncryptedKeyVersions.put(a.getSafeId(), cryptedSecret);
 	}
 
 	/**
@@ -184,7 +182,7 @@ public class GroupAgent extends Agent {
 	 * @return true, if the given agent is a member of this group
 	 */
 	public boolean isMember(Agent a) {
-		return isMember(a.getId());
+		return isMember(a.getSafeId());
 	}
 
 	/**
@@ -194,7 +192,7 @@ public class GroupAgent extends Agent {
 	 * @return true, if the given agent is a member of this group
 	 */
 	public boolean isMemberRecursive(Agent a) {
-		return isMemberRecursive(a.getId());
+		return isMemberRecursive(a.getSafeId());
 	}
 
 	/**
@@ -203,7 +201,7 @@ public class GroupAgent extends Agent {
 	 * @param id
 	 * @return true, if the given agent is a member if this group
 	 */
-	public boolean isMember(long id) {
+	public boolean isMember(String id) {
 		// TODO only for opened groups?
 		return (htEncryptedKeyVersions.get(id) != null);
 	}
@@ -214,11 +212,11 @@ public class GroupAgent extends Agent {
 	 * @param id
 	 * @return true, if the given agent is a member if this group
 	 */
-	public boolean isMemberRecursive(long id) {
+	public boolean isMemberRecursive(String id) {
 		if (isMember(id) == true) {
 			return true;
 		}
-		for (Long memberId : htEncryptedKeyVersions.keySet()) {
+		for (String memberId : htEncryptedKeyVersions.keySet()) {
 			try {
 				Agent agent = AgentContext.getCurrent().getAgent(memberId);
 				if (agent instanceof GroupAgent) {
@@ -250,7 +248,7 @@ public class GroupAgent extends Agent {
 	 */
 	public int getSizeRecursive() {
 		int result = 0;
-		for (Long memberId : htEncryptedKeyVersions.keySet()) {
+		for (String memberId : htEncryptedKeyVersions.keySet()) {
 			try {
 				Agent agent = AgentContext.getCurrent().getAgent(memberId);
 				if (agent instanceof GroupAgent) {
@@ -272,8 +270,8 @@ public class GroupAgent extends Agent {
 	 * 
 	 * @return an array with the ids of all direct member agents
 	 */
-	public Long[] getMemberList() {
-		return htEncryptedKeyVersions.keySet().toArray(new Long[0]);
+	public String[] getMemberList() {
+		return htEncryptedKeyVersions.keySet().toArray(new String[0]);
 	}
 
 	/**
@@ -281,9 +279,9 @@ public class GroupAgent extends Agent {
 	 * 
 	 * @return an array with the ids of all member agents
 	 */
-	public Long[] getMemberListRecursive() {
-		ArrayList<Long> result = new ArrayList<Long>(htEncryptedKeyVersions.keySet());
-		for (Long id : result) {
+	public String[] getMemberListRecursive() {
+		ArrayList<String> result = new ArrayList<String>(htEncryptedKeyVersions.keySet());
+		for (String id : result) {
 			try {
 				Agent agent = AgentContext.getCurrent().getAgent(id);
 				if (agent instanceof GroupAgent) {
@@ -294,7 +292,7 @@ public class GroupAgent extends Agent {
 				L2pLogger.logEvent(Event.SERVICE_ERROR, "Can't get agent for id " + id);
 			}
 		}
-		return result.toArray(new Long[0]);
+		return result.toArray(new String[result.size()]);
 	}
 
 	/**
@@ -313,7 +311,7 @@ public class GroupAgent extends Agent {
 	 * @throws L2pSecurityException
 	 */
 	public void removeMember(Agent a) throws L2pSecurityException {
-		removeMember(a.getId());
+		removeMember(a.getSafeId());
 	}
 
 	/**
@@ -323,7 +321,7 @@ public class GroupAgent extends Agent {
 	 * @throws L2pSecurityException
 	 */
 	public void removeMemberRecursive(Agent a) throws L2pSecurityException {
-		removeMemberRecursive(a.getId());
+		removeMemberRecursive(a.getSafeId());
 	}
 
 	/**
@@ -332,7 +330,7 @@ public class GroupAgent extends Agent {
 	 * @param id
 	 * @throws L2pSecurityException
 	 */
-	public void removeMember(long id) throws L2pSecurityException {
+	public void removeMember(String id) throws L2pSecurityException {
 		if (isLocked()) {
 			throw new L2pSecurityException("You have to unlock this agent first!");
 		}
@@ -340,13 +338,13 @@ public class GroupAgent extends Agent {
 		htEncryptedKeyVersions.remove(id);
 	}
 
-	public void removeMemberRecursive(long id) throws L2pSecurityException {
+	public void removeMemberRecursive(String id) throws L2pSecurityException {
 		if (isLocked()) {
 			throw new L2pSecurityException("You have to unlock this agent first!");
 		}
 
 		htEncryptedKeyVersions.remove(id);
-		for (Long memberId : htEncryptedKeyVersions.keySet()) {
+		for (String memberId : htEncryptedKeyVersions.keySet()) {
 			try {
 				Agent agent = AgentContext.getCurrent().getAgent(memberId);
 				if (agent instanceof GroupAgent) {
@@ -371,13 +369,13 @@ public class GroupAgent extends Agent {
 		try {
 			String keyList = "";
 
-			for (Long id : htEncryptedKeyVersions.keySet()) {
+			for (String id : htEncryptedKeyVersions.keySet()) {
 				keyList += "\t\t<keyentry forAgent=\"" + id + "\" encoding=\"base64\">"
 						+ Base64.getEncoder().encodeToString(htEncryptedKeyVersions.get(id)) + "</keyentry>\n";
 			}
 
-			StringBuffer result = new StringBuffer("<las2peer:agent type=\"group\">\n" + "\t<id>" + getId() + "</id>\n"
-					+ "\t<publickey encoding=\"base64\">" + SerializeTools.serializeToBase64(getPublicKey())
+			StringBuffer result = new StringBuffer("<las2peer:agent type=\"group\">\n" + "\t<id>" + getSafeId()
+					+ "</id>\n" + "\t<publickey encoding=\"base64\">" + SerializeTools.serializeToBase64(getPublicKey())
 					+ "</publickey>\n" + "\t<privatekey encoding=\"base64\" encrypted=\""
 					+ CryptoTools.getSymmetricAlgorithm() + "\">" + getEncodedPrivate() + "</privatekey>\n"
 					+ "\t<unlockKeys method=\"" + CryptoTools.getAsymmetricAlgorithm() + "\">\n" + keyList
@@ -420,13 +418,16 @@ public class GroupAgent extends Agent {
 		try {
 			// read id field from XML
 			Element elId = XmlTools.getSingularElement(root, "id");
-			long id = Long.parseLong(elId.getTextContent());
+			String id = elId.getTextContent();
 			// read public key from XML
 			Element pubKey = XmlTools.getSingularElement(root, "publickey");
 			if (!pubKey.getAttribute("encoding").equals("base64")) {
 				throw new MalformedXMLException("base64 encoding expected");
 			}
 			PublicKey publicKey = (PublicKey) SerializeTools.deserializeBase64(pubKey.getTextContent());
+			if (!id.equalsIgnoreCase(CryptoTools.publicKeyToSHA512(publicKey))) {
+				throw new MalformedXMLException("id does not match with public key");
+			}
 			// read private key from XML
 			Element privKey = XmlTools.getSingularElement(root, "privatekey");
 			if (!privKey.getAttribute("encrypted").equals(CryptoTools.getSymmetricAlgorithm())) {
@@ -438,7 +439,7 @@ public class GroupAgent extends Agent {
 			if (!encryptedKeys.getAttribute("method").equals(CryptoTools.getAsymmetricAlgorithm())) {
 				throw new MalformedXMLException("base64 encoding expected");
 			}
-			Hashtable<Long, byte[]> htMemberKeys = new Hashtable<Long, byte[]>();
+			Hashtable<String, byte[]> htMemberKeys = new Hashtable<>();
 			NodeList enGroups = encryptedKeys.getElementsByTagName("keyentry");
 			for (int n = 0; n < enGroups.getLength(); n++) {
 				org.w3c.dom.Node node = enGroups.item(n);
@@ -455,11 +456,11 @@ public class GroupAgent extends Agent {
 					throw new MalformedXMLException("base64 encoding expected");
 				}
 
-				long agentId = Long.parseLong(elKey.getAttribute("forAgent"));
+				String agentId = elKey.getAttribute("forAgent");
 				byte[] content = Base64.getDecoder().decode(elKey.getTextContent());
 				htMemberKeys.put(agentId, content);
 			}
-			GroupAgent result = new GroupAgent(id, publicKey, encPrivate, htMemberKeys);
+			GroupAgent result = new GroupAgent(publicKey, encPrivate, htMemberKeys);
 
 			// read and set optional fields
 			Element groupname = XmlTools.getOptionalElement(root, "groupname");
@@ -490,8 +491,7 @@ public class GroupAgent extends Agent {
 	 */
 	public static GroupAgent createGroupAgent(Agent[] members)
 			throws L2pSecurityException, CryptoException, SerializationException {
-		Random r = new Random();
-		return new GroupAgent(r.nextLong(), CryptoTools.generateKeyPair(), CryptoTools.generateSymmetricKey(), members);
+		return new GroupAgent(CryptoTools.generateKeyPair(), CryptoTools.generateSymmetricKey(), members);
 	}
 
 	@Override
@@ -521,7 +521,7 @@ public class GroupAgent extends Agent {
 					+ content.getClass());
 		}
 		// send message content to each member of this group
-		for (Long memberId : getMemberList()) {
+		for (String memberId : getMemberList()) {
 			Agent member = null;
 			try {
 				member = getRunningAtNode().getAgent(memberId);
