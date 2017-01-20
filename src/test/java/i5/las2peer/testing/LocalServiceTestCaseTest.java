@@ -3,34 +3,41 @@ package i5.las2peer.testing;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.io.IOException;
-
+import org.junit.Assert;
 import org.junit.Test;
 
 import i5.las2peer.api.Service;
-import i5.las2peer.execution.NoSuchServiceException;
-import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.security.Agent;
 
 public class LocalServiceTestCaseTest extends LocalServiceTestCase {
 
 	@Test
-	public void test() throws NoSuchServiceException {
-		assertEquals(TestService.class, getServiceClass());
-		assertEquals(TestService.class.getName(), getMyAgent().getServiceNameVersion().getName());
+	public void test() {
+		try {
+			assertEquals(TestService.class, getServiceClass());
+			assertEquals(TestService.class.getName(), getMyAgent().getServiceNameVersion().getName());
 
-		assertTrue(getNode().hasAgent(getMyAgent().getSafeId()));
+			assertTrue(getNode().hasAgent(getMyAgent().getSafeId()));
 
-		assertEquals(TestService.class, getServiceInstance().getClass());
+			assertEquals(TestService.class, getServiceInstance().getClass());
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail(e.toString());
+		}
 	}
 
 	@Test
-	public void testMockAgents() throws MalformedXMLException, IOException {
-		Agent eve = MockAgentFactory.getEve();
-		getNode().hasAgent(eve.getSafeId());
+	public void testMockAgents() {
+		try {
+			Agent eve = MockAgentFactory.getEve();
+			getNode().hasAgent(eve.getSafeId());
 
-		assertTrue(getNode().hasAgent(MockAgentFactory.getAdam().getSafeId()));
-		assertTrue(getNode().hasAgent(MockAgentFactory.getAbel().getSafeId()));
+			assertTrue(getNode().hasAgent(MockAgentFactory.getAdam().getSafeId()));
+			assertTrue(getNode().hasAgent(MockAgentFactory.getAbel().getSafeId()));
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail(e.toString());
+		}
 	}
 
 	@Override
