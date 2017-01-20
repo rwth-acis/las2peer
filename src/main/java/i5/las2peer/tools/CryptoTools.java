@@ -136,6 +136,9 @@ public class CryptoTools {
 	 * @throws CryptoException If the selected algorithm does not exist or an issue with the given key occurs.
 	 */
 	public static SecretKey generateKeyForPassphrase(String passphrase, byte[] salt) throws CryptoException {
+		if (passphrase == null || passphrase.isEmpty()) {
+			throw new CryptoException("Null or empty String as passphrase given");
+		}
 		try {
 			PBEKeySpec password = new PBEKeySpec(passphrase.toCharArray(), salt, 1000, 128);
 			SecretKeyFactory factory = SecretKeyFactory.getInstance(keyFactoryName);
