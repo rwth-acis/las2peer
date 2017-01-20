@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Enumeration;
+import java.util.LinkedList;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -126,6 +127,23 @@ public class LoadedJarLibrary extends LoadedLibrary {
 		}
 
 		return asResult;
+	}
+
+	/**
+	 * Gets a list with all file names from files contained in the given jar package file.
+	 * 
+	 * @return Returns a list of filenames.
+	 */
+	public LinkedList<String> getContainedFiles() {
+		LinkedList<String> result = new LinkedList<>();
+		Enumeration<JarEntry> entries = jfFile.entries();
+		while (entries.hasMoreElements()) {
+			JarEntry entry = entries.nextElement();
+			if (!entry.isDirectory()) {
+				result.add(entry.getName());
+			}
+		}
+		return result;
 	}
 
 	/**

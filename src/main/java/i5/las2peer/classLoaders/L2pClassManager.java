@@ -103,10 +103,14 @@ public class L2pClassManager {
 			return;
 		}
 
+		LibraryIdentifier libId = new LibraryIdentifier(sPackage, version);
 		LoadedLibrary lib = null;
 		for (int i = 0; i < repositories.size() && lib == null; i++) {
 			try {
-				lib = repositories.get(i).findLibrary(new LibraryIdentifier(sPackage, version));
+				lib = repositories.get(i).findLibrary(libId);
+				if (lib != null) {
+					break;
+				}
 			} catch (LibraryNotFoundException e) {
 			}
 		}

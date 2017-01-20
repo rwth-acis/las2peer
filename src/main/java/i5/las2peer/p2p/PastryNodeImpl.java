@@ -27,6 +27,7 @@ import i5.las2peer.api.StorageStoreResultHandler;
 import i5.las2peer.api.exceptions.ArtifactNotFoundException;
 import i5.las2peer.api.exceptions.StorageException;
 import i5.las2peer.classLoaders.L2pClassManager;
+import i5.las2peer.classLoaders.libraries.SharedStorageRepository;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
 import i5.las2peer.logging.L2pLogger;
@@ -280,6 +281,8 @@ public class PastryNodeImpl extends Node {
 		threadpool = Executors.newCachedThreadPool();
 		application = new NodeApplication(this);
 		pastStorage = new SharedStorage(pastryNode, mode, threadpool, storageDir);
+		// add past storage as network repository
+		getBaseClassLoader().addRepository(new SharedStorageRepository(this));
 	}
 
 	/**
