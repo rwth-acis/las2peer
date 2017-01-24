@@ -6,9 +6,9 @@ import i5.las2peer.classLoaders.UnresolvedDependenciesException;
 import i5.las2peer.classLoaders.helpers.LibraryDependency;
 import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
 import i5.las2peer.logging.L2pLogger;
+import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.persistency.Envelope;
 import i5.las2peer.persistency.MalformedXMLException;
-import i5.las2peer.persistency.NodeStorageInterface;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.SerializationException;
@@ -17,26 +17,27 @@ public class SharedStorageRepository implements Repository {
 
 	private static final L2pLogger logger = L2pLogger.getInstance(SharedStorageRepository.class);
 
-	private static final String LIBRARY_PREFIX = "network-lib_";
-	private static final String FILE_INFIX = "_file_";
-	private static final long FETCH_LIB_TIMEOUT = 30000;
+	private static final String SERVICE_PACKAGE_PREFIX = "las2peer-service-package-";
+	private static final String SERVICE_VERSIONS_PREFIX = "las2peer-service-versions-";
 
-	private final NodeStorageInterface storage;
+	private static final long FETCH_TIMEOUT = 30000;
+
+	private final PastryNodeImpl node;
 
 	public static String getLibraryEnvelopeIdentifier(LibraryIdentifier libId) {
 		return getLibraryEnvelopeIdentifier(libId.toString());
 	}
 
-	private static String getLibraryEnvelopeIdentifier(String libName) {
-		return LIBRARY_PREFIX + libName;
+	private static String getLibraryEnvelopeIdentifier(String libId) {
+		return SERVICE_PACKAGE_PREFIX + libId;
 	}
 
-	public static String getFileEnvelopeIdentifier(LibraryIdentifier libId, String filename) {
-		return getLibraryEnvelopeIdentifier(libId) + FILE_INFIX + filename;
+	public static String getLibraryVersionsEnvelopeIdentifier(String libName) {
+		return SERVICE_VERSIONS_PREFIX + libName;
 	}
 
-	public SharedStorageRepository(NodeStorageInterface storage) {
-		this.storage = storage;
+	public SharedStorageRepository(PastryNodeImpl node) {
+		this.node = node;
 	}
 
 	@Override
@@ -45,8 +46,24 @@ public class SharedStorageRepository implements Repository {
 	}
 
 	@Override
-	public LoadedLibrary findLibrary(LibraryIdentifier lib) throws LibraryNotFoundException {
-		return fetchLibraryInformation(lib.toString());
+	public LoadedLibrary findLibrary(LibraryIdentifier libId) throws LibraryNotFoundException {
+		return fetchLibraryInformation(libId.toString());
+	}
+
+	private LoadedLibrary fetchLibraryInformation(String libId) throws LibraryNotFoundException {
+		try {
+			String libEnvId = getLibraryEnvelopeIdentifier(libId);
+			Envelope fetched = node.fetchEnvelope(libEnvId, FETCH_TIMEOUT);
+			String xmlStr = (String) fetched.getContent();
+			return LoadedNetworkLibrary.createFromXml(node, xmlStr);
+		} catch (StorageException e) {
+			throw new LibraryNotFoundException("Could not fetch library '" + libId + "' information from network", e);
+		} catch (CryptoException | L2pSecurityException | SerializationException e) {
+			throw new LibraryNotFoundException(
+					"Could not read library '" + libId + "' information from network envelope", e);
+		} catch (MalformedXMLException e) {
+			throw new LibraryNotFoundException("Could not read library '" + libId + "' xml representation", e);
+		}
 	}
 
 	@Override
@@ -66,22 +83,6 @@ public class SharedStorageRepository implements Repository {
 						+ idMin.toString() + "' as fallback");
 				return findLibrary(idMin);
 			}
-		}
-	}
-
-	private LoadedLibrary fetchLibraryInformation(String libName) throws LibraryNotFoundException {
-		try {
-			String libEnvId = getLibraryEnvelopeIdentifier(libName);
-			Envelope fetched = storage.fetchEnvelope(libEnvId, FETCH_LIB_TIMEOUT);
-			String xmlStr = (String) fetched.getContent();
-			return LoadedNetworkLibrary.createFromXml(storage, xmlStr);
-		} catch (StorageException e) {
-			throw new LibraryNotFoundException("Could not fetch library '" + libName + "' information from network", e);
-		} catch (CryptoException | L2pSecurityException | SerializationException e) {
-			throw new LibraryNotFoundException(
-					"Could not read library '" + libName + "' information from network envelope", e);
-		} catch (MalformedXMLException e) {
-			throw new LibraryNotFoundException("Could not read library '" + libName + "' xml representation", e);
 		}
 	}
 

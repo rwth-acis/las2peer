@@ -1,20 +1,29 @@
 package i5.las2peer.tools;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 import java.util.logging.Level;
 
+import i5.las2peer.api.exceptions.ArtifactNotFoundException;
 import i5.las2peer.api.exceptions.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.exceptions.StorageException;
-import i5.las2peer.classLoaders.helpers.LibraryDependency;
-import i5.las2peer.classLoaders.libraries.LoadedJarLibrary;
+import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
 import i5.las2peer.classLoaders.libraries.LoadedNetworkLibrary;
-import i5.las2peer.classLoaders.libraries.ResourceNotFoundException;
 import i5.las2peer.classLoaders.libraries.SharedStorageRepository;
 import i5.las2peer.logging.L2pLogger;
+import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.persistency.Envelope;
 import i5.las2peer.persistency.MalformedXMLException;
-import i5.las2peer.persistency.NodeStorageInterface;
 import i5.las2peer.security.Agent;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.PassphraseAgent;
@@ -29,31 +38,105 @@ public class PackageUploader {
 	 * file. All the files extracted from the jars are signed with the given developers agent to prevent manipulations.
 	 * 
 	 * @param node The node storage, where the files should be uploaded into.
-	 * @param serviceJarFile The service jar that should be uploaded.
-	 * @param developerAgentXMLFile The developers agent, who is responsible for this service.
+	 * @param serviceJarFilename The service jar that should be uploaded.
+	 * @param developerAgentXMLFilename The developers agent, who is responsible for this service.
 	 * @param developerPassword The password for the developers agent.
 	 * @throws ServicePackageException If an issue occurs with the service jar itself or its dependencies (jars).
 	 */
-	public static void uploadServicePackage(NodeStorageInterface node, String serviceJarFile,
-			String developerAgentXMLFile, String developerPassword) throws ServicePackageException {
+	public static void uploadServicePackage(PastryNodeImpl node, String serviceJarFilename,
+			String developerAgentXMLFilename, String developerPassword) throws ServicePackageException {
 		// early verify the developer agent to avoid needless heavy duty jar parsing
-		Agent devAgent = unlockDeveloperAgent(developerAgentXMLFile, developerPassword);
+		Agent devAgent = unlockDeveloperAgent(developerAgentXMLFilename, developerPassword);
+		JarFile serviceJar = null;
 		try {
-			// XXX better upload or check for dependencies before uploading actual service jar?
-			// publish service jar first
-			LoadedNetworkLibrary netLib = publishLibrary(serviceJarFile, node, devAgent);
-			// upload all dependencies
-			String serviceJarDirectory = new File(serviceJarFile).getParent();
-			for (LibraryDependency dependency : netLib.getDependencies()) {
-				// XXX what if max version of dependency jar not found?
-				String depJarFilename = serviceJarDirectory + File.separator + dependency.getName() + "-"
-						+ dependency.getMax() + ".jar";
-				publishLibrary(depJarFilename, node, devAgent);
+			long uploadStart = System.currentTimeMillis();
+			serviceJar = new JarFile(serviceJarFilename);
+			// read general service information from jar manifest
+			Manifest manifest = serviceJar.getManifest();
+			if (manifest == null) {
+				throw new ServicePackageException("Service jar package contains no manifest file");
 			}
+			String serviceName = manifest.getMainAttributes().getValue("las2peer-service-name");
+			String serviceVersion = manifest.getMainAttributes().getValue("las2peer-service-version");
+			if (serviceName == null) {
+				throw new ServicePackageException(
+						"No service name value in manifest file. Please specify 'las2peer-service-name'");
+			} else if (serviceVersion == null) {
+				throw new ServicePackageException(
+						"No service version value in manifest file. Please specify 'las2peer-service-version'");
+			}
+			LibraryIdentifier libId = new LibraryIdentifier(serviceName, serviceVersion);
+			// read files from jar and generate hashes
+			HashMap<String, byte[]> depHashes = new HashMap<>();
+			HashMap<String, byte[]> jarFiles = new HashMap<>();
+			Enumeration<JarEntry> jarEntries = serviceJar.entries();
+			while (jarEntries.hasMoreElements()) {
+				JarEntry entry = jarEntries.nextElement();
+				if (!entry.isDirectory()) {
+					byte[] bytes = SimpleTools.toByteArray(serviceJar.getInputStream(entry));
+					byte[] hash = CryptoTools.getSecureHash(bytes);
+					String filename = entry.getName();
+					depHashes.put(filename, hash);
+					jarFiles.put(filename, bytes);
+				}
+			}
+			// store metadata envelope for service
+			LoadedNetworkLibrary netLib = new LoadedNetworkLibrary(node, libId, depHashes);
+			// upload network library as XML representation
+			String libEnvId = SharedStorageRepository.getLibraryEnvelopeIdentifier(netLib.getIdentifier());
+			logger.info("publishing library '" + netLib.getIdentifier().toString() + "' to '" + libEnvId + "'");
+			Envelope libEnv = node.createUnencryptedEnvelope(libEnvId, netLib.toXmlString());
+			node.storeEnvelope(libEnv, devAgent);
+			// TODO upload all files async to the network ignore already existing files
+			for (Entry<String, byte[]> entry : jarFiles.entrySet()) {
+				logger.info("publishing file '" + entry.getKey() + "' from jar");
+				node.storeHashedContent(entry.getValue());
+			}
+			// add service version to general service envelope
+			String envVersionId = SharedStorageRepository.getLibraryVersionsEnvelopeIdentifier(serviceName);
+			logger.info("publishing version information to '" + envVersionId + "'");
+			// fetch or create versions envelope
+			Envelope versionEnv = null;
+			try {
+				Envelope storedVersions = node.fetchEnvelope(envVersionId);
+				// add version to list
+				Serializable content = storedVersions.getContent();
+				if (content instanceof ServiceVersionList) {
+					ServiceVersionList versions = (ServiceVersionList) content;
+					versions.add(libId.getVersion().toString());
+					versionEnv = node.createUnencryptedEnvelope(storedVersions, versions);
+				} else {
+					throw new ServicePackageException(
+							"Invalid version envelope expected " + List.class.getCanonicalName()
+									+ " but envelope contains " + content.getClass().getCanonicalName());
+				}
+			} catch (ArtifactNotFoundException e) {
+				ServiceVersionList versions = new ServiceVersionList();
+				versions.add(libId.getVersion().toString());
+				versionEnv = node.createUnencryptedEnvelope(envVersionId, versions);
+			} catch (L2pSecurityException e) {
+				throw new ServicePackageException("Unencrypted content in service versions envelope expected", e);
+			}
+			// store envelope with service version information
+			node.storeEnvelope(versionEnv, devAgent);
+			// TODO wait for all async uploads
+			long uploadTime = System.currentTimeMillis() - uploadStart;
+			System.out.println("Service package '" + serviceJarFilename + "' uploaded in " + uploadTime + " ms");
+		} catch (FileNotFoundException e) {
+			logger.log(Level.SEVERE, "Service package upload failed! " + e.toString());
 		} catch (EnvelopeAlreadyExistsException e) {
 			logger.log(Level.SEVERE,
 					"Service package upload failed! Version is already known in the network. To update increase version number");
-			return;
+		} catch (IOException | CryptoException | StorageException | SerializationException e) {
+			logger.log(Level.SEVERE, "Service package upload failed!", e);
+		} finally {
+			if (serviceJar != null) {
+				try {
+					serviceJar.close();
+				} catch (IOException e) {
+					logger.log(Level.SEVERE, "Exception while closing jar file", e);
+				}
+			}
 		}
 	}
 
@@ -75,38 +158,10 @@ public class PackageUploader {
 		}
 	}
 
-	private static LoadedNetworkLibrary publishLibrary(String jarFilename, NodeStorageInterface node, Agent devAgent)
-			throws ServicePackageException, EnvelopeAlreadyExistsException {
-		try {
-			// read jar as jar library
-			LoadedJarLibrary jarLib = LoadedJarLibrary.createFromJar(jarFilename);
-			// transform jar library into network library
-			LoadedNetworkLibrary netLib = new LoadedNetworkLibrary(node, jarLib.getIdentifier(),
-					jarLib.getDependencies());
-			logger.info("publishing library '" + netLib.getIdentifier().toString() + "'");
-			// upload network library as XML representation
-			String libEnvId = SharedStorageRepository.getLibraryEnvelopeIdentifier(netLib.getIdentifier());
-			String xmlNetLib = netLib.toXmlString();
-			Envelope libEnv = node.createUnencryptedEnvelope(libEnvId, xmlNetLib);
-			node.storeEnvelope(libEnv, devAgent);
-			// upload all files from the jar library
-			for (String filename : jarLib.getContainedFiles()) {
-				byte[] fileRaw = jarLib.getResourceAsBinary(filename);
-				String fileEnvId = SharedStorageRepository.getFileEnvelopeIdentifier(netLib.getIdentifier(), filename);
-				Envelope fileEnv = node.createUnencryptedEnvelope(fileEnvId, fileRaw);
-				try {
-					node.storeEnvelope(fileEnv, devAgent);
-				} catch (EnvelopeAlreadyExistsException e) {
-					logger.info("The file '" + fileEnvId + "' already exists in network and is not republished");
-				}
-			}
-			return netLib;
-		} catch (EnvelopeAlreadyExistsException e) {
-			throw e; // is handled in calling function
-		} catch (IllegalArgumentException | IOException | SerializationException | CryptoException | StorageException
-				| ResourceNotFoundException e) {
-			throw new ServicePackageException("Could not publish network library from jar '" + jarFilename + "'", e);
-		}
+	public static class ServiceVersionList extends LinkedList<String> {
+
+		private static final long serialVersionUID = 1L;
+
 	}
 
 }
