@@ -3,8 +3,8 @@ package i5.las2peer.persistency.pastry;
 import java.util.concurrent.ExecutorService;
 
 import i5.las2peer.api.StorageExceptionHandler;
+import i5.las2peer.persistency.AbstractArtifact;
 import i5.las2peer.persistency.Envelope;
-import i5.las2peer.persistency.NetworkArtifact;
 import i5.las2peer.persistency.StorageArtifactHandler;
 import rice.Continuation;
 import rice.p2p.past.PastContent;
@@ -37,8 +37,8 @@ public class PastFetchContinuation implements Continuation<PastContent, Exceptio
 		dispatcher.execute(new Runnable() {
 			@Override
 			public void run() {
-				if (result instanceof NetworkArtifact) {
-					resultHandler.onReceive((NetworkArtifact) result);
+				if (result instanceof AbstractArtifact) {
+					resultHandler.onReceive((AbstractArtifact) result);
 				} else {
 					receiveException(new IllegalArgumentException(result.getClass().getCanonicalName()
 							+ " is not instance of " + Envelope.class.getCanonicalName()));

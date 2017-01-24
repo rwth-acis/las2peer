@@ -4,6 +4,6 @@ import java.io.Serializable;
 
 public interface StorageArtifactHandler {
 
-	public <T extends Serializable> void onReceive(NetworkArtifact artifact);
+	public <T extends Serializable> void onReceive(AbstractArtifact artifact);
 
 }

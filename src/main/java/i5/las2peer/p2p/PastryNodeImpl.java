@@ -38,6 +38,7 @@ import i5.las2peer.persistency.Envelope;
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.persistency.SharedStorage;
 import i5.las2peer.persistency.SharedStorage.STORAGE_MODE;
+import i5.las2peer.persistency.StorageArtifactHandler;
 import i5.las2peer.security.Agent;
 import i5.las2peer.security.AgentContext;
 import i5.las2peer.security.AgentException;
@@ -773,6 +774,32 @@ public class PastryNodeImpl extends Node {
 	@Override
 	public void removeEnvelope(String identifier) throws ArtifactNotFoundException, StorageException {
 		pastStorage.removeEnvelope(identifier);
+	}
+
+	public void storeHashedContentAsync(byte[] content, StorageStoreResultHandler resultHandler,
+			StorageExceptionHandler exceptionHandler) {
+		pastStorage.storeHashedContentAsync(content, resultHandler, exceptionHandler);
+	}
+
+	public void storeHashedContent(byte[] content) throws StorageException {
+		storeHashedContent(content, HASHED_STORE_TIMEOUT);
+	}
+
+	public void storeHashedContent(byte[] content, long timeoutMs) throws StorageException {
+		pastStorage.storeHashedContent(content, timeoutMs);
+	}
+
+	public void fetchHashedContentAsync(byte[] hash, StorageArtifactHandler artifactHandler,
+			StorageExceptionHandler exceptionHandler) {
+		pastStorage.fetchHashedContentAsync(hash, artifactHandler, exceptionHandler);
+	}
+
+	public byte[] fetchHashedContent(byte[] hash) throws StorageException {
+		return fetchHashedContent(hash, HASHED_FETCH_TIMEOUT);
+	}
+
+	public byte[] fetchHashedContent(byte[] hash, long timeoutMs) throws StorageException {
+		return pastStorage.fetchHashedContent(hash, timeoutMs);
 	}
 
 }
