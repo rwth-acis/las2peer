@@ -224,9 +224,9 @@ public class PastryNodeImpl extends Node {
 	@Override
 	protected void launchSub() throws NodeException {
 		try {
-			setupPastryEnvironment();
-
 			setStatus(NodeStatus.STARTING);
+
+			setupPastryEnvironment();
 
 			NodeIdFactory nidFactory = null;
 			if (nodeIdSeed == null) {
@@ -325,7 +325,7 @@ public class PastryNodeImpl extends Node {
 				System.err.println("Error opening property file " + found + ": " + e.getMessage());
 			}
 		} else {
-			System.out.println("No pastry property file found - using default values");
+			logger.fine("No pastry property file found - using default values");
 		}
 		if (!properties.containsKey("nat_search_policy")) {
 			properties.put("nat_search_policy", "never");
@@ -352,7 +352,7 @@ public class PastryNodeImpl extends Node {
 		}
 		for (String prop : properties.keySet()) {
 			pastryEnvironment.getParameters().setString(prop, properties.get(prop));
-			logger.info("setting: " + prop + ": '" + properties.get(prop) + "'");
+			logger.fine("setting: " + prop + ": '" + properties.get(prop) + "'");
 		}
 	}
 
