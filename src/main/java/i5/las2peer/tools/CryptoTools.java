@@ -9,6 +9,7 @@ import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -40,7 +41,7 @@ import i5.las2peer.persistency.VerificationFailedException;
  */
 public class CryptoTools {
 
-	private static final String DEFAULT_HASH_METHOD = "SHA1";
+	private static final String DEFAULT_HASH_METHOD = "SHA-512";
 	private static String hashMethod = DEFAULT_HASH_METHOD;
 
 	private static String DEFAULT_ASYMMETRIC_ALGORITHM = "RSA";
@@ -94,7 +95,7 @@ public class CryptoTools {
 	 * @return signature method
 	 */
 	public static String getSignatureMethod() {
-		return getHashMethod() + "with" + getAsymmetricAlgorithm();
+		return "SHA1with" + getAsymmetricAlgorithm();
 	}
 
 	/**
@@ -494,12 +495,22 @@ public class CryptoTools {
 		}
 	}
 
+	public static byte[] getSecureHash(byte[] data) throws CryptoException {
+		try {
+			MessageDigest digest = MessageDigest.getInstance(getHashMethod());
+			digest.update(data);
+			return digest.digest();
+		} catch (Exception e) {
+			throw new CryptoException("Failure creating hash!", e);
+		}
+	}
+
 	/*** statics **** */
 	private static KeyGenerator keyGeneratorSymmetric = null;
 	private static KeyPairGenerator keyGeneratorAsymmetric = null;
 
 	/**
-	 * (re) inistialize the key generators
+	 * (re) initialize the key generators
 	 */
 	private static void initialize() {
 		try {
