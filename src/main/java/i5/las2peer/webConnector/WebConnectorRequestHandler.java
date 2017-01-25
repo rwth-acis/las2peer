@@ -654,17 +654,29 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	}
 
 	private void sendResponseHeaders(HttpExchange exchange, int responseCode, long contentLength) throws IOException {
-		// add configured headers
 		Headers responseHeaders = exchange.getResponseHeaders();
+
+		// remove CORSheaders from service
+		responseHeaders.remove("Access-Control-Allow-Origin");
+		responseHeaders.remove("Access-Control-Max-Age");
+		responseHeaders.remove("Access-Control-Allow-Headers");
+		responseHeaders.remove("Access-Control-Allow-Methods");
+
+		// add CORS
 		if (connector.enableCrossOriginResourceSharing) {
 			responseHeaders.add("Access-Control-Allow-Origin", connector.crossOriginResourceDomain);
 			responseHeaders.add("Access-Control-Max-Age", String.valueOf(connector.crossOriginResourceMaxAge));
 			// just reply all requested headers
 			String requestedHeaders = exchange.getRequestHeaders().getFirst("Access-Control-Request-Headers");
 			if (requestedHeaders != null) {
+				if (!requestedHeaders.toLowerCase().contains("authorization")) {
+					if (!requestedHeaders.trim().equals("")) {
+						requestedHeaders += ", ";
+					}
+					requestedHeaders += "Authorization";
+				}
 				responseHeaders.add("Access-Control-Allow-Headers", requestedHeaders);
 			}
-			responseHeaders.add("Access-Control-Allow-Headers", "Authorization");
 			responseHeaders.add("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS");
 		}
 		exchange.sendResponseHeaders(responseCode, contentLength);
