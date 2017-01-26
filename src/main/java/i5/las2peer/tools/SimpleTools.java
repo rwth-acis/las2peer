@@ -1,5 +1,8 @@
 package i5.las2peer.tools;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -96,14 +99,16 @@ public class SimpleTools {
 	 * 
 	 */
 	public static String repeat(String string, int count) {
-		if (string == null)
+		if (string == null) {
 			return null;
-		else if (string.isEmpty() || count <= 0)
+		} else if (string.isEmpty() || count <= 0) {
 			return "";
+		}
 
 		StringBuffer result = new StringBuffer();
-		for (int i = 0; i < count; i++)
+		for (int i = 0; i < count; i++) {
 			result.append(string);
+		}
 
 		return result.toString();
 	}
@@ -117,6 +122,17 @@ public class SimpleTools {
 	 */
 	public static String repeat(Object o, int count) {
 		return repeat(o.toString(), count);
+	}
+
+	public static byte[] toByteArray(InputStream is) throws IOException {
+		ByteArrayOutputStream data = new ByteArrayOutputStream();
+		int nRead;
+		byte[] buffer = new byte[8096];
+		while ((nRead = is.read(buffer, 0, buffer.length)) != -1) {
+			data.write(buffer, 0, nRead);
+		}
+		data.flush();
+		return data.toByteArray();
 	}
 
 }
