@@ -51,7 +51,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	public static final long SEARCH_TIMEOUT = 10000; // 10 seconds
 	private static final int RESPONSE_WAIT_TIMEOUT = 10000; // 10 seconds
 
-	private final L2pLogger logger = L2pLogger.getInstance(NodeApplication.class.getName());
+	private static final L2pLogger logger = L2pLogger.getInstance(NodeApplication.class.getName());
 
 	protected Endpoint endpoint;
 
