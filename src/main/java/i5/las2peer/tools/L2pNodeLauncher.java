@@ -160,6 +160,9 @@ public class L2pNodeLauncher {
 				content = FileContentReader.read(file).split("\n");
 				for (String line : content) {
 					line = line.trim();
+					if (line.isEmpty()) {
+						continue;
+					}
 					String[] split = line.split(";", 2);
 					if (split.length != 2) {
 						printWarning("Ignoring invalid passphrase line (" + line + ") in '" + filename + "'");
