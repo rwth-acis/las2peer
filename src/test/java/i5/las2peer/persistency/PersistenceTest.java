@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import i5.las2peer.p2p.PastryNodeImpl;
@@ -63,6 +64,7 @@ public class PersistenceTest {
 		}
 	}
 
+	@Ignore
 	@Test
 	public void testVersionSafety() {
 		try {
