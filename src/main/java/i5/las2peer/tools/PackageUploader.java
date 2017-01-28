@@ -32,6 +32,12 @@ public class PackageUploader {
 
 	private static L2pLogger logger = L2pLogger.getInstance(PackageUploader.class);
 
+	public static class ServiceVersionList extends LinkedList<String> {
+
+		private static final long serialVersionUID = 1L;
+
+	}
+
 	/**
 	 * Uploads the complete service (jar) and all its dependencies into the given nodes shared storage to be used for
 	 * network class loading. The dependencies are read from the "Import-Library" statement inside the jars manifest
@@ -58,14 +64,6 @@ public class PackageUploader {
 			}
 			String serviceName = manifest.getMainAttributes().getValue("las2peer-service-name");
 			String serviceVersion = manifest.getMainAttributes().getValue("las2peer-service-version");
-			if (serviceName == null) {
-				throw new ServicePackageException(
-						"No service name value in manifest file. Please specify 'las2peer-service-name'");
-			} else if (serviceVersion == null) {
-				throw new ServicePackageException(
-						"No service version value in manifest file. Please specify 'las2peer-service-version'");
-			}
-			LibraryIdentifier libId = new LibraryIdentifier(serviceName, serviceVersion);
 			// read files from jar and generate hashes
 			HashMap<String, byte[]> depHashes = new HashMap<>();
 			HashMap<String, byte[]> jarFiles = new HashMap<>();
@@ -80,46 +78,7 @@ public class PackageUploader {
 					jarFiles.put(filename, bytes);
 				}
 			}
-			// store metadata envelope for service
-			LoadedNetworkLibrary netLib = new LoadedNetworkLibrary(node, libId, depHashes);
-			// upload network library as XML representation
-			String libEnvId = SharedStorageRepository.getLibraryEnvelopeIdentifier(netLib.getIdentifier());
-			logger.info("publishing library '" + netLib.getIdentifier().toString() + "' to '" + libEnvId + "'");
-			Envelope libEnv = node.createUnencryptedEnvelope(libEnvId, netLib.toXmlString());
-			node.storeEnvelope(libEnv, devAgent);
-			// TODO upload all files async to the network ignore already existing files
-			for (Entry<String, byte[]> entry : jarFiles.entrySet()) {
-				logger.info("publishing file '" + entry.getKey() + "' from jar");
-				node.storeHashedContent(entry.getValue());
-			}
-			// add service version to general service envelope
-			String envVersionId = SharedStorageRepository.getLibraryVersionsEnvelopeIdentifier(serviceName);
-			logger.info("publishing version information to '" + envVersionId + "'");
-			// fetch or create versions envelope
-			Envelope versionEnv = null;
-			try {
-				Envelope storedVersions = node.fetchEnvelope(envVersionId);
-				// add version to list
-				Serializable content = storedVersions.getContent();
-				if (content instanceof ServiceVersionList) {
-					ServiceVersionList versions = (ServiceVersionList) content;
-					versions.add(libId.getVersion().toString());
-					versionEnv = node.createUnencryptedEnvelope(storedVersions, versions);
-				} else {
-					throw new ServicePackageException(
-							"Invalid version envelope expected " + List.class.getCanonicalName()
-									+ " but envelope contains " + content.getClass().getCanonicalName());
-				}
-			} catch (ArtifactNotFoundException e) {
-				ServiceVersionList versions = new ServiceVersionList();
-				versions.add(libId.getVersion().toString());
-				versionEnv = node.createUnencryptedEnvelope(envVersionId, versions);
-			} catch (L2pSecurityException e) {
-				throw new ServicePackageException("Unencrypted content in service versions envelope expected", e);
-			}
-			// store envelope with service version information
-			node.storeEnvelope(versionEnv, devAgent);
-			// TODO wait for all async uploads
+			uploadServicePackage(node, serviceName, serviceVersion, depHashes, jarFiles, devAgent);
 			long uploadTime = System.currentTimeMillis() - uploadStart;
 			System.out.println("Service package '" + serviceJarFilename + "' uploaded in " + uploadTime + " ms");
 		} catch (FileNotFoundException e) {
@@ -158,10 +117,57 @@ public class PackageUploader {
 		}
 	}
 
-	public static class ServiceVersionList extends LinkedList<String> {
-
-		private static final long serialVersionUID = 1L;
-
+	public static void uploadServicePackage(PastryNodeImpl node, String serviceName, String serviceVersion,
+			HashMap<String, byte[]> depHashes, HashMap<String, byte[]> jarFiles, Agent devAgent)
+			throws IllegalArgumentException, SerializationException, CryptoException, StorageException,
+			ServicePackageException {
+		if (serviceName == null) {
+			throw new ServicePackageException(
+					"No service name value in manifest file. Please specify 'las2peer-service-name'");
+		} else if (serviceVersion == null) {
+			throw new ServicePackageException(
+					"No service version value in manifest file. Please specify 'las2peer-service-version'");
+		}
+		LibraryIdentifier libId = new LibraryIdentifier(serviceName, serviceVersion);
+		// store metadata envelope for service
+		LoadedNetworkLibrary netLib = new LoadedNetworkLibrary(node, libId, depHashes);
+		// upload network library as XML representation
+		String libEnvId = SharedStorageRepository.getLibraryEnvelopeIdentifier(netLib.getIdentifier());
+		logger.info("publishing library '" + netLib.getIdentifier().toString() + "' to '" + libEnvId + "'");
+		Envelope libEnv = node.createUnencryptedEnvelope(libEnvId, netLib.toXmlString());
+		node.storeEnvelope(libEnv, devAgent);
+		// TODO upload all files async to the network ignore already existing files
+		for (Entry<String, byte[]> entry : jarFiles.entrySet()) {
+			logger.info("publishing file '" + entry.getKey() + "' from jar");
+			node.storeHashedContent(entry.getValue());
+		}
+		// add service version to general service envelope
+		String envVersionId = SharedStorageRepository.getLibraryVersionsEnvelopeIdentifier(serviceName);
+		logger.info("publishing version information to '" + envVersionId + "'");
+		// fetch or create versions envelope
+		Envelope versionEnv = null;
+		try {
+			Envelope storedVersions = node.fetchEnvelope(envVersionId);
+			// add version to list
+			Serializable content = storedVersions.getContent();
+			if (content instanceof ServiceVersionList) {
+				ServiceVersionList versions = (ServiceVersionList) content;
+				versions.add(libId.getVersion().toString());
+				versionEnv = node.createUnencryptedEnvelope(storedVersions, versions);
+			} else {
+				throw new ServicePackageException("Invalid version envelope expected " + List.class.getCanonicalName()
+						+ " but envelope contains " + content.getClass().getCanonicalName());
+			}
+		} catch (ArtifactNotFoundException e) {
+			ServiceVersionList versions = new ServiceVersionList();
+			versions.add(libId.getVersion().toString());
+			versionEnv = node.createUnencryptedEnvelope(envVersionId, versions);
+		} catch (L2pSecurityException e) {
+			throw new ServicePackageException("Unencrypted content in service versions envelope expected", e);
+		}
+		// store envelope with service version information
+		node.storeEnvelope(versionEnv, devAgent);
+		// TODO wait for all async uploads
 	}
 
 }
