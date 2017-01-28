@@ -28,6 +28,7 @@ public class L2pSecurityManager extends SecurityManager {
 			InputStream fromJar = this.getClass().getResourceAsStream("/las2peer.policy");
 			if (fromJar != null) {
 				try {
+					new File("etc").mkdir();
 					Files.copy(fromJar, new File("etc/las2peer.policy").toPath(), new CopyOption[] {});
 				} catch (IOException e) {
 					logger.log(Level.SEVERE, "Problems creating policy file! Sandboxing probably not working!", e);
