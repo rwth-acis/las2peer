@@ -15,7 +15,7 @@ public class HashedArtifactTest {
 	@Test
 	public void testStoreAndFetch() {
 		try {
-			ArrayList<PastryNodeImpl> nodes = TestSuite.launchNetwork(5);
+			ArrayList<PastryNodeImpl> nodes = TestSuite.launchNetwork(SharedStorage.DEFAULT_NUM_OF_REPLICAS + 1);
 			PastryNodeImpl firstNode = nodes.get(0);
 			byte[] testData = new String("This is las2peer!").getBytes(StandardCharsets.UTF_8);
 			byte[] hash = CryptoTools.getSecureHash(testData);
@@ -31,7 +31,7 @@ public class HashedArtifactTest {
 	@Test
 	public void testStoreOverwrite() {
 		try {
-			ArrayList<PastryNodeImpl> nodes = TestSuite.launchNetwork(5);
+			ArrayList<PastryNodeImpl> nodes = TestSuite.launchNetwork(SharedStorage.DEFAULT_NUM_OF_REPLICAS + 1);
 			PastryNodeImpl firstNode = nodes.get(0);
 			byte[] testData = new String("This is las2peer!").getBytes(StandardCharsets.UTF_8);
 			byte[] hash = CryptoTools.getSecureHash(testData);
