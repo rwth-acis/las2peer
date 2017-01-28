@@ -65,10 +65,20 @@ public class PastryNodeImpl extends Node {
 
 	private static final L2pLogger logger = L2pLogger.getInstance(PastryNodeImpl.class);
 
-	private static final int AGENT_GET_TIMEOUT = 10000;
-	private static final int AGENT_STORE_TIMEOUT = 10000;
-	private static final int ARTIFACT_GET_TIMEOUT = 10000;
-	private static final int ARTIFACT_STORE_TIMEOUT = 10000;
+	/**
+	 * The PAST_MESSAGE_TIMEOUT defines when a message in a Past (shared storage) operation is considered lost. This
+	 * means all other timeouts depend on this value.
+	 */
+	private static final int PAST_MESSAGE_TIMEOUT = 60000;
+	// FIXME the timeouts should be PER STORAGE OPERATION and for the complete fetch or store process, as there might
+	// have to be send several messages for a single operation. Their value should be equal to PAST_MESSAGE_TIMEOUT plus
+	// a grace value of a few seconds.
+	private static final int AGENT_GET_TIMEOUT = 300000;
+	private static final int AGENT_STORE_TIMEOUT = 300000;
+	private static final int ARTIFACT_GET_TIMEOUT = 300000;
+	private static final int ARTIFACT_STORE_TIMEOUT = 300000;
+	private static final int HASHED_FETCH_TIMEOUT = 300000;
+	private static final int HASHED_STORE_TIMEOUT = 300000;
 
 	private InetAddress pastryBindAddress = null; // null = detect Internet address
 
@@ -340,7 +350,7 @@ public class PastryNodeImpl extends Node {
 			properties.put("allow_loopback_address", "1");
 		}
 		if (!properties.containsKey("p2p_past_messageTimeout")) {
-			properties.put("p2p_past_messageTimeout", "120000");
+			properties.put("p2p_past_messageTimeout", Integer.toString(PAST_MESSAGE_TIMEOUT));
 		}
 		if (!properties.containsKey("pastry_socket_known_network_address")) {
 			if (!properties.containsKey("pastry_socket_known_network_address_port")) {
