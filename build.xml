@@ -78,7 +78,7 @@
 
 		<ivy:makepom 
 			ivyfile="${ivy.dep.file}" 
-			pomfile="${export}/jars/${ivy.module}.pom" 
+			pomfile="${export.jars}/${ivy.module}.pom" 
 			artifactName="${ivy.module}"
 			artifactPackaging="jar">
 			<mapping conf="default" scope="compile" />
@@ -89,7 +89,7 @@
 			overwrite="true"
 			forcedeliver="true"
 			status="integration">
-			<artifacts pattern="${export}/jars/${ivy.module}.[ext]" />
+			<artifacts pattern="${export.jars}/${ivy.module}.[ext]" />
 		</ivy:publish>
 
 	</target>
@@ -104,7 +104,7 @@
 
 		<ivy:makepom 
 			ivyfile="${ivy.dep.file}" 
-			pomfile="${export}/jars/${ivy.module}.pom" 
+			pomfile="${export.jars}/${ivy.module}.pom" 
 			artifactName="${ivy.module}"
 			artifactPackaging="jar">
 			<mapping conf="default" scope="compile" />
@@ -115,7 +115,7 @@
 			overwrite="true"
 			forcedeliver="true"
 			status="release">
-			<artifacts pattern="${export}/jars/${ivy.module}.[ext]" />
+			<artifacts pattern="${export.jars}/${ivy.module}.[ext]" />
 		</ivy:publish>
 
 	</target>
@@ -189,8 +189,7 @@
 			</mapper>
 		</pathconvert>
 		<jar jarfile="${export.jars}/${ivy.module}.jar">
-			<fileset dir="${tmp.classes}">
-			</fileset>
+			<fileset dir="${tmp.classes}" />
 			<manifest>
 				<attribute name="Class-Path" value="${classpath.name}" />
 			</manifest>
@@ -198,12 +197,12 @@
 	</target>
 
 	<target name="javadoc" depends="init_doc" description="--> generate Javadoc for this project" >
-        <javadoc destdir="${export.doc}"
+		<javadoc destdir="${export.doc}"
 			author="true"
 			version="true"
-            use="true"
-			windowtitle="las2peer RESTMapper Documentation"
-            failonerror="yes"
+			use="true"
+			windowtitle="${ant.project.name} Documentation"
+			failonerror="yes"
             encoding="utf-8"
             classpath="${tmp.classes}"
             classpathref="libraries"
