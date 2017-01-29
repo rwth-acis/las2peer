@@ -70,7 +70,7 @@ public class CommandPrompt {
 	 * storage for local variables (instances)
 	 * 
 	 */
-	private Hashtable<String, Object> htLocals = new Hashtable<String, Object>();
+	private Hashtable<String, Object> htLocals = new Hashtable<>();
 
 	/**
 	 * reader for the input
@@ -176,16 +176,17 @@ public class CommandPrompt {
 
 			for (int i = 0; i < split.length; i++) {
 				if ((split[i].charAt(0) == '"' && split[i].charAt(split[i].length() - 1) == '"')
-						|| (split[i].charAt(0) == '\'' && split[i].charAt(split[i].length() - 1) == '\''))
+						|| (split[i].charAt(0) == '\'' && split[i].charAt(split[i].length() - 1) == '\'')) {
 					result[i] = split[i].substring(1, split[i].length() - 1);
-				else {
+				} else {
 					result[i] = htLocals.get(split[i]);
 					System.out.println("  " + split[i] + ": " + result[i]);
 				}
 			}
 			return result;
-		} else
+		} else {
 			return new String[0];
+		}
 
 	}
 
@@ -202,10 +203,11 @@ public class CommandPrompt {
 		Object[] parameters = getParameters(value);
 
 		String cls;
-		if (value.contains("("))
+		if (value.contains("(")) {
 			cls = value.substring(0, value.indexOf("(")).trim();
-		else
+		} else {
 			cls = value.trim();
+		}
 
 		try {
 			return createInstance(cls, parameters);
@@ -213,8 +215,9 @@ public class CommandPrompt {
 			System.out.println("   not found: " + cls);
 			if (packagePrefix != null && !packagePrefix.isEmpty()) {
 				return createInstance(packagePrefix + "." + cls, parameters);
-			} else
+			} else {
 				throw new ClassNotFoundException("class " + cls + " not found");
+			}
 		}
 	}
 
@@ -229,8 +232,9 @@ public class CommandPrompt {
 	private Object createInstance(String className, Object[] parameters) throws Exception {
 		Class<?> cls = Class.forName(className);
 
-		if (parameters == null || parameters.length == 0)
+		if (parameters == null || parameters.length == 0) {
 			return cls.newInstance();
+		}
 
 		Class<?>[] types = getParameterTypes(parameters);
 
@@ -246,11 +250,13 @@ public class CommandPrompt {
 	 */
 	private Class<?>[] getParameterTypes(Object[] parameters) {
 		Class<?>[] types = new Class<?>[parameters.length];
-		for (int i = 0; i < types.length; i++)
-			if (parameters[i] == null)
+		for (int i = 0; i < types.length; i++) {
+			if (parameters[i] == null) {
 				types[i] = null;
-			else
+			} else {
 				types[i] = parameters[i].getClass();
+			}
+		}
 		return types;
 	}
 
@@ -265,10 +271,11 @@ public class CommandPrompt {
 		Object[] parameters = getParameters(command);
 
 		String cmd;
-		if (command.contains("("))
+		if (command.contains("(")) {
 			cmd = command.substring(0, command.indexOf("(")).trim();
-		else
+		} else {
 			cmd = command;
+		}
 
 		if (cmd.contains(".")) {
 			String firstPart = cmd.substring(0, cmd.lastIndexOf("."));
@@ -280,9 +287,10 @@ public class CommandPrompt {
 				return executeStatic(firstPart, method, parameters);
 			}
 		} else {
-			if (boundTo == null)
+			if (boundTo == null) {
 				System.out.println(ColoredOutput.colorize("  bound is not set -> unable to execute methods on it!",
 						ForegroundColor.Red));
+			}
 
 			return executeMethod(boundTo, cmd, parameters);
 		}
@@ -310,20 +318,23 @@ public class CommandPrompt {
 			int lauf = 0;
 			boolean hasMethodOfName = false;
 			while (m == null && lauf < methods.length) {
-				if (methods[lauf].getName().equals(method))
+				if (methods[lauf].getName().equals(method)) {
 					hasMethodOfName = true;
+				}
 
-				if (methodMatches(methods[lauf], method, parameters))
+				if (methodMatches(methods[lauf], method, parameters)) {
 					m = methods[lauf];
+				}
 				lauf++;
 			}
 
 			if (m == null) {
-				if (hasMethodOfName)
+				if (hasMethodOfName) {
 					throw new NoSuchMethodException("No signature of " + method + " on " + on.getClass().getSimpleName()
 							+ " matches the given parameters");
-				else
+				} else {
 					throw new NoSuchMethodException(on.getClass().getSimpleName() + " has no method '" + method + "'");
+				}
 			}
 
 		}
@@ -332,8 +343,9 @@ public class CommandPrompt {
 			System.out.println(ColoredOutput.colorize("  warning: this method is static - executing anyway",
 					ForegroundColor.Yellow));
 			return executeStatic(on.getClass(), method, parameters);
-		} else
+		} else {
 			return m.invoke(on, parameters);
+		}
 
 	}
 
@@ -347,18 +359,22 @@ public class CommandPrompt {
 	 */
 	private boolean methodMatches(Method method, String methodName, Object[] parameters) {
 
-		if (!method.getName().equals(methodName))
+		if (!method.getName().equals(methodName)) {
 			return false;
+		}
 
 		Class<?>[] types = getParameterTypes(parameters);
 
 		Class<?>[] methodParameterTypes = method.getParameterTypes();
-		if (methodParameterTypes.length != types.length)
+		if (methodParameterTypes.length != types.length) {
 			return false;
+		}
 
-		for (int lauf = 0; lauf < types.length; lauf++)
-			if (types[lauf] == null || !methodParameterTypes[lauf].isAssignableFrom(types[lauf]))
+		for (int lauf = 0; lauf < types.length; lauf++) {
+			if (types[lauf] == null || !methodParameterTypes[lauf].isAssignableFrom(types[lauf])) {
 				return false;
+			}
+		}
 
 		return true;
 
@@ -379,13 +395,15 @@ public class CommandPrompt {
 		Class<?> cls = null;
 
 		try {
-			if (packagePrefix != null && !packagePrefix.isEmpty())
+			if (packagePrefix != null && !packagePrefix.isEmpty()) {
 				cls = Class.forName(packagePrefix + "." + className);
+			}
 		} catch (ClassNotFoundException e) {
 		}
 
-		if (cls == null)
+		if (cls == null) {
 			cls = Class.forName(className);
+		}
 
 		return executeStatic(cls, method, parameters);
 	}
@@ -404,8 +422,9 @@ public class CommandPrompt {
 
 		Method m = cls.getMethod(method, types);
 
-		if (!Modifier.isStatic(m.getModifiers()))
+		if (!Modifier.isStatic(m.getModifiers())) {
 			throw new NoSuchMethodException("the given method is not static!");
+		}
 
 		return m.invoke(null, parameters);
 	}
@@ -419,14 +438,16 @@ public class CommandPrompt {
 	public ReturnStatus handleLine(String line) {
 		lineNumber++;
 
-		if (line.trim().startsWith("//") || line.trim().startsWith("#"))
+		if (line.trim().startsWith("//") || line.trim().startsWith("#")) {
 			return ReturnStatus.OK_NOTHING_TO_DO;
+		}
 
 		ReturnStatus status;
-		if (line.contains("="))
+		if (line.contains("=")) {
 			status = handleAssignment(line);
-		else
+		} else {
 			status = localCommand(line);
+		}
 
 		if (status == ReturnStatus.NOT_KNOWN_PROCEED) {
 			try {
@@ -462,8 +483,9 @@ public class CommandPrompt {
 			}
 		}
 
-		if (status == ReturnStatus.NOT_KNOWN_PROCEED) // TODO this will never be reached
+		if (status == ReturnStatus.NOT_KNOWN_PROCEED) {
 			System.out.println(ColoredOutput.colorize("   -> command '" + line + "' not known", ForegroundColor.Red));
+		}
 
 		return status;
 	}
@@ -503,9 +525,9 @@ public class CommandPrompt {
 	private void printResult(Object result, int level) {
 		String tab = SimpleTools.repeat("\t", level + 1);
 
-		if (result == null)
+		if (result == null) {
 			System.out.println(" /null/");
-		else if (result.getClass().isArray()) {
+		} else if (result.getClass().isArray()) {
 			System.out
 					.println("Array (" + ((Object[]) result).length + ", " + result.getClass().getSimpleName() + ") :");
 
@@ -533,9 +555,10 @@ public class CommandPrompt {
 			if (htLocals.containsKey(split[i])) {
 				System.out.println("   " + split[i] + ": " + htLocals.get(split[i]) + " ("
 						+ htLocals.get(split[i]).getClass().getCanonicalName() + ")");
-			} else
+			} else {
 				System.out.println(
 						ColoredOutput.colorize("  --> local var '" + split[i] + "' not known", ForegroundColor.Red));
+			}
 		}
 		System.out.println("");
 		return status;
@@ -575,14 +598,15 @@ public class CommandPrompt {
 				return ReturnStatus.ERROR_PROCEED;
 			}
 		} else if (split[0].equals("package")) {
-			if (split.length == 1)
+			if (split.length == 1) {
 				packagePrefix = "";
-			else if (split.length > 2) {
+			} else if (split.length > 2) {
 				System.out.println(
 						ColoredOutput.colorize("  -> usage: package [used package prefix]", ForegroundColor.Red));
 				return ReturnStatus.ERROR_PROCEED;
-			} else
+			} else {
 				packagePrefix = split[1].trim();
+			}
 
 			return ReturnStatus.OK_PROCEED;
 		} else if (split[0].equals("list") || split[0].equals("l")) {
@@ -615,8 +639,9 @@ public class CommandPrompt {
 	 */
 	private void printMethodsOfBound(Object object) {
 		ListMethodsContent lmc = new ListMethodsContent(false);
-		for (Method m : object.getClass().getMethods())
+		for (Method m : object.getClass().getMethods()) {
 			lmc.addMethod(m);
+		}
 
 		for (String methodName : lmc.getSortedMethodNames()) {
 			boolean namePrinted = false;
@@ -745,17 +770,20 @@ public class CommandPrompt {
 	public ReturnStatus prompt() {
 		try {
 			System.out.print("" + lineNumber);
-			if (packagePrefix != null && !packagePrefix.isEmpty())
+			if (packagePrefix != null && !packagePrefix.isEmpty()) {
 				System.out.print(" : " + packagePrefix);
-			if (boundTo != null)
+			}
+			if (boundTo != null) {
 				System.out.print(" : " + boundTo);
+			}
 			System.out.print(" > ");
 			String read = input.readLine().trim();
 
-			if (!read.trim().isEmpty())
+			if (!read.trim().isEmpty()) {
 				return handleLine(read);
-			else
+			} else {
 				return ReturnStatus.OK_PROCEED;
+			}
 		} catch (IOException e) {
 			System.err.println("Error reading input command: " + e);
 			return ReturnStatus.ERROR_EXIT;

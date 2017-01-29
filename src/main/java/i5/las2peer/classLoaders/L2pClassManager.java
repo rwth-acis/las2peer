@@ -35,12 +35,12 @@ public class L2pClassManager {
 	/**
 	 * all registered main bundles (i.e. services) (name, version) => BundleClassLoader
 	 */
-	private Hashtable<String, Hashtable<LibraryVersion, BundleClassManager>> registeredLoaders = new Hashtable<String, Hashtable<LibraryVersion, BundleClassManager>>();
+	private Hashtable<String, Hashtable<LibraryVersion, BundleClassManager>> registeredLoaders = new Hashtable<>();
 
 	/**
 	 * all registered libraries name, version => LoadedLibraryCache
 	 */
-	private Hashtable<String, Hashtable<LibraryVersion, LoadedLibraryCache>> registeredLibraries = new Hashtable<String, Hashtable<LibraryVersion, LoadedLibraryCache>>();
+	private Hashtable<String, Hashtable<LibraryVersion, LoadedLibraryCache>> registeredLibraries = new Hashtable<>();
 
 	/**
 	 * create a new L2pClassLoader, which uses the given repository
@@ -60,7 +60,6 @@ public class L2pClassManager {
 	 */
 	public L2pClassManager(Repository[] repositories, ClassLoader platformLoader) {
 		this.platformLoader = platformLoader;
-
 		this.repositories = new ArrayList<>(Arrays.asList(repositories));
 	}
 
@@ -162,7 +161,7 @@ public class L2pClassManager {
 		// register bundle
 		Hashtable<LibraryVersion, BundleClassManager> htBcls = registeredLoaders.get(lib.getIdentifier().getName());
 		if (htBcls == null) {
-			htBcls = new Hashtable<LibraryVersion, BundleClassManager>();
+			htBcls = new Hashtable<>();
 			registeredLoaders.put(lib.getIdentifier().getName(), htBcls);
 		}
 		htBcls.put(lib.getLibraryIdentifier().getVersion(), bcl);
@@ -345,7 +344,7 @@ public class L2pClassManager {
 		Hashtable<LibraryVersion, LoadedLibraryCache> htLoaders = registeredLibraries
 				.get(lib.getIdentifier().getName());
 		if (htLoaders == null) {
-			htLoaders = new Hashtable<LibraryVersion, LoadedLibraryCache>();
+			htLoaders = new Hashtable<>();
 			registeredLibraries.put(lib.getIdentifier().getName(), htLoaders);
 		}
 		htLoaders.put(lib.getIdentifier().getVersion(), loader);
