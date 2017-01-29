@@ -7,7 +7,7 @@
     <dependencies>
         <dependency org="i5" name="las2peer" rev="${ivy.las2peer.version}" changing="true"
             conf="default->compile,master,default" />
-        <dependency org="junit" name="junit" rev="4.11" conf="default->compile,master,default" />
+        <dependency org="junit" name="junit" rev="4.12" conf="default->compile,master,default" />
         <dependency org="io.swagger" name="swagger-jersey2-jaxrs" rev="1.5.10" conf="default->compile,master,default" />
         <dependency org="org.glassfish.jersey.core" name="jersey-server" rev="2.23.2"
             conf="default->compile,master,default" />

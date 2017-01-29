@@ -34,7 +34,7 @@
 	<classpathentry kind="lib" path="lib/jersey-media-multipart-2.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jersey-server-2.23.2.jar"/>
 	<classpathentry kind="lib" path="lib/joda-time-2.2.jar"/>
-	<classpathentry kind="lib" path="lib/junit-4.11.jar"/>
+	<classpathentry kind="lib" path="lib/junit-4.12.jar"/>
 	<classpathentry kind="lib" path="lib/las2peer-0.6-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="lib/mimepull-1.8.jar"/>
 	<classpathentry kind="lib" path="lib/osgi-resource-locator-1.0.1.jar"/>
