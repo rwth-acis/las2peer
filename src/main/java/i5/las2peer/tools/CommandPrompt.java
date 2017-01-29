@@ -779,7 +779,7 @@ public class CommandPrompt {
 			System.out.print(" > ");
 			String read = input.readLine().trim();
 
-			if (!read.trim().isEmpty()) {
+			if (!read.isEmpty()) {
 				return handleLine(read);
 			} else {
 				return ReturnStatus.OK_PROCEED;
