@@ -23,8 +23,8 @@
 	<property name="src.junit" location="src/test/java" />
 
 	<property name="tmp" location="tmp" />
-
 	<property name="tmp.classes" location="${tmp}/classes" />
+	<property name="tmp.bundle" location="${tmp}/bundle" />
 	<property name="tmp.junit" location="${tmp}/test" />
 
 	<property name="junit.report" location="${tmp}/test_reports" />
@@ -65,7 +65,8 @@
 		<ivy:settings>
 			<credentials host="role.dbis.rwth-aachen.de:9911/archiva" realm="Repository internal" />
 		</ivy:settings>
-		<ivy:retrieve type="jar, bundle" />
+		<ivy:retrieve type="jar, bundle" conf="*" pattern="${lib}/[artifact]-[revision].[ext]" />
+		<ivy:retrieve type="jar, bundle" conf="bundle" pattern="${tmp.bundle}/[artifact]-[revision].[ext]" />
 	</target>
 
 	<target name="deploy-snapshot" depends="jar, junit" description="--> deploy snapshot">
@@ -81,7 +82,9 @@
 			pomfile="${export.jars}/${ivy.module}.pom" 
 			artifactName="${ivy.module}"
 			artifactPackaging="jar"
-		/>
+			conf="platform">
+			<mapping conf="platform" scope="compile" />
+		</ivy:makepom>
 
 		<ivy:publish resolver="acis-snapshots"
 			publishivy="false"
@@ -106,7 +109,9 @@
 			pomfile="${export.jars}/${ivy.module}.pom" 
 			artifactName="${ivy.module}"
 			artifactPackaging="jar"
-		/>
+			conf="platform">
+			<mapping conf="platform" scope="compile" />
+		</ivy:makepom>
 
 		<ivy:publish resolver="acis-internal"
 			publishivy="false"
@@ -188,10 +193,12 @@
 		</pathconvert>
 		<jar jarfile="${export.jars}/${ivy.module}.jar">
 			<fileset dir="${tmp.classes}" />
+			<zipgroupfileset dir="${tmp.bundle}" />
 			<manifest>
 				<attribute name="Class-Path" value="${classpath.name}" />
 			</manifest>
 		</jar>
+		<copyfile src="${export.jars}/${ivy.module}.jar" dest="${export.jars}/${ivy.module}-${ivy.las2peer.version}.jar"/>
 	</target>
 
 	<target name="javadoc" depends="init_doc" description="--> generate Javadoc for this project" >
