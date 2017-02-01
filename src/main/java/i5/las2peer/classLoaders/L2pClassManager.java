@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.List;
 
 import i5.las2peer.classLoaders.helpers.LibraryDependency;
 import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
@@ -59,8 +60,18 @@ public class L2pClassManager {
 	 * @param platformLoader
 	 */
 	public L2pClassManager(Repository[] repositories, ClassLoader platformLoader) {
+		this(Arrays.asList(repositories), platformLoader);
+	}
+
+	/**
+	 * create a new L2PClassLoader, which uses the given repositories
+	 * 
+	 * @param repositories
+	 * @param platformLoader
+	 */
+	public L2pClassManager(List<Repository> repositories, ClassLoader platformLoader) {
+		this.repositories = new ArrayList<>(repositories);
 		this.platformLoader = platformLoader;
-		this.repositories = new ArrayList<>(Arrays.asList(repositories));
 	}
 
 	/**
