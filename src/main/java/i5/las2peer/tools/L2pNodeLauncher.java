@@ -171,7 +171,7 @@ public class L2pNodeLauncher {
 					result.put(split[0], split[1]);
 				}
 			} catch (IOException e) {
-				printError("Error reading contents of " + filename + ": " + e);
+				printErrorWithStacktrace("Error reading contents of " + filename, e);
 				logger.printStackTrace(e);
 				bFinished = true;
 			}
@@ -225,13 +225,13 @@ public class L2pNodeLauncher {
 					throw new IllegalArgumentException("Unknown agent type: " + agent.getClass());
 				}
 			} catch (MalformedXMLException e) {
-				printError("unable to deserialize contents of " + xmlFile.toString() + "!");
+				printErrorWithStacktrace("unable to deserialize contents of " + xmlFile.toString() + "!", e);
 			} catch (L2pSecurityException e) {
-				printError("error storing agent from " + xmlFile.toString() + ": " + e);
+				printErrorWithStacktrace("error storing agent from " + xmlFile.toString(), e);
 			} catch (AgentAlreadyRegisteredException e) {
-				printError("agent from " + xmlFile.toString() + " already known at this node!");
+				printErrorWithStacktrace("agent from " + xmlFile.toString() + " already known at this node!", e);
 			} catch (AgentException e) {
-				printError("unable to generate agent " + xmlFile.toString() + "!");
+				printErrorWithStacktrace("unable to generate agent " + xmlFile.toString() + "!", e);
 			}
 		}
 		// wait till all user agents are added from startup directory to unlock group agents
@@ -241,7 +241,7 @@ public class L2pNodeLauncher {
 				try {
 					memberAgent = node.getAgent(memberId);
 				} catch (AgentNotKnownException e) {
-					printError("Can't get agent for group member " + memberId);
+					printErrorWithStacktrace("Can't get agent for group member " + memberId, e);
 					continue;
 				}
 				if ((memberAgent instanceof PassphraseAgent) == false) {
@@ -266,8 +266,8 @@ public class L2pNodeLauncher {
 					printMessage("\t- stored group agent from " + xmlName);
 					break;
 				} catch (Exception e) {
-					printError("Can't unlock group agent " + currentGroupAgent.getId() + " with member "
-							+ memberPassAgent.getId());
+					printErrorWithStacktrace("Can't unlock group agent " + currentGroupAgent.getId() + " with member "
+							+ memberPassAgent.getId(), e);
 					continue;
 				}
 			}
@@ -327,16 +327,8 @@ public class L2pNodeLauncher {
 			Connector connector = loadConnector(connectorClass);
 			connector.start(node);
 			connectors.add(connector);
-
-		} catch (ConnectorException e) {
-			printError(" --> Problems starting the connector: " + e);
-			logger.printStackTrace(e);
-		} catch (ClassNotFoundException e) {
-			logger.printStackTrace(e);
-		} catch (InstantiationException e) {
-			logger.printStackTrace(e);
-		} catch (IllegalAccessException e) {
-			logger.printStackTrace(e);
+		} catch (Exception e) {
+			printErrorWithStacktrace(" --> Problems starting the connector", e);
 		}
 	}
 
@@ -803,6 +795,16 @@ public class L2pNodeLauncher {
 	private static void printError(String message) {
 		message = ColoredOutput.colorize(message, ColoredOutput.ForegroundColor.Red);
 		logger.severe(message);
+	}
+
+	/**
+	 * Prints a (Red) error message to the console including a stack trace.
+	 * 
+	 * @param message
+	 */
+	private static void printErrorWithStacktrace(String message, Throwable throwable) {
+		message = ColoredOutput.colorize(message, ColoredOutput.ForegroundColor.Red);
+		logger.log(Level.SEVERE, message, throwable);
 	}
 
 	/**
