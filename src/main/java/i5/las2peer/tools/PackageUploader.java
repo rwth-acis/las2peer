@@ -84,6 +84,7 @@ public class PackageUploader {
 		} catch (FileNotFoundException e) {
 			logger.log(Level.SEVERE, "Service package upload failed! " + e.toString());
 		} catch (EnvelopeAlreadyExistsException e) {
+			// TODO actually compare old and new service version to determine exact version change required
 			logger.log(Level.SEVERE,
 					"Service package upload failed! Version is already known in the network. To update increase version number");
 		} catch (IOException | CryptoException | StorageException | SerializationException e) {
