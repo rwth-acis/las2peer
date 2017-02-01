@@ -753,7 +753,7 @@ public class L2pNodeLauncher {
 	 * @param cl the class loader to be used with this node
 	 * @param nodeIdSeed the seed to generate node IDs from
 	 */
-	private L2pNodeLauncher(int port, String bootstrap, STORAGE_MODE storageMode, boolean monitoringObserver,
+	private L2pNodeLauncher(Integer port, String bootstrap, STORAGE_MODE storageMode, boolean monitoringObserver,
 			L2pClassManager cl, Long nodeIdSeed) {
 		if (storageMode == null) {
 			if (System.getenv().containsKey("MEM_STORAGE")) {
@@ -763,12 +763,6 @@ public class L2pNodeLauncher {
 			}
 		}
 		node = new PastryNodeImpl(cl, monitoringObserver, port, bootstrap, storageMode, nodeIdSeed);
-
-		commandPrompt = new CommandPrompt(this);
-	}
-
-	private L2pNodeLauncher(L2pClassManager cl, Integer port, String bootstrap) {
-		node = new PastryNodeImpl(cl, port, bootstrap, STORAGE_MODE.MEMORY, null, null);
 		commandPrompt = new CommandPrompt(this);
 	}
 
@@ -999,7 +993,7 @@ public class L2pNodeLauncher {
 		// instantiate launcher
 		L2pClassManager cl = new L2pClassManager(new FileSystemRepository(serviceDirectories, true),
 				L2pNodeLauncher.class.getClassLoader());
-		L2pNodeLauncher launcher = new L2pNodeLauncher(cl, port, boostrap);
+		L2pNodeLauncher launcher = new L2pNodeLauncher(port, boostrap, STORAGE_MODE.MEMORY, false, cl, null);
 		// handle commands
 		try {
 			launcher.start();
