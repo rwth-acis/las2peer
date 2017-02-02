@@ -47,10 +47,8 @@ import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.SerializationException;
 import rice.environment.Environment;
 import rice.p2p.commonapi.NodeHandle;
-import rice.pastry.NodeIdFactory;
 import rice.pastry.PastryNode;
 import rice.pastry.socket.internet.InternetPastryNodeFactory;
-import rice.pastry.standard.RandomNodeIdFactory;
 
 /**
  * A <a href="http://freepastry.org">FreePastry</a> implementation of a las2peer {@link Node}.
@@ -217,14 +215,12 @@ public class PastryNodeImpl extends Node {
 
 			setupPastryEnvironment();
 
-			NodeIdFactory nidFactory = null;
 			if (nodeIdSeed == null) {
-				nidFactory = new RandomNodeIdFactory(pastryEnvironment);
-			} else {
-				nidFactory = new L2pNodeIdFactory(nodeIdSeed);
+				// auto generate node id seed from ip and port
+				nodeIdSeed = Long.valueOf(getBindAddress().getHostAddress().replace(".", "") + getPort());
 			}
-			InternetPastryNodeFactory factory = new InternetPastryNodeFactory(nidFactory, pastryBindAddress, pastryPort,
-					pastryEnvironment, null, null, null);
+			InternetPastryNodeFactory factory = new InternetPastryNodeFactory(new L2pNodeIdFactory(nodeIdSeed),
+					pastryBindAddress, pastryPort, pastryEnvironment, null, null, null);
 			pastryNode = factory.newNode();
 
 			setupPastryApplications();
