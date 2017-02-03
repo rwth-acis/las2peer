@@ -9,8 +9,6 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.UnknownHostException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.List;
@@ -243,28 +241,7 @@ public class PastryNodeImpl extends Node {
 			if (nodeIdSeed == null) {
 				nidFactory = new RandomNodeIdFactory(pastryEnvironment);
 			} else {
-				nidFactory = new NodeIdFactory() {
-					@Override
-					public rice.pastry.Id generateNodeId() {
-						// same method as in rice.pastry.standard.RandomNodeIdFactory but except using nodeIdSeed
-						byte raw[] = new byte[8];
-						long tmp = ++nodeIdSeed;
-						for (int i = 0; i < 8; i++) {
-							raw[i] = (byte) (tmp & 0xff);
-							tmp >>= 8;
-						}
-						MessageDigest md = null;
-						try {
-							md = MessageDigest.getInstance("SHA");
-						} catch (NoSuchAlgorithmException e) {
-							throw new RuntimeException("No SHA support!", e);
-						}
-						md.update(raw);
-						byte[] digest = md.digest();
-						rice.pastry.Id nodeId = rice.pastry.Id.build(digest);
-						return nodeId;
-					}
-				};
+				nidFactory = new L2pNodeIdFactory(nodeIdSeed);
 			}
 			InternetPastryNodeFactory factory = new InternetPastryNodeFactory(nidFactory, pastryBindAddress, pastryPort,
 					pastryEnvironment, null, null, null);
