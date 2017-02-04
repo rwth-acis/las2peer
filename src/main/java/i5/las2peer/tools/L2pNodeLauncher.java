@@ -1007,12 +1007,25 @@ public class L2pNodeLauncher {
 	}
 
 	/**
+	 * Gets the las2peer version as String.
+	 * 
+	 * @return Returns the las2peer version as "major.minor.build" or "DEBUG" if not set.
+	 */
+	public static String getVersion() {
+		Package p = L2pNodeLauncher.class.getPackage();
+		String version = p.getImplementationVersion();
+		if (version != null) {
+			return version;
+		} else {
+			return "DEBUG";
+		}
+	}
+
+	/**
 	 * Prints the las2peer version.
 	 */
 	public static void printVersion() {
-		Package p = L2pNodeLauncher.class.getPackage();
-		String version = p.getImplementationVersion();
-		System.out.println("las2peer version \"" + version + "\"");
+		System.out.println("las2peer version \"" + getVersion() + "\"");
 	}
 
 	/**
