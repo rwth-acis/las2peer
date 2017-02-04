@@ -378,7 +378,7 @@
 			windowtitle="las2peer Documentation"
 			failonerror="yes"
 			encoding="utf8"
-			classpath="${lib.cp}:${tmp.classes}"
+			classpath="${lib.cp}:${tmp.classes}:${lib.junit}"
          >
             <packageset dir="${src.main}" defaultexcludes="yes">
                 <include name="i5/las2peer/**" />
