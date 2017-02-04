@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.Base64;
-import java.util.Random;
 import java.util.regex.Pattern;
 
 import org.w3c.dom.Element;
@@ -35,16 +34,14 @@ public class UserAgent extends PassphraseAgent {
 	/**
 	 * atm constructor for the MockAgent class, just don't know, how agent creation will take place later
 	 * 
-	 * @param id
 	 * @param pair
 	 * @param passphrase
 	 * @param salt
 	 * @throws L2pSecurityException
 	 * @throws CryptoException
 	 */
-	protected UserAgent(long id, KeyPair pair, String passphrase, byte[] salt)
-			throws L2pSecurityException, CryptoException {
-		super(id, pair, passphrase, salt);
+	protected UserAgent(KeyPair pair, String passphrase, byte[] salt) throws L2pSecurityException, CryptoException {
+		super(pair, passphrase, salt);
 
 	}
 
@@ -53,13 +50,12 @@ public class UserAgent extends PassphraseAgent {
 	 * 
 	 * used within {@link #createFromXml}
 	 * 
-	 * @param id
 	 * @param pubKey
 	 * @param encryptedPrivate
 	 * @param salt
 	 */
-	protected UserAgent(long id, PublicKey pubKey, byte[] encryptedPrivate, byte[] salt) {
-		super(id, pubKey, encryptedPrivate, salt);
+	protected UserAgent(PublicKey pubKey, byte[] encryptedPrivate, byte[] salt) {
+		super(pubKey, encryptedPrivate, salt);
 	}
 
 	/**
@@ -146,8 +142,8 @@ public class UserAgent extends PassphraseAgent {
 	@Override
 	public String toXmlString() {
 		try {
-			StringBuffer result = new StringBuffer("<las2peer:agent type=\"user\">\n" + "\t<id>" + getId() + "</id>\n"
-					+ "\t<publickey encoding=\"base64\">" + SerializeTools.serializeToBase64(getPublicKey())
+			StringBuffer result = new StringBuffer("<las2peer:agent type=\"user\">\n" + "\t<id>" + getSafeId()
+					+ "</id>\n" + "\t<publickey encoding=\"base64\">" + SerializeTools.serializeToBase64(getPublicKey())
 					+ "</publickey>\n" + "\t<privatekey encrypted=\"" + CryptoTools.getSymmetricAlgorithm()
 					+ "\" keygen=\"" + CryptoTools.getSymmetricKeygenMethod() + "\">\n"
 					+ "\t\t<salt encoding=\"base64\">" + Base64.getEncoder().encodeToString(getSalt()) + "</salt>\n"
@@ -198,27 +194,8 @@ public class UserAgent extends PassphraseAgent {
 	 * @throws L2pSecurityException
 	 */
 	public static UserAgent createUserAgent(String passphrase) throws CryptoException, L2pSecurityException {
-		Random r = new Random();
-
 		byte[] salt = CryptoTools.generateSalt();
-
-		return new UserAgent(r.nextLong(), CryptoTools.generateKeyPair(), passphrase, salt);
-	}
-
-	/**
-	 * Create a new UserAgent with a given id protected by the given passphrase.
-	 * 
-	 * @param id agent id of new user
-	 * @param passphrase passphrase for the secret key of the new user
-	 * @return a new UserAgent
-	 * @throws CryptoException
-	 * @throws L2pSecurityException
-	 */
-	public static UserAgent createUserAgent(long id, String passphrase) throws CryptoException, L2pSecurityException {
-
-		byte[] salt = CryptoTools.generateSalt();
-
-		return new UserAgent(id, CryptoTools.generateKeyPair(), passphrase, salt);
+		return new UserAgent(CryptoTools.generateKeyPair(), passphrase, salt);
 	}
 
 	/**
@@ -234,13 +211,16 @@ public class UserAgent extends PassphraseAgent {
 		try {
 			// read id field from XML
 			Element elId = XmlTools.getSingularElement(root, "id");
-			long id = Long.parseLong(elId.getTextContent());
+			String id = elId.getTextContent();
 			// read public key from XML
 			Element pubKey = XmlTools.getSingularElement(root, "publickey");
 			if (!pubKey.getAttribute("encoding").equals("base64")) {
 				throw new MalformedXMLException("base64 encoding expected");
 			}
 			PublicKey publicKey = (PublicKey) SerializeTools.deserializeBase64(pubKey.getTextContent());
+			if (!id.equalsIgnoreCase(CryptoTools.publicKeyToSHA512(publicKey))) {
+				throw new MalformedXMLException("id does not match with public key");
+			}
 			// read private key from XML
 			Element privKey = XmlTools.getSingularElement(root, "privatekey");
 			if (!privKey.getAttribute("encrypted").equals(CryptoTools.getSymmetricAlgorithm())) {
@@ -259,7 +239,7 @@ public class UserAgent extends PassphraseAgent {
 			byte[] salt = Base64.getDecoder().decode(elSalt.getTextContent());
 
 			// required fields complete, create result
-			UserAgent result = new UserAgent(id, publicKey, encPrivate, salt);
+			UserAgent result = new UserAgent(publicKey, encPrivate, salt);
 
 			// read and set optional fields
 

@@ -97,7 +97,7 @@ public class UserAgentTest {
 
 		UserAgent b = UserAgent.createFromXml(xml);
 
-		assertEquals(a.getId(), b.getId());
+		assertEquals(a.getSafeId(), b.getSafeId());
 		assertEquals(email, b.getEmail());
 		assertEquals(userData, b.getUserData());
 	}
@@ -172,7 +172,7 @@ public class UserAgentTest {
 			a.setEmail("afduaewd");
 			fail("Exception expected");
 		} catch (UserAgentException e) {
-			//assertTrue(e.getMessage().contains("@"));
+			// assertTrue(e.getMessage().contains("@"));
 		}
 	}
 

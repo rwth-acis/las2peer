@@ -137,6 +137,9 @@ public class CryptoTools {
 	 * @throws CryptoException If the selected algorithm does not exist or an issue with the given key occurs.
 	 */
 	public static SecretKey generateKeyForPassphrase(String passphrase, byte[] salt) throws CryptoException {
+		if (passphrase == null || passphrase.isEmpty()) {
+			throw new CryptoException("Null or empty String as passphrase given");
+		}
 		try {
 			PBEKeySpec password = new PBEKeySpec(passphrase.toCharArray(), salt, 1000, 128);
 			SecretKeyFactory factory = SecretKeyFactory.getInstance(keyFactoryName);
@@ -461,8 +464,8 @@ public class CryptoTools {
 		}
 	}
 
-	public static PublicKey stringToPublicKey(String stored) throws CryptoException {
-		byte[] data = Base64.getDecoder().decode(stored);
+	public static PublicKey stringToPublicKey(String base64) throws CryptoException {
+		byte[] data = Base64.getDecoder().decode(base64);
 		X509EncodedKeySpec spec = new X509EncodedKeySpec(data);
 		try {
 			KeyFactory fact = KeyFactory.getInstance(asymmetricAlgorithm);
@@ -492,6 +495,26 @@ public class CryptoTools {
 			return Base64.getEncoder().encodeToString(spec.getEncoded());
 		} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
 			throw new CryptoException("Could not convert public key into base64 string", e);
+		}
+	}
+
+	public static String publicKeyToSHA512(PublicKey publicKey) {
+		try {
+			// this must be cryptographically safe, SHA1 is not enough!
+			MessageDigest md = MessageDigest.getInstance("SHA-512");
+			md.update(publicKey.getEncoded());
+			byte[] hash = md.digest();
+			StringBuffer hexString = new StringBuffer();
+			for (byte element : hash) {
+				String hex = Integer.toHexString(0xff & element);
+				if (hex.length() == 1) {
+					hexString.append('0');
+				}
+				hexString.append(hex);
+			}
+			return hexString.toString();
+		} catch (NoSuchAlgorithmException e) {
+			throw new RuntimeException(e);
 		}
 	}
 

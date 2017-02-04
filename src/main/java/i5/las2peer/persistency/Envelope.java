@@ -55,19 +55,19 @@ public class Envelope implements Serializable, XmlAble {
 
 	private static final long serialVersionUID = 1L;
 
-	public static String getAgentIdentifier(long agentId) {
-		return "agent-" + Long.toString(agentId);
+	public static String getAgentIdentifier(String agentId) {
+		return "agent-" + agentId;
 	}
 
 	private final String identifier;
 	private final long version;
 	private final HashMap<PublicKey, byte[]> readerKeys;
-	private final HashSet<Long> readerGroupIds;
+	private final HashSet<String> readerGroupIds;
 	private final byte[] rawContent;
 
 	// just for the XML factory method
 	private Envelope(String identifier, long version, HashMap<PublicKey, byte[]> readerKeys,
-			HashSet<Long> readerGroupIds, byte[] rawContent) {
+			HashSet<String> readerGroupIds, byte[] rawContent) {
 		this.identifier = identifier;
 		this.version = version;
 		this.readerKeys = readerKeys;
@@ -138,7 +138,7 @@ public class Envelope implements Serializable, XmlAble {
 	 * @throws CryptoException If an cryptographic issue occurs.
 	 */
 	protected Envelope(String identifier, long version, Serializable content, Collection<?> readers,
-			Set<Long> readerGroups) throws IllegalArgumentException, SerializationException, CryptoException {
+			Set<String> readerGroups) throws IllegalArgumentException, SerializationException, CryptoException {
 		if (identifier == null) {
 			throw new IllegalArgumentException("The identifier must not be null");
 		}
@@ -160,7 +160,7 @@ public class Envelope implements Serializable, XmlAble {
 			for (Object reader : readers) {
 				if (reader instanceof GroupAgent) {
 					Agent agent = (Agent) reader;
-					readerGroupIds.add(agent.getId());
+					readerGroupIds.add(agent.getSafeId());
 				}
 				if (reader instanceof Agent) {
 					Agent agent = (Agent) reader;
@@ -209,7 +209,7 @@ public class Envelope implements Serializable, XmlAble {
 		return readerKeys;
 	}
 
-	public Set<Long> getReaderGroupIds() {
+	public Set<String> getReaderGroupIds() {
 		// return shallow copy to avoid manipulation
 		return new HashSet<>(readerGroupIds);
 	}
@@ -242,7 +242,7 @@ public class Envelope implements Serializable, XmlAble {
 		if (isEncrypted()) {
 			SecretKey decryptedReaderKey = null;
 			// fetch all groups
-			for (Long groupId : readerGroupIds) {
+			for (String groupId : readerGroupIds) {
 				try {
 					Agent agent = agentStorage.getAgent(groupId);
 
@@ -266,7 +266,7 @@ public class Envelope implements Serializable, XmlAble {
 				// no group matched
 				byte[] encryptedReaderKey = readerKeys.get(reader.getPublicKey());
 				if (encryptedReaderKey == null) {
-					throw new CryptoException("Agent (" + reader.getId() + ") has no read permission");
+					throw new CryptoException("Agent (" + reader.getSafeId() + ") has no read permission");
 				}
 				decryptedReaderKey = reader.decryptSymmetricKey(encryptedReaderKey);
 			}
@@ -306,7 +306,7 @@ public class Envelope implements Serializable, XmlAble {
 		}
 		result.append("\t</las2peer:keys>\n");
 		result.append("\t<las2peer:groups>\n");
-		for (Long groupId : readerGroupIds) {
+		for (String groupId : readerGroupIds) {
 			if (groupId != null) {
 				result.append("\t\t<las2peer:group id=\"" + groupId + "\"/>");
 			}
@@ -372,7 +372,7 @@ public class Envelope implements Serializable, XmlAble {
 		}
 		// groups
 		Element groups = XmlTools.getSingularElement(rootElement, "las2peer:groups");
-		HashSet<Long> readerGroupIds = new HashSet<>();
+		HashSet<String> readerGroupIds = new HashSet<>();
 		NodeList enGroups = groups.getChildNodes();
 		for (int n = 0; n < enGroups.getLength(); n++) {
 			Node node = enKeys.item(n);
@@ -387,7 +387,7 @@ public class Envelope implements Serializable, XmlAble {
 			if (!group.hasAttribute("id")) {
 				throw new MalformedXMLException("group id expected");
 			}
-			long groupId = Long.valueOf(group.getAttribute("id"));
+			String groupId = group.getAttribute("id");
 			readerGroupIds.add(groupId);
 		}
 		return new Envelope(identifier, version, readerKeys, readerGroupIds, rawContent);

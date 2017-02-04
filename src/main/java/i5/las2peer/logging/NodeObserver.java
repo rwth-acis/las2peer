@@ -339,7 +339,7 @@ public interface NodeObserver {
 	 * @param destinationAgentId a destination (las2peer) agent of the event (e.g. message receiver)
 	 * @param remarks (optional) additional remarks
 	 */
-	public void log(Long timestamp, Event event, String sourceNode, Long sourceAgentId, String destinationNode,
-			Long destinationAgentId, String remarks);
+	public void log(Long timestamp, Event event, String sourceNode, String sourceAgentId, String destinationNode,
+			String destinationAgentId, String remarks);
 
 }

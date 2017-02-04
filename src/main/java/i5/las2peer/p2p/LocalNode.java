@@ -101,13 +101,13 @@ public class LocalNode extends Node {
 		if (receiver instanceof Agent) {
 			Agent agent = (Agent) receiver;
 			try {
-				htKnownAgents.put(((Agent) receiver).getId(), agent.toXmlString());
+				htKnownAgents.put(((Agent) receiver).getSafeId(), agent.toXmlString());
 			} catch (SerializationException e) {
 				throw new AgentException("Could not register agent reciever", e);
 			}
 		}
 
-		deliverPendingMessages(receiver.getResponsibleForAgentId(), getNodeId());
+		deliverPendingMessages(receiver.getResponsibleForAgentSafeId(), getNodeId());
 	}
 
 	// TODO this code should be here or not?
@@ -224,14 +224,15 @@ public class LocalNode extends Node {
 	}
 
 	@Override
-	public Object[] findRegisteredAgent(long agentId, int hintOfExpectedCount) throws AgentNotKnownException {
+	public Object[] findRegisteredAgent(String agentId, int hintOfExpectedCount) throws AgentNotKnownException {
 		return findAllNodesWithAgent(agentId);
 	}
 
 	@Override
-	public Agent getAgent(long id) throws AgentNotKnownException {
+	public Agent getAgent(String id) throws AgentNotKnownException {
 		Agent anonymous = getAnonymous();
-		if (id == anonymous.getId()) { // TODO use isAnonymous, special ID or Classing for identification
+		if (id.equalsIgnoreCase(anonymous.getSafeId())) { // TODO use isAnonymous, special ID or Classing for
+															// identification
 			return anonymous;
 		} else {
 			synchronized (htKnownAgents) {
@@ -257,8 +258,8 @@ public class LocalNode extends Node {
 				throw new L2pSecurityException("Only unlocked agents may be updated during runtime!");
 			}
 
-			if (htKnownAgents.get(agent.getId()) != null) {
-				throw new AgentAlreadyRegisteredException("Agent " + agent.getId() + " already in storage");
+			if (htKnownAgents.get(agent.getSafeId()) != null) {
+				throw new AgentAlreadyRegisteredException("Agent " + agent.getSafeId() + " already in storage");
 			}
 
 			String agentXml = null;
@@ -268,7 +269,7 @@ public class LocalNode extends Node {
 				throw new AgentException("Serialization failed!", e);
 			}
 
-			htKnownAgents.put(agent.getId(), agentXml);
+			htKnownAgents.put(agent.getSafeId(), agentXml);
 
 			if (agent instanceof UserAgent) {
 				getUserManager().registerUserAgent((UserAgent) agent);
@@ -283,8 +284,8 @@ public class LocalNode extends Node {
 		}
 
 		synchronized (htKnownAgents) {
-			if (htKnownAgents.get(agent.getId()) == null) {
-				throw new AgentNotKnownException(agent.getId());
+			if (htKnownAgents.get(agent.getSafeId()) == null) {
+				throw new AgentNotKnownException(agent.getSafeId());
 			}
 
 			// TODO: verify, that it is the same agent!!! (e.g. the same private key)
@@ -305,7 +306,7 @@ public class LocalNode extends Node {
 				throw new AgentException("Serialization failed!", e);
 			}
 
-			htKnownAgents.put(agent.getId(), agentXml);
+			htKnownAgents.put(agent.getSafeId(), agentXml);
 
 			if (agent instanceof UserAgent) {
 				getUserManager().updateUserAgent((UserAgent) agent);
@@ -387,12 +388,12 @@ public class LocalNode extends Node {
 
 	private static LocalStorage storage = new LocalStorage();
 
-	private static Hashtable<Long, Hashtable<Message, MessageResultListener>> htPendingMessages = new Hashtable<>();
+	private static Hashtable<String, Hashtable<Message, MessageResultListener>> htPendingMessages = new Hashtable<>();
 
 	/**
 	 * Hashtable with string representations of all known agents
 	 */
-	private static Hashtable<Long, String> htKnownAgents = new Hashtable<>();
+	private static Hashtable<String, String> htKnownAgents = new Hashtable<>();
 
 	/**
 	 * register a node for later use
@@ -477,7 +478,7 @@ public class LocalNode extends Node {
 	 * @return id of a node hosting the given agent
 	 * @throws AgentNotKnownException
 	 */
-	public static long findFirstNodeWithAgent(long agentId) throws AgentNotKnownException {
+	public static long findFirstNodeWithAgent(String agentId) throws AgentNotKnownException {
 		synchronized (htLocalNodes) {
 
 			for (long nodeId : htLocalNodes.keySet()) {
@@ -496,7 +497,7 @@ public class LocalNode extends Node {
 	 * @param agentId
 	 * @return array with all ids of nodes hosting the given agent
 	 */
-	public static Long[] findAllNodesWithAgent(long agentId) {
+	public static Long[] findAllNodesWithAgent(String agentId) {
 		synchronized (htLocalNodes) {
 			HashSet<Long> hsResult = new HashSet<>();
 
@@ -554,7 +555,7 @@ public class LocalNode extends Node {
 	 * @param recipientId
 	 * @param nodeId
 	 */
-	protected static void deliverPendingMessages(long recipientId, long nodeId) {
+	protected static void deliverPendingMessages(String recipientId, long nodeId) {
 
 		synchronized (htPendingMessages) {
 			Hashtable<Message, MessageResultListener> pending = htPendingMessages.get(recipientId);
@@ -580,7 +581,7 @@ public class LocalNode extends Node {
 			System.out.println("checking for expired messages");
 			System.out.println("waiting for " + htPendingMessages.size() + " agents ");
 
-			for (long agentId : htPendingMessages.keySet()) {
+			for (String agentId : htPendingMessages.keySet()) {
 				Hashtable<Message, MessageResultListener> agentMessages = htPendingMessages.get(agentId);
 
 				for (Message m : agentMessages.keySet()) {

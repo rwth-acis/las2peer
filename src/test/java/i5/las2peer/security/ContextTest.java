@@ -6,6 +6,7 @@ import static org.junit.Assert.fail;
 
 import java.io.IOException;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import i5.las2peer.p2p.AgentAlreadyRegisteredException;
@@ -20,22 +21,25 @@ import i5.las2peer.tools.SerializationException;
 public class ContextTest {
 
 	// @Test
-	public void testCreation() throws L2pSecurityException, MalformedXMLException, IOException {
-
-		// idea has changes, context agent may be locked!
-
-		LocalNode node = LocalNode.launchNode();
-		UserAgent eve = MockAgentFactory.getEve();
+	public void testCreation() {
 		try {
-			new AgentContext(node, eve);
-			fail("L2pSecurityException expected");
-		} catch (L2pSecurityException e) {
+			// idea has changes, context agent may be locked!
+			LocalNode node = LocalNode.launchNode();
+			UserAgent eve = MockAgentFactory.getEve();
+			try {
+				new AgentContext(node, eve);
+				fail("L2pSecurityException expected");
+			} catch (L2pSecurityException e) {
+			}
+
+			eve.unlockPrivateKey("evespass");
+			AgentContext testee = new AgentContext(node, eve);
+
+			assertSame(eve, testee.getMainAgent());
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail(e.toString());
 		}
-
-		eve.unlockPrivateKey("evespass");
-		AgentContext testee = new AgentContext(node, eve);
-
-		assertSame(eve, testee.getMainAgent());
 	}
 
 	@Test
@@ -64,22 +68,22 @@ public class ContextTest {
 		AgentContext context = new AgentContext(node, eve);
 
 		try {
-			GroupAgent a = context.requestGroupAgent(group1.getId());
-			assertEquals(a.getId(), group1.getId());
+			GroupAgent a = context.requestGroupAgent(group1.getSafeId());
+			assertEquals(a.getSafeId(), group1.getSafeId());
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("exception thrown: " + e);
 		}
 
 		try {
-			context.requestGroupAgent(groupA.getId());
+			context.requestGroupAgent(groupA.getSafeId());
 			fail("exception expected");
 		} catch (Exception e) {
 		}
 
 		try {
-			GroupAgent a = context.requestGroupAgent(groupSuper.getId());
-			assertEquals(a.getId(), groupSuper.getId());
+			GroupAgent a = context.requestGroupAgent(groupSuper.getSafeId());
+			assertEquals(a.getSafeId(), groupSuper.getSafeId());
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("exception thrown: " + e);

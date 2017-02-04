@@ -10,7 +10,7 @@ public class AgentJoinedContent extends L2pScribeContent {
 
 	private static final long serialVersionUID = 311073208550954373L;
 
-	private final long agentId;
+	private final String agentId;
 
 	/**
 	 * create a new instance stating that the agent of the given id has been loaded at the given node
@@ -18,7 +18,7 @@ public class AgentJoinedContent extends L2pScribeContent {
 	 * @param from
 	 * @param agentId
 	 */
-	public AgentJoinedContent(NodeHandle from, long agentId) {
+	public AgentJoinedContent(NodeHandle from, String agentId) {
 		super(from);
 		this.agentId = agentId;
 	}
@@ -28,7 +28,7 @@ public class AgentJoinedContent extends L2pScribeContent {
 	 * 
 	 * @return an agent id
 	 */
-	public long getAgentId() {
+	public String getAgentId() {
 		return agentId;
 	}
 

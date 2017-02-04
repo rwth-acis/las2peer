@@ -432,7 +432,7 @@ public class NodeServiceCache {
 
 		private ServiceAgent agent;
 
-		long serviceAgentId;
+		String serviceAgentId;
 		Object nodeId;
 		long responseTimeMs;
 		private long lastSeen;
@@ -456,7 +456,7 @@ public class NodeServiceCache {
 		 * @param serviceAgentId
 		 * @param nodeId
 		 */
-		public ServiceInstance(ServiceNameVersion service, long serviceAgentId, Object nodeId) {
+		public ServiceInstance(ServiceNameVersion service, String serviceAgentId, Object nodeId) {
 			this.service = service;
 			this.isLocal = false;
 			this.serviceAgentId = serviceAgentId;
@@ -520,7 +520,7 @@ public class NodeServiceCache {
 			return service;
 		}
 
-		public long getServiceAgentId() {
+		public String getServiceAgentId() {
 			return serviceAgentId;
 		}
 

@@ -185,12 +185,12 @@ public class L2pThread extends Thread implements Context {
 	}
 
 	@Override
-	public GroupAgent requestGroupAgent(long groupId) throws AgentNotKnownException, L2pSecurityException {
+	public GroupAgent requestGroupAgent(String groupId) throws AgentNotKnownException, L2pSecurityException {
 		return callerContext.requestGroupAgent(groupId);
 	}
 
 	@Override
-	public Agent requestAgent(long agentId) throws AgentNotKnownException, L2pSecurityException {
+	public Agent requestAgent(String agentId) throws AgentNotKnownException, L2pSecurityException {
 		return callerContext.requestAgent(agentId);
 	}
 
@@ -200,13 +200,14 @@ public class L2pThread extends Thread implements Context {
 	}
 
 	@Override
-	public Envelope getStoredObject(Class<?> cls, String identifier) throws ArtifactNotFoundException, StorageException {
+	public Envelope getStoredObject(Class<?> cls, String identifier)
+			throws ArtifactNotFoundException, StorageException {
 		return null;
 	}
 
 	@Override
-	public Envelope getStoredObject(String className, String identifier) throws ArtifactNotFoundException,
-			StorageException {
+	public Envelope getStoredObject(String className, String identifier)
+			throws ArtifactNotFoundException, StorageException {
 		return null;
 	}
 
@@ -216,12 +217,12 @@ public class L2pThread extends Thread implements Context {
 	}
 
 	@Override
-	public Agent getAgent(long id) throws AgentNotKnownException {
+	public Agent getAgent(String id) throws AgentNotKnownException {
 		return callerContext.getAgent(id);
 	}
 
 	@Override
-	public boolean hasAgent(long id) {
+	public boolean hasAgent(String id) {
 		return callerContext.hasAgent(id);
 	}
 
@@ -231,7 +232,7 @@ public class L2pThread extends Thread implements Context {
 	}
 
 	@Override
-	public boolean hasAccess(long agentId) throws AgentNotKnownException, AgentLockedException {
+	public boolean hasAccess(String agentId) throws AgentNotKnownException, AgentLockedException {
 		return callerContext.hasAccess(agentId);
 	}
 
@@ -270,8 +271,8 @@ public class L2pThread extends Thread implements Context {
 	}
 
 	@Override
-	public Envelope createUnencryptedEnvelope(String identifier, Serializable content) throws IllegalArgumentException,
-			SerializationException, CryptoException {
+	public Envelope createUnencryptedEnvelope(String identifier, Serializable content)
+			throws IllegalArgumentException, SerializationException, CryptoException {
 		return callerContext.createUnencryptedEnvelope(identifier, content);
 	}
 
@@ -304,14 +305,14 @@ public class L2pThread extends Thread implements Context {
 	}
 
 	@Override
-	public Envelope createEnvelope(String identifier, Serializable content) throws IllegalArgumentException,
-			SerializationException, CryptoException {
+	public Envelope createEnvelope(String identifier, Serializable content)
+			throws IllegalArgumentException, SerializationException, CryptoException {
 		return callerContext.createEnvelope(identifier, content);
 	}
 
 	@Override
-	public Envelope createEnvelope(Envelope previousVersion, Serializable content) throws IllegalArgumentException,
-			SerializationException, CryptoException {
+	public Envelope createEnvelope(Envelope previousVersion, Serializable content)
+			throws IllegalArgumentException, SerializationException, CryptoException {
 		return callerContext.createEnvelope(previousVersion, content);
 	}
 

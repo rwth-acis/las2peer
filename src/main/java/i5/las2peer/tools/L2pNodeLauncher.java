@@ -111,12 +111,11 @@ public class L2pNodeLauncher {
 	/**
 	 * Searches for the given agent in the las2peer network.
 	 * 
-	 * @param id
+	 * @param agentId
 	 * @return node handles
 	 * @throws AgentNotKnownException
 	 */
-	public Object[] findAgent(String id) throws AgentNotKnownException {
-		long agentId = Long.parseLong(id);
+	public Object[] findAgent(String agentId) throws AgentNotKnownException {
 		return node.findRegisteredAgent(agentId);
 	}
 
@@ -202,7 +201,7 @@ public class L2pNodeLauncher {
 			throw new IllegalArgumentException(directory + " is not a directory!");
 		}
 		Hashtable<String, String> htPassphrases = loadPassphrases(directory + "/passphrases.txt");
-		Map<Long, String> agentIdToXml = new HashMap<>();
+		Map<String, String> agentIdToXml = new HashMap<>();
 		List<GroupAgent> groupAgents = new LinkedList<>();
 		for (File xmlFile : dir.listFiles(new FilenameFilter() {
 			@Override
@@ -213,7 +212,7 @@ public class L2pNodeLauncher {
 			try {
 				// maybe an agent?
 				Agent agent = Agent.createFromXml(xmlFile);
-				agentIdToXml.put(agent.getId(), xmlFile.getName());
+				agentIdToXml.put(agent.getSafeId(), xmlFile.getName());
 				if (agent instanceof PassphraseAgent) {
 					String passphrase = htPassphrases.get(xmlFile.getName());
 					if (passphrase != null) {
@@ -241,7 +240,7 @@ public class L2pNodeLauncher {
 		}
 		// wait till all user agents are added from startup directory to unlock group agents
 		for (GroupAgent currentGroupAgent : groupAgents) {
-			for (Long memberId : currentGroupAgent.getMemberList()) {
+			for (String memberId : currentGroupAgent.getMemberList()) {
 				Agent memberAgent = null;
 				try {
 					memberAgent = node.getAgent(memberId);
@@ -254,14 +253,14 @@ public class L2pNodeLauncher {
 					continue;
 				}
 				PassphraseAgent memberPassAgent = (PassphraseAgent) memberAgent;
-				String xmlName = agentIdToXml.get(memberPassAgent.getId());
+				String xmlName = agentIdToXml.get(memberPassAgent.getSafeId());
 				if (xmlName == null) {
-					printError("No known xml file for agent " + memberPassAgent.getId());
+					printError("No known xml file for agent " + memberPassAgent.getSafeId());
 					continue;
 				}
 				String passphrase = htPassphrases.get(xmlName);
 				if (passphrase == null) {
-					printError("No known password for agent " + memberPassAgent.getId());
+					printError("No known password for agent " + memberPassAgent.getSafeId());
 					continue;
 				}
 				try {
@@ -271,8 +270,8 @@ public class L2pNodeLauncher {
 					printMessage("\t- stored group agent from " + xmlName);
 					break;
 				} catch (Exception e) {
-					printErrorWithStacktrace("Can't unlock group agent " + currentGroupAgent.getId() + " with member "
-							+ memberPassAgent.getId(), e);
+					printErrorWithStacktrace("Can't unlock group agent " + currentGroupAgent.getSafeId()
+							+ " with member " + memberPassAgent.getSafeId(), e);
 					continue;
 				}
 			}
@@ -401,7 +400,7 @@ public class L2pNodeLauncher {
 	public boolean registerUserAgent(String id, String passphrase) {
 		try {
 			if (id.matches("-?[0-9].*")) {
-				currentUser = (UserAgent) node.getAgent(Long.valueOf(id));
+				currentUser = (UserAgent) node.getAgent(id);
 			} else {
 				currentUser = (UserAgent) node.getAgent(node.getUserManager().getAgentIdByLogin(id));
 			}
@@ -626,7 +625,7 @@ public class L2pNodeLauncher {
 			ServiceAgent serviceAgent;
 			try {
 				// check if the agent is already known to the network
-				serviceAgent = (ServiceAgent) node.getAgent(xmlAgent.getId());
+				serviceAgent = (ServiceAgent) node.getAgent(xmlAgent.getSafeId());
 				serviceAgent.unlockPrivateKey(passphrase);
 			} catch (AgentNotKnownException e) {
 				xmlAgent.unlockPrivateKey(passphrase);

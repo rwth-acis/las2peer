@@ -18,7 +18,7 @@ public class LocalServiceTestCaseTest2 extends LocalServiceTestCase {
 		assertEquals(TestService.class, getServiceClass());
 		assertEquals(TestService.class.getName(), getMyAgent().getServiceNameVersion().getName());
 
-		assertTrue(getNode().hasAgent(getMyAgent().getId()));
+		assertTrue(getNode().hasAgent(getMyAgent().getSafeId()));
 
 		assertEquals(TestService.class, getServiceInstance().getClass());
 
@@ -29,7 +29,7 @@ public class LocalServiceTestCaseTest2 extends LocalServiceTestCase {
 	public Class<? extends Service> getServiceClass() {
 		return TestService.class;
 	}
-	
+
 	@Override
 	public String getServiceVersion() {
 		return "1.0";

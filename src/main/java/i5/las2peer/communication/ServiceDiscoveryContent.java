@@ -23,7 +23,7 @@ public class ServiceDiscoveryContent implements Serializable {
 	/**
 	 * the service agent's id
 	 */
-	private long agentId;
+	private String agentId;
 
 	/**
 	 * the service's name and version
@@ -48,7 +48,7 @@ public class ServiceDiscoveryContent implements Serializable {
 	 * @param agentId
 	 * @param serviceNameVersion
 	 */
-	public ServiceDiscoveryContent(long agentId, ServiceNameVersion serviceNameVersion) {
+	public ServiceDiscoveryContent(String agentId, ServiceNameVersion serviceNameVersion) {
 		this.agentId = agentId;
 		this.request = false;
 		this.service = serviceNameVersion;
@@ -68,7 +68,7 @@ public class ServiceDiscoveryContent implements Serializable {
 	 * 
 	 * @return
 	 */
-	public long getAgentId() {
+	public String getAgentId() {
 		return agentId;
 	}
 
@@ -89,10 +89,11 @@ public class ServiceDiscoveryContent implements Serializable {
 	 * @return
 	 */
 	public boolean accepts(ServiceNameVersion service) {
-		if (this.exact)
+		if (this.exact) {
 			return this.service.equals(service);
-		else
+		} else {
 			return service.fits(this.service);
+		}
 	}
 
 }

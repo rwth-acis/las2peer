@@ -246,7 +246,7 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 						long mergedVersion = Math.max(envelope.getVersion(), inNetwork.getVersion()) + 1;
 						Set<PublicKey> mergedReaders = collisionHandler.mergeReaders(envelope.getReaderKeys().keySet(),
 								inNetwork.getReaderKeys().keySet());
-						Set<Long> mergedGroups = collisionHandler.mergeGroups(envelope.getReaderGroupIds(),
+						Set<String> mergedGroups = collisionHandler.mergeGroups(envelope.getReaderGroupIds(),
 								inNetwork.getReaderGroupIds());
 						Envelope mergedEnv = new Envelope(envelope.getIdentifier(), mergedVersion, mergedContent,
 								mergedReaders, mergedGroups);
