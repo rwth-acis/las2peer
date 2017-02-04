@@ -113,8 +113,8 @@ public interface Context {
 	 * @throws StorageException
 	 */
 	@Deprecated
-	public Envelope getStoredObject(String className, String identifier) throws ArtifactNotFoundException,
-			StorageException;
+	public Envelope getStoredObject(String className, String identifier)
+			throws ArtifactNotFoundException, StorageException;
 
 	/**
 	 * Gives access to the local node.
@@ -186,8 +186,8 @@ public interface Context {
 	public Envelope createEnvelope(Envelope previousVersion, Serializable content, List<Agent> readers)
 			throws IllegalArgumentException, SerializationException, CryptoException;
 
-	public Envelope createUnencryptedEnvelope(String identifier, Serializable content) throws IllegalArgumentException,
-			SerializationException, CryptoException;
+	public Envelope createUnencryptedEnvelope(String identifier, Serializable content)
+			throws IllegalArgumentException, SerializationException, CryptoException;
 
 	public Envelope createUnencryptedEnvelope(Envelope previousVersion, Serializable content)
 			throws IllegalArgumentException, SerializationException, CryptoException;
@@ -202,11 +202,11 @@ public interface Context {
 	public void fetchEnvelopeAsync(String identifier, StorageEnvelopeHandler envelopeHandler,
 			StorageExceptionHandler exceptionHandler);
 
-	public Envelope createEnvelope(String identifier, Serializable content) throws IllegalArgumentException,
-			SerializationException, CryptoException;
+	public Envelope createEnvelope(String identifier, Serializable content)
+			throws IllegalArgumentException, SerializationException, CryptoException;
 
-	public Envelope createEnvelope(Envelope previousVersion, Serializable content) throws IllegalArgumentException,
-			SerializationException, CryptoException;
+	public Envelope createEnvelope(Envelope previousVersion, Serializable content)
+			throws IllegalArgumentException, SerializationException, CryptoException;
 
 	public void storeEnvelope(Envelope envelope) throws StorageException;
 
@@ -246,7 +246,7 @@ public interface Context {
 	 * @throws ServiceNotAvailableException If the service is temporarily not available.
 	 * @throws RemoteServiceException If the remote service throws an exception.
 	 */
-	public Serializable invokeInterally(String service, String method, Serializable... parameters)
+	public Serializable invokeInternally(String service, String method, Serializable... parameters)
 			throws ServiceNotFoundException, ServiceNotAvailableException, RemoteServiceException;
 
 }
