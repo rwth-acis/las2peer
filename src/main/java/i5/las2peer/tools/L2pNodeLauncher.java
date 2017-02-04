@@ -21,6 +21,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import i5.las2peer.api.Connector;
 import i5.las2peer.api.ConnectorException;
@@ -909,6 +911,16 @@ public class L2pNodeLauncher {
 		L2pNodeLauncher launcher = new L2pNodeLauncher(launcherConfiguration.getPort(),
 				launcherConfiguration.getBootstrap(), launcherConfiguration.getStorageMode(),
 				launcherConfiguration.useMonitoringObserver(), cl, launcherConfiguration.getNodeIdSeed());
+		// check special commands
+		if (launcherConfiguration.isPrintHelp()) {
+			launcher.bFinished = true;
+			printHelp();
+			return launcher;
+		} else if (launcherConfiguration.isPrintVersion()) {
+			launcher.bFinished = true;
+			printVersion();
+			return launcher;
+		}
 		// handle commands
 		try {
 			launcher.start();
@@ -932,62 +944,66 @@ public class L2pNodeLauncher {
 	/**
 	 * Prints a help message for command line usage.
 	 * 
-	 * @param message a custom message that will be shown before the help message content
 	 */
-	public static void printHelp(String message) {
-		if (message != null && !message.isEmpty()) {
-			System.out.println(message + "\n\n");
-		}
-
+	public static void printHelp() {
 		System.out.println("las2peer Node Launcher");
-		System.out.println("----------------------\n");
-		System.out.println("Usage:\n");
-
-		System.out.println("Help Message:");
-		System.out.println("\t['--help'|'-h']");
-
-		System.out.println("las2peer version:");
-		System.out.println("\t['--version'|'-v']");
-
-		System.out.println("\nStart Node:");
-		System.out
-				.println("\t{optional: --colored-shell|-c} -p [port] {optional1} {optional2} {method1} {method2} ...");
-
-		System.out.println("\nOptional arguments");
-		System.out.println("\t--colored-shell|-c enables colored output (better readable command line)\n");
-		System.out.println("\t--log-directory|-l [directory] lets you choose the directory for log files (default: "
+		System.out.println("----------------------");
+		System.out.println("Usage:");
+		System.out.println("  java -cp lib/* " + L2pNodeLauncher.class.getCanonicalName() + " ["
+				+ L2pNodeLauncherConfiguration.ARG_HELP + "|" + L2pNodeLauncherConfiguration.ARG_SHORT_HELP + "] ["
+				+ L2pNodeLauncherConfiguration.ARG_VERSION + "|" + L2pNodeLauncherConfiguration.ARG_SHORT_VERSION
+				+ "] [" + L2pNodeLauncherConfiguration.ARG_COLORED_SHELL + "|"
+				+ L2pNodeLauncherConfiguration.ARG_SHORT_COLORED_SHELL
+				+ "] [Node Argument ...] [Launcher Method ...]\n");
+		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_HELP + "|"
+				+ L2pNodeLauncherConfiguration.ARG_SHORT_HELP + "\t\t\t\tprints the help message and exits");
+		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_VERSION + "|"
+				+ L2pNodeLauncherConfiguration.ARG_SHORT_VERSION + "\t\t\t\tprints the version information and exits");
+		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_COLORED_SHELL + "|"
+				+ L2pNodeLauncherConfiguration.ARG_SHORT_COLORED_SHELL
+				+ "\t\t\tenables colored output (better readable command line)");
+		System.out.println("\nNode Arguments:");
+		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_DEBUG + "|"
+				+ L2pNodeLauncherConfiguration.ARG_SHORT_DEBUG
+				+ "\t\t\tstarts the node in debug mode. This means the node will listen and accept connections only\n"
+				+ "\t\t\t\t\tfrom localhost, has a operating system defined port and uses a non persistent storage mode.\n");
+		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_PORT + "|"
+				+ L2pNodeLauncherConfiguration.ARG_SHORT_PORT + " port\t\t\tspecifies the port number of the node\n");
+		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_BOOTSTRAP + "|"
+				+ L2pNodeLauncherConfiguration.ARG_SHORT_BOOTSTRAP
+				+ " address|ip:port,...\trequires a comma seperated list of [address|ip:port] pairs of bootstrap nodes to connect to.");
+		System.out.println("  no bootstrap argument states, that a complete new las2peer network is to start\n");
+		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_LOG_DIRECTORY + "|"
+				+ L2pNodeLauncherConfiguration.ARG_SHORT_LOG_DIRECTORY
+				+ " directory\t\tlets you choose the directory for log files (default: "
 				+ L2pLogger.DEFAULT_LOG_DIRECTORY + ")\n");
+		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_SERVICE_DIRECTORY + "|"
+				+ L2pNodeLauncherConfiguration.ARG_SHORT_SERVICE_DIRECTORY
+				+ " directory\tadds the directory to the service class loader. This argument can occur multiple times.\n");
 		System.out.println(
-				"\t--service-directory|-s [directory] adds the directory you added your services to, to the class loader. This argument can occur multiple times.\n");
-		System.out.println("\t--port|-p [port] specifies the port number of the node\n");
-		System.out.println("\tno bootstrap argument states, that a complete new las2peer network is to start");
-		System.out.println("\tor");
-		System.out.println(
-				"\t--bootstrap|-b [host-list] requires a comma seperated list of [address:ip] pairs of bootstrap nodes to connect to. This argument can occur multiple times.\n");
-		System.out.println("\t--observer|-o starts a monitoring observer at this node\n");
-		System.out.println(
-				"\t--node-id-seed|-n [long] generates the node id by using this seed to provide persistence\n");
-		System.out
-				.println("\t--storage-mode|-m filesystem|memory sets Pastry's storage mode, defaults to filesystem\n");
+				"  " + L2pNodeLauncherConfiguration.ARG_OBSERVER + "|" + L2pNodeLauncherConfiguration.ARG_SHORT_OBSERVER
+						+ "\t\t\t\tstarts a monitoring observer at this node\n");
+		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_NODE_ID_SEED + "|"
+				+ L2pNodeLauncherConfiguration.ARG_SHORT_NODE_ID_SEED
+				+ " long\t\tgenerates the (random) node id by using this seed\n");
+		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_STORAGE_MODE + "|"
+				+ L2pNodeLauncherConfiguration.ARG_SHORT_STORAGE_MODE + " mode\t\tsets Pastry's storage mode\n"
+				+ "\t\t\t\t\tSupported Modes: "
+				+ String.join(", ", Stream.of(STORAGE_MODE.values()).map(Enum::name).collect(Collectors.toList()))
+				+ "\n");
 
+		System.out.println("Launcher Methods:");
 		System.out.println("The following methods can be used in arbitrary order and number:");
 
 		for (Method m : L2pNodeLauncher.class.getMethods()) {
 			if (Modifier.isPublic(m.getModifiers()) && !Modifier.isStatic(m.getModifiers())) {
-				System.out.print("\t- " + m.getName());
+				System.out.print("  " + m.getName());
 				for (int i = 0; i < m.getParameterTypes().length; i++) {
 					System.out.print(" " + m.getParameterTypes()[i].getName() + " ");
 				}
 				System.out.print("\n");
 			}
 		}
-	}
-
-	/**
-	 * Prints a help message for command line usage.
-	 */
-	public static void printHelp() {
-		printHelp(null);
 	}
 
 	/**
