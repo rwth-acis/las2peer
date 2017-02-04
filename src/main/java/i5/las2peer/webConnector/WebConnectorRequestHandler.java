@@ -1,27 +1,5 @@
 package i5.las2peer.webConnector;
 
-import i5.las2peer.execution.NoSuchServiceException;
-import i5.las2peer.execution.NoSuchServiceMethodException;
-import i5.las2peer.execution.ServiceInvocationException;
-import i5.las2peer.p2p.AgentAlreadyRegisteredException;
-import i5.las2peer.p2p.AgentNotKnownException;
-import i5.las2peer.p2p.AliasNotFoundException;
-import i5.las2peer.p2p.Node;
-import i5.las2peer.p2p.ServiceAliasManager.AliasResolveResponse;
-import i5.las2peer.p2p.ServiceNameVersion;
-import i5.las2peer.p2p.ServiceVersion;
-import i5.las2peer.p2p.TimeoutException;
-import i5.las2peer.restMapper.RESTResponse;
-import i5.las2peer.security.L2pSecurityException;
-import i5.las2peer.security.Mediator;
-import i5.las2peer.security.PassphraseAgent;
-import i5.las2peer.security.UserAgent;
-import io.swagger.models.Operation;
-import io.swagger.models.Path;
-import io.swagger.models.Swagger;
-import io.swagger.models.auth.OAuth2Definition;
-import io.swagger.util.Json;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,8 +22,6 @@ import java.util.Map.Entry;
 
 import javax.ws.rs.core.UriBuilder;
 
-import net.minidev.json.JSONObject;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -60,6 +36,29 @@ import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpsExchange;
+
+import i5.las2peer.execution.NoSuchServiceException;
+import i5.las2peer.execution.NoSuchServiceMethodException;
+import i5.las2peer.execution.ServiceInvocationException;
+import i5.las2peer.p2p.AgentAlreadyRegisteredException;
+import i5.las2peer.p2p.AgentNotKnownException;
+import i5.las2peer.p2p.AliasNotFoundException;
+import i5.las2peer.p2p.Node;
+import i5.las2peer.p2p.ServiceAliasManager.AliasResolveResponse;
+import i5.las2peer.p2p.ServiceNameVersion;
+import i5.las2peer.p2p.ServiceVersion;
+import i5.las2peer.p2p.TimeoutException;
+import i5.las2peer.restMapper.RESTResponse;
+import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.security.Mediator;
+import i5.las2peer.security.PassphraseAgent;
+import i5.las2peer.security.UserAgent;
+import io.swagger.models.Operation;
+import io.swagger.models.Path;
+import io.swagger.models.Swagger;
+import io.swagger.models.auth.OAuth2Definition;
+import io.swagger.util.Json;
+import net.minidev.json.JSONObject;
 
 /**
  * A HttpServer RequestHandler for handling requests to the las2peer Web Connector. Each request will be distributed to
@@ -109,11 +108,10 @@ public class WebConnectorRequestHandler implements HttpHandler {
 				&& exchange.getRequestHeaders().getFirst(AUTHENTICATION_FIELD).toLowerCase().startsWith("basic ")) {
 			// basic authentication
 			return authenticateBasic(exchange);
-		} else if (connector.oidcProviderInfos != null
-				&& ((exchange.getRequestURI().getRawQuery() != null && exchange.getRequestURI().getRawQuery()
-						.contains(ACCESS_TOKEN_KEY + "="))
-						|| exchange.getRequestHeaders().containsKey(ACCESS_TOKEN_KEY) || (exchange.getRequestHeaders()
-						.containsKey(AUTHENTICATION_FIELD) && exchange.getRequestHeaders()
+		} else if (connector.oidcProviderInfos != null && ((exchange.getRequestURI().getRawQuery() != null
+				&& exchange.getRequestURI().getRawQuery().contains(ACCESS_TOKEN_KEY + "="))
+				|| exchange.getRequestHeaders().containsKey(ACCESS_TOKEN_KEY)
+				|| (exchange.getRequestHeaders().containsKey(AUTHENTICATION_FIELD) && exchange.getRequestHeaders()
 						.getFirst(AUTHENTICATION_FIELD).toLowerCase().startsWith("bearer ")))) {
 			// openid connect
 			return authenticateOIDC(exchange);
@@ -303,8 +301,8 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			sendUnauthorizedResponse(exchange, null, exchange.getRemoteAddress() + ": user " + username + " not found");
 		} catch (L2pSecurityException e) {
 			connector.logError("passphrase invalid for user " + username, e);
-			sendUnauthorizedResponse(exchange, null, exchange.getRemoteAddress() + ": passphrase invalid for user "
-					+ username);
+			sendUnauthorizedResponse(exchange, null,
+					exchange.getRemoteAddress() + ": passphrase invalid for user " + username);
 		} catch (Exception e) {
 			connector.logError("something went horribly wrong. Check your request for correctness.", e);
 			sendUnauthorizedResponse(exchange, null, exchange.getRemoteAddress()
@@ -335,7 +333,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		}
 
 		// split path
-		ArrayList<String> pathSplit = new ArrayList<String>(Arrays.asList(requestPath.split("/")));
+		ArrayList<String> pathSplit = new ArrayList<>(Arrays.asList(requestPath.split("/")));
 		pathSplit.removeIf(item -> item == null || "".equals(item));
 
 		// resolve service name
@@ -347,8 +345,8 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			serviceAliasLength = response.getNumMatchedParts();
 		} catch (AliasNotFoundException e1) {
 			connector.logError("Could not resolve " + requestPath + " to a service name.", e1);
-			sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND, "Could not resolve " + requestPath
-					+ " to a service name.");
+			sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND,
+					"Could not resolve " + requestPath + " to a service name.");
 			return false;
 		}
 
@@ -580,23 +578,21 @@ public class WebConnectorRequestHandler implements HttpHandler {
 
 	private Serializable callServiceMethod(HttpExchange exchange, Mediator mediator, ServiceNameVersion service,
 			String method, Serializable[] params) {
-
 		Serializable result = null;
 		try {
 			result = mediator.invoke(service.toString(), method, params, connector.onlyLocalServices());
 		} catch (AgentNotKnownException | TimeoutException | NoSuchServiceException | NoSuchServiceMethodException e) {
 			connector.logError("No service found matching " + service + ".", e);
-			sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND, "No service found matching " + service + ".");
+			sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND,
+					"No service found matching " + service + ".");
 		} catch (ServiceInvocationException e) {
 			sendInvocationException(exchange, e);
 		} catch (Exception e) {
 			sendUnexpectedErrorResponse(exchange, "Service method invocation failed", e);
 		}
-
 		if (result == null) {
 			sendUnexpectedErrorResponse(exchange, "Service method invocation failed", null);
 		}
-
 		return result;
 	}
 
