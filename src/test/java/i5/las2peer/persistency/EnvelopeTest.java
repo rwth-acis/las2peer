@@ -50,7 +50,7 @@ public class EnvelopeTest {
 	public void startNetwork() {
 		try {
 			// start test node
-			nodes = TestSuite.launchNetwork(SharedStorage.DEFAULT_NUM_OF_REPLICAS + 1);
+			nodes = TestSuite.launchNetwork(3);
 			System.out.println("Test network started");
 		} catch (Exception e) {
 			e.printStackTrace();

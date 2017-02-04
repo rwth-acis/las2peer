@@ -9,7 +9,7 @@ fi;
 
 if [ $(uname -o) = "Cygwin" ]
 then
-    # we're in cygwin
+	# we're in cygwin
 	export COLOR_DISABLED=1
 	export CLASSPATH="${BASE}lib/*;${BASE}export/jars/las2peer.jar;"
 else

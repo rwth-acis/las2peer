@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import i5.las2peer.p2p.PastryNodeImpl;
@@ -21,7 +22,7 @@ public class PersistenceTest {
 	public void startNetwork() {
 		try {
 			// start test node
-			nodes = TestSuite.launchNetwork(SharedStorage.DEFAULT_NUM_OF_REPLICAS + 1, STORAGE_MODE.FILESYSTEM, true);
+			nodes = TestSuite.launchNetwork(3, STORAGE_MODE.FILESYSTEM, true);
 			System.out.println("Test network started");
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -52,7 +53,7 @@ public class PersistenceTest {
 			stopNetwork();
 			Thread.sleep(500);
 			// restart the network and read data
-			nodes = TestSuite.launchNetwork(SharedStorage.DEFAULT_NUM_OF_REPLICAS + 1, STORAGE_MODE.FILESYSTEM, false);
+			nodes = TestSuite.launchNetwork(3, STORAGE_MODE.FILESYSTEM, false);
 			System.out.println("test network restarted");
 			node1 = nodes.get(0);
 			Envelope after = node1.fetchEnvelope("test");
@@ -63,6 +64,7 @@ public class PersistenceTest {
 		}
 	}
 
+	@Ignore
 	@Test
 	public void testVersionSafety() {
 		try {
