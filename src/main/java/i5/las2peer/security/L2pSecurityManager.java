@@ -24,7 +24,7 @@ public class L2pSecurityManager extends SecurityManager {
 	public L2pSecurityManager() {
 		// check if local policy file exists, otherwise extract it from jar
 		if (!new File("etc/las2peer.policy").exists()) {
-			logger.info("Policy file not found. Extracting default policy file from jar...");
+			logger.info("Sandbox policy file not found. Extracting default policy file from jar...");
 			InputStream fromJar = this.getClass().getResourceAsStream("/las2peer.policy");
 			if (fromJar != null) {
 				try {
@@ -34,7 +34,7 @@ public class L2pSecurityManager extends SecurityManager {
 					logger.printStackTrace(e);
 				}
 			} else {
-				logger.severe("Fatal Error! No local policy file and no file in jar! Sandboxing WILL NOT WORK!");
+				throw new IllegalStateException("No local policy file and no file in jar! Sandboxing WILL NOT WORK!");
 			}
 		}
 		System.setProperty("java.security.policy", "etc/las2peer.policy");

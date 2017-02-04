@@ -94,7 +94,7 @@ public class PastryNodeImpl extends Node {
 	private NodeApplication application;
 	private SharedStorage pastStorage;
 	private STORAGE_MODE mode = STORAGE_MODE.FILESYSTEM;
-	private String storageDir; // null = default choosen by SharedStorage
+	private String storageDir; // null = default chosen by SharedStorage
 	private Long nodeIdSeed;
 
 	/**
