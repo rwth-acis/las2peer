@@ -7,12 +7,14 @@ PIDFILE="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/las2peer-network-scr
 echo "$PIDFILE"
 
 # launch bootstrap node at first
-screen -S 14501 -D -m java -cp "lib/*" i5.las2peer.tools.L2pNodeLauncher --port 14501 --node-id-seed=14501 interactive &
+echo "launching bootstrap node at port 14501"
+screen -S 14501 -D -m java -cp "lib/*" i5.las2peer.tools.L2pNodeLauncher --port 14501 --node-id-seed 14501 interactive &
 # save process id to be used in stop-network.sh later
 echo $! > "$PIDFILE"
 
 # launch other network nodes
-for i in {14502..14510}; do
-  screen -S $i -D -m java -cp "lib/*" i5.las2peer.tools.L2pNodeLauncher --port $i --bootstrap localhost:14501 --node-id-seed=$i interactive &
+for port in {14502..14510}; do
+  echo "launching node at port $port"
+  screen -S $port -D -m java -cp "lib/*" i5.las2peer.tools.L2pNodeLauncher --port $port --bootstrap localhost:14501 --node-id-seed $port interactive &
   echo $! >> "$PIDFILE"
 done
