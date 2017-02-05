@@ -95,7 +95,7 @@ public class CryptoTools {
 	 * @return signature method
 	 */
 	public static String getSignatureMethod() {
-		return "SHA1with" + getAsymmetricAlgorithm();
+		return "SHA256with" + getAsymmetricAlgorithm();
 	}
 
 	/**
