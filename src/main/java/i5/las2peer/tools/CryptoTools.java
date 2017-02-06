@@ -117,6 +117,10 @@ public class CryptoTools {
 		clear();
 	}
 
+	public static int getAsymmetricKeySize() {
+		return asymmetricKeySize;
+	}
+
 	/**
 	 * set the preferred size for symmetric keys
 	 * 
