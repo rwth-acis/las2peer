@@ -8,6 +8,7 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,6 +17,7 @@ import i5.las2peer.classLoaders.UnresolvedDependenciesException;
 import i5.las2peer.classLoaders.helpers.LibraryDependency;
 import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
 import i5.las2peer.classLoaders.helpers.LibraryVersion;
+import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.tools.SimpleTools;
 
 /**
@@ -24,6 +26,8 @@ import i5.las2peer.tools.SimpleTools;
  *
  */
 public class FileSystemRepository implements Repository {
+
+	private static final L2pLogger logger = L2pLogger.getInstance(FileSystemRepository.class);
 
 	private Iterable<String> directories;
 	private boolean recursive = false;
@@ -312,9 +316,14 @@ public class FileSystemRepository implements Repository {
 	private void searchJars(String directory) {
 		File f = new File(directory);
 
-		if (!f.exists() || !f.isDirectory()) {
-			// since this is a search function, stay friendly and don't throw an exception
-			System.err.println("Given path is not a directory: " + f.toString());
+		if (f.exists()) {
+			if (!f.isDirectory()) {
+				// since this is a search function, stay friendly and don't throw an exception
+				logger.log(Level.WARNING, "Given path is not a directory: " + f.toString());
+				return;
+			}
+		} else {
+			logger.log(Level.FINE, "Given path does not exist: " + f.toString());
 			return;
 		}
 
