@@ -26,7 +26,6 @@ import i5.las2peer.api.exceptions.ArtifactNotFoundException;
 import i5.las2peer.api.exceptions.StorageException;
 import i5.las2peer.classLoaders.L2pClassManager;
 import i5.las2peer.classLoaders.libraries.FileSystemRepository;
-import i5.las2peer.classLoaders.libraries.Repository;
 import i5.las2peer.communication.ListMethodsContent;
 import i5.las2peer.communication.Message;
 import i5.las2peer.execution.L2pServiceException;
@@ -945,15 +944,17 @@ public class L2pNodeLauncher {
 				printWarning("couldn't use '" + sLogDir + "' as log directory." + ex);
 			}
 		}
-		Repository[] repositories = new Repository[0]; // default only network class loading
-		if (serviceDirectories != null) {
-			repositories = new Repository[] { new FileSystemRepository(serviceDirectories, true) };
+		if (serviceDirectories == null) {
+			ArrayList<String> directories = new ArrayList<>();
+			directories.add(DEFAULT_SERVICE_DIRECTORY);
+			serviceDirectories = directories;
 		}
 		if (commands == null) {
 			commands = new ArrayList<>();
 		}
 		// instantiate launcher
-		L2pClassManager cl = new L2pClassManager(repositories, L2pNodeLauncher.class.getClassLoader());
+		L2pClassManager cl = new L2pClassManager(new FileSystemRepository(serviceDirectories, true),
+				L2pNodeLauncher.class.getClassLoader());
 		L2pNodeLauncher launcher = new L2pNodeLauncher(port, bootstrap, storageMode, observer, cl, nodeIdSeed);
 		// handle commands
 		try {
@@ -1051,8 +1052,10 @@ public class L2pNodeLauncher {
 		System.out.println("\t--colored-shell|-c enables colored output (better readable command line)\n");
 		System.out.println("\t--log-directory|-l [directory] lets you choose the directory for log files (default: "
 				+ L2pLogger.DEFAULT_LOG_DIRECTORY + ")\n");
-		System.out.println(
-				"\t--service-directory|-s [directory] adds the directory you added your services to, to the class loader. This argument can occur multiple times.\n");
+		System.out
+				.println("\t--service-directory|-s [directory] adds the directory you added your services to (default: "
+						+ DEFAULT_SERVICE_DIRECTORY
+						+ ") to the class loader. This argument can occur multiple times.\n");
 		System.out.println("\t--port|-p [port] specifies the port number of the node\n");
 		System.out.println("\tno bootstrap argument states, that a complete new las2peer network is to start");
 		System.out.println("\tor");
