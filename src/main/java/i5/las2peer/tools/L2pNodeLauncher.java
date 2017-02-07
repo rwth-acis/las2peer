@@ -866,7 +866,7 @@ public class L2pNodeLauncher {
 	 */
 	public static L2pNodeLauncher launchConfiguration(L2pNodeLauncherConfiguration launcherConfiguration)
 			throws CryptoException, NodeException, IllegalArgumentException {
-		System.setSecurityManager(new L2pSecurityManager()); // ENABLES SANDBOXING!!!
+		L2pSecurityManager.enableSandbox(); // ENABLE SANDBOXING!!!
 		// check configuration
 		String logDir = launcherConfiguration.getLogDir();
 		if (logDir != null) {
