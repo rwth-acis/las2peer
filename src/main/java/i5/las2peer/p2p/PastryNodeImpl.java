@@ -45,6 +45,7 @@ import i5.las2peer.security.MessageReceiver;
 import i5.las2peer.security.UserAgent;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.SerializationException;
+import i5.las2peer.tools.SimpleTools;
 import rice.environment.Environment;
 import rice.p2p.commonapi.NodeHandle;
 import rice.pastry.PastryNode;
@@ -225,7 +226,13 @@ public class PastryNodeImpl extends Node {
 
 			setupPastryApplications();
 
-			pastryNode.boot(getBootstrapAddresses());
+			Collection<InetSocketAddress> boot = getBootstrapAddresses();
+			if (boot == null || boot.isEmpty()) {
+				logger.info("Start new las2peer network ...");
+			} else {
+				logger.info("Bootstrapping to " + SimpleTools.join(boot, ", ") + " ...");
+			}
+			pastryNode.boot(boot);
 
 			synchronized (pastryNode) {
 				while (!pastryNode.isReady() && !pastryNode.joinFailed()) {
@@ -239,6 +246,8 @@ public class PastryNodeImpl extends Node {
 					}
 				}
 			}
+
+			logger.info("Node " + pastryNode.getId().toStringFull() + " started");
 
 			setStatus(NodeStatus.RUNNING);
 
