@@ -102,7 +102,7 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 				storageRootDir += File.separator;
 			}
 			try {
-				logger.info("loading persistent storage...");
+				logger.info("loading storage...");
 				long start = System.currentTimeMillis();
 				storage = new PersistentStorage(pastIdFactory, storageRootDir + "node_" + node.getId().toStringFull(),
 						maximumStorageSize, node.getEnvironment());
