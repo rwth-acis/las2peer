@@ -7,7 +7,9 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.persistency.SharedStorage.STORAGE_MODE;
+import i5.las2peer.testing.TestSuite;
 import i5.las2peer.tools.helper.L2pNodeLauncherConfiguration;
 
 public class L2pNodeLauncherConfigurationTest {

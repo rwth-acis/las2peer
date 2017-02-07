@@ -61,7 +61,7 @@ import rice.pastry.socket.internet.InternetPastryNodeFactory;
  */
 public class PastryNodeImpl extends Node {
 
-	public static final Integer DEFAULT_BOOTSTRAP_PORT = 14501;
+	public static final int DEFAULT_BOOTSTRAP_PORT = 14501;
 
 	private static final L2pLogger logger = L2pLogger.getInstance(PastryNodeImpl.class);
 
@@ -80,7 +80,7 @@ public class PastryNodeImpl extends Node {
 	private static final int HASHED_FETCH_TIMEOUT = 300000;
 	private static final int HASHED_STORE_TIMEOUT = 300000;
 
-	private final Integer pastryPort;
+	private final int pastryPort;
 	private final String bootStrap;
 	private final STORAGE_MODE storageMode;
 	private InetAddress pastryBindAddress; // null = auto detect Internet address
@@ -91,6 +91,23 @@ public class PastryNodeImpl extends Node {
 	private SharedStorage pastStorage;
 	private String storageDir; // null = default chosen by SharedStorage
 	private Long nodeIdSeed;
+
+	/**
+	 * This constructor is mainly used by the {@link i5.las2peer.testing.TestSuite}, uses a random system defined port
+	 * number and sets all parameters for a debugging and testing optimized operation mode.
+	 * 
+	 * @param bootstrap A bootstrap address that should be used, like hostname:port or <code>null</code> to start a new
+	 *            network.
+	 * @param storageMode A storage mode to be used by this node, see
+	 *            {@link i5.las2peer.persistency.SharedStorage.STORAGE_MODE}.
+	 * @param storageDir A directory to persist data to. Only considered in persistent storage mode. Overwrites
+	 *            {@link SharedStorage} configurations, which defines the default value in case of <code>null</code>.
+	 * @param nodeIdSeed A node id seed to enforce a specific (otherwise random) node id. If <code>null</code>, the node
+	 *            id will be random.
+	 */
+	public PastryNodeImpl(String bootstrap, STORAGE_MODE storageMode, String storageDir, Long nodeIdSeed) {
+		this(null, false, InetAddress.getLoopbackAddress(), null, bootstrap, storageMode, storageDir, nodeIdSeed);
+	}
 
 	/**
 	 * This is the regular constructor used by the {@link i5.las2peer.tools.L2pNodeLauncher}. Its parameters can be set
@@ -104,35 +121,15 @@ public class PastryNodeImpl extends Node {
 	 *            network.
 	 * @param storageMode A storage mode to be used by this node, see
 	 *            {@link i5.las2peer.persistency.SharedStorage.STORAGE_MODE}.
+	 * @param storageDir A directory to persist data to. Only considered in persistent storage mode. Overwrites
+	 *            {@link SharedStorage} configurations, which defines the default value in case of <code>null</code>.
 	 * @param nodeIdSeed A node id (random) seed to enforce a specific node id. If <code>null</code>, the node id will
 	 *            be random.
 	 */
-	public PastryNodeImpl(L2pClassManager classManager, boolean useMonitoringObserver, Integer pastryPort,
-			String bootstrap, STORAGE_MODE storageMode, Long nodeIdSeed) {
-		this(classManager, useMonitoringObserver, pastryPort, bootstrap, storageMode, null, nodeIdSeed);
-	}
-
-	/**
-	 * This constructor is mainly used by the {@link i5.las2peer.testing.TestSuite}, uses a random system defined port
-	 * number and sets all parameters for a debugging and testing optimized operation mode.
-	 * 
-	 * @param bootstrap A bootstrap address that should be used, like hostname:port or <code>null</code> to start a new
-	 *            network.
-	 * @param storageMode A storage mode to be used by this node, see
-	 *            {@link i5.las2peer.persistency.SharedStorage.STORAGE_MODE}.
-	 * @param storageDir A directory to persist data to. Only considered in persistent storage mode, but overwrites
-	 *            {@link SharedStorage} configurations.
-	 * @param nodeIdSeed A node id seed to enforce a specific (otherwise random) node id. If <code>null</code>, the node
-	 *            id will be random.
-	 */
-	public PastryNodeImpl(String bootstrap, STORAGE_MODE storageMode, String storageDir, Long nodeIdSeed) {
-		this(null, false, null, bootstrap, storageMode, storageDir, nodeIdSeed);
-	}
-
-	public PastryNodeImpl(L2pClassManager classManager, boolean useMonitoringObserver, Integer pastryPort,
-			String bootstrap, STORAGE_MODE storageMode, String storageDir, Long nodeIdSeed) {
+	public PastryNodeImpl(L2pClassManager classManager, boolean useMonitoringObserver, InetAddress pastryBindAddress,
+			Integer pastryPort, String bootstrap, STORAGE_MODE storageMode, String storageDir, Long nodeIdSeed) {
 		super(classManager, true, useMonitoringObserver);
-		pastryBindAddress = InetAddress.getLoopbackAddress();
+		this.pastryBindAddress = pastryBindAddress;
 		if (pastryPort == null || pastryPort < 1) {
 			this.pastryPort = getSystemDefinedPort();
 		} else {
@@ -217,8 +214,8 @@ public class PastryNodeImpl extends Node {
 			setupPastryEnvironment();
 
 			if (nodeIdSeed == null) {
-				// auto generate node id seed from ip and port
-				nodeIdSeed = Long.valueOf(getBindAddress().getHostAddress().replace(".", "") + getPort());
+				// auto generate node id seed from port
+				nodeIdSeed = Long.valueOf(getPort());
 			}
 			InternetPastryNodeFactory factory = new InternetPastryNodeFactory(new L2pNodeIdFactory(nodeIdSeed),
 					pastryBindAddress, pastryPort, pastryEnvironment, null, null, null);
@@ -329,7 +326,7 @@ public class PastryNodeImpl extends Node {
 		}
 	}
 
-	private static int getSystemDefinedPort() {
+	public static int getSystemDefinedPort() {
 		try {
 			ServerSocket tmpSocket = new ServerSocket(0);
 			tmpSocket.close();

@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.net.InetAddress;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -19,7 +20,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
@@ -743,12 +743,13 @@ public class L2pNodeLauncher {
 	 * @param port local port number to open
 	 * @param bootstrap comma separated list of bootstrap nodes to connect to or "-" for a new network
 	 * @param storageMode A {@link STORAGE_MODE} used by the local node instance for persistence.
+	 * @param storageDir
 	 * @param monitoringObserver determines, if the monitoring-observer will be started at this node
 	 * @param cl the class loader to be used with this node
 	 * @param nodeIdSeed the seed to generate node IDs from
 	 */
-	private L2pNodeLauncher(Integer port, String bootstrap, STORAGE_MODE storageMode, boolean monitoringObserver,
-			L2pClassManager cl, Long nodeIdSeed) {
+	private L2pNodeLauncher(InetAddress bindAddress, Integer port, String bootstrap, STORAGE_MODE storageMode,
+			String storageDir, boolean monitoringObserver, L2pClassManager cl, Long nodeIdSeed) {
 		if (storageMode == null) {
 			if (System.getenv().containsKey("MEM_STORAGE")) {
 				storageMode = STORAGE_MODE.MEMORY;
@@ -756,7 +757,8 @@ public class L2pNodeLauncher {
 				storageMode = STORAGE_MODE.FILESYSTEM;
 			}
 		}
-		node = new PastryNodeImpl(cl, monitoringObserver, port, bootstrap, storageMode, nodeIdSeed);
+		node = new PastryNodeImpl(cl, monitoringObserver, bindAddress, port, bootstrap, storageMode, storageDir,
+				nodeIdSeed);
 		commandPrompt = new CommandPrompt(this);
 	}
 
@@ -877,9 +879,13 @@ public class L2pNodeLauncher {
 				throw new IllegalArgumentException("Couldn't use '" + logDir + "' as log directory.", ex);
 			}
 		}
-		// in debug replace null node id seed with random seed
-		if (launcherConfiguration.isDebugMode() && launcherConfiguration.getNodeIdSeed() == null) {
-			launcherConfiguration.setNodeIdSeed(new Random().nextLong());
+		InetAddress bindAddress = null;
+		if (launcherConfiguration.isDebugMode()) {
+			// in debug only listen to loopback interface
+			bindAddress = InetAddress.getLoopbackAddress();
+		} else if (launcherConfiguration.getPort() == null) {
+			// in non debug mode replace null port
+			launcherConfiguration.setPort(PastryNodeImpl.DEFAULT_BOOTSTRAP_PORT);
 		}
 		Set<String> serviceDirectories = launcherConfiguration.getServiceDirectories();
 		if (serviceDirectories == null) {
@@ -890,9 +896,10 @@ public class L2pNodeLauncher {
 		// instantiate launcher
 		L2pClassManager cl = new L2pClassManager(new FileSystemRepository(serviceDirectories, true),
 				L2pNodeLauncher.class.getClassLoader());
-		L2pNodeLauncher launcher = new L2pNodeLauncher(launcherConfiguration.getPort(),
+		L2pNodeLauncher launcher = new L2pNodeLauncher(bindAddress, launcherConfiguration.getPort(),
 				launcherConfiguration.getBootstrap(), launcherConfiguration.getStorageMode(),
-				launcherConfiguration.useMonitoringObserver(), cl, launcherConfiguration.getNodeIdSeed());
+				launcherConfiguration.getStorageDirectory(), launcherConfiguration.useMonitoringObserver(), cl,
+				launcherConfiguration.getNodeIdSeed());
 		// check special commands
 		if (launcherConfiguration.isPrintHelp()) {
 			launcher.bFinished = true;
