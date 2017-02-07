@@ -45,6 +45,7 @@ import i5.las2peer.p2p.ServiceNameVersion;
 import i5.las2peer.p2p.TimeoutException;
 import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.persistency.MalformedXMLException;
+import i5.las2peer.persistency.SharedStorage;
 import i5.las2peer.persistency.SharedStorage.STORAGE_MODE;
 import i5.las2peer.security.Agent;
 import i5.las2peer.security.AgentException;
@@ -974,6 +975,10 @@ public class L2pNodeLauncher {
 				+ L2pNodeLauncherConfiguration.ARG_SHORT_STORAGE_MODE + " mode\t\tsets Pastry's storage mode\n"
 				+ "\t\t\t\t\tSupported Modes: "
 				+ String.join(", ", Stream.of(STORAGE_MODE.values()).map(Enum::name).collect(Collectors.toList()))
+				+ "\n");
+		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_STORAGE_DIRECTORY + "|"
+				+ L2pNodeLauncherConfiguration.ARG_SHORT_STORAGE_DIRECTORY
+				+ " directory\tsets Pastry's storage directory. Default: " + SharedStorage.DEFAULT_STORAGE_ROOT_DIR
 				+ "\n");
 
 		System.out.println("Launcher Methods:");

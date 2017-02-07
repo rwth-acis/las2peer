@@ -49,6 +49,9 @@ public class L2pNodeLauncherConfiguration {
 	public static final String ARG_SHORT_STORAGE_MODE = "-m";
 	public static final String ARG_STORAGE_MODE = "--storage-mode";
 
+	public static final String ARG_SHORT_STORAGE_DIRECTORY = "-sd";
+	public static final String ARG_STORAGE_DIRECTORY = "--storage-directory";
+
 	// special options - must be read and handled before regular options
 	private boolean printHelp;
 	private boolean printVersion;
@@ -59,6 +62,7 @@ public class L2pNodeLauncherConfiguration {
 	private Integer port;
 	private String bootstrap;
 	private STORAGE_MODE storageMode;
+	private String storageDirectory;
 	private boolean useMonitoringObserver;
 	private String logDir;
 	private final Set<String> serviceDirectories = new HashSet<>();
@@ -208,6 +212,14 @@ public class L2pNodeLauncherConfiguration {
 								"Illegal argument '" + arg + "', because storage mode '" + val + "' is unknown");
 					}
 				}
+			} else if (arg.equalsIgnoreCase(ARG_SHORT_STORAGE_DIRECTORY)
+					|| arg.equalsIgnoreCase(ARG_STORAGE_DIRECTORY)) {
+				if (itArg.hasNext() == false) {
+					throw new IllegalArgumentException(
+							"Illegal argument '" + arg + "', because storage directory expected after it");
+				} else {
+					result.setStorageDirectory(itArg.next());
+				}
 			} else {
 				result.getCommands().add(arg);
 			}
@@ -301,6 +313,14 @@ public class L2pNodeLauncherConfiguration {
 
 	public List<String> getCommands() {
 		return commands;
+	}
+
+	public String getStorageDirectory() {
+		return storageDirectory;
+	}
+
+	public void setStorageDirectory(String storageDirectory) {
+		this.storageDirectory = storageDirectory;
 	}
 
 }
