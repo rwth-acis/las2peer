@@ -870,14 +870,6 @@ public class L2pNodeLauncher {
 	public static L2pNodeLauncher launchConfiguration(L2pNodeLauncherConfiguration launcherConfiguration)
 			throws CryptoException, NodeException, IllegalArgumentException {
 		System.setSecurityManager(new L2pSecurityManager()); // ENABLES SANDBOXING!!!
-		// self test system encryption
-		try {
-			CryptoTools.encryptSymmetric("las2peer rulez!".getBytes(), CryptoTools.generateSymmetricKey());
-		} catch (CryptoException e) {
-			throw new CryptoException(
-					"Fatal Error! Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy Files are not installed!",
-					e);
-		}
 		// check configuration
 		String logDir = launcherConfiguration.getLogDir();
 		if (logDir != null) {
@@ -1033,6 +1025,14 @@ public class L2pNodeLauncher {
 	 */
 	public static void main(String[] argv) {
 		try {
+			// self test system encryption
+			try {
+				CryptoTools.encryptSymmetric("las2peer rulez!".getBytes(), CryptoTools.generateSymmetricKey());
+			} catch (CryptoException e) {
+				throw new CryptoException(
+						"Fatal Error! Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy Files are not installed!",
+						e);
+			}
 			// Launches the node
 			L2pNodeLauncher launcher = launchConfiguration(L2pNodeLauncherConfiguration.createFromMainArgs(argv));
 			if (launcher.isFinished()) {
