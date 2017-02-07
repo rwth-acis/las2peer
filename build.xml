@@ -29,8 +29,8 @@
 	<property name="src.help2" location="${src}/test_help2/java" />
 	
 	<property name="tmp" location="tmp" />
-	
 	<property name="tmp.classes" location="${tmp}/classes" />
+	<property name="tmp.bundle" location="${tmp}/bundle" />
 	<property name="tmp.junit" location="${tmp}/test" />
 	<property name="tmp.help1" location="${tmp}/test_help1" />
 	<property name="tmp.help2" location="${tmp}/test_help2" />
@@ -74,7 +74,8 @@
     </target>
 	
     <target name="get_deps" depends="install-ivy" description="--> resolve dependencies">
-        <ivy:retrieve type="jar, bundle"/>
+		<ivy:retrieve type="jar, bundle" conf="*" pattern="${lib.dir}/[artifact]-[revision].[ext]" />
+		<ivy:retrieve type="jar, bundle" conf="bundle" pattern="${tmp.bundle}/[artifact]-[revision].[ext]" />
     </target>
 	
 	<target name="deploy-snapshot" depends="main_jar" description="--> deploy snapshot">
@@ -91,7 +92,9 @@
 			pomfile="${export.jars}/${ant.project.name}-${ivy.las2peer.version}.pom" 
 			artifactName="${ant.project.name}"
 			artifactPackaging="jar"
-		/>
+			conf="platform">
+			<mapping conf="platform" scope="compile" />
+		</ivy:makepom>
 	
 		<ivy:publish resolver="acis-snapshots"
 			publishivy="false"
@@ -116,7 +119,9 @@
 			pomfile="${export.jars}/${ant.project.name}-${ivy.las2peer.version}.pom" 
 			artifactName="${ant.project.name}"
 			artifactPackaging="jar"
-		/>
+			conf="platform">
+			<mapping conf="platform" scope="compile" />
+		</ivy:makepom>
 
 		<ivy:publish resolver="acis-internal"
 			publishivy="false"
@@ -318,17 +323,14 @@
 	
 	<target name="main_jar" depends="compile_main">
 		<!-- constructs the external libraries classpath name -->
-		<pathconvert property="manifest.classpath" refid="classpath" pathsep=" ">
-			<mapper><chainedmapper><flattenmapper /></chainedmapper></mapper>
-		</pathconvert>
 		<jar jarfile="${export.jars}/${ant.project.name}-${ivy.las2peer.version}.jar">
+			<zipgroupfileset dir="${tmp.bundle}" includes="**/*.jar" />
 			<fileset dir="${tmp.classes}">
 				<exclude name="i5/las2peer/testing/services/**" />
 			</fileset>
 			<fileset file="etc/las2peer.policy" />
 			<manifest>
 				<attribute name="Main-Class" value="${main-class}"/>
-				<attribute name="Class-Path" value="${manifest.classpath}" />
 				<attribute name="Implementation-Title" value="${main-class}"/>
 				<attribute name="Implementation-Version" value="${ivy.las2peer.version}"/> 
 				<attribute name="Implementation-Vendor" value="${ivy.organisation}"/>
