@@ -18,6 +18,7 @@
     <property name="ivy.settings.file" value="${ivy.jar.dir}/ivysettings.xml" />
     <property name="ivy.dep.file" value="${ivy.jar.dir}/ivy.xml" />
 	<property name="ivy.pom_template.file" value="${ivy.jar.dir}/pom_template.xml" />
+	<property name="ant-contrib.jar.file" value="${ivy.jar.dir}/ant-contrib-1.0b3.jar" />
 	<tstamp><format property="ivy.now" pattern="yyyyMMddHHmmss" /></tstamp>
 	
 	<property name="src" location="src" />
@@ -54,8 +55,8 @@
 		</fileset>
 	</path>
 	
-	<taskdef resource="net/sf/antcontrib/antcontrib.properties" classpath="ant-contrib.jar" onerror="failall" />
-	<taskdef resource="net/sf/antcontrib/antlib.xml" classpath="ant-contrib.jar" onerror="failall" />
+	<taskdef resource="net/sf/antcontrib/antcontrib.properties" classpath="${ant-contrib.jar.file}" onerror="failall" />
+	<taskdef resource="net/sf/antcontrib/antlib.xml" classpath="${ant-contrib.jar.file}" onerror="failall" />
 	
 	<!-- Download Dependencies (IVY) -->
 	
