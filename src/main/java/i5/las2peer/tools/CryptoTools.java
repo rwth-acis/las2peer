@@ -508,15 +508,7 @@ public class CryptoTools {
 			MessageDigest md = MessageDigest.getInstance("SHA-512");
 			md.update(publicKey.getEncoded());
 			byte[] hash = md.digest();
-			StringBuffer hexString = new StringBuffer();
-			for (byte element : hash) {
-				String hex = Integer.toHexString(0xff & element);
-				if (hex.length() == 1) {
-					hexString.append('0');
-				}
-				hexString.append(hex);
-			}
-			return hexString.toString();
+			return SimpleTools.byteToHexString(hash);
 		} catch (NoSuchAlgorithmException e) {
 			throw new RuntimeException(e);
 		}
