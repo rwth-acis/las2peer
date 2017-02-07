@@ -149,7 +149,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 
 			logger.info("\t--> registering topic " + topic.getId() + ")");
 
-			scribeClient.subscribe(topic, this);
+			scribeClient.subscribe(topic, this, null, null);
 			l2pNode.observerNotice(Event.PASTRY_TOPIC_SUBSCRIPTION_SUCCESS, this.l2pNode.getNodeId(), (String) null,
 					"" + topic.getId());
 		}
