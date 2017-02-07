@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import i5.las2peer.persistency.SharedStorage.STORAGE_MODE;
@@ -43,6 +44,20 @@ public class L2pNodeLauncherConfigurationTest {
 		try {
 			L2pNodeLauncherConfiguration.createFromMainArgs("--startService((xxx)");
 			Assert.fail("IllegalArgumentException expected");
+		} catch (IllegalArgumentException e) {
+			// expected exception
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail(e.toString());
+		}
+	}
+
+	@Test
+	public void testMainArgsNoJoin() {
+		try {
+			L2pNodeLauncherConfiguration conf = L2pNodeLauncherConfiguration.createFromMainArgs("--startService(xxx)",
+					"interactive");
+			Assert.assertEquals(2, conf.getCommands().size());
 		} catch (IllegalArgumentException e) {
 			// expected exception
 		} catch (Exception e) {
@@ -146,6 +161,68 @@ public class L2pNodeLauncherConfigurationTest {
 			Assert.fail("Exception expected");
 		} catch (IllegalArgumentException e) {
 			// expected exception
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail(e.toString());
+		}
+	}
+
+	@Test
+	public void testNodePortInDebugMode() {
+		try {
+			L2pNodeLauncherConfiguration conf = new L2pNodeLauncherConfiguration();
+			conf.setDebugMode(true);
+			L2pNodeLauncher launcher = L2pNodeLauncher.launchConfiguration(conf);
+			// random port in debug mode expected
+			Assert.assertNotEquals(PastryNodeImpl.DEFAULT_BOOTSTRAP_PORT, launcher.getNode().getPort());
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail(e.toString());
+		}
+	}
+
+	@Test
+	public void testNodePortInDebugModeWithPort() {
+		try {
+			L2pNodeLauncherConfiguration conf = new L2pNodeLauncherConfiguration();
+			conf.setDebugMode(true);
+			int systemPort = PastryNodeImpl.getSystemDefinedPort();
+			System.out.println("Using system defined (random) port " + systemPort + " to test");
+			conf.setPort(systemPort);
+			L2pNodeLauncher launcher = L2pNodeLauncher.launchConfiguration(conf);
+			Assert.assertEquals(systemPort, launcher.getNode().getPort());
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail(e.toString());
+		}
+	}
+
+	@Ignore // because the port might be in use
+	@Test
+	public void testNodePortDefault() {
+		try {
+			TestSuite.wipeTestStorage();
+			L2pNodeLauncherConfiguration conf = new L2pNodeLauncherConfiguration();
+			conf.setStorageDirectory(TestSuite.TEST_STORAGE_DIR);
+			L2pNodeLauncher launcher = L2pNodeLauncher.launchConfiguration(conf);
+			Assert.assertEquals(PastryNodeImpl.DEFAULT_BOOTSTRAP_PORT, launcher.getNode().getPort());
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail(e.toString());
+		}
+	}
+
+	@Test
+	public void testNodePortWithPort() {
+		try {
+			TestSuite.wipeTestStorage();
+			L2pNodeLauncherConfiguration conf = new L2pNodeLauncherConfiguration();
+			conf.setStorageDirectory(TestSuite.TEST_STORAGE_DIR);
+			int systemPort = PastryNodeImpl.getSystemDefinedPort();
+			System.out.println("Using system defined (random) port " + systemPort + " to test");
+			conf.setPort(systemPort);
+			L2pNodeLauncher launcher = L2pNodeLauncher.launchConfiguration(conf);
+			Assert.assertEquals(systemPort, launcher.getNode().getPort());
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail(e.toString());
