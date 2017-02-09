@@ -192,6 +192,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 */
 	private ServiceAliasManager aliasManager;
 
+	private Date startTime;
+
 	/**
 	 * Creates a new node, if the standardObserver flag is true, an observer logging all events to a simple plain text
 	 * log file will be generated. If not, no observer will be used at startup.
@@ -538,6 +540,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	public final void launch() throws NodeException {
 		launchSub();
 
+		startTime = new Date();
+
 		// store anonymous if not stored yet
 		getAnonymous();
 
@@ -549,6 +553,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 */
 	public synchronized void shutDown() {
 		stopTidyUpTimer();
+
+		startTime = null;
 
 		// avoid ConcurrentModificationEception
 		String[] receivers = htRegisteredReceivers.keySet().toArray(new String[0]);
@@ -1733,6 +1739,10 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 				}
 			}
 		}
+	}
+
+	public Date getStartTime() {
+		return startTime;
 	}
 
 }
