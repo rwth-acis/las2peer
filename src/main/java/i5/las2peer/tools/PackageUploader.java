@@ -83,10 +83,6 @@ public class PackageUploader {
 			System.out.println("Service package '" + serviceJarFilename + "' uploaded in " + uploadTime + " ms");
 		} catch (FileNotFoundException e) {
 			logger.log(Level.SEVERE, "Service package upload failed! " + e.toString());
-		} catch (EnvelopeAlreadyExistsException e) {
-			// TODO actually compare old and new service version to determine exact version change required
-			logger.log(Level.SEVERE,
-					"Service package upload failed! Version is already known in the network. To update increase version number");
 		} catch (IOException | CryptoException | StorageException | SerializationException e) {
 			logger.log(Level.SEVERE, "Service package upload failed!", e);
 		} finally {
@@ -136,7 +132,14 @@ public class PackageUploader {
 		String libEnvId = SharedStorageRepository.getLibraryEnvelopeIdentifier(netLib.getIdentifier());
 		logger.info("publishing library '" + netLib.getIdentifier().toString() + "' to '" + libEnvId + "'");
 		Envelope libEnv = node.createUnencryptedEnvelope(libEnvId, netLib.toXmlString());
-		node.storeEnvelope(libEnv, devAgent);
+		try {
+			node.storeEnvelope(libEnv, devAgent);
+		} catch (EnvelopeAlreadyExistsException e) {
+			// TODO actually compare old and new service version to determine exact version change required
+			throw new ServicePackageException(
+					"Service package upload failed! Version is already known in the network. To update increase version number",
+					e);
+		}
 		// TODO upload all files async to the network ignore already existing files
 		for (Entry<String, byte[]> entry : jarFiles.entrySet()) {
 			logger.info("publishing file '" + entry.getKey() + "' from jar");
