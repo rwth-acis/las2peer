@@ -1097,7 +1097,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * 
 	 * @return a generic anonymous agent
 	 */
-	public Agent getAnonymous() {
+	public synchronized Agent getAnonymous() {
 		if (anonymousAgent == null) {
 			try {
 				anonymousAgent = MockAgentFactory.getAnonymous();
