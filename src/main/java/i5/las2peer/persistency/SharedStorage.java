@@ -123,6 +123,23 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 		versionCache = new ConcurrentHashMap<>();
 	}
 
+	public long getLocalSize() {
+		return pastStorage.getStorageManager().getTotalSize();
+	}
+
+	public long getLocalMaxSize() {
+		Storage storage = pastStorage.getStorageManager().getStorage();
+		if (storage instanceof MemoryStorage) {
+			// return max ram size
+			return Runtime.getRuntime().maxMemory();
+		} else if (storage instanceof PersistentStorage) {
+			return maximumStorageSize;
+		} else {
+			logger.severe("Unknown storage type. Could not determine storage size");
+			return 0;
+		}
+	}
+
 	private void lookupHandles(Id id, StorageLookupHandler lookupHandler, StorageExceptionHandler exceptionHandler) {
 		pastStorage.lookupHandles(id, numOfReplicas + 1,
 				new PastLookupContinuation(threadpool, lookupHandler, exceptionHandler));

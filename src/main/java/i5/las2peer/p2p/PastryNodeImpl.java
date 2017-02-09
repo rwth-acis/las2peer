@@ -597,6 +597,20 @@ public class PastryNodeImpl extends Node {
 		return application.getNodeInformation((NodeHandle) nodeId);
 	}
 
+	public long getLocalStorageSize() {
+		if (pastStorage == null) {
+			throw new IllegalStateException("Storage not yet initialized");
+		}
+		return pastStorage.getLocalSize();
+	}
+
+	public long getLocalMaxStorageSize() {
+		if (pastStorage == null) {
+			throw new IllegalStateException("Storage not yet initialized");
+		}
+		return pastStorage.getLocalMaxSize();
+	}
+
 	@Override
 	public void storeEnvelope(Envelope envelope, Agent author) throws StorageException {
 		storeEnvelope(envelope, author, ARTIFACT_STORE_TIMEOUT);
