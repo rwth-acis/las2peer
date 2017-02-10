@@ -1,11 +1,5 @@
 package i5.las2peer.p2p.pastry;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.logging.Level;
-
 import i5.las2peer.communication.MessageException;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.logging.NodeObserver.Event;
@@ -20,6 +14,13 @@ import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.MessageReceiver;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.WaiterThread;
+
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.logging.Level;
+
 import rice.p2p.commonapi.Application;
 import rice.p2p.commonapi.Endpoint;
 import rice.p2p.commonapi.Id;
@@ -51,7 +52,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	public static final long SEARCH_TIMEOUT = 10000; // 10 seconds
 	private static final int RESPONSE_WAIT_TIMEOUT = 10000; // 10 seconds
 
-	private final L2pLogger logger = L2pLogger.getInstance(NodeApplication.class.getName());
+	private static final L2pLogger logger = L2pLogger.getInstance(NodeApplication.class.getName());
 
 	protected Endpoint endpoint;
 
@@ -104,8 +105,8 @@ public class NodeApplication implements Application, ScribeMultiClient {
 
 			scribeClient.subscribe(agentTopic, this,
 					new AgentJoinedContent(getLocalHandle(), receiver.getResponsibleForAgentSafeId()), root);
-			l2pNode.observerNotice(Event.PASTRY_TOPIC_SUBSCRIPTION_SUCCESS, this.l2pNode.getNodeId(), receiver,
-					"" + agentTopic.getId());
+			l2pNode.observerNotice(Event.PASTRY_TOPIC_SUBSCRIPTION_SUCCESS, this.l2pNode.getNodeId(), receiver, ""
+					+ agentTopic.getId());
 			/*
 			System.out.println( "children of agent topic: " + scribeClient.numChildren(getAgentTopic(receiver)) );
 			for ( NodeHandle nh: scribeClient.getChildrenOfTopic(getAgentTopic ( receiver ))) 
@@ -149,8 +150,8 @@ public class NodeApplication implements Application, ScribeMultiClient {
 			logger.info("\t--> registering topic " + topic.getId() + ")");
 
 			scribeClient.subscribe(topic, this);
-			l2pNode.observerNotice(Event.PASTRY_TOPIC_SUBSCRIPTION_SUCCESS, this.l2pNode.getNodeId(), (String) null,
-					"" + topic.getId());
+			l2pNode.observerNotice(Event.PASTRY_TOPIC_SUBSCRIPTION_SUCCESS, this.l2pNode.getNodeId(), (String) null, ""
+					+ topic.getId());
 		}
 	}
 
@@ -239,8 +240,8 @@ public class NodeApplication implements Application, ScribeMultiClient {
 					(String) null, "");
 
 			// just store the sending node handle
-			HashSet<NodeHandle> pendingCollection = htPendingAgentSearches
-					.get(((SearchAnswerMessage) pastMessage).getRequestMessageId());
+			HashSet<NodeHandle> pendingCollection = htPendingAgentSearches.get(((SearchAnswerMessage) pastMessage)
+					.getRequestMessageId());
 
 			if (pendingCollection != null) {
 				pendingCollection.add(((SearchAnswerMessage) pastMessage).getSendingNode());
@@ -271,8 +272,8 @@ public class NodeApplication implements Application, ScribeMultiClient {
 				waiter.collectResult(irm);
 			}
 		} else {
-			l2pNode.observerNotice(Event.MESSAGE_RECEIVED, l2pNode.getNodeId(), (String) null,
-					"unkown message: " + pastMessage);
+			l2pNode.observerNotice(Event.MESSAGE_RECEIVED, l2pNode.getNodeId(), (String) null, "unkown message: "
+					+ pastMessage);
 			logger.warning("\t<-- received unknown message: " + pastMessage);
 		}
 	}
@@ -323,8 +324,8 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	 * @throws AgentNotKnownException
 	 * @throws MessageException
 	 */
-	public void sendMessage(MessageEnvelope m, NodeHandle to)
-			throws MalformedXMLException, L2pSecurityException, AgentNotKnownException, MessageException {
+	public void sendMessage(MessageEnvelope m, NodeHandle to) throws MalformedXMLException, L2pSecurityException,
+			AgentNotKnownException, MessageException {
 		l2pNode.observerNotice(Event.MESSAGE_SENDING, l2pNode.getPastryNode(), m.getContainedMessage().getSender(), to,
 				m.getContainedMessage().getRecipient(), "message: " + m);
 
@@ -400,8 +401,8 @@ public class NodeApplication implements Application, ScribeMultiClient {
 			System.out.println("Child in search: " + nh);
 		}
 
-		l2pNode.observerNotice(Event.AGENT_SEARCH_STARTED, this.l2pNode.getNodeId(), agentId, null, (String) null,
-				"(" + expectedAnswers + ") - topic: " + getAgentTopic(agentId));
+		l2pNode.observerNotice(Event.AGENT_SEARCH_STARTED, this.l2pNode.getNodeId(), agentId, null, (String) null, "("
+				+ expectedAnswers + ") - topic: " + getAgentTopic(agentId));
 
 		SearchAgentContent search = new SearchAgentContent(getLocalHandle(), agentId);
 		HashSet<NodeHandle> resultSet = new HashSet<>();
@@ -425,8 +426,8 @@ public class NodeApplication implements Application, ScribeMultiClient {
 
 		htPendingAgentSearches.remove(search.getRandomId());
 
-		l2pNode.observerNotice(Event.AGENT_SEARCH_FINISHED, this.l2pNode.getNodeId(), agentId, null, (String) null,
-				"" + resultSet.size());
+		l2pNode.observerNotice(Event.AGENT_SEARCH_FINISHED, this.l2pNode.getNodeId(), agentId, null, (String) null, ""
+				+ resultSet.size());
 
 		return resultSet;
 	}
@@ -460,10 +461,10 @@ public class NodeApplication implements Application, ScribeMultiClient {
 					// found the agent
 					// send message to searching node
 
-					endpoint.route(null,
-							new SearchAnswerMessage(((SearchAgentContent) content).getOrigin(),
-									this.l2pNode.getPastryNode().getLocalNodeHandle(),
-									((SearchAgentContent) content).getRandomId()),
+					endpoint.route(
+							null,
+							new SearchAnswerMessage(((SearchAgentContent) content).getOrigin(), this.l2pNode
+									.getPastryNode().getLocalNodeHandle(), ((SearchAgentContent) content).getRandomId()),
 							((SearchAgentContent) content).getOrigin());
 					// send return message
 
@@ -474,8 +475,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 
 			logger.severe("\t\t<--- subscribed but agent not found!!!!");
 		} else if (content instanceof AgentJoinedContent) {
-			logger.info(
-					"\t\t<--- got notification about agent joining: " + ((AgentJoinedContent) content).getAgentId());
+			logger.info("\t\t<--- got notification about agent joining: " + ((AgentJoinedContent) content).getAgentId());
 		} else if (content instanceof BroadcastMessageContent) {
 			final BroadcastMessageContent c = (BroadcastMessageContent) content;
 

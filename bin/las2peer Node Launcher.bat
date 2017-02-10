@@ -7,4 +7,3 @@ cd %~dp0
 
 java -cp %CLASSPATH% i5.las2peer.tools.L2pNodeLauncher %*
 pause
-

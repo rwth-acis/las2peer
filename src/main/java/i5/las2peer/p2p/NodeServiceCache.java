@@ -1,8 +1,10 @@
 package i5.las2peer.p2p;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -394,6 +396,29 @@ public class NodeServiceCache {
 			}
 			return instance.getServiceAgent();
 		}
+	}
+
+	public List<String> getLocalServiceNames() {
+		ArrayList<String> result = new ArrayList<>();
+		synchronized (localServices) {
+			if (localServices != null) {
+				result = new ArrayList<>(localServices.keySet());
+			}
+		}
+		return result;
+	}
+
+	public List<ServiceVersion> getLocalServiceVersions(String serviceName) {
+		ArrayList<ServiceVersion> result = new ArrayList<>();
+		synchronized (localServices) {
+			if (localServices != null) {
+				SortedMap<ServiceVersion, ServiceInstance> versions = localServices.get(serviceName);
+				if (versions != null) {
+					result.addAll(versions.keySet());
+				}
+			}
+		}
+		return result;
 	}
 
 	/**

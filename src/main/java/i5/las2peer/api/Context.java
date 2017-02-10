@@ -246,7 +246,7 @@ public interface Context {
 	 * @throws ServiceNotAvailableException If the service is temporarily not available.
 	 * @throws RemoteServiceException If the remote service throws an exception.
 	 */
-	public Serializable invokeInterally(String service, String method, Serializable... parameters)
+	public Serializable invokeInternally(String service, String method, Serializable... parameters)
 			throws ServiceNotFoundException, ServiceNotAvailableException, RemoteServiceException;
 
 }

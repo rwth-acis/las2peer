@@ -18,10 +18,9 @@ import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
  */
 public abstract class LoadedLibrary {
 
-	private HashSet<LoadedLibrary> resolvedDependencies;
-	private LibraryDependency[] initialDependencies;
-
-	private LibraryIdentifier myLibrary;
+	private final HashSet<LoadedLibrary> resolvedDependencies;
+	private final LibraryDependency[] initialDependencies;
+	private final LibraryIdentifier myLibrary;
 
 	/**
 	 * generates a new CL without any dependencies i.e. this ClassLoader may not use any other registered libraries
@@ -29,9 +28,7 @@ public abstract class LoadedLibrary {
 	 * @param libraryIdentifier identifier of the library bound to this ClassLoader
 	 */
 	LoadedLibrary(String libraryIdentifier) {
-		super();
-
-		myLibrary = new LibraryIdentifier(libraryIdentifier);
+		this(new LibraryIdentifier(libraryIdentifier));
 	}
 
 	/**
@@ -40,9 +37,7 @@ public abstract class LoadedLibrary {
 	 * @param lib identifier of the library bound to this ClassLoader
 	 */
 	LoadedLibrary(LibraryIdentifier lib) {
-		super();
-
-		myLibrary = lib;
+		this(lib, new LibraryDependency[0]);
 	}
 
 	/**
@@ -62,8 +57,9 @@ public abstract class LoadedLibrary {
 	 * @param initialDependencies array with ClassLoaders this one may use for class loading
 	 */
 	LoadedLibrary(LibraryIdentifier lib, LibraryDependency[] initialDependencies) {
-		this(lib);
+		this.myLibrary = lib;
 		this.initialDependencies = initialDependencies;
+		resolvedDependencies = new HashSet<>();
 	}
 
 	/**
@@ -88,7 +84,7 @@ public abstract class LoadedLibrary {
 	 * @param libs
 	 */
 	void setResolvedDependencies(LoadedLibrary[] libs) {
-		resolvedDependencies = new HashSet<LoadedLibrary>();
+		resolvedDependencies.clear();
 		for (LoadedLibrary lib : libs) {
 			resolvedDependencies.add(lib);
 		}

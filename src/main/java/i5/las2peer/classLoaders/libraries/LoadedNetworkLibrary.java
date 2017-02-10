@@ -22,7 +22,6 @@ import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.SerializationException;
 import i5.las2peer.tools.XmlTools;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * This class is stored as meta information in the network and represents a network library. All getter refer to
@@ -42,7 +41,8 @@ public class LoadedNetworkLibrary extends LoadedLibrary implements XmlAble {
 	@Override
 	public URL getResourceAsUrl(String resourceName) throws ResourceNotFoundException {
 		// TODO implement get resource as URL in network library
-		throw new NotImplementedException();
+		// return las2peer:// URL or https:// URL?
+		throw new ResourceNotFoundException("getResourceAsUrl not implemented, yet", getIdentifier().toString());
 	}
 
 	@Override

@@ -343,7 +343,7 @@ public class L2pThread extends Thread implements Context {
 	}
 
 	@Override
-	public Serializable invokeInterally(String service, String method, Serializable... parameters)
+	public Serializable invokeInternally(String service, String method, Serializable... parameters)
 			throws ServiceNotFoundException, ServiceNotAvailableException, RemoteServiceException {
 		return invokeWithAgent(serviceAgent, service, method, parameters);
 	}
