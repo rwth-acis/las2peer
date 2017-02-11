@@ -1,5 +1,4 @@
 <ivysettings>
-	<property name="revision" value="SNAPSHOT" override="false"/>
     <settings defaultResolver="chain" />
     <resolvers>
         <chain name="chain">
@@ -9,10 +8,9 @@
         </chain>
     </resolvers>
 
-    <property name="archiva.user" value="user" />
-    <property name="archiva.pass" value="pass" />
     <properties environment="env" />
     <include file="${env.CREDENTIALS_FILE}" optional="true" />
+    <include file="archiva_credentials.xml" optional="true" />
     <credentials host="role.dbis.rwth-aachen.de" realm="Repository Archiva Managed snapshots Repository" username="${archiva.user}" passwd="${archiva.pass}" />
     <credentials host="role.dbis.rwth-aachen.de" realm="Repository Archiva Managed internal Repository" username="${archiva.user}" passwd="${archiva.pass}" />
 </ivysettings>
