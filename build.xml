@@ -3,7 +3,6 @@
 	<property environment="env"/>
 	
 	<property name="ivy.organisation" value="i5" />
-	<property name="ivy.module" value="las2peer" />
 	<property name="ivy.revision" value="0.6" />
 	<property name="ivy.build.number" value="8" />
 	<property name="ivy.deliver.revision" value="${ivy.revision}" />
@@ -43,31 +42,26 @@
 	<property name="export.junitdoc" location="${export}/junitdoc" />
 	
 	<property name="lib.dir" value="lib" />
-	<property name="lib.cp" location="${lib.dir}/FreePastry-2.1.1.jar:${lib.dir}/xpp3-1.1.4c.jar" />
-	<property name="lib.junit" location="${lib.dir}/junit-4.12.jar:${lib.dir}/hamcrest-core-1.3.jar" />
 	
 	<property name="main-class" value="i5.las2peer.tools.L2pNodeLauncher" />
 	
 	<!-- external libraries classpath, we don't need sources and javadoc -->
 	<path id="classpath">
-		<fileset dir="${basedir}/">
-			<include name="${lib.dir}/*.jar" />
-			<exclude name="${lib.dir}/*sources.jar"/>
-			<exclude name="${lib.dir}/*javadoc.jar"/>
+		<fileset dir="${lib.dir}/">
+			<include name="**/*.jar" />
+			<exclude name="**/*sources.jar"/>
+			<exclude name="**/*javadoc.jar"/>
 		</fileset>
 	</path>
 	
-	<taskdef resource="net/sf/antcontrib/antcontrib.properties">
-		<classpath>
-			<pathelement location="${ivy.jar.dir}/ant-contrib.jar"/>
-		</classpath>
-	</taskdef>
+	<taskdef resource="net/sf/antcontrib/antcontrib.properties" classpath="ant-contrib.jar" onerror="failall" />
+	<taskdef resource="net/sf/antcontrib/antlib.xml" classpath="ant-contrib.jar" onerror="failall" />
 	
 	<!-- Download Dependencies (IVY) -->
 	
     <target name="download-ivy" unless="skip.download">
 		<echo message="installing ivy..."/>
-		<get src="http://repo1.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar"
+		<get src="https://repo1.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar"
 			dest="${ivy.jar.file}" usetimestamp="true"/>
     </target>
 	
@@ -82,7 +76,7 @@
         <ivy:retrieve type="jar, bundle"/>
     </target>
 	
-	<target name="deploy-snapshot" depends="jars" description="--> deploy snapshot">
+	<target name="deploy-snapshot" depends="main_jar" description="--> deploy snapshot">
 		
 		<property name="sn" value="${ivy.deliver.revision}-SNAPSHOT" />
 		<local name="ivy.deliver.revision"/>
@@ -93,8 +87,8 @@
 		<ivy:makepom 
 			ivyfile="${ivy.dep.file}" 
 			templatefile="${ivy.pom_template.file}"
-			pomfile="${export}/jars/${ivy.module}.pom" 
-			artifactName="${ivy.module}"
+			pomfile="${export.jars}/${ant.project.name}-${ivy.las2peer.version}.pom" 
+			artifactName="${ant.project.name}"
 			artifactPackaging="jar"
 		/>
 	
@@ -103,12 +97,12 @@
 			overwrite="true"
 			forcedeliver="true"
 			status="integration">
-			<artifacts pattern="${export}/jars/${ivy.module}.[ext]" />
+			<artifacts pattern="${export.jars}/${ant.project.name}-${ivy.las2peer.version}.[ext]" />
 		</ivy:publish>
 
 	</target>
 
-	<target name="deploy-release" depends="jars" description="--> deploy release">
+	<target name="deploy-release" depends="main_jar" description="--> deploy release">
 
 		<property name="sn" value="${ivy.deliver.revision}.${ivy.build.number}" />
 		<local name="ivy.deliver.revision" />
@@ -118,8 +112,8 @@
 
 		<ivy:makepom 
 			ivyfile="${ivy.dep.file}" 
-			pomfile="${export}/jars/${ivy.module}.pom" 
-			artifactName="${ivy.module}"
+			pomfile="${export.jars}/${ant.project.name}-${ivy.las2peer.version}.pom" 
+			artifactName="${ant.project.name}"
 			artifactPackaging="jar"
 		/>
 
@@ -128,7 +122,7 @@
 			overwrite="true"
 			forcedeliver="true"
 			status="release">
-			<artifacts pattern="${export}/jars/${ivy.module}.[ext]" />
+			<artifacts pattern="${export.jars}/${ant.project.name}-${ivy.las2peer.version}.[ext]" />
 		</ivy:publish>
 
 	</target>
@@ -179,7 +173,8 @@
 	<target name="compile_junit" depends="init_compile, compile_main">
 		<javac srcdir="${src.junit}"
 			destdir="${tmp.junit}"
-			classpath="${lib.cp}:${tmp.classes}:${lib.junit}"
+			classpathref="classpath"
+			classpath="${tmp.classes}"
 			debug="on"
 			encoding="UTF-8"
 			includeantruntime="false"
@@ -194,7 +189,8 @@
 	<target name="compile_help1" depends="init_compile, compile_main">
 		<javac srcdir="${src.help1}"
 			destdir="${tmp.help1}"
-			classpath="${lib.cp}:${tmp.classes}"
+			classpathref="classpath"
+			classpath="${tmp.classes}"
 			debug="on"
 			encoding="UTF-8"
 			includeantruntime="false"
@@ -210,7 +206,8 @@
 	<target name="compile_help2" depends="init_compile, compile_main">
 		<javac srcdir="${src.help2}"
 			destdir="${tmp.help2}"
-			classpath="${lib.cp}:${tmp.classes}"
+			classpathref="classpath"
+			classpath="${tmp.classes}"
 			debug="on"
 			encoding="UTF-8"
 			includeantruntime="false"
@@ -318,12 +315,12 @@
 	<target name="jars" depends="main_jar, test_service_jar, test_service_helper_jar" />
 	<target name="junit_jars" depends="jar_test1-1.1, jar_test1-1.2, jar_test2-1.0, jar_testService1-1.0, jar_testService1-1.1, jar_testService2-1.0" />
 	
-	<target name="main_jar" depends="compile_all">
+	<target name="main_jar" depends="compile_main">
 		<!-- constructs the external libraries classpath name -->
 		<pathconvert property="manifest.classpath" refid="classpath" pathsep=" ">
 			<mapper><chainedmapper><flattenmapper /></chainedmapper></mapper>
 		</pathconvert>
-		<jar jarfile="${export.jars}/las2peer.jar">
+		<jar jarfile="${export.jars}/${ant.project.name}-${ivy.las2peer.version}.jar">
 			<fileset dir="${tmp.classes}">
 				<exclude name="i5/las2peer/testing/services/**" />
 			</fileset>
@@ -336,8 +333,6 @@
 				<attribute name="Implementation-Vendor" value="${ivy.organisation}"/>
 			</manifest>
 		</jar>
-		<!-- create snapshot file -->
-		<copy file="${export.jars}/las2peer.jar" tofile="${export.jars}/las2peer-${ivy.las2peer.version}.jar"/>
 	</target>
 	
 	<target name="test_service_jar" depends="compile_main">
@@ -378,7 +373,8 @@
 			windowtitle="las2peer Documentation"
 			failonerror="yes"
 			encoding="utf8"
-			classpath="${lib.cp}:${tmp.classes}:${lib.junit}"
+			classpathref="classpath"
+			classpath="${tmp.classes}"
          >
             <packageset dir="${src.main}" defaultexcludes="yes">
                 <include name="i5/las2peer/**" />
@@ -394,7 +390,8 @@
 			windowtitle="las2peer Unit Test Documentation"
 			failonerror="yes"
 			encoding="utf8"
-			classpath="${lib.cp}:${tmp.classes}:${lib.junit}"
+			classpathref="classpath"
+			classpath="${tmp.classes}"
          >
         	<packageset dir="${src.junit}" defaultexcludes="yes">
 				<include name="i5/las2peer/**" />
@@ -413,14 +410,15 @@
 	    <map from="${src.junit}/" to="" />
 	  </pathconvert>
 
+	  <pathconvert property="lib.junit" refid="classpath" pathsep=":" />
+
 	  <!-- run one particular test -->
 	  <junit fork="yes" haltonerror="yes" haltonfailure="yes" printsummary="yes">
 
 	    <classpath>
+	    	<pathelement path="${lib.junit}" />
 	    	<pathelement path="${tmp.classes}" />
             <pathelement path="${tmp.junit}" />
-            <pathelement path="${lib.cp}" />
-            <pathelement path="${lib.junit}" />
 	    </classpath>
 
 	  	<formatter type="plain" usefile="false" />
