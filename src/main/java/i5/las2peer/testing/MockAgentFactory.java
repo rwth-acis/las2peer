@@ -27,27 +27,22 @@ public abstract class MockAgentFactory {
 	 */
 	public static String getContent(String resourceName) throws IOException {
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();
-
 		StringBuffer result = new StringBuffer();
-
 		InputStream is = loader.getResourceAsStream(resourceName);
 		BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-
 		String line = null;
 		while ((line = reader.readLine()) != null) {
 			result.append(line);
 			result.append(System.getProperty("line.separator"));
 		}
-
 		is.close();
-
 		return result.toString();
 	}
 
 	/**
-	 * get eve-agent
+	 * Gets Eves agent
 	 * 
-	 * @return the user agent of eve
+	 * @return Returns the user agent of Eve
 	 * @throws MalformedXMLException
 	 * @throws IOException
 	 */
@@ -56,9 +51,9 @@ public abstract class MockAgentFactory {
 	}
 
 	/**
-	 * get Adam agent
+	 * Gets Adams agent
 	 * 
-	 * @return the user agent of Adam
+	 * @return Returns the user agent of Adam
 	 * @throws MalformedXMLException
 	 * @throws IOException
 	 */
@@ -67,9 +62,9 @@ public abstract class MockAgentFactory {
 	}
 
 	/**
-	 * get Abel agent
+	 * Gets Abels agent
 	 * 
-	 * @return the user agent of Abel
+	 * @return Returns the user agent of Abel
 	 * @throws MalformedXMLException
 	 * @throws IOException
 	 */
@@ -78,9 +73,9 @@ public abstract class MockAgentFactory {
 	}
 
 	/**
-	 * get the anonymous agent
+	 * Gets Anonymous agent
 	 * 
-	 * @return the user agent to be used for anonymous access
+	 * @return Returns the user agent to be used for anonymous access
 	 * @throws MalformedXMLException
 	 * @throws IOException
 	 */
@@ -163,7 +158,7 @@ public abstract class MockAgentFactory {
 	}
 
 	/**
-	 * create an agent and print its xml representation to standard out the first command line argument will be used as
+	 * create an agent and print its XML representation to standard out the first command line argument will be used as
 	 * passphrase
 	 * 
 	 * @param argv

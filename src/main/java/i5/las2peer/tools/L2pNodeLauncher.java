@@ -13,12 +13,17 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import i5.las2peer.api.Connector;
 import i5.las2peer.api.ConnectorException;
@@ -49,6 +54,7 @@ import i5.las2peer.security.L2pSecurityManager;
 import i5.las2peer.security.PassphraseAgent;
 import i5.las2peer.security.ServiceAgent;
 import i5.las2peer.security.UserAgent;
+import i5.las2peer.tools.helper.L2pNodeLauncherConfiguration;
 import rice.p2p.commonapi.NodeHandle;
 
 /**
@@ -105,12 +111,11 @@ public class L2pNodeLauncher {
 	/**
 	 * Searches for the given agent in the las2peer network.
 	 * 
-	 * @param id
+	 * @param agentId
 	 * @return node handles
 	 * @throws AgentNotKnownException
 	 */
-	public Object[] findAgent(String id) throws AgentNotKnownException {
-		long agentId = Long.parseLong(id);
+	public Object[] findAgent(String agentId) throws AgentNotKnownException {
 		return node.findRegisteredAgent(agentId);
 	}
 
@@ -170,7 +175,7 @@ public class L2pNodeLauncher {
 					result.put(split[0], split[1]);
 				}
 			} catch (IOException e) {
-				printError("Error reading contents of " + filename + ": " + e);
+				printErrorWithStacktrace("Error reading contents of " + filename, e);
 				logger.printStackTrace(e);
 				bFinished = true;
 			}
@@ -196,7 +201,7 @@ public class L2pNodeLauncher {
 			throw new IllegalArgumentException(directory + " is not a directory!");
 		}
 		Hashtable<String, String> htPassphrases = loadPassphrases(directory + "/passphrases.txt");
-		Map<Long, String> agentIdToXml = new HashMap<>();
+		Map<String, String> agentIdToXml = new HashMap<>();
 		List<GroupAgent> groupAgents = new LinkedList<>();
 		for (File xmlFile : dir.listFiles(new FilenameFilter() {
 			@Override
@@ -207,7 +212,7 @@ public class L2pNodeLauncher {
 			try {
 				// maybe an agent?
 				Agent agent = Agent.createFromXml(xmlFile);
-				agentIdToXml.put(agent.getId(), xmlFile.getName());
+				agentIdToXml.put(agent.getSafeId(), xmlFile.getName());
 				if (agent instanceof PassphraseAgent) {
 					String passphrase = htPassphrases.get(xmlFile.getName());
 					if (passphrase != null) {
@@ -224,23 +229,23 @@ public class L2pNodeLauncher {
 					throw new IllegalArgumentException("Unknown agent type: " + agent.getClass());
 				}
 			} catch (MalformedXMLException e) {
-				printError("unable to deserialize contents of " + xmlFile.toString() + "!");
+				printErrorWithStacktrace("unable to deserialize contents of " + xmlFile.toString() + "!", e);
 			} catch (L2pSecurityException e) {
-				printError("error storing agent from " + xmlFile.toString() + ": " + e);
+				printErrorWithStacktrace("error storing agent from " + xmlFile.toString(), e);
 			} catch (AgentAlreadyRegisteredException e) {
-				printError("agent from " + xmlFile.toString() + " already known at this node!");
+				printErrorWithStacktrace("agent from " + xmlFile.toString() + " already known at this node!", e);
 			} catch (AgentException e) {
-				printError("unable to generate agent " + xmlFile.toString() + "!");
+				printErrorWithStacktrace("unable to generate agent " + xmlFile.toString() + "!", e);
 			}
 		}
 		// wait till all user agents are added from startup directory to unlock group agents
 		for (GroupAgent currentGroupAgent : groupAgents) {
-			for (Long memberId : currentGroupAgent.getMemberList()) {
+			for (String memberId : currentGroupAgent.getMemberList()) {
 				Agent memberAgent = null;
 				try {
 					memberAgent = node.getAgent(memberId);
 				} catch (AgentNotKnownException e) {
-					printError("Can't get agent for group member " + memberId);
+					printErrorWithStacktrace("Can't get agent for group member " + memberId, e);
 					continue;
 				}
 				if ((memberAgent instanceof PassphraseAgent) == false) {
@@ -248,14 +253,14 @@ public class L2pNodeLauncher {
 					continue;
 				}
 				PassphraseAgent memberPassAgent = (PassphraseAgent) memberAgent;
-				String xmlName = agentIdToXml.get(memberPassAgent.getId());
+				String xmlName = agentIdToXml.get(memberPassAgent.getSafeId());
 				if (xmlName == null) {
-					printError("No known xml file for agent " + memberPassAgent.getId());
+					printError("No known xml file for agent " + memberPassAgent.getSafeId());
 					continue;
 				}
 				String passphrase = htPassphrases.get(xmlName);
 				if (passphrase == null) {
-					printError("No known password for agent " + memberPassAgent.getId());
+					printError("No known password for agent " + memberPassAgent.getSafeId());
 					continue;
 				}
 				try {
@@ -265,8 +270,8 @@ public class L2pNodeLauncher {
 					printMessage("\t- stored group agent from " + xmlName);
 					break;
 				} catch (Exception e) {
-					printError("Can't unlock group agent " + currentGroupAgent.getId() + " with member "
-							+ memberPassAgent.getId());
+					printErrorWithStacktrace("Can't unlock group agent " + currentGroupAgent.getSafeId()
+							+ " with member " + memberPassAgent.getSafeId(), e);
 					continue;
 				}
 			}
@@ -326,16 +331,8 @@ public class L2pNodeLauncher {
 			Connector connector = loadConnector(connectorClass);
 			connector.start(node);
 			connectors.add(connector);
-
-		} catch (ConnectorException e) {
-			printError(" --> Problems starting the connector: " + e);
-			logger.printStackTrace(e);
-		} catch (ClassNotFoundException e) {
-			logger.printStackTrace(e);
-		} catch (InstantiationException e) {
-			logger.printStackTrace(e);
-		} catch (IllegalAccessException e) {
-			logger.printStackTrace(e);
+		} catch (Exception e) {
+			printErrorWithStacktrace(" --> Problems starting the connector", e);
 		}
 	}
 
@@ -403,7 +400,7 @@ public class L2pNodeLauncher {
 	public boolean registerUserAgent(String id, String passphrase) {
 		try {
 			if (id.matches("-?[0-9].*")) {
-				currentUser = (UserAgent) node.getAgent(Long.valueOf(id));
+				currentUser = (UserAgent) node.getAgent(id);
 			} else {
 				currentUser = (UserAgent) node.getAgent(node.getUserManager().getAgentIdByLogin(id));
 			}
@@ -628,7 +625,7 @@ public class L2pNodeLauncher {
 			ServiceAgent serviceAgent;
 			try {
 				// check if the agent is already known to the network
-				serviceAgent = (ServiceAgent) node.getAgent(xmlAgent.getId());
+				serviceAgent = (ServiceAgent) node.getAgent(xmlAgent.getSafeId());
 				serviceAgent.unlockPrivateKey(passphrase);
 			} catch (AgentNotKnownException e) {
 				xmlAgent.unlockPrivateKey(passphrase);
@@ -752,7 +749,7 @@ public class L2pNodeLauncher {
 	 * @param cl the class loader to be used with this node
 	 * @param nodeIdSeed the seed to generate node IDs from
 	 */
-	private L2pNodeLauncher(int port, String bootstrap, STORAGE_MODE storageMode, boolean monitoringObserver,
+	private L2pNodeLauncher(Integer port, String bootstrap, STORAGE_MODE storageMode, boolean monitoringObserver,
 			L2pClassManager cl, Long nodeIdSeed) {
 		if (storageMode == null) {
 			if (System.getenv().containsKey("MEM_STORAGE")) {
@@ -762,12 +759,6 @@ public class L2pNodeLauncher {
 			}
 		}
 		node = new PastryNodeImpl(cl, monitoringObserver, port, bootstrap, storageMode, nodeIdSeed);
-
-		commandPrompt = new CommandPrompt(this);
-	}
-
-	private L2pNodeLauncher(L2pClassManager cl, Integer port, String bootstrap) {
-		node = new PastryNodeImpl(cl, port, bootstrap, STORAGE_MODE.MEMORY, null, null);
 		commandPrompt = new CommandPrompt(this);
 	}
 
@@ -811,267 +802,198 @@ public class L2pNodeLauncher {
 	}
 
 	/**
-	 * Launches a single node.
+	 * Prints a (Red) error message to the console including a stack trace.
+	 * 
+	 * @param message
+	 */
+	private static void printErrorWithStacktrace(String message, Throwable throwable) {
+		message = ColoredOutput.colorize(message, ColoredOutput.ForegroundColor.Red);
+		logger.log(Level.SEVERE, message, throwable);
+	}
+
+	/**
+	 * @deprecated Use {@link #launchConfiguration(L2pNodeLauncherConfiguration)} instead.
+	 * 
+	 *             Launches a single node.
 	 * 
 	 * @param args
 	 * @return the L2pNodeLauncher instance
-	 * @throws NodeException
+	 * @throws CryptoException If the system encryption self test fails. See log/output for details.
+	 * @throws NodeException If an issue with the launched node occurs.
+	 * @throws IllegalArgumentException If an issue occurs with a configuration argument.
 	 */
-	public static L2pNodeLauncher launchSingle(Iterable<String> args) throws NodeException {
-		boolean debugMode = false;
-		Integer port = null;
-		String bootstrap = null;
-		STORAGE_MODE storageMode = null;
-		boolean observer = false;
-		String sLogDir = null;
-		ArrayList<String> serviceDirectories = null;
-		Long nodeIdSeed = null;
-		List<String> commands = new ArrayList<>();
-		// parse args
-		Iterator<String> itArg = args.iterator();
-		while (itArg.hasNext() == true) {
-			String arg = itArg.next();
-			itArg.remove();
-			String larg = arg.toLowerCase();
-			if (larg.equals("-debug") || larg.equals("--debug")) {
-				debugMode = true;
-			} else if (larg.equals("-p") == true || larg.equals("--port") == true) {
-				if (itArg.hasNext() == false) {
-					printWarning("ignored '" + arg + "', because port number expected after it");
-				} else {
-					String sPort = itArg.next();
-					try {
-						int p = Integer.valueOf(sPort);
-						// in case of an exception this structure doesn't override an already set port number
-						itArg.remove();
-						port = p;
-					} catch (NumberFormatException ex) {
-						printWarning("ignored '" + arg + "', because " + sPort + " is not an integer");
-					}
-				}
-			} else if (larg.equals("-b") == true || larg.equals("--bootstrap") == true) {
-				if (itArg.hasNext() == false) {
-					printWarning("ignored '" + arg + "', because comma separated bootstrap list expected after it");
-				} else {
-					String[] bsList = itArg.next().split(",");
-					for (String bs : bsList) {
-						if (bs.isEmpty() == false) {
-							if (bootstrap == null || bootstrap.isEmpty() == true) {
-								bootstrap = bs;
-							} else {
-								bootstrap += "," + bs;
-							}
-						}
-					}
-					itArg.remove();
-				}
-			} else if (larg.equals("-o") == true || larg.equals("--observer") == true) {
-				observer = true;
-			} else if (larg.equals("-l") == true || larg.equals("--log-directory") == true) {
-				if (itArg.hasNext() == false) {
-					printWarning("ignored '" + arg + "', because log directory expected after it");
-				} else {
-					sLogDir = itArg.next();
-					itArg.remove();
-				}
-			} else if (larg.equals("-n") == true || larg.equals("--node-id-seed") == true) {
-				if (itArg.hasNext() == false) {
-					printWarning("ignored '" + arg + "', because node id seed expected after it");
-				} else {
-					String sNodeId = itArg.next();
-					try {
-						long idSeed = Long.valueOf(sNodeId);
-						// in case of an exception this structure doesn't override an already set node id seed
-						itArg.remove();
-						nodeIdSeed = idSeed;
-					} catch (NumberFormatException ex) {
-						printWarning("ignored '" + arg + "', because " + sNodeId + " is not an integer");
-					}
-				}
-			} else if (larg.equals("-s") == true || larg.equals("--service-directory") == true) {
-				if (itArg.hasNext() == false) {
-					printWarning("ignored '" + arg + "', because service directory expected after it");
-				} else {
-					if (serviceDirectories == null) {
-						serviceDirectories = new ArrayList<>();
-					}
-					serviceDirectories.add(itArg.next());
-					itArg.remove();
-				}
-			} else if (larg.equals("-m") == true || larg.equals("--storage-mode") == true) {
-				if (itArg.hasNext() == false) {
-					printWarning("ignored '" + arg + "', because storage mode expected after it");
-				} else {
-					String val = itArg.next();
-					if (val.equals("memory")) {
-						storageMode = STORAGE_MODE.MEMORY;
-					} else if (val.equals("filesystem")) {
-						storageMode = STORAGE_MODE.FILESYSTEM;
-					} else {
-						printWarning("ignored '" + arg + "', because storage mode expected after it");
-					}
-					itArg.remove();
-				}
-			} else {
-				commands.add(arg);
-			}
-		}
-		// check parameters and launch node
-		if (debugMode) {
-			System.err.println("WARNING! Launching node in DEBUG mode! THIS NODE IS NON PERSISTENT!");
-			return launchDebug(port, bootstrap, sLogDir, serviceDirectories, commands);
-		} else {
-			if (port == null) {
-				printError("no port number specified");
-				return null;
-			} else if (port < 1) {
-				printError("invalid port number specified");
-				return null;
-			}
-			return launchSingle(port, bootstrap, storageMode, observer, sLogDir, serviceDirectories, nodeIdSeed,
-					commands);
-		}
+	@Deprecated
+	public static L2pNodeLauncher launchSingle(Iterable<String> args) throws CryptoException, NodeException {
+		return launchConfiguration(L2pNodeLauncherConfiguration.createFromIterableArgs(args));
 	}
 
+	/**
+	 * @deprecated Use {@link #launchConfiguration(L2pNodeLauncherConfiguration)} instead.
+	 * 
+	 *             Launches a single node.
+	 * 
+	 * @param port
+	 * @param bootstrap
+	 * @param storageMode
+	 * @param observer
+	 * @param sLogDir
+	 * @param serviceDirectories
+	 * @param nodeIdSeed
+	 * @param commands
+	 * @return
+	 * @throws CryptoException If the system encryption self test fails. See log/output for details.
+	 * @throws NodeException If an issue with the launched node occurs.
+	 * @throws IllegalArgumentException If an issue occurs with a configuration argument.
+	 */
+	@Deprecated
 	public static L2pNodeLauncher launchSingle(int port, String bootstrap, STORAGE_MODE storageMode, boolean observer,
 			String sLogDir, Iterable<String> serviceDirectories, Long nodeIdSeed, Iterable<String> commands)
-			throws NodeException {
-		// check parameters
-		if (sLogDir != null) {
-			try {
-				L2pLogger.setGlobalLogDirectory(sLogDir);
-			} catch (Exception ex) {
-				printWarning("couldn't use '" + sLogDir + "' as log directory." + ex);
-			}
-		}
-		if (serviceDirectories == null) {
-			ArrayList<String> directories = new ArrayList<>();
-			directories.add(DEFAULT_SERVICE_DIRECTORY);
-			serviceDirectories = directories;
-		}
-		if (commands == null) {
-			commands = new ArrayList<>();
-		}
-		// instantiate launcher
-		L2pClassManager cl = new L2pClassManager(new FileSystemRepository(serviceDirectories, true),
-				L2pNodeLauncher.class.getClassLoader());
-		L2pNodeLauncher launcher = new L2pNodeLauncher(port, bootstrap, storageMode, observer, cl, nodeIdSeed);
-		// handle commands
-		try {
-			launcher.start();
-
-			for (String command : commands) {
-				System.out.println("Handling: '" + command + "'");
-				launcher.commandPrompt.handleLine(command);
-			}
-
-			if (launcher.isFinished()) {
-				printMessage("All commands have been handled and shutdown has been called -> end!");
-			} else {
-				printMessage("All commands have been handled -- keeping node open!");
-			}
-		} catch (NodeException e) {
-			launcher.bFinished = true;
-			logger.printStackTrace(e);
-			throw e;
-		}
-
-		return launcher;
+			throws CryptoException, NodeException {
+		L2pNodeLauncherConfiguration configuration = new L2pNodeLauncherConfiguration();
+		configuration.setPort(port);
+		configuration.setBootstrap(bootstrap);
+		configuration.setStorageMode(storageMode);
+		configuration.setUseMonitoringObserver(observer);
+		configuration.setLogDir(sLogDir);
+		serviceDirectories.forEach(configuration.getServiceDirectories()::add);
+		configuration.setNodeIdSeed(nodeIdSeed);
+		commands.forEach(configuration.getCommands()::add);
+		return launchConfiguration(configuration);
 	}
 
-	private static L2pNodeLauncher launchDebug(Integer port, String boostrap, String sLogDir,
-			Iterable<String> serviceDirectories, Iterable<String> commands) throws NodeException {
-		// check parameters
-		if (sLogDir != null) {
+	/**
+	 * @param launcherConfiguration
+	 * @return Returns the launcher instance.
+	 * @throws CryptoException If the system encryption self test fails. See log/output for details.
+	 * @throws NodeException If an issue with the launched node occurs.
+	 * @throws IllegalArgumentException If an issue occurs with a configuration argument.
+	 */
+	public static L2pNodeLauncher launchConfiguration(L2pNodeLauncherConfiguration launcherConfiguration)
+			throws CryptoException, NodeException, IllegalArgumentException {
+		System.setSecurityManager(new L2pSecurityManager()); // ENABLES SANDBOXING!!!
+		// self test system encryption
+		try {
+			CryptoTools.encryptSymmetric("las2peer rulez!".getBytes(), CryptoTools.generateSymmetricKey());
+		} catch (CryptoException e) {
+			throw new CryptoException(
+					"Fatal Error! Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy Files are not installed!",
+					e);
+		}
+		// check configuration
+		String logDir = launcherConfiguration.getLogDir();
+		if (logDir != null) {
 			try {
-				L2pLogger.setGlobalLogDirectory(sLogDir);
+				L2pLogger.setGlobalLogDirectory(logDir);
 			} catch (Exception ex) {
-				printWarning("couldn't use '" + sLogDir + "' as log directory." + ex);
+				throw new IllegalArgumentException("Couldn't use '" + logDir + "' as log directory.", ex);
 			}
 		}
+		// in debug replace null node id seed with random seed
+		if (launcherConfiguration.isDebugMode() && launcherConfiguration.getNodeIdSeed() == null) {
+			launcherConfiguration.setNodeIdSeed(new Random().nextLong());
+		}
+		Set<String> serviceDirectories = launcherConfiguration.getServiceDirectories();
 		if (serviceDirectories == null) {
-			ArrayList<String> directories = new ArrayList<>();
+			HashSet<String> directories = new HashSet<>();
 			directories.add(DEFAULT_SERVICE_DIRECTORY);
 			serviceDirectories = directories;
-		}
-		if (commands == null) {
-			commands = new ArrayList<>();
 		}
 		// instantiate launcher
 		L2pClassManager cl = new L2pClassManager(new FileSystemRepository(serviceDirectories, true),
 				L2pNodeLauncher.class.getClassLoader());
-		L2pNodeLauncher launcher = new L2pNodeLauncher(cl, port, boostrap);
+		L2pNodeLauncher launcher = new L2pNodeLauncher(launcherConfiguration.getPort(),
+				launcherConfiguration.getBootstrap(), launcherConfiguration.getStorageMode(),
+				launcherConfiguration.useMonitoringObserver(), cl, launcherConfiguration.getNodeIdSeed());
+		// check special commands
+		if (launcherConfiguration.isPrintHelp()) {
+			launcher.bFinished = true;
+			printHelp();
+			return launcher;
+		} else if (launcherConfiguration.isPrintVersion()) {
+			launcher.bFinished = true;
+			printVersion();
+			return launcher;
+		}
 		// handle commands
+		if (launcherConfiguration.isDebugMode()) {
+			System.err.println("WARNING! Launching node in DEBUG mode! THIS NODE IS NON PERSISTENT!");
+		}
 		try {
 			launcher.start();
-
-			for (String command : commands) {
+			for (String command : launcherConfiguration.getCommands()) {
 				System.out.println("Handling: '" + command + "'");
 				launcher.commandPrompt.handleLine(command);
 			}
-
 			if (launcher.isFinished()) {
 				printMessage("All commands have been handled and shutdown has been called -> end!");
 			} else {
-				printMessage("All commands have been handled -- keeping node open!");
+				printMessage("All commands have been handled, but not finished yet -> keeping node open!");
 			}
+			return launcher;
 		} catch (NodeException e) {
 			launcher.bFinished = true;
 			logger.printStackTrace(e);
 			throw e;
 		}
-
-		return launcher;
 	}
 
 	/**
 	 * Prints a help message for command line usage.
 	 * 
-	 * @param message a custom message that will be shown before the help message content
 	 */
-	public static void printHelp(String message) {
-		if (message != null && !message.isEmpty()) {
-			System.out.println(message + "\n\n");
-		}
-
+	public static void printHelp() {
 		System.out.println("las2peer Node Launcher");
-		System.out.println("----------------------\n");
-		System.out.println("Usage:\n");
-
-		System.out.println("Help Message:");
-		System.out.println("\t['--help'|'-h']");
-
-		System.out.println("las2peer version:");
-		System.out.println("\t['--version'|'-v']");
-
-		System.out.println("\nStart Node:");
-		System.out
-				.println("\t{optional: --colored-shell|-c} -p [port] {optional1} {optional2} {method1} {method2} ...");
-
-		System.out.println("\nOptional arguments");
-		System.out.println("\t--colored-shell|-c enables colored output (better readable command line)\n");
-		System.out.println("\t--log-directory|-l [directory] lets you choose the directory for log files (default: "
+		System.out.println("----------------------");
+		System.out.println("Usage:");
+		System.out.println("  java -cp lib/* " + L2pNodeLauncher.class.getCanonicalName() + " ["
+				+ L2pNodeLauncherConfiguration.ARG_HELP + "|" + L2pNodeLauncherConfiguration.ARG_SHORT_HELP + "] ["
+				+ L2pNodeLauncherConfiguration.ARG_VERSION + "|" + L2pNodeLauncherConfiguration.ARG_SHORT_VERSION
+				+ "] [" + L2pNodeLauncherConfiguration.ARG_COLORED_SHELL + "|"
+				+ L2pNodeLauncherConfiguration.ARG_SHORT_COLORED_SHELL
+				+ "] [Node Argument ...] [Launcher Method ...]\n");
+		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_HELP + "|"
+				+ L2pNodeLauncherConfiguration.ARG_SHORT_HELP + "\t\t\t\tprints the help message and exits");
+		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_VERSION + "|"
+				+ L2pNodeLauncherConfiguration.ARG_SHORT_VERSION + "\t\t\t\tprints the version information and exits");
+		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_COLORED_SHELL + "|"
+				+ L2pNodeLauncherConfiguration.ARG_SHORT_COLORED_SHELL
+				+ "\t\t\tenables colored output (better readable command line)");
+		System.out.println("\nNode Arguments:");
+		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_DEBUG + "|"
+				+ L2pNodeLauncherConfiguration.ARG_SHORT_DEBUG
+				+ "\t\t\tstarts the node in debug mode. This means the node will listen and accept connections only\n"
+				+ "\t\t\t\t\tfrom localhost, has a operating system defined port and uses a non persistent storage mode.\n");
+		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_PORT + "|"
+				+ L2pNodeLauncherConfiguration.ARG_SHORT_PORT + " port\t\t\tspecifies the port number of the node\n");
+		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_BOOTSTRAP + "|"
+				+ L2pNodeLauncherConfiguration.ARG_SHORT_BOOTSTRAP
+				+ " address|ip:port,...\trequires a comma seperated list of [address|ip:port] pairs of bootstrap nodes to connect to.");
+		System.out.println("  no bootstrap argument states, that a complete new las2peer network is to start\n");
+		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_LOG_DIRECTORY + "|"
+				+ L2pNodeLauncherConfiguration.ARG_SHORT_LOG_DIRECTORY
+				+ " directory\t\tlets you choose the directory for log files (default: "
 				+ L2pLogger.DEFAULT_LOG_DIRECTORY + ")\n");
-		System.out
-				.println("\t--service-directory|-s [directory] adds the directory you added your services to (default: "
-						+ DEFAULT_SERVICE_DIRECTORY
-						+ ") to the class loader. This argument can occur multiple times.\n");
-		System.out.println("\t--port|-p [port] specifies the port number of the node\n");
-		System.out.println("\tno bootstrap argument states, that a complete new las2peer network is to start");
-		System.out.println("\tor");
+		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_SERVICE_DIRECTORY + "|"
+				+ L2pNodeLauncherConfiguration.ARG_SHORT_SERVICE_DIRECTORY
+				+ " directory\tadds the directory to the service class loader. This argument can occur multiple times.\n");
 		System.out.println(
-				"\t--bootstrap|-b [host-list] requires a comma seperated list of [address:ip] pairs of bootstrap nodes to connect to. This argument can occur multiple times.\n");
-		System.out.println("\t--observer|-o starts a monitoring observer at this node\n");
-		System.out.println(
-				"\t--node-id-seed|-n [long] generates the node id by using this seed to provide persistence\n");
-		System.out
-				.println("\t--storage-mode|-m filesystem|memory sets Pastry's storage mode, defaults to filesystem\n");
+				"  " + L2pNodeLauncherConfiguration.ARG_OBSERVER + "|" + L2pNodeLauncherConfiguration.ARG_SHORT_OBSERVER
+						+ "\t\t\t\tstarts a monitoring observer at this node\n");
+		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_NODE_ID_SEED + "|"
+				+ L2pNodeLauncherConfiguration.ARG_SHORT_NODE_ID_SEED
+				+ " long\t\tgenerates the (random) node id by using this seed\n");
+		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_STORAGE_MODE + "|"
+				+ L2pNodeLauncherConfiguration.ARG_SHORT_STORAGE_MODE + " mode\t\tsets Pastry's storage mode\n"
+				+ "\t\t\t\t\tSupported Modes: "
+				+ String.join(", ", Stream.of(STORAGE_MODE.values()).map(Enum::name).collect(Collectors.toList()))
+				+ "\n");
 
+		System.out.println("Launcher Methods:");
 		System.out.println("The following methods can be used in arbitrary order and number:");
 
 		for (Method m : L2pNodeLauncher.class.getMethods()) {
 			if (Modifier.isPublic(m.getModifiers()) && !Modifier.isStatic(m.getModifiers())) {
-				System.out.print("\t- " + m.getName());
+				System.out.print("  " + m.getName());
 				for (int i = 0; i < m.getParameterTypes().length; i++) {
 					System.out.print(" " + m.getParameterTypes()[i].getName() + " ");
 				}
@@ -1081,19 +1003,25 @@ public class L2pNodeLauncher {
 	}
 
 	/**
-	 * Prints a help message for command line usage.
+	 * Gets the las2peer version as String.
+	 * 
+	 * @return Returns the las2peer version as "major.minor.build" or "DEBUG" if not set.
 	 */
-	public static void printHelp() {
-		printHelp(null);
+	public static String getVersion() {
+		Package p = L2pNodeLauncher.class.getPackage();
+		String version = p.getImplementationVersion();
+		if (version != null) {
+			return version;
+		} else {
+			return "DEBUG";
+		}
 	}
 
 	/**
 	 * Prints the las2peer version.
 	 */
 	public static void printVersion() {
-		Package p = L2pNodeLauncher.class.getPackage();
-		String version = p.getImplementationVersion();
-		System.out.println("las2peer version \"" + version + "\"");
+		System.out.println("las2peer version \"" + getVersion() + "\"");
 	}
 
 	/**
@@ -1102,109 +1030,45 @@ public class L2pNodeLauncher {
 	 * The method will start a node and try to invoke all command line parameters as parameterless methods of this
 	 * class.
 	 * 
-	 * Hint: with "log-directory=.." you can set the logfile directory you want to use.
-	 * 
-	 * Hint: with "service-directory=.." you can set the directory your service jars are located at.
-	 * 
 	 * @param argv
-	 * @throws InterruptedException
-	 * @throws MalformedXMLException
-	 * @throws IOException
-	 * @throws L2pSecurityException
-	 * @throws EncodingFailedException
-	 * @throws SerializationException
-	 * @throws NodeException
 	 */
-	public static void main(String[] argv) throws InterruptedException, MalformedXMLException, IOException,
-			L2pSecurityException, EncodingFailedException, SerializationException, NodeException {
-		System.setSecurityManager(new L2pSecurityManager());
-		// self test encryption environment
+	public static void main(String[] argv) {
 		try {
-			CryptoTools.encryptSymmetric("las2peer rulez!".getBytes(), CryptoTools.generateSymmetricKey());
-		} catch (CryptoException e) {
-			throw new L2pSecurityException(
-					"Fatal Error! Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy Files are not installed!",
-					e);
-		}
-		// parse command line parameter into list
-		List<String> instArgs = new ArrayList<>();
-		// a command can have brackets with spaces inside, which is split by arg parsing falsely
-		List<String> argvJoined = new ArrayList<>();
-		String joined = "";
-		for (String arg : argv) {
-			int opening = arg.length() - arg.replace("(", "").length(); // nice way to count opening brackets
-			int closing = arg.length() - arg.replace(")", "").length();
-			if (opening == closing && joined.isEmpty()) {
-				// just an argument
-				argvJoined.add(arg);
-			} else {
-				// previous arg was unbalanced, attach this arg
-				joined += arg;
-				int openingJoined = joined.length() - joined.replace("(", "").length();
-				int closingJoined = joined.length() - joined.replace(")", "").length();
-				if (openingJoined == closingJoined) {
-					// now its balanced
-					argvJoined.add(joined);
-					joined = "";
-				} else if (openingJoined < closingJoined) {
-					throw new IllegalArgumentException("command \"" + joined + "\" has too many closing brackets!");
-				} // needs more args to balance
-			}
-		}
-		if (!joined.isEmpty()) {
-			throw new IllegalArgumentException("command \"" + joined + "\" has too many opening brackets!");
-		}
-		for (String arg : argvJoined) {
-			String larg = arg.toLowerCase();
-			if (larg.equals("-h") == true || larg.equals("--help") == true) { // Help Message
-				printHelp();
-				System.exit(1);
-			} else if (larg.equals("-v") || larg.equals("--version")) {
-				printVersion();
-				System.exit(1);
-			} else if (larg.equals("-w") || larg.equals("--windows-shell")) {
-				printWarning(
-						"Ignoring obsolete argument '" + arg + "', because colored output is disabled by default.");
-			} else if (larg.equals("-c") == true || larg.equals("--colored-shell") == true) { // turn on colored output
-				ColoredOutput.allOn();
-			} else { // node instance parameter
-				instArgs.add(arg);
-			}
-		}
-
-		// Launches the node
-		L2pNodeLauncher launcher = launchSingle(instArgs);
-		if (launcher == null) {
-			System.exit(2);
-		}
-
-		if (launcher.isFinished()) {
-			System.out.println("node has handled all commands and shut down!");
-			try {
-				Iterator<Connector> iterator = connectors.iterator();
-				while (iterator.hasNext()) {
-					iterator.next().stop();
-				}
-			} catch (ConnectorException e) {
-				logger.printStackTrace(e);
-			}
-		} else {
-			System.out.println("node has handled all commands -- keeping node open\n");
-			System.out.println("press Strg-C to exit\n");
-			try {
-				while (true) {
-					Thread.sleep(5000);
-				}
-			} catch (InterruptedException e) {
+			// Launches the node
+			L2pNodeLauncher launcher = launchConfiguration(L2pNodeLauncherConfiguration.createFromMainArgs(argv));
+			if (launcher.isFinished()) {
+				System.out.println("node has handled all commands and shut down!");
 				try {
 					Iterator<Connector> iterator = connectors.iterator();
 					while (iterator.hasNext()) {
 						iterator.next().stop();
 					}
-				} catch (ConnectorException ce) {
-					logger.printStackTrace(ce);
+				} catch (ConnectorException e) {
+					logger.printStackTrace(e);
+				}
+			} else {
+				System.out.println("node has handled all commands -- keeping node open\n");
+				System.out.println("press Strg-C to exit\n");
+				try {
+					while (true) {
+						Thread.sleep(5000);
+					}
+				} catch (InterruptedException e) {
+					try {
+						Iterator<Connector> iterator = connectors.iterator();
+						while (iterator.hasNext()) {
+							iterator.next().stop();
+						}
+					} catch (ConnectorException ce) {
+						logger.printStackTrace(ce);
+					}
 				}
 			}
+		} catch (CryptoException e) {
+			e.printStackTrace();
+		} catch (NodeException e) {
+			// exception already logged
+			System.exit(2);
 		}
 	}
 }

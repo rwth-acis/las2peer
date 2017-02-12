@@ -227,8 +227,8 @@ public abstract class Service extends Configurable {
 	 * @throws i5.las2peer.execution.NoSuchServiceMethodException
 	 *
 	 */
-	public Method searchMethod(String methodName, Object[] params) throws L2pSecurityException,
-			i5.las2peer.execution.NoSuchServiceMethodException {
+	public Method searchMethod(String methodName, Object[] params)
+			throws L2pSecurityException, i5.las2peer.execution.NoSuchServiceMethodException {
 		Class<?>[] acActualParamTypes = new Class[params.length];
 		Class<? extends Service> thisClass = this.getClass();
 
@@ -251,8 +251,8 @@ public abstract class Service extends Configurable {
 						for (int i = 0; i < acActualParamTypes.length && bPossible; i++) {
 							if (!acCheckParamTypes[i].isInstance(params[i])) {
 								// param[i] is not an instance of the formal parameter type
-								if (!(acCheckParamTypes[i].isPrimitive() && ServiceHelper.getWrapperClass(
-										acCheckParamTypes[i]).isInstance(params[i]))
+								if (!(acCheckParamTypes[i].isPrimitive()
+										&& ServiceHelper.getWrapperClass(acCheckParamTypes[i]).isInstance(params[i]))
 										&& !(ServiceHelper.isWrapperClass(acCheckParamTypes[i]) && ServiceHelper
 												.getUnwrappedClass(acCheckParamTypes[i]).isInstance(params[i]))) {
 									// and not wrapped or unwrapped either! -> so not more possibilities to match!

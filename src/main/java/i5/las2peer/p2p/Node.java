@@ -1,5 +1,24 @@
 package i5.las2peer.p2p;
 
+import java.io.File;
+import java.io.Serializable;
+import java.lang.management.ManagementFactory;
+import java.lang.reflect.InvocationTargetException;
+import java.security.KeyPair;
+import java.security.PublicKey;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.Vector;
+
+import com.sun.management.OperatingSystemMXBean;
+
 import i5.las2peer.api.Configurable;
 import i5.las2peer.api.exceptions.ArtifactNotFoundException;
 import i5.las2peer.api.exceptions.EnvelopeAlreadyExistsException;
@@ -42,31 +61,9 @@ import i5.las2peer.testing.MockAgentFactory;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
 import i5.las2peer.tools.SerializationException;
-
-import java.io.File;
-import java.io.Serializable;
-import java.lang.management.ManagementFactory;
-import java.lang.reflect.InvocationTargetException;
-import java.security.KeyPair;
-import java.security.PublicKey;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.Vector;
-
 import rice.pastry.NodeHandle;
 import rice.pastry.PastryNode;
 import rice.pastry.socket.SocketNodeHandle;
-
-import com.sun.management.OperatingSystemMXBean;
 
 /**
  * Base class for nodes in the las2peer environment.
@@ -144,12 +141,12 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	/**
 	 * observers to be notified of all occurring events
 	 */
-	private HashSet<NodeObserver> observers = new HashSet<NodeObserver>();
+	private HashSet<NodeObserver> observers = new HashSet<>();
 
 	/**
 	 * contexts for local method invocation
 	 */
-	private Hashtable<Long, AgentContext> htLocalExecutionContexts = new Hashtable<Long, AgentContext>();
+	private Hashtable<String, AgentContext> htLocalExecutionContexts = new Hashtable<>();
 
 	/**
 	 * Timer to tidy up hashtables etc (Contexts)
@@ -164,20 +161,20 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	/**
 	 * hashtable with all {@link i5.las2peer.security.MessageReceiver}s registered at this node
 	 */
-	private Hashtable<Long, MessageReceiver> htRegisteredReceivers = new Hashtable<Long, MessageReceiver>();
+	private Hashtable<String, MessageReceiver> htRegisteredReceivers = new Hashtable<>();
 
 	/**
 	 * map with all topics and their listeners
 	 */
-	private HashMap<Long, TreeMap<Long, MessageReceiver>> mapTopicListeners = new HashMap<Long, TreeMap<Long, MessageReceiver>>();
+	private HashMap<Long, TreeMap<String, MessageReceiver>> mapTopicListeners = new HashMap<>();
 	/**
 	 * other direction of {@link #mapTopicListeners}
 	 */
-	private HashMap<Long, TreeSet<Long>> mapListenerTopics = new HashMap<Long, TreeSet<Long>>();
+	private HashMap<String, TreeSet<Long>> mapListenerTopics = new HashMap<>();
 
 	private L2pClassManager baseClassLoader = null;
 
-	private Hashtable<Long, MessageResultListener> htAnswerListeners = new Hashtable<Long, MessageResultListener>();
+	private Hashtable<Long, MessageResultListener> htAnswerListeners = new Hashtable<>();
 
 	private static final String DEFAULT_INFORMATION_FILE = "etc/nodeInfo.xml";
 	private String sInformationFileName = DEFAULT_INFORMATION_FILE;
@@ -298,8 +295,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param service The service that should be monitored.
 	 */
 	public void setServiceMonitoring(ServiceAgent service) {
-		observerNotice(Event.SERVICE_ADD_TO_MONITORING, this.getNodeId(), service.getId(), null, null, service
-				.getServiceNameVersion().toString());
+		observerNotice(Event.SERVICE_ADD_TO_MONITORING, this.getNodeId(), service.getSafeId(), null, null,
+				service.getServiceNameVersion().toString());
 	}
 
 	/**
@@ -309,8 +306,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param remarks Some free text note or description about this event.
 	 */
 	public void observerNotice(Event event, String remarks) {
-		Long sourceAgentId = null; // otherwise calls are ambigious
-		observerNotice(event, null, sourceAgentId, null, null, remarks);
+		observerNotice(event, null, (String) null, null, null, remarks);
 	}
 
 	/**
@@ -321,8 +317,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param remarks Some free text note or description about this event.
 	 */
 	public void observerNotice(Event event, Object sourceNode, String remarks) {
-		Long sourceAgentId = null; // otherwise calls are ambigious
-		observerNotice(event, sourceNode, sourceAgentId, null, null, remarks);
+		observerNotice(event, sourceNode, (String) null, null, null, remarks);
 	}
 
 	/**
@@ -333,7 +328,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param sourceAgentId
 	 * @param remarks Some free text note or description about this event.
 	 */
-	public void observerNotice(Event event, Object sourceNode, long sourceAgentId, String remarks) {
+	public void observerNotice(Event event, Object sourceNode, String sourceAgentId, String remarks) {
 		observerNotice(event, sourceNode, sourceAgentId, null, null, remarks);
 	}
 
@@ -346,9 +341,9 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param remarks Some free text note or description about this event.
 	 */
 	public void observerNotice(Event event, Object sourceNode, MessageReceiver sourceAgent, String remarks) {
-		Long sourceAgentId = null;
+		String sourceAgentId = null;
 		if (sourceAgent != null) {
-			sourceAgentId = sourceAgent.getResponsibleForAgentId();
+			sourceAgentId = sourceAgent.getResponsibleForAgentSafeId();
 		}
 		observerNotice(event, sourceNode, sourceAgentId, null, null, remarks);
 	}
@@ -365,13 +360,13 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 */
 	public void observerNotice(Event event, Object sourceNode, Agent sourceAgent, Object destinationNode,
 			Agent destinationAgent, String remarks) {
-		Long sourceAgentId = null;
+		String sourceAgentId = null;
 		if (sourceAgent != null) {
-			sourceAgentId = sourceAgent.getId();
+			sourceAgentId = sourceAgent.getSafeId();
 		}
-		Long destinationAgentId = null;
+		String destinationAgentId = null;
 		if (destinationAgent != null) {
-			destinationAgentId = destinationAgent.getId();
+			destinationAgentId = destinationAgent.getSafeId();
 		}
 		observerNotice(event, sourceNode, sourceAgentId, destinationNode, destinationAgentId, remarks);
 	}
@@ -386,8 +381,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param destinationAgentId
 	 * @param remarks Some free text note or description about this event.
 	 */
-	public void observerNotice(Event event, Object sourceNode, Long sourceAgentId, Object destinationNode,
-			Long destinationAgentId, String remarks) {
+	public void observerNotice(Event event, Object sourceNode, String sourceAgentId, Object destinationNode,
+			String destinationAgentId, String remarks) {
 		long timestamp = new Date().getTime();
 		String sourceNodeRepresentation = getNodeRepresentation(sourceNode);
 		String destinationNodeRepresentation = getNodeRepresentation(destinationNode);
@@ -554,8 +549,9 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	public synchronized void shutDown() {
 		stopTidyUpTimer();
 
-		Long[] receivers = htRegisteredReceivers.keySet().toArray(new Long[0]); // avoid ConcurrentModificationEception
-		for (Long id : receivers) {
+		// avoid ConcurrentModificationEception
+		String[] receivers = htRegisteredReceivers.keySet().toArray(new String[0]);
+		for (String id : receivers) {
 			htRegisteredReceivers.get(id).notifyUnregister();
 		}
 		observerNotice(Event.NODE_SHUTDOWN, this.getNodeId(), null);
@@ -570,7 +566,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 				break;
 			}
 		}
-		htRegisteredReceivers = new Hashtable<Long, MessageReceiver>();
+		htRegisteredReceivers = new Hashtable<>();
 	}
 
 	/**
@@ -583,8 +579,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @throws AgentException any problem with the agent itself (probably on calling
 	 *             {@link i5.las2peer.security.Agent#notifyRegistrationTo}
 	 */
-	public void registerReceiver(MessageReceiver receiver) throws AgentAlreadyRegisteredException,
-			L2pSecurityException, AgentException {
+	public void registerReceiver(MessageReceiver receiver)
+			throws AgentAlreadyRegisteredException, L2pSecurityException, AgentException {
 
 		// TODO allow multiple mediators registered at the same time for one agent to avoid conflicts between connectors
 
@@ -592,8 +588,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 			throw new IllegalStateException("You can register agents only to running nodes!");
 		}
 
-		if (htRegisteredReceivers.contains(receiver.getResponsibleForAgentId())
-				&& htRegisteredReceivers.get(receiver.getResponsibleForAgentId()) != receiver) {
+		if (htRegisteredReceivers.contains(receiver.getResponsibleForAgentSafeId())
+				&& htRegisteredReceivers.get(receiver.getResponsibleForAgentSafeId()) != receiver) {
 			throw new AgentAlreadyRegisteredException(
 					"Another instance of this agent (or mediator) is already registered here!");
 		}
@@ -624,19 +620,19 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 			observerNotice(Event.AGENT_REGISTERED, this.getNodeId(), receiver, "Mediator");
 		}
 
-		htRegisteredReceivers.put(receiver.getResponsibleForAgentId(), receiver);
+		htRegisteredReceivers.put(receiver.getResponsibleForAgentSafeId(), receiver);
 
 		try {
 			receiver.notifyRegistrationTo(this);
 		} catch (AgentException e) {
 			observerNotice(Event.AGENT_LOAD_FAILED, this, receiver, e.toString());
 
-			htRegisteredReceivers.remove(receiver.getResponsibleForAgentId());
+			htRegisteredReceivers.remove(receiver.getResponsibleForAgentSafeId());
 			throw e;
 		} catch (Exception e) {
 			observerNotice(Event.AGENT_LOAD_FAILED, this, receiver, e.toString());
 
-			htRegisteredReceivers.remove(receiver.getResponsibleForAgentId());
+			htRegisteredReceivers.remove(receiver.getResponsibleForAgentSafeId());
 			throw new AgentException("problems notifying agent of registration", e);
 		}
 
@@ -650,7 +646,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @throws NodeException error in underlying layer
 	 */
 	public void unregisterReceiver(MessageReceiver receiver) throws AgentNotKnownException, NodeException {
-		long agentId = receiver.getResponsibleForAgentId();
+		String agentId = receiver.getResponsibleForAgentSafeId();
 		unregisterReceiver(agentId);
 
 		// unregister from topics
@@ -662,7 +658,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 		}
 	}
 
-	private void unregisterReceiver(long agentId) throws AgentNotKnownException {
+	private void unregisterReceiver(String agentId) throws AgentNotKnownException {
 		if (!htRegisteredReceivers.containsKey(agentId)) {
 			throw new AgentNotKnownException(agentId);
 		}
@@ -678,21 +674,21 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @throws AgentNotKnownException
 	 */
 	public void registerReceiverToTopic(MessageReceiver receiver, long topic) throws AgentNotKnownException {
-		if (!htRegisteredReceivers.containsKey(receiver.getResponsibleForAgentId())) {
-			throw new AgentNotKnownException(receiver.getResponsibleForAgentId());
+		if (!htRegisteredReceivers.containsKey(receiver.getResponsibleForAgentSafeId())) {
+			throw new AgentNotKnownException(receiver.getResponsibleForAgentSafeId());
 		}
 
 		synchronized (mapListenerTopics) {
 			synchronized (mapTopicListeners) {
-				if (mapListenerTopics.get(receiver.getResponsibleForAgentId()) == null) {
-					mapListenerTopics.put(receiver.getResponsibleForAgentId(), new TreeSet<>());
+				if (mapListenerTopics.get(receiver.getResponsibleForAgentSafeId()) == null) {
+					mapListenerTopics.put(receiver.getResponsibleForAgentSafeId(), new TreeSet<>());
 				}
 
-				if (mapListenerTopics.get(receiver.getResponsibleForAgentId()).add(topic)) {
+				if (mapListenerTopics.get(receiver.getResponsibleForAgentSafeId()).add(topic)) {
 					if (mapTopicListeners.get(topic) == null) {
 						mapTopicListeners.put(topic, new TreeMap<>());
 					}
-					mapTopicListeners.get(topic).put(receiver.getResponsibleForAgentId(), receiver);
+					mapTopicListeners.get(topic).put(receiver.getResponsibleForAgentSafeId(), receiver);
 				}
 			}
 		}
@@ -706,10 +702,10 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @throws NodeException
 	 */
 	public void unregisterReceiverFromTopic(MessageReceiver receiver, long topic) throws NodeException {
-		unregisterReceiverFromTopic(receiver.getResponsibleForAgentId(), topic);
+		unregisterReceiverFromTopic(receiver.getResponsibleForAgentSafeId(), topic);
 	}
 
-	private void unregisterReceiverFromTopic(long receiverId, long topic) {
+	private void unregisterReceiverFromTopic(String receiverId, long topic) {
 		synchronized (mapListenerTopics) {
 			synchronized (mapTopicListeners) {
 				if (!mapListenerTopics.containsKey(receiverId) || !mapListenerTopics.get(receiverId).contains(topic)) {
@@ -741,41 +737,13 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	}
 
 	/**
-	 * @deprecated Use {@link Node#unregisterReceiver(MessageReceiver)} instead!
-	 * 
-	 *             Unregisters an agent from this node.
-	 * 
-	 * @param agent
-	 * @throws AgentNotKnownException the agent is not registered to this node
-	 * @throws NodeException
-	 */
-	@Deprecated
-	public void unregisterAgent(Agent agent) throws AgentNotKnownException, NodeException {
-		unregisterReceiver(agent);
-	}
-
-	/**
-	 * @deprecated Use {@link Node#unregisterReceiver(MessageReceiver)} instead
-	 * 
-	 *             Is an instance of the given agent running at this node?
-	 * 
-	 * @param agentId
-	 * @throws AgentNotKnownException
-	 */
-	@Deprecated
-	public void unregisterAgent(long agentId) throws AgentNotKnownException {
-		// when removed, merge both unregisterReceiver methods into one public
-		unregisterReceiver(agentId);
-	}
-
-	/**
 	 * Is an instance of the given agent running at this node?
 	 * 
 	 * @param agent
 	 * @return true, if the given agent is running at this node
 	 */
 	public boolean hasLocalAgent(Agent agent) {
-		return hasLocalAgent(agent.getId());
+		return hasLocalAgent(agent.getSafeId());
 	}
 
 	/**
@@ -784,7 +752,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param agentId
 	 * @return true, if the given agent is registered here
 	 */
-	public boolean hasLocalAgent(long agentId) {
+	public boolean hasLocalAgent(String agentId) {
 		return htRegisteredReceivers.get(agentId) != null;
 	}
 
@@ -833,8 +801,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @throws NodeNotFoundException
 	 * @throws L2pSecurityException
 	 */
-	public void sendResponse(Message message, Object atNodeId) throws AgentNotKnownException, NodeNotFoundException,
-			L2pSecurityException {
+	public void sendResponse(Message message, Object atNodeId)
+			throws AgentNotKnownException, NodeNotFoundException, L2pSecurityException {
 		sendMessage(message, atNodeId, null);
 	}
 
@@ -874,7 +842,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 
 			receiver.receiveMessage(message, getAgentContext(message.getSenderId()));
 		} else {
-			TreeMap<Long, MessageReceiver> map = mapTopicListeners.get(message.getTopicId());
+			TreeMap<String, MessageReceiver> map = mapTopicListeners.get(message.getTopicId());
 
 			if (map == null) {
 				throw new MessageException("No receiver registered for this topic!");
@@ -888,7 +856,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 							msg = msg.clone();
 						}
 
-						msg.setRecipientId(receiver.getResponsibleForAgentId());
+						msg.setRecipientId(receiver.getResponsibleForAgentSafeId());
 
 						receiver.receiveMessage(msg, getAgentContext(message.getSenderId()));
 					}
@@ -959,7 +927,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @return array with the IDs of nodes, where the given agent is registered
 	 * @throws AgentNotKnownException
 	 */
-	public abstract Object[] findRegisteredAgent(long agentId, int hintOfExpectedCount) throws AgentNotKnownException;
+	public abstract Object[] findRegisteredAgent(String agentId, int hintOfExpectedCount) throws AgentNotKnownException;
 
 	/**
 	 * Search the nodes for registered versions of the given agent. Returns an array of objects identifying the nodes
@@ -970,7 +938,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @throws AgentNotKnownException
 	 */
 	public Object[] findRegisteredAgent(Agent agent) throws AgentNotKnownException {
-		return findRegisteredAgent(agent.getId());
+		return findRegisteredAgent(agent.getSafeId());
 	}
 
 	/**
@@ -981,7 +949,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @return array with the IDs of nodes, where the given agent is registered
 	 * @throws AgentNotKnownException
 	 */
-	public Object[] findRegisteredAgent(long agentId) throws AgentNotKnownException {
+	public Object[] findRegisteredAgent(String agentId) throws AgentNotKnownException {
 		return findRegisteredAgent(agentId, 1);
 	}
 
@@ -995,7 +963,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @throws AgentNotKnownException
 	 */
 	public Object[] findRegisteredAgent(Agent agent, int hintOfExpectedCount) throws AgentNotKnownException {
-		return findRegisteredAgent(agent.getId(), hintOfExpectedCount);
+		return findRegisteredAgent(agent.getSafeId(), hintOfExpectedCount);
 	}
 
 	/**
@@ -1009,7 +977,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @throws AgentNotKnownException
 	 */
 	@Override
-	public abstract Agent getAgent(long id) throws AgentNotKnownException;
+	public abstract Agent getAgent(String id) throws AgentNotKnownException;
 
 	/**
 	 * Does this node know an agent with the given id?
@@ -1020,10 +988,9 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @return true, if this node knows the given agent
 	 */
 	@Override
-	public boolean hasAgent(long id) {
+	public boolean hasAgent(String id) {
 		// Since an request for this agent is probable after this check, it makes sense
 		// to try to load it into this node and decide afterwards
-
 		try {
 			getAgent(id);
 			return true;
@@ -1059,7 +1026,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @return all local registered UserAgents
 	 */
 	public UserAgent[] getRegisteredAgents() {
-		Vector<UserAgent> result = new Vector<UserAgent>();
+		Vector<UserAgent> result = new Vector<>();
 
 		for (MessageReceiver rec : htRegisteredReceivers.values()) {
 			if (rec instanceof UserAgent) {
@@ -1076,7 +1043,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @return all local registered ServiceAgents
 	 */
 	public ServiceAgent[] getRegisteredServices() {
-		Vector<ServiceAgent> result = new Vector<ServiceAgent>();
+		Vector<ServiceAgent> result = new Vector<>();
 
 		for (MessageReceiver rec : htRegisteredReceivers.values()) {
 			if (rec instanceof ServiceAgent) {
@@ -1097,12 +1064,12 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @throws L2pSecurityException
 	 * @throws AgentAlreadyRegisteredException
 	 */
-	public Mediator createMediatorForAgent(Agent agent) throws AgentNotKnownException, L2pSecurityException,
-			AgentAlreadyRegisteredException {
+	public Mediator createMediatorForAgent(Agent agent)
+			throws AgentNotKnownException, L2pSecurityException, AgentAlreadyRegisteredException {
 		if (agent.isLocked()) {
 			throw new L2pSecurityException("You need to unlock the agent for mediation!");
 		}
-		MessageReceiver receiver = htRegisteredReceivers.get(agent.getId());
+		MessageReceiver receiver = htRegisteredReceivers.get(agent.getSafeId());
 
 		if (receiver != null && !(receiver instanceof Mediator)) {
 			throw new AgentNotKnownException("The requested Agent is registered directly at this node!");
@@ -1123,8 +1090,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @throws L2pSecurityException
 	 * @throws AgentException
 	 */
-	public abstract void storeAgent(Agent agent) throws AgentAlreadyRegisteredException, L2pSecurityException,
-			AgentException;
+	public abstract void storeAgent(Agent agent)
+			throws AgentAlreadyRegisteredException, L2pSecurityException, AgentException;
 
 	/**
 	 * Updates an existing agent of the network.
@@ -1180,7 +1147,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @return agent id
 	 * @throws AgentNotKnownException
 	 */
-	public long getAgentIdForLogin(String login) throws AgentNotKnownException, L2pSecurityException {
+	public String getAgentIdForLogin(String login) throws AgentNotKnownException, L2pSecurityException {
 		return userManager.getAgentIdByLogin(login);
 	}
 
@@ -1191,7 +1158,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @return agent id
 	 * @throws AgentNotKnownException
 	 */
-	public long getAgentIdForEmail(String email) throws AgentNotKnownException, L2pSecurityException {
+	public String getAgentIdForEmail(String email) throws AgentNotKnownException, L2pSecurityException {
 		return userManager.getAgentIdByEmail(email);
 	}
 
@@ -1278,8 +1245,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @throws InterruptedException
 	 */
 	public Serializable invoke(Agent executing, ServiceNameVersion service, String method, Serializable[] parameters,
-			boolean exactVersion) throws L2pSecurityException, AgentNotKnownException, L2pServiceException,
-			InterruptedException {
+			boolean exactVersion)
+			throws L2pSecurityException, AgentNotKnownException, L2pServiceException, InterruptedException {
 		return invoke(executing, service, method, parameters, exactVersion, false);
 	}
 
@@ -1300,8 +1267,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @throws InterruptedException
 	 */
 	public Serializable invoke(Agent executing, ServiceNameVersion service, String method, Serializable[] parameters,
-			boolean exactVersion, boolean localOnly) throws L2pSecurityException, AgentNotKnownException,
-			L2pServiceException, InterruptedException {
+			boolean exactVersion, boolean localOnly)
+			throws L2pSecurityException, AgentNotKnownException, L2pServiceException, InterruptedException {
 
 		if (getStatus() != NodeStatus.RUNNING) {
 			throw new IllegalStateException("You can invoke methods only on a running node!");
@@ -1357,8 +1324,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @throws L2pServiceException
 	 */
 	public Serializable invokeLocally(Agent executing, ServiceAgent serviceAgent, String method,
-			Serializable[] parameters) throws L2pSecurityException, AgentNotKnownException, InterruptedException,
-			L2pServiceException {
+			Serializable[] parameters)
+			throws L2pSecurityException, AgentNotKnownException, InterruptedException, L2pServiceException {
 
 		if (getStatus() != NodeStatus.RUNNING) {
 			throw new IllegalStateException("You can invoke methods only on a running node!");
@@ -1419,7 +1386,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @throws AgentNotKnownException
 	 * @throws NodeNotFoundException
 	 */
-	public Serializable invokeGlobally(Agent executing, long serviceAgentId, Object nodeId, String method,
+	public Serializable invokeGlobally(Agent executing, String serviceAgentId, Object nodeId, String method,
 			Serializable[] parameters) throws L2pSecurityException, ServiceInvocationException, InterruptedException,
 			TimeoutException, AgentNotKnownException, NodeNotFoundException {
 
@@ -1491,10 +1458,10 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 				return ((RMIResultContent) resultContent).getContent();
 			} else {
 				// Do not log service class name (privacy..)
-				this.observerNotice(Event.RMI_FAILED, this.getNodeId(), executing, "Unknown RMI response type: "
-						+ resultContent.getClass().getCanonicalName());
-				throw new ServiceInvocationException("Unknown RMI response type: "
-						+ resultContent.getClass().getCanonicalName());
+				this.observerNotice(Event.RMI_FAILED, this.getNodeId(), executing,
+						"Unknown RMI response type: " + resultContent.getClass().getCanonicalName());
+				throw new ServiceInvocationException(
+						"Unknown RMI response type: " + resultContent.getClass().getCanonicalName());
 			}
 		} catch (AgentNotKnownException e) {
 			// Do not log service class name (privacy..)
@@ -1551,8 +1518,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 			return false;
 		}
 
-		observerNotice(Event.MESSAGE_RECEIVED_ANSWER, answer.getSendingNodeId(), answer.getSenderId(),
-				this.getNodeId(), answer.getRecipientId(), "" + answer.getResponseToId());
+		observerNotice(Event.MESSAGE_RECEIVED_ANSWER, answer.getSendingNodeId(), answer.getSenderId(), this.getNodeId(),
+				answer.getRecipientId(), "" + answer.getResponseToId());
 
 		MessageResultListener listener = htAnswerListeners.get(answer.getResponseToId());
 		if (listener == null) {
@@ -1627,8 +1594,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @throws InterruptedException
 	 * @throws TimeoutException
 	 */
-	public Message[] sendMessageAndCollectAnswers(Message m, int recipientCount) throws InterruptedException,
-			TimeoutException {
+	public Message[] sendMessageAndCollectAnswers(Message m, int recipientCount)
+			throws InterruptedException, TimeoutException {
 		long timeout = m.getTimeoutTs() - new Date().getTime();
 		MessageResultListener listener = new MessageResultListener(timeout, timeout / 4);
 		listener.addRecipients(recipientCount);
@@ -1655,7 +1622,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @throws L2pSecurityException
 	 * @throws AgentNotKnownException
 	 */
-	protected AgentContext getAgentContext(long agentId) throws L2pSecurityException, AgentNotKnownException {
+	protected AgentContext getAgentContext(String agentId) throws L2pSecurityException, AgentNotKnownException {
 		AgentContext result = htLocalExecutionContexts.get(agentId);
 
 		if (result == null) {
@@ -1676,14 +1643,14 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @return a context
 	 */
 	protected AgentContext getAgentContext(Agent agent) {
-		AgentContext result = htLocalExecutionContexts.get(agent.getId());
+		AgentContext result = htLocalExecutionContexts.get(agent.getSafeId());
 
 		if (result == null || (result.getMainAgent().isLocked() && !agent.isLocked())) {
 			try {
 				result = new AgentContext(this, agent);
 			} catch (L2pSecurityException e) {
 			}
-			htLocalExecutionContexts.put(agent.getId(), result);
+			htLocalExecutionContexts.put(agent.getSafeId(), result);
 		}
 
 		result.touch();
@@ -1770,13 +1737,12 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * * Deleting old {@link AgentContext} objects from {@link #htLocalExecutionContexts}
 	 */
 	protected void runTidyUpTimer() {
-		Set<Entry<Long, AgentContext>> s = htLocalExecutionContexts.entrySet();
 		synchronized (htLocalExecutionContexts) {
-			Iterator<Entry<Long, AgentContext>> i = s.iterator();
-			while (i.hasNext()) {
-				Entry<Long, AgentContext> e = i.next();
-				if (e.getValue().getLastUsageTimestamp() <= new Date().getTime() - agentContextLifetime * 1000) {
-					i.remove();
+			Iterator<AgentContext> itContext = htLocalExecutionContexts.values().iterator();
+			while (itContext.hasNext()) {
+				AgentContext context = itContext.next();
+				if (context.getLastUsageTimestamp() <= new Date().getTime() - agentContextLifetime * 1000) {
+					itContext.remove();
 				}
 			}
 		}

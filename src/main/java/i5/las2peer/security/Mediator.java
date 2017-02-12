@@ -17,7 +17,8 @@ import i5.las2peer.tools.SerializationException;
 
 /**
  * A Mediator acts on behalf of an {@link PassphraseAgent}. This necessary e.g. for remote users logged in via a
- * {@link i5.las2peer.api.Connector} to collect incoming messages from the P2P network and transfer it to the connector. <br>
+ * {@link i5.las2peer.api.Connector} to collect incoming messages from the P2P network and transfer it to the connector.
+ * <br>
  * Two ways for message handling are provided: Register a {@link MessageHandler} that will be called for each received
  * message. Multiple MessageHandlers are possible (for example for different message contents). The second way to handle
  * messages is to get pending messages from the Mediator directly via the provided methods. Handling then has to be done
@@ -26,7 +27,7 @@ import i5.las2peer.tools.SerializationException;
  */
 public class Mediator implements MessageReceiver {
 
-	private LinkedList<Message> pending = new LinkedList<Message>();
+	private LinkedList<Message> pending = new LinkedList<>();
 
 	private Agent myAgent;
 	private Node runningAt;
@@ -36,7 +37,7 @@ public class Mediator implements MessageReceiver {
 	 */
 	private boolean isRegistered = false;
 
-	private Vector<MessageHandler> registeredHandlers = new Vector<MessageHandler>();
+	private Vector<MessageHandler> registeredHandlers = new Vector<>();
 
 	/**
 	 * Creates a new mediator.
@@ -78,7 +79,7 @@ public class Mediator implements MessageReceiver {
 
 	@Override
 	public void receiveMessage(Message message, AgentContext c) throws MessageException {
-		if (message.getRecipientId() != myAgent.getId()) {
+		if (!message.getRecipientId().equalsIgnoreCase(myAgent.getSafeId())) {
 			throw new MessageException("I'm not responsible for the receiver (something went very wrong)!");
 		}
 
@@ -155,8 +156,8 @@ public class Mediator implements MessageReceiver {
 	}
 
 	@Override
-	public long getResponsibleForAgentId() {
-		return myAgent.getId();
+	public String getResponsibleForAgentSafeId() {
+		return myAgent.getSafeId();
 	}
 
 	/**
@@ -170,8 +171,9 @@ public class Mediator implements MessageReceiver {
 
 	@Override
 	public void notifyRegistrationTo(Node node) {
-		if (node != runningAt)
+		if (node != runningAt) {
 			throw new IllegalStateException("The mediator has not been created at this node.");
+		}
 
 		this.isRegistered = true;
 	}
@@ -248,7 +250,7 @@ public class Mediator implements MessageReceiver {
 	public int unregisterMessageHandlerClass(Class<?> cls) {
 		int result = 0;
 
-		Vector<MessageHandler> newHandlers = new Vector<MessageHandler>();
+		Vector<MessageHandler> newHandlers = new Vector<>();
 
 		for (int i = 0; i < registeredHandlers.size(); i++) {
 			if (!cls.isInstance(registeredHandlers.get(i))) {

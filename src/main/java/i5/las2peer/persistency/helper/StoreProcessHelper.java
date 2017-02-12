@@ -43,7 +43,7 @@ public class StoreProcessHelper implements StorageStoreResultHandler, StorageCol
 	}
 
 	@Override
-	public Set<Long> mergeGroups(Set<Long> toStoreGroups, Set<Long> inNetworkGroups) {
+	public Set<String> mergeGroups(Set<String> toStoreGroups, Set<String> inNetworkGroups) {
 		// nothing to merge here in usual store operations there should be nothing to merge
 		return new HashSet<>();
 	}

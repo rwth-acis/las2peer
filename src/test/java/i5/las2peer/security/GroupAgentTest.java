@@ -42,9 +42,9 @@ public class GroupAgentTest {
 		GroupAgent testee = GroupAgent.createGroupAgent(new Agent[] { adam, eve });
 		assertEquals(2, testee.getSize());
 		assertFalse(testee.isMember(kain));
-		assertFalse(testee.isMember(abel.getId()));
+		assertFalse(testee.isMember(abel.getSafeId()));
 		assertTrue(testee.isMember(adam));
-		assertTrue(testee.isMember(eve.getId()));
+		assertTrue(testee.isMember(eve.getSafeId()));
 
 		assertTrue(testee.isLocked());
 
@@ -62,9 +62,9 @@ public class GroupAgentTest {
 
 		assertEquals(2, fromXml.getSize());
 		assertFalse(testee.isMember(kain));
-		assertFalse(testee.isMember(abel.getId()));
+		assertFalse(testee.isMember(abel.getSafeId()));
 		assertTrue(testee.isMember(adam));
-		assertTrue(testee.isMember(eve.getId()));
+		assertTrue(testee.isMember(eve.getSafeId()));
 
 		assertTrue(fromXml.isLocked());
 

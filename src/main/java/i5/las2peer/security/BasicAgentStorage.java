@@ -9,7 +9,7 @@ import i5.las2peer.p2p.AgentNotKnownException;
  */
 public class BasicAgentStorage implements AgentStorage {
 
-	private Hashtable<Long, Agent> htRegistered = new Hashtable<Long, Agent>();
+	private Hashtable<String, Agent> htRegistered = new Hashtable<>();
 
 	private AgentStorage backupStorage;
 
@@ -43,7 +43,7 @@ public class BasicAgentStorage implements AgentStorage {
 		try {
 			Agent register = agent.cloneLocked();
 
-			htRegistered.put(register.getId(), register);
+			htRegistered.put(register.getSafeId(), register);
 		} catch (CloneNotSupportedException e) {
 			// should not occur, since agent is cloneable
 			throw new RuntimeException("Clone problems", e);
@@ -67,7 +67,7 @@ public class BasicAgentStorage implements AgentStorage {
 	 * @param agent
 	 */
 	public void unregisterAgent(Agent agent) {
-		htRegistered.remove(agent.getId());
+		htRegistered.remove(agent.getSafeId());
 	}
 
 	/**
@@ -75,7 +75,7 @@ public class BasicAgentStorage implements AgentStorage {
 	 *
 	 * @param id
 	 */
-	public void unregisterAgent(long id) {
+	public void unregisterAgent(String id) {
 		htRegistered.remove(id);
 	}
 
@@ -87,7 +87,7 @@ public class BasicAgentStorage implements AgentStorage {
 	 * @throws AgentNotKnownException
 	 */
 	@Override
-	public Agent getAgent(long id) throws AgentNotKnownException {
+	public Agent getAgent(String id) throws AgentNotKnownException {
 		Agent result = htRegistered.get(id);
 
 		if (result != null) {
@@ -106,7 +106,7 @@ public class BasicAgentStorage implements AgentStorage {
 	}
 
 	@Override
-	public boolean hasAgent(long id) {
+	public boolean hasAgent(String id) {
 		return htRegistered.get(id) != null;
 	}
 

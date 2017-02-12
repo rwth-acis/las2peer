@@ -4,7 +4,7 @@ import i5.las2peer.api.StorageEnvelopeHandler;
 import i5.las2peer.api.StorageExceptionHandler;
 import i5.las2peer.persistency.Envelope;
 
-public class FetchProcessHelper implements StorageEnvelopeHandler, StorageExceptionHandler {
+public class FetchEnvelopeHelper implements StorageEnvelopeHandler, StorageExceptionHandler {
 
 	private Exception exception;
 	private Envelope result;

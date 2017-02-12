@@ -13,8 +13,8 @@ import i5.las2peer.tools.SerializationException;
 
 public class TestAgent extends Agent {
 
-	protected TestAgent(long id, KeyPair pair, SecretKey key) throws L2pSecurityException {
-		super(id, pair, key);
+	protected TestAgent(KeyPair pair, SecretKey key) throws L2pSecurityException {
+		super(pair, key);
 	}
 
 	@Override

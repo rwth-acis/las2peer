@@ -9,8 +9,6 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.UnknownHostException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.List;
@@ -38,6 +36,7 @@ import i5.las2peer.persistency.Envelope;
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.persistency.SharedStorage;
 import i5.las2peer.persistency.SharedStorage.STORAGE_MODE;
+import i5.las2peer.persistency.StorageArtifactHandler;
 import i5.las2peer.security.Agent;
 import i5.las2peer.security.AgentContext;
 import i5.las2peer.security.AgentException;
@@ -48,10 +47,8 @@ import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.SerializationException;
 import rice.environment.Environment;
 import rice.p2p.commonapi.NodeHandle;
-import rice.pastry.NodeIdFactory;
 import rice.pastry.PastryNode;
 import rice.pastry.socket.internet.InternetPastryNodeFactory;
-import rice.pastry.standard.RandomNodeIdFactory;
 
 /**
  * A <a href="http://freepastry.org">FreePastry</a> implementation of a las2peer {@link Node}.
@@ -62,6 +59,8 @@ import rice.pastry.standard.RandomNodeIdFactory;
  * encapsulation) of the FreePastry library.
  */
 public class PastryNodeImpl extends Node {
+
+	public static final Integer DEFAULT_BOOTSTRAP_PORT = 14501;
 
 	private static final L2pLogger logger = L2pLogger.getInstance(PastryNodeImpl.class);
 
@@ -80,20 +79,15 @@ public class PastryNodeImpl extends Node {
 	private static final int HASHED_FETCH_TIMEOUT = 300000;
 	private static final int HASHED_STORE_TIMEOUT = 300000;
 
-	private InetAddress pastryBindAddress = null; // null = detect Internet address
-
-	public static final int STANDARD_PORT = 9901;
-	private int pastryPort = STANDARD_PORT;
-
-	public static final String STANDARD_BOOTSTRAP = "localhost:9900,localhost:9999";
-	private String bootStrap = STANDARD_BOOTSTRAP;
-
+	private final Integer pastryPort;
+	private final String bootStrap;
+	private final STORAGE_MODE storageMode;
+	private InetAddress pastryBindAddress; // null = auto detect Internet address
 	private ExecutorService threadpool; // gather all threads in node object to minimize idle threads
 	private Environment pastryEnvironment;
 	private PastryNode pastryNode;
 	private NodeApplication application;
 	private SharedStorage pastStorage;
-	private STORAGE_MODE mode = STORAGE_MODE.FILESYSTEM;
 	private String storageDir; // null = default chosen by SharedStorage
 	private Long nodeIdSeed;
 
@@ -101,9 +95,10 @@ public class PastryNodeImpl extends Node {
 	 * This is the regular constructor used by the {@link i5.las2peer.tools.L2pNodeLauncher}. Its parameters can be set
 	 * to start a new network or join an existing Pastry ring.
 	 * 
-	 * @param classLoader A class loader that is used by the node.
+	 * @param classManager A class manager that is used by the node.
 	 * @param useMonitoringObserver If true, the node sends monitoring information to the monitoring service.
-	 * @param port A port number the PastryNode should listen to for network communication.
+	 * @param pastryPort A port number the PastryNode should listen to for network communication. <code>null</code>
+	 *            means use a random system defined port. Use {@link #getPort()} to retrieve the number.
 	 * @param bootstrap A bootstrap address that should be used, like hostname:port or <code>null</code> to start a new
 	 *            network.
 	 * @param storageMode A storage mode to be used by this node, see
@@ -111,20 +106,14 @@ public class PastryNodeImpl extends Node {
 	 * @param nodeIdSeed A node id (random) seed to enforce a specific node id. If <code>null</code>, the node id will
 	 *            be random.
 	 */
-	public PastryNodeImpl(L2pClassManager classLoader, boolean useMonitoringObserver, int port, String bootstrap,
-			STORAGE_MODE storageMode, Long nodeIdSeed) {
-		super(classLoader, true, useMonitoringObserver);
-		pastryPort = port;
-		this.bootStrap = bootstrap;
-		this.mode = storageMode;
-		this.storageDir = null; // null = SharedStorage chooses directory
-		this.nodeIdSeed = nodeIdSeed;
-		this.setStatus(NodeStatus.CONFIGURED);
+	public PastryNodeImpl(L2pClassManager classManager, boolean useMonitoringObserver, Integer pastryPort,
+			String bootstrap, STORAGE_MODE storageMode, Long nodeIdSeed) {
+		this(classManager, useMonitoringObserver, pastryPort, bootstrap, storageMode, null, nodeIdSeed);
 	}
 
 	/**
-	 * This constructor is mainly used by the {@link i5.las2peer.testing.TestSuite} and sets all parameters for
-	 * debugging and testing operation mode.
+	 * This constructor is mainly used by the {@link i5.las2peer.testing.TestSuite}, uses a random system defined port
+	 * number and sets all parameters for a debugging and testing optimized operation mode.
 	 * 
 	 * @param bootstrap A bootstrap address that should be used, like hostname:port or <code>null</code> to start a new
 	 *            network.
@@ -132,31 +121,24 @@ public class PastryNodeImpl extends Node {
 	 *            {@link i5.las2peer.persistency.SharedStorage.STORAGE_MODE}.
 	 * @param storageDir A directory to persist data to. Only considered in persistent storage mode, but overwrites
 	 *            {@link SharedStorage} configurations.
-	 * @param nodeIdSeed A node id (random) seed to enforce a specific node id. If <code>null</code>, the node id will
-	 *            be random.
+	 * @param nodeIdSeed A node id seed to enforce a specific (otherwise random) node id. If <code>null</code>, the node
+	 *            id will be random.
 	 */
 	public PastryNodeImpl(String bootstrap, STORAGE_MODE storageMode, String storageDir, Long nodeIdSeed) {
-		this(null, null, bootstrap, storageMode, storageDir, nodeIdSeed);
+		this(null, false, null, bootstrap, storageMode, storageDir, nodeIdSeed);
 	}
 
-	public PastryNodeImpl(L2pClassManager classManager, Integer port, String bootstrap, STORAGE_MODE storageMode,
-			String storageDir, Long nodeIdSeed) {
-		super(classManager, true, false);
+	public PastryNodeImpl(L2pClassManager classManager, boolean useMonitoringObserver, Integer pastryPort,
+			String bootstrap, STORAGE_MODE storageMode, String storageDir, Long nodeIdSeed) {
+		super(classManager, true, useMonitoringObserver);
 		pastryBindAddress = InetAddress.getLoopbackAddress();
-		if (port == null) {
-			// use system defined port
-			try {
-				ServerSocket tmpSocket = new ServerSocket(0);
-				tmpSocket.close();
-				pastryPort = tmpSocket.getLocalPort();
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
+		if (pastryPort == null || pastryPort < 1) {
+			this.pastryPort = getSystemDefinedPort();
 		} else {
-			pastryPort = port;
+			this.pastryPort = pastryPort;
 		}
 		this.bootStrap = bootstrap;
-		this.mode = storageMode;
+		this.storageMode = storageMode;
 		this.storageDir = storageDir;
 		this.nodeIdSeed = nodeIdSeed;
 		this.setStatus(NodeStatus.CONFIGURED);
@@ -178,20 +160,16 @@ public class PastryNodeImpl extends Node {
 	 */
 	private Collection<InetSocketAddress> getBootstrapAddresses() {
 		Vector<InetSocketAddress> result = new Vector<>();
-
 		if (bootStrap == null || bootStrap.isEmpty()) {
 			return result;
 		}
-
 		String[] addresses = bootStrap.split(",");
 		for (String address : addresses) {
 			String[] hostAndPort = address.split(":");
-			int port = STANDARD_PORT;
-
+			int port = DEFAULT_BOOTSTRAP_PORT;
 			if (hostAndPort.length == 2) {
 				port = Integer.parseInt(hostAndPort[1]);
 			}
-
 			try {
 				result.add(new InetSocketAddress(InetAddress.getByName(hostAndPort[0]), port));
 			} catch (UnknownHostException e) {
@@ -203,7 +181,6 @@ public class PastryNodeImpl extends Node {
 				}
 			}
 		}
-
 		return result;
 	}
 
@@ -223,7 +200,7 @@ public class PastryNodeImpl extends Node {
 	private void setupPastryApplications() throws StorageException {
 		threadpool = Executors.newCachedThreadPool();
 		application = new NodeApplication(this);
-		pastStorage = new SharedStorage(pastryNode, mode, threadpool, storageDir);
+		pastStorage = new SharedStorage(pastryNode, storageMode, threadpool, storageDir);
 		// add past storage as network repository
 		getBaseClassLoader().addRepository(new SharedStorageRepository(this));
 	}
@@ -238,35 +215,12 @@ public class PastryNodeImpl extends Node {
 
 			setupPastryEnvironment();
 
-			NodeIdFactory nidFactory = null;
 			if (nodeIdSeed == null) {
-				nidFactory = new RandomNodeIdFactory(pastryEnvironment);
-			} else {
-				nidFactory = new NodeIdFactory() {
-					@Override
-					public rice.pastry.Id generateNodeId() {
-						// same method as in rice.pastry.standard.RandomNodeIdFactory but except using nodeIdSeed
-						byte raw[] = new byte[8];
-						long tmp = ++nodeIdSeed;
-						for (int i = 0; i < 8; i++) {
-							raw[i] = (byte) (tmp & 0xff);
-							tmp >>= 8;
-						}
-						MessageDigest md = null;
-						try {
-							md = MessageDigest.getInstance("SHA");
-						} catch (NoSuchAlgorithmException e) {
-							throw new RuntimeException("No SHA support!", e);
-						}
-						md.update(raw);
-						byte[] digest = md.digest();
-						rice.pastry.Id nodeId = rice.pastry.Id.build(digest);
-						return nodeId;
-					}
-				};
+				// auto generate node id seed from ip and port
+				nodeIdSeed = Long.valueOf(getBindAddress().getHostAddress().replace(".", "") + getPort());
 			}
-			InternetPastryNodeFactory factory = new InternetPastryNodeFactory(nidFactory, pastryBindAddress, pastryPort,
-					pastryEnvironment, null, null, null);
+			InternetPastryNodeFactory factory = new InternetPastryNodeFactory(new L2pNodeIdFactory(nodeIdSeed),
+					pastryBindAddress, pastryPort, pastryEnvironment, null, null, null);
 			pastryNode = factory.newNode();
 
 			setupPastryApplications();
@@ -366,6 +320,16 @@ public class PastryNodeImpl extends Node {
 		}
 	}
 
+	private static int getSystemDefinedPort() {
+		try {
+			ServerSocket tmpSocket = new ServerSocket(0);
+			tmpSocket.close();
+			return tmpSocket.getLocalPort();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	/**
 	 * register node shutdown as JVM shutdown method
 	 */
@@ -415,7 +379,7 @@ public class PastryNodeImpl extends Node {
 	@Override
 	public void unregisterReceiver(MessageReceiver receiver) throws AgentNotKnownException, NodeException {
 		synchronized (this) {
-			application.unregisterAgentTopic(receiver.getResponsibleForAgentId());
+			application.unregisterAgentTopic(receiver.getResponsibleForAgentSafeId());
 			super.unregisterReceiver(receiver);
 		}
 	}
@@ -436,18 +400,6 @@ public class PastryNodeImpl extends Node {
 			if (!super.hasTopic(topic)) {
 				application.unregisterTopic(topic);
 			}
-		}
-	}
-
-	/**
-	 * @deprecated Use {@link PastryNodeImpl#unregisterReceiver(MessageReceiver)} instead!
-	 */
-	@Deprecated
-	@Override
-	public void unregisterAgent(long id) throws AgentNotKnownException {
-		synchronized (this) {
-			application.unregisterAgentTopic(id);
-			super.unregisterAgent(id);
 		}
 	}
 
@@ -532,8 +484,8 @@ public class PastryNodeImpl extends Node {
 	}
 
 	@Override
-	public Object[] findRegisteredAgent(long agentId, int hintOfExpectedCount) throws AgentNotKnownException {
-		observerNotice(Event.AGENT_SEARCH_STARTED, pastryNode, agentId, null, (Long) null, "");
+	public Object[] findRegisteredAgent(String agentId, int hintOfExpectedCount) throws AgentNotKnownException {
+		observerNotice(Event.AGENT_SEARCH_STARTED, pastryNode, agentId, null, (String) null, "");
 		return application.searchAgent(agentId, hintOfExpectedCount).toArray();
 	}
 
@@ -547,22 +499,23 @@ public class PastryNodeImpl extends Node {
 	}
 
 	@Override
-	public Agent getAgent(long id) throws AgentNotKnownException {
+	public Agent getAgent(String id) throws AgentNotKnownException {
 		// no caching here, because agents may have changed in the network
-		observerNotice(Event.AGENT_GET_STARTED, pastryNode, id, null, (Long) null, "");
+		observerNotice(Event.AGENT_GET_STARTED, pastryNode, id, null, (String) null, "");
 		try {
 			Agent agentFromNet = null;
 			Agent anonymous = getAnonymous();
-			if (id == anonymous.getId()) { // TODO use isAnonymous, special ID or Classing for identification
+			// TODO use isAnonymous, special ID or Classing for identification
+			if (id.equalsIgnoreCase(anonymous.getSafeId())) {
 				agentFromNet = anonymous;
 			} else {
 				Envelope agentEnvelope = pastStorage.fetchEnvelope(Envelope.getAgentIdentifier(id), AGENT_GET_TIMEOUT);
 				agentFromNet = Agent.createFromXml((String) agentEnvelope.getContent());
 			}
-			observerNotice(Event.AGENT_GET_SUCCESS, pastryNode, id, null, (Long) null, "");
+			observerNotice(Event.AGENT_GET_SUCCESS, pastryNode, id, null, (String) null, "");
 			return agentFromNet;
 		} catch (Exception e) {
-			observerNotice(Event.AGENT_GET_FAILED, pastryNode, id, null, (Long) null, "");
+			observerNotice(Event.AGENT_GET_FAILED, pastryNode, id, null, (String) null, "");
 			throw new AgentNotKnownException("Unable to retrieve Agent " + id + " from past storage", e);
 		}
 	}
@@ -578,11 +531,11 @@ public class PastryNodeImpl extends Node {
 		try {
 			Envelope agentEnvelope = null;
 			try {
-				agentEnvelope = pastStorage.fetchEnvelope(Envelope.getAgentIdentifier(agent.getId()),
+				agentEnvelope = pastStorage.fetchEnvelope(Envelope.getAgentIdentifier(agent.getSafeId()),
 						AGENT_GET_TIMEOUT);
 				agentEnvelope = pastStorage.createUnencryptedEnvelope(agentEnvelope, agent.toXmlString());
 			} catch (ArtifactNotFoundException e) {
-				agentEnvelope = pastStorage.createUnencryptedEnvelope(Envelope.getAgentIdentifier(agent.getId()),
+				agentEnvelope = pastStorage.createUnencryptedEnvelope(Envelope.getAgentIdentifier(agent.getSafeId()),
 						agent.toXmlString());
 			}
 			pastStorage.storeEnvelope(agentEnvelope, agent, AGENT_STORE_TIMEOUT);
@@ -617,6 +570,10 @@ public class PastryNodeImpl extends Node {
 		} else {
 			return pastryNode.getLocalNodeHandle();
 		}
+	}
+
+	public InetAddress getBindAddress() {
+		return pastryBindAddress;
 	}
 
 	public int getPort() {
@@ -773,6 +730,32 @@ public class PastryNodeImpl extends Node {
 	@Override
 	public void removeEnvelope(String identifier) throws ArtifactNotFoundException, StorageException {
 		pastStorage.removeEnvelope(identifier);
+	}
+
+	public void storeHashedContentAsync(byte[] content, StorageStoreResultHandler resultHandler,
+			StorageExceptionHandler exceptionHandler) {
+		pastStorage.storeHashedContentAsync(content, resultHandler, exceptionHandler);
+	}
+
+	public void storeHashedContent(byte[] content) throws StorageException {
+		storeHashedContent(content, HASHED_STORE_TIMEOUT);
+	}
+
+	public void storeHashedContent(byte[] content, long timeoutMs) throws StorageException {
+		pastStorage.storeHashedContent(content, timeoutMs);
+	}
+
+	public void fetchHashedContentAsync(byte[] hash, StorageArtifactHandler artifactHandler,
+			StorageExceptionHandler exceptionHandler) {
+		pastStorage.fetchHashedContentAsync(hash, artifactHandler, exceptionHandler);
+	}
+
+	public byte[] fetchHashedContent(byte[] hash) throws StorageException {
+		return fetchHashedContent(hash, HASHED_FETCH_TIMEOUT);
+	}
+
+	public byte[] fetchHashedContent(byte[] hash, long timeoutMs) throws StorageException {
+		return pastStorage.fetchHashedContent(hash, timeoutMs);
 	}
 
 }

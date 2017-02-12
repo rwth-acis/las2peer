@@ -60,7 +60,7 @@ public interface Context {
 	 * @throws AgentNotKnownException
 	 * @throws L2pSecurityException
 	 */
-	public GroupAgent requestGroupAgent(long groupId) throws AgentNotKnownException, L2pSecurityException;
+	public GroupAgent requestGroupAgent(String groupId) throws AgentNotKnownException, L2pSecurityException;
 
 	/**
 	 * returns an unlocked instance of the requested Agent
@@ -70,7 +70,7 @@ public interface Context {
 	 * @throws AgentNotKnownException agent not found
 	 * @throws L2pSecurityException agent cannot be unlocked
 	 */
-	public Agent requestAgent(long agentId) throws AgentNotKnownException, L2pSecurityException;
+	public Agent requestAgent(String agentId) throws AgentNotKnownException, L2pSecurityException;
 
 	/**
 	 * @deprecated Use {@link #fetchEnvelope(String)} instead.
@@ -131,10 +131,10 @@ public interface Context {
 	 * @return get the agent of the given id
 	 * @throws AgentNotKnownException
 	 */
-	public Agent getAgent(long id) throws AgentNotKnownException;
+	public Agent getAgent(String id) throws AgentNotKnownException;
 
 	@Deprecated
-	public boolean hasAgent(long id);
+	public boolean hasAgent(String id);
 
 	/**
 	 * Gets the current las2peer context.
@@ -166,7 +166,7 @@ public interface Context {
 	 * @throws AgentNotKnownException agent not found
 	 * @throws AgentLockedException main agent is locked
 	 */
-	public boolean hasAccess(long agentId) throws AgentNotKnownException, AgentLockedException;
+	public boolean hasAccess(String agentId) throws AgentNotKnownException, AgentLockedException;
 
 	// Envelopes
 

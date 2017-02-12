@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import i5.las2peer.api.StorageCollisionHandler;
 import i5.las2peer.api.StorageEnvelopeHandler;
@@ -28,7 +30,6 @@ import i5.las2peer.security.MessageReceiver;
 import i5.las2peer.security.UserAgent;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.SerializationException;
-import i5.las2peer.tools.TimerThread;
 
 /**
  * Implementation of the abstract {@link Node} class mostly for testing purposes. All data and agents will be stored in
@@ -100,13 +101,13 @@ public class LocalNode extends Node {
 		if (receiver instanceof Agent) {
 			Agent agent = (Agent) receiver;
 			try {
-				htKnownAgents.put(((Agent) receiver).getId(), agent.toXmlString());
+				htKnownAgents.put(((Agent) receiver).getSafeId(), agent.toXmlString());
 			} catch (SerializationException e) {
 				throw new AgentException("Could not register agent reciever", e);
 			}
 		}
 
-		deliverPendingMessages(receiver.getResponsibleForAgentId(), getNodeId());
+		deliverPendingMessages(receiver.getResponsibleForAgentSafeId(), getNodeId());
 	}
 
 	// TODO this code should be here or not?
@@ -223,14 +224,15 @@ public class LocalNode extends Node {
 	}
 
 	@Override
-	public Object[] findRegisteredAgent(long agentId, int hintOfExpectedCount) throws AgentNotKnownException {
+	public Object[] findRegisteredAgent(String agentId, int hintOfExpectedCount) throws AgentNotKnownException {
 		return findAllNodesWithAgent(agentId);
 	}
 
 	@Override
-	public Agent getAgent(long id) throws AgentNotKnownException {
+	public Agent getAgent(String id) throws AgentNotKnownException {
 		Agent anonymous = getAnonymous();
-		if (id == anonymous.getId()) { // TODO use isAnonymous, special ID or Classing for identification
+		if (id.equalsIgnoreCase(anonymous.getSafeId())) { // TODO use isAnonymous, special ID or Classing for
+															// identification
 			return anonymous;
 		} else {
 			synchronized (htKnownAgents) {
@@ -256,8 +258,8 @@ public class LocalNode extends Node {
 				throw new L2pSecurityException("Only unlocked agents may be updated during runtime!");
 			}
 
-			if (htKnownAgents.get(agent.getId()) != null) {
-				throw new AgentAlreadyRegisteredException("Agent " + agent.getId() + " already in storage");
+			if (htKnownAgents.get(agent.getSafeId()) != null) {
+				throw new AgentAlreadyRegisteredException("Agent " + agent.getSafeId() + " already in storage");
 			}
 
 			String agentXml = null;
@@ -267,7 +269,7 @@ public class LocalNode extends Node {
 				throw new AgentException("Serialization failed!", e);
 			}
 
-			htKnownAgents.put(agent.getId(), agentXml);
+			htKnownAgents.put(agent.getSafeId(), agentXml);
 
 			if (agent instanceof UserAgent) {
 				getUserManager().registerUserAgent((UserAgent) agent);
@@ -282,8 +284,8 @@ public class LocalNode extends Node {
 		}
 
 		synchronized (htKnownAgents) {
-			if (htKnownAgents.get(agent.getId()) == null) {
-				throw new AgentNotKnownException(agent.getId());
+			if (htKnownAgents.get(agent.getSafeId()) == null) {
+				throw new AgentNotKnownException(agent.getSafeId());
 			}
 
 			// TODO: verify, that it is the same agent!!! (e.g. the same private key)
@@ -304,7 +306,7 @@ public class LocalNode extends Node {
 				throw new AgentException("Serialization failed!", e);
 			}
 
-			htKnownAgents.put(agent.getId(), agentXml);
+			htKnownAgents.put(agent.getSafeId(), agentXml);
 
 			if (agent instanceof UserAgent) {
 				getUserManager().updateUserAgent((UserAgent) agent);
@@ -382,16 +384,16 @@ public class LocalNode extends Node {
 
 	/****************************** static *****************************************/
 
-	private static Hashtable<Long, LocalNode> htLocalNodes = new Hashtable<Long, LocalNode>();
+	private static Hashtable<Long, LocalNode> htLocalNodes = new Hashtable<>();
 
 	private static LocalStorage storage = new LocalStorage();
 
-	private static Hashtable<Long, Hashtable<Message, MessageResultListener>> htPendingMessages = new Hashtable<Long, Hashtable<Message, MessageResultListener>>();
+	private static Hashtable<String, Hashtable<Message, MessageResultListener>> htPendingMessages = new Hashtable<>();
 
 	/**
 	 * Hashtable with string representations of all known agents
 	 */
-	private static Hashtable<Long, String> htKnownAgents = new Hashtable<Long, String>();
+	private static Hashtable<String, String> htKnownAgents = new Hashtable<>();
 
 	/**
 	 * register a node for later use
@@ -443,10 +445,10 @@ public class LocalNode extends Node {
 	 * do a complete restart of all nodes, artifacts and messages
 	 */
 	public static void reset() {
-		htPendingMessages = new Hashtable<Long, Hashtable<Message, MessageResultListener>>();
+		htPendingMessages = new Hashtable<>();
 		storage = new LocalStorage();
-		htKnownAgents = new Hashtable<Long, String>();
-		htLocalNodes = new Hashtable<Long, LocalNode>();
+		htKnownAgents = new Hashtable<>();
+		htLocalNodes = new Hashtable<>();
 
 		iMessageMinWait = DEFAULT_MESSAGE_MIN_WAIT;
 		iMessageMaxWait = DEFAULT_MESSAGE_MAX_WAIT;
@@ -461,15 +463,12 @@ public class LocalNode extends Node {
 	 * stop the timeout cleaner thread
 	 */
 	public static void stopCleaner() {
-		if (pendingTimer != null) {
-			pendingTimer.stopTimer();
-			pendingTimer.interrupt();
-			try {
-				pendingTimer.join();
-			} catch (InterruptedException e) {
+		synchronized (pendingTimer) {
+			if (pendingTimerTask != null) {
+				pendingTimerTask.cancel();
+				pendingTimerTask = null;
 			}
 		}
-
 	}
 
 	/**
@@ -479,7 +478,7 @@ public class LocalNode extends Node {
 	 * @return id of a node hosting the given agent
 	 * @throws AgentNotKnownException
 	 */
-	public static long findFirstNodeWithAgent(long agentId) throws AgentNotKnownException {
+	public static long findFirstNodeWithAgent(String agentId) throws AgentNotKnownException {
 		synchronized (htLocalNodes) {
 
 			for (long nodeId : htLocalNodes.keySet()) {
@@ -498,9 +497,9 @@ public class LocalNode extends Node {
 	 * @param agentId
 	 * @return array with all ids of nodes hosting the given agent
 	 */
-	public static Long[] findAllNodesWithAgent(long agentId) {
+	public static Long[] findAllNodesWithAgent(String agentId) {
 		synchronized (htLocalNodes) {
-			HashSet<Long> hsResult = new HashSet<Long>();
+			HashSet<Long> hsResult = new HashSet<>();
 
 			for (long nodeId : htLocalNodes.keySet()) {
 				if (htLocalNodes.get(nodeId).hasLocalAgent(agentId)) {
@@ -520,7 +519,7 @@ public class LocalNode extends Node {
 	 */
 	public static Long[] findAllNodesWithTopic(long topicId) {
 		synchronized (htLocalNodes) {
-			HashSet<Long> hsResult = new HashSet<Long>();
+			HashSet<Long> hsResult = new HashSet<>();
 
 			for (long nodeId : htLocalNodes.keySet()) {
 				if (htLocalNodes.get(nodeId).hasTopic(topicId)) {
@@ -542,7 +541,7 @@ public class LocalNode extends Node {
 		synchronized (htPendingMessages) {
 			Hashtable<Message, MessageResultListener> pending = htPendingMessages.get(message.getRecipientId());
 			if (pending == null) {
-				pending = new Hashtable<Message, MessageResultListener>();
+				pending = new Hashtable<>();
 				htPendingMessages.put(message.getRecipientId(), pending);
 			}
 
@@ -556,7 +555,7 @@ public class LocalNode extends Node {
 	 * @param recipientId
 	 * @param nodeId
 	 */
-	protected static void deliverPendingMessages(long recipientId, long nodeId) {
+	protected static void deliverPendingMessages(String recipientId, long nodeId) {
 
 		synchronized (htPendingMessages) {
 			Hashtable<Message, MessageResultListener> pending = htPendingMessages.get(recipientId);
@@ -582,7 +581,7 @@ public class LocalNode extends Node {
 			System.out.println("checking for expired messages");
 			System.out.println("waiting for " + htPendingMessages.size() + " agents ");
 
-			for (long agentId : htPendingMessages.keySet()) {
+			for (String agentId : htPendingMessages.keySet()) {
 				Hashtable<Message, MessageResultListener> agentMessages = htPendingMessages.get(agentId);
 
 				for (Message m : agentMessages.keySet()) {
@@ -609,7 +608,8 @@ public class LocalNode extends Node {
 	private static int iMessageMaxWait = DEFAULT_MESSAGE_MAX_WAIT;
 	private static long lPendingTimeout = DEFAULT_PENDING_TIMEOUT;
 
-	private static TimerThread pendingTimer = null;
+	private final static Timer pendingTimer = new Timer();
+	private static TimerTask pendingTimerTask;
 
 	public static void setPendingTimeOut(int newtimeout) {
 		lPendingTimeout = newtimeout;
@@ -639,16 +639,17 @@ public class LocalNode extends Node {
 	 * start a thread clearing up expired messages from time to time
 	 */
 	private static void startPendingTimer() {
-		pendingTimer = new TimerThread(lPendingTimeout) {
-
-			@Override
-			public void tick() {
-				notifExpiredMessages();
+		synchronized (pendingTimer) {
+			if (pendingTimerTask == null) {
+				pendingTimerTask = new TimerTask() {
+					@Override
+					public void run() {
+						notifExpiredMessages();
+					}
+				};
+				pendingTimer.schedule(pendingTimerTask, 0, lPendingTimeout);
 			}
-
-		};
-
-		pendingTimer.start();
+		}
 	}
 
 	/**

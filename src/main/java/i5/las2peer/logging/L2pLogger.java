@@ -471,8 +471,8 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void log(Long timestamp, Event event, String sourceNode, Long sourceAgentId, String destinationNode,
-			Long destinationAgentId, String remarks) {
+	public void log(Long timestamp, Event event, String sourceNode, String sourceAgentId, String destinationNode,
+			String destinationAgentId, String remarks) {
 		StringBuilder logLine = new StringBuilder(DEFAULT_DATE_FORMAT.format(new Date(timestamp)) + "\t");
 		logLine.append(event + " (" + event.getCode() + ")\t");
 		logLine.append(appendPart(sourceNode));
