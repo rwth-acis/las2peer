@@ -7,11 +7,11 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import i5.las2peer.api.TestService;
+import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.p2p.PastryNodeImpl;
-import i5.las2peer.p2p.ServiceNameVersion;
 import i5.las2peer.persistency.SharedStorage;
-import i5.las2peer.security.ServiceAgent;
-import i5.las2peer.security.UserAgent;
+import i5.las2peer.security.ServiceAgentImpl;
+import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.testing.MockAgentFactory;
 import i5.las2peer.testing.TestSuite;
 import i5.las2peer.tools.CryptoTools;
@@ -35,14 +35,14 @@ public class NetworkClassLoadingTest {
 			filenameToHash.put(clsFilename, clsHash);
 			HashMap<String, byte[]> filenameToContent = new HashMap<>();
 			filenameToContent.put(clsFilename, clsHash);
-			UserAgent developerAgent = MockAgentFactory.getAdam();
-			developerAgent.unlockPrivateKey("adamspass");
+			UserAgentImpl developerAgent = MockAgentFactory.getAdam();
+			developerAgent.unlock("adamspass");
 			PackageUploader.uploadServicePackage(nodes.get(0), serviceName, serviceVersion, filenameToHash,
 					filenameToContent, developerAgent);
 			// start TestService on second node
-			ServiceAgent serviceAgent = ServiceAgent
+			ServiceAgentImpl serviceAgent = ServiceAgentImpl
 					.createServiceAgent(new ServiceNameVersion(serviceName, serviceVersion), "servicepass");
-			serviceAgent.unlockPrivateKey("servicepass");
+			serviceAgent.unlock("servicepass");
 			nodes.get(1).registerReceiver(serviceAgent);
 		} catch (Exception e) {
 			e.printStackTrace();

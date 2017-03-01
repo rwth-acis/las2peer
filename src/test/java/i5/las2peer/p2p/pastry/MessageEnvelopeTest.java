@@ -1,29 +1,13 @@
 package i5.las2peer.p2p.pastry;
 
 import static org.junit.Assert.assertEquals;
-<<<<<<< HEAD
-import i5.las2peer.api.security.AgentAccessDeniedException;
-=======
-
 import org.junit.Assert;
 import org.junit.Test;
 
->>>>>>> future-v0.7
 import i5.las2peer.communication.Message;
 import i5.las2peer.security.BasicAgentStorage;
-<<<<<<< HEAD
-import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.UserAgentImpl;
-import i5.las2peer.tools.CryptoException;
-import i5.las2peer.tools.SerializationException;
-=======
-import i5.las2peer.security.UserAgent;
->>>>>>> future-v0.7
 import i5.las2peer.tools.SerializeTools;
-
-import java.security.NoSuchAlgorithmException;
-
-import org.junit.Test;
 
 public class MessageEnvelopeTest {
 

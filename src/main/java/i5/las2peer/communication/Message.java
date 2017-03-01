@@ -592,7 +592,7 @@ public class Message implements XmlAble, Cloneable {
 	 * @throws AgentNotKnownException If an issue with the sender agent occurs
 	 */
 	public void open(AgentImpl unlockedRecipient, AgentStorage storage) throws L2pSecurityException,
-			AgentNotKnownException {
+			AgentException {
 		if (isOpen()) {
 			return;
 		}

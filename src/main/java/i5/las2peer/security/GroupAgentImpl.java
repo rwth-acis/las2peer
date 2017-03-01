@@ -404,7 +404,7 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 		try {
 			message.open(this, getRunningAtNode());
 			content = message.getContent();
-		} catch (AgentNotKnownException e1) {
+		} catch (i5.las2peer.security.AgentException e1) {
 			getRunningAtNode().observerNotice(MonitoringEvent.SERVICE_ERROR, e1.getMessage());
 		} catch (L2pSecurityException e2) {
 			getRunningAtNode().observerNotice(MonitoringEvent.SERVICE_ERROR, e2.getMessage());

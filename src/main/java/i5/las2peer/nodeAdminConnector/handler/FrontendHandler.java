@@ -20,11 +20,14 @@ import org.stringtemplate.v4.STGroupDir;
 
 import com.sun.net.httpserver.HttpExchange;
 
-import i5.las2peer.api.exceptions.ArtifactNotFoundException;
-import i5.las2peer.api.exceptions.EnvelopeAlreadyExistsException;
+import i5.las2peer.api.execution.ServiceNotFoundException;
+import i5.las2peer.api.p2p.ServiceNameVersion;
+import i5.las2peer.api.p2p.ServiceVersion;
+import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
+import i5.las2peer.api.persistency.EnvelopeNotFoundException;
+import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.classLoaders.L2pClassManager;
 import i5.las2peer.classLoaders.libraries.SharedStorageRepository;
-import i5.las2peer.execution.NoSuchServiceException;
 import i5.las2peer.nodeAdminConnector.AgentSession;
 import i5.las2peer.nodeAdminConnector.NodeAdminConnector;
 import i5.las2peer.nodeAdminConnector.ParameterFilter.ParameterMap;
@@ -34,14 +37,12 @@ import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.NodeException;
 import i5.las2peer.p2p.PastryNodeImpl;
-import i5.las2peer.p2p.ServiceNameVersion;
-import i5.las2peer.p2p.ServiceVersion;
-import i5.las2peer.persistency.Envelope;
-import i5.las2peer.security.Agent;
+import i5.las2peer.persistency.EnvelopeVersion;
 import i5.las2peer.security.AgentException;
+import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.L2pSecurityException;
-import i5.las2peer.security.ServiceAgent;
-import i5.las2peer.security.UserAgent;
+import i5.las2peer.security.ServiceAgentImpl;
+import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
 import i5.las2peer.tools.PackageUploader;
@@ -84,7 +85,7 @@ public class FrontendHandler extends AbstractHandler {
 					.getSessionFromCookies(exchange.getRequestHeaders().get("Cookie"));
 			String sessionId = null;
 			String agentId = null;
-			UserAgent activeAgent = null;
+			UserAgentImpl activeAgent = null;
 			if (requestingAgentSession != null) {
 				sessionId = requestingAgentSession.getSessionId();
 				activeAgent = requestingAgentSession.getAgent();
@@ -99,7 +100,7 @@ public class FrontendHandler extends AbstractHandler {
 	}
 
 	private void handleRequest(HttpExchange exchange, PastryNodeImpl node, String sessionId, String agentId,
-			UserAgent activeAgent) throws Exception {
+			UserAgentImpl activeAgent) throws Exception {
 		final String method = exchange.getRequestMethod();
 		final String path = exchange.getRequestURI().getPath();
 		if (path.isEmpty() || ROOT_PATH.equalsIgnoreCase(path)) {
@@ -243,11 +244,11 @@ public class FrontendHandler extends AbstractHandler {
 						// try to start the service
 						try {
 							// TODO is adminToken a good password?
-							ServiceAgent agent = ServiceAgent.createServiceAgent(snv, adminToken);
-							agent.unlockPrivateKey(adminToken);
+							ServiceAgentImpl agent = ServiceAgentImpl.createServiceAgent(snv, adminToken);
+							agent.unlock(adminToken);
 							node.registerReceiver(agent);
 							// FIXME store service agent locally
-						} catch (CryptoException | L2pSecurityException | AgentException e2) {
+						} catch (CryptoException | L2pSecurityException | AgentException | AgentAccessDeniedException e2) {
 							logger.log(Level.SEVERE, "Could not start service '" + startServiceName + "'", e2);
 							template.add("error", e2.toString());
 						}
@@ -265,9 +266,9 @@ public class FrontendHandler extends AbstractHandler {
 					template.add("stopError", "No version given");
 				} else {
 					try {
-						ServiceAgent agent = node.getLocalServiceAgent(service);
+						ServiceAgentImpl agent = node.getLocalServiceAgent(service);
 						if (agent == null) {
-							throw new NoSuchServiceException(stopServiceName);
+							throw new ServiceNotFoundException(stopServiceName);
 						} else {
 							try {
 								node.unregisterReceiver(agent);
@@ -277,7 +278,7 @@ public class FrontendHandler extends AbstractHandler {
 								template.add("stopError", e.toString());
 							}
 						}
-					} catch (NoSuchServiceException e) {
+					} catch (ServiceNotFoundException e) {
 						template.add("stopError", "Service not running locally");
 					}
 				}
@@ -320,7 +321,7 @@ public class FrontendHandler extends AbstractHandler {
 		try {
 			String libName = L2pClassManager.getPackageName(searchName);
 			String libId = SharedStorageRepository.getLibraryVersionsEnvelopeIdentifier(libName);
-			Envelope networkVersions = node.fetchEnvelope(libId);
+			EnvelopeVersion networkVersions = node.fetchEnvelope(libId);
 			Serializable content = networkVersions.getContent();
 			if (content instanceof ServiceVersionList) {
 				ServiceVersionList serviceversions = (ServiceVersionList) content;
@@ -331,7 +332,7 @@ public class FrontendHandler extends AbstractHandler {
 				throw new ServicePackageException("Invalid version envelope expected " + List.class.getCanonicalName()
 						+ " but envelope contains " + content.getClass().getCanonicalName());
 			}
-		} catch (ArtifactNotFoundException e) {
+		} catch (EnvelopeNotFoundException e) {
 			result.add(new PojoService(searchName, "not found"));
 		} catch (Exception e) {
 			result.add(new PojoService(searchName, e.toString()));
@@ -339,7 +340,7 @@ public class FrontendHandler extends AbstractHandler {
 		return result;
 	}
 
-	private void handleAuthenticateRequest(HttpExchange exchange, PastryNodeImpl node, Agent activeAgent, ST template)
+	private void handleAuthenticateRequest(HttpExchange exchange, PastryNodeImpl node, AgentImpl activeAgent, ST template)
 			throws Exception {
 		ParameterMap parameters = (ParameterMap) exchange.getAttribute("parameters");
 		String contentType = exchange.getRequestHeaders().getFirst("Content-Type");
@@ -359,14 +360,14 @@ public class FrontendHandler extends AbstractHandler {
 			} else {
 				final String identifier = USER_ACCOUNT_PREFIX + SimpleTools
 						.byteToHexString(CryptoTools.getSecureHash((email).getBytes(StandardCharsets.UTF_8)));
-				UserAgent agent;
+				UserAgentImpl agent;
 				try {
 					logger.info("looking for account id " + identifier);
-					Envelope accountEnv = node.fetchEnvelope(identifier);
+					EnvelopeVersion accountEnv = node.fetchEnvelope(identifier);
 					String agentId = (String) accountEnv.getContent();
-					agent = (UserAgent) node.getAgent(agentId);
-					agent.unlockPrivateKey(password);
-				} catch (ArtifactNotFoundException e) {
+					agent = (UserAgentImpl) node.getAgent(agentId);
+					agent.unlock(password);
+				} catch (EnvelopeNotFoundException e) {
 					if (isAuthenticate) {
 						// account does not yet exist
 						sendStringResponse(exchange, HttpURLConnection.HTTP_UNAUTHORIZED, "text/plain",
@@ -376,10 +377,10 @@ public class FrontendHandler extends AbstractHandler {
 						// try to create an account
 						logger.info("account not found, creating it");
 						try {
-							agent = UserAgent.createUserAgent(password);
-							agent.unlockPrivateKey(password);
+							agent = UserAgentImpl.createUserAgent(password);
+							agent.unlock(password);
 							node.storeAgent(agent);
-							Envelope accountEnv = node.createUnencryptedEnvelope(identifier, agent.getSafeId());
+							EnvelopeVersion accountEnv = node.createUnencryptedEnvelope(identifier, agent.getSafeId());
 							node.storeEnvelope(accountEnv, agent);
 							logger.info("created new account successfully");
 						} catch (Exception e2) {
@@ -417,7 +418,7 @@ public class FrontendHandler extends AbstractHandler {
 	}
 
 	private void handlePackageUpload(HttpExchange exchange, PastryNodeImpl node, ParameterMap parameters,
-			Agent activeAgent, ST template) throws Exception {
+			AgentImpl activeAgent, ST template) throws Exception {
 		if (activeAgent == null) {
 			template.add("error", "You have to be logged in to upload");
 			return;

@@ -135,11 +135,11 @@ public class ExecutionContext implements Context {
 			InternalServiceException {
 		try {
 			return callerContext.getLocalNode().invoke(agent, service, method, parameters);
-		} catch (AgentNotKnownException e) {
+		} catch (i5.las2peer.security.AgentException e) {
 			throw new ServiceNotFoundException("The service is not known.", e);
 		} catch (ServiceInvocationException e) {
 			throw new InternalServiceException("The service has thrown an exception.", e);
-		} catch (L2pServiceException | InterruptedException e) {
+		} catch (InterruptedException e) {
 			throw new InternalServiceException("The service seems not to be available.", e);
 		} catch (L2pSecurityException e) {
 			throw new IllegalStateException("Agent should be unlocked, but it isn't.");
@@ -198,7 +198,7 @@ public class ExecutionContext implements Context {
 	public Agent fetchAgent(String agentId) throws AgentNotFoundException {
 		try {
 			return node.getAgent(agentId);
-		} catch (AgentNotKnownException e) {
+		} catch (i5.las2peer.security.AgentException e) {
 			throw new AgentNotFoundException(e);
 		}
 	}

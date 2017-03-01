@@ -15,15 +15,15 @@ import java.util.logging.Level;
 import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpsServer;
 
-import i5.las2peer.api.Connector;
-import i5.las2peer.api.ConnectorException;
+import i5.las2peer.connectors.Connector;
+import i5.las2peer.connectors.ConnectorException;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.nodeAdminConnector.handler.DefaultHandler;
 import i5.las2peer.nodeAdminConnector.handler.FrontendHandler;
 import i5.las2peer.nodeAdminConnector.handler.ServiceHandler;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.PastryNodeImpl;
-import i5.las2peer.security.UserAgent;
+import i5.las2peer.security.UserAgentImpl;
 
 public class NodeAdminConnector extends Connector {
 
@@ -145,7 +145,7 @@ public class NodeAdminConnector extends Connector {
 		return node;
 	}
 
-	public AgentSession getOrCreateSession(UserAgent agent) {
+	public AgentSession getOrCreateSession(UserAgentImpl agent) {
 		synchronized (sessions) {
 			final String agentId = agent.getSafeId();
 			String sessionId = agentIdToSessionId.get(agentId);

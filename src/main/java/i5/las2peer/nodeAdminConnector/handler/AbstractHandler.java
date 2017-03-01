@@ -12,14 +12,14 @@ import java.util.logging.Level;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
-import i5.las2peer.api.exceptions.ArtifactNotFoundException;
+import i5.las2peer.api.p2p.ServiceNameVersion;
+import i5.las2peer.api.persistency.EnvelopeNotFoundException;
 import i5.las2peer.classLoaders.L2pClassManager;
 import i5.las2peer.classLoaders.libraries.SharedStorageRepository;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.nodeAdminConnector.NodeAdminConnector;
 import i5.las2peer.p2p.Node;
-import i5.las2peer.p2p.ServiceNameVersion;
-import i5.las2peer.persistency.Envelope;
+import i5.las2peer.persistency.EnvelopeVersion;
 import i5.las2peer.tools.L2pNodeLauncher;
 import i5.las2peer.tools.PackageUploader.ServiceVersionList;
 import i5.las2peer.tools.ServicePackageException;
@@ -92,7 +92,7 @@ public abstract class AbstractHandler implements HttpHandler {
 		try {
 			String libName = L2pClassManager.getPackageName(searchName);
 			String libId = SharedStorageRepository.getLibraryVersionsEnvelopeIdentifier(libName);
-			Envelope networkVersions = node.fetchEnvelope(libId);
+			EnvelopeVersion networkVersions = node.fetchEnvelope(libId);
 			Serializable content = networkVersions.getContent();
 			if (content instanceof ServiceVersionList) {
 				ServiceVersionList serviceversions = (ServiceVersionList) content;
@@ -103,7 +103,7 @@ public abstract class AbstractHandler implements HttpHandler {
 				throw new ServicePackageException("Invalid version envelope expected " + List.class.getCanonicalName()
 						+ " but envelope contains " + content.getClass().getCanonicalName());
 			}
-		} catch (ArtifactNotFoundException e) {
+		} catch (EnvelopeNotFoundException e) {
 			logger.fine(e.toString());
 		} catch (Exception e) {
 			logger.log(Level.SEVERE, "Could not load service versions from network", e);
