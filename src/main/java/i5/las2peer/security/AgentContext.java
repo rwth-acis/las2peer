@@ -81,7 +81,7 @@ public class AgentContext implements AgentStorage {
 		AgentImpl agent;
 		try {
 			agent = localNode.getAgent(groupId);
-		} catch (AgentNotKnownException e1) {
+		} catch (AgentException e1) {
 			throw new AgentNotFoundException(e1);
 		}
 
@@ -153,7 +153,7 @@ public class AgentContext implements AgentStorage {
 		AgentImpl a;
 		try {
 			a = getAgent(agentId);
-		} catch (AgentNotKnownException e) {
+		} catch (AgentException e) {
 			throw new AgentNotFoundException("Agent could not be found!", e);
 		}
 
@@ -184,7 +184,7 @@ public class AgentContext implements AgentStorage {
 						return true;
 					}
 				}
-			} catch (AgentNotKnownException e) {
+			} catch (AgentException e) {
 			}
 		}
 		return false;
@@ -224,7 +224,7 @@ public class AgentContext implements AgentStorage {
 	 * @throws AgentNotKnownException
 	 */
 	@Override
-	public AgentImpl getAgent(String id) throws AgentNotKnownException {
+	public AgentImpl getAgent(String id) throws AgentException {
 		if (id.equalsIgnoreCase(agent.getSafeId())) {
 			return agent;
 		}

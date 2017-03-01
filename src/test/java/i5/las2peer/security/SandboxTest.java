@@ -24,7 +24,7 @@ public class SandboxTest {
 		// print some important system properties
 		System.out.println(System.getProperty("java.home"));
 		System.out.println(System.getProperty("java.class.path"));
-		System.setSecurityManager(new L2pSecurityManager());
+		L2pSecurityManager.enableSandbox();
 	}
 
 	@Before

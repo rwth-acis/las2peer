@@ -21,13 +21,23 @@ public class L2pSecurityManager extends SecurityManager {
 
 	// reminder: reflection makes member variables unsafe
 
-	public L2pSecurityManager() {
+	private static boolean init = false;
+
+	public static synchronized void enableSandbox() {
+		if (!init) {
+			init = true;
+			System.setSecurityManager(new L2pSecurityManager());
+		}
+	}
+
+	private L2pSecurityManager() {
 		// check if local policy file exists, otherwise extract it from jar
 		if (!new File("etc/las2peer.policy").exists()) {
 			logger.info("Sandbox policy file not found. Extracting default policy file from jar...");
 			InputStream fromJar = this.getClass().getResourceAsStream("/las2peer.policy");
 			if (fromJar != null) {
 				try {
+					new File("etc").mkdir();
 					Files.copy(fromJar, new File("etc/las2peer.policy").toPath(), new CopyOption[] {});
 				} catch (IOException e) {
 					logger.log(Level.SEVERE, "Problems creating policy file! Sandboxing probably not working!", e);

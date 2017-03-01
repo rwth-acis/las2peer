@@ -22,7 +22,6 @@ import i5.las2peer.security.MessageReceiver;
 import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.SerializationException;
-import i5.las2peer.tools.TimerThread;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -30,6 +29,8 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Implementation of the abstract {@link Node} class mostly for testing purposes. All data and agents will be stored in
@@ -177,7 +178,7 @@ public class LocalNode extends Node {
 
 	@Override
 	public void sendMessage(Message message, Object atNodeId, MessageResultListener listener)
-			throws AgentNotKnownException, NodeNotFoundException {
+			throws NodeNotFoundException {
 		message.setSendingNodeId(this.getNodeId());
 
 		if (!(atNodeId instanceof Long)) {
@@ -463,15 +464,12 @@ public class LocalNode extends Node {
 	 * stop the timeout cleaner thread
 	 */
 	public static void stopCleaner() {
-		if (pendingTimer != null) {
-			pendingTimer.stopTimer();
-			pendingTimer.interrupt();
-			try {
-				pendingTimer.join();
-			} catch (InterruptedException e) {
+		synchronized (pendingTimer) {
+			if (pendingTimerTask != null) {
+				pendingTimerTask.cancel();
+				pendingTimerTask = null;
 			}
 		}
-
 	}
 
 	/**
@@ -611,7 +609,8 @@ public class LocalNode extends Node {
 	private static int iMessageMaxWait = DEFAULT_MESSAGE_MAX_WAIT;
 	private static long lPendingTimeout = DEFAULT_PENDING_TIMEOUT;
 
-	private static TimerThread pendingTimer = null;
+	private final static Timer pendingTimer = new Timer();
+	private static TimerTask pendingTimerTask;
 
 	public static void setPendingTimeOut(int newtimeout) {
 		lPendingTimeout = newtimeout;
@@ -641,16 +640,17 @@ public class LocalNode extends Node {
 	 * start a thread clearing up expired messages from time to time
 	 */
 	private static void startPendingTimer() {
-		pendingTimer = new TimerThread(lPendingTimeout) {
-
-			@Override
-			public void tick() {
-				notifExpiredMessages();
+		synchronized (pendingTimer) {
+			if (pendingTimerTask == null) {
+				pendingTimerTask = new TimerTask() {
+					@Override
+					public void run() {
+						notifExpiredMessages();
+					}
+				};
+				pendingTimer.schedule(pendingTimerTask, 0, lPendingTimeout);
 			}
-
-		};
-
-		pendingTimer.start();
+		}
 	}
 
 	/**

@@ -13,7 +13,7 @@ public class EnvelopeArtifact extends NetworkArtifact {
 	private static final long serialVersionUID = 1L;
 
 	public EnvelopeArtifact(PastryIdFactory idFactory, String identifier, int partIndex, byte[] rawPart, AgentImpl author)
-			throws CryptoException, L2pSecurityException {
+			throws CryptoException, L2pSecurityException, VerificationFailedException {
 		super(buildId(idFactory, identifier, partIndex), partIndex, rawPart, author);
 	}
 

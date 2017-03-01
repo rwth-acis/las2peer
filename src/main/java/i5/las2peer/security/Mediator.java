@@ -107,6 +107,8 @@ public class Mediator implements MessageReceiver {
 		} catch (AgentNotKnownException e) {
 			throw new MessageException(
 					"Sender unkown (since this is the receiver). Has the sending node gone offline? ", e);
+		} catch (AgentException e) {
+			throw new MessageException("Could not read the sender agent", e);
 		}
 
 		if (!workOnMessage(message, c)) {
@@ -192,9 +194,10 @@ public class Mediator implements MessageReceiver {
 	 * @return result of the method invocation
 	 * @throws L2pSecurityException
 	 * @throws ServiceInvocationException
+	 * @throws AgentException 
 	 */
 	public Serializable invoke(String service, String method, Serializable[] parameters, boolean localOnly)
-			throws L2pSecurityException, ServiceInvocationException {
+			throws L2pSecurityException, ServiceInvocationException, AgentException {
 
 		return runningAt.invoke(myAgent, ServiceNameVersion.fromString(service), method, parameters, false, localOnly);
 	}

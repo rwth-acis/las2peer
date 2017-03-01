@@ -200,6 +200,8 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 			throw new MessageException("message problems", e);
 		} catch (AgentNotKnownException e) {
 			throw new MessageException("answer receiver not found", e);
+		} catch (AgentException e) {
+			throw new MessageException("answer receiver not readable", e);
 		} catch (NodeNotFoundException e) {
 			throw new MessageException("answer destination not found", e);
 		}

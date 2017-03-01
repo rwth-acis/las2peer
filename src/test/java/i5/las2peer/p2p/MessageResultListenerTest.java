@@ -3,6 +3,12 @@ package i5.las2peer.p2p;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+
+import java.io.IOException;
+
+import org.junit.Assert;
+import org.junit.Test;
+
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.communication.Message;
 import i5.las2peer.persistency.MalformedXMLException;
@@ -10,10 +16,6 @@ import i5.las2peer.security.BasicAgentStorage;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.testing.MockAgentFactory;
-
-import java.io.IOException;
-
-import org.junit.Test;
 
 public class MessageResultListenerTest {
 
@@ -54,29 +56,34 @@ public class MessageResultListenerTest {
 	private static boolean test2;
 
 	@Test
-	public void testTimeout() throws InterruptedException {
-		test = false;
+	public void testTimeout() {
+		try {
+			test = false;
 
-		final MessageResultListener testee = new MessageResultListener(1500) {
-			@Override
-			public void notifySuccess() {
-			}
+			final MessageResultListener testee = new MessageResultListener(1500) {
+				@Override
+				public void notifySuccess() {
+				}
 
-			@Override
-			public void notifyTimeout() {
-				MessageResultListenerTest.test = true;
-			}
-		};
+				@Override
+				public void notifyTimeout() {
+					MessageResultListenerTest.test = true;
+				}
+			};
 
-		Thread.sleep(3000);
+			Thread.sleep(3000);
 
-		assertTrue(testee.checkTimeOut());
+			assertTrue(testee.checkTimeOut());
 
-		assertTrue(testee.isTimedOut());
-		assertTrue(testee.isFinished());
-		assertFalse(testee.isSuccess());
-		assertFalse(testee.hasException());
-		assertTrue(test);
+			assertTrue(testee.isTimedOut());
+			assertTrue(testee.isFinished());
+			assertFalse(testee.isSuccess());
+			assertFalse(testee.hasException());
+			assertTrue(test);
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail(e.toString());
+		}
 	}
 
 	@Test
@@ -106,50 +113,54 @@ public class MessageResultListenerTest {
 	}
 
 	@Test
-	public void testMultiple() throws InterruptedException, MalformedXMLException, IOException, L2pSecurityException,
-			AgentNotKnownException, AgentAccessDeniedException {
-		final UserAgentImpl eve = MockAgentFactory.getEve();
-		eve.unlock("evespass");
-		BasicAgentStorage storage = new BasicAgentStorage();
-		storage.registerAgent(eve);
+	public void testMultiple() {
+		try {
+			final UserAgentImpl eve = MockAgentFactory.getEve();
+			eve.unlock("evespass");
+			BasicAgentStorage storage = new BasicAgentStorage();
+			storage.registerAgent(eve);
 
-		test = test2 = false;
+			test = test2 = false;
 
-		final MessageResultListener testee = new MessageResultListener(10000) {
-			@Override
-			public void notifySuccess() {
-				MessageResultListenerTest.test2 = true;
-			}
-
-			@Override
-			public void notifyException(Exception e) {
-				MessageResultListenerTest.test = true;
-			}
-		};
-
-		testee.addRecipient();
-
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					Thread.sleep(2000);
-					testee.collectAnswer(new Message(eve, eve, "fertig"));
-					Thread.sleep(2000);
-					testee.collectException(new Exception());
-				} catch (Exception e) {
+			final MessageResultListener testee = new MessageResultListener(10000) {
+				@Override
+				public void notifySuccess() {
+					MessageResultListenerTest.test2 = true;
 				}
-			}
-		}).start();
 
-		testee.waitForAllAnswers();
+				@Override
+				public void notifyException(Exception e) {
+					MessageResultListenerTest.test = true;
+				}
+			};
 
-		Message answer = testee.getResults()[0];
-		answer.open(eve, storage);
+			testee.addRecipient();
 
-		assertEquals("fertig", testee.getResults()[0].getContent());
-		assertTrue(test);
-		assertTrue(test2);
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						Thread.sleep(2000);
+						testee.collectAnswer(new Message(eve, eve, "fertig"));
+						Thread.sleep(2000);
+						testee.collectException(new Exception());
+					} catch (Exception e) {
+					}
+				}
+			}).start();
+
+			testee.waitForAllAnswers();
+
+			Message answer = testee.getResults()[0];
+			answer.open(eve, storage);
+
+			assertEquals("fertig", testee.getResults()[0].getContent());
+			assertTrue(test);
+			assertTrue(test2);
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail(e.toString());
+		}
 	}
 
 	@Test

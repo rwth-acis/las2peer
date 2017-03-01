@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.List;
 
 import i5.las2peer.classLoaders.helpers.LibraryDependency;
 import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
@@ -35,12 +36,12 @@ public class L2pClassManager {
 	/**
 	 * all registered main bundles (i.e. services) (name, version) => BundleClassLoader
 	 */
-	private Hashtable<String, Hashtable<LibraryVersion, BundleClassManager>> registeredLoaders = new Hashtable<String, Hashtable<LibraryVersion, BundleClassManager>>();
+	private Hashtable<String, Hashtable<LibraryVersion, BundleClassManager>> registeredLoaders = new Hashtable<>();
 
 	/**
 	 * all registered libraries name, version => LoadedLibraryCache
 	 */
-	private Hashtable<String, Hashtable<LibraryVersion, LoadedLibraryCache>> registeredLibraries = new Hashtable<String, Hashtable<LibraryVersion, LoadedLibraryCache>>();
+	private Hashtable<String, Hashtable<LibraryVersion, LoadedLibraryCache>> registeredLibraries = new Hashtable<>();
 
 	/**
 	 * create a new L2pClassLoader, which uses the given repository
@@ -59,9 +60,18 @@ public class L2pClassManager {
 	 * @param platformLoader
 	 */
 	public L2pClassManager(Repository[] repositories, ClassLoader platformLoader) {
-		this.platformLoader = platformLoader;
+		this(Arrays.asList(repositories), platformLoader);
+	}
 
-		this.repositories = new ArrayList<>(Arrays.asList(repositories));
+	/**
+	 * create a new L2PClassLoader, which uses the given repositories
+	 * 
+	 * @param repositories
+	 * @param platformLoader
+	 */
+	public L2pClassManager(List<Repository> repositories, ClassLoader platformLoader) {
+		this.repositories = new ArrayList<>(repositories);
+		this.platformLoader = platformLoader;
 	}
 
 	/**
@@ -162,7 +172,7 @@ public class L2pClassManager {
 		// register bundle
 		Hashtable<LibraryVersion, BundleClassManager> htBcls = registeredLoaders.get(lib.getIdentifier().getName());
 		if (htBcls == null) {
-			htBcls = new Hashtable<LibraryVersion, BundleClassManager>();
+			htBcls = new Hashtable<>();
 			registeredLoaders.put(lib.getIdentifier().getName(), htBcls);
 		}
 		htBcls.put(lib.getLibraryIdentifier().getVersion(), bcl);
@@ -345,7 +355,7 @@ public class L2pClassManager {
 		Hashtable<LibraryVersion, LoadedLibraryCache> htLoaders = registeredLibraries
 				.get(lib.getIdentifier().getName());
 		if (htLoaders == null) {
-			htLoaders = new Hashtable<LibraryVersion, LoadedLibraryCache>();
+			htLoaders = new Hashtable<>();
 			registeredLibraries.put(lib.getIdentifier().getName(), htLoaders);
 		}
 		htLoaders.put(lib.getIdentifier().getVersion(), loader);

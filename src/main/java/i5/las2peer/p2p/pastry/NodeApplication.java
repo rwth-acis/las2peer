@@ -10,6 +10,7 @@ import i5.las2peer.p2p.NodeNotFoundException;
 import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.security.AgentImpl;
+import i5.las2peer.security.AgentException;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.MessageReceiver;
 import i5.las2peer.tools.CryptoException;
@@ -320,12 +321,9 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	 * @param m
 	 * @param to
 	 * @throws MalformedXMLException
-	 * @throws L2pSecurityException
-	 * @throws AgentNotKnownException
 	 * @throws MessageException
 	 */
-	public void sendMessage(MessageEnvelope m, NodeHandle to) throws MalformedXMLException, L2pSecurityException,
-			AgentNotKnownException, MessageException {
+	public void sendMessage(MessageEnvelope m, NodeHandle to) throws MalformedXMLException, MessageException {
 		l2pNode.observerNotice(MonitoringEvent.MESSAGE_SENDING, l2pNode.getPastryNode(), m.getContainedMessage()
 				.getSender(), to, m.getContainedMessage().getRecipient(), "message: " + m);
 
@@ -493,6 +491,8 @@ public class NodeApplication implements Application, ScribeMultiClient {
 						logger.log(Level.SEVERE, "MessageException while handling received message!", e);
 					} catch (AgentNotKnownException e) {
 						logger.severe("AgentNotKnown!?! - I shouldn't have gotten this message!");
+					} catch (AgentException e) {
+						logger.log(Level.SEVERE, "Got a message for an agent, but he failed!", e);
 					}
 				}
 

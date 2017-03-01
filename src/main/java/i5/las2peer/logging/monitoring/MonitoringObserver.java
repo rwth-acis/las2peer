@@ -100,7 +100,7 @@ public class MonitoringObserver implements NodeObserver {
 			} catch (AgentNotKnownException e) {
 				e.printStackTrace();
 			}
-		} catch (AgentNotKnownException | L2pServiceException | L2pSecurityException | InterruptedException
+		} catch (AgentException | L2pSecurityException | InterruptedException
 				| ServiceInvocationException e) {
 			System.out.println("Monitoring: Processing Service does not seem available! " + e);
 			e.printStackTrace();

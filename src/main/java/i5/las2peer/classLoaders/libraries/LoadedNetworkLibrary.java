@@ -5,12 +5,10 @@ import i5.las2peer.api.persistency.EnvelopeNotFoundException;
 import i5.las2peer.classLoaders.helpers.LibraryDependency;
 import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
 import i5.las2peer.classLoaders.helpers.LibraryVersion;
+import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.persistency.EnvelopeVersion;
 import i5.las2peer.persistency.MalformedXMLException;
-import i5.las2peer.persistency.NodeStorageInterface;
 import i5.las2peer.persistency.XmlAble;
-import i5.las2peer.security.L2pSecurityException;
-import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.SerializationException;
 import i5.las2peer.tools.XmlTools;
 
@@ -19,23 +17,30 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map.Entry;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 /**
- * This class is stored as meta information in the network and represents a network library. All getter refer to
- * internal meta information.
+ * This class is stored in the network and represents a network library.
  *
  */
 public class LoadedNetworkLibrary extends LoadedLibrary implements XmlAble {
 
-	private final NodeStorageInterface node;
+	private final PastryNodeImpl node;
 
-	public LoadedNetworkLibrary(NodeStorageInterface node, LibraryIdentifier lib,
-			LibraryDependency[] initialDependencies) {
-		super(lib, initialDependencies);
+	/**
+	 * maps the dependency filenames to their contents base64 encoded secure hashes
+	 */
+	private final HashMap<String, byte[]> dependencies;
+
+	public LoadedNetworkLibrary(PastryNodeImpl node, LibraryIdentifier lib, HashMap<String, byte[]> dependencies) {
+		super(lib);
 		this.node = node;
+		this.dependencies = dependencies;
 	}
 
 	@Override
@@ -67,14 +72,16 @@ public class LoadedNetworkLibrary extends LoadedLibrary implements XmlAble {
 
 	@Override
 	public byte[] getResourceAsBinary(String resourceName) throws IOException, ResourceNotFoundException {
-		String clsEnvId = SharedStorageRepository.getFileEnvelopeIdentifier(this.getIdentifier(), resourceName);
+		byte[] resourceHash = dependencies.get(resourceName);
+		if (resourceHash == null) {
+			throw new ResourceNotFoundException(resourceName, this.getLibraryIdentifier().toString());
+		}
 		try {
-			EnvelopeVersion clsEnv = node.fetchEnvelope(clsEnvId);
-			return (byte[]) clsEnv.getContent();
+			return node.fetchHashedContent(resourceHash);
 		} catch (EnvelopeNotFoundException e) {
 			throw new ResourceNotFoundException(resourceName, getIdentifier().toString(), e);
-		} catch (EnvelopeException | SerializationException | L2pSecurityException | CryptoException e) {
-			throw new IOException("Could not read class from envelope", e);
+		} catch (EnvelopeException e) {
+			throw new IOException("Could not read class from hashed content", e);
 		}
 	}
 
@@ -89,11 +96,12 @@ public class LoadedNetworkLibrary extends LoadedLibrary implements XmlAble {
 			result.append(" version=\"" + XmlTools.escapeAttributeValue(version.toString()) + "\"");
 		}
 		result.append(">\n");
-		LibraryDependency[] deps = getDependencies();
-		if (deps != null && deps.length > 0) {
+		if (dependencies != null && dependencies.size() > 0) {
 			result.append("<dependencies>\n");
-			for (LibraryDependency dep : getDependencies()) {
-				result.append("\t<dependency>" + XmlTools.escapeString(dep.toString()) + "</dependency>\n");
+			for (Entry<String, byte[]> dep : dependencies.entrySet()) {
+				result.append("\t<dependency name=\"" + XmlTools.escapeAttributeValue(dep.getKey())
+						+ "\" encoding=\"Base64\">" + Base64.getEncoder().encodeToString(dep.getValue())
+						+ "</dependency>\n");
 			}
 			result.append("</dependencies>\n");
 		}
@@ -101,8 +109,7 @@ public class LoadedNetworkLibrary extends LoadedLibrary implements XmlAble {
 		return result.toString();
 	}
 
-	public static LoadedNetworkLibrary createFromXml(NodeStorageInterface node, String xmlStr)
-			throws MalformedXMLException {
+	public static LoadedNetworkLibrary createFromXml(PastryNodeImpl node, String xmlStr) throws MalformedXMLException {
 		Element root = XmlTools.getRootElement(xmlStr, "las2peer:networklibrary");
 		LibraryIdentifier libId;
 		String identifier = root.getAttribute("identifier");
@@ -116,15 +123,38 @@ public class LoadedNetworkLibrary extends LoadedLibrary implements XmlAble {
 			String version = root.getAttribute("version");
 			libId = new LibraryIdentifier(name, version);
 		}
-		LibraryDependency[] libDeps = null;
+		HashMap<String, byte[]> libDeps = null;
 		Element elDependencies = XmlTools.getOptionalElement(root, "dependencies");
 		if (elDependencies != null) {
-			ArrayList<LibraryDependency> depList = new ArrayList<>();
-			NodeList deps = elDependencies.getElementsByTagName("dependency");
-			for (int c = 0; c < deps.getLength(); c++) {
-				depList.add(new LibraryDependency(deps.item(c).getTextContent()));
+			libDeps = new HashMap<>();
+			NodeList nodeList = elDependencies.getElementsByTagName("dependency");
+			for (int c = 0; c < nodeList.getLength(); c++) {
+				org.w3c.dom.Node currentNode = nodeList.item(c);
+				short nodeType = currentNode.getNodeType();
+				if (nodeType != org.w3c.dom.Node.ELEMENT_NODE) {
+					throw new MalformedXMLException(
+							"Node type (" + nodeType + ") is not type element (" + org.w3c.dom.Node.ELEMENT_NODE + ")");
+				}
+				Element currentElement = (Element) currentNode;
+				String name = currentElement.getAttribute("name");
+				if (name == null) {
+					throw new MalformedXMLException("Dependency name is null");
+				}
+				String encoding = currentElement.getAttribute("encoding");
+				if (!encoding.equalsIgnoreCase("base64")) {
+					throw new MalformedXMLException("Base64 encoding expected, got '" + encoding + "'");
+				}
+				String base64Hash = currentElement.getTextContent();
+				if (base64Hash == null) {
+					throw new MalformedXMLException("Dependency hash is null");
+				}
+				try {
+					byte[] hash = Base64.getDecoder().decode(base64Hash);
+					libDeps.put(name, hash);
+				} catch (IllegalArgumentException e) {
+					throw new MalformedXMLException("Could not decode base64 hash", e);
+				}
 			}
-			libDeps = depList.toArray(new LibraryDependency[depList.size()]);
 		}
 		return new LoadedNetworkLibrary(node, libId, libDeps);
 	}

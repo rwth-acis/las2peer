@@ -2,6 +2,7 @@ package i5.las2peer.persistency.helper;
 
 import java.util.ArrayList;
 
+import i5.las2peer.persistency.AbstractArtifact;
 import i5.las2peer.persistency.NetworkArtifact;
 import i5.las2peer.persistency.StorageArtifactHandler;
 import i5.las2peer.persistency.StorageExceptionHandler;
@@ -38,20 +39,24 @@ public class MultiArtifactHandler implements StorageArtifactHandler, StorageExce
 	}
 
 	@Override
-	public void onReceive(NetworkArtifact artifact) {
+	public void onReceive(AbstractArtifact artifact) {
 		synchronized (this) {
 			if (isComplete) {
 				return;
 			}
 		}
-		synchronized (parts) {
-			// TODO perform integrity checks on fetched objects, and fetch others on failure
-			parts.add(artifact);
-			// check if complete and call actual envelopeHandler
-			if (parts.size() >= numberOfParts) {
-				isComplete = true;
-				partsHandler.onPartsReceived(parts);
+		if (artifact instanceof NetworkArtifact) {
+			synchronized (parts) {
+				// TODO perform integrity checks on fetched objects, and fetch others on failure
+				parts.add((NetworkArtifact) artifact);
+				// check if complete and call actual envelopeHandler
+				if (parts.size() >= numberOfParts) {
+					isComplete = true;
+					partsHandler.onPartsReceived(parts);
+				}
 			}
+		} else {
+			// XXX logging
 		}
 	}
 

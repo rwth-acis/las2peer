@@ -41,7 +41,7 @@ import i5.las2peer.persistency.VerificationFailedException;
  */
 public class CryptoTools {
 
-	private static final String DEFAULT_HASH_METHOD = "SHA1";
+	private static final String DEFAULT_HASH_METHOD = "SHA-512";
 	private static String hashMethod = DEFAULT_HASH_METHOD;
 
 	private static String DEFAULT_ASYMMETRIC_ALGORITHM = "RSA";
@@ -95,7 +95,7 @@ public class CryptoTools {
 	 * @return signature method
 	 */
 	public static String getSignatureMethod() {
-		return getHashMethod() + "with" + getAsymmetricAlgorithm();
+		return "SHA256with" + getAsymmetricAlgorithm();
 	}
 
 	/**
@@ -115,6 +115,10 @@ public class CryptoTools {
 	public static void setAsymmetricKeySize(int size) {
 		asymmetricKeySize = size;
 		clear();
+	}
+
+	public static int getAsymmetricKeySize() {
+		return asymmetricKeySize;
 	}
 
 	/**
@@ -504,17 +508,19 @@ public class CryptoTools {
 			MessageDigest md = MessageDigest.getInstance("SHA-512");
 			md.update(publicKey.getEncoded());
 			byte[] hash = md.digest();
-			StringBuffer hexString = new StringBuffer();
-			for (byte element : hash) {
-				String hex = Integer.toHexString(0xff & element);
-				if (hex.length() == 1) {
-					hexString.append('0');
-				}
-				hexString.append(hex);
-			}
-			return hexString.toString();
+			return SimpleTools.byteToHexString(hash);
 		} catch (NoSuchAlgorithmException e) {
 			throw new RuntimeException(e);
+		}
+	}
+
+	public static byte[] getSecureHash(byte[] data) throws CryptoException {
+		try {
+			MessageDigest digest = MessageDigest.getInstance(getHashMethod());
+			digest.update(data);
+			return digest.digest();
+		} catch (Exception e) {
+			throw new CryptoException("Failure creating hash!", e);
 		}
 	}
 
@@ -523,7 +529,7 @@ public class CryptoTools {
 	private static KeyPairGenerator keyGeneratorAsymmetric = null;
 
 	/**
-	 * (re) inistialize the key generators
+	 * (re) initialize the key generators
 	 */
 	private static void initialize() {
 		try {

@@ -4,6 +4,7 @@ import i5.las2peer.api.Context;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.security.AgentContext;
+import i5.las2peer.security.AgentException;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.AgentStorage;
 import i5.las2peer.security.GroupAgentImpl;
@@ -33,6 +34,7 @@ import org.w3c.dom.NodeList;
 public class EnvelopeVersion implements Serializable, XmlAble {
 	
 	// TODO API store signing agent + reader list
+
 
 	private static final L2pLogger logger = L2pLogger.getInstance(EnvelopeVersion.class);
 
@@ -261,7 +263,7 @@ public class EnvelopeVersion implements Serializable, XmlAble {
 					} else {
 						logger.log(Level.WARNING, "Non GroupAgent listed as reader group");
 					}
-				} catch (AgentNotKnownException | L2pSecurityException | CryptoException | SerializationException e) {
+				} catch (AgentException | L2pSecurityException | CryptoException | SerializationException e) {
 					logger.log(Level.WARNING, "Issue with envelope reader", e);
 				}
 			}

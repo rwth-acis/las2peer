@@ -4,7 +4,6 @@ import i5.las2peer.api.security.UserAgent;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
 import i5.las2peer.communication.PingPongContent;
-import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.NodeNotFoundException;
 import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.persistency.MalformedXMLException;
@@ -292,7 +291,7 @@ public class UserAgentImpl extends PassphraseAgentImpl implements UserAgent {
 			throw new MessageException("encoding problems with sending an answer", e);
 		} catch (SerializationException e) {
 			throw new MessageException("serialization problems with sending an answer", e);
-		} catch (AgentNotKnownException e) {
+		} catch (AgentException e) {
 			// just fire and forget
 		} catch (NodeNotFoundException e) {
 			// just fire and forget

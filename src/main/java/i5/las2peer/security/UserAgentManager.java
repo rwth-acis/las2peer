@@ -93,19 +93,20 @@ public class UserAgentManager {
 	 * 
 	 * @param name
 	 * @return
-	 * @throws AgentNotKnownException
+	 * @throws AgentNotKnownException If no agent for the given login is found
+	 * @throws AgentException If any other issue with the agent occurs, e. g. XML not readable
 	 */
-	public String getAgentIdByLogin(String name) throws AgentNotKnownException, L2pSecurityException {
+	public String getAgentIdByLogin(String name) throws AgentNotKnownException, AgentException {
 		if (name.equalsIgnoreCase("anonymous")) {
 			return node.getAnonymous().getSafeId();
 		}
 		try {
 			EnvelopeVersion env = node.fetchEnvelope(PREFIX_USER_NAME + name.toLowerCase());
 			return (String) env.getContent();
-		} catch (EnvelopeException e) {
+		} catch (EnvelopeNotFoundException e) {
 			throw new AgentNotKnownException("Username not found!", e);
-		} catch (SerializationException | CryptoException e) {
-			throw new AgentNotKnownException("Could not read agent id from storage");
+		} catch (EnvelopeException | SerializationException | L2pSecurityException | CryptoException e) {
+			throw new AgentException("Could not read agent id from storage");
 		}
 	}
 
@@ -114,16 +115,17 @@ public class UserAgentManager {
 	 * 
 	 * @param email
 	 * @return
-	 * @throws AgentNotKnownException
+	 * @throws AgentNotKnownException If no agent for the given email is found
+	 * @throws AgentException If any other issue with the agent occurs, e. g. XML not readable
 	 */
-	public String getAgentIdByEmail(String email) throws AgentNotKnownException, L2pSecurityException {
+	public String getAgentIdByEmail(String email) throws AgentNotKnownException, AgentException {
 		try {
 			EnvelopeVersion env = node.fetchEnvelope(PREFIX_USER_MAIL + email.toLowerCase());
 			return (String) env.getContent();
-		} catch (EnvelopeException e) {
+		} catch (EnvelopeNotFoundException e) {
 			throw new AgentNotKnownException("Email not found!", e);
-		} catch (SerializationException | CryptoException e) {
-			throw new AgentNotKnownException("Could not read email from storage");
+		} catch (EnvelopeException | SerializationException | L2pSecurityException | CryptoException e) {
+			throw new AgentException("Could not read email from storage");
 		}
 	}
 }

@@ -125,7 +125,7 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 						unlockPrivateKey(member);
 						return;
 					}
-				} catch (AgentNotKnownException | L2pSecurityException | SerializationException | CryptoException e) {
+				} catch (AgentException | L2pSecurityException | SerializationException | CryptoException e) {
 				}
 			}
 		}
@@ -429,7 +429,7 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 			AgentImpl member = null;
 			try {
 				member = getRunningAtNode().getAgent(memberId);
-			} catch (AgentNotKnownException e1) {
+			} catch (AgentException e1) {
 				getRunningAtNode().observerNotice(MonitoringEvent.SERVICE_ERROR, e1.getMessage());
 			}
 			if (member == null) {

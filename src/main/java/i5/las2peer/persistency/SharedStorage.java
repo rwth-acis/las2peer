@@ -6,7 +6,8 @@ import i5.las2peer.api.persistency.EnvelopeNotFoundException;
 import i5.las2peer.helper.Configurable;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.persistency.helper.ArtifactPartComparator;
-import i5.las2peer.persistency.helper.FetchProcessHelper;
+import i5.las2peer.persistency.helper.FetchEnvelopeHelper;
+import i5.las2peer.persistency.helper.FetchHashedHelper;
 import i5.las2peer.persistency.helper.LatestArtifactVersionFinder;
 import i5.las2peer.persistency.helper.MergeCounter;
 import i5.las2peer.persistency.helper.MultiArtifactHandler;
@@ -98,7 +99,7 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 				storageRootDir += File.separator;
 			}
 			try {
-				logger.info("loading persistent storage...");
+				logger.info("loading storage...");
 				long start = System.currentTimeMillis();
 				storage = new PersistentStorage(pastIdFactory, storageRootDir + "node_" + node.getId().toStringFull(),
 						maximumStorageSize, node.getEnvironment());
@@ -117,6 +118,23 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 		artifactIdFactory = new PastryIdFactory(node.getEnvironment());
 		this.threadpool = threadpool;
 		versionCache = new ConcurrentHashMap<>();
+	}
+
+	public long getLocalSize() {
+		return pastStorage.getStorageManager().getTotalSize();
+	}
+
+	public long getLocalMaxSize() {
+		Storage storage = pastStorage.getStorageManager().getStorage();
+		if (storage instanceof MemoryStorage) {
+			// return max ram size
+			return Runtime.getRuntime().maxMemory();
+		} else if (storage instanceof PersistentStorage) {
+			return maximumStorageSize;
+		} else {
+			logger.severe("Unknown storage type. Could not determine storage size");
+			return 0;
+		}
 	}
 
 	private void lookupHandles(Id id, StorageLookupHandler lookupHandler, StorageExceptionHandler exceptionHandler) {
@@ -382,7 +400,7 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 		if (timeoutMs < 0) {
 			throw new IllegalArgumentException("Timeout must be greater or equal to zero");
 		}
-		FetchProcessHelper resultHelper = new FetchProcessHelper();
+		FetchEnvelopeHelper resultHelper = new FetchEnvelopeHelper();
 		fetchEnvelopeAsync(identifier, version, resultHelper, resultHelper);
 		long startWait = System.currentTimeMillis();
 		while (System.currentTimeMillis() - startWait < timeoutMs) {
@@ -472,7 +490,7 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 			StorageEnvelopeHandler envelopeHandler, StorageExceptionHandler exceptionHandler) {
 		fetchFromHandles(metadataHandles, new StorageArtifactHandler() {
 			@Override
-			public void onReceive(NetworkArtifact artifact) {
+			public void onReceive(AbstractArtifact artifact) {
 				try {
 					Serializable received = SerializeTools.deserialize(artifact.getContent());
 					if (received instanceof MetadataEnvelope) {
@@ -626,6 +644,91 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 	@Override
 	public void removeEnvelope(String identifier) throws EnvelopeNotFoundException, EnvelopeException {
 		throw new EnvelopeException("Delete not implemented in Past!");
+	}
+
+	public void storeHashedContentAsync(byte[] content, StorageStoreResultHandler resultHandler,
+			StorageExceptionHandler exceptionHandler) {
+		try {
+			HashedArtifact toStore = new HashedArtifact(artifactIdFactory, content);
+			logger.info("Storing hashed artifact with id " + toStore.getId().toStringFull());
+			pastStorage.insert(toStore,
+					new PastInsertContinuation(threadpool, resultHandler, exceptionHandler, toStore));
+		} catch (Exception e) {
+			if (exceptionHandler != null) {
+				exceptionHandler.onException(e);
+			}
+			return;
+		}
+	}
+
+	public void storeHashedContent(byte[] content, long timeoutMs) throws EnvelopeException {
+		if (timeoutMs < 0) {
+			throw new IllegalArgumentException("Timeout must be greater or equal to zero");
+		}
+		StoreProcessHelper resultHelper = new StoreProcessHelper();
+		storeHashedContentAsync(content, resultHelper, resultHelper);
+		waitForStoreResult(resultHelper, timeoutMs);
+	}
+
+	public void fetchHashedContentAsync(byte[] hash, StorageArtifactHandler artifactHandler,
+			StorageExceptionHandler exceptionHandler) {
+		try {
+			if (artifactHandler == null) {
+				// fetching something without caring about the result makes no sense
+				if (exceptionHandler != null) {
+					exceptionHandler.onException(new NullPointerException("artifact handler must not be null"));
+				}
+				return;
+			}
+			Id fetchId = HashedArtifact.buildIdFromHash(artifactIdFactory, hash);
+			lookupHandles(fetchId, new StorageLookupHandler() {
+				@Override
+				public void onLookup(ArrayList<PastContentHandle> handles) {
+					if (handles.size() > 0) {
+						// XXX pick the best fitting handle depending on nodeid (web-of-trust) or distance
+						PastContentHandle bestHandle = handles.get(new Random().nextInt(handles.size()));
+						pastStorage.fetch(bestHandle,
+								new PastFetchContinuation(threadpool, artifactHandler, exceptionHandler));
+					} else {
+						// not found
+						if (exceptionHandler != null) {
+							exceptionHandler
+									.onException(new EnvelopeNotFoundException("Hashed content for base64 hash '"
+											+ java.util.Base64.getEncoder().encodeToString(hash)
+											+ "' not found in shared storage!"));
+						}
+					}
+				}
+			}, exceptionHandler);
+		} catch (Exception e) {
+			if (exceptionHandler != null) {
+				exceptionHandler.onException(e);
+			}
+			return;
+		}
+	}
+
+	public byte[] fetchHashedContent(byte[] hash, long timeoutMs) throws EnvelopeException {
+		if (timeoutMs < 0) {
+			throw new IllegalArgumentException("Timeout must be greater or equal to zero");
+		}
+		FetchHashedHelper resultHelper = new FetchHashedHelper();
+		fetchHashedContentAsync(hash, resultHelper, resultHelper);
+		long startWait = System.currentTimeMillis();
+		while (System.currentTimeMillis() - startWait < timeoutMs) {
+			try {
+				HashedArtifact result = resultHelper.getResult();
+				if (result != null) {
+					return result.getContent();
+				}
+				Thread.sleep(1);
+			} catch (EnvelopeException e) {
+				throw e;
+			} catch (Exception e) {
+				throw new EnvelopeException(e);
+			}
+		}
+		throw new EnvelopeException("Fetch operation time out");
 	}
 
 }

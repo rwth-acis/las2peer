@@ -8,6 +8,7 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,6 +17,7 @@ import i5.las2peer.classLoaders.UnresolvedDependenciesException;
 import i5.las2peer.classLoaders.helpers.LibraryDependency;
 import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
 import i5.las2peer.classLoaders.helpers.LibraryVersion;
+import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.tools.SimpleTools;
 
 /**
@@ -24,6 +26,8 @@ import i5.las2peer.tools.SimpleTools;
  *
  */
 public class FileSystemRepository implements Repository {
+
+	private static final L2pLogger logger = L2pLogger.getInstance(FileSystemRepository.class);
 
 	private Iterable<String> directories;
 	private boolean recursive = false;
@@ -105,8 +109,9 @@ public class FileSystemRepository implements Repository {
 		LibraryVersion version = null;
 		for (Enumeration<LibraryVersion> en = htVersions.keys(); en.hasMoreElements();) {
 			LibraryVersion v = en.nextElement();
-			if (version == null || v.isLargerThan(version))
+			if (version == null || v.isLargerThan(version)) {
 				version = v;
+			}
 		}
 
 		try {
@@ -132,15 +137,17 @@ public class FileSystemRepository implements Repository {
 		updateRepository(false);
 
 		Hashtable<LibraryVersion, String> htVersions = htFoundJars.get(lib.getName());
-		if (htVersions == null)
+		if (htVersions == null) {
 			throw new LibraryNotFoundException(
 					"library '" + lib.toString() + "' package could not be found in the repositories!");
+		}
 
 		String jar = htVersions.get(lib.getVersion());
 
-		if (jar == null)
+		if (jar == null) {
 			throw new LibraryNotFoundException(
 					"library '" + lib.toString() + "' package could not be found in the repositories!");
+		}
 
 		try {
 			return LoadedJarLibrary.createFromJar(jar);
@@ -162,9 +169,10 @@ public class FileSystemRepository implements Repository {
 		updateRepository(false);
 
 		Hashtable<LibraryVersion, String> htVersions = htFoundJars.get(dep.getName());
-		if (htVersions == null)
+		if (htVersions == null) {
 			throw new LibraryNotFoundException(
 					"library '" + dep.getName() + "' package could not be found in the repositories!");
+		}
 
 		LibraryVersion[] available = htVersions.keySet().toArray(new LibraryVersion[0]);
 		Arrays.sort(available, Comparator.comparing((LibraryVersion s) -> s).reversed());
@@ -202,8 +210,9 @@ public class FileSystemRepository implements Repository {
 	 */
 	public Collection<LibraryVersion> getAvailableVersionSet(String libraryName) {
 		Hashtable<LibraryVersion, String> htFound = htFoundJars.get(libraryName);
-		if (htFound == null)
-			return new HashSet<LibraryVersion>();
+		if (htFound == null) {
+			return new HashSet<>();
+		}
 
 		return htFound.keySet();
 	}
@@ -224,7 +233,7 @@ public class FileSystemRepository implements Repository {
 	 * @return a collection with all libraries in this repository
 	 */
 	public Collection<String> getLibraryCollection() {
-		HashSet<String> hsTemp = new HashSet<String>();
+		HashSet<String> hsTemp = new HashSet<>();
 
 		Enumeration<String> eLibs = htFoundJars.keys();
 		while (eLibs.hasMoreElements()) {
@@ -292,7 +301,7 @@ public class FileSystemRepository implements Repository {
 	 * initialize the list if jars
 	 */
 	private void initJarList() {
-		htFoundJars = new Hashtable<String, Hashtable<LibraryVersion, String>>();
+		htFoundJars = new Hashtable<>();
 
 		for (String directory : directories) {
 			searchJars(directory);
@@ -307,9 +316,14 @@ public class FileSystemRepository implements Repository {
 	private void searchJars(String directory) {
 		File f = new File(directory);
 
-		if (!f.exists() || !f.isDirectory()) {
-			// since this is a search function, stay friendly and don't throw an exception
-			System.err.println("Given path is not a directory: " + f.toString());
+		if (f.exists()) {
+			if (!f.isDirectory()) {
+				// since this is a search function, stay friendly and don't throw an exception
+				logger.log(Level.WARNING, "Given path is not a directory: " + f.toString());
+				return;
+			}
+		} else {
+			logger.log(Level.FINE, "Given path does not exist: " + f.toString());
 			return;
 		}
 
@@ -317,26 +331,27 @@ public class FileSystemRepository implements Repository {
 
 		Pattern versionPattern = Pattern.compile("-[0-9]+(?:.[0-9]+(?:.[0-9]+)?)?(?:-[0-9]+)?$");
 
-		for (int i = 0; i < entries.length; i++) {
-			if (entries[i].isDirectory()) {
-				if (recursive)
-					searchJars(entries[i].toString());
-			} else if (entries[i].getPath().endsWith(".jar")) {
-				String file = entries[i].getName().substring(0, entries[i].getName().length() - 4);
+		for (File entry : entries) {
+			if (entry.isDirectory()) {
+				if (recursive) {
+					searchJars(entry.toString());
+				}
+			} else if (entry.getPath().endsWith(".jar")) {
+				String file = entry.getName().substring(0, entry.getName().length() - 4);
 				Matcher m = versionPattern.matcher(file);
 
 				if (m.find()) {
 					try {
 						String name = file.substring(0, m.start());
 						LibraryVersion version = new LibraryVersion(m.group().substring(1));
-						registerJar(entries[i].getPath(), name, version);
+						registerJar(entry.getPath(), name, version);
 					} catch (IllegalArgumentException e) {
-						System.out.println("Notice: library " + entries[i]
-								+ " has no version info in it's name! - Won't be used!");
+						System.out.println(
+								"Notice: library " + entry + " has no version info in it's name! - Won't be used!");
 					}
 				} else {
 					System.out.println(
-							"Notice: library " + entries[i] + " has no version info in it's name! - Won't be used!");
+							"Notice: library " + entry + " has no version info in it's name! - Won't be used!");
 				}
 			}
 		}
@@ -352,7 +367,7 @@ public class FileSystemRepository implements Repository {
 	private void registerJar(String file, String name, LibraryVersion version) {
 		Hashtable<LibraryVersion, String> htNameEntries = htFoundJars.get(name);
 		if (htNameEntries == null) {
-			htNameEntries = new Hashtable<LibraryVersion, String>();
+			htNameEntries = new Hashtable<>();
 			htFoundJars.put(name, htNameEntries);
 		}
 		htNameEntries.put(version, file);
