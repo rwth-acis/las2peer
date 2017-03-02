@@ -376,6 +376,7 @@ public interface Context {
 
 	/**
 	 * Gets the logger for the given class.
+	 * 
 	 * @param cls A class.
 	 * 
 	 * @return The logging instance for the current service.
