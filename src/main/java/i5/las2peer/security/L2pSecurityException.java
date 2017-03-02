@@ -1,7 +1,7 @@
 package i5.las2peer.security;
 
 
-//TODO API remove
+//TODO API remove or make more expressive
 
 /**
  * Base class for all security related exceptions in the las2peer setting.
