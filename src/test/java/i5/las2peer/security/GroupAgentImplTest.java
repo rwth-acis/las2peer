@@ -18,7 +18,7 @@ import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 
-public class GroupAgentTest {
+public class GroupAgentImplTest {
 
 	private static final String ADAMSPASS = "adamspass";
 	private static final String EVESSPASS = "evesspass";

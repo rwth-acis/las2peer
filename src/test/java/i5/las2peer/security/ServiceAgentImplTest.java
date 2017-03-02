@@ -22,7 +22,7 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-public class ServiceAgentTest {
+public class ServiceAgentImplTest {
 	private static final String servicename = "i5.las2peer.somePackage.AService";
 	private static final String serviceversion = "1.0";
 	private static final String passphrase = "a passphrase";

@@ -23,7 +23,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 
-public class EnvelopeTest {
+public class EnvelopeVersionTest {
 
 	private ArrayList<PastryNodeImpl> nodes;
 	private boolean asyncTestState;

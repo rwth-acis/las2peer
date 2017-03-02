@@ -12,7 +12,7 @@ import java.security.NoSuchAlgorithmException;
 
 import org.junit.Test;
 
-public class UserAgentTest {
+public class UserAgentImplTest {
 
 	@Test
 	public void testUnlocking() throws NoSuchAlgorithmException, CryptoException, AgentAccessDeniedException,
