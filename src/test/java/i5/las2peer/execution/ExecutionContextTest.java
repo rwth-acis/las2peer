@@ -13,7 +13,6 @@ import i5.las2peer.api.TestService;
 import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
-import i5.las2peer.classLoaders.LibraryClassLoader;
 import i5.las2peer.p2p.AgentAlreadyRegisteredException;
 import i5.las2peer.p2p.LocalNode;
 import i5.las2peer.p2p.Node;

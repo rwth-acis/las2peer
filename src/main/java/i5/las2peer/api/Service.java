@@ -1,7 +1,6 @@
 package i5.las2peer.api;
 
 import i5.las2peer.api.security.ServiceAgent;
-import i5.las2peer.helper.Configurable;
 
 /**
  * Base class for services to be hosted within the las2peer network.

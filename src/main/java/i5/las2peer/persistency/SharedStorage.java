@@ -1,9 +1,9 @@
 package i5.las2peer.persistency;
 
+import i5.las2peer.api.Configurable;
 import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.persistency.EnvelopeException;
 import i5.las2peer.api.persistency.EnvelopeNotFoundException;
-import i5.las2peer.helper.Configurable;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.persistency.helper.ArtifactPartComparator;
 import i5.las2peer.persistency.helper.FetchEnvelopeHelper;

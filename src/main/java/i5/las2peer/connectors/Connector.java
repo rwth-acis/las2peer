@@ -1,6 +1,6 @@
 package i5.las2peer.connectors;
 
-import i5.las2peer.helper.Configurable;
+import i5.las2peer.api.Configurable;
 import i5.las2peer.p2p.Node;
 
 /**

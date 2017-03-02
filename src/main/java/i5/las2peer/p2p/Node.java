@@ -1,5 +1,6 @@
 package i5.las2peer.p2p;
 
+import i5.las2peer.api.Configurable;
 import i5.las2peer.api.execution.ServiceInvocationException;
 import i5.las2peer.api.execution.ServiceNotAvailableException;
 import i5.las2peer.api.execution.ServiceNotFoundException;
@@ -17,7 +18,6 @@ import i5.las2peer.communication.MessageException;
 import i5.las2peer.communication.RMIExceptionContent;
 import i5.las2peer.communication.RMIResultContent;
 import i5.las2peer.execution.RMITask;
-import i5.las2peer.helper.Configurable;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.logging.NodeObserver;
 import i5.las2peer.logging.monitoring.MonitoringObserver;
