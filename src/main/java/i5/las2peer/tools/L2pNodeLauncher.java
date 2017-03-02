@@ -25,6 +25,7 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import i5.las2peer.api.execution.ServiceInvocationException;
 import i5.las2peer.api.execution.ServiceNotFoundException;
 import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.persistency.EnvelopeException;
@@ -53,7 +54,6 @@ import i5.las2peer.sandbox.L2pSecurityManager;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.GroupAgentImpl;
 import i5.las2peer.security.L2pSecurityException;
-import i5.las2peer.security.L2pServiceException;
 import i5.las2peer.security.PassphraseAgentImpl;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
@@ -492,10 +492,10 @@ public class L2pNodeLauncher {
 	 * @param serviceMethod
 	 * @param parameters pass an empty string if you want to call a method without parameters
 	 * @return
-	 * @throws L2pServiceException any exception during service method invocation
+	 * @throws ServiceInvocationException 
+	 * @throws L2pSecurityException 
 	 */
-	public Serializable invoke(String serviceIdentifier, String serviceMethod, String parameters)
-			throws L2pServiceException {
+	public Serializable invoke(String serviceIdentifier, String serviceMethod, String parameters) throws L2pSecurityException, ServiceInvocationException {
 		if (parameters.isEmpty()) {
 			return invoke(serviceIdentifier, serviceMethod, new Serializable[0]);
 		}
@@ -511,19 +511,15 @@ public class L2pNodeLauncher {
 	 * @param serviceMethod
 	 * @param parameters
 	 * @return
-	 * @throws L2pServiceException any exception during service method invocation
+	 * @throws ServiceInvocationException 
+	 * @throws L2pSecurityException 
 	 */
 	private Serializable invoke(String serviceIdentifier, String serviceMethod, Serializable... parameters)
-			throws L2pServiceException {
+			throws L2pSecurityException, ServiceInvocationException {
 		if (currentUser == null) {
 			throw new IllegalStateException("Please register a valid user with registerUserAgent before invoking!");
 		}
-
-		try {
-			return node.invoke(currentUser, serviceIdentifier, serviceMethod, parameters);
-		} catch (Exception e) {
-			throw new L2pServiceException("Exception during service method invocation!", e);
-		}
+		return node.invoke(currentUser, serviceIdentifier, serviceMethod, parameters);
 	}
 
 	/**

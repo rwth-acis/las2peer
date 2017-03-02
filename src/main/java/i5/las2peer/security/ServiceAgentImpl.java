@@ -149,10 +149,10 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 				getRunningAtNode().sendResponse(response, m.getSendingNodeId());
 			} else if (content instanceof ListMethodsContent) {
 				if (!((ListMethodsContent) content).isRequest()) {
-					throw new L2pServiceException("I don't know what to do with a response for a ListMethods request!");
+					throw new MessageException("I don't know what to do with a response for a ListMethods request!");
 				}
 				if (m.getSendingNodeId() == null) {
-					throw new L2pServiceException("If no sendind node is given - where should I send the answer to?!");
+					throw new MessageException("If no sendind node is given - where should I send the answer to?!");
 				}
 
 				ListMethodsContent responseContent = new ListMethodsContent(false);
@@ -165,10 +165,10 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 				getRunningAtNode().sendResponse(response, m.getSendingNodeId());
 			} else if (content instanceof ServiceDiscoveryContent) {
 				if (!((ServiceDiscoveryContent) content).isRequest()) {
-					throw new L2pServiceException("Got a ServiceDiscovery response - can't handle it!");
+					throw new MessageException("Got a ServiceDiscovery response - can't handle it!");
 				}
 				if (m.getSendingNodeId() == null) {
-					throw new L2pServiceException("If no sendind node is given - where should I send the answer to?!");
+					throw new MessageException("If no sendind node is given - where should I send the answer to?!");
 				}
 
 				// only answer if requirements are met
@@ -182,11 +182,9 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 				}
 
 			} else {
-				throw new L2pServiceException("I don't know what to do with a message content of type "
+				throw new MessageException("I don't know what to do with a message content of type "
 						+ content.getClass().getCanonicalName());
 			}
-		} catch (L2pServiceException e) {
-			throw new MessageException("service problems", e);
 		} catch (L2pSecurityException | AgentAccessDeniedException e) {
 			System.out.println("\n\n\nproblematic message:\n" + m.toXmlString() + "\n" + "Exception: " + e + "\n\n\n");
 
@@ -347,11 +345,11 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 	 * notify this service agent, that it has been registered (for usage) at the given node
 	 * 
 	 * @param node
-	 * @throws L2pServiceException
+	 * @throws AgentException
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public void notifyRegistrationTo(Node node) throws L2pServiceException {
+	public void notifyRegistrationTo(Node node) throws AgentException {
 		try {
 			Class<? extends Service> clServ = (Class<? extends Service>) node.getBaseClassLoader().getServiceClass(
 					sService.getName(), sService.getVersion().toString());
@@ -391,21 +389,21 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 			System.out.println("Service " + this.getServiceNameVersion() + " has been started!");
 
 		} catch (ClassLoaderException e1) {
-			throw new L2pServiceException("Problems with the classloader", e1);
+			throw new AgentException("Problems with the classloader", e1);
 		} catch (InstantiationException e1) {
-			throw new L2pServiceException("Consturctor failure while instantiating service", e1);
+			throw new AgentException("Consturctor failure while instantiating service", e1);
 		} catch (IllegalAccessException e1) {
-			throw new L2pServiceException("Constructor security exception", e1);
+			throw new AgentException("Constructor security exception", e1);
 		} catch (ClassCastException e) {
-			throw new L2pServiceException("given class " + sService + " is not a L2p-Service!");
+			throw new AgentException("given class " + sService + " is not a L2p-Service!");
 		} catch (ServiceException e) {
-			throw new L2pServiceException("Service instance problems!", e);
+			throw new AgentException("Service instance problems!", e);
 		} catch (AgentException e) {
-			throw new L2pServiceException("Agent problems after service instantiation", e);
+			throw new AgentException("Agent problems after service instantiation", e);
 		} catch (NoSuchMethodException e) {
-			throw new L2pServiceException("The given Service class has no standard constructor!", e);
+			throw new AgentException("The given Service class has no standard constructor!", e);
 		} catch (InvocationTargetException e) {
-			throw new L2pServiceException("Exception in service constructor", e.getCause());
+			throw new AgentException("Exception in service constructor", e.getCause());
 		}
 	}
 

@@ -2,7 +2,6 @@ package i5.las2peer.logging.monitoring;
 
 import i5.las2peer.api.execution.ServiceInvocationException;
 import i5.las2peer.api.logging.MonitoringEvent;
-import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.communication.Message;
@@ -11,7 +10,6 @@ import i5.las2peer.p2p.MessageResultListener;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.security.L2pSecurityException;
-import i5.las2peer.security.L2pServiceException;
 import i5.las2peer.security.MonitoringAgent;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.SerializationException;

@@ -8,7 +8,6 @@ import i5.las2peer.api.security.AgentException;
 import i5.las2peer.p2p.LocalNode;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.L2pSecurityException;
-import i5.las2peer.security.L2pServiceException;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.tools.CryptoException;
@@ -202,14 +201,12 @@ public abstract class LocalServiceTestCase {
 	 * @param method
 	 * @param parameters
 	 * @return result of the invocation
-	 * @throws L2pServiceException
 	 * @throws L2pSecurityException
 	 * @throws InterruptedException
 	 * @throws ServiceInvocationException
 	 */
 	public Serializable invoke(AgentImpl executing, String method, Serializable... parameters)
-			throws L2pServiceException, L2pSecurityException, InterruptedException,
-			ServiceInvocationException {
+			throws L2pSecurityException, InterruptedException, ServiceInvocationException {
 		return getNode().invokeLocally(executing, getMyAgent(), method, parameters);
 	}
 
