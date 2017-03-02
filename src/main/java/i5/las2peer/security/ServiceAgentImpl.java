@@ -382,9 +382,9 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 				try {
 					node.getServiceAliasManager().registerServiceAlias(this, alias);
 				} catch (AgentLockedException e) {
-					throw new L2pServiceException("Service alias could not be registered!", e);
+					throw new ServiceException("Service alias could not be registered!", e);
 				} catch (AliasConflictException e) {
-					throw new L2pServiceException("Service alias is already used by anther service!", e);
+					throw new ServiceException("Service alias is already used by anther service!", e);
 				}
 			}
 

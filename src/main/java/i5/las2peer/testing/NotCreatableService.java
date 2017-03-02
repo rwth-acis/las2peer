@@ -1,6 +1,7 @@
 package i5.las2peer.testing;
 
 import i5.las2peer.api.Service;
+import i5.las2peer.api.ServiceException;
 import i5.las2peer.security.L2pServiceException;
 
 /**
@@ -14,10 +15,10 @@ public class NotCreatableService extends Service {
 	/**
 	 * simple constructor just throwing an Exception
 	 * 
-	 * @throws L2pServiceException
+	 * @throws ServiceException
 	 */
-	public NotCreatableService() throws L2pServiceException {
-		throw new L2pServiceException("Constructor is throwing an exception!");
+	public NotCreatableService() throws ServiceException {
+		throw new ServiceException("Constructor is throwing an exception!");
 	}
 
 }

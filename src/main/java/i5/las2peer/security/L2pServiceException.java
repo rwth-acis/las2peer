@@ -2,6 +2,7 @@ package i5.las2peer.security;
 
 import i5.las2peer.api.security.AgentException;
 
+// TODO API remove
 
 /**
  * basic exception thrown on service (invocation) problems
