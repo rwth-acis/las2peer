@@ -44,7 +44,7 @@ public class EnvelopeImplTest {
 
 		EnvelopeImpl envelope = new EnvelopeImpl("test", owner);
 		assertEquals(envelope.getIdentifier(), "test");
-		assertEquals(envelope.getSigningAgentId(), owner.getId());
+		assertEquals(envelope.getSigningAgentId(), owner.getIdentifier());
 		assertTrue(envelope.hasReader(owner));
 		assertFalse(envelope.hasReader(reader));
 
@@ -78,7 +78,7 @@ public class EnvelopeImplTest {
 		node.storeEnvelope(version, owner);
 
 		EnvelopeImpl envelope = new EnvelopeImpl(version, ownerContext);
-		assertEquals(envelope.getSigningAgentId(), owner.getId());
+		assertEquals(envelope.getSigningAgentId(), owner.getIdentifier());
 		assertEquals(envelope.getContent(), "content");
 		assertTrue(envelope.hasReader(owner));
 

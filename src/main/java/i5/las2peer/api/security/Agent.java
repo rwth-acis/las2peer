@@ -12,7 +12,7 @@ public interface Agent {
 	 * 
 	 * @return The agent id.
 	 */
-	public String getId();
+	public String getIdentifier();
 
 	/**
 	 * Returns whether the agent is locked or not.

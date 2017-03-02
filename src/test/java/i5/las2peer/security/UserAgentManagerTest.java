@@ -22,7 +22,7 @@ public class UserAgentManagerTest {
 
 			node.storeAgent(a);
 
-			assertEquals(a.getSafeId(), l.getAgentIdByLogin("login"));
+			assertEquals(a.getIdentifier(), l.getAgentIdByLogin("login"));
 
 			UserAgentImpl b = UserAgentImpl.createUserAgent("pass");
 			b.unlock("pass");
@@ -40,7 +40,7 @@ public class UserAgentManagerTest {
 			b.setLoginName("login2");
 			node.updateAgent(b);
 
-			assertEquals(b.getSafeId(), l.getAgentIdByLogin("login2"));
+			assertEquals(b.getIdentifier(), l.getAgentIdByLogin("login2"));
 
 			b.setLoginName("LOGIN");
 			try {
@@ -76,7 +76,7 @@ public class UserAgentManagerTest {
 
 			node.storeAgent(a);
 
-			assertEquals(a.getSafeId(), l.getAgentIdByEmail("email@example.com"));
+			assertEquals(a.getIdentifier(), l.getAgentIdByEmail("email@example.com"));
 
 			UserAgentImpl b = UserAgentImpl.createUserAgent("pass");
 			b.unlock("pass");
@@ -98,12 +98,12 @@ public class UserAgentManagerTest {
 
 			b.setEmail("email2@example.com");
 			node.updateAgent(b);
-			assertEquals(b.getSafeId(), l.getAgentIdByEmail("email2@example.com"));
+			assertEquals(b.getIdentifier(), l.getAgentIdByEmail("email2@example.com"));
 
 			b.setEmail("email3@example.com");
 			node.updateAgent(b);
-			assertEquals(b.getSafeId(), l.getAgentIdByEmail("email3@example.com"));
-			assertEquals(b.getSafeId(), l.getAgentIdByEmail("EMAIL3@example.com"));
+			assertEquals(b.getIdentifier(), l.getAgentIdByEmail("email3@example.com"));
+			assertEquals(b.getIdentifier(), l.getAgentIdByEmail("EMAIL3@example.com"));
 
 			try {
 				l.getAgentIdByEmail("fdewfue");
@@ -121,7 +121,7 @@ public class UserAgentManagerTest {
 		try {
 			Node node = LocalNode.launchNode();
 			String a = node.getAgentIdForLogin("anonymous");
-			assertEquals(a, node.getAnonymous().getSafeId());
+			assertEquals(a, node.getAnonymous().getIdentifier());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

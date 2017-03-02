@@ -79,7 +79,7 @@ public class MonitoringObserver implements NodeObserver {
 			sendingAgent.unlock("sendingAgentPass");
 			registeredAt.storeAgent(sendingAgent);
 			registeredAt.registerReceiver(sendingAgent);
-			System.out.println("Monitoring: Registered MonitoringAgent: " + sendingAgent.getSafeId());
+			System.out.println("Monitoring: Registered MonitoringAgent: " + sendingAgent.getIdentifier());
 
 		} catch (AgentException e) {
 			System.out.println("Monitoring: Problems registering MonitoringAgent!" + e);
@@ -96,7 +96,7 @@ public class MonitoringObserver implements NodeObserver {
 					"getReceivingAgentId", testParameters);
 			try {
 				receivingAgent = (MonitoringAgent) registeredAt.getAgent(receivingAgentId);
-				System.out.println("Monitoring: Fetched receiving MonitoringAgent: " + receivingAgent.getSafeId());
+				System.out.println("Monitoring: Fetched receiving MonitoringAgent: " + receivingAgent.getIdentifier());
 			} catch (AgentNotFoundException e) {
 				e.printStackTrace();
 			}

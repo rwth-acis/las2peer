@@ -142,7 +142,7 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	 * @throws L2pSecurityException
 	 */
 	private void decryptSecretKey(AgentImpl agent) throws SerializationException, CryptoException, L2pSecurityException {
-		byte[] crypted = htEncryptedKeyVersions.get(agent.getSafeId());
+		byte[] crypted = htEncryptedKeyVersions.get(agent.getIdentifier());
 
 		if (crypted == null) {
 			throw new L2pSecurityException("the given agent is not listed as a group member!");
@@ -180,7 +180,7 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 		}
 
 		byte[] cryptedSecret = CryptoTools.encryptAsymmetric(symmetricGroupKey, a.getPublicKey());
-		htEncryptedKeyVersions.put(a.getSafeId(), cryptedSecret);
+		htEncryptedKeyVersions.put(a.getIdentifier(), cryptedSecret);
 	}
 
 	/**
@@ -190,7 +190,7 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	 * @return true, if the given agent is a member of this group
 	 */
 	public boolean isMember(AgentImpl a) {
-		return isMember(a.getSafeId());
+		return isMember(a.getIdentifier());
 	}
 
 	/**
@@ -243,7 +243,7 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	 * @throws L2pSecurityException
 	 */
 	public void removeMember(AgentImpl a) throws L2pSecurityException {
-		removeMember(a.getId());
+		removeMember(a.getIdentifier());
 	}
 
 	/**
@@ -277,7 +277,7 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 						+ Base64.getEncoder().encodeToString(htEncryptedKeyVersions.get(id)) + "</keyentry>\n";
 			}
 
-			StringBuffer result = new StringBuffer("<las2peer:agent type=\"group\">\n" + "\t<id>" + getSafeId()
+			StringBuffer result = new StringBuffer("<las2peer:agent type=\"group\">\n" + "\t<id>" + getIdentifier()
 					+ "</id>\n" + "\t<publickey encoding=\"base64\">"
 					+ SerializeTools.serializeToBase64(getPublicKey()) + "</publickey>\n"
 					+ "\t<privatekey encoding=\"base64\" encrypted=\"" + CryptoTools.getSymmetricAlgorithm() + "\">"
@@ -512,26 +512,26 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 
 	@Override
 	public void addMember(Agent agent) {
-		if (!htEncryptedKeyVersions.containsKey(agent.getId())) {
-			membersToAdd.put(agent.getId(), (AgentImpl)agent);
+		if (!htEncryptedKeyVersions.containsKey(agent.getIdentifier())) {
+			membersToAdd.put(agent.getIdentifier(), (AgentImpl)agent);
 		}
-		membersToRemove.remove(agent.getId());
+		membersToRemove.remove(agent.getIdentifier());
 
 	}
 
 	@Override
 	public void revokeMember(Agent agent) {
-		if (htEncryptedKeyVersions.containsKey(agent.getId())) {
-			membersToRemove.put(agent.getId(), (AgentImpl)agent);
+		if (htEncryptedKeyVersions.containsKey(agent.getIdentifier())) {
+			membersToRemove.put(agent.getIdentifier(), (AgentImpl)agent);
 		}
 		else if (membersToAdd.containsKey((AgentImpl)agent)) {
-			membersToAdd.remove(agent.getId());
+			membersToAdd.remove(agent.getIdentifier());
 		}
 	}
 
 	@Override
 	public boolean hasMember(Agent agent) {
-		return hasMember(agent.getId());
+		return hasMember(agent.getIdentifier());
 	}
 	
 	@Override

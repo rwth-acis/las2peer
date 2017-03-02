@@ -543,7 +543,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	 * @return a topic identifier for the agent to subscribe to
 	 */
 	public static String getAgentTopicId(AgentImpl agent) {
-		return getAgentTopicId(agent.getSafeId());
+		return getAgentTopicId(agent.getIdentifier());
 	}
 
 	/**

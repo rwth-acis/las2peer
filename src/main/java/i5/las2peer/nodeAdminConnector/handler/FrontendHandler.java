@@ -89,7 +89,7 @@ public class FrontendHandler extends AbstractHandler {
 			if (requestingAgentSession != null) {
 				sessionId = requestingAgentSession.getSessionId();
 				activeAgent = requestingAgentSession.getAgent();
-				agentId = activeAgent.getSafeId();
+				agentId = activeAgent.getIdentifier();
 			}
 			logger.info("Handler: " + getClass().getCanonicalName() + " Method: " + exchange.getRequestMethod()
 					+ " Request-Path: " + exchange.getRequestURI().getPath());
@@ -380,7 +380,7 @@ public class FrontendHandler extends AbstractHandler {
 							agent = UserAgentImpl.createUserAgent(password);
 							agent.unlock(password);
 							node.storeAgent(agent);
-							EnvelopeVersion accountEnv = node.createUnencryptedEnvelope(identifier, agent.getSafeId());
+							EnvelopeVersion accountEnv = node.createUnencryptedEnvelope(identifier, agent.getIdentifier());
 							node.storeEnvelope(accountEnv, agent);
 							logger.info("created new account successfully");
 						} catch (Exception e2) {

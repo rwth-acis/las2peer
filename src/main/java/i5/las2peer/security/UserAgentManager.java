@@ -39,7 +39,7 @@ public class UserAgentManager {
 		if (agent.isLocked()) {
 			throw new AgentLockedException("Only unlocked Agents can be registered!");
 		}
-		String agentId = agent.getSafeId();
+		String agentId = agent.getIdentifier();
 		if (agent.hasLogin()) {
 			try {
 				String identifier = PREFIX_USER_NAME + agent.getLoginName().toLowerCase();
@@ -99,7 +99,7 @@ public class UserAgentManager {
 	 */
 	public String getAgentIdByLogin(String name) throws AgentNotFoundException, AgentException {
 		if (name.equalsIgnoreCase("anonymous")) {
-			return node.getAnonymous().getSafeId();
+			return node.getAnonymous().getIdentifier();
 		}
 		try {
 			EnvelopeVersion env = node.fetchEnvelope(PREFIX_USER_NAME + name.toLowerCase());

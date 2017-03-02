@@ -99,7 +99,7 @@ public class MessageTest {
 					+ "<signature encoding=\"base64\" method=\"SHA1withRSA\">JQ75fwuY0p5FHp5Q7SuyKop1leutzfNW/56C8JljXSHqwHrFSKO257SoQuIqwRjilVtdFxqe0aEu01J7wSR3QinRJrPeYhqDZNARR1ZiAkg+NJnAjII8eQpuTDasvDpJR6RYOTNJGFXuU4F4+mBbWdp/1XFaHrB8qHpSZ/TnRbRwIdCEXdkiCTnVHxKLkwUgUEUIqC65/r21FZ3Yyts1ZA9W0GrjdM5bcZPcPDYG7TjCR72xYuzuAEvsdrqo+bwUxnBkbkUClXClnVX71uxaPJ/qS5u4U5ojycUd3yBDHdOpLbkpVzwguARaOMHZY5rxcDwzJupaq2GI7qObU9oZwg==</signature>"
 					+ "</las2peer:message>";
 
-			String messageXml2 = "<las2peer:message from=\"4882835596055779038\" to=\"" + b2.getSafeId()
+			String messageXml2 = "<las2peer:message from=\"4882835596055779038\" to=\"" + b2.getIdentifier()
 					+ "\" generated=\"" + new Date().getTime() + "\" timeout=\"10000\">"
 					+ "<content encryption=\"RSA \" encoding=\"base64\">ffERcSgVxV/xQecFT3g2V6qhMlV7WOQrQ7Zv5p6fbD+h5mOsze3Ab14NDgijmy+COndwJn4eKe3vTWBuooJof5u9pO9pDMwyrefAtln8/ZCTo0ZABBmHmHPa19dvvyQD/+cn4f4o3QLvdoUUr9PZQxaoKH2dAqVNJNsI1GagBrhhsFR4PrA3E/ai7Dk63Zb09as6ICcy2ffl4zQFDjMFKse85C5maNKhhp+zlE4YBkItGukpHnitu2n/3IsCYG5KHjMZy7u8vJRKtGpqtDqVLo8nTlTiTAWVlv+KJq026BN/Mu/mYE0vE3y/65oDg3jnpBCDOL2DRo7Etk/o+q8Cig==</content>"
 					+ "<signature encoding=\"base64\" method=\"SHA1withRSA\">JQ75fwuY0p5FHp5Q7SuyKop1leutzfNW/56C8JljXSHqwHrFSKO257SoQuIqwRjilVtdFxqe0aEu01J7wSR3QinRJrPeYhqDZNARR1ZiAkg+NJnAjII8eQpuTDasvDpJR6RYOTNJGFXuU4F4+mBbWdp/1XFaHrB8qHpSZ/TnRbRwIdCEXdkiCTnVHxKLkwUgUEUIqC65/r21FZ3Yyts1ZA9W0GrjdM5bcZPcPDYG7TjCR72xYuzuAEvsdrqo+bwUxnBkbkUClXClnVX71uxaPJ/qS5u4U5ojycUd3yBDHdOpLbkpVzwguARaOMHZY5rxcDwzJupaq2GI7qObU9oZwg==</signature>"
@@ -183,8 +183,8 @@ public class MessageTest {
 
 			Message testee = new Message(m, "some answer");
 
-			assertEquals(a.getSafeId(), m.getSender().getSafeId());
-			assertEquals(b.getSafeId(), m.getRecipient().getSafeId());
+			assertEquals(a.getIdentifier(), m.getSender().getIdentifier());
+			assertEquals(b.getIdentifier(), m.getRecipient().getIdentifier());
 
 			assertTrue(m.getRecipientId() == testee.getSenderId());
 			assertTrue(m.getSenderId() == testee.getRecipientId());
@@ -193,8 +193,8 @@ public class MessageTest {
 			assertEquals(m.getId(), testee.getResponseToId().longValue());
 
 			testee.open(a, storage);
-			assertEquals(a.getSafeId(), testee.getRecipient().getSafeId());
-			assertEquals(b.getSafeId(), testee.getSender().getSafeId());
+			assertEquals(a.getIdentifier(), testee.getRecipient().getIdentifier());
+			assertEquals(b.getIdentifier(), testee.getSender().getIdentifier());
 
 			String xml = testee.toXmlString();
 
@@ -202,8 +202,8 @@ public class MessageTest {
 
 			Message andBack = Message.createFromXml(xml);
 
-			assertTrue(a.getSafeId().equalsIgnoreCase(andBack.getRecipientId()));
-			assertEquals(b.getSafeId(), andBack.getSenderId());
+			assertTrue(a.getIdentifier().equalsIgnoreCase(andBack.getRecipientId()));
+			assertEquals(b.getIdentifier(), andBack.getSenderId());
 			assertEquals(m.getId(), andBack.getResponseToId().longValue());
 
 			andBack.open(a, storage);
@@ -241,8 +241,8 @@ public class MessageTest {
 
 			Message andBack = Message.createFromXml(xml);
 
-			assertEquals(m.getSender().getSafeId(), andBack.getSenderId());
-			assertTrue(m.getRecipient().getSafeId().equalsIgnoreCase(andBack.getRecipientId()));
+			assertEquals(m.getSender().getIdentifier(), andBack.getSenderId());
+			assertTrue(m.getRecipient().getIdentifier().equalsIgnoreCase(andBack.getRecipientId()));
 
 			andBack.open(b, storage);
 			assertEquals(m.getContent(), andBack.getContent());
@@ -267,15 +267,15 @@ public class MessageTest {
 			Message testee = new Message(a, b, "some content");
 			assertNull(testee.getSender());
 			assertNull(testee.getRecipient());
-			assertTrue(b.getSafeId().equalsIgnoreCase(testee.getRecipientId()));
-			assertEquals(a.getSafeId(), testee.getSenderId());
+			assertTrue(b.getIdentifier().equalsIgnoreCase(testee.getRecipientId()));
+			assertEquals(a.getIdentifier(), testee.getSenderId());
 
 			b.unlock("passb");
 			testee.open(b, storage);
 
 			assertNotSame(a, testee.getSender());
 			assertEquals(b, testee.getRecipient());
-			assertEquals(a.getSafeId(), testee.getSender().getSafeId());
+			assertEquals(a.getIdentifier(), testee.getSender().getIdentifier());
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail(e.toString());

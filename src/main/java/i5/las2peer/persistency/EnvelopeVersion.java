@@ -163,7 +163,7 @@ public class EnvelopeVersion implements Serializable, XmlAble {
 			for (Object reader : readers) {
 				if (reader instanceof GroupAgentImpl) {
 					AgentImpl agent = (AgentImpl) reader;
-					readerGroupIds.add(agent.getSafeId());
+					readerGroupIds.add(agent.getIdentifier());
 				}
 				if (reader instanceof AgentImpl) {
 					AgentImpl agent = (AgentImpl) reader;
@@ -270,7 +270,7 @@ public class EnvelopeVersion implements Serializable, XmlAble {
 				// no group matched
 				byte[] encryptedReaderKey = readerKeys.get(reader.getPublicKey());
 				if (encryptedReaderKey == null) {
-					throw new CryptoException("Agent (" + reader.getSafeId() + ") has no read permission");
+					throw new CryptoException("Agent (" + reader.getIdentifier() + ") has no read permission");
 				}
 				decryptedReaderKey = reader.decryptSymmetricKey(encryptedReaderKey);
 			}

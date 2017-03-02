@@ -16,7 +16,7 @@ public class LocalServiceTestCaseTest extends LocalServiceTestCase {
 			assertEquals(TestService.class, getServiceClass());
 			assertEquals(TestService.class.getName(), getMyAgent().getServiceNameVersion().getName());
 
-			assertTrue(getNode().hasAgent(getMyAgent().getSafeId()));
+			assertTrue(getNode().hasAgent(getMyAgent().getIdentifier()));
 
 			assertEquals(TestService.class, getServiceInstance().getClass());
 		} catch (Exception e) {
@@ -29,10 +29,10 @@ public class LocalServiceTestCaseTest extends LocalServiceTestCase {
 	public void testMockAgents() {
 		try {
 			AgentImpl eve = MockAgentFactory.getEve();
-			getNode().hasAgent(eve.getSafeId());
+			getNode().hasAgent(eve.getIdentifier());
 
-			assertTrue(getNode().hasAgent(MockAgentFactory.getAdam().getSafeId()));
-			assertTrue(getNode().hasAgent(MockAgentFactory.getAbel().getSafeId()));
+			assertTrue(getNode().hasAgent(MockAgentFactory.getAdam().getIdentifier()));
+			assertTrue(getNode().hasAgent(MockAgentFactory.getAbel().getIdentifier()));
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail(e.toString());

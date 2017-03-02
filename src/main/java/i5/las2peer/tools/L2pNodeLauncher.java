@@ -215,7 +215,7 @@ public class L2pNodeLauncher {
 			try {
 				// maybe an agent?
 				AgentImpl agent = AgentImpl.createFromXml(xmlFile);
-				agentIdToXml.put(agent.getSafeId(), xmlFile.getName());
+				agentIdToXml.put(agent.getIdentifier(), xmlFile.getName());
 				if (agent instanceof PassphraseAgentImpl) {
 					String passphrase = htPassphrases.get(xmlFile.getName());
 					if (passphrase != null) {
@@ -256,14 +256,14 @@ public class L2pNodeLauncher {
 					continue;
 				}
 				PassphraseAgentImpl memberPassAgent = (PassphraseAgentImpl) memberAgent;
-				String xmlName = agentIdToXml.get(memberPassAgent.getSafeId());
+				String xmlName = agentIdToXml.get(memberPassAgent.getIdentifier());
 				if (xmlName == null) {
-					printError("No known xml file for agent " + memberPassAgent.getSafeId());
+					printError("No known xml file for agent " + memberPassAgent.getIdentifier());
 					continue;
 				}
 				String passphrase = htPassphrases.get(xmlName);
 				if (passphrase == null) {
-					printError("No known password for agent " + memberPassAgent.getSafeId());
+					printError("No known password for agent " + memberPassAgent.getIdentifier());
 					continue;
 				}
 				try {
@@ -273,8 +273,8 @@ public class L2pNodeLauncher {
 					printMessage("\t- stored group agent from " + xmlName);
 					break;
 				} catch (Exception e) {
-					printErrorWithStacktrace("Can't unlock group agent " + currentGroupAgent.getSafeId()
-							+ " with member " + memberPassAgent.getSafeId(), e);
+					printErrorWithStacktrace("Can't unlock group agent " + currentGroupAgent.getIdentifier()
+							+ " with member " + memberPassAgent.getIdentifier(), e);
 					continue;
 				}
 			}
@@ -629,7 +629,7 @@ public class L2pNodeLauncher {
 			ServiceAgentImpl serviceAgent;
 			try {
 				// check if the agent is already known to the network
-				serviceAgent = (ServiceAgentImpl) node.getAgent(xmlAgent.getSafeId());
+				serviceAgent = (ServiceAgentImpl) node.getAgent(xmlAgent.getIdentifier());
 				serviceAgent.unlock(passphrase);
 			} catch (AgentNotFoundException e) {
 				xmlAgent.unlock(passphrase);

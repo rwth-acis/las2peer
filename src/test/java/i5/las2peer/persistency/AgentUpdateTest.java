@@ -33,9 +33,9 @@ public class AgentUpdateTest {
 			// store agents
 			firstNode.storeAgent(group);
 			PastryNodeImpl secondNode = nodes.get(1);
-			GroupAgentImpl fetched = (GroupAgentImpl) secondNode.getAgent(group.getSafeId());
+			GroupAgentImpl fetched = (GroupAgentImpl) secondNode.getAgent(group.getIdentifier());
 			// check attributes of both GroupAgents
-			Assert.assertEquals(group.getSafeId(), fetched.getSafeId());
+			Assert.assertEquals(group.getIdentifier(), fetched.getIdentifier());
 			Assert.assertEquals(group.getName(), fetched.getName());
 			Assert.assertEquals(group.getPublicKey(), fetched.getPublicKey());
 			Assert.assertEquals(group.getSize(), fetched.getSize());
@@ -45,9 +45,9 @@ public class AgentUpdateTest {
 			group.addMember(morpheus);
 			firstNode.storeAgent(group);
 			// fetch GroupAgent again on second node
-			fetched = (GroupAgentImpl) secondNode.getAgent(group.getSafeId());
+			fetched = (GroupAgentImpl) secondNode.getAgent(group.getIdentifier());
 			// check (again) attributes of both GroupAgents
-			Assert.assertEquals(group.getSafeId(), fetched.getSafeId());
+			Assert.assertEquals(group.getIdentifier(), fetched.getIdentifier());
 			Assert.assertEquals(group.getName(), fetched.getName());
 			Assert.assertEquals(group.getPublicKey(), fetched.getPublicKey());
 			Assert.assertEquals(group.getSize(), fetched.getSize());

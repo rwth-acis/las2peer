@@ -133,7 +133,7 @@ public class AgentContext implements AgentStorage {
 	 */
 	public Agent requestAgent(String agentId) throws AgentAccessDeniedException, AgentNotFoundException,
 			AgentOperationFailedException {
-		if (agentId.equalsIgnoreCase(getMainAgent().getSafeId())) {
+		if (agentId.equalsIgnoreCase(getMainAgent().getIdentifier())) {
 			return getMainAgent();
 		} else {
 			return requestGroupAgent(agentId);
@@ -148,7 +148,7 @@ public class AgentContext implements AgentStorage {
 	 * @throws AgentNotFoundException If the agent does not exist
 	 */
 	public boolean hasAccess(String agentId) throws AgentNotFoundException {
-		if (agent.getSafeId().equals(agentId)) {
+		if (agent.getIdentifier().equals(agentId)) {
 			return true;
 		}
 
@@ -160,7 +160,7 @@ public class AgentContext implements AgentStorage {
 		}
 
 		if (a instanceof GroupAgentImpl) {
-			return isMemberRecursive((GroupAgentImpl) a, agent.getSafeId());
+			return isMemberRecursive((GroupAgentImpl) a, agent.getIdentifier());
 		}
 
 		return false;
@@ -227,7 +227,7 @@ public class AgentContext implements AgentStorage {
 	 */
 	@Override
 	public AgentImpl getAgent(String id) throws AgentException {
-		if (id.equalsIgnoreCase(agent.getSafeId())) {
+		if (id.equalsIgnoreCase(agent.getIdentifier())) {
 			return agent;
 		}
 
@@ -241,7 +241,7 @@ public class AgentContext implements AgentStorage {
 
 	@Override
 	public boolean hasAgent(String id) {
-		return id.equalsIgnoreCase(agent.getSafeId()) || groupAgents.containsKey(id);
+		return id.equalsIgnoreCase(agent.getIdentifier()) || groupAgents.containsKey(id);
 	}
 
 	/**

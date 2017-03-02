@@ -44,7 +44,7 @@ public class BasicAgentStorage implements AgentStorage {
 		try {
 			AgentImpl register = agent.cloneLocked();
 
-			htRegistered.put(register.getSafeId(), register);
+			htRegistered.put(register.getIdentifier(), register);
 		} catch (CloneNotSupportedException e) {
 			// should not occur, since agent is cloneable
 			throw new RuntimeException("Clone problems", e);
@@ -68,7 +68,7 @@ public class BasicAgentStorage implements AgentStorage {
 	 * @param agent
 	 */
 	public void unregisterAgent(AgentImpl agent) {
-		htRegistered.remove(agent.getSafeId());
+		htRegistered.remove(agent.getIdentifier());
 	}
 
 	/**

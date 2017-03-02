@@ -31,7 +31,7 @@ public class EnvelopeImpl implements Envelope {
 		this.identifier = identifier;
 		this.content = null;
 		this.currentVersion = null;
-		this.signingAgentId = signingAgent.getId();
+		this.signingAgentId = signingAgent.getIdentifier();
 		this.readerToAdd.add(signingAgent);
 	}
 

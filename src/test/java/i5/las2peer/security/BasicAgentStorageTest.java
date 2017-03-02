@@ -18,22 +18,22 @@ public class BasicAgentStorageTest {
 
 			eve.unlock("evespass");
 
-			assertFalse(testee.hasAgent(eve.getSafeId()));
+			assertFalse(testee.hasAgent(eve.getIdentifier()));
 			testee.registerAgent(eve);
 
-			assertTrue(testee.hasAgent(eve.getSafeId()));
+			assertTrue(testee.hasAgent(eve.getIdentifier()));
 
-			assertNotSame(eve, testee.getAgent(eve.getSafeId()));
+			assertNotSame(eve, testee.getAgent(eve.getIdentifier()));
 
 			assertFalse(eve.isLocked());
 
-			UserAgentImpl eve2 = (UserAgentImpl) testee.getAgent(eve.getSafeId());
+			UserAgentImpl eve2 = (UserAgentImpl) testee.getAgent(eve.getIdentifier());
 			assertTrue(eve2.isLocked());
 
 			eve2.unlock("evespass");
 			assertFalse(eve2.isLocked());
 
-			assertTrue(testee.getAgent(eve.getSafeId()).isLocked());
+			assertTrue(testee.getAgent(eve.getIdentifier()).isLocked());
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail(e.toString());

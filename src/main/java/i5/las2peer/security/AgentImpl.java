@@ -130,13 +130,8 @@ public abstract class AgentImpl implements Agent, XmlAble, Cloneable, MessageRec
 		return privateKey == null;
 	}
 
-	public String getSafeId() {
+	public String getIdentifier() {
 		return CryptoTools.publicKeyToSHA512(getPublicKey());
-	}
-
-	@Override
-	public String getId() {
-		return getSafeId(); // TODO API use getIdentifier
 	}
 
 	/**
@@ -147,7 +142,7 @@ public abstract class AgentImpl implements Agent, XmlAble, Cloneable, MessageRec
 	 */
 	@Override
 	public String getResponsibleForAgentSafeId() {
-		return getSafeId();
+		return getIdentifier();
 	}
 
 	/**
@@ -347,7 +342,7 @@ public abstract class AgentImpl implements Agent, XmlAble, Cloneable, MessageRec
 		if (other == null || !other.getClass().isInstance(this)) {
 			return false;
 		}
-		return this.getSafeId().equalsIgnoreCase(((AgentImpl) other).getSafeId());
+		return this.getIdentifier().equalsIgnoreCase(((AgentImpl) other).getIdentifier());
 	}
 
 }

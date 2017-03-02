@@ -43,22 +43,22 @@ public class AgentContextTest {
 		AgentContext context = new AgentContext(node, eve);
 
 		try {
-			GroupAgentImpl a = (GroupAgentImpl) context.requestAgent(group1.getId());
-			assertEquals(a.getId(), group1.getId());
+			GroupAgentImpl a = (GroupAgentImpl) context.requestAgent(group1.getIdentifier());
+			assertEquals(a.getIdentifier(), group1.getIdentifier());
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("exception thrown: " + e);
 		}
 
 		try {
-			context.requestAgent(groupA.getId());
+			context.requestAgent(groupA.getIdentifier());
 			fail("exception expected");
 		} catch (Exception e) {
 		}
 
 		try {
-			GroupAgentImpl a = (GroupAgentImpl) context.requestAgent(groupSuper.getId());
-			assertEquals(a.getId(), groupSuper.getId());
+			GroupAgentImpl a = (GroupAgentImpl) context.requestAgent(groupSuper.getIdentifier());
+			assertEquals(a.getIdentifier(), groupSuper.getIdentifier());
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("exception thrown: " + e);
@@ -91,7 +91,7 @@ public class AgentContextTest {
 		AgentContext context = new AgentContext(node, eve);
 
 		try {
-			boolean result = context.hasAccess(group1.getId());
+			boolean result = context.hasAccess(group1.getIdentifier());
 			assertTrue(result);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -99,7 +99,7 @@ public class AgentContextTest {
 		}
 
 		try {
-			boolean result = context.hasAccess(groupA.getId());
+			boolean result = context.hasAccess(groupA.getIdentifier());
 			assertFalse(result);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -107,7 +107,7 @@ public class AgentContextTest {
 		}
 
 		try {
-			boolean result = context.hasAccess(groupSuper.getId());
+			boolean result = context.hasAccess(groupSuper.getIdentifier());
 			assertTrue(result);
 		} catch (Exception e) {
 			e.printStackTrace();

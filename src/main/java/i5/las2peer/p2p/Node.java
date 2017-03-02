@@ -299,7 +299,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param service The service that should be monitored.
 	 */
 	public void setServiceMonitoring(ServiceAgentImpl service) {
-		observerNotice(MonitoringEvent.SERVICE_ADD_TO_MONITORING, this.getNodeId(), service.getSafeId(), null, null,
+		observerNotice(MonitoringEvent.SERVICE_ADD_TO_MONITORING, this.getNodeId(), service.getIdentifier(), null, null,
 				service.getServiceNameVersion().toString());
 	}
 
@@ -366,11 +366,11 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 			AgentImpl destinationAgent, String remarks) {
 		String sourceAgentId = null;
 		if (sourceAgent != null) {
-			sourceAgentId = sourceAgent.getSafeId();
+			sourceAgentId = sourceAgent.getIdentifier();
 		}
 		String destinationAgentId = null;
 		if (destinationAgent != null) {
-			destinationAgentId = destinationAgent.getSafeId();
+			destinationAgentId = destinationAgent.getIdentifier();
 		}
 		observerNotice(event, sourceNode, sourceAgentId, destinationNode, destinationAgentId, remarks);
 	}
@@ -751,7 +751,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @return true, if the given agent is running at this node
 	 */
 	public boolean hasLocalAgent(AgentImpl agent) {
-		return hasLocalAgent(agent.getSafeId());
+		return hasLocalAgent(agent.getIdentifier());
 	}
 
 	/**
@@ -947,7 +947,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @throws AgentNotRegisteredException If the agent is not registered at this node
 	 */
 	public Object[] findRegisteredAgent(AgentImpl agent) throws AgentNotRegisteredException {
-		return findRegisteredAgent(agent.getSafeId());
+		return findRegisteredAgent(agent.getIdentifier());
 	}
 
 	/**
@@ -973,7 +973,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 */
 
 	public Object[] findRegisteredAgent(AgentImpl agent, int hintOfExpectedCount) throws AgentNotRegisteredException {
-		return findRegisteredAgent(agent.getSafeId(), hintOfExpectedCount);
+		return findRegisteredAgent(agent.getIdentifier(), hintOfExpectedCount);
 	}
 
 	/**
@@ -1071,7 +1071,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 		if (agent.isLocked()) {
 			throw new L2pSecurityException("You need to unlock the agent for mediation!");
 		}
-		MessageReceiver receiver = htRegisteredReceivers.get(agent.getSafeId());
+		MessageReceiver receiver = htRegisteredReceivers.get(agent.getIdentifier());
 
 		if (receiver != null && !(receiver instanceof Mediator)) {
 			throw new AgentAlreadyRegisteredException("The requested Agent is registered directly at this node!");
@@ -1612,11 +1612,11 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @return a context
 	 */
 	public AgentContext getAgentContext(AgentImpl agent) {
-		AgentContext result = htLocalExecutionContexts.get(agent.getSafeId());
+		AgentContext result = htLocalExecutionContexts.get(agent.getIdentifier());
 
 		if (result == null || (result.getMainAgent().isLocked() && !agent.isLocked())) {
 			result = new AgentContext(this, agent);
-			htLocalExecutionContexts.put(agent.getSafeId(), result);
+			htLocalExecutionContexts.put(agent.getIdentifier(), result);
 		}
 
 		result.touch();

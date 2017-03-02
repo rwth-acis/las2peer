@@ -158,7 +158,7 @@ public class NodeServiceCacheTest {
 		// global exact v2 -> v2
 		ServiceInstance instance = invokingNode.getNodeServiceCache().getServiceAgentInstance(
 				ServiceNameVersion.fromString("i5.las2peer.api.TestService@2"), true, false, userAgent);
-		assertEquals(instance.getServiceAgentId(), service2.getSafeId());
+		assertEquals(instance.getServiceAgentId(), service2.getIdentifier());
 		assertEquals(instance.getNodeId(), node1.getNodeId());
 
 		// local only v2 -> v22@invokingNode
@@ -187,7 +187,7 @@ public class NodeServiceCacheTest {
 		invokingNode.getNodeServiceCache().clear(); // clear cache to force reloading of service index
 		instance = invokingNode.getNodeServiceCache().getServiceAgentInstance(
 				ServiceNameVersion.fromString("i5.las2peer.api.TestService@2.2"), false, false, userAgent);
-		assertEquals(instance.getServiceAgentId(), service22.getSafeId());
+		assertEquals(instance.getServiceAgentId(), service22.getIdentifier());
 		assertEquals(instance.getNodeId(), node3.getNodeId());
 
 		// stop service v22@node3, global v2 -> v21
@@ -195,7 +195,7 @@ public class NodeServiceCacheTest {
 		node3.unregisterReceiver(service22_2);
 		instance = invokingNode.getNodeServiceCache().getServiceAgentInstance(
 				ServiceNameVersion.fromString("i5.las2peer.api.TestService@2"), false, false, userAgent);
-		assertEquals(instance.getServiceAgentId(), service21.getSafeId());
+		assertEquals(instance.getServiceAgentId(), service21.getIdentifier());
 		assertEquals(instance.getNodeId(), node1.getNodeId());
 
 		// stop service v22@node3, global * -> v3
@@ -203,7 +203,7 @@ public class NodeServiceCacheTest {
 		invokingNode.getNodeServiceCache().clear(); // clear cache to force reloading of service index
 		instance = invokingNode.getNodeServiceCache().getServiceAgentInstance(
 				ServiceNameVersion.fromString("i5.las2peer.api.TestService@*"), false, false, userAgent);
-		assertEquals(instance.getServiceAgentId(), service3.getSafeId());
+		assertEquals(instance.getServiceAgentId(), service3.getIdentifier());
 		assertEquals(instance.getNodeId(), node1.getNodeId());
 	}
 

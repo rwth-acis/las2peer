@@ -64,7 +64,7 @@ public class MediatorTest {
 			eve.unlock("evespass");
 			Mediator testee = new Mediator(null, eve);
 
-			assertEquals(eve.getSafeId(), testee.getResponsibleForAgentSafeId());
+			assertEquals(eve.getIdentifier(), testee.getResponsibleForAgentSafeId());
 
 			assertFalse(testee.hasMessages());
 		} catch (Exception e) {

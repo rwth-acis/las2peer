@@ -114,8 +114,8 @@ public class LocalNodeTest {
 		LocalNode testee1 = LocalNode.launchAgent(adam);
 		LocalNode.launchAgent(eve);
 
-		assertTrue(LocalNode.findAllNodesWithAgent(adam.getSafeId()).length > 0);
-		assertTrue(LocalNode.findAllNodesWithAgent(eve.getSafeId()).length > 0);
+		assertTrue(LocalNode.findAllNodesWithAgent(adam.getIdentifier()).length > 0);
+		assertTrue(LocalNode.findAllNodesWithAgent(eve.getIdentifier()).length > 0);
 
 		MessageResultListener l = new MessageResultListener(10000);
 		Message m = new Message(adam, eve, new PingPongContent());
@@ -164,16 +164,16 @@ public class LocalNodeTest {
 		// launch three nodes with one agent each
 		LocalNode testee1 = LocalNode.launchAgent(adam);
 		LocalNode hosting1 = LocalNode.launchAgent(eve);
-		assertEquals(1, LocalNode.findAllNodesWithAgent(eve.getSafeId()).length);
+		assertEquals(1, LocalNode.findAllNodesWithAgent(eve.getIdentifier()).length);
 
 		LocalNode hosting2 = LocalNode.launchAgent(eve);
 
 		assertTrue(hosting1.hasLocalAgent(eve));
 		assertTrue(hosting2.hasLocalAgent(eve));
 
-		assertNotSame(hosting1.getAgent(eve.getSafeId()), hosting2.getAgent(eve.getSafeId()));
+		assertNotSame(hosting1.getAgent(eve.getIdentifier()), hosting2.getAgent(eve.getIdentifier()));
 
-		assertEquals(2, LocalNode.findAllNodesWithAgent(eve.getSafeId()).length);
+		assertEquals(2, LocalNode.findAllNodesWithAgent(eve.getIdentifier()).length);
 
 		MessageResultListener l = new MessageResultListener(10000) {
 			@Override
@@ -260,7 +260,7 @@ public class LocalNodeTest {
 
 			LocalNode testee2 = LocalNode.launchNode();
 
-			UserAgentImpl retrieve = (UserAgentImpl) testee2.getAgent(abel.getSafeId());
+			UserAgentImpl retrieve = (UserAgentImpl) testee2.getAgent(abel.getIdentifier());
 			assertTrue(retrieve.isLocked());
 
 			try {
@@ -401,11 +401,11 @@ public class LocalNodeTest {
 			assertTrue(received1 != received2);
 
 			// check if receiver is set correctly
-			assertTrue(received1.getRecipientId().equalsIgnoreCase(adam.getSafeId()));
-			assertTrue(received2.getRecipientId().equalsIgnoreCase(abel.getSafeId()));
-			assertTrue(received3.getRecipientId().equalsIgnoreCase(eve.getSafeId()));
+			assertTrue(received1.getRecipientId().equalsIgnoreCase(adam.getIdentifier()));
+			assertTrue(received2.getRecipientId().equalsIgnoreCase(abel.getIdentifier()));
+			assertTrue(received3.getRecipientId().equalsIgnoreCase(eve.getIdentifier()));
 
-			assertTrue(received3.getSenderId().equalsIgnoreCase(adam.getSafeId()));
+			assertTrue(received3.getSenderId().equalsIgnoreCase(adam.getIdentifier()));
 			assertTrue(received3.getTopicId() == 1);
 
 			// cehck if open
@@ -528,8 +528,8 @@ public class LocalNodeTest {
 			testee.storeAgent(a);
 			testee.storeAgent(b);
 
-			assertEquals(a.getSafeId(), testee.getUserManager().getAgentIdByLogin("alpha"));
-			assertEquals(b.getSafeId(), testee.getUserManager().getAgentIdByLogin("beta"));
+			assertEquals(a.getIdentifier(), testee.getUserManager().getAgentIdByLogin("alpha"));
+			assertEquals(b.getIdentifier(), testee.getUserManager().getAgentIdByLogin("beta"));
 
 			try {
 				testee.getUserManager().getAgentIdByLogin("bla");

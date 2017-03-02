@@ -514,7 +514,7 @@ public class PastryNodeImpl extends Node {
 			AgentImpl agentFromNet = null;
 			AgentImpl anonymous = getAnonymous();
 			// TODO use isAnonymous, special ID or Classing for identification
-			if (id.equalsIgnoreCase(anonymous.getSafeId())) {
+			if (id.equalsIgnoreCase(anonymous.getIdentifier())) {
 				agentFromNet = anonymous;
 			} else {
 				EnvelopeVersion agentEnvelope = pastStorage.fetchEnvelope(EnvelopeVersion.getAgentIdentifier(id),
@@ -544,12 +544,12 @@ public class PastryNodeImpl extends Node {
 		try {
 			EnvelopeVersion agentEnvelope = null;
 			try {
-				agentEnvelope = pastStorage.fetchEnvelope(EnvelopeVersion.getAgentIdentifier(agent.getSafeId()),
+				agentEnvelope = pastStorage.fetchEnvelope(EnvelopeVersion.getAgentIdentifier(agent.getIdentifier()),
 						AGENT_GET_TIMEOUT);
 				agentEnvelope = pastStorage.createUnencryptedEnvelope(agentEnvelope, agent.toXmlString());
 			} catch (EnvelopeNotFoundException e) {
 				agentEnvelope = pastStorage.createUnencryptedEnvelope(
-						EnvelopeVersion.getAgentIdentifier(agent.getSafeId()), agent.toXmlString());
+						EnvelopeVersion.getAgentIdentifier(agent.getIdentifier()), agent.toXmlString());
 			}
 			pastStorage.storeEnvelope(agentEnvelope, agent, AGENT_STORE_TIMEOUT);
 			if (agent instanceof UserAgentImpl) {

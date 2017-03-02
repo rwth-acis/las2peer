@@ -135,7 +135,7 @@ public class MonitoringAgent extends PassphraseAgentImpl {
 	@Override
 	public String toXmlString() {
 		try {
-			StringBuffer result = new StringBuffer("<las2peer:agent type=\"monitoring\">\n" + "\t<id>" + getSafeId()
+			StringBuffer result = new StringBuffer("<las2peer:agent type=\"monitoring\">\n" + "\t<id>" + getIdentifier()
 					+ "</id>\n" + "\t<publickey encoding=\"base64\">"
 					+ SerializeTools.serializeToBase64(getPublicKey()) + "</publickey>\n"
 					+ "\t<privatekey encrypted=\"" + CryptoTools.getSymmetricAlgorithm() + "\" keygen=\""

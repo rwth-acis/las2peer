@@ -102,7 +102,7 @@ public class LocalNode extends Node {
 		if (receiver instanceof AgentImpl) {
 			AgentImpl agent = (AgentImpl) receiver;
 			try {
-				htKnownAgents.put(((AgentImpl) receiver).getSafeId(), agent.toXmlString());
+				htKnownAgents.put(((AgentImpl) receiver).getIdentifier(), agent.toXmlString());
 			} catch (SerializationException e) {
 				throw new AgentException("Could not register agent reciever", e);
 			}
@@ -232,7 +232,7 @@ public class LocalNode extends Node {
 	@Override
 	public AgentImpl getAgent(String id) throws AgentNotFoundException {
 		AgentImpl anonymous = getAnonymous();
-		if (id.equalsIgnoreCase(anonymous.getSafeId())) {
+		if (id.equalsIgnoreCase(anonymous.getIdentifier())) {
 			// TODO use isAnonymous, special ID or Classing for identification
 			return anonymous;
 		} else {
@@ -259,8 +259,8 @@ public class LocalNode extends Node {
 				throw new L2pSecurityException("Only unlocked agents may be updated during runtime!");
 			}
 
-			if (htKnownAgents.get(agent.getSafeId()) != null) {
-				throw new AgentAlreadyRegisteredException("Agent " + agent.getSafeId() + " already in storage");
+			if (htKnownAgents.get(agent.getIdentifier()) != null) {
+				throw new AgentAlreadyRegisteredException("Agent " + agent.getIdentifier() + " already in storage");
 			}
 
 			String agentXml = null;
@@ -270,7 +270,7 @@ public class LocalNode extends Node {
 				throw new AgentException("Serialization failed!", e);
 			}
 
-			htKnownAgents.put(agent.getSafeId(), agentXml);
+			htKnownAgents.put(agent.getIdentifier(), agentXml);
 
 			if (agent instanceof UserAgentImpl) {
 				getUserManager().registerUserAgent((UserAgentImpl) agent);
@@ -285,8 +285,8 @@ public class LocalNode extends Node {
 		}
 
 		synchronized (htKnownAgents) {
-			if (htKnownAgents.get(agent.getSafeId()) == null) {
-				throw new AgentNotRegisteredException(agent.getSafeId());
+			if (htKnownAgents.get(agent.getIdentifier()) == null) {
+				throw new AgentNotRegisteredException(agent.getIdentifier());
 			}
 
 			// TODO: verify, that it is the same agent!!! (e.g. the same private key)
@@ -307,7 +307,7 @@ public class LocalNode extends Node {
 				throw new AgentException("Serialization failed!", e);
 			}
 
-			htKnownAgents.put(agent.getSafeId(), agentXml);
+			htKnownAgents.put(agent.getIdentifier(), agentXml);
 
 			if (agent instanceof UserAgentImpl) {
 				getUserManager().updateUserAgent((UserAgentImpl) agent);

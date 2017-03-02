@@ -12,7 +12,7 @@ public class LocalServiceTestCaseStartupTest extends LocalServiceTestCase {
 
 	@Test
 	public void test() throws MalformedXMLException, IOException, AgentNotFoundException {
-		getNode().getAgent(MockAgentFactory.getEve().getSafeId());
+		getNode().getAgent(MockAgentFactory.getEve().getIdentifier());
 	}
 
 	@Override

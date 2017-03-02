@@ -44,9 +44,9 @@ public class GroupAgentTest {
 		GroupAgentImpl testee = GroupAgentImpl.createGroupAgent(new AgentImpl[] { adam, eve });
 		assertEquals(2, testee.getSize());
 		assertFalse(testee.isMember(kain));
-		assertFalse(testee.isMember(abel.getSafeId()));
+		assertFalse(testee.isMember(abel.getIdentifier()));
 		assertTrue(testee.isMember(adam));
-		assertTrue(testee.isMember(eve.getSafeId()));
+		assertTrue(testee.isMember(eve.getIdentifier()));
 
 		assertTrue(testee.isLocked());
 
@@ -64,9 +64,9 @@ public class GroupAgentTest {
 
 		assertEquals(2, fromXml.getSize());
 		assertFalse(testee.isMember(kain));
-		assertFalse(testee.isMember(abel.getSafeId()));
+		assertFalse(testee.isMember(abel.getIdentifier()));
 		assertTrue(testee.isMember(adam));
-		assertTrue(testee.isMember(eve.getSafeId()));
+		assertTrue(testee.isMember(eve.getIdentifier()));
 
 		assertTrue(fromXml.isLocked());
 
@@ -165,8 +165,8 @@ public class GroupAgentTest {
 		assertTrue(agent.hasMember(adam));
 		assertTrue(agent.hasMember(eve));
 		assertEquals(agent.getSize(), 2);
-		assertTrue(Arrays.asList(agent.getMemberList()).contains(adam.getId()));
-		assertTrue(Arrays.asList(agent.getMemberList()).contains(eve.getId()));
+		assertTrue(Arrays.asList(agent.getMemberList()).contains(adam.getIdentifier()));
+		assertTrue(Arrays.asList(agent.getMemberList()).contains(eve.getIdentifier()));
 		
 		agent.addMember(abel);
 		
@@ -174,9 +174,9 @@ public class GroupAgentTest {
 		assertTrue(agent.hasMember(eve));
 		assertTrue(agent.hasMember(abel));
 		assertEquals(agent.getSize(), 3);
-		assertTrue(Arrays.asList(agent.getMemberList()).contains(adam.getId()));
-		assertTrue(Arrays.asList(agent.getMemberList()).contains(eve.getId()));
-		assertTrue(Arrays.asList(agent.getMemberList()).contains(abel.getId()));
+		assertTrue(Arrays.asList(agent.getMemberList()).contains(adam.getIdentifier()));
+		assertTrue(Arrays.asList(agent.getMemberList()).contains(eve.getIdentifier()));
+		assertTrue(Arrays.asList(agent.getMemberList()).contains(abel.getIdentifier()));
 		
 		agent.revokeMember(adam);
 		
@@ -184,9 +184,9 @@ public class GroupAgentTest {
 		assertTrue(agent.hasMember(eve));
 		assertTrue(agent.hasMember(abel));
 		assertEquals(agent.getSize(), 2);
-		assertFalse(Arrays.asList(agent.getMemberList()).contains(adam.getId()));
-		assertTrue(Arrays.asList(agent.getMemberList()).contains(eve.getId()));
-		assertTrue(Arrays.asList(agent.getMemberList()).contains(abel.getId()));
+		assertFalse(Arrays.asList(agent.getMemberList()).contains(adam.getIdentifier()));
+		assertTrue(Arrays.asList(agent.getMemberList()).contains(eve.getIdentifier()));
+		assertTrue(Arrays.asList(agent.getMemberList()).contains(abel.getIdentifier()));
 		
 		agent.revokeMember(abel);
 		
@@ -194,9 +194,9 @@ public class GroupAgentTest {
 		assertTrue(agent.hasMember(eve));
 		assertFalse(agent.hasMember(abel));
 		assertEquals(agent.getSize(), 1);
-		assertFalse(Arrays.asList(agent.getMemberList()).contains(adam.getId()));
-		assertTrue(Arrays.asList(agent.getMemberList()).contains(eve.getId()));
-		assertFalse(Arrays.asList(agent.getMemberList()).contains(abel.getId()));
+		assertFalse(Arrays.asList(agent.getMemberList()).contains(adam.getIdentifier()));
+		assertTrue(Arrays.asList(agent.getMemberList()).contains(eve.getIdentifier()));
+		assertFalse(Arrays.asList(agent.getMemberList()).contains(abel.getIdentifier()));
 		
 		agent.addMember(adam);
 		
@@ -204,9 +204,9 @@ public class GroupAgentTest {
 		assertTrue(agent.hasMember(eve));
 		assertFalse(agent.hasMember(abel));
 		assertEquals(agent.getSize(), 2);
-		assertTrue(Arrays.asList(agent.getMemberList()).contains(adam.getId()));
-		assertTrue(Arrays.asList(agent.getMemberList()).contains(eve.getId()));
-		assertFalse(Arrays.asList(agent.getMemberList()).contains(abel.getId()));
+		assertTrue(Arrays.asList(agent.getMemberList()).contains(adam.getIdentifier()));
+		assertTrue(Arrays.asList(agent.getMemberList()).contains(eve.getIdentifier()));
+		assertFalse(Arrays.asList(agent.getMemberList()).contains(abel.getIdentifier()));
 		
 		try {
 			agent.apply();

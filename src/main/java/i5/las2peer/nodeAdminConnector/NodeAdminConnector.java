@@ -147,7 +147,7 @@ public class NodeAdminConnector extends Connector {
 
 	public AgentSession getOrCreateSession(UserAgentImpl agent) {
 		synchronized (sessions) {
-			final String agentId = agent.getSafeId();
+			final String agentId = agent.getIdentifier();
 			String sessionId = agentIdToSessionId.get(agentId);
 			if (sessionId == null) {
 				sessionId = generateToken();
@@ -197,7 +197,7 @@ public class NodeAdminConnector extends Connector {
 		synchronized (sessions) {
 			AgentSession removed = sessions.remove(sessionId);
 			if (removed != null) {
-				if (agentIdToSessionId.remove(removed.getAgent().getSafeId()) == null) {
+				if (agentIdToSessionId.remove(removed.getAgent().getIdentifier()) == null) {
 					logger.warning(
 							"Session " + sessionId + " destroyed, but did not find agent in agentid to sessionid map");
 				}

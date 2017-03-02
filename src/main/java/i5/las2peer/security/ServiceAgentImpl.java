@@ -104,7 +104,7 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 	public String toXmlString() {
 		try {
 			return "<las2peer:agent type=\"service\" serviceclass=\"" + getServiceNameVersion().toString() + "\">\n"
-					+ "\t<id>" + getSafeId() + "</id>\n" + "\t<publickey encoding=\"base64\">"
+					+ "\t<id>" + getIdentifier() + "</id>\n" + "\t<publickey encoding=\"base64\">"
 					+ SerializeTools.serializeToBase64(getPublicKey()) + "</publickey>\n"
 					+ "\t<privatekey encrypted=\"" + CryptoTools.getSymmetricAlgorithm() + "\" keygen=\""
 					+ CryptoTools.getSymmetricKeygenMethod() + "\">\n" + "\t\t<salt encoding=\"base64\">"
@@ -173,7 +173,7 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 
 				// only answer if requirements are met
 				if (((ServiceDiscoveryContent) content).accepts(this.getServiceNameVersion())) {
-					ServiceDiscoveryContent result = new ServiceDiscoveryContent(this.getSafeId(),
+					ServiceDiscoveryContent result = new ServiceDiscoveryContent(this.getIdentifier(),
 							this.getServiceNameVersion());
 
 					Message response = new Message(m, result);
@@ -192,7 +192,7 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 
 			e.printStackTrace();
 
-			throw new MessageException("security problems - " + m.getRecipient().getSafeId() + " at node "
+			throw new MessageException("security problems - " + m.getRecipient().getIdentifier() + " at node "
 					+ getRunningAtNode().getNodeId(), e);
 
 		} catch (EncodingFailedException e) {
