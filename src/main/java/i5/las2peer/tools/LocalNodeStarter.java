@@ -6,13 +6,13 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import i5.las2peer.api.security.AgentException;
 import i5.las2peer.p2p.AgentAlreadyRegisteredException;
 import i5.las2peer.p2p.LocalNode;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.NodeException;
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.security.AgentImpl;
-import i5.las2peer.security.AgentException;
 import i5.las2peer.security.L2pSecurityException;
 
 /**

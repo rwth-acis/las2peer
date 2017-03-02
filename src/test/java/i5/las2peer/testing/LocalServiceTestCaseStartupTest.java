@@ -5,13 +5,13 @@ import java.io.IOException;
 import org.junit.Test;
 
 import i5.las2peer.api.Service;
-import i5.las2peer.p2p.AgentNotKnownException;
+import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.persistency.MalformedXMLException;
 
 public class LocalServiceTestCaseStartupTest extends LocalServiceTestCase {
 
 	@Test
-	public void test() throws AgentNotKnownException, MalformedXMLException, IOException {
+	public void test() throws MalformedXMLException, IOException, AgentNotFoundException {
 		getNode().getAgent(MockAgentFactory.getEve().getSafeId());
 	}
 

@@ -30,6 +30,7 @@ import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.persistency.EnvelopeException;
 import i5.las2peer.api.persistency.EnvelopeNotFoundException;
 import i5.las2peer.api.security.AgentAccessDeniedException;
+import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.classLoaders.L2pClassManager;
 import i5.las2peer.classLoaders.libraries.FileSystemRepository;
@@ -39,7 +40,7 @@ import i5.las2peer.connectors.Connector;
 import i5.las2peer.connectors.ConnectorException;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.p2p.AgentAlreadyRegisteredException;
-import i5.las2peer.p2p.AgentNotKnownException;
+import i5.las2peer.p2p.AgentNotRegisteredException;
 import i5.las2peer.p2p.NodeException;
 import i5.las2peer.p2p.NodeInformation;
 import i5.las2peer.p2p.PastryNodeImpl;
@@ -49,7 +50,6 @@ import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.persistency.SharedStorage;
 import i5.las2peer.persistency.SharedStorage.STORAGE_MODE;
 import i5.las2peer.sandbox.L2pSecurityManager;
-import i5.las2peer.security.AgentException;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.GroupAgentImpl;
 import i5.las2peer.security.L2pSecurityException;
@@ -116,9 +116,9 @@ public class L2pNodeLauncher {
 	 * 
 	 * @param agentId
 	 * @return node handles
-	 * @throws AgentNotKnownException
+	 * @throws AgentNotRegisteredException
 	 */
-	public Object[] findAgent(String agentId) throws AgentNotKnownException {
+	public Object[] findAgent(String agentId) throws AgentNotRegisteredException {
 		return node.findRegisteredAgent(agentId);
 	}
 
@@ -237,7 +237,7 @@ public class L2pNodeLauncher {
 				printErrorWithStacktrace("error storing agent from " + xmlFile.toString(), e);
 			} catch (AgentAlreadyRegisteredException e) {
 				printErrorWithStacktrace("agent from " + xmlFile.toString() + " already known at this node!", e);
-			} catch (AgentException | AgentAccessDeniedException e) {
+			} catch (AgentException e) {
 				printErrorWithStacktrace("unable to generate agent " + xmlFile.toString() + "!", e);
 			}
 		}
@@ -476,7 +476,7 @@ public class L2pNodeLauncher {
 
 		try {
 			node.unregisterReceiver(currentUser);
-		} catch (AgentNotKnownException | NodeException e) {
+		} catch (AgentNotRegisteredException | NodeException e) {
 		}
 
 		currentUser = null;
@@ -631,7 +631,7 @@ public class L2pNodeLauncher {
 				// check if the agent is already known to the network
 				serviceAgent = (ServiceAgentImpl) node.getAgent(xmlAgent.getSafeId());
 				serviceAgent.unlock(passphrase);
-			} catch (AgentNotKnownException e) {
+			} catch (AgentNotFoundException e) {
 				xmlAgent.unlock(passphrase);
 				node.storeAgent(xmlAgent);
 				logger.info("ServiceAgent was not known in network. Published it");
@@ -672,12 +672,12 @@ public class L2pNodeLauncher {
 	 * needs name and version
 	 * 
 	 * @param serviceNameVersion
-	 * @throws AgentNotKnownException
+	 * @throws AgentNotRegisteredException
 	 * @throws NodeException
 	 * @throws ServiceNotFoundException 
 	 */
 	public void stopService(String serviceNameVersion)
-			throws AgentNotKnownException, NodeException, ServiceNotFoundException {
+			throws AgentNotRegisteredException, NodeException, ServiceNotFoundException {
 		ServiceAgentImpl agent = node.getLocalServiceAgent(ServiceNameVersion.fromString(serviceNameVersion));
 		node.unregisterReceiver(agent);
 	}

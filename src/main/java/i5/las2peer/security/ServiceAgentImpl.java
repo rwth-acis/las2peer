@@ -8,6 +8,8 @@ import i5.las2peer.api.execution.ServiceMethodNotFoundException;
 import i5.las2peer.api.logging.MonitoringEvent;
 import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.security.AgentAccessDeniedException;
+import i5.las2peer.api.security.AgentException;
+import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.api.security.ServiceAgent;
 import i5.las2peer.classLoaders.ClassLoaderException;
 import i5.las2peer.communication.ListMethodsContent;
@@ -19,7 +21,6 @@ import i5.las2peer.communication.ServiceDiscoveryContent;
 import i5.las2peer.execution.ExecutionContext;
 import i5.las2peer.execution.RMITask;
 import i5.las2peer.execution.ServiceHelper;
-import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.AliasConflictException;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.NodeNotFoundException;
@@ -198,7 +199,7 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 			throw new MessageException("message problems", e);
 		} catch (SerializationException e) {
 			throw new MessageException("message problems", e);
-		} catch (AgentNotKnownException e) {
+		} catch (AgentNotFoundException e) {
 			throw new MessageException("answer receiver not found", e);
 		} catch (AgentException e) {
 			throw new MessageException("answer receiver not readable", e);

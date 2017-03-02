@@ -1,6 +1,7 @@
 package i5.las2peer.security;
 
-import i5.las2peer.p2p.AgentNotKnownException;
+import i5.las2peer.api.security.AgentException;
+import i5.las2peer.api.security.AgentNotFoundException;
 
 import java.util.Hashtable;
 
@@ -80,21 +81,21 @@ public class BasicAgentStorage implements AgentStorage {
 	}
 
 	@Override
-	public AgentImpl getAgent(String id) throws AgentNotKnownException, AgentException {
+	public AgentImpl getAgent(String id) throws AgentNotFoundException, AgentException {
 		AgentImpl result = htRegistered.get(id);
 
 		if (result != null) {
 			try {
 				return result.cloneLocked();
 			} catch (CloneNotSupportedException e) {
-				throw new AgentNotKnownException(id, e);
+				throw new AgentNotFoundException(id, e);
 			}
 		}
 
 		if (backupStorage != null) {
 			return backupStorage.getAgent(id);
 		} else {
-			throw new AgentNotKnownException(id);
+			throw new AgentNotFoundException(id);
 		}
 	}
 

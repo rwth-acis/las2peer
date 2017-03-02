@@ -67,10 +67,10 @@ public class NodeServiceCache {
 	 * @param localOnly only look for local services
 	 * @param acting an acting agent invoking the service
 	 * @return any service agent matching the requirements
-	 * @throws AgentNotKnownException
+	 * @throws AgentNotRegisteredException
 	 */
 	public ServiceInstance getServiceAgentInstance(ServiceNameVersion service, boolean exact, boolean localOnly,
-			AgentImpl acting) throws AgentNotKnownException {
+			AgentImpl acting) throws AgentNotRegisteredException {
 
 		ServiceInstance local = null, global = null;
 
@@ -106,7 +106,7 @@ public class NodeServiceCache {
 						update(service, true, acting);
 					} catch (Exception e) {
 						if (local == null) {
-							throw new AgentNotKnownException("Could not retrieve service information from the network.",
+							throw new AgentNotRegisteredException("Could not retrieve service information from the network.",
 									e);
 						}
 					}
@@ -127,7 +127,7 @@ public class NodeServiceCache {
 						update(service, false, acting);
 					} catch (Exception e) {
 						if (local == null) {
-							throw new AgentNotKnownException("Could not retrieve service information from the network.",
+							throw new AgentNotRegisteredException("Could not retrieve service information from the network.",
 									e);
 						}
 					}
@@ -146,7 +146,7 @@ public class NodeServiceCache {
 			return global;
 		}
 
-		throw new AgentNotKnownException("Could not find any agent for this service on the network!");
+		throw new AgentNotRegisteredException("Could not find any agent for this service on the network!");
 	}
 
 	private ServiceInstance getBestGlobalInstanceFitsVersion(String name, ServiceVersion version) {
@@ -281,11 +281,10 @@ public class NodeServiceCache {
 	 * @throws SerializationException
 	 * @throws InterruptedException
 	 * @throws TimeoutException
-	 * @throws AgentNotKnownException
 	 */
 	private boolean update(ServiceNameVersion service, boolean exact, AgentImpl acting)
 			throws EncodingFailedException, L2pSecurityException, SerializationException, InterruptedException,
-			TimeoutException, AgentNotKnownException {
+			TimeoutException {
 
 		Message m = new Message(acting, ServiceAgentImpl.serviceNameToTopicId(service.getName()),
 				new ServiceDiscoveryContent(service, exact), timeoutMs);
@@ -384,17 +383,17 @@ public class NodeServiceCache {
 	 * 
 	 * @param service name and exact version of the service
 	 * @return
-	 * @throws AgentNotKnownException
+	 * @throws AgentNotRegisteredException
 	 */
-	public ServiceAgentImpl getLocalService(ServiceNameVersion service) throws AgentNotKnownException {
+	public ServiceAgentImpl getLocalService(ServiceNameVersion service) throws AgentNotRegisteredException {
 		synchronized (localServices) {
 			Map<ServiceVersion, ServiceInstance> versions = localServices.get(service.getName());
 			if (versions == null) {
-				throw new AgentNotKnownException("No local agent registered for this service!");
+				throw new AgentNotRegisteredException("No local agent registered for this service!");
 			}
 			ServiceInstance instance = versions.get(service.getVersion());
 			if (instance == null) {
-				throw new AgentNotKnownException("No local agent registered for this service!");
+				throw new AgentNotRegisteredException("No local agent registered for this service!");
 			}
 			return instance.getServiceAgent();
 		}

@@ -3,13 +3,13 @@ package i5.las2peer.logging.monitoring;
 import i5.las2peer.api.execution.ServiceInvocationException;
 import i5.las2peer.api.logging.MonitoringEvent;
 import i5.las2peer.api.security.AgentAccessDeniedException;
+import i5.las2peer.api.security.AgentException;
+import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.communication.Message;
 import i5.las2peer.logging.NodeObserver;
-import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.MessageResultListener;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.persistency.EncodingFailedException;
-import i5.las2peer.security.AgentException;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.L2pServiceException;
 import i5.las2peer.security.MonitoringAgent;
@@ -81,7 +81,7 @@ public class MonitoringObserver implements NodeObserver {
 			registeredAt.registerReceiver(sendingAgent);
 			System.out.println("Monitoring: Registered MonitoringAgent: " + sendingAgent.getSafeId());
 
-		} catch (AgentException | AgentAccessDeniedException e) {
+		} catch (AgentException e) {
 			System.out.println("Monitoring: Problems registering MonitoringAgent!" + e);
 			e.printStackTrace();
 		} catch (L2pSecurityException e) {
@@ -97,11 +97,10 @@ public class MonitoringObserver implements NodeObserver {
 			try {
 				receivingAgent = (MonitoringAgent) registeredAt.getAgent(receivingAgentId);
 				System.out.println("Monitoring: Fetched receiving MonitoringAgent: " + receivingAgent.getSafeId());
-			} catch (AgentNotKnownException e) {
+			} catch (AgentNotFoundException e) {
 				e.printStackTrace();
 			}
-		} catch (AgentException | L2pSecurityException | InterruptedException
-				| ServiceInvocationException e) {
+		} catch (AgentException | L2pSecurityException | ServiceInvocationException e) {
 			System.out.println("Monitoring: Processing Service does not seem available! " + e);
 			e.printStackTrace();
 			return false;

@@ -3,6 +3,8 @@ package i5.las2peer.p2p;
 import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.persistency.EnvelopeException;
 import i5.las2peer.api.persistency.EnvelopeNotFoundException;
+import i5.las2peer.api.security.AgentException;
+import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.classLoaders.L2pClassManager;
 import i5.las2peer.classLoaders.libraries.FileSystemRepository;
 import i5.las2peer.communication.Message;
@@ -15,7 +17,6 @@ import i5.las2peer.persistency.StorageEnvelopeHandler;
 import i5.las2peer.persistency.StorageExceptionHandler;
 import i5.las2peer.persistency.StorageStoreResultHandler;
 import i5.las2peer.security.AgentContext;
-import i5.las2peer.security.AgentException;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.MessageReceiver;
@@ -27,7 +28,6 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -148,7 +148,7 @@ public class LocalNode extends Node {
 					Long[] ids = findAllNodesWithAgent(message.getRecipientId());
 
 					if (ids.length == 0) {
-						listener.collectException(new AgentNotKnownException(message.getRecipientId()));
+						listener.collectException(new AgentNotRegisteredException(message.getRecipientId()));
 					} else {
 						listener.addRecipients(ids.length - 1);
 						for (long id : ids) {
@@ -171,7 +171,7 @@ public class LocalNode extends Node {
 				}
 
 			}
-		} catch (AgentNotKnownException e) {
+		} catch (AgentNotRegisteredException e) {
 			storeMessage(message, listener);
 		}
 	}
@@ -225,12 +225,12 @@ public class LocalNode extends Node {
 	}
 
 	@Override
-	public Object[] findRegisteredAgent(String agentId, int hintOfExpectedCount) throws AgentNotKnownException {
+	public Object[] findRegisteredAgent(String agentId, int hintOfExpectedCount) throws AgentNotRegisteredException {
 		return findAllNodesWithAgent(agentId);
 	}
 
 	@Override
-	public AgentImpl getAgent(String id) throws AgentNotKnownException {
+	public AgentImpl getAgent(String id) throws AgentNotFoundException {
 		AgentImpl anonymous = getAnonymous();
 		if (id.equalsIgnoreCase(anonymous.getSafeId())) {
 			// TODO use isAnonymous, special ID or Classing for identification
@@ -239,13 +239,13 @@ public class LocalNode extends Node {
 			synchronized (htKnownAgents) {
 				String xml = htKnownAgents.get(id);
 				if (xml == null) {
-					throw new AgentNotKnownException(id);
+					throw new AgentNotFoundException(id);
 				}
 
 				try {
 					return AgentImpl.createFromXml(xml);
 				} catch (MalformedXMLException e) {
-					throw new AgentNotKnownException("XML problems with storage!", e);
+					throw new AgentNotFoundException("XML problems with storage!", e);
 				}
 			}
 		}
@@ -286,7 +286,7 @@ public class LocalNode extends Node {
 
 		synchronized (htKnownAgents) {
 			if (htKnownAgents.get(agent.getSafeId()) == null) {
-				throw new AgentNotKnownException(agent.getSafeId());
+				throw new AgentNotRegisteredException(agent.getSafeId());
 			}
 
 			// TODO: verify, that it is the same agent!!! (e.g. the same private key)
@@ -477,9 +477,9 @@ public class LocalNode extends Node {
 	 * 
 	 * @param agentId
 	 * @return id of a node hosting the given agent
-	 * @throws AgentNotKnownException
+	 * @throws AgentNotRegisteredException
 	 */
-	public static long findFirstNodeWithAgent(String agentId) throws AgentNotKnownException {
+	public static long findFirstNodeWithAgent(String agentId) throws AgentNotRegisteredException {
 		synchronized (htLocalNodes) {
 
 			for (long nodeId : htLocalNodes.keySet()) {
@@ -488,7 +488,7 @@ public class LocalNode extends Node {
 				}
 			}
 
-			throw new AgentNotKnownException(agentId);
+			throw new AgentNotRegisteredException(agentId);
 		}
 	}
 

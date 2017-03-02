@@ -3,9 +3,10 @@ package i5.las2peer.security;
 import i5.las2peer.api.execution.ServiceInvocationException;
 import i5.las2peer.api.logging.MonitoringEvent;
 import i5.las2peer.api.p2p.ServiceNameVersion;
+import i5.las2peer.api.security.AgentException;
+import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
-import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.tools.SerializationException;
@@ -104,7 +105,7 @@ public class Mediator implements MessageReceiver {
 
 		} catch (L2pSecurityException e) {
 			throw new MessageException("Unable to open message because of security problems! ", e);
-		} catch (AgentNotKnownException e) {
+		} catch (AgentNotFoundException e) {
 			throw new MessageException(
 					"Sender unkown (since this is the receiver). Has the sending node gone offline? ", e);
 		} catch (AgentException e) {

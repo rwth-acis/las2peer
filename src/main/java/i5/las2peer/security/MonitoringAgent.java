@@ -2,10 +2,11 @@ package i5.las2peer.security;
 
 import i5.las2peer.api.execution.ServiceInvocationException;
 import i5.las2peer.api.execution.ServiceNotFoundException;
+import i5.las2peer.api.security.AgentException;
+import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
 import i5.las2peer.logging.monitoring.MonitoringMessage;
-import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
@@ -109,10 +110,7 @@ public class MonitoringAgent extends PassphraseAgentImpl {
 					}
 				} catch (ServiceNotFoundException e) {
 					System.out.println("Monitoring: I am not the Processing Service!");
-				} catch (L2pServiceException | ServiceInvocationException e) {
-					System.out.println("Monitoring: Something went wrong while invoking Processing Service!");
-					e.printStackTrace();
-				} catch (InterruptedException e) {
+				} catch (ServiceInvocationException e) {
 					System.out.println("Monitoring: Something went wrong while invoking Processing Service!");
 					e.printStackTrace();
 				}
@@ -121,7 +119,7 @@ public class MonitoringAgent extends PassphraseAgentImpl {
 			}
 		} catch (L2pSecurityException e) {
 			throw new MessageException("Security problems handling the received message", e);
-		} catch (AgentNotKnownException e) {
+		} catch (AgentNotFoundException e) {
 			// Do nothing..("this" is not known..would be strange, eh?)
 		} catch (AgentException e) {
 			throw new MessageException("Could not read the sender agent", e);

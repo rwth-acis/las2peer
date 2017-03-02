@@ -1,16 +1,16 @@
 package i5.las2peer.p2p.pastry;
 
 import i5.las2peer.api.logging.MonitoringEvent;
+import i5.las2peer.api.security.AgentException;
 import i5.las2peer.communication.MessageException;
 import i5.las2peer.logging.L2pLogger;
-import i5.las2peer.p2p.AgentNotKnownException;
+import i5.las2peer.p2p.AgentNotRegisteredException;
 import i5.las2peer.p2p.NodeException;
 import i5.las2peer.p2p.NodeInformation;
 import i5.las2peer.p2p.NodeNotFoundException;
 import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.security.AgentImpl;
-import i5.las2peer.security.AgentException;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.MessageReceiver;
 import i5.las2peer.tools.CryptoException;
@@ -120,15 +120,15 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	 * unregister an agent from its subscription
 	 * 
 	 * @param id
-	 * @throws AgentNotKnownException
+	 * @throws AgentNotRegisteredException
 	 */
-	public void unregisterAgentTopic(String id) throws AgentNotKnownException {
+	public void unregisterAgentTopic(String id) throws AgentNotRegisteredException {
 		synchronized (htAgentTopics) {
 
 			Topic agentTopic = htAgentTopics.get(id);
 
 			if (agentTopic == null) {
-				throw new AgentNotKnownException("an agent with id " + id + " is not registered at this node");
+				throw new AgentNotRegisteredException("an agent with id " + id + " is not registered at this node");
 			}
 
 			scribeClient.unsubscribe(agentTopic, this);
@@ -489,7 +489,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 						logger.severe("L2pSecurityException while handling received message!");
 					} catch (MessageException e) {
 						logger.log(Level.SEVERE, "MessageException while handling received message!", e);
-					} catch (AgentNotKnownException e) {
+					} catch (AgentNotRegisteredException e) {
 						logger.severe("AgentNotKnown!?! - I shouldn't have gotten this message!");
 					} catch (AgentException e) {
 						logger.log(Level.SEVERE, "Got a message for an agent, but he failed!", e);

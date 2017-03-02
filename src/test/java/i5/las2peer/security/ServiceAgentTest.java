@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.security.AgentAccessDeniedException;
+import i5.las2peer.api.security.AgentException;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.ServiceDiscoveryContent;
 import i5.las2peer.p2p.AgentAlreadyRegisteredException;

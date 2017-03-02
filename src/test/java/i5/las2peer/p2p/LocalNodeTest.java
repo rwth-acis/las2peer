@@ -8,6 +8,7 @@ import static org.junit.Assert.fail;
 import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
+import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.PingPongContent;
 import i5.las2peer.p2p.Node.SendMode;
@@ -55,7 +56,7 @@ public class LocalNodeTest {
 
 	@Test
 	public void test() throws EncodingFailedException, L2pSecurityException, SerializationException,
-			InterruptedException, AgentException, AgentAccessDeniedException, i5.las2peer.security.AgentException {
+			InterruptedException, AgentException, AgentAccessDeniedException {
 		System.out.println("start: " + new Date());
 
 		LocalNode testee = LocalNode.launchNode();
@@ -105,7 +106,7 @@ public class LocalNodeTest {
 
 	@Test
 	public void testTwoNodes() throws L2pSecurityException, EncodingFailedException, SerializationException,
-			InterruptedException, AgentException, AgentAccessDeniedException, i5.las2peer.security.AgentException {
+			InterruptedException, AgentException, AgentAccessDeniedException {
 		adam.unlock("adamspass");
 		eve.unlock("evespass");
 
@@ -130,7 +131,7 @@ public class LocalNodeTest {
 
 	@Test
 	public void testTimeout() throws EncodingFailedException, L2pSecurityException, SerializationException,
-			InterruptedException, AgentException, AgentAccessDeniedException, i5.las2peer.security.AgentException {
+			InterruptedException, AgentException, AgentAccessDeniedException {
 		adam.unlock("adamspass");
 
 		LocalNode testee1 = LocalNode.launchAgent(adam);
@@ -156,7 +157,7 @@ public class LocalNodeTest {
 
 	@Test
 	public void testBroadcast() throws EncodingFailedException, L2pSecurityException, SerializationException,
-			InterruptedException, AgentException, AgentAccessDeniedException, i5.las2peer.security.AgentException {
+			InterruptedException, AgentException, AgentAccessDeniedException {
 		adam.unlock("adamspass");
 		eve.unlock("evespass");
 
@@ -291,8 +292,8 @@ public class LocalNodeTest {
 			// test registering to topic without being registered to the node
 			try {
 				testee.registerReceiverToTopic(adam, 1);
-				fail("AgentNotKnownException expected");
-			} catch (AgentNotKnownException e) {
+				fail("AgentNotRegisteredException expected");
+			} catch (AgentNotRegisteredException e) {
 			}
 
 			// test unregsiter without being registered
@@ -532,8 +533,8 @@ public class LocalNodeTest {
 
 			try {
 				testee.getUserManager().getAgentIdByLogin("bla");
-				fail("AgentNotKnownException expected");
-			} catch (AgentNotKnownException e) {
+				fail("AgentNotFoundException expected");
+			} catch (AgentNotFoundException e) {
 				// corrects
 			}
 		} catch (Exception e) {

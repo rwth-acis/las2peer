@@ -3,6 +3,8 @@ package i5.las2peer.p2p;
 import i5.las2peer.api.logging.MonitoringEvent;
 import i5.las2peer.api.persistency.EnvelopeException;
 import i5.las2peer.api.persistency.EnvelopeNotFoundException;
+import i5.las2peer.api.security.AgentException;
+import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.classLoaders.L2pClassManager;
 import i5.las2peer.classLoaders.libraries.SharedStorageRepository;
 import i5.las2peer.communication.Message;
@@ -20,7 +22,6 @@ import i5.las2peer.persistency.StorageEnvelopeHandler;
 import i5.las2peer.persistency.StorageExceptionHandler;
 import i5.las2peer.persistency.StorageStoreResultHandler;
 import i5.las2peer.security.AgentContext;
-import i5.las2peer.security.AgentException;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.MessageReceiver;
@@ -384,7 +385,7 @@ public class PastryNodeImpl extends Node {
 	}
 
 	@Override
-	public void unregisterReceiver(MessageReceiver receiver) throws AgentNotKnownException, NodeException {
+	public void unregisterReceiver(MessageReceiver receiver) throws AgentNotRegisteredException, NodeException {
 		synchronized (this) {
 			application.unregisterAgentTopic(receiver.getResponsibleForAgentSafeId());
 			super.unregisterReceiver(receiver);
@@ -392,7 +393,7 @@ public class PastryNodeImpl extends Node {
 	}
 
 	@Override
-	public void registerReceiverToTopic(MessageReceiver receiver, long topic) throws AgentNotKnownException {
+	public void registerReceiverToTopic(MessageReceiver receiver, long topic) throws AgentNotRegisteredException {
 		synchronized (this) {
 			super.registerReceiverToTopic(receiver, topic);
 			application.registerTopic(topic);
@@ -491,7 +492,7 @@ public class PastryNodeImpl extends Node {
 	}
 
 	@Override
-	public Object[] findRegisteredAgent(String agentId, int hintOfExpectedCount) throws AgentNotKnownException {
+	public Object[] findRegisteredAgent(String agentId, int hintOfExpectedCount) throws AgentNotRegisteredException {
 		observerNotice(MonitoringEvent.AGENT_SEARCH_STARTED, pastryNode, agentId, null, (String) null, "");
 		return application.searchAgent(agentId, hintOfExpectedCount).toArray();
 	}
@@ -506,7 +507,7 @@ public class PastryNodeImpl extends Node {
 	}
 
 	@Override
-	public AgentImpl getAgent(String id) throws AgentNotKnownException, AgentException {
+	public AgentImpl getAgent(String id) throws AgentNotFoundException, AgentException {
 		// no caching here, because agents may have changed in the network
 		observerNotice(MonitoringEvent.AGENT_GET_STARTED, pastryNode, id, null, (String) null, "");
 		try {
@@ -524,7 +525,7 @@ public class PastryNodeImpl extends Node {
 			return agentFromNet;
 		} catch (EnvelopeNotFoundException e) {
 			observerNotice(MonitoringEvent.AGENT_GET_FAILED, pastryNode, id, null, (String) null, "");
-			throw new AgentNotKnownException("Agent " + id + " not found in storage", e);
+			throw new AgentNotFoundException("Agent " + id + " not found in storage", e);
 		} catch (EnvelopeException | MalformedXMLException | SerializationException | L2pSecurityException
 				| CryptoException e) {
 			observerNotice(MonitoringEvent.AGENT_GET_FAILED, pastryNode, id, null, (String) null, "");

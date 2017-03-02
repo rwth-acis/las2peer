@@ -1,6 +1,7 @@
 package i5.las2peer.security;
 
-import i5.las2peer.p2p.AgentNotKnownException;
+import i5.las2peer.api.security.AgentException;
+import i5.las2peer.api.security.AgentNotFoundException;
 
 /**
  * Interface for agent storages.
@@ -12,10 +13,10 @@ public interface AgentStorage {
 	 * 
 	 * @param id the agent id
 	 * @return a new locked Agent instance
-	 * @throws AgentNotKnownException If the agent is not found in this storage
+	 * @throws AgentNotFoundException If the agent is not found in this storage
 	 * @throws AgentException If any other issue with the agent occurs, e. g. XML not readable
 	 */
-	public AgentImpl getAgent(String id) throws AgentNotKnownException, AgentException;
+	public AgentImpl getAgent(String id) throws AgentNotFoundException, AgentException;
 
 	/**
 	 * does this storage know the requested agent?

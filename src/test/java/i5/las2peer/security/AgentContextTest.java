@@ -2,6 +2,7 @@ package i5.las2peer.security;
 
 import static org.junit.Assert.*;
 import i5.las2peer.api.security.AgentAccessDeniedException;
+import i5.las2peer.api.security.AgentException;
 import i5.las2peer.p2p.AgentAlreadyRegisteredException;
 import i5.las2peer.p2p.LocalNode;
 import i5.las2peer.p2p.NodeException;

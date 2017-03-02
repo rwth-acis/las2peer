@@ -1,5 +1,7 @@
 package i5.las2peer.security;
 
+import i5.las2peer.api.security.AgentException;
+
 public class UserAgentException extends AgentException {
 
 	/**

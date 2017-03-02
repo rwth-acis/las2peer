@@ -6,9 +6,9 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.security.AgentAccessDeniedException;
+import i5.las2peer.api.security.AgentException;
 import i5.las2peer.p2p.NodeServiceCache.ServiceInstance;
 import i5.las2peer.persistency.MalformedXMLException;
-import i5.las2peer.security.AgentException;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
@@ -22,7 +22,7 @@ import org.junit.Test;
 public class NodeServiceCacheTest {
 
 	@Test
-	public void testLocalServices() throws CryptoException, L2pSecurityException, AgentNotKnownException {
+	public void testLocalServices() throws CryptoException, L2pSecurityException, AgentNotRegisteredException {
 		Node node = LocalNode.launchNode();
 
 		NodeServiceCache cache = new NodeServiceCache(node, 0, 0);
@@ -65,14 +65,14 @@ public class NodeServiceCacheTest {
 
 		try {
 			cache.getServiceAgentInstance(ServiceNameVersion.fromString(service1.getName()), false, true, null);
-			fail("AgentNotKnownException expected");
-		} catch (AgentNotKnownException e) {
+			fail("AgentNotRegisteredException expected");
+		} catch (AgentNotRegisteredException e) {
 		}
 
 		try {
 			cache.getServiceAgentInstance(ServiceNameVersion.fromString(service3.getName()), false, true, null);
-			fail("AgentNotKnownException expected");
-		} catch (AgentNotKnownException e) {
+			fail("AgentNotRegisteredException expected");
+		} catch (AgentNotRegisteredException e) {
 		}
 	}
 
@@ -98,8 +98,8 @@ public class NodeServiceCacheTest {
 
 		try {
 			serviceNode.getNodeServiceCache().getServiceAgentInstance(serviceNameVersion, true, true, null);
-			fail("AgentNotKnownException exptected!");
-		} catch (AgentNotKnownException e) {
+			fail("AgentNotRegisteredException exptected!");
+		} catch (AgentNotRegisteredException e) {
 		}
 	}
 

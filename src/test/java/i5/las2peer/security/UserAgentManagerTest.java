@@ -2,7 +2,7 @@ package i5.las2peer.security;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import i5.las2peer.p2p.AgentNotKnownException;
+import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.p2p.LocalNode;
 import i5.las2peer.p2p.Node;
 
@@ -55,8 +55,8 @@ public class UserAgentManagerTest {
 
 			try {
 				l.getAgentIdByLogin("fdewfue");
-				fail("AgentNotKnownException expected");
-			} catch (AgentNotKnownException e) {
+				fail("AgentNotFoundException expected");
+			} catch (AgentNotFoundException e) {
 				// intended
 			}
 		} catch (Exception e) {
@@ -107,8 +107,8 @@ public class UserAgentManagerTest {
 
 			try {
 				l.getAgentIdByEmail("fdewfue");
-				fail("AgentNotKnownException expected");
-			} catch (AgentNotKnownException e) {
+				fail("AgentNotFoundException expected");
+			} catch (AgentNotFoundException e) {
 				// intended
 			}
 		} catch (Exception e) {

@@ -3,11 +3,11 @@ package i5.las2peer.security;
 import i5.las2peer.api.logging.MonitoringEvent;
 import i5.las2peer.api.security.Agent;
 import i5.las2peer.api.security.AgentAccessDeniedException;
+import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.api.security.GroupAgent;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
-import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.persistency.XmlAble;
@@ -404,7 +404,7 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 		try {
 			message.open(this, getRunningAtNode());
 			content = message.getContent();
-		} catch (i5.las2peer.security.AgentException e1) {
+		} catch (AgentException e1) {
 			getRunningAtNode().observerNotice(MonitoringEvent.SERVICE_ERROR, e1.getMessage());
 		} catch (L2pSecurityException e2) {
 			getRunningAtNode().observerNotice(MonitoringEvent.SERVICE_ERROR, e2.getMessage());

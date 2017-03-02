@@ -1,5 +1,6 @@
 package i5.las2peer.security;
 
+import i5.las2peer.api.security.AgentException;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
 import i5.las2peer.p2p.Node;

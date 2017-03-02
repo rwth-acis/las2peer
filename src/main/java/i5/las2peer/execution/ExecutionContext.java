@@ -26,7 +26,6 @@ import i5.las2peer.api.security.ServiceAgent;
 import i5.las2peer.api.security.UserAgent;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.p2p.AgentAlreadyRegisteredException;
-import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.persistency.EnvelopeImpl;
 import i5.las2peer.persistency.EnvelopeVersion;
@@ -34,7 +33,6 @@ import i5.las2peer.security.AgentContext;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.GroupAgentImpl;
 import i5.las2peer.security.L2pSecurityException;
-import i5.las2peer.security.L2pServiceException;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.tools.CryptoException;
@@ -135,12 +133,10 @@ public class ExecutionContext implements Context {
 			InternalServiceException {
 		try {
 			return callerContext.getLocalNode().invoke(agent, service, method, parameters);
-		} catch (i5.las2peer.security.AgentException e) {
-			throw new ServiceNotFoundException("The service is not known.", e);
+		} catch (ServiceNotFoundException | ServiceNotAvailableException | InternalServiceException e) {
+			throw e;
 		} catch (ServiceInvocationException e) {
-			throw new InternalServiceException("The service has thrown an exception.", e);
-		} catch (InterruptedException e) {
-			throw new InternalServiceException("The service seems not to be available.", e);
+			throw new ServiceNotAvailableException("Service invocation failed.", e);
 		} catch (L2pSecurityException e) {
 			throw new IllegalStateException("Agent should be unlocked, but it isn't.");
 		}
@@ -195,12 +191,15 @@ public class ExecutionContext implements Context {
 	}
 
 	@Override
-	public Agent fetchAgent(String agentId) throws AgentNotFoundException {
+	public Agent fetchAgent(String agentId) throws AgentNotFoundException, AgentOperationFailedException {
 		try {
 			return node.getAgent(agentId);
-		} catch (i5.las2peer.security.AgentException e) {
-			throw new AgentNotFoundException(e);
+		} catch (AgentNotFoundException e) {
+			throw e;
+		} catch (AgentException e) {
+			throw new AgentOperationFailedException("Error!", e);
 		}
+
 	}
 
 	@Override
@@ -221,14 +220,14 @@ public class ExecutionContext implements Context {
 		if (agent instanceof GroupAgentImpl) {
 			((GroupAgentImpl) agent).apply();
 		}
-		
+
 		try {
 			node.storeAgent((AgentImpl) agent);
 		} catch (AgentAlreadyRegisteredException e) {
 			throw new AgentAlreadyExistsException(e);
 		} catch (L2pSecurityException e) {
 			throw new AgentAccessDeniedException(e);
-		} catch (i5.las2peer.security.AgentException e) {
+		} catch (AgentException e) {
 			throw new AgentOperationFailedException(e);
 		}
 	}

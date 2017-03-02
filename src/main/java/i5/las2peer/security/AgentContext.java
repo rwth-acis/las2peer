@@ -2,11 +2,11 @@ package i5.las2peer.security;
 
 import i5.las2peer.api.security.Agent;
 import i5.las2peer.api.security.AgentAccessDeniedException;
+import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.api.security.PassphraseAgent;
 import i5.las2peer.execution.ServiceThread;
-import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.SerializationException;
@@ -81,8 +81,10 @@ public class AgentContext implements AgentStorage {
 		AgentImpl agent;
 		try {
 			agent = localNode.getAgent(groupId);
+		} catch(AgentNotFoundException e) {
+			throw e;
 		} catch (AgentException e1) {
-			throw new AgentNotFoundException(e1);
+			throw new AgentOperationFailedException(e1);
 		}
 
 		if (!(agent instanceof GroupAgentImpl)) {
@@ -221,7 +223,7 @@ public class AgentContext implements AgentStorage {
 	 * 
 	 * @param id
 	 * @return get the agent of the given id
-	 * @throws AgentNotKnownException
+	 * @throws AgentException
 	 */
 	@Override
 	public AgentImpl getAgent(String id) throws AgentException {

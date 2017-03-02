@@ -25,7 +25,8 @@ import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.p2p.ServiceVersion;
 import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.persistency.EnvelopeNotFoundException;
-import i5.las2peer.api.security.AgentAccessDeniedException;
+import i5.las2peer.api.security.AgentException;
+import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.classLoaders.L2pClassManager;
 import i5.las2peer.classLoaders.libraries.SharedStorageRepository;
 import i5.las2peer.nodeAdminConnector.AgentSession;
@@ -33,12 +34,11 @@ import i5.las2peer.nodeAdminConnector.NodeAdminConnector;
 import i5.las2peer.nodeAdminConnector.ParameterFilter.ParameterMap;
 import i5.las2peer.nodeAdminConnector.handler.pojo.PojoService;
 import i5.las2peer.nodeAdminConnector.multipart.FormDataPart;
-import i5.las2peer.p2p.AgentNotKnownException;
+import i5.las2peer.p2p.AgentNotRegisteredException;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.NodeException;
 import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.persistency.EnvelopeVersion;
-import i5.las2peer.security.AgentException;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.ServiceAgentImpl;
@@ -112,7 +112,7 @@ public class FrontendHandler extends AbstractHandler {
 			}
 			try {
 				node.unregisterReceiver(activeAgent);
-			} catch (AgentNotKnownException e) {
+			} catch (AgentNotRegisteredException e) {
 				// actually nobody cares
 				logger.log(Level.FINE, "Could not unregister agent on logout", e);
 			}
@@ -240,7 +240,7 @@ public class FrontendHandler extends AbstractHandler {
 					try {
 						node.getNodeServiceCache().getLocalService(snv);
 						template.add("result", "Service already running");
-					} catch (AgentNotKnownException e) {
+					} catch (AgentNotRegisteredException e) {
 						// try to start the service
 						try {
 							// TODO is adminToken a good password?
@@ -248,7 +248,7 @@ public class FrontendHandler extends AbstractHandler {
 							agent.unlock(adminToken);
 							node.registerReceiver(agent);
 							// FIXME store service agent locally
-						} catch (CryptoException | L2pSecurityException | AgentException | AgentAccessDeniedException e2) {
+						} catch (CryptoException | L2pSecurityException | AgentException e2) {
 							logger.log(Level.SEVERE, "Could not start service '" + startServiceName + "'", e2);
 							template.add("error", e2.toString());
 						}
@@ -273,7 +273,7 @@ public class FrontendHandler extends AbstractHandler {
 							try {
 								node.unregisterReceiver(agent);
 								template.add("stopResult", "Service stopped");
-							} catch (AgentNotKnownException | NodeException e) {
+							} catch (AgentNotRegisteredException | NodeException e) {
 								logger.log(Level.SEVERE, "Could not stop service '" + stopServiceName + "'", e);
 								template.add("stopError", e.toString());
 							}
@@ -394,7 +394,7 @@ public class FrontendHandler extends AbstractHandler {
 					// content is not an agent id, or it's not a UserAgent, what now?
 					sendInternalErrorResponse(exchange, "Could not read agent id from account envelope", e);
 					return;
-				} catch (AgentNotKnownException e) {
+				} catch (AgentNotFoundException e) {
 					// this should not happen, but we can re-create a new agent?
 					sendInternalErrorResponse(exchange, "Could not read agent from network storage", e);
 					return;

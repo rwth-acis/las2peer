@@ -1,10 +1,9 @@
 package i5.las2peer.persistency;
 
 import i5.las2peer.api.Context;
+import i5.las2peer.api.security.AgentException;
 import i5.las2peer.logging.L2pLogger;
-import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.security.AgentContext;
-import i5.las2peer.security.AgentException;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.AgentStorage;
 import i5.las2peer.security.GroupAgentImpl;

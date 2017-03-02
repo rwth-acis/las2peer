@@ -4,7 +4,8 @@ import i5.las2peer.api.logging.MonitoringEvent;
 import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.persistency.EnvelopeException;
 import i5.las2peer.api.persistency.EnvelopeNotFoundException;
-import i5.las2peer.p2p.AgentNotKnownException;
+import i5.las2peer.api.security.AgentException;
+import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.persistency.EnvelopeVersion;
 import i5.las2peer.tools.CryptoException;
@@ -93,10 +94,10 @@ public class UserAgentManager {
 	 * 
 	 * @param name
 	 * @return
-	 * @throws AgentNotKnownException If no agent for the given login is found
+	 * @throws AgentNotFoundException If no agent for the given login is found
 	 * @throws AgentException If any other issue with the agent occurs, e. g. XML not readable
 	 */
-	public String getAgentIdByLogin(String name) throws AgentNotKnownException, AgentException {
+	public String getAgentIdByLogin(String name) throws AgentNotFoundException, AgentException {
 		if (name.equalsIgnoreCase("anonymous")) {
 			return node.getAnonymous().getSafeId();
 		}
@@ -104,7 +105,7 @@ public class UserAgentManager {
 			EnvelopeVersion env = node.fetchEnvelope(PREFIX_USER_NAME + name.toLowerCase());
 			return (String) env.getContent();
 		} catch (EnvelopeNotFoundException e) {
-			throw new AgentNotKnownException("Username not found!", e);
+			throw new AgentNotFoundException("Username not found!", e);
 		} catch (EnvelopeException | SerializationException | L2pSecurityException | CryptoException e) {
 			throw new AgentException("Could not read agent id from storage");
 		}
@@ -115,15 +116,15 @@ public class UserAgentManager {
 	 * 
 	 * @param email
 	 * @return
-	 * @throws AgentNotKnownException If no agent for the given email is found
+	 * @throws AgentNotFoundException If no agent for the given email is found
 	 * @throws AgentException If any other issue with the agent occurs, e. g. XML not readable
 	 */
-	public String getAgentIdByEmail(String email) throws AgentNotKnownException, AgentException {
+	public String getAgentIdByEmail(String email) throws AgentNotFoundException, AgentException {
 		try {
 			EnvelopeVersion env = node.fetchEnvelope(PREFIX_USER_MAIL + email.toLowerCase());
 			return (String) env.getContent();
 		} catch (EnvelopeNotFoundException e) {
-			throw new AgentNotKnownException("Email not found!", e);
+			throw new AgentNotFoundException("Email not found!", e);
 		} catch (EnvelopeException | SerializationException | L2pSecurityException | CryptoException e) {
 			throw new AgentException("Could not read email from storage");
 		}
