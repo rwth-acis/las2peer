@@ -6,11 +6,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.security.NoSuchAlgorithmException;
 
-import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.security.GroupAgentImpl;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
+import i5.las2peer.serialization.MalformedXMLException;
 import i5.las2peer.tools.CryptoException;
 
 /**

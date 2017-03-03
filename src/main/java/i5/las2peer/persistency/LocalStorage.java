@@ -13,8 +13,8 @@ import i5.las2peer.api.persistency.EnvelopeNotFoundException;
 import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.persistency.EnvelopeException;
 import i5.las2peer.security.AgentImpl;
+import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.CryptoException;
-import i5.las2peer.tools.SerializationException;
 
 public class LocalStorage implements L2pStorageInterface {
 

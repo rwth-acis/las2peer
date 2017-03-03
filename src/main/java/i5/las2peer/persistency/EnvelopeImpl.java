@@ -5,8 +5,8 @@ import i5.las2peer.api.security.Agent;
 import i5.las2peer.security.AgentContext;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.CryptoException;
-import i5.las2peer.tools.SerializationException;
 
 import java.io.Serializable;
 import java.util.HashSet;

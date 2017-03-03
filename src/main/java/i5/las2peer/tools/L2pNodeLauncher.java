@@ -47,7 +47,6 @@ import i5.las2peer.p2p.NodeInformation;
 import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.p2p.TimeoutException;
 import i5.las2peer.persistency.EncodingFailedException;
-import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.persistency.SharedStorage;
 import i5.las2peer.persistency.SharedStorage.STORAGE_MODE;
 import i5.las2peer.sandbox.L2pSecurityManager;
@@ -57,6 +56,8 @@ import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.PassphraseAgentImpl;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
+import i5.las2peer.serialization.MalformedXMLException;
+import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.helper.L2pNodeLauncherConfiguration;
 import rice.p2p.commonapi.NodeHandle;
 

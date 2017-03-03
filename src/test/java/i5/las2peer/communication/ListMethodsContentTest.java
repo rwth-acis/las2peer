@@ -4,8 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import i5.las2peer.tools.SerializationException;
-import i5.las2peer.tools.SerializeTools;
+import i5.las2peer.serialization.SerializationException;
+import i5.las2peer.serialization.SerializeTools;
 
 public class ListMethodsContentTest {
 

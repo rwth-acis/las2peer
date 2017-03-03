@@ -1,4 +1,4 @@
-package i5.las2peer.tools;
+package i5.las2peer.serialization;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

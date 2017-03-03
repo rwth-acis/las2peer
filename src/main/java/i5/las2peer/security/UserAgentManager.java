@@ -8,8 +8,8 @@ import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.persistency.EnvelopeVersion;
+import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.CryptoException;
-import i5.las2peer.tools.SerializationException;
 
 /**
  * Maps usernames and emails to {@link UserAgentImpl}s.

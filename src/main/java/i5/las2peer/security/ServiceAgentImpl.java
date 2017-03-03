@@ -25,13 +25,13 @@ import i5.las2peer.p2p.AliasConflictException;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.NodeNotFoundException;
 import i5.las2peer.persistency.EncodingFailedException;
-import i5.las2peer.persistency.MalformedXMLException;
+import i5.las2peer.serialization.MalformedXMLException;
+import i5.las2peer.serialization.SerializationException;
+import i5.las2peer.serialization.SerializeTools;
+import i5.las2peer.serialization.XmlTools;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
-import i5.las2peer.tools.SerializationException;
-import i5.las2peer.tools.SerializeTools;
 import i5.las2peer.tools.SimpleTools;
-import i5.las2peer.tools.XmlTools;
 
 import java.io.Serializable;
 import java.lang.reflect.Constructor;

@@ -6,10 +6,10 @@ import i5.las2peer.api.security.AgentException;
 import i5.las2peer.p2p.AgentAlreadyRegisteredException;
 import i5.las2peer.p2p.LocalNode;
 import i5.las2peer.p2p.NodeException;
-import i5.las2peer.persistency.MalformedXMLException;
+import i5.las2peer.serialization.MalformedXMLException;
+import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.testing.MockAgentFactory;
 import i5.las2peer.tools.CryptoException;
-import i5.las2peer.tools.SerializationException;
 
 import java.io.IOException;
 

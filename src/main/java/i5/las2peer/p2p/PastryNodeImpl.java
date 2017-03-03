@@ -13,7 +13,6 @@ import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.p2p.pastry.MessageEnvelope;
 import i5.las2peer.p2p.pastry.NodeApplication;
 import i5.las2peer.persistency.EnvelopeVersion;
-import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.persistency.SharedStorage;
 import i5.las2peer.persistency.SharedStorage.STORAGE_MODE;
 import i5.las2peer.persistency.StorageArtifactHandler;
@@ -26,8 +25,9 @@ import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.MessageReceiver;
 import i5.las2peer.security.UserAgentImpl;
+import i5.las2peer.serialization.MalformedXMLException;
+import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.CryptoException;
-import i5.las2peer.tools.SerializationException;
 import i5.las2peer.tools.SimpleTools;
 
 import java.io.File;

@@ -5,7 +5,7 @@ import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 
-import i5.las2peer.persistency.MalformedXMLException;
+import i5.las2peer.serialization.MalformedXMLException;
 
 public class NodeInformationTest {
 

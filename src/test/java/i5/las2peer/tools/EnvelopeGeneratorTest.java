@@ -5,9 +5,10 @@ import static org.junit.Assert.assertTrue;
 import i5.las2peer.persistency.DecodingFailedException;
 import i5.las2peer.persistency.EnvelopeGenerator;
 import i5.las2peer.persistency.EnvelopeVersion;
-import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.UserAgentImpl;
+import i5.las2peer.serialization.MalformedXMLException;
+import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.testing.MockAgentFactory;
 
 import java.io.ByteArrayOutputStream;

@@ -35,8 +35,8 @@ import i5.las2peer.security.GroupAgentImpl;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
+import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.CryptoException;
-import i5.las2peer.tools.SerializationException;
 
 import java.io.Serializable;
 import java.security.PublicKey;

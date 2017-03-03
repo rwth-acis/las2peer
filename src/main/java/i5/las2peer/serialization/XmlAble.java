@@ -1,6 +1,4 @@
-package i5.las2peer.persistency;
-
-import i5.las2peer.tools.SerializationException;
+package i5.las2peer.serialization;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;

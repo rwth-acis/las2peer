@@ -38,10 +38,10 @@ import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.security.UnlockAgentCall;
 import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.security.UserAgentManager;
+import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.testing.MockAgentFactory;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
-import i5.las2peer.tools.SerializationException;
 
 import java.io.File;
 import java.io.Serializable;

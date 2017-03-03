@@ -9,10 +9,10 @@ import i5.las2peer.p2p.NodeException;
 import i5.las2peer.p2p.NodeInformation;
 import i5.las2peer.p2p.NodeNotFoundException;
 import i5.las2peer.p2p.PastryNodeImpl;
-import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.MessageReceiver;
+import i5.las2peer.serialization.MalformedXMLException;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.WaiterThread;
 

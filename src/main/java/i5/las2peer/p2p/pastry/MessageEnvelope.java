@@ -1,6 +1,6 @@
 package i5.las2peer.p2p.pastry;
 
-import i5.las2peer.persistency.MalformedXMLException;
+import i5.las2peer.serialization.MalformedXMLException;
 import rice.p2p.commonapi.Message;
 import rice.p2p.commonapi.NodeHandle;
 

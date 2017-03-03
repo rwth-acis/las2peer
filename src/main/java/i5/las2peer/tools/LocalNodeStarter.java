@@ -11,9 +11,9 @@ import i5.las2peer.p2p.AgentAlreadyRegisteredException;
 import i5.las2peer.p2p.LocalNode;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.NodeException;
-import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.serialization.MalformedXMLException;
 
 /**
  * Command line tool for starting a {@link i5.las2peer.p2p.LocalNode} and set up some artifacts from a directory

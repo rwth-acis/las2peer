@@ -34,6 +34,8 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import i5.las2peer.persistency.VerificationFailedException;
+import i5.las2peer.serialization.SerializationException;
+import i5.las2peer.serialization.SerializeTools;
 
 /**
  * Simple <i>static</i> class collecting useful cryptographic methods end encapsulating the access to the underlying

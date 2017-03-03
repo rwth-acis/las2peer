@@ -17,9 +17,9 @@ import i5.las2peer.persistency.pastry.PastFetchContinuation;
 import i5.las2peer.persistency.pastry.PastInsertContinuation;
 import i5.las2peer.persistency.pastry.PastLookupContinuation;
 import i5.las2peer.security.AgentImpl;
+import i5.las2peer.serialization.SerializationException;
+import i5.las2peer.serialization.SerializeTools;
 import i5.las2peer.tools.CryptoException;
-import i5.las2peer.tools.SerializationException;
-import i5.las2peer.tools.SerializeTools;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

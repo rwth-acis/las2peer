@@ -8,8 +8,8 @@ import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.api.security.PassphraseAgent;
 import i5.las2peer.execution.ServiceThread;
 import i5.las2peer.p2p.Node;
+import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.CryptoException;
-import i5.las2peer.tools.SerializationException;
 
 import java.util.Date;
 import java.util.Hashtable;

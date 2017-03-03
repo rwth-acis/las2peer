@@ -12,11 +12,11 @@ import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.persistency.SharedStorage;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
+import i5.las2peer.serialization.SerializeTools;
 import i5.las2peer.testing.MockAgentFactory;
 import i5.las2peer.testing.TestSuite;
 import i5.las2peer.tools.CryptoTools;
 import i5.las2peer.tools.PackageUploader;
-import i5.las2peer.tools.SerializeTools;
 
 public class NetworkClassLoadingTest {
 

@@ -1,16 +1,16 @@
 package i5.las2peer.p2p;
 
 import i5.las2peer.api.p2p.ServiceNameVersion;
-import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.persistency.VerificationFailedException;
-import i5.las2peer.persistency.XmlAble;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.ServiceAgentImpl;
+import i5.las2peer.serialization.MalformedXMLException;
+import i5.las2peer.serialization.SerializationException;
+import i5.las2peer.serialization.SerializeTools;
+import i5.las2peer.serialization.XmlAble;
+import i5.las2peer.serialization.XmlTools;
 import i5.las2peer.tools.CryptoTools;
 import i5.las2peer.tools.FileContentReader;
-import i5.las2peer.tools.SerializationException;
-import i5.las2peer.tools.SerializeTools;
-import i5.las2peer.tools.XmlTools;
 
 import java.io.IOException;
 import java.io.Serializable;

@@ -19,7 +19,7 @@ import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.ServiceAgentImpl;
-import i5.las2peer.tools.SerializationException;
+import i5.las2peer.serialization.SerializationException;
 
 /**
  * Caches the knowledge about existing services

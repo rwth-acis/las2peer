@@ -1,13 +1,14 @@
 package i5.las2peer.p2p.pastry;
 
 import static org.junit.Assert.assertEquals;
+
 import org.junit.Assert;
 import org.junit.Test;
 
 import i5.las2peer.communication.Message;
 import i5.las2peer.security.BasicAgentStorage;
 import i5.las2peer.security.UserAgentImpl;
-import i5.las2peer.tools.SerializeTools;
+import i5.las2peer.serialization.SerializeTools;
 
 public class MessageEnvelopeTest {
 

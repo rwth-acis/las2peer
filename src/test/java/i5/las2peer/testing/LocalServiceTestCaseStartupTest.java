@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import i5.las2peer.api.Service;
 import i5.las2peer.api.security.AgentNotFoundException;
-import i5.las2peer.persistency.MalformedXMLException;
+import i5.las2peer.serialization.MalformedXMLException;
 
 public class LocalServiceTestCaseStartupTest extends LocalServiceTestCase {
 

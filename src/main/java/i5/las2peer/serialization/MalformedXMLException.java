@@ -1,4 +1,4 @@
-package i5.las2peer.persistency;
+package i5.las2peer.serialization;
 
 /**
  * Exception for problems with XML-deserialization.

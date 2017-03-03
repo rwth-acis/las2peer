@@ -7,10 +7,10 @@ import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
 import i5.las2peer.classLoaders.helpers.LibraryVersion;
 import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.persistency.EnvelopeVersion;
-import i5.las2peer.persistency.MalformedXMLException;
-import i5.las2peer.persistency.XmlAble;
-import i5.las2peer.tools.SerializationException;
-import i5.las2peer.tools.XmlTools;
+import i5.las2peer.serialization.MalformedXMLException;
+import i5.las2peer.serialization.SerializationException;
+import i5.las2peer.serialization.XmlAble;
+import i5.las2peer.serialization.XmlTools;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

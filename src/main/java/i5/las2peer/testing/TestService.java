@@ -9,8 +9,8 @@ import i5.las2peer.api.persistency.EnvelopeOperationFailedException;
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentAlreadyExistsException;
 import i5.las2peer.api.security.AgentOperationFailedException;
-import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.serialization.MalformedXMLException;
 
 import java.io.IOException;
 import java.util.Hashtable;

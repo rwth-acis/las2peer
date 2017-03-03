@@ -2,16 +2,16 @@ package i5.las2peer.communication;
 
 import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.persistency.EncodingFailedException;
-import i5.las2peer.persistency.MalformedXMLException;
-import i5.las2peer.persistency.XmlAble;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.AgentStorage;
 import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.serialization.MalformedXMLException;
+import i5.las2peer.serialization.SerializationException;
+import i5.las2peer.serialization.SerializeTools;
+import i5.las2peer.serialization.XmlAble;
+import i5.las2peer.serialization.XmlTools;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
-import i5.las2peer.tools.SerializationException;
-import i5.las2peer.tools.SerializeTools;
-import i5.las2peer.tools.XmlTools;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

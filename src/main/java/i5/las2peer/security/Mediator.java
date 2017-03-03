@@ -9,7 +9,7 @@ import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.persistency.EncodingFailedException;
-import i5.las2peer.tools.SerializationException;
+import i5.las2peer.serialization.SerializationException;
 
 import java.io.Serializable;
 import java.util.LinkedList;

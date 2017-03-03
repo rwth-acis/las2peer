@@ -11,7 +11,6 @@ import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
 import i5.las2peer.persistency.EnvelopeVersion;
 import i5.las2peer.persistency.LocalStorage;
-import i5.las2peer.persistency.MalformedXMLException;
 import i5.las2peer.persistency.StorageCollisionHandler;
 import i5.las2peer.persistency.StorageEnvelopeHandler;
 import i5.las2peer.persistency.StorageExceptionHandler;
@@ -21,8 +20,9 @@ import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.MessageReceiver;
 import i5.las2peer.security.UserAgentImpl;
+import i5.las2peer.serialization.MalformedXMLException;
+import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.CryptoException;
-import i5.las2peer.tools.SerializationException;
 
 import java.io.Serializable;
 import java.util.Collection;

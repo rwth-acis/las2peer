@@ -3,9 +3,10 @@ package i5.las2peer.persistency;
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.PassphraseAgentImpl;
+import i5.las2peer.serialization.MalformedXMLException;
+import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.FileContentReader;
-import i5.las2peer.tools.SerializationException;
 
 import java.io.IOException;
 import java.io.Serializable;
