@@ -249,11 +249,13 @@ public class LocalNodeTest {
 			} catch (L2pSecurityException e) {
 			}
 
+			/* no problem anymore since its the same agent
 			try {
 				testee.storeAgent(adam);
 				fail("AgentAlreadyRegistered exception expected");
 			} catch (AgentAlreadyRegisteredException e) {
 			}
+			*/
 
 			abel.unlock("abelspass");
 			testee.storeAgent(abel);
@@ -264,13 +266,13 @@ public class LocalNodeTest {
 			assertTrue(retrieve.isLocked());
 
 			try {
-				testee2.updateAgent(retrieve);
+				testee2.storeAgent(retrieve);
 				fail("SecurtityException expected");
 			} catch (L2pSecurityException e) {
 			}
 
 			retrieve.unlock("abelspass");
-			testee2.updateAgent(retrieve);
+			testee2.storeAgent(retrieve);
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail(e.toString());
