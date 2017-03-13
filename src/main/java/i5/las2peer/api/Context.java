@@ -1,6 +1,8 @@
 package i5.las2peer.api;
 
 import i5.las2peer.api.execution.InternalServiceException;
+import i5.las2peer.api.execution.ServiceAccessDeniedException;
+import i5.las2peer.api.execution.ServiceInvocationFailedException;
 import i5.las2peer.api.execution.ServiceMethodNotFoundException;
 import i5.las2peer.api.execution.ServiceNotAvailableException;
 import i5.las2peer.api.execution.ServiceNotFoundException;
@@ -310,9 +312,12 @@ public interface Context {
 	 * @throws ServiceNotAvailableException If the service is temporarily not available.
 	 * @throws InternalServiceException If the remote service throws an exception.
 	 * @throws ServiceMethodNotFoundException If the service method does not exist.
+	 * @throws ServiceInvocationFailedException If the service invocation failed.
+	 * @throws ServiceAccessDeniedException If the access to the service has been denied.
 	 */
 	public Serializable invoke(String service, String method, Serializable... parameters)
-			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException, ServiceMethodNotFoundException;
+			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException,
+			ServiceMethodNotFoundException, ServiceInvocationFailedException, ServiceAccessDeniedException;
 
 	/**
 	 * Invokes the method of any other service on behalf of the main agent, thus sending the main agent as calling
@@ -328,9 +333,12 @@ public interface Context {
 	 * @throws ServiceNotAvailableException If the service is temporarily not available.
 	 * @throws InternalServiceException If the remote service throws an exception.
 	 * @throws ServiceMethodNotFoundException If the service method does not exist.
+	 * @throws ServiceInvocationFailedException If the service invocation failed.
+	 * @throws ServiceAccessDeniedException If the access to the service has been denied.
 	 */
 	public Serializable invoke(ServiceNameVersion service, String method, Serializable... parameters)
-			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException, ServiceMethodNotFoundException;
+			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException,
+			ServiceMethodNotFoundException, ServiceInvocationFailedException, ServiceAccessDeniedException;
 
 	/**
 	 * Invokes a service method using the agent of this service as calling agent.
@@ -345,9 +353,12 @@ public interface Context {
 	 * @throws ServiceNotAvailableException If the service is temporarily not available.
 	 * @throws InternalServiceException If the remote service throws an exception.
 	 * @throws ServiceMethodNotFoundException If the service method does not exist.
+	 * @throws ServiceInvocationFailedException If the service invocation failed.
+	 * @throws ServiceAccessDeniedException If the access to the service has been denied.
 	 */
 	public Serializable invokeInternally(String service, String method, Serializable... parameters)
-			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException, ServiceMethodNotFoundException;
+			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException,
+			ServiceMethodNotFoundException, ServiceInvocationFailedException, ServiceAccessDeniedException;
 
 	/**
 	 * Invokes a service method using the agent of this service as calling agent.
@@ -362,9 +373,12 @@ public interface Context {
 	 * @throws ServiceNotAvailableException If the service is temporarily not available.
 	 * @throws InternalServiceException If the remote service throws an exception.
 	 * @throws ServiceMethodNotFoundException If the service method does not exist.
+	 * @throws ServiceInvocationFailedException If the service invocation failed.
+	 * @throws ServiceAccessDeniedException If the access to the service has been denied.
 	 */
 	public Serializable invokeInternally(ServiceNameVersion service, String method, Serializable... parameters)
-			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException, ServiceMethodNotFoundException;
+			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException,
+			ServiceMethodNotFoundException, ServiceInvocationFailedException, ServiceAccessDeniedException;
 
 	// Execution
 
@@ -395,7 +409,8 @@ public interface Context {
 	 * 
 	 * Does not include the current acting main agent.
 	 *
-	 * @param event Differentiates between different log messages. Use MonitoringEvent.SERVICE_CUSTOM_MESSAGE_XXX as parameter.
+	 * @param event Differentiates between different log messages. Use MonitoringEvent.SERVICE_CUSTOM_MESSAGE_XXX as
+	 *            parameter.
 	 * @param message A message.
 	 */
 	public void monitorEvent(MonitoringEvent event, String message);
@@ -406,7 +421,8 @@ public interface Context {
 	 * Does not include the current acting main agent.
 	 * 
 	 * @param from Specifies from which class the message is sent from. Usually "this" is passed as parameter.
-	 * @param event Differentiates between different log messages. Use MonitoringEvent.SERVICE_CUSTOM_MESSAGE_XXX as parameter.
+	 * @param event Differentiates between different log messages. Use MonitoringEvent.SERVICE_CUSTOM_MESSAGE_XXX as
+	 *            parameter.
 	 * @param message A message.
 	 */
 	public void monitorEvent(Object from, MonitoringEvent event, String message);
@@ -415,7 +431,8 @@ public interface Context {
 	 * Writes a log message to the l2p system using node observers. Also makes data available to MobSOS.
 	 *
 	 * @param from Specifies from which class the message is sent from. Usually "this" is passed as parameter.
-	 * @param event Differentiates between different log messages. Use MonitoringEvent.SERVICE_CUSTOM_MESSAGE_XXX as parameter.
+	 * @param event Differentiates between different log messages. Use MonitoringEvent.SERVICE_CUSTOM_MESSAGE_XXX as
+	 *            parameter.
 	 * @param message A message.
 	 * @param includeActingUser If set to true, the current main agent will be included.
 	 */

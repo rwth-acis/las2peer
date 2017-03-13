@@ -1,5 +1,7 @@
 package i5.las2peer.api;
 
+import i5.las2peer.api.execution.ServiceAccessDeniedException;
+
 import java.util.Hashtable;
 
 /**
@@ -69,6 +71,14 @@ public class TestService extends Service {
 	
 	public String getEcho(String input) {
 		return input;
+	}
+	
+	public String accessForbidden() throws ServiceAccessDeniedException {
+		throw new ServiceAccessDeniedException();
+	}
+	
+	public String exception() throws Exception {
+		throw new Exception();
 	}
 
 	@Override

@@ -12,6 +12,8 @@ import org.junit.Test;
 
 import i5.las2peer.api.Context;
 import i5.las2peer.api.TestService;
+import i5.las2peer.api.execution.InternalServiceException;
+import i5.las2peer.api.execution.ServiceAccessDeniedException;
 import i5.las2peer.api.execution.ServiceMethodNotFoundException;
 import i5.las2peer.api.execution.ServiceNotFoundException;
 import i5.las2peer.api.logging.MonitoringEvent;
@@ -101,6 +103,20 @@ public class ExecutionContextTest {
 				result = (String) context.invoke("i5.las2peer.api.TestService@0.1", "doesNotExist");
 				fail("ServiceMethodNotFoundException expected");
 			} catch (ServiceMethodNotFoundException e) {
+
+			}
+			
+			try {
+				result = (String) context.invoke("i5.las2peer.api.TestService@0.1", "accessForbidden");
+				fail("ServiceAccessDeniedException expected");
+			} catch (ServiceAccessDeniedException e) {
+
+			}
+			
+			try {
+				result = (String) context.invoke("i5.las2peer.api.TestService@0.1", "exception");
+				fail("InternalServiceException expected");
+			} catch (InternalServiceException e) {
 
 			}
 

@@ -32,12 +32,10 @@ public class UserAgentManager {
 	 * @param agent an unlocked UserAgent
 	 * @throws DuplicateEmailException
 	 * @throws DuplicateLoginNameException
-	 * @throws AgentLockedException
 	 */
-	public void registerUserAgent(UserAgentImpl agent) throws DuplicateEmailException, DuplicateLoginNameException,
-			AgentLockedException {
+	public void registerUserAgent(UserAgentImpl agent) throws DuplicateEmailException, DuplicateLoginNameException {
 		if (agent.isLocked()) {
-			throw new AgentLockedException("Only unlocked Agents can be registered!");
+			throw new IllegalArgumentException("Only unlocked Agents can be registered!");
 		}
 		String agentId = agent.getIdentifier();
 		if (agent.hasLogin()) {
@@ -80,11 +78,10 @@ public class UserAgentManager {
 	 * updates login name and email of an user
 	 * 
 	 * @param agent
-	 * @throws AgentLockedException
 	 * @throws DuplicateEmailException
 	 * @throws DuplicateLoginNameException
 	 */
-	public void updateUserAgent(UserAgentImpl agent) throws AgentLockedException, DuplicateEmailException,
+	public void updateUserAgent(UserAgentImpl agent) throws DuplicateEmailException,
 			DuplicateLoginNameException {
 		registerUserAgent(agent);
 	}

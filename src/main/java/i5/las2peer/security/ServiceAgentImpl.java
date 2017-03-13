@@ -4,6 +4,7 @@ import i5.las2peer.api.Service;
 import i5.las2peer.api.ServiceException;
 import i5.las2peer.api.execution.InternalServiceException;
 import i5.las2peer.api.execution.ServiceInvocationException;
+import i5.las2peer.api.execution.ServiceInvocationFailedException;
 import i5.las2peer.api.execution.ServiceMethodNotFoundException;
 import i5.las2peer.api.logging.MonitoringEvent;
 import i5.las2peer.api.p2p.ServiceNameVersion;
@@ -379,7 +380,7 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 			if (alias != null) {
 				try {
 					node.getServiceAliasManager().registerServiceAlias(this, alias);
-				} catch (AgentLockedException e) {
+				} catch (IllegalArgumentException e) {
 					throw new ServiceException("Service alias could not be registered!", e);
 				} catch (AliasConflictException e) {
 					throw new ServiceException("Service alias is already used by anther service!", e);
@@ -460,8 +461,8 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 	 */
 	public Serializable handle(RMITask task, AgentContext agentContext) throws ServiceInvocationException {
 		if (!getServiceNameVersion().equals(task.getServiceNameVersion())) {
-			throw new ServiceInvocationException("Service is not matching requested class!" + getServiceNameVersion()
-					+ "/" + task.getServiceNameVersion());
+			throw new ServiceInvocationFailedException("Service is not matching requested class!"
+					+ getServiceNameVersion() + "/" + task.getServiceNameVersion());
 		}
 
 		// init context and executor
@@ -479,7 +480,7 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 						}
 
 						if (!(res instanceof Serializable)) {
-							throw new ServiceInvocationException("Result is not serializable: " + res.getClass()
+							throw new ServiceInvocationFailedException("Result is not serializable: " + res.getClass()
 									+ " / " + res);
 						}
 
@@ -487,14 +488,18 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 					}).get();
 		} catch (ExecutionException e) {
 			if (e.getCause() instanceof InvocationTargetException) {
-				throw new InternalServiceException("Internal exception in service", e.getCause());
+				if (e.getCause().getCause() instanceof ServiceInvocationException) {
+					throw (ServiceInvocationException) e.getCause().getCause();
+				} else {
+					throw new InternalServiceException("Internal exception in service", e.getCause());
+				}
 			} else if (e.getCause() instanceof ServiceInvocationException) {
 				throw (ServiceInvocationException) e.getCause();
 			} else {
-				throw new ServiceInvocationException("Service invocation failed", e);
+				throw new ServiceInvocationFailedException("Service invocation failed", e);
 			}
 		} catch (Exception e) {
-			throw new ServiceInvocationException("Service invocation failed", e);
+			throw new ServiceInvocationFailedException("Service invocation failed", e);
 		} finally {
 			executor.shutdownNow();
 		}

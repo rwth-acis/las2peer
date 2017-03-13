@@ -1,7 +1,7 @@
 package i5.las2peer.api.execution;
 
 /**
- * Thrown if a service method does not exist
+ * Thrown if a service method does not exist.
  *
  */
 public class ServiceMethodNotFoundException extends ServiceInvocationException {

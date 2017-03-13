@@ -3,7 +3,9 @@ package i5.las2peer.execution;
 import i5.las2peer.api.Context;
 import i5.las2peer.api.Service;
 import i5.las2peer.api.execution.InternalServiceException;
+import i5.las2peer.api.execution.ServiceAccessDeniedException;
 import i5.las2peer.api.execution.ServiceInvocationException;
+import i5.las2peer.api.execution.ServiceInvocationFailedException;
 import i5.las2peer.api.execution.ServiceMethodNotFoundException;
 import i5.las2peer.api.execution.ServiceNotAvailableException;
 import i5.las2peer.api.execution.ServiceNotFoundException;
@@ -107,37 +109,43 @@ public class ExecutionContext implements Context {
 
 	@Override
 	public Serializable invoke(String service, String method, Serializable... parameters)
-			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException, ServiceMethodNotFoundException {
+			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException,
+			ServiceMethodNotFoundException, ServiceInvocationFailedException, ServiceAccessDeniedException {
 		return invoke(ServiceNameVersion.fromString(service), method, parameters);
 	}
 
 	@Override
 	public Serializable invoke(ServiceNameVersion service, String method, Serializable... parameters)
-			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException, ServiceMethodNotFoundException {
+			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException,
+			ServiceMethodNotFoundException, ServiceInvocationFailedException, ServiceAccessDeniedException {
 		return invokeWithAgent(callerContext.getMainAgent(), service, method, parameters);
 	}
 
 	@Override
 	public Serializable invokeInternally(String service, String method, Serializable... parameters)
-			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException, ServiceMethodNotFoundException {
+			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException,
+			ServiceMethodNotFoundException, ServiceInvocationFailedException, ServiceAccessDeniedException {
 		return invokeInternally(ServiceNameVersion.fromString(service), method, parameters);
 	}
 
 	@Override
 	public Serializable invokeInternally(ServiceNameVersion service, String method, Serializable... parameters)
-			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException, ServiceMethodNotFoundException {
+			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException,
+			ServiceMethodNotFoundException, ServiceInvocationFailedException, ServiceAccessDeniedException {
 		return invokeWithAgent(serviceAgent, service, method, parameters);
 	}
 
 	private Serializable invokeWithAgent(AgentImpl agent, ServiceNameVersion service, String method,
 			Serializable[] parameters) throws ServiceNotFoundException, ServiceNotAvailableException,
-			InternalServiceException, ServiceMethodNotFoundException {
+			InternalServiceException, ServiceMethodNotFoundException, ServiceInvocationFailedException,
+			ServiceAccessDeniedException {
 		try {
 			return callerContext.getLocalNode().invoke(agent, service, method, parameters);
-		} catch (ServiceNotFoundException | ServiceNotAvailableException | InternalServiceException | ServiceMethodNotFoundException e) {
+		} catch (ServiceNotFoundException | ServiceNotAvailableException | InternalServiceException
+				| ServiceMethodNotFoundException | ServiceInvocationFailedException | ServiceAccessDeniedException e) {
 			throw e;
 		} catch (ServiceInvocationException e) {
-			throw new ServiceNotAvailableException("Service invocation failed.", e);
+			throw new ServiceInvocationFailedException("Service invocation failed.", e);
 		} catch (L2pSecurityException e) {
 			throw new IllegalStateException("Agent should be unlocked, but it isn't.");
 		}
@@ -153,7 +161,7 @@ public class ExecutionContext implements Context {
 		monitorEvent(from, event, message, false);
 
 	}
-	
+
 	@Override
 	public void monitorEvent(Object from, MonitoringEvent event, String message, boolean includeActingUser) {
 		Agent actingUser = null;
@@ -165,8 +173,9 @@ public class ExecutionContext implements Context {
 			msg = from.getClass().getName() + ": " + message;
 		}
 		node.observerNotice(event, node.getNodeId(), (AgentImpl) serviceAgent, null, (AgentImpl) actingUser, msg);
-		
+
 	}
+
 	@Override
 	public UserAgent createUserAgent(String passphrase) throws AgentOperationFailedException {
 		try {

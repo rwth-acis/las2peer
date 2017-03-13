@@ -4,7 +4,6 @@ import i5.las2peer.api.persistency.EnvelopeException;
 import i5.las2peer.api.persistency.EnvelopeNotFoundException;
 import i5.las2peer.persistency.EnvelopeVersion;
 import i5.las2peer.security.AgentImpl;
-import i5.las2peer.security.AgentLockedException;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.serialization.SerializationException;
@@ -56,14 +55,12 @@ public class ServiceAliasManager {
 	 * 
 	 * @param agent an unlocked service agent
 	 * @param alias an alias, optionally seperated by {@link #SEPERATOR} and not deeper than {@link #MAX_PATH_LEVEL}.
-	 * @throws AgentLockedException if the service agent is locked
 	 * @throws AliasConflictException if a conflict occurs (a prefix or whole alias is already registered)
 	 */
-	public void registerServiceAlias(ServiceAgentImpl agent, String alias) throws AgentLockedException,
-			AliasConflictException {
+	public void registerServiceAlias(ServiceAgentImpl agent, String alias) throws AliasConflictException {
 
 		if (agent.isLocked()) {
-			throw new AgentLockedException("Only unlocked Agents can be registered!");
+			throw new IllegalArgumentException("Only unlocked Agents can be registered!");
 		}
 
 		// if no alias exists, simply return

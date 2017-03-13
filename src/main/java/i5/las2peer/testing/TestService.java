@@ -2,6 +2,7 @@ package i5.las2peer.testing;
 
 import i5.las2peer.api.Context;
 import i5.las2peer.api.Service;
+import i5.las2peer.api.execution.ServiceAccessDeniedException;
 import i5.las2peer.api.persistency.Envelope;
 import i5.las2peer.api.persistency.EnvelopeAccessDeniedException;
 import i5.las2peer.api.persistency.EnvelopeNotFoundException;
@@ -9,7 +10,6 @@ import i5.las2peer.api.persistency.EnvelopeOperationFailedException;
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentAlreadyExistsException;
 import i5.las2peer.api.security.AgentOperationFailedException;
-import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.serialization.MalformedXMLException;
 
 import java.io.IOException;
@@ -63,7 +63,7 @@ public class TestService extends Service {
 
 	/**
 	 * Throws a RuntimeException
-	 *
+	 *updateAgent
 	 * @exception RuntimeException on each call
 	 */
 	public void runtimeExceptionThrower() throws RuntimeException {
@@ -170,10 +170,10 @@ public class TestService extends Service {
 	/**
 	 * throws an Exception indication, that the access (for the current user) has been denied.
 	 *
-	 * @exception L2pSecurityException
+	 * @exception ServiceAccessDeniedException
 	 */
-	public void accessForbidden() throws L2pSecurityException {
-		throw new L2pSecurityException("access forbidden!");
+	public void accessForbidden() throws ServiceAccessDeniedException {
+		throw new ServiceAccessDeniedException("access forbidden!");
 	}
 
 	/**
