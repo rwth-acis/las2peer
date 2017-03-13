@@ -40,7 +40,7 @@ public abstract class Configurable {
 	 *
 	 * @return hashtable with all property entries
 	 */
-	protected Hashtable<String, String> getProperties() {
+	protected final Hashtable<String, String> getProperties() {
 		Hashtable<String, String> result = new Hashtable<String, String>();
 
 		String propFile = findPropertyFile();
@@ -75,7 +75,7 @@ public abstract class Configurable {
 	 * @throws InstantiationException if this Class represents an abstract class, an interface, an array.
 	 */
 	@SuppressWarnings("unchecked")
-	public void setField(Field f, String value) throws IllegalAccessException, InstantiationException {
+	private void setField(Field f, String value) throws IllegalAccessException, InstantiationException {
 		Class<?> fieldType = f.getType();
 
 		if (fieldType.equals(String.class)) {
@@ -216,7 +216,7 @@ public abstract class Configurable {
 	 * 
 	 * @param except All fields mentioned in <i>except</i> will be left out.
 	 */
-	protected void setFieldValues(Set<String> except) {
+	private void setFieldValues(Set<String> except) {
 		Hashtable<String, String> props = getProperties();
 
 		for (String key : props.keySet()) {

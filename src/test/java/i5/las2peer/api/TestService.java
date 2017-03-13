@@ -10,6 +10,7 @@ import java.util.Hashtable;
  * 
  * 
  */
+@ManualDeployment
 public class TestService extends Service {
 
 	private int testInt1 = -1;

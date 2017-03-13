@@ -1,5 +1,7 @@
 package i5.las2peer.api;
 
+import java.lang.annotation.Annotation;
+
 import i5.las2peer.api.security.ServiceAgent;
 
 /**
@@ -49,7 +51,7 @@ public abstract class Service extends Configurable {
 	/**
 	 * Should return the service alias, which is registered on service start.
 	 * 
-	 * @return the alias, or null if no alias should be registered
+	 * @return The alias, or null if no alias should be registered.
 	 */
 	public String getAlias() {
 		return null;
@@ -58,21 +60,56 @@ public abstract class Service extends Configurable {
 	/**
 	 * Indicates whether monitoring is enabled for this service.
 	 * 
-	 * @return true if this service should be monitored
+	 * For self-deploying services, this will be always true since monitoring is set up on node level.
+	 * 
+	 * @return True if this service should be monitored.
 	 */
 	public final boolean isMonitor() {
-		return monitor;
+		return isSelfDeployable() || monitor;
+	}
+
+	/**
+	 * Indicates whether the service is self deployable (restricting some features) or not (unlimited access).
+	 * 
+	 * @return True if {@link ManualDeployment} is not set.
+	 */
+	public final boolean isSelfDeployable() {
+		for (Annotation classAnnotation : this.getClass().getAnnotations()) {
+			if (classAnnotation instanceof ManualDeployment) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Sets the fields of the service according to the configuration file.
+	 * 
+	 * Note that this feature is only available for services with self-deployment disabled.
+	 * 
+	 * @throws IllegalStateException If the service is not set up for manual deployment by annotating the service class
+	 *             with {@link ManualDeployment}.
+	 * 
+	 */
+	@Override
+	protected final void setFieldValues() {
+		if (isSelfDeployable()) {
+			throw new IllegalStateException("Configuration files are not available for self-deploying services. "
+					+ "To switch to manual deployment, add the @ManualDeployment to your class.");
+		} else {
+			super.setFieldValues();
+		}
 	}
 
 	/**
 	 * Gets the agent corresponding to this service.
 	 * 
-	 * @return the agent responsible for this service
+	 * @return The agent responsible for this service.
 	 * @throws ServiceException If the service is not started yet.
 	 */
 	public final ServiceAgent getAgent() throws ServiceException {
 		if (this.agent == null) {
-			throw new ServiceException("This Service has not been started yet!");
+			throw new ServiceException("This service has not been started yet!");
 		}
 		return this.agent;
 	}
