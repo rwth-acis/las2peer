@@ -4,6 +4,7 @@ import i5.las2peer.api.Context;
 import i5.las2peer.api.Service;
 import i5.las2peer.api.execution.InternalServiceException;
 import i5.las2peer.api.execution.ServiceInvocationException;
+import i5.las2peer.api.execution.ServiceMethodNotFoundException;
 import i5.las2peer.api.execution.ServiceNotAvailableException;
 import i5.las2peer.api.execution.ServiceNotFoundException;
 import i5.las2peer.api.logging.MonitoringEvent;
@@ -106,34 +107,34 @@ public class ExecutionContext implements Context {
 
 	@Override
 	public Serializable invoke(String service, String method, Serializable... parameters)
-			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException {
+			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException, ServiceMethodNotFoundException {
 		return invoke(ServiceNameVersion.fromString(service), method, parameters);
 	}
 
 	@Override
 	public Serializable invoke(ServiceNameVersion service, String method, Serializable... parameters)
-			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException {
+			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException, ServiceMethodNotFoundException {
 		return invokeWithAgent(callerContext.getMainAgent(), service, method, parameters);
 	}
 
 	@Override
 	public Serializable invokeInternally(String service, String method, Serializable... parameters)
-			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException {
+			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException, ServiceMethodNotFoundException {
 		return invokeInternally(ServiceNameVersion.fromString(service), method, parameters);
 	}
 
 	@Override
 	public Serializable invokeInternally(ServiceNameVersion service, String method, Serializable... parameters)
-			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException {
+			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException, ServiceMethodNotFoundException {
 		return invokeWithAgent(serviceAgent, service, method, parameters);
 	}
 
 	private Serializable invokeWithAgent(AgentImpl agent, ServiceNameVersion service, String method,
 			Serializable[] parameters) throws ServiceNotFoundException, ServiceNotAvailableException,
-			InternalServiceException {
+			InternalServiceException, ServiceMethodNotFoundException {
 		try {
 			return callerContext.getLocalNode().invoke(agent, service, method, parameters);
-		} catch (ServiceNotFoundException | ServiceNotAvailableException | InternalServiceException e) {
+		} catch (ServiceNotFoundException | ServiceNotAvailableException | InternalServiceException | ServiceMethodNotFoundException e) {
 			throw e;
 		} catch (ServiceInvocationException e) {
 			throw new ServiceNotAvailableException("Service invocation failed.", e);
@@ -182,7 +183,7 @@ public class ExecutionContext implements Context {
 	@Override
 	public GroupAgent createGroupAgent(Agent[] members) throws AgentOperationFailedException {
 		try {
-			GroupAgent agent = GroupAgentImpl.createGroupAgent((AgentImpl[]) members);
+			GroupAgent agent = GroupAgentImpl.createGroupAgent(members);
 			agent.unlock(members[0]);
 			return agent;
 		} catch (L2pSecurityException | CryptoException | SerializationException | AgentAccessDeniedException e) {
@@ -205,7 +206,7 @@ public class ExecutionContext implements Context {
 	@Override
 	public Agent requestAgent(String agentId, Agent using) throws AgentAccessDeniedException, AgentNotFoundException,
 			AgentOperationFailedException {
-		return callerContext.requestAgent(agentId);
+		return node.getAgentContext((AgentImpl) using).requestAgent(agentId);
 	}
 
 	@Override

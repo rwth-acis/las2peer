@@ -1101,6 +1101,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @throws AgentException If any issue with the agent occurs
 	 * @throws EnvelopeException
 	 */
+	@Deprecated
 	public abstract void updateAgent(AgentImpl agent) throws L2pSecurityException, AgentException, EnvelopeException;
 
 	private AgentImpl anonymousAgent = null;

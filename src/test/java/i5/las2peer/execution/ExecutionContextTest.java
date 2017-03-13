@@ -10,9 +10,19 @@ import org.junit.Test;
 
 import i5.las2peer.api.Context;
 import i5.las2peer.api.TestService;
+import i5.las2peer.api.execution.InternalServiceException;
+import i5.las2peer.api.execution.ServiceMethodNotFoundException;
+import i5.las2peer.api.execution.ServiceNotAvailableException;
+import i5.las2peer.api.execution.ServiceNotFoundException;
 import i5.las2peer.api.p2p.ServiceNameVersion;
+import i5.las2peer.api.security.Agent;
 import i5.las2peer.api.security.AgentAccessDeniedException;
+import i5.las2peer.api.security.AgentAlreadyExistsException;
 import i5.las2peer.api.security.AgentException;
+import i5.las2peer.api.security.AgentNotFoundException;
+import i5.las2peer.api.security.AgentOperationFailedException;
+import i5.las2peer.api.security.GroupAgent;
+import i5.las2peer.api.security.UserAgent;
 import i5.las2peer.p2p.AgentAlreadyRegisteredException;
 import i5.las2peer.p2p.LocalNode;
 import i5.las2peer.p2p.Node;
@@ -65,14 +75,42 @@ public class ExecutionContextTest {
 		assertNotNull(context.getServiceClassLoader());
 	}
 
+	@Test
 	public void testInvocation() {
-		/*
-		 * java.io.Serializable 	invoke(ServiceNameVersion service, java.lang.String method, java.io.Serializable... parameters)
-		java.io.Serializable 	invoke(java.lang.String service, java.lang.String method, java.io.Serializable... parameters)
-		java.io.Serializable 	invokeInternally(ServiceNameVersion service, java.lang.String method, java.io.Serializable... parameters)
-		java.io.Serializable 	invokeInternally(java.lang.String service, java.lang.String method, java.io.Serializable... parameters)
+		try {
+			String result = (String) context.invoke(ServiceNameVersion.fromString("i5.las2peer.api.TestService@0.1"),
+					"getCaller");
+			assertEquals(context.getMainAgent().getIdentifier(), result);
+			result = (String) context.invoke("i5.las2peer.api.TestService@0.1", "getCaller");
+			assertEquals(context.getMainAgent().getIdentifier(), result);
 
-		 */
+			result = (String) context.invokeInternally(
+					ServiceNameVersion.fromString("i5.las2peer.api.TestService@0.1"), "getCaller");
+			assertEquals(context.getServiceAgent().getIdentifier(), result);
+			result = (String) context.invokeInternally("i5.las2peer.api.TestService@0.1", "getCaller");
+			assertEquals(context.getServiceAgent().getIdentifier(), result);
+
+			result = (String) context.invoke("i5.las2peer.api.TestService@0.1", "getEcho", "test");
+			assertEquals("test", result);
+
+			try {
+				result = (String) context.invoke("i5.las2peer.api.TestService@0.2", "getCaller");
+				fail("ServiceNotFoundException expected");
+			} catch (ServiceNotFoundException e) {
+
+			}
+
+			try {
+				result = (String) context.invoke("i5.las2peer.api.TestService@0.1", "doesNotExist");
+				fail("ServiceMethodNotFoundException expected");
+			} catch (ServiceMethodNotFoundException e) {
+
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
 	}
 
 	public void testEnvelopes() {
@@ -90,17 +128,53 @@ public class ExecutionContextTest {
 		 */
 	}
 
+	@Test
 	public void testSecurity() {
-		/*
-		 * GroupAgent 	createGroupAgent(Agent[] members)
-		UserAgent 	createUserAgent(java.lang.String passphrase)
-		Agent 	fetchAgent(java.lang.String agentId)
-		Agent 	requestAgent(java.lang.String agentId)
-		Agent 	requestAgent(java.lang.String agentId, Agent using)
-		void 	storeAgent(Agent agent)
-		 * boolean 	hasAccess(java.lang.String agentId)
-		boolean 	hasAccess(java.lang.String agentId, Agent using)
-		 */
+		try {
+			UserAgent userA = context.createUserAgent("passphrase");
+			assertFalse(userA.isLocked());
+
+			UserAgent userB = context.createUserAgent("passphrase");
+			assertFalse(userB.isLocked());
+
+			GroupAgent group = context.createGroupAgent(new Agent[] { userA, userB });
+			assertFalse(group.isLocked());
+
+			context.storeAgent(userA);
+			context.storeAgent(userB);
+			context.storeAgent(group);
+
+			UserAgent userAFetched = (UserAgent) context.fetchAgent(userA.getIdentifier());
+			assertTrue(userAFetched.isLocked());
+			userAFetched.unlock("passphrase");
+			assertFalse(userAFetched.isLocked());
+
+			UserAgent userBFetched = (UserAgent) context.fetchAgent(userA.getIdentifier());
+			assertTrue(userBFetched.isLocked());
+			try {
+				context.storeAgent(userBFetched);
+				fail("AgentAccessDeniedException expected");
+			} catch (AgentAccessDeniedException e) {
+			}
+
+			GroupAgent groupRequested = (GroupAgent) context.requestAgent(group.getIdentifier(), userA);
+			assertFalse(groupRequested.isLocked());
+			assertTrue(groupRequested.hasMember(userA));
+			assertTrue(groupRequested.hasMember(userB));
+
+			groupRequested.revokeMember(userB);
+			context.storeAgent(groupRequested);
+			groupRequested = (GroupAgent) context.requestAgent(group.getIdentifier(), userA);
+			assertFalse(groupRequested.isLocked());
+			assertTrue(groupRequested.hasMember(userA));
+			assertFalse(groupRequested.hasMember(userB));
+
+			assertTrue(context.hasAccess(group.getIdentifier(), userA));
+			assertFalse(context.hasAccess(group.getIdentifier())); // adam is not in the group
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
 	}
 
 	public void testMonitoring() {

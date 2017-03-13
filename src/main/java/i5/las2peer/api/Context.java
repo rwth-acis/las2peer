@@ -1,6 +1,7 @@
 package i5.las2peer.api;
 
 import i5.las2peer.api.execution.InternalServiceException;
+import i5.las2peer.api.execution.ServiceMethodNotFoundException;
 import i5.las2peer.api.execution.ServiceNotAvailableException;
 import i5.las2peer.api.execution.ServiceNotFoundException;
 import i5.las2peer.api.logging.MonitoringEvent;
@@ -308,9 +309,10 @@ public interface Context {
 	 * @throws ServiceNotFoundException If the service is not known to the network.
 	 * @throws ServiceNotAvailableException If the service is temporarily not available.
 	 * @throws InternalServiceException If the remote service throws an exception.
+	 * @throws ServiceMethodNotFoundException If the service method does not exist.
 	 */
 	public Serializable invoke(String service, String method, Serializable... parameters)
-			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException;
+			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException, ServiceMethodNotFoundException;
 
 	/**
 	 * Invokes the method of any other service on behalf of the main agent, thus sending the main agent as calling
@@ -325,9 +327,10 @@ public interface Context {
 	 * @throws ServiceNotFoundException If the service is not known to the network.
 	 * @throws ServiceNotAvailableException If the service is temporarily not available.
 	 * @throws InternalServiceException If the remote service throws an exception.
+	 * @throws ServiceMethodNotFoundException If the service method does not exist.
 	 */
 	public Serializable invoke(ServiceNameVersion service, String method, Serializable... parameters)
-			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException;
+			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException, ServiceMethodNotFoundException;
 
 	/**
 	 * Invokes a service method using the agent of this service as calling agent.
@@ -341,9 +344,10 @@ public interface Context {
 	 * @throws ServiceNotFoundException If the service is not known to the network.
 	 * @throws ServiceNotAvailableException If the service is temporarily not available.
 	 * @throws InternalServiceException If the remote service throws an exception.
+	 * @throws ServiceMethodNotFoundException If the service method does not exist.
 	 */
 	public Serializable invokeInternally(String service, String method, Serializable... parameters)
-			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException;
+			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException, ServiceMethodNotFoundException;
 
 	/**
 	 * Invokes a service method using the agent of this service as calling agent.
@@ -357,9 +361,10 @@ public interface Context {
 	 * @throws ServiceNotFoundException If the service is not known to the network.
 	 * @throws ServiceNotAvailableException If the service is temporarily not available.
 	 * @throws InternalServiceException If the remote service throws an exception.
+	 * @throws ServiceMethodNotFoundException If the service method does not exist.
 	 */
 	public Serializable invokeInternally(ServiceNameVersion service, String method, Serializable... parameters)
-			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException;
+			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException, ServiceMethodNotFoundException;
 
 	// Execution
 

@@ -75,13 +75,13 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	 * @throws CryptoException
 	 * @throws SerializationException
 	 */
-	protected GroupAgentImpl(KeyPair keys, SecretKey secret, AgentImpl[] members) throws L2pSecurityException,
+	protected GroupAgentImpl(KeyPair keys, SecretKey secret, Agent[] members) throws L2pSecurityException,
 			CryptoException, SerializationException {
 		super(keys, secret);
 
 		symmetricGroupKey = secret;
-		for (AgentImpl a : members) {
-			addMember(a, false);
+		for (Agent a : members) {
+			addMember((AgentImpl)a, false);
 		}
 
 		lockPrivateKey();
@@ -392,7 +392,7 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	 * @throws CryptoException
 	 * @throws SerializationException
 	 */
-	public static GroupAgentImpl createGroupAgent(AgentImpl[] members) throws L2pSecurityException, CryptoException,
+	public static GroupAgentImpl createGroupAgent(Agent[] members) throws L2pSecurityException, CryptoException,
 			SerializationException {
 		return new GroupAgentImpl(CryptoTools.generateKeyPair(), CryptoTools.generateSymmetricKey(), members);
 	}

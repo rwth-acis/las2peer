@@ -259,10 +259,6 @@ public class LocalNode extends Node {
 				throw new L2pSecurityException("Only unlocked agents may be updated during runtime!");
 			}
 
-			if (htKnownAgents.get(agent.getIdentifier()) != null) {
-				throw new AgentAlreadyRegisteredException("Agent " + agent.getIdentifier() + " already in storage");
-			}
-
 			String agentXml = null;
 			try {
 				agentXml = agent.toXmlString();
@@ -278,41 +274,10 @@ public class LocalNode extends Node {
 		}
 	}
 
+	@Deprecated
 	@Override
 	public void updateAgent(AgentImpl agent) throws AgentException, L2pSecurityException {
-		if (agent.isLocked()) {
-			throw new L2pSecurityException("Only unlocked agents may be updated!");
-		}
-
-		synchronized (htKnownAgents) {
-			if (htKnownAgents.get(agent.getIdentifier()) == null) {
-				throw new AgentNotRegisteredException(agent.getIdentifier());
-			}
-
-			// TODO: verify, that it is the same agent!!! (e.g. the same private key)
-			// idea: encrypt to stored agent
-			// decrypt with new agent (which is unlocked)
-			// then update is ok
-
-			// other idea:
-			// get rid of agent id
-			// use hash value of private key instead
-
-			// this is verifyable on each local node
-
-			String agentXml = null;
-			try {
-				agentXml = agent.toXmlString();
-			} catch (SerializationException e) {
-				throw new AgentException("Serialization failed!", e);
-			}
-
-			htKnownAgents.put(agent.getIdentifier(), agentXml);
-
-			if (agent instanceof UserAgentImpl) {
-				getUserManager().updateUserAgent((UserAgentImpl) agent);
-			}
-		}
+		storeAgent(agent);
 	}
 
 	@Override

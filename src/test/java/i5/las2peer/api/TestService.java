@@ -62,6 +62,14 @@ public class TestService extends Service {
 	public String getTestString2() {
 		return testString2;
 	}
+	
+	public String getCaller() {
+		return Context.get().getMainAgent().getIdentifier();
+	}
+	
+	public String getEcho(String input) {
+		return input;
+	}
 
 	@Override
 	public String getAlias() {
