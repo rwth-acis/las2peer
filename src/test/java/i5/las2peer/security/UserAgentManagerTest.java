@@ -38,13 +38,13 @@ public class UserAgentManagerTest {
 			}
 
 			b.setLoginName("login2");
-			node.updateAgent(b);
+			node.storeAgent(b);
 
 			assertEquals(b.getIdentifier(), l.getAgentIdByLogin("login2"));
 
 			b.setLoginName("LOGIN");
 			try {
-				node.updateAgent(b);
+				node.storeAgent(b);
 				// TODO currently not supported this way
 				// the validation should be done in the fetch process
 //				fail("DuplicateLoginNameException expected");
@@ -90,18 +90,18 @@ public class UserAgentManagerTest {
 
 			b.setEmail("EMAIL@example.com");
 			try {
-				node.updateAgent(b);
+				node.storeAgent(b);
 				fail("DuplicateEmailException expected");
 			} catch (DuplicateEmailException e) {
 				// intended
 			}
 
 			b.setEmail("email2@example.com");
-			node.updateAgent(b);
+			node.storeAgent(b);
 			assertEquals(b.getIdentifier(), l.getAgentIdByEmail("email2@example.com"));
 
 			b.setEmail("email3@example.com");
-			node.updateAgent(b);
+			node.storeAgent(b);
 			assertEquals(b.getIdentifier(), l.getAgentIdByEmail("email3@example.com"));
 			assertEquals(b.getIdentifier(), l.getAgentIdByEmail("EMAIL3@example.com"));
 

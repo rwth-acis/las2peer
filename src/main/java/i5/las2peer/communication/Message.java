@@ -589,10 +589,10 @@ public class Message implements XmlAble, Cloneable {
 	 * 
 	 * 
 	 * @throws L2pSecurityException the private key of the receiver has to be unlocked for decryption
+	 * @throws AgentException
 	 * @throws AgentNotFoundException If an issue with the sender agent occurs
 	 */
-	public void open(AgentImpl unlockedRecipient, AgentStorage storage) throws L2pSecurityException,
-			AgentException {
+	public void open(AgentImpl unlockedRecipient, AgentStorage storage) throws L2pSecurityException, AgentException {
 		if (isOpen()) {
 			return;
 		}
@@ -645,7 +645,8 @@ public class Message implements XmlAble, Cloneable {
 				throw new L2pSecurityException("message is signed for another sender!!");
 			}
 			if (root.hasAttribute("recipient")
-					&& (recipient == null || !root.getAttribute("recipient").equalsIgnoreCase(recipient.getIdentifier()))) {
+					&& (recipient == null || !root.getAttribute("recipient")
+							.equalsIgnoreCase(recipient.getIdentifier()))) {
 				throw new L2pSecurityException("message is signed for another recipient!!");
 			}
 			if (root.hasAttribute("topic") && Long.parseLong(root.getAttribute("topic")) != (topicId)) {

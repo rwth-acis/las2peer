@@ -2,7 +2,6 @@ package i5.las2peer.persistency;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.List;
 
 import i5.las2peer.api.persistency.EnvelopeNotFoundException;
 import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;

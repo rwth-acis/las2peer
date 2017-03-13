@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 import i5.las2peer.api.execution.ServiceInvocationException;
 import i5.las2peer.api.execution.ServiceNotFoundException;
 import i5.las2peer.api.p2p.ServiceNameVersion;
-import i5.las2peer.execution.ServiceHelper;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.testing.MockAgentFactory;

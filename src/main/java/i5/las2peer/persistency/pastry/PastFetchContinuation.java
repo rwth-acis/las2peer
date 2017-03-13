@@ -4,7 +4,6 @@ import java.util.concurrent.ExecutorService;
 
 import i5.las2peer.persistency.AbstractArtifact;
 import i5.las2peer.persistency.EnvelopeVersion;
-import i5.las2peer.persistency.NetworkArtifact;
 import i5.las2peer.persistency.StorageArtifactHandler;
 import i5.las2peer.persistency.StorageExceptionHandler;
 import rice.Continuation;

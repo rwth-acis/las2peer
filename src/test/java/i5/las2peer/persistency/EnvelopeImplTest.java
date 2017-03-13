@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import i5.las2peer.api.persistency.EnvelopeException;
-import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.p2p.LocalNode;
 import i5.las2peer.security.AgentContext;

@@ -41,7 +41,6 @@ import java.net.ServerSocket;
 import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
@@ -117,6 +116,7 @@ public class PastryNodeImpl extends Node {
 	 * 
 	 * @param classManager A class manager that is used by the node.
 	 * @param useMonitoringObserver If true, the node sends monitoring information to the monitoring service.
+	 * @param pastryBindAddress 
 	 * @param pastryPort A port number the PastryNode should listen to for network communication. <code>null</code>
 	 *            means use a random system defined port. Use {@link #getPort()} to retrieve the number.
 	 * @param bootstrap A bootstrap address that should be used, like hostname:port or <code>null</code> to start a new

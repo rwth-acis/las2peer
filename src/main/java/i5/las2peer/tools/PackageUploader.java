@@ -4,8 +4,6 @@ import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.persistency.EnvelopeException;
 import i5.las2peer.api.persistency.EnvelopeNotFoundException;
 import i5.las2peer.api.security.AgentAccessDeniedException;
-import i5.las2peer.classLoaders.helpers.LibraryDependency;
-import i5.las2peer.classLoaders.libraries.LoadedJarLibrary;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -27,7 +25,6 @@ import i5.las2peer.classLoaders.libraries.SharedStorageRepository;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.persistency.EnvelopeVersion;
-import i5.las2peer.persistency.NodeStorageInterface;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.PassphraseAgentImpl;

@@ -2,7 +2,6 @@ package i5.las2peer.api.persistency;
 
 import i5.las2peer.api.Context;
 import i5.las2peer.api.security.Agent;
-import i5.las2peer.api.security.GroupAgent;
 
 import java.io.Serializable;
 

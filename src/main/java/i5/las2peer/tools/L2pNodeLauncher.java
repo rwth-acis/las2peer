@@ -304,6 +304,7 @@ public class L2pNodeLauncher {
 	 * @param serviceJarFile The service jar file that should be uploaded.
 	 * @param developerAgentXMLFile The XML file of the developers agent.
 	 * @param developerPassword The password for the developer agent.
+	 * @throws ServicePackageException 
 	 */
 	public void uploadServicePackage(String serviceJarFile, String developerAgentXMLFile, String developerPassword)
 			throws ServicePackageException {
@@ -740,6 +741,7 @@ public class L2pNodeLauncher {
 
 	/**
 	 * Creates a new node launcher instance.
+	 * @param bindAddress 
 	 * 
 	 * @param port local port number to open
 	 * @param bootstrap comma separated list of bootstrap nodes to connect to or "-" for a new network
@@ -805,6 +807,7 @@ public class L2pNodeLauncher {
 	 * Prints a (Red) error message to the console including a stack trace.
 	 * 
 	 * @param message
+	 * @param throwable 
 	 */
 	private static void printErrorWithStacktrace(String message, Throwable throwable) {
 		message = ColoredOutput.colorize(message, ColoredOutput.ForegroundColor.Red);
