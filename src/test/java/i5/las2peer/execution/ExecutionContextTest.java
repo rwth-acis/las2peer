@@ -34,8 +34,6 @@ import i5.las2peer.tools.CryptoException;
 
 public class ExecutionContextTest {
 
-	// TODO API test exec context
-
 	Node node;
 	Context context;
 
@@ -113,6 +111,8 @@ public class ExecutionContextTest {
 	}
 
 	public void testEnvelopes() {
+		// TODO API test exec context envelope api
+		
 		/*
 		 Envelope 	createEnvelope(java.lang.String identifier)
 			Envelope 	createEnvelope(java.lang.String identifier, Agent using)
