@@ -388,7 +388,7 @@ public interface Context {
 	 */
 	public Logger getLogger(Class<?> cls);
 
-	// Monitoring // TODO API rework...
+	// Monitoring
 
 	/**
 	 * Writes a log message to the l2p system using node observers. Also makes data available to MobSOS.
