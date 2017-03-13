@@ -40,7 +40,7 @@ public class EnvelopeImpl implements Envelope {
 		this.identifier = currentVersion.getIdentifier();
 		this.content = currentVersion.getContent(context.getMainAgent(), context);
 		this.currentVersion = currentVersion;
-		this.signingAgentId = null; // TODO API get signing agent
+		this.signingAgentId = null; // TODO API @Thomas: get signing agent
 	}
 
 	@Override

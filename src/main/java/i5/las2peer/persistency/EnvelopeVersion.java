@@ -34,7 +34,7 @@ import org.w3c.dom.NodeList;
 
 public class EnvelopeVersion implements Serializable, XmlAble {
 	
-	// TODO API store signing agent + reader list
+	// TODO API @Thomas: store signing agent + reader list
 
 
 	private static final L2pLogger logger = L2pLogger.getInstance(EnvelopeVersion.class);
