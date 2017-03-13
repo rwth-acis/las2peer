@@ -3,6 +3,8 @@ package i5.las2peer.execution;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
@@ -10,19 +12,16 @@ import org.junit.Test;
 
 import i5.las2peer.api.Context;
 import i5.las2peer.api.TestService;
-import i5.las2peer.api.execution.InternalServiceException;
 import i5.las2peer.api.execution.ServiceMethodNotFoundException;
-import i5.las2peer.api.execution.ServiceNotAvailableException;
 import i5.las2peer.api.execution.ServiceNotFoundException;
+import i5.las2peer.api.logging.MonitoringEvent;
 import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.security.Agent;
 import i5.las2peer.api.security.AgentAccessDeniedException;
-import i5.las2peer.api.security.AgentAlreadyExistsException;
 import i5.las2peer.api.security.AgentException;
-import i5.las2peer.api.security.AgentNotFoundException;
-import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.api.security.GroupAgent;
 import i5.las2peer.api.security.UserAgent;
+import i5.las2peer.logging.NodeObserver;
 import i5.las2peer.p2p.AgentAlreadyRegisteredException;
 import i5.las2peer.p2p.LocalNode;
 import i5.las2peer.p2p.Node;
@@ -177,14 +176,24 @@ public class ExecutionContextTest {
 		}
 	}
 
+	@Test
 	public void testMonitoring() {
-		/*
-		 * 	void 	monitorEvent(MonitoringEvent event, java.lang.String message)
-		void 	monitorEvent(MonitoringEvent event, java.lang.String message, Agent actingUser)
-		void 	monitorEvent(java.lang.Object from, MonitoringEvent event, java.lang.String message)
-		void 	monitorEvent(java.lang.Object from, MonitoringEvent event, java.lang.String message, Agent serviceAgent, Agent actingUser)
+		final List<String> messages = new ArrayList<>();
+		node.addObserver(new NodeObserver() {
+			@Override
+			public void log(Long timestamp, MonitoringEvent event, String sourceNode, String sourceAgentId,
+					String destinationNode, String destinationAgentId, String remarks) {
+				messages.add(timestamp + " " + event + " " + sourceNode + " " + sourceAgentId + " "
+						+ destinationNode + " " + destinationAgentId + " " + remarks);
+			}
+		});
 		
-
-		 */
+		context.monitorEvent(this, MonitoringEvent.SERVICE_CUSTOM_ERROR_1, "testMessage", true);
+		
+		assertTrue(messages.get(messages.size()-1).contains(this.getClass().getSimpleName()));
+		assertTrue(messages.get(messages.size()-1).contains(MonitoringEvent.SERVICE_CUSTOM_ERROR_1.toString()));
+		assertTrue(messages.get(messages.size()-1).contains("testMessage"));
+		assertTrue(messages.get(messages.size()-1).contains(context.getMainAgent().getIdentifier()));
+		assertTrue(messages.get(messages.size()-1).contains(context.getServiceAgent().getIdentifier()));
 	}
 }

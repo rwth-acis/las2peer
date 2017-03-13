@@ -388,49 +388,38 @@ public interface Context {
 	 */
 	public Logger getLogger(Class<?> cls);
 
-	// Monitoring
+	// Monitoring // TODO API rework...
 
 	/**
-	 * Writes a log message. The given event can be used to differentiate between different log messages.
+	 * Writes a log message to the l2p system using node observers. Also makes data available to MobSOS.
+	 * 
+	 * Does not include the current acting main agent.
 	 *
-	 * @param event used to differentiate between different log messages
-	 * @param message a message
+	 * @param event Differentiates between different log messages. Use MonitoringEvent.SERVICE_CUSTOM_MESSAGE_XXX as parameter.
+	 * @param message A message.
 	 */
 	public void monitorEvent(MonitoringEvent event, String message);
 
 	/**
-	 * Writes a log message. The given event can be used to differentiate between different log messages.
-	 *
-	 * @param event used to differentiate between different log messages
-	 * @param actingUser can be set to null if unknown / not desired
-	 * @param message a message
-	 */
-	public void monitorEvent(MonitoringEvent event, String message, Agent actingUser);
-
-	/**
-	 * Logs a message to the l2p system using the observers.
-	 *
-	 * Since this method will/should only be used in an L2pThread, the message will come from a service or a helper, so
-	 * a SERVICE_MESSAGE is assumed. Then this message will not be monitored by the monitoring observer.
-	 *
-	 * @param from the calling class
-	 * @param event used to differentiate between different log messages
-	 * @param message a message
+	 * Writes a log message to the l2p system using node observers. Also makes data available to MobSOS.
+	 * 
+	 * Does not include the current acting main agent.
+	 * 
+	 * @param from Specifies from which class the message is sent from. Usually "this" is passed as parameter.
+	 * @param event Differentiates between different log messages. Use MonitoringEvent.SERVICE_CUSTOM_MESSAGE_XXX as parameter.
+	 * @param message A message.
 	 */
 	public void monitorEvent(Object from, MonitoringEvent event, String message);
 
 	/**
-	 * Writes a log message. The given event can be used to differentiate between different log messages. The
-	 * serviceAgent and actingUser can be set to {@code null} if not known. Then this message will not be monitored by
-	 * the monitoring observer.
+	 * Writes a log message to the l2p system using node observers. Also makes data available to MobSOS.
 	 *
-	 * @param from the calling class
-	 * @param event used to differentiate between different log messages
-	 * @param message a message
-	 * @param serviceAgent can be set to null if unknown / not desired
-	 * @param actingUser can be set to null if unknown / not desired
+	 * @param from Specifies from which class the message is sent from. Usually "this" is passed as parameter.
+	 * @param event Differentiates between different log messages. Use MonitoringEvent.SERVICE_CUSTOM_MESSAGE_XXX as parameter.
+	 * @param message A message.
+	 * @param includeActingUser If set to true, the current main agent will be included.
 	 */
-	public void monitorEvent(Object from, MonitoringEvent event, String message, Agent serviceAgent, Agent actingUser);
+	public void monitorEvent(Object from, MonitoringEvent event, String message, boolean includeActingUser);
 
 	// Class loading
 

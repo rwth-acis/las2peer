@@ -145,30 +145,28 @@ public class ExecutionContext implements Context {
 
 	@Override
 	public void monitorEvent(MonitoringEvent event, String message) {
-		monitorEvent(null, event, message, null, null);
-
-	}
-
-	@Override
-	public void monitorEvent(MonitoringEvent event, String message, Agent actingUser) {
-		monitorEvent(null, event, message, this.serviceAgent, actingUser);
+		monitorEvent(null, event, message);
 	}
 
 	@Override
 	public void monitorEvent(Object from, MonitoringEvent event, String message) {
-		monitorEvent(from, event, message, null, null);
+		monitorEvent(from, event, message, false);
 
 	}
-
+	
 	@Override
-	public void monitorEvent(Object from, MonitoringEvent event, String message, Agent serviceAgent, Agent actingUser) {
+	public void monitorEvent(Object from, MonitoringEvent event, String message, boolean includeActingUser) {
+		Agent actingUser = null;
+		if (includeActingUser) {
+			actingUser = getMainAgent();
+		}
 		String msg = message;
 		if (from != null) {
-			msg = from.getClass().getSimpleName() + ": " + message;
+			msg = from.getClass().getName() + ": " + message;
 		}
 		node.observerNotice(event, node.getNodeId(), (AgentImpl) serviceAgent, null, (AgentImpl) actingUser, msg);
+		
 	}
-
 	@Override
 	public UserAgent createUserAgent(String passphrase) throws AgentOperationFailedException {
 		try {
