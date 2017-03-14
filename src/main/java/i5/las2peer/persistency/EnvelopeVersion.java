@@ -34,8 +34,6 @@ import i5.las2peer.tools.CryptoTools;
 
 public class EnvelopeVersion implements Serializable, XmlAble {
 
-	// TODO API @Thomas: store signing agent + reader list
-
 	private static final L2pLogger logger = L2pLogger.getInstance(EnvelopeVersion.class);
 
 	/**

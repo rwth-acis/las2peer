@@ -12,10 +12,6 @@ import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.CryptoException;
 
-// TODO refactor storage
-// EnvelopeVersion should contain a reader list and should already be opened,
-// move dealing with EnvelopeVersions to lower level
-
 public class EnvelopeImpl implements Envelope {
 
 	private String identifier;
@@ -24,7 +20,6 @@ public class EnvelopeImpl implements Envelope {
 	private Set<AgentImpl> readerToAdd = new HashSet<>();
 	private Set<AgentImpl> readerToRevoke = new HashSet<>();
 	private boolean revokeAllReaders = false;
-	private String signingAgentId;
 
 	private EnvelopeVersion currentVersion;
 
@@ -32,7 +27,6 @@ public class EnvelopeImpl implements Envelope {
 		this.identifier = identifier;
 		this.content = null;
 		this.currentVersion = null;
-		this.signingAgentId = signingAgent.getIdentifier();
 		this.readerToAdd.add(signingAgent);
 	}
 
@@ -41,7 +35,6 @@ public class EnvelopeImpl implements Envelope {
 		this.identifier = currentVersion.getIdentifier();
 		this.content = currentVersion.getContent(context.getMainAgent(), context);
 		this.currentVersion = currentVersion;
-		this.signingAgentId = null; // TODO API @Thomas: get signing agent
 	}
 
 	@Override
@@ -113,10 +106,6 @@ public class EnvelopeImpl implements Envelope {
 		this.revokeAllReaders = false;
 		this.readerToAdd.clear();
 		this.readerToRevoke.clear();
-	}
-
-	public String getSigningAgentId() {
-		return this.signingAgentId;
 	}
 
 }
