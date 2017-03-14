@@ -1,5 +1,24 @@
 package i5.las2peer.p2p;
 
+import java.io.File;
+import java.io.Serializable;
+import java.lang.management.ManagementFactory;
+import java.lang.reflect.InvocationTargetException;
+import java.security.KeyPair;
+import java.security.PublicKey;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.Vector;
+
+import com.sun.management.OperatingSystemMXBean;
+
 import i5.las2peer.api.Configurable;
 import i5.las2peer.api.execution.ServiceInvocationException;
 import i5.las2peer.api.execution.ServiceNotAvailableException;
@@ -42,29 +61,9 @@ import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.testing.MockAgentFactory;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
-
-import java.io.File;
-import java.io.Serializable;
-import java.lang.management.ManagementFactory;
-import java.lang.reflect.InvocationTargetException;
-import java.security.KeyPair;
-import java.security.PublicKey;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.Vector;
-
 import rice.pastry.NodeHandle;
 import rice.pastry.PastryNode;
 import rice.pastry.socket.SocketNodeHandle;
-
-import com.sun.management.OperatingSystemMXBean;
 
 /**
  * Base class for nodes in the las2peer environment.
@@ -587,8 +586,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @throws AgentException any problem with the agent itself (probably on calling
 	 *             {@link i5.las2peer.security.AgentImpl#notifyRegistrationTo}
 	 */
-	public void registerReceiver(MessageReceiver receiver) throws AgentAlreadyRegisteredException,
-			L2pSecurityException, AgentException {
+	public void registerReceiver(MessageReceiver receiver)
+			throws AgentAlreadyRegisteredException, L2pSecurityException, AgentException {
 
 		// TODO allow multiple mediators registered at the same time for one agent to avoid conflicts between connectors
 
@@ -821,8 +820,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @throws MessageException
 	 * @throws L2pSecurityException
 	 */
-	public void receiveMessage(Message message) throws AgentNotRegisteredException, AgentException, MessageException,
-			L2pSecurityException {
+	public void receiveMessage(Message message)
+			throws AgentNotRegisteredException, AgentException, MessageException, L2pSecurityException {
 		if (message.isResponse()) {
 			if (handoverAnswer(message)) {
 				return;
@@ -896,8 +895,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @throws EnvelopeException
 	 */
 	@Deprecated
-	public abstract EnvelopeVersion fetchArtifact(String identifier) throws EnvelopeNotFoundException,
-			EnvelopeException;
+	public abstract EnvelopeVersion fetchArtifact(String identifier)
+			throws EnvelopeNotFoundException, EnvelopeException;
 
 	/**
 	 * @deprecated Use {@link #storeEnvelope(EnvelopeVersion, AgentImpl)} instead
@@ -909,8 +908,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @throws EnvelopeException
 	 */
 	@Deprecated
-	public abstract void storeArtifact(EnvelopeVersion envelope) throws EnvelopeAlreadyExistsException,
-			EnvelopeException;
+	public abstract void storeArtifact(EnvelopeVersion envelope)
+			throws EnvelopeAlreadyExistsException, EnvelopeException;
 
 	/**
 	 * @deprecated Use {@link #removeEnvelope(String)} instead
@@ -1066,8 +1065,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @throws L2pSecurityException
 	 * @throws AgentAlreadyRegisteredException If the agent is already directly registered at this node
 	 */
-	public Mediator createMediatorForAgent(AgentImpl agent) throws L2pSecurityException,
-			AgentAlreadyRegisteredException {
+	public Mediator createMediatorForAgent(AgentImpl agent)
+			throws L2pSecurityException, AgentAlreadyRegisteredException {
 		if (agent.isLocked()) {
 			throw new L2pSecurityException("You need to unlock the agent for mediation!");
 		}
@@ -1224,8 +1223,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @throws ServiceInvocationException
 	 * @throws L2pSecurityException
 	 */
-	public Serializable invoke(AgentImpl executing, ServiceNameVersion service, String method, Serializable[] parameters)
-			throws L2pSecurityException, ServiceInvocationException {
+	public Serializable invoke(AgentImpl executing, ServiceNameVersion service, String method,
+			Serializable[] parameters) throws L2pSecurityException, ServiceInvocationException {
 		return invoke(executing, service, method, parameters, false, false);
 	}
 
@@ -1262,8 +1261,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @throws ServiceInvocationException
 	 */
 	public Serializable invoke(AgentImpl executing, ServiceNameVersion service, String method,
-			Serializable[] parameters, boolean exactVersion, boolean localOnly) throws L2pSecurityException,
-			ServiceInvocationException {
+			Serializable[] parameters, boolean exactVersion, boolean localOnly)
+			throws L2pSecurityException, ServiceInvocationException {
 
 		if (getStatus() != NodeStatus.RUNNING) {
 			throw new IllegalStateException("You can invoke methods only on a running node!");
@@ -1432,8 +1431,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 				// Do not log service class name (privacy..)
 				this.observerNotice(MonitoringEvent.RMI_FAILED, this.getNodeId(), executing,
 						"Unknown RMI response type: " + resultContent.getClass().getCanonicalName());
-				throw new ServiceInvocationException("Unknown RMI response type: "
-						+ resultContent.getClass().getCanonicalName());
+				throw new ServiceInvocationException(
+						"Unknown RMI response type: " + resultContent.getClass().getCanonicalName());
 			}
 		} catch (TimeoutException | InterruptedException e) {
 			// Do not log service class name (privacy..)
@@ -1537,8 +1536,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @throws InterruptedException
 	 * @throws TimeoutException
 	 */
-	public Message sendMessageAndWaitForAnswer(Message m, Object atNodeId) throws NodeNotFoundException,
-			InterruptedException, TimeoutException {
+	public Message sendMessageAndWaitForAnswer(Message m, Object atNodeId)
+			throws NodeNotFoundException, InterruptedException, TimeoutException {
 		long timeout = m.getTimeoutTs() - new Date().getTime();
 		MessageResultListener listener = new MessageResultListener(timeout);
 
@@ -1564,8 +1563,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @throws InterruptedException
 	 * @throws TimeoutException
 	 */
-	public Message[] sendMessageAndCollectAnswers(Message m, int recipientCount) throws InterruptedException,
-			TimeoutException {
+	public Message[] sendMessageAndCollectAnswers(Message m, int recipientCount)
+			throws InterruptedException, TimeoutException {
 		long timeout = m.getTimeoutTs() - new Date().getTime();
 		MessageResultListener listener = new MessageResultListener(timeout, timeout / 4);
 		listener.addRecipients(recipientCount);

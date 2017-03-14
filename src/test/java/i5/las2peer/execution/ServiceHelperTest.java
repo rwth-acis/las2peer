@@ -2,13 +2,14 @@ package i5.las2peer.execution;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import i5.las2peer.api.TestService;
-import i5.las2peer.api.execution.ServiceMethodNotFoundException;
-import i5.las2peer.security.L2pSecurityException;
 
 import java.lang.reflect.InvocationTargetException;
 
 import org.junit.Test;
+
+import i5.las2peer.api.TestService;
+import i5.las2peer.api.execution.ServiceMethodNotFoundException;
+import i5.las2peer.security.L2pSecurityException;
 
 public class ServiceHelperTest {
 
@@ -29,7 +30,8 @@ public class ServiceHelperTest {
 			InvocationTargetException, L2pSecurityException, ServiceMethodNotFoundException {
 		TestService testee = new TestService();
 
-		assertEquals("testnachricht", ServiceHelper.execute(testee, "subclass", new SecurityException("testnachricht")));
+		assertEquals("testnachricht",
+				ServiceHelper.execute(testee, "subclass", new SecurityException("testnachricht")));
 	}
 
 	@Test

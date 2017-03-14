@@ -1,14 +1,5 @@
 package i5.las2peer.persistency;
 
-import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
-import i5.las2peer.api.persistency.EnvelopeException;
-import i5.las2peer.api.persistency.EnvelopeNotFoundException;
-import i5.las2peer.p2p.PastryNodeImpl;
-import i5.las2peer.security.GroupAgentImpl;
-import i5.las2peer.security.UserAgentImpl;
-import i5.las2peer.testing.MockAgentFactory;
-import i5.las2peer.testing.TestSuite;
-
 import java.io.Serializable;
 import java.security.PublicKey;
 import java.util.ArrayList;
@@ -22,6 +13,15 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
+
+import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
+import i5.las2peer.api.persistency.EnvelopeException;
+import i5.las2peer.api.persistency.EnvelopeNotFoundException;
+import i5.las2peer.p2p.PastryNodeImpl;
+import i5.las2peer.security.GroupAgentImpl;
+import i5.las2peer.security.UserAgentImpl;
+import i5.las2peer.testing.MockAgentFactory;
+import i5.las2peer.testing.TestSuite;
 
 public class EnvelopeVersionTest {
 
@@ -81,8 +81,8 @@ public class EnvelopeVersionTest {
 			node1.storeEnvelopeAsync(envelope1, smith, new StorageStoreResultHandler() {
 				@Override
 				public void onResult(Serializable serializable, int successfulOperations) {
-					System.out.println("Successfully stored artifact " + serializable + " " + successfulOperations
-							+ " times");
+					System.out.println(
+							"Successfully stored artifact " + serializable + " " + successfulOperations + " times");
 					// fetch envelope again
 					System.out.println("Fetching artifact ...");
 					node1.fetchEnvelopeAsync("test", new StorageEnvelopeHandler() {
@@ -242,8 +242,9 @@ public class EnvelopeVersionTest {
 						public Serializable onCollision(EnvelopeVersion toStore, EnvelopeVersion inNetwork,
 								long numberOfCollisions) throws StopMergingException {
 							if (numberOfCollisions > 100) {
-								throw new StopMergingException("Merging failed, too many (" + numberOfCollisions
-										+ ") collisions!", numberOfCollisions);
+								throw new StopMergingException(
+										"Merging failed, too many (" + numberOfCollisions + ") collisions!",
+										numberOfCollisions);
 							}
 							// we return the "merged" version of both envelopes
 							// usually there one should put more effort into merging

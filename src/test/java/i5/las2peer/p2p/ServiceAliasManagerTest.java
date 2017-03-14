@@ -2,15 +2,16 @@ package i5.las2peer.p2p;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+
+import org.junit.Before;
+import org.junit.Test;
+
 import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.tools.CryptoException;
-
-import org.junit.Before;
-import org.junit.Test;
 
 public class ServiceAliasManagerTest {
 	@Before
@@ -122,27 +123,28 @@ public class ServiceAliasManagerTest {
 		// resolve
 		assertEquals(node.getServiceAliasManager().resolvePathToServiceName("prefix/prefix/aliasA").getServiceName(),
 				"serviceA");
-		assertEquals(node.getServiceAliasManager().resolvePathToServiceName("prefix/prefix/aliasA")
-				.getNumMatchedParts(), 3);
+		assertEquals(
+				node.getServiceAliasManager().resolvePathToServiceName("prefix/prefix/aliasA").getNumMatchedParts(), 3);
 		assertEquals(node.getServiceAliasManager().resolvePathToServiceName("prefix/prefix/aliasB").getServiceName(),
 				"serviceB");
-		assertEquals(node.getServiceAliasManager().resolvePathToServiceName("prefix/prefix/aliasB")
-				.getNumMatchedParts(), 3);
+		assertEquals(
+				node.getServiceAliasManager().resolvePathToServiceName("prefix/prefix/aliasB").getNumMatchedParts(), 3);
 		assertEquals(node.getServiceAliasManager().resolvePathToServiceName("prefix/aliasC").getServiceName(),
 				"serviceC");
 		assertEquals(node.getServiceAliasManager().resolvePathToServiceName("prefix/aliasC").getNumMatchedParts(), 2);
 		assertEquals(node.getServiceAliasManager().resolvePathToServiceName("prefix/aliasD").getServiceName(),
 				"serviceD");
 		assertEquals(node.getServiceAliasManager().resolvePathToServiceName("prefix/aliasD").getNumMatchedParts(), 2);
-		assertEquals(node.getServiceAliasManager().resolvePathToServiceName("prefix/prefix/aliasA/asdf")
-				.getServiceName(), "serviceA");
+		assertEquals(
+				node.getServiceAliasManager().resolvePathToServiceName("prefix/prefix/aliasA/asdf").getServiceName(),
+				"serviceA");
 		assertEquals(node.getServiceAliasManager().resolvePathToServiceName("prefix/prefix/aliasA/asdf")
 				.getNumMatchedParts(), 3);
-		assertEquals(
-				node.getServiceAliasManager().resolvePathToServiceName("prefix/aliasC/asdf/rtzh").getServiceName(),
+		assertEquals(node.getServiceAliasManager().resolvePathToServiceName("prefix/aliasC/asdf/rtzh").getServiceName(),
 				"serviceC");
-		assertEquals(node.getServiceAliasManager().resolvePathToServiceName("prefix/aliasC/asdf/rtzh")
-				.getNumMatchedParts(), 2);
+		assertEquals(
+				node.getServiceAliasManager().resolvePathToServiceName("prefix/aliasC/asdf/rtzh").getNumMatchedParts(),
+				2);
 
 		// resolve with empty path parts
 		assertEquals(node.getServiceAliasManager().resolvePathToServiceName("//prefix//aliasC//asdf//rtzh//")
@@ -155,8 +157,8 @@ public class ServiceAliasManagerTest {
 	public void testIntegration() throws CryptoException, L2pSecurityException, AgentAlreadyRegisteredException,
 			AgentException, AliasNotFoundException, AgentAccessDeniedException {
 		LocalNode node = LocalNode.launchNode();
-		ServiceAgentImpl agentA = ServiceAgentImpl.createServiceAgent(
-				ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.0"), "asdf");
+		ServiceAgentImpl agentA = ServiceAgentImpl
+				.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.0"), "asdf");
 		agentA.unlock("asdf");
 		node.registerReceiver(agentA);
 

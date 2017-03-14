@@ -1,5 +1,9 @@
 package i5.las2peer.testing;
 
+import java.io.IOException;
+import java.util.Hashtable;
+import java.util.Random;
+
 import i5.las2peer.api.Context;
 import i5.las2peer.api.Service;
 import i5.las2peer.api.execution.ServiceAccessDeniedException;
@@ -11,10 +15,6 @@ import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentAlreadyExistsException;
 import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.serialization.MalformedXMLException;
-
-import java.io.IOException;
-import java.util.Hashtable;
-import java.util.Random;
 
 /**
  * Simple test service for connectors to have a service with methods to call.
@@ -62,8 +62,8 @@ public class TestService extends Service {
 	}
 
 	/**
-	 * Throws a RuntimeException
-	 *updateAgent
+	 * Throws a RuntimeException updateAgent
+	 * 
 	 * @exception RuntimeException on each call
 	 */
 	public void runtimeExceptionThrower() throws RuntimeException {
@@ -258,8 +258,8 @@ public class TestService extends Service {
 	 * @throws EnvelopeNotFoundException
 	 * @throws EnvelopeAccessDeniedException
 	 */
-	public String getEnvelopeString() throws EnvelopeAccessDeniedException, EnvelopeNotFoundException,
-			EnvelopeOperationFailedException {
+	public String getEnvelopeString()
+			throws EnvelopeAccessDeniedException, EnvelopeNotFoundException, EnvelopeOperationFailedException {
 		if (envelopeId == null) {
 			return "nothing stored!";
 		}
@@ -292,8 +292,8 @@ public class TestService extends Service {
 	 * @throws EnvelopeNotFoundException
 	 * @throws EnvelopeAccessDeniedException
 	 */
-	public String getGroupEnvelopeString() throws EnvelopeAccessDeniedException, EnvelopeNotFoundException,
-			EnvelopeOperationFailedException {
+	public String getGroupEnvelopeString()
+			throws EnvelopeAccessDeniedException, EnvelopeNotFoundException, EnvelopeOperationFailedException {
 		if (groupEnvelopeId == null) {
 			return "nothing stored";
 		}
@@ -313,9 +313,9 @@ public class TestService extends Service {
 	 * @throws AgentAlreadyExistsException
 	 * @throws AgentAccessDeniedException
 	 */
-	public void storeGroupEnvelopeString(String store) throws EnvelopeAccessDeniedException,
-			EnvelopeOperationFailedException, AgentAccessDeniedException, AgentAlreadyExistsException,
-			AgentOperationFailedException, MalformedXMLException, IOException {
+	public void storeGroupEnvelopeString(String store)
+			throws EnvelopeAccessDeniedException, EnvelopeOperationFailedException, AgentAccessDeniedException,
+			AgentAlreadyExistsException, AgentOperationFailedException, MalformedXMLException, IOException {
 		Context.get().storeAgent(MockAgentFactory.getGroup1());
 		Envelope env = Context.get().createEnvelope(Long.toString(new Random().nextLong()));
 		env.setContent(store);

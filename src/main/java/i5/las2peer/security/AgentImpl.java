@@ -1,5 +1,18 @@
 package i5.las2peer.security;
 
+import java.io.File;
+import java.security.InvalidKeyException;
+import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Signature;
+import java.util.Base64;
+
+import javax.crypto.SecretKey;
+
+import org.w3c.dom.Element;
+
 import i5.las2peer.api.logging.MonitoringEvent;
 import i5.las2peer.api.security.Agent;
 import i5.las2peer.api.security.AgentException;
@@ -13,19 +26,6 @@ import i5.las2peer.serialization.XmlAble;
 import i5.las2peer.serialization.XmlTools;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
-
-import java.io.File;
-import java.security.InvalidKeyException;
-import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.Signature;
-import java.util.Base64;
-
-import javax.crypto.SecretKey;
-
-import org.w3c.dom.Element;
 
 /**
  * An Agent is the basic acting entity in the las2peer network. At the moment, an agent can represent a simple user, a
@@ -175,8 +175,8 @@ public abstract class AgentImpl implements Agent, XmlAble, Cloneable, MessageRec
 	 * @throws CryptoException If an issue occurs with decryption.
 	 * @throws SerializationException
 	 */
-	public SecretKey decryptSymmetricKey(byte[] crypted) throws L2pSecurityException, SerializationException,
-			CryptoException {
+	public SecretKey decryptSymmetricKey(byte[] crypted)
+			throws L2pSecurityException, SerializationException, CryptoException {
 		SecretKey symmetricGroupKey = (SecretKey) CryptoTools.decryptAsymmetric(crypted, this.getPrivateKey());
 		return symmetricGroupKey;
 	}

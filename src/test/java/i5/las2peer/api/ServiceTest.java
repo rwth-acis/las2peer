@@ -1,6 +1,9 @@
 package i5.las2peer.api;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.Hashtable;
 
@@ -21,21 +24,20 @@ public class ServiceTest {
 		assertEquals("test1", testee.getTestString1());
 		assertEquals("def", testee.getTestString2());
 	}
-	
+
 	@Test
 	public void testManualDeployment() {
 		TestService test1 = new TestService();
 		TestService2 test2 = new TestService2();
-		
+
 		assertFalse(test1.isSelfDeployable());
 		assertTrue(test2.isSelfDeployable());
-		
+
 		try {
 			test2.setFieldValues();
 			fail("IllegalStateException expected");
-		}
-		catch(IllegalStateException e) {
-			
+		} catch (IllegalStateException e) {
+
 		}
 	}
 

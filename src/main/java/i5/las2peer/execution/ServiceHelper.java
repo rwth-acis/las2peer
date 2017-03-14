@@ -1,12 +1,12 @@
 package i5.las2peer.execution;
 
-import i5.las2peer.api.Service;
-import i5.las2peer.api.execution.ServiceMethodNotFoundException;
-import i5.las2peer.security.L2pSecurityException;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+
+import i5.las2peer.api.Service;
+import i5.las2peer.api.execution.ServiceMethodNotFoundException;
+import i5.las2peer.security.L2pSecurityException;
 
 /**
  * static helper methods for invocation of service methods via reflection
@@ -114,8 +114,8 @@ public abstract class ServiceHelper {
 	 * @throws InvocationTargetException
 	 * @throws L2pSecurityException
 	 */
-	public static Object execute(Service service, String method) throws SecurityException,
-			ServiceMethodNotFoundException, IllegalArgumentException, IllegalAccessException,
+	public static Object execute(Service service, String method)
+			throws SecurityException, ServiceMethodNotFoundException, IllegalArgumentException, IllegalAccessException,
 			InvocationTargetException, L2pSecurityException {
 		return execute(service, method, new Object[0]);
 	}
@@ -180,8 +180,8 @@ public abstract class ServiceHelper {
 						for (int i = 0; i < acActualParamTypes.length && bPossible; i++) {
 							if (!acCheckParamTypes[i].isInstance(params[i])) {
 								// param[i] is not an instance of the formal parameter type
-								if (!(acCheckParamTypes[i].isPrimitive() && ServiceHelper.getWrapperClass(
-										acCheckParamTypes[i]).isInstance(params[i]))
+								if (!(acCheckParamTypes[i].isPrimitive()
+										&& ServiceHelper.getWrapperClass(acCheckParamTypes[i]).isInstance(params[i]))
 										&& !(ServiceHelper.isWrapperClass(acCheckParamTypes[i]) && ServiceHelper
 												.getUnwrappedClass(acCheckParamTypes[i]).isInstance(params[i]))) {
 									// and not wrapped or unwrapped either! -> so not more possibilities to match!

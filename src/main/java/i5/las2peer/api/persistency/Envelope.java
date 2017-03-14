@@ -1,9 +1,9 @@
 package i5.las2peer.api.persistency;
 
+import java.io.Serializable;
+
 import i5.las2peer.api.Context;
 import i5.las2peer.api.security.Agent;
-
-import java.io.Serializable;
 
 /**
  * Represents a (mutable) piece of data that is stored in the network.

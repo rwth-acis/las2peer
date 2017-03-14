@@ -81,8 +81,7 @@ public class UserAgentManager {
 	 * @throws DuplicateEmailException
 	 * @throws DuplicateLoginNameException
 	 */
-	public void updateUserAgent(UserAgentImpl agent) throws DuplicateEmailException,
-			DuplicateLoginNameException {
+	public void updateUserAgent(UserAgentImpl agent) throws DuplicateEmailException, DuplicateLoginNameException {
 		registerUserAgent(agent);
 	}
 

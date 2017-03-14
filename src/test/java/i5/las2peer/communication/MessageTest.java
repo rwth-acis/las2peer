@@ -7,20 +7,20 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import i5.las2peer.api.p2p.ServiceNameVersion;
-import i5.las2peer.execution.RMITask;
 
 import java.io.Serializable;
 import java.util.Date;
 
 import org.junit.Assert;
 import org.junit.Test;
+
+import i5.las2peer.api.p2p.ServiceNameVersion;
+import i5.las2peer.execution.RMITask;
 import i5.las2peer.security.BasicAgentStorage;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.testing.MockAgentFactory;
-
 
 public class MessageTest {
 
@@ -300,7 +300,7 @@ public class MessageTest {
 			String xml = m.toXmlString();
 
 			Message back = Message.createFromXml(xml);
-			
+
 			service.unlock("a pass");
 			back.open(service, storage);
 

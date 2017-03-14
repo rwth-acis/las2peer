@@ -228,8 +228,8 @@ public abstract class Configurable {
 				if (!Modifier.isFinal(f.getModifiers()) && !Modifier.isStatic(f.getModifiers())) {
 					f.setAccessible(true);
 					setField(f, props.get(key));
-					System.out.println("Class: " + getClass().getSimpleName() + " using: " + key + " -> "
-							+ props.get(key));
+					System.out.println(
+							"Class: " + getClass().getSimpleName() + " using: " + key + " -> " + props.get(key));
 				}
 			} catch (NoSuchFieldException e) {
 				System.err.println("field not found: " + key);

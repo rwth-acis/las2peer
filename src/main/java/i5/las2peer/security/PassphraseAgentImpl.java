@@ -1,14 +1,14 @@
 package i5.las2peer.security;
 
-import i5.las2peer.api.security.AgentAccessDeniedException;
-import i5.las2peer.api.security.PassphraseAgent;
-import i5.las2peer.tools.CryptoException;
-import i5.las2peer.tools.CryptoTools;
-
 import java.security.KeyPair;
 import java.security.PublicKey;
 
 import javax.crypto.SecretKey;
+
+import i5.las2peer.api.security.AgentAccessDeniedException;
+import i5.las2peer.api.security.PassphraseAgent;
+import i5.las2peer.tools.CryptoException;
+import i5.las2peer.tools.CryptoTools;
 
 /**
  * Base class for pass phrase protected agents.
@@ -34,8 +34,8 @@ public abstract class PassphraseAgentImpl extends AgentImpl implements Passphras
 	 * @throws L2pSecurityException
 	 * @throws CryptoException
 	 */
-	protected PassphraseAgentImpl(KeyPair pair, String passphrase, byte[] salt) throws L2pSecurityException,
-			CryptoException {
+	protected PassphraseAgentImpl(KeyPair pair, String passphrase, byte[] salt)
+			throws L2pSecurityException, CryptoException {
 		super(pair, CryptoTools.generateKeyForPassphrase(passphrase, salt));
 
 		this.salt = salt.clone();

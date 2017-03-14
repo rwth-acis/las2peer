@@ -1,10 +1,17 @@
 package i5.las2peer.persistency;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import i5.las2peer.api.persistency.EnvelopeException;
 import i5.las2peer.api.security.AgentException;
@@ -17,11 +24,6 @@ import i5.las2peer.serialization.MalformedXMLException;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.testing.MockAgentFactory;
 import i5.las2peer.tools.CryptoException;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
 
 public class EnvelopeImplTest {
 	LocalNode node;
@@ -37,8 +39,8 @@ public class EnvelopeImplTest {
 	}
 
 	@Test
-	public void testFresh() throws MalformedXMLException, IOException, IllegalArgumentException,
-			SerializationException, CryptoException, L2pSecurityException, EnvelopeException {
+	public void testFresh() throws MalformedXMLException, IOException, IllegalArgumentException, SerializationException,
+			CryptoException, L2pSecurityException, EnvelopeException {
 		AgentImpl owner = MockAgentFactory.getAdam();
 		AgentImpl reader = MockAgentFactory.getEve();
 
@@ -64,8 +66,7 @@ public class EnvelopeImplTest {
 	@Ignore
 	// TODO API fix
 	public void testFromExisting() throws MalformedXMLException, IOException, IllegalArgumentException,
-			SerializationException, CryptoException, L2pSecurityException, EnvelopeException,
-			AgentException {
+			SerializationException, CryptoException, L2pSecurityException, EnvelopeException, AgentException {
 		UserAgentImpl owner = MockAgentFactory.getAdam();
 		owner.unlock("adamspass");
 		node.storeAgent(owner);

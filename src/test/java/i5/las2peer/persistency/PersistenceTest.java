@@ -1,11 +1,5 @@
 package i5.las2peer.persistency;
 
-import i5.las2peer.p2p.PastryNodeImpl;
-import i5.las2peer.persistency.SharedStorage.STORAGE_MODE;
-import i5.las2peer.security.UserAgentImpl;
-import i5.las2peer.testing.MockAgentFactory;
-import i5.las2peer.testing.TestSuite;
-
 import java.util.ArrayList;
 
 import org.junit.After;
@@ -13,6 +7,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import i5.las2peer.p2p.PastryNodeImpl;
+import i5.las2peer.persistency.SharedStorage.STORAGE_MODE;
+import i5.las2peer.security.UserAgentImpl;
+import i5.las2peer.testing.MockAgentFactory;
+import i5.las2peer.testing.TestSuite;
 
 public class PersistenceTest {
 

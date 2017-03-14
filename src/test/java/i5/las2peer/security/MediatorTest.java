@@ -4,14 +4,15 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import i5.las2peer.communication.Message;
-import i5.las2peer.communication.MessageException;
-import i5.las2peer.testing.MockAgentFactory;
 
 import java.util.HashSet;
 
 import org.junit.Assert;
 import org.junit.Test;
+
+import i5.las2peer.communication.Message;
+import i5.las2peer.communication.MessageException;
+import i5.las2peer.testing.MockAgentFactory;
 
 //NOTE: Answering each message is disabled in testing mode (since there exists no real las2peer context here).
 //Also refer to the Mediator implementation for more information.

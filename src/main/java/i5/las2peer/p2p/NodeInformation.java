@@ -1,5 +1,14 @@
 package i5.las2peer.p2p;
 
+import java.io.IOException;
+import java.io.Serializable;
+import java.security.PublicKey;
+import java.util.Vector;
+
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.persistency.VerificationFailedException;
 import i5.las2peer.security.L2pSecurityException;
@@ -11,15 +20,6 @@ import i5.las2peer.serialization.XmlAble;
 import i5.las2peer.serialization.XmlTools;
 import i5.las2peer.tools.CryptoTools;
 import i5.las2peer.tools.FileContentReader;
-
-import java.io.IOException;
-import java.io.Serializable;
-import java.security.PublicKey;
-import java.util.Vector;
-
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 /**
  * A NodeInformation gives basic information about a node.
@@ -366,8 +366,8 @@ public class NodeInformation implements XmlAble {
 	 */
 	public static void main(String argv[]) {
 		if (argv.length < 4) {
-			System.out
-					.println("Usage: java i5.las2peer.p2p.NodeInformation adminName adminEmail organization description");
+			System.out.println(
+					"Usage: java i5.las2peer.p2p.NodeInformation adminName adminEmail organization description");
 			System.exit(0);
 		}
 

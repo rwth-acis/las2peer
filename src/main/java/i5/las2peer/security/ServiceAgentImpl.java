@@ -1,5 +1,17 @@
 package i5.las2peer.security;
 
+import java.io.Serializable;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.security.KeyPair;
+import java.security.PublicKey;
+import java.util.Base64;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+
+import org.w3c.dom.Element;
+
 import i5.las2peer.api.Service;
 import i5.las2peer.api.ServiceException;
 import i5.las2peer.api.execution.InternalServiceException;
@@ -33,18 +45,6 @@ import i5.las2peer.serialization.XmlTools;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
 import i5.las2peer.tools.SimpleTools;
-
-import java.io.Serializable;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.security.KeyPair;
-import java.security.PublicKey;
-import java.util.Base64;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-
-import org.w3c.dom.Element;
 
 /**
  * A service agent represents a service and its access rights in the las2peer setting.
@@ -106,11 +106,11 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 		try {
 			return "<las2peer:agent type=\"service\" serviceclass=\"" + getServiceNameVersion().toString() + "\">\n"
 					+ "\t<id>" + getIdentifier() + "</id>\n" + "\t<publickey encoding=\"base64\">"
-					+ SerializeTools.serializeToBase64(getPublicKey()) + "</publickey>\n"
-					+ "\t<privatekey encrypted=\"" + CryptoTools.getSymmetricAlgorithm() + "\" keygen=\""
-					+ CryptoTools.getSymmetricKeygenMethod() + "\">\n" + "\t\t<salt encoding=\"base64\">"
-					+ Base64.getEncoder().encodeToString(getSalt()) + "</salt>\n" + "\t\t<data encoding=\"base64\">"
-					+ getEncodedPrivate() + "</data>\n" + "\t</privatekey>\n" + "</las2peer:agent>\n";
+					+ SerializeTools.serializeToBase64(getPublicKey()) + "</publickey>\n" + "\t<privatekey encrypted=\""
+					+ CryptoTools.getSymmetricAlgorithm() + "\" keygen=\"" + CryptoTools.getSymmetricKeygenMethod()
+					+ "\">\n" + "\t\t<salt encoding=\"base64\">" + Base64.getEncoder().encodeToString(getSalt())
+					+ "</salt>\n" + "\t\t<data encoding=\"base64\">" + getEncodedPrivate() + "</data>\n"
+					+ "\t</privatekey>\n" + "</las2peer:agent>\n";
 		} catch (SerializationException e) {
 			throw new RuntimeException("Serialization problems with keys");
 		}
@@ -137,8 +137,8 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 
 				try {
 					response = new Message(m, new RMIResultContent(handle((RMITask) content, c)));
-					getRunningAtNode().observerNotice(MonitoringEvent.SERVICE_INVOCATION_FINISHED,
-							m.getSendingNodeId(), m.getSender(), getRunningAtNode().getNodeId(), this,
+					getRunningAtNode().observerNotice(MonitoringEvent.SERVICE_INVOCATION_FINISHED, m.getSendingNodeId(),
+							m.getSender(), getRunningAtNode().getNodeId(), this,
 							this.getServiceNameVersion() + "/" + ((RMITask) content).getMethodName());
 				} catch (ServiceInvocationException e) {
 					response = new Message(m, new RMIExceptionContent(e));
@@ -234,8 +234,8 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 	 * @throws L2pSecurityException
 	 */
 	@Deprecated
-	public static ServiceAgentImpl generateNewAgent(String forService, String passPhrase) throws CryptoException,
-			L2pSecurityException {
+	public static ServiceAgentImpl generateNewAgent(String forService, String passPhrase)
+			throws CryptoException, L2pSecurityException {
 		return createServiceAgent(new ServiceNameVersion(forService, "1.0"), passPhrase);
 	}
 
@@ -272,8 +272,8 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 	 * @throws L2pSecurityException
 	 */
 	@Deprecated
-	public static ServiceAgentImpl createServiceAgent(String serviceName, String passphrase) throws CryptoException,
-			L2pSecurityException {
+	public static ServiceAgentImpl createServiceAgent(String serviceName, String passphrase)
+			throws CryptoException, L2pSecurityException {
 		return createServiceAgent(new ServiceNameVersion(serviceName, "1.0"), passphrase);
 	}
 
@@ -352,8 +352,8 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 	@Override
 	public void notifyRegistrationTo(Node node) throws AgentException {
 		try {
-			Class<? extends Service> clServ = (Class<? extends Service>) node.getBaseClassLoader().getServiceClass(
-					sService.getName(), sService.getVersion().toString());
+			Class<? extends Service> clServ = (Class<? extends Service>) node.getBaseClassLoader()
+					.getServiceClass(sService.getName(), sService.getVersion().toString());
 
 			Constructor<? extends Service> cons = clServ.getConstructor(new Class<?>[0]);
 			serviceInstance = cons.newInstance();
@@ -471,21 +471,20 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 
 		// execute
 		try {
-			return executor.submit(
-					() -> {
-						Object res = invoke(task.getMethodName(), task.getParameters());
+			return executor.submit(() -> {
+				Object res = invoke(task.getMethodName(), task.getParameters());
 
-						if (res == null) {
-							return null;
-						}
+				if (res == null) {
+					return null;
+				}
 
-						if (!(res instanceof Serializable)) {
-							throw new ServiceInvocationFailedException("Result is not serializable: " + res.getClass()
-									+ " / " + res);
-						}
+				if (!(res instanceof Serializable)) {
+					throw new ServiceInvocationFailedException(
+							"Result is not serializable: " + res.getClass() + " / " + res);
+				}
 
-						return (Serializable) res;
-					}).get();
+				return (Serializable) res;
+			}).get();
 		} catch (ExecutionException e) {
 			if (e.getCause() instanceof InvocationTargetException) {
 				if (e.getCause().getCause() instanceof ServiceInvocationException) {

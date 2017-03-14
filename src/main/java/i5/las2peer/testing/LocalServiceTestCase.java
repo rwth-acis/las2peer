@@ -1,5 +1,13 @@
 package i5.las2peer.testing;
 
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.InputStream;
+import java.io.Serializable;
+
+import org.junit.After;
+import org.junit.Before;
+
 import i5.las2peer.api.Service;
 import i5.las2peer.api.execution.ServiceInvocationException;
 import i5.las2peer.api.execution.ServiceNotFoundException;
@@ -13,14 +21,6 @@ import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.FileContentReader;
 import i5.las2peer.tools.SimpleTools;
-
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.InputStream;
-import java.io.Serializable;
-
-import org.junit.After;
-import org.junit.Before;
 
 /**
  * Helper class to implement JUnit-Test for services to be published in a las2peer environment.
@@ -92,8 +92,8 @@ public abstract class LocalServiceTestCase {
 			}
 		} catch (NoSuchFieldException e) {
 			agentPassphrase = SimpleTools.createRandomString(10);
-			return ServiceAgentImpl.createServiceAgent(new ServiceNameVersion(getServiceClass().getName(),
-					getServiceVersion()), agentPassphrase);
+			return ServiceAgentImpl.createServiceAgent(
+					new ServiceNameVersion(getServiceClass().getName(), getServiceVersion()), agentPassphrase);
 		} catch (Exception e) {
 			if (e instanceof AgentException) {
 				throw (AgentException) e;

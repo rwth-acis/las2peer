@@ -1,5 +1,12 @@
 package i5.las2peer.persistency;
 
+import java.io.IOException;
+import java.io.Serializable;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
+import java.util.Random;
+
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.PassphraseAgentImpl;
@@ -7,13 +14,6 @@ import i5.las2peer.serialization.MalformedXMLException;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.FileContentReader;
-
-import java.io.IOException;
-import java.io.Serializable;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
-import java.util.Random;
 
 /**
  * A simple command line tool for generating XML envelopes to the standard out.
@@ -33,8 +33,8 @@ public class EnvelopeGenerator {
 	 * @param message additional information
 	 */
 	public static void usage(String message) {
-		System.err
-				.println("Usage: java [-cp ...] i5.las2peer.tools.EnvelopeGenerator [xml agent file] [agent passphrase] [nested class name] [String constructor value]");
+		System.err.println(
+				"Usage: java [-cp ...] i5.las2peer.tools.EnvelopeGenerator [xml agent file] [agent passphrase] [nested class name] [String constructor value]");
 		if (message != null) {
 			System.err.println("\n" + message);
 		}
@@ -119,9 +119,9 @@ public class EnvelopeGenerator {
 	 * @throws IllegalAccessException
 	 * @throws InvocationTargetException
 	 */
-	private static Serializable createSerializable(String classname, String value) throws ClassNotFoundException,
-			SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException,
-			IllegalAccessException, InvocationTargetException {
+	private static Serializable createSerializable(String classname, String value)
+			throws ClassNotFoundException, SecurityException, NoSuchMethodException, IllegalArgumentException,
+			InstantiationException, IllegalAccessException, InvocationTargetException {
 		Class<?> cls = Class.forName(classname);
 		Constructor<?> cons = cls.getConstructor(String.class);
 		return (Serializable) cons.newInstance(value);

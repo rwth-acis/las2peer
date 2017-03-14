@@ -1,5 +1,8 @@
 package i5.las2peer.security;
 
+import java.util.Date;
+import java.util.Hashtable;
+
 import i5.las2peer.api.security.Agent;
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
@@ -10,9 +13,6 @@ import i5.las2peer.execution.ServiceThread;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.CryptoException;
-
-import java.util.Date;
-import java.util.Hashtable;
 
 /**
  * A context that can be created for an agent to perform operations in the network. Cached in the node for remembering
@@ -72,8 +72,8 @@ public class AgentContext implements AgentStorage {
 	 * @throws AgentNotFoundException
 	 * @throws AgentOperationFailedException
 	 */
-	public GroupAgentImpl requestGroupAgent(String groupId) throws AgentAccessDeniedException, AgentNotFoundException,
-			AgentOperationFailedException {
+	public GroupAgentImpl requestGroupAgent(String groupId)
+			throws AgentAccessDeniedException, AgentNotFoundException, AgentOperationFailedException {
 		if (groupAgents.containsKey(groupId)) {
 			return groupAgents.get(groupId);
 		}
@@ -81,7 +81,7 @@ public class AgentContext implements AgentStorage {
 		AgentImpl agent;
 		try {
 			agent = localNode.getAgent(groupId);
-		} catch(AgentNotFoundException e) {
+		} catch (AgentNotFoundException e) {
 			throw e;
 		} catch (AgentException e1) {
 			throw new AgentOperationFailedException(e1);
@@ -131,8 +131,8 @@ public class AgentContext implements AgentStorage {
 	 * @throws AgentNotFoundException
 	 * @throws AgentAccessDeniedException
 	 */
-	public Agent requestAgent(String agentId) throws AgentAccessDeniedException, AgentNotFoundException,
-			AgentOperationFailedException {
+	public Agent requestAgent(String agentId)
+			throws AgentAccessDeniedException, AgentNotFoundException, AgentOperationFailedException {
 		if (agentId.equalsIgnoreCase(getMainAgent().getIdentifier())) {
 			return getMainAgent();
 		} else {

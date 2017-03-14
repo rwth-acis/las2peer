@@ -8,9 +8,9 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import i5.las2peer.api.persistency.EnvelopeNotFoundException;
 import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.persistency.EnvelopeException;
+import i5.las2peer.api.persistency.EnvelopeNotFoundException;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.CryptoException;
@@ -86,8 +86,8 @@ public class LocalStorage implements L2pStorageInterface {
 					Set<String> mergedGroups = collisionHandler.mergeGroups(envelope.getReaderGroupIds(),
 							inStorage.getReaderGroupIds());
 					try {
-						toStore = new EnvelopeVersion(envelope.getIdentifier(), mergedVersion, mergedContent, mergedReaders,
-								mergedGroups);
+						toStore = new EnvelopeVersion(envelope.getIdentifier(), mergedVersion, mergedContent,
+								mergedReaders, mergedGroups);
 					} catch (IllegalArgumentException | SerializationException | CryptoException e) {
 						if (exceptionHandler != null) {
 							exceptionHandler.onException(e);

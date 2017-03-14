@@ -2,8 +2,6 @@ package i5.las2peer.tools;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import i5.las2peer.serialization.SerializationException;
-import i5.las2peer.serialization.SerializeTools;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -14,6 +12,9 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 
 import org.junit.Test;
+
+import i5.las2peer.serialization.SerializationException;
+import i5.las2peer.serialization.SerializeTools;
 
 public class SerializeToolsTest {
 

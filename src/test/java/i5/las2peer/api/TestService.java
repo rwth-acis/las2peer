@@ -1,8 +1,8 @@
 package i5.las2peer.api;
 
-import i5.las2peer.api.execution.ServiceAccessDeniedException;
-
 import java.util.Hashtable;
+
+import i5.las2peer.api.execution.ServiceAccessDeniedException;
 
 /**
  * A simple service for testing (R)MI and service start.
@@ -65,19 +65,19 @@ public class TestService extends Service {
 	public String getTestString2() {
 		return testString2;
 	}
-	
+
 	public String getCaller() {
 		return Context.get().getMainAgent().getIdentifier();
 	}
-	
+
 	public String getEcho(String input) {
 		return input;
 	}
-	
+
 	public String accessForbidden() throws ServiceAccessDeniedException {
 		throw new ServiceAccessDeniedException();
 	}
-	
+
 	public String exception() throws Exception {
 		throw new Exception();
 	}

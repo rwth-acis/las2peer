@@ -1,21 +1,5 @@
 package i5.las2peer.persistency;
 
-import i5.las2peer.api.Context;
-import i5.las2peer.api.security.AgentException;
-import i5.las2peer.logging.L2pLogger;
-import i5.las2peer.security.AgentContext;
-import i5.las2peer.security.AgentImpl;
-import i5.las2peer.security.AgentStorage;
-import i5.las2peer.security.GroupAgentImpl;
-import i5.las2peer.security.L2pSecurityException;
-import i5.las2peer.serialization.MalformedXMLException;
-import i5.las2peer.serialization.SerializationException;
-import i5.las2peer.serialization.SerializeTools;
-import i5.las2peer.serialization.XmlAble;
-import i5.las2peer.serialization.XmlTools;
-import i5.las2peer.tools.CryptoException;
-import i5.las2peer.tools.CryptoTools;
-
 import java.io.Serializable;
 import java.security.PublicKey;
 import java.util.Base64;
@@ -32,10 +16,25 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public class EnvelopeVersion implements Serializable, XmlAble {
-	
-	// TODO API @Thomas: store signing agent + reader list
+import i5.las2peer.api.Context;
+import i5.las2peer.api.security.AgentException;
+import i5.las2peer.logging.L2pLogger;
+import i5.las2peer.security.AgentContext;
+import i5.las2peer.security.AgentImpl;
+import i5.las2peer.security.AgentStorage;
+import i5.las2peer.security.GroupAgentImpl;
+import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.serialization.MalformedXMLException;
+import i5.las2peer.serialization.SerializationException;
+import i5.las2peer.serialization.SerializeTools;
+import i5.las2peer.serialization.XmlAble;
+import i5.las2peer.serialization.XmlTools;
+import i5.las2peer.tools.CryptoException;
+import i5.las2peer.tools.CryptoTools;
 
+public class EnvelopeVersion implements Serializable, XmlAble {
+
+	// TODO API @Thomas: store signing agent + reader list
 
 	private static final L2pLogger logger = L2pLogger.getInstance(EnvelopeVersion.class);
 
@@ -107,10 +106,10 @@ public class EnvelopeVersion implements Serializable, XmlAble {
 	 * @throws SerializationException If a problem occurs with object serialization.
 	 * @throws CryptoException If an cryptographic issue occurs.
 	 */
-	protected EnvelopeVersion(EnvelopeVersion previousVersion, Serializable content) throws IllegalArgumentException,
-			SerializationException, CryptoException {
-		this(previousVersion.getIdentifier(), previousVersion.getVersion() + 1, content, previousVersion.readerKeys
-				.keySet(), previousVersion.readerGroupIds);
+	protected EnvelopeVersion(EnvelopeVersion previousVersion, Serializable content)
+			throws IllegalArgumentException, SerializationException, CryptoException {
+		this(previousVersion.getIdentifier(), previousVersion.getVersion() + 1, content,
+				previousVersion.readerKeys.keySet(), previousVersion.readerGroupIds);
 	}
 
 	/**
@@ -152,8 +151,8 @@ public class EnvelopeVersion implements Serializable, XmlAble {
 		}
 		this.identifier = identifier;
 		if (version > MAX_UPDATE_CYCLES) {
-			throw new IllegalArgumentException("Version number (" + version + ") is too high, max is "
-					+ MAX_UPDATE_CYCLES);
+			throw new IllegalArgumentException(
+					"Version number (" + version + ") is too high, max is " + MAX_UPDATE_CYCLES);
 		}
 		this.version = version;
 		readerKeys = new HashMap<>();
@@ -233,8 +232,8 @@ public class EnvelopeVersion implements Serializable, XmlAble {
 		}
 	}
 
-	public Serializable getContent(AgentImpl reader) throws CryptoException, L2pSecurityException,
-			SerializationException {
+	public Serializable getContent(AgentImpl reader)
+			throws CryptoException, L2pSecurityException, SerializationException {
 		try {
 			return getContent(reader, AgentContext.getCurrent().getLocalNode());
 		} catch (IllegalStateException e) {
@@ -242,8 +241,8 @@ public class EnvelopeVersion implements Serializable, XmlAble {
 		}
 	}
 
-	public Serializable getContent(AgentImpl reader, AgentStorage agentStorage) throws CryptoException,
-			L2pSecurityException, SerializationException {
+	public Serializable getContent(AgentImpl reader, AgentStorage agentStorage)
+			throws CryptoException, L2pSecurityException, SerializationException {
 		byte[] decrypted = null;
 		if (isEncrypted()) {
 			SecretKey decryptedReaderKey = null;
@@ -298,10 +297,10 @@ public class EnvelopeVersion implements Serializable, XmlAble {
 	public String toXmlString() throws SerializationException {
 		StringBuilder result = new StringBuilder();
 		result.append("<las2peer:envelope identifier=\"" + identifier + "\" version=\"" + version + "\">\n");
-		result.append("\t<las2peer:content encoding=\"Base64\">")
-				.append(Base64.getEncoder().encodeToString(rawContent)).append("</las2peer:content>\n");
-		result.append("\t<las2peer:keys encoding=\"base64\" encryption=\"" + CryptoTools.getAsymmetricAlgorithm()
-				+ "\">\n");
+		result.append("\t<las2peer:content encoding=\"Base64\">").append(Base64.getEncoder().encodeToString(rawContent))
+				.append("</las2peer:content>\n");
+		result.append(
+				"\t<las2peer:keys encoding=\"base64\" encryption=\"" + CryptoTools.getAsymmetricAlgorithm() + "\">\n");
 		for (Entry<PublicKey, byte[]> readerKey : readerKeys.entrySet()) {
 			try {
 				result.append("\t\t<las2peer:key public=\"" + CryptoTools.publicKeyToString(readerKey.getKey()) + "\">"
@@ -347,12 +346,12 @@ public class EnvelopeVersion implements Serializable, XmlAble {
 		// read reader keys from XML
 		Element keys = XmlTools.getSingularElement(rootElement, "las2peer:keys");
 		if (!keys.getAttribute("encoding").equalsIgnoreCase("base64")) {
-			throw new MalformedXMLException("base 64 encoding of the content expected - got: "
-					+ keys.getAttribute("encoding"));
+			throw new MalformedXMLException(
+					"base 64 encoding of the content expected - got: " + keys.getAttribute("encoding"));
 		}
 		if (!keys.getAttribute("encryption").equalsIgnoreCase(CryptoTools.getAsymmetricAlgorithm())) {
-			throw new MalformedXMLException(CryptoTools.getAsymmetricAlgorithm()
-					+ " encryption of the content expected");
+			throw new MalformedXMLException(
+					CryptoTools.getAsymmetricAlgorithm() + " encryption of the content expected");
 		}
 		HashMap<PublicKey, byte[]> readerKeys = new HashMap<>();
 		NodeList enKeys = keys.getChildNodes();

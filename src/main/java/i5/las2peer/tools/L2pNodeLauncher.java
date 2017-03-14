@@ -304,7 +304,7 @@ public class L2pNodeLauncher {
 	 * @param serviceJarFile The service jar file that should be uploaded.
 	 * @param developerAgentXMLFile The XML file of the developers agent.
 	 * @param developerPassword The password for the developer agent.
-	 * @throws ServicePackageException 
+	 * @throws ServicePackageException
 	 */
 	public void uploadServicePackage(String serviceJarFile, String developerAgentXMLFile, String developerPassword)
 			throws ServicePackageException {
@@ -431,7 +431,7 @@ public class L2pNodeLauncher {
 	 * @throws L2pSecurityException
 	 * @throws AgentAlreadyRegisteredException
 	 * @throws AgentException
-	 * @throws AgentAccessDeniedException 
+	 * @throws AgentAccessDeniedException
 	 */
 	public void registerUserAgent(UserAgentImpl agent)
 			throws L2pSecurityException, AgentAlreadyRegisteredException, AgentException, AgentAccessDeniedException {
@@ -449,9 +449,10 @@ public class L2pNodeLauncher {
 	 * @throws L2pSecurityException
 	 * @throws AgentAlreadyRegisteredException
 	 * @throws AgentException
-	 * @throws AgentAccessDeniedException 
+	 * @throws AgentAccessDeniedException
 	 */
-	public void registerUserAgent(UserAgentImpl agent, String passphrase) throws L2pSecurityException, AgentException, AgentAccessDeniedException {
+	public void registerUserAgent(UserAgentImpl agent, String passphrase)
+			throws L2pSecurityException, AgentException, AgentAccessDeniedException {
 		if (passphrase != null && agent.isLocked()) {
 			agent.unlock(passphrase);
 		}
@@ -494,10 +495,11 @@ public class L2pNodeLauncher {
 	 * @param serviceMethod
 	 * @param parameters pass an empty string if you want to call a method without parameters
 	 * @return
-	 * @throws ServiceInvocationException 
-	 * @throws L2pSecurityException 
+	 * @throws ServiceInvocationException
+	 * @throws L2pSecurityException
 	 */
-	public Serializable invoke(String serviceIdentifier, String serviceMethod, String parameters) throws L2pSecurityException, ServiceInvocationException {
+	public Serializable invoke(String serviceIdentifier, String serviceMethod, String parameters)
+			throws L2pSecurityException, ServiceInvocationException {
 		if (parameters.isEmpty()) {
 			return invoke(serviceIdentifier, serviceMethod, new Serializable[0]);
 		}
@@ -513,8 +515,8 @@ public class L2pNodeLauncher {
 	 * @param serviceMethod
 	 * @param parameters
 	 * @return
-	 * @throws ServiceInvocationException 
-	 * @throws L2pSecurityException 
+	 * @throws ServiceInvocationException
+	 * @throws L2pSecurityException
 	 */
 	private Serializable invoke(String serviceIdentifier, String serviceMethod, Serializable... parameters)
 			throws L2pSecurityException, ServiceInvocationException {
@@ -672,7 +674,7 @@ public class L2pNodeLauncher {
 	 * @param serviceNameVersion
 	 * @throws AgentNotRegisteredException
 	 * @throws NodeException
-	 * @throws ServiceNotFoundException 
+	 * @throws ServiceNotFoundException
 	 */
 	public void stopService(String serviceNameVersion)
 			throws AgentNotRegisteredException, NodeException, ServiceNotFoundException {
@@ -702,7 +704,7 @@ public class L2pNodeLauncher {
 	 * 
 	 * @param agent
 	 * @param passphrase
-	 * @throws AgentAccessDeniedException 
+	 * @throws AgentAccessDeniedException
 	 */
 	public void unlockAgent(PassphraseAgentImpl agent, String passphrase) throws AgentAccessDeniedException {
 		agent.unlock(passphrase);
@@ -741,7 +743,8 @@ public class L2pNodeLauncher {
 
 	/**
 	 * Creates a new node launcher instance.
-	 * @param bindAddress 
+	 * 
+	 * @param bindAddress
 	 * 
 	 * @param port local port number to open
 	 * @param bootstrap comma separated list of bootstrap nodes to connect to or "-" for a new network
@@ -807,7 +810,7 @@ public class L2pNodeLauncher {
 	 * Prints a (Red) error message to the console including a stack trace.
 	 * 
 	 * @param message
-	 * @param throwable 
+	 * @param throwable
 	 */
 	private static void printErrorWithStacktrace(String message, Throwable throwable) {
 		message = ColoredOutput.colorize(message, ColoredOutput.ForegroundColor.Red);
