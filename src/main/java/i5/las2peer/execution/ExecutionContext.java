@@ -323,15 +323,14 @@ public class ExecutionContext implements Context {
 
 		EnvelopeVersion version;
 		try {
-			AgentImpl signing = (AgentImpl) requestAgent(envelope.getSigningAgentId());
+			AgentImpl signing = (AgentImpl) using;
 			version = node.createEnvelope(envelope.getVersion(), envelope.getContent(), keys);
 			node.storeEnvelope(version, signing);
 		} catch (IllegalArgumentException | SerializationException e) {
 			throw new EnvelopeOperationFailedException(e);
-		} catch (AgentAccessDeniedException | AgentNotFoundException | EnvelopeAccessDeniedException
-				| CryptoException e) {
+		} catch (EnvelopeAccessDeniedException | CryptoException e) {
 			throw new EnvelopeAccessDeniedException(e);
-		} catch (EnvelopeException | AgentException e) {
+		} catch (EnvelopeException e) {
 			throw new EnvelopeOperationFailedException(e);
 		}
 
