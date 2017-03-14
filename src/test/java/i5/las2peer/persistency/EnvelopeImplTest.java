@@ -75,10 +75,10 @@ public class EnvelopeImplTest {
 		Collection<AgentImpl> readers = new ArrayList<>();
 		readers.add(owner);
 
-		EnvelopeVersion version = new EnvelopeVersion("test", "content", readers);
-		node.storeEnvelope(version, owner);
+		EnvelopeVersion oldVersion = new EnvelopeVersion("test", "content", readers);
+		node.storeEnvelope(oldVersion, owner);
 
-		EnvelopeImpl envelope = new EnvelopeImpl(version, ownerContext);
+		EnvelopeImpl envelope = new EnvelopeImpl(oldVersion, ownerContext);
 		assertEquals(envelope.getSigningAgentId(), owner.getIdentifier());
 		assertEquals(envelope.getContent(), "content");
 		assertTrue(envelope.hasReader(owner));
