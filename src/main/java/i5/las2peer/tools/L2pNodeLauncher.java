@@ -269,7 +269,7 @@ public class L2pNodeLauncher {
 				}
 				try {
 					memberPassAgent.unlock(passphrase);
-					currentGroupAgent.unlockPrivateKey(memberPassAgent);
+					currentGroupAgent.unlock(memberPassAgent);
 					node.storeAgent(currentGroupAgent);
 					printMessage("\t- stored group agent from " + xmlName);
 					break;

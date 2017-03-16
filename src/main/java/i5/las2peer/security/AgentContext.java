@@ -8,8 +8,6 @@ import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.api.security.PassphraseAgent;
 import i5.las2peer.execution.ServiceThread;
 import i5.las2peer.p2p.Node;
-import i5.las2peer.serialization.SerializationException;
-import i5.las2peer.tools.CryptoException;
 
 import java.util.Date;
 import java.util.Hashtable;
@@ -93,19 +91,13 @@ public class AgentContext implements AgentStorage {
 
 		GroupAgentImpl group = (GroupAgentImpl) agent;
 
-		if (group.isMember(this.getMainAgent())) {
-			try {
-				group.unlockPrivateKey(this.getMainAgent());
-			} catch (L2pSecurityException | CryptoException e) {
-				throw new AgentAccessDeniedException("Unable to open group!", e);
-			} catch (SerializationException e) {
-				throw new AgentOperationFailedException(e);
-			}
+		if (group.hasMember(this.getMainAgent())) { // TODO API may not be a real member yet!!
+			group.unlock(this.getMainAgent());
 		} else {
 			for (String memberId : group.getMemberList()) {
 				try {
 					GroupAgentImpl member = requestGroupAgent(memberId);
-					group.unlockPrivateKey(member);
+					group.unlock(member);
 					break;
 				} catch (Exception e) {
 					// do nothing
@@ -174,7 +166,7 @@ public class AgentContext implements AgentStorage {
 	 * @return true if it is a transitive member of the group.
 	 */
 	public boolean isMemberRecursive(GroupAgentImpl groupAgent, String agentId) {
-		if (groupAgent.isMember(agentId) == true) {
+		if (groupAgent.hasMember(agentId) == true) { // TODO API may not be a real member yet!!
 			return true;
 		}
 		for (String memberId : groupAgent.getMemberList()) {

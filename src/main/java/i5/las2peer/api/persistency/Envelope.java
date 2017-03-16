@@ -66,7 +66,7 @@ public interface Envelope {
 
 	/**
 	 * Removes all readers from this envelope and makes the contents available for everyone (the content is not
-	 * encrypted in thsi case).
+	 * encrypted in this case).
 	 */
 	public void setPublic();
 

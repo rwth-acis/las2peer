@@ -43,10 +43,10 @@ public class GroupAgentImplTest {
 			SerializationException, MalformedXMLException, AgentAccessDeniedException, AgentOperationFailedException {
 		GroupAgentImpl testee = GroupAgentImpl.createGroupAgent(new AgentImpl[] { adam, eve });
 		assertEquals(2, testee.getSize());
-		assertFalse(testee.isMember(kain));
-		assertFalse(testee.isMember(abel.getIdentifier()));
-		assertTrue(testee.isMember(adam));
-		assertTrue(testee.isMember(eve.getIdentifier()));
+		assertFalse(testee.hasMember(kain));
+		assertFalse(testee.hasMember(abel.getIdentifier()));
+		assertTrue(testee.hasMember(adam));
+		assertTrue(testee.hasMember(eve.getIdentifier()));
 
 		assertTrue(testee.isLocked());
 
@@ -63,10 +63,10 @@ public class GroupAgentImplTest {
 		GroupAgentImpl fromXml = GroupAgentImpl.createFromXml(xml);
 
 		assertEquals(2, fromXml.getSize());
-		assertFalse(testee.isMember(kain));
-		assertFalse(testee.isMember(abel.getIdentifier()));
-		assertTrue(testee.isMember(adam));
-		assertTrue(testee.isMember(eve.getIdentifier()));
+		assertFalse(testee.hasMember(kain));
+		assertFalse(testee.hasMember(abel.getIdentifier()));
+		assertTrue(testee.hasMember(adam));
+		assertTrue(testee.hasMember(eve.getIdentifier()));
 
 		assertTrue(fromXml.isLocked());
 
@@ -123,12 +123,12 @@ public class GroupAgentImplTest {
 		eve.unlock(EVESSPASS);
 		testee.unlock(eve);
 
-		assertFalse(testee.isMember(abel));
+		assertFalse(testee.hasMember(abel));
 
 		testee.addMember(abel);
 		testee.lockPrivateKey();
 
-		assertTrue(testee.isMember(abel));
+		assertTrue(testee.hasMember(abel));
 
 		testee.unlock(abel);
 	}
@@ -139,7 +139,7 @@ public class GroupAgentImplTest {
 		GroupAgentImpl subGroup = GroupAgentImpl.createGroupAgent(new AgentImpl[] { adam, eve });
 		GroupAgentImpl superGroup = GroupAgentImpl.createGroupAgent(new AgentImpl[] { abel, subGroup });
 
-		assertTrue(superGroup.isMember(subGroup));
+		assertTrue(superGroup.hasMember(subGroup));
 
 		eve.unlock(EVESSPASS);
 		try {

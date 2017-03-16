@@ -88,33 +88,17 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	}
 
 	/**
-	 * unlock the private key of this group for the given agent (which is hopefully a member)
-	 * 
-	 * @param agent
-	 * @throws L2pSecurityException
-	 * @throws SerializationException
-	 * @throws CryptoException
-	 */
-	public void unlockPrivateKey(AgentImpl agent) throws L2pSecurityException, SerializationException, CryptoException {
-		decryptSecretKey(agent);
-		openedBy = agent;
-		super.unlockPrivateKey(symmetricGroupKey);
-	}
-
-	/**
 	 * unlock the GroupAgent using transitive memberships
 	 * 
 	 * @param agentStorage to load the agents from
 	 * @param agent
-	 * @throws L2pSecurityException
-	 * @throws SerializationException
-	 * @throws CryptoException
+	 * @throws AgentOperationFailedException 
+	 * @throws AgentAccessDeniedException 
 	 */
 	// TODO API remove
-	public void unlockPrivateKeyRecursive(AgentImpl agent, AgentStorage agentStorage) throws L2pSecurityException,
-			SerializationException, CryptoException {
-		if (isMember(agent)) {
-			unlockPrivateKey(agent);
+	public void unlockPrivateKeyRecursive(AgentImpl agent, AgentStorage agentStorage) throws AgentAccessDeniedException, AgentOperationFailedException {
+		if (hasMember(agent)) { // TODO API may not be a real member yet!!
+			unlock(agent);
 			return;
 		} else {
 			for (String memberId : htEncryptedKeyVersions.keySet()) {
@@ -122,15 +106,15 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 					AgentImpl member = agentStorage.getAgent(memberId);
 					if (member instanceof GroupAgentImpl) {
 						((GroupAgentImpl) member).unlockPrivateKeyRecursive(agent, agentStorage);
-						unlockPrivateKey(member);
+						unlock(member);
 						return;
 					}
-				} catch (AgentException | L2pSecurityException | SerializationException | CryptoException e) {
+				} catch (AgentException e) {
 				}
 			}
 		}
 
-		throw new L2pSecurityException("The given agent has no access to this group!");
+		throw new AgentAccessDeniedException("The given agent has no access to this group!");
 	}
 
 	/**
@@ -181,26 +165,6 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 
 		byte[] cryptedSecret = CryptoTools.encryptAsymmetric(symmetricGroupKey, a.getPublicKey());
 		htEncryptedKeyVersions.put(a.getIdentifier(), cryptedSecret);
-	}
-
-	/**
-	 * check, if the given agent is member of this group
-	 * 
-	 * @param a
-	 * @return true, if the given agent is a member of this group
-	 */
-	public boolean isMember(AgentImpl a) {
-		return isMember(a.getIdentifier());
-	}
-
-	/**
-	 * check, if the given agent (id) is member of this group
-	 * 
-	 * @param id
-	 * @return true, if the given agent is a member if this group
-	 */
-	public boolean isMember(String id) {
-		return hasMember(id);
 	}
 
 	/**
@@ -543,7 +507,9 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	@Override
 	public void unlock(Agent agent) throws AgentAccessDeniedException, AgentOperationFailedException {
 		try {
-			unlockPrivateKey((AgentImpl) agent);
+			decryptSecretKey((AgentImpl) agent);
+			openedBy = (AgentImpl) agent;
+			super.unlockPrivateKey(symmetricGroupKey);
 		} catch (L2pSecurityException | CryptoException e) {
 			throw new AgentAccessDeniedException("Permission denied", e);
 		} catch (SerializationException e) {

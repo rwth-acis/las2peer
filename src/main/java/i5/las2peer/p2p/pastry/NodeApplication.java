@@ -138,6 +138,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 
 	}
 
+	@SuppressWarnings("deprecation")
 	public void registerTopic(long id) {
 		synchronized (htTopics) {
 			if (htTopics.get(id) != null) {

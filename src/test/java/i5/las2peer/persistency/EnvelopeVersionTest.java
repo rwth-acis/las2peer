@@ -537,8 +537,8 @@ public class EnvelopeVersionTest {
 			neo.unlock("evespass");
 			neo.notifyRegistrationTo(node1); // workaround for missing context during tests
 			GroupAgentImpl group1 = MockAgentFactory.getGroup1();
-			Assert.assertTrue(group1.isMember(smith));
-			Assert.assertTrue(group1.isMember(neo));
+			Assert.assertTrue(group1.hasMember(smith));
+			Assert.assertTrue(group1.hasMember(neo));
 			group1.unlock(smith);
 			node1.storeAgent(group1);
 			final String testContent = "content from smith";
@@ -579,8 +579,8 @@ public class EnvelopeVersionTest {
 			neo.unlock("evespass");
 			neo.notifyRegistrationTo(node1); // workaround for missing context during tests
 			GroupAgentImpl group1 = MockAgentFactory.getGroup1();
-			Assert.assertTrue(group1.isMember(smith));
-			Assert.assertTrue(group1.isMember(neo));
+			Assert.assertTrue(group1.hasMember(smith));
+			Assert.assertTrue(group1.hasMember(neo));
 			group1.unlock(smith);
 			node1.storeAgent(group1);
 			final String testContent = "content from smith";
