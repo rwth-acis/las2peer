@@ -2,11 +2,12 @@ package i5.las2peer.testing;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import i5.las2peer.api.Service;
-import i5.las2peer.security.AgentImpl;
 
 import org.junit.Assert;
 import org.junit.Test;
+
+import i5.las2peer.api.Service;
+import i5.las2peer.security.AgentImpl;
 
 public class LocalServiceTestCaseTest extends LocalServiceTestCase {
 

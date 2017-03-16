@@ -1,6 +1,5 @@
 package i5.las2peer.security;
 
-
 //TODO API remove or make more expressive
 
 /**

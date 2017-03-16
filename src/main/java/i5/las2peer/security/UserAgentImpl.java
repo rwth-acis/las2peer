@@ -1,5 +1,13 @@
 package i5.las2peer.security;
 
+import java.io.Serializable;
+import java.security.KeyPair;
+import java.security.PublicKey;
+import java.util.Base64;
+import java.util.regex.Pattern;
+
+import org.w3c.dom.Element;
+
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.UserAgent;
 import i5.las2peer.communication.Message;
@@ -13,14 +21,6 @@ import i5.las2peer.serialization.SerializeTools;
 import i5.las2peer.serialization.XmlTools;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
-
-import java.io.Serializable;
-import java.security.KeyPair;
-import java.security.PublicKey;
-import java.util.Base64;
-import java.util.regex.Pattern;
-
-import org.w3c.dom.Element;
 
 /**
  * An UserAgent represent a (End)user of the las2peer system.
@@ -113,8 +113,8 @@ public class UserAgentImpl extends PassphraseAgentImpl implements UserAgent {
 		}
 
 		// http://stackoverflow.com/questions/153716/verify-email-in-java
-		Pattern rfc2822 = Pattern
-				.compile("^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$");
+		Pattern rfc2822 = Pattern.compile(
+				"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$");
 
 		if (email != null && !email.contains("@") && !rfc2822.matcher(email).matches()) {
 			throw new UserAgentException("Invalid e-mail address");
@@ -143,12 +143,11 @@ public class UserAgentImpl extends PassphraseAgentImpl implements UserAgent {
 	public String toXmlString() {
 		try {
 			StringBuffer result = new StringBuffer("<las2peer:agent type=\"user\">\n" + "\t<id>" + getIdentifier()
-					+ "</id>\n" + "\t<publickey encoding=\"base64\">"
-					+ SerializeTools.serializeToBase64(getPublicKey()) + "</publickey>\n"
-					+ "\t<privatekey encrypted=\"" + CryptoTools.getSymmetricAlgorithm() + "\" keygen=\""
-					+ CryptoTools.getSymmetricKeygenMethod() + "\">\n" + "\t\t<salt encoding=\"base64\">"
-					+ Base64.getEncoder().encodeToString(getSalt()) + "</salt>\n" + "\t\t<data encoding=\"base64\">"
-					+ getEncodedPrivate() + "</data>\n" + "\t</privatekey>\n");
+					+ "</id>\n" + "\t<publickey encoding=\"base64\">" + SerializeTools.serializeToBase64(getPublicKey())
+					+ "</publickey>\n" + "\t<privatekey encrypted=\"" + CryptoTools.getSymmetricAlgorithm()
+					+ "\" keygen=\"" + CryptoTools.getSymmetricKeygenMethod() + "\">\n"
+					+ "\t\t<salt encoding=\"base64\">" + Base64.getEncoder().encodeToString(getSalt()) + "</salt>\n"
+					+ "\t\t<data encoding=\"base64\">" + getEncodedPrivate() + "</data>\n" + "\t</privatekey>\n");
 
 			if (sLoginName != null) {
 				result.append("\t<login>" + sLoginName + "</login>\n");
@@ -257,7 +256,8 @@ public class UserAgentImpl extends PassphraseAgentImpl implements UserAgent {
 			// optional user data
 			Element userdata = XmlTools.getOptionalElement(root, "userdata");
 			if (userdata != null) {
-				if (userdata.hasAttribute("encoding") && !userdata.getAttribute("encoding").equalsIgnoreCase("base64")) {
+				if (userdata.hasAttribute("encoding")
+						&& !userdata.getAttribute("encoding").equalsIgnoreCase("base64")) {
 					throw new MalformedXMLException("base64 encoding expected");
 				}
 				result.userData = SerializeTools.deserializeBase64(userdata.getTextContent());

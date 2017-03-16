@@ -1,5 +1,9 @@
 package i5.las2peer.persistency;
 
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
+
 import i5.las2peer.api.persistency.Envelope;
 import i5.las2peer.api.security.Agent;
 import i5.las2peer.security.AgentContext;
@@ -8,22 +12,14 @@ import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.CryptoException;
 
-import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
-
-// TODO refactor storage
-// EnvelopeVersion should contain a reader list and should already be opened,
-// move dealing with EnvelopeVersions to lower level
-
 public class EnvelopeImpl implements Envelope {
+
 	private String identifier;
 	private Serializable content;
 
 	private Set<AgentImpl> readerToAdd = new HashSet<>();
 	private Set<AgentImpl> readerToRevoke = new HashSet<>();
 	private boolean revokeAllReaders = false;
-	private String signingAgentId;
 
 	private EnvelopeVersion currentVersion;
 
@@ -31,16 +27,14 @@ public class EnvelopeImpl implements Envelope {
 		this.identifier = identifier;
 		this.content = null;
 		this.currentVersion = null;
-		this.signingAgentId = signingAgent.getIdentifier();
 		this.readerToAdd.add(signingAgent);
 	}
 
-	public EnvelopeImpl(EnvelopeVersion currentVersion, AgentContext context) throws CryptoException,
-			L2pSecurityException, SerializationException {
+	public EnvelopeImpl(EnvelopeVersion currentVersion, AgentContext context)
+			throws CryptoException, L2pSecurityException, SerializationException {
 		this.identifier = currentVersion.getIdentifier();
 		this.content = currentVersion.getContent(context.getMainAgent(), context);
 		this.currentVersion = currentVersion;
-		this.signingAgentId = null; // TODO API @Thomas: get signing agent
 	}
 
 	@Override
@@ -73,9 +67,8 @@ public class EnvelopeImpl implements Envelope {
 
 	@Override
 	public boolean hasReader(Agent agent) {
-		return (currentVersion != null
-				&& currentVersion.getReaderKeys().containsKey(((AgentImpl) agent).getPublicKey()) || readerToAdd
-					.contains(agent)) && !readerToRevoke.contains(agent) && !revokeAllReaders;
+		return (currentVersion != null && currentVersion.getReaderKeys().containsKey(((AgentImpl) agent).getPublicKey())
+				|| readerToAdd.contains(agent)) && !readerToRevoke.contains(agent) && !revokeAllReaders;
 	}
 
 	@Override
@@ -103,20 +96,16 @@ public class EnvelopeImpl implements Envelope {
 	public boolean getRevokeAllReaders() {
 		return revokeAllReaders;
 	}
-	
+
 	public EnvelopeVersion getVersion() {
 		return this.currentVersion;
 	}
-	
+
 	public void setVersion(EnvelopeVersion v) {
 		this.currentVersion = v;
 		this.revokeAllReaders = false;
 		this.readerToAdd.clear();
 		this.readerToRevoke.clear();
-	}
-	
-	public String getSigningAgentId() {
-		return this.signingAgentId;
 	}
 
 }

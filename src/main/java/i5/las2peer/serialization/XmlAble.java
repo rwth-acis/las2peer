@@ -33,8 +33,8 @@ public interface XmlAble {
 	 * @throws SerializationException
 	 * @throws ClassNotFoundException
 	 */
-	public static XmlAble createFromXml(String xml, String classname) throws MalformedXMLException,
-			SerializationException, ClassNotFoundException {
+	public static XmlAble createFromXml(String xml, String classname)
+			throws MalformedXMLException, SerializationException, ClassNotFoundException {
 		Class<?> c = Class.forName(classname);
 		return createFromXml(xml, c);
 	}

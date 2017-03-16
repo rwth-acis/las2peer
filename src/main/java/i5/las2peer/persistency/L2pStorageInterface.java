@@ -3,9 +3,9 @@ package i5.las2peer.persistency;
 import java.io.Serializable;
 import java.util.Collection;
 
-import i5.las2peer.api.persistency.EnvelopeNotFoundException;
 import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.persistency.EnvelopeException;
+import i5.las2peer.api.persistency.EnvelopeNotFoundException;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.CryptoException;
@@ -154,7 +154,8 @@ public interface L2pStorageInterface {
 	 * @throws EnvelopeNotFoundException If no envelope or any part of it was not found in the network.
 	 * @throws EnvelopeException If an issue with the storage occurs.
 	 */
-	public EnvelopeVersion fetchEnvelope(String identifier, long timeoutMs) throws EnvelopeNotFoundException, EnvelopeException;
+	public EnvelopeVersion fetchEnvelope(String identifier, long timeoutMs)
+			throws EnvelopeNotFoundException, EnvelopeException;
 
 	/**
 	 * Fetches the latest version for the given identifier from the network.

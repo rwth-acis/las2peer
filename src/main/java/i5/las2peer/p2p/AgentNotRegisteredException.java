@@ -9,7 +9,7 @@ import i5.las2peer.api.security.AgentException;
  *
  */
 public class AgentNotRegisteredException extends AgentException {
-	
+
 	private static final long serialVersionUID = 1L;
 
 	public AgentNotRegisteredException(String message) {
@@ -23,5 +23,5 @@ public class AgentNotRegisteredException extends AgentException {
 	public AgentNotRegisteredException(String message, Throwable cause) {
 		super(message, cause);
 	}
-		
+
 }

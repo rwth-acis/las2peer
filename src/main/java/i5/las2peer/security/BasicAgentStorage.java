@@ -1,9 +1,9 @@
 package i5.las2peer.security;
 
+import java.util.Hashtable;
+
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentNotFoundException;
-
-import java.util.Hashtable;
 
 /**
  * A simple Hashtable based storage for agents.

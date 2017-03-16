@@ -4,6 +4,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import java.io.IOException;
+
+import org.junit.Test;
+
 import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
@@ -14,10 +19,6 @@ import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.serialization.MalformedXMLException;
 import i5.las2peer.testing.MockAgentFactory;
 import i5.las2peer.tools.CryptoException;
-
-import java.io.IOException;
-
-import org.junit.Test;
 
 public class NodeServiceCacheTest {
 
@@ -44,11 +45,9 @@ public class NodeServiceCacheTest {
 		assertSame(cache.getServiceAgentInstance(service2, true, true, null).getServiceAgent(), agent2);
 		assertSame(cache.getServiceAgentInstance(service3, true, true, null).getServiceAgent(), agent3);
 
-		assertEquals(cache
-				.getServiceAgentInstance(ServiceNameVersion.fromString(service1.getName()), false, true, null)
+		assertEquals(cache.getServiceAgentInstance(ServiceNameVersion.fromString(service1.getName()), false, true, null)
 				.getService().getName(), service1.getName());
-		assertEquals(cache
-				.getServiceAgentInstance(ServiceNameVersion.fromString(service3.getName()), false, true, null)
+		assertEquals(cache.getServiceAgentInstance(ServiceNameVersion.fromString(service3.getName()), false, true, null)
 				.getService().getName(), service3.getName());
 
 		assertSame(cache.getLocalService(service1), agent1);
@@ -56,8 +55,7 @@ public class NodeServiceCacheTest {
 		assertSame(cache.getLocalService(service3), agent3);
 
 		cache.unregisterLocalService(agent1);
-		assertEquals(cache
-				.getServiceAgentInstance(ServiceNameVersion.fromString(service1.getName()), false, true, null)
+		assertEquals(cache.getServiceAgentInstance(ServiceNameVersion.fromString(service1.getName()), false, true, null)
 				.getService().getName(), service1.getName());
 
 		cache.unregisterLocalService(agent2);
@@ -104,9 +102,9 @@ public class NodeServiceCacheTest {
 	}
 
 	@Test
-	public void testGlobalServices() throws CryptoException, L2pSecurityException, AgentAlreadyRegisteredException,
-			AgentException, CloneNotSupportedException, MalformedXMLException, IOException, NodeException,
-			AgentAccessDeniedException {
+	public void testGlobalServices()
+			throws CryptoException, L2pSecurityException, AgentAlreadyRegisteredException, AgentException,
+			CloneNotSupportedException, MalformedXMLException, IOException, NodeException, AgentAccessDeniedException {
 		// Attention when changing NodeServiceCache parameters
 		// You may have to adjust these results afterwards since this may influence the selected versions
 
@@ -117,17 +115,17 @@ public class NodeServiceCacheTest {
 		LocalNode node3 = LocalNode.launchNode();
 
 		// generate services
-		ServiceAgentImpl service2 = ServiceAgentImpl.createServiceAgent(
-				ServiceNameVersion.fromString("i5.las2peer.api.TestService@2"), "a pass");
+		ServiceAgentImpl service2 = ServiceAgentImpl
+				.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@2"), "a pass");
 		service2.unlock("a pass");
-		ServiceAgentImpl service20 = ServiceAgentImpl.createServiceAgent(
-				ServiceNameVersion.fromString("i5.las2peer.api.TestService@2.0"), "a pass");
+		ServiceAgentImpl service20 = ServiceAgentImpl
+				.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@2.0"), "a pass");
 		service20.unlock("a pass");
-		ServiceAgentImpl service21 = ServiceAgentImpl.createServiceAgent(
-				ServiceNameVersion.fromString("i5.las2peer.api.TestService@2.1"), "a pass");
+		ServiceAgentImpl service21 = ServiceAgentImpl
+				.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@2.1"), "a pass");
 		service21.unlock("a pass");
-		ServiceAgentImpl service22 = ServiceAgentImpl.createServiceAgent(
-				ServiceNameVersion.fromString("i5.las2peer.api.TestService@2.2"), "a pass");
+		ServiceAgentImpl service22 = ServiceAgentImpl
+				.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@2.2"), "a pass");
 		service22.unlock("a pass");
 		ServiceAgentImpl service22_1 = (ServiceAgentImpl) service22.cloneLocked();
 		service22_1.unlock("a pass");
@@ -135,8 +133,8 @@ public class NodeServiceCacheTest {
 		service22_2.unlock("a pass");
 		ServiceAgentImpl service22_3 = (ServiceAgentImpl) service22.cloneLocked();
 		service22_3.unlock("a pass");
-		ServiceAgentImpl service3 = ServiceAgentImpl.createServiceAgent(
-				ServiceNameVersion.fromString("i5.las2peer.api.TestService@3"), "a pass");
+		ServiceAgentImpl service3 = ServiceAgentImpl
+				.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@3"), "a pass");
 		service3.unlock("a pass");
 
 		// start services

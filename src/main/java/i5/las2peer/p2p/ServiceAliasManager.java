@@ -1,5 +1,9 @@
 package i5.las2peer.p2p;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import i5.las2peer.api.persistency.EnvelopeException;
 import i5.las2peer.api.persistency.EnvelopeNotFoundException;
 import i5.las2peer.persistency.EnvelopeVersion;
@@ -8,10 +12,6 @@ import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.CryptoException;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Responsible for mapping service aliases to service names and resolving paths to service names.
@@ -187,8 +187,8 @@ public class ServiceAliasManager {
 		return content;
 	}
 
-	private void createEntry(AgentImpl agent, String key, String value) throws EnvelopeException,
-			IllegalArgumentException, SerializationException, CryptoException {
+	private void createEntry(AgentImpl agent, String key, String value)
+			throws EnvelopeException, IllegalArgumentException, SerializationException, CryptoException {
 		EnvelopeVersion envName = node.createEnvelope(PREFIX + key.toLowerCase(), value, agent, node.getAnonymous());
 		node.storeEnvelope(envName, agent);
 	}

@@ -5,6 +5,14 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import java.io.Serializable;
+import java.util.Date;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
 import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
@@ -19,13 +27,6 @@ import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.testing.MockAgentFactory;
-
-import java.io.Serializable;
-import java.util.Date;
-
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 
 public class LocalNodeTest {
 
@@ -494,8 +495,8 @@ public class LocalNodeTest {
 	public void testSimpleInvocation() {
 		try {
 			String serviceClass = "i5.las2peer.api.TestService";
-			ServiceAgentImpl testService = ServiceAgentImpl.createServiceAgent(
-					ServiceNameVersion.fromString(serviceClass + "@1.0"), "a passphrase");
+			ServiceAgentImpl testService = ServiceAgentImpl
+					.createServiceAgent(ServiceNameVersion.fromString(serviceClass + "@1.0"), "a passphrase");
 			testService.unlock("a passphrase");
 
 			LocalNode testee = LocalNode.launchNode();

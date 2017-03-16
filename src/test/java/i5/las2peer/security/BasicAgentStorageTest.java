@@ -3,10 +3,11 @@ package i5.las2peer.security;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
-import i5.las2peer.testing.MockAgentFactory;
 
 import org.junit.Assert;
 import org.junit.Test;
+
+import i5.las2peer.testing.MockAgentFactory;
 
 public class BasicAgentStorageTest {
 

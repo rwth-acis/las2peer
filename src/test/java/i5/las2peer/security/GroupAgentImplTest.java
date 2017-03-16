@@ -6,17 +6,18 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import i5.las2peer.api.security.AgentAccessDeniedException;
-import i5.las2peer.api.security.AgentOperationFailedException;
-import i5.las2peer.serialization.MalformedXMLException;
-import i5.las2peer.serialization.SerializationException;
-import i5.las2peer.tools.CryptoException;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import i5.las2peer.api.security.AgentAccessDeniedException;
+import i5.las2peer.api.security.AgentOperationFailedException;
+import i5.las2peer.serialization.MalformedXMLException;
+import i5.las2peer.serialization.SerializationException;
+import i5.las2peer.tools.CryptoException;
 
 public class GroupAgentImplTest {
 
@@ -159,17 +160,18 @@ public class GroupAgentImplTest {
 		superGroup.unlock(subGroup);
 		assertSame(subGroup, superGroup.getOpeningAgent());
 	}
-	
-	public void testApply() throws L2pSecurityException, CryptoException, SerializationException, AgentAccessDeniedException, AgentOperationFailedException {
+
+	public void testApply() throws L2pSecurityException, CryptoException, SerializationException,
+			AgentAccessDeniedException, AgentOperationFailedException {
 		GroupAgentImpl agent = GroupAgentImpl.createGroupAgent(new AgentImpl[] { adam, eve });
 		assertTrue(agent.hasMember(adam));
 		assertTrue(agent.hasMember(eve));
 		assertEquals(agent.getSize(), 2);
 		assertTrue(Arrays.asList(agent.getMemberList()).contains(adam.getIdentifier()));
 		assertTrue(Arrays.asList(agent.getMemberList()).contains(eve.getIdentifier()));
-		
+
 		agent.addMember(abel);
-		
+
 		assertTrue(agent.hasMember(adam));
 		assertTrue(agent.hasMember(eve));
 		assertTrue(agent.hasMember(abel));
@@ -177,9 +179,9 @@ public class GroupAgentImplTest {
 		assertTrue(Arrays.asList(agent.getMemberList()).contains(adam.getIdentifier()));
 		assertTrue(Arrays.asList(agent.getMemberList()).contains(eve.getIdentifier()));
 		assertTrue(Arrays.asList(agent.getMemberList()).contains(abel.getIdentifier()));
-		
+
 		agent.revokeMember(adam);
-		
+
 		assertFalse(agent.hasMember(adam));
 		assertTrue(agent.hasMember(eve));
 		assertTrue(agent.hasMember(abel));
@@ -187,9 +189,9 @@ public class GroupAgentImplTest {
 		assertFalse(Arrays.asList(agent.getMemberList()).contains(adam.getIdentifier()));
 		assertTrue(Arrays.asList(agent.getMemberList()).contains(eve.getIdentifier()));
 		assertTrue(Arrays.asList(agent.getMemberList()).contains(abel.getIdentifier()));
-		
+
 		agent.revokeMember(abel);
-		
+
 		assertFalse(agent.hasMember(adam));
 		assertTrue(agent.hasMember(eve));
 		assertFalse(agent.hasMember(abel));
@@ -197,9 +199,9 @@ public class GroupAgentImplTest {
 		assertFalse(Arrays.asList(agent.getMemberList()).contains(adam.getIdentifier()));
 		assertTrue(Arrays.asList(agent.getMemberList()).contains(eve.getIdentifier()));
 		assertFalse(Arrays.asList(agent.getMemberList()).contains(abel.getIdentifier()));
-		
+
 		agent.addMember(adam);
-		
+
 		assertTrue(agent.hasMember(adam));
 		assertTrue(agent.hasMember(eve));
 		assertFalse(agent.hasMember(abel));
@@ -207,19 +209,17 @@ public class GroupAgentImplTest {
 		assertTrue(Arrays.asList(agent.getMemberList()).contains(adam.getIdentifier()));
 		assertTrue(Arrays.asList(agent.getMemberList()).contains(eve.getIdentifier()));
 		assertFalse(Arrays.asList(agent.getMemberList()).contains(abel.getIdentifier()));
-		
+
 		try {
 			agent.apply();
 			fail("Exception expected");
+		} catch (Exception e) {
 		}
-		catch(Exception e) {
-		}
-		
+
 		try {
 			agent.unlock(adam);
 			agent.apply();
-		}
-		catch(Exception e) {
+		} catch (Exception e) {
 			fail("Got unexpected exception: " + e);
 		}
 	}

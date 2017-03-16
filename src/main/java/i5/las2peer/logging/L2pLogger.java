@@ -1,12 +1,5 @@
 package i5.las2peer.logging;
 
-import i5.las2peer.api.Context;
-import i5.las2peer.api.logging.MonitoringEvent;
-import i5.las2peer.execution.ServiceThread;
-import i5.las2peer.p2p.Node;
-import i5.las2peer.security.AgentImpl;
-import i5.las2peer.security.ServiceAgentImpl;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -23,6 +16,13 @@ import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import java.util.logging.StreamHandler;
+
+import i5.las2peer.api.Context;
+import i5.las2peer.api.logging.MonitoringEvent;
+import i5.las2peer.execution.ServiceThread;
+import i5.las2peer.p2p.Node;
+import i5.las2peer.security.AgentImpl;
+import i5.las2peer.security.ServiceAgentImpl;
 
 public final class L2pLogger extends Logger implements NodeObserver {
 
@@ -68,8 +68,8 @@ public final class L2pLogger extends Logger implements NodeObserver {
 		try {
 			GLOBAL_INSTANCE.handlerConsole.setEncoding(GLOBAL_INSTANCE.encoding);
 		} catch (UnsupportedEncodingException e) {
-			System.err.println("Fatal Error! Can't set console log encoding to '" + GLOBAL_INSTANCE.encoding + "'! "
-					+ e + " Using default: " + GLOBAL_INSTANCE.handlerConsole.getEncoding());
+			System.err.println("Fatal Error! Can't set console log encoding to '" + GLOBAL_INSTANCE.encoding + "'! " + e
+					+ " Using default: " + GLOBAL_INSTANCE.handlerConsole.getEncoding());
 		}
 		GLOBAL_INSTANCE.handlerConsole.setFormatter(GLOBAL_INSTANCE.consoleFormatter);
 		GLOBAL_INSTANCE.addHandler(GLOBAL_INSTANCE.handlerConsole);

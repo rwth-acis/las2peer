@@ -1,10 +1,5 @@
 package i5.las2peer.tools;
 
-import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
-import i5.las2peer.api.persistency.EnvelopeException;
-import i5.las2peer.api.persistency.EnvelopeNotFoundException;
-import i5.las2peer.api.security.AgentAccessDeniedException;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -19,6 +14,10 @@ import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.logging.Level;
 
+import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
+import i5.las2peer.api.persistency.EnvelopeException;
+import i5.las2peer.api.persistency.EnvelopeNotFoundException;
+import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
 import i5.las2peer.classLoaders.libraries.LoadedNetworkLibrary;
 import i5.las2peer.classLoaders.libraries.SharedStorageRepository;
@@ -105,9 +104,9 @@ public class PackageUploader {
 			// read agent from given XML file
 			AgentImpl agent = AgentImpl.createFromXml(new File(agentXMLFile));
 			if (!(agent instanceof PassphraseAgentImpl)) {
-				throw new ServicePackageException("Developer agent of type '"
-						+ PassphraseAgentImpl.class.getCanonicalName() + "' expected got '"
-						+ agent.getClass().getCanonicalName() + "' instead!");
+				throw new ServicePackageException(
+						"Developer agent of type '" + PassphraseAgentImpl.class.getCanonicalName() + "' expected got '"
+								+ agent.getClass().getCanonicalName() + "' instead!");
 			}
 			// unlock agent (verify password)
 			PassphraseAgentImpl devAgent = (PassphraseAgentImpl) agent;

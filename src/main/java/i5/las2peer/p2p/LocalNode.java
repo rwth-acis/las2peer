@@ -1,5 +1,13 @@
 package i5.las2peer.p2p;
 
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
+
 import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.persistency.EnvelopeException;
 import i5.las2peer.api.persistency.EnvelopeNotFoundException;
@@ -23,14 +31,6 @@ import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.serialization.MalformedXMLException;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.CryptoException;
-
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * Implementation of the abstract {@link Node} class mostly for testing purposes. All data and agents will be stored in
@@ -95,8 +95,8 @@ public class LocalNode extends Node {
 	}
 
 	@Override
-	public void registerReceiver(MessageReceiver receiver) throws AgentAlreadyRegisteredException,
-			L2pSecurityException, AgentException {
+	public void registerReceiver(MessageReceiver receiver)
+			throws AgentAlreadyRegisteredException, L2pSecurityException, AgentException {
 		super.registerReceiver(receiver);
 
 		if (receiver instanceof AgentImpl) {
@@ -135,8 +135,8 @@ public class LocalNode extends Node {
 					Long[] ids = findAllNodesWithTopic(message.getTopicId());
 
 					if (ids.length == 0) {
-						listener.collectException(new MessageException("No agent listening to topic "
-								+ message.getTopicId()));
+						listener.collectException(
+								new MessageException("No agent listening to topic " + message.getTopicId()));
 					} else {
 						localSendMessage(ids[0], message);
 					}
@@ -159,8 +159,8 @@ public class LocalNode extends Node {
 					Long[] ids = findAllNodesWithTopic(message.getTopicId());
 
 					if (ids.length == 0) {
-						listener.collectException(new MessageException("No agent listening to topic "
-								+ message.getTopicId()));
+						listener.collectException(
+								new MessageException("No agent listening to topic " + message.getTopicId()));
 					} else {
 						listener.addRecipients(ids.length - 1);
 						for (long id : ids) {
@@ -718,8 +718,8 @@ public class LocalNode extends Node {
 	}
 
 	@Override
-	public EnvelopeVersion fetchEnvelope(String identifier, long timeoutMs) throws EnvelopeNotFoundException,
-			EnvelopeException {
+	public EnvelopeVersion fetchEnvelope(String identifier, long timeoutMs)
+			throws EnvelopeNotFoundException, EnvelopeException {
 		return storage.fetchEnvelope(identifier, timeoutMs);
 	}
 

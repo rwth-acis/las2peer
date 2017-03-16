@@ -1,6 +1,10 @@
 package i5.las2peer.execution;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -48,8 +52,8 @@ public class ExecutionContextTest {
 		adam.unlock("adamspass");
 		node.storeAgent(adam);
 
-		ServiceAgentImpl serviceAgent = ServiceAgentImpl.createServiceAgent(
-				ServiceNameVersion.fromString("i5.las2peer.api.TestService@0.1"), "pass");
+		ServiceAgentImpl serviceAgent = ServiceAgentImpl
+				.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@0.1"), "pass");
 		serviceAgent.unlock("pass");
 		node.storeAgent(serviceAgent);
 		node.registerReceiver(serviceAgent);
@@ -83,8 +87,8 @@ public class ExecutionContextTest {
 			result = (String) context.invoke("i5.las2peer.api.TestService@0.1", "getCaller");
 			assertEquals(context.getMainAgent().getIdentifier(), result);
 
-			result = (String) context.invokeInternally(
-					ServiceNameVersion.fromString("i5.las2peer.api.TestService@0.1"), "getCaller");
+			result = (String) context.invokeInternally(ServiceNameVersion.fromString("i5.las2peer.api.TestService@0.1"),
+					"getCaller");
 			assertEquals(context.getServiceAgent().getIdentifier(), result);
 			result = (String) context.invokeInternally("i5.las2peer.api.TestService@0.1", "getCaller");
 			assertEquals(context.getServiceAgent().getIdentifier(), result);
@@ -105,14 +109,14 @@ public class ExecutionContextTest {
 			} catch (ServiceMethodNotFoundException e) {
 
 			}
-			
+
 			try {
 				result = (String) context.invoke("i5.las2peer.api.TestService@0.1", "accessForbidden");
 				fail("ServiceAccessDeniedException expected");
 			} catch (ServiceAccessDeniedException e) {
 
 			}
-			
+
 			try {
 				result = (String) context.invoke("i5.las2peer.api.TestService@0.1", "exception");
 				fail("InternalServiceException expected");
@@ -128,7 +132,7 @@ public class ExecutionContextTest {
 
 	public void testEnvelopes() {
 		// TODO API test exec context envelope api
-		
+
 		/*
 		 Envelope 	createEnvelope(java.lang.String identifier)
 			Envelope 	createEnvelope(java.lang.String identifier, Agent using)
@@ -199,17 +203,17 @@ public class ExecutionContextTest {
 			@Override
 			public void log(Long timestamp, MonitoringEvent event, String sourceNode, String sourceAgentId,
 					String destinationNode, String destinationAgentId, String remarks) {
-				messages.add(timestamp + " " + event + " " + sourceNode + " " + sourceAgentId + " "
-						+ destinationNode + " " + destinationAgentId + " " + remarks);
+				messages.add(timestamp + " " + event + " " + sourceNode + " " + sourceAgentId + " " + destinationNode
+						+ " " + destinationAgentId + " " + remarks);
 			}
 		});
-		
+
 		context.monitorEvent(this, MonitoringEvent.SERVICE_CUSTOM_ERROR_1, "testMessage", true);
-		
-		assertTrue(messages.get(messages.size()-1).contains(this.getClass().getSimpleName()));
-		assertTrue(messages.get(messages.size()-1).contains(MonitoringEvent.SERVICE_CUSTOM_ERROR_1.toString()));
-		assertTrue(messages.get(messages.size()-1).contains("testMessage"));
-		assertTrue(messages.get(messages.size()-1).contains(context.getMainAgent().getIdentifier()));
-		assertTrue(messages.get(messages.size()-1).contains(context.getServiceAgent().getIdentifier()));
+
+		assertTrue(messages.get(messages.size() - 1).contains(this.getClass().getSimpleName()));
+		assertTrue(messages.get(messages.size() - 1).contains(MonitoringEvent.SERVICE_CUSTOM_ERROR_1.toString()));
+		assertTrue(messages.get(messages.size() - 1).contains("testMessage"));
+		assertTrue(messages.get(messages.size() - 1).contains(context.getMainAgent().getIdentifier()));
+		assertTrue(messages.get(messages.size() - 1).contains(context.getServiceAgent().getIdentifier()));
 	}
 }

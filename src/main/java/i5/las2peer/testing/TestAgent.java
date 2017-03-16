@@ -6,8 +6,8 @@ import javax.crypto.SecretKey;
 
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
-import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.AgentContext;
+import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.serialization.SerializationException;
 

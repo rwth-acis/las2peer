@@ -10,8 +10,8 @@ public class MetadataArtifact extends NetworkArtifact {
 
 	private static final long serialVersionUID = 1L;
 
-	public MetadataArtifact(PastryIdFactory idFactory, String identifier, long version, byte[] serialize, AgentImpl author)
-			throws CryptoException, L2pSecurityException, VerificationFailedException {
+	public MetadataArtifact(PastryIdFactory idFactory, String identifier, long version, byte[] serialize,
+			AgentImpl author) throws CryptoException, L2pSecurityException, VerificationFailedException {
 		super(buildMetadataId(idFactory, identifier, version), 0, serialize, author);
 	}
 

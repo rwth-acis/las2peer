@@ -2,14 +2,6 @@ package i5.las2peer.tools;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import i5.las2peer.persistency.DecodingFailedException;
-import i5.las2peer.persistency.EnvelopeGenerator;
-import i5.las2peer.persistency.EnvelopeVersion;
-import i5.las2peer.security.L2pSecurityException;
-import i5.las2peer.security.UserAgentImpl;
-import i5.las2peer.serialization.MalformedXMLException;
-import i5.las2peer.serialization.SerializationException;
-import i5.las2peer.testing.MockAgentFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -18,6 +10,15 @@ import java.io.PrintStream;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import i5.las2peer.persistency.DecodingFailedException;
+import i5.las2peer.persistency.EnvelopeGenerator;
+import i5.las2peer.persistency.EnvelopeVersion;
+import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.security.UserAgentImpl;
+import i5.las2peer.serialization.MalformedXMLException;
+import i5.las2peer.serialization.SerializationException;
+import i5.las2peer.testing.MockAgentFactory;
 
 public class EnvelopeGeneratorTest {
 
@@ -38,8 +39,8 @@ public class EnvelopeGeneratorTest {
 
 	@Test
 	public void testGeneration() throws Exception {
-		EnvelopeGenerator.main(new String[] { "src/main/java/i5/las2peer/testing/eve.xml", "evespass",
-				"java.lang.Integer", "102" });
+		EnvelopeGenerator.main(
+				new String[] { "src/main/java/i5/las2peer/testing/eve.xml", "evespass", "java.lang.Integer", "102" });
 		String output = standardOut.toString();
 		String error = standardError.toString();
 

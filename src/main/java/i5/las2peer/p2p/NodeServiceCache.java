@@ -106,8 +106,8 @@ public class NodeServiceCache {
 						update(service, true, acting);
 					} catch (Exception e) {
 						if (local == null) {
-							throw new AgentNotRegisteredException("Could not retrieve service information from the network.",
-									e);
+							throw new AgentNotRegisteredException(
+									"Could not retrieve service information from the network.", e);
 						}
 					}
 					instance = getBestGlobalInstanceOfVersion(service.getName(), service.getVersion());
@@ -127,8 +127,8 @@ public class NodeServiceCache {
 						update(service, false, acting);
 					} catch (Exception e) {
 						if (local == null) {
-							throw new AgentNotRegisteredException("Could not retrieve service information from the network.",
-									e);
+							throw new AgentNotRegisteredException(
+									"Could not retrieve service information from the network.", e);
 						}
 					}
 					instance = getBestGlobalInstanceFitsVersion(service.getName(), service.getVersion());
@@ -282,9 +282,8 @@ public class NodeServiceCache {
 	 * @throws InterruptedException
 	 * @throws TimeoutException
 	 */
-	private boolean update(ServiceNameVersion service, boolean exact, AgentImpl acting)
-			throws EncodingFailedException, L2pSecurityException, SerializationException, InterruptedException,
-			TimeoutException {
+	private boolean update(ServiceNameVersion service, boolean exact, AgentImpl acting) throws EncodingFailedException,
+			L2pSecurityException, SerializationException, InterruptedException, TimeoutException {
 
 		Message m = new Message(acting, ServiceAgentImpl.serviceNameToTopicId(service.getName()),
 				new ServiceDiscoveryContent(service, exact), timeoutMs);

@@ -30,7 +30,8 @@ public class ServiceAgentGenerator {
 		}
 
 		try {
-			ServiceAgentImpl agent = ServiceAgentImpl.createServiceAgent(ServiceNameVersion.fromString(argv[0]), argv[1]);
+			ServiceAgentImpl agent = ServiceAgentImpl.createServiceAgent(ServiceNameVersion.fromString(argv[0]),
+					argv[1]);
 			System.out.print(agent.toXmlString());
 		} catch (Exception e) {
 			System.err.println("unable to generate new agent: " + e);

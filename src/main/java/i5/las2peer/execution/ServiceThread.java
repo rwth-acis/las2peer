@@ -1,6 +1,5 @@
 package i5.las2peer.execution;
 
-
 public class ServiceThread extends Thread {
 
 	private final ExecutionContext context;

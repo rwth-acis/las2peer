@@ -76,8 +76,8 @@ public class XmlTools {
 		NodeList nList = document.getElementsByTagName(rootElementName);
 		int len = nList.getLength();
 		if (len != 1) {
-			throw new MalformedXMLException("Exactly one element '" + rootElementName
-					+ "' per XML document expected! Found: " + len);
+			throw new MalformedXMLException(
+					"Exactly one element '" + rootElementName + "' per XML document expected! Found: " + len);
 		}
 		org.w3c.dom.Node rootNode = nList.item(0);
 		String rootNodeName = rootNode.getNodeName();
@@ -109,8 +109,8 @@ public class XmlTools {
 		org.w3c.dom.Node firstNode = nodeList.item(0);
 		short nodeType = firstNode.getNodeType();
 		if (nodeType != org.w3c.dom.Node.ELEMENT_NODE) {
-			throw new MalformedXMLException("Node type (" + nodeType + ") is not type element ("
-					+ org.w3c.dom.Node.ELEMENT_NODE + ")");
+			throw new MalformedXMLException(
+					"Node type (" + nodeType + ") is not type element (" + org.w3c.dom.Node.ELEMENT_NODE + ")");
 		}
 		return (Element) firstNode;
 	}
@@ -132,8 +132,8 @@ public class XmlTools {
 			org.w3c.dom.Node firstNode = nodeList.item(0);
 			short nodeType = firstNode.getNodeType();
 			if (nodeType != org.w3c.dom.Node.ELEMENT_NODE) {
-				throw new MalformedXMLException("Node type (" + nodeType + ") is not type element ("
-						+ org.w3c.dom.Node.ELEMENT_NODE + ")");
+				throw new MalformedXMLException(
+						"Node type (" + nodeType + ") is not type element (" + org.w3c.dom.Node.ELEMENT_NODE + ")");
 			}
 			return (Element) firstNode;
 		} else {

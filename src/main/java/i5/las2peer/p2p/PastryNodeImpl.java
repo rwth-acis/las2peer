@@ -1,5 +1,22 @@
 package i5.las2peer.p2p;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.Serializable;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.UnknownHostException;
+import java.util.Collection;
+import java.util.Hashtable;
+import java.util.Properties;
+import java.util.Vector;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.logging.Level;
+
 import i5.las2peer.api.logging.MonitoringEvent;
 import i5.las2peer.api.persistency.EnvelopeException;
 import i5.las2peer.api.persistency.EnvelopeNotFoundException;
@@ -29,24 +46,6 @@ import i5.las2peer.serialization.MalformedXMLException;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.SimpleTools;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.Serializable;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.UnknownHostException;
-import java.util.Collection;
-import java.util.Hashtable;
-import java.util.Properties;
-import java.util.Vector;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.logging.Level;
-
 import rice.environment.Environment;
 import rice.p2p.commonapi.NodeHandle;
 import rice.pastry.PastryNode;
@@ -116,7 +115,7 @@ public class PastryNodeImpl extends Node {
 	 * 
 	 * @param classManager A class manager that is used by the node.
 	 * @param useMonitoringObserver If true, the node sends monitoring information to the monitoring service.
-	 * @param pastryBindAddress 
+	 * @param pastryBindAddress
 	 * @param pastryPort A port number the PastryNode should listen to for network communication. <code>null</code>
 	 *            means use a random system defined port. Use {@link #getPort()} to retrieve the number.
 	 * @param bootstrap A bootstrap address that should be used, like hostname:port or <code>null</code> to start a new
@@ -240,8 +239,8 @@ public class PastryNodeImpl extends Node {
 
 					// abort if can't join
 					if (pastryNode.joinFailed()) {
-						throw new NodeException("Could not join the FreePastry ring.  Reason:"
-								+ pastryNode.joinFailedReason());
+						throw new NodeException(
+								"Could not join the FreePastry ring.  Reason:" + pastryNode.joinFailedReason());
 					}
 				}
 			}
@@ -372,8 +371,8 @@ public class PastryNodeImpl extends Node {
 	}
 
 	@Override
-	public void registerReceiver(MessageReceiver receiver) throws AgentAlreadyRegisteredException,
-			L2pSecurityException, AgentException {
+	public void registerReceiver(MessageReceiver receiver)
+			throws AgentAlreadyRegisteredException, L2pSecurityException, AgentException {
 
 		synchronized (this) {
 			super.registerReceiver(receiver);
@@ -698,8 +697,8 @@ public class PastryNodeImpl extends Node {
 		}, collisionHandler, new StorageExceptionHandler() {
 			@Override
 			public void onException(Exception e) {
-				observerNotice(MonitoringEvent.ARTIFACT_UPLOAD_FAILED, pastryNode, "Storage error for Artifact "
-						+ envelope.getIdentifier());
+				observerNotice(MonitoringEvent.ARTIFACT_UPLOAD_FAILED, pastryNode,
+						"Storage error for Artifact " + envelope.getIdentifier());
 				if (exceptionHandler != null) {
 					exceptionHandler.onException(e);
 				}
@@ -708,8 +707,8 @@ public class PastryNodeImpl extends Node {
 	}
 
 	@Override
-	public EnvelopeVersion fetchEnvelope(String identifier, long timeoutMs) throws EnvelopeNotFoundException,
-			EnvelopeException {
+	public EnvelopeVersion fetchEnvelope(String identifier, long timeoutMs)
+			throws EnvelopeNotFoundException, EnvelopeException {
 		if (pastStorage == null) {
 			throw new IllegalStateException(
 					"Past storage not initialized! You can fetch artifacts only from running nodes!");

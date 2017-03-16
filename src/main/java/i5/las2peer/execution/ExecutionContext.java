@@ -1,5 +1,13 @@
 package i5.las2peer.execution;
 
+import java.io.Serializable;
+import java.security.PublicKey;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.logging.Logger;
+
 import i5.las2peer.api.Context;
 import i5.las2peer.api.Service;
 import i5.las2peer.api.execution.InternalServiceException;
@@ -40,14 +48,6 @@ import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.CryptoException;
-
-import java.io.Serializable;
-import java.security.PublicKey;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.logging.Logger;
 
 public class ExecutionContext implements Context {
 	final private AgentContext callerContext;
@@ -136,9 +136,9 @@ public class ExecutionContext implements Context {
 	}
 
 	private Serializable invokeWithAgent(AgentImpl agent, ServiceNameVersion service, String method,
-			Serializable[] parameters) throws ServiceNotFoundException, ServiceNotAvailableException,
-			InternalServiceException, ServiceMethodNotFoundException, ServiceInvocationFailedException,
-			ServiceAccessDeniedException {
+			Serializable[] parameters)
+			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException,
+			ServiceMethodNotFoundException, ServiceInvocationFailedException, ServiceAccessDeniedException {
 		try {
 			return callerContext.getLocalNode().invoke(agent, service, method, parameters);
 		} catch (ServiceNotFoundException | ServiceNotAvailableException | InternalServiceException
@@ -211,20 +211,20 @@ public class ExecutionContext implements Context {
 	}
 
 	@Override
-	public Agent requestAgent(String agentId, Agent using) throws AgentAccessDeniedException, AgentNotFoundException,
-			AgentOperationFailedException {
+	public Agent requestAgent(String agentId, Agent using)
+			throws AgentAccessDeniedException, AgentNotFoundException, AgentOperationFailedException {
 		return node.getAgentContext((AgentImpl) using).requestAgent(agentId);
 	}
 
 	@Override
-	public Agent requestAgent(String agentId) throws AgentAccessDeniedException, AgentNotFoundException,
-			AgentOperationFailedException {
+	public Agent requestAgent(String agentId)
+			throws AgentAccessDeniedException, AgentNotFoundException, AgentOperationFailedException {
 		return callerContext.requestAgent(agentId);
 	}
 
 	@Override
-	public void storeAgent(Agent agent) throws AgentAccessDeniedException, AgentAlreadyExistsException,
-			AgentOperationFailedException {
+	public void storeAgent(Agent agent)
+			throws AgentAccessDeniedException, AgentAlreadyExistsException, AgentOperationFailedException {
 		if (agent instanceof GroupAgentImpl) {
 			((GroupAgentImpl) agent).apply();
 		}
@@ -258,8 +258,8 @@ public class ExecutionContext implements Context {
 	}
 
 	@Override
-	public Envelope requestEnvelope(String identifier, Agent using) throws EnvelopeAccessDeniedException,
-			EnvelopeNotFoundException, EnvelopeOperationFailedException {
+	public Envelope requestEnvelope(String identifier, Agent using)
+			throws EnvelopeAccessDeniedException, EnvelopeNotFoundException, EnvelopeOperationFailedException {
 		EnvelopeVersion version;
 		try {
 			version = node.fetchEnvelope(identifier);
@@ -281,14 +281,14 @@ public class ExecutionContext implements Context {
 	}
 
 	@Override
-	public Envelope requestEnvelope(String identifier) throws EnvelopeAccessDeniedException, EnvelopeNotFoundException,
-			EnvelopeOperationFailedException {
+	public Envelope requestEnvelope(String identifier)
+			throws EnvelopeAccessDeniedException, EnvelopeNotFoundException, EnvelopeOperationFailedException {
 		return requestEnvelope(identifier, callerContext.getMainAgent());
 	}
 
 	@Override
-	public void storeEnvelope(Envelope env, Agent using) throws EnvelopeAccessDeniedException,
-			EnvelopeOperationFailedException {
+	public void storeEnvelope(Envelope env, Agent using)
+			throws EnvelopeAccessDeniedException, EnvelopeOperationFailedException {
 		storeEnvelope(env, (Envelope env1, Envelope env2) -> {
 			throw new MergeFailedException("No collision handler implemented.");
 		}, using);
@@ -309,7 +309,7 @@ public class ExecutionContext implements Context {
 		Set<PublicKey> keys;
 
 		if (envelope.getRevokeAllReaders()) {
-			keys = new HashSet<PublicKey>();
+			keys = new HashSet<>();
 		} else {
 			keys = envelope.getVersion().getReaderKeys().keySet();
 		}
@@ -323,14 +323,14 @@ public class ExecutionContext implements Context {
 
 		EnvelopeVersion version;
 		try {
-			AgentImpl signing = (AgentImpl) requestAgent(envelope.getSigningAgentId());
+			AgentImpl signing = (AgentImpl) using;
 			version = node.createEnvelope(envelope.getVersion(), envelope.getContent(), keys);
 			node.storeEnvelope(version, signing);
 		} catch (IllegalArgumentException | SerializationException e) {
 			throw new EnvelopeOperationFailedException(e);
-		} catch (AgentAccessDeniedException | AgentNotFoundException | EnvelopeAccessDeniedException | CryptoException e) {
+		} catch (EnvelopeAccessDeniedException | CryptoException e) {
 			throw new EnvelopeAccessDeniedException(e);
-		} catch (EnvelopeException | AgentException e) {
+		} catch (EnvelopeException e) {
 			throw new EnvelopeOperationFailedException(e);
 		}
 
@@ -339,14 +339,14 @@ public class ExecutionContext implements Context {
 	}
 
 	@Override
-	public void storeEnvelope(Envelope env, EnvelopeCollisionHandler handler) throws EnvelopeAccessDeniedException,
-			EnvelopeOperationFailedException {
+	public void storeEnvelope(Envelope env, EnvelopeCollisionHandler handler)
+			throws EnvelopeAccessDeniedException, EnvelopeOperationFailedException {
 		storeEnvelope(env, handler, callerContext.getMainAgent());
 	}
 
 	@Override
-	public void reclaimEnvelope(String identifier, Agent using) throws EnvelopeAccessDeniedException,
-			EnvelopeNotFoundException, EnvelopeOperationFailedException {
+	public void reclaimEnvelope(String identifier, Agent using)
+			throws EnvelopeAccessDeniedException, EnvelopeNotFoundException, EnvelopeOperationFailedException {
 		try {
 			node.removeEnvelope(identifier);
 		} catch (EnvelopeException e) {
@@ -355,8 +355,8 @@ public class ExecutionContext implements Context {
 	}
 
 	@Override
-	public void reclaimEnvelope(String identifier) throws EnvelopeAccessDeniedException, EnvelopeNotFoundException,
-			EnvelopeOperationFailedException {
+	public void reclaimEnvelope(String identifier)
+			throws EnvelopeAccessDeniedException, EnvelopeNotFoundException, EnvelopeOperationFailedException {
 		reclaimEnvelope(identifier, callerContext.getMainAgent());
 	}
 

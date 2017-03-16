@@ -2,11 +2,12 @@ package i5.las2peer.security;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+
+import org.junit.Test;
+
 import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.p2p.LocalNode;
 import i5.las2peer.p2p.Node;
-
-import org.junit.Test;
 
 public class UserAgentManagerTest {
 

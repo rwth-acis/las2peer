@@ -3,20 +3,21 @@ package i5.las2peer.security;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import i5.las2peer.api.security.AgentAccessDeniedException;
-import i5.las2peer.serialization.MalformedXMLException;
-import i5.las2peer.serialization.SerializationException;
-import i5.las2peer.tools.CryptoException;
 
 import java.security.NoSuchAlgorithmException;
 
 import org.junit.Test;
 
+import i5.las2peer.api.security.AgentAccessDeniedException;
+import i5.las2peer.serialization.MalformedXMLException;
+import i5.las2peer.serialization.SerializationException;
+import i5.las2peer.tools.CryptoException;
+
 public class UserAgentImplTest {
 
 	@Test
-	public void testUnlocking() throws NoSuchAlgorithmException, CryptoException, AgentAccessDeniedException,
-			L2pSecurityException {
+	public void testUnlocking()
+			throws NoSuchAlgorithmException, CryptoException, AgentAccessDeniedException, L2pSecurityException {
 		String passphrase = "A passphrase to unlock";
 		UserAgentImpl a = UserAgentImpl.createUserAgent(passphrase);
 
@@ -58,8 +59,8 @@ public class UserAgentImplTest {
 	}
 
 	@Test
-	public void testPassphraseChange() throws NoSuchAlgorithmException, L2pSecurityException, CryptoException,
-			AgentAccessDeniedException {
+	public void testPassphraseChange()
+			throws NoSuchAlgorithmException, L2pSecurityException, CryptoException, AgentAccessDeniedException {
 		String passphrase = "a passphrase";
 		UserAgentImpl a = UserAgentImpl.createUserAgent(passphrase);
 
@@ -84,8 +85,8 @@ public class UserAgentImplTest {
 	}
 
 	@Test
-	public void testXml() throws NoSuchAlgorithmException, L2pSecurityException, MalformedXMLException,
-			CryptoException, UserAgentException, AgentAccessDeniedException {
+	public void testXml() throws NoSuchAlgorithmException, L2pSecurityException, MalformedXMLException, CryptoException,
+			UserAgentException, AgentAccessDeniedException {
 		String passphrase = "a pass";
 		String email = "usera@example.org";
 		String userData = "This is the user data attachement.";

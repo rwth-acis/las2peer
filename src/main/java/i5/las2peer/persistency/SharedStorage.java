@@ -1,5 +1,22 @@
 package i5.las2peer.persistency;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.security.PublicKey;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Random;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+
 import i5.las2peer.api.Configurable;
 import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.persistency.EnvelopeException;
@@ -20,24 +37,6 @@ import i5.las2peer.security.AgentImpl;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.serialization.SerializeTools;
 import i5.las2peer.tools.CryptoException;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
-import java.security.PublicKey;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Random;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-
 import rice.p2p.commonapi.Id;
 import rice.p2p.commonapi.IdFactory;
 import rice.p2p.commonapi.Node;
@@ -137,8 +136,8 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 	}
 
 	private void lookupHandles(Id id, StorageLookupHandler lookupHandler, StorageExceptionHandler exceptionHandler) {
-		pastStorage.lookupHandles(id, numOfReplicas + 1, new PastLookupContinuation(threadpool, lookupHandler,
-				exceptionHandler));
+		pastStorage.lookupHandles(id, numOfReplicas + 1,
+				new PastLookupContinuation(threadpool, lookupHandler, exceptionHandler));
 	}
 
 	private void waitForStoreResult(StoreProcessHelper resultHelper, long timeoutMs) throws EnvelopeException {
@@ -219,9 +218,9 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 		storeEnvelopeAsync(envelope, author, resultHandler, collisionHandler, exceptionHandler, mergeCounter);
 	}
 
-	private void storeEnvelopeAsync(EnvelopeVersion envelope, AgentImpl author,
-			StorageStoreResultHandler resultHandler, StorageCollisionHandler collisionHandler,
-			StorageExceptionHandler exceptionHandler, MergeCounter mergeCounter) {
+	private void storeEnvelopeAsync(EnvelopeVersion envelope, AgentImpl author, StorageStoreResultHandler resultHandler,
+			StorageCollisionHandler collisionHandler, StorageExceptionHandler exceptionHandler,
+			MergeCounter mergeCounter) {
 		// check for collision to offer merging
 		threadpool.execute(new Runnable() {
 			@Override
@@ -270,14 +269,15 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 						mergeCounter.increase();
 						storeEnvelopeAsync(mergedEnv, author, resultHandler, collisionHandler, exceptionHandler,
 								mergeCounter);
-					} catch (StopMergingException | IllegalArgumentException | SerializationException | CryptoException e) {
+					} catch (StopMergingException | IllegalArgumentException | SerializationException
+							| CryptoException e) {
 						exceptionHandler.onException(e);
 					}
 				}
 			}, exceptionHandler);
 		} else if (exceptionHandler != null) {
-			exceptionHandler.onException(new EnvelopeAlreadyExistsException("Duplicate DHT entry for envelope "
-					+ envelope.toString()));
+			exceptionHandler.onException(
+					new EnvelopeAlreadyExistsException("Duplicate DHT entry for envelope " + envelope.toString()));
 		}
 	}
 
@@ -286,8 +286,8 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 		final long version = envelope.getVersion();
 		if (version < 1) { // just to be sure
 			if (exceptionHandler != null) {
-				exceptionHandler.onException(new IllegalArgumentException("Version number (" + version
-						+ ") must be higher than zero"));
+				exceptionHandler.onException(
+						new IllegalArgumentException("Version number (" + version + ") must be higher than zero"));
 			}
 			return;
 		}
@@ -365,8 +365,8 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 					SerializeTools.serialize(metadataEnvelope), author);
 			logger.info("Storing metadata for envelope " + metadataEnvelope.toString() + " with id "
 					+ metadataArtifact.getId().toStringFull());
-			pastStorage.insert(metadataArtifact, new PastInsertContinuation(threadpool,
-					new StorageStoreResultHandler() {
+			pastStorage.insert(metadataArtifact,
+					new PastInsertContinuation(threadpool, new StorageStoreResultHandler() {
 						@Override
 						public void onResult(Serializable envelope, int successfulOperations) {
 							// all done - call actual user defined result handlers
@@ -389,8 +389,8 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 	}
 
 	@Override
-	public EnvelopeVersion fetchEnvelope(String identifier, long timeoutMs) throws EnvelopeNotFoundException,
-			EnvelopeException {
+	public EnvelopeVersion fetchEnvelope(String identifier, long timeoutMs)
+			throws EnvelopeNotFoundException, EnvelopeException {
 		return fetchEnvelope(identifier, EnvelopeVersion.LATEST_VERSION, timeoutMs);
 	}
 
@@ -474,9 +474,9 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 					} else {
 						// not found
 						if (exceptionHandler != null) {
-							exceptionHandler.onException(new EnvelopeNotFoundException("Envelope with identifier '"
-									+ identifier + "' and version " + version + " (" + checkId.toStringFull()
-									+ ") not found in shared storage!"));
+							exceptionHandler.onException(new EnvelopeNotFoundException(
+									"Envelope with identifier '" + identifier + "' and version " + version + " ("
+											+ checkId.toStringFull() + ") not found in shared storage!"));
 						}
 					}
 				}
@@ -485,8 +485,8 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 		}
 	}
 
-	private void fetchWithMetadata(ArrayList<PastContentHandle> metadataHandles,
-			StorageEnvelopeHandler envelopeHandler, StorageExceptionHandler exceptionHandler) {
+	private void fetchWithMetadata(ArrayList<PastContentHandle> metadataHandles, StorageEnvelopeHandler envelopeHandler,
+			StorageExceptionHandler exceptionHandler) {
 		fetchFromHandles(metadataHandles, new StorageArtifactHandler() {
 			@Override
 			public void onReceive(AbstractArtifact artifact) {
@@ -515,9 +515,9 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 									artifactHandler);
 						}
 					} else if (exceptionHandler != null) {
-						exceptionHandler.onException(new EnvelopeException("expected "
-								+ MetadataEnvelope.class.getCanonicalName() + " but got "
-								+ received.getClass().getCanonicalName() + " instead"));
+						exceptionHandler.onException(
+								new EnvelopeException("expected " + MetadataEnvelope.class.getCanonicalName()
+										+ " but got " + received.getClass().getCanonicalName() + " instead"));
 					}
 				} catch (SerializationException | VerificationFailedException e) {
 					if (exceptionHandler != null) {

@@ -4,6 +4,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import java.io.IOException;
+
+import org.junit.Test;
+
 import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
@@ -18,10 +23,6 @@ import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.testing.MockAgentFactory;
 import i5.las2peer.tools.CryptoException;
 
-import java.io.IOException;
-
-import org.junit.Test;
-
 public class ServiceAgentImplTest {
 	private static final String servicename = "i5.las2peer.somePackage.AService";
 	private static final String serviceversion = "1.0";
@@ -29,8 +30,8 @@ public class ServiceAgentImplTest {
 
 	@Test
 	public void testCreation() throws CryptoException, L2pSecurityException, AgentAccessDeniedException {
-		ServiceAgentImpl testee = ServiceAgentImpl.createServiceAgent(
-				ServiceNameVersion.fromString(servicename + "@" + serviceversion), passphrase);
+		ServiceAgentImpl testee = ServiceAgentImpl
+				.createServiceAgent(ServiceNameVersion.fromString(servicename + "@" + serviceversion), passphrase);
 
 		assertEquals(servicename + "@" + serviceversion, testee.getServiceNameVersion().toString());
 
@@ -50,10 +51,10 @@ public class ServiceAgentImplTest {
 	}
 
 	@Test
-	public void testXmlAndBack() throws CryptoException, L2pSecurityException, MalformedXMLException,
-			AgentAccessDeniedException {
-		ServiceAgentImpl testee = ServiceAgentImpl.createServiceAgent(
-				ServiceNameVersion.fromString(servicename + "@" + serviceversion), passphrase);
+	public void testXmlAndBack()
+			throws CryptoException, L2pSecurityException, MalformedXMLException, AgentAccessDeniedException {
+		ServiceAgentImpl testee = ServiceAgentImpl
+				.createServiceAgent(ServiceNameVersion.fromString(servicename + "@" + serviceversion), passphrase);
 
 		String xml = testee.toXmlString();
 
@@ -70,23 +71,23 @@ public class ServiceAgentImplTest {
 		// start node
 		LocalNode node = LocalNode.launchNode();
 
-		ServiceAgentImpl testServiceAgentImpl0 = ServiceAgentImpl.createServiceAgent(
-				ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.0"), "a pass");
+		ServiceAgentImpl testServiceAgentImpl0 = ServiceAgentImpl
+				.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.0"), "a pass");
 		testServiceAgentImpl0.unlock("a pass");
 		node.registerReceiver(testServiceAgentImpl0);
 
-		ServiceAgentImpl testServiceAgentImpl1 = ServiceAgentImpl.createServiceAgent(
-				ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.1"), "a pass");
+		ServiceAgentImpl testServiceAgentImpl1 = ServiceAgentImpl
+				.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.1"), "a pass");
 		testServiceAgentImpl1.unlock("a pass");
 		node.registerReceiver(testServiceAgentImpl1);
 
-		ServiceAgentImpl testServiceAgentImpl2 = ServiceAgentImpl.createServiceAgent(
-				ServiceNameVersion.fromString("i5.las2peer.api.TestService@2.0"), "a pass");
+		ServiceAgentImpl testServiceAgentImpl2 = ServiceAgentImpl
+				.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@2.0"), "a pass");
 		testServiceAgentImpl2.unlock("a pass");
 		node.registerReceiver(testServiceAgentImpl2);
 
-		ServiceAgentImpl testServiceAgentImpl3 = ServiceAgentImpl.createServiceAgent(
-				ServiceNameVersion.fromString("i5.las2peer.api.TestService2@1.0"), "a pass");
+		ServiceAgentImpl testServiceAgentImpl3 = ServiceAgentImpl
+				.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService2@1.0"), "a pass");
 		testServiceAgentImpl3.unlock("a pass");
 
 		node.registerReceiver(testServiceAgentImpl3);
