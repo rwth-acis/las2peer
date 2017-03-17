@@ -13,6 +13,7 @@ import i5.las2peer.api.execution.ServiceInvocationException;
 import i5.las2peer.api.execution.ServiceNotFoundException;
 import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.security.AgentException;
+import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.p2p.LocalNode;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.L2pSecurityException;
@@ -201,12 +202,12 @@ public abstract class LocalServiceTestCase {
 	 * @param method
 	 * @param parameters
 	 * @return result of the invocation
-	 * @throws L2pSecurityException
 	 * @throws InterruptedException
 	 * @throws ServiceInvocationException
+	 * @throws AgentLockedException 
 	 */
 	public Serializable invoke(AgentImpl executing, String method, Serializable... parameters)
-			throws L2pSecurityException, InterruptedException, ServiceInvocationException {
+			throws InterruptedException, ServiceInvocationException, AgentLockedException {
 		return getNode().invokeLocally(executing, getMyAgent(), method, parameters);
 	}
 

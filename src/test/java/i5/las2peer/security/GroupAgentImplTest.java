@@ -42,7 +42,8 @@ public class GroupAgentImplTest {
 
 	@Test
 	public void testXmlAndBack() throws NoSuchAlgorithmException, L2pSecurityException, CryptoException,
-			SerializationException, MalformedXMLException, AgentAccessDeniedException, AgentOperationFailedException {
+			SerializationException, MalformedXMLException, AgentAccessDeniedException, AgentOperationFailedException,
+			AgentLockedException {
 		GroupAgentImpl testee = GroupAgentImpl.createGroupAgent(new AgentImpl[] { adam, eve });
 		assertEquals(2, testee.getSize());
 		assertFalse(testee.hasMember(kain));
@@ -83,8 +84,8 @@ public class GroupAgentImplTest {
 
 		try {
 			testee.addMember(kain);
-			fail("SecurityException should have been thrown!");
-		} catch (L2pSecurityException e) {
+			fail("AgentLockedException should have been thrown!");
+		} catch (AgentLockedException e) {
 		}
 
 		try {
@@ -112,13 +113,13 @@ public class GroupAgentImplTest {
 
 	@Test
 	public void testAdding() throws L2pSecurityException, CryptoException, SerializationException,
-			AgentAccessDeniedException, AgentOperationFailedException {
+			AgentAccessDeniedException, AgentOperationFailedException, AgentLockedException {
 		GroupAgentImpl testee = GroupAgentImpl.createGroupAgent(new AgentImpl[] { adam, eve });
 		abel.unlock(ABELSPASS);
 
 		try {
 			testee.unlock(abel);
-			fail("SecurityException should have been thrown");
+			fail("AgentAccessDeniedException should have been thrown");
 		} catch (AgentAccessDeniedException e) {
 		}
 

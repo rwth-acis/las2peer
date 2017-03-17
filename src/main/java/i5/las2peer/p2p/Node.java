@@ -20,7 +20,9 @@ import java.util.Vector;
 import com.sun.management.OperatingSystemMXBean;
 
 import i5.las2peer.api.Configurable;
+import i5.las2peer.api.execution.ServiceAccessDeniedException;
 import i5.las2peer.api.execution.ServiceInvocationException;
+import i5.las2peer.api.execution.ServiceInvocationFailedException;
 import i5.las2peer.api.execution.ServiceNotAvailableException;
 import i5.las2peer.api.execution.ServiceNotFoundException;
 import i5.las2peer.api.logging.MonitoringEvent;
@@ -29,6 +31,7 @@ import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.persistency.EnvelopeException;
 import i5.las2peer.api.persistency.EnvelopeNotFoundException;
 import i5.las2peer.api.security.AgentException;
+import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.classLoaders.L2pClassManager;
 import i5.las2peer.classLoaders.libraries.Repository;
@@ -1204,11 +1207,11 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param method
 	 * @param parameters
 	 * @return
-	 * @throws L2pSecurityException
+	 * @throws AgentLockedException 
 	 * @throws ServiceInvocationException
 	 */
 	public Serializable invoke(AgentImpl executing, String service, String method, Serializable[] parameters)
-			throws L2pSecurityException, ServiceInvocationException {
+			throws AgentLockedException, ServiceInvocationException {
 		return invoke(executing, ServiceNameVersion.fromString(service), method, parameters, false, false);
 	}
 
@@ -1220,11 +1223,11 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param method
 	 * @param parameters
 	 * @return
+	 * @throws AgentLockedException 
 	 * @throws ServiceInvocationException
-	 * @throws L2pSecurityException
 	 */
 	public Serializable invoke(AgentImpl executing, ServiceNameVersion service, String method,
-			Serializable[] parameters) throws L2pSecurityException, ServiceInvocationException {
+			Serializable[] parameters) throws AgentLockedException, ServiceInvocationException {
 		return invoke(executing, service, method, parameters, false, false);
 	}
 
@@ -1238,10 +1241,10 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param exactVersion
 	 * @return
 	 * @throws ServiceInvocationException
-	 * @throws L2pSecurityException
+	 * @throws AgentLockedException
 	 */
 	public Serializable invoke(AgentImpl executing, ServiceNameVersion service, String method,
-			Serializable[] parameters, boolean exactVersion) throws L2pSecurityException, ServiceInvocationException {
+			Serializable[] parameters, boolean exactVersion) throws AgentLockedException, ServiceInvocationException {
 		return invoke(executing, service, method, parameters, exactVersion, false);
 	}
 
@@ -1256,20 +1259,20 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 *            choosen
 	 * @param localOnly if true, only locally running services are executed
 	 * @return invocation result
-	 * @throws L2pSecurityException
 	 * @throws ServiceNotFoundException
 	 * @throws ServiceInvocationException
+	 * @throws AgentLockedException 
 	 */
 	public Serializable invoke(AgentImpl executing, ServiceNameVersion service, String method,
 			Serializable[] parameters, boolean exactVersion, boolean localOnly)
-			throws L2pSecurityException, ServiceInvocationException {
+			throws ServiceInvocationException, AgentLockedException {
 
 		if (getStatus() != NodeStatus.RUNNING) {
 			throw new IllegalStateException("You can invoke methods only on a running node!");
 		}
 
 		if (executing.isLocked()) {
-			throw new L2pSecurityException("The executing agent has to be unlocked to call a RMI");
+			throw new AgentLockedException("The executing agent has to be unlocked to call a RMI");
 		}
 
 		int retry = invocationRetryCount;
@@ -1312,18 +1315,18 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param method service method
 	 * @param parameters method parameters
 	 * @return innovation result
-	 * @throws L2pSecurityException
 	 * @throws ServiceInvocationException
+	 * @throws AgentLockedException 
 	 */
 	public Serializable invokeLocally(AgentImpl executing, ServiceAgentImpl serviceAgent, String method,
-			Serializable[] parameters) throws L2pSecurityException, ServiceInvocationException {
+			Serializable[] parameters) throws ServiceInvocationException, AgentLockedException {
 
 		if (getStatus() != NodeStatus.RUNNING) {
 			throw new IllegalStateException("You can invoke methods only on a running node!");
 		}
 
 		if (executing.isLocked()) {
-			throw new L2pSecurityException("The executing agent has to be unlocked to call a RMI");
+			throw new AgentLockedException("The executing agent has to be unlocked to call a RMI");
 		}
 
 		// check if local service agent
@@ -1349,11 +1352,11 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param method service method
 	 * @param parameters method parameters
 	 * @return invocation result
-	 * @throws L2pSecurityException
 	 * @throws ServiceInvocationException
+	 * @throws AgentLockedException 
 	 */
 	public Serializable invokeGlobally(AgentImpl executing, String serviceAgentId, Object nodeId, String method,
-			Serializable[] parameters) throws L2pSecurityException, ServiceInvocationException {
+			Serializable[] parameters) throws ServiceInvocationException, AgentLockedException {
 
 		if (getStatus() != NodeStatus.RUNNING) {
 			throw new IllegalStateException("You can invoke methods only on a running node!");
@@ -1363,7 +1366,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 		this.observerNotice(MonitoringEvent.RMI_SENT, this.getNodeId(), executing, null);
 
 		if (executing.isLocked()) {
-			throw new L2pSecurityException("The executing agent has to be unlocked to call a RMI");
+			throw new AgentLockedException("The executing agent has to be unlocked to call a RMI");
 		}
 
 		ServiceAgentImpl serviceAgent;
@@ -1418,7 +1421,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 				} else if ((thrown instanceof InvocationTargetException)
 						&& (thrown.getCause() instanceof L2pSecurityException)) {
 					// internal L2pSecurityException (like internal method access or unauthorizes object access)
-					throw new L2pSecurityException("internal securityException!", thrown.getCause());
+					throw new ServiceAccessDeniedException("Internal security exception!", thrown.getCause());
 				} else {
 					throw new ServiceInvocationException("remote exception at target node", thrown);
 				}
@@ -1434,6 +1437,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 				throw new ServiceInvocationException(
 						"Unknown RMI response type: " + resultContent.getClass().getCanonicalName());
 			}
+		} catch (L2pSecurityException e) {
+			throw new ServiceInvocationFailedException("Cannot encrypt or decrypt message!", e);
 		} catch (TimeoutException | InterruptedException e) {
 			// Do not log service class name (privacy..)
 			this.observerNotice(MonitoringEvent.RMI_FAILED, this.getNodeId(), executing, e.toString());

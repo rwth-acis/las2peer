@@ -77,12 +77,17 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	 * @throws SerializationException
 	 */
 	protected GroupAgentImpl(KeyPair keys, SecretKey secret, Agent[] members)
-			throws L2pSecurityException, CryptoException, SerializationException {
+			throws L2pSecurityException, CryptoException, SerializationException  {
 		super(keys, secret);
 
 		symmetricGroupKey = secret;
 		for (Agent a : members) {
-			addMember((AgentImpl) a, false);
+			try {
+				addMember((AgentImpl) a, false);
+			} catch (AgentLockedException e) {
+				throw new IllegalStateException(e);
+			}
+			
 		}
 
 		lockPrivateKey();
@@ -141,11 +146,11 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	 * add a member to this group
 	 * 
 	 * @param a
-	 * @throws L2pSecurityException
 	 * @throws CryptoException
 	 * @throws SerializationException
+	 * @throws AgentLockedException 
 	 */
-	public void addMember(AgentImpl a) throws L2pSecurityException, CryptoException, SerializationException {
+	public void addMember(AgentImpl a) throws CryptoException, SerializationException, AgentLockedException {
 		addMember(a, true);
 	}
 
@@ -155,14 +160,14 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	 * 
 	 * @param a
 	 * @param securityCheck
-	 * @throws L2pSecurityException
 	 * @throws SerializationException
 	 * @throws CryptoException
+	 * @throws AgentLockedException 
 	 */
 	private final void addMember(AgentImpl a, boolean securityCheck)
-			throws L2pSecurityException, CryptoException, SerializationException {
+			throws CryptoException, SerializationException, AgentLockedException {
 		if (securityCheck && isLocked()) {
-			throw new L2pSecurityException("you have to unlock this group first!");
+			throw new AgentLockedException();
 		}
 
 		byte[] cryptedSecret = CryptoTools.encryptAsymmetric(symmetricGroupKey, a.getPublicKey());
@@ -206,9 +211,9 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	 * remove a member from this group
 	 * 
 	 * @param a
-	 * @throws L2pSecurityException
+	 * @throws AgentLockedException 
 	 */
-	public void removeMember(AgentImpl a) throws L2pSecurityException {
+	public void removeMember(AgentImpl a) throws AgentLockedException {
 		removeMember(a.getIdentifier());
 	}
 
@@ -216,11 +221,11 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	 * remove a member from this group
 	 * 
 	 * @param id
-	 * @throws L2pSecurityException
+	 * @throws AgentLockedException 
 	 */
-	public void removeMember(String id) throws L2pSecurityException {
+	public void removeMember(String id) throws AgentLockedException {
 		if (isLocked()) {
-			throw new L2pSecurityException("You have to unlock this agent first!");
+			throw new AgentLockedException();
 		}
 
 		htEncryptedKeyVersions.remove(id);
@@ -434,11 +439,11 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	 * Sets a name for this group(-agent)
 	 * 
 	 * @param groupname A name to be used for this group. This is no identifier! May have duplicates.
-	 * @throws L2pSecurityException When the user agent is still locked.
+	 * @throws AgentLockedException 
 	 */
-	public void setName(String groupname) throws L2pSecurityException {
+	public void setName(String groupname) throws AgentLockedException {
 		if (this.isLocked()) {
-			throw new L2pSecurityException("unlock needed first!");
+			throw new AgentLockedException();
 		}
 		this.name = groupname;
 	}
@@ -459,10 +464,11 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	 * 
 	 * @param object The user data object to be serialized and attached.
 	 * @throws L2pSecurityException When the user agent is still locked.
+	 * @throws AgentLockedException 
 	 */
-	public void setUserData(Serializable object) throws L2pSecurityException {
+	public void setUserData(Serializable object) throws L2pSecurityException, AgentLockedException {
 		if (this.isLocked()) {
-			throw new L2pSecurityException("unlock needed first!");
+			throw new AgentLockedException();
 		}
 		this.userData = object;
 	}
@@ -526,7 +532,7 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 		}
 	}
 
-	public void apply() throws AgentAccessDeniedException, AgentOperationFailedException {
+	public void apply() throws AgentOperationFailedException, AgentLockedException {
 		try {
 			for (AgentImpl agent : membersToRemove.values()) {
 				removeMember(agent);
@@ -535,8 +541,6 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 			for (AgentImpl agent : membersToAdd.values()) {
 				addMember(agent);
 			}
-		} catch (L2pSecurityException e) {
-			throw new AgentAccessDeniedException("Agent is locked!");
 		} catch (CryptoException | SerializationException e) {
 			throw new AgentOperationFailedException("Agent corrupted!", e);
 		}

@@ -9,6 +9,7 @@ import java.security.NoSuchAlgorithmException;
 import org.junit.Test;
 
 import i5.las2peer.api.security.AgentAccessDeniedException;
+import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.serialization.MalformedXMLException;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.CryptoException;
@@ -60,15 +61,15 @@ public class UserAgentImplTest {
 
 	@Test
 	public void testPassphraseChange()
-			throws NoSuchAlgorithmException, L2pSecurityException, CryptoException, AgentAccessDeniedException {
+			throws NoSuchAlgorithmException, L2pSecurityException, CryptoException, AgentAccessDeniedException, AgentLockedException {
 		String passphrase = "a passphrase";
 		UserAgentImpl a = UserAgentImpl.createUserAgent(passphrase);
 
 		String sndPass = "ein anderes Passphrase";
 		try {
 			a.changePassphrase(sndPass);
-			fail("SecurityException expected");
-		} catch (L2pSecurityException e) {
+			fail("AgentLockedException expected");
+		} catch (AgentLockedException e) {
 		}
 		a.unlock(passphrase);
 
@@ -77,7 +78,7 @@ public class UserAgentImplTest {
 
 		try {
 			a.unlock(passphrase);
-			fail("SecurityException expected");
+			fail("AgentAccessDeniedException expected");
 		} catch (AgentAccessDeniedException e) {
 		}
 

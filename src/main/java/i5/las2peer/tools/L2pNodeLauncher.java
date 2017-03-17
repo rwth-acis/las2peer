@@ -32,6 +32,7 @@ import i5.las2peer.api.persistency.EnvelopeException;
 import i5.las2peer.api.persistency.EnvelopeNotFoundException;
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
+import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.classLoaders.L2pClassManager;
 import i5.las2peer.classLoaders.libraries.FileSystemRepository;
@@ -496,10 +497,10 @@ public class L2pNodeLauncher {
 	 * @param parameters pass an empty string if you want to call a method without parameters
 	 * @return
 	 * @throws ServiceInvocationException
-	 * @throws L2pSecurityException
+	 * @throws AgentLockedException
 	 */
 	public Serializable invoke(String serviceIdentifier, String serviceMethod, String parameters)
-			throws L2pSecurityException, ServiceInvocationException {
+			throws AgentLockedException, ServiceInvocationException {
 		if (parameters.isEmpty()) {
 			return invoke(serviceIdentifier, serviceMethod, new Serializable[0]);
 		}
@@ -516,10 +517,10 @@ public class L2pNodeLauncher {
 	 * @param parameters
 	 * @return
 	 * @throws ServiceInvocationException
-	 * @throws L2pSecurityException
+	 * @throws AgentLockedException 
 	 */
 	private Serializable invoke(String serviceIdentifier, String serviceMethod, Serializable... parameters)
-			throws L2pSecurityException, ServiceInvocationException {
+			throws ServiceInvocationException, AgentLockedException {
 		if (currentUser == null) {
 			throw new IllegalStateException("Please register a valid user with registerUserAgent before invoking!");
 		}

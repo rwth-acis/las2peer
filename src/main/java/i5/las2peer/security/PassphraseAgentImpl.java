@@ -6,6 +6,7 @@ import java.security.PublicKey;
 import javax.crypto.SecretKey;
 
 import i5.las2peer.api.security.AgentAccessDeniedException;
+import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.PassphraseAgent;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
@@ -76,8 +77,9 @@ public abstract class PassphraseAgentImpl extends AgentImpl implements Passphras
 	 * 
 	 * @param passphrase
 	 * @throws L2pSecurityException
+	 * @throws AgentLockedException 
 	 */
-	private void encryptPrivateKey(String passphrase) throws L2pSecurityException {
+	private void encryptPrivateKey(String passphrase) throws L2pSecurityException, AgentLockedException {
 		try {
 			salt = CryptoTools.generateSalt();
 			super.encryptPrivateKey(CryptoTools.generateKeyForPassphrase(passphrase, salt));
@@ -100,10 +102,11 @@ public abstract class PassphraseAgentImpl extends AgentImpl implements Passphras
 	 * 
 	 * @param passphrase
 	 * @throws L2pSecurityException
+	 * @throws AgentLockedException 
 	 */
-	public void changePassphrase(String passphrase) throws L2pSecurityException {
+	public void changePassphrase(String passphrase) throws L2pSecurityException, AgentLockedException {
 		if (isLocked()) {
-			throw new L2pSecurityException("You have to unlock the key first!");
+			throw new AgentLockedException();
 		}
 		encryptPrivateKey(passphrase);
 	}
@@ -118,11 +121,11 @@ public abstract class PassphraseAgentImpl extends AgentImpl implements Passphras
 	 * get the current passphrase
 	 * 
 	 * @return
-	 * @throws L2pSecurityException
+	 * @throws AgentLockedException 
 	 */
-	public String getPassphrase() throws L2pSecurityException {
+	public String getPassphrase() throws AgentLockedException {
 		if (isLocked()) {
-			throw new L2pSecurityException("You have to unlock the key first!");
+			throw new AgentLockedException();
 		}
 		return this.passphrase;
 	}

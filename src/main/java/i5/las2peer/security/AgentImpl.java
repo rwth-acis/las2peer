@@ -16,6 +16,7 @@ import org.w3c.dom.Element;
 import i5.las2peer.api.logging.MonitoringEvent;
 import i5.las2peer.api.security.Agent;
 import i5.las2peer.api.security.AgentException;
+import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
 import i5.las2peer.p2p.Node;
@@ -62,7 +63,11 @@ public abstract class AgentImpl implements Agent, XmlAble, Cloneable, MessageRec
 		this.publicKey = pair.getPublic();
 		this.privateKey = pair.getPrivate();
 
-		encryptPrivateKey(key);
+		try {
+			encryptPrivateKey(key);
+		} catch(AgentLockedException e) {
+			throw new IllegalStateException(e);
+		}
 		lockPrivateKey();
 	}
 
@@ -106,10 +111,11 @@ public abstract class AgentImpl implements Agent, XmlAble, Cloneable, MessageRec
 	 * 
 	 * @param key A key that is used to encrypt the agents private key.
 	 * @throws L2pSecurityException If an issue with the given key occurs.
+	 * @throws AgentLockedException 
 	 */
-	public void encryptPrivateKey(SecretKey key) throws L2pSecurityException {
+	public void encryptPrivateKey(SecretKey key) throws L2pSecurityException, AgentLockedException {
 		if (isLocked()) {
-			throw new L2pSecurityException("You have to unlock the key first!");
+			throw new AgentLockedException();
 		}
 
 		try {

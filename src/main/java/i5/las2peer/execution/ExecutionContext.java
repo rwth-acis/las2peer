@@ -147,7 +147,7 @@ public class ExecutionContext implements Context {
 			throw e;
 		} catch (ServiceInvocationException e) {
 			throw new ServiceInvocationFailedException("Service invocation failed.", e);
-		} catch (L2pSecurityException e) {
+		} catch (AgentLockedException e) {
 			throw new IllegalStateException("Agent should be unlocked, but it isn't.");
 		}
 	}
