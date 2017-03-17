@@ -14,6 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import i5.las2peer.api.security.AgentAccessDeniedException;
+import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.serialization.MalformedXMLException;
 import i5.las2peer.serialization.SerializationException;
@@ -162,7 +163,7 @@ public class GroupAgentImplTest {
 	}
 
 	public void testApply() throws L2pSecurityException, CryptoException, SerializationException,
-			AgentAccessDeniedException, AgentOperationFailedException {
+			AgentAccessDeniedException, AgentOperationFailedException, AgentLockedException {
 		GroupAgentImpl agent = GroupAgentImpl.createGroupAgent(new AgentImpl[] { adam, eve });
 		assertTrue(agent.hasMember(adam));
 		assertTrue(agent.hasMember(eve));

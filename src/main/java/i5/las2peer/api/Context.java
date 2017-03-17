@@ -20,6 +20,7 @@ import i5.las2peer.api.persistency.EnvelopeOperationFailedException;
 import i5.las2peer.api.security.Agent;
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentAlreadyExistsException;
+import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.api.security.GroupAgent;
@@ -117,8 +118,8 @@ public interface Context {
 	 * @throws AgentNotFoundException If the specified agent cannot be found.
 	 * @throws AgentOperationFailedException If an error occurred on the node.
 	 */
-	public Agent requestAgent(String agentId, Agent using)
-			throws AgentAccessDeniedException, AgentNotFoundException, AgentOperationFailedException;
+	public Agent requestAgent(String agentId, Agent using) throws AgentAccessDeniedException, AgentNotFoundException,
+			AgentOperationFailedException;
 
 	/**
 	 * Requests an agent from the network using the calling (main) agent.
@@ -129,8 +130,8 @@ public interface Context {
 	 * @throws AgentNotFoundException If the specified agent cannot be found.
 	 * @throws AgentOperationFailedException If an error occurred on the node.
 	 */
-	public Agent requestAgent(String agentId)
-			throws AgentAccessDeniedException, AgentNotFoundException, AgentOperationFailedException;
+	public Agent requestAgent(String agentId) throws AgentAccessDeniedException, AgentNotFoundException,
+			AgentOperationFailedException;
 
 	/**
 	 * Fetches an agent from the network.
@@ -145,13 +146,16 @@ public interface Context {
 	/**
 	 * Stores and/or updates an agent to the network.
 	 * 
-	 * @param agent The agent to store.
+	 * The given agent must be unlocked.
+	 * 
+	 * @param agent The unlocked agent to store.
 	 * @throws AgentAccessDeniedException If the agent cannot be overridden due to access restrictions.
 	 * @throws AgentAlreadyExistsException If another agent already exists.
 	 * @throws AgentOperationFailedException If an error occurred on the node.
+	 * @throws AgentLockedException If the agent is locked.
 	 */
-	public void storeAgent(Agent agent)
-			throws AgentAccessDeniedException, AgentAlreadyExistsException, AgentOperationFailedException;
+	public void storeAgent(Agent agent) throws AgentAccessDeniedException, AgentAlreadyExistsException,
+			AgentOperationFailedException, AgentLockedException;
 
 	/**
 	 * Checks if the agent specified by using is able to unlock the agent agentId. This also includes recursive
@@ -187,8 +191,8 @@ public interface Context {
 	 * @throws EnvelopeNotFoundException If the envelope doesn not exist.
 	 * @throws EnvelopeOperationFailedException If an error occurred in the node or network.
 	 */
-	public Envelope requestEnvelope(String identifier, Agent using)
-			throws EnvelopeAccessDeniedException, EnvelopeNotFoundException, EnvelopeOperationFailedException;
+	public Envelope requestEnvelope(String identifier, Agent using) throws EnvelopeAccessDeniedException,
+			EnvelopeNotFoundException, EnvelopeOperationFailedException;
 
 	/**
 	 * Requests an envelope from the network. This means fetching and decrypting it using the current main agent.
@@ -199,8 +203,8 @@ public interface Context {
 	 * @throws EnvelopeNotFoundException If the envelope doesn not exist.
 	 * @throws EnvelopeOperationFailedException If an error occurred at the node or in the network.
 	 */
-	public Envelope requestEnvelope(String identifier)
-			throws EnvelopeAccessDeniedException, EnvelopeNotFoundException, EnvelopeOperationFailedException;
+	public Envelope requestEnvelope(String identifier) throws EnvelopeAccessDeniedException, EnvelopeNotFoundException,
+			EnvelopeOperationFailedException;
 
 	/**
 	 * Stores the envelope to the network and signs it with the specified agent.
@@ -210,8 +214,8 @@ public interface Context {
 	 * @throws EnvelopeAccessDeniedException If the specified agent is not allowed to write to the envelope.
 	 * @throws EnvelopeOperationFailedException If an error occurred at the node or in the network.
 	 */
-	public void storeEnvelope(Envelope env, Agent using)
-			throws EnvelopeAccessDeniedException, EnvelopeOperationFailedException;
+	public void storeEnvelope(Envelope env, Agent using) throws EnvelopeAccessDeniedException,
+			EnvelopeOperationFailedException;
 
 	/**
 	 * Stores the envelope to the network and signs it with the current main agent.
@@ -243,8 +247,8 @@ public interface Context {
 	 * @throws EnvelopeAccessDeniedException If the specified agent is not allowed to write to the envelope.
 	 * @throws EnvelopeOperationFailedException If an error occurred at the node or in the network.
 	 */
-	public void storeEnvelope(Envelope env, EnvelopeCollisionHandler handler)
-			throws EnvelopeAccessDeniedException, EnvelopeOperationFailedException;
+	public void storeEnvelope(Envelope env, EnvelopeCollisionHandler handler) throws EnvelopeAccessDeniedException,
+			EnvelopeOperationFailedException;
 
 	/**
 	 * Reclaims the envelope using the specified agent.
@@ -259,8 +263,8 @@ public interface Context {
 	 * @throws EnvelopeNotFoundException If the envelope does not exist.
 	 * @throws EnvelopeOperationFailedException If an error occurred at the node or in the network.
 	 */
-	public void reclaimEnvelope(String identifier, Agent using)
-			throws EnvelopeAccessDeniedException, EnvelopeNotFoundException, EnvelopeOperationFailedException;
+	public void reclaimEnvelope(String identifier, Agent using) throws EnvelopeAccessDeniedException,
+			EnvelopeNotFoundException, EnvelopeOperationFailedException;
 
 	/**
 	 * Reclaims the envelope using the current main agent agent.
@@ -274,8 +278,8 @@ public interface Context {
 	 * @throws EnvelopeNotFoundException If the envelope does not exist.
 	 * @throws EnvelopeOperationFailedException If an error occurred at the node or in the network.
 	 */
-	public void reclaimEnvelope(String identifier)
-			throws EnvelopeAccessDeniedException, EnvelopeNotFoundException, EnvelopeOperationFailedException;
+	public void reclaimEnvelope(String identifier) throws EnvelopeAccessDeniedException, EnvelopeNotFoundException,
+			EnvelopeOperationFailedException;
 
 	/**
 	 * Creates a new envelope with the given agent as signing agent and first reader.

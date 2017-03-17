@@ -13,6 +13,7 @@ import i5.las2peer.api.persistency.EnvelopeNotFoundException;
 import i5.las2peer.api.persistency.EnvelopeOperationFailedException;
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentAlreadyExistsException;
+import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.serialization.MalformedXMLException;
 
@@ -312,10 +313,11 @@ public class TestService extends Service {
 	 * @throws AgentOperationFailedException
 	 * @throws AgentAlreadyExistsException
 	 * @throws AgentAccessDeniedException
+	 * @throws AgentLockedException 
 	 */
 	public void storeGroupEnvelopeString(String store)
 			throws EnvelopeAccessDeniedException, EnvelopeOperationFailedException, AgentAccessDeniedException,
-			AgentAlreadyExistsException, AgentOperationFailedException, MalformedXMLException, IOException {
+			AgentAlreadyExistsException, AgentOperationFailedException, MalformedXMLException, IOException, AgentLockedException {
 		Context.get().storeAgent(MockAgentFactory.getGroup1());
 		Envelope env = Context.get().createEnvelope(Long.toString(new Random().nextLong()));
 		env.setContent(store);

@@ -30,6 +30,7 @@ import i5.las2peer.api.security.Agent;
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentAlreadyExistsException;
 import i5.las2peer.api.security.AgentException;
+import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.api.security.GroupAgent;
@@ -224,7 +225,12 @@ public class ExecutionContext implements Context {
 
 	@Override
 	public void storeAgent(Agent agent)
-			throws AgentAccessDeniedException, AgentAlreadyExistsException, AgentOperationFailedException {
+ throws AgentAccessDeniedException, AgentAlreadyExistsException,
+			AgentOperationFailedException, AgentLockedException {
+		if (agent.isLocked()) {
+			throw new AgentLockedException();
+		}
+		
 		if (agent instanceof GroupAgentImpl) {
 			((GroupAgentImpl) agent).apply();
 		}

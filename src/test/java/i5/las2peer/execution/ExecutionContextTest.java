@@ -25,6 +25,7 @@ import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.security.Agent;
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
+import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.GroupAgent;
 import i5.las2peer.api.security.UserAgent;
 import i5.las2peer.logging.NodeObserver;
@@ -172,8 +173,8 @@ public class ExecutionContextTest {
 			assertTrue(userBFetched.isLocked());
 			try {
 				context.storeAgent(userBFetched);
-				fail("AgentAccessDeniedException expected");
-			} catch (AgentAccessDeniedException e) {
+				fail("AgentLockedException expected");
+			} catch (AgentLockedException e) {
 			}
 
 			GroupAgent groupRequested = (GroupAgent) context.requestAgent(group.getIdentifier(), userA);

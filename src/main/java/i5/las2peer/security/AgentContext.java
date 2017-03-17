@@ -91,7 +91,7 @@ public class AgentContext implements AgentStorage {
 
 		GroupAgentImpl group = (GroupAgentImpl) agent;
 
-		if (group.hasMember(this.getMainAgent())) { // TODO API may not be a real member yet!!
+		if (group.hasMember(this.getMainAgent())) {
 			group.unlock(this.getMainAgent());
 		} else {
 			for (String memberId : group.getMemberList()) {
@@ -166,7 +166,7 @@ public class AgentContext implements AgentStorage {
 	 * @return true if it is a transitive member of the group.
 	 */
 	public boolean isMemberRecursive(GroupAgentImpl groupAgent, String agentId) {
-		if (groupAgent.hasMember(agentId) == true) { // TODO API may not be a real member yet!!
+		if (groupAgent.hasMember(agentId)) {
 			return true;
 		}
 		for (String memberId : groupAgent.getMemberList()) {

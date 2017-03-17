@@ -18,6 +18,7 @@ import i5.las2peer.api.logging.MonitoringEvent;
 import i5.las2peer.api.security.Agent;
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
+import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.api.security.GroupAgent;
 import i5.las2peer.communication.Message;
@@ -97,7 +98,7 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	 */
 	// TODO API remove
 	public void unlockPrivateKeyRecursive(AgentImpl agent, AgentStorage agentStorage) throws AgentAccessDeniedException, AgentOperationFailedException {
-		if (hasMember(agent)) { // TODO API may not be a real member yet!!
+		if (hasMember(agent)) {
 			unlock(agent);
 			return;
 		} else {
@@ -476,7 +477,11 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	}
 
 	@Override
-	public void addMember(Agent agent) {
+	public void addMember(Agent agent) throws AgentLockedException {
+		if (isLocked()) {
+			throw new AgentLockedException();
+		}
+		
 		if (!htEncryptedKeyVersions.containsKey(agent.getIdentifier())) {
 			membersToAdd.put(agent.getIdentifier(), (AgentImpl) agent);
 		}
@@ -485,7 +490,11 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	}
 
 	@Override
-	public void revokeMember(Agent agent) {
+	public void revokeMember(Agent agent) throws AgentLockedException {
+		if (isLocked()) {
+			throw new AgentLockedException();
+		}
+		
 		if (htEncryptedKeyVersions.containsKey(agent.getIdentifier())) {
 			membersToRemove.put(agent.getIdentifier(), (AgentImpl) agent);
 		} else if (membersToAdd.containsKey((AgentImpl) agent)) {

@@ -13,9 +13,12 @@ public interface GroupAgent extends Agent {
 	/**
 	 * Adds a member to the group.
 	 * 
+	 * Only for unlocked groups.
+	 * 
 	 * @param agent The member to add.
+	 * @throws AgentLockedException If this group is locked.
 	 */
-	public void addMember(Agent agent);
+	public void addMember(Agent agent) throws AgentLockedException;
 
 	/**
 	 * Revokes a group membership. This means that the given agent will not have access to any future updates to agents
@@ -24,9 +27,12 @@ public interface GroupAgent extends Agent {
 	 * 
 	 * Ideally, a new key pair for this group will be generated whenever a member is removed.
 	 * 
+	 * Only for unlocked groups.
+	 * 
 	 * @param agent The member to remove from the group.
+	 * @throws AgentLockedException If this group is locked.
 	 */
-	public void revokeMember(Agent agent);
+	public void revokeMember(Agent agent) throws AgentLockedException;
 
 	/**
 	 * Checks if the given agent is a member of this group.
