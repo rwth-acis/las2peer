@@ -53,11 +53,12 @@ public interface GroupAgent extends Agent {
 	/**
 	 * Unlock this group using a given agent. Will not work for transitive memberships.
 	 * 
-	 * @param agent A direct member of this group.
+	 * @param agent A direct member of this group, must be unlocked.
 	 * @throws AgentAccessDeniedException If the given agent is not a direct member of this group.
 	 * @throws AgentOperationFailedException If the agent is corrupted.
+	 * @throws AgentLockedException If agent is locked.
 	 */
-	public void unlock(Agent agent) throws AgentAccessDeniedException, AgentOperationFailedException;
+	public void unlock(Agent agent) throws AgentAccessDeniedException, AgentOperationFailedException, AgentLockedException;
 	
 	/**
 	 * Get the number of direct group members.

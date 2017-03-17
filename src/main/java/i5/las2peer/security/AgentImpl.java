@@ -162,11 +162,11 @@ public abstract class AgentImpl implements Agent, XmlAble, Cloneable, MessageRec
 	/**
 	 * 
 	 * @return the cryptographic private key of this agent
-	 * @throws L2pSecurityException the private key has not been unlocked yet
+	 * @throws AgentLockedException the private key has not been unlocked yet
 	 */
-	private PrivateKey getPrivateKey() throws L2pSecurityException {
+	private PrivateKey getPrivateKey() throws AgentLockedException {
 		if (privateKey == null) {
-			throw new L2pSecurityException("You have to unlock the key using a passphrase first!");
+			throw new AgentLockedException();
 		}
 		return privateKey;
 	}
@@ -177,12 +177,12 @@ public abstract class AgentImpl implements Agent, XmlAble, Cloneable, MessageRec
 	 * 
 	 * @param crypted The encrypted content that is decrypted using the agents private key.
 	 * @return Returns a {@link javax.crypto.SecretKey} decrypted from the crypted input and the agent's private key
-	 * @throws L2pSecurityException the private key has not been unlocked yet
+	 * @throws AgentLockedException the private key has not been unlocked yet
 	 * @throws CryptoException If an issue occurs with decryption.
 	 * @throws SerializationException
 	 */
 	public SecretKey decryptSymmetricKey(byte[] crypted)
-			throws L2pSecurityException, SerializationException, CryptoException {
+			throws AgentLockedException, SerializationException, CryptoException {
 		SecretKey symmetricGroupKey = (SecretKey) CryptoTools.decryptAsymmetric(crypted, this.getPrivateKey());
 		return symmetricGroupKey;
 	}
@@ -192,11 +192,11 @@ public abstract class AgentImpl implements Agent, XmlAble, Cloneable, MessageRec
 	 * initializes the object for signing with the agent's private key.
 	 * 
 	 * @return a {@link Signature java.security.Signature}
-	 * @throws L2pSecurityException the private key has not been unlocked yet
+	 * @throws AgentLockedException the private key has not been unlocked yet
 	 * @throws InvalidKeyException
 	 * @throws NoSuchAlgorithmException
 	 */
-	public Signature createSignature() throws InvalidKeyException, L2pSecurityException, NoSuchAlgorithmException {
+	public Signature createSignature() throws InvalidKeyException, AgentLockedException, NoSuchAlgorithmException {
 		Signature sig = Signature.getInstance(CryptoTools.getSignatureMethod());
 		sig.initSign(this.getPrivateKey());
 		return sig;
@@ -207,10 +207,10 @@ public abstract class AgentImpl implements Agent, XmlAble, Cloneable, MessageRec
 	 * 
 	 * @param plainData
 	 * @return a signed version of the input
-	 * @throws L2pSecurityException the private key has not been unlocked yet
+	 * @throws AgentLockedException the private key has not been unlocked yet
 	 * @throws CryptoException
 	 */
-	public byte[] signContent(byte[] plainData) throws CryptoException, L2pSecurityException {
+	public byte[] signContent(byte[] plainData) throws CryptoException, AgentLockedException {
 		byte[] signature = CryptoTools.signContent(plainData, this.getPrivateKey());
 		return signature;
 	}

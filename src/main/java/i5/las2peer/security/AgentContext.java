@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.Hashtable;
 
 import i5.las2peer.api.security.Agent;
+import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentNotFoundException;
@@ -92,7 +93,12 @@ public class AgentContext implements AgentStorage {
 		GroupAgentImpl group = (GroupAgentImpl) agent;
 
 		if (group.hasMember(this.getMainAgent())) {
-			group.unlock(this.getMainAgent());
+			try {
+				group.unlock(this.getMainAgent());
+			} catch (AgentAccessDeniedException | AgentLockedException e) {
+				throw new IllegalStateException("Cannot unlock group!", e);
+			}
+			
 		} else {
 			for (String memberId : group.getMemberList()) {
 				try {

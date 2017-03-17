@@ -12,6 +12,7 @@ import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.persistency.EnvelopeException;
 import i5.las2peer.api.persistency.EnvelopeNotFoundException;
 import i5.las2peer.api.security.AgentException;
+import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.classLoaders.L2pClassManager;
 import i5.las2peer.classLoaders.libraries.FileSystemRepository;
@@ -96,7 +97,7 @@ public class LocalNode extends Node {
 
 	@Override
 	public void registerReceiver(MessageReceiver receiver)
-			throws AgentAlreadyRegisteredException, L2pSecurityException, AgentException {
+			throws AgentAlreadyRegisteredException, AgentException {
 		super.registerReceiver(receiver);
 
 		if (receiver instanceof AgentImpl) {
@@ -252,11 +253,11 @@ public class LocalNode extends Node {
 	}
 
 	@Override
-	public void storeAgent(AgentImpl agent) throws L2pSecurityException, AgentException {
+	public void storeAgent(AgentImpl agent) throws AgentException {
 		synchronized (htKnownAgents) {
 			// only accept unlocked agents at startup
 			if (agent.isLocked() && getStatus() == NodeStatus.RUNNING) {
-				throw new L2pSecurityException("Only unlocked agents may be updated during runtime!");
+				throw new AgentLockedException();
 			}
 
 			String agentXml = null;

@@ -10,6 +10,7 @@ import java.util.HashSet;
 import org.junit.Assert;
 import org.junit.Test;
 
+import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
 import i5.las2peer.testing.MockAgentFactory;
@@ -57,8 +58,8 @@ public class MediatorTest {
 
 			try {
 				new Mediator(null, eve);
-				fail("L2pSecurityException expected");
-			} catch (L2pSecurityException e) {
+				fail("AgentLockedException expected");
+			} catch (AgentLockedException e) {
 				// that's expected!
 			}
 

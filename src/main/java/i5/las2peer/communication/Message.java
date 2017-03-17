@@ -22,6 +22,7 @@ import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 import i5.las2peer.api.security.AgentException;
+import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.security.AgentImpl;
@@ -178,7 +179,11 @@ public class Message implements XmlAble, Cloneable {
 
 		encryptContent();
 
-		signContent();
+		try {
+			signContent();
+		} catch (AgentLockedException e) {
+			throw new L2pSecurityException("Agent locked", e);
+		}
 
 		close();
 	}
@@ -284,7 +289,11 @@ public class Message implements XmlAble, Cloneable {
 			baEncryptedContent = baDecryptedContent;
 		}
 
-		signContent();
+		try {
+			signContent();
+		} catch (AgentLockedException e) {
+			throw new L2pSecurityException("Agent locked", e);
+		}
 
 		close();
 	}
@@ -445,11 +454,11 @@ public class Message implements XmlAble, Cloneable {
 	/**
 	 * sign the contents of this message
 	 * 
-	 * @throws L2pSecurityException
 	 * @throws SerializationException
 	 * @throws EncodingFailedException
+	 * @throws AgentLockedException 
 	 */
-	private void signContent() throws L2pSecurityException, SerializationException, EncodingFailedException {
+	private void signContent() throws SerializationException, EncodingFailedException, AgentLockedException {
 		try {
 			Signature sig = sender.createSignature();
 			sig.update(baDecryptedContent);

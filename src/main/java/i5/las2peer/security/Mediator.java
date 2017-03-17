@@ -8,6 +8,7 @@ import i5.las2peer.api.execution.ServiceInvocationException;
 import i5.las2peer.api.logging.MonitoringEvent;
 import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.security.AgentException;
+import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
@@ -44,11 +45,11 @@ public class Mediator implements MessageReceiver {
 	 * 
 	 * @param n the node
 	 * @param a the agent
-	 * @throws L2pSecurityException
+	 * @throws AgentLockedException
 	 */
-	public Mediator(Node n, AgentImpl a) throws L2pSecurityException {
+	public Mediator(Node n, AgentImpl a) throws AgentLockedException {
 		if (a.isLocked()) {
-			throw new L2pSecurityException("You need to unlock the private key of the agent for mediating.");
+			throw new AgentLockedException("You need to unlock the private key of the agent for mediating.");
 		}
 
 		myAgent = a;

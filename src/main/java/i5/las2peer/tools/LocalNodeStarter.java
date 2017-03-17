@@ -7,12 +7,12 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import i5.las2peer.api.security.AgentException;
+import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.p2p.AgentAlreadyRegisteredException;
 import i5.las2peer.p2p.LocalNode;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.NodeException;
 import i5.las2peer.security.AgentImpl;
-import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.serialization.MalformedXMLException;
 
 /**
@@ -51,7 +51,7 @@ public class LocalNodeStarter {
 				System.err.println("unable to deserialize contents of " + xml.toString() + " into an XML envelope!");
 			} catch (IOException e) {
 				System.err.println("problems reading the contents of " + xml.toString() + ": " + e);
-			} catch (L2pSecurityException e) {
+			} catch (AgentLockedException e) {
 				System.err.println("error storing agent from " + xml.toString() + ": " + e);
 			} catch (AgentAlreadyRegisteredException e) {
 				System.err.println("agent from " + xml.toString() + " already known at this node!");

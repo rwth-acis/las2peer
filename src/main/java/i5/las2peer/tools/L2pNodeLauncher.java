@@ -235,7 +235,7 @@ public class L2pNodeLauncher {
 				}
 			} catch (MalformedXMLException e) {
 				printErrorWithStacktrace("unable to deserialize contents of " + xmlFile.toString() + "!", e);
-			} catch (L2pSecurityException e) {
+			} catch (AgentLockedException e) {
 				printErrorWithStacktrace("error storing agent from " + xmlFile.toString(), e);
 			} catch (AgentAlreadyRegisteredException e) {
 				printErrorWithStacktrace("agent from " + xmlFile.toString() + " already known at this node!", e);

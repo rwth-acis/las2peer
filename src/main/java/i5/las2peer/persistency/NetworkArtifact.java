@@ -7,8 +7,8 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 
+import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.security.AgentImpl;
-import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
 import rice.p2p.commonapi.Id;
@@ -27,7 +27,7 @@ public abstract class NetworkArtifact extends AbstractArtifact {
 	private final byte[] keySignature;
 
 	protected NetworkArtifact(Id id, int partIndex, byte[] content, AgentImpl author)
-			throws CryptoException, L2pSecurityException, VerificationFailedException {
+			throws CryptoException, VerificationFailedException, AgentLockedException {
 		super(id, content);
 		this.partIndex = partIndex;
 		this.signature = author.signContent(content);

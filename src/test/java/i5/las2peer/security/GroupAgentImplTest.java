@@ -79,7 +79,7 @@ public class GroupAgentImplTest {
 
 	@Test
 	public void testUnlocking() throws L2pSecurityException, CryptoException, SerializationException,
-			AgentAccessDeniedException, AgentOperationFailedException {
+			AgentAccessDeniedException, AgentOperationFailedException, AgentLockedException {
 		GroupAgentImpl testee = GroupAgentImpl.createGroupAgent(new AgentImpl[] { adam, eve });
 
 		try {
@@ -90,8 +90,8 @@ public class GroupAgentImplTest {
 
 		try {
 			testee.unlock(adam);
-			fail("SecurityException should have been thrown!");
-		} catch (AgentAccessDeniedException e) {
+			fail("AgentLockedException should have been thrown!");
+		} catch (AgentLockedException e) {
 		}
 
 		adam.unlock(ADAMSPASS);
@@ -101,8 +101,8 @@ public class GroupAgentImplTest {
 
 		try {
 			testee.unlock(eve);
-			fail("SecurityException should have been thrown");
-		} catch (AgentAccessDeniedException e) {
+			fail("AgentLockedException should have been thrown");
+		} catch (AgentLockedException e) {
 		}
 
 		testee.lockPrivateKey();
@@ -138,7 +138,7 @@ public class GroupAgentImplTest {
 
 	@Test
 	public void testSubGrouping() throws SerializationException, CryptoException, L2pSecurityException,
-			AgentAccessDeniedException, AgentOperationFailedException {
+			AgentAccessDeniedException, AgentOperationFailedException, AgentLockedException {
 		GroupAgentImpl subGroup = GroupAgentImpl.createGroupAgent(new AgentImpl[] { adam, eve });
 		GroupAgentImpl superGroup = GroupAgentImpl.createGroupAgent(new AgentImpl[] { abel, subGroup });
 
@@ -147,13 +147,13 @@ public class GroupAgentImplTest {
 		eve.unlock(EVESSPASS);
 		try {
 			superGroup.unlock(subGroup);
-			fail("SecurityException should have been thrown!");
-		} catch (AgentAccessDeniedException e) {
+			fail("AgentLockedException should have been thrown!");
+		} catch (AgentLockedException e) {
 		}
 
 		try {
 			superGroup.unlock(eve);
-			fail("SecurityException should have been thrown!");
+			fail("AgentAccessDeniedException should have been thrown!");
 		} catch (AgentAccessDeniedException e) {
 		}
 

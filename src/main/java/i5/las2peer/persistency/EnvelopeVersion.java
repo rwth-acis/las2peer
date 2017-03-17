@@ -18,6 +18,7 @@ import org.w3c.dom.NodeList;
 
 import i5.las2peer.api.Context;
 import i5.las2peer.api.security.AgentException;
+import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.security.AgentContext;
 import i5.las2peer.security.AgentImpl;
@@ -263,7 +264,7 @@ public class EnvelopeVersion implements Serializable, XmlAble {
 					} else {
 						logger.log(Level.WARNING, "Non GroupAgent listed as reader group");
 					}
-				} catch (AgentException | L2pSecurityException | CryptoException | SerializationException e) {
+				} catch (AgentException | CryptoException | SerializationException e) {
 					logger.log(Level.WARNING, "Issue with envelope reader", e);
 				}
 			}
@@ -273,7 +274,11 @@ public class EnvelopeVersion implements Serializable, XmlAble {
 				if (encryptedReaderKey == null) {
 					throw new CryptoException("Agent (" + reader.getIdentifier() + ") has no read permission");
 				}
-				decryptedReaderKey = reader.decryptSymmetricKey(encryptedReaderKey);
+				try {
+					decryptedReaderKey = reader.decryptSymmetricKey(encryptedReaderKey);
+				} catch (AgentLockedException e) {
+					throw new L2pSecurityException("Reader locked...", e);
+				}
 			}
 			// decrypt content
 			decrypted = CryptoTools.decryptSymmetric(rawContent, decryptedReaderKey);

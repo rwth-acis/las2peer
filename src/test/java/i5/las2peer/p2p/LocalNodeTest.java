@@ -16,6 +16,7 @@ import org.junit.Test;
 import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
+import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.PingPongContent;
@@ -64,8 +65,8 @@ public class LocalNodeTest {
 
 		try {
 			testee.registerReceiver(eve);
-			fail("L2pSecurityException expected");
-		} catch (L2pSecurityException e) {
+			fail("AgentLockedException expected");
+		} catch (AgentLockedException e) {
 		}
 		eve.unlock("evespass");
 		adam.unlock("adamspass");
@@ -246,8 +247,8 @@ public class LocalNodeTest {
 
 			try {
 				testee.storeAgent(abel);
-				fail("L2sSecurityAxception expected");
-			} catch (L2pSecurityException e) {
+				fail("AgentLockedException expected");
+			} catch (AgentLockedException e) {
 			}
 
 			/* no problem anymore since its the same agent
@@ -268,8 +269,8 @@ public class LocalNodeTest {
 
 			try {
 				testee2.storeAgent(retrieve);
-				fail("SecurtityException expected");
-			} catch (L2pSecurityException e) {
+				fail("AgentLockedException expected");
+			} catch (AgentLockedException e) {
 			}
 
 			retrieve.unlock("abelspass");
@@ -478,8 +479,8 @@ public class LocalNodeTest {
 
 			try {
 				testee.storeAgent(abel);
-				fail("L2pSecurityException expected");
-			} catch (L2pSecurityException e) {
+				fail("AgentLockedException expected");
+			} catch (AgentLockedException e) {
 				// ok
 			}
 

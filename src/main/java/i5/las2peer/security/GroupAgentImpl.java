@@ -104,7 +104,12 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	// TODO API remove
 	public void unlockPrivateKeyRecursive(AgentImpl agent, AgentStorage agentStorage) throws AgentAccessDeniedException, AgentOperationFailedException {
 		if (hasMember(agent)) {
-			unlock(agent);
+			try {
+				unlock(agent);
+			} catch (AgentAccessDeniedException | AgentLockedException e) {
+				throw new IllegalStateException("Cannot unlock!", e);
+			}
+			
 			return;
 		} else {
 			for (String memberId : htEncryptedKeyVersions.keySet()) {
@@ -129,17 +134,23 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	 * @param agent
 	 * @throws SerializationException
 	 * @throws CryptoException
-	 * @throws L2pSecurityException
+	 * @throws AgentLockedException
+	 * @throws AgentAccessDeniedException 
 	 */
 	private void decryptSecretKey(AgentImpl agent)
-			throws SerializationException, CryptoException, L2pSecurityException {
+			throws SerializationException, CryptoException, AgentLockedException, AgentAccessDeniedException {
 		byte[] crypted = htEncryptedKeyVersions.get(agent.getIdentifier());
 
 		if (crypted == null) {
-			throw new L2pSecurityException("the given agent is not listed as a group member!");
+			throw new AgentAccessDeniedException("the given agent is not listed as a group member!");
 		}
 
-		symmetricGroupKey = agent.decryptSymmetricKey(crypted);
+		try {
+			symmetricGroupKey = agent.decryptSymmetricKey(crypted);
+		} catch (AgentLockedException e) {
+			throw new AgentLockedException("The given agent is locked!", e);
+		}
+		
 	}
 
 	/**
@@ -520,7 +531,8 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	}
 
 	@Override
-	public void unlock(Agent agent) throws AgentAccessDeniedException, AgentOperationFailedException {
+	public void unlock(Agent agent) throws AgentAccessDeniedException, AgentOperationFailedException,
+			AgentLockedException {
 		try {
 			decryptSecretKey((AgentImpl) agent);
 			openedBy = (AgentImpl) agent;

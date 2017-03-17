@@ -17,15 +17,15 @@ import i5.las2peer.tools.CryptoException;
 public class UserAgentImplTest {
 
 	@Test
-	public void testUnlocking()
-			throws NoSuchAlgorithmException, CryptoException, AgentAccessDeniedException, L2pSecurityException {
+	public void testUnlocking() throws NoSuchAlgorithmException, CryptoException, AgentAccessDeniedException,
+			L2pSecurityException, AgentLockedException {
 		String passphrase = "A passphrase to unlock";
 		UserAgentImpl a = UserAgentImpl.createUserAgent(passphrase);
 
 		try {
 			a.decryptSymmetricKey(null); // not possible without unlocking the private key first
-			fail("SecurityException should have been thrown");
-		} catch (L2pSecurityException e) {
+			fail("AgentLockedException should have been thrown");
+		} catch (AgentLockedException e) {
 			// Should be thrown
 		} catch (SerializationException e) {
 			fail("SecurityException should have been thrown");
@@ -40,11 +40,11 @@ public class UserAgentImplTest {
 
 		try {
 			a.decryptSymmetricKey(null); // not possible without unlocking the private key first
-			fail("SecurityException should have been thrown");
-		} catch (L2pSecurityException e) {
+			fail("AgentLockedException should have been thrown");
+		} catch (AgentLockedException e) {
 			// Should be thrown
 		} catch (SerializationException e) {
-			fail("SecurityException should have been thrown");
+			fail("AgentLockedException should have been thrown");
 			e.printStackTrace();
 		}
 		a.unlock(passphrase);
@@ -60,8 +60,8 @@ public class UserAgentImplTest {
 	}
 
 	@Test
-	public void testPassphraseChange()
-			throws NoSuchAlgorithmException, L2pSecurityException, CryptoException, AgentAccessDeniedException, AgentLockedException {
+	public void testPassphraseChange() throws NoSuchAlgorithmException, L2pSecurityException, CryptoException,
+			AgentAccessDeniedException, AgentLockedException {
 		String passphrase = "a passphrase";
 		UserAgentImpl a = UserAgentImpl.createUserAgent(passphrase);
 
@@ -86,8 +86,8 @@ public class UserAgentImplTest {
 	}
 
 	@Test
-	public void testXml() throws NoSuchAlgorithmException, L2pSecurityException, MalformedXMLException, CryptoException,
-			UserAgentException, AgentAccessDeniedException {
+	public void testXml() throws NoSuchAlgorithmException, MalformedXMLException, CryptoException, UserAgentException,
+			AgentAccessDeniedException, AgentLockedException, L2pSecurityException {
 		String passphrase = "a pass";
 		String email = "usera@example.org";
 		String userData = "This is the user data attachement.";
@@ -107,7 +107,7 @@ public class UserAgentImplTest {
 	}
 
 	public void testLogin() throws CryptoException, L2pSecurityException, MalformedXMLException, UserAgentException,
-			AgentAccessDeniedException {
+			AgentAccessDeniedException, AgentLockedException {
 		UserAgentImpl a = UserAgentImpl.createUserAgent("test");
 		a.unlock("test");
 
@@ -122,7 +122,7 @@ public class UserAgentImplTest {
 
 	@Test
 	public void testEmail() throws CryptoException, L2pSecurityException, MalformedXMLException, UserAgentException,
-			AgentAccessDeniedException {
+			AgentAccessDeniedException, AgentLockedException {
 		UserAgentImpl a = UserAgentImpl.createUserAgent("test");
 		a.unlock("test");
 
@@ -137,7 +137,7 @@ public class UserAgentImplTest {
 
 	@Test
 	public void testEmailAndLogin() throws CryptoException, L2pSecurityException, MalformedXMLException,
-			UserAgentException, AgentAccessDeniedException {
+			UserAgentException, AgentAccessDeniedException, AgentLockedException {
 		UserAgentImpl a = UserAgentImpl.createUserAgent("test");
 		a.unlock("test");
 
@@ -153,7 +153,8 @@ public class UserAgentImplTest {
 	}
 
 	@Test
-	public void testLoginExceptions() throws L2pSecurityException, CryptoException, AgentAccessDeniedException {
+	public void testLoginExceptions() throws L2pSecurityException, CryptoException, AgentAccessDeniedException,
+			AgentLockedException {
 		UserAgentImpl a = UserAgentImpl.createUserAgent("test");
 		a.unlock("test");
 
@@ -170,13 +171,14 @@ public class UserAgentImplTest {
 	}
 
 	@Test
-	public void testEmailExceptions() throws L2pSecurityException, CryptoException, AgentAccessDeniedException {
+	public void testEmailExceptions() throws L2pSecurityException, CryptoException, AgentAccessDeniedException,
+			AgentLockedException {
 		UserAgentImpl a = UserAgentImpl.createUserAgent("test");
 		a.unlock("test");
 
 		try {
 			a.setEmail("afduaewd");
-			fail("Exception expected");
+			fail("UserAgentException expected");
 		} catch (UserAgentException e) {
 			// assertTrue(e.getMessage().contains("@"));
 		}

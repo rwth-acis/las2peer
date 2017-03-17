@@ -585,12 +585,12 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param receiver
 	 *
 	 * @throws AgentAlreadyRegisteredException the given agent is already registered to this node
-	 * @throws L2pSecurityException the agent is not unlocked
+	 * @throws AgentLockedException the agent is not unlocked
 	 * @throws AgentException any problem with the agent itself (probably on calling
 	 *             {@link i5.las2peer.security.AgentImpl#notifyRegistrationTo}
 	 */
 	public void registerReceiver(MessageReceiver receiver)
-			throws AgentAlreadyRegisteredException, L2pSecurityException, AgentException {
+			throws AgentAlreadyRegisteredException, AgentException {
 
 		// TODO allow multiple mediators registered at the same time for one agent to avoid conflicts between connectors
 
@@ -608,7 +608,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 			// we have an agent
 			AgentImpl agent = (AgentImpl) receiver;
 			if (agent.isLocked()) {
-				throw new L2pSecurityException("An agent has to be unlocked for registering at a node");
+				throw new AgentLockedException("An agent has to be unlocked for registering at a node.");
 			}
 
 			try {
@@ -1065,13 +1065,13 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * 
 	 * @param agent
 	 * @return the mediator for the given agent
-	 * @throws L2pSecurityException
+	 * @throws AgentLockedException If the agent is locked.
 	 * @throws AgentAlreadyRegisteredException If the agent is already directly registered at this node
 	 */
 	public Mediator createMediatorForAgent(AgentImpl agent)
-			throws L2pSecurityException, AgentAlreadyRegisteredException {
+			throws AgentLockedException, AgentAlreadyRegisteredException {
 		if (agent.isLocked()) {
-			throw new L2pSecurityException("You need to unlock the agent for mediation!");
+			throw new AgentLockedException("You need to unlock the agent for mediation!");
 		}
 		MessageReceiver receiver = htRegisteredReceivers.get(agent.getIdentifier());
 

@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 import org.w3c.dom.Element;
 
 import i5.las2peer.api.security.AgentException;
+import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.UserAgent;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
@@ -80,12 +81,12 @@ public class UserAgentImpl extends PassphraseAgentImpl implements UserAgent {
 	 * select a login name for this agent
 	 * 
 	 * @param loginName
-	 * @throws L2pSecurityException
+	 * @throws AgentLockedException
 	 * @throws UserAgentException
 	 */
-	public void setLoginName(String loginName) throws L2pSecurityException, UserAgentException {
+	public void setLoginName(String loginName) throws AgentLockedException, UserAgentException {
 		if (this.isLocked()) {
-			throw new L2pSecurityException("unlock needed first!");
+			throw new AgentLockedException();
 		}
 
 		if (loginName != null && loginName.length() < 4) {
@@ -104,12 +105,12 @@ public class UserAgentImpl extends PassphraseAgentImpl implements UserAgent {
 	 * select an email address to assign to this user agent
 	 * 
 	 * @param email
-	 * @throws L2pSecurityException
+	 * @throws AgentLockedException
 	 * @throws UserAgentException
 	 */
-	public void setEmail(String email) throws L2pSecurityException, UserAgentException {
+	public void setEmail(String email) throws AgentLockedException, UserAgentException {
 		if (this.isLocked()) {
-			throw new L2pSecurityException("unlock needed first!");
+			throw new AgentLockedException();
 		}
 
 		// http://stackoverflow.com/questions/153716/verify-email-in-java
@@ -130,11 +131,11 @@ public class UserAgentImpl extends PassphraseAgentImpl implements UserAgent {
 	 * network.
 	 * 
 	 * @param object The user data object to be serialized and attached.
-	 * @throws L2pSecurityException When the user agent is still locked.
+	 * @throws AgentLockedException When the user agent is still locked.
 	 */
-	public void setUserData(Serializable object) throws L2pSecurityException {
+	public void setUserData(Serializable object) throws AgentLockedException {
 		if (this.isLocked()) {
-			throw new L2pSecurityException("unlock needed first!");
+			throw new AgentLockedException();
 		}
 		this.userData = object;
 	}

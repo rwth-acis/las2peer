@@ -1,7 +1,7 @@
 package i5.las2peer.persistency;
 
+import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.security.AgentImpl;
-import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.tools.CryptoException;
 import rice.p2p.commonapi.Id;
 import rice.p2p.past.PastContent;
@@ -13,7 +13,7 @@ public class EnvelopeArtifact extends NetworkArtifact {
 	private static final long serialVersionUID = 1L;
 
 	public EnvelopeArtifact(PastryIdFactory idFactory, String identifier, int partIndex, byte[] rawPart,
-			AgentImpl author) throws CryptoException, L2pSecurityException, VerificationFailedException {
+			AgentImpl author) throws CryptoException, VerificationFailedException, AgentLockedException {
 		super(buildId(idFactory, identifier, partIndex), partIndex, rawPart, author);
 	}
 

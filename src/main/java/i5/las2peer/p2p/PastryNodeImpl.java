@@ -21,6 +21,7 @@ import i5.las2peer.api.logging.MonitoringEvent;
 import i5.las2peer.api.persistency.EnvelopeException;
 import i5.las2peer.api.persistency.EnvelopeNotFoundException;
 import i5.las2peer.api.security.AgentException;
+import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.classLoaders.L2pClassManager;
 import i5.las2peer.classLoaders.libraries.SharedStorageRepository;
@@ -372,7 +373,7 @@ public class PastryNodeImpl extends Node {
 
 	@Override
 	public void registerReceiver(MessageReceiver receiver)
-			throws AgentAlreadyRegisteredException, L2pSecurityException, AgentException {
+			throws AgentAlreadyRegisteredException, AgentException {
 
 		synchronized (this) {
 			super.registerReceiver(receiver);
@@ -533,9 +534,9 @@ public class PastryNodeImpl extends Node {
 	}
 
 	@Override
-	public void storeAgent(AgentImpl agent) throws L2pSecurityException, AgentException {
+	public void storeAgent(AgentImpl agent) throws AgentException {
 		if (agent.isLocked()) {
-			throw new L2pSecurityException("You have to unlock the agent before storage!");
+			throw new AgentLockedException();
 			// because the agent has to sign itself
 		}
 		// TODO check if anonymous should be stored and deny
