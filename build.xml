@@ -198,7 +198,7 @@
 				<attribute name="Class-Path" value="${classpath.name}" />
 			</manifest>
 		</jar>
-		<copyfile src="${export.jars}/${ivy.module}.jar" dest="${export.jars}/${ivy.module}-${ivy.las2peer.version}.jar"/>
+		<copy file="${export.jars}/${ivy.module}.jar" tofile="${export.jars}/${ivy.module}-${ivy.las2peer.version}.jar"/>
 	</target>
 
 	<target name="javadoc" depends="init_doc" description="--> generate Javadoc for this project" >
