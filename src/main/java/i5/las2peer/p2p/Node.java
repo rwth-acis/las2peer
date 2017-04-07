@@ -270,7 +270,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * The event for this notification. conflicts if running multiple nodes on the same machine.
 	 */
 	private void initStandardLogfile() {
-		addObserver(L2pLogger.getInstance(Node.class.getName()));
+		addObserver(L2pLogger.getInstance(Node.class));
 	}
 
 	/**
