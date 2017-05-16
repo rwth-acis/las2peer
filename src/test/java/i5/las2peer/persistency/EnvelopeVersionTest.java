@@ -76,7 +76,7 @@ public class EnvelopeVersionTest {
 			// create envelope to store in the shared network storage
 			UserAgentImpl smith = MockAgentFactory.getAdam();
 			smith.unlock("adamspass");
-			EnvelopeVersion envelope1 = node1.createUnencryptedEnvelope("test", "Hello World!");
+			EnvelopeVersion envelope1 = node1.createUnencryptedEnvelope("test", smith.getPublicKey(), "Hello World!");
 			// upload envelope
 			node1.storeEnvelopeAsync(envelope1, smith, new StorageStoreResultHandler() {
 				@Override
@@ -149,7 +149,7 @@ public class EnvelopeVersionTest {
 			byte[] testContent = new byte[datasize];
 			// generate random data
 			new Random().nextBytes(testContent);
-			EnvelopeVersion envelope1 = node1.createUnencryptedEnvelope("test", testContent);
+			EnvelopeVersion envelope1 = node1.createUnencryptedEnvelope("test", smith.getPublicKey(), testContent);
 			// upload envelope
 			long startStore = System.currentTimeMillis();
 			node1.storeEnvelopeAsync(envelope1, smith, new StorageStoreResultHandler() {
@@ -203,8 +203,8 @@ public class EnvelopeVersionTest {
 			// create envelope to store in the shared network storage
 			UserAgentImpl smith = MockAgentFactory.getAdam();
 			smith.unlock("adamspass");
-			EnvelopeVersion envelope1 = node1.createUnencryptedEnvelope("test", "Hello World 1!");
-			EnvelopeVersion envelope2 = node1.createUnencryptedEnvelope("test", "Hello World 2!");
+			EnvelopeVersion envelope1 = node1.createUnencryptedEnvelope("test", smith.getPublicKey(), "Hello World 1!");
+			EnvelopeVersion envelope2 = node1.createUnencryptedEnvelope("test", smith.getPublicKey(), "Hello World 2!");
 			// upload envelope
 			node1.storeEnvelopeAsync(envelope1, smith, new StorageStoreResultHandler() {
 				@Override
@@ -301,8 +301,8 @@ public class EnvelopeVersionTest {
 			// create envelope to store in the shared network storage
 			UserAgentImpl smith = MockAgentFactory.getAdam();
 			smith.unlock("adamspass");
-			EnvelopeVersion envelope1 = node1.createUnencryptedEnvelope("test", "Hello World 1!");
-			EnvelopeVersion envelope2 = node1.createUnencryptedEnvelope("test", "Hello World 2!");
+			EnvelopeVersion envelope1 = node1.createUnencryptedEnvelope("test", smith.getPublicKey(), "Hello World 1!");
+			EnvelopeVersion envelope2 = node1.createUnencryptedEnvelope("test", smith.getPublicKey(), "Hello World 2!");
 			// upload first envelope
 			node1.storeEnvelopeAsync(envelope1, smith, new StorageStoreResultHandler() {
 				@Override
@@ -358,8 +358,8 @@ public class EnvelopeVersionTest {
 			// create envelope to store in the shared network storage
 			UserAgentImpl smith = MockAgentFactory.getAdam();
 			smith.unlock("adamspass");
-			EnvelopeVersion envelope1 = node1.createUnencryptedEnvelope("test", "Hello World 1!");
-			EnvelopeVersion envelope2 = node1.createUnencryptedEnvelope("test", "Hello World 2!");
+			EnvelopeVersion envelope1 = node1.createUnencryptedEnvelope("test", smith.getPublicKey(), "Hello World 1!");
+			EnvelopeVersion envelope2 = node1.createUnencryptedEnvelope("test", smith.getPublicKey(), "Hello World 2!");
 			// upload envelope
 			node1.storeEnvelopeAsync(envelope1, smith, new StorageStoreResultHandler() {
 				@Override
@@ -426,7 +426,8 @@ public class EnvelopeVersionTest {
 			PastryNodeImpl node1 = nodes.get(0);
 			UserAgentImpl smith = MockAgentFactory.getAdam();
 			smith.unlock("adamspass");
-			EnvelopeVersion updated = node1.createUnencryptedEnvelope("test", "envelope version number 1");
+			EnvelopeVersion updated = node1.createUnencryptedEnvelope("test", smith.getPublicKey(),
+					"envelope version number 1");
 			node1.storeEnvelope(updated, smith);
 			for (int c = 2; c <= 250; c++) {
 				updated = node1.createUnencryptedEnvelope(updated, "envelope version number " + c);
@@ -487,7 +488,7 @@ public class EnvelopeVersionTest {
 			// create envelope to store in the shared network storage
 			UserAgentImpl smith = MockAgentFactory.getAdam();
 			smith.unlock("adamspass");
-			EnvelopeVersion envelope1 = node1.createUnencryptedEnvelope("test", "Hello World!");
+			EnvelopeVersion envelope1 = node1.createUnencryptedEnvelope("test", smith.getPublicKey(), "Hello World!");
 			// upload envelope
 			node1.storeEnvelope(envelope1, smith);
 			// change content type to integer
@@ -506,7 +507,7 @@ public class EnvelopeVersionTest {
 			UserAgentImpl smith = MockAgentFactory.getAdam();
 			smith.unlock("adamspass");
 			final String testContent = "envelope of smith";
-			EnvelopeVersion original = node1.createUnencryptedEnvelope("test", testContent);
+			EnvelopeVersion original = node1.createUnencryptedEnvelope("test", smith.getPublicKey(), testContent);
 			node1.storeEnvelope(original, smith);
 			UserAgentImpl neo = MockAgentFactory.getEve();
 			neo.unlock("evespass");
@@ -543,7 +544,7 @@ public class EnvelopeVersionTest {
 			group1.unlock(smith);
 			node1.storeAgent(group1);
 			final String testContent = "content from smith";
-			EnvelopeVersion groupEnv = node1.createEnvelope("test", testContent, group1);
+			EnvelopeVersion groupEnv = node1.createEnvelope("test", smith.getPublicKey(), testContent, group1);
 			node1.storeEnvelope(groupEnv, smith);
 			// Agent Neo (same group) reads the envelope
 			PastryNodeImpl node2 = nodes.get(1);
@@ -585,7 +586,7 @@ public class EnvelopeVersionTest {
 			group1.unlock(smith);
 			node1.storeAgent(group1);
 			final String testContent = "content from smith";
-			EnvelopeVersion groupEnv = node1.createEnvelope("test", testContent);
+			EnvelopeVersion groupEnv = node1.createEnvelope("test", group1.getPublicKey(), testContent);
 			node1.storeEnvelope(groupEnv, group1);
 			// Agent Neo (same group) reads the envelope ...
 			PastryNodeImpl node2 = nodes.get(1);

@@ -158,15 +158,15 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 	}
 
 	@Override
-	public EnvelopeVersion createEnvelope(String identifier, Serializable content, AgentImpl... readers)
-			throws IllegalArgumentException, SerializationException, CryptoException {
-		return new EnvelopeVersion(identifier, content, Arrays.asList(readers));
+	public EnvelopeVersion createEnvelope(String identifier, PublicKey expectedAuthorPubKey, Serializable content,
+			AgentImpl... readers) throws IllegalArgumentException, SerializationException, CryptoException {
+		return new EnvelopeVersion(identifier, expectedAuthorPubKey, content, Arrays.asList(readers));
 	}
 
 	@Override
-	public EnvelopeVersion createEnvelope(String identifier, Serializable content, Collection<?> readers)
-			throws IllegalArgumentException, SerializationException, CryptoException {
-		return new EnvelopeVersion(identifier, content, readers);
+	public EnvelopeVersion createEnvelope(String identifier, PublicKey expectedAuthorPubKey, Serializable content,
+			Collection<?> readers) throws IllegalArgumentException, SerializationException, CryptoException {
+		return new EnvelopeVersion(identifier, expectedAuthorPubKey, content, readers);
 	}
 
 	@Override
@@ -188,9 +188,9 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 	}
 
 	@Override
-	public EnvelopeVersion createUnencryptedEnvelope(String identifier, Serializable content)
-			throws IllegalArgumentException, SerializationException, CryptoException {
-		return new EnvelopeVersion(identifier, content, new ArrayList<AgentImpl>());
+	public EnvelopeVersion createUnencryptedEnvelope(String identifier, PublicKey expectedAuthorPubKey,
+			Serializable content) throws IllegalArgumentException, SerializationException, CryptoException {
+		return new EnvelopeVersion(identifier, expectedAuthorPubKey, content, new ArrayList<AgentImpl>());
 	}
 
 	@Override
@@ -262,7 +262,7 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 						Set<String> mergedGroups = collisionHandler.mergeGroups(envelope.getReaderGroupIds(),
 								inNetwork.getReaderGroupIds());
 						EnvelopeVersion mergedEnv = new EnvelopeVersion(envelope.getIdentifier(), mergedVersion,
-								mergedContent, mergedReaders, mergedGroups);
+								author.getPublicKey(), mergedContent, mergedReaders, mergedGroups);
 						logger.info("Merged envelope (collisions: " + mergeCounter.value() + ") from network "
 								+ inNetwork.toString() + " with local copy " + envelope.toString()
 								+ " to merged version " + mergedEnv.toString());
@@ -569,6 +569,7 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 			long envelopeVersion = EnvelopeVersion.NULL_VERSION;
 			int lastPartIndex = -1;
 			int numberOfParts = 0;
+			PublicKey authorPubKey = null;
 			// concat raw byte arrays
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			for (NetworkArtifact artifact : artifacts) {
@@ -612,6 +613,17 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 					throw new EnvelopeException("Number of parts from artifact (" + numberOfParts
 							+ ") did not match with envelope parts number (" + parts + ")");
 				}
+				// check author public key
+				try {
+					PublicKey artifactAuthorPubKey = artifact.getAuthorPublicKey();
+					if (authorPubKey == null) {
+						authorPubKey = artifactAuthorPubKey;
+					} else if (!authorPubKey.equals(artifactAuthorPubKey)) {
+						throw new EnvelopeException("Parts auhtor public keys do not match");
+					}
+				} catch (VerificationFailedException e) {
+					throw new EnvelopeException("Could not retrieve author public key from network artifact.");
+				}
 				try {
 					byte[] rawContent = artifact.getContent();
 					if (rawContent != null) {
@@ -633,6 +645,9 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 			} else {
 				throw new EnvelopeException("expected class " + EnvelopeVersion.class.getCanonicalName() + " but got "
 						+ obj.getClass().getCanonicalName() + " instead");
+			}
+			if (authorPubKey == null || !authorPubKey.equals(result.getAuthorPublicKey())) {
+				throw new EnvelopeException("Network artifacts and envelope have different authors");
 			}
 			return result;
 		} catch (IOException | ClassNotFoundException | ClassCastException | IllegalArgumentException e) {

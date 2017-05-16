@@ -46,7 +46,7 @@ public class UserAgentManager {
 					EnvelopeVersion stored = node.fetchEnvelope(identifier);
 					envName = node.createUnencryptedEnvelope(stored, agentId);
 				} catch (EnvelopeNotFoundException e) {
-					envName = node.createUnencryptedEnvelope(identifier, agentId);
+					envName = node.createUnencryptedEnvelope(identifier, agent.getPublicKey(), agentId);
 				}
 				node.storeEnvelope(envName, agent);
 			} catch (EnvelopeAlreadyExistsException e) {
@@ -63,7 +63,7 @@ public class UserAgentManager {
 				try {
 					envMail = node.fetchEnvelope(identifier);
 				} catch (EnvelopeNotFoundException e) {
-					envMail = node.createUnencryptedEnvelope(identifier, agentId);
+					envMail = node.createUnencryptedEnvelope(identifier, agent.getPublicKey(), agentId);
 				}
 				node.storeEnvelope(envMail, agent);
 			} catch (EnvelopeAlreadyExistsException e) {

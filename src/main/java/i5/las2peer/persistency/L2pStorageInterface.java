@@ -1,6 +1,7 @@
 package i5.las2peer.persistency;
 
 import java.io.Serializable;
+import java.security.PublicKey;
 import java.util.Collection;
 
 import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
@@ -16,6 +17,7 @@ public interface L2pStorageInterface {
 	 * Creates a new version of an Envelope. The Envelope uses by default the start version number.
 	 * 
 	 * @param identifier An unique identifier for the Envelope.
+	 * @param authorPubKey The authors public key. Validated on store operation.
 	 * @param content The actual content that should be stored.
 	 * @param readers An arbitrary number of Agents, who are allowed to read the content.
 	 * @return Returns the Envelope instance.
@@ -24,13 +26,14 @@ public interface L2pStorageInterface {
 	 * @throws SerializationException If a problem occurs with object serialization.
 	 * @throws CryptoException If an cryptographic issue occurs.
 	 */
-	public EnvelopeVersion createEnvelope(String identifier, Serializable content, AgentImpl... readers)
-			throws IllegalArgumentException, SerializationException, CryptoException;
+	public EnvelopeVersion createEnvelope(String identifier, PublicKey authorPubKey, Serializable content,
+			AgentImpl... readers) throws IllegalArgumentException, SerializationException, CryptoException;
 
 	/**
 	 * Creates a new version of an Envelope. The Envelope uses by default the start version number.
 	 * 
 	 * @param identifier An unique identifier for the Envelope.
+	 * @param authorPubKey The authors public key. Validated on store operation.
 	 * @param content The actual content that should be stored.
 	 * @param readers An arbitrary number of Agents, who are allowed to read the content.
 	 * @return Returns the Envelope instance.
@@ -39,8 +42,8 @@ public interface L2pStorageInterface {
 	 * @throws SerializationException If a problem occurs with object serialization.
 	 * @throws CryptoException If an cryptographic issue occurs.
 	 */
-	public EnvelopeVersion createEnvelope(String identifier, Serializable content, Collection<?> readers)
-			throws IllegalArgumentException, SerializationException, CryptoException;
+	public EnvelopeVersion createEnvelope(String identifier, PublicKey authorPubKey, Serializable content,
+			Collection<?> readers) throws IllegalArgumentException, SerializationException, CryptoException;
 
 	/**
 	 * Creates an continuous version instance for the given Envelope. This method copies the reader list from the
@@ -91,6 +94,7 @@ public interface L2pStorageInterface {
 	 * Creates a new version of an unencrypted Envelope. The Envelope uses by default the start version number.
 	 * 
 	 * @param identifier An unique identifier for the Envelope.
+	 * @param authorPubKey The authors public key. Validated on store operation.
 	 * @param content The updated content that should be stored.
 	 * @return Returns the Envelope instance.
 	 * @throws IllegalArgumentException If the given identifier is {@code null}, the version number is below the start
@@ -98,7 +102,7 @@ public interface L2pStorageInterface {
 	 * @throws SerializationException If a problem occurs with object serialization.
 	 * @throws CryptoException If an cryptographic issue occurs.
 	 */
-	public EnvelopeVersion createUnencryptedEnvelope(String identifier, Serializable content)
+	public EnvelopeVersion createUnencryptedEnvelope(String identifier, PublicKey authorPubKey, Serializable content)
 			throws IllegalArgumentException, SerializationException, CryptoException;
 
 	/**

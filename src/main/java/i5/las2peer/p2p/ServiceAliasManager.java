@@ -174,7 +174,7 @@ public class ServiceAliasManager {
 	private List<String> splitPath(String path) {
 		path = path.toLowerCase().trim();
 
-		ArrayList<String> pathSplit = new ArrayList<String>(Arrays.asList(path.split(SEPERATOR)));
+		ArrayList<String> pathSplit = new ArrayList<>(Arrays.asList(path.split(SEPERATOR)));
 		pathSplit.removeIf(item -> item == null || "".equals(item));
 
 		return pathSplit;
@@ -189,7 +189,8 @@ public class ServiceAliasManager {
 
 	private void createEntry(AgentImpl agent, String key, String value)
 			throws EnvelopeException, IllegalArgumentException, SerializationException, CryptoException {
-		EnvelopeVersion envName = node.createEnvelope(PREFIX + key.toLowerCase(), value, agent, node.getAnonymous());
+		EnvelopeVersion envName = node.createEnvelope(PREFIX + key.toLowerCase(), agent.getPublicKey(), value, agent,
+				node.getAnonymous());
 		node.storeEnvelope(envName, agent);
 	}
 }

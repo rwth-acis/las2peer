@@ -10,7 +10,6 @@ import java.util.Collection;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import i5.las2peer.api.persistency.EnvelopeException;
@@ -63,8 +62,6 @@ public class EnvelopeImplTest {
 	}
 
 	@Test
-	@Ignore
-	// TODO API fix
 	public void testFromExisting() throws MalformedXMLException, IOException, IllegalArgumentException,
 			SerializationException, CryptoException, L2pSecurityException, EnvelopeException, AgentException {
 		UserAgentImpl owner = MockAgentFactory.getAdam();
@@ -75,7 +72,7 @@ public class EnvelopeImplTest {
 		Collection<AgentImpl> readers = new ArrayList<>();
 		readers.add(owner);
 
-		EnvelopeVersion oldVersion = new EnvelopeVersion("test", "content", readers);
+		EnvelopeVersion oldVersion = new EnvelopeVersion("test", owner.getPublicKey(), "content", readers);
 		node.storeEnvelope(oldVersion, owner);
 
 		EnvelopeImpl envelope = new EnvelopeImpl(oldVersion, ownerContext);

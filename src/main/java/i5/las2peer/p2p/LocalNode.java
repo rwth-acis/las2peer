@@ -1,6 +1,7 @@
 package i5.las2peer.p2p;
 
 import java.io.Serializable;
+import java.security.PublicKey;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -96,8 +97,7 @@ public class LocalNode extends Node {
 	}
 
 	@Override
-	public void registerReceiver(MessageReceiver receiver)
-			throws AgentAlreadyRegisteredException, AgentException {
+	public void registerReceiver(MessageReceiver receiver) throws AgentAlreadyRegisteredException, AgentException {
 		super.registerReceiver(receiver);
 
 		if (receiver instanceof AgentImpl) {
@@ -653,9 +653,9 @@ public class LocalNode extends Node {
 	}
 
 	@Override
-	public EnvelopeVersion createEnvelope(String identifier, Serializable content, AgentImpl... reader)
-			throws IllegalArgumentException, SerializationException, CryptoException {
-		return storage.createEnvelope(identifier, content, reader);
+	public EnvelopeVersion createEnvelope(String identifier, PublicKey authorPubKey, Serializable content,
+			AgentImpl... reader) throws IllegalArgumentException, SerializationException, CryptoException {
+		return storage.createEnvelope(identifier, authorPubKey, content, reader);
 	}
 
 	@Override
@@ -683,9 +683,9 @@ public class LocalNode extends Node {
 	}
 
 	@Override
-	public EnvelopeVersion createEnvelope(String identifier, Serializable content, Collection<?> readers)
-			throws IllegalArgumentException, SerializationException, CryptoException {
-		return storage.createEnvelope(identifier, content, readers);
+	public EnvelopeVersion createEnvelope(String identifier, PublicKey authorPubKey, Serializable content,
+			Collection<?> readers) throws IllegalArgumentException, SerializationException, CryptoException {
+		return storage.createEnvelope(identifier, authorPubKey, content, readers);
 	}
 
 	@Override
@@ -695,9 +695,9 @@ public class LocalNode extends Node {
 	}
 
 	@Override
-	public EnvelopeVersion createUnencryptedEnvelope(String identifier, Serializable content)
+	public EnvelopeVersion createUnencryptedEnvelope(String identifier, PublicKey authorPubKey, Serializable content)
 			throws IllegalArgumentException, SerializationException, CryptoException {
-		return storage.createUnencryptedEnvelope(identifier, content);
+		return storage.createUnencryptedEnvelope(identifier, authorPubKey, content);
 	}
 
 	@Override

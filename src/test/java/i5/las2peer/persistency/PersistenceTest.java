@@ -45,9 +45,9 @@ public class PersistenceTest {
 		try {
 			// start network and write data into shared storage
 			PastryNodeImpl node1 = nodes.get(0);
-			EnvelopeVersion before = node1.createUnencryptedEnvelope("test", "This is las2peer!");
 			UserAgentImpl smith = MockAgentFactory.getAdam();
 			smith.unlock("adamspass");
+			EnvelopeVersion before = node1.createUnencryptedEnvelope("test", smith.getPublicKey(), "This is las2peer!");
 			node1.storeEnvelope(before, smith);
 			// shutdown network
 			stopNetwork();
@@ -70,9 +70,9 @@ public class PersistenceTest {
 		try {
 			// start network and write data into shared storage
 			PastryNodeImpl node1 = nodes.get(0);
-			EnvelopeVersion env = node1.createUnencryptedEnvelope("test", "This is las2peer!");
 			UserAgentImpl smith = MockAgentFactory.getAdam();
 			smith.unlock("adamspass");
+			EnvelopeVersion env = node1.createUnencryptedEnvelope("test", smith.getPublicKey(), "This is las2peer!");
 			node1.storeEnvelope(env, smith);
 			// shutdown node 2
 			PastryNodeImpl node2 = nodes.remove(1);

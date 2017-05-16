@@ -47,9 +47,9 @@ public class MissingNodesTest {
 			nodes.remove(r.nextInt(nodes.size())).shutDown();
 			// store test content
 			PastryNodeImpl active = nodes.get(r.nextInt(nodes.size()));
-			EnvelopeVersion env = active.createUnencryptedEnvelope("test", "This is las2peer!");
 			UserAgentImpl smith = MockAgentFactory.getAdam();
 			smith.unlock("adamspass");
+			EnvelopeVersion env = active.createUnencryptedEnvelope("test", smith.getPublicKey(), "This is las2peer!");
 			long start = System.currentTimeMillis();
 			active.storeEnvelope(env, smith);
 			long delay = System.currentTimeMillis() - start;
@@ -65,9 +65,9 @@ public class MissingNodesTest {
 		try {
 			// store test content
 			PastryNodeImpl active = nodes.get(r.nextInt(nodes.size()));
-			EnvelopeVersion env = active.createUnencryptedEnvelope("test", "This is las2peer!");
 			UserAgentImpl smith = MockAgentFactory.getAdam();
 			smith.unlock("adamspass");
+			EnvelopeVersion env = active.createUnencryptedEnvelope("test", smith.getPublicKey(), "This is las2peer!");
 			active.storeEnvelope(env, smith);
 			// shutdown a random node
 			nodes.remove(r.nextInt(nodes.size())).shutDown();

@@ -35,8 +35,6 @@ import i5.las2peer.tools.CryptoTools;
 
 public class EnvelopeVersion implements Serializable, XmlAble {
 
-	// TODO API @Thomas: store signing agent + reader list
-
 	private static final L2pLogger logger = L2pLogger.getInstance(EnvelopeVersion.class);
 
 	/**
@@ -66,15 +64,17 @@ public class EnvelopeVersion implements Serializable, XmlAble {
 
 	private final String identifier;
 	private final long version;
+	private final PublicKey authorPubKey;
 	private final HashMap<PublicKey, byte[]> readerKeys;
 	private final HashSet<String> readerGroupIds;
 	private final byte[] rawContent;
 
 	// just for the XML factory method
-	private EnvelopeVersion(String identifier, long version, HashMap<PublicKey, byte[]> readerKeys,
-			HashSet<String> readerGroupIds, byte[] rawContent) {
+	private EnvelopeVersion(String identifier, long version, PublicKey authorPubKey,
+			HashMap<PublicKey, byte[]> readerKeys, HashSet<String> readerGroupIds, byte[] rawContent) {
 		this.identifier = identifier;
 		this.version = version;
+		this.authorPubKey = authorPubKey;
 		this.readerKeys = readerKeys;
 		this.readerGroupIds = readerGroupIds;
 		this.rawContent = rawContent;
@@ -84,6 +84,7 @@ public class EnvelopeVersion implements Serializable, XmlAble {
 	 * Creates a new version of an Envelope. The envelope uses by default the start version number.
 	 * 
 	 * @param identifier An unique identifier for the envelope.
+	 * @param authorPubKey The authors public key. Validated on store operation.
 	 * @param content The updated content that should be stored.
 	 * @param readers An arbitrary number of Agents, who are allowed to read the content.
 	 * @throws IllegalArgumentException If the given identifier is null, the version number is below the start version
@@ -91,9 +92,9 @@ public class EnvelopeVersion implements Serializable, XmlAble {
 	 * @throws SerializationException If a problem occurs with object serialization.
 	 * @throws CryptoException If an cryptographic issue occurs.
 	 */
-	protected EnvelopeVersion(String identifier, Serializable content, Collection<?> readers)
+	protected EnvelopeVersion(String identifier, PublicKey authorPubKey, Serializable content, Collection<?> readers)
 			throws IllegalArgumentException, SerializationException, CryptoException {
-		this(identifier, START_VERSION, content, readers, new HashSet<>());
+		this(identifier, START_VERSION, authorPubKey, content, readers, new HashSet<>());
 	}
 
 	/**
@@ -109,7 +110,7 @@ public class EnvelopeVersion implements Serializable, XmlAble {
 	 */
 	protected EnvelopeVersion(EnvelopeVersion previousVersion, Serializable content)
 			throws IllegalArgumentException, SerializationException, CryptoException {
-		this(previousVersion.getIdentifier(), previousVersion.getVersion() + 1, content,
+		this(previousVersion.identifier, previousVersion.version + 1, previousVersion.authorPubKey, content,
 				previousVersion.readerKeys.keySet(), previousVersion.readerGroupIds);
 	}
 
@@ -126,7 +127,8 @@ public class EnvelopeVersion implements Serializable, XmlAble {
 	 */
 	protected EnvelopeVersion(EnvelopeVersion previousVersion, Serializable content, Collection<?> readers)
 			throws IllegalArgumentException, SerializationException, CryptoException {
-		this(previousVersion.getIdentifier(), previousVersion.getVersion() + 1, content, readers, new HashSet<>());
+		this(previousVersion.identifier, previousVersion.version + 1, previousVersion.authorPubKey, content, readers,
+				new HashSet<>());
 	}
 
 	/**
@@ -134,6 +136,7 @@ public class EnvelopeVersion implements Serializable, XmlAble {
 	 * 
 	 * @param identifier An unique identifier for the envelope.
 	 * @param version The version number for this envelope.
+	 * @param authorPubKey The authors public key for this envelope.
 	 * @param content The actual content that should be stored.
 	 * @param readers An arbitrary number of Agents, who are allowed to read the content.
 	 * @param readerGroups A set of group agent id's with read access.
@@ -142,8 +145,9 @@ public class EnvelopeVersion implements Serializable, XmlAble {
 	 * @throws SerializationException If a problem occurs with object serialization.
 	 * @throws CryptoException If an cryptographic issue occurs.
 	 */
-	protected EnvelopeVersion(String identifier, long version, Serializable content, Collection<?> readers,
-			Set<String> readerGroups) throws IllegalArgumentException, SerializationException, CryptoException {
+	protected EnvelopeVersion(String identifier, long version, PublicKey authorPubKey, Serializable content,
+			Collection<?> readers, Set<String> readerGroups)
+			throws IllegalArgumentException, SerializationException, CryptoException {
 		if (identifier == null) {
 			throw new IllegalArgumentException("The identifier must not be null");
 		}
@@ -156,6 +160,10 @@ public class EnvelopeVersion implements Serializable, XmlAble {
 					"Version number (" + version + ") is too high, max is " + MAX_UPDATE_CYCLES);
 		}
 		this.version = version;
+		if (authorPubKey == null) {
+			throw new IllegalArgumentException("The author public key must not be null");
+		}
+		this.authorPubKey = authorPubKey;
 		readerKeys = new HashMap<>();
 		readerGroupIds = new HashSet<>(readerGroups);
 		if (readers != null && !readers.isEmpty()) {
@@ -199,6 +207,15 @@ public class EnvelopeVersion implements Serializable, XmlAble {
 	 */
 	public long getVersion() {
 		return version;
+	}
+
+	/**
+	 * Gets the authors public key of this envelope.
+	 * 
+	 * @return Returns the authors public key.
+	 */
+	public PublicKey getAuthorPublicKey() {
+		return authorPubKey;
 	}
 
 	@Override
@@ -301,7 +318,12 @@ public class EnvelopeVersion implements Serializable, XmlAble {
 	@Override
 	public String toXmlString() throws SerializationException {
 		StringBuilder result = new StringBuilder();
-		result.append("<las2peer:envelope identifier=\"" + identifier + "\" version=\"" + version + "\">\n");
+		try {
+			result.append("<las2peer:envelope identifier=\"" + identifier + "\" version=\"" + version
+					+ "\" authorPubKey=\"" + CryptoTools.publicKeyToString(authorPubKey) + "\">\n");
+		} catch (CryptoException e) {
+			throw new SerializationException("Could not convert author public key to String", e);
+		}
 		result.append("\t<las2peer:content encoding=\"Base64\">").append(Base64.getEncoder().encodeToString(rawContent))
 				.append("</las2peer:content>\n");
 		result.append(
@@ -342,6 +364,16 @@ public class EnvelopeVersion implements Serializable, XmlAble {
 			throw new MalformedXMLException("version attribute expected!");
 		}
 		long version = Long.parseLong(rootElement.getAttribute("version"));
+		// read author public key from XML
+		if (!rootElement.hasAttribute("authorPubKey")) {
+			throw new MalformedXMLException("author public key attribute expected!");
+		}
+		PublicKey authorPubKey;
+		try {
+			authorPubKey = CryptoTools.stringToPublicKey(rootElement.getAttribute("authorPubKey"));
+		} catch (CryptoException e) {
+			throw new MalformedXMLException("Could not retrieve author public key from XML", e);
+		}
 		// read content from XML
 		Element content = XmlTools.getSingularElement(rootElement, "las2peer:content");
 		if (!content.getAttribute("encoding").equals("Base64")) {
@@ -400,7 +432,7 @@ public class EnvelopeVersion implements Serializable, XmlAble {
 			String groupId = group.getAttribute("id");
 			readerGroupIds.add(groupId);
 		}
-		return new EnvelopeVersion(identifier, version, readerKeys, readerGroupIds, rawContent);
+		return new EnvelopeVersion(identifier, version, authorPubKey, readerKeys, readerGroupIds, rawContent);
 	}
 
 	/**
