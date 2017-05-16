@@ -19,8 +19,8 @@ public interface L2pStorageInterface {
 	 * @param content The actual content that should be stored.
 	 * @param readers An arbitrary number of Agents, who are allowed to read the content.
 	 * @return Returns the Envelope instance.
-	 * @throws IllegalArgumentException If the given identifier is null, the version number is below the start version
-	 *             number or too high.
+	 * @throws IllegalArgumentException If the given identifier is {@code null}, the version number is below the start
+	 *             version number or too high.
 	 * @throws SerializationException If a problem occurs with object serialization.
 	 * @throws CryptoException If an cryptographic issue occurs.
 	 */
@@ -34,8 +34,8 @@ public interface L2pStorageInterface {
 	 * @param content The actual content that should be stored.
 	 * @param readers An arbitrary number of Agents, who are allowed to read the content.
 	 * @return Returns the Envelope instance.
-	 * @throws IllegalArgumentException If the given identifier is null, the version number is below the start version
-	 *             number or too high.
+	 * @throws IllegalArgumentException If the given identifier is {@code null}, the version number is below the start
+	 *             version number or too high.
 	 * @throws SerializationException If a problem occurs with object serialization.
 	 * @throws CryptoException If an cryptographic issue occurs.
 	 */
@@ -49,8 +49,8 @@ public interface L2pStorageInterface {
 	 * @param previousVersion The previous version of the Envelope that should be updated.
 	 * @param content The updated content that should be stored.
 	 * @return Returns the Envelope instance.
-	 * @throws IllegalArgumentException If the given identifier is null, the version number is below the start version
-	 *             number or too high.
+	 * @throws IllegalArgumentException If the given identifier is {@code null}, the version number is below the start
+	 *             version number or too high.
 	 * @throws SerializationException If a problem occurs with object serialization.
 	 * @throws CryptoException If an cryptographic issue occurs.
 	 */
@@ -64,8 +64,8 @@ public interface L2pStorageInterface {
 	 * @param content The updated content that should be stored.
 	 * @param readers An arbitrary number of Agents, who are allowed to read the content.
 	 * @return Returns the Envelope instance.
-	 * @throws IllegalArgumentException If the given identifier is null, the version number is below the start version
-	 *             number or too high.
+	 * @throws IllegalArgumentException If the given identifier is {@code null}, the version number is below the start
+	 *             version number or too high.
 	 * @throws SerializationException If a problem occurs with object serialization.
 	 * @throws CryptoException If an cryptographic issue occurs.
 	 */
@@ -79,8 +79,8 @@ public interface L2pStorageInterface {
 	 * @param content The updated content that should be stored.
 	 * @param readers An arbitrary number of Agents, who are allowed to read the content.
 	 * @return Returns the Envelope instance.
-	 * @throws IllegalArgumentException If the given identifier is null, the version number is below the start version
-	 *             number or too high.
+	 * @throws IllegalArgumentException If the given identifier is {@code null}, the version number is below the start
+	 *             version number or too high.
 	 * @throws SerializationException If a problem occurs with object serialization.
 	 * @throws CryptoException If an cryptographic issue occurs.
 	 */
@@ -93,8 +93,8 @@ public interface L2pStorageInterface {
 	 * @param identifier An unique identifier for the Envelope.
 	 * @param content The updated content that should be stored.
 	 * @return Returns the Envelope instance.
-	 * @throws IllegalArgumentException If the given identifier is null, the version number is below the start version
-	 *             number or too high.
+	 * @throws IllegalArgumentException If the given identifier is {@code null}, the version number is below the start
+	 *             version number or too high.
 	 * @throws SerializationException If a problem occurs with object serialization.
 	 * @throws CryptoException If an cryptographic issue occurs.
 	 */
@@ -107,8 +107,8 @@ public interface L2pStorageInterface {
 	 * @param previousVersion The previous version of the Envelope that should be updated.
 	 * @param content The updated content that should be stored.
 	 * @return Returns the Envelope instance.
-	 * @throws IllegalArgumentException If the given identifier is null, the version number is below the start version
-	 *             number or too high.
+	 * @throws IllegalArgumentException If the given identifier is {@code null}, the version number is below the start
+	 *             version number or too high.
 	 * @throws SerializationException If a problem occurs with object serialization.
 	 * @throws CryptoException If an cryptographic issue occurs.
 	 */
