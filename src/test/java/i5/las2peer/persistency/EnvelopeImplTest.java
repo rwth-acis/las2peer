@@ -79,8 +79,8 @@ public class EnvelopeImplTest {
 		node.storeEnvelope(oldVersion, owner);
 
 		EnvelopeImpl envelope = new EnvelopeImpl(oldVersion, ownerContext);
-		assertEquals(envelope.getSigningAgentId(), owner.getIdentifier());
-		assertEquals(envelope.getContent(), "content");
+		assertEquals(owner.getIdentifier(), envelope.getSigningAgentId());
+		assertEquals("content", envelope.getContent());
 		assertTrue(envelope.hasReader(owner));
 
 		envelope.revokeReader(owner);
