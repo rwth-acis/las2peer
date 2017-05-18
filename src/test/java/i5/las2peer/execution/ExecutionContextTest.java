@@ -26,7 +26,9 @@ import i5.las2peer.api.security.Agent;
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentLockedException;
+import i5.las2peer.api.security.EmailAlreadyTakenException;
 import i5.las2peer.api.security.GroupAgent;
+import i5.las2peer.api.security.LoginNameAlreadyTakenException;
 import i5.las2peer.api.security.UserAgent;
 import i5.las2peer.logging.NodeObserver;
 import i5.las2peer.p2p.AgentAlreadyRegisteredException;
@@ -191,6 +193,55 @@ public class ExecutionContextTest {
 
 			assertTrue(context.hasAccess(group.getIdentifier(), userA));
 			assertFalse(context.hasAccess(group.getIdentifier())); // adam is not in the group
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+	
+	@Test
+	public void testUserAgents() {
+		try {
+			UserAgent userA = context.createUserAgent("passphrase");
+			userA.setLoginName("loginA");
+			userA.setEmail("emaila@asdf.de");
+			assertEquals("loginA", userA.getLoginName());
+			assertEquals("emaila@asdf.de", userA.getEmail());
+
+			UserAgent userB = context.createUserAgent("passphrase");
+			userB.setLoginName("loginB");
+			userB.setEmail("emailb@asdf.de");
+			assertEquals("loginB", userB.getLoginName());
+			assertEquals("emailb@asdf.de", userB.getEmail());
+
+			context.storeAgent(userA);
+			context.storeAgent(userB);
+			
+			userA = (UserAgent) context.fetchAgent(userA.getIdentifier());
+			userA.unlock("passphrase");
+			assertEquals("loginA", userA.getLoginName());
+			assertEquals("emaila@asdf.de", userA.getEmail());
+			
+			userB = (UserAgent) context.fetchAgent(userB.getIdentifier());
+			userB.unlock("passphrase");
+			assertEquals("loginB", userB.getLoginName());
+			assertEquals("emailb@asdf.de", userB.getEmail());
+
+			userB.setLoginName("userA");
+			
+			try {
+				context.storeAgent(userB);
+				fail("Exception expected");
+			} catch (LoginNameAlreadyTakenException e) {
+			}
+			
+			userA.setEmail("emailb@asdf.de");
+			
+			try {
+				context.storeAgent(userA);
+				fail("Exception expected");
+			} catch (EmailAlreadyTakenException e) {
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();

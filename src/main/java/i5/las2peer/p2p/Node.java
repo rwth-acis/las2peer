@@ -33,6 +33,7 @@ import i5.las2peer.api.persistency.EnvelopeNotFoundException;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentNotFoundException;
+import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.classLoaders.L2pClassManager;
 import i5.las2peer.classLoaders.libraries.Repository;
 import i5.las2peer.communication.Message;
@@ -1149,9 +1150,9 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param login
 	 * @return agent id
 	 * @throws AgentNotFoundException If no agent for the given login is found
-	 * @throws AgentException If any other issue with the agent occurs, e. g. XML not readable
+	 * @throws AgentOperationFailedException If any other issue with the agent occurs, e. g. XML not readable
 	 */
-	public String getAgentIdForLogin(String login) throws AgentNotFoundException, AgentException {
+	public String getAgentIdForLogin(String login) throws AgentNotFoundException, AgentOperationFailedException {
 		return userManager.getAgentIdByLogin(login);
 	}
 
@@ -1161,9 +1162,9 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param email
 	 * @return agent id
 	 * @throws AgentNotFoundException If no agent for the given email is found
-	 * @throws AgentException If any other issue with the agent occurs, e. g. XML not readable
+	 * @throws AgentOperationFailedException If any other issue with the agent occurs, e. g. XML not readable
 	 */
-	public String getAgentIdForEmail(String email) throws AgentNotFoundException, AgentException {
+	public String getAgentIdForEmail(String email) throws AgentNotFoundException, AgentOperationFailedException {
 		return userManager.getAgentIdByEmail(email);
 	}
 

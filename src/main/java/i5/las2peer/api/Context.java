@@ -150,7 +150,7 @@ public interface Context {
 	 * 
 	 * @param agent The unlocked agent to store.
 	 * @throws AgentAccessDeniedException If the agent cannot be overridden due to access restrictions.
-	 * @throws AgentAlreadyExistsException If another agent already exists.
+	 * @throws AgentAlreadyExistsException If another agent already exists (regarding some agent specific properties).
 	 * @throws AgentOperationFailedException If an error occurred on the node.
 	 * @throws AgentLockedException If the agent is locked.
 	 */
@@ -167,7 +167,7 @@ public interface Context {
 	 * @throws AgentNotFoundException If the agent specified by agentId does not exist.
 	 * @throws AgentOperationFailedException If an error occurred on the node.
 	 */
-	boolean hasAccess(String agentId, Agent using) throws AgentNotFoundException, AgentOperationFailedException;
+	public boolean hasAccess(String agentId, Agent using) throws AgentNotFoundException, AgentOperationFailedException;
 
 	/**
 	 * Checks if the main agent is able to unlock the agent agentId. This also includes recursive unlocking.
@@ -177,7 +177,29 @@ public interface Context {
 	 * @throws AgentNotFoundException If the agent specified by agentId does not exist.
 	 * @throws AgentOperationFailedException If an error occurred on the node.
 	 */
-	boolean hasAccess(String agentId) throws AgentNotFoundException, AgentOperationFailedException;
+	public boolean hasAccess(String agentId) throws AgentNotFoundException, AgentOperationFailedException;
+	
+	// UserAgents
+	
+	/**
+	 * Gets a {@link UserAgent}'s identifier by its login name.
+	 * 
+	 * @param loginName The user's login name
+	 * @return The identifier of the user agents.
+	 * @throws AgentNotFoundException If there is no agent with the given login name.
+	 * @throws AgentOperationFailedException On node errors.
+	 */
+	public String getUserAgentIdentifierByLoginName(String loginName) throws AgentNotFoundException, AgentOperationFailedException;
+	
+	/**
+	 * Gets a {@link UserAgent}'s identifier by its email address.
+	 * 
+	 * @param emailAddress The user's email address.
+	 * @return The identifier of the user agents.
+	 * @throws AgentNotFoundException If there is no agent with the given email address.
+	 * @throws AgentOperationFailedException On node errors.
+	 */
+	public String getUserAgentIdentifierByEmail(String emailAddress) throws AgentNotFoundException, AgentOperationFailedException;
 
 	// Envelopes
 

@@ -37,7 +37,6 @@ import i5.las2peer.api.security.GroupAgent;
 import i5.las2peer.api.security.ServiceAgent;
 import i5.las2peer.api.security.UserAgent;
 import i5.las2peer.logging.L2pLogger;
-import i5.las2peer.p2p.AgentAlreadyRegisteredException;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.persistency.EnvelopeImpl;
 import i5.las2peer.persistency.EnvelopeVersion;
@@ -237,8 +236,9 @@ public class ExecutionContext implements Context {
 
 		try {
 			node.storeAgent((AgentImpl) agent);
-		} catch (AgentAlreadyRegisteredException e) {
-			throw new AgentAlreadyExistsException(e);
+		} catch (AgentAlreadyExistsException | AgentLockedException | AgentAccessDeniedException
+				| AgentOperationFailedException e) {
+			throw e;
 		} catch (L2pSecurityException e) {
 			throw new AgentAccessDeniedException(e);
 		} catch (AgentException e) {
@@ -254,6 +254,18 @@ public class ExecutionContext implements Context {
 	@Override
 	public boolean hasAccess(String agentId) throws AgentNotFoundException {
 		return callerContext.hasAccess(agentId);
+	}
+	
+	@Override
+	public String getUserAgentIdentifierByLoginName(String loginName) throws AgentNotFoundException,
+			AgentOperationFailedException {
+		return node.getAgentIdForLogin(loginName);
+	}
+
+	@Override
+	public String getUserAgentIdentifierByEmail(String emailAddress) throws AgentNotFoundException,
+			AgentOperationFailedException {
+		return node.getAgentIdForEmail(emailAddress);
 	}
 
 	// --------------------------------------------------------------

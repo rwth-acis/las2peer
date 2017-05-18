@@ -6,6 +6,8 @@ import static org.junit.Assert.fail;
 import org.junit.Test;
 
 import i5.las2peer.api.security.AgentNotFoundException;
+import i5.las2peer.api.security.EmailAlreadyTakenException;
+import i5.las2peer.api.security.LoginNameAlreadyTakenException;
 import i5.las2peer.p2p.LocalNode;
 import i5.las2peer.p2p.Node;
 
@@ -31,10 +33,10 @@ public class UserAgentManagerTest {
 
 			try {
 				node.storeAgent(b);
-				// TODO currently not supported this way
+				// TODO API @Thomas please fix!
 				// the validation should be done in the fetch process
-//				fail("DuplicateLoginNameException expected");
-			} catch (DuplicateLoginNameException e) {
+				fail("LoginNameAlreadyTakenException expected");
+			} catch (LoginNameAlreadyTakenException e) {
 				// intended
 			}
 
@@ -46,13 +48,13 @@ public class UserAgentManagerTest {
 			b.setLoginName("LOGIN");
 			try {
 				node.storeAgent(b);
-				// TODO currently not supported this way
+				// TODO API @Thomas please fix!
 				// the validation should be done in the fetch process
-//				fail("DuplicateLoginNameException expected");
-			} catch (DuplicateLoginNameException e) {
+				fail("LoginNameAlreadyTakenException expected");
+			} catch (LoginNameAlreadyTakenException e) {
 				// intended
 			}
-//			assertEquals(a.getId(), l.getAgentIdByLogin("LOGIN"));
+			assertEquals(a.getIdentifier(), l.getAgentIdByLogin("LOGIN"));
 
 			try {
 				l.getAgentIdByLogin("fdewfue");
@@ -84,16 +86,16 @@ public class UserAgentManagerTest {
 			b.setEmail("email@example.com");
 			try {
 				node.storeAgent(b);
-				fail("DuplicateEmailException expected");
-			} catch (DuplicateEmailException e) {
+				fail("EmailAlreadyTakenException expected");
+			} catch (EmailAlreadyTakenException e) {
 				// intended
 			}
 
 			b.setEmail("EMAIL@example.com");
 			try {
 				node.storeAgent(b);
-				fail("DuplicateEmailException expected");
-			} catch (DuplicateEmailException e) {
+				fail("EmailAlreadyTakenException expected");
+			} catch (EmailAlreadyTakenException e) {
 				// intended
 			}
 

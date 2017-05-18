@@ -46,6 +46,8 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 
 	private SecretKey symmetricGroupKey = null;
 	private AgentImpl openedBy = null;
+	
+	// TODO API remove user data and name
 	private String name;
 	private Serializable userData;
 

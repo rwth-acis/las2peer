@@ -59,56 +59,36 @@ public class UserAgentImpl extends PassphraseAgentImpl implements UserAgent {
 		super(pubKey, encryptedPrivate, salt);
 	}
 
-	/**
-	 * get the login name stored for this user agent
-	 * 
-	 * @return the user login name
-	 */
+	@Override
 	public String getLoginName() {
 		return sLoginName;
 	}
 
-	/**
-	 * has this user a login name
-	 * 
-	 * @return true, if a login name is assigned
-	 */
-	public boolean hasLogin() {
+	@Override
+	public boolean hasLoginName() {
 		return sLoginName != null;
 	}
 
-	/**
-	 * select a login name for this agent
-	 * 
-	 * @param loginName
-	 * @throws AgentLockedException
-	 * @throws UserAgentException
-	 */
-	public void setLoginName(String loginName) throws AgentLockedException, UserAgentException {
+	@Override
+	public void setLoginName(String loginName) throws AgentLockedException, IllegalArgumentException {
 		if (this.isLocked()) {
 			throw new AgentLockedException();
 		}
 
 		if (loginName != null && loginName.length() < 4) {
-			throw new UserAgentException("please use a login name longer than three characters!");
+			throw new IllegalArgumentException("please use a login name longer than three characters!");
 		}
 
 		if (loginName != null && !(loginName.matches("[a-zA-Z].*"))) {
-			throw new UserAgentException("please use a login name startung with a normal character (a-z or A-Z)");
+			throw new IllegalArgumentException("please use a login name startung with a normal character (a-z or A-Z)");
 		}
 
 		// duplicate check is performed when storing/updating an UserAgent in a Node
 		this.sLoginName = loginName;
 	}
 
-	/**
-	 * select an email address to assign to this user agent
-	 * 
-	 * @param email
-	 * @throws AgentLockedException
-	 * @throws UserAgentException
-	 */
-	public void setEmail(String email) throws AgentLockedException, UserAgentException {
+	@Override
+	public void setEmail(String email) throws AgentLockedException, IllegalArgumentException {
 		if (this.isLocked()) {
 			throw new AgentLockedException();
 		}
@@ -118,7 +98,7 @@ public class UserAgentImpl extends PassphraseAgentImpl implements UserAgent {
 				"^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$");
 
 		if (email != null && !email.contains("@") && !rfc2822.matcher(email).matches()) {
-			throw new UserAgentException("Invalid e-mail address");
+			throw new IllegalArgumentException("Invalid e-mail address");
 		}
 
 		// duplicate check is performed when storing/updating an UserAgent in a Node
@@ -139,6 +119,8 @@ public class UserAgentImpl extends PassphraseAgentImpl implements UserAgent {
 		}
 		this.userData = object;
 	}
+	
+	// TODO API remove user data
 
 	@Override
 	public String toXmlString() {

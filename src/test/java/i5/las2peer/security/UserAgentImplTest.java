@@ -86,7 +86,7 @@ public class UserAgentImplTest {
 	}
 
 	@Test
-	public void testXml() throws NoSuchAlgorithmException, MalformedXMLException, CryptoException, UserAgentException,
+	public void testXml() throws NoSuchAlgorithmException, MalformedXMLException, CryptoException,
 			AgentAccessDeniedException, AgentLockedException, L2pSecurityException {
 		String passphrase = "a pass";
 		String email = "usera@example.org";
@@ -106,7 +106,7 @@ public class UserAgentImplTest {
 		assertEquals(userData, b.getUserData());
 	}
 
-	public void testLogin() throws CryptoException, L2pSecurityException, MalformedXMLException, UserAgentException,
+	public void testLogin() throws CryptoException, L2pSecurityException, MalformedXMLException,
 			AgentAccessDeniedException, AgentLockedException {
 		UserAgentImpl a = UserAgentImpl.createUserAgent("test");
 		a.unlock("test");
@@ -121,7 +121,7 @@ public class UserAgentImplTest {
 	}
 
 	@Test
-	public void testEmail() throws CryptoException, L2pSecurityException, MalformedXMLException, UserAgentException,
+	public void testEmail() throws CryptoException, L2pSecurityException, MalformedXMLException,
 			AgentAccessDeniedException, AgentLockedException {
 		UserAgentImpl a = UserAgentImpl.createUserAgent("test");
 		a.unlock("test");
@@ -137,7 +137,7 @@ public class UserAgentImplTest {
 
 	@Test
 	public void testEmailAndLogin() throws CryptoException, L2pSecurityException, MalformedXMLException,
-			UserAgentException, AgentAccessDeniedException, AgentLockedException {
+			AgentAccessDeniedException, AgentLockedException {
 		UserAgentImpl a = UserAgentImpl.createUserAgent("test");
 		a.unlock("test");
 
@@ -160,12 +160,12 @@ public class UserAgentImplTest {
 
 		try {
 			a.setLoginName("12323");
-		} catch (UserAgentException e) {
+		} catch (IllegalArgumentException e) {
 			assertTrue(e.getMessage().contains("a-z"));
 		}
 		try {
 			a.setLoginName("123");
-		} catch (UserAgentException e) {
+		} catch (IllegalArgumentException e) {
 			assertTrue(e.getMessage().contains("longer"));
 		}
 	}
@@ -179,7 +179,7 @@ public class UserAgentImplTest {
 		try {
 			a.setEmail("afduaewd");
 			fail("UserAgentException expected");
-		} catch (UserAgentException e) {
+		} catch (IllegalArgumentException e) {
 			// assertTrue(e.getMessage().contains("@"));
 		}
 	}
