@@ -41,7 +41,7 @@ public abstract class Configurable {
 	 * @return hashtable with all property entries
 	 */
 	protected final Hashtable<String, String> getProperties() {
-		Hashtable<String, String> result = new Hashtable<String, String>();
+		Hashtable<String, String> result = new Hashtable<>();
 
 		String propFile = findPropertyFile();
 		if (propFile == null) {

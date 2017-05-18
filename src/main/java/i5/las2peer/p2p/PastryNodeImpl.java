@@ -9,6 +9,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.UnknownHostException;
+import java.security.PublicKey;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Properties;
@@ -372,8 +373,7 @@ public class PastryNodeImpl extends Node {
 	}
 
 	@Override
-	public void registerReceiver(MessageReceiver receiver)
-			throws AgentAlreadyRegisteredException, AgentException {
+	public void registerReceiver(MessageReceiver receiver) throws AgentAlreadyRegisteredException, AgentException {
 
 		synchronized (this) {
 			super.registerReceiver(receiver);
@@ -549,7 +549,8 @@ public class PastryNodeImpl extends Node {
 				agentEnvelope = pastStorage.createUnencryptedEnvelope(agentEnvelope, agent.toXmlString());
 			} catch (EnvelopeNotFoundException e) {
 				agentEnvelope = pastStorage.createUnencryptedEnvelope(
-						EnvelopeVersion.getAgentIdentifier(agent.getIdentifier()), agent.toXmlString());
+						EnvelopeVersion.getAgentIdentifier(agent.getIdentifier()), agent.getPublicKey(),
+						agent.toXmlString());
 			}
 			pastStorage.storeEnvelope(agentEnvelope, agent, AGENT_STORE_TIMEOUT);
 			if (agent instanceof UserAgentImpl) {
@@ -631,15 +632,15 @@ public class PastryNodeImpl extends Node {
 	}
 
 	@Override
-	public EnvelopeVersion createEnvelope(String identifier, Serializable content, AgentImpl... reader)
-			throws IllegalArgumentException, SerializationException, CryptoException {
-		return pastStorage.createEnvelope(identifier, content, reader);
+	public EnvelopeVersion createEnvelope(String identifier, PublicKey authorPubKey, Serializable content,
+			AgentImpl... reader) throws IllegalArgumentException, SerializationException, CryptoException {
+		return pastStorage.createEnvelope(identifier, authorPubKey, content, reader);
 	}
 
 	@Override
-	public EnvelopeVersion createEnvelope(String identifier, Serializable content, Collection<?> readers)
-			throws IllegalArgumentException, SerializationException, CryptoException {
-		return pastStorage.createEnvelope(identifier, content, readers);
+	public EnvelopeVersion createEnvelope(String identifier, PublicKey authorPubKey, Serializable content,
+			Collection<?> readers) throws IllegalArgumentException, SerializationException, CryptoException {
+		return pastStorage.createEnvelope(identifier, authorPubKey, content, readers);
 	}
 
 	@Override
@@ -661,9 +662,9 @@ public class PastryNodeImpl extends Node {
 	}
 
 	@Override
-	public EnvelopeVersion createUnencryptedEnvelope(String identifier, Serializable content)
+	public EnvelopeVersion createUnencryptedEnvelope(String identifier, PublicKey authorPubKey, Serializable content)
 			throws IllegalArgumentException, SerializationException, CryptoException {
-		return pastStorage.createUnencryptedEnvelope(identifier, content);
+		return pastStorage.createUnencryptedEnvelope(identifier, authorPubKey, content);
 	}
 
 	@Override

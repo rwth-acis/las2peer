@@ -3,8 +3,8 @@
 	<property environment="env"/>
 	
 	<property name="ivy.organisation" value="i5" />
-	<property name="ivy.revision" value="0.6" />
-	<property name="ivy.build.number" value="8" />
+	<property name="ivy.revision" value="0.7" />
+	<property name="ivy.build.number" value="0" />
 	<property name="ivy.deliver.revision" value="${ivy.revision}" />
 	<property name="ivy.pom.version" value="${ivy.revision}" />
 	
@@ -419,7 +419,7 @@
 	  <pathconvert property="lib.junit" refid="classpath" pathsep=":" />
 
 	  <!-- run one particular test -->
-	  <junit fork="yes" haltonerror="yes" haltonfailure="yes" printsummary="yes">
+	  <junit fork="yes" dir="." haltonerror="yes" haltonfailure="yes" printsummary="yes">
 
 	    <classpath>
 	    	<pathelement path="${lib.junit}" />
@@ -450,7 +450,7 @@
 	</target>
 	
 	<target name="junit_tests" depends="init_junit, junit_jars, compile_all">
-		<for threadCount="9" parallel="true" param="test.source.absolute">
+		<for threadCount="9" parallel="false" param="test.source.absolute">
 			<path>
 				<fileset dir="${src.junit}">
 					<include name="**/*Test.java"/>

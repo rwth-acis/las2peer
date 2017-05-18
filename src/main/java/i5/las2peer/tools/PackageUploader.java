@@ -134,7 +134,8 @@ public class PackageUploader {
 		// upload network library as XML representation
 		String libEnvId = SharedStorageRepository.getLibraryEnvelopeIdentifier(netLib.getIdentifier());
 		logger.info("publishing library '" + netLib.getIdentifier().toString() + "' to '" + libEnvId + "'");
-		EnvelopeVersion libEnv = node.createUnencryptedEnvelope(libEnvId, netLib.toXmlString());
+		EnvelopeVersion libEnv = node.createUnencryptedEnvelope(libEnvId, devAgent.getPublicKey(),
+				netLib.toXmlString());
 		try {
 			node.storeEnvelope(libEnv, devAgent);
 		} catch (EnvelopeAlreadyExistsException e) {
@@ -168,7 +169,7 @@ public class PackageUploader {
 		} catch (EnvelopeNotFoundException e) {
 			ServiceVersionList versions = new ServiceVersionList();
 			versions.add(libId.getVersion().toString());
-			versionEnv = node.createUnencryptedEnvelope(envVersionId, versions);
+			versionEnv = node.createUnencryptedEnvelope(envVersionId, devAgent.getPublicKey(), versions);
 		} catch (L2pSecurityException e) {
 			throw new ServicePackageException("Unencrypted content in service versions envelope expected", e);
 		}

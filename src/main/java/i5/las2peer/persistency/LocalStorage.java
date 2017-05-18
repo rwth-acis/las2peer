@@ -20,15 +20,15 @@ public class LocalStorage implements L2pStorageInterface {
 	private final ConcurrentHashMap<String, EnvelopeVersion> storedEnvelopes = new ConcurrentHashMap<>();
 
 	@Override
-	public EnvelopeVersion createEnvelope(String identifier, Serializable content, AgentImpl... readers)
-			throws IllegalArgumentException, SerializationException, CryptoException {
-		return new EnvelopeVersion(identifier, content, Arrays.asList(readers));
+	public EnvelopeVersion createEnvelope(String identifier, PublicKey authorPubKey, Serializable content,
+			AgentImpl... readers) throws IllegalArgumentException, SerializationException, CryptoException {
+		return new EnvelopeVersion(identifier, authorPubKey, content, Arrays.asList(readers));
 	}
 
 	@Override
-	public EnvelopeVersion createEnvelope(String identifier, Serializable content, Collection<?> readers)
-			throws IllegalArgumentException, SerializationException, CryptoException {
-		return new EnvelopeVersion(identifier, content, readers);
+	public EnvelopeVersion createEnvelope(String identifier, PublicKey authorPubKey, Serializable content,
+			Collection<?> readers) throws IllegalArgumentException, SerializationException, CryptoException {
+		return new EnvelopeVersion(identifier, authorPubKey, content, readers);
 	}
 
 	@Override
@@ -50,9 +50,9 @@ public class LocalStorage implements L2pStorageInterface {
 	}
 
 	@Override
-	public EnvelopeVersion createUnencryptedEnvelope(String identifier, Serializable content)
+	public EnvelopeVersion createUnencryptedEnvelope(String identifier, PublicKey authorPubKey, Serializable content)
 			throws IllegalArgumentException, SerializationException, CryptoException {
-		return new EnvelopeVersion(identifier, content, new ArrayList<>());
+		return new EnvelopeVersion(identifier, authorPubKey, content, new ArrayList<>());
 	}
 
 	@Override
@@ -86,8 +86,8 @@ public class LocalStorage implements L2pStorageInterface {
 					Set<String> mergedGroups = collisionHandler.mergeGroups(envelope.getReaderGroupIds(),
 							inStorage.getReaderGroupIds());
 					try {
-						toStore = new EnvelopeVersion(envelope.getIdentifier(), mergedVersion, mergedContent,
-								mergedReaders, mergedGroups);
+						toStore = new EnvelopeVersion(envelope.getIdentifier(), mergedVersion, author.getPublicKey(),
+								mergedContent, mergedReaders, mergedGroups);
 					} catch (IllegalArgumentException | SerializationException | CryptoException e) {
 						if (exceptionHandler != null) {
 							exceptionHandler.onException(e);

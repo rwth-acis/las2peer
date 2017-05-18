@@ -75,8 +75,8 @@ public class EnvelopeGenerator {
 			PassphraseAgentImpl owner = loadAgent(argv[0]);
 			owner.unlock(argv[1]);
 			Serializable temp = createSerializable(argv[2], argv[3]);
-			EnvelopeVersion env = new EnvelopeVersion(Long.toString(new Random().nextLong()), temp,
-					Arrays.asList(new AgentImpl[] { owner }));
+			EnvelopeVersion env = new EnvelopeVersion(Long.toString(new Random().nextLong()), owner.getPublicKey(),
+					temp, Arrays.asList(new AgentImpl[] { owner }));
 			System.out.println(env.toXmlString());
 		} catch (SecurityException e) {
 			usage("Unable to call constructor of nested class: " + e);
