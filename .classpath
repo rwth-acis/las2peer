@@ -13,7 +13,7 @@
 	<classpathentry kind="lib" path="lib/hk2-locator-2.5.0-b05.jar"/>
 	<classpathentry kind="lib" path="lib/hk2-utils-2.5.0-b05.jar"/>
 	<classpathentry kind="lib" path="lib/jackson-annotations-2.5.4.jar"/>
-	<classpathentry kind="lib" path="lib/jackson-core-2.5.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jackson-core-2.5.4.jar"/>
 	<classpathentry kind="lib" path="lib/jackson-databind-2.5.4.jar"/>
 	<classpathentry kind="lib" path="lib/jackson-dataformat-xml-2.4.5.jar"/>
 	<classpathentry kind="lib" path="lib/jackson-dataformat-yaml-2.4.5.jar"/>
@@ -46,10 +46,10 @@
 	<classpathentry kind="lib" path="lib/snakeyaml-1.12.jar"/>
 	<classpathentry kind="lib" path="lib/stax2-api-3.1.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/swagger-annotations-1.5.10.jar"/>
-	<classpathentry kind="lib" path="lib/swagger-core-1.5.10.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/swagger-core-1.5.10.jar"/>
 	<classpathentry kind="lib" path="lib/swagger-jaxrs-1.5.10.jar"/>
 	<classpathentry kind="lib" path="lib/swagger-jersey2-jaxrs-1.5.10.jar"/>
-	<classpathentry kind="lib" path="lib/swagger-models-1.5.10.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/swagger-models-1.5.10.jar"/>
 	<classpathentry kind="lib" path="lib/validation-api-1.1.0.Final.jar"/>
 	<classpathentry kind="output" path="output"/>
 </classpath>
