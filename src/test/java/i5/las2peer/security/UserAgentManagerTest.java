@@ -33,8 +33,6 @@ public class UserAgentManagerTest {
 
 			try {
 				node.storeAgent(b);
-				// TODO API @Thomas please fix!
-				// the validation should be done in the fetch process
 				fail("LoginNameAlreadyTakenException expected");
 			} catch (LoginNameAlreadyTakenException e) {
 				// intended
@@ -48,8 +46,6 @@ public class UserAgentManagerTest {
 			b.setLoginName("LOGIN");
 			try {
 				node.storeAgent(b);
-				// TODO API @Thomas please fix!
-				// the validation should be done in the fetch process
 				fail("LoginNameAlreadyTakenException expected");
 			} catch (LoginNameAlreadyTakenException e) {
 				// intended

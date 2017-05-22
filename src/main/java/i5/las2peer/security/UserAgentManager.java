@@ -46,35 +46,39 @@ public class UserAgentManager {
 		if (agent.hasLoginName()) {
 			try {
 				String identifier = PREFIX_USER_NAME + agent.getLoginName().toLowerCase();
-				EnvelopeVersion envName = null;
 				try {
 					EnvelopeVersion stored = node.fetchEnvelope(identifier);
-					envName = node.createUnencryptedEnvelope(stored, agentId);
+					if (!stored.getContent().equals(agentId)) {
+						throw new LoginNameAlreadyTakenException();
+					}
 				} catch (EnvelopeNotFoundException e) {
-					envName = node.createUnencryptedEnvelope(identifier, agent.getPublicKey(), agentId);
+					EnvelopeVersion envName = node.createUnencryptedEnvelope(identifier, agent.getPublicKey(), agentId);
+					node.storeEnvelope(envName, agent);
 				}
-				node.storeEnvelope(envName, agent);
+				
 			} catch (EnvelopeAlreadyExistsException e) {
 				throw new LoginNameAlreadyTakenException();
-			} catch (SerializationException | CryptoException | EnvelopeException e) {
-				node.observerNotice(MonitoringEvent.NODE_ERROR, "Envelope error while updating user list: " + e);
+			} catch (SerializationException | CryptoException | EnvelopeException | L2pSecurityException e) {
+				node.observerNotice(MonitoringEvent.NODE_ERROR, "Envelope error while registering login name: " + e);
 			}
 		}
 
 		if (agent.hasEmail()) {
 			try {
 				String identifier = PREFIX_USER_MAIL + agent.getEmail().toLowerCase();
-				EnvelopeVersion envMail = null;
 				try {
-					envMail = node.fetchEnvelope(identifier);
+					EnvelopeVersion stored = node.fetchEnvelope(identifier);
+					if (!stored.getContent().equals(agentId)) {
+						throw new EmailAlreadyTakenException();
+					}
 				} catch (EnvelopeNotFoundException e) {
-					envMail = node.createUnencryptedEnvelope(identifier, agent.getPublicKey(), agentId);
+					EnvelopeVersion envMail = node.createUnencryptedEnvelope(identifier, agent.getPublicKey(), agentId);
+					node.storeEnvelope(envMail, agent);
 				}
-				node.storeEnvelope(envMail, agent);
 			} catch (EnvelopeAlreadyExistsException e) {
 				throw new EmailAlreadyTakenException();
-			} catch (SerializationException | CryptoException | EnvelopeException e) {
-				node.observerNotice(MonitoringEvent.NODE_ERROR, "Envelope error while updating user list: " + e);
+			} catch (SerializationException | CryptoException | EnvelopeException | L2pSecurityException e) {
+				node.observerNotice(MonitoringEvent.NODE_ERROR, "Envelope error while registering email: " + e);
 			}
 		}
 	}

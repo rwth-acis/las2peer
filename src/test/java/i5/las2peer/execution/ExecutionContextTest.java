@@ -227,7 +227,7 @@ public class ExecutionContextTest {
 			assertEquals("loginB", userB.getLoginName());
 			assertEquals("emailb@asdf.de", userB.getEmail());
 
-			userB.setLoginName("userA");
+			userB.setLoginName("loginA");
 			
 			try {
 				context.storeAgent(userB);
