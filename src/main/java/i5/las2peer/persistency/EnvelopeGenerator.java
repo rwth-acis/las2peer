@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Random;
 
 import i5.las2peer.api.security.AgentAccessDeniedException;
+import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.PassphraseAgentImpl;
 import i5.las2peer.serialization.MalformedXMLException;
@@ -86,7 +87,7 @@ public class EnvelopeGenerator {
 			usage("malformed agent XML file");
 		} catch (IOException e) {
 			usage("unable to read contents of given agent file (" + argv[0] + ")");
-		} catch (AgentAccessDeniedException e) {
+		} catch (AgentAccessDeniedException | AgentOperationFailedException e) {
 			usage("unable to unlock agent!");
 		} catch (ClassNotFoundException e) {
 			usage("content class does not exist!");

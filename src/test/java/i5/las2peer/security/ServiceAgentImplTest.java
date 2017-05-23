@@ -12,6 +12,7 @@ import org.junit.Test;
 import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
+import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.ServiceDiscoveryContent;
 import i5.las2peer.p2p.AgentAlreadyRegisteredException;
@@ -29,7 +30,7 @@ public class ServiceAgentImplTest {
 	private static final String passphrase = "a passphrase";
 
 	@Test
-	public void testCreation() throws CryptoException, L2pSecurityException, AgentAccessDeniedException {
+	public void testCreation() throws CryptoException, L2pSecurityException, AgentAccessDeniedException, AgentOperationFailedException {
 		ServiceAgentImpl testee = ServiceAgentImpl
 				.createServiceAgent(ServiceNameVersion.fromString(servicename + "@" + serviceversion), passphrase);
 
@@ -39,7 +40,7 @@ public class ServiceAgentImplTest {
 
 		try {
 			testee.unlock("dummy");
-			fail("L2pSecurityException expected!");
+			fail("Exception expected!");
 		} catch (AgentAccessDeniedException e) {
 			// intended
 			assertTrue(testee.isLocked());
@@ -52,7 +53,7 @@ public class ServiceAgentImplTest {
 
 	@Test
 	public void testXmlAndBack()
-			throws CryptoException, L2pSecurityException, MalformedXMLException, AgentAccessDeniedException {
+			throws CryptoException, L2pSecurityException, MalformedXMLException, AgentAccessDeniedException, AgentOperationFailedException {
 		ServiceAgentImpl testee = ServiceAgentImpl
 				.createServiceAgent(ServiceNameVersion.fromString(servicename + "@" + serviceversion), passphrase);
 

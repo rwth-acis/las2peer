@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentLockedException;
+import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.serialization.MalformedXMLException;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.CryptoException;
@@ -18,7 +19,7 @@ public class UserAgentImplTest {
 
 	@Test
 	public void testUnlocking() throws NoSuchAlgorithmException, CryptoException, AgentAccessDeniedException,
-			L2pSecurityException, AgentLockedException {
+			L2pSecurityException, AgentLockedException, AgentOperationFailedException {
 		String passphrase = "A passphrase to unlock";
 		UserAgentImpl a = UserAgentImpl.createUserAgent(passphrase);
 
@@ -61,7 +62,7 @@ public class UserAgentImplTest {
 
 	@Test
 	public void testPassphraseChange() throws NoSuchAlgorithmException, L2pSecurityException, CryptoException,
-			AgentAccessDeniedException, AgentLockedException {
+			AgentAccessDeniedException, AgentLockedException, AgentOperationFailedException {
 		String passphrase = "a passphrase";
 		UserAgentImpl a = UserAgentImpl.createUserAgent(passphrase);
 
@@ -87,14 +88,12 @@ public class UserAgentImplTest {
 
 	@Test
 	public void testXml() throws NoSuchAlgorithmException, MalformedXMLException, CryptoException,
-			AgentAccessDeniedException, AgentLockedException, L2pSecurityException {
+			AgentAccessDeniedException, AgentLockedException, L2pSecurityException, AgentOperationFailedException {
 		String passphrase = "a pass";
 		String email = "usera@example.org";
-		String userData = "This is the user data attachement.";
 		UserAgentImpl a = UserAgentImpl.createUserAgent(passphrase);
 		a.unlock(passphrase);
 		a.setEmail(email);
-		a.setUserData(userData);
 
 		String xml = a.toXmlString();
 		System.out.println(xml);
@@ -103,11 +102,10 @@ public class UserAgentImplTest {
 
 		assertEquals(a.getIdentifier(), b.getIdentifier());
 		assertEquals(email, b.getEmail());
-		assertEquals(userData, b.getUserData());
 	}
 
 	public void testLogin() throws CryptoException, L2pSecurityException, MalformedXMLException,
-			AgentAccessDeniedException, AgentLockedException {
+			AgentAccessDeniedException, AgentLockedException, AgentOperationFailedException {
 		UserAgentImpl a = UserAgentImpl.createUserAgent("test");
 		a.unlock("test");
 
@@ -122,7 +120,7 @@ public class UserAgentImplTest {
 
 	@Test
 	public void testEmail() throws CryptoException, L2pSecurityException, MalformedXMLException,
-			AgentAccessDeniedException, AgentLockedException {
+			AgentAccessDeniedException, AgentLockedException, AgentOperationFailedException {
 		UserAgentImpl a = UserAgentImpl.createUserAgent("test");
 		a.unlock("test");
 
@@ -137,7 +135,7 @@ public class UserAgentImplTest {
 
 	@Test
 	public void testEmailAndLogin() throws CryptoException, L2pSecurityException, MalformedXMLException,
-			AgentAccessDeniedException, AgentLockedException {
+			AgentAccessDeniedException, AgentLockedException, AgentOperationFailedException {
 		UserAgentImpl a = UserAgentImpl.createUserAgent("test");
 		a.unlock("test");
 
@@ -154,7 +152,7 @@ public class UserAgentImplTest {
 
 	@Test
 	public void testLoginExceptions() throws L2pSecurityException, CryptoException, AgentAccessDeniedException,
-			AgentLockedException {
+			AgentLockedException, AgentOperationFailedException {
 		UserAgentImpl a = UserAgentImpl.createUserAgent("test");
 		a.unlock("test");
 
@@ -172,7 +170,7 @@ public class UserAgentImplTest {
 
 	@Test
 	public void testEmailExceptions() throws L2pSecurityException, CryptoException, AgentAccessDeniedException,
-			AgentLockedException {
+			AgentLockedException, AgentOperationFailedException {
 		UserAgentImpl a = UserAgentImpl.createUserAgent("test");
 		a.unlock("test");
 

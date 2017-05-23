@@ -34,6 +34,7 @@ import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentNotFoundException;
+import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.classLoaders.L2pClassManager;
 import i5.las2peer.classLoaders.libraries.FileSystemRepository;
 import i5.las2peer.communication.ListMethodsContent;
@@ -706,8 +707,9 @@ public class L2pNodeLauncher {
 	 * @param agent
 	 * @param passphrase
 	 * @throws AgentAccessDeniedException
+	 * @throws AgentOperationFailedException 
 	 */
-	public void unlockAgent(PassphraseAgentImpl agent, String passphrase) throws AgentAccessDeniedException {
+	public void unlockAgent(PassphraseAgentImpl agent, String passphrase) throws AgentAccessDeniedException, AgentOperationFailedException {
 		agent.unlock(passphrase);
 	}
 

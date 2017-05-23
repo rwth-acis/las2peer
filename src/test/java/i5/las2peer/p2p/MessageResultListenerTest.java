@@ -10,6 +10,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import i5.las2peer.api.security.AgentAccessDeniedException;
+import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.communication.Message;
 import i5.las2peer.security.BasicAgentStorage;
 import i5.las2peer.security.L2pSecurityException;
@@ -25,7 +26,7 @@ public class MessageResultListenerTest {
 
 	@Test
 	public void test() throws InterruptedException, MalformedXMLException, IOException, L2pSecurityException,
-			AgentAccessDeniedException {
+			AgentAccessDeniedException, AgentOperationFailedException {
 		final UserAgentImpl eve = MockAgentFactory.getEve();
 		eve.unlock("evespass");
 

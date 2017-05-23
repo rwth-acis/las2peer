@@ -18,6 +18,7 @@ import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.persistency.EnvelopeException;
 import i5.las2peer.api.persistency.EnvelopeNotFoundException;
 import i5.las2peer.api.security.AgentAccessDeniedException;
+import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
 import i5.las2peer.classLoaders.libraries.LoadedNetworkLibrary;
 import i5.las2peer.classLoaders.libraries.SharedStorageRepository;
@@ -112,7 +113,7 @@ public class PackageUploader {
 			PassphraseAgentImpl devAgent = (PassphraseAgentImpl) agent;
 			devAgent.unlock(developerPassword);
 			return devAgent;
-		} catch (MalformedXMLException | AgentAccessDeniedException e) {
+		} catch (MalformedXMLException | AgentAccessDeniedException | AgentOperationFailedException e) {
 			throw new ServicePackageException(e);
 		}
 	}

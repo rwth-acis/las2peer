@@ -46,8 +46,9 @@ public class AgentContext implements AgentStorage {
 	 * 
 	 * @param passphrase Passphrase of the agent
 	 * @throws AgentAccessDeniedException If the passphrase is invalid.
+	 * @throws AgentOperationFailedException 
 	 */
-	public void unlockMainAgent(String passphrase) throws AgentAccessDeniedException {
+	public void unlockMainAgent(String passphrase) throws AgentAccessDeniedException, AgentOperationFailedException {
 		if (this.agent.isLocked() && this.agent instanceof PassphraseAgent) {
 			((PassphraseAgent) this.agent).unlock(passphrase);
 		}

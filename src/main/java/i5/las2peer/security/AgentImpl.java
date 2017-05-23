@@ -15,8 +15,10 @@ import org.w3c.dom.Element;
 
 import i5.las2peer.api.logging.MonitoringEvent;
 import i5.las2peer.api.security.Agent;
+import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentLockedException;
+import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
 import i5.las2peer.p2p.Node;
@@ -94,15 +96,16 @@ public abstract class AgentImpl implements Agent, XmlAble, Cloneable, MessageRec
 	 * Unlocks the private key.
 	 * 
 	 * @param key A key that is used to unlock the agents private key.
-	 * @throws L2pSecurityException If an issue with the given key occurs.
+	 * @throws AgentOperationFailedException 
+	 * @throws AgentAccessDeniedException 
 	 */
-	public void unlockPrivateKey(SecretKey key) throws L2pSecurityException {
+	public void unlockPrivateKey(SecretKey key) throws AgentOperationFailedException, AgentAccessDeniedException {
 		try {
 			privateKey = (PrivateKey) SerializeTools.deserialize(CryptoTools.decryptSymmetric(baEncrypedPrivate, key));
 		} catch (SerializationException e) {
-			throw new L2pSecurityException("unable do deserialize key", e);
+			throw new AgentOperationFailedException("unable do deserialize key", e);
 		} catch (CryptoException e) {
-			throw new L2pSecurityException("unable do decrypt key", e);
+			throw new AgentAccessDeniedException("unable do decrypt key", e);
 		}
 	}
 

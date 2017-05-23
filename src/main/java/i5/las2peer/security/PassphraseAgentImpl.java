@@ -7,6 +7,7 @@ import javax.crypto.SecretKey;
 
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentLockedException;
+import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.api.security.PassphraseAgent;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
@@ -62,12 +63,12 @@ public abstract class PassphraseAgentImpl extends AgentImpl implements Passphras
 	}
 
 	@Override
-	public void unlock(String passphrase) throws AgentAccessDeniedException {
+	public void unlock(String passphrase) throws AgentAccessDeniedException, AgentOperationFailedException {
 		try {
 			SecretKey key = CryptoTools.generateKeyForPassphrase(passphrase, salt);
 			super.unlockPrivateKey(key);
 			this.passphrase = passphrase;
-		} catch (CryptoException | L2pSecurityException e) {
+		} catch (CryptoException e) {
 			throw new AgentAccessDeniedException("unable to create key from passphrase", e);
 		}
 	}

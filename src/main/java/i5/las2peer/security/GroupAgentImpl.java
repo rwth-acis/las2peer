@@ -46,10 +46,6 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 
 	private SecretKey symmetricGroupKey = null;
 	private AgentImpl openedBy = null;
-	
-	// TODO API remove user data and name
-	private String name;
-	private Serializable userData;
 
 	/**
 	 * hashtable storing the encrypted versions of the group secret key for each member
@@ -268,13 +264,6 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 					+ "\t<unlockKeys method=\"" + CryptoTools.getAsymmetricAlgorithm() + "\">\n" + keyList
 					+ "\t</unlockKeys>\n");
 
-			if (name != null) {
-				result.append("<groupname>" + name + "</groupname>");
-			}
-			if (userData != null) {
-				result.append("<userdata>" + SerializeTools.serializeToBase64(userData) + "</userdata>");
-			}
-
 			result.append("</las2peer:agent>\n");
 
 			return result.toString();
@@ -348,16 +337,6 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 				htMemberKeys.put(agentId, content);
 			}
 			GroupAgentImpl result = new GroupAgentImpl(publicKey, encPrivate, htMemberKeys);
-
-			// read and set optional fields
-			Element groupname = XmlTools.getOptionalElement(root, "groupname");
-			if (groupname != null) {
-				result.name = groupname.getTextContent();
-			}
-			Element userdata = XmlTools.getOptionalElement(root, "userdata");
-			if (userdata != null) {
-				result.userData = SerializeTools.deserializeBase64(userdata.getTextContent());
-			}
 
 			return result;
 		} catch (SerializationException e) {
@@ -448,53 +427,6 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 		// do nothing
 	}
 
-	/**
-	 * Sets a name for this group(-agent)
-	 * 
-	 * @param groupname A name to be used for this group. This is no identifier! May have duplicates.
-	 * @throws AgentLockedException 
-	 */
-	public void setName(String groupname) throws AgentLockedException {
-		if (this.isLocked()) {
-			throw new AgentLockedException();
-		}
-		this.name = groupname;
-	}
-
-	/**
-	 * Gets the name for this group.
-	 * 
-	 * @return Returns the group name or {@code null} if no name was assigned.
-	 */
-	public String getName() {
-		return name;
-	}
-
-	/**
-	 * Attaches the given object directly to this agent. The user data represent a field of this user agent and should
-	 * be used with small values (&lt; 1MB) only. Larger byte amounts could handicap the agent handling inside the
-	 * network.
-	 * 
-	 * @param object The user data object to be serialized and attached.
-	 * @throws L2pSecurityException When the user agent is still locked.
-	 * @throws AgentLockedException 
-	 */
-	public void setUserData(Serializable object) throws L2pSecurityException, AgentLockedException {
-		if (this.isLocked()) {
-			throw new AgentLockedException();
-		}
-		this.userData = object;
-	}
-
-	/**
-	 * get the user data assigned to this agent
-	 * 
-	 * @return Returns the user data object
-	 */
-	public Serializable getUserData() {
-		return this.userData;
-	}
-
 	@Override
 	public void addMember(Agent agent) throws AgentLockedException {
 		if (isLocked()) {
@@ -539,7 +471,7 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 			decryptSecretKey((AgentImpl) agent);
 			openedBy = (AgentImpl) agent;
 			super.unlockPrivateKey(symmetricGroupKey);
-		} catch (L2pSecurityException | CryptoException e) {
+		} catch (CryptoException e) {
 			throw new AgentAccessDeniedException("Permission denied", e);
 		} catch (SerializationException e) {
 			throw new AgentOperationFailedException("Agent corrupted", e);

@@ -55,10 +55,6 @@ public class GroupAgentImplTest {
 
 		adam.unlock(ADAMSPASS);
 		testee.unlock(adam);
-		String groupname = "Test Group";
-		testee.setName(groupname);
-		String userData = "This is the user data attachement.";
-		testee.setUserData(userData);
 
 		String xml = testee.toXmlString();
 		System.out.println(xml);
@@ -72,9 +68,6 @@ public class GroupAgentImplTest {
 		assertTrue(testee.hasMember(eve.getIdentifier()));
 
 		assertTrue(fromXml.isLocked());
-
-		assertEquals(fromXml.getName(), groupname);
-		assertEquals(fromXml.getUserData(), userData);
 	}
 
 	@Test

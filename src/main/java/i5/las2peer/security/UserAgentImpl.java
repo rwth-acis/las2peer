@@ -1,6 +1,5 @@
 package i5.las2peer.security;
 
-import java.io.Serializable;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.Base64;
@@ -31,7 +30,6 @@ public class UserAgentImpl extends PassphraseAgentImpl implements UserAgent {
 
 	private String sLoginName = null;
 	private String sEmail = null;
-	private Serializable userData = null;
 
 	/**
 	 * atm constructor for the MockAgent class, just don't know, how agent creation will take place later
@@ -105,23 +103,6 @@ public class UserAgentImpl extends PassphraseAgentImpl implements UserAgent {
 		this.sEmail = email.toLowerCase();
 	}
 
-	/**
-	 * Attaches the given object directly to this agent. The user data represent a field of this user agent and should
-	 * be used with small values (&lt; 1MB) only. Larger byte amounts could handicap the agent handling inside the
-	 * network.
-	 * 
-	 * @param object The user data object to be serialized and attached.
-	 * @throws AgentLockedException When the user agent is still locked.
-	 */
-	public void setUserData(Serializable object) throws AgentLockedException {
-		if (this.isLocked()) {
-			throw new AgentLockedException();
-		}
-		this.userData = object;
-	}
-	
-	// TODO API remove user data
-
 	@Override
 	public String toXmlString() {
 		try {
@@ -137,10 +118,6 @@ public class UserAgentImpl extends PassphraseAgentImpl implements UserAgent {
 			}
 			if (sEmail != null) {
 				result.append("\t<email>" + sEmail + "</email>\n");
-			}
-			if (userData != null) {
-				result.append("\t<userdata encoding=\"base64\">" + SerializeTools.serializeToBase64(userData)
-						+ "</userdata>\n");
 			}
 
 			result.append("</las2peer:agent>\n");
@@ -236,15 +213,6 @@ public class UserAgentImpl extends PassphraseAgentImpl implements UserAgent {
 			if (email != null) {
 				result.sEmail = email.getTextContent();
 			}
-			// optional user data
-			Element userdata = XmlTools.getOptionalElement(root, "userdata");
-			if (userdata != null) {
-				if (userdata.hasAttribute("encoding")
-						&& !userdata.getAttribute("encoding").equalsIgnoreCase("base64")) {
-					throw new MalformedXMLException("base64 encoding expected");
-				}
-				result.userData = SerializeTools.deserializeBase64(userdata.getTextContent());
-			}
 
 			return result;
 		} catch (SerializationException e) {
@@ -292,6 +260,7 @@ public class UserAgentImpl extends PassphraseAgentImpl implements UserAgent {
 	 * 
 	 * @return an email address
 	 */
+	@Override
 	public String getEmail() {
 		return sEmail;
 	}
@@ -301,17 +270,9 @@ public class UserAgentImpl extends PassphraseAgentImpl implements UserAgent {
 	 * 
 	 * @return true, if an email address is assigned
 	 */
+	@Override
 	public boolean hasEmail() {
 		return sEmail != null;
-	}
-
-	/**
-	 * get the user data assigned to this agent
-	 * 
-	 * @return Returns the user data object
-	 */
-	public Serializable getUserData() {
-		return this.userData;
 	}
 
 }

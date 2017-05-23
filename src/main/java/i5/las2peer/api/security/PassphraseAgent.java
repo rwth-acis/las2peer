@@ -10,6 +10,7 @@ public interface PassphraseAgent extends Agent {
 	 * 
 	 * @param passphrase The passphrase to unlock this agent.
 	 * @throws AgentAccessDeniedException If the passphrase is not valid.
+	 * @throws AgentOperationFailedException 
 	 */
-	void unlock(String passphrase) throws AgentAccessDeniedException;
+	void unlock(String passphrase) throws AgentAccessDeniedException, AgentOperationFailedException;
 }

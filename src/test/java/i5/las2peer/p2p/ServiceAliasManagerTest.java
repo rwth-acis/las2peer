@@ -9,6 +9,7 @@ import org.junit.Test;
 import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
+import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.tools.CryptoException;
@@ -21,7 +22,7 @@ public class ServiceAliasManagerTest {
 
 	@Test
 	public void testDuplication() throws CryptoException, L2pSecurityException, AliasConflictException,
-			AliasNotFoundException, AgentAccessDeniedException {
+			AliasNotFoundException, AgentAccessDeniedException, AgentOperationFailedException {
 		LocalNode node = LocalNode.launchNode();
 		ServiceAgentImpl agentA = ServiceAgentImpl.createServiceAgent(ServiceNameVersion.fromString("serviceA@1.0"),
 				"asdf");
@@ -57,7 +58,7 @@ public class ServiceAliasManagerTest {
 
 	@Test
 	public void testRegistering() throws CryptoException, L2pSecurityException, AliasConflictException,
-			AliasNotFoundException, AgentAccessDeniedException {
+			AliasNotFoundException, AgentAccessDeniedException, AgentOperationFailedException {
 		LocalNode node = LocalNode.launchNode();
 		ServiceAgentImpl agentA = ServiceAgentImpl.createServiceAgent(ServiceNameVersion.fromString("serviceA@1.0"),
 				"asdf");
@@ -99,7 +100,7 @@ public class ServiceAliasManagerTest {
 
 	@Test
 	public void testResolve() throws CryptoException, L2pSecurityException, AliasConflictException,
-			AliasNotFoundException, AgentAccessDeniedException {
+			AliasNotFoundException, AgentAccessDeniedException, AgentOperationFailedException {
 		LocalNode node = LocalNode.launchNode();
 		ServiceAgentImpl agentA = ServiceAgentImpl.createServiceAgent(ServiceNameVersion.fromString("serviceA@1.0"),
 				"asdf");

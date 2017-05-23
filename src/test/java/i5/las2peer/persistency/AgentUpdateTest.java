@@ -36,7 +36,6 @@ public class AgentUpdateTest {
 			GroupAgentImpl fetched = (GroupAgentImpl) secondNode.getAgent(group.getIdentifier());
 			// check attributes of both GroupAgents
 			Assert.assertEquals(group.getIdentifier(), fetched.getIdentifier());
-			Assert.assertEquals(group.getName(), fetched.getName());
 			Assert.assertEquals(group.getPublicKey(), fetched.getPublicKey());
 			Assert.assertEquals(group.getSize(), fetched.getSize());
 			Assert.assertArrayEquals(group.getMemberList(), fetched.getMemberList());
@@ -48,7 +47,6 @@ public class AgentUpdateTest {
 			fetched = (GroupAgentImpl) secondNode.getAgent(group.getIdentifier());
 			// check (again) attributes of both GroupAgents
 			Assert.assertEquals(group.getIdentifier(), fetched.getIdentifier());
-			Assert.assertEquals(group.getName(), fetched.getName());
 			Assert.assertEquals(group.getPublicKey(), fetched.getPublicKey());
 			Assert.assertEquals(group.getSize(), fetched.getSize());
 			Assert.assertArrayEquals(group.getMemberList(), fetched.getMemberList());
