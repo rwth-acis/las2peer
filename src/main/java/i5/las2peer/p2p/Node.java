@@ -106,7 +106,6 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 
 	private NodeServiceCache nodeServiceCache;
 
-	// TODO make node parameters configurable
 	public static final double DEFAULT_CPU_LOAD_TRESHOLD = 0.5;
 	/**
 	 * cpu load threshold to determine whether the node is considered busy
