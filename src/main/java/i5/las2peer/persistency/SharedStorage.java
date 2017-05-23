@@ -38,7 +38,6 @@ import i5.las2peer.persistency.pastry.PastFetchContinuation;
 import i5.las2peer.persistency.pastry.PastInsertContinuation;
 import i5.las2peer.persistency.pastry.PastLookupContinuation;
 import i5.las2peer.security.Agent;
-import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.SerializationException;
 import i5.las2peer.tools.SerializeTools;
@@ -123,6 +122,28 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 		versionCache = new ConcurrentHashMap<>();
 	}
 
+	private void lookupHandles(Id id, StorageLookupHandler lookupHandler, StorageExceptionHandler exceptionHandler) {
+		pastStorage.lookupHandles(id, numOfReplicas + 1,
+				new PastLookupContinuation(threadpool, lookupHandler, exceptionHandler));
+	}
+
+	private void waitForStoreResult(StoreProcessHelper resultHelper, long timeoutMs) throws StorageException {
+		long startWait = System.currentTimeMillis();
+		while (System.currentTimeMillis() - startWait < timeoutMs) {
+			try {
+				if (resultHelper.getResult() >= 0) {
+					return;
+				}
+				Thread.sleep(1);
+			} catch (StorageException e) {
+				throw e;
+			} catch (Exception e) {
+				throw new StorageException(e);
+			}
+		}
+		throw new StorageException("store operation timed out");
+	}
+
 	@Override
 	public Envelope createEnvelope(String identifier, Serializable content, Agent... readers)
 			throws IllegalArgumentException, SerializationException, CryptoException {
@@ -172,26 +193,7 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 		}
 		StoreProcessHelper resultHelper = new StoreProcessHelper();
 		storeEnvelopeAsync(envelope, author, resultHelper, resultHelper, resultHelper);
-		long startWait = System.nanoTime();
-		while (System.nanoTime() - startWait < timeoutMs * 1000000) {
-			try {
-				if (resultHelper.getResult() >= 0) {
-					return;
-				}
-			} catch (Exception e) {
-				if (e instanceof StorageException) {
-					throw (StorageException) e;
-				} else {
-					throw new StorageException(e);
-				}
-			}
-			try {
-				Thread.sleep(1);
-			} catch (InterruptedException e) {
-				throw new StorageException(e);
-			}
-		}
-		throw new StorageException("store operation timed out");
+		waitForStoreResult(resultHelper, timeoutMs);
 	}
 
 	@Override
@@ -211,22 +213,21 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 			@Override
 			public void run() {
 				logger.info("Checking collision for " + envelope.toString());
-				pastStorage.lookupHandles(
-						MetadataArtifact.buildMetadataId(artifactIdFactory, envelope.getIdentifier(),
-								envelope.getVersion()),
-						numOfReplicas + 1, new PastLookupContinuation(threadpool, new StorageLookupHandler() {
-							@Override
-							public void onLookup(ArrayList<PastContentHandle> metadataHandles) {
-								if (metadataHandles.size() > 0) {
-									// collision detected
-									handleCollision(envelope, author, metadataHandles, resultHandler, collisionHandler,
-											exceptionHandler, mergeCounter);
-								} else {
-									// no collision -> try insert
-									insertEnvelope(envelope, author, resultHandler, exceptionHandler);
-								}
-							}
-						}, exceptionHandler));
+				Id metadataId = MetadataArtifact.buildMetadataId(artifactIdFactory, envelope.getIdentifier(),
+						envelope.getVersion());
+				lookupHandles(metadataId, new StorageLookupHandler() {
+					@Override
+					public void onLookup(ArrayList<PastContentHandle> metadataHandles) {
+						if (metadataHandles.size() > 0) {
+							// collision detected
+							handleCollision(envelope, author, metadataHandles, resultHandler, collisionHandler,
+									exceptionHandler, mergeCounter);
+						} else {
+							// no collision -> try insert
+							insertEnvelope(envelope, author, resultHandler, exceptionHandler);
+						}
+					}
+				}, exceptionHandler);
 			}
 		});
 	}
@@ -311,7 +312,7 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 				pastStorage.insert(toStore, new PastInsertContinuation(threadpool, multiResult, multiResult, toStore));
 				offset += partsize;
 			}
-		} catch (CryptoException | L2pSecurityException e) {
+		} catch (Exception e) {
 			if (exceptionHandler != null) {
 				exceptionHandler.onException(e);
 			}
@@ -365,10 +366,11 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 							}
 						}
 					}, exceptionHandler, metadataArtifact));
-		} catch (CryptoException | L2pSecurityException | SerializationException e) {
+		} catch (Exception e) {
 			if (exceptionHandler != null) {
 				exceptionHandler.onException(e);
 			}
+			return;
 		}
 	}
 
@@ -385,23 +387,17 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 		}
 		FetchProcessHelper resultHelper = new FetchProcessHelper();
 		fetchEnvelopeAsync(identifier, version, resultHelper, resultHelper);
-		long startWait = System.nanoTime();
-		while (System.nanoTime() - startWait < timeoutMs * 1000000) {
+		long startWait = System.currentTimeMillis();
+		while (System.currentTimeMillis() - startWait < timeoutMs) {
 			try {
 				Envelope result = resultHelper.getResult();
 				if (result != null) {
 					return result;
 				}
-			} catch (Exception e) {
-				if (e instanceof StorageException) {
-					throw (StorageException) e;
-				} else {
-					throw new StorageException(e);
-				}
-			}
-			try {
 				Thread.sleep(1);
-			} catch (InterruptedException e) {
+			} catch (StorageException e) {
+				throw e;
+			} catch (Exception e) {
 				throw new StorageException(e);
 			}
 		}
@@ -455,26 +451,23 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 			}, artifactIdFactory, pastStorage, numOfReplicas + 1, threadpool));
 		} else {
 			Id checkId = MetadataArtifact.buildMetadataId(artifactIdFactory, identifier, version);
-			pastStorage.lookupHandles(checkId, numOfReplicas + 1,
-					new PastLookupContinuation(threadpool, new StorageLookupHandler() {
-
-						@Override
-						public void onLookup(ArrayList<PastContentHandle> metadataHandles) {
-							if (metadataHandles.size() > 0) {
-								// call from first part
-								fetchWithMetadata(metadataHandles, envelopeHandler, exceptionHandler);
-							} else {
-								// not found
-								if (exceptionHandler != null) {
-									exceptionHandler
-											.onException(new ArtifactNotFoundException("Envelope with identifier '"
-													+ identifier + "' and version " + version + " ("
-													+ checkId.toStringFull() + ") not found in shared storage!"));
-								}
-							}
+			lookupHandles(checkId, new StorageLookupHandler() {
+				@Override
+				public void onLookup(ArrayList<PastContentHandle> metadataHandles) {
+					if (metadataHandles.size() > 0) {
+						// call from first part
+						fetchWithMetadata(metadataHandles, envelopeHandler, exceptionHandler);
+					} else {
+						// not found
+						if (exceptionHandler != null) {
+							exceptionHandler.onException(new ArtifactNotFoundException(
+									"Envelope with identifier '" + identifier + "' and version " + version + " ("
+											+ checkId.toStringFull() + ") not found in shared storage!"));
 						}
+					}
+				}
 
-					}, exceptionHandler));
+			}, exceptionHandler);
 		}
 	}
 
@@ -525,21 +518,18 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 		Id checkId = EnvelopeArtifact.buildId(artifactIdFactory, identifier, part);
 		logger.info("Fetching part (" + part + ") of envelope '" + identifier + "' with id " + checkId.toStringFull()
 				+ " ...");
-		pastStorage.lookupHandles(checkId, numOfReplicas + 1,
-				new PastLookupContinuation(threadpool, new StorageLookupHandler() {
-					@Override
-					public void onLookup(ArrayList<PastContentHandle> handles) {
-						logger.info("Got " + handles.size() + " past handles for part (" + part + ") of '" + identifier
-								+ "'");
-						if (handles.size() < 1) {
-							artifactHandler.onException(new ArtifactNotFoundException(
-									"Part (" + part + ") of '" + identifier + "' with id (" + checkId.toStringFull()
-											+ ") not found in shared storage!"));
-						} else {
-							fetchFromHandles(handles, artifactHandler, artifactHandler);
-						}
-					}
-				}, artifactHandler));
+		lookupHandles(checkId, new StorageLookupHandler() {
+			@Override
+			public void onLookup(ArrayList<PastContentHandle> handles) {
+				logger.info("Got " + handles.size() + " past handles for part (" + part + ") of '" + identifier + "'");
+				if (handles.size() < 1) {
+					artifactHandler.onException(new ArtifactNotFoundException("Part (" + part + ") of '" + identifier
+							+ "' with id (" + checkId.toStringFull() + ") not found in shared storage!"));
+				} else {
+					fetchFromHandles(handles, artifactHandler, artifactHandler);
+				}
+			}
+		}, artifactHandler);
 	}
 
 	private void fetchFromHandles(ArrayList<PastContentHandle> handles, StorageArtifactHandler artifactHandler,
@@ -610,8 +600,10 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 				}
 				try {
 					byte[] rawContent = artifact.getContent();
-					// add content to buffer
-					baos.write(rawContent);
+					if (rawContent != null) {
+						// add content to buffer
+						baos.write(rawContent);
+					}
 				} catch (VerificationFailedException e) {
 					throw new StorageException("Could not retrieve content from part", e);
 				}

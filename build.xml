@@ -5,7 +5,7 @@
 	<property name="ivy.organisation" value="i5" />
 	<property name="ivy.module" value="las2peer" />
 	<property name="ivy.revision" value="0.6" />
-	<property name="ivy.build.number" value="8" />
+	<property name="ivy.build.number" value="9" />
 	<property name="ivy.deliver.revision" value="${ivy.revision}" />
 	<property name="ivy.pom.version" value="${ivy.revision}" />
 	
@@ -378,7 +378,7 @@
 			windowtitle="las2peer Documentation"
 			failonerror="yes"
 			encoding="utf8"
-			classpath="${lib.cp}:${tmp.classes}"
+			classpath="${lib.cp}:${tmp.classes}:${lib.junit}"
          >
             <packageset dir="${src.main}" defaultexcludes="yes">
                 <include name="i5/las2peer/**" />
@@ -412,26 +412,30 @@
 	    <fileset file="${test.source.absolute}" />
 	    <map from="${src.junit}/" to="" />
 	  </pathconvert>
-
+		<basename property="filename" file="${test.source.relative}"/>
+		<taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml" classpathref="classpath"/>
+		<jacoco:coverage destfile="${export}/reports/${filename}.exec" xmlns:jacoco="antlib:org.jacoco.ant">
 	  <!-- run one particular test -->
-	  <junit fork="yes" haltonerror="yes" haltonfailure="yes" printsummary="yes">
-
-	    <classpath>
-	    	<pathelement path="${tmp.classes}" />
-            <pathelement path="${tmp.junit}" />
-            <pathelement path="${lib.cp}" />
-            <pathelement path="${lib.junit}" />
-	    </classpath>
-
-	  	<formatter type="plain" usefile="false" />
-	  	<formatter type="plain" />
-
-	    <batchtest todir="${junit.report}">
-	      <fileset dir="${src.junit}">
-	        <filename name="${test.source.relative}" />
-	      </fileset>
-	    </batchtest>
-	  </junit>
+			<junit fork="yes" haltonerror="yes" haltonfailure="yes" printsummary="yes">
+				
+				<classpath>
+					<pathelement path="${tmp.classes}" />
+				    <pathelement path="${tmp.junit}" />
+				    <pathelement path="${lib.cp}" />
+				    <pathelement path="${lib.junit}" />
+				</classpath>
+				
+				<formatter type="plain" usefile="false" />
+				<formatter type="plain" />
+				
+				<batchtest todir="${junit.report}">
+				  <fileset dir="${src.junit}">
+				    <filename name="${test.source.relative}" />
+				  </fileset>
+				</batchtest>
+			</junit>
+		</jacoco:coverage>
+		
 
 	</target>
 	
@@ -446,7 +450,7 @@
 	</target>
 	
 	<target name="junit_tests" depends="init_junit, junit_jars, compile_all">
-		<for threadCount="9" parallel="true" param="test.source.absolute">
+		<for threadCount="9" parallel="false" param="test.source.absolute">
 			<path>
 				<fileset dir="${src.junit}">
 					<include name="**/*Test.java"/>
@@ -461,6 +465,23 @@
 				</antcall>
 			</sequential>
 		</for>
+		<taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml"  classpathref="classpath"/>
+	  	    	        <jacoco:report xmlns:jacoco="antlib:org.jacoco.ant">
+	  	    	            <executiondata>
+	  	    	            	<fileset dir="${export}/reports/" includes="*.exec"/>
+	  	    	            </executiondata>
+	  	    	 
+	  	    	            <structure name="jacoco">
+	  	    	                <classfiles>
+	  	    	                    <fileset dir="${tmp.classes}" />
+	  	    	                </classfiles>
+	  	    	                <sourcefiles encoding="UTF-8">
+	  	    	                    <fileset dir="${src.main}" />
+	  	    	                </sourcefiles>
+	  	    	            </structure>
+	  	    	             
+	  	    	            <xml destfile="coverage.xml" />
+		</jacoco:report>
 	</target>
 	
 	<target name="test_colored" depends="init_general">

@@ -20,4 +20,17 @@ public class PastryNodeImplTest {
 		}
 	}
 
+	@Test
+	public void testNodeRestart() {
+		try {
+			PastryNodeImpl testNode = TestSuite.launchNetwork(1).get(0);
+			testNode.shutDown();
+			testNode.launch();
+			testNode.shutDown();
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail(e.toString());
+		}
+	}
+
 }

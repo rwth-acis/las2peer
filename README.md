@@ -1,4 +1,6 @@
-![las2peer](https://github.com/rwth-acis/las2peer/blob/master/img/logo/bitmap/las2peer-logo-128x128.png)
+![las2peer](https://rwth-acis.github.io/las2peer/logo/vector/las2peer-logo.svg)
+
+# [![Build Status](http://layers.dbis.rwth-aachen.de/jenkins/buildStatus/icon?job=las2peer%20Core)](http://layers.dbis.rwth-aachen.de/jenkins/job/las2peer%20Core/) [![Build Status](https://travis-ci.org/rwth-acis/las2peer.svg?branch=master)](https://travis-ci.org/rwth-acis/las2peer) [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/rwth-acis/las2peer)
 
 las2peer is a Java-based server framework for developing and deploying services in a distributed Peer-to-Peer (P2P) environment. las2peer was developed by the Advanced Community Information Systems (ACIS) group at the Chair of Computer Science 5 (Information Systems & Databases), RWTH Aachen University, Germany. It's main focus lies on providing developers with a tool to easily develop and test their services and deploy them in a P2P network without having to rely on a centralized infrastructure.
 
@@ -34,9 +36,6 @@ To build the las2peer jar file simply run default target:
     or directly
     ```ant jars```
 
-Jenkins: [![Build Status](http://layers.dbis.rwth-aachen.de/jenkins/buildStatus/icon?job=las2peer Core)](http://layers.dbis.rwth-aachen.de/jenkins/job/las2peer%20Core/)
-
-Travis CI: [![Build Status](https://travis-ci.org/rwth-acis/las2peer.svg?branch=master)](https://travis-ci.org/rwth-acis/las2peer)
 
 JUnit Tests
 -----------

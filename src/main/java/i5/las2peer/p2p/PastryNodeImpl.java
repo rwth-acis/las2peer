@@ -65,10 +65,20 @@ public class PastryNodeImpl extends Node {
 
 	private static final L2pLogger logger = L2pLogger.getInstance(PastryNodeImpl.class);
 
-	private static final int AGENT_GET_TIMEOUT = 10000;
-	private static final int AGENT_STORE_TIMEOUT = 10000;
-	private static final int ARTIFACT_GET_TIMEOUT = 10000;
-	private static final int ARTIFACT_STORE_TIMEOUT = 10000;
+	/**
+	 * The PAST_MESSAGE_TIMEOUT defines when a message in a Past (shared storage) operation is considered lost. This
+	 * means all other timeouts depend on this value.
+	 */
+	private static final int PAST_MESSAGE_TIMEOUT = 60000;
+	// FIXME the timeouts should be PER STORAGE OPERATION and for the complete fetch or store process, as there might
+	// have to be send several messages for a single operation. Their value should be equal to PAST_MESSAGE_TIMEOUT plus
+	// a grace value of a few seconds.
+	private static final int AGENT_GET_TIMEOUT = 300000;
+	private static final int AGENT_STORE_TIMEOUT = 300000;
+	private static final int ARTIFACT_GET_TIMEOUT = 300000;
+	private static final int ARTIFACT_STORE_TIMEOUT = 300000;
+	private static final int HASHED_FETCH_TIMEOUT = 300000;
+	private static final int HASHED_STORE_TIMEOUT = 300000;
 
 	private InetAddress pastryBindAddress = null; // null = detect Internet address
 
@@ -84,7 +94,7 @@ public class PastryNodeImpl extends Node {
 	private NodeApplication application;
 	private SharedStorage pastStorage;
 	private STORAGE_MODE mode = STORAGE_MODE.FILESYSTEM;
-	private String storageDir; // null = default choosen by SharedStorage
+	private String storageDir; // null = default chosen by SharedStorage
 	private Long nodeIdSeed;
 
 	/**
@@ -109,7 +119,6 @@ public class PastryNodeImpl extends Node {
 		this.mode = storageMode;
 		this.storageDir = null; // null = SharedStorage chooses directory
 		this.nodeIdSeed = nodeIdSeed;
-		setupPastryEnvironment();
 		this.setStatus(NodeStatus.CONFIGURED);
 	}
 
@@ -150,73 +159,7 @@ public class PastryNodeImpl extends Node {
 		this.mode = storageMode;
 		this.storageDir = storageDir;
 		this.nodeIdSeed = nodeIdSeed;
-		setupPastryEnvironment();
 		this.setStatus(NodeStatus.CONFIGURED);
-	}
-
-	/**
-	 * setup pastry environment settings
-	 */
-	private void setupPastryEnvironment() {
-		pastryEnvironment = new Environment();
-		String[] configFiles = new String[] { "etc/pastry.properties", "config/pastry.properties",
-				"properties/pastry.properties" };
-		String found = null;
-		for (String filename : configFiles) {
-			try {
-				if (new File(filename).exists()) {
-					found = filename;
-					break;
-				}
-			} catch (Exception e) {
-				logger.log(Level.FINER, "Exception while checking for config file '" + filename + "'", e);
-			}
-		}
-		Hashtable<String, String> properties = new Hashtable<>();
-		if (found != null) {
-			System.out.println("Using pastry property file " + found);
-			try {
-				Properties props = new Properties();
-				props.load(new FileInputStream(found));
-
-				for (Object propname : props.keySet()) {
-					properties.put((String) propname, (String) props.get(propname));
-				}
-			} catch (FileNotFoundException e) {
-				System.err.println("Unable to open property file " + found);
-			} catch (IOException e) {
-				System.err.println("Error opening property file " + found + ": " + e.getMessage());
-			}
-		} else {
-			System.out.println("No pastry property file found - using default values");
-		}
-		if (!properties.containsKey("nat_search_policy")) {
-			properties.put("nat_search_policy", "never");
-		}
-		if (!properties.containsKey("firewall_test_policy")) {
-			properties.put("firewall_test_policy", "never");
-		}
-		if (!properties.containsKey("nat_network_prefixes")) {
-			properties.put("nat_network_prefixes", "127.0.0.1;10.;192.168.;");
-		}
-		if (pastryBindAddress != null && pastryBindAddress.isLoopbackAddress()) {
-			properties.put("allow_loopback_address", "1");
-		}
-		if (!properties.containsKey("p2p_past_messageTimeout")) {
-			properties.put("p2p_past_messageTimeout", "120000");
-		}
-		if (!properties.containsKey("pastry_socket_known_network_address")) {
-			if (!properties.containsKey("pastry_socket_known_network_address_port")) {
-				properties.put("pastry_socket_known_network_address_port", "80");
-			}
-		}
-		if (!properties.containsKey("nat_search_policy")) {
-			properties.put("nat_search_policy", "never");
-		}
-		for (String prop : properties.keySet()) {
-			pastryEnvironment.getParameters().setString(prop, properties.get(prop));
-			logger.info("setting: " + prop + ": '" + properties.get(prop) + "'");
-		}
 	}
 
 	/**
@@ -290,9 +233,10 @@ public class PastryNodeImpl extends Node {
 	 */
 	@Override
 	protected void launchSub() throws NodeException {
-
 		try {
 			setStatus(NodeStatus.STARTING);
+
+			setupPastryEnvironment();
 
 			NodeIdFactory nidFactory = null;
 			if (nodeIdSeed == null) {
@@ -354,6 +298,71 @@ public class PastryNodeImpl extends Node {
 			throw new NodeException("Interrupted while joining pastry ring!", e);
 		} catch (IllegalStateException e) {
 			throw new NodeException("Unable to open Netwock socket - is the port already in use?", e);
+		}
+	}
+
+	/**
+	 * setup pastry environment settings
+	 */
+	private void setupPastryEnvironment() {
+		pastryEnvironment = new Environment();
+		String[] configFiles = new String[] { "etc/pastry.properties", "config/pastry.properties",
+				"properties/pastry.properties" };
+		String found = null;
+		for (String filename : configFiles) {
+			try {
+				if (new File(filename).exists()) {
+					found = filename;
+					break;
+				}
+			} catch (Exception e) {
+				logger.log(Level.FINER, "Exception while checking for config file '" + filename + "'", e);
+			}
+		}
+		Hashtable<String, String> properties = new Hashtable<>();
+		if (found != null) {
+			System.out.println("Using pastry property file " + found);
+			try {
+				Properties props = new Properties();
+				props.load(new FileInputStream(found));
+
+				for (Object propname : props.keySet()) {
+					properties.put((String) propname, (String) props.get(propname));
+				}
+			} catch (FileNotFoundException e) {
+				System.err.println("Unable to open property file " + found);
+			} catch (IOException e) {
+				System.err.println("Error opening property file " + found + ": " + e.getMessage());
+			}
+		} else {
+			logger.fine("No pastry property file found - using default values");
+		}
+		if (!properties.containsKey("nat_search_policy")) {
+			properties.put("nat_search_policy", "never");
+		}
+		if (!properties.containsKey("firewall_test_policy")) {
+			properties.put("firewall_test_policy", "never");
+		}
+		if (!properties.containsKey("nat_network_prefixes")) {
+			properties.put("nat_network_prefixes", "127.0.0.1;10.;192.168.;");
+		}
+		if (pastryBindAddress != null && pastryBindAddress.isLoopbackAddress()) {
+			properties.put("allow_loopback_address", "1");
+		}
+		if (!properties.containsKey("p2p_past_messageTimeout")) {
+			properties.put("p2p_past_messageTimeout", Integer.toString(PAST_MESSAGE_TIMEOUT));
+		}
+		if (!properties.containsKey("pastry_socket_known_network_address")) {
+			if (!properties.containsKey("pastry_socket_known_network_address_port")) {
+				properties.put("pastry_socket_known_network_address_port", "80");
+			}
+		}
+		if (!properties.containsKey("nat_search_policy")) {
+			properties.put("nat_search_policy", "never");
+		}
+		for (String prop : properties.keySet()) {
+			pastryEnvironment.getParameters().setString(prop, properties.get(prop));
+			logger.fine("setting: " + prop + ": '" + properties.get(prop) + "'");
 		}
 	}
 

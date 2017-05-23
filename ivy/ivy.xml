@@ -13,5 +13,13 @@
 		<dependency org="xpp3" name="xpp3" rev="1.1.4c" />
 
 		<dependency org="javax.xml.parsers" name="jaxp-api" rev="1.4.5" />
+
+		<!-- UPnP libs for NAT handling -->
+		<dependency org="commons-jxpath" name="commons-jxpath" rev="1.1" />
+		<dependency org="commons-logging" name="commons-logging" rev="1.2" />
+		<dependency org="net" name="sbbi-upnplib" rev="1.0.4" />
+		
+		<!-- CodeCoverage -->
+		<dependency org="org.jacoco" name="org.jacoco.ant" rev="0.7.5.201505241946"/>
 	</dependencies>
 </ivy-module>

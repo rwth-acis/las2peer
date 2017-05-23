@@ -200,13 +200,14 @@ public class L2pThread extends Thread implements Context {
 	}
 
 	@Override
-	public Envelope getStoredObject(Class<?> cls, String identifier) throws ArtifactNotFoundException, StorageException {
+	public Envelope getStoredObject(Class<?> cls, String identifier)
+			throws ArtifactNotFoundException, StorageException {
 		return null;
 	}
 
 	@Override
-	public Envelope getStoredObject(String className, String identifier) throws ArtifactNotFoundException,
-			StorageException {
+	public Envelope getStoredObject(String className, String identifier)
+			throws ArtifactNotFoundException, StorageException {
 		return null;
 	}
 
@@ -270,8 +271,8 @@ public class L2pThread extends Thread implements Context {
 	}
 
 	@Override
-	public Envelope createUnencryptedEnvelope(String identifier, Serializable content) throws IllegalArgumentException,
-			SerializationException, CryptoException {
+	public Envelope createUnencryptedEnvelope(String identifier, Serializable content)
+			throws IllegalArgumentException, SerializationException, CryptoException {
 		return callerContext.createUnencryptedEnvelope(identifier, content);
 	}
 
@@ -304,14 +305,14 @@ public class L2pThread extends Thread implements Context {
 	}
 
 	@Override
-	public Envelope createEnvelope(String identifier, Serializable content) throws IllegalArgumentException,
-			SerializationException, CryptoException {
+	public Envelope createEnvelope(String identifier, Serializable content)
+			throws IllegalArgumentException, SerializationException, CryptoException {
 		return callerContext.createEnvelope(identifier, content);
 	}
 
 	@Override
-	public Envelope createEnvelope(Envelope previousVersion, Serializable content) throws IllegalArgumentException,
-			SerializationException, CryptoException {
+	public Envelope createEnvelope(Envelope previousVersion, Serializable content)
+			throws IllegalArgumentException, SerializationException, CryptoException {
 		return callerContext.createEnvelope(previousVersion, content);
 	}
 
@@ -342,7 +343,7 @@ public class L2pThread extends Thread implements Context {
 	}
 
 	@Override
-	public Serializable invokeInterally(String service, String method, Serializable... parameters)
+	public Serializable invokeInternally(String service, String method, Serializable... parameters)
 			throws ServiceNotFoundException, ServiceNotAvailableException, RemoteServiceException {
 		return invokeWithAgent(serviceAgent, service, method, parameters);
 	}
