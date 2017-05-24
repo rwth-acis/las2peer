@@ -1,12 +1,5 @@
 package i5.las2peer.webConnector;
 
-import i5.las2peer.api.Connector;
-import i5.las2peer.api.ConnectorException;
-import i5.las2peer.logging.L2pLogger;
-import i5.las2peer.logging.NodeObserver.Event;
-import i5.las2peer.p2p.Node;
-import i5.las2peer.webConnector.util.NameLock;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -25,14 +18,20 @@ import java.util.logging.StreamHandler;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 
-import net.minidev.json.JSONObject;
-import net.minidev.json.JSONValue;
-
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest.Method;
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsServer;
+
+import i5.las2peer.api.logging.MonitoringEvent;
+import i5.las2peer.connectors.Connector;
+import i5.las2peer.connectors.ConnectorException;
+import i5.las2peer.logging.L2pLogger;
+import i5.las2peer.p2p.Node;
+import i5.las2peer.webConnector.util.NameLock;
+import net.minidev.json.JSONObject;
+import net.minidev.json.JSONValue;
 
 /**
  * Starter class for registering the Web Connector at the las2peer server.
@@ -74,7 +73,7 @@ public class WebConnector extends Connector {
 
 	public static final String DEFAULT_DEFAULT_OIDC_PROVIDER = "https://api.learning-layers.eu/o/oauth2";
 	protected String defaultOIDCProvider = DEFAULT_DEFAULT_OIDC_PROVIDER;
-	protected ArrayList<String> oidcProviders = new ArrayList<String>();
+	protected ArrayList<String> oidcProviders = new ArrayList<>();
 
 	{
 		oidcProviders.add(DEFAULT_DEFAULT_OIDC_PROVIDER);
@@ -105,7 +104,7 @@ public class WebConnector extends Connector {
 
 	// information on Open ID Connect server, including configuration, according
 	// to Open ID Connect Discovery (cf. http://openid.net/specs/openid-connect-discovery-1_0.html)
-	protected Map<String, JSONObject> oidcProviderInfos = new HashMap<String, JSONObject>();
+	protected Map<String, JSONObject> oidcProviderInfos = new HashMap<>();
 
 	private NameLock lockOidc = new NameLock();
 
@@ -376,7 +375,7 @@ public class WebConnector extends Connector {
 	 */
 	public void logMessage(String message) {
 		logger.info(message);
-		myNode.observerNotice(Event.CONNECTOR_MESSAGE, myNode.getNodeId(), WEB_CONNECTOR + message);
+		myNode.observerNotice(MonitoringEvent.CONNECTOR_MESSAGE, myNode.getNodeId(), WEB_CONNECTOR + message);
 		if (logHandler != null) { // StreamHandler don't auto flush
 			logHandler.flush();
 		}
@@ -391,7 +390,7 @@ public class WebConnector extends Connector {
 	public void logError(String message, Throwable throwable) {
 		logger.log(Level.SEVERE, message, throwable);
 		if (myNode != null) {
-			myNode.observerNotice(Event.CONNECTOR_ERROR, myNode.getNodeId(), WEB_CONNECTOR + message);
+			myNode.observerNotice(MonitoringEvent.CONNECTOR_ERROR, myNode.getNodeId(), WEB_CONNECTOR + message);
 		}
 		if (logHandler != null) { // StreamHandler don't auto flush
 			logHandler.flush();
@@ -443,8 +442,8 @@ public class WebConnector extends Connector {
 			result.put("config", config);
 		} catch (Exception e) {
 			System.out.println("OpenID Connect Provider " + providerURI + " unreachable!");
-			System.err
-					.println("Make sure to set a correct OpenID Connect Provider URL in your las2peer Web Connector config!");
+			System.err.println(
+					"Make sure to set a correct OpenID Connect Provider URL in your las2peer Web Connector config!");
 			System.out.println("WebConnector will now run in OIDC agnostic mode.");
 			logError("Could not retrieve a valid OIDC provider config from " + providerURI + "!");
 

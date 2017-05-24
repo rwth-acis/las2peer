@@ -37,22 +37,24 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpsExchange;
 
-import i5.las2peer.execution.NoSuchServiceException;
-import i5.las2peer.execution.NoSuchServiceMethodException;
-import i5.las2peer.execution.ServiceInvocationException;
+import i5.las2peer.api.execution.ServiceInvocationException;
+import i5.las2peer.api.p2p.ServiceNameVersion;
+import i5.las2peer.api.p2p.ServiceVersion;
+import i5.las2peer.api.security.AgentAccessDeniedException;
+import i5.las2peer.api.security.AgentException;
+import i5.las2peer.api.security.AgentLockedException;
+import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.p2p.AgentAlreadyRegisteredException;
-import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.p2p.AliasNotFoundException;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.ServiceAliasManager.AliasResolveResponse;
-import i5.las2peer.p2p.ServiceNameVersion;
-import i5.las2peer.p2p.ServiceVersion;
-import i5.las2peer.p2p.TimeoutException;
 import i5.las2peer.restMapper.RESTResponse;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.Mediator;
-import i5.las2peer.security.PassphraseAgent;
-import i5.las2peer.security.UserAgent;
+import i5.las2peer.security.PassphraseAgentImpl;
+import i5.las2peer.security.UserAgentImpl;
+import i5.las2peer.tools.CryptoTools;
+import i5.las2peer.tools.SimpleTools;
 import io.swagger.models.Operation;
 import io.swagger.models.Path;
 import io.swagger.models.Swagger;
@@ -91,7 +93,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		exchange.getResponseHeaders().set("Server-Name", "las2peer WebConnector");
 
 		try {
-			PassphraseAgent userAgent;
+			PassphraseAgentImpl userAgent;
 			if ((userAgent = authenticate(exchange)) != null) {
 				invoke(userAgent, exchange);
 			}
@@ -103,7 +105,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		exchange.getResponseBody().close();
 	}
 
-	private PassphraseAgent authenticate(HttpExchange exchange) throws UnsupportedEncodingException {
+	private PassphraseAgentImpl authenticate(HttpExchange exchange) throws UnsupportedEncodingException {
 		if (exchange.getRequestHeaders().containsKey(AUTHENTICATION_FIELD)
 				&& exchange.getRequestHeaders().getFirst(AUTHENTICATION_FIELD).toLowerCase().startsWith("basic ")) {
 			// basic authentication
@@ -126,7 +128,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		}
 	}
 
-	private PassphraseAgent authenticateBasic(HttpExchange exchange) {
+	private PassphraseAgentImpl authenticateBasic(HttpExchange exchange) {
 		// looks like: Authentication Basic <Byte64(name:pass)>
 		String userPass = exchange.getRequestHeaders().getFirst(AUTHENTICATION_FIELD).substring("BASIC ".length());
 		userPass = new String(Base64.getDecoder().decode(userPass), StandardCharsets.UTF_8);
@@ -139,7 +141,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		return authenticateNamePassword(username, password, exchange);
 	}
 
-	private PassphraseAgent authenticateOIDC(HttpExchange exchange) throws UnsupportedEncodingException {
+	private PassphraseAgentImpl authenticateOIDC(HttpExchange exchange) throws UnsupportedEncodingException {
 		// extract token
 		String token = "";
 		String oidcProviderURI = connector.defaultOIDCProvider;
@@ -233,18 +235,18 @@ public class WebConnectorRequestHandler implements HttpHandler {
 
 		String sub = (String) ujson.get("sub");
 
+		String oidcAgentId = SimpleTools.byteToHexString(CryptoTools.getSecureHash(sub.getBytes()));
 		// TODO choose other scheme for generating agent password
-		long oidcAgentId = hash(sub);
 		String password = sub;
 
 		this.connector.getLockOidc().lock(oidcAgentId + "");
 
 		try {
 			try {
-				PassphraseAgent pa = (PassphraseAgent) l2pNode.getAgent(oidcAgentId);
-				pa.unlockPrivateKey(password);
-				if (pa instanceof UserAgent) {
-					UserAgent ua = (UserAgent) pa;
+				PassphraseAgentImpl pa = (PassphraseAgentImpl) l2pNode.getAgent(oidcAgentId);
+				pa.unlock(password);
+				if (pa instanceof UserAgentImpl) {
+					UserAgentImpl ua = (UserAgentImpl) pa;
 					ua.setUserData(ujson.toJSONString());
 					return ua;
 				} else {
@@ -254,11 +256,11 @@ public class WebConnectorRequestHandler implements HttpHandler {
 				connector.logError("Authentication failed!", e);
 				sendStringResponse(exchange, HttpURLConnection.HTTP_UNAUTHORIZED, e.getMessage());
 				return null;
-			} catch (AgentNotKnownException e) {
-				UserAgent oidcAgent;
+			} catch (AgentNotFoundException e) {
+				UserAgentImpl oidcAgent;
 				try {
-					oidcAgent = UserAgent.createUserAgent(oidcAgentId, password);
-					oidcAgent.unlockPrivateKey(password);
+					oidcAgent = UserAgentImpl.createUserAgent(oidcAgentId, password);
+					oidcAgent.unlock(password);
 
 					oidcAgent.setEmail((String) ujson.get("email"));
 					oidcAgent.setLoginName((String) ujson.get("preferred_username"));
@@ -277,29 +279,18 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		}
 	}
 
-	private PassphraseAgent authenticateNamePassword(String username, String password, HttpExchange exchange) {
+	private PassphraseAgentImpl authenticateNamePassword(String username, String password, HttpExchange exchange) {
 		try {
-			long userId;
-			PassphraseAgent userAgent;
+			String userId = l2pNode.getAgentIdForLogin(username);
 
-			if (username.matches("-?[0-9].*")) { // username is id
-				try {
-					userId = Long.valueOf(username);
-				} catch (NumberFormatException e) {
-					throw new L2pSecurityException("The given user does not contain a valid agent id!");
-				}
-			} else {// username is string
-				userId = l2pNode.getAgentIdForLogin(username);
-			}
-
-			userAgent = (PassphraseAgent) l2pNode.getAgent(userId);
-			userAgent.unlockPrivateKey(password);
+			PassphraseAgentImpl userAgent = (PassphraseAgentImpl) l2pNode.getAgent(userId);
+			userAgent.unlock(password);
 
 			return userAgent;
-		} catch (AgentNotKnownException e) {
+		} catch (AgentNotFoundException e) {
 			connector.logError("user " + username + " not found", e);
 			sendUnauthorizedResponse(exchange, null, exchange.getRemoteAddress() + ": user " + username + " not found");
-		} catch (L2pSecurityException e) {
+		} catch (AgentAccessDeniedException e) {
 			connector.logError("passphrase invalid for user " + username, e);
 			sendUnauthorizedResponse(exchange, null,
 					exchange.getRemoteAddress() + ": passphrase invalid for user " + username);
@@ -311,19 +302,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		return null;
 	}
 
-	// helper function to create long hash from string
-	// TODO should be replaced, although it prooves good knowledge from DSAL ;)
-	private static long hash(String string) {
-		long h = 1125899906842597L; // prime
-		int len = string.length();
-
-		for (int i = 0; i < len; i++) {
-			h = 31 * h + string.charAt(i);
-		}
-		return h;
-	}
-
-	private boolean invoke(PassphraseAgent agent, HttpExchange exchange) {
+	private boolean invoke(PassphraseAgentImpl agent, HttpExchange exchange) {
 		String requestPath = exchange.getRequestURI().getPath();
 
 		// welcome page
@@ -380,7 +359,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		Mediator mediator;
 		try {
 			mediator = l2pNode.createMediatorForAgent(agent);
-		} catch (AgentNotKnownException | L2pSecurityException | AgentAlreadyRegisteredException e) {
+		} catch (AgentAlreadyRegisteredException | AgentLockedException e) {
 			// should not occur, since agent is known and unlocked at this point
 			sendUnexpectedErrorResponse(exchange, "Mediator could not be created", e);
 			return false;
@@ -584,7 +563,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			if (result == null) {
 				sendUnexpectedErrorResponse(exchange, "Service method invocation returned null response", null);
 			}
-		} catch (AgentNotKnownException | TimeoutException | NoSuchServiceException | NoSuchServiceMethodException e) {
+		} catch (AgentException e) {
 			connector.logError("No service found matching " + service + ".", e);
 			sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND,
 					"No service found matching " + service + ".");

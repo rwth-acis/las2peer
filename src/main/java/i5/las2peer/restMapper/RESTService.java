@@ -1,14 +1,5 @@
 package i5.las2peer.restMapper;
 
-import i5.las2peer.api.Context;
-import i5.las2peer.api.Service;
-import i5.las2peer.restMapper.annotations.ServicePath;
-import i5.las2peer.security.Agent;
-import i5.las2peer.security.UserAgent;
-import io.swagger.jaxrs.Reader;
-import io.swagger.models.Swagger;
-import io.swagger.util.Json;
-
 import java.io.ByteArrayInputStream;
 import java.lang.annotation.Annotation;
 import java.net.URI;
@@ -26,6 +17,15 @@ import org.glassfish.jersey.server.ContainerRequest;
 import org.glassfish.jersey.server.ResourceConfig;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+
+import i5.las2peer.api.Context;
+import i5.las2peer.api.Service;
+import i5.las2peer.api.security.Agent;
+import i5.las2peer.api.security.UserAgent;
+import i5.las2peer.restMapper.annotations.ServicePath;
+import io.swagger.jaxrs.Reader;
+import io.swagger.models.Swagger;
+import io.swagger.util.Json;
 
 /**
  * Base class for RESTful services.
@@ -184,8 +184,9 @@ public abstract class RESTService extends Service {
 						public String getName() {
 							// only users
 							Agent agent = context.getMainAgent();
-							if (!(agent instanceof UserAgent))
+							if (!(agent instanceof UserAgent)) {
 								return null;
+							}
 
 							UserAgent userAgent = (UserAgent) agent;
 							return userAgent.getLoginName();
@@ -228,8 +229,9 @@ public abstract class RESTService extends Service {
 				}
 			}
 
-			if (pathPrefix == null)
+			if (pathPrefix == null) {
 				throw new Exception("ServicePath annotation for service class is required!");
+			}
 
 			pathPrefix = pathPrefix.trim();
 			pathPrefix = pathPrefix.replaceAll("(^/)|(/$)", "");

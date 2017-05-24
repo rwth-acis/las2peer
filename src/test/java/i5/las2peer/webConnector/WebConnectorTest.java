@@ -4,20 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import i5.las2peer.p2p.LocalNode;
-import i5.las2peer.p2p.ServiceNameVersion;
-import i5.las2peer.security.GroupAgent;
-import i5.las2peer.security.ServiceAgent;
-import i5.las2peer.security.UserAgent;
-import i5.las2peer.testing.MockAgentFactory;
-import i5.las2peer.webConnector.client.ClientResponse;
-import i5.las2peer.webConnector.client.MiniClient;
-import i5.las2peer.webConnector.services.TestClassLoaderService;
-import i5.las2peer.webConnector.services.TestDeepPathService;
-import i5.las2peer.webConnector.services.TestSecurityContextService;
-import i5.las2peer.webConnector.services.TestService;
-import i5.las2peer.webConnector.services.TestSwaggerService;
-import i5.las2peer.webConnector.services.TestVersionService;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -29,6 +15,22 @@ import java.util.Random;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import i5.las2peer.api.p2p.ServiceNameVersion;
+import i5.las2peer.api.security.UserAgent;
+import i5.las2peer.p2p.LocalNode;
+import i5.las2peer.security.GroupAgentImpl;
+import i5.las2peer.security.ServiceAgentImpl;
+import i5.las2peer.security.UserAgentImpl;
+import i5.las2peer.testing.MockAgentFactory;
+import i5.las2peer.webConnector.client.ClientResponse;
+import i5.las2peer.webConnector.client.MiniClient;
+import i5.las2peer.webConnector.services.TestClassLoaderService;
+import i5.las2peer.webConnector.services.TestDeepPathService;
+import i5.las2peer.webConnector.services.TestSecurityContextService;
+import i5.las2peer.webConnector.services.TestService;
+import i5.las2peer.webConnector.services.TestSwaggerService;
+import i5.las2peer.webConnector.services.TestVersionService;
 
 public class WebConnectorTest {
 
@@ -52,15 +54,15 @@ public class WebConnectorTest {
 	@BeforeClass
 	public static void startServer() throws Exception {
 		// init agents
-		UserAgent eve = MockAgentFactory.getEve();
-		eve.unlockPrivateKey("evespass");
-		UserAgent adam = MockAgentFactory.getAdam();
-		adam.unlockPrivateKey("adamspass");
+		UserAgentImpl eve = MockAgentFactory.getEve();
+		eve.unlock("evespass");
+		UserAgentImpl adam = MockAgentFactory.getAdam();
+		adam.unlock("adamspass");
 		adam.setLoginName("adam");
-		UserAgent abel = MockAgentFactory.getAbel();
-		abel.unlockPrivateKey("abelspass");
-		GroupAgent group1 = MockAgentFactory.getGroup1();
-		group1.unlockPrivateKey(adam);
+		UserAgentImpl abel = MockAgentFactory.getAbel();
+		abel.unlock("abelspass");
+		GroupAgentImpl group1 = MockAgentFactory.getGroup1();
+		group1.unlock(adam);
 
 		// start Node
 		node = LocalNode.newNode();
@@ -70,25 +72,25 @@ public class WebConnectorTest {
 		node.storeAgent(group1);
 		node.launch();
 
-		ServiceAgent testService1 = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass1),
-				"a pass");
-		ServiceAgent testService2 = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass2),
-				"a pass");
-		ServiceAgent testService3 = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass3),
-				"a pass");
-		ServiceAgent testService4 = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass4),
-				"a pass");
-		ServiceAgent testService5 = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass5),
-				"a pass");
-		ServiceAgent testService6 = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass6),
-				"a pass");
+		ServiceAgentImpl testService1 = ServiceAgentImpl
+				.createServiceAgent(ServiceNameVersion.fromString(testServiceClass1), "a pass");
+		ServiceAgentImpl testService2 = ServiceAgentImpl
+				.createServiceAgent(ServiceNameVersion.fromString(testServiceClass2), "a pass");
+		ServiceAgentImpl testService3 = ServiceAgentImpl
+				.createServiceAgent(ServiceNameVersion.fromString(testServiceClass3), "a pass");
+		ServiceAgentImpl testService4 = ServiceAgentImpl
+				.createServiceAgent(ServiceNameVersion.fromString(testServiceClass4), "a pass");
+		ServiceAgentImpl testService5 = ServiceAgentImpl
+				.createServiceAgent(ServiceNameVersion.fromString(testServiceClass5), "a pass");
+		ServiceAgentImpl testService6 = ServiceAgentImpl
+				.createServiceAgent(ServiceNameVersion.fromString(testServiceClass6), "a pass");
 
-		testService1.unlockPrivateKey("a pass");
-		testService2.unlockPrivateKey("a pass");
-		testService3.unlockPrivateKey("a pass");
-		testService4.unlockPrivateKey("a pass");
-		testService5.unlockPrivateKey("a pass");
-		testService6.unlockPrivateKey("a pass");
+		testService1.unlock("a pass");
+		testService2.unlock("a pass");
+		testService3.unlock("a pass");
+		testService4.unlock("a pass");
+		testService5.unlock("a pass");
+		testService6.unlock("a pass");
 
 		node.registerReceiver(testService1);
 		node.registerReceiver(testService2);
@@ -128,7 +130,7 @@ public class WebConnectorTest {
 		MiniClient c = new MiniClient();
 		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 		try {
-			c.setLogin(Long.toString(testAgent.getId()), testPass);
+			c.setLogin(testAgent.getIdentifier(), testPass);
 
 			ClientResponse response = c.sendRequest("GET", "service1/asdag", "");
 			assertEquals(404, response.getHttpCode());
@@ -144,7 +146,7 @@ public class WebConnectorTest {
 
 		// correct, id based
 		try {
-			c.setLogin(Long.toString(testAgent.getId()), testPass);
+			c.setLogin(testAgent.getIdentifier(), testPass);
 			ClientResponse result = c.sendRequest("get", "test/ok", "");
 			assertEquals("OK", result.getResponse().trim());
 		} catch (Exception e) {
@@ -165,7 +167,7 @@ public class WebConnectorTest {
 
 		// invalid password
 		try {
-			c.setLogin(Long.toString(testAgent.getId()), "aaaaaaaaaaaaa");
+			c.setLogin(testAgent.getIdentifier(), "aaaaaaaaaaaaa");
 
 			ClientResponse result = c.sendRequest("GET", "test/ok", "");
 			assertEquals(401, result.getHttpCode());
@@ -206,7 +208,7 @@ public class WebConnectorTest {
 		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 		try {
 			// unknown service
-			c.setLogin(Long.toString(testAgent.getId()), testPass);
+			c.setLogin(testAgent.getIdentifier(), testPass);
 			ClientResponse result = c.sendRequest("GET", "doesNotExist", "");
 			assertEquals(404, result.getHttpCode());
 
@@ -224,7 +226,7 @@ public class WebConnectorTest {
 		MiniClient c = new MiniClient();
 		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 		try {
-			c.setLogin(Long.toString(testAgent.getId()), testPass);
+			c.setLogin(testAgent.getIdentifier(), testPass);
 
 			// this test should work for an unknown function, too
 			ClientResponse response = c.sendRequest("GET", "asdag", "");
@@ -242,7 +244,7 @@ public class WebConnectorTest {
 		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 
 		try {
-			c.setLogin(Long.toString(testAgent.getId()), testPass);
+			c.setLogin(testAgent.getIdentifier(), testPass);
 
 			ClientResponse result = c.sendRequest("GET", "version/path", "");
 			assertTrue(result.getResponse().trim().endsWith("version/"));
@@ -261,7 +263,7 @@ public class WebConnectorTest {
 		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 
 		try {
-			c.setLogin(Long.toString(testAgent.getId()), testPass);
+			c.setLogin(testAgent.getIdentifier(), testPass);
 			ClientResponse result = c.sendRequest("GET", "swaggertest/swagger.json", "");
 
 			assertTrue(result.getResponse().trim().contains("createSomething"));
@@ -278,7 +280,7 @@ public class WebConnectorTest {
 		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 
 		try {
-			c.setLogin(Long.toString(testAgent.getId()), testPass);
+			c.setLogin(testAgent.getIdentifier(), testPass);
 
 			ClientResponse result = c.sendRequest("PUT", "swaggertest/create/notfound", "");
 			assertEquals(404, result.getHttpCode());
@@ -298,7 +300,7 @@ public class WebConnectorTest {
 		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 
 		try {
-			c.setLogin(Long.toString(testAgent.getId()), testPass);
+			c.setLogin(testAgent.getIdentifier(), testPass);
 
 			ClientResponse result = c.sendRequest("GET", "swaggertest/subresource/content", "");
 			assertEquals(200, result.getHttpCode());
@@ -314,7 +316,7 @@ public class WebConnectorTest {
 		MiniClient c = new MiniClient();
 		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 		try {
-			c.setLogin(Long.toString(testAgent.getId()), testPass);
+			c.setLogin(testAgent.getIdentifier(), testPass);
 
 			byte[] testContent = new byte[WebConnector.DEFAULT_MAX_REQUEST_BODY_SIZE];
 			new Random().nextBytes(testContent);
@@ -333,7 +335,7 @@ public class WebConnectorTest {
 		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 		try {
 			// unauthenticated request
-			c.setLogin(Long.toString(node.getAnonymous().getId()), "anonymous");
+			c.setLogin(node.getAnonymous().getIdentifier(), "anonymous");
 			ClientResponse result = c.sendRequest("GET", "security/name", "");
 			System.out.println("RESPONSE: " + result.getResponse());
 			assertEquals("no principal", result.getResponse().trim());
@@ -344,7 +346,7 @@ public class WebConnectorTest {
 			assertEquals(200, result.getHttpCode());
 
 			// authenticated request
-			c.setLogin(Long.toString(testAgent.getId()), testPass);
+			c.setLogin(testAgent.getIdentifier(), testPass);
 			result = c.sendRequest("GET", "security/name", "");
 			assertEquals(200, result.getHttpCode());
 			assertEquals("adam", result.getResponse().trim());
@@ -365,7 +367,7 @@ public class WebConnectorTest {
 		MiniClient c = new MiniClient();
 		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 		try {
-			c.setLogin(Long.toString(testAgent.getId()), testPass);
+			c.setLogin(testAgent.getIdentifier(), testPass);
 			ClientResponse result = c.sendRequest("GET", "classloader/test", "");
 			assertEquals(200, result.getHttpCode());
 			assertEquals("OK", result.getResponse().trim());
@@ -380,7 +382,7 @@ public class WebConnectorTest {
 		MiniClient c = new MiniClient();
 		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 		try {
-			c.setLogin(Long.toString(testAgent.getId()), testPass);
+			c.setLogin(testAgent.getIdentifier(), testPass);
 			ClientResponse result = c.sendRequest("GET", "test/empty", "");
 			assertEquals(200, result.getHttpCode());
 		} catch (Exception e) {
@@ -394,7 +396,7 @@ public class WebConnectorTest {
 		MiniClient c = new MiniClient();
 		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 		try {
-			c.setLogin(Long.toString(testAgent.getId()), testPass);
+			c.setLogin(testAgent.getIdentifier(), testPass);
 
 			// test auth params in GET
 			ClientResponse result = c.sendRequest("GET", "test/requesturi?param1=sadf&access_token=secret", "");
@@ -421,7 +423,7 @@ public class WebConnectorTest {
 		MiniClient c = new MiniClient();
 		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 		try {
-			c.setLogin(Long.toString(testAgent.getId()), testPass);
+			c.setLogin(testAgent.getIdentifier(), testPass);
 			ClientResponse result = c.sendRequest("GET", "test/encoding", "");
 			assertEquals(200, result.getHttpCode());
 			assertTrue(result.getResponse().contains("☺"));
@@ -438,7 +440,7 @@ public class WebConnectorTest {
 		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 		try {
 			String body = "This is a test.";
-			c.setLogin(Long.toString(testAgent.getId()), testPass);
+			c.setLogin(testAgent.getIdentifier(), testPass);
 			ClientResponse result = c.sendRequest("POST", "test/body", body);
 			assertEquals(200, result.getHttpCode());
 			assertTrue(result.getResponse().trim().equals(body));
@@ -453,7 +455,7 @@ public class WebConnectorTest {
 		MiniClient c = new MiniClient();
 		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 		try {
-			c.setLogin(Long.toString(testAgent.getId()), testPass);
+			c.setLogin(testAgent.getIdentifier(), testPass);
 
 			ClientResponse result = c.sendRequest("GET", "deep/path/test", "");
 			assertEquals(200, result.getHttpCode());
