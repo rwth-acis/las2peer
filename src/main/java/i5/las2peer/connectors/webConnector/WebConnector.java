@@ -1,4 +1,4 @@
-package i5.las2peer.webConnector;
+package i5.las2peer.connectors.webConnector;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -27,9 +27,9 @@ import com.sun.net.httpserver.HttpsServer;
 import i5.las2peer.api.logging.MonitoringEvent;
 import i5.las2peer.connectors.Connector;
 import i5.las2peer.connectors.ConnectorException;
+import i5.las2peer.connectors.webConnector.util.NameLock;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.p2p.Node;
-import i5.las2peer.webConnector.util.NameLock;
 import net.minidev.json.JSONObject;
 import net.minidev.json.JSONValue;
 

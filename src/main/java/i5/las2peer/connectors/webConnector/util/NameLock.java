@@ -1,4 +1,4 @@
-package i5.las2peer.webConnector.util;
+package i5.las2peer.connectors.webConnector.util;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;

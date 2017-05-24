@@ -1,4 +1,4 @@
-package i5.las2peer.webConnector.client;
+package i5.las2peer.connectors.webConnector.client;
 
 import java.util.HashMap;
 

@@ -1,4 +1,4 @@
-package i5.las2peer.webConnector.services;
+package i5.las2peer.connectors.webConnector.services;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

@@ -1,4 +1,4 @@
-package i5.las2peer.webConnector.client;
+package i5.las2peer.connectors.webConnector.client;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import i5.las2peer.webConnector.WebConnector;
+import i5.las2peer.connectors.webConnector.WebConnector;
 
 /**
  * Very simple client to communicate with the las2peer web connector

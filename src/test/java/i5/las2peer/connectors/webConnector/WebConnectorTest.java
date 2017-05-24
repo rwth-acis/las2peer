@@ -1,4 +1,4 @@
-package i5.las2peer.webConnector;
+package i5.las2peer.connectors.webConnector;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -18,19 +18,20 @@ import org.junit.Test;
 
 import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.security.UserAgent;
+import i5.las2peer.connectors.webConnector.WebConnector;
+import i5.las2peer.connectors.webConnector.client.ClientResponse;
+import i5.las2peer.connectors.webConnector.client.MiniClient;
+import i5.las2peer.connectors.webConnector.services.TestClassLoaderService;
+import i5.las2peer.connectors.webConnector.services.TestDeepPathService;
+import i5.las2peer.connectors.webConnector.services.TestSecurityContextService;
+import i5.las2peer.connectors.webConnector.services.TestService;
+import i5.las2peer.connectors.webConnector.services.TestSwaggerService;
+import i5.las2peer.connectors.webConnector.services.TestVersionService;
 import i5.las2peer.p2p.LocalNode;
 import i5.las2peer.security.GroupAgentImpl;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.testing.MockAgentFactory;
-import i5.las2peer.webConnector.client.ClientResponse;
-import i5.las2peer.webConnector.client.MiniClient;
-import i5.las2peer.webConnector.services.TestClassLoaderService;
-import i5.las2peer.webConnector.services.TestDeepPathService;
-import i5.las2peer.webConnector.services.TestSecurityContextService;
-import i5.las2peer.webConnector.services.TestService;
-import i5.las2peer.webConnector.services.TestSwaggerService;
-import i5.las2peer.webConnector.services.TestVersionService;
 
 public class WebConnectorTest {
 

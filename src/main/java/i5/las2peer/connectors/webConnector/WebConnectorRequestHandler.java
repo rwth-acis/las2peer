@@ -1,4 +1,4 @@
-package i5.las2peer.webConnector;
+package i5.las2peer.connectors.webConnector;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
