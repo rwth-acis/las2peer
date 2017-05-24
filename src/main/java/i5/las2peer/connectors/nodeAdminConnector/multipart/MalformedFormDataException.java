@@ -1,4 +1,4 @@
-package i5.las2peer.nodeAdminConnector.multipart;
+package i5.las2peer.connectors.nodeAdminConnector.multipart;
 
 import java.io.IOException;
 

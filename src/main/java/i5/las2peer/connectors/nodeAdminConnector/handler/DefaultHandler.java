@@ -1,4 +1,4 @@
-package i5.las2peer.nodeAdminConnector.handler;
+package i5.las2peer.connectors.nodeAdminConnector.handler;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -8,7 +8,7 @@ import java.util.logging.Level;
 
 import com.sun.net.httpserver.HttpExchange;
 
-import i5.las2peer.nodeAdminConnector.NodeAdminConnector;
+import i5.las2peer.connectors.nodeAdminConnector.NodeAdminConnector;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.tools.SimpleTools;
 

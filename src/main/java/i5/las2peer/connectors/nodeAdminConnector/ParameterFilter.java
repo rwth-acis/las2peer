@@ -1,4 +1,4 @@
-package i5.las2peer.nodeAdminConnector;
+package i5.las2peer.connectors.nodeAdminConnector;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -19,7 +19,7 @@ import java.util.List;
 import com.sun.net.httpserver.Filter;
 import com.sun.net.httpserver.HttpExchange;
 
-import i5.las2peer.nodeAdminConnector.multipart.MultipartHelper;
+import i5.las2peer.connectors.nodeAdminConnector.multipart.MultipartHelper;
 
 public class ParameterFilter extends Filter {
 

@@ -1,4 +1,4 @@
-package i5.las2peer.nodeAdminConnector;
+package i5.las2peer.connectors.nodeAdminConnector;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -17,10 +17,10 @@ import com.sun.net.httpserver.HttpsServer;
 
 import i5.las2peer.connectors.Connector;
 import i5.las2peer.connectors.ConnectorException;
+import i5.las2peer.connectors.nodeAdminConnector.handler.DefaultHandler;
+import i5.las2peer.connectors.nodeAdminConnector.handler.FrontendHandler;
+import i5.las2peer.connectors.nodeAdminConnector.handler.ServiceHandler;
 import i5.las2peer.logging.L2pLogger;
-import i5.las2peer.nodeAdminConnector.handler.DefaultHandler;
-import i5.las2peer.nodeAdminConnector.handler.FrontendHandler;
-import i5.las2peer.nodeAdminConnector.handler.ServiceHandler;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.security.UserAgentImpl;

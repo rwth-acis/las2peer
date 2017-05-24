@@ -1,4 +1,4 @@
-package i5.las2peer.nodeAdminConnector.handler;
+package i5.las2peer.connectors.nodeAdminConnector.handler;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -16,8 +16,8 @@ import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.persistency.EnvelopeNotFoundException;
 import i5.las2peer.classLoaders.L2pClassManager;
 import i5.las2peer.classLoaders.libraries.SharedStorageRepository;
+import i5.las2peer.connectors.nodeAdminConnector.NodeAdminConnector;
 import i5.las2peer.logging.L2pLogger;
-import i5.las2peer.nodeAdminConnector.NodeAdminConnector;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.persistency.EnvelopeVersion;
 import i5.las2peer.tools.L2pNodeLauncher;

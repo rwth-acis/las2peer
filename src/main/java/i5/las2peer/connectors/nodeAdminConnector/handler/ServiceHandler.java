@@ -1,11 +1,11 @@
-package i5.las2peer.nodeAdminConnector.handler;
+package i5.las2peer.connectors.nodeAdminConnector.handler;
 
 import java.net.HttpURLConnection;
 import java.util.logging.Level;
 
 import com.sun.net.httpserver.HttpExchange;
 
-import i5.las2peer.nodeAdminConnector.NodeAdminConnector;
+import i5.las2peer.connectors.nodeAdminConnector.NodeAdminConnector;
 
 public class ServiceHandler extends AbstractHandler {
 

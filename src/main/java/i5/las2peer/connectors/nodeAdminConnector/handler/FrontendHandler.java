@@ -1,4 +1,4 @@
-package i5.las2peer.nodeAdminConnector.handler;
+package i5.las2peer.connectors.nodeAdminConnector.handler;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -29,11 +29,11 @@ import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.classLoaders.L2pClassManager;
 import i5.las2peer.classLoaders.libraries.SharedStorageRepository;
-import i5.las2peer.nodeAdminConnector.AgentSession;
-import i5.las2peer.nodeAdminConnector.NodeAdminConnector;
-import i5.las2peer.nodeAdminConnector.ParameterFilter.ParameterMap;
-import i5.las2peer.nodeAdminConnector.handler.pojo.PojoService;
-import i5.las2peer.nodeAdminConnector.multipart.FormDataPart;
+import i5.las2peer.connectors.nodeAdminConnector.AgentSession;
+import i5.las2peer.connectors.nodeAdminConnector.NodeAdminConnector;
+import i5.las2peer.connectors.nodeAdminConnector.ParameterFilter.ParameterMap;
+import i5.las2peer.connectors.nodeAdminConnector.handler.pojo.PojoService;
+import i5.las2peer.connectors.nodeAdminConnector.multipart.FormDataPart;
 import i5.las2peer.p2p.AgentNotRegisteredException;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.NodeException;

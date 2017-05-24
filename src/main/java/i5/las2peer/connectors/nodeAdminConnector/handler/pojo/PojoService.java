@@ -1,4 +1,4 @@
-package i5.las2peer.nodeAdminConnector.handler.pojo;
+package i5.las2peer.connectors.nodeAdminConnector.handler.pojo;
 
 public class PojoService {
 
