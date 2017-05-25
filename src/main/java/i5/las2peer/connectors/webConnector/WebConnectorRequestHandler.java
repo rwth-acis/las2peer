@@ -49,10 +49,10 @@ import i5.las2peer.p2p.AliasNotFoundException;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.ServiceAliasManager.AliasResolveResponse;
 import i5.las2peer.restMapper.RESTResponse;
-import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.Mediator;
 import i5.las2peer.security.PassphraseAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
+import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
 import i5.las2peer.tools.SimpleTools;
 import io.swagger.models.Operation;
@@ -235,7 +235,14 @@ public class WebConnectorRequestHandler implements HttpHandler {
 
 		String sub = (String) ujson.get("sub");
 
-		String oidcAgentId = SimpleTools.byteToHexString(CryptoTools.getSecureHash(sub.getBytes()));
+		String oidcAgentId;
+		try {
+			oidcAgentId = SimpleTools.byteToHexString(CryptoTools.getSecureHash(sub.getBytes()));
+		} catch (CryptoException e) {
+			connector.logError("Could not derive agent id from oidc sub", e);
+			sendStringResponse(exchange, HttpURLConnection.HTTP_UNAUTHORIZED, e.toString());
+			return null;
+		}
 		// TODO choose other scheme for generating agent password
 		String password = sub;
 
@@ -247,32 +254,38 @@ public class WebConnectorRequestHandler implements HttpHandler {
 				pa.unlock(password);
 				if (pa instanceof UserAgentImpl) {
 					UserAgentImpl ua = (UserAgentImpl) pa;
-					ua.setUserData(ujson.toJSONString());
+					// TODO provide OIDC user data for agent
+//					ua.setUserData(ujson.toJSONString());
 					return ua;
 				} else {
 					return pa;
 				}
-			} catch (L2pSecurityException e) {
+			} catch (AgentAccessDeniedException e) {
 				connector.logError("Authentication failed!", e);
-				sendStringResponse(exchange, HttpURLConnection.HTTP_UNAUTHORIZED, e.getMessage());
+				sendStringResponse(exchange, HttpURLConnection.HTTP_UNAUTHORIZED, e.toString());
 				return null;
 			} catch (AgentNotFoundException e) {
 				UserAgentImpl oidcAgent;
 				try {
-					oidcAgent = UserAgentImpl.createUserAgent(oidcAgentId, password);
+					oidcAgent = UserAgentImpl.createUserAgent(password);
 					oidcAgent.unlock(password);
 
 					oidcAgent.setEmail((String) ujson.get("email"));
 					oidcAgent.setLoginName((String) ujson.get("preferred_username"));
-					oidcAgent.setUserData(ujson.toJSONString());
+					// TODO provide OIDC user data for agent
+//					oidcAgent.setUserData(ujson.toJSONString());
 
 					l2pNode.storeAgent(oidcAgent);
-
+					l2pNode.getUserManager().registerOIDCSub(oidcAgent, sub);
 					return oidcAgent;
 				} catch (Exception e1) {
 					sendUnexpectedErrorResponse(exchange, "OIDC agent creation failed", e1);
 					return null;
 				}
+			} catch (AgentException e) {
+				connector.logError("Could not retrieve and unlock agent from network", e);
+				sendStringResponse(exchange, HttpURLConnection.HTTP_UNAUTHORIZED, e.toString());
+				return null;
 			}
 		} finally {
 			this.connector.getLockOidc().unlock(oidcAgentId + "");
