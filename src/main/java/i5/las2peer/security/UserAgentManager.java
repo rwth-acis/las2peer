@@ -7,6 +7,7 @@ import i5.las2peer.api.persistency.EnvelopeNotFoundException;
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.api.security.AgentOperationFailedException;
+import i5.las2peer.api.security.AnonymousAgent;
 import i5.las2peer.api.security.EmailAlreadyTakenException;
 import i5.las2peer.api.security.LoginNameAlreadyTakenException;
 import i5.las2peer.api.security.OIDCSubAlreadyTakenException;
@@ -132,8 +133,12 @@ public class UserAgentManager {
 	 * @throws AgentOperationFailedException If any other issue with the agent occurs, e. g. XML not readable
 	 */
 	public String getAgentIdByLogin(String name) throws AgentNotFoundException, AgentOperationFailedException {
-		if (name.equalsIgnoreCase("anonymous")) {
-			return node.getAnonymous().getIdentifier();
+		if (name.equalsIgnoreCase(AnonymousAgent.LOGIN_NAME)) {
+			try {
+				return AnonymousAgentImpl.getInstance().getIdentifier();
+			} catch (L2pSecurityException | CryptoException e) {
+				throw new AgentNotFoundException("Could not retrieve anonymous agent", e);
+			}
 		}
 		try {
 			EnvelopeVersion env = node.fetchEnvelope(PREFIX_USER_NAME + name.toLowerCase());
@@ -154,6 +159,13 @@ public class UserAgentManager {
 	 * @throws AgentOperationFailedException If any other issue with the agent occurs, e. g. XML not readable
 	 */
 	public String getAgentIdByEmail(String email) throws AgentNotFoundException, AgentOperationFailedException {
+		if (email.equalsIgnoreCase(AnonymousAgent.EMAIL)) {
+			try {
+				return AnonymousAgentImpl.getInstance().getIdentifier();
+			} catch (L2pSecurityException | CryptoException e) {
+				throw new AgentNotFoundException("Could not retrieve anonymous agent", e);
+			}
+		}
 		try {
 			EnvelopeVersion env = node.fetchEnvelope(PREFIX_USER_MAIL + email.toLowerCase());
 			return (String) env.getContent();

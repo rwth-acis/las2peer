@@ -183,14 +183,14 @@ public class ServiceAliasManager {
 	private String getEntry(String key) throws EnvelopeNotFoundException, EnvelopeException, CryptoException,
 			L2pSecurityException, SerializationException {
 		EnvelopeVersion env = node.fetchEnvelope(PREFIX + key);
-		String content = (String) env.getContent(node.getAnonymous());
+		String content = (String) env.getContent();
 		return content;
 	}
 
 	private void createEntry(AgentImpl agent, String key, String value)
 			throws EnvelopeException, IllegalArgumentException, SerializationException, CryptoException {
-		EnvelopeVersion envName = node.createEnvelope(PREFIX + key.toLowerCase(), agent.getPublicKey(), value, agent,
-				node.getAnonymous());
+		EnvelopeVersion envName = node.createUnencryptedEnvelope(PREFIX + key.toLowerCase(), agent.getPublicKey(),
+				value);
 		node.storeEnvelope(envName, agent);
 	}
 }

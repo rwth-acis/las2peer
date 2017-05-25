@@ -24,6 +24,7 @@ import i5.las2peer.api.persistency.EnvelopeNotFoundException;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentNotFoundException;
+import i5.las2peer.api.security.AnonymousAgent;
 import i5.las2peer.classLoaders.L2pClassManager;
 import i5.las2peer.classLoaders.libraries.SharedStorageRepository;
 import i5.las2peer.communication.Message;
@@ -41,6 +42,7 @@ import i5.las2peer.persistency.StorageExceptionHandler;
 import i5.las2peer.persistency.StorageStoreResultHandler;
 import i5.las2peer.security.AgentContext;
 import i5.las2peer.security.AgentImpl;
+import i5.las2peer.security.AnonymousAgentImpl;
 import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.MessageReceiver;
 import i5.las2peer.security.UserAgentImpl;
@@ -512,10 +514,12 @@ public class PastryNodeImpl extends Node {
 		observerNotice(MonitoringEvent.AGENT_GET_STARTED, pastryNode, id, null, (String) null, "");
 		try {
 			AgentImpl agentFromNet = null;
-			AgentImpl anonymous = getAnonymous();
-			// TODO use isAnonymous, special ID or Classing for identification
-			if (id.equalsIgnoreCase(anonymous.getIdentifier())) {
-				agentFromNet = anonymous;
+			if (id.equalsIgnoreCase(AnonymousAgent.LOGIN_NAME)) {
+				try {
+					agentFromNet = AnonymousAgentImpl.getInstance();
+				} catch (L2pSecurityException | CryptoException e) {
+					throw new AgentNotFoundException("Could not retrieve anonymous agent", e);
+				}
 			} else {
 				EnvelopeVersion agentEnvelope = pastStorage.fetchEnvelope(EnvelopeVersion.getAgentIdentifier(id),
 						AGENT_GET_TIMEOUT);
@@ -539,7 +543,9 @@ public class PastryNodeImpl extends Node {
 			throw new AgentLockedException();
 			// because the agent has to sign itself
 		}
-		// TODO check if anonymous should be stored and deny
+		if (agent instanceof AnonymousAgent) {
+			throw new AgentException("Must not store anonymous agent");
+		}
 		observerNotice(MonitoringEvent.AGENT_UPLOAD_STARTED, pastryNode, agent, "");
 		try {
 			EnvelopeVersion agentEnvelope = null;

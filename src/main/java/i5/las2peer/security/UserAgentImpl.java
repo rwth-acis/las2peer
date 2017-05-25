@@ -64,7 +64,7 @@ public class UserAgentImpl extends PassphraseAgentImpl implements UserAgent {
 
 	@Override
 	public boolean hasLoginName() {
-		return sLoginName != null;
+		return getLoginName() != null;
 	}
 
 	@Override
@@ -272,7 +272,7 @@ public class UserAgentImpl extends PassphraseAgentImpl implements UserAgent {
 	 */
 	@Override
 	public boolean hasEmail() {
-		return sEmail != null;
+		return getEmail() != null;
 	}
 
 }

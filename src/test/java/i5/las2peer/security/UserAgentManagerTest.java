@@ -6,6 +6,7 @@ import static org.junit.Assert.fail;
 import org.junit.Test;
 
 import i5.las2peer.api.security.AgentNotFoundException;
+import i5.las2peer.api.security.AnonymousAgent;
 import i5.las2peer.api.security.EmailAlreadyTakenException;
 import i5.las2peer.api.security.LoginNameAlreadyTakenException;
 import i5.las2peer.p2p.LocalNode;
@@ -119,8 +120,8 @@ public class UserAgentManagerTest {
 	public void testAnonymous() {
 		try {
 			Node node = LocalNode.launchNode();
-			String a = node.getAgentIdForLogin("anonymous");
-			assertEquals(a, node.getAnonymous().getIdentifier());
+			String anonymousAgentId = node.getAgentIdForLogin(AnonymousAgent.LOGIN_NAME);
+			assertEquals(AnonymousAgentImpl.getInstance().getIdentifier(), anonymousAgentId);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -21,6 +21,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import i5.las2peer.api.Context;
 import i5.las2peer.api.Service;
 import i5.las2peer.api.security.Agent;
+import i5.las2peer.api.security.AnonymousAgent;
 import i5.las2peer.api.security.UserAgent;
 import i5.las2peer.restMapper.annotations.ServicePath;
 import io.swagger.jaxrs.Reader;
@@ -176,7 +177,7 @@ public abstract class RESTService extends Service {
 				}
 
 				// treat anonymous as unauthenticated
-				if (context.getLocalNode().getAnonymous().equals(context.getMainAgent())) {
+				if (context.getMainAgent() instanceof AnonymousAgent) {
 					return null;
 				} else {
 					return new Principal() {

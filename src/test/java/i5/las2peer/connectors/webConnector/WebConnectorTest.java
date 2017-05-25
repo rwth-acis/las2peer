@@ -17,8 +17,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import i5.las2peer.api.p2p.ServiceNameVersion;
+import i5.las2peer.api.security.AnonymousAgent;
 import i5.las2peer.api.security.UserAgent;
-import i5.las2peer.connectors.webConnector.WebConnector;
 import i5.las2peer.connectors.webConnector.client.ClientResponse;
 import i5.las2peer.connectors.webConnector.client.MiniClient;
 import i5.las2peer.connectors.webConnector.services.TestClassLoaderService;
@@ -336,7 +336,7 @@ public class WebConnectorTest {
 		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 		try {
 			// unauthenticated request
-			c.setLogin(node.getAnonymous().getIdentifier(), "anonymous");
+			c.setLogin(AnonymousAgent.LOGIN_NAME, AnonymousAgent.PASSPHRASE);
 			ClientResponse result = c.sendRequest("GET", "security/name", "");
 			System.out.println("RESPONSE: " + result.getResponse());
 			assertEquals("no principal", result.getResponse().trim());

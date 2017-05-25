@@ -62,7 +62,6 @@ import i5.las2peer.security.UnlockAgentCall;
 import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.security.UserAgentManager;
 import i5.las2peer.serialization.SerializationException;
-import i5.las2peer.testing.MockAgentFactory;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
 import rice.pastry.NodeHandle;
@@ -545,9 +544,6 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 
 		startTime = new Date();
 
-		// store anonymous if not stored yet
-		getAnonymous();
-
 		startTidyUpTimer();
 	}
 
@@ -589,8 +585,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @throws AgentException any problem with the agent itself (probably on calling
 	 *             {@link i5.las2peer.security.AgentImpl#notifyRegistrationTo}
 	 */
-	public void registerReceiver(MessageReceiver receiver)
-			throws AgentAlreadyRegisteredException, AgentException {
+	public void registerReceiver(MessageReceiver receiver) throws AgentAlreadyRegisteredException, AgentException {
 
 		// TODO allow multiple mediators registered at the same time for one agent to avoid conflicts between connectors
 
@@ -1106,34 +1101,6 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	@Deprecated
 	public abstract void updateAgent(AgentImpl agent) throws L2pSecurityException, AgentException, EnvelopeException;
 
-	private AgentImpl anonymousAgent = null;
-
-	/**
-	 * get an agent to use, if no <i>real</i> agent is available
-	 * 
-	 * @return a generic anonymous agent
-	 */
-	public synchronized AgentImpl getAnonymous() {
-		if (anonymousAgent == null) {
-			try {
-				anonymousAgent = MockAgentFactory.getAnonymous();
-				((UserAgentImpl) anonymousAgent).unlock("anonymous");
-			} catch (Exception e1) {
-				throw new RuntimeException("No anonymous agent could be initialized!?!", e1);
-			}
-		}
-
-		AgentImpl result;
-		try {
-			result = anonymousAgent.cloneLocked();
-			((UserAgentImpl) result).unlock("anonymous");
-		} catch (Exception e) {
-			throw new RuntimeException("Strange - should not happen...");
-		}
-
-		return result;
-	}
-
 	/**
 	 * returns the manager responsible for user management
 	 * 
@@ -1207,7 +1174,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param method
 	 * @param parameters
 	 * @return
-	 * @throws AgentLockedException 
+	 * @throws AgentLockedException
 	 * @throws ServiceInvocationException
 	 */
 	public Serializable invoke(AgentImpl executing, String service, String method, Serializable[] parameters)
@@ -1223,7 +1190,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param method
 	 * @param parameters
 	 * @return
-	 * @throws AgentLockedException 
+	 * @throws AgentLockedException
 	 * @throws ServiceInvocationException
 	 */
 	public Serializable invoke(AgentImpl executing, ServiceNameVersion service, String method,
@@ -1261,7 +1228,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @return invocation result
 	 * @throws ServiceNotFoundException
 	 * @throws ServiceInvocationException
-	 * @throws AgentLockedException 
+	 * @throws AgentLockedException
 	 */
 	public Serializable invoke(AgentImpl executing, ServiceNameVersion service, String method,
 			Serializable[] parameters, boolean exactVersion, boolean localOnly)
@@ -1316,7 +1283,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param parameters method parameters
 	 * @return innovation result
 	 * @throws ServiceInvocationException
-	 * @throws AgentLockedException 
+	 * @throws AgentLockedException
 	 */
 	public Serializable invokeLocally(AgentImpl executing, ServiceAgentImpl serviceAgent, String method,
 			Serializable[] parameters) throws ServiceInvocationException, AgentLockedException {
@@ -1353,7 +1320,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param parameters method parameters
 	 * @return invocation result
 	 * @throws ServiceInvocationException
-	 * @throws AgentLockedException 
+	 * @throws AgentLockedException
 	 */
 	public Serializable invokeGlobally(AgentImpl executing, String serviceAgentId, Object nodeId, String method,
 			Serializable[] parameters) throws ServiceInvocationException, AgentLockedException {

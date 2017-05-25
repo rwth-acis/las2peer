@@ -44,11 +44,15 @@ import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentNotFoundException;
+import i5.las2peer.api.security.AgentOperationFailedException;
+import i5.las2peer.api.security.AnonymousAgent;
 import i5.las2peer.p2p.AgentAlreadyRegisteredException;
 import i5.las2peer.p2p.AliasNotFoundException;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.ServiceAliasManager.AliasResolveResponse;
 import i5.las2peer.restMapper.RESTResponse;
+import i5.las2peer.security.AnonymousAgentImpl;
+import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.Mediator;
 import i5.las2peer.security.PassphraseAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
@@ -121,7 +125,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			// anonymous login
 			return authenticateNamePassword(connector.defaultLoginUser, connector.defaultLoginPassword, exchange);
 		} else if (exchange.getRequestMethod().equalsIgnoreCase("options")) {
-			return authenticateNamePassword("anonymous", "anonymous", exchange);
+			return authenticateAnonymous(exchange);
 		} else {
 			sendUnauthorizedResponse(exchange, null, exchange.getRemoteAddress() + ": No Authentication provided!");
 			return null;
@@ -293,6 +297,9 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	}
 
 	private PassphraseAgentImpl authenticateNamePassword(String username, String password, HttpExchange exchange) {
+		if (username.equalsIgnoreCase(AnonymousAgent.LOGIN_NAME)) {
+			return authenticateAnonymous(exchange);
+		}
 		try {
 			String userId = l2pNode.getAgentIdForLogin(username);
 
@@ -311,6 +318,19 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			connector.logError("something went horribly wrong. Check your request for correctness.", e);
 			sendUnauthorizedResponse(exchange, null, exchange.getRemoteAddress()
 					+ ": something went horribly wrong. Check your request for correctness.");
+		}
+		return null;
+	}
+
+	private PassphraseAgentImpl authenticateAnonymous(HttpExchange exchange) {
+		try {
+			AnonymousAgentImpl anonymousAgent = AnonymousAgentImpl.getInstance();
+			anonymousAgent.unlock(AnonymousAgent.PASSPHRASE);
+			return anonymousAgent;
+		} catch (CryptoException | L2pSecurityException | AgentAccessDeniedException
+				| AgentOperationFailedException e) {
+			connector.logError("Could not authenticate as user anonymous", e);
+			sendUnauthorizedResponse(exchange, null, "Could not authenticate as user anonymous");
 		}
 		return null;
 	}

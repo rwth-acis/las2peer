@@ -73,17 +73,6 @@ public abstract class MockAgentFactory {
 	}
 
 	/**
-	 * Gets Anonymous agent
-	 * 
-	 * @return Returns the user agent to be used for anonymous access
-	 * @throws MalformedXMLException
-	 * @throws IOException
-	 */
-	public static UserAgentImpl getAnonymous() throws MalformedXMLException, IOException {
-		return UserAgentImpl.createFromXml(getContent("i5/las2peer/testing/anonymous.agent.xml"));
-	}
-
-	/**
 	 * get ServiceAgent for <i>i5.las2peer.api.TestService</i>
 	 * 
 	 * The TestServices are placed in the JUnit source tree.
