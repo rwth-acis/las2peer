@@ -18,7 +18,6 @@ import org.junit.Test;
 
 import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.security.AnonymousAgent;
-import i5.las2peer.api.security.UserAgent;
 import i5.las2peer.connectors.webConnector.client.ClientResponse;
 import i5.las2peer.connectors.webConnector.client.MiniClient;
 import i5.las2peer.connectors.webConnector.services.TestClassLoaderService;
@@ -42,7 +41,7 @@ public class WebConnectorTest {
 	private static WebConnector connector;
 	private static ByteArrayOutputStream logStream;
 
-	private static UserAgent testAgent;
+	private static UserAgentImpl testAgent;
 	private static final String testPass = "adamspass";
 
 	private static final String testServiceClass1 = TestSecurityContextService.class.getName() + "@1.0";
@@ -109,6 +108,8 @@ public class WebConnectorTest {
 		connector.start(node);
 
 		testAgent = adam;
+		testAgent.unlock("adamspass");
+		node.storeAgent(testAgent);
 	}
 
 	@AfterClass

@@ -11,7 +11,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import i5.las2peer.api.p2p.ServiceNameVersion;
-import i5.las2peer.api.security.UserAgent;
 import i5.las2peer.connectors.webConnector.client.ClientResponse;
 import i5.las2peer.connectors.webConnector.client.MiniClient;
 import i5.las2peer.connectors.webConnector.services.TestMissingPathService;
@@ -31,7 +30,7 @@ public class WebConnectorServiceInfoTest {
 	private static WebConnector connector;
 	private static ByteArrayOutputStream logStream;
 
-	private static UserAgent testAgent;
+	private static UserAgentImpl testAgent;
 	private static final String testPass = "adamspass";
 
 	private static final String testServiceClass1 = TestVersionService.class.getName() + "@1";
@@ -94,8 +93,9 @@ public class WebConnectorServiceInfoTest {
 		connector.setLogStream(new PrintStream(logStream));
 		connector.start(node);
 
-		// eve is the anonymous agent!
-		testAgent = MockAgentFactory.getAdam();
+		testAgent = adam;
+		testAgent.unlock("adamspass");
+		node.storeAgent(testAgent);
 	}
 
 	@AfterClass

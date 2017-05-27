@@ -301,7 +301,13 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			return authenticateAnonymous(exchange);
 		}
 		try {
-			String userId = l2pNode.getAgentIdForLogin(username);
+			String userId;
+			// check if username is an agent id
+			if (CryptoTools.isAgentID(username)) {
+				userId = username;
+			} else {
+				userId = l2pNode.getAgentIdForLogin(username);
+			}
 
 			PassphraseAgentImpl userAgent = (PassphraseAgentImpl) l2pNode.getAgent(userId);
 			userAgent.unlock(password);

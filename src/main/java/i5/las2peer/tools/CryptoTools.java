@@ -526,6 +526,20 @@ public class CryptoTools {
 		}
 	}
 
+	public static boolean isAgentID(String idString) {
+		if (idString == null || idString.isEmpty() || idString.getBytes().length / 2 * 8 != 512) {
+			return false;
+		} else {
+			// check if idString is a hex string
+			for (int i = 1; i < idString.length(); i++) {
+				if (Character.digit(idString.charAt(i), 16) == -1) {
+					return false;
+				}
+			}
+			return true;
+		}
+	}
+
 	/*** statics **** */
 	private static KeyGenerator keyGeneratorSymmetric = null;
 	private static KeyPairGenerator keyGeneratorAsymmetric = null;
