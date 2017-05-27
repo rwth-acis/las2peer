@@ -320,7 +320,7 @@ public class EnvelopeVersion implements Serializable, XmlAble {
 		StringBuilder result = new StringBuilder();
 		try {
 			result.append("<las2peer:envelope identifier=\"" + identifier + "\" version=\"" + version
-					+ "\" authorPubKey=\"" + CryptoTools.publicKeyToString(authorPubKey) + "\">\n");
+					+ "\" authorPubKey=\"" + CryptoTools.publicKeyToBase64String(authorPubKey) + "\">\n");
 		} catch (CryptoException e) {
 			throw new SerializationException("Could not convert author public key to String", e);
 		}
@@ -330,7 +330,7 @@ public class EnvelopeVersion implements Serializable, XmlAble {
 				"\t<las2peer:keys encoding=\"base64\" encryption=\"" + CryptoTools.getAsymmetricAlgorithm() + "\">\n");
 		for (Entry<PublicKey, byte[]> readerKey : readerKeys.entrySet()) {
 			try {
-				result.append("\t\t<las2peer:key public=\"" + CryptoTools.publicKeyToString(readerKey.getKey()) + "\">"
+				result.append("\t\t<las2peer:key public=\"" + CryptoTools.publicKeyToBase64String(readerKey.getKey()) + "\">"
 						+ Base64.getEncoder().encodeToString(readerKey.getValue()) + "</las2peer:key>\n");
 			} catch (CryptoException e) {
 				throw new SerializationException("Could not encode key as string", e);

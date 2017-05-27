@@ -457,8 +457,8 @@ public class CryptoTools {
 		return encryptSymmetric(SerializeTools.serialize(plainData), key);
 	}
 
-	public static PrivateKey privateKeyToString(String key64) throws CryptoException {
-		byte[] clear = Base64.getDecoder().decode(key64);
+	public static PrivateKey privateKeyToString(String base64) throws CryptoException {
+		byte[] clear = Base64.getDecoder().decode(base64);
 		PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(clear);
 		try {
 			KeyFactory fact = KeyFactory.getInstance(asymmetricAlgorithm);
@@ -481,7 +481,7 @@ public class CryptoTools {
 		}
 	}
 
-	public static String privateKeyToString(PrivateKey priv) throws CryptoException {
+	public static String privateKeyToBase64String(PrivateKey priv) throws CryptoException {
 		try {
 			KeyFactory fact = KeyFactory.getInstance(asymmetricAlgorithm);
 			PKCS8EncodedKeySpec spec = fact.getKeySpec(priv, PKCS8EncodedKeySpec.class);
@@ -494,7 +494,7 @@ public class CryptoTools {
 		}
 	}
 
-	public static String publicKeyToString(PublicKey publ) throws CryptoException {
+	public static String publicKeyToBase64String(PublicKey publ) throws CryptoException {
 		try {
 			KeyFactory fact = KeyFactory.getInstance(asymmetricAlgorithm);
 			X509EncodedKeySpec spec = fact.getKeySpec(publ, X509EncodedKeySpec.class);
