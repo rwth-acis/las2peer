@@ -518,7 +518,7 @@ public class L2pNodeLauncher {
 	 * @param parameters
 	 * @return
 	 * @throws ServiceInvocationException
-	 * @throws AgentLockedException 
+	 * @throws AgentLockedException
 	 */
 	private Serializable invoke(String serviceIdentifier, String serviceMethod, Serializable... parameters)
 			throws ServiceInvocationException, AgentLockedException {
@@ -709,7 +709,8 @@ public class L2pNodeLauncher {
 	 * @throws AgentAccessDeniedException
 	 * @throws AgentOperationFailedException 
 	 */
-	public void unlockAgent(PassphraseAgentImpl agent, String passphrase) throws AgentAccessDeniedException, AgentOperationFailedException {
+	public void unlockAgent(PassphraseAgentImpl agent, String passphrase)
+			throws AgentAccessDeniedException, AgentOperationFailedException {
 		agent.unlock(passphrase);
 	}
 

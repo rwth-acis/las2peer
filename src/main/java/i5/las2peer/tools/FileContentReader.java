@@ -34,8 +34,9 @@ public class FileContentReader {
 	 * @throws IOException
 	 */
 	public static String read(File file) throws IOException {
-		if (!file.isFile())
+		if (!file.isFile()) {
 			throw new IOException("File " + file.getName() + " does not exist");
+		}
 
 		return read(new FileInputStream(file));
 	}

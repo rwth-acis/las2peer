@@ -99,7 +99,6 @@ public class AgentContext implements AgentStorage {
 			} catch (AgentAccessDeniedException | AgentLockedException e) {
 				throw new IllegalStateException("Cannot unlock group!", e);
 			}
-			
 		} else {
 			for (String memberId : group.getMemberList()) {
 				try {

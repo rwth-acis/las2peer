@@ -58,15 +58,16 @@ public interface GroupAgent extends Agent {
 	 * @throws AgentOperationFailedException If the agent is corrupted.
 	 * @throws AgentLockedException If agent is locked.
 	 */
-	public void unlock(Agent agent) throws AgentAccessDeniedException, AgentOperationFailedException, AgentLockedException;
-	
+	public void unlock(Agent agent)
+			throws AgentAccessDeniedException, AgentOperationFailedException, AgentLockedException;
+
 	/**
 	 * Get the number of direct group members.
 	 * 
 	 * @return The group size.
 	 */
 	public int getSize();
-	
+
 	/**
 	 * Get a list of direct group members.
 	 * 

@@ -67,7 +67,7 @@ public abstract class AgentImpl implements Agent, XmlAble, Cloneable, MessageRec
 
 		try {
 			encryptPrivateKey(key);
-		} catch(AgentLockedException e) {
+		} catch (AgentLockedException e) {
 			throw new IllegalStateException(e);
 		}
 		lockPrivateKey();
@@ -114,7 +114,7 @@ public abstract class AgentImpl implements Agent, XmlAble, Cloneable, MessageRec
 	 * 
 	 * @param key A key that is used to encrypt the agents private key.
 	 * @throws L2pSecurityException If an issue with the given key occurs.
-	 * @throws AgentLockedException 
+	 * @throws AgentLockedException
 	 */
 	public void encryptPrivateKey(SecretKey key) throws L2pSecurityException, AgentLockedException {
 		if (isLocked()) {
@@ -139,6 +139,7 @@ public abstract class AgentImpl implements Agent, XmlAble, Cloneable, MessageRec
 		return privateKey == null;
 	}
 
+	@Override
 	public String getIdentifier() {
 		return CryptoTools.publicKeyToSHA512(getPublicKey());
 	}
