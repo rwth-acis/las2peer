@@ -57,9 +57,9 @@ public abstract class AgentImpl implements Agent, XmlAble, Cloneable, MessageRec
 	/**
 	 * Creates a new agent.
 	 * 
-	 * @param pair
-	 * @param key
-	 * @throws L2pSecurityException
+	 * @param pair The private public keypair to use for this agent
+	 * @param key The secret key to encrypt the private key
+	 * @throws L2pSecurityException If the private key can not be encrypted
 	 */
 	protected AgentImpl(KeyPair pair, SecretKey key) throws L2pSecurityException {
 		this.publicKey = pair.getPublic();
@@ -76,8 +76,8 @@ public abstract class AgentImpl implements Agent, XmlAble, Cloneable, MessageRec
 	/**
 	 * Creates a new agent.
 	 * 
-	 * @param publicKey
-	 * @param encryptedPrivate
+	 * @param publicKey The public key to use for this agent
+	 * @param encryptedPrivate The encrypted private key to use for this agent
 	 */
 	protected AgentImpl(PublicKey publicKey, byte[] encryptedPrivate) {
 		this.publicKey = publicKey;
@@ -96,8 +96,8 @@ public abstract class AgentImpl implements Agent, XmlAble, Cloneable, MessageRec
 	 * Unlocks the private key.
 	 * 
 	 * @param key A key that is used to unlock the agents private key.
-	 * @throws AgentOperationFailedException 
-	 * @throws AgentAccessDeniedException 
+	 * @throws AgentOperationFailedException If the agent's private key can not be deserialized.
+	 * @throws AgentAccessDeniedException
 	 */
 	public void unlockPrivateKey(SecretKey key) throws AgentOperationFailedException, AgentAccessDeniedException {
 		try {
@@ -114,7 +114,7 @@ public abstract class AgentImpl implements Agent, XmlAble, Cloneable, MessageRec
 	 * 
 	 * @param key A key that is used to encrypt the agents private key.
 	 * @throws L2pSecurityException If an issue with the given key occurs.
-	 * @throws AgentLockedException
+	 * @throws AgentLockedException If the given agent is not unlocked
 	 */
 	public void encryptPrivateKey(SecretKey key) throws L2pSecurityException, AgentLockedException {
 		if (isLocked()) {
@@ -183,7 +183,7 @@ public abstract class AgentImpl implements Agent, XmlAble, Cloneable, MessageRec
 	 * @return Returns a {@link javax.crypto.SecretKey} decrypted from the crypted input and the agent's private key
 	 * @throws AgentLockedException the private key has not been unlocked yet
 	 * @throws CryptoException If an issue occurs with decryption.
-	 * @throws SerializationException
+	 * @throws SerializationException If an issue occurs with deserializing the given and decrypted data.
 	 */
 	public SecretKey decryptSymmetricKey(byte[] crypted)
 			throws AgentLockedException, SerializationException, CryptoException {
@@ -209,8 +209,8 @@ public abstract class AgentImpl implements Agent, XmlAble, Cloneable, MessageRec
 	/**
 	 * Uses the {@link i5.las2peer.tools.CryptoTools} to sign the passed data with the agent's private key.
 	 * 
-	 * @param plainData
-	 * @return a signed version of the input
+	 * @param plainData The plain data to sign
+	 * @return Returns a signed version of the input
 	 * @throws AgentLockedException the private key has not been unlocked yet
 	 * @throws CryptoException
 	 */

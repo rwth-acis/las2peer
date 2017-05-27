@@ -55,7 +55,7 @@ public interface GroupAgent extends Agent {
 	 * 
 	 * @param agent A direct member of this group, must be unlocked.
 	 * @throws AgentAccessDeniedException If the given agent is not a direct member of this group.
-	 * @throws AgentOperationFailedException If the agent is corrupted.
+	 * @throws AgentOperationFailedException If the agent's private key can not be deserialized.
 	 * @throws AgentLockedException If agent is locked.
 	 */
 	public void unlock(Agent agent)

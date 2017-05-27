@@ -34,7 +34,7 @@ public interface Envelope {
 	 * 
 	 * After modifying the envelope, it should be stored using the {@link Context#storeEnvelope}.
 	 * 
-	 * @param content
+	 * @param content The content to set
 	 */
 	public void setContent(Serializable content);
 

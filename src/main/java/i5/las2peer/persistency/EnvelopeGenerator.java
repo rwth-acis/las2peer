@@ -44,10 +44,10 @@ public class EnvelopeGenerator {
 	/**
 	 * Loads an agent from the given XML file name.
 	 * 
-	 * @param filename
-	 * @return a PassphraseAgent
-	 * @throws IOException
-	 * @throws MalformedXMLException
+	 * @param filename The XML filename to load the agent
+	 * @return Returns a PassphraseAgent instance
+	 * @throws IOException If the file could not be read
+	 * @throws MalformedXMLException If the agent's XML representation is malformed
 	 */
 	public static PassphraseAgentImpl loadAgent(String filename) throws MalformedXMLException, IOException {
 		return (PassphraseAgentImpl) AgentImpl.createFromXml(FileContentReader.read(filename));
@@ -56,16 +56,14 @@ public class EnvelopeGenerator {
 	/**
 	 * Command line script for generating a simple envelope.
 	 * 
-	 * Arguments:
-	 * <ol>
-	 * <li>xml file with owner agent</li>
-	 * <li>passphrase of the owner for unlocking the key</li>
-	 * <li>name of the (serializable or XmlAble) class to be nested in the envelope<br>
-	 * needs a string constructor</li>
-	 * <li>String constructor value</li>
-	 * </ol>
-	 * 
 	 * @param argv
+	 *            <ol>
+	 *            <li>xml file with owner agent</li>
+	 *            <li>passphrase of the owner for unlocking the key</li>
+	 *            <li>name of the (serializable or XmlAble) class to be nested in the envelope<br>
+	 *            needs a string constructor</li>
+	 *            <li>String constructor value</li>
+	 *            </ol>
 	 */
 	public static void main(String argv[]) {
 		if (argv.length != 4) {

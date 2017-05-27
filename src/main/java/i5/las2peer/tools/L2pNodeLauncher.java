@@ -707,7 +707,7 @@ public class L2pNodeLauncher {
 	 * @param agent
 	 * @param passphrase
 	 * @throws AgentAccessDeniedException
-	 * @throws AgentOperationFailedException 
+	 * @throws AgentOperationFailedException If the agent's private key can not be deserialized.
 	 */
 	public void unlockAgent(PassphraseAgentImpl agent, String passphrase)
 			throws AgentAccessDeniedException, AgentOperationFailedException {

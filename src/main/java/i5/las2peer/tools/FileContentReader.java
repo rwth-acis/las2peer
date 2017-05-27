@@ -16,10 +16,10 @@ import java.io.InputStreamReader;
 public class FileContentReader {
 
 	/**
-	 * get the contents of a file as String
+	 * Gets the content of a file as String
 	 * 
-	 * @param filename
-	 * @return contents of the given file as String
+	 * @param filename The filename to read from
+	 * @return Returns the content of the given file as String
 	 * @throws IOException
 	 */
 	public static String read(String filename) throws IOException {

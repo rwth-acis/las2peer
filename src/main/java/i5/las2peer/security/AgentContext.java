@@ -4,9 +4,9 @@ import java.util.Date;
 import java.util.Hashtable;
 
 import i5.las2peer.api.security.Agent;
-import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
+import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.api.security.PassphraseAgent;
@@ -30,8 +30,8 @@ public class AgentContext implements AgentStorage {
 	/**
 	 * Creates a new (local) context.
 	 * 
-	 * @param mainAgent
-	 * @param localNode
+	 * @param mainAgent The main agent for this context.
+	 * @param localNode The node this context is bound to.
 	 */
 	public AgentContext(Node localNode, AgentImpl mainAgent) {
 		this.agent = mainAgent;
@@ -46,7 +46,7 @@ public class AgentContext implements AgentStorage {
 	 * 
 	 * @param passphrase Passphrase of the agent
 	 * @throws AgentAccessDeniedException If the passphrase is invalid.
-	 * @throws AgentOperationFailedException 
+	 * @throws AgentOperationFailedException If the agent's private key can not be deserialized.
 	 */
 	public void unlockMainAgent(String passphrase) throws AgentAccessDeniedException, AgentOperationFailedException {
 		if (this.agent.isLocked() && this.agent instanceof PassphraseAgent) {
@@ -68,9 +68,9 @@ public class AgentContext implements AgentStorage {
 	 * 
 	 * @param groupId The group id to fetch and unlock
 	 * @return the unlocked GroupAgent of the given id
-	 * @throws AgentAccessDeniedException
-	 * @throws AgentNotFoundException
-	 * @throws AgentOperationFailedException
+	 * @throws AgentAccessDeniedException If the group agent can not be unlocked
+	 * @throws AgentNotFoundException If the group agent could not be found or is not a group agent
+	 * @throws AgentOperationFailedException If the agent's keys can not be deserialized
 	 */
 	public GroupAgentImpl requestGroupAgent(String groupId)
 			throws AgentAccessDeniedException, AgentNotFoundException, AgentOperationFailedException {
