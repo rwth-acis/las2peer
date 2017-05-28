@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -111,7 +112,22 @@ public class MiniClient {
 				return response;
 			}
 
-			BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+			Map<String, List<String>> responseMap = connection.getHeaderFields();
+			for (String key : responseMap.keySet()) {
+				StringBuilder sb = new StringBuilder();
+				List<String> values = responseMap.get(key);
+				for (int i = 0; i < values.size(); i++) {
+					Object o = values.get(i);
+					sb.append(" " + o);
+				}
+				if (key == null) {
+					key = "head";
+				}
+				response.addHeader(key.trim(), sb.toString().trim());
+			}
+
+			// TODO use charset from content-type header param
+			BufferedReader rd = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
 			StringBuilder responseText = new StringBuilder();
 			String line;
 			while ((line = rd.readLine()) != null) {
@@ -119,26 +135,8 @@ public class MiniClient {
 				responseText.append('\r');
 			}
 			response.setResponse(responseText.toString());
-
-			Map<String, List<String>> responseMap = connection.getHeaderFields();
-			StringBuilder sb = new StringBuilder();
-			for (String key : responseMap.keySet()) {
-				sb.setLength(0);
-
-				List<String> values = responseMap.get(key);
-				for (int i = 0; i < values.size(); i++) {
-					Object o = values.get(i);
-					sb.append(" " + o);
-				}
-
-				if (key == null) {
-					key = "head";
-				}
-
-				response.addHeader(key.trim(), sb.toString().trim());
-			}
-
 			rd.close();
+
 			return response;
 
 		} catch (Exception e) {
