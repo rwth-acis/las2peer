@@ -24,6 +24,7 @@ public class TestService extends RESTService {
 
 	@Path("/")
 	public static class Resource {
+
 		@GET
 		@Path("/ok")
 		public String getOk() {
@@ -40,7 +41,7 @@ public class TestService extends RESTService {
 		}
 
 		@GET
-		@Path("empty")
+		@Path("/empty")
 		public Response getEmptyResponse() {
 			return Response.ok().build();
 		}
@@ -68,18 +69,19 @@ public class TestService extends RESTService {
 		}
 
 		@GET
-		@Path("encoding")
+		@Path("/encoding")
 		@Produces(MediaType.TEXT_PLAIN + ";charset=utf-8")
 		public String getSmiley() {
 			return "☺";
 		}
 
 		@POST
-		@Path("body")
+		@Path("/body")
 		@Consumes("text/plain")
 		public String getBody(String body) {
 			return body;
 		}
+
 	}
 
 }

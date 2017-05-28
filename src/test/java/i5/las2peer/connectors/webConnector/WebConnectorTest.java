@@ -2,6 +2,7 @@ package i5.las2peer.connectors.webConnector;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -430,8 +431,14 @@ public class WebConnectorTest {
 			c.setLogin(testAgent.getIdentifier(), testPass);
 			ClientResponse result = c.sendRequest("GET", "test/encoding", "");
 			assertEquals(200, result.getHttpCode());
-			assertTrue(result.getResponse().contains("☺"));
-			assertTrue(result.getHeader(HttpHeaders.CONTENT_TYPE).toLowerCase().contains("charset=utf-8"));
+			final String header = result.getHeader(HttpHeaders.CONTENT_TYPE);
+			System.out.println("header is: " + header);
+			assertNotNull(header);
+			assertTrue(header.toLowerCase().contains("charset=utf-8"));
+			final String response = result.getResponse();
+			System.out.println("response is: " + response);
+			assertNotNull(response);
+			assertTrue(response.contains("☺"));
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("Exception: " + e);
