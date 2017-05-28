@@ -125,6 +125,9 @@ public class SimpleTools {
 	}
 
 	public static byte[] toByteArray(InputStream is) throws IOException {
+		if (is == null) {
+			throw new IllegalArgumentException("Given input stream must not be null");
+		}
 		ByteArrayOutputStream data = new ByteArrayOutputStream();
 		int nRead;
 		byte[] buffer = new byte[8096];
