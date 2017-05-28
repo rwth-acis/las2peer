@@ -7,6 +7,7 @@ public class ClientResponse {
 	String response = "";
 	HashMap<String, String> headers = new HashMap<>();
 	int httpCode;
+	private byte[] rawResponse;
 
 	public ClientResponse(int httpCode) {
 		this.httpCode = httpCode;
@@ -36,6 +37,14 @@ public class ClientResponse {
 	public String getHeader(String name) {
 		// HTTP headers are case insensitive
 		return headers.get(name.toLowerCase());
+	}
+
+	public byte[] getRawResponse() {
+		return rawResponse;
+	}
+
+	public void setRawResponse(byte[] rawResponse) {
+		this.rawResponse = rawResponse;
 	}
 
 }

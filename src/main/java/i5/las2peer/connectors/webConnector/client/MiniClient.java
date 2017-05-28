@@ -1,6 +1,7 @@
 package i5.las2peer.connectors.webConnector.client;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -15,6 +16,7 @@ import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
 
 import i5.las2peer.connectors.webConnector.WebConnector;
+import i5.las2peer.tools.SimpleTools;
 
 /**
  * Very simple client to communicate with the las2peer web connector
@@ -126,8 +128,10 @@ public class MiniClient {
 				response.addHeader(key.trim(), sb.toString().trim());
 			}
 
+			response.setRawResponse(SimpleTools.toByteArray(is));
 			// TODO use charset from content-type header param
-			BufferedReader rd = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+			BufferedReader rd = new BufferedReader(
+					new InputStreamReader(new ByteArrayInputStream(response.getRawResponse()), StandardCharsets.UTF_8));
 			StringBuilder responseText = new StringBuilder();
 			String line;
 			while ((line = rd.readLine()) != null) {
