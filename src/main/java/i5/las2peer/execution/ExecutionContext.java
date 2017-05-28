@@ -256,16 +256,16 @@ public class ExecutionContext implements Context {
 	public boolean hasAccess(String agentId) throws AgentNotFoundException {
 		return callerContext.hasAccess(agentId);
 	}
-	
+
 	@Override
-	public String getUserAgentIdentifierByLoginName(String loginName) throws AgentNotFoundException,
-			AgentOperationFailedException {
+	public String getUserAgentIdentifierByLoginName(String loginName)
+			throws AgentNotFoundException, AgentOperationFailedException {
 		return node.getAgentIdForLogin(loginName);
 	}
 
 	@Override
-	public String getUserAgentIdentifierByEmail(String emailAddress) throws AgentNotFoundException,
-			AgentOperationFailedException {
+	public String getUserAgentIdentifierByEmail(String emailAddress)
+			throws AgentNotFoundException, AgentOperationFailedException {
 		return node.getAgentIdForEmail(emailAddress);
 	}
 
@@ -322,29 +322,29 @@ public class ExecutionContext implements Context {
 	public void storeEnvelope(Envelope env, EnvelopeCollisionHandler handler, Agent using)
 			throws EnvelopeAccessDeniedException, EnvelopeOperationFailedException {
 		// TODO API collision handler
-
 		EnvelopeImpl envelope = (EnvelopeImpl) env;
-
-		Set<PublicKey> keys;
-
-		if (envelope.getRevokeAllReaders()) {
-			keys = new HashSet<>();
-		} else {
+		Set<PublicKey> keys = new HashSet<>();
+		if (!envelope.getRevokeAllReaders() && envelope.getVersion() != null) {
 			keys = envelope.getVersion().getReaderKeys().keySet();
+			for (AgentImpl a : envelope.getReaderToRevoke()) {
+				keys.remove(a.getPublicKey());
+			}
+			for (AgentImpl a : envelope.getReaderToAdd()) {
+				keys.add(a.getPublicKey());
+			}
 		}
 
-		for (AgentImpl a : envelope.getReaderToRevoke()) {
-			keys.remove(a.getPublicKey());
-		}
-		for (AgentImpl a : envelope.getReaderToAdd()) {
-			keys.add(a.getPublicKey());
-		}
-
-		EnvelopeVersion version;
 		try {
+			EnvelopeVersion version;
 			AgentImpl signing = (AgentImpl) requestAgent(envelope.getSigningAgentId());
-			version = node.createEnvelope(envelope.getVersion(), envelope.getContent(), keys);
+			if (envelope.getVersion() != null) {
+				version = node.createEnvelope(envelope.getVersion(), envelope.getContent(), keys);
+			} else {
+				version = node.createEnvelope(envelope.getIdentifier(), signing.getPublicKey(), envelope.getContent(),
+						keys);
+			}
 			node.storeEnvelope(version, signing);
+			envelope.setVersion(version);
 		} catch (IllegalArgumentException | SerializationException e) {
 			throw new EnvelopeOperationFailedException(e);
 		} catch (AgentAccessDeniedException | AgentNotFoundException | EnvelopeAccessDeniedException
@@ -353,9 +353,6 @@ public class ExecutionContext implements Context {
 		} catch (EnvelopeException | AgentException e) {
 			throw new EnvelopeOperationFailedException(e);
 		}
-
-		envelope.setVersion(version);
-
 	}
 
 	@Override
