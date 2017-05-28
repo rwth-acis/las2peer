@@ -114,7 +114,7 @@ public interface Context {
 	 * @param agentId The id of the agent to fetch.
 	 * @param using The agent used to unlock the fetched agent.
 	 * @return An unlocked instance of the requested agent.
-	 * @throws AgentAccessDeniedException If the given agent cannot access hte fetched agent.
+	 * @throws AgentAccessDeniedException If the given agent cannot access the fetched agent.
 	 * @throws AgentNotFoundException If the specified agent cannot be found.
 	 * @throws AgentOperationFailedException If an error occurred on the node.
 	 */
@@ -126,7 +126,7 @@ public interface Context {
 	 * 
 	 * @param agentId The id of the agent to fetch.
 	 * @return An unlocked instance of the requested agent.
-	 * @throws AgentAccessDeniedException If the main agent cannot access hte fetched agent.
+	 * @throws AgentAccessDeniedException If the main agent cannot access the fetched agent.
 	 * @throws AgentNotFoundException If the specified agent cannot be found.
 	 * @throws AgentOperationFailedException If an error occurred on the node.
 	 */
