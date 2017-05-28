@@ -41,6 +41,7 @@ import i5.las2peer.communication.ListMethodsContent;
 import i5.las2peer.communication.Message;
 import i5.las2peer.connectors.Connector;
 import i5.las2peer.connectors.ConnectorException;
+import i5.las2peer.connectors.webConnector.WebConnector;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.p2p.AgentAlreadyRegisteredException;
 import i5.las2peer.p2p.AgentNotRegisteredException;
@@ -324,7 +325,7 @@ public class L2pNodeLauncher {
 	 * Start the Web-Connector.
 	 */
 	public void startWebConnector() {
-		startConnector("i5.las2peer.webConnector.WebConnector");
+		startConnector(WebConnector.class.getCanonicalName().toString());
 	}
 
 	/**
@@ -354,7 +355,7 @@ public class L2pNodeLauncher {
 	 * Stops the Web-Connector.
 	 */
 	public void stopWebConnector() {
-		stopConnector("i5.las2peer.webConnector.WebConnector");
+		stopConnector(WebConnector.class.getCanonicalName().toString());
 	}
 
 	/**
