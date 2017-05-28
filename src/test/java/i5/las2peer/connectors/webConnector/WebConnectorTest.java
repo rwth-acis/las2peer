@@ -1,6 +1,7 @@
 package i5.las2peer.connectors.webConnector;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 import java.io.PrintStream;
 import java.net.HttpURLConnection;
 import java.util.Base64;
@@ -29,6 +30,7 @@ import i5.las2peer.security.GroupAgentImpl;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.testing.MockAgentFactory;
+import i5.las2peer.tools.SimpleTools;
 
 public class WebConnectorTest {
 
@@ -485,4 +487,22 @@ public class WebConnectorTest {
 			Assert.fail("Exception: " + e);
 		}
 	}
+
+	@Test
+	public void testFavicon() {
+		try {
+			MiniClient c = new MiniClient();
+			c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
+			c.setLogin(testAgent.getIdentifier(), testPass);
+
+			ClientResponse result = c.sendRequest("GET", "favicon.ico", "");
+			Assert.assertEquals(200, result.getHttpCode());
+			Assert.assertArrayEquals(SimpleTools.toByteArray(new FileInputStream("etc/favicon.ico")),
+					result.getRawResponse());
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail("Exception: " + e);
+		}
+	}
+
 }

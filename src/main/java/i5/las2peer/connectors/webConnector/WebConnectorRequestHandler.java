@@ -1,6 +1,7 @@
 package i5.las2peer.connectors.webConnector;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -347,9 +348,12 @@ public class WebConnectorRequestHandler implements HttpHandler {
 	private boolean invoke(PassphraseAgentImpl agent, HttpExchange exchange) {
 		String requestPath = exchange.getRequestURI().getPath();
 
-		// welcome page
-		if (requestPath.equalsIgnoreCase("/")) {
+		// filter special pages
+		if (requestPath.equalsIgnoreCase("/")) { // welcome page
 			sendStringResponse(exchange, HttpURLConnection.HTTP_OK, "Welcome to las2peer!");
+			return true;
+		} else if (requestPath.equalsIgnoreCase("/favicon.ico")) { // favicon
+			sendFaviconResponse(exchange);
 			return true;
 		}
 
@@ -412,6 +416,20 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			return invokeSwagger(exchange, mediator, requiredService, basePath);
 		} else {
 			return invokeRestService(exchange, mediator, requiredService, basePath);
+		}
+	}
+
+	private void sendFaviconResponse(HttpExchange exchange) {
+		try {
+			exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
+			OutputStream os = exchange.getResponseBody();
+			InputStream is = new FileInputStream("etc/favicon.ico");
+			if (is != null) {
+				os.write(SimpleTools.toByteArray(is));
+			}
+			os.close();
+		} catch (IOException e) {
+			connector.logError(e.toString(), e);
 		}
 	}
 

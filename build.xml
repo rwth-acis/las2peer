@@ -331,6 +331,7 @@
 				<exclude name="i5/las2peer/testing/services/**" />
 			</fileset>
 			<fileset file="etc/las2peer.policy" />
+			<fileset file="etc/favicon.ico" />
 			<fileset dir="${basedir}/resources" />
 			<manifest>
 				<attribute name="Main-Class" value="${main-class}"/>
