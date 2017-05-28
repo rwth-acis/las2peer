@@ -3,9 +3,9 @@ package i5.las2peer.connectors.nodeAdminConnector.multipart;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-public class FormDataPart {
+import javax.ws.rs.core.HttpHeaders;
 
-	public static final String HEADER_CONTENT_TYPE = "Content-Type";
+public class FormDataPart {
 
 	private final Map<String, FormDataHeader> headers;
 	private final byte[] content;
@@ -52,7 +52,7 @@ public class FormDataPart {
 	 * @throws MalformedFormDataException If the content type header has more than one parameter.
 	 */
 	public String getContentType() throws MalformedFormDataException {
-		FormDataHeader contentTypeHeader = getHeader(HEADER_CONTENT_TYPE);
+		FormDataHeader contentTypeHeader = getHeader(HttpHeaders.CONTENT_TYPE);
 		if (contentTypeHeader != null) {
 			// there should be only one parameter for this header
 			if (contentTypeHeader.countParameter() > 1) {

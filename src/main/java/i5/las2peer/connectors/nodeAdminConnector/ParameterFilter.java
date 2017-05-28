@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.ws.rs.core.HttpHeaders;
+
 import com.sun.net.httpserver.Filter;
 import com.sun.net.httpserver.HttpExchange;
 
@@ -48,7 +50,7 @@ public class ParameterFilter extends Filter {
 
 	private void parsePostParameters(HttpExchange exchange, ParameterMap parameters) throws IOException {
 		if ("post".equalsIgnoreCase(exchange.getRequestMethod())) {
-			String contentType = exchange.getRequestHeaders().getFirst("Content-Type");
+			String contentType = exchange.getRequestHeaders().getFirst(HttpHeaders.CONTENT_TYPE);
 			if (MultipartHelper.MULTIPART_BOUNDARY_PATTERN.matcher(contentType).find()) {
 				InputStream is = exchange.getRequestBody();
 				ByteArrayOutputStream buffer = new ByteArrayOutputStream();
@@ -68,7 +70,7 @@ public class ParameterFilter extends Filter {
 				if (overflow) {
 					byte[] content = ("Given request body exceeds limit of " + MAX_REQUEST_BODY_SIZE + " bytes")
 							.getBytes(StandardCharsets.UTF_8);
-					exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=utf-8");
+					exchange.getResponseHeaders().set(HttpHeaders.CONTENT_TYPE, "text/plain; charset=utf-8");
 					exchange.sendResponseHeaders(HttpURLConnection.HTTP_ENTITY_TOO_LARGE, content.length);
 					OutputStream os = exchange.getResponseBody();
 					os.write(content);

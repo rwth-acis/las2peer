@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.UriBuilder;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -658,7 +659,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 
 	private void sendStringResponse(HttpExchange exchange, int responseCode, String response) {
 		byte[] content = response.getBytes();
-		exchange.getResponseHeaders().set("content-type", "text/plain");
+		exchange.getResponseHeaders().set(HttpHeaders.CONTENT_TYPE, "text/plain");
 		try {
 			sendResponseHeaders(exchange, responseCode, content.length);
 			OutputStream os = exchange.getResponseBody();

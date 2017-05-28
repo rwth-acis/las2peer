@@ -15,6 +15,8 @@ import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 import java.util.logging.Level;
 
+import javax.ws.rs.core.HttpHeaders;
+
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupDir;
 
@@ -343,7 +345,7 @@ public class FrontendHandler extends AbstractHandler {
 	private void handleAuthenticateRequest(HttpExchange exchange, PastryNodeImpl node, AgentImpl activeAgent,
 			ST template) throws Exception {
 		ParameterMap parameters = (ParameterMap) exchange.getAttribute("parameters");
-		String contentType = exchange.getRequestHeaders().getFirst("Content-Type");
+		String contentType = exchange.getRequestHeaders().getFirst(HttpHeaders.CONTENT_TYPE);
 		if (contentType == null || contentType.isEmpty()) {
 			sendStringResponse(exchange, HttpURLConnection.HTTP_BAD_REQUEST, "text/plain", "400 (no content type)\n");
 		} else {

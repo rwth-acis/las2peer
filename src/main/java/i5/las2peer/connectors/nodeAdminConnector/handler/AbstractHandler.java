@@ -9,6 +9,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 
+import javax.ws.rs.core.HttpHeaders;
+
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -46,7 +48,7 @@ public abstract class AbstractHandler implements HttpHandler {
 	protected void sendStringResponse(HttpExchange exchange, int responseCode, String mime, String response) {
 		try {
 			byte[] content = response.getBytes(StandardCharsets.UTF_8);
-			exchange.getResponseHeaders().set("Content-Type", mime + "; charset=utf-8");
+			exchange.getResponseHeaders().set(HttpHeaders.CONTENT_TYPE, mime + "; charset=utf-8");
 			exchange.sendResponseHeaders(responseCode, content.length);
 			OutputStream os = exchange.getResponseBody();
 			os.write(content);

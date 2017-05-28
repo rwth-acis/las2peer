@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.core.HttpHeaders;
+
 import i5.las2peer.connectors.webConnector.WebConnector;
 
 /**
@@ -64,8 +66,8 @@ public class MiniClient {
 		if (content.length() < WebConnector.DEFAULT_MAX_REQUEST_BODY_SIZE) {
 			strContent = content;
 		}
-		System.out.println("Request: " + method + " URI: " + uri + " Content: " + strContent + " Content-type: "
-				+ contentType + " accept: " + accept + " headers: " + headers.size());
+		System.out.println("Request: " + method + " URI: " + uri + " Content: " + strContent + " "
+				+ HttpHeaders.CONTENT_TYPE + ": " + contentType + " accept: " + accept + " headers: " + headers.size());
 		HttpURLConnection connection = null;
 		ClientResponse response;
 		try {
@@ -76,7 +78,7 @@ public class MiniClient {
 			if (authorization != null && authorization.length() > 0) {
 				connection.setRequestProperty("Authorization", "Basic " + authorization);
 			}
-			connection.setRequestProperty("Content-Type", contentType);
+			connection.setRequestProperty(HttpHeaders.CONTENT_TYPE, contentType);
 			connection.setRequestProperty("Accept", accept);
 			connection.setRequestProperty("Content-Length", Integer.toString(content.getBytes().length));
 
