@@ -153,14 +153,16 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			// get OIDC parameters from headers
 			token = exchange.getRequestHeaders().getFirst(ACCESS_TOKEN_KEY);
 			if (exchange.getRequestHeaders().containsKey(OIDC_PROVIDER_KEY)) {
-				oidcProviderURI = URLDecoder.decode(exchange.getRequestHeaders().getFirst(OIDC_PROVIDER_KEY), "UTF-8");
+				oidcProviderURI = URLDecoder.decode(exchange.getRequestHeaders().getFirst(OIDC_PROVIDER_KEY),
+						StandardCharsets.UTF_8.name());
 			}
 		} else if (exchange.getRequestHeaders().containsKey(AUTHENTICATION_FIELD)
 				&& exchange.getRequestHeaders().getFirst(AUTHENTICATION_FIELD).toLowerCase().startsWith("bearer ")) {
 			// get BEARER token from Authentication field
 			token = exchange.getRequestHeaders().getFirst(AUTHENTICATION_FIELD).substring("BEARER ".length());
 			if (exchange.getRequestHeaders().containsKey(OIDC_PROVIDER_KEY)) {
-				oidcProviderURI = URLDecoder.decode(exchange.getRequestHeaders().getFirst(OIDC_PROVIDER_KEY), "UTF-8");
+				oidcProviderURI = URLDecoder.decode(exchange.getRequestHeaders().getFirst(OIDC_PROVIDER_KEY),
+						StandardCharsets.UTF_8.name());
 			}
 		} else { // get OIDC parameters from GET values
 			String[] params = exchange.getRequestURI().getRawQuery().split("&");
@@ -169,7 +171,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 				if (keyval[0].equalsIgnoreCase(ACCESS_TOKEN_KEY)) {
 					token = keyval[1];
 				} else if (keyval[0].equalsIgnoreCase(OIDC_PROVIDER_KEY)) {
-					oidcProviderURI = URLDecoder.decode(keyval[1], "UTF-8");
+					oidcProviderURI = URLDecoder.decode(keyval[1], StandardCharsets.UTF_8.name());
 				}
 			}
 		}

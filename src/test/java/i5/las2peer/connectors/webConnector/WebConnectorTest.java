@@ -8,6 +8,7 @@ import static org.junit.Assert.fail;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.net.HttpURLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Random;
@@ -429,7 +430,8 @@ public class WebConnectorTest {
 			ClientResponse result = c.sendRequest("GET", "test/encoding", "");
 			assertEquals(200, result.getHttpCode());
 			assertTrue(result.getResponse().contains("☺"));
-			assertTrue(result.getHeaders().get("content-type").contains("charset=utf-8"));
+			assertTrue(result.getHeaders().get("content-type").toLowerCase()
+					.contains("charset=utf-8"));
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("Exception: " + e);
