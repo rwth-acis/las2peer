@@ -1,11 +1,5 @@
 package i5.las2peer.connectors.webConnector;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.net.HttpURLConnection;
@@ -16,6 +10,7 @@ import java.util.Random;
 import javax.ws.rs.core.HttpHeaders;
 
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -138,9 +133,9 @@ public class WebConnectorTest {
 			c.setLogin(testAgent.getIdentifier(), testPass);
 
 			ClientResponse response = c.sendRequest("GET", "service1/asdag", "");
-			assertEquals(404, response.getHttpCode());
+			Assert.assertEquals(404, response.getHttpCode());
 		} catch (Exception e) {
-			fail("Not existing service caused wrong exception");
+			Assert.fail("Not existing service caused wrong exception");
 		}
 	}
 
@@ -153,10 +148,10 @@ public class WebConnectorTest {
 		try {
 			c.setLogin(testAgent.getIdentifier(), testPass);
 			ClientResponse result = c.sendRequest("get", "test/ok", "");
-			assertEquals("OK", result.getResponse().trim());
+			Assert.assertEquals("OK", result.getResponse().trim());
 		} catch (Exception e) {
 			e.printStackTrace();
-			fail("Exception: " + e);
+			Assert.fail("Exception: " + e);
 		}
 
 		// correct, name based
@@ -164,10 +159,10 @@ public class WebConnectorTest {
 			c.setLogin("adam", testPass);
 
 			ClientResponse result = c.sendRequest("GET", "test/ok", "");
-			assertEquals("OK", result.getResponse().trim());
+			Assert.assertEquals("OK", result.getResponse().trim());
 		} catch (Exception e) {
 			e.printStackTrace();
-			fail("Exception: " + e);
+			Assert.fail("Exception: " + e);
 		}
 
 		// invalid password
@@ -175,20 +170,20 @@ public class WebConnectorTest {
 			c.setLogin(testAgent.getIdentifier(), "aaaaaaaaaaaaa");
 
 			ClientResponse result = c.sendRequest("GET", "test/ok", "");
-			assertEquals(401, result.getHttpCode());
+			Assert.assertEquals(401, result.getHttpCode());
 		} catch (Exception e) {
 			e.printStackTrace();
-			fail("Exception: " + e);
+			Assert.fail("Exception: " + e);
 		}
 		// invalid user
 		try {
 			c.setLogin(Long.toString(65464), "aaaaaaaaaaaaa");
 
 			ClientResponse result = c.sendRequest("GET", "test/ok", "");
-			assertEquals(401, result.getHttpCode());
+			Assert.assertEquals(401, result.getHttpCode());
 		} catch (Exception e) {
 			e.printStackTrace();
-			fail("Exception: " + e);
+			Assert.fail("Exception: " + e);
 		}
 
 		// no authentication, use default (wrong)
@@ -200,10 +195,10 @@ public class WebConnectorTest {
 			c.setLogin(Long.toString(65464), "aaaaaaaaaaaaa");
 
 			ClientResponse result = c.sendRequest("GET", "test/ok", "");
-			assertEquals(401, result.getHttpCode());
+			Assert.assertEquals(401, result.getHttpCode());
 		} catch (Exception e) {
 			e.printStackTrace();
-			fail("Exception: " + e);
+			Assert.fail("Exception: " + e);
 		}
 	}
 
@@ -215,14 +210,14 @@ public class WebConnectorTest {
 			c.setLogin(testAgent.getIdentifier(), testPass);
 			// unknown service
 			ClientResponse result = c.sendRequest("GET", "doesNotExist", "");
-			assertEquals(404, result.getHttpCode());
+			Assert.assertEquals(404, result.getHttpCode());
 
 			// exception in invocation
 			result = c.sendRequest("GET", "test/exception", "");
-			assertEquals(500, result.getHttpCode());
+			Assert.assertEquals(500, result.getHttpCode());
 		} catch (Exception e) {
 			e.printStackTrace();
-			fail("Exception: " + e);
+			Assert.fail("Exception: " + e);
 		}
 	}
 
@@ -235,11 +230,11 @@ public class WebConnectorTest {
 
 			// this test should work for an unknown function, too
 			ClientResponse response = c.sendRequest("GET", "asdag", "");
-			assertEquals(connector.crossOriginResourceDomain, response.getHeader("Access-Control-Allow-Origin"));
-			assertEquals(String.valueOf(connector.crossOriginResourceMaxAge),
+			Assert.assertEquals(connector.crossOriginResourceDomain, response.getHeader("Access-Control-Allow-Origin"));
+			Assert.assertEquals(String.valueOf(connector.crossOriginResourceMaxAge),
 					response.getHeader("Access-Control-Max-Age"));
 		} catch (Exception e) {
-			fail("Not existing service caused wrong exception");
+			Assert.fail("Not existing service caused wrong exception");
 		}
 	}
 
@@ -251,13 +246,13 @@ public class WebConnectorTest {
 			c.setLogin(testAgent.getIdentifier(), testPass);
 
 			ClientResponse result = c.sendRequest("GET", "version/path", "");
-			assertTrue(result.getResponse().trim().endsWith("version/"));
+			Assert.assertTrue(result.getResponse().trim().endsWith("version/"));
 
 			result = c.sendRequest("GET", "version/v1/path", "");
-			assertTrue(result.getResponse().trim().endsWith("version/v1/"));
+			Assert.assertTrue(result.getResponse().trim().endsWith("version/v1/"));
 		} catch (Exception e) {
 			e.printStackTrace();
-			fail("Exception: " + e);
+			Assert.fail("Exception: " + e);
 		}
 	}
 
@@ -270,11 +265,11 @@ public class WebConnectorTest {
 			c.setLogin(testAgent.getIdentifier(), testPass);
 			ClientResponse result = c.sendRequest("GET", "swaggertest/swagger.json", "");
 
-			assertTrue(result.getResponse().trim().contains("createSomething"));
-			assertTrue(result.getResponse().trim().contains("subresource/content"));
+			Assert.assertTrue(result.getResponse().trim().contains("createSomething"));
+			Assert.assertTrue(result.getResponse().trim().contains("subresource/content"));
 		} catch (Exception e) {
 			e.printStackTrace();
-			fail("Exception: " + e);
+			Assert.fail("Exception: " + e);
 		}
 	}
 
@@ -286,14 +281,14 @@ public class WebConnectorTest {
 			c.setLogin(testAgent.getIdentifier(), testPass);
 
 			ClientResponse result = c.sendRequest("PUT", "swaggertest/create/notfound", "");
-			assertEquals(404, result.getHttpCode());
+			Assert.assertEquals(404, result.getHttpCode());
 
 			result = c.sendRequest("PUT", "swaggertest/create/asdf", "");
-			assertEquals(200, result.getHttpCode());
+			Assert.assertEquals(200, result.getHttpCode());
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			fail("Exception: " + e);
+			Assert.fail("Exception: " + e);
 		}
 	}
 
@@ -305,11 +300,11 @@ public class WebConnectorTest {
 			c.setLogin(testAgent.getIdentifier(), testPass);
 
 			ClientResponse result = c.sendRequest("GET", "swaggertest/subresource/content", "");
-			assertEquals(200, result.getHttpCode());
-			assertEquals("test", result.getResponse().trim());
+			Assert.assertEquals(200, result.getHttpCode());
+			Assert.assertEquals("test", result.getResponse().trim());
 		} catch (Exception e) {
 			e.printStackTrace();
-			fail("Exception: " + e);
+			Assert.fail("Exception: " + e);
 		}
 	}
 
@@ -324,10 +319,10 @@ public class WebConnectorTest {
 			new Random().nextBytes(testContent);
 			String base64 = Base64.getEncoder().encodeToString(testContent);
 			ClientResponse result = c.sendRequest("POST", "test", base64);
-			assertEquals(HttpURLConnection.HTTP_ENTITY_TOO_LARGE, result.getHttpCode());
+			Assert.assertEquals(HttpURLConnection.HTTP_ENTITY_TOO_LARGE, result.getHttpCode());
 		} catch (Exception e) {
 			e.printStackTrace();
-			fail("Exception: " + e);
+			Assert.fail("Exception: " + e);
 		}
 	}
 
@@ -341,27 +336,27 @@ public class WebConnectorTest {
 
 			ClientResponse result = c.sendRequest("GET", "security/name", "");
 			System.out.println("RESPONSE: " + result.getResponse());
-			assertEquals("no principal", result.getResponse().trim());
-			assertEquals(403, result.getHttpCode());
+			Assert.assertEquals("no principal", result.getResponse().trim());
+			Assert.assertEquals(403, result.getHttpCode());
 			result = c.sendRequest("GET", "security/authenticated", "");
-			assertEquals(403, result.getHttpCode());
+			Assert.assertEquals(403, result.getHttpCode());
 			result = c.sendRequest("GET", "security/anonymous", "");
-			assertEquals(200, result.getHttpCode());
+			Assert.assertEquals(200, result.getHttpCode());
 
 			// authenticated request
 			c.setLogin(testAgent.getIdentifier(), testPass);
 			result = c.sendRequest("GET", "security/name", "");
-			assertEquals(200, result.getHttpCode());
-			assertEquals("adam", result.getResponse().trim());
+			Assert.assertEquals(200, result.getHttpCode());
+			Assert.assertEquals("adam", result.getResponse().trim());
 			result = c.sendRequest("GET", "security/authenticated", "");
-			assertEquals(200, result.getHttpCode());
+			Assert.assertEquals(200, result.getHttpCode());
 			result = c.sendRequest("GET", "security/anonymous", "");
-			assertEquals(200, result.getHttpCode());
+			Assert.assertEquals(200, result.getHttpCode());
 			result = c.sendRequest("GET", "security/bot", "");
-			assertEquals(403, result.getHttpCode());
+			Assert.assertEquals(403, result.getHttpCode());
 		} catch (Exception e) {
 			e.printStackTrace();
-			fail("Exception: " + e);
+			Assert.fail("Exception: " + e);
 		}
 	}
 
@@ -373,11 +368,11 @@ public class WebConnectorTest {
 			c.setLogin(testAgent.getIdentifier(), testPass);
 
 			ClientResponse result = c.sendRequest("GET", "classloader/test", "");
-			assertEquals(200, result.getHttpCode());
-			assertEquals("OK", result.getResponse().trim());
+			Assert.assertEquals(200, result.getHttpCode());
+			Assert.assertEquals("OK", result.getResponse().trim());
 		} catch (Exception e) {
 			e.printStackTrace();
-			fail("Exception: " + e);
+			Assert.fail("Exception: " + e);
 		}
 	}
 
@@ -389,10 +384,10 @@ public class WebConnectorTest {
 			c.setLogin(testAgent.getIdentifier(), testPass);
 
 			ClientResponse result = c.sendRequest("GET", "test/empty", "");
-			assertEquals(200, result.getHttpCode());
+			Assert.assertEquals(200, result.getHttpCode());
 		} catch (Exception e) {
 			e.printStackTrace();
-			fail("Exception: " + e);
+			Assert.fail("Exception: " + e);
 		}
 	}
 
@@ -405,21 +400,21 @@ public class WebConnectorTest {
 
 			// test auth params in GET
 			ClientResponse result = c.sendRequest("GET", "test/requesturi?param1=sadf&access_token=secret", "");
-			assertEquals(200, result.getHttpCode());
-			assertTrue(result.getResponse().contains("param1"));
-			assertFalse(result.getResponse().contains("secret"));
-			assertFalse(result.getResponse().contains("access_token"));
+			Assert.assertEquals(200, result.getHttpCode());
+			Assert.assertTrue(result.getResponse().contains("param1"));
+			Assert.assertFalse(result.getResponse().contains("secret"));
+			Assert.assertFalse(result.getResponse().contains("access_token"));
 
 			// test auth params in header
 			HashMap<String, String> headers = new HashMap<>();
 			headers.put("param1", "asdf");
 			result = c.sendRequest("GET", "test/headers", "", headers);
-			assertEquals(200, result.getHttpCode());
-			assertTrue(result.getResponse().toLowerCase().contains("param1"));
-			assertFalse(result.getResponse().toLowerCase().contains("authorization"));
+			Assert.assertEquals(200, result.getHttpCode());
+			Assert.assertTrue(result.getResponse().toLowerCase().contains("param1"));
+			Assert.assertFalse(result.getResponse().toLowerCase().contains("authorization"));
 		} catch (Exception e) {
 			e.printStackTrace();
-			fail("Exception: " + e);
+			Assert.fail("Exception: " + e);
 		}
 	}
 
@@ -431,18 +426,18 @@ public class WebConnectorTest {
 			c.setLogin(testAgent.getIdentifier(), testPass);
 
 			ClientResponse result = c.sendRequest("GET", "test/encoding", "");
-			assertEquals(200, result.getHttpCode());
+			Assert.assertEquals(200, result.getHttpCode());
 			final String header = result.getHeader(HttpHeaders.CONTENT_TYPE);
 			System.out.println("header is: " + header);
-			assertNotNull(header);
-			assertTrue(header.toLowerCase().contains("charset=utf-8"));
+			Assert.assertNotNull(header);
+			Assert.assertTrue(header.toLowerCase().contains("charset=utf-8"));
 			final String response = result.getResponse();
 			System.out.println("response is: " + response);
-			assertNotNull(response);
-			assertTrue(response.contains("☺"));
+			Assert.assertNotNull(response);
+			Assert.assertTrue(response.contains("☺"));
 		} catch (Exception e) {
 			e.printStackTrace();
-			fail("Exception: " + e);
+			Assert.fail("Exception: " + e);
 		}
 	}
 
@@ -455,11 +450,11 @@ public class WebConnectorTest {
 
 			String body = "This is a test.";
 			ClientResponse result = c.sendRequest("POST", "test/body", body);
-			assertEquals(200, result.getHttpCode());
-			assertTrue(result.getResponse().trim().equals(body));
+			Assert.assertEquals(200, result.getHttpCode());
+			Assert.assertTrue(result.getResponse().trim().equals(body));
 		} catch (Exception e) {
 			e.printStackTrace();
-			fail("Exception: " + e);
+			Assert.fail("Exception: " + e);
 		}
 	}
 
@@ -471,23 +466,23 @@ public class WebConnectorTest {
 			c.setLogin(testAgent.getIdentifier(), testPass);
 
 			ClientResponse result = c.sendRequest("GET", "deep/path/test", "");
-			assertEquals(200, result.getHttpCode());
-			assertTrue(result.getResponse().trim().endsWith("deep/path/"));
+			Assert.assertEquals(200, result.getHttpCode());
+			Assert.assertTrue(result.getResponse().trim().endsWith("deep/path/"));
 
 			result = c.sendRequest("GET", "deep/path/v1/test", "");
-			assertEquals(200, result.getHttpCode());
-			assertTrue(result.getResponse().trim().endsWith("deep/path/v1/"));
+			Assert.assertEquals(200, result.getHttpCode());
+			Assert.assertTrue(result.getResponse().trim().endsWith("deep/path/v1/"));
 
 			result = c.sendRequest("GET", "deep/path", "");
-			assertEquals(200, result.getHttpCode());
-			assertTrue(result.getResponse().trim().endsWith("deep/path/"));
+			Assert.assertEquals(200, result.getHttpCode());
+			Assert.assertTrue(result.getResponse().trim().endsWith("deep/path/"));
 
 			result = c.sendRequest("GET", "deep/path/v1", "");
-			assertEquals(200, result.getHttpCode());
-			assertTrue(result.getResponse().trim().endsWith("deep/path/v1/"));
+			Assert.assertEquals(200, result.getHttpCode());
+			Assert.assertTrue(result.getResponse().trim().endsWith("deep/path/v1/"));
 		} catch (Exception e) {
 			e.printStackTrace();
-			fail("Exception: " + e);
+			Assert.fail("Exception: " + e);
 		}
 	}
 }
