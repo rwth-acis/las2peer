@@ -132,9 +132,9 @@ public class WebConnectorTest {
 
 	@Test
 	public void testNotMethodService() {
-		MiniClient c = new MiniClient();
-		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 		try {
+			MiniClient c = new MiniClient();
+			c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 			c.setLogin(testAgent.getIdentifier(), testPass);
 
 			ClientResponse response = c.sendRequest("GET", "service1/asdag", "");
@@ -209,11 +209,11 @@ public class WebConnectorTest {
 
 	@Test
 	public void testExceptions() {
-		MiniClient c = new MiniClient();
-		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 		try {
-			// unknown service
+			MiniClient c = new MiniClient();
+			c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 			c.setLogin(testAgent.getIdentifier(), testPass);
+			// unknown service
 			ClientResponse result = c.sendRequest("GET", "doesNotExist", "");
 			assertEquals(404, result.getHttpCode());
 
@@ -228,9 +228,9 @@ public class WebConnectorTest {
 
 	@Test
 	public void testCrossOriginHeader() {
-		MiniClient c = new MiniClient();
-		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 		try {
+			MiniClient c = new MiniClient();
+			c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 			c.setLogin(testAgent.getIdentifier(), testPass);
 
 			// this test should work for an unknown function, too
@@ -245,10 +245,9 @@ public class WebConnectorTest {
 
 	@Test
 	public void testPath() {
-		MiniClient c = new MiniClient();
-		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
-
 		try {
+			MiniClient c = new MiniClient();
+			c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 			c.setLogin(testAgent.getIdentifier(), testPass);
 
 			ClientResponse result = c.sendRequest("GET", "version/path", "");
@@ -281,10 +280,9 @@ public class WebConnectorTest {
 
 	@Test
 	public void testResponseCode() {
-		MiniClient c = new MiniClient();
-		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
-
 		try {
+			MiniClient c = new MiniClient();
+			c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 			c.setLogin(testAgent.getIdentifier(), testPass);
 
 			ClientResponse result = c.sendRequest("PUT", "swaggertest/create/notfound", "");
@@ -301,10 +299,9 @@ public class WebConnectorTest {
 
 	@Test
 	public void testSubresource() {
-		MiniClient c = new MiniClient();
-		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
-
 		try {
+			MiniClient c = new MiniClient();
+			c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 			c.setLogin(testAgent.getIdentifier(), testPass);
 
 			ClientResponse result = c.sendRequest("GET", "swaggertest/subresource/content", "");
@@ -318,9 +315,9 @@ public class WebConnectorTest {
 
 	@Test
 	public void testUploadLimit() {
-		MiniClient c = new MiniClient();
-		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 		try {
+			MiniClient c = new MiniClient();
+			c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 			c.setLogin(testAgent.getIdentifier(), testPass);
 
 			byte[] testContent = new byte[WebConnector.DEFAULT_MAX_REQUEST_BODY_SIZE];
@@ -336,11 +333,12 @@ public class WebConnectorTest {
 
 	@Test
 	public void testSecurityContextIntegration() {
-		MiniClient c = new MiniClient();
-		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 		try {
+			MiniClient c = new MiniClient();
+			c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 			// unauthenticated request
 			c.setLogin(AnonymousAgent.LOGIN_NAME, AnonymousAgent.PASSPHRASE);
+
 			ClientResponse result = c.sendRequest("GET", "security/name", "");
 			System.out.println("RESPONSE: " + result.getResponse());
 			assertEquals("no principal", result.getResponse().trim());
@@ -369,10 +367,11 @@ public class WebConnectorTest {
 
 	@Test
 	public void testClassLoading() {
-		MiniClient c = new MiniClient();
-		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 		try {
+			MiniClient c = new MiniClient();
+			c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 			c.setLogin(testAgent.getIdentifier(), testPass);
+
 			ClientResponse result = c.sendRequest("GET", "classloader/test", "");
 			assertEquals(200, result.getHttpCode());
 			assertEquals("OK", result.getResponse().trim());
@@ -384,10 +383,11 @@ public class WebConnectorTest {
 
 	@Test
 	public void testEmptyResponse() {
-		MiniClient c = new MiniClient();
-		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 		try {
+			MiniClient c = new MiniClient();
+			c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 			c.setLogin(testAgent.getIdentifier(), testPass);
+
 			ClientResponse result = c.sendRequest("GET", "test/empty", "");
 			assertEquals(200, result.getHttpCode());
 		} catch (Exception e) {
@@ -398,9 +398,9 @@ public class WebConnectorTest {
 
 	@Test
 	public void testAuthParamSanitization() {
-		MiniClient c = new MiniClient();
-		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 		try {
+			MiniClient c = new MiniClient();
+			c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 			c.setLogin(testAgent.getIdentifier(), testPass);
 
 			// test auth params in GET
@@ -425,10 +425,11 @@ public class WebConnectorTest {
 
 	@Test
 	public void testEncoding() {
-		MiniClient c = new MiniClient();
-		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 		try {
+			MiniClient c = new MiniClient();
+			c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 			c.setLogin(testAgent.getIdentifier(), testPass);
+
 			ClientResponse result = c.sendRequest("GET", "test/encoding", "");
 			assertEquals(200, result.getHttpCode());
 			final String header = result.getHeader(HttpHeaders.CONTENT_TYPE);
@@ -447,11 +448,12 @@ public class WebConnectorTest {
 
 	@Test
 	public void testBody() {
-		MiniClient c = new MiniClient();
-		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 		try {
-			String body = "This is a test.";
+			MiniClient c = new MiniClient();
+			c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 			c.setLogin(testAgent.getIdentifier(), testPass);
+
+			String body = "This is a test.";
 			ClientResponse result = c.sendRequest("POST", "test/body", body);
 			assertEquals(200, result.getHttpCode());
 			assertTrue(result.getResponse().trim().equals(body));
@@ -463,9 +465,9 @@ public class WebConnectorTest {
 
 	@Test
 	public void testPathResolve() {
-		MiniClient c = new MiniClient();
-		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 		try {
+			MiniClient c = new MiniClient();
+			c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 			c.setLogin(testAgent.getIdentifier(), testPass);
 
 			ClientResponse result = c.sendRequest("GET", "deep/path/test", "");
