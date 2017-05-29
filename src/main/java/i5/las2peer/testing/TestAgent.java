@@ -4,16 +4,16 @@ import java.security.KeyPair;
 
 import javax.crypto.SecretKey;
 
+import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
 import i5.las2peer.security.AgentContext;
 import i5.las2peer.security.AgentImpl;
-import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.serialization.SerializationException;
 
 public class TestAgent extends AgentImpl {
 
-	protected TestAgent(KeyPair pair, SecretKey key) throws L2pSecurityException {
+	protected TestAgent(KeyPair pair, SecretKey key) throws AgentOperationFailedException {
 		super(pair, key);
 	}
 

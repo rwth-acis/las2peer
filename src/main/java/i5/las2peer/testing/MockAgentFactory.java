@@ -6,8 +6,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.security.NoSuchAlgorithmException;
 
+import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.security.GroupAgentImpl;
-import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.serialization.MalformedXMLException;
@@ -152,12 +152,12 @@ public abstract class MockAgentFactory {
 	 * 
 	 * @param argv
 	 * @throws NoSuchAlgorithmException
-	 * @throws L2pSecurityException
+	 * @throws AgentOperationFailedException
 	 * @throws CryptoException
 	 * @throws IOException
 	 */
 	public static void main(String argv[])
-			throws NoSuchAlgorithmException, L2pSecurityException, CryptoException, IOException {
+			throws NoSuchAlgorithmException, AgentOperationFailedException, CryptoException, IOException {
 		System.out.println(UserAgentImpl.createUserAgent(argv[0]).toXmlString());
 	}
 

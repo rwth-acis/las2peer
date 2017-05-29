@@ -55,7 +55,7 @@ import i5.las2peer.persistency.SharedStorage.STORAGE_MODE;
 import i5.las2peer.sandbox.L2pSecurityManager;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.GroupAgentImpl;
-import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.security.InternalSecurityException;
 import i5.las2peer.security.PassphraseAgentImpl;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
@@ -431,13 +431,13 @@ public class L2pNodeLauncher {
 	 * Make sure, that the private key of the agent is unlocked before registering
 	 * 
 	 * @param agent
-	 * @throws L2pSecurityException
+	 * @throws InternalSecurityException
 	 * @throws AgentAlreadyRegisteredException
 	 * @throws AgentException
 	 * @throws AgentAccessDeniedException
 	 */
 	public void registerUserAgent(UserAgentImpl agent)
-			throws L2pSecurityException, AgentAlreadyRegisteredException, AgentException, AgentAccessDeniedException {
+			throws InternalSecurityException, AgentAlreadyRegisteredException, AgentException, AgentAccessDeniedException {
 		registerUserAgent(agent, null);
 	}
 
@@ -449,13 +449,13 @@ public class L2pNodeLauncher {
 	 * 
 	 * @param agent
 	 * @param passphrase
-	 * @throws L2pSecurityException
+	 * @throws InternalSecurityException
 	 * @throws AgentAlreadyRegisteredException
 	 * @throws AgentException
 	 * @throws AgentAccessDeniedException
 	 */
 	public void registerUserAgent(UserAgentImpl agent, String passphrase)
-			throws L2pSecurityException, AgentException, AgentAccessDeniedException {
+			throws InternalSecurityException, AgentException, AgentAccessDeniedException {
 		if (passphrase != null && agent.isLocked()) {
 			agent.unlock(passphrase);
 		}
@@ -534,14 +534,14 @@ public class L2pNodeLauncher {
 	 * 
 	 * @param serviceNameVersion Exact service name and version, same syntax as in {@link #startService(String)}
 	 * @return list of methods encapsulated in a ListMethodsContent
-	 * @throws L2pSecurityException
+	 * @throws InternalSecurityException
 	 * @throws AgentException
 	 * @throws InterruptedException
 	 * @throws SerializationException
 	 * @throws EncodingFailedException
 	 * @throws TimeoutException
 	 */
-	public ListMethodsContent getServiceMethods(String serviceNameVersion) throws L2pSecurityException, AgentException,
+	public ListMethodsContent getServiceMethods(String serviceNameVersion) throws InternalSecurityException, AgentException,
 			InterruptedException, EncodingFailedException, SerializationException, TimeoutException {
 		if (currentUser == null) {
 			throw new IllegalStateException("please log in a valid user with registerUserAgent before!");
@@ -653,11 +653,11 @@ public class L2pNodeLauncher {
 	 * 
 	 * @param serviceAgent
 	 * @throws AgentAlreadyRegisteredException
-	 * @throws L2pSecurityException
+	 * @throws InternalSecurityException
 	 * @throws AgentException
 	 */
 	public void startService(AgentImpl serviceAgent)
-			throws AgentAlreadyRegisteredException, L2pSecurityException, AgentException {
+			throws AgentAlreadyRegisteredException, InternalSecurityException, AgentException {
 		if (!(serviceAgent instanceof ServiceAgentImpl)) {
 			throw new IllegalArgumentException("given Agent is not a service agent!");
 

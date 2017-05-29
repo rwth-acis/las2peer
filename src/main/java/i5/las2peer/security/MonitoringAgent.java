@@ -11,6 +11,7 @@ import i5.las2peer.api.execution.ServiceInvocationException;
 import i5.las2peer.api.execution.ServiceNotFoundException;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentNotFoundException;
+import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
 import i5.las2peer.logging.monitoring.MonitoringMessage;
@@ -40,12 +41,12 @@ public class MonitoringAgent extends PassphraseAgentImpl {
 	 * @param pair
 	 * @param passphrase
 	 * @param salt
-	 * @throws L2pSecurityException
+	 * @throws AgentOperationFailedException
 	 * @throws CryptoException
 	 * 
 	 */
 	protected MonitoringAgent(KeyPair pair, String passphrase, byte[] salt)
-			throws L2pSecurityException, CryptoException {
+			throws AgentOperationFailedException, CryptoException {
 		super(pair, passphrase, salt);
 	}
 
@@ -71,11 +72,11 @@ public class MonitoringAgent extends PassphraseAgentImpl {
 	 * @param passphrase passphrase for the secret key of the new agent
 	 * @return a new UserAgent
 	 * @throws CryptoException
-	 * @throws L2pSecurityException
+	 * @throws AgentOperationFailedException
 	 * 
 	 */
 	public static MonitoringAgent createMonitoringAgent(String passphrase)
-			throws CryptoException, L2pSecurityException {
+			throws CryptoException, AgentOperationFailedException {
 		return new MonitoringAgent(CryptoTools.generateKeyPair(), passphrase, CryptoTools.generateSalt());
 	}
 
@@ -118,7 +119,7 @@ public class MonitoringAgent extends PassphraseAgentImpl {
 			} else {
 				throw new MessageException("MonitoringAgents only receive monitoring messages!");
 			}
-		} catch (L2pSecurityException e) {
+		} catch (InternalSecurityException e) {
 			throw new MessageException("Security problems handling the received message", e);
 		} catch (AgentNotFoundException e) {
 			// Do nothing..("this" is not known..would be strange, eh?)

@@ -5,10 +5,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 import i5.las2peer.api.persistency.Envelope;
+import i5.las2peer.api.persistency.EnvelopeAccessDeniedException;
 import i5.las2peer.api.security.Agent;
 import i5.las2peer.security.AgentContext;
 import i5.las2peer.security.AgentImpl;
-import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
@@ -34,9 +34,9 @@ public class EnvelopeImpl implements Envelope {
 	}
 
 	public EnvelopeImpl(EnvelopeVersion currentVersion, AgentContext context)
-			throws CryptoException, L2pSecurityException, SerializationException {
+			throws CryptoException, EnvelopeAccessDeniedException, SerializationException {
 		this.identifier = currentVersion.getIdentifier();
-		this.content = currentVersion.getContent(context.getMainAgent(), context);
+		this.content = currentVersion.getContent(context);
 		this.currentVersion = currentVersion;
 		this.signingAgentId = CryptoTools.publicKeyToSHA512(currentVersion.getAuthorPublicKey());
 	}

@@ -23,6 +23,7 @@ import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentNotFoundException;
+import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.api.security.ServiceAgent;
 import i5.las2peer.classLoaders.ClassLoaderException;
 import i5.las2peer.communication.ListMethodsContent;
@@ -69,11 +70,11 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 	 * @param pair
 	 * @param passphrase
 	 * @param salt
-	 * @throws L2pSecurityException
+	 * @throws AgentOperationFailedException
 	 * @throws CryptoException
 	 */
 	protected ServiceAgentImpl(ServiceNameVersion service, KeyPair pair, String passphrase, byte[] salt)
-			throws L2pSecurityException, CryptoException {
+			throws AgentOperationFailedException, CryptoException {
 		super(pair, passphrase, salt);
 		this.sService = service;
 	}
@@ -186,7 +187,7 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 				throw new MessageException("I don't know what to do with a message content of type "
 						+ content.getClass().getCanonicalName());
 			}
-		} catch (L2pSecurityException | AgentAccessDeniedException e) {
+		} catch (InternalSecurityException | AgentAccessDeniedException e) {
 			System.out.println("\n\n\nproblematic message:\n" + m.toXmlString() + "\n" + "Exception: " + e + "\n\n\n");
 
 			e.printStackTrace();
@@ -231,11 +232,11 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 	 * @param passPhrase
 	 * @return
 	 * @throws CryptoException
-	 * @throws L2pSecurityException
+	 * @throws AgentOperationFailedException
 	 */
 	@Deprecated
 	public static ServiceAgentImpl generateNewAgent(String forService, String passPhrase)
-			throws CryptoException, L2pSecurityException {
+			throws CryptoException, AgentOperationFailedException {
 		return createServiceAgent(new ServiceNameVersion(forService, "1.0"), passPhrase);
 	}
 
@@ -248,10 +249,10 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 	 * @param passphrase a pass phrase for the private key of the agent
 	 * @return a new ServiceAgent
 	 * @throws CryptoException
-	 * @throws L2pSecurityException
+	 * @throws AgentOperationFailedException
 	 */
 	public static ServiceAgentImpl createServiceAgent(ServiceNameVersion service, String passphrase)
-			throws CryptoException, L2pSecurityException {
+			throws CryptoException, AgentOperationFailedException {
 		if (service.getVersion().toString().equals("*")) {
 			throw new IllegalArgumentException("You must specify a version!");
 		}
@@ -269,11 +270,11 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 	 * @param passphrase
 	 * @return
 	 * @throws CryptoException
-	 * @throws L2pSecurityException
+	 * @throws AgentOperationFailedException
 	 */
 	@Deprecated
 	public static ServiceAgentImpl createServiceAgent(String serviceName, String passphrase)
-			throws CryptoException, L2pSecurityException {
+			throws CryptoException, AgentOperationFailedException {
 		return createServiceAgent(new ServiceNameVersion(serviceName, "1.0"), passphrase);
 	}
 
@@ -433,7 +434,7 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 	 * @param method
 	 * @param parameters
 	 * @return result of the method invocation
-	 * @throws L2pSecurityException
+	 * @throws InternalSecurityException
 	 * @throws InvocationTargetException
 	 * @throws IllegalAccessException
 	 * @throws ServiceMethodNotFoundException
@@ -441,7 +442,7 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 	 * @throws SecurityException
 	 */
 	public Object invoke(String method, Object[] parameters) throws IllegalArgumentException,
-			ServiceMethodNotFoundException, IllegalAccessException, InvocationTargetException, L2pSecurityException {
+			ServiceMethodNotFoundException, IllegalAccessException, InvocationTargetException, InternalSecurityException {
 		if (!isRunning()) {
 			throw new IllegalStateException("This agent instance does not handle a started service!");
 		}

@@ -17,7 +17,7 @@ import org.junit.Test;
 import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.execution.RMITask;
 import i5.las2peer.security.BasicAgentStorage;
-import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.security.InternalSecurityException;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.testing.MockAgentFactory;
@@ -116,7 +116,7 @@ public class MessageTest {
 			try {
 				m2.open(b2, storage);
 				fail("SecurityException should have been thrown!");
-			} catch (L2pSecurityException e) {
+			} catch (InternalSecurityException e) {
 				assertTrue(e.getMessage().contains("another recipient"));
 			}
 		} catch (Exception e) {
@@ -231,7 +231,7 @@ public class MessageTest {
 			try {
 				m.getContent();
 				fail("L2pSecurityException expected");
-			} catch (L2pSecurityException e) {
+			} catch (InternalSecurityException e) {
 				// intended
 			}
 			m.open(b, storage);

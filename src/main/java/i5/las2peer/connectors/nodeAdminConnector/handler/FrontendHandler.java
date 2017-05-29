@@ -27,6 +27,7 @@ import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.p2p.ServiceVersion;
 import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.persistency.EnvelopeNotFoundException;
+import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.classLoaders.L2pClassManager;
@@ -42,7 +43,6 @@ import i5.las2peer.p2p.NodeException;
 import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.persistency.EnvelopeVersion;
 import i5.las2peer.security.AgentImpl;
-import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.tools.CryptoException;
@@ -250,7 +250,7 @@ public class FrontendHandler extends AbstractHandler {
 							agent.unlock(adminToken);
 							node.registerReceiver(agent);
 							// FIXME store service agent locally
-						} catch (CryptoException | L2pSecurityException | AgentException e2) {
+						} catch (CryptoException | AgentException e2) {
 							logger.log(Level.SEVERE, "Could not start service '" + startServiceName + "'", e2);
 							template.add("error", e2.toString());
 						}
@@ -401,7 +401,7 @@ public class FrontendHandler extends AbstractHandler {
 					// this should not happen, but we can re-create a new agent?
 					sendInternalErrorResponse(exchange, "Could not read agent from network storage", e);
 					return;
-				} catch (L2pSecurityException e) {
+				} catch (AgentAccessDeniedException e) {
 					// TODO show error in template instead
 					sendStringResponse(exchange, HttpURLConnection.HTTP_FORBIDDEN, "text/plain",
 							"Could not unlock agent with given password - Reason: " + e.toString());

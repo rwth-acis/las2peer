@@ -17,7 +17,7 @@ import i5.las2peer.communication.Message;
 import i5.las2peer.communication.ServiceDiscoveryContent;
 import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.security.AgentImpl;
-import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.security.InternalSecurityException;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.serialization.SerializationException;
 
@@ -277,13 +277,13 @@ public class NodeServiceCache {
 	 * @param acting
 	 * @return true if instances have been found
 	 * @throws EncodingFailedException
-	 * @throws L2pSecurityException
+	 * @throws InternalSecurityException
 	 * @throws SerializationException
 	 * @throws InterruptedException
 	 * @throws TimeoutException
 	 */
 	private boolean update(ServiceNameVersion service, boolean exact, AgentImpl acting) throws EncodingFailedException,
-			L2pSecurityException, SerializationException, InterruptedException, TimeoutException {
+			InternalSecurityException, SerializationException, InterruptedException, TimeoutException {
 
 		Message m = new Message(acting, ServiceAgentImpl.serviceNameToTopicId(service.getName()),
 				new ServiceDiscoveryContent(service, exact), timeoutMs);

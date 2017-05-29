@@ -17,14 +17,13 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import i5.las2peer.api.Context;
+import i5.las2peer.api.persistency.EnvelopeAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.security.AgentContext;
 import i5.las2peer.security.AgentImpl;
-import i5.las2peer.security.AgentStorage;
 import i5.las2peer.security.GroupAgentImpl;
-import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.serialization.MalformedXMLException;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.serialization.SerializeTools;
@@ -236,9 +235,9 @@ public class EnvelopeVersion implements Serializable, XmlAble {
 		return new HashSet<>(readerGroupIds);
 	}
 
-	public Serializable getContent() throws CryptoException, L2pSecurityException, SerializationException {
+	public Serializable getContent() throws CryptoException, EnvelopeAccessDeniedException, SerializationException {
 		if (isEncrypted()) {
-			return getContent(AgentContext.getCurrent().getMainAgent());
+			return getContent(AgentContext.getCurrent());
 		} else {
 			ClassLoader clsLoader = null;
 			try {
@@ -250,36 +249,20 @@ public class EnvelopeVersion implements Serializable, XmlAble {
 		}
 	}
 
-	public Serializable getContent(AgentImpl reader)
-			throws CryptoException, L2pSecurityException, SerializationException {
-		try {
-			return getContent(reader, AgentContext.getCurrent().getLocalNode());
-		} catch (IllegalStateException e) {
-			return getContent(reader, reader.getRunningAtNode());
-		}
-	}
-
-	public Serializable getContent(AgentImpl reader, AgentStorage agentStorage)
-			throws CryptoException, L2pSecurityException, SerializationException {
+	public Serializable getContent(AgentContext context)
+			throws CryptoException, EnvelopeAccessDeniedException, SerializationException {
 		byte[] decrypted = null;
 		if (isEncrypted()) {
 			SecretKey decryptedReaderKey = null;
 			// fetch all groups
 			for (String groupId : readerGroupIds) {
 				try {
-					AgentImpl agent = agentStorage.getAgent(groupId);
-
-					if (agent instanceof GroupAgentImpl) {
-						GroupAgentImpl group = (GroupAgentImpl) agent;
-						byte[] encryptedReaderKey = readerKeys.get(group.getPublicKey());
-						if (encryptedReaderKey != null) {
-							// use group to decrypt content
-							group.unlockPrivateKeyRecursive(reader, agentStorage);
-							decryptedReaderKey = group.decryptSymmetricKey(encryptedReaderKey);
-							break;
-						}
-					} else {
-						logger.log(Level.WARNING, "Non GroupAgent listed as reader group");
+					GroupAgentImpl agent = context.requestGroupAgent(groupId);
+					byte[] encryptedReaderKey = readerKeys.get(agent.getPublicKey());
+					if (encryptedReaderKey != null) {
+						// use group to decrypt content
+						decryptedReaderKey = agent.decryptSymmetricKey(encryptedReaderKey);
+						break;
 					}
 				} catch (AgentException | CryptoException | SerializationException e) {
 					logger.log(Level.WARNING, "Issue with envelope reader", e);
@@ -287,14 +270,14 @@ public class EnvelopeVersion implements Serializable, XmlAble {
 			}
 			if (decryptedReaderKey == null) {
 				// no group matched
-				byte[] encryptedReaderKey = readerKeys.get(reader.getPublicKey());
+				byte[] encryptedReaderKey = readerKeys.get(context.getMainAgent().getPublicKey());
 				if (encryptedReaderKey == null) {
-					throw new CryptoException("Agent (" + reader.getIdentifier() + ") has no read permission");
+					throw new CryptoException("Agent (" + context.getMainAgent().getIdentifier() + ") has no read permission");
 				}
 				try {
-					decryptedReaderKey = reader.decryptSymmetricKey(encryptedReaderKey);
+					decryptedReaderKey = context.getMainAgent().decryptSymmetricKey(encryptedReaderKey);
 				} catch (AgentLockedException e) {
-					throw new L2pSecurityException("Reader locked...", e);
+					throw new EnvelopeAccessDeniedException("Reader locked...", e);
 				}
 			}
 			// decrypt content

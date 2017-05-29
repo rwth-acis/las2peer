@@ -104,7 +104,7 @@ public class Mediator implements MessageReceiver {
 			}
 			// END
 
-		} catch (L2pSecurityException e) {
+		} catch (InternalSecurityException e) {
 			throw new MessageException("Unable to open message because of security problems! ", e);
 		} catch (AgentNotFoundException e) {
 			throw new MessageException(
@@ -194,12 +194,12 @@ public class Mediator implements MessageReceiver {
 	 * @param parameters list of method parameters
 	 * @param localOnly if true, only services on this node are invoked
 	 * @return result of the method invocation
-	 * @throws L2pSecurityException
+	 * @throws InternalSecurityException
 	 * @throws ServiceInvocationException
 	 * @throws AgentException
 	 */
 	public Serializable invoke(String service, String method, Serializable[] parameters, boolean localOnly)
-			throws L2pSecurityException, ServiceInvocationException, AgentException {
+			throws InternalSecurityException, ServiceInvocationException, AgentException {
 
 		return runningAt.invoke(myAgent, ServiceNameVersion.fromString(service), method, parameters, false, localOnly);
 	}

@@ -10,7 +10,7 @@ import i5.las2peer.p2p.NodeInformation;
 import i5.las2peer.p2p.NodeNotFoundException;
 import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.security.AgentImpl;
-import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.security.InternalSecurityException;
 import i5.las2peer.security.MessageReceiver;
 import i5.las2peer.serialization.MalformedXMLException;
 import i5.las2peer.tools.CryptoException;
@@ -486,7 +486,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 						l2pNode.receiveMessage(c.getMessage());
 					} catch (MalformedXMLException e) {
 						logger.severe("unable to open BroadcastMessageContent!");
-					} catch (L2pSecurityException e) {
+					} catch (InternalSecurityException e) {
 						logger.severe("L2pSecurityException while handling received message!");
 					} catch (MessageException e) {
 						logger.log(Level.SEVERE, "MessageException while handling received message!", e);

@@ -24,6 +24,7 @@ import i5.las2peer.api.persistency.EnvelopeNotFoundException;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentNotFoundException;
+import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.api.security.AnonymousAgent;
 import i5.las2peer.classLoaders.L2pClassManager;
 import i5.las2peer.classLoaders.libraries.SharedStorageRepository;
@@ -43,7 +44,7 @@ import i5.las2peer.persistency.StorageStoreResultHandler;
 import i5.las2peer.security.AgentContext;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.AnonymousAgentImpl;
-import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.security.InternalSecurityException;
 import i5.las2peer.security.MessageReceiver;
 import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.serialization.MalformedXMLException;
@@ -517,7 +518,7 @@ public class PastryNodeImpl extends Node {
 			if (id.equalsIgnoreCase(AnonymousAgent.LOGIN_NAME)) {
 				try {
 					agentFromNet = AnonymousAgentImpl.getInstance();
-				} catch (L2pSecurityException | CryptoException e) {
+				} catch (AgentOperationFailedException | CryptoException e) {
 					throw new AgentNotFoundException("Could not retrieve anonymous agent", e);
 				}
 			} else {
@@ -530,8 +531,7 @@ public class PastryNodeImpl extends Node {
 		} catch (EnvelopeNotFoundException e) {
 			observerNotice(MonitoringEvent.AGENT_GET_FAILED, pastryNode, id, null, (String) null, "");
 			throw new AgentNotFoundException("Agent " + id + " not found in storage", e);
-		} catch (EnvelopeException | MalformedXMLException | SerializationException | L2pSecurityException
-				| CryptoException e) {
+		} catch (EnvelopeException | MalformedXMLException | SerializationException | CryptoException e) {
 			observerNotice(MonitoringEvent.AGENT_GET_FAILED, pastryNode, id, null, (String) null, "");
 			throw new AgentException("Unable to retrieve Agent " + id + " from past storage", e);
 		}
@@ -574,7 +574,7 @@ public class PastryNodeImpl extends Node {
 	 */
 	@Deprecated
 	@Override
-	public void updateAgent(AgentImpl agent) throws AgentException, L2pSecurityException, EnvelopeException {
+	public void updateAgent(AgentImpl agent) throws AgentException, InternalSecurityException, EnvelopeException {
 		storeAgent(agent);
 	}
 

@@ -9,13 +9,13 @@ import org.junit.Test;
 
 import i5.las2peer.api.TestService;
 import i5.las2peer.api.execution.ServiceMethodNotFoundException;
-import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.security.InternalSecurityException;
 
 public class ServiceHelperTest {
 
 	@Test
 	public void testInvocation() throws SecurityException, IllegalArgumentException, ServiceMethodNotFoundException,
-			IllegalAccessException, InvocationTargetException, L2pSecurityException {
+			IllegalAccessException, InvocationTargetException, InternalSecurityException {
 
 		TestService testee = new TestService();
 		assertEquals(10, ServiceHelper.execute(testee, "getInt"));
@@ -27,7 +27,7 @@ public class ServiceHelperTest {
 
 	@Test
 	public void testSubclassParam() throws SecurityException, IllegalArgumentException, IllegalAccessException,
-			InvocationTargetException, L2pSecurityException, ServiceMethodNotFoundException {
+			InvocationTargetException, InternalSecurityException, ServiceMethodNotFoundException {
 		TestService testee = new TestService();
 
 		assertEquals("testnachricht",
@@ -36,7 +36,7 @@ public class ServiceHelperTest {
 
 	@Test
 	public void testExceptions() throws SecurityException, IllegalArgumentException, IllegalAccessException,
-			InvocationTargetException, L2pSecurityException {
+			InvocationTargetException, InternalSecurityException {
 		TestService testee = new TestService();
 
 		try {

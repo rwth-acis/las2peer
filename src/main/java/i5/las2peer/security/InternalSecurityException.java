@@ -1,14 +1,10 @@
 package i5.las2peer.security;
 
-//TODO API remove or make more expressive
-
 /**
- * Base class for all security related exceptions in the las2peer setting.
+ * Represents internal security exceptions.
  * 
- * 
- *
  */
-public class L2pSecurityException extends Exception {
+public class InternalSecurityException extends Exception {
 
 	/**
 	 * 
@@ -20,7 +16,7 @@ public class L2pSecurityException extends Exception {
 	 * 
 	 * @param message
 	 */
-	public L2pSecurityException(String message) {
+	public InternalSecurityException(String message) {
 		super(message);
 	}
 
@@ -30,7 +26,7 @@ public class L2pSecurityException extends Exception {
 	 * @param message
 	 * @param cause
 	 */
-	public L2pSecurityException(String message, Throwable cause) {
+	public InternalSecurityException(String message, Throwable cause) {
 		super(message, cause);
 	}
 

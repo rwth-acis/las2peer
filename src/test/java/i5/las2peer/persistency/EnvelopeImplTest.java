@@ -17,7 +17,7 @@ import i5.las2peer.api.security.AgentException;
 import i5.las2peer.p2p.LocalNode;
 import i5.las2peer.security.AgentContext;
 import i5.las2peer.security.AgentImpl;
-import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.security.InternalSecurityException;
 import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.serialization.MalformedXMLException;
 import i5.las2peer.serialization.SerializationException;
@@ -39,7 +39,7 @@ public class EnvelopeImplTest {
 
 	@Test
 	public void testFresh() throws MalformedXMLException, IOException, IllegalArgumentException, SerializationException,
-			CryptoException, L2pSecurityException, EnvelopeException {
+			CryptoException, InternalSecurityException, EnvelopeException {
 		AgentImpl owner = MockAgentFactory.getAdam();
 		AgentImpl reader = MockAgentFactory.getEve();
 
@@ -63,7 +63,7 @@ public class EnvelopeImplTest {
 
 	@Test
 	public void testFromExisting() throws MalformedXMLException, IOException, IllegalArgumentException,
-			SerializationException, CryptoException, L2pSecurityException, EnvelopeException, AgentException {
+			SerializationException, CryptoException, InternalSecurityException, EnvelopeException, AgentException {
 		UserAgentImpl owner = MockAgentFactory.getAdam();
 		owner.unlock("adamspass");
 		node.storeAgent(owner);

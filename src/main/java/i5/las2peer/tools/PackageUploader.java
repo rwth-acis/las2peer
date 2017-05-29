@@ -14,6 +14,7 @@ import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.logging.Level;
 
+import i5.las2peer.api.persistency.EnvelopeAccessDeniedException;
 import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.persistency.EnvelopeException;
 import i5.las2peer.api.persistency.EnvelopeNotFoundException;
@@ -26,7 +27,6 @@ import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.persistency.EnvelopeVersion;
 import i5.las2peer.security.AgentImpl;
-import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.PassphraseAgentImpl;
 import i5.las2peer.serialization.MalformedXMLException;
 import i5.las2peer.serialization.SerializationException;
@@ -171,7 +171,7 @@ public class PackageUploader {
 			ServiceVersionList versions = new ServiceVersionList();
 			versions.add(libId.getVersion().toString());
 			versionEnv = node.createUnencryptedEnvelope(envVersionId, devAgent.getPublicKey(), versions);
-		} catch (L2pSecurityException e) {
+		} catch (EnvelopeAccessDeniedException e) {
 			throw new ServicePackageException("Unencrypted content in service versions envelope expected", e);
 		}
 		// store envelope with service version information

@@ -13,7 +13,7 @@ import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.p2p.NodeServiceCache.ServiceInstance;
-import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.security.InternalSecurityException;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.serialization.MalformedXMLException;
@@ -23,7 +23,7 @@ import i5.las2peer.tools.CryptoException;
 public class NodeServiceCacheTest {
 
 	@Test
-	public void testLocalServices() throws CryptoException, L2pSecurityException, AgentNotRegisteredException {
+	public void testLocalServices() throws CryptoException, AgentException, AgentNotRegisteredException {
 		Node node = LocalNode.launchNode();
 
 		NodeServiceCache cache = new NodeServiceCache(node, 0, 0);
@@ -75,7 +75,7 @@ public class NodeServiceCacheTest {
 	}
 
 	@Test
-	public void testIntegration() throws CryptoException, L2pSecurityException, AgentAlreadyRegisteredException,
+	public void testIntegration() throws CryptoException, InternalSecurityException, AgentAlreadyRegisteredException,
 			AgentException, NodeException, AgentAccessDeniedException {
 		ServiceNameVersion serviceNameVersion = ServiceNameVersion
 				.fromString("i5.las2peer.testServices.testPackage2.UsingService@1.0");
@@ -103,7 +103,7 @@ public class NodeServiceCacheTest {
 
 	@Test
 	public void testGlobalServices()
-			throws CryptoException, L2pSecurityException, AgentAlreadyRegisteredException, AgentException,
+			throws CryptoException, InternalSecurityException, AgentAlreadyRegisteredException, AgentException,
 			CloneNotSupportedException, MalformedXMLException, IOException, NodeException, AgentAccessDeniedException {
 		// Attention when changing NodeServiceCache parameters
 		// You may have to adjust these results afterwards since this may influence the selected versions

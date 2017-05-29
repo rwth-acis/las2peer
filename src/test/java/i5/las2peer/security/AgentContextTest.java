@@ -22,7 +22,7 @@ import i5.las2peer.tools.CryptoException;
 public class AgentContextTest {
 
 	@Test
-	public void testRequestAgent() throws MalformedXMLException, IOException, L2pSecurityException, CryptoException,
+	public void testRequestAgent() throws MalformedXMLException, IOException, InternalSecurityException, CryptoException,
 			SerializationException, AgentException, NodeException, AgentAccessDeniedException {
 		LocalNode node = LocalNode.newNode();
 
@@ -70,7 +70,7 @@ public class AgentContextTest {
 	}
 
 	@Test
-	public void testHasAccess() throws MalformedXMLException, IOException, L2pSecurityException, CryptoException,
+	public void testHasAccess() throws MalformedXMLException, IOException, InternalSecurityException, CryptoException,
 			SerializationException, AgentException, NodeException, AgentAccessDeniedException {
 		LocalNode node = LocalNode.newNode();
 

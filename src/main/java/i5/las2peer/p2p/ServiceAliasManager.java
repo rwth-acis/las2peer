@@ -6,9 +6,9 @@ import java.util.List;
 
 import i5.las2peer.api.persistency.EnvelopeException;
 import i5.las2peer.api.persistency.EnvelopeNotFoundException;
+import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.persistency.EnvelopeVersion;
 import i5.las2peer.security.AgentImpl;
-import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.CryptoException;
@@ -85,7 +85,7 @@ public class ServiceAliasManager {
 			} else {
 				return; // otherwise we're done
 			}
-		} catch (EnvelopeException | CryptoException | L2pSecurityException | SerializationException e) {
+		} catch (EnvelopeException | CryptoException | AgentAccessDeniedException | SerializationException e) {
 			// alias can be registered
 		}
 
@@ -103,7 +103,7 @@ public class ServiceAliasManager {
 			String currentEntry = null;
 			try {
 				currentEntry = getEntry(currentKey);
-			} catch (EnvelopeException | CryptoException | L2pSecurityException | SerializationException e) {
+			} catch (EnvelopeException | CryptoException | AgentAccessDeniedException | SerializationException e) {
 			}
 
 			if (currentEntry != null && !currentEntry.equals(BLANK)) {
@@ -152,7 +152,7 @@ public class ServiceAliasManager {
 			String currentEntry = null;
 			try {
 				currentEntry = getEntry(currentKey);
-			} catch (EnvelopeException | CryptoException | L2pSecurityException | SerializationException e) {
+			} catch (EnvelopeException | CryptoException | AgentAccessDeniedException | SerializationException e) {
 				throw new AliasNotFoundException("Path does not exist.", e);
 			}
 
@@ -181,14 +181,14 @@ public class ServiceAliasManager {
 	}
 
 	private String getEntry(String key) throws EnvelopeNotFoundException, EnvelopeException, CryptoException,
-			L2pSecurityException, SerializationException {
+			AgentAccessDeniedException, SerializationException {
 		EnvelopeVersion env = node.fetchEnvelope(PREFIX + key);
 		String content = (String) env.getContent();
 		return content;
 	}
 
-	private void createEntry(AgentImpl agent, String key, String value)
-			throws EnvelopeException, IllegalArgumentException, SerializationException, CryptoException {
+	private void createEntry(AgentImpl agent, String key, String value) throws EnvelopeException,
+			IllegalArgumentException, SerializationException, CryptoException {
 		EnvelopeVersion envName = node.createUnencryptedEnvelope(PREFIX + key.toLowerCase(), agent.getPublicKey(),
 				value);
 		node.storeEnvelope(envName, agent);

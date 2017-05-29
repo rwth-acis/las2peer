@@ -13,7 +13,7 @@ import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.communication.Message;
 import i5.las2peer.security.BasicAgentStorage;
-import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.security.InternalSecurityException;
 import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.serialization.MalformedXMLException;
 import i5.las2peer.testing.MockAgentFactory;
@@ -25,7 +25,7 @@ public class MessageResultListenerTest {
 	}
 
 	@Test
-	public void test() throws InterruptedException, MalformedXMLException, IOException, L2pSecurityException,
+	public void test() throws InterruptedException, MalformedXMLException, IOException, InternalSecurityException,
 			AgentAccessDeniedException, AgentOperationFailedException {
 		final UserAgentImpl eve = MockAgentFactory.getEve();
 		eve.unlock("evespass");

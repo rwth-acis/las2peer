@@ -30,7 +30,7 @@ public class ServiceAgentImplTest {
 	private static final String passphrase = "a passphrase";
 
 	@Test
-	public void testCreation() throws CryptoException, L2pSecurityException, AgentAccessDeniedException, AgentOperationFailedException {
+	public void testCreation() throws CryptoException, InternalSecurityException, AgentAccessDeniedException, AgentOperationFailedException {
 		ServiceAgentImpl testee = ServiceAgentImpl
 				.createServiceAgent(ServiceNameVersion.fromString(servicename + "@" + serviceversion), passphrase);
 
@@ -53,7 +53,7 @@ public class ServiceAgentImplTest {
 
 	@Test
 	public void testXmlAndBack()
-			throws CryptoException, L2pSecurityException, MalformedXMLException, AgentAccessDeniedException, AgentOperationFailedException {
+			throws CryptoException, InternalSecurityException, MalformedXMLException, AgentAccessDeniedException, AgentOperationFailedException {
 		ServiceAgentImpl testee = ServiceAgentImpl
 				.createServiceAgent(ServiceNameVersion.fromString(servicename + "@" + serviceversion), passphrase);
 
@@ -65,7 +65,7 @@ public class ServiceAgentImplTest {
 	}
 
 	@Test
-	public void testServiceDiscovery() throws CryptoException, L2pSecurityException, AgentAlreadyRegisteredException,
+	public void testServiceDiscovery() throws CryptoException, InternalSecurityException, AgentAlreadyRegisteredException,
 			AgentException, MalformedXMLException, IOException, EncodingFailedException, SerializationException,
 			InterruptedException, TimeoutException, AgentAccessDeniedException {
 

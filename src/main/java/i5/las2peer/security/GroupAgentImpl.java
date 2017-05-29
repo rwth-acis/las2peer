@@ -57,7 +57,7 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 
 	@SuppressWarnings("unchecked")
 	protected GroupAgentImpl(PublicKey pubKey, byte[] encryptedPrivate, Hashtable<String, byte[]> htEncryptedKeys)
-			throws L2pSecurityException {
+			throws AgentOperationFailedException {
 		super(pubKey, encryptedPrivate);
 
 		htEncryptedKeyVersions = (Hashtable<String, byte[]>) htEncryptedKeys.clone();
@@ -70,12 +70,12 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	 * @param keys
 	 * @param secret
 	 * @param members
-	 * @throws L2pSecurityException
+	 * @throws AgentOperationFailedException
 	 * @throws CryptoException
 	 * @throws SerializationException
 	 */
 	protected GroupAgentImpl(KeyPair keys, SecretKey secret, Agent[] members)
-			throws L2pSecurityException, CryptoException, SerializationException  {
+			throws AgentOperationFailedException, CryptoException, SerializationException  {
 		super(keys, secret);
 
 		symmetricGroupKey = secret;
@@ -89,41 +89,6 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 		}
 
 		lockPrivateKey();
-	}
-
-	/**
-	 * unlock the GroupAgent using transitive memberships
-	 * 
-	 * @param agentStorage to load the agents from
-	 * @param agent
-	 * @throws AgentOperationFailedException 
-	 * @throws AgentAccessDeniedException 
-	 */
-	// TODO API remove
-	public void unlockPrivateKeyRecursive(AgentImpl agent, AgentStorage agentStorage) throws AgentAccessDeniedException, AgentOperationFailedException {
-		if (hasMember(agent)) {
-			try {
-				unlock(agent);
-			} catch (AgentAccessDeniedException | AgentLockedException e) {
-				throw new IllegalStateException("Cannot unlock!", e);
-			}
-			
-			return;
-		} else {
-			for (String memberId : htEncryptedKeyVersions.keySet()) {
-				try {
-					AgentImpl member = agentStorage.getAgent(memberId);
-					if (member instanceof GroupAgentImpl) {
-						((GroupAgentImpl) member).unlockPrivateKeyRecursive(agent, agentStorage);
-						unlock(member);
-						return;
-					}
-				} catch (AgentException e) {
-				}
-			}
-		}
-
-		throw new AgentAccessDeniedException("The given agent has no access to this group!");
 	}
 
 	/**
@@ -341,7 +306,7 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 			return result;
 		} catch (SerializationException e) {
 			throw new MalformedXMLException("Deserialization problems", e);
-		} catch (L2pSecurityException e) {
+		} catch (AgentOperationFailedException e) {
 			throw new MalformedXMLException("Security Problems creating an agent from the xml string", e);
 		}
 	}
@@ -351,12 +316,12 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	 * 
 	 * @param members
 	 * @return a group agent
-	 * @throws L2pSecurityException
+	 * @throws AgentOperationFailedException
 	 * @throws CryptoException
 	 * @throws SerializationException
 	 */
 	public static GroupAgentImpl createGroupAgent(Agent[] members)
-			throws L2pSecurityException, CryptoException, SerializationException {
+			throws AgentOperationFailedException, CryptoException, SerializationException {
 		return new GroupAgentImpl(CryptoTools.generateKeyPair(), CryptoTools.generateSymmetricKey(), members);
 	}
 
@@ -369,7 +334,7 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 			content = message.getContent();
 		} catch (AgentException e1) {
 			getRunningAtNode().observerNotice(MonitoringEvent.SERVICE_ERROR, e1.getMessage());
-		} catch (L2pSecurityException e2) {
+		} catch (InternalSecurityException e2) {
 			getRunningAtNode().observerNotice(MonitoringEvent.SERVICE_ERROR, e2.getMessage());
 		}
 		if (content == null) {
@@ -414,7 +379,7 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 				getRunningAtNode().sendMessage(msg, null);
 			} catch (EncodingFailedException e) {
 				getRunningAtNode().observerNotice(MonitoringEvent.SERVICE_ERROR, e.getMessage());
-			} catch (L2pSecurityException e) {
+			} catch (InternalSecurityException e) {
 				getRunningAtNode().observerNotice(MonitoringEvent.SERVICE_ERROR, e.getMessage());
 			} catch (SerializationException e) {
 				getRunningAtNode().observerNotice(MonitoringEvent.SERVICE_ERROR, e.getMessage());

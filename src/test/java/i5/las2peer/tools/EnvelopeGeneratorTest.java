@@ -14,7 +14,8 @@ import org.junit.Test;
 import i5.las2peer.persistency.DecodingFailedException;
 import i5.las2peer.persistency.EnvelopeGenerator;
 import i5.las2peer.persistency.EnvelopeVersion;
-import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.security.AgentContext;
+import i5.las2peer.security.InternalSecurityException;
 import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.serialization.MalformedXMLException;
 import i5.las2peer.serialization.SerializationException;
@@ -52,7 +53,7 @@ public class EnvelopeGeneratorTest {
 		UserAgentImpl eve = MockAgentFactory.getEve();
 		eve.unlock("evespass");
 
-		Integer content = (Integer) test.getContent(eve);
+		Integer content = (Integer) test.getContent(new AgentContext(null, eve));
 
 		assertEquals(102, content.intValue());
 	}
@@ -67,7 +68,7 @@ public class EnvelopeGeneratorTest {
 	}
 
 	@Test
-	public void testOpenFail() throws SerializationException, DecodingFailedException, L2pSecurityException,
+	public void testOpenFail() throws SerializationException, DecodingFailedException, InternalSecurityException,
 			MalformedXMLException, IOException {
 		EnvelopeGenerator
 				.main(new String[] { "src/main/java/i5/las2peer/testing/eve.xml", "failure", "Integer", "102" });

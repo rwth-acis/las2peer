@@ -3,9 +3,9 @@ package i5.las2peer.tools;
 import java.io.IOException;
 import java.util.Vector;
 
+import i5.las2peer.api.security.AgentException;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.GroupAgentImpl;
-import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.serialization.MalformedXMLException;
 import i5.las2peer.serialization.SerializationException;
 
@@ -23,12 +23,12 @@ public class GroupAgentGenerator {
 	 * @param argv
 	 * @throws MalformedXMLException
 	 * @throws IOException
-	 * @throws L2pSecurityException
+	 * @throws AgentException
 	 * @throws CryptoException
 	 * @throws SerializationException
 	 */
 	public static void main(String[] argv)
-			throws MalformedXMLException, IOException, L2pSecurityException, CryptoException, SerializationException {
+			throws MalformedXMLException, IOException, AgentException, CryptoException, SerializationException {
 		if (argv.length == 0 || argv[0].equals("-?")) {
 			System.out.println("Just give a liste with xml files of the agents, you want to aggregate in a group");
 			System.exit(0);

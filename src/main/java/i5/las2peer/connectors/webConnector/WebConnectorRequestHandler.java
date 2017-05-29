@@ -54,7 +54,6 @@ import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.ServiceAliasManager.AliasResolveResponse;
 import i5.las2peer.restMapper.RESTResponse;
 import i5.las2peer.security.AnonymousAgentImpl;
-import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.Mediator;
 import i5.las2peer.security.PassphraseAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
@@ -337,7 +336,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			AnonymousAgentImpl anonymousAgent = AnonymousAgentImpl.getInstance();
 			anonymousAgent.unlock(AnonymousAgent.PASSPHRASE);
 			return anonymousAgent;
-		} catch (CryptoException | L2pSecurityException | AgentAccessDeniedException
+		} catch (CryptoException | AgentAccessDeniedException
 				| AgentOperationFailedException e) {
 			connector.logError("Could not authenticate as user anonymous", e);
 			sendUnauthorizedResponse(exchange, null, "Could not authenticate as user anonymous");

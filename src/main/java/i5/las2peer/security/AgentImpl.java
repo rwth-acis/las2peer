@@ -59,9 +59,9 @@ public abstract class AgentImpl implements Agent, XmlAble, Cloneable, MessageRec
 	 * 
 	 * @param pair The private public keypair to use for this agent
 	 * @param key The secret key to encrypt the private key
-	 * @throws L2pSecurityException If the private key can not be encrypted
+	 * @throws AgentOperationFailedException If the private key can not be encrypted
 	 */
-	protected AgentImpl(KeyPair pair, SecretKey key) throws L2pSecurityException {
+	protected AgentImpl(KeyPair pair, SecretKey key) throws AgentOperationFailedException {
 		this.publicKey = pair.getPublic();
 		this.privateKey = pair.getPrivate();
 
@@ -113,10 +113,10 @@ public abstract class AgentImpl implements Agent, XmlAble, Cloneable, MessageRec
 	 * Encrypts the private key into a byte array with strong encryption based on a passphrase. to unlock the key
 	 * 
 	 * @param key A key that is used to encrypt the agents private key.
-	 * @throws L2pSecurityException If an issue with the given key occurs.
+	 * @throws AgentOperationFailedException If an issue with the given key occurs.
 	 * @throws AgentLockedException If the given agent is not unlocked
 	 */
-	public void encryptPrivateKey(SecretKey key) throws L2pSecurityException, AgentLockedException {
+	public void encryptPrivateKey(SecretKey key) throws AgentOperationFailedException, AgentLockedException {
 		if (isLocked()) {
 			throw new AgentLockedException();
 		}
@@ -124,9 +124,9 @@ public abstract class AgentImpl implements Agent, XmlAble, Cloneable, MessageRec
 		try {
 			baEncrypedPrivate = CryptoTools.encryptSymmetric(privateKey, key);
 		} catch (CryptoException e) {
-			throw new L2pSecurityException("Unable to encrypt private key", e);
+			throw new AgentOperationFailedException("Unable to encrypt private key", e);
 		} catch (SerializationException e) {
-			throw new L2pSecurityException("unable to serialize private key", e);
+			throw new AgentOperationFailedException("unable to serialize private key", e);
 		}
 	}
 

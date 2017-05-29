@@ -6,7 +6,7 @@ import java.lang.reflect.Modifier;
 
 import i5.las2peer.api.Service;
 import i5.las2peer.api.execution.ServiceMethodNotFoundException;
-import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.security.InternalSecurityException;
 
 /**
  * static helper methods for invocation of service methods via reflection
@@ -112,11 +112,11 @@ public abstract class ServiceHelper {
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 * @throws InvocationTargetException
-	 * @throws L2pSecurityException
+	 * @throws InternalSecurityException
 	 */
 	public static Object execute(Service service, String method)
 			throws SecurityException, ServiceMethodNotFoundException, IllegalArgumentException, IllegalAccessException,
-			InvocationTargetException, L2pSecurityException {
+			InvocationTargetException, InternalSecurityException {
 		return execute(service, method, new Object[0]);
 	}
 
@@ -133,11 +133,11 @@ public abstract class ServiceHelper {
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 * @throws InvocationTargetException
-	 * @throws L2pSecurityException
+	 * @throws InternalSecurityException
 	 */
 	public static Object execute(Service service, String method, Object... parameters)
 			throws ServiceMethodNotFoundException, IllegalArgumentException, IllegalAccessException,
-			InvocationTargetException, L2pSecurityException {
+			InvocationTargetException, InternalSecurityException {
 		Method m = searchMethod(service.getClass(), method, parameters);
 
 		return m.invoke(service, parameters);
@@ -153,12 +153,12 @@ public abstract class ServiceHelper {
 	 *
 	 * @return a Method
 	 *
-	 * @throws L2pSecurityException
+	 * @throws InternalSecurityException
 	 * @throws ServiceMethodNotFoundException
 	 *
 	 */
 	public static Method searchMethod(Class<? extends Service> serviceClass, String methodName, Object[] params)
-			throws L2pSecurityException, ServiceMethodNotFoundException {
+			throws InternalSecurityException, ServiceMethodNotFoundException {
 		Class<?>[] acActualParamTypes = new Class[params.length];
 
 		for (int i = 0; i < params.length; i++) {

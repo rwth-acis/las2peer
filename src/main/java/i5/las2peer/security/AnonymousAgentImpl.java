@@ -13,7 +13,7 @@ public class AnonymousAgentImpl extends UserAgentImpl implements AnonymousAgent 
 
 	private static AnonymousAgentImpl instance;
 
-	public static synchronized AnonymousAgentImpl getInstance() throws L2pSecurityException, CryptoException {
+	public static synchronized AnonymousAgentImpl getInstance() throws AgentOperationFailedException, CryptoException {
 		if (instance == null) {
 			instance = new AnonymousAgentImpl(CryptoTools.generateKeyPair(), AnonymousAgent.PASSPHRASE,
 					CryptoTools.generateSalt());
@@ -22,7 +22,7 @@ public class AnonymousAgentImpl extends UserAgentImpl implements AnonymousAgent 
 	}
 
 	private AnonymousAgentImpl(KeyPair pair, String passphrase, byte[] salt)
-			throws L2pSecurityException, CryptoException {
+			throws AgentOperationFailedException, CryptoException {
 		super(pair, passphrase, salt);
 	}
 

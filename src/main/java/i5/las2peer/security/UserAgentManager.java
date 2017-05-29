@@ -61,7 +61,7 @@ public class UserAgentManager {
 
 			} catch (EnvelopeAlreadyExistsException e) {
 				throw new LoginNameAlreadyTakenException();
-			} catch (SerializationException | CryptoException | EnvelopeException | L2pSecurityException e) {
+			} catch (SerializationException | CryptoException | EnvelopeException e) {
 				node.observerNotice(MonitoringEvent.NODE_ERROR, "Envelope error while registering login name: " + e);
 			}
 		}
@@ -80,7 +80,7 @@ public class UserAgentManager {
 				}
 			} catch (EnvelopeAlreadyExistsException e) {
 				throw new EmailAlreadyTakenException();
-			} catch (SerializationException | CryptoException | EnvelopeException | L2pSecurityException e) {
+			} catch (SerializationException | CryptoException | EnvelopeException e) {
 				node.observerNotice(MonitoringEvent.NODE_ERROR, "Envelope error while registering email: " + e);
 			}
 		}
@@ -118,7 +118,7 @@ public class UserAgentManager {
 
 			} catch (EnvelopeAlreadyExistsException e) {
 				throw new OIDCSubAlreadyTakenException();
-			} catch (SerializationException | CryptoException | EnvelopeException | L2pSecurityException e) {
+			} catch (SerializationException | CryptoException | EnvelopeException e) {
 				node.observerNotice(MonitoringEvent.NODE_ERROR, "Envelope error while registering OIDC sub: " + e);
 			}
 		}
@@ -136,7 +136,7 @@ public class UserAgentManager {
 		if (name.equalsIgnoreCase(AnonymousAgent.LOGIN_NAME)) {
 			try {
 				return AnonymousAgentImpl.getInstance().getIdentifier();
-			} catch (L2pSecurityException | CryptoException e) {
+			} catch (AgentOperationFailedException | CryptoException e) {
 				throw new AgentNotFoundException("Could not retrieve anonymous agent", e);
 			}
 		}
@@ -145,7 +145,7 @@ public class UserAgentManager {
 			return (String) env.getContent();
 		} catch (EnvelopeNotFoundException e) {
 			throw new AgentNotFoundException("Username not found!", e);
-		} catch (EnvelopeException | SerializationException | L2pSecurityException | CryptoException e) {
+		} catch (EnvelopeException | SerializationException | CryptoException e) {
 			throw new AgentOperationFailedException("Could not read agent id from storage");
 		}
 	}
@@ -162,7 +162,7 @@ public class UserAgentManager {
 		if (email.equalsIgnoreCase(AnonymousAgent.EMAIL)) {
 			try {
 				return AnonymousAgentImpl.getInstance().getIdentifier();
-			} catch (L2pSecurityException | CryptoException e) {
+			} catch (AgentOperationFailedException | CryptoException e) {
 				throw new AgentNotFoundException("Could not retrieve anonymous agent", e);
 			}
 		}
@@ -171,7 +171,7 @@ public class UserAgentManager {
 			return (String) env.getContent();
 		} catch (EnvelopeNotFoundException e) {
 			throw new AgentNotFoundException("Email not found!", e);
-		} catch (EnvelopeException | SerializationException | L2pSecurityException | CryptoException e) {
+		} catch (EnvelopeException | SerializationException | CryptoException e) {
 			throw new AgentOperationFailedException("Could not read email from storage");
 		}
 	}
@@ -190,7 +190,7 @@ public class UserAgentManager {
 			return (String) env.getContent();
 		} catch (EnvelopeNotFoundException e) {
 			throw new AgentNotFoundException("OIDC sub not found!", e);
-		} catch (EnvelopeException | SerializationException | L2pSecurityException | CryptoException e) {
+		} catch (EnvelopeException | SerializationException | CryptoException e) {
 			throw new AgentOperationFailedException("Could not read OIDC sub from storage");
 		}
 	}

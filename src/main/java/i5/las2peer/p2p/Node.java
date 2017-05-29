@@ -52,7 +52,7 @@ import i5.las2peer.security.AgentContext;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.AgentStorage;
 import i5.las2peer.security.GroupAgentImpl;
-import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.security.InternalSecurityException;
 import i5.las2peer.security.Mediator;
 import i5.las2peer.security.MessageReceiver;
 import i5.las2peer.security.MonitoringAgent;
@@ -816,10 +816,10 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @throws AgentNotRegisteredException If the designated recipient is not known at this node
 	 * @throws AgentException If any other issue with the agent occurs, e. g. XML not readable
 	 * @throws MessageException
-	 * @throws L2pSecurityException
+	 * @throws InternalSecurityException
 	 */
 	public void receiveMessage(Message message)
-			throws AgentNotRegisteredException, AgentException, MessageException, L2pSecurityException {
+			throws AgentNotRegisteredException, AgentException, MessageException, InternalSecurityException {
 		if (message.isResponse()) {
 			if (handoverAnswer(message)) {
 				return;
@@ -1085,21 +1085,21 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * Stores a new Agent to the network.
 	 * 
 	 * @param agent
-	 * @throws L2pSecurityException
+	 * @throws InternalSecurityException
 	 * @throws AgentException If any issue with the agent occurs
 	 */
-	public abstract void storeAgent(AgentImpl agent) throws AgentException, L2pSecurityException;
+	public abstract void storeAgent(AgentImpl agent) throws AgentException, InternalSecurityException;
 
 	/**
 	 * Updates an existing agent of the network.
 	 * 
 	 * @param agent
-	 * @throws L2pSecurityException
+	 * @throws InternalSecurityException
 	 * @throws AgentException If any issue with the agent occurs
 	 * @throws EnvelopeException
 	 */
 	@Deprecated
-	public abstract void updateAgent(AgentImpl agent) throws L2pSecurityException, AgentException, EnvelopeException;
+	public abstract void updateAgent(AgentImpl agent) throws InternalSecurityException, AgentException, EnvelopeException;
 
 	/**
 	 * returns the manager responsible for user management
@@ -1386,7 +1386,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 				if (thrown instanceof ServiceInvocationException) {
 					throw (ServiceInvocationException) thrown;
 				} else if ((thrown instanceof InvocationTargetException)
-						&& (thrown.getCause() instanceof L2pSecurityException)) {
+						&& (thrown.getCause() instanceof InternalSecurityException)) {
 					// internal L2pSecurityException (like internal method access or unauthorizes object access)
 					throw new ServiceAccessDeniedException("Internal security exception!", thrown.getCause());
 				} else {
@@ -1404,7 +1404,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 				throw new ServiceInvocationException(
 						"Unknown RMI response type: " + resultContent.getClass().getCanonicalName());
 			}
-		} catch (L2pSecurityException e) {
+		} catch (InternalSecurityException e) {
 			throw new ServiceInvocationFailedException("Cannot encrypt or decrypt message!", e);
 		} catch (TimeoutException | InterruptedException e) {
 			// Do not log service class name (privacy..)
@@ -1560,10 +1560,10 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * 
 	 * @param agentId
 	 * @return the context for the given agent
-	 * @throws L2pSecurityException
+	 * @throws InternalSecurityException
 	 * @throws AgentException If any issue with the agent occurs, e. g. XML not readable
 	 */
-	public AgentContext getAgentContext(String agentId) throws L2pSecurityException, AgentException {
+	public AgentContext getAgentContext(String agentId) throws InternalSecurityException, AgentException {
 		AgentContext result = htLocalExecutionContexts.get(agentId);
 
 		if (result == null) {

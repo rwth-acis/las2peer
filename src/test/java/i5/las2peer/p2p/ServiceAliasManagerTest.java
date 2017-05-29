@@ -10,7 +10,7 @@ import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentOperationFailedException;
-import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.security.InternalSecurityException;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.tools.CryptoException;
 
@@ -21,7 +21,7 @@ public class ServiceAliasManagerTest {
 	}
 
 	@Test
-	public void testDuplication() throws CryptoException, L2pSecurityException, AliasConflictException,
+	public void testDuplication() throws CryptoException, InternalSecurityException, AliasConflictException,
 			AliasNotFoundException, AgentAccessDeniedException, AgentOperationFailedException {
 		LocalNode node = LocalNode.launchNode();
 		ServiceAgentImpl agentA = ServiceAgentImpl.createServiceAgent(ServiceNameVersion.fromString("serviceA@1.0"),
@@ -57,7 +57,7 @@ public class ServiceAliasManagerTest {
 	}
 
 	@Test
-	public void testRegistering() throws CryptoException, L2pSecurityException, AliasConflictException,
+	public void testRegistering() throws CryptoException, InternalSecurityException, AliasConflictException,
 			AliasNotFoundException, AgentAccessDeniedException, AgentOperationFailedException {
 		LocalNode node = LocalNode.launchNode();
 		ServiceAgentImpl agentA = ServiceAgentImpl.createServiceAgent(ServiceNameVersion.fromString("serviceA@1.0"),
@@ -99,7 +99,7 @@ public class ServiceAliasManagerTest {
 	}
 
 	@Test
-	public void testResolve() throws CryptoException, L2pSecurityException, AliasConflictException,
+	public void testResolve() throws CryptoException, InternalSecurityException, AliasConflictException,
 			AliasNotFoundException, AgentAccessDeniedException, AgentOperationFailedException {
 		LocalNode node = LocalNode.launchNode();
 		ServiceAgentImpl agentA = ServiceAgentImpl.createServiceAgent(ServiceNameVersion.fromString("serviceA@1.0"),
@@ -155,7 +155,7 @@ public class ServiceAliasManagerTest {
 	}
 
 	@Test
-	public void testIntegration() throws CryptoException, L2pSecurityException, AgentAlreadyRegisteredException,
+	public void testIntegration() throws CryptoException, InternalSecurityException, AgentAlreadyRegisteredException,
 			AgentException, AliasNotFoundException, AgentAccessDeniedException {
 		LocalNode node = LocalNode.launchNode();
 		ServiceAgentImpl agentA = ServiceAgentImpl

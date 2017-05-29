@@ -13,6 +13,7 @@ import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.persistency.EnvelopeException;
 import i5.las2peer.api.persistency.EnvelopeNotFoundException;
 import i5.las2peer.api.security.AgentException;
+import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.api.security.AnonymousAgent;
@@ -29,7 +30,7 @@ import i5.las2peer.persistency.StorageStoreResultHandler;
 import i5.las2peer.security.AgentContext;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.AnonymousAgentImpl;
-import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.security.InternalSecurityException;
 import i5.las2peer.security.MessageReceiver;
 import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.serialization.MalformedXMLException;
@@ -237,7 +238,7 @@ public class LocalNode extends Node {
 		if (id.equalsIgnoreCase(AnonymousAgent.LOGIN_NAME)) {
 			try {
 				return AnonymousAgentImpl.getInstance();
-			} catch (L2pSecurityException | CryptoException e) {
+			} catch (AgentOperationFailedException | CryptoException e) {
 				throw new AgentNotFoundException("Could not retrieve anonymous agent", e);
 			}
 		} else {
@@ -281,7 +282,7 @@ public class LocalNode extends Node {
 
 	@Deprecated
 	@Override
-	public void updateAgent(AgentImpl agent) throws AgentException, L2pSecurityException {
+	public void updateAgent(AgentImpl agent) throws AgentException, InternalSecurityException {
 		storeAgent(agent);
 	}
 
@@ -340,10 +341,10 @@ public class LocalNode extends Node {
 	 * 
 	 * @param a
 	 * @return a freshly started node hosting the given agent
-	 * @throws L2pSecurityException
+	 * @throws InternalSecurityException
 	 * @throws AgentException
 	 */
-	public static LocalNode launchAgent(AgentImpl a) throws L2pSecurityException, AgentException {
+	public static LocalNode launchAgent(AgentImpl a) throws InternalSecurityException, AgentException {
 		LocalNode result = launchNode();
 		try {
 			result.registerReceiver(a);

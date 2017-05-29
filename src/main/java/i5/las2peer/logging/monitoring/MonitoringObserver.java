@@ -4,12 +4,13 @@ import i5.las2peer.api.execution.ServiceInvocationException;
 import i5.las2peer.api.logging.MonitoringEvent;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentNotFoundException;
+import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.communication.Message;
 import i5.las2peer.logging.NodeObserver;
 import i5.las2peer.p2p.MessageResultListener;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.persistency.EncodingFailedException;
-import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.security.InternalSecurityException;
 import i5.las2peer.security.MonitoringAgent;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.CryptoException;
@@ -59,7 +60,7 @@ public class MonitoringObserver implements NodeObserver {
 			sendingAgent = MonitoringAgent.createMonitoringAgent("sendingAgentPass");
 		} catch (CryptoException e) {
 			e.printStackTrace();
-		} catch (L2pSecurityException e) {
+		} catch (AgentOperationFailedException e) {
 			e.printStackTrace();
 		}
 	}
@@ -82,7 +83,7 @@ public class MonitoringObserver implements NodeObserver {
 		} catch (AgentException e) {
 			System.out.println("Monitoring: Problems registering MonitoringAgent!" + e);
 			e.printStackTrace();
-		} catch (L2pSecurityException e) {
+		} catch (InternalSecurityException e) {
 			System.out.println("Monitoring: Problems registering MonitoringAgent!" + e);
 			e.printStackTrace();
 		}
@@ -171,7 +172,7 @@ public class MonitoringObserver implements NodeObserver {
 			messageResultListener = new MessageResultListener(2000); // unused
 			registeredAt.sendMessage(las2peerMessage, messageResultListener);
 			System.out.println("Monitoring: message " + las2peerMessage.getId() + " send!");
-		} catch (L2pSecurityException e) {
+		} catch (InternalSecurityException e) {
 			e.printStackTrace();
 		} catch (EncodingFailedException e) {
 			e.printStackTrace();

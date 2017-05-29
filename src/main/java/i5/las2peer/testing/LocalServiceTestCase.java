@@ -16,7 +16,7 @@ import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.p2p.LocalNode;
 import i5.las2peer.security.AgentImpl;
-import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.security.InternalSecurityException;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.tools.CryptoException;
@@ -64,10 +64,10 @@ public abstract class LocalServiceTestCase {
 	 * 
 	 * @return the service agent either created or loaded
 	 * @throws CryptoException
-	 * @throws L2pSecurityException
+	 * @throws InternalSecurityException
 	 * @throws AgentException
 	 */
-	public ServiceAgentImpl createServiceAgent() throws CryptoException, L2pSecurityException, AgentException {
+	public ServiceAgentImpl createServiceAgent() throws CryptoException, InternalSecurityException, AgentException {
 		Class<? extends LocalServiceTestCase> cls = getClass();
 
 		try {

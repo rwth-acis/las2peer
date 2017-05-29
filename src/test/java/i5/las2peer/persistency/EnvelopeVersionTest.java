@@ -549,7 +549,7 @@ public class EnvelopeVersionTest {
 			// Agent Neo (same group) reads the envelope
 			PastryNodeImpl node2 = nodes.get(1);
 			EnvelopeVersion fetchedEnv = node2.fetchEnvelope("test");
-			String content = (String) fetchedEnv.getContent(neo, node2);
+			String content = (String) fetchedEnv.getContent(node2.getAgentContext(neo));
 			Assert.assertEquals(testContent, content);
 			Assert.assertEquals(groupEnv.getReaderGroupIds(), fetchedEnv.getReaderGroupIds());
 			// Agent Smith updates the envelope
@@ -559,7 +559,7 @@ public class EnvelopeVersionTest {
 			node1.storeEnvelope(groupEnv2, smith);
 			// Agent Neo reads the content again
 			EnvelopeVersion fetchedEnv2 = node2.fetchEnvelope("test");
-			String content2 = (String) fetchedEnv2.getContent(neo, node2);
+			String content2 = (String) fetchedEnv2.getContent(node2.getAgentContext(neo));
 			Assert.assertEquals(testContent2, content2);
 			Assert.assertEquals(groupEnv2.getReaderGroupIds(), fetchedEnv2.getReaderGroupIds());
 		} catch (Exception e) {
@@ -591,7 +591,7 @@ public class EnvelopeVersionTest {
 			// Agent Neo (same group) reads the envelope ...
 			PastryNodeImpl node2 = nodes.get(1);
 			EnvelopeVersion fetchedEnv = node2.fetchEnvelope("test");
-			String content = (String) fetchedEnv.getContent(neo, node2);
+			String content = (String) fetchedEnv.getContent(node2.getAgentContext(neo));
 			Assert.assertEquals(testContent, content);
 			// ... and updates it.
 			final String testContent2 = "content from neo";
@@ -599,7 +599,7 @@ public class EnvelopeVersionTest {
 			node2.storeEnvelope(updated, group1);
 			// Agent Smith reads content from Neo
 			EnvelopeVersion fetched2 = node1.fetchEnvelope("test");
-			String content2 = (String) fetched2.getContent(smith, node1);
+			String content2 = (String) fetched2.getContent(node1.getAgentContext(smith));
 			Assert.assertEquals(testContent2, content2);
 		} catch (Exception e) {
 			e.printStackTrace();

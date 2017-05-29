@@ -43,7 +43,7 @@ import i5.las2peer.persistency.EnvelopeVersion;
 import i5.las2peer.security.AgentContext;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.GroupAgentImpl;
-import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.security.InternalSecurityException;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.serialization.SerializationException;
@@ -183,7 +183,7 @@ public class ExecutionContext implements Context {
 			UserAgent agent = UserAgentImpl.createUserAgent(passphrase);
 			agent.unlock(passphrase);
 			return agent;
-		} catch (CryptoException | L2pSecurityException | AgentAccessDeniedException e) {
+		} catch (CryptoException | AgentAccessDeniedException e) {
 			throw new AgentOperationFailedException(e);
 		}
 	}
@@ -194,7 +194,7 @@ public class ExecutionContext implements Context {
 			GroupAgent agent = GroupAgentImpl.createGroupAgent(members);
 			agent.unlock(members[0]);
 			return agent;
-		} catch (L2pSecurityException | AgentLockedException | CryptoException | SerializationException
+		} catch (AgentLockedException | CryptoException | SerializationException
 				| AgentAccessDeniedException e) {
 			throw new AgentOperationFailedException(e);
 		}
@@ -240,7 +240,7 @@ public class ExecutionContext implements Context {
 		} catch (AgentAlreadyExistsException | AgentLockedException | AgentAccessDeniedException
 				| AgentOperationFailedException e) {
 			throw e;
-		} catch (L2pSecurityException e) {
+		} catch (InternalSecurityException e) {
 			throw new AgentAccessDeniedException(e);
 		} catch (AgentException e) {
 			throw new AgentOperationFailedException(e);
@@ -291,7 +291,7 @@ public class ExecutionContext implements Context {
 		Envelope envelope;
 		try {
 			envelope = new EnvelopeImpl(version, node.getAgentContext((AgentImpl) using));
-		} catch (CryptoException | L2pSecurityException e) {
+		} catch (CryptoException e) {
 			throw new EnvelopeAccessDeniedException("This agent does not have access to the envelope!", e);
 		} catch (SerializationException e) {
 			throw new EnvelopeOperationFailedException("Envelope cannot be deserialized!", e);

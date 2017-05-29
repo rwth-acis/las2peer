@@ -14,6 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import i5.las2peer.api.security.AgentAccessDeniedException;
+import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.serialization.MalformedXMLException;
@@ -33,7 +34,7 @@ public class GroupAgentImplTest {
 	private UserAgentImpl abel;
 
 	@Before
-	public void setUp() throws NoSuchAlgorithmException, L2pSecurityException, CryptoException {
+	public void setUp() throws NoSuchAlgorithmException, AgentException, CryptoException {
 		adam = UserAgentImpl.createUserAgent(ADAMSPASS);
 		eve = UserAgentImpl.createUserAgent(EVESSPASS);
 		kain = UserAgentImpl.createUserAgent(KAINSPASS);
@@ -41,7 +42,7 @@ public class GroupAgentImplTest {
 	}
 
 	@Test
-	public void testXmlAndBack() throws NoSuchAlgorithmException, L2pSecurityException, CryptoException,
+	public void testXmlAndBack() throws NoSuchAlgorithmException, InternalSecurityException, CryptoException,
 			SerializationException, MalformedXMLException, AgentAccessDeniedException, AgentOperationFailedException,
 			AgentLockedException {
 		GroupAgentImpl testee = GroupAgentImpl.createGroupAgent(new AgentImpl[] { adam, eve });
@@ -71,7 +72,7 @@ public class GroupAgentImplTest {
 	}
 
 	@Test
-	public void testUnlocking() throws L2pSecurityException, CryptoException, SerializationException,
+	public void testUnlocking() throws InternalSecurityException, CryptoException, SerializationException,
 			AgentAccessDeniedException, AgentOperationFailedException, AgentLockedException {
 		GroupAgentImpl testee = GroupAgentImpl.createGroupAgent(new AgentImpl[] { adam, eve });
 
@@ -105,7 +106,7 @@ public class GroupAgentImplTest {
 	}
 
 	@Test
-	public void testAdding() throws L2pSecurityException, CryptoException, SerializationException,
+	public void testAdding() throws InternalSecurityException, CryptoException, SerializationException,
 			AgentAccessDeniedException, AgentOperationFailedException, AgentLockedException {
 		GroupAgentImpl testee = GroupAgentImpl.createGroupAgent(new AgentImpl[] { adam, eve });
 		abel.unlock(ABELSPASS);
@@ -130,7 +131,7 @@ public class GroupAgentImplTest {
 	}
 
 	@Test
-	public void testSubGrouping() throws SerializationException, CryptoException, L2pSecurityException,
+	public void testSubGrouping() throws SerializationException, CryptoException, InternalSecurityException,
 			AgentAccessDeniedException, AgentOperationFailedException, AgentLockedException {
 		GroupAgentImpl subGroup = GroupAgentImpl.createGroupAgent(new AgentImpl[] { adam, eve });
 		GroupAgentImpl superGroup = GroupAgentImpl.createGroupAgent(new AgentImpl[] { abel, subGroup });
@@ -156,7 +157,7 @@ public class GroupAgentImplTest {
 		assertSame(subGroup, superGroup.getOpeningAgent());
 	}
 
-	public void testApply() throws L2pSecurityException, CryptoException, SerializationException,
+	public void testApply() throws InternalSecurityException, CryptoException, SerializationException,
 			AgentAccessDeniedException, AgentOperationFailedException, AgentLockedException {
 		GroupAgentImpl agent = GroupAgentImpl.createGroupAgent(new AgentImpl[] { adam, eve });
 		assertTrue(agent.hasMember(adam));

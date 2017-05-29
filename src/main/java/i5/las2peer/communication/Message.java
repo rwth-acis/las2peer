@@ -27,7 +27,7 @@ import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.AgentStorage;
-import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.security.InternalSecurityException;
 import i5.las2peer.serialization.MalformedXMLException;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.serialization.SerializeTools;
@@ -141,12 +141,12 @@ public class Message implements XmlAble, Cloneable {
 	 * @param to
 	 * @param data
 	 * @throws EncodingFailedException
-	 * @throws L2pSecurityException the private key of the sender is not accessible for signing
+	 * @throws InternalSecurityException the private key of the sender is not accessible for signing
 	 * @throws SerializationException
 	 * 
 	 */
 	public Message(AgentImpl from, AgentImpl to, Serializable data)
-			throws EncodingFailedException, L2pSecurityException, SerializationException {
+			throws EncodingFailedException, InternalSecurityException, SerializationException {
 		this(from, to, data, DEFAULT_TIMEOUT);
 	}
 
@@ -158,11 +158,11 @@ public class Message implements XmlAble, Cloneable {
 	 * @param data
 	 * @param timeOutMs timeout for the validity of the new message
 	 * @throws EncodingFailedException
-	 * @throws L2pSecurityException the private key of the sender is not accessible for signing
+	 * @throws InternalSecurityException the private key of the sender is not accessible for signing
 	 * @throws SerializationException
 	 */
 	public Message(AgentImpl from, AgentImpl to, Serializable data, long timeOutMs)
-			throws EncodingFailedException, L2pSecurityException, SerializationException {
+			throws EncodingFailedException, InternalSecurityException, SerializationException {
 		if (from == null || to == null) {
 			throw new IllegalArgumentException("null not allowed as sender or recipient!");
 		}
@@ -182,7 +182,7 @@ public class Message implements XmlAble, Cloneable {
 		try {
 			signContent();
 		} catch (AgentLockedException e) {
-			throw new L2pSecurityException("Agent locked", e);
+			throw new InternalSecurityException("Agent locked", e);
 		}
 
 		close();
@@ -195,11 +195,11 @@ public class Message implements XmlAble, Cloneable {
 	 * @param to
 	 * @param data
 	 * @throws EncodingFailedException
-	 * @throws L2pSecurityException the private key of the sender is not accessible for signing
+	 * @throws InternalSecurityException the private key of the sender is not accessible for signing
 	 * @throws SerializationException
 	 */
 	public Message(AgentImpl from, AgentImpl to, XmlAble data)
-			throws EncodingFailedException, L2pSecurityException, SerializationException {
+			throws EncodingFailedException, InternalSecurityException, SerializationException {
 		this(from, to, data, DEFAULT_TIMEOUT);
 	}
 
@@ -211,11 +211,11 @@ public class Message implements XmlAble, Cloneable {
 	 * @param data
 	 * @param timeoutMs timeout for the validity of the new message
 	 * @throws EncodingFailedException
-	 * @throws L2pSecurityException the private key of the sender is not accessible for signing
+	 * @throws InternalSecurityException the private key of the sender is not accessible for signing
 	 * @throws SerializationException
 	 */
 	public Message(AgentImpl from, AgentImpl to, XmlAble data, long timeoutMs)
-			throws EncodingFailedException, L2pSecurityException, SerializationException {
+			throws EncodingFailedException, InternalSecurityException, SerializationException {
 		sender = from;
 		senderId = from.getIdentifier();
 		recipient = to;
@@ -233,11 +233,11 @@ public class Message implements XmlAble, Cloneable {
 	 * @param topic
 	 * @param data
 	 * @throws EncodingFailedException
-	 * @throws L2pSecurityException
+	 * @throws InternalSecurityException
 	 * @throws SerializationException
 	 */
 	public Message(AgentImpl from, long topic, Serializable data)
-			throws EncodingFailedException, L2pSecurityException, SerializationException {
+			throws EncodingFailedException, InternalSecurityException, SerializationException {
 		this(from, topic, data, DEFAULT_TIMEOUT);
 	}
 
@@ -249,11 +249,11 @@ public class Message implements XmlAble, Cloneable {
 	 * @param data
 	 * @param timeoutMs
 	 * @throws EncodingFailedException
-	 * @throws L2pSecurityException
+	 * @throws InternalSecurityException
 	 * @throws SerializationException
 	 */
 	public Message(AgentImpl from, long topic, Serializable data, long timeoutMs)
-			throws EncodingFailedException, L2pSecurityException, SerializationException {
+			throws EncodingFailedException, InternalSecurityException, SerializationException {
 		if (from == null) {
 			throw new IllegalArgumentException("null not allowed as sender!");
 		}
@@ -275,10 +275,10 @@ public class Message implements XmlAble, Cloneable {
 	 * common to all constructors
 	 * 
 	 * @throws EncodingFailedException
-	 * @throws L2pSecurityException
+	 * @throws InternalSecurityException
 	 * @throws SerializationException
 	 */
-	private void finalizeConstructor() throws EncodingFailedException, L2pSecurityException, SerializationException {
+	private void finalizeConstructor() throws EncodingFailedException, InternalSecurityException, SerializationException {
 		timestampMs = new Date().getTime();
 		id = new Random().nextLong();
 
@@ -292,7 +292,7 @@ public class Message implements XmlAble, Cloneable {
 		try {
 			signContent();
 		} catch (AgentLockedException e) {
-			throw new L2pSecurityException("Agent locked", e);
+			throw new InternalSecurityException("Agent locked", e);
 		}
 
 		close();
@@ -305,11 +305,11 @@ public class Message implements XmlAble, Cloneable {
 	 * @param data
 	 * @param timeoutMs timeout for the validity of the new message
 	 * @throws EncodingFailedException
-	 * @throws L2pSecurityException the private key of the sender is not accessible for signing
+	 * @throws InternalSecurityException the private key of the sender is not accessible for signing
 	 * @throws SerializationException
 	 */
 	public Message(Message responseTo, XmlAble data, long timeoutMs)
-			throws EncodingFailedException, L2pSecurityException, SerializationException {
+			throws EncodingFailedException, InternalSecurityException, SerializationException {
 		if (!responseTo.isOpen()) {
 			throw new IllegalStateException("the original message has to be open to create a response to it!");
 		}
@@ -336,11 +336,11 @@ public class Message implements XmlAble, Cloneable {
 	 * @param responseTo
 	 * @param data
 	 * @throws SerializationException
-	 * @throws L2pSecurityException the private key of the sender is not accessible for signing
+	 * @throws InternalSecurityException the private key of the sender is not accessible for signing
 	 * @throws EncodingFailedException
 	 */
 	public Message(Message responseTo, XmlAble data)
-			throws EncodingFailedException, L2pSecurityException, SerializationException {
+			throws EncodingFailedException, InternalSecurityException, SerializationException {
 		this(responseTo, data, DEFAULT_TIMEOUT);
 	}
 
@@ -351,11 +351,11 @@ public class Message implements XmlAble, Cloneable {
 	 * @param data
 	 * @param timeoutMs
 	 * @throws EncodingFailedException
-	 * @throws L2pSecurityException the private key of the sender is not accessible for signing
+	 * @throws InternalSecurityException the private key of the sender is not accessible for signing
 	 * @throws SerializationException
 	 */
 	public Message(Message responseTo, Serializable data, long timeoutMs)
-			throws EncodingFailedException, L2pSecurityException, SerializationException {
+			throws EncodingFailedException, InternalSecurityException, SerializationException {
 		if (!responseTo.isOpen()) {
 			throw new IllegalStateException("the original message has to be open to create a response to it!");
 		}
@@ -383,11 +383,11 @@ public class Message implements XmlAble, Cloneable {
 	 * @param responseTo
 	 * @param data
 	 * @throws EncodingFailedException
-	 * @throws L2pSecurityException the private key of the sender is not accessible for signing
+	 * @throws InternalSecurityException the private key of the sender is not accessible for signing
 	 * @throws SerializationException
 	 */
 	public Message(Message responseTo, Serializable data)
-			throws EncodingFailedException, L2pSecurityException, SerializationException {
+			throws EncodingFailedException, InternalSecurityException, SerializationException {
 		this(responseTo, data, DEFAULT_TIMEOUT);
 	}
 
@@ -563,11 +563,11 @@ public class Message implements XmlAble, Cloneable {
 	 * get the content of this message may be Serializable or XmlAble
 	 * 
 	 * @return actual content of the message
-	 * @throws L2pSecurityException the message (envelope) has to be opened (decrypted) first
+	 * @throws InternalSecurityException the message (envelope) has to be opened (decrypted) first
 	 */
-	public Object getContent() throws L2pSecurityException {
+	public Object getContent() throws InternalSecurityException {
 		if (!isOpen()) {
-			throw new L2pSecurityException("You have to open the envelope first!");
+			throw new InternalSecurityException("You have to open the envelope first!");
 		}
 
 		return content;
@@ -580,10 +580,10 @@ public class Message implements XmlAble, Cloneable {
 	 * {@link i5.las2peer.security.AgentContext} bound to him.
 	 * 
 	 * @param storage
-	 * @throws L2pSecurityException
+	 * @throws InternalSecurityException
 	 * @throws AgentException If an issue with the sender agent occurs
 	 */
-	public void open(AgentStorage storage) throws L2pSecurityException, AgentException {
+	public void open(AgentStorage storage) throws InternalSecurityException, AgentException {
 		open(null, storage);
 	}
 
@@ -596,11 +596,11 @@ public class Message implements XmlAble, Cloneable {
 	 * @param storage
 	 * 
 	 * 
-	 * @throws L2pSecurityException the private key of the receiver has to be unlocked for decryption
+	 * @throws InternalSecurityException the private key of the receiver has to be unlocked for decryption
 	 * @throws AgentException
 	 * @throws AgentNotFoundException If an issue with the sender agent occurs
 	 */
-	public void open(AgentImpl unlockedRecipient, AgentStorage storage) throws L2pSecurityException, AgentException {
+	public void open(AgentImpl unlockedRecipient, AgentStorage storage) throws InternalSecurityException, AgentException {
 		if (isOpen()) {
 			return;
 		}
@@ -615,7 +615,7 @@ public class Message implements XmlAble, Cloneable {
 			}
 
 			if (recipient.isLocked()) {
-				throw new L2pSecurityException("private key of recipient is locked!");
+				throw new InternalSecurityException("private key of recipient is locked!");
 			}
 		}
 
@@ -634,44 +634,44 @@ public class Message implements XmlAble, Cloneable {
 			Element root = doc.getDocumentElement();
 
 			if (!root.hasAttribute("sender")) {
-				throw new L2pSecurityException("content block needs sender attribute!");
+				throw new InternalSecurityException("content block needs sender attribute!");
 			}
 			if (!root.hasAttribute("recipient") && !root.hasAttribute("topic")) {
-				throw new L2pSecurityException("content block needs recipient or topic attribute!");
+				throw new InternalSecurityException("content block needs recipient or topic attribute!");
 			}
 			if (!root.hasAttribute("timestamp")) {
-				throw new L2pSecurityException("content block needs timestamp attribute!");
+				throw new InternalSecurityException("content block needs timestamp attribute!");
 			}
 			if (!root.hasAttribute("timeout")) {
-				throw new L2pSecurityException("content block needs timeout attribute!");
+				throw new InternalSecurityException("content block needs timeout attribute!");
 			}
 			if (!root.hasAttribute("id")) {
-				throw new L2pSecurityException("content block needs id attribute!");
+				throw new InternalSecurityException("content block needs id attribute!");
 			}
 
 			if (!root.getAttribute("sender").equalsIgnoreCase(sender.getIdentifier())) {
-				throw new L2pSecurityException("message is signed for another sender!!");
+				throw new InternalSecurityException("message is signed for another sender!!");
 			}
 			if (root.hasAttribute("recipient") && (recipient == null
 					|| !root.getAttribute("recipient").equalsIgnoreCase(recipient.getIdentifier()))) {
-				throw new L2pSecurityException("message is signed for another recipient!!");
+				throw new InternalSecurityException("message is signed for another recipient!!");
 			}
 			if (root.hasAttribute("topic") && Long.parseLong(root.getAttribute("topic")) != (topicId)) {
-				throw new L2pSecurityException("message is signed for another topic!!");
+				throw new InternalSecurityException("message is signed for another topic!!");
 			}
 			if (Long.parseLong(root.getAttribute("timestamp")) != timestampMs) {
-				throw new L2pSecurityException("message is signed for another timestamp!!");
+				throw new InternalSecurityException("message is signed for another timestamp!!");
 			}
 			if (Long.parseLong(root.getAttribute("timeout")) != validMs) {
-				throw new L2pSecurityException("message is signed for another timeout value!!");
+				throw new InternalSecurityException("message is signed for another timeout value!!");
 			}
 			if (Long.parseLong(root.getAttribute("id")) != id) {
-				throw new L2pSecurityException("message is signed for another id!");
+				throw new InternalSecurityException("message is signed for another id!");
 			}
 
 			if ((root.hasAttribute("responseTo") || responseToId != null)
 					&& !responseToId.equals(Long.parseLong(root.getAttribute("responseTo")))) {
-				throw new L2pSecurityException("message is signed as response to another message!");
+				throw new InternalSecurityException("message is signed as response to another message!");
 			}
 
 			if (root.getAttribute("type").equals("Serializable")) {
@@ -680,13 +680,13 @@ public class Message implements XmlAble, Cloneable {
 				content = XmlAble.createFromXml(root.getFirstChild().toString(), root.getAttribute("class"));
 			}
 		} catch (CryptoException e) {
-			throw new L2pSecurityException("Crypto-Problems: Unable to open message content", e);
+			throw new InternalSecurityException("Crypto-Problems: Unable to open message content", e);
 		} catch (SerializationException e) {
-			throw new L2pSecurityException("deserializiation problems with decryption!", e);
+			throw new InternalSecurityException("deserializiation problems with decryption!", e);
 		} catch (ClassNotFoundException e) {
-			throw new L2pSecurityException("content class missing with decryption!", e);
+			throw new InternalSecurityException("content class missing with decryption!", e);
 		} catch (MalformedXMLException | ParserConfigurationException | SAXException | IOException e) {
-			throw new L2pSecurityException("xml syntax problems with decryption!", e);
+			throw new InternalSecurityException("xml syntax problems with decryption!", e);
 		}
 
 		// verify signature
@@ -696,9 +696,9 @@ public class Message implements XmlAble, Cloneable {
 	/**
 	 * verify the signature of this message the content has to be available for this
 	 * 
-	 * @throws L2pSecurityException
+	 * @throws InternalSecurityException
 	 */
-	public void verifySignature() throws L2pSecurityException {
+	public void verifySignature() throws InternalSecurityException {
 		Signature sig;
 		try {
 			sig = Signature.getInstance(CryptoTools.getSignatureMethod());
@@ -706,14 +706,14 @@ public class Message implements XmlAble, Cloneable {
 			sig.update(baDecryptedContent);
 
 			if (!sig.verify(baSignature)) {
-				throw new L2pSecurityException("Signature invalid!");
+				throw new InternalSecurityException("Signature invalid!");
 			}
 		} catch (InvalidKeyException e) {
-			throw new L2pSecurityException("unable to verify signature: key problems", e);
+			throw new InternalSecurityException("unable to verify signature: key problems", e);
 		} catch (NoSuchAlgorithmException e) {
-			throw new L2pSecurityException("unable to verify signature: algorithm problems", e);
+			throw new InternalSecurityException("unable to verify signature: algorithm problems", e);
 		} catch (SignatureException e) {
-			throw new L2pSecurityException("unable to verify signature: signature problems", e);
+			throw new InternalSecurityException("unable to verify signature: signature problems", e);
 		}
 	}
 

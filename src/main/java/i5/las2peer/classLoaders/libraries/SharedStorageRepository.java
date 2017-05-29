@@ -8,7 +8,6 @@ import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.persistency.EnvelopeVersion;
 import i5.las2peer.p2p.PastryNodeImpl;
-import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.serialization.MalformedXMLException;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.CryptoException;
@@ -58,7 +57,7 @@ public class SharedStorageRepository implements Repository {
 			return LoadedNetworkLibrary.createFromXml(node, xmlStr);
 		} catch (EnvelopeException e) {
 			throw new LibraryNotFoundException("Could not fetch library '" + libId + "' information from network", e);
-		} catch (CryptoException | L2pSecurityException | SerializationException e) {
+		} catch (CryptoException | SerializationException e) {
 			throw new LibraryNotFoundException(
 					"Could not read library '" + libId + "' information from network envelope", e);
 		} catch (MalformedXMLException e) {

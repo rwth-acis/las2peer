@@ -160,7 +160,7 @@ public class MediatorTest {
 						} else {
 							return false;
 						}
-					} catch (L2pSecurityException e) {
+					} catch (InternalSecurityException e) {
 						return false;
 					}
 				}

@@ -9,6 +9,7 @@ import org.w3c.dom.Element;
 
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentLockedException;
+import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.api.security.UserAgent;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
@@ -37,10 +38,10 @@ public class UserAgentImpl extends PassphraseAgentImpl implements UserAgent {
 	 * @param pair
 	 * @param passphrase
 	 * @param salt
-	 * @throws L2pSecurityException
+	 * @throws AgentOperationFailedException
 	 * @throws CryptoException
 	 */
-	protected UserAgentImpl(KeyPair pair, String passphrase, byte[] salt) throws L2pSecurityException, CryptoException {
+	protected UserAgentImpl(KeyPair pair, String passphrase, byte[] salt) throws AgentOperationFailedException, CryptoException {
 		super(pair, passphrase, salt);
 	}
 
@@ -151,9 +152,9 @@ public class UserAgentImpl extends PassphraseAgentImpl implements UserAgent {
 	 * @param passphrase passphrase for the secret key of the new user
 	 * @return a new UserAgent
 	 * @throws CryptoException
-	 * @throws L2pSecurityException
+	 * @throws AgentOperationFailedException
 	 */
-	public static UserAgentImpl createUserAgent(String passphrase) throws CryptoException, L2pSecurityException {
+	public static UserAgentImpl createUserAgent(String passphrase) throws CryptoException, AgentOperationFailedException {
 		byte[] salt = CryptoTools.generateSalt();
 		return new UserAgentImpl(CryptoTools.generateKeyPair(), passphrase, salt);
 	}
@@ -237,7 +238,7 @@ public class UserAgentImpl extends PassphraseAgentImpl implements UserAgent {
 				System.out.println("response: " + message.getResponseToId());
 				throw new MessageException("What to do with this message?!");
 			}
-		} catch (L2pSecurityException e) {
+		} catch (InternalSecurityException e) {
 			throw new MessageException("Security problems handling the received message", e);
 		} catch (EncodingFailedException e) {
 			throw new MessageException("encoding problems with sending an answer", e);

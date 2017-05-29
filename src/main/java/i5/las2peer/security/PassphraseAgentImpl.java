@@ -33,11 +33,11 @@ public abstract class PassphraseAgentImpl extends AgentImpl implements Passphras
 	 * @param pair
 	 * @param passphrase
 	 * @param salt
-	 * @throws L2pSecurityException
+	 * @throws AgentOperationFailedException
 	 * @throws CryptoException
 	 */
 	protected PassphraseAgentImpl(KeyPair pair, String passphrase, byte[] salt)
-			throws L2pSecurityException, CryptoException {
+			throws AgentOperationFailedException, CryptoException {
 		super(pair, CryptoTools.generateKeyForPassphrase(passphrase, salt));
 
 		this.salt = salt.clone();
@@ -77,15 +77,15 @@ public abstract class PassphraseAgentImpl extends AgentImpl implements Passphras
 	 * encrypt the private key into a byte array with strong encryption based on a passphrase to unlock the key
 	 * 
 	 * @param passphrase
-	 * @throws L2pSecurityException
+	 * @throws AgentOperationFailedException
 	 * @throws AgentLockedException 
 	 */
-	private void encryptPrivateKey(String passphrase) throws L2pSecurityException, AgentLockedException {
+	private void encryptPrivateKey(String passphrase) throws AgentOperationFailedException, AgentLockedException {
 		try {
 			salt = CryptoTools.generateSalt();
 			super.encryptPrivateKey(CryptoTools.generateKeyForPassphrase(passphrase, salt));
 		} catch (CryptoException e) {
-			throw new L2pSecurityException("problems with key generation for passphrase", e);
+			throw new AgentOperationFailedException("problems with key generation for passphrase", e);
 		}
 	}
 
@@ -102,10 +102,10 @@ public abstract class PassphraseAgentImpl extends AgentImpl implements Passphras
 	 * Change the passphrase for unlocking the private key. The key has to be unlocked first, of course.
 	 * 
 	 * @param passphrase
-	 * @throws L2pSecurityException
+	 * @throws AgentOperationFailedException
 	 * @throws AgentLockedException 
 	 */
-	public void changePassphrase(String passphrase) throws L2pSecurityException, AgentLockedException {
+	public void changePassphrase(String passphrase) throws AgentOperationFailedException, AgentLockedException {
 		if (isLocked()) {
 			throw new AgentLockedException();
 		}

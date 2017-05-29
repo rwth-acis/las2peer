@@ -11,7 +11,7 @@ import org.w3c.dom.NodeList;
 
 import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.persistency.VerificationFailedException;
-import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.security.InternalSecurityException;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.serialization.MalformedXMLException;
 import i5.las2peer.serialization.SerializationException;
@@ -143,23 +143,23 @@ public class NodeInformation implements XmlAble {
 	/**
 	 * verify the signature
 	 * 
-	 * @throws L2pSecurityException
+	 * @throws InternalSecurityException
 	 */
-	public void verifySignature() throws L2pSecurityException {
+	public void verifySignature() throws InternalSecurityException {
 		if (signature == null) {
-			throw new L2pSecurityException("No Signature!");
+			throw new InternalSecurityException("No Signature!");
 		}
 
 		if (nodeKey == null) {
-			throw new L2pSecurityException("No node key!");
+			throw new InternalSecurityException("No node key!");
 		}
 
 		try {
 			if (!CryptoTools.verifySignature(signature, getSignatureContent(), nodeKey)) {
-				throw new L2pSecurityException("signaure faulty!");
+				throw new InternalSecurityException("signaure faulty!");
 			}
 		} catch (VerificationFailedException e) {
-			throw new L2pSecurityException("unable to verify signature", e);
+			throw new InternalSecurityException("unable to verify signature", e);
 		}
 	}
 

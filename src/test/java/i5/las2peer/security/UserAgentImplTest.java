@@ -19,7 +19,7 @@ public class UserAgentImplTest {
 
 	@Test
 	public void testUnlocking() throws NoSuchAlgorithmException, CryptoException, AgentAccessDeniedException,
-			L2pSecurityException, AgentLockedException, AgentOperationFailedException {
+			InternalSecurityException, AgentLockedException, AgentOperationFailedException {
 		String passphrase = "A passphrase to unlock";
 		UserAgentImpl a = UserAgentImpl.createUserAgent(passphrase);
 
@@ -61,7 +61,7 @@ public class UserAgentImplTest {
 	}
 
 	@Test
-	public void testPassphraseChange() throws NoSuchAlgorithmException, L2pSecurityException, CryptoException,
+	public void testPassphraseChange() throws NoSuchAlgorithmException, InternalSecurityException, CryptoException,
 			AgentAccessDeniedException, AgentLockedException, AgentOperationFailedException {
 		String passphrase = "a passphrase";
 		UserAgentImpl a = UserAgentImpl.createUserAgent(passphrase);
@@ -88,7 +88,7 @@ public class UserAgentImplTest {
 
 	@Test
 	public void testXml() throws NoSuchAlgorithmException, MalformedXMLException, CryptoException,
-			AgentAccessDeniedException, AgentLockedException, L2pSecurityException, AgentOperationFailedException {
+			AgentAccessDeniedException, AgentLockedException, InternalSecurityException, AgentOperationFailedException {
 		String passphrase = "a pass";
 		String email = "usera@example.org";
 		UserAgentImpl a = UserAgentImpl.createUserAgent(passphrase);
@@ -104,7 +104,7 @@ public class UserAgentImplTest {
 		assertEquals(email, b.getEmail());
 	}
 
-	public void testLogin() throws CryptoException, L2pSecurityException, MalformedXMLException,
+	public void testLogin() throws CryptoException, InternalSecurityException, MalformedXMLException,
 			AgentAccessDeniedException, AgentLockedException, AgentOperationFailedException {
 		UserAgentImpl a = UserAgentImpl.createUserAgent("test");
 		a.unlock("test");
@@ -119,7 +119,7 @@ public class UserAgentImplTest {
 	}
 
 	@Test
-	public void testEmail() throws CryptoException, L2pSecurityException, MalformedXMLException,
+	public void testEmail() throws CryptoException, InternalSecurityException, MalformedXMLException,
 			AgentAccessDeniedException, AgentLockedException, AgentOperationFailedException {
 		UserAgentImpl a = UserAgentImpl.createUserAgent("test");
 		a.unlock("test");
@@ -134,7 +134,7 @@ public class UserAgentImplTest {
 	}
 
 	@Test
-	public void testEmailAndLogin() throws CryptoException, L2pSecurityException, MalformedXMLException,
+	public void testEmailAndLogin() throws CryptoException, InternalSecurityException, MalformedXMLException,
 			AgentAccessDeniedException, AgentLockedException, AgentOperationFailedException {
 		UserAgentImpl a = UserAgentImpl.createUserAgent("test");
 		a.unlock("test");
@@ -151,7 +151,7 @@ public class UserAgentImplTest {
 	}
 
 	@Test
-	public void testLoginExceptions() throws L2pSecurityException, CryptoException, AgentAccessDeniedException,
+	public void testLoginExceptions() throws InternalSecurityException, CryptoException, AgentAccessDeniedException,
 			AgentLockedException, AgentOperationFailedException {
 		UserAgentImpl a = UserAgentImpl.createUserAgent("test");
 		a.unlock("test");
@@ -169,7 +169,7 @@ public class UserAgentImplTest {
 	}
 
 	@Test
-	public void testEmailExceptions() throws L2pSecurityException, CryptoException, AgentAccessDeniedException,
+	public void testEmailExceptions() throws InternalSecurityException, CryptoException, AgentAccessDeniedException,
 			AgentLockedException, AgentOperationFailedException {
 		UserAgentImpl a = UserAgentImpl.createUserAgent("test");
 		a.unlock("test");

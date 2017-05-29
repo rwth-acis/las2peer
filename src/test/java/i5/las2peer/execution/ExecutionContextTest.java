@@ -34,7 +34,7 @@ import i5.las2peer.logging.NodeObserver;
 import i5.las2peer.p2p.AgentAlreadyRegisteredException;
 import i5.las2peer.p2p.LocalNode;
 import i5.las2peer.p2p.Node;
-import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.security.InternalSecurityException;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.serialization.MalformedXMLException;
@@ -48,7 +48,7 @@ public class ExecutionContextTest {
 
 	@Before
 	public void setup() throws MalformedXMLException, IOException, AgentAccessDeniedException,
-			AgentAlreadyRegisteredException, L2pSecurityException, AgentException, CryptoException {
+			AgentAlreadyRegisteredException, InternalSecurityException, AgentException, CryptoException {
 		node = LocalNode.launchNode();
 
 		UserAgentImpl adam = MockAgentFactory.getAdam();

@@ -22,7 +22,7 @@ import i5.las2peer.communication.Message;
 import i5.las2peer.communication.PingPongContent;
 import i5.las2peer.p2p.Node.SendMode;
 import i5.las2peer.persistency.EncodingFailedException;
-import i5.las2peer.security.L2pSecurityException;
+import i5.las2peer.security.InternalSecurityException;
 import i5.las2peer.security.Mediator;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
@@ -57,7 +57,7 @@ public class LocalNodeTest {
 	private static boolean testVariable;
 
 	@Test
-	public void test() throws EncodingFailedException, L2pSecurityException, SerializationException,
+	public void test() throws EncodingFailedException, InternalSecurityException, SerializationException,
 			InterruptedException, AgentException, AgentAccessDeniedException {
 		System.out.println("start: " + new Date());
 
@@ -107,7 +107,7 @@ public class LocalNodeTest {
 	}
 
 	@Test
-	public void testTwoNodes() throws L2pSecurityException, EncodingFailedException, SerializationException,
+	public void testTwoNodes() throws InternalSecurityException, EncodingFailedException, SerializationException,
 			InterruptedException, AgentException, AgentAccessDeniedException {
 		adam.unlock("adamspass");
 		eve.unlock("evespass");
@@ -132,7 +132,7 @@ public class LocalNodeTest {
 	}
 
 	@Test
-	public void testTimeout() throws EncodingFailedException, L2pSecurityException, SerializationException,
+	public void testTimeout() throws EncodingFailedException, InternalSecurityException, SerializationException,
 			InterruptedException, AgentException, AgentAccessDeniedException {
 		adam.unlock("adamspass");
 
@@ -158,7 +158,7 @@ public class LocalNodeTest {
 	}
 
 	@Test
-	public void testBroadcast() throws EncodingFailedException, L2pSecurityException, SerializationException,
+	public void testBroadcast() throws EncodingFailedException, InternalSecurityException, SerializationException,
 			InterruptedException, AgentException, AgentAccessDeniedException {
 		adam.unlock("adamspass");
 		eve.unlock("evespass");
