@@ -124,6 +124,7 @@ public abstract class PassphraseAgentImpl extends AgentImpl implements Passphras
 	 * @return Returns the passphrase of this agent
 	 * @throws AgentLockedException
 	 */
+	// FIXME this method should not exist
 	public String getPassphrase() throws AgentLockedException {
 		if (isLocked()) {
 			throw new AgentLockedException();
