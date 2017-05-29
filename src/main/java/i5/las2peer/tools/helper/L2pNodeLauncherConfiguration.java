@@ -83,7 +83,7 @@ public class L2pNodeLauncherConfiguration {
 	 * Usually it should be used in main(String[] args) methods.
 	 * 
 	 * @param argv
-	 * @return
+	 * @return Returns the configuration created from given args
 	 */
 	public static L2pNodeLauncherConfiguration createFromMainArgs(String... argv) {
 		List<String> result = new ArrayList<>();

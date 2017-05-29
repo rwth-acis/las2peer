@@ -378,10 +378,10 @@ public class NodeServiceCache {
 	}
 
 	/**
-	 * get a locally registered service agent
+	 * Gets a locally registered service agent
 	 * 
 	 * @param service name and exact version of the service
-	 * @return
+	 * @return Returns the local service agent instance
 	 * @throws AgentNotRegisteredException
 	 */
 	public ServiceAgentImpl getLocalService(ServiceNameVersion service) throws AgentNotRegisteredException {

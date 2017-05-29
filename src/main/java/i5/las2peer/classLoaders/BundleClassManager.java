@@ -102,7 +102,7 @@ public class BundleClassManager {
 	 * Used to load the main service class.
 	 * 
 	 * @param className
-	 * @return
+	 * @return Returns the loaded class
 	 * @throws ClassNotFoundException
 	 */
 	public Class<?> loadClass(String className) throws ClassNotFoundException {

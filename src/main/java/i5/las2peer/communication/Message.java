@@ -506,7 +506,7 @@ public class Message implements XmlAble, Cloneable {
 	}
 
 	/**
-	 * get the id of the recipient agent
+	 * Gets the id of the recipient agent
 	 * 
 	 * @return id of the receiving agent
 	 */
@@ -515,25 +515,25 @@ public class Message implements XmlAble, Cloneable {
 	}
 
 	/**
-	 * get the id of the receiving topic
+	 * Gets the id of the receiving topic
 	 * 
-	 * @return
+	 * @return Returns the topic id
 	 */
 	public Long getTopicId() {
 		return topicId;
 	}
 
 	/**
-	 * check if this message is sent to a topic
+	 * Check if this message is sent to a topic
 	 * 
-	 * @return
+	 * @return Returns {@code true} if this message is sent to a topic
 	 */
 	public boolean isTopic() {
 		return topicId != null;
 	}
 
 	/**
-	 * get the id of this message
+	 * Gets the id of this message
 	 * 
 	 * @return id
 	 */

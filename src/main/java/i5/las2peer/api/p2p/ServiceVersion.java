@@ -402,7 +402,7 @@ public class ServiceVersion implements Comparable<ServiceVersion>, Serializable 
 	 * e.g. "1.5.2-123" will fit "1.5", but "1.5" won't fit "1.6" or "1.5.2"
 	 * 
 	 * @param required
-	 * @return
+	 * @return Returns true if this version fits the required version
 	 */
 	public boolean fits(ServiceVersion required) {
 		if (required.major == null) {

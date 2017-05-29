@@ -119,10 +119,10 @@ public abstract class PassphraseAgentImpl extends AgentImpl implements Passphras
 	}
 
 	/**
-	 * get the current passphrase
+	 * Gets the current passphrase
 	 * 
-	 * @return
-	 * @throws AgentLockedException 
+	 * @return Returns the passphrase of this agent
+	 * @throws AgentLockedException
 	 */
 	public String getPassphrase() throws AgentLockedException {
 		if (isLocked()) {

@@ -497,7 +497,7 @@ public class L2pNodeLauncher {
 	 * @param serviceIdentifier
 	 * @param serviceMethod
 	 * @param parameters pass an empty string if you want to call a method without parameters
-	 * @return
+	 * @return Returns the invocation result
 	 * @throws ServiceInvocationException
 	 * @throws AgentLockedException
 	 */
@@ -517,7 +517,7 @@ public class L2pNodeLauncher {
 	 * @param serviceIdentifier
 	 * @param serviceMethod
 	 * @param parameters
-	 * @return
+	 * @return Returns the invocation result
 	 * @throws ServiceInvocationException
 	 * @throws AgentLockedException
 	 */
@@ -851,7 +851,7 @@ public class L2pNodeLauncher {
 	 * @param serviceDirectories
 	 * @param nodeIdSeed
 	 * @param commands
-	 * @return
+	 * @return Returns a L2pNodeLauncher instance
 	 * @throws CryptoException If the system encryption self test fails. See log/output for details.
 	 * @throws NodeException If an issue with the launched node occurs.
 	 * @throws IllegalArgumentException If an issue occurs with a configuration argument.

@@ -315,7 +315,7 @@ public class LocalNode extends Node {
 	 * create a LocalNode using a FileSystemRepository at the given location
 	 * 
 	 * @param fileSystemRepository a path to the service directory
-	 * @return
+	 * @return Returns a LocalNode instance
 	 */
 	public static LocalNode newNode(String fileSystemRepository) {
 		return new LocalNode(new L2pClassManager(new FileSystemRepository(fileSystemRepository),
@@ -487,7 +487,7 @@ public class LocalNode extends Node {
 	 * get the ids of all nodes where agents listening to the given topic are running
 	 * 
 	 * @param topicId
-	 * @return
+	 * @return Returns a list with all node ids for the given topic
 	 */
 	public static Long[] findAllNodesWithTopic(long topicId) {
 		synchronized (htLocalNodes) {

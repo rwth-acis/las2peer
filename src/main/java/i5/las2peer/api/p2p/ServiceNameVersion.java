@@ -34,27 +34,27 @@ public class ServiceNameVersion implements Serializable {
 	}
 
 	/**
-	 * get the service name
+	 * Gets the service name
 	 * 
-	 * @return
+	 * @return Returns the service name
 	 */
 	public String getName() {
 		return name;
 	}
 
 	/**
-	 * get the service version
+	 * Gets the service version
 	 * 
-	 * @return
+	 * @return Returns the service version
 	 */
 	public ServiceVersion getVersion() {
 		return version;
 	}
 
 	/**
-	 * get a string representation
+	 * Gets a string representation
 	 * 
-	 * @return
+	 * @return Returns the name version string
 	 */
 	public String getNameVersion() {
 		return this.toString();
@@ -94,7 +94,7 @@ public class ServiceNameVersion implements Serializable {
 	 * construct a ServiceNameVersion from a String of the format name@version
 	 * 
 	 * @param nameVersion
-	 * @return
+	 * @return Returns the service name version
 	 */
 	public static ServiceNameVersion fromString(String nameVersion) {
 		String[] a = nameVersion.split(SEPERATOR);
@@ -106,10 +106,10 @@ public class ServiceNameVersion implements Serializable {
 	}
 
 	/**
-	 * true if the names are equal and this version fits the required version
+	 * Checks if the this version fits the required version
 	 * 
 	 * @param required
-	 * @return
+	 * @return Returns true if the names are equal and this version fits the required version
 	 */
 	public boolean fits(ServiceNameVersion required) {
 		return (this.name.equals(required.getName()) && this.getVersion().fits(required.getVersion()));

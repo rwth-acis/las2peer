@@ -58,7 +58,7 @@ public class LoadedLibraryCache {
 	/**
 	 * check if this cache is used
 	 * 
-	 * @return
+	 * @return Returns true if this cache is used in a bundle
 	 */
 	public boolean isUsed() {
 		return !bundles.isEmpty();
@@ -67,7 +67,7 @@ public class LoadedLibraryCache {
 	/**
 	 * get the cached library
 	 * 
-	 * @return
+	 * @return Returns the library instance contained in this cache
 	 */
 	public LoadedLibrary getLoadedLibrary() {
 		return loadedLibrary;
@@ -77,7 +77,7 @@ public class LoadedLibraryCache {
 	 * get a cached resource
 	 * 
 	 * @param resourceName
-	 * @return
+	 * @return Returns the resource as binary blob
 	 * @throws ResourceNotFoundException
 	 * @throws IOException
 	 */
@@ -97,7 +97,7 @@ public class LoadedLibraryCache {
 	 * creates a new cache for a jar library
 	 * 
 	 * @param filename
-	 * @return
+	 * @return Returns the instance created from the given jar file
 	 * @throws IllegalArgumentException
 	 * @throws IOException
 	 */

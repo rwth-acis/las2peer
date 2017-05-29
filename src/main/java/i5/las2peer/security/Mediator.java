@@ -164,9 +164,9 @@ public class Mediator implements MessageReceiver {
 	}
 
 	/**
-	 * returns the mediated agent
+	 * Gets the mediated agent
 	 * 
-	 * @return
+	 * @return Returns the mediated agent
 	 */
 	public AgentImpl getAgent() {
 		return myAgent;

@@ -138,7 +138,7 @@ public class UserAgentImpl extends PassphraseAgentImpl implements UserAgent {
 	 *
 	 *
 	 * @param xml a String
-	 * @return
+	 * @return Returns a new UserAgent instance
 	 *
 	 * @exception MalformedXMLException
 	 *
@@ -151,7 +151,7 @@ public class UserAgentImpl extends PassphraseAgentImpl implements UserAgent {
 	 * Create a new UserAgent protected by the given passphrase.
 	 * 
 	 * @param passphrase passphrase for the secret key of the new user
-	 * @return a new UserAgent
+	 * @return Returns a new UserAgent instance
 	 * @throws CryptoException
 	 * @throws AgentOperationFailedException
 	 */
@@ -165,10 +165,8 @@ public class UserAgentImpl extends PassphraseAgentImpl implements UserAgent {
 	 * Sets the state of the object from a string representation resulting from a previous {@link #toXmlString} call.
 	 *
 	 * @param root parsed XML document
-	 * @return
-	 *
-	 * @exception MalformedXMLException
-	 *
+	 * @return Returns a new UserAgent instance
+	 * @throws MalformedXMLException
 	 */
 	public static UserAgentImpl createFromXml(Element root) throws MalformedXMLException {
 		try {

@@ -253,7 +253,7 @@ public class FileSystemRepository implements Repository {
 	 * 
 	 * @param dir
 	 * @param recursive
-	 * @return
+	 * @return Returns the last modified date in epoch format
 	 */
 	public static long getLastModified(File dir, boolean recursive) {
 		File[] files = dir.listFiles();

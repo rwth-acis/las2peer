@@ -230,7 +230,7 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 	 * @deprecated Please use {@link ServiceAgentImpl#createServiceAgent(ServiceNameVersion, String)} instead
 	 * @param forService
 	 * @param passPhrase
-	 * @return
+	 * @return Returns a new ServiceAgent instance
 	 * @throws CryptoException
 	 * @throws AgentOperationFailedException
 	 */
@@ -268,7 +268,7 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 	 * 
 	 * @param serviceName
 	 * @param passphrase
-	 * @return
+	 * @return Returns a new service agent instance
 	 * @throws CryptoException
 	 * @throws AgentOperationFailedException
 	 */
@@ -410,10 +410,10 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 	}
 
 	/**
-	 * returns the service topic id for the given service name
+	 * Gets the service topic id for the given service name
 	 * 
 	 * @param service
-	 * @return
+	 * @return Returns the service topic id
 	 */
 	public static long serviceNameToTopicId(String service) {
 		return SimpleTools.longHash(service);
