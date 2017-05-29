@@ -436,8 +436,8 @@ public class L2pNodeLauncher {
 	 * @throws AgentException
 	 * @throws AgentAccessDeniedException
 	 */
-	public void registerUserAgent(UserAgentImpl agent)
-			throws InternalSecurityException, AgentAlreadyRegisteredException, AgentException, AgentAccessDeniedException {
+	public void registerUserAgent(UserAgentImpl agent) throws InternalSecurityException,
+			AgentAlreadyRegisteredException, AgentException, AgentAccessDeniedException {
 		registerUserAgent(agent, null);
 	}
 
@@ -541,8 +541,8 @@ public class L2pNodeLauncher {
 	 * @throws EncodingFailedException
 	 * @throws TimeoutException
 	 */
-	public ListMethodsContent getServiceMethods(String serviceNameVersion) throws InternalSecurityException, AgentException,
-			InterruptedException, EncodingFailedException, SerializationException, TimeoutException {
+	public ListMethodsContent getServiceMethods(String serviceNameVersion) throws InternalSecurityException,
+			AgentException, InterruptedException, EncodingFailedException, SerializationException, TimeoutException {
 		if (currentUser == null) {
 			throw new IllegalStateException("please log in a valid user with registerUserAgent before!");
 		}

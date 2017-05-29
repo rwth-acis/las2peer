@@ -59,8 +59,9 @@ public class BundleClassManager {
 	public LibraryIdentifier[] getLibraryIdentifiers() {
 		LibraryIdentifier[] result = new LibraryIdentifier[libraryLoaders.length];
 
-		for (int i = 0; i < result.length; i++)
+		for (int i = 0; i < result.length; i++) {
 			result[i] = libraryLoaders[i].getLibrary().getLibraryIdentifier();
+		}
 
 		return result;
 	}
@@ -82,10 +83,10 @@ public class BundleClassManager {
 	public URL findResource(String resourceName, LibraryClassLoader calledFromChild) {
 		Logger.logGetResource(this, resourceName, null, null);
 
-		for (int i = 0; i < libraryLoaders.length; i++) {
-			if (libraryLoaders[i] != calledFromChild) {
+		for (LibraryClassLoader libraryLoader : libraryLoaders) {
+			if (libraryLoader != calledFromChild) {
 				try {
-					return libraryLoaders[i].getResource(resourceName, false);
+					return libraryLoader.getResource(resourceName, false);
 				} catch (Exception e) {
 					System.err.println("some other than " + ResourceNotFoundException.class.getName() + ": " + e);
 				}

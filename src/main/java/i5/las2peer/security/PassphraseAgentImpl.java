@@ -78,7 +78,7 @@ public abstract class PassphraseAgentImpl extends AgentImpl implements Passphras
 	 * 
 	 * @param passphrase
 	 * @throws AgentOperationFailedException
-	 * @throws AgentLockedException 
+	 * @throws AgentLockedException
 	 */
 	private void encryptPrivateKey(String passphrase) throws AgentOperationFailedException, AgentLockedException {
 		try {
@@ -103,7 +103,7 @@ public abstract class PassphraseAgentImpl extends AgentImpl implements Passphras
 	 * 
 	 * @param passphrase
 	 * @throws AgentOperationFailedException
-	 * @throws AgentLockedException 
+	 * @throws AgentLockedException
 	 */
 	public void changePassphrase(String passphrase) throws AgentOperationFailedException, AgentLockedException {
 		if (isLocked()) {

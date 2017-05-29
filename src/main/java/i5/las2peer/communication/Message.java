@@ -278,7 +278,8 @@ public class Message implements XmlAble, Cloneable {
 	 * @throws InternalSecurityException
 	 * @throws SerializationException
 	 */
-	private void finalizeConstructor() throws EncodingFailedException, InternalSecurityException, SerializationException {
+	private void finalizeConstructor()
+			throws EncodingFailedException, InternalSecurityException, SerializationException {
 		timestampMs = new Date().getTime();
 		id = new Random().nextLong();
 
@@ -456,7 +457,7 @@ public class Message implements XmlAble, Cloneable {
 	 * 
 	 * @throws SerializationException
 	 * @throws EncodingFailedException
-	 * @throws AgentLockedException 
+	 * @throws AgentLockedException
 	 */
 	private void signContent() throws SerializationException, EncodingFailedException, AgentLockedException {
 		try {
@@ -600,7 +601,8 @@ public class Message implements XmlAble, Cloneable {
 	 * @throws AgentException
 	 * @throws AgentNotFoundException If an issue with the sender agent occurs
 	 */
-	public void open(AgentImpl unlockedRecipient, AgentStorage storage) throws InternalSecurityException, AgentException {
+	public void open(AgentImpl unlockedRecipient, AgentStorage storage)
+			throws InternalSecurityException, AgentException {
 		if (isOpen()) {
 			return;
 		}

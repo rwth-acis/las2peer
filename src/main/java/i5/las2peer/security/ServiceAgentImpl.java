@@ -441,8 +441,9 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 	 * @throws IllegalArgumentException
 	 * @throws SecurityException
 	 */
-	public Object invoke(String method, Object[] parameters) throws IllegalArgumentException,
-			ServiceMethodNotFoundException, IllegalAccessException, InvocationTargetException, InternalSecurityException {
+	public Object invoke(String method, Object[] parameters)
+			throws IllegalArgumentException, ServiceMethodNotFoundException, IllegalAccessException,
+			InvocationTargetException, InternalSecurityException {
 		if (!isRunning()) {
 			throw new IllegalStateException("This agent instance does not handle a started service!");
 		}

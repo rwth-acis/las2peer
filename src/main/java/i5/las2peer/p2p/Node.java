@@ -1099,7 +1099,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @throws EnvelopeException
 	 */
 	@Deprecated
-	public abstract void updateAgent(AgentImpl agent) throws InternalSecurityException, AgentException, EnvelopeException;
+	public abstract void updateAgent(AgentImpl agent)
+			throws InternalSecurityException, AgentException, EnvelopeException;
 
 	/**
 	 * returns the manager responsible for user management

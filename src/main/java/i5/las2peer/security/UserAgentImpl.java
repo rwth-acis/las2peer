@@ -41,7 +41,8 @@ public class UserAgentImpl extends PassphraseAgentImpl implements UserAgent {
 	 * @throws AgentOperationFailedException
 	 * @throws CryptoException
 	 */
-	protected UserAgentImpl(KeyPair pair, String passphrase, byte[] salt) throws AgentOperationFailedException, CryptoException {
+	protected UserAgentImpl(KeyPair pair, String passphrase, byte[] salt)
+			throws AgentOperationFailedException, CryptoException {
 		super(pair, passphrase, salt);
 	}
 
@@ -154,7 +155,8 @@ public class UserAgentImpl extends PassphraseAgentImpl implements UserAgent {
 	 * @throws CryptoException
 	 * @throws AgentOperationFailedException
 	 */
-	public static UserAgentImpl createUserAgent(String passphrase) throws CryptoException, AgentOperationFailedException {
+	public static UserAgentImpl createUserAgent(String passphrase)
+			throws CryptoException, AgentOperationFailedException {
 		byte[] salt = CryptoTools.generateSalt();
 		return new UserAgentImpl(CryptoTools.generateKeyPair(), passphrase, salt);
 	}
