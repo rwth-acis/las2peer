@@ -1,7 +1,6 @@
 package i5.las2peer.connectors.webConnector;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
 import java.io.PrintStream;
 import java.net.HttpURLConnection;
 import java.util.Base64;
@@ -497,7 +496,7 @@ public class WebConnectorTest {
 
 			ClientResponse result = c.sendRequest("GET", "favicon.ico", "");
 			Assert.assertEquals(200, result.getHttpCode());
-			Assert.assertArrayEquals(SimpleTools.toByteArray(new FileInputStream("etc/favicon.ico")),
+			Assert.assertArrayEquals(SimpleTools.toByteArray(getClass().getResourceAsStream("/favicon.ico")),
 					result.getRawResponse());
 		} catch (Exception e) {
 			e.printStackTrace();
