@@ -33,6 +33,7 @@ import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.api.security.AgentOperationFailedException;
+import i5.las2peer.api.security.AnonymousAgent;
 import i5.las2peer.api.security.GroupAgent;
 import i5.las2peer.api.security.ServiceAgent;
 import i5.las2peer.api.security.UserAgent;
@@ -194,8 +195,7 @@ public class ExecutionContext implements Context {
 			GroupAgent agent = GroupAgentImpl.createGroupAgent(members);
 			agent.unlock(members[0]);
 			return agent;
-		} catch (AgentLockedException | CryptoException | SerializationException
-				| AgentAccessDeniedException e) {
+		} catch (AgentLockedException | CryptoException | SerializationException | AgentAccessDeniedException e) {
 			throw new AgentOperationFailedException(e);
 		}
 	}
@@ -229,9 +229,9 @@ public class ExecutionContext implements Context {
 			AgentOperationFailedException, AgentLockedException {
 		if (agent.isLocked()) {
 			throw new AgentLockedException();
-		}
-
-		if (agent instanceof GroupAgentImpl) {
+		} else if (agent instanceof AnonymousAgent) {
+			throw new AgentOperationFailedException("Anonymous agent must not be stored");
+		} else if (agent instanceof GroupAgentImpl) {
 			((GroupAgentImpl) agent).apply();
 		}
 
@@ -321,6 +321,9 @@ public class ExecutionContext implements Context {
 	@Override
 	public void storeEnvelope(Envelope env, EnvelopeCollisionHandler handler, Agent using)
 			throws EnvelopeAccessDeniedException, EnvelopeOperationFailedException {
+		if (using instanceof AnonymousAgent) {
+			throw new EnvelopeOperationFailedException("Anonymous agent must not be used to persist data");
+		}
 		// TODO API collision handler
 		EnvelopeImpl envelope = (EnvelopeImpl) env;
 		Set<PublicKey> keys = new HashSet<>();
