@@ -121,7 +121,7 @@ public interface L2pStorageInterface {
 
 	/**
 	 * Stores the given Envelope in the network. The content is signed with the key from the given author. If an
-	 * exception occurs its wrapped as StorageException. With this method collisions are handled by throwing an
+	 * exception occurs it's wrapped as StorageException. With this method collisions are handled by throwing an
 	 * {@link EnvelopeAlreadyExistsException}.
 	 * 
 	 * @param Envelope The Envelope to store in the network.
