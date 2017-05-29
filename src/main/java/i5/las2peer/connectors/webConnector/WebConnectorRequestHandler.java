@@ -2,6 +2,7 @@ package i5.las2peer.connectors.webConnector;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -422,9 +423,13 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		try {
 			exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
 			OutputStream os = exchange.getResponseBody();
-			InputStream is = new FileInputStream("etc/favicon.ico");
-			if (is != null) {
-				os.write(SimpleTools.toByteArray(is));
+			try {
+				InputStream is = new FileInputStream("etc/favicon.ico");
+				if (is != null) {
+					os.write(SimpleTools.toByteArray(is));
+				}
+			} catch (FileNotFoundException e) {
+				connector.logError(e.toString());
 			}
 			os.close();
 		} catch (IOException e) {
