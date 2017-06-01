@@ -23,6 +23,7 @@
         <dependency org="org.glassfish.jersey.core" name="jersey-common" rev="2.25.1" conf="bundle->*" />
         <dependency org="org.glassfish.jersey.media" name="jersey-media-json-jackson" rev="2.25.1" conf="bundle->*" />
         <dependency org="javax.ws.rs" name="javax.ws.rs-api" rev="2.0.1" conf="bundle->*" />
+        <dependency org="org.glassfish.jersey.media" name="jersey-media-multipart" rev="2.25.1" />
 
         <!-- WebConnector -->
         <dependency org="com.nimbusds" name="oauth2-oidc-sdk" rev="4.17" conf="bundle->*" />
