@@ -41,6 +41,7 @@ import i5.las2peer.communication.ListMethodsContent;
 import i5.las2peer.communication.Message;
 import i5.las2peer.connectors.Connector;
 import i5.las2peer.connectors.ConnectorException;
+import i5.las2peer.connectors.nodeAdminConnector.NodeAdminConnector;
 import i5.las2peer.connectors.webConnector.WebConnector;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.p2p.AgentAlreadyRegisteredException;
@@ -315,17 +316,31 @@ public class L2pNodeLauncher {
 	}
 
 	/**
-	 * Starts the HTTP connector.
+	 * Starts the WebConnector
 	 */
-	public void startHttpConnector() {
-		startConnector("i5.las2peer.httpConnector.HttpConnector");
+	public void startWebConnector() {
+		startConnector(WebConnector.class.getCanonicalName());
 	}
 
 	/**
-	 * Start the Web-Connector.
+	 * Stops the WebConnector
 	 */
-	public void startWebConnector() {
-		startConnector(WebConnector.class.getCanonicalName().toString());
+	public void stopWebConnector() {
+		stopConnector(WebConnector.class.getCanonicalName());
+	}
+
+	/**
+	 * Starts the NodeAdminConnector
+	 */
+	public void startNodeAdminConnector() {
+		startConnector(NodeAdminConnector.class.getCanonicalName());
+	}
+
+	/**
+	 * Stops the NodeAdminConnector
+	 */
+	public void stopNodeAdminConnector() {
+		stopConnector(NodeAdminConnector.class.getCanonicalName());
 	}
 
 	/**
@@ -342,20 +357,6 @@ public class L2pNodeLauncher {
 		} catch (Exception e) {
 			printErrorWithStacktrace(" --> Problems starting the connector", e);
 		}
-	}
-
-	/**
-	 * Stops the http Connector.
-	 */
-	public void stopHttpConnector() {
-		stopConnector("i5.las2peer.httpConnector.HttpConnector");
-	}
-
-	/**
-	 * Stops the Web-Connector.
-	 */
-	public void stopWebConnector() {
-		stopConnector(WebConnector.class.getCanonicalName().toString());
 	}
 
 	/**
