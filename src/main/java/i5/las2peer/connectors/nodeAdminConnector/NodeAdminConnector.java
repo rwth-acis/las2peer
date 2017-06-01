@@ -84,6 +84,8 @@ public class NodeAdminConnector extends Connector {
 			https.setExecutor(Executors.newFixedThreadPool(maxActiveConnections));
 			https.start();
 			logger.info(NodeAdminConnector.class.getSimpleName() + " in HTTPS mode running on port " + port);
+			logger.info(
+					"Please visit https://" + node.getBindAddress().getHostAddress() + ":" + port + " to continue ...");
 		} catch (Exception e) {
 			if (https != null) {
 				// try to cleanup mess
