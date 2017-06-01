@@ -225,6 +225,7 @@ public class PastryNodeImpl extends Node {
 			}
 			InternetPastryNodeFactory factory = new InternetPastryNodeFactory(new L2pNodeIdFactory(nodeIdSeed),
 					pastryBindAddress, pastryPort, pastryEnvironment, null, null, null);
+			pastryBindAddress = factory.getBindAddress();
 			pastryNode = factory.newNode();
 
 			setupPastryApplications();
