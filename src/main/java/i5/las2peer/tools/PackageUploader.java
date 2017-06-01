@@ -150,6 +150,7 @@ public class PackageUploader {
 			logger.info("publishing file '" + entry.getKey() + "' from jar");
 			node.storeHashedContent(entry.getValue());
 		}
+		// TODO wait for all async uploads
 		// add service version to general service envelope
 		String envVersionId = SharedStorageRepository.getLibraryVersionsEnvelopeIdentifier(serviceName);
 		logger.info("publishing version information to '" + envVersionId + "'");
@@ -176,7 +177,6 @@ public class PackageUploader {
 		}
 		// store envelope with service version information
 		node.storeEnvelope(versionEnv, devAgent);
-		// TODO wait for all async uploads
 	}
 
 }
