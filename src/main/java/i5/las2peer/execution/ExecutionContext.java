@@ -269,8 +269,6 @@ public class ExecutionContext implements Context {
 		return node.getAgentIdForEmail(emailAddress);
 	}
 
-	// --------------------------------------------------------------
-
 	@Override
 	public Logger getLogger(Class<?> cls) {
 		return L2pLogger.getInstance(cls);
