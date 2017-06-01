@@ -337,8 +337,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			AnonymousAgentImpl anonymousAgent = AnonymousAgentImpl.getInstance();
 			anonymousAgent.unlock(AnonymousAgent.PASSPHRASE);
 			return anonymousAgent;
-		} catch (CryptoException | AgentAccessDeniedException
-				| AgentOperationFailedException e) {
+		} catch (CryptoException | AgentAccessDeniedException | AgentOperationFailedException e) {
 			connector.logError("Could not authenticate as user anonymous", e);
 			sendUnauthorizedResponse(exchange, null, "Could not authenticate as user anonymous");
 		}
@@ -578,7 +577,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		// deserialize Swagger
 		Swagger swagger;
 		try {
-			swagger = Json.mapper().reader(Swagger.class).readValue((String) result);
+			swagger = Json.mapper().readerFor(Swagger.class).readValue((String) result);
 		} catch (Exception e) {
 			connector.logError("Swagger API declaration not available!", e);
 			sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND, "Swagger API declaration not available!");
