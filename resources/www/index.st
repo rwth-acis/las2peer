@@ -38,10 +38,10 @@ body:after{
                     <li><a href="/www/services">Service Version Lookup</a></li>
 $if(sessionid)$
                     <li><a href="/www/logout?sessionid=$sessionid$">Logout</a></li>
-                    <li><a href="/www/upload">Upload Service Package</a></li>
 $else$
-                    <li><a href="/www/login">Login</a></li>
+                    <li><a href="/www/login">Login/Registration</a></li>
 $endif$
+                    <li><a href="/www/upload">Upload Service Jar Package</a></li>
                     <li><a href="/www/admin">Node Administration</a></li>
                 </ul>
             </td>
