@@ -57,25 +57,25 @@ public class ServiceDiscoveryContent implements Serializable {
 	/**
 	 * check if its a request
 	 * 
-	 * @return
+	 * @return Returns true if this is a request
 	 */
 	public boolean isRequest() {
 		return request;
 	}
 
 	/**
-	 * service agent id
+	 * Gets the service agent id for this discovery
 	 * 
-	 * @return
+	 * @return Returns the service agent id
 	 */
 	public String getAgentId() {
 		return agentId;
 	}
 
 	/**
-	 * the service that is running
+	 * Gets the service that is running
 	 * 
-	 * @return
+	 * @return Returns the service name and version
 	 */
 	public ServiceNameVersion getService() {
 		return service;
@@ -86,7 +86,7 @@ public class ServiceDiscoveryContent implements Serializable {
 	 * 
 	 * @param service
 	 * 
-	 * @return
+	 * @return Returns true if the service is accepted
 	 */
 	public boolean accepts(ServiceNameVersion service) {
 		if (this.exact) {

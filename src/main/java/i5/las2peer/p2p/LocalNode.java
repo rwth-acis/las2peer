@@ -13,9 +13,9 @@ import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.persistency.EnvelopeException;
 import i5.las2peer.api.persistency.EnvelopeNotFoundException;
 import i5.las2peer.api.security.AgentException;
-import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentNotFoundException;
+import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.api.security.AnonymousAgent;
 import i5.las2peer.classLoaders.L2pClassManager;
 import i5.las2peer.classLoaders.libraries.FileSystemRepository;
@@ -315,7 +315,7 @@ public class LocalNode extends Node {
 	 * create a LocalNode using a FileSystemRepository at the given location
 	 * 
 	 * @param fileSystemRepository a path to the service directory
-	 * @return
+	 * @return Returns a LocalNode instance
 	 */
 	public static LocalNode newNode(String fileSystemRepository) {
 		return new LocalNode(new L2pClassManager(new FileSystemRepository(fileSystemRepository),
@@ -487,7 +487,7 @@ public class LocalNode extends Node {
 	 * get the ids of all nodes where agents listening to the given topic are running
 	 * 
 	 * @param topicId
-	 * @return
+	 * @return Returns a list with all node ids for the given topic
 	 */
 	public static Long[] findAllNodesWithTopic(long topicId) {
 		synchronized (htLocalNodes) {

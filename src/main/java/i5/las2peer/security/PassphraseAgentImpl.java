@@ -78,7 +78,7 @@ public abstract class PassphraseAgentImpl extends AgentImpl implements Passphras
 	 * 
 	 * @param passphrase
 	 * @throws AgentOperationFailedException
-	 * @throws AgentLockedException 
+	 * @throws AgentLockedException
 	 */
 	private void encryptPrivateKey(String passphrase) throws AgentOperationFailedException, AgentLockedException {
 		try {
@@ -103,7 +103,7 @@ public abstract class PassphraseAgentImpl extends AgentImpl implements Passphras
 	 * 
 	 * @param passphrase
 	 * @throws AgentOperationFailedException
-	 * @throws AgentLockedException 
+	 * @throws AgentLockedException
 	 */
 	public void changePassphrase(String passphrase) throws AgentOperationFailedException, AgentLockedException {
 		if (isLocked()) {
@@ -119,11 +119,12 @@ public abstract class PassphraseAgentImpl extends AgentImpl implements Passphras
 	}
 
 	/**
-	 * get the current passphrase
+	 * Gets the current passphrase
 	 * 
-	 * @return
-	 * @throws AgentLockedException 
+	 * @return Returns the passphrase of this agent
+	 * @throws AgentLockedException
 	 */
+	// FIXME this method should not exist
 	public String getPassphrase() throws AgentLockedException {
 		if (isLocked()) {
 			throw new AgentLockedException();

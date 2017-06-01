@@ -192,6 +192,9 @@
 				<include name="**/*.xml" />
 			</fileset>
 		</copy>
+		<copy todir="${tmp.junit}">
+			<fileset dir="resources/" />
+		</copy>
 	</target>
 	
 	<target name="compile_help1" depends="init_compile, compile_main">
@@ -330,8 +333,8 @@
 			<fileset dir="${tmp.classes}">
 				<exclude name="i5/las2peer/testing/services/**" />
 			</fileset>
-			<fileset file="etc/las2peer.policy" />
-			<fileset file="etc/favicon.ico" />
+			<fileset file="resources/las2peer.policy" />
+			<fileset file="resources/favicon.ico" />
 			<fileset dir="${basedir}/resources" />
 			<manifest>
 				<attribute name="Main-Class" value="${main-class}"/>

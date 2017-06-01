@@ -41,7 +41,8 @@ public class UserAgentImpl extends PassphraseAgentImpl implements UserAgent {
 	 * @throws AgentOperationFailedException
 	 * @throws CryptoException
 	 */
-	protected UserAgentImpl(KeyPair pair, String passphrase, byte[] salt) throws AgentOperationFailedException, CryptoException {
+	protected UserAgentImpl(KeyPair pair, String passphrase, byte[] salt)
+			throws AgentOperationFailedException, CryptoException {
 		super(pair, passphrase, salt);
 	}
 
@@ -137,7 +138,7 @@ public class UserAgentImpl extends PassphraseAgentImpl implements UserAgent {
 	 *
 	 *
 	 * @param xml a String
-	 * @return
+	 * @return Returns a new UserAgent instance
 	 *
 	 * @exception MalformedXMLException
 	 *
@@ -150,11 +151,12 @@ public class UserAgentImpl extends PassphraseAgentImpl implements UserAgent {
 	 * Create a new UserAgent protected by the given passphrase.
 	 * 
 	 * @param passphrase passphrase for the secret key of the new user
-	 * @return a new UserAgent
+	 * @return Returns a new UserAgent instance
 	 * @throws CryptoException
 	 * @throws AgentOperationFailedException
 	 */
-	public static UserAgentImpl createUserAgent(String passphrase) throws CryptoException, AgentOperationFailedException {
+	public static UserAgentImpl createUserAgent(String passphrase)
+			throws CryptoException, AgentOperationFailedException {
 		byte[] salt = CryptoTools.generateSalt();
 		return new UserAgentImpl(CryptoTools.generateKeyPair(), passphrase, salt);
 	}
@@ -163,10 +165,8 @@ public class UserAgentImpl extends PassphraseAgentImpl implements UserAgent {
 	 * Sets the state of the object from a string representation resulting from a previous {@link #toXmlString} call.
 	 *
 	 * @param root parsed XML document
-	 * @return
-	 *
-	 * @exception MalformedXMLException
-	 *
+	 * @return Returns a new UserAgent instance
+	 * @throws MalformedXMLException
 	 */
 	public static UserAgentImpl createFromXml(Element root) throws MalformedXMLException {
 		try {

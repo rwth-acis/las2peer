@@ -15,10 +15,10 @@ import java.util.Random;
 public class SimpleTools {
 
 	/**
-	 * get a long hash value from a given String
+	 * Gets a long hash value from a given String
 	 * 
 	 * @param s
-	 * @return
+	 * @return Returns the hash as long number
 	 */
 	public static long longHash(String s) {
 		long h = 1125899906842597L;

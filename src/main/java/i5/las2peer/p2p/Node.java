@@ -810,8 +810,6 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * For <i>external</i> access to this node. Will be called by the (P2P) network library, when a new message has been
 	 * received via the network and could not be handled otherwise.
 	 * 
-	 * Make sure, that the {@link #baseClassLoader} method is used for answer messages.
-	 * 
 	 * @param message
 	 * @throws AgentNotRegisteredException If the designated recipient is not known at this node
 	 * @throws AgentException If any other issue with the agent occurs, e. g. XML not readable
@@ -1099,7 +1097,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @throws EnvelopeException
 	 */
 	@Deprecated
-	public abstract void updateAgent(AgentImpl agent) throws InternalSecurityException, AgentException, EnvelopeException;
+	public abstract void updateAgent(AgentImpl agent)
+			throws InternalSecurityException, AgentException, EnvelopeException;
 
 	/**
 	 * returns the manager responsible for user management
@@ -1137,7 +1136,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	/**
 	 * get the manager responsible for the mapping from service alias to service names
 	 * 
-	 * @return
+	 * @return Returns the {@code ServiceAliasManager} instance of this node
 	 */
 	public ServiceAliasManager getServiceAliasManager() {
 		return aliasManager;
@@ -1173,7 +1172,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param service
 	 * @param method
 	 * @param parameters
-	 * @return
+	 * @return Returns the invocation result
 	 * @throws AgentLockedException
 	 * @throws ServiceInvocationException
 	 */
@@ -1189,7 +1188,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param service
 	 * @param method
 	 * @param parameters
-	 * @return
+	 * @return Returns the invocation result
 	 * @throws AgentLockedException
 	 * @throws ServiceInvocationException
 	 */
@@ -1206,7 +1205,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param method
 	 * @param parameters
 	 * @param exactVersion
-	 * @return
+	 * @return Returns the invocation result
 	 * @throws ServiceInvocationException
 	 * @throws AgentLockedException
 	 */
@@ -1225,7 +1224,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param exactVersion if true, an exact version match is required, otherwise, an appropriate version will be
 	 *            choosen
 	 * @param localOnly if true, only locally running services are executed
-	 * @return invocation result
+	 * @return Returns the invocation result
 	 * @throws ServiceNotFoundException
 	 * @throws ServiceInvocationException
 	 * @throws AgentLockedException
@@ -1348,6 +1347,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 		try {
 			Serializable msg;
 			if (executing instanceof PassphraseAgentImpl) {
+				// FIXME send unlocked agent instance
 				msg = new UnlockAgentCall(new RMITask(serviceAgent.getServiceNameVersion(), method, parameters),
 						((PassphraseAgentImpl) executing).getPassphrase());
 			} else {
@@ -1531,7 +1531,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * 
 	 * @param m
 	 * @param recipientCount expected number of answers
-	 * @return
+	 * @return Returns an array with all collected answers
 	 * @throws InterruptedException
 	 * @throws TimeoutException
 	 */
@@ -1615,7 +1615,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	/**
 	 * get the NodeServiceCache of this node
 	 * 
-	 * @return
+	 * @return Returns the {@code NodeServiceCache} instance for this node
 	 */
 	public NodeServiceCache getNodeServiceCache() {
 		return this.nodeServiceCache;
@@ -1672,7 +1672,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	/**
 	 * executed by the tidy up timer, currently it does:
 	 * 
-	 * * Deleting old {@link AgentContext} objects from {@link #htLocalExecutionContexts}
+	 * Deleting old {@link AgentContext} objects from {@link #htLocalExecutionContexts}
 	 */
 	protected void runTidyUpTimer() {
 		synchronized (htLocalExecutionContexts) {

@@ -436,8 +436,8 @@ public class L2pNodeLauncher {
 	 * @throws AgentException
 	 * @throws AgentAccessDeniedException
 	 */
-	public void registerUserAgent(UserAgentImpl agent)
-			throws InternalSecurityException, AgentAlreadyRegisteredException, AgentException, AgentAccessDeniedException {
+	public void registerUserAgent(UserAgentImpl agent) throws InternalSecurityException,
+			AgentAlreadyRegisteredException, AgentException, AgentAccessDeniedException {
 		registerUserAgent(agent, null);
 	}
 
@@ -497,7 +497,7 @@ public class L2pNodeLauncher {
 	 * @param serviceIdentifier
 	 * @param serviceMethod
 	 * @param parameters pass an empty string if you want to call a method without parameters
-	 * @return
+	 * @return Returns the invocation result
 	 * @throws ServiceInvocationException
 	 * @throws AgentLockedException
 	 */
@@ -517,7 +517,7 @@ public class L2pNodeLauncher {
 	 * @param serviceIdentifier
 	 * @param serviceMethod
 	 * @param parameters
-	 * @return
+	 * @return Returns the invocation result
 	 * @throws ServiceInvocationException
 	 * @throws AgentLockedException
 	 */
@@ -541,8 +541,8 @@ public class L2pNodeLauncher {
 	 * @throws EncodingFailedException
 	 * @throws TimeoutException
 	 */
-	public ListMethodsContent getServiceMethods(String serviceNameVersion) throws InternalSecurityException, AgentException,
-			InterruptedException, EncodingFailedException, SerializationException, TimeoutException {
+	public ListMethodsContent getServiceMethods(String serviceNameVersion) throws InternalSecurityException,
+			AgentException, InterruptedException, EncodingFailedException, SerializationException, TimeoutException {
 		if (currentUser == null) {
 			throw new IllegalStateException("please log in a valid user with registerUserAgent before!");
 		}
@@ -851,7 +851,7 @@ public class L2pNodeLauncher {
 	 * @param serviceDirectories
 	 * @param nodeIdSeed
 	 * @param commands
-	 * @return
+	 * @return Returns a L2pNodeLauncher instance
 	 * @throws CryptoException If the system encryption self test fails. See log/output for details.
 	 * @throws NodeException If an issue with the launched node occurs.
 	 * @throws IllegalArgumentException If an issue occurs with a configuration argument.

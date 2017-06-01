@@ -154,7 +154,7 @@ public class LibraryClassLoader extends ClassLoader {
 	 * 
 	 * @param resourceName
 	 * @param lookUp
-	 * @return the resource
+	 * @return Returns the resource
 	 */
 	URL getResource(String resourceName, boolean lookUp) {
 		Logger.logGetResource(this, resourceName, null, lookUp);
@@ -191,7 +191,7 @@ public class LibraryClassLoader extends ClassLoader {
 	 * get the URL for a resource
 	 * 
 	 * @param resourceName
-	 * @return
+	 * @return Returns the URL for the resource or {@code null}, if the resource was not found
 	 */
 	@Override
 	public URL getResource(String resourceName) {

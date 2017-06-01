@@ -43,13 +43,9 @@ public class PastryTestMessage implements Message {
 		return "TestMessage: " + messageCounter + " from " + from + " to " + to;
 	}
 
-	/**
-	 * Use low priority to prevent interference with overlay maintenance traffic.
-	 * 
-	 * @return
-	 */
 	@Override
 	public int getPriority() {
+		// Use low priority to prevent interference with overlay maintenance traffic.
 		return Message.LOW_PRIORITY;
 	}
 

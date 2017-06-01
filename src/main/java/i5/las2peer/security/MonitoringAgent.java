@@ -160,7 +160,7 @@ public class MonitoringAgent extends PassphraseAgentImpl {
 	 * this method.
 	 * 
 	 * @param xml a String
-	 * @return
+	 * @return Returns a new agent instance
 	 * @exception MalformedXMLException
 	 * 
 	 */
@@ -173,7 +173,7 @@ public class MonitoringAgent extends PassphraseAgentImpl {
 	 * Sets the state of the object from a string representation resulting from a previous {@link #toXmlString} call.
 	 * 
 	 * @param rootElement parsed XML document
-	 * @return
+	 * @return Returns a new agent instance
 	 * @exception MalformedXMLException
 	 * 
 	 */

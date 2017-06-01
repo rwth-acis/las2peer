@@ -25,8 +25,8 @@ public class MergeCounter {
 	/**
 	 * This method is called on each merging attempt and increases the counter.
 	 *
-	 * @throws StopMergingException If the counter is greater than the {@value EnvelopeVersion#MAX_UPDATE_CYCLES} to prevent
-	 *             some infinite lookps.
+	 * @throws StopMergingException If the counter is greater than the
+	 *             {@value i5.las2peer.persistency.EnvelopeVersion#MAX_UPDATE_CYCLES} to prevent some infinite lookps.
 	 */
 	public void increase() throws StopMergingException {
 		synchronized (this) {

@@ -18,3 +18,4 @@ ivy.jar
 *.secret
 *.jks
 archiva_credentials.xml
+/etc/las2peer.policy
