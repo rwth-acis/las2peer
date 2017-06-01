@@ -33,7 +33,7 @@ public class NodeAdminConnector extends Connector {
 
 	private static final L2pLogger logger = L2pLogger.getInstance(NodeAdminConnector.class);
 
-	public static final int DEFAULT_PORT = 14580;
+	public static final int DEFAULT_PORT = 14577;
 	private final int port;
 	public static final int DEFAULT_MAX_ACTIVE_CONNECTIONS = 20;
 	private final int maxActiveConnections;
