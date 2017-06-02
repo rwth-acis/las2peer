@@ -2,7 +2,6 @@ package i5.las2peer.connectors.nodeAdminConnector.handler;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
@@ -125,16 +124,11 @@ public class FrontendHandler extends AbstractHandler {
 			sendRedirect(exchange, STATUS_PATH, false);
 			return;
 		} else if (LOGO_PATH.equalsIgnoreCase(path)) {
-			if ("get".equalsIgnoreCase(method)) {
-				exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
-				InputStream is = getClass().getClassLoader().getResourceAsStream(path.substring(1));
-				byte[] bytes = SimpleTools.toByteArray(is);
-				OutputStream os = exchange.getResponseBody();
-				os.write(bytes);
-				os.close();
-			}
+			InputStream is = getClass().getClassLoader().getResourceAsStream(path.substring(1));
+			byte[] bytes = SimpleTools.toByteArray(is);
+			sendRawResponse(exchange, HttpURLConnection.HTTP_OK, bytes);
 			return;
-		} // TODO handle favicon requests
+		}
 		reloadTemplates(); // TODO create reload method for admins to recreate/update group
 		ST mainTemplate = templateGroup.getInstanceOf("/index");
 		if (mainTemplate == null) {
