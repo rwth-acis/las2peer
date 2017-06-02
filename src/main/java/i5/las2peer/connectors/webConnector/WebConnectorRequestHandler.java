@@ -435,7 +435,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			}
 			OutputStream os = exchange.getResponseBody();
 			if (bytes != null) {
-				exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
+				exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, bytes.length);
 				os.write(bytes);
 			} else {
 				exchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_FOUND, NO_RESPONSE_BODY);
