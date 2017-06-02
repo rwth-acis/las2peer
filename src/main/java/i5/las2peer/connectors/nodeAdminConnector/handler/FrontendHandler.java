@@ -211,7 +211,7 @@ public class FrontendHandler extends AbstractHandler {
 		// verify token
 		if (adminToken == null || !adminToken.equals(parameters.get("token"))) {
 			return;
-		} // FIXME alternatively check for admin envelope
+		} // TODO alternatively check for admin envelope
 		String startServiceName = parameters.getSingle("startService");
 		String stopServiceName = parameters.getSingle("stopService");
 		if (startServiceName != null) {
@@ -411,7 +411,7 @@ public class FrontendHandler extends AbstractHandler {
 				AgentSession session = connector.getOrCreateSession(agent);
 				node.registerReceiver(agent);
 				exchange.getResponseHeaders().add("Set-Cookie", "agent-session-id=" + session.getSessionId());
-				// FIXME auto add node to trusted list
+				// TODO auto add node to trusted list
 				// redirect to status page
 				exchange.getResponseHeaders().add("Location", "/" + FrontendHandler.ROOT_NAME);
 				exchange.sendResponseHeaders(HttpURLConnection.HTTP_SEE_OTHER, NO_RESPONSE_BODY);
