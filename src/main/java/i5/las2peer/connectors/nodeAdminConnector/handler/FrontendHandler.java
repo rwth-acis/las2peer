@@ -60,6 +60,10 @@ public class FrontendHandler extends AbstractHandler {
 	public static final String LOGOUT_PATH = ROOT_PATH + "/logout";
 	public static final String STATUS_PATH = ROOT_PATH + "/status";
 	public static final String LOGO_PATH = ROOT_PATH + "/las2peer-logo.svg";
+	private static final String ADMIN_PATH = "/admin";
+	private static final String LOGIN_PATH = "/login";
+	private static final String SERVICES_LIST_PATH = "/services";
+	private static final String UPLOAD_PATH = "/upload";
 
 	private static final String TEMPLATES_SUBPATH = "/inline";
 	private static final String USER_ACCOUNT_PREFIX = "useraccount-";
@@ -142,10 +146,9 @@ public class FrontendHandler extends AbstractHandler {
 		String content = "404 (Not Found)";
 		if (template != null) {
 			ParameterMap parameters = (ParameterMap) exchange.getAttribute("parameters");
-			// FIXME replace with path constants?
-			if (subPath.toLowerCase().startsWith("/admin")) {
+			if (subPath.toLowerCase().startsWith(ADMIN_PATH)) {
 				handleAdmin(exchange, node, parameters, template);
-			} else if (subPath.equalsIgnoreCase("/status")) {
+			} else if (subPath.equalsIgnoreCase(STATUS_PATH)) {
 				template.add("nodeid", node.getNodeId());
 				template.add("cpuload", getCPULoad(node) + "%");
 				template.add("publicKey", node.getPublicNodeKey().toString());
@@ -154,12 +157,12 @@ public class FrontendHandler extends AbstractHandler {
 				template.add("uptime", getUptime(node));
 				template.add("localServices", getLocalServices(node));
 				template.add("otherNodes", node.getOtherKnownNodes());
-			} else if (subPath.equalsIgnoreCase("/login")) {
+			} else if (subPath.equalsIgnoreCase(LOGIN_PATH)) {
 				if ("post".equalsIgnoreCase(method)) {
 					handleAuthenticateRequest(exchange, node, activeAgent, template);
 					return;
 				}
-			} else if (subPath.equalsIgnoreCase("/services")) {
+			} else if (subPath.equalsIgnoreCase(SERVICES_LIST_PATH)) {
 				String searchname = parameters.getSingle("searchname");
 				if (searchname != null && !searchname.isEmpty()) {
 					template.add("searchname", searchname);
@@ -167,7 +170,7 @@ public class FrontendHandler extends AbstractHandler {
 					template.add("searchname", "i5.las2peer.services.fileService.FileService");
 				}
 				template.add("services", getServices(node, searchname));
-			} else if (subPath.equalsIgnoreCase("/upload")) {
+			} else if (subPath.equalsIgnoreCase(UPLOAD_PATH)) {
 				template.add("agentid", agentId);
 				if ("post".equalsIgnoreCase(method)) {
 					handlePackageUpload(exchange, node, parameters, activeAgent, template);
