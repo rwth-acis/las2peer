@@ -198,7 +198,7 @@ public class ExecutionContextTest {
 			fail();
 		}
 	}
-	
+
 	@Test
 	public void testUserAgents() {
 		try {
@@ -216,27 +216,27 @@ public class ExecutionContextTest {
 
 			context.storeAgent(userA);
 			context.storeAgent(userB);
-			
+
 			userA = (UserAgent) context.fetchAgent(userA.getIdentifier());
 			userA.unlock("passphrase");
 			assertEquals("loginA", userA.getLoginName());
 			assertEquals("emaila@asdf.de", userA.getEmail());
-			
+
 			userB = (UserAgent) context.fetchAgent(userB.getIdentifier());
 			userB.unlock("passphrase");
 			assertEquals("loginB", userB.getLoginName());
 			assertEquals("emailb@asdf.de", userB.getEmail());
 
 			userB.setLoginName("loginA");
-			
+
 			try {
 				context.storeAgent(userB);
 				fail("Exception expected");
 			} catch (LoginNameAlreadyTakenException e) {
 			}
-			
+
 			userA.setEmail("emailb@asdf.de");
-			
+
 			try {
 				context.storeAgent(userA);
 				fail("Exception expected");
@@ -268,4 +268,5 @@ public class ExecutionContextTest {
 		assertTrue(messages.get(messages.size() - 1).contains(context.getMainAgent().getIdentifier()));
 		assertTrue(messages.get(messages.size() - 1).contains(context.getServiceAgent().getIdentifier()));
 	}
+
 }
