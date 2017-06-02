@@ -19,7 +19,6 @@ import i5.las2peer.connectors.Connector;
 import i5.las2peer.connectors.ConnectorException;
 import i5.las2peer.connectors.nodeAdminConnector.handler.DefaultHandler;
 import i5.las2peer.connectors.nodeAdminConnector.handler.FrontendHandler;
-import i5.las2peer.connectors.nodeAdminConnector.handler.ServiceHandler;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.PastryNodeImpl;
@@ -80,7 +79,6 @@ public class NodeAdminConnector extends Connector {
 			HttpContext frontendContext = https.createContext("/" + FrontendHandler.ROOT_NAME,
 					new FrontendHandler(this, getOrCreateSecretFromFile("webadmin token", ADMIN_SECRET_FILENAME)));
 			frontendContext.getFilters().add(new ParameterFilter());
-			https.createContext("/service", new ServiceHandler(this));
 			https.setExecutor(Executors.newFixedThreadPool(maxActiveConnections));
 			https.start();
 			logger.info(NodeAdminConnector.class.getSimpleName() + " in HTTPS mode running on port " + port);
