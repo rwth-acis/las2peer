@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -26,6 +27,8 @@ import i5.las2peer.api.security.Agent;
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentLockedException;
+import i5.las2peer.api.security.AgentOperationFailedException;
+import i5.las2peer.api.security.AnonymousAgent;
 import i5.las2peer.api.security.EmailAlreadyTakenException;
 import i5.las2peer.api.security.GroupAgent;
 import i5.las2peer.api.security.LoginNameAlreadyTakenException;
@@ -34,6 +37,7 @@ import i5.las2peer.logging.NodeObserver;
 import i5.las2peer.p2p.AgentAlreadyRegisteredException;
 import i5.las2peer.p2p.LocalNode;
 import i5.las2peer.p2p.Node;
+import i5.las2peer.security.AnonymousAgentImpl;
 import i5.las2peer.security.InternalSecurityException;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
@@ -267,6 +271,21 @@ public class ExecutionContextTest {
 		assertTrue(messages.get(messages.size() - 1).contains("testMessage"));
 		assertTrue(messages.get(messages.size() - 1).contains(context.getMainAgent().getIdentifier()));
 		assertTrue(messages.get(messages.size() - 1).contains(context.getServiceAgent().getIdentifier()));
+	}
+
+	@Test
+	public void testStoreAnonymous() {
+		try {
+			AnonymousAgentImpl anonymous = AnonymousAgentImpl.getInstance();
+			anonymous.unlock(AnonymousAgent.PASSPHRASE);
+			context.storeAgent(anonymous);
+			Assert.fail("Exception expected");
+		} catch (AgentOperationFailedException e) {
+			// expected
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail(e.toString());
+		}
 	}
 
 }

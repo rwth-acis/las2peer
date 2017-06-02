@@ -53,7 +53,7 @@ public class AnonymousAgentImpl extends UserAgentImpl implements AnonymousAgent 
 
 	@Override
 	public String toXmlString() {
-		throw new RuntimeException("anonymous agent should not be converted to XML");
+		throw new IllegalStateException("anonymous agent should not be converted to XML");
 	}
 
 }

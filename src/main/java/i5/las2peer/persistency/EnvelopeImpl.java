@@ -7,6 +7,7 @@ import java.util.Set;
 import i5.las2peer.api.persistency.Envelope;
 import i5.las2peer.api.persistency.EnvelopeAccessDeniedException;
 import i5.las2peer.api.security.Agent;
+import i5.las2peer.api.security.AnonymousAgent;
 import i5.las2peer.security.AgentContext;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.serialization.SerializationException;
@@ -30,6 +31,9 @@ public class EnvelopeImpl implements Envelope {
 		this.content = null;
 		this.currentVersion = null;
 		this.signingAgentId = signingAgent.getIdentifier();
+		if (signingAgent instanceof AnonymousAgent) {
+			throw new IllegalArgumentException("Anonymous agent must not be used to sign an envelope");
+		}
 		this.readerToAdd.add(signingAgent);
 	}
 
@@ -59,6 +63,10 @@ public class EnvelopeImpl implements Envelope {
 
 	@Override
 	public void addReader(Agent agent) {
+		if (agent instanceof AnonymousAgent) {
+			throw new IllegalArgumentException(
+					"Anonymous agent must not be given read access. Set the envelope instance public instead.");
+		}
 		this.readerToAdd.add((AgentImpl) agent);
 		this.readerToRevoke.remove(agent);
 	}

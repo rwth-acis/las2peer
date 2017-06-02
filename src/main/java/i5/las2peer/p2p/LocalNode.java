@@ -261,8 +261,11 @@ public class LocalNode extends Node {
 	public void storeAgent(AgentImpl agent) throws AgentException {
 		synchronized (htKnownAgents) {
 			// only accept unlocked agents at startup
-			if (agent.isLocked() && getStatus() == NodeStatus.RUNNING) {
+			if (agent.isLocked()) {
 				throw new AgentLockedException();
+			}
+			if (agent instanceof AnonymousAgent) {
+				throw new AgentException("Must not store anonymous agent");
 			}
 
 			String agentXml = null;

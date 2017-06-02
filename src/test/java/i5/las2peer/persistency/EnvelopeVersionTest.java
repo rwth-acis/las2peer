@@ -17,7 +17,9 @@ import org.junit.rules.TestName;
 import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.persistency.EnvelopeException;
 import i5.las2peer.api.persistency.EnvelopeNotFoundException;
+import i5.las2peer.api.security.AgentException;
 import i5.las2peer.p2p.PastryNodeImpl;
+import i5.las2peer.security.AnonymousAgentImpl;
 import i5.las2peer.security.GroupAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.testing.MockAgentFactory;
@@ -601,6 +603,22 @@ public class EnvelopeVersionTest {
 			EnvelopeVersion fetched2 = node1.fetchEnvelope("test");
 			String content2 = (String) fetched2.getContent(node1.getAgentContext(smith));
 			Assert.assertEquals(testContent2, content2);
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail(e.toString());
+		}
+	}
+
+	@Test
+	public void testStoreAnonymous() {
+		try {
+			PastryNodeImpl node = nodes.get(0);
+			AnonymousAgentImpl anonymous = AnonymousAgentImpl.getInstance();
+			anonymous.unlock(AnonymousAgentImpl.PASSPHRASE);
+			node.storeAgent(anonymous);
+			Assert.fail("Exception expected");
+		} catch (AgentException e) {
+			// expected
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail(e.toString());

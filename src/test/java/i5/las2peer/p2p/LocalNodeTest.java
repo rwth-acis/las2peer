@@ -22,6 +22,7 @@ import i5.las2peer.communication.Message;
 import i5.las2peer.communication.PingPongContent;
 import i5.las2peer.p2p.Node.SendMode;
 import i5.las2peer.persistency.EncodingFailedException;
+import i5.las2peer.security.AnonymousAgentImpl;
 import i5.las2peer.security.InternalSecurityException;
 import i5.las2peer.security.Mediator;
 import i5.las2peer.security.ServiceAgentImpl;
@@ -562,6 +563,22 @@ public class LocalNodeTest {
 			LocalNode testee2 = LocalNode.launchNode();
 
 			testee2.getUserManager().getAgentIdByLogin("login_2");
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail(e.toString());
+		}
+	}
+
+	@Test
+	public void testStoreAnonymousAgent() {
+		try {
+			LocalNode testNode = LocalNode.launchNode();
+			AnonymousAgentImpl anonymous = AnonymousAgentImpl.getInstance();
+			anonymous.unlock(AnonymousAgentImpl.PASSPHRASE);
+			testNode.storeAgent(anonymous);
+			Assert.fail("Exception expected");
+		} catch (AgentException e) {
+			// expected
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail(e.toString());
