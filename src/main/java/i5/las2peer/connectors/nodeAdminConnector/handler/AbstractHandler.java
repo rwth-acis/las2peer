@@ -58,6 +58,17 @@ public abstract class AbstractHandler implements HttpHandler {
 		}
 	}
 
+	protected void sendRawResponse(HttpExchange exchange, int responseCode, byte[] content) {
+		try {
+			exchange.sendResponseHeaders(responseCode, content.length);
+			OutputStream os = exchange.getResponseBody();
+			os.write(content);
+			os.close();
+		} catch (Exception e) {
+			logger.log(Level.WARNING, e.toString());
+		}
+	}
+
 	protected void sendInternalErrorResponse(HttpExchange exchange, String msg) {
 		sendInternalErrorResponse(exchange, msg, null);
 	}
