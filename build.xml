@@ -326,7 +326,21 @@
 	<target name="jars" depends="main_jar, test_service_jar, test_service_helper_jar" />
 	<target name="junit_jars" depends="jar_test1-1.1, jar_test1-1.2, jar_test2-1.0, jar_testService1-1.0, jar_testService1-1.1, jar_testService2-1.0" />
 	
-	<target name="main_jar" depends="compile_main">
+	<target name="build_frontend">
+		<exec executable="npm" dir="frontend" failonerror="true">
+			<arg value="install" />
+			<arg value="bower" />
+			<arg value="polymer-cli" />
+		</exec>
+		<exec executable="node_modules/bower/bin/bower" dir="frontend" failonerror="true">
+			<arg value="install" />
+		</exec>
+		<exec executable="node_modules/polymer-cli/bin/polymer.js" dir="frontend" failonerror="true">
+			<arg value="build" />
+		</exec>
+	</target>
+	
+	<target name="main_jar" depends="compile_main, build_frontend">
 		<!-- constructs the external libraries classpath name -->
 		<jar jarfile="${export.jars}/${ant.project.name}-${ivy.las2peer.version}.jar">
 			<zipgroupfileset dir="${tmp.bundle}" includes="**/*.jar" />

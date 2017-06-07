@@ -2,6 +2,7 @@
 /export
 /node-storage
 /.las2peer
+/frontend/node_modules
 /tmp
 /log
 /lib
