@@ -26,9 +26,14 @@ public class AgentContextTest {
 			CryptoException, SerializationException, AgentException, NodeException, AgentAccessDeniedException {
 		LocalNode node = LocalNode.newNode();
 
+		UserAgentImpl adam = MockAgentFactory.getAdam();
+		adam.unlock("adamspass");
 		GroupAgentImpl group1 = MockAgentFactory.getGroup1();
+		group1.unlock(adam);
 		GroupAgentImpl groupA = MockAgentFactory.getGroupA();
+		groupA.unlock(adam);
 		GroupAgentImpl groupSuper = GroupAgentImpl.createGroupAgent(new AgentImpl[] { group1, groupA });
+		groupSuper.unlock(group1);
 		try {
 			node.storeAgent(group1);
 		} catch (AgentAlreadyRegisteredException e) {
@@ -74,9 +79,14 @@ public class AgentContextTest {
 			SerializationException, AgentException, NodeException, AgentAccessDeniedException {
 		LocalNode node = LocalNode.newNode();
 
+		UserAgentImpl adam = MockAgentFactory.getAdam();
+		adam.unlock("adamspass");
 		GroupAgentImpl group1 = MockAgentFactory.getGroup1();
+		group1.unlock(adam);
 		GroupAgentImpl groupA = MockAgentFactory.getGroupA();
+		groupA.unlock(adam);
 		GroupAgentImpl groupSuper = GroupAgentImpl.createGroupAgent(new AgentImpl[] { group1, groupA });
+		groupSuper.unlock(group1);
 		try {
 			node.storeAgent(group1);
 		} catch (AgentAlreadyRegisteredException e) {
