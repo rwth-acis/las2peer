@@ -37,7 +37,7 @@
 	<classpathentry kind="lib" path="lib/jersey-guava-2.25.1.jar"/>
 	<classpathentry kind="lib" path="lib/jersey-media-jaxb-2.25.1.jar"/>
 	<classpathentry kind="lib" path="lib/jersey-media-json-jackson-2.25.1.jar"/>
-	<classpathentry kind="lib" path="lib/jersey-media-multipart-2.25.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jersey-media-multipart-2.25.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jersey-server-2.25.1.jar"/>
 	<classpathentry kind="lib" path="lib/mimepull-1.9.6.jar"/>
 	<classpathentry kind="lib" path="lib/org.osgi.core-4.2.0.jar"/>
