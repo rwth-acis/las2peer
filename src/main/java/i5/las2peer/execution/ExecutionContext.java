@@ -279,7 +279,7 @@ public class ExecutionContext implements Context {
 			throws EnvelopeAccessDeniedException, EnvelopeNotFoundException, EnvelopeOperationFailedException {
 		EnvelopeVersion version;
 		try {
-			version = node.fetchEnvelope(identifier);
+			version = node.fetchEnvelope(serviceAgent.getServiceNameVersion().getName() + "$" + identifier);
 		} catch (EnvelopeNotFoundException e1) {
 			throw e1;
 		} catch (EnvelopeException e1) {
@@ -341,8 +341,9 @@ public class ExecutionContext implements Context {
 			if (envelope.getVersion() != null) {
 				version = node.createEnvelope(envelope.getVersion(), envelope.getContent(), keys);
 			} else {
-				version = node.createEnvelope(envelope.getIdentifier(), signing.getPublicKey(), envelope.getContent(),
-						keys);
+				version = node.createEnvelope(
+						serviceAgent.getServiceNameVersion().getName() + "$" + envelope.getIdentifier(),
+						signing.getPublicKey(), envelope.getContent(), keys);
 			}
 			node.storeEnvelope(version, signing);
 			envelope.setVersion(version);

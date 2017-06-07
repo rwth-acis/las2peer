@@ -39,7 +39,13 @@ public class EnvelopeImpl implements Envelope {
 
 	public EnvelopeImpl(EnvelopeVersion currentVersion, AgentContext context)
 			throws CryptoException, EnvelopeAccessDeniedException, SerializationException {
-		this.identifier = currentVersion.getIdentifier();
+		String id = currentVersion.getIdentifier();
+		int sepIndex = id.indexOf("$");
+		if (sepIndex == -1) {
+			this.identifier = id;
+		} else {
+			this.identifier = id.substring(sepIndex);
+		}
 		this.content = currentVersion.getContent(context);
 		this.currentVersion = currentVersion;
 		this.signingAgentId = CryptoTools.publicKeyToSHA512(currentVersion.getAuthorPublicKey());
