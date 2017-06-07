@@ -75,7 +75,7 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	 * @throws SerializationException
 	 */
 	protected GroupAgentImpl(KeyPair keys, SecretKey secret, Agent[] members)
-			throws AgentOperationFailedException, CryptoException, SerializationException  {
+			throws AgentOperationFailedException, CryptoException, SerializationException {
 		super(keys, secret);
 
 		symmetricGroupKey = secret;
@@ -85,7 +85,6 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 			} catch (AgentLockedException e) {
 				throw new IllegalStateException(e);
 			}
-			
 		}
 
 		lockPrivateKey();
@@ -98,7 +97,7 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	 * @throws SerializationException
 	 * @throws CryptoException
 	 * @throws AgentLockedException
-	 * @throws AgentAccessDeniedException 
+	 * @throws AgentAccessDeniedException
 	 */
 	private void decryptSecretKey(AgentImpl agent)
 			throws SerializationException, CryptoException, AgentLockedException, AgentAccessDeniedException {
@@ -113,7 +112,6 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 		} catch (AgentLockedException e) {
 			throw new AgentLockedException("The given agent is locked!", e);
 		}
-		
 	}
 
 	/**
@@ -122,7 +120,7 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	 * @param a
 	 * @throws CryptoException
 	 * @throws SerializationException
-	 * @throws AgentLockedException 
+	 * @throws AgentLockedException
 	 */
 	public void addMember(AgentImpl a) throws CryptoException, SerializationException, AgentLockedException {
 		addMember(a, true);
@@ -136,7 +134,7 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	 * @param securityCheck
 	 * @throws SerializationException
 	 * @throws CryptoException
-	 * @throws AgentLockedException 
+	 * @throws AgentLockedException
 	 */
 	private final void addMember(AgentImpl a, boolean securityCheck)
 			throws CryptoException, SerializationException, AgentLockedException {
@@ -185,7 +183,7 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	 * remove a member from this group
 	 * 
 	 * @param a
-	 * @throws AgentLockedException 
+	 * @throws AgentLockedException
 	 */
 	public void removeMember(AgentImpl a) throws AgentLockedException {
 		removeMember(a.getIdentifier());
@@ -195,7 +193,7 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	 * remove a member from this group
 	 * 
 	 * @param id
-	 * @throws AgentLockedException 
+	 * @throws AgentLockedException
 	 */
 	public void removeMember(String id) throws AgentLockedException {
 		if (isLocked()) {
@@ -397,7 +395,7 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 		if (isLocked()) {
 			throw new AgentLockedException();
 		}
-		
+
 		if (!htEncryptedKeyVersions.containsKey(agent.getIdentifier())) {
 			membersToAdd.put(agent.getIdentifier(), (AgentImpl) agent);
 		}
@@ -410,10 +408,10 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 		if (isLocked()) {
 			throw new AgentLockedException();
 		}
-		
+
 		if (htEncryptedKeyVersions.containsKey(agent.getIdentifier())) {
 			membersToRemove.put(agent.getIdentifier(), (AgentImpl) agent);
-		} else if (membersToAdd.containsKey((AgentImpl) agent)) {
+		} else if (membersToAdd.containsKey(agent)) {
 			membersToAdd.remove(agent.getIdentifier());
 		}
 	}
@@ -430,8 +428,8 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	}
 
 	@Override
-	public void unlock(Agent agent) throws AgentAccessDeniedException, AgentOperationFailedException,
-			AgentLockedException {
+	public void unlock(Agent agent)
+			throws AgentAccessDeniedException, AgentOperationFailedException, AgentLockedException {
 		try {
 			decryptSecretKey((AgentImpl) agent);
 			openedBy = (AgentImpl) agent;
