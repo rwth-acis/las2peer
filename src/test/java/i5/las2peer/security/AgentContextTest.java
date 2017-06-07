@@ -22,8 +22,8 @@ import i5.las2peer.tools.CryptoException;
 public class AgentContextTest {
 
 	@Test
-	public void testRequestAgent() throws MalformedXMLException, IOException, InternalSecurityException, CryptoException,
-			SerializationException, AgentException, NodeException, AgentAccessDeniedException {
+	public void testRequestAgent() throws MalformedXMLException, IOException, InternalSecurityException,
+			CryptoException, SerializationException, AgentException, NodeException, AgentAccessDeniedException {
 		LocalNode node = LocalNode.newNode();
 
 		GroupAgentImpl group1 = MockAgentFactory.getGroup1();
