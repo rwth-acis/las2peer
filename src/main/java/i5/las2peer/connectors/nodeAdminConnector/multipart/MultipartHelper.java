@@ -45,6 +45,7 @@ public class MultipartHelper {
 			FormDataHeader contentDispositionHeader = headerMap.get(HEADER_CONTENT_DISPOSITION);
 			String dispositionName = contentDispositionHeader.getParameter("name");
 			if (dispositionName == null || dispositionName.isEmpty()) {
+				// FIXME Exception not visible return bad request response instead
 				throw new MalformedFormDataException("no name provided");
 			}
 			// copy part to result array

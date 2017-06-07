@@ -1,16 +1,13 @@
 package i5.las2peer.connectors.nodeAdminConnector;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URLDecoder;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,11 +31,16 @@ public class ParameterFilter extends Filter {
 
 	@Override
 	public void doFilter(HttpExchange exchange, Chain chain) throws IOException {
-		ParameterMap parameters = new ParameterMap();
-		exchange.setAttribute("parameters", parameters);
-		parseGetParameters(exchange, parameters);
-		parsePostParameters(exchange, parameters);
-		chain.doFilter(exchange);
+		try {
+			ParameterMap parameters = new ParameterMap();
+			exchange.setAttribute("parameters", parameters);
+			parseGetParameters(exchange, parameters);
+			parsePostParameters(exchange, parameters);
+			chain.doFilter(exchange);
+		} catch (Exception e) {
+			// XXX logging
+			e.printStackTrace();
+		}
 	}
 
 	private void parseGetParameters(HttpExchange exchange, ParameterMap parameters)
@@ -51,7 +53,8 @@ public class ParameterFilter extends Filter {
 	private void parsePostParameters(HttpExchange exchange, ParameterMap parameters) throws IOException {
 		if ("post".equalsIgnoreCase(exchange.getRequestMethod())) {
 			String contentType = exchange.getRequestHeaders().getFirst(HttpHeaders.CONTENT_TYPE);
-			if (MultipartHelper.MULTIPART_BOUNDARY_PATTERN.matcher(contentType).find()) {
+			if (contentType != null && !contentType.isEmpty()
+					&& MultipartHelper.MULTIPART_BOUNDARY_PATTERN.matcher(contentType).find()) {
 				InputStream is = exchange.getRequestBody();
 				ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 				int nRead;
@@ -79,17 +82,6 @@ public class ParameterFilter extends Filter {
 				} else {
 					parameters.putAll(MultipartHelper.getParts(buffer.toByteArray(), contentType));
 				}
-			} else {
-				Charset charset = StandardCharsets.UTF_8;
-				String encoding = exchange.getRequestHeaders().getFirst("Content-Encoding");
-				if (encoding != null && !encoding.isEmpty()) {
-					charset = Charset.forName(encoding);
-				}
-				InputStreamReader isr = new InputStreamReader(exchange.getRequestBody(), charset);
-				BufferedReader br = new BufferedReader(isr);
-				// XXX read more lines?
-				String query = br.readLine();
-				parseQuery(query, parameters);
 			}
 		}
 	}

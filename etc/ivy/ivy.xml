@@ -28,5 +28,8 @@
 
         <!-- WebConnector -->
         <dependency org="com.nimbusds" name="oauth2-oidc-sdk" rev="4.17" conf="bundle->*" />
+
+        <!-- SwaggerUI -->
+        <dependency org="org.webjars" name="swagger-ui" rev="2.2.10" />
     </dependencies>
 </ivy-module>

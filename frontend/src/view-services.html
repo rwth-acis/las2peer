@@ -1,0 +1,138 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-form/iron-form.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/iron-input/iron-input.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="services-view">
+  <template>
+    <iron-ajax id="ajaxServicesSearch"
+               url="[[las2peerConnectorEndpoint]]/services/search"
+               handle-as="json"
+               on-response="_handleSearchResponse"
+               on-error="_handleError"
+               loading = "{{_submittingSearch}}"></iron-ajax>
+    <iron-ajax id="ajaxUploadService"
+               method="POST"
+               url="[[las2peerConnectorEndpoint]]/services/upload"
+               handle-as="json"
+               on-response="_handleUploadServiceResponse"
+               on-error="_handleError"
+               loading = "{{_submittingUpload}}"></iron-ajax>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        padding: 0.1em;
+      }
+    </style>
+
+    <div class="card">
+      <h1>las2peer Services</h1>
+      Enter a service name to search for published versions
+      <form is="iron-form">
+        <paper-input id="inputSearchname" label="service canoncial name" on-keypress="_keyPressedSearchService" autofocus value="i5.las2peer.services.fileService.FileService">
+          <paper-spinner slot="suffix" active="[[_submittingSearch]]"></paper-spinner>
+          <paper-icon-button slot="suffix" icon="search" on-tap="submitSearch" disabled="[[_submittingSearch]]"></paper-icon-button>
+        </paper-input>
+      </form>
+      <template is="dom-if" if="[[_services]]">
+        <h3>Known Versions</h3>
+        <table width="100%">
+          <tr><th>Name</th><th style="width: 5%">Version</th><th style="width: 1%; white-space: nowrap">Swagger API</th></tr>
+          <template is="dom-repeat" items="[[_services]]">
+            <tr>
+              <td>[[item.name]]</td>
+              <td style="padding-right: 0.5em; text-align: right">[[item.version]]</td>
+              <td style="width: 1%; white-space: nowrap"><a href="[[las2peerConnectorEndpoint]]/swagger-ui/index.html?url=[[item.swagger]]" tabindex="-1"><paper-button raised title="Show Swagger API Doc" style="background-color: #89bf04"><iron-icon src="[[las2peerConnectorEndpoint]]/swagger-ui/images/logo_small.png"></iron-icon></paper-button></a></td>
+            </tr>
+          </template>
+        </table>
+      </template>
+      <div id="searchServicesMsg" style="font-weight: bold"></div>
+      <h2>Upload Service</h2>
+      Upload a service to the network.
+      <form is="iron-form" on-keypress="_keyPressedUploadService">
+        <paper-input label="service jar file" id="serviceUploadFile" disabled="[[_submittingUpload]]" type="file" required="true"></paper-input>
+        <paper-button raised on-tap="uploadService" disabled="[[_submittingUpload]]">Upload Service</paper-button>
+      </form>
+      <div id="uploadServiceMsg" style="font-weight: bold"></div>
+    </div>
+  </template>
+  <script>
+    class ServicesView extends Polymer.Element {
+      static get is() { return 'services-view'; }
+      static get properties() { return { las2peerConnectorEndpoint: String, sessionid: String, _services: { type: Object }, _submittingSearch: { type: Boolean }, _submittingUpload: { type: Boolean } } }
+
+      _keyPressedSearchService(event) {
+        if (event.which == 13 || event.keyCode == 13) {
+          event.preventDefault();
+          this.submitSearch();
+          return false;
+        }
+        return true;
+      }
+
+      submitSearch() {
+        var searchname = this.$.inputSearchname.value;
+          var req = this.$.ajaxServicesSearch;
+          req.params = { searchname: searchname };
+          req.generateRequest();
+      }
+
+      _handleSearchResponse(event) {
+        var resp = event.detail.response;
+        this.$.inputSearchname.value = '';
+        this._services = resp.instances;
+        if (!resp.msg) {
+          resp.msg = '';
+        }
+        this.$.searchServicesMsg.innerHTML = resp.msg;
+      }
+
+      _keyPressedUploadService(event) {
+        if (event.which == 13 || event.keyCode == 13) {
+          event.preventDefault();
+          this.uploadService();
+          return false;
+        }
+        return true;
+      }
+
+      uploadService(event) {
+        var req = this.$.ajaxUploadService;
+        req.headers = { 'X-Agent-Session-Id': this.sessionid };
+        req.body = new FormData();
+        req.body.append('jarfile', this.$.serviceUploadFile.inputElement.inputElement.files[0]); // this is an input inside an iron-input inside a paper-input
+        req.generateRequest();
+      }
+
+      _handleUploadServiceResponse(event) {
+        this.$.serviceUploadFile.value = '';
+        this.$.uploadServiceMsg.innerHTML = event.detail.response.msg;
+      }
+
+      _handleError(event) {
+        var errorTitle = 'Error', errorMsg;
+        if (event.detail.request.xhr.readyState == 4 && event.detail.request.xhr.status == 0) { // network issues
+          console.log('Network Connection Error - Could not connect to: ' + event.detail.request.url);
+        }
+        else {
+          var response = event.detail.request.xhr.response.reason;
+          if (response) {
+            console.log(response);
+            this.$.uploadServiceMsg.innerHTML = response;
+          }
+          else { // no error message returned, show generic message
+            console.log('An error occurred. Please try again.');
+          }
+        }
+      }
+
+    }
+    customElements.define(ServicesView.is, ServicesView);
+  </script>
+</dom-module>

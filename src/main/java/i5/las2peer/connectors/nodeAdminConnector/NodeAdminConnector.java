@@ -8,38 +8,41 @@ import java.nio.file.Files;
 import java.security.SecureRandom;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 
-import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpsServer;
 
 import i5.las2peer.connectors.Connector;
 import i5.las2peer.connectors.ConnectorException;
+import i5.las2peer.connectors.nodeAdminConnector.handler.AgentsHandler;
+import i5.las2peer.connectors.nodeAdminConnector.handler.AppHandler;
+import i5.las2peer.connectors.nodeAdminConnector.handler.AuthHandler;
 import i5.las2peer.connectors.nodeAdminConnector.handler.DefaultHandler;
-import i5.las2peer.connectors.nodeAdminConnector.handler.FrontendHandler;
+import i5.las2peer.connectors.nodeAdminConnector.handler.RMIHandler;
+import i5.las2peer.connectors.nodeAdminConnector.handler.ServicesHandler;
+import i5.las2peer.connectors.nodeAdminConnector.handler.StatusHandler;
+import i5.las2peer.connectors.nodeAdminConnector.handler.SwaggerUIHandler;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.PastryNodeImpl;
-import i5.las2peer.security.UserAgentImpl;
+import i5.las2peer.security.PassphraseAgentImpl;
 
 public class NodeAdminConnector extends Connector {
 
-	private static final String ADMIN_SECRET_FILENAME = "etc/webadmin.secret";
-	private static final String KEYSTORE_FILENAME = "etc/NodeAdminConnector.jks";
+	private static final String KEYSTORE_FILENAME_PREFIX = "etc/NodeAdminConnector-";
 	private static final String KEYSTORE_SECRET_FILENAME = "etc/keystore.secret";
 
 	private static final L2pLogger logger = L2pLogger.getInstance(NodeAdminConnector.class);
 
 	public static final int DEFAULT_PORT = 14577;
-	private final int port;
+	private int port;
 	public static final int DEFAULT_MAX_ACTIVE_CONNECTIONS = 20;
-	private final int maxActiveConnections;
+	private int maxActiveConnections;
 	public static final int DEFAULT_MAX_WAITING_CONNECTIONS = 10;
-	private final int maxWaitingConnections;
+	private int maxWaitingConnections;
 	public static final int DEFAULT_SESSION_TIMEOUT = 24 * 60; // minutes = 24 hours
-	private final int sessionTimeout;
+	private int sessionTimeout;
 	private final SecureRandom secureRandom;
 	private PastryNodeImpl node;
 	private HttpsServer https;
@@ -62,6 +65,7 @@ public class NodeAdminConnector extends Connector {
 		this.secureRandom = new SecureRandom();
 		this.agentIdToSessionId = new HashMap<>();
 		this.sessions = new HashMap<>();
+		setFieldValues();
 	}
 
 	@Override
@@ -72,18 +76,23 @@ public class NodeAdminConnector extends Connector {
 		// usual connector start
 		node = (PastryNodeImpl) runningAt;
 		try {
+			String hostname = node.getBindAddress().getHostName();
 			https = HttpsServer.create(new InetSocketAddress(port), maxWaitingConnections);
-			https.setHttpsConfigurator(KeystoreManager.loadOrCreateKeystore(KEYSTORE_FILENAME,
-					getOrCreateSecretFromFile("keystore password", KEYSTORE_SECRET_FILENAME)));
+			String keystoreSecret = getOrCreateSecretFromFile("keystore password", KEYSTORE_SECRET_FILENAME);
+			https.setHttpsConfigurator(
+					KeystoreManager.loadOrCreateKeystore(KEYSTORE_FILENAME_PREFIX, hostname, keystoreSecret));
 			https.createContext("/", new DefaultHandler(this));
-			HttpContext frontendContext = https.createContext("/" + FrontendHandler.ROOT_NAME,
-					new FrontendHandler(this, getOrCreateSecretFromFile("webadmin token", ADMIN_SECRET_FILENAME)));
-			frontendContext.getFilters().add(new ParameterFilter());
+			https.createContext("/app", new AppHandler(this)).getFilters().add(new ParameterFilter());
+			https.createContext("/status", new StatusHandler(this)).getFilters().add(new ParameterFilter());
+			https.createContext("/services", new ServicesHandler(this)).getFilters().add(new ParameterFilter());
+			https.createContext("/auth", new AuthHandler(this)).getFilters().add(new ParameterFilter());
+			https.createContext("/agents", new AgentsHandler(this)).getFilters().add(new ParameterFilter());
+			https.createContext("/swagger-ui", new SwaggerUIHandler(this)).getFilters().add(new ParameterFilter());
+			https.createContext("/rmi", new RMIHandler(this)).getFilters().add(new ParameterFilter());
 			https.setExecutor(Executors.newFixedThreadPool(maxActiveConnections));
 			https.start();
 			logger.info(NodeAdminConnector.class.getSimpleName() + " in HTTPS mode running on port " + port);
-			logger.info(
-					"Please visit https://" + node.getBindAddress().getHostAddress() + ":" + port + " to continue ...");
+			logger.info("Please visit https://" + hostname + ":" + port + " to continue ...");
 		} catch (Exception e) {
 			if (https != null) {
 				// try to cleanup mess
@@ -97,7 +106,7 @@ public class NodeAdminConnector extends Connector {
 			}
 			throw new ConnectorException("Connector start failed", e);
 		}
-		// FIXME start sessions cleanup thread
+		// TODO start sessions cleanup thread
 	}
 
 	private String getOrCreateSecretFromFile(String passwordName, String filename) {
@@ -145,7 +154,11 @@ public class NodeAdminConnector extends Connector {
 		return node;
 	}
 
-	public AgentSession getOrCreateSession(UserAgentImpl agent) {
+	public int getPort() {
+		return port;
+	}
+
+	public AgentSession getOrCreateSession(PassphraseAgentImpl agent) {
 		synchronized (sessions) {
 			final String agentId = agent.getIdentifier();
 			String sessionId = agentIdToSessionId.get(agentId);
@@ -163,33 +176,26 @@ public class NodeAdminConnector extends Connector {
 		}
 	}
 
-	public AgentSession getSessionFromCookies(List<String> cookies) {
-		synchronized (sessions) {
-			if (cookies != null) {
-				for (String pairs : cookies) {
-					for (String cookie : pairs.split(";")) {
-						cookie = cookie.trim();
-						int equalPos = cookie.indexOf("=");
-						if (equalPos > 0) {
-							String key = cookie.substring(0, equalPos).trim();
-							String value = cookie.substring(equalPos + 1).trim();
-							if (key.equalsIgnoreCase("agent-session-id")) {
-								AgentSession session = sessions.get(value);
-								if (session != null) {
-									Calendar cal = Calendar.getInstance();
-									cal.add(Calendar.MINUTE, -sessionTimeout);
-									if (session.getLastActive().after(cal.getTime())) {
-										// session is still active
-										session.touch();
-										return session;
-									}
-								}
-							}
-						}
+	public AgentSession getSessionFromHeader(String headerValue) {
+		if (headerValue == null || headerValue.isEmpty()) {
+			return null;
+		} else {
+			synchronized (sessions) {
+				AgentSession session = sessions.get(headerValue);
+				if (session != null) {
+					// check if session is not timed out
+					Calendar cal = Calendar.getInstance();
+					cal.add(Calendar.MINUTE, -sessionTimeout);
+					if (session.getLastActive().after(cal.getTime())) { // session is still active
+						session.touch();
+					} else { // timed out, destroy session
+						logger.info("Destroying timed out session " + session.getSessionId());
+						destroySession(session.getSessionId());
+						session = null;
 					}
 				}
+				return session;
 			}
-			return null;
 		}
 	}
 

@@ -1,30 +1,30 @@
 package i5.las2peer.connectors.nodeAdminConnector.handler;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.Serializable;
 import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.logging.Level;
 
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
-import i5.las2peer.api.p2p.ServiceNameVersion;
-import i5.las2peer.api.persistency.EnvelopeNotFoundException;
-import i5.las2peer.classLoaders.L2pClassManager;
-import i5.las2peer.classLoaders.libraries.SharedStorageRepository;
+import i5.las2peer.connectors.nodeAdminConnector.AgentSession;
 import i5.las2peer.connectors.nodeAdminConnector.NodeAdminConnector;
+import i5.las2peer.connectors.nodeAdminConnector.ParameterFilter.ParameterMap;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.p2p.Node;
-import i5.las2peer.persistency.EnvelopeVersion;
+import i5.las2peer.p2p.PastryNodeImpl;
+import i5.las2peer.security.AnonymousAgentImpl;
+import i5.las2peer.security.PassphraseAgentImpl;
 import i5.las2peer.tools.L2pNodeLauncher;
-import i5.las2peer.tools.PackageUploader.ServiceVersionList;
-import i5.las2peer.tools.ServicePackageException;
+import i5.las2peer.tools.SimpleTools;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 
 public abstract class AbstractHandler implements HttpHandler {
 
@@ -37,12 +37,100 @@ public abstract class AbstractHandler implements HttpHandler {
 		this.connector = connector;
 	}
 
+	@Override
+	public void handle(HttpExchange exchange) throws IOException {
+		try {
+			final String method = exchange.getRequestMethod();
+			logger.fine("Handler: " + getClass().getSimpleName() + " Request-Method: " + method + " Request-Path: "
+					+ exchange.getRequestURI().getPath());
+			exchange.getResponseHeaders().set("Server-Name", "las2peer " + getClass().getSimpleName());
+			String origin = exchange.getRequestHeaders().getFirst("Origin");
+			if (origin != null) {
+				exchange.getResponseHeaders().add("Access-Control-Allow-Origin", origin);
+			} else {
+				exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+			}
+			exchange.getResponseHeaders().add("Access-Control-Max-Age", "60");
+			exchange.getResponseHeaders().add("Access-Control-Allow-Credentials", "true");
+			ParameterMap parameters = (ParameterMap) exchange.getAttribute("parameters");
+			String sessionid = exchange.getRequestHeaders().getFirst("X-Agent-Session-Id");
+			AgentSession requestingAgentSession = connector.getSessionFromHeader(sessionid);
+			String sessionId = null;
+			PassphraseAgentImpl activeAgent = null;
+			if (requestingAgentSession != null) {
+				sessionId = requestingAgentSession.getSessionId();
+				activeAgent = requestingAgentSession.getAgent();
+			} else { // default to anonymous agent
+				activeAgent = AnonymousAgentImpl.getInstance();
+				activeAgent.unlock(AnonymousAgentImpl.PASSPHRASE);
+			}
+			if (exchange.getRequestMethod().equalsIgnoreCase("OPTIONS")) {
+				handleOptionsRequest(exchange);
+			} else {
+				// read request body
+				byte[] requestBody = new byte[0];
+				InputStream is = exchange.getRequestBody();
+				if (is != null) {
+					requestBody = SimpleTools.toByteArray(is);
+					is.close();
+				}
+				// TODO limit request body to 5M?
+				handleSub(exchange, connector.getNode(), parameters, sessionId, activeAgent, requestBody);
+			}
+		} catch (Exception e) {
+			sendInternalErrorResponse(exchange, "Unknown connector error", e);
+		}
+	}
+
+	protected abstract void handleSub(HttpExchange exchange, PastryNodeImpl node, ParameterMap parameters,
+			String sessionId, PassphraseAgentImpl activeAgent, byte[] requestBody) throws Exception;
+
+	private void handleOptionsRequest(HttpExchange exchange) {
+		String requestedHeaders = exchange.getRequestHeaders().getFirst("Access-Control-Request-Headers");
+		if (requestedHeaders != null) {
+			// we accept all headers (at the moment)
+			exchange.getResponseHeaders().add("Access-Control-Allow-Headers", requestedHeaders);
+		} else {
+			// we accept all methods (at the moment)
+			exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS");
+		}
+		sendEmptyResponse(exchange, HttpURLConnection.HTTP_OK);
+	}
+
 	protected void sendPlainResponse(HttpExchange exchange, String text) {
-		sendStringResponse(exchange, HttpURLConnection.HTTP_OK, "text/plain", text);
+		sendStringResponse(exchange, HttpURLConnection.HTTP_OK, MediaType.TEXT_PLAIN, text);
 	}
 
 	protected void sendHtmlResponse(HttpExchange exchange, String html) {
-		sendStringResponse(exchange, HttpURLConnection.HTTP_OK, "text/html", html);
+		sendStringResponse(exchange, HttpURLConnection.HTTP_OK, MediaType.TEXT_HTML, html);
+	}
+
+	protected void sendJSONResponseBadRequest(HttpExchange exchange, String reason) {
+		sendJSONResponse(exchange, HttpURLConnection.HTTP_BAD_REQUEST, "Bad Request", reason);
+	}
+
+	protected void sendJSONResponseForbidden(HttpExchange exchange, String reason) {
+		sendJSONResponse(exchange, HttpURLConnection.HTTP_FORBIDDEN, "Forbidden", reason);
+	}
+
+	protected void sendJSONResponse(HttpExchange exchange, int responseCode, String text, String reason) {
+		JSONObject json = new JSONObject();
+		json.put("code", responseCode);
+		json.put("text", responseCode + " - " + text);
+		json.put("reason", reason);
+		sendJSONResponse(exchange, responseCode, json);
+	}
+
+	protected void sendJSONResponse(HttpExchange exchange, JSONObject json) {
+		sendJSONResponse(exchange, HttpURLConnection.HTTP_OK, json);
+	}
+
+	protected void sendJSONResponse(HttpExchange exchange, int responseCode, JSONObject json) {
+		sendStringResponse(exchange, responseCode, MediaType.APPLICATION_JSON, json.toJSONString());
+	}
+
+	protected void sendJSONResponse(HttpExchange exchange, JSONArray json) {
+		sendStringResponse(exchange, HttpURLConnection.HTTP_OK, MediaType.APPLICATION_JSON, json.toJSONString());
 	}
 
 	protected void sendStringResponse(HttpExchange exchange, int responseCode, String mime, String response) {
@@ -69,6 +157,15 @@ public abstract class AbstractHandler implements HttpHandler {
 		}
 	}
 
+	protected void sendEmptyResponse(HttpExchange exchange, int responseCode) {
+		try {
+			exchange.sendResponseHeaders(responseCode, 0);
+			exchange.getResponseBody().close(); // close to signal client
+		} catch (Exception e) {
+			logger.log(Level.WARNING, e.toString());
+		}
+	}
+
 	protected void sendInternalErrorResponse(HttpExchange exchange, String msg) {
 		sendInternalErrorResponse(exchange, msg, null);
 	}
@@ -79,7 +176,7 @@ public abstract class AbstractHandler implements HttpHandler {
 		if (e != null) {
 			reason = " - Reason: " + e.toString();
 		}
-		sendStringResponse(exchange, HttpURLConnection.HTTP_INTERNAL_ERROR, "text/plain", msg + reason);
+		sendStringResponse(exchange, HttpURLConnection.HTTP_INTERNAL_ERROR, MediaType.TEXT_PLAIN, msg + reason);
 	}
 
 	protected void sendRedirect(HttpExchange exchange, String location, boolean permanent) throws IOException {
@@ -98,30 +195,6 @@ public abstract class AbstractHandler implements HttpHandler {
 
 	protected int getCPULoad(Node node) {
 		return (int) (node.getNodeCpuLoad() * 100);
-	}
-
-	protected List<ServiceNameVersion> getNetworkServices(Node node, String searchName) {
-		List<ServiceNameVersion> result = new LinkedList<>();
-		try {
-			String libName = L2pClassManager.getPackageName(searchName);
-			String libId = SharedStorageRepository.getLibraryVersionsEnvelopeIdentifier(libName);
-			EnvelopeVersion networkVersions = node.fetchEnvelope(libId);
-			Serializable content = networkVersions.getContent();
-			if (content instanceof ServiceVersionList) {
-				ServiceVersionList serviceversions = (ServiceVersionList) content;
-				for (String version : serviceversions) {
-					result.add(new ServiceNameVersion(searchName, version));
-				}
-			} else {
-				throw new ServicePackageException("Invalid version envelope expected " + List.class.getCanonicalName()
-						+ " but envelope contains " + content.getClass().getCanonicalName());
-			}
-		} catch (EnvelopeNotFoundException e) {
-			logger.fine(e.toString());
-		} catch (Exception e) {
-			logger.log(Level.SEVERE, "Could not load service versions from network", e);
-		}
-		return result;
 	}
 
 }

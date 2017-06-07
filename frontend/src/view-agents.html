@@ -1,0 +1,371 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-form/iron-form.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/iron-input/iron-input.html">
+<link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="agents-view">
+  <template>
+    <iron-ajax id="ajaxCreateAgent"
+               method="POST"
+               url="[[las2peerConnectorEndpoint]]/agents/createAgent"
+               handle-as="json"
+               on-response="_handleCreateAgentResponse"
+               on-error="_handleError"
+               loading = "{{_working}}"></iron-ajax>
+    <iron-ajax id="ajaxExportAgent"
+               method="POST"
+               url="[[las2peerConnectorEndpoint]]/agents/exportAgent"
+               handle-as="text"
+               on-response="_handleExportAgentResponse"
+               on-error="_handleError"
+               loading = "{{_working}}"></iron-ajax>
+    <iron-ajax id="ajaxUploadAgent"
+               method="POST"
+               url="[[las2peerConnectorEndpoint]]/agents/uploadAgent"
+               handle-as="json"
+               on-response="_handleUploadAgentResponse"
+               on-error="_handleError"
+               loading = "{{_working}}"></iron-ajax>
+    <iron-ajax id="ajaxChangePassphrase"
+               method="POST"
+               url="[[las2peerConnectorEndpoint]]/agents/changePassphrase"
+               handle-as="json"
+               on-response="_handleChangePassphraseResponse"
+               on-error="_handleError"
+               loading = "{{_working}}"></iron-ajax>
+    <iron-ajax id="ajaxAddMember"
+               method="POST"
+               url="[[las2peerConnectorEndpoint]]/agents/getAgent"
+               handle-as="json"
+               on-response="_handleAddMemberResponse"
+               on-error="_handleError"
+               loading = "{{_working}}"></iron-ajax>
+    <iron-ajax id="ajaxCreateGroup"
+               method="POST"
+               url="[[las2peerConnectorEndpoint]]/agents/createGroup"
+               handle-as="json"
+               on-response="_handleCreateGroupResponse"
+               on-error="_handleError"
+               loading = "{{_working}}"></iron-ajax>
+    <iron-ajax id="ajaxLoadGroup"
+               method="POST"
+               url="[[las2peerConnectorEndpoint]]/agents/loadGroup"
+               handle-as="json"
+               on-response="_handleLoadGroupResponse"
+               on-error="_handleError"
+               loading = "{{_working}}"></iron-ajax>
+    <iron-ajax id="ajaxChangeGroup"
+               method="POST"
+               url="[[las2peerConnectorEndpoint]]/agents/changeGroup"
+               handle-as="json"
+               on-response="_handleChangeGroupResponse"
+               on-error="_handleError"
+               loading = "{{_working}}"></iron-ajax>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        padding: 0.1em;
+      }
+    </style>
+
+    <div class="card">
+      <h1>Agents</h1>
+      <h2 on-tap="toggleCreateAgent" style="cursor: pointer">Create Agent</h2>
+      <iron-collapse id="collapseCreateAgent">
+        Create a new user agent and upload it to the network for later usage.
+        <form is="iron-form" on-keypress="_keyPressedCreateAgent">
+          <paper-input label="username (optional)" id="agentUsername" disabled="[[_working]]" value=""></paper-input>
+          <paper-input label="email (optional)" id="agentEmail" disabled="[[_working]]" value=""></paper-input>
+          <paper-input label="password" id="agentPassword" disabled="[[_working]]" value="" type="password" required="true"></paper-input>
+          <paper-button raised on-tap="createAgent" disabled="[[_working]]">Create Agent</paper-button>
+        </form>
+        <div id="createAgentMsg" style="font-weight: bold"></div>
+      </iron-collapse>
+      <h2 on-tap="toggleExportAgent" style="cursor: pointer">Export Agent</h2>
+      <iron-collapse id="collapseExportAgent">
+        Dump an existing agent as XML file and download it from the network. Only one detail below is required.
+        <form is="iron-form" on-keypress="_keyPressedExportAgent">
+          <paper-input label="agentid" id="exportAgentId" disabled="[[_working]]" value=""></paper-input>
+          <paper-input label="username" id="exportAgentUsername" disabled="[[_working]]" value=""></paper-input>
+          <paper-input label="email" id="exportAgentEmail" disabled="[[_working]]" value=""></paper-input>
+          <paper-button raised on-tap="exportAgent" disabled="[[_working]]">Export Agent</paper-button>
+        </form>
+      </iron-collapse>
+      <h2 on-tap="toggleUploadAgent" style="cursor: pointer">Upload Agent</h2>
+      <iron-collapse id="collapseUploadAgent">
+        <form is="iron-form" on-keypress="_keyPressedUploadAgent">
+          <paper-input label="agent xml file" id="agentUploadFile" disabled="[[_working]]" type="file" required="true"></paper-input>
+          <paper-input label="password (optional)" id="agentUploadPassword" disabled="[[_working]]" value="" type="password"></paper-input>
+          <paper-button raised on-tap="uploadAgent" disabled="[[_working]]">Upload Agent</paper-button>
+        </form>
+        <div id="uploadAgentMsg" style="font-weight: bold"></div>
+      </iron-collapse>
+      <h2 on-tap="toggleChangePassphrase" style="cursor: pointer">Change Passphrase</h2>
+      <iron-collapse id="collapseChangePassphrase">
+        <form is="iron-form" on-keypress="_keyPressedChangePassphrase">
+          <paper-input label="agentid" id="changePassphraseAgentid" disabled="[[_working]]" value=""></paper-input>
+          <paper-input label="old passphrase" id="passphrase" disabled="[[_working]]" value="" type="password" required="true"></paper-input>
+          <paper-input label="new passphrase" id="passphraseNew" disabled="[[_working]]" value="" type="password" required="true"></paper-input>
+          <paper-input label="new passphrase (repetition)" id="passphraseNew2" disabled="[[_working]]" value="" type="password" required="true"></paper-input>
+          <paper-button raised on-tap="changePassphrase" disabled="[[_working]]">Change Passphrase</paper-button>
+        </form>
+        <div id="changePassphraseMsg" style="font-weight: bold"></div>
+      </iron-collapse>
+      <h2 on-tap="toggleCreateGroup" style="cursor: pointer">Create Group</h2>
+      <iron-collapse id="collapseCreateGroup">
+        <h3>Members</h3>
+        <table width="100%">
+          <tr><th>Agentid</th><th>Username</th><th>Email</th></tr>
+          <template is="dom-repeat" items="[[_memberAgents]]">
+            <tr><td>[[item.shortid]]</td><td>[[item.username]]</td><td>[[item.email]]</td></tr>
+          </template>
+        </table>
+        Add a member to the new group. Only one detail required.
+        <form is="iron-form" on-keypress="_keyPressedAddMember">
+          <paper-input label="agentid" id="addMemberId" disabled="[[_working]]" value=""></paper-input>
+          <paper-input label="username" id="addMemberUsername" disabled="[[_working]]" value=""></paper-input>
+          <paper-input label="email" id="addMemberEmail" disabled="[[_working]]" value=""></paper-input>
+          <paper-button raised on-tap="addGroupMember">Add Member</paper-button>
+        </form>
+        <form is="iron-form" on-keypress="_keyPressedCreateGroup">
+          <paper-button raised on-tap="createGroup" disabled="[[_hasNoMemberAgents]]">Create Group</paper-button>
+        </form>
+        <div id="createGroupMsg" style="font-weight: bold"></div>
+      </iron-collapse>
+      <h2 on-tap="toggleManageGroup" style="cursor: pointer">Manage Group</h2>
+      <iron-collapse id="collapseManageGroup">
+        <template is="dom-if" if="[[!_hasNoManageAgents]]">
+          <h3>Members</h3>
+          <table width="100%">
+            <tr><th></th><th>Agentid</th><th>Username</th><th>Email</th></tr>
+            <template is="dom-repeat" items="[[_manageAgents]]" as="agent">
+              <tr><td><paper-icon-button raised icon="delete" title="remove member from group" on-tap="removeManageMember"></paper-icon-button></td><td>[[agent.shortid]]</td><td>[[agent.username]]</td><td>[[agent.email]]</td></tr>
+            </template>
+          </table>
+        </template>
+        <form is="iron-form">
+          <template is="dom-if" if="[[_hasNoManageAgents]]">
+            <paper-input label="group agentid" disabled="[[_working]]" value="{{_manageGroupAgentId}}"></paper-input>
+            <paper-button raised on-tap="loadGroup">Load Group</paper-button>
+          </template>
+          <template is="dom-if" if="[[!_hasNoManageAgents]]">
+            <paper-button raised on-tap="saveGroup">Save Group</paper-button>
+          </template>
+        </form>
+      </iron-collapse>
+    </div>
+  </template>
+  <script>
+    class AgentsView extends Polymer.Element {
+      static get is() { return 'agents-view'; }
+      static get properties() { return { las2peerConnectorEndpoint: String, sessionid: String, _working: Boolean, _memberAgents: { type: Array, value: [] }, _hasNoMemberAgents: { type: Boolean, value: true }, _manageAgents: { type: Array, value: [] }, _hasNoManageAgents: { type: Boolean, value: true }, _manageGroupAgentId: String } }
+
+      toggleCreateAgent() { this.$.collapseCreateAgent.toggle(); }
+
+      _keyPressedCreateAgent(event) {
+        if (event.which == 13 || event.keyCode == 13) {
+          event.preventDefault();
+          this.createAgent();
+          return false;
+        }
+        return true;
+      }
+
+      createAgent() {
+        var req = this.$.ajaxCreateAgent;
+        req.body = JSON.stringify({ username: this.$.agentUsername.value, email: this.$.agentEmail.value, password: this.$.agentPassword.value });
+        req.generateRequest();
+      }
+
+      _handleCreateAgentResponse(event) {
+        this.$.agentUsername.value = '';
+        this.$.agentEmail.value = '';
+        this.$.agentPassword.value = '';
+        this.$.createAgentMsg.innerHTML = 'Agent successfully created, ID: ' + event.detail.response.agentid;
+      }
+
+      toggleExportAgent() { this.$.collapseExportAgent.toggle(); }
+
+      _keyPressedExportAgent(event) {
+        if (event.which == 13 || event.keyCode == 13) {
+          event.preventDefault();
+          this.exportAgent();
+          return false;
+        }
+        return true;
+      }
+
+      exportAgent() {
+        var req = this.$.ajaxExportAgent;
+        req.body = JSON.stringify({ agentid: this.$.exportAgentId.value, username: this.$.exportAgentUsername.value, email: this.$.exportAgentEmail.value });
+        req.generateRequest();
+      }
+
+      _handleExportAgentResponse(event) {
+        this.$.exportAgentId.value = '';
+        this.$.exportAgentUsername.value = '';
+        this.$.exportAgentEmail.value = '';
+        // pack response as download file
+        var element = document.createElement('a');
+        element.style.display = 'none';
+        element.setAttribute('href', 'data:application/xml;charset=utf-8,' + encodeURIComponent(event.detail.response));
+        element.setAttribute('download', 'agent.xml');
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+      }
+
+      toggleUploadAgent() { this.$.collapseUploadAgent.toggle(); }
+
+      _keyPressedUploadAgent(event) {
+        if (event.which == 13 || event.keyCode == 13) {
+          event.preventDefault();
+          this.uploadAgent();
+          return false;
+        }
+        return true;
+      }
+
+      uploadAgent(event) {
+        var req = this.$.ajaxUploadAgent;
+        req.headers = { 'X-Agent-Session-Id': this.sessionid };
+        req.body = new FormData();
+        req.body.append('agentFile', this.$.agentUploadFile.inputElement.inputElement.files[0]); // this is an input inside an iron-input inside a paper-input
+        req.body.append('agentPassword', this.$.agentUploadPassword.value);
+        req.generateRequest();
+      }
+
+      _handleUploadAgentResponse(event) {
+        this.$.agentUploadFile.value = '';
+        this.$.agentUploadPassword.value = '';
+        this.$.uploadAgentMsg.innerHTML = 'Agent successfully uploaded, ID: ' + event.detail.response.agentid;
+      }
+
+      toggleChangePassphrase() { this.$.collapseChangePassphrase.toggle(); }
+
+      _keyPressedChangePassphrase(event) {
+        if (event.which == 13 || event.keyCode == 13) {
+          event.preventDefault();
+          this.changePassphrase();
+          return false;
+        }
+        return true;
+      }
+
+      changePassphrase(event) {
+        var req = this.$.ajaxChangePassphrase;
+        req.body = JSON.stringify({ agentid: this.$.changePassphraseAgentid.value, passphrase: this.$.passphrase.value, passphraseNew: this.$.passphraseNew.value, passphraseNew2: this.$.passphraseNew2.value });
+        req.generateRequest();
+      }
+
+      _handleChangePassphraseResponse(event) {
+        this.$.changePassphraseAgentid.value = '';
+        this.$.passphrase.value = '';
+        this.$.passphraseNew.value = '';
+        this.$.passphraseNew2.value = '';
+        this.$.changePassphraseMsg.innerHTML = 'Passphrase successfully changed, agentid: ' + event.detail.response.agentid;
+      }
+
+      toggleCreateGroup() { this.$.collapseCreateGroup.toggle(); }
+
+      _keyPressedAddMember(event) {
+        if (event.which == 13 || event.keyCode == 13) {
+          event.preventDefault();
+          this.addGroupMember();
+          return false;
+        }
+        return true;
+      }
+
+      addGroupMember() {
+        var req = this.$.ajaxAddMember;
+        req.body = JSON.stringify({ agentid: this.$.addMemberId.value, username: this.$.addMemberUsername.value, email: this.$.addMemberEmail.value });
+        req.generateRequest();
+      }
+
+      _handleAddMemberResponse(event) {
+        this.$.addMemberId.value = '';
+        this.$.addMemberUsername.value = '';
+        this.$.addMemberEmail.value = '';
+        var agent = event.detail.response;
+        if (!(this._memberAgents.find(m => m.agentid === agent.agentid))) { // avoid duplicate membership
+          agent.shortid = agent.agentid.substr(0, 15) + '...';
+          this.push('_memberAgents', agent);
+        }
+        this._hasNoMemberAgents = false;
+      }
+
+      createGroup() {
+        var req = this.$.ajaxCreateGroup;
+        req.headers = { 'X-Agent-Session-Id': this.sessionid };
+        req.body = JSON.stringify({ members: this._memberAgents });
+        req.generateRequest();
+      }
+
+      _handleCreateGroupResponse() {
+        this.splice('_memberAgents', 0, this._memberAgents.length);
+        this._hasNoMemberAgents = true;
+        this.$.createGroupMsg.innerHTML = 'Group successfully created, ID: ' + event.detail.response.agentid;
+      }
+
+      toggleManageGroup() { this.$.collapseManageGroup.toggle(); }
+
+      loadGroup() {
+        var req = this.$.ajaxLoadGroup;
+        req.headers = { 'X-Agent-Session-Id': this.sessionid };
+        req.body = JSON.stringify({ agentid: this._manageGroupAgentId });
+        req.generateRequest();
+      }
+
+      _handleLoadGroupResponse(event) {
+        var response = event.detail.response;
+        response.members.forEach(function(element) { element.shortid = element.agentid.substr(0, 15) + '...' });
+        this._manageAgents = response.members;
+        this._hasNoManageAgents = false;
+      }
+
+      removeManageMember(event) {
+        var agentid = event.model.get('agent.agentid');
+        this._manageAgents = this._manageAgents.filter(function(obj) { return obj.agentid !== agentid; });
+      }
+
+      saveGroup() {
+        var req = this.$.ajaxChangeGroup;
+        req.headers = { 'X-Agent-Session-Id': this.sessionid };
+        req.body = JSON.stringify({ agentid: this._manageGroupAgentId, members: this._manageAgents });
+        req.generateRequest();
+      }
+
+      _handleChangeGroupResponse(event) {
+        var response = event.detail.response;
+        this._manageAgents = [];
+        this._hasNoManageAgents = true;
+      }
+
+      _handleError(event) {
+        var errorTitle = 'Error', errorMsg;
+        if (event.detail.request.xhr.readyState == 4 && event.detail.request.xhr.status == 0) { // network issues
+          console.log('Network Connection Error - Could not connect to: ' + event.detail.request.url);
+        }
+        else {
+          var response = event.detail.request.xhr.response.reason;
+          if (response) {
+            console.log(response);
+            this.$.createAgentMsg.innerHTML = "Error: " + response;
+          }
+          else { // no error message returned, show generic message
+            console.log('An error occurred. Please try again.');
+          }
+        }
+      }
+
+    }
+    customElements.define(AgentsView.is, AgentsView);
+  </script>
+</dom-module>

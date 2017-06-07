@@ -1,0 +1,72 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="status-view">
+  <template>
+    <iron-ajax id="ajaxStatus"
+               auto
+               url="[[las2peerConnectorEndpoint]]/status"
+               handle-as="json"
+               on-response="_handleStatusResponse"
+               on-error="_handleError"
+               debounce-duration="300"></iron-ajax>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        padding: 0.1em;
+      }
+    </style>
+
+    <div class="card">
+      <h1>Node Status <paper-icon-button icon="refresh" on-tap="refreshStatus"></paper-icon-button></h1>
+      node id: [[_status.nodeid]]<br>
+      cpu load: [[_status.cpuload]]%<br>
+      local storage: <meter value="[[_status.storageSize]]" min="0" max="[[_status.maxStorageSize]]"></meter> [[_status.storageSizeStr]] of [[_status.maxStorageSizeStr]] used<br>
+      uptime: [[_status.uptime]]
+      <h3>Known Nodes In Network</h3>
+      <ul>
+        <template is="dom-repeat" items="[[_status.otherNodes]]">
+          <li>[[item]]</li>
+        </template>
+      </ul>
+
+      <h3>Local Running Services</h3>
+      <table width="100%">
+      <tr><th>Name</th><th width="10%">Version</th></tr>
+        <template is="dom-repeat" items="[[_status.localServices]]">
+          <tr><td><b style="color: #0A0">[[item.name]]</b></td><td>[[item.version]]</td></tr>
+        </template>
+      </table>
+    </div>
+  </template>
+  <script>
+    class StatusView extends Polymer.Element {
+      static get is() { return 'status-view'; }
+      static get properties() { return { las2peerConnectorEndpoint: String, sessionid: String, _status: { type: Object, value: { nodeid: "...", cpuload: "...", storageSize: 0, maxStorageSize: 1, storageSizeStr: "...", maxStorageSizeStr: "...", uptime: "...", publicKey: "..." } } } }
+
+      refreshStatus() {
+        this.$.ajaxStatus.generateRequest();
+      }
+
+      _handleStatusResponse(event) {
+        this._status = event.detail.response;
+      }
+
+      _handleError(event) {
+        var errorMsg;
+        if (event.detail.request.xhr.readyState == 4 && event.detail.request.xhr.status == 0) { // network issues
+          errorMsg = 'Network Connection Error - Could not connect to: ' + event.detail.request.url;
+        }
+        else {
+          errorMsg = event.detail.error;
+        }
+        console.log(errorMsg);
+      }
+
+    }
+    customElements.define(StatusView.is, StatusView);
+  </script>
+</dom-module>

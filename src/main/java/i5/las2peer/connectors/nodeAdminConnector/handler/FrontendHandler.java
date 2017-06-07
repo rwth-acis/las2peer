@@ -42,6 +42,7 @@ import i5.las2peer.p2p.NodeException;
 import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.persistency.EnvelopeVersion;
 import i5.las2peer.security.AgentImpl;
+import i5.las2peer.security.PassphraseAgentImpl;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.tools.CryptoException;
@@ -86,16 +87,16 @@ public class FrontendHandler extends AbstractHandler {
 		try {
 			exchange.getResponseHeaders().set("Server-Name", "las2peer " + getClass().getSimpleName());
 			final PastryNodeImpl node = connector.getNode();
-			final AgentSession requestingAgentSession = connector
-					.getSessionFromCookies(exchange.getRequestHeaders().get("Cookie"));
+//			final AgentSession requestingAgentSession = connector
+//					.getSessionFromCookies(exchange.getRequestHeaders().get("Cookie"));
 			String sessionId = null;
 			String agentId = null;
-			UserAgentImpl activeAgent = null;
-			if (requestingAgentSession != null) {
-				sessionId = requestingAgentSession.getSessionId();
-				activeAgent = requestingAgentSession.getAgent();
-				agentId = activeAgent.getIdentifier();
-			}
+			PassphraseAgentImpl activeAgent = null;
+//			if (requestingAgentSession != null) {
+//				sessionId = requestingAgentSession.getSessionId();
+//				activeAgent = requestingAgentSession.getAgent();
+//				agentId = activeAgent.getIdentifier();
+//			}
 			logger.info("Handler: " + getClass().getCanonicalName() + " Method: " + exchange.getRequestMethod()
 					+ " Request-Path: " + exchange.getRequestURI().getPath());
 			handleRequest(exchange, node, sessionId, agentId, activeAgent);
@@ -104,8 +105,15 @@ public class FrontendHandler extends AbstractHandler {
 		}
 	}
 
+	@Override
+	protected void handleSub(HttpExchange exchange, PastryNodeImpl node, ParameterMap parameters, String sessionId,
+			PassphraseAgentImpl activeAgent, byte[] requestBody) throws Exception {
+		// TODO Auto-generated method stub
+
+	}
+
 	private void handleRequest(HttpExchange exchange, PastryNodeImpl node, String sessionId, String agentId,
-			UserAgentImpl activeAgent) throws Exception {
+			PassphraseAgentImpl activeAgent) throws Exception {
 		final String method = exchange.getRequestMethod();
 		final String path = exchange.getRequestURI().getPath();
 		if (path.isEmpty() || ROOT_PATH.equalsIgnoreCase(path)) {
@@ -285,6 +293,30 @@ public class FrontendHandler extends AbstractHandler {
 		}
 		template.add("token", adminToken);
 		template.add("localServices", getLocalServices(node));
+	}
+
+	protected List<ServiceNameVersion> getNetworkServices(Node node, String searchName) {
+		List<ServiceNameVersion> result = new LinkedList<>();
+		try {
+			String libName = L2pClassManager.getPackageName(searchName);
+			String libId = SharedStorageRepository.getLibraryVersionsEnvelopeIdentifier(libName);
+			EnvelopeVersion networkVersions = node.fetchEnvelope(libId);
+			Serializable content = networkVersions.getContent();
+			if (content instanceof ServiceVersionList) {
+				ServiceVersionList serviceversions = (ServiceVersionList) content;
+				for (String version : serviceversions) {
+					result.add(new ServiceNameVersion(searchName, version));
+				}
+			} else {
+				throw new ServicePackageException("Invalid version envelope expected " + List.class.getCanonicalName()
+						+ " but envelope contains " + content.getClass().getCanonicalName());
+			}
+		} catch (EnvelopeNotFoundException e) {
+			logger.fine(e.toString());
+		} catch (Exception e) {
+			logger.log(Level.SEVERE, "Could not load service versions from network", e);
+		}
+		return result;
 	}
 
 	private List<PojoService> getLocalServices(Node node) {

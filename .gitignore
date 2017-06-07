@@ -16,7 +16,8 @@ ivy.jar
 /junit*.properties
 /etc/startup
 *.secret
-*.jks
+/etc/*.jks
+/etc/*.pem
 archiva_credentials.xml
 /etc/las2peer.policy
 /etc/launcher-configuration.ini
