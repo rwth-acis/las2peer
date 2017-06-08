@@ -13,7 +13,7 @@ public class PastryNodeImplTest {
 	public void testSystemDefinedPort() {
 		try {
 			PastryNodeImpl testNode = TestSuite.launchNetwork(1).get(0);
-			Assert.assertNotEquals(testNode.getPort(), 0);
+			Assert.assertNotEquals(0, testNode.getPort());
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail(e.toString());

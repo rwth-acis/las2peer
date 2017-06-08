@@ -50,17 +50,17 @@ public class ServiceVersionTest {
 
 	@Test
 	public void testCompare() {
-		assertEquals(vStar.compareTo(vNull), 0);
-		assertEquals(v0.compareTo(v1), -1);
-		assertEquals(v1.compareTo(v0), 1);
-		assertEquals(v1.compareTo(v10), -1);
-		assertEquals(vNull.compareTo(v1), -1);
+		assertEquals(0, vStar.compareTo(vNull));
+		assertEquals(-1, v0.compareTo(v1));
+		assertEquals(1, v1.compareTo(v0));
+		assertEquals(-1, v1.compareTo(v10));
+		assertEquals(-1, vNull.compareTo(v1));
 	}
 
 	@Test
 	public void testString() {
-		assertEquals(vStar.toString(), "*");
-		assertEquals(v1001.toString(), "1.0.0-1");
+		assertEquals("*", vStar.toString());
+		assertEquals("1.0.0-1", v1001.toString());
 	}
 
 }

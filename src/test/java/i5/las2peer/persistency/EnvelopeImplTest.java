@@ -44,8 +44,8 @@ public class EnvelopeImplTest {
 		AgentImpl reader = MockAgentFactory.getEve();
 
 		EnvelopeImpl envelope = new EnvelopeImpl("test", owner);
-		assertEquals(envelope.getIdentifier(), "test");
-		assertEquals(envelope.getSigningAgentId(), owner.getIdentifier());
+		assertEquals("test", envelope.getIdentifier());
+		assertEquals(owner.getIdentifier(), envelope.getSigningAgentId());
 		assertTrue(envelope.hasReader(owner));
 		assertFalse(envelope.hasReader(reader));
 

@@ -30,7 +30,8 @@ public class ServiceAgentImplTest {
 	private static final String passphrase = "a passphrase";
 
 	@Test
-	public void testCreation() throws CryptoException, InternalSecurityException, AgentAccessDeniedException, AgentOperationFailedException {
+	public void testCreation() throws CryptoException, InternalSecurityException, AgentAccessDeniedException,
+			AgentOperationFailedException {
 		ServiceAgentImpl testee = ServiceAgentImpl
 				.createServiceAgent(ServiceNameVersion.fromString(servicename + "@" + serviceversion), passphrase);
 
@@ -52,8 +53,8 @@ public class ServiceAgentImplTest {
 	}
 
 	@Test
-	public void testXmlAndBack()
-			throws CryptoException, InternalSecurityException, MalformedXMLException, AgentAccessDeniedException, AgentOperationFailedException {
+	public void testXmlAndBack() throws CryptoException, InternalSecurityException, MalformedXMLException,
+			AgentAccessDeniedException, AgentOperationFailedException {
 		ServiceAgentImpl testee = ServiceAgentImpl
 				.createServiceAgent(ServiceNameVersion.fromString(servicename + "@" + serviceversion), passphrase);
 
@@ -65,9 +66,10 @@ public class ServiceAgentImplTest {
 	}
 
 	@Test
-	public void testServiceDiscovery() throws CryptoException, InternalSecurityException, AgentAlreadyRegisteredException,
-			AgentException, MalformedXMLException, IOException, EncodingFailedException, SerializationException,
-			InterruptedException, TimeoutException, AgentAccessDeniedException {
+	public void testServiceDiscovery()
+			throws CryptoException, InternalSecurityException, AgentAlreadyRegisteredException, AgentException,
+			MalformedXMLException, IOException, EncodingFailedException, SerializationException, InterruptedException,
+			TimeoutException, AgentAccessDeniedException {
 
 		// start node
 		LocalNode node = LocalNode.launchNode();
@@ -104,7 +106,7 @@ public class ServiceAgentImplTest {
 
 		Message[] answers = node.sendMessageAndCollectAnswers(request, 4);
 
-		assertEquals(answers.length, 2);
+		assertEquals(2, answers.length);
 
 		boolean found10 = false, found11 = false;
 		for (Message m : answers) {
@@ -127,7 +129,7 @@ public class ServiceAgentImplTest {
 
 		answers = node.sendMessageAndCollectAnswers(request, 4);
 
-		assertEquals(answers.length, 1);
+		assertEquals(1, answers.length);
 
 		answers[0].open(userAgent, node);
 		ServiceDiscoveryContent c = (ServiceDiscoveryContent) answers[0].getContent();

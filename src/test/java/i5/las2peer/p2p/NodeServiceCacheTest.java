@@ -41,22 +41,25 @@ public class NodeServiceCacheTest {
 		cache.registerLocalService(agent2);
 		cache.registerLocalService(agent3);
 
-		assertSame(cache.getServiceAgentInstance(service1, true, true, null).getServiceAgent(), agent1);
-		assertSame(cache.getServiceAgentInstance(service2, true, true, null).getServiceAgent(), agent2);
-		assertSame(cache.getServiceAgentInstance(service3, true, true, null).getServiceAgent(), agent3);
+		assertSame(agent1, cache.getServiceAgentInstance(service1, true, true, null).getServiceAgent());
+		assertSame(agent2, cache.getServiceAgentInstance(service2, true, true, null).getServiceAgent());
+		assertSame(agent3, cache.getServiceAgentInstance(service3, true, true, null).getServiceAgent());
 
-		assertEquals(cache.getServiceAgentInstance(ServiceNameVersion.fromString(service1.getName()), false, true, null)
-				.getService().getName(), service1.getName());
-		assertEquals(cache.getServiceAgentInstance(ServiceNameVersion.fromString(service3.getName()), false, true, null)
-				.getService().getName(), service3.getName());
+		assertEquals(service1.getName(),
+				cache.getServiceAgentInstance(ServiceNameVersion.fromString(service1.getName()), false, true, null)
+						.getService().getName());
+		assertEquals(service3.getName(),
+				cache.getServiceAgentInstance(ServiceNameVersion.fromString(service3.getName()), false, true, null)
+						.getService().getName());
 
-		assertSame(cache.getLocalService(service1), agent1);
-		assertSame(cache.getLocalService(service2), agent2);
-		assertSame(cache.getLocalService(service3), agent3);
+		assertSame(agent1, cache.getLocalService(service1));
+		assertSame(agent2, cache.getLocalService(service2));
+		assertSame(agent3, cache.getLocalService(service3));
 
 		cache.unregisterLocalService(agent1);
-		assertEquals(cache.getServiceAgentInstance(ServiceNameVersion.fromString(service1.getName()), false, true, null)
-				.getService().getName(), service1.getName());
+		assertEquals(service1.getName(),
+				cache.getServiceAgentInstance(ServiceNameVersion.fromString(service1.getName()), false, true, null)
+						.getService().getName());
 
 		cache.unregisterLocalService(agent2);
 		cache.unregisterLocalService(agent3);
@@ -156,26 +159,26 @@ public class NodeServiceCacheTest {
 		// global exact v2 -> v2
 		ServiceInstance instance = invokingNode.getNodeServiceCache().getServiceAgentInstance(
 				ServiceNameVersion.fromString("i5.las2peer.api.TestService@2"), true, false, userAgent);
-		assertEquals(instance.getServiceAgentId(), service2.getIdentifier());
-		assertEquals(instance.getNodeId(), node1.getNodeId());
+		assertEquals(service2.getIdentifier(), instance.getServiceAgentId());
+		assertEquals(node1.getNodeId(), instance.getNodeId());
 
 		// local only v2 -> v22@invokingNode
 		instance = invokingNode.getNodeServiceCache().getServiceAgentInstance(
 				ServiceNameVersion.fromString("i5.las2peer.api.TestService@2"), false, true, userAgent);
-		assertEquals(instance.getServiceAgent(), service22);
+		assertEquals(service22, instance.getServiceAgent());
 		assertTrue(instance.local());
 
 		// global * -> v22@invokingNode
 		// v3 is not returned since local versions are available
 		instance = invokingNode.getNodeServiceCache().getServiceAgentInstance(
 				ServiceNameVersion.fromString("i5.las2peer.api.TestService@*"), false, false, userAgent);
-		assertEquals(instance.getServiceAgent(), service22);
+		assertEquals(service22, instance.getServiceAgent());
 		assertTrue(instance.local());
 
 		// global v2 -> v22@invokingNode
 		instance = invokingNode.getNodeServiceCache().getServiceAgentInstance(
 				ServiceNameVersion.fromString("i5.las2peer.api.TestService@2"), false, false, userAgent);
-		assertEquals(instance.getServiceAgent(), service22_3);
+		assertEquals(service22_3, instance.getServiceAgent());
 		assertTrue(instance.local());
 
 		// stop all services v22 except v22@node3, global v2.2 -> v22@node3
@@ -185,24 +188,24 @@ public class NodeServiceCacheTest {
 		invokingNode.getNodeServiceCache().clear(); // clear cache to force reloading of service index
 		instance = invokingNode.getNodeServiceCache().getServiceAgentInstance(
 				ServiceNameVersion.fromString("i5.las2peer.api.TestService@2.2"), false, false, userAgent);
-		assertEquals(instance.getServiceAgentId(), service22.getIdentifier());
-		assertEquals(instance.getNodeId(), node3.getNodeId());
+		assertEquals(service22.getIdentifier(), instance.getServiceAgentId());
+		assertEquals(node3.getNodeId(), instance.getNodeId());
 
 		// stop service v22@node3, global v2 -> v21
 		invokingNode.getNodeServiceCache().clear(); // clear cache to force reloading of service index
 		node3.unregisterReceiver(service22_2);
 		instance = invokingNode.getNodeServiceCache().getServiceAgentInstance(
 				ServiceNameVersion.fromString("i5.las2peer.api.TestService@2"), false, false, userAgent);
-		assertEquals(instance.getServiceAgentId(), service21.getIdentifier());
-		assertEquals(instance.getNodeId(), node1.getNodeId());
+		assertEquals(service21.getIdentifier(), instance.getServiceAgentId());
+		assertEquals(node1.getNodeId(), instance.getNodeId());
 
 		// stop service v22@node3, global * -> v3
 		invokingNode.getNodeServiceCache().setWaitForResults(5);
 		invokingNode.getNodeServiceCache().clear(); // clear cache to force reloading of service index
 		instance = invokingNode.getNodeServiceCache().getServiceAgentInstance(
 				ServiceNameVersion.fromString("i5.las2peer.api.TestService@*"), false, false, userAgent);
-		assertEquals(instance.getServiceAgentId(), service3.getIdentifier());
-		assertEquals(instance.getNodeId(), node1.getNodeId());
+		assertEquals(service3.getIdentifier(), instance.getServiceAgentId());
+		assertEquals(node1.getNodeId(), instance.getNodeId());
 	}
 
 }

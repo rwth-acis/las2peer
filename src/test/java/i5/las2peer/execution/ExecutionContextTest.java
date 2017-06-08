@@ -77,11 +77,11 @@ public class ExecutionContextTest {
 	public void testGetter() throws MalformedXMLException, IOException {
 		assertNotNull(context.getExecutor());
 		assertNotNull(context.getLogger(this.getClass()));
-		assertEquals(context.getMainAgent(), MockAgentFactory.getAdam());
-		assertEquals(context.getService().getClass(), TestService.class);
-		assertEquals(context.getService(TestService.class).getClass(), TestService.class);
-		assertEquals(context.getServiceAgent().getServiceNameVersion(),
-				ServiceNameVersion.fromString("i5.las2peer.api.TestService@0.1"));
+		assertEquals(MockAgentFactory.getAdam(), context.getMainAgent());
+		assertEquals(TestService.class, context.getService().getClass());
+		assertEquals(TestService.class, context.getService(TestService.class).getClass());
+		assertEquals(ServiceNameVersion.fromString("i5.las2peer.api.TestService@0.1"),
+				context.getServiceAgent().getServiceNameVersion());
 		assertNotNull(context.getServiceClassLoader());
 	}
 

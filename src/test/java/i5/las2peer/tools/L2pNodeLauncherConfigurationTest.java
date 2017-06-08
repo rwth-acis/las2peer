@@ -72,18 +72,14 @@ public class L2pNodeLauncherConfigurationTest {
 	public void testStorageMode() {
 		try {
 			// test large/small case
-			Assert.assertEquals(
-					L2pNodeLauncherConfiguration.createFromMainArgs("--storage-mode", "MEMORY").getStorageMode(),
-					STORAGE_MODE.MEMORY);
-			Assert.assertEquals(
-					L2pNodeLauncherConfiguration.createFromMainArgs("--storage-mode", "memory").getStorageMode(),
-					STORAGE_MODE.MEMORY);
-			Assert.assertEquals(
-					L2pNodeLauncherConfiguration.createFromMainArgs("--storage-mode", "FILESYSTEM").getStorageMode(),
-					STORAGE_MODE.FILESYSTEM);
-			Assert.assertEquals(
-					L2pNodeLauncherConfiguration.createFromMainArgs("--storage-mode", "filesystem").getStorageMode(),
-					STORAGE_MODE.FILESYSTEM);
+			Assert.assertEquals(STORAGE_MODE.MEMORY,
+					L2pNodeLauncherConfiguration.createFromMainArgs("--storage-mode", "MEMORY").getStorageMode());
+			Assert.assertEquals(STORAGE_MODE.MEMORY,
+					L2pNodeLauncherConfiguration.createFromMainArgs("--storage-mode", "memory").getStorageMode());
+			Assert.assertEquals(STORAGE_MODE.FILESYSTEM,
+					L2pNodeLauncherConfiguration.createFromMainArgs("--storage-mode", "FILESYSTEM").getStorageMode());
+			Assert.assertEquals(STORAGE_MODE.FILESYSTEM,
+					L2pNodeLauncherConfiguration.createFromMainArgs("--storage-mode", "filesystem").getStorageMode());
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail(e.toString());

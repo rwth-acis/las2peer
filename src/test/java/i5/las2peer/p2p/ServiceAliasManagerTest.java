@@ -39,11 +39,11 @@ public class ServiceAliasManagerTest {
 
 		// regular creation
 		node.getServiceAliasManager().registerServiceAlias(agentA, "aliasA");
-		assertEquals(node.getServiceAliasManager().resolvePathToServiceName("aliasA").getServiceName(), "serviceA");
+		assertEquals("serviceA", node.getServiceAliasManager().resolvePathToServiceName("aliasA").getServiceName());
 
 		// second alias
 		node.getServiceAliasManager().registerServiceAlias(agentB, "aliasB");
-		assertEquals(node.getServiceAliasManager().resolvePathToServiceName("aliasB").getServiceName(), "serviceB");
+		assertEquals("serviceB", node.getServiceAliasManager().resolvePathToServiceName("aliasB").getServiceName());
 
 		// register second time, no conflict
 		node.getServiceAliasManager().registerServiceAlias(agentA2, "aliasA");
@@ -75,13 +75,13 @@ public class ServiceAliasManagerTest {
 
 		// regular creation
 		node.getServiceAliasManager().registerServiceAlias(agentA, "prefix/prefix/aliasA");
-		assertEquals(node.getServiceAliasManager().resolvePathToServiceName("prefix/prefix/aliasA").getServiceName(),
-				"serviceA");
+		assertEquals("serviceA",
+				node.getServiceAliasManager().resolvePathToServiceName("prefix/prefix/aliasA").getServiceName());
 
 		// second alias
 		node.getServiceAliasManager().registerServiceAlias(agentB, "prefix/prefix/aliasB");
-		assertEquals(node.getServiceAliasManager().resolvePathToServiceName("prefix/prefix/aliasB").getServiceName(),
-				"serviceB");
+		assertEquals("serviceB",
+				node.getServiceAliasManager().resolvePathToServiceName("prefix/prefix/aliasB").getServiceName());
 
 		// existing alias is prefix of new one
 		try {
@@ -122,36 +122,34 @@ public class ServiceAliasManagerTest {
 		node.getServiceAliasManager().registerServiceAlias(agentD, "prefix/aliasD");
 
 		// resolve
-		assertEquals(node.getServiceAliasManager().resolvePathToServiceName("prefix/prefix/aliasA").getServiceName(),
-				"serviceA");
-		assertEquals(
-				node.getServiceAliasManager().resolvePathToServiceName("prefix/prefix/aliasA").getNumMatchedParts(), 3);
-		assertEquals(node.getServiceAliasManager().resolvePathToServiceName("prefix/prefix/aliasB").getServiceName(),
-				"serviceB");
-		assertEquals(
-				node.getServiceAliasManager().resolvePathToServiceName("prefix/prefix/aliasB").getNumMatchedParts(), 3);
-		assertEquals(node.getServiceAliasManager().resolvePathToServiceName("prefix/aliasC").getServiceName(),
-				"serviceC");
-		assertEquals(node.getServiceAliasManager().resolvePathToServiceName("prefix/aliasC").getNumMatchedParts(), 2);
-		assertEquals(node.getServiceAliasManager().resolvePathToServiceName("prefix/aliasD").getServiceName(),
-				"serviceD");
-		assertEquals(node.getServiceAliasManager().resolvePathToServiceName("prefix/aliasD").getNumMatchedParts(), 2);
-		assertEquals(
-				node.getServiceAliasManager().resolvePathToServiceName("prefix/prefix/aliasA/asdf").getServiceName(),
-				"serviceA");
-		assertEquals(node.getServiceAliasManager().resolvePathToServiceName("prefix/prefix/aliasA/asdf")
-				.getNumMatchedParts(), 3);
-		assertEquals(node.getServiceAliasManager().resolvePathToServiceName("prefix/aliasC/asdf/rtzh").getServiceName(),
-				"serviceC");
-		assertEquals(
-				node.getServiceAliasManager().resolvePathToServiceName("prefix/aliasC/asdf/rtzh").getNumMatchedParts(),
-				2);
+		assertEquals("serviceA",
+				node.getServiceAliasManager().resolvePathToServiceName("prefix/prefix/aliasA").getServiceName());
+		assertEquals(3,
+				node.getServiceAliasManager().resolvePathToServiceName("prefix/prefix/aliasA").getNumMatchedParts());
+		assertEquals("serviceB",
+				node.getServiceAliasManager().resolvePathToServiceName("prefix/prefix/aliasB").getServiceName());
+		assertEquals(3,
+				node.getServiceAliasManager().resolvePathToServiceName("prefix/prefix/aliasB").getNumMatchedParts());
+		assertEquals("serviceC",
+				node.getServiceAliasManager().resolvePathToServiceName("prefix/aliasC").getServiceName());
+		assertEquals(2, node.getServiceAliasManager().resolvePathToServiceName("prefix/aliasC").getNumMatchedParts());
+		assertEquals("serviceD",
+				node.getServiceAliasManager().resolvePathToServiceName("prefix/aliasD").getServiceName());
+		assertEquals(2, node.getServiceAliasManager().resolvePathToServiceName("prefix/aliasD").getNumMatchedParts());
+		assertEquals("serviceA",
+				node.getServiceAliasManager().resolvePathToServiceName("prefix/prefix/aliasA/asdf").getServiceName());
+		assertEquals(3, node.getServiceAliasManager().resolvePathToServiceName("prefix/prefix/aliasA/asdf")
+				.getNumMatchedParts());
+		assertEquals("serviceC",
+				node.getServiceAliasManager().resolvePathToServiceName("prefix/aliasC/asdf/rtzh").getServiceName());
+		assertEquals(2,
+				node.getServiceAliasManager().resolvePathToServiceName("prefix/aliasC/asdf/rtzh").getNumMatchedParts());
 
 		// resolve with empty path parts
-		assertEquals(node.getServiceAliasManager().resolvePathToServiceName("//prefix//aliasC//asdf//rtzh//")
-				.getServiceName(), "serviceC");
-		assertEquals(node.getServiceAliasManager().resolvePathToServiceName("//prefix//aliasC//asdf//rtzh//")
-				.getNumMatchedParts(), 2);
+		assertEquals("serviceC", node.getServiceAliasManager()
+				.resolvePathToServiceName("//prefix//aliasC//asdf//rtzh//").getServiceName());
+		assertEquals(2, node.getServiceAliasManager().resolvePathToServiceName("//prefix//aliasC//asdf//rtzh//")
+				.getNumMatchedParts());
 	}
 
 	@Test
@@ -164,7 +162,7 @@ public class ServiceAliasManagerTest {
 		node.registerReceiver(agentA);
 
 		// regular creation
-		assertEquals(node.getServiceAliasManager().resolvePathToServiceName("test").getServiceName(),
-				"i5.las2peer.api.TestService");
+		assertEquals("i5.las2peer.api.TestService",
+				node.getServiceAliasManager().resolvePathToServiceName("test").getServiceName());
 	}
 }

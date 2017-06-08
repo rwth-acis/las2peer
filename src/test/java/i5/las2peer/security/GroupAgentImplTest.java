@@ -42,9 +42,9 @@ public class GroupAgentImplTest {
 	}
 
 	@Test
-	public void testXmlAndBack() throws NoSuchAlgorithmException, InternalSecurityException, CryptoException,
-			SerializationException, MalformedXMLException, AgentAccessDeniedException, AgentOperationFailedException,
-			AgentLockedException {
+	public void testXmlAndBack()
+			throws NoSuchAlgorithmException, InternalSecurityException, CryptoException, SerializationException,
+			MalformedXMLException, AgentAccessDeniedException, AgentOperationFailedException, AgentLockedException {
 		GroupAgentImpl testee = GroupAgentImpl.createGroupAgent(new AgentImpl[] { adam, eve });
 		assertEquals(2, testee.getSize());
 		assertFalse(testee.hasMember(kain));
@@ -162,7 +162,7 @@ public class GroupAgentImplTest {
 		GroupAgentImpl agent = GroupAgentImpl.createGroupAgent(new AgentImpl[] { adam, eve });
 		assertTrue(agent.hasMember(adam));
 		assertTrue(agent.hasMember(eve));
-		assertEquals(agent.getSize(), 2);
+		assertEquals(2, agent.getSize());
 		assertTrue(Arrays.asList(agent.getMemberList()).contains(adam.getIdentifier()));
 		assertTrue(Arrays.asList(agent.getMemberList()).contains(eve.getIdentifier()));
 
@@ -171,7 +171,7 @@ public class GroupAgentImplTest {
 		assertTrue(agent.hasMember(adam));
 		assertTrue(agent.hasMember(eve));
 		assertTrue(agent.hasMember(abel));
-		assertEquals(agent.getSize(), 3);
+		assertEquals(3, agent.getSize());
 		assertTrue(Arrays.asList(agent.getMemberList()).contains(adam.getIdentifier()));
 		assertTrue(Arrays.asList(agent.getMemberList()).contains(eve.getIdentifier()));
 		assertTrue(Arrays.asList(agent.getMemberList()).contains(abel.getIdentifier()));
@@ -181,7 +181,7 @@ public class GroupAgentImplTest {
 		assertFalse(agent.hasMember(adam));
 		assertTrue(agent.hasMember(eve));
 		assertTrue(agent.hasMember(abel));
-		assertEquals(agent.getSize(), 2);
+		assertEquals(2, agent.getSize());
 		assertFalse(Arrays.asList(agent.getMemberList()).contains(adam.getIdentifier()));
 		assertTrue(Arrays.asList(agent.getMemberList()).contains(eve.getIdentifier()));
 		assertTrue(Arrays.asList(agent.getMemberList()).contains(abel.getIdentifier()));
@@ -191,7 +191,7 @@ public class GroupAgentImplTest {
 		assertFalse(agent.hasMember(adam));
 		assertTrue(agent.hasMember(eve));
 		assertFalse(agent.hasMember(abel));
-		assertEquals(agent.getSize(), 1);
+		assertEquals(1, agent.getSize());
 		assertFalse(Arrays.asList(agent.getMemberList()).contains(adam.getIdentifier()));
 		assertTrue(Arrays.asList(agent.getMemberList()).contains(eve.getIdentifier()));
 		assertFalse(Arrays.asList(agent.getMemberList()).contains(abel.getIdentifier()));
@@ -201,7 +201,7 @@ public class GroupAgentImplTest {
 		assertTrue(agent.hasMember(adam));
 		assertTrue(agent.hasMember(eve));
 		assertFalse(agent.hasMember(abel));
-		assertEquals(agent.getSize(), 2);
+		assertEquals(2, agent.getSize());
 		assertTrue(Arrays.asList(agent.getMemberList()).contains(adam.getIdentifier()));
 		assertTrue(Arrays.asList(agent.getMemberList()).contains(eve.getIdentifier()));
 		assertFalse(Arrays.asList(agent.getMemberList()).contains(abel.getIdentifier()));

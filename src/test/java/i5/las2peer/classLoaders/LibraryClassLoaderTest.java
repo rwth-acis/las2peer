@@ -44,7 +44,7 @@ public class LibraryClassLoaderTest {
 
 		assertEquals(1, ((Integer) res).intValue());
 
-		assertSame(cl.getClassLoader(), testee);
+		assertSame(testee, cl.getClassLoader());
 
 		try {
 			testee.loadClass("some.not.existing.class");
@@ -83,12 +83,12 @@ public class LibraryClassLoaderTest {
 		Class<?> test2 = testee2.loadClass("i5.las2peer.classLoaders.testPackage1.CounterClass", false, false);
 
 		assertNotSame(test1, test2);
-		assertSame(test1.getClassLoader(), testee1);
-		assertSame(test2.getClassLoader(), testee2);
+		assertSame(testee1, test1.getClassLoader());
+		assertSame(testee2, test2.getClassLoader());
 
 		test2 = testee1.loadClass("i5.las2peer.classLoaders.testPackage1.CounterClass");
 		assertEquals(test1, test2);
-		assertSame(test2.getClassLoader(), testee1);
+		assertSame(testee1, test2.getClassLoader());
 	}
 
 	@Test
@@ -99,7 +99,7 @@ public class LibraryClassLoaderTest {
 
 		Class<?> cl = testee.loadClass("i5.las2peer.classLoaders.testPackage1.CounterClass", false, false);
 
-		assertSame(cl.getClassLoader(), testee);
+		assertSame(testee, cl.getClassLoader());
 
 		assertNotNull(cl.getPackage());
 

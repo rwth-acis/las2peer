@@ -225,7 +225,7 @@ public class EnvelopeVersionTest {
 									@Override
 									public void onEnvelopeReceived(EnvelopeVersion envelope) {
 										try {
-											Assert.assertEquals(envelope.getVersion(), 2);
+											Assert.assertEquals(2, envelope.getVersion());
 											String content = (String) envelope.getContent();
 											System.out.println("Envelope content is '" + content + "'");
 											asyncTestState = true;
