@@ -457,7 +457,7 @@ public class CryptoTools {
 		return encryptSymmetric(SerializeTools.serialize(plainData), key);
 	}
 
-	public static PrivateKey privateKeyToString(String base64) throws CryptoException {
+	public static PrivateKey stringToPrivateKey(String base64) throws CryptoException {
 		byte[] clear = Base64.getDecoder().decode(base64);
 		PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(clear);
 		try {
