@@ -7,7 +7,6 @@
 <dom-module id="status-view">
   <template>
     <iron-ajax id="ajaxStatus"
-               auto
                url="[[las2peerConnectorEndpoint]]/status"
                handle-as="json"
                on-response="_handleStatusResponse"
@@ -46,6 +45,13 @@
     class StatusView extends Polymer.Element {
       static get is() { return 'status-view'; }
       static get properties() { return { las2peerConnectorEndpoint: String, sessionid: String, _status: { type: Object, value: { nodeid: "...", cpuload: "...", storageSize: 0, maxStorageSize: 1, storageSizeStr: "...", maxStorageSizeStr: "...", uptime: "...", publicKey: "..." } } } }
+
+      ready() {
+        super.ready();
+        var appThis = this;
+        window.setTimeout(function() { appThis.refreshStatus(); }, 1);
+        window.setInterval(function() { appThis.refreshStatus(); }, 5000);
+      }
 
       refreshStatus() {
         this.$.ajaxStatus.generateRequest();
