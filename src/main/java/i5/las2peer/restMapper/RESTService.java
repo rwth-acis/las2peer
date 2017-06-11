@@ -76,6 +76,7 @@ public abstract class RESTService extends Service {
 		if (this.application == null) {
 			ResourceConfig resourceConfig = new ResourceConfig();
 			resourceConfig.setClassLoader(this.getClass().getClassLoader());
+			resourceConfig.register(GenericExceptionMapper.class);
 			resourceConfig.register(JacksonFeature.class);
 			resourceConfig.register(MultiPartFeature.class);
 			resourceConfig.property("jersey.config.server.wadl.disableWadl", true);
