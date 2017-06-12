@@ -322,11 +322,13 @@ public class ExecutionContext implements Context {
 		if (using instanceof AnonymousAgent) {
 			throw new EnvelopeOperationFailedException("Anonymous agent must not be used to persist data");
 		}
-		// TODO API collision handler
+		// TODO collision handler
+		
+		// create reader set
 		EnvelopeImpl envelope = (EnvelopeImpl) env;
 		Set<PublicKey> keys = new HashSet<>();
 		if (!envelope.getRevokeAllReaders() && envelope.getVersion() != null) {
-			keys = envelope.getVersion().getReaderKeys().keySet();
+			keys.addAll(envelope.getVersion().getReaderKeys().keySet());
 			for (AgentImpl a : envelope.getReaderToRevoke()) {
 				keys.remove(a.getPublicKey());
 			}
@@ -334,10 +336,16 @@ public class ExecutionContext implements Context {
 				keys.add(a.getPublicKey());
 			}
 		}
+		else {
+			for (AgentImpl a : envelope.getReaderToAdd()) {
+				keys.add(a.getPublicKey());
+			}
+		}
 
+		// reate new envelope version
 		try {
 			EnvelopeVersion version;
-			AgentImpl signing = (AgentImpl) requestAgent(envelope.getSigningAgentId());
+			AgentImpl signing = (AgentImpl) requestAgent(envelope.getSigningAgentId(), using);
 			if (envelope.getVersion() != null) {
 				version = node.createEnvelope(envelope.getVersion(), envelope.getContent(), keys);
 			} else {
@@ -368,6 +376,8 @@ public class ExecutionContext implements Context {
 			throws EnvelopeAccessDeniedException, EnvelopeNotFoundException, EnvelopeOperationFailedException {
 		try {
 			node.removeEnvelope(identifier);
+		} catch (EnvelopeAccessDeniedException e) {
+			throw e;
 		} catch (EnvelopeException e) {
 			throw new EnvelopeOperationFailedException("The operation failed.", e);
 		}

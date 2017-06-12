@@ -23,6 +23,10 @@ import i5.las2peer.api.execution.ServiceMethodNotFoundException;
 import i5.las2peer.api.execution.ServiceNotFoundException;
 import i5.las2peer.api.logging.MonitoringEvent;
 import i5.las2peer.api.p2p.ServiceNameVersion;
+import i5.las2peer.api.persistency.Envelope;
+import i5.las2peer.api.persistency.EnvelopeAccessDeniedException;
+import i5.las2peer.api.persistency.EnvelopeNotFoundException;
+import i5.las2peer.api.persistency.EnvelopeOperationFailedException;
 import i5.las2peer.api.security.Agent;
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
@@ -49,15 +53,21 @@ public class ExecutionContextTest {
 
 	Node node;
 	Context context;
+	UserAgentImpl adam;
+	UserAgentImpl eve;
 
 	@Before
 	public void setup() throws MalformedXMLException, IOException, AgentAccessDeniedException,
 			AgentAlreadyRegisteredException, InternalSecurityException, AgentException, CryptoException {
 		node = LocalNode.launchNode();
 
-		UserAgentImpl adam = MockAgentFactory.getAdam();
+		adam = MockAgentFactory.getAdam();
 		adam.unlock("adamspass");
 		node.storeAgent(adam);
+		
+		eve = MockAgentFactory.getEve();
+		eve.unlock("evespass");
+		node.storeAgent(eve);
 
 		ServiceAgentImpl serviceAgent = ServiceAgentImpl
 				.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@0.1"), "pass");
@@ -137,21 +147,76 @@ public class ExecutionContextTest {
 		}
 	}
 
-	public void testEnvelopes() {
-		// TODO API test exec context envelope api
+	@Test
+	public void testEnvelopes() throws EnvelopeOperationFailedException, EnvelopeAccessDeniedException, EnvelopeNotFoundException {
+		// TODO improve these tests
 
-		/*
-		 Envelope 	createEnvelope(java.lang.String identifier)
-			Envelope 	createEnvelope(java.lang.String identifier, Agent using)
-		Envelope 	requestEnvelope(java.lang.String identifier)
-		Envelope 	requestEnvelope(java.lang.String identifier, Agent using)
-		void 	storeEnvelope(Envelope env)
-		void 	storeEnvelope(Envelope env, Agent using)
-		void 	storeEnvelope(Envelope env, EnvelopeCollisionHandler handler)
-		void 	storeEnvelope(Envelope env, EnvelopeCollisionHandler handler, Agent using)
-		void 	reclaimEnvelope(java.lang.String identifier)
-		void 	reclaimEnvelope(java.lang.String identifier, Agent using)
-		 */
+		try {
+			Envelope env = context.createEnvelope("id");
+			env.setContent("content");
+			assertTrue(env.isPrivate());
+			assertTrue(env.hasReader(adam));
+			context.storeEnvelope(env);
+			
+			try {
+				env = context.requestEnvelope("id", eve);
+				fail("Exception expected");
+			} catch (EnvelopeAccessDeniedException e) {
+			}
+			
+			try {
+				env = context.requestEnvelope("id123");
+				fail("Exception expected");
+			} catch (EnvelopeNotFoundException e) {
+			}
+			
+			env = context.requestEnvelope("id");
+			assertEquals("content", env.getContent());
+			
+			env.setContent("content123");
+			context.storeEnvelope(env);
+			env = context.requestEnvelope("id");
+			assertEquals("content123", env.getContent());
+			
+			env.addReader(eve);
+			context.storeEnvelope(env);
+			env = context.requestEnvelope("id", eve);
+			
+			env.setPublic();
+			context.storeEnvelope(env);
+			assertFalse(env.isPrivate());
+			env = context.requestEnvelope("id", eve);
+			assertFalse(env.isPrivate());
+			
+			env = context.requestEnvelope("id", eve);
+			env.setContent("bad");
+			try {
+				context.storeEnvelope(env, eve);
+				fail("Exception expected");
+			} catch (EnvelopeAccessDeniedException e) {
+			}
+			env = context.requestEnvelope("id");
+			assertEquals("content123", env.getContent());
+			
+			// TODO reclaim operation not (properly) implemented ...
+			/*
+			try {
+				context.reclaimEnvelope("id", eve);
+				fail("Exception expected");
+			} catch (EnvelopeAccessDeniedException e) {
+			}
+			
+			context.reclaimEnvelope("id");
+			try {
+				env = context.requestEnvelope("id");
+				fail("Exception expected");
+			} catch (EnvelopeNotFoundException e) {
+			}
+			*/
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
 	}
 
 	@Test

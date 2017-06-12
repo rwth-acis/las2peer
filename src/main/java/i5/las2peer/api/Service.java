@@ -1,6 +1,7 @@
 package i5.las2peer.api;
 
 import java.lang.annotation.Annotation;
+import java.util.logging.Logger;
 
 import i5.las2peer.api.security.ServiceAgent;
 
@@ -26,13 +27,18 @@ public abstract class Service extends Configurable {
 	 * The service agent responsible for this service.
 	 */
 	private ServiceAgent agent = null;
+	
+	/**
+	 * The logger for the service class.
+	 */
+	private Logger logger = null;
 
 	/**
 	 * Notifies the service that it has been launched at the given node.
 	 * 
 	 * Simple startup hook that may be overwritten in subclasses.
 	 * 
-	 * @throws ServiceException Can be thrown if an error occurs. The service will not be advertised on running.
+	 * @throws ServiceException Can be thrown if an error occurs. The service will not be advertised to be running.
 	 */
 	public void onStart() throws ServiceException {
 	}
@@ -41,10 +47,12 @@ public abstract class Service extends Configurable {
 	 * Notifies the service that it has been launched at the given node.
 	 * 
 	 * @param agent The agent responsible for executing this service.
-	 * @throws ServiceException Can be thrown if an error occurs. The service will not be advertised on running.
+	 * @param logger The logger for the service class.
+	 * @throws ServiceException Can be thrown if an error occurs. The service will not be advertised to be running.
 	 */
-	public final void onStart(ServiceAgent agent) throws ServiceException {
+	public final void onStart(ServiceAgent agent, Logger logger) throws ServiceException {
 		this.agent = agent;
+		this.logger = logger;
 		onStart();
 	}
 
@@ -121,6 +129,19 @@ public abstract class Service extends Configurable {
 			throw new ServiceException("This service has not been started yet!");
 		}
 		return this.agent;
+	}
+	
+	/**
+	 * Gets the logger for the service class.
+	 * 
+	 * @return The agent responsible for this service.
+	 * @throws ServiceException If the service is not started yet.
+	 */
+	public final Logger getLogger() throws ServiceException {
+		if (this.logger == null) {
+			throw new ServiceException("This service has not been started yet!");
+		}
+		return this.logger;
 	}
 
 }

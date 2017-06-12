@@ -35,6 +35,7 @@ import i5.las2peer.communication.ServiceDiscoveryContent;
 import i5.las2peer.execution.ExecutionContext;
 import i5.las2peer.execution.RMITask;
 import i5.las2peer.execution.ServiceHelper;
+import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.p2p.AliasConflictException;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.NodeNotFoundException;
@@ -365,7 +366,7 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 			}
 
 			// notify the service, that it has been launched
-			serviceInstance.onStart(this);
+			serviceInstance.onStart(this, L2pLogger.getInstance(serviceInstance.getClass()));
 
 			// and the agent
 			super.notifyRegistrationTo(node);
@@ -384,7 +385,7 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 				} catch (IllegalArgumentException e) {
 					throw new ServiceException("Service alias could not be registered!", e);
 				} catch (AliasConflictException e) {
-					throw new ServiceException("Service alias is already used by anther service!", e);
+					throw new ServiceException("Service alias is already used by another service!", e);
 				}
 			}
 
