@@ -28,15 +28,24 @@ public abstract class Service extends Configurable {
 	private ServiceAgent agent = null;
 
 	/**
-	 * Notifies the service, that it has been launched at the given node.
+	 * Notifies the service that it has been launched at the given node.
 	 * 
 	 * Simple startup hook that may be overwritten in subclasses.
+	 * 
+	 * @throws ServiceException Can be thrown if an error occurs. The service will not be advertised on running.
+	 */
+	public void onStart() throws ServiceException {
+	}
+	
+	/**
+	 * Notifies the service that it has been launched at the given node.
 	 * 
 	 * @param agent The agent responsible for executing this service.
 	 * @throws ServiceException Can be thrown if an error occurs. The service will not be advertised on running.
 	 */
-	public void onStart(ServiceAgent agent) throws ServiceException {
+	public final void onStart(ServiceAgent agent) throws ServiceException {
 		this.agent = agent;
+		onStart();
 	}
 
 	/**
