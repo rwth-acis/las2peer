@@ -193,9 +193,19 @@ public class ExecutionContext implements Context {
 	public GroupAgent createGroupAgent(Agent[] members) throws AgentOperationFailedException {
 		try {
 			GroupAgent agent = GroupAgentImpl.createGroupAgent(members);
-			agent.unlock(members[0]);
+			for (Agent a : members) {
+				try {
+					agent.unlock(a);
+					break;
+				}
+				catch (AgentAccessDeniedException | AgentLockedException | AgentOperationFailedException e) {
+				}
+			}
+			if (agent.isLocked()) {
+				throw new AgentOperationFailedException("Cannot unlock group agent.");
+			}
 			return agent;
-		} catch (AgentLockedException | CryptoException | SerializationException | AgentAccessDeniedException e) {
+		} catch (CryptoException | SerializationException e) {
 			throw new AgentOperationFailedException(e);
 		}
 	}
