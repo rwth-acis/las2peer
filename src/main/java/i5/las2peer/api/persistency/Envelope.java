@@ -76,5 +76,12 @@ public interface Envelope {
 	 * @return True, if the content is private.
 	 */
 	public boolean isPrivate();
-
+	
+	/**
+	 * Get the id of the owner (signing agent) of this envelope.
+	 * 
+	 * @return Agent id of the owner.
+	 */
+	public String getOwnerId();
+	
 }

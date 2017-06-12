@@ -352,10 +352,10 @@ public class ExecutionContext implements Context {
 			}
 		}
 
-		// reate new envelope version
+		// create new envelope version
 		try {
 			EnvelopeVersion version;
-			AgentImpl signing = (AgentImpl) requestAgent(envelope.getSigningAgentId(), using);
+			AgentImpl signing = (AgentImpl) requestAgent(envelope.getOwnerId(), using);
 			if (envelope.getVersion() != null) {
 				version = node.createEnvelope(envelope.getVersion(), envelope.getContent(), keys);
 			} else {

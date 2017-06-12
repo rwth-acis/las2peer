@@ -126,7 +126,8 @@ public class EnvelopeImpl implements Envelope {
 		this.readerToRevoke.clear();
 	}
 
-	public String getSigningAgentId() {
+	@Override
+	public String getOwnerId() {
 		return this.signingAgentId;
 	}
 
