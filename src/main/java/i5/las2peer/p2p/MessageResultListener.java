@@ -37,8 +37,8 @@ public class MessageResultListener {
 	// private int randomId = new Random().nextInt();
 
 	private Status status = Status.WAITING;
-	private Vector<Exception> exceptions = new Vector<Exception>();
-	private Vector<Message> answers = new Vector<Message>();
+	private Vector<Exception> exceptions = new Vector<>();
+	private Vector<Message> answers = new Vector<>();
 
 	private int numberOfRecipients = 1;
 
@@ -114,8 +114,9 @@ public class MessageResultListener {
 	 */
 	public void collectException(Exception e) {
 		synchronized (this) {
-			if (status == Status.WAITING)
+			if (status == Status.WAITING) {
 				status = Status.EXCEPTION;
+			}
 			exceptions.add(e);
 
 			notifyException(e);
@@ -132,8 +133,9 @@ public class MessageResultListener {
 		synchronized (this) {
 			answers.addElement(answer);
 
-			if (status == Status.WAITING)
+			if (status == Status.WAITING) {
 				status = Status.SUCCESS;
+			}
 
 			notifySuccess();
 
@@ -296,18 +298,21 @@ public class MessageResultListener {
 	 */
 	public boolean checkTimeOut() {
 		synchronized (this) {
-			if (inWaitMethod || isFinished())
+			if (inWaitMethod || isFinished()) {
 				return false;
-			if (isTimedOut())
+			}
+			if (isTimedOut()) {
 				return true;
+			}
 
 			if (new Date().getTime() - startedAt > timeoutMs) {
 				status = Status.TIMEOUT;
 				notifyTimeout();
 
 				return true;
-			} else
+			} else {
 				return false;
+			}
 		}
 	}
 

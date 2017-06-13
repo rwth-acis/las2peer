@@ -1,6 +1,16 @@
 package i5.las2peer.security;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
+
+import java.io.IOException;
+import java.io.Serializable;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
 import i5.las2peer.api.Context;
 import i5.las2peer.api.execution.ServiceInvocationException;
 import i5.las2peer.api.p2p.ServiceNameVersion;
@@ -22,32 +32,24 @@ import i5.las2peer.serialization.MalformedXMLException;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.CryptoException;
 
-import java.io.IOException;
-import java.io.Serializable;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
-
 public class AnonymousAgentImplTest {
 
 	// TODO API test anonymousagent
-	
+
 	Node node;
 	Node node2;
 	ServiceAgentImpl serviceAgent;
 	AnonymousAgentImpl anonymousAgent;
 	ServiceNameVersion service = ServiceNameVersion.fromString("i5.las2peer.api.TestService@0.1");
-	
+
 	@Before
 	public void setup() throws MalformedXMLException, IOException, AgentAccessDeniedException,
 			AgentAlreadyRegisteredException, InternalSecurityException, AgentException, CryptoException {
 		node = LocalNode.launchNode();
 		node2 = LocalNode.launchNode();
-		
+
 		anonymousAgent = AnonymousAgentImpl.getInstance();
-		
+
 		serviceAgent = ServiceAgentImpl.createServiceAgent(service, "pass");
 		serviceAgent.unlock("pass");
 		node2.storeAgent(serviceAgent);
@@ -61,52 +63,54 @@ public class AnonymousAgentImplTest {
 		eve = MockAgentFactory.getEve();
 		eve.unlock("evespass");
 		node.storeAgent(eve);
-
+		
 		ServiceAgentImpl serviceAgent = ServiceAgentImpl
 				.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@0.1"), "pass");
 		serviceAgent.unlock("pass");
 		node.storeAgent(serviceAgent);
 		node.registerReceiver(serviceAgent);
-
+		
 		context = new ExecutionContext(serviceAgent, node.getAgentContext(adam), node);
 		*/
 	}
-	
+
 	@Test
 	public void testCreation() {
 		assertFalse(anonymousAgent.isLocked());
 	}
-	
+
 	@Test
-	public void testMessages() throws EncodingFailedException, InternalSecurityException, SerializationException, AgentException {
+	public void testMessages()
+			throws EncodingFailedException, InternalSecurityException, SerializationException, AgentException {
 		// anonymous as sender
 		Message m = new Message(anonymousAgent, serviceAgent, "myContent");
 		m.open(serviceAgent, node);
 		m.verifySignature();
 		assertEquals("myContent", m.getContent());
-		
+
 		// send answer
 		Message answer = new Message(m, "myAnswer");
 		answer.open(anonymousAgent, node);
 		assertEquals("myAnswer", answer.getContent());
-		
+
 	}
-	
+
 	@Test
 	public void testMediatorAndRMI() throws InternalSecurityException, ServiceInvocationException, AgentException {
 		// create mediator
 		Mediator mediator = node.createMediatorForAgent(anonymousAgent);
-		
+
 		// invoke
-		Serializable s = mediator.invoke(service.toString(), "getEcho", new Serializable[] {"myString"}, false);
+		Serializable s = mediator.invoke(service.toString(), "getEcho", new Serializable[] { "myString" }, false);
 		assertEquals("myString", s);
 	}
-	
+
 	@Test
-	public void testStorage() throws EnvelopeOperationFailedException, EnvelopeAccessDeniedException, EnvelopeNotFoundException {
+	public void testStorage()
+			throws EnvelopeOperationFailedException, EnvelopeAccessDeniedException, EnvelopeNotFoundException {
 		// create context
 		Context context = new ExecutionContext(serviceAgent, node.getAgentContext(anonymousAgent), node);
-		
+
 		// try to store with anonymous
 		Envelope env;
 		try {
@@ -115,7 +119,7 @@ public class AnonymousAgentImplTest {
 			fail("Exception expected");
 		} catch (EnvelopeAccessDeniedException e) {
 		}
-		
+
 		// create envelope
 		env = context.createEnvelope("myEnv", serviceAgent);
 		env.setContent("myContent");
@@ -126,22 +130,22 @@ public class AnonymousAgentImplTest {
 		env = context.requestEnvelope("myEnv");
 		assertEquals("myContent", env.getContent());
 	}
-	
+
 	@Test
 	public void testOperations() throws AgentNotFoundException, AgentException, InternalSecurityException {
 		// load anonymous
 		AnonymousAgent a = (AnonymousAgent) node.getAgent(AnonymousAgent.IDENTIFIER);
 		assertEquals(a.getIdentifier(), AnonymousAgent.IDENTIFIER);
-		
+
 		a = (AnonymousAgent) node.getAgent(AnonymousAgent.LOGIN_NAME);
 		assertEquals(a.getIdentifier(), AnonymousAgent.IDENTIFIER);
-		
+
 		// store anonymous
 		try {
 			node.storeAgent(anonymousAgent);
 			fail("Exception expected");
-		} catch(AgentException e) {
-			
+		} catch (AgentException e) {
+
 		}
 	}
 
