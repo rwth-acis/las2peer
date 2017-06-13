@@ -1,9 +1,7 @@
 package i5.las2peer.execution;
 
 import java.io.Serializable;
-import java.security.PublicKey;
 import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
