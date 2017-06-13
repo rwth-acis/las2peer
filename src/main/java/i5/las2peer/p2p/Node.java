@@ -16,6 +16,7 @@ import java.util.TimerTask;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Vector;
+import java.util.logging.Level;
 
 import com.sun.management.OperatingSystemMXBean;
 
@@ -96,6 +97,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 		CLOSING,
 		CLOSED
 	}
+
+	private final L2pLogger logger = L2pLogger.getInstance(Node.class);
 
 	/**
 	 * For performance measurement (load balance)
@@ -848,9 +851,9 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 				throw new MessageException("No receiver registered for this topic!");
 			}
 
-			try {
-				synchronized (map) {
-					for (MessageReceiver receiver : map.values()) {
+			synchronized (map) {
+				for (MessageReceiver receiver : map.values()) {
+					try {
 						Message msg = message;
 						if (map.size() > 1) {
 							msg = msg.clone();
@@ -859,10 +862,12 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 						msg.setRecipientId(receiver.getResponsibleForAgentSafeId());
 
 						receiver.receiveMessage(msg, getAgentContext(message.getSenderId()));
+					} catch (CloneNotSupportedException e) {
+						throw new MessageException("Cloning failed", e);
+					} catch (Exception e) {
+						logger.log(Level.SEVERE, "Message receiver failed", e);
 					}
 				}
-			} catch (CloneNotSupportedException e) {
-				throw new MessageException("Cloning failed", e);
 			}
 		}
 	}
