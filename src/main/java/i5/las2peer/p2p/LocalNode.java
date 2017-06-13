@@ -115,16 +115,6 @@ public class LocalNode extends Node {
 		deliverPendingMessages(receiver.getResponsibleForAgentSafeId(), getNodeId());
 	}
 
-	// TODO this code should be here or not?
-//	@Override
-//	public void unregisterReceiver(MessageReceiver receiver) throws AgentNotKnownException, NodeException {
-//		super.unregisterReceiver(receiver);
-//		if (receiver instanceof Agent) {
-//			Agent agent = (Agent) receiver;
-//			htKnownAgents.remove(agent.getId());
-//		}
-//	}
-
 	@Override
 	public void sendMessage(Message message, MessageResultListener listener, SendMode mode) {
 		message.setSendingNodeId(this.getNodeId());
