@@ -6,6 +6,7 @@ import java.util.Base64;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
@@ -127,7 +128,7 @@ public class EnvelopeVersion implements Serializable, XmlAble {
 	protected EnvelopeVersion(EnvelopeVersion previousVersion, Serializable content, Collection<?> readers)
 			throws IllegalArgumentException, SerializationException, CryptoException {
 		this(previousVersion.identifier, previousVersion.version + 1, previousVersion.authorPubKey, content, readers,
-				new HashSet<>());
+				previousVersion.readerGroupIds);
 	}
 
 	/**
@@ -183,6 +184,20 @@ public class EnvelopeVersion implements Serializable, XmlAble {
 					byte[] readerKey = CryptoTools.encryptAsymmetric(contentKey, pubkey);
 					readerKeys.put(pubkey, readerKey);
 				}
+			}
+			// remove reader groups ids that do not exist anymore
+			for (Iterator<String> i = readerGroupIds.iterator(); i.hasNext();) {
+			    String groupId = i.next();
+			    boolean containsKey = false;
+			    for (PublicKey pk : readerKeys.keySet()) {
+			    	if (groupId.equals(CryptoTools.publicKeyToSHA512(pk))) {
+			    		containsKey=true;
+			    		break;
+			    	}
+			    }
+			    if (!containsKey) {
+			        i.remove();
+			    }
 			}
 		} else {
 			// unencrypted envelope

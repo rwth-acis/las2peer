@@ -336,19 +336,21 @@ public class ExecutionContext implements Context {
 		
 		// create reader set
 		EnvelopeImpl envelope = (EnvelopeImpl) env;
-		Set<PublicKey> keys = new HashSet<>();
+		HashSet<Object> keys = new HashSet<>();
 		if (!envelope.getRevokeAllReaders() && envelope.getVersion() != null) {
 			keys.addAll(envelope.getVersion().getReaderKeys().keySet());
 			for (AgentImpl a : envelope.getReaderToRevoke()) {
 				keys.remove(a.getPublicKey());
 			}
 			for (AgentImpl a : envelope.getReaderToAdd()) {
-				keys.add(a.getPublicKey());
+				if (!keys.contains(a.getPublicKey())) {
+					keys.add(a);
+				}
 			}
 		}
-		else {
+		else if (!envelope.getRevokeAllReaders()) {
 			for (AgentImpl a : envelope.getReaderToAdd()) {
-				keys.add(a.getPublicKey());
+				keys.add(a);
 			}
 		}
 
