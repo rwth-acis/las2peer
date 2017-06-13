@@ -148,9 +148,7 @@ public class ExecutionContextTest {
 	}
 
 	@Test
-	public void testEnvelopes() throws EnvelopeOperationFailedException, EnvelopeAccessDeniedException, EnvelopeNotFoundException {
-		// TODO improve these tests
-
+	public void testEnvelope() throws EnvelopeOperationFailedException, EnvelopeAccessDeniedException, EnvelopeNotFoundException {
 		try {
 			Envelope env = context.createEnvelope("id");
 			env.setContent("content");
@@ -218,7 +216,127 @@ public class ExecutionContextTest {
 			fail();
 		}
 	}
+	
+	@Test
+	public void testEnvelopeReaderGroup() {
+		try {
+			Envelope env = context.createEnvelope("id");
+			env.setContent("content");
+			assertTrue(env.isPrivate());
+			assertTrue(env.hasReader(adam));
+			context.storeEnvelope(env);
+			
+			env = context.requestEnvelope("id");
+			GroupAgent group = context.createGroupAgent(new Agent[] {adam, eve});
+			context.storeAgent(group);
+			env.addReader(group);
+			context.storeEnvelope(env);
+			
+			env = context.requestEnvelope("id", eve);
+			assertTrue(env.hasReader(group));
 
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+
+	@Test
+	public void testEnvelopeSigningGroup() {
+		try {
+			GroupAgent group = context.createGroupAgent(new Agent[] {adam, eve});
+			context.storeAgent(group);
+			
+			Envelope env = context.createEnvelope("id", group);
+			env.setContent("content");
+			assertTrue(env.isPrivate());
+			assertTrue(env.hasReader(group));
+			context.storeEnvelope(env);
+			
+			env = context.requestEnvelope("id", eve);
+			env.setContent("newContent");
+			context.storeEnvelope(env, eve);
+			
+			env = context.requestEnvelope("id");
+			assertEquals(env.getContent(), "newContent");
+			
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+	
+	@Test
+	public void testEnvelopeStore() {
+		try {
+			// store twice
+			Envelope env = context.createEnvelope("id");
+			assertTrue(env.isPrivate());
+			assertTrue(env.hasReader(adam));
+			context.storeEnvelope(env);
+			context.storeEnvelope(env);
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+	
+	@Test
+	public void testEnvelopePublic() {
+		try {
+			// create
+			Envelope env = context.createEnvelope("id");
+			assertTrue(env.isPrivate());
+			assertTrue(env.hasReader(adam));
+			context.storeEnvelope(env);
+			
+			// make public
+			env = context.requestEnvelope("id");
+			assertTrue(env.isPrivate());
+			assertTrue(env.hasReader(adam));
+			env.setPublic();
+			assertFalse(env.isPrivate());
+			assertFalse(env.hasReader(adam));
+			context.storeEnvelope(env);
+			
+			// access with other agent
+			env = context.requestEnvelope("id", eve);
+			assertFalse(env.isPrivate());
+			assertFalse(env.hasReader(adam));
+			assertFalse(env.hasReader(eve));
+			
+			// add new agent
+			env.addReader(adam);
+			assertTrue(env.isPrivate());
+			
+			// try to store with non singing agent
+			try {
+				context.storeEnvelope(env, eve);
+				fail("Exception expected");
+			} catch (EnvelopeAccessDeniedException e) {	
+			}
+			
+			// store with singing agent
+			context.storeEnvelope(env);
+			
+			// check if private again
+			env = context.requestEnvelope("id");
+			assertTrue(env.isPrivate());
+			assertTrue(env.hasReader(adam));
+			
+			// try to fetch with other agent
+			try {
+				context.requestEnvelope("id", eve);
+				fail("Exception expected");
+			} catch (EnvelopeAccessDeniedException e) {	
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+	
 	@Test
 	public void testSecurity() {
 		try {
