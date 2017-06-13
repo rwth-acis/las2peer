@@ -1,0 +1,49 @@
+<!--
+@license
+Copyright (c) 2017 Advanced Community Information Systems (ACIS) Group, Chair of Computer Science 5 (Databases & Information Systems), RWTH Aachen University, Germany
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="widget-frame.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="widgets-view">
+  <template>
+    <style>
+      :host {
+        display: inline-block;
+      }
+    </style>
+
+  </template>
+  <script>
+    class WidgetsView extends Polymer.Element {
+      static get is() { return 'widgets-view'; }
+      static get properties() { return { las2peerConnectorEndpoint: String, sessionid: String, error: { type: Object, notify: true } } }
+
+      ready() {
+        super.ready();
+        this.createWidget(this.las2peerConnectorEndpoint + '/rmi/i5.las2peer.services.fileService.FileService/2.0/files/las2peer-file-upload-widget/las2peer-file-upload-widget.html', 'las2peer-file-upload-widget', 'File Upload', 30, 100, 350, 450);
+      }
+
+      createWidget(url, widgetName, frameTitle, x, y, width, height) {
+        var viewThis = this;
+        Polymer.importHref(url, function(e) { // e.target.import is the import document.
+          var wid = document.createElement(widgetName);
+          wid.las2peerConnectorEndpoint = viewThis.las2peerConnectorEndpoint;
+          wid.las2peerAuthHeader = { 'X-Agent-Session-Id': viewThis.sessionid };
+          var frame = document.createElement('widget-frame');
+          frame.x = x;
+          frame.y = y;
+          frame.widget = wid;
+          frame.frameTitle = frameTitle;
+          Polymer.dom(viewThis.root).appendChild(frame);
+        }, function(e) { // loading error
+          console.log(e);
+          viewThis.error = { title: 'Widget Import Failed', msg: url + '<br><br>Please see console log for details' };
+        });
+      }
+    }
+    customElements.define(WidgetsView.is, WidgetsView);
+  </script>
+</dom-module>

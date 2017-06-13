@@ -26,6 +26,7 @@ Copyright (c) 2017 Advanced Community Information Systems (ACIS) Group, Chair of
 <link rel="lazy-import" href="view-status.html">
 <link rel="lazy-import" href="view-services.html">
 <link rel="lazy-import" href="view-agents.html">
+<link rel="lazy-import" href="view-widgets.html">
 <link rel="lazy-import" href="view404.html">
 
 <dom-module id="las2peer-app">
@@ -133,6 +134,7 @@ Copyright (c) 2017 Advanced Community Information Systems (ACIS) Group, Chair of
           <a name="view-status" href="view-status">Status</a>
           <a name="view-services" href="view-services">Services</a>
           <a name="view-agents" href="view-agents">Agents</a>
+          <a name="view-widgets" href="view-widgets">Widget-Space</a>
         </iron-selector>
       </app-drawer>
 
@@ -160,6 +162,7 @@ Copyright (c) 2017 Advanced Community Information Systems (ACIS) Group, Chair of
           <status-view name="view-status" las2peer-connector-endpoint="[[las2peerConnectorEndpoint]]" sessionid="[[_sessionid]]" error="{{_error}}"></status-view>
           <services-view name="view-services" las2peer-connector-endpoint="[[las2peerConnectorEndpoint]]" sessionid="[[_sessionid]]" error="{{_error}}"></services-view>
           <agents-view name="view-agents" las2peer-connector-endpoint="[[las2peerConnectorEndpoint]]" sessionid="[[_sessionid]]" error="{{_error}}"></agents-view>
+          <widgets-view name="view-widgets" las2peer-connector-endpoint="[[las2peerConnectorEndpoint]]" sessionid="[[_sessionid]]" error="{{_error}}"></widgets-view>
           <my-view404 name="view404"></my-view404>
         </iron-pages>
       </app-header-layout>
