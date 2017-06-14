@@ -4,6 +4,7 @@ Copyright (c) 2017 Advanced Community Information Systems (ACIS) Group, Chair of
 -->
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
 <link rel="import" href="widget-frame.html">
 <link rel="import" href="shared-styles.html">
 
@@ -13,33 +14,60 @@ Copyright (c) 2017 Advanced Community Information Systems (ACIS) Group, Chair of
       :host {
         display: inline-block;
       }
+      #idAddWidgetDialog {
+        position: fixed;
+        right: 0;
+        top: 100px;
+      }
+      #idAddWidgetButton {
+        position: fixed;
+        right: 2em;
+        bottom: 2em;
+      }
     </style>
+
+    <paper-dialog id="idAddWidgetDialog" modal="[[_loadingWidget]]">
+      <h2>Add Widget</h2>
+      <paper-input label="Widget URL" id="idWidgetUrl" disabled="[[_loadingWidget]]" value="/rmi/i5.las2peer.services.fileService.FileService/2.0/files/las2peer-file-upload-widget/las2peer-file-upload-widget.html" size="50"></paper-input>
+      <paper-input label="Widget Name" id="idWidgetName" disabled="[[_loadingWidget]]" value="las2peer-file-upload-widget" required></paper-input>
+      <paper-input label="Frame Title (optional)" id="idFrameTitle" disabled="[[_loadingWidget]]" value="File Upload"></paper-input>
+      <div class="buttons">
+        <paper-button dialog-dismiss disabled="[[_loadingWidget]]">Cancel</paper-button>
+        <paper-button on-tap="createWidget" disabled="[[_loadingWidget]]">Create Widget</paper-button>
+      </div>
+    </paper-dialog>
+
+    <paper-fab id="idAddWidgetButton" icon="add" on-tap="openAddWidgetDialog"></paper-fab>
 
   </template>
   <script>
     class WidgetsView extends Polymer.Element {
       static get is() { return 'widgets-view'; }
-      static get properties() { return { las2peerConnectorEndpoint: String, sessionid: String, error: { type: Object, notify: true } } }
+      static get properties() { return { las2peerConnectorEndpoint: String, sessionid: String, error: { type: Object, notify: true }, _loadingWidget: { type: Boolean, value: false } } }
 
-      ready() {
-        super.ready();
-        this.createWidget(this.las2peerConnectorEndpoint + '/rmi/i5.las2peer.services.fileService.FileService/2.0/files/las2peer-file-upload-widget/las2peer-file-upload-widget.html', 'las2peer-file-upload-widget', 'File Upload', 30, 100, 350, 450);
+      openAddWidgetDialog() {
+        this.$.idAddWidgetDialog.open();
       }
 
-      createWidget(url, widgetName, frameTitle, x, y, width, height) {
+      createWidget() {
+        this._loadingWidget = true;
         var viewThis = this;
+        var url = this.$.idWidgetUrl.value;
         Polymer.importHref(url, function(e) { // e.target.import is the import document.
-          var wid = document.createElement(widgetName);
+          viewThis._loadingWidget = false;
+          var wid = document.createElement(viewThis.$.idWidgetName.value);
           wid.las2peerConnectorEndpoint = viewThis.las2peerConnectorEndpoint;
           wid.las2peerAuthHeader = { 'X-Agent-Session-Id': viewThis.sessionid };
           var frame = document.createElement('widget-frame');
-          frame.x = x;
-          frame.y = y;
+          frame.x = 100;
+          frame.y = 100;
           frame.widget = wid;
-          frame.frameTitle = frameTitle;
+          frame.frameTitle = viewThis.$.idFrameTitle.value;
           Polymer.dom(viewThis.root).appendChild(frame);
+          viewThis.$.idAddWidgetDialog.close();
         }, function(e) { // loading error
           console.log(e);
+          viewThis._loadingWidget = false;
           viewThis.error = { title: 'Widget Import Failed', msg: url + '<br><br>Please see console log for details' };
         });
       }
