@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.logging.Level;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sun.net.httpserver.HttpExchange;
@@ -36,7 +37,7 @@ public class RMIHandler extends AbstractHandler {
 	}
 
 	@Override
-	protected void handleSub(HttpExchange exchange, PastryNodeImpl node, ParameterMap parameters, String sessionId,
+	protected void handleSub(HttpExchange exchange, PastryNodeImpl node, ParameterMap parameters,
 			PassphraseAgentImpl activeAgent, byte[] requestBody) throws Exception {
 		final String path = exchange.getRequestURI().getPath();
 		final String subPathString = path.substring(RMI_PATH.length());
@@ -130,12 +131,13 @@ public class RMIHandler extends AbstractHandler {
 				final byte[] responseBody = response.getBody();
 				exchange.sendResponseHeaders(response.getHttpCode(), getResponseLength(responseBody.length));
 				OutputStream os = exchange.getResponseBody();
+				System.out.println("Writting " + responseBody.length + " bytes");
 				if (responseBody.length > 0) {
 					os.write(responseBody);
 				}
 				os.close();
 			} catch (IOException e) {
-				logger.warning(e.toString());
+				logger.log(Level.WARNING, "Communication with client failed", e);
 			}
 		} else {
 			sendInternalErrorResponse(exchange, "Expected " + RESTResponse.class.getCanonicalName() + ", but got "

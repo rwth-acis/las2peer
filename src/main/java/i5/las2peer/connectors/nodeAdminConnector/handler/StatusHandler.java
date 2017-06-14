@@ -21,8 +21,8 @@ public class StatusHandler extends AbstractHandler {
 	}
 
 	@Override
-	protected void handleSub(HttpExchange exchange, PastryNodeImpl node, ParameterMap parameters, String sessionId,
-			PassphraseAgentImpl activeAgent, byte[] requestBody) throws Exception {
+	protected void handleSub(HttpExchange exchange, PastryNodeImpl node, ParameterMap parameters, PassphraseAgentImpl activeAgent,
+			byte[] requestBody) throws Exception {
 		// gather status values and return as JSON string
 		JSONObject response = new JSONObject();
 		response.put("nodeid", node.getNodeId().toString());

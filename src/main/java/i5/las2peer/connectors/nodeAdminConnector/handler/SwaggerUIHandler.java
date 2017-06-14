@@ -24,8 +24,8 @@ public class SwaggerUIHandler extends AbstractHandler {
 	}
 
 	@Override
-	protected void handleSub(HttpExchange exchange, PastryNodeImpl node, ParameterMap parameters, String sessionId,
-			PassphraseAgentImpl activeAgent, byte[] requestBody) throws Exception {
+	protected void handleSub(HttpExchange exchange, PastryNodeImpl node, ParameterMap parameters, PassphraseAgentImpl activeAgent,
+			byte[] requestBody) throws Exception {
 		// serve files from swagger-ui jar
 		String path = exchange.getRequestURI().getPath();
 		String subPath = path.substring(ROOT_PATH.length());

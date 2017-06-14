@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.logging.Level;
 
 import javax.ws.rs.core.HttpHeaders;
@@ -53,12 +54,12 @@ public abstract class AbstractHandler implements HttpHandler {
 			exchange.getResponseHeaders().add("Access-Control-Max-Age", "60");
 			exchange.getResponseHeaders().add("Access-Control-Allow-Credentials", "true");
 			ParameterMap parameters = (ParameterMap) exchange.getAttribute("parameters");
-			String sessionid = exchange.getRequestHeaders().getFirst("X-Agent-Session-Id");
-			AgentSession requestingAgentSession = connector.getSessionFromHeader(sessionid);
-			String sessionId = null;
+			List<String> cookies = exchange.getRequestHeaders().get(HttpHeaders.COOKIE);
+			AgentSession requestingAgentSession = connector.getSessionFromCookies(cookies);
 			PassphraseAgentImpl activeAgent = null;
 			if (requestingAgentSession != null) {
-				sessionId = requestingAgentSession.getSessionId();
+				exchange.getResponseHeaders().add(HttpHeaders.SET_COOKIE, NodeAdminConnector.COOKIE_SESSION_KEY + "="
+						+ requestingAgentSession.getSessionId() + "; Path=/; Secure; HttpOnly");
 				activeAgent = requestingAgentSession.getAgent();
 			} else { // default to anonymous agent
 				activeAgent = AnonymousAgentImpl.getInstance();
@@ -75,7 +76,7 @@ public abstract class AbstractHandler implements HttpHandler {
 					is.close();
 				}
 				// TODO limit request body to 5M?
-				handleSub(exchange, connector.getNode(), parameters, sessionId, activeAgent, requestBody);
+				handleSub(exchange, connector.getNode(), parameters, activeAgent, requestBody);
 			}
 		} catch (Exception e) {
 			sendInternalErrorResponse(exchange, "Unknown connector error", e);
@@ -83,7 +84,7 @@ public abstract class AbstractHandler implements HttpHandler {
 	}
 
 	protected abstract void handleSub(HttpExchange exchange, PastryNodeImpl node, ParameterMap parameters,
-			String sessionId, PassphraseAgentImpl activeAgent, byte[] requestBody) throws Exception;
+			PassphraseAgentImpl activeAgent, byte[] requestBody) throws Exception;
 
 	private void handleOptionsRequest(HttpExchange exchange) {
 		String requestedHeaders = exchange.getRequestHeaders().getFirst("Access-Control-Request-Headers");

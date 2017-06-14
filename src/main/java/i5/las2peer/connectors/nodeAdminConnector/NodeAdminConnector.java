@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.security.SecureRandom;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 
@@ -26,9 +27,12 @@ import i5.las2peer.connectors.nodeAdminConnector.handler.SwaggerUIHandler;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.PastryNodeImpl;
+import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.PassphraseAgentImpl;
 
 public class NodeAdminConnector extends Connector {
+
+	public static final String COOKIE_SESSION_KEY = "sessionid";
 
 	private static final String KEYSTORE_FILENAME_PREFIX = "etc/NodeAdminConnector-";
 	private static final String KEYSTORE_SECRET_FILENAME = "etc/keystore.secret";
@@ -177,11 +181,36 @@ public class NodeAdminConnector extends Connector {
 	}
 
 	public AgentSession getSessionFromHeader(String headerValue) {
-		if (headerValue == null || headerValue.isEmpty()) {
+		return getSession(headerValue);
+	}
+
+	public AgentSession getSessionFromCookies(List<String> cookies) {
+		if (cookies != null) {
+			for (String cookie : cookies) {
+				String[] parts = cookie.split(";");
+				for (String part : parts) {
+					String[] keyValue = part.split("=");
+					if (keyValue.length == 2) {
+						String key = keyValue[0];
+						String value = keyValue[1];
+						if (key.equalsIgnoreCase(COOKIE_SESSION_KEY)) {
+							if (!value.isEmpty()) {
+								return getSession(value);
+							}
+						}
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+	private AgentSession getSession(String sessionid) {
+		if (sessionid == null || sessionid.isEmpty()) {
 			return null;
 		} else {
 			synchronized (sessions) {
-				AgentSession session = sessions.get(headerValue);
+				AgentSession session = sessions.get(sessionid);
 				if (session != null) {
 					// check if session is not timed out
 					Calendar cal = Calendar.getInstance();
@@ -206,6 +235,19 @@ public class NodeAdminConnector extends Connector {
 				if (agentIdToSessionId.remove(removed.getAgent().getIdentifier()) == null) {
 					logger.warning(
 							"Session " + sessionId + " destroyed, but did not find agent in agentid to sessionid map");
+				}
+			}
+		}
+	}
+
+	public void destroySession(AgentImpl agent) {
+		if (agent == null) {
+			return;
+		} else {
+			synchronized (sessions) {
+				String sessionId = agentIdToSessionId.remove(agent);
+				if (sessionId != null) {
+					sessions.remove(sessionId);
 				}
 			}
 		}

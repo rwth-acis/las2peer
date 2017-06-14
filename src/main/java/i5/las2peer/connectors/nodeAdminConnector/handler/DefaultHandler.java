@@ -24,8 +24,8 @@ public class DefaultHandler extends AbstractHandler {
 	}
 
 	@Override
-	protected void handleSub(HttpExchange exchange, PastryNodeImpl node, ParameterMap parameters, String sessionId,
-			PassphraseAgentImpl activeAgent, byte[] requestBody) throws Exception {
+	protected void handleSub(HttpExchange exchange, PastryNodeImpl node, ParameterMap parameters, PassphraseAgentImpl activeAgent,
+			byte[] requestBody) throws Exception {
 		final Path path = Paths.get(exchange.getRequestURI().getPath());
 		if (path.getNameCount() > 0) {
 			String path0 = path.getName(0).toString();

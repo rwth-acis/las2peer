@@ -24,7 +24,7 @@ public class AppHandler extends AbstractHandler {
 	}
 
 	@Override
-	protected void handleSub(HttpExchange exchange, PastryNodeImpl node, ParameterMap parameters, String sessionId,
+	protected void handleSub(HttpExchange exchange, PastryNodeImpl node, ParameterMap parameters,
 			PassphraseAgentImpl activeAgent, byte[] requestBody) throws Exception {
 		final String path = exchange.getRequestURI().getPath();
 		if (path.equalsIgnoreCase("/")) {

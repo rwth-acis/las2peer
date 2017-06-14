@@ -13,56 +13,56 @@
   <template>
     <iron-ajax id="ajaxCreateAgent"
                method="POST"
-               url="[[las2peerConnectorEndpoint]]/agents/createAgent"
+               url="/agents/createAgent"
                handle-as="json"
                on-response="_handleCreateAgentResponse"
                on-error="_handleError"
                loading = "{{_working}}"></iron-ajax>
     <iron-ajax id="ajaxExportAgent"
                method="POST"
-               url="[[las2peerConnectorEndpoint]]/agents/exportAgent"
+               url="/agents/exportAgent"
                handle-as="text"
                on-response="_handleExportAgentResponse"
                on-error="_handleError"
                loading = "{{_working}}"></iron-ajax>
     <iron-ajax id="ajaxUploadAgent"
                method="POST"
-               url="[[las2peerConnectorEndpoint]]/agents/uploadAgent"
+               url="/agents/uploadAgent"
                handle-as="json"
                on-response="_handleUploadAgentResponse"
                on-error="_handleError"
                loading = "{{_working}}"></iron-ajax>
     <iron-ajax id="ajaxChangePassphrase"
                method="POST"
-               url="[[las2peerConnectorEndpoint]]/agents/changePassphrase"
+               url="/agents/changePassphrase"
                handle-as="json"
                on-response="_handleChangePassphraseResponse"
                on-error="_handleError"
                loading = "{{_working}}"></iron-ajax>
     <iron-ajax id="ajaxAddMember"
                method="POST"
-               url="[[las2peerConnectorEndpoint]]/agents/getAgent"
+               url="/agents/getAgent"
                handle-as="json"
                on-response="_handleAddMemberResponse"
                on-error="_handleError"
                loading = "{{_working}}"></iron-ajax>
     <iron-ajax id="ajaxCreateGroup"
                method="POST"
-               url="[[las2peerConnectorEndpoint]]/agents/createGroup"
+               url="/agents/createGroup"
                handle-as="json"
                on-response="_handleCreateGroupResponse"
                on-error="_handleError"
                loading = "{{_working}}"></iron-ajax>
     <iron-ajax id="ajaxLoadGroup"
                method="POST"
-               url="[[las2peerConnectorEndpoint]]/agents/loadGroup"
+               url="/agents/loadGroup"
                handle-as="json"
                on-response="_handleLoadGroupResponse"
                on-error="_handleError"
                loading = "{{_working}}"></iron-ajax>
     <iron-ajax id="ajaxChangeGroup"
                method="POST"
-               url="[[las2peerConnectorEndpoint]]/agents/changeGroup"
+               url="/agents/changeGroup"
                handle-as="json"
                on-response="_handleChangeGroupResponse"
                on-error="_handleError"
@@ -164,7 +164,7 @@
   <script>
     class AgentsView extends Polymer.Element {
       static get is() { return 'agents-view'; }
-      static get properties() { return { las2peerConnectorEndpoint: String, sessionid: String, error: { type: Object, notify: true }, _working: Boolean, _memberAgents: { type: Array, value: [] }, _hasNoMemberAgents: { type: Boolean, value: true }, _manageAgents: { type: Array, value: [] }, _hasNoManageAgents: { type: Boolean, value: true }, _manageGroupAgentId: String } }
+      static get properties() { return { agentid: String, error: { type: Object, notify: true }, _working: Boolean, _memberAgents: { type: Array, value: [] }, _hasNoMemberAgents: { type: Boolean, value: true }, _manageAgents: { type: Array, value: [] }, _hasNoManageAgents: { type: Boolean, value: true }, _manageGroupAgentId: String } }
 
       toggleCreateAgent() { this.$.collapseCreateAgent.toggle(); }
 
@@ -234,7 +234,6 @@
 
       uploadAgent(event) {
         var req = this.$.ajaxUploadAgent;
-        req.headers = { 'X-Agent-Session-Id': this.sessionid };
         req.body = new FormData();
         req.body.append('agentFile', this.$.agentUploadFile.inputElement.inputElement.files[0]); // this is an input inside an iron-input inside a paper-input
         req.body.append('agentPassword', this.$.agentUploadPassword.value);
@@ -303,7 +302,6 @@
 
       createGroup() {
         var req = this.$.ajaxCreateGroup;
-        req.headers = { 'X-Agent-Session-Id': this.sessionid };
         req.body = JSON.stringify({ members: this._memberAgents });
         req.generateRequest();
       }
@@ -318,7 +316,6 @@
 
       loadGroup() {
         var req = this.$.ajaxLoadGroup;
-        req.headers = { 'X-Agent-Session-Id': this.sessionid };
         req.body = JSON.stringify({ agentid: this._manageGroupAgentId });
         req.generateRequest();
       }
@@ -337,7 +334,6 @@
 
       saveGroup() {
         var req = this.$.ajaxChangeGroup;
-        req.headers = { 'X-Agent-Session-Id': this.sessionid };
         req.body = JSON.stringify({ agentid: this._manageGroupAgentId, members: this._manageAgents });
         req.generateRequest();
       }

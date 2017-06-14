@@ -4,6 +4,8 @@ import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
+import javax.ws.rs.core.HttpHeaders;
+
 import com.sun.net.httpserver.HttpExchange;
 
 import i5.las2peer.api.security.AgentAccessDeniedException;
@@ -13,6 +15,7 @@ import i5.las2peer.connectors.nodeAdminConnector.NodeAdminConnector;
 import i5.las2peer.connectors.nodeAdminConnector.ParameterFilter.ParameterMap;
 import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.security.AgentImpl;
+import i5.las2peer.security.AnonymousAgentImpl;
 import i5.las2peer.security.PassphraseAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
 import net.minidev.json.JSONObject;
@@ -31,7 +34,7 @@ public class AuthHandler extends AbstractHandler {
 	}
 
 	@Override
-	protected void handleSub(HttpExchange exchange, PastryNodeImpl node, ParameterMap parameters, String sessionId,
+	protected void handleSub(HttpExchange exchange, PastryNodeImpl node, ParameterMap parameters,
 			PassphraseAgentImpl activeAgent, byte[] requestBody) throws Exception {
 		final String path = exchange.getRequestURI().getPath();
 		if (path.equalsIgnoreCase("/auth/login")) {
@@ -39,9 +42,9 @@ public class AuthHandler extends AbstractHandler {
 		} else if (path.equalsIgnoreCase("/auth/create")) {
 			handleRegistration(exchange, node, parameters, requestBody);
 		} else if (path.equalsIgnoreCase("/auth/logout")) {
-			handleLogout(exchange, node, sessionId, activeAgent);
+			handleLogout(exchange, node, activeAgent);
 		} else if (path.equalsIgnoreCase("/auth/validate")) {
-			handleValidate(exchange, node, sessionId);
+			handleValidate(exchange, node, activeAgent);
 		} else {
 			sendEmptyResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND);
 		}
@@ -122,10 +125,11 @@ public class AuthHandler extends AbstractHandler {
 			long loginStarted) throws Exception {
 		// register session, set cookie and send response
 		AgentSession session = connector.getOrCreateSession(agent);
+		exchange.getResponseHeaders().add(HttpHeaders.SET_COOKIE,
+				NodeAdminConnector.COOKIE_SESSION_KEY + "=" + session.getSessionId() + "; Path=/; Secure; HttpOnly");
 		JSONObject json = new JSONObject();
 		json.put("code", HttpURLConnection.HTTP_OK);
 		json.put("text", HttpURLConnection.HTTP_OK + " - Login OK");
-		json.put("sessionid", session.getSessionId());
 		json.put("agentid", agent.getIdentifier());
 		if (agent instanceof UserAgentImpl) {
 			UserAgentImpl user = (UserAgentImpl) agent;
@@ -170,26 +174,23 @@ public class AuthHandler extends AbstractHandler {
 		return namePass;
 	}
 
-	private void handleLogout(HttpExchange exchange, PastryNodeImpl node, String sessionId,
-			PassphraseAgentImpl activeAgent) throws Exception {
-		if (sessionId != null) {
-			connector.destroySession(sessionId);
-		}
+	private void handleLogout(HttpExchange exchange, PastryNodeImpl node, PassphraseAgentImpl activeAgent)
+			throws Exception {
+		connector.destroySession(activeAgent);
 		sendEmptyResponse(exchange, HttpURLConnection.HTTP_OK);
 	}
 
-	private void handleValidate(HttpExchange exchange, PastryNodeImpl node, String sessionId) {
-		if (sessionId != null) {
+	private void handleValidate(HttpExchange exchange, PastryNodeImpl node, PassphraseAgentImpl activeAgent) {
+		if (activeAgent != null && !(activeAgent instanceof AnonymousAgentImpl)) {
 			JSONObject json = new JSONObject();
 			json.put("code", HttpURLConnection.HTTP_OK);
 			json.put("text", HttpURLConnection.HTTP_OK + " - Session OK");
-			json.put("sessionid", sessionId);
+			json.put("agentid", activeAgent.getIdentifier());
 			sendJSONResponse(exchange, json);
 		} else {
 			JSONObject json = new JSONObject();
 			json.put("code", HttpURLConnection.HTTP_UNAUTHORIZED);
 			json.put("text", HttpURLConnection.HTTP_UNAUTHORIZED + " - Session Invalid");
-			json.put("sessionid", "");
 			sendJSONResponse(exchange, json);
 		}
 	}

@@ -106,8 +106,8 @@ public class FrontendHandler extends AbstractHandler {
 	}
 
 	@Override
-	protected void handleSub(HttpExchange exchange, PastryNodeImpl node, ParameterMap parameters, String sessionId,
-			PassphraseAgentImpl activeAgent, byte[] requestBody) throws Exception {
+	protected void handleSub(HttpExchange exchange, PastryNodeImpl node, ParameterMap parameters, PassphraseAgentImpl activeAgent,
+			byte[] requestBody) throws Exception {
 		// TODO Auto-generated method stub
 
 	}

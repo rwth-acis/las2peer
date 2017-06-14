@@ -43,7 +43,7 @@ Copyright (c) 2017 Advanced Community Information Systems (ACIS) Group, Chair of
   <script>
     class WidgetsView extends Polymer.Element {
       static get is() { return 'widgets-view'; }
-      static get properties() { return { las2peerConnectorEndpoint: String, sessionid: String, error: { type: Object, notify: true }, _loadingWidget: { type: Boolean, value: false } } }
+      static get properties() { return { agentid: String, error: { type: Object, notify: true }, _loadingWidget: { type: Boolean, value: false } } }
 
       openAddWidgetDialog() {
         this.$.idAddWidgetDialog.open();
@@ -55,13 +55,10 @@ Copyright (c) 2017 Advanced Community Information Systems (ACIS) Group, Chair of
         var url = this.$.idWidgetUrl.value;
         Polymer.importHref(url, function(e) { // e.target.import is the import document.
           viewThis._loadingWidget = false;
-          var wid = document.createElement(viewThis.$.idWidgetName.value);
-          wid.las2peerConnectorEndpoint = viewThis.las2peerConnectorEndpoint;
-          wid.las2peerAuthHeader = { 'X-Agent-Session-Id': viewThis.sessionid };
           var frame = document.createElement('widget-frame');
           frame.x = 100;
           frame.y = 100;
-          frame.widget = wid;
+          frame.widget = document.createElement(viewThis.$.idWidgetName.value);
           frame.frameTitle = viewThis.$.idFrameTitle.value;
           Polymer.dom(viewThis.root).appendChild(frame);
           viewThis.$.idAddWidgetDialog.close();
