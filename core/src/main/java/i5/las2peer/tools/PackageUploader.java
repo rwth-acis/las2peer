@@ -20,7 +20,7 @@ import i5.las2peer.api.persistency.EnvelopeException;
 import i5.las2peer.api.persistency.EnvelopeNotFoundException;
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentOperationFailedException;
-import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
+import i5.las2peer.classLoaders.libraries.LibraryIdentifier;
 import i5.las2peer.classLoaders.libraries.LoadedNetworkLibrary;
 import i5.las2peer.classLoaders.libraries.SharedStorageRepository;
 import i5.las2peer.logging.L2pLogger;

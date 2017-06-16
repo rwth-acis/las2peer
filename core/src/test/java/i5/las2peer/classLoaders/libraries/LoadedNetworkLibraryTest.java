@@ -3,9 +3,6 @@ package i5.las2peer.classLoaders.libraries;
 import org.junit.Assert;
 import org.junit.Test;
 
-import i5.las2peer.classLoaders.helpers.LibraryDependency;
-import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
-
 public class LoadedNetworkLibraryTest {
 
 	@Test
@@ -16,9 +13,6 @@ public class LoadedNetworkLibraryTest {
 			String xml = noDeps.toXmlString();
 			LoadedNetworkLibrary backNoDeps = LoadedNetworkLibrary.createFromXml(null, xml);
 			Assert.assertEquals(noDeps.getIdentifier().toString(), backNoDeps.getIdentifier().toString());
-			LibraryDependency[] deps = backNoDeps.getDependencies();
-			Assert.assertNotNull(deps);
-			Assert.assertEquals(0, deps.length);
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail(e.toString());

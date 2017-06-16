@@ -7,23 +7,23 @@ import i5.las2peer.classLoaders.libraries.LoadedLibrary;
 import i5.las2peer.classLoaders.libraries.ResourceNotFoundException;
 
 /**
- * a LibraryClassLoader is responsible for loading classes from one library bundle, probably loaded via a
+ * A service class loader is responsible for loading classes from the service bundle, probably loaded via a
  * {@link i5.las2peer.classLoaders.libraries.Repository}
  * 
  * 
  *
  */
-public class LibraryClassLoader extends ClassLoader {
+public class ServiceClassLoader extends ClassLoader {
 
 	/**
-	 * the library, this class loader is responsible for
+	 * the library this class loader is responsible for
 	 */
-	private LoadedLibraryCache myLibrary = null;
+	private LoadedLibrary library = null;
 
 	/**
-	 * parent class loader
+	 * parent class manager
 	 */
-	private BundleClassManager parent;
+	private ClassLoader parent;
 
 	/**
 	 * create a new class loader for a given library.
@@ -31,8 +31,8 @@ public class LibraryClassLoader extends ClassLoader {
 	 * @param lib
 	 * @param parent
 	 */
-	public LibraryClassLoader(LoadedLibraryCache lib, BundleClassManager parent) {
-		this.myLibrary = lib;
+	public ServiceClassLoader(LoadedLibrary lib, ClassLoader parent) {
+		this.library = lib;
 
 		this.parent = parent;
 	}
@@ -46,7 +46,7 @@ public class LibraryClassLoader extends ClassLoader {
 	 * @throws IOException
 	 */
 	private byte[] getResourceContent(String resourceName) throws ClassLoaderException, IOException {
-		return myLibrary.getCachedResourceAsBinary(resourceName);
+		return library.getResourceAsBinary(resourceName);
 	}
 
 	@Override
@@ -74,11 +74,6 @@ public class LibraryClassLoader extends ClassLoader {
 		}
 	}
 
-	@Override
-	protected synchronized Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-		return loadClass(name, resolve, true);
-	}
-
 	/**
 	 * loading classes in a Library classloader follows the following steps: check if the class has already been loaded
 	 * look into all bundles class loaders this library class loader has been registered to look into the bootstrap
@@ -86,24 +81,25 @@ public class LibraryClassLoader extends ClassLoader {
 	 * 
 	 * @param name
 	 * @param resolve
-	 * @param lookUp
 	 * @return class definition of the requested class
 	 * @throws ClassNotFoundException
 	 */
-	protected synchronized Class<?> loadClass(String name, boolean resolve, boolean lookUp)
+	@Override
+	protected synchronized Class<?> loadClass(String name, boolean resolve)
 			throws ClassNotFoundException {
-		Logger.logLoading(this, name, null, lookUp);
+		Logger.logLoading(this, name, null);
 
 		// First, check if the class has already been loaded
 		Class<?> c = findLoadedClass(name);
 
 		// ask parent loader
-		if (c == null && lookUp && parent != null) {
+		// TODO restrict access to platform classes
+		if (c == null && parent != null) {
 			try {
-				c = parent.loadClass(name, this);
+				c = parent.loadClass(name);
 			} catch (ClassNotFoundException e) {
 			}
-		} else if (c == null && lookUp && parent == null) { // for test cases
+		} else if (c == null && parent == null) { // for test cases
 			try {
 				c = getSystemClassLoader().loadClass(name);
 			} catch (ClassNotFoundException e) {
@@ -128,21 +124,21 @@ public class LibraryClassLoader extends ClassLoader {
 		}
 
 		if (c == null) {
-			Logger.logLoading(this, name, false, lookUp);
+			Logger.logLoading(this, name, false);
 			throw new ClassNotFoundException();
 		}
 
-		Logger.logLoading(this, name, true, lookUp);
+		Logger.logLoading(this, name, true);
 		return c;
 	}
 
 	/**
-	 * get the library, this loader is responsible for
+	 * get the library this loader is responsible for
 	 * 
 	 * @return library linked to this classloader
 	 */
 	public LoadedLibrary getLibrary() {
-		return myLibrary.getLoadedLibrary();
+		return library;
 	}
 
 	/**
@@ -162,10 +158,10 @@ public class LibraryClassLoader extends ClassLoader {
 		URL res;
 
 		try {
-			res = myLibrary.getLoadedLibrary().getResourceAsUrl(resourceName);
+			res = library.getResourceAsUrl(resourceName);
 		} catch (ResourceNotFoundException e) {
 			if (lookUp && parent != null) {
-				URL result = parent.findResource(resourceName, this);
+				URL result = parent.getResource(resourceName);
 				if (result != null) {
 					return result;
 				} else {

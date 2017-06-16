@@ -2,7 +2,7 @@ package i5.las2peer.classLoaders.testPackage2;
 
 import java.util.ResourceBundle;
 
-import i5.las2peer.classLoaders.testPackage1.CounterClass;
+import i5.las2peer.classLoaders.testPackage2.CounterClass;
 
 public class UsingCounter {
 

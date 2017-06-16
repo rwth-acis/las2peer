@@ -10,16 +10,17 @@ import java.lang.reflect.Method;
 
 import org.junit.Test;
 
+import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.classLoaders.libraries.FileSystemRepository;
 
-public class L2pClassManagerTest {
+public class ClassManagerTest {
 
 	@Test
 	public void testPackageName() {
-		assertEquals("my.package", L2pClassManager.getPackageName("my.package.Class"));
+		assertEquals("my.package", ClassManager.getPackageName("my.package.Class"));
 
 		try {
-			L2pClassManager.getPackageName("teststring");
+			ClassManager.getPackageName("teststring");
 			fail("IllegalArgumentException should have been thrown");
 		} catch (IllegalArgumentException e) {
 		}
@@ -28,10 +29,10 @@ public class L2pClassManagerTest {
 	@Test
 	public void testServiceClassLoading() throws ClassLoaderException, SecurityException, NoSuchMethodException,
 			IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-		L2pClassManager testee = new L2pClassManager(new FileSystemRepository("export/jars/"),
+		ClassManager testee = new ClassManager(new FileSystemRepository("export/jars/"),
 				ClassLoader.getSystemClassLoader());
 
-		Class<?> cl = testee.getServiceClass("i5.las2peer.classLoaders.testPackage2.UsingCounter", "1.0");
+		Class<?> cl = testee.getServiceClass(ServiceNameVersion.fromString("i5.las2peer.classLoaders.testPackage2.UsingCounter@1.0"));
 
 		assertFalse(cl.getClassLoader().equals(ClassLoader.getSystemClassLoader()));
 
@@ -41,8 +42,8 @@ public class L2pClassManagerTest {
 
 		assertEquals(-2, ((Integer) result).intValue());
 
-		Class<?> cl1 = testee.getServiceClass("i5.las2peer.testServices.testPackage1.TestService", "1.0");
-		Class<?> cl2 = testee.getServiceClass("i5.las2peer.testServices.testPackage1.TestService", "1.1");
+		Class<?> cl1 = testee.getServiceClass(new ServiceNameVersion("i5.las2peer.testServices.testPackage1.TestService", "1.0"));
+		Class<?> cl2 = testee.getServiceClass(new ServiceNameVersion("i5.las2peer.testServices.testPackage1.TestService", "1.1"));
 		Method m1 = cl1.getDeclaredMethod("getVersionStatic");
 		Method m2 = cl2.getDeclaredMethod("getVersionStatic");
 		assertEquals(m1.invoke(null), 100);
@@ -51,34 +52,31 @@ public class L2pClassManagerTest {
 
 	@Test
 	public void testJarBehaviour() throws IllegalArgumentException, ClassLoaderException {
-		L2pClassManager testee = new L2pClassManager(new FileSystemRepository("export/jars/"),
+		ClassManager testee = new ClassManager(new FileSystemRepository("export/jars/"),
 				ClassLoader.getSystemClassLoader());
-		testee.getServiceClass("i5.las2peer.classLoaders.testPackage2.UsingCounter", "1.0");
+		testee.getServiceClass(new ServiceNameVersion("i5.las2peer.classLoaders.testPackage2.UsingCounter", "1.0"));
 
-		assertEquals(1, testee.numberOfRegisteredBundles());
-		assertEquals(2, testee.numberOfRegisteredLibraries());
+		assertEquals(1, testee.numberOfRegisteredServices());
 
-		testee.unregisterService("i5.las2peer.classLoaders.testPackage2.UsingCounter", "1.0");
+		testee.unregisterService(new ServiceNameVersion("i5.las2peer.classLoaders.testPackage2.UsingCounter", "1.0"));
 
-		assertEquals(0, testee.numberOfRegisteredBundles());
-		assertEquals(0, testee.numberOfRegisteredLibraries());
+		assertEquals(0, testee.numberOfRegisteredServices());
 
-		testee.getServiceClass("i5.las2peer.classLoaders.testPackage2.UsingCounter", "1.0");
-		testee.getServiceClass("i5.las2peer.classLoaders.testPackage1.CounterClass", "1.0");
-		testee.getServiceClass("i5.las2peer.classLoaders.testPackage1.CounterClass", "1.1");
+		testee.getServiceClass(new ServiceNameVersion("i5.las2peer.classLoaders.testPackage2.UsingCounter", "1.0"));
+		testee.getServiceClass(new ServiceNameVersion("i5.las2peer.classLoaders.testPackage1.CounterClass", "1.0"));
+		testee.getServiceClass(new ServiceNameVersion("i5.las2peer.classLoaders.testPackage1.CounterClass", "1.1"));
 
-		assertEquals(3, testee.numberOfRegisteredBundles());
-		assertEquals(3, testee.numberOfRegisteredLibraries());
+		assertEquals(3, testee.numberOfRegisteredServices());
 	}
 
 	@Test
 	public void testMultipleServiceClassLoading() throws ClassLoaderException, SecurityException, NoSuchMethodException,
 			IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-		L2pClassManager testee = new L2pClassManager(new FileSystemRepository("export/jars/"),
+		ClassManager testee = new ClassManager(new FileSystemRepository("export/jars/"),
 				ClassLoader.getSystemClassLoader());
 
-		Class<?> cl1 = testee.getServiceClass("i5.las2peer.classLoaders.testPackage2.UsingCounter", "1.0");
-		Class<?> cl2 = testee.getServiceClass("i5.las2peer.classLoaders.testPackage2.UsingCounter", "1.0");
+		Class<?> cl1 = testee.getServiceClass(new ServiceNameVersion("i5.las2peer.classLoaders.testPackage2.UsingCounter", "1.0"));
+		Class<?> cl2 = testee.getServiceClass(new ServiceNameVersion("i5.las2peer.classLoaders.testPackage2.UsingCounter", "1.0"));
 
 		assertFalse(cl1.getClassLoader().equals(ClassLoader.getSystemClassLoader()));
 		assertFalse(cl2.getClassLoader().equals(ClassLoader.getSystemClassLoader()));

@@ -35,7 +35,7 @@ import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.api.security.AgentOperationFailedException;
-import i5.las2peer.classLoaders.L2pClassManager;
+import i5.las2peer.classLoaders.ClassManager;
 import i5.las2peer.classLoaders.libraries.FileSystemRepository;
 import i5.las2peer.communication.ListMethodsContent;
 import i5.las2peer.communication.Message;
@@ -759,7 +759,7 @@ public class L2pNodeLauncher {
 	 * @param nodeIdSeed the seed to generate node IDs from
 	 */
 	private L2pNodeLauncher(InetAddress bindAddress, Integer port, String bootstrap, STORAGE_MODE storageMode,
-			String storageDir, boolean monitoringObserver, L2pClassManager cl, Long nodeIdSeed) {
+			String storageDir, boolean monitoringObserver, ClassManager cl, Long nodeIdSeed) {
 		if (storageMode == null) {
 			if (System.getenv().containsKey("MEM_STORAGE")) {
 				storageMode = STORAGE_MODE.MEMORY;
@@ -905,7 +905,7 @@ public class L2pNodeLauncher {
 			serviceDirectories = directories;
 		}
 		// instantiate launcher
-		L2pClassManager cl = new L2pClassManager(new FileSystemRepository(serviceDirectories, true),
+		ClassManager cl = new ClassManager(new FileSystemRepository(serviceDirectories, true),
 				L2pNodeLauncher.class.getClassLoader());
 		L2pNodeLauncher launcher = new L2pNodeLauncher(bindAddress, launcherConfiguration.getPort(),
 				launcherConfiguration.getBootstrap(), launcherConfiguration.getStorageMode(),

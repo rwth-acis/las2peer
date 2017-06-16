@@ -5,10 +5,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.HashSet;
-
-import i5.las2peer.classLoaders.helpers.LibraryDependency;
-import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
 
 /**
  * a loaded library represents a library in the l2p classloader context
@@ -18,48 +14,14 @@ import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
  */
 public abstract class LoadedLibrary {
 
-	private final HashSet<LoadedLibrary> resolvedDependencies;
-	private final LibraryDependency[] initialDependencies;
 	private final LibraryIdentifier myLibrary;
 
-	/**
-	 * generates a new CL without any dependencies i.e. this ClassLoader may not use any other registered libraries
-	 * 
-	 * @param libraryIdentifier identifier of the library bound to this ClassLoader
-	 */
 	LoadedLibrary(String libraryIdentifier) {
 		this(new LibraryIdentifier(libraryIdentifier));
 	}
-
-	/**
-	 * generates a new CL without any dependencies i.e. this ClassLoader may not use any other registered libraries
-	 * 
-	 * @param lib identifier of the library bound to this ClassLoader
-	 */
+	
 	LoadedLibrary(LibraryIdentifier lib) {
-		this(lib, new LibraryDependency[0]);
-	}
-
-	/**
-	 * generates a new CL with dependencies which may be used for loading classes
-	 * 
-	 * @param libraryIdentifier identifier of the library bound to this ClassLoader
-	 * @param initialDependencies array with dependency information
-	 */
-	LoadedLibrary(String libraryIdentifier, LibraryDependency[] initialDependencies) {
-		this(new LibraryIdentifier(libraryIdentifier), initialDependencies);
-	}
-
-	/**
-	 * generates a new CL with dependencies which may be used in class loading
-	 * 
-	 * @param lib identifier of the library bound to this ClassLoader
-	 * @param initialDependencies array with ClassLoaders this one may use for class loading
-	 */
-	LoadedLibrary(LibraryIdentifier lib, LibraryDependency[] initialDependencies) {
 		this.myLibrary = lib;
-		this.initialDependencies = initialDependencies;
-		resolvedDependencies = new HashSet<>();
 	}
 
 	/**
@@ -68,35 +30,6 @@ public abstract class LoadedLibrary {
 	 */
 	public LibraryIdentifier getLibraryIdentifier() {
 		return myLibrary;
-	}
-
-	/**
-	 * 
-	 * @return array with dependency information
-	 */
-	public LibraryDependency[] getDependencies() {
-		return initialDependencies;
-	}
-
-	/**
-	 * set the (resolved) library dependencies of this library
-	 * 
-	 * @param libs
-	 */
-	void setResolvedDependencies(LoadedLibrary[] libs) {
-		resolvedDependencies.clear();
-		for (LoadedLibrary lib : libs) {
-			resolvedDependencies.add(lib);
-		}
-	}
-
-	/**
-	 * add a loaded library to the dependencies of this one
-	 * 
-	 * @param lib
-	 */
-	void addResolvedDependency(LoadedLibrary lib) {
-		resolvedDependencies.add(lib);
 	}
 
 	/**

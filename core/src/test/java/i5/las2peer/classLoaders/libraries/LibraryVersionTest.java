@@ -1,9 +1,10 @@
-package i5.las2peer.classLoaders.helpers;
+package i5.las2peer.classLoaders.libraries;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import i5.las2peer.classLoaders.libraries.LibraryVersion;
 
 import org.junit.Test;
 
@@ -112,66 +113,6 @@ public class LibraryVersionTest {
 		assertEquals("10.0.1", new LibraryVersion(10, 0, 1).toString());
 		assertEquals("10.1", new LibraryVersion(10, 1).toString());
 		assertEquals("10", new LibraryVersion(10).toString());
-	}
-
-	@Test
-	public void testSmaller() {
-		assertTrue(new LibraryVersion("10.0.1-1234").isSmallerThan("10.0.2"));
-		assertTrue(new LibraryVersion("10.0.1-1234").isSmallerThan("10.0.1-2212"));
-		assertTrue(new LibraryVersion("10.0.1-1234").isSmallerThan("10.1.0"));
-		assertTrue(new LibraryVersion("10.0.1-1234").isSmallerThan("10.2"));
-		assertTrue(new LibraryVersion("10.0.1-1234").isSmallerThan("10.2.0-1222"));
-		assertTrue(new LibraryVersion("10.0.1-1234").isSmallerThan("11"));
-		assertTrue(new LibraryVersion("10.0.1").isSmallerThan("10.0.1-1234"));
-		assertTrue(new LibraryVersion("10.1").isSmallerThan("10.1.1"));
-		assertTrue(new LibraryVersion("10.1").isSmallerThan("10.2"));
-		assertTrue(new LibraryVersion("10").isSmallerThan("10.2"));
-		assertTrue(new LibraryVersion("10").isSmallerThan("11"));
-
-		assertFalse(new LibraryVersion("10.1.1-1234").isSmallerThan("10.0.1-2222"));
-		assertFalse(new LibraryVersion("10.1.1-1234").isSmallerThan("10.1.1"));
-		assertFalse(new LibraryVersion("10.1.1-1234").isSmallerThan("10.1"));
-		assertFalse(new LibraryVersion("10.1.1-1234").isSmallerThan("10.1.0-2222"));
-		assertFalse(new LibraryVersion("10.1.1-1234").isSmallerThan("10.0.2"));
-		assertFalse(new LibraryVersion("10.1.1-1234").isSmallerThan("9"));
-	}
-
-	@Test
-	public void testLarger() {
-		assertFalse(new LibraryVersion("10.0.1-1234").isLargerThan("10.0.2"));
-		assertFalse(new LibraryVersion("10.0.1-1234").isLargerThan("10.0.1-2212"));
-		assertFalse(new LibraryVersion("10.0.1-1234").isLargerThan("10.1.0"));
-		assertFalse(new LibraryVersion("10.0.1-1234").isLargerThan("10.2"));
-		assertFalse(new LibraryVersion("10.0.1-1234").isLargerThan("10.2.0-1222"));
-		assertFalse(new LibraryVersion("10.0.1-1234").isLargerThan("11"));
-		assertFalse(new LibraryVersion("10.0.1").isLargerThan("10.0.1-1234"));
-		assertFalse(new LibraryVersion("10.1").isLargerThan("10.1.1"));
-		assertFalse(new LibraryVersion("10.1").isLargerThan("10.2"));
-		assertFalse(new LibraryVersion("10").isLargerThan("10.2"));
-		assertFalse(new LibraryVersion("10").isLargerThan("11"));
-
-		assertTrue(new LibraryVersion("10.1.1-1234").isLargerThan("10.0.1-2222"));
-		assertTrue(new LibraryVersion("10.1.1-1234").isLargerThan("10.1.1"));
-		assertTrue(new LibraryVersion("10.1.1-1234").isLargerThan("10.1"));
-		assertTrue(new LibraryVersion("10.1.1-1234").isLargerThan("10.1.0-2222"));
-		assertTrue(new LibraryVersion("10.1.1-1234").isLargerThan("10.0.2"));
-		assertTrue(new LibraryVersion("10.1.1-1234").isLargerThan("9"));
-	}
-
-	@Test
-	public void testIsBetween() {
-		assertTrue(new LibraryVersion("10.2.3-1234").isBetween("10", "11"));
-		assertTrue(new LibraryVersion("10.2.3-1234").isBetween("10.2.3-1234", "10.2.3-1234"));
-		assertTrue(new LibraryVersion("10.2.3-1234").isBetween("10", "10.2.3-1234"));
-
-		assertFalse(new LibraryVersion("10.2.3-1234").isBetween("10", "10.2.3-1222"));
-		assertFalse(new LibraryVersion("10.2.3-1234").isBetween("10", "10.2.3"));
-		assertFalse(new LibraryVersion("10.2.3-1234").isBetween("10", "10.2"));
-	}
-
-	@Test
-	public void testSimpleVersion() {
-		assertTrue(new LibraryDependency("test;version=\"9\"").fits(new LibraryVersion("9")));
 	}
 
 }

@@ -1,4 +1,4 @@
-package i5.las2peer.classLoaders.helpers;
+package i5.las2peer.classLoaders.libraries;
 
 /**
  * a simple class managing a library version number in the format major.minor.subversion-build where minor, subversion
@@ -7,7 +7,7 @@ package i5.las2peer.classLoaders.helpers;
  * 
  *
  */
-public class LibraryVersion implements Comparable<LibraryVersion> {
+public class LibraryVersion {
 
 	private int major = 0;
 	private Integer minor = null;
@@ -126,154 +126,7 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 			throw new IllegalArgumentException("Negative version numbers are not allowed!");
 		this.major = major;
 	}
-
-	/**
-	 * check if this version is larger than the given one
-	 * 
-	 * @param v
-	 * @return true, if this version is larger than the given one
-	 */
-	public boolean isLargerThan(LibraryVersion v) {
-		if (this.major > v.major)
-			return true;
-		if (this.major < v.major)
-			return false;
-
-		if (this.minor != null && v.minor != null) {
-			if (this.minor > v.minor)
-				return true;
-			if (this.minor < v.minor)
-				return false;
-		} else if (this.minor == null)
-			return false;
-		else if (v.minor == null)
-			return true;
-
-		if (this.sub != null && v.sub != null) {
-			if (this.sub > v.sub)
-				return true;
-			if (this.sub < v.sub)
-				return false;
-		} else if (this.sub == null)
-			return false;
-		else if (v.sub == null)
-			return true;
-
-		if (this.build == null)
-			return false;
-		if (v.build == null)
-			return true;
-		if (this.build > v.build)
-			return true;
-
-		return false;
-	}
-
-	/**
-	 * tries to create a version number from the given string and compares it to this version
-	 * 
-	 * @param v
-	 * @return true, if this version is larger than the given one
-	 * @throws IllegalArgumentException
-	 */
-	public boolean isLargerThan(String v) throws IllegalArgumentException {
-		return isLargerThan(new LibraryVersion(v));
-	}
-
-	/**
-	 * check if this version is smaller than the given one
-	 * 
-	 * @param v
-	 * @return true, if this version is smaller than the given one
-	 */
-	public boolean isSmallerThan(LibraryVersion v) {
-		return !this.equals(v) && !this.isLargerThan(v);
-	}
-
-	/**
-	 * tries to create a version number from the given string and compares it to this version
-	 * 
-	 * @param v
-	 * @return true, if this version is smaller than the given one
-	 * @throws IllegalArgumentException
-	 */
-	public boolean isSmallerThan(String v) {
-		return isSmallerThan(new LibraryVersion(v));
-	}
-
-	/**
-	 * check if this version is larger than or equal to the given one
-	 * 
-	 * @param v
-	 * @return true, if this version is larger than or equal to the given one
-	 */
-	public boolean isLargerOrEqual(LibraryVersion v) {
-		return this.equals(v) || this.isLargerThan(v);
-	}
-
-	/**
-	 * tries to create a version number from the given string and compares it to this version
-	 * 
-	 * @param v
-	 * @return true, if this version is larger than or equal to the given one
-	 * @throws IllegalArgumentException
-	 */
-	public boolean isLargerOrEqual(String v) {
-		return this.isLargerOrEqual(new LibraryVersion(v));
-	}
-
-	/**
-	 * check if this version is smaller than or equal to the given one
-	 * 
-	 * @param v
-	 * @return true, if this version is smaller than or equal to the given one
-	 */
-	public boolean isSmallerOrEqual(LibraryVersion v) {
-		return this.equals(v) || this.isSmallerThan(v);
-	}
-
-	/**
-	 * tries to create a version number from the given string and compares it to this version
-	 * 
-	 * @param v
-	 * @return true, if this version is smaller than or equal to the given one
-	 * @throws IllegalArgumentException
-	 */
-	public boolean isSmallerOrEqual(String v) {
-		return this.isSmallerOrEqual(new LibraryVersion(v));
-	}
-
-	/**
-	 * check if this version is between the given ones
-	 * 
-	 * @param smaller
-	 * @param larger
-	 * @return true, if this version is between the two given ones
-	 */
-	public boolean isBetween(LibraryVersion smaller, LibraryVersion larger) {
-		if (smaller.isLargerThan(larger))
-			return isBetween(larger, smaller);
-
-		if (this.equals(smaller))
-			return true;
-		else if (this.equals(larger))
-			return true;
-		else
-			return this.isLargerThan(smaller) && this.isSmallerThan(larger);
-	}
-
-	/**
-	 * tries to create a version number from the given strings and compares them to this version
-	 * 
-	 * @param smaller
-	 * @param larger
-	 * @return true, if this version is between the two given ones
-	 * @throws IllegalArgumentException
-	 */
-	public boolean isBetween(String smaller, String larger) {
-		return this.isBetween(new LibraryVersion(smaller), new LibraryVersion(larger));
-	}
-
+	
 	/**
 	 * compares to version and checks for equality
 	 * 
@@ -371,21 +224,4 @@ public class LibraryVersion implements Comparable<LibraryVersion> {
 
 		return result;
 	}
-
-	/**
-	 * implementation of Comparable, so that the L2pClassLoader may maintain TreeSets of versions
-	 * 
-	 * @param other
-	 * @return coparison code
-	 */
-	@Override
-	public int compareTo(LibraryVersion other) {
-		if (this.isSmallerThan(other))
-			return -1;
-		else if (this.equals(other))
-			return 0;
-		else
-			return 1;
-	}
-
 }

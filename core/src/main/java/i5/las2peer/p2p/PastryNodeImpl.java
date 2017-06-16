@@ -25,7 +25,7 @@ import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.api.security.AnonymousAgent;
-import i5.las2peer.classLoaders.L2pClassManager;
+import i5.las2peer.classLoaders.ClassManager;
 import i5.las2peer.classLoaders.libraries.SharedStorageRepository;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
@@ -131,7 +131,7 @@ public class PastryNodeImpl extends Node {
 	 * @param nodeIdSeed A node id (random) seed to enforce a specific node id. If <code>null</code>, the node id will
 	 *            be random.
 	 */
-	public PastryNodeImpl(L2pClassManager classManager, boolean useMonitoringObserver, InetAddress pastryBindAddress,
+	public PastryNodeImpl(ClassManager classManager, boolean useMonitoringObserver, InetAddress pastryBindAddress,
 			Integer pastryPort, String bootstrap, STORAGE_MODE storageMode, String storageDir, Long nodeIdSeed) {
 		super(classManager, true, useMonitoringObserver);
 		this.pastryBindAddress = pastryBindAddress;
