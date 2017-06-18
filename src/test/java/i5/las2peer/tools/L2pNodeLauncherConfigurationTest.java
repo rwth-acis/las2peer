@@ -184,7 +184,7 @@ public class L2pNodeLauncherConfigurationTest {
 		try {
 			L2pNodeLauncherConfiguration conf = new L2pNodeLauncherConfiguration();
 			conf.setDebugMode(true);
-			int systemPort = PastryNodeImpl.getSystemDefinedPort();
+			int systemPort = SimpleTools.getSystemDefinedPort();
 			System.out.println("Using system defined (random) port " + systemPort + " to test");
 			conf.setPort(systemPort);
 			L2pNodeLauncher launcher = L2pNodeLauncher.launchConfiguration(conf);
@@ -216,7 +216,7 @@ public class L2pNodeLauncherConfigurationTest {
 			TestSuite.wipeTestStorage();
 			L2pNodeLauncherConfiguration conf = new L2pNodeLauncherConfiguration();
 			conf.setStorageDirectory(TestSuite.TEST_STORAGE_DIR);
-			int systemPort = PastryNodeImpl.getSystemDefinedPort();
+			int systemPort = SimpleTools.getSystemDefinedPort();
 			System.out.println("Using system defined (random) port " + systemPort + " to test");
 			conf.setPort(systemPort);
 			L2pNodeLauncher launcher = L2pNodeLauncher.launchConfiguration(conf);

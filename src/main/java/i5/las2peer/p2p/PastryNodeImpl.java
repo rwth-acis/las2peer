@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.ServerSocket;
 import java.net.UnknownHostException;
 import java.security.PublicKey;
 import java.util.Collection;
@@ -136,7 +135,7 @@ public class PastryNodeImpl extends Node {
 		super(classManager, true, useMonitoringObserver);
 		this.pastryBindAddress = pastryBindAddress;
 		if (pastryPort == null || pastryPort < 1) {
-			this.pastryPort = getSystemDefinedPort();
+			this.pastryPort = SimpleTools.getSystemDefinedPort();
 		} else {
 			this.pastryPort = pastryPort;
 		}
@@ -329,16 +328,6 @@ public class PastryNodeImpl extends Node {
 		for (String prop : properties.keySet()) {
 			pastryEnvironment.getParameters().setString(prop, properties.get(prop));
 			logger.fine("setting: " + prop + ": '" + properties.get(prop) + "'");
-		}
-	}
-
-	public static int getSystemDefinedPort() {
-		try {
-			ServerSocket tmpSocket = new ServerSocket(0);
-			tmpSocket.close();
-			return tmpSocket.getLocalPort();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
 		}
 	}
 
