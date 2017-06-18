@@ -22,6 +22,7 @@
         <dependency org="io.swagger" name="swagger-jersey2-jaxrs" rev="1.5.12" conf="bundle->*" />
         <dependency org="org.glassfish.jersey.core" name="jersey-server" rev="2.25.1" conf="bundle->*" />
         <dependency org="org.glassfish.jersey.core" name="jersey-common" rev="2.25.1" conf="bundle->*" />
+        <dependency org="org.glassfish.jersey.containers" name="jersey-container-jdk-http" rev="2.25.1" conf="bundle->*" />
         <dependency org="org.glassfish.jersey.media" name="jersey-media-json-jackson" rev="2.25.1" conf="bundle->*" />
         <dependency org="javax.ws.rs" name="javax.ws.rs-api" rev="2.0.1" conf="bundle->*" />
         <dependency org="org.glassfish.jersey.media" name="jersey-media-multipart" rev="2.25.1" />

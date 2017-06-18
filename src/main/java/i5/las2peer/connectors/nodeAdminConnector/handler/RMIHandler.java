@@ -1,33 +1,50 @@
 package i5.las2peer.connectors.nodeAdminConnector.handler;
 
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.InputStream;
 import java.io.Serializable;
-import java.net.HttpURLConnection;
 import java.net.URI;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.StringTokenizer;
 import java.util.logging.Level;
 
+import javax.ws.rs.CookieParam;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.ServerErrorException;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.sun.net.httpserver.HttpExchange;
 
 import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.p2p.ServiceVersion;
+import i5.las2peer.api.security.AgentException;
+import i5.las2peer.api.security.AgentNotFoundException;
+import i5.las2peer.connectors.nodeAdminConnector.AgentSession;
 import i5.las2peer.connectors.nodeAdminConnector.NodeAdminConnector;
-import i5.las2peer.connectors.nodeAdminConnector.ParameterFilter.ParameterMap;
-import i5.las2peer.p2p.Node;
-import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.restMapper.RESTResponse;
+import i5.las2peer.security.AgentImpl;
+import i5.las2peer.security.AnonymousAgentImpl;
 import i5.las2peer.security.Mediator;
 import i5.las2peer.security.PassphraseAgentImpl;
 import i5.las2peer.tools.SimpleTools;
 import io.swagger.models.Swagger;
 import io.swagger.util.Json;
 
+@Path(RMIHandler.RMI_PATH)
 public class RMIHandler extends AbstractHandler {
 
 	public static final String RMI_PATH = "/rmi";
@@ -36,123 +53,190 @@ public class RMIHandler extends AbstractHandler {
 		super(connector);
 	}
 
-	@Override
-	protected void handleSub(HttpExchange exchange, PastryNodeImpl node, ParameterMap parameters,
-			PassphraseAgentImpl activeAgent, byte[] requestBody) throws Exception {
-		final String path = exchange.getRequestURI().getPath();
-		final String subPathString = path.substring(RMI_PATH.length());
-		final Path subPath = Paths.get(path.substring(RMI_PATH.length()));
-		final int pathCount = subPath.getNameCount();
-		if (subPathString.isEmpty() || pathCount < 1) {
-			sendPlainResponse(exchange, "Please specify a service name");
-			return;
-		}
+	@GET
+	@Path("/{serviceName}")
+	public Response getLocalInstances(@PathParam("serviceName") String serviceName) {
 		// resolve service name and search for local running versions
-		String serviceName = subPath.getName(0).toString();
-		if (pathCount == 1) { // show local running instances
-			String versions = "Service '" + serviceName + "' not running locally";
-			List<ServiceVersion> versionList = node.getNodeServiceCache().getLocalServiceVersions(serviceName);
-			if (versionList != null && !versionList.isEmpty()) {
-				versions = SimpleTools.join(versionList, "\n");
-			}
-			sendPlainResponse(exchange, "Service versions running locally:\n" + versions);
-			return;
+		String versions = "Service '" + serviceName + "' not running locally";
+		List<ServiceVersion> versionList = node.getNodeServiceCache().getLocalServiceVersions(serviceName);
+		if (versionList != null && !versionList.isEmpty()) {
+			versions = SimpleTools.join(versionList, "\n");
 		}
-		// validate service version
-		String version = subPath.getName(1).toString();
-		ServiceNameVersion snv = new ServiceNameVersion(serviceName, version);
-		Mediator mediator = node.createMediatorForAgent(activeAgent);
-		if (pathCount == 3 && subPath.getName(2).toString().equalsIgnoreCase("swagger.json")) {
-			sendSwaggerListing(exchange, node, mediator, snv, path);
-			return;
-		} else {
-			handleServiceInvocation(exchange, node, mediator, snv, requestBody);
-		}
+		return Response.ok("Service versions running locally:\n" + versions, MediaType.TEXT_PLAIN).build();
 	}
 
-	private void sendSwaggerListing(HttpExchange exchange, Node node, Mediator mediator,
-			ServiceNameVersion serviceNameVersion, String path) throws Exception {
-		String basePath = path.substring(0, path.length() - "swagger.json".length());
+	@GET
+	@Path("/{serviceName}/{serviceVersion}/swagger.json")
+	public Response sendSwaggerListing(@PathParam("serviceName") String serviceName,
+			@PathParam("serviceVersion") String versionString) throws Exception {
+		ServiceNameVersion serviceNameVersion = new ServiceNameVersion(serviceName, versionString);
+		AnonymousAgentImpl anonymous = AnonymousAgentImpl.getInstance();
+		Mediator mediator = node.createMediatorForAgent(anonymous);
 		Serializable swagResult = mediator.invoke(serviceNameVersion, "getSwagger", new Serializable[0], false);
 		if (swagResult == null) {
-			sendInternalErrorResponse(exchange, "Method invocation 'getSwagger' returned null");
-			return;
-		}
-		if (!(swagResult instanceof String)) {
-			sendInternalErrorResponse(exchange,
-					"Expected type String got '" + swagResult.getClass().getCanonicalName() + "' instead");
-			return;
+			return Response.serverError().entity("Method invocation 'getSwagger' returned null").build();
+		} else if (!(swagResult instanceof String)) {
+			return Response.serverError()
+					.entity("Expected type String got '" + swagResult.getClass().getCanonicalName() + "' instead")
+					.build();
 		}
 		// deserialize Swagger
 		Swagger swagger;
 		try {
 			swagger = Json.mapper().readerFor(Swagger.class).readValue((String) swagResult);
 		} catch (Exception e) {
-			sendInternalErrorResponse(exchange, "Swagger API declaration not available!", e);
-			return;
+			logger.log(Level.WARNING, "Could not get Swagger API declaration", e);
+			return Response.serverError().entity("Swagger API declaration not available! Reason: " + e.toString())
+					.build();
 		}
-		swagger.setBasePath(basePath);
+		swagger.setBasePath(RMI_PATH + "/" + serviceName + "/" + versionString + "/");
 		// serialize Swagger API listing into a JSON String
 		try {
 			String swaggerJson = Json.mapper().writeValueAsString(swagger);
-			sendStringResponse(exchange, HttpURLConnection.HTTP_OK, "application/json", swaggerJson);
+			return Response.ok(swaggerJson, MediaType.APPLICATION_JSON).build();
 		} catch (JsonProcessingException e) {
-			sendInternalErrorResponse(exchange, "Swagger documentation could not be serialized to JSON", e);
-			return;
+			throw new ServerErrorException("Swagger documentation could not be serialized to JSON",
+					Status.INTERNAL_SERVER_ERROR, e);
 		}
 	}
 
-	private void handleServiceInvocation(HttpExchange exchange, Node node, Mediator mediator,
-			ServiceNameVersion serviceNameVersion, byte[] requestBody) throws Exception {
-		final URI requestUri = exchange.getRequestURI();
-		Path requestPath = Paths.get(requestUri.getPath());
-		URI baseUri = new URI(
-				"/" + requestPath.getName(0) + "/" + requestPath.getName(1) + "/" + requestPath.getName(2) + "/");
+	@POST
+	@Path("/{serviceName}/{serviceVersion}/{any: .+}")
+	public Response handleServiceInvocationPOST(@PathParam("serviceName") String serviceName,
+			@PathParam("serviceVersion") String versionString, @Context UriInfo uriInfo,
+			@Context HttpHeaders httpHeaders, @CookieParam(NodeAdminConnector.COOKIE_SESSIONID_KEY) String sessionId,
+			InputStream requestBody) throws Exception {
+		return handleServiceInvocation(serviceName, versionString, uriInfo, "POST", httpHeaders, sessionId,
+				requestBody);
+	}
+
+	@PUT
+	@Path("/{serviceName}/{serviceVersion}/{any: .+}")
+	public Response handleServiceInvocationPUT(@PathParam("serviceName") String serviceName,
+			@PathParam("serviceVersion") String versionString, @Context UriInfo uriInfo,
+			@Context HttpHeaders httpHeaders, @CookieParam(NodeAdminConnector.COOKIE_SESSIONID_KEY) String sessionId,
+			InputStream requestBody) throws Exception {
+		return handleServiceInvocation(serviceName, versionString, uriInfo, "PUT", httpHeaders, sessionId, requestBody);
+	}
+
+	@GET
+	@Path("/{serviceName}/{serviceVersion}/{any: .+}")
+	public Response handleServiceInvocationGET(@PathParam("serviceName") String serviceName,
+			@PathParam("serviceVersion") String versionString, @Context UriInfo uriInfo,
+			@Context HttpHeaders httpHeaders, @CookieParam(NodeAdminConnector.COOKIE_SESSIONID_KEY) String sessionId)
+			throws Exception {
+		return handleServiceInvocation(serviceName, versionString, uriInfo, "GET", httpHeaders, sessionId, null);
+	}
+
+	@DELETE
+	@Path("/{serviceName}/{serviceVersion}/{any: .+}")
+	public Response handleServiceInvocationDELETE(@PathParam("serviceName") String serviceName,
+			@PathParam("serviceVersion") String versionString, @Context UriInfo uriInfo,
+			@Context HttpHeaders httpHeaders, @CookieParam(NodeAdminConnector.COOKIE_SESSIONID_KEY) String sessionId)
+			throws Exception {
+		return handleServiceInvocation(serviceName, versionString, uriInfo, "DELETE", httpHeaders, sessionId, null);
+	}
+
+	private Response handleServiceInvocation(String serviceName, String versionString, UriInfo uriInfo,
+			String httpMethod, HttpHeaders httpHeaders, String sessionId, InputStream requestBody) throws Exception {
+		ServiceNameVersion serviceNameVersion = new ServiceNameVersion(serviceName, versionString);
+		AgentSession session = connector.getSessionById(sessionId);
+		AgentImpl activeAgent = null;
+		if (session == null) {
+			final List<String> authorization = httpHeaders.getRequestHeader(HttpHeaders.AUTHORIZATION);
+			if (authorization != null && !authorization.isEmpty()) {
+				try {
+					final String encodedUserPassword = authorization.get(0).substring("basic ".length());
+					String usernameAndPassword = new String(Base64.getDecoder().decode(encodedUserPassword),
+							StandardCharsets.UTF_8);
+					final StringTokenizer tokenizer = new StringTokenizer(usernameAndPassword, ":");
+					final String username = tokenizer.nextToken();
+					final String password = tokenizer.nextToken();
+					try {
+						AgentImpl agent = node.getAgent(username);
+						if (agent instanceof PassphraseAgentImpl) {
+							activeAgent = agent;
+							((PassphraseAgentImpl) activeAgent).unlock(password);
+						} else {
+							// just to reach the catch block
+							throw new AgentException(
+									"Invalid agent type '" + agent.getClass().getCanonicalName() + "'");
+						}
+					} catch (AgentException e) {
+						try {
+							String agentId = node.getAgentIdForLogin(username);
+							AgentImpl agent = node.getAgent(agentId);
+							if (agent instanceof PassphraseAgentImpl) {
+								activeAgent = agent;
+								((PassphraseAgentImpl) activeAgent).unlock(password);
+							} else {
+								// just to reach the catch block
+								throw new AgentException(
+										"Invalid agent type '" + agent.getClass().getCanonicalName() + "'");
+							}
+						} catch (AgentException e2) {
+							try {
+								String agentId = node.getAgentIdForLogin(username);
+								AgentImpl agent = node.getAgent(agentId);
+								if (agent instanceof PassphraseAgentImpl) {
+									activeAgent = agent;
+									((PassphraseAgentImpl) activeAgent).unlock(password);
+								} else {
+									// just to reach the catch block
+									throw new AgentException(
+											"Invalid agent type '" + agent.getClass().getCanonicalName() + "'");
+								}
+							} catch (AgentException e3) {
+								throw new AgentNotFoundException("No match with an agent");
+							}
+						}
+					}
+				} catch (AgentNotFoundException e) {
+					return Response.status(Status.UNAUTHORIZED).entity(e.toString()).build();
+				} catch (Exception e) {
+					logger.log(Level.SEVERE, "Could not use basic auth header", e);
+					throw new InternalError("Could not use basic auth header");
+				}
+			}
+			if (activeAgent == null) {
+				activeAgent = AnonymousAgentImpl.getInstance();
+			}
+		} else {
+			activeAgent = session.getAgent();
+		}
+		Mediator mediator = node.createMediatorForAgent(activeAgent);
+		URI baseUri = new URI(uriInfo.getBaseUri().toString() + "rmi/" + serviceName + "/" + versionString + "/");
+		URI requestUri = uriInfo.getRequestUri();
 		HashMap<String, List<String>> headers = new HashMap<>();
-		for (Entry<String, List<String>> headerEntry : exchange.getRequestHeaders().entrySet()) {
-			headers.put(headerEntry.getKey(), headerEntry.getValue());
+		headers.putAll(httpHeaders.getRequestHeaders());
+		byte[] requestBodyData = new byte[0];
+		if (requestBody != null) {
+			requestBodyData = SimpleTools.toByteArray(requestBody);
 		}
 		// invoke
-		Serializable[] params = new Serializable[] { baseUri, requestUri, exchange.getRequestMethod(), requestBody,
-				headers };
+		Serializable[] params = new Serializable[] { baseUri, requestUri, httpMethod, requestBodyData, headers };
 		Serializable result = null;
 		try {
 			result = mediator.invoke(serviceNameVersion, "handle", params, false);
 		} catch (Exception e) {
-			sendInternalErrorResponse(exchange, "Service method invocation failed", e);
-			return;
+			throw new ServerErrorException("Service method invocation failed", Status.INTERNAL_SERVER_ERROR, e);
 		}
 		if (result == null) {
-			sendInternalErrorResponse(exchange, "Service method invocation returned null response");
+			return Response.serverError().entity("Service method invocation returned null response").build();
 		} else if (result instanceof RESTResponse) {
-			RESTResponse response = (RESTResponse) result;
-			exchange.getResponseHeaders().putAll(response.getHeaders());
-			try {
-				final byte[] responseBody = response.getBody();
-				exchange.sendResponseHeaders(response.getHttpCode(), getResponseLength(responseBody.length));
-				OutputStream os = exchange.getResponseBody();
-				System.out.println("Writting " + responseBody.length + " bytes");
-				if (responseBody.length > 0) {
-					os.write(responseBody);
+			RESTResponse restResponse = (RESTResponse) result;
+			ResponseBuilder responseBuilder = Response.status(restResponse.getHttpCode())
+					.entity(restResponse.getBody());
+			for (Entry<String, List<String>> header : restResponse.getHeaders().entrySet()) {
+				for (String value : header.getValue()) {
+					responseBuilder.header(header.getKey(), value);
 				}
-				os.close();
-			} catch (IOException e) {
-				logger.log(Level.WARNING, "Communication with client failed", e);
 			}
+			return responseBuilder.build();
 		} else {
-			sendInternalErrorResponse(exchange, "Expected " + RESTResponse.class.getCanonicalName() + ", but got "
-					+ result.getClass().getCanonicalName() + " instead");
+			return Response.serverError().entity("Expected " + RESTResponse.class.getCanonicalName() + ", but got "
+					+ result.getClass().getCanonicalName() + " instead").build();
 		}
-	}
-
-	private long getResponseLength(final long contentLength) {
-		if (contentLength == 0) {
-			return -1;
-		}
-		if (contentLength < 0) {
-			return 0;
-		}
-		return contentLength;
 	}
 
 }

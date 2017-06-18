@@ -13,11 +13,7 @@ import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.logging.Level;
 
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
 import javax.security.auth.x500.X500Principal;
-
-import com.sun.net.httpserver.HttpsConfigurator;
 
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.tools.CryptoTools;
@@ -36,34 +32,27 @@ import sun.security.x509.X509CertInfo;
 
 public class KeystoreManager {
 
-	private static final String CA_NAME = NodeAdminConnector.class.getSimpleName() + " Root CA";
-
 	private static final L2pLogger logger = L2pLogger.getInstance(KeystoreManager.class);
 
-	public static HttpsConfigurator loadOrCreateKeystore(String keystoreFilenamePrefix, String hostname,
-			String keystorePassword) throws Exception {
+	public static KeyStore loadOrCreateKeystore(String keystoreFilenamePrefix, String hostname, char[] keystorePassword,
+			boolean persistentKeystore) throws Exception {
 		String keystoreFilename = keystoreFilenamePrefix + hostname + ".jks";
-		char[] passwd = keystorePassword.toCharArray();
 		KeyStore ks = KeyStore.getInstance("JKS");
 		try {
-			ks.load(new FileInputStream(keystoreFilename), passwd);
+			if (persistentKeystore) {
+				ks.load(new FileInputStream(keystoreFilename), keystorePassword);
+			} else {
+				throw new FileNotFoundException(); // TODO hacky -> refactor
+			}
 		} catch (FileNotFoundException e) {
 			logger.log(Level.INFO, "Keystore '" + keystoreFilename + "' not found");
-			createKeystore(ks, keystoreFilename, passwd, hostname);
+			createKeystore(ks, keystoreFilename, keystorePassword, hostname, persistentKeystore);
 		}
-		// export CA certificate to file, overwrite existing
-		writeCertificateToPEMFile(ks.getCertificate(CA_NAME), keystoreFilenamePrefix + "CA.pem");
-		KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-		kmf.init(ks, passwd);
-		// other context names, see
-		// https://docs.oracle.com/javase/8/docs/technotes/guides/security/StandardNames.html#SSLContext
-		SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
-		sslContext.init(kmf.getKeyManagers(), null, null);
-		return new HttpsConfigurator(sslContext);
+		return ks;
 	}
 
-	private static void createKeystore(KeyStore ks, String keystoreFilename, char[] password, String hostname)
-			throws Exception {
+	private static void createKeystore(KeyStore ks, String keystoreFilename, char[] password, String hostname,
+			boolean persistKeystore) throws Exception {
 		ks.load(null, password);
 		// generate self signed CA certificate
 		CertAndKeyGen caKeyGen = new CertAndKeyGen(CryptoTools.getAsymmetricAlgorithm(),
@@ -71,14 +60,15 @@ public class KeystoreManager {
 		caKeyGen.generate(CryptoTools.getAsymmetricKeySize());
 		PrivateKey caPrivateKey = caKeyGen.getPrivateKey();
 		CertificateExtensions caExts = new CertificateExtensions();
-		X500Name caX500Name = new X500Name("CN=" + CA_NAME + ", O=las2peer, OU=RWTH-ACIS");
+		X500Name caX500Name = new X500Name("CN=" + hostname + " Root CA, O=las2peer, OU=RWTH-ACIS");
 		SubjectAlternativeNameExtension caNameExt = new SubjectAlternativeNameExtension(
 				new GeneralNames().add(new GeneralName(caX500Name)));
 		caExts.set(caNameExt.getName(), caNameExt);
 		BasicConstraintsExtension bce = new BasicConstraintsExtension(true, 0);
 		caExts.set(bce.getName(), bce);
 		X509Certificate caCert = caKeyGen.getSelfCertificate(caX500Name, new Date(), 3 * 365 * 24 * 3600, caExts);
-		ks.setKeyEntry(CA_NAME, caPrivateKey, password, new X509Certificate[] { caCert });
+		ks.setKeyEntry(NodeAdminConnector.class.getSimpleName() + " Root CA", caPrivateKey, password,
+				new X509Certificate[] { caCert });
 		// generate connector certificate signed by CA
 		CertAndKeyGen keyGen = new CertAndKeyGen(CryptoTools.getAsymmetricAlgorithm(),
 				CryptoTools.getSignatureMethod());
@@ -90,13 +80,16 @@ public class KeystoreManager {
 		exts.set(nameExt.getName(), nameExt);
 		X509Certificate certReq = keyGen.getSelfCertificate(x500Name, new Date(), 3 * 365 * 24 * 3600, exts);
 		X509Certificate cert = createSignedCertificate(certReq, caCert, caPrivateKey);
+		// the alias has to be the class name here
 		ks.setKeyEntry(NodeAdminConnector.class.getSimpleName(), keyGen.getPrivateKey(), password,
 				new X509Certificate[] { cert, caCert });
-		// write keystore to file
-		FileOutputStream fos = new FileOutputStream(keystoreFilename);
-		ks.store(fos, password);
-		fos.close();
-		logger.log(Level.INFO, "Created Keystore at '" + keystoreFilename + "'");
+		if (persistKeystore) {
+			// write keystore to file
+			FileOutputStream fos = new FileOutputStream(keystoreFilename);
+			ks.store(fos, password);
+			fos.close();
+			logger.log(Level.INFO, "Created Keystore at '" + keystoreFilename + "'");
+		}
 	}
 
 	private static X509Certificate createSignedCertificate(X509Certificate cetrificate,

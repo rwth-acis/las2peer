@@ -1,18 +1,26 @@
 package i5.las2peer.connectors.nodeAdminConnector.handler;
 
-import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.CookieParam;
+import javax.ws.rs.ForbiddenException;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.HttpHeaders;
-
-import com.sun.net.httpserver.HttpExchange;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.NewCookie;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.connectors.nodeAdminConnector.AgentSession;
 import i5.las2peer.connectors.nodeAdminConnector.NodeAdminConnector;
-import i5.las2peer.connectors.nodeAdminConnector.ParameterFilter.ParameterMap;
 import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.AnonymousAgentImpl;
@@ -22,80 +30,19 @@ import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 
+@Path("/auth")
 public class AuthHandler extends AbstractHandler {
-
-	/**
-	 * the login process takes at least this time to prevent brute force attacks
-	 */
-	private static final long BRUTE_FORCE_LOGIN_DELAY = 500; // ms
 
 	public AuthHandler(NodeAdminConnector connector) {
 		super(connector);
 	}
 
-	@Override
-	protected void handleSub(HttpExchange exchange, PastryNodeImpl node, ParameterMap parameters,
-			PassphraseAgentImpl activeAgent, byte[] requestBody) throws Exception {
-		final String path = exchange.getRequestURI().getPath();
-		if (path.equalsIgnoreCase("/auth/login")) {
-			handleAuthentication(exchange, node);
-		} else if (path.equalsIgnoreCase("/auth/create")) {
-			handleRegistration(exchange, node, parameters, requestBody);
-		} else if (path.equalsIgnoreCase("/auth/logout")) {
-			handleLogout(exchange, node, activeAgent);
-		} else if (path.equalsIgnoreCase("/auth/validate")) {
-			handleValidate(exchange, node, activeAgent);
-		} else {
-			sendEmptyResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND);
-		}
-	}
-
-	private void handleRegistration(HttpExchange exchange, PastryNodeImpl node, ParameterMap parameters,
-			byte[] requestBody) throws Exception {
-		if (requestBody.length == 0) {
-			sendJSONResponseBadRequest(exchange, "No request body");
-			return;
-		}
-		JSONObject payload;
-		try {
-			payload = (JSONObject) new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(requestBody);
-		} catch (ParseException e) {
-			sendJSONResponseBadRequest(exchange, "Could not parse json request body");
-			return;
-		}
-		String username = (String) payload.get("username");
-		if (username == null || username.isEmpty()) {
-			sendJSONResponseBadRequest(exchange, "No username provided");
-			return;
-		}
-		String password = (String) payload.get("password");
-		if (password == null || password.isEmpty()) {
-			sendJSONResponseBadRequest(exchange, "No password provided");
-			return;
-		}
-		// check if username is already taken
-		try {
-			node.getAgentIdForLogin(username);
-			sendJSONResponseBadRequest(exchange, "Username already taken");
-			return;
-		} catch (AgentNotFoundException e) {
-			// expected
-		}
-		// create new user agent and store in network
-		UserAgentImpl agent = UserAgentImpl.createUserAgent(password);
-		agent.unlock(password);
-		agent.setLoginName(username);
-		node.storeAgent(agent);
-		registerAgentSession(exchange, node, agent, 0);
-	}
-
-	private void handleAuthentication(HttpExchange exchange, PastryNodeImpl node) throws Exception {
+	@GET
+	@Path("/login")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getLogin(@HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader) throws Exception {
 		// TODO is already logged in? destroy old session?
-		long loginStarted = System.currentTimeMillis();
-		String[] namePass = getNamePassword(exchange);
-		if (namePass == null) {
-			return; // response already sent
-		}
+		String[] namePass = getNamePassword(authHeader);
 		String userid = namePass[0];
 		String password = namePass[1];
 		try {
@@ -108,91 +55,150 @@ public class AuthHandler extends AbstractHandler {
 			}
 			AgentImpl agent = node.getAgent(id);
 			if (!(agent instanceof PassphraseAgentImpl)) {
-				sendJSONResponseBadRequest(exchange, "Invalid agent type");
-				return;
+				throw new BadRequestException("Invalid agent type");
 			}
 			PassphraseAgentImpl passphraseAgent = (PassphraseAgentImpl) agent;
 			passphraseAgent.unlock(password);
-			registerAgentSession(exchange, node, passphraseAgent, loginStarted);
+			return registerAgentSession(node, passphraseAgent);
 		} catch (AgentNotFoundException e) {
-			sendJSONResponseBadRequest(exchange, "Agent not found");
+			throw new BadRequestException("Agent not found");
 		} catch (AgentAccessDeniedException e) {
-			sendJSONResponseForbidden(exchange, "Invalid passphrase");
+			throw new ForbiddenException("Invalid passphrase");
 		}
 	}
 
-	private void registerAgentSession(HttpExchange exchange, PastryNodeImpl node, PassphraseAgentImpl agent,
-			long loginStarted) throws Exception {
+	private String[] getNamePassword(String authHeader) {
+		if (authHeader == null || !authHeader.toLowerCase().startsWith("basic ")) {
+			throw new BadRequestException("No basic auth header set");
+		}
+		String[] parts = authHeader.split(" ");
+		if (parts.length != 2) {
+			throw new BadRequestException("Malformed basic auth header");
+		}
+		String base64 = parts[1];
+		String decoded = new String(Base64.getDecoder().decode(base64), StandardCharsets.UTF_8);
+		String[] namePass = decoded.split(":");
+		if (namePass.length != 2) {
+			throw new BadRequestException("Malformed auth token");
+		}
+		if (namePass[0] == null || namePass[0].isEmpty()) {
+			throw new BadRequestException("No username provided");
+		}
+		if (namePass[1] == null || namePass[1].isEmpty()) {
+			throw new BadRequestException("No password provided");
+		}
+		return namePass;
+	}
+
+	@POST
+	@Path("/create")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response handleRegistration(String requestBody) throws Exception {
+		if (requestBody.trim().isEmpty()) {
+			throw new BadRequestException("No request body");
+		}
+		JSONObject payload;
+		try {
+			payload = (JSONObject) new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(requestBody);
+		} catch (ParseException e) {
+			throw new BadRequestException("Could not parse json request body");
+		}
+		String password = payload.getAsString("password");
+		if (password == null || password.isEmpty()) {
+			throw new BadRequestException("No password provided");
+		}
+		String username = payload.getAsString("username");
+		if (username != null && !username.isEmpty()) {
+			// check if username is already taken
+			try {
+				node.getAgentIdForLogin(username);
+				throw new BadRequestException("Username already taken");
+			} catch (AgentNotFoundException e) {
+				// expected
+			}
+		}
+		String email = payload.getAsString("email");
+		if (email != null && !email.isEmpty()) {
+			// check if email is already taken
+			try {
+				node.getAgentIdForEmail(email);
+				throw new BadRequestException("Username already taken");
+			} catch (AgentNotFoundException e) {
+				// expected
+			}
+		}
+		// create new user agent and store in network
+		UserAgentImpl agent = UserAgentImpl.createUserAgent(password);
+		agent.unlock(password);
+		if (username != null && !username.isEmpty()) {
+			agent.setLoginName(username);
+		}
+		if (email != null && !email.isEmpty()) {
+			agent.setEmail(email);
+		}
+		node.storeAgent(agent);
+		return registerAgentSession(node, agent);
+	}
+
+	private Response registerAgentSession(PastryNodeImpl node, PassphraseAgentImpl agent) throws Exception {
 		// register session, set cookie and send response
 		AgentSession session = connector.getOrCreateSession(agent);
-		exchange.getResponseHeaders().add(HttpHeaders.SET_COOKIE,
-				NodeAdminConnector.COOKIE_SESSION_KEY + "=" + session.getSessionId() + "; Path=/; Secure; HttpOnly");
+		NewCookie cookie = new NewCookie(NodeAdminConnector.COOKIE_SESSIONID_KEY, session.getSessionId(), "/", null, 1,
+				null, -1, null, true, true);
 		JSONObject json = new JSONObject();
-		json.put("code", HttpURLConnection.HTTP_OK);
-		json.put("text", HttpURLConnection.HTTP_OK + " - Login OK");
+		json.put("code", Status.OK.getStatusCode());
+		json.put("text", Status.OK.getStatusCode() + " - Login OK");
 		json.put("agentid", agent.getIdentifier());
 		if (agent instanceof UserAgentImpl) {
 			UserAgentImpl user = (UserAgentImpl) agent;
 			json.put("username", user.getLoginName());
 			json.put("email", user.getEmail());
 		}
-		// delay login process, to prevent brute-force attacks
-		long toSleep = BRUTE_FORCE_LOGIN_DELAY - (System.currentTimeMillis() - loginStarted);
-		if (toSleep > 0) {
-			logger.info("Delaying auth request for " + toSleep + "ms to prevent brute-force");
-			Thread.sleep(toSleep);
-		}
-		sendJSONResponse(exchange, HttpURLConnection.HTTP_OK, json);
+		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).cookie(cookie).build();
 	}
 
-	private String[] getNamePassword(HttpExchange exchange) {
-		String authHeader = exchange.getRequestHeaders().getFirst("Authorization");
-		if (authHeader == null || !authHeader.toLowerCase().startsWith("basic ")) {
-			sendJSONResponseBadRequest(exchange, "No basic auth header set");
-			return null;
-		}
-		String[] parts = authHeader.split(" ");
-		if (parts.length != 2) {
-			sendJSONResponseBadRequest(exchange, "Malformed basic auth header");
-			return null;
-		}
-		String base64 = parts[1];
-		String decoded = new String(Base64.getDecoder().decode(base64), StandardCharsets.UTF_8);
-		String[] namePass = decoded.split(":");
-		if (namePass.length != 2) {
-			sendJSONResponseBadRequest(exchange, "Malformed auth token");
-			return null;
-		}
-		if (namePass[0] == null || namePass[0].isEmpty()) {
-			sendJSONResponseBadRequest(exchange, "No username provided");
-			return null;
-		}
-		if (namePass[1] == null || namePass[1].isEmpty()) {
-			sendJSONResponseBadRequest(exchange, "No password provided");
-			return null;
-		}
-		return namePass;
+	@GET
+	@Path("/logout")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getLogout(@CookieParam(NodeAdminConnector.COOKIE_SESSIONID_KEY) String sessionId) throws Exception {
+		return handleLogout(sessionId);
 	}
 
-	private void handleLogout(HttpExchange exchange, PastryNodeImpl node, PassphraseAgentImpl activeAgent)
+	@POST
+	@Path("/logout")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response postLogout(@CookieParam(NodeAdminConnector.COOKIE_SESSIONID_KEY) String sessionId)
 			throws Exception {
-		connector.destroySession(activeAgent);
-		sendEmptyResponse(exchange, HttpURLConnection.HTTP_OK);
+		return handleLogout(sessionId);
 	}
 
-	private void handleValidate(HttpExchange exchange, PastryNodeImpl node, PassphraseAgentImpl activeAgent) {
-		if (activeAgent != null && !(activeAgent instanceof AnonymousAgentImpl)) {
-			JSONObject json = new JSONObject();
-			json.put("code", HttpURLConnection.HTTP_OK);
-			json.put("text", HttpURLConnection.HTTP_OK + " - Session OK");
-			json.put("agentid", activeAgent.getIdentifier());
-			sendJSONResponse(exchange, json);
-		} else {
-			JSONObject json = new JSONObject();
-			json.put("code", HttpURLConnection.HTTP_UNAUTHORIZED);
-			json.put("text", HttpURLConnection.HTTP_UNAUTHORIZED + " - Session Invalid");
-			sendJSONResponse(exchange, json);
+	private Response handleLogout(String sessionId) {
+		connector.destroySession(sessionId);
+		JSONObject json = new JSONObject();
+		json.put("code", Status.OK.getStatusCode());
+		json.put("text", Status.OK.getStatusCode() + " - Logout successful");
+		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
+	}
+
+	@GET
+	@Path("/validate")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getValidate(@CookieParam(NodeAdminConnector.COOKIE_SESSIONID_KEY) String sessionId) {
+		AgentSession session = connector.getSessionById(sessionId);
+		if (session != null) {
+			AgentImpl activeAgent = session.getAgent();
+			if (activeAgent != null && !(activeAgent instanceof AnonymousAgentImpl)) {
+				JSONObject json = new JSONObject();
+				json.put("code", Status.OK.getStatusCode());
+				json.put("text", Status.OK.getStatusCode() + " - Session OK");
+				json.put("agentid", activeAgent.getIdentifier());
+				return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
+			}
 		}
+		JSONObject json = new JSONObject();
+		json.put("code", Status.OK.getStatusCode());
+		json.put("text", Status.OK.getStatusCode() + " - Session invalid");
+		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
 	}
 
 }

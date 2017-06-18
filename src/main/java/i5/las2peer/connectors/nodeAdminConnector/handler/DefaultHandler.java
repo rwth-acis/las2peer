@@ -4,45 +4,49 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Date;
+import java.util.List;
 
-import com.sun.net.httpserver.HttpExchange;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
+import i5.las2peer.api.p2p.ServiceVersion;
 import i5.las2peer.connectors.nodeAdminConnector.NodeAdminConnector;
-import i5.las2peer.connectors.nodeAdminConnector.ParameterFilter.ParameterMap;
+import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.PastryNodeImpl;
-import i5.las2peer.security.PassphraseAgentImpl;
+import i5.las2peer.tools.L2pNodeLauncher;
 import i5.las2peer.tools.SimpleTools;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 
+@Path("/")
 public class DefaultHandler extends AbstractHandler {
 
 	public DefaultHandler(NodeAdminConnector connector) {
 		super(connector);
 	}
 
-	@Override
-	protected void handleSub(HttpExchange exchange, PastryNodeImpl node, ParameterMap parameters, PassphraseAgentImpl activeAgent,
-			byte[] requestBody) throws Exception {
-		final Path path = Paths.get(exchange.getRequestURI().getPath());
-		if (path.getNameCount() > 0) {
-			String path0 = path.getName(0).toString();
-			if (path0.equalsIgnoreCase("version")) {
-				sendPlainResponse(exchange, getCoreVersion());
-			} else if (path0.equalsIgnoreCase("favicon.ico")) {
-				sendFaviconResponse(exchange);
-			} else {
-				sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND, "text/plain", "404 (Not Found)\n");
-			}
-		} else {
-			// perm redirect to frontend
-			sendRedirect(exchange, AppHandler.DEFAULT_ROUTE, true);
-		}
+	@GET
+	public Response rootPath() throws URISyntaxException {
+		return Response.temporaryRedirect(new URI(AppHandler.DEFAULT_ROUTE)).build();
 	}
 
-	private void sendFaviconResponse(HttpExchange exchange) throws IOException {
+	@GET
+	@Path("/version")
+	@Produces(MediaType.TEXT_PLAIN)
+	public String getCoreVersion() {
+		return L2pNodeLauncher.getVersion();
+	}
+
+	@GET
+	@Path("/favicon.ico")
+	@Produces("image/x-icon")
+	public Response getFavicon() throws IOException {
 		byte[] bytes = null;
 		try {
 			FileInputStream fis = new FileInputStream("etc/favicon.ico");
@@ -56,14 +60,78 @@ public class DefaultHandler extends AbstractHandler {
 				is.close();
 			}
 		}
-		OutputStream os = exchange.getResponseBody();
-		if (bytes != null) {
-			exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, bytes.length);
-			os.write(bytes);
-		} else {
-			exchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_FOUND, NO_RESPONSE_BODY);
+		return Response.ok(bytes, "image/x-icon").build();
+	}
+
+	@GET
+	@Path("/status")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String getNodeStatus() {
+		// gather status values and return as JSON string
+		JSONObject response = new JSONObject();
+		response.put("nodeid", node.getNodeId().toString());
+		response.put("cpuload", getCPULoad(node));
+		long localStorageSize = node.getLocalStorageSize();
+		response.put("storageSize", localStorageSize);
+		response.put("storageSizeStr", humanReadableByteCount(localStorageSize, true));
+		long maxLocalStorageSize = node.getLocalMaxStorageSize();
+		response.put("maxStorageSize", maxLocalStorageSize);
+		response.put("maxStorageSizeStr", humanReadableByteCount(maxLocalStorageSize, true));
+		response.put("uptime", getUptime(node));
+		response.put("localServices", getLocalServices(node));
+		response.put("otherNodes", getOtherNodes(node));
+		return response.toJSONString();
+	}
+
+	private int getCPULoad(Node node) {
+		return (int) (node.getNodeCpuLoad() * 100);
+	}
+
+	// Source: http://stackoverflow.com/questions/3758606/how-to-convert-byte-size-into-human-readable-format-in-java
+	private static String humanReadableByteCount(long bytes, boolean si) {
+		int unit = si ? 1000 : 1024;
+		if (bytes < unit) {
+			return bytes + " B";
 		}
-		os.close();
+		int exp = (int) (Math.log(bytes) / Math.log(unit));
+		String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
+		return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
+	}
+
+	private String getUptime(PastryNodeImpl node) {
+		Date startTime = node.getStartTime();
+		if (startTime == null) {
+			return "node stopped";
+		} else {
+			long uptimeInSeconds = (new Date().getTime() - node.getStartTime().getTime()) / 1000;
+			long hours = uptimeInSeconds / 3600;
+			long minutes = uptimeInSeconds / 60 % 60;
+			long seconds = uptimeInSeconds % 60;
+			return hours + ":" + String.format("%02d", minutes) + ":" + String.format("%02d", seconds);
+		}
+	}
+
+	private JSONArray getLocalServices(Node node) {
+		List<String> serviceNames = node.getNodeServiceCache().getLocalServiceNames();
+		JSONArray result = new JSONArray();
+		for (String serviceName : serviceNames) {
+			List<ServiceVersion> serviceVersions = node.getNodeServiceCache().getLocalServiceVersions(serviceName);
+			for (ServiceVersion version : serviceVersions) {
+				JSONObject json = new JSONObject();
+				json.put("name", serviceName);
+				json.put("version", version.toString());
+				result.add(json);
+			}
+		}
+		return result;
+	}
+
+	private JSONArray getOtherNodes(PastryNodeImpl node) {
+		JSONArray result = new JSONArray();
+		for (Object other : node.getOtherKnownNodes()) {
+			result.add(other.toString());
+		}
+		return result;
 	}
 
 }

@@ -1,27 +1,35 @@
 package i5.las2peer.connectors.nodeAdminConnector.handler;
 
-import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.io.Serializable;
-import java.net.HttpURLConnection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 
-import com.sun.net.httpserver.HttpExchange;
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.CookieParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+
+import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.persistency.EnvelopeNotFoundException;
 import i5.las2peer.classLoaders.L2pClassManager;
 import i5.las2peer.classLoaders.libraries.SharedStorageRepository;
+import i5.las2peer.connectors.nodeAdminConnector.AgentSession;
 import i5.las2peer.connectors.nodeAdminConnector.NodeAdminConnector;
-import i5.las2peer.connectors.nodeAdminConnector.ParameterFilter.ParameterMap;
-import i5.las2peer.connectors.nodeAdminConnector.multipart.FormDataPart;
 import i5.las2peer.p2p.Node;
-import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.persistency.EnvelopeVersion;
-import i5.las2peer.security.PassphraseAgentImpl;
 import i5.las2peer.tools.CryptoTools;
 import i5.las2peer.tools.PackageUploader;
 import i5.las2peer.tools.PackageUploader.ServiceVersionList;
@@ -30,30 +38,18 @@ import i5.las2peer.tools.SimpleTools;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 
+@Path("/services")
 public class ServicesHandler extends AbstractHandler {
 
 	public ServicesHandler(NodeAdminConnector connector) {
 		super(connector);
 	}
 
-	@Override
-	protected void handleSub(HttpExchange exchange, PastryNodeImpl node, ParameterMap parameters, PassphraseAgentImpl activeAgent,
-			byte[] requestBody) throws Exception {
-		final String path = exchange.getRequestURI().getPath();
-		if (path.equalsIgnoreCase("/services/search")) {
-			handleSearchService(exchange, node, parameters);
-		} else if (path.equalsIgnoreCase("/services/upload")) {
-			handleServicePackageUpload(exchange, node, activeAgent, parameters);
-		} else {
-			sendEmptyResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND);
-		}
-	}
-
-	private void handleSearchService(HttpExchange exchange, PastryNodeImpl node, ParameterMap parameters) {
-		// use host header, so browsers do not block subsequent ajax requests to an unknown host
-		String hostHeader = exchange.getRequestHeaders().getFirst("Host");
-		// search the network for services with the given name and return as JSONArray
-		String searchName = parameters.getSingle("searchname");
+	@GET
+	@Path("/search")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response handleSearchService(@HeaderParam("Host") String hostHeader,
+			@QueryParam("searchname") String searchName) {
 		JSONObject result = new JSONObject();
 		try {
 			JSONArray instances = new JSONArray();
@@ -74,7 +70,7 @@ public class ServicesHandler extends AbstractHandler {
 		} catch (Exception e) {
 			result.put("msg", e.toString());
 		}
-		sendJSONResponse(exchange, result);
+		return Response.ok(result.toJSONString(), MediaType.APPLICATION_JSON).build();
 	}
 
 	private JSONArray getNetworkServices(Node node, String hostHeader, String searchName) throws Exception {
@@ -89,6 +85,7 @@ public class ServicesHandler extends AbstractHandler {
 				JSONObject jsonObject = new JSONObject();
 				jsonObject.put("name", searchName);
 				jsonObject.put("version", version);
+				// use host header, so browsers do not block subsequent ajax requests to an unknown host
 				jsonObject.put("swagger", "https://" + hostHeader + RMIHandler.RMI_PATH + "/" + searchName + "/"
 						+ version + "/swagger.json");
 				result.add(jsonObject);
@@ -100,35 +97,25 @@ public class ServicesHandler extends AbstractHandler {
 		return result;
 	}
 
-	private void handleServicePackageUpload(HttpExchange exchange, PastryNodeImpl node, PassphraseAgentImpl activeAgent,
-			ParameterMap parameters) throws Exception {
-		if (activeAgent == null) {
-			sendJSONResponseBadRequest(exchange, "You have to be logged in to upload");
-			return;
+	@POST
+	@Path("/upload")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response handleServicePackageUpload(@CookieParam(NodeAdminConnector.COOKIE_SESSIONID_KEY) String sessionId,
+			@FormDataParam("jarfile") InputStream jarfile) throws Exception {
+		AgentSession session = connector.getSessionById(sessionId);
+		if (session == null) {
+			throw new BadRequestException("You have to be logged in to upload");
 		}
-		Object jarParam = parameters.get("jarfile");
-		if (jarParam == null) {
-			sendJSONResponseBadRequest(exchange, "No jar file provided");
-			return;
-		}
-		if (!(jarParam instanceof FormDataPart)) {
-			sendInternalErrorResponse(exchange, FormDataPart.class.getCanonicalName() + " expected, but got "
-					+ jarParam.getClass().getCanonicalName(), null);
-			return;
-		}
-		byte[] jarFileContent = ((FormDataPart) jarParam).getContentRaw();
-		if (jarFileContent.length < 1) {
-			sendJSONResponseBadRequest(exchange, "No file content provided");
-			return;
+		if (jarfile == null) {
+			throw new BadRequestException("No jar file provided");
 		}
 		// create jar from inputstream
-		JarInputStream jarStream = new JarInputStream(new ByteArrayInputStream(jarFileContent));
+		JarInputStream jarStream = new JarInputStream(jarfile);
 		// read general service information from jar manifest
 		Manifest manifest = jarStream.getManifest();
 		if (manifest == null) {
 			jarStream.close();
-			sendJSONResponseBadRequest(exchange, "Service jar package contains no manifest file");
-			return;
+			throw new BadRequestException("Service jar package contains no manifest file");
 		}
 		String serviceName = manifest.getMainAttributes().getValue("las2peer-service-name");
 		String serviceVersion = manifest.getMainAttributes().getValue("las2peer-service-version");
@@ -148,19 +135,19 @@ public class ServicesHandler extends AbstractHandler {
 		}
 		jarStream.close();
 		try {
-			PackageUploader.uploadServicePackage(node, serviceName, serviceVersion, depHashes, jarFiles, activeAgent);
+			PackageUploader.uploadServicePackage(node, serviceName, serviceVersion, depHashes, jarFiles,
+					session.getAgent());
 			JSONObject json = new JSONObject();
-			json.put("code", HttpURLConnection.HTTP_OK);
-			json.put("text", HttpURLConnection.HTTP_OK + " - Service package upload successful");
+			json.put("code", Status.OK.getStatusCode());
+			json.put("text", Status.OK.getStatusCode() + " - Service package upload successful");
 			json.put("msg", "Service package upload successful");
-			sendJSONResponse(exchange, HttpURLConnection.HTTP_OK, json);
+			return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
 		} catch (EnvelopeAlreadyExistsException e) {
-			sendJSONResponseBadRequest(exchange,
-					"Service package upload failed! Version is already known in the network. To update increase version number");
-			return;
+			throw new BadRequestException("Version is already known in the network. To update increase version number",
+					e);
 		} catch (ServicePackageException e) {
-			sendJSONResponseBadRequest(exchange, "Service package upload failed - Reason: " + e.toString());
-			return;
+			e.printStackTrace();
+			throw new BadRequestException("Service package upload failed", e);
 		}
 	}
 

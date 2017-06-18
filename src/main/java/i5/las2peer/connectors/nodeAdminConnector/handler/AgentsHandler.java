@@ -1,20 +1,27 @@
 package i5.las2peer.connectors.nodeAdminConnector.handler;
 
-import java.net.HttpURLConnection;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.logging.Level;
 
-import com.sun.net.httpserver.HttpExchange;
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.CookieParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.ServerErrorException;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+
+import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentNotFoundException;
+import i5.las2peer.connectors.nodeAdminConnector.AgentSession;
 import i5.las2peer.connectors.nodeAdminConnector.NodeAdminConnector;
-import i5.las2peer.connectors.nodeAdminConnector.ParameterFilter.ParameterMap;
-import i5.las2peer.connectors.nodeAdminConnector.multipart.FormDataPart;
-import i5.las2peer.p2p.Node;
-import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.GroupAgentImpl;
 import i5.las2peer.security.PassphraseAgentImpl;
@@ -26,73 +33,38 @@ import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 
+@Path("/agents")
 public class AgentsHandler extends AbstractHandler {
 
 	public AgentsHandler(NodeAdminConnector connector) {
 		super(connector);
 	}
 
-	@Override
-	protected void handleSub(HttpExchange exchange, PastryNodeImpl node, ParameterMap parameters, PassphraseAgentImpl activeAgent,
-			byte[] requestBody) throws Exception {
-		final String path = exchange.getRequestURI().getPath();
-		if (path.equalsIgnoreCase("/agents/uploadAgent")) {
-			handleUploadAgent(exchange, node, parameters, activeAgent);
-		} else {
-			if (requestBody.length == 0) {
-				sendJSONResponseBadRequest(exchange, "No request body");
-				return;
-			}
-			JSONObject payload;
-			try {
-				payload = (JSONObject) new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(requestBody);
-			} catch (ParseException e) {
-				sendJSONResponseBadRequest(exchange, "Could not parse json request body");
-				return;
-			}
-			if (path.equalsIgnoreCase("/agents/createAgent")) {
-				handleCreateAgent(exchange, node, payload);
-			} else if (path.equalsIgnoreCase("/agents/getAgent")) {
-				handleGetAgent(exchange, node, payload);
-			} else if (path.equalsIgnoreCase("/agents/exportAgent")) {
-				handleExportAgent(exchange, node, payload);
-			} else if (path.equalsIgnoreCase("/agents/changePassphrase")) {
-				handleChangePassphrase(exchange, node, payload);
-			} else if (path.equalsIgnoreCase("/agents/createGroup")) {
-				handleCreateGroup(exchange, node, activeAgent, payload);
-			} else if (path.equalsIgnoreCase("/agents/loadGroup")) {
-				handleLoadGroup(exchange, node, activeAgent, payload);
-			} else if (path.equalsIgnoreCase("/agents/changeGroup")) {
-				handleChangeGroup(exchange, node, activeAgent, payload);
-			} else {
-				sendEmptyResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND);
-			}
-		}
-	}
-
-	private void handleCreateAgent(HttpExchange exchange, Node node, JSONObject payload) throws Exception {
-		String password = (String) payload.get("password");
+	@POST
+	@Path("/createAgent")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response handleCreateAgent(@FormDataParam("password") String password,
+			@FormDataParam("username") String username, @FormDataParam("email") String email) throws Exception {
 		if (password == null || password.isEmpty()) {
-			sendJSONResponseBadRequest(exchange, "No password provided");
-			return;
+			return Response.status(Status.BAD_REQUEST).entity("No password provided").build();
 		}
-		String username = (String) payload.get("username");
-		// check if username is already taken
-		try {
-			node.getAgentIdForLogin(username);
-			sendJSONResponseBadRequest(exchange, "Username already taken");
-			return;
-		} catch (AgentNotFoundException e) {
-			// expected
+		if (username != null && !username.isEmpty()) {
+			// check if username is already taken
+			try {
+				node.getAgentIdForLogin(username);
+				return Response.status(Status.BAD_REQUEST).entity("Username already taken").build();
+			} catch (AgentNotFoundException e) {
+				// expected
+			}
 		}
-		String email = (String) payload.get("email");
-		// check if email is already taken
-		try {
-			node.getAgentIdForEmail(email);
-			sendJSONResponseBadRequest(exchange, "Email already taken");
-			return;
-		} catch (AgentNotFoundException e) {
-			// expected
+		if (email != null && !email.isEmpty()) {
+			// check if email is already taken
+			try {
+				node.getAgentIdForEmail(email);
+				return Response.status(Status.BAD_REQUEST).entity("Email already taken").build();
+			} catch (AgentNotFoundException e) {
+				// expected
+			}
 		}
 		// create new user agent and store in network
 		UserAgentImpl agent = UserAgentImpl.createUserAgent(password);
@@ -105,228 +77,210 @@ public class AgentsHandler extends AbstractHandler {
 		}
 		node.storeAgent(agent);
 		JSONObject json = new JSONObject();
-		json.put("code", HttpURLConnection.HTTP_OK);
-		json.put("text", HttpURLConnection.HTTP_OK + " - Agent Created");
+		json.put("code", Status.OK.getStatusCode());
+		json.put("text", Status.OK.getStatusCode() + " - Agent created");
 		json.put("agentid", agent.getIdentifier());
-		sendJSONResponse(exchange, HttpURLConnection.HTTP_OK, json);
+		json.put("username", agent.getLoginName());
+		json.put("email", agent.getEmail());
+		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
 	}
 
-	private void handleGetAgent(HttpExchange exchange, PastryNodeImpl node, JSONObject payload) throws Exception {
-		AgentImpl agent = getAgentFromBodyPayload(exchange, node, payload);
-		if (agent != null) {
-			JSONObject json = new JSONObject();
-			json.put("agentid", agent.getIdentifier());
-			if (agent instanceof UserAgentImpl) {
-				UserAgentImpl userAgent = (UserAgentImpl) agent;
-				json.put("username", userAgent.getLoginName());
-				json.put("email", userAgent.getEmail());
-			}
-			sendJSONResponse(exchange, json);
+	@POST
+	@Path("/getAgent")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response handleGetAgent(@FormDataParam("agentid") String agentId, @FormDataParam("username") String username,
+			@FormDataParam("email") String email) throws Exception {
+		AgentImpl agent = getAgentByDetail(agentId, username, email);
+		JSONObject json = new JSONObject();
+		json.put("agentid", agent.getIdentifier());
+		if (agent instanceof UserAgentImpl) {
+			UserAgentImpl userAgent = (UserAgentImpl) agent;
+			json.put("username", userAgent.getLoginName());
+			json.put("email", userAgent.getEmail());
 		}
+		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
 	}
 
-	private void handleExportAgent(HttpExchange exchange, PastryNodeImpl node, JSONObject payload) throws Exception {
-		AgentImpl agent = getAgentFromBodyPayload(exchange, node, payload);
-		if (agent != null) {
-			sendStringResponse(exchange, HttpURLConnection.HTTP_OK, "application/xml", agent.toXmlString());
-		} // otherwise answer already sent
+	@POST
+	@Path("/exportAgent")
+	public Response handleExportAgent(@FormDataParam("agentid") String agentId,
+			@FormDataParam("username") String username, @FormDataParam("email") String email) throws Exception {
+		AgentImpl agent = getAgentByDetail(agentId, username, email);
+		return Response.ok(agent.toXmlString(), MediaType.APPLICATION_XML).build();
 	}
 
-	private AgentImpl getAgentFromBodyPayload(HttpExchange exchange, PastryNodeImpl node, JSONObject payload)
-			throws Exception {
-		// check for agentid
-		String agentid = (String) payload.get("agentid");
-		String username = (String) payload.get("username");
-		String email = (String) payload.get("email");
+	private AgentImpl getAgentByDetail(String agentId, String username, String email) throws Exception {
 		try {
-			if (agentid == null || agentid.isEmpty()) {
+			if (agentId == null || agentId.isEmpty()) {
 				if (username != null && !username.isEmpty()) {
-					agentid = node.getAgentIdForLogin(username);
+					agentId = node.getAgentIdForLogin(username);
 				} else if (email != null && !email.isEmpty()) {
-					agentid = node.getAgentIdForEmail(email);
+					agentId = node.getAgentIdForEmail(email);
 				} else {
-					sendJSONResponseBadRequest(exchange, "No required agent detail provided");
-					return null;
+					throw new BadRequestException("No required agent detail provided");
 				}
 			}
-			return node.getAgent(agentid);
+			return node.getAgent(agentId);
 		} catch (AgentNotFoundException e) {
-			sendJSONResponseBadRequest(exchange, "Agent not found");
-			return null;
+			throw new BadRequestException("Agent not found");
 		}
 	}
 
-	private void handleUploadAgent(HttpExchange exchange, PastryNodeImpl node, ParameterMap parameters,
-			PassphraseAgentImpl activeAgent) throws Exception {
-		Object formPart = parameters.get("agentFile");
-		if (formPart == null || !(formPart instanceof FormDataPart)) {
-			sendJSONResponseBadRequest(exchange, "No agent file provided");
-			return;
+	@POST
+	@Path("/uploadAgent")
+	public Response handleUploadAgent(@FormDataParam("agentFile") InputStream formPart,
+			@FormDataParam("agentPassword") String password,
+			@CookieParam(NodeAdminConnector.COOKIE_SESSIONID_KEY) String sessionId) throws Exception {
+		if (formPart == null) {
+			return Response.status(Status.BAD_REQUEST).entity("No agent file provided").build();
 		}
-		String agentFile = ((FormDataPart) formPart).getContent();
-		AgentImpl agent = AgentImpl.createFromXml(agentFile);
+		AgentImpl agent = AgentImpl.createFromXml(formPart);
 		if (agent instanceof PassphraseAgentImpl) {
 			PassphraseAgentImpl passphraseAgent = (PassphraseAgentImpl) agent;
-			Object objPasswd = parameters.get("agentPassword");
-			if (objPasswd == null || !(objPasswd instanceof FormDataPart)) {
-				sendJSONResponseBadRequest(exchange, "No password provided");
-				return;
+			if (password == null) {
+				return Response.status(Status.BAD_REQUEST).entity("No password provided").build();
 			}
-			String password = ((FormDataPart) objPasswd).getContent();
 			try {
 				passphraseAgent.unlock(password);
 			} catch (AgentAccessDeniedException e) {
-				sendJSONResponseBadRequest(exchange, "Invalid agent password");
-				return;
+				return Response.status(Status.BAD_REQUEST).entity("Invalid agent password").build();
 			}
 		} else if (agent instanceof GroupAgentImpl) {
 			GroupAgentImpl groupAgent = (GroupAgentImpl) agent;
-			if (activeAgent == null) {
-				sendJSONResponseBadRequest(exchange, "You have to be logged in, to unlock and update a group");
-				return;
+			AgentSession session = connector.getSessionById(sessionId);
+			if (session == null) {
+				return Response.status(Status.BAD_REQUEST)
+						.entity("You have to be logged in, to unlock and update a group").build();
 			}
 			try {
-				groupAgent.unlock(activeAgent);
+				groupAgent.unlock(session.getAgent());
 			} catch (AgentAccessDeniedException e) {
-				sendJSONResponseForbidden(exchange, "You have to be a member of the uploaded group");
-				return;
+				return Response.status(Status.FORBIDDEN).entity("You have to be a member of the uploaded group")
+						.build();
 			}
 		} else {
-			sendJSONResponseBadRequest(exchange, "Invalid agent type '" + agentFile.getClass().getSimpleName() + "'");
-			return;
+			return Response.status(Status.BAD_REQUEST)
+					.entity("Invalid agent type '" + agent.getClass().getSimpleName() + "'").build();
 		}
 		node.storeAgent(agent);
 		JSONObject json = new JSONObject();
-		json.put("code", HttpURLConnection.HTTP_OK);
-		json.put("text", HttpURLConnection.HTTP_OK + " - Agent Uploaded");
+		json.put("code", Status.OK.getStatusCode());
+		json.put("text", Status.OK.getStatusCode() + " - Agent uploaded");
 		json.put("agentid", agent.getIdentifier());
-		sendJSONResponse(exchange, HttpURLConnection.HTTP_OK, json);
+		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
 	}
 
-	private void handleChangePassphrase(HttpExchange exchange, Node node, JSONObject payload) throws Exception {
-		String agentid = (String) payload.get("agentid");
-		if (agentid == null || agentid.isEmpty()) {
-			sendJSONResponseBadRequest(exchange, "No agentid provided");
-			return;
+	@POST
+	@Path("/changePassphrase")
+	public Response handleChangePassphrase(@FormDataParam("agentid") String agentId,
+			@FormDataParam("passphrase") String passphrase, @FormDataParam("passphraseNew") String passphraseNew,
+			@FormDataParam("passphraseNew2") String passphraseNew2) throws Exception {
+		if (agentId == null || agentId.isEmpty()) {
+			return Response.status(Status.BAD_REQUEST).entity("No agentid provided").build();
 		}
 		AgentImpl agent;
 		try {
-			agent = node.getAgent(agentid);
+			agent = node.getAgent(agentId);
 		} catch (AgentNotFoundException e) {
-			sendJSONResponseBadRequest(exchange, "Agent not found");
-			return;
+			return Response.status(Status.BAD_REQUEST).entity("Agent not found").build();
 		}
 		if (!(agent instanceof PassphraseAgentImpl)) {
-			sendJSONResponseBadRequest(exchange, "Invalid agent type");
-			return;
+			return Response.status(Status.BAD_REQUEST).entity("Invalid agent type").build();
 		}
 		PassphraseAgentImpl passAgent = (PassphraseAgentImpl) agent;
-		String passphrase = (String) payload.get("passphrase");
 		if (passphrase == null || passphrase.isEmpty()) {
-			sendJSONResponseBadRequest(exchange, "No passphrase provided");
-			return;
+			return Response.status(Status.BAD_REQUEST).entity("No passphrase provided").build();
 		}
 		try {
 			passAgent.unlock(passphrase);
 		} catch (AgentAccessDeniedException e) {
-			sendJSONResponseBadRequest(exchange, "Invalid passphrase");
-			return;
+			return Response.status(Status.BAD_REQUEST).entity("Invalid passphrase").build();
 		}
-		String passphraseNew = (String) payload.get("passphraseNew");
 		if (passphraseNew == null || passphraseNew.isEmpty()) {
-			sendJSONResponseBadRequest(exchange, "No passphrase to change provided");
-			return;
+			return Response.status(Status.BAD_REQUEST).entity("No passphrase to change provided").build();
 		}
-		String passphraseNew2 = (String) payload.get("passphraseNew2");
 		if (passphraseNew2 == null || passphraseNew2.isEmpty()) {
-			sendJSONResponseBadRequest(exchange, "No passphrase repetition provided");
-			return;
+			return Response.status(Status.BAD_REQUEST).entity("No passphrase repetition provided").build();
 		}
 		if (!passphraseNew.equals(passphraseNew2)) {
-			sendJSONResponseBadRequest(exchange, "New passphrase and repetition do not match");
-			return;
+			return Response.status(Status.BAD_REQUEST).entity("New passphrase and repetition do not match").build();
 		}
 		passAgent.changePassphrase(passphraseNew);
 		node.storeAgent(passAgent);
 		JSONObject json = new JSONObject();
-		json.put("code", HttpURLConnection.HTTP_OK);
-		json.put("text", HttpURLConnection.HTTP_OK + " - Passphrase changed");
+		json.put("code", Status.OK.getStatusCode());
+		json.put("text", Status.OK.getStatusCode() + " - Passphrase changed");
 		json.put("agentid", agent.getIdentifier());
-		sendJSONResponse(exchange, HttpURLConnection.HTTP_OK, json);
+		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
 	}
 
-	private void handleCreateGroup(HttpExchange exchange, PastryNodeImpl node, AgentImpl activeAgent,
-			JSONObject payload) throws Exception {
-		if (activeAgent == null) {
-			sendJSONResponseForbidden(exchange, "You have to be logged in to create a group");
-			return;
+	@POST
+	@Path("/createGroup")
+	public Response handleCreateGroup(@CookieParam(NodeAdminConnector.COOKIE_SESSIONID_KEY) String sessionId,
+			@FormDataParam("members") String strMembers) throws Exception {
+		AgentSession session = connector.getSessionById(sessionId);
+		if (session == null) {
+			return Response.status(Status.FORBIDDEN).entity("You have to be logged in to create a group").build();
 		}
-		Object objMembers = payload.get("members");
-		if (objMembers == null || !(objMembers instanceof JSONArray)) {
-			sendJSONResponseBadRequest(exchange, "No members provided");
-			return;
+		if (strMembers == null) {
+			return Response.status(Status.BAD_REQUEST).entity("No members provided").build();
 		}
-		JSONArray jsonMembers = (JSONArray) objMembers;
+		JSONArray jsonMembers = (JSONArray) new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(strMembers);
 		if (jsonMembers.isEmpty()) {
-			sendJSONResponseBadRequest(exchange, "Members list empty");
-			return;
+			return Response.status(Status.BAD_REQUEST).entity("Members list empty").build();
 		}
 		ArrayList<AgentImpl> memberAgents = new ArrayList<>(jsonMembers.size());
 		for (Object objMember : jsonMembers) {
 			if (objMember instanceof JSONObject) {
 				JSONObject jsonMember = (JSONObject) objMember;
-				String agentId = (String) jsonMember.get("agentid");
+				String agentId = jsonMember.getAsString("agentid");
 				try {
 					memberAgents.add(node.getAgent(agentId));
 				} catch (Exception e) {
-					sendInternalErrorResponse(exchange, "Could not get member " + agentId, e);
-					return;
+					throw new ServerErrorException("Could not get member " + agentId, Status.INTERNAL_SERVER_ERROR, e);
 				}
 			}
 		}
 		GroupAgentImpl groupAgent = GroupAgentImpl
 				.createGroupAgent(memberAgents.toArray(new AgentImpl[memberAgents.size()]));
-		groupAgent.unlock(activeAgent);
+		groupAgent.unlock(session.getAgent());
 		node.storeAgent(groupAgent);
 		JSONObject json = new JSONObject();
-		json.put("code", HttpURLConnection.HTTP_OK);
-		json.put("text", HttpURLConnection.HTTP_OK + " - GroupAgent Created");
+		json.put("code", Status.OK.getStatusCode());
+		json.put("text", Status.OK.getStatusCode() + " - GroupAgent created");
 		json.put("agentid", groupAgent.getIdentifier());
-		sendJSONResponse(exchange, HttpURLConnection.HTTP_OK, json);
+		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
 	}
 
-	private void handleLoadGroup(HttpExchange exchange, PastryNodeImpl node, PassphraseAgentImpl activeAgent,
-			JSONObject payload) throws AgentException {
-		if (activeAgent == null) {
-			sendJSONResponseForbidden(exchange, "You have to be logged in to load a group");
-			return;
+	@POST
+	@Path("/loadGroup")
+	public Response handleLoadGroup(@CookieParam(NodeAdminConnector.COOKIE_SESSIONID_KEY) String sessionId,
+			@FormDataParam("agentid") String agentId) throws AgentException {
+		AgentSession session = connector.getSessionById(sessionId);
+		if (session == null) {
+			return Response.status(Status.FORBIDDEN).entity("You have to be logged in to load a group").build();
 		}
-		String agentid = (String) payload.get("agentid");
-		if (agentid == null || agentid.isEmpty()) {
-			sendJSONResponseBadRequest(exchange, "No agent id provided");
-			return;
+		if (agentId == null || agentId.isEmpty()) {
+			return Response.status(Status.BAD_REQUEST).entity("No agent id provided").build();
 		}
 		AgentImpl agent;
 		try {
-			agent = node.getAgent(agentid);
+			agent = node.getAgent(agentId);
 		} catch (AgentNotFoundException e) {
-			sendJSONResponseBadRequest(exchange, "Agent not found");
-			return;
+			return Response.status(Status.BAD_REQUEST).entity("Agent not found").build();
 		}
 		if (!(agent instanceof GroupAgentImpl)) {
-			sendJSONResponseBadRequest(exchange, "Agent is not a GroupAgent");
-			return;
+			return Response.status(Status.BAD_REQUEST).entity("Agent is not a GroupAgent").build();
 		}
 		GroupAgentImpl groupAgent = (GroupAgentImpl) agent;
 		try {
-			groupAgent.unlock(activeAgent);
+			groupAgent.unlock(session.getAgent());
 		} catch (AgentAccessDeniedException e) {
-			sendJSONResponseBadRequest(exchange, "You must be a member of this group");
-			return;
+			return Response.status(Status.BAD_REQUEST).entity("You must be a member of this group").build();
 		}
 		JSONObject json = new JSONObject();
-		json.put("code", HttpURLConnection.HTTP_OK);
-		json.put("text", HttpURLConnection.HTTP_OK + " - GroupAgent Loaded");
+		json.put("code", Status.OK.getStatusCode());
+		json.put("text", Status.OK.getStatusCode() + " - GroupAgent loaded");
 		json.put("agentid", groupAgent.getIdentifier());
 		JSONArray memberList = new JSONArray();
 		for (String memberid : groupAgent.getMemberList()) {
@@ -345,54 +299,49 @@ public class AgentsHandler extends AbstractHandler {
 			memberList.add(member);
 		}
 		json.put("members", memberList);
-		sendJSONResponse(exchange, HttpURLConnection.HTTP_OK, json);
+		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
 	}
 
-	private void handleChangeGroup(HttpExchange exchange, PastryNodeImpl node, PassphraseAgentImpl activeAgent,
-			JSONObject payload) throws AgentException, CryptoException, SerializationException {
-		if (activeAgent == null) {
-			sendJSONResponseForbidden(exchange, "You have to be logged in to change a group");
-			return;
+	@POST
+	@Path("/changeGroup")
+	public Response handleChangeGroup(@CookieParam(NodeAdminConnector.COOKIE_SESSIONID_KEY) String sessionId,
+			@FormDataParam("agentid") String agentId, @FormDataParam("members") String strMembers)
+			throws AgentException, CryptoException, SerializationException, ParseException {
+		AgentSession session = connector.getSessionById(sessionId);
+		if (session == null) {
+			return Response.status(Status.FORBIDDEN).entity("You have to be logged in to change a group").build();
 		}
-		String agentid = (String) payload.get("agentid");
-		if (agentid == null || agentid.isEmpty()) {
-			sendJSONResponseBadRequest(exchange, "No agent id provided");
-			return;
+		if (agentId == null || agentId.isEmpty()) {
+			return Response.status(Status.BAD_REQUEST).entity("No agent id provided").build();
 		}
-		Object objMembers = payload.get("members");
-		if (objMembers == null || !(objMembers instanceof JSONArray)) {
-			sendJSONResponseBadRequest(exchange, "No members to change provided");
-			return;
+		if (strMembers == null) {
+			return Response.status(Status.BAD_REQUEST).entity("No members to change provided").build();
 		}
-		JSONArray changedMembers = (JSONArray) objMembers;
+		JSONArray changedMembers = (JSONArray) new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(strMembers);
 		if (changedMembers.isEmpty()) {
-			sendJSONResponseBadRequest(exchange, "Changed members list must not be empty");
-			return;
+			return Response.status(Status.BAD_REQUEST).entity("Changed members list must not be empty").build();
 		}
 		AgentImpl agent;
 		try {
-			agent = node.getAgent(agentid);
+			agent = node.getAgent(agentId);
 		} catch (AgentNotFoundException e) {
-			sendJSONResponseBadRequest(exchange, "Agent not found");
-			return;
+			return Response.status(Status.BAD_REQUEST).entity("Agent not found").build();
 		}
 		if (!(agent instanceof GroupAgentImpl)) {
-			sendJSONResponseBadRequest(exchange, "Agent is not a GroupAgent");
-			return;
+			return Response.status(Status.BAD_REQUEST).entity("Agent is not a GroupAgent").build();
 		}
 		GroupAgentImpl groupAgent = (GroupAgentImpl) agent;
 		try {
-			groupAgent.unlock(activeAgent);
+			groupAgent.unlock(session.getAgent());
 		} catch (AgentAccessDeniedException e) {
-			sendJSONResponseBadRequest(exchange, "You must be a member of this group");
-			return;
+			return Response.status(Status.BAD_REQUEST).entity("You must be a member of this group").build();
 		}
 		// add new members
 		HashSet<String> memberIds = new HashSet<>();
 		for (Object obj : changedMembers) {
 			if (obj instanceof JSONObject) {
 				JSONObject json = (JSONObject) obj;
-				String memberid = (String) json.get("agentid");
+				String memberid = json.getAsString("agentid");
 				if (memberid == null || memberid.isEmpty()) {
 					logger.fine("Skipping invalid member id '" + memberid + "'");
 					continue;
@@ -410,9 +359,8 @@ public class AgentsHandler extends AbstractHandler {
 				logger.info("Skipping invalid member object '" + obj.getClass().getCanonicalName() + "'");
 			}
 		}
-		if (!memberIds.contains(activeAgent.getIdentifier().toLowerCase())) {
-			sendJSONResponseBadRequest(exchange, "You can't remove yourself from a group");
-			return;
+		if (!memberIds.contains(session.getAgent().getIdentifier().toLowerCase())) {
+			return Response.status(Status.BAD_REQUEST).entity("You can't remove yourself from a group").build();
 		}
 		// remove all non members
 		for (String oldMemberId : groupAgent.getMemberList()) {
@@ -424,10 +372,10 @@ public class AgentsHandler extends AbstractHandler {
 		// store changed group
 		node.storeAgent(groupAgent);
 		JSONObject json = new JSONObject();
-		json.put("code", HttpURLConnection.HTTP_OK);
-		json.put("text", HttpURLConnection.HTTP_OK + " - GroupAgent Changed");
+		json.put("code", Status.OK.getStatusCode());
+		json.put("text", Status.OK.getStatusCode() + " - GroupAgent changed");
 		json.put("agentid", groupAgent.getIdentifier());
-		sendJSONResponse(exchange, HttpURLConnection.HTTP_OK, json);
+		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
 	}
 
 }
