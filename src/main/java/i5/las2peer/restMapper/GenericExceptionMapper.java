@@ -19,7 +19,7 @@ public class GenericExceptionMapper implements ExceptionMapper<Throwable> {
 
 	@Override
 	public Response toResponse(Throwable e) {
-		logger.log(Level.INFO, "Request failed: " + e.toString());
+		logger.log(Level.INFO, "Request failed: " + e.toString(), e);
 		int code = Status.INTERNAL_SERVER_ERROR.getStatusCode();
 		if (e instanceof WebApplicationException) {
 			WebApplicationException webEx = (WebApplicationException) e;
