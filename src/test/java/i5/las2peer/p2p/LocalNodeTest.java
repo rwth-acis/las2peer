@@ -574,7 +574,6 @@ public class LocalNodeTest {
 		try {
 			LocalNode testNode = LocalNode.launchNode();
 			AnonymousAgentImpl anonymous = AnonymousAgentImpl.getInstance();
-			anonymous.unlock(AnonymousAgentImpl.PASSPHRASE);
 			testNode.storeAgent(anonymous);
 			Assert.fail("Exception expected");
 		} catch (AgentException e) {

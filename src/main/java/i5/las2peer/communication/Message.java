@@ -24,9 +24,11 @@ import org.xml.sax.SAXException;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentNotFoundException;
+import i5.las2peer.api.security.AnonymousAgent;
 import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.AgentStorage;
+import i5.las2peer.security.AnonymousAgentImpl;
 import i5.las2peer.security.InternalSecurityException;
 import i5.las2peer.serialization.MalformedXMLException;
 import i5.las2peer.serialization.SerializationException;
@@ -176,7 +178,7 @@ public class Message implements XmlAble, Cloneable {
 		validMs = timeOutMs;
 
 		id = new Random().nextLong();
-
+		
 		encryptContent();
 
 		try {
@@ -283,7 +285,7 @@ public class Message implements XmlAble, Cloneable {
 		timestampMs = new Date().getTime();
 		id = new Random().nextLong();
 
-		if (!isTopic()) {
+		if (!isTopic() && !(recipient instanceof AnonymousAgent)) {
 			encryptContent();
 		} else {
 			baDecryptedContent = getContentString().getBytes(StandardCharsets.UTF_8);
@@ -434,7 +436,7 @@ public class Message implements XmlAble, Cloneable {
 	 * @throws EncodingFailedException
 	 */
 	private void encryptContent() throws EncodingFailedException {
-		if (recipient == null) {
+		if (recipient == null || recipient instanceof AnonymousAgent) {
 			return;
 		}
 
@@ -460,6 +462,10 @@ public class Message implements XmlAble, Cloneable {
 	 * @throws AgentLockedException
 	 */
 	private void signContent() throws SerializationException, EncodingFailedException, AgentLockedException {
+		if (sender instanceof AnonymousAgent) {
+			return;
+		}
+		
 		try {
 			Signature sig = sender.createSignature();
 			sig.update(baDecryptedContent);
@@ -622,7 +628,7 @@ public class Message implements XmlAble, Cloneable {
 		}
 
 		try {
-			if (!isTopic()) {
+			if (!isTopic() && !(recipient instanceof AnonymousAgent)) {
 				SecretKey contentKey = recipient.decryptSymmetricKey(baContentKey);
 				baDecryptedContent = CryptoTools.decryptSymmetric(baEncryptedContent, contentKey);
 			} else { // topics are not encrypted
@@ -701,6 +707,10 @@ public class Message implements XmlAble, Cloneable {
 	 * @throws InternalSecurityException
 	 */
 	public void verifySignature() throws InternalSecurityException {
+		if (sender instanceof AnonymousAgentImpl) {
+			return;
+		}
+		
 		Signature sig;
 		try {
 			sig = Signature.getInstance(CryptoTools.getSignatureMethod());

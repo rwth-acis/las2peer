@@ -149,7 +149,7 @@ public interface Context {
 	 * The given agent must be unlocked.
 	 * 
 	 * @param agent The unlocked agent to store.
-	 * @throws AgentAccessDeniedException If the agent cannot be overridden due to access restrictions.
+	 * @throws AgentAccessDeniedException If the agent cannot be overridden due to access restrictions. Or it is the AnonymousAgent.
 	 * @throws AgentAlreadyExistsException If another agent already exists (regarding some agent specific properties).
 	 * @throws AgentOperationFailedException If an error occurred on the node.
 	 * @throws AgentLockedException If the agent is locked.
@@ -310,8 +310,9 @@ public interface Context {
 	 * @param using Signing agent (owner) of the envelope.
 	 * @return An envelope that is not stored to the network yet.
 	 * @throws EnvelopeOperationFailedException If an error occurred at the node or in the network.
+	 * @throws EnvelopeAccessDeniedException If the agent is not allowed to create envelopes (e.g. the AnonymousAgent).
 	 */
-	public Envelope createEnvelope(String identifier, Agent using) throws EnvelopeOperationFailedException;
+	public Envelope createEnvelope(String identifier, Agent using) throws EnvelopeOperationFailedException, EnvelopeAccessDeniedException;
 
 	/**
 	 * Creates a new envelope with the current main agent as signing agent and first reader.
@@ -319,8 +320,9 @@ public interface Context {
 	 * @param identifier Identifier of the envelope.
 	 * @return An envelope that is not stored to the network yet.
 	 * @throws EnvelopeOperationFailedException If an error occurred at the node or in the network.
+	 * @throws EnvelopeAccessDeniedException If the agent is not allowed to create envelopes (e.g. the AnonymousAgent).
 	 */
-	public Envelope createEnvelope(String identifier) throws EnvelopeOperationFailedException;
+	public Envelope createEnvelope(String identifier) throws EnvelopeOperationFailedException, EnvelopeAccessDeniedException;
 
 	// RMI
 

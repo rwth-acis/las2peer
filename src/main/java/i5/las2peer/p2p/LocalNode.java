@@ -15,7 +15,6 @@ import i5.las2peer.api.persistency.EnvelopeNotFoundException;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentNotFoundException;
-import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.api.security.AnonymousAgent;
 import i5.las2peer.classLoaders.L2pClassManager;
 import i5.las2peer.classLoaders.libraries.FileSystemRepository;
@@ -225,12 +224,8 @@ public class LocalNode extends Node {
 
 	@Override
 	public AgentImpl getAgent(String id) throws AgentNotFoundException {
-		if (id.equalsIgnoreCase(AnonymousAgent.LOGIN_NAME)) {
-			try {
-				return AnonymousAgentImpl.getInstance();
-			} catch (AgentOperationFailedException | CryptoException e) {
-				throw new AgentNotFoundException("Could not retrieve anonymous agent", e);
-			}
+		if (id.equalsIgnoreCase(AnonymousAgent.IDENTIFIER)) {
+			return AnonymousAgentImpl.getInstance();
 		} else {
 			synchronized (htKnownAgents) {
 				String xml = htKnownAgents.get(id);

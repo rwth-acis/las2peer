@@ -189,8 +189,6 @@ public class WebConnectorTest {
 
 		// no authentication, use default (wrong)
 		try {
-			connector.defaultLoginUser = "Hans";
-			connector.defaultLoginPassword = "asdasd";
 			c = new MiniClient();
 			c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 			c.setLogin(Long.toString(65464), "aaaaaaaaaaaaa");
@@ -333,7 +331,7 @@ public class WebConnectorTest {
 			MiniClient c = new MiniClient();
 			c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 			// unauthenticated request
-			c.setLogin(AnonymousAgent.LOGIN_NAME, AnonymousAgent.PASSPHRASE);
+			// c.setLogin(AnonymousAgent.LOGIN_NAME, AnonymousAgent.PASSPHRASE);
 
 			ClientResponse result = c.sendRequest("GET", "security/name", "");
 			System.out.println("RESPONSE: " + result.getResponse());

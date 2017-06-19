@@ -614,7 +614,6 @@ public class EnvelopeVersionTest {
 		try {
 			PastryNodeImpl node = nodes.get(0);
 			AnonymousAgentImpl anonymous = AnonymousAgentImpl.getInstance();
-			anonymous.unlock(AnonymousAgentImpl.PASSPHRASE);
 			node.storeAgent(anonymous);
 			Assert.fail("Exception expected");
 		} catch (AgentException e) {

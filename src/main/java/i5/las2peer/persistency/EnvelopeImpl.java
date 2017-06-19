@@ -26,13 +26,13 @@ public class EnvelopeImpl implements Envelope {
 
 	private EnvelopeVersion currentVersion;
 
-	public EnvelopeImpl(String identifier, AgentImpl signingAgent) {
+	public EnvelopeImpl(String identifier, AgentImpl signingAgent) throws EnvelopeAccessDeniedException {
 		this.identifier = identifier;
 		this.content = null;
 		this.currentVersion = null;
 		this.signingAgentId = signingAgent.getIdentifier();
 		if (signingAgent instanceof AnonymousAgent) {
-			throw new IllegalArgumentException("Anonymous agent must not be used to sign an envelope");
+			throw new EnvelopeAccessDeniedException("Anonymous agent must not be used to sign an envelope");
 		}
 		this.readerToAdd.add(signingAgent);
 	}

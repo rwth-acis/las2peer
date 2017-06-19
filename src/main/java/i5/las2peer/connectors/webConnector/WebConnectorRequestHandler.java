@@ -47,13 +47,13 @@ import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentNotFoundException;
-import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.api.security.AnonymousAgent;
 import i5.las2peer.p2p.AgentAlreadyRegisteredException;
 import i5.las2peer.p2p.AliasNotFoundException;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.ServiceAliasManager.AliasResolveResponse;
 import i5.las2peer.restMapper.RESTResponse;
+import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.AnonymousAgentImpl;
 import i5.las2peer.security.Mediator;
 import i5.las2peer.security.PassphraseAgentImpl;
@@ -99,7 +99,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		exchange.getResponseHeaders().set("Server-Name", "las2peer WebConnector");
 
 		try {
-			PassphraseAgentImpl userAgent;
+			AgentImpl userAgent;
 			if ((userAgent = authenticate(exchange)) != null) {
 				invoke(userAgent, exchange);
 			}
@@ -111,7 +111,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		exchange.getResponseBody().close();
 	}
 
-	private PassphraseAgentImpl authenticate(HttpExchange exchange) throws UnsupportedEncodingException {
+	private AgentImpl authenticate(HttpExchange exchange) throws UnsupportedEncodingException {
 		if (exchange.getRequestHeaders().containsKey(AUTHENTICATION_FIELD)
 				&& exchange.getRequestHeaders().getFirst(AUTHENTICATION_FIELD).toLowerCase().startsWith("basic ")) {
 			// basic authentication
@@ -123,18 +123,13 @@ public class WebConnectorRequestHandler implements HttpHandler {
 						.getFirst(AUTHENTICATION_FIELD).toLowerCase().startsWith("bearer ")))) {
 			// openid connect
 			return authenticateOIDC(exchange);
-		} else if (connector.defaultLoginUser.length() > 0) {
-			// anonymous login
-			return authenticateNamePassword(connector.defaultLoginUser, connector.defaultLoginPassword, exchange);
-		} else if (exchange.getRequestMethod().equalsIgnoreCase("options")) {
-			return authenticateAnonymous(exchange);
 		} else {
-			sendUnauthorizedResponse(exchange, null, exchange.getRemoteAddress() + ": No Authentication provided!");
-			return null;
+			// anonymous login
+			return authenticateAnonymous(exchange);
 		}
 	}
 
-	private PassphraseAgentImpl authenticateBasic(HttpExchange exchange) {
+	private AgentImpl authenticateBasic(HttpExchange exchange) {
 		// looks like: Authentication Basic <Byte64(name:pass)>
 		String userPass = exchange.getRequestHeaders().getFirst(AUTHENTICATION_FIELD).substring("BASIC ".length());
 		userPass = new String(Base64.getDecoder().decode(userPass), StandardCharsets.UTF_8);
@@ -300,7 +295,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		}
 	}
 
-	private PassphraseAgentImpl authenticateNamePassword(String username, String password, HttpExchange exchange) {
+	private AgentImpl authenticateNamePassword(String username, String password, HttpExchange exchange) {
 		if (username.equalsIgnoreCase(AnonymousAgent.LOGIN_NAME)) {
 			return authenticateAnonymous(exchange);
 		}
@@ -332,19 +327,12 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		return null;
 	}
 
-	private PassphraseAgentImpl authenticateAnonymous(HttpExchange exchange) {
-		try {
-			AnonymousAgentImpl anonymousAgent = AnonymousAgentImpl.getInstance();
-			anonymousAgent.unlock(AnonymousAgent.PASSPHRASE);
-			return anonymousAgent;
-		} catch (CryptoException | AgentAccessDeniedException | AgentOperationFailedException e) {
-			connector.logError("Could not authenticate as user anonymous", e);
-			sendUnauthorizedResponse(exchange, null, "Could not authenticate as user anonymous");
-		}
-		return null;
+	private AgentImpl authenticateAnonymous(HttpExchange exchange) {
+		AnonymousAgentImpl anonymousAgent = AnonymousAgentImpl.getInstance();
+		return anonymousAgent;
 	}
 
-	private boolean invoke(PassphraseAgentImpl agent, HttpExchange exchange) {
+	private boolean invoke(AgentImpl agent, HttpExchange exchange) {
 		String requestPath = exchange.getRequestURI().getPath();
 
 		// filter special pages

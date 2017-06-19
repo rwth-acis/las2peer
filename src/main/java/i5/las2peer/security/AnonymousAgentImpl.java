@@ -1,59 +1,79 @@
 package i5.las2peer.security;
 
-import java.security.KeyPair;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.Signature;
 
-import i5.las2peer.api.security.AgentAccessDeniedException;
+import javax.crypto.SecretKey;
+
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.api.security.AnonymousAgent;
+import i5.las2peer.communication.Message;
+import i5.las2peer.communication.MessageException;
+import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.CryptoException;
-import i5.las2peer.tools.CryptoTools;
 
-public class AnonymousAgentImpl extends UserAgentImpl implements AnonymousAgent {
-
-	private static AnonymousAgentImpl instance;
-
-	public static synchronized AnonymousAgentImpl getInstance() throws AgentOperationFailedException, CryptoException {
-		if (instance == null) {
-			instance = new AnonymousAgentImpl(CryptoTools.generateKeyPair(), AnonymousAgent.PASSPHRASE,
-					CryptoTools.generateSalt());
+public class AnonymousAgentImpl extends AgentImpl implements AnonymousAgent {
+	
+	public static AnonymousAgentImpl getInstance() {
+		try {
+			return new AnonymousAgentImpl();
+		} catch (AgentOperationFailedException e) {
+			throw new IllegalStateException(e);
 		}
-		return instance;
 	}
 
-	private AnonymousAgentImpl(KeyPair pair, String passphrase, byte[] salt)
-			throws AgentOperationFailedException, CryptoException {
-		super(pair, passphrase, salt);
-	}
-
-	@Override
-	public void unlock(String passphrase) throws AgentAccessDeniedException, AgentOperationFailedException {
-		super.unlock(AnonymousAgent.PASSPHRASE);
-	}
-
-	@Override
-	public String getLoginName() {
-		return AnonymousAgent.LOGIN_NAME;
-	}
-
-	@Override
-	public String getEmail() {
-		return AnonymousAgent.EMAIL;
-	}
-
-	@Override
-	public void setLoginName(String loginName) throws AgentLockedException, IllegalArgumentException {
-		throw new IllegalStateException("Can't change login name for anonymous agent");
-	}
-
-	@Override
-	public void setEmail(String email) throws AgentLockedException, IllegalArgumentException {
-		throw new IllegalStateException("Can't change email for anonymous agent");
+	private AnonymousAgentImpl() throws AgentOperationFailedException {
+		super();
 	}
 
 	@Override
 	public String toXmlString() {
-		throw new IllegalStateException("anonymous agent should not be converted to XML");
+		throw new IllegalStateException("Anonymous agent cannot be converted to XML");
+	}
+
+	@Override
+	public void receiveMessage(Message message, AgentContext c) throws MessageException {
+		// do nothing
+	}
+	
+	public void unlockPrivateKey(SecretKey key) {
+		// do nothing
+	}
+	
+	public void encryptPrivateKey(SecretKey key) {
+		// do nothing
+	}
+	
+	public boolean isLocked() {
+		return false;
+	}
+	
+	public String getIdentifier() {
+		return AnonymousAgent.IDENTIFIER;
+	}
+	
+	public PublicKey getPublicKey() {
+		throw new IllegalStateException("Anonymous does not have a key pair!");
+	}
+	
+	public SecretKey decryptSymmetricKey(byte[] crypted)
+			throws AgentLockedException, SerializationException, CryptoException {
+		throw new AgentLockedException("Anonymous does not have a key pair!");
+	}
+	
+	public Signature createSignature() throws InvalidKeyException, AgentLockedException, NoSuchAlgorithmException {
+		throw new AgentLockedException("Anonymous does not have a key pair!");
+	}
+	
+	public byte[] signContent(byte[] plainData) throws CryptoException, AgentLockedException {
+		throw new AgentLockedException("Anonymous does not have a key pair!");
+	}
+	
+	public boolean equals(Object other) {
+		return other instanceof AnonymousAgent;
 	}
 
 }

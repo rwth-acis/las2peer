@@ -460,10 +460,9 @@ public class ExecutionContextTest {
 	public void testStoreAnonymous() {
 		try {
 			AnonymousAgentImpl anonymous = AnonymousAgentImpl.getInstance();
-			anonymous.unlock(AnonymousAgent.PASSPHRASE);
 			context.storeAgent(anonymous);
 			Assert.fail("Exception expected");
-		} catch (AgentOperationFailedException e) {
+		} catch (AgentAccessDeniedException e) {
 			// expected
 		} catch (Exception e) {
 			e.printStackTrace();

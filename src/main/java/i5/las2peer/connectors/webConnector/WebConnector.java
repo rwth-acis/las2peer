@@ -79,9 +79,6 @@ public class WebConnector extends Connector {
 		oidcProviders.add(DEFAULT_DEFAULT_OIDC_PROVIDER);
 	}
 
-	protected String defaultLoginUser = "";
-	protected String defaultLoginPassword = "";
-
 	public static final int DEFAULT_MAX_CONNECTIONS = 500;
 	protected int maxConnections = DEFAULT_MAX_CONNECTIONS;
 

@@ -134,11 +134,7 @@ public class UserAgentManager {
 	 */
 	public String getAgentIdByLogin(String name) throws AgentNotFoundException, AgentOperationFailedException {
 		if (name.equalsIgnoreCase(AnonymousAgent.LOGIN_NAME)) {
-			try {
-				return AnonymousAgentImpl.getInstance().getIdentifier();
-			} catch (AgentOperationFailedException | CryptoException e) {
-				throw new AgentNotFoundException("Could not retrieve anonymous agent", e);
-			}
+			return AnonymousAgentImpl.getInstance().getIdentifier();
 		}
 		try {
 			EnvelopeVersion env = node.fetchEnvelope(PREFIX_USER_NAME + name.toLowerCase());
@@ -159,13 +155,6 @@ public class UserAgentManager {
 	 * @throws AgentOperationFailedException If any other issue with the agent occurs, e. g. XML not readable
 	 */
 	public String getAgentIdByEmail(String email) throws AgentNotFoundException, AgentOperationFailedException {
-		if (email.equalsIgnoreCase(AnonymousAgent.EMAIL)) {
-			try {
-				return AnonymousAgentImpl.getInstance().getIdentifier();
-			} catch (AgentOperationFailedException | CryptoException e) {
-				throw new AgentNotFoundException("Could not retrieve anonymous agent", e);
-			}
-		}
 		try {
 			EnvelopeVersion env = node.fetchEnvelope(PREFIX_USER_MAIL + email.toLowerCase());
 			return (String) env.getContent();

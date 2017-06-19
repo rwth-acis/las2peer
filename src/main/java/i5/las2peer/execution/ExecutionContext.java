@@ -238,7 +238,7 @@ public class ExecutionContext implements Context {
 		if (agent.isLocked()) {
 			throw new AgentLockedException();
 		} else if (agent instanceof AnonymousAgent) {
-			throw new AgentOperationFailedException("Anonymous agent must not be stored");
+			throw new AgentAccessDeniedException("Anonymous agent must not be stored");
 		} else if (agent instanceof GroupAgentImpl) {
 			((GroupAgentImpl) agent).apply();
 		}
@@ -400,14 +400,14 @@ public class ExecutionContext implements Context {
 	}
 
 	@Override
-	public Envelope createEnvelope(String identifier, Agent using) throws EnvelopeOperationFailedException {
+	public Envelope createEnvelope(String identifier, Agent using) throws EnvelopeOperationFailedException, EnvelopeAccessDeniedException {
 		EnvelopeImpl envelope = new EnvelopeImpl(identifier, (AgentImpl) using);
 		envelope.addReader(using);
 		return envelope;
 	}
 
 	@Override
-	public Envelope createEnvelope(String identifier) throws EnvelopeOperationFailedException {
+	public Envelope createEnvelope(String identifier) throws EnvelopeOperationFailedException, EnvelopeAccessDeniedException {
 		return createEnvelope(identifier, callerContext.getMainAgent());
 	}
 

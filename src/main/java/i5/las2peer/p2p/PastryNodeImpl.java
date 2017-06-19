@@ -24,7 +24,6 @@ import i5.las2peer.api.persistency.EnvelopeNotFoundException;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentNotFoundException;
-import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.api.security.AnonymousAgent;
 import i5.las2peer.classLoaders.L2pClassManager;
 import i5.las2peer.classLoaders.libraries.SharedStorageRepository;
@@ -516,12 +515,8 @@ public class PastryNodeImpl extends Node {
 		observerNotice(MonitoringEvent.AGENT_GET_STARTED, pastryNode, id, null, (String) null, "");
 		try {
 			AgentImpl agentFromNet = null;
-			if (id.equalsIgnoreCase(AnonymousAgent.LOGIN_NAME)) {
-				try {
-					agentFromNet = AnonymousAgentImpl.getInstance();
-				} catch (AgentOperationFailedException | CryptoException e) {
-					throw new AgentNotFoundException("Could not retrieve anonymous agent", e);
-				}
+			if (id.equalsIgnoreCase(AnonymousAgent.IDENTIFIER)) {
+				agentFromNet = AnonymousAgentImpl.getInstance();
 			} else {
 				EnvelopeVersion agentEnvelope = pastStorage.fetchEnvelope(EnvelopeVersion.getAgentIdentifier(id),
 						AGENT_GET_TIMEOUT);
