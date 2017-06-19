@@ -76,6 +76,8 @@ public class AppHandler extends AbstractHandler {
 			mime = "application/json";
 		} else if (lName.endsWith(".ico")) {
 			return Response.ok(bytes).type("image/x-icon").build(); // don't use stringContent, return raw bytes instead
+		} else if (lName.endsWith(".png")) {
+			mime = "image/png";
 		} else {
 			logger.log(Level.WARNING, "Unknown file type '" + filename + "' using " + mime + " as mime");
 		}
