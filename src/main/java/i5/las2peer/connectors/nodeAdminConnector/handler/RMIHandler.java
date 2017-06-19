@@ -29,6 +29,7 @@ import javax.ws.rs.core.UriInfo;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import i5.las2peer.api.execution.ServiceNotFoundException;
 import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.p2p.ServiceVersion;
 import i5.las2peer.api.security.AgentException;
@@ -40,6 +41,7 @@ import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.AnonymousAgentImpl;
 import i5.las2peer.security.Mediator;
 import i5.las2peer.security.PassphraseAgentImpl;
+import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.tools.SimpleTools;
 import io.swagger.models.Swagger;
 import io.swagger.util.Json;
@@ -72,7 +74,7 @@ public class RMIHandler extends AbstractHandler {
 		ServiceNameVersion serviceNameVersion = new ServiceNameVersion(serviceName, versionString);
 		AnonymousAgentImpl anonymous = AnonymousAgentImpl.getInstance();
 		Mediator mediator = node.createMediatorForAgent(anonymous);
-		Serializable swagResult = mediator.invoke(serviceNameVersion, "getSwagger", new Serializable[0], false);
+		Serializable swagResult = invokeServiceMethod(mediator, serviceNameVersion, "getSwagger", new Serializable[0]);
 		if (swagResult == null) {
 			return Response.serverError().entity("Method invocation 'getSwagger' returned null").build();
 		} else if (!(swagResult instanceof String)) {
@@ -237,6 +239,33 @@ public class RMIHandler extends AbstractHandler {
 			return Response.serverError().entity("Expected " + RESTResponse.class.getCanonicalName() + ", but got "
 					+ result.getClass().getCanonicalName() + " instead").build();
 		}
+	}
+
+	private Serializable invokeServiceMethod(Mediator mediator, ServiceNameVersion serviceNameVersion,
+			String serviceMethodName, Serializable[] params) throws ServerErrorException {
+		Serializable result = null;
+		try {
+			try {
+				result = mediator.invoke(serviceNameVersion, serviceMethodName, params, false);
+			} catch (ServiceNotFoundException e) {
+				// FIXME autostart service, locally?
+				logger.info("Service not reachable in network. Using autostart feature");
+				try {
+					ServiceAgentImpl serviceAgent = ServiceAgentImpl.createServiceAgent(serviceNameVersion,
+							"autostart");
+					serviceAgent.unlock("autostart");
+					node.registerReceiver(serviceAgent);
+					// FIXME persist agent?
+				} catch (Exception e2) {
+					throw new ServerErrorException("Could not autostart service", Status.INTERNAL_SERVER_ERROR, e2);
+				}
+				// FIXME repeat invocation
+				result = mediator.invoke(serviceNameVersion, serviceMethodName, params, false);
+			}
+		} catch (Exception e) {
+			throw new ServerErrorException("Service method invocation failed", Status.INTERNAL_SERVER_ERROR, e);
+		}
+		return result;
 	}
 
 }
