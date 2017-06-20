@@ -15,7 +15,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import i5.las2peer.api.p2p.ServiceNameVersion;
-import i5.las2peer.api.security.AnonymousAgent;
 import i5.las2peer.connectors.webConnector.client.ClientResponse;
 import i5.las2peer.connectors.webConnector.client.MiniClient;
 import i5.las2peer.connectors.webConnector.services.TestClassLoaderService;
