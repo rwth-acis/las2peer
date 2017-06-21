@@ -9,8 +9,10 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.security.PublicKey;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
@@ -84,7 +86,7 @@ public class PastryNodeImpl extends Node {
 	private static final int HASHED_STORE_TIMEOUT = 300000;
 
 	private final int pastryPort;
-	private final String bootStrap;
+	private final List<String> bootStrap;
 	private final STORAGE_MODE storageMode;
 	private InetAddress pastryBindAddress; // null = auto detect Internet address
 	private ExecutorService threadpool; // gather all threads in node object to minimize idle threads
@@ -109,7 +111,8 @@ public class PastryNodeImpl extends Node {
 	 *            id will be random.
 	 */
 	public PastryNodeImpl(String bootstrap, STORAGE_MODE storageMode, String storageDir, Long nodeIdSeed) {
-		this(null, false, InetAddress.getLoopbackAddress(), null, bootstrap, storageMode, storageDir, nodeIdSeed);
+		this(null, false, InetAddress.getLoopbackAddress(), null, Arrays.asList(bootstrap), storageMode, storageDir,
+				nodeIdSeed);
 	}
 
 	/**
@@ -121,8 +124,8 @@ public class PastryNodeImpl extends Node {
 	 * @param pastryBindAddress
 	 * @param pastryPort A port number the PastryNode should listen to for network communication. <code>null</code>
 	 *            means use a random system defined port. Use {@link #getPort()} to retrieve the number.
-	 * @param bootstrap A bootstrap address that should be used, like hostname:port or <code>null</code> to start a new
-	 *            network.
+	 * @param bootstrap A list of host addresses that should be used for bootstrap, like hostname:port or
+	 *            <code>null</code> to start a new network.
 	 * @param storageMode A storage mode to be used by this node, see
 	 *            {@link i5.las2peer.persistency.SharedStorage.STORAGE_MODE}.
 	 * @param storageDir A directory to persist data to. Only considered in persistent storage mode. Overwrites
@@ -131,7 +134,7 @@ public class PastryNodeImpl extends Node {
 	 *            be random.
 	 */
 	public PastryNodeImpl(L2pClassManager classManager, boolean useMonitoringObserver, InetAddress pastryBindAddress,
-			Integer pastryPort, String bootstrap, STORAGE_MODE storageMode, String storageDir, Long nodeIdSeed) {
+			Integer pastryPort, List<String> bootstrap, STORAGE_MODE storageMode, String storageDir, Long nodeIdSeed) {
 		super(classManager, true, useMonitoringObserver);
 		this.pastryBindAddress = pastryBindAddress;
 		if (pastryPort == null || pastryPort < 1) {
@@ -165,8 +168,10 @@ public class PastryNodeImpl extends Node {
 		if (bootStrap == null || bootStrap.isEmpty()) {
 			return result;
 		}
-		String[] addresses = bootStrap.split(",");
-		for (String address : addresses) {
+		for (String address : bootStrap) {
+			if (address == null || address.isEmpty()) {
+				continue;
+			}
 			String[] hostAndPort = address.split(":");
 			int port = DEFAULT_BOOTSTRAP_PORT;
 			if (hostAndPort.length == 2) {

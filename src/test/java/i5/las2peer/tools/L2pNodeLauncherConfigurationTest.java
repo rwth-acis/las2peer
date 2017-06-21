@@ -1,6 +1,10 @@
 package i5.las2peer.tools;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.Assert;
@@ -99,7 +103,7 @@ public class L2pNodeLauncherConfigurationTest {
 			Assert.assertTrue(conf.isColoredOutput());
 			Assert.assertTrue(conf.isDebugMode());
 			Assert.assertEquals((Integer) 12345, conf.getPort());
-			Assert.assertEquals("test:1234", conf.getBootstrap());
+			Assert.assertEquals(Arrays.asList("test:1234"), conf.getBootstrap());
 			Assert.assertTrue(conf.useMonitoringObserver());
 			Assert.assertEquals("testdir", conf.getLogDir());
 			Assert.assertEquals((Long) 0000l, conf.getNodeIdSeed());
@@ -125,7 +129,7 @@ public class L2pNodeLauncherConfigurationTest {
 			Assert.assertTrue(conf.isColoredOutput());
 			Assert.assertTrue(conf.isDebugMode());
 			Assert.assertEquals((Integer) 12345, conf.getPort());
-			Assert.assertEquals("test:1234", conf.getBootstrap());
+			Assert.assertEquals(Arrays.asList("test:1234"), conf.getBootstrap());
 			Assert.assertTrue(conf.useMonitoringObserver());
 			Assert.assertEquals("testdir", conf.getLogDir());
 			Assert.assertEquals((Long) 0000l, conf.getNodeIdSeed());
@@ -221,6 +225,85 @@ public class L2pNodeLauncherConfigurationTest {
 			conf.setPort(systemPort);
 			L2pNodeLauncher launcher = L2pNodeLauncher.launchConfiguration(conf);
 			Assert.assertEquals(systemPort, launcher.getNode().getPort());
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail(e.toString());
+		}
+	}
+
+	@Test
+	public void testStoreAndLoadWithFile() {
+		try {
+			File tmpFile = File.createTempFile("junit-test-node-configuration", ".ini");
+			tmpFile.deleteOnExit();
+			System.out.println("Using temporary file '" + tmpFile.getAbsolutePath() + "' to store and load properties");
+			L2pNodeLauncherConfiguration conf = new L2pNodeLauncherConfiguration();
+			conf.setPort(12345);
+			conf.addBootstrap("localhost:1234");
+			conf.addBootstrap("remotehost:5678");
+			conf.setStorageMode(STORAGE_MODE.MEMORY);
+			conf.setStorageDirectory("test/");
+			conf.setUseMonitoringObserver(true);
+			conf.setLogDir("testlog/");
+			conf.getServiceDirectories().add("testservice/");
+			conf.setNodeIdSeed(1270011452L);
+			conf.getCommands().add("startService('TestService', 'geheim')");
+			conf.getCommands().add("interactive");
+			conf.writeToFile(tmpFile.getAbsolutePath());
+			L2pNodeLauncherConfiguration conf2 = new L2pNodeLauncherConfiguration();
+			conf2.setFromFile(tmpFile.getAbsolutePath());
+			Assert.assertEquals(conf.getPort(), conf2.getPort());
+			Assert.assertEquals(conf.getBootstrap(), conf2.getBootstrap());
+			Assert.assertEquals(conf.getStorageMode(), conf2.getStorageMode());
+			Assert.assertEquals(conf.getStorageDirectory(), conf2.getStorageDirectory());
+			Assert.assertEquals(conf.useMonitoringObserver(), conf2.useMonitoringObserver());
+			Assert.assertEquals(conf.getLogDir(), conf2.getLogDir());
+			Assert.assertEquals(conf.getServiceDirectories(), conf2.getServiceDirectories());
+			Assert.assertEquals(conf.getNodeIdSeed(), conf2.getNodeIdSeed());
+			Assert.assertEquals(conf.getCommands(), conf2.getCommands());
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail(e.toString());
+		}
+	}
+
+	@Test
+	public void testBootstrap() {
+		try {
+			L2pNodeLauncherConfiguration conf = new L2pNodeLauncherConfiguration();
+			conf.setBootstrap((String) null);
+			Assert.assertNull(conf.getBootstrap());
+			L2pNodeLauncherConfiguration conf4 = new L2pNodeLauncherConfiguration();
+			conf4.setBootstrap((List<String>) null);
+			Assert.assertNull(conf4.getBootstrap());
+			L2pNodeLauncherConfiguration conf2 = new L2pNodeLauncherConfiguration();
+			conf2.addBootstrap("test:1234");
+			Assert.assertEquals(Arrays.asList("test:1234"), conf2.getBootstrap());
+			L2pNodeLauncherConfiguration conf3 = new L2pNodeLauncherConfiguration();
+			conf3.setBootstrap(Arrays.asList("test:1234"));
+			Assert.assertEquals(Arrays.asList("test:1234"), conf3.getBootstrap());
+			// test empty bootstrap file handling
+			File tmpFile = File.createTempFile("junit-bootstrap-launcher-configuration-test", ".ini");
+			tmpFile.deleteOnExit();
+			System.out.println("Using temporary file '" + tmpFile.getAbsolutePath() + "' to store and load properties");
+			L2pNodeLauncherConfiguration conf5 = new L2pNodeLauncherConfiguration();
+			conf5.setBootstrap(new ArrayList<String>());
+			conf5.writeToFile(tmpFile.getAbsolutePath());
+			L2pNodeLauncherConfiguration conf6 = new L2pNodeLauncherConfiguration();
+			conf6.setFromFile(tmpFile.getAbsolutePath());
+			Assert.assertNotNull(conf6.getBootstrap());
+			Assert.assertEquals(new ArrayList<>(), conf6.getBootstrap());
+			// test null bootstrap file handling
+			File tmpFile2 = File.createTempFile("junit-bootstrap-launcher-configuration-test-2", ".ini");
+			tmpFile2.deleteOnExit();
+			System.out
+					.println("Using temporary file '" + tmpFile2.getAbsolutePath() + "' to store and load properties");
+			L2pNodeLauncherConfiguration conf7 = new L2pNodeLauncherConfiguration();
+			conf7.setBootstrap((String) null);
+			conf7.writeToFile(tmpFile2.getAbsolutePath());
+			L2pNodeLauncherConfiguration conf8 = new L2pNodeLauncherConfiguration();
+			conf8.setFromFile(tmpFile2.getAbsolutePath());
+			Assert.assertNull(conf8.getBootstrap());
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail(e.toString());
