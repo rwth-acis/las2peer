@@ -42,12 +42,11 @@
       <template is="dom-if" if="[[_services]]">
         <h3>Known Versions</h3>
         <table width="100%">
-          <tr><th>Name</th><th style="width: 5%">Version</th><th style="width: 1%; white-space: nowrap">Swagger API</th></tr>
+          <tr><th>Name</th><th style="width: 5%">Version</th></tr>
           <template is="dom-repeat" items="[[_services]]">
             <tr>
               <td>[[item.name]]</td>
               <td style="padding-right: 0.5em; text-align: right">[[item.version]]</td>
-              <td style="width: 1%; white-space: nowrap"><a href="/swagger-ui/index.html?url=[[item.swagger]]" tabindex="-1"><paper-button raised title="Show Swagger API Doc" style="background-color: #89bf04"><iron-icon src="/swagger-ui/images/logo_small.png"></iron-icon></paper-button></a></td>
             </tr>
           </template>
         </table>

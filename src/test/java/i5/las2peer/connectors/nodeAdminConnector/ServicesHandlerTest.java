@@ -23,7 +23,6 @@ import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
 import org.junit.Assert;
 import org.junit.Test;
 
-import i5.las2peer.connectors.nodeAdminConnector.handler.RMIHandler;
 import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.security.PassphraseAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
@@ -80,9 +79,6 @@ public class ServicesHandlerTest extends AbstractTestHandler {
 			JSONObject inst = (JSONObject) instances.get(0);
 			Assert.assertEquals(serviceName, inst.getAsString("name"));
 			Assert.assertEquals(serviceVersion, inst.getAsString("version"));
-			String serviceSwagger = connector.getHostname() + RMIHandler.RMI_PATH + "/" + serviceName + "/"
-					+ serviceVersion + "/swagger.json";
-			Assert.assertEquals(serviceSwagger, inst.getAsString("swagger"));
 			response.close();
 		} catch (Exception e) {
 			e.printStackTrace();

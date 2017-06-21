@@ -34,9 +34,13 @@
 
       <h3>Local Running Services</h3>
       <table width="100%">
-      <tr><th>Name</th><th width="10%">Version</th></tr>
+        <tr><th>Name</th><th width="10%">Version</th><th style="width: 1%; white-space: nowrap">Swagger</th></tr>
         <template is="dom-repeat" items="[[_status.localServices]]">
-          <tr><td><b style="color: #0A0">[[item.name]]</b></td><td>[[item.version]]</td></tr>
+          <tr>
+            <td><b style="color: #0A0">[[item.name]]</b></td>
+            <td>[[item.version]]</td>
+            <td style="width: 1%; white-space: nowrap"><a href="/swagger-ui/index.html?url=[[item.swagger]]" tabindex="-1"><paper-button raised title="Show Swagger API Doc" style="background-color: #89bf04"><iron-icon src="/swagger-ui/images/logo_small.png"></iron-icon></paper-button></a></td>
+          </tr>
         </template>
       </table>
     </div>

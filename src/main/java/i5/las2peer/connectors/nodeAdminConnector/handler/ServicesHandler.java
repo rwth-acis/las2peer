@@ -85,9 +85,6 @@ public class ServicesHandler extends AbstractHandler {
 				JSONObject jsonObject = new JSONObject();
 				jsonObject.put("name", searchName);
 				jsonObject.put("version", version);
-				// use host header, so browsers do not block subsequent ajax requests to an unknown host
-				jsonObject.put("swagger", "https://" + hostHeader + RMIHandler.RMI_PATH + "/" + searchName + "/"
-						+ version + "/swagger.json");
 				result.add(jsonObject);
 			}
 		} else {

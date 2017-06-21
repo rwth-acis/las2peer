@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.List;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
@@ -66,7 +67,7 @@ public class DefaultHandler extends AbstractHandler {
 	@GET
 	@Path("/status")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String getNodeStatus() {
+	public String getNodeStatus(@HeaderParam("Host") String hostHeader) {
 		// gather status values and return as JSON string
 		JSONObject response = new JSONObject();
 		response.put("nodeid", node.getNodeId().toString());
@@ -78,7 +79,7 @@ public class DefaultHandler extends AbstractHandler {
 		response.put("maxStorageSize", maxLocalStorageSize);
 		response.put("maxStorageSizeStr", humanReadableByteCount(maxLocalStorageSize, true));
 		response.put("uptime", getUptime(node));
-		response.put("localServices", getLocalServices(node));
+		response.put("localServices", getLocalServices(node, hostHeader));
 		response.put("otherNodes", getOtherNodes(node));
 		return response.toJSONString();
 	}
@@ -111,7 +112,7 @@ public class DefaultHandler extends AbstractHandler {
 		}
 	}
 
-	private JSONArray getLocalServices(Node node) {
+	private JSONArray getLocalServices(Node node, String hostHeader) {
 		List<String> serviceNames = node.getNodeServiceCache().getLocalServiceNames();
 		JSONArray result = new JSONArray();
 		for (String serviceName : serviceNames) {
@@ -120,6 +121,9 @@ public class DefaultHandler extends AbstractHandler {
 				JSONObject json = new JSONObject();
 				json.put("name", serviceName);
 				json.put("version", version.toString());
+				// use host header, so browsers do not block subsequent ajax requests to an unknown host
+				json.put("swagger", "https://" + hostHeader + RMIHandler.RMI_PATH + "/" + serviceName + "/"
+						+ version.toString() + "/swagger.json");
 				result.add(json);
 			}
 		}
