@@ -12,6 +12,7 @@ import javax.ws.rs.core.SecurityContext;
 
 import org.glassfish.jersey.internal.MapPropertiesDelegate;
 import org.glassfish.jersey.jackson.JacksonFeature;
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ApplicationHandler;
 import org.glassfish.jersey.server.ContainerRequest;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -76,6 +77,7 @@ public abstract class RESTService extends Service {
 			ResourceConfig resourceConfig = new ResourceConfig();
 			resourceConfig.setClassLoader(this.getClass().getClassLoader());
 			resourceConfig.register(JacksonFeature.class);
+			resourceConfig.register(MultiPartFeature.class);
 			resourceConfig.property("jersey.config.server.wadl.disableWadl", true);
 			this.application = resourceConfig;
 		}
