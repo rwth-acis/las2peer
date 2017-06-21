@@ -117,6 +117,14 @@ Copyright (c) 2017 Advanced Community Information Systems (ACIS) Group, Chair of
       <div><paper-button raised disabled="[[_submittingLogin]]" on-tap="createNewAgent"><iron-icon icon="add-circle-outline"></iron-icon> Generate new Agent</paper-button></div>
     </paper-dialog>
 
+    <paper-dialog id="las2peerErrorDialog">
+      <h2 id="las2peerErrorDialogTitle">Error</h2>
+      <div id="las2peerErrorDialogMessage"></div>
+      <div class="buttons">
+        <paper-button dialog-dismiss>OK</paper-button>
+      </div>
+    </paper-dialog>
+
     <app-drawer-layout fullbleed>
       <!-- Drawer content -->
       <app-drawer id="drawer" slot="drawer">
@@ -149,9 +157,9 @@ Copyright (c) 2017 Advanced Community Information Systems (ACIS) Group, Chair of
             attr-for-selected="name"
             fallback-selection="view404"
             role="main">
-          <status-view name="view-status" las2peer-connector-endpoint="[[las2peerConnectorEndpoint]]" sessionid="[[_sessionid]]"></status-view>
-          <services-view name="view-services" las2peer-connector-endpoint="[[las2peerConnectorEndpoint]]" sessionid="[[_sessionid]]"></services-view>
-          <agents-view name="view-agents" las2peer-connector-endpoint="[[las2peerConnectorEndpoint]]" sessionid="[[_sessionid]]"></agents-view>
+          <status-view name="view-status" las2peer-connector-endpoint="[[las2peerConnectorEndpoint]]" sessionid="[[_sessionid]]" error="{{_error}}"></status-view>
+          <services-view name="view-services" las2peer-connector-endpoint="[[las2peerConnectorEndpoint]]" sessionid="[[_sessionid]]" error="{{_error}}"></services-view>
+          <agents-view name="view-agents" las2peer-connector-endpoint="[[las2peerConnectorEndpoint]]" sessionid="[[_sessionid]]" error="{{_error}}"></agents-view>
           <my-view404 name="view404"></my-view404>
         </iron-pages>
       </app-header-layout>
@@ -175,6 +183,7 @@ Copyright (c) 2017 Advanced Community Information Systems (ACIS) Group, Chair of
         las2peerConnectorEndpoint: String,
         _sessionid: { type: String, value: '' },
         _submittingLogin: { type: Boolean, value: false },
+        _error: { type: Object, observer: '_errorChanged' },
       }; }
 
       static get observers() {
@@ -263,17 +272,24 @@ Copyright (c) 2017 Advanced Community Information Systems (ACIS) Group, Chair of
       _handleError(event) {
         var errorTitle = 'Error', errorMsg;
         if (event.detail.request.xhr.readyState == 4 && event.detail.request.xhr.status == 0) { // network issues
-          console.log('Network Connection Error - Could not connect to: ' + event.detail.request.url);
+          errorTitle = 'Network Connection Error';
+          errorMsg = 'Could not connect to: ' + event.detail.request.url;
         }
         else {
-          var response = event.detail.request.xhr.response.reason;
-          if (response) {
-            console.log(response);
-          }
-          else { // no error message returned, show generic message
-            console.log('An error occurred. Please try again.');
+          var errorMsg = event.detail.request.xhr.response.reason;
+          if (!errorMsg) { // no error message returned, show generic message
+            errorMsg = 'An error occurred. Please check console output.';
           }
         }
+        console.log(errorTitle + ' - ' + errorMsg);
+        this._error = { title: errorTitle, msg: errorMsg };
+      }
+
+      _errorChanged(error) {
+        this.$.las2peerErrorDialog.close(); // otherwise the dialog is rendered in wrong place
+        this.$.las2peerErrorDialogTitle.innerHTML = error.title;
+        this.$.las2peerErrorDialogMessage.innerHTML = error.msg;
+        this.$.las2peerErrorDialog.open();
       }
 
       _routePageChanged(page) {

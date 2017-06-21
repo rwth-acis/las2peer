@@ -164,7 +164,7 @@
   <script>
     class AgentsView extends Polymer.Element {
       static get is() { return 'agents-view'; }
-      static get properties() { return { las2peerConnectorEndpoint: String, sessionid: String, _working: Boolean, _memberAgents: { type: Array, value: [] }, _hasNoMemberAgents: { type: Boolean, value: true }, _manageAgents: { type: Array, value: [] }, _hasNoManageAgents: { type: Boolean, value: true }, _manageGroupAgentId: String } }
+      static get properties() { return { las2peerConnectorEndpoint: String, sessionid: String, error: { type: Object, notify: true }, _working: Boolean, _memberAgents: { type: Array, value: [] }, _hasNoMemberAgents: { type: Boolean, value: true }, _manageAgents: { type: Array, value: [] }, _hasNoManageAgents: { type: Boolean, value: true }, _manageGroupAgentId: String } }
 
       toggleCreateAgent() { this.$.collapseCreateAgent.toggle(); }
 
@@ -351,18 +351,17 @@
       _handleError(event) {
         var errorTitle = 'Error', errorMsg;
         if (event.detail.request.xhr.readyState == 4 && event.detail.request.xhr.status == 0) { // network issues
-          console.log('Network Connection Error - Could not connect to: ' + event.detail.request.url);
+          errorTitle = 'Network Connection Error';
+          errorMsg = 'Could not connect to: ' + event.detail.request.url;
         }
         else {
-          var response = event.detail.request.xhr.response.reason;
-          if (response) {
-            console.log(response);
-            this.$.createAgentMsg.innerHTML = "Error: " + response;
-          }
-          else { // no error message returned, show generic message
-            console.log('An error occurred. Please try again.');
+          var errorMsg = event.detail.request.xhr.response.reason;
+          if (!errorMsg) { // no error message returned, show generic message
+            errorMsg = 'An error occurred. Please check console output.';
           }
         }
+        console.log(errorTitle + ' - ' + errorMsg);
+        this.error = { title: errorTitle, msg: errorMsg };
       }
 
     }

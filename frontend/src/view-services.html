@@ -65,7 +65,7 @@
   <script>
     class ServicesView extends Polymer.Element {
       static get is() { return 'services-view'; }
-      static get properties() { return { las2peerConnectorEndpoint: String, sessionid: String, _services: { type: Object }, _submittingSearch: { type: Boolean }, _submittingUpload: { type: Boolean } } }
+      static get properties() { return { las2peerConnectorEndpoint: String, sessionid: String, error: { type: Object, notify: true }, _services: { type: Object }, _submittingSearch: { type: Boolean }, _submittingUpload: { type: Boolean } } }
 
       _keyPressedSearchService(event) {
         if (event.which == 13 || event.keyCode == 13) {
@@ -118,18 +118,17 @@
       _handleError(event) {
         var errorTitle = 'Error', errorMsg;
         if (event.detail.request.xhr.readyState == 4 && event.detail.request.xhr.status == 0) { // network issues
-          console.log('Network Connection Error - Could not connect to: ' + event.detail.request.url);
+          errorTitle = 'Network Connection Error';
+          errorMsg = 'Could not connect to: ' + event.detail.request.url;
         }
         else {
-          var response = event.detail.request.xhr.response.reason;
-          if (response) {
-            console.log(response);
-            this.$.uploadServiceMsg.innerHTML = response;
-          }
-          else { // no error message returned, show generic message
-            console.log('An error occurred. Please try again.');
+          var errorMsg = event.detail.request.xhr.response.reason;
+          if (!errorMsg) { // no error message returned, show generic message
+            errorMsg = 'An error occurred. Please check console output.';
           }
         }
+        console.log(errorTitle + ' - ' + errorMsg);
+        this.error = { title: errorTitle, msg: errorMsg };
       }
 
     }

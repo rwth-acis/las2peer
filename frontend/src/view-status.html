@@ -44,7 +44,7 @@
   <script>
     class StatusView extends Polymer.Element {
       static get is() { return 'status-view'; }
-      static get properties() { return { las2peerConnectorEndpoint: String, sessionid: String, _status: { type: Object, value: { nodeid: "...", cpuload: "...", storageSize: 0, maxStorageSize: 1, storageSizeStr: "...", maxStorageSizeStr: "...", uptime: "...", publicKey: "..." } } } }
+      static get properties() { return { las2peerConnectorEndpoint: String, sessionid: String, error: { type: Object, notify: true }, _status: { type: Object, value: { nodeid: "...", cpuload: "...", storageSize: 0, maxStorageSize: 1, storageSizeStr: "...", maxStorageSizeStr: "...", uptime: "...", publicKey: "..." } } } }
 
       ready() {
         super.ready();
@@ -62,14 +62,19 @@
       }
 
       _handleError(event) {
-        var errorMsg;
+        var errorTitle = 'Error', errorMsg;
         if (event.detail.request.xhr.readyState == 4 && event.detail.request.xhr.status == 0) { // network issues
-          errorMsg = 'Network Connection Error - Could not connect to: ' + event.detail.request.url;
+          errorTitle = 'Network Connection Error';
+          errorMsg = 'Could not connect to: ' + event.detail.request.url;
         }
         else {
-          errorMsg = event.detail.error;
+          var errorMsg = event.detail.request.xhr.response.reason;
+          if (!errorMsg) { // no error message returned, show generic message
+            errorMsg = 'An error occurred. Please check console output.';
+          }
         }
-        console.log(errorMsg);
+        console.log(errorTitle + ' - ' + errorMsg);
+        this.error = { title: errorTitle, msg: errorMsg };
       }
 
     }
