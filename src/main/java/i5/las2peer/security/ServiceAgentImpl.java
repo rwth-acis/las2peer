@@ -131,17 +131,18 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 			}
 
 			if (content instanceof RMITask) {
+				RMITask task = (RMITask) content;
 				getRunningAtNode().observerNotice(MonitoringEvent.SERVICE_INVOCATION, m.getSendingNodeId(),
 						m.getSender(), getRunningAtNode().getNodeId(), this,
-						this.getServiceNameVersion() + "/" + ((RMITask) content).getMethodName());
+						this.getServiceNameVersion() + "/" + task.getMethodName());
 
 				Message response;
 
 				try {
-					response = new Message(m, new RMIResultContent(handle((RMITask) content, c)));
+					response = new Message(m, new RMIResultContent(handle(task, c)));
 					getRunningAtNode().observerNotice(MonitoringEvent.SERVICE_INVOCATION_FINISHED, m.getSendingNodeId(),
 							m.getSender(), getRunningAtNode().getNodeId(), this,
-							this.getServiceNameVersion() + "/" + ((RMITask) content).getMethodName());
+							this.getServiceNameVersion() + "/" + task.getMethodName());
 				} catch (ServiceInvocationException e) {
 					response = new Message(m, new RMIExceptionContent(e));
 					getRunningAtNode().observerNotice(MonitoringEvent.SERVICE_INVOCATION_FAILED, m.getSendingNodeId(),
@@ -183,7 +184,6 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 					response.setSendingNodeId(getRunningAtNode().getNodeId());
 					getRunningAtNode().sendResponse(response, m.getSendingNodeId());
 				}
-
 			} else {
 				throw new MessageException("I don't know what to do with a message content of type "
 						+ content.getClass().getCanonicalName());

@@ -101,7 +101,7 @@ public class AnonymousAgentImplTest {
 		Mediator mediator = node.createMediatorForAgent(anonymousAgent);
 
 		// invoke
-		Serializable s = mediator.invoke(service.toString(), "getEcho", new Serializable[] { "myString" }, false);
+		Serializable s = mediator.invoke(service, "getEcho", new Serializable[] { "myString" }, false);
 		assertEquals("myString", s);
 	}
 
