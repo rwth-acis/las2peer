@@ -7,6 +7,7 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.Path;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.SecurityContext;
 
@@ -34,6 +35,7 @@ import io.swagger.util.Json;
  * Provides Jersey and Swagger integration.
  * 
  */
+@Path("/")
 public abstract class RESTService extends Service {
 
 	private Application application;
@@ -59,8 +61,12 @@ public abstract class RESTService extends Service {
 	 * {@link #setApplication(Application)}.
 	 * 
 	 * Resources cannot be set up afterwards.
+	 * 
+	 * If the method is not overridden by the service, the service class itself will be registered as resource.
 	 */
-	protected abstract void initResources();
+	protected void initResources() {
+		getResourceConfig().register(this);
+	}
 
 	/**
 	 * Sets a Jersey's ResourceConfig as JAX-RS Application if no application is set and returns it.

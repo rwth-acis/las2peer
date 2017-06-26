@@ -3,6 +3,7 @@ package i5.las2peer.restMapper;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import i5.las2peer.restMapper.services.TestCustomApplicationService;
+import i5.las2peer.restMapper.services.TestResourceService;
 import i5.las2peer.restMapper.services.TestService;
 
 import java.net.URI;
@@ -18,11 +19,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 public class RESTServiceTest {
 	RESTService testee;
 	RESTService testeeCustomApplication;
+	RESTService testeeResource;
 
 	@Before
 	public void setup() {
 		this.testee = new TestService();
 		this.testeeCustomApplication = new TestCustomApplicationService();
+		this.testeeResource = new TestResourceService();
 	}
 
 	@Test
@@ -74,6 +77,14 @@ public class RESTServiceTest {
 
 		assertEquals(200, response.getHttpCode());
 		assertTrue(new String(response.getBody()).contains("myTestBean"));
+	}
+	
+	@Test
+	public void testResource() throws URISyntaxException {
+		RESTResponse response = invoke(testeeResource, "GET", "hello", "");
+
+		assertEquals(200, response.getHttpCode());
+		assertEquals("Hello World!", new String(response.getBody()));
 	}
 
 }
