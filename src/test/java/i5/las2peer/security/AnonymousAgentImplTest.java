@@ -31,8 +31,6 @@ import org.junit.Test;
 
 
 public class AnonymousAgentImplTest {
-
-	// TODO API test anonymousagent
 	
 	Node node;
 	Node node2;
