@@ -1,5 +1,6 @@
 {
   "name": "las2peer-node-frontend",
+  "description": "A webapp frontend for a las2peer node based on the NodeAdminConnector",
   "license": "BSD-3-Clause",
   "devDependencies": {
     "eslint": "^3.19.0",
@@ -12,8 +13,13 @@
     "test": "polymer test",
     "test:integration": "polymer build # test that psk builds without error with the CLI"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rwth-acis/las2peer.git"
+  },
   "dependencies": {
     "bower": "^1.8.0",
     "polymer-cli": "^1.2.0"
-  }
+  },
+  "homepage": "https://las2peer.org/"
 }
