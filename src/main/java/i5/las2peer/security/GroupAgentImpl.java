@@ -44,8 +44,8 @@ import i5.las2peer.tools.CryptoTools;
  */
 public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 
-	private SecretKey symmetricGroupKey = null;
-	private AgentImpl openedBy = null;
+	private SecretKey symmetricGroupKey;
+	private AgentImpl openedBy;
 
 	/**
 	 * hashtable storing the encrypted versions of the group secret key for each member

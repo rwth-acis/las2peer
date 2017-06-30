@@ -51,15 +51,15 @@ public abstract class AgentImpl implements Agent, XmlAble, Cloneable, MessageRec
 	/**
 	 * private key for asymmetric encryption
 	 */
-	private PrivateKey privateKey = null;
+	private PrivateKey privateKey;
 
-	private Node runningAt = null;
-	
+	private Node runningAt;
+
 	/**
 	 * Creates an empty agent.
 	 * 
 	 */
-	protected AgentImpl()  {
+	protected AgentImpl() {
 	}
 
 	/**

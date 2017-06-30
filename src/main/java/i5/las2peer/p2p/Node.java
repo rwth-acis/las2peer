@@ -1317,7 +1317,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * 
 	 * preferably, use {@link #invoke(AgentImpl, ServiceNameVersion, String, Serializable[], boolean, boolean)}
 	 * 
-	 * @param executing teh executing agent
+	 * @param executing the executing agent
 	 * @param serviceAgentId the id of the service agent
 	 * @param nodeId id of the node running the agent (may be null)
 	 * @param method service method
