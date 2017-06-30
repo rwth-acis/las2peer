@@ -11,6 +11,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
+import java.util.Locale;
 import java.util.logging.Level;
 
 import javax.security.auth.x500.X500Principal;
@@ -20,10 +21,12 @@ import i5.las2peer.tools.CryptoTools;
 import sun.misc.BASE64Encoder;
 import sun.security.provider.X509Factory;
 import sun.security.tools.keytool.CertAndKeyGen;
+import sun.security.util.DerOutputStream;
 import sun.security.x509.BasicConstraintsExtension;
 import sun.security.x509.CertificateExtensions;
 import sun.security.x509.DNSName;
 import sun.security.x509.GeneralName;
+import sun.security.x509.GeneralNameInterface;
 import sun.security.x509.GeneralNames;
 import sun.security.x509.SubjectAlternativeNameExtension;
 import sun.security.x509.X500Name;
@@ -62,7 +65,7 @@ public class KeystoreManager {
 		CertificateExtensions caExts = new CertificateExtensions();
 		X500Name caX500Name = new X500Name("CN=" + hostname + " Root CA, O=las2peer, OU=RWTH-ACIS");
 		SubjectAlternativeNameExtension caNameExt = new SubjectAlternativeNameExtension(
-				new GeneralNames().add(new GeneralName(caX500Name)));
+				new GeneralNames().add(new GeneralName(new MyDNSName(hostname))));
 		caExts.set(caNameExt.getName(), caNameExt);
 		BasicConstraintsExtension bce = new BasicConstraintsExtension(true, 0);
 		caExts.set(bce.getName(), bce);
@@ -76,7 +79,7 @@ public class KeystoreManager {
 		X500Name x500Name = new X500Name("CN=" + hostname + ", O=las2peer, OU=RWTH-ACIS");
 		CertificateExtensions exts = new CertificateExtensions();
 		SubjectAlternativeNameExtension nameExt = new SubjectAlternativeNameExtension(
-				new GeneralNames().add(new GeneralName(new DNSName(hostname))));
+				new GeneralNames().add(new GeneralName(new MyDNSName(hostname))));
 		exts.set(nameExt.getName(), nameExt);
 		X509Certificate certReq = keyGen.getSelfCertificate(x500Name, new Date(), 3 * 365 * 24 * 3600, exts);
 		X509Certificate cert = createSignedCertificate(certReq, caCert, caPrivateKey);
@@ -111,6 +114,104 @@ public class KeystoreManager {
 		fw.write(new BASE64Encoder().encodeBuffer(certificate.getEncoded()));
 		fw.write(X509Factory.END_CERT);
 		fw.close();
+	}
+
+	/**
+	 * This class is used as workaround to allow DNS Names to start with a number.
+	 * 
+	 * See https://bugs.openjdk.java.net/browse/JDK-8016345
+	 * 
+	 */
+	// XXX remove workaround for JDK-8016345
+	private static class MyDNSName implements GeneralNameInterface {
+
+		private final String dnsName;
+
+		public MyDNSName(String dnsName) {
+			this.dnsName = dnsName;
+		}
+
+		@Override
+		public int getType() {
+			// same as in sun.security.X509.DNSName
+			return (GeneralNameInterface.NAME_DNS);
+		}
+
+		@Override
+		public void encode(DerOutputStream out) throws IOException {
+			// same as in sun.security.X509.DNSName
+			out.putIA5String(dnsName);
+		}
+
+		@Override
+		public int constrains(GeneralNameInterface inputName) throws UnsupportedOperationException {
+			// same as in sun.security.X509.DNSName
+			int constraintType;
+			if (inputName == null) {
+				constraintType = NAME_DIFF_TYPE;
+			} else if (inputName.getType() != NAME_DNS) {
+				constraintType = NAME_DIFF_TYPE;
+			} else {
+				String inName = (((DNSName) inputName).getName()).toLowerCase(Locale.ENGLISH);
+				String thisName = dnsName.toLowerCase(Locale.ENGLISH);
+				if (inName.equals(thisName)) {
+					constraintType = NAME_MATCH;
+				} else if (thisName.endsWith(inName)) {
+					int inNdx = thisName.lastIndexOf(inName);
+					if (thisName.charAt(inNdx - 1) == '.') {
+						constraintType = NAME_WIDENS;
+					} else {
+						constraintType = NAME_SAME_TYPE;
+					}
+				} else if (inName.endsWith(thisName)) {
+					int ndx = inName.lastIndexOf(thisName);
+					if (inName.charAt(ndx - 1) == '.') {
+						constraintType = NAME_NARROWS;
+					} else {
+						constraintType = NAME_SAME_TYPE;
+					}
+				} else {
+					constraintType = NAME_SAME_TYPE;
+				}
+			}
+			return constraintType;
+		}
+
+		@Override
+		public int subtreeDepth() throws UnsupportedOperationException {
+			// same as in sun.security.X509.DNSName
+			int sum = 1;
+			for (int i = dnsName.indexOf('.'); i >= 0; i = dnsName.indexOf('.', i + 1)) {
+				++sum;
+			}
+			return sum;
+		}
+
+		@Override
+		public String toString() {
+			// same as in sun.security.X509.DNSName
+			return ("DNSName: " + dnsName);
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			// same as in sun.security.X509.DNSName
+			if (this == obj) {
+				return true;
+			}
+			if (!(obj instanceof MyDNSName)) {
+				return false;
+			}
+			MyDNSName other = (MyDNSName) obj;
+			return dnsName.equalsIgnoreCase(other.dnsName);
+		}
+
+		@Override
+		public int hashCode() {
+			// same as in sun.security.X509.DNSName
+			return dnsName.toUpperCase(Locale.ENGLISH).hashCode();
+		}
+
 	}
 
 }
