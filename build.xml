@@ -326,7 +326,7 @@
 	<target name="jars" depends="main_jar, test_service_jar, test_service_helper_jar" />
 	<target name="junit_jars" depends="jar_test1-1.1, jar_test1-1.2, jar_test2-1.0, jar_testService1-1.0, jar_testService1-1.1, jar_testService2-1.0" />
 	
-	<target name="build_frontend">
+	<target name="build_frontend" description="--> build the polymer frontend with bower">
 		<exec executable="npm" dir="frontend" failonerror="true">
 			<arg value="install" />
 			<arg value="bower" />
