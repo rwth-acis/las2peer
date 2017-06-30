@@ -1,9 +1,11 @@
 package i5.las2peer.connectors.nodeAdminConnector.handler;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
@@ -15,8 +17,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import i5.las2peer.api.p2p.ServiceVersion;
+import i5.las2peer.connectors.nodeAdminConnector.KeystoreManager;
 import i5.las2peer.connectors.nodeAdminConnector.NodeAdminConnector;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.PastryNodeImpl;
@@ -62,6 +66,22 @@ public class DefaultHandler extends AbstractHandler {
 			}
 		}
 		return Response.ok(bytes, "image/x-icon").build();
+	}
+
+	@GET
+	@Path("/cacert.pem")
+	public Response getCACert() throws IOException {
+		try {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			OutputStreamWriter osw = new OutputStreamWriter(baos);
+			KeystoreManager.writeCertificateToPEMStream(connector.getCACertificate(), osw);
+			osw.close();
+			return Response.ok(baos.toByteArray(), "application/x-pem-file").build();
+		} catch (FileNotFoundException e) {
+			return Response.status(Status.NOT_FOUND).build();
+		} catch (Exception e) {
+			return Response.serverError().entity(e.toString()).build();
+		}
 	}
 
 	@GET

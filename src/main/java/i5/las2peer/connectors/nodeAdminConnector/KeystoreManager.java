@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
@@ -107,12 +108,17 @@ public class KeystoreManager {
 		return outCert;
 	}
 
+	public static void writeCertificateToPEMStream(Certificate certificate, OutputStreamWriter outputStreamWriter)
+			throws IOException, CertificateEncodingException {
+		outputStreamWriter.write(X509Factory.BEGIN_CERT + "\n");
+		outputStreamWriter.write(new BASE64Encoder().encodeBuffer(certificate.getEncoded()));
+		outputStreamWriter.write(X509Factory.END_CERT);
+	}
+
 	public static void writeCertificateToPEMFile(Certificate certificate, String filename)
 			throws IOException, CertificateEncodingException {
 		FileWriter fw = new FileWriter(filename);
-		fw.write(X509Factory.BEGIN_CERT + "\n");
-		fw.write(new BASE64Encoder().encodeBuffer(certificate.getEncoded()));
-		fw.write(X509Factory.END_CERT);
+		writeCertificateToPEMStream(certificate, fw);
 		fw.close();
 	}
 
