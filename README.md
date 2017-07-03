@@ -5,17 +5,13 @@ las2peer is a Java-based server framework for developing and deploying services 
 
 Developers can develop and test their services locally and then deploy them on any machine that has joined the network. For communication between nodes, the FreePastry (http://www.freepastry.org/) library is used.
 
-Currently, connection to the outside is realized via the [HTTP-Connector](https://github.com/rwth-acis/las2peer-HttpConnector/) or the [Web-Connector](https://github.com/rwth-acis/las2peer-WebConnector/).
-
-Service Development
------------------------
-This project contains las2peer itself. To develop a service for las2peer, please use the 
+## Service Development
+This project contains las2peer itself. To develop a service for las2peer, please use the
 [las2peer Template Project](https://github.com/rwth-acis/las2peer-Template-Project/) and follow the instructions of the project's ReadMe.  
 
 If you want to learn more about las2peer, please visit the [las2peer Template Project's Wiki Page](https://github.com/rwth-acis/las2peer-Template-Project/wiki).
 
-Preparations
------------------------
+## Preparations
 
 las2peer depends on strong encryption enabled in its Java Runtime Environment (JRE).
 If you use an Oracle Java version, you have to enable strong encryption by replacing a set of policy files in subdirectory ./lib/security/ of your JRE installation.
@@ -26,29 +22,42 @@ Policy files for strong encryption can be downloaded via Oracle:
 
 (If the JUnit-test "i5.las2peer.communication.MessageTest" runs successfully, you have enabled strong encryption correctly)
 
+## Project structure
 
-Building Instructions
-----------------------
+### Modules
 
-To build the las2peer jar file simply run default target:
-    ```ant```
-    or directly
-    ```ant jars```
+This repository contains four las2peer modules:
+* Core (`/core`)
+* REST Mapper (`/restmapper`)
+* Web Connector (`/webconnector`)
+* Node Admin Connector (`/nodeadminconnector`)
 
+Each of them lays in its own subfolder, containing a build file providing the following tasks:
+* `ant` or `ant main_jar` will build the respective jar of the submodule. The jars will be stored in `/export/jars`.
+* `ant junit_tests` will run the respective junit tests. Test reports will be stored in `/tmp/test_reports`.
+* `ant javadoc` will create the javadocs for the respective submodule. The results will be stored in `/export/javadoc`.
+* `ant all` runs all the tasks from above.
+* `ant deploy-local` deploys the respective submodule to the local ivy repository. If you have set up  a project to resolve dependencies from the local repository, you can conventiently test your local changes to the code without pushing and publishing them to everyone.
 
-JUnit Tests
------------
+Hint: If you want to build a module that depends on another module and want to test them together, run `ant deploy-local` on the dependency!
 
-All JUnit tests are started with:  
-    ```ant junit_tests```
+### Bundle
 
-Reports can be found in ./tmp/test_reports afterwards.
+las2peer has a modular structure and many dependencies. However, most installations use all modules together, this is why we provide a bundle of all submodules and their dependencies in one single jar. The build script for the bundle can be found in `/bundle`.
 
+The build script provides the following tasks:
+* `ant` or `ant main_jar` will build the fat jar. The jar will be stored in `/export/jars`.
+* `ant deploy-local` deploys the bundle to the local ivy repository.
 
-Javadoc
-----------
+If you want to bundle your local changes, run `ant deploy-local` on all modules.
 
-Simply build the standard Javadocs with:  
-    ```ant javadoc```
+### Super build script
 
-Javadoc can be found in ./export/javadoc afterwards.
+To make life easier for us developers, this repository contains a build script for convenient building multiple submodules.
+
+* `ant` or `ant build-only` will run `deploy-local` on each submodule
+* `ant all` will run `ant all` and `deploy-local` on each submodule
+
+## CI
+
+All subprojects and bundles will be built by Jenkins and be published as snapshot.
