@@ -355,7 +355,7 @@
 			<fileset dir="${tmp.classes}">
 				<exclude name="i5/las2peer/testing/services/**" />
 			</fileset>
-			<fileset file="etc/las2peer.policy" />
+			<fileset file="resources/las2peer.policy" />
 			<manifest>
 				<attribute name="Main-Class" value="${main-class}"/>
 				<attribute name="Class-Path" value="${manifest.classpath}" />
