@@ -16,5 +16,21 @@
 		<ant dir="nodeadminconnector" antfile="build.xml" target="all" />  
 		<ant dir="bundle" antfile="build.xml" target="all" /> 
 	</target>
+	
+	<target name="deploy-snapshot" depends="all">
+	    <ant dir="core" antfile="build.xml" target="deploy-snapshot" />        
+		<ant dir="restmapper" antfile="build.xml" target="deploy-snapshot" />  
+		<ant dir="webconnector" antfile="build.xml" target="deploy-snapshot" />   
+		<ant dir="nodeadminconnector" antfile="build.xml" target="deploy-snapshot" />  
+		<ant dir="bundle" antfile="build.xml" target="deploy-snapshot" /> 
+	</target>
+	
+	<target name="deploy-release">
+	    <ant dir="core" antfile="build.xml" target="deploy-release" />        
+		<ant dir="restmapper" antfile="build.xml" target="deploy-release" />  
+		<ant dir="webconnector" antfile="build.xml" target="deploy-release" />   
+		<ant dir="nodeadminconnector" antfile="build.xml" target="deploy-release" />  
+		<ant dir="bundle" antfile="build.xml" target="deploy-release" /> 
+	</target>
 
 </project>
