@@ -1,8 +1,4 @@
-/output
-/export
-/node-storage
-/.las2peer
-/tmp
+/output/
 /log
 /lib
 ivy.jar
@@ -16,3 +12,4 @@ ivy.jar
 /junitvmwatcher*.properties
 /junit*.properties
 /etc/startup
+/ivy/ivy.jar
