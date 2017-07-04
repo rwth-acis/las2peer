@@ -16,7 +16,7 @@ import com.sun.net.httpserver.HttpHandler;
 
 import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.persistency.EnvelopeNotFoundException;
-import i5.las2peer.classLoaders.L2pClassManager;
+import i5.las2peer.classLoaders.ClassManager;
 import i5.las2peer.classLoaders.libraries.SharedStorageRepository;
 import i5.las2peer.connectors.nodeAdminConnector.NodeAdminConnector;
 import i5.las2peer.logging.L2pLogger;
@@ -103,7 +103,7 @@ public abstract class AbstractHandler implements HttpHandler {
 	protected List<ServiceNameVersion> getNetworkServices(Node node, String searchName) {
 		List<ServiceNameVersion> result = new LinkedList<>();
 		try {
-			String libName = L2pClassManager.getPackageName(searchName);
+			String libName = ClassManager.getPackageName(searchName);
 			String libId = SharedStorageRepository.getLibraryVersionsEnvelopeIdentifier(libName);
 			EnvelopeVersion networkVersions = node.fetchEnvelope(libId);
 			Serializable content = networkVersions.getContent();

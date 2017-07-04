@@ -29,7 +29,7 @@ import i5.las2peer.api.persistency.EnvelopeNotFoundException;
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentNotFoundException;
-import i5.las2peer.classLoaders.L2pClassManager;
+import i5.las2peer.classLoaders.ClassManager;
 import i5.las2peer.classLoaders.libraries.SharedStorageRepository;
 import i5.las2peer.connectors.nodeAdminConnector.AgentSession;
 import i5.las2peer.connectors.nodeAdminConnector.NodeAdminConnector;
@@ -318,7 +318,7 @@ public class FrontendHandler extends AbstractHandler {
 	private List<PojoService> getPojoNetworkServices(Node node, String searchName) {
 		List<PojoService> result = new LinkedList<>();
 		try {
-			String libName = L2pClassManager.getPackageName(searchName);
+			String libName = ClassManager.getPackageName(searchName);
 			String libId = SharedStorageRepository.getLibraryVersionsEnvelopeIdentifier(libName);
 			EnvelopeVersion networkVersions = node.fetchEnvelope(libId);
 			Serializable content = networkVersions.getContent();

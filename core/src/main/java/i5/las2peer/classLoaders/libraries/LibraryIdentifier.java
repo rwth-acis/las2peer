@@ -1,4 +1,4 @@
-package i5.las2peer.classLoaders.helpers;
+package i5.las2peer.classLoaders.libraries;
 
 import java.io.File;
 import java.util.regex.Matcher;
@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
  * {@link LibraryVersion}
  * 
  */
-public class LibraryIdentifier implements Comparable<LibraryIdentifier> {
+public class LibraryIdentifier {
 
 	private String name;
 	private LibraryVersion version;
@@ -134,28 +134,6 @@ public class LibraryIdentifier implements Comparable<LibraryIdentifier> {
 	}
 
 	/**
-	 * checks, if this library matches the given range
-	 * 
-	 * @param min
-	 * @param max
-	 * @return true, if this version is included in the given range
-	 */
-	public boolean matchesRange(LibraryVersion min, LibraryVersion max) {
-		return this.version.isBetween(min, max);
-	}
-
-	/**
-	 * checks, if this library matches the given range
-	 * 
-	 * @param min
-	 * @param max
-	 * @return true, if this version is included in the given range
-	 */
-	public boolean matchesRange(String min, String max) {
-		return this.version.isBetween(min, max);
-	}
-
-	/**
 	 * since equals is overridden, we should implement an own hashCode.
 	 * 
 	 * @return a hash code
@@ -163,31 +141,6 @@ public class LibraryIdentifier implements Comparable<LibraryIdentifier> {
 	@Override
 	public int hashCode() {
 		return (this.toString()).hashCode();
-	}
-
-	/**
-	 * does the given library identifier match this library dependency
-	 * 
-	 * @param dep
-	 * @return true, if this version fits the given dependency
-	 */
-	public boolean matches(LibraryDependency dep) {
-		return dep.fits(this);
-	}
-
-	/**
-	 * implement {@code Comparable<LibraryDependency>} so that the L2pClassLoader may keep a (sorted) TreeMap of all
-	 * registered Libraries
-	 * 
-	 * @return comparison code
-	 */
-	@Override
-	public int compareTo(LibraryIdentifier other) {
-		if (this.getName().equals(other.getName())) {
-			return this.getVersion().compareTo(other.getVersion());
-		} else {
-			return this.getName().compareTo(other.getName());
-		}
 	}
 
 }

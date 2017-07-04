@@ -1,9 +1,9 @@
-package i5.las2peer.classLoaders.helpers;
+package i5.las2peer.classLoaders.libraries;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import i5.las2peer.classLoaders.libraries.LibraryIdentifier;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -30,17 +30,6 @@ public class LibraryIdentifierTest {
 	public void testEquality() {
 		assertEquals(new LibraryIdentifier("testname;version=\"1.0.1-22\""), "testname;version=\"1.0.1-22\"");
 		assertFalse(new LibraryIdentifier("testname;version=\"1.0.1-22\"").equals("tstname;version=\"1.0.1-22\""));
-	}
-
-	@Test
-	public void testMatchesRange() {
-		assertTrue(new LibraryIdentifier("test;version=\"10.2.3-1234\"").matchesRange("10", "11"));
-		assertTrue(new LibraryIdentifier("test;version=\"10.2.3-1234\"").matchesRange("10.2.3-1234", "10.2.3-1234"));
-		assertTrue(new LibraryIdentifier("test;version=\"10.2.3-1234\"").matchesRange("10", "10.2.3-1234"));
-
-		assertFalse(new LibraryIdentifier("test;version=\"10.2.3-1234\"").matchesRange("10", "10.2.3-1222"));
-		assertFalse(new LibraryIdentifier("test;version=\"10.2.3-1234\"").matchesRange("10", "10.2.3"));
-		assertFalse(new LibraryIdentifier("test;version=\"10.2.3-1234\"").matchesRange("10", "10.2"));
 	}
 
 	@Test

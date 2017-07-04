@@ -9,9 +9,6 @@ import java.util.LinkedList;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import i5.las2peer.classLoaders.helpers.LibraryDependency;
-import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
-
 /**
  * a loaded jar library implements a library on the basis of a standard jar file
  * 
@@ -31,11 +28,10 @@ public class LoadedJarLibrary extends LoadedLibrary {
 	 * 
 	 * @param filename
 	 * @param ident
-	 * @param deps
 	 * @throws IOException
 	 */
-	public LoadedJarLibrary(String filename, LibraryIdentifier ident, LibraryDependency[] deps) throws IOException {
-		super(ident, deps);
+	public LoadedJarLibrary(String filename, LibraryIdentifier ident) throws IOException {
+		super(ident);
 
 		sJarFileName = filename;
 		jfFile = new JarFile(filename);
@@ -178,7 +174,6 @@ public class LoadedJarLibrary extends LoadedLibrary {
 	public static LoadedJarLibrary createFromJar(String filename) throws IllegalArgumentException, IOException {
 		JarFile jfFile = new JarFile(filename);
 
-		String sImport = jfFile.getManifest().getMainAttributes().getValue("Import-Library");
 		String sName = jfFile.getManifest().getMainAttributes().getValue("Library-SymbolicName");
 		String sVersion = jfFile.getManifest().getMainAttributes().getValue("Library-Version");
 
@@ -194,8 +189,7 @@ public class LoadedJarLibrary extends LoadedLibrary {
 		}
 
 		jfFile.close();
-		return new LoadedJarLibrary(filename, new LibraryIdentifier(sName, sVersion),
-				LibraryDependency.fromString(sImport));
+		return new LoadedJarLibrary(filename, new LibraryIdentifier(sName, sVersion));
 
 	}
 

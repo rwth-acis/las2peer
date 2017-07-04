@@ -16,7 +16,7 @@ import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.api.security.AnonymousAgent;
-import i5.las2peer.classLoaders.L2pClassManager;
+import i5.las2peer.classLoaders.ClassManager;
 import i5.las2peer.classLoaders.libraries.FileSystemRepository;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
@@ -66,7 +66,7 @@ public class LocalNode extends Node {
 	 * 
 	 * @param classManager
 	 */
-	private LocalNode(L2pClassManager classManager) {
+	private LocalNode(ClassManager classManager) {
 		super(classManager);
 
 		Random r = new Random();
@@ -306,7 +306,7 @@ public class LocalNode extends Node {
 	 * @return Returns a LocalNode instance
 	 */
 	public static LocalNode newNode(String fileSystemRepository) {
-		return new LocalNode(new L2pClassManager(new FileSystemRepository(fileSystemRepository),
+		return new LocalNode(new ClassManager(new FileSystemRepository(fileSystemRepository),
 				ClassLoader.getSystemClassLoader()));
 	}
 

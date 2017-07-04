@@ -3,7 +3,6 @@ package i5.las2peer.classLoaders.libraries;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -13,10 +12,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import i5.las2peer.classLoaders.LibraryNotFoundException;
-import i5.las2peer.classLoaders.UnresolvedDependenciesException;
-import i5.las2peer.classLoaders.helpers.LibraryDependency;
-import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
-import i5.las2peer.classLoaders.helpers.LibraryVersion;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.tools.SimpleTools;
 
@@ -91,10 +86,9 @@ public class FileSystemRepository implements Repository {
 	 * @param name
 	 * @return a LoadedLibrary for the requested library name
 	 * @throws LibraryNotFoundException
-	 * @throws UnresolvedDependenciesException
 	 */
 	@Override
-	public LoadedLibrary findLibrary(String name) throws LibraryNotFoundException, UnresolvedDependenciesException {
+	public LoadedLibrary findLibrary(String name) throws LibraryNotFoundException {
 		updateRepository(false);
 
 		Hashtable<LibraryVersion, String> htVersions = htFoundJars.get(name);
@@ -109,17 +103,13 @@ public class FileSystemRepository implements Repository {
 		LibraryVersion version = null;
 		for (Enumeration<LibraryVersion> en = htVersions.keys(); en.hasMoreElements();) {
 			LibraryVersion v = en.nextElement();
-			if (version == null || v.isLargerThan(version)) {
+			if (version == null) {
 				version = v;
 			}
 		}
 
 		try {
 			return LoadedJarLibrary.createFromJar(htVersions.get(version));
-		} catch (IllegalArgumentException e) {
-			// somthing's wrong with the manifest
-			throw new UnresolvedDependenciesException(
-					"Somethings seems wrong with the dependency information of " + name + ": " + e.getMessage(), e);
 		} catch (Exception e) {
 			throw new LibraryNotFoundException("Error opening library jar " + htVersions.get(version), e);
 		}
@@ -155,41 +145,6 @@ public class FileSystemRepository implements Repository {
 			throw new LibraryNotFoundException(
 					"library '" + lib.toString() + "' package could not be found in the repositories!", e);
 		}
-	}
-
-	/**
-	 * get the newest library matching the given library dependency (name and version range)
-	 * 
-	 * @param dep
-	 * @return a LoadedLibray matching the given library dependency
-	 * @throws LibraryNotFoundException
-	 */
-	@Override
-	public LoadedLibrary findMatchingLibrary(LibraryDependency dep) throws LibraryNotFoundException {
-		updateRepository(false);
-
-		Hashtable<LibraryVersion, String> htVersions = htFoundJars.get(dep.getName());
-		if (htVersions == null) {
-			throw new LibraryNotFoundException(
-					"library '" + dep.getName() + "' package could not be found in the repositories!");
-		}
-
-		LibraryVersion[] available = htVersions.keySet().toArray(new LibraryVersion[0]);
-		Arrays.sort(available, Comparator.comparing((LibraryVersion s) -> s).reversed());
-
-		for (LibraryVersion version : available) {
-			if (dep.fits(version)) {
-				try {
-					return LoadedJarLibrary.createFromJar(htVersions.get(version));
-				} catch (Exception e) {
-					System.out.println("Error loading jar: " + e);
-					e.printStackTrace();
-				}
-			}
-		}
-
-		throw new LibraryNotFoundException(
-				"library '" + dep.toString() + "' package could not be found in the repositories!");
 	}
 
 	/**

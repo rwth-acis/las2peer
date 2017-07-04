@@ -2,8 +2,6 @@ package i5.las2peer.classLoaders.libraries;
 
 import i5.las2peer.api.persistency.EnvelopeException;
 import i5.las2peer.api.persistency.EnvelopeNotFoundException;
-import i5.las2peer.classLoaders.helpers.LibraryIdentifier;
-import i5.las2peer.classLoaders.helpers.LibraryVersion;
 import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.serialization.MalformedXMLException;
 import i5.las2peer.serialization.SerializationException;

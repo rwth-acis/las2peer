@@ -6,6 +6,8 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
+import i5.las2peer.classLoaders.libraries.LoadedJarLibrary;
+import i5.las2peer.classLoaders.libraries.LoadedLibrary;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -15,13 +17,13 @@ import java.util.Properties;
 
 import org.junit.Test;
 
-public class LibraryClassLoaderTest {
+public class ServiceClassLoaderTest {
 
 	@Test
 	public void test() throws IllegalArgumentException, IOException {
-		LoadedLibraryCache lib = LoadedLibraryCache
+		LoadedLibrary lib = LoadedJarLibrary
 				.createFromJar("export/jars/i5.las2peer.classLoaders.testPackage2-1.0.jar");
-		LibraryClassLoader testee = new LibraryClassLoader(lib, null);
+		ServiceClassLoader testee = new ServiceClassLoader(lib, null);
 
 		assertEquals("i5.las2peer.classLoaders.testPackage2", testee.getLibrary().getIdentifier().getName());
 		assertEquals("1.0", testee.getLibrary().getIdentifier().getVersion().toString());
@@ -30,11 +32,11 @@ public class LibraryClassLoaderTest {
 	@Test
 	public void testClassLoading() throws IllegalArgumentException, IOException, ClassNotFoundException,
 			SecurityException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-		LoadedLibraryCache lib = LoadedLibraryCache
+		LoadedLibrary lib = LoadedJarLibrary
 				.createFromJar("export/jars/i5.las2peer.classLoaders.testPackage1-1.0.jar");
-		LibraryClassLoader testee = new LibraryClassLoader(lib, null);
+		ServiceClassLoader testee = new ServiceClassLoader(lib, null);
 
-		Class<?> cl = testee.loadClass("i5.las2peer.classLoaders.testPackage1.CounterClass", false, false);
+		Class<?> cl = testee.loadClass("i5.las2peer.classLoaders.testPackage1.CounterClass", false);
 
 		Method inc = cl.getDeclaredMethod("inc");
 		Method counter = cl.getDeclaredMethod("getCounter");
@@ -55,9 +57,9 @@ public class LibraryClassLoaderTest {
 
 	@Test
 	public void testResources() throws IllegalArgumentException, IOException {
-		LoadedLibraryCache lib = LoadedLibraryCache
+		LoadedLibrary lib = LoadedJarLibrary
 				.createFromJar("export/jars/i5.las2peer.classLoaders.testPackage1-1.0.jar");
-		LibraryClassLoader testee = new LibraryClassLoader(lib, null);
+		ServiceClassLoader testee = new ServiceClassLoader(lib, null);
 
 		Properties properties = new Properties();
 		properties.load(testee.getResourceAsStream("i5/las2peer/classLoaders/testPackage1/test.properties"));
@@ -74,13 +76,13 @@ public class LibraryClassLoaderTest {
 
 	@Test
 	public void testLoaderBehaviour() throws ClassNotFoundException, IllegalArgumentException, IOException {
-		LoadedLibraryCache lib = LoadedLibraryCache
+		LoadedLibrary lib = LoadedJarLibrary
 				.createFromJar("export/jars/i5.las2peer.classLoaders.testPackage1-1.0.jar");
-		LibraryClassLoader testee1 = new LibraryClassLoader(lib, null);
-		LibraryClassLoader testee2 = new LibraryClassLoader(lib, null);
+		ServiceClassLoader testee1 = new ServiceClassLoader(lib, null);
+		ServiceClassLoader testee2 = new ServiceClassLoader(lib, null);
 
-		Class<?> test1 = testee1.loadClass("i5.las2peer.classLoaders.testPackage1.CounterClass", false, false);
-		Class<?> test2 = testee2.loadClass("i5.las2peer.classLoaders.testPackage1.CounterClass", false, false);
+		Class<?> test1 = testee1.loadClass("i5.las2peer.classLoaders.testPackage1.CounterClass", false);
+		Class<?> test2 = testee2.loadClass("i5.las2peer.classLoaders.testPackage1.CounterClass", false);
 
 		assertNotSame(test1, test2);
 		assertSame(testee1, test1.getClassLoader());
@@ -93,11 +95,11 @@ public class LibraryClassLoaderTest {
 
 	@Test
 	public void testPackages() throws IllegalArgumentException, IOException, ClassNotFoundException {
-		LoadedLibraryCache lib = LoadedLibraryCache
+		LoadedLibrary lib = LoadedJarLibrary
 				.createFromJar("export/jars/i5.las2peer.classLoaders.testPackage1-1.0.jar");
-		LibraryClassLoader testee = new LibraryClassLoader(lib, null);
+		ServiceClassLoader testee = new ServiceClassLoader(lib, null);
 
-		Class<?> cl = testee.loadClass("i5.las2peer.classLoaders.testPackage1.CounterClass", false, false);
+		Class<?> cl = testee.loadClass("i5.las2peer.classLoaders.testPackage1.CounterClass", false);
 
 		assertSame(testee, cl.getClassLoader());
 

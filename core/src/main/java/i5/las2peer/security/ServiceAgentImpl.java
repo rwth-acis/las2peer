@@ -355,7 +355,7 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 	public void notifyRegistrationTo(Node node) throws AgentException {
 		try {
 			Class<? extends Service> clServ = (Class<? extends Service>) node.getBaseClassLoader()
-					.getServiceClass(sService.getName(), sService.getVersion().toString());
+					.getServiceClass(sService);
 
 			Constructor<? extends Service> cons = clServ.getConstructor(new Class<?>[0]);
 			serviceInstance = cons.newInstance();

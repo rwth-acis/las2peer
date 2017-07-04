@@ -34,7 +34,7 @@ import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.api.security.AgentOperationFailedException;
-import i5.las2peer.classLoaders.L2pClassManager;
+import i5.las2peer.classLoaders.ClassManager;
 import i5.las2peer.classLoaders.libraries.Repository;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
@@ -175,7 +175,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 */
 	private HashMap<String, TreeSet<Long>> mapListenerTopics = new HashMap<>();
 
-	private L2pClassManager baseClassLoader = null;
+	private ClassManager classManager = null;
 
 	private Hashtable<Long, MessageResultListener> htAnswerListeners = new Hashtable<>();
 
@@ -214,29 +214,29 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	}
 
 	/**
-	 * @param baseClassLoader A default class loader used by this node.
+	 * @param classManager A default class loader used by this node.
 	 */
-	public Node(L2pClassManager baseClassLoader) {
-		this(baseClassLoader, true);
+	public Node(ClassManager classManager) {
+		this(classManager, true);
 	}
 
 	/**
-	 * @param baseClassLoader A default class loader used by this node.
+	 * @param classManager A default class loader used by this node.
 	 * @param standardObserver If true, the node uses the default logger.
 	 */
-	public Node(L2pClassManager baseClassLoader, boolean standardObserver) {
-		this(baseClassLoader, standardObserver, false);
+	public Node(ClassManager classManager, boolean standardObserver) {
+		this(classManager, standardObserver, false);
 	}
 
 	/**
 	 * Generates a new Node with the given baseClassLoader. The Observer-flags determine, which observers will be
 	 * registered at startup.
 	 * 
-	 * @param baseClassLoader A default class loader used by this node.
+	 * @param classManager A default class loader used by this node.
 	 * @param standardObserver If true, the node uses the default logger.
 	 * @param monitoringObserver If true, the monitoring is enabled for this node.
 	 */
-	public Node(L2pClassManager baseClassLoader, boolean standardObserver, boolean monitoringObserver) {
+	public Node(ClassManager classManager, boolean standardObserver, boolean monitoringObserver) {
 		setFieldValues();
 
 		if (standardObserver) {
@@ -246,10 +246,10 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 			addObserver(new MonitoringObserver(50, this));
 		}
 
-		this.baseClassLoader = baseClassLoader;
+		this.classManager = classManager;
 
-		if (baseClassLoader == null) {
-			this.baseClassLoader = new L2pClassManager(new Repository[0], this.getClass().getClassLoader());
+		if (classManager == null) {
+			this.classManager = new ClassManager(new Repository[0], this.getClass().getClassLoader());
 		}
 
 		nodeKeyPair = CryptoTools.generateKeyPair();
@@ -439,14 +439,14 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 
 	/**
 	 * Gets the class loader, this node is bound to. In a <i>real</i> las2peer environment, this should refer to a
-	 * {@link i5.las2peer.classLoaders.L2pClassManager}
+	 * {@link i5.las2peer.classLoaders.ClassManager}
 	 * 
 	 * Otherwise, the class loader of this Node class is used.
 	 * 
 	 * @return a class loader
 	 */
-	public L2pClassManager getBaseClassLoader() {
-		return baseClassLoader;
+	public ClassManager getBaseClassLoader() {
+		return classManager;
 	}
 
 	/**

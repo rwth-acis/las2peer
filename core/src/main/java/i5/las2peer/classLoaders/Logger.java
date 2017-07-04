@@ -31,22 +31,20 @@ public class Logger {
 		logger.finer("f\t" + "\t" + whoString + "\t" + classname + "\t" + message);
 	}
 
-	static void logLoading(Object who, String classname, Boolean success, Object add) {
+	static void logLoading(Object who, String classname, Boolean success) {
 		String whoString = getWhoString(who);
-		logger.finer("l\t" + success + "\t" + whoString + "\t" + classname + "\t" + add);
+		logger.finer("l\t" + success + "\t" + whoString + "\t" + classname);
 	}
 
-	static void logSubLibrary(Object who, LibraryClassLoader libraryLoader) {
+	static void logSubLibrary(Object who, ServiceClassLoader libraryLoader) {
 		String whoString = getWhoString(who);
 		logger.finer("library load\t" + whoString + "\t" + libraryLoader.getLibrary().getIdentifier());
 	}
 
 	private static String getWhoString(Object cl) {
-		if (cl instanceof LibraryClassLoader) {
-			return "lcl" + "\t" + ((LibraryClassLoader) cl).getLibrary().getIdentifier();
-		} else if (cl instanceof BundleClassManager) {
-			return "bcl" + "\t" + ((BundleClassManager) cl).getMainLibraryIdentifier();
-		} else if (cl instanceof L2pClassManager) {
+		if (cl instanceof ServiceClassLoader) {
+			return "lcl" + "\t" + ((ServiceClassLoader) cl).getLibrary().getIdentifier();
+		} else if (cl instanceof ClassManager) {
 			return "l2p-main" + "\t\t";
 		} else {
 			return "unkown";
