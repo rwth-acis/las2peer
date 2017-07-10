@@ -5,6 +5,7 @@ import java.net.URL;
 
 import i5.las2peer.classLoaders.libraries.LoadedLibrary;
 import i5.las2peer.classLoaders.libraries.ResourceNotFoundException;
+import i5.las2peer.classLoaders.policies.ClassLoaderPolicy;
 
 /**
  * A service class loader is responsible for loading classes from the service bundle, probably loaded via a
@@ -24,17 +25,25 @@ public class ServiceClassLoader extends ClassLoader {
 	 * parent class manager
 	 */
 	private ClassLoader parent;
+	
+	/**
+	 * The policy
+	 */
+	private ClassLoaderPolicy policy;
 
 	/**
 	 * create a new class loader for a given library.
 	 *
 	 * @param lib
 	 * @param parent
+	 * @param policy 
 	 */
-	public ServiceClassLoader(LoadedLibrary lib, ClassLoader parent) {
+	public ServiceClassLoader(LoadedLibrary lib, ClassLoader parent, ClassLoaderPolicy policy) {
 		this.library = lib;
 
 		this.parent = parent;
+		
+		this.policy = policy;
 	}
 
 	/**
@@ -93,18 +102,20 @@ public class ServiceClassLoader extends ClassLoader {
 		Class<?> c = findLoadedClass(name);
 
 		// ask parent loader
-		// TODO restrict access to platform classes
-		if (c == null && parent != null) {
-			try {
-				c = parent.loadClass(name);
-			} catch (ClassNotFoundException e) {
-			}
-		} else if (c == null && parent == null) { // for test cases
-			try {
-				c = getSystemClassLoader().loadClass(name);
-			} catch (ClassNotFoundException e) {
+		if (this.policy.canLoad(name)) {
+			if (c == null && parent != null) {
+				try {
+					c = parent.loadClass(name);
+				} catch (ClassNotFoundException e) {
+				}
+			} else if (c == null && parent == null) { // for test cases
+				try {
+					c = getSystemClassLoader().loadClass(name);
+				} catch (ClassNotFoundException e) {
+				}
 			}
 		}
+		
 
 		// then look in this library
 		if (c == null) {

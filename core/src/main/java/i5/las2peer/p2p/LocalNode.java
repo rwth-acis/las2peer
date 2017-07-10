@@ -18,6 +18,7 @@ import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.api.security.AnonymousAgent;
 import i5.las2peer.classLoaders.ClassManager;
 import i5.las2peer.classLoaders.libraries.FileSystemRepository;
+import i5.las2peer.classLoaders.policies.DefaultPolicy;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
 import i5.las2peer.persistency.EnvelopeVersion;
@@ -307,7 +308,7 @@ public class LocalNode extends Node {
 	 */
 	public static LocalNode newNode(String fileSystemRepository) {
 		return new LocalNode(new ClassManager(new FileSystemRepository(fileSystemRepository),
-				ClassLoader.getSystemClassLoader()));
+				LocalNode.class.getClassLoader(), new DefaultPolicy()));
 	}
 
 	/**

@@ -8,6 +8,8 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
 import i5.las2peer.classLoaders.libraries.LoadedJarLibrary;
 import i5.las2peer.classLoaders.libraries.LoadedLibrary;
+import i5.las2peer.classLoaders.policies.DefaultPolicy;
+import i5.las2peer.classLoaders.policies.RestrictivePolicy;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -23,7 +25,7 @@ public class ServiceClassLoaderTest {
 	public void test() throws IllegalArgumentException, IOException {
 		LoadedLibrary lib = LoadedJarLibrary
 				.createFromJar("export/jars/i5.las2peer.classLoaders.testPackage2-1.0.jar");
-		ServiceClassLoader testee = new ServiceClassLoader(lib, null);
+		ServiceClassLoader testee = new ServiceClassLoader(lib, null, new DefaultPolicy());
 
 		assertEquals("i5.las2peer.classLoaders.testPackage2", testee.getLibrary().getIdentifier().getName());
 		assertEquals("1.0", testee.getLibrary().getIdentifier().getVersion().toString());
@@ -34,7 +36,7 @@ public class ServiceClassLoaderTest {
 			SecurityException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 		LoadedLibrary lib = LoadedJarLibrary
 				.createFromJar("export/jars/i5.las2peer.classLoaders.testPackage1-1.0.jar");
-		ServiceClassLoader testee = new ServiceClassLoader(lib, null);
+		ServiceClassLoader testee = new ServiceClassLoader(lib, null, new DefaultPolicy());
 
 		Class<?> cl = testee.loadClass("i5.las2peer.classLoaders.testPackage1.CounterClass", false);
 
@@ -59,7 +61,7 @@ public class ServiceClassLoaderTest {
 	public void testResources() throws IllegalArgumentException, IOException {
 		LoadedLibrary lib = LoadedJarLibrary
 				.createFromJar("export/jars/i5.las2peer.classLoaders.testPackage1-1.0.jar");
-		ServiceClassLoader testee = new ServiceClassLoader(lib, null);
+		ServiceClassLoader testee = new ServiceClassLoader(lib, null, new DefaultPolicy());
 
 		Properties properties = new Properties();
 		properties.load(testee.getResourceAsStream("i5/las2peer/classLoaders/testPackage1/test.properties"));
@@ -78,8 +80,8 @@ public class ServiceClassLoaderTest {
 	public void testLoaderBehaviour() throws ClassNotFoundException, IllegalArgumentException, IOException {
 		LoadedLibrary lib = LoadedJarLibrary
 				.createFromJar("export/jars/i5.las2peer.classLoaders.testPackage1-1.0.jar");
-		ServiceClassLoader testee1 = new ServiceClassLoader(lib, null);
-		ServiceClassLoader testee2 = new ServiceClassLoader(lib, null);
+		ServiceClassLoader testee1 = new ServiceClassLoader(lib, null, new DefaultPolicy());
+		ServiceClassLoader testee2 = new ServiceClassLoader(lib, null, new DefaultPolicy());
 
 		Class<?> test1 = testee1.loadClass("i5.las2peer.classLoaders.testPackage1.CounterClass", false);
 		Class<?> test2 = testee2.loadClass("i5.las2peer.classLoaders.testPackage1.CounterClass", false);
@@ -97,7 +99,7 @@ public class ServiceClassLoaderTest {
 	public void testPackages() throws IllegalArgumentException, IOException, ClassNotFoundException {
 		LoadedLibrary lib = LoadedJarLibrary
 				.createFromJar("export/jars/i5.las2peer.classLoaders.testPackage1-1.0.jar");
-		ServiceClassLoader testee = new ServiceClassLoader(lib, null);
+		ServiceClassLoader testee = new ServiceClassLoader(lib, null, new DefaultPolicy());
 
 		Class<?> cl = testee.loadClass("i5.las2peer.classLoaders.testPackage1.CounterClass", false);
 
@@ -106,6 +108,40 @@ public class ServiceClassLoaderTest {
 		assertNotNull(cl.getPackage());
 
 		assertEquals(cl.getPackage().getName(), "i5.las2peer.classLoaders.testPackage1");
+	}
+	
+	@Test
+	public void testPolicy() throws IllegalArgumentException, IOException, ClassNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+		LoadedLibrary lib = LoadedJarLibrary
+				.createFromJar("export/jars/i5.las2peer.classLoaders.evilService-1.0.jar");
+		ServiceClassLoader testee = new ServiceClassLoader(lib, null, new RestrictivePolicy());
+
+		Class<?> cl = testee.loadClass("i5.las2peer.classLoaders.evilService.EvilService", false);
+		
+		Method notEvil = cl.getDeclaredMethod("notEvil");
+		Method accessNode = cl.getDeclaredMethod("accessNode");
+		Method createThread = cl.getDeclaredMethod("createThread");
+		
+		notEvil.invoke(null);
+
+		try {
+			accessNode.invoke(null);
+			fail("NoClassDefFoundError expected");
+		} catch (InvocationTargetException e) {
+			System.out.print(e.getTargetException());
+			if (!(e.getTargetException() instanceof NoClassDefFoundError)) {
+				fail("NoClassDefFoundError expected");
+			}
+		}
+		
+		try {
+			createThread.invoke(null);
+			fail("NoClassDefFoundError expected");
+		} catch (InvocationTargetException e) {
+			if (!(e.getTargetException() instanceof NoClassDefFoundError)) {
+				fail("NoClassDefFoundError expected");
+			}
+		}
 	}
 
 }

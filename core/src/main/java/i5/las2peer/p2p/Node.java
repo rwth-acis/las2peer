@@ -36,6 +36,7 @@ import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.classLoaders.ClassManager;
 import i5.las2peer.classLoaders.libraries.Repository;
+import i5.las2peer.classLoaders.policies.DefaultPolicy;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
 import i5.las2peer.communication.RMIExceptionContent;
@@ -249,7 +250,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 		this.classManager = classManager;
 
 		if (classManager == null) {
-			this.classManager = new ClassManager(new Repository[0], this.getClass().getClassLoader());
+			this.classManager = new ClassManager(new Repository[0], this.getClass().getClassLoader(), new DefaultPolicy());
 		}
 
 		nodeKeyPair = CryptoTools.generateKeyPair();

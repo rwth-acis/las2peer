@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.classLoaders.libraries.FileSystemRepository;
+import i5.las2peer.classLoaders.policies.DefaultPolicy;
 
 public class ClassManagerTest {
 
@@ -30,7 +31,7 @@ public class ClassManagerTest {
 	public void testServiceClassLoading() throws ClassLoaderException, SecurityException, NoSuchMethodException,
 			IllegalArgumentException, IllegalAccessException, InvocationTargetException {
 		ClassManager testee = new ClassManager(new FileSystemRepository("export/jars/"),
-				ClassLoader.getSystemClassLoader());
+				ClassLoader.getSystemClassLoader(), new DefaultPolicy());
 
 		Class<?> cl = testee.getServiceClass(ServiceNameVersion.fromString("i5.las2peer.classLoaders.testPackage2.UsingCounter@1.0"));
 
@@ -53,7 +54,7 @@ public class ClassManagerTest {
 	@Test
 	public void testJarBehaviour() throws IllegalArgumentException, ClassLoaderException {
 		ClassManager testee = new ClassManager(new FileSystemRepository("export/jars/"),
-				ClassLoader.getSystemClassLoader());
+				ClassLoader.getSystemClassLoader(), new DefaultPolicy());
 		testee.getServiceClass(new ServiceNameVersion("i5.las2peer.classLoaders.testPackage2.UsingCounter", "1.0"));
 
 		assertEquals(1, testee.numberOfRegisteredServices());
@@ -73,7 +74,7 @@ public class ClassManagerTest {
 	public void testMultipleServiceClassLoading() throws ClassLoaderException, SecurityException, NoSuchMethodException,
 			IllegalArgumentException, IllegalAccessException, InvocationTargetException {
 		ClassManager testee = new ClassManager(new FileSystemRepository("export/jars/"),
-				ClassLoader.getSystemClassLoader());
+				ClassLoader.getSystemClassLoader(), new DefaultPolicy());
 
 		Class<?> cl1 = testee.getServiceClass(new ServiceNameVersion("i5.las2peer.classLoaders.testPackage2.UsingCounter", "1.0"));
 		Class<?> cl2 = testee.getServiceClass(new ServiceNameVersion("i5.las2peer.classLoaders.testPackage2.UsingCounter", "1.0"));

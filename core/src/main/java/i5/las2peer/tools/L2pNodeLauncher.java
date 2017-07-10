@@ -37,6 +37,7 @@ import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.classLoaders.ClassManager;
 import i5.las2peer.classLoaders.libraries.FileSystemRepository;
+import i5.las2peer.classLoaders.policies.RestrictivePolicy;
 import i5.las2peer.communication.ListMethodsContent;
 import i5.las2peer.communication.Message;
 import i5.las2peer.connectors.Connector;
@@ -906,7 +907,7 @@ public class L2pNodeLauncher {
 		}
 		// instantiate launcher
 		ClassManager cl = new ClassManager(new FileSystemRepository(serviceDirectories, true),
-				L2pNodeLauncher.class.getClassLoader());
+				L2pNodeLauncher.class.getClassLoader(),new RestrictivePolicy()); // TODO POL make optional
 		L2pNodeLauncher launcher = new L2pNodeLauncher(bindAddress, launcherConfiguration.getPort(),
 				launcherConfiguration.getBootstrap(), launcherConfiguration.getStorageMode(),
 				launcherConfiguration.getStorageDirectory(), launcherConfiguration.useMonitoringObserver(), cl,
