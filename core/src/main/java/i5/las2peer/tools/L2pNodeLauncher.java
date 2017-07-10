@@ -37,6 +37,8 @@ import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.classLoaders.ClassManager;
 import i5.las2peer.classLoaders.libraries.FileSystemRepository;
+import i5.las2peer.classLoaders.policies.ClassLoaderPolicy;
+import i5.las2peer.classLoaders.policies.DefaultPolicy;
 import i5.las2peer.classLoaders.policies.RestrictivePolicy;
 import i5.las2peer.communication.ListMethodsContent;
 import i5.las2peer.communication.Message;
@@ -881,7 +883,9 @@ public class L2pNodeLauncher {
 	 */
 	public static L2pNodeLauncher launchConfiguration(L2pNodeLauncherConfiguration launcherConfiguration)
 			throws CryptoException, NodeException, IllegalArgumentException {
-		L2pSecurityManager.enableSandbox(); // ENABLE SANDBOXING!!!
+		if (launcherConfiguration.isSandbox()) {
+			L2pSecurityManager.enableSandbox(); // ENABLE SANDBOXING!!!
+		}
 		// check configuration
 		String logDir = launcherConfiguration.getLogDir();
 		if (logDir != null) {
@@ -905,9 +909,14 @@ public class L2pNodeLauncher {
 			directories.add(DEFAULT_SERVICE_DIRECTORY);
 			serviceDirectories = directories;
 		}
+		// set up class loader policy
+		ClassLoaderPolicy clp = new DefaultPolicy();
+		if (launcherConfiguration.isSandbox()) {
+			clp = new RestrictivePolicy();
+		}
 		// instantiate launcher
 		ClassManager cl = new ClassManager(new FileSystemRepository(serviceDirectories, true),
-				L2pNodeLauncher.class.getClassLoader(),new RestrictivePolicy()); // TODO POL make optional
+				L2pNodeLauncher.class.getClassLoader(),clp);
 		L2pNodeLauncher launcher = new L2pNodeLauncher(bindAddress, launcherConfiguration.getPort(),
 				launcherConfiguration.getBootstrap(), launcherConfiguration.getStorageMode(),
 				launcherConfiguration.getStorageDirectory(), launcherConfiguration.useMonitoringObserver(), cl,
