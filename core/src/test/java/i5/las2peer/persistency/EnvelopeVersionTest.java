@@ -10,6 +10,7 @@ import java.util.Set;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -25,6 +26,7 @@ import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.testing.MockAgentFactory;
 import i5.las2peer.testing.TestSuite;
 
+@Ignore // TODO reenable, see LAS-423
 public class EnvelopeVersionTest {
 
 	private ArrayList<PastryNodeImpl> nodes;
