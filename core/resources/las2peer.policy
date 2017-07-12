@@ -2,14 +2,6 @@
 // If you want a service to have access to the file system or
 // open network ports add the respective rights below.
 
-// THE SANDBOX IS DISABLED BY DEFAULT!
-// If you want to deploy las2peer it's strongly recommended to comment out or delete the following lines.
-// This enables sandboxing and protects your system from malicious file access and networking operations.
-// If you experience issues please check the logs for blocked permissions and whitelist them in this file.
-grant {
-    permission java.security.AllPermission;
-};
-
 // example: This entry gives read and write access to a local directory called 'localdir'
 //     in your las2peer installation directory.
 //grant {

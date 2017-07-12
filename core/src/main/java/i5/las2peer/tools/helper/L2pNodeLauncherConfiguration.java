@@ -51,6 +51,9 @@ public class L2pNodeLauncherConfiguration {
 
 	public static final String ARG_SHORT_STORAGE_DIRECTORY = "-sd";
 	public static final String ARG_STORAGE_DIRECTORY = "--storage-directory";
+	
+	public static final String ARG_SANDBOX = "--sandbox";
+	public static final String ARG_SHORT_SANDBOX = "-sb";
 
 	// special options - must be read and handled before regular options
 	private boolean printHelp;
@@ -68,6 +71,7 @@ public class L2pNodeLauncherConfiguration {
 	private final Set<String> serviceDirectories = new HashSet<>();
 	private Long nodeIdSeed;
 	private final List<String> commands = new LinkedList<>();
+	private boolean sandbox;
 
 	public L2pNodeLauncherConfiguration() {
 		// set default values
@@ -143,6 +147,8 @@ public class L2pNodeLauncherConfiguration {
 				result.setColoredOutput(true);
 			} else if (arg.equalsIgnoreCase(ARG_SHORT_DEBUG) || arg.equalsIgnoreCase(ARG_DEBUG)) {
 				result.setDebugMode(true);
+			} else if (arg.equalsIgnoreCase(ARG_SHORT_SANDBOX) || arg.equalsIgnoreCase(ARG_SANDBOX)) {
+				result.setSandbox(true);
 			} else if (arg.equalsIgnoreCase(ARG_SHORT_PORT) || arg.equalsIgnoreCase(ARG_PORT)) {
 				if (itArg.hasNext() == false) {
 					throw new IllegalArgumentException(
@@ -257,6 +263,14 @@ public class L2pNodeLauncherConfiguration {
 
 	public void setDebugMode(boolean debugMode) {
 		this.debugMode = debugMode;
+	}
+	
+	public boolean isSandbox() {
+		return sandbox;
+	}
+
+	public void setSandbox(boolean sandbox) {
+		this.sandbox = sandbox;
 	}
 
 	public Integer getPort() {

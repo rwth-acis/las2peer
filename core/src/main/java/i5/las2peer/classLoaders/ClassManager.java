@@ -10,6 +10,7 @@ import i5.las2peer.classLoaders.libraries.LibraryIdentifier;
 import i5.las2peer.classLoaders.libraries.LibraryVersion;
 import i5.las2peer.classLoaders.libraries.LoadedLibrary;
 import i5.las2peer.classLoaders.libraries.Repository;
+import i5.las2peer.classLoaders.policies.ClassLoaderPolicy;
 
 /**
  * The main class for loading classes in the las2peer environment. This ClassManager handles library registering and
@@ -36,15 +37,21 @@ public class ClassManager {
 	 * all registered main bundles (i.e. services) (name, version) => ServiceClassLoader
 	 */
 	private Hashtable<ServiceNameVersion, ServiceClassLoader> registeredLoaders = new Hashtable<>();
+	
+	/**
+	 * The policy
+	 */
+	private ClassLoaderPolicy policy;
 
 	/**
 	 * create a new L2pClassLoader, which uses the given repository
 	 * 
 	 * @param repository
 	 * @param platformLoader
+	 * @param policy 
 	 */
-	public ClassManager(Repository repository, ClassLoader platformLoader) {
-		this(new Repository[] { repository }, platformLoader);
+	public ClassManager(Repository repository, ClassLoader platformLoader, ClassLoaderPolicy policy) {
+		this(new Repository[] { repository }, platformLoader, policy);
 	}
 
 	/**
@@ -52,9 +59,10 @@ public class ClassManager {
 	 * 
 	 * @param repositories
 	 * @param platformLoader
+	 * @param policy 
 	 */
-	public ClassManager(Repository[] repositories, ClassLoader platformLoader) {
-		this(Arrays.asList(repositories), platformLoader);
+	public ClassManager(Repository[] repositories, ClassLoader platformLoader, ClassLoaderPolicy policy) {
+		this(Arrays.asList(repositories), platformLoader, policy);
 	}
 
 	/**
@@ -62,10 +70,12 @@ public class ClassManager {
 	 * 
 	 * @param repositories
 	 * @param platformLoader
+	 * @param policy 
 	 */
-	public ClassManager(List<Repository> repositories, ClassLoader platformLoader) {
+	public ClassManager(List<Repository> repositories, ClassLoader platformLoader, ClassLoaderPolicy policy) {
 		this.repositories = new ArrayList<>(repositories);
 		this.platformLoader = platformLoader;
+		this.policy = policy;
 	}
 
 	/**
@@ -100,7 +110,7 @@ public class ClassManager {
 		}
 		
 		// register
-		ServiceClassLoader cl = new ServiceClassLoader(lib, platformLoader);
+		ServiceClassLoader cl = new ServiceClassLoader(lib, platformLoader, policy);
 		registeredLoaders.put(serviceIdentifier, cl);
 	}
 
