@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.junit.Assert;
 import org.junit.Test;
 
+import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.GroupAgentImpl;
@@ -20,9 +21,10 @@ public class AgentUpdateTest {
 	 */
 	@Test
 	public void testGroupAgentUpdate() {
+		ArrayList<PastryNodeImpl> nodes = null;
 		try {
 			// launch network
-			ArrayList<PastryNodeImpl> nodes = TestSuite.launchNetwork(2);
+			nodes = TestSuite.launchNetwork(2);
 			PastryNodeImpl firstNode = nodes.get(0);
 			// create agents
 			UserAgentImpl smith = MockAgentFactory.getAdam();
@@ -53,6 +55,10 @@ public class AgentUpdateTest {
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail();
+		} finally {
+			for (Node node : nodes) {
+				node.shutDown();
+			}
 		}
 	}
 

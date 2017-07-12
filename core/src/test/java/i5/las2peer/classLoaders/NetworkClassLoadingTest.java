@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import i5.las2peer.api.TestService;
 import i5.las2peer.api.p2p.ServiceNameVersion;
+import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.persistency.SharedStorage;
 import i5.las2peer.security.ServiceAgentImpl;
@@ -22,8 +23,9 @@ public class NetworkClassLoadingTest {
 
 	@Test
 	public void testServiceStart() {
+		ArrayList<PastryNodeImpl> nodes = null;
 		try {
-			ArrayList<PastryNodeImpl> nodes = TestSuite.launchNetwork(SharedStorage.DEFAULT_NUM_OF_REPLICAS + 1);
+			nodes = TestSuite.launchNetwork(SharedStorage.DEFAULT_NUM_OF_REPLICAS + 1);
 			// upload TestService on first node
 			final Class<?> testServiceClass = TestService.class;
 			final String serviceName = testServiceClass.getCanonicalName();
@@ -47,6 +49,10 @@ public class NetworkClassLoadingTest {
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail(e.toString());
+		} finally {
+			for (Node node : nodes) {
+				node.shutDown();
+			}
 		}
 	}
 
