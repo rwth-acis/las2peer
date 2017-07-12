@@ -19,3 +19,4 @@ ivy.jar
 *.jks
 archiva_credentials.xml
 /etc/las2peer.policy
+/etc/
