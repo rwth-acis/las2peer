@@ -313,7 +313,7 @@
 	</target>
 	
 	<target name="junit_tests" depends="init_junit, junit_jars, compile_all">
-		<for threadCount="9" parallel="false" param="test.source.absolute">
+		<for threadCount="9" parallel="true" param="test.source.absolute">
 			<path>
 				<fileset dir="${src.junit}">
 					<include name="**/*Test.java"/>
