@@ -3,6 +3,7 @@ package i5.las2peer.serialization;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -56,6 +57,26 @@ public class XmlTools {
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 			Document doc = dBuilder.parse(xmlFile);
+			return getRootElement(doc, rootElementName);
+		} catch (ParserConfigurationException | IOException | SAXException e) {
+			throw new MalformedXMLException("Error parsing xml string", e);
+		}
+	}
+
+	/**
+	 * Gets the root element from the given input stream containing only ONE XML representation and throws an exception
+	 * if the name does not match with the given name.
+	 * 
+	 * @param inputStream The input stream containing one XML representation that should be parsed.
+	 * @param rootElementName The tag name of the root element. CASE SENSITIVE
+	 * @return Returns the root element with the given tag name.
+	 * @throws MalformedXMLException If the root element does not have the given name or multiple root elements exist.
+	 */
+	public static Element getRootElement(InputStream inputStream, String rootElementName) throws MalformedXMLException {
+		try {
+			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+			Document doc = dBuilder.parse(inputStream);
 			return getRootElement(doc, rootElementName);
 		} catch (ParserConfigurationException | IOException | SAXException e) {
 			throw new MalformedXMLException("Error parsing xml string", e);

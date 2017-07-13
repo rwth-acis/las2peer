@@ -1,6 +1,7 @@
 package i5.las2peer.security;
 
 import java.io.File;
+import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
@@ -50,15 +51,15 @@ public abstract class AgentImpl implements Agent, XmlAble, Cloneable, MessageRec
 	/**
 	 * private key for asymmetric encryption
 	 */
-	private PrivateKey privateKey = null;
+	private PrivateKey privateKey;
 
-	private Node runningAt = null;
-	
+	private Node runningAt;
+
 	/**
 	 * Creates an empty agent.
 	 * 
 	 */
-	protected AgentImpl()  {
+	protected AgentImpl() {
 	}
 
 	/**
@@ -324,6 +325,20 @@ public abstract class AgentImpl implements Agent, XmlAble, Cloneable, MessageRec
 	 */
 	public static AgentImpl createFromXml(String xml) throws MalformedXMLException {
 		return createFromXml(XmlTools.getRootElement(xml, "las2peer:agent"));
+	}
+
+	/**
+	 * Factory: Create an agent from its XML input stream representation.
+	 * 
+	 * Depending on the type attribute of the root node, the type will be a {@link UserAgentImpl},
+	 * {@link GroupAgentImpl}, {@link ServiceAgentImpl}. Creation of {@link MonitoringAgent}s is not supported.
+	 * 
+	 * @param is
+	 * @return an agent
+	 * @throws MalformedXMLException
+	 */
+	public static AgentImpl createFromXml(InputStream is) throws MalformedXMLException {
+		return createFromXml(XmlTools.getRootElement(is, "las2peer:agent"));
 	}
 
 	/**

@@ -9,9 +9,9 @@
         <artifact type="jar" ext="jar" conf="*" />
     </publications>
     <dependencies>
-    	<dependency org="i5" name="las2peer" rev="${ivy.las2peer.version}" changing="true" conf="runtime->runtime" />
-    	<dependency org="i5" name="las2peer-web-connector" rev="${ivy.las2peer.version}" changing="true" conf="runtime->runtime" />
-    	<dependency org="i5" name="las2peer-rest-mapper" rev="${ivy.las2peer.version}" changing="true" conf="runtime->runtime" />
-    	<dependency org="i5" name="las2peer-node-admin-connector" rev="${ivy.las2peer.version}" changing="true" conf="runtime->runtime" />
+    	<dependency org="i5" name="las2peer" rev="${ivy.las2peer.version}" changing="true" />
+    	<dependency org="i5" name="las2peer-web-connector" rev="${ivy.las2peer.version}" changing="true" />
+    	<dependency org="i5" name="las2peer-rest-mapper" rev="${ivy.las2peer.version}" changing="true" />
+    	<dependency org="i5" name="las2peer-node-admin-connector" rev="${ivy.las2peer.version}" changing="true" />
     </dependencies>
 </ivy-module>

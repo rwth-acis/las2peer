@@ -6,19 +6,16 @@ import i5.las2peer.api.p2p.ServiceNameVersion;
 
 /**
  * a simple invocation task
- * 
- * 
- *
  */
 public class RMITask implements Serializable {
 
 	private static final long serialVersionUID = 6654217287828959042L;
 
-	private Serializable[] parameters;
+	private final Serializable[] parameters;
 
-	private String methodName;
+	private final String methodName;
 
-	private ServiceNameVersion service;
+	private final ServiceNameVersion service;
 
 	/**
 	 * create a new invocation task

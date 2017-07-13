@@ -1,5 +1,10 @@
 package i5.las2peer.tools.helper;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -7,10 +12,14 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
 
+import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.persistency.SharedStorage.STORAGE_MODE;
 
 public class L2pNodeLauncherConfiguration {
+
+	public static final String DEFAULT_PROPERTIES_FILENAME = "etc/launcher-configuration.ini";
 
 	public static final String ARG_HELP = "--help";
 	public static final String ARG_SHORT_HELP = "-h";
@@ -51,9 +60,13 @@ public class L2pNodeLauncherConfiguration {
 
 	public static final String ARG_SHORT_STORAGE_DIRECTORY = "-sd";
 	public static final String ARG_STORAGE_DIRECTORY = "--storage-directory";
-	
+
 	public static final String ARG_SANDBOX = "--sandbox";
 	public static final String ARG_SHORT_SANDBOX = "-sb";
+
+	private static final L2pLogger logger = L2pLogger.getInstance(L2pNodeLauncherConfiguration.class);
+
+	private String filename;
 
 	// special options - must be read and handled before regular options
 	private boolean printHelp;
@@ -63,10 +76,10 @@ public class L2pNodeLauncherConfiguration {
 	// regular options
 	private boolean debugMode;
 	private Integer port;
-	private String bootstrap;
+	private List<String> bootstrap;
 	private STORAGE_MODE storageMode;
 	private String storageDirectory;
-	private boolean useMonitoringObserver;
+	private Boolean useMonitoringObserver;
 	private String logDir;
 	private final Set<String> serviceDirectories = new HashSet<>();
 	private Long nodeIdSeed;
@@ -90,14 +103,20 @@ public class L2pNodeLauncherConfiguration {
 	 * @return Returns the configuration created from given args
 	 */
 	public static L2pNodeLauncherConfiguration createFromMainArgs(String... argv) {
-		List<String> result = new ArrayList<>();
+		L2pNodeLauncherConfiguration result = new L2pNodeLauncherConfiguration();
+		result.setFromMainArgs(argv);
+		return result;
+	}
+
+	public void setFromMainArgs(String... argv) {
+		List<String> argList = new ArrayList<>();
 		String joined = "";
 		for (String arg : argv) {
 			int opening = arg.length() - arg.replace("(", "").length(); // nice way to count opening brackets
 			int closing = arg.length() - arg.replace(")", "").length();
 			if (opening == closing && joined.isEmpty()) {
 				// just an argument
-				result.add(arg);
+				argList.add(arg);
 			} else {
 				// previous arg was unbalanced, attach this arg
 				joined += arg;
@@ -105,7 +124,7 @@ public class L2pNodeLauncherConfiguration {
 				int closingJoined = joined.length() - joined.replace(")", "").length();
 				if (openingJoined == closingJoined) {
 					// now it's balanced
-					result.add(joined);
+					argList.add(joined);
 					joined = "";
 				} else if (openingJoined < closingJoined) {
 					throw new IllegalArgumentException("command \"" + joined + "\" has too many closing brackets!");
@@ -115,7 +134,7 @@ public class L2pNodeLauncherConfiguration {
 		if (!joined.isEmpty()) {
 			throw new IllegalArgumentException("command \"" + joined + "\" has too many opening brackets!");
 		}
-		return createFromIterableArgs(result);
+		setFromIterableArgs(argList);
 	}
 
 	public static L2pNodeLauncherConfiguration createFromArrayArgs(String... args) {
@@ -133,22 +152,33 @@ public class L2pNodeLauncherConfiguration {
 	public static L2pNodeLauncherConfiguration createFromIterableArgs(Iterable<String> args)
 			throws IllegalArgumentException {
 		L2pNodeLauncherConfiguration result = new L2pNodeLauncherConfiguration();
+		result.setFromIterableArgs(args);
+		return result;
+	}
+
+	/**
+	 * Sets launch configuration from the given bunch of arguments.
+	 * 
+	 * @param args A bunch of arguments that should be used as configuration values.
+	 * @throws IllegalArgumentException If an issue occurs parsing an argument.
+	 */
+	public void setFromIterableArgs(Iterable<String> args) throws IllegalArgumentException {
 		Iterator<String> itArg = args.iterator();
 		while (itArg.hasNext()) {
 			String arg = itArg.next();
 			if (arg.equalsIgnoreCase(ARG_SHORT_HELP) || arg.equalsIgnoreCase(ARG_HELP)) {
-				result.setPrintHelp(true);
+				setPrintHelp(true);
 			} else if (arg.equalsIgnoreCase(ARG_SHORT_VERSION) || arg.equalsIgnoreCase(ARG_VERSION)) {
-				result.setPrintVersion(true);
+				setPrintVersion(true);
 			} else if (arg.equalsIgnoreCase(ARG_SHORT_WINDOWS_SHELL) || arg.equalsIgnoreCase(ARG_WINDOWS_SHELL)) {
 				throw new IllegalArgumentException(
 						"Illegal argument '" + arg + "', because colored output is disabled by default");
 			} else if (arg.equalsIgnoreCase(ARG_SHORT_COLORED_SHELL) || arg.equalsIgnoreCase(ARG_COLORED_SHELL)) {
-				result.setColoredOutput(true);
+				setColoredOutput(true);
 			} else if (arg.equalsIgnoreCase(ARG_SHORT_DEBUG) || arg.equalsIgnoreCase(ARG_DEBUG)) {
-				result.setDebugMode(true);
+				setDebugMode(true);
 			} else if (arg.equalsIgnoreCase(ARG_SHORT_SANDBOX) || arg.equalsIgnoreCase(ARG_SANDBOX)) {
-				result.setSandbox(true);
+				setSandbox(true);
 			} else if (arg.equalsIgnoreCase(ARG_SHORT_PORT) || arg.equalsIgnoreCase(ARG_PORT)) {
 				if (itArg.hasNext() == false) {
 					throw new IllegalArgumentException(
@@ -158,7 +188,7 @@ public class L2pNodeLauncherConfiguration {
 					try {
 						int p = Integer.valueOf(sPort);
 						// in case of an exception this structure doesn't override an already set port number
-						result.setPort(p);
+						setPort(p);
 					} catch (NumberFormatException ex) {
 						throw new IllegalArgumentException(
 								"Illegal argument '" + arg + "', because " + sPort + " is not an integer");
@@ -169,16 +199,16 @@ public class L2pNodeLauncherConfiguration {
 					throw new IllegalArgumentException(
 							"Illegal argument '" + arg + "', because comma separated bootstrap list expected after it");
 				} else {
-					result.setBootstrap(itArg.next());
+					addBootstrap(itArg.next());
 				}
 			} else if (arg.equalsIgnoreCase(ARG_SHORT_OBSERVER) || arg.equalsIgnoreCase(ARG_OBSERVER)) {
-				result.setUseMonitoringObserver(true);
+				setUseMonitoringObserver(true);
 			} else if (arg.equalsIgnoreCase(ARG_SHORT_LOG_DIRECTORY) || arg.equalsIgnoreCase(ARG_LOG_DIRECTORY)) {
 				if (itArg.hasNext() == false) {
 					throw new IllegalArgumentException(
 							"Illegal argument '" + arg + "', because log directory expected after it");
 				} else {
-					result.setLogDir(itArg.next());
+					setLogDir(itArg.next());
 				}
 			} else if (arg.equalsIgnoreCase(ARG_SHORT_NODE_ID_SEED) || arg.equalsIgnoreCase(ARG_NODE_ID_SEED)) {
 				if (itArg.hasNext() == false) {
@@ -189,7 +219,7 @@ public class L2pNodeLauncherConfiguration {
 					try {
 						long idSeed = Long.valueOf(sNodeId);
 						// in case of an exception this structure doesn't override an already set node id seed
-						result.setNodeIdSeed(idSeed);
+						setNodeIdSeed(idSeed);
 					} catch (NumberFormatException ex) {
 						throw new IllegalArgumentException(
 								"Illegal argument '" + arg + "', because '" + sNodeId + "' is not an integer");
@@ -201,7 +231,7 @@ public class L2pNodeLauncherConfiguration {
 					throw new IllegalArgumentException(
 							"Illegal argument '" + arg + "', because service directory expected after it");
 				} else {
-					result.getServiceDirectories().add(itArg.next());
+					getServiceDirectories().add(itArg.next());
 				}
 			} else if (arg.equalsIgnoreCase(ARG_SHORT_STORAGE_MODE) || arg.equalsIgnoreCase(ARG_STORAGE_MODE)) {
 				if (itArg.hasNext() == false) {
@@ -210,7 +240,7 @@ public class L2pNodeLauncherConfiguration {
 				} else {
 					String val = itArg.next();
 					try {
-						result.setStorageMode(STORAGE_MODE.valueOf(val.toUpperCase()));
+						setStorageMode(STORAGE_MODE.valueOf(val.toUpperCase()));
 						// remove only on successful storage mode parsing
 					} catch (IllegalArgumentException e) {
 						// not a valid storage mode
@@ -224,13 +254,95 @@ public class L2pNodeLauncherConfiguration {
 					throw new IllegalArgumentException(
 							"Illegal argument '" + arg + "', because storage directory expected after it");
 				} else {
-					result.setStorageDirectory(itArg.next());
+					setStorageDirectory(itArg.next());
 				}
 			} else {
-				result.getCommands().add(arg);
+				getCommands().add(arg);
 			}
 		}
-		return result;
+	}
+
+	public void setFromFile() throws IOException {
+		try {
+			setFromFile(DEFAULT_PROPERTIES_FILENAME);
+		} catch (FileNotFoundException e) {
+			logger.log(Level.FINE, "Could not load default properties file", e);
+		}
+	}
+
+	public void setFromFile(String filename) throws IOException {
+		this.filename = filename;
+		FileInputStream fis = new FileInputStream(filename);
+		setFromInput(fis);
+		fis.close();
+	}
+
+	public void setFromInput(InputStream inputStream) throws IOException {
+		ConfigFile conf = new ConfigFile(inputStream);
+		String strPort = conf.get("port");
+		if (strPort != null) {
+			setPort(Integer.valueOf(strPort));
+		}
+		List<String> bootstrap = conf.getAll("bootstrap");
+		if (bootstrap != null) {
+			setBootstrap(bootstrap);
+		}
+		String strStorageMode = conf.get("storageMode");
+		if (strStorageMode != null) {
+			setStorageMode(STORAGE_MODE.valueOf(strStorageMode.toUpperCase()));
+		}
+		String strStorageDirectory = conf.get("storageDirectory");
+		if (strStorageDirectory != null) {
+			setStorageDirectory(strStorageDirectory);
+		}
+		String strUseMonitoringObserver = conf.get("useMonitoringObserver");
+		if (strUseMonitoringObserver != null) {
+			setUseMonitoringObserver(Boolean.valueOf(strUseMonitoringObserver));
+		}
+		String strLogDir = conf.get("logDir");
+		if (strLogDir != null) {
+			setLogDir(strLogDir);
+		}
+		List<String> strServiceDirectories = conf.getAll("serviceDirectories");
+		if (strServiceDirectories != null) {
+			getServiceDirectories().addAll(strServiceDirectories);
+		}
+		String strNodeIdSeed = conf.get("nodeIdSeed");
+		if (strNodeIdSeed != null) {
+			setNodeIdSeed(Long.valueOf(strNodeIdSeed));
+		}
+		List<String> commands = conf.getAll("commands");
+		if (commands != null) {
+			getCommands().addAll(commands);
+		}
+	}
+
+	public void writeToFile() {
+		if (filename == null) { // e. g. in tests
+			logger.info("configuration file name is not set, configuration not written to file");
+		} else {
+			writeToFile(filename);
+		}
+	}
+
+	public void writeToFile(String filename) {
+		try {
+			ConfigFile conf = new ConfigFile(filename);
+			conf.put("port", getPort());
+			conf.put("bootstrap", getBootstrap());
+			conf.put("storageMode", getStorageMode());
+			conf.put("storageDirectory", getStorageDirectory());
+			conf.put("useMonitoringObserver", useMonitoringObserver());
+			conf.put("logDir", getLogDir());
+			conf.put("serviceDirectories", getServiceDirectories());
+			conf.put("nodeIdSeed", getNodeIdSeed());
+			conf.put("commands", getCommands());
+			FileOutputStream fos = new FileOutputStream(filename);
+			conf.store(fos);
+			fos.close();
+		} catch (IOException e) {
+			logger.log(Level.INFO, "Could not write launcher configuration to file '" + filename + "'", e);
+		}
 	}
 
 	public boolean isPrintHelp() {
@@ -264,7 +376,7 @@ public class L2pNodeLauncherConfiguration {
 	public void setDebugMode(boolean debugMode) {
 		this.debugMode = debugMode;
 	}
-	
+
 	public boolean isSandbox() {
 		return sandbox;
 	}
@@ -281,12 +393,27 @@ public class L2pNodeLauncherConfiguration {
 		this.port = port;
 	}
 
-	public String getBootstrap() {
+	public List<String> getBootstrap() {
 		return bootstrap;
 	}
 
-	public void setBootstrap(String bootstrap) {
+	public void setBootstrap(List<String> bootstrap) {
 		this.bootstrap = bootstrap;
+	}
+
+	public void setBootstrap(String bootstrap) {
+		if (bootstrap == null) {
+			this.bootstrap = null;
+		} else {
+			addBootstrap(bootstrap);
+		}
+	}
+
+	public void addBootstrap(String bootstrap) {
+		if (this.bootstrap == null) {
+			this.bootstrap = new LinkedList<>();
+		}
+		this.bootstrap.add(bootstrap);
 	}
 
 	public STORAGE_MODE getStorageMode() {
@@ -297,8 +424,8 @@ public class L2pNodeLauncherConfiguration {
 		this.storageMode = storageMode;
 	}
 
-	public boolean useMonitoringObserver() {
-		return useMonitoringObserver;
+	public Boolean useMonitoringObserver() {
+		return useMonitoringObserver != null && useMonitoringObserver;
 	}
 
 	public void setUseMonitoringObserver(boolean useMonitoringObserver) {

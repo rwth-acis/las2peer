@@ -217,8 +217,7 @@
 			<mapper><chainedmapper><flattenmapper /></chainedmapper></mapper>
 		</pathconvert>
 		<jar jarfile="${export.jars}/${ant.project.name}-${ivy.las2peer.version}.jar">
-			<fileset dir="${tmp.classes}">
-			</fileset>
+			<fileset dir="${tmp.classes}" />
 			<manifest>
 				<attribute name="Class-Path" value="${manifest.classpath}" />
 				<attribute name="Implementation-Version" value="${ivy.las2peer.version}"/> 

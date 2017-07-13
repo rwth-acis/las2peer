@@ -198,10 +198,28 @@ public class Mediator implements MessageReceiver {
 	 * @throws ServiceInvocationException
 	 * @throws AgentException
 	 */
+	@Deprecated
 	public Serializable invoke(String service, String method, Serializable[] parameters, boolean localOnly)
 			throws InternalSecurityException, ServiceInvocationException, AgentException {
+		return invoke(ServiceNameVersion.fromString(service), method, parameters, localOnly);
+	}
 
-		return runningAt.invoke(myAgent, ServiceNameVersion.fromString(service), method, parameters, false, localOnly);
+	/**
+	 * Invokes a service method (in the network) for the mediated agent.
+	 * 
+	 * @param serviceNameVersion the service and version to invoke
+	 * @param method method to invoke
+	 * @param parameters list of method parameters
+	 * @param localOnly if true, only services on this node are invoked
+	 * @return result of the method invocation
+	 * @throws InternalSecurityException
+	 * @throws ServiceInvocationException
+	 * @throws AgentException
+	 */
+	public Serializable invoke(ServiceNameVersion serviceNameVersion, String method, Serializable[] parameters,
+			boolean localOnly) throws InternalSecurityException, ServiceInvocationException, AgentException {
+
+		return runningAt.invoke(myAgent, serviceNameVersion, method, parameters, false, localOnly);
 	}
 
 	/**

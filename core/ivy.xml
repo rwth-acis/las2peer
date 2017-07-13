@@ -11,15 +11,15 @@
     <dependencies>
         <dependency org="junit" name="junit" rev="4.12" conf="test->*" />
 
-        <dependency org="FreePastry" name="FreePastry" rev="2.1.1" conf="runtime->*" />
-        <dependency org="xpp3" name="xpp3" rev="1.1.4c" conf="runtime->*" /> <!-- FreePastry dependency -->
-        <dependency org="javax.xml.parsers" name="jaxp-api" rev="1.4.5" conf="runtime->*" />
+        <dependency org="FreePastry" name="FreePastry" rev="2.1.1" />
+        <dependency org="xpp3" name="xpp3" rev="1.1.4c" /> <!-- FreePastry dependency -->
+        <dependency org="javax.xml.parsers" name="jaxp-api" rev="1.4.5" />
         
         <!-- UPnP libs for NAT handling -->
-		<dependency org="commons-jxpath" name="commons-jxpath" rev="1.1" conf="runtime->runtime">
+		<dependency org="commons-jxpath" name="commons-jxpath" rev="1.1">
 			<exclude name="ant-optional" /> 
 		</dependency>
-		<dependency org="commons-logging" name="commons-logging" rev="1.2" conf="runtime->runtime" />
-		<dependency org="net" name="sbbi-upnplib" rev="1.0.4" conf="runtime->runtime" />
+		<dependency org="commons-logging" name="commons-logging" rev="1.2" />
+		<dependency org="net" name="sbbi-upnplib" rev="1.0.4" />
     </dependencies>
 </ivy-module>

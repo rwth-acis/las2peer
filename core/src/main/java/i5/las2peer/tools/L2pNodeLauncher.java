@@ -7,12 +7,14 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -64,7 +66,7 @@ import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.serialization.MalformedXMLException;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.helper.L2pNodeLauncherConfiguration;
-import rice.p2p.commonapi.NodeHandle;
+import rice.pastry.socket.SocketNodeHandle;
 
 /**
  * las2peer node launcher
@@ -551,7 +553,7 @@ public class L2pNodeLauncher {
 
 		AgentImpl receiver = node.getServiceAgent(ServiceNameVersion.fromString(serviceNameVersion), currentUser);
 		Message request = new Message(currentUser, receiver, new ListMethodsContent());
-		request.setSendingNodeId((NodeHandle) node.getNodeId());
+		request.setSendingNodeId(node.getNodeId());
 
 		Message response = node.sendMessageAndWaitForAnswer(request);
 		response.open(currentUser, node);
@@ -754,21 +756,24 @@ public class L2pNodeLauncher {
 	 * @param bindAddress
 	 * 
 	 * @param port local port number to open
-	 * @param bootstrap comma separated list of bootstrap nodes to connect to or "-" for a new network
+	 * @param bootstrap list of bootstrap hosts to connect to or {@code null} for a new network
 	 * @param storageMode A {@link STORAGE_MODE} used by the local node instance for persistence.
 	 * @param storageDir
 	 * @param monitoringObserver determines, if the monitoring-observer will be started at this node
 	 * @param cl the class loader to be used with this node
 	 * @param nodeIdSeed the seed to generate node IDs from
 	 */
-	private L2pNodeLauncher(InetAddress bindAddress, Integer port, String bootstrap, STORAGE_MODE storageMode,
-			String storageDir, boolean monitoringObserver, ClassManager cl, Long nodeIdSeed) {
+	private L2pNodeLauncher(InetAddress bindAddress, Integer port, List<String> bootstrap, STORAGE_MODE storageMode,
+			String storageDir, Boolean monitoringObserver, ClassManager cl, Long nodeIdSeed) {
 		if (storageMode == null) {
 			if (System.getenv().containsKey("MEM_STORAGE")) {
 				storageMode = STORAGE_MODE.MEMORY;
 			} else {
 				storageMode = STORAGE_MODE.FILESYSTEM;
 			}
+		}
+		if (monitoringObserver == null) {
+			monitoringObserver = false;
 		}
 		node = new PastryNodeImpl(cl, monitoringObserver, bindAddress, port, bootstrap, storageMode, storageDir,
 				nodeIdSeed);
@@ -916,7 +921,7 @@ public class L2pNodeLauncher {
 		}
 		// instantiate launcher
 		ClassManager cl = new ClassManager(new FileSystemRepository(serviceDirectories, true),
-				L2pNodeLauncher.class.getClassLoader(),clp);
+				L2pNodeLauncher.class.getClassLoader(), clp);
 		L2pNodeLauncher launcher = new L2pNodeLauncher(bindAddress, launcherConfiguration.getPort(),
 				launcherConfiguration.getBootstrap(), launcherConfiguration.getStorageMode(),
 				launcherConfiguration.getStorageDirectory(), launcherConfiguration.useMonitoringObserver(), cl,
@@ -937,6 +942,20 @@ public class L2pNodeLauncher {
 		}
 		try {
 			launcher.start();
+			if (!launcherConfiguration.isDebugMode()) {
+				// auto-update bootstrap parameter in configuration file
+				ArrayList<String> bootstrapList = new ArrayList<>();
+				Iterator<Object> itOther = Arrays.asList(launcher.node.getOtherKnownNodes()).iterator();
+				while (itOther.hasNext()) {
+					SocketNodeHandle handle = (SocketNodeHandle) itOther.next();
+					InetSocketAddress addr = handle.getInetSocketAddress();
+					bootstrapList.add(addr.getHostString() + ":" + addr.getPort());
+				}
+				launcherConfiguration.setBootstrap(bootstrapList);
+				// FIXME what about tests? which use launchConfiguration?
+				launcherConfiguration.writeToFile();
+			}
+			// execute other node commands
 			for (String command : launcherConfiguration.getCommands()) {
 				System.out.println("Handling: '" + command + "'");
 				launcher.commandPrompt.handleLine(command);
@@ -1064,7 +1083,22 @@ public class L2pNodeLauncher {
 						e);
 			}
 			// Launches the node
-			L2pNodeLauncher launcher = launchConfiguration(L2pNodeLauncherConfiguration.createFromMainArgs(argv));
+			L2pNodeLauncherConfiguration conf = new L2pNodeLauncherConfiguration();
+			try {
+				conf.setFromFile();
+			} catch (IOException e) {
+				System.err.println("Could not load node configuration");
+				e.printStackTrace();
+				System.exit(2);
+			}
+			List<String> comFromFile = new ArrayList<>(conf.getCommands());
+			conf.getCommands().clear(); // avoid command duplication
+			conf.setFromMainArgs(argv);
+			if (conf.getCommands().isEmpty()) { // no commands specified in main args
+				// readd commands from file
+				conf.getCommands().addAll(comFromFile);
+			}
+			L2pNodeLauncher launcher = launchConfiguration(conf);
 			if (launcher.isFinished()) {
 				System.out.println("node has handled all commands and shut down!");
 				try {

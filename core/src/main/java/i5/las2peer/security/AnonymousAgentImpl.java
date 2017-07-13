@@ -38,40 +38,49 @@ public class AnonymousAgentImpl extends AgentImpl implements AnonymousAgent {
 	public void receiveMessage(Message message, AgentContext c) throws MessageException {
 		// do nothing
 	}
-	
+
+	@Override
 	public void unlockPrivateKey(SecretKey key) {
 		// do nothing
 	}
-	
+
+	@Override
 	public void encryptPrivateKey(SecretKey key) {
 		// do nothing
 	}
-	
+
+	@Override
 	public boolean isLocked() {
 		return false;
 	}
-	
+
+	@Override
 	public String getIdentifier() {
 		return AnonymousAgent.IDENTIFIER;
 	}
-	
+
+	@Override
 	public PublicKey getPublicKey() {
 		throw new IllegalStateException("Anonymous does not have a key pair!");
 	}
-	
+
+	@Override
 	public SecretKey decryptSymmetricKey(byte[] crypted)
 			throws AgentLockedException, SerializationException, CryptoException {
 		throw new AgentLockedException("Anonymous does not have a key pair!");
 	}
-	
+
+	@Override
 	public Signature createSignature() throws InvalidKeyException, AgentLockedException, NoSuchAlgorithmException {
 		throw new AgentLockedException("Anonymous does not have a key pair!");
 	}
-	
+
+	@Override
 	public byte[] signContent(byte[] plainData) throws CryptoException, AgentLockedException {
 		throw new AgentLockedException("Anonymous does not have a key pair!");
 	}
-	
+
+	@Override
 	public boolean equals(Object other) {
 		return other instanceof AnonymousAgent;
 	}

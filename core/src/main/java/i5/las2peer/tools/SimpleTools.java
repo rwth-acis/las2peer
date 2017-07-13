@@ -3,6 +3,7 @@ package i5.las2peer.tools;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.ServerSocket;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -148,6 +149,16 @@ public class SimpleTools {
 			hexString.append(hex);
 		}
 		return hexString.toString();
+	}
+
+	public static int getSystemDefinedPort() {
+		try {
+			ServerSocket tmpSocket = new ServerSocket(0);
+			tmpSocket.close();
+			return tmpSocket.getLocalPort();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 }

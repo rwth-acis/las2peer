@@ -10,14 +10,14 @@
     </publications>
     <dependencies>
         <dependency org="junit" name="junit" rev="4.12" conf="test->*" />
-        
-        <dependency org="i5" name="las2peer" rev="${ivy.las2peer.version}" changing="true" conf="runtime->runtime" />
 
-        <dependency org="io.swagger" name="swagger-jersey2-jaxrs" rev="1.5.12" conf="runtime->*" />
-        <dependency org="org.glassfish.jersey.core" name="jersey-server" rev="2.25.1" conf="runtime->*" />
-        <dependency org="org.glassfish.jersey.core" name="jersey-common" rev="2.25.1" conf="runtime->*" />
-        <dependency org="org.glassfish.jersey.media" name="jersey-media-json-jackson" rev="2.25.1" conf="runtime->*" />
-        <dependency org="javax.ws.rs" name="javax.ws.rs-api" rev="2.0.1" conf="runtime->*" />
-        <dependency org="org.glassfish.jersey.media" name="jersey-media-multipart" rev="2.25.1" conf="runtime->*" />
+        <dependency org="i5" name="las2peer" rev="${ivy.las2peer.version}" changing="true" />
+
+        <dependency org="io.swagger" name="swagger-jersey2-jaxrs" rev="1.5.12" />
+        <dependency org="org.glassfish.jersey.core" name="jersey-server" rev="2.25.1" />
+        <dependency org="org.glassfish.jersey.core" name="jersey-common" rev="2.25.1" />
+        <dependency org="org.glassfish.jersey.media" name="jersey-media-json-jackson" rev="2.25.1" />
+        <dependency org="javax.ws.rs" name="javax.ws.rs-api" rev="2.0.1" />
+        <dependency org="org.glassfish.jersey.media" name="jersey-media-multipart" rev="2.25.1" />
     </dependencies>
 </ivy-module>

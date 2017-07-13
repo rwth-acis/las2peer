@@ -138,7 +138,6 @@ public class NodeApplication implements Application, ScribeMultiClient {
 
 	}
 
-	@SuppressWarnings("deprecation")
 	public void registerTopic(long id) {
 		synchronized (htTopics) {
 			if (htTopics.get(id) != null) {
@@ -151,7 +150,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 
 			logger.info("\t--> registering topic " + topic.getId() + ")");
 
-			scribeClient.subscribe(topic, this);
+			scribeClient.subscribe(topic, this, null, null);
 			l2pNode.observerNotice(MonitoringEvent.PASTRY_TOPIC_SUBSCRIPTION_SUCCESS, this.l2pNode.getNodeId(),
 					(String) null, "" + topic.getId());
 		}
@@ -507,7 +506,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 
 	@Override
 	public void subscribeFailed(Topic topic) {
-		// System.out.println(ColoredOutput.colorize( "topic subscription failed!", ForegroundColor.Yellow));
+		logger.warning("topic '" + topic.getId() + "' subscription failed");
 		l2pNode.observerNotice(MonitoringEvent.PASTRY_TOPIC_SUBSCRIPTION_FAILED, this.l2pNode.getNodeId(),
 				"" + topic.toString());
 	}
@@ -524,17 +523,10 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	@Override
 	public void subscribeSuccess(Collection<Topic> topics) {
 		for (Topic t : topics) {
-			System.out.println("Subscribe success! Topic info:");
-			System.out.println("\troot: " + scribeClient.getRoot(t) + " / " + scribeClient.isRoot(t));
-			System.out.println("\tparent: " + scribeClient.getParent(t));
-			// System.out.println( "\tchildren: " + scribeClient.getChildren(t).length );
+			l2pNode.observerNotice(MonitoringEvent.PASTRY_TOPIC_SUBSCRIPTION_SUCCESS,
+					this.l2pNode.getNodeId() + "" + t.toString());
+			logger.info("Successfully subscribed to topic '" + t.getId() + "'");
 		}
-
-		// System.out.println(ColoredOutput.colorize( "\t\t<--sucessfully subscribed to topic collection",
-		// ForegroundColor.Yellow));
-		// for (Topic t: topics) {
-		// System.out.println(ColoredOutput.colorize( "\t\t\t" + t.getId(), ForegroundColor.Yellow));
-		// }
 	}
 
 	/**

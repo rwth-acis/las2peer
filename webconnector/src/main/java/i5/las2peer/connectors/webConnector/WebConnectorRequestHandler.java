@@ -621,7 +621,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			String method, Serializable[] params) {
 		Serializable result = null;
 		try {
-			result = mediator.invoke(service.toString(), method, params, connector.onlyLocalServices());
+			result = mediator.invoke(service, method, params, connector.onlyLocalServices());
 			if (result == null) {
 				sendUnexpectedErrorResponse(exchange, "Service method invocation returned null response", null);
 			}

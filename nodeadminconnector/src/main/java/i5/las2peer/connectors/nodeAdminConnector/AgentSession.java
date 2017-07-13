@@ -2,15 +2,15 @@ package i5.las2peer.connectors.nodeAdminConnector;
 
 import java.util.Date;
 
-import i5.las2peer.security.UserAgentImpl;
+import i5.las2peer.security.PassphraseAgentImpl;
 
 public class AgentSession {
 
 	private final String sessionId;
-	private final UserAgentImpl agent;
+	private final PassphraseAgentImpl agent;
 	private Date lastActive;
 
-	public AgentSession(String sessionId, UserAgentImpl agent) {
+	public AgentSession(String sessionId, PassphraseAgentImpl agent) {
 		this.sessionId = sessionId;
 		this.agent = agent;
 		lastActive = new Date();
@@ -20,7 +20,7 @@ public class AgentSession {
 		return sessionId;
 	}
 
-	public UserAgentImpl getAgent() {
+	public PassphraseAgentImpl getAgent() {
 		return agent;
 	}
 

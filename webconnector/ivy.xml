@@ -10,9 +10,9 @@
     </publications>
     <dependencies>
         <dependency org="junit" name="junit" rev="4.12" conf="test->*" />
-        
-        <dependency org="i5" name="las2peer-rest-mapper" rev="${ivy.las2peer.version}" changing="true" conf="runtime->runtime" />
 
-        <dependency org="com.nimbusds" name="oauth2-oidc-sdk" rev="4.17" conf="runtime->*" />
+        <dependency org="i5" name="las2peer-rest-mapper" rev="${ivy.las2peer.version}" changing="true" />
+
+        <dependency org="com.nimbusds" name="oauth2-oidc-sdk" rev="4.17" />
     </dependencies>
 </ivy-module>

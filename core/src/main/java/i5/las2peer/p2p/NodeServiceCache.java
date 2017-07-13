@@ -15,6 +15,7 @@ import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.p2p.ServiceVersion;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.ServiceDiscoveryContent;
+import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.InternalSecurityException;
@@ -25,6 +26,8 @@ import i5.las2peer.serialization.SerializationException;
  * Caches the knowledge about existing services
  */
 public class NodeServiceCache {
+
+	private final L2pLogger logger = L2pLogger.getInstance(NodeServiceCache.class);
 
 	private final Node runningAt;
 
@@ -105,6 +108,7 @@ public class NodeServiceCache {
 					try {
 						update(service, true, acting);
 					} catch (Exception e) {
+						logger.info(e.toString());
 						if (local == null) {
 							throw new AgentNotRegisteredException(
 									"Could not retrieve service information from the network.", e);
@@ -126,6 +130,7 @@ public class NodeServiceCache {
 					try {
 						update(service, false, acting);
 					} catch (Exception e) {
+						logger.info(e.toString());
 						if (local == null) {
 							throw new AgentNotRegisteredException(
 									"Could not retrieve service information from the network.", e);
