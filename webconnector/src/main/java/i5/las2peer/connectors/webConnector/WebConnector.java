@@ -146,13 +146,9 @@ public class WebConnector extends Connector {
 	 * @param port
 	 */
 	public void setHttpPort(int port) {
-		if (port < 80) {
-			throw new IllegalArgumentException("illegal port number: " + port);
-		}
 		if (myNode != null) {
 			throw new IllegalStateException("change of port only before startup!");
 		}
-
 		httpPort = port;
 	}
 
@@ -162,13 +158,9 @@ public class WebConnector extends Connector {
 	 * @param port
 	 */
 	public void setHttpsPort(int port) {
-		if (port < 80) {
-			throw new IllegalArgumentException("illegal port number: " + port);
-		}
 		if (myNode != null) {
 			throw new IllegalStateException("change of port only before startup!");
 		}
-
 		httpsPort = port;
 	}
 
@@ -308,7 +300,10 @@ public class WebConnector extends Connector {
 	private void createServer(boolean isHttps) throws ConnectorException {
 		try {
 			if (isHttps) {
-				https = HttpsServer.create(new InetSocketAddress(httpsPort), maxConnections);
+				synchronized (this) {
+					https = HttpsServer.create(new InetSocketAddress(httpsPort), maxConnections);
+					httpsPort = https.getAddress().getPort();
+				}
 				// apply ssl certificates and key
 				SSLContext sslContext = SSLContext.getInstance("TLS");
 				char[] keystorePassword = sslKeyPassword.toCharArray();
@@ -320,7 +315,10 @@ public class WebConnector extends Connector {
 				HttpsConfigurator configurator = new HttpsConfigurator(sslContext);
 				https.setHttpsConfigurator(configurator);
 			} else {
-				http = HttpServer.create(new InetSocketAddress(httpPort), maxConnections);
+				synchronized (this) {
+					http = HttpServer.create(new InetSocketAddress(httpPort), maxConnections);
+					httpPort = http.getAddress().getPort();
+				}
 			}
 		} catch (IOException e) {
 			throw new ConnectorException("Startup has been interrupted!", e);
@@ -448,6 +446,14 @@ public class WebConnector extends Connector {
 		}
 
 		return result;
+	}
+
+	public int getHttpPort() {
+		return httpPort;
+	}
+
+	public int getHttpsPort() {
+		return httpsPort;
 	}
 
 }

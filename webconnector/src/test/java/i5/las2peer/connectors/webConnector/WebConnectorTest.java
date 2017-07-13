@@ -34,7 +34,6 @@ import i5.las2peer.tools.SimpleTools;
 public class WebConnectorTest {
 
 	private static final String HTTP_ADDRESS = "http://127.0.0.1";
-	private static final int HTTP_PORT = WebConnector.DEFAULT_HTTP_PORT;
 
 	private LocalNode node;
 	private WebConnector connector;
@@ -99,7 +98,7 @@ public class WebConnectorTest {
 		node.registerReceiver(testService6);
 
 		// start connector
-		connector = new WebConnector(true, HTTP_PORT, false, 1000);
+		connector = new WebConnector(true, 0, false, 0); // Port: 0 => the system picks a port
 		connector.setCrossOriginResourceDomain("*");
 		connector.setCrossOriginResourceSharing(true);
 		logStream = new ByteArrayOutputStream();
@@ -128,7 +127,7 @@ public class WebConnectorTest {
 	public void testNotMethodService() {
 		try {
 			MiniClient c = new MiniClient();
-			c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
+			c.setAddressPort(HTTP_ADDRESS, connector.getHttpPort());
 			c.setLogin(testAgent.getIdentifier(), testPass);
 
 			ClientResponse response = c.sendRequest("GET", "service1/asdag", "");
@@ -141,7 +140,7 @@ public class WebConnectorTest {
 	@Test
 	public void testLogin() {
 		MiniClient c = new MiniClient();
-		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
+		c.setAddressPort(HTTP_ADDRESS, connector.getHttpPort());
 
 		// correct, id based
 		try {
@@ -188,7 +187,7 @@ public class WebConnectorTest {
 		// no authentication, use default (wrong)
 		try {
 			c = new MiniClient();
-			c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
+			c.setAddressPort(HTTP_ADDRESS, connector.getHttpPort());
 			c.setLogin(Long.toString(65464), "aaaaaaaaaaaaa");
 
 			ClientResponse result = c.sendRequest("GET", "test/ok", "");
@@ -203,7 +202,7 @@ public class WebConnectorTest {
 	public void testExceptions() {
 		try {
 			MiniClient c = new MiniClient();
-			c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
+			c.setAddressPort(HTTP_ADDRESS, connector.getHttpPort());
 			c.setLogin(testAgent.getIdentifier(), testPass);
 			// unknown service
 			ClientResponse result = c.sendRequest("GET", "doesNotExist", "");
@@ -222,7 +221,7 @@ public class WebConnectorTest {
 	public void testCrossOriginHeader() {
 		try {
 			MiniClient c = new MiniClient();
-			c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
+			c.setAddressPort(HTTP_ADDRESS, connector.getHttpPort());
 			c.setLogin(testAgent.getIdentifier(), testPass);
 
 			// this test should work for an unknown function, too
@@ -239,7 +238,7 @@ public class WebConnectorTest {
 	public void testPath() {
 		try {
 			MiniClient c = new MiniClient();
-			c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
+			c.setAddressPort(HTTP_ADDRESS, connector.getHttpPort());
 			c.setLogin(testAgent.getIdentifier(), testPass);
 
 			ClientResponse result = c.sendRequest("GET", "version/path", "");
@@ -256,7 +255,7 @@ public class WebConnectorTest {
 	@Test
 	public void testSwagger() {
 		MiniClient c = new MiniClient();
-		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
+		c.setAddressPort(HTTP_ADDRESS, connector.getHttpPort());
 
 		try {
 			c.setLogin(testAgent.getIdentifier(), testPass);
@@ -274,7 +273,7 @@ public class WebConnectorTest {
 	public void testResponseCode() {
 		try {
 			MiniClient c = new MiniClient();
-			c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
+			c.setAddressPort(HTTP_ADDRESS, connector.getHttpPort());
 			c.setLogin(testAgent.getIdentifier(), testPass);
 
 			ClientResponse result = c.sendRequest("PUT", "swaggertest/create/notfound", "");
@@ -293,7 +292,7 @@ public class WebConnectorTest {
 	public void testSubresource() {
 		try {
 			MiniClient c = new MiniClient();
-			c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
+			c.setAddressPort(HTTP_ADDRESS, connector.getHttpPort());
 			c.setLogin(testAgent.getIdentifier(), testPass);
 
 			ClientResponse result = c.sendRequest("GET", "swaggertest/subresource/content", "");
@@ -309,7 +308,7 @@ public class WebConnectorTest {
 	public void testUploadLimit() {
 		try {
 			MiniClient c = new MiniClient();
-			c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
+			c.setAddressPort(HTTP_ADDRESS, connector.getHttpPort());
 			c.setLogin(testAgent.getIdentifier(), testPass);
 
 			byte[] testContent = new byte[WebConnector.DEFAULT_MAX_REQUEST_BODY_SIZE];
@@ -327,7 +326,7 @@ public class WebConnectorTest {
 	public void testSecurityContextIntegration() {
 		try {
 			MiniClient c = new MiniClient();
-			c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
+			c.setAddressPort(HTTP_ADDRESS, connector.getHttpPort());
 			// unauthenticated request
 			// c.setLogin(AnonymousAgent.LOGIN_NAME, AnonymousAgent.PASSPHRASE);
 
@@ -361,7 +360,7 @@ public class WebConnectorTest {
 	public void testClassLoading() {
 		try {
 			MiniClient c = new MiniClient();
-			c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
+			c.setAddressPort(HTTP_ADDRESS, connector.getHttpPort());
 			c.setLogin(testAgent.getIdentifier(), testPass);
 
 			ClientResponse result = c.sendRequest("GET", "classloader/test", "");
@@ -377,7 +376,7 @@ public class WebConnectorTest {
 	public void testEmptyResponse() {
 		try {
 			MiniClient c = new MiniClient();
-			c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
+			c.setAddressPort(HTTP_ADDRESS, connector.getHttpPort());
 			c.setLogin(testAgent.getIdentifier(), testPass);
 
 			ClientResponse result = c.sendRequest("GET", "test/empty", "");
@@ -392,7 +391,7 @@ public class WebConnectorTest {
 	public void testAuthParamSanitization() {
 		try {
 			MiniClient c = new MiniClient();
-			c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
+			c.setAddressPort(HTTP_ADDRESS, connector.getHttpPort());
 			c.setLogin(testAgent.getIdentifier(), testPass);
 
 			// test auth params in GET
@@ -419,7 +418,7 @@ public class WebConnectorTest {
 	public void testEncoding() {
 		try {
 			MiniClient c = new MiniClient();
-			c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
+			c.setAddressPort(HTTP_ADDRESS, connector.getHttpPort());
 			c.setLogin(testAgent.getIdentifier(), testPass);
 
 			ClientResponse result = c.sendRequest("GET", "test/encoding", "");
@@ -442,7 +441,7 @@ public class WebConnectorTest {
 	public void testBody() {
 		try {
 			MiniClient c = new MiniClient();
-			c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
+			c.setAddressPort(HTTP_ADDRESS, connector.getHttpPort());
 			c.setLogin(testAgent.getIdentifier(), testPass);
 
 			String body = "This is a test.";
@@ -459,7 +458,7 @@ public class WebConnectorTest {
 	public void testPathResolve() {
 		try {
 			MiniClient c = new MiniClient();
-			c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
+			c.setAddressPort(HTTP_ADDRESS, connector.getHttpPort());
 			c.setLogin(testAgent.getIdentifier(), testPass);
 
 			ClientResponse result = c.sendRequest("GET", "deep/path/test", "");
@@ -487,7 +486,7 @@ public class WebConnectorTest {
 	public void testFavicon() {
 		try {
 			MiniClient c = new MiniClient();
-			c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
+			c.setAddressPort(HTTP_ADDRESS, connector.getHttpPort());
 			c.setLogin(testAgent.getIdentifier(), testPass);
 
 			ClientResponse result = c.sendRequest("GET", "favicon.ico", "");

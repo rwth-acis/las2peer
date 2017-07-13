@@ -25,7 +25,6 @@ import i5.las2peer.testing.MockAgentFactory;
 public class WebConnectorServiceInfoTest {
 
 	private static final String HTTP_ADDRESS = "http://127.0.0.1";
-	private static final int HTTP_PORT = WebConnector.DEFAULT_HTTP_PORT;
 
 	private LocalNode node;
 	private WebConnector connector;
@@ -90,7 +89,7 @@ public class WebConnectorServiceInfoTest {
 
 		// start connector
 		logStream = new ByteArrayOutputStream();
-		connector = new WebConnector(true, HTTP_PORT, false, 1000);
+		connector = new WebConnector(true, 0, false, 0); // Port: 0 => the system picks a port
 		connector.setLogStream(new PrintStream(logStream));
 		connector.start(node);
 
@@ -115,7 +114,7 @@ public class WebConnectorServiceInfoTest {
 	@Test
 	public void testVersions() {
 		MiniClient c = new MiniClient();
-		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
+		c.setAddressPort(HTTP_ADDRESS, connector.getHttpPort());
 
 		// without version
 		try {
