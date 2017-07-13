@@ -13,6 +13,7 @@ import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.p2p.AgentAlreadyRegisteredException;
 import i5.las2peer.p2p.LocalNode;
+import i5.las2peer.p2p.LocalNodeManager;
 import i5.las2peer.p2p.NodeException;
 import i5.las2peer.serialization.MalformedXMLException;
 import i5.las2peer.serialization.SerializationException;
@@ -24,7 +25,7 @@ public class AgentContextTest {
 	@Test
 	public void testRequestAgent() throws MalformedXMLException, IOException, InternalSecurityException,
 			CryptoException, SerializationException, AgentException, NodeException, AgentAccessDeniedException {
-		LocalNode node = LocalNode.newNode();
+		LocalNode node = new LocalNodeManager().newNode();
 
 		UserAgentImpl adam = MockAgentFactory.getAdam();
 		adam.unlock("adamspass");
@@ -77,7 +78,7 @@ public class AgentContextTest {
 	@Test
 	public void testHasAccess() throws MalformedXMLException, IOException, InternalSecurityException, CryptoException,
 			SerializationException, AgentException, NodeException, AgentAccessDeniedException {
-		LocalNode node = LocalNode.newNode();
+		LocalNode node = new LocalNodeManager().newNode();
 
 		UserAgentImpl adam = MockAgentFactory.getAdam();
 		adam.unlock("adamspass");

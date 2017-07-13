@@ -17,6 +17,7 @@ import i5.las2peer.communication.Message;
 import i5.las2peer.communication.ServiceDiscoveryContent;
 import i5.las2peer.p2p.AgentAlreadyRegisteredException;
 import i5.las2peer.p2p.LocalNode;
+import i5.las2peer.p2p.LocalNodeManager;
 import i5.las2peer.p2p.TimeoutException;
 import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.serialization.MalformedXMLException;
@@ -72,7 +73,7 @@ public class ServiceAgentImplTest {
 			TimeoutException, AgentAccessDeniedException {
 
 		// start node
-		LocalNode node = LocalNode.launchNode();
+		LocalNode node = new LocalNodeManager().launchNode();
 
 		ServiceAgentImpl testServiceAgentImpl0 = ServiceAgentImpl
 				.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.0"), "a pass");

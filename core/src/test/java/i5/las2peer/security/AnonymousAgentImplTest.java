@@ -7,7 +7,6 @@ import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.io.Serializable;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -25,7 +24,7 @@ import i5.las2peer.api.security.AnonymousAgent;
 import i5.las2peer.communication.Message;
 import i5.las2peer.execution.ExecutionContext;
 import i5.las2peer.p2p.AgentAlreadyRegisteredException;
-import i5.las2peer.p2p.LocalNode;
+import i5.las2peer.p2p.LocalNodeManager;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.serialization.MalformedXMLException;
@@ -43,8 +42,9 @@ public class AnonymousAgentImplTest {
 	@Before
 	public void setup() throws MalformedXMLException, IOException, AgentAccessDeniedException,
 			AgentAlreadyRegisteredException, InternalSecurityException, AgentException, CryptoException {
-		node = LocalNode.launchNode();
-		node2 = LocalNode.launchNode();
+		LocalNodeManager manager = new LocalNodeManager();
+		node = manager.launchNode();
+		node2 = manager.launchNode();
 
 		anonymousAgent = AnonymousAgentImpl.getInstance();
 
@@ -147,8 +147,4 @@ public class AnonymousAgentImplTest {
 		}
 	}
 
-	@After
-	public void reset() {
-		LocalNode.reset();
-	}
 }

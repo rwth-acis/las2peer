@@ -3,7 +3,6 @@ package i5.las2peer.p2p;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import i5.las2peer.api.p2p.ServiceNameVersion;
@@ -15,15 +14,11 @@ import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.tools.CryptoException;
 
 public class ServiceAliasManagerTest {
-	@Before
-	public void reset() {
-		LocalNode.reset();
-	}
 
 	@Test
 	public void testDuplication() throws CryptoException, InternalSecurityException, AliasConflictException,
 			AliasNotFoundException, AgentAccessDeniedException, AgentOperationFailedException {
-		LocalNode node = LocalNode.launchNode();
+		LocalNode node = new LocalNodeManager().launchNode();
 		ServiceAgentImpl agentA = ServiceAgentImpl.createServiceAgent(ServiceNameVersion.fromString("serviceA@1.0"),
 				"asdf");
 		agentA.unlock("asdf");
@@ -59,7 +54,7 @@ public class ServiceAliasManagerTest {
 	@Test
 	public void testRegistering() throws CryptoException, InternalSecurityException, AliasConflictException,
 			AliasNotFoundException, AgentAccessDeniedException, AgentOperationFailedException {
-		LocalNode node = LocalNode.launchNode();
+		LocalNode node = new LocalNodeManager().launchNode();
 		ServiceAgentImpl agentA = ServiceAgentImpl.createServiceAgent(ServiceNameVersion.fromString("serviceA@1.0"),
 				"asdf");
 		agentA.unlock("asdf");
@@ -101,7 +96,7 @@ public class ServiceAliasManagerTest {
 	@Test
 	public void testResolve() throws CryptoException, InternalSecurityException, AliasConflictException,
 			AliasNotFoundException, AgentAccessDeniedException, AgentOperationFailedException {
-		LocalNode node = LocalNode.launchNode();
+		LocalNode node = new LocalNodeManager().launchNode();
 		ServiceAgentImpl agentA = ServiceAgentImpl.createServiceAgent(ServiceNameVersion.fromString("serviceA@1.0"),
 				"asdf");
 		agentA.unlock("asdf");
@@ -155,7 +150,7 @@ public class ServiceAliasManagerTest {
 	@Test
 	public void testIntegration() throws CryptoException, InternalSecurityException, AgentAlreadyRegisteredException,
 			AgentException, AliasNotFoundException, AgentAccessDeniedException {
-		LocalNode node = LocalNode.launchNode();
+		LocalNode node = new LocalNodeManager().launchNode();
 		ServiceAgentImpl agentA = ServiceAgentImpl
 				.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.0"), "asdf");
 		agentA.unlock("asdf");

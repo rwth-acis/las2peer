@@ -10,6 +10,7 @@ import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.p2p.AgentAlreadyRegisteredException;
 import i5.las2peer.p2p.LocalNode;
+import i5.las2peer.p2p.LocalNodeManager;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.NodeException;
 import i5.las2peer.security.AgentImpl;
@@ -144,7 +145,7 @@ public class LocalNodeStarter {
 			return;
 		}
 
-		LocalNode node = LocalNode.newNode();
+		LocalNode node = new LocalNodeManager().newNode();
 
 		configureNode(node, argv[0]);
 

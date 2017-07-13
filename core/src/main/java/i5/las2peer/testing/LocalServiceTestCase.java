@@ -5,7 +5,6 @@ import java.io.FilenameFilter;
 import java.io.InputStream;
 import java.io.Serializable;
 
-import org.junit.After;
 import org.junit.Before;
 
 import i5.las2peer.api.Service;
@@ -15,6 +14,7 @@ import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.p2p.LocalNode;
+import i5.las2peer.p2p.LocalNodeManager;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.InternalSecurityException;
 import i5.las2peer.security.ServiceAgentImpl;
@@ -115,7 +115,7 @@ public abstract class LocalServiceTestCase {
 
 		agent.unlock(agentPassphrase);
 
-		localNode = LocalNode.newNode();
+		localNode = new LocalNodeManager().newNode();
 
 		UserAgentImpl eve = MockAgentFactory.getEve();
 		eve.unlock("evespass");
@@ -131,18 +131,6 @@ public abstract class LocalServiceTestCase {
 
 		localNode.launch();
 		localNode.registerReceiver(agent);
-	}
-
-	/**
-	 * stop and reset all LocalNodes
-	 * 
-	 * @throws Exception
-	 */
-	@After
-	public void stopServer() throws Exception {
-		localNode.shutDown();
-
-		LocalNode.reset();
 	}
 
 	/**
@@ -204,7 +192,7 @@ public abstract class LocalServiceTestCase {
 	 * @return result of the invocation
 	 * @throws InterruptedException
 	 * @throws ServiceInvocationException
-	 * @throws AgentLockedException 
+	 * @throws AgentLockedException
 	 */
 	public Serializable invoke(AgentImpl executing, String method, Serializable... parameters)
 			throws InterruptedException, ServiceInvocationException, AgentLockedException {

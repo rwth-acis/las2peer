@@ -9,9 +9,9 @@ import java.util.Random;
 
 import javax.ws.rs.core.HttpHeaders;
 
-import org.junit.AfterClass;
+import org.junit.After;
 import org.junit.Assert;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 
 import i5.las2peer.api.p2p.ServiceNameVersion;
@@ -24,6 +24,7 @@ import i5.las2peer.connectors.webConnector.services.TestService;
 import i5.las2peer.connectors.webConnector.services.TestSwaggerService;
 import i5.las2peer.connectors.webConnector.services.TestVersionService;
 import i5.las2peer.p2p.LocalNode;
+import i5.las2peer.p2p.LocalNodeManager;
 import i5.las2peer.security.GroupAgentImpl;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
@@ -35,11 +36,11 @@ public class WebConnectorTest {
 	private static final String HTTP_ADDRESS = "http://127.0.0.1";
 	private static final int HTTP_PORT = WebConnector.DEFAULT_HTTP_PORT;
 
-	private static LocalNode node;
-	private static WebConnector connector;
-	private static ByteArrayOutputStream logStream;
+	private LocalNode node;
+	private WebConnector connector;
+	private ByteArrayOutputStream logStream;
 
-	private static UserAgentImpl testAgent;
+	private UserAgentImpl testAgent;
 	private static final String testPass = "adamspass";
 
 	private static final String testServiceClass1 = TestSecurityContextService.class.getName() + "@1.0";
@@ -49,8 +50,8 @@ public class WebConnectorTest {
 	private static final String testServiceClass5 = TestClassLoaderService.class.getName() + "@1.0";
 	private static final String testServiceClass6 = TestDeepPathService.class.getName() + "@1.0";
 
-	@BeforeClass
-	public static void startServer() throws Exception {
+	@Before
+	public void startServer() throws Exception {
 		// init agents
 		UserAgentImpl eve = MockAgentFactory.getEve();
 		eve.unlock("evespass");
@@ -63,7 +64,7 @@ public class WebConnectorTest {
 		group1.unlock(adam);
 
 		// start Node
-		node = LocalNode.newNode();
+		node = new LocalNodeManager().newNode();
 		node.storeAgent(eve);
 		node.storeAgent(adam);
 		node.storeAgent(abel);
@@ -110,15 +111,13 @@ public class WebConnectorTest {
 		node.storeAgent(testAgent);
 	}
 
-	@AfterClass
-	public static void shutDownServer() throws Exception {
+	@After
+	public void shutDownServer() throws Exception {
 		connector.stop();
 		node.shutDown();
 
 		connector = null;
 		node = null;
-
-		LocalNode.reset();
 
 		System.out.println("Connector-Log:");
 		System.out.println("--------------");

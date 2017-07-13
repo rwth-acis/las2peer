@@ -25,7 +25,7 @@ public class NodeServiceCacheTest {
 
 	@Test
 	public void testLocalServices() throws CryptoException, AgentException, AgentNotRegisteredException {
-		Node node = LocalNode.launchNode();
+		Node node = new LocalNodeManager().launchNode();
 
 		NodeServiceCache cache = new NodeServiceCache(node, 0, 0);
 
@@ -84,7 +84,7 @@ public class NodeServiceCacheTest {
 		ServiceNameVersion serviceNameVersion = ServiceNameVersion
 				.fromString("i5.las2peer.testServices.testPackage2.UsingService@1.0");
 
-		LocalNode serviceNode = LocalNode.newNode("export/jars/");
+		LocalNode serviceNode = new LocalNodeManager().newNode("export/jars/");
 		serviceNode.launch();
 
 		ServiceAgentImpl serviceAgent = ServiceAgentImpl.createServiceAgent(serviceNameVersion, "a pass");

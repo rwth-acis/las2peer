@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,7 +36,7 @@ import i5.las2peer.api.security.LoginNameAlreadyTakenException;
 import i5.las2peer.api.security.UserAgent;
 import i5.las2peer.logging.NodeObserver;
 import i5.las2peer.p2p.AgentAlreadyRegisteredException;
-import i5.las2peer.p2p.LocalNode;
+import i5.las2peer.p2p.LocalNodeManager;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.security.AnonymousAgentImpl;
 import i5.las2peer.security.InternalSecurityException;
@@ -57,12 +56,12 @@ public class ExecutionContextTest {
 	@Before
 	public void setup() throws MalformedXMLException, IOException, AgentAccessDeniedException,
 			AgentAlreadyRegisteredException, InternalSecurityException, AgentException, CryptoException {
-		node = LocalNode.launchNode();
+		node = new LocalNodeManager().launchNode();
 
 		adam = MockAgentFactory.getAdam();
 		adam.unlock("adamspass");
 		node.storeAgent(adam);
-		
+
 		eve = MockAgentFactory.getEve();
 		eve.unlock("evespass");
 		node.storeAgent(eve);
@@ -74,11 +73,6 @@ public class ExecutionContextTest {
 		node.registerReceiver(serviceAgent);
 
 		context = new ExecutionContext(serviceAgent, node.getAgentContext(adam), node);
-	}
-
-	@After
-	public void reset() {
-		LocalNode.reset();
 	}
 
 	@Test
@@ -146,44 +140,45 @@ public class ExecutionContextTest {
 	}
 
 	@Test
-	public void testEnvelope() throws EnvelopeOperationFailedException, EnvelopeAccessDeniedException, EnvelopeNotFoundException {
+	public void testEnvelope()
+			throws EnvelopeOperationFailedException, EnvelopeAccessDeniedException, EnvelopeNotFoundException {
 		try {
 			Envelope env = context.createEnvelope("id");
 			env.setContent("content");
 			assertTrue(env.isPrivate());
 			assertTrue(env.hasReader(adam));
 			context.storeEnvelope(env);
-			
+
 			try {
 				env = context.requestEnvelope("id", eve);
 				fail("Exception expected");
 			} catch (EnvelopeAccessDeniedException e) {
 			}
-			
+
 			try {
 				env = context.requestEnvelope("id123");
 				fail("Exception expected");
 			} catch (EnvelopeNotFoundException e) {
 			}
-			
+
 			env = context.requestEnvelope("id");
 			assertEquals("content", env.getContent());
-			
+
 			env.setContent("content123");
 			context.storeEnvelope(env);
 			env = context.requestEnvelope("id");
 			assertEquals("content123", env.getContent());
-			
+
 			env.addReader(eve);
 			context.storeEnvelope(env);
 			env = context.requestEnvelope("id", eve);
-			
+
 			env.setPublic();
 			context.storeEnvelope(env);
 			assertFalse(env.isPrivate());
 			env = context.requestEnvelope("id", eve);
 			assertFalse(env.isPrivate());
-			
+
 			env = context.requestEnvelope("id", eve);
 			env.setContent("bad");
 			try {
@@ -193,7 +188,7 @@ public class ExecutionContextTest {
 			}
 			env = context.requestEnvelope("id");
 			assertEquals("content123", env.getContent());
-			
+
 			// TODO reclaim operation not (properly) implemented ...
 			/*
 			try {
@@ -214,7 +209,7 @@ public class ExecutionContextTest {
 			fail();
 		}
 	}
-	
+
 	@Test
 	public void testEnvelopeReaderGroup() {
 		try {
@@ -223,13 +218,13 @@ public class ExecutionContextTest {
 			assertTrue(env.isPrivate());
 			assertTrue(env.hasReader(adam));
 			context.storeEnvelope(env);
-			
+
 			env = context.requestEnvelope("id");
-			GroupAgent group = context.createGroupAgent(new Agent[] {adam, eve});
+			GroupAgent group = context.createGroupAgent(new Agent[] { adam, eve });
 			context.storeAgent(group);
 			env.addReader(group);
 			context.storeEnvelope(env);
-			
+
 			env = context.requestEnvelope("id", eve);
 			assertTrue(env.hasReader(group));
 
@@ -242,29 +237,28 @@ public class ExecutionContextTest {
 	@Test
 	public void testEnvelopeSigningGroup() {
 		try {
-			GroupAgent group = context.createGroupAgent(new Agent[] {adam, eve});
+			GroupAgent group = context.createGroupAgent(new Agent[] { adam, eve });
 			context.storeAgent(group);
-			
+
 			Envelope env = context.createEnvelope("id", group);
 			env.setContent("content");
 			assertTrue(env.isPrivate());
 			assertTrue(env.hasReader(group));
 			context.storeEnvelope(env);
-			
+
 			env = context.requestEnvelope("id", eve);
 			env.setContent("newContent");
 			context.storeEnvelope(env, eve);
-			
+
 			env = context.requestEnvelope("id");
 			assertEquals(env.getContent(), "newContent");
-			
 
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();
 		}
 	}
-	
+
 	@Test
 	public void testEnvelopeStore() {
 		try {
@@ -279,7 +273,7 @@ public class ExecutionContextTest {
 			fail();
 		}
 	}
-	
+
 	@Test
 	public void testEnvelopePublic() {
 		try {
@@ -288,7 +282,7 @@ public class ExecutionContextTest {
 			assertTrue(env.isPrivate());
 			assertTrue(env.hasReader(adam));
 			context.storeEnvelope(env);
-			
+
 			// make public
 			env = context.requestEnvelope("id");
 			assertTrue(env.isPrivate());
@@ -297,44 +291,44 @@ public class ExecutionContextTest {
 			assertFalse(env.isPrivate());
 			assertFalse(env.hasReader(adam));
 			context.storeEnvelope(env);
-			
+
 			// access with other agent
 			env = context.requestEnvelope("id", eve);
 			assertFalse(env.isPrivate());
 			assertFalse(env.hasReader(adam));
 			assertFalse(env.hasReader(eve));
-			
+
 			// add new agent
 			env.addReader(adam);
 			assertTrue(env.isPrivate());
-			
+
 			// try to store with non singing agent
 			try {
 				context.storeEnvelope(env, eve);
 				fail("Exception expected");
-			} catch (EnvelopeAccessDeniedException e) {	
+			} catch (EnvelopeAccessDeniedException e) {
 			}
-			
+
 			// store with singing agent
 			context.storeEnvelope(env);
-			
+
 			// check if private again
 			env = context.requestEnvelope("id");
 			assertTrue(env.isPrivate());
 			assertTrue(env.hasReader(adam));
-			
+
 			// try to fetch with other agent
 			try {
 				context.requestEnvelope("id", eve);
 				fail("Exception expected");
-			} catch (EnvelopeAccessDeniedException e) {	
+			} catch (EnvelopeAccessDeniedException e) {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();
 		}
 	}
-	
+
 	@Test
 	public void testSecurity() {
 		try {

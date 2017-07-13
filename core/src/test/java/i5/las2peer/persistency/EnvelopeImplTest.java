@@ -8,13 +8,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import i5.las2peer.api.persistency.EnvelopeException;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.p2p.LocalNode;
+import i5.las2peer.p2p.LocalNodeManager;
 import i5.las2peer.security.AgentContext;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.InternalSecurityException;
@@ -25,16 +25,12 @@ import i5.las2peer.testing.MockAgentFactory;
 import i5.las2peer.tools.CryptoException;
 
 public class EnvelopeImplTest {
+
 	LocalNode node;
 
 	@Before
 	public void setup() {
-		node = LocalNode.launchNode();
-	}
-
-	@After
-	public void reset() {
-		LocalNode.reset();
+		node = new LocalNodeManager().launchNode();
 	}
 
 	@Test

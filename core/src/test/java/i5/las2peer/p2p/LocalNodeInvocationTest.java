@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.Serializable;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,24 +18,20 @@ import i5.las2peer.testing.MockAgentFactory;
 
 public class LocalNodeInvocationTest {
 
+	private LocalNodeManager manager;
+
 	@Before
-	public void reset() {
-		LocalNode.reset();
-
+	public void init() {
+		manager = new LocalNodeManager();
 		// make results determinant
-		LocalNode.setMinMessageWait(100);
-		LocalNode.setMaxMessageWait(100);
-	}
-
-	@After
-	public void clearThreads() {
-		LocalNode.stopCleaner();
+		manager.setMinMessageWait(100);
+		manager.setMaxMessageWait(100);
 	}
 
 	@Test
 	public void testLocalInvocation() {
 		try {
-			LocalNode node = LocalNode.newNode();
+			LocalNode node = manager.newNode();
 			UserAgentImpl eve = MockAgentFactory.getEve();
 
 			eve.unlock("evespass");
@@ -61,7 +56,7 @@ public class LocalNodeInvocationTest {
 	@Test
 	public void testGlobalInvocation() {
 		try {
-			LocalNode serviceNode = LocalNode.newNode();
+			LocalNode serviceNode = manager.newNode();
 			serviceNode.getNodeServiceCache().setWaitForResults(3);
 			UserAgentImpl eve = MockAgentFactory.getEve();
 
@@ -74,7 +69,7 @@ public class LocalNodeInvocationTest {
 			testServiceAgent.unlock("a pass");
 			serviceNode.registerReceiver(testServiceAgent);
 
-			LocalNode callerNode = LocalNode.launchNode();
+			LocalNode callerNode = manager.launchNode();
 			Object result = callerNode.invokeGlobally(eve, testServiceAgent.getIdentifier(),
 					testServiceAgent.getRunningAtNode().getNodeId(), "inc", new Serializable[] { new Integer(12) });
 
@@ -88,8 +83,8 @@ public class LocalNodeInvocationTest {
 	@Test
 	public void testSubinvocation() {
 		try {
-			LocalNode serviceNode1 = LocalNode.newNode();
-			LocalNode serviceNode2 = LocalNode.newNode();
+			LocalNode serviceNode1 = manager.newNode();
+			LocalNode serviceNode2 = manager.newNode();
 			UserAgentImpl eve = MockAgentFactory.getEve();
 
 			eve.unlock("evespass");
@@ -107,7 +102,7 @@ public class LocalNodeInvocationTest {
 			testServiceAgent2.unlock("a 2nd pass");
 			serviceNode2.registerReceiver(testServiceAgent2);
 
-			LocalNode callerNode = LocalNode.launchNode();
+			LocalNode callerNode = manager.launchNode();
 			Object result = callerNode.invoke(eve, "i5.las2peer.api.TestService2@1.0", "usingOther",
 					new Serializable[] { new Integer(12) });
 
@@ -121,7 +116,7 @@ public class LocalNodeInvocationTest {
 	@Test
 	public void testSubinvocationFail() {
 		try {
-			LocalNode serviceNode2 = LocalNode.newNode();
+			LocalNode serviceNode2 = manager.newNode();
 			UserAgentImpl eve = MockAgentFactory.getEve();
 
 			eve.unlock("evespass");
@@ -133,7 +128,7 @@ public class LocalNodeInvocationTest {
 			testServiceAgent2.unlock("a 2nd pass");
 			serviceNode2.registerReceiver(testServiceAgent2);
 
-			LocalNode callerNode = LocalNode.launchNode();
+			LocalNode callerNode = manager.launchNode();
 			Object result = callerNode.invoke(eve, "i5.las2peer.api.TestService2@1.0", "usingOther",
 					new Serializable[] { new Integer(12) });
 
@@ -148,8 +143,8 @@ public class LocalNodeInvocationTest {
 	public void testInvocation() {
 		try {
 			// start
-			LocalNode serviceNode1 = LocalNode.newNode("export/jars/");
-			LocalNode serviceNode2 = LocalNode.newNode("export/jars/");
+			LocalNode serviceNode1 = manager.newNode("export/jars/");
+			LocalNode serviceNode2 = manager.newNode("export/jars/");
 			UserAgentImpl eve = MockAgentFactory.getEve();
 
 			eve.unlock("evespass");
@@ -172,7 +167,7 @@ public class LocalNodeInvocationTest {
 			serviceAgent2.unlock("a pass");
 			serviceNode2.registerReceiver(serviceAgent2);
 
-			LocalNode callerNode = LocalNode.launchNode();
+			LocalNode callerNode = manager.launchNode();
 
 			// specify exact version
 			Object result = callerNode.invoke(eve,

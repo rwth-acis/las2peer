@@ -9,7 +9,7 @@ import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.api.security.AnonymousAgent;
 import i5.las2peer.api.security.EmailAlreadyTakenException;
 import i5.las2peer.api.security.LoginNameAlreadyTakenException;
-import i5.las2peer.p2p.LocalNode;
+import i5.las2peer.p2p.LocalNodeManager;
 import i5.las2peer.p2p.Node;
 
 public class UserAgentManagerTest {
@@ -17,7 +17,7 @@ public class UserAgentManagerTest {
 	@Test
 	public void testLogin() {
 		try {
-			Node node = LocalNode.launchNode();
+			Node node = new LocalNodeManager().launchNode();
 			UserAgentManager l = node.getUserManager();
 
 			UserAgentImpl a = UserAgentImpl.createUserAgent("pass");
@@ -67,7 +67,7 @@ public class UserAgentManagerTest {
 	@Test
 	public void testEmail() {
 		try {
-			Node node = LocalNode.launchNode();
+			Node node = new LocalNodeManager().launchNode();
 			UserAgentManager l = node.getUserManager();
 
 			UserAgentImpl a = UserAgentImpl.createUserAgent("pass");
@@ -119,7 +119,7 @@ public class UserAgentManagerTest {
 	@Test
 	public void testAnonymous() {
 		try {
-			Node node = LocalNode.launchNode();
+			Node node = new LocalNodeManager().launchNode();
 			String anonymousAgentId = node.getAgentIdForLogin(AnonymousAgent.LOGIN_NAME);
 			assertEquals(AnonymousAgentImpl.getInstance().getIdentifier(), anonymousAgentId);
 		} catch (Exception e) {
