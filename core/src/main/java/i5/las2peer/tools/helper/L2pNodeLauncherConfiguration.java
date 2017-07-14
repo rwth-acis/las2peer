@@ -1,5 +1,6 @@
 package i5.las2peer.tools.helper;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -337,6 +338,12 @@ public class L2pNodeLauncherConfiguration {
 			conf.put("serviceDirectories", getServiceDirectories());
 			conf.put("nodeIdSeed", getNodeIdSeed());
 			conf.put("commands", getCommands());
+			// auto create parent directory
+			File parent = new File(filename).getParentFile();
+			if (parent != null) {
+				parent.mkdirs();
+			}
+			// write configuration to file
 			FileOutputStream fos = new FileOutputStream(filename);
 			conf.store(fos);
 			fos.close();
