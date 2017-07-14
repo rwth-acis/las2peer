@@ -268,7 +268,7 @@ public class AgentsHandlerTest extends AbstractTestHandler {
 	public void testPostUploadAgent() {
 		try {
 			FormDataMultiPart formData = new FormDataMultiPart();
-			File agentFile = new File("src/test/java/i5/las2peer/connectors/nodeAdminConnector/smith.xml");
+			File agentFile = new File(getClass().getResource("smith.xml").toURI());
 			formData.bodyPart(new FileDataBodyPart("agentFile", agentFile));
 			formData.field("agentPassword", "adamspass");
 			formData.setMediaType(MediaType.MULTIPART_FORM_DATA_TYPE);
@@ -306,7 +306,7 @@ public class AgentsHandlerTest extends AbstractTestHandler {
 			Assert.assertEquals(NodeAdminConnector.COOKIE_SESSIONID_KEY, cookie.getName());
 			// start actual test
 			FormDataMultiPart formData = new FormDataMultiPart();
-			File agentFile = new File("src/test/java/i5/las2peer/connectors/nodeAdminConnector/group.xml");
+			File agentFile = new File(getClass().getResource("group.xml").toURI());
 			formData.bodyPart(new FileDataBodyPart("agentFile", agentFile));
 			formData.setMediaType(MediaType.MULTIPART_FORM_DATA_TYPE);
 			WebTarget target = sslClient.target(connector.getHostname() + "/agents/uploadAgent");
