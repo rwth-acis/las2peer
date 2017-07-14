@@ -7,6 +7,7 @@ import java.util.Base64;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Form;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
@@ -30,11 +31,10 @@ public class AgentsHandlerTest extends AbstractTestHandler {
 	@Test
 	public void testPostCreateAgentMinimal() {
 		try {
-			FormDataMultiPart formData = new FormDataMultiPart();
-			formData.field("password", "topsecret");
-			formData.setMediaType(MediaType.MULTIPART_FORM_DATA_TYPE);
+			Form formData = new Form();
+			formData.param("password", "topsecret");
 			WebTarget target = sslClient.target(connector.getHostname() + "/agents/createAgent");
-			Response response = target.request().post(Entity.entity(formData, MediaType.MULTIPART_FORM_DATA_TYPE));
+			Response response = target.request().post(Entity.entity(formData, MediaType.APPLICATION_FORM_URLENCODED));
 			Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
 			Assert.assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
 			byte[] bytes = SimpleTools.toByteArray((InputStream) response.getEntity());
@@ -53,13 +53,12 @@ public class AgentsHandlerTest extends AbstractTestHandler {
 	@Test
 	public void testPostCreateAgentFull() {
 		try {
-			FormDataMultiPart formData = new FormDataMultiPart();
-			formData.field("password", "topsecret");
-			formData.field("username", "testuser");
-			formData.field("email", "testuser@example.org");
-			formData.setMediaType(MediaType.MULTIPART_FORM_DATA_TYPE);
+			Form formData = new Form();
+			formData.param("password", "topsecret");
+			formData.param("username", "testuser");
+			formData.param("email", "testuser@example.org");
 			WebTarget target = sslClient.target(connector.getHostname() + "/agents/createAgent");
-			Response response = target.request().post(Entity.entity(formData, MediaType.MULTIPART_FORM_DATA_TYPE));
+			Response response = target.request().post(Entity.entity(formData, MediaType.APPLICATION_FORM_URLENCODED));
 			Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
 			Assert.assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
 			byte[] bytes = SimpleTools.toByteArray((InputStream) response.getEntity());
@@ -85,11 +84,10 @@ public class AgentsHandlerTest extends AbstractTestHandler {
 			PastryNodeImpl activeNode = nodes.get(0);
 			activeNode.storeAgent(adam);
 			// start actual test
-			FormDataMultiPart formData = new FormDataMultiPart();
-			formData.field("agentid", adam.getIdentifier());
-			formData.setMediaType(MediaType.MULTIPART_FORM_DATA_TYPE);
+			Form formData = new Form();
+			formData.param("agentid", adam.getIdentifier());
 			WebTarget target = sslClient.target(connector.getHostname() + "/agents/getAgent");
-			Response response = target.request().post(Entity.entity(formData, MediaType.MULTIPART_FORM_DATA_TYPE));
+			Response response = target.request().post(Entity.entity(formData, MediaType.APPLICATION_FORM_URLENCODED));
 			Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
 			Assert.assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
 			byte[] bytes = SimpleTools.toByteArray((InputStream) response.getEntity());
@@ -113,11 +111,10 @@ public class AgentsHandlerTest extends AbstractTestHandler {
 			PastryNodeImpl activeNode = nodes.get(0);
 			activeNode.storeAgent(adam);
 			// start actual test
-			FormDataMultiPart formData = new FormDataMultiPart();
-			formData.field("username", adam.getLoginName());
-			formData.setMediaType(MediaType.MULTIPART_FORM_DATA_TYPE);
+			Form formData = new Form();
+			formData.param("username", adam.getLoginName());
 			WebTarget target = sslClient.target(connector.getHostname() + "/agents/getAgent");
-			Response response = target.request().post(Entity.entity(formData, MediaType.MULTIPART_FORM_DATA_TYPE));
+			Response response = target.request().post(Entity.entity(formData, MediaType.APPLICATION_FORM_URLENCODED));
 			Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
 			Assert.assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
 			byte[] bytes = SimpleTools.toByteArray((InputStream) response.getEntity());
@@ -141,11 +138,10 @@ public class AgentsHandlerTest extends AbstractTestHandler {
 			PastryNodeImpl activeNode = nodes.get(0);
 			activeNode.storeAgent(adam);
 			// start actual test
-			FormDataMultiPart formData = new FormDataMultiPart();
-			formData.field("email", adam.getEmail());
-			formData.setMediaType(MediaType.MULTIPART_FORM_DATA_TYPE);
+			Form formData = new Form();
+			formData.param("email", adam.getEmail());
 			WebTarget target = sslClient.target(connector.getHostname() + "/agents/getAgent");
-			Response response = target.request().post(Entity.entity(formData, MediaType.MULTIPART_FORM_DATA_TYPE));
+			Response response = target.request().post(Entity.entity(formData, MediaType.APPLICATION_FORM_URLENCODED));
 			Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
 			Assert.assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
 			byte[] bytes = SimpleTools.toByteArray((InputStream) response.getEntity());
@@ -169,13 +165,12 @@ public class AgentsHandlerTest extends AbstractTestHandler {
 			PastryNodeImpl activeNode = nodes.get(0);
 			activeNode.storeAgent(adam);
 			// start actual test
-			FormDataMultiPart formData = new FormDataMultiPart();
-			formData.field("agentid", adam.getIdentifier());
-			formData.field("username", "eva");
-			formData.field("email", "testuser@example.org");
-			formData.setMediaType(MediaType.MULTIPART_FORM_DATA_TYPE);
+			Form formData = new Form();
+			formData.param("agentid", adam.getIdentifier());
+			formData.param("username", "eva");
+			formData.param("email", "testuser@example.org");
 			WebTarget target = sslClient.target(connector.getHostname() + "/agents/getAgent");
-			Response response = target.request().post(Entity.entity(formData, MediaType.MULTIPART_FORM_DATA_TYPE));
+			Response response = target.request().post(Entity.entity(formData, MediaType.APPLICATION_FORM_URLENCODED));
 			Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
 			Assert.assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
 			byte[] bytes = SimpleTools.toByteArray((InputStream) response.getEntity());
@@ -199,11 +194,10 @@ public class AgentsHandlerTest extends AbstractTestHandler {
 			PastryNodeImpl activeNode = nodes.get(0);
 			activeNode.storeAgent(adam);
 			// start actual test
-			FormDataMultiPart formData = new FormDataMultiPart();
-			formData.field("agentid", adam.getIdentifier());
-			formData.setMediaType(MediaType.MULTIPART_FORM_DATA_TYPE);
+			Form formData = new Form();
+			formData.param("agentid", adam.getIdentifier());
 			WebTarget target = sslClient.target(connector.getHostname() + "/agents/exportAgent");
-			Response response = target.request().post(Entity.entity(formData, MediaType.MULTIPART_FORM_DATA_TYPE));
+			Response response = target.request().post(Entity.entity(formData, MediaType.APPLICATION_FORM_URLENCODED));
 			Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
 			Assert.assertEquals(MediaType.APPLICATION_XML_TYPE, response.getMediaType());
 			byte[] bytes = SimpleTools.toByteArray((InputStream) response.getEntity());
@@ -224,11 +218,10 @@ public class AgentsHandlerTest extends AbstractTestHandler {
 			PastryNodeImpl activeNode = nodes.get(0);
 			activeNode.storeAgent(adam);
 			// start actual test
-			FormDataMultiPart formData = new FormDataMultiPart();
-			formData.field("username", adam.getLoginName());
-			formData.setMediaType(MediaType.MULTIPART_FORM_DATA_TYPE);
+			Form formData = new Form();
+			formData.param("username", adam.getLoginName());
 			WebTarget target = sslClient.target(connector.getHostname() + "/agents/exportAgent");
-			Response response = target.request().post(Entity.entity(formData, MediaType.MULTIPART_FORM_DATA_TYPE));
+			Response response = target.request().post(Entity.entity(formData, MediaType.APPLICATION_FORM_URLENCODED));
 			Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
 			Assert.assertEquals(MediaType.APPLICATION_XML_TYPE, response.getMediaType());
 			byte[] bytes = SimpleTools.toByteArray((InputStream) response.getEntity());
@@ -249,11 +242,10 @@ public class AgentsHandlerTest extends AbstractTestHandler {
 			PastryNodeImpl activeNode = nodes.get(0);
 			activeNode.storeAgent(adam);
 			// start actual test
-			FormDataMultiPart formData = new FormDataMultiPart();
-			formData.field("email", adam.getEmail());
-			formData.setMediaType(MediaType.MULTIPART_FORM_DATA_TYPE);
+			Form formData = new Form();
+			formData.param("email", adam.getEmail());
 			WebTarget target = sslClient.target(connector.getHostname() + "/agents/exportAgent");
-			Response response = target.request().post(Entity.entity(formData, MediaType.MULTIPART_FORM_DATA_TYPE));
+			Response response = target.request().post(Entity.entity(formData, MediaType.APPLICATION_FORM_URLENCODED));
 			Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
 			Assert.assertEquals(MediaType.APPLICATION_XML_TYPE, response.getMediaType());
 			byte[] bytes = SimpleTools.toByteArray((InputStream) response.getEntity());
