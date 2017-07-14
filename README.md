@@ -23,6 +23,11 @@ Policy files for strong encryption can be downloaded via Oracle:
 
 (If the JUnit-test "i5.las2peer.communication.MessageTest" runs successfully, you have enabled strong encryption correctly)
 
+## Build dependencies
+
+* Apache ant
+* Node 6 / npm
+
 ## Project structure
 
 ### Modules
