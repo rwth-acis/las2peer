@@ -9,7 +9,7 @@
 		<ant dir="bundle" antfile="build.xml" target="deploy-local" /> 
 	</target>
 	
-	<target name="all" description="all">
+	<target name="all" depends="build-only" description="all">
 	    <ant dir="core" antfile="build.xml" target="all" />        
 		<ant dir="restmapper" antfile="build.xml" target="all" />  
 		<ant dir="webconnector" antfile="build.xml" target="all" />   
@@ -33,4 +33,12 @@
 		<ant dir="bundle" antfile="build.xml" target="deploy-release" /> 
 	</target>
 
+	<target name="clean" description="clean all modules">
+	    <ant dir="core" antfile="build.xml" target="clean" />        
+		<ant dir="restmapper" antfile="build.xml" target="clean" />  
+		<ant dir="webconnector" antfile="build.xml" target="clean" />   
+		<ant dir="nodeadminconnector" antfile="build.xml" target="clean" />  
+		<ant dir="bundle" antfile="build.xml" target="clean" /> 
+	</target>
+	
 </project>
