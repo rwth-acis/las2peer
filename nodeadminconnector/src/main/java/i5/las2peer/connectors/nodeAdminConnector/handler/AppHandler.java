@@ -1,20 +1,24 @@
 package i5.las2peer.connectors.nodeAdminConnector.handler;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import i5.las2peer.connectors.nodeAdminConnector.NodeAdminConnector;
+import i5.las2peer.tools.SimpleTools;
 
 @Path(AppHandler.ROOT_ROUTE)
-public class AppHandler extends AbstractFilesHandler {
+public class AppHandler extends AbstractHandler {
 
 	public static final String ROOT_ROUTE = "/webapp";
 	public static final String DEFAULT_ROUTE = ROOT_ROUTE + "/view-status";
@@ -46,14 +50,22 @@ public class AppHandler extends AbstractFilesHandler {
 		}
 	}
 
-	@Override
-	protected String replaceContent(String filename, String myHostname, String strContent) {
+	protected Response serveFile(String filename, String myHostname) throws IOException {
+		InputStream is = getClass().getResourceAsStream(filename);
+		if (is == null) {
+			logger.info("File not found: '" + filename + "'");
+			return Response.status(Status.NOT_FOUND).build();
+		}
+		byte[] bytes = SimpleTools.toByteArray(is);
+		String strContent = new String(bytes, StandardCharsets.UTF_8);
 		if (filename.equalsIgnoreCase(ROOT_ROUTE + "/index.html")) {
 			strContent = strContent.replace("<base href=\"/\">", "<base href=\"" + ROOT_ROUTE + "/\">");
 			// just return host header, so browsers do not block subsequent ajax requests to an possible insecure host
 			strContent = strContent.replace("$connector_address$", myHostname);
+			return Response.ok(strContent).build();
+		} else {
+			return Response.ok(bytes).build();
 		}
-		return strContent;
 	}
 
 }
