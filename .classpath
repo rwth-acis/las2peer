@@ -62,9 +62,10 @@
 	<classpathentry kind="lib" path="webconnector/lib/commons-io-2.4.jar"/>
 	<classpathentry kind="lib" path="webconnector/lib/jcip-annotations-1.0.jar"/>
 	<classpathentry kind="lib" path="webconnector/lib/mail-1.4.7.jar"/>
+	<classpathentry kind="lib" path="nodeadminconnector/lib/accessors-smart-1.2.jar"/>
 	<classpathentry kind="lib" path="nodeadminconnector/lib/jersey-container-jdk-http-2.25.1.jar"/>
 	<classpathentry kind="lib" path="nodeadminconnector/lib/json-smart-2.3.jar"/>
-	<classpathentry kind="lib" path="nodeadminconnector/lib/accessors-smart-1.2.jar"/>
+	<classpathentry kind="lib" path="nodeadminconnector/lib/swagger-ui-2.2.10.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="output"/>
 </classpath>
