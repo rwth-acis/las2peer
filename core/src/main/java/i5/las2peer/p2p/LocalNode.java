@@ -47,6 +47,8 @@ public class LocalNode extends Node {
 
 	/**
 	 * create a LocalNode
+	 * 
+	 * @param localNodeManager A manager to handle a group (network) of local nodes
 	 */
 	public LocalNode(LocalNodeManager localNodeManager) {
 		this(localNodeManager, null);
@@ -55,6 +57,7 @@ public class LocalNode extends Node {
 	/**
 	 * create a LocalNode
 	 * 
+	 * @param localNodeManager A manager to handle a group (network) of local nodes
 	 * @param classManager
 	 */
 	public LocalNode(LocalNodeManager localNodeManager, ClassManager classManager) {
