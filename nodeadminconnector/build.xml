@@ -215,9 +215,9 @@
 	<target name="junit_jars" depends="" />
 	
 	<target name="build_frontend" description="--> build the polymer frontend with bower">
-		<echo message="Installing bower and polymer-cli..." />
+		<echo message="Preparing bower and polymer-cli..." />
 		<exec executable="npm" dir="frontend" failonerror="true">
-			<arg value="install" />
+			<arg value="update" />
 			<arg value="bower" />
 			<arg value="polymer-cli" />
 		</exec>

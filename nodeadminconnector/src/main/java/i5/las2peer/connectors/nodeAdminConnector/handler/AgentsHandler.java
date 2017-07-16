@@ -7,7 +7,6 @@ import java.util.logging.Level;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.CookieParam;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -44,8 +43,8 @@ public class AgentsHandler extends AbstractHandler {
 	@POST
 	@Path("/createAgent")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response handleCreateAgent(@FormParam("password") String password, @FormParam("username") String username,
-			@FormParam("email") String email) throws Exception {
+	public Response handleCreateAgent(@FormDataParam("username") String username, @FormDataParam("email") String email,
+			@FormDataParam("password") String password) throws Exception {
 		if (password == null || password.isEmpty()) {
 			return Response.status(Status.BAD_REQUEST).entity("No password provided").build();
 		}
@@ -89,8 +88,8 @@ public class AgentsHandler extends AbstractHandler {
 	@POST
 	@Path("/getAgent")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response handleGetAgent(@FormParam("agentid") String agentId, @FormParam("username") String username,
-			@FormParam("email") String email) throws Exception {
+	public Response handleGetAgent(@FormDataParam("agentid") String agentId, @FormDataParam("username") String username,
+			@FormDataParam("email") String email) throws Exception {
 		AgentImpl agent = getAgentByDetail(agentId, username, email);
 		JSONObject json = new JSONObject();
 		json.put("agentid", agent.getIdentifier());
@@ -104,8 +103,8 @@ public class AgentsHandler extends AbstractHandler {
 
 	@POST
 	@Path("/exportAgent")
-	public Response handleExportAgent(@FormParam("agentid") String agentId, @FormParam("username") String username,
-			@FormParam("email") String email) throws Exception {
+	public Response handleExportAgent(@FormDataParam("agentid") String agentId,
+			@FormDataParam("username") String username, @FormDataParam("email") String email) throws Exception {
 		AgentImpl agent = getAgentByDetail(agentId, username, email);
 		return Response.ok(agent.toXmlString(), MediaType.APPLICATION_XML).build();
 	}
@@ -129,13 +128,13 @@ public class AgentsHandler extends AbstractHandler {
 
 	@POST
 	@Path("/uploadAgent")
-	public Response handleUploadAgent(@FormDataParam("agentFile") InputStream formPart,
-			@FormDataParam("agentPassword") String password,
+	public Response handleUploadAgent(@FormDataParam("agentFile") InputStream agentFile,
+			@FormDataParam("password") String password,
 			@CookieParam(NodeAdminConnector.COOKIE_SESSIONID_KEY) String sessionId) throws Exception {
-		if (formPart == null) {
+		if (agentFile == null) {
 			return Response.status(Status.BAD_REQUEST).entity("No agent file provided").build();
 		}
-		AgentImpl agent = AgentImpl.createFromXml(formPart);
+		AgentImpl agent = AgentImpl.createFromXml(agentFile);
 		if (agent instanceof PassphraseAgentImpl) {
 			PassphraseAgentImpl passphraseAgent = (PassphraseAgentImpl) agent;
 			if (password == null) {
@@ -173,9 +172,9 @@ public class AgentsHandler extends AbstractHandler {
 
 	@POST
 	@Path("/changePassphrase")
-	public Response handleChangePassphrase(@FormParam("agentid") String agentId,
-			@FormParam("passphrase") String passphrase, @FormParam("passphraseNew") String passphraseNew,
-			@FormParam("passphraseNew2") String passphraseNew2) throws Exception {
+	public Response handleChangePassphrase(@FormDataParam("agentid") String agentId,
+			@FormDataParam("passphrase") String passphrase, @FormDataParam("passphraseNew") String passphraseNew,
+			@FormDataParam("passphraseNew2") String passphraseNew2) throws Exception {
 		if (agentId == null || agentId.isEmpty()) {
 			return Response.status(Status.BAD_REQUEST).entity("No agentid provided").build();
 		}
@@ -218,15 +217,15 @@ public class AgentsHandler extends AbstractHandler {
 	@POST
 	@Path("/createGroup")
 	public Response handleCreateGroup(@CookieParam(NodeAdminConnector.COOKIE_SESSIONID_KEY) String sessionId,
-			@FormParam("members") String strMembers) throws Exception {
+			@FormDataParam("members") String members) throws Exception {
 		AgentSession session = connector.getSessionById(sessionId);
 		if (session == null) {
 			return Response.status(Status.FORBIDDEN).entity("You have to be logged in to create a group").build();
 		}
-		if (strMembers == null) {
+		if (members == null) {
 			return Response.status(Status.BAD_REQUEST).entity("No members provided").build();
 		}
-		JSONArray jsonMembers = (JSONArray) new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(strMembers);
+		JSONArray jsonMembers = (JSONArray) new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(members);
 		if (jsonMembers.isEmpty()) {
 			return Response.status(Status.BAD_REQUEST).entity("Members list empty").build();
 		}
@@ -256,7 +255,7 @@ public class AgentsHandler extends AbstractHandler {
 	@POST
 	@Path("/loadGroup")
 	public Response handleLoadGroup(@CookieParam(NodeAdminConnector.COOKIE_SESSIONID_KEY) String sessionId,
-			@FormParam("agentid") String agentId) throws AgentException {
+			@FormDataParam("agentid") String agentId) throws AgentException {
 		AgentSession session = connector.getSessionById(sessionId);
 		if (session == null) {
 			return Response.status(Status.FORBIDDEN).entity("You have to be logged in to load a group").build();
@@ -306,7 +305,7 @@ public class AgentsHandler extends AbstractHandler {
 	@POST
 	@Path("/changeGroup")
 	public Response handleChangeGroup(@CookieParam(NodeAdminConnector.COOKIE_SESSIONID_KEY) String sessionId,
-			@FormParam("agentid") String agentId, @FormParam("members") String strMembers)
+			@FormDataParam("agentid") String agentId, @FormDataParam("members") String members)
 			throws AgentException, CryptoException, SerializationException, ParseException {
 		AgentSession session = connector.getSessionById(sessionId);
 		if (session == null) {
@@ -315,10 +314,10 @@ public class AgentsHandler extends AbstractHandler {
 		if (agentId == null || agentId.isEmpty()) {
 			return Response.status(Status.BAD_REQUEST).entity("No agent id provided").build();
 		}
-		if (strMembers == null) {
+		if (members == null) {
 			return Response.status(Status.BAD_REQUEST).entity("No members to change provided").build();
 		}
-		JSONArray changedMembers = (JSONArray) new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(strMembers);
+		JSONArray changedMembers = (JSONArray) new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(members);
 		if (changedMembers.isEmpty()) {
 			return Response.status(Status.BAD_REQUEST).entity("Changed members list must not be empty").build();
 		}

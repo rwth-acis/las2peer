@@ -80,9 +80,9 @@
       <iron-collapse id="collapseCreateAgent">
         Create a new user agent and upload it to the network for later usage.
         <form is="iron-form" on-keypress="_keyPressedCreateAgent">
-          <paper-input label="username (optional)" id="agentUsername" disabled="[[_working]]" value=""></paper-input>
-          <paper-input label="email (optional)" id="agentEmail" disabled="[[_working]]" value=""></paper-input>
-          <paper-input label="password" id="agentPassword" disabled="[[_working]]" value="" type="password" required="true"></paper-input>
+          <paper-input label="username (optional)" id="createAgentUsername" disabled="[[_working]]" value=""></paper-input>
+          <paper-input label="email (optional)" id="createAgentEmail" disabled="[[_working]]" value=""></paper-input>
+          <paper-input label="password" id="createAgentPassword" disabled="[[_working]]" value="" type="password" required="true"></paper-input>
           <paper-button raised on-tap="createAgent" disabled="[[_working]]">Create Agent</paper-button>
         </form>
         <div id="createAgentMsg" style="font-weight: bold"></div>
@@ -100,8 +100,8 @@
       <h2 on-tap="toggleUploadAgent" style="cursor: pointer">Upload Agent</h2>
       <iron-collapse id="collapseUploadAgent">
         <form is="iron-form" on-keypress="_keyPressedUploadAgent">
-          <paper-input label="agent xml file" id="agentUploadFile" disabled="[[_working]]" type="file" required="true"></paper-input>
-          <paper-input label="password (optional)" id="agentUploadPassword" disabled="[[_working]]" value="" type="password"></paper-input>
+          <paper-input label="agent xml file" id="uploadAgentFile" disabled="[[_working]]" type="file" required="true"></paper-input>
+          <paper-input label="password (optional)" id="uploadAgentPassword" disabled="[[_working]]" value="" type="password"></paper-input>
           <paper-button raised on-tap="uploadAgent" disabled="[[_working]]">Upload Agent</paper-button>
         </form>
         <div id="uploadAgentMsg" style="font-weight: bold"></div>
@@ -110,9 +110,9 @@
       <iron-collapse id="collapseChangePassphrase">
         <form is="iron-form" on-keypress="_keyPressedChangePassphrase">
           <paper-input label="agentid" id="changePassphraseAgentid" disabled="[[_working]]" value=""></paper-input>
-          <paper-input label="old passphrase" id="passphrase" disabled="[[_working]]" value="" type="password" required="true"></paper-input>
-          <paper-input label="new passphrase" id="passphraseNew" disabled="[[_working]]" value="" type="password" required="true"></paper-input>
-          <paper-input label="new passphrase (repetition)" id="passphraseNew2" disabled="[[_working]]" value="" type="password" required="true"></paper-input>
+          <paper-input label="old passphrase" id="changePassphrasePassphrase" disabled="[[_working]]" value="" type="password" required="true"></paper-input>
+          <paper-input label="new passphrase" id="changePassphrasePassphraseNew" disabled="[[_working]]" value="" type="password" required="true"></paper-input>
+          <paper-input label="new passphrase (repetition)" id="changePassphrasePassphraseNew2" disabled="[[_working]]" value="" type="password" required="true"></paper-input>
           <paper-button raised on-tap="changePassphrase" disabled="[[_working]]">Change Passphrase</paper-button>
         </form>
         <div id="changePassphraseMsg" style="font-weight: bold"></div>
@@ -179,14 +179,17 @@
 
       createAgent() {
         var req = this.$.ajaxCreateAgent;
-        req.body = JSON.stringify({ username: this.$.agentUsername.value, email: this.$.agentEmail.value, password: this.$.agentPassword.value });
+        req.body = new FormData();
+        req.body.append('username', this.$.createAgentUsername.value);
+        req.body.append('email', this.$.createAgentEmail.value);
+        req.body.append('password', this.$.createAgentPassword.value);
         req.generateRequest();
       }
 
       _handleCreateAgentResponse(event) {
-        this.$.agentUsername.value = '';
-        this.$.agentEmail.value = '';
-        this.$.agentPassword.value = '';
+        this.$.createAgentUsername.value = '';
+        this.$.createAgentEmail.value = '';
+        this.$.createAgentPassword.value = '';
         this.$.createAgentMsg.innerHTML = 'Agent successfully created, ID: ' + event.detail.response.agentid;
       }
 
@@ -203,7 +206,10 @@
 
       exportAgent() {
         var req = this.$.ajaxExportAgent;
-        req.body = JSON.stringify({ agentid: this.$.exportAgentId.value, username: this.$.exportAgentUsername.value, email: this.$.exportAgentEmail.value });
+        req.body = new FormData();
+        req.body.append('agentid', this.$.exportAgentId.value);
+        req.body.append('username', this.$.exportAgentUsername.value);
+        req.body.append('email', this.$.exportAgentEmail.value);
         req.generateRequest();
       }
 
@@ -235,14 +241,14 @@
       uploadAgent(event) {
         var req = this.$.ajaxUploadAgent;
         req.body = new FormData();
-        req.body.append('agentFile', this.$.agentUploadFile.inputElement.inputElement.files[0]); // this is an input inside an iron-input inside a paper-input
-        req.body.append('agentPassword', this.$.agentUploadPassword.value);
+        req.body.append('agentFile', this.$.uploadAgentFile.inputElement.inputElement.files[0]); // this is an input inside an iron-input inside a paper-input
+        req.body.append('password', this.$.uploadAgentPassword.value);
         req.generateRequest();
       }
 
       _handleUploadAgentResponse(event) {
-        this.$.agentUploadFile.value = '';
-        this.$.agentUploadPassword.value = '';
+        this.$.uploadAgentFile.value = '';
+        this.$.uploadAgentPassword.value = '';
         this.$.uploadAgentMsg.innerHTML = 'Agent successfully uploaded, ID: ' + event.detail.response.agentid;
       }
 
@@ -259,7 +265,11 @@
 
       changePassphrase(event) {
         var req = this.$.ajaxChangePassphrase;
-        req.body = JSON.stringify({ agentid: this.$.changePassphraseAgentid.value, passphrase: this.$.passphrase.value, passphraseNew: this.$.passphraseNew.value, passphraseNew2: this.$.passphraseNew2.value });
+        req.body = new FormData();
+        req.body.append('agentid', this.$.changePassphraseAgentid.value);
+        req.body.append('passphrase', this.$.passphrase.value);
+        req.body.append('passphraseNew', this.$.passphraseNew.value);
+        req.body.append('passphraseNew2', this.$.passphraseNew2.value);
         req.generateRequest();
       }
 
@@ -284,7 +294,10 @@
 
       addGroupMember() {
         var req = this.$.ajaxAddMember;
-        req.body = JSON.stringify({ agentid: this.$.addMemberId.value, username: this.$.addMemberUsername.value, email: this.$.addMemberEmail.value });
+        req.body = new FormData();
+        req.body.append('agentid', this.$.addMemberId.value);
+        req.body.append('username', this.$.addMemberUsername.value);
+        req.body.append('email', this.$.addMemberEmail.value);
         req.generateRequest();
       }
 
@@ -302,7 +315,8 @@
 
       createGroup() {
         var req = this.$.ajaxCreateGroup;
-        req.body = JSON.stringify({ members: this._memberAgents });
+        req.body = new FormData();
+        req.body.append('members', this._memberAgents);
         req.generateRequest();
       }
 
@@ -316,7 +330,8 @@
 
       loadGroup() {
         var req = this.$.ajaxLoadGroup;
-        req.body = JSON.stringify({ agentid: this._manageGroupAgentId });
+        req.body = new FormData();
+        req.body.append('agentid', this._manageGroupAgentId);
         req.generateRequest();
       }
 
@@ -334,7 +349,9 @@
 
       saveGroup() {
         var req = this.$.ajaxChangeGroup;
-        req.body = JSON.stringify({ agentid: this._manageGroupAgentId, members: this._manageAgents });
+        req.body = new FormData();
+        req.body.append('agentid', this._manageGroupAgentId);
+        req.body.append('members', this._manageAgents);
         req.generateRequest();
       }
 
