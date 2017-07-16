@@ -242,8 +242,8 @@
 			<fileset dir="${basedir}/resources" />
 			<manifest>
 				<attribute name="Class-Path" value="${manifest.classpath}" />
-				<attribute name="Implementation-Version" value="${ivy.las2peer.version}"/> 
-				<attribute name="Implementation-Vendor" value="${ivy.organisation}"/>
+				<attribute name="Implementation-Version" value="${ivy.las2peer.version}" />
+				<attribute name="Implementation-Vendor" value="${ivy.organisation}" />
 			</manifest>
 		</jar>
 	</target>

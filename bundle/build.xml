@@ -168,8 +168,8 @@
 			<manifest>
 				<attribute name="Main-Class" value="${main-class}"/>
 				<attribute name="Implementation-Title" value="${main-class}"/>
-				<attribute name="Implementation-Version" value="${ivy.las2peer.version}"/> 
-				<attribute name="Implementation-Vendor" value="${ivy.organisation}"/>
+				<attribute name="Implementation-Version" value="${ivy.las2peer.version}" />
+				<attribute name="Implementation-Vendor" value="${ivy.organisation}" />
 			</manifest>
 		</jar>
 	</target>
