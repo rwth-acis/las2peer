@@ -17,14 +17,14 @@ import javax.ws.rs.core.UriInfo;
 import i5.las2peer.connectors.nodeAdminConnector.NodeAdminConnector;
 import i5.las2peer.tools.SimpleTools;
 
-@Path(AppHandler.ROOT_ROUTE)
-public class AppHandler extends AbstractHandler {
+@Path(WebappHandler.ROOT_ROUTE)
+public class WebappHandler extends AbstractHandler {
 
 	public static final String ROOT_ROUTE = "/webapp";
 	public static final String DEFAULT_ROUTE = ROOT_ROUTE + "/view-status";
 	public static final String INDEX_PATH = ROOT_ROUTE + "/index.html";
 
-	public AppHandler(NodeAdminConnector connector) {
+	public WebappHandler(NodeAdminConnector connector) {
 		super(connector);
 	}
 

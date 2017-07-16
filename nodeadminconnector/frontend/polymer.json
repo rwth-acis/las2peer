@@ -1,5 +1,5 @@
 {
-  "shell": "src/las2peer-app.html",
+  "shell": "src/las2peer-webapp.html",
   "fragments": [
     "src/view-status.html",
     "src/view-services.html",

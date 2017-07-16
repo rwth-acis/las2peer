@@ -14,8 +14,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
 
-    <title>las2peer App</title>
-    <meta name="description" content="las2peer App description">
+    <title>las2peer webapp</title>
+    <meta name="description" content="A generic webapp frontend for las2peer nodes.">
 
     <!--
       If deploying to a non-root path, replace href="/" with the full path to the project root.
@@ -33,12 +33,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <!-- Add to homescreen for Chrome on Android. Fallback for manifest.json -->
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="las2peer App">
+    <meta name="application-name" content="las2peer webapp">
 
     <!-- Add to homescreen for Safari on iOS -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="las2peer App">
+    <meta name="apple-mobile-web-app-title" content="las2peer webapp">
 
     <!-- Homescreen icons -->
     <link rel="apple-touch-icon" href="images/manifest/icon-48x48.png">
@@ -68,7 +68,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <script src="bower_components/webcomponentsjs/webcomponents-loader.js"></script>
 
     <!-- Load your application shell -->
-    <link rel="import" href="src/las2peer-app.html">
+    <link rel="import" href="src/las2peer-webapp.html">
 
     <!-- Add any global styles for body, document, etc. -->
     <style>
@@ -83,7 +83,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </head>
   <body>
     <!-- replace '$connector_address$' with your NodeAdminConnector address and port for testing, like: 127.0.0.1:14577 -->
-    <las2peer-app las2peer-connector-endpoint="https://$connector_address$"></las2peer-app>
+    <las2peer-webapp las2peer-connector-endpoint="https://$connector_address$"></las2peer-webapp>
     <noscript>
       Please enable JavaScript to view this website.
     </noscript>
