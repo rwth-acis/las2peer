@@ -18,6 +18,7 @@
         <!-- UPnP libs for NAT handling -->
 		<dependency org="commons-jxpath" name="commons-jxpath" rev="1.1">
 			<exclude name="ant-optional" /> 
+			<exclude name="junit" /> 
 		</dependency>
 		<dependency org="commons-logging" name="commons-logging" rev="1.2" />
 		<dependency org="net" name="sbbi-upnplib" rev="1.0.4" />
