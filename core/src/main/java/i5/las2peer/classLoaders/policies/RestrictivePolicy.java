@@ -22,6 +22,7 @@ public class RestrictivePolicy extends ClassLoaderPolicy {
 		allow("java.lang");
 		allow("java.util");
 		allow("java.net");
+		allow("java.io");
 		deny("java.lang.System");
 		deny("java.lang.Runtime");
 		deny("java.lang.Thread");
