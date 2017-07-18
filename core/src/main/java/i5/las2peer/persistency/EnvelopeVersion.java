@@ -21,6 +21,7 @@ import i5.las2peer.api.Context;
 import i5.las2peer.api.persistency.EnvelopeAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentLockedException;
+import i5.las2peer.api.security.AnonymousAgent;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.security.AgentContext;
 import i5.las2peer.security.AgentImpl;
@@ -268,6 +269,10 @@ public class EnvelopeVersion implements Serializable, XmlAble {
 			throws CryptoException, EnvelopeAccessDeniedException, SerializationException {
 		byte[] decrypted = null;
 		if (isEncrypted()) {
+			if (context.getMainAgent() instanceof AnonymousAgent) {
+				throw new EnvelopeAccessDeniedException("The AnonymousAgent can only access unencrypted envelopes!");
+			}
+			
 			SecretKey decryptedReaderKey = null;
 			// fetch all groups
 			for (String groupId : readerGroupIds) {
