@@ -50,7 +50,7 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	/**
 	 * hashtable storing the encrypted versions of the group secret key for each member
 	 */
-	private Hashtable<String, byte[]> htEncryptedKeyVersions = new Hashtable<>();
+	private HashMap<String, byte[]> htEncryptedKeyVersions = new HashMap<>();
 
 	private Map<String, AgentImpl> membersToAdd = new HashMap<>();
 	private Map<String, AgentImpl> membersToRemove = new HashMap<>();
@@ -60,7 +60,7 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 			throws AgentOperationFailedException {
 		super(pubKey, encryptedPrivate);
 
-		htEncryptedKeyVersions = (Hashtable<String, byte[]>) htEncryptedKeys.clone();
+		htEncryptedKeyVersions = (HashMap<String, byte[]>) htEncryptedKeys.clone();
 	}
 
 	/**
@@ -446,10 +446,12 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 			for (AgentImpl agent : membersToRemove.values()) {
 				removeMember(agent);
 			}
+			membersToRemove.clear();
 
 			for (AgentImpl agent : membersToAdd.values()) {
 				addMember(agent);
 			}
+			membersToAdd.clear();
 		} catch (CryptoException | SerializationException e) {
 			throw new AgentOperationFailedException("Agent corrupted!", e);
 		}

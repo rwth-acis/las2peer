@@ -435,18 +435,41 @@ public class ExecutionContextTest {
 		try {
 			// create group
 			GroupAgent a = context.createGroupAgent(new Agent[] {adam});
+			assertEquals(1,a.getMemberList().length);
 			context.storeAgent(a);
 			
 			// add member
+			a = (GroupAgent) context.requestAgent(a.getIdentifier());
+			assertEquals(1,a.getMemberList().length);
 			a.addMember(eve);
+			assertEquals(2,a.getMemberList().length);
 			context.storeAgent(a);
+			assertEquals(2,a.getMemberList().length);
 			
 			// request group
 			a = (GroupAgent) context.requestAgent(a.getIdentifier());
 			assertTrue(a.hasMember(adam));
 			assertTrue(a.hasMember(eve));
-			assertEquals(a.getMemberList().length,2);
+			assertEquals(2,a.getMemberList().length);
 			
+			// do the same with unlock instead of request:
+			
+			// create group
+			GroupAgent b = context.createGroupAgent(new Agent[] {adam});
+			context.storeAgent(b);
+			
+			// add member
+			b = (GroupAgent) context.fetchAgent(b.getIdentifier());
+			b.unlock(adam);
+			b.addMember(eve);
+			context.storeAgent(b);
+			
+			// request group
+			b = (GroupAgent) context.fetchAgent(b.getIdentifier());
+			b.unlock(adam);
+			assertTrue(b.hasMember(adam));
+			assertTrue(b.hasMember(eve));
+			assertEquals(2,b.getMemberList().length);
 			
 		} catch (AgentOperationFailedException | AgentAccessDeniedException | AgentAlreadyExistsException
 				| AgentLockedException | AgentNotFoundException e) {
