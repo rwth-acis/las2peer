@@ -28,8 +28,11 @@ import i5.las2peer.api.persistency.EnvelopeNotFoundException;
 import i5.las2peer.api.persistency.EnvelopeOperationFailedException;
 import i5.las2peer.api.security.Agent;
 import i5.las2peer.api.security.AgentAccessDeniedException;
+import i5.las2peer.api.security.AgentAlreadyExistsException;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentLockedException;
+import i5.las2peer.api.security.AgentNotFoundException;
+import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.api.security.EmailAlreadyTakenException;
 import i5.las2peer.api.security.GroupAgent;
 import i5.las2peer.api.security.LoginNameAlreadyTakenException;
@@ -425,6 +428,31 @@ public class ExecutionContextTest {
 			e.printStackTrace();
 			fail();
 		}
+	}
+	
+	@Test
+	public void testGroupAgents() {
+		try {
+			// create group
+			GroupAgent a = context.createGroupAgent(new Agent[] {adam});
+			context.storeAgent(a);
+			
+			// add member
+			a.addMember(eve);
+			context.storeAgent(a);
+			
+			// request group
+			a = (GroupAgent) context.requestAgent(a.getIdentifier());
+			assertTrue(a.hasMember(adam));
+			assertTrue(a.hasMember(eve));
+			assertEquals(a.getMemberList().length,2);
+			
+			
+		} catch (AgentOperationFailedException | AgentAccessDeniedException | AgentAlreadyExistsException
+				| AgentLockedException | AgentNotFoundException e) {
+			fail();
+		}
+		
 	}
 
 	@Test
