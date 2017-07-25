@@ -6,7 +6,6 @@ import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Map;
 
 import javax.crypto.SecretKey;
@@ -56,7 +55,7 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	private Map<String, AgentImpl> membersToRemove = new HashMap<>();
 
 	@SuppressWarnings("unchecked")
-	protected GroupAgentImpl(PublicKey pubKey, byte[] encryptedPrivate, Hashtable<String, byte[]> htEncryptedKeys)
+	protected GroupAgentImpl(PublicKey pubKey, byte[] encryptedPrivate, HashMap<String, byte[]> htEncryptedKeys)
 			throws AgentOperationFailedException {
 		super(pubKey, encryptedPrivate);
 
@@ -278,7 +277,7 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 			if (!encryptedKeys.getAttribute("method").equals(CryptoTools.getAsymmetricAlgorithm())) {
 				throw new MalformedXMLException("base64 encoding expected");
 			}
-			Hashtable<String, byte[]> htMemberKeys = new Hashtable<>();
+			HashMap<String, byte[]> htMemberKeys = new HashMap<>();
 			NodeList enGroups = encryptedKeys.getElementsByTagName("keyentry");
 			for (int n = 0; n < enGroups.getLength(); n++) {
 				org.w3c.dom.Node node = enGroups.item(n);

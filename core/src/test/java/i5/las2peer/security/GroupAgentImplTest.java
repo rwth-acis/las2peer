@@ -51,6 +51,14 @@ public class GroupAgentImplTest {
 		assertFalse(testee.hasMember(abel.getIdentifier()));
 		assertTrue(testee.hasMember(adam));
 		assertTrue(testee.hasMember(eve.getIdentifier()));
+		
+		testee.apply();
+		
+		assertEquals(2, testee.getSize());
+		assertFalse(testee.hasMember(kain));
+		assertFalse(testee.hasMember(abel.getIdentifier()));
+		assertTrue(testee.hasMember(adam));
+		assertTrue(testee.hasMember(eve.getIdentifier()));
 
 		assertTrue(testee.isLocked());
 
