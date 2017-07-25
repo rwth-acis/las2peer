@@ -46,7 +46,7 @@ public class ServicesHandlerTest extends AbstractTestHandler {
 			Assert.assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
 			byte[] bytes = SimpleTools.toByteArray((InputStream) response.getEntity());
 			JSONObject result = (JSONObject) new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(bytes);
-			Assert.assertEquals("'" + serviceName + "' not found", result.getAsString("msg"));
+			Assert.assertEquals("'" + serviceName + "' not found in network", result.getAsString("msg"));
 			response.close();
 		} catch (Exception e) {
 			e.printStackTrace();

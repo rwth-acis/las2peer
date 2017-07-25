@@ -12,7 +12,7 @@ import javax.ws.rs.core.Response.Status;
 import org.junit.Assert;
 import org.junit.Test;
 
-import i5.las2peer.connectors.nodeAdminConnector.handler.AppHandler;
+import i5.las2peer.connectors.nodeAdminConnector.handler.WebappHandler;
 import i5.las2peer.tools.L2pNodeLauncher;
 import i5.las2peer.tools.SimpleTools;
 import net.minidev.json.JSONObject;
@@ -26,7 +26,7 @@ public class DefaultHandlerTest extends AbstractTestHandler {
 			WebTarget target = sslClient.target(connector.getHostname());
 			Response response = target.request().get();
 			Assert.assertEquals(Status.TEMPORARY_REDIRECT.getStatusCode(), response.getStatus());
-			Assert.assertEquals(connector.getHostname() + AppHandler.DEFAULT_ROUTE,
+			Assert.assertEquals(connector.getHostname() + WebappHandler.DEFAULT_ROUTE,
 					response.getHeaderString(HttpHeaders.LOCATION));
 			response.close();
 		} catch (Exception e) {
@@ -41,7 +41,7 @@ public class DefaultHandlerTest extends AbstractTestHandler {
 			WebTarget target = sslClient.target(connector.getHostname() + "/");
 			Response response = target.request().get();
 			Assert.assertEquals(Status.TEMPORARY_REDIRECT.getStatusCode(), response.getStatus());
-			Assert.assertEquals(connector.getHostname() + AppHandler.DEFAULT_ROUTE,
+			Assert.assertEquals(connector.getHostname() + WebappHandler.DEFAULT_ROUTE,
 					response.getHeaderString(HttpHeaders.LOCATION));
 			response.close();
 		} catch (Exception e) {

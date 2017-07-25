@@ -29,7 +29,7 @@ Copyright (c) 2017 Advanced Community Information Systems (ACIS) Group, Chair of
 <link rel="lazy-import" href="view-widgets.html">
 <link rel="lazy-import" href="view404.html">
 
-<dom-module id="las2peer-app">
+<dom-module id="las2peer-webapp">
   <template>
     <iron-ajax id="ajaxLoginUseridPassword"
                url="/auth/login"
@@ -144,7 +144,7 @@ Copyright (c) 2017 Advanced Community Information Systems (ACIS) Group, Chair of
         <app-header slot="header" condenses reveals effects="waterfall">
           <app-toolbar>
             <paper-icon-button icon="icons:menu" drawer-toggle></paper-icon-button>
-            <div main-title>las2peer App</div>
+            <div main-title>las2peer webapp</div>
             <template is="dom-if" if="[[_agentid]]">
               <paper-button on-tap="destroySession">Logout <iron-icon icon="account-circle"></iron-icon></paper-button>
             </template>
@@ -172,7 +172,7 @@ Copyright (c) 2017 Advanced Community Information Systems (ACIS) Group, Chair of
   <script>
     class NodeApp extends Polymer.Element {
 
-      static get is() { return 'las2peer-app'; }
+      static get is() { return 'las2peer-webapp'; }
 
       static get properties() { return {
         page: {

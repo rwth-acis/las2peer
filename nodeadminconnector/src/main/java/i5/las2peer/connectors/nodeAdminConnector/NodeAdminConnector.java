@@ -26,7 +26,7 @@ import com.sun.net.httpserver.HttpServer;
 import i5.las2peer.connectors.Connector;
 import i5.las2peer.connectors.ConnectorException;
 import i5.las2peer.connectors.nodeAdminConnector.handler.AgentsHandler;
-import i5.las2peer.connectors.nodeAdminConnector.handler.AppHandler;
+import i5.las2peer.connectors.nodeAdminConnector.handler.WebappHandler;
 import i5.las2peer.connectors.nodeAdminConnector.handler.AuthHandler;
 import i5.las2peer.connectors.nodeAdminConnector.handler.DefaultHandler;
 import i5.las2peer.connectors.nodeAdminConnector.handler.RMIHandler;
@@ -103,7 +103,7 @@ public class NodeAdminConnector extends Connector {
 			config.property("jersey.config.server.wadl.disableWadl", true);
 			config.register(CORSResponseFilter.class);
 			config.register(new DefaultHandler(this));
-			config.register(new AppHandler(this));
+			config.register(new WebappHandler(this));
 			config.register(new AuthHandler(this));
 			config.register(new ServicesHandler(this));
 			config.register(new AgentsHandler(this));

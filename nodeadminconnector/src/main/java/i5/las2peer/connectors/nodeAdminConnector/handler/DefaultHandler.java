@@ -38,7 +38,7 @@ public class DefaultHandler extends AbstractHandler {
 
 	@GET
 	public Response rootPath() throws URISyntaxException {
-		return Response.temporaryRedirect(new URI(AppHandler.DEFAULT_ROUTE)).build();
+		return Response.temporaryRedirect(new URI(WebappHandler.DEFAULT_ROUTE)).build();
 	}
 
 	@GET

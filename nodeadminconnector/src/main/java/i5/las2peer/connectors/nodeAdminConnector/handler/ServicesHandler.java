@@ -66,7 +66,7 @@ public class ServicesHandler extends AbstractHandler {
 			}
 			result.put("instances", instances);
 		} catch (EnvelopeNotFoundException | IllegalArgumentException e) {
-			result.put("msg", "'" + searchName + "' not found");
+			result.put("msg", "'" + searchName + "' not found in network");
 		} catch (Exception e) {
 			result.put("msg", e.toString());
 		}
