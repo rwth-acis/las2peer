@@ -30,6 +30,7 @@ import i5.las2peer.connectors.ConnectorException;
 import i5.las2peer.connectors.webConnector.util.NameLock;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.p2p.Node;
+import i5.las2peer.tools.SimpleTools;
 import net.minidev.json.JSONObject;
 import net.minidev.json.JSONValue;
 
@@ -145,11 +146,15 @@ public class WebConnector extends Connector {
 	 * 
 	 * @param port
 	 */
-	public void setHttpPort(int port) {
+	public void setHttpPort(Integer port) {
 		if (myNode != null) {
 			throw new IllegalStateException("change of port only before startup!");
 		}
-		httpPort = port;
+		if (port == null || port < 1) {
+			httpsPort = SimpleTools.getSystemDefinedPort();
+		} else {
+			httpsPort = port;
+		}
 	}
 
 	/**
@@ -157,11 +162,15 @@ public class WebConnector extends Connector {
 	 * 
 	 * @param port
 	 */
-	public void setHttpsPort(int port) {
+	public void setHttpsPort(Integer port) {
 		if (myNode != null) {
 			throw new IllegalStateException("change of port only before startup!");
 		}
-		httpsPort = port;
+		if (port == null || port < 1) {
+			httpsPort = SimpleTools.getSystemDefinedPort();
+		} else {
+			httpsPort = port;
+		}
 	}
 
 	/**
