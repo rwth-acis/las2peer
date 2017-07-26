@@ -1,4 +1,4 @@
-package i5.las2peer.connectors.nodeAdminConnector.handler;
+package i5.las2peer.connectors.webConnector.handler;
 
 import java.io.InputStream;
 import java.io.Serializable;
@@ -16,6 +16,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -26,9 +27,10 @@ import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.persistency.EnvelopeNotFoundException;
 import i5.las2peer.classLoaders.ClassManager;
 import i5.las2peer.classLoaders.libraries.SharedStorageRepository;
-import i5.las2peer.connectors.nodeAdminConnector.AgentSession;
-import i5.las2peer.connectors.nodeAdminConnector.NodeAdminConnector;
+import i5.las2peer.connectors.webConnector.WebConnector;
+import i5.las2peer.connectors.webConnector.util.AgentSession;
 import i5.las2peer.p2p.Node;
+import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.persistency.EnvelopeVersion;
 import i5.las2peer.tools.CryptoTools;
 import i5.las2peer.tools.PackageUploader;
@@ -38,11 +40,23 @@ import i5.las2peer.tools.SimpleTools;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 
-@Path("/services")
-public class ServicesHandler extends AbstractHandler {
+@Path(ServicesHandler.RESOURCE_PATH)
+public class ServicesHandler {
 
-	public ServicesHandler(NodeAdminConnector connector) {
-		super(connector);
+	public static final String RESOURCE_PATH = DefaultHandler.ROOT_RESOURCE_PATH + "/services";
+
+	private final WebConnector connector;
+	private final Node node;
+	private final PastryNodeImpl pastryNode;
+
+	public ServicesHandler(WebConnector connector) {
+		this.connector = connector;
+		this.node = connector.getL2pNode();
+		if (node instanceof PastryNodeImpl) {
+			pastryNode = (PastryNodeImpl) node;
+		} else {
+			pastryNode = null;
+		}
 	}
 
 	@GET
@@ -97,14 +111,17 @@ public class ServicesHandler extends AbstractHandler {
 	@POST
 	@Path("/upload")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response handleServicePackageUpload(@CookieParam(NodeAdminConnector.COOKIE_SESSIONID_KEY) String sessionId,
+	public Response handleServicePackageUpload(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId,
 			@FormDataParam("jarfile") InputStream jarfile) throws Exception {
 		AgentSession session = connector.getSessionById(sessionId);
 		if (session == null) {
 			throw new BadRequestException("You have to be logged in to upload");
-		}
-		if (jarfile == null) {
+		} else if (jarfile == null) {
 			throw new BadRequestException("No jar file provided");
+		} else if (pastryNode == null) {
+			throw new ServerErrorException(
+					"Service upload only available for " + PastryNodeImpl.class.getCanonicalName() + " Nodes",
+					Status.INTERNAL_SERVER_ERROR);
 		}
 		// create jar from inputstream
 		JarInputStream jarStream = new JarInputStream(jarfile);
@@ -132,7 +149,7 @@ public class ServicesHandler extends AbstractHandler {
 		}
 		jarStream.close();
 		try {
-			PackageUploader.uploadServicePackage(node, serviceName, serviceVersion, depHashes, jarFiles,
+			PackageUploader.uploadServicePackage(pastryNode, serviceName, serviceVersion, depHashes, jarFiles,
 					session.getAgent());
 			JSONObject json = new JSONObject();
 			json.put("code", Status.OK.getStatusCode());

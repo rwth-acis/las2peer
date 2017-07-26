@@ -1,4 +1,4 @@
-package i5.las2peer.connectors.nodeAdminConnector;
+package i5.las2peer.connectors.webConnector.util;
 
 import java.util.Date;
 

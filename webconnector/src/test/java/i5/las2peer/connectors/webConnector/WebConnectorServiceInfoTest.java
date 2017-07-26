@@ -5,8 +5,10 @@ import static org.junit.Assert.fail;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.net.HttpURLConnection;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -23,8 +25,6 @@ import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.testing.MockAgentFactory;
 
 public class WebConnectorServiceInfoTest {
-
-	private static final String HTTP_ADDRESS = "http://127.0.0.1";
 
 	private LocalNode node;
 	private WebConnector connector;
@@ -114,12 +114,13 @@ public class WebConnectorServiceInfoTest {
 	@Test
 	public void testVersions() {
 		MiniClient c = new MiniClient();
-		c.setAddressPort(HTTP_ADDRESS, connector.getHttpPort());
+		c.setConnectorEndpoint(connector.getHttpEndpoint());
 
 		// without version
 		try {
 			c.setLogin(testAgent.getIdentifier(), testPass);
 			ClientResponse result = c.sendRequest("GET", "version/test", "");
+			Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getHttpCode());
 			assertTrue(result.getResponse().trim().startsWith("2"));
 		} catch (Exception e) {
 			fail(e.getMessage());
@@ -129,6 +130,7 @@ public class WebConnectorServiceInfoTest {
 		try {
 			c.setLogin(testAgent.getIdentifier(), testPass);
 			ClientResponse result = c.sendRequest("GET", "version/v1/test", "");
+			Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getHttpCode());
 			assertTrue(result.getResponse().trim().equals("1"));
 		} catch (Exception e) {
 			fail(e.getMessage());
@@ -140,6 +142,7 @@ public class WebConnectorServiceInfoTest {
 		try {
 			c.setLogin(testAgent.getIdentifier(), testPass);
 			ClientResponse result = c.sendRequest("GET", "version/v2/test", "");
+			Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getHttpCode());
 			assertTrue(result.getResponse().trim().startsWith("2.2"));
 		} catch (Exception e) {
 			fail(e.getMessage());
@@ -149,6 +152,7 @@ public class WebConnectorServiceInfoTest {
 		try {
 			c.setLogin(testAgent.getIdentifier(), testPass);
 			ClientResponse result = c.sendRequest("GET", "version/v2.2.0-1/test", "");
+			Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getHttpCode());
 			assertTrue(result.getResponse().trim().equals("2.2.0-1"));
 		} catch (Exception e) {
 			fail(e.getMessage());

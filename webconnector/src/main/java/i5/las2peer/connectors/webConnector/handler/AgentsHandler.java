@@ -1,4 +1,4 @@
-package i5.las2peer.connectors.nodeAdminConnector.handler;
+package i5.las2peer.connectors.webConnector.handler;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -20,8 +20,10 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentNotFoundException;
-import i5.las2peer.connectors.nodeAdminConnector.AgentSession;
-import i5.las2peer.connectors.nodeAdminConnector.NodeAdminConnector;
+import i5.las2peer.connectors.webConnector.WebConnector;
+import i5.las2peer.connectors.webConnector.util.AgentSession;
+import i5.las2peer.logging.L2pLogger;
+import i5.las2peer.p2p.Node;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.GroupAgentImpl;
 import i5.las2peer.security.PassphraseAgentImpl;
@@ -33,11 +35,19 @@ import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 
-@Path("/agents")
-public class AgentsHandler extends AbstractHandler {
+@Path(AgentsHandler.RESOURCE_PATH)
+public class AgentsHandler {
 
-	public AgentsHandler(NodeAdminConnector connector) {
-		super(connector);
+	public static final String RESOURCE_PATH = DefaultHandler.ROOT_RESOURCE_PATH + "/agents";
+
+	private final L2pLogger logger = L2pLogger.getInstance(AgentsHandler.class);
+
+	private final WebConnector connector;
+	private final Node node;
+
+	public AgentsHandler(WebConnector connector) {
+		this.connector = connector;
+		this.node = connector.getL2pNode();
 	}
 
 	@POST
@@ -130,7 +140,7 @@ public class AgentsHandler extends AbstractHandler {
 	@Path("/uploadAgent")
 	public Response handleUploadAgent(@FormDataParam("agentFile") InputStream agentFile,
 			@FormDataParam("password") String password,
-			@CookieParam(NodeAdminConnector.COOKIE_SESSIONID_KEY) String sessionId) throws Exception {
+			@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId) throws Exception {
 		if (agentFile == null) {
 			return Response.status(Status.BAD_REQUEST).entity("No agent file provided").build();
 		}
@@ -216,7 +226,7 @@ public class AgentsHandler extends AbstractHandler {
 
 	@POST
 	@Path("/createGroup")
-	public Response handleCreateGroup(@CookieParam(NodeAdminConnector.COOKIE_SESSIONID_KEY) String sessionId,
+	public Response handleCreateGroup(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId,
 			@FormDataParam("members") String members) throws Exception {
 		AgentSession session = connector.getSessionById(sessionId);
 		if (session == null) {
@@ -254,7 +264,7 @@ public class AgentsHandler extends AbstractHandler {
 
 	@POST
 	@Path("/loadGroup")
-	public Response handleLoadGroup(@CookieParam(NodeAdminConnector.COOKIE_SESSIONID_KEY) String sessionId,
+	public Response handleLoadGroup(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId,
 			@FormDataParam("agentid") String agentId) throws AgentException {
 		AgentSession session = connector.getSessionById(sessionId);
 		if (session == null) {
@@ -304,7 +314,7 @@ public class AgentsHandler extends AbstractHandler {
 
 	@POST
 	@Path("/changeGroup")
-	public Response handleChangeGroup(@CookieParam(NodeAdminConnector.COOKIE_SESSIONID_KEY) String sessionId,
+	public Response handleChangeGroup(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId,
 			@FormDataParam("agentid") String agentId, @FormDataParam("members") String members)
 			throws AgentException, CryptoException, SerializationException, ParseException {
 		AgentSession session = connector.getSessionById(sessionId);

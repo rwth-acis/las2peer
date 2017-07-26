@@ -1,4 +1,4 @@
-package i5.las2peer.connectors.nodeAdminConnector;
+package i5.las2peer.connectors.webConnector;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -12,7 +12,8 @@ import javax.ws.rs.core.Response.Status;
 import org.junit.Assert;
 import org.junit.Test;
 
-import i5.las2peer.connectors.nodeAdminConnector.handler.WebappHandler;
+import i5.las2peer.connectors.webConnector.handler.DefaultHandler;
+import i5.las2peer.connectors.webConnector.handler.WebappHandler;
 import i5.las2peer.tools.L2pNodeLauncher;
 import i5.las2peer.tools.SimpleTools;
 import net.minidev.json.JSONObject;
@@ -23,10 +24,10 @@ public class DefaultHandlerTest extends AbstractTestHandler {
 	@Test
 	public void testRootPath() {
 		try {
-			WebTarget target = sslClient.target(connector.getHostname());
+			WebTarget target = webClient.target(connector.getHttpEndpoint());
 			Response response = target.request().get();
 			Assert.assertEquals(Status.TEMPORARY_REDIRECT.getStatusCode(), response.getStatus());
-			Assert.assertEquals(connector.getHostname() + WebappHandler.DEFAULT_ROUTE,
+			Assert.assertEquals(connector.getHttpEndpoint() + WebappHandler.DEFAULT_ROUTE,
 					response.getHeaderString(HttpHeaders.LOCATION));
 			response.close();
 		} catch (Exception e) {
@@ -38,11 +39,57 @@ public class DefaultHandlerTest extends AbstractTestHandler {
 	@Test
 	public void testRootPathWithSlash() {
 		try {
-			WebTarget target = sslClient.target(connector.getHostname() + "/");
+			WebTarget target = webClient.target(connector.getHttpEndpoint() + "/");
 			Response response = target.request().get();
 			Assert.assertEquals(Status.TEMPORARY_REDIRECT.getStatusCode(), response.getStatus());
-			Assert.assertEquals(connector.getHostname() + WebappHandler.DEFAULT_ROUTE,
+			Assert.assertEquals(connector.getHttpEndpoint() + WebappHandler.DEFAULT_ROUTE,
 					response.getHeaderString(HttpHeaders.LOCATION));
+			response.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail(e.toString());
+		}
+	}
+
+	@Test
+	public void testRootResourcePath() {
+		try {
+			WebTarget target = webClient.target(connector.getHttpEndpoint() + DefaultHandler.ROOT_RESOURCE_PATH);
+			Response response = target.request().get();
+			Assert.assertEquals(Status.TEMPORARY_REDIRECT.getStatusCode(), response.getStatus());
+			Assert.assertEquals(connector.getHttpEndpoint() + WebappHandler.DEFAULT_ROUTE,
+					response.getHeaderString(HttpHeaders.LOCATION));
+			response.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail(e.toString());
+		}
+	}
+
+	@Test
+	public void testRootResourcePathWithSlash() {
+		try {
+			WebTarget target = webClient.target(connector.getHttpEndpoint() + DefaultHandler.ROOT_RESOURCE_PATH + "/");
+			Response response = target.request().get();
+			Assert.assertEquals(Status.TEMPORARY_REDIRECT.getStatusCode(), response.getStatus());
+			Assert.assertEquals(connector.getHttpEndpoint() + WebappHandler.DEFAULT_ROUTE,
+					response.getHeaderString(HttpHeaders.LOCATION));
+			response.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail(e.toString());
+		}
+	}
+
+	@Test
+	public void testGetFavicon() {
+		try {
+			WebTarget target = webClient.target(connector.getHttpEndpoint() + "/favicon.ico");
+			Response response = target.request().get();
+			Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
+			Assert.assertEquals(new MediaType("image", "x-icon"), response.getMediaType());
+			byte[] bytes = SimpleTools.toByteArray((InputStream) response.getEntity());
+			Assert.assertTrue(bytes.length > 0);
 			response.close();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -53,7 +100,8 @@ public class DefaultHandlerTest extends AbstractTestHandler {
 	@Test
 	public void testGetCoreVersion() {
 		try {
-			WebTarget target = sslClient.target(connector.getHostname() + "/version");
+			WebTarget target = webClient
+					.target(connector.getHttpEndpoint() + DefaultHandler.ROOT_RESOURCE_PATH + "/version");
 			Response response = target.request().get();
 			Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
 			Assert.assertEquals(MediaType.TEXT_PLAIN_TYPE, response.getMediaType());
@@ -68,25 +116,10 @@ public class DefaultHandlerTest extends AbstractTestHandler {
 	}
 
 	@Test
-	public void testGetFavicon() {
-		try {
-			WebTarget target = sslClient.target(connector.getHostname() + "/favicon.ico");
-			Response response = target.request().get();
-			Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
-			Assert.assertEquals(new MediaType("image", "x-icon"), response.getMediaType());
-			byte[] bytes = SimpleTools.toByteArray((InputStream) response.getEntity());
-			Assert.assertTrue(bytes.length > 0);
-			response.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-			Assert.fail(e.toString());
-		}
-	}
-
-	@Test
 	public void testGetNodeStatus() {
 		try {
-			WebTarget target = sslClient.target(connector.getHostname() + "/status");
+			WebTarget target = webClient
+					.target(connector.getHttpEndpoint() + DefaultHandler.ROOT_RESOURCE_PATH + "/status");
 			Response response = target.request().get();
 			Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
 			Assert.assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());

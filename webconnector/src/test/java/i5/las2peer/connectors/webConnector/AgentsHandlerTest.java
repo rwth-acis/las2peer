@@ -1,4 +1,4 @@
-package i5.las2peer.connectors.nodeAdminConnector;
+package i5.las2peer.connectors.webConnector;
 
 import java.io.File;
 import java.io.InputStream;
@@ -18,6 +18,8 @@ import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
 import org.junit.Assert;
 import org.junit.Test;
 
+import i5.las2peer.connectors.webConnector.handler.AgentsHandler;
+import i5.las2peer.connectors.webConnector.handler.AuthHandler;
 import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.testing.MockAgentFactory;
@@ -32,7 +34,8 @@ public class AgentsHandlerTest extends AbstractTestHandler {
 		try {
 			FormDataMultiPart formData = new FormDataMultiPart();
 			formData.field("password", "topsecret");
-			WebTarget target = sslClient.target(connector.getHostname() + "/agents/createAgent");
+			WebTarget target = webClient
+					.target(connector.getHttpEndpoint() + AgentsHandler.RESOURCE_PATH + "/createAgent");
 			Response response = target.request().post(Entity.entity(formData, MediaType.MULTIPART_FORM_DATA));
 			Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
 			Assert.assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
@@ -56,7 +59,8 @@ public class AgentsHandlerTest extends AbstractTestHandler {
 			formData.field("password", "topsecret");
 			formData.field("username", "testuser");
 			formData.field("email", "testuser@example.org");
-			WebTarget target = sslClient.target(connector.getHostname() + "/agents/createAgent");
+			WebTarget target = webClient
+					.target(connector.getHttpEndpoint() + AgentsHandler.RESOURCE_PATH + "/createAgent");
 			Response response = target.request().post(Entity.entity(formData, MediaType.MULTIPART_FORM_DATA));
 			Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
 			Assert.assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
@@ -85,7 +89,7 @@ public class AgentsHandlerTest extends AbstractTestHandler {
 			// start actual test
 			FormDataMultiPart formData = new FormDataMultiPart();
 			formData.field("agentid", adam.getIdentifier());
-			WebTarget target = sslClient.target(connector.getHostname() + "/agents/getAgent");
+			WebTarget target = webClient.target(connector.getHttpEndpoint() + AgentsHandler.RESOURCE_PATH + "/getAgent");
 			Response response = target.request().post(Entity.entity(formData, MediaType.MULTIPART_FORM_DATA));
 			Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
 			Assert.assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
@@ -112,7 +116,7 @@ public class AgentsHandlerTest extends AbstractTestHandler {
 			// start actual test
 			FormDataMultiPart formData = new FormDataMultiPart();
 			formData.field("username", adam.getLoginName());
-			WebTarget target = sslClient.target(connector.getHostname() + "/agents/getAgent");
+			WebTarget target = webClient.target(connector.getHttpEndpoint() + AgentsHandler.RESOURCE_PATH + "/getAgent");
 			Response response = target.request().post(Entity.entity(formData, MediaType.MULTIPART_FORM_DATA));
 			Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
 			Assert.assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
@@ -139,7 +143,7 @@ public class AgentsHandlerTest extends AbstractTestHandler {
 			// start actual test
 			FormDataMultiPart formData = new FormDataMultiPart();
 			formData.field("email", adam.getEmail());
-			WebTarget target = sslClient.target(connector.getHostname() + "/agents/getAgent");
+			WebTarget target = webClient.target(connector.getHttpEndpoint() + AgentsHandler.RESOURCE_PATH + "/getAgent");
 			Response response = target.request().post(Entity.entity(formData, MediaType.MULTIPART_FORM_DATA));
 			Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
 			Assert.assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
@@ -168,7 +172,7 @@ public class AgentsHandlerTest extends AbstractTestHandler {
 			formData.field("agentid", adam.getIdentifier());
 			formData.field("username", "eva");
 			formData.field("email", "testuser@example.org");
-			WebTarget target = sslClient.target(connector.getHostname() + "/agents/getAgent");
+			WebTarget target = webClient.target(connector.getHttpEndpoint() + AgentsHandler.RESOURCE_PATH + "/getAgent");
 			Response response = target.request().post(Entity.entity(formData, MediaType.MULTIPART_FORM_DATA));
 			Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
 			Assert.assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
@@ -195,7 +199,8 @@ public class AgentsHandlerTest extends AbstractTestHandler {
 			// start actual test
 			FormDataMultiPart formData = new FormDataMultiPart();
 			formData.field("agentid", adam.getIdentifier());
-			WebTarget target = sslClient.target(connector.getHostname() + "/agents/exportAgent");
+			WebTarget target = webClient
+					.target(connector.getHttpEndpoint() + AgentsHandler.RESOURCE_PATH + "/exportAgent");
 			Response response = target.request().post(Entity.entity(formData, MediaType.MULTIPART_FORM_DATA));
 			Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
 			Assert.assertEquals(MediaType.APPLICATION_XML_TYPE, response.getMediaType());
@@ -219,7 +224,8 @@ public class AgentsHandlerTest extends AbstractTestHandler {
 			// start actual test
 			FormDataMultiPart formData = new FormDataMultiPart();
 			formData.field("username", adam.getLoginName());
-			WebTarget target = sslClient.target(connector.getHostname() + "/agents/exportAgent");
+			WebTarget target = webClient
+					.target(connector.getHttpEndpoint() + AgentsHandler.RESOURCE_PATH + "/exportAgent");
 			Response response = target.request().post(Entity.entity(formData, MediaType.MULTIPART_FORM_DATA));
 			Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
 			Assert.assertEquals(MediaType.APPLICATION_XML_TYPE, response.getMediaType());
@@ -243,7 +249,8 @@ public class AgentsHandlerTest extends AbstractTestHandler {
 			// start actual test
 			FormDataMultiPart formData = new FormDataMultiPart();
 			formData.field("email", adam.getEmail());
-			WebTarget target = sslClient.target(connector.getHostname() + "/agents/exportAgent");
+			WebTarget target = webClient
+					.target(connector.getHttpEndpoint() + AgentsHandler.RESOURCE_PATH + "/exportAgent");
 			Response response = target.request().post(Entity.entity(formData, MediaType.MULTIPART_FORM_DATA));
 			Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
 			Assert.assertEquals(MediaType.APPLICATION_XML_TYPE, response.getMediaType());
@@ -263,7 +270,8 @@ public class AgentsHandlerTest extends AbstractTestHandler {
 			formData.bodyPart(new FileDataBodyPart("agentFile", agentFile));
 			formData.field("password", "adamspass");
 			formData.setMediaType(MediaType.MULTIPART_FORM_DATA_TYPE);
-			WebTarget target = sslClient.target(connector.getHostname() + "/agents/uploadAgent");
+			WebTarget target = webClient
+					.target(connector.getHttpEndpoint() + AgentsHandler.RESOURCE_PATH + "/uploadAgent");
 			Response response = target.request().post(Entity.entity(formData, MediaType.MULTIPART_FORM_DATA_TYPE));
 			Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
 			Assert.assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
@@ -286,21 +294,22 @@ public class AgentsHandlerTest extends AbstractTestHandler {
 			adam.unlock("adamspass");
 			PastryNodeImpl activeNode = nodes.get(0);
 			activeNode.storeAgent(adam);
-			WebTarget targetLogin = sslClient.target(connector.getHostname() + "/auth/login");
+			WebTarget targetLogin = webClient.target(connector.getHttpEndpoint() + AuthHandler.RESOURCE_PATH + "/login");
 			Response responseLogin = targetLogin.request()
 					.header(HttpHeaders.AUTHORIZATION, "basic " + Base64.getEncoder()
 							.encodeToString((adam.getLoginName() + ":" + "adamspass").getBytes(StandardCharsets.UTF_8)))
 					.get();
 			Assert.assertEquals(Status.OK.getStatusCode(), responseLogin.getStatus());
-			NewCookie cookie = responseLogin.getCookies().get(NodeAdminConnector.COOKIE_SESSIONID_KEY);
+			NewCookie cookie = responseLogin.getCookies().get(WebConnector.COOKIE_SESSIONID_KEY);
 			Assert.assertNotNull(cookie);
-			Assert.assertEquals(NodeAdminConnector.COOKIE_SESSIONID_KEY, cookie.getName());
+			Assert.assertEquals(WebConnector.COOKIE_SESSIONID_KEY, cookie.getName());
 			// start actual test
 			FormDataMultiPart formData = new FormDataMultiPart();
 			File agentFile = new File(getClass().getResource("group.xml").toURI());
 			formData.bodyPart(new FileDataBodyPart("agentFile", agentFile));
 			formData.setMediaType(MediaType.MULTIPART_FORM_DATA_TYPE);
-			WebTarget target = sslClient.target(connector.getHostname() + "/agents/uploadAgent");
+			WebTarget target = webClient
+					.target(connector.getHttpEndpoint() + AgentsHandler.RESOURCE_PATH + "/uploadAgent");
 			Response response = target.request().cookie(cookie)
 					.post(Entity.entity(formData, MediaType.MULTIPART_FORM_DATA_TYPE));
 			Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());

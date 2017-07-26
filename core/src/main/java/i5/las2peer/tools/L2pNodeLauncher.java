@@ -322,6 +322,7 @@ public class L2pNodeLauncher {
 	 * Starts the WebConnector
 	 */
 	public void startWebConnector() {
+		// adding the actual class here, would add an undesired dependency from WebConnector to the core
 		startConnector("i5.las2peer.connectors.webConnector.WebConnector");
 	}
 
@@ -329,21 +330,26 @@ public class L2pNodeLauncher {
 	 * Stops the WebConnector
 	 */
 	public void stopWebConnector() {
+		// adding the actual class here, would add an undesired dependency from WebConnector to the core
 		stopConnector("i5.las2peer.connectors.webConnector.WebConnector");
 	}
 
 	/**
-	 * Starts the NodeAdminConnector
+	 * @deprecated Use {@link #startWebConnector()} instead.
 	 */
+	@Deprecated
 	public void startNodeAdminConnector() {
-		startConnector("i5.las2peer.connectors.nodeAdminConnector.NodeAdminConnector");
+		System.err.println("NodeAdminConnector is now merged into WebConnector. Use startWebConnector instead!");
+		startWebConnector();
 	}
 
 	/**
-	 * Stops the NodeAdminConnector
+	 * @deprecated Use {@link #stopWebConnector()} instead.
 	 */
+	@Deprecated
 	public void stopNodeAdminConnector() {
-		stopConnector("i5.las2peer.connectors.nodeAdminConnector.NodeAdminConnector");
+		System.err.println("NodeAdminConnector is now merged into WebConnector. Use stopWebConnetor instead!");
+		stopWebConnector();
 	}
 
 	/**

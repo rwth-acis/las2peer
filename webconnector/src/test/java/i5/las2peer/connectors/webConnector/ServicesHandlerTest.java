@@ -1,4 +1,4 @@
-package i5.las2peer.connectors.nodeAdminConnector;
+package i5.las2peer.connectors.webConnector;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -23,6 +23,8 @@ import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
 import org.junit.Assert;
 import org.junit.Test;
 
+import i5.las2peer.connectors.webConnector.handler.AuthHandler;
+import i5.las2peer.connectors.webConnector.handler.ServicesHandler;
 import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.security.PassphraseAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
@@ -39,7 +41,8 @@ public class ServicesHandlerTest extends AbstractTestHandler {
 	@Test
 	public void testGetSearchNonExisting() {
 		try {
-			WebTarget target = sslClient.target(connector.getHostname() + "/services/search");
+			WebTarget target = webClient
+					.target(connector.getHttpEndpoint() + ServicesHandler.RESOURCE_PATH + "/search");
 			final String serviceName = "i5.las2peer.services.nonExistingService.NonExistingService";
 			Response response = target.queryParam("searchname", serviceName).request().get();
 			Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
@@ -68,7 +71,8 @@ public class ServicesHandlerTest extends AbstractTestHandler {
 			PackageUploader.uploadServicePackage(serviceNode, TestService.class.getPackage().getName(), serviceVersion,
 					depHashes, jarFiles, devAgent);
 			// start actual test
-			WebTarget target = sslClient.target(connector.getHostname() + "/services/search");
+			WebTarget target = webClient
+					.target(connector.getHttpEndpoint() + ServicesHandler.RESOURCE_PATH + "/search");
 			Response response = target.queryParam("searchname", serviceName).request().get();
 			Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
 			Assert.assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
@@ -89,7 +93,8 @@ public class ServicesHandlerTest extends AbstractTestHandler {
 	@Test
 	public void testPostServicePackageUploadNoLogin() {
 		try {
-			WebTarget target = sslClient.target(connector.getHostname() + "/services/upload");
+			WebTarget target = webClient
+					.target(connector.getHttpEndpoint() + ServicesHandler.RESOURCE_PATH + "/upload");
 			MultiPart multiPart = new MultiPart();
 			multiPart.setMediaType(MediaType.MULTIPART_FORM_DATA_TYPE);
 			File tmpJarFile = File.createTempFile("TestService", ".jar");
@@ -100,11 +105,10 @@ public class ServicesHandlerTest extends AbstractTestHandler {
 			multiPart.bodyPart(fileDataBodyPart);
 			Response response = target.request().post(Entity.entity(multiPart, multiPart.getMediaType()));
 			Assert.assertEquals(Status.BAD_REQUEST.getStatusCode(), response.getStatus());
-			Assert.assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
+			Assert.assertEquals(MediaType.TEXT_PLAIN_TYPE, response.getMediaType());
 			byte[] bytes = SimpleTools.toByteArray((InputStream) response.getEntity());
-			JSONObject result = (JSONObject) new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(bytes);
-			Assert.assertEquals(Status.BAD_REQUEST.getStatusCode(), result.getAsNumber("code"));
-			Assert.assertEquals("You have to be logged in to upload", result.getAsString("msg"));
+			String str = new String(bytes);
+			Assert.assertEquals("You have to be logged in to upload", str);
 			response.close();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -120,17 +124,19 @@ public class ServicesHandlerTest extends AbstractTestHandler {
 			adam.unlock("adamspass");
 			PastryNodeImpl activeNode = nodes.get(0);
 			activeNode.storeAgent(adam);
-			WebTarget targetLogin = sslClient.target(connector.getHostname() + "/auth/login");
+			WebTarget targetLogin = webClient
+					.target(connector.getHttpEndpoint() + AuthHandler.RESOURCE_PATH + "/login");
 			Response responseLogin = targetLogin.request()
 					.header(HttpHeaders.AUTHORIZATION, "basic " + Base64.getEncoder()
 							.encodeToString((adam.getLoginName() + ":" + "adamspass").getBytes(StandardCharsets.UTF_8)))
 					.get();
 			Assert.assertEquals(Status.OK.getStatusCode(), responseLogin.getStatus());
-			NewCookie cookie = responseLogin.getCookies().get(NodeAdminConnector.COOKIE_SESSIONID_KEY);
+			NewCookie cookie = responseLogin.getCookies().get(WebConnector.COOKIE_SESSIONID_KEY);
 			Assert.assertNotNull(cookie);
-			Assert.assertEquals(NodeAdminConnector.COOKIE_SESSIONID_KEY, cookie.getName());
+			Assert.assertEquals(WebConnector.COOKIE_SESSIONID_KEY, cookie.getName());
 			// start actual test
-			WebTarget target = sslClient.target(connector.getHostname() + "/services/upload");
+			WebTarget target = webClient
+					.target(connector.getHttpEndpoint() + ServicesHandler.RESOURCE_PATH + "/upload");
 			File tmpJarFile = File.createTempFile("TestService", ".jar");
 			tmpJarFile.deleteOnExit();
 			Manifest manifest = new Manifest();

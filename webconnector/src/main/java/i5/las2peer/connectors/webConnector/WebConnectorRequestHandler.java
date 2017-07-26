@@ -5,14 +5,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,8 +17,29 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.ForbiddenException;
+import javax.ws.rs.GET;
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.InternalServerErrorException;
+import javax.ws.rs.NotAuthorizedException;
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.PathSegment;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.UriInfo;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.nimbusds.oauth2.sdk.ErrorObject;
@@ -35,10 +51,6 @@ import com.nimbusds.openid.connect.sdk.UserInfoErrorResponse;
 import com.nimbusds.openid.connect.sdk.UserInfoResponse;
 import com.nimbusds.openid.connect.sdk.UserInfoSuccessResponse;
 import com.nimbusds.openid.connect.sdk.claims.UserInfo;
-import com.sun.net.httpserver.Headers;
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
-import com.sun.net.httpserver.HttpsExchange;
 
 import i5.las2peer.api.execution.ServiceInvocationException;
 import i5.las2peer.api.p2p.ServiceNameVersion;
@@ -48,6 +60,7 @@ import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.api.security.AnonymousAgent;
+import i5.las2peer.connectors.webConnector.handler.WebappHandler;
 import i5.las2peer.p2p.AgentAlreadyRegisteredException;
 import i5.las2peer.p2p.AliasNotFoundException;
 import i5.las2peer.p2p.Node;
@@ -62,7 +75,6 @@ import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
 import i5.las2peer.tools.SimpleTools;
 import io.swagger.models.Operation;
-import io.swagger.models.Path;
 import io.swagger.models.Swagger;
 import io.swagger.models.auth.OAuth2Definition;
 import io.swagger.util.Json;
@@ -73,17 +85,14 @@ import net.minidev.json.JSONObject;
  * its corresponding session.
  * 
  */
-public class WebConnectorRequestHandler implements HttpHandler {
+@Path("/")
+public class WebConnectorRequestHandler {
 
-	private static final String AUTHENTICATION_FIELD = "Authorization";
 	private static final String ACCESS_TOKEN_KEY = "access_token";
 	private static final String OIDC_PROVIDER_KEY = "oidc_provider";
-	private static final int NO_RESPONSE_BODY = -1;
-	// 0 means chunked transfer encoding, see
-	// https://docs.oracle.com/javase/8/docs/jre/api/net/httpserver/spec/com/sun/net/httpserver/HttpExchange.html#sendResponseHeaders-int-long-
-	private static final List<String> INGORE_HEADERS = Arrays.asList(AUTHENTICATION_FIELD.toLowerCase(),
+	private static final List<String> INGORE_HEADERS = Arrays.asList(HttpHeaders.AUTHORIZATION.toLowerCase(),
 			ACCESS_TOKEN_KEY.toLowerCase(), OIDC_PROVIDER_KEY.toLowerCase());
-	private static final List<String> INGORE_QUERY_PARAMS = Arrays.asList(ACCESS_TOKEN_KEY.toLowerCase(),
+	private static final List<String> IGNORE_QUERY_PARAMS = Arrays.asList(ACCESS_TOKEN_KEY.toLowerCase(),
 			OIDC_PROVIDER_KEY.toLowerCase());
 
 	private WebConnector connector;
@@ -94,44 +103,113 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		l2pNode = connector.getL2pNode();
 	}
 
-	@Override
-	public void handle(HttpExchange exchange) throws IOException {
-		exchange.getResponseHeaders().set("Server-Name", "las2peer WebConnector");
-
-		try {
-			AgentImpl userAgent;
-			if ((userAgent = authenticate(exchange)) != null) {
-				invoke(userAgent, exchange);
-			}
-		} catch (Exception e) {
-			sendUnexpectedErrorResponse(exchange, e.toString(), e);
-		}
-
-		// otherwise the client waits till the timeout for an answer
-		exchange.getResponseBody().close();
+	@GET
+	public Response rootPath() throws URISyntaxException {
+		return Response.temporaryRedirect(new URI(WebappHandler.DEFAULT_ROUTE)).build();
 	}
 
-	private AgentImpl authenticate(HttpExchange exchange) throws UnsupportedEncodingException {
-		if (exchange.getRequestHeaders().containsKey(AUTHENTICATION_FIELD)
-				&& exchange.getRequestHeaders().getFirst(AUTHENTICATION_FIELD).toLowerCase().startsWith("basic ")) {
+	@GET
+	@Path("/favicon.ico")
+	@Produces("image/x-icon")
+	public Response getFavicon() throws IOException {
+		byte[] bytes = null;
+		try {
+			FileInputStream fis = new FileInputStream("etc/favicon.ico");
+			bytes = SimpleTools.toByteArray(fis);
+			fis.close();
+		} catch (FileNotFoundException e) {
+			// use fallback from classpath
+			InputStream is = getClass().getResourceAsStream("/favicon.ico");
+			if (is != null) {
+				bytes = SimpleTools.toByteArray(is);
+				is.close();
+			}
+		}
+		return Response.ok(bytes, "image/x-icon").build();
+	}
+
+	@GET
+	@Path("/{paths: .+}")
+	public Response handleGET(@PathParam("paths") List<PathSegment> paths, @Context UriInfo uriInfo,
+			@Context HttpHeaders requestHeaders) throws Exception {
+		return handle(HttpMethod.GET, uriInfo, paths, null, requestHeaders);
+	}
+
+	@POST
+	@Path("/{paths: .+}")
+	public Response handlePOST(@PathParam("paths") List<PathSegment> paths, @Context UriInfo uriInfo,
+			@Context HttpHeaders requestHeaders, InputStream requestBody) throws Exception {
+		return handle(HttpMethod.POST, uriInfo, paths, requestBody, requestHeaders);
+	}
+
+	@PUT
+	@Path("/{paths: .+}")
+	public Response handlePUT(@PathParam("paths") List<PathSegment> paths, @Context UriInfo uriInfo,
+			@Context HttpHeaders requestHeaders, InputStream requestBody) throws Exception {
+		return handle(HttpMethod.PUT, uriInfo, paths, requestBody, requestHeaders);
+	}
+
+	@DELETE
+	@Path("/{paths: .+}")
+	public Response handleDELETE(@PathParam("paths") List<PathSegment> paths, @Context UriInfo uriInfo,
+			@Context HttpHeaders requestHeaders, InputStream requestBody) throws Exception {
+		return handle(HttpMethod.DELETE, uriInfo, paths, requestBody, requestHeaders);
+	}
+
+	private Response handle(String requestMethod, UriInfo uriInfo, List<PathSegment> paths, InputStream requestBody,
+			HttpHeaders httpHeaders) throws Exception {
+		MultivaluedMap<String, String> requestHeaders = httpHeaders.getRequestHeaders();
+		try {
+			Mediator mediator = authenticate(requestHeaders, uriInfo.getQueryParameters().getFirst(ACCESS_TOKEN_KEY));
+			if (mediator != null) {
+				ArrayList<String> strPaths = new ArrayList<>(paths.size());
+				for (PathSegment seg : paths) {
+					strPaths.add(seg.getPath());
+				}
+				return resolveServiceAndInvoke(mediator, strPaths, requestMethod, uriInfo, requestBody, requestHeaders);
+			} else {
+				// XXX refactor: is this necesssary?
+				throw new InternalServerErrorException("Authorization failed! Agent is null");
+			}
+		} catch (NotFoundException e) {
+			connector.logError("not found: " + e.getMessage(), e);
+			return Response.status(Status.NOT_FOUND).entity(e.getMessage()).build();
+		} catch (NotAuthorizedException e) {
+			connector.logError("authorization error: " + e.getMessage(), e);
+			return Response.status(Status.UNAUTHORIZED).entity(e.getMessage()).build();
+		} catch (InternalServerErrorException e) {
+			connector.logError("Internal Server Error: " + e.getMessage(), e);
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+		}
+	}
+
+	private Mediator authenticate(MultivaluedMap<String, String> requestHeaders, String accessTokenQueryParam) {
+		final String authorizationHeader = requestHeaders.getFirst(HttpHeaders.AUTHORIZATION);
+		final String accessTokenHeader = requestHeaders.getFirst(ACCESS_TOKEN_KEY);
+		AgentImpl agent;
+		if (authorizationHeader != null && authorizationHeader.toLowerCase().startsWith("basic ")) {
 			// basic authentication
-			return authenticateBasic(exchange);
-		} else if (connector.oidcProviderInfos != null && ((exchange.getRequestURI().getRawQuery() != null
-				&& exchange.getRequestURI().getRawQuery().contains(ACCESS_TOKEN_KEY + "="))
-				|| exchange.getRequestHeaders().containsKey(ACCESS_TOKEN_KEY)
-				|| (exchange.getRequestHeaders().containsKey(AUTHENTICATION_FIELD) && exchange.getRequestHeaders()
-						.getFirst(AUTHENTICATION_FIELD).toLowerCase().startsWith("bearer ")))) {
+			agent = authenticateBasic(authorizationHeader);
+		} else if (connector.oidcProviderInfos != null && accessTokenQueryParam != null || accessTokenHeader != null
+				|| (authorizationHeader != null && authorizationHeader.toLowerCase().startsWith("bearer "))) {
 			// openid connect
-			return authenticateOIDC(exchange);
+			final String oidcProviderHeader = requestHeaders.getFirst(OIDC_PROVIDER_KEY);
+			agent = authenticateOIDC(authorizationHeader, accessTokenQueryParam, accessTokenHeader, oidcProviderHeader);
 		} else {
 			// anonymous login
-			return authenticateAnonymous(exchange);
+			agent = authenticateAnonymous();
+		}
+		try {
+			return l2pNode.createMediatorForAgent(agent);
+		} catch (AgentAlreadyRegisteredException | AgentLockedException e) {
+			// should not occur, since agent is known and unlocked at this point
+			throw new InternalServerErrorException("Mediator could not be created", e);
 		}
 	}
 
-	private AgentImpl authenticateBasic(HttpExchange exchange) {
+	private AgentImpl authenticateBasic(String authorizationHeader) {
 		// looks like: Authentication Basic <Byte64(name:pass)>
-		String userPass = exchange.getRequestHeaders().getFirst(AUTHENTICATION_FIELD).substring("BASIC ".length());
+		String userPass = authorizationHeader.substring("BASIC ".length());
 		userPass = new String(Base64.getDecoder().decode(userPass), StandardCharsets.UTF_8);
 		int separatorPos = userPass.indexOf(':');
 
@@ -139,53 +217,43 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		String username = userPass.substring(0, separatorPos);
 		String password = userPass.substring(separatorPos + 1);
 
-		return authenticateNamePassword(username, password, exchange);
+		return authenticateNamePassword(username, password);
 	}
 
-	private PassphraseAgentImpl authenticateOIDC(HttpExchange exchange) throws UnsupportedEncodingException {
+	private PassphraseAgentImpl authenticateOIDC(String authorizationHeader, String accessTokenQueryParam,
+			String accessTokenHeader, String oidcProviderHeader) {
 		// extract token
 		String token = "";
 		String oidcProviderURI = connector.defaultOIDCProvider;
-		if (exchange.getRequestHeaders().containsKey(ACCESS_TOKEN_KEY)) {
+		if (accessTokenHeader != null) {
 			// get OIDC parameters from headers
-			token = exchange.getRequestHeaders().getFirst(ACCESS_TOKEN_KEY);
-			if (exchange.getRequestHeaders().containsKey(OIDC_PROVIDER_KEY)) {
-				oidcProviderURI = URLDecoder.decode(exchange.getRequestHeaders().getFirst(OIDC_PROVIDER_KEY),
-						StandardCharsets.UTF_8.name());
+			token = accessTokenHeader;
+			if (oidcProviderHeader != null) {
+				oidcProviderURI = oidcProviderHeader;
 			}
-		} else if (exchange.getRequestHeaders().containsKey(AUTHENTICATION_FIELD)
-				&& exchange.getRequestHeaders().getFirst(AUTHENTICATION_FIELD).toLowerCase().startsWith("bearer ")) {
+		} else if (authorizationHeader != null && authorizationHeader.toLowerCase().startsWith("bearer ")) {
 			// get BEARER token from Authentication field
-			token = exchange.getRequestHeaders().getFirst(AUTHENTICATION_FIELD).substring("BEARER ".length());
-			if (exchange.getRequestHeaders().containsKey(OIDC_PROVIDER_KEY)) {
-				oidcProviderURI = URLDecoder.decode(exchange.getRequestHeaders().getFirst(OIDC_PROVIDER_KEY),
-						StandardCharsets.UTF_8.name());
+			token = authorizationHeader.substring("BEARER ".length());
+			if (oidcProviderHeader != null) {
+				oidcProviderURI = oidcProviderHeader;
 			}
 		} else { // get OIDC parameters from GET values
-			String[] params = exchange.getRequestURI().getRawQuery().split("&");
-			for (String param : params) {
-				String[] keyval = param.split("=");
-				if (keyval[0].equalsIgnoreCase(ACCESS_TOKEN_KEY)) {
-					token = keyval[1];
-				} else if (keyval[0].equalsIgnoreCase(OIDC_PROVIDER_KEY)) {
-					oidcProviderURI = URLDecoder.decode(keyval[1], StandardCharsets.UTF_8.name());
-				}
-			}
+			token = accessTokenQueryParam;
+			oidcProviderURI = oidcProviderHeader;
 		}
 
 		// validate given OIDC provider and get provider info
 		JSONObject oidcProviderInfo = null;
 		if (!connector.oidcProviders.contains(oidcProviderURI)
 				|| connector.oidcProviderInfos.get(oidcProviderURI) == null) {
-			sendStringResponse(exchange, HttpURLConnection.HTTP_INTERNAL_ERROR, "The given OIDC provider ("
-					+ oidcProviderURI
+			throw new InternalServerErrorException("The given OIDC provider (" + oidcProviderURI
 					+ ") is not whitelisted! Please make sure the complete OIDC provider URI is added to the config.");
-			return null;
 		} else {
 			oidcProviderInfo = connector.oidcProviderInfos.get(oidcProviderURI);
 		}
 
-		// send request to OpenID Connect user info endpoint to retrieve complete user information
+		// send request to OpenID Connect user info endpoint to retrieve
+		// complete user information
 		// in exchange for access token.
 		HTTPRequest hrq;
 		HTTPResponse hrs;
@@ -196,11 +264,11 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			hrq = new HTTPRequest(Method.GET, userinfoEndpointUri.toURL());
 			hrq.setAuthorization("Bearer " + token);
 
-			// TODO process all error cases that can happen (in particular invalid tokens)
+			// TODO process all error cases that can happen (in particular
+			// invalid tokens)
 			hrs = hrq.send();
 		} catch (IOException | URISyntaxException e) {
-			sendUnexpectedErrorResponse(exchange, "Fetching OIDC user info failed", e);
-			return null;
+			throw new InternalServerErrorException("Fetching OIDC user info failed", e);
 		}
 
 		// process response from OpenID Connect user info endpoint
@@ -208,8 +276,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		try {
 			userInfoResponse = UserInfoResponse.parse(hrs);
 		} catch (ParseException e) {
-			sendUnexpectedErrorResponse(exchange, "Couldn't parse UserInfo response", e);
-			return null;
+			throw new InternalServerErrorException("Couldn't parse UserInfo response", e);
 		}
 
 		// failed request for OpenID Connect user info
@@ -220,9 +287,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			if (err != null) {
 				cause = err.getDescription();
 			}
-			sendStringResponse(exchange, HttpURLConnection.HTTP_UNAUTHORIZED,
-					"Open ID Connect UserInfo request failed! Cause: " + cause);
-			return null;
+			throw new NotAuthorizedException("Open ID Connect UserInfo request failed! Cause: " + cause);
 		}
 
 		// successful request
@@ -231,9 +296,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		JSONObject ujson = userInfo.toJSONObject();
 
 		if (!ujson.containsKey("sub") || !ujson.containsKey("email") || !ujson.containsKey("preferred_username")) {
-			sendStringResponse(exchange, HttpURLConnection.HTTP_FORBIDDEN,
-					"Could not get provider information. Please check your scopes.");
-			return null;
+			throw new ForbiddenException("Could not get provider information. Please check your scopes.");
 		}
 
 		String sub = (String) ujson.get("sub");
@@ -243,8 +306,7 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			oidcAgentId = SimpleTools.byteToHexString(CryptoTools.getSecureHash(sub.getBytes()));
 		} catch (CryptoException e) {
 			connector.logError("Could not derive agent id from oidc sub", e);
-			sendStringResponse(exchange, HttpURLConnection.HTTP_UNAUTHORIZED, e.toString());
-			return null;
+			throw new NotAuthorizedException(e.toString(), e);
 		}
 		// TODO choose other scheme for generating agent password
 		String password = sub;
@@ -258,15 +320,14 @@ public class WebConnectorRequestHandler implements HttpHandler {
 				if (pa instanceof UserAgentImpl) {
 					UserAgentImpl ua = (UserAgentImpl) pa;
 					// TODO provide OIDC user data for agent
-//					ua.setUserData(ujson.toJSONString());
+					// ua.setUserData(ujson.toJSONString());
 					return ua;
 				} else {
 					return pa;
 				}
 			} catch (AgentAccessDeniedException e) {
 				connector.logError("Authentication failed!", e);
-				sendStringResponse(exchange, HttpURLConnection.HTTP_UNAUTHORIZED, e.toString());
-				return null;
+				throw new NotAuthorizedException(e.toString(), e);
 			} catch (AgentNotFoundException e) {
 				UserAgentImpl oidcAgent;
 				try {
@@ -276,28 +337,26 @@ public class WebConnectorRequestHandler implements HttpHandler {
 					oidcAgent.setEmail((String) ujson.get("email"));
 					oidcAgent.setLoginName((String) ujson.get("preferred_username"));
 					// TODO provide OIDC user data for agent
-//					oidcAgent.setUserData(ujson.toJSONString());
+					// oidcAgent.setUserData(ujson.toJSONString());
 
 					l2pNode.storeAgent(oidcAgent);
 					l2pNode.getUserManager().registerOIDCSub(oidcAgent, sub);
 					return oidcAgent;
 				} catch (Exception e1) {
-					sendUnexpectedErrorResponse(exchange, "OIDC agent creation failed", e1);
-					return null;
+					throw new InternalServerErrorException("OIDC agent creation failed", e1);
 				}
 			} catch (AgentException e) {
 				connector.logError("Could not retrieve and unlock agent from network", e);
-				sendStringResponse(exchange, HttpURLConnection.HTTP_UNAUTHORIZED, e.toString());
-				return null;
+				throw new NotAuthorizedException(e.toString(), e);
 			}
 		} finally {
 			this.connector.getLockOidc().unlock(oidcAgentId + "");
 		}
 	}
 
-	private AgentImpl authenticateNamePassword(String username, String password, HttpExchange exchange) {
+	private AgentImpl authenticateNamePassword(String username, String password) {
 		if (username.equalsIgnoreCase(AnonymousAgent.LOGIN_NAME)) {
-			return authenticateAnonymous(exchange);
+			return authenticateAnonymous();
 		}
 		try {
 			String userId;
@@ -314,40 +373,25 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			return userAgent;
 		} catch (AgentNotFoundException e) {
 			connector.logError("user " + username + " not found", e);
-			sendUnauthorizedResponse(exchange, null, exchange.getRemoteAddress() + ": user " + username + " not found");
+			throw new NotAuthorizedException("user " + username + " not found");
 		} catch (AgentAccessDeniedException e) {
 			connector.logError("passphrase invalid for user " + username, e);
-			sendUnauthorizedResponse(exchange, null,
-					exchange.getRemoteAddress() + ": passphrase invalid for user " + username);
+			throw new NotAuthorizedException("passphrase invalid for user " + username);
 		} catch (Exception e) {
 			connector.logError("something went horribly wrong. Check your request for correctness.", e);
-			sendUnauthorizedResponse(exchange, null, exchange.getRemoteAddress()
-					+ ": something went horribly wrong. Check your request for correctness.");
+			throw new NotAuthorizedException("something went horribly wrong. Check your request for correctness.");
 		}
-		return null;
 	}
 
-	private AgentImpl authenticateAnonymous(HttpExchange exchange) {
+	private AgentImpl authenticateAnonymous() {
 		AnonymousAgentImpl anonymousAgent = AnonymousAgentImpl.getInstance();
 		return anonymousAgent;
 	}
 
-	private boolean invoke(AgentImpl agent, HttpExchange exchange) {
-		String requestPath = exchange.getRequestURI().getPath();
-
-		// filter special pages
-		if (requestPath.equalsIgnoreCase("/")) { // welcome page
-			sendStringResponse(exchange, HttpURLConnection.HTTP_OK, "Welcome to las2peer!");
-			return true;
-		} else if (requestPath.equalsIgnoreCase("/favicon.ico")) { // favicon
-			sendFaviconResponse(exchange);
-			return true;
-		}
-
-		// split path
-		ArrayList<String> pathSplit = new ArrayList<>(Arrays.asList(requestPath.split("/")));
-		pathSplit.removeIf(item -> item == null || "".equals(item));
-
+	private Response resolveServiceAndInvoke(Mediator mediator, ArrayList<String> pathSplit, String requestMethod,
+			UriInfo uriInfo, InputStream requestBody, MultivaluedMap<String, String> requestHeaders)
+			throws URISyntaxException {
+		String requestPath = String.join("/", pathSplit);
 		// resolve service name
 		String serviceName;
 		int serviceAliasLength;
@@ -356,12 +400,8 @@ public class WebConnectorRequestHandler implements HttpHandler {
 			serviceName = response.getServiceName();
 			serviceAliasLength = response.getNumMatchedParts();
 		} catch (AliasNotFoundException e1) {
-			connector.logError("Could not resolve " + requestPath + " to a service name.", e1);
-			sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND,
-					"Could not resolve " + requestPath + " to a service name.");
-			return false;
+			throw new NotFoundException("Could not resolve " + requestPath + " to a service name.", e1);
 		}
-
 		// get service version
 		ServiceVersion serviceVersion;
 		boolean versionSpecified = false;
@@ -375,158 +415,163 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		} else {
 			serviceVersion = new ServiceVersion("*");
 		}
-
 		// required service
 		ServiceNameVersion requiredService = new ServiceNameVersion(serviceName, serviceVersion);
-
 		// construct base path
-		String basePath = "/";
+		String basePath = "";
 		for (int i = 0; i < serviceAliasLength; i++) {
 			basePath += pathSplit.get(i) + "/";
 		}
 		if (versionSpecified) {
 			basePath += pathSplit.get(serviceAliasLength) + "/";
 		}
-
-		// create mediator
-		Mediator mediator;
-		try {
-			mediator = l2pNode.createMediatorForAgent(agent);
-		} catch (AgentAlreadyRegisteredException | AgentLockedException e) {
-			// should not occur, since agent is known and unlocked at this point
-			sendUnexpectedErrorResponse(exchange, "Mediator could not be created", e);
-			return false;
-		}
-
-		if (exchange.getRequestMethod().equalsIgnoreCase("get")
-				&& exchange.getRequestURI().getPath().toString().equals(basePath + "swagger.json")) {
-			return invokeSwagger(exchange, mediator, requiredService, basePath);
+		// invoke
+		if (requestMethod.equalsIgnoreCase("get") && requestPath.equals(basePath + "swagger.json")) {
+			return invokeSwagger(mediator, requiredService, basePath);
 		} else {
-			return invokeRestService(exchange, mediator, requiredService, basePath);
+			return invokeRestService(mediator, requiredService, basePath, requestMethod, uriInfo, requestBody,
+					requestHeaders);
 		}
 	}
 
-	private void sendFaviconResponse(HttpExchange exchange) {
+	private Response invokeSwagger(Mediator mediator, ServiceNameVersion requiredService, String basePath) {
+		// get definitions
+		Serializable result = callServiceMethod(mediator, requiredService, "getSwagger", new Serializable[] {});
+		if (!(result instanceof String)) {
+			throw new InternalServerErrorException("Swagger API declaration not available!");
+		}
+		// deserialize Swagger
+		Swagger swagger;
 		try {
-			byte[] bytes = null;
-			try {
-				FileInputStream fis = new FileInputStream("etc/favicon.ico");
-				bytes = SimpleTools.toByteArray(fis);
-				fis.close();
-			} catch (FileNotFoundException e) {
-				// use fallback from classpath
-				InputStream is = getClass().getResourceAsStream("/favicon.ico");
-				if (is != null) {
-					bytes = SimpleTools.toByteArray(is);
-					is.close();
+			swagger = Json.mapper().readerFor(Swagger.class).readValue((String) result);
+		} catch (Exception e) {
+			throw new NotFoundException("Swagger API declaration not available!", e);
+		}
+		// modify Swagger
+		swagger.setBasePath(basePath);
+		// OpenID Connect integration
+		if (connector.oidcProviderInfos != null && connector.defaultOIDCProvider != null
+				&& !connector.defaultOIDCProvider.isEmpty()) {
+			// add security definition for default provider
+			JSONObject infos = connector.oidcProviderInfos.get(connector.defaultOIDCProvider);
+			OAuth2Definition scheme = new OAuth2Definition();
+			String authUrl = (String) ((JSONObject) infos.get("config")).get("authorization_endpoint");
+			scheme.implicit(authUrl);
+			scheme.addScope("openid", "Access Identity");
+			scheme.addScope("email", "Access E-Mail-Address");
+			scheme.addScope("profile", "Access Profile Data");
+			swagger.addSecurityDefinition("defaultProvider", scheme);
+			// add security requirements to operations
+			List<String> scopes = new ArrayList<>();
+			scopes.add("openid");
+			scopes.add("email");
+			scopes.add("profile");
+			Map<String, io.swagger.models.Path> paths = swagger.getPaths();
+			if (paths != null) {
+				for (io.swagger.models.Path path : paths.values()) {
+					for (Operation operation : path.getOperations()) {
+						operation.addSecurity("defaultProvider", scopes);
+					}
 				}
 			}
-			OutputStream os = exchange.getResponseBody();
-			if (bytes != null) {
-				exchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, bytes.length);
-				os.write(bytes);
-			} else {
-				exchange.sendResponseHeaders(HttpURLConnection.HTTP_NOT_FOUND, NO_RESPONSE_BODY);
-			}
-			os.close();
-		} catch (IOException e) {
-			connector.logError(e.toString(), e);
-			return;
 		}
+		// serialize Swagger
+		String json;
+		try {
+			json = Json.mapper().writeValueAsString(swagger);
+		} catch (JsonProcessingException e) {
+			throw new InternalServerErrorException("Swagger documentation could not be serialized to JSON", e);
+		}
+		return Response.ok(json, MediaType.APPLICATION_JSON).build();
 	}
 
-	private boolean invokeRestService(HttpExchange exchange, Mediator mediator, ServiceNameVersion requiredService,
-			String basePath) {
-
+	private Response invokeRestService(Mediator mediator, ServiceNameVersion requiredService, String basePath,
+			String requestMethod, UriInfo uriInfo, InputStream requestBody,
+			MultivaluedMap<String, String> requestHeaders) throws URISyntaxException {
 		// URIs
-		URI exchangeUri = exchange.getRequestURI();
-		UriBuilder exchangeUriBuilder = UriBuilder.fromUri(exchangeUri);
-		if (!exchangeUri.getPath().endsWith("/")) { // make sure URI ends with "/"
-			exchangeUriBuilder.path("/");
+		URI baseUri = new URI(uriInfo.getBaseUri().toString() + basePath);
+		URI requestUri = uriInfo.getRequestUri();
+		UriBuilder cleanRequestUriBuilder = UriBuilder.fromUri(requestUri);
+		if (!requestUri.getPath().endsWith("/")) { // make sure URI ends with "/"
+			cleanRequestUriBuilder.path("/");
 		}
-		for (String param : INGORE_QUERY_PARAMS) { // remove auth params from uri
-			exchangeUriBuilder.replaceQueryParam(param);
+		for (String param : IGNORE_QUERY_PARAMS) { // remove auth params from uri
+			cleanRequestUriBuilder.replaceQueryParam(param);
 		}
-		exchangeUri = exchangeUriBuilder.build();
-
-		final URI baseUri = getBaseUri(exchange, basePath);
-		final URI requestUri = getRequestUri(exchange, baseUri, exchangeUri);
+		URI cleanRequestUri = cleanRequestUriBuilder.build();
 
 		// content
 		byte[] requestContent;
 		try {
-			requestContent = getRequestContent(exchange);
+			requestContent = getRequestContent(requestBody);
 		} catch (IOException e1) {
-			sendUnexpectedErrorResponse(exchange, "An error occurred: " + e1, e1);
-			return false;
+			throw new InternalServerErrorException("An error occurred: " + e1, e1);
 		}
 		if (requestContent == null) {
-			sendStringResponse(exchange, HttpURLConnection.HTTP_ENTITY_TOO_LARGE,
-					"Given request body exceeds limit of " + connector.maxRequestBodySize + " bytes");
-			return false;
+			throw new ClientErrorException(
+					"Given request body exceeds limit of " + connector.maxRequestBodySize + " bytes",
+					Status.REQUEST_ENTITY_TOO_LARGE);
 		}
 
 		// headers
-		HashMap<String, ArrayList<String>> headers = new HashMap<>();
-		for (Entry<String, List<String>> entry : exchange.getRequestHeaders().entrySet()) {
+		HashMap<String, ArrayList<String>> cleanHeaders = new HashMap<>();
+		for (Entry<String, List<String>> entry : requestHeaders.entrySet()) {
 			// exclude some headers for security reasons
 			if (!INGORE_HEADERS.contains(entry.getKey().toLowerCase())) {
 				ArrayList<String> list = new ArrayList<>();
 				list.addAll(entry.getValue());
-				headers.put(entry.getKey(), list);
+				cleanHeaders.put(entry.getKey(), list);
 			}
 		}
 
 		// invoke
-		Serializable[] params = new Serializable[] { baseUri, requestUri, exchange.getRequestMethod(), requestContent,
-				headers };
-
-		Serializable result = callServiceMethod(exchange, mediator, requiredService, "handle", params);
-		if (result == null) {
-			return false;
-		}
-
+		Serializable[] params = new Serializable[] { baseUri, cleanRequestUri, requestMethod, requestContent,
+				cleanHeaders };
+		Serializable result = callServiceMethod(mediator, requiredService, "handle", params);
 		if (result instanceof RESTResponse) {
-			sendRESTResponse(exchange, (RESTResponse) result);
-			return true;
-		} else {
-			sendStringResponse(exchange, HttpURLConnection.HTTP_INTERNAL_ERROR, "Internal Server Error");
-			return false;
-		}
-	}
-
-	private URI getBaseUri(final HttpExchange exchange, final String decodedBasePath) {
-		final String scheme = (exchange instanceof HttpsExchange) ? "https" : "http";
-
-		final URI baseUri;
-		try {
-			final List<String> hostHeader = exchange.getRequestHeaders().get("Host");
-			if (hostHeader != null) {
-				baseUri = new URI(scheme + "://" + hostHeader.get(0) + decodedBasePath);
-			} else {
-				final InetSocketAddress addr = exchange.getLocalAddress();
-				baseUri = new URI(scheme, null, addr.getHostName(), addr.getPort(), decodedBasePath, null, null);
+			RESTResponse restResponse = (RESTResponse) result;
+			ResponseBuilder responseBuilder = Response.status(restResponse.getHttpCode());
+			for (Entry<String, List<String>> entry : restResponse.getHeaders().entrySet()) {
+				// don't add possible CORS headers set by service
+				final String key = entry.getKey();
+				if (!key.equalsIgnoreCase("Access-Control-Allow-Origin")
+						&& !key.equalsIgnoreCase("Access-Control-Max-Age")
+						&& !key.equalsIgnoreCase("Access-Control-Allow-Headers")
+						&& !key.equalsIgnoreCase("Access-Control-Allow-Methods")) {
+					for (String value : entry.getValue()) {
+						responseBuilder.header(key, value);
+					}
+				} else {
+					// XXX logging
+				}
 			}
-		} catch (final URISyntaxException ex) {
-			throw new IllegalArgumentException(ex);
+			// add CORS headers
+			if (connector.enableCrossOriginResourceSharing) {
+				// just reply all requested headers, other values are set by filter
+				String requestedHeaders = requestHeaders.getFirst("Access-Control-Request-Headers");
+				if (requestedHeaders != null) {
+					if (!requestedHeaders.toLowerCase().contains("authorization")) {
+						if (!requestedHeaders.trim().equals("")) {
+							requestedHeaders += ", ";
+						}
+						requestedHeaders += "Authorization";
+					}
+					responseBuilder.header("Access-Control-Allow-Headers", requestedHeaders);
+				}
+			}
+			// add response body
+			responseBuilder.entity(restResponse.getBody());
+			return responseBuilder.build();
+		} else {
+			throw new InternalServerErrorException(
+					"Service method response is not an " + RESTResponse.class.getSimpleName());
 		}
-		return baseUri;
 	}
 
-	private URI getRequestUri(final HttpExchange exchange, final URI baseUri, final URI exchangeUri) {
-		try {
-			return new URI(getServerAddress(baseUri) + exchangeUri);
-		} catch (URISyntaxException ex) {
-			throw new IllegalArgumentException(ex);
+	private byte[] getRequestContent(InputStream is) throws IOException {
+		if (is == null) {
+			return new byte[0];
 		}
-	}
-
-	private String getServerAddress(final URI baseUri) throws URISyntaxException {
-		return new URI(baseUri.getScheme(), null, baseUri.getHost(), baseUri.getPort(), null, null, null).toString();
-	}
-
-	private byte[] getRequestContent(HttpExchange exchange) throws IOException {
-		InputStream is = exchange.getRequestBody();
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 		int nRead;
 		byte[] data = new byte[4096];
@@ -547,186 +592,22 @@ public class WebConnectorRequestHandler implements HttpHandler {
 		return buffer.toByteArray();
 	}
 
-	private boolean invokeSwagger(HttpExchange exchange, Mediator mediator, ServiceNameVersion requiredService,
-			String basePath) {
-
-		// get definitions
-		Serializable result = callServiceMethod(exchange, mediator, requiredService, "getSwagger",
-				new Serializable[] {});
-		if (result == null) {
-			return false;
-		}
-
-		if (!(result instanceof String)) {
-			sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND, "Swagger API declaration not available!");
-			return false;
-		}
-
-		// deserialize Swagger
-		Swagger swagger;
+	private Serializable callServiceMethod(Mediator mediator, ServiceNameVersion service, String method,
+			Serializable[] params) {
 		try {
-			swagger = Json.mapper().readerFor(Swagger.class).readValue((String) result);
-		} catch (Exception e) {
-			connector.logError("Swagger API declaration not available!", e);
-			sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND, "Swagger API declaration not available!");
-			return false;
-		}
-
-		// modify Swagger
-		swagger.setBasePath(basePath);
-
-		// OpenID Connect integration
-		if (connector.oidcProviderInfos != null && connector.defaultOIDCProvider != null
-				&& !connector.defaultOIDCProvider.isEmpty()) {
-			// add security definition for default provider
-			JSONObject infos = connector.oidcProviderInfos.get(connector.defaultOIDCProvider);
-			OAuth2Definition scheme = new OAuth2Definition();
-			String authUrl = (String) ((JSONObject) infos.get("config")).get("authorization_endpoint");
-			scheme.implicit(authUrl);
-			scheme.addScope("openid", "Access Identity");
-			scheme.addScope("email", "Access E-Mail-Address");
-			scheme.addScope("profile", "Access Profile Data");
-
-			swagger.addSecurityDefinition("defaultProvider", scheme);
-
-			// add security requirements to operations
-			List<String> scopes = new ArrayList<>();
-			scopes.add("openid");
-			scopes.add("email");
-			scopes.add("profile");
-			Map<String, Path> paths = swagger.getPaths();
-			if (paths != null) {
-				for (Path path : paths.values()) {
-					for (Operation operation : path.getOperations()) {
-						operation.addSecurity("defaultProvider", scopes);
-					}
-				}
-			}
-		}
-
-		// serialize Swagger
-		String json;
-		try {
-			json = Json.mapper().writeValueAsString(swagger);
-		} catch (JsonProcessingException e) {
-			sendUnexpectedErrorResponse(exchange, "Swagger documentation could not be serialized to JSON", e);
-			return false;
-		}
-
-		sendStringResponse(exchange, HttpURLConnection.HTTP_OK, json);
-		return true;
-	}
-
-	private Serializable callServiceMethod(HttpExchange exchange, Mediator mediator, ServiceNameVersion service,
-			String method, Serializable[] params) {
-		Serializable result = null;
-		try {
-			result = mediator.invoke(service, method, params, connector.onlyLocalServices());
+			Serializable result = mediator.invoke(service, method, params, connector.onlyLocalServices());
 			if (result == null) {
-				sendUnexpectedErrorResponse(exchange, "Service method invocation returned null response", null);
+				throw new InternalServerErrorException("Service method invocation returned null response");
 			}
+			return result;
 		} catch (AgentException e) {
 			connector.logError("No service found matching " + service + ".", e);
-			sendStringResponse(exchange, HttpURLConnection.HTTP_NOT_FOUND,
-					"No service found matching " + service + ".");
+			throw new NotFoundException("No service found matching " + service + ".");
 		} catch (ServiceInvocationException e) {
-			sendInvocationException(exchange, e);
+			throw new InternalServerErrorException("Exception during RMI invocation!", e);
 		} catch (Exception e) {
-			sendUnexpectedErrorResponse(exchange, "Service method invocation failed", e);
+			throw new InternalServerErrorException("Service method invocation failed", e);
 		}
-		return result;
-	}
-
-	private void sendInvocationException(HttpExchange exchange, ServiceInvocationException e) {
-		connector.logError("Exception while processing RMI: " + exchange.getRequestURI().getPath(), e);
-		sendStringResponse(exchange, HttpURLConnection.HTTP_INTERNAL_ERROR, "Exception during RMI invocation!");
-	}
-
-	private void sendRESTResponse(HttpExchange exchange, RESTResponse result) {
-		exchange.getResponseHeaders().putAll(result.getHeaders());
-		try {
-			sendResponseHeaders(exchange, result.getHttpCode(), getResponseLength(result.getBody().length));
-			OutputStream os = exchange.getResponseBody();
-			if (result.getBody().length > 0) {
-				os.write(result.getBody());
-			}
-			os.close();
-		} catch (IOException e) {
-			connector.logError("Sending REST response (Code: " + result.getHttpCode() + ") failed!", e);
-		}
-	}
-
-	private void sendUnauthorizedResponse(HttpExchange exchange, String answerMessage, String logMessage) {
-		connector.logMessage(logMessage);
-		exchange.getResponseHeaders().set("WWW-Authenticate", "Basic realm=\"las2peer WebConnector\"");
-		if (answerMessage != null) {
-			sendStringResponse(exchange, HttpURLConnection.HTTP_UNAUTHORIZED, answerMessage);
-		} else {
-			try {
-				sendResponseHeaders(exchange, HttpURLConnection.HTTP_UNAUTHORIZED, NO_RESPONSE_BODY);
-				// otherwise the client waits till the timeout for an answer
-				exchange.getResponseBody().close();
-			} catch (IOException e) {
-				connector.logError(e.toString(), e);
-			}
-		}
-	}
-
-	private void sendUnexpectedErrorResponse(HttpExchange exchange, String message, Throwable e) {
-		connector.logError("Internal Server Error: " + message, e);
-		sendStringResponse(exchange, HttpURLConnection.HTTP_INTERNAL_ERROR, message);
-	}
-
-	private void sendStringResponse(HttpExchange exchange, int responseCode, String response) {
-		byte[] content = response.getBytes();
-		exchange.getResponseHeaders().set(HttpHeaders.CONTENT_TYPE, "text/plain");
-		try {
-			sendResponseHeaders(exchange, responseCode, content.length);
-			OutputStream os = exchange.getResponseBody();
-			os.write(content);
-			os.close();
-		} catch (IOException e) {
-			connector.logError(e.toString(), e);
-		}
-	}
-
-	private void sendResponseHeaders(HttpExchange exchange, int responseCode, long contentLength) throws IOException {
-		Headers responseHeaders = exchange.getResponseHeaders();
-
-		// remove CORSheaders from service
-		responseHeaders.remove("Access-Control-Allow-Origin");
-		responseHeaders.remove("Access-Control-Max-Age");
-		responseHeaders.remove("Access-Control-Allow-Headers");
-		responseHeaders.remove("Access-Control-Allow-Methods");
-
-		// add CORS
-		if (connector.enableCrossOriginResourceSharing) {
-			responseHeaders.add("Access-Control-Allow-Origin", connector.crossOriginResourceDomain);
-			responseHeaders.add("Access-Control-Max-Age", String.valueOf(connector.crossOriginResourceMaxAge));
-			// just reply all requested headers
-			String requestedHeaders = exchange.getRequestHeaders().getFirst("Access-Control-Request-Headers");
-			if (requestedHeaders != null) {
-				if (!requestedHeaders.toLowerCase().contains("authorization")) {
-					if (!requestedHeaders.trim().equals("")) {
-						requestedHeaders += ", ";
-					}
-					requestedHeaders += "Authorization";
-				}
-				responseHeaders.add("Access-Control-Allow-Headers", requestedHeaders);
-			}
-			responseHeaders.add("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS");
-		}
-		exchange.sendResponseHeaders(responseCode, contentLength);
-	}
-
-	private long getResponseLength(final long contentLength) {
-		if (contentLength == 0) {
-			return -1;
-		}
-		if (contentLength < 0) {
-			return 0;
-		}
-		return contentLength;
 	}
 
 }

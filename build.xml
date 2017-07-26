@@ -5,7 +5,6 @@
 		<ant dir="core" antfile="build.xml" target="deploy-local" />
 		<ant dir="restmapper" antfile="build.xml" target="deploy-local" />
 		<ant dir="webconnector" antfile="build.xml" target="deploy-local" />
-		<ant dir="nodeadminconnector" antfile="build.xml" target="deploy-local" />
 		<ant dir="bundle" antfile="build.xml" target="deploy-local" />
 	</target>
 
@@ -13,7 +12,6 @@
 		<ant dir="core" antfile="build.xml" target="all" />
 		<ant dir="restmapper" antfile="build.xml" target="all" />
 		<ant dir="webconnector" antfile="build.xml" target="all" />
-		<ant dir="nodeadminconnector" antfile="build.xml" target="all" />
 		<ant dir="bundle" antfile="build.xml" target="all" />
 	</target>
 
@@ -21,7 +19,6 @@
 		<ant dir="core" antfile="build.xml" target="deploy-snapshot" />
 		<ant dir="restmapper" antfile="build.xml" target="deploy-snapshot" />
 		<ant dir="webconnector" antfile="build.xml" target="deploy-snapshot" />
-		<ant dir="nodeadminconnector" antfile="build.xml" target="deploy-snapshot" />
 		<ant dir="bundle" antfile="build.xml" target="deploy-snapshot" />
 	</target>
 
@@ -29,7 +26,6 @@
 		<ant dir="core" antfile="build.xml" target="deploy-release" />
 		<ant dir="restmapper" antfile="build.xml" target="deploy-release" />
 		<ant dir="webconnector" antfile="build.xml" target="deploy-release" />
-		<ant dir="nodeadminconnector" antfile="build.xml" target="deploy-release" />
 		<ant dir="bundle" antfile="build.xml" target="deploy-release" />
 	</target>
 
@@ -37,7 +33,6 @@
 		<ant dir="core" antfile="build.xml" target="clean" />
 		<ant dir="restmapper" antfile="build.xml" target="clean" />
 		<ant dir="webconnector" antfile="build.xml" target="clean" />
-		<ant dir="nodeadminconnector" antfile="build.xml" target="clean" />
 		<ant dir="bundle" antfile="build.xml" target="clean" />
 	</target>
 

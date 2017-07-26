@@ -1,4 +1,4 @@
-package i5.las2peer.connectors.nodeAdminConnector;
+package i5.las2peer.connectors.webConnector.util;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -17,6 +17,7 @@ import java.util.logging.Level;
 
 import javax.security.auth.x500.X500Principal;
 
+import i5.las2peer.connectors.webConnector.WebConnector;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.tools.CryptoTools;
 import sun.misc.BASE64Encoder;
@@ -71,7 +72,7 @@ public class KeystoreManager {
 		BasicConstraintsExtension bce = new BasicConstraintsExtension(true, 0);
 		caExts.set(bce.getName(), bce);
 		X509Certificate caCert = caKeyGen.getSelfCertificate(caX500Name, new Date(), 3 * 365 * 24 * 3600, caExts);
-		ks.setKeyEntry(NodeAdminConnector.class.getSimpleName() + " Root CA", caPrivateKey, password,
+		ks.setKeyEntry(WebConnector.class.getSimpleName() + " Root CA", caPrivateKey, password,
 				new X509Certificate[] { caCert });
 		// generate connector certificate signed by CA
 		CertAndKeyGen keyGen = new CertAndKeyGen(CryptoTools.getAsymmetricAlgorithm(),
@@ -85,7 +86,7 @@ public class KeystoreManager {
 		X509Certificate certReq = keyGen.getSelfCertificate(x500Name, new Date(), 3 * 365 * 24 * 3600, exts);
 		X509Certificate cert = createSignedCertificate(certReq, caCert, caPrivateKey);
 		// the alias has to be the class name here
-		ks.setKeyEntry(NodeAdminConnector.class.getSimpleName(), keyGen.getPrivateKey(), password,
+		ks.setKeyEntry(WebConnector.class.getSimpleName(), keyGen.getPrivateKey(), password,
 				new X509Certificate[] { cert, caCert });
 		if (persistKeystore) {
 			// write keystore to file

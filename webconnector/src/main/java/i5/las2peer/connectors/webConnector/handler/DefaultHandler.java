@@ -1,10 +1,8 @@
-package i5.las2peer.connectors.nodeAdminConnector.handler;
+package i5.las2peer.connectors.webConnector.handler;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -19,21 +17,28 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.p2p.ServiceVersion;
-import i5.las2peer.connectors.nodeAdminConnector.KeystoreManager;
-import i5.las2peer.connectors.nodeAdminConnector.NodeAdminConnector;
+import i5.las2peer.connectors.webConnector.WebConnector;
+import i5.las2peer.connectors.webConnector.util.KeystoreManager;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.PastryNodeImpl;
+import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.tools.L2pNodeLauncher;
-import i5.las2peer.tools.SimpleTools;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 
-@Path("/")
-public class DefaultHandler extends AbstractHandler {
+@Path(DefaultHandler.ROOT_RESOURCE_PATH)
+public class DefaultHandler {
 
-	public DefaultHandler(NodeAdminConnector connector) {
-		super(connector);
+	public static final String ROOT_RESOURCE_PATH = "/las2peer";
+
+	private final WebConnector connector;
+	private final Node node;
+
+	public DefaultHandler(WebConnector connector) {
+		this.connector = connector;
+		this.node = connector.getL2pNode();
 	}
 
 	@GET
@@ -46,26 +51,6 @@ public class DefaultHandler extends AbstractHandler {
 	@Produces(MediaType.TEXT_PLAIN)
 	public String getCoreVersion() {
 		return L2pNodeLauncher.getVersion();
-	}
-
-	@GET
-	@Path("/favicon.ico")
-	@Produces("image/x-icon")
-	public Response getFavicon() throws IOException {
-		byte[] bytes = null;
-		try {
-			FileInputStream fis = new FileInputStream("etc/favicon.ico");
-			bytes = SimpleTools.toByteArray(fis);
-			fis.close();
-		} catch (FileNotFoundException e) {
-			// use fallback from classpath
-			InputStream is = getClass().getResourceAsStream("/favicon.ico");
-			if (is != null) {
-				bytes = SimpleTools.toByteArray(is);
-				is.close();
-			}
-		}
-		return Response.ok(bytes, "image/x-icon").build();
 	}
 
 	@GET
@@ -92,10 +77,14 @@ public class DefaultHandler extends AbstractHandler {
 		JSONObject response = new JSONObject();
 		response.put("nodeid", node.getNodeId().toString());
 		response.put("cpuload", getCPULoad(node));
-		long localStorageSize = node.getLocalStorageSize();
+		long localStorageSize = -1;
+		long maxLocalStorageSize = -1;
+		if (node instanceof PastryNodeImpl) {
+			localStorageSize = ((PastryNodeImpl) node).getLocalStorageSize();
+			maxLocalStorageSize = ((PastryNodeImpl) node).getLocalMaxStorageSize();
+		}
 		response.put("storageSize", localStorageSize);
 		response.put("storageSizeStr", humanReadableByteCount(localStorageSize, true));
-		long maxLocalStorageSize = node.getLocalMaxStorageSize();
 		response.put("maxStorageSize", maxLocalStorageSize);
 		response.put("maxStorageSizeStr", humanReadableByteCount(maxLocalStorageSize, true));
 		response.put("uptime", getUptime(node));
@@ -119,7 +108,7 @@ public class DefaultHandler extends AbstractHandler {
 		return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
 	}
 
-	private String getUptime(PastryNodeImpl node) {
+	private String getUptime(Node node) {
 		Date startTime = node.getStartTime();
 		if (startTime == null) {
 			return "node stopped";
@@ -138,19 +127,26 @@ public class DefaultHandler extends AbstractHandler {
 		for (String serviceName : serviceNames) {
 			List<ServiceVersion> serviceVersions = node.getNodeServiceCache().getLocalServiceVersions(serviceName);
 			for (ServiceVersion version : serviceVersions) {
-				JSONObject json = new JSONObject();
-				json.put("name", serviceName);
-				json.put("version", version.toString());
-				// use host header, so browsers do not block subsequent ajax requests to an unknown host
-				json.put("swagger", "https://" + hostHeader + RMIHandler.RMI_PATH + "/" + serviceName + "/"
-						+ version.toString() + "/swagger.json");
-				result.add(json);
+				try {
+					ServiceAgentImpl localServiceAgent = node.getNodeServiceCache()
+							.getLocalService(new ServiceNameVersion(serviceName, version));
+					JSONObject json = new JSONObject();
+					json.put("name", serviceName);
+					json.put("version", version.toString());
+					// use host header, so browsers do not block subsequent ajax requests to an unknown host
+					String serviceAlias = localServiceAgent.getServiceInstance().getAlias();
+					json.put("swagger", "https://" + hostHeader + serviceAlias + "/swagger.json");
+					result.add(json);
+				} catch (Exception e) {
+					// XXX logging
+					e.printStackTrace();
+				}
 			}
 		}
 		return result;
 	}
 
-	private JSONArray getOtherNodes(PastryNodeImpl node) {
+	private JSONArray getOtherNodes(Node node) {
 		JSONArray result = new JSONArray();
 		for (Object other : node.getOtherKnownNodes()) {
 			result.add(other.toString());

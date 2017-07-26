@@ -1,4 +1,4 @@
-package i5.las2peer.connectors.nodeAdminConnector.handler;
+package i5.las2peer.connectors.webConnector.handler;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -19,9 +19,9 @@ import javax.ws.rs.core.Response.Status;
 
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentNotFoundException;
-import i5.las2peer.connectors.nodeAdminConnector.AgentSession;
-import i5.las2peer.connectors.nodeAdminConnector.NodeAdminConnector;
-import i5.las2peer.p2p.PastryNodeImpl;
+import i5.las2peer.connectors.webConnector.WebConnector;
+import i5.las2peer.connectors.webConnector.util.AgentSession;
+import i5.las2peer.p2p.Node;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.AnonymousAgentImpl;
 import i5.las2peer.security.PassphraseAgentImpl;
@@ -30,11 +30,17 @@ import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 
-@Path("/auth")
-public class AuthHandler extends AbstractHandler {
+@Path(AuthHandler.RESOURCE_PATH)
+public class AuthHandler {
 
-	public AuthHandler(NodeAdminConnector connector) {
-		super(connector);
+	public static final String RESOURCE_PATH = DefaultHandler.ROOT_RESOURCE_PATH + "/auth";
+
+	private final WebConnector connector;
+	private final Node node;
+
+	public AuthHandler(WebConnector connector) {
+		this.connector = connector;
+		this.node = connector.getL2pNode();
 	}
 
 	@GET
@@ -59,7 +65,7 @@ public class AuthHandler extends AbstractHandler {
 			}
 			PassphraseAgentImpl passphraseAgent = (PassphraseAgentImpl) agent;
 			passphraseAgent.unlock(password);
-			return registerAgentSession(node, passphraseAgent);
+			return registerAgentSession(passphraseAgent);
 		} catch (AgentNotFoundException e) {
 			throw new BadRequestException("Agent not found");
 		} catch (AgentAccessDeniedException e) {
@@ -137,14 +143,14 @@ public class AuthHandler extends AbstractHandler {
 			agent.setEmail(email);
 		}
 		node.storeAgent(agent);
-		return registerAgentSession(node, agent);
+		return registerAgentSession(agent);
 	}
 
-	private Response registerAgentSession(PastryNodeImpl node, PassphraseAgentImpl agent) throws Exception {
+	private Response registerAgentSession(PassphraseAgentImpl agent) throws Exception {
 		// register session, set cookie and send response
 		AgentSession session = connector.getOrCreateSession(agent);
-		NewCookie cookie = new NewCookie(NodeAdminConnector.COOKIE_SESSIONID_KEY, session.getSessionId(), "/", null, 1,
-				null, -1, null, true, true);
+		NewCookie cookie = new NewCookie(WebConnector.COOKIE_SESSIONID_KEY, session.getSessionId(), "/", null, 1, null,
+				-1, null, true, true);
 		JSONObject json = new JSONObject();
 		json.put("code", Status.OK.getStatusCode());
 		json.put("text", Status.OK.getStatusCode() + " - Login OK");
@@ -160,15 +166,14 @@ public class AuthHandler extends AbstractHandler {
 	@GET
 	@Path("/logout")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getLogout(@CookieParam(NodeAdminConnector.COOKIE_SESSIONID_KEY) String sessionId) throws Exception {
+	public Response getLogout(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId) throws Exception {
 		return handleLogout(sessionId);
 	}
 
 	@POST
 	@Path("/logout")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response postLogout(@CookieParam(NodeAdminConnector.COOKIE_SESSIONID_KEY) String sessionId)
-			throws Exception {
+	public Response postLogout(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId) throws Exception {
 		return handleLogout(sessionId);
 	}
 
@@ -183,7 +188,7 @@ public class AuthHandler extends AbstractHandler {
 	@GET
 	@Path("/validate")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getValidate(@CookieParam(NodeAdminConnector.COOKIE_SESSIONID_KEY) String sessionId) {
+	public Response getValidate(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId) {
 		AgentSession session = connector.getSessionById(sessionId);
 		if (session != null) {
 			AgentImpl activeAgent = session.getAgent();

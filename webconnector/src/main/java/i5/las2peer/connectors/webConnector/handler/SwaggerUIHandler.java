@@ -1,4 +1,4 @@
-package i5.las2peer.connectors.nodeAdminConnector.handler;
+package i5.las2peer.connectors.webConnector.handler;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,22 +12,19 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import i5.las2peer.connectors.nodeAdminConnector.NodeAdminConnector;
+import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.tools.SimpleTools;
 
 @Path(SwaggerUIHandler.RESOURCE_PATH)
-public class SwaggerUIHandler extends AbstractHandler {
+public class SwaggerUIHandler {
 
-	public static final String RESOURCE_NAME2 = "swagger-ui";
-	public static final String RESOURCE_PATH = "/" + RESOURCE_NAME2;
-	public static final String BASE_PATH = RESOURCE_NAME2 + "/";
+	private final L2pLogger logger = L2pLogger.getInstance(SwaggerUIHandler.class);
+
+	public static final String RESOURCE_PATH = DefaultHandler.ROOT_RESOURCE_PATH + "/swagger-ui";
+	public static final String BASE_PATH = RESOURCE_PATH + "/";
 
 	private static final String SWAGGER_UI_JAR_PREFIX = "/META-INF/resources/webjars/swagger-ui/2.2.10/";
-	private static final String INDEX_FILE = "/" + BASE_PATH + "index.html";
-
-	public SwaggerUIHandler(NodeAdminConnector connector) {
-		super(connector);
-	}
+	private static final String INDEX_FILE = RESOURCE_PATH + "/index.html";
 
 	@GET
 	public Response rootPath() throws IOException, URISyntaxException {

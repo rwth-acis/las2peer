@@ -1,4 +1,4 @@
-package i5.las2peer.connectors.nodeAdminConnector.handler;
+package i5.las2peer.connectors.webConnector.handler;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,19 +14,18 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import i5.las2peer.connectors.nodeAdminConnector.NodeAdminConnector;
+import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.tools.SimpleTools;
 
-@Path(WebappHandler.ROOT_ROUTE)
-public class WebappHandler extends AbstractHandler {
+@Path(WebappHandler.RESOURCE_PATH)
+public class WebappHandler {
 
-	public static final String ROOT_ROUTE = "/webapp";
-	public static final String DEFAULT_ROUTE = ROOT_ROUTE + "/view-status";
-	public static final String INDEX_PATH = ROOT_ROUTE + "/index.html";
+	public static final String RESOURCE_PATH = DefaultHandler.ROOT_RESOURCE_PATH + "/webapp";
+	public static final String DEFAULT_ROUTE = RESOURCE_PATH + "/view-status";
 
-	public WebappHandler(NodeAdminConnector connector) {
-		super(connector);
-	}
+	private static final String INDEX_PATH = RESOURCE_PATH + "/index.html";
+
+	private final L2pLogger logger = L2pLogger.getInstance(WebappHandler.class);
 
 	@GET
 	public Response rootPath(@HeaderParam("Host") String myHostname) throws IOException {
@@ -58,8 +57,8 @@ public class WebappHandler extends AbstractHandler {
 		}
 		byte[] bytes = SimpleTools.toByteArray(is);
 		String strContent = new String(bytes, StandardCharsets.UTF_8);
-		if (filename.equalsIgnoreCase(ROOT_ROUTE + "/index.html")) {
-			strContent = strContent.replace("<base href=\"/\">", "<base href=\"" + ROOT_ROUTE + "/\">");
+		if (filename.equalsIgnoreCase(RESOURCE_PATH + "/index.html")) {
+			strContent = strContent.replace("<base href=\"/\">", "<base href=\"" + RESOURCE_PATH + "/\">");
 			// just return host header, so browsers do not block subsequent ajax requests to an possible insecure host
 			strContent = strContent.replace("$connector_address$", myHostname);
 			return Response.ok(strContent).build();

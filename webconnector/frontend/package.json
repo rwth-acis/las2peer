@@ -1,6 +1,6 @@
 {
   "name": "las2peer-node-frontend",
-  "description": "A webapp frontend for a las2peer node based on the NodeAdminConnector",
+  "description": "A webapp frontend for a las2peer node",
   "license": "BSD-3-Clause",
   "devDependencies": {
     "eslint": "^3.19.0",

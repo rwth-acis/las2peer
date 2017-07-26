@@ -214,7 +214,24 @@
 	<target name="jars" depends="main_jar" />
 	<target name="junit_jars" depends="" />
 	
-	<target name="main_jar" depends="compile_main">		
+	<target name="build_frontend" description="--> build the polymer frontend with bower">
+		<echo message="Preparing bower and polymer-cli..." />
+		<exec executable="npm" dir="frontend" failonerror="true">
+			<arg value="update" />
+			<arg value="bower" />
+			<arg value="polymer-cli" />
+		</exec>
+		<echo message="Executing bower install..." />
+		<exec executable="node_modules/bower/bin/bower" dir="frontend" failonerror="true">
+			<arg value="install" />
+		</exec>
+		<echo message="Executing polymer build..." />
+		<exec executable="node_modules/polymer-cli/bin/polymer.js" dir="frontend" failonerror="true">
+			<arg value="build" />
+		</exec>
+	</target>
+	
+	<target name="main_jar" depends="compile_main, build_frontend">
 		<!-- constructs the external libraries classpath name -->
 		<pathconvert property="manifest.classpath" refid="classpath" pathsep=" ">
 			<mapper><chainedmapper><flattenmapper /></chainedmapper></mapper>
@@ -222,6 +239,7 @@
 		<jar jarfile="${export.jars}/${ant.project.name}-${ivy.las2peer.version}.jar">
 			<fileset dir="${tmp.classes}" />
 			<fileset file="resources/favicon.ico" />
+			<fileset dir="${basedir}/resources" />
 			<manifest>
 				<attribute name="Class-Path" value="${manifest.classpath}" />
 				<attribute name="Implementation-Version" value="${ivy.las2peer.version}" />

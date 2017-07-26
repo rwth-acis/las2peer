@@ -7,7 +7,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
@@ -31,13 +30,10 @@ public class TestService extends RESTService {
 			return "OK";
 		}
 
-		@SuppressWarnings("null")
 		@GET
 		@Path("/exception")
 		public String getException() {
-			// produce NullPointerException
-			String str = null;
-			return str.trim();
+			throw new NullPointerException();
 		}
 
 		@GET
@@ -70,7 +66,7 @@ public class TestService extends RESTService {
 
 		@GET
 		@Path("/encoding")
-		@Produces(MediaType.TEXT_PLAIN + ";charset=utf-8")
+		@Produces("text/plain;charset=utf-8")
 		public String getSmiley() {
 			return "☺";
 		}

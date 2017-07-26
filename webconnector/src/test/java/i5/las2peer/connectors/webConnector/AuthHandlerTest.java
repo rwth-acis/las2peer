@@ -1,4 +1,4 @@
-package i5.las2peer.connectors.nodeAdminConnector;
+package i5.las2peer.connectors.webConnector;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -15,6 +15,7 @@ import javax.ws.rs.core.Response.Status;
 import org.junit.Assert;
 import org.junit.Test;
 
+import i5.las2peer.connectors.webConnector.handler.AuthHandler;
 import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.testing.MockAgentFactory;
@@ -29,7 +30,7 @@ public class AuthHandlerTest extends AbstractTestHandler {
 		try {
 			JSONObject jsonBody = new JSONObject();
 			jsonBody.put("password", "topsecret");
-			WebTarget target = sslClient.target(connector.getHostname() + "/auth/create");
+			WebTarget target = webClient.target(connector.getHttpEndpoint() + AuthHandler.RESOURCE_PATH + "/create");
 			Response response = target.request().post(Entity.json(jsonBody.toJSONString()));
 			Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
 			Assert.assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
@@ -51,7 +52,7 @@ public class AuthHandlerTest extends AbstractTestHandler {
 			jsonBody.put("password", "topsecret");
 			jsonBody.put("username", "testuser");
 			jsonBody.put("email", "testuser@example.org");
-			WebTarget target = sslClient.target(connector.getHostname() + "/auth/create");
+			WebTarget target = webClient.target(connector.getHttpEndpoint() + AuthHandler.RESOURCE_PATH + "/create");
 			Response response = target.request().post(Entity.json(jsonBody.toJSONString()));
 			Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
 			Assert.assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
@@ -75,16 +76,17 @@ public class AuthHandlerTest extends AbstractTestHandler {
 			adam.unlock("adamspass");
 			PastryNodeImpl activeNode = nodes.get(0);
 			activeNode.storeAgent(adam);
-			WebTarget targetLogin = sslClient.target(connector.getHostname() + "/auth/login");
+			WebTarget targetLogin = webClient
+					.target(connector.getHttpEndpoint() + AuthHandler.RESOURCE_PATH + "/login");
 			Response responseLogin = targetLogin.request()
 					.header(HttpHeaders.AUTHORIZATION, "basic " + Base64.getEncoder()
 							.encodeToString((adam.getLoginName() + ":" + "adamspass").getBytes(StandardCharsets.UTF_8)))
 					.get();
 			Assert.assertEquals(Status.OK.getStatusCode(), responseLogin.getStatus());
-			NewCookie cookie = responseLogin.getCookies().get(NodeAdminConnector.COOKIE_SESSIONID_KEY);
+			NewCookie cookie = responseLogin.getCookies().get(WebConnector.COOKIE_SESSIONID_KEY);
 			Assert.assertNotNull(cookie);
 			Assert.assertEquals(-1, cookie.getMaxAge());
-			Assert.assertEquals(NodeAdminConnector.COOKIE_SESSIONID_KEY, cookie.getName());
+			Assert.assertEquals(WebConnector.COOKIE_SESSIONID_KEY, cookie.getName());
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail(e.toString());
@@ -99,17 +101,18 @@ public class AuthHandlerTest extends AbstractTestHandler {
 			adam.unlock("adamspass");
 			PastryNodeImpl activeNode = nodes.get(0);
 			activeNode.storeAgent(adam);
-			WebTarget targetLogin = sslClient.target(connector.getHostname() + "/auth/login");
+			WebTarget targetLogin = webClient
+					.target(connector.getHttpEndpoint() + AuthHandler.RESOURCE_PATH + "/login");
 			Response responseLogin = targetLogin.request()
 					.header(HttpHeaders.AUTHORIZATION, "basic " + Base64.getEncoder()
 							.encodeToString((adam.getLoginName() + ":" + "adamspass").getBytes(StandardCharsets.UTF_8)))
 					.get();
 			Assert.assertEquals(Status.OK.getStatusCode(), responseLogin.getStatus());
-			NewCookie cookie = responseLogin.getCookies().get(NodeAdminConnector.COOKIE_SESSIONID_KEY);
+			NewCookie cookie = responseLogin.getCookies().get(WebConnector.COOKIE_SESSIONID_KEY);
 			Assert.assertNotNull(cookie);
-			Assert.assertEquals(NodeAdminConnector.COOKIE_SESSIONID_KEY, cookie.getName());
+			Assert.assertEquals(WebConnector.COOKIE_SESSIONID_KEY, cookie.getName());
 			// start actual test
-			WebTarget target = sslClient.target(connector.getHostname() + "/auth/logout");
+			WebTarget target = webClient.target(connector.getHttpEndpoint() + AuthHandler.RESOURCE_PATH + "/logout");
 			Response response = target.request().cookie(cookie).get();
 			Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
 			Assert.assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
@@ -131,17 +134,18 @@ public class AuthHandlerTest extends AbstractTestHandler {
 			adam.unlock("adamspass");
 			PastryNodeImpl activeNode = nodes.get(0);
 			activeNode.storeAgent(adam);
-			WebTarget targetLogin = sslClient.target(connector.getHostname() + "/auth/login");
+			WebTarget targetLogin = webClient
+					.target(connector.getHttpEndpoint() + AuthHandler.RESOURCE_PATH + "/login");
 			Response responseLogin = targetLogin.request()
 					.header(HttpHeaders.AUTHORIZATION, "basic " + Base64.getEncoder()
 							.encodeToString((adam.getLoginName() + ":" + "adamspass").getBytes(StandardCharsets.UTF_8)))
 					.get();
 			Assert.assertEquals(Status.OK.getStatusCode(), responseLogin.getStatus());
-			NewCookie cookie = responseLogin.getCookies().get(NodeAdminConnector.COOKIE_SESSIONID_KEY);
+			NewCookie cookie = responseLogin.getCookies().get(WebConnector.COOKIE_SESSIONID_KEY);
 			Assert.assertNotNull(cookie);
-			Assert.assertEquals(NodeAdminConnector.COOKIE_SESSIONID_KEY, cookie.getName());
+			Assert.assertEquals(WebConnector.COOKIE_SESSIONID_KEY, cookie.getName());
 			// start actual test
-			WebTarget target = sslClient.target(connector.getHostname() + "/auth/validate");
+			WebTarget target = webClient.target(connector.getHttpEndpoint() + AuthHandler.RESOURCE_PATH + "/validate");
 			Response response = target.request().cookie(cookie).get();
 			Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
 			Assert.assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
@@ -159,10 +163,10 @@ public class AuthHandlerTest extends AbstractTestHandler {
 	@Test
 	public void testGetValidateWithoutLogin() {
 		try {
-			WebTarget target = sslClient.target(connector.getHostname() + "/auth/validate");
+			WebTarget target = webClient.target(connector.getHttpEndpoint() + AuthHandler.RESOURCE_PATH + "/validate");
 			// use some self baked cookie
-			NewCookie cookie = new NewCookie(NodeAdminConnector.COOKIE_SESSIONID_KEY, "12345678", "/", null, null, 0,
-					true, true);
+			NewCookie cookie = new NewCookie(WebConnector.COOKIE_SESSIONID_KEY, "12345678", "/", null, null, 0, true,
+					true);
 			Response response = target.request().cookie(cookie).get();
 			Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
 			Assert.assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());

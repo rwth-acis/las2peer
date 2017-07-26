@@ -32,11 +32,10 @@ Policy files for strong encryption can be downloaded via Oracle:
 
 ### Modules
 
-This repository contains four las2peer modules:
+This repository contains three las2peer modules:
 * Core (`/core`)
 * REST Mapper (`/restmapper`)
 * Web Connector (`/webconnector`)
-* Node Admin Connector (`/nodeadminconnector`)
 
 Each of them lays in its own subfolder, containing a build file providing the following tasks:
 * `ant` or `ant main_jar` will build the respective jar of the submodule. The jars will be stored in `/export/jars`.

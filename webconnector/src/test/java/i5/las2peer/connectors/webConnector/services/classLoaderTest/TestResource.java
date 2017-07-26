@@ -6,7 +6,6 @@ import javax.ws.rs.Path;
 @Path("test")
 public class TestResource {
 	@GET
-	@Path("/")
 	public String getOk() {
 		return "OK";
 	}

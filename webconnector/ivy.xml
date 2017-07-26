@@ -14,5 +14,8 @@
         <dependency org="i5" name="las2peer-rest-mapper" rev="${ivy.las2peer.version}" changing="true" />
 
         <dependency org="com.nimbusds" name="oauth2-oidc-sdk" rev="4.17" />
+        <dependency org="org.glassfish.jersey.containers" name="jersey-container-jdk-http" rev="2.25.1" />
+        <dependency org="net.minidev" name="json-smart" rev="2.3" />
+        <dependency org="org.webjars" name="swagger-ui" rev="2.2.10" />
     </dependencies>
 </ivy-module>

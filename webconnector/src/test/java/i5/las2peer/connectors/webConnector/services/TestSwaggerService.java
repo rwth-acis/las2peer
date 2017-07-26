@@ -1,15 +1,15 @@
 package i5.las2peer.connectors.webConnector.services;
 
-import i5.las2peer.restMapper.RESTService;
-import i5.las2peer.restMapper.annotations.ServicePath;
-import io.swagger.annotations.Api;
-
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
+import i5.las2peer.restMapper.RESTService;
+import i5.las2peer.restMapper.annotations.ServicePath;
+import io.swagger.annotations.Api;
 
 @ServicePath("swaggertest")
 public class TestSwaggerService extends RESTService {
@@ -23,8 +23,8 @@ public class TestSwaggerService extends RESTService {
 	@Api
 	@Path("/")
 	public static class RootResource {
+
 		@GET
-		@Path("/")
 		public String login() {
 			return "OK";
 		}
@@ -43,6 +43,7 @@ public class TestSwaggerService extends RESTService {
 		public SubResource getSubResource() {
 			return new SubResource("test");
 		}
+
 	}
 
 	public static class SubResource {
