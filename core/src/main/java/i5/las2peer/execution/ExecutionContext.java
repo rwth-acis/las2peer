@@ -42,7 +42,6 @@ import i5.las2peer.persistency.EnvelopeVersion;
 import i5.las2peer.security.AgentContext;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.GroupAgentImpl;
-import i5.las2peer.security.InternalSecurityException;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.serialization.SerializationException;
@@ -247,8 +246,6 @@ public class ExecutionContext implements Context {
 		} catch (AgentAlreadyExistsException | AgentLockedException | AgentAccessDeniedException
 				| AgentOperationFailedException e) {
 			throw e;
-		} catch (InternalSecurityException e) {
-			throw new AgentAccessDeniedException(e);
 		} catch (AgentException e) {
 			throw new AgentOperationFailedException(e);
 		}

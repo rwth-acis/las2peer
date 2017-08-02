@@ -1090,10 +1090,9 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * Stores a new Agent to the network.
 	 * 
 	 * @param agent
-	 * @throws InternalSecurityException
 	 * @throws AgentException If any issue with the agent occurs
 	 */
-	public abstract void storeAgent(AgentImpl agent) throws AgentException, InternalSecurityException;
+	public abstract void storeAgent(AgentImpl agent) throws AgentException;
 
 	/**
 	 * Updates an existing agent of the network.
