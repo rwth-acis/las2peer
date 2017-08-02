@@ -2,43 +2,43 @@
 <project name="build-common" default="all">
 
 	<target name="build-only" description="build-only">
-	    <ant dir="core" antfile="build.xml" target="deploy-local" />        
-		<ant dir="restmapper" antfile="build.xml" target="deploy-local" />  
-		<ant dir="webconnector" antfile="build.xml" target="deploy-local" />   
-		<ant dir="nodeadminconnector" antfile="build.xml" target="deploy-local" />  
-		<ant dir="bundle" antfile="build.xml" target="deploy-local" /> 
+		<ant dir="core" antfile="build.xml" target="deploy-local" />
+		<ant dir="restmapper" antfile="build.xml" target="deploy-local" />
+		<ant dir="webconnector" antfile="build.xml" target="deploy-local" />
+		<ant dir="nodeadminconnector" antfile="build.xml" target="deploy-local" />
+		<ant dir="bundle" antfile="build.xml" target="deploy-local" />
 	</target>
-	
+
 	<target name="all" depends="build-only" description="all">
-	    <ant dir="core" antfile="build.xml" target="all" />        
-		<ant dir="restmapper" antfile="build.xml" target="all" />  
-		<ant dir="webconnector" antfile="build.xml" target="all" />   
-		<ant dir="nodeadminconnector" antfile="build.xml" target="all" />  
-		<ant dir="bundle" antfile="build.xml" target="all" /> 
+		<ant dir="core" antfile="build.xml" target="all" />
+		<ant dir="restmapper" antfile="build.xml" target="all" />
+		<ant dir="webconnector" antfile="build.xml" target="all" />
+		<ant dir="nodeadminconnector" antfile="build.xml" target="all" />
+		<ant dir="bundle" antfile="build.xml" target="all" />
 	</target>
-	
+
 	<target name="deploy-snapshot" description="deploy snapshot to archiva">
-	    <ant dir="core" antfile="build.xml" target="deploy-snapshot" />        
-		<ant dir="restmapper" antfile="build.xml" target="deploy-snapshot" />  
-		<ant dir="webconnector" antfile="build.xml" target="deploy-snapshot" />   
-		<ant dir="nodeadminconnector" antfile="build.xml" target="deploy-snapshot" />  
-		<ant dir="bundle" antfile="build.xml" target="deploy-snapshot" /> 
+		<ant dir="core" antfile="build.xml" target="deploy-snapshot" />
+		<ant dir="restmapper" antfile="build.xml" target="deploy-snapshot" />
+		<ant dir="webconnector" antfile="build.xml" target="deploy-snapshot" />
+		<ant dir="nodeadminconnector" antfile="build.xml" target="deploy-snapshot" />
+		<ant dir="bundle" antfile="build.xml" target="deploy-snapshot" />
 	</target>
-	
+
 	<target name="deploy-release" description="deploy release to archiva">
-	    <ant dir="core" antfile="build.xml" target="deploy-release" />        
-		<ant dir="restmapper" antfile="build.xml" target="deploy-release" />  
-		<ant dir="webconnector" antfile="build.xml" target="deploy-release" />   
-		<ant dir="nodeadminconnector" antfile="build.xml" target="deploy-release" />  
-		<ant dir="bundle" antfile="build.xml" target="deploy-release" /> 
+		<ant dir="core" antfile="build.xml" target="deploy-release" />
+		<ant dir="restmapper" antfile="build.xml" target="deploy-release" />
+		<ant dir="webconnector" antfile="build.xml" target="deploy-release" />
+		<ant dir="nodeadminconnector" antfile="build.xml" target="deploy-release" />
+		<ant dir="bundle" antfile="build.xml" target="deploy-release" />
 	</target>
 
 	<target name="clean" description="clean all modules">
-	    <ant dir="core" antfile="build.xml" target="clean" />        
-		<ant dir="restmapper" antfile="build.xml" target="clean" />  
-		<ant dir="webconnector" antfile="build.xml" target="clean" />   
-		<ant dir="nodeadminconnector" antfile="build.xml" target="clean" />  
-		<ant dir="bundle" antfile="build.xml" target="clean" /> 
+		<ant dir="core" antfile="build.xml" target="clean" />
+		<ant dir="restmapper" antfile="build.xml" target="clean" />
+		<ant dir="webconnector" antfile="build.xml" target="clean" />
+		<ant dir="nodeadminconnector" antfile="build.xml" target="clean" />
+		<ant dir="bundle" antfile="build.xml" target="clean" />
 	</target>
-	
+
 </project>

@@ -253,7 +253,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 		this.classManager = classManager;
 
 		if (classManager == null) {
-			this.classManager = new ClassManager(new Repository[0], this.getClass().getClassLoader(), new DefaultPolicy());
+			this.classManager = new ClassManager(new Repository[0], this.getClass().getClassLoader(),
+					new DefaultPolicy());
 		}
 
 		nodeKeyPair = CryptoTools.generateKeyPair();
@@ -304,7 +305,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param service The service that should be monitored.
 	 */
 	public void setServiceMonitoring(ServiceAgentImpl service) {
-		observerNotice(MonitoringEvent.SERVICE_ADD_TO_MONITORING, this.getNodeId(), service.getIdentifier(), null, null,				service.getServiceNameVersion().toString());
+		observerNotice(MonitoringEvent.SERVICE_ADD_TO_MONITORING, this.getNodeId(), service.getIdentifier(), null, null,
+				service.getServiceNameVersion().toString());
 	}
 
 	/**

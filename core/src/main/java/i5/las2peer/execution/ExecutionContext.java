@@ -195,8 +195,7 @@ public class ExecutionContext implements Context {
 				try {
 					agent.unlock(a);
 					break;
-				}
-				catch (AgentAccessDeniedException | AgentLockedException | AgentOperationFailedException e) {
+				} catch (AgentAccessDeniedException | AgentLockedException | AgentOperationFailedException e) {
 				}
 			}
 			if (agent.isLocked()) {
@@ -331,7 +330,7 @@ public class ExecutionContext implements Context {
 			throw new EnvelopeOperationFailedException("Anonymous agent must not be used to persist data");
 		}
 		// TODO collision handler
-		
+
 		// create reader set
 		EnvelopeImpl envelope = (EnvelopeImpl) env;
 		HashSet<Object> keys = new HashSet<>();
@@ -345,8 +344,7 @@ public class ExecutionContext implements Context {
 					keys.add(a);
 				}
 			}
-		}
-		else if (!envelope.getRevokeAllReaders()) {
+		} else if (!envelope.getRevokeAllReaders()) {
 			for (AgentImpl a : envelope.getReaderToAdd()) {
 				keys.add(a);
 			}
@@ -400,14 +398,16 @@ public class ExecutionContext implements Context {
 	}
 
 	@Override
-	public Envelope createEnvelope(String identifier, Agent using) throws EnvelopeOperationFailedException, EnvelopeAccessDeniedException {
+	public Envelope createEnvelope(String identifier, Agent using)
+			throws EnvelopeOperationFailedException, EnvelopeAccessDeniedException {
 		EnvelopeImpl envelope = new EnvelopeImpl(identifier, (AgentImpl) using);
 		envelope.addReader(using);
 		return envelope;
 	}
 
 	@Override
-	public Envelope createEnvelope(String identifier) throws EnvelopeOperationFailedException, EnvelopeAccessDeniedException {
+	public Envelope createEnvelope(String identifier)
+			throws EnvelopeOperationFailedException, EnvelopeAccessDeniedException {
 		return createEnvelope(identifier, callerContext.getMainAgent());
 	}
 
