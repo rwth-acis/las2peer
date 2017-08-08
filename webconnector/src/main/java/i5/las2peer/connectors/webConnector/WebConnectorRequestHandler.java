@@ -71,7 +71,6 @@ import i5.las2peer.security.AnonymousAgentImpl;
 import i5.las2peer.security.Mediator;
 import i5.las2peer.security.PassphraseAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
-import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
 import i5.las2peer.tools.SimpleTools;
 import io.swagger.models.Operation;
@@ -301,20 +300,13 @@ public class WebConnectorRequestHandler {
 
 		String sub = (String) ujson.get("sub");
 
-		String oidcAgentId;
-		try {
-			oidcAgentId = SimpleTools.byteToHexString(CryptoTools.getSecureHash(sub.getBytes()));
-		} catch (CryptoException e) {
-			connector.logError("Could not derive agent id from oidc sub", e);
-			throw new NotAuthorizedException(e.toString(), e);
-		}
 		// TODO choose other scheme for generating agent password
 		String password = sub;
 
-		this.connector.getLockOidc().lock(oidcAgentId + "");
-
 		try {
+			String oidcAgentId = l2pNode.getUserManager().getAgentIdByOIDCSub(sub);
 			try {
+				this.connector.getLockOidc().lock(oidcAgentId);
 				PassphraseAgentImpl pa = (PassphraseAgentImpl) l2pNode.getAgent(oidcAgentId);
 				pa.unlock(password);
 				if (pa instanceof UserAgentImpl) {
@@ -325,32 +317,35 @@ public class WebConnectorRequestHandler {
 				} else {
 					return pa;
 				}
-			} catch (AgentAccessDeniedException e) {
-				connector.logError("Authentication failed!", e);
-				throw new NotAuthorizedException(e.toString(), e);
-			} catch (AgentNotFoundException e) {
-				UserAgentImpl oidcAgent;
+			} finally {
+				this.connector.getLockOidc().unlock(oidcAgentId);
+			}
+		} catch (AgentAccessDeniedException e) {
+			connector.logError("Authentication failed!", e);
+			throw new NotAuthorizedException(e.toString(), e);
+		} catch (AgentNotFoundException e) {
+			try {
+				UserAgentImpl oidcAgent = UserAgentImpl.createUserAgent(password);
+				String oidcAgentId = oidcAgent.getIdentifier();
 				try {
-					oidcAgent = UserAgentImpl.createUserAgent(password);
+					this.connector.getLockOidc().lock(oidcAgentId);
 					oidcAgent.unlock(password);
-
 					oidcAgent.setEmail((String) ujson.get("email"));
 					oidcAgent.setLoginName((String) ujson.get("preferred_username"));
 					// TODO provide OIDC user data for agent
 					// oidcAgent.setUserData(ujson.toJSONString());
-
 					l2pNode.storeAgent(oidcAgent);
 					l2pNode.getUserManager().registerOIDCSub(oidcAgent, sub);
 					return oidcAgent;
-				} catch (Exception e1) {
-					throw new InternalServerErrorException("OIDC agent creation failed", e1);
+				} finally {
+					this.connector.getLockOidc().unlock(oidcAgentId);
 				}
-			} catch (AgentException e) {
-				connector.logError("Could not retrieve and unlock agent from network", e);
-				throw new NotAuthorizedException(e.toString(), e);
+			} catch (Exception e1) {
+				throw new InternalServerErrorException("OIDC agent creation failed", e1);
 			}
-		} finally {
-			this.connector.getLockOidc().unlock(oidcAgentId + "");
+		} catch (AgentException e) {
+			connector.logError("Could not retrieve and unlock agent from network", e);
+			throw new NotAuthorizedException(e.toString(), e);
 		}
 	}
 
