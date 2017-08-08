@@ -196,9 +196,9 @@ public class WebConnector extends Connector {
 			throw new IllegalStateException("change of port only before startup!");
 		}
 		if (port == null || port < 1) {
-			httpsPort = SimpleTools.getSystemDefinedPort();
+			httpPort = SimpleTools.getSystemDefinedPort();
 		} else {
-			httpsPort = port;
+			httpPort = port;
 		}
 	}
 
@@ -452,7 +452,7 @@ public class WebConnector extends Connector {
 	}
 
 	public String getHttpEndpoint() {
-		return "http://" + getMyHostname() + ":" + httpsPort;
+		return "http://" + getMyHostname() + ":" + httpPort;
 	}
 
 	@Override
