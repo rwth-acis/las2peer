@@ -135,7 +135,7 @@ public class DefaultHandler {
 					json.put("version", version.toString());
 					// use host header, so browsers do not block subsequent ajax requests to an unknown host
 					String serviceAlias = localServiceAgent.getServiceInstance().getAlias();
-					json.put("swagger", "https://" + hostHeader + serviceAlias + "/swagger.json");
+					json.put("swagger", "https://" + hostHeader + "/" + serviceAlias + "/swagger.json");
 					result.add(json);
 				} catch (Exception e) {
 					// XXX logging
