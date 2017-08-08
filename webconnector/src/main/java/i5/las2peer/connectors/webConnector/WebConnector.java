@@ -104,6 +104,10 @@ public class WebConnector extends Connector {
 		oidcProviders.add(DEFAULT_DEFAULT_OIDC_PROVIDER);
 	}
 
+	protected String oidcClientId;
+
+	protected String oidcClientSecret;
+
 	public static final int DEFAULT_MAX_CONNECTIONS = 500;
 	protected int maxConnections = DEFAULT_MAX_CONNECTIONS;
 
@@ -365,7 +369,7 @@ public class WebConnector extends Connector {
 			config.register(new AuthHandler(this));
 			config.register(new ServicesHandler(this));
 			config.register(new AgentsHandler(this));
-			config.register(new SwaggerUIHandler());
+			config.register(new SwaggerUIHandler(this));
 			if (startHttp) {
 				startHttpServer(config);
 			}
@@ -564,6 +568,14 @@ public class WebConnector extends Connector {
 		}
 
 		return result;
+	}
+
+	public String getOidcClientId() {
+		return oidcClientId;
+	}
+
+	public String getOidcClientSecret() {
+		return oidcClientSecret;
 	}
 
 	public int getHttpPort() {
