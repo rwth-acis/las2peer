@@ -386,7 +386,7 @@ public class WebConnectorRequestHandler {
 	private Response resolveServiceAndInvoke(Mediator mediator, ArrayList<String> pathSplit, String requestMethod,
 			UriInfo uriInfo, InputStream requestBody, MultivaluedMap<String, String> requestHeaders)
 			throws URISyntaxException {
-		String requestPath = String.join("/", pathSplit);
+		String requestPath = "/" + String.join("/", pathSplit);
 		// resolve service name
 		String serviceName;
 		int serviceAliasLength;
@@ -413,7 +413,7 @@ public class WebConnectorRequestHandler {
 		// required service
 		ServiceNameVersion requiredService = new ServiceNameVersion(serviceName, serviceVersion);
 		// construct base path
-		String basePath = "";
+		String basePath = "/";
 		for (int i = 0; i < serviceAliasLength; i++) {
 			basePath += pathSplit.get(i) + "/";
 		}
@@ -484,7 +484,8 @@ public class WebConnectorRequestHandler {
 			String requestMethod, UriInfo uriInfo, InputStream requestBody,
 			MultivaluedMap<String, String> requestHeaders) throws URISyntaxException {
 		// URIs
-		URI baseUri = new URI(uriInfo.getBaseUri().toString() + basePath);
+		String baseUriStr = uriInfo.getBaseUri().toString();
+		URI baseUri = new URI(baseUriStr.substring(0, baseUriStr.length() - 1) + basePath);
 		URI requestUri = uriInfo.getRequestUri();
 		UriBuilder cleanRequestUriBuilder = UriBuilder.fromUri(requestUri);
 		if (!requestUri.getPath().endsWith("/")) { // make sure URI ends with "/"
