@@ -13,9 +13,12 @@ import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+
+import org.glassfish.jersey.media.multipart.ContentDisposition;
 
 import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.p2p.ServiceVersion;
@@ -54,14 +57,17 @@ public class DefaultHandler {
 	}
 
 	@GET
-	@Path("/cacert.pem")
+	@Path("/cacert")
 	public Response getCACert() throws IOException {
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			OutputStreamWriter osw = new OutputStreamWriter(baos);
 			KeystoreManager.writeCertificateToPEMStream(connector.getCACertificate(), osw);
 			osw.close();
-			return Response.ok(baos.toByteArray(), "application/x-pem-file").build();
+			return Response.ok(baos.toByteArray(), "application/x-pem-file")
+					.header(HttpHeaders.CONTENT_DISPOSITION,
+							ContentDisposition.type("attachment").fileName(connector.getRootCAFilename()).build())
+					.build();
 		} catch (FileNotFoundException e) {
 			return Response.status(Status.NOT_FOUND).build();
 		} catch (Exception e) {

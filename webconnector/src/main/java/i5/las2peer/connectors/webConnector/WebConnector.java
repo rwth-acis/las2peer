@@ -423,7 +423,7 @@ public class WebConnector extends Connector {
 		caCert = (X509Certificate) keystore.getCertificate(myHostname + " Root CA");
 		cert = (X509Certificate) keystore.getCertificate(myHostname);
 		// export CA certificate to file, overwrite existing
-		KeystoreManager.writeCertificateToPEMFile(caCert, KEYSTORE_DIRECTORY + myHostname + " Root CA.pem");
+		KeystoreManager.writeCertificateToPEMFile(caCert, KEYSTORE_DIRECTORY + getRootCAFilename());
 		KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
 		kmf.init(keystore, keystoreSecret);
 		SSLContext sslContext = SSLContext.getInstance(SSL_INSTANCE_NAME);
@@ -433,6 +433,10 @@ public class WebConnector extends Connector {
 		https.setExecutor(Executors.newFixedThreadPool(maxThreads));
 		https.start();
 		logMessage("Web-Connector in HTTPS mode running at " + getHttpsEndpoint());
+	}
+
+	public String getRootCAFilename() {
+		return getMyHostname() + "-RootCA.pem";
 	}
 
 	public String getMyHostname() {
