@@ -78,11 +78,11 @@ public class WebConnector extends Connector {
 
 	private static final String KEYSTORE_DIRECTORY = "etc/";
 
-	public static final String DEFAULT_SSL_KEYSTORE = "keys/ssl";
-	protected String sslKeystore = DEFAULT_SSL_KEYSTORE;
+	// default: sslKeystore = "etc/WebConnector-{{hostname}}.jks"
+	protected String sslKeystore;
 
-	public static final String DEFAULT_SSL_KEY_PASSWORD = "123456";
-	protected String sslKeyPassword = DEFAULT_SSL_KEY_PASSWORD;
+	// default: stored and generated in file "etc/WebConnector-{{hostname}}.secret"
+	protected String sslKeyPassword;
 
 	public static final String DEFAULT_CROSS_ORIGIN_RESOURCE_DOMAIN = "*";
 	protected String crossOriginResourceDomain = DEFAULT_CROSS_ORIGIN_RESOURCE_DOMAIN;
@@ -141,7 +141,6 @@ public class WebConnector extends Connector {
 
 	private X509Certificate caCert;
 	private X509Certificate cert;
-	private boolean persistentKeystore;
 	private final HashMap<String, String> agentIdToSessionId;
 	private final HashMap<String, AgentSession> sessions;
 	private final SecureRandom secureRandom;
@@ -412,22 +411,19 @@ public class WebConnector extends Connector {
 	private void startHttpsServer(ResourceConfig config) throws Exception {
 		String myHostname = getMyHostname();
 		char[] keystoreSecret;
-		if (persistentKeystore) {
-			keystoreSecret = getOrCreateSecretFromFile("keystore password",
-					KEYSTORE_DIRECTORY + WebConnector.class.getSimpleName() + "-" + myHostname + ".secret")
-							.toCharArray();
-		} else {
-			keystoreSecret = generateToken().toCharArray();
+		if (sslKeyPassword == null) {
+			sslKeyPassword = getOrCreateSecretFromFile("keystore password",
+					KEYSTORE_DIRECTORY + WebConnector.class.getSimpleName() + "-" + myHostname + ".secret");
 		}
-		KeyStore keystore = KeystoreManager.loadOrCreateKeystore(
-				KEYSTORE_DIRECTORY + WebConnector.class.getSimpleName() + "-", myHostname, keystoreSecret,
-				persistentKeystore);
-		caCert = (X509Certificate) keystore.getCertificate(WebConnector.class.getSimpleName() + " Root CA");
-		cert = (X509Certificate) keystore.getCertificate(WebConnector.class.getSimpleName());
-		if (persistentKeystore) {
-			// export CA certificate to file, overwrite existing
-			KeystoreManager.writeCertificateToPEMFile(caCert, KEYSTORE_DIRECTORY + myHostname + " Root CA.pem");
+		keystoreSecret = sslKeyPassword.toCharArray();
+		if (sslKeystore == null) {
+			sslKeystore = KEYSTORE_DIRECTORY + WebConnector.class.getSimpleName() + "-" + myHostname + ".jks";
 		}
+		KeyStore keystore = KeystoreManager.loadOrCreateKeystore(sslKeystore, myHostname, keystoreSecret);
+		caCert = (X509Certificate) keystore.getCertificate(myHostname + " Root CA");
+		cert = (X509Certificate) keystore.getCertificate(myHostname);
+		// export CA certificate to file, overwrite existing
+		KeystoreManager.writeCertificateToPEMFile(caCert, KEYSTORE_DIRECTORY + myHostname + " Root CA.pem");
 		KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
 		kmf.init(keystore, keystoreSecret);
 		SSLContext sslContext = SSLContext.getInstance(SSL_INSTANCE_NAME);
