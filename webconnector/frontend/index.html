@@ -17,11 +17,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <title>las2peer webapp</title>
     <meta name="description" content="A generic webapp frontend for las2peer nodes.">
 
-    <!--
-      If deploying to a non-root path, replace href="/" with the full path to the project root.
-      For example: href="/polymer-starter-kit/relative-path-example/"
-    -->
-    <base href="/">
+    <base href="/las2peer/webapp/">
 
     <link rel="icon" href="images/favicon.ico">
 
@@ -82,8 +78,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </style>
   </head>
   <body>
-    <!-- replace '$connector_address$' with your connectors address and port for testing, like: 127.0.0.1:12345 -->
-    <las2peer-webapp las2peer-connector-endpoint="https://$connector_address$"></las2peer-webapp>
+    <las2peer-webapp></las2peer-webapp>
     <noscript>
       Please enable JavaScript to view this website.
     </noscript>

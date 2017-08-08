@@ -13,56 +13,56 @@
   <template>
     <iron-ajax id="ajaxCreateAgent"
                method="POST"
-               url="/agents/createAgent"
+               url="/las2peer/agents/createAgent"
                handle-as="json"
                on-response="_handleCreateAgentResponse"
                on-error="_handleError"
                loading = "{{_working}}"></iron-ajax>
     <iron-ajax id="ajaxExportAgent"
                method="POST"
-               url="/agents/exportAgent"
+               url="/las2peer/agents/exportAgent"
                handle-as="text"
                on-response="_handleExportAgentResponse"
                on-error="_handleError"
                loading = "{{_working}}"></iron-ajax>
     <iron-ajax id="ajaxUploadAgent"
                method="POST"
-               url="/agents/uploadAgent"
+               url="/las2peer/agents/uploadAgent"
                handle-as="json"
                on-response="_handleUploadAgentResponse"
                on-error="_handleError"
                loading = "{{_working}}"></iron-ajax>
     <iron-ajax id="ajaxChangePassphrase"
                method="POST"
-               url="/agents/changePassphrase"
+               url="/las2peer/agents/changePassphrase"
                handle-as="json"
                on-response="_handleChangePassphraseResponse"
                on-error="_handleError"
                loading = "{{_working}}"></iron-ajax>
     <iron-ajax id="ajaxAddMember"
                method="POST"
-               url="/agents/getAgent"
+               url="/las2peer/agents/getAgent"
                handle-as="json"
                on-response="_handleAddMemberResponse"
                on-error="_handleError"
                loading = "{{_working}}"></iron-ajax>
     <iron-ajax id="ajaxCreateGroup"
                method="POST"
-               url="/agents/createGroup"
+               url="/las2peer/agents/createGroup"
                handle-as="json"
                on-response="_handleCreateGroupResponse"
                on-error="_handleError"
                loading = "{{_working}}"></iron-ajax>
     <iron-ajax id="ajaxLoadGroup"
                method="POST"
-               url="/agents/loadGroup"
+               url="/las2peer/agents/loadGroup"
                handle-as="json"
                on-response="_handleLoadGroupResponse"
                on-error="_handleError"
                loading = "{{_working}}"></iron-ajax>
     <iron-ajax id="ajaxChangeGroup"
                method="POST"
-               url="/agents/changeGroup"
+               url="/las2peer/agents/changeGroup"
                handle-as="json"
                on-response="_handleChangeGroupResponse"
                on-error="_handleError"
@@ -164,7 +164,18 @@
   <script>
     class AgentsView extends Polymer.Element {
       static get is() { return 'agents-view'; }
-      static get properties() { return { agentid: String, error: { type: Object, notify: true }, _working: Boolean, _memberAgents: { type: Array, value: [] }, _hasNoMemberAgents: { type: Boolean, value: true }, _manageAgents: { type: Array, value: [] }, _hasNoManageAgents: { type: Boolean, value: true }, _manageGroupAgentId: String } }
+      static get properties() {
+        return {
+          agentid: String,
+          error: { type: Object, notify: true },
+          _working: Boolean,
+          _memberAgents: { type: Array, value: [] },
+          _hasNoMemberAgents: { type: Boolean, value: true },
+          _manageAgents: { type: Array, value: [] },
+          _hasNoManageAgents: { type: Boolean, value: true },
+          _manageGroupAgentId: String
+        };
+      }
 
       toggleCreateAgent() { this.$.collapseCreateAgent.toggle(); }
 

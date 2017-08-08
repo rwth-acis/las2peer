@@ -7,7 +7,7 @@
 <dom-module id="status-view">
   <template>
     <iron-ajax id="ajaxStatus"
-               url="[[las2peerConnectorEndpoint]]/status"
+               url="/las2peer/status"
                handle-as="json"
                on-response="_handleStatusResponse"
                on-error="_handleError"
@@ -39,19 +39,36 @@
           <tr>
             <td><b style="color: #0A0">[[item.name]]</b></td>
             <td>[[item.version]]</td>
-            <td style="width: 1%; white-space: nowrap"><a href="/swagger-ui/index.html?url=[[item.swagger]]" tabindex="-1"><paper-button raised title="Show Swagger API Doc" style="background-color: #89bf04"><iron-icon src="/swagger-ui/images/logo_small.png"></iron-icon></paper-button></a></td>
+            <td style="width: 1%; white-space: nowrap"><a href="/las2peer/swagger-ui/index.html?url=[[item.swagger]]" tabindex="-1"><paper-button raised title="Show Swagger API Doc" style="background-color: #89bf04"><iron-icon src="/swagger-ui/images/logo_small.png"></iron-icon></paper-button></a></td>
           </tr>
         </template>
       </table>
 
       <h2>Secure Node SSL Encryption</h2>
-      <p>If you trust this node, it's recommended to import the nodes certificate authority into your browsers trust store. You can download the certificate authority file <a href="/cacert.pem">here</a></p>
+      <p>If you trust this node, it's recommended to import the nodes certificate authority into your browsers trust store. You can download the certificate authority file <a href="/las2peer/cacert.pem">here</a></p>
     </div>
   </template>
   <script>
     class StatusView extends Polymer.Element {
       static get is() { return 'status-view'; }
-      static get properties() { return { las2peerConnectorEndpoint: String, sessionid: String, error: { type: Object, notify: true }, _status: { type: Object, value: { nodeid: "...", cpuload: "...", storageSize: 0, maxStorageSize: 1, storageSizeStr: "...", maxStorageSizeStr: "...", uptime: "...", publicKey: "..." } } } }
+      static get properties() {
+        return {
+          agentid: String,
+          error: { type: Object, notify: true },
+          _status: {
+            type: Object,
+            value: {
+              nodeid: "...", 
+              cpuload: "...",
+              storageSize: 0,
+              maxStorageSize: 1,
+              storageSizeStr: "...",
+              maxStorageSizeStr: "...",
+              uptime: "..."
+            }
+          }
+        };
+      }
 
       ready() {
         super.ready();

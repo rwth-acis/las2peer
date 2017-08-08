@@ -11,14 +11,14 @@
 <dom-module id="services-view">
   <template>
     <iron-ajax id="ajaxServicesSearch"
-               url="/services/search"
+               url="/las2peer/services/search"
                handle-as="json"
                on-response="_handleSearchResponse"
                on-error="_handleError"
                loading = "{{_submittingSearch}}"></iron-ajax>
     <iron-ajax id="ajaxUploadService"
                method="POST"
-               url="/services/upload"
+               url="/las2peer/services/upload"
                handle-as="json"
                on-response="_handleUploadServiceResponse"
                on-error="_handleError"
@@ -64,7 +64,15 @@
   <script>
     class ServicesView extends Polymer.Element {
       static get is() { return 'services-view'; }
-      static get properties() { return { agentid: String, error: { type: Object, notify: true }, _services: { type: Object }, _submittingSearch: { type: Boolean }, _submittingUpload: { type: Boolean } } }
+      static get properties() {
+        return {
+          agentid: String,
+          error: { type: Object, notify: true },
+          _services: { type: Object },
+          _submittingSearch: { type: Boolean },
+          _submittingUpload: { type: Boolean }
+        };
+      }
 
       _keyPressedSearchService(event) {
         if (event.which == 13 || event.keyCode == 13) {

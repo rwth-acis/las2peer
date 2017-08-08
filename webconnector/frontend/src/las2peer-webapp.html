@@ -32,27 +32,27 @@ Copyright (c) 2017 Advanced Community Information Systems (ACIS) Group, Chair of
 <dom-module id="las2peer-webapp">
   <template>
     <iron-ajax id="ajaxLoginUseridPassword"
-               url="/auth/login"
+               url="/las2peer/auth/login"
                handle-as="json"
                on-response="_handleLoginResponse"
                on-error="_handleError"
                loading="{{_submittingLogin}}"></iron-ajax>
     <iron-ajax id="ajaxCreateAgent"
                method="POST"
-               url="/auth/create"
+               url="/las2peer/auth/create"
                handle-as="json"
                on-response="_handleLoginResponse"
                on-error="_handleError"
                loading="{{_submittingLogin}}"></iron-ajax>
     <iron-ajax id="ajaxDestroySession"
                method="POST"
-               url="/auth/logout"
+               url="/las2peer/auth/logout"
                handle-as="json"
                on-response="_handleLogoutResponse"
                on-error="_handleError"
                loading="{{_submittingLogout}}"></iron-ajax>
     <iron-ajax id="ajaxValidateSession"
-               url="/auth/validate"
+               url="/las2peer/auth/validate"
                handle-as="json"
                on-response="_handleValidateResponse"
                on-error="_handleError"
@@ -96,7 +96,7 @@ Copyright (c) 2017 Advanced Community Information Systems (ACIS) Group, Chair of
       }
     </style>
 
-    <app-location route="{{route}}" url-space-regex="^/webapp/"></app-location>
+    <app-location route="{{route}}" url-space-regex="^/las2peer/webapp/"></app-location>
     <app-route
         route="{{route}}"
         pattern="[[rootPattern]]:page"
@@ -113,7 +113,6 @@ Copyright (c) 2017 Advanced Community Information Systems (ACIS) Group, Chair of
       <template is="dom-if" if="[[_submittingLogin]]">
         <paper-spinner style="left: 38%; position: absolute; z-index: 10" active="[[_submittingLogin]]"></paper-spinner>
       </template>
-      <div><paper-button raised disabled="[[_submittingLogin]]"><iron-icon src="https://assets-cdn.github.com/images/modules/logos_page/GitHub-Mark.png"></iron-icon> Login with GitHub</paper-button></div>
       <div><paper-button raised disabled="[[_submittingLogin]]"><iron-icon src="https://api.learning-layers.eu//logo.png"></iron-icon> Login with Learning Layers</paper-button></div>
       <div><paper-button raised disabled="[[_submittingLogin]]" on-tap="createNewAgent"><iron-icon icon="add-circle-outline"></iron-icon> Generate new Agent</paper-button></div>
     </paper-dialog>

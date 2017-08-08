@@ -43,7 +43,13 @@ Copyright (c) 2017 Advanced Community Information Systems (ACIS) Group, Chair of
   <script>
     class WidgetsView extends Polymer.Element {
       static get is() { return 'widgets-view'; }
-      static get properties() { return { agentid: String, error: { type: Object, notify: true }, _loadingWidget: { type: Boolean, value: false } } }
+      static get properties() {
+        return {
+          agentid: String,
+          error: { type: Object, notify: true },
+          _loadingWidget: { type: Boolean, value: false }
+        };
+      }
 
       openAddWidgetDialog() {
         this.$.idAddWidgetDialog.open();
