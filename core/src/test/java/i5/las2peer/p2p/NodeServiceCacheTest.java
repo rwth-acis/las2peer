@@ -5,103 +5,108 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.util.ArrayList;
-
 import org.junit.Assert;
 import org.junit.Test;
 
 import i5.las2peer.api.p2p.ServiceNameVersion;
-import i5.las2peer.api.security.AgentAccessDeniedException;
-import i5.las2peer.api.security.AgentException;
 import i5.las2peer.p2p.NodeServiceCache.ServiceInstance;
-import i5.las2peer.security.InternalSecurityException;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.testing.MockAgentFactory;
-import i5.las2peer.testing.TestSuite;
-import i5.las2peer.tools.CryptoException;
 
 public class NodeServiceCacheTest {
 
 	@Test
-	public void testLocalServices() throws CryptoException, AgentException, AgentNotRegisteredException {
-		Node node = new LocalNodeManager().launchNode();
-
-		NodeServiceCache cache = new NodeServiceCache(node, 0, 0);
-
-		ServiceNameVersion service1 = ServiceNameVersion.fromString("test.service@1.0.5-12");
-		ServiceAgentImpl agent1 = ServiceAgentImpl.createServiceAgent(service1, "test");
-
-		ServiceNameVersion service2 = ServiceNameVersion.fromString("test.service@2");
-		ServiceAgentImpl agent2 = ServiceAgentImpl.createServiceAgent(service2, "test");
-
-		ServiceNameVersion service3 = ServiceNameVersion.fromString("test.service3@1.0");
-		ServiceAgentImpl agent3 = ServiceAgentImpl.createServiceAgent(service3, "test");
-
-		cache.registerLocalService(agent1);
-		cache.registerLocalService(agent2);
-		cache.registerLocalService(agent3);
-
-		assertSame(agent1, cache.getServiceAgentInstance(service1, true, true, null).getServiceAgent());
-		assertSame(agent2, cache.getServiceAgentInstance(service2, true, true, null).getServiceAgent());
-		assertSame(agent3, cache.getServiceAgentInstance(service3, true, true, null).getServiceAgent());
-
-		assertEquals(service1.getName(),
-				cache.getServiceAgentInstance(ServiceNameVersion.fromString(service1.getName()), false, true, null)
-						.getService().getName());
-		assertEquals(service3.getName(),
-				cache.getServiceAgentInstance(ServiceNameVersion.fromString(service3.getName()), false, true, null)
-						.getService().getName());
-
-		assertSame(agent1, cache.getLocalService(service1));
-		assertSame(agent2, cache.getLocalService(service2));
-		assertSame(agent3, cache.getLocalService(service3));
-
-		cache.unregisterLocalService(agent1);
-		assertEquals(service1.getName(),
-				cache.getServiceAgentInstance(ServiceNameVersion.fromString(service1.getName()), false, true, null)
-						.getService().getName());
-
-		cache.unregisterLocalService(agent2);
-		cache.unregisterLocalService(agent3);
-
+	public void testLocalServices() {
 		try {
-			cache.getServiceAgentInstance(ServiceNameVersion.fromString(service1.getName()), false, true, null);
-			fail("AgentNotRegisteredException expected");
-		} catch (AgentNotRegisteredException e) {
-		}
+			Node node = new LocalNodeManager().launchNode();
 
-		try {
-			cache.getServiceAgentInstance(ServiceNameVersion.fromString(service3.getName()), false, true, null);
-			fail("AgentNotRegisteredException expected");
-		} catch (AgentNotRegisteredException e) {
+			NodeServiceCache cache = new NodeServiceCache(node, 0, 0);
+
+			ServiceNameVersion service1 = ServiceNameVersion.fromString("test.service@1.0.5-12");
+			ServiceAgentImpl agent1 = ServiceAgentImpl.createServiceAgent(service1, "test");
+
+			ServiceNameVersion service2 = ServiceNameVersion.fromString("test.service@2");
+			ServiceAgentImpl agent2 = ServiceAgentImpl.createServiceAgent(service2, "test");
+
+			ServiceNameVersion service3 = ServiceNameVersion.fromString("test.service3@1.0");
+			ServiceAgentImpl agent3 = ServiceAgentImpl.createServiceAgent(service3, "test");
+
+			cache.registerLocalService(agent1);
+			cache.registerLocalService(agent2);
+			cache.registerLocalService(agent3);
+
+			assertSame(agent1, cache.getServiceAgentInstance(service1, true, true, null).getServiceAgent());
+			assertSame(agent2, cache.getServiceAgentInstance(service2, true, true, null).getServiceAgent());
+			assertSame(agent3, cache.getServiceAgentInstance(service3, true, true, null).getServiceAgent());
+
+			assertEquals(service1.getName(),
+					cache.getServiceAgentInstance(ServiceNameVersion.fromString(service1.getName()), false, true, null)
+							.getService().getName());
+			assertEquals(service3.getName(),
+					cache.getServiceAgentInstance(ServiceNameVersion.fromString(service3.getName()), false, true, null)
+							.getService().getName());
+
+			assertSame(agent1, cache.getLocalService(service1));
+			assertSame(agent2, cache.getLocalService(service2));
+			assertSame(agent3, cache.getLocalService(service3));
+
+			cache.unregisterLocalService(agent1);
+			assertEquals(service1.getName(),
+					cache.getServiceAgentInstance(ServiceNameVersion.fromString(service1.getName()), false, true, null)
+							.getService().getName());
+
+			cache.unregisterLocalService(agent2);
+			cache.unregisterLocalService(agent3);
+
+			try {
+				cache.getServiceAgentInstance(ServiceNameVersion.fromString(service1.getName()), false, true, null);
+				fail("AgentNotRegisteredException expected");
+			} catch (AgentNotRegisteredException e) {
+				// expected
+			}
+
+			try {
+				cache.getServiceAgentInstance(ServiceNameVersion.fromString(service3.getName()), false, true, null);
+				fail("AgentNotRegisteredException expected");
+			} catch (AgentNotRegisteredException e) {
+				// expected
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail(e.toString());
 		}
 	}
 
 	@Test
-	public void testIntegration() throws CryptoException, InternalSecurityException, AgentAlreadyRegisteredException,
-			AgentException, NodeException, AgentAccessDeniedException {
-		ServiceNameVersion serviceNameVersion = ServiceNameVersion
-				.fromString("i5.las2peer.testServices.testPackage2.UsingService@1.0");
-
-		LocalNode serviceNode = new LocalNodeManager().newNode("export/jars/");
-		serviceNode.launch();
-
-		ServiceAgentImpl serviceAgent = ServiceAgentImpl.createServiceAgent(serviceNameVersion, "a pass");
-		serviceAgent.unlock("a pass");
-		serviceNode.registerReceiver(serviceAgent);
-
-		ServiceAgentImpl localServiceAgent = serviceNode.getNodeServiceCache()
-				.getServiceAgentInstance(serviceNameVersion, true, true, null).getServiceAgent();
-
-		assertSame(serviceAgent, localServiceAgent);
-
-		serviceNode.unregisterReceiver(serviceAgent);
-
+	public void testIntegration() {
 		try {
-			serviceNode.getNodeServiceCache().getServiceAgentInstance(serviceNameVersion, true, true, null);
-			fail("AgentNotRegisteredException exptected!");
-		} catch (AgentNotRegisteredException e) {
+			ServiceNameVersion serviceNameVersion = ServiceNameVersion
+					.fromString("i5.las2peer.testServices.testPackage2.UsingService@1.0");
+
+			LocalNode serviceNode = new LocalNodeManager().newNode("export/jars/");
+			serviceNode.launch();
+
+			ServiceAgentImpl serviceAgent = ServiceAgentImpl.createServiceAgent(serviceNameVersion, "a pass");
+			serviceAgent.unlock("a pass");
+			serviceNode.registerReceiver(serviceAgent);
+
+			ServiceAgentImpl localServiceAgent = serviceNode.getNodeServiceCache()
+					.getServiceAgentInstance(serviceNameVersion, true, true, null).getServiceAgent();
+
+			assertSame(serviceAgent, localServiceAgent);
+
+			serviceNode.unregisterReceiver(serviceAgent);
+
+			try {
+				serviceNode.getNodeServiceCache().getServiceAgentInstance(serviceNameVersion, true, true, null);
+				fail("AgentNotRegisteredException exptected!");
+			} catch (AgentNotRegisteredException e) {
+				// expected
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail(e.toString());
 		}
 	}
 
@@ -112,11 +117,11 @@ public class NodeServiceCacheTest {
 			// You may have to adjust these results afterwards since this may influence the selected versions
 
 			// launch nodes
-			ArrayList<PastryNodeImpl> nodes = TestSuite.launchNetwork(4);
-			Node invokingNode = nodes.get(0);
-			Node node1 = nodes.get(1);
-			Node node2 = nodes.get(2);
-			Node node3 = nodes.get(3);
+			LocalNodeManager manager = new LocalNodeManager();
+			Node invokingNode = manager.launchNode();
+			Node node1 = manager.launchNode();
+			Node node2 = manager.launchNode();
+			Node node3 = manager.launchNode();
 
 			// generate services
 			ServiceAgentImpl service2 = ServiceAgentImpl
