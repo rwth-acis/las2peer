@@ -28,7 +28,24 @@ public class MiniClient {
 	private String serverAddress;
 
 	/**
-	 * Set the connectors endpoint URI this client should connect to.
+	 * @deprecated Use {@link #setConnectorEndpoint(String)} instead.
+	 * 
+	 *             set address and port
+	 * 
+	 * @param address address of the server
+	 * @param port if 0 no port is appended to the address
+	 */
+	@Deprecated
+	public void setAddressPort(String address, int port) {
+		if (port > 0) {
+			setConnectorEndpoint(serverAddress += ":" + Integer.toString(port));
+		} else {
+			setConnectorEndpoint(address);
+		}
+	}
+
+	/**
+	 * Sets the connectors endpoint URI this client should connect to.
 	 * 
 	 * @param endpoint A connector endpoint like http://localhost:12345, with no trailing slash
 	 */
