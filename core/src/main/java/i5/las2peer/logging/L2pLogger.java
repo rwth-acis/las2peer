@@ -534,7 +534,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 		if (name == null || name.isEmpty() || "i5.las2peer".equals(name)) {
 			throw new IllegalArgumentException("Invalid logger name '" + name + "' given!");
 		}
-		L2pLogger result = null;
+		L2pLogger result;
 		try {
 			result = new L2pLogger(name, null);
 			if (!LogManager.getLogManager().addLogger(result)) {
@@ -544,6 +544,9 @@ public final class L2pLogger extends Logger implements NodeObserver {
 		} catch (IllegalArgumentException e) {
 			// a logger with that name is already registered
 			result = (L2pLogger) LogManager.getLogManager().getLogger(name);
+		}
+		if (result == null) {
+			throw new NullPointerException("Logger instance should not be null");
 		}
 		return result;
 	}
