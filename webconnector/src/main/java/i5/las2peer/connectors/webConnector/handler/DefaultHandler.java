@@ -10,13 +10,14 @@ import java.util.Date;
 import java.util.List;
 
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 
 import org.glassfish.jersey.media.multipart.ContentDisposition;
 
@@ -78,7 +79,7 @@ public class DefaultHandler {
 	@GET
 	@Path("/status")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String getNodeStatus(@HeaderParam("Host") String hostHeader) {
+	public String getNodeStatus(@Context UriInfo uriInfo) {
 		// gather status values and return as JSON string
 		JSONObject response = new JSONObject();
 		response.put("nodeid", node.getNodeId().toString());
@@ -94,7 +95,7 @@ public class DefaultHandler {
 		response.put("maxStorageSize", maxLocalStorageSize);
 		response.put("maxStorageSizeStr", humanReadableByteCount(maxLocalStorageSize, true));
 		response.put("uptime", getUptime(node));
-		response.put("localServices", getLocalServices(node, hostHeader));
+		response.put("localServices", getLocalServices(node, uriInfo.getRequestUri()));
 		response.put("otherNodes", getOtherNodes(node));
 		return response.toJSONString();
 	}
@@ -127,7 +128,7 @@ public class DefaultHandler {
 		}
 	}
 
-	private JSONArray getLocalServices(Node node, String hostHeader) {
+	private JSONArray getLocalServices(Node node, URI requestURI) {
 		List<String> serviceNames = node.getNodeServiceCache().getLocalServiceNames();
 		JSONArray result = new JSONArray();
 		for (String serviceName : serviceNames) {
@@ -141,7 +142,9 @@ public class DefaultHandler {
 					json.put("version", version.toString());
 					// use host header, so browsers do not block subsequent ajax requests to an unknown host
 					String serviceAlias = localServiceAgent.getServiceInstance().getAlias();
-					json.put("swagger", "https://" + hostHeader + "/" + serviceAlias + "/swagger.json");
+					URI swaggerURI = new URI(requestURI.getScheme(), null, requestURI.getHost(), requestURI.getPort(),
+							"/" + serviceAlias + "/swagger.json", null, null);
+					json.put("swagger", swaggerURI.toString());
 					result.add(json);
 				} catch (Exception e) {
 					// XXX logging
