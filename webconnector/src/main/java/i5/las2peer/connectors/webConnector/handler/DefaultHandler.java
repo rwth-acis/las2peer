@@ -27,6 +27,7 @@ import i5.las2peer.connectors.webConnector.WebConnector;
 import i5.las2peer.connectors.webConnector.util.KeystoreManager;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.PastryNodeImpl;
+import i5.las2peer.restMapper.RESTService;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.tools.L2pNodeLauncher;
 import net.minidev.json.JSONArray;
@@ -141,10 +142,15 @@ public class DefaultHandler {
 					json.put("name", serviceName);
 					json.put("version", version.toString());
 					// use host header, so browsers do not block subsequent ajax requests to an unknown host
-					String serviceAlias = localServiceAgent.getServiceInstance().getAlias();
-					URI swaggerURI = new URI(requestURI.getScheme(), null, requestURI.getHost(), requestURI.getPort(),
-							"/" + serviceAlias + "/v" + version.toString() + "/swagger.json", null, null);
-					json.put("swagger", swaggerURI.toString());
+					String swaggerStr = "";
+					if (localServiceAgent.getServiceInstance() instanceof RESTService) {
+						String serviceAlias = localServiceAgent.getServiceInstance().getAlias();
+						URI swaggerURI = new URI(requestURI.getScheme(), null, requestURI.getHost(),
+								requestURI.getPort(), "/" + serviceAlias + "/v" + version.toString() + "/swagger.json",
+								null, null);
+						swaggerStr = swaggerURI.toString();
+					}
+					json.put("swagger", swaggerStr);
 					result.add(json);
 				} catch (Exception e) {
 					// XXX logging

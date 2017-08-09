@@ -39,7 +39,11 @@
           <tr>
             <td><b style="color: #0A0">[[item.name]]</b></td>
             <td>[[item.version]]</td>
-            <td style="width: 1%; white-space: nowrap"><a href="/las2peer/swagger-ui/index.html?url=[[item.swagger]]" tabindex="-1"><paper-button raised title="Show Swagger API Doc" style="background-color: #89bf04"><iron-icon src="/las2peer/swagger-ui/images/logo_small.png"></iron-icon></paper-button></a></td>
+            <td style="width: 1%; white-space: nowrap">
+              <template is="dom-if" if="[[item.swagger]]">
+                <a href="/las2peer/swagger-ui/index.html?url=[[item.swagger]]" tabindex="-1"><paper-button raised title="Show Swagger API Doc" style="background-color: #89bf04"><iron-icon src="/las2peer/swagger-ui/images/logo_small.png"></iron-icon></paper-button></a>
+              </template>
+            </td>
           </tr>
         </template>
       </table>
