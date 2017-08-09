@@ -66,7 +66,7 @@ public abstract class RESTService extends Service {
 	 * If the method is not overridden by the service, the service class itself will be registered as resource.
 	 */
 	protected void initResources() {
-		getResourceConfig().register(this);
+		getResourceConfig().register(this.getClass());
 	}
 
 	/**
