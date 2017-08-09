@@ -1,5 +1,6 @@
 package i5.las2peer.execution;
 
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -162,7 +163,11 @@ public abstract class ServiceHelper {
 		Class<?>[] acActualParamTypes = new Class[params.length];
 
 		for (int i = 0; i < params.length; i++) {
-			acActualParamTypes[i] = params[i].getClass();
+			if (params[i] == null) {
+				acActualParamTypes[i] = Serializable.class;
+			} else {
+				acActualParamTypes[i] = params[i].getClass();
+			}
 		}
 
 		Method found = null;
@@ -178,7 +183,8 @@ public abstract class ServiceHelper {
 					if (acCheckParamTypes.length == acActualParamTypes.length) {
 						boolean bPossible = true;
 						for (int i = 0; i < acActualParamTypes.length && bPossible; i++) {
-							if (!acCheckParamTypes[i].isInstance(params[i])) {
+							if (params[i] != null && !acCheckParamTypes[i].isPrimitive()
+									&& !acCheckParamTypes[i].isInstance(params[i])) {
 								// param[i] is not an instance of the formal parameter type
 								if (!(acCheckParamTypes[i].isPrimitive()
 										&& ServiceHelper.getWrapperClass(acCheckParamTypes[i]).isInstance(params[i]))
@@ -246,7 +252,11 @@ public abstract class ServiceHelper {
 	public static String getParameterString(Object[] params) {
 		StringBuffer result = new StringBuffer("(");
 		for (int i = 0; i < params.length - 1; i++) {
-			result.append(params[i].getClass().getCanonicalName()).append(", ");
+			if (params[i] == null) {
+				result.append(Object.class.getCanonicalName()).append(", ");
+			} else {
+				result.append(params[i].getClass().getCanonicalName()).append(", ");
+			}
 		}
 		if (params.length > 0) {
 			result.append(params[params.length - 1].getClass().getCanonicalName());
