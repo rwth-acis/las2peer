@@ -143,7 +143,7 @@ public class DefaultHandler {
 					// use host header, so browsers do not block subsequent ajax requests to an unknown host
 					String serviceAlias = localServiceAgent.getServiceInstance().getAlias();
 					URI swaggerURI = new URI(requestURI.getScheme(), null, requestURI.getHost(), requestURI.getPort(),
-							"/" + serviceAlias + "/swagger.json", null, null);
+							"/" + serviceAlias + "/v" + version.toString() + "/swagger.json", null, null);
 					json.put("swagger", swaggerURI.toString());
 					result.add(json);
 				} catch (Exception e) {
