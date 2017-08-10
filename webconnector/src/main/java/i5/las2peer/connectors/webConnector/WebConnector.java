@@ -52,7 +52,6 @@ import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.security.PassphraseAgentImpl;
-import i5.las2peer.tools.SimpleTools;
 import net.minidev.json.JSONObject;
 import net.minidev.json.JSONValue;
 
@@ -199,7 +198,7 @@ public class WebConnector extends Connector {
 			throw new IllegalStateException("change of port only before startup!");
 		}
 		if (port == null || port < 1) {
-			httpPort = SimpleTools.getSystemDefinedPort();
+			httpPort = 0;
 		} else {
 			httpPort = port;
 		}
@@ -215,7 +214,7 @@ public class WebConnector extends Connector {
 			throw new IllegalStateException("change of port only before startup!");
 		}
 		if (port == null || port < 1) {
-			httpsPort = SimpleTools.getSystemDefinedPort();
+			httpsPort = 0;
 		} else {
 			httpsPort = port;
 		}
@@ -407,6 +406,7 @@ public class WebConnector extends Connector {
 
 	private void startHttpServer(ResourceConfig config) throws Exception {
 		http = JdkHttpServerFactory.createHttpServer(new URI(getHttpEndpoint() + "/"), config, null, false);
+		httpPort = http.getAddress().getPort();
 		http.setExecutor(Executors.newFixedThreadPool(maxThreads));
 		http.start();
 		logMessage("Web-Connector in HTTP mode running at " + getHttpEndpoint());
@@ -434,6 +434,7 @@ public class WebConnector extends Connector {
 		sslContext.init(kmf.getKeyManagers(), null, null);
 		https = (HttpsServer) JdkHttpServerFactory.createHttpServer(new URI(getHttpsEndpoint() + "/"), config,
 				sslContext, false);
+		httpsPort = https.getAddress().getPort();
 		https.setExecutor(Executors.newFixedThreadPool(maxThreads));
 		https.start();
 		logMessage("Web-Connector in HTTPS mode running at " + getHttpsEndpoint());
