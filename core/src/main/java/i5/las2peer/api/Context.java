@@ -20,6 +20,7 @@ import i5.las2peer.api.persistency.EnvelopeOperationFailedException;
 import i5.las2peer.api.security.Agent;
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentAlreadyExistsException;
+import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.api.security.AgentOperationFailedException;
@@ -27,6 +28,8 @@ import i5.las2peer.api.security.GroupAgent;
 import i5.las2peer.api.security.ServiceAgent;
 import i5.las2peer.api.security.UserAgent;
 import i5.las2peer.execution.ServiceThread;
+import i5.las2peer.p2p.AgentAlreadyRegisteredException;
+import i5.las2peer.security.MessageReceiver;
 
 /**
  * Provides access to the context of the current call.
@@ -200,6 +203,10 @@ public interface Context {
 	 * @throws AgentOperationFailedException On node errors.
 	 */
 	public String getUserAgentIdentifierByEmail(String emailAddress) throws AgentNotFoundException, AgentOperationFailedException;
+
+	// TODO remove this after monitoring concept is fixed
+	@Deprecated // edge case for monitoring, violates service replication concept
+	public void registerReceiver(MessageReceiver receiver) throws AgentAlreadyRegisteredException, AgentException;
 
 	// Envelopes
 

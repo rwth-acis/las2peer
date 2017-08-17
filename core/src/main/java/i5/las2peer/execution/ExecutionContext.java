@@ -36,12 +36,14 @@ import i5.las2peer.api.security.GroupAgent;
 import i5.las2peer.api.security.ServiceAgent;
 import i5.las2peer.api.security.UserAgent;
 import i5.las2peer.logging.L2pLogger;
+import i5.las2peer.p2p.AgentAlreadyRegisteredException;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.persistency.EnvelopeImpl;
 import i5.las2peer.persistency.EnvelopeVersion;
 import i5.las2peer.security.AgentContext;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.GroupAgentImpl;
+import i5.las2peer.security.MessageReceiver;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.serialization.SerializationException;
@@ -271,6 +273,11 @@ public class ExecutionContext implements Context {
 	public String getUserAgentIdentifierByEmail(String emailAddress)
 			throws AgentNotFoundException, AgentOperationFailedException {
 		return node.getAgentIdForEmail(emailAddress);
+	}
+
+	@Override
+	public void registerReceiver(MessageReceiver receiver) throws AgentAlreadyRegisteredException, AgentException {
+		node.registerReceiver(receiver);
 	}
 
 	@Override
