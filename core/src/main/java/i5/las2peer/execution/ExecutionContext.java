@@ -1,10 +1,18 @@
 package i5.las2peer.execution;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectStreamClass;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
+
+import com.sun.beans.finder.ClassFinder;
 
 import i5.las2peer.api.Context;
 import i5.las2peer.api.Service;
@@ -141,7 +149,31 @@ public class ExecutionContext implements Context {
 			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException,
 			ServiceMethodNotFoundException, ServiceInvocationFailedException, ServiceAccessDeniedException {
 		try {
-			return callerContext.getLocalNode().invoke(agent, service, method, parameters);
+			Serializable rmiResult = callerContext.getLocalNode().invoke(agent, service, method, parameters);
+			ClassLoader localServiceLoader = serviceAgent.getServiceInstance().getClass().getClassLoader();
+			if (rmiResult.getClass().getClassLoader() != localServiceLoader) {
+				// mimic global invocation serialization/deserialization to avoid class cast/not-found exceptions
+				// XXX remove logging
+				System.out.println("Classloader before re-serialization: " + rmiResult.getClass().getClassLoader());
+				try {
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					new ObjectOutputStream(baos).writeObject(rmiResult);
+					baos.close();
+					ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(baos.toByteArray())) {
+						@Override
+						protected Class<?> resolveClass(ObjectStreamClass classDesc)
+								throws IOException, ClassNotFoundException {
+							return ClassFinder.resolveClass(classDesc.getName(), localServiceLoader);
+						}
+					};
+					rmiResult = (Serializable) ois.readObject();
+					// XXX remove logging
+					System.out.println("Classloader after re-serialization: " + rmiResult.getClass().getClassLoader());
+				} catch (IOException | ClassNotFoundException e) {
+					throw new ServiceInvocationFailedException("Re-serialization failed", e);
+				}
+			}
+			return rmiResult;
 		} catch (ServiceNotFoundException | ServiceNotAvailableException | InternalServiceException
 				| ServiceMethodNotFoundException | ServiceInvocationFailedException | ServiceAccessDeniedException e) {
 			throw e;
