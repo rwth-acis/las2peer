@@ -234,12 +234,16 @@ public class PastryNodeImpl extends Node {
 			setupPastryApplications();
 
 			Collection<InetSocketAddress> boot = getBootstrapAddresses();
+			long timeStartBootstrap = System.currentTimeMillis();
 			if (boot == null || boot.isEmpty()) {
-				logger.info("Start new las2peer network ...");
+				logger.info("Starting new las2peer network...");
 			} else {
-				logger.info("Bootstrapping to " + SimpleTools.join(boot, ", ") + " ...");
+				logger.info("Bootstrapping to " + SimpleTools.join(boot, ", ") + "...");
 			}
 			pastryNode.boot(boot);
+			if (boot != null && !boot.isEmpty()) {
+				logger.info("Bootstrapping completed in " + (System.currentTimeMillis() - timeStartBootstrap) + "ms");
+			}
 
 			synchronized (pastryNode) {
 				while (!pastryNode.isReady() && !pastryNode.joinFailed()) {

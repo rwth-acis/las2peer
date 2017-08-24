@@ -10,9 +10,6 @@ import i5.las2peer.classLoaders.policies.ClassLoaderPolicy;
 /**
  * A service class loader is responsible for loading classes from the service bundle, probably loaded via a
  * {@link i5.las2peer.classLoaders.libraries.Repository}
- * 
- * 
- *
  */
 public class ServiceClassLoader extends ClassLoader {
 
@@ -25,7 +22,7 @@ public class ServiceClassLoader extends ClassLoader {
 	 * parent class manager
 	 */
 	private ClassLoader parent;
-	
+
 	/**
 	 * The policy
 	 */
@@ -36,13 +33,13 @@ public class ServiceClassLoader extends ClassLoader {
 	 *
 	 * @param lib
 	 * @param parent
-	 * @param policy 
+	 * @param policy
 	 */
 	public ServiceClassLoader(LoadedLibrary lib, ClassLoader parent, ClassLoaderPolicy policy) {
 		this.library = lib;
 
 		this.parent = parent;
-		
+
 		this.policy = policy;
 	}
 
@@ -94,8 +91,7 @@ public class ServiceClassLoader extends ClassLoader {
 	 * @throws ClassNotFoundException
 	 */
 	@Override
-	protected synchronized Class<?> loadClass(String name, boolean resolve)
-			throws ClassNotFoundException {
+	protected synchronized Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
 		Logger.logLoading(this, name, null);
 
 		// First, check if the class has already been loaded
@@ -115,7 +111,6 @@ public class ServiceClassLoader extends ClassLoader {
 				}
 			}
 		}
-		
 
 		// then look in this library
 		if (c == null) {
