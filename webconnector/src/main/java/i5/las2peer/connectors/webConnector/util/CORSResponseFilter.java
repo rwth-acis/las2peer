@@ -25,6 +25,10 @@ public class CORSResponseFilter implements ContainerResponseFilter {
 			headers.add("Access-Control-Allow-Origin", connector.getCrossOriginResourceDomain());
 			headers.add("Access-Control-Max-Age", String.valueOf(connector.getCrossOriginResourceMaxAge()));
 			headers.add("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS");
+			String aclRequestHeaders = requestContext.getHeaderString("Access-Control-Request-Headers");
+			if (aclRequestHeaders != null && !aclRequestHeaders.isEmpty()) {
+				headers.add("Access-Control-Allow-Headers", aclRequestHeaders);
+			}
 		}
 	}
 
