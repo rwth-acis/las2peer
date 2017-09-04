@@ -23,6 +23,7 @@ import java.util.logging.StreamHandler;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
+import javax.ws.rs.core.MultivaluedMap;
 
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
@@ -44,6 +45,7 @@ import i5.las2peer.connectors.webConnector.handler.ServicesHandler;
 import i5.las2peer.connectors.webConnector.handler.SwaggerUIHandler;
 import i5.las2peer.connectors.webConnector.handler.WebappHandler;
 import i5.las2peer.connectors.webConnector.util.AgentSession;
+import i5.las2peer.connectors.webConnector.util.AuthenticationManager;
 import i5.las2peer.connectors.webConnector.util.CORSResponseFilter;
 import i5.las2peer.connectors.webConnector.util.KeystoreManager;
 import i5.las2peer.connectors.webConnector.util.NameLock;
@@ -51,6 +53,7 @@ import i5.las2peer.connectors.webConnector.util.WebConnectorExceptionMapper;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.PastryNodeImpl;
+import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.PassphraseAgentImpl;
 import net.minidev.json.JSONObject;
 import net.minidev.json.JSONValue;
@@ -96,8 +99,8 @@ public class WebConnector extends Connector {
 	protected boolean onlyLocalServices = DEFAULT_ONLY_LOCAL_SERVICES;
 
 	public static final String DEFAULT_DEFAULT_OIDC_PROVIDER = "https://api.learning-layers.eu/o/oauth2";
-	protected String defaultOIDCProvider = DEFAULT_DEFAULT_OIDC_PROVIDER;
-	protected ArrayList<String> oidcProviders = new ArrayList<>();
+	public String defaultOIDCProvider = DEFAULT_DEFAULT_OIDC_PROVIDER;
+	public ArrayList<String> oidcProviders = new ArrayList<>();
 
 	{
 		oidcProviders.add(DEFAULT_DEFAULT_OIDC_PROVIDER);
@@ -138,7 +141,7 @@ public class WebConnector extends Connector {
 
 	// information on Open ID Connect server, including configuration, according
 	// to Open ID Connect Discovery (cf. http://openid.net/specs/openid-connect-discovery-1_0.html)
-	protected Map<String, JSONObject> oidcProviderInfos = new HashMap<>();
+	public Map<String, JSONObject> oidcProviderInfos = new HashMap<>();
 
 	private NameLock lockOidc = new NameLock();
 
@@ -147,6 +150,7 @@ public class WebConnector extends Connector {
 	private final HashMap<String, String> agentIdToSessionId;
 	private final HashMap<String, AgentSession> sessions;
 	private final SecureRandom secureRandom;
+	private AuthenticationManager authenticationManager;
 
 	/**
 	 * create a new web connector instance.
@@ -355,6 +359,7 @@ public class WebConnector extends Connector {
 		}
 
 		myNode = node;
+		authenticationManager = new AuthenticationManager(this);
 		try {
 			ResourceConfig config = new ResourceConfig();
 			config.register(new WebConnectorExceptionMapper(this));
@@ -620,6 +625,10 @@ public class WebConnector extends Connector {
 			}
 		}
 		return result;
+	}
+
+	public AgentImpl authenticateAgent(MultivaluedMap<String, String> requestHeaders, String accessTokenQueryParam) {
+		return authenticationManager.authenticateAgent(requestHeaders, accessTokenQueryParam);
 	}
 
 	public AgentSession getOrCreateSession(PassphraseAgentImpl agent) {

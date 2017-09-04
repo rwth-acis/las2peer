@@ -8,10 +8,8 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +17,6 @@ import java.util.Map.Entry;
 
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.DELETE;
-import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.InternalServerErrorException;
@@ -42,36 +39,21 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.nimbusds.oauth2.sdk.ErrorObject;
-import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.http.HTTPRequest;
-import com.nimbusds.oauth2.sdk.http.HTTPRequest.Method;
-import com.nimbusds.oauth2.sdk.http.HTTPResponse;
-import com.nimbusds.openid.connect.sdk.UserInfoErrorResponse;
-import com.nimbusds.openid.connect.sdk.UserInfoResponse;
-import com.nimbusds.openid.connect.sdk.UserInfoSuccessResponse;
-import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 
 import i5.las2peer.api.execution.ServiceInvocationException;
 import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.p2p.ServiceVersion;
-import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentLockedException;
-import i5.las2peer.api.security.AgentNotFoundException;
-import i5.las2peer.api.security.AnonymousAgent;
 import i5.las2peer.connectors.webConnector.handler.WebappHandler;
+import i5.las2peer.connectors.webConnector.util.AuthenticationManager;
 import i5.las2peer.p2p.AgentAlreadyRegisteredException;
 import i5.las2peer.p2p.AliasNotFoundException;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.ServiceAliasManager.AliasResolveResponse;
 import i5.las2peer.restMapper.RESTResponse;
 import i5.las2peer.security.AgentImpl;
-import i5.las2peer.security.AnonymousAgentImpl;
 import i5.las2peer.security.Mediator;
-import i5.las2peer.security.PassphraseAgentImpl;
-import i5.las2peer.security.UserAgentImpl;
-import i5.las2peer.tools.CryptoTools;
 import i5.las2peer.tools.SimpleTools;
 import io.swagger.models.Operation;
 import io.swagger.models.Swagger;
@@ -87,12 +69,12 @@ import net.minidev.json.JSONObject;
 @Path("/")
 public class WebConnectorRequestHandler {
 
-	private static final String ACCESS_TOKEN_KEY = "access_token";
-	private static final String OIDC_PROVIDER_KEY = "oidc_provider";
 	private static final List<String> INGORE_HEADERS = Arrays.asList(HttpHeaders.AUTHORIZATION.toLowerCase(),
-			ACCESS_TOKEN_KEY.toLowerCase(), OIDC_PROVIDER_KEY.toLowerCase());
-	private static final List<String> IGNORE_QUERY_PARAMS = Arrays.asList(ACCESS_TOKEN_KEY.toLowerCase(),
-			OIDC_PROVIDER_KEY.toLowerCase());
+			AuthenticationManager.ACCESS_TOKEN_KEY.toLowerCase(),
+			AuthenticationManager.OIDC_PROVIDER_KEY.toLowerCase());
+	private static final List<String> IGNORE_QUERY_PARAMS = Arrays.asList(
+			AuthenticationManager.ACCESS_TOKEN_KEY.toLowerCase(),
+			AuthenticationManager.OIDC_PROVIDER_KEY.toLowerCase());
 
 	private WebConnector connector;
 	private Node l2pNode;
@@ -159,7 +141,8 @@ public class WebConnectorRequestHandler {
 			HttpHeaders httpHeaders) throws Exception {
 		MultivaluedMap<String, String> requestHeaders = httpHeaders.getRequestHeaders();
 		try {
-			Mediator mediator = authenticate(requestHeaders, uriInfo.getQueryParameters().getFirst(ACCESS_TOKEN_KEY));
+			Mediator mediator = authenticate(requestHeaders,
+					uriInfo.getQueryParameters().getFirst(AuthenticationManager.ACCESS_TOKEN_KEY));
 			if (mediator != null) {
 				ArrayList<String> strPaths = new ArrayList<>(paths.size());
 				for (PathSegment seg : paths) {
@@ -183,204 +166,13 @@ public class WebConnectorRequestHandler {
 	}
 
 	private Mediator authenticate(MultivaluedMap<String, String> requestHeaders, String accessTokenQueryParam) {
-		final String authorizationHeader = requestHeaders.getFirst(HttpHeaders.AUTHORIZATION);
-		final String accessTokenHeader = requestHeaders.getFirst(ACCESS_TOKEN_KEY);
-		AgentImpl agent;
-		if (authorizationHeader != null && authorizationHeader.toLowerCase().startsWith("basic ")) {
-			// basic authentication
-			agent = authenticateBasic(authorizationHeader);
-		} else if (connector.oidcProviderInfos != null && accessTokenQueryParam != null || accessTokenHeader != null
-				|| (authorizationHeader != null && authorizationHeader.toLowerCase().startsWith("bearer "))) {
-			// openid connect
-			final String oidcProviderHeader = requestHeaders.getFirst(OIDC_PROVIDER_KEY);
-			agent = authenticateOIDC(authorizationHeader, accessTokenQueryParam, accessTokenHeader, oidcProviderHeader);
-		} else {
-			// anonymous login
-			agent = authenticateAnonymous();
-		}
+		AgentImpl agent = connector.authenticateAgent(requestHeaders, accessTokenQueryParam);
 		try {
 			return l2pNode.createMediatorForAgent(agent);
 		} catch (AgentAlreadyRegisteredException | AgentLockedException e) {
 			// should not occur, since agent is known and unlocked at this point
 			throw new InternalServerErrorException("Mediator could not be created", e);
 		}
-	}
-
-	private AgentImpl authenticateBasic(String authorizationHeader) {
-		// looks like: Authentication Basic <Byte64(name:pass)>
-		String userPass = authorizationHeader.substring("BASIC ".length());
-		userPass = new String(Base64.getDecoder().decode(userPass), StandardCharsets.UTF_8);
-		int separatorPos = userPass.indexOf(':');
-
-		// get username and password
-		String username = userPass.substring(0, separatorPos);
-		String password = userPass.substring(separatorPos + 1);
-
-		return authenticateNamePassword(username, password);
-	}
-
-	private PassphraseAgentImpl authenticateOIDC(String authorizationHeader, String accessTokenQueryParam,
-			String accessTokenHeader, String oidcProviderHeader) {
-		// extract token
-		String token = "";
-		String oidcProviderURI = connector.defaultOIDCProvider;
-		if (accessTokenHeader != null) {
-			// get OIDC parameters from headers
-			token = accessTokenHeader;
-			if (oidcProviderHeader != null) {
-				oidcProviderURI = oidcProviderHeader;
-			}
-		} else if (authorizationHeader != null && authorizationHeader.toLowerCase().startsWith("bearer ")) {
-			// get BEARER token from Authentication field
-			token = authorizationHeader.substring("BEARER ".length());
-			if (oidcProviderHeader != null) {
-				oidcProviderURI = oidcProviderHeader;
-			}
-		} else { // get OIDC parameters from GET values
-			token = accessTokenQueryParam;
-			oidcProviderURI = oidcProviderHeader;
-		}
-
-		// validate given OIDC provider and get provider info
-		JSONObject oidcProviderInfo = null;
-		if (!connector.oidcProviders.contains(oidcProviderURI)
-				|| connector.oidcProviderInfos.get(oidcProviderURI) == null) {
-			throw new InternalServerErrorException("The given OIDC provider (" + oidcProviderURI
-					+ ") is not whitelisted! Please make sure the complete OIDC provider URI is added to the config.");
-		} else {
-			oidcProviderInfo = connector.oidcProviderInfos.get(oidcProviderURI);
-		}
-
-		// send request to OpenID Connect user info endpoint to retrieve
-		// complete user information
-		// in exchange for access token.
-		HTTPRequest hrq;
-		HTTPResponse hrs;
-
-		try {
-			URI userinfoEndpointUri = new URI(
-					(String) ((JSONObject) oidcProviderInfo.get("config")).get("userinfo_endpoint"));
-			hrq = new HTTPRequest(Method.GET, userinfoEndpointUri.toURL());
-			hrq.setAuthorization("Bearer " + token);
-
-			// TODO process all error cases that can happen (in particular
-			// invalid tokens)
-			hrs = hrq.send();
-		} catch (IOException | URISyntaxException e) {
-			throw new InternalServerErrorException("Fetching OIDC user info failed", e);
-		}
-
-		// process response from OpenID Connect user info endpoint
-		UserInfoResponse userInfoResponse;
-		try {
-			userInfoResponse = UserInfoResponse.parse(hrs);
-		} catch (ParseException e) {
-			throw new InternalServerErrorException("Couldn't parse UserInfo response", e);
-		}
-
-		// failed request for OpenID Connect user info
-		if (userInfoResponse instanceof UserInfoErrorResponse) {
-			UserInfoErrorResponse uier = (UserInfoErrorResponse) userInfoResponse;
-			ErrorObject err = uier.getErrorObject();
-			String cause = "Session expired?";
-			if (err != null) {
-				cause = err.getDescription();
-			}
-			throw new NotAuthorizedException("Open ID Connect UserInfo request failed! Cause: " + cause);
-		}
-
-		// successful request
-		UserInfo userInfo = ((UserInfoSuccessResponse) userInfoResponse).getUserInfo();
-
-		JSONObject ujson = userInfo.toJSONObject();
-
-		if (!ujson.containsKey("sub") || !ujson.containsKey("email") || !ujson.containsKey("preferred_username")) {
-			throw new ForbiddenException("Could not get provider information. Please check your scopes.");
-		}
-
-		String sub = (String) ujson.get("sub");
-
-		// TODO choose other scheme for generating agent password
-		String password = sub;
-
-		try {
-			String oidcAgentId = l2pNode.getUserManager().getAgentIdByOIDCSub(sub);
-			try {
-				this.connector.getLockOidc().lock(oidcAgentId);
-				PassphraseAgentImpl pa = (PassphraseAgentImpl) l2pNode.getAgent(oidcAgentId);
-				pa.unlock(password);
-				if (pa instanceof UserAgentImpl) {
-					UserAgentImpl ua = (UserAgentImpl) pa;
-					// TODO provide OIDC user data for agent
-					// ua.setUserData(ujson.toJSONString());
-					return ua;
-				} else {
-					return pa;
-				}
-			} finally {
-				this.connector.getLockOidc().unlock(oidcAgentId);
-			}
-		} catch (AgentAccessDeniedException e) {
-			connector.logError("Authentication failed!", e);
-			throw new NotAuthorizedException(e.toString(), e);
-		} catch (AgentNotFoundException e) {
-			try {
-				UserAgentImpl oidcAgent = UserAgentImpl.createUserAgent(password);
-				String oidcAgentId = oidcAgent.getIdentifier();
-				try {
-					this.connector.getLockOidc().lock(oidcAgentId);
-					oidcAgent.unlock(password);
-					oidcAgent.setEmail((String) ujson.get("email"));
-					oidcAgent.setLoginName((String) ujson.get("preferred_username"));
-					// TODO provide OIDC user data for agent
-					// oidcAgent.setUserData(ujson.toJSONString());
-					l2pNode.storeAgent(oidcAgent);
-					l2pNode.getUserManager().registerOIDCSub(oidcAgent, sub);
-					return oidcAgent;
-				} finally {
-					this.connector.getLockOidc().unlock(oidcAgentId);
-				}
-			} catch (Exception e1) {
-				throw new InternalServerErrorException("OIDC agent creation failed", e1);
-			}
-		} catch (AgentException e) {
-			connector.logError("Could not retrieve and unlock agent from network", e);
-			throw new NotAuthorizedException(e.toString(), e);
-		}
-	}
-
-	private AgentImpl authenticateNamePassword(String username, String password) {
-		if (username.equalsIgnoreCase(AnonymousAgent.LOGIN_NAME)) {
-			return authenticateAnonymous();
-		}
-		try {
-			String userId;
-			// check if username is an agent id
-			if (CryptoTools.isAgentID(username)) {
-				userId = username;
-			} else {
-				userId = l2pNode.getAgentIdForLogin(username);
-			}
-
-			PassphraseAgentImpl userAgent = (PassphraseAgentImpl) l2pNode.getAgent(userId);
-			userAgent.unlock(password);
-
-			return userAgent;
-		} catch (AgentNotFoundException e) {
-			connector.logError("user " + username + " not found", e);
-			throw new NotAuthorizedException("user " + username + " not found");
-		} catch (AgentAccessDeniedException e) {
-			connector.logError("passphrase invalid for user " + username, e);
-			throw new NotAuthorizedException("passphrase invalid for user " + username);
-		} catch (Exception e) {
-			connector.logError("something went horribly wrong. Check your request for correctness.", e);
-			throw new NotAuthorizedException("something went horribly wrong. Check your request for correctness.");
-		}
-	}
-
-	private AgentImpl authenticateAnonymous() {
-		AnonymousAgentImpl anonymousAgent = AnonymousAgentImpl.getInstance();
-		return anonymousAgent;
 	}
 
 	private Response resolveServiceAndInvoke(Mediator mediator, ArrayList<String> pathSplit, String requestMethod,

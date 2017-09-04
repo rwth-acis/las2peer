@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.List;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
@@ -23,12 +24,16 @@ import org.glassfish.jersey.media.multipart.ContentDisposition;
 
 import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.p2p.ServiceVersion;
+import i5.las2peer.api.security.Agent;
 import i5.las2peer.connectors.webConnector.WebConnector;
+import i5.las2peer.connectors.webConnector.util.AuthenticationManager;
 import i5.las2peer.connectors.webConnector.util.KeystoreManager;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.restMapper.RESTService;
+import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.ServiceAgentImpl;
+import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.L2pNodeLauncher;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -167,6 +172,51 @@ public class DefaultHandler {
 			result.add(other.toString());
 		}
 		return result;
+	}
+
+	@GET
+	@Produces(MediaType.TEXT_PLAIN)
+	@Path("/currentagent")
+	public String getCurrentAgentId(@Context UriInfo uriInfo, @Context HttpHeaders httpHeaders) {
+		Agent agent = connector.authenticateAgent(httpHeaders.getRequestHeaders(),
+				uriInfo.getQueryParameters().getFirst(AuthenticationManager.ACCESS_TOKEN_KEY));
+		if (agent == null) {
+			throw new InternalServerErrorException("Authorization failed");
+		} else {
+			return agent.getIdentifier();
+		}
+	}
+
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/currentagent")
+	public String getCurrentAgentJson(@Context UriInfo uriInfo, @Context HttpHeaders httpHeaders) {
+		Agent agent = connector.authenticateAgent(httpHeaders.getRequestHeaders(),
+				uriInfo.getQueryParameters().getFirst(AuthenticationManager.ACCESS_TOKEN_KEY));
+		if (agent == null) {
+			return null;
+		} else {
+			JSONObject json = new JSONObject();
+			json.put("agentid", agent.getIdentifier());
+			return json.toJSONString();
+		}
+	}
+
+	@GET
+	@Produces(MediaType.APPLICATION_XML)
+	@Path("/currentagent")
+	public String getCurrentAgentXml(@Context UriInfo uriInfo, @Context HttpHeaders httpHeaders) {
+		AgentImpl agent = connector.authenticateAgent(httpHeaders.getRequestHeaders(),
+				uriInfo.getQueryParameters().getFirst(AuthenticationManager.ACCESS_TOKEN_KEY));
+		if (agent == null) {
+			throw new InternalServerErrorException("Authorization failed");
+		} else {
+			try {
+				return agent.toXmlString();
+			} catch (SerializationException e) {
+				throw new InternalServerErrorException(e);
+			}
+		}
 	}
 
 }

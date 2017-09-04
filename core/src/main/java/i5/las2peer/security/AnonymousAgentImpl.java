@@ -16,7 +16,7 @@ import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.CryptoException;
 
 public class AnonymousAgentImpl extends AgentImpl implements AnonymousAgent {
-	
+
 	public static AnonymousAgentImpl getInstance() {
 		try {
 			return new AnonymousAgentImpl();
@@ -31,7 +31,7 @@ public class AnonymousAgentImpl extends AgentImpl implements AnonymousAgent {
 
 	@Override
 	public String toXmlString() {
-		throw new IllegalStateException("Anonymous agent cannot be converted to XML");
+		return "<las2peer:agent type=\"anonymous\"></las2peer:agent>";
 	}
 
 	@Override
