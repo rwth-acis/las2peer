@@ -1,9 +1,9 @@
 package i5.las2peer.api.execution;
 
 /**
- * Thrown if access to the serice (method) has been denied.
+ * Thrown if access to the service (method) has been denied.
  * 
- * May also be thrown by a service to indicate that the main agent doet have access to the method or accessed content.
+ * May also be thrown by a service to indicate that the main agent does have access to the method or accessed content.
  *
  */
 public class ServiceAccessDeniedException extends ServiceInvocationException {
