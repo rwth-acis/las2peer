@@ -179,6 +179,7 @@ public class WebConnector extends Connector {
 
 	public WebConnector(Integer httpPort) {
 		this();
+		enableHttpHttps(true, false);
 		setHttpPort(httpPort);
 	}
 

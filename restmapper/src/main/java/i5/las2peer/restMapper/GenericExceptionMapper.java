@@ -38,7 +38,8 @@ public class GenericExceptionMapper implements ExceptionMapper<Throwable> {
 			} else if (e instanceof ResourceNotFoundException) {
 				e = new NotFoundException(e.getMessage(), e.getCause());
 			} else if (e instanceof ServiceNotAuthorizedException) {
-				e = new NotAuthorizedException(e.getMessage(), e.getCause());
+				e = new NotAuthorizedException(e.getMessage(), Response.status(Status.UNAUTHORIZED).build(),
+						e.getCause());
 			} else if (e instanceof ServiceAccessDeniedException) {
 				e = new ForbiddenException(e.getMessage(), e.getCause());
 			} else {

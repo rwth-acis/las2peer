@@ -8,6 +8,7 @@ import i5.las2peer.api.execution.InternalServiceException;
 import i5.las2peer.api.execution.ServiceAccessDeniedException;
 import i5.las2peer.api.execution.ServiceInvocationFailedException;
 import i5.las2peer.api.execution.ServiceMethodNotFoundException;
+import i5.las2peer.api.execution.ServiceNotAuthorizedException;
 import i5.las2peer.api.execution.ServiceNotAvailableException;
 import i5.las2peer.api.execution.ServiceNotFoundException;
 import i5.las2peer.api.logging.MonitoringEvent;
@@ -121,8 +122,8 @@ public interface Context {
 	 * @throws AgentNotFoundException If the specified agent cannot be found.
 	 * @throws AgentOperationFailedException If an error occurred on the node.
 	 */
-	public Agent requestAgent(String agentId, Agent using) throws AgentAccessDeniedException, AgentNotFoundException,
-			AgentOperationFailedException;
+	public Agent requestAgent(String agentId, Agent using)
+			throws AgentAccessDeniedException, AgentNotFoundException, AgentOperationFailedException;
 
 	/**
 	 * Requests an agent from the network using the calling (main) agent.
@@ -133,8 +134,8 @@ public interface Context {
 	 * @throws AgentNotFoundException If the specified agent cannot be found.
 	 * @throws AgentOperationFailedException If an error occurred on the node.
 	 */
-	public Agent requestAgent(String agentId) throws AgentAccessDeniedException, AgentNotFoundException,
-			AgentOperationFailedException;
+	public Agent requestAgent(String agentId)
+			throws AgentAccessDeniedException, AgentNotFoundException, AgentOperationFailedException;
 
 	/**
 	 * Fetches an agent from the network.
@@ -152,7 +153,8 @@ public interface Context {
 	 * The given agent must be unlocked.
 	 * 
 	 * @param agent The unlocked agent to store.
-	 * @throws AgentAccessDeniedException If the agent cannot be overridden due to access restrictions. Or it is the AnonymousAgent.
+	 * @throws AgentAccessDeniedException If the agent cannot be overridden due to access restrictions. Or it is the
+	 *             AnonymousAgent.
 	 * @throws AgentAlreadyExistsException If another agent already exists (regarding some agent specific properties).
 	 * @throws AgentOperationFailedException If an error occurred on the node.
 	 * @throws AgentLockedException If the agent is locked.
@@ -181,9 +183,9 @@ public interface Context {
 	 * @throws AgentOperationFailedException If an error occurred on the node.
 	 */
 	public boolean hasAccess(String agentId) throws AgentNotFoundException, AgentOperationFailedException;
-	
+
 	// UserAgents
-	
+
 	/**
 	 * Gets a {@link UserAgent}'s identifier by its login name.
 	 * 
@@ -192,8 +194,9 @@ public interface Context {
 	 * @throws AgentNotFoundException If there is no agent with the given login name.
 	 * @throws AgentOperationFailedException On node errors.
 	 */
-	public String getUserAgentIdentifierByLoginName(String loginName) throws AgentNotFoundException, AgentOperationFailedException;
-	
+	public String getUserAgentIdentifierByLoginName(String loginName)
+			throws AgentNotFoundException, AgentOperationFailedException;
+
 	/**
 	 * Gets a {@link UserAgent}'s identifier by its email address.
 	 * 
@@ -202,7 +205,8 @@ public interface Context {
 	 * @throws AgentNotFoundException If there is no agent with the given email address.
 	 * @throws AgentOperationFailedException On node errors.
 	 */
-	public String getUserAgentIdentifierByEmail(String emailAddress) throws AgentNotFoundException, AgentOperationFailedException;
+	public String getUserAgentIdentifierByEmail(String emailAddress)
+			throws AgentNotFoundException, AgentOperationFailedException;
 
 	// TODO remove this after monitoring concept is fixed
 	@Deprecated // edge case for monitoring, violates service replication concept
@@ -220,8 +224,8 @@ public interface Context {
 	 * @throws EnvelopeNotFoundException If the envelope doesn not exist.
 	 * @throws EnvelopeOperationFailedException If an error occurred in the node or network.
 	 */
-	public Envelope requestEnvelope(String identifier, Agent using) throws EnvelopeAccessDeniedException,
-			EnvelopeNotFoundException, EnvelopeOperationFailedException;
+	public Envelope requestEnvelope(String identifier, Agent using)
+			throws EnvelopeAccessDeniedException, EnvelopeNotFoundException, EnvelopeOperationFailedException;
 
 	/**
 	 * Requests an envelope from the network. This means fetching and decrypting it using the current main agent.
@@ -232,8 +236,8 @@ public interface Context {
 	 * @throws EnvelopeNotFoundException If the envelope doesn not exist.
 	 * @throws EnvelopeOperationFailedException If an error occurred at the node or in the network.
 	 */
-	public Envelope requestEnvelope(String identifier) throws EnvelopeAccessDeniedException, EnvelopeNotFoundException,
-			EnvelopeOperationFailedException;
+	public Envelope requestEnvelope(String identifier)
+			throws EnvelopeAccessDeniedException, EnvelopeNotFoundException, EnvelopeOperationFailedException;
 
 	/**
 	 * Stores the envelope to the network and signs it with the specified agent.
@@ -243,8 +247,8 @@ public interface Context {
 	 * @throws EnvelopeAccessDeniedException If the specified agent is not allowed to write to the envelope.
 	 * @throws EnvelopeOperationFailedException If an error occurred at the node or in the network.
 	 */
-	public void storeEnvelope(Envelope env, Agent using) throws EnvelopeAccessDeniedException,
-			EnvelopeOperationFailedException;
+	public void storeEnvelope(Envelope env, Agent using)
+			throws EnvelopeAccessDeniedException, EnvelopeOperationFailedException;
 
 	/**
 	 * Stores the envelope to the network and signs it with the current main agent.
@@ -276,8 +280,8 @@ public interface Context {
 	 * @throws EnvelopeAccessDeniedException If the specified agent is not allowed to write to the envelope.
 	 * @throws EnvelopeOperationFailedException If an error occurred at the node or in the network.
 	 */
-	public void storeEnvelope(Envelope env, EnvelopeCollisionHandler handler) throws EnvelopeAccessDeniedException,
-			EnvelopeOperationFailedException;
+	public void storeEnvelope(Envelope env, EnvelopeCollisionHandler handler)
+			throws EnvelopeAccessDeniedException, EnvelopeOperationFailedException;
 
 	/**
 	 * Reclaims the envelope using the specified agent.
@@ -292,8 +296,8 @@ public interface Context {
 	 * @throws EnvelopeNotFoundException If the envelope does not exist.
 	 * @throws EnvelopeOperationFailedException If an error occurred at the node or in the network.
 	 */
-	public void reclaimEnvelope(String identifier, Agent using) throws EnvelopeAccessDeniedException,
-			EnvelopeNotFoundException, EnvelopeOperationFailedException;
+	public void reclaimEnvelope(String identifier, Agent using)
+			throws EnvelopeAccessDeniedException, EnvelopeNotFoundException, EnvelopeOperationFailedException;
 
 	/**
 	 * Reclaims the envelope using the current main agent agent.
@@ -307,8 +311,8 @@ public interface Context {
 	 * @throws EnvelopeNotFoundException If the envelope does not exist.
 	 * @throws EnvelopeOperationFailedException If an error occurred at the node or in the network.
 	 */
-	public void reclaimEnvelope(String identifier) throws EnvelopeAccessDeniedException, EnvelopeNotFoundException,
-			EnvelopeOperationFailedException;
+	public void reclaimEnvelope(String identifier)
+			throws EnvelopeAccessDeniedException, EnvelopeNotFoundException, EnvelopeOperationFailedException;
 
 	/**
 	 * Creates a new envelope with the given agent as signing agent and first reader.
@@ -319,7 +323,8 @@ public interface Context {
 	 * @throws EnvelopeOperationFailedException If an error occurred at the node or in the network.
 	 * @throws EnvelopeAccessDeniedException If the agent is not allowed to create envelopes (e.g. the AnonymousAgent).
 	 */
-	public Envelope createEnvelope(String identifier, Agent using) throws EnvelopeOperationFailedException, EnvelopeAccessDeniedException;
+	public Envelope createEnvelope(String identifier, Agent using)
+			throws EnvelopeOperationFailedException, EnvelopeAccessDeniedException;
 
 	/**
 	 * Creates a new envelope with the current main agent as signing agent and first reader.
@@ -329,7 +334,8 @@ public interface Context {
 	 * @throws EnvelopeOperationFailedException If an error occurred at the node or in the network.
 	 * @throws EnvelopeAccessDeniedException If the agent is not allowed to create envelopes (e.g. the AnonymousAgent).
 	 */
-	public Envelope createEnvelope(String identifier) throws EnvelopeOperationFailedException, EnvelopeAccessDeniedException;
+	public Envelope createEnvelope(String identifier)
+			throws EnvelopeOperationFailedException, EnvelopeAccessDeniedException;
 
 	// RMI
 
@@ -349,10 +355,12 @@ public interface Context {
 	 * @throws ServiceMethodNotFoundException If the service method does not exist.
 	 * @throws ServiceInvocationFailedException If the service invocation failed.
 	 * @throws ServiceAccessDeniedException If the access to the service has been denied.
+	 * @throws ServiceNotAuthorizedException If access to the service method requires a logged in user.
 	 */
 	public Serializable invoke(String service, String method, Serializable... parameters)
 			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException,
-			ServiceMethodNotFoundException, ServiceInvocationFailedException, ServiceAccessDeniedException;
+			ServiceMethodNotFoundException, ServiceInvocationFailedException, ServiceAccessDeniedException,
+			ServiceNotAuthorizedException;
 
 	/**
 	 * Invokes the method of any other service on behalf of the main agent, thus sending the main agent as calling
@@ -370,10 +378,12 @@ public interface Context {
 	 * @throws ServiceMethodNotFoundException If the service method does not exist.
 	 * @throws ServiceInvocationFailedException If the service invocation failed.
 	 * @throws ServiceAccessDeniedException If the access to the service has been denied.
+	 * @throws ServiceNotAuthorizedException If access to the service method requires a logged in user.
 	 */
 	public Serializable invoke(ServiceNameVersion service, String method, Serializable... parameters)
 			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException,
-			ServiceMethodNotFoundException, ServiceInvocationFailedException, ServiceAccessDeniedException;
+			ServiceMethodNotFoundException, ServiceInvocationFailedException, ServiceAccessDeniedException,
+			ServiceNotAuthorizedException;
 
 	/**
 	 * Invokes a service method using the agent of this service as calling agent.
@@ -390,10 +400,12 @@ public interface Context {
 	 * @throws ServiceMethodNotFoundException If the service method does not exist.
 	 * @throws ServiceInvocationFailedException If the service invocation failed.
 	 * @throws ServiceAccessDeniedException If the access to the service has been denied.
+	 * @throws ServiceNotAuthorizedException If access to the service method requires a logged in user.
 	 */
 	public Serializable invokeInternally(String service, String method, Serializable... parameters)
 			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException,
-			ServiceMethodNotFoundException, ServiceInvocationFailedException, ServiceAccessDeniedException;
+			ServiceMethodNotFoundException, ServiceInvocationFailedException, ServiceAccessDeniedException,
+			ServiceNotAuthorizedException;
 
 	/**
 	 * Invokes a service method using the agent of this service as calling agent.
@@ -410,10 +422,12 @@ public interface Context {
 	 * @throws ServiceMethodNotFoundException If the service method does not exist.
 	 * @throws ServiceInvocationFailedException If the service invocation failed.
 	 * @throws ServiceAccessDeniedException If the access to the service has been denied.
+	 * @throws ServiceNotAuthorizedException If access to the service method requires a logged in user.
 	 */
 	public Serializable invokeInternally(ServiceNameVersion service, String method, Serializable... parameters)
 			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException,
-			ServiceMethodNotFoundException, ServiceInvocationFailedException, ServiceAccessDeniedException;
+			ServiceMethodNotFoundException, ServiceInvocationFailedException, ServiceAccessDeniedException,
+			ServiceNotAuthorizedException;
 
 	// Execution
 
