@@ -178,7 +178,7 @@ public class Message implements XmlAble, Cloneable {
 		validMs = timeOutMs;
 
 		id = new Random().nextLong();
-		
+
 		encryptContent();
 
 		try {
@@ -465,7 +465,7 @@ public class Message implements XmlAble, Cloneable {
 		if (sender instanceof AnonymousAgent) {
 			return;
 		}
-		
+
 		try {
 			Signature sig = sender.createSignature();
 			sig.update(baDecryptedContent);
@@ -710,7 +710,7 @@ public class Message implements XmlAble, Cloneable {
 		if (sender instanceof AnonymousAgentImpl) {
 			return;
 		}
-		
+
 		Signature sig;
 		try {
 			sig = Signature.getInstance(CryptoTools.getSignatureMethod());
@@ -795,6 +795,9 @@ public class Message implements XmlAble, Cloneable {
 	 */
 	@Override
 	public String toXmlString() {
+		if (baSignature == null) {
+			throw new RuntimeException("Message not signed");
+		}
 		String response = "";
 		if (responseToId != null) {
 			response = " responseTo=\"" + responseToId + "\"";
