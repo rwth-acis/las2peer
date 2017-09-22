@@ -10,6 +10,7 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.logging.Level;
 
 import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.p2p.ServiceVersion;
@@ -108,7 +109,7 @@ public class NodeServiceCache {
 					try {
 						update(service, true, acting);
 					} catch (Exception e) {
-						logger.info(e.toString());
+						logger.log(Level.INFO, "Could not update service cache", e);
 						if (local == null) {
 							throw new AgentNotRegisteredException(
 									"Could not retrieve service information from the network.", e);
@@ -130,7 +131,7 @@ public class NodeServiceCache {
 					try {
 						update(service, false, acting);
 					} catch (Exception e) {
-						logger.info(e.toString());
+						logger.log(Level.INFO, "Could not update service cache", e);
 						if (local == null) {
 							throw new AgentNotRegisteredException(
 									"Could not retrieve service information from the network.", e);
