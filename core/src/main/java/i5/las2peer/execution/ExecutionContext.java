@@ -155,6 +155,9 @@ public class ExecutionContext implements Context {
 			ServiceAccessDeniedException, ServiceNotAuthorizedException {
 		try {
 			Serializable rmiResult = callerContext.getLocalNode().invoke(agent, service, method, parameters);
+			if (rmiResult == null) {
+				return null;
+			}
 			ClassLoader localServiceLoader = serviceAgent.getServiceInstance().getClass().getClassLoader();
 			if (rmiResult.getClass().getClassLoader() != localServiceLoader) {
 				// mimic global invocation serialization/deserialization to avoid class cast/not-found exceptions
