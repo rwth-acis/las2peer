@@ -17,7 +17,7 @@
 	<classpathentry kind="lib" path="restmapper/lib/swagger-jersey2-jaxrs-1.5.12.jar"/>
 	<classpathentry exported="true" kind="lib" path="restmapper/lib/javax.ws.rs-api-2.0.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="restmapper/lib/jersey-server-2.25.1.jar"/>
-	<classpathentry kind="lib" path="restmapper/lib/jersey-media-json-jackson-2.25.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="restmapper/lib/jersey-media-json-jackson-2.25.1.jar"/>
 	<classpathentry kind="lib" path="restmapper/lib/jersey-common-2.25.1.jar"/>
 	<classpathentry kind="lib" path="restmapper/lib/jackson-core-2.8.4.jar"/>
 	<classpathentry kind="lib" path="restmapper/lib/swagger-jaxrs-1.5.12.jar"/>
