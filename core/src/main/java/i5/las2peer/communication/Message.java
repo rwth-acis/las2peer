@@ -258,8 +258,6 @@ public class Message implements XmlAble, Cloneable {
 			throws EncodingFailedException, InternalSecurityException, SerializationException {
 		if (from == null) {
 			throw new IllegalArgumentException("null not allowed as sender!");
-		} else if (from instanceof AnonymousAgent) {
-			throw new IllegalArgumentException("Anonymous not allowed as message sender!");
 		}
 
 		sender = from;
