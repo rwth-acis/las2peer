@@ -190,11 +190,10 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	/**
 	 * Just calls the parent constructor and adds the new instance to the LogManager.
 	 *
-	 * @param name A name for the logger. This should be a dot-separated name and should normally be based on the
-	 *            package name or class name of the subsystem, such as java.net or javax.swing. It may be null for
-	 *            anonymous Loggers.
-	 * @param resourceBundleName name of ResourceBundle to be used for localizing messages for this logger. May be null
-	 *            if none of the messages require localization.
+	 * @param name A name for the logger. This should be a dot-separated name and should normally be based on the package name or class name
+	 *            of the subsystem, such as java.net or javax.swing. It may be null for anonymous Loggers.
+	 * @param resourceBundleName name of ResourceBundle to be used for localizing messages for this logger. May be null if none of the
+	 *            messages require localization.
 	 * @throws IllegalArgumentException If a logger with the given name is already registered.
 	 */
 	protected L2pLogger(String name, String resourceBundleName) throws IllegalArgumentException {
@@ -350,10 +349,10 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	}
 
 	/**
-	 * Updates the loggers own log level and sets it to the minimal value of all assigned handlers. This way the
-	 * performance is slightly improved, because the logger itself drops messages not suitable for assigned handlers.
-	 * Please pay attention that this will drop messages, that may be interesting for parent loggers or handlers, too.
-	 * Usually this method should be only used with the global instance.
+	 * Updates the loggers own log level and sets it to the minimal value of all assigned handlers. This way the performance is slightly
+	 * improved, because the logger itself drops messages not suitable for assigned handlers. Please pay attention that this will drop
+	 * messages, that may be interesting for parent loggers or handlers, too. Usually this method should be only used with the global
+	 * instance.
 	 */
 	private synchronized void minimizeLogLevel() {
 		// set minimal level of all handlers and this logger instance
@@ -406,8 +405,8 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	/**
 	 * Logs a message to the l2p system using the observers.
 	 *
-	 * Since this method will/should only be used in an L2pThread, the message will come from a service or a helper, so
-	 * a SERVICE_MESSAGE is assumed. Then this message will not be monitored by the monitoring observer.
+	 * Since this method will/should only be used in an L2pThread, the message will come from a service or a helper, so a SERVICE_MESSAGE is
+	 * assumed. Then this message will not be monitored by the monitoring observer.
 	 *
 	 * @param from the calling class
 	 * @param event used to differentiate between different log messages
@@ -419,9 +418,8 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	}
 
 	/**
-	 * Writes a log message. The given event can be used to differentiate between different log messages. The
-	 * serviceAgent and actingUser can be set to {@code null} if not known. Then this message will not be monitored by
-	 * the monitoring observer.
+	 * Writes a log message. The given event can be used to differentiate between different log messages. The serviceAgent and actingUser
+	 * can be set to {@code null} if not known. Then this message will not be monitored by the monitoring observer.
 	 *
 	 * @param from the calling class
 	 * @param event used to differentiate between different log messages
@@ -437,9 +435,10 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	}
 
 	/**
-	 * Writes a log message. The given event can be used to differentiate between different log messages. The
-	 * serviceAgent and actingUser can be set to {@code null} if not known. Then this message will not be monitored by
-	 * the monitoring observer.
+	 * @deprecated Use {@link #log
+	 * 
+	 *             Writes a log message. The given event can be used to differentiate between different log messages. The serviceAgent and
+	 *             actingUser can be set to {@code null} if not known. Then this message will not be monitored by the monitoring observer.
 	 *
 	 * @param node
 	 * @param from the calling class
@@ -459,8 +458,44 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Same as #log(MonitoringEvent, String) without any remarks, just logs the plain event.
+	 * 
+	 * @param event A monitoring event to log
 	 */
+	public void log(MonitoringEvent event) {
+		log(System.currentTimeMillis(), event, null, Context.get().getMainAgent().getIdentifier(), null, null, null);
+	}
+
+	/**
+	 * Same as #log(MonitoringEvent, String, String, String) with context main agent as default source agent.
+	 * 
+	 * @param event A monitoring event to log
+	 * @param remarks Arbitrary data to log along with the event
+	 */
+	public void log(MonitoringEvent event, String remarks) {
+		log(System.currentTimeMillis(), event, null, Context.get().getMainAgent().getIdentifier(), null, null, remarks);
+	}
+
+	/**
+	 * Same as {@link #log(Long, MonitoringEvent, String, String, String, String, String)} with current system timestamp and no source or
+	 * destination node.
+	 * 
+	 * @param event A monitoring event to log
+	 * @param sourceAgentId A source agent id for this monitoring event
+	 * @param destinationAgentId A destination agent id for this monitoring event
+	 * @param remarks Arbitrary data to log along with the event
+	 */
+	public void log(MonitoringEvent event, String sourceAgentId, String destinationAgentId, String remarks) {
+		log(System.currentTimeMillis(), event, null, sourceAgentId, null, destinationAgentId, remarks);
+	}
+
+	/**
+	 * @deprecated Use {@link #log(Long, MonitoringEvent, String, String, String, String, String)} instead. The coupling between nodes and
+	 *             services is softened now.
+	 * 
+	 *             {@inheritDoc}
+	 */
+	@Deprecated
 	@Override
 	public void log(Long timestamp, MonitoringEvent event, String sourceNode, String sourceAgentId,
 			String destinationNode, String destinationAgentId, String remarks) {
@@ -512,9 +547,8 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	 *
 	 * @param cls Should be the class this instance is used with.
 	 * @return Returns a L2pLogger instance for the given class.
-	 * @throws ClassCastException If someone overloaded the loggers instance by adding some other logger implementation
-	 *             with the same name. In this case you may use Java native method by calling
-	 *             {@link Logger#getLogger(String)}.
+	 * @throws ClassCastException If someone overloaded the loggers instance by adding some other logger implementation with the same name.
+	 *             In this case you may use Java native method by calling {@link Logger#getLogger(String)}.
 	 */
 	public static L2pLogger getInstance(Class<?> cls) throws ClassCastException {
 		return getInstance(cls.getCanonicalName());
@@ -526,9 +560,8 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	 * @param name A name for the new logger instance. Should be the name of your current class by default. Like
 	 *            L2pLogger.class.getCanonicalName()
 	 * @return Returns a L2pLogger instance for the given name.
-	 * @throws ClassCastException If someone overloaded the loggers instance by adding some other logger implementation
-	 *             with the same name. In this case you may use Java native method by calling
-	 *             {@link Logger#getLogger(String)}.
+	 * @throws ClassCastException If someone overloaded the loggers instance by adding some other logger implementation with the same name.
+	 *             In this case you may use Java native method by calling {@link Logger#getLogger(String)}.
 	 */
 	public static L2pLogger getInstance(String name) throws ClassCastException {
 		if (name == null || name.isEmpty() || "i5.las2peer".equals(name)) {
