@@ -126,25 +126,33 @@ public class NodeServiceCacheTest {
 			// generate services
 			ServiceAgentImpl service2 = ServiceAgentImpl
 					.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@2"), "a pass");
+			System.out.println("NodeServiceCacheTest: service2 instance " + service2.getIdentifier());
 			service2.unlock("a pass");
 			ServiceAgentImpl service20 = ServiceAgentImpl
 					.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@2.0"), "a pass");
+			System.out.println("NodeServiceCacheTest: service20 instance " + service20.getIdentifier());
 			service20.unlock("a pass");
 			ServiceAgentImpl service21 = ServiceAgentImpl
 					.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@2.1"), "a pass");
+			System.out.println("NodeServiceCacheTest: service21 instance " + service21.getIdentifier());
 			service21.unlock("a pass");
 			ServiceAgentImpl service22 = ServiceAgentImpl
 					.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@2.2"), "a pass");
+			System.out.println("NodeServiceCacheTest: service22 instance " + service22.getIdentifier());
 			service22.unlock("a pass");
 			ServiceAgentImpl service22_1 = (ServiceAgentImpl) service22.cloneLocked();
+			System.out.println("NodeServiceCacheTest: service22_1 instance " + service22_1.getIdentifier());
 			service22_1.unlock("a pass");
 			ServiceAgentImpl service22_2 = (ServiceAgentImpl) service22.cloneLocked();
+			System.out.println("NodeServiceCacheTest: service22_2 instance " + service22_2.getIdentifier());
 			service22_2.unlock("a pass");
 			ServiceAgentImpl service22_3 = (ServiceAgentImpl) service22.cloneLocked();
+			System.out.println("NodeServiceCacheTest: service22_3 instance " + service22_3.getIdentifier());
 			service22_3.unlock("a pass");
 			ServiceAgentImpl service3 = ServiceAgentImpl
 					.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@3"), "a pass");
 			service3.unlock("a pass");
+			System.out.println("NodeServiceCacheTest: service3 instance " + service3.getIdentifier());
 
 			// start services
 			// v2@node1 v20@node1 v21@node1 v22@node1 v22@node2 v22@node3 v22@invokingNode v3@node1
