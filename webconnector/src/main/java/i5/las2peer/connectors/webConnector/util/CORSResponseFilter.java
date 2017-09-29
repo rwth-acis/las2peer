@@ -22,6 +22,7 @@ public class CORSResponseFilter implements ContainerResponseFilter {
 			throws IOException {
 		if (connector.isCrossOriginResourceSharing()) {
 			MultivaluedMap<String, Object> headers = responseContext.getHeaders();
+			headers.add("Access-Control-Expose-Headers", String.join(", ", headers.keySet()));
 			headers.add("Access-Control-Allow-Origin", connector.getCrossOriginResourceDomain());
 			headers.add("Access-Control-Max-Age", String.valueOf(connector.getCrossOriginResourceMaxAge()));
 			headers.add("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS");
