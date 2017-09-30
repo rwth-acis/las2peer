@@ -435,10 +435,10 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	}
 
 	/**
-	 * @deprecated Use {@link #log
+	 * @deprecated Use {@link #log}
 	 * 
-	 *             Writes a log message. The given event can be used to differentiate between different log messages. The serviceAgent and
-	 *             actingUser can be set to {@code null} if not known. Then this message will not be monitored by the monitoring observer.
+	 * Writes a log message. The given event can be used to differentiate between different log messages. The serviceAgent and
+	 * actingUser can be set to {@code null} if not known. Then this message will not be monitored by the monitoring observer.
 	 *
 	 * @param node
 	 * @param from the calling class
