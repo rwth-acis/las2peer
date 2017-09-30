@@ -35,8 +35,8 @@ public class LibraryIdentifier {
 	/**
 	 * generate a new LibraryIdentifier from its string representation
 	 * 
-	 * @param name
-	 * @throws IllegalArgumentException
+	 * @param name A canonical library name
+	 * @throws IllegalArgumentException If the version information is not correctly formatted
 	 */
 	public LibraryIdentifier(String name) throws IllegalArgumentException {
 		int index = name.indexOf(";version=\"");
@@ -57,9 +57,9 @@ public class LibraryIdentifier {
 	/**
 	 * generate a new identifier
 	 * 
-	 * @param name
-	 * @param version
-	 * @throws IllegalArgumentException
+	 * @param name A canonical library name
+	 * @param version A library version
+	 * @throws IllegalArgumentException If the version information is not correctly formatted
 	 */
 	public LibraryIdentifier(String name, String version) throws IllegalArgumentException {
 		if (version != null) {
@@ -73,8 +73,8 @@ public class LibraryIdentifier {
 	/**
 	 * generate a new library identifier
 	 * 
-	 * @param name
-	 * @param version
+	 * @param name A canonical library name
+	 * @param version A library version
 	 */
 	public LibraryIdentifier(String name, LibraryVersion version) {
 		this.name = name;
@@ -108,7 +108,7 @@ public class LibraryIdentifier {
 	/**
 	 * compares this identifier to another one
 	 * 
-	 * @param i
+	 * @param i A library identifier
 	 * @return true, if the given identifier is the same as this
 	 */
 	public boolean equals(LibraryIdentifier i) {
@@ -119,7 +119,7 @@ public class LibraryIdentifier {
 	 * compares this identifier against other objects if a string is given, the string representation of this identifier
 	 * is compared to the given string
 	 * 
-	 * @param o
+	 * @param o Another object to compare to
 	 * @return true, if the given object is an identifier and is the same as this
 	 */
 	@Override

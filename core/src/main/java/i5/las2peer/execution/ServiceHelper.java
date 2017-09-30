@@ -7,7 +7,6 @@ import java.lang.reflect.Modifier;
 
 import i5.las2peer.api.Service;
 import i5.las2peer.api.execution.ServiceMethodNotFoundException;
-import i5.las2peer.security.InternalSecurityException;
 
 /**
  * static helper methods for invocation of service methods via reflection
@@ -60,8 +59,8 @@ public abstract class ServiceHelper {
 	/**
 	 * check, if the first given class is a subclass of the second one
 	 * 
-	 * @param subClass
-	 * @param superClass
+	 * @param subClass A class to check
+	 * @param superClass A super class to check
 	 * @return true, if the first parameter class is a subclass of the second one
 	 */
 	public static boolean isSubclass(Class<?> subClass, Class<?> superClass) {
@@ -104,62 +103,53 @@ public abstract class ServiceHelper {
 	/**
 	 * Executes a service method.
 	 * 
-	 * @param service
-	 * 
+	 * @param service A service to use
 	 * @param method the service method
 	 * @return result of the method invocation
-	 * @throws SecurityException
-	 * @throws ServiceMethodNotFoundException
-	 * @throws IllegalArgumentException
-	 * @throws IllegalAccessException
-	 * @throws InvocationTargetException
-	 * @throws InternalSecurityException
+	 * @throws ServiceMethodNotFoundException If the method was not found in the given class
+	 * @throws IllegalArgumentException Thrown to indicate that a method has been passed an illegal or inappropriate
+	 *             argument.
+	 * @throws IllegalAccessException if this Method object is enforcing Java language access control and the underlying
+	 *             method is inaccessible.
+	 * @throws InvocationTargetException if the underlying method throws an exception.
 	 */
-	public static Object execute(Service service, String method)
-			throws SecurityException, ServiceMethodNotFoundException, IllegalArgumentException, IllegalAccessException,
-			InvocationTargetException, InternalSecurityException {
+	public static Object execute(Service service, String method) throws ServiceMethodNotFoundException,
+			IllegalArgumentException, IllegalAccessException, InvocationTargetException {
 		return execute(service, method, new Object[0]);
 	}
 
 	/**
 	 * Executes a service method.
 	 * 
-	 * @param service
-	 * 
+	 * @param service A service to use
 	 * @param method the service method
-	 * @param parameters
+	 * @param parameters A bunch of parameters
 	 * @return result of the method invocation
-	 * @throws SecurityException
-	 * @throws ServiceMethodNotFoundException
-	 * @throws IllegalArgumentException
-	 * @throws IllegalAccessException
-	 * @throws InvocationTargetException
-	 * @throws InternalSecurityException
+	 * @throws ServiceMethodNotFoundException If the method was not found in the given class
+	 * @throws IllegalArgumentException Thrown to indicate that a method has been passed an illegal or inappropriate
+	 *             argument.
+	 * @throws IllegalAccessException if this Method object is enforcing Java language access control and the underlying
+	 *             method is inaccessible.
+	 * @throws InvocationTargetException if the underlying method throws an exception.
 	 */
 	public static Object execute(Service service, String method, Object... parameters)
 			throws ServiceMethodNotFoundException, IllegalArgumentException, IllegalAccessException,
-			InvocationTargetException, InternalSecurityException {
+			InvocationTargetException {
 		Method m = searchMethod(service.getClass(), method, parameters);
-
 		return m.invoke(service, parameters);
 	}
 
 	/**
 	 * Searches the service method fitting to the given parameter classes.
 	 * 
-	 * @param serviceClass
-	 *
+	 * @param serviceClass A service class to search in
 	 * @param methodName the service method
-	 * @param params
-	 *
+	 * @param params A bunch of parameters
 	 * @return a Method
-	 *
-	 * @throws InternalSecurityException
-	 * @throws ServiceMethodNotFoundException
-	 *
+	 * @throws ServiceMethodNotFoundException If the method was not found in the given class
 	 */
 	public static Method searchMethod(Class<? extends Service> serviceClass, String methodName, Object[] params)
-			throws InternalSecurityException, ServiceMethodNotFoundException {
+			throws ServiceMethodNotFoundException {
 		Class<?>[] acActualParamTypes = new Class[params.length];
 
 		for (int i = 0; i < params.length; i++) {
@@ -246,7 +236,7 @@ public abstract class ServiceHelper {
 	/**
 	 * Creates a string with all classes from an array of parameters.
 	 * 
-	 * @param params
+	 * @param params A bunch of parameters
 	 * @return a string describing a parameter list for the given actual parameters
 	 */
 	public static String getParameterString(Object[] params) {

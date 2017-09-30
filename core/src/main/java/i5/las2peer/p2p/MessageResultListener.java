@@ -59,7 +59,7 @@ public class MessageResultListener {
 	/**
 	 * simple constructor
 	 * 
-	 * @param timeoutMs
+	 * @param timeoutMs A timeout for the result
 	 */
 	public MessageResultListener(long timeoutMs) {
 		startedAt = new Date().getTime();
@@ -67,10 +67,10 @@ public class MessageResultListener {
 	}
 
 	/**
-	 * simple contructor
+	 * simple constructor
 	 * 
-	 * @param timeoutMs
-	 * @param timeoutMoreMs
+	 * @param timeoutMs A timeout for the result
+	 * @param timeoutMoreMs A timeout after first result
 	 */
 	public MessageResultListener(long timeoutMs, long timeoutMoreMs) {
 		startedAt = new Date().getTime();
@@ -81,7 +81,7 @@ public class MessageResultListener {
 	/**
 	 * simple constructor
 	 * 
-	 * @param timeoutMs
+	 * @param timeoutMs A timeout for the result
 	 */
 	public MessageResultListener(int timeoutMs) {
 		this((long) timeoutMs);
@@ -97,7 +97,7 @@ public class MessageResultListener {
 	/**
 	 * increase the number of recipients
 	 * 
-	 * @param number
+	 * @param number Amount of recipients to add
 	 */
 	public void addRecipients(int number) {
 		synchronized (this) {
@@ -110,7 +110,7 @@ public class MessageResultListener {
 	 * 
 	 * will cause a notifyException call
 	 * 
-	 * @param e
+	 * @param e An exception to collect
 	 */
 	public void collectException(Exception e) {
 		synchronized (this) {
@@ -127,7 +127,7 @@ public class MessageResultListener {
 	/**
 	 * set the result of the message, will cause a notifySuccess() call
 	 * 
-	 * @param answer
+	 * @param answer A message to collect as answer
 	 */
 	public synchronized void collectAnswer(Message answer) {
 		synchronized (this) {
@@ -222,7 +222,7 @@ public class MessageResultListener {
 	/**
 	 * sleep until a result has been received
 	 * 
-	 * @throws InterruptedException
+	 * @throws InterruptedException If waiting was interrupted
 	 */
 	public void waitForOneAnswer() throws InterruptedException {
 		waitForOneAnswer(DEFAULT_TIMER);
@@ -232,7 +232,7 @@ public class MessageResultListener {
 	 * sleep until a result has been received.
 	 * 
 	 * @param sleepTimeMs how long to sleep between checks
-	 * @throws InterruptedException
+	 * @throws InterruptedException If waiting was interrupted
 	 */
 	public void waitForOneAnswer(int sleepTimeMs) throws InterruptedException {
 
@@ -259,7 +259,7 @@ public class MessageResultListener {
 	/**
 	 * wait for all expected results
 	 * 
-	 * @throws InterruptedException
+	 * @throws InterruptedException If waiting was interrupted
 	 */
 	public void waitForAllAnswers() throws InterruptedException {
 		waitForAllAnswers(true);
@@ -268,7 +268,7 @@ public class MessageResultListener {
 	/**
 	 * 
 	 * @param waitForAll waits for all results if false, otherwise
-	 * @throws InterruptedException
+	 * @throws InterruptedException If waiting was interrupted
 	 */
 	public void waitForAllAnswers(boolean waitForAll) throws InterruptedException {
 		synchronized (this) {
@@ -338,7 +338,7 @@ public class MessageResultListener {
 	 * 
 	 * Also useful in a closure like generation of a Listener instance
 	 * 
-	 * @param exception
+	 * @param exception An exception that was received
 	 */
 	public void notifyException(Exception exception) {
 	}

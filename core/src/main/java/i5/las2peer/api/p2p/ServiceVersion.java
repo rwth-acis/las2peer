@@ -27,8 +27,8 @@ public class ServiceVersion implements Comparable<ServiceVersion>, Serializable 
 	 * format : major.minor.sub-build (where minor, subversion and build are optional) or "*" (no version specified /
 	 * matches all versions)
 	 * 
-	 * @param version
-	 * @throws IllegalArgumentException
+	 * @param version A version string representation to parse
+	 * @throws IllegalArgumentException If the string contains no valid version representation
 	 */
 	public ServiceVersion(String version) throws IllegalArgumentException {
 		if (version != null && !version.equals("*")) {
@@ -87,11 +87,11 @@ public class ServiceVersion implements Comparable<ServiceVersion>, Serializable 
 	/**
 	 * generate a new ServiceVersion
 	 * 
-	 * @param major
-	 * @param minor
-	 * @param sub
-	 * @param build
-	 * @throws IllegalArgumentException a version is smaller than 0
+	 * @param major Major version number part
+	 * @param minor Minor version number part
+	 * @param sub Sub version number part
+	 * @param build Build number
+	 * @throws IllegalArgumentException If a version number part is smaller than 0
 	 */
 	public ServiceVersion(int major, int minor, int sub, int build) throws IllegalArgumentException {
 		this(major, minor, sub);
@@ -105,10 +105,10 @@ public class ServiceVersion implements Comparable<ServiceVersion>, Serializable 
 	/**
 	 * generate a new ServiceVersion
 	 * 
-	 * @param major
-	 * @param minor
-	 * @param sub
-	 * @throws IllegalArgumentException a version is smaller than 0
+	 * @param major Major version number part
+	 * @param minor Minor version number part
+	 * @param sub Sub version number part
+	 * @throws IllegalArgumentException If a version number part is smaller than 0
 	 */
 	public ServiceVersion(int major, int minor, int sub) throws IllegalArgumentException {
 		this(major, minor);
@@ -121,9 +121,9 @@ public class ServiceVersion implements Comparable<ServiceVersion>, Serializable 
 	/**
 	 * generate a new ServiceVersion
 	 * 
-	 * @param major
-	 * @param minor
-	 * @throws IllegalArgumentException
+	 * @param major Major version number part
+	 * @param minor Minor version number part
+	 * @throws IllegalArgumentException If a version number part is smaller than 0
 	 */
 	public ServiceVersion(int major, int minor) throws IllegalArgumentException {
 		this(major);
@@ -136,8 +136,8 @@ public class ServiceVersion implements Comparable<ServiceVersion>, Serializable 
 	/**
 	 * generate a new ServiceVersion
 	 * 
-	 * @param major
-	 * @throws IllegalArgumentException
+	 * @param major Major version number part
+	 * @throws IllegalArgumentException If a version number part is smaller than 0
 	 */
 	public ServiceVersion(int major) throws IllegalArgumentException {
 		if (major < 0) {
@@ -149,7 +149,7 @@ public class ServiceVersion implements Comparable<ServiceVersion>, Serializable 
 	/**
 	 * check if this version is larger than the given one
 	 * 
-	 * @param v
+	 * @param v Another service version to compare to
 	 * @return true, if this version is larger than the given one
 	 */
 	public boolean isLargerThan(ServiceVersion v) {
@@ -208,7 +208,7 @@ public class ServiceVersion implements Comparable<ServiceVersion>, Serializable 
 	/**
 	 * check if this version is smaller than the given one
 	 * 
-	 * @param v
+	 * @param v Another service version to compare to
 	 * @return true, if this version is smaller than the given one
 	 */
 	public boolean isSmallerThan(ServiceVersion v) {
@@ -218,7 +218,7 @@ public class ServiceVersion implements Comparable<ServiceVersion>, Serializable 
 	/**
 	 * check if this version is larger than or equal to the given one
 	 * 
-	 * @param v
+	 * @param v Another service version to compare to
 	 * @return true, if this version is larger than or equal to the given one
 	 */
 	public boolean isLargerOrEqual(ServiceVersion v) {
@@ -228,7 +228,7 @@ public class ServiceVersion implements Comparable<ServiceVersion>, Serializable 
 	/**
 	 * check if this version is smaller than or equal to the given one
 	 * 
-	 * @param v
+	 * @param v Another service version to compare to
 	 * @return true, if this version is smaller than or equal to the given one
 	 */
 	public boolean isSmallerOrEqual(ServiceVersion v) {
@@ -238,8 +238,8 @@ public class ServiceVersion implements Comparable<ServiceVersion>, Serializable 
 	/**
 	 * check if this version is between the given ones
 	 * 
-	 * @param smaller
-	 * @param larger
+	 * @param smaller A smaller service version to check for
+	 * @param larger A larger service version to check for
 	 * @return true, if this version is between the two given ones
 	 */
 	public boolean isBetween(ServiceVersion smaller, ServiceVersion larger) {
@@ -259,10 +259,9 @@ public class ServiceVersion implements Comparable<ServiceVersion>, Serializable 
 	/**
 	 * tries to create a version number from the given strings and compares them to this version
 	 * 
-	 * @param smaller
-	 * @param larger
+	 * @param smaller A smaller service version to check for
+	 * @param larger A larger service version to check for
 	 * @return true, if this version is between the two given ones
-	 * @throws IllegalArgumentException
 	 */
 	public boolean isBetween(String smaller, String larger) {
 		return this.isBetween(new ServiceVersion(smaller), new ServiceVersion(larger));
@@ -271,7 +270,7 @@ public class ServiceVersion implements Comparable<ServiceVersion>, Serializable 
 	/**
 	 * compares to version and checks for equality
 	 * 
-	 * @param v
+	 * @param v Another service version to compare to
 	 * @return true, if this version is the same as the given one
 	 */
 	public boolean equals(ServiceVersion v) {
@@ -283,7 +282,7 @@ public class ServiceVersion implements Comparable<ServiceVersion>, Serializable 
 	 * 
 	 * if the given object is a String, the string representation of this version is compared to the given string
 	 * 
-	 * @param o
+	 * @param o Another object to check
 	 * @return true, if the given object is a version and the same as this one
 	 */
 	@Override
@@ -382,8 +381,8 @@ public class ServiceVersion implements Comparable<ServiceVersion>, Serializable 
 	/**
 	 * implementation of Comparable
 	 * 
-	 * @param other
-	 * @return coparison code
+	 * @param other Another service version to check
+	 * @return comparison code
 	 */
 	@Override
 	public int compareTo(ServiceVersion other) {
@@ -401,7 +400,7 @@ public class ServiceVersion implements Comparable<ServiceVersion>, Serializable 
 	 * 
 	 * e.g. "1.5.2-123" will fit "1.5", but "1.5" won't fit "1.6" or "1.5.2"
 	 * 
-	 * @param required
+	 * @param required A required service version to check for
 	 * @return Returns true if this version fits the required version
 	 */
 	public boolean fits(ServiceVersion required) {

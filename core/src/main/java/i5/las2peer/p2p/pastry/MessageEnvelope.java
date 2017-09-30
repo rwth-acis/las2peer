@@ -18,8 +18,8 @@ public class MessageEnvelope implements Message {
 	/**
 	 * create a message envelope with simple string content
 	 * 
-	 * @param sendingNode
-	 * @param content
+	 * @param sendingNode A sending node handle
+	 * @param content Arbitrary message content string
 	 */
 	public MessageEnvelope(NodeHandle sendingNode, String content) {
 		this.sendingNode = sendingNode;
@@ -29,8 +29,8 @@ public class MessageEnvelope implements Message {
 	/**
 	 * generate an Pastry message envelope from a las2peer message
 	 * 
-	 * @param sendingNode
-	 * @param content
+	 * @param sendingNode A sending node handle
+	 * @param content Another message to wrap
 	 */
 	public MessageEnvelope(NodeHandle sendingNode, i5.las2peer.communication.Message content) {
 		this.sendingNode = sendingNode;
@@ -59,7 +59,7 @@ public class MessageEnvelope implements Message {
 	 * get the contained las2peer message
 	 * 
 	 * @return the contained las2peer message
-	 * @throws MalformedXMLException
+	 * @throws MalformedXMLException If the XML data string is malformed
 	 */
 	public i5.las2peer.communication.Message getContainedMessage() throws MalformedXMLException {
 		return i5.las2peer.communication.Message.createFromXml(content);

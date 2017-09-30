@@ -1,8 +1,8 @@
 package i5.las2peer.logging.monitoring;
 
-import i5.las2peer.api.logging.MonitoringEvent;
-
 import java.io.Serializable;
+
+import i5.las2peer.api.logging.MonitoringEvent;
 
 /**
  * 
@@ -28,14 +28,13 @@ public class MonitoringMessage implements Serializable {
 	 * 
 	 * Constructor of a MonitoringMessage.
 	 * 
-	 * @param timestamp
-	 * @param event
-	 * @param sourceNode
-	 * @param sourceAgentId
-	 * @param destinationNode
-	 * @param destinationAgentId
-	 * @param remarks
-	 * 
+	 * @param timestamp A timestamp for this message
+	 * @param event A monitoring event identifier
+	 * @param sourceNode A source node
+	 * @param sourceAgentId A source agent id
+	 * @param destinationNode A destination node
+	 * @param destinationAgentId A destination agent id
+	 * @param remarks Any additional information about this message
 	 */
 	public MonitoringMessage(Long timestamp, MonitoringEvent event, String sourceNode, String sourceAgentId,
 			String destinationNode, String destinationAgentId, String remarks) {

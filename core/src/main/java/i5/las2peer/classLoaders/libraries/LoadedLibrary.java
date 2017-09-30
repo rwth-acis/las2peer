@@ -19,7 +19,7 @@ public abstract class LoadedLibrary {
 	LoadedLibrary(String libraryIdentifier) {
 		this(new LibraryIdentifier(libraryIdentifier));
 	}
-	
+
 	LoadedLibrary(LibraryIdentifier lib) {
 		this.myLibrary = lib;
 	}
@@ -35,8 +35,8 @@ public abstract class LoadedLibrary {
 	/**
 	 * for class and resource loading: get the URL for the specified resource
 	 * 
-	 * @param name
-	 * @return a URL for the requested ressource
+	 * @param name A resource name
+	 * @return a URL for the requested resource
 	 * @throws ResourceNotFoundException the given resource does not exists in this library
 	 */
 	public abstract URL getResourceAsUrl(String name) throws ResourceNotFoundException;
@@ -62,9 +62,9 @@ public abstract class LoadedLibrary {
 	/**
 	 * get the contents of a resource as a String
 	 * 
-	 * @param resourceName
+	 * @param resourceName A resource name
 	 * @return content of the given resource as string
-	 * @throws IOException
+	 * @throws IOException If the resource could not be read
 	 * @throws ResourceNotFoundException the given resource does not exists in this library
 	 */
 	public String getResourceAsString(String resourceName) throws IOException, ResourceNotFoundException {
@@ -85,9 +85,9 @@ public abstract class LoadedLibrary {
 	/**
 	 * get the contents of a resource as a byte array
 	 * 
-	 * @param resourceName
+	 * @param resourceName A resource name
 	 * @return contents of the requested resource
-	 * @throws IOException
+	 * @throws IOException If the resource could not be read
 	 * @throws ResourceNotFoundException the given resource does not exists in this library
 	 */
 	public byte[] getResourceAsBinary(String resourceName) throws IOException, ResourceNotFoundException {

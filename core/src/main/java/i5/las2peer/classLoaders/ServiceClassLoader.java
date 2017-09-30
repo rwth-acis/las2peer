@@ -31,15 +31,13 @@ public class ServiceClassLoader extends ClassLoader {
 	/**
 	 * create a new class loader for a given library.
 	 *
-	 * @param lib
-	 * @param parent
-	 * @param policy
+	 * @param lib A library to load service classes from
+	 * @param parent A parent class loader
+	 * @param policy A class loader policy
 	 */
 	public ServiceClassLoader(LoadedLibrary lib, ClassLoader parent, ClassLoaderPolicy policy) {
 		this.library = lib;
-
 		this.parent = parent;
-
 		this.policy = policy;
 	}
 
@@ -81,14 +79,14 @@ public class ServiceClassLoader extends ClassLoader {
 	}
 
 	/**
-	 * loading classes in a Library classloader follows the following steps: check if the class has already been loaded
+	 * loading classes in a Library class loader follows the following steps: check if the class has already been loaded
 	 * look into all bundles class loaders this library class loader has been registered to look into the bootstrap
-	 * classloader alert that the class cannot be found
+	 * class loader alert that the class cannot be found
 	 * 
-	 * @param name
-	 * @param resolve
+	 * @param name A class name to load
+	 * @param resolve If true the loaded class is resolved
 	 * @return class definition of the requested class
-	 * @throws ClassNotFoundException
+	 * @throws ClassNotFoundException If the class was not found
 	 */
 	@Override
 	protected synchronized Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
@@ -192,7 +190,7 @@ public class ServiceClassLoader extends ClassLoader {
 	/**
 	 * get the URL for a resource
 	 * 
-	 * @param resourceName
+	 * @param resourceName A resource name
 	 * @return Returns the URL for the resource or {@code null}, if the resource was not found
 	 */
 	@Override

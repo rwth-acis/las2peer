@@ -26,9 +26,9 @@ public class LoadedJarLibrary extends LoadedLibrary {
 	/**
 	 * create a new LodadJarLibrary
 	 * 
-	 * @param filename
-	 * @param ident
-	 * @throws IOException
+	 * @param filename A jar file name
+	 * @param ident A library identifier
+	 * @throws IOException If the given jar filename could not be used
 	 */
 	public LoadedJarLibrary(String filename, LibraryIdentifier ident) throws IOException {
 		super(ident);
@@ -168,8 +168,8 @@ public class LoadedJarLibrary extends LoadedLibrary {
 	 * 
 	 * @param filename filename of the jar file
 	 * @return a loaded jar library representing the given file
-	 * @throws IOException
-	 * @throws IllegalArgumentException
+	 * @throws IOException If the given jar filename could not be used
+	 * @throws IllegalArgumentException If the library identifier could not be created
 	 */
 	public static LoadedJarLibrary createFromJar(String filename) throws IllegalArgumentException, IOException {
 		JarFile jfFile = new JarFile(filename);

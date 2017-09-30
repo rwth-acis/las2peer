@@ -139,12 +139,12 @@ public class Message implements XmlAble, Cloneable {
 	/**
 	 * create a new message with default timeout
 	 * 
-	 * @param from
-	 * @param to
-	 * @param data
-	 * @throws EncodingFailedException
+	 * @param from A sending agent
+	 * @param to A receiving agent
+	 * @param data Arbitrary data to wrap in the message
+	 * @throws EncodingFailedException If the content serialization fails
 	 * @throws InternalSecurityException the private key of the sender is not accessible for signing
-	 * @throws SerializationException
+	 * @throws SerializationException If the content serialization fails
 	 * 
 	 */
 	public Message(AgentImpl from, AgentImpl to, Serializable data)
@@ -155,13 +155,13 @@ public class Message implements XmlAble, Cloneable {
 	/**
 	 * create a new message
 	 * 
-	 * @param from
-	 * @param to
-	 * @param data
+	 * @param from A sending agent
+	 * @param to A receiving agent
+	 * @param data Arbitrary data to wrap in the message
 	 * @param timeOutMs timeout for the validity of the new message
-	 * @throws EncodingFailedException
+	 * @throws EncodingFailedException If the content serialization fails
 	 * @throws InternalSecurityException the private key of the sender is not accessible for signing
-	 * @throws SerializationException
+	 * @throws SerializationException If the content serialization fails
 	 */
 	public Message(AgentImpl from, AgentImpl to, Serializable data, long timeOutMs)
 			throws EncodingFailedException, InternalSecurityException, SerializationException {
@@ -193,12 +193,12 @@ public class Message implements XmlAble, Cloneable {
 	/**
 	 * create a new message with default timeout
 	 * 
-	 * @param from
-	 * @param to
-	 * @param data
-	 * @throws EncodingFailedException
+	 * @param from A sending agent
+	 * @param to A receiving agent
+	 * @param data Arbitrary data to wrap in the message
+	 * @throws EncodingFailedException If the content serialization fails
 	 * @throws InternalSecurityException the private key of the sender is not accessible for signing
-	 * @throws SerializationException
+	 * @throws SerializationException If the content serialization fails
 	 */
 	public Message(AgentImpl from, AgentImpl to, XmlAble data)
 			throws EncodingFailedException, InternalSecurityException, SerializationException {
@@ -208,13 +208,13 @@ public class Message implements XmlAble, Cloneable {
 	/**
 	 * create a new message
 	 * 
-	 * @param from
-	 * @param to
-	 * @param data
+	 * @param from A sending agent
+	 * @param to A receiving agent
+	 * @param data Arbitrary data to wrap in the message
 	 * @param timeoutMs timeout for the validity of the new message
-	 * @throws EncodingFailedException
+	 * @throws EncodingFailedException If the content serialization fails
 	 * @throws InternalSecurityException the private key of the sender is not accessible for signing
-	 * @throws SerializationException
+	 * @throws SerializationException If the content serialization fails
 	 */
 	public Message(AgentImpl from, AgentImpl to, XmlAble data, long timeoutMs)
 			throws EncodingFailedException, InternalSecurityException, SerializationException {
@@ -231,12 +231,12 @@ public class Message implements XmlAble, Cloneable {
 	/**
 	 * create a new message to a topic with default timeout
 	 * 
-	 * @param from
-	 * @param topic
-	 * @param data
-	 * @throws EncodingFailedException
-	 * @throws InternalSecurityException
-	 * @throws SerializationException
+	 * @param from A sending agent
+	 * @param topic A target topic
+	 * @param data Arbitrary data to wrap in the message
+	 * @throws EncodingFailedException If the content serialization fails
+	 * @throws InternalSecurityException the private key of the sender is not accessible for signing
+	 * @throws SerializationException If the content serialization fails
 	 */
 	public Message(AgentImpl from, long topic, Serializable data)
 			throws EncodingFailedException, InternalSecurityException, SerializationException {
@@ -246,13 +246,13 @@ public class Message implements XmlAble, Cloneable {
 	/**
 	 * create a new message to all agents listening on the given topic
 	 * 
-	 * @param from
-	 * @param topic
-	 * @param data
-	 * @param timeoutMs
-	 * @throws EncodingFailedException
-	 * @throws InternalSecurityException
-	 * @throws SerializationException
+	 * @param from A sending agent
+	 * @param topic A target topic
+	 * @param data Arbitrary data to wrap in the message
+	 * @param timeoutMs A timeout to send message
+	 * @throws EncodingFailedException If the content serialization fails
+	 * @throws InternalSecurityException the private key of the sender is not accessible for signing
+	 * @throws SerializationException If the content serialization fails
 	 */
 	public Message(AgentImpl from, long topic, Serializable data, long timeoutMs)
 			throws EncodingFailedException, InternalSecurityException, SerializationException {
@@ -304,12 +304,12 @@ public class Message implements XmlAble, Cloneable {
 	/**
 	 * Generate a new message in response to the given one. Sender and recipient will be derived from the given message.
 	 * 
-	 * @param responseTo
-	 * @param data
+	 * @param responseTo A message reference
+	 * @param data Arbitrary data to wrap in the message
 	 * @param timeoutMs timeout for the validity of the new message
-	 * @throws EncodingFailedException
+	 * @throws EncodingFailedException If the content serialization fails
 	 * @throws InternalSecurityException the private key of the sender is not accessible for signing
-	 * @throws SerializationException
+	 * @throws SerializationException If the content serialization fails
 	 */
 	public Message(Message responseTo, XmlAble data, long timeoutMs)
 			throws EncodingFailedException, InternalSecurityException, SerializationException {
@@ -336,11 +336,11 @@ public class Message implements XmlAble, Cloneable {
 	/**
 	 * Generate a new message in response to the given one. Sender and recipient will be derived from the given message.
 	 * 
-	 * @param responseTo
-	 * @param data
-	 * @throws SerializationException
+	 * @param responseTo A message reference
+	 * @param data Arbitrary data to wrap in the message
+	 * @throws EncodingFailedException If the content serialization fails
 	 * @throws InternalSecurityException the private key of the sender is not accessible for signing
-	 * @throws EncodingFailedException
+	 * @throws SerializationException If the content serialization fails
 	 */
 	public Message(Message responseTo, XmlAble data)
 			throws EncodingFailedException, InternalSecurityException, SerializationException {
@@ -350,12 +350,12 @@ public class Message implements XmlAble, Cloneable {
 	/**
 	 * Generate a new message in response to the given one. Sender and recipient will be derived from the given message.
 	 * 
-	 * @param responseTo
-	 * @param data
-	 * @param timeoutMs
-	 * @throws EncodingFailedException
+	 * @param responseTo A message reference
+	 * @param data Arbitrary data to wrap in the message
+	 * @param timeoutMs A timeout to send message
+	 * @throws EncodingFailedException If the content serialization fails
 	 * @throws InternalSecurityException the private key of the sender is not accessible for signing
-	 * @throws SerializationException
+	 * @throws SerializationException If the content serialization fails
 	 */
 	public Message(Message responseTo, Serializable data, long timeoutMs)
 			throws EncodingFailedException, InternalSecurityException, SerializationException {
@@ -383,11 +383,11 @@ public class Message implements XmlAble, Cloneable {
 	/**
 	 * Generate a new message in response to the given one. Sender and recipient will be derived from the given message.
 	 * 
-	 * @param responseTo
-	 * @param data
-	 * @throws EncodingFailedException
+	 * @param responseTo A message reference
+	 * @param data Arbitrary data to wrap in the message
+	 * @throws EncodingFailedException If the content serialization fails
 	 * @throws InternalSecurityException the private key of the sender is not accessible for signing
-	 * @throws SerializationException
+	 * @throws SerializationException If the content serialization fails
 	 */
 	public Message(Message responseTo, Serializable data)
 			throws EncodingFailedException, InternalSecurityException, SerializationException {
@@ -397,7 +397,7 @@ public class Message implements XmlAble, Cloneable {
 	/**
 	 * get the contents of this message as base 64 encoded string
 	 * 
-	 * @return message contents in xml format with all important attributes and the actual content as base64 encoded
+	 * @return message contents in XML format with all important attributes and the actual content as base64 encoded
 	 *         string
 	 * 
 	 * @throws SerializationException
@@ -433,7 +433,7 @@ public class Message implements XmlAble, Cloneable {
 	/**
 	 * encrypt the content of this message (as base64 encoded string) with asymmetric encryption
 	 * 
-	 * @throws EncodingFailedException
+	 * @throws EncodingFailedException If the content serialization fails
 	 */
 	private void encryptContent() throws EncodingFailedException {
 		if (recipient == null || recipient instanceof AnonymousAgent) {
@@ -586,8 +586,8 @@ public class Message implements XmlAble, Cloneable {
 	 * The storage has to know an unlocked version of the recipient agent! (i.e. a
 	 * {@link i5.las2peer.security.AgentContext} bound to him.
 	 * 
-	 * @param storage
-	 * @throws InternalSecurityException
+	 * @param storage An agent storage to use
+	 * @throws InternalSecurityException If the private key of the receiver has to be unlocked for decryption
 	 * @throws AgentException If an issue with the sender agent occurs
 	 */
 	public void open(AgentStorage storage) throws InternalSecurityException, AgentException {
@@ -599,12 +599,10 @@ public class Message implements XmlAble, Cloneable {
 	 * 
 	 * the private key has to be unlocked first!
 	 * 
-	 * @param unlockedRecipient
-	 * @param storage
-	 * 
-	 * 
-	 * @throws InternalSecurityException the private key of the receiver has to be unlocked for decryption
-	 * @throws AgentException
+	 * @param unlockedRecipient An unlocked recipient
+	 * @param storage An agent storage to use
+	 * @throws InternalSecurityException If the private key of the receiver has to be unlocked for decryption
+	 * @throws AgentException If an issue with the sender agent occurs
 	 * @throws AgentNotFoundException If an issue with the sender agent occurs
 	 */
 	public void open(AgentImpl unlockedRecipient, AgentStorage storage)
@@ -704,7 +702,7 @@ public class Message implements XmlAble, Cloneable {
 	/**
 	 * verify the signature of this message the content has to be available for this
 	 * 
-	 * @throws InternalSecurityException
+	 * @throws InternalSecurityException If signature verification fails
 	 */
 	public void verifySignature() throws InternalSecurityException {
 		if (sender instanceof AnonymousAgentImpl) {
@@ -837,8 +835,8 @@ public class Message implements XmlAble, Cloneable {
 	/**
 	 * for XmlAble: set the state of this object from the given xml document
 	 * 
-	 * @param xml
-	 * @throws MalformedXMLException
+	 * @param xml An XML data string
+	 * @throws MalformedXMLException If the XML data string is malformed
 	 */
 	public void setStateFromXml(String xml) throws MalformedXMLException {
 		try {
@@ -918,7 +916,7 @@ public class Message implements XmlAble, Cloneable {
 	/**
 	 * set the if of the node sending this message The NodeHandle-variant is for Pastry based networks.
 	 * 
-	 * @param handle
+	 * @param handle A sending node handle
 	 */
 	public void setSendingNodeId(NodeHandle handle) {
 		sendingNodeId = handle;
@@ -927,7 +925,7 @@ public class Message implements XmlAble, Cloneable {
 	/**
 	 * set the id of the node sending this message The long-variant is to use in case of a LocalNode network.
 	 * 
-	 * @param id
+	 * @param id A sending node id
 	 */
 	public void setSendingNodeId(Long id) {
 		sendingNodeId = id;
@@ -936,7 +934,7 @@ public class Message implements XmlAble, Cloneable {
 	/**
 	 * set the id of the recipient (used by the node when receiving messages from topics)
 	 * 
-	 * @param id
+	 * @param id A receiver id
 	 */
 	public void setRecipientId(String id) {
 		recipientId = id;
@@ -945,7 +943,7 @@ public class Message implements XmlAble, Cloneable {
 	/**
 	 * set the id of the node sending this message
 	 * 
-	 * @param id
+	 * @param id A sending node id object
 	 */
 	public void setSendingNodeId(Object id) {
 		if (id instanceof NodeHandle) {
@@ -970,9 +968,9 @@ public class Message implements XmlAble, Cloneable {
 	/**
 	 * factory: create a message from an XML document
 	 * 
-	 * @param xml
+	 * @param xml An XML data string
 	 * @return a message generated from the given XML document
-	 * @throws MalformedXMLException
+	 * @throws MalformedXMLException If the XML data string is malformed
 	 */
 	public static Message createFromXml(String xml) throws MalformedXMLException {
 		Message result = new Message();

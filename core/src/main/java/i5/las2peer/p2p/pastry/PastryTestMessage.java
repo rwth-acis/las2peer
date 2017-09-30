@@ -27,8 +27,8 @@ public class PastryTestMessage implements Message {
 	/**
 	 * Constructor.
 	 * 
-	 * @param from
-	 * @param to
+	 * @param from A sending id
+	 * @param to A receiving id
 	 */
 	public PastryTestMessage(Id from, Id to) {
 		counter++;

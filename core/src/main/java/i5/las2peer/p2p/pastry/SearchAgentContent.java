@@ -19,8 +19,8 @@ public class SearchAgentContent extends L2pScribeContent {
 	/**
 	 * create a new search content looking for the agent of the given id, created at the given node (handle)
 	 * 
-	 * @param from
-	 * @param id
+	 * @param from A sending node handle
+	 * @param id An agent id to search for
 	 */
 	public SearchAgentContent(NodeHandle from, String id) {
 		super(from);

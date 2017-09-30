@@ -20,9 +20,9 @@ public class RMITask implements Serializable {
 	/**
 	 * create a new invocation task
 	 * 
-	 * @param service
-	 * @param methodName
-	 * @param parameters
+	 * @param service A service name and version
+	 * @param methodName A method name to call
+	 * @param parameters A bunch of parameters
 	 */
 	public RMITask(ServiceNameVersion service, String methodName, Serializable[] parameters) {
 		this.service = service;

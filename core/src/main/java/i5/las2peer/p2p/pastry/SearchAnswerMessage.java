@@ -19,8 +19,8 @@ public class SearchAnswerMessage implements Message {
 	/**
 	 * create a new answer
 	 * 
-	 * @param to
-	 * @param from
+	 * @param to A node handle to answer to
+	 * @param from A sending node handle
 	 * @param answerToId id of the {@link SearchAgentContent} message this one is a response to
 	 */
 	public SearchAnswerMessage(NodeHandle to, NodeHandle from, long answerToId) {
@@ -32,8 +32,8 @@ public class SearchAnswerMessage implements Message {
 	/**
 	 * create a new answer for the given search request
 	 * 
-	 * @param from
-	 * @param search
+	 * @param from A sending node handle
+	 * @param search A search result content
 	 */
 	public SearchAnswerMessage(NodeHandle from, SearchAgentContent search) {
 		this(search.getOrigin(), from, search.getRandomId());
