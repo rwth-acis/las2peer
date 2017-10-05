@@ -225,7 +225,7 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 		threadpool.execute(new Runnable() {
 			@Override
 			public void run() {
-				logger.info("Checking collision for " + envelope.toString());
+				logger.fine("Checking collision for " + envelope.toString());
 				Id metadataId = MetadataArtifact.buildMetadataId(artifactIdFactory, envelope.getIdentifier(),
 						envelope.getVersion());
 				lookupHandles(metadataId, new StorageLookupHandler() {
@@ -292,7 +292,7 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 			return;
 		}
 		// XXX only accept envelope if the content has changed?
-		logger.info("Inserting parted envelope into network DHT");
+		logger.fine("Inserting parted envelope into network DHT");
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try {
 			ObjectOutputStream oos = new ObjectOutputStream(baos);
@@ -312,7 +312,7 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 			parts++; // this happens if max size is not a divider of size
 		}
 		int partsize = size / parts + 1;
-		logger.info("Given object is serialized " + size + " bytes heavy, split into " + parts + " parts each "
+		logger.fine("Given object is serialized " + size + " bytes heavy, split into " + parts + " parts each "
 				+ partsize + " bytes in size");
 		MultiStoreResult multiResult = new MultiStoreResult(parts);
 		final String identifier = envelope.getIdentifier();
@@ -321,7 +321,7 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 			for (int part = 0; part < parts; part++) {
 				byte[] rawPart = Arrays.copyOfRange(serialized, offset, offset + partsize);
 				NetworkArtifact toStore = new EnvelopeArtifact(artifactIdFactory, identifier, part, rawPart, author);
-				logger.info("Storing part " + part + " for envelope " + envelope + " with id "
+				logger.fine("Storing part " + part + " for envelope " + envelope + " with id "
 						+ toStore.getId().toStringFull());
 				pastStorage.insert(toStore, new PastInsertContinuation(threadpool, multiResult, multiResult, toStore));
 				offset += partsize;
@@ -363,7 +363,7 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 			MetadataEnvelope metadataEnvelope = new MetadataEnvelope(identifier, version, parts);
 			NetworkArtifact metadataArtifact = new MetadataArtifact(artifactIdFactory, identifier, version,
 					SerializeTools.serialize(metadataEnvelope), author);
-			logger.info("Storing metadata for envelope " + metadataEnvelope.toString() + " with id "
+			logger.fine("Storing metadata for envelope " + metadataEnvelope.toString() + " with id "
 					+ metadataArtifact.getId().toStringFull());
 			pastStorage.insert(metadataArtifact,
 					new PastInsertContinuation(threadpool, new StorageStoreResultHandler() {
@@ -440,7 +440,7 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 			if (startVersion == null) {
 				startVersion = EnvelopeVersion.START_VERSION;
 			}
-			logger.info("Starting latest version lookup for " + identifier + " at " + startVersion);
+			logger.fine("Starting latest version lookup for " + identifier + " at " + startVersion);
 			threadpool.execute(new LatestArtifactVersionFinder(identifier, startVersion, new StorageLookupHandler() {
 				@Override
 				public void onLookup(ArrayList<PastContentHandle> metadataHandles) {
@@ -530,12 +530,12 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 
 	private void fetchPart(String identifier, int part, long version, MultiArtifactHandler artifactHandler) {
 		Id checkId = EnvelopeArtifact.buildId(artifactIdFactory, identifier, part);
-		logger.info("Fetching part (" + part + ") of envelope '" + identifier + "' with id " + checkId.toStringFull()
+		logger.fine("Fetching part (" + part + ") of envelope '" + identifier + "' with id " + checkId.toStringFull()
 				+ " ...");
 		lookupHandles(checkId, new StorageLookupHandler() {
 			@Override
 			public void onLookup(ArrayList<PastContentHandle> handles) {
-				logger.info("Got " + handles.size() + " past handles for part (" + part + ") of '" + identifier + "'");
+				logger.fine("Got " + handles.size() + " past handles for part (" + part + ") of '" + identifier + "'");
 				if (handles.size() < 1) {
 					artifactHandler.onException(new EnvelopeNotFoundException("Part (" + part + ") of '" + identifier
 							+ "' with id (" + checkId.toStringFull() + ") not found in shared storage!"));
@@ -573,7 +573,7 @@ public class SharedStorage extends Configurable implements L2pStorageInterface {
 			// concat raw byte arrays
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			for (NetworkArtifact artifact : artifacts) {
-				logger.info("concating content of " + artifact.toString() + " with " + metadata.getEnvelopeNumOfParts()
+				logger.fine("concating content of " + artifact.toString() + " with " + metadata.getEnvelopeNumOfParts()
 						+ " parts");
 				// check identifier
 				String artifactIdentifier = metadata.getEnvelopeIdentifier();

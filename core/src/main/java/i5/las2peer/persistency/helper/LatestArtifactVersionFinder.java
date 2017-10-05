@@ -65,7 +65,7 @@ public class LatestArtifactVersionFinder implements Runnable, StorageLookupHandl
 
 	@Override
 	public void onLookup(ArrayList<PastContentHandle> metadataHandles) {
-		logger.info("Lookup got " + metadataHandles.size() + " past handles for identifier '" + identifier
+		logger.fine("Lookup got " + metadataHandles.size() + " past handles for identifier '" + identifier
 				+ "' and version " + currentVersion);
 		versionToHandle.put(currentVersion, metadataHandles);
 		if (metadataHandles.size() > 0) {
@@ -108,13 +108,13 @@ public class LatestArtifactVersionFinder implements Runnable, StorageLookupHandl
 	private void requestLookup(long version) {
 		currentVersion = version;
 		Id checkId = MetadataArtifact.buildMetadataId(artifactIdFactory, identifier, currentVersion);
-		logger.info("Looking for metadata envelope with identifier '" + identifier + "' and version " + currentVersion
+		logger.fine("Looking for metadata envelope with identifier '" + identifier + "' and version " + currentVersion
 				+ " at id " + checkId.toStringFull() + " ...");
 		pastStorage.lookupHandles(checkId, maxHandles, new PastLookupContinuation(threadpool, this, this));
 	}
 
 	private void queryVersion() {
-		logger.info("found latest version (" + latestVersion + ") for " + identifier);
+		logger.fine("found latest version (" + latestVersion + ") for " + identifier);
 		ArrayList<PastContentHandle> handles = versionToHandle.get(latestVersion);
 		if (handles == null) {
 			throw new RuntimeException("No handles for current version in map");
