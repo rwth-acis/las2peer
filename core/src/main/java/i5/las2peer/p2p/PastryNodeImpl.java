@@ -93,7 +93,7 @@ public class PastryNodeImpl extends Node {
 	private NodeApplication application;
 	private SharedStorage pastStorage;
 	private String storageDir; // null = default chosen by SharedStorage
-	private Long nodeIdSeed;
+	private String nodeIdSeed;
 
 	/**
 	 * This constructor is mainly used by the {@link i5.las2peer.testing.TestSuite}, uses a random system defined port
@@ -143,7 +143,7 @@ public class PastryNodeImpl extends Node {
 		this.bootStrap = bootstrap;
 		this.storageMode = storageMode;
 		this.storageDir = storageDir;
-		this.nodeIdSeed = nodeIdSeed;
+		this.nodeIdSeed = nodeIdSeed != null ? Long.toString(nodeIdSeed) : null;
 		this.setStatus(NodeStatus.CONFIGURED);
 	}
 
@@ -222,7 +222,7 @@ public class PastryNodeImpl extends Node {
 
 			if (nodeIdSeed == null) {
 				// auto generate node id seed from port
-				nodeIdSeed = Long.valueOf(getPort());
+				nodeIdSeed = InetAddress.getLocalHost().getHostName() + getPort();
 			}
 			InternetPastryNodeFactory factory = new InternetPastryNodeFactory(new L2pNodeIdFactory(nodeIdSeed),
 					pastryBindAddress, pastryPort, pastryEnvironment, null, null, null);

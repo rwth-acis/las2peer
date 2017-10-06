@@ -1,6 +1,6 @@
 package i5.las2peer.p2p;
 
-import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
@@ -10,9 +10,8 @@ public class L2pNodeIdFactory implements NodeIdFactory {
 
 	final byte[] raw;
 
-	public L2pNodeIdFactory(long nodeIdSeed) {
-		// long to byte[]
-		raw = ByteBuffer.allocate(Long.SIZE / Byte.SIZE).putLong(nodeIdSeed).array();
+	public L2pNodeIdFactory(String nodeIdSeed) {
+		raw = nodeIdSeed.getBytes(StandardCharsets.UTF_8);
 	}
 
 	@Override
