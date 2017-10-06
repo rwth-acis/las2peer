@@ -906,7 +906,7 @@ public class L2pNodeLauncher {
 				throw new IllegalArgumentException("Couldn't use '" + logDir + "' as log directory.", ex);
 			}
 		}
-		InetAddress bindAddress = null;
+		InetAddress bindAddress = launcherConfiguration.getBindAddress();
 		if (launcherConfiguration.isDebugMode()) {
 			// in debug only listen to loopback interface
 			bindAddress = InetAddress.getLoopbackAddress();
