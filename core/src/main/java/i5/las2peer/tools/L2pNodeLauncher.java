@@ -948,6 +948,11 @@ public class L2pNodeLauncher {
 		}
 		try {
 			launcher.start();
+			// execute other node commands
+			for (String command : launcherConfiguration.getCommands()) {
+				System.out.println("Handling: '" + command + "'");
+				launcher.commandPrompt.handleLine(command);
+			}
 			if (!launcherConfiguration.isDebugMode()) {
 				// auto-update bootstrap parameter in configuration file
 				ArrayList<String> bootstrapList = new ArrayList<>();
@@ -958,13 +963,7 @@ public class L2pNodeLauncher {
 					bootstrapList.add(addr.getHostString() + ":" + addr.getPort());
 				}
 				launcherConfiguration.setBootstrap(bootstrapList);
-				// FIXME what about tests? which use launchConfiguration?
 				launcherConfiguration.writeToFile();
-			}
-			// execute other node commands
-			for (String command : launcherConfiguration.getCommands()) {
-				System.out.println("Handling: '" + command + "'");
-				launcher.commandPrompt.handleLine(command);
 			}
 			if (launcher.isFinished()) {
 				printMessage("All commands have been handled and shutdown has been called -> end!");
