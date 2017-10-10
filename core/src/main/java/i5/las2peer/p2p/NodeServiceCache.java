@@ -53,6 +53,10 @@ public class NodeServiceCache {
 		this.lifeTimeSeconds = c;
 	}
 
+	public void setTimeoutMs(int timeoutMs) {
+		this.timeoutMs = timeoutMs;
+	}
+
 	/**
 	 * clears the global cache (needed for units tests)
 	 */

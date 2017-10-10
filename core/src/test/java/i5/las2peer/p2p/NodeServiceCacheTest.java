@@ -176,6 +176,7 @@ public class NodeServiceCacheTest {
 			invokingNode.storeAgent(userAgent);
 			invokingNode.registerReceiver(userAgent);
 
+			invokingNode.getNodeServiceCache().setTimeoutMs(10000);
 			// global exact v2 -> v2
 			ServiceInstance instance = invokingNode.getNodeServiceCache().getServiceAgentInstance(
 					ServiceNameVersion.fromString("i5.las2peer.api.TestService@2"), true, false, userAgent);
