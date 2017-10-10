@@ -809,6 +809,11 @@ public class Message implements XmlAble, Cloneable {
 			}
 		}
 
+		String base64ContentKey = "";
+		if (baContentKey != null) {
+			base64ContentKey = Base64.getEncoder().encodeToString(baContentKey);
+		}
+
 		String receiver;
 		String contentKey = "";
 		String encryption = "";
@@ -816,17 +821,22 @@ public class Message implements XmlAble, Cloneable {
 			receiver = "to=\"" + recipientId + "\"";
 			encryption = " encryption=\"" + CryptoTools.getSymmetricAlgorithm() + "\"";
 			contentKey = "\t<contentKey encryption=\"" + CryptoTools.getAsymmetricAlgorithm()
-					+ "\" encoding=\"base64\">" + Base64.getEncoder().encodeToString(baContentKey) + "</contentKey>\n";
+					+ "\" encoding=\"base64\">" + base64ContentKey + "</contentKey>\n";
 		} else {
 			receiver = "topic=\"" + topicId + "\"";
+		}
+
+		String base64Signature = "";
+		if (baSignature != null) {
+			base64Signature = Base64.getEncoder().encodeToString(baSignature);
 		}
 
 		return "<las2peer:message" + " id=\"" + id + "\"" + response + " from=\"" + senderId + "\" " + receiver
 				+ " generated=\"" + timestampMs + "\" timeout=\"" + validMs + "\">\n" + sending + "\t<content"
 				+ encryption + " encoding=\"base64\">" + Base64.getEncoder().encodeToString(baEncryptedContent)
 				+ "</content>\n" + contentKey + "\t<signature encoding=\"base64\" method=\""
-				+ CryptoTools.getSignatureMethod() + "\">" + Base64.getEncoder().encodeToString(baSignature)
-				+ "</signature>\n" + "</las2peer:message>\n";
+				+ CryptoTools.getSignatureMethod() + "\">" + base64Signature + "</signature>\n"
+				+ "</las2peer:message>\n";
 	}
 
 	/**
