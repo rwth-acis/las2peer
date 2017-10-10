@@ -793,9 +793,6 @@ public class Message implements XmlAble, Cloneable {
 	 */
 	@Override
 	public String toXmlString() {
-		if (baSignature == null) {
-			throw new RuntimeException("Message not signed");
-		}
 		String response = "";
 		if (responseToId != null) {
 			response = " responseTo=\"" + responseToId + "\"";
