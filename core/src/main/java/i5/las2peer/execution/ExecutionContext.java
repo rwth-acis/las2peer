@@ -161,8 +161,6 @@ public class ExecutionContext implements Context {
 			ClassLoader localServiceLoader = serviceAgent.getServiceInstance().getClass().getClassLoader();
 			if (rmiResult.getClass().getClassLoader() != localServiceLoader) {
 				// mimic global invocation serialization/deserialization to avoid class cast/not-found exceptions
-				// XXX remove logging
-				System.out.println("Classloader before re-serialization: " + rmiResult.getClass().getClassLoader());
 				try {
 					ByteArrayOutputStream baos = new ByteArrayOutputStream();
 					new ObjectOutputStream(baos).writeObject(rmiResult);
@@ -175,8 +173,6 @@ public class ExecutionContext implements Context {
 						}
 					};
 					rmiResult = (Serializable) ois.readObject();
-					// XXX remove logging
-					System.out.println("Classloader after re-serialization: " + rmiResult.getClass().getClassLoader());
 				} catch (IOException | ClassNotFoundException e) {
 					throw new ServiceInvocationFailedException("Re-serialization failed", e);
 				}

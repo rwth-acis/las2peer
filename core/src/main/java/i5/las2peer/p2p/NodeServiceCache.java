@@ -307,12 +307,13 @@ public class NodeServiceCache {
 				try {
 					res.open(acting, runningAt);
 				} catch (Exception e) {
-					// XXX logging
+					logger.log(Level.WARNING, "Could not open service response message", e);
 					continue;
 				}
 
 				if (!(res.getContent() instanceof ServiceDiscoveryContent)) {
-					// XXX logging
+					logger.log(Level.INFO, "Response content is not " + ServiceDiscoveryContent.class.getCanonicalName()
+							+ " got " + res.getContent().getClass().getCanonicalName() + " instead");
 					continue;
 				}
 
