@@ -13,7 +13,6 @@ import i5.las2peer.classLoaders.policies.DefaultPolicy;
 import i5.las2peer.communication.Message;
 import i5.las2peer.persistency.LocalStorage;
 import i5.las2peer.security.AgentImpl;
-import i5.las2peer.security.InternalSecurityException;
 
 public class LocalNodeManager {
 
@@ -59,12 +58,11 @@ public class LocalNodeManager {
 	/**
 	 * factory: launch a node an register the given agent
 	 * 
-	 * @param a
+	 * @param a An agent to launch
 	 * @return a freshly started node hosting the given agent
-	 * @throws InternalSecurityException
-	 * @throws AgentException
+	 * @throws AgentException If agent registration fails
 	 */
-	public LocalNode launchAgent(AgentImpl a) throws InternalSecurityException, AgentException {
+	public LocalNode launchAgent(AgentImpl a) throws AgentException {
 		LocalNode result = launchNode();
 		try {
 			result.registerReceiver(a);
@@ -90,7 +88,7 @@ public class LocalNodeManager {
 	/**
 	 * register a node for later use
 	 * 
-	 * @param node
+	 * @param node A node to register to
 	 */
 	public void registerNode(LocalNode node) {
 		synchronized (htLocalNodes) {
@@ -101,7 +99,7 @@ public class LocalNodeManager {
 	/**
 	 * remove a node from the central storage
 	 * 
-	 * @param node
+	 * @param node A node to register to
 	 */
 	public void unregisterNode(LocalNode node) {
 		synchronized (htLocalNodes) {
@@ -112,7 +110,7 @@ public class LocalNodeManager {
 	/**
 	 * get a node from the central storage
 	 * 
-	 * @param id
+	 * @param id A node id
 	 * @return the node with the given id
 	 */
 	public LocalNode getNode(long id) {
@@ -124,7 +122,7 @@ public class LocalNodeManager {
 	/**
 	 * does the given node exist in the central storage?
 	 * 
-	 * @param id
+	 * @param id A node id
 	 * @return true, if a node of the given it is known to the registry
 	 */
 	public boolean hasNode(long id) {
@@ -166,9 +164,9 @@ public class LocalNodeManager {
 	/**
 	 * find the first node, where the given agent is registered to
 	 * 
-	 * @param agentId
+	 * @param agentId An agent id
 	 * @return id of a node hosting the given agent
-	 * @throws AgentNotRegisteredException
+	 * @throws AgentNotRegisteredException If the agent is not registered at any node
 	 */
 	public long findFirstNodeWithAgent(String agentId) throws AgentNotRegisteredException {
 		synchronized (htLocalNodes) {
@@ -186,7 +184,7 @@ public class LocalNodeManager {
 	/**
 	 * get the ids of all nodes where the given agent is running
 	 * 
-	 * @param agentId
+	 * @param agentId An agent id
 	 * @return array with all ids of nodes hosting the given agent
 	 */
 	public Long[] findAllNodesWithAgent(String agentId) {
@@ -206,7 +204,7 @@ public class LocalNodeManager {
 	/**
 	 * get the ids of all nodes where agents listening to the given topic are running
 	 * 
-	 * @param topicId
+	 * @param topicId A topic id
 	 * @return Returns a list with all node ids for the given topic
 	 */
 	public Long[] findAllNodesWithTopic(long topicId) {
@@ -226,8 +224,8 @@ public class LocalNodeManager {
 	/**
 	 * store messages for agents not known to this "network" of nodes
 	 * 
-	 * @param message
-	 * @param listener
+	 * @param message A message to store
+	 * @param listener A message result listener to add the message
 	 */
 	protected void storeMessage(Message message, MessageResultListener listener) {
 		synchronized (htPendingMessages) {
@@ -244,8 +242,8 @@ public class LocalNodeManager {
 	/**
 	 * fetch all pending messages for the given agent
 	 * 
-	 * @param recipientId
-	 * @param nodeId
+	 * @param recipientId A recipient id to serve
+	 * @param nodeId A node id to send to
 	 */
 	protected void deliverPendingMessages(String recipientId, long nodeId) {
 
@@ -342,8 +340,8 @@ public class LocalNodeManager {
 	/**
 	 * does the actual <i>sending</i> of a message in a separate thread with a configurable delay
 	 * 
-	 * @param nodeId
-	 * @param message
+	 * @param nodeId A node id to send to
+	 * @param message A message to send
 	 */
 	public void localSendMessage(final long nodeId, final Message message) {
 

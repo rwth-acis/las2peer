@@ -10,6 +10,7 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.logging.Level;
 
 import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.p2p.ServiceVersion;
@@ -52,6 +53,10 @@ public class NodeServiceCache {
 		this.lifeTimeSeconds = c;
 	}
 
+	public void setTimeoutMs(int timeoutMs) {
+		this.timeoutMs = timeoutMs;
+	}
+
 	/**
 	 * clears the global cache (needed for units tests)
 	 */
@@ -70,7 +75,7 @@ public class NodeServiceCache {
 	 * @param localOnly only look for local services
 	 * @param acting an acting agent invoking the service
 	 * @return any service agent matching the requirements
-	 * @throws AgentNotRegisteredException
+	 * @throws AgentNotRegisteredException If the service agent is not registered
 	 */
 	public ServiceInstance getServiceAgentInstance(ServiceNameVersion service, boolean exact, boolean localOnly,
 			AgentImpl acting) throws AgentNotRegisteredException {
@@ -108,7 +113,7 @@ public class NodeServiceCache {
 					try {
 						update(service, true, acting);
 					} catch (Exception e) {
-						logger.info(e.toString());
+						logger.log(Level.INFO, "Could not update service cache", e);
 						if (local == null) {
 							throw new AgentNotRegisteredException(
 									"Could not retrieve service information from the network.", e);
@@ -130,7 +135,7 @@ public class NodeServiceCache {
 					try {
 						update(service, false, acting);
 					} catch (Exception e) {
-						logger.info(e.toString());
+						logger.log(Level.INFO, "Could not update service cache", e);
 						if (local == null) {
 							throw new AgentNotRegisteredException(
 									"Could not retrieve service information from the network.", e);
@@ -255,7 +260,7 @@ public class NodeServiceCache {
 	 * 
 	 * to be called when an instance is detected as not available
 	 * 
-	 * @param instance
+	 * @param instance A service instance to remove
 	 */
 	public void removeGlobalServiceInstance(ServiceInstance instance) {
 		synchronized (globalServices) {
@@ -302,12 +307,13 @@ public class NodeServiceCache {
 				try {
 					res.open(acting, runningAt);
 				} catch (Exception e) {
-					// XXX logging
+					logger.log(Level.WARNING, "Could not open service response message", e);
 					continue;
 				}
 
 				if (!(res.getContent() instanceof ServiceDiscoveryContent)) {
-					// XXX logging
+					logger.log(Level.INFO, "Response content is not " + ServiceDiscoveryContent.class.getCanonicalName()
+							+ " got " + res.getContent().getClass().getCanonicalName() + " instead");
 					continue;
 				}
 
@@ -334,7 +340,7 @@ public class NodeServiceCache {
 	/**
 	 * register a local service
 	 * 
-	 * @param agent
+	 * @param agent A service agent to register
 	 */
 	public void registerLocalService(ServiceAgentImpl agent) {
 		synchronized (localServices) {
@@ -358,7 +364,7 @@ public class NodeServiceCache {
 	/**
 	 * unregister a local service
 	 * 
-	 * @param agent
+	 * @param agent A service agent to unregister
 	 */
 	public void unregisterLocalService(ServiceAgentImpl agent) {
 		synchronized (localServices) {
@@ -387,7 +393,7 @@ public class NodeServiceCache {
 	 * 
 	 * @param service name and exact version of the service
 	 * @return Returns the local service agent instance
-	 * @throws AgentNotRegisteredException
+	 * @throws AgentNotRegisteredException If no agent is registered
 	 */
 	public ServiceAgentImpl getLocalService(ServiceNameVersion service) throws AgentNotRegisteredException {
 		synchronized (localServices) {
@@ -445,7 +451,7 @@ public class NodeServiceCache {
 		/**
 		 * create a local service instance
 		 * 
-		 * @param agent
+		 * @param agent A service agent
 		 */
 		public ServiceInstance(ServiceAgentImpl agent) {
 			this.isLocal = true;
@@ -457,9 +463,9 @@ public class NodeServiceCache {
 		/**
 		 * create a global service instance
 		 * 
-		 * @param service
-		 * @param serviceAgentId
-		 * @param nodeId
+		 * @param service A service name and version
+		 * @param serviceAgentId A service agent id
+		 * @param nodeId A node id
 		 */
 		public ServiceInstance(ServiceNameVersion service, String serviceAgentId, Object nodeId) {
 			this.service = service;

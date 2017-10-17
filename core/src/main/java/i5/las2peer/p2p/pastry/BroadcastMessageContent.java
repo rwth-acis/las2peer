@@ -25,7 +25,7 @@ public class BroadcastMessageContent extends L2pScribeContent {
 	 * get the l2p message inside
 	 * 
 	 * @return the contained Las2peer message
-	 * @throws MalformedXMLException
+	 * @throws MalformedXMLException If the XML data string is malformed
 	 */
 	public Message getMessage() throws MalformedXMLException {
 		if (message == null) {

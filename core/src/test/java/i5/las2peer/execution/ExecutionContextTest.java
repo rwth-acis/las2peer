@@ -28,8 +28,11 @@ import i5.las2peer.api.persistency.EnvelopeNotFoundException;
 import i5.las2peer.api.persistency.EnvelopeOperationFailedException;
 import i5.las2peer.api.security.Agent;
 import i5.las2peer.api.security.AgentAccessDeniedException;
+import i5.las2peer.api.security.AgentAlreadyExistsException;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentLockedException;
+import i5.las2peer.api.security.AgentNotFoundException;
+import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.api.security.EmailAlreadyTakenException;
 import i5.las2peer.api.security.GroupAgent;
 import i5.las2peer.api.security.LoginNameAlreadyTakenException;
@@ -425,6 +428,54 @@ public class ExecutionContextTest {
 			e.printStackTrace();
 			fail();
 		}
+	}
+	
+	@Test
+	public void testGroupAgents() {
+		try {
+			// create group
+			GroupAgent a = context.createGroupAgent(new Agent[] {adam});
+			assertEquals(1,a.getMemberList().length);
+			context.storeAgent(a);
+			
+			// add member
+			a = (GroupAgent) context.requestAgent(a.getIdentifier());
+			assertEquals(1,a.getMemberList().length);
+			a.addMember(eve);
+			assertEquals(2,a.getMemberList().length);
+			context.storeAgent(a);
+			assertEquals(2,a.getMemberList().length);
+			
+			// request group
+			a = (GroupAgent) context.requestAgent(a.getIdentifier());
+			assertTrue(a.hasMember(adam));
+			assertTrue(a.hasMember(eve));
+			assertEquals(2,a.getMemberList().length);
+			
+			// do the same with unlock instead of request:
+			
+			// create group
+			GroupAgent b = context.createGroupAgent(new Agent[] {adam});
+			context.storeAgent(b);
+			
+			// add member
+			b = (GroupAgent) context.fetchAgent(b.getIdentifier());
+			b.unlock(adam);
+			b.addMember(eve);
+			context.storeAgent(b);
+			
+			// request group
+			b = (GroupAgent) context.fetchAgent(b.getIdentifier());
+			b.unlock(adam);
+			assertTrue(b.hasMember(adam));
+			assertTrue(b.hasMember(eve));
+			assertEquals(2,b.getMemberList().length);
+			
+		} catch (AgentOperationFailedException | AgentAccessDeniedException | AgentAlreadyExistsException
+				| AgentLockedException | AgentNotFoundException e) {
+			fail();
+		}
+		
 	}
 
 	@Test

@@ -23,7 +23,6 @@ import i5.las2peer.persistency.StorageStoreResultHandler;
 import i5.las2peer.security.AgentContext;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.AnonymousAgentImpl;
-import i5.las2peer.security.InternalSecurityException;
 import i5.las2peer.security.MessageReceiver;
 import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.serialization.MalformedXMLException;
@@ -47,6 +46,8 @@ public class LocalNode extends Node {
 
 	/**
 	 * create a LocalNode
+	 * 
+	 * @param localNodeManager A manager to handle a group (network) of local nodes
 	 */
 	public LocalNode(LocalNodeManager localNodeManager) {
 		this(localNodeManager, null);
@@ -55,7 +56,8 @@ public class LocalNode extends Node {
 	/**
 	 * create a LocalNode
 	 * 
-	 * @param classManager
+	 * @param localNodeManager A manager to handle a group (network) of local nodes
+	 * @param classManager A class manager to use
 	 */
 	public LocalNode(LocalNodeManager localNodeManager, ClassManager classManager) {
 		super(classManager);
@@ -263,7 +265,7 @@ public class LocalNode extends Node {
 
 	@Deprecated
 	@Override
-	public void updateAgent(AgentImpl agent) throws AgentException, InternalSecurityException {
+	public void updateAgent(AgentImpl agent) throws AgentException {
 		storeAgent(agent);
 	}
 

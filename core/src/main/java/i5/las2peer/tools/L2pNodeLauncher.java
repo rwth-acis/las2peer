@@ -322,6 +322,7 @@ public class L2pNodeLauncher {
 	 * Starts the WebConnector
 	 */
 	public void startWebConnector() {
+		// adding the actual class here, would add an undesired dependency from WebConnector to the core
 		startConnector("i5.las2peer.connectors.webConnector.WebConnector");
 	}
 
@@ -329,21 +330,26 @@ public class L2pNodeLauncher {
 	 * Stops the WebConnector
 	 */
 	public void stopWebConnector() {
+		// adding the actual class here, would add an undesired dependency from WebConnector to the core
 		stopConnector("i5.las2peer.connectors.webConnector.WebConnector");
 	}
 
 	/**
-	 * Starts the NodeAdminConnector
+	 * @deprecated Use {@link #startWebConnector()} instead.
 	 */
+	@Deprecated
 	public void startNodeAdminConnector() {
-		startConnector("i5.las2peer.connectors.nodeAdminConnector.NodeAdminConnector");
+		System.err.println("NodeAdminConnector is now merged into WebConnector. Use startWebConnector instead!");
+		startWebConnector();
 	}
 
 	/**
-	 * Stops the NodeAdminConnector
+	 * @deprecated Use {@link #stopWebConnector()} instead.
 	 */
+	@Deprecated
 	public void stopNodeAdminConnector() {
-		stopConnector("i5.las2peer.connectors.nodeAdminConnector.NodeAdminConnector");
+		System.err.println("NodeAdminConnector is now merged into WebConnector. Use stopWebConnetor instead!");
+		stopWebConnector();
 	}
 
 	/**
@@ -900,7 +906,7 @@ public class L2pNodeLauncher {
 				throw new IllegalArgumentException("Couldn't use '" + logDir + "' as log directory.", ex);
 			}
 		}
-		InetAddress bindAddress = null;
+		InetAddress bindAddress = launcherConfiguration.getBindAddress();
 		if (launcherConfiguration.isDebugMode()) {
 			// in debug only listen to loopback interface
 			bindAddress = InetAddress.getLoopbackAddress();
@@ -942,6 +948,11 @@ public class L2pNodeLauncher {
 		}
 		try {
 			launcher.start();
+			// execute other node commands
+			for (String command : launcherConfiguration.getCommands()) {
+				System.out.println("Handling: '" + command + "'");
+				launcher.commandPrompt.handleLine(command);
+			}
 			if (!launcherConfiguration.isDebugMode()) {
 				// auto-update bootstrap parameter in configuration file
 				ArrayList<String> bootstrapList = new ArrayList<>();
@@ -952,13 +963,7 @@ public class L2pNodeLauncher {
 					bootstrapList.add(addr.getHostString() + ":" + addr.getPort());
 				}
 				launcherConfiguration.setBootstrap(bootstrapList);
-				// FIXME what about tests? which use launchConfiguration?
 				launcherConfiguration.writeToFile();
-			}
-			// execute other node commands
-			for (String command : launcherConfiguration.getCommands()) {
-				System.out.println("Handling: '" + command + "'");
-				launcher.commandPrompt.handleLine(command);
 			}
 			if (launcher.isFinished()) {
 				printMessage("All commands have been handled and shutdown has been called -> end!");

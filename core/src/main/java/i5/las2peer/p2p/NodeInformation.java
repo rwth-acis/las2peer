@@ -23,6 +23,7 @@ import i5.las2peer.tools.FileContentReader;
 
 /**
  * A NodeInformation gives basic information about a node.
+ * 
  */
 public class NodeInformation implements XmlAble {
 
@@ -47,7 +48,7 @@ public class NodeInformation implements XmlAble {
 	/**
 	 * create a standard node information for a node hosting the given services
 	 * 
-	 * @param hostedServiceAgents
+	 * @param hostedServiceAgents A bunch of service agents hosted on this node
 	 */
 	public NodeInformation(ServiceAgentImpl[] hostedServiceAgents) {
 		this();
@@ -116,7 +117,7 @@ public class NodeInformation implements XmlAble {
 	/**
 	 * for the node itself: set the signature before sending
 	 * 
-	 * @param signature
+	 * @param signature A signature to set
 	 */
 	public void setSignature(byte[] signature) {
 		this.signature = signature;
@@ -125,7 +126,7 @@ public class NodeInformation implements XmlAble {
 	/**
 	 * for the node itself: deliver the handle
 	 * 
-	 * @param nodeHandle
+	 * @param nodeHandle A node handle to set
 	 */
 	public void setNodeHandle(Serializable nodeHandle) {
 		this.nodeHandle = nodeHandle;
@@ -134,7 +135,7 @@ public class NodeInformation implements XmlAble {
 	/**
 	 * for the node itself: deliver the key
 	 * 
-	 * @param nodeKey
+	 * @param nodeKey A node public key to set
 	 */
 	public void setNodeKey(PublicKey nodeKey) {
 		this.nodeKey = nodeKey;
@@ -143,7 +144,7 @@ public class NodeInformation implements XmlAble {
 	/**
 	 * verify the signature
 	 * 
-	 * @throws InternalSecurityException
+	 * @throws InternalSecurityException If verifying the signature fails
 	 */
 	public void verifySignature() throws InternalSecurityException {
 		if (signature == null) {
@@ -265,10 +266,10 @@ public class NodeInformation implements XmlAble {
 	/**
 	 * factory: create a NodeInformation instance from a XML file
 	 * 
-	 * @param filename
+	 * @param filename A name for a file containing the XML data
 	 * @return the node information contained in the given XML file
-	 * @throws MalformedXMLException
-	 * @throws IOException
+	 * @throws MalformedXMLException If the XML data is malformed
+	 * @throws IOException If reading the file fails
 	 */
 	public static NodeInformation createFromXmlFile(String filename) throws MalformedXMLException, IOException {
 		return createFromXml(FileContentReader.read(filename));
@@ -277,13 +278,11 @@ public class NodeInformation implements XmlAble {
 	/**
 	 * factory: create a NodeInformation instance from a XML file and set the hosted services
 	 * 
-	 * @param filename
-	 * @param serviceAgents
+	 * @param filename A filename to read from
+	 * @param serviceAgents A bunch of service agents hosted on this node
 	 * @return a node information
-	 * 
-	 * 
-	 * @throws MalformedXMLException
-	 * @throws IOException
+	 * @throws MalformedXMLException If the XML data is malformed
+	 * @throws IOException If reading the file fails
 	 */
 	public static NodeInformation createFromXmlFile(String filename, ServiceAgentImpl[] serviceAgents)
 			throws MalformedXMLException, IOException {
@@ -296,9 +295,9 @@ public class NodeInformation implements XmlAble {
 	/**
 	 * factory create a node information instance from an XML string
 	 * 
-	 * @param xml
+	 * @param xml An XML data string
 	 * @return node information contained in the given XML string
-	 * @throws MalformedXMLException
+	 * @throws MalformedXMLException If the XML data string is malformed
 	 */
 	public static NodeInformation createFromXml(String xml) throws MalformedXMLException {
 		Element root = XmlTools.getRootElement(xml, "las2peerNode");
@@ -362,7 +361,7 @@ public class NodeInformation implements XmlAble {
 	/**
 	 * command line tool for generating a description XML file
 	 * 
-	 * @param argv
+	 * @param argv A bunch of args
 	 */
 	public static void main(String argv[]) {
 		if (argv.length < 4) {

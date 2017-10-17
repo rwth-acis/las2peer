@@ -1,0 +1,25 @@
+{
+  "name": "las2peer-node-frontend",
+  "description": "A webapp frontend for a las2peer node",
+  "license": "BSD-3-Clause",
+  "devDependencies": {
+    "eslint": "^3.19.0",
+    "eslint-config-google": "^0.7.0",
+    "eslint-plugin-html": "^2.0.0"
+  },
+  "scripts": {
+    "lint": "npm run lint:javascript",
+    "lint:javascript": "eslint . --ext js,html --ignore-path .gitignore",
+    "test": "polymer test",
+    "test:integration": "polymer build # test that psk builds without error with the CLI"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rwth-acis/las2peer.git"
+  },
+  "dependencies": {
+    "bower": "^1.8.2",
+    "polymer-cli": "^1.5.6"
+  },
+  "homepage": "https://las2peer.org/"
+}

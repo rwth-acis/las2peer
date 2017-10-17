@@ -21,7 +21,7 @@ public abstract class L2pScribeContent implements ScribeContent {
 	/**
 	 * create a new scribe content created at the given node handle
 	 * 
-	 * @param from
+	 * @param from A sending node handle
 	 */
 	public L2pScribeContent(NodeHandle from) {
 		this.from = from;

@@ -127,6 +127,19 @@ public class AnonymousAgentImplTest {
 		// read envelope
 		env = context.requestEnvelope("myEnv");
 		assertEquals("myContent", env.getContent());
+		
+		// create encrypted envelope
+		env = context.createEnvelope("myEnvEnc", serviceAgent);
+		env.setContent("myContent");
+		context.storeEnvelope(env, serviceAgent);
+		
+		// read encrypted envelope
+		try {
+			context.requestEnvelope("myEnvEnc");
+			fail("EnvelopeAccessDeniedException expected");
+		} catch(EnvelopeAccessDeniedException e) {
+			// expected
+		}
 	}
 
 	@Test

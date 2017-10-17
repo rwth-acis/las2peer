@@ -213,7 +213,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	 * Same as {@link #setLogDirectory(String)} for the global static instance.
 	 *
 	 * @param directory A directory path given as String. {@code null} is equal to "" and the class loader directory.
-	 * @throws IOException
+	 * @throws IOException If the log file could not be written
 	 */
 	public static void setGlobalLogDirectory(String directory) throws IOException {
 		GLOBAL_INSTANCE.setLogDirectory(directory);
@@ -223,7 +223,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	 * Sets the directory to store log files.
 	 *
 	 * @param directory A directory path given as String. {@code null} is equal to "" and the class loader directory.
-	 * @throws IOException
+	 * @throws IOException If the log file could not be written
 	 */
 	public synchronized void setLogDirectory(String directory) throws IOException {
 		if (directory == null || directory.isEmpty()) {
@@ -241,7 +241,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	 * Same as {@link #setLogfilePrefix(String)} for global static instance.
 	 *
 	 * @param prefix If {@code null} is given, file logging will be disabled.
-	 * @throws IOException
+	 * @throws IOException If the log file could not be written
 	 */
 	public static void setGlobalLogfilePrefix(String prefix) throws IOException {
 		GLOBAL_INSTANCE.setLogfilePrefix(prefix);
@@ -251,7 +251,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	 * Sets the prefix used to generate log files.
 	 *
 	 * @param prefix If {@code null} is given, file logging will be disabled.
-	 * @throws IOException
+	 * @throws IOException If the log file could not be written
 	 */
 	public synchronized void setLogfilePrefix(String prefix) throws IOException {
 		if (prefix.equals(logfilePrefix)) {
@@ -265,7 +265,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	/**
 	 * This method must be called each time the log file target is changed.
 	 *
-	 * @throws IOException
+	 * @throws IOException If the log file could not be written
 	 */
 	private synchronized void updateLogfileHandler() throws IOException {
 		Level oldLevel = null;
@@ -278,7 +278,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 		if (logfilePrefix == null) {
 			return;
 		}
-		// auto create log dir
+		// auto create log directory
 		createDir(logDir);
 		// file logging
 		handlerLogfile = new FileHandler(logDir + logfilePrefix, limitBytes, limitFiles, true);
@@ -381,10 +381,12 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	}
 
 	/**
-	 * Writes a log message. The given event can be used to differentiate between different log messages.
+	 * @deprecated Use {@link #log(MonitoringEvent, String)}
+	 * 
+	 *             Writes a log message. The given event can be used to differentiate between different log messages.
 	 *
 	 * @param event used to differentiate between different log messages
-	 * @param message
+	 * @param message A message to log in the monitoring data
 	 */
 	@Deprecated
 	public static void logEvent(MonitoringEvent event, String message) {
@@ -392,11 +394,13 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	}
 
 	/**
-	 * Writes a log message. The given event can be used to differentiate between different log messages.
+	 * @deprecated Use {@link #log(MonitoringEvent, String, String, String)}
+	 * 
+	 *             Writes a log message. The given event can be used to differentiate between different log messages.
 	 *
 	 * @param event used to differentiate between different log messages
 	 * @param actingUser can be set to null if unknown / not desired
-	 * @param message
+	 * @param message A message to log in the monitoring data
 	 */
 	@Deprecated
 	public static void logEvent(MonitoringEvent event, AgentImpl actingUser, String message) {
@@ -404,14 +408,17 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	}
 
 	/**
-	 * Logs a message to the l2p system using the observers.
+	 * @deprecated Use {@link #log(MonitoringEvent, String, String, String)}
+	 * 
+	 *             Logs a message to the l2p system using the observers.
 	 *
-	 * Since this method will/should only be used in an L2pThread, the message will come from a service or a helper, so
-	 * a SERVICE_MESSAGE is assumed. Then this message will not be monitored by the monitoring observer.
+	 *             Since this method will/should only be used in an L2pThread, the message will come from a service or a
+	 *             helper, so a SERVICE_MESSAGE is assumed. Then this message will not be monitored by the monitoring
+	 *             observer.
 	 *
 	 * @param from the calling class
 	 * @param event used to differentiate between different log messages
-	 * @param message
+	 * @param message A message to log in the monitoring data
 	 */
 	@Deprecated
 	public static void logEvent(Object from, MonitoringEvent event, String message) {
@@ -419,13 +426,15 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	}
 
 	/**
-	 * Writes a log message. The given event can be used to differentiate between different log messages. The
-	 * serviceAgent and actingUser can be set to {@code null} if not known. Then this message will not be monitored by
-	 * the monitoring observer.
+	 * @deprecated Use {@link #log(MonitoringEvent, String, String, String)}
+	 * 
+	 *             Writes a log message. The given event can be used to differentiate between different log messages.
+	 *             The serviceAgent and actingUser can be set to {@code null} if not known. Then this message will not
+	 *             be monitored by the monitoring observer.
 	 *
 	 * @param from the calling class
 	 * @param event used to differentiate between different log messages
-	 * @param message
+	 * @param message A message to log in the monitoring data
 	 * @param serviceAgent can be set to null if unknown / not desired
 	 * @param actingUser can be set to null if unknown / not desired
 	 */
@@ -437,14 +446,16 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	}
 
 	/**
-	 * Writes a log message. The given event can be used to differentiate between different log messages. The
-	 * serviceAgent and actingUser can be set to {@code null} if not known. Then this message will not be monitored by
-	 * the monitoring observer.
+	 * @deprecated Use {@link #log(MonitoringEvent, String, String, String)}
+	 * 
+	 *             Writes a log message. The given event can be used to differentiate between different log messages.
+	 *             The serviceAgent and actingUser can be set to {@code null} if not known. Then this message will not
+	 *             be monitored by the monitoring observer.
 	 *
-	 * @param node
+	 * @param node The node that should be noticed about this event
 	 * @param from the calling class
 	 * @param event used to differentiate between different log messages
-	 * @param message
+	 * @param message A message to log in the monitoring data
 	 * @param serviceAgent can be set to null if unknown / not desired
 	 * @param actingUser can be set to null if unknown / not desired
 	 */
@@ -459,8 +470,43 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Same as #log(MonitoringEvent, String) without any remarks, just logs the plain event.
+	 * 
+	 * @param event A monitoring event to log
 	 */
+	public void log(MonitoringEvent event) {
+		log(System.currentTimeMillis(), event, null, Context.get().getMainAgent().getIdentifier(), null, null, null);
+	}
+
+	/**
+	 * Same as #log(MonitoringEvent, String, String, String) with context main agent as default source agent.
+	 * 
+	 * @param event A monitoring event to log
+	 * @param remarks Arbitrary data to log along with the event
+	 */
+	public void log(MonitoringEvent event, String remarks) {
+		log(System.currentTimeMillis(), event, null, Context.get().getMainAgent().getIdentifier(), null, null, remarks);
+	}
+
+	/**
+	 * Same as {@link #log(Long, MonitoringEvent, String, String, String, String, String)} with current system timestamp
+	 * and no source or destination node.
+	 * 
+	 * @param event A monitoring event to log
+	 * @param sourceAgentId A source agent id for this monitoring event
+	 * @param destinationAgentId A destination agent id for this monitoring event
+	 * @param remarks Arbitrary data to log along with the event
+	 */
+	public void log(MonitoringEvent event, String sourceAgentId, String destinationAgentId, String remarks) {
+		log(System.currentTimeMillis(), event, null, sourceAgentId, null, destinationAgentId, remarks);
+	}
+
+	/**
+	 * @deprecated Use {@link #log(Long, MonitoringEvent, String, String, String, String, String)} instead. The coupling
+	 *             between nodes and services is softened now.
+	 * 
+	 */
+	@Deprecated
 	@Override
 	public void log(Long timestamp, MonitoringEvent event, String sourceNode, String sourceAgentId,
 			String destinationNode, String destinationAgentId, String remarks) {
@@ -534,7 +580,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 		if (name == null || name.isEmpty() || "i5.las2peer".equals(name)) {
 			throw new IllegalArgumentException("Invalid logger name '" + name + "' given!");
 		}
-		L2pLogger result = null;
+		L2pLogger result;
 		try {
 			result = new L2pLogger(name, null);
 			if (!LogManager.getLogManager().addLogger(result)) {
@@ -544,6 +590,9 @@ public final class L2pLogger extends Logger implements NodeObserver {
 		} catch (IllegalArgumentException e) {
 			// a logger with that name is already registered
 			result = (L2pLogger) LogManager.getLogManager().getLogger(name);
+		}
+		if (result == null) {
+			throw new NullPointerException("Logger instance should not be null");
 		}
 		return result;
 	}

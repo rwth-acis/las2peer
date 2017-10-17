@@ -1,5 +1,11 @@
 package i5.las2peer.p2p.pastry;
 
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.logging.Level;
+
 import i5.las2peer.api.logging.MonitoringEvent;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.communication.MessageException;
@@ -10,18 +16,10 @@ import i5.las2peer.p2p.NodeInformation;
 import i5.las2peer.p2p.NodeNotFoundException;
 import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.security.AgentImpl;
-import i5.las2peer.security.InternalSecurityException;
 import i5.las2peer.security.MessageReceiver;
 import i5.las2peer.serialization.MalformedXMLException;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.WaiterThread;
-
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.logging.Level;
-
 import rice.p2p.commonapi.Application;
 import rice.p2p.commonapi.Endpoint;
 import rice.p2p.commonapi.Id;
@@ -72,7 +70,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	/**
 	 * create a pastry application for the given node
 	 * 
-	 * @param node
+	 * @param node A node to wrap around
 	 */
 	public NodeApplication(PastryNodeImpl node) {
 		l2pNode = node;
@@ -86,7 +84,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	/**
 	 * register this node to the topic related to the given message receiver
 	 * 
-	 * @param receiver
+	 * @param receiver A message receiver
 	 */
 	public void registerAgentTopic(MessageReceiver receiver) {
 		synchronized (htAgentTopics) {
@@ -119,8 +117,8 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	/**
 	 * unregister an agent from its subscription
 	 * 
-	 * @param id
-	 * @throws AgentNotRegisteredException
+	 * @param id A topic id
+	 * @throws AgentNotRegisteredException If the agent was not registered for this topic
 	 */
 	public void unregisterAgentTopic(String id) throws AgentNotRegisteredException {
 		synchronized (htAgentTopics) {
@@ -175,9 +173,9 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	/**
 	 * get information about a foreign node
 	 * 
-	 * @param nodeHandle
+	 * @param nodeHandle A node handle
 	 * @return node information
-	 * @throws NodeNotFoundException
+	 * @throws NodeNotFoundException If the node was not found
 	 */
 	public NodeInformation getNodeInformation(NodeHandle nodeHandle) throws NodeNotFoundException {
 		GetInfoMessage gim = new GetInfoMessage(getLocalHandle());
@@ -241,8 +239,8 @@ public class NodeApplication implements Application, ScribeMultiClient {
 					(String) null, "");
 
 			// just store the sending node handle
-			HashSet<NodeHandle> pendingCollection = htPendingAgentSearches.get(((SearchAnswerMessage) pastMessage)
-					.getRequestMessageId());
+			HashSet<NodeHandle> pendingCollection = htPendingAgentSearches
+					.get(((SearchAnswerMessage) pastMessage).getRequestMessageId());
 
 			if (pendingCollection != null) {
 				pendingCollection.add(((SearchAnswerMessage) pastMessage).getSendingNode());
@@ -295,7 +293,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	/**
 	 * Called to route a message to the id
 	 * 
-	 * @param id
+	 * @param id A target id to route to
 	 */
 	public void routeMyMsg(Id id) {
 		logger.info("\t --> " + this + " sending to " + id);
@@ -306,7 +304,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	/**
 	 * Called to directly send a message to the nh
 	 * 
-	 * @param nh
+	 * @param nh A target node handle to route to
 	 */
 	public void routeMyMsgDirect(NodeHandle nh) {
 		logger.info("\t --> " + this + " sending direct to " + nh);
@@ -318,14 +316,13 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	/**
 	 * send a message to the given node handle
 	 * 
-	 * @param m
-	 * @param to
-	 * @throws MalformedXMLException
-	 * @throws MessageException
+	 * @param m A message to send
+	 * @param to A target node handle
+	 * @throws MalformedXMLException If the XML data string is malformed
 	 */
-	public void sendMessage(MessageEnvelope m, NodeHandle to) throws MalformedXMLException, MessageException {
-		l2pNode.observerNotice(MonitoringEvent.MESSAGE_SENDING, l2pNode.getPastryNode(), m.getContainedMessage()
-				.getSender(), to, m.getContainedMessage().getRecipient(), "message: " + m);
+	public void sendMessage(MessageEnvelope m, NodeHandle to) throws MalformedXMLException {
+		l2pNode.observerNotice(MonitoringEvent.MESSAGE_SENDING, l2pNode.getPastryNode(),
+				m.getContainedMessage().getSender(), to, m.getContainedMessage().getRecipient(), "message: " + m);
 
 		logger.info("\t --> " + this + " sending (encapsulated) message directly to " + to);
 		endpoint.route(null, m, to);
@@ -334,8 +331,8 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	/**
 	 * send a pastry message to the given node
 	 * 
-	 * @param m
-	 * @param to
+	 * @param m A message to send
+	 * @param to A target node handle
 	 */
 	public void sendMessageDirectly(Message m, NodeHandle to) {
 		endpoint.route(null, m, to);
@@ -344,7 +341,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	/**
 	 * broadcast a {@link i5.las2peer.communication.Message} to all running instances of its recipient agent
 	 * 
-	 * @param l2pMessage
+	 * @param l2pMessage A message to send
 	 */
 	public void sendMessage(i5.las2peer.communication.Message l2pMessage) {
 		BroadcastMessageContent content = new BroadcastMessageContent(getLocalHandle(), l2pMessage);
@@ -382,8 +379,8 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	 * 
 	 * However the search will be aborted after <i>SEARCH_TIMEOUT</i> milliseconds.
 	 * 
-	 * @param agentId
-	 * @param expectedAnswers
+	 * @param agentId An agent id to search for
+	 * @param expectedAnswers Amount of expected answers
 	 * @return a collections of node handles where the requested agent is registered to
 	 */
 	public Collection<NodeHandle> searchAgent(String agentId, int expectedAnswers) {
@@ -442,7 +439,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	/**
 	 * look for a running/registered version of an agent in the p2p net
 	 * 
-	 * @param agentId
+	 * @param agentId An agent id to search for
 	 * @return a collection of node handles running the requested agent
 	 */
 	public Collection<NodeHandle> searchAgent(String agentId) {
@@ -459,10 +456,10 @@ public class NodeApplication implements Application, ScribeMultiClient {
 					// found the agent
 					// send message to searching node
 
-					endpoint.route(
-							null,
-							new SearchAnswerMessage(((SearchAgentContent) content).getOrigin(), this.l2pNode
-									.getPastryNode().getLocalNodeHandle(), ((SearchAgentContent) content).getRandomId()),
+					endpoint.route(null,
+							new SearchAnswerMessage(((SearchAgentContent) content).getOrigin(),
+									this.l2pNode.getPastryNode().getLocalNodeHandle(),
+									((SearchAgentContent) content).getRandomId()),
 							((SearchAgentContent) content).getOrigin());
 					// send return message
 
@@ -473,7 +470,8 @@ public class NodeApplication implements Application, ScribeMultiClient {
 
 			logger.severe("\t\t<--- subscribed but agent not found!!!!");
 		} else if (content instanceof AgentJoinedContent) {
-			logger.info("\t\t<--- got notification about agent joining: " + ((AgentJoinedContent) content).getAgentId());
+			logger.info(
+					"\t\t<--- got notification about agent joining: " + ((AgentJoinedContent) content).getAgentId());
 		} else if (content instanceof BroadcastMessageContent) {
 			final BroadcastMessageContent c = (BroadcastMessageContent) content;
 
@@ -485,8 +483,6 @@ public class NodeApplication implements Application, ScribeMultiClient {
 						l2pNode.receiveMessage(c.getMessage());
 					} catch (MalformedXMLException e) {
 						logger.severe("unable to open BroadcastMessageContent!");
-					} catch (InternalSecurityException e) {
-						logger.severe("L2pSecurityException while handling received message!");
 					} catch (MessageException e) {
 						logger.log(Level.SEVERE, "MessageException while handling received message!", e);
 					} catch (AgentNotRegisteredException e) {
@@ -532,7 +528,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	/**
 	 * generate an id string for topic corresponding to a l2p agent
 	 * 
-	 * @param agent
+	 * @param agent An agent to generate topic id
 	 * @return a topic identifier for the agent to subscribe to
 	 */
 	public static String getAgentTopicId(AgentImpl agent) {
@@ -542,7 +538,7 @@ public class NodeApplication implements Application, ScribeMultiClient {
 	/**
 	 * generate an id string for topic corresponding to a l2p agent
 	 * 
-	 * @param id
+	 * @param id An agent id to generate topic id
 	 * @return a topic identifier for the agent to subscribe to
 	 */
 	public static String getAgentTopicId(String id) {

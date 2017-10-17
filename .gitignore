@@ -14,10 +14,6 @@ ivy.jar
 /.settings/
 /junitvmwatcher*.properties
 /junit*.properties
-/etc/startup/
+/etc/
 *.secret
-/etc/*.jks
-/etc/*.pem
 archiva_credentials.xml
-/etc/las2peer.policy
-/etc/launcher-configuration.ini

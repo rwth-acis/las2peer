@@ -15,8 +15,8 @@ public class AgentJoinedContent extends L2pScribeContent {
 	/**
 	 * create a new instance stating that the agent of the given id has been loaded at the given node
 	 * 
-	 * @param from
-	 * @param agentId
+	 * @param from A node handle
+	 * @param agentId An agent id
 	 */
 	public AgentJoinedContent(NodeHandle from, String agentId) {
 		super(from);

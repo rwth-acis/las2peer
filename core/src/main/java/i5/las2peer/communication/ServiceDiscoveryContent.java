@@ -5,9 +5,7 @@ import java.io.Serializable;
 import i5.las2peer.api.p2p.ServiceNameVersion;
 
 public class ServiceDiscoveryContent implements Serializable {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -33,8 +31,8 @@ public class ServiceDiscoveryContent implements Serializable {
 	/**
 	 * creates a request
 	 * 
-	 * @param requestedService
-	 * @param exact
+	 * @param requestedService A service name and version
+	 * @param exact If true the versions must match exactly
 	 */
 	public ServiceDiscoveryContent(ServiceNameVersion requestedService, boolean exact) {
 		this.request = true;
@@ -45,8 +43,8 @@ public class ServiceDiscoveryContent implements Serializable {
 	/**
 	 * creates a response
 	 * 
-	 * @param agentId
-	 * @param serviceNameVersion
+	 * @param agentId An agent identifier
+	 * @param serviceNameVersion A service name and version
 	 */
 	public ServiceDiscoveryContent(String agentId, ServiceNameVersion serviceNameVersion) {
 		this.agentId = agentId;
@@ -84,8 +82,7 @@ public class ServiceDiscoveryContent implements Serializable {
 	/**
 	 * checks if the service is accepted by this request
 	 * 
-	 * @param service
-	 * 
+	 * @param service A service name and version
 	 * @return Returns true if the service is accepted
 	 */
 	public boolean accepts(ServiceNameVersion service) {

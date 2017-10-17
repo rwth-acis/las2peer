@@ -6,7 +6,6 @@ import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Map;
 
 import javax.crypto.SecretKey;
@@ -50,17 +49,17 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	/**
 	 * hashtable storing the encrypted versions of the group secret key for each member
 	 */
-	private Hashtable<String, byte[]> htEncryptedKeyVersions = new Hashtable<>();
+	private HashMap<String, byte[]> htEncryptedKeyVersions = new HashMap<>();
 
 	private Map<String, AgentImpl> membersToAdd = new HashMap<>();
 	private Map<String, AgentImpl> membersToRemove = new HashMap<>();
 
 	@SuppressWarnings("unchecked")
-	protected GroupAgentImpl(PublicKey pubKey, byte[] encryptedPrivate, Hashtable<String, byte[]> htEncryptedKeys)
+	protected GroupAgentImpl(PublicKey pubKey, byte[] encryptedPrivate, HashMap<String, byte[]> htEncryptedKeys)
 			throws AgentOperationFailedException {
 		super(pubKey, encryptedPrivate);
 
-		htEncryptedKeyVersions = (Hashtable<String, byte[]>) htEncryptedKeys.clone();
+		htEncryptedKeyVersions = (HashMap<String, byte[]>) htEncryptedKeys.clone();
 	}
 
 	/**
@@ -278,7 +277,7 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 			if (!encryptedKeys.getAttribute("method").equals(CryptoTools.getAsymmetricAlgorithm())) {
 				throw new MalformedXMLException("base64 encoding expected");
 			}
-			Hashtable<String, byte[]> htMemberKeys = new Hashtable<>();
+			HashMap<String, byte[]> htMemberKeys = new HashMap<>();
 			NodeList enGroups = encryptedKeys.getElementsByTagName("keyentry");
 			for (int n = 0; n < enGroups.getLength(); n++) {
 				org.w3c.dom.Node node = enGroups.item(n);
@@ -446,10 +445,12 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 			for (AgentImpl agent : membersToRemove.values()) {
 				removeMember(agent);
 			}
+			membersToRemove.clear();
 
 			for (AgentImpl agent : membersToAdd.values()) {
 				addMember(agent);
 			}
+			membersToAdd.clear();
 		} catch (CryptoException | SerializationException e) {
 			throw new AgentOperationFailedException("Agent corrupted!", e);
 		}

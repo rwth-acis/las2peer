@@ -37,7 +37,7 @@ public class ClassManager {
 	 * all registered main bundles (i.e. services) (name, version) => ServiceClassLoader
 	 */
 	private Hashtable<ServiceNameVersion, ServiceClassLoader> registeredLoaders = new Hashtable<>();
-	
+
 	/**
 	 * The policy
 	 */
@@ -46,9 +46,9 @@ public class ClassManager {
 	/**
 	 * create a new L2pClassLoader, which uses the given repository
 	 * 
-	 * @param repository
-	 * @param platformLoader
-	 * @param policy 
+	 * @param repository A repository to load classes from
+	 * @param platformLoader A platform class loader
+	 * @param policy A class loader policy
 	 */
 	public ClassManager(Repository repository, ClassLoader platformLoader, ClassLoaderPolicy policy) {
 		this(new Repository[] { repository }, platformLoader, policy);
@@ -57,9 +57,9 @@ public class ClassManager {
 	/**
 	 * create a new L2PClassLoader, which uses the given repositories
 	 * 
-	 * @param repositories
-	 * @param platformLoader
-	 * @param policy 
+	 * @param repositories A bunch of repositories to load classes from
+	 * @param platformLoader A platform class loader
+	 * @param policy A class loader policy
 	 */
 	public ClassManager(Repository[] repositories, ClassLoader platformLoader, ClassLoaderPolicy policy) {
 		this(Arrays.asList(repositories), platformLoader, policy);
@@ -68,9 +68,9 @@ public class ClassManager {
 	/**
 	 * create a new L2PClassLoader, which uses the given repositories
 	 * 
-	 * @param repositories
-	 * @param platformLoader
-	 * @param policy 
+	 * @param repositories A bunch of repositories to load classes from
+	 * @param platformLoader A platform class loader
+	 * @param policy A class loader policy
 	 */
 	public ClassManager(List<Repository> repositories, ClassLoader platformLoader, ClassLoaderPolicy policy) {
 		this.repositories = new ArrayList<>(repositories);
@@ -80,9 +80,9 @@ public class ClassManager {
 
 	/**
 	 * Register a service with the given identifier.
-	 * @param serviceIdentifier 
 	 * 
-	 * @throws ClassLoaderException
+	 * @param serviceIdentifier A service name and version identifier
+	 * @throws ClassLoaderException If the library for this service could not be found
 	 */
 	public void registerService(ServiceNameVersion serviceIdentifier) throws ClassLoaderException {
 		LibraryIdentifier libId = new LibraryIdentifier(getPackageName(serviceIdentifier.getName()),
@@ -108,7 +108,7 @@ public class ClassManager {
 		if (lib == null) {
 			throw new LibraryNotFoundException(libId.toString());
 		}
-		
+
 		// register
 		ServiceClassLoader cl = new ServiceClassLoader(lib, platformLoader, policy);
 		registeredLoaders.put(serviceIdentifier, cl);
@@ -116,15 +116,15 @@ public class ClassManager {
 
 	/**
 	 * Unregister a service class loader.
-	 * @param service 
 	 * 
-	 * @throws NotRegisteredException
+	 * @param service A service name and version
+	 * @throws NotRegisteredException If the library for this service could not be found
 	 */
 	public void unregisterService(ServiceNameVersion service) throws NotRegisteredException {
 		if (!registeredLoaders.containsKey(service)) {
 			throw new NotRegisteredException(service);
 		}
-		
+
 		registeredLoaders.remove(service);
 	}
 
@@ -133,9 +133,9 @@ public class ClassManager {
 	 * 
 	 * a service has to be provided in a bundle of the package containing the service
 	 * 
-	 * @param service
+	 * @param service A service name and version
 	 * @return a class definition of the requested service
-	 * @throws ClassLoaderException
+	 * @throws ClassLoaderException If the library for this service could not be found
 	 */
 	public Class<?> getServiceClass(ServiceNameVersion service) throws ClassLoaderException {
 		ServiceClassLoader cl = registeredLoaders.get(service);
@@ -155,12 +155,12 @@ public class ClassManager {
 				}
 			}
 		}
-		
+
 		try {
 			return cl.loadClass(service.getName());
 		} catch (ClassNotFoundException e) {
-			throw new LibraryNotFoundException("The library for " + service
-					+ " could be loaded, but the class is not available!", e);
+			throw new LibraryNotFoundException(
+					"The library for " + service + " could be loaded, but the class is not available!", e);
 		}
 	}
 
@@ -172,11 +172,11 @@ public class ClassManager {
 	int numberOfRegisteredServices() {
 		return registeredLoaders.size();
 	}
-	
+
 	/**
 	 * extract the package name from a class name
 	 * 
-	 * @param className
+	 * @param className A canonical class name
 	 * @return the package name of a complete class name
 	 */
 	public static final String getPackageName(String className) {

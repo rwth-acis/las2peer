@@ -19,9 +19,9 @@ public class InfoResponseMessage implements Message {
 	/**
 	 * create a new message
 	 * 
-	 * @param responseTo
-	 * @param sendingNode
-	 * @param xmlContent
+	 * @param responseTo A message reference id
+	 * @param sendingNode A sending node handle
+	 * @param xmlContent An XML data content string
 	 */
 	public InfoResponseMessage(long responseTo, NodeHandle sendingNode, String xmlContent) {
 		this.responseTo = responseTo;
@@ -32,12 +32,12 @@ public class InfoResponseMessage implements Message {
 	/**
 	 * create a new Message
 	 * 
-	 * @param resonseTo
-	 * @param sendingNode
-	 * @param content
+	 * @param responseTo A message reference id
+	 * @param sendingNode A sending node handle
+	 * @param content A node information content
 	 */
-	public InfoResponseMessage(long resonseTo, NodeHandle sendingNode, NodeInformation content) {
-		this(resonseTo, sendingNode, content.toXmlString());
+	public InfoResponseMessage(long responseTo, NodeHandle sendingNode, NodeInformation content) {
+		this(responseTo, sendingNode, content.toXmlString());
 	}
 
 	/**

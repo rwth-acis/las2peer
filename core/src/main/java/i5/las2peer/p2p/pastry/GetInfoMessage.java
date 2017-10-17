@@ -15,7 +15,7 @@ public class GetInfoMessage implements Message {
 	/**
 	 * create a new
 	 * 
-	 * @param sender
+	 * @param sender A sending node handle
 	 */
 	public GetInfoMessage(NodeHandle sender) {
 		this.sendingNode = sender;

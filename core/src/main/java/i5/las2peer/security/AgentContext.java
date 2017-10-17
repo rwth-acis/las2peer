@@ -134,7 +134,11 @@ public class AgentContext implements AgentStorage {
 		if (agentId.equalsIgnoreCase(getMainAgent().getIdentifier())) {
 			return getMainAgent();
 		} else {
-			return requestGroupAgent(agentId);
+			try {
+				return requestGroupAgent(agentId);
+			} catch (AgentAccessDeniedException e) {
+				throw new AgentAccessDeniedException("Access to agent denied!", e);
+			}
 		}
 	}
 

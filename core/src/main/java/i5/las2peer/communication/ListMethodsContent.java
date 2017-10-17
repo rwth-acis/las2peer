@@ -10,9 +10,6 @@ public class ListMethodsContent implements Serializable {
 
 	public class MethodComparator implements Comparator<String[]>, Serializable {
 
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = -3575390237718967189L;
 
 		@Override
@@ -30,13 +27,9 @@ public class ListMethodsContent implements Serializable {
 
 	}
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -8167152562828966791L;
 
 	private TreeMap<String, TreeSet<String[]>> htMethodDescriptions = null;
-
 	private boolean bFinalized = false;
 
 	/**
@@ -50,7 +43,7 @@ public class ListMethodsContent implements Serializable {
 	 * create a new ListMethodsContent either as a request or as a response, a response is open for adding methods after
 	 * creation
 	 * 
-	 * @param request
+	 * @param request If true, this is treated as request or as a response otherwise.
 	 */
 	public ListMethodsContent(boolean request) {
 		if (request) {
@@ -64,7 +57,7 @@ public class ListMethodsContent implements Serializable {
 	/**
 	 * add a method to this response
 	 * 
-	 * @param m
+	 * @param m A method to add
 	 */
 	public void addMethod(Method m) {
 		if (isRequest() || bFinalized)
@@ -104,7 +97,7 @@ public class ListMethodsContent implements Serializable {
 	/**
 	 * get a sorted array of all parameter signatures for the given method name
 	 * 
-	 * @param methodName
+	 * @param methodName A method name
 	 * @return sorted array with all parameter signatures
 	 */
 	public String[][] getSortedMethodParameters(String methodName) {

@@ -15,7 +15,7 @@ public class ServiceNameVersion implements Serializable {
 	/**
 	 * Instantiate a ServiceNameVersion
 	 * 
-	 * @param name
+	 * @param name A canonical service name
 	 * @param version see {@link ServiceVersion} how to specify a version
 	 */
 	public ServiceNameVersion(String name, String version) {
@@ -25,8 +25,8 @@ public class ServiceNameVersion implements Serializable {
 	/**
 	 * Instantiate a ServiceNameVersion
 	 * 
-	 * @param name
-	 * @param version
+	 * @param name A canonical service name
+	 * @param version see {@link ServiceVersion} how to specify a version
 	 */
 	public ServiceNameVersion(String name, ServiceVersion version) {
 		this.name = name;
@@ -93,7 +93,7 @@ public class ServiceNameVersion implements Serializable {
 	/**
 	 * construct a ServiceNameVersion from a String of the format name@version
 	 * 
-	 * @param nameVersion
+	 * @param nameVersion A string representing a canonical service name and version
 	 * @return Returns the service name version
 	 */
 	public static ServiceNameVersion fromString(String nameVersion) {
@@ -108,10 +108,11 @@ public class ServiceNameVersion implements Serializable {
 	/**
 	 * Checks if the this version fits the required version
 	 * 
-	 * @param required
+	 * @param required A required service name and version to check for
 	 * @return Returns true if the names are equal and this version fits the required version
 	 */
 	public boolean fits(ServiceNameVersion required) {
 		return (this.name.equals(required.getName()) && this.getVersion().fits(required.getVersion()));
 	}
+
 }

@@ -1,10 +1,18 @@
 package i5.las2peer.execution;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectStreamClass;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
+
+import com.sun.beans.finder.ClassFinder;
 
 import i5.las2peer.api.Context;
 import i5.las2peer.api.Service;
@@ -13,6 +21,7 @@ import i5.las2peer.api.execution.ServiceAccessDeniedException;
 import i5.las2peer.api.execution.ServiceInvocationException;
 import i5.las2peer.api.execution.ServiceInvocationFailedException;
 import i5.las2peer.api.execution.ServiceMethodNotFoundException;
+import i5.las2peer.api.execution.ServiceNotAuthorizedException;
 import i5.las2peer.api.execution.ServiceNotAvailableException;
 import i5.las2peer.api.execution.ServiceNotFoundException;
 import i5.las2peer.api.logging.MonitoringEvent;
@@ -36,13 +45,14 @@ import i5.las2peer.api.security.GroupAgent;
 import i5.las2peer.api.security.ServiceAgent;
 import i5.las2peer.api.security.UserAgent;
 import i5.las2peer.logging.L2pLogger;
+import i5.las2peer.p2p.AgentAlreadyRegisteredException;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.persistency.EnvelopeImpl;
 import i5.las2peer.persistency.EnvelopeVersion;
 import i5.las2peer.security.AgentContext;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.GroupAgentImpl;
-import i5.las2peer.security.InternalSecurityException;
+import i5.las2peer.security.MessageReceiver;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.serialization.SerializationException;
@@ -110,39 +120,67 @@ public class ExecutionContext implements Context {
 	@Override
 	public Serializable invoke(String service, String method, Serializable... parameters)
 			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException,
-			ServiceMethodNotFoundException, ServiceInvocationFailedException, ServiceAccessDeniedException {
+			ServiceMethodNotFoundException, ServiceInvocationFailedException, ServiceAccessDeniedException,
+			ServiceNotAuthorizedException {
 		return invoke(ServiceNameVersion.fromString(service), method, parameters);
 	}
 
 	@Override
 	public Serializable invoke(ServiceNameVersion service, String method, Serializable... parameters)
 			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException,
-			ServiceMethodNotFoundException, ServiceInvocationFailedException, ServiceAccessDeniedException {
+			ServiceMethodNotFoundException, ServiceInvocationFailedException, ServiceAccessDeniedException,
+			ServiceNotAuthorizedException {
 		return invokeWithAgent(callerContext.getMainAgent(), service, method, parameters);
 	}
 
 	@Override
 	public Serializable invokeInternally(String service, String method, Serializable... parameters)
 			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException,
-			ServiceMethodNotFoundException, ServiceInvocationFailedException, ServiceAccessDeniedException {
+			ServiceMethodNotFoundException, ServiceInvocationFailedException, ServiceAccessDeniedException,
+			ServiceNotAuthorizedException {
 		return invokeInternally(ServiceNameVersion.fromString(service), method, parameters);
 	}
 
 	@Override
 	public Serializable invokeInternally(ServiceNameVersion service, String method, Serializable... parameters)
 			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException,
-			ServiceMethodNotFoundException, ServiceInvocationFailedException, ServiceAccessDeniedException {
+			ServiceMethodNotFoundException, ServiceInvocationFailedException, ServiceAccessDeniedException,
+			ServiceNotAuthorizedException {
 		return invokeWithAgent(serviceAgent, service, method, parameters);
 	}
 
 	private Serializable invokeWithAgent(AgentImpl agent, ServiceNameVersion service, String method,
-			Serializable[] parameters)
-			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException,
-			ServiceMethodNotFoundException, ServiceInvocationFailedException, ServiceAccessDeniedException {
+			Serializable[] parameters) throws ServiceNotFoundException, ServiceNotAvailableException,
+			InternalServiceException, ServiceMethodNotFoundException, ServiceInvocationFailedException,
+			ServiceAccessDeniedException, ServiceNotAuthorizedException {
 		try {
-			return callerContext.getLocalNode().invoke(agent, service, method, parameters);
+			Serializable rmiResult = callerContext.getLocalNode().invoke(agent, service, method, parameters);
+			if (rmiResult == null) {
+				return null;
+			}
+			ClassLoader localServiceLoader = serviceAgent.getServiceInstance().getClass().getClassLoader();
+			if (rmiResult.getClass().getClassLoader() != localServiceLoader) {
+				// mimic global invocation serialization/deserialization to avoid class cast/not-found exceptions
+				try {
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					new ObjectOutputStream(baos).writeObject(rmiResult);
+					baos.close();
+					ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(baos.toByteArray())) {
+						@Override
+						protected Class<?> resolveClass(ObjectStreamClass classDesc)
+								throws IOException, ClassNotFoundException {
+							return ClassFinder.resolveClass(classDesc.getName(), localServiceLoader);
+						}
+					};
+					rmiResult = (Serializable) ois.readObject();
+				} catch (IOException | ClassNotFoundException e) {
+					throw new ServiceInvocationFailedException("Re-serialization failed", e);
+				}
+			}
+			return rmiResult;
 		} catch (ServiceNotFoundException | ServiceNotAvailableException | InternalServiceException
-				| ServiceMethodNotFoundException | ServiceInvocationFailedException | ServiceAccessDeniedException e) {
+				| ServiceMethodNotFoundException | ServiceInvocationFailedException | ServiceAccessDeniedException
+				| ServiceNotAuthorizedException e) {
 			throw e;
 		} catch (ServiceInvocationException e) {
 			throw new ServiceInvocationFailedException("Service invocation failed.", e);
@@ -195,8 +233,7 @@ public class ExecutionContext implements Context {
 				try {
 					agent.unlock(a);
 					break;
-				}
-				catch (AgentAccessDeniedException | AgentLockedException | AgentOperationFailedException e) {
+				} catch (AgentAccessDeniedException | AgentLockedException | AgentOperationFailedException e) {
 				}
 			}
 			if (agent.isLocked()) {
@@ -248,8 +285,6 @@ public class ExecutionContext implements Context {
 		} catch (AgentAlreadyExistsException | AgentLockedException | AgentAccessDeniedException
 				| AgentOperationFailedException e) {
 			throw e;
-		} catch (InternalSecurityException e) {
-			throw new AgentAccessDeniedException(e);
 		} catch (AgentException e) {
 			throw new AgentOperationFailedException(e);
 		}
@@ -275,6 +310,11 @@ public class ExecutionContext implements Context {
 	public String getUserAgentIdentifierByEmail(String emailAddress)
 			throws AgentNotFoundException, AgentOperationFailedException {
 		return node.getAgentIdForEmail(emailAddress);
+	}
+
+	@Override
+	public void registerReceiver(MessageReceiver receiver) throws AgentAlreadyRegisteredException, AgentException {
+		node.registerReceiver(receiver);
 	}
 
 	@Override
@@ -331,7 +371,7 @@ public class ExecutionContext implements Context {
 			throw new EnvelopeOperationFailedException("Anonymous agent must not be used to persist data");
 		}
 		// TODO collision handler
-		
+
 		// create reader set
 		EnvelopeImpl envelope = (EnvelopeImpl) env;
 		HashSet<Object> keys = new HashSet<>();
@@ -345,8 +385,7 @@ public class ExecutionContext implements Context {
 					keys.add(a);
 				}
 			}
-		}
-		else if (!envelope.getRevokeAllReaders()) {
+		} else if (!envelope.getRevokeAllReaders()) {
 			for (AgentImpl a : envelope.getReaderToAdd()) {
 				keys.add(a);
 			}
@@ -400,14 +439,16 @@ public class ExecutionContext implements Context {
 	}
 
 	@Override
-	public Envelope createEnvelope(String identifier, Agent using) throws EnvelopeOperationFailedException, EnvelopeAccessDeniedException {
+	public Envelope createEnvelope(String identifier, Agent using)
+			throws EnvelopeOperationFailedException, EnvelopeAccessDeniedException {
 		EnvelopeImpl envelope = new EnvelopeImpl(identifier, (AgentImpl) using);
 		envelope.addReader(using);
 		return envelope;
 	}
 
 	@Override
-	public Envelope createEnvelope(String identifier) throws EnvelopeOperationFailedException, EnvelopeAccessDeniedException {
+	public Envelope createEnvelope(String identifier)
+			throws EnvelopeOperationFailedException, EnvelopeAccessDeniedException {
 		return createEnvelope(identifier, callerContext.getMainAgent());
 	}
 

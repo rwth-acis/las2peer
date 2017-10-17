@@ -32,7 +32,7 @@ public class FileSystemRepository implements Repository {
 	/**
 	 * create a repository for the given directory, non-recursive
 	 * 
-	 * @param directory
+	 * @param directory A directory path name to use as repository
 	 */
 	public FileSystemRepository(String directory) {
 		this(new String[] { directory }, false);
@@ -41,8 +41,8 @@ public class FileSystemRepository implements Repository {
 	/**
 	 * create a repository for the given directory
 	 * 
-	 * @param directory
-	 * @param recursive
+	 * @param directory A directory path name to use as repository
+	 * @param recursive If true, recursion is used for sub-directories.
 	 */
 	public FileSystemRepository(String directory, boolean recursive) {
 		this(new String[] { directory }, recursive);
@@ -51,7 +51,7 @@ public class FileSystemRepository implements Repository {
 	/**
 	 * create a repository for the given directories, non-recursive
 	 * 
-	 * @param directories
+	 * @param directories An array of directory path names to use as repository
 	 */
 	public FileSystemRepository(String[] directories) {
 		this(directories, false);
@@ -60,8 +60,8 @@ public class FileSystemRepository implements Repository {
 	/**
 	 * create a repository for the given directories
 	 * 
-	 * @param directories
-	 * @param recursive
+	 * @param directories An array of directory path names to use as repository
+	 * @param recursive If true, recursion is used for sub-directories.
 	 */
 	public FileSystemRepository(String[] directories, boolean recursive) {
 		this(Arrays.asList(directories), recursive);
@@ -70,8 +70,8 @@ public class FileSystemRepository implements Repository {
 	/**
 	 * create a repository for the given directories
 	 * 
-	 * @param directories
-	 * @param recursive
+	 * @param directories A bunch of directory path names to use as repository
+	 * @param recursive If true, recursion is used for sub-directories.
 	 */
 	public FileSystemRepository(Iterable<String> directories, boolean recursive) {
 		this.directories = directories;
@@ -83,9 +83,9 @@ public class FileSystemRepository implements Repository {
 	/**
 	 * get the newest library for the given name
 	 * 
-	 * @param name
-	 * @return a LoadedLibrary for the requested library name
-	 * @throws LibraryNotFoundException
+	 * @param name A library name to search for
+	 * @return Returns a LoadedLibrary for the requested library name
+	 * @throws LibraryNotFoundException If the library could not be found in this repository
 	 */
 	@Override
 	public LoadedLibrary findLibrary(String name) throws LibraryNotFoundException {
@@ -118,9 +118,9 @@ public class FileSystemRepository implements Repository {
 	/**
 	 * get a library matching name and version of the given identifier
 	 * 
-	 * @param lib
-	 * @return a LoadedLibrary for the requested library identifier
-	 * @throws LibraryNotFoundException
+	 * @param lib A library identifier
+	 * @return Returns a LoadedLibrary for the requested library identifier
+	 * @throws LibraryNotFoundException If the library could not be found in this repository
 	 */
 	@Override
 	public LoadedLibrary findLibrary(LibraryIdentifier lib) throws LibraryNotFoundException {
@@ -150,7 +150,7 @@ public class FileSystemRepository implements Repository {
 	/**
 	 * get an array with all versions found for the given library name
 	 * 
-	 * @param libraryName
+	 * @param libraryName A canonical library name
 	 * @return array with all available versions of the given library
 	 */
 	public String[] getAvailableVersions(String libraryName) {
@@ -160,7 +160,7 @@ public class FileSystemRepository implements Repository {
 	/**
 	 * get a collection with all versions found for the given library name
 	 * 
-	 * @param libraryName
+	 * @param libraryName A canonical library name
 	 * @return a collections with all versions of the given library
 	 */
 	public Collection<LibraryVersion> getAvailableVersionSet(String libraryName) {
@@ -206,8 +206,8 @@ public class FileSystemRepository implements Repository {
 	/**
 	 * helper method to get the last modification date of a directory
 	 * 
-	 * @param dir
-	 * @param recursive
+	 * @param dir A directory
+	 * @param recursive If true also files inside the directory are considered
 	 * @return Returns the last modified date in epoch format
 	 */
 	public static long getLastModified(File dir, boolean recursive) {

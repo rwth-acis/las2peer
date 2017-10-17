@@ -1,10 +1,12 @@
 package i5.las2peer.tools.helper;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -36,6 +38,9 @@ public class L2pNodeLauncherConfiguration {
 
 	public static final String ARG_DEBUG = "--debug";
 	public static final String ARG_SHORT_DEBUG = "-debug";
+
+	public static final String ARG_SHORT_BIND_ADDRESS = "-if";
+	public static final String ARG_BIND_ADDRESS = "--bind-address";
 
 	public static final String ARG_SHORT_PORT = "-p";
 	public static final String ARG_PORT = "--port";
@@ -75,6 +80,7 @@ public class L2pNodeLauncherConfiguration {
 
 	// regular options
 	private boolean debugMode;
+	private InetAddress bindAddress;
 	private Integer port;
 	private List<String> bootstrap;
 	private STORAGE_MODE storageMode;
@@ -179,6 +185,22 @@ public class L2pNodeLauncherConfiguration {
 				setDebugMode(true);
 			} else if (arg.equalsIgnoreCase(ARG_SHORT_SANDBOX) || arg.equalsIgnoreCase(ARG_SANDBOX)) {
 				setSandbox(true);
+			} else if (arg.equalsIgnoreCase(ARG_SHORT_BIND_ADDRESS) || arg.equalsIgnoreCase(ARG_BIND_ADDRESS)) {
+				if (itArg.hasNext() == false) {
+					throw new IllegalArgumentException(
+							"Illegal argument '" + arg + "', because ip address expected after it");
+				} else {
+					String sBindAddress = itArg.next();
+					try {
+						InetAddress addr = InetAddress.getByName(sBindAddress);
+						// in case of an exception this structure doesn't override an already set value
+						setBindAddress(addr);
+					} catch (Exception ex) {
+						throw new IllegalArgumentException(
+								"Illegal argument '" + arg + "', because " + sBindAddress + " is not an ip address");
+					}
+
+				}
 			} else if (arg.equalsIgnoreCase(ARG_SHORT_PORT) || arg.equalsIgnoreCase(ARG_PORT)) {
 				if (itArg.hasNext() == false) {
 					throw new IllegalArgumentException(
@@ -279,6 +301,10 @@ public class L2pNodeLauncherConfiguration {
 
 	public void setFromInput(InputStream inputStream) throws IOException {
 		ConfigFile conf = new ConfigFile(inputStream);
+		String strBindAddress = conf.get("bindAddress");
+		if (strBindAddress != null) {
+			setBindAddress(InetAddress.getByName(strBindAddress));
+		}
 		String strPort = conf.get("port");
 		if (strPort != null) {
 			setPort(Integer.valueOf(strPort));
@@ -337,6 +363,12 @@ public class L2pNodeLauncherConfiguration {
 			conf.put("serviceDirectories", getServiceDirectories());
 			conf.put("nodeIdSeed", getNodeIdSeed());
 			conf.put("commands", getCommands());
+			// auto create parent directory
+			File parent = new File(filename).getParentFile();
+			if (parent != null) {
+				parent.mkdirs();
+			}
+			// write configuration to file
 			FileOutputStream fos = new FileOutputStream(filename);
 			conf.store(fos);
 			fos.close();
@@ -383,6 +415,14 @@ public class L2pNodeLauncherConfiguration {
 
 	public void setSandbox(boolean sandbox) {
 		this.sandbox = sandbox;
+	}
+
+	public InetAddress getBindAddress() {
+		return bindAddress;
+	}
+
+	public void setBindAddress(InetAddress bindAddress) {
+		this.bindAddress = bindAddress;
 	}
 
 	public Integer getPort() {

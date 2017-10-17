@@ -29,7 +29,6 @@ import i5.las2peer.api.security.AnonymousAgent;
 import i5.las2peer.classLoaders.ClassManager;
 import i5.las2peer.classLoaders.libraries.SharedStorageRepository;
 import i5.las2peer.communication.Message;
-import i5.las2peer.communication.MessageException;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.p2p.pastry.MessageEnvelope;
 import i5.las2peer.p2p.pastry.NodeApplication;
@@ -44,7 +43,6 @@ import i5.las2peer.persistency.StorageStoreResultHandler;
 import i5.las2peer.security.AgentContext;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.AnonymousAgentImpl;
-import i5.las2peer.security.InternalSecurityException;
 import i5.las2peer.security.MessageReceiver;
 import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.serialization.MalformedXMLException;
@@ -95,7 +93,7 @@ public class PastryNodeImpl extends Node {
 	private NodeApplication application;
 	private SharedStorage pastStorage;
 	private String storageDir; // null = default chosen by SharedStorage
-	private Long nodeIdSeed;
+	private String nodeIdSeed;
 
 	/**
 	 * This constructor is mainly used by the {@link i5.las2peer.testing.TestSuite}, uses a random system defined port
@@ -121,7 +119,7 @@ public class PastryNodeImpl extends Node {
 	 * 
 	 * @param classManager A class manager that is used by the node.
 	 * @param useMonitoringObserver If true, the node sends monitoring information to the monitoring service.
-	 * @param pastryBindAddress
+	 * @param pastryBindAddress An address to bind to, {@code null} binds to Internet address
 	 * @param pastryPort A port number the PastryNode should listen to for network communication. <code>null</code>
 	 *            means use a random system defined port. Use {@link #getPort()} to retrieve the number.
 	 * @param bootstrap A list of host addresses that should be used for bootstrap, like hostname:port or
@@ -145,7 +143,7 @@ public class PastryNodeImpl extends Node {
 		this.bootStrap = bootstrap;
 		this.storageMode = storageMode;
 		this.storageDir = storageDir;
-		this.nodeIdSeed = nodeIdSeed;
+		this.nodeIdSeed = nodeIdSeed != null ? Long.toString(nodeIdSeed) : null;
 		this.setStatus(NodeStatus.CONFIGURED);
 	}
 
@@ -224,7 +222,7 @@ public class PastryNodeImpl extends Node {
 
 			if (nodeIdSeed == null) {
 				// auto generate node id seed from port
-				nodeIdSeed = Long.valueOf(getPort());
+				nodeIdSeed = InetAddress.getLocalHost().getHostName() + getPort();
 			}
 			InternetPastryNodeFactory factory = new InternetPastryNodeFactory(new L2pNodeIdFactory(nodeIdSeed),
 					pastryBindAddress, pastryPort, pastryEnvironment, null, null, null);
@@ -234,12 +232,16 @@ public class PastryNodeImpl extends Node {
 			setupPastryApplications();
 
 			Collection<InetSocketAddress> boot = getBootstrapAddresses();
+			long timeStartBootstrap = System.currentTimeMillis();
 			if (boot == null || boot.isEmpty()) {
-				logger.info("Start new las2peer network ...");
+				logger.info("Starting new las2peer network...");
 			} else {
-				logger.info("Bootstrapping to " + SimpleTools.join(boot, ", ") + " ...");
+				logger.info("Bootstrapping to " + SimpleTools.join(boot, ", ") + "...");
 			}
 			pastryNode.boot(boot);
+			if (boot != null && !boot.isEmpty()) {
+				logger.info("Bootstrapping completed in " + (System.currentTimeMillis() - timeStartBootstrap) + "ms");
+			}
 
 			synchronized (pastryNode) {
 				while (!pastryNode.isReady() && !pastryNode.joinFailed()) {
@@ -445,10 +447,6 @@ public class PastryNodeImpl extends Node {
 			logger.log(Level.SEVERE, "Can't read message XML", e);
 			observerNotice(MonitoringEvent.MESSAGE_FAILED, pastryNode, message.getSenderId(), atNodeId,
 					message.getRecipientId(), "XML exception!");
-		} catch (MessageException e) {
-			logger.log(Level.SEVERE, "Could not send message", e);
-			observerNotice(MonitoringEvent.MESSAGE_FAILED, pastryNode, message.getSenderId(), atNodeId,
-					message.getRecipientId(), "Message exception!");
 		}
 	}
 
@@ -564,7 +562,7 @@ public class PastryNodeImpl extends Node {
 	 */
 	@Deprecated
 	@Override
-	public void updateAgent(AgentImpl agent) throws AgentException, InternalSecurityException, EnvelopeException {
+	public void updateAgent(AgentImpl agent) throws AgentException {
 		storeAgent(agent);
 	}
 

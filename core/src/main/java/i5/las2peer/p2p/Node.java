@@ -253,7 +253,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 		this.classManager = classManager;
 
 		if (classManager == null) {
-			this.classManager = new ClassManager(new Repository[0], this.getClass().getClassLoader(), new DefaultPolicy());
+			this.classManager = new ClassManager(new Repository[0], this.getClass().getClassLoader(),
+					new DefaultPolicy());
 		}
 
 		nodeKeyPair = CryptoTools.generateKeyPair();
@@ -304,7 +305,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param service The service that should be monitored.
 	 */
 	public void setServiceMonitoring(ServiceAgentImpl service) {
-		observerNotice(MonitoringEvent.SERVICE_ADD_TO_MONITORING, this.getNodeId(), service.getIdentifier(), null, null,				service.getServiceNameVersion().toString());
+		observerNotice(MonitoringEvent.SERVICE_ADD_TO_MONITORING, this.getNodeId(), service.getIdentifier(), null, null,
+				service.getServiceNameVersion().toString());
 	}
 
 	/**
@@ -321,7 +323,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * Logs an event to all observers.
 	 * 
 	 * @param event The event for this notification.
-	 * @param sourceNode
+	 * @param sourceNode A source node for this event
 	 * @param remarks Some free text note or description about this event.
 	 */
 	public void observerNotice(MonitoringEvent event, Object sourceNode, String remarks) {
@@ -332,8 +334,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * Logs an event to all observers.
 	 * 
 	 * @param event The event for this notification.
-	 * @param sourceNode
-	 * @param sourceAgentId
+	 * @param sourceNode A source node for this event
+	 * @param sourceAgentId A source agent id for this event
 	 * @param remarks Some free text note or description about this event.
 	 */
 	public void observerNotice(MonitoringEvent event, Object sourceNode, String sourceAgentId, String remarks) {
@@ -344,8 +346,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * Logs an event to all observers.
 	 * 
 	 * @param event The event for this notification.
-	 * @param sourceNode
-	 * @param sourceAgent
+	 * @param sourceNode A source node for this event
+	 * @param sourceAgent A source agent for this event
 	 * @param remarks Some free text note or description about this event.
 	 */
 	public void observerNotice(MonitoringEvent event, Object sourceNode, MessageReceiver sourceAgent, String remarks) {
@@ -360,10 +362,10 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * Logs an event to all observers.
 	 * 
 	 * @param event The event for this notification.
-	 * @param sourceNode
-	 * @param sourceAgent
-	 * @param destinationNode
-	 * @param destinationAgent
+	 * @param sourceNode A source node for this event
+	 * @param sourceAgent A source agent for this event
+	 * @param destinationNode A destination node for this event
+	 * @param destinationAgent A destination agent for this event
 	 * @param remarks Some free text note or description about this event.
 	 */
 	public void observerNotice(MonitoringEvent event, Object sourceNode, AgentImpl sourceAgent, Object destinationNode,
@@ -383,10 +385,10 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * Logs an event to all observers.
 	 * 
 	 * @param event The event for this notification.
-	 * @param sourceNode
-	 * @param sourceAgentId
-	 * @param destinationNode
-	 * @param destinationAgentId
+	 * @param sourceNode A source node for this event
+	 * @param sourceAgentId A source agent id for this event
+	 * @param destinationNode A destination node for this event
+	 * @param destinationAgentId A destination agent id for this event
 	 * @param remarks Some free text note or description about this event.
 	 */
 	public void observerNotice(MonitoringEvent event, Object sourceNode, String sourceAgentId, Object destinationNode,
@@ -517,9 +519,9 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	/**
 	 * Gets information about a distant node.
 	 * 
-	 * @param nodeId
+	 * @param nodeId A node id to query
 	 * @return information about the node
-	 * @throws NodeNotFoundException
+	 * @throws NodeNotFoundException If the node was not found
 	 */
 	public abstract NodeInformation getNodeInformation(Object nodeId) throws NodeNotFoundException;
 
@@ -533,14 +535,14 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	/**
 	 * Starts this node.
 	 * 
-	 * @throws NodeException
+	 * @throws NodeException If launching the node fails
 	 */
 	protected abstract void launchSub() throws NodeException;
 
 	/**
 	 * Starts this node.
 	 * 
-	 * @throws NodeException
+	 * @throws NodeException If launching the node fails
 	 */
 	public final void launch() throws NodeException {
 		launchSub();
@@ -581,8 +583,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	/**
 	 * Registers a (local) Agent for usage through this node. The Agent has to be unlocked before registration.
 	 * 
-	 * @param receiver
-	 *
+	 * @param receiver A message receiver to register
 	 * @throws AgentAlreadyRegisteredException the given agent is already registered to this node
 	 * @throws AgentLockedException the agent is not unlocked
 	 * @throws AgentException any problem with the agent itself (probably on calling
@@ -705,9 +706,9 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	/**
 	 * unregister a receiver from a topic
 	 * 
-	 * @param receiver the recevier
+	 * @param receiver the receiver
 	 * @param topic the topic id
-	 * @throws NodeException
+	 * @throws NodeException If unregistering fails
 	 */
 	public void unregisterReceiverFromTopic(MessageReceiver receiver, long topic) throws NodeException {
 		unregisterReceiverFromTopic(receiver.getResponsibleForAgentSafeId(), topic);
@@ -747,7 +748,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	/**
 	 * Is an instance of the given agent running at this node?
 	 * 
-	 * @param agent
+	 * @param agent An agent to check for
 	 * @return true, if the given agent is running at this node
 	 */
 	public boolean hasLocalAgent(AgentImpl agent) {
@@ -757,7 +758,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	/**
 	 * Is an instance of the given agent running at this node?
 	 * 
-	 * @param agentId
+	 * @param agentId An agent id to check for
 	 * @return true, if the given agent is registered here
 	 */
 	public boolean hasLocalAgent(String agentId) {
@@ -790,10 +791,10 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	/**
 	 * Sends a message to the agent residing at the given node.
 	 * 
-	 * @param message
-	 * @param atNodeId
+	 * @param message A message to send
+	 * @param atNodeId A node id to send from
 	 * @param listener a listener for getting the result separately
-	 * @throws NodeNotFoundException
+	 * @throws NodeNotFoundException If the node was not found
 	 */
 	public abstract void sendMessage(Message message, Object atNodeId, MessageResultListener listener)
 			throws NodeNotFoundException;
@@ -801,9 +802,9 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	/**
 	 * Sends the given response message to the given node.
 	 * 
-	 * @param message
-	 * @param atNodeId
-	 * @throws NodeNotFoundException
+	 * @param message A message to send
+	 * @param atNodeId A node id to send from
+	 * @throws NodeNotFoundException If the node was not found
 	 */
 	public void sendResponse(Message message, Object atNodeId) throws NodeNotFoundException {
 		sendMessage(message, atNodeId, null);
@@ -813,14 +814,12 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * For <i>external</i> access to this node. Will be called by the (P2P) network library, when a new message has been
 	 * received via the network and could not be handled otherwise.
 	 * 
-	 * @param message
+	 * @param message A message that is received
 	 * @throws AgentNotRegisteredException If the designated recipient is not known at this node
 	 * @throws AgentException If any other issue with the agent occurs, e. g. XML not readable
-	 * @throws MessageException
-	 * @throws InternalSecurityException
+	 * @throws MessageException If handling the message fails
 	 */
-	public void receiveMessage(Message message)
-			throws AgentNotRegisteredException, AgentException, MessageException, InternalSecurityException {
+	public void receiveMessage(Message message) throws AgentNotRegisteredException, AgentException, MessageException {
 		if (message.isResponse()) {
 			if (handoverAnswer(message)) {
 				return;
@@ -877,10 +876,10 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * 
 	 *             Gets an artifact from the p2p storage.
 	 * 
-	 * @param id
+	 * @param id An id to identify the envelope
 	 * @return the envelope containing the requested artifact
-	 * @throws EnvelopeNotFoundException
-	 * @throws EnvelopeException
+	 * @throws EnvelopeNotFoundException If the envelope was not found
+	 * @throws EnvelopeException If an issue with the envelope occurred
 	 */
 	@Deprecated
 	public abstract EnvelopeVersion fetchArtifact(long id) throws EnvelopeNotFoundException, EnvelopeException;
@@ -890,10 +889,10 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * 
 	 *             Gets an artifact from the p2p storage.
 	 * 
-	 * @param identifier
+	 * @param identifier An identifier for the envelope
 	 * @return the envelope containing the requested artifact
-	 * @throws EnvelopeNotFoundException
-	 * @throws EnvelopeException
+	 * @throws EnvelopeNotFoundException If the envelope was not found
+	 * @throws EnvelopeException If an issue with the envelope occurred
 	 */
 	@Deprecated
 	public abstract EnvelopeVersion fetchArtifact(String identifier)
@@ -904,9 +903,9 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * 
 	 *             Stores an artifact to the p2p storage.
 	 * 
-	 * @param envelope
-	 * @throws EnvelopeAlreadyExistsException
-	 * @throws EnvelopeException
+	 * @param envelope An envelope to store
+	 * @throws EnvelopeAlreadyExistsException If the envelope already exists
+	 * @throws EnvelopeException If an issue with the envelope occurred
 	 */
 	@Deprecated
 	public abstract void storeArtifact(EnvelopeVersion envelope)
@@ -918,10 +917,10 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 *             Removes an artifact from the p2p storage. <i>NOTE: This is not possible with a FreePastry
 	 *             backend!</i>
 	 * 
-	 * @param id
-	 * @param signature
-	 * @throws EnvelopeNotFoundException
-	 * @throws EnvelopeException
+	 * @param id An identifier for the artifact
+	 * @param signature A signature to use
+	 * @throws EnvelopeNotFoundException If the envelope was not found
+	 * @throws EnvelopeException If an issue with the envelope occurred
 	 */
 	@Deprecated
 	public abstract void removeArtifact(long id, byte[] signature) throws EnvelopeNotFoundException, EnvelopeException;
@@ -942,7 +941,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * Search the nodes for registered versions of the given agent. Returns an array of objects identifying the nodes
 	 * the given agent is registered to.
 	 * 
-	 * @param agent
+	 * @param agent An agent to find
 	 * @return array with the IDs of nodes, where the given agent is registered
 	 * @throws AgentNotRegisteredException If the agent is not registered at this node
 	 */
@@ -966,7 +965,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * searches the nodes for registered versions of the given agent. Returns an array of objects identifying the nodes
 	 * the given agent is registered to.
 	 * 
-	 * @param agent
+	 * @param agent An agent to look for
 	 * @param hintOfExpectedCount a hint for the expected number of results (e.g. to wait for)
 	 * @return array with the IDs of nodes, where the given agent is registered
 	 * @throws AgentNotRegisteredException If the agent is not registered at this node
@@ -982,7 +981,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * make sure, always to return fresh versions of the requested agent, so that no thread can unlock the private key
 	 * for another one!
 	 * 
-	 * @param id
+	 * @param id An agent id
 	 * @return the requested agent
 	 * @throws AgentNotFoundException If the agent is not found
 	 * @throws AgentException If any other issue with the agent occurs, e. g. XML not readable
@@ -1005,7 +1004,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	/**
 	 * Gets a local registered agent by its id.
 	 * 
-	 * @param id
+	 * @param id An agent id
 	 * @return the agent registered to this node
 	 * @throws AgentNotRegisteredException If the agent is not found at this node
 	 */
@@ -1061,7 +1060,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	/**
 	 * Gets a local registered mediator for the given agent id. If no mediator exists, registers a new one to this node.
 	 * 
-	 * @param agent
+	 * @param agent An agent to mediate
 	 * @return the mediator for the given agent
 	 * @throws AgentLockedException If the agent is locked.
 	 * @throws AgentAlreadyRegisteredException If the agent is already directly registered at this node
@@ -1087,23 +1086,19 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	/**
 	 * Stores a new Agent to the network.
 	 * 
-	 * @param agent
-	 * @throws InternalSecurityException
+	 * @param agent An agent to store
 	 * @throws AgentException If any issue with the agent occurs
 	 */
-	public abstract void storeAgent(AgentImpl agent) throws AgentException, InternalSecurityException;
+	public abstract void storeAgent(AgentImpl agent) throws AgentException;
 
 	/**
 	 * Updates an existing agent of the network.
 	 * 
-	 * @param agent
-	 * @throws InternalSecurityException
+	 * @param agent An agent to update
 	 * @throws AgentException If any issue with the agent occurs
-	 * @throws EnvelopeException
 	 */
 	@Deprecated
-	public abstract void updateAgent(AgentImpl agent)
-			throws InternalSecurityException, AgentException, EnvelopeException;
+	public abstract void updateAgent(AgentImpl agent) throws AgentException;
 
 	/**
 	 * returns the manager responsible for user management
@@ -1117,7 +1112,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	/**
 	 * Gets an id for the user for the given login name.
 	 * 
-	 * @param login
+	 * @param login A login name to identify agent
 	 * @return agent id
 	 * @throws AgentNotFoundException If no agent for the given login is found
 	 * @throws AgentOperationFailedException If any other issue with the agent occurs, e. g. XML not readable
@@ -1129,7 +1124,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	/**
 	 * Gets an id for the user for the given email address.
 	 * 
-	 * @param email
+	 * @param email An email address to identify agent
 	 * @return agent id
 	 * @throws AgentNotFoundException If no agent for the given email is found
 	 * @throws AgentOperationFailedException If any other issue with the agent occurs, e. g. XML not readable
@@ -1152,8 +1147,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * 
 	 * Prefer using a locally registered agent.
 	 * 
-	 * @param service
-	 * @param acting
+	 * @param service service to be invoked
+	 * @param acting agent
 	 * @return the ServiceAgent responsible for the given service class
 	 * @throws AgentException If any issue with the agent occurs, e. g. not found, XML not readable
 	 */
@@ -1173,13 +1168,13 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	/**
 	 * invoke a service in the network
 	 * 
-	 * @param executing
-	 * @param service
-	 * @param method
-	 * @param parameters
+	 * @param executing the executing agent
+	 * @param service service to be invoked
+	 * @param method service method
+	 * @param parameters invocation parameters
 	 * @return Returns the invocation result
-	 * @throws AgentLockedException
-	 * @throws ServiceInvocationException
+	 * @throws ServiceInvocationException If service invocation fails
+	 * @throws AgentLockedException If the executing agent was locked
 	 */
 	public Serializable invoke(AgentImpl executing, String service, String method, Serializable[] parameters)
 			throws AgentLockedException, ServiceInvocationException {
@@ -1189,13 +1184,13 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	/**
 	 * invoke a service in the network (choosing an appropriate version)
 	 * 
-	 * @param executing
-	 * @param service
-	 * @param method
-	 * @param parameters
+	 * @param executing the executing agent
+	 * @param service service to be invoked
+	 * @param method service method
+	 * @param parameters invocation parameters
 	 * @return Returns the invocation result
-	 * @throws AgentLockedException
-	 * @throws ServiceInvocationException
+	 * @throws ServiceInvocationException If service invocation fails
+	 * @throws AgentLockedException If the executing agent was locked
 	 */
 	public Serializable invoke(AgentImpl executing, ServiceNameVersion service, String method,
 			Serializable[] parameters) throws AgentLockedException, ServiceInvocationException {
@@ -1205,14 +1200,14 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	/**
 	 * invoke a service in the network or locally
 	 * 
-	 * @param executing
-	 * @param service
-	 * @param method
-	 * @param parameters
-	 * @param exactVersion
+	 * @param executing the executing agent
+	 * @param service service to be invoked
+	 * @param method service method
+	 * @param parameters invocation parameters
+	 * @param exactVersion if true, an exact version match is required, otherwise, an appropriate version will be chosen
 	 * @return Returns the invocation result
-	 * @throws ServiceInvocationException
-	 * @throws AgentLockedException
+	 * @throws ServiceInvocationException If service invocation fails
+	 * @throws AgentLockedException If the executing agent was locked
 	 */
 	public Serializable invoke(AgentImpl executing, ServiceNameVersion service, String method,
 			Serializable[] parameters, boolean exactVersion) throws AgentLockedException, ServiceInvocationException {
@@ -1226,13 +1221,11 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param service service to be invoked
 	 * @param method service method
 	 * @param parameters invocation parameters
-	 * @param exactVersion if true, an exact version match is required, otherwise, an appropriate version will be
-	 *            choosen
+	 * @param exactVersion if true, an exact version match is required, otherwise, an appropriate version will be chosen
 	 * @param localOnly if true, only locally running services are executed
 	 * @return Returns the invocation result
-	 * @throws ServiceNotFoundException
-	 * @throws ServiceInvocationException
-	 * @throws AgentLockedException
+	 * @throws ServiceInvocationException If service invocation fails
+	 * @throws AgentLockedException If the executing agent was locked
 	 */
 	public Serializable invoke(AgentImpl executing, ServiceNameVersion service, String method,
 			Serializable[] parameters, boolean exactVersion, boolean localOnly)
@@ -1286,8 +1279,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param method service method
 	 * @param parameters method parameters
 	 * @return innovation result
-	 * @throws ServiceInvocationException
-	 * @throws AgentLockedException
+	 * @throws ServiceInvocationException If service invocation fails
+	 * @throws AgentLockedException If the executing agent was locked
 	 */
 	public Serializable invokeLocally(AgentImpl executing, ServiceAgentImpl serviceAgent, String method,
 			Serializable[] parameters) throws ServiceInvocationException, AgentLockedException {
@@ -1323,8 +1316,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param method service method
 	 * @param parameters method parameters
 	 * @return invocation result
-	 * @throws ServiceInvocationException
-	 * @throws AgentLockedException
+	 * @throws ServiceInvocationException If service invocation fails
+	 * @throws AgentLockedException If the executing agent is locked
 	 */
 	public Serializable invokeGlobally(AgentImpl executing, String serviceAgentId, Object nodeId, String method,
 			Serializable[] parameters) throws ServiceInvocationException, AgentLockedException {
@@ -1429,10 +1422,9 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	/**
 	 * Tries to get an instance of the given class as a registered service of this node.
 	 * 
-	 * @param service
-	 * 
+	 * @param service A service name and version to check for
 	 * @return the instance of the given service class running at this node
-	 * @throws ServiceNotFoundException
+	 * @throws ServiceNotFoundException If the service is not found
 	 */
 	public ServiceAgentImpl getLocalServiceAgent(ServiceNameVersion service) throws ServiceNotFoundException {
 		try {
@@ -1445,8 +1437,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	/**
 	 * Registers a MessageResultListener for collecting answers.
 	 * 
-	 * @param messageId
-	 * @param listener
+	 * @param messageId A message id to register for
+	 * @param listener An answer listener
 	 */
 	public void registerAnswerListener(long messageId, MessageResultListener listener) {
 		if (listener == null) {
@@ -1458,7 +1450,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	/**
 	 * Hands over an answer message to the corresponding listener.
 	 * 
-	 * @param answer
+	 * @param answer A answer message to handle
 	 * @return true, if a listener for this answer was notified
 	 */
 	public boolean handoverAnswer(Message answer) {
@@ -1483,10 +1475,10 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	/**
 	 * Sends a message and wait for one answer message.
 	 * 
-	 * @param m
+	 * @param m A message to send
 	 * @return a (possible) response message
-	 * @throws InterruptedException
-	 * @throws TimeoutException
+	 * @throws InterruptedException If sending the message was interrupted
+	 * @throws TimeoutException If sending the message timeouts
 	 */
 	public Message sendMessageAndWaitForAnswer(Message m) throws InterruptedException, TimeoutException {
 		long timeout = m.getTimeoutTs() - new Date().getTime();
@@ -1506,12 +1498,12 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	/**
 	 * Sends a message to the given id and wait for one answer message.
 	 * 
-	 * @param m
-	 * @param atNodeId
+	 * @param m A message to send
+	 * @param atNodeId A node id to send from
 	 * @return a response message
-	 * @throws NodeNotFoundException
-	 * @throws InterruptedException
-	 * @throws TimeoutException
+	 * @throws NodeNotFoundException If no node was not found with given id
+	 * @throws InterruptedException If sending the message was interrupted
+	 * @throws TimeoutException If sending the message timeouts
 	 */
 	public Message sendMessageAndWaitForAnswer(Message m, Object atNodeId)
 			throws NodeNotFoundException, InterruptedException, TimeoutException {
@@ -1534,11 +1526,11 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * 
 	 * Uses a broadcast
 	 * 
-	 * @param m
+	 * @param m A message to send
 	 * @param recipientCount expected number of answers
 	 * @return Returns an array with all collected answers
-	 * @throws InterruptedException
-	 * @throws TimeoutException
+	 * @throws InterruptedException If sending the message was interrupted
+	 * @throws TimeoutException If sending the message timeouts
 	 */
 	public Message[] sendMessageAndCollectAnswers(Message m, int recipientCount)
 			throws InterruptedException, TimeoutException {
@@ -1563,12 +1555,11 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * Gets the local execution context of an agent. If there is currently none, a new one will be created and stored
 	 * for later use.
 	 * 
-	 * @param agentId
+	 * @param agentId An agent id to get the context for
 	 * @return the context for the given agent
-	 * @throws InternalSecurityException
 	 * @throws AgentException If any issue with the agent occurs, e. g. XML not readable
 	 */
-	public AgentContext getAgentContext(String agentId) throws InternalSecurityException, AgentException {
+	public AgentContext getAgentContext(String agentId) throws AgentException {
 		AgentContext result = htLocalExecutionContexts.get(agentId);
 
 		if (result == null) {
@@ -1585,8 +1576,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	/**
 	 * Gets a (possibly fresh) context for the given agent.
 	 * 
-	 * @param agent
-	 * @return a context
+	 * @param agent An agent to get the context for
+	 * @return Returns a context
 	 */
 	public AgentContext getAgentContext(AgentImpl agent) {
 		AgentContext result = htLocalExecutionContexts.get(agent.getIdentifier());
@@ -1604,7 +1595,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	/**
 	 * Checks, if the given service class is running at this node.
 	 * 
-	 * @param service
+	 * @param service A service name and version to check for
 	 * @return true, if this node as an instance of the given service running
 	 */
 	public boolean hasService(ServiceNameVersion service) {

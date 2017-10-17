@@ -14,18 +14,18 @@ public interface Repository {
 	/**
 	 * get the newest library for the given name
 	 * 
-	 * @param name
+	 * @param name A library name
 	 * @return a loaded library for the given library name
-	 * @throws LibraryNotFoundException
+	 * @throws LibraryNotFoundException If the library was not found in this repository
 	 */
 	public LoadedLibrary findLibrary(String name) throws LibraryNotFoundException;
 
 	/**
 	 * get a library matching name and version of the given identifier
 	 * 
-	 * @param lib
+	 * @param lib A library identifier
 	 * @return a loaded library for the given identifier
-	 * @throws LibraryNotFoundException
+	 * @throws LibraryNotFoundException If the library was not found in this repository
 	 */
 	public LoadedLibrary findLibrary(LibraryIdentifier lib) throws LibraryNotFoundException;
 

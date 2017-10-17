@@ -83,9 +83,6 @@ public class MonitoringObserver implements NodeObserver {
 		} catch (AgentException e) {
 			System.out.println("Monitoring: Problems registering MonitoringAgent!" + e);
 			e.printStackTrace();
-		} catch (InternalSecurityException e) {
-			System.out.println("Monitoring: Problems registering MonitoringAgent!" + e);
-			e.printStackTrace();
 		}
 
 		try {

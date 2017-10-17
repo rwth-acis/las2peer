@@ -21,8 +21,8 @@ public class LibraryVersion {
 	 * 
 	 * minor, subversion and build are optional
 	 * 
-	 * @param version
-	 * @throws IllegalArgumentException
+	 * @param version A version string representation
+	 * @throws IllegalArgumentException If the string contains no valid version representation
 	 */
 	public LibraryVersion(String version) throws IllegalArgumentException {
 		try {
@@ -72,11 +72,11 @@ public class LibraryVersion {
 	/**
 	 * generate a new LibraryVersion
 	 * 
-	 * @param major
-	 * @param minor
-	 * @param sub
-	 * @param build
-	 * @throws IllegalArgumentException a version is smaller than 0
+	 * @param major Major version number part
+	 * @param minor Minor version number part
+	 * @param sub Sub version number part
+	 * @param build Build number
+	 * @throws IllegalArgumentException If a version number part is smaller than 0
 	 */
 	public LibraryVersion(int major, int minor, int sub, int build) throws IllegalArgumentException {
 		this(major, minor, sub);
@@ -89,10 +89,10 @@ public class LibraryVersion {
 	/**
 	 * generate a new LibraryVersion
 	 * 
-	 * @param major
-	 * @param minor
-	 * @param sub
-	 * @throws IllegalArgumentException a version is smaller than 0
+	 * @param major Major version number part
+	 * @param minor Minor version number part
+	 * @param sub Sub version number part
+	 * @throws IllegalArgumentException If a version number part is smaller than 0
 	 */
 	public LibraryVersion(int major, int minor, int sub) throws IllegalArgumentException {
 		this(major, minor);
@@ -104,9 +104,9 @@ public class LibraryVersion {
 	/**
 	 * generate a new LibraryVersion
 	 * 
-	 * @param major
-	 * @param minor
-	 * @throws IllegalArgumentException
+	 * @param major Major version number part
+	 * @param minor Minor version number part
+	 * @throws IllegalArgumentException If a version number part is smaller than 0
 	 */
 	public LibraryVersion(int major, int minor) throws IllegalArgumentException {
 		this(major);
@@ -118,19 +118,19 @@ public class LibraryVersion {
 	/**
 	 * generate a new LibraryVersion
 	 * 
-	 * @param major
-	 * @throws IllegalArgumentException
+	 * @param major Major version number part
+	 * @throws IllegalArgumentException If a version number part is smaller than 0
 	 */
 	public LibraryVersion(int major) throws IllegalArgumentException {
 		if (major < 0)
 			throw new IllegalArgumentException("Negative version numbers are not allowed!");
 		this.major = major;
 	}
-	
+
 	/**
 	 * compares to version and checks for equality
 	 * 
-	 * @param v
+	 * @param v Another library version to check
 	 * @return true, if this version is the same as the given one
 	 */
 	public boolean equals(LibraryVersion v) {
@@ -142,7 +142,7 @@ public class LibraryVersion {
 	 * 
 	 * if the given object is a String, the string representation of this version is compared to the given string
 	 * 
-	 * @param o
+	 * @param o Another version string to check
 	 * @return true, if the given object is a version and the same as this one
 	 */
 	@Override

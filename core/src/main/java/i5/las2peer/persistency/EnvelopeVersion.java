@@ -21,6 +21,7 @@ import i5.las2peer.api.Context;
 import i5.las2peer.api.persistency.EnvelopeAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentLockedException;
+import i5.las2peer.api.security.AnonymousAgent;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.security.AgentContext;
 import i5.las2peer.security.AgentImpl;
@@ -187,17 +188,17 @@ public class EnvelopeVersion implements Serializable, XmlAble {
 			}
 			// remove reader groups ids that do not exist anymore
 			for (Iterator<String> i = readerGroupIds.iterator(); i.hasNext();) {
-			    String groupId = i.next();
-			    boolean containsKey = false;
-			    for (PublicKey pk : readerKeys.keySet()) {
-			    	if (groupId.equals(CryptoTools.publicKeyToSHA512(pk))) {
-			    		containsKey=true;
-			    		break;
-			    	}
-			    }
-			    if (!containsKey) {
-			        i.remove();
-			    }
+				String groupId = i.next();
+				boolean containsKey = false;
+				for (PublicKey pk : readerKeys.keySet()) {
+					if (groupId.equals(CryptoTools.publicKeyToSHA512(pk))) {
+						containsKey = true;
+						break;
+					}
+				}
+				if (!containsKey) {
+					i.remove();
+				}
 			}
 		} else {
 			// unencrypted envelope
@@ -268,6 +269,10 @@ public class EnvelopeVersion implements Serializable, XmlAble {
 			throws CryptoException, EnvelopeAccessDeniedException, SerializationException {
 		byte[] decrypted = null;
 		if (isEncrypted()) {
+			if (context.getMainAgent() instanceof AnonymousAgent) {
+				throw new EnvelopeAccessDeniedException("The AnonymousAgent can only access unencrypted envelopes!");
+			}
+
 			SecretKey decryptedReaderKey = null;
 			// fetch all groups
 			for (String groupId : readerGroupIds) {
@@ -287,7 +292,8 @@ public class EnvelopeVersion implements Serializable, XmlAble {
 				// no group matched
 				byte[] encryptedReaderKey = readerKeys.get(context.getMainAgent().getPublicKey());
 				if (encryptedReaderKey == null) {
-					throw new CryptoException("Agent (" + context.getMainAgent().getIdentifier() + ") has no read permission");
+					throw new CryptoException(
+							"Agent (" + context.getMainAgent().getIdentifier() + ") has no read permission");
 				}
 				try {
 					decryptedReaderKey = context.getMainAgent().decryptSymmetricKey(encryptedReaderKey);
@@ -311,7 +317,7 @@ public class EnvelopeVersion implements Serializable, XmlAble {
 
 	/**
 	 * @return a XML (string) representation of this envelope
-	 * @throws SerializationException
+	 * @throws SerializationException If serialization fails
 	 */
 	@Override
 	public String toXmlString() throws SerializationException {
@@ -328,8 +334,8 @@ public class EnvelopeVersion implements Serializable, XmlAble {
 				"\t<las2peer:keys encoding=\"base64\" encryption=\"" + CryptoTools.getAsymmetricAlgorithm() + "\">\n");
 		for (Entry<PublicKey, byte[]> readerKey : readerKeys.entrySet()) {
 			try {
-				result.append("\t\t<las2peer:key public=\"" + CryptoTools.publicKeyToBase64String(readerKey.getKey()) + "\">"
-						+ Base64.getEncoder().encodeToString(readerKey.getValue()) + "</las2peer:key>\n");
+				result.append("\t\t<las2peer:key public=\"" + CryptoTools.publicKeyToBase64String(readerKey.getKey())
+						+ "\">" + Base64.getEncoder().encodeToString(readerKey.getValue()) + "</las2peer:key>\n");
 			} catch (CryptoException e) {
 				throw new SerializationException("Could not encode key as string", e);
 			}
@@ -349,9 +355,9 @@ public class EnvelopeVersion implements Serializable, XmlAble {
 	/**
 	 * factory for generating an envelope from the given XML String representation
 	 * 
-	 * @param rootElement
+	 * @param rootElement A root element to use
 	 * @return envelope created from the given XML String serialization
-	 * @throws MalformedXMLException
+	 * @throws MalformedXMLException If the XML data is malformed
 	 */
 	public static EnvelopeVersion createFromXml(Element rootElement) throws MalformedXMLException {
 		if (!rootElement.hasAttribute("identifier")) {
@@ -436,9 +442,9 @@ public class EnvelopeVersion implements Serializable, XmlAble {
 	/**
 	 * factory for generating an envelope from the given XML String representation
 	 * 
-	 * @param xml
+	 * @param xml An XML data string
 	 * @return envelope created from the given XML String serialization
-	 * @throws MalformedXMLException
+	 * @throws MalformedXMLException If the XML data string is malformed
 	 */
 	public static EnvelopeVersion createFromXml(String xml) throws MalformedXMLException {
 		return createFromXml(XmlTools.getRootElement(xml, "las2peer:envelope"));
