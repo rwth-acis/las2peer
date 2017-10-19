@@ -214,6 +214,7 @@ public class LocalNodeTest {
 			eve.unlock("evespass");
 
 			LocalNodeManager manager = new LocalNodeManager();
+			manager.setMaxMessageWait(8000);
 			LocalNode testee = manager.launchAgent(adam);
 
 			MessageResultListener l = new MessageResultListener(8000) {
