@@ -1636,6 +1636,10 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 		return (getNodeCpuLoad() > cpuLoadThreshold);
 	}
 
+	public void setCpuLoadThreshold(double cpuLoadThreshold) {
+		this.cpuLoadThreshold = cpuLoadThreshold;
+	}
+
 	// Tidy up Timer
 
 	/**
