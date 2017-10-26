@@ -12,6 +12,8 @@ import org.junit.Test;
 import i5.las2peer.api.execution.ServiceInvocationException;
 import i5.las2peer.api.execution.ServiceNotFoundException;
 import i5.las2peer.api.p2p.ServiceNameVersion;
+import i5.las2peer.classLoaders.ServiceClassLoader;
+import i5.las2peer.execution.ExecutionContext;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.testing.MockAgentFactory;
@@ -234,6 +236,66 @@ public class LocalNodeInvocationTest {
 				failed = true;
 			}
 			assertTrue(failed);
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail(e.toString());
+		}
+	}
+
+	@Test
+	public void testMultiNodeClassLoading() {
+		try {
+			// service jar is used
+			LocalNodeManager manager = new LocalNodeManager();
+			LocalNode serviceNode1 = manager.newNode(new String[] { "export/jars/", "core/export/jars/" });
+			serviceNode1.launch();
+			LocalNode serviceNode2 = manager.newNode(new String[] { "export/jars/", "core/export/jars/" });
+			serviceNode2.launch();
+
+			UserAgentImpl eve = MockAgentFactory.getEve();
+			eve.unlock("evespass");
+			serviceNode1.storeAgent(eve);
+
+			// start two nodes with both powering the service
+			ServiceNameVersion snv = new ServiceNameVersion("i5.las2peer.testServices.testPackage3.PackageTestService",
+					"1.0");
+			ServiceAgentImpl serviceAgent1 = ServiceAgentImpl.createServiceAgent(snv, "a pass");
+			serviceAgent1.unlock("a pass");
+			serviceNode1.storeAgent(serviceAgent1);
+			serviceNode1.registerReceiver(serviceAgent1);
+			Assert.assertEquals(ServiceClassLoader.class,
+					serviceAgent1.getServiceInstance().getClass().getClassLoader().getClass());
+
+			ServiceAgentImpl serviceAgent2 = ServiceAgentImpl.createServiceAgent(snv, "a pass");
+			serviceAgent2.unlock("a pass");
+			serviceNode2.storeAgent(serviceAgent2);
+			serviceNode2.registerReceiver(serviceAgent2);
+			Assert.assertEquals(ServiceClassLoader.class,
+					serviceAgent2.getServiceInstance().getClass().getClassLoader().getClass());
+
+			ExecutionContext context = new ExecutionContext(serviceAgent1, serviceNode1.getAgentContext(eve),
+					serviceNode1);
+
+			// make regular RMI call (here locally)
+			Object result = context.invoke(snv, "getValue", new Serializable[] { 42 });
+			Assert.assertEquals(ServiceClassLoader.class.getCanonicalName(),
+					result.getClass().getClassLoader().getClass().getCanonicalName());
+			Class<?> resultCls = result.getClass().getClassLoader()
+					.loadClass("i5.las2peer.testServices.testPackage3.helperClasses.SomeValue");
+			Assert.assertEquals(resultCls, result.getClass());
+			Assert.assertEquals(-42, resultCls.getMethod("getValue").invoke(result));
+
+			// make first node "busy"
+			serviceNode1.setCpuLoadThreshold(-1);
+
+			// make RMI call from first to second node (because node1 is busy now)
+			result = context.invoke(snv, "getValue", new Serializable[] { 42 });
+			Assert.assertEquals(ServiceClassLoader.class.getCanonicalName(),
+					result.getClass().getClassLoader().getClass().getCanonicalName());
+			resultCls = result.getClass().getClassLoader()
+					.loadClass("i5.las2peer.testServices.testPackage3.helperClasses.SomeValue");
+			Assert.assertEquals(resultCls, result.getClass());
+			Assert.assertEquals(-42, resultCls.getMethod("getValue").invoke(result));
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail(e.toString());

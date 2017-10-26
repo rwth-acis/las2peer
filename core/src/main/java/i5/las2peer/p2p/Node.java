@@ -1369,8 +1369,18 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 				resultMessage = sendMessageAndWaitForAnswer(rmiMessage);
 			}
 
+			ClassLoader msgClsLoader = null;
 			try {
-				resultMessage.open(executing, this);
+				ServiceAgentImpl localInst = getLocalServiceAgent(serviceAgent.getServiceNameVersion());
+				if (localInst != null) {
+					msgClsLoader = localInst.getServiceInstance().getClass().getClassLoader();
+				}
+			} catch (ServiceNotFoundException e) {
+				// ok, no local instance found
+			}
+
+			try {
+				resultMessage.open(executing, this, msgClsLoader);
 			} catch (AgentException e) {
 				throw new ServiceInvocationException("Could not open received answer!", e);
 			}

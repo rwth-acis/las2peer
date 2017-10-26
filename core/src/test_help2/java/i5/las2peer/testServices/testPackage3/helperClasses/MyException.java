@@ -1,4 +1,4 @@
-package i5.las2peer.testing.services.helperClasses;
+package i5.las2peer.testServices.testPackage3.helperClasses;
 
 /**
  * An exception inside the used library for testing purposes.

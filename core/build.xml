@@ -354,9 +354,21 @@
 			</manifest>
 		</jar>
 	</target>
+
+	<target name="jar_testPackageService" depends="init_jars, compile_help2">
+		<jar jarfile="${export.jars}/i5.las2peer.testServices.testPackage3-1.0.jar">
+			<fileset dir="${tmp.help2}">
+				<include name="i5/las2peer/testServices/testPackage3/**/*" />
+			</fileset>
+			<manifest>
+				<attribute name="Library-SymbolicName" value="i5.las2peer.testServices.testPackage3" />
+				<attribute name="Library-Version" value="1.0" />
+			</manifest>
+		</jar>
+	</target>
 	
-	<target name="jars" depends="main_jar, test_service_jar, test_service_helper_jar" />
-	<target name="junit_jars" depends="jar_test1-1.1, jar_test1-1.2, jar_test2-1.0, jar_testService1-1.0, jar_testService1-1.1, jar_testService2-1.0, jar_evilService" />
+	<target name="jars" depends="main_jar" />
+	<target name="junit_jars" depends="jar_test1-1.1, jar_test1-1.2, jar_test2-1.0, jar_testService1-1.0, jar_testService1-1.1, jar_testService2-1.0, jar_evilService, jar_testPackageService" />
 	
 	<target name="main_jar" depends="compile_main">		
 		<!-- constructs the external libraries classpath name -->
@@ -375,31 +387,6 @@
 				<attribute name="Implementation-Version" value="${ivy.las2peer.version}" />
 				<attribute name="Implementation-Vendor" value="${ivy.organisation}" />
 				<attribute name="Build-Time" value="${ivy.now}" />
-			</manifest>
-		</jar>
-	</target>
-	
-	<target name="test_service_jar" depends="compile_main">
-		<property name="testService.version" value="0.0.1" />
-		<jar jarfile="${export.jars}/i5.las2peer.testing.services-${testService.version}.jar">
-			<fileset dir="${tmp.classes}" includes="i5/las2peer/testing/services/*" />
-			<manifest>
-				<attribute name="Library-Version" value="${testService.version}" />
-				<attribute name="Library-SymbolicName" value="i5.las2peer.testing.services" />
-				<attribute name="Import-Library" value='test_service_helper;version="(0.0.1,1.0)"' />
-			</manifest>
-		</jar>
-	</target>
-	
-	<target name="test_service_helper_jar" depends="compile_main">
-		<property name="testServiceHelper.version" value="0.2" />
-		<jar jarfile="${export.jars}/test_service_helper-${testServiceHelper.version}.jar">
-			<fileset dir="${tmp.classes}"
-				includes="i5/las2peer/testing/services/helperClasses/**" />
-			<manifest>
-				<attribute name="Library-Version" value="${testServiceHelper.version}" />
-				<attribute name="Library-SymbolicName" value="i5.las2peer.testing.services.helperClasses" />
-				<attribute name="Import-Library" value="" />
 			</manifest>
 		</jar>
 	</target>

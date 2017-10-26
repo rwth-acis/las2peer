@@ -1,10 +1,10 @@
-package i5.las2peer.testing.services;
+package i5.las2peer.testServices.testPackage3;
 
 import java.io.IOException;
 
 import i5.las2peer.api.Service;
-import i5.las2peer.testing.services.helperClasses.MyException;
-import i5.las2peer.testing.services.helperClasses.SomeValue;
+import i5.las2peer.testServices.testPackage3.helperClasses.MyException;
+import i5.las2peer.testServices.testPackage3.helperClasses.SomeValue;
 import i5.las2peer.tools.FileContentReader;
 
 /**
