@@ -235,7 +235,9 @@ public class LocalNodeTest {
 
 			// launch another node hosting eve
 			manager.launchAgent(eve);
-			Thread.sleep(manager.getMaxMessageWait() + 6000);
+			Thread.sleep(manager.getMaxMessageWait() + 8000 + 6000);
+			System.out.println(l.getResults());
+			System.out.println(l.getExceptions());
 
 			assertTrue(l.isSuccess());
 			assertTrue(l.isFinished());
