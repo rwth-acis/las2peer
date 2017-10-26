@@ -235,25 +235,23 @@ public class MessageResultListener {
 	 * @throws InterruptedException If waiting was interrupted
 	 */
 	public void waitForOneAnswer(int sleepTimeMs) throws InterruptedException {
-
 		synchronized (this) {
 			inWaitMethod = true;
 			try {
 				long startedAt = new Date().getTime();
 				long now = startedAt;
-				do {
+				while ((now - startedAt) < timeoutMs && exceptions.isEmpty() && answers.isEmpty()) {
 					wait(timeoutMs - (now - startedAt));
 					now = new Date().getTime();
-				} while ((now - startedAt) < timeoutMs && exceptions.size() == 0 && answers.size() == 0);
+				}
 			} finally {
-				if (exceptions.size() == 00 && answers.size() == 0) {
+				if (exceptions.isEmpty() && answers.isEmpty()) {
 					status = Status.TIMEOUT;
 					notifyTimeout();
 				}
 				inWaitMethod = false;
 			}
 		}
-
 	}
 
 	/**
@@ -276,13 +274,13 @@ public class MessageResultListener {
 			try {
 				long startedAt = new Date().getTime();
 				long now = startedAt;
-				do {
+				while ((now - startedAt) < timeoutMs
+						&& (waitForAll || answers.isEmpty() || (now - startedAt) < timeoutMoreMs || !isFinished())) {
 					wait(timeoutMs - (now - startedAt));
 					now = new Date().getTime();
-				} while ((now - startedAt) < timeoutMs
-						&& (waitForAll || answers.size() == 0 || (now - startedAt) < timeoutMoreMs || !isFinished()));
+				}
 			} finally {
-				if (exceptions.size() == 00 && answers.size() == 0) {
+				if (exceptions.isEmpty() && answers.isEmpty()) {
 					status = Status.TIMEOUT;
 					notifyTimeout();
 				}

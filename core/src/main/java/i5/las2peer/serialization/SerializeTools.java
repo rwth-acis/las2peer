@@ -53,7 +53,7 @@ public class SerializeTools {
 	 * deserialize a single Object from a byte array
 	 * 
 	 * @param bytes
-	 * @return deseriaized object
+	 * @return deserialized object
 	 * @throws SerializationException
 	 */
 	public static Serializable deserialize(byte[] bytes) throws SerializationException {
@@ -65,7 +65,7 @@ public class SerializeTools {
 	 * 
 	 * @param bytes
 	 * @param clsLoader
-	 * @return deseriaized object
+	 * @return deserialized object
 	 * @throws SerializationException
 	 */
 	public static Serializable deserialize(byte[] bytes, ClassLoader clsLoader) throws SerializationException {
@@ -102,7 +102,19 @@ public class SerializeTools {
 	 * @throws SerializationException
 	 */
 	public static Serializable deserializeBase64(String base64) throws SerializationException {
-		return deserialize(Base64.getDecoder().decode(base64));
+		return deserializeBase64(base64, null);
+	}
+
+	/**
+	 * decodes a given base64 encoded string and deserializes it into a java object
+	 * 
+	 * @param base64
+	 * @param clsLoader
+	 * @return deserialized object
+	 * @throws SerializationException
+	 */
+	public static Serializable deserializeBase64(String base64, ClassLoader clsLoader) throws SerializationException {
+		return deserialize(Base64.getDecoder().decode(base64), clsLoader);
 	}
 
 	/**

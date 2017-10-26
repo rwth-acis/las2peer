@@ -73,7 +73,7 @@ public class PastryNodeImpl extends Node {
 	 * means all other timeouts depend on this value.
 	 */
 	private static final int PAST_MESSAGE_TIMEOUT = 60000;
-	// FIXME the timeouts should be PER STORAGE OPERATION and for the complete fetch or store process, as there might
+	// TODO the timeouts should be PER STORAGE OPERATION and for the complete fetch or store process, as there might
 	// have to be send several messages for a single operation. Their value should be equal to PAST_MESSAGE_TIMEOUT plus
 	// a grace value of a few seconds.
 	private static final int AGENT_GET_TIMEOUT = 300000;

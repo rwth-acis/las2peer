@@ -574,7 +574,7 @@ public class Message implements XmlAble, Cloneable {
 	 */
 	public Object getContent() throws InternalSecurityException {
 		if (!isOpen()) {
-			throw new InternalSecurityException("You have to open the envelope first!");
+			throw new InternalSecurityException("You have to open the message first!");
 		}
 
 		return content;

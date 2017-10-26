@@ -1345,7 +1345,6 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 		try {
 			Serializable msg;
 			if (executing instanceof PassphraseAgentImpl) {
-				// FIXME send unlocked agent instance
 				msg = new UnlockAgentCall(new RMITask(serviceAgent.getServiceNameVersion(), method, parameters),
 						((PassphraseAgentImpl) executing).getPassphrase());
 			} else {

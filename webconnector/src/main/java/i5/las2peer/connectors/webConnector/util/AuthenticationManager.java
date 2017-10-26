@@ -119,8 +119,7 @@ public class AuthenticationManager {
 			hrq = new HTTPRequest(Method.GET, userinfoEndpointUri.toURL());
 			hrq.setAuthorization("Bearer " + token);
 
-			// TODO process all error cases that can happen (in particular
-			// invalid tokens)
+			// TODO process all error cases that can happen (in particular invalid tokens)
 			hrs = hrq.send();
 		} catch (IOException | URISyntaxException e) {
 			throw new InternalServerErrorException("Fetching OIDC user info failed", e);

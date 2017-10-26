@@ -328,7 +328,7 @@ public class AgentsHandlerTest extends AbstractTestHandler {
 	@Test
 	public void testChangePassphrase() {
 		try {
-			// FIXME method stub
+			// TODO method stub
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail(e.toString());
@@ -338,7 +338,7 @@ public class AgentsHandlerTest extends AbstractTestHandler {
 	@Test
 	public void testPostCreateGroup() {
 		try {
-			// FIXME method stub
+			// TODO method stub
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail(e.toString());
@@ -348,7 +348,7 @@ public class AgentsHandlerTest extends AbstractTestHandler {
 	@Test
 	public void testPostLoadGroup() {
 		try {
-			// FIXME method stub
+			// TODO method stub
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail(e.toString());

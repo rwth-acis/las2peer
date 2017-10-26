@@ -28,11 +28,9 @@ public class GenericExceptionMapper implements ExceptionMapper<Throwable> {
 
 	@Override
 	public Response toResponse(Throwable e) {
-		// FIXME use format from WebConnector#sendUnexpectedErrorResponse
 		logger.log(Level.INFO, "Request failed: " + e.toString(), e);
 		int code = Status.INTERNAL_SERVER_ERROR.getStatusCode();
-		// map ServiceInvocationExceptions to WebApplicationExceptions
-		if (e instanceof ServiceInvocationException) {
+		if (e instanceof ServiceInvocationException) { // map ServiceInvocationExceptions to WebApplicationExceptions
 			if (e instanceof InvocationBadArgumentException) {
 				e = new BadRequestException(e.getMessage(), e.getCause());
 			} else if (e instanceof ResourceNotFoundException) {
