@@ -607,6 +607,23 @@ public class Message implements XmlAble, Cloneable {
 	 */
 	public void open(AgentImpl unlockedRecipient, AgentStorage storage)
 			throws InternalSecurityException, AgentException {
+		open(unlockedRecipient, storage, null);
+	}
+
+	/**
+	 * open the message, i.e. decrypt the content with the private key of the receiving agent
+	 * 
+	 * the private key has to be unlocked first!
+	 * 
+	 * @param unlockedRecipient An unlocked recipient
+	 * @param storage An agent storage to use
+	 * @param contentClsLoader A class loader to deserialize the content
+	 * @throws InternalSecurityException If the private key of the receiver has to be unlocked for decryption
+	 * @throws AgentException If an issue with the sender agent occurs
+	 * @throws AgentNotFoundException If an issue with the sender agent occurs
+	 */
+	public void open(AgentImpl unlockedRecipient, AgentStorage storage, ClassLoader contentClsLoader)
+			throws InternalSecurityException, AgentException {
 		if (isOpen()) {
 			return;
 		}
@@ -681,7 +698,7 @@ public class Message implements XmlAble, Cloneable {
 			}
 
 			if (root.getAttribute("type").equals("Serializable")) {
-				content = SerializeTools.deserializeBase64(root.getTextContent());
+				content = SerializeTools.deserializeBase64(root.getTextContent(), contentClsLoader);
 			} else {
 				content = XmlAble.createFromXml(root.getFirstChild().toString(), root.getAttribute("class"));
 			}
