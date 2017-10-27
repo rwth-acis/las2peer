@@ -52,24 +52,6 @@ public class AnonymousAgentImplTest {
 		serviceAgent.unlock("pass");
 		node2.storeAgent(serviceAgent);
 		node2.registerReceiver(serviceAgent);
-
-		/*
-		adam = MockAgentFactory.getAdam();
-		adam.unlock("adamspass");
-		node.storeAgent(adam);
-		
-		eve = MockAgentFactory.getEve();
-		eve.unlock("evespass");
-		node.storeAgent(eve);
-		
-		ServiceAgentImpl serviceAgent = ServiceAgentImpl
-				.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@0.1"), "pass");
-		serviceAgent.unlock("pass");
-		node.storeAgent(serviceAgent);
-		node.registerReceiver(serviceAgent);
-		
-		context = new ExecutionContext(serviceAgent, node.getAgentContext(adam), node);
-		*/
 	}
 
 	@Test
@@ -127,17 +109,17 @@ public class AnonymousAgentImplTest {
 		// read envelope
 		env = context.requestEnvelope("myEnv");
 		assertEquals("myContent", env.getContent());
-		
+
 		// create encrypted envelope
 		env = context.createEnvelope("myEnvEnc", serviceAgent);
 		env.setContent("myContent");
 		context.storeEnvelope(env, serviceAgent);
-		
+
 		// read encrypted envelope
 		try {
 			context.requestEnvelope("myEnvEnc");
 			fail("EnvelopeAccessDeniedException expected");
-		} catch(EnvelopeAccessDeniedException e) {
+		} catch (EnvelopeAccessDeniedException e) {
 			// expected
 		}
 	}
