@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Date;
 
 import org.junit.Assert;
@@ -236,8 +237,8 @@ public class LocalNodeTest {
 			// launch another node hosting eve
 			manager.launchAgent(eve);
 			Thread.sleep(manager.getMaxMessageWait() + 8000 + 6000);
-			System.out.println(l.getResults());
-			System.out.println(l.getExceptions());
+			Arrays.stream(l.getExceptions()).forEach(e -> System.out.print("pending exception: " + e.toString()));
+			Arrays.stream(l.getResults()).forEach(rm -> System.out.println("pending result: " + rm.toXmlString()));
 
 			assertTrue(l.isSuccess());
 			assertTrue(l.isFinished());
