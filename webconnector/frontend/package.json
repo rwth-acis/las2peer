@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "bower": "^1.8.2",
-    "polymer-cli": "^1.5.6"
+    "polymer-cli": "^1.5.7"
   },
   "homepage": "https://las2peer.org/"
 }
