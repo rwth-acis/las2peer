@@ -42,6 +42,17 @@ public class LocalNodeManager {
 	}
 
 	/**
+	 * create a LocalNode using a FileSystemRepository at the given locations
+	 * 
+	 * @param fileSystemRepositories a path to the service directories
+	 * @return Returns a LocalNode instance
+	 */
+	public LocalNode newNode(String[] fileSystemRepositories) {
+		return new LocalNode(this, new ClassManager(new FileSystemRepository(fileSystemRepositories),
+				LocalNode.class.getClassLoader(), new DefaultPolicy()));
+	}
+
+	/**
 	 * factory: launch a node
 	 * 
 	 * @return a freshly started node
