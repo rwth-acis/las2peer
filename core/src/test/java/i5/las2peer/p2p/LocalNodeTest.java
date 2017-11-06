@@ -7,7 +7,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Date;
 
 import org.junit.Assert;
@@ -215,33 +214,30 @@ public class LocalNodeTest {
 			eve.unlock("evespass");
 
 			LocalNodeManager manager = new LocalNodeManager();
-			manager.setMaxMessageWait(8000);
-			LocalNode testee = manager.launchAgent(adam);
+			LocalNode node1 = manager.launchAgent(adam);
 
-			MessageResultListener l = new MessageResultListener(8000) {
+			MessageResultListener resultListener = new MessageResultListener(8000) {
 				@Override
 				public void notifySuccess() {
 					LocalNodeTest.testPendingVariable = true;
 				}
 			};
 
-			Message m = new Message(adam, eve, new PingPongContent());
-			testee.sendMessage(m, l);
+			Message msg = new Message(adam, eve, new PingPongContent());
+			node1.sendMessage(msg, resultListener);
 
 			Thread.sleep(5000);
 
 			assertFalse(testPendingVariable);
-			assertFalse(l.isSuccess());
-			assertFalse(l.isFinished());
+			assertFalse(resultListener.isSuccess());
+			assertFalse(resultListener.isFinished());
 
 			// launch another node hosting eve
 			manager.launchAgent(eve);
-			Thread.sleep(manager.getMaxMessageWait() + 8000 + 6000);
-			Arrays.stream(l.getExceptions()).forEach(e -> System.out.print("pending exception: " + e.toString()));
-			Arrays.stream(l.getResults()).forEach(rm -> System.out.println("pending result: " + rm.toXmlString()));
+			Thread.sleep(manager.getMaxMessageWait() + 6000);
 
-			assertTrue(l.isSuccess());
-			assertTrue(l.isFinished());
+			assertTrue(resultListener.isSuccess());
+			assertTrue(resultListener.isFinished());
 			assertTrue(testPendingVariable);
 		} catch (Exception e) {
 			e.printStackTrace();
