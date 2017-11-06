@@ -113,7 +113,11 @@ public class NodeServiceCache {
 					try {
 						update(service, true, acting);
 					} catch (Exception e) {
-						logger.log(Level.INFO, "Could not update service cache", e);
+						if (e instanceof TimeoutException) {
+							logger.log(Level.INFO, "Timeout while updating service cache. " + e.toString());
+						} else {
+							logger.log(Level.INFO, "Could not update service cache", e);
+						}
 						if (local == null) {
 							throw new AgentNotRegisteredException(
 									"Could not retrieve service information from the network.", e);

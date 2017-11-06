@@ -245,8 +245,8 @@ public class LocalNodeManager {
 				pending = new Hashtable<>();
 				htPendingMessages.put(message.getRecipientId(), pending);
 			}
-
 			pending.put(message, listener);
+			System.out.println("Stored pending message " + message.getId());
 		}
 	}
 
@@ -257,26 +257,22 @@ public class LocalNodeManager {
 	 * @param nodeId A node id to send to
 	 */
 	protected void deliverPendingMessages(String recipientId, long nodeId) {
-
 		synchronized (htPendingMessages) {
 			Hashtable<Message, MessageResultListener> pending = htPendingMessages.get(recipientId);
-
 			if (pending != null) {
 				for (Message m : pending.keySet()) {
 					System.out.println("send pending message..." + m.getId());
 					localSendMessage(nodeId, m);
 				}
-
 				htPendingMessages.remove(recipientId);
 			}
 		}
-
 	}
 
 	/**
 	 * get all expired messages and notify their senders
 	 */
-	protected void notifExpiredMessages() {
+	protected void notifyExpiredMessages() {
 		synchronized (htPendingMessages) {
 
 			System.out.println("checking for expired messages");
@@ -340,7 +336,7 @@ public class LocalNodeManager {
 				pendingTimerTask = new TimerTask() {
 					@Override
 					public void run() {
-						notifExpiredMessages();
+						notifyExpiredMessages();
 					}
 				};
 				pendingTimer.schedule(pendingTimerTask, 0, lPendingTimeout);
