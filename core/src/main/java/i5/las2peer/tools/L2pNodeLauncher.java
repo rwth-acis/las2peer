@@ -771,13 +771,6 @@ public class L2pNodeLauncher {
 	 */
 	private L2pNodeLauncher(InetAddress bindAddress, Integer port, List<String> bootstrap, STORAGE_MODE storageMode,
 			String storageDir, Boolean monitoringObserver, ClassManager cl, Long nodeIdSeed) {
-		if (storageMode == null) {
-			if (System.getenv().containsKey("MEM_STORAGE")) {
-				storageMode = STORAGE_MODE.MEMORY;
-			} else {
-				storageMode = STORAGE_MODE.FILESYSTEM;
-			}
-		}
 		if (monitoringObserver == null) {
 			monitoringObserver = false;
 		}
@@ -914,6 +907,14 @@ public class L2pNodeLauncher {
 			// in non debug mode replace null port
 			launcherConfiguration.setPort(PastryNodeImpl.DEFAULT_BOOTSTRAP_PORT);
 		}
+		STORAGE_MODE storageMode = launcherConfiguration.getStorageMode();
+		if (storageMode == null) {
+			if (System.getenv().containsKey("MEM_STORAGE") || launcherConfiguration.isDebugMode()) {
+				storageMode = STORAGE_MODE.MEMORY;
+			} else {
+				storageMode = STORAGE_MODE.FILESYSTEM;
+			}
+		}
 		Set<String> serviceDirectories = launcherConfiguration.getServiceDirectories();
 		if (serviceDirectories == null) {
 			HashSet<String> directories = new HashSet<>();
@@ -929,9 +930,8 @@ public class L2pNodeLauncher {
 		ClassManager cl = new ClassManager(new FileSystemRepository(serviceDirectories, true),
 				L2pNodeLauncher.class.getClassLoader(), clp);
 		L2pNodeLauncher launcher = new L2pNodeLauncher(bindAddress, launcherConfiguration.getPort(),
-				launcherConfiguration.getBootstrap(), launcherConfiguration.getStorageMode(),
-				launcherConfiguration.getStorageDirectory(), launcherConfiguration.useMonitoringObserver(), cl,
-				launcherConfiguration.getNodeIdSeed());
+				launcherConfiguration.getBootstrap(), storageMode, launcherConfiguration.getStorageDirectory(),
+				launcherConfiguration.useMonitoringObserver(), cl, launcherConfiguration.getNodeIdSeed());
 		// check special commands
 		if (launcherConfiguration.isPrintHelp()) {
 			launcher.bFinished = true;
