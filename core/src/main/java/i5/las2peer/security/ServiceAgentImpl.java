@@ -212,14 +212,15 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 
 	@Override
 	public void notifyUnregister() {
-		getRunningAtNode().getNodeServiceCache().unregisterLocalService(this);
-
+		Node runningAt = getRunningAtNode();
+		if (runningAt != null) {
+			runningAt.getNodeServiceCache().unregisterLocalService(this);
+		}
 		if (serviceInstance != null) {
 			serviceInstance.onStop();
 			System.out.println("Service " + this.getServiceNameVersion() + " has been stopped!");
 			serviceInstance = null;
 		}
-		Node runningAt = getRunningAtNode();
 		if (runningAt != null) {
 			runningAt.observerNotice(MonitoringEvent.SERVICE_SHUTDOWN, runningAt.getNodeId(), this,
 					getServiceNameVersion().toString());
