@@ -32,8 +32,8 @@ public class NodeServiceCache {
 
 	private final Node runningAt;
 
-	private Map<String, SortedMap<ServiceVersion, ServiceInstance>> localServices = new HashMap<>();
-	private Map<String, SortedMap<ServiceVersion, SortedSet<ServiceInstance>>> globalServices = new HashMap<>();
+	private final Map<String, SortedMap<ServiceVersion, ServiceInstance>> localServices = new HashMap<>();
+	private final Map<String, SortedMap<ServiceVersion, SortedSet<ServiceInstance>>> globalServices = new HashMap<>();
 
 	private long lifeTimeSeconds = 30;
 	private int waitForResults = 3;

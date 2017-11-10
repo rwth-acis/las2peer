@@ -107,7 +107,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	private OperatingSystemMXBean osBean = (com.sun.management.OperatingSystemMXBean) ManagementFactory
 			.getOperatingSystemMXBean();
 
-	private NodeServiceCache nodeServiceCache;
+	private final NodeServiceCache nodeServiceCache;
 
 	public static final double DEFAULT_CPU_LOAD_TRESHOLD = 0.5;
 	/**
