@@ -151,7 +151,7 @@ public class ClassManager {
 				try {
 					return this.platformLoader.loadClass(service.getName());
 				} catch (ClassNotFoundException e2) {
-					throw new LibraryNotFoundException(e2);
+					throw e;
 				}
 			}
 		}
