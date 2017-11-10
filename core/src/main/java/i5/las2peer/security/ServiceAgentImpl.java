@@ -26,6 +26,7 @@ import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.api.security.ServiceAgent;
 import i5.las2peer.classLoaders.ClassLoaderException;
+import i5.las2peer.classLoaders.LibraryNotFoundException;
 import i5.las2peer.communication.ListMethodsContent;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
@@ -57,7 +58,7 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 	/**
 	 * the name of the service class, this agent represents in the network
 	 */
-	private ServiceNameVersion sService;
+	private ServiceNameVersion nameVersion;
 
 	/**
 	 * instance of the service (if started at a node)
@@ -77,7 +78,7 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 	protected ServiceAgentImpl(ServiceNameVersion service, KeyPair pair, String passphrase, byte[] salt)
 			throws AgentOperationFailedException, CryptoException {
 		super(pair, passphrase, salt);
-		this.sService = service;
+		this.nameVersion = service;
 	}
 
 	/**
@@ -90,7 +91,7 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 	 */
 	protected ServiceAgentImpl(ServiceNameVersion service, PublicKey pubKey, byte[] encodedPrivate, byte[] salt) {
 		super(pubKey, encodedPrivate, salt);
-		this.sService = service;
+		this.nameVersion = service;
 	}
 
 	/**
@@ -100,7 +101,7 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 	 */
 	@Override
 	public ServiceNameVersion getServiceNameVersion() {
-		return this.sService;
+		return this.nameVersion;
 	}
 
 	@Override
@@ -351,15 +352,12 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 	 * @param node
 	 * @throws AgentException
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
 	public void notifyRegistrationTo(Node node) throws AgentException {
 		try {
-			Class<? extends Service> clServ = (Class<? extends Service>) node.getBaseClassLoader()
-					.getServiceClass(sService);
-
-			Constructor<? extends Service> cons = clServ.getConstructor(new Class<?>[0]);
-			serviceInstance = cons.newInstance();
+			Class<?> clServ = node.getBaseClassLoader().getServiceClass(nameVersion);
+			Constructor<?> cons = clServ.getConstructor(new Class<?>[0]);
+			serviceInstance = (Service) cons.newInstance();
 
 			// set up monitoring
 			if (serviceInstance.isMonitor()) {
@@ -392,14 +390,16 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 
 			System.out.println("Service " + this.getServiceNameVersion() + " has been started!");
 
-		} catch (ClassLoaderException e1) {
-			throw new AgentException("Problems with the classloader", e1);
-		} catch (InstantiationException e1) {
-			throw new AgentException("Consturctor failure while instantiating service", e1);
-		} catch (IllegalAccessException e1) {
-			throw new AgentException("Constructor security exception", e1);
+		} catch (LibraryNotFoundException e) {
+			throw new AgentException("Could not find library for " + nameVersion, e);
+		} catch (ClassLoaderException e) {
+			throw new AgentException("Problems with the classloader", e);
+		} catch (InstantiationException e) {
+			throw new AgentException("Consturctor failure while instantiating service", e);
+		} catch (IllegalAccessException e) {
+			throw new AgentException("Constructor security exception", e);
 		} catch (ClassCastException e) {
-			throw new AgentException("given class " + sService + " is not a L2p-Service!");
+			throw new AgentException("given class " + nameVersion + " is not a L2p-Service!");
 		} catch (ServiceException e) {
 			throw new AgentException("Service instance problems!", e);
 		} catch (AgentException e) {
