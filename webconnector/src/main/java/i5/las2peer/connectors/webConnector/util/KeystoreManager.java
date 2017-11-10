@@ -59,7 +59,7 @@ public class KeystoreManager {
 		caKeyGen.generate(CryptoTools.getAsymmetricKeySize());
 		PrivateKey caPrivateKey = caKeyGen.getPrivateKey();
 		CertificateExtensions caExts = new CertificateExtensions();
-		X500Name caX500Name = new X500Name("CN=" + hostname + " Root CA, O=las2peer, OU=RWTH-ACIS");
+		X500Name caX500Name = new X500Name("CN=Node Local las2peer Root CA, O=las2peer, OU=RWTH-ACIS");
 		SubjectAlternativeNameExtension caNameExt = new SubjectAlternativeNameExtension(
 				new GeneralNames().add(new GeneralName(new MyDNSName(hostname))));
 		caExts.set(caNameExt.getName(), caNameExt);

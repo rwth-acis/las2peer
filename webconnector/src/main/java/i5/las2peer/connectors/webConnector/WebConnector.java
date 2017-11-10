@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.SecureRandom;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -23,6 +24,7 @@ import java.util.logging.StreamHandler;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLException;
 import javax.ws.rs.core.MultivaluedMap;
 
 import org.glassfish.jersey.jackson.JacksonFeature;
@@ -420,6 +422,10 @@ public class WebConnector extends Connector {
 
 	private void startHttpsServer(ResourceConfig config) throws Exception {
 		String myHostname = getMyHostname();
+		if (!myHostname.contains(".")) { // hacky check for canoncial name,
+											// "localhost" or "las2peer" are not valid in SSL context
+			throw new SSLException("Invalid hostname! '" + myHostname + "' can't be used with SSL");
+		}
 		char[] keystoreSecret;
 		if (sslKeyPassword == null) {
 			sslKeyPassword = getOrCreateSecretFromFile("keystore password",
@@ -430,8 +436,14 @@ public class WebConnector extends Connector {
 			sslKeystore = KEYSTORE_DIRECTORY + WebConnector.class.getSimpleName() + "-" + myHostname + ".jks";
 		}
 		KeyStore keystore = KeystoreManager.loadOrCreateKeystore(sslKeystore, myHostname, keystoreSecret);
-		caCert = (X509Certificate) keystore.getCertificate(myHostname + " Root CA");
+		caCert = (X509Certificate) keystore.getCertificate("Node Local las2peer Root CA");
+		if (caCert == null) {
+			throw new CertificateException("CA certificate is null. Please check keystore...");
+		}
 		cert = (X509Certificate) keystore.getCertificate(myHostname);
+		if (cert == null) {
+			throw new CertificateException("Host certificate is null. Please check keystore...");
+		}
 		// export CA certificate to file, overwrite existing
 		KeystoreManager.writeCertificateToPEMFile(caCert, KEYSTORE_DIRECTORY + getRootCAFilename());
 		KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
@@ -452,7 +464,7 @@ public class WebConnector extends Connector {
 
 	public String getMyHostname() {
 		if (myNode instanceof PastryNodeImpl) {
-			return ((PastryNodeImpl) myNode).getBindAddress().getHostName();
+			return ((PastryNodeImpl) myNode).getBindAddress().getCanonicalHostName();
 		} else {
 			return "localhost";
 		}
