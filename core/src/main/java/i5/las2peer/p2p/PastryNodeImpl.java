@@ -243,16 +243,14 @@ public class PastryNodeImpl extends Node {
 				logger.info("Bootstrapping completed in " + (System.currentTimeMillis() - timeStartBootstrap) + "ms");
 			}
 
-			synchronized (pastryNode) {
-				while (!pastryNode.isReady() && !pastryNode.joinFailed()) {
-					// delay so we don't busy-wait
-					pastryNode.wait(500);
+			while (!pastryNode.isReady() && !pastryNode.joinFailed()) {
+				// delay so we don't busy-wait
+				Thread.sleep(100);
 
-					// abort if can't join
-					if (pastryNode.joinFailed()) {
-						throw new NodeException(
-								"Could not join the FreePastry ring.  Reason:" + pastryNode.joinFailedReason());
-					}
+				// abort if can't join
+				if (pastryNode.joinFailed()) {
+					throw new NodeException(
+							"Could not join the FreePastry ring.  Reason:" + pastryNode.joinFailedReason());
 				}
 			}
 
@@ -372,41 +370,29 @@ public class PastryNodeImpl extends Node {
 	}
 
 	@Override
-	public void registerReceiver(MessageReceiver receiver) throws AgentAlreadyRegisteredException, AgentException {
-
-		synchronized (this) {
-			super.registerReceiver(receiver);
-			application.registerAgentTopic(receiver);
-
-			// Observer is called in superclass!
-		}
-
+	public synchronized void registerReceiver(MessageReceiver receiver) throws AgentAlreadyRegisteredException, AgentException {
+		super.registerReceiver(receiver);
+		application.registerAgentTopic(receiver);
+		// Observer is called in superclass!
 	}
 
 	@Override
-	public void unregisterReceiver(MessageReceiver receiver) throws AgentNotRegisteredException, NodeException {
-		synchronized (this) {
-			application.unregisterAgentTopic(receiver.getResponsibleForAgentSafeId());
-			super.unregisterReceiver(receiver);
-		}
+	public synchronized void unregisterReceiver(MessageReceiver receiver) throws AgentNotRegisteredException, NodeException {
+		application.unregisterAgentTopic(receiver.getResponsibleForAgentSafeId());
+		super.unregisterReceiver(receiver);
 	}
 
 	@Override
-	public void registerReceiverToTopic(MessageReceiver receiver, long topic) throws AgentNotRegisteredException {
-		synchronized (this) {
-			super.registerReceiverToTopic(receiver, topic);
-			application.registerTopic(topic);
-		}
+	public synchronized void registerReceiverToTopic(MessageReceiver receiver, long topic) throws AgentNotRegisteredException {
+		super.registerReceiverToTopic(receiver, topic);
+		application.registerTopic(topic);
 	}
 
 	@Override
-	public void unregisterReceiverFromTopic(MessageReceiver receiver, long topic) throws NodeException {
-		synchronized (this) {
-			super.unregisterReceiverFromTopic(receiver, topic);
-
-			if (!super.hasTopic(topic)) {
-				application.unregisterTopic(topic);
-			}
+	public synchronized void unregisterReceiverFromTopic(MessageReceiver receiver, long topic) throws NodeException {
+		super.unregisterReceiverFromTopic(receiver, topic);
+		if (!super.hasTopic(topic)) {
+			application.unregisterTopic(topic);
 		}
 	}
 
