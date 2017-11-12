@@ -2,7 +2,10 @@ package i5.las2peer.connectors.webConnector.handler;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -20,7 +23,11 @@ public abstract class AbstractFileHandler {
 			return Response.status(Status.NOT_FOUND).build();
 		}
 		byte[] bytes = SimpleTools.toByteArray(is);
-		return Response.ok(bytes).build();
+		String mime = Files.probeContentType(Paths.get(filename));
+		if (mime == null) {
+			mime = MediaType.APPLICATION_OCTET_STREAM;
+		}
+		return Response.ok(bytes, mime).build();
 	}
 
 }
