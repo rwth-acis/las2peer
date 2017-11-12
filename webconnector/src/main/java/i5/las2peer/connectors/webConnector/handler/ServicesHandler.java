@@ -26,6 +26,7 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.persistency.EnvelopeNotFoundException;
 import i5.las2peer.classLoaders.ClassManager;
+import i5.las2peer.classLoaders.libraries.LibraryIdentifier;
 import i5.las2peer.classLoaders.libraries.SharedStorageRepository;
 import i5.las2peer.connectors.webConnector.WebConnector;
 import i5.las2peer.connectors.webConnector.util.AgentSession;
@@ -131,8 +132,9 @@ public class ServicesHandler {
 			jarStream.close();
 			throw new BadRequestException("Service jar package contains no manifest file");
 		}
-		String serviceName = manifest.getMainAttributes().getValue("Library-SymbolicName");
-		String serviceVersion = manifest.getMainAttributes().getValue("Library-Version");
+		String serviceName = manifest.getMainAttributes().getValue(LibraryIdentifier.MANIFEST_LIBRARY_NAME_ATTRIBUTE);
+		String serviceVersion = manifest.getMainAttributes()
+				.getValue(LibraryIdentifier.MANIFEST_LIBRARY_VERSION_ATTRIBUTE);
 		// read files from jar and generate hashes
 		HashMap<String, byte[]> depHashes = new HashMap<>();
 		HashMap<String, byte[]> jarFiles = new HashMap<>();

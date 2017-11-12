@@ -23,6 +23,7 @@ import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
 import org.junit.Assert;
 import org.junit.Test;
 
+import i5.las2peer.classLoaders.libraries.LibraryIdentifier;
 import i5.las2peer.connectors.webConnector.handler.AuthHandler;
 import i5.las2peer.connectors.webConnector.handler.ServicesHandler;
 import i5.las2peer.p2p.PastryNodeImpl;
@@ -137,8 +138,9 @@ public class ServicesHandlerTest extends AbstractTestHandler {
 			tmpJarFile.deleteOnExit();
 			Manifest manifest = new Manifest();
 			manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
-			manifest.getMainAttributes().putValue("Library-SymbolicName", TestService.class.getPackage().getName());
-			manifest.getMainAttributes().putValue("Library-Version", "1.2.3");
+			manifest.getMainAttributes().putValue(LibraryIdentifier.MANIFEST_LIBRARY_NAME_ATTRIBUTE,
+					TestService.class.getPackage().getName());
+			manifest.getMainAttributes().putValue(LibraryIdentifier.MANIFEST_LIBRARY_VERSION_ATTRIBUTE, "1.2.3");
 			new JarOutputStream(new FileOutputStream(tmpJarFile), manifest).close();
 			FileDataBodyPart fileDataBodyPart = new FileDataBodyPart("jarfile", tmpJarFile,
 					MediaType.APPLICATION_OCTET_STREAM_TYPE);

@@ -7,7 +7,6 @@ import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
-import java.util.List;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.InternalServerErrorException;
@@ -23,7 +22,6 @@ import javax.ws.rs.core.UriInfo;
 import org.glassfish.jersey.media.multipart.ContentDisposition;
 
 import i5.las2peer.api.p2p.ServiceNameVersion;
-import i5.las2peer.api.p2p.ServiceVersion;
 import i5.las2peer.api.security.Agent;
 import i5.las2peer.connectors.webConnector.WebConnector;
 import i5.las2peer.connectors.webConnector.util.AuthenticationManager;
@@ -135,32 +133,28 @@ public class DefaultHandler {
 	}
 
 	private JSONArray getLocalServices(Node node, URI requestURI) {
-		List<String> serviceNames = node.getNodeServiceCache().getLocalServiceNames();
 		JSONArray result = new JSONArray();
-		for (String serviceName : serviceNames) {
-			List<ServiceVersion> serviceVersions = node.getNodeServiceCache().getLocalServiceVersions(serviceName);
-			for (ServiceVersion version : serviceVersions) {
-				try {
-					ServiceAgentImpl localServiceAgent = node.getNodeServiceCache()
-							.getLocalService(new ServiceNameVersion(serviceName, version));
-					JSONObject json = new JSONObject();
-					json.put("name", serviceName);
-					json.put("version", version.toString());
-					// use host header, so browsers do not block subsequent ajax requests to an unknown host
-					String swaggerStr = "";
-					if (localServiceAgent.getServiceInstance() instanceof RESTService) {
-						String serviceAlias = localServiceAgent.getServiceInstance().getAlias();
-						URI swaggerURI = new URI(requestURI.getScheme(), null, requestURI.getHost(),
-								requestURI.getPort(), "/" + serviceAlias + "/v" + version.toString() + "/swagger.json",
-								null, null);
-						swaggerStr = swaggerURI.toString();
-					}
-					json.put("swagger", swaggerStr);
-					result.add(json);
-				} catch (Exception e) {
-					// XXX logging
-					e.printStackTrace();
+		ServiceAgentImpl[] localServices = node.getRegisteredServices();
+		for (ServiceAgentImpl localServiceAgent : localServices) {
+			try {
+				ServiceNameVersion nameVersion = localServiceAgent.getServiceNameVersion();
+				JSONObject json = new JSONObject();
+				json.put("name", nameVersion.getName());
+				json.put("version", nameVersion.getVersion().toString());
+				// use host header, so browsers do not block subsequent ajax requests to an unknown host
+				String swaggerStr = "";
+				if (localServiceAgent.getServiceInstance() instanceof RESTService) {
+					String serviceAlias = localServiceAgent.getServiceInstance().getAlias();
+					URI swaggerURI = new URI(requestURI.getScheme(), null, requestURI.getHost(), requestURI.getPort(),
+							"/" + serviceAlias + "/v" + nameVersion.getVersion().toString() + "/swagger.json", null,
+							null);
+					swaggerStr = swaggerURI.toString();
 				}
+				json.put("swagger", swaggerStr);
+				result.add(json);
+			} catch (Exception e) {
+				// XXX logging
+				e.printStackTrace();
 			}
 		}
 		return result;

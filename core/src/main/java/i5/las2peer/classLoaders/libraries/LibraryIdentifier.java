@@ -11,6 +11,9 @@ import java.util.regex.Pattern;
  */
 public class LibraryIdentifier {
 
+	public static final String MANIFEST_LIBRARY_NAME_ATTRIBUTE = "Library-SymbolicName";
+	public static final String MANIFEST_LIBRARY_VERSION_ATTRIBUTE = "Library-Version";
+
 	private String name;
 	private LibraryVersion version;
 

@@ -65,8 +65,18 @@ public class PackageUploader {
 			if (manifest == null) {
 				throw new ServicePackageException("Service jar package contains no manifest file");
 			}
-			String serviceName = manifest.getMainAttributes().getValue("Library-SymbolicName");
-			String serviceVersion = manifest.getMainAttributes().getValue("Library-Version");
+			String serviceName = manifest.getMainAttributes()
+					.getValue(LibraryIdentifier.MANIFEST_LIBRARY_NAME_ATTRIBUTE);
+			if (serviceName == null) {
+				throw new ServicePackageException("No service name value in manifest file. Please specify '"
+						+ LibraryIdentifier.MANIFEST_LIBRARY_NAME_ATTRIBUTE + "'");
+			}
+			String serviceVersion = manifest.getMainAttributes()
+					.getValue(LibraryIdentifier.MANIFEST_LIBRARY_VERSION_ATTRIBUTE);
+			if (serviceVersion == null) {
+				throw new ServicePackageException("No service version value in manifest file. Please specify '"
+						+ LibraryIdentifier.MANIFEST_LIBRARY_VERSION_ATTRIBUTE + "'");
+			}
 			// read files from jar and generate hashes
 			HashMap<String, byte[]> depHashes = new HashMap<>();
 			HashMap<String, byte[]> jarFiles = new HashMap<>();
@@ -123,11 +133,9 @@ public class PackageUploader {
 			throws IllegalArgumentException, SerializationException, CryptoException, EnvelopeException,
 			ServicePackageException {
 		if (serviceName == null) {
-			throw new ServicePackageException(
-					"No service name value in manifest file. Please specify 'Library-SymbolicName'");
+			throw new ServicePackageException("No service name given");
 		} else if (serviceVersion == null) {
-			throw new ServicePackageException(
-					"No service version value in manifest file. Please specify 'Library-Version'");
+			throw new ServicePackageException("No service version given");
 		}
 		LibraryIdentifier libId = new LibraryIdentifier(serviceName, serviceVersion);
 		// store metadata envelope for service

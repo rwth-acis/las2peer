@@ -174,8 +174,10 @@ public class LoadedJarLibrary extends LoadedLibrary {
 	public static LoadedJarLibrary createFromJar(String filename) throws IllegalArgumentException, IOException {
 		JarFile jfFile = new JarFile(filename);
 
-		String sName = jfFile.getManifest().getMainAttributes().getValue("Library-SymbolicName");
-		String sVersion = jfFile.getManifest().getMainAttributes().getValue("Library-Version");
+		String sName = jfFile.getManifest().getMainAttributes()
+				.getValue(LibraryIdentifier.MANIFEST_LIBRARY_NAME_ATTRIBUTE);
+		String sVersion = jfFile.getManifest().getMainAttributes()
+				.getValue(LibraryIdentifier.MANIFEST_LIBRARY_VERSION_ATTRIBUTE);
 
 		// fill in version and name info from file name
 		if (sName == null || sVersion == null) {

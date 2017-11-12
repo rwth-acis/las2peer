@@ -259,7 +259,7 @@ public class EnvelopeVersion implements Serializable, XmlAble {
 			try {
 				clsLoader = Context.get().getServiceClassLoader();
 			} catch (IllegalStateException e) {
-				logger.log(Level.FINER, "Could not get service class loader" + e.toString());
+				logger.log(Level.FINER, "Could not get service class loader using default. " + e.toString());
 			}
 			return SerializeTools.deserialize(rawContent, clsLoader);
 		}
@@ -310,7 +310,7 @@ public class EnvelopeVersion implements Serializable, XmlAble {
 		try {
 			clsLoader = Context.get().getServiceClassLoader();
 		} catch (IllegalStateException e) {
-			logger.log(Level.FINER, "Could not get service class loader" + e.toString());
+			logger.log(Level.FINER, "Could not get service class loader using default. " + e.toString());
 		}
 		return SerializeTools.deserialize(decrypted, clsLoader);
 	}
