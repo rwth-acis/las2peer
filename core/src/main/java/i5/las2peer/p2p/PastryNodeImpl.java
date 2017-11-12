@@ -243,6 +243,8 @@ public class PastryNodeImpl extends Node {
 				logger.info("Bootstrapping completed in " + (System.currentTimeMillis() - timeStartBootstrap) + "ms");
 			}
 
+			logger.info("Syncing with network...");
+			long timeSyncStart = System.currentTimeMillis();
 			while (!pastryNode.isReady() && !pastryNode.joinFailed()) {
 				// delay so we don't busy-wait
 				Thread.sleep(100);
@@ -253,6 +255,7 @@ public class PastryNodeImpl extends Node {
 							"Could not join the FreePastry ring.  Reason:" + pastryNode.joinFailedReason());
 				}
 			}
+			logger.info("Sync done. Took " + (System.currentTimeMillis() - timeSyncStart) + "ms");
 
 			logger.info("Node " + pastryNode.getId().toStringFull() + " started");
 
@@ -370,20 +373,23 @@ public class PastryNodeImpl extends Node {
 	}
 
 	@Override
-	public synchronized void registerReceiver(MessageReceiver receiver) throws AgentAlreadyRegisteredException, AgentException {
+	public synchronized void registerReceiver(MessageReceiver receiver)
+			throws AgentAlreadyRegisteredException, AgentException {
 		super.registerReceiver(receiver);
 		application.registerAgentTopic(receiver);
 		// Observer is called in superclass!
 	}
 
 	@Override
-	public synchronized void unregisterReceiver(MessageReceiver receiver) throws AgentNotRegisteredException, NodeException {
+	public synchronized void unregisterReceiver(MessageReceiver receiver)
+			throws AgentNotRegisteredException, NodeException {
 		application.unregisterAgentTopic(receiver.getResponsibleForAgentSafeId());
 		super.unregisterReceiver(receiver);
 	}
 
 	@Override
-	public synchronized void registerReceiverToTopic(MessageReceiver receiver, long topic) throws AgentNotRegisteredException {
+	public synchronized void registerReceiverToTopic(MessageReceiver receiver, long topic)
+			throws AgentNotRegisteredException {
 		super.registerReceiverToTopic(receiver, topic);
 		application.registerTopic(topic);
 	}
