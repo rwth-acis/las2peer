@@ -8,6 +8,7 @@ import javax.ws.rs.CookieParam;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -67,9 +68,9 @@ public class AuthHandler {
 			passphraseAgent.unlock(password);
 			return registerAgentSession(passphraseAgent);
 		} catch (AgentNotFoundException e) {
-			throw new BadRequestException("Agent not found");
+			throw new NotAuthorizedException("Agent not found", e);
 		} catch (AgentAccessDeniedException e) {
-			throw new ForbiddenException("Invalid passphrase");
+			throw new ForbiddenException("Invalid passphrase", e);
 		}
 	}
 
