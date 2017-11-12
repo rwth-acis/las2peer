@@ -37,6 +37,7 @@ import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.api.security.AgentOperationFailedException;
+import i5.las2peer.api.security.ServiceAgent;
 import i5.las2peer.classLoaders.ClassManager;
 import i5.las2peer.classLoaders.libraries.FileSystemRepository;
 import i5.las2peer.classLoaders.policies.ClassLoaderPolicy;
@@ -754,6 +755,23 @@ public class L2pNodeLauncher {
 	 */
 	public String getNetInfo() {
 		return SimpleTools.join(node.getOtherKnownNodes(), "\n\t");
+	}
+
+	/**
+	 * Gets a list of local running services on this node
+	 * 
+	 * @return Returns a list of local running services
+	 */
+	public List<ServiceNameVersion> getLocalServices() {
+		List<ServiceNameVersion> result = new LinkedList<>();
+		if (node == null) {
+			return result;
+		}
+		ServiceAgent[] localServices = node.getRegisteredServices();
+		for (ServiceAgent localService : localServices) {
+			result.add(localService.getServiceNameVersion());
+		}
+		return result;
 	}
 
 	/**
