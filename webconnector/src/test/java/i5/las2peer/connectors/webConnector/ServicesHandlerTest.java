@@ -105,11 +105,7 @@ public class ServicesHandlerTest extends AbstractTestHandler {
 			multiPart.bodyPart(fileDataBodyPart);
 			Response response = target.request().post(Entity.entity(multiPart, multiPart.getMediaType()));
 			Assert.assertEquals(Status.BAD_REQUEST.getStatusCode(), response.getStatus());
-			Assert.assertEquals(MediaType.TEXT_PLAIN_TYPE, response.getMediaType());
-			byte[] bytes = SimpleTools.toByteArray((InputStream) response.getEntity());
-			String str = new String(bytes);
-			Assert.assertEquals("You have to be logged in to upload", str);
-			response.close();
+			Assert.assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail(e.toString());
@@ -141,8 +137,8 @@ public class ServicesHandlerTest extends AbstractTestHandler {
 			tmpJarFile.deleteOnExit();
 			Manifest manifest = new Manifest();
 			manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
-			manifest.getMainAttributes().putValue("las2peer-service-name", TestService.class.getPackage().getName());
-			manifest.getMainAttributes().putValue("las2peer-service-version", "1.2.3");
+			manifest.getMainAttributes().putValue("Library-SymbolicName", TestService.class.getPackage().getName());
+			manifest.getMainAttributes().putValue("Library-Version", "1.2.3");
 			new JarOutputStream(new FileOutputStream(tmpJarFile), manifest).close();
 			FileDataBodyPart fileDataBodyPart = new FileDataBodyPart("jarfile", tmpJarFile,
 					MediaType.APPLICATION_OCTET_STREAM_TYPE);

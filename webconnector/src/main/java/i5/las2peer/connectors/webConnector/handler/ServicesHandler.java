@@ -131,8 +131,8 @@ public class ServicesHandler {
 			jarStream.close();
 			throw new BadRequestException("Service jar package contains no manifest file");
 		}
-		String serviceName = manifest.getMainAttributes().getValue("las2peer-service-name");
-		String serviceVersion = manifest.getMainAttributes().getValue("las2peer-service-version");
+		String serviceName = manifest.getMainAttributes().getValue("Library-SymbolicName");
+		String serviceVersion = manifest.getMainAttributes().getValue("Library-Version");
 		// read files from jar and generate hashes
 		HashMap<String, byte[]> depHashes = new HashMap<>();
 		HashMap<String, byte[]> jarFiles = new HashMap<>();

@@ -65,8 +65,8 @@ public class PackageUploader {
 			if (manifest == null) {
 				throw new ServicePackageException("Service jar package contains no manifest file");
 			}
-			String serviceName = manifest.getMainAttributes().getValue("las2peer-service-name");
-			String serviceVersion = manifest.getMainAttributes().getValue("las2peer-service-version");
+			String serviceName = manifest.getMainAttributes().getValue("Library-SymbolicName");
+			String serviceVersion = manifest.getMainAttributes().getValue("Library-Version");
 			// read files from jar and generate hashes
 			HashMap<String, byte[]> depHashes = new HashMap<>();
 			HashMap<String, byte[]> jarFiles = new HashMap<>();
@@ -124,10 +124,10 @@ public class PackageUploader {
 			ServicePackageException {
 		if (serviceName == null) {
 			throw new ServicePackageException(
-					"No service name value in manifest file. Please specify 'las2peer-service-name'");
+					"No service name value in manifest file. Please specify 'Library-SymbolicName'");
 		} else if (serviceVersion == null) {
 			throw new ServicePackageException(
-					"No service version value in manifest file. Please specify 'las2peer-service-version'");
+					"No service version value in manifest file. Please specify 'Library-Version'");
 		}
 		LibraryIdentifier libId = new LibraryIdentifier(serviceName, serviceVersion);
 		// store metadata envelope for service
