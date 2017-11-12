@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.Serializable;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.InvocationTargetException;
-import java.security.KeyPair;
-import java.security.PublicKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -65,7 +63,6 @@ import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.security.UserAgentManager;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.CryptoException;
-import i5.las2peer.tools.CryptoTools;
 import rice.pastry.NodeHandle;
 import rice.pastry.PastryNode;
 import rice.pastry.socket.SocketNodeHandle;
@@ -186,8 +183,6 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	private static final String DEFAULT_INFORMATION_FILE = "etc/nodeInfo.xml";
 	private String sInformationFileName = DEFAULT_INFORMATION_FILE;
 
-	private KeyPair nodeKeyPair;
-
 	/**
 	 * maps names and emails to UserAgents
 	 */
@@ -257,20 +252,10 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 					new DefaultPolicy());
 		}
 
-		nodeKeyPair = CryptoTools.generateKeyPair();
 		nodeServiceCache = new NodeServiceCache(this, nodeServiceCacheLifetime, nodeServiceCacheResultCount);
 
 		userManager = new UserAgentManager(this);
 		aliasManager = new ServiceAliasManager(this);
-	}
-
-	/**
-	 * Gets the public key of this node.
-	 * 
-	 * @return a public key
-	 */
-	public PublicKey getPublicNodeKey() {
-		return nodeKeyPair.getPublic();
 	}
 
 	/**
@@ -509,9 +494,6 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 		}
 
 		result.setNodeHandle(getNodeId());
-		result.setNodeKey(nodeKeyPair.getPublic());
-
-		result.setSignature(CryptoTools.signContent(result.getSignatureContent(), nodeKeyPair.getPrivate()));
 
 		return result;
 	}
