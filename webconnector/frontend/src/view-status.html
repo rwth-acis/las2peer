@@ -90,18 +90,23 @@
       }
 
       _handleError(event) {
+        console.log(event);
         var errorTitle = 'Error', errorMsg;
         if (event.detail.request.xhr.readyState == 4 && event.detail.request.xhr.status == 0) { // network issues
           errorTitle = 'Network Connection Error';
           errorMsg = 'Could not connect to: ' + event.detail.request.url;
+        } else if (event.detail.request.xhr.response && event.detail.request.xhr.response.msg) {
+          errorTitle = event.detail.request.xhr.status + " - " + event.detail.request.xhr.statusText;
+          errorMsg = event.detail.request.xhr.response.msg;
+        } else if (event.detail.error && event.detail.error.message) {
+          errorTitle = event.detail.request.xhr.status + " - " + event.detail.request.xhr.statusText;
+          errorMsg = event.detail.error.message;
         }
-        else {
-          var errorMsg = event.detail.request.xhr.response.reason;
-          if (!errorMsg) { // no error message returned, show generic message
-            errorMsg = 'An error occurred. Please check console output.';
-          }
+        if (!errorMsg) {
+          errorMsg = 'An unknown error occurred. Please check console output.';
+        } else {
+          console.log(errorTitle + ' - ' + errorMsg);
         }
-        console.log(errorTitle + ' - ' + errorMsg);
         // do not set error dialog params to prevent dialog spamming
       }
 
