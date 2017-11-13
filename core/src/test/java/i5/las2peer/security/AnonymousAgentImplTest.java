@@ -44,6 +44,7 @@ public class AnonymousAgentImplTest {
 			AgentAlreadyRegisteredException, InternalSecurityException, AgentException, CryptoException {
 		LocalNodeManager manager = new LocalNodeManager();
 		node = manager.launchNode();
+		node.getNodeServiceCache().setTimeoutMs(10000);
 		node2 = manager.launchNode();
 
 		anonymousAgent = AnonymousAgentImpl.getInstance();
