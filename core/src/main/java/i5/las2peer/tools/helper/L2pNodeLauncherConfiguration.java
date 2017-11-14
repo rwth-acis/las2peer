@@ -309,9 +309,11 @@ public class L2pNodeLauncherConfiguration {
 		if (strPort != null) {
 			setPort(Integer.valueOf(strPort));
 		}
-		List<String> bootstrap = conf.getAll("bootstrap");
-		if (bootstrap != null) {
-			setBootstrap(bootstrap);
+		if (this.bootstrap == null || this.bootstrap.isEmpty()) {
+			List<String> bootstrap = conf.getAll("bootstrap");
+			if (bootstrap != null) {
+				setBootstrap(bootstrap);
+			}
 		}
 		String strStorageMode = conf.get("storageMode");
 		if (strStorageMode != null) {
@@ -442,9 +444,8 @@ public class L2pNodeLauncherConfiguration {
 	}
 
 	public void setBootstrap(String bootstrap) {
-		if (bootstrap == null) {
-			this.bootstrap = null;
-		} else {
+		this.bootstrap = null;
+		if (bootstrap != null) {
 			addBootstrap(bootstrap);
 		}
 	}
