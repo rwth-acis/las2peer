@@ -38,7 +38,7 @@ public class MiniClient {
 	@Deprecated
 	public void setAddressPort(String address, int port) {
 		if (port > 0) {
-			setConnectorEndpoint(serverAddress += ":" + Integer.toString(port));
+			setConnectorEndpoint(serverAddress + ":" + Integer.toString(port));
 		} else {
 			setConnectorEndpoint(address);
 		}
