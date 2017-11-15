@@ -19,10 +19,9 @@ import java.util.logging.StreamHandler;
 
 import i5.las2peer.api.Context;
 import i5.las2peer.api.logging.MonitoringEvent;
+import i5.las2peer.api.security.Agent;
 import i5.las2peer.execution.ServiceThread;
 import i5.las2peer.p2p.Node;
-import i5.las2peer.security.AgentImpl;
-import i5.las2peer.security.ServiceAgentImpl;
 
 public final class L2pLogger extends Logger implements NodeObserver {
 
@@ -403,8 +402,8 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	 * @param message A message to log in the monitoring data
 	 */
 	@Deprecated
-	public static void logEvent(MonitoringEvent event, AgentImpl actingUser, String message) {
-		logEvent(null, event, message, (ServiceAgentImpl) Context.get().getServiceAgent(), actingUser);
+	public static void logEvent(MonitoringEvent event, Agent actingUser, String message) {
+		logEvent(null, event, message, Context.get().getServiceAgent(), actingUser);
 	}
 
 	/**
@@ -439,8 +438,8 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	 * @param actingUser can be set to null if unknown / not desired
 	 */
 	@Deprecated
-	public static void logEvent(Object from, MonitoringEvent event, String message, AgentImpl serviceAgent,
-			AgentImpl actingUser) {
+	public static void logEvent(Object from, MonitoringEvent event, String message, Agent serviceAgent,
+			Agent actingUser) {
 		logEvent(ServiceThread.getCurrentContext().getCallerContext().getLocalNode(), from, event, message,
 				serviceAgent, actingUser);
 	}
@@ -460,8 +459,8 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	 * @param actingUser can be set to null if unknown / not desired
 	 */
 	@Deprecated
-	public static void logEvent(Node node, Object from, MonitoringEvent event, String message, AgentImpl serviceAgent,
-			AgentImpl actingUser) {
+	public static void logEvent(Node node, Object from, MonitoringEvent event, String message, Agent serviceAgent,
+			Agent actingUser) {
 		String msg = message;
 		if (from != null) {
 			msg = from.getClass().getSimpleName() + ": " + message;

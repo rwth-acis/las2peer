@@ -29,6 +29,7 @@ import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.persistency.EnvelopeException;
 import i5.las2peer.api.persistency.EnvelopeNotFoundException;
+import i5.las2peer.api.security.Agent;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentNotFoundException;
@@ -353,8 +354,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 * @param destinationAgent A destination agent for this event
 	 * @param remarks Some free text note or description about this event.
 	 */
-	public void observerNotice(MonitoringEvent event, Object sourceNode, AgentImpl sourceAgent, Object destinationNode,
-			AgentImpl destinationAgent, String remarks) {
+	public void observerNotice(MonitoringEvent event, Object sourceNode, Agent sourceAgent, Object destinationNode,
+			Agent destinationAgent, String remarks) {
 		String sourceAgentId = null;
 		if (sourceAgent != null) {
 			sourceAgentId = sourceAgent.getIdentifier();

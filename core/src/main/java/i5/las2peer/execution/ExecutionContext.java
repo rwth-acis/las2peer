@@ -210,7 +210,7 @@ public class ExecutionContext implements Context {
 		if (from != null) {
 			msg = from.getClass().getName() + ": " + message;
 		}
-		node.observerNotice(event, node.getNodeId(), (AgentImpl) serviceAgent, null, (AgentImpl) actingUser, msg);
+		node.observerNotice(event, node.getNodeId(), serviceAgent, null, actingUser, msg);
 
 	}
 
