@@ -8,6 +8,7 @@ import java.util.Random;
 import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.persistency.EnvelopeException;
 import i5.las2peer.api.persistency.EnvelopeNotFoundException;
+import i5.las2peer.api.security.Agent;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentNotFoundException;
@@ -235,6 +236,10 @@ public class LocalNode extends Node {
 				}
 			}
 		}
+	}
+
+	public void storeAgent(Agent agent) throws AgentException {
+		storeAgent((AgentImpl) agent);
 	}
 
 	@Override
