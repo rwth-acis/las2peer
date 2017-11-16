@@ -96,17 +96,14 @@ public class ServiceClassLoader extends ClassLoader {
 		Class<?> c = findLoadedClass(name);
 
 		// ask parent loader
-		if (this.policy.canLoad(name)) {
-			if (c == null && parent != null) {
-				try {
+		if (c == null && this.policy.canLoad(name)) {
+			try {
+				if (parent != null) {
 					c = parent.loadClass(name);
-				} catch (ClassNotFoundException e) {
-				}
-			} else if (c == null && parent == null) { // for test cases
-				try {
+				} else { // fallback for test cases
 					c = getSystemClassLoader().loadClass(name);
-				} catch (ClassNotFoundException e) {
 				}
+			} catch (ClassNotFoundException e) {
 			}
 		}
 
@@ -115,21 +112,16 @@ public class ServiceClassLoader extends ClassLoader {
 			try {
 				c = findClass(name);
 			} catch (ClassNotFoundException e) {
-				// class not found in this Library
-				// XXX logging
+				Logger.logLoading(this, name, false);
+				throw e;
 			}
 		}
 
 		// resolve
 		// note that all classes need to be resolved here (even the ones loaded by another loader),
 		// because of the order classes are found (Platform, Bundle, Library)
-		if (resolve && c != null) {
+		if (resolve) {
 			resolveClass(c);
-		}
-
-		if (c == null) {
-			Logger.logLoading(this, name, false);
-			throw new ClassNotFoundException();
 		}
 
 		Logger.logLoading(this, name, true);
