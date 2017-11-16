@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Random;
 
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response.Status;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -17,6 +18,7 @@ import org.junit.Test;
 import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.connectors.webConnector.client.ClientResponse;
 import i5.las2peer.connectors.webConnector.client.MiniClient;
+import i5.las2peer.connectors.webConnector.services.TestCapsService;
 import i5.las2peer.connectors.webConnector.services.TestClassLoaderService;
 import i5.las2peer.connectors.webConnector.services.TestDeepPathService;
 import i5.las2peer.connectors.webConnector.services.TestSecurityContextService;
@@ -46,6 +48,7 @@ public class WebConnectorTest {
 	private static final String testServiceClass4 = TestService.class.getName() + "@1.0";
 	private static final String testServiceClass5 = TestClassLoaderService.class.getName() + "@1.0";
 	private static final String testServiceClass6 = TestDeepPathService.class.getName() + "@1.0";
+	private static final String testServiceClass7 = TestCapsService.class.getName() + "@1.0";
 
 	@Before
 	public void startServer() throws Exception {
@@ -80,6 +83,8 @@ public class WebConnectorTest {
 				.createServiceAgent(ServiceNameVersion.fromString(testServiceClass5), "a pass");
 		ServiceAgentImpl testService6 = ServiceAgentImpl
 				.createServiceAgent(ServiceNameVersion.fromString(testServiceClass6), "a pass");
+		ServiceAgentImpl testService7 = ServiceAgentImpl
+				.createServiceAgent(ServiceNameVersion.fromString(testServiceClass7), "a pass");
 
 		testService1.unlock("a pass");
 		testService2.unlock("a pass");
@@ -87,6 +92,7 @@ public class WebConnectorTest {
 		testService4.unlock("a pass");
 		testService5.unlock("a pass");
 		testService6.unlock("a pass");
+		testService7.unlock("a pass");
 
 		node.registerReceiver(testService1);
 		node.registerReceiver(testService2);
@@ -94,6 +100,7 @@ public class WebConnectorTest {
 		node.registerReceiver(testService4);
 		node.registerReceiver(testService5);
 		node.registerReceiver(testService6);
+		node.registerReceiver(testService7);
 
 		// start connector
 		connector = new WebConnector(true, 0, false, 0); // Port: 0 => the system picks a port
@@ -240,10 +247,24 @@ public class WebConnectorTest {
 			c.setLogin(testAgent.getIdentifier(), testPass);
 
 			ClientResponse result = c.sendRequest("GET", "version/path", "");
+			Assert.assertEquals(Status.OK.getStatusCode(), result.getHttpCode());
 			Assert.assertTrue(result.getResponse().trim().endsWith("version/"));
 
 			result = c.sendRequest("GET", "version/v1/path", "");
+			Assert.assertEquals(Status.OK.getStatusCode(), result.getHttpCode());
 			Assert.assertTrue(result.getResponse().trim().endsWith("version/v1/"));
+
+			result = c.sendRequest("GET", "VERSION/path", "");
+			Assert.assertEquals(Status.OK.getStatusCode(), result.getHttpCode());
+			Assert.assertTrue(result.getResponse().trim().endsWith("VERSION/"));
+
+			result = c.sendRequest("GET", "UPPERCASE/test", "");
+			Assert.assertEquals(Status.OK.getStatusCode(), result.getHttpCode());
+			Assert.assertEquals("success", result.getResponse().trim());
+
+			result = c.sendRequest("GET", "uppercase/test", "");
+			Assert.assertEquals(Status.OK.getStatusCode(), result.getHttpCode());
+			Assert.assertEquals("success", result.getResponse().trim());
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail("Exception: " + e);
