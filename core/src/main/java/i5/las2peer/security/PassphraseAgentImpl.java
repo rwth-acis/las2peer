@@ -73,6 +73,11 @@ public abstract class PassphraseAgentImpl extends AgentImpl implements Passphras
 		}
 	}
 
+	@Override
+	public void unlockPrivateKey(String passphrase) throws AgentAccessDeniedException, AgentOperationFailedException {
+		unlock(passphrase);
+	}
+
 	/**
 	 * encrypt the private key into a byte array with strong encryption based on a passphrase to unlock the key
 	 * 
