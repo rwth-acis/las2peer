@@ -595,7 +595,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 
 			try {
 				// ensure (unlocked) context
-				getAgentContext((AgentImpl) receiver);
+				getAgentContext(agent);
 			} catch (Exception e) {
 			}
 			if (agent instanceof UserAgentImpl) {
@@ -607,9 +607,12 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 			} else if (agent instanceof MonitoringAgent) {
 				observerNotice(MonitoringEvent.AGENT_REGISTERED, this.getNodeId(), agent, "MonitoringAgent");
 			}
-		} else {
+		} else if (receiver instanceof Mediator) {
 			// ok, we have a mediator
 			observerNotice(MonitoringEvent.AGENT_REGISTERED, this.getNodeId(), receiver, "Mediator");
+		} else {
+			throw new IllegalArgumentException("Given receiver is not an agent or mediator. Got "
+					+ receiver.getClass().getCanonicalName() + " instead");
 		}
 
 		htRegisteredReceivers.put(receiver.getResponsibleForAgentSafeId(), receiver);
