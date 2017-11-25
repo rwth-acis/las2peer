@@ -1,6 +1,7 @@
 package i5.las2peer.connectors.webConnector;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -11,7 +12,6 @@ import java.nio.file.Files;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.SecureRandom;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -148,7 +148,6 @@ public class WebConnector extends Connector {
 	private NameLock lockOidc = new NameLock();
 
 	private X509Certificate caCert;
-	private X509Certificate cert;
 	private final HashMap<String, String> agentIdToSessionId;
 	private final HashMap<String, AgentSession> sessions;
 	private final SecureRandom secureRandom;
@@ -438,14 +437,11 @@ public class WebConnector extends Connector {
 		KeyStore keystore = KeystoreManager.loadOrCreateKeystore(sslKeystore, myHostname, keystoreSecret);
 		caCert = (X509Certificate) keystore.getCertificate("Node Local las2peer Root CA");
 		if (caCert == null) {
-			throw new CertificateException("CA certificate is null. Please check keystore...");
+			logger.info("CA cert not found in keystore");
+		} else {
+			// export CA certificate to file, overwrite existing
+			KeystoreManager.writeCertificateToPEMFile(caCert, KEYSTORE_DIRECTORY + getRootCAFilename());
 		}
-		cert = (X509Certificate) keystore.getCertificate(myHostname);
-		if (cert == null) {
-			throw new CertificateException("Host certificate is null. Please check keystore...");
-		}
-		// export CA certificate to file, overwrite existing
-		KeystoreManager.writeCertificateToPEMFile(caCert, KEYSTORE_DIRECTORY + getRootCAFilename());
 		KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
 		kmf.init(keystore, keystoreSecret);
 		SSLContext sslContext = SSLContext.getInstance(SSL_INSTANCE_NAME);
@@ -488,7 +484,6 @@ public class WebConnector extends Connector {
 			http.stop(0);
 		}
 		caCert = null;
-		cert = null;
 		agentIdToSessionId.clear();
 		sessions.clear();
 		logMessage("Web-Connector has been stopped");
@@ -605,12 +600,17 @@ public class WebConnector extends Connector {
 		return httpsPort;
 	}
 
-	public X509Certificate getCACertificate() {
+	/**
+	 * Gets the currently used CA certificate.
+	 * 
+	 * @return Returns the CA certificate or {@code null}, if the connector is not started.
+	 * @throws FileNotFoundException If the certificate is not stored in the local keystore.
+	 */
+	public X509Certificate getCACertificate() throws FileNotFoundException {
+		if (caCert == null) {
+			throw new FileNotFoundException();
+		}
 		return caCert;
-	}
-
-	public X509Certificate getCertificate() {
-		return cert;
 	}
 
 	private String getOrCreateSecretFromFile(String passwordName, String filename) {
