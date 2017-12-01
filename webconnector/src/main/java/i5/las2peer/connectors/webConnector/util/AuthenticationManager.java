@@ -94,7 +94,9 @@ public class AuthenticationManager {
 			}
 		} else { // get OIDC parameters from GET values
 			token = accessTokenQueryParam;
-			oidcProviderURI = oidcProviderHeader;
+			if (oidcProviderHeader != null) {
+				oidcProviderURI = oidcProviderHeader;
+			}
 		}
 
 		// validate given OIDC provider and get provider info
