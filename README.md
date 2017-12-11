@@ -14,14 +14,17 @@ If you want to learn more about las2peer, please visit the [las2peer Template Pr
 
 ## Preparations
 
+### Java Cryptography Extension (JCE) Installation
+
+This step is **not** required with the following Java versions:
+* any **Java 9**, **Java 8u162** or later, **Java 7u181** or later, **Java 6u191** or later
+
 las2peer depends on strong encryption enabled in its Java Runtime Environment (JRE).
 If you use an Oracle Java version, you have to enable strong encryption by replacing a set of policy files in subdirectory ./lib/security/ of your JRE installation.
 
-Policy files for strong encryption can be downloaded via Oracle:
+Policy files for strong encryption can be downloaded via Oracle: [JCE for Java 8](http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html "JCE-8")
 
-[JCE for Java 8](http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html "JCE-8")
-
-(If the JUnit-test "i5.las2peer.communication.MessageTest" runs successfully, you have enabled strong encryption correctly)
+Each las2peer node performs an encryption self test on startup. If you want to make a more detailed test, use the JUnit-tests provided.
 
 ## Build dependencies
 
