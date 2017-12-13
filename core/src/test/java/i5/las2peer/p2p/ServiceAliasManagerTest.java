@@ -151,10 +151,7 @@ public class ServiceAliasManagerTest {
 	public void testIntegration() throws CryptoException, InternalSecurityException, AgentAlreadyRegisteredException,
 			AgentException, AliasNotFoundException, AgentAccessDeniedException {
 		LocalNode node = new LocalNodeManager().launchNode();
-		ServiceAgentImpl agentA = ServiceAgentImpl
-				.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.0"), "asdf");
-		agentA.unlock("asdf");
-		node.registerReceiver(agentA);
+		node.startService(ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.0"), "asdf");
 
 		// regular creation
 		assertEquals("i5.las2peer.api.TestService",

@@ -49,10 +49,7 @@ public class AnonymousAgentImplTest {
 
 		anonymousAgent = AnonymousAgentImpl.getInstance();
 
-		serviceAgent = ServiceAgentImpl.createServiceAgent(service, "pass");
-		serviceAgent.unlock("pass");
-		node2.storeAgent(serviceAgent);
-		node2.registerReceiver(serviceAgent);
+		serviceAgent = node2.startService(service, "pass");
 	}
 
 	@Test

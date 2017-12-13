@@ -11,7 +11,6 @@ import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.persistency.SharedStorage;
-import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.serialization.SerializeTools;
 import i5.las2peer.testing.MockAgentFactory;
@@ -42,10 +41,7 @@ public class NetworkClassLoadingTest {
 			PackageUploader.uploadServicePackage(nodes.get(0), serviceName, serviceVersion, filenameToHash,
 					filenameToContent, developerAgent);
 			// start TestService on second node
-			ServiceAgentImpl serviceAgent = ServiceAgentImpl
-					.createServiceAgent(new ServiceNameVersion(serviceName, serviceVersion), "servicepass");
-			serviceAgent.unlock("servicepass");
-			nodes.get(1).registerReceiver(serviceAgent);
+			nodes.get(1).startService(new ServiceNameVersion(serviceName, serviceVersion), "servicepass");
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail(e.toString());

@@ -87,16 +87,14 @@ public class NodeServiceCacheTest {
 			LocalNode serviceNode = new LocalNodeManager().newNode("export/jars/");
 			serviceNode.launch();
 
-			ServiceAgentImpl serviceAgent = ServiceAgentImpl.createServiceAgent(serviceNameVersion, "a pass");
-			serviceAgent.unlock("a pass");
-			serviceNode.registerReceiver(serviceAgent);
+			ServiceAgentImpl serviceAgent = serviceNode.startService(serviceNameVersion, "a pass");
 
 			ServiceAgentImpl localServiceAgent = serviceNode.getNodeServiceCache()
 					.getServiceAgentInstance(serviceNameVersion, true, true, null).getServiceAgent();
 
 			assertSame(serviceAgent, localServiceAgent);
 
-			serviceNode.unregisterReceiver(serviceAgent);
+			serviceNode.stopService(serviceAgent);
 
 			try {
 				serviceNode.getNodeServiceCache().getServiceAgentInstance(serviceNameVersion, true, true, null);
@@ -123,52 +121,28 @@ public class NodeServiceCacheTest {
 			Node node2 = manager.launchNode();
 			Node node3 = manager.launchNode();
 
-			// generate services
-			ServiceAgentImpl service2 = ServiceAgentImpl
-					.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@2"), "a pass");
-			System.out.println("NodeServiceCacheTest: service2 instance " + service2.getIdentifier());
-			service2.unlock("a pass");
-			ServiceAgentImpl service20 = ServiceAgentImpl
-					.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@2.0"), "a pass");
-			System.out.println("NodeServiceCacheTest: service20 instance " + service20.getIdentifier());
-			service20.unlock("a pass");
-			ServiceAgentImpl service21 = ServiceAgentImpl
-					.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@2.1"), "a pass");
-			System.out.println("NodeServiceCacheTest: service21 instance " + service21.getIdentifier());
-			service21.unlock("a pass");
-			ServiceAgentImpl service22_1 = ServiceAgentImpl
-					.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@2.2"), "a pass");
-			System.out.println("NodeServiceCacheTest: service22_1 instance " + service22_1.getIdentifier());
-			service22_1.unlock("a pass");
-			ServiceAgentImpl service22_2 = ServiceAgentImpl
-					.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@2.2"), "a pass");
-			System.out.println("NodeServiceCacheTest: service22_2 instance " + service22_2.getIdentifier());
-			service22_2.unlock("a pass");
-			ServiceAgentImpl service22_3 = ServiceAgentImpl
-					.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@2.2"), "a pass");
-			System.out.println("NodeServiceCacheTest: service22_3 instance " + service22_3.getIdentifier());
-			service22_3.unlock("a pass");
-			ServiceAgentImpl service3 = ServiceAgentImpl
-					.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@3"), "a pass");
-			service3.unlock("a pass");
-			System.out.println("NodeServiceCacheTest: service3 instance " + service3.getIdentifier());
-
 			// start services
 			// v2@node1 v20@node1 v21@node1 v22@node1 v22@node2 v22@node3 v22@invokingNode v3@node1
-			node1.storeAgent(service2);
-			node1.registerReceiver(service2);
-			node1.storeAgent(service20);
-			node1.registerReceiver(service20);
-			node1.storeAgent(service21);
-			node1.registerReceiver(service21);
-			node2.storeAgent(service22_1);
-			node2.registerReceiver(service22_1);
-			node3.storeAgent(service22_2);
-			node3.registerReceiver(service22_2);
-			invokingNode.storeAgent(service22_3);
-			invokingNode.registerReceiver(service22_3);
-			node1.storeAgent(service3);
-			node1.registerReceiver(service3);
+			ServiceAgentImpl service2 = node1
+					.startService(ServiceNameVersion.fromString("i5.las2peer.api.TestService@2"), "a pass");
+			System.out.println("NodeServiceCacheTest: service2 instance " + service2.getIdentifier());
+			ServiceAgentImpl service20 = node1
+					.startService(ServiceNameVersion.fromString("i5.las2peer.api.TestService@2.0"), "a pass");
+			System.out.println("NodeServiceCacheTest: service20 instance " + service20.getIdentifier());
+			ServiceAgentImpl service21 = node1
+					.startService(ServiceNameVersion.fromString("i5.las2peer.api.TestService@2.1"), "a pass");
+			System.out.println("NodeServiceCacheTest: service21 instance " + service21.getIdentifier());
+			ServiceAgentImpl service22_1 = node2
+					.startService(ServiceNameVersion.fromString("i5.las2peer.api.TestService@2.2"), "a pass");
+			System.out.println("NodeServiceCacheTest: service22_1 instance " + service22_1.getIdentifier());
+			ServiceAgentImpl service22_2 = node3
+					.startService(ServiceNameVersion.fromString("i5.las2peer.api.TestService@2.2"), "a pass");
+			ServiceAgentImpl service22_3 = invokingNode
+					.startService(ServiceNameVersion.fromString("i5.las2peer.api.TestService@2.2"), "a pass");
+			System.out.println("NodeServiceCacheTest: service22_3 instance " + service22_3.getIdentifier());
+			ServiceAgentImpl service3 = node1
+					.startService(ServiceNameVersion.fromString("i5.las2peer.api.TestService@3"), "a pass");
+			System.out.println("NodeServiceCacheTest: service3 instance " + service3.getIdentifier());
 
 			// register user
 			UserAgentImpl userAgent = MockAgentFactory.getAdam();
@@ -203,8 +177,8 @@ public class NodeServiceCacheTest {
 			assertTrue(instance.local());
 
 			// stop all services v22 except v22@node3, global v2.2 -> v22@node3
-			node2.unregisterReceiver(service22_1);
-			invokingNode.unregisterReceiver(service22_3);
+			node2.stopService(service22_1);
+			invokingNode.stopService(service22_3);
 			invokingNode.getNodeServiceCache().clear(); // clear cache to force reloading of service index
 			instance = invokingNode.getNodeServiceCache().getServiceAgentInstance(
 					ServiceNameVersion.fromString("i5.las2peer.api.TestService@2.2"), false, false, userAgent);
@@ -213,7 +187,7 @@ public class NodeServiceCacheTest {
 
 			// stop service v22@node3, global v2 -> v21
 			invokingNode.getNodeServiceCache().clear(); // clear cache to force reloading of service index
-			node3.unregisterReceiver(service22_2);
+			node3.stopService(service22_2);
 			instance = invokingNode.getNodeServiceCache().getServiceAgentInstance(
 					ServiceNameVersion.fromString("i5.las2peer.api.TestService@2"), false, false, userAgent);
 			assertEquals(service21.getIdentifier(), instance.getServiceAgentId());

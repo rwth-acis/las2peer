@@ -41,10 +41,8 @@ public class LocalNodeInvocationTest {
 
 			node.launch();
 
-			ServiceAgentImpl testServiceAgent = ServiceAgentImpl
-					.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.0"), "a pass");
-			testServiceAgent.unlock("a pass");
-			node.registerReceiver(testServiceAgent);
+			ServiceAgentImpl testServiceAgent = node
+					.startService(ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.0"), "a pass");
 
 			Object result = node.invokeLocally(eve, testServiceAgent, "inc", new Serializable[] { new Integer(10) });
 
@@ -66,10 +64,8 @@ public class LocalNodeInvocationTest {
 			serviceNode.storeAgent(eve);
 			serviceNode.launch();
 
-			ServiceAgentImpl testServiceAgent = ServiceAgentImpl
-					.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.0"), "a pass");
-			testServiceAgent.unlock("a pass");
-			serviceNode.registerReceiver(testServiceAgent);
+			ServiceAgentImpl testServiceAgent = serviceNode
+					.startService(ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.0"), "a pass");
 
 			LocalNode callerNode = manager.launchNode();
 			Object result = callerNode.invokeGlobally(eve, testServiceAgent.getIdentifier(),
@@ -94,15 +90,9 @@ public class LocalNodeInvocationTest {
 			serviceNode1.launch();
 			serviceNode2.launch();
 
-			ServiceAgentImpl testServiceAgent = ServiceAgentImpl
-					.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.0"), "a pass");
-			testServiceAgent.unlock("a pass");
-			serviceNode1.registerReceiver(testServiceAgent);
+			serviceNode1.startService(ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.0"), "a pass");
 
-			ServiceAgentImpl testServiceAgent2 = ServiceAgentImpl.createServiceAgent(
-					ServiceNameVersion.fromString("i5.las2peer.api.TestService2@1.0"), "a 2nd pass");
-			testServiceAgent2.unlock("a 2nd pass");
-			serviceNode2.registerReceiver(testServiceAgent2);
+			serviceNode2.startService(ServiceNameVersion.fromString("i5.las2peer.api.TestService2@1.0"), "a 2nd pass");
 
 			LocalNode callerNode = manager.launchNode();
 			Object result = callerNode.invoke(eve, "i5.las2peer.api.TestService2@1.0", "usingOther",
@@ -125,10 +115,7 @@ public class LocalNodeInvocationTest {
 			serviceNode2.storeAgent(eve);
 			serviceNode2.launch();
 
-			ServiceAgentImpl testServiceAgent2 = ServiceAgentImpl.createServiceAgent(
-					ServiceNameVersion.fromString("i5.las2peer.api.TestService2@1.0"), "a 2nd pass");
-			testServiceAgent2.unlock("a 2nd pass");
-			serviceNode2.registerReceiver(testServiceAgent2);
+			serviceNode2.startService(ServiceNameVersion.fromString("i5.las2peer.api.TestService2@1.0"), "a 2nd pass");
 
 			LocalNode callerNode = manager.launchNode();
 			Object result = callerNode.invoke(eve, "i5.las2peer.api.TestService2@1.0", "usingOther",
@@ -154,20 +141,14 @@ public class LocalNodeInvocationTest {
 			serviceNode1.launch();
 			serviceNode2.launch();
 
-			ServiceAgentImpl usingAgent = ServiceAgentImpl.createServiceAgent(
+			serviceNode1.startService(
 					ServiceNameVersion.fromString("i5.las2peer.testServices.testPackage2.UsingService@1.0"), "a pass");
-			usingAgent.unlock("a pass");
-			serviceNode1.registerReceiver(usingAgent);
 
-			ServiceAgentImpl serviceAgent1 = ServiceAgentImpl.createServiceAgent(
+			serviceNode2.startService(
 					ServiceNameVersion.fromString("i5.las2peer.testServices.testPackage1.TestService@1.0"), "a pass");
-			serviceAgent1.unlock("a pass");
-			serviceNode2.registerReceiver(serviceAgent1);
 
-			ServiceAgentImpl serviceAgent2 = ServiceAgentImpl.createServiceAgent(
+			serviceNode2.startService(
 					ServiceNameVersion.fromString("i5.las2peer.testServices.testPackage1.TestService@1.1"), "a pass");
-			serviceAgent2.unlock("a pass");
-			serviceNode2.registerReceiver(serviceAgent2);
 
 			LocalNode callerNode = manager.launchNode();
 
@@ -259,17 +240,11 @@ public class LocalNodeInvocationTest {
 			// start two nodes with both powering the service
 			ServiceNameVersion snv = new ServiceNameVersion("i5.las2peer.testServices.testPackage3.PackageTestService",
 					"1.0");
-			ServiceAgentImpl serviceAgent1 = ServiceAgentImpl.createServiceAgent(snv, "a pass");
-			serviceAgent1.unlock("a pass");
-			serviceNode1.storeAgent(serviceAgent1);
-			serviceNode1.registerReceiver(serviceAgent1);
+			ServiceAgentImpl serviceAgent1 = serviceNode1.startService(snv, "a pass");
 			Assert.assertEquals(ServiceClassLoader.class,
 					serviceAgent1.getServiceInstance().getClass().getClassLoader().getClass());
 
-			ServiceAgentImpl serviceAgent2 = ServiceAgentImpl.createServiceAgent(snv, "a pass");
-			serviceAgent2.unlock("a pass");
-			serviceNode2.storeAgent(serviceAgent2);
-			serviceNode2.registerReceiver(serviceAgent2);
+			ServiceAgentImpl serviceAgent2 = serviceNode2.startService(snv, "a pass");
 			Assert.assertEquals(ServiceClassLoader.class,
 					serviceAgent2.getServiceInstance().getClass().getClassLoader().getClass());
 

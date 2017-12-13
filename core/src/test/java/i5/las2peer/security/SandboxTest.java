@@ -33,10 +33,7 @@ public class SandboxTest {
 		try {
 			node = TestSuite.launchNetwork(1).get(0);
 			node.launch();
-			service = ServiceAgentImpl
-					.createServiceAgent(new ServiceNameVersion(MaliciousService.class.getName(), "1.0"), "testpasswd");
-			service.unlock("testpasswd");
-			node.registerReceiver(service);
+			node.startService(new ServiceNameVersion(MaliciousService.class.getName(), "1.0"), "testpasswd");
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("Can't bring up network!");
