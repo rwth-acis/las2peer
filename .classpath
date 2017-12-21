@@ -63,7 +63,7 @@
 	<classpathentry kind="lib" path="webconnector/lib/jersey-container-jdk-http-2.25.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="webconnector/lib/json-smart-2.3.jar"/>
 	<classpathentry kind="lib" path="webconnector/lib/mail-1.4.7.jar"/>
-	<classpathentry kind="lib" path="webconnector/lib/swagger-ui-2.2.10.jar"/>
+	<classpathentry kind="lib" path="webconnector/lib/swagger-ui-3.6.1.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="output"/>
 </classpath>
