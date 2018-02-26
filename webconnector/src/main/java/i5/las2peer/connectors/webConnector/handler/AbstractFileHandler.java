@@ -5,10 +5,10 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import i5.las2peer.connectors.webConnector.util.MimeTypes;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.tools.SimpleTools;
 
@@ -25,7 +25,7 @@ public abstract class AbstractFileHandler {
 		byte[] bytes = SimpleTools.toByteArray(is);
 		String mime = Files.probeContentType(Paths.get(filename));
 		if (mime == null) {
-			mime = MediaType.APPLICATION_OCTET_STREAM;
+			mime = MimeTypes.get(filename);
 		}
 		return Response.ok(bytes, mime).build();
 	}
