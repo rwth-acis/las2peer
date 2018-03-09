@@ -75,26 +75,13 @@ public class ServiceAgentImplTest {
 		// start node
 		LocalNode node = new LocalNodeManager().launchNode();
 
-		ServiceAgentImpl testServiceAgentImpl0 = ServiceAgentImpl
-				.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.0"), "a pass");
-		testServiceAgentImpl0.unlock("a pass");
-		node.registerReceiver(testServiceAgentImpl0);
+		node.startService(ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.0"), "a pass");
 
-		ServiceAgentImpl testServiceAgentImpl1 = ServiceAgentImpl
-				.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.1"), "a pass");
-		testServiceAgentImpl1.unlock("a pass");
-		node.registerReceiver(testServiceAgentImpl1);
+		node.startService(ServiceNameVersion.fromString("i5.las2peer.api.TestService@1.1"), "a pass");
 
-		ServiceAgentImpl testServiceAgentImpl2 = ServiceAgentImpl
-				.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService@2.0"), "a pass");
-		testServiceAgentImpl2.unlock("a pass");
-		node.registerReceiver(testServiceAgentImpl2);
+		node.startService(ServiceNameVersion.fromString("i5.las2peer.api.TestService@2.0"), "a pass");
 
-		ServiceAgentImpl testServiceAgentImpl3 = ServiceAgentImpl
-				.createServiceAgent(ServiceNameVersion.fromString("i5.las2peer.api.TestService2@1.0"), "a pass");
-		testServiceAgentImpl3.unlock("a pass");
-
-		node.registerReceiver(testServiceAgentImpl3);
+		node.startService(ServiceNameVersion.fromString("i5.las2peer.api.TestService2@1.0"), "a pass");
 
 		PassphraseAgentImpl userAgent = MockAgentFactory.getAdam();
 		userAgent.unlock("adamspass");

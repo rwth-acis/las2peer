@@ -692,8 +692,7 @@ public class L2pNodeLauncher {
 	 */
 	public void stopService(String serviceNameVersion)
 			throws AgentNotRegisteredException, NodeException, ServiceNotFoundException {
-		ServiceAgentImpl agent = node.getLocalServiceAgent(ServiceNameVersion.fromString(serviceNameVersion));
-		node.unregisterReceiver(agent);
+		node.stopService(ServiceNameVersion.fromString(serviceNameVersion));
 	}
 
 	/**

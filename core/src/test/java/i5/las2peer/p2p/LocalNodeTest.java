@@ -528,9 +528,6 @@ public class LocalNodeTest {
 	public void testSimpleInvocation() {
 		try {
 			String serviceClass = "i5.las2peer.api.TestService";
-			ServiceAgentImpl testService = ServiceAgentImpl
-					.createServiceAgent(ServiceNameVersion.fromString(serviceClass + "@1.0"), "a passphrase");
-			testService.unlock("a passphrase");
 
 			LocalNode testee = new LocalNodeManager().launchNode();
 
@@ -538,8 +535,8 @@ public class LocalNodeTest {
 			eve.unlock("evespass");
 			testee.storeAgent(eve);
 
-			testee.storeAgent(testService);
-			testee.registerReceiver(testService);
+			ServiceAgentImpl testService = testee.startService(ServiceNameVersion.fromString(serviceClass + "@1.0"),
+					"a passphrase");
 
 			Serializable result = testee.invokeLocally(eve, testService, "inc", new Serializable[] { new Integer(10) });
 

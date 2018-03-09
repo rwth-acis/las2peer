@@ -5,6 +5,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.logging.Level;
 
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.InternalServerErrorException;
@@ -23,10 +24,12 @@ import com.nimbusds.openid.connect.sdk.UserInfoSuccessResponse;
 import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 
 import i5.las2peer.api.security.AgentAccessDeniedException;
+import i5.las2peer.api.security.AgentAlreadyExistsException;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.api.security.AnonymousAgent;
 import i5.las2peer.connectors.webConnector.WebConnector;
+import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.AnonymousAgentImpl;
 import i5.las2peer.security.PassphraseAgentImpl;
@@ -35,6 +38,8 @@ import i5.las2peer.tools.CryptoTools;
 import net.minidev.json.JSONObject;
 
 public class AuthenticationManager {
+
+	private final L2pLogger logger = L2pLogger.getInstance(AuthenticationManager.class.getName());
 
 	public static final String ACCESS_TOKEN_KEY = "access_token";
 	public static final String OIDC_PROVIDER_KEY = "oidc_provider";
@@ -94,7 +99,9 @@ public class AuthenticationManager {
 			}
 		} else { // get OIDC parameters from GET values
 			token = accessTokenQueryParam;
-			oidcProviderURI = oidcProviderHeader;
+			if (oidcProviderHeader != null) {
+				oidcProviderURI = oidcProviderHeader;
+			}
 		}
 
 		// validate given OIDC provider and get provider info
@@ -190,7 +197,11 @@ public class AuthenticationManager {
 					// TODO provide OIDC user data for agent
 					// oidcAgent.setUserData(ujson.toJSONString());
 					connector.getL2pNode().storeAgent(oidcAgent);
-					connector.getL2pNode().getUserManager().registerOIDCSub(oidcAgent, sub);
+					try {
+						connector.getL2pNode().getUserManager().registerOIDCSub(oidcAgent, sub);
+					} catch (AgentAlreadyExistsException e2) {
+						logger.log(Level.FINE, "Could not register OIDC sub", e2);
+					}
 					return oidcAgent;
 				} finally {
 					connector.getLockOidc().unlock(oidcAgentId);

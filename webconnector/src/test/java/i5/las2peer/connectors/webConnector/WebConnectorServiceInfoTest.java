@@ -20,7 +20,6 @@ import i5.las2peer.connectors.webConnector.services.TestVersionService;
 import i5.las2peer.p2p.LocalNode;
 import i5.las2peer.p2p.LocalNodeManager;
 import i5.las2peer.security.GroupAgentImpl;
-import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.testing.MockAgentFactory;
 
@@ -60,32 +59,12 @@ public class WebConnectorServiceInfoTest {
 		node.storeAgent(group1);
 		node.launch();
 
-		ServiceAgentImpl testService1 = ServiceAgentImpl
-				.createServiceAgent(ServiceNameVersion.fromString(testServiceClass1), "a pass");
-		ServiceAgentImpl testService2 = ServiceAgentImpl
-				.createServiceAgent(ServiceNameVersion.fromString(testServiceClass2), "a pass");
-		ServiceAgentImpl testService3 = ServiceAgentImpl
-				.createServiceAgent(ServiceNameVersion.fromString(testServiceClass3), "a pass");
-		ServiceAgentImpl testService4 = ServiceAgentImpl
-				.createServiceAgent(ServiceNameVersion.fromString(testServiceClass4), "a pass");
-		ServiceAgentImpl testService5 = ServiceAgentImpl
-				.createServiceAgent(ServiceNameVersion.fromString(testServiceClass5), "a pass");
-		ServiceAgentImpl testService6 = ServiceAgentImpl
-				.createServiceAgent(ServiceNameVersion.fromString(testServiceClass6), "a pass");
-
-		testService1.unlock("a pass");
-		testService2.unlock("a pass");
-		testService3.unlock("a pass");
-		testService4.unlock("a pass");
-		testService5.unlock("a pass");
-		testService6.unlock("a pass");
-
-		node.registerReceiver(testService1);
-		node.registerReceiver(testService2);
-		node.registerReceiver(testService3);
-		node.registerReceiver(testService4);
-		node.registerReceiver(testService5);
-		node.registerReceiver(testService6); // should not throw an error
+		node.startService(ServiceNameVersion.fromString(testServiceClass1), "a pass");
+		node.startService(ServiceNameVersion.fromString(testServiceClass2), "a pass");
+		node.startService(ServiceNameVersion.fromString(testServiceClass3), "a pass");
+		node.startService(ServiceNameVersion.fromString(testServiceClass4), "a pass");
+		node.startService(ServiceNameVersion.fromString(testServiceClass5), "a pass");
+		node.startService(ServiceNameVersion.fromString(testServiceClass6), "a pass");
 
 		// start connector
 		logStream = new ByteArrayOutputStream();

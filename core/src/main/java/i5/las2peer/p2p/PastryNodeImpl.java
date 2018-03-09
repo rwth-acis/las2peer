@@ -22,6 +22,7 @@ import java.util.logging.Level;
 import i5.las2peer.api.logging.MonitoringEvent;
 import i5.las2peer.api.persistency.EnvelopeException;
 import i5.las2peer.api.persistency.EnvelopeNotFoundException;
+import i5.las2peer.api.security.AgentAlreadyExistsException;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentNotFoundException;
@@ -540,7 +541,11 @@ public class PastryNodeImpl extends Node {
 			}
 			pastStorage.storeEnvelope(agentEnvelope, agent, AGENT_STORE_TIMEOUT);
 			if (agent instanceof UserAgentImpl) {
-				getUserManager().registerUserAgent((UserAgentImpl) agent);
+				try {
+					getUserManager().registerUserAgent((UserAgentImpl) agent);
+				} catch (AgentAlreadyExistsException e) {
+					logger.log(Level.FINE, "Could not register user agent", e);
+				}
 			}
 			observerNotice(MonitoringEvent.AGENT_UPLOAD_SUCCESS, pastryNode, agent, "");
 		} catch (CryptoException | SerializationException | EnvelopeException e) {

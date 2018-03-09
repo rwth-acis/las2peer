@@ -752,6 +752,48 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	}
 
 	/**
+	 * Starts a new instance of the given service on this node. This creates, stores and registers a new service agent.
+	 * 
+	 * @param nameVersion A service name and version to identify the service
+	 * @param passphrase A passphrase to secure this instance
+	 * @return Returns the local service agent instance
+	 * @throws CryptoException
+	 * @throws AgentException
+	 */
+	public ServiceAgentImpl startService(ServiceNameVersion nameVersion, String passphrase)
+			throws CryptoException, AgentException {
+		ServiceAgentImpl serviceAgent = ServiceAgentImpl.createServiceAgent(nameVersion, passphrase);
+		serviceAgent.unlock(passphrase);
+		storeAgent(serviceAgent);
+		registerReceiver(serviceAgent);
+		return serviceAgent;
+	}
+
+	/**
+	 * Stops the local service instance.
+	 * 
+	 * @param nameVersion A service name and version to identify the service
+	 * @throws AgentNotRegisteredException If the service is not registered locally
+	 * @throws ServiceNotFoundException If the service is not known locally
+	 * @throws NodeException
+	 */
+	public void stopService(ServiceNameVersion nameVersion)
+			throws AgentNotRegisteredException, ServiceNotFoundException, NodeException {
+		stopService(getLocalServiceAgent(nameVersion));
+	}
+
+	/**
+	 * Stops the local service instance.
+	 * 
+	 * @param serviceAgent
+	 * @throws AgentNotRegisteredException If the service is not registered locally
+	 * @throws NodeException
+	 */
+	public void stopService(ServiceAgentImpl serviceAgent) throws AgentNotRegisteredException, NodeException {
+		unregisterReceiver(serviceAgent);
+	}
+
+	/**
 	 * Sends a message, recipient and sender are stated in the message. The node tries to find a node hosting the
 	 * recipient and sends the message there.
 	 * 
