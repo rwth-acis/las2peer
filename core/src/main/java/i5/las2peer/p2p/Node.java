@@ -292,7 +292,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 */
 	public void setServiceMonitoring(ServiceAgentImpl service) {
 		observerNotice(MonitoringEvent.SERVICE_ADD_TO_MONITORING, this.getNodeId(), service.getIdentifier(), null, null,
-				service.getServiceNameVersion().toString());
+				"{\"serviceName\":\"" + service.getServiceNameVersion().toString() + "\",\"serviceAlias\":\""
+						+ service.getServiceInstance().getAlias() + "\"}");
 	}
 
 	/**
