@@ -360,6 +360,7 @@ public class ServiceAgentImpl extends PassphraseAgentImpl implements ServiceAgen
 			serviceInstance = (Service) cons.newInstance();
 
 			// set up monitoring
+			// TODO Remove Noracle later
 			if (serviceInstance.isMonitor() || this.getServiceNameVersion().getName().contains("noracleService")) {
 				node.setServiceMonitoring(this);
 			}

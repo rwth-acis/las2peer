@@ -139,6 +139,7 @@ public class MonitoringObserver implements NodeObserver {
 				System.out.println("Monitoring: Problems with initializing Agents..");
 			}
 		} else if (messagesCount > 0) {
+			// Send messages after waitUntilSend ms 
 			if (monitoringMessages[messagesCount - 1].getTimestamp() < (System.currentTimeMillis() - waitUntilSend)) {
 				if (initializedDone) {
 					// Do not send old messages...
@@ -147,6 +148,8 @@ public class MonitoringObserver implements NodeObserver {
 						monitoringMessages[counter] = null;
 						counter++;
 					}
+					// reset messageCount before sending messages 
+					// otherwise StackOverflow... 
 					messagesCount = 0;
 					sendMessages();
 				} else {
