@@ -37,6 +37,7 @@ public class MonitoringObserver implements NodeObserver {
 	private MessageResultListener messageResultListener; // The ResultListener that will be used for message-sending
 															// (currently unused though).
 	private Node registeredAt; // If we want to send messages, we need a sending node.
+	private long waitUntilSend;
 
 	/**
 	 * 
@@ -51,6 +52,7 @@ public class MonitoringObserver implements NodeObserver {
 	 */
 	public MonitoringObserver(int messageCache, Node registeredAt) {
 		this.registeredAt = registeredAt;
+		waitUntilSend = 1000 * 60 * 5; // 5 min
 		if (messageCache < 50) {
 			messageCache = 50; // Minimum cache to give the observer enough time to initialize before first sending
 		}
@@ -136,10 +138,32 @@ public class MonitoringObserver implements NodeObserver {
 				messagesCount = 0;
 				System.out.println("Monitoring: Problems with initializing Agents..");
 			}
+		} else if (messagesCount > 0) {
+			if (monitoringMessages[messagesCount - 1].getTimestamp() < (System.currentTimeMillis() - waitUntilSend)) {
+				if (initializedDone) {
+					// Do not send old messages...
+					int counter = messagesCount;
+					while (counter < monitoringMessages.length) {
+						monitoringMessages[counter] = null;
+						counter++;
+					}
+					messagesCount = 0;
+					sendMessages();
+				} else {
+					messagesCount = 0;
+					System.out.println("Monitoring: Problems with initializing Agents..");
+				}
+			}
 		}
-		monitoringMessages[messagesCount] = new MonitoringMessage(timestamp, event, sourceNode, sourceAgentId,
-				destinationNode, destinationAgentId, remarks);
-		messagesCount++;
+		if (event != MonitoringEvent.ARTIFACT_FETCH_STARTED && event != MonitoringEvent.ARTIFACT_RECEIVED
+				&& event != MonitoringEvent.AGENT_GET_STARTED && event != MonitoringEvent.AGENT_GET_SUCCESS
+				&& event != MonitoringEvent.MESSAGE_SENDING && event != MonitoringEvent.ARTIFACT_FETCH_FAILED
+				&& event != MonitoringEvent.MESSAGE_RECEIVED_ANSWER && event != MonitoringEvent.MESSAGE_FORWARDING
+				&& event != MonitoringEvent.MESSAGE_RECEIVED) {
+			monitoringMessages[messagesCount] = new MonitoringMessage(timestamp, event, sourceNode, sourceAgentId,
+					destinationNode, destinationAgentId, remarks);
+			messagesCount++;
+		}
 		// We can only send our last message if the node is closing, so we will have to assume that all services are
 		// shutdown
 		// when a node is closed (seems to be a fair bet)
