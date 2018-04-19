@@ -107,7 +107,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 
 	private final NodeServiceCache nodeServiceCache;
 
-	public static final double DEFAULT_CPU_LOAD_TRESHOLD = 0.5;
+	public static final double DEFAULT_CPU_LOAD_TRESHOLD = 0.9;
 	/**
 	 * cpu load threshold to determine whether the node is considered busy
 	 */
@@ -1672,7 +1672,14 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	}
 
 	public boolean isBusy() {
-		return (getNodeCpuLoad() > cpuLoadThreshold);
+		double cpuLoad = getNodeCpuLoad();
+		if (cpuLoad > cpuLoadThreshold) {
+			observerNotice(MonitoringEvent.NODE_BUSY, this.getNodeId(),
+					"CPU Load: " + cpuLoad + " (Node threshold: " + cpuLoadThreshold + ")");
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	public void setCpuLoadThreshold(double cpuLoadThreshold) {
