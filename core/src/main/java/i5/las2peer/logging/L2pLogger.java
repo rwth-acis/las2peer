@@ -144,9 +144,13 @@ public final class L2pLogger extends Logger implements NodeObserver {
 			// timestamp
 			sb.append(logger.dateFormat.format(new Date(record.getMillis()))).append(" ");
 			// level
-			sb.append(record.getLevel().getName()).append(" ");
+			sb.append(record.getLevel().getName());
 			// class and method name
-			sb.append(record.getSourceClassName());
+			// only append, if a meaningful name can be determined
+			final String sourceClassName = record.getSourceClassName();
+			if (!sourceClassName.equals(L2pLogger.class.getName())) {
+				sb.append(" ").append(sourceClassName);				
+			}
 			if (logger.getLevel().intValue() >= Level.FINER.intValue()) { // print the method name, too
 				sb.append("#").append(record.getSourceMethodName());
 			}
@@ -509,7 +513,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	@Override
 	public void log(Long timestamp, MonitoringEvent event, String sourceNode, String sourceAgentId,
 			String destinationNode, String destinationAgentId, String remarks) {
-		StringBuilder logLine = new StringBuilder(DEFAULT_DATE_FORMAT.format(new Date(timestamp)) + "\t");
+		StringBuilder logLine = new StringBuilder();
 		logLine.append(event + " (" + event.getCode() + ")\t");
 		logLine.append(appendPart(sourceNode));
 		logLine.append(appendPart(sourceAgentId));
