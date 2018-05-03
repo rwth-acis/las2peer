@@ -145,12 +145,11 @@ public final class L2pLogger extends Logger implements NodeObserver {
 			sb.append(logger.dateFormat.format(new Date(record.getMillis()))).append(" ");
 			// level
 			sb.append(record.getLevel().getName());
-			// class and method name
-			// only append, if a meaningful name can be determined
-			final String sourceClassName = record.getSourceClassName();
-			if (!sourceClassName.equals(L2pLogger.class.getName())) {
-				sb.append(" ").append(sourceClassName);				
-			}
+			// sourceClassName replaced by loggerName, as source class is 
+			// always L2pLogger itself
+			// final String loggerName = record.getSourceClassName();
+			final String loggerName = record.getLoggerName();
+			sb.append(" ").append(loggerName);
 			if (logger.getLevel().intValue() >= Level.FINER.intValue()) { // print the method name, too
 				sb.append("#").append(record.getSourceMethodName());
 			}
@@ -586,10 +585,6 @@ public final class L2pLogger extends Logger implements NodeObserver {
 		L2pLogger result;
 		try {
 			result = new L2pLogger(name, null);
-			if (!LogManager.getLogManager().addLogger(result)) {
-				// the log manager already has a logger with that name
-				result = (L2pLogger) LogManager.getLogManager().getLogger(name);
-			}
 		} catch (IllegalArgumentException e) {
 			// a logger with that name is already registered
 			result = (L2pLogger) LogManager.getLogManager().getLogger(name);
