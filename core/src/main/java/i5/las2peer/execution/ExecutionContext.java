@@ -190,6 +190,11 @@ public class ExecutionContext implements Context {
 	}
 
 	@Override
+	public void monitorEvent(String message) {
+		monitorEvent(null, MonitoringEvent.SERVICE_MESSAGE, message);
+	}
+	
+	@Override
 	public void monitorEvent(MonitoringEvent event, String message) {
 		monitorEvent(null, event, message);
 	}
