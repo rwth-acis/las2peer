@@ -452,6 +452,17 @@ public interface Context {
 	public Logger getLogger(Class<?> cls);
 
 	// Monitoring
+	/**
+	 * Writes a log message to the l2p system using node observers. Also makes data available to MobSOS.
+	 * 
+	 * Does not include the current acting main agent. The MonitoringEvent will default to MonitoringEvent.SERVICE_MESSAGE.
+	 * Use this method for trivial log messages.
+	 *
+	 * @param event Differentiates between different log messages. Use MonitoringEvent.SERVICE_CUSTOM_MESSAGE_XXX as
+	 *            parameter.
+	 * @param message A message.
+	 */
+	void monitorEvent(String message);
 
 	/**
 	 * Writes a log message to the l2p system using node observers. Also makes data available to MobSOS.
@@ -495,5 +506,6 @@ public interface Context {
 	 * @return The current service class loader.
 	 */
 	public ClassLoader getServiceClassLoader();
+
 
 }
