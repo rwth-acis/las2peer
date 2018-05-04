@@ -82,6 +82,11 @@ public abstract class Service extends Configurable {
 	 * @return True if this service should be monitored.
 	 */
 	public final boolean isMonitor() {
+		for (Annotation classAnnotation : this.getClass().getAnnotations()) {
+			if (classAnnotation instanceof DoNotMonitor) {
+				return false;
+			}
+		}
 		return isSelfDeployable() || monitor;
 	}
 
