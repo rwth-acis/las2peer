@@ -71,8 +71,6 @@ public abstract class Service extends Configurable {
 	/**
 	 * Indicates whether monitoring is enabled for this service.
 	 * 
-	 * For self-deploying services, this will be always true since monitoring is set up on node level.
-	 * 
 	 * @return True if this service should be monitored.
 	 */
 	public final boolean isMonitor() {

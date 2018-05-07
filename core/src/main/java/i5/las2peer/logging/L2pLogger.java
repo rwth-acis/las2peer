@@ -383,7 +383,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	}
 
 	/**
-	 * @deprecated Use {@link #log(MonitoringEvent, String)}
+	 * @deprecated Use {@link i5.las2peer.api.Context#monitorEvent(MonitoringEvent, String)}
 	 * 
 	 *             Writes a log message. The given event can be used to differentiate between different log messages.
 	 *
@@ -396,7 +396,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	}
 
 	/**
-	 * @deprecated Use {@link #log(MonitoringEvent, String, String, String)}
+	 * @deprecated Use {@link i5.las2peer.api.Context#monitorEvent(Object, MonitoringEvent, String, boolean)}
 	 * 
 	 *             Writes a log message. The given event can be used to differentiate between different log messages.
 	 *
@@ -410,7 +410,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	}
 
 	/**
-	 * @deprecated Use {@link #log(MonitoringEvent, String, String, String)}
+	 * @deprecated Use {@link i5.las2peer.api.Context#monitorEvent(Object, MonitoringEvent, String)}
 	 * 
 	 *             Logs a message to the l2p system using the observers.
 	 *
@@ -428,7 +428,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	}
 
 	/**
-	 * @deprecated Use {@link #log(MonitoringEvent, String, String, String)}
+	 * @deprecated Use {@link i5.las2peer.api.Context#monitorEvent(Object, MonitoringEvent, String, boolean)}
 	 * 
 	 *             Writes a log message. The given event can be used to differentiate between different log messages.
 	 *             The serviceAgent and actingUser can be set to {@code null} if not known. Then this message will not
@@ -448,7 +448,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	}
 
 	/**
-	 * @deprecated Use {@link #log(MonitoringEvent, String, String, String)}
+	 * @deprecated Use {@link i5.las2peer.api.Context#monitorEvent(Object, MonitoringEvent, String, boolean)}
 	 * 
 	 *             Writes a log message. The given event can be used to differentiate between different log messages.
 	 *             The serviceAgent and actingUser can be set to {@code null} if not known. Then this message will not
