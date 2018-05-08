@@ -1,6 +1,7 @@
 package i5.las2peer.p2p;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.InvocationTargetException;
@@ -107,7 +108,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 
 	private final NodeServiceCache nodeServiceCache;
 
-	public static final double DEFAULT_CPU_LOAD_TRESHOLD = 0.5;
+	public static final double DEFAULT_CPU_LOAD_TRESHOLD = 0.9;
 	/**
 	 * cpu load threshold to determine whether the node is considered busy
 	 */
@@ -185,6 +186,12 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	private String sInformationFileName = DEFAULT_INFORMATION_FILE;
 
 	/**
+	 * logger for writing custom events to a separate logfile
+	 */
+	private L2pLogger serviceLogger;
+	private static final String SERVICE_LOGFILE = "service.log";
+	
+	/**
 	 * maps names and emails to UserAgents
 	 */
 	private UserAgentManager userManager;
@@ -241,7 +248,9 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 
 		if (standardObserver) {
 			initStandardLogfile();
+			initServiceLogfile();
 		}
+		
 		if (monitoringObserver) {
 			addObserver(new MonitoringObserver(50, this));
 		}
@@ -260,11 +269,26 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	}
 
 	/**
-	 * Creates an observer for a standard log-file. The name of the log-file will contain the id of the node to prevent
-	 * The event for this notification. conflicts if running multiple nodes on the same machine.
+	 * Creates an observer for a standard log-file + console
 	 */
 	private void initStandardLogfile() {
-		addObserver(L2pLogger.getInstance(Node.class));
+		L2pLogger logger = L2pLogger.getInstance(this.getClass());
+		addObserver(logger);
+	}
+	
+	/**
+	 * Creates an additional observer for the log-file for custom mesages
+	 */
+	private void initServiceLogfile() {
+		serviceLogger = L2pLogger.getInstance("service");
+		try {
+			serviceLogger.setLogfilePrefix(SERVICE_LOGFILE);
+			addObserver(serviceLogger);
+		} catch (IOException e) {
+			System.err.println("Fatal Error! Can't use logging prefix '"
+					+ SERVICE_LOGFILE
+					+ "'! File logging is disabled!");
+		}
 	}
 
 	/**
@@ -383,6 +407,11 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 		String sourceNodeRepresentation = getNodeRepresentation(sourceNode);
 		String destinationNodeRepresentation = getNodeRepresentation(destinationNode);
 		for (NodeObserver ob : observers) {
+			if (ob == serviceLogger 
+					&& (Math.abs(event.getCode()) < 7500 || Math.abs(event.getCode()) >= 7600)) {
+				// custom logger shall only log service messages
+				continue;
+			}
 			ob.log(timestamp, event, sourceNodeRepresentation, sourceAgentId, destinationNodeRepresentation,
 					destinationAgentId, remarks);
 		}
@@ -1671,7 +1700,14 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	}
 
 	public boolean isBusy() {
-		return (getNodeCpuLoad() > cpuLoadThreshold);
+		double cpuLoad = getNodeCpuLoad();
+		if (cpuLoad > cpuLoadThreshold) {
+			observerNotice(MonitoringEvent.NODE_BUSY, this.getNodeId(),
+					"CPU Load: " + cpuLoad + " (Node threshold: " + cpuLoadThreshold + ")");
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	public void setCpuLoadThreshold(double cpuLoadThreshold) {

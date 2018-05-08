@@ -37,6 +37,7 @@ public class MonitoringObserver implements NodeObserver {
 	private MessageResultListener messageResultListener; // The ResultListener that will be used for message-sending
 															// (currently unused though).
 	private Node registeredAt; // If we want to send messages, we need a sending node.
+	private long waitUntilSend;
 
 	/**
 	 * 
@@ -51,6 +52,7 @@ public class MonitoringObserver implements NodeObserver {
 	 */
 	public MonitoringObserver(int messageCache, Node registeredAt) {
 		this.registeredAt = registeredAt;
+		waitUntilSend = 1000 * 60 * 5; // 5 min
 		if (messageCache < 50) {
 			messageCache = 50; // Minimum cache to give the observer enough time to initialize before first sending
 		}
@@ -128,7 +130,29 @@ public class MonitoringObserver implements NodeObserver {
 		if (sourceNode == null) {
 			return; // We do not log events without a source node into a database with different sources;-)
 		}
-		if (messagesCount >= monitoringMessages.length) {
+		
+		/*
+		 * Temporary fix to exclude the very frequent messages from monitoring
+		 * in order to not spam too much into the monitoring db.
+		 */
+		if (event == MonitoringEvent.ARTIFACT_FETCH_STARTED 
+				|| event == MonitoringEvent.ARTIFACT_RECEIVED
+				|| event == MonitoringEvent.AGENT_GET_STARTED 
+				|| event == MonitoringEvent.AGENT_GET_SUCCESS
+				|| event == MonitoringEvent.MESSAGE_SENDING 
+				|| event == MonitoringEvent.ARTIFACT_FETCH_FAILED
+				|| event == MonitoringEvent.MESSAGE_RECEIVED_ANSWER 
+				|| event == MonitoringEvent.MESSAGE_FORWARDING
+				|| event == MonitoringEvent.MESSAGE_RECEIVED) {
+			return;
+		}
+		
+		monitoringMessages[messagesCount++] = new MonitoringMessage(
+				timestamp, event, sourceNode, sourceAgentId, destinationNode,
+				destinationAgentId, remarks);
+		
+		
+		if (readyToSend()) {
 			if (initializedDone) {
 				messagesCount = 0;
 				sendMessages();
@@ -137,9 +161,7 @@ public class MonitoringObserver implements NodeObserver {
 				System.out.println("Monitoring: Problems with initializing Agents..");
 			}
 		}
-		monitoringMessages[messagesCount] = new MonitoringMessage(timestamp, event, sourceNode, sourceAgentId,
-				destinationNode, destinationAgentId, remarks);
-		messagesCount++;
+
 		// We can only send our last message if the node is closing, so we will have to assume that all services are
 		// shutdown
 		// when a node is closed (seems to be a fair bet)
@@ -156,6 +178,28 @@ public class MonitoringObserver implements NodeObserver {
 				System.out.println("Monitoring: Problems with initializing Agents..");
 			}
 		}
+	}
+	
+	/**
+	 * Checks whether the queue is ready to be flushed, either due to reaching
+	 * the limit or because enough time has passed
+	 * 
+	 * @return true is ready to flush
+	 */
+	private boolean readyToSend() {
+		if (messagesCount >= monitoringMessages.length) {
+			return true;
+		}
+
+		if (messagesCount > 1) {
+			long previous = monitoringMessages[messagesCount - 2].getTimestamp();
+			long sendDeadline = System.currentTimeMillis() - waitUntilSend;
+			if (previous < sendDeadline) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 
 	/**
