@@ -1,6 +1,6 @@
 ![las2peer](https://rwth-acis.github.io/las2peer/logo/vector/las2peer-logo.svg)
 
-# [![Build Status](https://jenkins.dbis.rwth-aachen.de/buildStatus/icon?job=las2peer Core)](https://jenkins.dbis.rwth-aachen.de/job/las2peer%20Core/) [![Build Status](https://travis-ci.org/rwth-acis/las2peer.svg?branch=master)](https://travis-ci.org/rwth-acis/las2peer) [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/rwth-acis/las2peer)
+# [![Build Status](https://jenkins.dbis.rwth-aachen.de/buildStatus/icon?job=las2peer%20Core)](https://jenkins.dbis.rwth-aachen.de/job/las2peer%20Core/) [![Build Status](https://travis-ci.org/rwth-acis/las2peer.svg?branch=master)](https://travis-ci.org/rwth-acis/las2peer) [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/rwth-acis/las2peer)
 
 las2peer is a Java-based server framework for developing and deploying microservices in a distributed Peer-to-Peer (P2P) environment. las2peer was developed by the Advanced Community Information Systems (ACIS) group at the Chair of Computer Science 5 (Information Systems & Databases), RWTH Aachen University, Germany. It's main focus lies on providing developers with a tool to easily develop and test their microsservices and deploy them in a P2P network without having to rely on a centralized infrastructure.
 
