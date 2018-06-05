@@ -24,6 +24,7 @@ import i5.las2peer.persistency.StorageStoreResultHandler;
 import i5.las2peer.security.AgentContext;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.AnonymousAgentImpl;
+import i5.las2peer.security.BotAgent;
 import i5.las2peer.security.MessageReceiver;
 import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.serialization.MalformedXMLException;
@@ -264,6 +265,8 @@ public class LocalNode extends Node {
 
 			if (agent instanceof UserAgentImpl) {
 				getUserManager().registerUserAgent((UserAgentImpl) agent);
+			} else if (agent instanceof BotAgent) {
+				getUserManager().registerUserAgent((BotAgent) agent);
 			}
 		}
 	}

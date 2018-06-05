@@ -29,8 +29,8 @@ import i5.las2peer.tools.CryptoTools;
  */
 public class UserAgentImpl extends PassphraseAgentImpl implements UserAgent {
 
-	private String sLoginName = null;
-	private String sEmail = null;
+	protected String sLoginName = null;
+	protected String sEmail = null;
 
 	/**
 	 * atm constructor for the MockAgent class, just don't know, how agent creation will take place later

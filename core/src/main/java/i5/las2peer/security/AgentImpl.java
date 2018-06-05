@@ -361,6 +361,8 @@ public abstract class AgentImpl implements Agent, XmlAble, Cloneable, MessageRec
 			return ServiceAgentImpl.createFromXml(rootElement);
 		} else if ("monitoring".equalsIgnoreCase(type)) {
 			return MonitoringAgent.createFromXml(rootElement);
+		} else if ("bot".equalsIgnoreCase(type)) {
+			return BotAgent.createFromXml(rootElement);
 		} else {
 			throw new MalformedXMLException("Unknown agent type: " + type);
 		}

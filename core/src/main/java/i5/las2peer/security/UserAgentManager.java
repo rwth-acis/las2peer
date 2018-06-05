@@ -11,6 +11,7 @@ import i5.las2peer.api.security.AnonymousAgent;
 import i5.las2peer.api.security.EmailAlreadyTakenException;
 import i5.las2peer.api.security.LoginNameAlreadyTakenException;
 import i5.las2peer.api.security.OIDCSubAlreadyTakenException;
+import i5.las2peer.api.security.UserAgent;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.persistency.EnvelopeVersion;
 import i5.las2peer.serialization.SerializationException;
@@ -40,7 +41,7 @@ public class UserAgentManager {
 	 * @throws LoginNameAlreadyTakenException If the given login name is already in use by another agent
 	 * @throws AgentLockedException If the given agent is not unlocked
 	 */
-	public void registerUserAgent(UserAgentImpl agent)
+	public void registerUserAgent(UserAgent agent)
 			throws EmailAlreadyTakenException, LoginNameAlreadyTakenException, AgentLockedException {
 		if (agent.isLocked()) {
 			throw new AgentLockedException("Only unlocked Agents can be registered.");
@@ -55,8 +56,16 @@ public class UserAgentManager {
 						throw new LoginNameAlreadyTakenException();
 					}
 				} catch (EnvelopeNotFoundException e) {
-					EnvelopeVersion envName = node.createUnencryptedEnvelope(identifier, agent.getPublicKey(), agentId);
-					node.storeEnvelope(envName, agent);
+					if (agent instanceof UserAgentImpl) {
+						EnvelopeVersion envName = node.createUnencryptedEnvelope(identifier,
+								((UserAgentImpl) agent).getPublicKey(), agentId);
+						node.storeEnvelope(envName, ((UserAgentImpl) agent));
+					} else if (agent instanceof BotAgent) {
+						EnvelopeVersion envName = node.createUnencryptedEnvelope(identifier,
+								((BotAgent) agent).getPublicKey(), agentId);
+						node.storeEnvelope(envName, ((BotAgent) agent));
+					}
+
 				}
 
 			} catch (EnvelopeAlreadyExistsException e) {
@@ -75,8 +84,16 @@ public class UserAgentManager {
 						throw new EmailAlreadyTakenException();
 					}
 				} catch (EnvelopeNotFoundException e) {
-					EnvelopeVersion envMail = node.createUnencryptedEnvelope(identifier, agent.getPublicKey(), agentId);
-					node.storeEnvelope(envMail, agent);
+					if (agent instanceof UserAgentImpl) {
+						EnvelopeVersion envMail = node.createUnencryptedEnvelope(identifier,
+								((UserAgentImpl) agent).getPublicKey(), agentId);
+						node.storeEnvelope(envMail, ((UserAgentImpl) agent));
+					} else if (agent instanceof BotAgent) {
+						EnvelopeVersion envMail = node.createUnencryptedEnvelope(identifier,
+								((BotAgent) agent).getPublicKey(), agentId);
+						node.storeEnvelope(envMail, ((BotAgent) agent));
+					}
+
 				}
 			} catch (EnvelopeAlreadyExistsException e) {
 				throw new EmailAlreadyTakenException();

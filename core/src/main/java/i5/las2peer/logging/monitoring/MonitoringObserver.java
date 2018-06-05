@@ -52,7 +52,38 @@ public class MonitoringObserver implements NodeObserver {
 	 */
 	public MonitoringObserver(int messageCache, Node registeredAt) {
 		this.registeredAt = registeredAt;
-		waitUntilSend = 1000 * 60 * 5; // 5 min
+		waitUntilSend = 1000 * 30 * 1; // 5 min
+		Thread sendingThread = new Thread() {
+			public void run() {
+				try {
+					while (true) {
+						Thread.sleep(waitUntilSend);
+						if (messagesCount > 0) {
+							// Send messages after waitUntilSend ms
+							if (initializedDone) {
+								// Do not send old messages...
+								int counter = messagesCount;
+								while (counter < monitoringMessages.length) {
+									monitoringMessages[counter] = null;
+									counter++;
+								}
+								// reset messageCount before sending messages
+								// otherwise StackOverflow...
+								messagesCount = 0;
+								sendMessages();
+							} else {
+								messagesCount = 0;
+								System.out.println("Monitoring: Problems with initializing Agents..");
+							}
+						}
+					}
+				} catch (InterruptedException v) {
+					System.out.println(v);
+				}
+			}
+		};
+
+		sendingThread.start();
 		if (messageCache < 50) {
 			messageCache = 50; // Minimum cache to give the observer enough time to initialize before first sending
 		}
@@ -137,25 +168,6 @@ public class MonitoringObserver implements NodeObserver {
 			} else {
 				messagesCount = 0;
 				System.out.println("Monitoring: Problems with initializing Agents..");
-			}
-		} else if (messagesCount > 0) {
-			// Send messages after waitUntilSend ms 
-			if (monitoringMessages[messagesCount - 1].getTimestamp() < (System.currentTimeMillis() - waitUntilSend)) {
-				if (initializedDone) {
-					// Do not send old messages...
-					int counter = messagesCount;
-					while (counter < monitoringMessages.length) {
-						monitoringMessages[counter] = null;
-						counter++;
-					}
-					// reset messageCount before sending messages 
-					// otherwise StackOverflow... 
-					messagesCount = 0;
-					sendMessages();
-				} else {
-					messagesCount = 0;
-					System.out.println("Monitoring: Problems with initializing Agents..");
-				}
 			}
 		}
 		if (event != MonitoringEvent.ARTIFACT_FETCH_STARTED && event != MonitoringEvent.ARTIFACT_RECEIVED

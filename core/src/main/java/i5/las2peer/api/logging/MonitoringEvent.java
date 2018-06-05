@@ -73,6 +73,7 @@ public enum MonitoringEvent {
 	SERVICE_INVOCATION_FAILED(-7210),
 
 	SERVICE_ADD_TO_MONITORING(7300), // Used by the LoggingObserver itself
+	BOT_ADD_TO_MONITORING(7400), // Used by the LoggingObserver itself
 
 	// To be used by the service developer
 	SERVICE_MESSAGE(7500),
