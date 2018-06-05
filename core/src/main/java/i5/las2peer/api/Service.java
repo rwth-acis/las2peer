@@ -18,12 +18,6 @@ import i5.las2peer.api.security.ServiceAgent;
 public abstract class Service extends Configurable {
 
 	/**
-	 * Used to determine, if this service should be monitored. Can be overwritten by service configuration file.
-	 * Deactivated per default.
-	 */
-	private boolean monitor = false;
-
-	/**
 	 * The service agent responsible for this service.
 	 */
 	private ServiceAgent agent = null;
@@ -77,12 +71,15 @@ public abstract class Service extends Configurable {
 	/**
 	 * Indicates whether monitoring is enabled for this service.
 	 * 
-	 * For self-deploying services, this will be always true since monitoring is set up on node level.
-	 * 
 	 * @return True if this service should be monitored.
 	 */
 	public final boolean isMonitor() {
-		return isSelfDeployable() || monitor;
+		for (Annotation classAnnotation : this.getClass().getAnnotations()) {
+			if (classAnnotation instanceof DoNotMonitor) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**

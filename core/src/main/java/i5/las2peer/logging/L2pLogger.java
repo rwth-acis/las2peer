@@ -144,9 +144,12 @@ public final class L2pLogger extends Logger implements NodeObserver {
 			// timestamp
 			sb.append(logger.dateFormat.format(new Date(record.getMillis()))).append(" ");
 			// level
-			sb.append(record.getLevel().getName()).append(" ");
-			// class and method name
-			sb.append(record.getSourceClassName());
+			sb.append(record.getLevel().getName());
+			// sourceClassName replaced by loggerName, as source class is 
+			// always L2pLogger itself
+			// final String loggerName = record.getSourceClassName();
+			final String loggerName = record.getLoggerName();
+			sb.append(" ").append(loggerName);
 			if (logger.getLevel().intValue() >= Level.FINER.intValue()) { // print the method name, too
 				sb.append("#").append(record.getSourceMethodName());
 			}
@@ -380,7 +383,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	}
 
 	/**
-	 * @deprecated Use {@link #log(MonitoringEvent, String)}
+	 * @deprecated Use {@link i5.las2peer.api.Context#monitorEvent(MonitoringEvent, String)}
 	 * 
 	 *             Writes a log message. The given event can be used to differentiate between different log messages.
 	 *
@@ -393,7 +396,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	}
 
 	/**
-	 * @deprecated Use {@link #log(MonitoringEvent, String, String, String)}
+	 * @deprecated Use {@link i5.las2peer.api.Context#monitorEvent(Object, MonitoringEvent, String, boolean)}
 	 * 
 	 *             Writes a log message. The given event can be used to differentiate between different log messages.
 	 *
@@ -407,7 +410,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	}
 
 	/**
-	 * @deprecated Use {@link #log(MonitoringEvent, String, String, String)}
+	 * @deprecated Use {@link i5.las2peer.api.Context#monitorEvent(Object, MonitoringEvent, String)}
 	 * 
 	 *             Logs a message to the l2p system using the observers.
 	 *
@@ -425,7 +428,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	}
 
 	/**
-	 * @deprecated Use {@link #log(MonitoringEvent, String, String, String)}
+	 * @deprecated Use {@link i5.las2peer.api.Context#monitorEvent(Object, MonitoringEvent, String, boolean)}
 	 * 
 	 *             Writes a log message. The given event can be used to differentiate between different log messages.
 	 *             The serviceAgent and actingUser can be set to {@code null} if not known. Then this message will not
@@ -445,7 +448,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	}
 
 	/**
-	 * @deprecated Use {@link #log(MonitoringEvent, String, String, String)}
+	 * @deprecated Use {@link i5.las2peer.api.Context#monitorEvent(Object, MonitoringEvent, String, boolean)}
 	 * 
 	 *             Writes a log message. The given event can be used to differentiate between different log messages.
 	 *             The serviceAgent and actingUser can be set to {@code null} if not known. Then this message will not
@@ -509,7 +512,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	@Override
 	public void log(Long timestamp, MonitoringEvent event, String sourceNode, String sourceAgentId,
 			String destinationNode, String destinationAgentId, String remarks) {
-		StringBuilder logLine = new StringBuilder(DEFAULT_DATE_FORMAT.format(new Date(timestamp)) + "\t");
+		StringBuilder logLine = new StringBuilder();
 		logLine.append(event + " (" + event.getCode() + ")\t");
 		logLine.append(appendPart(sourceNode));
 		logLine.append(appendPart(sourceAgentId));
@@ -582,10 +585,6 @@ public final class L2pLogger extends Logger implements NodeObserver {
 		L2pLogger result;
 		try {
 			result = new L2pLogger(name, null);
-			if (!LogManager.getLogManager().addLogger(result)) {
-				// the log manager already has a logger with that name
-				result = (L2pLogger) LogManager.getLogManager().getLogger(name);
-			}
 		} catch (IllegalArgumentException e) {
 			// a logger with that name is already registered
 			result = (L2pLogger) LogManager.getLogManager().getLogger(name);
