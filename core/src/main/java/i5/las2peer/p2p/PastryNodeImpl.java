@@ -44,6 +44,7 @@ import i5.las2peer.persistency.StorageStoreResultHandler;
 import i5.las2peer.security.AgentContext;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.AnonymousAgentImpl;
+import i5.las2peer.security.BotAgent;
 import i5.las2peer.security.MessageReceiver;
 import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.serialization.MalformedXMLException;
@@ -545,6 +546,12 @@ public class PastryNodeImpl extends Node {
 					getUserManager().registerUserAgent((UserAgentImpl) agent);
 				} catch (AgentAlreadyExistsException e) {
 					logger.log(Level.FINE, "Could not register user agent", e);
+				}
+			} else if (agent instanceof BotAgent) {
+				try {
+					getUserManager().registerUserAgent((BotAgent) agent);
+				} catch (AgentAlreadyExistsException e) {
+					logger.log(Level.FINE, "Could not register bot agent", e);
 				}
 			}
 			observerNotice(MonitoringEvent.AGENT_UPLOAD_SUCCESS, pastryNode, agent, "");

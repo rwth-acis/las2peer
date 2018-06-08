@@ -53,6 +53,7 @@ import i5.las2peer.persistency.NodeStorageInterface;
 import i5.las2peer.security.AgentContext;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.AgentStorage;
+import i5.las2peer.security.BotAgent;
 import i5.las2peer.security.GroupAgentImpl;
 import i5.las2peer.security.InternalSecurityException;
 import i5.las2peer.security.Mediator;
@@ -316,7 +317,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 */
 	public void setServiceMonitoring(ServiceAgentImpl service) {
 		observerNotice(MonitoringEvent.SERVICE_ADD_TO_MONITORING, this.getNodeId(), service.getIdentifier(), null, null,
-				service.getServiceNameVersion().toString());
+				"{\"serviceName\":\"" + service.getServiceNameVersion().toString() + "\",\"serviceAlias\":\""
+						+ service.getServiceInstance().getAlias() + "\"}");
 	}
 
 	/**
@@ -635,6 +637,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 				observerNotice(MonitoringEvent.AGENT_REGISTERED, this.getNodeId(), agent, "GroupAgent");
 			} else if (agent instanceof MonitoringAgent) {
 				observerNotice(MonitoringEvent.AGENT_REGISTERED, this.getNodeId(), agent, "MonitoringAgent");
+			} else if (agent instanceof BotAgent) {
+				observerNotice(MonitoringEvent.AGENT_REGISTERED, this.getNodeId(), agent, "BotAgent");
 			}
 		} else if (receiver instanceof Mediator) {
 			// ok, we have a mediator
