@@ -93,7 +93,7 @@ public class ClassManager {
 			return;
 		}
 
-		// get loaded libraray from repository
+		// get loaded library from repository
 		LoadedLibrary lib = null;
 		for (int i = 0; i < repositories.size() && lib == null; i++) {
 			try {
