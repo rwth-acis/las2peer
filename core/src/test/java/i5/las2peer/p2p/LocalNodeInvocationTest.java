@@ -140,7 +140,6 @@ public class LocalNodeInvocationTest {
 			serviceNode1.storeAgent(eve);
 			serviceNode1.launch();
 			serviceNode2.launch();
-
 			serviceNode1.startService(
 					ServiceNameVersion.fromString("i5.las2peer.testServices.testPackage2.UsingService@1.0"), "a pass");
 
