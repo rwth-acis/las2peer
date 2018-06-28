@@ -99,7 +99,6 @@ public class WebConnectorServiceInfoTest {
 		try {
 			c.setLogin(testAgent.getIdentifier(), testPass);
 			ClientResponse result = c.sendRequest("GET", "version/test", "");
-			System.out.println("response "+result.getResponse());
 			Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getHttpCode());
 			assertTrue(result.getResponse().trim().startsWith("2"));
 		} catch (Exception e) {
@@ -110,7 +109,6 @@ public class WebConnectorServiceInfoTest {
 		try {
 			c.setLogin(testAgent.getIdentifier(), testPass);
 			ClientResponse result = c.sendRequest("GET", "version/v1/test", "");
-			System.out.println("response "+result.getResponse());
 			Assert.assertEquals(HttpURLConnection.HTTP_OK, result.getHttpCode());
 			assertTrue(result.getResponse().trim().equals("1"));
 		} catch (Exception e) {
@@ -138,7 +136,6 @@ public class WebConnectorServiceInfoTest {
 		} catch (Exception e) {
 			fail(e.getMessage());
 		}
-
 	}
 
 }

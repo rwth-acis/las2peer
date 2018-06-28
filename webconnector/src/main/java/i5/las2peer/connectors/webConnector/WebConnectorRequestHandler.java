@@ -179,63 +179,29 @@ public class WebConnectorRequestHandler {
 			UriInfo uriInfo, InputStream requestBody, MultivaluedMap<String, String> requestHeaders)
 			throws URISyntaxException {
 		String requestPath = "/" + String.join("/", pathSplit);
-
-		String serviceName = null;
-		int serviceAliasLength = 0;
-
-		// get service version
-		ServiceVersion serviceVersion = new ServiceVersion("*");
-		boolean versionSpecified = false; // is specified in path
-//		if (pathSplit.size() > serviceAliasLength && pathSplit.get(serviceAliasLength).startsWith("v")) {
-//			try {
-//				serviceVersion = new ServiceVersion(pathSplit.get(serviceAliasLength).substring(1));
-//				versionSpecified = true;
-//			} catch (IllegalArgumentException e) {
-//				serviceVersion = new ServiceVersion("*");
-//			}
-//		} else {
-//			serviceVersion = new ServiceVersion("*");
-//		}
-
-		// resolve service name and get version
+		// resolve service name
+		String serviceName;
+		int serviceAliasLength;
 		try {
-			List<AliasResolveResponse> responses = l2pNode.getServiceAliasManager().resolvePathToServiceNames(requestPath);
-			for (AliasResolveResponse response:responses) {
-				String foundName = response.getServiceNameVersion();
-				ServiceVersion foundVersion = ServiceNameVersion.fromString(foundName).getVersion();
-				int foundServiceAliasLength = response.getNumMatchedParts();
-				ServiceVersion serviceVersionTrial;
-				String versionTrialFromPath = foundServiceAliasLength >= pathSplit.size() ? 
-						"noversion" : pathSplit.get(foundServiceAliasLength);
-				
-				if (versionTrialFromPath.matches("^v\\d+(\\.\\d+)*(-\\d+)?$")) {
-					try {
-						serviceVersionTrial = new ServiceVersion(pathSplit.get(foundServiceAliasLength).substring(1));
-						versionSpecified = true;
-					} catch (IllegalArgumentException e) {
-						serviceVersionTrial = new ServiceVersion("*");
-					}
-				} else {
-					serviceVersionTrial = new ServiceVersion("*");
-				}
-				if (foundVersion.fits(serviceVersionTrial)) {
-					serviceName = foundName.split("@")[0];
-					serviceAliasLength = foundServiceAliasLength;
-					serviceVersion = serviceVersionTrial;
-					if (!versionSpecified) {
-						// Only immediately break if service version was specified
-						// Otherwise the last one found will be the most recent matching version
-						break;
-					}
-				}
-			}
-			if (serviceName == null) {
-				throw new AliasNotFoundException("Could not resolve " + requestPath + " to a service name.");
-			}
+			AliasResolveResponse response = l2pNode.getServiceAliasManager().resolvePathToServiceName(requestPath);
+			serviceName = response.getServiceName();
+			serviceAliasLength = response.getNumMatchedParts();
 		} catch (AliasNotFoundException e1) {
 			throw new NotFoundException("Could not resolve " + requestPath + " to a service name.", e1);
 		}
-				
+		// get service version
+		ServiceVersion serviceVersion;
+		boolean versionSpecified = false;
+		if (pathSplit.size() > serviceAliasLength && pathSplit.get(serviceAliasLength).startsWith("v")) {
+			try {
+				serviceVersion = new ServiceVersion(pathSplit.get(serviceAliasLength).substring(1));
+				versionSpecified = true;
+			} catch (IllegalArgumentException e) {
+				serviceVersion = new ServiceVersion("*");
+			}
+		} else {
+			serviceVersion = new ServiceVersion("*");
+		}
 		// required service
 		ServiceNameVersion requiredService = new ServiceNameVersion(serviceName, serviceVersion);
 		// construct base path

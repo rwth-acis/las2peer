@@ -2,7 +2,6 @@ package i5.las2peer.p2p;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
 import i5.las2peer.api.persistency.EnvelopeException;
@@ -22,21 +21,20 @@ public class ServiceAliasManager {
 
 	private static final String PREFIX = "SERVICE_ALIAS-";
 	private static final int MAX_PATH_LEVEL = 10;
-	private static final int MAX_VERSIONS = 20;
 	private static final String SEPERATOR = "/";
 	private static final String BLANK = "BLANK";
 
 	public class AliasResolveResponse {
-		String serviceNameVersion;
+		String serviceName;
 		int numMatchedParts;
 
-		public AliasResolveResponse(String serviceNameVersion, int numMatchedParts) {
-			this.serviceNameVersion = serviceNameVersion;
+		public AliasResolveResponse(String serviceName, int numMatchedParts) {
+			this.serviceName = serviceName;
 			this.numMatchedParts = numMatchedParts;
 		}
 
-		public String getServiceNameVersion() {
-			return this.serviceNameVersion;
+		public String getServiceName() {
+			return this.serviceName;
 		}
 
 		public int getNumMatchedParts() {
@@ -70,7 +68,7 @@ public class ServiceAliasManager {
 			return;
 		}
 
-		String serviceName = agent.getServiceNameVersion().getNameVersion();
+		String serviceName = agent.getServiceNameVersion().getName();
 
 		// preprocess path
 		List<String> split = splitPath(alias);
@@ -79,26 +77,16 @@ public class ServiceAliasManager {
 			new AliasConflictException("Alias is too long.");
 		}
 
-		// loop over envelopes until empty slot or desired agent is found
-		int trial = 1;
-		String lookup = "";
-		while (trial <= MAX_VERSIONS) {
-			lookup = trial == 1 ? alias : alias + "-" + trial;
-			try {
-				String currentEntry = getEntry(lookup);
-				if (currentEntry.equals(serviceName)) {
-					// alias is already registered
-					return;
-				}
-			} catch (EnvelopeException | CryptoException | AgentAccessDeniedException | SerializationException e) {
-				// alias can be registered
-				break;
+		// check for conflicts
+		try {
+			String currentEntry = getEntry(alias);
+			if (!currentEntry.equals(serviceName)) { // if service name is not the same, it's an error
+				throw new AliasConflictException("Alias has already been taken.");
+			} else {
+				return; // otherwise we're done
 			}
-			trial ++;
-		}
-		
-		if (trial == MAX_VERSIONS + 1) {
-			throw new AliasConflictException("Maximum number of concurrent versions (" + trial + ") reached.");
+		} catch (EnvelopeException | CryptoException | AgentAccessDeniedException | SerializationException e) {
+			// alias can be registered
 		}
 
 		// register prefixes as BLANK
@@ -135,23 +123,22 @@ public class ServiceAliasManager {
 
 		// register alias
 		try {
-			createEntry(agent, lookup, serviceName);
+			createEntry(agent, alias, serviceName);
 		} catch (IllegalArgumentException | EnvelopeException | SerializationException | CryptoException e) {
 			throw new AliasConflictException("Storage error.", e);
 		}
 	}
 
 	/**
-	 * Resolves a path to multiple service aliases.
+	 * Resolves a path to a service alias.
 	 * 
 	 * @param path the path
 	 * @return the service name
 	 * @throws AliasNotFoundException if the path cannot be resolves to a service name
 	 */
-	public List<AliasResolveResponse> resolvePathToServiceNames(String path) throws AliasNotFoundException {
+	public AliasResolveResponse resolvePathToServiceName(String path) throws AliasNotFoundException {
 		List<String> split = splitPath(path);
-		LinkedList<AliasResolveResponse> result = new LinkedList<AliasResolveResponse>();
-		
+
 		int level = 0;
 		String currentKey = null;
 		while (level < split.size() && level < MAX_PATH_LEVEL) {
@@ -162,31 +149,28 @@ public class ServiceAliasManager {
 				currentKey += SEPERATOR + split.get(level);
 			}
 
-			// loop over envelopes until empty slot or desired agent is found
-			int trial = 1;
-			String lookup = "";
-			while (trial <= MAX_VERSIONS) {
-				lookup = trial == 1 ? currentKey : currentKey + "-" + trial;
-				try {
-					String currentEntry = getEntry(lookup);
-					if (!currentEntry.equals(BLANK)) {
-						result.add(new AliasResolveResponse(currentEntry, level+1));						
-					} else {
-						break;
-					}
-				} catch (EnvelopeException | CryptoException | AgentAccessDeniedException | SerializationException e) {
-					break;
-				}
-				trial ++;
+			String currentEntry = null;
+			try {
+				currentEntry = getEntry(currentKey);
+			} catch (EnvelopeException | CryptoException | AgentAccessDeniedException | SerializationException e) {
+				throw new AliasNotFoundException("Path does not exist.", e);
 			}
-			
+
+			if (!currentEntry.equals(BLANK)) {
+				return new AliasResolveResponse(currentEntry, level + 1);
+			}
+
 			// in the case of BLANK go one level deeper
 			level++;
 		}
-		
-		return result;
+
+		if (level == MAX_PATH_LEVEL) {
+			throw new AliasNotFoundException("Given path is too long.");
+		}
+
+		throw new AliasNotFoundException("Given path does not fit any alias.");
 	}
-	
+
 	private List<String> splitPath(String path) {
 		path = path.toLowerCase().trim();
 
@@ -201,23 +185,6 @@ public class ServiceAliasManager {
 		EnvelopeVersion env = node.fetchEnvelope(PREFIX + key);
 		String content = (String) env.getContent();
 		return content;
-	}
-	
-	/**
-	 * Only use this for testing purposes!
-	 * 
-	 * @param agent
-	 * @param key
-	 * @param value
-	 * @throws IllegalArgumentException
-	 * @throws EnvelopeException
-	 * @throws SerializationException
-	 * @throws CryptoException
-	 */
-	@Deprecated
-	public void createEntryForTest(AgentImpl agent, String key, String value) throws IllegalArgumentException, 
-			EnvelopeException, SerializationException, CryptoException {
-		this.createEntry(agent, key, value);
 	}
 
 	private void createEntry(AgentImpl agent, String key, String value) throws EnvelopeException,

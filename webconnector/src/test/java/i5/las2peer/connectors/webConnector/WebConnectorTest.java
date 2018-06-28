@@ -460,8 +460,6 @@ public class WebConnectorTest {
 			Assert.assertEquals(200, result.getHttpCode());
 			Assert.assertTrue(result.getResponse().trim().endsWith("deep/path/"));
 
-			System.out.println("________________________________________");
-			
 			result = c.sendRequest("GET", "deep/path/v1/test", "");
 			Assert.assertEquals(200, result.getHttpCode());
 			Assert.assertTrue(result.getResponse().trim().endsWith("deep/path/v1/"));
