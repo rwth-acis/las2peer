@@ -52,7 +52,7 @@ public class MonitoringObserver implements NodeObserver {
 	 */
 	public MonitoringObserver(int messageCache, Node registeredAt) {
 		this.registeredAt = registeredAt;
-		waitUntilSend = 1000 * 30 * 5; // 5 min
+		waitUntilSend = 1000 * 10; // 10 s
 		Thread sendingThread = new Thread() {
 			public void run() {
 				try {
@@ -161,28 +161,22 @@ public class MonitoringObserver implements NodeObserver {
 		if (sourceNode == null) {
 			return; // We do not log events without a source node into a database with different sources;-)
 		}
-		
+
 		/*
 		 * Temporary fix to exclude the very frequent messages from monitoring
 		 * in order to not spam too much into the monitoring db.
 		 */
-		if (event == MonitoringEvent.ARTIFACT_FETCH_STARTED 
-				|| event == MonitoringEvent.ARTIFACT_RECEIVED
-				|| event == MonitoringEvent.AGENT_GET_STARTED 
-				|| event == MonitoringEvent.AGENT_GET_SUCCESS
-				|| event == MonitoringEvent.MESSAGE_SENDING 
-				|| event == MonitoringEvent.ARTIFACT_FETCH_FAILED
-				|| event == MonitoringEvent.MESSAGE_RECEIVED_ANSWER 
-				|| event == MonitoringEvent.MESSAGE_FORWARDING
+		if (event == MonitoringEvent.ARTIFACT_FETCH_STARTED || event == MonitoringEvent.ARTIFACT_RECEIVED
+				|| event == MonitoringEvent.AGENT_GET_STARTED || event == MonitoringEvent.AGENT_GET_SUCCESS
+				|| event == MonitoringEvent.MESSAGE_SENDING || event == MonitoringEvent.ARTIFACT_FETCH_FAILED
+				|| event == MonitoringEvent.MESSAGE_RECEIVED_ANSWER || event == MonitoringEvent.MESSAGE_FORWARDING
 				|| event == MonitoringEvent.MESSAGE_RECEIVED) {
 			return;
 		}
-		
-		monitoringMessages[messagesCount++] = new MonitoringMessage(
-				timestamp, event, sourceNode, sourceAgentId, destinationNode,
-				destinationAgentId, remarks);
-		
-		
+
+		monitoringMessages[messagesCount++] = new MonitoringMessage(timestamp, event, sourceNode, sourceAgentId,
+				destinationNode, destinationAgentId, remarks);
+
 		if (readyToSend()) {
 			if (initializedDone) {
 				messagesCount = 0;
@@ -212,8 +206,8 @@ public class MonitoringObserver implements NodeObserver {
 	}
 
 	/**
-	 * Checks whether the queue is ready to be flushed, either due to reaching
-	 * the limit or because enough time has passed
+	 * Checks whether the queue is ready to be flushed, either due to reaching the limit or because enough time has
+	 * passed
 	 * 
 	 * @return true is ready to flush
 	 */
@@ -229,7 +223,7 @@ public class MonitoringObserver implements NodeObserver {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
 
