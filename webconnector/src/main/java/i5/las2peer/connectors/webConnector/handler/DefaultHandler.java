@@ -33,6 +33,7 @@ import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.L2pNodeLauncher;
+import i5.las2peer.registryGateway.EthereumException;
 import i5.las2peer.registryGateway.Registry;
 
 import net.minidev.json.JSONArray;
@@ -45,10 +46,12 @@ public class DefaultHandler {
 
 	private final WebConnector connector;
 	private final Node node;
+	private final Registry registry;
 
 	public DefaultHandler(WebConnector connector) {
 		this.connector = connector;
 		this.node = connector.getL2pNode();
+		this.registry = new Registry();
 	}
 
 	@GET
@@ -60,9 +63,18 @@ public class DefaultHandler {
 	@Path("/eth/clientversion")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String getEthClientVersion() {
-		Registry r = new Registry();
-		String s = r.foo();
-		return s;
+		try {
+			return registry.getEthClientVersion();
+		} catch (EthereumException e) {
+			return "[failed to determine version]";
+		}
+	}
+
+	@GET
+	@Path("/eth/debug")
+	@Produces(MediaType.TEXT_PLAIN)
+	public String getEthDebug() {
+		return registry.debug();
 	}
 
 	@GET
