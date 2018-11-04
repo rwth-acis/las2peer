@@ -53,7 +53,7 @@
 
     <!-- Download Dependencies (IVY) -->
 
-    <target name="download-ivy" unless="skip.download">
+    <target name="download-ivy" unless="${skip.download-ivy}">
         <echo message="installing ivy..."/>
         <get src="https://repo1.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar"
             dest="${ivy.jar.file}" usetimestamp="true"/>
@@ -66,7 +66,7 @@
         <taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" classpathref="ivy.lib.path"/>
     </target>
 
-    <target name="get_deps" depends="install-ivy" description="--> resolve dependencies">
+    <target name="get_deps" depends="install-ivy" description="--> resolve dependencies" unless="${skip.get_deps}">
         <ivy:retrieve type="jar, bundle" conf="*" pattern="${lib.dir}/[artifact]-[revision].[ext]" />
     </target>
 
