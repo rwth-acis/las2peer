@@ -33,6 +33,8 @@ import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.L2pNodeLauncher;
+import i5.las2peer.registryGateway.Registry;
+
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 
@@ -52,6 +54,15 @@ public class DefaultHandler {
 	@GET
 	public Response rootPath() throws URISyntaxException {
 		return Response.temporaryRedirect(new URI(WebappHandler.DEFAULT_ROUTE)).build();
+	}
+
+	@GET
+	@Path("/eth/clientversion")
+	@Produces(MediaType.TEXT_PLAIN)
+	public String getEthClientVersion() {
+		Registry r = new Registry();
+		String s = r.foo();
+		return s;
 	}
 
 	@GET
@@ -101,6 +112,7 @@ public class DefaultHandler {
 		response.put("uptime", getUptime(node));
 		response.put("localServices", getLocalServices(node, uriInfo.getRequestUri()));
 		response.put("otherNodes", getOtherNodes(node));
+		response.put("ethClientVersion", getEthClientVersion());
 		return response.toJSONString();
 	}
 

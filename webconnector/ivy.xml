@@ -12,6 +12,7 @@
         <dependency org="junit" name="junit" rev="4.12" conf="test->*" />
 
         <dependency org="i5" name="las2peer-rest-mapper" rev="${ivy.las2peer.version}" changing="true" />
+        <dependency org="i5" name="las2peer-registry-gateway" rev="${ivy.las2peer.version}" changing="true" />
 
         <dependency org="com.nimbusds" name="oauth2-oidc-sdk" rev="4.17" />
         <dependency org="org.glassfish.jersey.containers" name="jersey-container-jdk-http" rev="2.25.1" />
