@@ -1,6 +1,7 @@
 package i5.las2peer.registryGateway;
 
 import i5.las2peer.registryGateway.contracts.CommunityTagIndex;
+import i5.las2peer.registryGateway.contracts.ServiceRegistry;
 import i5.las2peer.registryGateway.contracts.UserRegistry;
 
 import i5.las2peer.logging.L2pLogger;
@@ -53,6 +54,7 @@ public class Registry {
 
 	private CommunityTagIndex communityTagIndex;
 	private UserRegistry userRegistry;
+	private ServiceRegistry serviceRegistry;
 
 	/**
 	 * Connect to Ethereum node, initialize contracts, and start
@@ -74,6 +76,7 @@ public class Registry {
 	private void initContracts() {
 		this.communityTagIndex = CommunityTagIndex.load(COMMUNITY_TAG_INDEX_ADDRESS, web3j, credentials, GAS_PRICE, GAS_LIMIT);
 		this.userRegistry = UserRegistry.load(USER_REGISTRY_ADDRESS, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+		this.serviceRegistry = ServiceRegistry.load(SERVICE_REGISTRY_ADDRESS, web3j, credentials, GAS_PRICE, GAS_LIMIT);
 	}
 
 	/**
@@ -159,13 +162,29 @@ public class Registry {
 		}
 	}
 
+	private void registerService(String serviceName, String authorName) throws EthereumException {
+		try {
+			this.serviceRegistry.register(Util.padAndConvertString(serviceName, 32), Util.padAndConvertString(authorName, 32)).send();
+		} catch (Exception e) {
+			throw new EthereumException("Failed to register service", e);
+		}
+	}
+
+	private String getServiceAuthor(String serviceName) throws EthereumException {
+		try {
+			byte[] author = this.serviceRegistry.serviceNameToAuthor(Util.padAndConvertString(serviceName, 32)).send();
+			return Util.recoverString(author);
+		} catch (Exception e) {
+			throw new EthereumException("Failed look up service author", e);
+		}
+	}
+
 	/**
 	 * Output some (changing) debug info.
 	 */
 	public String debug() {
 		try {
-			//this.userRegistry.register(Util.padAndConvertString("alice", 32), Util.padAndConvertString("some-agent-id", 32)).send();
-			return getUser("alice").toString();
+			return getServiceAuthor("someService");
 		} catch (Exception e) {
 			return "error: " + e;
 		}
