@@ -39,4 +39,9 @@ public class Util {
 		byte[] trimmed = trimLeadingZeroes(byteArray);
 		return new String(trimmed, StandardCharsets.UTF_8);
 	}
+
+	public static String recoverString(byte[] byteArray) {
+		byte[] trimmed = trimLeadingZeroes(byteArray);
+		return new String(trimmed, StandardCharsets.UTF_8);
+	}
 }

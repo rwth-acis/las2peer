@@ -1,6 +1,7 @@
 package i5.las2peer.registryGateway;
 
 import i5.las2peer.registryGateway.contracts.CommunityTagIndex;
+import i5.las2peer.registryGateway.contracts.UserRegistry;
 
 import i5.las2peer.logging.L2pLogger;
 
@@ -42,12 +43,16 @@ public class Registry {
 	private static final String PRIVATE_KEY = "0x964d02d3f440a078af46dbc459fc2ac7674e715903fd9f20df737ce26f8bd368";
 
 	private static final String COMMUNITY_TAG_INDEX_ADDRESS = "0x48c7234741fa9910f9228bdc247a92852d531bcd";
+	private static final String USER_REGISTRY_ADDRESS = "0x213a9432a55a6fe0129f238bed7119a7a2b75b94";
+	private static final String SERVICE_REGISTRY_ADDRESS = "0xdd934d1dfb15be4f3e5a50199963ead449392bae";
+
 	private static final String COMMUNITY_TAG_CREATE_EVENT_NAME = "CommunityTagCreated";
 
 	private Web3j web3j;
 	private Credentials credentials;
 
 	private CommunityTagIndex communityTagIndex;
+	private UserRegistry userRegistry;
 
 	/**
 	 * Connect to Ethereum node, initialize contracts, and start
@@ -68,6 +73,7 @@ public class Registry {
 
 	private void initContracts() {
 		this.communityTagIndex = CommunityTagIndex.load(COMMUNITY_TAG_INDEX_ADDRESS, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+		this.userRegistry = UserRegistry.load(USER_REGISTRY_ADDRESS, web3j, credentials, GAS_PRICE, GAS_LIMIT);
 	}
 
 	/**
@@ -144,7 +150,24 @@ public class Registry {
 		});
 	}
 
+	private UserData getUser(String name) throws EthereumException {
+		try {
+			Tuple4<byte[], byte[], String, byte[]> t = this.userRegistry.users(Util.padAndConvertString(name, 32)).send();
+			return new UserData(t.getValue1(), t.getValue2(), t.getValue3(), t.getValue4());
+		} catch (Exception e) {
+			throw new EthereumException("Could not get user", e);
+		}
+	}
+
+	/**
+	 * Output some (changing) debug info.
+	 */
 	public String debug() {
-		return "noop";
+		try {
+			//this.userRegistry.register(Util.padAndConvertString("alice", 32), Util.padAndConvertString("some-agent-id", 32)).send();
+			return getUser("alice").toString();
+		} catch (Exception e) {
+			return "error: " + e;
+		}
 	}
 }
