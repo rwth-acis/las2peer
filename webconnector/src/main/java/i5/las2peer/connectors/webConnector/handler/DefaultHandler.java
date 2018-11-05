@@ -7,6 +7,7 @@ import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
+import java.util.Map;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.InternalServerErrorException;
@@ -75,6 +76,17 @@ public class DefaultHandler {
 	@Produces(MediaType.TEXT_PLAIN)
 	public String getEthDebug() {
 		return registry.debug();
+	}
+
+	@GET
+	@Path("/registry/tags")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String getTags() {
+		JSONObject jsonObject = new JSONObject();
+		for (Map.Entry<String, String> tag: registry.tags.entrySet()) {
+			jsonObject.put(tag.getKey(), tag.getValue());
+		}
+		return jsonObject.toJSONString();
 	}
 
 	@GET
