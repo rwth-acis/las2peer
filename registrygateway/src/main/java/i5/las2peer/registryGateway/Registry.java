@@ -17,6 +17,7 @@ import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.response.Web3ClientVersion;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tuples.generated.Tuple4;
+import org.web3j.tuples.generated.Tuple5;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -179,12 +180,36 @@ public class Registry {
 		}
 	}
 
+	private void releaseService(String serviceName, String authorName, int versionMajor, int versionMinor, int versionPatch) throws EthereumException {
+		try {
+			this.serviceRegistry.release(
+					Util.padAndConvertString(serviceName, 32),
+					Util.padAndConvertString(authorName, 32),
+					BigInteger.valueOf(versionMajor), BigInteger.valueOf(versionMinor), BigInteger.valueOf(versionPatch)).send();
+		} catch (Exception e) {
+			throw new EthereumException("Failed to submit service release", e);
+		}
+	}
+
+	private ServiceReleaseData getServiceRelease(String serviceName, int index) throws EthereumException {
+		// TODO: index should not be a thing!
+		try {
+			Tuple5<byte[], BigInteger, BigInteger, BigInteger, byte[]> t = this.serviceRegistry.serviceNameToReleases(
+					Util.padAndConvertString(serviceName, 32),
+					BigInteger.valueOf(index)).send();
+			return new ServiceReleaseData(t.getValue1(), t.getValue2(), t.getValue3(), t.getValue4(), t.getValue5());
+		} catch (Exception e) {
+			throw new EthereumException("Failed to look up service release", e);
+		}
+	}
+
 	/**
 	 * Output some (changing) debug info.
 	 */
 	public String debug() {
 		try {
-			return getServiceAuthor("someService");
+			this.releaseService("someService","alice", 0, 0, 2);
+			return getServiceRelease("someService", 1).toString();
 		} catch (Exception e) {
 			return "error: " + e;
 		}
