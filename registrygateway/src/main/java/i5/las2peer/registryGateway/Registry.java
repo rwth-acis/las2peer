@@ -5,16 +5,14 @@ import i5.las2peer.registryGateway.contracts.CommunityTagIndex;
 import i5.las2peer.logging.L2pLogger;
 
 import org.web3j.abi.EventEncoder;
-import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
+import org.web3j.abi.datatypes.BytesType;
 import org.web3j.abi.datatypes.Event;
-import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.generated.Bytes32;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.request.EthFilter;
-import org.web3j.protocol.core.methods.response.Log;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.core.methods.response.Web3ClientVersion;
 import org.web3j.protocol.http.HttpService;
@@ -23,7 +21,8 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.List;
+
+import static org.web3j.utils.Numeric.hexStringToByteArray;
 
 public class Registry {
 	private final L2pLogger logger = L2pLogger.getInstance(Registry.class);
@@ -47,6 +46,10 @@ public class Registry {
 	public Registry() {
 		this.web3j = Web3j.build(new HttpService(ENDPOINT));
 		this.credentials = Credentials.create(PRIVATE_KEY);
+
+		// DEBUG
+		this.eventDebug();
+		logger.info("filtering ...");
 	}
 
 	public String getEthClientVersion() throws EthereumException {
@@ -63,28 +66,7 @@ public class Registry {
 
 		try {
 			byte[] tagName = Util.padAndConvertString(tag, 32);
-			TransactionReceipt transactionReceipt = communityTagIndex.create(tagName, "Lorem ipsum dolor sit amet").send();
-
-			Event event = new Event("CommunityTagCreated", Arrays.<TypeReference<?>>asList(new TypeReference<Bytes32>() {}));
-			logger.info("created tag, processing receipt:");
-			List<Log> logs = transactionReceipt.getLogs();
-			for (Log log : logs) {
-				logger.info("next log:");
-
-				List<String> topics = log.getTopics();
-				for (String topic : topics) {
-					logger.info("next topic: " + topic);
-				}
-
-				String data = log.getData();
-				logger.info("data: " + data);
-				List<Type> results = FunctionReturnDecoder.decode(data, event.getNonIndexedParameters());
-				for (Type entry : results) {
-					logger.info("data entry: " + entry);
-					logger.info("attempting decode: " + new String(((Bytes32) entry).getValue(), StandardCharsets.UTF_8));
-				}
-			}
-
+			communityTagIndex.create(tagName, "Lorem ipsum dolor sit amet").send();
 			return communityTagIndex.viewDescription(tagName).send();
 		} catch (Exception e) {
 			throw new EthereumException(e);
@@ -92,33 +74,26 @@ public class Registry {
 	}
 
 	public void eventDebug() {
-		EthFilter filter = new EthFilter(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST, COMMUNITY_TAG_INDEX_ADDRESS);
+		EthFilter filter = new EthFilter(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST, COMMUNITY_TAG_INDEX_ADDRESS.substring(2));
 
 		Event event = new Event("CommunityTagCreated", Arrays.<TypeReference<?>>asList(new TypeReference<Bytes32>() {}));
 		String topicData = EventEncoder.encode(event);
 		filter.addSingleTopic(topicData);
 		logger.info(topicData);
 
-		// FIXME: even though the Event signature seems to match the actual
-		// logged events (e.g. triggered by tagDebug), the subscription does
-		// not trigger
-
 		web3j.ethLogObservable(filter).subscribe(log -> {
-			logger.info("got one:");
-			logger.info(log.getBlockNumber().toString());
-			logger.info(log.getTransactionHash());
-			List<String> topics = log.getTopics();
-			for (String topic : topics) {
-				logger.info(topic);
-			}
+			logger.fine("got one: " + log);
+			String dataHexString = log.getData();
+			byte[] dataByteArray = hexStringToByteArray(dataHexString);
+			BytesType dataBytes = new BytesType(dataByteArray, "Bytes32");
+			String dataValue = new String(dataBytes.getValue(), StandardCharsets.UTF_8);
+			logger.info("attempting decode: " + dataValue);
 		});
 	}
 
 	public String debug() {
 		logger.info("attempting stuff ...");
 		try {
-			this.eventDebug();
-			logger.info("filtering ...");
 			this.tagDebug("foo" + System.currentTimeMillis());
 			this.tagDebug("bar" + System.currentTimeMillis());
 			this.tagDebug("spam" + System.currentTimeMillis());
