@@ -14,12 +14,20 @@ import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.response.Web3ClientVersion;
 import org.web3j.protocol.http.HttpService;
+import org.web3j.tuples.generated.Tuple4;
 
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
 
 public class Registry {
+	/**
+	 * Map of currently known tags and their descriptions.
+	 *
+	 * Do not change; it is continuously updated to reflect the current
+	 * known state of the blockchain. (With the expected delay of
+	 * blocks being mined and broadcast.)
+	 */
 	public Map<String, String> tags;
 
 	private final L2pLogger logger = L2pLogger.getInstance(Registry.class);
@@ -41,12 +49,16 @@ public class Registry {
 
 	private CommunityTagIndex communityTagIndex;
 
+	/**
+	 * Connect to Ethereum node, initialize contracts, and start
+	 * updating state to mirror the blockchain.
+	 */
 	public Registry() {
 		this.web3j = Web3j.build(new HttpService(ENDPOINT));
 		this.credentials = Credentials.create(PRIVATE_KEY);
 
 		this.initContracts();
-		this.tags = new HashMap<>();
+
 		try {
 			this.keepTagsUpToDate();
 		} catch (EthereumException e) {
@@ -58,6 +70,9 @@ public class Registry {
 		this.communityTagIndex = CommunityTagIndex.load(COMMUNITY_TAG_INDEX_ADDRESS, web3j, credentials, GAS_PRICE, GAS_LIMIT);
 	}
 
+	/**
+	 * Return version string of connected Ethereum client.
+	 */
 	public String getEthClientVersion() throws EthereumException {
 		try {
 			Web3ClientVersion web3ClientVersion = web3j.web3ClientVersion().send();
@@ -67,6 +82,12 @@ public class Registry {
 		}
 	}
 
+	/**
+	 * Create new tag on blockchain.
+	 * @param tagName String with <= 32 UTF-8 characters
+	 * @param tagDescription String of arbitrary (!?) length
+	 * @throws EthereumException if transaction failed for some reason (gas? networking?)
+	 */
 	public void createTag(String tagName, String tagDescription) throws EthereumException {
 		try {
 			communityTagIndex.create(Util.padAndConvertString(tagName, 32), tagDescription).send();
@@ -77,6 +98,9 @@ public class Registry {
 		}
 	}
 
+	/**
+	 * Read description string of tag from blockchain.
+	 */
 	private String getTagDescription(String tagName) throws EthereumException {
 		try {
 			return communityTagIndex.viewDescription(Util.padAndConvertString(tagName, 32)).send();
@@ -87,14 +111,26 @@ public class Registry {
 		}
 	}
 
+	/**
+	 * Create a blockchain observer that reacts to all (past and future)
+	 * tag creation events by putting them in the map.
+	 */
+	// it *may* be possible to simplify this a bit with the generated
+	// event observable methods, but I don't know how
+	// https://docs.web3j.io/smart_contracts.html#invoking-transactions-and-events
 	private void keepTagsUpToDate() throws EthereumException {
+		this.tags = new HashMap<>();
+
+		// create a filter "topic" based on event signature
 		List<TypeReference<?>> eventArguments = Arrays.asList(new TypeReference<Bytes32>() {});
 		Event event = new Event(COMMUNITY_TAG_CREATE_EVENT_NAME, eventArguments);
 		String topicData = EventEncoder.encode(event);
 
+		// apply filter to all blocks (from the very beginning to all future blocks)
 		EthFilter tagContractFilter = new EthFilter(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST, COMMUNITY_TAG_INDEX_ADDRESS.substring(2));
 		tagContractFilter.addSingleTopic(topicData);
 
+		// asynchronously put tags in the Map as soon as such a Tx is in a mined block
 		web3j.ethLogObservable(tagContractFilter).subscribe(logEntry -> {
 			String tagName = Util.recoverString(logEntry.getData());
 			try {
