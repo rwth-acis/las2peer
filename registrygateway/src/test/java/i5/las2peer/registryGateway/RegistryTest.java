@@ -12,9 +12,4 @@ public class RegistryTest {
     public void setup() {
         this.testee = new Registry();
     }
-
-    @Test
-    public void testSomething() {
-        assertTrue(false);
-    }
 }
