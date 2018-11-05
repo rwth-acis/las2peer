@@ -11,9 +11,8 @@
     <dependencies>
         <dependency org="junit" name="junit" rev="4.12" conf="test->*" />
 
-        <!--
         <dependency org="i5" name="las2peer" rev="${ivy.las2peer.version}" changing="true" />
-        -->
+
         <dependency org="ch.qos.logback" name="logback-core" rev="1.2.3">
             <artifact name="logback-core" type="jar"/>
         </dependency>
