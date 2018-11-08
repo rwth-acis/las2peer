@@ -7,6 +7,7 @@ import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.GET;
@@ -21,6 +22,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import i5.las2peer.registryGateway.BadEthereumCredentialsException;
+import i5.las2peer.registryGateway.ServiceReleaseData;
 import org.glassfish.jersey.media.multipart.ContentDisposition;
 
 import i5.las2peer.api.p2p.ServiceNameVersion;
@@ -88,8 +90,26 @@ public class DefaultHandler {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getRegisteredServices() {
 		JSONObject jsonObject = new JSONObject();
-		for (Map.Entry<String, String> tag: registry.serviceNameToAuthor.entrySet()) {
-			jsonObject.put(tag.getKey(), tag.getValue());
+		for (Map.Entry<String, String> service: registry.serviceNameToAuthor.entrySet()) {
+			jsonObject.put(service.getKey(), service.getValue());
+		}
+		return jsonObject.toJSONString();
+	}
+
+	@GET
+	@Path("/registry/service-releases")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String getServiceReleases() {
+		JSONObject jsonObject = new JSONObject();
+		for (Map.Entry<String, List<ServiceReleaseData>> service: registry.serviceReleases.entrySet()) {
+			JSONArray releaseList = new JSONArray();
+			for (ServiceReleaseData release : service.getValue()) {
+				JSONObject entry = new JSONObject();
+				entry.put("name", release.getServiceName());
+				entry.put("version", release.getVersion());
+				releaseList.add(entry);
+			}
+			jsonObject.put(service.getKey(), releaseList);
 		}
 		return jsonObject.toJSONString();
 	}

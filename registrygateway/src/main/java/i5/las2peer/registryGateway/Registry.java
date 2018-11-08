@@ -77,6 +77,7 @@ public class Registry extends Configurable {
 		try {
 			this.keepTagsUpToDate();
 			this.keepServiceIndexUpToDate();
+			this.keepServiceReleasesUpToDate();
 		} catch (EthereumException e) {
 			logger.severe("bad stuff happened FIXME");
 		}
@@ -174,6 +175,17 @@ public class Registry extends Configurable {
 			String serviceName = Util.recoverString(response.name);
 			String authorName = Util.recoverString(response.author);
 			this.serviceNameToAuthor.put(serviceName, authorName);
+		});
+	}
+
+	private void keepServiceReleasesUpToDate() throws EthereumException {
+		this.serviceReleases = new HashMap<>();
+
+		this.serviceRegistry.serviceReleasedEventObservable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST).subscribe(r -> {
+			ServiceRegistry.ServiceReleasedEventResponse response = r;
+			ServiceReleaseData release = new ServiceReleaseData(response.name, response.versionMajor, response.versionMinor, response.versionPatch, new byte[]{});
+			this.serviceReleases.computeIfAbsent(release.getServiceName(), k -> new ArrayList<>());
+			this.serviceReleases.get(release.getServiceName()).add(release);
 		});
 	}
 

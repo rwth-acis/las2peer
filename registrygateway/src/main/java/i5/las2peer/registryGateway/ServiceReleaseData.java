@@ -2,7 +2,7 @@ package i5.las2peer.registryGateway;
 
 import java.math.BigInteger;
 
-class ServiceReleaseData {
+public class ServiceReleaseData {
 	private byte[] serviceName;
 	private BigInteger versionMajor;
 	private BigInteger versionMinor;
