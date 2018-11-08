@@ -76,6 +76,7 @@ public class Registry extends Configurable {
 
 		try {
 			this.keepTagsUpToDate();
+			this.keepServiceIndexUpToDate();
 		} catch (EthereumException e) {
 			logger.severe("bad stuff happened FIXME");
 		}
@@ -193,6 +194,27 @@ public class Registry extends Configurable {
 				logger.severe("FIXME exception in lambda, oh no, good luck");
 			}
 		});
+	}
+
+	private void keepServiceIndexUpToDate() throws EthereumException {
+		List<TypeReference<?>> eventArguments = Arrays.asList(new TypeReference<Bytes32>() {}, new TypeReference<Bytes32>() {});
+		EthFilter serviceRegisteredEvent = createEventFilter(ServiceRegistry.SERVICECREATED_EVENT, serviceRegistryAddress);
+
+		this.serviceNameToAuthor = new HashMap<>();
+		web3j.ethLogObservable(serviceRegisteredEvent).subscribe(logEntry -> {
+			String serviceName = Util.recoverString(logEntry.getTopics().get(1));
+			String authorName = Util.recoverString(logEntry.getTopics().get(2));
+			this.serviceNameToAuthor.put(serviceName, authorName);
+		});
+	}
+
+	private void registerUser(String name, String agentId) throws EthereumException {
+		// TODO: more parameters
+		try {
+			this.userRegistry.register(Util.padAndConvertString(name, 32), Util.padAndConvertString(agentId, 32)).send();
+		} catch (Exception e) {
+			throw new EthereumException("Could not register user", e);
+		}
 	}
 
 	private UserData getUser(String name) throws EthereumException {
