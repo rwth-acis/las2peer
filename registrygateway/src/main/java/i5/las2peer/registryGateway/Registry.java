@@ -1,5 +1,6 @@
 package i5.las2peer.registryGateway;
 
+import i5.las2peer.api.Configurable;
 import i5.las2peer.registryGateway.contracts.CommunityTagIndex;
 import i5.las2peer.registryGateway.contracts.ServiceRegistry;
 import i5.las2peer.registryGateway.contracts.UserRegistry;
@@ -23,32 +24,30 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
 
-public class Registry {
+public class Registry extends Configurable {
 	/**
 	 * Map of currently known tags and their descriptions.
 	 *
-	 * Do not change; it is continuously updated to reflect the current
-	 * known state of the blockchain. (With the expected delay of
-	 * blocks being mined and broadcast.)
+	 * Do not change; it is continuously updated to reflect the current known state of the
+	 * blockchain. (With the expected delay of blocks being mined and broadcast.)
 	 */
 	public Map<String, String> tags;
 
-	private final L2pLogger logger = L2pLogger.getInstance(Registry.class);
+	public Map<String, String> serviceNameToAuthor;
+	public Map<String, List<ServiceReleaseData>> serviceReleases;
 
-	// TODO: put stuff in config file
-	private static final String ENDPOINT = "http://localhost:8545";
-	private static final BigInteger GAS_PRICE = BigInteger.valueOf(20_000_000_000L);
-	private static final BigInteger GAS_LIMIT = BigInteger.valueOf(6_721_975L);
+	private String endpoint;
+	private long gasPrice;
+	private long gasLimit;
 
-	// first account using mnemonic "differ employ cook sport clinic wedding melody column pave stuff oak price"
-	private static final String ACCOUNT = "0xee5e18b0963126cde89dd2b826f0acdb7e71acdb";
-	private static final String PRIVATE_KEY = "0x964d02d3f440a078af46dbc459fc2ac7674e715903fd9f20df737ce26f8bd368";
+	private String account;
+	private String privateKey;
+	private String walletFile;
+	private String password;
 
-	private static final String COMMUNITY_TAG_INDEX_ADDRESS = "0x48c7234741fa9910f9228bdc247a92852d531bcd";
-	private static final String USER_REGISTRY_ADDRESS = "0x213a9432a55a6fe0129f238bed7119a7a2b75b94";
-	private static final String SERVICE_REGISTRY_ADDRESS = "0xdd934d1dfb15be4f3e5a50199963ead449392bae";
-
-	private static final String COMMUNITY_TAG_CREATE_EVENT_NAME = "CommunityTagCreated";
+	private String communityTagIndexAddress;
+	private String userRegistryAddress;
+	private String serviceRegistryAddress;
 
 	private Web3j web3j;
 	private Credentials credentials;
@@ -57,13 +56,16 @@ public class Registry {
 	private UserRegistry userRegistry;
 	private ServiceRegistry serviceRegistry;
 
+	private final L2pLogger logger = L2pLogger.getInstance(Registry.class);
+
 	/**
-	 * Connect to Ethereum node, initialize contracts, and start
-	 * updating state to mirror the blockchain.
+	 * Connect to Ethereum node, initialize contracts, and start updating state to mirror the
+	 * blockchain.
 	 */
 	public Registry() {
-		this.web3j = Web3j.build(new HttpService(ENDPOINT));
-		this.credentials = Credentials.create(PRIVATE_KEY);
+		this.setFieldValues();
+		this.web3j = Web3j.build(new HttpService(endpoint));
+		this.credentials = Credentials.create(privateKey);
 
 		this.initContracts();
 
@@ -75,9 +77,11 @@ public class Registry {
 	}
 
 	private void initContracts() {
-		this.communityTagIndex = CommunityTagIndex.load(COMMUNITY_TAG_INDEX_ADDRESS, web3j, credentials, GAS_PRICE, GAS_LIMIT);
-		this.userRegistry = UserRegistry.load(USER_REGISTRY_ADDRESS, web3j, credentials, GAS_PRICE, GAS_LIMIT);
-		this.serviceRegistry = ServiceRegistry.load(SERVICE_REGISTRY_ADDRESS, web3j, credentials, GAS_PRICE, GAS_LIMIT);
+		BigInteger gasPrice = BigInteger.valueOf(this.gasPrice);
+		BigInteger gasLimit = BigInteger.valueOf(this.gasLimit);
+		this.communityTagIndex = CommunityTagIndex.load(communityTagIndexAddress, web3j, credentials, gasPrice, gasLimit);
+		this.userRegistry = UserRegistry.load(userRegistryAddress, web3j, credentials, gasPrice, gasLimit);
+		this.serviceRegistry = ServiceRegistry.load(serviceRegistryAddress, web3j, credentials, gasPrice, gasLimit);
 	}
 
 	/**
