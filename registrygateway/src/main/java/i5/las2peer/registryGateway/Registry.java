@@ -8,6 +8,7 @@ import i5.las2peer.registryGateway.contracts.UserRegistry;
 import i5.las2peer.logging.L2pLogger;
 
 import org.web3j.abi.EventEncoder;
+import org.web3j.abi.datatypes.Event;
 import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
@@ -149,13 +150,15 @@ public class Registry extends Configurable {
 	 * @param emittingContractAddress address of the contract that emits the event (may or may not include '0x' prefix)
 	 * @return filter ranging over all past and future log entries
 	 */
-	private EthFilter emittingAddressFilter(String emittingContractAddress) {
+	private EthFilter createFilter(String emittingContractAddress, Event event) {
 		// work around bug / API inconsistency in ganache-cli vs geth
 		String addressWithoutPrefix = cleanHexPrefix(emittingContractAddress);
 		String addressWithPrefix = "0x" + addressWithoutPrefix;
 		String address = filterAddressHasHexPrefix ? addressWithPrefix : addressWithoutPrefix;
 
-		return new EthFilter(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST, address);
+		EthFilter filter = new EthFilter(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST, address);
+		filter.addSingleTopic(EventEncoder.encode(event));
+		return filter;
 	}
 
 	/**
@@ -165,10 +168,7 @@ public class Registry extends Configurable {
 	private void keepTagsUpToDate() throws EthereumException {
 		this.tags = new HashMap<>();
 
-		EthFilter addressFilter = emittingAddressFilter(communityTagIndexAddress);
-		addressFilter.addSingleTopic(EventEncoder.encode(CommunityTagIndex.COMMUNITYTAGCREATED_EVENT));
-
-		this.communityTagIndex.communityTagCreatedEventObservable(addressFilter).subscribe(r -> {
+		this.communityTagIndex.communityTagCreatedEventObservable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST).subscribe(r -> {
 			CommunityTagIndex.CommunityTagCreatedEventResponse response = r;
 			String tagName = Util.recoverString(response.name);
 			try {
@@ -185,10 +185,7 @@ public class Registry extends Configurable {
 	private void keepServiceIndexUpToDate() throws EthereumException {
 		this.serviceNameToAuthor = new HashMap<>();
 
-		EthFilter addressFilter = emittingAddressFilter(serviceRegistryAddress);
-		addressFilter.addSingleTopic(EventEncoder.encode(ServiceRegistry.SERVICECREATED_EVENT));
-
-		this.serviceRegistry.serviceCreatedEventObservable(addressFilter).subscribe(r -> {
+		this.serviceRegistry.serviceCreatedEventObservable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST).subscribe(r -> {
 			ServiceRegistry.ServiceCreatedEventResponse response = r;
 			String serviceName = Util.recoverString(response.name);
 			String authorName = Util.recoverString(response.author);
