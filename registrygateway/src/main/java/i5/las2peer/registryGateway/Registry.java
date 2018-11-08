@@ -141,27 +141,41 @@ public class Registry extends Configurable {
 		}
 	}
 
+
+	/**
+	 * Create an filter for blockchain events based on the event signature and address of the event
+	 * emitting contract.
+	 * @param eventName name of the event (i.e., as declared in Solidity)
+	 * @param eventArgumentTypes list of the event's argument types
+	 * @param emittingContractAddress address of the contract that emits the event (may or may not
+	 *                                include '0x' prefix)
+	 * @return filter ranging over all past and future events matching the arguments
+	 */
+	private EthFilter createEventFilter(String eventName, List<TypeReference<?>> eventArgumentTypes, String emittingContractAddress) {
+		return createEventFilter(new Event(eventName, eventArgumentTypes), emittingContractAddress);
+	}
+
+	// it *may* be possible to use the generated event observable methods instead,
+	// but I don't know how
+	// https://docs.web3j.io/smart_contracts.html#invoking-transactions-and-events
+	private EthFilter createEventFilter(Event event, String emittingContractAddress) {
+		String filterTopic = EventEncoder.encode(event);
+
+
+		EthFilter filter = new EthFilter(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST, emittingContractAddress);
+		filter.addSingleTopic(filterTopic);
+		return filter;
+	}
+
 	/**
 	 * Create a blockchain observer that reacts to all (past and future)
 	 * tag creation events by putting them in the map.
 	 */
-	// it *may* be possible to simplify this a bit with the generated
-	// event observable methods, but I don't know how
-	// https://docs.web3j.io/smart_contracts.html#invoking-transactions-and-events
 	private void keepTagsUpToDate() throws EthereumException {
+		EthFilter tagCreatedFilter = createEventFilter(CommunityTagIndex.COMMUNITYTAGCREATED_EVENT, communityTagIndexAddress);
+
 		this.tags = new HashMap<>();
-
-		// create a filter "topic" based on event signature
-		List<TypeReference<?>> eventArguments = Arrays.asList(new TypeReference<Bytes32>() {});
-		Event event = new Event(COMMUNITY_TAG_CREATE_EVENT_NAME, eventArguments);
-		String topicData = EventEncoder.encode(event);
-
-		// apply filter to all blocks (from the very beginning to all future blocks)
-		EthFilter tagContractFilter = new EthFilter(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST, COMMUNITY_TAG_INDEX_ADDRESS.substring(2));
-		tagContractFilter.addSingleTopic(topicData);
-
-		// asynchronously put tags in the Map as soon as such a Tx is in a mined block
-		web3j.ethLogObservable(tagContractFilter).subscribe(logEntry -> {
+		web3j.ethLogObservable(tagCreatedFilter).subscribe(logEntry -> {
 			String tagName = Util.recoverString(logEntry.getData());
 			try {
 				String tagDescription = getTagDescription(tagName);
