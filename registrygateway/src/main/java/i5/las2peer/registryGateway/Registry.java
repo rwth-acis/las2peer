@@ -146,22 +146,6 @@ public class Registry extends Configurable {
 	}
 
 	/**
-	 * Create an Ethereum filter based on the address of the event emitting contract.
-	 * @param emittingContractAddress address of the contract that emits the event (may or may not include '0x' prefix)
-	 * @return filter ranging over all past and future log entries
-	 */
-	private EthFilter createFilter(String emittingContractAddress, Event event) {
-		// work around bug / API inconsistency in ganache-cli vs geth
-		String addressWithoutPrefix = cleanHexPrefix(emittingContractAddress);
-		String addressWithPrefix = "0x" + addressWithoutPrefix;
-		String address = filterAddressHasHexPrefix ? addressWithPrefix : addressWithoutPrefix;
-
-		EthFilter filter = new EthFilter(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST, address);
-		filter.addSingleTopic(EventEncoder.encode(event));
-		return filter;
-	}
-
-	/**
 	 * Create a blockchain observer that reacts to all (past and future)
 	 * tag creation events by putting them in the map.
 	 */
