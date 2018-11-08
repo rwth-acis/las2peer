@@ -8,9 +8,6 @@ import i5.las2peer.registryGateway.contracts.UserRegistry;
 import i5.las2peer.logging.L2pLogger;
 
 import org.web3j.abi.EventEncoder;
-import org.web3j.abi.TypeReference;
-import org.web3j.abi.datatypes.Event;
-import org.web3j.abi.datatypes.generated.Bytes32;
 import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
@@ -40,6 +37,7 @@ public class Registry extends Configurable {
 	public Map<String, String> serviceNameToAuthor;
 	public Map<String, List<ServiceReleaseData>> serviceReleases;
 
+	// injected from config file
 	private String endpoint;
 	private long gasPrice;
 	private long gasLimit;
@@ -53,6 +51,7 @@ public class Registry extends Configurable {
 	private String communityTagIndexAddress;
 	private String userRegistryAddress;
 	private String serviceRegistryAddress;
+	// end config values
 
 	private Web3j web3j;
 	private Credentials credentials;
@@ -145,34 +144,18 @@ public class Registry extends Configurable {
 		}
 	}
 
-
 	/**
-	 * Create an filter for blockchain events based on the event signature and address of the event
-	 * emitting contract.
-	 * @param eventName name of the event (i.e., as declared in Solidity)
-	 * @param eventArgumentTypes list of the event's argument types
-	 * @param emittingContractAddress address of the contract that emits the event (may or may not
-	 *                                include '0x' prefix)
-	 * @return filter ranging over all past and future events matching the arguments
+	 * Create an Ethereum filter based on the address of the event emitting contract.
+	 * @param emittingContractAddress address of the contract that emits the event (may or may not include '0x' prefix)
+	 * @return filter ranging over all past and future log entries
 	 */
-	private EthFilter createEventFilter(String eventName, List<TypeReference<?>> eventArgumentTypes, String emittingContractAddress) {
-		return createEventFilter(new Event(eventName, eventArgumentTypes), emittingContractAddress);
-	}
-
-	// it *may* be possible to use the generated event observable methods instead,
-	// but I don't know how
-	// https://docs.web3j.io/smart_contracts.html#invoking-transactions-and-events
-	private EthFilter createEventFilter(Event event, String emittingContractAddress) {
-		String filterTopic = EventEncoder.encode(event);
-
+	private EthFilter emittingAddressFilter(String emittingContractAddress) {
 		// work around bug / API inconsistency in ganache-cli vs geth
 		String addressWithoutPrefix = cleanHexPrefix(emittingContractAddress);
 		String addressWithPrefix = "0x" + addressWithoutPrefix;
 		String address = filterAddressHasHexPrefix ? addressWithPrefix : addressWithoutPrefix;
 
-		EthFilter filter = new EthFilter(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST, address);
-		filter.addSingleTopic(filterTopic);
-		return filter;
+		return new EthFilter(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST, address);
 	}
 
 	/**
@@ -180,11 +163,14 @@ public class Registry extends Configurable {
 	 * tag creation events by putting them in the map.
 	 */
 	private void keepTagsUpToDate() throws EthereumException {
-		EthFilter tagCreatedFilter = createEventFilter(CommunityTagIndex.COMMUNITYTAGCREATED_EVENT, communityTagIndexAddress);
-
 		this.tags = new HashMap<>();
-		web3j.ethLogObservable(tagCreatedFilter).subscribe(logEntry -> {
-			String tagName = Util.recoverString(logEntry.getData());
+
+		EthFilter addressFilter = emittingAddressFilter(communityTagIndexAddress);
+		addressFilter.addSingleTopic(EventEncoder.encode(CommunityTagIndex.COMMUNITYTAGCREATED_EVENT));
+
+		this.communityTagIndex.communityTagCreatedEventObservable(addressFilter).subscribe(r -> {
+			CommunityTagIndex.CommunityTagCreatedEventResponse response = r;
+			String tagName = Util.recoverString(response.name);
 			try {
 				String tagDescription = getTagDescription(tagName);
 				this.tags.put(tagName, tagDescription);
@@ -197,13 +183,15 @@ public class Registry extends Configurable {
 	}
 
 	private void keepServiceIndexUpToDate() throws EthereumException {
-		List<TypeReference<?>> eventArguments = Arrays.asList(new TypeReference<Bytes32>() {}, new TypeReference<Bytes32>() {});
-		EthFilter serviceRegisteredEvent = createEventFilter(ServiceRegistry.SERVICECREATED_EVENT, serviceRegistryAddress);
-
 		this.serviceNameToAuthor = new HashMap<>();
-		web3j.ethLogObservable(serviceRegisteredEvent).subscribe(logEntry -> {
-			String serviceName = Util.recoverString(logEntry.getTopics().get(1));
-			String authorName = Util.recoverString(logEntry.getTopics().get(2));
+
+		EthFilter addressFilter = emittingAddressFilter(serviceRegistryAddress);
+		addressFilter.addSingleTopic(EventEncoder.encode(ServiceRegistry.SERVICECREATED_EVENT));
+
+		this.serviceRegistry.serviceCreatedEventObservable(addressFilter).subscribe(r -> {
+			ServiceRegistry.ServiceCreatedEventResponse response = r;
+			String serviceName = Util.recoverString(response.name);
+			String authorName = Util.recoverString(response.author);
 			this.serviceNameToAuthor.put(serviceName, authorName);
 		});
 	}
