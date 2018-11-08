@@ -11,7 +11,9 @@ import org.web3j.abi.EventEncoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Event;
 import org.web3j.abi.datatypes.generated.Bytes32;
+import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
+import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.request.EthFilter;
@@ -62,17 +64,31 @@ public class Registry extends Configurable {
 	 * Connect to Ethereum node, initialize contracts, and start updating state to mirror the
 	 * blockchain.
 	 */
-	public Registry() {
+	public Registry() throws BadEthereumCredentialsException {
 		this.setFieldValues();
-		this.web3j = Web3j.build(new HttpService(endpoint));
-		this.credentials = Credentials.create(privateKey);
 
+		this.web3j = Web3j.build(new HttpService(endpoint));
+		this.initCredentials();
 		this.initContracts();
 
 		try {
 			this.keepTagsUpToDate();
 		} catch (EthereumException e) {
 			logger.severe("bad stuff happened FIXME");
+		}
+	}
+
+	private void initCredentials() throws BadEthereumCredentialsException {
+		if ((walletFile == null) == (privateKey == null)) {
+			logger.severe("credentials must be specified: EITHER as walletFile/password or privateKey");
+		} else if (walletFile != null) {
+			try {
+				this.credentials = WalletUtils.loadCredentials(password, walletFile);
+			} catch (IOException | CipherException e) {
+				throw new BadEthereumCredentialsException("Could not load or decrypt wallet file", e);
+			}
+		} else {
+			this.credentials = Credentials.create(privateKey);
 		}
 	}
 

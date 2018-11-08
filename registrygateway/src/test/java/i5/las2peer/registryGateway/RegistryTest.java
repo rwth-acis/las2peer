@@ -9,7 +9,7 @@ public class RegistryTest {
     Registry testee;
 
     @Before
-    public void setup() {
-        this.testee = new Registry();
+    public void setup() throws BadEthereumCredentialsException {
+		this.testee = new Registry();
     }
 }
