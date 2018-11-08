@@ -26,6 +26,8 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
 
+import static org.web3j.utils.Numeric.cleanHexPrefix;
+
 public class Registry extends Configurable {
 	/**
 	 * Map of currently known tags and their descriptions.
@@ -41,6 +43,7 @@ public class Registry extends Configurable {
 	private String endpoint;
 	private long gasPrice;
 	private long gasLimit;
+	private boolean filterAddressHasHexPrefix;
 
 	private String account;
 	private String privateKey;
@@ -161,8 +164,12 @@ public class Registry extends Configurable {
 	private EthFilter createEventFilter(Event event, String emittingContractAddress) {
 		String filterTopic = EventEncoder.encode(event);
 
+		// work around bug / API inconsistency in ganache-cli vs geth
+		String addressWithoutPrefix = cleanHexPrefix(emittingContractAddress);
+		String addressWithPrefix = "0x" + addressWithoutPrefix;
+		String address = filterAddressHasHexPrefix ? addressWithPrefix : addressWithoutPrefix;
 
-		EthFilter filter = new EthFilter(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST, emittingContractAddress);
+		EthFilter filter = new EthFilter(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST, address);
 		filter.addSingleTopic(filterTopic);
 		return filter;
 	}
