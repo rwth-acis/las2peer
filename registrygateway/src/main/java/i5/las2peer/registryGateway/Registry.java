@@ -19,6 +19,8 @@ import org.web3j.protocol.core.methods.response.Web3ClientVersion;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tuples.generated.Tuple4;
 import org.web3j.tuples.generated.Tuple5;
+import org.web3j.tx.gas.ContractGasProvider;
+import org.web3j.tx.gas.StaticGasProvider;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -56,6 +58,7 @@ public class Registry extends Configurable {
 
 	private Web3j web3j;
 	private Credentials credentials;
+	private ContractGasProvider gasProvider;
 
 	private CommunityTagIndex communityTagIndex;
 	private UserRegistry userRegistry;
@@ -98,11 +101,10 @@ public class Registry extends Configurable {
 	}
 
 	private void initContracts() {
-		BigInteger gasPrice = BigInteger.valueOf(this.gasPrice);
-		BigInteger gasLimit = BigInteger.valueOf(this.gasLimit);
-		this.communityTagIndex = CommunityTagIndex.load(communityTagIndexAddress, web3j, credentials, gasPrice, gasLimit);
-		this.userRegistry = UserRegistry.load(userRegistryAddress, web3j, credentials, gasPrice, gasLimit);
-		this.serviceRegistry = ServiceRegistry.load(serviceRegistryAddress, web3j, credentials, gasPrice, gasLimit);
+		this.gasProvider = new StaticGasProvider(BigInteger.valueOf(gasPrice), BigInteger.valueOf(gasLimit));
+		this.communityTagIndex = CommunityTagIndex.load(communityTagIndexAddress, web3j, credentials, gasProvider);
+		this.userRegistry = UserRegistry.load(userRegistryAddress, web3j, credentials, gasProvider);
+		this.serviceRegistry = ServiceRegistry.load(serviceRegistryAddress, web3j, credentials, gasProvider);
 	}
 
 	/**
