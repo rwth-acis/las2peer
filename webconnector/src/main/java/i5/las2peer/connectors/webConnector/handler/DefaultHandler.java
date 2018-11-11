@@ -89,11 +89,9 @@ public class DefaultHandler {
 	@Path("/registry/services")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getRegisteredServices() {
-		JSONObject jsonObject = new JSONObject();
-		for (Map.Entry<String, String> service: registry.serviceNameToAuthor.entrySet()) {
-			jsonObject.put(service.getKey(), service.getValue());
-		}
-		return jsonObject.toJSONString();
+		JSONArray serviceNameList = new JSONArray();
+		serviceNameList.addAll(registry.getServiceNames());
+		return serviceNameList.toJSONString();
 	}
 
 	@GET
@@ -101,7 +99,7 @@ public class DefaultHandler {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getServiceReleases() {
 		JSONObject jsonObject = new JSONObject();
-		for (Map.Entry<String, List<ServiceReleaseData>> service: registry.serviceReleases.entrySet()) {
+		for (Map.Entry<String, List<ServiceReleaseData>> service: registry.getServiceReleases().entrySet()) {
 			JSONArray releaseList = new JSONArray();
 			for (ServiceReleaseData release : service.getValue()) {
 				JSONObject entry = new JSONObject();
@@ -119,7 +117,7 @@ public class DefaultHandler {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getTags() {
 		JSONObject jsonObject = new JSONObject();
-		for (Map.Entry<String, String> tag: registry.tags.entrySet()) {
+		for (Map.Entry<String, String> tag: registry.getTags().entrySet()) {
 			jsonObject.put(tag.getKey(), tag.getValue());
 		}
 		return jsonObject.toJSONString();

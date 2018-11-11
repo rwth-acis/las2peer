@@ -7,14 +7,11 @@ import i5.las2peer.registryGateway.contracts.UserRegistry;
 
 import i5.las2peer.logging.L2pLogger;
 
-import org.web3j.abi.EventEncoder;
-import org.web3j.abi.datatypes.Event;
 import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
-import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.response.Web3ClientVersion;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tuples.generated.Tuple4;
@@ -26,25 +23,15 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
 
-import static org.web3j.utils.Numeric.cleanHexPrefix;
-
 public class Registry extends Configurable {
-	/**
-	 * Map of currently known tags and their descriptions.
-	 *
-	 * Do not change; it is continuously updated to reflect the current known state of the
-	 * blockchain. (With the expected delay of blocks being mined and broadcast.)
-	 */
-	public Map<String, String> tags;
-
-	public Map<String, String> serviceNameToAuthor;
-	public Map<String, List<ServiceReleaseData>> serviceReleases;
+	private Map<String, String> tags;
+	private Map<String, String> serviceNameToAuthor;
+	private Map<String, List<ServiceReleaseData>> serviceReleases;
 
 	// injected from config file
 	private String endpoint;
 	private long gasPrice;
 	private long gasLimit;
-	private boolean filterAddressHasHexPrefix;
 
 	private String account;
 	private String privateKey;
@@ -160,27 +147,25 @@ public class Registry extends Configurable {
 			String tagName = Util.recoverString(response.name);
 			try {
 				String tagDescription = getTagDescription(tagName);
-				this.tags.put(tagName, tagDescription);
+				this.getTags().put(tagName, tagDescription);
 			} catch (EthereumException e) {
 				// actually handling this is apparently tricky in Java:
 				// https://stackoverflow.com/questions/31270759/a-better-approach-to-handling-exceptions-in-a-functional-way/31270760#31270760
-				logger.severe("FIXME exception in lambda, oh no, good luck");
+				logger.severe("Failure while updating tags: Could not get tag description.");
 			}
-		});
+		}, e -> logger.severe("Error observing tag event: " + e.toString()));
 	}
 
-	private void keepServiceIndexUpToDate() throws EthereumException {
+	private void keepServiceIndexUpToDate() {
 		this.serviceNameToAuthor = new HashMap<>();
 
 		this.serviceRegistry.serviceCreatedEventObservable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST).subscribe(r -> {
 			ServiceRegistry.ServiceCreatedEventResponse response = r;
-			String serviceName = Util.recoverString(response.name);
-			String authorName = Util.recoverString(response.author);
-			this.serviceNameToAuthor.put(serviceName, authorName);
-		});
+			this.serviceNameToAuthor.put(Util.recoverString(response.name), Util.recoverString(response.author));
+		}, e -> logger.severe("Error observing service registration event: " + e.toString()));
 	}
 
-	private void keepServiceReleasesUpToDate() throws EthereumException {
+	private void keepServiceReleasesUpToDate() {
 		this.serviceReleases = new HashMap<>();
 
 		this.serviceRegistry.serviceReleasedEventObservable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST).subscribe(r -> {
@@ -245,8 +230,27 @@ public class Registry extends Configurable {
 					BigInteger.valueOf(index)).send();
 			return new ServiceReleaseData(t.getValue1(), t.getValue2(), t.getValue3(), t.getValue4(), t.getValue5());
 		} catch (Exception e) {
+			logger.severe("Error: " + e);
 			throw new EthereumException("Failed to look up service release", e);
 		}
+	}
+
+	/**
+	 * Map of currently known tags and their descriptions.
+	 *
+	 * Do not change; it is continuously updated to reflect the current known state of the
+	 * blockchain. (With the expected delay of blocks being mined and broadcast.)
+	 */
+	public Map<String, String> getTags() {
+		return this.tags;
+	}
+
+	public Set<String> getServiceNames() {
+		return this.serviceNameToAuthor.keySet();
+	}
+
+	public Map<String, List<ServiceReleaseData>> getServiceReleases() {
+		return this.serviceReleases;
 	}
 
 	/**
