@@ -69,17 +69,26 @@ public class UserRegistry extends Contract {
     static {
         _addresses = new HashMap<String, String>();
         _addresses.put("1541421861694", "0x213a9432a55a6fe0129f238bed7119a7a2b75b94");
-        _addresses.put("1537881365143", "0x777f6c40d84df9d9e43efd6590c482576d2daaf9");
-        _addresses.put("1541353003952", "0x213a9432a55a6fe0129f238bed7119a7a2b75b94");
+        _addresses.put("1542660356610", "0x2571336c2c62db833e5e251bb13546c02da70082");
         _addresses.put("1541429234327", "0x213a9432a55a6fe0129f238bed7119a7a2b75b94");
         _addresses.put("1538948396210", "0x896d2ea49d60a7d490566c0ff7c0353cae494b80");
-        _addresses.put("1541006760161", "0x9adc3881b3858377a82f39a564536fd9a4a2a929");
         _addresses.put("1540910817715", "0x39eaaef93bb162bbffb25207ffd8366f097621ba");
         _addresses.put("1540914412800", "0x213a9432a55a6fe0129f238bed7119a7a2b75b94");
-        _addresses.put("1537802983234", "0x641b3fa5e1dfe5dc5fad4c42f2aa1e46ffb52c57");
-        _addresses.put("456719", "0x6bcdb445aa96d436a25fb234c7a5dd9dd5bfcf22");
+        _addresses.put("456719", "0x7117983d3be99e1cbe296dfeaf034c91db3cd02b");
         _addresses.put("1538963171946", "0x5fe12658b58b3a4af2ec8c4a3a2a51805b59056b");
         _addresses.put("1538343946582", "0xc06b03b0871c21550c1222306304c7d2307d9316");
+        _addresses.put("1542029033973", "0x213a9432a55a6fe0129f238bed7119a7a2b75b94");
+        _addresses.put("1537881365143", "0x777f6c40d84df9d9e43efd6590c482576d2daaf9");
+        _addresses.put("1337", "0x881fc15662f524d751a70c66dd8651f88b74c7c5");
+        _addresses.put("1541353003952", "0x213a9432a55a6fe0129f238bed7119a7a2b75b94");
+        _addresses.put("1542059718816", "0x213a9432a55a6fe0129f238bed7119a7a2b75b94");
+        _addresses.put("1542059511560", "0x213a9432a55a6fe0129f238bed7119a7a2b75b94");
+        _addresses.put("1541006760161", "0x9adc3881b3858377a82f39a564536fd9a4a2a929");
+        _addresses.put("1541606582953", "0x213a9432a55a6fe0129f238bed7119a7a2b75b94");
+        _addresses.put("1542106474778", "0xf300eb5556912ce4aeca505a7d9308fe7c6cd6bd");
+        _addresses.put("1542106226176", "0x213a9432a55a6fe0129f238bed7119a7a2b75b94");
+        _addresses.put("1537802983234", "0x641b3fa5e1dfe5dc5fad4c42f2aa1e46ffb52c57");
+        _addresses.put("1542554349057", "0x213a9432a55a6fe0129f238bed7119a7a2b75b94");
     }
 
     @Deprecated
