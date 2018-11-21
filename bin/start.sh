@@ -14,7 +14,7 @@ ETH_PROPS_DIR=./etc/
 ETH_PROPS=i5.las2peer.registryGateway.Registry.properties
 
 echo Attempting to autoconfigure registry blockchain parameters ...
-if ./bin/wait-for-it.sh ${LAS2PEER_CONFIG_ENDPOINT} --timeout=300; then
+if true || ./bin/wait-for-it.sh ${LAS2PEER_CONFIG_ENDPOINT} --timeout=300; then
     echo Downloading ...
     wget "http://${LAS2PEER_CONFIG_ENDPOINT}/${ETH_PROPS}" -O "${ETH_PROPS_DIR}${ETH_PROPS}"
     echo done.
@@ -25,12 +25,12 @@ else
 fi
 
 echo Replacing Ethereum client host in config files ...
-sed -i "s|^endpoint.*$|endpoint = http://${LAS2PEER_ETH_HOST}:8545|" "${ETH_PROPS_DIR}${ETH_PROPS}"
+sed -i.bak "s|^endpoint.*$|endpoint = http://${LAS2PEER_ETH_HOST}:8545|" "${ETH_PROPS_DIR}${ETH_PROPS}"
 echo Replacing wallets path ...
-sed -i "s|/root/keystore|./bin/keystore|" "${ETH_PROPS_DIR}${ETH_PROPS}"
+sed -i.bak "s|/root/keystore|./bin/keystore|" "${ETH_PROPS_DIR}${ETH_PROPS}"
 echo done.
 
-if ./bin/wait-for-it.sh ${LAS2PEER_BOOTSTRAP} --timeout=300; then
+if true || ./bin/wait-for-it.sh ${LAS2PEER_BOOTSTRAP} --timeout=300; then
     echo Las2peer bootstrap available, continuing.
 else
     echo Las2peer bootstrap specified but not accessible. Aborting.
