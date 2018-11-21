@@ -25,6 +25,8 @@ fi
 
 echo Replacing Ethereum client host in config files ...
 sed -i "s|^endpoint.*$|endpoint = http://${LAS2PEER_ETH_HOST}:8545|" "${ETH_PROPS_DIR}${ETH_PROPS}"
+echo Replacing wallets path ...
+sed -i "s|/root/keystore|./bin/keystore|" "${ETH_PROPS_DIR}${ETH_PROPS}"
 echo done.
 
 if ./bin/wait-for-it.sh ${LAS2PEER_BOOTSTRAP} --timeout=300; then
