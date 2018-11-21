@@ -8,7 +8,7 @@ LAS2PEER_ETH_HOST=${LAS2PEER_ETH_HOST:-"127.0.0.1"}
 LAS2PEER_PORT=${LAS2PEER_PORT:-"9000"}
 
 echo "Starting Ethereum node in Docker container (uses ports 8545 and 30303) ..."
-docker run --rm -p 8545:8545 -p 30303:30303 -e ETHEREUM_BOOTSTRAP=${LAS2PEER_ETH_BOOTSTRAP} -e MINE=${MINE:-"yes"} -it --name eth-peer tjanson/go-ethereum:monitored-client
+docker run --rm -d -p 8545:8545 -p 30303:30303 -e ETHEREUM_BOOTSTRAP=${LAS2PEER_ETH_BOOTSTRAP} -e MINE=${MINE:-"yes"} -it --name eth-peer tjanson/go-ethereum:monitored-client
 
 ETH_PROPS_DIR=./etc/
 ETH_PROPS=i5.las2peer.registryGateway.Registry.properties
