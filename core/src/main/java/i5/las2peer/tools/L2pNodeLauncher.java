@@ -48,12 +48,7 @@ import i5.las2peer.communication.Message;
 import i5.las2peer.connectors.Connector;
 import i5.las2peer.connectors.ConnectorException;
 import i5.las2peer.logging.L2pLogger;
-import i5.las2peer.p2p.AgentAlreadyRegisteredException;
-import i5.las2peer.p2p.AgentNotRegisteredException;
-import i5.las2peer.p2p.NodeException;
-import i5.las2peer.p2p.NodeInformation;
-import i5.las2peer.p2p.PastryNodeImpl;
-import i5.las2peer.p2p.TimeoutException;
+import i5.las2peer.p2p.*;
 import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.persistency.SharedStorage;
 import i5.las2peer.persistency.SharedStorage.STORAGE_MODE;
@@ -97,9 +92,9 @@ public class L2pNodeLauncher {
 		return bFinished;
 	}
 
-	private PastryNodeImpl node;
+	private EthereumNodeImpl node;
 
-	public PastryNodeImpl getNode() {
+	public EthereumNodeImpl getNode() {
 		return node;
 	}
 
@@ -791,14 +786,14 @@ public class L2pNodeLauncher {
 		if (monitoringObserver == null) {
 			monitoringObserver = false;
 		}
-		node = new PastryNodeImpl(cl, monitoringObserver, bindAddress, port, bootstrap, storageMode, storageDir,
+		node = new EthereumNodeImpl(cl, monitoringObserver, bindAddress, port, bootstrap, storageMode, storageDir,
 				nodeIdSeed);
 		commandPrompt = new CommandPrompt(this);
 	}
 
 	/**
 	 * actually start the node
-	 * 
+	 *
 	 * @throws NodeException
 	 */
 	private void start() throws NodeException {

@@ -3,13 +3,13 @@ package i5.las2peer.registryGateway;
 import java.math.BigInteger;
 
 public class ServiceReleaseData {
-	private byte[] serviceName;
+	private String serviceName;
 	private BigInteger versionMajor;
 	private BigInteger versionMinor;
 	private BigInteger versionPatch;
 	private byte[] signature; // TODO
 
-	public ServiceReleaseData(byte[] serviceName, BigInteger versionMajor, BigInteger versionMinor, BigInteger versionPatch, byte[] signature) {
+	public ServiceReleaseData(String serviceName, BigInteger versionMajor, BigInteger versionMinor, BigInteger versionPatch, byte[] signature) {
 		this.serviceName = serviceName;
 		this.versionMajor = versionMajor;
 		this.versionMinor = versionMinor;
@@ -18,11 +18,23 @@ public class ServiceReleaseData {
 	}
 
 	public String getServiceName() {
-		return Util.recoverString(this.serviceName);
+		return serviceName;
 	}
 
 	public String getVersion() {
 		return versionMajor + "." + versionMinor + "." + versionPatch;
+	}
+
+	public Integer getVersionMajor() {
+		return versionMajor.intValue();
+	}
+
+	public Integer getVersionMinor() {
+		return versionMinor.intValue();
+	}
+
+	public Integer getVersionPatch() {
+		return versionPatch.intValue();
 	}
 
 	@Override

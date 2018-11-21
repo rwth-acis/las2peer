@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="build-common" default="all">
 
+	<target name="build-modules-only" description="build-only">
+		<ant dir="core" antfile="build.xml" target="deploy-local" />
+		<ant dir="registrygateway" antfile="build.xml" target="deploy-local" />
+		<ant dir="restmapper" antfile="build.xml" target="deploy-local" />
+		<ant dir="webconnector" antfile="build.xml" target="deploy-local" />
+	</target>
+
 	<target name="build-only" description="build-only">
 		<ant dir="core" antfile="build.xml" target="deploy-local" />
 		<ant dir="registrygateway" antfile="build.xml" target="deploy-local" />

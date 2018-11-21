@@ -14,24 +14,30 @@ import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.Web3ClientVersion;
 import org.web3j.protocol.http.HttpService;
+import org.web3j.tuples.generated.Tuple2;
 import org.web3j.tuples.generated.Tuple4;
-import org.web3j.tuples.generated.Tuple5;
 import org.web3j.tx.gas.ContractGasProvider;
 import org.web3j.tx.gas.StaticGasProvider;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.time.Instant;
 import java.util.*;
+
+import static org.web3j.utils.Numeric.cleanHexPrefix;
 
 public class Registry extends Configurable {
 	private Map<String, String> tags;
 	private Map<String, String> serviceNameToAuthor;
 	private Map<String, List<ServiceReleaseData>> serviceReleases;
+	private Map<String, Map<Integer, Map<Integer, Map<Integer, ServiceReleaseData>>>> serviceReleasesByVersion;
+	private Map<String, List<ServiceDeploymentData>> serviceDeployments;
 
 	// injected from config file
 	private String endpoint;
 	private long gasPrice;
 	private long gasLimit;
+	private boolean removeHexPrefixFromAddresses;
 
 	private String account;
 	private String privateKey;
@@ -58,24 +64,21 @@ public class Registry extends Configurable {
 	 * blockchain.
 	 */
 	public Registry() throws BadEthereumCredentialsException {
-		this.setFieldValues();
+		setFieldValues();
 
 		this.web3j = Web3j.build(new HttpService(endpoint));
-		this.initCredentials();
-		this.initContracts();
+		initCredentials();
+		initContracts();
 
-		try {
-			this.keepTagsUpToDate();
-			this.keepServiceIndexUpToDate();
-			this.keepServiceReleasesUpToDate();
-		} catch (EthereumException e) {
-			logger.severe("bad stuff happened FIXME");
-		}
+		keepTagsUpToDate();
+		keepServiceIndexUpToDate();
+		keepServiceReleasesUpToDate();
+		keepServiceDeploymentsUpToDate();
 	}
 
 	private void initCredentials() throws BadEthereumCredentialsException {
 		if ((walletFile == null) == (privateKey == null)) {
-			logger.severe("credentials must be specified: EITHER as walletFile/password or privateKey");
+			throw new BadEthereumCredentialsException("Credentials must be specified EITHER as walletFile+password or privateKey");
 		} else if (walletFile != null) {
 			try {
 				this.credentials = WalletUtils.loadCredentials(password, walletFile);
@@ -88,6 +91,11 @@ public class Registry extends Configurable {
 	}
 
 	private void initContracts() {
+		if (this.removeHexPrefixFromAddresses) {
+			this.communityTagIndexAddress = cleanHexPrefix(this.communityTagIndexAddress);
+			this.userRegistryAddress = cleanHexPrefix(this.userRegistryAddress);
+			this.serviceRegistryAddress = cleanHexPrefix(this.serviceRegistryAddress);
+		}
 		this.gasProvider = new StaticGasProvider(BigInteger.valueOf(gasPrice), BigInteger.valueOf(gasLimit));
 		this.communityTagIndex = CommunityTagIndex.load(communityTagIndexAddress, web3j, credentials, gasProvider);
 		this.userRegistry = UserRegistry.load(userRegistryAddress, web3j, credentials, gasProvider);
@@ -139,7 +147,7 @@ public class Registry extends Configurable {
 	 * Create a blockchain observer that reacts to all (past and future)
 	 * tag creation events by putting them in the map.
 	 */
-	private void keepTagsUpToDate() throws EthereumException {
+	private void keepTagsUpToDate() {
 		this.tags = new HashMap<>();
 
 		this.communityTagIndex.communityTagCreatedEventObservable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST).subscribe(r -> {
@@ -147,7 +155,7 @@ public class Registry extends Configurable {
 			String tagName = Util.recoverString(response.name);
 			try {
 				String tagDescription = getTagDescription(tagName);
-				this.getTags().put(tagName, tagDescription);
+				this.tags.put(tagName, tagDescription);
 			} catch (EthereumException e) {
 				// actually handling this is apparently tricky in Java:
 				// https://stackoverflow.com/questions/31270759/a-better-approach-to-handling-exceptions-in-a-functional-way/31270760#31270760
@@ -161,22 +169,51 @@ public class Registry extends Configurable {
 
 		this.serviceRegistry.serviceCreatedEventObservable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST).subscribe(r -> {
 			ServiceRegistry.ServiceCreatedEventResponse response = r;
-			this.serviceNameToAuthor.put(Util.recoverString(response.name), Util.recoverString(response.author));
+			try {
+				String serviceName = this.serviceRegistry.hashToName(response.nameHash).send();
+				this.serviceNameToAuthor.put(serviceName, Util.recoverString(response.author));
+			} catch (Exception e) {
+				logger.severe("Error while looking up new service's name.");
+			}
 		}, e -> logger.severe("Error observing service registration event: " + e.toString()));
 	}
 
 	private void keepServiceReleasesUpToDate() {
 		this.serviceReleases = new HashMap<>();
+		this.serviceReleasesByVersion = new HashMap<>();
 
 		this.serviceRegistry.serviceReleasedEventObservable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST).subscribe(r -> {
 			ServiceRegistry.ServiceReleasedEventResponse response = r;
-			ServiceReleaseData release = new ServiceReleaseData(response.name, response.versionMajor, response.versionMinor, response.versionPatch, new byte[]{});
-			this.serviceReleases.computeIfAbsent(release.getServiceName(), k -> new ArrayList<>());
-			this.serviceReleases.get(release.getServiceName()).add(release);
+			try {
+				String serviceName = this.serviceRegistry.hashToName(response.nameHash).send();
+				ServiceReleaseData release = new ServiceReleaseData(serviceName, response.versionMajor, response.versionMinor, response.versionPatch, new byte[]{});
+				this.serviceReleases.computeIfAbsent(release.getServiceName(), k -> new ArrayList<>());
+				this.serviceReleases.get(release.getServiceName()).add(release);
+
+				storeReleaseByVersion(release);
+			} catch (Exception e) {
+				logger.severe("Error while looking up service's name.");
+			}
 		});
 	}
 
-	private void registerUser(String name, String agentId) throws EthereumException {
+	private void keepServiceDeploymentsUpToDate() {
+		this.serviceDeployments = new HashMap<>();
+
+		this.serviceRegistry.serviceDeploymentEventObservable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST).subscribe(r -> {
+			ServiceRegistry.ServiceDeploymentEventResponse response = r;
+			try {
+				String serviceName = this.serviceRegistry.hashToName(response.nameHash).send();
+				ServiceDeploymentData deployment = new ServiceDeploymentData(serviceName, response.versionMajor, response.versionMinor, response.versionPatch, response.timestamp, response.nodeId);
+				this.serviceDeployments.computeIfAbsent(deployment.getServiceName(), k -> new ArrayList<>());
+				this.serviceDeployments.get(deployment.getServiceName()).add(deployment);
+			} catch (Exception e) {
+				logger.severe("Error while looking up service's name.");
+			}
+		});
+	}
+
+	public void registerUser(String name, String agentId) throws EthereumException {
 		// TODO: more parameters
 		try {
 			this.userRegistry.register(Util.padAndConvertString(name, 32), Util.padAndConvertString(agentId, 32)).send();
@@ -185,53 +222,109 @@ public class Registry extends Configurable {
 		}
 	}
 
-	private UserData getUser(String name) throws EthereumException {
+	public UserData getUser(String name) throws EthereumException {
 		try {
 			Tuple4<byte[], byte[], String, byte[]> t = this.userRegistry.users(Util.padAndConvertString(name, 32)).send();
+
+			byte[] returnedName = t.getValue1();
+
+			if (Arrays.equals(returnedName, new byte[returnedName.length])) {
+				// name is 0s, meaning entry does not exist
+				return null;
+			}
+
 			return new UserData(t.getValue1(), t.getValue2(), t.getValue3(), t.getValue4());
 		} catch (Exception e) {
 			throw new EthereumException("Could not get user", e);
 		}
 	}
 
-	private void registerService(String serviceName, String authorName) throws EthereumException {
+	public void registerService(String serviceName, String authorName) throws EthereumException {
 		try {
-			this.serviceRegistry.register(Util.padAndConvertString(serviceName, 32), Util.padAndConvertString(authorName, 32)).send();
+			this.serviceRegistry.register(serviceName, Util.padAndConvertString(authorName, 32)).send();
 		} catch (Exception e) {
 			throw new EthereumException("Failed to register service", e);
 		}
 	}
 
-	private String getServiceAuthor(String serviceName) throws EthereumException {
+	public String getServiceAuthor(String serviceName) throws EthereumException {
 		try {
-			byte[] author = this.serviceRegistry.serviceNameToAuthor(Util.padAndConvertString(serviceName, 32)).send();
-			return Util.recoverString(author);
+			byte[] serviceNameHash = Util.soliditySha3(serviceName);
+			Tuple2<String, byte[]> t = this.serviceRegistry.services(serviceNameHash).send();
+			return Util.recoverString(t.getValue2());
 		} catch (Exception e) {
 			throw new EthereumException("Failed look up service author", e);
 		}
 	}
 
-	private void releaseService(String serviceName, String authorName, int versionMajor, int versionMinor, int versionPatch) throws EthereumException {
+	public void releaseService(String serviceName, String authorName, String versionString) throws EthereumException {
+		int[] version = Util.parseVersion(versionString);
+		releaseService(serviceName, authorName, version[0], version[1], version[2]);
+	}
+
+	public void releaseService(String serviceName, String authorName, int versionMajor, int versionMinor, int versionPatch) throws EthereumException {
+		releaseService(serviceName, authorName, versionMajor, versionMinor, versionPatch, "");
+	}
+
+	private void releaseService(String serviceName, String authorName, int versionMajor, int versionMinor, int versionPatch, String dhtSupplement) throws EthereumException {
+		if (getReleaseByVersion(serviceName, versionMajor, versionMinor, versionPatch) != null) {
+			logger.severe("Tried to submit duplicate release (name / version already exist), ignoring! (Maybe look into why this happened?)");
+			return;
+		}
+
 		try {
-			this.serviceRegistry.release(
-					Util.padAndConvertString(serviceName, 32),
-					Util.padAndConvertString(authorName, 32),
-					BigInteger.valueOf(versionMajor), BigInteger.valueOf(versionMinor), BigInteger.valueOf(versionPatch)).send();
+			this.serviceRegistry.release(serviceName, Util.padAndConvertString(authorName, 32),
+					BigInteger.valueOf(versionMajor), BigInteger.valueOf(versionMinor), BigInteger.valueOf(versionPatch),
+					dhtSupplement).send();
 		} catch (Exception e) {
 			throw new EthereumException("Failed to submit service release", e);
 		}
 	}
 
-	private ServiceReleaseData getServiceRelease(String serviceName, int index) throws EthereumException {
-		// TODO: index should not be a thing!
+	//public ServiceReleaseData getServiceRelease(String serviceName, int index) throws EthereumException {
+	//	// TODO: index should not be a thing!
+	//	try {
+	//		Tuple5<byte[], BigInteger, BigInteger, BigInteger, byte[]> t = this.serviceRegistry.serviceNameToReleases(
+	//				Util.padAndConvertString(serviceName, 32),
+	//				BigInteger.valueOf(index)).send();
+	//		return new ServiceReleaseData(t.getValue1(), t.getValue2(), t.getValue3(), t.getValue4(), t.getValue5());
+	//	} catch (Exception e) {
+	//		logger.severe("Error: " + e);
+	//		throw new EthereumException("Failed to look up service release", e);
+	//	}
+	//}
+
+	// FIXME: for some reason, the node shell does not find functions with this signature:
+	// java.lang.NoSuchMethodException: No signature of okay on Registry matches the given parameters
+	// (same for different function with same params)
+	public void announceDeployment(String serviceName, int versionMajor, int versionMinor, int versionPatch, String nodeId) throws EthereumException {
+		long timeNow = Instant.now().getEpochSecond();
 		try {
-			Tuple5<byte[], BigInteger, BigInteger, BigInteger, byte[]> t = this.serviceRegistry.serviceNameToReleases(
-					Util.padAndConvertString(serviceName, 32),
-					BigInteger.valueOf(index)).send();
-			return new ServiceReleaseData(t.getValue1(), t.getValue2(), t.getValue3(), t.getValue4(), t.getValue5());
+			this.serviceRegistry.announceDeployment(serviceName,
+					BigInteger.valueOf(versionMajor), BigInteger.valueOf(versionMinor), BigInteger.valueOf(versionPatch),
+					BigInteger.valueOf(timeNow), nodeId).send();
 		} catch (Exception e) {
-			logger.severe("Error: " + e);
-			throw new EthereumException("Failed to look up service release", e);
+			throw new EthereumException("Failed to submit service deployment announcement", e);
+		}
+	}
+
+	private void storeReleaseByVersion(ServiceReleaseData release) {
+		// store release under "name -> x -> y -> z -> release" (i.e. essentially a map of the name and the version triple)
+		this.serviceReleasesByVersion.computeIfAbsent(release.getServiceName(), k -> new HashMap<>());
+		this.serviceReleasesByVersion.get(release.getServiceName()).computeIfAbsent(release.getVersionMajor(), k -> new HashMap<>());
+		this.serviceReleasesByVersion.get(release.getServiceName()).get(release.getVersionMajor()).computeIfAbsent(release.getVersionMinor(), k -> new HashMap<>());
+		if (this.serviceReleasesByVersion.get(release.getServiceName()).get(release.getVersionMajor()).get(release.getVersionMinor()).containsKey(release.getVersionPatch())) {
+			logger.warning("Tried to store duplicate release. Ignoring. FIXME: someone is misbehaving.");
+		} else {
+			this.serviceReleasesByVersion.get(release.getServiceName()).get(release.getVersionMajor()).get(release.getVersionMinor()).put(release.getVersionPatch(), release);
+		}
+	}
+
+	private ServiceReleaseData getReleaseByVersion(String serviceName, int versionMajor, int versionMinor, int versionPatch) {
+		try {
+			return this.serviceReleasesByVersion.get(serviceName).get(versionMajor).get(versionMinor).get(versionPatch);
+		} catch (NullPointerException e) {
+			return null;
 		}
 	}
 
@@ -253,13 +346,17 @@ public class Registry extends Configurable {
 		return this.serviceReleases;
 	}
 
+	public Map<String, List<ServiceDeploymentData>> getServiceDeployments() {
+		return this.serviceDeployments;
+	}
+
 	/**
 	 * Output some (changing) debug info.
 	 */
 	public String debug() {
 		try {
-			this.releaseService("someService","alice", 0, 0, 2);
-			return getServiceRelease("someService", 1).toString();
+			announceDeployment("fooService", 1, 2, 3, "barNode");
+			return "Deployment announcement okay.";
 		} catch (Exception e) {
 			return "error: " + e;
 		}

@@ -24,10 +24,13 @@ import i5.las2peer.classLoaders.libraries.LibraryIdentifier;
 import i5.las2peer.classLoaders.libraries.LoadedNetworkLibrary;
 import i5.las2peer.classLoaders.libraries.SharedStorageRepository;
 import i5.las2peer.logging.L2pLogger;
+import i5.las2peer.p2p.EthereumNodeImpl;
 import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.persistency.EnvelopeVersion;
+import i5.las2peer.registryGateway.EthereumException;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.PassphraseAgentImpl;
+import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.serialization.MalformedXMLException;
 import i5.las2peer.serialization.SerializationException;
 
@@ -94,6 +97,9 @@ public class PackageUploader {
 			uploadServicePackage(node, serviceName, serviceVersion, depHashes, jarFiles, devAgent);
 			long uploadTime = System.currentTimeMillis() - uploadStart;
 			System.out.println("Service package '" + serviceJarFilename + "' uploaded in " + uploadTime + " ms");
+			if (node instanceof EthereumNodeImpl) {
+				registerUploadedService((EthereumNodeImpl) node, serviceName, serviceVersion, devAgent);
+			}
 		} catch (FileNotFoundException e) {
 			logger.log(Level.SEVERE, "Service package upload failed! " + e.toString());
 		} catch (IOException | CryptoException | EnvelopeException | SerializationException e) {
@@ -187,4 +193,35 @@ public class PackageUploader {
 		node.storeEnvelope(versionEnv, devAgent);
 	}
 
+	private static void registerUploadedService(EthereumNodeImpl node, String serviceName, String serviceVersion,
+			AgentImpl author) {
+		if (!(author instanceof UserAgentImpl))  {
+			logger.severe("Cannot register service using non-user agent. Skipping.");
+			return;
+		}
+		String authorName = ((UserAgentImpl) author).getLoginName();
+
+		try {
+			if (node.getRegistry().getServiceNames().contains(serviceName)) {
+				String serviceOwnerName = node.getRegistry().getServiceAuthor(serviceName);
+				if (!authorName.equals(serviceOwnerName)) {
+					logger.severe("Service owner does not match current agent. Cannot register.");
+					return;
+				}
+			} else {
+				if (node.getRegistry().getUser(authorName) == null) {
+					// TODO: don't do this automatically (but for now it's convenient ...)
+					logger.info("User '" + authorName + "' not yet registered, registering now ...");
+					node.getRegistry().registerUser(authorName, "some-agent-id");
+				}
+
+				logger.fine("Service '" + serviceName + "' not already known, registering ...");
+				node.getRegistry().registerService(serviceName, authorName);
+			}
+			logger.info("Registering service release '" + serviceName + "', v" + serviceVersion + " ...");
+			node.getRegistry().releaseService(serviceName, authorName, serviceVersion);
+		} catch (EthereumException e) {
+			logger.severe("FIXME Error while registering release: " + e);
+		}
+	}
 }

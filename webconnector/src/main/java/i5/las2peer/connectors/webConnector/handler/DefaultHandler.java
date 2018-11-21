@@ -21,8 +21,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import i5.las2peer.registryGateway.BadEthereumCredentialsException;
-import i5.las2peer.registryGateway.ServiceReleaseData;
+import i5.las2peer.p2p.EthereumNodeImpl;
+import i5.las2peer.registryGateway.*;
 import org.glassfish.jersey.media.multipart.ContentDisposition;
 
 import i5.las2peer.api.p2p.ServiceNameVersion;
@@ -37,8 +37,6 @@ import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.L2pNodeLauncher;
-import i5.las2peer.registryGateway.EthereumException;
-import i5.las2peer.registryGateway.Registry;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -50,15 +48,20 @@ public class DefaultHandler {
 
 	private final WebConnector connector;
 	private final Node node;
-	private final Registry registry;
+	private Registry registry;
 
 	public DefaultHandler(WebConnector connector) {
 		this.connector = connector;
 		this.node = connector.getL2pNode();
 		try {
-			this.registry = new Registry();
+			if (this.node instanceof EthereumNodeImpl) {
+				this.registry = ((EthereumNodeImpl) this.node).getRegistry();
+			} else {
+				// TODO: only handle if ethereum enabled
+				this.registry = new Registry();
+			}
 		} catch (BadEthereumCredentialsException e) {
-			throw new RuntimeException(e);
+				System.exit(7);
 		}
 	}
 
@@ -108,6 +111,26 @@ public class DefaultHandler {
 				releaseList.add(entry);
 			}
 			jsonObject.put(service.getKey(), releaseList);
+		}
+		return jsonObject.toJSONString();
+	}
+
+	@GET
+	@Path("/registry/service-deployments")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String getServiceDeployments() {
+		JSONObject jsonObject = new JSONObject();
+		for (Map.Entry<String, List<ServiceDeploymentData>> service: registry.getServiceDeployments().entrySet()) {
+			JSONArray deploymentList = new JSONArray();
+			for (ServiceDeploymentData deployment : service.getValue()) {
+				JSONObject entry = new JSONObject();
+				entry.put("name", deployment.getServiceName());
+				entry.put("version", deployment.getVersion());
+				entry.put("time", deployment.getTime());
+				entry.put("nodeId", deployment.getNodeId());
+				deploymentList.add(entry);
+			}
+			jsonObject.put(service.getKey(), deploymentList);
 		}
 		return jsonObject.toJSONString();
 	}
