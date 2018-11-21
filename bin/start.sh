@@ -20,6 +20,7 @@ if ./bin/wait-for-it.sh ${LAS2PEER_CONFIG_ENDPOINT} --timeout=300; then
     echo done.
 else
     echo Registry configuration endpoint specified but not accessible. Aborting.
+    docker kill eth-peer
     exit 1
 fi
 
@@ -33,8 +34,10 @@ if ./bin/wait-for-it.sh ${LAS2PEER_BOOTSTRAP} --timeout=300; then
     echo Las2peer bootstrap available, continuing.
 else
     echo Las2peer bootstrap specified but not accessible. Aborting.
+    docker kill eth-peer
     exit 3
 fi
 
 echo Starting las2peer node ...
-java -cp "registrygateway/src/main/resources/:core/export/jars/*:registrygateway/export/jars/*:restmapper/export/jars/*:webconnector/export/jars/*:core/lib/*:registrygateway/lib/*:restmapper/lib/*:webconnector/lib/*" i5.las2peer.tools.L2pNodeLauncher --port $LAS2PEER_PORT $([ -n "$LAS2PEER_BOOTSTRAP" ] && echo "--bootstrap $LAS2PEER_BOOTSTRAP") --node-id-seed $RANDOM startWebConnector "node=getNode()" "registry=node.getRegistry()" "n=getNode" "r=n.getRegistry()" interactive
+java -cp "registrygateway/src/main/resources/:core/export/jars/*:registrygateway/export/jars/*:restmapper/export/jars/*:webconnector/export/jars/*:core/lib/*:registrygateway/lib/*:restmapper/lib/*:webconnector/lib/*" i5.las2peer.tools.L2pNodeLauncher --port $LAS2PEER_PORT $([ -n "$LAS2PEER_BOOTSTRAP" ] && echo "--bootstrap $LAS2PEER_BOOTSTRAP") --node-id-seed $RANDOM startWebConnector "node=getNode()" "registry=node.getRegistry()" "n=getNode" "r=n.getRegistry()" interactive \
+|| docker kill eth-peer
