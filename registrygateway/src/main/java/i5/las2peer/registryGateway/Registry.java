@@ -17,6 +17,7 @@ import org.web3j.protocol.core.methods.response.Web3ClientVersion;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tuples.generated.Tuple2;
 import org.web3j.tuples.generated.Tuple4;
+import org.web3j.tx.ReadonlyTransactionManager;
 import org.web3j.tx.gas.ContractGasProvider;
 import org.web3j.tx.gas.StaticGasProvider;
 
@@ -70,7 +71,7 @@ public class Registry extends Configurable {
 		setFieldValues();
 
 		this.web3j = Web3j.build(new HttpService(endpoint));
-		initCredentials();
+		//initCredentials();
 		initContracts();
 
 		keepTagsUpToDate();
@@ -102,9 +103,16 @@ public class Registry extends Configurable {
 			this.serviceRegistryAddress = cleanHexPrefix(this.serviceRegistryAddress);
 		}
 		this.gasProvider = new StaticGasProvider(BigInteger.valueOf(gasPrice), BigInteger.valueOf(gasLimit));
-		this.communityTagIndex = CommunityTagIndex.load(communityTagIndexAddress, web3j, credentials, gasProvider);
-		this.userRegistry = UserRegistry.load(userRegistryAddress, web3j, credentials, gasProvider);
-		this.serviceRegistry = ServiceRegistry.load(serviceRegistryAddress, web3j, credentials, gasProvider);
+
+		ReadonlyTransactionManager transactionManager = new ReadonlyTransactionManager(web3j, account);
+
+		this.communityTagIndex = CommunityTagIndex.load(communityTagIndexAddress, web3j, transactionManager, gasProvider);
+		this.userRegistry = UserRegistry.load(userRegistryAddress, web3j, transactionManager, gasProvider);
+		this.serviceRegistry = ServiceRegistry.load(serviceRegistryAddress, web3j, transactionManager, gasProvider);
+
+		//this.communityTagIndex = CommunityTagIndex.load(communityTagIndexAddress, web3j, credentials, gasProvider);
+		//this.userRegistry = UserRegistry.load(userRegistryAddress, web3j, credentials, gasProvider);
+		//this.serviceRegistry = ServiceRegistry.load(serviceRegistryAddress, web3j, credentials, gasProvider);
 	}
 
 	/**
