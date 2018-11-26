@@ -150,7 +150,7 @@ public class Registry extends Configurable {
 	private void keepTagsUpToDate() {
 		this.tags = new HashMap<>();
 
-		this.communityTagIndex.communityTagCreatedEventObservable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST).subscribe(r -> {
+		this.communityTagIndex.communityTagCreatedEventFlowable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST).subscribe(r -> {
 			CommunityTagIndex.CommunityTagCreatedEventResponse response = r;
 			String tagName = Util.recoverString(response.name);
 			try {
@@ -167,7 +167,7 @@ public class Registry extends Configurable {
 	private void keepServiceIndexUpToDate() {
 		this.serviceNameToAuthor = new HashMap<>();
 
-		this.serviceRegistry.serviceCreatedEventObservable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST).subscribe(r -> {
+		this.serviceRegistry.serviceCreatedEventFlowable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST).subscribe(r -> {
 			ServiceRegistry.ServiceCreatedEventResponse response = r;
 			try {
 				String serviceName = this.serviceRegistry.hashToName(response.nameHash).send();
@@ -182,7 +182,7 @@ public class Registry extends Configurable {
 		this.serviceReleases = new HashMap<>();
 		this.serviceReleasesByVersion = new HashMap<>();
 
-		this.serviceRegistry.serviceReleasedEventObservable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST).subscribe(r -> {
+		this.serviceRegistry.serviceReleasedEventFlowable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST).subscribe(r -> {
 			ServiceRegistry.ServiceReleasedEventResponse response = r;
 			try {
 				String serviceName = this.serviceRegistry.hashToName(response.nameHash).send();
@@ -200,7 +200,7 @@ public class Registry extends Configurable {
 	private void keepServiceDeploymentsUpToDate() {
 		this.serviceDeployments = new HashMap<>();
 
-		this.serviceRegistry.serviceDeploymentEventObservable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST).subscribe(r -> {
+		this.serviceRegistry.serviceDeploymentEventFlowable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST).subscribe(r -> {
 			ServiceRegistry.ServiceDeploymentEventResponse response = r;
 			try {
 				String serviceName = this.serviceRegistry.hashToName(response.nameHash).send();

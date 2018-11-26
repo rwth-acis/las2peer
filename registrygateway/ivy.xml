@@ -16,6 +16,6 @@
         <dependency org="ch.qos.logback" name="logback-core" rev="1.2.3">
             <artifact name="logback-core" type="jar"/>
         </dependency>
-        <dependency org="org.web3j" name="core" rev="3.6.0" />
+        <dependency org="org.web3j" name="core" rev="4.0.1" />
     </dependencies>
 </ivy-module>
