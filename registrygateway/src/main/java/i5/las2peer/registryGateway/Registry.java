@@ -7,6 +7,7 @@ import i5.las2peer.registryGateway.contracts.UserRegistry;
 
 import i5.las2peer.logging.L2pLogger;
 
+import org.web3j.crypto.Bip39Wallet;
 import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
@@ -19,8 +20,10 @@ import org.web3j.tuples.generated.Tuple4;
 import org.web3j.tx.gas.ContractGasProvider;
 import org.web3j.tx.gas.StaticGasProvider;
 
+import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 
@@ -74,6 +77,8 @@ public class Registry extends Configurable {
 		keepServiceIndexUpToDate();
 		keepServiceReleasesUpToDate();
 		keepServiceDeploymentsUpToDate();
+
+		debug();
 	}
 
 	private void initCredentials() throws BadEthereumCredentialsException {
@@ -355,8 +360,14 @@ public class Registry extends Configurable {
 	 */
 	public String debug() {
 		try {
-			announceDeployment("fooService", 1, 2, 3, "barNode");
-			return "Deployment announcement okay.";
+			String passphrase = "hunter2";
+			File walletDir = new File("tmp");
+			Instant start = Instant.now();
+			Bip39Wallet w = WalletUtils.generateBip39Wallet(passphrase, walletDir);
+			Instant end = Instant.now();
+			logger.info("Wallet creation took " + Duration.between(start, end).toString());
+			logger.info("Wallet mnemonic is '" + w.getMnemonic() + "'");
+			return w.toString();
 		} catch (Exception e) {
 			return "error: " + e;
 		}
