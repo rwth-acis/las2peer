@@ -17,7 +17,7 @@ import org.web3j.protocol.core.methods.response.Web3ClientVersion;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tuples.generated.Tuple2;
 import org.web3j.tuples.generated.Tuple4;
-import org.web3j.tx.ReadonlyTransactionManager;
+import org.web3j.tx.Contract;
 import org.web3j.tx.gas.ContractGasProvider;
 import org.web3j.tx.gas.StaticGasProvider;
 
@@ -27,8 +27,6 @@ import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
-
-import static org.web3j.utils.Numeric.cleanHexPrefix;
 
 public class Registry extends Configurable {
 	private Map<String, String> tags;
@@ -41,9 +39,10 @@ public class Registry extends Configurable {
 	private String endpoint;
 	private long gasPrice;
 	private long gasLimit;
-	private boolean removeHexPrefixFromAddresses;
 
 	private String account;
+
+	// TODO: remove
 	private String privateKey;
 	private String walletFile;
 	private String password;
@@ -54,12 +53,17 @@ public class Registry extends Configurable {
 	// end config values
 
 	private Web3j web3j;
-	private Credentials credentials;
-	private ContractGasProvider gasProvider;
+	private Contracts.ContractsBuilder contractsWithoutCredentials;
 
-	private CommunityTagIndex communityTagIndex;
-	private UserRegistry userRegistry;
-	private ServiceRegistry serviceRegistry;
+	private Contracts readOnlyContracts;
+	private Credentials currentUserCredentials;
+	private Contracts userCredentialContracts;
+
+	// TODO: sort of get rid of
+	// would that really be so ugly? yes!
+	//private CommunityTagIndex communityTagIndex;
+	//private UserRegistry userRegistry;
+	//private ServiceRegistry serviceRegistry;
 
 	private final L2pLogger logger = L2pLogger.getInstance(Registry.class);
 
@@ -67,12 +71,12 @@ public class Registry extends Configurable {
 	 * Connect to Ethereum node, initialize contracts, and start updating state to mirror the
 	 * blockchain.
 	 */
-	public Registry() throws BadEthereumCredentialsException {
+	public Registry() {
 		setFieldValues();
 
 		this.web3j = Web3j.build(new HttpService(endpoint));
-		//initCredentials();
-		initContracts();
+		initContractsWithoutCredentials();
+		initReadOnlyContracts();
 
 		keepTagsUpToDate();
 		keepServiceIndexUpToDate();
@@ -82,37 +86,46 @@ public class Registry extends Configurable {
 		debug();
 	}
 
-	private void initCredentials() throws BadEthereumCredentialsException {
-		if ((walletFile == null) == (privateKey == null)) {
-			throw new BadEthereumCredentialsException("Credentials must be specified EITHER as walletFile+password or privateKey");
-		} else if (walletFile != null) {
-			try {
-				this.credentials = WalletUtils.loadCredentials(password, walletFile);
-			} catch (IOException | CipherException e) {
-				throw new BadEthereumCredentialsException("Could not load or decrypt wallet file", e);
-			}
-		} else {
-			this.credentials = Credentials.create(privateKey);
+	public void setCurrentUserCredentials(Credentials credentials) {
+		this.currentUserCredentials = credentials;
+	}
+
+	public void setCurrentUserCredentials(String walletFile, String password) throws BadEthereumCredentialsException {
+		try {
+			this.currentUserCredentials = WalletUtils.loadCredentials(password, walletFile);
+		} catch (IOException | CipherException e) {
+			throw new BadEthereumCredentialsException("Could not load or decrypt wallet file", e);
 		}
 	}
 
-	private void initContracts() {
-		if (this.removeHexPrefixFromAddresses) {
-			this.communityTagIndexAddress = cleanHexPrefix(this.communityTagIndexAddress);
-			this.userRegistryAddress = cleanHexPrefix(this.userRegistryAddress);
-			this.serviceRegistryAddress = cleanHexPrefix(this.serviceRegistryAddress);
-		}
-		this.gasProvider = new StaticGasProvider(BigInteger.valueOf(gasPrice), BigInteger.valueOf(gasLimit));
+	public void setCurrentUserCredentials(String privateKey) {
+		setCurrentUserCredentials(Credentials.create(privateKey));
+	}
 
-		ReadonlyTransactionManager transactionManager = new ReadonlyTransactionManager(web3j, account);
+	/**
+	 * Initialize ContractsBuilder object with everything but
+	 * credentials.
+	 * (We want to use this later to quickly build Contracts with
+	 * user-supplied credentials.)
+	 */
+	private void initContractsWithoutCredentials() {
+		Map<Class<? extends Contract>, String> addresses = new HashMap<>();
+		addresses.put(CommunityTagIndex.class, communityTagIndexAddress);
+		addresses.put(UserRegistry.class, userRegistryAddress);
+		addresses.put(ServiceRegistry.class, serviceRegistryAddress);
 
-		this.communityTagIndex = CommunityTagIndex.load(communityTagIndexAddress, web3j, transactionManager, gasProvider);
-		this.userRegistry = UserRegistry.load(userRegistryAddress, web3j, transactionManager, gasProvider);
-		this.serviceRegistry = ServiceRegistry.load(serviceRegistryAddress, web3j, transactionManager, gasProvider);
+		ContractGasProvider gasProvider = new StaticGasProvider(BigInteger.valueOf(gasPrice), BigInteger.valueOf(gasLimit));
+		this.contractsWithoutCredentials = new Contracts.ContractsBuilder(this.web3j, addresses, gasProvider);
+	}
 
-		//this.communityTagIndex = CommunityTagIndex.load(communityTagIndexAddress, web3j, credentials, gasProvider);
-		//this.userRegistry = UserRegistry.load(userRegistryAddress, web3j, credentials, gasProvider);
-		//this.serviceRegistry = ServiceRegistry.load(serviceRegistryAddress, web3j, credentials, gasProvider);
+	/**
+	 * Instantiate contracts for read-only use.
+	 */
+	private void initReadOnlyContracts() {
+		this.readOnlyContracts = this.contractsWithoutCredentials.buildReadOnly(this.account);
+		//this.communityTagIndex = (CommunityTagIndex) this.readOnlyContracts.get(CommunityTagIndex.class);
+		//this.userRegistry = (UserRegistry) this.readOnlyContracts.get(UserRegistry.class);
+		//this.serviceRegistry = (ServiceRegistry) this.readOnlyContracts.get(ServiceRegistry.class);
 	}
 
 	/**
@@ -148,6 +161,8 @@ public class Registry extends Configurable {
 	 */
 	private String getTagDescription(String tagName) throws EthereumException {
 		try {
+			//CommunityTagIndex communityTagIndex = (CommunityTagIndex) this.readOnlyContracts.get(CommunityTagIndex.class);
+			CommunityTagIndex communityTagIndex = this.readOnlyContracts.byClass(CommunityTagIndex.class);
 			return communityTagIndex.viewDescription(Util.padAndConvertString(tagName, 32)).send();
 		} catch (IllegalArgumentException e) {
 			throw new IllegalArgumentException("tag name invalid (too long?)", e);
@@ -294,6 +309,7 @@ public class Registry extends Configurable {
 		}
 	}
 
+	//@Deprecated
 	//public ServiceReleaseData getServiceRelease(String serviceName, int index) throws EthereumException {
 	//	// TODO: index should not be a thing!
 	//	try {
