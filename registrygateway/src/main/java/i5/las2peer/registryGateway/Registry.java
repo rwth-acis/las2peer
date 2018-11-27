@@ -3,7 +3,6 @@ package i5.las2peer.registryGateway;
 import i5.las2peer.api.Configurable;
 import i5.las2peer.registryGateway.contracts.CommunityTagIndex;
 import i5.las2peer.registryGateway.contracts.ServiceRegistry;
-import i5.las2peer.registryGateway.contracts.UserRegistry;
 
 import i5.las2peer.logging.L2pLogger;
 
@@ -17,7 +16,6 @@ import org.web3j.protocol.core.methods.response.Web3ClientVersion;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tuples.generated.Tuple2;
 import org.web3j.tuples.generated.Tuple4;
-import org.web3j.tx.Contract;
 import org.web3j.tx.gas.ContractGasProvider;
 import org.web3j.tx.gas.StaticGasProvider;
 
@@ -40,12 +38,7 @@ public class Registry extends Configurable {
 	private long gasPrice;
 	private long gasLimit;
 
-	private String account;
-
-	// TODO: remove
-	private String privateKey;
-	private String walletFile;
-	private String password;
+	private String account; // TODO: rename
 
 	private String communityTagIndexAddress;
 	private String userRegistryAddress;
@@ -56,14 +49,8 @@ public class Registry extends Configurable {
 	private Contracts.ContractsBuilder contractsWithoutCredentials;
 
 	private Contracts readOnlyContracts;
-	private Credentials currentUserCredentials;
+	private Credentials userCredentials;
 	private Contracts userCredentialContracts;
-
-	// TODO: sort of get rid of
-	// would that really be so ugly? yes!
-	//private CommunityTagIndex communityTagIndex;
-	//private UserRegistry userRegistry;
-	//private ServiceRegistry serviceRegistry;
 
 	private final L2pLogger logger = L2pLogger.getInstance(Registry.class);
 
@@ -86,20 +73,26 @@ public class Registry extends Configurable {
 		debug();
 	}
 
-	public void setCurrentUserCredentials(Credentials credentials) {
-		this.currentUserCredentials = credentials;
-	}
-
-	public void setCurrentUserCredentials(String walletFile, String password) throws BadEthereumCredentialsException {
+	public void loadUserCredentials(String walletFile, String password) throws BadEthereumCredentialsException {
 		try {
-			this.currentUserCredentials = WalletUtils.loadCredentials(password, walletFile);
+			this.userCredentials = WalletUtils.loadCredentials(password, walletFile);
 		} catch (IOException | CipherException e) {
 			throw new BadEthereumCredentialsException("Could not load or decrypt wallet file", e);
 		}
 	}
 
-	public void setCurrentUserCredentials(String privateKey) {
-		setCurrentUserCredentials(Credentials.create(privateKey));
+	public void loadUserCredentials(String privateKey) {
+		loadUserCredentials(Credentials.create(privateKey));
+	}
+
+	public void loadUserCredentials(Credentials credentials) {
+		this.userCredentials = credentials;
+		this.userCredentialContracts = this.contractsWithoutCredentials.build(credentials);
+	}
+
+	public void removeUserCredentials() {
+		this.userCredentials = null;
+		this.userCredentialContracts = null;
 	}
 
 	/**
@@ -109,13 +102,11 @@ public class Registry extends Configurable {
 	 * user-supplied credentials.)
 	 */
 	private void initContractsWithoutCredentials() {
-		Map<Class<? extends Contract>, String> addresses = new HashMap<>();
-		addresses.put(CommunityTagIndex.class, communityTagIndexAddress);
-		addresses.put(UserRegistry.class, userRegistryAddress);
-		addresses.put(ServiceRegistry.class, serviceRegistryAddress);
-
 		ContractGasProvider gasProvider = new StaticGasProvider(BigInteger.valueOf(gasPrice), BigInteger.valueOf(gasLimit));
-		this.contractsWithoutCredentials = new Contracts.ContractsBuilder(this.web3j, addresses, gasProvider);
+		this.contractsWithoutCredentials = new Contracts.ContractsBuilder(web3j, gasProvider);
+		this.contractsWithoutCredentials.setCommunityTagIndexAddress(communityTagIndexAddress);
+		this.contractsWithoutCredentials.setUserRegistryAddress(userRegistryAddress);
+		this.contractsWithoutCredentials.setServiceRegistryAddress(serviceRegistryAddress);
 	}
 
 	/**
@@ -123,9 +114,6 @@ public class Registry extends Configurable {
 	 */
 	private void initReadOnlyContracts() {
 		this.readOnlyContracts = this.contractsWithoutCredentials.buildReadOnly(this.account);
-		//this.communityTagIndex = (CommunityTagIndex) this.readOnlyContracts.get(CommunityTagIndex.class);
-		//this.userRegistry = (UserRegistry) this.readOnlyContracts.get(UserRegistry.class);
-		//this.serviceRegistry = (ServiceRegistry) this.readOnlyContracts.get(ServiceRegistry.class);
 	}
 
 	/**
@@ -146,9 +134,14 @@ public class Registry extends Configurable {
 	 * @param tagDescription String of arbitrary (!?) length
 	 * @throws EthereumException if transaction failed for some reason (gas? networking?)
 	 */
-	public void createTag(String tagName, String tagDescription) throws EthereumException {
+	public void createTag(String tagName, String tagDescription)
+			throws EthereumException, MissingEthereumCredentialsException {
+		if (this.userCredentialContracts == null) {
+			throw new MissingEthereumCredentialsException("user credentials must be loaded");
+		}
+
 		try {
-			communityTagIndex.create(Util.padAndConvertString(tagName, 32), tagDescription).send();
+			this.userCredentialContracts.communityTagIndex.create(Util.padAndConvertString(tagName, 32), tagDescription).send();
 		} catch (IllegalArgumentException e) {
 			throw new IllegalArgumentException("tag name invalid (too long?)", e);
 		} catch (Exception e) {
@@ -161,9 +154,7 @@ public class Registry extends Configurable {
 	 */
 	private String getTagDescription(String tagName) throws EthereumException {
 		try {
-			//CommunityTagIndex communityTagIndex = (CommunityTagIndex) this.readOnlyContracts.get(CommunityTagIndex.class);
-			CommunityTagIndex communityTagIndex = this.readOnlyContracts.byClass(CommunityTagIndex.class);
-			return communityTagIndex.viewDescription(Util.padAndConvertString(tagName, 32)).send();
+			return this.readOnlyContracts.communityTagIndex.viewDescription(Util.padAndConvertString(tagName, 32)).send();
 		} catch (IllegalArgumentException e) {
 			throw new IllegalArgumentException("tag name invalid (too long?)", e);
 		} catch (Exception e) {
@@ -178,7 +169,7 @@ public class Registry extends Configurable {
 	private void keepTagsUpToDate() {
 		this.tags = new HashMap<>();
 
-		this.communityTagIndex.communityTagCreatedEventFlowable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST).subscribe(r -> {
+		this.readOnlyContracts.communityTagIndex.communityTagCreatedEventFlowable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST).subscribe(r -> {
 			CommunityTagIndex.CommunityTagCreatedEventResponse response = r;
 			String tagName = Util.recoverString(response.name);
 			try {
@@ -195,10 +186,10 @@ public class Registry extends Configurable {
 	private void keepServiceIndexUpToDate() {
 		this.serviceNameToAuthor = new HashMap<>();
 
-		this.serviceRegistry.serviceCreatedEventFlowable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST).subscribe(r -> {
+		this.readOnlyContracts.serviceRegistry.serviceCreatedEventFlowable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST).subscribe(r -> {
 			ServiceRegistry.ServiceCreatedEventResponse response = r;
 			try {
-				String serviceName = this.serviceRegistry.hashToName(response.nameHash).send();
+				String serviceName = this.readOnlyContracts.serviceRegistry.hashToName(response.nameHash).send();
 				this.serviceNameToAuthor.put(serviceName, Util.recoverString(response.author));
 			} catch (Exception e) {
 				logger.severe("Error while looking up new service's name.");
@@ -210,10 +201,10 @@ public class Registry extends Configurable {
 		this.serviceReleases = new HashMap<>();
 		this.serviceReleasesByVersion = new HashMap<>();
 
-		this.serviceRegistry.serviceReleasedEventFlowable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST).subscribe(r -> {
+		this.readOnlyContracts.serviceRegistry.serviceReleasedEventFlowable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST).subscribe(r -> {
 			ServiceRegistry.ServiceReleasedEventResponse response = r;
 			try {
-				String serviceName = this.serviceRegistry.hashToName(response.nameHash).send();
+				String serviceName = this.readOnlyContracts.serviceRegistry.hashToName(response.nameHash).send();
 				ServiceReleaseData release = new ServiceReleaseData(serviceName, response.versionMajor, response.versionMinor, response.versionPatch, new byte[]{});
 				this.serviceReleases.computeIfAbsent(release.getServiceName(), k -> new ArrayList<>());
 				this.serviceReleases.get(release.getServiceName()).add(release);
@@ -228,10 +219,10 @@ public class Registry extends Configurable {
 	private void keepServiceDeploymentsUpToDate() {
 		this.serviceDeployments = new HashMap<>();
 
-		this.serviceRegistry.serviceDeploymentEventFlowable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST).subscribe(r -> {
+		this.readOnlyContracts.serviceRegistry.serviceDeploymentEventFlowable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST).subscribe(r -> {
 			ServiceRegistry.ServiceDeploymentEventResponse response = r;
 			try {
-				String serviceName = this.serviceRegistry.hashToName(response.nameHash).send();
+				String serviceName = this.readOnlyContracts.serviceRegistry.hashToName(response.nameHash).send();
 				ServiceDeploymentData deployment = new ServiceDeploymentData(serviceName, response.versionMajor, response.versionMinor, response.versionPatch, response.timestamp, response.nodeId);
 				this.serviceDeployments.computeIfAbsent(deployment.getServiceName(), k -> new ArrayList<>());
 				this.serviceDeployments.get(deployment.getServiceName()).add(deployment);
@@ -241,10 +232,14 @@ public class Registry extends Configurable {
 		});
 	}
 
-	public void registerUser(String name, String agentId) throws EthereumException {
+	public void registerUser(String name, String agentId) throws EthereumException, MissingEthereumCredentialsException {
+		if (this.userCredentialContracts == null) {
+			throw new MissingEthereumCredentialsException("user credentials must be loaded");
+		}
+
 		// TODO: more parameters
 		try {
-			this.userRegistry.register(Util.padAndConvertString(name, 32), Util.padAndConvertString(agentId, 32)).send();
+			this.userCredentialContracts.userRegistry.register(Util.padAndConvertString(name, 32), Util.padAndConvertString(agentId, 32)).send();
 		} catch (Exception e) {
 			throw new EthereumException("Could not register user", e);
 		}
@@ -252,7 +247,7 @@ public class Registry extends Configurable {
 
 	public UserData getUser(String name) throws EthereumException {
 		try {
-			Tuple4<byte[], byte[], String, byte[]> t = this.userRegistry.users(Util.padAndConvertString(name, 32)).send();
+			Tuple4<byte[], byte[], String, byte[]> t = this.readOnlyContracts.userRegistry.users(Util.padAndConvertString(name, 32)).send();
 
 			byte[] returnedName = t.getValue1();
 
@@ -267,9 +262,13 @@ public class Registry extends Configurable {
 		}
 	}
 
-	public void registerService(String serviceName, String authorName) throws EthereumException {
+	public void registerService(String serviceName, String authorName)
+			throws EthereumException, MissingEthereumCredentialsException {
+		if (this.userCredentialContracts == null) {
+			throw new MissingEthereumCredentialsException("user credentials must be loaded");
+		}
 		try {
-			this.serviceRegistry.register(serviceName, Util.padAndConvertString(authorName, 32)).send();
+			this.userCredentialContracts.serviceRegistry.register(serviceName, Util.padAndConvertString(authorName, 32)).send();
 		} catch (Exception e) {
 			throw new EthereumException("Failed to register service", e);
 		}
@@ -278,30 +277,37 @@ public class Registry extends Configurable {
 	public String getServiceAuthor(String serviceName) throws EthereumException {
 		try {
 			byte[] serviceNameHash = Util.soliditySha3(serviceName);
-			Tuple2<String, byte[]> t = this.serviceRegistry.services(serviceNameHash).send();
+			Tuple2<String, byte[]> t = this.readOnlyContracts.serviceRegistry.services(serviceNameHash).send();
 			return Util.recoverString(t.getValue2());
 		} catch (Exception e) {
 			throw new EthereumException("Failed look up service author", e);
 		}
 	}
 
-	public void releaseService(String serviceName, String authorName, String versionString) throws EthereumException {
+	public void releaseService(String serviceName, String authorName, String versionString)
+			throws EthereumException, MissingEthereumCredentialsException {
 		int[] version = Util.parseVersion(versionString);
 		releaseService(serviceName, authorName, version[0], version[1], version[2]);
 	}
 
-	public void releaseService(String serviceName, String authorName, int versionMajor, int versionMinor, int versionPatch) throws EthereumException {
+	public void releaseService(String serviceName, String authorName, int versionMajor, int versionMinor, int versionPatch)
+			throws EthereumException, MissingEthereumCredentialsException {
 		releaseService(serviceName, authorName, versionMajor, versionMinor, versionPatch, "");
 	}
 
-	private void releaseService(String serviceName, String authorName, int versionMajor, int versionMinor, int versionPatch, String dhtSupplement) throws EthereumException {
+	private void releaseService(String serviceName, String authorName, int versionMajor, int versionMinor, int versionPatch, String dhtSupplement)
+			throws EthereumException, MissingEthereumCredentialsException {
+		if (this.userCredentialContracts == null) {
+			throw new MissingEthereumCredentialsException("user credentials must be loaded");
+		}
+
 		if (getReleaseByVersion(serviceName, versionMajor, versionMinor, versionPatch) != null) {
 			logger.severe("Tried to submit duplicate release (name / version already exist), ignoring! (Maybe look into why this happened?)");
 			return;
 		}
 
 		try {
-			this.serviceRegistry.release(serviceName, Util.padAndConvertString(authorName, 32),
+			this.userCredentialContracts.serviceRegistry.release(serviceName, Util.padAndConvertString(authorName, 32),
 					BigInteger.valueOf(versionMajor), BigInteger.valueOf(versionMinor), BigInteger.valueOf(versionPatch),
 					dhtSupplement).send();
 		} catch (Exception e) {
@@ -309,27 +315,18 @@ public class Registry extends Configurable {
 		}
 	}
 
-	//@Deprecated
-	//public ServiceReleaseData getServiceRelease(String serviceName, int index) throws EthereumException {
-	//	// TODO: index should not be a thing!
-	//	try {
-	//		Tuple5<byte[], BigInteger, BigInteger, BigInteger, byte[]> t = this.serviceRegistry.serviceNameToReleases(
-	//				Util.padAndConvertString(serviceName, 32),
-	//				BigInteger.valueOf(index)).send();
-	//		return new ServiceReleaseData(t.getValue1(), t.getValue2(), t.getValue3(), t.getValue4(), t.getValue5());
-	//	} catch (Exception e) {
-	//		logger.severe("Error: " + e);
-	//		throw new EthereumException("Failed to look up service release", e);
-	//	}
-	//}
-
 	// FIXME: for some reason, the node shell does not find functions with this signature:
 	// java.lang.NoSuchMethodException: No signature of okay on Registry matches the given parameters
 	// (same for different function with same params)
-	public void announceDeployment(String serviceName, int versionMajor, int versionMinor, int versionPatch, String nodeId) throws EthereumException {
+	public void announceDeployment(String serviceName, int versionMajor, int versionMinor, int versionPatch, String nodeId)
+			throws EthereumException, MissingEthereumCredentialsException {
+		if (this.userCredentialContracts == null) {
+			throw new MissingEthereumCredentialsException("user credentials must be loaded");
+		}
+
 		long timeNow = Instant.now().getEpochSecond();
 		try {
-			this.serviceRegistry.announceDeployment(serviceName,
+			this.userCredentialContracts.serviceRegistry.announceDeployment(serviceName,
 					BigInteger.valueOf(versionMajor), BigInteger.valueOf(versionMinor), BigInteger.valueOf(versionPatch),
 					BigInteger.valueOf(timeNow), nodeId).send();
 		} catch (Exception e) {

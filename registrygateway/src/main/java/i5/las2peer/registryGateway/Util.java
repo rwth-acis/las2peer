@@ -1,9 +1,7 @@
 package i5.las2peer.registryGateway;
 
-import org.web3j.abi.datatypes.BytesType;
 import org.web3j.crypto.Hash;
 
-import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
