@@ -1,5 +1,8 @@
 package i5.las2peer.registryGateway;
 
+import i5.las2peer.registryGateway.contracts.CommunityTagIndex;
+import i5.las2peer.registryGateway.contracts.ServiceRegistry;
+import i5.las2peer.registryGateway.contracts.UserRegistry;
 import org.web3j.protocol.Web3j;
 import org.web3j.tx.Contract;
 import org.web3j.tx.gas.ContractGasProvider;
@@ -14,9 +17,15 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Contracts extends HashMap<Class<? extends Contract>, Contract> {
-	public <T extends Contract> T byClass(Class<T> clazz) {
-		return (T) this.get(clazz);
+public class Contracts {
+	CommunityTagIndex communityTagIndex;
+	UserRegistry userRegistry;
+	ServiceRegistry serviceRegistry;
+
+	private Contracts(CommunityTagIndex communityTagIndex, UserRegistry userRegistry, ServiceRegistry serviceRegistry) {
+		this.communityTagIndex = communityTagIndex;
+		this.userRegistry = userRegistry;
+		this.serviceRegistry = serviceRegistry;
 	}
 
 	public static class ContractsBuilder {
@@ -46,20 +55,13 @@ public class Contracts extends HashMap<Class<? extends Contract>, Contract> {
 		public Contracts build(TransactionManager transactionManager) {
 			this.transactionManager = transactionManager;
 
-			Contracts contracts = new Contracts();
-			for (Map.Entry<Class<? extends Contract>, String> entry : contractAddresses.entrySet()) {
-				Class<? extends Contract> contractClass = entry.getKey();
-				String address = entry.getValue();
+			Map<Class<? extends Contract>, Contract> contracts = new HashMap<>();
 
-				try {
-					// wow, Java sure is simple
-					Constructor<?> ctor = contractClass.getDeclaredConstructor(String.class, Web3j.class, TransactionManager.class, ContractGasProvider.class);
-					Contract contract = (Contract) ctor.newInstance(address, web3j, transactionManager, gasProvider);
-					contracts.put(contractClass, contract);
-				} catch (NoSuchMethodException|InstantiationException|IllegalAccessException| InvocationTargetException e) {
-				}
-			}
-			return contracts;
+			// nominee for ugliest code 2018 in Cannes
+			contractAddresses.forEach((k, address) -> contracts.put(k, k.getDeclaredConstructor(String.class, Web3j.class, TransactionManager.class, ContractGasProvider.class).newInstance(address, this.web3j, transactionManager, this.gasProvider))); // yeeeehaww
+			return new Contracts((CommunityTagIndex) contracts.get(CommunityTagIndex.class),
+					(UserRegistry) contracts.get(UserRegistry.class),
+					(ServiceRegistry) contracts.get(ServiceRegistry.class));
 		}
 	}
 }
