@@ -92,10 +92,15 @@ public class L2pNodeLauncher {
 		return bFinished;
 	}
 
-	private EthereumNodeImpl node;
+	private Node node;
 
-	public EthereumNodeImpl getNode() {
+	public Node getNode() {
 		return node;
+	}
+
+	// helper function because the Launcher shell can't cast objects
+	public EthereumNode getNodeAsEthereumNode() {
+		return (EthereumNode) node;
 	}
 
 	private UserAgentImpl currentUser;
@@ -311,7 +316,7 @@ public class L2pNodeLauncher {
 	 */
 	public void uploadServicePackage(String serviceJarFile, String developerAgentXMLFile, String developerPassword)
 			throws ServicePackageException {
-		PackageUploader.uploadServicePackage(node, serviceJarFile, developerAgentXMLFile, developerPassword);
+		PackageUploader.uploadServicePackage((PastryNodeImpl) node, serviceJarFile, developerAgentXMLFile, developerPassword);
 	}
 
 	/**
@@ -673,6 +678,9 @@ public class L2pNodeLauncher {
 		}
 
 		node.registerReceiver(serviceAgent);
+		if (node instanceof EthereumNode) {
+			((EthereumNode) node).announceServiceDeployment((ServiceAgentImpl) serviceAgent);
+		}
 	}
 
 	/**
@@ -782,12 +790,36 @@ public class L2pNodeLauncher {
 	 * @param nodeIdSeed the seed to generate node IDs from
 	 */
 	private L2pNodeLauncher(InetAddress bindAddress, Integer port, List<String> bootstrap, STORAGE_MODE storageMode,
-			String storageDir, Boolean monitoringObserver, ClassManager cl, Long nodeIdSeed) {
+							String storageDir, Boolean monitoringObserver, ClassManager cl, Long nodeIdSeed) {
+		this(bindAddress, port, bootstrap, storageMode, storageDir, monitoringObserver, cl, nodeIdSeed, null, null);
+	}
+
+	/**
+	 * Creates a new node launcher instance with blockchain-based service registry.
+	 *
+	 * @param bindAddress
+	 *
+	 * @param port local port number to open
+	 * @param bootstrap list of bootstrap hosts to connect to or {@code null} for a new network
+	 * @param storageMode A {@link STORAGE_MODE} used by the local node instance for persistence.
+	 * @param storageDir
+	 * @param monitoringObserver determines, if the monitoring-observer will be started at this node
+	 * @param cl the class loader to be used with this node
+	 * @param nodeIdSeed the seed to generate node IDs from
+	 */
+	private L2pNodeLauncher(InetAddress bindAddress, Integer port, List<String> bootstrap, STORAGE_MODE storageMode,
+			String storageDir, Boolean monitoringObserver, ClassManager cl, Long nodeIdSeed,
+			String ethereumWalletPath, String ethereumWalletPassword) {
 		if (monitoringObserver == null) {
 			monitoringObserver = false;
 		}
-		node = new EthereumNodeImpl(cl, monitoringObserver, bindAddress, port, bootstrap, storageMode, storageDir,
-				nodeIdSeed);
+		if (ethereumWalletPath == null) {
+			node = new PastryNodeImpl(cl, monitoringObserver, bindAddress, port, bootstrap, storageMode, storageDir,
+					nodeIdSeed);
+		} else {
+			node = new EthereumNode(cl, monitoringObserver, bindAddress, port, bootstrap, storageMode, storageDir,
+					nodeIdSeed, ethereumWalletPath, ethereumWalletPassword);
+		}
 		commandPrompt = new CommandPrompt(this);
 	}
 
@@ -943,7 +975,8 @@ public class L2pNodeLauncher {
 				L2pNodeLauncher.class.getClassLoader(), clp);
 		L2pNodeLauncher launcher = new L2pNodeLauncher(bindAddress, launcherConfiguration.getPort(),
 				launcherConfiguration.getBootstrap(), storageMode, launcherConfiguration.getStorageDirectory(),
-				launcherConfiguration.useMonitoringObserver(), cl, launcherConfiguration.getNodeIdSeed());
+				launcherConfiguration.useMonitoringObserver(), cl, launcherConfiguration.getNodeIdSeed(),
+				launcherConfiguration.getEthereumWalletPath(), launcherConfiguration.getEthereumWalletPassword());
 		// check special commands
 		if (launcherConfiguration.isPrintHelp()) {
 			launcher.bFinished = true;
@@ -1044,6 +1077,11 @@ public class L2pNodeLauncher {
 				+ L2pNodeLauncherConfiguration.ARG_SHORT_STORAGE_DIRECTORY
 				+ " directory\tsets Pastry's storage directory. Default: " + SharedStorage.DEFAULT_STORAGE_ROOT_DIR
 				+ "\n");
+		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_ETHEREUM_WALLET
+				+ " file path\tsets Node operator's Ethereum wallet for Service Registry.\n"
+				+ "\t\t\t\tThis is used e.g. for service deployment announcements.");
+		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_ETHEREUM_WALLET_PASSWORD
+				+ " password\tsets password to unlock Ethereum wallet (if password-protected).\n");
 
 		System.out.println("Launcher Methods:");
 		System.out.println("The following methods can be used in arbitrary order and number:");

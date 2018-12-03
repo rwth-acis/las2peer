@@ -80,7 +80,7 @@ public class UserRegistry extends Contract {
         _addresses.put("1538963171946", "0x5fe12658b58b3a4af2ec8c4a3a2a51805b59056b");
         _addresses.put("1542029033973", "0x213a9432a55a6fe0129f238bed7119a7a2b75b94");
         _addresses.put("1543166567414", "0x10294d2950378c3f811c7be05da0481fc5b64387");
-        _addresses.put("1337", "0x53f73e963f2e0161531cefd7d58c3991c8e40308");
+        _addresses.put("1337", "0xcd3bf94d85ebd9c8a31a3fb9905eb5dc7ff66182");
         _addresses.put("1543180833463", "0x213a9432a55a6fe0129f238bed7119a7a2b75b94");
         _addresses.put("1543175929774", "0x213a9432a55a6fe0129f238bed7119a7a2b75b94");
         _addresses.put("1543173626032", "0x213a9432a55a6fe0129f238bed7119a7a2b75b94");

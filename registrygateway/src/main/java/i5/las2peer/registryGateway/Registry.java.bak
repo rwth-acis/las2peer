@@ -6,10 +6,7 @@ import i5.las2peer.registryGateway.contracts.ServiceRegistry;
 
 import i5.las2peer.logging.L2pLogger;
 
-import org.web3j.crypto.Bip39Wallet;
-import org.web3j.crypto.CipherException;
-import org.web3j.crypto.Credentials;
-import org.web3j.crypto.WalletUtils;
+import org.web3j.crypto.*;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.Web3ClientVersion;
@@ -73,18 +70,19 @@ public class Registry extends Configurable {
 		debug();
 	}
 
-	public void loadUserCredentials(String walletFile, String password) throws BadEthereumCredentialsException {
-		try {
-			this.userCredentials = WalletUtils.loadCredentials(password, walletFile);
-		} catch (IOException | CipherException e) {
-			throw new BadEthereumCredentialsException("Could not load or decrypt wallet file", e);
+	static class CredentialedRegistry {
+		private Registry registry;
+		private Credentials credentials;
+
+		CredentialedRegistry(Registry registry, Credentials credentials) {
+			this.registry = registry;
+			this.credentials = credentials;
 		}
 	}
 
-	public void loadUserCredentials(String privateKey) {
-		loadUserCredentials(Credentials.create(privateKey));
-	}
-
+	// it would be much cleaner to return a new Registry object with
+	// the credentials, rather than risking race conditions and forgotten
+	// logouts here. TODO
 	public void loadUserCredentials(Credentials credentials) {
 		this.userCredentials = credentials;
 		this.userCredentialContracts = this.contractsWithoutCredentials.build(credentials);
@@ -381,6 +379,20 @@ public class Registry extends Configurable {
 	 */
 	public String debug() {
 		try {
+			//registerUser("alice", "some-agent-id");
+			//registerService("thirdService", "alice");
+			//releaseService("someService", "alice", 0, 1, 4);
+
+			//String newTag = "t" + System.currentTimeMillis();
+			//createTag(newTag, "foo");
+			//return getTagDescription(newTag);
+
+			//return getServiceAuthor("someService");
+			//return getServiceRelease("someService", 0).toString();
+
+			//announceDeployment("fooService", 1, 2, 3, "barNode");
+			//return "Deployment announcement okay.";
+
 			String passphrase = "hunter2";
 			File walletDir = new File("tmp");
 			Instant start = Instant.now();

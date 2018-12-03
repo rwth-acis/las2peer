@@ -21,7 +21,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import i5.las2peer.p2p.EthereumNodeImpl;
+import i5.las2peer.p2p.EthereumNode;
 import i5.las2peer.registryGateway.*;
 import org.glassfish.jersey.media.multipart.ContentDisposition;
 
@@ -48,20 +48,16 @@ public class DefaultHandler {
 
 	private final WebConnector connector;
 	private final Node node;
-	private Registry registry;
+	private ReadOnlyRegistryClient registry;
 
 	public DefaultHandler(WebConnector connector) {
 		this.connector = connector;
-		this.node = connector.getL2pNode();
-		try {
-			if (this.node instanceof EthereumNodeImpl) {
-				this.registry = ((EthereumNodeImpl) this.node).getRegistry();
-			} else {
-				// TODO: only handle if ethereum enabled
-				this.registry = new Registry();
-			}
-		} catch (BadEthereumCredentialsException e) {
-				System.exit(7);
+		node = connector.getL2pNode();
+		if (node instanceof EthereumNode) {
+			registry = ((EthereumNode) this.node).getRegistryClient();
+		} else {
+			// TODO: only handle if ethereum enabled
+			registry = new ReadOnlyRegistryClient(new RegistryConfiguration());
 		}
 	}
 

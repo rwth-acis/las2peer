@@ -4,14 +4,16 @@ import java.math.BigInteger;
 
 public class ServiceDeploymentData {
 	private String serviceName;
+	private String serviceClass;
 	private BigInteger versionMajor;
 	private BigInteger versionMinor;
 	private BigInteger versionPatch;
 	private BigInteger timestamp;
 	private String nodeId;
 
-	public ServiceDeploymentData(String serviceName, BigInteger versionMajor, BigInteger versionMinor, BigInteger versionPatch, BigInteger timestamp, String nodeId) {
+	public ServiceDeploymentData(String serviceName, String serviceClass, BigInteger versionMajor, BigInteger versionMinor, BigInteger versionPatch, BigInteger timestamp, String nodeId) {
 		this.serviceName = serviceName;
+		this.serviceClass = serviceClass;
 		this.versionMajor = versionMajor;
 		this.versionMinor = versionMinor;
 		this.versionPatch = versionPatch;

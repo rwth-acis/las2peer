@@ -39,5 +39,5 @@ else
 fi
 
 echo Starting las2peer node ...
-java -cp "registrygateway/src/main/resources/:core/export/jars/*:registrygateway/export/jars/*:restmapper/export/jars/*:webconnector/export/jars/*:core/lib/*:registrygateway/lib/*:restmapper/lib/*:webconnector/lib/*" i5.las2peer.tools.L2pNodeLauncher --port $LAS2PEER_PORT $([ -n "$LAS2PEER_BOOTSTRAP" ] && echo "--bootstrap $LAS2PEER_BOOTSTRAP") --node-id-seed $RANDOM startWebConnector "node=getNode()" "registry=node.getRegistry()" "n=getNode" "r=n.getRegistry()" interactive \
+java -cp "registrygateway/src/main/resources/:core/export/jars/*:registrygateway/export/jars/*:restmapper/export/jars/*:webconnector/export/jars/*:core/lib/*:registrygateway/lib/*:restmapper/lib/*:webconnector/lib/*" i5.las2peer.tools.L2pNodeLauncher --port $LAS2PEER_PORT $([ -n "$LAS2PEER_BOOTSTRAP" ] && echo "--bootstrap $LAS2PEER_BOOTSTRAP") --node-id-seed $RANDOM startWebConnector "node=getNodeAsEthereumNode()" "registry=node.getRegistryClient()" "n=getNodeAsEthereumNode()" "r=n.getRegistryClient()" interactive \
 || docker kill eth-peer
