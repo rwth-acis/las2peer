@@ -1,4 +1,4 @@
-package i5.las2peer.registryGateway;
+package i5.las2peer.registry;
 
 import i5.las2peer.logging.L2pLogger;
 
@@ -54,7 +54,7 @@ public class ReadOnlyRegistryClient {
 
 	private String getTagDescription(String tagName) throws EthereumException {
 		try {
-			return this.contracts.communityTagIndex.viewDescription(Util.padAndConvertString(tagName, 32)).send();
+			return contracts.communityTagIndex.viewDescription(Util.padAndConvertString(tagName, 32)).send();
 		} catch (IllegalArgumentException e) {
 			throw new IllegalArgumentException("Tag name invalid (too long?)", e);
 		} catch (Exception e) {
@@ -62,9 +62,25 @@ public class ReadOnlyRegistryClient {
 		}
 	}
 
+	public boolean usernameIsAvailable(String name) throws EthereumException {
+		try {
+			return contracts.userRegistry.nameIsAvailable(Util.padAndConvertString(name, 32)).send();
+		} catch (Exception e) {
+			throw new EthereumException(e);
+		}
+	}
+
+	public boolean usernameIsValid(String name) throws EthereumException {
+		try {
+			return contracts.userRegistry.nameIsValid(Util.padAndConvertString(name, 32)).send();
+		} catch (Exception e) {
+			throw new EthereumException(e);
+		}
+	}
+
 	public UserData getUser(String name) throws EthereumException {
 		try {
-			Tuple4<byte[], byte[], String, byte[]> t = this.contracts.userRegistry.users(Util.padAndConvertString(name, 32)).send();
+			Tuple4<byte[], byte[], String, byte[]> t = contracts.userRegistry.users(Util.padAndConvertString(name, 32)).send();
 
 			byte[] returnedName = t.getValue1();
 
@@ -82,7 +98,7 @@ public class ReadOnlyRegistryClient {
 	public String getServiceAuthor(String serviceName) throws EthereumException {
 		try {
 			byte[] serviceNameHash = Util.soliditySha3(serviceName);
-			Tuple2<String, byte[]> t = this.contracts.serviceRegistry.services(serviceNameHash).send();
+			Tuple2<String, byte[]> t = contracts.serviceRegistry.services(serviceNameHash).send();
 			return Util.recoverString(t.getValue2());
 		} catch (Exception e) {
 			throw new EthereumException("Failed look up service author", e);

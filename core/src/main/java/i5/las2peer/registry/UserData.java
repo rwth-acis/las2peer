@@ -1,6 +1,6 @@
-package i5.las2peer.registryGateway;
+package i5.las2peer.registry;
 
-class UserData {
+public class UserData {
 	private byte[] name;
 	private byte[] agentId;
 	private String ownerAddress;

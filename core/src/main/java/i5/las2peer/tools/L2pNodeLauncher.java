@@ -94,8 +94,8 @@ public class L2pNodeLauncher {
 
 	private Node node;
 
-	public Node getNode() {
-		return node;
+	public PastryNodeImpl getNode() {
+		return (PastryNodeImpl) node;
 	}
 
 	// helper function because the Launcher shell can't cast objects

@@ -1,4 +1,4 @@
-package i5.las2peer.registryGateway.contracts;
+package i5.las2peer.registry.contracts;
 
 import io.reactivex.Flowable;
 import java.math.BigInteger;
@@ -32,7 +32,7 @@ import org.web3j.tx.gas.ContractGasProvider;
  * <p>Auto generated code.
  * <p><strong>Do not modify!</strong>
  * <p>Please use the <a href="https://docs.web3j.io/command_line.html">web3j command line tools</a>,
- * or the org.web3j.codegen.SolidityFunctionWrapperGenerator in the 
+ * or the org.web3j.codegen.SolidityFunctionWrapperGenerator in the
  * <a href="https://github.com/web3j/web3j/tree/master/codegen">codegen module</a> to update.
  *
  * <p>Generated with web3j version 4.0.1.
@@ -48,7 +48,7 @@ public class CommunityTagIndex extends Contract {
 
     public static final String FUNC_VIEWDESCRIPTION = "viewDescription";
 
-    public static final Event COMMUNITYTAGCREATED_EVENT = new Event("CommunityTagCreated", 
+    public static final Event COMMUNITYTAGCREATED_EVENT = new Event("CommunityTagCreated",
             Arrays.<TypeReference<?>>asList(new TypeReference<Bytes32>() {}));
     ;
 
@@ -69,7 +69,7 @@ public class CommunityTagIndex extends Contract {
         _addresses.put("1538963171946", "0x1ead3da213d39d614b843dab4c29a726b1294b8b");
         _addresses.put("1542029033973", "0x48c7234741fa9910f9228bdc247a92852d531bcd");
         _addresses.put("1543166567414", "0x2571f11ce15d40d5b23c5d8ea2f5470aa6f98c75");
-        _addresses.put("1337", "0x72b55c7767e00505f7b8ede76fb5217fb5221720");
+        _addresses.put("1337", "0x2304f9d9912f7465922667e0e992486c0da76298");
         _addresses.put("1543180833463", "0x48c7234741fa9910f9228bdc247a92852d531bcd");
         _addresses.put("1543175929774", "0x48c7234741fa9910f9228bdc247a92852d531bcd");
         _addresses.put("1543173626032", "0x48c7234741fa9910f9228bdc247a92852d531bcd");
@@ -114,8 +114,8 @@ public class CommunityTagIndex extends Contract {
     }
 
     public RemoteCall<Tuple2<byte[], String>> tagIndex(byte[] param0) {
-        final Function function = new Function(FUNC_TAGINDEX, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(param0)), 
+        final Function function = new Function(FUNC_TAGINDEX,
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(param0)),
                 Arrays.<TypeReference<?>>asList(new TypeReference<Bytes32>() {}, new TypeReference<Utf8String>() {}));
         return new RemoteCall<Tuple2<byte[], String>>(
                 new Callable<Tuple2<byte[], String>>() {
@@ -123,7 +123,7 @@ public class CommunityTagIndex extends Contract {
                     public Tuple2<byte[], String> call() throws Exception {
                         List<Type> results = executeCallMultipleValueReturn(function);
                         return new Tuple2<byte[], String>(
-                                (byte[]) results.get(0).getValue(), 
+                                (byte[]) results.get(0).getValue(),
                                 (String) results.get(1).getValue());
                     }
                 });
@@ -161,24 +161,24 @@ public class CommunityTagIndex extends Contract {
     }
 
     public RemoteCall<Boolean> isAvailable(byte[] name) {
-        final Function function = new Function(FUNC_ISAVAILABLE, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(name)), 
+        final Function function = new Function(FUNC_ISAVAILABLE,
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(name)),
                 Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() {}));
         return executeRemoteCallSingleValueReturn(function, Boolean.class);
     }
 
     public RemoteCall<TransactionReceipt> create(byte[] name, String description) {
         final Function function = new Function(
-                FUNC_CREATE, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(name), 
-                new org.web3j.abi.datatypes.Utf8String(description)), 
+                FUNC_CREATE,
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(name),
+                new org.web3j.abi.datatypes.Utf8String(description)),
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
 
     public RemoteCall<String> viewDescription(byte[] name) {
-        final Function function = new Function(FUNC_VIEWDESCRIPTION, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(name)), 
+        final Function function = new Function(FUNC_VIEWDESCRIPTION,
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(name)),
                 Arrays.<TypeReference<?>>asList(new TypeReference<Utf8String>() {}));
         return executeRemoteCallSingleValueReturn(function, String.class);
     }

@@ -1,4 +1,4 @@
-package i5.las2peer.registryGateway;
+package i5.las2peer.registry;
 
 import i5.las2peer.api.Configurable;
 
@@ -13,6 +13,10 @@ public class RegistryConfiguration extends Configurable {
 
 	public RegistryConfiguration() {
 		setFieldValues();
+		if (endpoint == null || communityTagIndexAddress == null || userRegistryAddress == null
+				|| serviceRegistryAddress == null) {
+			throw new RuntimeException("Registry configuration file incomplete! This is almost certainly unintended.");
+		}
 	}
 
 	public String getEndpoint() {

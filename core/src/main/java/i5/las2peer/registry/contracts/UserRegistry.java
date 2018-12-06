@@ -1,4 +1,4 @@
-package i5.las2peer.registryGateway.contracts;
+package i5.las2peer.registry.contracts;
 
 import io.reactivex.Flowable;
 import java.math.BigInteger;
@@ -33,7 +33,7 @@ import org.web3j.tx.gas.ContractGasProvider;
  * <p>Auto generated code.
  * <p><strong>Do not modify!</strong>
  * <p>Please use the <a href="https://docs.web3j.io/command_line.html">web3j command line tools</a>,
- * or the org.web3j.codegen.SolidityFunctionWrapperGenerator in the 
+ * or the org.web3j.codegen.SolidityFunctionWrapperGenerator in the
  * <a href="https://github.com/web3j/web3j/tree/master/codegen">codegen module</a> to update.
  *
  * <p>Generated with web3j version 4.0.1.
@@ -55,11 +55,11 @@ public class UserRegistry extends Contract {
 
     public static final String FUNC_TRANSFER = "transfer";
 
-    public static final Event USERREGISTERED_EVENT = new Event("UserRegistered", 
+    public static final Event USERREGISTERED_EVENT = new Event("UserRegistered",
             Arrays.<TypeReference<?>>asList(new TypeReference<Bytes32>() {}));
     ;
 
-    public static final Event USERTRANSFERRED_EVENT = new Event("UserTransferred", 
+    public static final Event USERTRANSFERRED_EVENT = new Event("UserTransferred",
             Arrays.<TypeReference<?>>asList(new TypeReference<Bytes32>() {}));
     ;
 
@@ -80,7 +80,7 @@ public class UserRegistry extends Contract {
         _addresses.put("1538963171946", "0x5fe12658b58b3a4af2ec8c4a3a2a51805b59056b");
         _addresses.put("1542029033973", "0x213a9432a55a6fe0129f238bed7119a7a2b75b94");
         _addresses.put("1543166567414", "0x10294d2950378c3f811c7be05da0481fc5b64387");
-        _addresses.put("1337", "0xcd3bf94d85ebd9c8a31a3fb9905eb5dc7ff66182");
+        _addresses.put("1337", "0x5a405272214de85bf865a1e0a3c1352e82faa861");
         _addresses.put("1543180833463", "0x213a9432a55a6fe0129f238bed7119a7a2b75b94");
         _addresses.put("1543175929774", "0x213a9432a55a6fe0129f238bed7119a7a2b75b94");
         _addresses.put("1543173626032", "0x213a9432a55a6fe0129f238bed7119a7a2b75b94");
@@ -125,8 +125,8 @@ public class UserRegistry extends Contract {
     }
 
     public RemoteCall<Tuple4<byte[], byte[], String, byte[]>> users(byte[] param0) {
-        final Function function = new Function(FUNC_USERS, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(param0)), 
+        final Function function = new Function(FUNC_USERS,
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(param0)),
                 Arrays.<TypeReference<?>>asList(new TypeReference<Bytes32>() {}, new TypeReference<DynamicBytes>() {}, new TypeReference<Address>() {}, new TypeReference<DynamicBytes>() {}));
         return new RemoteCall<Tuple4<byte[], byte[], String, byte[]>>(
                 new Callable<Tuple4<byte[], byte[], String, byte[]>>() {
@@ -134,9 +134,9 @@ public class UserRegistry extends Contract {
                     public Tuple4<byte[], byte[], String, byte[]> call() throws Exception {
                         List<Type> results = executeCallMultipleValueReturn(function);
                         return new Tuple4<byte[], byte[], String, byte[]>(
-                                (byte[]) results.get(0).getValue(), 
-                                (byte[]) results.get(1).getValue(), 
-                                (String) results.get(2).getValue(), 
+                                (byte[]) results.get(0).getValue(),
+                                (byte[]) results.get(1).getValue(),
+                                (String) results.get(2).getValue(),
                                 (byte[]) results.get(3).getValue());
                     }
                 });
@@ -205,49 +205,49 @@ public class UserRegistry extends Contract {
     }
 
     public RemoteCall<Boolean> nameIsValid(byte[] name) {
-        final Function function = new Function(FUNC_NAMEISVALID, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(name)), 
+        final Function function = new Function(FUNC_NAMEISVALID,
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(name)),
                 Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() {}));
         return executeRemoteCallSingleValueReturn(function, Boolean.class);
     }
 
     public RemoteCall<Boolean> nameIsTaken(byte[] name) {
-        final Function function = new Function(FUNC_NAMEISTAKEN, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(name)), 
+        final Function function = new Function(FUNC_NAMEISTAKEN,
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(name)),
                 Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() {}));
         return executeRemoteCallSingleValueReturn(function, Boolean.class);
     }
 
     public RemoteCall<Boolean> nameIsAvailable(byte[] name) {
-        final Function function = new Function(FUNC_NAMEISAVAILABLE, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(name)), 
+        final Function function = new Function(FUNC_NAMEISAVAILABLE,
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(name)),
                 Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() {}));
         return executeRemoteCallSingleValueReturn(function, Boolean.class);
     }
 
     public RemoteCall<TransactionReceipt> register(byte[] name, byte[] agentId) {
         final Function function = new Function(
-                FUNC_REGISTER, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(name), 
-                new org.web3j.abi.datatypes.DynamicBytes(agentId)), 
+                FUNC_REGISTER,
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(name),
+                new org.web3j.abi.datatypes.DynamicBytes(agentId)),
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
 
     public RemoteCall<TransactionReceipt> setSupplement(byte[] name, byte[] supplement) {
         final Function function = new Function(
-                FUNC_SETSUPPLEMENT, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(name), 
-                new org.web3j.abi.datatypes.DynamicBytes(supplement)), 
+                FUNC_SETSUPPLEMENT,
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(name),
+                new org.web3j.abi.datatypes.DynamicBytes(supplement)),
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
 
     public RemoteCall<TransactionReceipt> transfer(byte[] name, String newOwner) {
         final Function function = new Function(
-                FUNC_TRANSFER, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(name), 
-                new org.web3j.abi.datatypes.Address(newOwner)), 
+                FUNC_TRANSFER,
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(name),
+                new org.web3j.abi.datatypes.Address(newOwner)),
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }

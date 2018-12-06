@@ -22,7 +22,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import i5.las2peer.p2p.EthereumNode;
-import i5.las2peer.registryGateway.*;
+import i5.las2peer.registry.*;
 import org.glassfish.jersey.media.multipart.ContentDisposition;
 
 import i5.las2peer.api.p2p.ServiceNameVersion;

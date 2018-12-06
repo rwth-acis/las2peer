@@ -2,11 +2,10 @@ package i5.las2peer.security;
 
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentOperationFailedException;
-import i5.las2peer.api.security.UserAgent;
-import i5.las2peer.registryGateway.BadEthereumCredentialsException;
-import i5.las2peer.registryGateway.CredentialUtils;
-import i5.las2peer.registryGateway.ReadWriteRegistryClient;
-import i5.las2peer.registryGateway.RegistryConfiguration;
+import i5.las2peer.registry.BadEthereumCredentialsException;
+import i5.las2peer.registry.CredentialUtils;
+import i5.las2peer.registry.ReadWriteRegistryClient;
+import i5.las2peer.registry.RegistryConfiguration;
 import i5.las2peer.serialization.MalformedXMLException;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.serialization.SerializeTools;
@@ -14,6 +13,8 @@ import i5.las2peer.serialization.XmlTools;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
 import org.w3c.dom.Element;
+import org.web3j.crypto.Credentials;
+import org.web3j.crypto.WalletFile;
 
 import java.security.KeyPair;
 import java.security.PublicKey;
@@ -23,17 +24,14 @@ public class EthereumAgent extends UserAgentImpl {
 	// this should probably be configured elsewhere
 	private static final String DEFAULT_WALLET_DIRECTORY = "./etc/wallets";
 
+	// TODO: don't store the wallet file path. store its contents
 	private String ethereumWalletPath;
 
-	// it would be prettier to have a single password for both the user private key and the wallet
-	// but they're generated separately for now, so whatever
-	// FIXME actually, let's force it to be the same now
-	// TODO change wallet passwords
-	//private String ethereumWalletPassword;
-
 	private ReadWriteRegistryClient registryClient;
+	private String ethereumAddress;
 
-	public EthereumAgent(PublicKey pubKey, byte[] encryptedPrivate, byte[] salt, String ethereumWalletPath) {
+	// TODO: make name mandatory
+	public EthereumAgent(PublicKey pubKey, byte[] encryptedPrivate, byte[] salt, String loginName, String ethereumWalletPath) {
 		super(pubKey, encryptedPrivate, salt);
 		this.ethereumWalletPath = ethereumWalletPath;
 	}
@@ -55,8 +53,9 @@ public class EthereumAgent extends UserAgentImpl {
 	public void unlock(String passphrase) throws AgentAccessDeniedException, AgentOperationFailedException {
 		super.unlock(passphrase);
 		try {
-			registryClient = new ReadWriteRegistryClient(new RegistryConfiguration(),
-				CredentialUtils.fromWallet(ethereumWalletPath, passphrase));
+			Credentials credentials = CredentialUtils.fromWallet(ethereumWalletPath, passphrase);
+			registryClient = new ReadWriteRegistryClient(new RegistryConfiguration(), credentials);
+			ethereumAddress = CredentialUtils.fromWallet(ethereumWalletPath, passphrase).getAddress();
 		} catch (BadEthereumCredentialsException e) {
 			throw new AgentAccessDeniedException("Could not unlock Ethereum wallet. Ensure password is set to the"
 				+ "agent's passphrase (if not change it!).", e);
@@ -89,11 +88,9 @@ public class EthereumAgent extends UserAgentImpl {
 					+ "\" keygen=\"" + CryptoTools.getSymmetricKeygenMethod() + "\">\n"
 					+ "\t\t<salt encoding=\"base64\">" + Base64.getEncoder().encodeToString(getSalt()) + "</salt>\n"
 					+ "\t\t<data encoding=\"base64\">" + getEncodedPrivate() + "</data>\n" + "\t</privatekey>\n"
+					+ "\t<login>" + sLoginName + "</login>\n"
 					+ "\t<ethereumwalletpath>" + ethereumWalletPath + "</ethereumwalletpath>\n");
 
-			if (sLoginName != null) {
-				result.append("\t<login>" + sLoginName + "</login>\n");
-			}
 			if (sEmail != null) {
 				result.append("\t<email>" + sEmail + "</email>\n");
 			}
@@ -118,6 +115,10 @@ public class EthereumAgent extends UserAgentImpl {
 
 	public ReadWriteRegistryClient getRegistryClient() {
 		return registryClient;
+	}
+
+	public String getEthereumAddress() {
+		return ethereumAddress;
 	}
 
 	public static EthereumAgent createFromXml(String xml) throws MalformedXMLException {
@@ -155,19 +156,17 @@ public class EthereumAgent extends UserAgentImpl {
 			}
 			byte[] salt = Base64.getDecoder().decode(elSalt.getTextContent());
 
+			Element loginElement = XmlTools.getSingularElement(root, "login");
+			String login = loginElement.getTextContent();
+
 			Element ethereumWalletPathElement = XmlTools.getSingularElement(root, "ethereumwalletpath");
 			String ethereumWalletPath = ethereumWalletPathElement.getTextContent();
 
 			// required fields complete, create result
-			EthereumAgent result = new EthereumAgent(publicKey, encPrivate, salt, ethereumWalletPath);
+			EthereumAgent result = new EthereumAgent(publicKey, encPrivate, salt, login, ethereumWalletPath);
 
 			// read and set optional fields
-
-			// optional login name
-			Element login = XmlTools.getOptionalElement(root, "login");
-			if (login != null) {
-				result.sLoginName = login.getTextContent();
-			}
+			// note: login name is not optional here
 			// optional email address
 			Element email = XmlTools.getOptionalElement(root, "email");
 			if (email != null) {

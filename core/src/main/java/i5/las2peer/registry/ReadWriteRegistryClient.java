@@ -1,4 +1,4 @@
-package i5.las2peer.registryGateway;
+package i5.las2peer.registry;
 
 import i5.las2peer.logging.L2pLogger;
 import org.web3j.crypto.Credentials;

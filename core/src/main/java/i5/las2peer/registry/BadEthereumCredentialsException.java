@@ -1,4 +1,4 @@
-package i5.las2peer.registryGateway;
+package i5.las2peer.registry;
 
 public class BadEthereumCredentialsException extends Exception {
 	public BadEthereumCredentialsException() {

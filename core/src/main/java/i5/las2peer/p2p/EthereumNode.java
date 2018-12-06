@@ -2,19 +2,22 @@ package i5.las2peer.p2p;
 
 import i5.las2peer.api.execution.ServiceNotFoundException;
 import i5.las2peer.api.p2p.ServiceNameVersion;
-import i5.las2peer.api.security.AgentException;
-import i5.las2peer.api.security.AgentNotFoundException;
-import i5.las2peer.api.security.ServiceAgent;
+import i5.las2peer.api.security.*;
 import i5.las2peer.classLoaders.ClassManager;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.persistency.SharedStorage;
-import i5.las2peer.registryGateway.*;
+import i5.las2peer.registry.*;
 import i5.las2peer.security.AgentImpl;
+import i5.las2peer.security.EthereumAgent;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.tools.CryptoException;
 
 import java.net.InetAddress;
 import java.util.List;
+
+// TODO: should the user registry vs Pastry agent stuff be handled here?
+// this is the stuff that falls under the "hybrid" gateway concept, which integrates both.
+// so this could be handled in a cleaner way. then again I guess it's fine here.
 
 public class EthereumNode extends PastryNodeImpl {
 	private ReadWriteRegistryClient registryClient;
@@ -48,6 +51,8 @@ public class EthereumNode extends PastryNodeImpl {
 	@Override
 	public synchronized void shutDown() {
 		// TODO: stop all services
+		// actually, don't do that here, instead extend NodeServiceCache
+		// otherwise there would be a lot of redundancy
 		super.shutDown();
 	}
 
@@ -78,21 +83,67 @@ public class EthereumNode extends PastryNodeImpl {
 
 	@Override
 	public void stopService(ServiceNameVersion nameVersion) throws AgentNotRegisteredException, ServiceNotFoundException, NodeException {
-		// should there be Stop Announcements? maybe.
+		// TODO: should there be Stop Announcements? maybe.
 		super.stopService(nameVersion);
 	}
 
 	@Override
-	public AgentImpl getAgent(String id) throws AgentNotFoundException, AgentException {
-		// maybe check agent is in blockchain?
-		// no, actually probably not -- should just apply to service authors
-		return super.getAgent(id);
+	public AgentImpl getAgent(String id) throws AgentException {
+		AgentImpl agent = super.getAgent(id);
+		if (agent instanceof EthereumAgent) {
+			try {
+				if (agentMatchesUserRegistryData((EthereumAgent) agent)) {
+
+				}
+			} catch (EthereumException e) {
+				throw new AgentException("Error while comparing stored agent to user registry. Aborting out of caution.");
+			}
+		}
+		return agent;
 	}
 
 	@Override
 	public void storeAgent(AgentImpl agent) throws AgentException {
-		// TODO: figure out which should be stored
 		super.storeAgent(agent);
+		if (agent instanceof EthereumAgent) {
+			try {
+				registerAgentInBlockchain((EthereumAgent) agent);
+			} catch (AgentException|EthereumException e) {
+				throw new AgentException("Problem storing Ethereum agent", e);
+			}
+		}
+	}
+
+	/**
+	 *
+	 * Note: Unfortunately the term "register" is also used for storing
+	 * the agent data in the shared storage in some parts of the code
+	 * base.
+	 */
+	private void registerAgentInBlockchain(EthereumAgent ethereumAgent) throws AgentException, EthereumException {
+		String name = ethereumAgent.getLoginName();
+
+		if (registryClient.usernameIsAvailable(name)) {
+			registryClient.registerUser(name, ethereumAgent.getIdentifier());
+		} else if (!registryClient.usernameIsValid(name)) {
+			// this should probably be checked during creation too
+			throw new AgentException("Agent login name is not valid for registry smart contracts.");
+		} else if (agentMatchesUserRegistryData(ethereumAgent)) {
+			// already registered, but ID and address match
+			// this is fine, I guess
+		} else {
+			throw new AgentAlreadyExistsException("Agent username is already taken in blockchain user registry and details do NOT match.");
+		}
+	}
+
+	private boolean agentMatchesUserRegistryData(EthereumAgent agent) throws EthereumException {
+		UserData userInBlockchain = registryClient.getUser(agent.getLoginName());
+		if (userInBlockchain == null) {
+			return false;
+		} else {
+			return userInBlockchain.getOwnerAddress().equals(agent.getEthereumAddress())
+					&& userInBlockchain.getAgentId().equals(agent.getIdentifier());
+		}
 	}
 
 	public ReadWriteRegistryClient getRegistryClient() {

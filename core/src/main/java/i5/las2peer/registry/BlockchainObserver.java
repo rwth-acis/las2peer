@@ -1,4 +1,4 @@
-package i5.las2peer.registryGateway;
+package i5.las2peer.registry;
 
 import i5.las2peer.logging.L2pLogger;
 import org.web3j.protocol.core.DefaultBlockParameterName;
@@ -44,7 +44,11 @@ class BlockchainObserver {
 			String tagName = Util.recoverString(tag.name);
 			String tagDescription = contracts.communityTagIndex.viewDescription(Util.padAndConvertString(tagName, 32)).send();
 			tags.put(tagName, tagDescription);
-		}, e -> logger.severe("Error observing tag event: " + e.toString()));
+		}, e -> {
+			logger.severe("Error observing tag event: " + e.toString());
+			String foo = "DEBUG";
+			logger.severe(foo);
+		});
 	}
 
 	private void observeServiceRegistrations() {

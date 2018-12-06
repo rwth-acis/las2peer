@@ -1,8 +1,8 @@
-package i5.las2peer.registryGateway;
+package i5.las2peer.registry;
 
-import i5.las2peer.registryGateway.contracts.CommunityTagIndex;
-import i5.las2peer.registryGateway.contracts.ServiceRegistry;
-import i5.las2peer.registryGateway.contracts.UserRegistry;
+import i5.las2peer.registry.contracts.CommunityTagIndex;
+import i5.las2peer.registry.contracts.ServiceRegistry;
+import i5.las2peer.registry.contracts.UserRegistry;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tx.gas.ContractGasProvider;
@@ -67,10 +67,10 @@ class Contracts {
 			if (this == o) return true;
 			if (o == null || getClass() != o.getClass()) return false;
 			ContractsConfig that = (ContractsConfig) o;
-			return communityTagIndexAddress.equals(that.communityTagIndexAddress) &&
-					userRegistryAddress.equals(that.userRegistryAddress) &&
-					serviceRegistryAddress.equals(that.serviceRegistryAddress) &&
-					endpoint.equals(that.endpoint);
+			return Objects.equals(communityTagIndexAddress, that.communityTagIndexAddress) &&
+					Objects.equals(userRegistryAddress, that.userRegistryAddress) &&
+					Objects.equals(serviceRegistryAddress, that.serviceRegistryAddress) &&
+					Objects.equals(endpoint, that.endpoint);
 		}
 
 		@Override
