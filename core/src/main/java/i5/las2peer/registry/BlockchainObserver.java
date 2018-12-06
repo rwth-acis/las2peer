@@ -1,23 +1,53 @@
 package i5.las2peer.registry;
 
 import i5.las2peer.logging.L2pLogger;
+import i5.las2peer.registry.data.ServiceDeploymentData;
+import i5.las2peer.registry.data.ServiceReleaseData;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 
 import java.util.*;
 
+/**
+ * Observes blockchain events related to the registry and updates its
+ * state accordingly.
+ */
 class BlockchainObserver {
 	private static Map<Contracts.ContractsConfig, BlockchainObserver> instances = new HashMap<>();
 
 	private Contracts contracts;
 
+	/** Tags to their description */
 	Map<String, String> tags;
+
+	/** Service names to name of their author/owner */
 	Map<String, String> serviceNameToAuthor;
+
+	/** Service names to list of releases */
 	Map<String, List<ServiceReleaseData>> serviceReleases;
+
+	/**
+	 * Nested map from service name and version components to that
+	 * exact release.
+	 *
+	 * E.g., "com.example.service" -> 1 -> 0 -> 2 -> release 1.0.2.
+	 */
 	Map<String, Map<Integer, Map<Integer, Map<Integer, ServiceReleaseData>>>> serviceReleasesByVersion;
+
+	/** Service name to list of service deployment announcements. */
 	Map<String, List<ServiceDeploymentData>> serviceDeployments;
 
 	private static final L2pLogger logger = L2pLogger.getInstance(BlockchainObserver.class);
 
+	/**
+	 * Returns a BlockchainObserver instance for the given contracts
+	 * configuration.
+	 *
+	 * The intent is to prevent redundant observers by returning an
+	 * already existing instance when possible.
+	 * @param contractsConfig registry contract addresses and Ethereum
+	 *                        client endpoint
+	 * @return BlockchainObserver reflecting the contracts' state
+	 */
 	public static BlockchainObserver getInstance(Contracts.ContractsConfig contractsConfig) {
 		logger.fine("Blockchain observer instance requested, looking up ...");
 		instances.computeIfAbsent(contractsConfig, BlockchainObserver::new);
@@ -33,10 +63,6 @@ class BlockchainObserver {
 		observeServiceDeployments();
 	}
 
-	/**
-	 * Create a blockchain observer that reacts to all (past and future)
-	 * tag creation events by putting them in the map.
-	 */
 	private void observeTagCreations() {
 		tags = new HashMap<>();
 
@@ -88,7 +114,6 @@ class BlockchainObserver {
 		}, e -> logger.severe("Error observing service deployment event: " + e.toString()));
 	}
 
-	// TODO: it's questionable whether this should be here rather than in Registry
 	private void storeReleaseByVersion(ServiceReleaseData release) {
 		// store release under "name -> x -> y -> z -> release" (i.e. essentially a map of the name and the version triple)
 		serviceReleasesByVersion.computeIfAbsent(release.getServiceName(), k -> new HashMap<>());
@@ -101,6 +126,10 @@ class BlockchainObserver {
 		}
 	}
 
+	/**
+	 * Safely accesses the nested map, returning null if the entry
+	 * does not exist.
+	 */
 	ServiceReleaseData getReleaseByVersion(String serviceName, int versionMajor, int versionMinor, int versionPatch) {
 		try {
 			return serviceReleasesByVersion.get(serviceName).get(versionMajor).get(versionMinor).get(versionPatch);

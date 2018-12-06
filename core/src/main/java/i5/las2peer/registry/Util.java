@@ -9,13 +9,18 @@ import java.util.Date;
 import static org.web3j.utils.Bytes.trimLeadingZeroes;
 import static org.web3j.utils.Numeric.hexStringToByteArray;
 
+/**
+ * Helper methods mostly for converting data.
+ */
 public class Util {
 	private Util() {
 	}
 
 	/**
-	 * Convert string to to byte array, padded with zero bytes.
-	 * Uses UTF-8 encoding.
+	 * Converts string to byte array, padded with zero bytes,
+	 * using UTF-8 encoding.
+	 * @param string input string. Must be no longer than <code>desiredLength</code>
+	 * @param desiredLength length of the returned byte array
 	 */
 	public static byte[] padAndConvertString(String string, int desiredLength) {
 		if (string.length() > desiredLength) {
@@ -32,9 +37,11 @@ public class Util {
 	}
 
 	/**
-	 * Recover string from byte-encoded hex string.
+	 * Recovers string from byte-encoded hex string.
 	 * (E.g., the hex strings in transactions / event logs.)
 	 * Assumes UTF-8 encoding.
+	 * @param hexString hexadecimal string containing Unicode
+	 * @return decoded string
 	 */
 	public static String recoverString(String hexString) {
 		byte[] byteArray = hexStringToByteArray(hexString);
@@ -42,23 +49,36 @@ public class Util {
 		return new String(trimmed, StandardCharsets.UTF_8);
 	}
 
+	/**
+	 * Recovers string from byte array with possible leading zeros.
+	 * Assumes UTF-8 encoding.
+	 * @param byteArray Unicode byte array. Leading zeros are allowed
+	 *                  and will be trimmed before decoding.
+	 * @return decoded string
+	 */
 	public static String recoverString(byte[] byteArray) {
 		byte[] trimmed = trimLeadingZeroes(byteArray);
 		return new String(trimmed, StandardCharsets.UTF_8);
 	}
 
 	/**
-	 * Compute Sha3 (= Keccak256) sum, hopefully matching the sum
+	 * Computes Sha3 (= Keccak256) sum, hopefully matching the sum
 	 * produced by Solidity's keccak256 and web3's soliditySha3.
+	 * @param input arbitrary input string
+	 * @return hash of input
 	 */
 	public static byte[] soliditySha3(String input) {
 		return Hash.sha3(input.getBytes(StandardCharsets.UTF_8));
 	}
 
 	/**
-	 * Convert version string ("x.y.z") to integers.
+	 * Converts version string ("x.y.z") to integers.
 	 * If the string has the form "x.y" or "x", the unspecified
 	 * components are assumed to be zero. (E.g., "1" = [1,0,0].)
+	 * @param versionString version consisting of digits and up to
+	 *                      three periods. Components must be parsable
+	 *                      as Integers.
+	 * @return equivalent version as int array of length three
 	 */
 	public static int[] parseVersion(String versionString) {
 		String[] components = versionString.split("\\.");
@@ -76,7 +96,9 @@ public class Util {
 	}
 
 	/**
-	 * Return human-readable time string.
+	 * Returns human-readable time string.
+	 * @param unixSeconds Unix time in seconds
+	 * @return date and time as string
 	 */
 	public static String unixtimeToString(long unixSeconds) {
 		long unixMilliseconds = unixSeconds * 1000L;

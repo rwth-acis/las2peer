@@ -1,12 +1,15 @@
 package i5.las2peer.p2p;
 
-import i5.las2peer.api.execution.ServiceNotFoundException;
 import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.security.*;
 import i5.las2peer.classLoaders.ClassManager;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.persistency.SharedStorage;
 import i5.las2peer.registry.*;
+import i5.las2peer.registry.data.RegistryConfiguration;
+import i5.las2peer.registry.data.UserData;
+import i5.las2peer.registry.exceptions.BadEthereumCredentialsException;
+import i5.las2peer.registry.exceptions.EthereumException;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.EthereumAgent;
 import i5.las2peer.security.ServiceAgentImpl;
@@ -15,10 +18,30 @@ import i5.las2peer.tools.CryptoException;
 import java.net.InetAddress;
 import java.util.List;
 
-// TODO: should the user registry vs Pastry agent stuff be handled here?
-// this is the stuff that falls under the "hybrid" gateway concept, which integrates both.
-// so this could be handled in a cleaner way. then again I guess it's fine here.
-
+// TODO: send stop announcements on service stop / node shutdown
+// actually, don't do that here, instead extend NodeServiceCache
+// otherwise there would be a lot of redundancy
+/**
+ * Node implementation that extends the FreePastry-based node with
+ * access to an Ethereum blockchain-based service and user registry.
+ *
+ * Access to the registry is encapsulated in the package
+ * {@link i5.las2peer.registry}. (The actual Ethereum client is run
+ * separately, but see there for details.)
+ *
+ * The operator of an EthereumNode must have an Ethereum wallet (which
+ * is a JSON file containing a possibly encrypted key pair, much like
+ * las2peer's agent XML files, as well as an Ethereum address).
+ * The Ether funds of that wallet are used to announce service
+ * deployments, i.e., services running at this node.
+ * The same account should be used for mining in the Ethereum client,
+ * so that new Ether is added.
+ *
+ * Operations triggered by agents, such as users registering and
+ * releasing services, are paid for by them.
+ *
+ * @see EthereumAgent
+ */
 public class EthereumNode extends PastryNodeImpl {
 	private ReadWriteRegistryClient registryClient;
 	private String ethereumWalletPath;
@@ -26,6 +49,14 @@ public class EthereumNode extends PastryNodeImpl {
 
 	private static L2pLogger logger = L2pLogger.getInstance(EthereumNode.class);
 
+	/**
+	 * @param ethereumWalletPath path to standard Ethereum wallet file
+	 *                           belonging to the Node operator
+	 * @param ethereumWalletPassword password for wallet (may be null
+	 *                               or empty, but obviously that's not
+	 *                               recommended)
+	 * @see PastryNodeImpl#PastryNodeImpl(ClassManager, boolean, InetAddress, Integer, List, SharedStorage.STORAGE_MODE, String, Long)
+	 */
 	public EthereumNode(ClassManager classManager, boolean useMonitoringObserver, InetAddress pastryBindAddress,
 						Integer pastryPort, List<String> bootstrap, SharedStorage.STORAGE_MODE storageMode,
 						String storageDir, Long nodeIdSeed, String ethereumWalletPath, String ethereumWalletPassword) {
@@ -49,25 +80,26 @@ public class EthereumNode extends PastryNodeImpl {
 	}
 
 	@Override
-	public synchronized void shutDown() {
-		// TODO: stop all services
-		// actually, don't do that here, instead extend NodeServiceCache
-		// otherwise there would be a lot of redundancy
-		super.shutDown();
-	}
-
-	@Override
 	public ServiceAgentImpl startService(ServiceNameVersion nameVersion, String passphrase)
 			throws CryptoException, AgentException {
 		announceServiceDeployment(nameVersion);
 		return super.startService(nameVersion, passphrase);
 	}
 
+	/**
+	 * Announce deployment of the service associated with this service
+	 * agent using the service registry.
+	 * @param serviceAgent agent of service being started
+	 */
 	public void announceServiceDeployment(ServiceAgent serviceAgent) {
 		announceServiceDeployment(serviceAgent.getServiceNameVersion());
 	}
 
-	public void announceServiceDeployment(ServiceNameVersion nameVersion) {
+	/**
+	 * Announce deployment of the service instance.
+	 * @param nameVersion service being started
+	 */
+	private void announceServiceDeployment(ServiceNameVersion nameVersion) {
 		String serviceName = nameVersion.getPackageName();
 		String className = nameVersion.getSimpleClassName();
 		int versionMajor = nameVersion.getVersion().getMajor();
@@ -79,12 +111,6 @@ public class EthereumNode extends PastryNodeImpl {
 		} catch (EthereumException e) {
 			logger.severe("Error while announcing deployment: " + e);
 		}
-	}
-
-	@Override
-	public void stopService(ServiceNameVersion nameVersion) throws AgentNotRegisteredException, ServiceNotFoundException, NodeException {
-		// TODO: should there be Stop Announcements? maybe.
-		super.stopService(nameVersion);
 	}
 
 	@Override
@@ -114,12 +140,9 @@ public class EthereumNode extends PastryNodeImpl {
 		}
 	}
 
-	/**
-	 *
-	 * Note: Unfortunately the term "register" is also used for storing
-	 * the agent data in the shared storage in some parts of the code
-	 * base.
-	 */
+	// Note: Unfortunately the term "register" is also used for storing
+	// the agent data in the shared storage in some parts of the code
+	// base. So "registerAgent" is definitely ambiguous.
 	private void registerAgentInBlockchain(EthereumAgent ethereumAgent) throws AgentException, EthereumException {
 		String name = ethereumAgent.getLoginName();
 
@@ -146,6 +169,7 @@ public class EthereumNode extends PastryNodeImpl {
 		}
 	}
 
+	/** @return registry client using this agent's credentials */
 	public ReadWriteRegistryClient getRegistryClient() {
 		return registryClient;
 	}

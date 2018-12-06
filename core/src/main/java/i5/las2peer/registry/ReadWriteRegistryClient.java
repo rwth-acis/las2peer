@@ -1,22 +1,40 @@
 package i5.las2peer.registry;
 
 import i5.las2peer.logging.L2pLogger;
+import i5.las2peer.registry.data.RegistryConfiguration;
+import i5.las2peer.registry.exceptions.EthereumException;
 import org.web3j.crypto.Credentials;
 
 import java.math.BigInteger;
 import java.time.Instant;
 
+/**
+ * Facade providing simple read/write access to the registry smart
+ * contracts.
+ *
+ * Requires Ethereum credentials with sufficient Ether funds to pay
+ * for transaction gas.
+ *
+ * @see ReadOnlyRegistryClient
+ */
 public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 	private final L2pLogger logger = L2pLogger.getInstance(ReadWriteRegistryClient.class);
 
+	/**
+	 * Create client providing access to both read and write registry
+	 * functions.
+	 * @param registryConfiguration addresses of registry contracts and
+	 *                              Ethereum client HTTP JSON RPC API
+	 *                              endpoint
+	 */
 	public ReadWriteRegistryClient(RegistryConfiguration registryConfiguration, Credentials credentials) {
 		super(registryConfiguration, credentials);
 	}
 
 	/**
 	 * Create new tag on blockchain.
-	 * @param tagName String with <= 32 UTF-8 characters
-	 * @param tagDescription String of arbitrary (!?) length
+	 * @param tagName tag name consisting of 1 to 32 UTF-8 characters
+	 * @param tagDescription tag description of arbitrary length
 	 * @throws EthereumException if transaction failed for some reason (gas? networking?)
 	 */
 	public void createTag(String tagName, String tagDescription) throws EthereumException {
@@ -29,10 +47,15 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		}
 	}
 
-	public void registerUser(String name, char[] agentId) throws EthereumException {
-		registerUser(name, new String(agentId));
-	}
-
+	/**
+	 * Register a user name and attach it to an agent ID.
+	 *
+	 * This entry will be owned by the Ethereum address associated with
+	 * the credentials used in the constructor.
+	 *
+	 * @param name user name consisting of 1 to 32 Unicode characters
+	 * @param agentId 128 character las2peer agent ID
+	 */
 	public void registerUser(String name, String agentId) throws EthereumException {
 		// TODO: change agentId field
 		try {
@@ -43,6 +66,11 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		}
 	}
 
+	/**
+	 * Register a service name to the given author.
+	 * @param serviceName service (package) name of arbitrary length
+	 * @param authorName user name consisting of 1 to 32 Unicode characters
+	 */
 	public void registerService(String serviceName, String authorName) throws EthereumException {
 		try {
 			contracts.serviceRegistry.register(serviceName, Util.padAndConvertString(authorName, 32)).send();
@@ -51,11 +79,27 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		}
 	}
 
+	/**
+	 * Announce the release of a specific version of a service.
+	 * @param serviceName name of existing service
+	 * @param authorName name of author of this version
+	 * @param versionString version consisting of digits and up to two periods
+	 */
+	// TODO: why ask for author here? isn't it implicitly the author/owner?
+	// I guess not if there's ownership/rights delegation, but for now it's pointless
 	public void releaseService(String serviceName, String authorName, String versionString) throws EthereumException {
 		int[] version = Util.parseVersion(versionString);
 		releaseService(serviceName, authorName, version[0], version[1], version[2]);
 	}
 
+	/**
+	 * Announce the release of a specific version of a service.
+	 * @param serviceName name of existing service
+	 * @param authorName name of author of this version
+	 * @param versionMajor major version, as used in semantic versioning
+	 * @param versionMinor minor version, as used in semantic versioning
+	 * @param versionPatch patch version, as used in semantic versioning
+	 */
 	public void releaseService(String serviceName, String authorName,
 							   int versionMajor, int versionMinor, int versionPatch) throws EthereumException {
 		releaseService(serviceName, authorName, versionMajor, versionMinor, versionPatch, "");
@@ -78,6 +122,18 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		}
 	}
 
+	/**
+	 * Announce the deployment of a specific version of a service at
+	 * the given node.
+	 * @param servicePackageName name of service (package). E.g.
+	 *                           <code>com.example.some.package</code>.
+	 * @param serviceClassName name of the service class that is run.
+	 *                         E.g., <code>ExampleService</code>.
+	 * @param versionMajor major version, as used in semantic versioning
+	 * @param versionMinor minor version, as used in semantic versioning
+	 * @param versionPatch patch version, as used in semantic versioning
+	 * @param nodeId identifier of the node running the deployment
+	 */
 	public void announceDeployment(String servicePackageName, String serviceClassName,
 								   int versionMajor, int versionMinor, int versionPatch,
 								   String nodeId) throws EthereumException {
@@ -91,6 +147,20 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		}
 	}
 
+	/**
+	 * Announce that a service deployment is stopping or no longer
+	 * accessible.
+	 * @param servicePackageName name of service (package). E.g.
+	 *                           <code>com.example.some.package</code>.
+	 * @param serviceClassName name of the service class that is run.
+	 *                         E.g., <code>ExampleService</code>.
+	 * @param versionMajor major version, as used in semantic versioning
+	 * @param versionMinor minor version, as used in semantic versioning
+	 * @param versionPatch patch version, as used in semantic versioning
+	 * @param nodeId identifier of the node running the deployment
+	 */
+	// TODO: is there a more elegant way? referencing the tx is possible of course
+	// but not really preferable
 	public void announceDeploymentEnd(String servicePackageName, String serviceClassName,
 									  int versionMajor, int versionMinor, int versionPatch,
 									  String nodeId) throws EthereumException {

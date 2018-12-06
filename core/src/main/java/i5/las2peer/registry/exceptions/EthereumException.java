@@ -1,5 +1,10 @@
-package i5.las2peer.registry;
+package i5.las2peer.registry.exceptions;
 
+/**
+ * Thrown for errors related to Ethereum, including execution of the
+ * smart contracts themselves, errors in their wrapper code, or
+ * communication with the Ethereum client.
+ */
 public class EthereumException extends Exception {
 	public EthereumException() {
 	}

@@ -2,10 +2,10 @@ package i5.las2peer.security;
 
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentOperationFailedException;
-import i5.las2peer.registry.BadEthereumCredentialsException;
+import i5.las2peer.registry.exceptions.BadEthereumCredentialsException;
 import i5.las2peer.registry.CredentialUtils;
 import i5.las2peer.registry.ReadWriteRegistryClient;
-import i5.las2peer.registry.RegistryConfiguration;
+import i5.las2peer.registry.data.RegistryConfiguration;
 import i5.las2peer.serialization.MalformedXMLException;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.serialization.SerializeTools;
@@ -14,35 +14,61 @@ import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
 import org.w3c.dom.Element;
 import org.web3j.crypto.Credentials;
-import org.web3j.crypto.WalletFile;
 
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.Base64;
 
+/**
+ * User agent for las2peer networks with blockchain-based registry.
+ *
+ * In addition to the usual key pair, this agent has an Ethereum wallet
+ * (which is also a key pair) with an associated Ethereum address.
+ *
+ * For now, this wallet is stored separately on disk. (It's just a JSON
+ * file.)
+ */
+// TODO: don't store the wallet file path. store its contents
 public class EthereumAgent extends UserAgentImpl {
 	// this should probably be configured elsewhere
 	private static final String DEFAULT_WALLET_DIRECTORY = "./etc/wallets";
 
-	// TODO: don't store the wallet file path. store its contents
 	private String ethereumWalletPath;
 
 	private ReadWriteRegistryClient registryClient;
 	private String ethereumAddress;
 
-	// TODO: make name mandatory
-	public EthereumAgent(PublicKey pubKey, byte[] encryptedPrivate, byte[] salt, String loginName, String ethereumWalletPath) {
-		super(pubKey, encryptedPrivate, salt);
+	protected EthereumAgent(KeyPair pair, String passphrase, byte[] salt, String ethereumWalletPath, String loginName)
+			throws AgentOperationFailedException, CryptoException {
+		super(pair, passphrase, salt);
+		checkLoginNameValidity(loginName);
+		sLoginName = loginName;
 		this.ethereumWalletPath = ethereumWalletPath;
 	}
 
-	protected EthereumAgent(KeyPair pair, String passphrase, byte[] salt, String ethereumWalletPath)
-			throws AgentOperationFailedException, CryptoException {
-		super(pair, passphrase, salt);
+	protected EthereumAgent(PublicKey pubKey, byte[] encryptedPrivate, byte[] salt, String ethereumWalletPath,
+			String loginName) {
+		super(pubKey, encryptedPrivate, salt);
+		checkLoginNameValidity(loginName);
+		sLoginName = loginName;
 		this.ethereumWalletPath = ethereumWalletPath;
+	}
+
+	// as in the superclass, it would be nicer not to use an exception
+	@Override
+	void checkLoginNameValidity(String loginName) throws IllegalArgumentException {
+		super.checkLoginNameValidity(loginName);
+		if (loginName.length() > 32) {
+			throw new IllegalArgumentException("Login name must be at most 32 characters");
+		}
 	}
 
 	// bit of unfortunate name here, but let's stick with it
+
+	/**
+	 * Removes decrypted private key and the registry client (which
+	 * contains user credentials).
+	 */
 	@Override
 	public void lockPrivateKey() {
 		super.lockPrivateKey();
@@ -64,7 +90,7 @@ public class EthereumAgent extends UserAgentImpl {
 
 	@Override
 	public boolean isLocked() {
-		boolean ethereumIsLocked = registryClient == null;
+		boolean ethereumIsLocked = (registryClient == null);
 		boolean userAgentIsLocked = super.isLocked();
 		if (userAgentIsLocked == ethereumIsLocked) {
 			return userAgentIsLocked;
@@ -103,20 +129,36 @@ public class EthereumAgent extends UserAgentImpl {
 		}
 	}
 
-	public static EthereumAgent createEthereumAgent(String passphrase) throws CryptoException  {
+	/**
+	 * Creates new agent with given passphrase and login name.
+	 * Wallet file will be created in default location (for now).
+	 * @param passphrase passphrase with which both the agent key pair
+	 *                   and the Ethereum wallet are encrypted
+	 * @param loginName name matching [a-zA-Z].{3,31} (hopefully UTF-8
+	 *                  characters, let's not get too crazy)
+	 * @return new EthereumAgent instance
+	 * @throws CryptoException if there is an internal error during
+	 *                         wallet creation
+	 */
+	public static EthereumAgent createEthereumAgent(String passphrase, String loginName) throws CryptoException  {
 		byte[] salt = CryptoTools.generateSalt();
 		try {
 			String walletPath = CredentialUtils.createWallet(passphrase, DEFAULT_WALLET_DIRECTORY);
-			return new EthereumAgent(CryptoTools.generateKeyPair(), passphrase, salt, walletPath);
+			return new EthereumAgent(CryptoTools.generateKeyPair(), passphrase, salt, walletPath, loginName);
 		} catch (Exception e) {
 			throw new CryptoException("Wallet generation failed.", e);
 		}
 	}
 
+	/**
+	 * Gets registry client that uses the agent's credentials.
+	 * May be <code>null</code>; use {@link #unlock(String)}.
+	 */
 	public ReadWriteRegistryClient getRegistryClient() {
 		return registryClient;
 	}
 
+	/** @return address of the Ethereum wallet associated with the agent */
 	public String getEthereumAddress() {
 		return ethereumAddress;
 	}
@@ -163,7 +205,7 @@ public class EthereumAgent extends UserAgentImpl {
 			String ethereumWalletPath = ethereumWalletPathElement.getTextContent();
 
 			// required fields complete, create result
-			EthereumAgent result = new EthereumAgent(publicKey, encPrivate, salt, login, ethereumWalletPath);
+			EthereumAgent result = new EthereumAgent(publicKey, encPrivate, salt, ethereumWalletPath, login);
 
 			// read and set optional fields
 			// note: login name is not optional here

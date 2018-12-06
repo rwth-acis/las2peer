@@ -1,4 +1,4 @@
-package i5.las2peer.registry;
+package i5.las2peer.registry.data;
 
 import java.math.BigInteger;
 

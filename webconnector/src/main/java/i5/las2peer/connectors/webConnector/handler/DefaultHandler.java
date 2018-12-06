@@ -23,6 +23,10 @@ import javax.ws.rs.core.UriInfo;
 
 import i5.las2peer.p2p.EthereumNode;
 import i5.las2peer.registry.*;
+import i5.las2peer.registry.data.RegistryConfiguration;
+import i5.las2peer.registry.data.ServiceDeploymentData;
+import i5.las2peer.registry.data.ServiceReleaseData;
+import i5.las2peer.registry.exceptions.EthereumException;
 import org.glassfish.jersey.media.multipart.ContentDisposition;
 
 import i5.las2peer.api.p2p.ServiceNameVersion;
@@ -75,13 +79,6 @@ public class DefaultHandler {
 		} catch (EthereumException e) {
 			return "[failed to determine version]";
 		}
-	}
-
-	@GET
-	@Path("/eth/debug")
-	@Produces(MediaType.TEXT_PLAIN)
-	public String getEthDebug() {
-		return registry.debug();
 	}
 
 	@GET

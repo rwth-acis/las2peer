@@ -1,8 +1,10 @@
 package i5.las2peer.registry;
 
-import i5.las2peer.logging.L2pLogger;
-
-import i5.las2peer.security.EthereumAgent;
+import i5.las2peer.registry.data.RegistryConfiguration;
+import i5.las2peer.registry.data.ServiceDeploymentData;
+import i5.las2peer.registry.data.ServiceReleaseData;
+import i5.las2peer.registry.data.UserData;
+import i5.las2peer.registry.exceptions.EthereumException;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.Web3ClientVersion;
@@ -13,14 +15,24 @@ import org.web3j.tuples.generated.Tuple4;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * Facade providing simple read-only access to the registry smart
+ * contracts.
+ *
+ * @see ReadWriteRegistryClient
+ */
 public class ReadOnlyRegistryClient {
 	Web3j web3j;
 	Contracts.ContractsConfig contractsConfig;
 	Contracts contracts;
 	BlockchainObserver observer;
 
-	private final L2pLogger logger = L2pLogger.getInstance(ReadOnlyRegistryClient.class);
-
+	/**
+	 * Create client providing access to read-only registry functions.
+	 * @param registryConfiguration addresses of registry contracts and
+	 *                              Ethereum client HTTP JSON RPC API
+	 *                              endpoint
+	 */
 	public ReadOnlyRegistryClient(RegistryConfiguration registryConfiguration) {
 		this(registryConfiguration, null);
 	}
@@ -41,7 +53,10 @@ public class ReadOnlyRegistryClient {
 
 	/**
 	 * Return version string of connected Ethereum client.
+	 * @deprecated there's no reason to reveal this implementation
+	 * 	           detail, so this may be removed
 	 */
+	// this is the only place where `web3j` is (directly) accessed
 	@Deprecated
 	public String getEthClientVersion() throws EthereumException {
 		try {
@@ -62,6 +77,11 @@ public class ReadOnlyRegistryClient {
 		}
 	}
 
+	/**
+	 * Return true if user name is both valid and not already taken and
+	 * thus can be registered.
+	 * @param name user name consisting of 1 to 32 Unicode characters
+	 */
 	public boolean usernameIsAvailable(String name) throws EthereumException {
 		try {
 			return contracts.userRegistry.nameIsAvailable(Util.padAndConvertString(name, 32)).send();
@@ -70,6 +90,15 @@ public class ReadOnlyRegistryClient {
 		}
 	}
 
+	/**
+	 * Return true if user name is both valid, as encoded in the
+	 * registry smart contract code.
+	 *
+	 * (Any non-empty String of up to 32 characters should work, but
+	 * let's not press our luck.)
+	 *
+	 * @param name user name consisting of 1 to 32 Unicode characters
+	 */
 	public boolean usernameIsValid(String name) throws EthereumException {
 		try {
 			return contracts.userRegistry.nameIsValid(Util.padAndConvertString(name, 32)).send();
@@ -78,6 +107,12 @@ public class ReadOnlyRegistryClient {
 		}
 	}
 
+	/**
+	 * Retrieve user data stored in registry for given name.
+	 * @param name user name consisting of 1 to 32 Unicode characters
+	 * @return user data object containing ID and owner address, or
+	 * 		   <code>null</code> if user name is not taken
+	 */
 	public UserData getUser(String name) throws EthereumException {
 		try {
 			Tuple4<byte[], byte[], String, byte[]> t = contracts.userRegistry.users(Util.padAndConvertString(name, 32)).send();
@@ -95,6 +130,11 @@ public class ReadOnlyRegistryClient {
 		}
 	}
 
+	/**
+	 * Look up author/owner for a given service.
+	 * @param serviceName service package name
+	 * @return author owning the service name
+	 */
 	public String getServiceAuthor(String serviceName) throws EthereumException {
 		try {
 			byte[] serviceNameHash = Util.soliditySha3(serviceName);
@@ -105,55 +145,59 @@ public class ReadOnlyRegistryClient {
 		}
 	}
 
-	/**
-	 * Output some (changing) debug info.
-	 */
-	public String debug(/*Node node*/) {
-		try {
-			/*
-			String identifier = "foooo-im-an-id";
-			UserAgentImpl agent = UserAgentImpl.createUserAgent("hunter2");
-			agent.unlock("hunter2");
-			String agentId = agent.getIdentifier();
-			String content = "hello there";
+//	/**
+//	 * Output some (changing) debug info.
+//	 */
+//	public String debug(/*Node node*/) {
+//		try {
+//			/*
+//			String identifier = "foooo-im-an-id";
+//			UserAgentImpl agent = UserAgentImpl.createUserAgent("hunter2");
+//			agent.unlock("hunter2");
+//			String agentId = agent.getIdentifier();
+//			String content = "hello there";
+//
+//			EnvelopeVersion envName = node.createUnencryptedEnvelope(identifier, agent.getPublicKey(), content);
+//			node.storeEnvelope(envName, agent);
+//
+//			EnvelopeVersion retrieved = node.fetchEnvelope(identifier);
+//			Serializable serializable = retrieved.getContent();
+//			String recovered = (String) serializable;
+//
+//			return "{\"id\": \"" + identifier + "\", \"content\": \"" + recovered + "\"}";
+//			*/
+//
+//			EthereumAgent agent = EthereumAgent.createEthereumAgent("hunter2");
+//			agent.unlock("hunter2");
+//			String xmlString = agent.toXmlString();
+//			EthereumAgent sameAgent = EthereumAgent.createFromXml(xmlString);
+//
+//			if (!xmlString.equals(sameAgent.toXmlString())) {
+//				return "hell no this aint working";
+//			}
+//
+//			return sameAgent.toXmlString();
+//		} catch (Exception e) {
+//			return "error: " + e;
+//		}
+//	}
 
-			EnvelopeVersion envName = node.createUnencryptedEnvelope(identifier, agent.getPublicKey(), content);
-			node.storeEnvelope(envName, agent);
-
-			EnvelopeVersion retrieved = node.fetchEnvelope(identifier);
-			Serializable serializable = retrieved.getContent();
-			String recovered = (String) serializable;
-
-			return "{\"id\": \"" + identifier + "\", \"content\": \"" + recovered + "\"}";
-			*/
-
-			EthereumAgent agent = EthereumAgent.createEthereumAgent("hunter2");
-			agent.unlock("hunter2");
-			String xmlString = agent.toXmlString();
-			EthereumAgent sameAgent = EthereumAgent.createFromXml(xmlString);
-
-			if (!xmlString.equals(sameAgent.toXmlString())) {
-				return "hell no this aint working";
-			}
-
-			return sameAgent.toXmlString();
-		} catch (Exception e) {
-			return "error: " + e;
-		}
-	}
-
+	/** @return map of tags to descriptions */
 	public Map<String, String> getTags() {
 		return observer.tags;
 	}
 
+	/** @return set of registered service (package) names */
 	public Set<String> getServiceNames() {
 		return observer.serviceNameToAuthor.keySet();
 	}
 
+	/** @return map of names to service release objects */
 	public Map<String, List<ServiceReleaseData>> getServiceReleases() {
 		return observer.serviceReleases;
 	}
 
+	/** @return map of names to service deployments announcements */
 	public Map<String, List<ServiceDeploymentData>> getServiceDeployments() {
 		return observer.serviceDeployments;
 	}

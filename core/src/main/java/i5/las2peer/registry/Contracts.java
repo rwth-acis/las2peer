@@ -26,8 +26,8 @@ import java.util.Objects;
  * Thus it can make sense to have several instances, e.g., a read-only
  * instance and an instance for a currently used agent.
  *
- * They're also pretty complicated to instantiate, so let's use a
- * builder pattern and wrap some data.
+ * They're also pretty complicated to instantiate, so that's done with
+ * a builder.
  */
 class Contracts {
 	final CommunityTagIndex communityTagIndex;
@@ -100,21 +100,58 @@ class Contracts {
 		private ContractGasProvider gasProvider;
 		private Credentials credentials;
 
+		/**
+		 * Create builder with the mandatory arguments. Optional fields
+		 * can then be set with the setter methods, before using the
+		 * build method to construct a {@link Contracts} instance.
+		 * @param config addresses of the registry contracts and
+		 *               Ethereum client HTTP JSON RPC API endpoint
+		 */
 		public ContractsBuilder(ContractsConfig config) {
 			this.config = config;
 		}
 
-		// TODO: check out whether these are needed when in read-only mode
+		/**
+		 * Configures the gas parameters of transactions sent via the
+		 * contracts wrappers.
+		 *
+		 * Static gas parameters are used, i.e., all transactions use
+		 * the same values.
+		 *
+		 * @param gasPrice price (in Wei) to be paid per gas unit.
+		 *                 Offering a higher price will potentially
+		 *                 prioritise transactions for mining.
+		 * @param gasLimit maximum amount of gas a transaction may use.
+		 *                 If exceeded, the transaction fails and all
+		 *                 gas is still consumed.
+		 * @return this builder instance. Allows chained method calls.
+		 * @see <a href="https://ethereum.stackexchange.com/questions/3/what-is-meant-by-the-term-gas">Detailed explanations on StackExchange</a>
+		 * @see <a href="https://web3j.readthedocs.io/en/latest/smart_contracts.html#dynamic-gas-price-and-limit">web3j dynamic gas configuration</a>
+		 */
 		public ContractsBuilder setGasOptions(long gasPrice, long gasLimit) {
 			gasProvider = new StaticGasProvider(BigInteger.valueOf(gasPrice), BigInteger.valueOf(gasLimit));
 			return this;
 		}
 
+		/**
+		 * Set credentials which are used to sign transactions sent via
+		 * the contract wrappers.
+		 * If no credentials are provided, the contracts must be used
+		 * as read-only (no state-changing function invocations).
+		 * @param credentials wrapper of key pair and Ethereum address
+		 * @return this builder instance. Allows chained method calls.
+		 */
 		public ContractsBuilder setCredentials(Credentials credentials) {
 			this.credentials = credentials;
 			return this;
 		}
 
+		/**
+		 * Constructs the Ethereum smart contract wrapper instances
+		 * for the given configuration. Notably, the credentials are
+		 * baked into the wrapper: They cannot be changed (or removed).
+		 * @return instance of contracts wrapper, ready for use
+		 */
 		public Contracts build() {
 			if (gasProvider == null) {
 				gasProvider = new DefaultGasProvider();
