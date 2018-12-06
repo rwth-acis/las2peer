@@ -79,13 +79,6 @@ public class EthereumNode extends PastryNodeImpl {
 		super.launchSub();
 	}
 
-	@Override
-	public ServiceAgentImpl startService(ServiceNameVersion nameVersion, String passphrase)
-			throws CryptoException, AgentException {
-		announceServiceDeployment(nameVersion);
-		return super.startService(nameVersion, passphrase);
-	}
-
 	/**
 	 * Announce deployment of the service associated with this service
 	 * agent using the service registry.
@@ -110,6 +103,34 @@ public class EthereumNode extends PastryNodeImpl {
 			registryClient.announceDeployment(serviceName, className, versionMajor, versionMinor, versionPatch, nodeId);
 		} catch (EthereumException e) {
 			logger.severe("Error while announcing deployment: " + e);
+		}
+	}
+
+	/**
+	 * Announce end of deployment (i.e., shutdown) of the service
+	 * associated with this service agent using the service registry.
+	 * @param serviceAgent agent of service being shut down
+	 */
+	public void announceServiceDeploymentEnd(ServiceAgent serviceAgent) {
+		announceServiceDeploymentEnd(serviceAgent.getServiceNameVersion());
+	}
+
+	/**
+	 * Announce end of deployment (i.e., shutdown) of the service
+	 * instance.
+	 * @param nameVersion service being shut down
+	 */
+	private void announceServiceDeploymentEnd(ServiceNameVersion nameVersion) {
+		String serviceName = nameVersion.getPackageName();
+		String className = nameVersion.getSimpleClassName();
+		int versionMajor = nameVersion.getVersion().getMajor();
+		int versionMinor = nameVersion.getVersion().getMinor();
+		int versionPatch = nameVersion.getVersion().getSub();
+		String nodeId = getPastryNode().getId().toStringFull();
+		try {
+			registryClient.announceDeploymentEnd(serviceName, className, versionMajor, versionMinor, versionPatch, nodeId);
+		} catch (EthereumException e) {
+			logger.severe("Error while announcing end of deployment: " + e);
 		}
 	}
 

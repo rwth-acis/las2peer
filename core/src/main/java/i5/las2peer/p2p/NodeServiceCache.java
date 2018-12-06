@@ -367,6 +367,9 @@ public class NodeServiceCache {
 						"Another ServiceAgent running the same Service is present on this Node - something went wrong!");
 			}
 		}
+		if (runningAt instanceof EthereumNode) {
+			((EthereumNode) runningAt).announceServiceDeployment(agent);
+		}
 	}
 
 	/**
@@ -393,6 +396,9 @@ public class NodeServiceCache {
 			if (versions.size() == 0) {
 				localServices.remove(service.getName());
 			}
+		}
+		if (runningAt instanceof EthereumNode) {
+			((EthereumNode) runningAt).announceServiceDeploymentEnd(agent);
 		}
 	}
 
