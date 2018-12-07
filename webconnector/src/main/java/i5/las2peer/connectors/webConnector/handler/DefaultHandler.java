@@ -23,7 +23,6 @@ import javax.ws.rs.core.UriInfo;
 
 import i5.las2peer.p2p.EthereumNode;
 import i5.las2peer.registry.*;
-import i5.las2peer.registry.data.RegistryConfiguration;
 import i5.las2peer.registry.data.ServiceDeploymentData;
 import i5.las2peer.registry.data.ServiceReleaseData;
 import i5.las2peer.registry.exceptions.EthereumException;
@@ -69,17 +68,6 @@ public class DefaultHandler {
 	@GET
 	public Response rootPath() throws URISyntaxException {
 		return Response.temporaryRedirect(new URI(WebappHandler.DEFAULT_ROUTE)).build();
-	}
-
-	@GET
-	@Path("/eth/clientversion")
-	@Produces(MediaType.TEXT_PLAIN)
-	public String getEthClientVersion() {
-		try {
-			return registry.getEthClientVersion();
-		} catch (EthereumException e) {
-			return "[failed to determine version]";
-		}
 	}
 
 	@GET
@@ -188,7 +176,6 @@ public class DefaultHandler {
 		response.put("uptime", getUptime(node));
 		response.put("localServices", getLocalServices(node, uriInfo.getRequestUri()));
 		response.put("otherNodes", getOtherNodes(node));
-		response.put("ethClientVersion", getEthClientVersion());
 		return response.toJSONString();
 	}
 
