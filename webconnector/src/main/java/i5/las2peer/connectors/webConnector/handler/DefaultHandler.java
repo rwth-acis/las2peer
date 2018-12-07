@@ -61,7 +61,8 @@ public class DefaultHandler {
 			registry = ((EthereumNode) this.node).getRegistryClient();
 		} else {
 			// TODO: only handle if ethereum enabled
-			registry = new ReadOnlyRegistryClient(new RegistryConfiguration());
+			// better: refactor into separate handler!
+			// registry = new ReadOnlyRegistryClient(new RegistryConfiguration());
 		}
 	}
 
