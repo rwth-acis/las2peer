@@ -164,7 +164,18 @@
 	<target name="main_jar" depends="get_deps">
 		<!-- constructs the external libraries classpath name -->
 		<jar jarfile="${export.jars}/${ant.project.name}-${ivy.las2peer.version}.jar">
-			<zipgroupfileset dir="${lib.dir}" includes="**/*.jar" />
+			<!--zipgroupfileset dir="${lib.dir}" includes="**/*.jar" /-->
+			<restrict>
+				<archives>
+					<zips>
+						<fileset dir="${lib.dir}" includes="**/*.jar" />
+					</zips>
+				</archives>
+				<not>
+					<name regex="META-INF\/(.*)\.(DSA|RSA|SF)" />
+					<!-- alternative: also exclude licenses with "META-INF\/((.*)\.(DSA|RSA|SF)|(LICENSE|NOTICE)(\.(txt|md|rst))?)" -->
+				</not>
+			</restrict>
 			<manifest>
 				<attribute name="Main-Class" value="${main-class}"/>
 				<attribute name="Implementation-Title" value="${main-class}"/>

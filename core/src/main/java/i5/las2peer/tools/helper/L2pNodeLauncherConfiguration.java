@@ -69,6 +69,10 @@ public class L2pNodeLauncherConfiguration {
 	public static final String ARG_SANDBOX = "--sandbox";
 	public static final String ARG_SHORT_SANDBOX = "-sb";
 
+	public static final String ARG_ETHEREUM_WALLET = "--ethereum-wallet";
+
+	public static final String ARG_ETHEREUM_WALLET_PASSWORD = "--ethereum-wallet-password";
+
 	private static final L2pLogger logger = L2pLogger.getInstance(L2pNodeLauncherConfiguration.class);
 
 	private String filename;
@@ -91,6 +95,8 @@ public class L2pNodeLauncherConfiguration {
 	private Long nodeIdSeed;
 	private final List<String> commands = new LinkedList<>();
 	private boolean sandbox;
+	private String ethereumWalletPath;
+	private String ethereumWalletPassword;
 
 	public L2pNodeLauncherConfiguration() {
 		// set default values
@@ -278,6 +284,20 @@ public class L2pNodeLauncherConfiguration {
 				} else {
 					setStorageDirectory(itArg.next());
 				}
+			} else if (arg.equalsIgnoreCase(ARG_ETHEREUM_WALLET)) {
+				if (!itArg.hasNext()) {
+					throw new IllegalArgumentException(
+							"Illegal argument '" + arg + "', because Ethereum wallet path expected after it");
+				} else {
+					setEthereumWalletPath(itArg.next());
+				}
+			} else if (arg.equalsIgnoreCase(ARG_ETHEREUM_WALLET_PASSWORD)) {
+				if (!itArg.hasNext()) {
+					throw new IllegalArgumentException(
+							"Illegal argument '" + arg + "', because password for Ethereum wallet expected after it");
+				} else {
+					setEthereumWalletPassword(itArg.next());
+				}
 			} else {
 				getCommands().add(arg);
 			}
@@ -338,6 +358,10 @@ public class L2pNodeLauncherConfiguration {
 		String strNodeIdSeed = conf.get("nodeIdSeed");
 		if (strNodeIdSeed != null) {
 			setNodeIdSeed(Long.valueOf(strNodeIdSeed));
+		}
+		String strEthereumWalletPath = conf.get("ethereumWalletPath");
+		if (strEthereumWalletPath != null) {
+			setEthereumWalletPath(strEthereumWalletPath);
 		}
 		List<String> commands = conf.getAll("commands");
 		if (commands != null) {
@@ -503,6 +527,22 @@ public class L2pNodeLauncherConfiguration {
 
 	public void setStorageDirectory(String storageDirectory) {
 		this.storageDirectory = storageDirectory;
+	}
+
+	public String getEthereumWalletPath() {
+		return ethereumWalletPath;
+	}
+
+	public void setEthereumWalletPath(String ethereumWalletPath) {
+		this.ethereumWalletPath = ethereumWalletPath;
+	}
+
+	public String getEthereumWalletPassword() {
+		return ethereumWalletPassword;
+	}
+
+	public void setEthereumWalletPassword(String ethereumWalletPassword) {
+		this.ethereumWalletPassword = ethereumWalletPassword;
 	}
 
 }

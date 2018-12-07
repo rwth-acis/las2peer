@@ -43,6 +43,32 @@ public class ServiceNameVersion implements Serializable {
 	}
 
 	/**
+	 * Gets the package name of the service
+	 *
+	 * @return Returns the package name
+	 */
+	public String getPackageName() {
+		if (name.indexOf('.') < 0) {
+			return "";
+		} else {
+			return name.substring(0, name.lastIndexOf('.'));
+		}
+	}
+
+	/**
+	 * Gets the simple name of the service class
+	 *
+	 * @return Returns the simple class name
+	 */
+	public String getSimpleClassName() {
+		if (name.indexOf('.') < 0) {
+			return name;
+		} else {
+			return name.substring(name.lastIndexOf('.') + 1);
+		}
+	}
+
+	/**
 	 * Gets the service version
 	 * 
 	 * @return Returns the service version

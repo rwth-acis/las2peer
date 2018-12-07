@@ -353,18 +353,21 @@ public abstract class AgentImpl implements Agent, XmlAble, Cloneable, MessageRec
 	 */
 	public static AgentImpl createFromXml(Element rootElement) throws MalformedXMLException {
 		String type = rootElement.getAttribute("type");
-		if ("user".equalsIgnoreCase(type)) {
-			return UserAgentImpl.createFromXml(rootElement);
-		} else if ("group".equalsIgnoreCase(type)) {
-			return GroupAgentImpl.createFromXml(rootElement);
-		} else if ("service".equalsIgnoreCase(type)) {
-			return ServiceAgentImpl.createFromXml(rootElement);
-		} else if ("monitoring".equalsIgnoreCase(type)) {
-			return MonitoringAgent.createFromXml(rootElement);
-		} else if ("bot".equalsIgnoreCase(type)) {
-			return BotAgent.createFromXml(rootElement);
-		} else {
-			throw new MalformedXMLException("Unknown agent type: " + type);
+		switch (type.toLowerCase()) {
+			case "user":
+				return UserAgentImpl.createFromXml(rootElement);
+			case "group":
+				return GroupAgentImpl.createFromXml(rootElement);
+			case "service":
+				return ServiceAgentImpl.createFromXml(rootElement);
+			case "monitoring":
+				return MonitoringAgent.createFromXml(rootElement);
+			case "bot":
+				return BotAgent.createFromXml(rootElement);
+			case "ethereum":
+				return EthereumAgent.createFromXml(rootElement);
+			default:
+				throw new MalformedXMLException("Unknown agent type: " + type);
 		}
 	}
 

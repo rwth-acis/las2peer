@@ -21,8 +21,12 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import i5.las2peer.registryGateway.BadEthereumCredentialsException;
-import i5.las2peer.registryGateway.ServiceReleaseData;
+import i5.las2peer.p2p.EthereumNode;
+import i5.las2peer.registry.*;
+import i5.las2peer.registry.data.RegistryConfiguration;
+import i5.las2peer.registry.data.ServiceDeploymentData;
+import i5.las2peer.registry.data.ServiceReleaseData;
+import i5.las2peer.registry.exceptions.EthereumException;
 import org.glassfish.jersey.media.multipart.ContentDisposition;
 
 import i5.las2peer.api.p2p.ServiceNameVersion;
@@ -37,8 +41,6 @@ import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.L2pNodeLauncher;
-import i5.las2peer.registryGateway.EthereumException;
-import i5.las2peer.registryGateway.Registry;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -50,15 +52,16 @@ public class DefaultHandler {
 
 	private final WebConnector connector;
 	private final Node node;
-	private final Registry registry;
+	private ReadOnlyRegistryClient registry;
 
 	public DefaultHandler(WebConnector connector) {
 		this.connector = connector;
-		this.node = connector.getL2pNode();
-		try {
-			this.registry = new Registry();
-		} catch (BadEthereumCredentialsException e) {
-			throw new RuntimeException(e);
+		node = connector.getL2pNode();
+		if (node instanceof EthereumNode) {
+			registry = ((EthereumNode) this.node).getRegistryClient();
+		} else {
+			// TODO: only handle if ethereum enabled
+			registry = new ReadOnlyRegistryClient(new RegistryConfiguration());
 		}
 	}
 
@@ -79,21 +82,12 @@ public class DefaultHandler {
 	}
 
 	@GET
-	@Path("/eth/debug")
-	@Produces(MediaType.TEXT_PLAIN)
-	public String getEthDebug() {
-		return registry.debug();
-	}
-
-	@GET
 	@Path("/registry/services")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getRegisteredServices() {
-		JSONObject jsonObject = new JSONObject();
-		for (Map.Entry<String, String> service: registry.serviceNameToAuthor.entrySet()) {
-			jsonObject.put(service.getKey(), service.getValue());
-		}
-		return jsonObject.toJSONString();
+		JSONArray serviceNameList = new JSONArray();
+		serviceNameList.addAll(registry.getServiceNames());
+		return serviceNameList.toJSONString();
 	}
 
 	@GET
@@ -101,7 +95,7 @@ public class DefaultHandler {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getServiceReleases() {
 		JSONObject jsonObject = new JSONObject();
-		for (Map.Entry<String, List<ServiceReleaseData>> service: registry.serviceReleases.entrySet()) {
+		for (Map.Entry<String, List<ServiceReleaseData>> service: registry.getServiceReleases().entrySet()) {
 			JSONArray releaseList = new JSONArray();
 			for (ServiceReleaseData release : service.getValue()) {
 				JSONObject entry = new JSONObject();
@@ -115,11 +109,32 @@ public class DefaultHandler {
 	}
 
 	@GET
+	@Path("/registry/service-deployments")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String getServiceDeployments() {
+		JSONObject jsonObject = new JSONObject();
+		for (Map.Entry<String, List<ServiceDeploymentData>> service: registry.getServiceDeployments().entrySet()) {
+			JSONArray deploymentList = new JSONArray();
+			for (ServiceDeploymentData deployment : service.getValue()) {
+				JSONObject entry = new JSONObject();
+				entry.put("packageName", deployment.getServicePackageName());
+				entry.put("className", deployment.getServiceClassName());
+				entry.put("version", deployment.getVersion());
+				entry.put("time", deployment.getTime());
+				entry.put("nodeId", deployment.getNodeId());
+				deploymentList.add(entry);
+			}
+			jsonObject.put(service.getKey(), deploymentList);
+		}
+		return jsonObject.toJSONString();
+	}
+
+	@GET
 	@Path("/registry/tags")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getTags() {
 		JSONObject jsonObject = new JSONObject();
-		for (Map.Entry<String, String> tag: registry.tags.entrySet()) {
+		for (Map.Entry<String, String> tag: registry.getTags().entrySet()) {
 			jsonObject.put(tag.getKey(), tag.getValue());
 		}
 		return jsonObject.toJSONString();
