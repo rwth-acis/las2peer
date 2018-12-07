@@ -678,9 +678,6 @@ public class L2pNodeLauncher {
 		}
 
 		node.registerReceiver(serviceAgent);
-		if (node instanceof EthereumNode) {
-			((EthereumNode) node).announceServiceDeployment((ServiceAgentImpl) serviceAgent);
-		}
 	}
 
 	/**

@@ -14,6 +14,7 @@ import org.web3j.tuples.generated.Tuple4;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Facade providing simple read-only access to the registry smart
@@ -145,43 +146,6 @@ public class ReadOnlyRegistryClient {
 		}
 	}
 
-//	/**
-//	 * Output some (changing) debug info.
-//	 */
-//	public String debug(/*Node node*/) {
-//		try {
-//			/*
-//			String identifier = "foooo-im-an-id";
-//			UserAgentImpl agent = UserAgentImpl.createUserAgent("hunter2");
-//			agent.unlock("hunter2");
-//			String agentId = agent.getIdentifier();
-//			String content = "hello there";
-//
-//			EnvelopeVersion envName = node.createUnencryptedEnvelope(identifier, agent.getPublicKey(), content);
-//			node.storeEnvelope(envName, agent);
-//
-//			EnvelopeVersion retrieved = node.fetchEnvelope(identifier);
-//			Serializable serializable = retrieved.getContent();
-//			String recovered = (String) serializable;
-//
-//			return "{\"id\": \"" + identifier + "\", \"content\": \"" + recovered + "\"}";
-//			*/
-//
-//			EthereumAgent agent = EthereumAgent.createEthereumAgent("hunter2");
-//			agent.unlock("hunter2");
-//			String xmlString = agent.toXmlString();
-//			EthereumAgent sameAgent = EthereumAgent.createFromXml(xmlString);
-//
-//			if (!xmlString.equals(sameAgent.toXmlString())) {
-//				return "hell no this aint working";
-//			}
-//
-//			return sameAgent.toXmlString();
-//		} catch (Exception e) {
-//			return "error: " + e;
-//		}
-//	}
-
 	/** @return map of tags to descriptions */
 	public Map<String, String> getTags() {
 		return observer.tags;
@@ -194,11 +158,13 @@ public class ReadOnlyRegistryClient {
 
 	/** @return map of names to service release objects */
 	public Map<String, List<ServiceReleaseData>> getServiceReleases() {
-		return observer.serviceReleases;
+		return observer.releases;
 	}
 
 	/** @return map of names to service deployments announcements */
 	public Map<String, List<ServiceDeploymentData>> getServiceDeployments() {
-		return observer.serviceDeployments;
+		// just getting rid of the redundant (for our purposes) nested map
+		return observer.deployments.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
+				value -> new ArrayList<>(value.getValue().values()))); // ooh, yeah
 	}
 }

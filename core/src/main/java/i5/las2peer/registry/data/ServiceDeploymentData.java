@@ -3,6 +3,7 @@ package i5.las2peer.registry.data;
 import i5.las2peer.registry.Util;
 
 import java.math.BigInteger;
+import java.util.Objects;
 
 public class ServiceDeploymentData {
 	private String serviceName;
@@ -23,8 +24,12 @@ public class ServiceDeploymentData {
 		this.nodeId = nodeId;
 	}
 
-	public String getServiceName() {
+	public String getServicePackageName() {
 		return serviceName;
+	}
+
+	public String getServiceClassName() {
+		return serviceClass;
 	}
 
 	public String getVersion() {
@@ -45,6 +50,30 @@ public class ServiceDeploymentData {
 
 	@Override
 	public String toString() {
-		return "ServiceDeploymentData(service name: " + this.getServiceName() + ", version: " + this.getVersion() + ", time: " + getTime() + ", node ID: " + getNodeId() + ")";
+		return "ServiceDeploymentData(package: " + this.getServicePackageName()
+				+ ", class: " + this.getServiceClassName() + ", version: " + this.getVersion() + ", time: " + getTime()
+				+ ", node ID: " + getNodeId() + ")";
+	}
+
+	/** Considered equal if all fields but timestamp match. */
+	// the timestamp can be considered optional metadata
+	// the intent here is to replace "outdated" instances when one with
+	// a newer timestamp comes in
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		ServiceDeploymentData that = (ServiceDeploymentData) o;
+		return Objects.equals(serviceName, that.serviceName) &&
+				Objects.equals(serviceClass, that.serviceClass) &&
+				Objects.equals(versionMajor, that.versionMajor) &&
+				Objects.equals(versionMinor, that.versionMinor) &&
+				Objects.equals(versionPatch, that.versionPatch) &&
+				Objects.equals(nodeId, that.nodeId);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(serviceName, serviceClass, versionMajor, versionMinor, versionPatch, nodeId);
 	}
 }

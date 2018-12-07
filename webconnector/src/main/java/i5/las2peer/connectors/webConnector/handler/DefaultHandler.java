@@ -117,7 +117,8 @@ public class DefaultHandler {
 			JSONArray deploymentList = new JSONArray();
 			for (ServiceDeploymentData deployment : service.getValue()) {
 				JSONObject entry = new JSONObject();
-				entry.put("name", deployment.getServiceName());
+				entry.put("packageName", deployment.getServicePackageName());
+				entry.put("className", deployment.getServiceClassName());
 				entry.put("version", deployment.getVersion());
 				entry.put("time", deployment.getTime());
 				entry.put("nodeId", deployment.getNodeId());

@@ -12,8 +12,6 @@ import i5.las2peer.registry.exceptions.BadEthereumCredentialsException;
 import i5.las2peer.registry.exceptions.EthereumException;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.EthereumAgent;
-import i5.las2peer.security.ServiceAgentImpl;
-import i5.las2peer.tools.CryptoException;
 
 import java.net.InetAddress;
 import java.util.List;
@@ -92,7 +90,7 @@ public class EthereumNode extends PastryNodeImpl {
 	 * Announce deployment of the service instance.
 	 * @param nameVersion service being started
 	 */
-	private void announceServiceDeployment(ServiceNameVersion nameVersion) {
+	public void announceServiceDeployment(ServiceNameVersion nameVersion) {
 		String serviceName = nameVersion.getPackageName();
 		String className = nameVersion.getSimpleClassName();
 		int versionMajor = nameVersion.getVersion().getMajor();

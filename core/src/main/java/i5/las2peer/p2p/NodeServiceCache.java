@@ -1,15 +1,9 @@
 package i5.las2peer.p2p;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 import i5.las2peer.api.p2p.ServiceNameVersion;
@@ -43,6 +37,22 @@ public class NodeServiceCache {
 		this.runningAt = parent;
 		this.lifeTimeSeconds = lifeTime;
 		this.waitForResults = resultCount;
+
+		if (runningAt instanceof EthereumNode) {
+			// every ten minutes, re-announce all running service instances
+			ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+			scheduler.scheduleAtFixedRate(() -> {
+				try {
+					localServices.forEach((name, versionsMap) -> versionsMap.forEach((version, instance) ->
+							((EthereumNode) runningAt).announceServiceDeployment(instance.getService())));
+				} catch (ConcurrentModificationException e) {
+					// this is fine, it just means the service stopped
+					// well, there might be an "announcement race condition", so to speak
+					// which isn't nice, but not terrible
+					// TODO: only change if this occurs often
+				}
+			}, 10, 15, TimeUnit.SECONDS); // change back to reasonable value
+		}
 	}
 
 	public void setWaitForResults(int c) {
