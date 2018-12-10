@@ -412,16 +412,19 @@ public class L2pNodeLauncher {
 	 * Try to register the user of the given id at the node and for later usage in this launcher, i.e. for service
 	 * method calls via {@link #invoke}.
 	 * 
-	 * @param id id or login of the agent to load
+	 * @param idOrLogin id or login of the agent to load
 	 * @param passphrase passphrase to unlock the private key of the agent
 	 * @return the registered agent
 	 */
-	public boolean registerUserAgent(String id, String passphrase) {
+	public boolean registerUserAgent(String idOrLogin, String passphrase) {
 		try {
-			if (id.matches("-?[0-9].*")) {
-				currentUser = (UserAgentImpl) node.getAgent(id);
-			} else {
-				currentUser = (UserAgentImpl) node.getAgent(node.getUserManager().getAgentIdByLogin(id));
+			// we can't actually determine whether it's an ID based on the format, because technically something
+			// matching [a-f][a-z0-9]{127} could be either
+			// so we try both
+			try {
+				currentUser = (UserAgentImpl) node.getAgent(idOrLogin);
+			} catch (AgentNotFoundException e) {
+				currentUser = (UserAgentImpl) node.getAgent(node.getUserManager().getAgentIdByLogin(idOrLogin));
 			}
 
 			currentUser.unlock(passphrase);
