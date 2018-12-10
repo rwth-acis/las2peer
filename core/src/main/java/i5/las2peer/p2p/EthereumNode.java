@@ -166,7 +166,7 @@ public class EthereumNode extends PastryNodeImpl {
 		String name = ethereumAgent.getLoginName();
 
 		if (registryClient.usernameIsAvailable(name)) {
-			registryClient.registerUser(name, ethereumAgent.getIdentifier());
+			ethereumAgent.getRegistryClient().registerUser(name, ethereumAgent.getIdentifier());
 		} else if (!registryClient.usernameIsValid(name)) {
 			// this should probably be checked during creation too
 			throw new AgentException("Agent login name is not valid for registry smart contracts.");
