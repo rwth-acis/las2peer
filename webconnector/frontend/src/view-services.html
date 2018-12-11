@@ -22,6 +22,12 @@
                last-response="{{registeredServices}}"
                handleAs="json"
                debounce-duration="300"></iron-ajax>
+    <iron-ajax id="ajaxServiceAuthors"
+               auto
+               url="/las2peer/registry/service-authors"
+               last-response="{{serviceAuthors}}"
+               handleAs="json"
+               debounce-duration="300"></iron-ajax>
     <iron-ajax id="ajaxServiceReleases"
                auto
                url="/las2peer/registry/service-releases"
@@ -53,8 +59,8 @@
       <h2>Registered Services</h2>
       These service names have been registered by some author on the blockchain-based service registry:
       <ul>
-        <template is="dom-repeat" items="[[registeredServices]]">
-          <li>[[item]]</li>
+        <template is="dom-repeat" items="[[_toArray(serviceAuthors)]]">
+          <li>[[item.name]] by <emph>[[item.value]]</emph></li>
         </template>
       </ul>
 
@@ -152,9 +158,9 @@
       refresh() {
         this.$.ajaxCommunityTags.generateRequest();
         this.$.ajaxRegisteredServices.generateRequest();
+        this.$.ajaxServiceAuthors.generateRequest();
         this.$.ajaxServiceReleases.generateRequest();
         this.$.ajaxServiceDeployments.generateRequest();
-
       }
 
       _toArray(obj) {

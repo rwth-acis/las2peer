@@ -80,6 +80,17 @@ public class DefaultHandler {
 	}
 
 	@GET
+	@Path("/registry/service-authors")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String getServiceAuthors() {
+		JSONObject jsonObject = new JSONObject();
+		for (Map.Entry<String, String> tag: registry.getServiceAuthors().entrySet()) {
+			jsonObject.put(tag.getKey(), tag.getValue());
+		}
+		return jsonObject.toJSONString();
+	}
+
+	@GET
 	@Path("/registry/service-releases")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getServiceReleases() {

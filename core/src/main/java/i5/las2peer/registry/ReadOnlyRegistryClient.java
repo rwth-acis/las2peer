@@ -156,6 +156,11 @@ public class ReadOnlyRegistryClient {
 		return observer.serviceNameToAuthor.keySet();
 	}
 
+	/** @return map of service names to their authors */
+	public Map<String, String> getServiceAuthors() {
+		return observer.serviceNameToAuthor;
+	}
+
 	/** @return map of names to service release objects */
 	public Map<String, List<ServiceReleaseData>> getServiceReleases() {
 		return observer.releases;
