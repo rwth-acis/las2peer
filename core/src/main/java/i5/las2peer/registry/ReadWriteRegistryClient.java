@@ -143,7 +143,8 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 				BigInteger.valueOf(versionMajor), BigInteger.valueOf(versionMinor), BigInteger.valueOf(versionPatch),
 				BigInteger.valueOf(timeNow), nodeId).send();
 		} catch (Exception e) {
-			throw new EthereumException("Failed to submit service deployment announcement", e);
+			throw new EthereumException("Failed to submit service deployment announcement ("
+					+ "DEBUG: " + serviceClassName + ", " + e.getMessage() + ")", e);
 		}
 	}
 
@@ -169,7 +170,8 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 				BigInteger.valueOf(versionMajor), BigInteger.valueOf(versionMinor), BigInteger.valueOf(versionPatch),
 				nodeId).send();
 		} catch (Exception e) {
-			throw new EthereumException("Failed to submit service deployment announcement", e);
+			throw new EthereumException("Failed to submit service deployment *end* announcement ("
+					+ "DEBUG: " + serviceClassName + ", " + e.getMessage() + ")", e);
 		}
 	}
 }
