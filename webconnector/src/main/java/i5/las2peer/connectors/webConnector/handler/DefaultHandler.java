@@ -84,8 +84,8 @@ public class DefaultHandler {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getServiceAuthors() {
 		JSONObject jsonObject = new JSONObject();
-		for (Map.Entry<String, String> tag: registry.getServiceAuthors().entrySet()) {
-			jsonObject.put(tag.getKey(), tag.getValue());
+		for (Map.Entry<String, String> serviceWithAuthor: registry.getServiceAuthors().entrySet()) {
+			jsonObject.put(serviceWithAuthor.getKey(), serviceWithAuthor.getValue());
 		}
 		return jsonObject.toJSONString();
 	}

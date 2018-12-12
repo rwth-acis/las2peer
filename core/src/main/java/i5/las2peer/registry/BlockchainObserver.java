@@ -95,6 +95,16 @@ class BlockchainObserver {
 		contracts.serviceRegistry.serviceCreatedEventFlowable(DefaultBlockParameterName.EARLIEST,
 				DefaultBlockParameterName.LATEST).subscribe(service -> {
 			String serviceName = contracts.serviceRegistry.hashToName(service.nameHash).send();
+
+			if (serviceName.equals("")) {
+				// I've seen this; this must be a race condition, but, uhhh, it *cannot* happen sooo ... ???
+				// reasoning: the ServiceCreated event is emitted *after* the hash entry has been set
+				// so what's going on!?
+				logger.severe("FIXME service name is empty, which definitely should not happen");
+				logger.severe("--> hash: " + service.nameHash);
+				logger.severe("--> log entry: " + service.log);
+			}
+
 			serviceNameToAuthor.put(serviceName, Util.recoverString(service.author));
 		}, e -> logger.severe("Error observing service registration event: " + e.toString()));
 	}
@@ -107,6 +117,12 @@ class BlockchainObserver {
 					release.versionMajor, release.versionMinor, release.versionPatch, new byte[]{});
 
 			releases.computeIfAbsent(releaseData.getServiceName(), k -> new ArrayList<>());
+
+			if (releases.get(releaseData.getServiceName()).contains(releaseData)) {
+				logger.warning("Duplicate release event received. This *can* happen due to race-condition, but shouldn't happen often. Release: " + releaseData);
+				// TODO: decide whether to ignore duplicates or allow them
+				// TODO: investigate why there are lots of duplicates
+			}
 			releases.get(releaseData.getServiceName()).add(releaseData);
 
 			storeReleaseByVersion(releaseData);
