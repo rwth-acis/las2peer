@@ -108,8 +108,10 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 	private void releaseService(String serviceName, String authorName,
 								int versionMajor, int versionMinor, int versionPatch,
 								String dhtSupplement) throws EthereumException {
+		logger.fine("DEBUG: release called: " + serviceName); // DEBUG
 		if (observer.getReleaseByVersion(serviceName, versionMajor, versionMinor, versionPatch) != null) {
 			logger.warning("Tried to submit duplicate release (name / version already exist), ignoring!");
+			// FIXME: handle in contracts, cause this is a race condition
 			return;
 		}
 
