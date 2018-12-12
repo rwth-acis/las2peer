@@ -5,9 +5,9 @@ import i5.las2peer.registry.contracts.ServiceRegistry;
 import i5.las2peer.registry.contracts.UserRegistry;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.http.HttpService;
+import org.web3j.tx.FastRawTransactionManager;
 import org.web3j.tx.gas.ContractGasProvider;
 import org.web3j.crypto.Credentials;
-import org.web3j.tx.RawTransactionManager;
 import org.web3j.tx.ReadonlyTransactionManager;
 import org.web3j.tx.TransactionManager;
 import org.web3j.tx.gas.DefaultGasProvider;
@@ -163,7 +163,9 @@ class Contracts {
 			if (credentials == null) {
 				transactionManager = new ReadonlyTransactionManager(web3j, DEFAULT_FROM_ADDRESS);
 			} else {
-				transactionManager = new RawTransactionManager(web3j, credentials);
+				// use FastRaw... instead of Raw... since Raw lead to this:
+				// https://ethereum.stackexchange.com/questions/63818/quick-web3j-transactions-to-the-same-destination-address-results-in-replacement
+				transactionManager = new FastRawTransactionManager(web3j, credentials);
 			}
 
 			CommunityTagIndex communityTagIndex = CommunityTagIndex.load(config.communityTagIndexAddress, web3j, transactionManager, gasProvider);
