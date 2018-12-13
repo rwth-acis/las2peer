@@ -161,25 +161,35 @@ class Contracts {
 
 			Web3j web3j = Web3j.build((config.endpoint == null) ? new HttpService() : new HttpService(config.endpoint));
 
-			TransactionManager transactionManager;
-			if (credentials == null) {
-				transactionManager = new ReadonlyTransactionManager(web3j, DEFAULT_FROM_ADDRESS);
-			} else {
-				// use FastRaw... instead of Raw... since Raw lead to this:
-				// https://ethereum.stackexchange.com/questions/63818/quick-web3j-transactions-to-the-same-destination-address-results-in-replacement
-				// also use faster polling interval
-				// https://ethereum.stackexchange.com/questions/34502/how-could-i-send-transactions-continuously-by-web3j-generated-wrapper
-				long pollingIntervalMillisecs = 3000;
-				int attempts = 40; // total: 3s*40 = 2min -- it definitely should not take that long, no idea what's appropriate
-				TransactionReceiptProcessor receiptProcessor = new PollingTransactionReceiptProcessor(web3j, pollingIntervalMillisecs, attempts);
-				transactionManager = new FastRawTransactionManager(web3j, credentials, receiptProcessor);
-			}
-
+			TransactionManager transactionManager = constructTxManager(web3j, credentials);
 			CommunityTagIndex communityTagIndex = CommunityTagIndex.load(config.communityTagIndexAddress, web3j, transactionManager, gasProvider);
 			UserRegistry userRegistry = UserRegistry.load(config.userRegistryAddress, web3j, transactionManager, gasProvider);
 			ServiceRegistry serviceRegistry = ServiceRegistry.load(config.serviceRegistryAddress, web3j, transactionManager, gasProvider);
 
 			return new Contracts(communityTagIndex, userRegistry, serviceRegistry);
+		}
+
+		private TransactionManager constructTxManager(Web3j web3j, Credentials credentials) {
+			if (credentials == null) {
+				return new ReadonlyTransactionManager(web3j, DEFAULT_FROM_ADDRESS);
+			} else {
+				// FIXME: "nonce too low" error still occurs
+				// it only seems to happen on the first couple of announcements, meaning it's not really a problem
+				// bit still, it should be fixed
+				//
+				// see:
+				// https://ethereum.stackexchange.com/questions/63818/quick-web3j-transactions-to-the-same-destination-address-results-in-replacement
+				// https://ethereum.stackexchange.com/questions/34502/how-could-i-send-transactions-continuously-by-web3j-generated-wrapper
+				//
+				// unfortunately, this is not working yet. the timeouts should be plenty:
+				// service announcements every 30 secs with polling 3 secs should be perfectly fine, but it's not.
+				// so let's reduce this. whatever.
+				long pollingIntervalMillisecs = 500;
+				int attempts = 40;
+				TransactionReceiptProcessor receiptProcessor = new PollingTransactionReceiptProcessor(web3j, pollingIntervalMillisecs, attempts);
+				return new FastRawTransactionManager(web3j, credentials, receiptProcessor);
+			}
+
 		}
 	}
 }

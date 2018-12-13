@@ -29,8 +29,8 @@ public class NodeServiceCache {
 	private final Map<String, SortedMap<ServiceVersion, ServiceInstance>> localServices = new HashMap<>();
 	private final Map<String, SortedMap<ServiceVersion, SortedSet<ServiceInstance>>> globalServices = new HashMap<>();
 
-	private long lifeTimeSeconds = 30;
-	private int waitForResults = 3;
+	private long lifeTimeSeconds;
+	private int waitForResults;
 	private int timeoutMs = 2000;
 
 	public NodeServiceCache(Node parent, long lifeTime, int resultCount) {
@@ -50,7 +50,7 @@ public class NodeServiceCache {
 					// which isn't nice, but not terrible
 					// TODO: only change if this occurs often
 				}
-			}, lifeTimeSeconds, lifeTimeSeconds, TimeUnit.SECONDS);
+			}, 30, 30, TimeUnit.SECONDS);
 			// TODO: for now, 30 seconds is nice for testing, but eventually something like 5min would be okay
 		}
 	}
