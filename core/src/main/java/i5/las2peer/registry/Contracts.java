@@ -12,6 +12,8 @@ import org.web3j.tx.ReadonlyTransactionManager;
 import org.web3j.tx.TransactionManager;
 import org.web3j.tx.gas.DefaultGasProvider;
 import org.web3j.tx.gas.StaticGasProvider;
+import org.web3j.tx.response.PollingTransactionReceiptProcessor;
+import org.web3j.tx.response.TransactionReceiptProcessor;
 
 import java.math.BigInteger;
 import java.util.Objects;
@@ -165,7 +167,12 @@ class Contracts {
 			} else {
 				// use FastRaw... instead of Raw... since Raw lead to this:
 				// https://ethereum.stackexchange.com/questions/63818/quick-web3j-transactions-to-the-same-destination-address-results-in-replacement
-				transactionManager = new FastRawTransactionManager(web3j, credentials);
+				// also use faster polling interval
+				// https://ethereum.stackexchange.com/questions/34502/how-could-i-send-transactions-continuously-by-web3j-generated-wrapper
+				long pollingIntervalMillisecs = 3000;
+				int attempts = 40; // total: 3s*40 = 2min -- it definitely should not take that long, no idea what's appropriate
+				TransactionReceiptProcessor receiptProcessor = new PollingTransactionReceiptProcessor(web3j, pollingIntervalMillisecs, attempts);
+				transactionManager = new FastRawTransactionManager(web3j, credentials, receiptProcessor);
 			}
 
 			CommunityTagIndex communityTagIndex = CommunityTagIndex.load(config.communityTagIndexAddress, web3j, transactionManager, gasProvider);

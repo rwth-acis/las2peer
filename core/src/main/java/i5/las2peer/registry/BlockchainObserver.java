@@ -96,7 +96,7 @@ class BlockchainObserver {
 				DefaultBlockParameterName.LATEST).subscribe(service -> {
 			String serviceName = contracts.serviceRegistry.hashToName(service.nameHash).send();
 
-			if (serviceName.equals("")) {
+			if (serviceName.isEmpty()) {
 				// I've seen this; this must be a race condition, but, uhhh, it *cannot* happen sooo ... ???
 				// reasoning: the ServiceCreated event is emitted *after* the hash entry has been set
 				// so what's going on!?

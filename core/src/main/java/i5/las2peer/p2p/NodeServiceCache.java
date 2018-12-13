@@ -39,7 +39,6 @@ public class NodeServiceCache {
 		this.waitForResults = resultCount;
 
 		if (runningAt instanceof EthereumNode) {
-			// every ten minutes, re-announce all running service instances
 			ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 			scheduler.scheduleAtFixedRate(() -> {
 				try {
@@ -51,7 +50,8 @@ public class NodeServiceCache {
 					// which isn't nice, but not terrible
 					// TODO: only change if this occurs often
 				}
-			}, 10, 15, TimeUnit.SECONDS); // change back to reasonable value
+			}, lifeTimeSeconds, lifeTimeSeconds, TimeUnit.SECONDS);
+			// TODO: for now, 30 seconds is nice for testing, but eventually something like 5min would be okay
 		}
 	}
 
