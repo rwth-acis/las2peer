@@ -116,8 +116,18 @@ class BlockchainObserver {
 		DefaultBlockParameterName.LATEST).subscribe(tag -> {
 			if (!txHasAlreadyBeenHandled(tag.log.getTransactionHash())) {
 			String tagName = Util.recoverString(tag.name);
-			String tagDescription = contracts.communityTagIndex.viewDescription(
+
+				// same issue as lookUpServiceName; let's just retry
+				String tagDescription = "";
+				for (int i = 0; i < 5; i++) {
+					tagDescription = contracts.communityTagIndex.viewDescription(
 					Util.padAndConvertString(tagName, 32)).send();
+					if (!tagDescription.isEmpty()) {
+						break;
+					}
+					logger.warning("Tag description returned empty, retrying");
+				}
+
 			tags.put(tagName, tagDescription);
 			}
 		}, e -> logger.severe("Error observing tag event: " + e.toString()));
