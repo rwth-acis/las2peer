@@ -3,6 +3,7 @@ package i5.las2peer.registry;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.registry.data.ServiceDeploymentData;
 import i5.las2peer.registry.data.ServiceReleaseData;
+import i5.las2peer.registry.exceptions.EthereumException;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 
 import java.util.*;
@@ -122,22 +123,39 @@ class BlockchainObserver {
 		}, e -> logger.severe("Error observing tag event: " + e.toString()));
 	}
 
+	// hacky workaround
+	// I'm fairly sure this is part of the chain reorganization stuff,
+	// see observedEventTxHashes
+	// here, the tx with the event was mined, the block accepted as part of the longest chain,
+	// then the block was orphaned (due to 2+ other blocks becoming),
+	// exactly then we look up the name, and *then* it gets mined again
+	// this only happens occasionally and the window of "opportunity" (for failure) is a few seconds long
+	// hopefully just trying a couple times is enough
+	private String lookupServiceName(byte[] hashOfName) throws EthereumException {
+		int retries = 5;
+		int wait = 2 * 1000;
+		for (int i = 0; i < retries ; i++) {
+			try {
+				String serviceName = contracts.serviceRegistry.hashToName(hashOfName).send();
+				if (!serviceName.isEmpty()) {
+					return serviceName;
+				}
+				logger.warning("service name is empty (due to race cond?), trying again");
+				logger.severe("--> hash: " + hashOfName);
+				Thread.sleep(wait);
+			} catch (Exception e) {
+				logger.severe("--> more bad stuff happened: " + e.getMessage());
+			}
+		}
+		throw new EthereumException("Could not look up service name");
+	}
+
 	private void observeServiceRegistrations() {
 		contracts.serviceRegistry.serviceCreatedEventFlowable(DefaultBlockParameterName.EARLIEST,
 				DefaultBlockParameterName.LATEST).subscribe(service -> {
 			if (!txHasAlreadyBeenHandled(service.log.getTransactionHash())) {
-			String serviceName = contracts.serviceRegistry.hashToName(service.nameHash).send();
-
-			if (serviceName.isEmpty()) {
-				// I've seen this; this must be a race condition, but, uhhh, it *cannot* happen sooo ... ???
-				// reasoning: the ServiceCreated event is emitted *after* the hash entry has been set
-				// so what's going on!?
-				logger.severe("FIXME service name is empty, which definitely should not happen");
-				logger.severe("--> hash: " + service.nameHash);
-				logger.severe("--> log entry: " + service.log);
-			}
-
-			serviceNameToAuthor.put(serviceName, Util.recoverString(service.author));
+				String serviceName = lookupServiceName(service.nameHash);
+				serviceNameToAuthor.put(serviceName, Util.recoverString(service.author));
 			}
 		}, e -> logger.severe("Error observing service registration event: " + e.toString()));
 	}
@@ -151,14 +169,7 @@ class BlockchainObserver {
 					release.versionMajor, release.versionMinor, release.versionPatch, new byte[]{});
 
 			releases.computeIfAbsent(releaseData.getServiceName(), k -> new ArrayList<>());
-
-			if (releases.get(releaseData.getServiceName()).contains(releaseData)) {
-				logger.warning("Duplicate release event received. This *can* happen due to race-condition, but shouldn't happen often. Release: " + releaseData);
-				// TODO: decide whether to ignore duplicates or allow them
-				// TODO: investigate why there are lots of duplicates
-			}
 			releases.get(releaseData.getServiceName()).add(releaseData);
-
 			storeReleaseByVersion(releaseData);
 			}
 		}, e -> logger.severe("Error observing service release event: " + e.toString()));
