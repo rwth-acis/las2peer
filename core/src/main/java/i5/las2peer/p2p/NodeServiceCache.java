@@ -50,8 +50,8 @@ public class NodeServiceCache {
 					// which isn't nice, but not terrible
 					// TODO: only change if this occurs often
 				}
-			}, 30, 30, TimeUnit.SECONDS);
-			// TODO: for now, 30 seconds is nice for testing, but eventually something like 5min would be okay
+			}, 1, 1, TimeUnit.MINUTES);
+			// TODO: for now this is nice for testing, but eventually something like 5min would be okay
 		}
 	}
 

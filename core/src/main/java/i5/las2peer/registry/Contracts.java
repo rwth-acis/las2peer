@@ -184,8 +184,10 @@ class Contracts {
 				// unfortunately, this is not working yet. the timeouts should be plenty:
 				// service announcements every 30 secs with polling 3 secs should be perfectly fine, but it's not.
 				// so let's reduce this. whatever.
-				long pollingIntervalMillisecs = 500;
-				int attempts = 40;
+				//
+				// okay, frankly, I'm not even sure if this can fix the nonce too low error (but that's what the issue / StackEx suggest)
+				long pollingIntervalMillisecs = 1000;
+				int attempts = 30;
 				TransactionReceiptProcessor receiptProcessor = new PollingTransactionReceiptProcessor(web3j, pollingIntervalMillisecs, attempts);
 				return new FastRawTransactionManager(web3j, credentials, receiptProcessor);
 			}
