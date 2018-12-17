@@ -61,6 +61,14 @@ public class Util {
 		return new String(trimmed, StandardCharsets.UTF_8);
 	}
 
+	public static String bytesToHexString(byte[] byteArray) {
+		StringBuilder sb = new StringBuilder();
+		for (byte b : byteArray) {
+			sb.append(String.format("%02X ", b));
+		}
+		return sb.toString();
+	}
+
 	/**
 	 * Computes Sha3 (= Keccak256) sum, hopefully matching the sum
 	 * produced by Solidity's keccak256 and web3's soliditySha3.

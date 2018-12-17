@@ -4,13 +4,19 @@ import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.registry.data.ServiceDeploymentData;
 import i5.las2peer.registry.data.ServiceReleaseData;
 import i5.las2peer.registry.exceptions.EthereumException;
+import io.reactivex.schedulers.Schedulers;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
- * Observes blockchain events related to the registry and updates its
- * state accordingly.
+ * Observes blockchain events related to the registry and updates its state
+ * accordingly.
+ *
+ * The JavaRx Flowables use extra threads so that look-ups etc. don't block
+ * the main thread.
  */
 class BlockchainObserver {
 	/** Tags to their description */
@@ -44,7 +50,9 @@ class BlockchainObserver {
 	// so far, this is ugly but fine. maybe hide this under sane accessors
 	Map<String, Map<ServiceDeploymentData, ServiceDeploymentData>> deployments;
 
-	private static Map<Contracts.ContractsConfig, BlockchainObserver> instances = new HashMap<>();
+	private static final ConcurrentMap<String, String> hashToNameCache = new ConcurrentHashMap<>();
+
+	private static final Map<Contracts.ContractsConfig, BlockchainObserver> instances = new HashMap<>();
 
 	private Contracts contracts;
 
@@ -113,7 +121,10 @@ class BlockchainObserver {
 
 	private void observeTagCreations() {
 		contracts.communityTagIndex.communityTagCreatedEventFlowable(DefaultBlockParameterName.EARLIEST,
-		DefaultBlockParameterName.LATEST).subscribe(tag -> {
+		DefaultBlockParameterName.LATEST)
+				.observeOn(Schedulers.io())
+				.subscribeOn(Schedulers.io())
+				.subscribe(tag -> {
 			if (!txHasAlreadyBeenHandled(tag.log.getTransactionHash())) {
 			String tagName = Util.recoverString(tag.name);
 
@@ -133,28 +144,47 @@ class BlockchainObserver {
 		}, e -> logger.severe("Error observing tag event: " + e.toString()));
 	}
 
-	// hacky workaround
-	// I'm fairly sure this is part of the chain reorganization stuff,
-	// see observedEventTxHashes
-	// here, the tx with the event was mined, the block accepted as part of the longest chain,
-	// then the block was orphaned (due to 2+ other blocks becoming),
-	// exactly then we look up the name, and *then* it gets mined again
-	// this only happens occasionally and the window of "opportunity" (for failure) is a few seconds long
-	// hopefully just trying a couple times is enough
+	/**
+	 * Looks up service name from hash with caching and retry if unavailable.
+	 *
+	 * Result is cached because this is an RPC call and thus expensive (very
+	 * roughly ~100ms, too expensive to call thousands of times).
+	 *
+	 * We retry because a chain reorganization can mean that we try to query
+	 * the name in the brief window where the most recent block(s) becomes
+	 * orphaned by a slightly longer chain segment, but before its
+	 * transactions are included in one of those main-chain blocks.
+	 * (As of this writing, that window is less than a second long, so one or
+	 * two retries should do the trick.)
+	 *
+	 * This method is hopefully thread-safe, since it only modifies the cache
+	 * using {@link java.util.concurrent.ConcurrentHashMap#putIfAbsent}.
+	 *
+	 * @param hashOfName raw hash bytes as returned by the smart contract
+	 * @return service name
+	 */
 	private String lookupServiceName(byte[] hashOfName) throws EthereumException {
-		int retries = 5;
-		int wait = 2 * 1000;
+		String hashAsString = new String(hashOfName); // this is not human readable
+		if (hashToNameCache.containsKey(hashAsString)) {
+			return hashToNameCache.get(hashAsString);
+		}
+		logger.fine("Cache miss for " + Util.bytesToHexString(hashOfName) + ", querying Eth client ...");
+
+		int retries = 120;
+		int wait = 500;
 		for (int i = 0; i < retries ; i++) {
 			try {
+				logger.finer("Lookup attempt " + i + "  querying Eth client ...");
 				String serviceName = contracts.serviceRegistry.hashToName(hashOfName).send();
 				if (!serviceName.isEmpty()) {
+					logger.finer("... succeeded.");
+					hashToNameCache.putIfAbsent(hashAsString, serviceName);
 					return serviceName;
 				}
-				logger.warning("service name is empty (due to race cond?), trying again");
-				logger.severe("--> hash: " + hashOfName);
+				logger.finer("... still not available, retrying.");
 				Thread.sleep(wait);
 			} catch (Exception e) {
-				logger.severe("--> more bad stuff happened: " + e.getMessage());
+				logger.severe("Error while looking up service name: " + e.getMessage());
 			}
 		}
 		throw new EthereumException("Could not look up service name");
@@ -162,7 +192,10 @@ class BlockchainObserver {
 
 	private void observeServiceRegistrations() {
 		contracts.serviceRegistry.serviceCreatedEventFlowable(DefaultBlockParameterName.EARLIEST,
-				DefaultBlockParameterName.LATEST).subscribe(service -> {
+				DefaultBlockParameterName.LATEST)
+				.observeOn(Schedulers.io())
+				.subscribeOn(Schedulers.io())
+				.subscribe(service -> {
 			if (!txHasAlreadyBeenHandled(service.log.getTransactionHash())) {
 				String serviceName = lookupServiceName(service.nameHash);
 				serviceNameToAuthor.put(serviceName, Util.recoverString(service.author));
@@ -172,15 +205,18 @@ class BlockchainObserver {
 
 	private void observeServiceReleases() {
 		contracts.serviceRegistry.serviceReleasedEventFlowable(DefaultBlockParameterName.EARLIEST,
-				DefaultBlockParameterName.LATEST).subscribe(release -> {
+				DefaultBlockParameterName.LATEST)
+				.observeOn(Schedulers.io())
+				.subscribeOn(Schedulers.io())
+				.subscribe(release -> {
 			if (!txHasAlreadyBeenHandled(release.log.getTransactionHash())) {
-			String serviceName = contracts.serviceRegistry.hashToName(release.nameHash).send();
-			ServiceReleaseData releaseData = new ServiceReleaseData(serviceName,
-					release.versionMajor, release.versionMinor, release.versionPatch, new byte[]{});
+				String serviceName = lookupServiceName(release.nameHash);
+				ServiceReleaseData releaseData = new ServiceReleaseData(serviceName,
+						release.versionMajor, release.versionMinor, release.versionPatch, new byte[]{});
 
-			releases.computeIfAbsent(releaseData.getServiceName(), k -> new ArrayList<>());
-			releases.get(releaseData.getServiceName()).add(releaseData);
-			storeReleaseByVersion(releaseData);
+				releases.computeIfAbsent(releaseData.getServiceName(), k -> new ArrayList<>());
+				releases.get(releaseData.getServiceName()).add(releaseData);
+				storeReleaseByVersion(releaseData);
 			}
 		}, e -> logger.severe("Error observing service release event: " + e.toString()));
 	}
@@ -188,13 +224,16 @@ class BlockchainObserver {
 	private void observeServiceDeployments() {
 		// service deployment announcements and re-announcements
 		contracts.serviceRegistry.serviceDeploymentEventFlowable(DefaultBlockParameterName.EARLIEST,
-				DefaultBlockParameterName.LATEST).subscribe(deployment -> {
+				DefaultBlockParameterName.LATEST)
+				.observeOn(Schedulers.io())
+				.subscribeOn(Schedulers.io())
+				.subscribe(deployment -> {
 			if (!txHasAlreadyBeenHandled(deployment.log.getTransactionHash())) {
-			String serviceName = contracts.serviceRegistry.hashToName(deployment.nameHash).send();
-			ServiceDeploymentData deploymentData = new ServiceDeploymentData(serviceName, deployment.className,
-					deployment.versionMajor, deployment.versionMinor, deployment.versionPatch, deployment.timestamp,
-					deployment.nodeId);
-			addOrUpdateDeployment(deploymentData);
+				String serviceName = lookupServiceName(deployment.nameHash);
+				ServiceDeploymentData deploymentData = new ServiceDeploymentData(serviceName, deployment.className,
+						deployment.versionMajor, deployment.versionMinor, deployment.versionPatch, deployment.timestamp,
+						deployment.nodeId);
+				addOrUpdateDeployment(deploymentData);
 			}
 		}, e -> logger.severe("Error observing service deployment event: " + e.toString()));
 
@@ -205,15 +244,18 @@ class BlockchainObserver {
 		// (this would only last until the re-announcement anyway. still.)
 		// TODO: yeah, this is definitely needed
 		contracts.serviceRegistry.serviceDeploymentEndEventFlowable(DefaultBlockParameterName.EARLIEST,
-				DefaultBlockParameterName.LATEST).subscribe(stopped -> {
+				DefaultBlockParameterName.LATEST)
+				.observeOn(Schedulers.io())
+				.subscribeOn(Schedulers.io())
+				.subscribe(stopped -> {
 			if (!txHasAlreadyBeenHandled(stopped.log.getTransactionHash())) {
-			String serviceName = contracts.serviceRegistry.hashToName(stopped.nameHash).send();
+				String serviceName = lookupServiceName(stopped.nameHash);
 
-			// for comparison only; remember: this event signifies the END of a deployment, not actually a deployment
-			ServiceDeploymentData deploymentThatEnded = new ServiceDeploymentData(serviceName, stopped.className,
-					stopped.versionMajor, stopped.versionMinor, stopped.versionPatch, null,
-					stopped.nodeId);
-			deployments.get(serviceName).remove(deploymentThatEnded);
+				// for comparison only; remember: this event signifies the END of a deployment, not actually a deployment
+				ServiceDeploymentData deploymentThatEnded = new ServiceDeploymentData(serviceName, stopped.className,
+						stopped.versionMajor, stopped.versionMinor, stopped.versionPatch, null,
+						stopped.nodeId);
+				deployments.get(serviceName).remove(deploymentThatEnded);
 			}
 		}, e -> logger.severe("Error observing service deployment event: " + e.toString()));
 	}
