@@ -69,9 +69,9 @@ public class L2pNodeLauncherConfiguration {
 	public static final String ARG_SANDBOX = "--sandbox";
 	public static final String ARG_SHORT_SANDBOX = "-sb";
 
-	public static final String ARG_ETHEREUM_WALLET = "--ethereum-wallet";
+	public static final String ARG_ETHEREUM_ENCRYPTED_PRIVATE_KEY = "--ethereum-encrypted-private-key";
 
-	public static final String ARG_ETHEREUM_WALLET_PASSWORD = "--ethereum-wallet-password";
+	public static final String ARG_ETHEREUM_PASSWORD = "--ethereum-password";
 
 	private static final L2pLogger logger = L2pLogger.getInstance(L2pNodeLauncherConfiguration.class);
 
@@ -95,8 +95,8 @@ public class L2pNodeLauncherConfiguration {
 	private Long nodeIdSeed;
 	private final List<String> commands = new LinkedList<>();
 	private boolean sandbox;
-	private String ethereumWalletPath;
-	private String ethereumWalletPassword;
+	private String ethereumEncryptedPrivateKey;
+	private String ethereumPassword;
 
 	public L2pNodeLauncherConfiguration() {
 		// set default values
@@ -284,19 +284,19 @@ public class L2pNodeLauncherConfiguration {
 				} else {
 					setStorageDirectory(itArg.next());
 				}
-			} else if (arg.equalsIgnoreCase(ARG_ETHEREUM_WALLET)) {
+			} else if (arg.equalsIgnoreCase(ARG_ETHEREUM_ENCRYPTED_PRIVATE_KEY)) {
 				if (!itArg.hasNext()) {
 					throw new IllegalArgumentException(
-							"Illegal argument '" + arg + "', because Ethereum wallet path expected after it");
+							"Illegal argument '" + arg + "', because encrypted private key for Ethereum expected after it");
 				} else {
-					setEthereumWalletPath(itArg.next());
+					setEthereumEncryptedPrivateKey(itArg.next());
 				}
-			} else if (arg.equalsIgnoreCase(ARG_ETHEREUM_WALLET_PASSWORD)) {
+			} else if (arg.equalsIgnoreCase(ARG_ETHEREUM_PASSWORD)) {
 				if (!itArg.hasNext()) {
 					throw new IllegalArgumentException(
-							"Illegal argument '" + arg + "', because password for Ethereum wallet expected after it");
+							"Illegal argument '" + arg + "', because password for Ethereum private key expected after it");
 				} else {
-					setEthereumWalletPassword(itArg.next());
+					setEthereumPassword(itArg.next());
 				}
 			} else {
 				getCommands().add(arg);
@@ -359,9 +359,9 @@ public class L2pNodeLauncherConfiguration {
 		if (strNodeIdSeed != null) {
 			setNodeIdSeed(Long.valueOf(strNodeIdSeed));
 		}
-		String strEthereumWalletPath = conf.get("ethereumWalletPath");
-		if (strEthereumWalletPath != null) {
-			setEthereumWalletPath(strEthereumWalletPath);
+		String strEthereumEncryptedPrivateKey = conf.get("ethereumEncryptedPrivateKey");
+		if (strEthereumEncryptedPrivateKey != null) {
+			setEthereumPassword(strEthereumEncryptedPrivateKey);
 		}
 		List<String> commands = conf.getAll("commands");
 		if (commands != null) {
@@ -529,20 +529,20 @@ public class L2pNodeLauncherConfiguration {
 		this.storageDirectory = storageDirectory;
 	}
 
-	public String getEthereumWalletPath() {
-		return ethereumWalletPath;
+	public String getEthereumEncryptedPrivateKey() {
+		return ethereumEncryptedPrivateKey;
 	}
 
-	public void setEthereumWalletPath(String ethereumWalletPath) {
-		this.ethereumWalletPath = ethereumWalletPath;
+	public void setEthereumEncryptedPrivateKey(String ethereumEncryptedPrivateKey) {
+		this.ethereumEncryptedPrivateKey = ethereumEncryptedPrivateKey;
 	}
 
-	public String getEthereumWalletPassword() {
-		return ethereumWalletPassword;
+	public String getEthereumPassword() {
+		return ethereumPassword;
 	}
 
-	public void setEthereumWalletPassword(String ethereumWalletPassword) {
-		this.ethereumWalletPassword = ethereumWalletPassword;
+	public void setEthereumPassword(String ethereumPassword) {
+		this.ethereumPassword = ethereumPassword;
 	}
 
 }

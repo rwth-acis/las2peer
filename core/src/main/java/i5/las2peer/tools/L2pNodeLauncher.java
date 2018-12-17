@@ -809,16 +809,16 @@ public class L2pNodeLauncher {
 	 */
 	private L2pNodeLauncher(InetAddress bindAddress, Integer port, List<String> bootstrap, STORAGE_MODE storageMode,
 			String storageDir, Boolean monitoringObserver, ClassManager cl, Long nodeIdSeed,
-			String ethereumWalletPath, String ethereumWalletPassword) {
+			String ethereumEncryptedPrivateKey, String ethereumPassword) {
 		if (monitoringObserver == null) {
 			monitoringObserver = false;
 		}
-		if (ethereumWalletPath == null) {
+		if (ethereumEncryptedPrivateKey == null) {
 			node = new PastryNodeImpl(cl, monitoringObserver, bindAddress, port, bootstrap, storageMode, storageDir,
 					nodeIdSeed);
 		} else {
 			node = new EthereumNode(cl, monitoringObserver, bindAddress, port, bootstrap, storageMode, storageDir,
-					nodeIdSeed, ethereumWalletPath, ethereumWalletPassword);
+					nodeIdSeed, ethereumEncryptedPrivateKey, ethereumPassword);
 		}
 		commandPrompt = new CommandPrompt(this);
 	}
@@ -976,7 +976,7 @@ public class L2pNodeLauncher {
 		L2pNodeLauncher launcher = new L2pNodeLauncher(bindAddress, launcherConfiguration.getPort(),
 				launcherConfiguration.getBootstrap(), storageMode, launcherConfiguration.getStorageDirectory(),
 				launcherConfiguration.useMonitoringObserver(), cl, launcherConfiguration.getNodeIdSeed(),
-				launcherConfiguration.getEthereumWalletPath(), launcherConfiguration.getEthereumWalletPassword());
+				launcherConfiguration.getEthereumEncryptedPrivateKey(), launcherConfiguration.getEthereumPassword());
 		// check special commands
 		if (launcherConfiguration.isPrintHelp()) {
 			launcher.bFinished = true;
@@ -1077,11 +1077,11 @@ public class L2pNodeLauncher {
 				+ L2pNodeLauncherConfiguration.ARG_SHORT_STORAGE_DIRECTORY
 				+ " directory\tsets Pastry's storage directory. Default: " + SharedStorage.DEFAULT_STORAGE_ROOT_DIR
 				+ "\n");
-		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_ETHEREUM_WALLET
-				+ " file path\tsets Node operator's Ethereum wallet for Service Registry.\n"
+		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_ETHEREUM_ENCRYPTED_PRIVATE_KEY
+				+ " file path\tsets Node operator's encrypted private key for Ethereum for Service Registry.\n"
 				+ "\t\t\t\tThis is used e.g. for service deployment announcements.");
-		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_ETHEREUM_WALLET_PASSWORD
-				+ " password\tsets password to unlock Ethereum wallet (if password-protected).\n");
+		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_ETHEREUM_PASSWORD
+				+ " password\tsets password to unlock Ethereum private key.\n");
 
 		System.out.println("Launcher Methods:");
 		System.out.println("The following methods can be used in arbitrary order and number:");
