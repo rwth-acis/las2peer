@@ -16,9 +16,6 @@ import i5.las2peer.security.EthereumAgent;
 import java.net.InetAddress;
 import java.util.List;
 
-// TODO: send stop announcements on service stop / node shutdown
-// actually, don't do that here, instead extend NodeServiceCache
-// otherwise there would be a lot of redundancy
 /**
  * Node implementation that extends the FreePastry-based node with
  * access to an Ethereum blockchain-based service and user registry.
@@ -27,10 +24,9 @@ import java.util.List;
  * {@link i5.las2peer.registry}. (The actual Ethereum client is run
  * separately, but see there for details.)
  *
- * The operator of an EthereumNode must have an Ethereum wallet (which
- * is a JSON file containing a possibly encrypted key pair, much like
- * las2peer's agent XML files, as well as an Ethereum address).
- * The Ether funds of that wallet are used to announce service
+ * The operator of an EthereumNode must have an Ethereum BIP39
+ * mnemonic-derived key pair (e.g., as created for EthereumAgents).
+ * The Ether funds of that account are used to announce service
  * deployments, i.e., services running at this node.
  * The same account should be used for mining in the Ethereum client,
  * so that new Ether is added.
@@ -40,40 +36,38 @@ import java.util.List;
  *
  * @see EthereumAgent
  */
+// TODO: it would make sense to just require an EthereumAgent XML file instead
+// that would be cleaner both in terms of implementation and concept
 public class EthereumNode extends PastryNodeImpl {
 	private ReadWriteRegistryClient registryClient;
-	private String ethereumWalletPath;
-	private String ethereumWalletPassword;
+	private String ethereumMnemonic;
+	private String ethereumPassword;
 
 	private static L2pLogger logger = L2pLogger.getInstance(EthereumNode.class);
 
 	/**
-	 * @param ethereumWalletPath path to standard Ethereum wallet file
-	 *                           belonging to the Node operator
-	 * @param ethereumWalletPassword password for wallet (may be null
+	 * @param ethereumMnemonic BIP39 Ethereum mnemonic for Node operator's key
+	 *                         pair
+	 * @param ethereumPassword password to be used with mnemonic (may be null
 	 *                               or empty, but obviously that's not
 	 *                               recommended)
 	 * @see PastryNodeImpl#PastryNodeImpl(ClassManager, boolean, InetAddress, Integer, List, SharedStorage.STORAGE_MODE, String, Long)
 	 */
 	public EthereumNode(ClassManager classManager, boolean useMonitoringObserver, InetAddress pastryBindAddress,
 						Integer pastryPort, List<String> bootstrap, SharedStorage.STORAGE_MODE storageMode,
-						String storageDir, Long nodeIdSeed, String ethereumWalletPath, String ethereumWalletPassword) {
+						String storageDir, Long nodeIdSeed, String ethereumMnemonic, String ethereumPassword) {
 		super(classManager, useMonitoringObserver, pastryBindAddress, pastryPort, bootstrap, storageMode, storageDir,
 			nodeIdSeed);
-		this.ethereumWalletPath = ethereumWalletPath;
-		this.ethereumWalletPassword = ethereumWalletPassword;
+		this.ethereumMnemonic = ethereumMnemonic;
+		this.ethereumPassword = ethereumPassword;
 	}
 
 	@Override
 	protected void launchSub() throws NodeException {
 		setStatus(NodeStatus.STARTING);
 		RegistryConfiguration conf = new RegistryConfiguration();
-		try {
-			registryClient = new ReadWriteRegistryClient(conf,
-				CredentialUtils.fromWallet(ethereumWalletPath, ethereumWalletPassword));
-		} catch (BadEthereumCredentialsException e) {
-			throw new NodeException("Bad Ethereum credentials. Cannot start.", e);
-		}
+		registryClient = new ReadWriteRegistryClient(conf,
+				CredentialUtils.fromMnemonic(ethereumMnemonic, ethereumPassword));
 		super.launchSub();
 	}
 

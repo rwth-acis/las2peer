@@ -138,7 +138,6 @@ public class EthereumAgent extends UserAgentImpl {
 
 	/**
 	 * Creates new agent with given passphrase and login name.
-	 * Wallet file will be created in default location (for now).
 	 * @param passphrase passphrase with which both the agent key pair
 	 *                   and the Ethereum key pair are encrypted
 	 * @param loginName name matching [a-zA-Z].{3,31} (hopefully UTF-8
@@ -147,13 +146,19 @@ public class EthereumAgent extends UserAgentImpl {
 	 * @throws CryptoException if there is an internal error during
 	 *                         Ethereum key creation
 	 */
-	public static EthereumAgent createEthereumAgent(String passphrase, String loginName) throws CryptoException  {
+	public static EthereumAgent createEthereumAgent(String passphrase, String loginName) throws CryptoException {
+		return createEthereumAgent(passphrase, loginName, CredentialUtils.createMnemonic());
+	}
+
+	// use this if you already want to use a mnemonic generated somewhere else
+	// note that this still uses the password to generate the key pair
+	private static EthereumAgent createEthereumAgent(String passphrase, String loginName, String ethereumMnemonic)
+			throws CryptoException {
 		byte[] salt = CryptoTools.generateSalt();
 		try {
-			String mnemonic = CredentialUtils.createMnemonic();
-			return new EthereumAgent(CryptoTools.generateKeyPair(), passphrase, salt, loginName, mnemonic);
+			return new EthereumAgent(CryptoTools.generateKeyPair(), passphrase, salt, loginName, ethereumMnemonic);
 		} catch (Exception e) {
-			throw new CryptoException("Wallet generation failed.", e);
+			throw new CryptoException("Ethereum key generation failed.", e);
 		}
 	}
 
