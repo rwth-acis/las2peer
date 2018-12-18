@@ -1050,38 +1050,38 @@ public class L2pNodeLauncher {
 				+ "\t\t\tstarts the node in debug mode. This means the node will listen and accept connections only\n"
 				+ "\t\t\t\t\tfrom localhost, has a operating system defined port and uses a non persistent storage mode.\n");
 		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_PORT + "|"
-				+ L2pNodeLauncherConfiguration.ARG_SHORT_PORT + " port\t\t\tspecifies the port number of the node\n");
+				+ L2pNodeLauncherConfiguration.ARG_SHORT_PORT + " PORT\t\t\tspecifies the port number of the node\n");
 		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_BOOTSTRAP + "|"
 				+ L2pNodeLauncherConfiguration.ARG_SHORT_BOOTSTRAP
-				+ " address|ip:port,...\trequires a comma seperated list of [address|ip:port] pairs of bootstrap nodes to connect to.");
-		System.out.println("  no bootstrap argument states, that a complete new las2peer network is to start\n");
+				+ " ADDRESS|IP:PORT,...\trequires a comma seperated list of [ADDRESS|IP:PORT] pairs of bootstrap nodes to connect to.");
+		System.out.println("\t\t\t\t\tno bootstrap argument states, that a complete new las2peer network is to start\n");
 		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_LOG_DIRECTORY + "|"
 				+ L2pNodeLauncherConfiguration.ARG_SHORT_LOG_DIRECTORY
-				+ " directory\t\tlets you choose the directory for log files (default: "
+				+ " DIRECTORY\t\tlets you choose the directory for log files (default: "
 				+ L2pLogger.DEFAULT_LOG_DIRECTORY + ")\n");
 		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_SERVICE_DIRECTORY + "|"
 				+ L2pNodeLauncherConfiguration.ARG_SHORT_SERVICE_DIRECTORY
-				+ " directory\tadds the directory to the service class loader. This argument can occur multiple times.\n");
+				+ " DIRECTORY\tadds the directory to the service class loader. This argument can occur multiple times.\n");
 		System.out.println(
 				"  " + L2pNodeLauncherConfiguration.ARG_OBSERVER + "|" + L2pNodeLauncherConfiguration.ARG_SHORT_OBSERVER
 						+ "\t\t\t\tstarts a monitoring observer at this node\n");
 		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_NODE_ID_SEED + "|"
 				+ L2pNodeLauncherConfiguration.ARG_SHORT_NODE_ID_SEED
-				+ " long\t\tgenerates the (random) node id by using this seed\n");
+				+ " LONG\t\tgenerates the (random) node id by using this seed\n");
 		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_STORAGE_MODE + "|"
-				+ L2pNodeLauncherConfiguration.ARG_SHORT_STORAGE_MODE + " mode\t\tsets Pastry's storage mode\n"
+				+ L2pNodeLauncherConfiguration.ARG_SHORT_STORAGE_MODE + " MODE\t\tsets Pastry's storage mode\n"
 				+ "\t\t\t\t\tSupported Modes: "
 				+ String.join(", ", Stream.of(STORAGE_MODE.values()).map(Enum::name).collect(Collectors.toList()))
 				+ "\n");
 		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_STORAGE_DIRECTORY + "|"
 				+ L2pNodeLauncherConfiguration.ARG_SHORT_STORAGE_DIRECTORY
-				+ " directory\tsets Pastry's storage directory. Default: " + SharedStorage.DEFAULT_STORAGE_ROOT_DIR
+				+ " DIRECTORY\tsets Pastry's storage directory. Default: " + SharedStorage.DEFAULT_STORAGE_ROOT_DIR
 				+ "\n");
 		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_ETHEREUM_MNEMONIC
-				+ " quoted string\tsets Node operator's Ethereum BIP39 mnemonic for Service Registry.\n"
-				+ "\t\t\t\tThis is used along with the password to derive the public/private key pair.");
+				+ " \"QUOTED STRING\"\tsets Node operator's Ethereum BIP39 mnemonic for Service Registry.\n"
+				+ "\t\t\t\t\tThis is used along with the password to derive the public/private key pair.");
 		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_ETHEREUM_PASSWORD
-				+ " password\tsets password to unlock Ethereum private key.\n");
+				+ " PASSWORD\t\tsets password to unlock Ethereum private key.\n");
 
 		System.out.println("Launcher Methods:");
 		System.out.println("The following methods can be used in arbitrary order and number:");
