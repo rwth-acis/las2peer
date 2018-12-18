@@ -69,7 +69,7 @@ public class L2pNodeLauncherConfiguration {
 	public static final String ARG_SANDBOX = "--sandbox";
 	public static final String ARG_SHORT_SANDBOX = "-sb";
 
-	public static final String ARG_ETHEREUM_ENCRYPTED_PRIVATE_KEY = "--ethereum-encrypted-private-key";
+	public static final String ARG_ETHEREUM_MNEMONIC = "--ethereum-mnemonic";
 
 	public static final String ARG_ETHEREUM_PASSWORD = "--ethereum-password";
 
@@ -95,7 +95,7 @@ public class L2pNodeLauncherConfiguration {
 	private Long nodeIdSeed;
 	private final List<String> commands = new LinkedList<>();
 	private boolean sandbox;
-	private String ethereumEncryptedPrivateKey;
+	private String ethereumMnemonic;
 	private String ethereumPassword;
 
 	public L2pNodeLauncherConfiguration() {
@@ -284,17 +284,17 @@ public class L2pNodeLauncherConfiguration {
 				} else {
 					setStorageDirectory(itArg.next());
 				}
-			} else if (arg.equalsIgnoreCase(ARG_ETHEREUM_ENCRYPTED_PRIVATE_KEY)) {
+			} else if (arg.equalsIgnoreCase(ARG_ETHEREUM_MNEMONIC)) {
 				if (!itArg.hasNext()) {
 					throw new IllegalArgumentException(
-							"Illegal argument '" + arg + "', because encrypted private key for Ethereum expected after it");
+							"Illegal argument '" + arg + "', because BIP39 Ethereum mnemonic expected after it");
 				} else {
-					setEthereumEncryptedPrivateKey(itArg.next());
+					setEthereumMnemonic(itArg.next());
 				}
 			} else if (arg.equalsIgnoreCase(ARG_ETHEREUM_PASSWORD)) {
 				if (!itArg.hasNext()) {
 					throw new IllegalArgumentException(
-							"Illegal argument '" + arg + "', because password for Ethereum private key expected after it");
+							"Illegal argument '" + arg + "', because password for Ethereum mnemonic expected after it");
 				} else {
 					setEthereumPassword(itArg.next());
 				}
@@ -359,9 +359,13 @@ public class L2pNodeLauncherConfiguration {
 		if (strNodeIdSeed != null) {
 			setNodeIdSeed(Long.valueOf(strNodeIdSeed));
 		}
-		String strEthereumEncryptedPrivateKey = conf.get("ethereumEncryptedPrivateKey");
-		if (strEthereumEncryptedPrivateKey != null) {
-			setEthereumPassword(strEthereumEncryptedPrivateKey);
+		String strEthereumMnemonic = conf.get("ethereumMnemonic");
+		if (strEthereumMnemonic != null) {
+			setEthereumMnemonic(strEthereumMnemonic);
+		}
+		String strEthereumPassword = conf.get("ethereumPassword");
+		if (strEthereumPassword != null) {
+			setEthereumPassword(strEthereumPassword);
 		}
 		List<String> commands = conf.getAll("commands");
 		if (commands != null) {
@@ -529,12 +533,12 @@ public class L2pNodeLauncherConfiguration {
 		this.storageDirectory = storageDirectory;
 	}
 
-	public String getEthereumEncryptedPrivateKey() {
-		return ethereumEncryptedPrivateKey;
+	public String getEthereumMnemonic() {
+		return ethereumMnemonic;
 	}
 
-	public void setEthereumEncryptedPrivateKey(String ethereumEncryptedPrivateKey) {
-		this.ethereumEncryptedPrivateKey = ethereumEncryptedPrivateKey;
+	public void setEthereumMnemonic(String ethereumMnemonic) {
+		this.ethereumMnemonic = ethereumMnemonic;
 	}
 
 	public String getEthereumPassword() {
