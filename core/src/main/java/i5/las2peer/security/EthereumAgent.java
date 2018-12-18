@@ -16,6 +16,7 @@ import org.w3c.dom.Element;
 import org.web3j.crypto.Credentials;
 
 import java.security.KeyPair;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Base64;
 
@@ -31,27 +32,30 @@ import java.util.Base64;
 // TODO: don't store the wallet file path. store its contents
 public class EthereumAgent extends UserAgentImpl {
 	// this should probably be configured elsewhere
-	private static final String DEFAULT_WALLET_DIRECTORY = "./etc/wallets";
 
-	private String ethereumWalletPath;
-
-	private ReadWriteRegistryClient registryClient;
+	private byte[] ethereumSalt;
+	private byte[] ethereumEncryptedPrivateKey;
+	private PrivateKey ethereumPrivateKey;
+	private PublicKey ethereumPublicKey;
 	private String ethereumAddress;
 
-	protected EthereumAgent(KeyPair pair, String passphrase, byte[] salt, String ethereumWalletPath, String loginName)
+	private ReadWriteRegistryClient registryClient;
+
+	protected EthereumAgent(KeyPair pair, String passphrase, byte[] salt, KeyPair ethereumKeyPair, String loginName)
 			throws AgentOperationFailedException, CryptoException {
 		super(pair, passphrase, salt);
 		checkLoginNameValidity(loginName);
-		sLoginName = loginName;
-		this.ethereumWalletPath = ethereumWalletPath;
+		this.sLoginName = loginName;
+		this.ethereumPrivateKey = ethereumKeyPair.getPrivate();
+		this.ethereumPublicKey = ethereumKeyPair.getPublic();
 	}
 
-	protected EthereumAgent(PublicKey pubKey, byte[] encryptedPrivate, byte[] salt, String ethereumWalletPath,
+	protected EthereumAgent(PublicKey pubKey, byte[] encryptedPrivate, byte[] salt, byte[] ethereumEncryptedPrivateKey,
 			String loginName) {
 		super(pubKey, encryptedPrivate, salt);
 		checkLoginNameValidity(loginName);
-		sLoginName = loginName;
-		this.ethereumWalletPath = ethereumWalletPath;
+		this.sLoginName = loginName;
+		this.ethereumEncryptedPrivateKey = ethereumEncryptedPrivateKey.clone(); // why clone?
 	}
 
 	// as in the superclass, it would be nicer not to use an exception
@@ -72,14 +76,23 @@ public class EthereumAgent extends UserAgentImpl {
 	@Override
 	public void lockPrivateKey() {
 		super.lockPrivateKey();
-		registryClient = null;
+		this.ethereumPrivateKey = null;
+		this.registryClient = null;
 	}
 
 	@Override
 	public void unlock(String passphrase) throws AgentAccessDeniedException, AgentOperationFailedException {
+		try {
+			SecretKey key = CryptoTools.generateKeyForPassphrase(passphrase, salt);
+			super.unlockPrivateKey(key);
+			this.passphrase = passphrase;
+		} catch (CryptoException e) {
+			throw new AgentAccessDeniedException("unable to create key from passphrase", e);
+		}
 		super.unlock(passphrase);
 		try {
 			Credentials credentials = CredentialUtils.fromWallet(ethereumWalletPath, passphrase);
+			credentials = CredentialUtils.fromPrivateKey(ethereumPrivateKey);
 			registryClient = new ReadWriteRegistryClient(new RegistryConfiguration(), credentials);
 			ethereumAddress = CredentialUtils.fromWallet(ethereumWalletPath, passphrase).getAddress();
 		} catch (BadEthereumCredentialsException e) {
