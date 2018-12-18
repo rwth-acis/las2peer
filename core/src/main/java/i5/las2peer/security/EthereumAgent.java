@@ -2,7 +2,6 @@ package i5.las2peer.security;
 
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentOperationFailedException;
-import i5.las2peer.registry.exceptions.BadEthereumCredentialsException;
 import i5.las2peer.registry.CredentialUtils;
 import i5.las2peer.registry.ReadWriteRegistryClient;
 import i5.las2peer.registry.data.RegistryConfiguration;
@@ -16,46 +15,55 @@ import org.w3c.dom.Element;
 import org.web3j.crypto.Credentials;
 
 import java.security.KeyPair;
-import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Base64;
 
 /**
  * User agent for las2peer networks with blockchain-based registry.
  *
- * In addition to the usual key pair, this agent has an Ethereum wallet
- * (which is also a key pair) with an associated Ethereum address.
+ * In addition to the usual key pair, this agent has a separate Ethereum key
+ * pair with an associated Ethereum address. (The address can be derived from
+ * the private key.)
  *
- * For now, this wallet is stored separately on disk. (It's just a JSON
- * file.)
+ * In contrast to the regular las2peer key pair, the Ethereum key pair is not
+ * stored as an encrypted private key, but instead as a mnemonic string which
+ * serves the same function but is a standardized, human-readable
+ * representation.
  */
-// TODO: don't store the wallet file path. store its contents
 public class EthereumAgent extends UserAgentImpl {
 	// this should probably be configured elsewhere
 
-	private byte[] ethereumSalt;
-	private byte[] ethereumEncryptedPrivateKey;
-	private PrivateKey ethereumPrivateKey;
-	private PublicKey ethereumPublicKey;
+	/**
+	 * BIP39 mnemonic used together with the agent's password to generate the
+	 * private key for Ethereum.
+	 *
+	 * (Instead of this, we could use the encrypted private key directly, like
+	 * the regular agent key pair, but using the mnemonic abstraction allows
+	 * the user to potentially use other wallet software/services and allows
+	 * us to delegate the tricky crypto operations to a compatible library.)
+	 */
+	// should the salt be used, too? can't hurt, but not sure if there's an
+	// advantage. I'm fairly certain Web3J uses its own salt and whatnot
+	private String ethereumMnemonic;
+	/** Ethereum account address. (This is not secret.) */
 	private String ethereumAddress;
 
 	private ReadWriteRegistryClient registryClient;
 
-	protected EthereumAgent(KeyPair pair, String passphrase, byte[] salt, KeyPair ethereumKeyPair, String loginName)
+	protected EthereumAgent(KeyPair pair, String passphrase, byte[] salt, String loginName, String ethereumMnemonic)
 			throws AgentOperationFailedException, CryptoException {
 		super(pair, passphrase, salt);
 		checkLoginNameValidity(loginName);
 		this.sLoginName = loginName;
-		this.ethereumPrivateKey = ethereumKeyPair.getPrivate();
-		this.ethereumPublicKey = ethereumKeyPair.getPublic();
+		this.ethereumMnemonic = ethereumMnemonic;
 	}
 
-	protected EthereumAgent(PublicKey pubKey, byte[] encryptedPrivate, byte[] salt, byte[] ethereumEncryptedPrivateKey,
-			String loginName) {
+	protected EthereumAgent(PublicKey pubKey, byte[] encryptedPrivate, byte[] salt, String loginName,
+			String ethereumMnemonic) {
 		super(pubKey, encryptedPrivate, salt);
 		checkLoginNameValidity(loginName);
 		this.sLoginName = loginName;
-		this.ethereumEncryptedPrivateKey = ethereumEncryptedPrivateKey.clone(); // why clone?
+		this.ethereumMnemonic = ethereumMnemonic;
 	}
 
 	// as in the superclass, it would be nicer not to use an exception
@@ -68,7 +76,6 @@ public class EthereumAgent extends UserAgentImpl {
 	}
 
 	// bit of unfortunate name here, but let's stick with it
-
 	/**
 	 * Removes decrypted private key and the registry client (which
 	 * contains user credentials).
@@ -76,29 +83,16 @@ public class EthereumAgent extends UserAgentImpl {
 	@Override
 	public void lockPrivateKey() {
 		super.lockPrivateKey();
-		this.ethereumPrivateKey = null;
 		this.registryClient = null;
 	}
 
 	@Override
 	public void unlock(String passphrase) throws AgentAccessDeniedException, AgentOperationFailedException {
-		try {
-			SecretKey key = CryptoTools.generateKeyForPassphrase(passphrase, salt);
-			super.unlockPrivateKey(key);
-			this.passphrase = passphrase;
-		} catch (CryptoException e) {
-			throw new AgentAccessDeniedException("unable to create key from passphrase", e);
-		}
 		super.unlock(passphrase);
-		try {
-			Credentials credentials = CredentialUtils.fromWallet(ethereumWalletPath, passphrase);
-			credentials = CredentialUtils.fromPrivateKey(ethereumPrivateKey);
-			registryClient = new ReadWriteRegistryClient(new RegistryConfiguration(), credentials);
-			ethereumAddress = CredentialUtils.fromWallet(ethereumWalletPath, passphrase).getAddress();
-		} catch (BadEthereumCredentialsException e) {
-			throw new AgentAccessDeniedException("Could not unlock Ethereum wallet. Ensure password is set to the"
-				+ "agent's passphrase (if not change it!).", e);
-		}
+
+		Credentials credentials = CredentialUtils.fromMnemonic(ethereumMnemonic, passphrase);
+		registryClient = new ReadWriteRegistryClient(new RegistryConfiguration(), credentials);
+		ethereumAddress = credentials.getAddress();
 	}
 
 	@Override
@@ -109,7 +103,7 @@ public class EthereumAgent extends UserAgentImpl {
 			return userAgentIsLocked;
 		} else {
 			// this hopefully only happens during initialization, where this is called from a superclass's constructor
-			if (ethereumWalletPath == null) {
+			if (ethereumMnemonic == null) {
 				// we're almost certainly in the middle of initialization
 				return userAgentIsLocked;
 			} else {
@@ -128,7 +122,7 @@ public class EthereumAgent extends UserAgentImpl {
 					+ "\t\t<salt encoding=\"base64\">" + Base64.getEncoder().encodeToString(getSalt()) + "</salt>\n"
 					+ "\t\t<data encoding=\"base64\">" + getEncodedPrivate() + "</data>\n" + "\t</privatekey>\n"
 					+ "\t<login>" + sLoginName + "</login>\n"
-					+ "\t<ethereumwalletpath>" + ethereumWalletPath + "</ethereumwalletpath>\n");
+					+ "\t<ethereummnemonic>" + ethereumMnemonic + "</ethereummnemonic>\n");
 
 			if (sEmail != null) {
 				result.append("\t<email>" + sEmail + "</email>\n");
@@ -146,18 +140,18 @@ public class EthereumAgent extends UserAgentImpl {
 	 * Creates new agent with given passphrase and login name.
 	 * Wallet file will be created in default location (for now).
 	 * @param passphrase passphrase with which both the agent key pair
-	 *                   and the Ethereum wallet are encrypted
+	 *                   and the Ethereum key pair are encrypted
 	 * @param loginName name matching [a-zA-Z].{3,31} (hopefully UTF-8
 	 *                  characters, let's not get too crazy)
 	 * @return new EthereumAgent instance
 	 * @throws CryptoException if there is an internal error during
-	 *                         wallet creation
+	 *                         Ethereum key creation
 	 */
 	public static EthereumAgent createEthereumAgent(String passphrase, String loginName) throws CryptoException  {
 		byte[] salt = CryptoTools.generateSalt();
 		try {
-			String walletPath = CredentialUtils.createWallet(passphrase, DEFAULT_WALLET_DIRECTORY);
-			return new EthereumAgent(CryptoTools.generateKeyPair(), passphrase, salt, walletPath, loginName);
+			String mnemonic = CredentialUtils.createMnemonic();
+			return new EthereumAgent(CryptoTools.generateKeyPair(), passphrase, salt, loginName, mnemonic);
 		} catch (Exception e) {
 			throw new CryptoException("Wallet generation failed.", e);
 		}
@@ -171,7 +165,7 @@ public class EthereumAgent extends UserAgentImpl {
 		return registryClient;
 	}
 
-	/** @return address of the Ethereum wallet associated with the agent */
+	/** @return address of the Ethereum key pair associated with the agent */
 	public String getEthereumAddress() {
 		return ethereumAddress;
 	}
@@ -214,11 +208,11 @@ public class EthereumAgent extends UserAgentImpl {
 			Element loginElement = XmlTools.getSingularElement(root, "login");
 			String login = loginElement.getTextContent();
 
-			Element ethereumWalletPathElement = XmlTools.getSingularElement(root, "ethereumwalletpath");
-			String ethereumWalletPath = ethereumWalletPathElement.getTextContent();
+			Element ethereumMnemonicElement = XmlTools.getSingularElement(root, "ethereummnemonic");
+			String ethereumMnemonic = ethereumMnemonicElement.getTextContent();
 
 			// required fields complete, create result
-			EthereumAgent result = new EthereumAgent(publicKey, encPrivate, salt, ethereumWalletPath, login);
+			EthereumAgent result = new EthereumAgent(publicKey, encPrivate, salt, login, ethereumMnemonic);
 
 			// read and set optional fields
 			// note: login name is not optional here
