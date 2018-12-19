@@ -29,6 +29,13 @@ public class ReadOnlyRegistryClient {
 	Contracts contracts;
 	BlockchainObserver observer;
 
+	// note: these are also baked into the TransactionManager, which is in
+	// turn baked into the contract wrappers. so we don't need this (and do
+	// not use) this field for contract function invocations.
+	// as of this writing, this is only used for the sendEther method in the
+	// ReadWriteRegistryClient (which is only used for debugging)
+	Credentials credentials;
+
 	/**
 	 * Create client providing access to read-only registry functions.
 	 * @param registryConfiguration addresses of registry contracts and
@@ -43,7 +50,8 @@ public class ReadOnlyRegistryClient {
 		web3j = Web3j.build(new HttpService(registryConfiguration.getEndpoint()));
 
 		contractsConfig = new Contracts.ContractsConfig(registryConfiguration.getCommunityTagIndexAddress(),
-				registryConfiguration.getUserRegistryAddress(), registryConfiguration.getServiceRegistryAddress(), registryConfiguration.getEndpoint());
+				registryConfiguration.getUserRegistryAddress(), registryConfiguration.getServiceRegistryAddress(),
+				registryConfiguration.getEndpoint());
 
 		observer = BlockchainObserver.getInstance(contractsConfig);
 
@@ -51,6 +59,8 @@ public class ReadOnlyRegistryClient {
 				setGasOptions(registryConfiguration.getGasPrice(), registryConfiguration.getGasLimit())
 				.setCredentials(credentials) // may be null, that's okay here
 				.build();
+
+		this.credentials = credentials;
 	}
 
 	/**

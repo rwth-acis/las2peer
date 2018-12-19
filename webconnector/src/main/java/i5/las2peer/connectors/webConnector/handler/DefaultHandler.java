@@ -4,16 +4,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.InternalServerErrorException;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -26,6 +24,8 @@ import i5.las2peer.registry.*;
 import i5.las2peer.registry.data.ServiceDeploymentData;
 import i5.las2peer.registry.data.ServiceReleaseData;
 import i5.las2peer.registry.exceptions.EthereumException;
+import net.minidev.json.parser.JSONParser;
+import net.minidev.json.parser.ParseException;
 import org.glassfish.jersey.media.multipart.ContentDisposition;
 
 import i5.las2peer.api.p2p.ServiceNameVersion;
@@ -43,6 +43,8 @@ import i5.las2peer.tools.L2pNodeLauncher;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.web3j.crypto.Credentials;
+import org.web3j.crypto.WalletUtils;
 
 @Path(DefaultHandler.ROOT_RESOURCE_PATH)
 public class DefaultHandler {
@@ -68,6 +70,57 @@ public class DefaultHandler {
 	@GET
 	public Response rootPath() throws URISyntaxException {
 		return Response.temporaryRedirect(new URI(WebappHandler.DEFAULT_ROUTE)).build();
+	}
+
+	@POST
+	@Path("/registry/debug/faucet")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response sendEtherFromNodeOwnerToAddress(String requestBody) {
+		JSONObject payload = parseBodyAsJson(requestBody);
+		String address = payload.getAsString("address");
+		if (!WalletUtils.isValidAddress(address)) {
+			throw new BadRequestException("Address is not valid.");
+		}
+
+		Number valueAsNumber = payload.getAsNumber("valueInWei");
+		if (valueAsNumber == null) {
+			throw new BadRequestException("Value is invalid.");
+		}
+
+		BigDecimal valueInWei = BigDecimal.valueOf(valueAsNumber.longValue());
+		try {
+			((ReadWriteRegistryClient) registry).sendEther(address, valueInWei);
+		} catch (EthereumException e) {
+			return Response.serverError().entity(e.toString()).build();
+		}
+		return Response.ok().build();
+	}
+
+	@GET
+	@Path("/registry/debug/mnemonic/new")
+	@Produces(MediaType.TEXT_PLAIN)
+	public Response generateMnemonic() {
+		String mnemonic = CredentialUtils.createMnemonic();
+		return Response.ok(mnemonic).build();
+	}
+
+	@POST
+	@Path("/registry/debug/mnemonic")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response showKeysForMnemonic(String requestBody) {
+		JSONObject payload = parseBodyAsJson(requestBody);
+		String mnemonic = payload.getAsString("mnemonic");
+		String password = payload.getAsString("password");
+
+		Credentials credentials = CredentialUtils.fromMnemonic(mnemonic, password);
+
+		JSONObject json = new JSONObject()
+				.appendField("mnemonic", mnemonic)
+				.appendField("password", password)
+				.appendField("publicKey", credentials.getEcKeyPair().getPublicKey())
+				.appendField("privateKey", credentials.getEcKeyPair().getPrivateKey())
+				.appendField("address", credentials.getAddress());
+		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
 	}
 
 	@GET
@@ -299,4 +352,14 @@ public class DefaultHandler {
 		}
 	}
 
+	private JSONObject parseBodyAsJson(String requestBody) {
+		if (requestBody.trim().isEmpty()) {
+			throw new BadRequestException("No request body");
+		}
+		try {
+			return (JSONObject) new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(requestBody);
+		} catch (ParseException e) {
+			throw new BadRequestException("Could not parse json request body");
+		}
+	}
 }

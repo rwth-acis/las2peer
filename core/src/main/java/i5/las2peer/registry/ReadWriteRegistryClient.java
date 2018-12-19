@@ -4,7 +4,11 @@ import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.registry.data.RegistryConfiguration;
 import i5.las2peer.registry.exceptions.EthereumException;
 import org.web3j.crypto.Credentials;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.tx.Transfer;
+import org.web3j.utils.Convert;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
 
@@ -174,6 +178,26 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		} catch (Exception e) {
 			throw new EthereumException("Failed to submit service deployment *end* announcement ("
 					+ "DEBUG: " + serviceClassName + ", " + e.getMessage() + ")", e);
+		}
+	}
+
+	/**
+	 * Send ether to the recipient address.
+	 *
+	 * This sends ether from the "owner" of this registry client (i.e., the
+	 * account specified by the credentials which were used to construct this
+	 * client), to the given recipient address.
+	 */
+	// this is (so far) only for debugging / testing / etc.
+	@Deprecated
+	public void sendEther(String recipientAddress, BigDecimal valueInWei) throws EthereumException {
+		try {
+			TransactionReceipt receipt = Transfer.sendFunds(web3j, credentials, recipientAddress, valueInWei, Convert.Unit.WEI).send();
+			if (!receipt.isStatusOK()) {
+				throw new EthereumException("TX status field is not OK. TX failed.");
+			}
+		} catch (Exception e) {
+			throw new EthereumException("Could not send ether to address '" + recipientAddress + "'", e);
 		}
 	}
 }

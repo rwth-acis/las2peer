@@ -152,7 +152,7 @@ public class EthereumAgent extends UserAgentImpl {
 
 	// use this if you already want to use a mnemonic generated somewhere else
 	// note that this still uses the password to generate the key pair
-	private static EthereumAgent createEthereumAgent(String loginName, String passphrase, String ethereumMnemonic)
+	public static EthereumAgent createEthereumAgent(String loginName, String passphrase, String ethereumMnemonic)
 			throws CryptoException {
 		byte[] salt = CryptoTools.generateSalt();
 		try {

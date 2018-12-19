@@ -132,10 +132,16 @@ public class AuthHandler {
 				// expected
 			}
 		}
+		String ethereumMnemonic = payload.getAsString("mnemonic");
+
 		// create new user agent and store in network
 		UserAgentImpl agent;
 		if (node instanceof EthereumNode) {
-			agent = EthereumAgent.createEthereumAgent(username, password);
+			if (ethereumMnemonic != null) {
+				agent = EthereumAgent.createEthereumAgent(username, password, ethereumMnemonic);
+			} else {
+				agent = EthereumAgent.createEthereumAgent(username, password);
+			}
 		} else {
 			agent = UserAgentImpl.createUserAgent(password);
 		}
