@@ -8,7 +8,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.InternalServerErrorException;
@@ -84,7 +84,7 @@ public class DefaultHandler {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getServiceAuthors() {
 		JSONObject jsonObject = new JSONObject();
-		for (Map.Entry<String, String> serviceWithAuthor: registry.getServiceAuthors().entrySet()) {
+		for (ConcurrentMap.Entry<String, String> serviceWithAuthor: registry.getServiceAuthors().entrySet()) {
 			jsonObject.put(serviceWithAuthor.getKey(), serviceWithAuthor.getValue());
 		}
 		return jsonObject.toJSONString();
@@ -95,7 +95,7 @@ public class DefaultHandler {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getServiceReleases() {
 		JSONObject jsonObject = new JSONObject();
-		for (Map.Entry<String, List<ServiceReleaseData>> service: registry.getServiceReleases().entrySet()) {
+		for (ConcurrentMap.Entry<String, List<ServiceReleaseData>> service: registry.getServiceReleases().entrySet()) {
 			JSONArray releaseList = new JSONArray();
 			for (ServiceReleaseData release : service.getValue()) {
 				JSONObject entry = new JSONObject();
@@ -113,7 +113,7 @@ public class DefaultHandler {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getServiceDeployments() {
 		JSONObject jsonObject = new JSONObject();
-		for (Map.Entry<String, List<ServiceDeploymentData>> service: registry.getServiceDeployments().entrySet()) {
+		for (ConcurrentMap.Entry<String, List<ServiceDeploymentData>> service: registry.getServiceDeployments().entrySet()) {
 			JSONArray deploymentList = new JSONArray();
 			for (ServiceDeploymentData deployment : service.getValue()) {
 				JSONObject entry = new JSONObject();
@@ -134,7 +134,7 @@ public class DefaultHandler {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getTags() {
 		JSONObject jsonObject = new JSONObject();
-		for (Map.Entry<String, String> tag: registry.getTags().entrySet()) {
+		for (ConcurrentMap.Entry<String, String> tag: registry.getTags().entrySet()) {
 			jsonObject.put(tag.getKey(), tag.getValue());
 		}
 		return jsonObject.toJSONString();

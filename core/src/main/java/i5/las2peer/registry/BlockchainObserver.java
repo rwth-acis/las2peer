@@ -20,13 +20,13 @@ import java.util.concurrent.ConcurrentMap;
  */
 class BlockchainObserver {
 	/** Tags to their description */
-	Map<String, String> tags;
+	ConcurrentMap<String, String> tags;
 
 	/** Service names to name of their author/owner */
-	Map<String, String> serviceNameToAuthor;
+	ConcurrentMap<String, String> serviceNameToAuthor;
 
 	/** Service names to list of releases */
-	Map<String, List<ServiceReleaseData>> releases;
+	ConcurrentMap<String, List<ServiceReleaseData>> releases;
 
 	/**
 	 * Nested map from service name and version components to that
@@ -34,7 +34,7 @@ class BlockchainObserver {
 	 *
 	 * E.g., "com.example.service" -> 1 -> 0 -> 2 -> release 1.0.2.
 	 */
-	Map<String, Map<Integer, Map<Integer, Map<Integer, ServiceReleaseData>>>> releasesByVersion;
+	ConcurrentMap<String, Map<Integer, Map<Integer, Map<Integer, ServiceReleaseData>>>> releasesByVersion;
 
 	/**
 	 * Service name to service deployment announcements.
@@ -48,7 +48,7 @@ class BlockchainObserver {
 	// Java's Set is too limited; this is exactly the use case we have:
 	// https://stackoverflow.com/questions/7283338/getting-an-element-from-a-set
 	// so far, this is ugly but fine. maybe hide this under sane accessors
-	Map<String, Map<ServiceDeploymentData, ServiceDeploymentData>> deployments;
+	ConcurrentMap<String, Map<ServiceDeploymentData, ServiceDeploymentData>> deployments;
 
 	private static final ConcurrentMap<String, String> hashToNameCache = new ConcurrentHashMap<>();
 
@@ -98,11 +98,11 @@ class BlockchainObserver {
 		logger.fine("Creating new blockchain observer");
 		contracts = new Contracts.ContractsBuilder(contractsConfig).build();
 
-		tags = new HashMap<>();
-		serviceNameToAuthor = new HashMap<>();
-		releases = new HashMap<>();
-		releasesByVersion = new HashMap<>();
-		deployments = new HashMap<>();
+		tags = new ConcurrentHashMap<>();
+		serviceNameToAuthor = new ConcurrentHashMap<>();
+		releases = new ConcurrentHashMap<>();
+		releasesByVersion = new ConcurrentHashMap<>();
+		deployments = new ConcurrentHashMap<>();
 
 		observeTagCreations();
 		observeServiceRegistrations();
@@ -257,7 +257,7 @@ class BlockchainObserver {
 						stopped.nodeId);
 				deployments.get(serviceName).remove(deploymentThatEnded);
 			}
-		}, e -> logger.severe("Error observing service deployment event: " + e.toString()));
+		}, e -> logger.severe("Error observing service deployment end event: " + e.toString()));
 	}
 
 	/**

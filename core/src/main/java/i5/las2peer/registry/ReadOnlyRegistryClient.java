@@ -14,6 +14,7 @@ import org.web3j.tuples.generated.Tuple4;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
 /**
@@ -147,7 +148,7 @@ public class ReadOnlyRegistryClient {
 	}
 
 	/** @return map of tags to descriptions */
-	public Map<String, String> getTags() {
+	public ConcurrentMap<String, String> getTags() {
 		return observer.tags;
 	}
 
@@ -157,12 +158,12 @@ public class ReadOnlyRegistryClient {
 	}
 
 	/** @return map of service names to their authors */
-	public Map<String, String> getServiceAuthors() {
+	public ConcurrentMap<String, String> getServiceAuthors() {
 		return observer.serviceNameToAuthor;
 	}
 
 	/** @return map of names to service release objects */
-	public Map<String, List<ServiceReleaseData>> getServiceReleases() {
+	public ConcurrentMap<String, List<ServiceReleaseData>> getServiceReleases() {
 		return observer.releases;
 	}
 
