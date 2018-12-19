@@ -22,11 +22,9 @@ import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.connectors.webConnector.WebConnector;
 import i5.las2peer.connectors.webConnector.util.AgentSession;
+import i5.las2peer.p2p.EthereumNode;
 import i5.las2peer.p2p.Node;
-import i5.las2peer.security.AgentImpl;
-import i5.las2peer.security.AnonymousAgentImpl;
-import i5.las2peer.security.PassphraseAgentImpl;
-import i5.las2peer.security.UserAgentImpl;
+import i5.las2peer.security.*;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
@@ -135,7 +133,12 @@ public class AuthHandler {
 			}
 		}
 		// create new user agent and store in network
-		UserAgentImpl agent = UserAgentImpl.createUserAgent(password);
+		UserAgentImpl agent;
+		if (node instanceof EthereumNode) {
+			agent = EthereumAgent.createEthereumAgent(username, password);
+		} else {
+			agent = UserAgentImpl.createUserAgent(password);
+		}
 		agent.unlock(password);
 		if (username != null && !username.isEmpty()) {
 			agent.setLoginName(username);

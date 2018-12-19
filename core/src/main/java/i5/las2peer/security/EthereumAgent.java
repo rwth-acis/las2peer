@@ -146,13 +146,13 @@ public class EthereumAgent extends UserAgentImpl {
 	 * @throws CryptoException if there is an internal error during
 	 *                         Ethereum key creation
 	 */
-	public static EthereumAgent createEthereumAgent(String passphrase, String loginName) throws CryptoException {
-		return createEthereumAgent(passphrase, loginName, CredentialUtils.createMnemonic());
+	public static EthereumAgent createEthereumAgent(String loginName, String passphrase) throws CryptoException {
+		return createEthereumAgent(loginName, passphrase, CredentialUtils.createMnemonic());
 	}
 
 	// use this if you already want to use a mnemonic generated somewhere else
 	// note that this still uses the password to generate the key pair
-	private static EthereumAgent createEthereumAgent(String passphrase, String loginName, String ethereumMnemonic)
+	private static EthereumAgent createEthereumAgent(String loginName, String passphrase, String ethereumMnemonic)
 			throws CryptoException {
 		byte[] salt = CryptoTools.generateSalt();
 		try {
