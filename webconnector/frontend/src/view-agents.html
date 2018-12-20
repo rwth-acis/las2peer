@@ -82,6 +82,7 @@
         <form is="iron-form" on-keypress="_keyPressedCreateAgent">
           <paper-input label="username (optional)" id="createAgentUsername" disabled="[[_working]]" value=""></paper-input>
           <paper-input label="email (optional)" id="createAgentEmail" disabled="[[_working]]" value=""></paper-input>
+          <paper-input label="ethereum mnemonic phrase (optional)" id="createAgentEthereumMnemonic" disabled="[[_working]]" value=""></paper-input>
           <paper-input label="password" id="createAgentPassword" disabled="[[_working]]" value="" type="password" required="true"></paper-input>
           <paper-button raised on-tap="createAgent" disabled="[[_working]]">Create Agent</paper-button>
         </form>
@@ -193,6 +194,7 @@
         req.body = new FormData();
         req.body.append('username', this.$.createAgentUsername.value);
         req.body.append('email', this.$.createAgentEmail.value);
+        req.body.append('mnemonic', this.$.createAgentEthereumMnemonic.value);
         req.body.append('password', this.$.createAgentPassword.value);
         req.generateRequest();
       }

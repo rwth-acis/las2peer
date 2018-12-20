@@ -15,6 +15,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import i5.las2peer.api.security.UserAgent;
+import i5.las2peer.p2p.EthereumNode;
+import i5.las2peer.security.*;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import i5.las2peer.api.security.AgentAccessDeniedException;
@@ -24,10 +27,6 @@ import i5.las2peer.connectors.webConnector.WebConnector;
 import i5.las2peer.connectors.webConnector.util.AgentSession;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.p2p.Node;
-import i5.las2peer.security.AgentImpl;
-import i5.las2peer.security.GroupAgentImpl;
-import i5.las2peer.security.PassphraseAgentImpl;
-import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.CryptoException;
 import net.minidev.json.JSONArray;
@@ -54,7 +53,8 @@ public class AgentsHandler {
 	@Path("/createAgent")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response handleCreateAgent(@FormDataParam("username") String username, @FormDataParam("email") String email,
-			@FormDataParam("password") String password) throws Exception {
+			@FormDataParam("mnemonic") String ethereumMnemonic, @FormDataParam("password") String password)
+			throws Exception {
 		if (password == null || password.isEmpty()) {
 			return Response.status(Status.BAD_REQUEST).entity("No password provided").build();
 		}
@@ -77,7 +77,17 @@ public class AgentsHandler {
 			}
 		}
 		// create new user agent and store in network
-		UserAgentImpl agent = UserAgentImpl.createUserAgent(password);
+		// TODO: deduplicate this / AuthHandler#handleRegistration
+		UserAgentImpl agent;
+		if (node instanceof EthereumNode) {
+			if (ethereumMnemonic != null) {
+				agent = EthereumAgent.createEthereumAgent(username, password, ethereumMnemonic);
+			} else {
+				agent = EthereumAgent.createEthereumAgent(username, password);
+			}
+		} else {
+			agent = UserAgentImpl.createUserAgent(password);
+		}
 		agent.unlock(password);
 		if (username != null && !username.isEmpty()) {
 			agent.setLoginName(username);
@@ -86,12 +96,15 @@ public class AgentsHandler {
 			agent.setEmail(email);
 		}
 		node.storeAgent(agent);
-		JSONObject json = new JSONObject();
-		json.put("code", Status.OK.getStatusCode());
-		json.put("text", Status.OK.getStatusCode() + " - Agent created");
-		json.put("agentid", agent.getIdentifier());
-		json.put("username", agent.getLoginName());
-		json.put("email", agent.getEmail());
+		JSONObject json = new JSONObject()
+				.appendField("code", Status.OK.getStatusCode())
+				.appendField("text", Status.OK.getStatusCode() + " - Agent created")
+				.appendField("agentid", agent.getIdentifier())
+				.appendField("username", agent.getLoginName())
+				.appendField("email", agent.getEmail());
+		if (agent instanceof EthereumAgent) {
+			json.put("registryAddress", ((EthereumAgent) agent).getEthereumAddress());
+		}
 		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
 	}
 

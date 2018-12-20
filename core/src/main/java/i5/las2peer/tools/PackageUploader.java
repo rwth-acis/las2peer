@@ -196,6 +196,13 @@ public class PackageUploader {
 		}
 		// store envelope with service version information
 		node.storeEnvelope(versionEnv, devAgent);
+		if (node instanceof EthereumNode) {
+			try {
+				registerUploadedService((EthereumNode) node, serviceName, serviceVersion, devAgent);
+			} catch (AgentException e) {
+				logger.warning("Agent not suitable for registering service, reason:\n" + e.toString());
+			}
+		}
 	}
 
 	private static void registerUploadedService(EthereumNode node, String serviceName, String serviceVersion,

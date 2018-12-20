@@ -143,7 +143,6 @@ public class EthereumNode extends PastryNodeImpl {
 
 	@Override
 	public void storeAgent(AgentImpl agent) throws AgentException {
-		super.storeAgent(agent);
 		if (agent instanceof EthereumAgent) {
 			try {
 				registerAgentInBlockchain((EthereumAgent) agent);
@@ -152,6 +151,7 @@ public class EthereumNode extends PastryNodeImpl {
 				throw new AgentException("Problem storing Ethereum agent", e);
 			}
 		}
+		super.storeAgent(agent);
 	}
 
 	// Note: Unfortunately the term "register" is also used for storing

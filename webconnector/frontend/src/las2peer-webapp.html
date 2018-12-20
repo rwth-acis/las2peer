@@ -108,16 +108,19 @@ Copyright (c) 2017 Advanced Community Information Systems (ACIS) Group, Chair of
       <form is="iron-form" id="las2peerLoginForm" on-keypress="_keyPressedLogin">
         <paper-input label="email or username" id="las2peerUserid" disabled="[[_submittingLogin]]" value="" autofocus></paper-input>
         <paper-input label="password" id="las2peerPassword" disabled="[[_submittingLogin]]" value="" type="password"><paper-icon-button id="las2peerLoginButton" icon="send" slot="suffix"></paper-icon-button></paper-input>
+        <!--
         <paper-input label="ethereum mnemonic (optional, registration only)" id="ethereumMnemonic" disabled="[[_submittingLogin]]" value=""></paper-input>
+        -->
         <input type="submit" id="loginSubmitButton" style="display: none" />
       </form>
       <template is="dom-if" if="[[_submittingLogin]]">
         <paper-spinner style="left: 38%; position: absolute; z-index: 10" active="[[_submittingLogin]]"></paper-spinner>
       </template>
+      <div>To register, use the <a name="view-agents" href="view-agents">Agents</a> tab.</div>
       <!--
       <div><paper-button raised disabled="[[_submittingLogin]]"><iron-icon src="https://api.learning-layers.eu//logo.png"></iron-icon> Login with Learning Layers</paper-button></div>
-      -->
       <div><paper-button raised disabled="[[_submittingLogin]]" on-tap="createNewAgent"><iron-icon icon="add-circle-outline"></iron-icon> Generate new Agent</paper-button></div>
+      -->
     </paper-dialog>
 
     <paper-dialog id="las2peerErrorDialog">
