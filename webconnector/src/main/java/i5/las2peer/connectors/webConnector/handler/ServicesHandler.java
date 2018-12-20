@@ -2,8 +2,10 @@ package i5.las2peer.connectors.webConnector.handler;
 
 import java.io.InputStream;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ConcurrentMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
@@ -21,6 +23,13 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import i5.las2peer.p2p.EthereumNode;
+import i5.las2peer.registry.CredentialUtils;
+import i5.las2peer.registry.data.ServiceDeploymentData;
+import i5.las2peer.registry.data.ServiceReleaseData;
+import i5.las2peer.registry.exceptions.EthereumException;
+import net.minidev.json.parser.JSONParser;
+import net.minidev.json.parser.ParseException;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
@@ -40,6 +49,8 @@ import i5.las2peer.tools.ServicePackageException;
 import i5.las2peer.tools.SimpleTools;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.web3j.crypto.Credentials;
+import org.web3j.crypto.WalletUtils;
 
 @Path(ServicesHandler.RESOURCE_PATH)
 public class ServicesHandler {
@@ -49,15 +60,13 @@ public class ServicesHandler {
 	private final WebConnector connector;
 	private final Node node;
 	private final PastryNodeImpl pastryNode;
+	private final EthereumNode ethereumNode;
 
 	public ServicesHandler(WebConnector connector) {
 		this.connector = connector;
 		this.node = connector.getL2pNode();
-		if (node instanceof PastryNodeImpl) {
-			pastryNode = (PastryNodeImpl) node;
-		} else {
-			pastryNode = null;
-		}
+		pastryNode = (node instanceof PastryNodeImpl) ? (PastryNodeImpl) node :null;
+		ethereumNode = (node instanceof EthereumNode) ? (EthereumNode) node : null;
 	}
 
 	@GET
@@ -167,4 +176,135 @@ public class ServicesHandler {
 		}
 	}
 
+	@GET
+	@Path("/names")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String getRegisteredServices() {
+		JSONArray serviceNameList = new JSONArray();
+		serviceNameList.addAll(ethereumNode.getRegistryClient().getServiceNames());
+		return serviceNameList.toJSONString();
+	}
+
+	@GET
+	@Path("/authors")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String getServiceAuthors() {
+		JSONObject jsonObject = new JSONObject();
+		for (ConcurrentMap.Entry<String, String> serviceWithAuthor: ethereumNode.getRegistryClient().getServiceAuthors().entrySet()) {
+			jsonObject.put(serviceWithAuthor.getKey(), serviceWithAuthor.getValue());
+		}
+		return jsonObject.toJSONString();
+	}
+
+	@GET
+	@Path("/releases")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String getServiceReleases() {
+		JSONObject jsonObject = new JSONObject();
+		for (ConcurrentMap.Entry<String, List<ServiceReleaseData>> service: ethereumNode.getRegistryClient().getServiceReleases().entrySet()) {
+			JSONArray releaseList = new JSONArray();
+			for (ServiceReleaseData release : service.getValue()) {
+				JSONObject entry = new JSONObject();
+				entry.put("name", release.getServiceName());
+				entry.put("version", release.getVersion());
+				releaseList.add(entry);
+			}
+			jsonObject.put(service.getKey(), releaseList);
+		}
+		return jsonObject.toJSONString();
+	}
+
+	@GET
+	@Path("/deployments")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String getServiceDeployments() {
+		JSONObject jsonObject = new JSONObject();
+		for (ConcurrentMap.Entry<String, List<ServiceDeploymentData>> service: ethereumNode.getRegistryClient().getServiceDeployments().entrySet()) {
+			JSONArray deploymentList = new JSONArray();
+			for (ServiceDeploymentData deployment : service.getValue()) {
+				JSONObject entry = new JSONObject();
+				entry.put("packageName", deployment.getServicePackageName());
+				entry.put("className", deployment.getServiceClassName());
+				entry.put("version", deployment.getVersion());
+				entry.put("time", deployment.getTime());
+				entry.put("nodeId", deployment.getNodeId());
+				deploymentList.add(entry);
+			}
+			jsonObject.put(service.getKey(), deploymentList);
+		}
+		return jsonObject.toJSONString();
+	}
+
+	@GET
+	@Path("/registry/tags")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String getTags() {
+		JSONObject jsonObject = new JSONObject();
+		for (ConcurrentMap.Entry<String, String> tag: ethereumNode.getRegistryClient().getTags().entrySet()) {
+			jsonObject.put(tag.getKey(), tag.getValue());
+		}
+		return jsonObject.toJSONString();
+	}
+
+	@POST
+	@Path("/registry/faucet")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response sendEtherFromNodeOwnerToAddress(String requestBody) {
+		JSONObject payload = parseBodyAsJson(requestBody);
+		String address = payload.getAsString("address");
+		if (!WalletUtils.isValidAddress(address)) {
+			throw new BadRequestException("Address is not valid.");
+		}
+
+		Number valueAsNumber = payload.getAsNumber("valueInWei");
+		if (valueAsNumber == null) {
+			throw new BadRequestException("Value is invalid.");
+		}
+
+		BigDecimal valueInWei = BigDecimal.valueOf(valueAsNumber.longValue());
+		try {
+			ethereumNode.getRegistryClient().sendEther(address, valueInWei);
+		} catch (EthereumException e) {
+			return Response.serverError().entity(e.toString()).build();
+		}
+		return Response.ok().build();
+	}
+
+	@GET
+	@Path("/registry/mnemonic")
+	@Produces(MediaType.TEXT_PLAIN)
+	public Response generateMnemonic() {
+		String mnemonic = CredentialUtils.createMnemonic();
+		return Response.ok(mnemonic).build();
+	}
+
+	@POST
+	@Path("/registry/mnemonic")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response showKeysForMnemonic(String requestBody) {
+		JSONObject payload = parseBodyAsJson(requestBody);
+		String mnemonic = payload.getAsString("mnemonic");
+		String password = payload.getAsString("password");
+
+		Credentials credentials = CredentialUtils.fromMnemonic(mnemonic, password);
+
+		JSONObject json = new JSONObject()
+				.appendField("mnemonic", mnemonic)
+				.appendField("password", password)
+				.appendField("publicKey", credentials.getEcKeyPair().getPublicKey())
+				.appendField("privateKey", credentials.getEcKeyPair().getPrivateKey())
+				.appendField("address", credentials.getAddress());
+		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
+	}
+
+	private JSONObject parseBodyAsJson(String requestBody) {
+		if (requestBody.trim().isEmpty()) {
+			throw new BadRequestException("No request body");
+		}
+		try {
+			return (JSONObject) new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(requestBody);
+		} catch (ParseException e) {
+			throw new BadRequestException("Could not parse json request body");
+		}
+	}
 }

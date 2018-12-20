@@ -4,12 +4,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
-import java.util.List;
-import java.util.concurrent.ConcurrentMap;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -19,13 +16,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import i5.las2peer.p2p.EthereumNode;
-import i5.las2peer.registry.*;
-import i5.las2peer.registry.data.ServiceDeploymentData;
-import i5.las2peer.registry.data.ServiceReleaseData;
-import i5.las2peer.registry.exceptions.EthereumException;
-import net.minidev.json.parser.JSONParser;
-import net.minidev.json.parser.ParseException;
 import org.glassfish.jersey.media.multipart.ContentDisposition;
 
 import i5.las2peer.api.p2p.ServiceNameVersion;
@@ -43,8 +33,6 @@ import i5.las2peer.tools.L2pNodeLauncher;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
-import org.web3j.crypto.Credentials;
-import org.web3j.crypto.WalletUtils;
 
 @Path(DefaultHandler.ROOT_RESOURCE_PATH)
 public class DefaultHandler {
@@ -53,144 +41,15 @@ public class DefaultHandler {
 
 	private final WebConnector connector;
 	private final Node node;
-	private ReadOnlyRegistryClient registry;
 
 	public DefaultHandler(WebConnector connector) {
 		this.connector = connector;
 		node = connector.getL2pNode();
-		if (node instanceof EthereumNode) {
-			registry = ((EthereumNode) this.node).getRegistryClient();
-		} else {
-			// TODO: only handle if ethereum enabled
-			// better: refactor into separate handler!
-			// registry = new ReadOnlyRegistryClient(new RegistryConfiguration());
-		}
 	}
 
 	@GET
 	public Response rootPath() throws URISyntaxException {
 		return Response.temporaryRedirect(new URI(WebappHandler.DEFAULT_ROUTE)).build();
-	}
-
-	@POST
-	@Path("/registry/debug/faucet")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response sendEtherFromNodeOwnerToAddress(String requestBody) {
-		JSONObject payload = parseBodyAsJson(requestBody);
-		String address = payload.getAsString("address");
-		if (!WalletUtils.isValidAddress(address)) {
-			throw new BadRequestException("Address is not valid.");
-		}
-
-		Number valueAsNumber = payload.getAsNumber("valueInWei");
-		if (valueAsNumber == null) {
-			throw new BadRequestException("Value is invalid.");
-		}
-
-		BigDecimal valueInWei = BigDecimal.valueOf(valueAsNumber.longValue());
-		try {
-			((ReadWriteRegistryClient) registry).sendEther(address, valueInWei);
-		} catch (EthereumException e) {
-			return Response.serverError().entity(e.toString()).build();
-		}
-		return Response.ok().build();
-	}
-
-	@GET
-	@Path("/registry/debug/mnemonic/new")
-	@Produces(MediaType.TEXT_PLAIN)
-	public Response generateMnemonic() {
-		String mnemonic = CredentialUtils.createMnemonic();
-		return Response.ok(mnemonic).build();
-	}
-
-	@POST
-	@Path("/registry/debug/mnemonic")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response showKeysForMnemonic(String requestBody) {
-		JSONObject payload = parseBodyAsJson(requestBody);
-		String mnemonic = payload.getAsString("mnemonic");
-		String password = payload.getAsString("password");
-
-		Credentials credentials = CredentialUtils.fromMnemonic(mnemonic, password);
-
-		JSONObject json = new JSONObject()
-				.appendField("mnemonic", mnemonic)
-				.appendField("password", password)
-				.appendField("publicKey", credentials.getEcKeyPair().getPublicKey())
-				.appendField("privateKey", credentials.getEcKeyPair().getPrivateKey())
-				.appendField("address", credentials.getAddress());
-		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
-	}
-
-	@GET
-	@Path("/registry/services")
-	@Produces(MediaType.APPLICATION_JSON)
-	public String getRegisteredServices() {
-		JSONArray serviceNameList = new JSONArray();
-		serviceNameList.addAll(registry.getServiceNames());
-		return serviceNameList.toJSONString();
-	}
-
-	@GET
-	@Path("/registry/service-authors")
-	@Produces(MediaType.APPLICATION_JSON)
-	public String getServiceAuthors() {
-		JSONObject jsonObject = new JSONObject();
-		for (ConcurrentMap.Entry<String, String> serviceWithAuthor: registry.getServiceAuthors().entrySet()) {
-			jsonObject.put(serviceWithAuthor.getKey(), serviceWithAuthor.getValue());
-		}
-		return jsonObject.toJSONString();
-	}
-
-	@GET
-	@Path("/registry/service-releases")
-	@Produces(MediaType.APPLICATION_JSON)
-	public String getServiceReleases() {
-		JSONObject jsonObject = new JSONObject();
-		for (ConcurrentMap.Entry<String, List<ServiceReleaseData>> service: registry.getServiceReleases().entrySet()) {
-			JSONArray releaseList = new JSONArray();
-			for (ServiceReleaseData release : service.getValue()) {
-				JSONObject entry = new JSONObject();
-				entry.put("name", release.getServiceName());
-				entry.put("version", release.getVersion());
-				releaseList.add(entry);
-			}
-			jsonObject.put(service.getKey(), releaseList);
-		}
-		return jsonObject.toJSONString();
-	}
-
-	@GET
-	@Path("/registry/service-deployments")
-	@Produces(MediaType.APPLICATION_JSON)
-	public String getServiceDeployments() {
-		JSONObject jsonObject = new JSONObject();
-		for (ConcurrentMap.Entry<String, List<ServiceDeploymentData>> service: registry.getServiceDeployments().entrySet()) {
-			JSONArray deploymentList = new JSONArray();
-			for (ServiceDeploymentData deployment : service.getValue()) {
-				JSONObject entry = new JSONObject();
-				entry.put("packageName", deployment.getServicePackageName());
-				entry.put("className", deployment.getServiceClassName());
-				entry.put("version", deployment.getVersion());
-				entry.put("time", deployment.getTime());
-				entry.put("nodeId", deployment.getNodeId());
-				deploymentList.add(entry);
-			}
-			jsonObject.put(service.getKey(), deploymentList);
-		}
-		return jsonObject.toJSONString();
-	}
-
-	@GET
-	@Path("/registry/tags")
-	@Produces(MediaType.APPLICATION_JSON)
-	public String getTags() {
-		JSONObject jsonObject = new JSONObject();
-		for (ConcurrentMap.Entry<String, String> tag: registry.getTags().entrySet()) {
-			jsonObject.put(tag.getKey(), tag.getValue());
-		}
-		return jsonObject.toJSONString();
 	}
 
 	@GET
@@ -349,17 +208,6 @@ public class DefaultHandler {
 			} catch (SerializationException e) {
 				throw new InternalServerErrorException(e);
 			}
-		}
-	}
-
-	private JSONObject parseBodyAsJson(String requestBody) {
-		if (requestBody.trim().isEmpty()) {
-			throw new BadRequestException("No request body");
-		}
-		try {
-			return (JSONObject) new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(requestBody);
-		} catch (ParseException e) {
-			throw new BadRequestException("Could not parse json request body");
 		}
 	}
 }
