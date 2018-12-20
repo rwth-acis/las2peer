@@ -12,31 +12,31 @@
   <template>
     <iron-ajax id="ajaxCommunityTags"
                auto
-               url="/las2peer/registry/tags"
+               url="/las2peer/services/registry/tags"
                last-response="{{communityTags}}"
                handleAs="json"
                debounce-duration="300"></iron-ajax>
     <iron-ajax id="ajaxRegisteredServices"
                auto
-               url="/las2peer/registry/services"
+               url="/las2peer/services/names"
                last-response="{{registeredServices}}"
                handleAs="json"
                debounce-duration="300"></iron-ajax>
     <iron-ajax id="ajaxServiceAuthors"
                auto
-               url="/las2peer/registry/service-authors"
+               url="/las2peer/services/authors"
                last-response="{{serviceAuthors}}"
                handleAs="json"
                debounce-duration="300"></iron-ajax>
     <iron-ajax id="ajaxServiceReleases"
                auto
-               url="/las2peer/registry/service-releases"
+               url="/las2peer/services/releases"
                last-response="{{serviceReleases}}"
                handleAs="json"
                debounce-duration="300"></iron-ajax>
     <iron-ajax id="ajaxServiceDeployments"
                auto
-               url="/las2peer/registry/service-deployments"
+               url="/las2peer/services/deployments"
                last-response="{{serviceDeployments}}"
                handleAs="json"
                debounce-duration="300"></iron-ajax>

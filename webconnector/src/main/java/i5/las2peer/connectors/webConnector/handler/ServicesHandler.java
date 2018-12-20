@@ -176,59 +176,8 @@ public class ServicesHandler {
 		}
 	}
 
-	@POST
-	@Path("/registry/debug/faucet")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response sendEtherFromNodeOwnerToAddress(String requestBody) {
-		JSONObject payload = parseBodyAsJson(requestBody);
-		String address = payload.getAsString("address");
-		if (!WalletUtils.isValidAddress(address)) {
-			throw new BadRequestException("Address is not valid.");
-		}
-
-		Number valueAsNumber = payload.getAsNumber("valueInWei");
-		if (valueAsNumber == null) {
-			throw new BadRequestException("Value is invalid.");
-		}
-
-		BigDecimal valueInWei = BigDecimal.valueOf(valueAsNumber.longValue());
-		try {
-			ethereumNode.getRegistryClient().sendEther(address, valueInWei);
-		} catch (EthereumException e) {
-			return Response.serverError().entity(e.toString()).build();
-		}
-		return Response.ok().build();
-	}
-
 	@GET
-	@Path("/registry/debug/mnemonic/new")
-	@Produces(MediaType.TEXT_PLAIN)
-	public Response generateMnemonic() {
-		String mnemonic = CredentialUtils.createMnemonic();
-		return Response.ok(mnemonic).build();
-	}
-
-	@POST
-	@Path("/registry/debug/mnemonic")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response showKeysForMnemonic(String requestBody) {
-		JSONObject payload = parseBodyAsJson(requestBody);
-		String mnemonic = payload.getAsString("mnemonic");
-		String password = payload.getAsString("password");
-
-		Credentials credentials = CredentialUtils.fromMnemonic(mnemonic, password);
-
-		JSONObject json = new JSONObject()
-				.appendField("mnemonic", mnemonic)
-				.appendField("password", password)
-				.appendField("publicKey", credentials.getEcKeyPair().getPublicKey())
-				.appendField("privateKey", credentials.getEcKeyPair().getPrivateKey())
-				.appendField("address", credentials.getAddress());
-		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
-	}
-
-	@GET
-	@Path("/registry/services")
+	@Path("/names")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getRegisteredServices() {
 		JSONArray serviceNameList = new JSONArray();
@@ -237,7 +186,7 @@ public class ServicesHandler {
 	}
 
 	@GET
-	@Path("/registry/service-authors")
+	@Path("/authors")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getServiceAuthors() {
 		JSONObject jsonObject = new JSONObject();
@@ -248,7 +197,7 @@ public class ServicesHandler {
 	}
 
 	@GET
-	@Path("/registry/service-releases")
+	@Path("/releases")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getServiceReleases() {
 		JSONObject jsonObject = new JSONObject();
@@ -266,7 +215,7 @@ public class ServicesHandler {
 	}
 
 	@GET
-	@Path("/registry/service-deployments")
+	@Path("/deployments")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getServiceDeployments() {
 		JSONObject jsonObject = new JSONObject();
@@ -295,6 +244,57 @@ public class ServicesHandler {
 			jsonObject.put(tag.getKey(), tag.getValue());
 		}
 		return jsonObject.toJSONString();
+	}
+
+	@POST
+	@Path("/registry/faucet")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response sendEtherFromNodeOwnerToAddress(String requestBody) {
+		JSONObject payload = parseBodyAsJson(requestBody);
+		String address = payload.getAsString("address");
+		if (!WalletUtils.isValidAddress(address)) {
+			throw new BadRequestException("Address is not valid.");
+		}
+
+		Number valueAsNumber = payload.getAsNumber("valueInWei");
+		if (valueAsNumber == null) {
+			throw new BadRequestException("Value is invalid.");
+		}
+
+		BigDecimal valueInWei = BigDecimal.valueOf(valueAsNumber.longValue());
+		try {
+			ethereumNode.getRegistryClient().sendEther(address, valueInWei);
+		} catch (EthereumException e) {
+			return Response.serverError().entity(e.toString()).build();
+		}
+		return Response.ok().build();
+	}
+
+	@GET
+	@Path("/registry/mnemonic")
+	@Produces(MediaType.TEXT_PLAIN)
+	public Response generateMnemonic() {
+		String mnemonic = CredentialUtils.createMnemonic();
+		return Response.ok(mnemonic).build();
+	}
+
+	@POST
+	@Path("/registry/mnemonic")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response showKeysForMnemonic(String requestBody) {
+		JSONObject payload = parseBodyAsJson(requestBody);
+		String mnemonic = payload.getAsString("mnemonic");
+		String password = payload.getAsString("password");
+
+		Credentials credentials = CredentialUtils.fromMnemonic(mnemonic, password);
+
+		JSONObject json = new JSONObject()
+				.appendField("mnemonic", mnemonic)
+				.appendField("password", password)
+				.appendField("publicKey", credentials.getEcKeyPair().getPublicKey())
+				.appendField("privateKey", credentials.getEcKeyPair().getPrivateKey())
+				.appendField("address", credentials.getAddress());
+		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
 	}
 
 	private JSONObject parseBodyAsJson(String requestBody) {
