@@ -25,8 +25,8 @@
     "@webcomponents/webcomponentsjs": "^2.0.0"
   },
   "devDependencies": {
-    "polymer-cli": "^1.7.1",
-    "wct-browser-legacy": "^1.0.0"
+    "polymer-cli": "^1.9.3",
+    "wct-browser-legacy": "^1.0.2"
   },
   "engines": {
     "node": ">=8.0"
