@@ -14,7 +14,7 @@
       "type": "image/png"
     }
   ],
-  "start_url": "/",
+  "start_url": "/las2peer/webapp/",
   "display": "standalone",
   "theme_color": "#3f51b5",
   "background_color": "#3f51b5"

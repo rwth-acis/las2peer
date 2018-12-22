@@ -13,6 +13,7 @@
   "builds": [
     {
       "name": "esm-bundled",
+      "basePath": "las2peer/webapp",
       "browserCapabilities": [
         "es2015",
         "modules"
@@ -31,6 +32,7 @@
     },
     {
       "name": "es6-bundled",
+      "basePath": "las2peer/webapp",
       "browserCapabilities": [
         "es2015"
       ],
@@ -49,6 +51,7 @@
     },
     {
       "name": "es5-bundled",
+      "basePath": "las2peer/webapp",
       "js": {
         "minify": true,
         "compile": true,
