@@ -177,6 +177,19 @@ public class ServicesHandler {
 	}
 
 	@GET
+	@Path("/services")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String getAllServiceInfo() {
+		// a bit silly to convert the JSON stuff back and forth, but whatever
+		return new JSONObject()
+				//.appendField("names", parseJson(getRegisteredServices()))
+				.appendField("authors", parseJson(getServiceAuthors()))
+				.appendField("releases", parseJson(getServiceReleases()))
+				.appendField("deployments", parseJson(getServiceDeployments()))
+		        .toJSONString();
+	}
+
+	@GET
 	@Path("/names")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getRegisteredServices() {
@@ -250,7 +263,7 @@ public class ServicesHandler {
 	@Path("/registry/faucet")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response sendEtherFromNodeOwnerToAddress(String requestBody) {
-		JSONObject payload = parseBodyAsJson(requestBody);
+		JSONObject payload = parseJson(requestBody);
 		String address = payload.getAsString("address");
 		if (!WalletUtils.isValidAddress(address)) {
 			throw new BadRequestException("Address is not valid.");
@@ -273,38 +286,36 @@ public class ServicesHandler {
 	@GET
 	@Path("/registry/mnemonic")
 	@Produces(MediaType.TEXT_PLAIN)
-	public Response generateMnemonic() {
-		String mnemonic = CredentialUtils.createMnemonic();
-		return Response.ok(mnemonic).build();
+	public String generateMnemonic() {
+		return CredentialUtils.createMnemonic();
 	}
 
 	@POST
 	@Path("/registry/mnemonic")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response showKeysForMnemonic(String requestBody) {
-		JSONObject payload = parseBodyAsJson(requestBody);
+	public String showKeysForMnemonic(String requestBody) {
+		JSONObject payload = parseJson(requestBody);
 		String mnemonic = payload.getAsString("mnemonic");
 		String password = payload.getAsString("password");
 
 		Credentials credentials = CredentialUtils.fromMnemonic(mnemonic, password);
 
-		JSONObject json = new JSONObject()
+		return new JSONObject()
 				.appendField("mnemonic", mnemonic)
 				.appendField("password", password)
 				.appendField("publicKey", credentials.getEcKeyPair().getPublicKey())
 				.appendField("privateKey", credentials.getEcKeyPair().getPrivateKey())
-				.appendField("address", credentials.getAddress());
-		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
+				.appendField("address", credentials.getAddress())
+				.toJSONString();
 	}
 
-	private JSONObject parseBodyAsJson(String requestBody) {
-		if (requestBody.trim().isEmpty()) {
-			throw new BadRequestException("No request body");
-		}
+	// only handles objects (not JSON arrays)
+	private JSONObject parseJson(String s) {
+		// TODO: handle emptiness checks at call site (maybe?)
 		try {
-			return (JSONObject) new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(requestBody);
+			return (JSONObject) new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(s);
 		} catch (ParseException e) {
-			throw new BadRequestException("Could not parse json request body");
+			throw new BadRequestException("Could not parse JSON");
 		}
 	}
 }

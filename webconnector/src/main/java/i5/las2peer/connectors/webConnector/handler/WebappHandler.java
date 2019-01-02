@@ -14,7 +14,7 @@ public class WebappHandler extends AbstractFileHandler {
 
 	public static final String RESOURCE_NAME = "/webapp";
 	public static final String RESOURCE_PATH = DefaultHandler.ROOT_RESOURCE_PATH + RESOURCE_NAME;
-	public static final String DEFAULT_ROUTE = RESOURCE_PATH + "/view-status";
+	public static final String DEFAULT_ROUTE = RESOURCE_PATH + "/view1";
 
 	@GET
 	public Response rootPath() throws IOException, URISyntaxException {
@@ -26,7 +26,7 @@ public class WebappHandler extends AbstractFileHandler {
 	public Response processRequest(@PathParam("any") String path) throws IOException, URISyntaxException {
 		if (path.isEmpty() || path.endsWith("/")) { // don't list directories
 			return rootPath();
-		} else if (!path.matches(".+/[^/]+\\.[^/]+")) { // not a file request
+		} else if (!path.matches(".+[^/]+\\.[^/]+")) { // not a file request // FIXME: explain reasoning!?
 			// must be some kind of route path
 			return serveFile(RESOURCE_NAME + "/index.html");
 		} else {

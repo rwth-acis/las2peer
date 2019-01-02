@@ -84,8 +84,8 @@ public class DefaultHandler {
 	public String getNodeStatus(@Context UriInfo uriInfo) {
 		// gather status values and return as JSON string
 		JSONObject response = new JSONObject();
-		response.put("nodeid", node.getNodeId().toString());
-		response.put("cpuload", getCPULoad(node));
+		response.put("nodeId", node.getNodeId().toString());
+		response.put("cpuLoad", getCPULoad(node));
 		long localStorageSize = -1;
 		long maxLocalStorageSize = -1;
 		if (node instanceof PastryNodeImpl) {
