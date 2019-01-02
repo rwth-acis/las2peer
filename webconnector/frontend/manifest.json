@@ -1,7 +1,7 @@
 {
-  "name": "My App",
-  "short_name": "My App",
-  "description": "My App description",
+  "name": "las2peer Node Front-End",
+  "short_name": "las2peer",
+  "description": "Status information and administrative functions of the las2peer node",
   "icons": [
     {
       "src": "images/manifest/icon-192x192.png",

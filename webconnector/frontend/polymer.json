@@ -1,6 +1,6 @@
 {
   "entrypoint": "index.html",
-  "shell": "src/my-app.js",
+  "shell": "src/node-frontend.js",
   "sources": [
     "images/**/*"
   ],

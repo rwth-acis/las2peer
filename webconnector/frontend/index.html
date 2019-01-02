@@ -15,8 +15,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <meta name="generator" content="Polymer Starter Kit">
     <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
 
-    <title>My App</title>
-    <meta name="description" content="My App description">
+    <title>las2peer Node Front-End</title>
+    <meta name="description" content="Web front-end for las2peer nodes">
 
     <!--
       The `<base>` tag below is present to support two advanced deployment options:
@@ -40,12 +40,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <!-- Add to homescreen for Chrome on Android. Fallback for manifest.json -->
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="My App">
+    <meta name="application-name" content="las2peer Node Front-End">
 
     <!-- Add to homescreen for Safari on iOS -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="My App">
+    <meta name="apple-mobile-web-app-title" content="las2peer Node Front-End">
 
     <!-- Homescreen icons -->
     <link rel="apple-touch-icon" href="images/manifest/icon-48x48.png">
@@ -71,13 +71,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       * to indicate the path from which you'll be serving, including leading
       * and trailing slashes (e.g., `/my-app/`).
       */
-      window.MyAppGlobals = { rootPath: '/las2peer/webapp/' };
+      window.NodeFrontendGlobals = { rootPath: '/las2peer/webapp/' };
 
       // Load and register pre-caching Service Worker
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', function() {
           navigator.serviceWorker.register('service-worker.js', {
-            scope: MyAppGlobals.rootPath
+            scope: NodeFrontendGlobals.rootPath
           });
         });
       }
@@ -87,7 +87,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <script src="node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
 
     <!-- Load your application shell -->
-    <script type="module" src="src/my-app.js"></script>
+    <script type="module" src="src/node-frontend.js"></script>
 
     <!-- Add any global styles for body, document, etc. -->
     <style>
@@ -101,7 +101,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </style>
   </head>
   <body>
-    <my-app></my-app>
+    <node-frontend></node-frontend>
     <noscript>
       Please enable JavaScript to view this website.
     </noscript>
