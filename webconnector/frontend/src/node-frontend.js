@@ -309,7 +309,7 @@ class NodeFrontend extends PolymerElement {
       req.headers = { Authorization: 'Bearer ' + accessToken };
       req.generateRequest();
     } catch (err) {
-      this._handleError(userObject, "login failed", err)
+      this._handleError(userObject, "Login failed", err)
     }
   }
 
@@ -355,20 +355,26 @@ class NodeFrontend extends PolymerElement {
     }
   }
 
+  // iron-ajax error event for some reason passes two arguments
+  // that can be confusing, but it's not a problem
   _handleError(object, title, message) {
-    if (!title && !message) {
+    console.log("[DEBUG] object: ", object);
+    console.log("[DEBUG] title: ", title);
+    console.log("[DEBUG] message: ", message);
+    if (!title || !message) {
       // try to get details of known possible errors
       let maybeDetail = (object || {}).detail;
       let maybeError = (maybeDetail || {}).error;
-      let maybeXhr = ((maybeDetail || {}.request) || {}).xhr;
+      let maybeXhr = ((maybeDetail || {}).request || {}).xhr;
 
-      if (maybeXhr.readyState === 4 && maybeXhr.status === 0) { // network issues
+      // TODO: this is for from perfect. all fields should be checked before usage
+      if ((maybeXhr || {}).readyState === 4 && (maybeXhr || {}).status === 0) { // network issues
         title = 'Network Connection Error';
         message = 'Could not connect to: ' + object.detail.request.url;
-      } else if (maybeXhr.response && maybeXhr.response.msg) {
+      } else if ((maybeXhr || {}).status && (maybeXhr.response || {}).msg) {
         title = maybeXhr.status + " - " + maybeXhr.statusText;
         message = maybeXhr.response.msg;
-      } else if (maybeError.message) {
+      } else if ((maybeXhr || {}).status && (maybeError || {}).message) {
         title = maybeXhr.status + " - " + maybeXhr.statusText;
         message = maybeError.message;
       } else {
@@ -376,8 +382,6 @@ class NodeFrontend extends PolymerElement {
         message = "Could not determine type of error, check manually in console"
       }
     }
-    console.log(title + ' - ' + message);
-    console.log("[DEBUG] object which apparently caused error: " + object);
     this._error = { title: title, msg: message, obj: object };
   }
 
