@@ -26,6 +26,8 @@ import '@polymer/paper-icon-button/paper-icon-button.js';
 import './my-icons.js';
 import 'openidconnect-signin/openidconnect-signin.js'
 import 'openidconnect-signin/openidconnect-popup-signin-callback.js'
+import 'openidconnect-signin/openidconnect-popup-signout-callback.js'
+import 'openidconnect-signin/openidconnect-signin-silent-callback.js'
 
 // Gesture events like tap and track generated from touch will not be
 // preventable, allowing for better scrolling performance.
@@ -101,29 +103,21 @@ class NodeFrontend extends PolymerElement {
             <app-toolbar>
               <paper-icon-button icon="my-icons:menu" drawer-toggle=""></paper-icon-button>
               <div main-title="">las2peer Node Front-End</div>
-              <div on-click="debug">DEBUG</div>
             
-              <!-- FIXME -->
               <openidconnect-signin id="signin"
                                     scope="openid profile"
                                     clientid="a4b3f15a-eaec-489a-af08-1dc9cf57347e"
                                     authority="https://api.learning-layers.eu/o/oauth2"
                                     providername="Layers"
-                                    popupredirecturi="http://127.0.0.1:8080/las2peer/webapp/"
+                                    popupredirecturi$="[[_loadUrl]]"
+                                    popuppostlogoutredirecturi$="[[_loadUrl]]"
+                                    silentredirecturi$="[[_loadUrl]]"
                                     ></openidconnect-signin>
-                                    <!--
-                                    popupredirecturi="http://127.0.0.1:8081/demo/popup-signin-callback.html"
-                                    popuppostlogoutredirecturi="http://127.0.0.1:8081/demo/popup-signout-callback.html"
-                                    silentredirecturi="http://127.0.0.1:8081/demo/silent-callback.html"
-                                    -->
+              <!-- no idea if this is a bad way to do it, but it seems to work -->
               <openidconnect-popup-signin-callback></openidconnect-popup-signin-callback>
+              <openidconnect-popup-signout-callback></openidconnect-popup-signout-callback>
+              <openidconnect-signin-silent-callback></openidconnect-signin-silent-callback>
             </app-toolbar>
-            <template is="dom-if" if="[[_agentid]]">
-              <paper-button on-tap="destroySession">Logout <iron-icon icon="account-circle"></iron-icon></paper-button>
-            </template>
-            <template is="dom-if" if="[[!_agentid]]">
-            </template>
-            <paper-button on-tap="showLoginDialog">Login <iron-icon icon="account-circle"></iron-icon></paper-button>
           </app-header>
 
           <iron-pages selected="[[page]]" attr-for-selected="name" role="main">
@@ -134,23 +128,12 @@ class NodeFrontend extends PolymerElement {
           </iron-pages>
         </app-header-layout>
       </app-drawer-layout>
-      
-      <paper-dialog id="loginDialog" modal="[[_submittingLogin]]">
-        <h2>Login</h2>
-        <openidconnect-signin id="signin"
-                              scope="openid profile"
-                              clientid="a4b3f15a-eaec-489a-af08-1dc9cf57347e"
-                              authority="https://api.learning-layers.eu/o/oauth2"
-                              providername="Layers"
-                              popupredirecturi="http://localhost:8081/las2peer/webapp"
-                              ></openidconnect-signin>
-                              <!--
-                              popupredirecturi="http://127.0.0.1:8081/demo/popup-signin-callback.html"
-                              popuppostlogoutredirecturi="http://127.0.0.1:8081/demo/popup-signout-callback.html"
-                              silentredirecturi="http://127.0.0.1:8081/demo/silent-callback.html"
-                              -->
-      </paper-dialog>
     `;
+  }
+
+  ready() {
+    super.ready();
+    this._loadUrl = document.URL; // there's definitely better ways to do this, but I have no idea
   }
 
   static get properties() {
@@ -209,10 +192,6 @@ class NodeFrontend extends PolymerElement {
         import('./my-view404.js');
         break;
     }
-  }
-
-  showLoginDialog() {
-    this.$.loginDialog.open();
   }
 }
 
