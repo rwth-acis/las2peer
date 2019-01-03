@@ -24,7 +24,6 @@ import '@polymer/iron-selector/iron-selector.js';
 import '@polymer/paper-button/paper-button.js';
 import '@polymer/paper-dialog/paper-dialog.js';
 import '@polymer/paper-icon-button/paper-icon-button.js';
-import './my-icons.js';
 import '@polymer/paper-input/paper-input.js';
 import 'openidconnect-signin/openidconnect-signin.js'
 import 'openidconnect-signin/openidconnect-popup-signin-callback.js'
@@ -122,7 +121,7 @@ class NodeFrontend extends PolymerElement {
 
           <app-header slot="header" condenses="" reveals="" effects="waterfall">
             <app-toolbar>
-              <paper-icon-button icon="my-icons:menu" drawer-toggle=""></paper-icon-button>
+              <paper-icon-button icon="icons:menu" drawer-toggle=""></paper-icon-button>
               <div main-title="">las2peer Node Front-End</div>
               
               <template is="dom-if" if="[[_agentid]]">
