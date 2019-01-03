@@ -26,10 +26,12 @@
     "@polymer/iron-pages": "^3.0.1",
     "@polymer/iron-selector": "^3.0.1",
     "@polymer/paper-button": "3.0.1",
+    "@polymer/paper-dialog": "3.0.1",
     "@polymer/paper-icon-button": "^3.0.1",
     "@polymer/paper-input": "^3.0.1",
     "@polymer/polymer": "^3.1.0",
-    "@webcomponents/webcomponentsjs": "^2.2.1"
+    "@webcomponents/webcomponentsjs": "^2.2.1",
+    "openidconnect-signin": "github:rwth-acis/openidconnect-signin#lit-element"
   },
   "devDependencies": {
     "polymer-cli": "^1.9.4",

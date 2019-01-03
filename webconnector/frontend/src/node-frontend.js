@@ -20,8 +20,11 @@ import '@polymer/app-route/app-location.js';
 import '@polymer/app-route/app-route.js';
 import '@polymer/iron-pages/iron-pages.js';
 import '@polymer/iron-selector/iron-selector.js';
+import '@polymer/paper-dialog/paper-dialog.js';
+import '@polymer/paper-button/paper-button.js';
 import '@polymer/paper-icon-button/paper-icon-button.js';
 import './my-icons.js';
+import 'openidconnect-signin/openidconnect-signin.js'
 
 // Gesture events like tap and track generated from touch will not be
 // preventable, allowing for better scrolling performance.
@@ -98,6 +101,12 @@ class NodeFrontend extends PolymerElement {
               <paper-icon-button icon="my-icons:menu" drawer-toggle=""></paper-icon-button>
               <div main-title="">las2peer Node Front-End</div>
             </app-toolbar>
+            <template is="dom-if" if="[[_agentid]]">
+              <paper-button on-tap="destroySession">Logout <iron-icon icon="account-circle"></iron-icon></paper-button>
+            </template>
+            <template is="dom-if" if="[[!_agentid]]">
+            </template>
+            <paper-button on-tap="showLoginDialog">Login <iron-icon icon="account-circle"></iron-icon></paper-button>
           </app-header>
 
           <iron-pages selected="[[page]]" attr-for-selected="name" role="main">
@@ -108,6 +117,22 @@ class NodeFrontend extends PolymerElement {
           </iron-pages>
         </app-header-layout>
       </app-drawer-layout>
+      
+      <paper-dialog id="loginDialog" modal="[[_submittingLogin]]">
+        <h2>Login</h2>
+        <openidconnect-signin id="signin"
+                              scope="openid profile"
+                              clientid="a4b3f15a-eaec-489a-af08-1dc9cf57347e"
+                              authority="https://api.learning-layers.eu/o/oauth2"
+                              providername="Layers"
+                              popupredirecturi="http://localhost:8081/las2peer/webapp"
+                              ></openidconnect-signin>
+                              <!--
+                              popupredirecturi="http://127.0.0.1:8081/demo/popup-signin-callback.html"
+                              popuppostlogoutredirecturi="http://127.0.0.1:8081/demo/popup-signout-callback.html"
+                              silentredirecturi="http://127.0.0.1:8081/demo/silent-callback.html"
+                              -->
+      </paper-dialog>
     `;
   }
 
@@ -167,6 +192,10 @@ class NodeFrontend extends PolymerElement {
         import('./my-view404.js');
         break;
     }
+  }
+
+  showLoginDialog() {
+    this.$.loginDialog.open();
   }
 }
 
