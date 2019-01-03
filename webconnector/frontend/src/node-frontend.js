@@ -18,12 +18,14 @@ import '@polymer/app-layout/app-scroll-effects/app-scroll-effects.js';
 import '@polymer/app-layout/app-toolbar/app-toolbar.js';
 import '@polymer/app-route/app-location.js';
 import '@polymer/app-route/app-route.js';
+import '@polymer/iron-ajax/iron-ajax.js';
 import '@polymer/iron-pages/iron-pages.js';
 import '@polymer/iron-selector/iron-selector.js';
-import '@polymer/paper-dialog/paper-dialog.js';
 import '@polymer/paper-button/paper-button.js';
+import '@polymer/paper-dialog/paper-dialog.js';
 import '@polymer/paper-icon-button/paper-icon-button.js';
 import './my-icons.js';
+import '@polymer/paper-input/paper-input.js';
 import 'openidconnect-signin/openidconnect-signin.js'
 import 'openidconnect-signin/openidconnect-popup-signin-callback.js'
 import 'openidconnect-signin/openidconnect-popup-signout-callback.js'
@@ -40,6 +42,33 @@ setRootPath(NodeFrontendGlobals.rootPath);
 class NodeFrontend extends PolymerElement {
   static get template() {
     return html`
+      <iron-ajax id="ajaxLoginUseridPassword"
+                 url="/las2peer/auth/login"
+                 handle-as="json"
+                 on-response="_handleLoginResponse"
+                 on-error="_handleError"
+                 loading="{{_submittingLogin}}"></iron-ajax>
+      <iron-ajax id="ajaxLoginOidc"
+                 url="/las2peer/auth/login"
+                 handle-as="json"
+                 on-response="_handleLoginResponse"
+                 on-error="_handleError"
+                 loading="{{_submittingLogin}}"></iron-ajax>
+      <iron-ajax id="ajaxDestroySession"
+                 method="POST"
+                 url="/las2peer/auth/logout"
+                 handle-as="json"
+                 on-response="_handleLogoutResponse"
+                 on-error="_handleError"
+                 loading="{{_submittingLogout}}"></iron-ajax>
+      <iron-ajax id="ajaxValidateSession"
+                 url="/las2peer/auth/validate"
+                 handle-as="json"
+                 on-response="_handleValidateResponse"
+                 on-error="_handleError"
+                 loading="{{_submittingLogin}}"></iron-ajax>
+
+
       <style>
         :host {
           --app-primary-color: #4285f4;
@@ -79,11 +108,9 @@ class NodeFrontend extends PolymerElement {
         }
       </style>
 
-      <app-location route="{{route}}" url-space-regex="^[[rootPath]]">
-      </app-location>
+      <app-location route="{{route}}" url-space-regex="^[[rootPath]]"></app-location>
 
-      <app-route route="{{route}}" pattern="[[rootPath]]:page" data="{{routeData}}" tail="{{subroute}}">
-      </app-route>
+      <app-route route="{{route}}" pattern="[[rootPath]]:page" data="{{routeData}}" tail="{{subroute}}"></app-route>
 
       <app-drawer-layout fullbleed="" narrow="{{narrow}}">
         <!-- Drawer content -->
@@ -103,20 +130,13 @@ class NodeFrontend extends PolymerElement {
             <app-toolbar>
               <paper-icon-button icon="my-icons:menu" drawer-toggle=""></paper-icon-button>
               <div main-title="">las2peer Node Front-End</div>
-            
-              <openidconnect-signin id="signin"
-                                    scope="openid profile"
-                                    clientid="a4b3f15a-eaec-489a-af08-1dc9cf57347e"
-                                    authority="https://api.learning-layers.eu/o/oauth2"
-                                    providername="Layers"
-                                    popupredirecturi$="[[_loadUrl]]"
-                                    popuppostlogoutredirecturi$="[[_loadUrl]]"
-                                    silentredirecturi$="[[_loadUrl]]"
-                                    ></openidconnect-signin>
-              <!-- no idea if this is a bad way to do it, but it seems to work -->
-              <openidconnect-popup-signin-callback></openidconnect-popup-signin-callback>
-              <openidconnect-popup-signout-callback></openidconnect-popup-signout-callback>
-              <openidconnect-signin-silent-callback></openidconnect-signin-silent-callback>
+              
+              <template is="dom-if" if="[[_agentid]]">
+                <paper-button on-tap="destroySession">Logout <iron-icon icon="account-circle"></iron-icon></paper-button>
+              </template>
+              <template is="dom-if" if="[[!_agentid]]">
+                <paper-button on-tap="showLoginDialog">Login <iron-icon icon="account-circle"></iron-icon></paper-button>
+              </template>
             </app-toolbar>
           </app-header>
 
@@ -127,24 +147,62 @@ class NodeFrontend extends PolymerElement {
             <my-view404 name="view404"></my-view404>
           </iron-pages>
         </app-header-layout>
+        
+        <!-- modal dialogs -->
+        <paper-dialog id="loginDialog" modal="[[_submittingLogin]]">
+          <h2>Login</h2>
+          
+          <dom-if if="[[_oidcUser]]">
+            <template>
+              <div>You are logged in via Layers. Welcome!</div>
+            </template>
+          </dom-if>
+          <openidconnect-signin id="signin"
+                                scope="openid profile"
+                                clientid="a4b3f15a-eaec-489a-af08-1dc9cf57347e"
+                                authority="https://api.learning-layers.eu/o/oauth2"
+                                providername="Layers"
+                                popupredirecturi$="[[_loadUrl]]"
+                                popuppostlogoutredirecturi$="[[_loadUrl]]"
+                                silentredirecturi$="[[_loadUrl]]"
+                                ></openidconnect-signin>
+          <!-- no idea if this is a bad way to do it, but it seems to work -->
+          <openidconnect-popup-signin-callback></openidconnect-popup-signin-callback>
+          <openidconnect-popup-signout-callback></openidconnect-popup-signout-callback>
+          <openidconnect-signin-silent-callback></openidconnect-signin-silent-callback>
+          
+          <div hidden$="[[_oidcUser]]">
+            <div>Or use your las2peer agent credentials:</div>
+            <form is="iron-form" id="loginForm" on-keypress="_keyPressedLogin">
+              <paper-input label="email or username" id="useridField" disabled="[[_submittingLogin]]" value="" autofocus></paper-input>
+              <paper-input label="password" id="passwordField" disabled="[[_submittingLogin]]" value="" type="password">
+                <paper-icon-button id="loginButton" icon="send" slot="suffix"></paper-icon-button>
+              </paper-input>
+              <!-- hidden button is triggered via paper button above -->
+              <input type="submit" id="loginSubmitButton" style="display: none" />
+            </form>
+            <dom-if if="[[_submittingLogin]]">
+              <template>
+              <paper-spinner style="left: 38%; position: absolute; z-index: 10" active="[[_submittingLogin]]"></paper-spinner>
+              </template>
+            </dom-if>
+            <div>To register, use the <a name="view-agents" href="[[rootPath]]view-agents">Agents</a> tab.</div>
+          </div>
+        </paper-dialog>
+    
       </app-drawer-layout>
     `;
   }
 
-  ready() {
-    super.ready();
-    this._loadUrl = document.URL; // there's definitely better ways to do this, but I have no idea
-  }
-
   static get properties() {
     return {
-      page: {
-        type: String,
-        reflectToAttribute: true,
-        observer: '_pageChanged'
-      },
+      page: { type: String, reflectToAttribute: true, observer: '_pageChanged' },
       routeData: Object,
-      subroute: Object
+      subroute: Object,
+      _agentid: { type: String, value: '' },
+      _submittingLogin: { type: Boolean, value: false },
+      _error: { type: Object, observer: '_errorChanged' },
+      _oidcUser: Object
     };
   }
 
@@ -192,6 +250,112 @@ class NodeFrontend extends PolymerElement {
         import('./my-view404.js');
         break;
     }
+  }
+
+  ready() {
+    super.ready();
+    let appThis = this;
+
+    this._loadUrl = document.URL; // there's definitely better ways to do this, but I have no idea
+
+    this.$.ajaxValidateSession.generateRequest(); // validate old session
+
+    this.$.signin.addEventListener('signed-in', function(event) { appThis.loginOidc(event); });
+    this.$.signin.addEventListener('signed-out', e => appThis._oidcUser = null);
+
+    // these error
+
+    // trigger hidden, real submit button
+    this.$.loginButton.addEventListener('click', function() { appThis.$.loginSubmitButton.click(); });
+
+    this.$.loginForm.addEventListener('submit', function(event) { event.preventDefault(); appThis.loginUseridPassword(event); });
+  }
+
+  showLoginDialog() {
+    this.$.loginDialog.open();
+    console.log("OIDC User there:", this.$.signin.___user);
+    console.log("OIDC User here:", this._oidcUser);
+  }
+
+  destroySession() {
+    this.$.ajaxDestroySession.generateRequest();
+  }
+
+  loginOidc(event) {
+    this._oidcUser = event.detail;
+    let req = this.$.ajaxLoginOidc;
+    let totallySecret = event.detail;
+    req.headers = { Authorization: 'Token: ' + "DEBUG" };
+    req.generateRequest();
+  }
+
+  loginUseridPassword(event) {
+    let req = this.$.ajaxLoginUseridPassword;
+    req.headers = { Authorization: 'Basic ' + btoa(this.$.useridField.value + ':' + this.$.passwordField.value) };
+    req.generateRequest();
+  }
+
+  _keyPressedLogin(event) {
+    if (event.which == 13 || event.keyCode == 13) {
+      this.$.loginSubmitButton.click();
+      return false;
+    }
+    return true;
+  }
+
+  _handleLoginResponse(event) {
+    console.log("login response: ", event);
+    let resp = event.detail.response;
+    if (resp && resp.hasOwnProperty('agentid')) {
+      this._agentid = resp.agentid;
+      this.$.loginDialog.close();
+      this.$.useridField.value = '';
+      this.$.passwordField.value = '';
+    } else {
+      console.log("FIXME1");
+    }
+  }
+
+  _handleLogoutResponse() {
+    this._agentid = '';
+  }
+
+  _handleValidateResponse(event) {
+    console.log("validate response: ", event);
+    let resp = event.detail.response;
+    if (!resp || resp.agentid === undefined || resp.agentid === '') {
+      this._handleLogoutResponse();
+    } else {
+      this._agentid = resp.agentid;
+    }
+  }
+
+  _handleError(event) {
+    console.log(event);
+    let errorTitle = 'Error', errorMsg;
+    if (event.detail.request.xhr.readyState == 4 && event.detail.request.xhr.status == 0) { // network issues
+      errorTitle = 'Network Connection Error';
+      errorMsg = 'Could not connect to: ' + event.detail.request.url;
+    } else if (event.detail.request.xhr.response && event.detail.request.xhr.response.msg) {
+      errorTitle = event.detail.request.xhr.status + " - " + event.detail.request.xhr.statusText;
+      errorMsg = event.detail.request.xhr.response.msg;
+    } else if (event.detail.error && event.detail.error.message) {
+      errorTitle = event.detail.request.xhr.status + " - " + event.detail.request.xhr.statusText;
+      errorMsg = event.detail.error.message;
+    }
+    if (!errorMsg) {
+      errorMsg = 'An unknown error occurred. Please check console output.';
+    } else {
+      console.log(errorTitle + ' - ' + errorMsg);
+    }
+    this._error = { title: errorTitle, msg: errorMsg };
+  }
+
+  _errorChanged(error) {
+    this.$.las2peerErrorDialog.close(); // otherwise the dialog is rendered in wrong place
+    this.$.las2peerErrorDialogTitle.innerHTML = error.title;
+    this.$.las2peerErrorDialogMessage.innerHTML = error.msg;
+    this.$.las2peerErrorDialog.open();
   }
 }
 
