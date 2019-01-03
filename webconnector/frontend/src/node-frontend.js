@@ -25,6 +25,7 @@ import '@polymer/paper-button/paper-button.js';
 import '@polymer/paper-icon-button/paper-icon-button.js';
 import './my-icons.js';
 import 'openidconnect-signin/openidconnect-signin.js'
+import 'openidconnect-signin/openidconnect-popup-signin-callback.js'
 
 // Gesture events like tap and track generated from touch will not be
 // preventable, allowing for better scrolling performance.
@@ -100,6 +101,22 @@ class NodeFrontend extends PolymerElement {
             <app-toolbar>
               <paper-icon-button icon="my-icons:menu" drawer-toggle=""></paper-icon-button>
               <div main-title="">las2peer Node Front-End</div>
+              <div on-click="debug">DEBUG</div>
+            
+              <!-- FIXME -->
+              <openidconnect-signin id="signin"
+                                    scope="openid profile"
+                                    clientid="a4b3f15a-eaec-489a-af08-1dc9cf57347e"
+                                    authority="https://api.learning-layers.eu/o/oauth2"
+                                    providername="Layers"
+                                    popupredirecturi="http://127.0.0.1:8080/las2peer/webapp/"
+                                    ></openidconnect-signin>
+                                    <!--
+                                    popupredirecturi="http://127.0.0.1:8081/demo/popup-signin-callback.html"
+                                    popuppostlogoutredirecturi="http://127.0.0.1:8081/demo/popup-signout-callback.html"
+                                    silentredirecturi="http://127.0.0.1:8081/demo/silent-callback.html"
+                                    -->
+              <openidconnect-popup-signin-callback></openidconnect-popup-signin-callback>
             </app-toolbar>
             <template is="dom-if" if="[[_agentid]]">
               <paper-button on-tap="destroySession">Logout <iron-icon icon="account-circle"></iron-icon></paper-button>
