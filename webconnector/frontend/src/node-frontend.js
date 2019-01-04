@@ -134,7 +134,7 @@ class NodeFrontend extends PolymerElement {
             </app-toolbar>
           </app-header>
 
-          <iron-pages selected="[[page]]" attr-for-selected="name" role="main">
+          <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
             <status-view name="view-status" agentid="[[_agentid]]" error="{{_error}}"></status-view>
             <services-view name="view-services" agentid="[[_agentid]]" error="{{_error}}"></services-view>
             <agents-view name="view-agents" agentid="[[_agentid]]" error="{{_error}}"></agents-view>
