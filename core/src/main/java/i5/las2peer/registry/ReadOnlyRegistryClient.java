@@ -55,8 +55,8 @@ public class ReadOnlyRegistryClient {
 
 		observer = BlockchainObserver.getInstance(contractsConfig);
 
-		contracts = new Contracts.ContractsBuilder(contractsConfig).
-				setGasOptions(registryConfiguration.getGasPrice(), registryConfiguration.getGasLimit())
+		contracts = new Contracts.ContractsBuilder(contractsConfig)
+				.setGasOptions(registryConfiguration.getGasPrice(), registryConfiguration.getGasLimit())
 				.setCredentials(credentials) // may be null, that's okay here
 				.build();
 
