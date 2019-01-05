@@ -42,13 +42,7 @@ setRootPath(NodeFrontendGlobals.rootPath);
 class NodeFrontend extends PolymerElement {
   static get template() {
     return html`
-      <iron-ajax id="ajaxLoginUseridPassword"
-                 url="/las2peer/auth/login"
-                 handle-as="json"
-                 on-response="_handleLoginResponse"
-                 on-error="_handleError"
-                 loading="{{_submittingLogin}}"></iron-ajax>
-      <iron-ajax id="ajaxLoginOidc"
+      <iron-ajax id="ajaxLogin"
                  url="/las2peer/auth/login"
                  handle-as="json"
                  on-response="_handleLoginResponse"
@@ -171,7 +165,7 @@ class NodeFrontend extends PolymerElement {
           <openidconnect-popup-signout-callback></openidconnect-popup-signout-callback>
           <openidconnect-signin-silent-callback></openidconnect-signin-silent-callback>
           
-          <div hidden$="[[_oidcUser]]">
+          <div hidden$="[[!!_oidcUser]]">
             <div>Or use your las2peer agent credentials:</div>
             <form is="iron-form" id="loginForm" on-keypress="_keyPressedLogin">
               <paper-input label="email or username" id="useridField" disabled="[[_submittingLogin]]" value="" autofocus></paper-input>
@@ -189,7 +183,15 @@ class NodeFrontend extends PolymerElement {
             <div>To register, use the <a name="view-agents" href="[[rootPath]]view-agents">Agents</a> tab.</div>
           </div>
         </paper-dialog>
-    
+        
+        <paper-dialog id="las2peerErrorDialog">
+          <h2 id="las2peerErrorDialogTitle">Error</h2>
+          <div id="las2peerErrorDialogMessage"></div>
+          <div class="buttons">
+            <paper-button dialog-dismiss>OK</paper-button>
+          </div>
+        </paper-dialog>
+
       </app-drawer-layout>
     `;
   }
@@ -260,37 +262,60 @@ class NodeFrontend extends PolymerElement {
 
     this.$.ajaxValidateSession.generateRequest(); // validate old session
 
-    this.$.signin.addEventListener('signed-in', function(event) { appThis.loginOidc(event); });
+    this.$.signin.addEventListener('signed-in', function(event) { appThis.loginOidc(event.detail); });
+
+    // should this sign the user out of las2peer too?
+    // I guess not, since that session is separate and in principle unrelated
     this.$.signin.addEventListener('signed-out', e => appThis._oidcUser = null);
 
-    // these error
-
-    // trigger hidden, real submit button
+    // trigger the hidden, real submit button
     this.$.loginButton.addEventListener('click', function() { appThis.$.loginSubmitButton.click(); });
 
     this.$.loginForm.addEventListener('submit', function(event) { event.preventDefault(); appThis.loginUseridPassword(event); });
   }
 
   showLoginDialog() {
-    this.$.loginDialog.open();
-    console.log("OIDC User there:", this.$.signin.___user);
-    console.log("OIDC User here:", this._oidcUser);
+    // before showing the dialog, check whether OIDC is already logged in
+    // if yes, attempt to log in to las2peer with access token
+    // if no or failure, open dialog
+    if (this._oidcUser && this.oidcTokenStillValid(this._oidcUser)) {
+      this.loginOidc(this._oidcUser)
+      // if there is an error, the error dialog should be triggered
+      // so we should not have to handle anything here
+    } else {
+      this.$.loginDialog.open();
+    }
+  }
+
+  oidcTokenStillValid(userObject) {
+    // it's possible that the OIDC element triggers a logout when the token
+    // expires, maybe. I don't know. if yes, this would be unnecessary
+    return (userObject.expires_at * 1000) > Date.now();
   }
 
   destroySession() {
     this.$.ajaxDestroySession.generateRequest();
   }
 
-  loginOidc(event) {
-    this._oidcUser = event.detail;
-    let req = this.$.ajaxLoginOidc;
-    let totallySecret = event.detail;
-    req.headers = { Authorization: 'Token: ' + "DEBUG" };
-    req.generateRequest();
+  loginOidc(userObject) {
+    console.log("OIDC sign-in triggered, logging in to las2peer ...");
+    console.log("[DEBUG] OIDC user obj:" + userObject);
+    try {
+      if (userObject.token_type !== "Bearer") throw "unexpected OIDC token type, fix me";
+      let accessToken = userObject.access_token;
+
+      this._oidcUser = userObject;
+
+      let req = this.$.ajaxLogin;
+      req.headers = { Authorization: 'Bearer ' + accessToken };
+      req.generateRequest();
+    } catch (err) {
+      this._handleError(userObject, "login failed", err)
+    }
   }
 
   loginUseridPassword(event) {
-    let req = this.$.ajaxLoginUseridPassword;
+    let req = this.$.ajaxLogin;
     req.headers = { Authorization: 'Basic ' + btoa(this.$.useridField.value + ':' + this.$.passwordField.value) };
     req.generateRequest();
   }
@@ -308,11 +333,12 @@ class NodeFrontend extends PolymerElement {
     let resp = event.detail.response;
     if (resp && resp.hasOwnProperty('agentid')) {
       this._agentid = resp.agentid;
+      console.log("login successful. agent ID: " + this._agentid);
       this.$.loginDialog.close();
       this.$.useridField.value = '';
       this.$.passwordField.value = '';
     } else {
-      console.log("FIXME1");
+      this._handleError(event, "Bad response", "Login returned no agent ID")
     }
   }
 
@@ -330,25 +356,30 @@ class NodeFrontend extends PolymerElement {
     }
   }
 
-  _handleError(event) {
-    console.log(event);
-    let errorTitle = 'Error', errorMsg;
-    if (event.detail.request.xhr.readyState == 4 && event.detail.request.xhr.status == 0) { // network issues
-      errorTitle = 'Network Connection Error';
-      errorMsg = 'Could not connect to: ' + event.detail.request.url;
-    } else if (event.detail.request.xhr.response && event.detail.request.xhr.response.msg) {
-      errorTitle = event.detail.request.xhr.status + " - " + event.detail.request.xhr.statusText;
-      errorMsg = event.detail.request.xhr.response.msg;
-    } else if (event.detail.error && event.detail.error.message) {
-      errorTitle = event.detail.request.xhr.status + " - " + event.detail.request.xhr.statusText;
-      errorMsg = event.detail.error.message;
+  _handleError(object, title, message) {
+    if (!title && !message) {
+      // try to get details of known possible errors
+      let maybeDetail = (object || {}).detail;
+      let maybeError = (maybeDetail || {}).error;
+      let maybeXhr = ((maybeDetail || {}.request) || {}).xhr;
+
+      if (maybeXhr.readyState === 4 && maybeXhr.status === 0) { // network issues
+        title = 'Network Connection Error';
+        message = 'Could not connect to: ' + object.detail.request.url;
+      } else if (maybeXhr.response && maybeXhr.response.msg) {
+        title = maybeXhr.status + " - " + maybeXhr.statusText;
+        message = maybeXhr.response.msg;
+      } else if (maybeError.message) {
+        title = maybeXhr.status + " - " + maybeXhr.statusText;
+        message = maybeError.message;
+      } else {
+        title = "Unknown error";
+        message = "Could not determine type of error, check manually in console"
+      }
     }
-    if (!errorMsg) {
-      errorMsg = 'An unknown error occurred. Please check console output.';
-    } else {
-      console.log(errorTitle + ' - ' + errorMsg);
-    }
-    this._error = { title: errorTitle, msg: errorMsg };
+    console.log(title + ' - ' + message);
+    console.log("[DEBUG] object which apparently caused error: " + object);
+    this._error = { title: title, msg: message, obj: object };
   }
 
   _errorChanged(error) {
