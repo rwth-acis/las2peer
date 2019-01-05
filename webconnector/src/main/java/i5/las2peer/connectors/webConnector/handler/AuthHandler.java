@@ -12,16 +12,16 @@ import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.NewCookie;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.Status;
 
+import i5.las2peer.api.security.Agent;
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentNotFoundException;
+import i5.las2peer.api.security.PassphraseAgent;
 import i5.las2peer.connectors.webConnector.WebConnector;
 import i5.las2peer.connectors.webConnector.util.AgentSession;
+import i5.las2peer.connectors.webConnector.util.AuthenticationManager;
 import i5.las2peer.p2p.EthereumNode;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.security.*;
@@ -43,58 +43,20 @@ public class AuthHandler {
 	}
 
 	@GET
-	@Path("/login")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getLogin(@HeaderParam(HttpHeaders.AUTHORIZATION) String authHeader) throws Exception {
-		// TODO is already logged in? destroy old session?
-		String[] namePass = getNamePassword(authHeader);
-		String userid = namePass[0];
-		String password = namePass[1];
-		try {
-			String id;
-			try {
-				id = node.getAgentIdForEmail(userid);
-			} catch (AgentNotFoundException e) {
-				// given userid is not a known email, try as login name
-				id = node.getAgentIdForLogin(userid);
-			}
-			AgentImpl agent = node.getAgent(id);
-			if (!(agent instanceof PassphraseAgentImpl)) {
-				throw new BadRequestException("Invalid agent type");
-			}
-			PassphraseAgentImpl passphraseAgent = (PassphraseAgentImpl) agent;
-			passphraseAgent.unlock(password);
-			return registerAgentSession(passphraseAgent);
-		} catch (AgentNotFoundException e) {
-			throw new NotAuthorizedException("Agent not found", e);
-		} catch (AgentAccessDeniedException e) {
-			throw new ForbiddenException("Invalid passphrase", e);
+	@Path("/login")
+	public Response getLogin(@Context UriInfo uriInfo, @Context HttpHeaders httpHeaders) throws Exception {
+		Agent agent = connector.authenticateAgent(httpHeaders.getRequestHeaders(),
+				uriInfo.getQueryParameters().getFirst(AuthenticationManager.ACCESS_TOKEN_KEY));
+		if (!(agent instanceof PassphraseAgentImpl)) {
+			throw new BadRequestException("Invalid agent type");
 		}
+		// FIXME is the agent always unlocked at this point?
+		// FIXME check if agent is anonymous -- guess that shouldn't be allowed as "login"
+		return registerAgentSession((PassphraseAgentImpl) agent);
 	}
 
-	private String[] getNamePassword(String authHeader) {
-		if (authHeader == null || !authHeader.toLowerCase().startsWith("basic ")) {
-			throw new BadRequestException("No basic auth header set");
-		}
-		String[] parts = authHeader.split(" ");
-		if (parts.length != 2) {
-			throw new BadRequestException("Malformed basic auth header");
-		}
-		String base64 = parts[1];
-		String decoded = new String(Base64.getDecoder().decode(base64), StandardCharsets.UTF_8);
-		String[] namePass = decoded.split(":");
-		if (namePass.length != 2) {
-			throw new BadRequestException("Malformed auth token");
-		}
-		if (namePass[0] == null || namePass[0].isEmpty()) {
-			throw new BadRequestException("No username provided");
-		}
-		if (namePass[1] == null || namePass[1].isEmpty()) {
-			throw new BadRequestException("No password provided");
-		}
-		return namePass;
-	}
-
+	// TODO refactor and de-duplicate this code (see agentshandler, authenticationmanager)
 	@POST
 	@Path("/create")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -156,7 +118,7 @@ public class AuthHandler {
 		return registerAgentSession(agent);
 	}
 
-	private Response registerAgentSession(PassphraseAgentImpl agent) throws Exception {
+	private Response registerAgentSession(PassphraseAgentImpl agent) {
 		// register session, set cookie and send response
 		AgentSession session = connector.getOrCreateSession(agent);
 		boolean secureCookie = false; // FIXME DEBUG
@@ -177,14 +139,14 @@ public class AuthHandler {
 	@GET
 	@Path("/logout")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getLogout(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId) throws Exception {
+	public Response getLogout(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId) {
 		return handleLogout(sessionId);
 	}
 
 	@POST
 	@Path("/logout")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response postLogout(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId) throws Exception {
+	public Response postLogout(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId) {
 		return handleLogout(sessionId);
 	}
 
