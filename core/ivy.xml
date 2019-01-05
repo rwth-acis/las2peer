@@ -9,7 +9,8 @@
 		<artifact type="jar" ext="jar" conf="*"/>
 	</publications>
 	<dependencies>
-		<dependency org="junit" name="junit" rev="4.12" conf="test->*"/>
+		<!-- not just test conf, because JUnit asserts are used in main main/java/i5/las2peer/testing/TestSuite.java -->
+		<dependency org="junit" name="junit" rev="4.12" conf="*"/>
 
 		<dependency org="FreePastry" name="FreePastry" rev="2.1.1"/>
 		<dependency org="xpp3" name="xpp3" rev="1.1.4c"/> <!-- FreePastry dependency -->
