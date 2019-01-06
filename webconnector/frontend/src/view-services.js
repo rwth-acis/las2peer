@@ -155,7 +155,7 @@ class ServicesView extends PolymerElement {
     this.$.uploadServiceMsg.innerHTML = event.detail.response.msg;
   }
 
-  static _handleError(event) {
+  _handleError(event) {
     console.log(event);
     let errorTitle = 'Error', errorMsg = 'An unknown error occurred. Please check console output.';
     if (event.detail.request.xhr.readyState == 4 && event.detail.request.xhr.status == 0) { // network issues

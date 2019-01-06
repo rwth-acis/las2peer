@@ -24,7 +24,6 @@ import '@polymer/iron-selector/iron-selector.js';
 import '@polymer/paper-button/paper-button.js';
 import '@polymer/paper-dialog/paper-dialog.js';
 import '@polymer/paper-icon-button/paper-icon-button.js';
-import './my-icons.js';
 import '@polymer/paper-input/paper-input.js';
 import 'openidconnect-signin/openidconnect-signin.js'
 import 'openidconnect-signin/openidconnect-popup-signin-callback.js'
@@ -122,7 +121,7 @@ class NodeFrontend extends PolymerElement {
 
           <app-header slot="header" condenses="" reveals="" effects="waterfall">
             <app-toolbar>
-              <paper-icon-button icon="my-icons:menu" drawer-toggle=""></paper-icon-button>
+              <paper-icon-button icon="icons:menu" drawer-toggle=""></paper-icon-button>
               <div main-title="">las2peer Node Front-End</div>
               
               <template is="dom-if" if="[[_agentid]]">
@@ -134,7 +133,7 @@ class NodeFrontend extends PolymerElement {
             </app-toolbar>
           </app-header>
 
-          <iron-pages selected="[[page]]" attr-for-selected="name" role="main">
+          <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
             <status-view name="view-status" agentid="[[_agentid]]" error="{{_error}}"></status-view>
             <services-view name="view-services" agentid="[[_agentid]]" error="{{_error}}"></services-view>
             <agents-view name="view-agents" agentid="[[_agentid]]" error="{{_error}}"></agents-view>
@@ -310,7 +309,7 @@ class NodeFrontend extends PolymerElement {
       req.headers = { Authorization: 'Bearer ' + accessToken };
       req.generateRequest();
     } catch (err) {
-      this._handleError(userObject, "login failed", err)
+      this._handleError(userObject, "Login failed", err)
     }
   }
 
@@ -356,20 +355,26 @@ class NodeFrontend extends PolymerElement {
     }
   }
 
+  // iron-ajax error event for some reason passes two arguments
+  // that can be confusing, but it's not a problem
   _handleError(object, title, message) {
-    if (!title && !message) {
+    console.log("[DEBUG] object: ", object);
+    console.log("[DEBUG] title: ", title);
+    console.log("[DEBUG] message: ", message);
+    if (!title || !message) {
       // try to get details of known possible errors
       let maybeDetail = (object || {}).detail;
       let maybeError = (maybeDetail || {}).error;
-      let maybeXhr = ((maybeDetail || {}.request) || {}).xhr;
+      let maybeXhr = ((maybeDetail || {}).request || {}).xhr;
 
-      if (maybeXhr.readyState === 4 && maybeXhr.status === 0) { // network issues
+      // TODO: this is for from perfect. all fields should be checked before usage
+      if ((maybeXhr || {}).readyState === 4 && (maybeXhr || {}).status === 0) { // network issues
         title = 'Network Connection Error';
         message = 'Could not connect to: ' + object.detail.request.url;
-      } else if (maybeXhr.response && maybeXhr.response.msg) {
+      } else if ((maybeXhr || {}).status && (maybeXhr.response || {}).msg) {
         title = maybeXhr.status + " - " + maybeXhr.statusText;
         message = maybeXhr.response.msg;
-      } else if (maybeError.message) {
+      } else if ((maybeXhr || {}).status && (maybeError || {}).message) {
         title = maybeXhr.status + " - " + maybeXhr.statusText;
         message = maybeError.message;
       } else {
@@ -377,8 +382,6 @@ class NodeFrontend extends PolymerElement {
         message = "Could not determine type of error, check manually in console"
       }
     }
-    console.log(title + ' - ' + message);
-    console.log("[DEBUG] object which apparently caused error: " + object);
     this._error = { title: title, msg: message, obj: object };
   }
 
