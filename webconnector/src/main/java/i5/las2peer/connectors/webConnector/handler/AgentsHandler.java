@@ -80,7 +80,7 @@ public class AgentsHandler {
 		// TODO: deduplicate this / AuthHandler#handleRegistration
 		UserAgentImpl agent;
 		if (node instanceof EthereumNode) {
-			if (ethereumMnemonic != null) {
+			if (ethereumMnemonic != null && !ethereumMnemonic.isEmpty()) {
 				agent = EthereumAgent.createEthereumAgent(username, password, ethereumMnemonic);
 			} else {
 				agent = EthereumAgent.createEthereumAgent(username, password);
