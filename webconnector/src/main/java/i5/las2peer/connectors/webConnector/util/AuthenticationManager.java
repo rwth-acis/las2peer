@@ -23,11 +23,7 @@ import com.nimbusds.openid.connect.sdk.UserInfoResponse;
 import com.nimbusds.openid.connect.sdk.UserInfoSuccessResponse;
 import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 
-import i5.las2peer.api.security.AgentAccessDeniedException;
-import i5.las2peer.api.security.AgentAlreadyExistsException;
-import i5.las2peer.api.security.AgentException;
-import i5.las2peer.api.security.AgentNotFoundException;
-import i5.las2peer.api.security.AnonymousAgent;
+import i5.las2peer.api.security.*;
 import i5.las2peer.connectors.webConnector.WebConnector;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.security.AgentImpl;
@@ -82,133 +78,34 @@ public class AuthenticationManager {
 
 	private PassphraseAgentImpl authenticateOIDC(String authorizationHeader, String accessTokenQueryParam,
 			String accessTokenHeader, String oidcProviderHeader) {
-		// extract token
-		String token = "";
-		String oidcProviderURI = connector.defaultOIDCProvider;
-		if (accessTokenHeader != null) {
-			// get OIDC parameters from headers
-			token = accessTokenHeader;
-			if (oidcProviderHeader != null) {
-				oidcProviderURI = oidcProviderHeader;
-			}
-		} else if (authorizationHeader != null && authorizationHeader.toLowerCase().startsWith("bearer ")) {
-			// get BEARER token from Authentication field
-			token = authorizationHeader.substring("BEARER ".length());
-			if (oidcProviderHeader != null) {
-				oidcProviderURI = oidcProviderHeader;
-			}
-		} else { // get OIDC parameters from GET values
-			token = accessTokenQueryParam;
-			if (oidcProviderHeader != null) {
-				oidcProviderURI = oidcProviderHeader;
-			}
-		}
+		String token = extractToken(authorizationHeader, accessTokenQueryParam, accessTokenHeader);
 
-		// validate given OIDC provider and get provider info
-		JSONObject oidcProviderInfo = null;
-		if (!connector.oidcProviders.contains(oidcProviderURI)
-				|| connector.oidcProviderInfos.get(oidcProviderURI) == null) {
-			throw new InternalServerErrorException("The given OIDC provider (" + oidcProviderURI
-					+ ") is not whitelisted! Please make sure the complete OIDC provider URI is added to the config.");
-		} else {
-			oidcProviderInfo = connector.oidcProviderInfos.get(oidcProviderURI);
-		}
-
-		// send request to OpenID Connect user info endpoint to retrieve
-		// complete user information
-		// in exchange for access token.
-		HTTPRequest hrq;
-		HTTPResponse hrs;
-
+		String endpoint;
 		try {
-			URI userinfoEndpointUri = new URI(
-					(String) ((JSONObject) oidcProviderInfo.get("config")).get("userinfo_endpoint"));
-			hrq = new HTTPRequest(Method.GET, userinfoEndpointUri.toURL());
-			hrq.setAuthorization("Bearer " + token);
-
-			// TODO process all error cases that can happen (in particular invalid tokens)
-			hrs = hrq.send();
-		} catch (IOException | URISyntaxException e) {
-			throw new InternalServerErrorException("Fetching OIDC user info failed", e);
+			String oidcProviderURI = (oidcProviderHeader != null) ? oidcProviderHeader : connector.defaultOIDCProvider;
+			JSONObject oidcProviderInfo = getOidcProviderInfo(oidcProviderURI);
+			endpoint = (String) ((JSONObject) oidcProviderInfo.get("config")).get("userinfo_endpoint");
+		} catch (IllegalArgumentException e) {
+			throw new InternalServerErrorException(e);
 		}
 
-		// process response from OpenID Connect user info endpoint
-		UserInfoResponse userInfoResponse;
-		try {
-			userInfoResponse = UserInfoResponse.parse(hrs);
-		} catch (ParseException e) {
-			throw new InternalServerErrorException("Couldn't parse UserInfo response", e);
+		JSONObject userInfo = retrieveOidcUserInfo(endpoint, token).toJSONObject();
+
+		if (!userInfo.containsKey("sub") || !userInfo.containsKey("email") || !userInfo.containsKey("preferred_username")) {
+			throw new ForbiddenException("Could not get all necessary OIDC fields. Please check your scopes.");
 		}
-
-		// failed request for OpenID Connect user info
-		if (userInfoResponse instanceof UserInfoErrorResponse) {
-			UserInfoErrorResponse uier = (UserInfoErrorResponse) userInfoResponse;
-			ErrorObject err = uier.getErrorObject();
-			String cause = "Session expired?";
-			if (err != null) {
-				cause = err.getDescription();
-			}
-			throw new NotAuthorizedException("Open ID Connect UserInfo request failed! Cause: " + cause);
-		}
-
-		// successful request
-		UserInfo userInfo = ((UserInfoSuccessResponse) userInfoResponse).getUserInfo();
-
-		JSONObject ujson = userInfo.toJSONObject();
-
-		if (!ujson.containsKey("sub") || !ujson.containsKey("email") || !ujson.containsKey("preferred_username")) {
-			throw new ForbiddenException("Could not get provider information. Please check your scopes.");
-		}
-
-		String sub = (String) ujson.get("sub");
 
 		// TODO choose other scheme for generating agent password
-		String password = sub;
+		String password = (String) userInfo.get("sub");
 
 		try {
-			String oidcAgentId = connector.getL2pNode().getUserManager().getAgentIdByOIDCSub(sub);
-			try {
-				connector.getLockOidc().lock(oidcAgentId);
-				PassphraseAgentImpl pa = (PassphraseAgentImpl) connector.getL2pNode().getAgent(oidcAgentId);
-				pa.unlock(password);
-				if (pa instanceof UserAgentImpl) {
-					UserAgentImpl ua = (UserAgentImpl) pa;
-					// TODO provide OIDC user data for agent
-					// ua.setUserData(ujson.toJSONString());
-					return ua;
-				} else {
-					return pa;
-				}
-			} finally {
-				connector.getLockOidc().unlock(oidcAgentId);
-			}
+			String oidcAgentId = connector.getL2pNode().getUserManager().getAgentIdByOIDCSub((String) userInfo.get("sub"));
+			return getExistingOidcAgent(oidcAgentId, password);
 		} catch (AgentAccessDeniedException e) {
 			connector.logError("Authentication failed!", e);
 			throw new NotAuthorizedException(e.toString(), e);
 		} catch (AgentNotFoundException e) {
-			try {
-				UserAgentImpl oidcAgent = UserAgentImpl.createUserAgent(password);
-				String oidcAgentId = oidcAgent.getIdentifier();
-				try {
-					connector.getLockOidc().lock(oidcAgentId);
-					oidcAgent.unlock(password);
-					oidcAgent.setEmail((String) ujson.get("email"));
-					oidcAgent.setLoginName((String) ujson.get("preferred_username"));
-					// TODO provide OIDC user data for agent
-					// oidcAgent.setUserData(ujson.toJSONString());
-					connector.getL2pNode().storeAgent(oidcAgent);
-					try {
-						connector.getL2pNode().getUserManager().registerOIDCSub(oidcAgent, sub);
-					} catch (AgentAlreadyExistsException e2) {
-						logger.log(Level.FINE, "Could not register OIDC sub", e2);
-					}
-					return oidcAgent;
-				} finally {
-					connector.getLockOidc().unlock(oidcAgentId);
-				}
-			} catch (Exception e1) {
-				throw new InternalServerErrorException("OIDC agent creation failed", e1);
-			}
+			return createNewOidcAgent(password, userInfo);
 		} catch (AgentException e) {
 			connector.logError("Could not retrieve and unlock agent from network", e);
 			throw new NotAuthorizedException(e.toString(), e);
@@ -245,8 +142,108 @@ public class AuthenticationManager {
 	}
 
 	private AgentImpl authenticateAnonymous() {
-		AnonymousAgentImpl anonymousAgent = AnonymousAgentImpl.getInstance();
-		return anonymousAgent;
+		return AnonymousAgentImpl.getInstance();
 	}
 
+	private String extractToken(String authorizationHeader, String accessTokenQueryParam, String accessTokenHeader) {
+		if (accessTokenHeader != null) {
+			// get OIDC parameters from headers
+			return accessTokenHeader;
+		} else if (authorizationHeader != null && authorizationHeader.toLowerCase().startsWith("bearer ")) {
+			// get BEARER token from Authentication field
+			return authorizationHeader.substring("BEARER ".length());
+		} else { // get OIDC parameters from GET values
+			return accessTokenQueryParam;
+		}
+	}
+
+	private JSONObject getOidcProviderInfo(String oidcProviderURI) {
+		if (connector.oidcProviders.contains(oidcProviderURI)
+				&& connector.oidcProviderInfos.get(oidcProviderURI) != null) {
+			return connector.oidcProviderInfos.get(oidcProviderURI);
+		} else {
+			throw new IllegalArgumentException("The given OIDC provider (" + oidcProviderURI + ") is not whitelisted!"
+					+ "Please make sure the complete OIDC provider URI is added to the config.");
+		}
+	}
+
+	// send request to OpenID Connect user info endpoint to retrieve
+	// complete user information in exchange for access token.
+	private UserInfo retrieveOidcUserInfo(String endpoint, String authToken) {
+		HTTPResponse hrs;
+		try {
+			URI userinfoEndpointUri = new URI(endpoint);
+			HTTPRequest hrq = new HTTPRequest(Method.GET, userinfoEndpointUri.toURL());
+			hrq.setAuthorization("Bearer " + authToken);
+
+			// TODO process all error cases that can happen (in particular invalid tokens)
+			hrs = hrq.send();
+		} catch (IOException | URISyntaxException e) {
+			throw new InternalServerErrorException("Fetching OIDC user info failed", e);
+		}
+
+		// process response from OpenID Connect user info endpoint
+		UserInfoResponse userInfoResponse;
+		try {
+			userInfoResponse = UserInfoResponse.parse(hrs);
+		} catch (ParseException e) {
+			throw new InternalServerErrorException("Couldn't parse UserInfo response", e);
+		}
+
+		if (userInfoResponse instanceof UserInfoErrorResponse) {
+			// failed request for OpenID Connect user info
+			UserInfoErrorResponse uier = (UserInfoErrorResponse) userInfoResponse;
+			ErrorObject err = uier.getErrorObject();
+			String cause = "Session expired?";
+			if (err != null) {
+				cause = err.getDescription();
+			}
+			throw new NotAuthorizedException("Open ID Connect UserInfo request failed! Cause: " + cause);
+		} else {
+			return ((UserInfoSuccessResponse) userInfoResponse).getUserInfo();
+		}
+	}
+
+	private PassphraseAgentImpl getExistingOidcAgent(String oidcAgentId, String password) throws AgentException {
+		try {
+			connector.getLockOidc().lock(oidcAgentId);
+			PassphraseAgentImpl pa = (PassphraseAgentImpl) connector.getL2pNode().getAgent(oidcAgentId);
+			pa.unlock(password);
+
+			// TODO provide OIDC user data for agent
+			// if (pa instanceof UserAgent) {
+			// 		((UserAgent) pa).setUserData(userInfo.toJSONString());
+			// }
+
+			return pa;
+		} finally {
+			connector.getLockOidc().unlock(oidcAgentId);
+		}
+	}
+
+	private UserAgentImpl createNewOidcAgent(String password, JSONObject userInfo) {
+		try {
+			UserAgentImpl oidcAgent = UserAgentImpl.createUserAgent(password);
+			String oidcAgentId = oidcAgent.getIdentifier();
+			try {
+				connector.getLockOidc().lock(oidcAgentId);
+				oidcAgent.unlock(password);
+				oidcAgent.setEmail((String) userInfo.get("email"));
+				oidcAgent.setLoginName((String) userInfo.get("preferred_username"));
+				// TODO provide OIDC user data for agent
+				// oidcAgent.setUserData(userInfo.toJSONString());
+				connector.getL2pNode().storeAgent(oidcAgent);
+				try {
+					connector.getL2pNode().getUserManager().registerOIDCSub(oidcAgent, (String) userInfo.get("sub"));
+				} catch (AgentAlreadyExistsException e) {
+					logger.log(Level.FINE, "Could not register OIDC sub", e);
+				}
+				return oidcAgent;
+			} finally {
+				connector.getLockOidc().unlock(oidcAgentId);
+			}
+		} catch (Exception e) {
+			throw new InternalServerErrorException("OIDC agent creation failed", e);
+		}
+	}
 }
