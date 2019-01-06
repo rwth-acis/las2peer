@@ -26,10 +26,8 @@ import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 import i5.las2peer.api.security.*;
 import i5.las2peer.connectors.webConnector.WebConnector;
 import i5.las2peer.logging.L2pLogger;
-import i5.las2peer.security.AgentImpl;
-import i5.las2peer.security.AnonymousAgentImpl;
-import i5.las2peer.security.PassphraseAgentImpl;
-import i5.las2peer.security.UserAgentImpl;
+import i5.las2peer.p2p.EthereumNode;
+import i5.las2peer.security.*;
 import i5.las2peer.tools.CryptoTools;
 import net.minidev.json.JSONObject;
 
@@ -223,7 +221,16 @@ public class AuthenticationManager {
 
 	private UserAgentImpl createNewOidcAgent(String password, JSONObject userInfo) {
 		try {
-			UserAgentImpl oidcAgent = UserAgentImpl.createUserAgent(password);
+			UserAgentImpl oidcAgent;
+			if (connector.getL2pNode() instanceof EthereumNode) {
+				String loginName = (String) userInfo.get("preferred_username");
+				oidcAgent = EthereumAgent.createEthereumAgent(loginName, password);
+			} else {
+				// TODO: should we just always create an EthereumAgent?
+				// should Node have a createAgent (instance? static?) method?
+				// whatever, let's be conservative for now
+				oidcAgent = UserAgentImpl.createUserAgent(password);
+			}
 			String oidcAgentId = oidcAgent.getIdentifier();
 			try {
 				connector.getLockOidc().lock(oidcAgentId);
