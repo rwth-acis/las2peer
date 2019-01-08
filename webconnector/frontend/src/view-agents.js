@@ -21,56 +21,56 @@ class AgentsView extends PolymerElement {
     return html`
       <iron-ajax id="ajaxCreateAgent"
                  method="POST"
-                 url="/las2peer/agents/createAgent"
+                 url$="[[apiEndpoint]]/agents/createAgent"
                  handle-as="json"
                  on-response="_handleCreateAgentResponse"
                  on-error="_handleError"
                  loading = "{{_working}}"></iron-ajax>
       <iron-ajax id="ajaxExportAgent"
                  method="POST"
-                 url="/las2peer/agents/exportAgent"
+                 url$="[[apiEndpoint]]/agents/exportAgent"
                  handle-as="text"
                  on-response="_handleExportAgentResponse"
                  on-error="_handleError"
                  loading = "{{_working}}"></iron-ajax>
       <iron-ajax id="ajaxUploadAgent"
                  method="POST"
-                 url="/las2peer/agents/uploadAgent"
+                 url$="[[apiEndpoint]]/agents/uploadAgent"
                  handle-as="json"
                  on-response="_handleUploadAgentResponse"
                  on-error="_handleError"
                  loading = "{{_working}}"></iron-ajax>
       <iron-ajax id="ajaxChangePassphrase"
                  method="POST"
-                 url="/las2peer/agents/changePassphrase"
+                 url$="[[apiEndpoint]]/agents/changePassphrase"
                  handle-as="json"
                  on-response="_handleChangePassphraseResponse"
                  on-error="_handleError"
                  loading = "{{_working}}"></iron-ajax>
       <iron-ajax id="ajaxAddMember"
                  method="POST"
-                 url="/las2peer/agents/getAgent"
+                 url$="[[apiEndpoint]]/agents/getAgent"
                  handle-as="json"
                  on-response="_handleAddMemberResponse"
                  on-error="_handleError"
                  loading = "{{_working}}"></iron-ajax>
       <iron-ajax id="ajaxCreateGroup"
                  method="POST"
-                 url="/las2peer/agents/createGroup"
+                 url$="[[apiEndpoint]]/agents/createGroup"
                  handle-as="json"
                  on-response="_handleCreateGroupResponse"
                  on-error="_handleError"
                  loading = "{{_working}}"></iron-ajax>
       <iron-ajax id="ajaxLoadGroup"
                  method="POST"
-                 url="/las2peer/agents/loadGroup"
+                 url$="[[apiEndpoint]]/agents/loadGroup"
                  handle-as="json"
                  on-response="_handleLoadGroupResponse"
                  on-error="_handleError"
                  loading = "{{_working}}"></iron-ajax>
       <iron-ajax id="ajaxChangeGroup"
                  method="POST"
-                 url="/las2peer/agents/changeGroup"
+                 url$="[[apiEndpoint]]/agents/changeGroup"
                  handle-as="json"
                  on-response="_handleChangeGroupResponse"
                  on-error="_handleError"
@@ -190,7 +190,8 @@ class AgentsView extends PolymerElement {
 
   static get properties() {
     return {
-      agentid: String,
+      apiEndpoint: { type: String, notify: true },
+      agentId: { type: String, notify: true },
       error: { type: Object, notify: true },
       _working: Boolean,
       _memberAgents: { type: Array, value: [] },

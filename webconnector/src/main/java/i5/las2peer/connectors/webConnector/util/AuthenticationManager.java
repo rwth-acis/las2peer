@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.logging.Level;
 
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.NotAuthorizedException;
@@ -44,40 +45,46 @@ public class AuthenticationManager {
 		this.connector = connector;
 	}
 
+	// FIXME: "bearer" authorization is broken, because for the OIDC auto-registration we require both a token and a
+	// password, and when sending a bearer authorization header, there can't also be the basic authorization header
+	// containing the password
+	// NOTE: the frontend currently always sends the access token when it has it, because it doesn't know whether the
+	// OIDC agent has already been registered
+	/**
+	 * Returns agent for various authentication methods, including OIDC with auto-registration.
+	 *
+	 * For "regular" login, a prefixed identifier (containing agent ID, login, email, or OIDC sub) and a password are
+	 * provided via the basic authorization header. This only attempts a login, no registration.
+	 *
+	 * However, whenever an access token is passed via any means, we use a different flow: OIDC "auto-registration".
+	 * This means that we access the user profile from the OIDC server, verifying the access token.
+	 * Then we use the (also required!) password from the basic authorization header (the username is ignored) and
+	 * attempt to register the agent.
+	 * If it exists, we try to unlock the existing agent.
+	 */
 	public AgentImpl authenticateAgent(MultivaluedMap<String, String> requestHeaders, String accessTokenQueryParam) {
 		final String authorizationHeader = requestHeaders.getFirst(HttpHeaders.AUTHORIZATION);
 		final String accessTokenHeader = requestHeaders.getFirst(ACCESS_TOKEN_KEY);
-		if (authorizationHeader != null && authorizationHeader.toLowerCase().startsWith("basic ")) {
-			// basic authentication
-			return authenticateBasic(authorizationHeader);
-		} else if (connector.oidcProviderInfos != null && accessTokenQueryParam != null || accessTokenHeader != null
-				|| (authorizationHeader != null && authorizationHeader.toLowerCase().startsWith("bearer "))) {
-			// openid connect
+
+		String accessToken = extractToken(accessTokenHeader, authorizationHeader, accessTokenQueryParam);
+		Credentials credentials = extractBasicAuthCredentials(authorizationHeader);
+
+		if (accessToken != null) {
+			if (credentials == null) {
+				throw new BadRequestException("We require a password (in basic authorization header) when a OIDC access token sent! (see Javadoc)");
+			}
 			final String oidcProviderHeader = requestHeaders.getFirst(OIDC_PROVIDER_KEY);
-			return authenticateOIDC(authorizationHeader, accessTokenQueryParam, accessTokenHeader, oidcProviderHeader);
+			return authenticateOIDC(accessToken, oidcProviderHeader, credentials.password);
+		} else if (credentials != null) {
+			// basic authentication
+			return authenticateCredentials(credentials.identifier, credentials.password);
 		} else {
 			// anonymous login
-			return authenticateAnonymous();
+			return AnonymousAgentImpl.getInstance();
 		}
 	}
 
-	private AgentImpl authenticateBasic(String authorizationHeader) {
-		// looks like: Authentication Basic <Byte64(name:pass)>
-		String userPass = authorizationHeader.substring("BASIC ".length());
-		userPass = new String(Base64.getDecoder().decode(userPass), StandardCharsets.UTF_8);
-		int separatorPos = userPass.indexOf(':');
-
-		// get username and password
-		String username = userPass.substring(0, separatorPos);
-		String password = userPass.substring(separatorPos + 1);
-
-		return authenticateNamePassword(username, password);
-	}
-
-	private PassphraseAgentImpl authenticateOIDC(String authorizationHeader, String accessTokenQueryParam,
-			String accessTokenHeader, String oidcProviderHeader) {
-		String token = extractToken(authorizationHeader, accessTokenQueryParam, accessTokenHeader);
-
+	private PassphraseAgentImpl authenticateOIDC(String token, String oidcProviderHeader, String password) {
 		String endpoint;
 		try {
 			String oidcProviderURI = (oidcProviderHeader != null) ? oidcProviderHeader : connector.defaultOIDCProvider;
@@ -93,9 +100,6 @@ public class AuthenticationManager {
 			throw new ForbiddenException("Could not get all necessary OIDC fields. Please check your scopes.");
 		}
 
-		// TODO choose other scheme for generating agent password
-		String password = (String) userInfo.get("sub");
-
 		try {
 			String oidcAgentId = connector.getL2pNode().getUserManager().getAgentIdByOIDCSub((String) userInfo.get("sub"));
 			return getExistingOidcAgent(oidcAgentId, password);
@@ -110,40 +114,69 @@ public class AuthenticationManager {
 		}
 	}
 
-	private AgentImpl authenticateNamePassword(String username, String password) {
-		if (username.equalsIgnoreCase(AnonymousAgent.LOGIN_NAME)) {
-			return authenticateAnonymous();
-		}
+	/**
+	 * Returns unlocked agent corresponding to the given basic authorization header.
+	 * The identifier is not simply an agent ID (sorry) but starts with a namespace prefix as defined in
+	 * {@link UserAgentManager} followed by the corresponding string. This allows logging in via either
+	 * the agent ID, a login ID, an email address, and so on.
+	 *
+	 */
+	private AgentImpl authenticateCredentials(String prefixedIdentifier, String password) {
 		try {
-			String userId;
-			// check if username is an agent id
-			if (CryptoTools.isAgentID(username)) {
-				userId = username;
-			} else {
-				userId = connector.getL2pNode().getAgentIdForLogin(username);
+			String agentId;
+
+			try {
+				agentId = connector.getL2pNode().getUserManager().getAgentId(prefixedIdentifier);
+			} catch (IllegalArgumentException e) {
+				// no valid prefix. we could just throw an error here, but for potential backwards compatibility,
+				// let's be forgiving and try to guess the type
+				if (CryptoTools.isAgentID(prefixedIdentifier)) {
+					agentId = prefixedIdentifier;
+				} else {
+					agentId = connector.getL2pNode().getAgentIdForLogin(prefixedIdentifier);
+				}
 			}
 
-			PassphraseAgentImpl userAgent = (PassphraseAgentImpl) connector.getL2pNode().getAgent(userId);
-			userAgent.unlock(password);
+			AgentImpl agent = connector.getL2pNode().getAgent(agentId);
 
-			return userAgent;
+			if (agent instanceof PassphraseAgentImpl) {
+				((PassphraseAgentImpl) agent).unlock(password);
+			}
+
+			return agent;
 		} catch (AgentNotFoundException e) {
-			connector.logError("user " + username + " not found", e);
-			throw new NotAuthorizedException("user " + username + " not found");
+			connector.logError("user " + prefixedIdentifier + " not found", e);
+			throw new NotAuthorizedException("user " + prefixedIdentifier + " not found");
 		} catch (AgentAccessDeniedException e) {
-			connector.logError("passphrase invalid for user " + username, e);
-			throw new NotAuthorizedException("passphrase invalid for user " + username);
+			connector.logError("passphrase invalid for user " + prefixedIdentifier, e);
+			throw new NotAuthorizedException("passphrase invalid for user " + prefixedIdentifier);
 		} catch (Exception e) {
 			connector.logError("something went horribly wrong. Check your request for correctness.", e);
 			throw new NotAuthorizedException("something went horribly wrong. Check your request for correctness.");
 		}
 	}
 
-	private AgentImpl authenticateAnonymous() {
-		return AnonymousAgentImpl.getInstance();
+	/**
+	 * @param basicAuthHeader basic authentication header containing base64 encoding of "identifier:password"
+	 */
+	private Credentials extractBasicAuthCredentials(String basicAuthHeader) {
+		if (basicAuthHeader == null) {
+			return null;
+		}
+		try {
+			String encodedCredentials = basicAuthHeader.substring("BASIC ".length());
+			String decodedCredentials = new String(Base64.getDecoder().decode(encodedCredentials), StandardCharsets.UTF_8);
+			int separatorPos = decodedCredentials.indexOf(':');
+
+			String identifier = decodedCredentials.substring(0, separatorPos);
+			String password = decodedCredentials.substring(separatorPos + 1);
+			return new Credentials(identifier, password);
+		} catch (IllegalArgumentException e) {
+			return null;
+		}
 	}
 
-	private String extractToken(String authorizationHeader, String accessTokenQueryParam, String accessTokenHeader) {
+	private String extractToken(String accessTokenHeader, String authorizationHeader, String accessTokenQueryParam) {
 		if (accessTokenHeader != null) {
 			// get OIDC parameters from headers
 			return accessTokenHeader;
@@ -251,6 +284,15 @@ public class AuthenticationManager {
 			}
 		} catch (Exception e) {
 			throw new InternalServerErrorException("OIDC agent creation failed", e);
+		}
+	}
+
+	private class Credentials {
+		String identifier;
+		String password;
+		Credentials(String identifier, String password) {
+			this.identifier = identifier;
+			this.password = password;
 		}
 	}
 }

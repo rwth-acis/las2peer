@@ -23,6 +23,7 @@ import i5.las2peer.tools.CryptoException;
  */
 public class UserAgentManager {
 
+	private static final String PREFIX_AGENT_ID = "ID-";
 	private static final String PREFIX_USER_NAME = "USER_NAME-";
 	private static final String PREFIX_USER_MAIL = "USER_MAIL-";
 	private static final String PREFIX_OIDC_SUB = "OIDC_SUB-";
@@ -138,6 +139,29 @@ public class UserAgentManager {
 			} catch (SerializationException | CryptoException | EnvelopeException e) {
 				node.observerNotice(MonitoringEvent.NODE_ERROR, "Envelope error while registering OIDC sub: " + e);
 			}
+		}
+	}
+
+	// TODO: having this means that the "private" prefixes above are part of the API. whether this is desirable is
+	// debatable, but it definitely offers an advantage: being able to use them for the HTTP basic authorization
+	// related to LAS-452
+	/**
+	 * Get agent ID for a prefixed identifier, i.e., a string consisting of one of the prefixes defined in this class
+	 * and the corresponding attribute (e.g., email address).
+	 * @param prefixedIdentifier
+	 * @return agent ID
+	 */
+	public String getAgentId(String prefixedIdentifier) throws AgentNotFoundException, AgentOperationFailedException {
+		if (prefixedIdentifier.startsWith(PREFIX_AGENT_ID)) {
+			return prefixedIdentifier.substring(PREFIX_AGENT_ID.length()); // maybe validate?
+		} else if (prefixedIdentifier.startsWith(PREFIX_OIDC_SUB)) {
+			return getAgentIdByOIDCSub(prefixedIdentifier.substring(PREFIX_OIDC_SUB.length()));
+		} else if (prefixedIdentifier.startsWith(PREFIX_USER_MAIL)) {
+			return getAgentIdByEmail(prefixedIdentifier.substring(PREFIX_USER_MAIL.length()));
+		} else if (prefixedIdentifier.startsWith(PREFIX_USER_NAME)) {
+			return getAgentIdByLogin(prefixedIdentifier.substring(PREFIX_USER_NAME.length()));
+		} else {
+			throw new IllegalArgumentException("Prefixed identifier must have valid prefix");
 		}
 	}
 

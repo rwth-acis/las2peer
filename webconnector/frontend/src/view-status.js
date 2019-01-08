@@ -18,7 +18,7 @@ class StatusView extends PolymerElement {
   static get template() {
     return html`
       <iron-ajax id="ajaxStatus"
-                 url="/las2peer/status"
+                 url$="[[apiEndpoint]]/status"
                  handle-as="json"
                  last-response="{{_status}}"
                  on-error="_handleError"
@@ -54,7 +54,7 @@ class StatusView extends PolymerElement {
               <td>[[item.version]]</td>
               <td style="width: 1%; white-space: nowrap">
                 <template is="dom-if" if="[[item.swagger]]">
-                  <a href="/las2peer/swagger-ui/index.html?url=[[item.swagger]]" tabindex="-1"><paper-button raised title="Show Swagger API Doc" style="background-color: #89bf04"><iron-icon src="/las2peer/swagger-ui/favicon-32x32.png"></iron-icon></paper-button></a>
+                  <a href="[[apiEndpoint]]//swagger-ui/index.html?url=[[item.swagger]]" tabindex="-1"><paper-button raised title="Show Swagger API Doc" style="background-color: #89bf04"><iron-icon src="/las2peer/swagger-ui/favicon-32x32.png"></iron-icon></paper-button></a>
                 </template>
               </td>
             </tr>
@@ -62,14 +62,15 @@ class StatusView extends PolymerElement {
         </table>
 
         <h2>Secure Node SSL Encryption</h2>
-        <p>If you trust this node, it's recommended to import the nodes certificate authority into your browsers trust store. You can download the certificate authority file <a href="/las2peer/cacert">here</a>.</p>
+        <p>If you trust this node, it's recommended to import the nodes certificate authority into your browsers trust store. You can download the certificate authority file <a href="[[apiEndpoint]]//cacert">here</a>.</p>
       </div>
     `;
   }
 
   static get properties() {
     return {
-      agentId: String,
+      apiEndpoint: { type: String, notify: true },
+      agentId: { type: String, notify: true },
       error: { type: Object, notify: true },
       _status: {
         type: Object,

@@ -20,21 +20,21 @@ class ServicesView extends PolymerElement {
     return html`
       <iron-ajax id="ajaxServiceData"
                  auto
-                 url="/las2peer/services/services"
+                 url$="[[apiEndpoint]]/services/services"
                  handle-as="json"
                  last-response="{{_services}}"
                  on-error="_handleError"
                  debounce-duration="300"></iron-ajax>
       <iron-ajax id="ajaxCommunityTags"
                  auto
-                 url="/las2peer/services/registry/tags"
+                 url$="[[apiEndpoint]]/services/registry/tags"
                  handleAs="json"
                  last-response="{{communityTags}}"
                  on-error="_handleError"
                  debounce-duration="300"></iron-ajax>
       <iron-ajax id="ajaxUploadService"
                  method="POST"
-                 url="/las2peer/services/upload"
+                 url$="[[apiEndpoint]]/services/upload"
                  handle-as="json"
                  on-response="_handleUploadServiceResponse"
                  on-error="_handleError"
@@ -110,7 +110,8 @@ class ServicesView extends PolymerElement {
 
   static get properties() {
     return {
-      agentid: String,
+      apiEndpoint: { type: String, notify: true },
+      agentId: { type: String, notify: true },
       error: { type: Object, notify: true },
       _services: { type: Object },
       _submittingSearch: { type: Boolean },
