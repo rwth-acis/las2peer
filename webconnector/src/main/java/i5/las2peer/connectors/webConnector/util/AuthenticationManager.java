@@ -63,96 +63,85 @@ public class AuthenticationManager {
 	 * If it exists, we try to unlock the existing agent.
 	 */
 	public AgentImpl authenticateAgent(MultivaluedMap<String, String> requestHeaders, String accessTokenQueryParam) {
-		final String authorizationHeader = requestHeaders.getFirst(HttpHeaders.AUTHORIZATION);
-		final String accessTokenHeader = requestHeaders.getFirst(ACCESS_TOKEN_KEY);
+		String authorizationHeader = requestHeaders.getFirst(HttpHeaders.AUTHORIZATION);
+		String accessTokenHeader = requestHeaders.getFirst(ACCESS_TOKEN_KEY);
 
 		String accessToken = extractToken(accessTokenHeader, authorizationHeader, accessTokenQueryParam);
 		Credentials credentials = extractBasicAuthCredentials(authorizationHeader);
 
-		if (accessToken != null) {
-			if (credentials == null) {
-				throw new BadRequestException("We require a password (in basic authorization header) when a OIDC access token sent! (see Javadoc)");
+		try {
+			if (accessToken != null) {
+				if (credentials == null) {
+					throw new BadRequestException("We require a password (in basic authorization header) when a OIDC access token sent! (see Javadoc)");
+				}
+				String oidcProviderHeader = requestHeaders.getFirst(OIDC_PROVIDER_KEY);
+				return authenticateOIDC(accessToken, oidcProviderHeader, credentials);
+			} else if (credentials != null) {
+				// basic authentication
+				return authenticateCredentials(credentials);
+			} else {
+				// anonymous login
+				return AnonymousAgentImpl.getInstance();
 			}
-			final String oidcProviderHeader = requestHeaders.getFirst(OIDC_PROVIDER_KEY);
-			return authenticateOIDC(accessToken, oidcProviderHeader, credentials.password);
-		} else if (credentials != null) {
-			// basic authentication
-			return authenticateCredentials(credentials.identifier, credentials.password);
-		} else {
-			// anonymous login
-			return AnonymousAgentImpl.getInstance();
-		}
-	}
-
-	private PassphraseAgentImpl authenticateOIDC(String token, String oidcProviderHeader, String password) {
-		String endpoint;
-		try {
-			String oidcProviderURI = (oidcProviderHeader != null) ? oidcProviderHeader : connector.defaultOIDCProvider;
-			JSONObject oidcProviderInfo = getOidcProviderInfo(oidcProviderURI);
-			endpoint = (String) ((JSONObject) oidcProviderInfo.get("config")).get("userinfo_endpoint");
-		} catch (IllegalArgumentException e) {
-			throw new InternalServerErrorException(e);
-		}
-
-		JSONObject userInfo = retrieveOidcUserInfo(endpoint, token).toJSONObject();
-
-		if (!userInfo.containsKey("sub") || !userInfo.containsKey("email") || !userInfo.containsKey("preferred_username")) {
-			throw new ForbiddenException("Could not get all necessary OIDC fields. Please check your scopes.");
-		}
-
-		try {
-			String oidcAgentId = connector.getL2pNode().getUserManager().getAgentIdByOIDCSub((String) userInfo.get("sub"));
-			return getExistingOidcAgent(oidcAgentId, password);
-		} catch (AgentAccessDeniedException e) {
-			connector.logError("Authentication failed!", e);
-			throw new NotAuthorizedException(e.toString(), e);
 		} catch (AgentNotFoundException e) {
-			return createNewOidcAgent(password, userInfo);
+			throw new NotAuthorizedException("agent not found");
+		} catch (AgentAccessDeniedException e) {
+			throw new NotAuthorizedException("passphrase invalid");
 		} catch (AgentException e) {
-			connector.logError("Could not retrieve and unlock agent from network", e);
-			throw new NotAuthorizedException(e.toString(), e);
+			throw new NotAuthorizedException("not sure what went wrong");
 		}
 	}
 
 	/**
-	 * Returns unlocked agent corresponding to the given basic authorization header.
+	 * Returns unlocked agent corresponding to the given credentials.
 	 * The identifier is not simply an agent ID (sorry) but starts with a namespace prefix as defined in
 	 * {@link UserAgentManager} followed by the corresponding string. This allows logging in via either
 	 * the agent ID, a login ID, an email address, and so on.
 	 *
+	 * {@see UserAgentManager#getAgentId(String)}
 	 */
-	private AgentImpl authenticateCredentials(String prefixedIdentifier, String password) {
+	private AgentImpl authenticateCredentials(Credentials credentials) throws AgentException {
+		String prefixedIdentifier = credentials.identifier;
+		String agentId;
+
 		try {
-			String agentId;
-
-			try {
-				agentId = connector.getL2pNode().getUserManager().getAgentId(prefixedIdentifier);
-			} catch (IllegalArgumentException e) {
-				// no valid prefix. we could just throw an error here, but for potential backwards compatibility,
-				// let's be forgiving and try to guess the type
-				if (CryptoTools.isAgentID(prefixedIdentifier)) {
-					agentId = prefixedIdentifier;
-				} else {
-					agentId = connector.getL2pNode().getAgentIdForLogin(prefixedIdentifier);
-				}
+			agentId = connector.getL2pNode().getUserManager().getAgentId(prefixedIdentifier);
+		} catch (IllegalArgumentException e) {
+			// no valid prefix. we could just throw an error here, but for potential backwards compatibility,
+			// let's be forgiving and try to guess the type
+			if (CryptoTools.isAgentID(prefixedIdentifier)) {
+				agentId = prefixedIdentifier;
+			} else {
+				agentId = connector.getL2pNode().getAgentIdForLogin(prefixedIdentifier);
 			}
+		}
 
-			AgentImpl agent = connector.getL2pNode().getAgent(agentId);
+		AgentImpl agent = connector.getL2pNode().getAgent(agentId);
+		if (agent instanceof PassphraseAgentImpl) {
+			((PassphraseAgentImpl) agent).unlock(credentials.password);
+		}
+		return agent;
+	}
 
-			if (agent instanceof PassphraseAgentImpl) {
-				((PassphraseAgentImpl) agent).unlock(password);
+	/**
+	 * Attempts to find an existing agent and unlock it, otherwise registers a new one.
+	 *
+	 * For registration, uses OIDC profile "preferred_username" as login name, ignoring identifier in credentials.
+	 * For log-in, uses provided credentials, ignoring all OIDC data including the token.
+	 *
+	 * {@see UserAgentManager#getAgentId(String)}
+	 */
+	private PassphraseAgentImpl authenticateOIDC(String token, String oidcProviderHeader, Credentials credentials) throws AgentException {
+		try {
+			AgentImpl existingAgent = authenticateCredentials(credentials);
+			if (existingAgent instanceof UserAgentImpl) {
+				return (UserAgentImpl) existingAgent;
+			} else {
+				throw new AgentException("credentials were valid but agent had unexpected type");
 			}
-
-			return agent;
 		} catch (AgentNotFoundException e) {
-			connector.logError("user " + prefixedIdentifier + " not found", e);
-			throw new NotAuthorizedException("user " + prefixedIdentifier + " not found");
-		} catch (AgentAccessDeniedException e) {
-			connector.logError("passphrase invalid for user " + prefixedIdentifier, e);
-			throw new NotAuthorizedException("passphrase invalid for user " + prefixedIdentifier);
-		} catch (Exception e) {
-			connector.logError("something went horribly wrong. Check your request for correctness.", e);
-			throw new NotAuthorizedException("something went horribly wrong. Check your request for correctness.");
+			// expected - auto-register
+			return createNewOidcAgent(token, oidcProviderHeader, credentials);
 		}
 	}
 
@@ -235,6 +224,8 @@ public class AuthenticationManager {
 		}
 	}
 
+	// FIXME find out why that lock is needed (is it??)
+	/** @deprecated */
 	private PassphraseAgentImpl getExistingOidcAgent(String oidcAgentId, String password) throws AgentException {
 		try {
 			connector.getLockOidc().lock(oidcAgentId);
@@ -252,7 +243,24 @@ public class AuthenticationManager {
 		}
 	}
 
-	private UserAgentImpl createNewOidcAgent(String password, JSONObject userInfo) {
+	private UserAgentImpl createNewOidcAgent(String token, String oidcProviderHeader, Credentials credentials) {
+		String password = credentials.password;
+
+		String endpoint;
+		try {
+			String oidcProviderURI = (oidcProviderHeader != null) ? oidcProviderHeader : connector.defaultOIDCProvider;
+			JSONObject oidcProviderInfo = getOidcProviderInfo(oidcProviderURI);
+			endpoint = (String) ((JSONObject) oidcProviderInfo.get("config")).get("userinfo_endpoint");
+		} catch (IllegalArgumentException argErr) {
+			throw new InternalServerErrorException(argErr);
+		}
+
+		JSONObject userInfo = retrieveOidcUserInfo(endpoint, token).toJSONObject();
+
+		if (!userInfo.containsKey("sub") || !userInfo.containsKey("email") || !userInfo.containsKey("preferred_username")) {
+			throw new ForbiddenException("Could not get all necessary OIDC fields. Please check your scopes.");
+		}
+
 		try {
 			UserAgentImpl oidcAgent;
 			if (connector.getL2pNode() instanceof EthereumNode) {
