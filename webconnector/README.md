@@ -37,10 +37,24 @@ Yeah, no, we’re starting over.
 ### Using OIDC with las2peer
 
 The `oidcconnect-signin` component (the button) emits a `'signed-in'` event, whose `.detail` contains the `access_token` and the user's `profile`.
-That token can be passed to las2peer in three ways:
+
+<details>
+<summary>There a several ways to pass this token to las2peer's Webconnector.</summary>
+
+Note: The authentication procedure was changed, so that these examples no longer work.
+The access token is now only used during OIDC auto-registration (i.e., the first time an OIDC user tries to login), and still requires a password (which then becomes the new agent's password).
+
+For details, see `AuthenticationManager#authenticateAgent`, but the gist is this: An access token alone is no longer sufficient for logging in (nor registering), instead, we always also require a password in the form of a basic authorization header.
+
+You can still pass the access token in these ways:
 
 1. as a query string parameter: ([HTTPie](https://httpie.org/) example) `http ":8080/las2peer/currentagent?access_token=<TOKEN>`
 2. as a [standard Bearer Authorization](https://security.stackexchange.com/a/120244/60003) request header: `http :8080/las2peer/currentagent "Authorization:Bearer <TOKEN>"`
 3. as a `access_token` request header: `http :8080/las2peer/currentagent "access_token: <TOKEN>"`
 
-This token is only used to *log-in* to las2peer (which will give you a session cookie – *that* is the actual auth method).
+However, this will yield a 400 error saying that a basic auth header is needed as well.
+This makes this a bit more complicated, but we can do this.
+Here's one: `"Authorization:Basic VVNFUl9OQU1FLWFkYW06YWRhbXNwYXNz"` (that's base64 of `USER_NAME-adam:adamspass`).
+
+With that header, everything works as expected. Well, except one thing: You can't send both a Bearer and Basic authorization header, so that option currently does not work. (Did anyone ever use it?)
+</details>
