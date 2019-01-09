@@ -7,11 +7,14 @@ The `./resources` directory contains symlinks, whose targets are bundled into th
 
 Aside from that, the structure is the same as for the other las2peer modules.
 
-## Building the front-end (separately)
+## Development Workflow
 
-When you build the las2peer / the Webconnector module via ant, the front-end is automatically built and included in the jar.
-But if you want to build it separately (e.g., during development), you can do so by running `polymer build` in `./frontend`. (See the README there. `npm run build` is equivalent.)
-You can also run `polymer serve`, which reflects your changes without needing to rebuild (but of course this serves just the front-end, it does not run las2peer's Webconnector).
+When making changes to the front-end only, you probably don't want to wait for the entire Webconnector to build in order to test your changes in your browser.
+Instead, you can use `polymer serve` (in `./frontend`) to serve the front-end only.
+In order to use your (separately running) Webconnector back-end, change the `apiEndpoint` property in `node-frontend.js`.
+
+As a concrete example, let's say your node runs the Webconnector at its default port, `8080`, then invoking `polymer serve` will automatically select a different port (`8081`). To use the running back-end change the `apiEndpoint`s value to `'http://localhost:8080/las2peer'`.
+With `polymer serve` changes are applied immediately (after a page refresh), there is no need to build anything.
 
 ## HTTP Server
 
