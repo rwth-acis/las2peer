@@ -125,23 +125,23 @@ class BlockchainObserver {
 				.observeOn(Schedulers.io())
 				.subscribeOn(Schedulers.io())
 				.subscribe(tag -> {
-			if (!txHasAlreadyBeenHandled(tag.log.getTransactionHash())) {
-			String tagName = Util.recoverString(tag.name);
+					if (!txHasAlreadyBeenHandled(tag.log.getTransactionHash())) {
+						String tagName = Util.recoverString(tag.name);
 
-				// same issue as lookUpServiceName; let's just retry
-				String tagDescription = "";
-				for (int i = 0; i < 5; i++) {
-					tagDescription = contracts.communityTagIndex.viewDescription(
-					Util.padAndConvertString(tagName, 32)).send();
-					if (!tagDescription.isEmpty()) {
-						break;
+							// same issue as lookUpServiceName; let's just retry
+							String tagDescription = "";
+							for (int i = 0; i < 5; i++) {
+								tagDescription = contracts.communityTagIndex.viewDescription(
+								Util.padAndConvertString(tagName, 32)).send();
+								if (!tagDescription.isEmpty()) {
+									break;
+								}
+								logger.warning("Tag description returned empty, retrying");
+							}
+
+						tags.put(tagName, tagDescription);
 					}
-					logger.warning("Tag description returned empty, retrying");
-				}
-
-			tags.put(tagName, tagDescription);
-			}
-		}, e -> logger.severe("Error observing tag event: " + e.toString()));
+				}, e -> logger.severe("Error observing tag event: " + e.toString()));
 	}
 
 	/**
@@ -196,11 +196,11 @@ class BlockchainObserver {
 				.observeOn(Schedulers.io())
 				.subscribeOn(Schedulers.io())
 				.subscribe(service -> {
-			if (!txHasAlreadyBeenHandled(service.log.getTransactionHash())) {
-				String serviceName = lookupServiceName(service.nameHash);
-				serviceNameToAuthor.put(serviceName, Util.recoverString(service.author));
-			}
-		}, e -> logger.severe("Error observing service registration event: " + e.toString()));
+					if (!txHasAlreadyBeenHandled(service.log.getTransactionHash())) {
+						String serviceName = lookupServiceName(service.nameHash);
+						serviceNameToAuthor.put(serviceName, Util.recoverString(service.author));
+					}
+				}, e -> logger.severe("Error observing service registration event: " + e.toString()));
 	}
 
 	private void observeServiceReleases() {
@@ -209,16 +209,16 @@ class BlockchainObserver {
 				.observeOn(Schedulers.io())
 				.subscribeOn(Schedulers.io())
 				.subscribe(release -> {
-			if (!txHasAlreadyBeenHandled(release.log.getTransactionHash())) {
-				String serviceName = lookupServiceName(release.nameHash);
-				ServiceReleaseData releaseData = new ServiceReleaseData(serviceName,
-						release.versionMajor, release.versionMinor, release.versionPatch, new byte[]{});
+					if (!txHasAlreadyBeenHandled(release.log.getTransactionHash())) {
+						String serviceName = lookupServiceName(release.nameHash);
+						ServiceReleaseData releaseData = new ServiceReleaseData(serviceName,
+								release.versionMajor, release.versionMinor, release.versionPatch, new byte[]{});
 
-				releases.computeIfAbsent(releaseData.getServiceName(), k -> new ArrayList<>());
-				releases.get(releaseData.getServiceName()).add(releaseData);
-				storeReleaseByVersion(releaseData);
-			}
-		}, e -> logger.severe("Error observing service release event: " + e.toString()));
+						releases.computeIfAbsent(releaseData.getServiceName(), k -> new ArrayList<>());
+						releases.get(releaseData.getServiceName()).add(releaseData);
+						storeReleaseByVersion(releaseData);
+					}
+				}, e -> logger.severe("Error observing service release event: " + e.toString()));
 	}
 
 	private void observeServiceDeployments() {
@@ -228,14 +228,14 @@ class BlockchainObserver {
 				.observeOn(Schedulers.io())
 				.subscribeOn(Schedulers.io())
 				.subscribe(deployment -> {
-			if (!txHasAlreadyBeenHandled(deployment.log.getTransactionHash())) {
-				String serviceName = lookupServiceName(deployment.nameHash);
-				ServiceDeploymentData deploymentData = new ServiceDeploymentData(serviceName, deployment.className,
-						deployment.versionMajor, deployment.versionMinor, deployment.versionPatch, deployment.timestamp,
-						deployment.nodeId);
-				addOrUpdateDeployment(deploymentData);
-			}
-		}, e -> logger.severe("Error observing service deployment event: " + e.toString()));
+					if (!txHasAlreadyBeenHandled(deployment.log.getTransactionHash())) {
+						String serviceName = lookupServiceName(deployment.nameHash);
+						ServiceDeploymentData deploymentData = new ServiceDeploymentData(serviceName, deployment.className,
+								deployment.versionMajor, deployment.versionMinor, deployment.versionPatch, deployment.timestamp,
+								deployment.nodeId);
+						addOrUpdateDeployment(deploymentData);
+					}
+				}, e -> logger.severe("Error observing service deployment event: " + e.toString()));
 
 		// *end* of service deployment announcements
 		// FIXME: this should work almost always, but it would be far safer to actually add a timestamp
@@ -248,16 +248,16 @@ class BlockchainObserver {
 				.observeOn(Schedulers.io())
 				.subscribeOn(Schedulers.io())
 				.subscribe(stopped -> {
-			if (!txHasAlreadyBeenHandled(stopped.log.getTransactionHash())) {
-				String serviceName = lookupServiceName(stopped.nameHash);
+					if (!txHasAlreadyBeenHandled(stopped.log.getTransactionHash())) {
+						String serviceName = lookupServiceName(stopped.nameHash);
 
-				// for comparison only; remember: this event signifies the END of a deployment, not actually a deployment
-				ServiceDeploymentData deploymentThatEnded = new ServiceDeploymentData(serviceName, stopped.className,
-						stopped.versionMajor, stopped.versionMinor, stopped.versionPatch, null,
-						stopped.nodeId);
-				deployments.get(serviceName).remove(deploymentThatEnded);
-			}
-		}, e -> logger.severe("Error observing service deployment end event: " + e.toString()));
+						// for comparison only; remember: this event signifies the END of a deployment, not actually a deployment
+						ServiceDeploymentData deploymentThatEnded = new ServiceDeploymentData(serviceName, stopped.className,
+								stopped.versionMajor, stopped.versionMinor, stopped.versionPatch, null,
+								stopped.nodeId);
+						deployments.get(serviceName).remove(deploymentThatEnded);
+					}
+				}, e -> logger.severe("Error observing service deployment end event: " + e.toString()));
 	}
 
 	/**
