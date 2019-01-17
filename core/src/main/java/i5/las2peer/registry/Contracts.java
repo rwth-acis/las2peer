@@ -6,6 +6,7 @@ import i5.las2peer.registry.contracts.UserRegistry;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tx.FastRawTransactionManager;
+import org.web3j.tx.RawTransactionManager;
 import org.web3j.tx.gas.ContractGasProvider;
 import org.web3j.crypto.Credentials;
 import org.web3j.tx.ReadonlyTransactionManager;
@@ -14,6 +15,7 @@ import org.web3j.tx.gas.DefaultGasProvider;
 import org.web3j.tx.gas.StaticGasProvider;
 import org.web3j.tx.response.PollingTransactionReceiptProcessor;
 import org.web3j.tx.response.TransactionReceiptProcessor;
+import org.web3j.utils.TxHashVerifier;
 
 import java.math.BigInteger;
 import java.util.Objects;
@@ -189,9 +191,21 @@ class Contracts {
 				long pollingIntervalMillisecs = 1000;
 				int attempts = 30;
 				TransactionReceiptProcessor receiptProcessor = new PollingTransactionReceiptProcessor(web3j, pollingIntervalMillisecs, attempts);
-				return new FastRawTransactionManager(web3j, credentials, receiptProcessor);
+				RawTransactionManager transactionManager = new FastRawTransactionManager(web3j, credentials, receiptProcessor);
+
+				// txHashVerification throws false alarms (not sure why), disable check
+				// TODO: figure out what's going and and reenable
+				// see https://github.com/web3j/web3j/pull/584
+				transactionManager.setTxHashVerifier(new NoopTxHashVerifier());
+				return transactionManager;
 			}
 
+		}
+	}
+
+	static class NoopTxHashVerifier extends TxHashVerifier {
+		@Override public boolean verify(String hash1, String hash2) {
+			return true;
 		}
 	}
 }

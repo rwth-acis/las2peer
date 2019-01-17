@@ -4,10 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -20,6 +17,7 @@ import i5.las2peer.api.persistency.EnvelopeException;
 import i5.las2peer.api.persistency.EnvelopeNotFoundException;
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
+import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.classLoaders.libraries.LibraryIdentifier;
 import i5.las2peer.classLoaders.libraries.LoadedNetworkLibrary;
@@ -29,6 +27,7 @@ import i5.las2peer.p2p.EthereumNode;
 import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.persistency.EnvelopeVersion;
 import i5.las2peer.registry.exceptions.EthereumException;
+import i5.las2peer.registry.exceptions.NotFoundException;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.EthereumAgent;
 import i5.las2peer.security.PassphraseAgentImpl;
@@ -98,17 +97,8 @@ public class PackageUploader {
 			uploadServicePackage(node, serviceName, serviceVersion, depHashes, jarFiles, devAgent);
 			long uploadTime = System.currentTimeMillis() - uploadStart;
 			logger.info("Service package '" + serviceJarFilename + "' uploaded in " + uploadTime + " ms");
-			if (node instanceof EthereumNode) {
-				try {
-					registerUploadedService((EthereumNode) node, serviceName, serviceVersion, devAgent);
-				} catch (AgentException e) {
-					logger.warning("Agent not suitable for registering service, reason:\n" + e.toString());
-				}
-			}
-		} catch (FileNotFoundException e) {
-			logger.log(Level.SEVERE, "Service package upload failed! " + e.toString());
-		} catch (IOException | CryptoException | EnvelopeException | SerializationException e) {
-			logger.log(Level.SEVERE, "Service package upload failed!", e);
+		} catch (Exception e) {
+			logger.log(Level.SEVERE, "Service package upload failed! " + e.toString(), e);
 		} finally {
 			if (serviceJar != null) {
 				try {
@@ -140,14 +130,21 @@ public class PackageUploader {
 	}
 
 	public static void uploadServicePackage(PastryNodeImpl node, String serviceName, String serviceVersion,
-			HashMap<String, byte[]> depHashes, HashMap<String, byte[]> jarFiles, AgentImpl devAgent)
-			throws IllegalArgumentException, SerializationException, CryptoException, EnvelopeException,
-			ServicePackageException {
+			Map<String, byte[]> depHashes, Map<String, byte[]> jarFiles, AgentImpl devAgent)
+			throws SerializationException, CryptoException, EnvelopeException, ServicePackageException, AgentException {
 		if (serviceName == null) {
 			throw new ServicePackageException("No service name given");
 		} else if (serviceVersion == null) {
 			throw new ServicePackageException("No service version given");
 		}
+
+		if (node instanceof EthereumNode) {
+			if (!(devAgent instanceof EthereumAgent)) {
+				throw new AgentException("Cannot use non-Ethereum agent to upload services on this Ethereum-enabled node!");
+			}
+			((EthereumNode) node).registerServiceInBlockchain(serviceName, serviceVersion, (EthereumAgent) devAgent);
+		}
+
 		LibraryIdentifier libId = new LibraryIdentifier(serviceName, serviceVersion);
 		// store metadata envelope for service
 		LoadedNetworkLibrary netLib = new LoadedNetworkLibrary(node, libId, depHashes);
@@ -196,52 +193,6 @@ public class PackageUploader {
 		}
 		// store envelope with service version information
 		node.storeEnvelope(versionEnv, devAgent);
-		if (node instanceof EthereumNode) {
-			try {
-				registerUploadedService((EthereumNode) node, serviceName, serviceVersion, devAgent);
-			} catch (AgentException e) {
-				logger.warning("Agent not suitable for registering service, reason:\n" + e.toString());
-			}
-		}
 	}
 
-	private static void registerUploadedService(EthereumNode node, String serviceName, String serviceVersion,
-												AgentImpl author) throws AgentException {
-		// TODO: handle both exceptions gracefully / prevent them in the first place
-		if (!(author instanceof EthereumAgent))  {
-			throw new AgentException("Cannot register service using non-Ethereum-enabled agent.");
-		}
-
-		EthereumAgent ethereumAgent = (EthereumAgent) author;
-		if (ethereumAgent.isLocked()) {
-			throw new AgentException("Cannot register service because Ethereum-enabled agent is locked.");
-		}
-
-		// TODO: consider security implications, but I think it's fine since all contract operations check ownership
-		String authorName = ethereumAgent.getLoginName();
-
-		try {
-			if (node.getRegistryClient().getServiceNames().contains(serviceName)) {
-				String serviceOwnerName = node.getRegistryClient().getServiceAuthor(serviceName);
-				if (!authorName.equals(serviceOwnerName)) {
-					logger.severe("Service owner does not match current agent. Cannot register.");
-					return;
-				}
-			} else {
-				// TODO: don't do this automatically (but for now it's convenient ...)
-				// this should be done on user creation, or possibly as a separate step, but not here
-				if (node.getRegistryClient().getUser(authorName) == null) {
-					logger.info("User '" + authorName + "' not yet registered, registering now ...");
-					ethereumAgent.getRegistryClient().registerUser(ethereumAgent.getLoginName(), ethereumAgent.getIdentifier());
-				}
-
-				logger.fine("Service '" + serviceName + "' not already known, registering ...");
-				ethereumAgent.getRegistryClient().registerService(serviceName, authorName);
-			}
-			logger.info("Registering service release '" + serviceName + "', v" + serviceVersion + " ...");
-			ethereumAgent.getRegistryClient().releaseService(serviceName, authorName, serviceVersion);
-		} catch (EthereumException e) {
-			logger.severe("FIXME Error while registering release: " + e);
-		}
-	}
 }

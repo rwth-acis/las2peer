@@ -72,6 +72,7 @@ public class ServicesHandler {
 	@GET
 	@Path("/search")
 	@Produces(MediaType.APPLICATION_JSON)
+	@Deprecated // no longer needed, and insecure, see #getNetworkServices below -- TODO: just remove this?
 	public Response handleSearchService(@HeaderParam("Host") String hostHeader,
 			@QueryParam("searchname") String searchName) {
 		JSONObject result = new JSONObject();
@@ -97,6 +98,7 @@ public class ServicesHandler {
 		return Response.ok(result.toJSONString(), MediaType.APPLICATION_JSON).build();
 	}
 
+	@Deprecated // this bypasses the Repository and Registry, replace
 	private JSONArray getNetworkServices(Node node, String hostHeader, String searchName) throws Exception {
 		JSONArray result = new JSONArray();
 		String libName = ClassManager.getPackageName(searchName);

@@ -1,6 +1,7 @@
 package i5.las2peer.security;
 
 import i5.las2peer.api.security.AgentAccessDeniedException;
+import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.registry.CredentialUtils;
 import i5.las2peer.registry.ReadWriteRegistryClient;
@@ -48,6 +49,10 @@ public class EthereumAgent extends UserAgentImpl {
 	/** Ethereum account address. (This is not secret.) */
 	private String ethereumAddress;
 
+	/** Ethereum credentials; used for Ethereum message signing. */
+	private Credentials credentials;
+
+	/** This agent's registry client to make direct smart contract calls. */
 	private ReadWriteRegistryClient registryClient;
 
 	protected EthereumAgent(KeyPair pair, String passphrase, byte[] salt, String loginName, String ethereumMnemonic)
@@ -83,6 +88,7 @@ public class EthereumAgent extends UserAgentImpl {
 	@Override
 	public void lockPrivateKey() {
 		super.lockPrivateKey();
+		this.credentials = null;
 		this.registryClient = null;
 	}
 
@@ -90,7 +96,7 @@ public class EthereumAgent extends UserAgentImpl {
 	public void unlock(String passphrase) throws AgentAccessDeniedException, AgentOperationFailedException {
 		super.unlock(passphrase);
 
-		Credentials credentials = CredentialUtils.fromMnemonic(ethereumMnemonic, passphrase);
+		credentials = CredentialUtils.fromMnemonic(ethereumMnemonic, passphrase);
 		registryClient = new ReadWriteRegistryClient(new RegistryConfiguration(), credentials);
 		ethereumAddress = credentials.getAddress();
 	}
@@ -173,6 +179,13 @@ public class EthereumAgent extends UserAgentImpl {
 	/** @return address of the Ethereum key pair associated with the agent */
 	public String getEthereumAddress() {
 		return ethereumAddress;
+	}
+
+	public Credentials getEthereumCredentials() throws AgentLockedException {
+		if (isLocked()) {
+			throw new AgentLockedException();
+		}
+		return this.credentials;
 	}
 
 	public static EthereumAgent createFromXml(String xml) throws MalformedXMLException {

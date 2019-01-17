@@ -3,15 +3,17 @@ package i5.las2peer.p2p;
 import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.security.*;
 import i5.las2peer.classLoaders.ClassManager;
+import i5.las2peer.classLoaders.libraries.BlockchainRepository;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.persistency.SharedStorage;
 import i5.las2peer.registry.*;
 import i5.las2peer.registry.data.RegistryConfiguration;
 import i5.las2peer.registry.data.UserData;
-import i5.las2peer.registry.exceptions.BadEthereumCredentialsException;
 import i5.las2peer.registry.exceptions.EthereumException;
+import i5.las2peer.registry.exceptions.NotFoundException;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.EthereumAgent;
+import i5.las2peer.serialization.SerializationException;
 
 import java.net.InetAddress;
 import java.util.List;
@@ -62,6 +64,7 @@ public class EthereumNode extends PastryNodeImpl {
 		this.ethereumPassword = ethereumPassword;
 	}
 
+	/** In addition to super(), set up registry client with CLI credentials */
 	@Override
 	protected void launchSub() throws NodeException {
 		setStatus(NodeStatus.STARTING);
@@ -69,6 +72,12 @@ public class EthereumNode extends PastryNodeImpl {
 		registryClient = new ReadWriteRegistryClient(conf,
 				CredentialUtils.fromMnemonic(ethereumMnemonic, ethereumPassword));
 		super.launchSub();
+	}
+
+	/** Add blockchain-enabled Pastry repo, which verifies service authors */
+	@Override
+	protected void setupRepository() {
+		getBaseClassLoader().addRepository(new BlockchainRepository(this));
 	}
 
 	/**
@@ -85,6 +94,7 @@ public class EthereumNode extends PastryNodeImpl {
 	 * @param nameVersion service being started
 	 */
 	public void announceServiceDeployment(ServiceNameVersion nameVersion) {
+		// this could be refactored
 		String serviceName = nameVersion.getPackageName();
 		String className = nameVersion.getSimpleClassName();
 		int versionMajor = nameVersion.getVersion().getMajor();
@@ -131,8 +141,8 @@ public class EthereumNode extends PastryNodeImpl {
 		AgentImpl agent = super.getAgent(id);
 		if (agent instanceof EthereumAgent) {
 			try {
-				if (agentMatchesUserRegistryData((EthereumAgent) agent)) {
-
+				if (!agentMatchesUserRegistryData((EthereumAgent) agent)) {
+					throw new AgentException("User data in blockchain does not match agent stored in shared storage!");
 				}
 			} catch (EthereumException e) {
 				throw new AgentException("Error while comparing stored agent to user registry. Aborting out of caution.");
@@ -146,7 +156,7 @@ public class EthereumNode extends PastryNodeImpl {
 		if (agent instanceof EthereumAgent) {
 			try {
 				registerAgentInBlockchain((EthereumAgent) agent);
-			} catch (AgentException|EthereumException e) {
+			} catch (AgentException|EthereumException|SerializationException e) {
 				logger.warning("Failed to register EthereumAgent; error: " + e);
 				throw new AgentException("Problem storing Ethereum agent", e);
 			}
@@ -157,30 +167,92 @@ public class EthereumNode extends PastryNodeImpl {
 	// Note: Unfortunately the term "register" is also used for storing
 	// the agent data in the shared storage in some parts of the code
 	// base. So "registerAgent" is definitely ambiguous.
-	private void registerAgentInBlockchain(EthereumAgent ethereumAgent) throws AgentException, EthereumException {
+	private void registerAgentInBlockchain(EthereumAgent ethereumAgent)
+			throws AgentException, EthereumException, SerializationException {
 		String name = ethereumAgent.getLoginName();
 
 		if (registryClient.usernameIsAvailable(name)) {
-			ethereumAgent.getRegistryClient().registerUser(name, ethereumAgent.getIdentifier());
+			registryClient.registerUser(ethereumAgent);
 		} else if (!registryClient.usernameIsValid(name)) {
 			// this should probably be checked during creation too
 			throw new AgentException("Agent login name is not valid for registry smart contracts.");
 		} else if (agentMatchesUserRegistryData(ethereumAgent)) {
-			// already registered, but ID and address match
-			// this is fine, I guess
+			logger.fine("Agent was already registered (same data), so that's fine.");
 		} else {
 			throw new AgentAlreadyExistsException("Agent username is already taken in blockchain user registry and details do NOT match.");
 		}
 	}
 
 	private boolean agentMatchesUserRegistryData(EthereumAgent agent) throws EthereumException {
-		UserData userInBlockchain = registryClient.getUser(agent.getLoginName());
-		if (userInBlockchain == null) {
-			return false;
-		} else {
+		try {
+			UserData userInBlockchain = registryClient.getUser(agent.getLoginName());
 			return userInBlockchain.getOwnerAddress().equals(agent.getEthereumAddress())
-					&& userInBlockchain.getAgentId().equals(agent.getIdentifier());
+					&& userInBlockchain.getAgentId().equals(agent.getIdentifier())
+					&& userInBlockchain.getPublicKey().equals(agent.getPublicKey());
+		} catch (NotFoundException e) {
+			return false;
+		} catch (SerializationException e) {
+			throw new EthereumException("Public key in user registry can't be deserialized.", e);
 		}
+	}
+
+	/**
+	 * Registers a service release in the blockchain-based registry.
+	 *
+	 * Also registers the service name to the author, and registers the
+	 * author, if those have not already happened.
+	 */
+	public void registerServiceInBlockchain(String serviceName, String serviceVersion, EthereumAgent author)
+			throws AgentException, SerializationException {
+		if (author.isLocked()) {
+			throw new AgentLockedException("Cannot register service because Ethereum-enabled agent is locked.");
+		}
+
+		try {
+			boolean serviceAlreadyRegistered = getRegistryClient().getServiceNames().contains(serviceName);
+			if (serviceAlreadyRegistered) {
+				if (!isServiceOwner(author.getLoginName(), serviceName)) {
+					throw new AgentException("Service is already registered to someone else, cannot register!");
+				}
+			} else {
+				registerServiceName(serviceName, author);
+			}
+
+			logger.info("Registering service release '" + serviceName + "', v" + serviceVersion + " ...");
+			getRegistryClient().releaseService(serviceName, serviceVersion, author);
+		} catch (EthereumException e) {
+			logger.severe("FIXME Error while registering release: " + e);
+		}
+	}
+
+	private boolean isServiceOwner(String authorName, String serviceName) throws EthereumException {
+		try {
+			String serviceOwnerName = getRegistryClient().getServiceAuthor(serviceName);
+			return authorName.equals(serviceOwnerName);
+		} catch (NotFoundException|EthereumException e) {
+			throw new EthereumException("Ownership check errored or was inconsistent, investigate.");
+		}
+	}
+
+	/** Register service name and if needed the author too */
+	private void registerServiceName(String name, EthereumAgent author)
+			throws EthereumException, AgentLockedException, SerializationException {
+		String authorName = author.getLoginName();
+
+		// register author if needed
+		try {
+			getRegistryClient().getUser(authorName);
+		} catch (NotFoundException e) {
+			if (!getRegistryClient().usernameIsAvailable(authorName)) {
+				throw new EthereumException("User name not available but also not found, lord help us!");
+			} else {
+				logger.info("User '" + authorName + "' not yet registered, registering now ...");
+				getRegistryClient().registerUser(author);
+			}
+		}
+
+		logger.fine("Service '" + name + "' not already known, registering ...");
+		getRegistryClient().registerService(name, author);
 	}
 
 	/** @return registry client using this agent's credentials */

@@ -1,8 +1,15 @@
 package i5.las2peer.registry;
 
+import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.logging.L2pLogger;
+import i5.las2peer.registry.contracts.ServiceRegistry;
+import i5.las2peer.registry.contracts.UserRegistry;
 import i5.las2peer.registry.data.RegistryConfiguration;
 import i5.las2peer.registry.exceptions.EthereumException;
+import i5.las2peer.security.EthereumAgent;
+import i5.las2peer.serialization.SerializationException;
+import i5.las2peer.serialization.SerializeTools;
+import org.web3j.abi.datatypes.Function;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.tx.Transfer;
@@ -11,6 +18,10 @@ import org.web3j.utils.Convert;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
+import java.util.Arrays;
+import java.util.Collections;
+
+import static org.web3j.utils.Numeric.hexStringToByteArray;
 
 /**
  * Facade providing simple read/write access to the registry smart
@@ -52,19 +63,45 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 	}
 
 	/**
-	 * Register a user name and attach it to an agent ID.
+	 * Register an Ethereum agent in the blockchain.
 	 *
-	 * This entry will be owned by the Ethereum address associated with
-	 * the credentials used in the constructor.
+	 * This will register the user (login) name to the agent's Ethereum
+	 * account and store some additional fields that help others verify
+	 * the user's identity. (E.g., the las2peer public key is stored in
+	 * order to verify message signatures etc.)
 	 *
-	 * @param name user name consisting of 1 to 32 Unicode characters
-	 * @param agentId 128 character las2peer agent ID
+	 * As with the other delegated registry methods, the registration
+	 * transaction itself is performed by the node operator; but the agent's
+	 * credentials are used to sign a message consenting to the registration.
+	 * The registry smart contracts verify that signature and perform the
+	 * registration as if the transaction came directly from the agent.
+	 * (This simply means that the user name is registered to the agent's
+	 * account, not the node operator's.)
+	 *
+	 * This means that the node operator pays the transaction fees.
 	 */
-	public void registerUser(String name, String agentId) throws EthereumException {
-		// TODO: change agentId field
+	public void registerUser(EthereumAgent agent) throws EthereumException, AgentLockedException,
+			SerializationException {
+		// TODO: check that this encoding is appropriate
+		//       (e.g., is there a more space-efficient way to store the public key? probably.)
+		// TODO: reconsider which fields are actually strictly necessary
+		//       (e.g., since we have login name and pubkey, do we really need the agentId? what for?)
+		byte[] name = Util.padAndConvertString(agent.getLoginName(), 32);
+		byte[] agentId = Util.padAndConvertString(agent.getIdentifier(), 128);
+		byte[] publicKey = SerializeTools.serialize(agent.getPublicKey());
+
+		final Function function = new Function(
+				UserRegistry.FUNC_REGISTER,
+				Arrays.asList(new org.web3j.abi.datatypes.generated.Bytes32(name),
+						new org.web3j.abi.datatypes.DynamicBytes(agentId),
+						new org.web3j.abi.datatypes.DynamicBytes(publicKey)),
+				Collections.emptyList());
+
+		String consentee = agent.getEthereumAddress();
+		byte[] signature = SignatureUtils.signFunctionCall(function, agent.getEthereumCredentials());
+
 		try {
-			contracts.userRegistry.register(Util.padAndConvertString(name, 32),
-				Util.padAndConvertString(agentId, 128)).send();
+			contracts.userRegistry.delegatedRegister(name, agentId, publicKey, consentee, signature).send();
 		} catch (Exception e) {
 			throw new EthereumException("Could not register user", e);
 		}
@@ -72,12 +109,26 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 
 	/**
 	 * Register a service name to the given author.
+	 *
+	 * The registration call is delegated, see description of
+	 * {@link #registerUser(EthereumAgent)} for details.
+	 *
 	 * @param serviceName service (package) name of arbitrary length
-	 * @param authorName user name consisting of 1 to 32 Unicode characters
+	 * @param agent Ethereum agent of the service author
 	 */
-	public void registerService(String serviceName, String authorName) throws EthereumException {
+	public void registerService(String serviceName, EthereumAgent agent) throws EthereumException,
+			AgentLockedException {
+		byte[] authorName = Util.padAndConvertString(agent.getLoginName(), 32);
+
+		final Function function = new Function(ServiceRegistry.FUNC_REGISTER,
+				Arrays.asList(new org.web3j.abi.datatypes.Utf8String(serviceName),
+						new org.web3j.abi.datatypes.generated.Bytes32(authorName)), Collections.emptyList());
+
+		String consentee = agent.getEthereumAddress();
+		byte[] signature = SignatureUtils.signFunctionCall(function, agent.getEthereumCredentials());
+
 		try {
-			contracts.serviceRegistry.register(serviceName, Util.padAndConvertString(authorName, 32)).send();
+			contracts.serviceRegistry.delegatedRegister(serviceName, authorName, consentee, signature).send();
 		} catch (Exception e) {
 			throw new EthereumException("Failed to register service", e);
 		}
@@ -86,43 +137,59 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 	/**
 	 * Announce the release of a specific version of a service.
 	 * @param serviceName name of existing service
-	 * @param authorName name of author of this version
 	 * @param versionString version consisting of digits and up to two periods
+	 * @param author agent of author of this version
 	 */
-	// TODO: why ask for author here? isn't it implicitly the author/owner?
-	// I guess not if there's ownership/rights delegation, but for now it's pointless
-	public void releaseService(String serviceName, String authorName, String versionString) throws EthereumException {
+	public void releaseService(String serviceName, String versionString, EthereumAgent author)
+			throws EthereumException, AgentLockedException {
 		int[] version = Util.parseVersion(versionString);
-		releaseService(serviceName, authorName, version[0], version[1], version[2]);
+		releaseService(serviceName, version[0], version[1], version[2], author);
 	}
 
 	/**
 	 * Announce the release of a specific version of a service.
+	 *
+	 * The release call is delegated, see description of
+	 * {@link #registerUser(EthereumAgent)} for details.
+	 *
 	 * @param serviceName name of existing service
-	 * @param authorName name of author of this version
 	 * @param versionMajor major version, as used in semantic versioning
 	 * @param versionMinor minor version, as used in semantic versioning
 	 * @param versionPatch patch version, as used in semantic versioning
+	 * @param author agent of author of this version
 	 */
-	public void releaseService(String serviceName, String authorName,
-							   int versionMajor, int versionMinor, int versionPatch) throws EthereumException {
-		releaseService(serviceName, authorName, versionMajor, versionMinor, versionPatch, "");
-	}
-
-	private void releaseService(String serviceName, String authorName,
-								int versionMajor, int versionMinor, int versionPatch,
-								String dhtSupplement) throws EthereumException {
-		logger.fine("DEBUG: release called: " + serviceName); // DEBUG
+	public void releaseService(String serviceName, int versionMajor, int versionMinor, int versionPatch,
+			EthereumAgent author) throws EthereumException, AgentLockedException {
 		if (observer.getReleaseByVersion(serviceName, versionMajor, versionMinor, versionPatch) != null) {
 			logger.warning("Tried to submit duplicate release (name / version already exist), ignoring!");
-			// FIXME: handle in contracts, cause this is a race condition
+			// TODO: handle in contracts, cause this is a race condition
 			return;
 		}
 
+		byte[] authorName = Util.padAndConvertString(author.getLoginName(), 32);
+		byte[] hash = hexStringToByteArray("1234");
+		// TODO: hash parameter is unused. instead, we check whether the library NetworkArtifact signature matches the
+		// author (pubkey registered in the blockchain), and consider that good enough
+		// (this leaves *some* room for undesired behavior: an author modifying his node code and replacing an already
+		// released version, but the potential for abuse seems pretty low)
+
+		final Function function = new Function(
+				ServiceRegistry.FUNC_RELEASE,
+				Arrays.asList(new org.web3j.abi.datatypes.Utf8String(serviceName),
+						new org.web3j.abi.datatypes.generated.Bytes32(authorName),
+						new org.web3j.abi.datatypes.generated.Uint256(versionMajor),
+						new org.web3j.abi.datatypes.generated.Uint256(versionMinor),
+						new org.web3j.abi.datatypes.generated.Uint256(versionPatch),
+						new org.web3j.abi.datatypes.DynamicBytes(hash)),
+				Collections.emptyList());
+
+		String consentee = author.getEthereumAddress();
+		byte[] signature = SignatureUtils.signFunctionCall(function, author.getEthereumCredentials());
+
 		try {
-			contracts.serviceRegistry.release(serviceName, Util.padAndConvertString(authorName, 32),
-				BigInteger.valueOf(versionMajor), BigInteger.valueOf(versionMinor), BigInteger.valueOf(versionPatch),
-				dhtSupplement).send();
+			contracts.serviceRegistry.delegatedRelease(serviceName, authorName,
+					BigInteger.valueOf(versionMajor), BigInteger.valueOf(versionMinor), BigInteger.valueOf(versionPatch),
+					hash, consentee, signature).send();
 		} catch (Exception e) {
 			throw new EthereumException("Failed to submit service release", e);
 		}
