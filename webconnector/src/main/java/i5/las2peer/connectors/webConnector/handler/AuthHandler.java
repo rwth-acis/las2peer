@@ -122,8 +122,17 @@ public class AuthHandler {
 		// register session, set cookie and send response
 		AgentSession session = connector.getOrCreateSession(agent);
 		boolean secureCookie = false; // FIXME DEBUG
-		NewCookie cookie = new NewCookie(WebConnector.COOKIE_SESSIONID_KEY, session.getSessionId(), "/", null, 1, null,
-				-1, null, secureCookie, true);
+		NewCookie cookie = new NewCookie(
+				WebConnector.COOKIE_SESSIONID_KEY,
+				session.getSessionId(),
+				"/",
+				null,
+				1,
+				null,
+				-1,
+				null,
+				secureCookie,
+				false);
 		JSONObject json = new JSONObject();
 		json.put("code", Status.OK.getStatusCode());
 		json.put("text", Status.OK.getStatusCode() + " - Login OK");

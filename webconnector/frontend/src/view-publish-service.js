@@ -48,6 +48,8 @@ class ServicePublishView extends PolymerElement {
       <iron-ajax id="ajaxUploadService"
                  method="POST"
                  url$="[[apiEndpoint]]/services/upload"
+                 headers='{"Access-Control-Allow-Origin": "http://localhost:8081", "Access-Control-Allow-Credentials": "true"}'
+                 with-credentials="true"
                  handle-as="json"
                  on-response="_handleUploadServiceResponse"
                  on-error="_handleError"

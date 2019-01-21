@@ -88,7 +88,7 @@ public class WebConnector extends Connector {
 	// default: stored and generated in file "etc/WebConnector-{{hostname}}.secret"
 	protected String sslKeyPassword;
 
-	public static final String DEFAULT_CROSS_ORIGIN_RESOURCE_DOMAIN = "*";
+	public static final String DEFAULT_CROSS_ORIGIN_RESOURCE_DOMAIN = "http://localhost:8081"; // FIXME DEBUG
 	protected String crossOriginResourceDomain = DEFAULT_CROSS_ORIGIN_RESOURCE_DOMAIN;
 
 	public static final int DEFAULT_CROSS_ORIGIN_RESOURCE_MAX_AGE = 60;

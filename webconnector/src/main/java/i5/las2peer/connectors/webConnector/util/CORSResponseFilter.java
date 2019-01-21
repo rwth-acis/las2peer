@@ -23,9 +23,14 @@ public class CORSResponseFilter implements ContainerResponseFilter {
 		if (connector.isCrossOriginResourceSharing()) {
 			MultivaluedMap<String, Object> headers = responseContext.getHeaders();
 			headers.add("Access-Control-Expose-Headers", String.join(", ", headers.keySet()));
+
+			// this should probably check the request header origin, compare it against a whitelist (which should
+			// include the production and dev environment hosts), and send back the same host (if allowed)
 			headers.add("Access-Control-Allow-Origin", connector.getCrossOriginResourceDomain());
+
 			headers.add("Access-Control-Max-Age", String.valueOf(connector.getCrossOriginResourceMaxAge()));
 			headers.add("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS");
+			headers.add("Access-Control-Allow-Credentials", "true"); // FIXME DEBUG
 			String aclRequestHeaders = requestContext.getHeaderString("Access-Control-Request-Headers");
 			if (aclRequestHeaders != null && !aclRequestHeaders.isEmpty()) {
 				headers.add("Access-Control-Allow-Headers", aclRequestHeaders);

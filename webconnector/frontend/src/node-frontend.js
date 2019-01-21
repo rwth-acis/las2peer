@@ -46,6 +46,8 @@ class NodeFrontend extends PolymerElement {
     return html`
       <iron-ajax id="ajaxLogin"
                  url$="[[apiEndpoint]]/auth/login"
+                 headers='{"Access-Control-Allow-Origin": "http://localhost:8081", "Access-Control-Allow-Credentials": "true"}'
+                 with-credentials="true"
                  handle-as="json"
                  on-response="_handleLoginResponse"
                  on-error="_handleError"
@@ -63,7 +65,6 @@ class NodeFrontend extends PolymerElement {
                  on-response="_handleValidateResponse"
                  on-error="_handleError"
                  loading="{{_submittingLogin}}"></iron-ajax>
-
 
       <style>
         :host {
@@ -221,7 +222,7 @@ class NodeFrontend extends PolymerElement {
       page: { type: String, reflectToAttribute: true, observer: '_pageChanged' },
       routeData: Object,
       subroute: Object,
-      apiEndpoint: { type: String, value: '/las2peer' },
+      apiEndpoint: { type: String, value: 'http://localhost:8080/las2peer' }, // DEBUG dont commit like this
       _agentId: { type: String, value: '' },
       _submittingLogin: { type: Boolean, value: false },
       _error: { type: Object, observer: '_errorChanged' },
