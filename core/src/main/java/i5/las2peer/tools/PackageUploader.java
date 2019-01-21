@@ -1,13 +1,11 @@
 package i5.las2peer.tools;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.Serializable;
+import java.io.*;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 import java.util.logging.Level;
 
@@ -15,9 +13,9 @@ import i5.las2peer.api.persistency.EnvelopeAccessDeniedException;
 import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.persistency.EnvelopeException;
 import i5.las2peer.api.persistency.EnvelopeNotFoundException;
+import i5.las2peer.api.security.Agent;
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
-import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.classLoaders.libraries.LibraryIdentifier;
 import i5.las2peer.classLoaders.libraries.LoadedNetworkLibrary;
@@ -44,27 +42,50 @@ public class PackageUploader {
 
 	}
 
+	/** @see #uploadServicePackage(PastryNodeImpl, String, String, String, String) */
+	public static void uploadServicePackage(PastryNodeImpl node, String serviceJarFilename,
+			String developerAgentXMLFilename, String developerPassword)
+			throws ServicePackageException, EnvelopeAlreadyExistsException {
+		uploadServicePackage(node, serviceJarFilename, developerAgentXMLFilename, developerPassword, null);
+	}
+
+	/**
+	 * @param serviceJarFilename The service jar that should be uploaded.
+	 * @param developerAgentXMLFilename The developers agent, who is responsible for this service.
+	 * @param developerPassword The password for the developers agent.
+	 * @see #uploadServicePackage(PastryNodeImpl, JarInputStream, AgentImpl, String)
+	 */
+	public static void uploadServicePackage(PastryNodeImpl node, String serviceJarFilename,
+			String developerAgentXMLFilename, String developerPassword)
+			throws ServicePackageException, EnvelopeAlreadyExistsException {
+		// early verify the developer agent to avoid needless heavy duty jar parsing
+		AgentImpl devAgent = unlockDeveloperAgent(developerAgentXMLFilename, developerPassword);
+
+		File file = new File(serviceJarFilename);
+		try (
+			InputStream inputStream = new FileInputStream(file);
+			JarInputStream jarInputStream = new JarInputStream(inputStream)
+		) {
+			uploadServicePackage(node, jarInputStream, devAgent);
+		} catch (IOException e) {
+			logger.log(Level.SEVERE, "Exception while reading jar file", e);
+		}
+	}
+
 	/**
 	 * Uploads the complete service (jar) and all its dependencies into the given nodes shared storage to be used for
 	 * network class loading. The dependencies are read from the "Import-Library" statement inside the jars manifest
 	 * file. All the files extracted from the jars are signed with the given developers agent to prevent manipulations.
-	 * 
+	 *
 	 * @param node The node storage, where the files should be uploaded into.
-	 * @param serviceJarFilename The service jar that should be uploaded.
-	 * @param developerAgentXMLFilename The developers agent, who is responsible for this service.
-	 * @param developerPassword The password for the developers agent.
 	 * @throws ServicePackageException If an issue occurs with the service jar itself or its dependencies (jars).
 	 */
-	public static void uploadServicePackage(PastryNodeImpl node, String serviceJarFilename,
-			String developerAgentXMLFilename, String developerPassword) throws ServicePackageException {
-		// early verify the developer agent to avoid needless heavy duty jar parsing
-		AgentImpl devAgent = unlockDeveloperAgent(developerAgentXMLFilename, developerPassword);
-		JarFile serviceJar = null;
+	public static void uploadServicePackage(PastryNodeImpl node, JarInputStream jarInputStream, AgentImpl devAgent)
+			throws ServicePackageException, EnvelopeAlreadyExistsException {
 		try {
 			long uploadStart = System.currentTimeMillis();
-			serviceJar = new JarFile(serviceJarFilename);
 			// read general service information from jar manifest
-			Manifest manifest = serviceJar.getManifest();
+			Manifest manifest = jarInputStream.getManifest();
 			if (manifest == null) {
 				throw new ServicePackageException("Service jar package contains no manifest file");
 			}
@@ -80,33 +101,32 @@ public class PackageUploader {
 				throw new ServicePackageException("No service version value in manifest file. Please specify '"
 						+ LibraryIdentifier.MANIFEST_LIBRARY_VERSION_ATTRIBUTE + "'");
 			}
+
 			// read files from jar and generate hashes
-			HashMap<String, byte[]> depHashes = new HashMap<>();
-			HashMap<String, byte[]> jarFiles = new HashMap<>();
-			Enumeration<JarEntry> jarEntries = serviceJar.entries();
-			while (jarEntries.hasMoreElements()) {
-				JarEntry entry = jarEntries.nextElement();
+			Map<String, byte[]> depHashes = new HashMap<>();
+			Map<String, byte[]> jarFiles = new HashMap<>();
+			JarEntry entry;
+			while ((entry = jarInputStream.getNextJarEntry()) != null) {
 				if (!entry.isDirectory()) {
-					byte[] bytes = SimpleTools.toByteArray(serviceJar.getInputStream(entry));
+					byte[] bytes = SimpleTools.toByteArray(jarInputStream);
+					jarInputStream.closeEntry();
 					byte[] hash = CryptoTools.getSecureHash(bytes);
 					String filename = entry.getName();
 					depHashes.put(filename, hash);
 					jarFiles.put(filename, bytes);
 				}
 			}
+			jarInputStream.close();
+
 			uploadServicePackage(node, serviceName, serviceVersion, depHashes, jarFiles, devAgent);
 			long uploadTime = System.currentTimeMillis() - uploadStart;
-			logger.info("Service package '" + serviceJarFilename + "' uploaded in " + uploadTime + " ms");
-		} catch (Exception e) {
+			logger.info("Service package '" + serviceName + "' uploaded in " + uploadTime + " ms");
+		} catch (EnvelopeAlreadyExistsException e) {
+			logger.log(Level.SEVERE, "Service package already exists!", e);
+			throw e;
+		} catch (IOException|AgentException|SerializationException|EnvelopeException|CryptoException e) {
 			logger.log(Level.SEVERE, "Service package upload failed! " + e.toString(), e);
-		} finally {
-			if (serviceJar != null) {
-				try {
-					serviceJar.close();
-				} catch (IOException e) {
-					logger.log(Level.SEVERE, "Exception while closing jar file", e);
-				}
-			}
+			e.printStackTrace();
 		}
 	}
 
@@ -139,12 +159,35 @@ public class PackageUploader {
 		}
 
 		if (node instanceof EthereumNode) {
-			if (!(devAgent instanceof EthereumAgent)) {
-				throw new AgentException("Cannot use non-Ethereum agent to upload services on this Ethereum-enabled node!");
-			}
-			((EthereumNode) node).registerServiceInBlockchain(serviceName, serviceVersion, (EthereumAgent) devAgent);
+			registerService((EthereumNode) node, serviceName, serviceVersion, devAgent);
 		}
+		storeServiceFiles(node, jarFiles);
+		LibraryIdentifier libId = storeServiceMetadata(node, serviceName, serviceVersion, depHashes, devAgent);
+		EnvelopeVersion versionEnv = fetchOrCreateVersionsEnvelope(node, serviceName, devAgent, libId);
+		node.storeEnvelope(versionEnv, devAgent);
+	}
 
+	private static void registerService(EthereumNode node, String serviceName, String serviceVersion,
+			AgentImpl devAgent)
+			throws AgentException, EnvelopeException, CryptoException, SerializationException {
+		if (!(devAgent instanceof EthereumAgent)) {
+			throw new AgentException("Cannot use non-Ethereum agent to upload services on this Ethereum-enabled node!");
+		}
+		node.registerServiceInBlockchain(serviceName, serviceVersion, (EthereumAgent) devAgent);
+	}
+
+	private static void storeServiceFiles(PastryNodeImpl node, Map<String, byte[]> jarFiles) throws EnvelopeException {
+		// TODO upload all files async to the network ignore already existing files
+		for (Entry<String, byte[]> entry : jarFiles.entrySet()) {
+			logger.info("publishing file '" + entry.getKey() + "' from jar");
+			node.storeHashedContent(entry.getValue());
+		}
+		// TODO wait for all async uploads
+	}
+
+	private static LibraryIdentifier storeServiceMetadata(PastryNodeImpl node, String serviceName,
+			String serviceVersion, Map<String, byte[]> depHashes, AgentImpl devAgent)
+			throws SerializationException, CryptoException, EnvelopeException, ServicePackageException {
 		LibraryIdentifier libId = new LibraryIdentifier(serviceName, serviceVersion);
 		// store metadata envelope for service
 		LoadedNetworkLibrary netLib = new LoadedNetworkLibrary(node, libId, depHashes);
@@ -157,17 +200,15 @@ public class PackageUploader {
 			node.storeEnvelope(libEnv, devAgent);
 		} catch (EnvelopeAlreadyExistsException e) {
 			// TODO actually compare old and new service version to determine exact version change required
-			throw new ServicePackageException(
-					"Service package upload failed! Version is already known in the network. To update increase version number",
-					e);
+			throw new ServicePackageException("Service package upload failed! Version is already known in the network. To update increase version number", e);
 		}
-		// TODO upload all files async to the network ignore already existing files
-		for (Entry<String, byte[]> entry : jarFiles.entrySet()) {
-			logger.info("publishing file '" + entry.getKey() + "' from jar");
-			node.storeHashedContent(entry.getValue());
-		}
-		// TODO wait for all async uploads
-		// add service version to general service envelope
+
+		return libId;
+	}
+
+	private static EnvelopeVersion fetchOrCreateVersionsEnvelope(PastryNodeImpl node, String serviceName,
+			AgentImpl devAgent, LibraryIdentifier libId)
+			throws EnvelopeException, CryptoException, SerializationException, ServicePackageException {
 		String envVersionId = SharedStorageRepository.getLibraryVersionsEnvelopeIdentifier(serviceName);
 		logger.info("publishing version information to '" + envVersionId + "'");
 		// fetch or create versions envelope
@@ -191,8 +232,6 @@ public class PackageUploader {
 		} catch (EnvelopeAccessDeniedException e) {
 			throw new ServicePackageException("Unencrypted content in service versions envelope expected", e);
 		}
-		// store envelope with service version information
-		node.storeEnvelope(versionEnv, devAgent);
+		return versionEnv;
 	}
-
 }

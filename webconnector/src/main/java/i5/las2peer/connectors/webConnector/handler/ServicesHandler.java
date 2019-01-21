@@ -3,22 +3,11 @@ package i5.las2peer.connectors.webConnector.handler;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ConcurrentMap;
-import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
-import java.util.jar.Manifest;
 
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.CookieParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.ServerErrorException;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -28,6 +17,7 @@ import i5.las2peer.registry.CredentialUtils;
 import i5.las2peer.registry.data.ServiceDeploymentData;
 import i5.las2peer.registry.data.ServiceReleaseData;
 import i5.las2peer.registry.exceptions.EthereumException;
+import i5.las2peer.tools.*;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 import org.glassfish.jersey.media.multipart.FormDataParam;
@@ -35,18 +25,13 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.persistency.EnvelopeNotFoundException;
 import i5.las2peer.classLoaders.ClassManager;
-import i5.las2peer.classLoaders.libraries.LibraryIdentifier;
 import i5.las2peer.classLoaders.libraries.SharedStorageRepository;
 import i5.las2peer.connectors.webConnector.WebConnector;
 import i5.las2peer.connectors.webConnector.util.AgentSession;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.persistency.EnvelopeVersion;
-import i5.las2peer.tools.CryptoTools;
-import i5.las2peer.tools.PackageUploader;
 import i5.las2peer.tools.PackageUploader.ServiceVersionList;
-import i5.las2peer.tools.ServicePackageException;
-import i5.las2peer.tools.SimpleTools;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.web3j.crypto.Credentials;
@@ -135,43 +120,18 @@ public class ServicesHandler {
 					"Service upload only available for " + PastryNodeImpl.class.getCanonicalName() + " Nodes",
 					Status.INTERNAL_SERVER_ERROR);
 		}
-		// create jar from inputstream
+
 		JarInputStream jarStream = new JarInputStream(jarfile);
-		// read general service information from jar manifest
-		Manifest manifest = jarStream.getManifest();
-		if (manifest == null) {
-			jarStream.close();
-			throw new BadRequestException("Service jar package contains no manifest file");
-		}
-		String serviceName = manifest.getMainAttributes().getValue(LibraryIdentifier.MANIFEST_LIBRARY_NAME_ATTRIBUTE);
-		String serviceVersion = manifest.getMainAttributes()
-				.getValue(LibraryIdentifier.MANIFEST_LIBRARY_VERSION_ATTRIBUTE);
-		// read files from jar and generate hashes
-		HashMap<String, byte[]> depHashes = new HashMap<>();
-		HashMap<String, byte[]> jarFiles = new HashMap<>();
-		JarEntry entry = null;
-		while ((entry = jarStream.getNextJarEntry()) != null) {
-			if (!entry.isDirectory()) {
-				byte[] bytes = SimpleTools.toByteArray(jarStream);
-				jarStream.closeEntry();
-				byte[] hash = CryptoTools.getSecureHash(bytes);
-				String filename = entry.getName();
-				depHashes.put(filename, hash);
-				jarFiles.put(filename, bytes);
-			}
-		}
-		jarStream.close();
+
 		try {
-			PackageUploader.uploadServicePackage(pastryNode, serviceName, serviceVersion, depHashes, jarFiles,
-					session.getAgent());
+			PackageUploader.uploadServicePackage(pastryNode, jarStream, session.getAgent());
 			JSONObject json = new JSONObject();
 			json.put("code", Status.OK.getStatusCode());
 			json.put("text", Status.OK.getStatusCode() + " - Service package upload successful");
 			json.put("msg", "Service package upload successful");
 			return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
 		} catch (EnvelopeAlreadyExistsException e) {
-			throw new BadRequestException("Version is already known in the network. To update increase version number",
-					e);
+			throw new BadRequestException("Version is already known in the network. To update increase version number", e);
 		} catch (ServicePackageException e) {
 			e.printStackTrace();
 			throw new BadRequestException("Service package upload failed", e);
