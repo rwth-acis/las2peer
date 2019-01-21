@@ -134,16 +134,23 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		}
 	}
 
-	/**
-	 * Announce the release of a specific version of a service.
-	 * @param serviceName name of existing service
-	 * @param versionString version consisting of digits and up to two periods
-	 * @param author agent of author of this version
-	 */
+	/** @see #releaseService(String, int, int, int, EthereumAgent, byte[]) */
 	public void releaseService(String serviceName, String versionString, EthereumAgent author)
 			throws EthereumException, AgentLockedException {
+		releaseService(serviceName, versionString, author, null);
+	}
+
+	/** @see #releaseService(String, int, int, int, EthereumAgent, byte[]) */
+	public void releaseService(String serviceName, String versionString, EthereumAgent author, byte[] supplementHash)
+			throws EthereumException, AgentLockedException {
 		int[] version = Util.parseVersion(versionString);
-		releaseService(serviceName, version[0], version[1], version[2], author);
+		releaseService(serviceName, version[0], version[1], version[2], author, supplementHash);
+	}
+
+	/** @see #releaseService(String, int, int, int, EthereumAgent, byte[]) */
+	public void releaseService(String serviceName, int versionMajor, int versionMinor, int versionPatch,
+			EthereumAgent author) throws EthereumException, AgentLockedException {
+		releaseService(serviceName, versionMajor, versionMinor, versionPatch, author, null);
 	}
 
 	/**
@@ -157,9 +164,11 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 	 * @param versionMinor minor version, as used in semantic versioning
 	 * @param versionPatch patch version, as used in semantic versioning
 	 * @param author agent of author of this version
+	 * @param supplementHash hash of supplemental data in
+	 *                                    shared storage
 	 */
 	public void releaseService(String serviceName, int versionMajor, int versionMinor, int versionPatch,
-			EthereumAgent author) throws EthereumException, AgentLockedException {
+			EthereumAgent author, byte[] supplementHash)throws EthereumException, AgentLockedException {
 		if (observer.getReleaseByVersion(serviceName, versionMajor, versionMinor, versionPatch) != null) {
 			logger.warning("Tried to submit duplicate release (name / version already exist), ignoring!");
 			// TODO: handle in contracts, cause this is a race condition
@@ -167,11 +176,12 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		}
 
 		byte[] authorName = Util.padAndConvertString(author.getLoginName(), 32);
-		byte[] hash = hexStringToByteArray("1234");
+
 		// TODO: hash parameter is unused. instead, we check whether the library NetworkArtifact signature matches the
 		// author (pubkey registered in the blockchain), and consider that good enough
 		// (this leaves *some* room for undesired behavior: an author modifying his node code and replacing an already
 		// released version, but the potential for abuse seems pretty low)
+		// NOTE: actually, hash is now (ab)used for supplement (which happens to also be a hash)
 
 		final Function function = new Function(
 				ServiceRegistry.FUNC_RELEASE,
@@ -180,7 +190,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 						new org.web3j.abi.datatypes.generated.Uint256(versionMajor),
 						new org.web3j.abi.datatypes.generated.Uint256(versionMinor),
 						new org.web3j.abi.datatypes.generated.Uint256(versionPatch),
-						new org.web3j.abi.datatypes.DynamicBytes(hash)),
+						new org.web3j.abi.datatypes.DynamicBytes(supplementHash)),
 				Collections.emptyList());
 
 		String consentee = author.getEthereumAddress();
@@ -189,7 +199,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		try {
 			contracts.serviceRegistry.delegatedRelease(serviceName, authorName,
 					BigInteger.valueOf(versionMajor), BigInteger.valueOf(versionMinor), BigInteger.valueOf(versionPatch),
-					hash, consentee, signature).send();
+					supplementHash, consentee, signature).send();
 		} catch (Exception e) {
 			throw new EthereumException("Failed to submit service release", e);
 		}

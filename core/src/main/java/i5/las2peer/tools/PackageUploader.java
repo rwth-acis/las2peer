@@ -1,6 +1,11 @@
 package i5.las2peer.tools;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.Serializable;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.jar.JarEntry;
@@ -32,6 +37,15 @@ import i5.las2peer.security.PassphraseAgentImpl;
 import i5.las2peer.serialization.MalformedXMLException;
 import i5.las2peer.serialization.SerializationException;
 
+// A NOTE ON THE "SUPPLEMENT":
+// The idea was that non-essential service registration info should not be stored directly on the blockchain but as a
+// hash referencing the shared storage. This is a good idea.
+// Executing it this way is pretty ugly though. Rather than adding some random JSON (of unknown / unchecked structure),
+// in a separate step, in a separate envelope, as a separate parameter, ... that data should simply be part of the JAR.
+// There is no need to treat it differently than any other file.
+// I'm doing this anyway, because it's a pragmatic solution and actually matches my proposal ...
+// But really this should be refactored!
+
 public class PackageUploader {
 
 	private static L2pLogger logger = L2pLogger.getInstance(PackageUploader.class);
@@ -53,10 +67,11 @@ public class PackageUploader {
 	 * @param serviceJarFilename The service jar that should be uploaded.
 	 * @param developerAgentXMLFilename The developers agent, who is responsible for this service.
 	 * @param developerPassword The password for the developers agent.
+	 * @param supplement additional, optional metadata
 	 * @see #uploadServicePackage(PastryNodeImpl, JarInputStream, AgentImpl, String)
 	 */
 	public static void uploadServicePackage(PastryNodeImpl node, String serviceJarFilename,
-			String developerAgentXMLFilename, String developerPassword)
+			String developerAgentXMLFilename, String developerPassword, String supplement)
 			throws ServicePackageException, EnvelopeAlreadyExistsException {
 		// early verify the developer agent to avoid needless heavy duty jar parsing
 		AgentImpl devAgent = unlockDeveloperAgent(developerAgentXMLFilename, developerPassword);
@@ -66,7 +81,7 @@ public class PackageUploader {
 			InputStream inputStream = new FileInputStream(file);
 			JarInputStream jarInputStream = new JarInputStream(inputStream)
 		) {
-			uploadServicePackage(node, jarInputStream, devAgent);
+			uploadServicePackage(node, jarInputStream, devAgent, supplement);
 		} catch (IOException e) {
 			logger.log(Level.SEVERE, "Exception while reading jar file", e);
 		}
@@ -78,10 +93,12 @@ public class PackageUploader {
 	 * file. All the files extracted from the jars are signed with the given developers agent to prevent manipulations.
 	 *
 	 * @param node The node storage, where the files should be uploaded into.
+	 * @param jarInputStream service JAR as JAR input stream
+	 * @param devAgent unlocked developer agent
 	 * @throws ServicePackageException If an issue occurs with the service jar itself or its dependencies (jars).
 	 */
-	public static void uploadServicePackage(PastryNodeImpl node, JarInputStream jarInputStream, AgentImpl devAgent)
-			throws ServicePackageException, EnvelopeAlreadyExistsException {
+	public static void uploadServicePackage(PastryNodeImpl node, JarInputStream jarInputStream, AgentImpl devAgent,
+			String supplement) throws ServicePackageException, EnvelopeAlreadyExistsException {
 		try {
 			long uploadStart = System.currentTimeMillis();
 			// read general service information from jar manifest
@@ -118,7 +135,7 @@ public class PackageUploader {
 			}
 			jarInputStream.close();
 
-			uploadServicePackage(node, serviceName, serviceVersion, depHashes, jarFiles, devAgent);
+			uploadServicePackage(node, serviceName, serviceVersion, depHashes, jarFiles, devAgent, supplement);
 			long uploadTime = System.currentTimeMillis() - uploadStart;
 			logger.info("Service package '" + serviceName + "' uploaded in " + uploadTime + " ms");
 		} catch (EnvelopeAlreadyExistsException e) {
@@ -150,7 +167,7 @@ public class PackageUploader {
 	}
 
 	public static void uploadServicePackage(PastryNodeImpl node, String serviceName, String serviceVersion,
-			Map<String, byte[]> depHashes, Map<String, byte[]> jarFiles, AgentImpl devAgent)
+			Map<String, byte[]> depHashes, Map<String, byte[]> jarFiles, AgentImpl devAgent, String supplement)
 			throws SerializationException, CryptoException, EnvelopeException, ServicePackageException, AgentException {
 		if (serviceName == null) {
 			throw new ServicePackageException("No service name given");
@@ -159,7 +176,7 @@ public class PackageUploader {
 		}
 
 		if (node instanceof EthereumNode) {
-			registerService((EthereumNode) node, serviceName, serviceVersion, devAgent);
+			registerService((EthereumNode) node, serviceName, serviceVersion, devAgent, supplement);
 		}
 		storeServiceFiles(node, jarFiles);
 		LibraryIdentifier libId = storeServiceMetadata(node, serviceName, serviceVersion, depHashes, devAgent);
@@ -168,12 +185,13 @@ public class PackageUploader {
 	}
 
 	private static void registerService(EthereumNode node, String serviceName, String serviceVersion,
-			AgentImpl devAgent)
+			AgentImpl devAgent, String supplement)
 			throws AgentException, EnvelopeException, CryptoException, SerializationException {
 		if (!(devAgent instanceof EthereumAgent)) {
 			throw new AgentException("Cannot use non-Ethereum agent to upload services on this Ethereum-enabled node!");
 		}
-		node.registerServiceInBlockchain(serviceName, serviceVersion, (EthereumAgent) devAgent);
+		byte[] supplementHash = storeSupplement(node, supplement);
+		node.registerServiceInBlockchain(serviceName, serviceVersion, (EthereumAgent) devAgent, supplementHash);
 	}
 
 	private static void storeServiceFiles(PastryNodeImpl node, Map<String, byte[]> jarFiles) throws EnvelopeException {
@@ -234,4 +252,16 @@ public class PackageUploader {
 		}
 		return versionEnv;
 	}
+
+	private static byte[] storeSupplement(PastryNodeImpl node, String supplement)
+		throws EnvelopeException, CryptoException {
+		if (supplement == null) {
+			supplement = "";
+		}
+		byte[] bytes = supplement.getBytes(StandardCharsets.UTF_8);
+		byte[] hash = CryptoTools.getSecureHash(bytes);
+		node.storeHashedContent(bytes);
+		return hash;
+	}
+
 }

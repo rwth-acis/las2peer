@@ -109,7 +109,7 @@ public class ServicesHandler {
 	@Path("/upload")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response handleServicePackageUpload(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId,
-			@FormDataParam("jarfile") InputStream jarfile) throws Exception {
+			@FormDataParam("jarfile") InputStream jarfile, @DefaultValue("") @FormDataParam("supplement") String supplement) throws Exception {
 		AgentSession session = connector.getSessionById(sessionId);
 		if (session == null) {
 			throw new BadRequestException("You have to be logged in to upload");
@@ -124,7 +124,7 @@ public class ServicesHandler {
 		JarInputStream jarStream = new JarInputStream(jarfile);
 
 		try {
-			PackageUploader.uploadServicePackage(pastryNode, jarStream, session.getAgent());
+			PackageUploader.uploadServicePackage(pastryNode, jarStream, session.getAgent(), supplement);
 			JSONObject json = new JSONObject();
 			json.put("code", Status.OK.getStatusCode());
 			json.put("text", Status.OK.getStatusCode() + " - Service package upload successful");

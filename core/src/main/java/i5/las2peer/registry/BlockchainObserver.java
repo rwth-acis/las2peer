@@ -212,7 +212,7 @@ class BlockchainObserver {
 					if (!txHasAlreadyBeenHandled(release.log.getTransactionHash())) {
 						String serviceName = lookupServiceName(release.nameHash);
 						ServiceReleaseData releaseData = new ServiceReleaseData(serviceName,
-								release.versionMajor, release.versionMinor, release.versionPatch, new byte[]{});
+								release.versionMajor, release.versionMinor, release.versionPatch, release.hash);
 
 						releases.computeIfAbsent(releaseData.getServiceName(), k -> new ArrayList<>());
 						releases.get(releaseData.getServiceName()).add(releaseData);

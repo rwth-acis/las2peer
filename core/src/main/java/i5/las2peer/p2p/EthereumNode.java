@@ -1,6 +1,7 @@
 package i5.las2peer.p2p;
 
 import i5.las2peer.api.p2p.ServiceNameVersion;
+import i5.las2peer.api.persistency.EnvelopeException;
 import i5.las2peer.api.security.*;
 import i5.las2peer.classLoaders.ClassManager;
 import i5.las2peer.classLoaders.libraries.BlockchainRepository;
@@ -16,7 +17,9 @@ import i5.las2peer.security.EthereumAgent;
 import i5.las2peer.serialization.SerializationException;
 
 import java.net.InetAddress;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Node implementation that extends the FreePastry-based node with
@@ -44,6 +47,9 @@ public class EthereumNode extends PastryNodeImpl {
 	private ReadWriteRegistryClient registryClient;
 	private String ethereumMnemonic;
 	private String ethereumPassword;
+
+	// cache for DHT supplement hash lookups
+	private Map<byte[], byte[]> hashToData = new HashMap<>();
 
 	private static L2pLogger logger = L2pLogger.getInstance(EthereumNode.class);
 
@@ -202,7 +208,7 @@ public class EthereumNode extends PastryNodeImpl {
 	 * Also registers the service name to the author, and registers the
 	 * author, if those have not already happened.
 	 */
-	public void registerServiceInBlockchain(String serviceName, String serviceVersion, EthereumAgent author)
+	public void registerServiceInBlockchain(String serviceName, String serviceVersion, EthereumAgent author, byte[] supplementHash)
 			throws AgentException, SerializationException {
 		if (author.isLocked()) {
 			throw new AgentLockedException("Cannot register service because Ethereum-enabled agent is locked.");
@@ -219,7 +225,7 @@ public class EthereumNode extends PastryNodeImpl {
 			}
 
 			logger.info("Registering service release '" + serviceName + "', v" + serviceVersion + " ...");
-			getRegistryClient().releaseService(serviceName, serviceVersion, author);
+			getRegistryClient().releaseService(serviceName, serviceVersion, author, supplementHash);
 		} catch (EthereumException e) {
 			logger.severe("FIXME Error while registering release: " + e);
 		}
@@ -253,6 +259,16 @@ public class EthereumNode extends PastryNodeImpl {
 
 		logger.fine("Service '" + name + "' not already known, registering ...");
 		getRegistryClient().registerService(name, author);
+	}
+
+	/** uses a cache in contrast to {@link i5.las2peer.p2p.PastryNodeImpl#fetchHashedContent(byte[])} */
+	@Override
+	public byte[] fetchHashedContent(byte[] hash) throws EnvelopeException {
+		if (!hashToData.containsKey(hash)) {
+			byte[] data = super.fetchHashedContent(hash);
+			hashToData.put(hash, data);
+		}
+		return hashToData.get(hash);
 	}
 
 	/** @return registry client using this agent's credentials */

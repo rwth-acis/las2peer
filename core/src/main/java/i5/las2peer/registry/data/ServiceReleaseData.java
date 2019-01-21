@@ -1,5 +1,7 @@
 package i5.las2peer.registry.data;
 
+import i5.las2peer.registry.Util;
+
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Objects;
@@ -9,14 +11,14 @@ public class ServiceReleaseData {
 	private BigInteger versionMajor;
 	private BigInteger versionMinor;
 	private BigInteger versionPatch;
-	private byte[] signature; // TODO
+	private byte[] supplementHash;
 
-	public ServiceReleaseData(String serviceName, BigInteger versionMajor, BigInteger versionMinor, BigInteger versionPatch, byte[] signature) {
+	public ServiceReleaseData(String serviceName, BigInteger versionMajor, BigInteger versionMinor, BigInteger versionPatch, byte[] supplementHash) {
 		this.serviceName = serviceName;
 		this.versionMajor = versionMajor;
 		this.versionMinor = versionMinor;
 		this.versionPatch = versionPatch;
-		this.signature = signature;
+		this.supplementHash = supplementHash;
 	}
 
 	public String getServiceName() {
@@ -39,9 +41,14 @@ public class ServiceReleaseData {
 		return versionPatch.intValue();
 	}
 
+	public byte[] getSupplementHash() {
+		return supplementHash;
+	}
+
 	@Override
 	public String toString() {
-		return "ServiceReleaseData(service name: " + this.getServiceName() + ", version: " + this.getVersion() + ")";
+		return "ServiceReleaseData(service name: " + getServiceName() + ", version: " + getVersion()
+				+ "; supp. hash: " + Util.bytesToHexString(getSupplementHash()) + ")";
 	}
 
 	@Override
@@ -53,13 +60,13 @@ public class ServiceReleaseData {
 				Objects.equals(versionMajor, that.versionMajor) &&
 				Objects.equals(versionMinor, that.versionMinor) &&
 				Objects.equals(versionPatch, that.versionPatch) &&
-				Arrays.equals(signature, that.signature);
+				Arrays.equals(supplementHash, that.supplementHash);
 	}
 
 	@Override
 	public int hashCode() {
 		int result = Objects.hash(serviceName, versionMajor, versionMinor, versionPatch);
-		result = 31 * result + Arrays.hashCode(signature);
+		result = 31 * result + Arrays.hashCode(supplementHash);
 		return result;
 	}
 }
