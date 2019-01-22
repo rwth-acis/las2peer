@@ -69,28 +69,36 @@ class ServicesView extends PolymerElement {
       <div class="card">
         <h2>Services in this Network</h2>
 
-        <template is="dom-repeat" items="[[_services]]">
-          <paper-card heading$="[[_getLatestName(item.releases)]]" style="width: 100%;margin-bottom: 1em" class="service">
-            <div class="card-content">
-              <div>Author: [[item.authorName]]</div>
-              <div>Latest version: [[_getLatestVersionNumber(item.releases)]]</div>
-              <p>[[_getLatestDescription(item.releases)]]</p>
-              <div><iron-icon icon="icons:archive" title="Part of package"></iron-icon> [[item.name]]</div>
-              <ul>
-                <template is="dom-repeat" items="[[_getLatestInstances(item.releases)]]">
-                  <li>
-                    <span class="node"><iron-icon icon="hardware:device-hub" title="Running on Node"></iron-icon> [[item.nodeId]]</span>
-                    <span class="time"><iron-icon icon="device:access-time" title="Last Announcement"></iron-icon> [[item.humanTime]]</span>
-                  </li>
-                </template>
-              </ul>
-            </div>
-            <div class="card-actions">
-                <paper-button on-click="startService" data-args$="[[item.name]].[[_getLatestDefaultClass(item.releases)]],[[_getLatestVersionNumber(item.releases)]]">Start on this Node</paper-button>
-                <a href$="[[_getLatestVcsUrl(item.releases)]]" hidden$="[[!_getLatestVcsUrl(item.releases)]]" target="_blank" tabindex="-1"><paper-button>View source code</paper-button></a>
-                <a href$="[[_getLatestFrontendUrl(item.releases)]]" hidden$="[[!_getLatestFrontendUrl(item.releases)]]" target="_blank" tabindex="-1"><paper-button>Open front-end</paper-button></a>
-            </div>
-          </paper-card>
+        <template is="dom-repeat" items="[[_services]]" as="service">
+          <template is="dom-repeat" items="[[_getLatestAsArray(service.releases)]]" as="release">
+            <!-- we actually just want a single item here: the latest release. but I don't know how to do that without abusing repeat like this -->
+            <paper-card heading$="[[release.supplement.name]]" style="width: 100%;margin-bottom: 1em" class="service">
+              <div class="card-content">
+                <div>Author: <span class="author">[[service.authorName]]</span></div>
+                <div>Latest version: <span class="version">[[release.version]]</span>, published <span class="timestamp">[[_toHumanDate(release.publicationEpochSeconds)]]</span></div>
+                <div>Release history:
+                  <template is="dom-repeat" items="[[_toArray(service.releases)]]" as="version">
+                    <span>[[version.name]] [[_toHumanDate(version.value.publicationEpochSeconds)]]</span>
+                  </template>
+                </div>
+                <p class="description">[[release.supplement.description]]</p>
+                <div class="package"><iron-icon icon="icons:archive" title="Part of package"></iron-icon>[[service.name]]</div>
+                <ul>
+                  <template is="dom-repeat" items="[[release.instances]]" as="instance">
+                    <li>
+                      <span class="node"><iron-icon icon="hardware:device-hub" title="Running on Node"></iron-icon> [[instance.nodeId]]</span>
+                      <span class="time"><iron-icon icon="device:access-time" title="Last Announcement"></iron-icon> [[_toHumanDate(instance.announcementEpochSeconds)]]</span>
+                    </li>
+                  </template>
+                </ul>
+              </div>
+              <div class="card-actions">
+                  <paper-button on-click="startService" data-args$="[[service.name]].[[release.supplement.class]],[[release.version]]">Start on this Node</paper-button>
+                  <a href$="[[release.supplement.vcsUrl]]" hidden$="[[!release.supplement.vcsUrl]]" target="_blank" tabindex="-1"><paper-button>View source code</paper-button></a>
+                  <a href$="[[release.supplement.frontendUrl]]" hidden$="[[!release.supplement.frontendUrl]]" target="_blank" tabindex="-1"><paper-button>Open front-end</paper-button></a>
+              </div>
+            </paper-card>
+          </template>
         </template>
       </div>
 
@@ -144,8 +152,10 @@ class ServicesView extends PolymerElement {
     return Object.keys(obj).map(k => ({ name: k, value: obj[k] }));
   }
 
-  // is this really the only way to get that stuff into the template? no nested function?
-  // why the hell is this so ugly?? surely that's not right.
+  _toHumanDate(epochSeconds) {
+    return new Date(epochSeconds * 1000).toLocaleString();
+  }
+
   _getLatestVersionNumber(obj) {
     // FIXME: use proper semver sort
     let latestVersion = Object.keys(obj).sort().reverse()[0];
@@ -153,35 +163,15 @@ class ServicesView extends PolymerElement {
   }
 
   _getLatest(obj) {
-    return obj[this._getLatestVersionNumber(obj)];
+    let latestVersionNumber = this._getLatestVersionNumber(obj);
+    let latestRelease = obj[latestVersionNumber];
+    // version number is key, let's add it so we can access it
+    latestRelease.version = latestVersionNumber;
+    return latestRelease;
   }
 
-  _getLatestInstances(obj) {
-    return this._getLatest(obj).instances
-  }
-
-  _getLatestSupplement(obj) {
-    return this._getLatest(obj).supplement;
-  }
-
-  _getLatestName(obj) {
-    return this._getLatest(obj).supplement.name;
-  }
-
-  _getLatestDescription(obj) {
-    return this._getLatest(obj).supplement.description;
-  }
-
-  _getLatestDefaultClass(obj) {
-    return this._getLatest(obj).supplement.class;
-  }
-
-  _getLatestVcsUrl(obj) {
-    return this._getLatest(obj).supplement.vcsUrl;
-  }
-
-  _getLatestFrontendUrl(obj) {
-    return this._getLatest(obj).supplement.frontendUrl;
+  _getLatestAsArray(obj) {
+    return [this._getLatest(obj)];
   }
 
   _keyPressedUploadService(event) {
