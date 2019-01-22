@@ -86,9 +86,21 @@ class AgentsView extends PolymerElement {
 
       <div class="card">
         <h1>Agents</h1>
-        <h2 on-click="toggleCreateAgent" style="cursor: pointer">Create Agent</h2>
-        <iron-collapse id="collapseCreateAgent">
-          Create a new user agent and upload it to the network for later usage.
+        <h2 on-click="toggleCreateAgent" style="cursor: pointer">Register Agent</h2>
+        <iron-collapse opened id="collapseCreateAgent">
+          <p>
+            Create a new user agent and register it in the network for later usage.
+            You will then be able to log in with your username and password.
+          </p>
+          <p>
+            By specifying an Ethereum mnemonic phrase, you can use an existing Ethereum account.
+            If you leave it blank, a new account will be created for you.
+            <!-- The seed phrase is stored in the (publicly accessible) agent file.
+                 The key pair is generated from the phrase + the password.
+                 This follows BIP39 but not the HD Wallet standards, since Web3J does not fully support those right now.
+                 You can POST a mnemonic to .../services/registry/mnemonic to see the generated key pair.
+            -->
+          </p>
           <iron-form on-keypress="_keyPressedCreateAgent">
             <form>
               <paper-input label="username (optional)" id="createAgentUsername" disabled="[[_working]]" value=""></paper-input>
@@ -123,6 +135,8 @@ class AgentsView extends PolymerElement {
           </iron-form>
           <div id="uploadAgentMsg" style="font-weight: bold"></div>
         </iron-collapse>
+
+        <!-- FIXME: passphrase change currently breaks ETH key generation (needs a second layer, an "inner" password)
         <h2 on-click="toggleChangePassphrase" style="cursor: pointer">Change Passphrase</h2>
         <iron-collapse id="collapseChangePassphrase">
           <iron-form on-keypress="_keyPressedChangePassphrase">
@@ -136,6 +150,8 @@ class AgentsView extends PolymerElement {
           </iron-form>
           <div id="changePassphraseMsg" style="font-weight: bold"></div>
         </iron-collapse>
+        -->
+
         <h2 on-click="toggleCreateGroup" style="cursor: pointer">Create Group</h2>
         <iron-collapse id="collapseCreateGroup">
           <h3>Members</h3>

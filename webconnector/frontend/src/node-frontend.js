@@ -192,7 +192,7 @@ class NodeFrontend extends PolymerElement {
             </template>
           </dom-if>
 
-          <div hidden$="[[toBool(_oidcUser)]]">To register, use the <a name="view-agents" href="[[rootPath]]view-agents">Agents</a> tab.</div>
+          <div hidden$="[[toBool(_oidcUser)]]">To register, use the <a dialog-dismiss name="view-agents" href="[[rootPath]]view-agents">Agents</a> tab.</div>
         </paper-dialog>
 
         <paper-dialog id="las2peerErrorDialog">

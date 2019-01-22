@@ -34,10 +34,10 @@ class StatusView extends PolymerElement {
 
       <div class="card">
         <h1>Node Status <paper-icon-button icon="refresh" on-tap="refreshStatus"></paper-icon-button></h1>
-        node id: [[_status.nodeId]]<br>
-        cpu load: [[_status.cpuLoad]]%<br>
-        local storage: <meter value="[[_status.storageSize]]" min="0" max="[[_status.maxStorageSize]]"></meter> [[_status.storageSizeStr]] of [[_status.maxStorageSizeStr]] used<br>
-        uptime: [[_status.uptime]]
+        Node ID: [[_status.nodeId]]<br>
+        CPU Load: [[_status.cpuLoad]]%<br>
+        Local Storage: <meter value="[[_status.storageSize]]" min="0" max="[[_status.maxStorageSize]]"></meter> [[_status.storageSizeStr]] of [[_status.maxStorageSizeStr]] used<br>
+        Uptime: [[_status.uptime]]
         <h3>Known Nodes In Network</h3>
         <ul>
           <template is="dom-repeat" items="[[_status.otherNodes]]">
@@ -45,6 +45,7 @@ class StatusView extends PolymerElement {
           </template>
         </ul>
 
+        <!--
         <h3>Local Running Services</h3>
         <table width="100%">
           <tr><th>Name</th><th width="10%">Version</th><th style="width: 1%; white-space: nowrap">Swagger</th></tr>
@@ -60,9 +61,10 @@ class StatusView extends PolymerElement {
             </tr>
           </template>
         </table>
+        -->
 
         <h2>Secure Node SSL Encryption</h2>
-        <p>If you trust this node, it's recommended to import the nodes certificate authority into your browsers trust store. You can download the certificate authority file <a href="[[apiEndpoint]]//cacert">here</a>.</p>
+        <p>If you trust this node, it’s recommended to import the node’s certificate authority into your browsers trust store. You can download the certificate authority file <a href="[[apiEndpoint]]/cacert">here</a>.</p>
       </div>
     `;
   }

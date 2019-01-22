@@ -4,14 +4,24 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.*;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import java.util.jar.JarInputStream;
+import java.util.stream.Collectors;
+import java.util.jar.Manifest;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import i5.las2peer.api.p2p.ServiceNameVersion;
+import i5.las2peer.api.persistency.EnvelopeException;
+import i5.las2peer.api.security.AgentException;
 import i5.las2peer.p2p.EthereumNode;
 import i5.las2peer.registry.CredentialUtils;
 import i5.las2peer.registry.data.ServiceDeploymentData;
@@ -138,18 +148,64 @@ public class ServicesHandler {
 		}
 	}
 
+	@POST
+	@Path("/start")
+	public Response handleStartService(@QueryParam("serviceName") String serviceName, @QueryParam("version") String version)
+			throws CryptoException, AgentException {
+		// TODO: uhhh, about that password -- is that relevant??
+		ethereumNode.startService(ServiceNameVersion.fromString(serviceName + "@" + version), "foofoo");
+		return Response.ok().build();
+	}
+
 	@GET
 	@Path("/services")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String getAllServiceInfo() {
-		// a bit silly to convert the JSON stuff back and forth, but whatever
-		return new JSONObject()
-				//.appendField("names", parseJson(getRegisteredServices()))
-				.appendField("authors", parseJson(getServiceAuthors()))
-				.appendField("releases", parseJson(getServiceReleases()))
-				.appendField("deployments", parseJson(getServiceDeployments()))
-		        .toJSONString();
+	public String getStructuredServiceData() throws EnvelopeException {
+		// the fact that so much conversion / data restructuring is done here is a hint that
+		// maybe the data should be stored in this way in the first place ...
+		// TODO: refactor this (into EthereumNode or Registry?)
+		Map<String, String> servicesWithAuthors = ethereumNode.getRegistryClient().getServiceAuthors();
+		Map<String, List<ServiceDeploymentData>> allDeployments = ethereumNode.getRegistryClient().getServiceDeployments();
+
+		JSONArray services = new JSONArray();
+		for (Map.Entry<String, String> serviceAuthorPair : servicesWithAuthors.entrySet()) {
+			String serviceName = serviceAuthorPair.getKey();
+			String authorName = serviceAuthorPair.getValue();
+
+			Map<String, JSONObject> releasesByVersion = new HashMap<>();
+			for (ServiceReleaseData release : ethereumNode.getRegistryClient().getServiceReleases().get(serviceName)) {
+				byte[] rawSupplement = ethereumNode.fetchHashedContent(release.getSupplementHash());
+				JSONObject supplement = parseJson(new String(rawSupplement, StandardCharsets.UTF_8));
+
+				List<ServiceDeploymentData> deploymentsOfRelease = allDeployments.getOrDefault(serviceName, Collections.emptyList())
+						.stream().filter(d -> d.getVersion().equals(release.getVersion())).collect(Collectors.toList());
+
+				JSONArray deploymentsJson = new JSONArray();
+				for (ServiceDeploymentData deployment : deploymentsOfRelease) {
+					deploymentsJson.add(new JSONObject()
+							.appendField("className", deployment.getServiceClassName())
+							.appendField("nodeId", deployment.getNodeId())
+							.appendField("humanTime", deployment.getTime())
+							.appendField("unixSeconds", deployment.getTimestamp())
+					);
+				}
+
+				releasesByVersion.put(release.getVersion(), new JSONObject()
+						.appendField("instances", deploymentsJson)
+						.appendField("supplement", supplement));
+			}
+
+			services.appendElement(new JSONObject()
+					.appendField("name", serviceName)
+					.appendField("authorName", authorName)
+					.appendField("releases", new JSONObject(releasesByVersion))
+			);
+		}
+
+		return services.toJSONString();
 	}
+
+	// TODO: decide which of the below are worth keeping
 
 	@GET
 	@Path("/names")
@@ -221,6 +277,7 @@ public class ServicesHandler {
 		return jsonObject.toJSONString();
 	}
 
+	// TODO: disable when no longer needed for testing
 	@POST
 	@Path("/registry/faucet")
 	@Produces(MediaType.APPLICATION_JSON)

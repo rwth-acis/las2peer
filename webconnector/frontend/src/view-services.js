@@ -11,8 +11,13 @@
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 import '@polymer/iron-ajax/iron-ajax.js';
 import '@polymer/iron-form/iron-form.js';
-import '@polymer/paper-input/paper-input.js';
+import '@polymer/iron-icon/iron-icon.js';
+import '@polymer/iron-icons/iron-icons.js';
+import '@polymer/iron-icons/device-icons.js';
+import '@polymer/iron-icons/hardware-icons.js';
+import '@polymer/paper-card/paper-card.js';
 import '@polymer/paper-button/paper-button.js';
+import '@polymer/paper-input/paper-input.js';
 import './shared-styles.js';
 
 class ServicesView extends PolymerElement {
@@ -39,6 +44,12 @@ class ServicesView extends PolymerElement {
                  on-response="_handleUploadServiceResponse"
                  on-error="_handleError"
                  loading = "{{_submittingUpload}}"></iron-ajax>
+      <iron-ajax id="ajaxStartService"
+                 method="POST"
+                 url$="[[apiEndpoint]]/services/start"
+                 handle-as="text"
+                 on-response="_handleStartServiceResponse"
+                 on-error="_handleError"></iron-ajax>
 
       <style include="shared-styles">
         :host {
@@ -46,10 +57,63 @@ class ServicesView extends PolymerElement {
 
           padding: 10px;
         }
+        .service .node, .service .time {
+          width: 15em;
+          display: inline-block;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
       </style>
 
       <div class="card">
-        <h1>las2peer Services</h1>
+        <h2>Services in this Network</h2>
+
+        <template is="dom-repeat" items="[[_services]]">
+          <paper-card heading$="[[_getLatestName(item.releases)]]" style="width: 100%;margin-bottom: 1em" class="service">
+            <div class="card-content">
+              <div>Author: [[item.authorName]]</div>
+              <div>Latest version: [[_getLatestVersionNumber(item.releases)]]</div>
+              <p>[[_getLatestDescription(item.releases)]]</p>
+              <div><iron-icon icon="icons:archive" title="Part of package"></iron-icon> [[item.name]]</div>
+              <ul>
+                <template is="dom-repeat" items="[[_getLatestInstances(item.releases)]]">
+                  <li>
+                    <span class="node"><iron-icon icon="hardware:device-hub" title="Running on Node"></iron-icon> [[item.nodeId]]</span>
+                    <span class="time"><iron-icon icon="device:access-time" title="Last Announcement"></iron-icon> [[item.humanTime]]</span>
+                  </li>
+                </template>
+              </ul>
+              <!--
+              <ul>
+                <template is="dom-repeat" items="[[_toArray(item.releases)]]">
+                  <li>[[item.name]]
+                    <ul>
+                      <template is="dom-repeat" items="[[item.value]]">
+                        <li>
+                          <paper-card heading="[[item.className]]">
+                            <div class="card-content">
+                              <div class="node"><iron-icon icon="hardware:device-hub" title="Running on Node"></iron-icon> [[item.nodeId]]</div>
+                              <div><iron-icon icon="device:access-time" title="Last Announcement"></iron-icon> [[item.time]]</div>
+                            </div>
+                          </paper-card>
+                        </li>
+                      </template>
+                    </ul>
+                  </li>
+                </template>
+              </ul>
+              -->
+            </div>
+            <div class="card-actions">
+                <paper-button on-click="startService" data-args$="[[item.name]].[[_getLatestDefaultClass(item.releases)]],[[_getLatestVersionNumber(item.releases)]]">Start on this Node</paper-button>
+            </div>
+          </paper-card>
+        </template>
+
+        <!--
+        <hr/>
+
         <h2>Registered Services</h2>
         These service names have been registered by some author on the blockchain-based service registry:
         <ul>
@@ -96,11 +160,19 @@ class ServicesView extends PolymerElement {
           <li><strong>[[item.name]]</strong>: “[[item.value]]”</li>
           </template>
         </ul>
+        -->
+      </div>
 
-        <h2>Upload Service</h2>
-        Upload a service to the network.
+      <div class="card">
+        <h2>Upload and Register Service</h2>
+        <p>Release a service in the network by uploading its JAR file and providing some metadata.<p>
+        <p>The service package name will automatically be registered to your name, if it isn’t already. Further releases can only be uploaded by you.</p>
+        <p>The additional metadata will help users discover your service and its features. The name should be a human-readable variant of the package name. The description should consist of a few short sentences.</p>
         <iron-form on-keypress="_keyPressedUploadService">
-          <paper-input label="service jar file" id="serviceUploadFile" disabled="[[_submittingUpload]]" type="file" required="true"></paper-input>
+          <paper-input label="JAR file" id="serviceUploadFile" disabled="[[_submittingUpload]]" type="file" required="true"></paper-input>
+          <paper-input label="Default class to start" id="serviceUploadClass" disabled="[[_submittingUpload]]" required="true"></paper-input>
+          <paper-input label="Name" id="serviceUploadName" disabled="[[_submittingUpload]]" required="true"></paper-input>
+          <paper-input label="Description" id="serviceUploadDescription" disabled="[[_submittingUpload]]" required="true"></paper-input>
           <paper-button raised on-tap="uploadService" disabled="[[_submittingUpload]]">Upload Service</paper-button>
         </iron-form>
         <div id="uploadServiceMsg" style="font-weight: bold"></div>
@@ -131,8 +203,44 @@ class ServicesView extends PolymerElement {
     this.$.ajaxServiceData.generateRequest();
   }
 
+  _stringify(obj) {
+    return JSON.stringify(obj);
+  }
+
   _toArray(obj) {
     return Object.keys(obj).map(k => ({ name: k, value: obj[k] }));
+  }
+
+  // is this really the only way to get that stuff into the template? no nested function?
+  // why the hell is this so ugly?? surely that's not right.
+  _getLatestVersionNumber(obj) {
+    // FIXME: use proper semver sort
+    let latestVersion = Object.keys(obj).sort().reverse()[0];
+    return latestVersion;
+  }
+
+  _getLatest(obj) {
+    return obj[this._getLatestVersionNumber(obj)];
+  }
+
+  _getLatestInstances(obj) {
+    return this._getLatest(obj).instances
+  }
+
+  _getLatestSupplement(obj) {
+    return this._getLatest(obj).supplement;
+  }
+
+  _getLatestName(obj) {
+    return this._getLatest(obj).supplement.name;
+  }
+
+  _getLatestDescription(obj) {
+    return this._getLatest(obj).supplement.description;
+  }
+
+  _getLatestDefaultClass(obj) {
+    return this._getLatest(obj).supplement.class;
   }
 
   _keyPressedUploadService(event) {
@@ -148,6 +256,14 @@ class ServicesView extends PolymerElement {
     let req = this.$.ajaxUploadService;
     req.body = new FormData();
     req.body.append('jarfile', this.$.serviceUploadFile.inputElement.inputElement.files[0]); // this is an input inside an iron-input inside a paper-input
+
+    let supplement = {
+      'class': this.$.serviceUploadClass.inputElement.inputElement.value,
+      'name': this.$.serviceUploadName.inputElement.inputElement.value,
+      'description': this.$.serviceUploadDescription.inputElement.inputElement.value,
+    };
+    req.body.append('supplement', JSON.stringify(supplement));
+
     req.generateRequest();
   }
 
@@ -155,6 +271,19 @@ class ServicesView extends PolymerElement {
     this.$.serviceUploadFile.value = '';
     this.$.uploadServiceMsg.innerHTML = event.detail.response.msg;
   }
+
+  startService(event) {
+    let args = event.target.getAttribute('data-args').split(',');
+    let req = this.$.ajaxStartService;
+    req.params = { 'serviceName': args[0], 'version': args[1] };
+    console.log("Requesting start of '" + args[0] + "'@'" + args[1] + "' ...");
+    req.generateRequest();
+  }
+
+  _handleStartServiceResponse(event) {
+    // TODO
+  }
+
 
   _handleError(event) {
     console.log(event);
