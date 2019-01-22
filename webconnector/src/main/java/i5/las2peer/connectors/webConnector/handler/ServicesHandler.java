@@ -3,7 +3,6 @@ package i5.las2peer.connectors.webConnector.handler;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
@@ -12,7 +11,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import java.util.jar.JarInputStream;
 import java.util.stream.Collectors;
-import java.util.jar.Manifest;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
