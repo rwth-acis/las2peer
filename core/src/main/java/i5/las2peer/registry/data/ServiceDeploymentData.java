@@ -37,6 +37,9 @@ public class ServiceDeploymentData {
 	}
 
 	public String getTime() {
+		if (timestamp == null) {
+			return null;
+		}
 		return Util.unixtimeToString(timestamp.longValue());
 	}
 
