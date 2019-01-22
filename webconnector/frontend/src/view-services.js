@@ -18,6 +18,7 @@ import '@polymer/iron-icons/hardware-icons.js';
 import '@polymer/paper-card/paper-card.js';
 import '@polymer/paper-button/paper-button.js';
 import '@polymer/paper-input/paper-input.js';
+import '@polymer/paper-tooltip/paper-tooltip.js';
 import './shared-styles.js';
 
 class ServicesView extends PolymerElement {
@@ -75,11 +76,18 @@ class ServicesView extends PolymerElement {
             <paper-card heading$="[[release.supplement.name]]" style="width: 100%;margin-bottom: 1em" class="service">
               <div class="card-content">
                 <div>Author: <span class="author">[[service.authorName]]</span></div>
-                <div>Latest version: <span class="version">[[release.version]]</span>, published <span class="timestamp">[[_toHumanDate(release.publicationEpochSeconds)]]</span></div>
-                <div>Release history:
-                  <template is="dom-repeat" items="[[_toArray(service.releases)]]" as="version">
-                    <span>[[version.name]] [[_toHumanDate(version.value.publicationEpochSeconds)]]</span>
-                  </template>
+                <div>
+                  Latest Version: <span class="version">[[release.version]]</span>
+                  published <span class="timestamp">[[_toHumanDate(release.publicationEpochSeconds)]]</span>
+                  <span class="history">
+                    <iron-icon icon="icons:info" title="Release history"></iron-icon>
+                    <paper-tooltip position="right">
+                      Release History<br/>
+                      <template is="dom-repeat" items="[[_toArray(service.releases)]]" as="version">
+                        <div>[[version.name]] at [[_toHumanDate(version.value.publicationEpochSeconds)]]</div>
+                      </template>
+                    </paper-tooltip>
+                  </span>
                 </div>
                 <p class="description">[[release.supplement.description]]</p>
                 <div class="package"><iron-icon icon="icons:archive" title="Part of package"></iron-icon>[[service.name]]</div>
