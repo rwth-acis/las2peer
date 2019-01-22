@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 import i5.las2peer.api.execution.ServiceInvocationException;
 import i5.las2peer.api.execution.ServiceNotFoundException;
 import i5.las2peer.api.p2p.ServiceNameVersion;
+import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.persistency.EnvelopeException;
 import i5.las2peer.api.persistency.EnvelopeNotFoundException;
 import i5.las2peer.api.security.AgentAccessDeniedException;
@@ -312,10 +313,9 @@ public class L2pNodeLauncher {
 	 * @param serviceJarFile The service jar file that should be uploaded.
 	 * @param developerAgentXMLFile The XML file of the developers agent.
 	 * @param developerPassword The password for the developer agent.
-	 * @throws ServicePackageException
 	 */
 	public void uploadServicePackage(String serviceJarFile, String developerAgentXMLFile, String developerPassword)
-			throws ServicePackageException {
+			throws ServicePackageException, EnvelopeAlreadyExistsException {
 		PackageUploader.uploadServicePackage((PastryNodeImpl) node, serviceJarFile, developerAgentXMLFile, developerPassword);
 	}
 
