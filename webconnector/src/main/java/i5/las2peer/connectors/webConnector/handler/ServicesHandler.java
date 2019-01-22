@@ -183,12 +183,12 @@ public class ServicesHandler {
 					deploymentsJson.add(new JSONObject()
 							.appendField("className", deployment.getServiceClassName())
 							.appendField("nodeId", deployment.getNodeId())
-							.appendField("humanTime", deployment.getTime())
-							.appendField("unixSeconds", deployment.getTimestamp())
+							.appendField("announcementEpochSeconds", deployment.getTimestamp().getEpochSecond())
 					);
 				}
 
 				releasesByVersion.put(release.getVersion(), new JSONObject()
+						.appendField("publicationEpochSeconds", release.getTimestamp().getEpochSecond())
 						.appendField("instances", deploymentsJson)
 						.appendField("supplement", supplement));
 			}

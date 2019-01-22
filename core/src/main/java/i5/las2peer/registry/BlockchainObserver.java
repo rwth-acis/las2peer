@@ -212,7 +212,8 @@ class BlockchainObserver {
 					if (!txHasAlreadyBeenHandled(release.log.getTransactionHash())) {
 						String serviceName = lookupServiceName(release.nameHash);
 						ServiceReleaseData releaseData = new ServiceReleaseData(serviceName,
-								release.versionMajor, release.versionMinor, release.versionPatch, release.hash);
+								release.versionMajor, release.versionMinor, release.versionPatch,
+								release.hash, release.timestamp);
 
 						releases.computeIfAbsent(releaseData.getServiceName(), k -> new ArrayList<>());
 						releases.get(releaseData.getServiceName()).add(releaseData);
@@ -231,8 +232,8 @@ class BlockchainObserver {
 					if (!txHasAlreadyBeenHandled(deployment.log.getTransactionHash())) {
 						String serviceName = lookupServiceName(deployment.nameHash);
 						ServiceDeploymentData deploymentData = new ServiceDeploymentData(serviceName, deployment.className,
-								deployment.versionMajor, deployment.versionMinor, deployment.versionPatch, deployment.timestamp,
-								deployment.nodeId);
+								deployment.versionMajor, deployment.versionMinor, deployment.versionPatch,
+								deployment.nodeId, deployment.timestamp);
 						addOrUpdateDeployment(deploymentData);
 					}
 				}, e -> logger.severe("Error observing service deployment event: " + e.toString()));
@@ -253,8 +254,7 @@ class BlockchainObserver {
 
 						// for comparison only; remember: this event signifies the END of a deployment, not actually a deployment
 						ServiceDeploymentData deploymentThatEnded = new ServiceDeploymentData(serviceName, stopped.className,
-								stopped.versionMajor, stopped.versionMinor, stopped.versionPatch, null,
-								stopped.nodeId);
+								stopped.versionMajor, stopped.versionMinor, stopped.versionPatch, stopped.nodeId, null);
 						deployments.get(serviceName).remove(deploymentThatEnded);
 					}
 				}, e -> logger.severe("Error observing service deployment end event: " + e.toString()));
