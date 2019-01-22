@@ -87,6 +87,8 @@ class ServicesView extends PolymerElement {
             </div>
             <div class="card-actions">
                 <paper-button on-click="startService" data-args$="[[item.name]].[[_getLatestDefaultClass(item.releases)]],[[_getLatestVersionNumber(item.releases)]]">Start on this Node</paper-button>
+                <a href$="[[_getLatestVcsUrl(item.releases)]]" hidden$="![[_getLatestVcsUrl(item.releases)]]" tabindex="-1"><paper-button>View source code</paper-button></a>
+                <a href$="[[_getLatestFrontendUrl(item.releases)]]" hidden$="![[_getLatestFrontendUrl(item.releases)]]" tabindex="-1"><paper-button>Open front-end</paper-button></a>
             </div>
           </paper-card>
         </template>
@@ -102,6 +104,8 @@ class ServicesView extends PolymerElement {
           <paper-input label="Default class to start" id="serviceUploadClass" disabled="[[_submittingUpload]]" required="true"></paper-input>
           <paper-input label="Name" id="serviceUploadName" disabled="[[_submittingUpload]]" required="true"></paper-input>
           <paper-input label="Description" id="serviceUploadDescription" disabled="[[_submittingUpload]]" required="true"></paper-input>
+          <paper-input label="Source code URL (e.g., GitHub project)" id="serviceUploadVcsUrl" disabled="[[_submittingUpload]]"></paper-input>
+          <paper-input label="Front-end URL" id="serviceUploadFrontendUrl" disabled="[[_submittingUpload]]"></paper-input>
           <paper-button raised on-tap="uploadService" disabled="[[_submittingUpload]]">Upload Service</paper-button>
         </iron-form>
         <div id="uploadServiceMsg" style="font-weight: bold"></div>
@@ -172,6 +176,14 @@ class ServicesView extends PolymerElement {
     return this._getLatest(obj).supplement.class;
   }
 
+  _getLatestVcsUrl(obj) {
+    return this._getLatest(obj).supplement.vcsUrl;
+  }
+
+  _getLatestFrontendUrl(obj) {
+    return this._getLatest(obj).supplement.frontendUrl;
+  }
+
   _keyPressedUploadService(event) {
     if (event.which == 13 || event.keyCode == 13) {
       event.preventDefault();
@@ -190,6 +202,8 @@ class ServicesView extends PolymerElement {
       'class': this.$.serviceUploadClass.inputElement.inputElement.value,
       'name': this.$.serviceUploadName.inputElement.inputElement.value,
       'description': this.$.serviceUploadDescription.inputElement.inputElement.value,
+      'vcsUrl': this.$.serviceUploadVcsUrl.inputElement.inputElement.value,
+      'frontendUrl': this.$.serviceUploadFrontendUrl.inputElement.inputElement.value,
     };
     req.body.append('supplement', JSON.stringify(supplement));
 
@@ -212,7 +226,6 @@ class ServicesView extends PolymerElement {
   _handleStartServiceResponse(event) {
     // TODO
   }
-
 
   _handleError(event) {
     console.log(event);
