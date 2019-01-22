@@ -84,83 +84,12 @@ class ServicesView extends PolymerElement {
                   </li>
                 </template>
               </ul>
-              <!--
-              <ul>
-                <template is="dom-repeat" items="[[_toArray(item.releases)]]">
-                  <li>[[item.name]]
-                    <ul>
-                      <template is="dom-repeat" items="[[item.value]]">
-                        <li>
-                          <paper-card heading="[[item.className]]">
-                            <div class="card-content">
-                              <div class="node"><iron-icon icon="hardware:device-hub" title="Running on Node"></iron-icon> [[item.nodeId]]</div>
-                              <div><iron-icon icon="device:access-time" title="Last Announcement"></iron-icon> [[item.time]]</div>
-                            </div>
-                          </paper-card>
-                        </li>
-                      </template>
-                    </ul>
-                  </li>
-                </template>
-              </ul>
-              -->
             </div>
             <div class="card-actions">
                 <paper-button on-click="startService" data-args$="[[item.name]].[[_getLatestDefaultClass(item.releases)]],[[_getLatestVersionNumber(item.releases)]]">Start on this Node</paper-button>
             </div>
           </paper-card>
         </template>
-
-        <!--
-        <hr/>
-
-        <h2>Registered Services</h2>
-        These service names have been registered by some author on the blockchain-based service registry:
-        <ul>
-          <template is="dom-repeat" items="[[_toArray(_services.authors)]]">
-            <li>[[item.name]] by <emph>[[item.value]]</emph></li>
-          </template>
-        </ul>
-
-        <h2>Service Releases</h2>
-        These specific versions have been published:
-        <ul>
-          <template is="dom-repeat" items="[[_toArray(_services.releases)]]">
-            <li>[[item.name]] @
-              <template is="dom-repeat" items="[[item.value]]">
-                <strong>[[item.version]]</strong>
-              </template>
-            </li>
-          </template>
-        </ul>
-
-        <h2>Service Deployments</h2>
-        Running service instances on nodes in this network:
-        <ul>
-          <template is="dom-repeat" items="[[_toArray(_services.deployments)]]">
-            <li>[[item.name]]
-              <ul>
-                <template is="dom-repeat" items="[[item.value]]">
-                <li>[[item.packageName]].<strong>[[item.className]]</strong> @[[item.version]]
-                  <ul>
-                    <li>Running on Node <strong>[[item.nodeId]]</strong></li>
-                    <li>Last announced at <strong>[[item.time]]</strong></li>
-                  </ul>
-                </li>
-                </template>
-              </ul>
-            </li>
-          </template>
-        </ul>
-
-        <h2>Community Tags</h2>
-        These tags currently serve no function …
-        <ul>
-          <template is="dom-repeat" items="[[_toArray(communityTags)]]">
-          <li><strong>[[item.name]]</strong>: “[[item.value]]”</li>
-          </template>
-        </ul>
-        -->
       </div>
 
       <div class="card">
