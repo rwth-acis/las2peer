@@ -87,8 +87,8 @@ class ServicesView extends PolymerElement {
             </div>
             <div class="card-actions">
                 <paper-button on-click="startService" data-args$="[[item.name]].[[_getLatestDefaultClass(item.releases)]],[[_getLatestVersionNumber(item.releases)]]">Start on this Node</paper-button>
-                <a href$="[[_getLatestVcsUrl(item.releases)]]" hidden$="[[!_getLatestVcsUrl(item.releases)]]" tabindex="-1"><paper-button>View source code</paper-button></a>
-                <a href$="[[_getLatestFrontendUrl(item.releases)]]" hidden$="[[!_getLatestFrontendUrl(item.releases)]]" tabindex="-1"><paper-button>Open front-end</paper-button></a>
+                <a href$="[[_getLatestVcsUrl(item.releases)]]" hidden$="[[!_getLatestVcsUrl(item.releases)]]" target="_blank" tabindex="-1"><paper-button>View source code</paper-button></a>
+                <a href$="[[_getLatestFrontendUrl(item.releases)]]" hidden$="[[!_getLatestFrontendUrl(item.releases)]]" target="_blank" tabindex="-1"><paper-button>Open front-end</paper-button></a>
             </div>
           </paper-card>
         </template>
