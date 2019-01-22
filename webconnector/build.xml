@@ -187,6 +187,8 @@
 	<target name="junit_jars" depends=""/>
 
 	<target name="build_frontend" description="--> build the polymer frontend with bower">
+		<echo message="SKIPPING FRONTEND FOR FAST DEV - DONT COMMIT"/>
+		<!--
 		<echo message="Installing dependencies (if needed) ..."/>
 		<exec executable="npm" dir="frontend" failonerror="true">
 			<arg value="install"/>
@@ -196,6 +198,7 @@
 			<arg value="run"/>
 			<arg value="build"/>
 		</exec>
+		-->
 	</target>
 
 	<target name="main_jar" depends="compile_main, build_frontend">
