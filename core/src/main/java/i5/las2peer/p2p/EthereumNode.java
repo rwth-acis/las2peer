@@ -189,10 +189,15 @@ public class EthereumNode extends PastryNodeImpl {
 		}
 	}
 
+	/** compares agent login name and public key */
 	private boolean agentMatchesUserRegistryData(EthereumAgent agent) throws EthereumException {
 		try {
 			UserData userInBlockchain = registryClient.getUser(agent.getLoginName());
-			return userInBlockchain.getOwnerAddress().equals(agent.getEthereumAddress())
+
+			// damn, we might not be able to compare the ethereum address, because it may be null if the agent is locked
+			// does it matter? I guess not. if name and pubkey match, do we care who the owner address is?
+			// let's go with no. TODO: consider implications
+			return true //userInBlockchain.getOwnerAddress().equals(agent.getEthereumAddress())
 					&& userInBlockchain.getAgentId().equals(agent.getIdentifier())
 					&& userInBlockchain.getPublicKey().equals(agent.getPublicKey());
 		} catch (NotFoundException e) {

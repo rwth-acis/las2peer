@@ -72,7 +72,7 @@ class BlockchainObserver {
 	 * all tx are mined in main chain blocks eventually, this approach should
 	 * be fine.
 	 *
-	 * @see <a href="web3.js issue describing the same problem">https://github.com/ethereum/web3.js/issues/398#issuecomment-189163101</a>
+	 * @see <a href="https://github.com/ethereum/web3.js/issues/398#issuecomment-189163101">web3.js issue describing the same problem</a>
 	 */
 	private final Set<String> observedEventTxHashes = new HashSet<>();
 
