@@ -3,6 +3,7 @@ package i5.las2peer.registry.data;
 import i5.las2peer.registry.Util;
 
 import java.math.BigInteger;
+import java.time.Instant;
 import java.util.Objects;
 
 public class ServiceDeploymentData {
@@ -11,17 +12,18 @@ public class ServiceDeploymentData {
 	private BigInteger versionMajor;
 	private BigInteger versionMinor;
 	private BigInteger versionPatch;
-	private BigInteger timestamp;
 	private String nodeId;
+	private BigInteger timestamp;
 
-	public ServiceDeploymentData(String serviceName, String serviceClass, BigInteger versionMajor, BigInteger versionMinor, BigInteger versionPatch, BigInteger timestamp, String nodeId) {
+	public ServiceDeploymentData(String serviceName, String serviceClass, BigInteger versionMajor, BigInteger versionMinor, BigInteger versionPatch,
+			String nodeId, BigInteger timestamp) {
 		this.serviceName = serviceName;
 		this.serviceClass = serviceClass;
 		this.versionMajor = versionMajor;
 		this.versionMinor = versionMinor;
 		this.versionPatch = versionPatch;
-		this.timestamp = timestamp;
 		this.nodeId = nodeId;
+		this.timestamp = timestamp;
 	}
 
 	public String getServicePackageName() {
@@ -43,8 +45,8 @@ public class ServiceDeploymentData {
 		return Util.unixtimeToString(timestamp.longValue());
 	}
 
-	public BigInteger getTimestamp() {
-		return timestamp;
+	public Instant getTimestamp() {
+		return Instant.ofEpochSecond(timestamp.longValue());
 	}
 
 	public String getNodeId() {
