@@ -160,6 +160,22 @@ public class ServicesHandler {
 	}
 
 	@GET
+	@Path("/node-id")
+	@Produces(MediaType.APPLICATION_JSON)
+	// sort of a duplicate of the status thing, but actually not, because this is the full Pastry node ID
+	public JSONObject getRawNodeIdAsJson() {
+		return new JSONObject().appendField("id", pastryNode.getPastryNode().getId().toStringFull());
+	}
+
+	@GET
+	@Path("/node-id")
+	@Produces(MediaType.TEXT_PLAIN)
+	// sort of a duplicate of the status thing, but actually not, because this is the full Pastry node ID
+	public String getRawNodeId() {
+		return pastryNode.getPastryNode().getId().toStringFull();
+	}
+
+	@GET
 	@Path("/services")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getStructuredServiceData() {
