@@ -253,9 +253,10 @@ class BlockchainObserver {
 						String serviceName = lookupServiceName(stopped.nameHash);
 
 						// for comparison only; remember: this event signifies the END of a deployment, not actually a deployment
-						ServiceDeploymentData deploymentThatEnded = new ServiceDeploymentData(serviceName, stopped.className,
-								stopped.versionMajor, stopped.versionMinor, stopped.versionPatch, stopped.nodeId, null);
-						deployments.get(serviceName).remove(deploymentThatEnded);
+						ServiceDeploymentData deploymentThatEnded = new ServiceDeploymentData(serviceName,
+								stopped.className, stopped.versionMajor, stopped.versionMinor, stopped.versionPatch,
+								stopped.nodeId, stopped.timestamp, true);
+						addOrUpdateDeployment(deploymentThatEnded);
 					}
 				}, e -> logger.severe("Error observing service deployment end event: " + e.toString()));
 	}

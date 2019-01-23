@@ -14,9 +14,15 @@ public class ServiceDeploymentData {
 	private BigInteger versionPatch;
 	private String nodeId;
 	private BigInteger timestamp;
+	private boolean ended;
 
 	public ServiceDeploymentData(String serviceName, String serviceClass, BigInteger versionMajor, BigInteger versionMinor, BigInteger versionPatch,
 			String nodeId, BigInteger timestamp) {
+		this(serviceName, serviceClass, versionMajor, versionMinor, versionPatch, nodeId, timestamp, false);
+	}
+
+	public ServiceDeploymentData(String serviceName, String serviceClass, BigInteger versionMajor, BigInteger versionMinor, BigInteger versionPatch,
+			String nodeId, BigInteger timestamp, boolean ended) {
 		this.serviceName = serviceName;
 		this.serviceClass = serviceClass;
 		this.versionMajor = versionMajor;
@@ -24,6 +30,7 @@ public class ServiceDeploymentData {
 		this.versionPatch = versionPatch;
 		this.nodeId = nodeId;
 		this.timestamp = timestamp;
+		this.ended = ended;
 	}
 
 	public String getServicePackageName() {
@@ -38,6 +45,10 @@ public class ServiceDeploymentData {
 		return versionMajor + "." + versionMinor + "." + versionPatch;
 	}
 
+	public String getNodeId() {
+		return nodeId;
+	}
+
 	public String getTime() {
 		if (timestamp == null) {
 			return null;
@@ -49,8 +60,8 @@ public class ServiceDeploymentData {
 		return Instant.ofEpochSecond(timestamp.longValue());
 	}
 
-	public String getNodeId() {
-		return nodeId;
+	public boolean hasEnded() {
+		return ended;
 	}
 
 	@Override
