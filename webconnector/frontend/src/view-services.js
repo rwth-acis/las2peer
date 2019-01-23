@@ -49,7 +49,11 @@ class ServicesView extends PolymerElement {
                  method="POST"
                  url$="[[apiEndpoint]]/services/start"
                  handle-as="text"
-                 on-response="_handleStartServiceResponse"
+                 on-error="_handleError"></iron-ajax>
+      <iron-ajax id="ajaxStopService"
+                 method="POST"
+                 url$="[[apiEndpoint]]/services/stop"
+                 handle-as="text"
                  on-error="_handleError"></iron-ajax>
 
       <style include="shared-styles">
@@ -102,6 +106,7 @@ class ServicesView extends PolymerElement {
               </div>
               <div class="card-actions">
                   <paper-button on-click="startService" data-args$="[[service.name]].[[release.supplement.class]],[[release.version]]">Start on this Node</paper-button>
+                  <paper-button on-click="stopService" data-args$="[[service.name]].[[release.supplement.class]],[[release.version]]">Stop</paper-button>
                   <a href$="[[release.supplement.vcsUrl]]" hidden$="[[!release.supplement.vcsUrl]]" target="_blank" tabindex="-1"><paper-button>View source code</paper-button></a>
                   <a href$="[[release.supplement.frontendUrl]]" hidden$="[[!release.supplement.frontendUrl]]" target="_blank" tabindex="-1"><paper-button>Open front-end</paper-button></a>
               </div>
@@ -221,8 +226,12 @@ class ServicesView extends PolymerElement {
     req.generateRequest();
   }
 
-  _handleStartServiceResponse(event) {
-    // TODO
+  stopService(event) {
+    let args = event.target.getAttribute('data-args').split(',');
+    let req = this.$.ajaxStopService;
+    req.params = { 'serviceName': args[0], 'version': args[1] };
+    console.log("Requesting stop of '" + args[0] + "'@'" + args[1] + "' ...");
+    req.generateRequest();
   }
 
   _handleError(event) {
