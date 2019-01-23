@@ -34,7 +34,8 @@
     "@polymer/paper-tooltip": "^3.0.1",
     "@polymer/polymer": "^3.1.0",
     "@webcomponents/webcomponentsjs": "^2.2.1",
-    "openidconnect-signin": "github:rwth-acis/openidconnect-signin#f158f7f"
+    "openidconnect-signin": "github:rwth-acis/openidconnect-signin#f158f7f",
+    "las2peer-frontend-user-widget": "github:rwth-acis/las2peer-frontend-user-widget#polymer3.0"
   },
   "devDependencies": {
     "polymer-cli": "^1.9.4",

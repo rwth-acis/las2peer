@@ -30,6 +30,8 @@ import 'openidconnect-signin/openidconnect-signin.js'
 import 'openidconnect-signin/openidconnect-popup-signin-callback.js'
 import 'openidconnect-signin/openidconnect-popup-signout-callback.js'
 import 'openidconnect-signin/openidconnect-signin-silent-callback.js'
+import 'las2peer-frontend-user-widget/las2peer-user-widget.js'
+import 'las2peer-frontend-user-widget/las2peer-userlist-widget.js'
 
 // Gesture events like tap and track generated from touch will not be
 // preventable, allowing for better scrolling performance.
@@ -125,6 +127,9 @@ class NodeFrontend extends PolymerElement {
               <paper-icon-button icon="icons:menu" drawer-toggle=""></paper-icon-button>
               <div main-title="">las2peer Node Front-End</div>
 
+            <template is="dom-if" if="[[_agentId]]">
+              <las2peer-user-widget base-url="http://127.0.0.1:8080" login-oidc-token="[[_oidcUser.access_token]]" login-oidc-name="[[_oidcUser.profile.preferred_username]]"></las2peer-user-widget>
+            </template>
               <template is="dom-if" if="[[_agentId]]">
                 <paper-button on-tap="destroySession">Logout <iron-icon icon="account-circle"></iron-icon></paper-button>
               </template>
