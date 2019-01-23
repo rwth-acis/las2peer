@@ -2,29 +2,26 @@ package i5.las2peer.connectors.webConnector.handler;
 
 import java.io.InputStream;
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentMap;
 import java.util.jar.JarInputStream;
-import java.util.stream.Collectors;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import i5.las2peer.api.execution.ServiceNotFoundException;
 import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.persistency.EnvelopeException;
 import i5.las2peer.api.security.AgentException;
-import i5.las2peer.p2p.EthereumNode;
+import i5.las2peer.p2p.*;
 import i5.las2peer.registry.CredentialUtils;
+import i5.las2peer.registry.ReadOnlyRegistryClient;
 import i5.las2peer.registry.data.ServiceDeploymentData;
 import i5.las2peer.registry.data.ServiceReleaseData;
-import i5.las2peer.registry.exceptions.EthereumException;
+import i5.las2peer.security.EthereumAgent;
 import i5.las2peer.tools.*;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
@@ -36,14 +33,11 @@ import i5.las2peer.classLoaders.ClassManager;
 import i5.las2peer.classLoaders.libraries.SharedStorageRepository;
 import i5.las2peer.connectors.webConnector.WebConnector;
 import i5.las2peer.connectors.webConnector.util.AgentSession;
-import i5.las2peer.p2p.Node;
-import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.persistency.EnvelopeVersion;
 import i5.las2peer.tools.PackageUploader.ServiceVersionList;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.web3j.crypto.Credentials;
-import org.web3j.crypto.WalletUtils;
 
 @Path(ServicesHandler.RESOURCE_PATH)
 public class ServicesHandler {
@@ -54,12 +48,14 @@ public class ServicesHandler {
 	private final Node node;
 	private final PastryNodeImpl pastryNode;
 	private final EthereumNode ethereumNode;
+	private final ReadOnlyRegistryClient registry;
 
 	public ServicesHandler(WebConnector connector) {
 		this.connector = connector;
 		this.node = connector.getL2pNode();
-		pastryNode = (node instanceof PastryNodeImpl) ? (PastryNodeImpl) node :null;
+		pastryNode = (node instanceof PastryNodeImpl) ? (PastryNodeImpl) node : null;
 		ethereumNode = (node instanceof EthereumNode) ? (EthereumNode) node : null;
+		registry = (node instanceof EthereumNode) ? ethereumNode.getRegistryClient() : null;
 	}
 
 	@GET
@@ -155,50 +151,54 @@ public class ServicesHandler {
 		return Response.ok().build();
 	}
 
+	@POST
+	@Path("/stop")
+	public Response handleStopService(@QueryParam("serviceName") String serviceName, @QueryParam("version") String version)
+			throws NodeException, AgentNotRegisteredException, ServiceNotFoundException {
+		ethereumNode.stopService(ServiceNameVersion.fromString(serviceName + "@" + version));
+		return Response.ok().build();
+	}
+
 	@GET
 	@Path("/services")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String getStructuredServiceData() throws EnvelopeException {
-		// the fact that so much conversion / data restructuring is done here is a hint that
-		// maybe the data should be stored in this way in the first place ...
-		// TODO: refactor this (into EthereumNode or Registry?)
-		Map<String, String> servicesWithAuthors = ethereumNode.getRegistryClient().getServiceAuthors();
-		Map<String, List<ServiceDeploymentData>> allDeployments = ethereumNode.getRegistryClient().getServiceDeployments();
-
+	public String getStructuredServiceData() {
 		JSONArray services = new JSONArray();
-		for (Map.Entry<String, String> serviceAuthorPair : servicesWithAuthors.entrySet()) {
-			String serviceName = serviceAuthorPair.getKey();
-			String authorName = serviceAuthorPair.getValue();
 
+		registry.getServiceNames().forEach(name -> {
 			Map<String, JSONObject> releasesByVersion = new HashMap<>();
-			for (ServiceReleaseData release : ethereumNode.getRegistryClient().getServiceReleases().get(serviceName)) {
-				byte[] rawSupplement = ethereumNode.fetchHashedContent(release.getSupplementHash());
+
+			registry.getServiceReleases().getOrDefault(name, Collections.emptyList()).forEach(release -> {
+				// this is a bit ugly, but there's no way to handle errors in a lambda
+				byte[] rawSupplement = new byte[0];
+				try {
+					rawSupplement = ethereumNode.fetchHashedContent(release.getSupplementHash());
+				} catch (EnvelopeException e) {
+					e.printStackTrace();
+				}
 				JSONObject supplement = parseJson(new String(rawSupplement, StandardCharsets.UTF_8));
 
-				List<ServiceDeploymentData> deploymentsOfRelease = allDeployments.getOrDefault(serviceName, Collections.emptyList())
-						.stream().filter(d -> d.getVersion().equals(release.getVersion())).collect(Collectors.toList());
-
 				JSONArray deploymentsJson = new JSONArray();
-				for (ServiceDeploymentData deployment : deploymentsOfRelease) {
+				registry.getDeployments(name, release.getVersion()).forEach(deployment -> {
 					deploymentsJson.add(new JSONObject()
 							.appendField("className", deployment.getServiceClassName())
 							.appendField("nodeId", deployment.getNodeId())
 							.appendField("announcementEpochSeconds", deployment.getTimestamp().getEpochSecond())
 					);
-				}
+				});
 
 				releasesByVersion.put(release.getVersion(), new JSONObject()
 						.appendField("publicationEpochSeconds", release.getTimestamp().getEpochSecond())
 						.appendField("instances", deploymentsJson)
 						.appendField("supplement", supplement));
-			}
+			});
 
 			services.appendElement(new JSONObject()
-					.appendField("name", serviceName)
-					.appendField("authorName", authorName)
+					.appendField("name", name)
+					.appendField("authorName", registry.getServiceAuthors().get(name))
 					.appendField("releases", new JSONObject(releasesByVersion))
 			);
-		}
+		});
 
 		return services.toJSONString();
 	}
@@ -210,18 +210,17 @@ public class ServicesHandler {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getRegisteredServices() {
 		JSONArray serviceNameList = new JSONArray();
-		serviceNameList.addAll(ethereumNode.getRegistryClient().getServiceNames());
+		serviceNameList.addAll(registry.getServiceNames());
 		return serviceNameList.toJSONString();
 	}
 
 	@GET
 	@Path("/authors")
 	@Produces(MediaType.APPLICATION_JSON)
+	@Deprecated
 	public String getServiceAuthors() {
 		JSONObject jsonObject = new JSONObject();
-		for (ConcurrentMap.Entry<String, String> serviceWithAuthor: ethereumNode.getRegistryClient().getServiceAuthors().entrySet()) {
-			jsonObject.put(serviceWithAuthor.getKey(), serviceWithAuthor.getValue());
-		}
+		jsonObject.putAll(registry.getServiceAuthors());
 		return jsonObject.toJSONString();
 	}
 
@@ -230,7 +229,7 @@ public class ServicesHandler {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getServiceReleases() {
 		JSONObject jsonObject = new JSONObject();
-		for (ConcurrentMap.Entry<String, List<ServiceReleaseData>> service: ethereumNode.getRegistryClient().getServiceReleases().entrySet()) {
+		for (ConcurrentMap.Entry<String, List<ServiceReleaseData>> service: registry.getServiceReleases().entrySet()) {
 			JSONArray releaseList = new JSONArray();
 			for (ServiceReleaseData release : service.getValue()) {
 				JSONObject entry = new JSONObject();
@@ -248,9 +247,9 @@ public class ServicesHandler {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getServiceDeployments() {
 		JSONObject jsonObject = new JSONObject();
-		for (ConcurrentMap.Entry<String, List<ServiceDeploymentData>> service: ethereumNode.getRegistryClient().getServiceDeployments().entrySet()) {
+		registry.getServiceNames().forEach(serviceName -> {
 			JSONArray deploymentList = new JSONArray();
-			for (ServiceDeploymentData deployment : service.getValue()) {
+			registry.getDeployments(serviceName).forEach(deployment -> {
 				JSONObject entry = new JSONObject();
 				entry.put("packageName", deployment.getServicePackageName());
 				entry.put("className", deployment.getServiceClassName());
@@ -258,9 +257,9 @@ public class ServicesHandler {
 				entry.put("time", deployment.getTime());
 				entry.put("nodeId", deployment.getNodeId());
 				deploymentList.add(entry);
-			}
-			jsonObject.put(service.getKey(), deploymentList);
-		}
+			});
+			jsonObject.put(serviceName, deploymentList);
+		});
 		return jsonObject.toJSONString();
 	}
 
@@ -269,35 +268,8 @@ public class ServicesHandler {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getTags() {
 		JSONObject jsonObject = new JSONObject();
-		for (ConcurrentMap.Entry<String, String> tag: ethereumNode.getRegistryClient().getTags().entrySet()) {
-			jsonObject.put(tag.getKey(), tag.getValue());
-		}
+		jsonObject.putAll(registry.getTags());
 		return jsonObject.toJSONString();
-	}
-
-	// TODO: disable when no longer needed for testing
-	@POST
-	@Path("/registry/faucet")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response sendEtherFromNodeOwnerToAddress(String requestBody) {
-		JSONObject payload = parseJson(requestBody);
-		String address = payload.getAsString("address");
-		if (!WalletUtils.isValidAddress(address)) {
-			throw new BadRequestException("Address is not valid.");
-		}
-
-		Number valueAsNumber = payload.getAsNumber("valueInWei");
-		if (valueAsNumber == null) {
-			throw new BadRequestException("Value is invalid.");
-		}
-
-		BigDecimal valueInWei = BigDecimal.valueOf(valueAsNumber.longValue());
-		try {
-			ethereumNode.getRegistryClient().sendEther(address, valueInWei);
-		} catch (EthereumException e) {
-			return Response.serverError().entity(e.toString()).build();
-		}
-		return Response.ok().build();
 	}
 
 	@GET

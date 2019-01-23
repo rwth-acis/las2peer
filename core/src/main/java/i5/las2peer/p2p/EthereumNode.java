@@ -238,7 +238,7 @@ public class EthereumNode extends PastryNodeImpl {
 
 	private boolean isServiceOwner(String authorName, String serviceName) throws EthereumException {
 		try {
-			String serviceOwnerName = getRegistryClient().getServiceAuthor(serviceName);
+			String serviceOwnerName = getRegistryClient().lookupServiceAuthor(serviceName);
 			return authorName.equals(serviceOwnerName);
 		} catch (NotFoundException|EthereumException e) {
 			throw new EthereumException("Ownership check errored or was inconsistent, investigate.");

@@ -17,11 +17,8 @@ import org.web3j.utils.Convert;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
-
-import static org.web3j.utils.Numeric.hexStringToByteArray;
 
 /**
  * Facade providing simple read/write access to the registry smart
@@ -220,11 +217,10 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 	public void announceDeployment(String servicePackageName, String serviceClassName,
 								   int versionMajor, int versionMinor, int versionPatch,
 								   String nodeId) throws EthereumException {
-		long timeNow = Instant.now().getEpochSecond();
 		try {
 			contracts.serviceRegistry.announceDeployment(servicePackageName, serviceClassName,
 				BigInteger.valueOf(versionMajor), BigInteger.valueOf(versionMinor), BigInteger.valueOf(versionPatch),
-				BigInteger.valueOf(timeNow), nodeId).send();
+				nodeId).send();
 		} catch (Exception e) {
 			throw new EthereumException("Failed to submit service deployment announcement ("
 					+ "DEBUG: " + serviceClassName + ", " + e.getMessage() + ")", e);

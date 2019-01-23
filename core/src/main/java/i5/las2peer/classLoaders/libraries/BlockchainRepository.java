@@ -25,7 +25,7 @@ public class BlockchainRepository extends SharedStorageRepository {
 		String servicePackageName = libId.substring(0, libId.indexOf(';'));
 
 		try {
-			String ownerOfServiceName = registryClient.getServiceAuthor(servicePackageName);
+			String ownerOfServiceName = registryClient.lookupServiceAuthor(servicePackageName);
 			PublicKey ownerPublicKey = registryClient.getUser(ownerOfServiceName).getPublicKey();
 
 			if (!signingKey.equals(ownerPublicKey)) {

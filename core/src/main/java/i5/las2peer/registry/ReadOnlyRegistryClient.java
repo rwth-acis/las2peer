@@ -149,7 +149,7 @@ public class ReadOnlyRegistryClient {
 	 * @param serviceName service package name
 	 * @return author owning the service name
 	 */
-	public String getServiceAuthor(String serviceName) throws EthereumException, NotFoundException {
+	public String lookupServiceAuthor(String serviceName) throws EthereumException, NotFoundException {
 		byte[] serviceNameHash = Util.soliditySha3(serviceName);
 		Tuple2<String, byte[]> serviceNameAndOwner;
 		try {
@@ -187,10 +187,41 @@ public class ReadOnlyRegistryClient {
 		return observer.releases;
 	}
 
-	/** @return map of names to service deployments announcements */
+	/** @return set of all active service deployments */
+	public Set<ServiceDeploymentData> getDeployments() {
+		Set<ServiceDeploymentData> activeDeployments = new HashSet<>();
+
+		observer.deployments.values().forEach(innerMap -> {
+			innerMap.values().forEach(deploymentData -> {
+				if (!deploymentData.hasEnded()) {
+					activeDeployments.add(deploymentData);
+				}
+			});
+		});
+
+		return activeDeployments;
+	}
+
+	public Set<ServiceDeploymentData> getDeployments(String serviceName) {
+		return getDeployments().stream().filter(d -> d.getServicePackageName().equals(serviceName)).collect(Collectors.toSet());
+	}
+
+	public Set<ServiceDeploymentData> getDeployments(String serviceName, String version) {
+		return getDeployments().stream().filter(d -> (d.getServicePackageName().equals(serviceName) && d.getVersion().equals(version))).collect(Collectors.toSet());
+	}
+
+	/*
+	@Deprecated
 	public Map<String, List<ServiceDeploymentData>> getServiceDeployments() {
 		// just getting rid of the redundant (for our purposes) nested map
-		return observer.deployments.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
-				value -> new ArrayList<>(value.getValue().values()))); // ooh, yeah
+		// and filtering out those deployments that have ended (we need to keep track of them internally, but don't
+		// want to expose them)
+		return observer.deployments.entrySet().stream()
+				.collect(Collectors.toMap(Map.Entry::getKey, value -> new ArrayList<>(value.getValue().values())))
+				.entrySet().stream() // OMG
+				.filter(e -> e.getValue().stream().anyMatch(deploymentData -> deploymentData.hasEnded()))
+				.collect(Collectors.toMap(e -> e.getKey(), e-> e.getValue())); // are you serious?
+		// ahhhahahahahaaahaaaa embrace the dark side, let it flow through you!
 	}
+	*/
 }

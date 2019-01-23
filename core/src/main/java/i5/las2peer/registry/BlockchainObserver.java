@@ -48,6 +48,7 @@ class BlockchainObserver {
 	// Java's Set is too limited; this is exactly the use case we have:
 	// https://stackoverflow.com/questions/7283338/getting-an-element-from-a-set
 	// so far, this is ugly but fine. maybe hide this under sane accessors
+	// FIXME document "end" stuff
 	ConcurrentMap<String, Map<ServiceDeploymentData, ServiceDeploymentData>> deployments;
 
 	private static final ConcurrentMap<String, String> hashToNameCache = new ConcurrentHashMap<>();
