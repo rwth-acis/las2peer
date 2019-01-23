@@ -79,6 +79,15 @@ class ServicesView extends PolymerElement {
           width: 8em;
         }
       </style>
+      <custom-style>
+        <style is="custom-style">
+          paper-tooltip.large {
+            --paper-tooltip: {
+              font-size: medium;
+            }
+          }
+        </style>
+      </custom-style>
 
       <div class="card">
         <h2>Services in this Network</h2>
@@ -97,7 +106,7 @@ class ServicesView extends PolymerElement {
                   published <span class="timestamp">[[_toHumanDate(release.publicationEpochSeconds)]]</span>
                   <span class="history">
                     <iron-icon icon="icons:info" title="Release history"></iron-icon>
-                    <paper-tooltip position="right">
+                    <paper-tooltip position="right" class="large">
                       Release History<br/>
                       <ul>
                         <template is="dom-repeat" items="[[_toArray(service.releases)]]" as="version">
