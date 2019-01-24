@@ -308,8 +308,8 @@ public class ServicesHandler {
 		return new JSONObject()
 				.appendField("mnemonic", mnemonic)
 				.appendField("password", password)
-				.appendField("publicKey", credentials.getEcKeyPair().getPublicKey())
-				.appendField("privateKey", credentials.getEcKeyPair().getPrivateKey())
+				.appendField("publicKey", "0x" + credentials.getEcKeyPair().getPublicKey().toString(16))
+				.appendField("privateKey", "0x" + credentials.getEcKeyPair().getPrivateKey().toString(16))
 				.appendField("address", credentials.getAddress())
 				.toJSONString();
 	}
