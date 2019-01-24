@@ -76,7 +76,8 @@ class ServicesView extends PolymerElement {
           text-overflow: ellipsis;
         }
         .service .nodeId {
-          width: 8em;
+          width: 6.5em;
+          margin-right: 1em;
         }
       </style>
       <custom-style>
@@ -120,30 +121,51 @@ class ServicesView extends PolymerElement {
                 <details>
                   <summary>
                     <div style="display: inline-block; vertical-align: top">
+                      Service consists of [[_count(release.supplement.class)]] microservices<br/>
+                      [[_countRunningLocally(release)]] running locally on this node, [[_countInstancesRunningRemoteOnly(release)]] running remotely in network
+                      <!--
                       [[_countRunningLocally(release)]] of [[_count(release.supplement.class)]] Service classes running on this node
-                      <iron-icon icon="hardware:security" title="Running on network nodes"></iron-icon><br/>
+                      <iron-icon icon="hardware:security" title="Running locally"></iron-icon><br/>
                       <span hidden$="[[_fullyAvailableLocally(release)]]">
                       [[_countRunningRemoteOnly(release)]] of [[_countMissingLocally(release)]] running remotely in network
                       <iron-icon icon="icons:cloud" title="Running on network nodes"></iron-icon>
                       </span>
+                      -->
                     </div>
                   </summary>
-                  <ul style="list-style: none">
+                  <ul style="list-style: none"><!-- TODO: this could/should actually be an HTML table, for once -->
+                      <li>
+                        <div style="display: inline-block; vertical-align: top; width: 17em; overflow: hidden">
+                          <strong>Microservice</strong>
+                        </div>
+                        <ul style="display: inline-block; list-style: none; padding-left: 0">
+                          <li style="margin-left: 0">
+                            <span class="nodeId"><iron-icon icon="hardware:device-hub" title="Running on Node"></iron-icon> <strong>Node ID</strong></span>
+                            <span class="time"><iron-icon icon="device:access-time" title="Last Announcement"></iron-icon> <strong>Last announced</strong></span>
+                          </li>
+                        </ul>
+                      </li>
                     <template is="dom-repeat" items="[[_split(release.supplement.class)]]" as="class">
                       <li>
-                        <div style="display: inline-block; vertical-align: top; width: 15em; overflow: hidden">[[class]]</div>
+                        <div style="display: inline-block; vertical-align: top; width: 17em; overflow: hidden">
+                          [[class]]
+                          <iron-icon hidden$="[[!_hasLocalRunningInstance(release.instances, class)]]" icon="hardware:security" title="Running locally"></iron-icon>
+                          <iron-icon hidden$="[[!_hasOnlyRemoteRunningInstance(release.instances, class)]]" icon="icons:cloud" title="Running on network nodes"></iron-icon>
+                        </div>
                         <ul style="display: inline-block; list-style: none; padding-left: 0">
-                          <span hidden$="[[_hasRunningInstance(release.instances, class)]]">—</span>
+                          <span hidden$="[[_hasRunningInstance(release.instances, class)]]">not running</span>
                           <template is="dom-repeat" items="[[_filterInstances(release.instances, class)]]" as="instance">
                             <li style="margin-left: 0">
-                              <span class="nodeId"><iron-icon icon="hardware:device-hub" title="Running on Node"></iron-icon> [[instance.nodeId]]</span>
-                              <span class="time"><iron-icon icon="device:access-time" title="Last Announcement"></iron-icon> [[_toHumanDate(instance.announcementEpochSeconds)]]</span>
+                              <span class="nodeId">[[instance.nodeId]]</span>
+                              <span class="time">[[_toHumanDate(instance.announcementEpochSeconds)]]</span>
                             </li>
                           </template>
                         </ul>
                       </li>
                     </template>
                   </ul>
+                  <span style="margin-right:1em"><iron-icon icon="hardware:security" title="Running locally"></iron-icon> Microservice running locally</span>
+                  <span><iron-icon icon="icons:cloud" title="Running on network nodes"></iron-icon> Microservice running remotely only</span>
                 </details>
               </div>
               <div class="card-actions">
@@ -248,6 +270,14 @@ class ServicesView extends PolymerElement {
     return this._filterInstances(instances, serviceClass).length > 0
   }
 
+  _hasLocalRunningInstance(instances, serviceClass) {
+    return this._filterInstances(instances, serviceClass).filter(i => i.nodeId === this._nodeId.id).length > 0;
+  }
+
+  _hasOnlyRemoteRunningInstance(instances, serviceClass) {
+    return this._hasRunningInstance(instances, serviceClass) && !this._hasLocalRunningInstance(instances, serviceClass);
+  }
+
   _classesNotRunningAnywhere(release) {
     let classes = this._split(release.supplement.class)
     let missing = classes.filter(c => {
@@ -289,6 +319,11 @@ class ServicesView extends PolymerElement {
 
   _countRunningRemoteOnly(release) {
     return this._countRunning(release) - this._countRunningLocally(release)
+  }
+
+  // this counts several instances of a service class (in contrast, most other methods here ignore duplicates)
+  _countInstancesRunningRemoteOnly(release) {
+    return release.instances.length - this._countRunningLocally(release);
   }
 
   _fullyAvailableLocally(release) {
