@@ -100,6 +100,8 @@ public class WebConnector extends Connector {
 	public static final boolean DEFAULT_ONLY_LOCAL_SERVICES = false;
 	protected boolean onlyLocalServices = DEFAULT_ONLY_LOCAL_SERVICES;
 
+    public static final String SESSION_COOKIE = "cookie";
+
 	public static final String DEFAULT_DEFAULT_OIDC_PROVIDER = "https://api.learning-layers.eu/o/oauth2";
 	public String defaultOIDCProvider = DEFAULT_DEFAULT_OIDC_PROVIDER;
 	public ArrayList<String> oidcProviders = new ArrayList<>();
@@ -641,6 +643,16 @@ public class WebConnector extends Connector {
 	}
 
 	public AgentImpl authenticateAgent(MultivaluedMap<String, String> requestHeaders, String accessTokenQueryParam) {
+	    // if the requestHeader contains a valid sessionId we can just return the corresponding agent
+        // check for sessionId in header
+        String sessionIdHeader = requestHeaders.getFirst(SESSION_COOKIE);
+        String sessionId = extractSessionCookie(sessionIdHeader);
+        if (sessionId != null) {
+            // check if sessionId is valid
+            AgentSession session;
+            if ((session = getSessionById(sessionId)) != null)
+                return session.getAgent();
+        }
 		return authenticationManager.authenticateAgent(requestHeaders, accessTokenQueryParam);
 	}
 
@@ -705,4 +717,13 @@ public class WebConnector extends Connector {
 		return new BigInteger(260, secureRandom).toString(32);
 	}
 
+    private String extractSessionCookie(String sessionIdHeader) {
+        if (sessionIdHeader != null) {
+            // check if value is valid session id format
+            if (sessionIdHeader.startsWith("sessionid="))
+                // return the session id
+                return sessionIdHeader.substring("sessionid=".length());
+        }
+        return null;
+    }
 }
