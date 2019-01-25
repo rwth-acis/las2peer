@@ -162,7 +162,7 @@ class NodeFrontend extends PolymerElement {
             <div style="text-align: center">
               <openidconnect-signin id="oidcButton"
                                     scope="openid profile email"
-                                    clientid="937682b6-4bd5-4959-8c65-050c96f4f35d"
+                                    clientid="e4080a03-1839-49d4-92e7-d50fab990576"
                                     authority="https://api.learning-layers.eu/o/oauth2"
                                     providername="Layers"
                                     popupredirecturi$="[[_loadUrl]]"
