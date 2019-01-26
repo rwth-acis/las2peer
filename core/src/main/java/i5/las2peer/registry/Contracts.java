@@ -189,7 +189,7 @@ class Contracts {
 				//
 				// okay, frankly, I'm not even sure if this can fix the nonce too low error (but that's what the issue / StackEx suggest)
 				long pollingIntervalMillisecs = 1000;
-				int attempts = 30;
+				int attempts = 90;
 				TransactionReceiptProcessor receiptProcessor = new PollingTransactionReceiptProcessor(web3j, pollingIntervalMillisecs, attempts);
 				RawTransactionManager transactionManager = new FastRawTransactionManager(web3j, credentials, receiptProcessor);
 
