@@ -111,9 +111,11 @@ class NodeFrontend extends PolymerElement {
         <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]">
           <app-toolbar>Menu</app-toolbar>
           <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
-            <a name="view-status" href="[[rootPath]]view-status">Status</a>
-            <a name="view-services" href="[[rootPath]]view-services">Services</a>
-            <a name="view-agents" href="[[rootPath]]view-agents">Agent Tools</a>
+            <a name="welcome" href="[[rootPath]]welcome">Welcome</a>
+            <a name="status" href="[[rootPath]]status">Status</a>
+            <a name="view-services" href="[[rootPath]]view-services">View Services</a>
+            <a name="publish-service" href="[[rootPath]]publish-service">Publish Service</a>
+            <a name="agent-tools" href="[[rootPath]]agent-tools">Agent Tools</a>
           </iron-selector>
         </app-drawer>
 
@@ -135,9 +137,11 @@ class NodeFrontend extends PolymerElement {
           </app-header>
 
           <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
-            <status-view name="view-status" api-endpoint="[[apiEndpoint]]" agent-id="[[_agentId]]" error="{{_error}}"></status-view>
+            <welcome-view name="welcome" api-endpoint="[[apiEndpoint]]" agent-id="[[_agentId]]" error="{{_error}}"></welcome-view>
+            <status-view name="status" api-endpoint="[[apiEndpoint]]" agent-id="[[_agentId]]" error="{{_error}}"></status-view>
             <services-view name="view-services" api-endpoint="[[apiEndpoint]]" agent-id="[[_agentId]]" error="{{_error}}"></services-view>
-            <agents-view name="view-agents" api-endpoint="[[apiEndpoint]]" agent-id="[[_agentId]]" error="{{_error}}"></agents-view>
+            <service-publish-view name="publish-service" api-endpoint="[[apiEndpoint]]" agent-id="[[_agentId]]" error="{{_error}}"></service-publish-view>
+            <agents-view name="agent-tools" api-endpoint="[[apiEndpoint]]" agent-id="[[_agentId]]" error="{{_error}}"></agents-view>
             <my-view404 name="view404"></my-view404>
           </iron-pages>
         </app-header-layout>
@@ -192,7 +196,7 @@ class NodeFrontend extends PolymerElement {
             </template>
           </dom-if>
 
-          <div hidden$="[[toBool(_oidcUser)]]">To register, use the <a dialog-dismiss name="view-agents" href="[[rootPath]]view-agents">Agents</a> tab.</div>
+          <div hidden$="[[toBool(_oidcUser)]]">To register, use the <a dialog-dismiss name="view-agents" href="[[rootPath]]agent-tools">Agents</a> tab.</div>
         </paper-dialog>
 
         <paper-dialog id="las2peerErrorDialog">
@@ -236,8 +240,8 @@ class NodeFrontend extends PolymerElement {
      // If no page was found in the route data, page will be an empty string.
      // Show 'view1' in that case. And if the page doesn't exist, show 'view404'.
     if (!page) {
-      this.page = 'view-status';
-    } else if (['view-status', 'view-services', 'view-agents'].indexOf(page) !== -1) {
+      this.page = 'welcome';
+    } else if (['welcome', 'status', 'view-services', 'publish-service', 'agent-tools'].indexOf(page) !== -1) {
       this.page = page;
     } else {
       this.page = 'view404';
@@ -255,13 +259,19 @@ class NodeFrontend extends PolymerElement {
     // Note: `polymer build` doesn't like string concatenation in the import
     // statement, so break it up.
     switch (page) {
-      case 'view-status':
+      case 'welcome':
+        import('./view-welcome.js');
+        break;
+      case 'status':
         import('./view-status.js');
         break;
       case 'view-services':
         import('./view-services.js');
         break;
-      case 'view-agents':
+      case 'publish-service':
+        import('./view-publish-service.js');
+        break;
+      case 'agent-tools':
         import('./view-agents.js');
         break;
       case 'view404':

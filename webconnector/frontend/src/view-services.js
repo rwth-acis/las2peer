@@ -45,13 +45,6 @@ class ServicesView extends PolymerElement {
                  last-response="{{_communityTags}}"
                  on-error="_handleError"
                  debounce-duration="300"></iron-ajax>
-      <iron-ajax id="ajaxUploadService"
-                 method="POST"
-                 url$="[[apiEndpoint]]/services/upload"
-                 handle-as="json"
-                 on-response="_handleUploadServiceResponse"
-                 on-error="_handleError"
-                 loading = "{{_submittingUpload}}"></iron-ajax>
       <iron-ajax id="ajaxStartService"
                  method="POST"
                  url$="[[apiEndpoint]]/services/start"
@@ -79,6 +72,9 @@ class ServicesView extends PolymerElement {
           width: 6.5em;
           margin-right: 1em;
         }
+        details {
+          cursor: pointer;
+        }
       </style>
       <custom-style>
         <style is="custom-style">
@@ -91,8 +87,12 @@ class ServicesView extends PolymerElement {
       </custom-style>
 
       <div class="card">
-        <h2>Services in this Network</h2>
+        <h1>Services in this Network</h1>
 
+        <p hidden$="[[_toBool(_services)]]">
+          There are no services published in this network.<br/>
+          Feel free to use the <a href="[[rootPath]]publish-service">Publish Service</a> tab.
+        </p>
         <template is="dom-repeat" items="[[_services]]" as="service">
           <template is="dom-repeat" items="[[_getLatestAsArray(service.releases)]]" as="release">
             <!-- we actually just want a single item here: the latest release. but I don't know how to do that without abusing repeat like this -->
@@ -121,8 +121,21 @@ class ServicesView extends PolymerElement {
                 <details>
                   <summary>
                     <div style="display: inline-block; vertical-align: top">
-                      Service consists of [[_count(release.supplement.class)]] microservices<br/>
+                      Service consists of [[_count(release.supplement.class)]] microservice[[_pluralS(release.supplement.class)]]<br/>
                       [[_countRunningLocally(release)]] running locally on this node, [[_countInstancesRunningRemoteOnly(release)]] running remotely in network
+                      <div hidden="[[!_fullyAvailableLocally(release)]]">
+                        Service available locally, authenticity verified
+                        <iron-icon icon="hardware:security" title="Running locally"></iron-icon>
+                      </div>
+                      <div hidden="[[_fullyAvailableLocally(release)]]">
+                        <div hidden="[[!_fullyAvailableAnywhere(release)]]">
+                          Service available remotely on other nodes
+                          <iron-icon icon="icons:cloud" title="Running on network nodes"></iron-icon>
+                        </div>
+                      </div>
+                      <div hidden="[[_fullyAvailableAnywhere(release)]]">
+                        Service not available
+                      </div>
                       <!--
                       [[_countRunningLocally(release)]] of [[_count(release.supplement.class)]] Service classes running on this node
                       <iron-icon icon="hardware:security" title="Running locally"></iron-icon><br/>
@@ -169,31 +182,22 @@ class ServicesView extends PolymerElement {
                 </details>
               </div>
               <div class="card-actions">
-                  <paper-button on-click="_handleStartButton" data-args$="[[service.name]]#[[_classesNotRunningLocally(release)]]@[[release.version]]">Start on this Node</paper-button>
-                  <paper-button on-click="_handleStopButton" data-args$="[[service.name]]#[[release.supplement.class]]@[[release.version]]">Stop</paper-button>
-                  <a href$="[[release.supplement.vcsUrl]]" hidden$="[[!release.supplement.vcsUrl]]" target="_blank" tabindex="-1"><paper-button>View source code</paper-button></a>
-                  <a href$="[[release.supplement.frontendUrl]]" hidden$="[[!release.supplement.frontendUrl]]" target="_blank" tabindex="-1"><paper-button>Open front-end</paper-button></a>
+                  <paper-button on-click="_handleStartButton"
+                                data-args$="[[service.name]]#[[_classesNotRunningLocally(release)]]@[[release.version]]">Start on this Node</paper-button>
+                  <paper-button on-click="_handleStopButton"
+                                disabled$="[[!_countRunningLocally(release)]]"
+                                data-args$="[[service.name]]#[[release.supplement.class]]@[[release.version]]">Stop</paper-button>
+                  <paper-button hidden$="[[!release.supplement.vcsUrl]]"
+                                on-click="_handleVcsButton"
+                                data-args$="[[release.supplement.vcsUrl]]">View source code</paper-button>
+                  <paper-button hidden$="[[!release.supplement.frontendUrl]]"
+                                on-click="_handleFrontendButton"
+                                disabled$="[[!_fullyAvailableAnywhere(release)]]"
+                                data-args$="[[_frontendUrlIfServiceAvailable(release)]]">Open front-end</paper-button>
               </div>
             </paper-card>
           </template>
         </template>
-      </div>
-
-      <div class="card">
-        <h2>Upload and Register Service</h2>
-        <p>Release a service in the network by uploading its JAR file and providing some metadata.<p>
-        <p>The service package name will automatically be registered to your name, if it isn’t already. Further releases can only be uploaded by you.</p>
-        <p>The additional metadata will help users discover your service and its features. The name should be a human-readable variant of the package name. The description should consist of a few short sentences.</p>
-        <iron-form on-keypress="_keyPressedUploadService">
-          <paper-input label="JAR file" id="serviceUploadFile" disabled="[[_submittingUpload]]" type="file" required="true"></paper-input>
-          <paper-input label="Service classes to start (comma-separated)" id="serviceUploadClass" disabled="[[_submittingUpload]]" required="true"></paper-input>
-          <paper-input label="Name" id="serviceUploadName" disabled="[[_submittingUpload]]" required="true"></paper-input>
-          <paper-input label="Description" id="serviceUploadDescription" disabled="[[_submittingUpload]]" required="true"></paper-input>
-          <paper-input label="Source code URL (e.g., GitHub project)" id="serviceUploadVcsUrl" disabled="[[_submittingUpload]]"></paper-input>
-          <paper-input label="Front-end URL" id="serviceUploadFrontendUrl" disabled="[[_submittingUpload]]"></paper-input>
-          <paper-button raised on-tap="uploadService" disabled="[[_submittingUpload]]">Upload Service</paper-button>
-        </iron-form>
-        <div id="uploadServiceMsg" style="font-weight: bold"></div>
       </div>
     `;
   }
@@ -232,12 +236,20 @@ class ServicesView extends PolymerElement {
     return Object.keys(obj).map(k => ({ name: k, value: obj[k] }));
   }
 
+  _toBool(obj) {
+    return !!obj;
+  }
+
   _split(stringWithCommas) {
     return stringWithCommas.split(',');
   }
 
   _count(stringWithCommas) {
     return this._split(stringWithCommas).length
+  }
+
+  _pluralS(stringWithCommas) {
+    return (this._count(stringWithCommas) > 1) ? "s" : "";
   }
 
   _toHumanDate(epochSeconds) {
@@ -288,7 +300,7 @@ class ServicesView extends PolymerElement {
   }
 
   _classesNotRunningLocally(release) {
-    let classes = this._split(release.supplement.class)
+    let classes = this._split(release.supplement.class);
     let missing = classes.filter(c => {
       let localInstancesOfClass = release.instances.filter(i => i.className === c && i.nodeId === this._nodeId.id);
       return localInstancesOfClass < 1;
@@ -304,21 +316,21 @@ class ServicesView extends PolymerElement {
   _countRunning(release) {
     let classes = this._split(release.supplement.class);
     let missing = this._classesNotRunningAnywhere(release);
-    return classes.length - missing.length
+    return classes.length - missing.length;
   }
 
   _countRunningLocally(release) {
     let classes = this._split(release.supplement.class);
     let missing = this._classesNotRunningLocally(release);
-    return classes.length - missing.length
+    return classes.length - missing.length;
   }
 
   _countMissingLocally(release) {
-   return this._count(release.supplement.class) - this._countRunningLocally(release)
+   return this._count(release.supplement.class) - this._countRunningLocally(release);
   }
 
   _countRunningRemoteOnly(release) {
-    return this._countRunning(release) - this._countRunningLocally(release)
+    return this._countRunning(release) - this._countRunningLocally(release);
   }
 
   // this counts several instances of a service class (in contrast, most other methods here ignore duplicates)
@@ -326,8 +338,20 @@ class ServicesView extends PolymerElement {
     return release.instances.length - this._countRunningLocally(release);
   }
 
+  _fullyAvailableAnywhere(release) {
+    return this._classesNotRunningAnywhere(release).length === 0;
+  }
+
   _fullyAvailableLocally(release) {
-    return this._countMissingLocally(release) === 0
+    return this._countMissingLocally(release) === 0;
+  }
+
+  _frontendUrlIfServiceAvailable(release) {
+    if (this._fullyAvailableAnywhere(release)) {
+      return release.supplement.frontendUrl;
+    } else {
+      return false;
+    }
   }
 
   _keyPressedUploadService(event) {
@@ -337,28 +361,6 @@ class ServicesView extends PolymerElement {
       return false;
     }
     return true;
-  }
-
-  uploadService(event) {
-    let req = this.$.ajaxUploadService;
-    req.body = new FormData();
-    req.body.append('jarfile', this.$.serviceUploadFile.inputElement.inputElement.files[0]); // this is an input inside an iron-input inside a paper-input
-
-    let supplement = {
-      'class': this.$.serviceUploadClass.inputElement.inputElement.value,
-      'name': this.$.serviceUploadName.inputElement.inputElement.value,
-      'description': this.$.serviceUploadDescription.inputElement.inputElement.value,
-      'vcsUrl': this.$.serviceUploadVcsUrl.inputElement.inputElement.value,
-      'frontendUrl': this.$.serviceUploadFrontendUrl.inputElement.inputElement.value,
-    };
-    req.body.append('supplement', JSON.stringify(supplement));
-
-    req.generateRequest();
-  }
-
-  _handleUploadServiceResponse(event) {
-    this.$.serviceUploadFile.value = '';
-    this.$.uploadServiceMsg.innerHTML = event.detail.response.msg;
   }
 
   _handleStartButton(event) {
@@ -395,6 +397,18 @@ class ServicesView extends PolymerElement {
     req.params = { 'serviceName': fullClassName, 'version': version };
     console.log("Requesting stop of '" + fullClassName + "'@'" + version + "' ...");
     req.generateRequest();
+  }
+
+  _handleVcsButton(event) {
+    if (event.target.getAttribute('data-args')) {
+      window.open(event.target.getAttribute('data-args'));
+    }
+  }
+
+  _handleFrontendButton(event) {
+    if (event.target.getAttribute('data-args')) {
+      window.open(event.target.getAttribute('data-args'));
+    }
   }
 
   _handleError(event) {

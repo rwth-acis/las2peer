@@ -93,8 +93,10 @@ class AgentsView extends PolymerElement {
             You will then be able to log in with your username and password.
           </p>
           <p>
+            <!--
             By specifying an Ethereum mnemonic phrase, you can use an existing Ethereum account.
             If you leave it blank, a new account will be created for you.
+            -->
             <!-- The seed phrase is stored in the (publicly accessible) agent file.
                  The key pair is generated from the phrase + the password.
                  This follows BIP39 but not the HD Wallet standards, since Web3J does not fully support those right now.
@@ -105,7 +107,7 @@ class AgentsView extends PolymerElement {
             <form>
               <paper-input label="username (optional)" id="createAgentUsername" disabled="[[_working]]" value=""></paper-input>
               <paper-input label="email (optional)" id="createAgentEmail" disabled="[[_working]]" value=""></paper-input>
-              <paper-input label="ethereum mnemonic phrase (optional)" id="createAgentEthereumMnemonic" disabled="[[_working]]" value=""></paper-input>
+              <paper-input hidden="true" label="ethereum mnemonic phrase (optional)" id="createAgentEthereumMnemonic" disabled="[[_working]]" value=""></paper-input>
               <paper-input label="password" id="createAgentPassword" disabled="[[_working]]" value="" type="password" required="true"></paper-input>
               <paper-button raised on-click="createAgent" disabled="[[_working]]">Create Agent</paper-button>
             </form>
