@@ -73,7 +73,7 @@ class ServicePublishView extends PolymerElement {
 
       <div class="card">
         <h1>Publish Service</h1>
-        <p>Publish a service in the network by uploading its JAR file and providing some metadata.<p>
+        <p>Publish a service in the network by uploading its JAR file and providing some metadata.</p>
         <p>The service package name will automatically be registered to your name, if it isn’t already. Further releases can only be uploaded by you.</p>
         <p>The additional metadata will help users discover your service and its features. The name should be a human-readable variant of the package name. The description should consist of a few short sentences.</p>
         <iron-form on-keypress="_keyPressedUploadService">
