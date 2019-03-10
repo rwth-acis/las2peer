@@ -133,7 +133,7 @@ class BlockchainObserver {
 							String tagDescription = "";
 							for (int i = 0; i < 5; i++) {
 								tagDescription = contracts.communityTagIndex.viewDescription(
-								Util.padAndConvertString(tagName, 32)).send();
+										Util.padAndConvertString(tagName, 32)).send();
 								if (!tagDescription.isEmpty()) {
 									break;
 								}

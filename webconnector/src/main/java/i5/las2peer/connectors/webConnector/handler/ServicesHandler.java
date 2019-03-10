@@ -316,7 +316,9 @@ public class ServicesHandler {
 
 	// only handles objects (not JSON arrays)
 	private JSONObject parseJson(String s) {
-		// TODO: handle emptiness checks at call site (maybe?)
+		if (s.isEmpty()) {
+			return new JSONObject();
+		}
 		try {
 			return (JSONObject) new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(s);
 		} catch (ParseException e) {
