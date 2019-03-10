@@ -316,7 +316,20 @@ public class L2pNodeLauncher {
 	 */
 	public void uploadServicePackage(String serviceJarFile, String developerAgentXMLFile, String developerPassword)
 			throws ServicePackageException, EnvelopeAlreadyExistsException {
-		PackageUploader.uploadServicePackage((PastryNodeImpl) node, serviceJarFile, developerAgentXMLFile, developerPassword);
+		uploadServicePackage(serviceJarFile, developerAgentXMLFile, developerPassword, null);
+	}
+
+	/**
+	 * Uploads the service jar file and its dependencies into the shared storage to be used for network class loading.
+	 *
+	 * @param serviceJarFile The service jar file that should be uploaded.
+	 * @param developerAgentXMLFile The XML file of the developers agent.
+	 * @param developerPassword The password for the developer agent.
+	 * @param supplement Additional service metadata string.
+	 */
+	public void uploadServicePackage(String serviceJarFile, String developerAgentXMLFile, String developerPassword, String supplement)
+			throws ServicePackageException, EnvelopeAlreadyExistsException {
+		PackageUploader.uploadServicePackage((PastryNodeImpl) node, serviceJarFile, developerAgentXMLFile, developerPassword, supplement);
 	}
 
 	/**
