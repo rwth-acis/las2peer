@@ -131,12 +131,17 @@ public class L2pNodeLauncherConfiguration {
 				argList.add(arg);
 			} else {
 				// previous arg was unbalanced, attach this arg
+
+				// add space, because it may need to be treated literally, e.g. when in a quoted string
+				// this is not an issue if the entire command was quoted, but that can be a pain (escaping the quotes)
+				joined += " ";
+
 				joined += arg;
 				int openingJoined = joined.length() - joined.replace("(", "").length();
 				int closingJoined = joined.length() - joined.replace(")", "").length();
 				if (openingJoined == closingJoined) {
 					// now it's balanced
-					argList.add(joined);
+					argList.add(joined.trim()); // remove potentially superfluous space in front
 					joined = "";
 				} else if (openingJoined < closingJoined) {
 					throw new IllegalArgumentException("command \"" + joined + "\" has too many closing brackets!");
