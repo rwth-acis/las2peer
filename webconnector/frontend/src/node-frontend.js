@@ -130,7 +130,7 @@ class NodeFrontend extends PolymerElement {
               <div main-title="">las2peer Node Front-End</div>
 
             <template is="dom-if" if="[[_agentId]]">
-              <las2peer-user-widget base-url="http://127.0.0.1:8080" login-oidc-token="[[_oidcUser.access_token]]" login-oidc-name="[[_oidcUser.profile.preferred_username]]"></las2peer-user-widget>
+              <las2peer-user-widget base-url="/" login-oidc-token="[[_oidcUser.access_token]]" login-oidc-name="[[_oidcUser.profile.preferred_username]]"></las2peer-user-widget>
             </template>
               <template is="dom-if" if="[[_agentId]]">
                 <paper-button on-tap="destroySession">Logout <iron-icon icon="account-circle"></iron-icon></paper-button>
