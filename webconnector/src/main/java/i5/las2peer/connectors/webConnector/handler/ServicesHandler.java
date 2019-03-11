@@ -179,6 +179,8 @@ public class ServicesHandler {
 	@Path("/services")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getStructuredServiceData() {
+		if (registry == null) throw new NotFoundException("Node does not use registry.");
+
 		JSONArray services = new JSONArray();
 
 		registry.getServiceNames().forEach(name -> {
@@ -225,6 +227,7 @@ public class ServicesHandler {
 	@Path("/names")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getRegisteredServices() {
+		if (registry == null) throw new NotFoundException("Node does not use registry.");
 		JSONArray serviceNameList = new JSONArray();
 		serviceNameList.addAll(registry.getServiceNames());
 		return serviceNameList.toJSONString();
@@ -235,6 +238,7 @@ public class ServicesHandler {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Deprecated
 	public String getServiceAuthors() {
+		if (registry == null) throw new NotFoundException("Node does not use registry.");
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.putAll(registry.getServiceAuthors());
 		return jsonObject.toJSONString();
@@ -244,6 +248,7 @@ public class ServicesHandler {
 	@Path("/releases")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getServiceReleases() {
+		if (registry == null) throw new NotFoundException("Node does not use registry.");
 		JSONObject jsonObject = new JSONObject();
 		for (ConcurrentMap.Entry<String, List<ServiceReleaseData>> service: registry.getServiceReleases().entrySet()) {
 			JSONArray releaseList = new JSONArray();
@@ -262,6 +267,7 @@ public class ServicesHandler {
 	@Path("/deployments")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getServiceDeployments() {
+		if (registry == null) throw new NotFoundException("Node does not use registry.");
 		JSONObject jsonObject = new JSONObject();
 		registry.getServiceNames().forEach(serviceName -> {
 			JSONArray deploymentList = new JSONArray();
@@ -283,6 +289,7 @@ public class ServicesHandler {
 	@Path("/registry/tags")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getTags() {
+		if (registry == null) throw new NotFoundException("Node does not use registry.");
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.putAll(registry.getTags());
 		return jsonObject.toJSONString();
