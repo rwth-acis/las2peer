@@ -125,8 +125,8 @@ public class DefaultHandlerTest extends AbstractTestHandler {
 			Assert.assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
 			byte[] bytes = SimpleTools.toByteArray((InputStream) response.getEntity());
 			JSONObject result = (JSONObject) new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(bytes);
-			Assert.assertEquals(nodes.get(0).getNodeId().toString(), result.getAsString("nodeid"));
-			Assert.assertNotNull(result.get("cpuload"));
+			Assert.assertEquals(nodes.get(0).getNodeId().toString(), result.getAsString("nodeId"));
+			Assert.assertNotNull(result.get("cpuLoad"));
 			Assert.assertNotNull(result.get("storageSize"));
 			Assert.assertNotNull(result.get("storageSizeStr"));
 			Assert.assertNotNull(result.get("maxStorageSize"));

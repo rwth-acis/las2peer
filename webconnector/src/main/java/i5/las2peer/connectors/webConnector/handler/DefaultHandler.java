@@ -8,10 +8,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.InternalServerErrorException;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -33,6 +30,7 @@ import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.L2pNodeLauncher;
+
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 
@@ -46,7 +44,7 @@ public class DefaultHandler {
 
 	public DefaultHandler(WebConnector connector) {
 		this.connector = connector;
-		this.node = connector.getL2pNode();
+		node = connector.getL2pNode();
 	}
 
 	@GET
@@ -86,8 +84,8 @@ public class DefaultHandler {
 	public String getNodeStatus(@Context UriInfo uriInfo) {
 		// gather status values and return as JSON string
 		JSONObject response = new JSONObject();
-		response.put("nodeid", node.getNodeId().toString());
-		response.put("cpuload", getCPULoad(node));
+		response.put("nodeId", node.getNodeId().toString());
+		response.put("cpuLoad", getCPULoad(node));
 		long localStorageSize = -1;
 		long maxLocalStorageSize = -1;
 		if (node instanceof PastryNodeImpl) {
@@ -212,5 +210,4 @@ public class DefaultHandler {
 			}
 		}
 	}
-
 }

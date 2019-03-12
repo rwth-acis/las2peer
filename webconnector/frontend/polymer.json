@@ -1,25 +1,41 @@
 {
-  "shell": "src/las2peer-webapp.html",
-  "fragments": [
-    "src/view-status.html",
-    "src/view-services.html",
-    "src/view-agents.html",
-    "src/view404.html"
-  ],
-  "builds": [{
-    "bundle": true,
-    "addServiceWorker": true
-  }],
+  "entrypoint": "index.html",
+  "shell": "src/node-frontend.js",
   "sources": [
-    "src/**/*",
-    "images/**/*",
-    "bower.json"
+    "images/**/*"
   ],
   "extraDependencies": [
     "manifest.json",
-    "bower_components/webcomponentsjs/*.js"
+    "node_modules/@webcomponents/webcomponentsjs/*.js",
+    "!node_modules/@webcomponents/webcomponentsjs/gulpfile.js",
+    "node_modules/@webcomponents/webcomponentsjs/bundles/*.js"
   ],
+  "builds": [
+    {
+      "name": "es6-bundled",
+      "basePath": "las2peer/webapp",
+      "browserCapabilities": [
+        "es2015"
+      ],
+      "js": {
+        "minify": true,
+        "transformModulesToAmd": true
+      },
+      "css": {
+        "minify": true
+      },
+      "html": {
+        "minify": true
+      },
+      "bundle": true,
+      "addServiceWorker": true
+    }
+  ],
+  "moduleResolution": "node",
+  "npm": true,
   "lint": {
-    "rules": ["polymer-2"]
+    "rules": [
+      "polymer-3"
+    ]
   }
 }

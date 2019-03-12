@@ -1,26 +1,47 @@
 {
   "name": "las2peer-node-frontend",
-  "description": "A webapp frontend for a las2peer node",
+  "version": "2.0.0",
+  "description": "A web front-end for las2peer nodes",
+  "repository": "rwth-acis/las2peer",
+  "homepage": "https://las2peer.org/",
   "license": "BSD-3-Clause",
-  "devDependencies": {
-    "eslint": "^3.19.0",
-    "eslint-config-google": "^0.7.0",
-    "eslint-plugin-html": "^2.0.0"
-  },
   "scripts": {
-    "lint": "npm run lint:javascript",
-    "lint:javascript": "eslint . --ext js,html --ignore-path .gitignore",
+    "start": "polymer serve",
+    "build": "polymer build",
+    "lint": "polymer lint",
     "test": "polymer test",
     "test:integration": "polymer build # test that psk builds without error with the CLI"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/rwth-acis/las2peer.git"
-  },
   "dependencies": {
-    "bower": "^1.8.4",
-    "polymer-cli": "^1.9.0",
-    "wd": "^1.4.1"
+    "@polymer/app-layout": "^3.0.2",
+    "@polymer/app-route": "^3.0.2",
+    "@polymer/iron-ajax": "^3.0.1",
+    "@polymer/iron-collapse": "3.0.1",
+    "@polymer/iron-flex-layout": "^3.0.1",
+    "@polymer/iron-form": "^3.0.1",
+    "@polymer/iron-icon": "^3.0.1",
+    "@polymer/iron-icons": "^3.0.1",
+    "@polymer/iron-iconset-svg": "^3.0.1",
+    "@polymer/iron-input": "^3.0.1",
+    "@polymer/iron-media-query": "^3.0.1",
+    "@polymer/iron-pages": "^3.0.1",
+    "@polymer/iron-selector": "^3.0.1",
+    "@polymer/paper-button": "3.0.1",
+    "@polymer/paper-card": "^3.0.1",
+    "@polymer/paper-dialog": "3.0.1",
+    "@polymer/paper-icon-button": "^3.0.1",
+    "@polymer/paper-input": "^3.0.1",
+    "@polymer/paper-tooltip": "^3.0.1",
+    "@polymer/polymer": "^3.1.0",
+    "@webcomponents/webcomponentsjs": "^2.2.1",
+    "openidconnect-signin": "github:rwth-acis/openidconnect-signin#f158f7f",
+    "las2peer-frontend-user-widget": "github:rwth-acis/las2peer-frontend-user-widget#polymer3.0"
   },
-  "homepage": "https://las2peer.org/"
+  "devDependencies": {
+    "polymer-cli": "^1.9.4",
+    "wct-browser-legacy": "^1.0.2"
+  },
+  "engines": {
+    "node": ">=8.0"
+  }
 }

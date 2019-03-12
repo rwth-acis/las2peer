@@ -47,9 +47,9 @@ public class SwaggerUIHandler extends AbstractFileHandler {
 	}
 
 	@Override
-	protected Response serveFile(String filename) throws IOException {
-		String resourceName = "/META-INF/resources/webjars/swagger-ui/3.6.1/" + filename;
-		if (filename.equalsIgnoreCase("index.html")) {
+	protected Response serveFile(String relativeUri) throws IOException {
+		String resourceName = "/META-INF/resources/webjars/swagger-ui/3.6.1/" + relativeUri;
+		if (relativeUri.equalsIgnoreCase("index.html")) {
 			InputStream is = getClass().getResourceAsStream(resourceName);
 			if (is == null) {
 				logger.info("File not found: '" + resourceName + "'");

@@ -208,7 +208,11 @@ public class PastryNodeImpl extends Node {
 		threadpool = Executors.newCachedThreadPool();
 		application = new NodeApplication(this);
 		pastStorage = new SharedStorage(pastryNode, storageMode, threadpool, storageDir);
-		// add past storage as network repository
+		setupRepository();
+	}
+
+	/** Add past storage as network repository */
+	protected void setupRepository() {
 		getBaseClassLoader().addRepository(new SharedStorageRepository(this));
 	}
 
