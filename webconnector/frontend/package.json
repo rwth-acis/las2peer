@@ -37,7 +37,7 @@
     "las2peer-frontend-statusbar": "github:rwth-acis/las2peer-frontend-statusbar"
   },
   "devDependencies": {
-    "polymer-cli": "^1.9.4",
+    "polymer-cli": "^1.9.7",
     "wct-browser-legacy": "^1.0.2"
   },
   "engines": {

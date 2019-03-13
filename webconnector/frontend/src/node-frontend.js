@@ -124,7 +124,7 @@ class NodeFrontend extends PolymerElement {
             oidcsilentsigninurl$="[[_loadUrl]]"
             loginoidctoken$="[[_oidcUser.access_token]]"
             loginoidcprovider="https://api.learning-layers.eu/o/oauth2"
-            sendcookie=true></las2peer-frontend-statusbar>
+          ></las2peer-frontend-statusbar>
 
           <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
             <welcome-view name="welcome" api-endpoint="[[apiEndpoint]]" agent-id="[[_agentId]]" error="{{_error}}"></welcome-view>
@@ -158,6 +158,7 @@ class NodeFrontend extends PolymerElement {
             <div style="margin-top: 1em">Or enter your login name:</div>
           </div>
 
+          <!-- This form is not used right now since the login is completely based on the OIDC credentials -->
           <form is="iron-form" id="loginForm" on-keypress="_keyPressedLogin" style="margin-top: 0; margin-bottom: 1em">
             <paper-input hidden$="[[toBool(_oidcUser)]]" label="email or username" id="userIdField" disabled="[[_submittingLogin]]" value="" autofocus></paper-input>
             <paper-input label="password" id="passwordField" disabled="[[_submittingLogin]]" value="" type="password">
@@ -270,6 +271,7 @@ class NodeFrontend extends PolymerElement {
 
     this.$.statusbar.addEventListener('signed-out', function() { appThis._oidcUser = null; appThis.destroySession(); });
 
+    // deprecated code supporting login with las2peer credentials
     // trigger the hidden, real submit button
     this.$.loginButton.addEventListener('click', function() { appThis.$.loginSubmitButton.click(); });
 
@@ -285,11 +287,6 @@ class NodeFrontend extends PolymerElement {
   }
 
   destroySession() {
-    let i = document.createElement('iframe');
-    i.style.display = 'none';
-    i.onload = function() { i.parentNode.removeChild(i); };
-    i.src = 'https://api.learning-layers.eu/o/oauth2/logout';
-    document.body.appendChild(i);
     this.$.ajaxDestroySession.generateRequest();
   }
 
@@ -300,6 +297,8 @@ class NodeFrontend extends PolymerElement {
   }
 
   sendLogin() {
+    // the code for detecting the login method is deprecated
+    // the only credentials that are used are the OIDC access token and OIDC sub
     const PREFIX_USER_NAME = "USER_NAME-";
     const PREFIX_USER_MAIL = "USER_MAIL-";
     const PREFIX_OIDC_SUB = "OIDC_SUB-";
