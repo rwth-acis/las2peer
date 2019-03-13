@@ -26,12 +26,7 @@ import '@polymer/paper-card/paper-card.js';
 import '@polymer/paper-dialog/paper-dialog.js';
 import '@polymer/paper-icon-button/paper-icon-button.js';
 import '@polymer/paper-input/paper-input.js';
-import 'openidconnect-signin/openidconnect-signin.js'
-import 'openidconnect-signin/openidconnect-popup-signin-callback.js'
-import 'openidconnect-signin/openidconnect-popup-signout-callback.js'
-import 'openidconnect-signin/openidconnect-signin-silent-callback.js'
-import 'las2peer-frontend-user-widget/las2peer-user-widget.js'
-import 'las2peer-frontend-user-widget/las2peer-userlist-widget.js'
+import 'las2peer-frontend-statusbar/las2peer-frontend-statusbar.js';
 
 // Gesture events like tap and track generated from touch will not be
 // preventable, allowing for better scrolling performance.
@@ -77,9 +72,8 @@ class NodeFrontend extends PolymerElement {
           display: none;
         }
 
-        app-header {
+        .app-header {
           color: #fff;
-          background-color: var(--app-primary-color);
         }
 
         app-header paper-icon-button {
@@ -122,24 +116,15 @@ class NodeFrontend extends PolymerElement {
         </app-drawer>
 
         <!-- Main content -->
-        <app-header-layout has-scrolling-region="">
-
-          <app-header slot="header" condenses="" reveals="" effects="waterfall">
-            <app-toolbar>
-              <paper-icon-button icon="icons:menu" drawer-toggle=""></paper-icon-button>
-              <div main-title="">las2peer Node Front-End</div>
-
-            <template is="dom-if" if="[[_agentId]]">
-              <las2peer-user-widget base-url="/" login-oidc-token="[[_oidcUser.access_token]]" login-oidc-name="[[_oidcUser.profile.preferred_username]]"></las2peer-user-widget>
-            </template>
-              <template is="dom-if" if="[[_agentId]]">
-                <paper-button on-tap="destroySession">Logout <iron-icon icon="account-circle"></iron-icon></paper-button>
-              </template>
-              <template is="dom-if" if="[[!_agentId]]">
-                <paper-button on-tap="showLoginDialog">Login <iron-icon icon="account-circle"></iron-icon></paper-button>
-              </template>
-            </app-toolbar>
-          </app-header>
+        <div class="app-header">
+          <las2peer-frontend-statusbar id="statusbar" base-url="/" service="las2peer Node Front-End"
+            oidcclientid="bdda7396-3f6d-4d83-ac21-65b4069d0eab"
+            oidcpopupsigninurl$="[[_loadUrl]]"
+            oidcpopupsignouturl$="[[_loadUrl]]"
+            oidcsilentsigninurl$="[[_loadUrl]]"
+            loginoidctoken$="[[_oidcUser.access_token]]"
+            loginoidcprovider="https://api.learning-layers.eu/o/oauth2"
+            sendcookie=true></las2peer-frontend-statusbar>
 
           <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
             <welcome-view name="welcome" api-endpoint="[[apiEndpoint]]" agent-id="[[_agentId]]" error="{{_error}}"></welcome-view>
@@ -149,8 +134,7 @@ class NodeFrontend extends PolymerElement {
             <agents-view name="agent-tools" api-endpoint="[[apiEndpoint]]" agent-id="[[_agentId]]" error="{{_error}}"></agents-view>
             <my-view404 name="view404"></my-view404>
           </iron-pages>
-        </app-header-layout>
-
+        </div>
         <!-- modal dialogs -->
         <paper-dialog id="loginDialog" modal="[[_submittingLogin]]">
           <h2>Login</h2>
@@ -167,19 +151,6 @@ class NodeFrontend extends PolymerElement {
             </paper-card>
           </div>
 
-          <div hidden$="[[toBool(_oidcUser)]]">
-            <div style="text-align: center">
-              <openidconnect-signin id="oidcButton"
-                                    scope="openid profile email"
-                                    clientid="bdda7396-3f6d-4d83-ac21-65b4069d0eab"
-                                    authority="https://api.learning-layers.eu/o/oauth2"
-                                    providername="Layers"
-                                    popupredirecturi$="[[_loadUrl]]"
-                                    popuppostlogoutredirecturi$="[[_loadUrl]]"
-                                    silentredirecturi$="[[_loadUrl]]"
-                                    ></openidconnect-signin>
-            </div>
-            <!-- no idea if having all these elements on this page is a bad way to do it, but it seems to work -->
             <openidconnect-popup-signin-callback></openidconnect-popup-signin-callback>
             <openidconnect-popup-signout-callback></openidconnect-popup-signout-callback>
             <openidconnect-signin-silent-callback></openidconnect-signin-silent-callback>
@@ -221,6 +192,7 @@ class NodeFrontend extends PolymerElement {
       page: { type: String, reflectToAttribute: true, observer: '_pageChanged' },
       routeData: Object,
       subroute: Object,
+      hostUrl: {type: String, value: null},
       apiEndpoint: { type: String, value: '/las2peer' },
       _agentId: { type: String, value: '' },
       _submittingLogin: { type: Boolean, value: false },
@@ -293,22 +265,17 @@ class NodeFrontend extends PolymerElement {
 
     this.$.ajaxValidateSession.generateRequest(); // validate old session
 
-    this.$.oidcButton.addEventListener('signed-in', function(event) { appThis.storeOidcUser(event.detail); });
+    this.$.statusbar.addEventListener('signed-in', function(event) { appThis.storeOidcUser(event.detail); });
 
-    // should this sign the user out of las2peer too?
-    // I guess not, since that session is separate and in principle unrelated
-    this.$.oidcButton.addEventListener('signed-out', e => appThis._oidcUser = null);
+
+    this.$.statusbar.addEventListener('signed-out', function() { appThis._oidcUser = null; appThis.destroySession(); });
 
     // trigger the hidden, real submit button
     this.$.loginButton.addEventListener('click', function() { appThis.$.loginSubmitButton.click(); });
 
     this.$.loginForm.addEventListener('submit', function(event) { event.preventDefault(); appThis.sendLogin(); });
 
-    this.$.oidcChangeUserButton.addEventListener('click', function() { appThis.$.oidcButton._handleClick(); });
-  }
-
-  showLoginDialog() {
-    this.$.loginDialog.open();
+    this.$.oidcChangeUserButton.addEventListener('click', function() { appThis.$.statusbar.shadowRoot.querySelector("#oidcButton")._handleClick(); });
   }
 
   oidcTokenStillValid(userObject) {
@@ -318,13 +285,18 @@ class NodeFrontend extends PolymerElement {
   }
 
   destroySession() {
+    let i = document.createElement('iframe');
+    i.style.display = 'none';
+    i.onload = function() { i.parentNode.removeChild(i); };
+    i.src = 'https://api.learning-layers.eu/o/oauth2/logout';
+    document.body.appendChild(i);
     this.$.ajaxDestroySession.generateRequest();
   }
 
   storeOidcUser(userObject) {
-    console.log("[DEBUG] OIDC user obj:", userObject);
     if (userObject.token_type !== "Bearer") throw "unexpected OIDC token type, fix me";
     this._oidcUser = userObject;
+    this.sendLogin();
   }
 
   sendLogin() {
@@ -348,13 +320,14 @@ class NodeFrontend extends PolymerElement {
       prefixedIdentifier = PREFIX_USER_NAME + credentials.loginNameOrEmail;
     } else if ((credentials.oidcSub || "").length > 0) {
       prefixedIdentifier = PREFIX_OIDC_SUB + credentials.oidcSub;
+      console.log(credentials.oidcSub);
     } else {
       this._handleError(credentials, "Malformed credentials", "Entered credentials were incomplete. (Empty login name?)")
       return;
     }
 
     let req = this.$.ajaxLogin;
-    req.headers = { Authorization: 'Basic ' + btoa(prefixedIdentifier + ':' + credentials.password) };
+    req.headers = { Authorization: 'Basic ' + btoa(prefixedIdentifier + ':' + credentials.oidcSub) };
     if (((this._oidcUser || {}).access_token || "").length > 0) {
       req.headers['access_token'] = this._oidcUser.access_token;
     }
@@ -378,6 +351,7 @@ class NodeFrontend extends PolymerElement {
       this.$.loginDialog.close();
       this.$.userIdField.value = '';
       this.$.passwordField.value = '';
+      this.$.statusbar._appendWidget();
     } else {
       this._handleError(event, "Bad response", "Login returned no agent ID")
     }
@@ -385,6 +359,7 @@ class NodeFrontend extends PolymerElement {
 
   _handleLogoutResponse() {
     this._agentId = '';
+    this.$.statusbar._appendWidget();
   }
 
   _handleValidateResponse(event) {
