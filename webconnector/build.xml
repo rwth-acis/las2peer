@@ -191,11 +191,13 @@
 		<exec executable="npm" dir="frontend" failonerror="true">
 			<arg value="install"/>
 		</exec>
+		<!--
         <echo message="Fixing vulnerabilities ..."/>
         <exec executable="npm" dir="frontend" failonerror="true">
             <arg value="audit"/>
             <arg value="fix"/>
         </exec>
+        -->
 		<echo message="Building frontend ..."/>
 		<exec executable="npm" dir="frontend" failonerror="true">
 			<arg value="run"/>
