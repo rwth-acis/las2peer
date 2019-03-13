@@ -38,8 +38,9 @@ public class NetworkClassLoadingTest {
 			filenameToContent.put(clsFilename, clsHash);
 			UserAgentImpl developerAgent = MockAgentFactory.getAdam();
 			developerAgent.unlock("adamspass");
+			String supplement = "";
 			PackageUploader.uploadServicePackage(nodes.get(0), serviceName, serviceVersion, filenameToHash,
-					filenameToContent, developerAgent);
+					filenameToContent, developerAgent, supplement);
 			// start TestService on second node
 			nodes.get(1).startService(new ServiceNameVersion(serviceName, serviceVersion), "servicepass");
 		} catch (Exception e) {

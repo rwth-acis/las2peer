@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 import i5.las2peer.api.execution.ServiceInvocationException;
 import i5.las2peer.api.execution.ServiceNotFoundException;
 import i5.las2peer.api.p2p.ServiceNameVersion;
+import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.persistency.EnvelopeException;
 import i5.las2peer.api.persistency.EnvelopeNotFoundException;
 import i5.las2peer.api.security.AgentAccessDeniedException;
@@ -48,12 +49,7 @@ import i5.las2peer.communication.Message;
 import i5.las2peer.connectors.Connector;
 import i5.las2peer.connectors.ConnectorException;
 import i5.las2peer.logging.L2pLogger;
-import i5.las2peer.p2p.AgentAlreadyRegisteredException;
-import i5.las2peer.p2p.AgentNotRegisteredException;
-import i5.las2peer.p2p.NodeException;
-import i5.las2peer.p2p.NodeInformation;
-import i5.las2peer.p2p.PastryNodeImpl;
-import i5.las2peer.p2p.TimeoutException;
+import i5.las2peer.p2p.*;
 import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.persistency.SharedStorage;
 import i5.las2peer.persistency.SharedStorage.STORAGE_MODE;
@@ -97,10 +93,15 @@ public class L2pNodeLauncher {
 		return bFinished;
 	}
 
-	private PastryNodeImpl node;
+	private Node node;
 
 	public PastryNodeImpl getNode() {
-		return node;
+		return (PastryNodeImpl) node;
+	}
+
+	// helper function because the Launcher shell can't cast objects
+	public EthereumNode getNodeAsEthereumNode() {
+		return (EthereumNode) node;
 	}
 
 	private UserAgentImpl currentUser;
@@ -312,11 +313,23 @@ public class L2pNodeLauncher {
 	 * @param serviceJarFile The service jar file that should be uploaded.
 	 * @param developerAgentXMLFile The XML file of the developers agent.
 	 * @param developerPassword The password for the developer agent.
-	 * @throws ServicePackageException
 	 */
 	public void uploadServicePackage(String serviceJarFile, String developerAgentXMLFile, String developerPassword)
-			throws ServicePackageException {
-		PackageUploader.uploadServicePackage(node, serviceJarFile, developerAgentXMLFile, developerPassword);
+			throws ServicePackageException, EnvelopeAlreadyExistsException {
+		uploadServicePackage(serviceJarFile, developerAgentXMLFile, developerPassword, null);
+	}
+
+	/**
+	 * Uploads the service jar file and its dependencies into the shared storage to be used for network class loading.
+	 *
+	 * @param serviceJarFile The service jar file that should be uploaded.
+	 * @param developerAgentXMLFile The XML file of the developers agent.
+	 * @param developerPassword The password for the developer agent.
+	 * @param supplement Additional service metadata string.
+	 */
+	public void uploadServicePackage(String serviceJarFile, String developerAgentXMLFile, String developerPassword, String supplement)
+			throws ServicePackageException, EnvelopeAlreadyExistsException {
+		PackageUploader.uploadServicePackage((PastryNodeImpl) node, serviceJarFile, developerAgentXMLFile, developerPassword, supplement);
 	}
 
 	/**
@@ -412,16 +425,19 @@ public class L2pNodeLauncher {
 	 * Try to register the user of the given id at the node and for later usage in this launcher, i.e. for service
 	 * method calls via {@link #invoke}.
 	 * 
-	 * @param id id or login of the agent to load
+	 * @param idOrLogin id or login of the agent to load
 	 * @param passphrase passphrase to unlock the private key of the agent
 	 * @return the registered agent
 	 */
-	public boolean registerUserAgent(String id, String passphrase) {
+	public boolean registerUserAgent(String idOrLogin, String passphrase) {
 		try {
-			if (id.matches("-?[0-9].*")) {
-				currentUser = (UserAgentImpl) node.getAgent(id);
-			} else {
-				currentUser = (UserAgentImpl) node.getAgent(node.getUserManager().getAgentIdByLogin(id));
+			// we can't actually determine whether it's an ID based on the format, because technically something
+			// matching [a-f][a-z0-9]{127} could be either
+			// so we try both
+			try {
+				currentUser = (UserAgentImpl) node.getAgent(idOrLogin);
+			} catch (AgentNotFoundException e) {
+				currentUser = (UserAgentImpl) node.getAgent(node.getUserManager().getAgentIdByLogin(idOrLogin));
 			}
 
 			currentUser.unlock(passphrase);
@@ -787,18 +803,42 @@ public class L2pNodeLauncher {
 	 * @param nodeIdSeed the seed to generate node IDs from
 	 */
 	private L2pNodeLauncher(InetAddress bindAddress, Integer port, List<String> bootstrap, STORAGE_MODE storageMode,
-			String storageDir, Boolean monitoringObserver, ClassManager cl, Long nodeIdSeed) {
+							String storageDir, Boolean monitoringObserver, ClassManager cl, Long nodeIdSeed) {
+		this(bindAddress, port, bootstrap, storageMode, storageDir, monitoringObserver, cl, nodeIdSeed, null, null);
+	}
+
+	/**
+	 * Creates a new node launcher instance with blockchain-based service registry.
+	 *
+	 * @param bindAddress
+	 *
+	 * @param port local port number to open
+	 * @param bootstrap list of bootstrap hosts to connect to or {@code null} for a new network
+	 * @param storageMode A {@link STORAGE_MODE} used by the local node instance for persistence.
+	 * @param storageDir
+	 * @param monitoringObserver determines, if the monitoring-observer will be started at this node
+	 * @param cl the class loader to be used with this node
+	 * @param nodeIdSeed the seed to generate node IDs from
+	 */
+	private L2pNodeLauncher(InetAddress bindAddress, Integer port, List<String> bootstrap, STORAGE_MODE storageMode,
+			String storageDir, Boolean monitoringObserver, ClassManager cl, Long nodeIdSeed,
+			String ethereumMnemonic, String ethereumPassword) {
 		if (monitoringObserver == null) {
 			monitoringObserver = false;
 		}
-		node = new PastryNodeImpl(cl, monitoringObserver, bindAddress, port, bootstrap, storageMode, storageDir,
-				nodeIdSeed);
+		if (ethereumMnemonic == null) {
+			node = new PastryNodeImpl(cl, monitoringObserver, bindAddress, port, bootstrap, storageMode, storageDir,
+					nodeIdSeed);
+		} else {
+			node = new EthereumNode(cl, monitoringObserver, bindAddress, port, bootstrap, storageMode, storageDir,
+					nodeIdSeed, ethereumMnemonic, ethereumPassword);
+		}
 		commandPrompt = new CommandPrompt(this);
 	}
 
 	/**
 	 * actually start the node
-	 * 
+	 *
 	 * @throws NodeException
 	 */
 	private void start() throws NodeException {
@@ -948,7 +988,8 @@ public class L2pNodeLauncher {
 				L2pNodeLauncher.class.getClassLoader(), clp);
 		L2pNodeLauncher launcher = new L2pNodeLauncher(bindAddress, launcherConfiguration.getPort(),
 				launcherConfiguration.getBootstrap(), storageMode, launcherConfiguration.getStorageDirectory(),
-				launcherConfiguration.useMonitoringObserver(), cl, launcherConfiguration.getNodeIdSeed());
+				launcherConfiguration.useMonitoringObserver(), cl, launcherConfiguration.getNodeIdSeed(),
+				launcherConfiguration.getEthereumMnemonic(), launcherConfiguration.getEthereumPassword());
 		// check special commands
 		if (launcherConfiguration.isPrintHelp()) {
 			launcher.bFinished = true;
@@ -1022,33 +1063,38 @@ public class L2pNodeLauncher {
 				+ "\t\t\tstarts the node in debug mode. This means the node will listen and accept connections only\n"
 				+ "\t\t\t\t\tfrom localhost, has a operating system defined port and uses a non persistent storage mode.\n");
 		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_PORT + "|"
-				+ L2pNodeLauncherConfiguration.ARG_SHORT_PORT + " port\t\t\tspecifies the port number of the node\n");
+				+ L2pNodeLauncherConfiguration.ARG_SHORT_PORT + " PORT\t\t\tspecifies the port number of the node\n");
 		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_BOOTSTRAP + "|"
 				+ L2pNodeLauncherConfiguration.ARG_SHORT_BOOTSTRAP
-				+ " address|ip:port,...\trequires a comma seperated list of [address|ip:port] pairs of bootstrap nodes to connect to.");
-		System.out.println("  no bootstrap argument states, that a complete new las2peer network is to start\n");
+				+ " ADDRESS|IP:PORT,...\trequires a comma seperated list of [ADDRESS|IP:PORT] pairs of bootstrap nodes to connect to.");
+		System.out.println("\t\t\t\t\tno bootstrap argument states, that a complete new las2peer network is to start\n");
 		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_LOG_DIRECTORY + "|"
 				+ L2pNodeLauncherConfiguration.ARG_SHORT_LOG_DIRECTORY
-				+ " directory\t\tlets you choose the directory for log files (default: "
+				+ " DIRECTORY\t\tlets you choose the directory for log files (default: "
 				+ L2pLogger.DEFAULT_LOG_DIRECTORY + ")\n");
 		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_SERVICE_DIRECTORY + "|"
 				+ L2pNodeLauncherConfiguration.ARG_SHORT_SERVICE_DIRECTORY
-				+ " directory\tadds the directory to the service class loader. This argument can occur multiple times.\n");
+				+ " DIRECTORY\tadds the directory to the service class loader. This argument can occur multiple times.\n");
 		System.out.println(
 				"  " + L2pNodeLauncherConfiguration.ARG_OBSERVER + "|" + L2pNodeLauncherConfiguration.ARG_SHORT_OBSERVER
 						+ "\t\t\t\tstarts a monitoring observer at this node\n");
 		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_NODE_ID_SEED + "|"
 				+ L2pNodeLauncherConfiguration.ARG_SHORT_NODE_ID_SEED
-				+ " long\t\tgenerates the (random) node id by using this seed\n");
+				+ " LONG\t\tgenerates the (random) node id by using this seed\n");
 		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_STORAGE_MODE + "|"
-				+ L2pNodeLauncherConfiguration.ARG_SHORT_STORAGE_MODE + " mode\t\tsets Pastry's storage mode\n"
+				+ L2pNodeLauncherConfiguration.ARG_SHORT_STORAGE_MODE + " MODE\t\tsets Pastry's storage mode\n"
 				+ "\t\t\t\t\tSupported Modes: "
 				+ String.join(", ", Stream.of(STORAGE_MODE.values()).map(Enum::name).collect(Collectors.toList()))
 				+ "\n");
 		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_STORAGE_DIRECTORY + "|"
 				+ L2pNodeLauncherConfiguration.ARG_SHORT_STORAGE_DIRECTORY
-				+ " directory\tsets Pastry's storage directory. Default: " + SharedStorage.DEFAULT_STORAGE_ROOT_DIR
+				+ " DIRECTORY\tsets Pastry's storage directory. Default: " + SharedStorage.DEFAULT_STORAGE_ROOT_DIR
 				+ "\n");
+		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_ETHEREUM_MNEMONIC
+				+ " \"QUOTED STRING\"\tsets Node operator's Ethereum BIP39 mnemonic for Service Registry.\n"
+				+ "\t\t\t\t\tThis is used along with the password to derive the public/private key pair.");
+		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_ETHEREUM_PASSWORD
+				+ " PASSWORD\t\tsets password to unlock Ethereum private key.\n");
 
 		System.out.println("Launcher Methods:");
 		System.out.println("The following methods can be used in arbitrary order and number:");

@@ -171,7 +171,12 @@ public class CommandPrompt {
 				return new String[0];
 			}
 
-			String[] split = parameterString.trim().split("\\s*,\\s*");
+			// https://stackoverflow.com/questions/632475/regex-to-pick-commas-outside-of-quotes
+			String regexForUnquotedCommas = "(,)(?=(?:[^\"]|\"[^\"]*\")*$)";
+			String[] split = parameterString.trim().split(regexForUnquotedCommas);
+			for (int i = 0; i < split.length; i++) {
+				split[i] = split[i].trim(); // this could be handled in the regex too, but it's ugly enough as is
+			}
 			Object[] result = new Object[split.length];
 
 			for (int i = 0; i < split.length; i++) {

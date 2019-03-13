@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.w3c.dom.Element;
@@ -30,9 +31,9 @@ public class LoadedNetworkLibrary extends LoadedLibrary implements XmlAble {
 	/**
 	 * maps the dependency filenames to their contents base64 encoded secure hashes
 	 */
-	private final HashMap<String, byte[]> dependencies;
+	private final Map<String, byte[]> dependencies;
 
-	public LoadedNetworkLibrary(PastryNodeImpl node, LibraryIdentifier lib, HashMap<String, byte[]> dependencies) {
+	public LoadedNetworkLibrary(PastryNodeImpl node, LibraryIdentifier lib, Map<String, byte[]> dependencies) {
 		super(lib);
 		this.node = node;
 		this.dependencies = dependencies;

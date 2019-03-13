@@ -24,7 +24,10 @@ public class L2pNodeLauncherConfigurationTest {
 			L2pNodeLauncherConfiguration conf = L2pNodeLauncherConfiguration
 					.createFromMainArgs("--startService('i5.las2peer.testService.TestService',", "'testpass')");
 			Assert.assertNotNull(conf);
-			Assert.assertEquals("--startService('i5.las2peer.testService.TestService','testpass')",
+			// note the whitespace after the comma
+			// in this case it is not important, but when part of strings
+			// (possibly with nested/escaped quotes) things get interesting
+			Assert.assertEquals("--startService('i5.las2peer.testService.TestService', 'testpass')",
 					conf.getCommands().get(0));
 		} catch (Exception e) {
 			e.printStackTrace();

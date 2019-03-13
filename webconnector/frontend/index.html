@@ -12,12 +12,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <html lang="en">
   <head>
     <meta charset="utf-8">
+    <meta name="generator" content="Polymer Starter Kit">
     <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
 
-    <title>las2peer webapp</title>
-    <meta name="description" content="A generic webapp frontend for las2peer nodes.">
+    <title>las2peer Node Front-End</title>
+    <meta name="description" content="Web front-end for las2peer nodes">
 
-    <base href="/las2peer/webapp/">
+    <!--
+      The `<base>` tag below is present to support two advanced deployment options:
+      1) Differential serving. 2) Serving from a non-root path.
+
+      Instead of manually editing the `<base>` tag yourself, you should generally either:
+      a) Add a `basePath` property to the build configuration in your `polymer.json`.
+      b) Use the `--base-path` command-line option for `polymer build`.
+
+      Note: If you intend to serve from a non-root path, see [polymer-root-path] below.
+    -->
+    <base href="/">
 
     <link rel="icon" href="images/favicon.ico">
 
@@ -29,12 +40,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <!-- Add to homescreen for Chrome on Android. Fallback for manifest.json -->
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="las2peer webapp">
+    <meta name="application-name" content="las2peer Node Front-End">
 
     <!-- Add to homescreen for Safari on iOS -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="las2peer webapp">
+    <meta name="apple-mobile-web-app-title" content="las2peer Node Front-End">
 
     <!-- Homescreen icons -->
     <link rel="apple-touch-icon" href="images/manifest/icon-48x48.png">
@@ -49,28 +60,40 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <meta name="msapplication-tap-highlight" content="no">
 
     <script>
-      // Register the base URL
-      const baseUrl = document.querySelector('base').href;
+      /**
+      * [polymer-root-path]
+      *
+      * Leave this line unchanged if you intend to serve your app from the root
+      * path (e.g., with URLs like `my.domain/` and `my.domain/view1`).
+      *
+      * If you intend to serve your app from a non-root path (e.g., with URLs
+      * like `my.domain/my-app/` and `my.domain/my-app/view1`), edit this line
+      * to indicate the path from which you'll be serving, including leading
+      * and trailing slashes (e.g., `/my-app/`).
+      */
+      window.NodeFrontendGlobals = { rootPath: '/las2peer/webapp/' };
 
       // Load and register pre-caching Service Worker
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', function() {
-          navigator.serviceWorker.register(baseUrl + 'service-worker.js');
+          navigator.serviceWorker.register('service-worker.js', {
+            scope: NodeFrontendGlobals.rootPath
+          });
         });
       }
     </script>
 
     <!-- Load webcomponents-loader.js to check and load any polyfills your browser needs -->
-    <script src="bower_components/webcomponentsjs/webcomponents-loader.js"></script>
+    <script src="node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
 
     <!-- Load your application shell -->
-    <link rel="import" href="src/las2peer-webapp.html">
+    <script type="module" src="src/node-frontend.js"></script>
 
     <!-- Add any global styles for body, document, etc. -->
     <style>
       body {
         margin: 0;
-        font-family: 'Roboto', 'Noto', sans-serif;
+        font-family: "Roboto", "Noto", sans-serif;
         line-height: 1.5;
         min-height: 100vh;
         background-color: #eeeeee;
@@ -78,9 +101,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </style>
   </head>
   <body>
-    <las2peer-webapp></las2peer-webapp>
+    <node-frontend></node-frontend>
     <noscript>
       Please enable JavaScript to view this website.
     </noscript>
+    <!-- Built with love using Polymer Starter Kit -->
   </body>
 </html>

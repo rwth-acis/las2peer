@@ -69,8 +69,9 @@ public class ServicesHandlerTest extends AbstractTestHandler {
 			HashMap<String, byte[]> jarFiles = new HashMap<>();
 			PassphraseAgentImpl devAgent = MockAgentFactory.getAdam();
 			devAgent.unlock("adamspass");
+			String supplement = "";
 			PackageUploader.uploadServicePackage(serviceNode, TestService.class.getPackage().getName(), serviceVersion,
-					depHashes, jarFiles, devAgent);
+					depHashes, jarFiles, devAgent, supplement);
 			// start actual test
 			WebTarget target = webClient
 					.target(connector.getHttpEndpoint() + ServicesHandler.RESOURCE_PATH + "/search");

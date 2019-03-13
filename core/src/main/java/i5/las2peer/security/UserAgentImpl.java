@@ -75,16 +75,21 @@ public class UserAgentImpl extends PassphraseAgentImpl implements UserAgent {
 			throw new AgentLockedException();
 		}
 
-		if (loginName != null && loginName.length() < 4) {
-			throw new IllegalArgumentException("please use a login name longer than three characters!");
-		}
-
-		if (loginName != null && !(loginName.matches("[a-zA-Z].*"))) {
-			throw new IllegalArgumentException("please use a login name startung with a normal character (a-z or A-Z)");
-		}
+		checkLoginNameValidity(loginName);
 
 		// duplicate check is performed when storing/updating an UserAgent in a Node
 		this.sLoginName = loginName;
+	}
+
+	// it would be nicer not to (ab)use exceptions for this
+	void checkLoginNameValidity(String loginName) throws IllegalArgumentException {
+		if (loginName == null) {
+			throw new IllegalArgumentException("Login name must not be null or an ");
+		} else if (loginName.length() < 4) {
+			throw new IllegalArgumentException("please use a login name longer than three characters!");
+		} else if (!(loginName.matches("[a-zA-Z].*"))) {
+			throw new IllegalArgumentException("please use a login name starting with a normal character (a-z or A-Z)");
+		}
 	}
 
 	@Override

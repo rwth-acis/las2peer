@@ -69,6 +69,10 @@ public class L2pNodeLauncherConfiguration {
 	public static final String ARG_SANDBOX = "--sandbox";
 	public static final String ARG_SHORT_SANDBOX = "-sb";
 
+	public static final String ARG_ETHEREUM_MNEMONIC = "--ethereum-mnemonic";
+
+	public static final String ARG_ETHEREUM_PASSWORD = "--ethereum-password";
+
 	private static final L2pLogger logger = L2pLogger.getInstance(L2pNodeLauncherConfiguration.class);
 
 	private String filename;
@@ -91,6 +95,8 @@ public class L2pNodeLauncherConfiguration {
 	private Long nodeIdSeed;
 	private final List<String> commands = new LinkedList<>();
 	private boolean sandbox;
+	private String ethereumMnemonic;
+	private String ethereumPassword;
 
 	public L2pNodeLauncherConfiguration() {
 		// set default values
@@ -125,12 +131,17 @@ public class L2pNodeLauncherConfiguration {
 				argList.add(arg);
 			} else {
 				// previous arg was unbalanced, attach this arg
+
+				// add space, because it may need to be treated literally, e.g. when in a quoted string
+				// this is not an issue if the entire command was quoted, but that can be a pain (escaping the quotes)
+				joined += " ";
+
 				joined += arg;
 				int openingJoined = joined.length() - joined.replace("(", "").length();
 				int closingJoined = joined.length() - joined.replace(")", "").length();
 				if (openingJoined == closingJoined) {
 					// now it's balanced
-					argList.add(joined);
+					argList.add(joined.trim()); // remove potentially superfluous space in front
 					joined = "";
 				} else if (openingJoined < closingJoined) {
 					throw new IllegalArgumentException("command \"" + joined + "\" has too many closing brackets!");
@@ -278,6 +289,20 @@ public class L2pNodeLauncherConfiguration {
 				} else {
 					setStorageDirectory(itArg.next());
 				}
+			} else if (arg.equalsIgnoreCase(ARG_ETHEREUM_MNEMONIC)) {
+				if (!itArg.hasNext()) {
+					throw new IllegalArgumentException(
+							"Illegal argument '" + arg + "', because BIP39 Ethereum mnemonic expected after it");
+				} else {
+					setEthereumMnemonic(itArg.next());
+				}
+			} else if (arg.equalsIgnoreCase(ARG_ETHEREUM_PASSWORD)) {
+				if (!itArg.hasNext()) {
+					throw new IllegalArgumentException(
+							"Illegal argument '" + arg + "', because password for Ethereum mnemonic expected after it");
+				} else {
+					setEthereumPassword(itArg.next());
+				}
 			} else {
 				getCommands().add(arg);
 			}
@@ -338,6 +363,14 @@ public class L2pNodeLauncherConfiguration {
 		String strNodeIdSeed = conf.get("nodeIdSeed");
 		if (strNodeIdSeed != null) {
 			setNodeIdSeed(Long.valueOf(strNodeIdSeed));
+		}
+		String strEthereumMnemonic = conf.get("ethereumMnemonic");
+		if (strEthereumMnemonic != null) {
+			setEthereumMnemonic(strEthereumMnemonic);
+		}
+		String strEthereumPassword = conf.get("ethereumPassword");
+		if (strEthereumPassword != null) {
+			setEthereumPassword(strEthereumPassword);
 		}
 		List<String> commands = conf.getAll("commands");
 		if (commands != null) {
@@ -503,6 +536,22 @@ public class L2pNodeLauncherConfiguration {
 
 	public void setStorageDirectory(String storageDirectory) {
 		this.storageDirectory = storageDirectory;
+	}
+
+	public String getEthereumMnemonic() {
+		return ethereumMnemonic;
+	}
+
+	public void setEthereumMnemonic(String ethereumMnemonic) {
+		this.ethereumMnemonic = ethereumMnemonic;
+	}
+
+	public String getEthereumPassword() {
+		return ethereumPassword;
+	}
+
+	public void setEthereumPassword(String ethereumPassword) {
+		this.ethereumPassword = ethereumPassword;
 	}
 
 }
