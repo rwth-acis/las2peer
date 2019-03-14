@@ -87,13 +87,16 @@ class ServicesView extends PolymerElement {
       </custom-style>
 
       <div class="card">
+        <div style="float: right; width: 15em; margin-top: -8px">
+          <paper-input label="search" id="filterField" on-value-changed="_triggerFilter" value=""></paper-input>
+        </div>
         <h1>Services in this Network</h1>
 
         <p hidden$="[[_toBool(_services)]]">
           There are no services published in this network.<br/>
           Feel free to use the <a href="[[rootPath]]publish-service">Publish Service</a> tab.
         </p>
-        <template is="dom-repeat" items="[[_services]]" as="service">
+        <template id="serviceList" is="dom-repeat" items="[[_services]]" as="service" sort="_sort" filter="_filter">
           <template is="dom-repeat" items="[[_getLatestAsArray(service.releases)]]" as="release">
             <!-- we actually just want a single item here: the latest release. but I don't know how to do that without abusing repeat like this -->
             <paper-card heading$="[[release.supplement.name]]" style="width: 100%;margin-bottom: 1em" class="service">
@@ -226,6 +229,30 @@ class ServicesView extends PolymerElement {
     this.$.ajaxNodeId.generateRequest();
     this.$.ajaxServiceData.generateRequest();
     this.$.ajaxCommunityTags.generateRequest();
+  }
+
+  _sort(service, otherService) {
+    try {
+      // alphabetically by packagename
+      return (service.name < otherService.name) ? -1 : 1;
+    } catch(err) {
+      return -1; // whatever
+    }
+  }
+
+  _filter(service) {
+    try {
+      let query = this.$.filterField.value.trim();
+      if (query.length < 1) return true;
+      let serviceAsJson = JSON.stringify(service);
+      return serviceAsJson.match(new RegExp(query, 'i'));
+    } catch(err) {
+      return true;
+    }
+  }
+
+  _triggerFilter(event) {
+    this.$.serviceList.render();
   }
 
   _stringify(obj) {
