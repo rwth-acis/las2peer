@@ -241,7 +241,7 @@ class ServicesView extends PolymerElement {
   }
 
   _split(stringWithCommas) {
-    return stringWithCommas.split(',');
+    return (stringWithCommas || "").split(',');
   }
 
   _count(stringWithCommas) {
@@ -266,7 +266,7 @@ class ServicesView extends PolymerElement {
     let latestVersionNumber = this._getLatestVersionNumber(obj);
     let latestRelease = obj[latestVersionNumber];
     // version number is key, let's add it so we can access it
-    latestRelease.version = latestVersionNumber;
+    (latestRelease || {}).version = latestVersionNumber;
     return latestRelease;
   }
 
@@ -283,7 +283,7 @@ class ServicesView extends PolymerElement {
   }
 
   _hasLocalRunningInstance(instances, serviceClass) {
-    return this._filterInstances(instances, serviceClass).filter(i => i.nodeId === this._nodeId.id).length > 0;
+    return this._filterInstances(instances, serviceClass).filter(i => i.nodeId === (this._nodeId || {}).id).length > 0;
   }
 
   _hasOnlyRemoteRunningInstance(instances, serviceClass) {
@@ -291,18 +291,18 @@ class ServicesView extends PolymerElement {
   }
 
   _classesNotRunningAnywhere(release) {
-    let classes = this._split(release.supplement.class)
+    let classes = this._split((release.supplement || {}).class)
     let missing = classes.filter(c => {
-      let instancesOfClass = release.instances.filter(i => i.className === c);
+      let instancesOfClass = (release.instances || []).filter(i => i.className === c);
       return instancesOfClass < 1;
     });
     return missing;
   }
 
   _classesNotRunningLocally(release) {
-    let classes = this._split(release.supplement.class);
+    let classes = this._split((release.supplement || {}).class);
     let missing = classes.filter(c => {
-      let localInstancesOfClass = release.instances.filter(i => i.className === c && i.nodeId === this._nodeId.id);
+      let localInstancesOfClass = (release.instances || []).filter(i => i.className === c && i.nodeId === (this._nodeId || {}).id);
       return localInstancesOfClass < 1;
     });
     return missing;
@@ -314,19 +314,19 @@ class ServicesView extends PolymerElement {
   }
 
   _countRunning(release) {
-    let classes = this._split(release.supplement.class);
+    let classes = this._split((release.supplement || {}).class);
     let missing = this._classesNotRunningAnywhere(release);
     return classes.length - missing.length;
   }
 
   _countRunningLocally(release) {
-    let classes = this._split(release.supplement.class);
+    let classes = this._split((release.supplement || {}).class);
     let missing = this._classesNotRunningLocally(release);
     return classes.length - missing.length;
   }
 
   _countMissingLocally(release) {
-   return this._count(release.supplement.class) - this._countRunningLocally(release);
+   return this._count((release.supplement || {}).class) - this._countRunningLocally(release);
   }
 
   _countRunningRemoteOnly(release) {
@@ -335,7 +335,7 @@ class ServicesView extends PolymerElement {
 
   // this counts several instances of a service class (in contrast, most other methods here ignore duplicates)
   _countInstancesRunningRemoteOnly(release) {
-    return release.instances.length - this._countRunningLocally(release);
+    return (release.instances || "").length - this._countRunningLocally(release);
   }
 
   _fullyAvailableAnywhere(release) {
@@ -348,7 +348,7 @@ class ServicesView extends PolymerElement {
 
   _frontendUrlIfServiceAvailable(release) {
     if (this._fullyAvailableAnywhere(release)) {
-      return release.supplement.frontendUrl;
+      return (release.supplement || {}).frontendUrl;
     } else {
       return false;
     }
