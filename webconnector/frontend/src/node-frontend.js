@@ -75,6 +75,11 @@ class NodeFrontend extends PolymerElement {
         .app-header {
           color: #fff;
         }
+        
+        las2peer-frontend-statusbar{
+          --statusbar-background: var(--app-primary-color);
+          --user-widget-button-background: white;
+        }
 
         app-header paper-icon-button {
           --paper-icon-button-ink-color: white;
@@ -117,7 +122,7 @@ class NodeFrontend extends PolymerElement {
 
         <!-- Main content -->
         <div class="app-header">
-          <las2peer-frontend-statusbar id="statusbar" style="--statusbar-backgroundcolor:#4285f4"
+          <las2peer-frontend-statusbar id="statusbar"
             base-url="[[hostUrl]]" service="las2peer Node Front-End"
             oidcclientid="bdda7396-3f6d-4d83-ac21-65b4069d0eab"
             oidcpopupsigninurl$="[[_loadUrl]]"
