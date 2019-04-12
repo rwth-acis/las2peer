@@ -60,9 +60,23 @@
 	<taskdef resource="net/sf/antcontrib/antcontrib.properties" classpath="${ant-contrib.jar.file}" onerror="failall"/>
 	<taskdef resource="net/sf/antcontrib/antlib.xml" classpath="${ant-contrib.jar.file}" onerror="failall"/>
 
+	
+	<target name="print-version"> 
+	   <echo>Java/JVM version: ${ant.java.version}</echo> 
+	   <echo>Java/JVM detail version: ${java.version}</echo> 
+		<fail message="Unsupported Java version: ${ant.java.version}. 
+		  Make sure that the Java version is 1.8.">
+		  <condition>
+		  	<not>
+				<equals arg1="${ant.java.version}" arg2="1.8"/>
+			</not>
+		  </condition>
+		</fail>
+	</target>
+	
 	<!-- Download Dependencies (IVY) -->
 
-	<target name="download-ivy" unless="skip.download">
+	<target name="download-ivy" depends="print-version" unless="skip.download">
 		<echo message="installing ivy..."/>
 		<get src="https://repo1.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar"
 		     dest="${ivy.jar.file}" usetimestamp="true"/>

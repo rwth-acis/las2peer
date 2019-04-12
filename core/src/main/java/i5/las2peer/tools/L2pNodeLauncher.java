@@ -1143,6 +1143,13 @@ public class L2pNodeLauncher {
 	public static void main(String[] argv) {
 		try {
 			// self test system encryption
+			
+			String version = System.getProperty("java.version");
+			if(!version.startsWith("1.8")) {
+				throw new JavaVersionException("Unsupported Java version "+version+". las2peer only runs with Java 8");
+			}
+			
+			
 			try {
 				CryptoTools.encryptSymmetric("las2peer rulez!".getBytes(), CryptoTools.generateSymmetricKey());
 			} catch (CryptoException e) {
