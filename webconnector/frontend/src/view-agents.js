@@ -371,11 +371,11 @@ class AgentsView extends PolymerElement {
   createGroup() {
     let req = this.$.ajaxCreateGroup;
     req.body = new FormData();
-    req.body.append('members', this._memberAgents);
+    req.body.append('members', JSON.stringify(this._memberAgents));
     req.generateRequest();
   }
 
-  _handleCreateGroupResponse() {
+  _handleCreateGroupResponse(event) {
     this.splice('_memberAgents', 0, this._memberAgents.length);
     this._hasNoMemberAgents = true;
     this.$.createGroupMsg.innerHTML = 'Group successfully created, ID: ' + event.detail.response.agentid;
