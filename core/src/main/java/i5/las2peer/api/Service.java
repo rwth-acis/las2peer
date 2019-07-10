@@ -1,6 +1,8 @@
 package i5.las2peer.api;
 
 import java.lang.annotation.Annotation;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import i5.las2peer.api.security.ServiceAgent;
@@ -141,4 +143,12 @@ public abstract class Service extends Configurable {
 		return this.logger;
 	}
 
+	/**
+	 * Override this method to make descriptions for log message codes available to other services.
+	 *
+	 * @return A map with "SERVICE_CUSTOM_MESSAGE_(1-99) as key and a Markdown formatted string as value.
+	 */
+	public Map<String, String> getCustomMessageDescriptions() {
+		return new HashMap<>();
+	}
 }
