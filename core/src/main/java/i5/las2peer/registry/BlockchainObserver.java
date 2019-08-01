@@ -19,6 +19,10 @@ import java.util.concurrent.ConcurrentMap;
  * the main thread.
  */
 class BlockchainObserver {
+	
+	/** Profiles to their owners */
+	ConcurrentMap<String, String> profiles;
+	
 	/** Tags to their description */
 	ConcurrentMap<String, String> tags;
 
@@ -99,12 +103,14 @@ class BlockchainObserver {
 		logger.fine("Creating new blockchain observer");
 		contracts = new Contracts.ContractsBuilder(contractsConfig).build();
 
+		profiles = new ConcurrentHashMap<>();
 		tags = new ConcurrentHashMap<>();
 		serviceNameToAuthor = new ConcurrentHashMap<>();
 		releases = new ConcurrentHashMap<>();
 		releasesByVersion = new ConcurrentHashMap<>();
 		deployments = new ConcurrentHashMap<>();
 
+		observeUserProfileCreations();
 		observeTagCreations();
 		observeServiceRegistrations();
 		observeServiceReleases();
@@ -118,6 +124,24 @@ class BlockchainObserver {
 			observedEventTxHashes.add(txHash);
 			return false;
 		}
+	}
+	
+	private void observeUserProfileCreations() {
+		contracts.reputationRegistry.userProfileCreatedEventFlowable(DefaultBlockParameterName.EARLIEST,
+		DefaultBlockParameterName.LATEST)
+			.observeOn(Schedulers.io())
+			.subscribeOn(Schedulers.io())
+			.subscribe(profile -> {
+				if (txHasAlreadyBeenHandled(profile.log.getTransactionHash()))
+				{
+					return;
+				}
+				String profileName = Util.recoverString(profile.name);
+				String profileOwner = Util.recoverString(profile.owner);
+				this.profiles.put(profileOwner, profileName);
+				logger.fine("observed profile creation: [" + profileOwner + "]: " + profileName);
+				
+			}, e -> logger.severe("Error observing profile creation event: " + e.toString()));
 	}
 
 	private void observeTagCreations() {

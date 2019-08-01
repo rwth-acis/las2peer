@@ -280,4 +280,8 @@ public class EthereumNode extends PastryNodeImpl {
 	public ReadWriteRegistryClient getRegistryClient() {
 		return registryClient;
 	}
+	
+	public void registerProfile(EthereumAgent author) throws EthereumException {
+		registryClient.registerUserProfile(author);
+	}
 }

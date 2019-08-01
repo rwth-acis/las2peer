@@ -2,6 +2,7 @@ package i5.las2peer.connectors.webConnector.handler;
 
 import java.io.InputStream;
 import java.io.Serializable;
+import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentMap;
@@ -21,7 +22,10 @@ import i5.las2peer.registry.CredentialUtils;
 import i5.las2peer.registry.ReadOnlyRegistryClient;
 import i5.las2peer.registry.data.ServiceDeploymentData;
 import i5.las2peer.registry.data.ServiceReleaseData;
+import i5.las2peer.registry.exceptions.EthereumException;
+import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.EthereumAgent;
+import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.tools.*;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
@@ -35,6 +39,9 @@ import i5.las2peer.connectors.webConnector.WebConnector;
 import i5.las2peer.connectors.webConnector.util.AgentSession;
 import i5.las2peer.persistency.EnvelopeVersion;
 import i5.las2peer.tools.PackageUploader.ServiceVersionList;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.web3j.crypto.Credentials;
@@ -159,6 +166,38 @@ public class ServicesHandler {
 		return Response.ok().build();
 	}
 
+	/**
+	 * Template of a get function.
+	 *
+	 * @param randID Key of persistent storage ID
+	 * @return Returns an HTTP response with the username as string content.
+	 */
+	
+	@GET
+	@Path("/test")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response handleTest(@QueryParam("id") int randID, @CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId)
+	{
+		
+		JSONObject json = new JSONObject();
+		AgentSession session = connector.getSessionById(sessionId);
+		if (session == null) {
+			throw new BadRequestException("You have to be logged in to upload");
+		}
+		EthereumAgent agent = (EthereumAgent) session.getAgent();
+		
+		try {
+			ethereumNode.registerProfile(agent);
+		} catch (EthereumException e) {			
+			throw new BadRequestException("Profile registration failed" + e.getMessage());
+		}
+		json.put("code", Status.OK.getStatusCode());
+		json.put("text", Status.OK.getStatusCode() + " - Service test successful");
+		json.put("msg", "Read GET param " + randID);
+		
+		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
+	}
+	
 	@GET
 	@Path("/node-id")
 	@Produces(MediaType.APPLICATION_JSON)

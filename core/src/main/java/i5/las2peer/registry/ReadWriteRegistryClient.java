@@ -103,6 +103,23 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 			throw new EthereumException("Could not register user", e);
 		}
 	}
+	
+	public void registerUserProfile(EthereumAgent agent) throws EthereumException
+	{
+		if ( !agent.hasLoginName() )
+		{
+			throw new EthereumException("Could not register profile: agent has no login name");
+		}
+		
+		byte[] profileName = Util.padAndConvertString(agent.getLoginName(), 32);
+		logger.fine( "registering user profile: " + agent.getLoginName() + " | " + profileName.toString() );
+		
+		try {
+			contracts.reputationRegistry.createProfile(profileName).send();
+		} catch (Exception e) {
+			throw new EthereumException("Could not register profile: " + e.getMessage(), e);
+		}
+	}
 
 	/**
 	 * Register a service name to the given author.
