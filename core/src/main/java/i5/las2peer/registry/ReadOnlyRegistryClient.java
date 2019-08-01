@@ -53,7 +53,7 @@ public class ReadOnlyRegistryClient {
 
 		contractsConfig = new Contracts.ContractsConfig(registryConfiguration.getCommunityTagIndexAddress(),
 				registryConfiguration.getUserRegistryAddress(), registryConfiguration.getServiceRegistryAddress(),
-				registryConfiguration.getEndpoint());
+				registryConfiguration.getReputationRegistryAddress(), registryConfiguration.getEndpoint());
 
 		observer = BlockchainObserver.getInstance(contractsConfig);
 

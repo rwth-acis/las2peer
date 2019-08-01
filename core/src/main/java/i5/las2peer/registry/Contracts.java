@@ -1,6 +1,7 @@
 package i5.las2peer.registry;
 
 import i5.las2peer.registry.contracts.CommunityTagIndex;
+import i5.las2peer.registry.contracts.ReputationRegistry;
 import i5.las2peer.registry.contracts.ServiceRegistry;
 import i5.las2peer.registry.contracts.UserRegistry;
 import org.web3j.protocol.Web3j;
@@ -37,11 +38,13 @@ class Contracts {
 	final CommunityTagIndex communityTagIndex;
 	final UserRegistry userRegistry;
 	final ServiceRegistry serviceRegistry;
+	final ReputationRegistry reputationRegistry;
 
-	private Contracts(CommunityTagIndex communityTagIndex, UserRegistry userRegistry, ServiceRegistry serviceRegistry) {
+	private Contracts(CommunityTagIndex communityTagIndex, UserRegistry userRegistry, ServiceRegistry serviceRegistry, ReputationRegistry reputationRegistry) {
 		this.communityTagIndex = communityTagIndex;
 		this.userRegistry = userRegistry;
 		this.serviceRegistry = serviceRegistry;
+		this.reputationRegistry = reputationRegistry;
 	}
 
 	/**
@@ -56,13 +59,15 @@ class Contracts {
 		final String communityTagIndexAddress;
 		final String userRegistryAddress;
 		final String serviceRegistryAddress;
+		final String reputationRegistryAddress;
 
 		final String endpoint;
 
-		ContractsConfig(String communityTagIndexAddress, String userRegistryAddress, String serviceRegistryAddress, String endpoint) {
+		ContractsConfig(String communityTagIndexAddress, String userRegistryAddress, String serviceRegistryAddress, String reputationRegistryAddress, String endpoint) {
 			this.communityTagIndexAddress = communityTagIndexAddress;
 			this.userRegistryAddress = userRegistryAddress;
 			this.serviceRegistryAddress = serviceRegistryAddress;
+			this.reputationRegistryAddress = reputationRegistryAddress;
 			this.endpoint = endpoint;
 		}
 
@@ -74,12 +79,13 @@ class Contracts {
 			return Objects.equals(communityTagIndexAddress, that.communityTagIndexAddress) &&
 					Objects.equals(userRegistryAddress, that.userRegistryAddress) &&
 					Objects.equals(serviceRegistryAddress, that.serviceRegistryAddress) &&
+					Objects.equals(reputationRegistryAddress, that.reputationRegistryAddress) &&
 					Objects.equals(endpoint, that.endpoint);
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(communityTagIndexAddress, userRegistryAddress, serviceRegistryAddress, endpoint);
+			return Objects.hash(communityTagIndexAddress, userRegistryAddress, serviceRegistryAddress, reputationRegistryAddress, endpoint);
 		}
 	}
 
@@ -167,8 +173,9 @@ class Contracts {
 			CommunityTagIndex communityTagIndex = CommunityTagIndex.load(config.communityTagIndexAddress, web3j, transactionManager, gasProvider);
 			UserRegistry userRegistry = UserRegistry.load(config.userRegistryAddress, web3j, transactionManager, gasProvider);
 			ServiceRegistry serviceRegistry = ServiceRegistry.load(config.serviceRegistryAddress, web3j, transactionManager, gasProvider);
+			ReputationRegistry reputationRegistry = ReputationRegistry.load(config.reputationRegistryAddress, web3j, transactionManager, gasProvider);
 
-			return new Contracts(communityTagIndex, userRegistry, serviceRegistry);
+			return new Contracts(communityTagIndex, userRegistry, serviceRegistry, reputationRegistry);
 		}
 
 		private TransactionManager constructTxManager(Web3j web3j, Credentials credentials) {
