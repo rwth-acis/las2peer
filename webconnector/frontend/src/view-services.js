@@ -284,8 +284,9 @@ class ServicesView extends PolymerElement {
   }
 
   _getLatestVersionNumber(obj) {
-    // FIXME: use proper semver sort
-    let latestVersion = Object.keys(obj).sort().reverse()[0];
+    // NOTE: sorting issue fixed
+    let latestVersion = Object.keys(obj).map( a => a.split('.').map( n => +n+1000000 ).join('.') ).sort()
+        .map( a => a.split('.').map( n => +n-1000000 ).join('.') ).reverse()[0];
     return latestVersion;
   }
 
