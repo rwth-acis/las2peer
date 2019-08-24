@@ -207,7 +207,7 @@
 		
 		<echo message="Fixing webapp symlink ..."/>
 		<exec executable="/bin/bash" failonerror="true">
-	    	<arg value="/app/las2peer/webconnector/fix_symlink.sh"/>
+	    	<arg value="${basedir}/fix_symlink.sh"/>
 	  	</exec>
 		
 	</target>
