@@ -14,6 +14,7 @@ import '@polymer/iron-collapse/iron-collapse.js';
 import '@polymer/iron-form/iron-form.js';
 import '@polymer/paper-input/paper-input.js';
 import '@polymer/paper-button/paper-button.js';
+import '@cwmr/iron-star-rating/iron-star-rating.js';
 import './shared-styles.js';
 
 class AgentsView extends PolymerElement {
@@ -75,6 +76,13 @@ class AgentsView extends PolymerElement {
                  on-response="_handleChangeGroupResponse"
                  on-error="_handleError"
                  loading = "{{_working}}"></iron-ajax>
+      <iron-ajax id="ajaxListAgents"
+                 method="POST"
+                 url$="[[apiEndpoint]]/agents/listAgents"
+                 handle-as="json"
+                 on-response="_handleLoadAgentlistResponse"
+                 on-error="_handleError"
+                 loading="{{_working}}"></iron-ajax>
 
       <style include="shared-styles">
         :host {
@@ -202,6 +210,31 @@ class AgentsView extends PolymerElement {
             </form>
           </iron-form>
         </iron-collapse>
+
+        <h2 on-click="toggleAgentList" style="cursor: pointer">List User Agents</h2>
+        <iron-collapse id="collapseAgentList">
+          <template is="dom-if" if="[[!_hasNoAgentsList]]">
+            <h3>Members</h3>
+            <table width="100%">
+              <tr>
+              	<th>Agentid</th>
+              	<th>Username</th>
+              	<th>Email</th>
+              	<th>Reputation</th>
+              </tr>
+              <template is="dom-repeat" items="[[_listAgents]]" as="agent">
+                <tr>
+                  <td>[[agent.shortid]]</td>
+                  <td>[[agent.username]]</td>
+                  <td>[[agent.email]]</td>
+                  <td>
+                  	<iron-star-rating value="[[agent.rating]]" readonly></iron-star-rating>
+                  </td>
+                </tr>
+              </template>
+            </table>
+          </template>
+        </iron-collapse>
       </div>
     `;
   }
@@ -214,13 +247,33 @@ class AgentsView extends PolymerElement {
       _working: Boolean,
       _memberAgents: { type: Array, value: [] },
       _hasNoMemberAgents: { type: Boolean, value: true },
+      _hasNoAgentsList: { type: Boolean, value: true },
       _manageAgents: { type: Array, value: [] },
+      _listAgents: { type: Array, value: [] },
       _hasNoManageAgents: { type: Boolean, value: true },
       _manageGroupAgentId: String
     };
   }
 
+  ready() {
+    super.ready();
+    let appThis = this;
+    window.setTimeout(function() { appThis.refresh(); }, 1);
+  }
+
+  refresh() {
+    this.$.ajaxListAgents.generateRequest();
+  }
+
   toggleCreateAgent() { this.$.collapseCreateAgent.toggle(); }
+  toggleAgentList() { this.$.collapseAgentList.toggle(); }
+  _handleLoadAgentlistResponse(event) {
+    console.log(event.detail.response);
+    let response = event.detail.response;
+    response.members.forEach(function(element) { element.shortid = element.agentid.substr(0, 15) + '...' });
+    this._listAgents = response.members;
+    this._hasNoAgentsList = false;
+  }
 
   _keyPressedCreateAgent(event) {
     if (event.which == 13 || event.keyCode == 13) {

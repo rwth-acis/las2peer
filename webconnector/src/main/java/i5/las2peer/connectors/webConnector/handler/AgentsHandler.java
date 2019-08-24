@@ -1,8 +1,10 @@
 package i5.las2peer.connectors.webConnector.handler;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.logging.Level;
 
 import javax.ws.rs.BadRequestException;
@@ -27,7 +29,9 @@ import i5.las2peer.connectors.webConnector.WebConnector;
 import i5.las2peer.connectors.webConnector.util.AgentSession;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.p2p.Node;
+import i5.las2peer.serialization.MalformedXMLException;
 import i5.las2peer.serialization.SerializationException;
+import i5.las2peer.testing.MockAgentFactory;
 import i5.las2peer.tools.CryptoException;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -272,6 +276,75 @@ public class AgentsHandler {
 		json.put("code", Status.OK.getStatusCode());
 		json.put("text", Status.OK.getStatusCode() + " - GroupAgent created");
 		json.put("agentid", groupAgent.getIdentifier());
+		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
+	}
+	
+	@POST
+	@Path("/listAgents")
+	public Response handleListAgents(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId) throws AgentException, MalformedXMLException, IOException {
+		/*
+		AgentSession session = connector.getSessionById(sessionId);
+		if (session == null) {
+			return Response.status(Status.FORBIDDEN).entity("You have to be logged in to load a group").build();
+		}*/
+		Random rand = new Random();
+		//GroupAgentImpl groupAgent = MockAgentFactory.getGroup3();
+		UserAgentImpl adamAgent = MockAgentFactory.getAdam();
+		UserAgentImpl eveAgent = MockAgentFactory.getEve();
+		UserAgentImpl abelAgent = MockAgentFactory.getAbel();
+		
+		UserAgentImpl[] agents = { adamAgent, eveAgent, abelAgent };
+		
+		JSONObject json = new JSONObject();
+		json.put("code", Status.OK.getStatusCode());
+		json.put("text", Status.OK.getStatusCode() + " - GroupAgent loaded");
+		JSONArray memberList = new JSONArray();
+		
+		// TODO: query agent list from blockchain
+		// TODO: figure out mapping blockchain <-> actors
+		for( UserAgentImpl agent: agents)
+		{
+			JSONObject member = new JSONObject();
+			member.put("agentid", agent.getIdentifier());
+			
+			member.put("username", agent.getLoginName());
+			member.put("email", agent.getEmail());
+			member.put("rating", rand.nextInt(6));
+			
+			memberList.add(member);
+		}
+		
+		
+		// TODO: query agent list from blockchain
+		// TODO: figure out mapping blockchain <-> actors
+		/*for (String memberid : groupAgent.getMemberList()) {
+			JSONObject member = new JSONObject();
+			member.put("agentid", memberid);
+			try {
+				AgentImpl memberAgent = node.getAgent(memberid);
+				member.put("class", memberAgent.getClass().toString());
+				if (memberAgent instanceof UserAgentImpl) {
+					UserAgentImpl memberUserAgent = (UserAgentImpl) memberAgent;
+					member.put("username", memberUserAgent.getLoginName());
+					member.put("email", memberUserAgent.getEmail());
+					member.put("rating", rand.nextInt(6));
+				}
+			} catch (AgentException e) {
+				logger.log(Level.WARNING, "Could not retrieve group member agent from network", e);
+			}
+			memberList.add(member);
+		}*/
+		/*
+		JSONObject member = new JSONObject();
+		
+		member.put("agentid", adamAgent.getIdentifier());
+		member.put("username", adamAgent.getLoginName());
+		member.put("email", adamAgent.getEmail());
+		member.put("rating", rand.nextInt(6));
+		memberList.add(member);
+		*/
+		
+		json.put("members", memberList);
 		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
 	}
 
