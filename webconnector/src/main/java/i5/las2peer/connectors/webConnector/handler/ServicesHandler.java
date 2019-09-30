@@ -165,38 +165,6 @@ public class ServicesHandler {
 		ethereumNode.stopService(ServiceNameVersion.fromString(serviceName + "@" + version));
 		return Response.ok().build();
 	}
-
-	/**
-	 * Template of a get function.
-	 *
-	 * @param randID Key of persistent storage ID
-	 * @return Returns an HTTP response with the username as string content.
-	 */
-	
-	@GET
-	@Path("/test")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response handleTest(@QueryParam("id") int randID, @CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId)
-	{
-		
-		JSONObject json = new JSONObject();
-		AgentSession session = connector.getSessionById(sessionId);
-		if (session == null) {
-			throw new BadRequestException("You have to be logged in to upload");
-		}
-		EthereumAgent agent = (EthereumAgent) session.getAgent();
-		
-		try {
-			ethereumNode.registerProfile(agent);
-		} catch (EthereumException e) {			
-			throw new BadRequestException("Profile registration failed" + e.getMessage());
-		}
-		json.put("code", Status.OK.getStatusCode());
-		json.put("text", Status.OK.getStatusCode() + " - Service test successful");
-		json.put("msg", "Read GET param " + randID);
-		
-		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
-	}
 	
 	@GET
 	@Path("/node-id")

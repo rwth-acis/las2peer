@@ -83,6 +83,13 @@ class AgentsView extends PolymerElement {
                  on-response="_handleLoadAgentlistResponse"
                  on-error="_handleError"
                  loading="{{_working}}"></iron-ajax>
+      <iron-ajax id="ajaxRateAgent"
+                 method="POST"
+                 url$="[[apiEndpoint]]/agents/rateAgent"
+                 handle-as="json"
+                 on-response="_handleRateAgentResponse"
+                 on-error="_handleError"
+                 loading="{{_working}}"></iron-ajax>
 
       <style include="shared-styles">
         :host {
@@ -228,7 +235,7 @@ class AgentsView extends PolymerElement {
                   <td>[[agent.username]]</td>
                   <td>[[agent.email]]</td>
                   <td>
-                  	<iron-star-rating value="[[agent.rating]]" readonly></iron-star-rating>
+                  	<iron-star-rating value="[[agent.rating]]" on-rating-selected="rateAgent"></iron-star-rating>
                   </td>
                 </tr>
               </template>
@@ -236,6 +243,10 @@ class AgentsView extends PolymerElement {
           </template>
         </iron-collapse>
       </div>
+      
+              
+      <!-- Toast Messages -->
+      <paper-toast id="toast" horizontal-align="right"></paper-toast>
     `;
   }
 
@@ -267,12 +278,36 @@ class AgentsView extends PolymerElement {
 
   toggleCreateAgent() { this.$.collapseCreateAgent.toggle(); }
   toggleAgentList() { this.$.collapseAgentList.toggle(); }
+  
   _handleLoadAgentlistResponse(event) {
     console.log(event.detail.response);
     let response = event.detail.response;
     response.members.forEach(function(element) { element.shortid = element.agentid.substr(0, 15) + '...' });
     this._listAgents = response.members;
     this._hasNoAgentsList = false;
+  }
+  _handleRateAgentResponse(event) {
+	  console.log(event);
+	  let response = event.detail.response;
+	  
+	  this.$.toast.innerHTML = 'Rating (' + response.recipientname + ': '+ response.rating + ') successfully casted.';
+	  this.$.toast.open();
+  }
+  rateAgent(event) {
+	  console.log(event);
+	  console.log(event.model.get('agent'));
+	  console.log(event.model.get('agent.shortid'));
+	  console.log(event.model.get('agent.username'));
+	  
+	  //let req = this.$.ajaxRateAgentMock;
+	  let req = this.$.ajaxRateAgent;
+      req.body = new FormData();
+      req.body.append('agentid', event.model.get('agent.agentid'));
+      req.body.append('rating', event.detail.rating);
+      req.generateRequest();
+      
+      //this.$.toast.innerHTML = 'Rating (' + event.model.get('agent.username') + ': '+ event.detail.rating + ') successfully casted.';
+	  //this.$.toast.open();
   }
 
   _keyPressedCreateAgent(event) {

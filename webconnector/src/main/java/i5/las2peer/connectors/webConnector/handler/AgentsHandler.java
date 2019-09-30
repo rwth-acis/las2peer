@@ -4,14 +4,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.CookieParam;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -29,6 +34,10 @@ import i5.las2peer.connectors.webConnector.WebConnector;
 import i5.las2peer.connectors.webConnector.util.AgentSession;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.p2p.Node;
+import i5.las2peer.p2p.PastryNodeImpl;
+import i5.las2peer.registry.ReadOnlyRegistryClient;
+import i5.las2peer.registry.data.UserData;
+import i5.las2peer.registry.exceptions.EthereumException;
 import i5.las2peer.serialization.MalformedXMLException;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.testing.MockAgentFactory;
@@ -47,10 +56,16 @@ public class AgentsHandler {
 
 	private final WebConnector connector;
 	private final Node node;
+	private final PastryNodeImpl pastryNode;
+	private final EthereumNode ethereumNode;
+	private final ReadOnlyRegistryClient registry;
 
 	public AgentsHandler(WebConnector connector) {
 		this.connector = connector;
 		this.node = connector.getL2pNode();
+		pastryNode = (node instanceof PastryNodeImpl) ? (PastryNodeImpl) node : null;
+		ethereumNode = (node instanceof EthereumNode) ? (EthereumNode) node : null;
+		registry = (node instanceof EthereumNode) ? ethereumNode.getRegistryClient() : null;
 	}
 
 	@POST
@@ -279,21 +294,82 @@ public class AgentsHandler {
 		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
 	}
 	
+	/**
+	 * Template of a get function.
+	 *
+	 * @param randID Key of persistent storage ID
+	 * @return Returns an HTTP response with the username as string content.
+	 * @throws IOException 
+	 * @throws MalformedXMLException 
+	 */
+	
+	@GET
+	@Path("/registerProfile")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response handleTest(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId) throws MalformedXMLException, IOException
+	{
+		
+		JSONObject json = new JSONObject();
+		AgentSession session = connector.getSessionById(sessionId);
+		if (session == null) {
+			throw new BadRequestException("You have to be logged in");
+		}
+		
+		EthereumAgent agent = (EthereumAgent) session.getAgent();
+		//UserAgentImpl agent = MockAgentFactory.getAdam();
+		//JSONObject json = new JSONObject();
+		try {
+			//ethereumNode.registerProfile(agent);
+			ethereumNode.getRegistryClient().registerUserProfile(agent);
+		} catch (EthereumException e) {			
+			throw new BadRequestException("Profile registration failed" + e.getMessage());
+		}
+		json.put("code", Status.OK.getStatusCode());
+		json.put("text", Status.OK.getStatusCode() + " - Profile creation successful");
+		
+		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
+	}
+	
 	@POST
 	@Path("/listAgents")
-	public Response handleListAgents(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId) throws AgentException, MalformedXMLException, IOException {
+	public Response handleListAgents(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId) throws MalformedXMLException, IOException {
 		/*
 		AgentSession session = connector.getSessionById(sessionId);
 		if (session == null) {
 			return Response.status(Status.FORBIDDEN).entity("You have to be logged in to load a group").build();
-		}*/
+		}
+		*/
 		Random rand = new Random();
 		//GroupAgentImpl groupAgent = MockAgentFactory.getGroup3();
 		UserAgentImpl adamAgent = MockAgentFactory.getAdam();
 		UserAgentImpl eveAgent = MockAgentFactory.getEve();
 		UserAgentImpl abelAgent = MockAgentFactory.getAbel();
 		
-		UserAgentImpl[] agents = { adamAgent, eveAgent, abelAgent };
+		//UserAgentImpl[] agents = { adamAgent, eveAgent, abelAgent };
+		List<UserAgentImpl> agents = new ArrayList<UserAgentImpl>();
+		agents.add(adamAgent);
+		agents.add(eveAgent);
+		agents.add(abelAgent);
+		
+		//observer.getUserProfiles();
+		ConcurrentMap<String, String> profiles = ethereumNode.getRegistryClient().getUserProfiles();
+		
+		for( Map.Entry<String, String> profile : profiles.entrySet() )
+		{
+			String owner = profile.getKey().toString();
+			String username = profile.getValue().toString();
+			AgentImpl userAgent = null;
+			try {
+				userAgent = getAgentByDetail(owner, username, null);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if ( userAgent instanceof UserAgentImpl )
+			{
+				agents.add((UserAgentImpl) userAgent);
+			}
+		}
 		
 		JSONObject json = new JSONObject();
 		json.put("code", Status.OK.getStatusCode());
@@ -345,6 +421,58 @@ public class AgentsHandler {
 		*/
 		
 		json.put("members", memberList);
+		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
+	}
+	
+	@POST
+	@Path("/rateAgent")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response handleRateAgent(
+			@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId,
+			@FormDataParam("agentid") String agentId,
+			@FormDataParam("rating") Integer rating
+		) throws Exception {
+		
+		// check login
+		AgentSession session = connector.getSessionById(sessionId);
+		if (session == null) {
+			throw new BadRequestException("You have to be logged in to rate");
+		}
+		
+		/*// check if sender is ETH agent - necessary?
+		AgentImpl senderAgent = session.getAgent();
+		if ( !( senderAgent instanceof EthereumAgent ) )
+		{
+			throw new BadRequestException("Logged in agent is not EthereumAgent");
+		}
+		EthereumAgent senderEthAgent = (EthereumAgent) senderAgent;
+		*/
+		
+		// find recipient in user registry
+		AgentImpl recipientAgent = getAgentByDetail(agentId, null, null);
+		if ( !(recipientAgent instanceof UserAgentImpl) ) {
+			throw new BadRequestException("Recipient is not a UserAgent or cannot find by agentId");
+		}
+		UserAgentImpl recipientUserAgent = (UserAgentImpl) recipientAgent;
+		
+		// find recipient on blockchain
+		UserData userInBlockchain = ethereumNode.getRegistryClient().getUser(recipientUserAgent.getLoginName());
+		
+		// add transaction
+		// rating must be between amountMin and amountMax
+		try {
+			ethereumNode.getRegistryClient().addUserRating(userInBlockchain, rating);
+		} catch (EthereumException e) {			
+			throw new BadRequestException("Profile rating failed: " + e.getMessage());
+		}
+		
+		JSONObject json = new JSONObject();
+		json.put("code", Status.OK.getStatusCode());
+		json.put("text", Status.OK.getStatusCode() + " - UserProfile rating added");
+		json.put("recipientid", userInBlockchain.getAgentId());
+		json.put("recipientname", userInBlockchain.getName());
+		json.put("rating", rating);
+		
 		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
 	}
 

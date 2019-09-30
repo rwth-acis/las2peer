@@ -181,6 +181,11 @@ public class ReadOnlyRegistryClient {
 	public ConcurrentMap<String, String> getServiceAuthors() {
 		return observer.serviceNameToAuthor;
 	}
+	
+	/** @return map of profile owners to their usernames */
+	public ConcurrentMap<String, String> getUserProfiles() {
+		return observer.profiles;
+	}
 
 	/** @return map of names to service release objects */
 	public ConcurrentMap<String, List<ServiceReleaseData>> getServiceReleases() {

@@ -14,6 +14,7 @@ import i5.las2peer.registry.exceptions.EthereumException;
 import i5.las2peer.registry.exceptions.NotFoundException;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.EthereumAgent;
+import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.serialization.SerializationException;
 
 import java.net.InetAddress;
@@ -281,7 +282,8 @@ public class EthereumNode extends PastryNodeImpl {
 		return registryClient;
 	}
 	
-	public void registerProfile(EthereumAgent author) throws EthereumException {
-		registryClient.registerUserProfile(author);
-	}
+	//public void registerProfile(UserAgentImpl author) throws EthereumException {
+	//	registryClient.registerUserProfile(author);
+	//}
+	 
 }

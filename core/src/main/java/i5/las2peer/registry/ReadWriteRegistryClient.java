@@ -5,8 +5,10 @@ import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.registry.contracts.ServiceRegistry;
 import i5.las2peer.registry.contracts.UserRegistry;
 import i5.las2peer.registry.data.RegistryConfiguration;
+import i5.las2peer.registry.data.UserData;
 import i5.las2peer.registry.exceptions.EthereumException;
 import i5.las2peer.security.EthereumAgent;
+import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.serialization.SerializeTools;
 import org.web3j.abi.datatypes.Function;
@@ -104,7 +106,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		}
 	}
 	
-	public void registerUserProfile(EthereumAgent agent) throws EthereumException
+	public void registerUserProfile(UserAgentImpl agent) throws EthereumException
 	{
 		if ( !agent.hasLoginName() )
 		{
@@ -118,6 +120,23 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 			contracts.reputationRegistry.createProfile(profileName).send();
 		} catch (Exception e) {
 			throw new EthereumException("Could not register profile: " + e.getMessage(), e);
+		}
+	}
+	
+	public void addUserRating(UserData receivingAgent, Integer rating ) throws EthereumException
+	{
+		// see reputation registry
+	    int __amountMax = 5;
+	    int __amountMin = __amountMax * -1;
+		if ( rating > __amountMax || rating < __amountMin )
+			throw new EthereumException("Could not add user rating: rating outside bounds (" + __amountMin + " - " + __amountMax + ")");
+		
+		logger.fine( "rating user profile: " + receivingAgent.getName() + " | " + rating + "(" + BigInteger.valueOf(rating).intValue() + ")" );
+		
+		try {
+			contracts.reputationRegistry.addTransaction(receivingAgent.getPublicKey().toString(), BigInteger.valueOf(rating)).send();
+		} catch (Exception e) {
+			throw new EthereumException("Could not add user rating: " + e.getMessage(), e);
 		}
 	}
 
