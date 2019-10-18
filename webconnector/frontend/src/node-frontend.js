@@ -75,6 +75,11 @@ class NodeFrontend extends PolymerElement {
         .app-header {
           color: #fff;
         }
+        
+        las2peer-frontend-statusbar{
+          --statusbar-background: var(--app-primary-color);
+          --user-widget-button-background: white;
+        }
 
         app-header paper-icon-button {
           --paper-icon-button-ink-color: white;
@@ -117,7 +122,8 @@ class NodeFrontend extends PolymerElement {
 
         <!-- Main content -->
         <div class="app-header">
-          <las2peer-frontend-statusbar id="statusbar" base-url="/" service="las2peer Node Front-End"
+          <las2peer-frontend-statusbar id="statusbar"
+            base-url="[[hostUrl]]" service="las2peer Node Front-End"
             oidcclientid="bdda7396-3f6d-4d83-ac21-65b4069d0eab"
             oidcpopupsigninurl$="[[_loadUrl]]"
             oidcpopupsignouturl$="[[_loadUrl]]"
@@ -264,10 +270,12 @@ class NodeFrontend extends PolymerElement {
 
     this._loadUrl = document.URL; // there's definitely better ways to do this, but I have no idea
 
+    let scheme = this._loadUrl.split(":")[0] + "://";
+    this.hostUrl = scheme + window.location.host;
+
     this.$.ajaxValidateSession.generateRequest(); // validate old session
 
     this.$.statusbar.addEventListener('signed-in', function(event) { appThis.storeOidcUser(event.detail); });
-
 
     this.$.statusbar.addEventListener('signed-out', function() { appThis._oidcUser = null; appThis.destroySession(); });
 

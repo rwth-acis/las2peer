@@ -87,13 +87,16 @@ class ServicesView extends PolymerElement {
       </custom-style>
 
       <div class="card">
+        <div style="float: right; width: 15em; margin-top: -8px">
+          <paper-input label="search" id="filterField" on-value-changed="_triggerFilter" value=""></paper-input>
+        </div>
         <h1>Services in this Network</h1>
 
         <p hidden$="[[_toBool(_services)]]">
           There are no services published in this network.<br/>
           Feel free to use the <a href="[[rootPath]]publish-service">Publish Service</a> tab.
         </p>
-        <template is="dom-repeat" items="[[_services]]" as="service">
+        <template id="serviceList" is="dom-repeat" items="[[_services]]" as="service" sort="_sort" filter="_filter">
           <template is="dom-repeat" items="[[_getLatestAsArray(service.releases)]]" as="release">
             <!-- we actually just want a single item here: the latest release. but I don't know how to do that without abusing repeat like this -->
             <paper-card heading$="[[release.supplement.name]]" style="width: 100%;margin-bottom: 1em" class="service">
@@ -228,6 +231,30 @@ class ServicesView extends PolymerElement {
     this.$.ajaxCommunityTags.generateRequest();
   }
 
+  _sort(service, otherService) {
+    try {
+      // alphabetically by packagename
+      return (service.name < otherService.name) ? -1 : 1;
+    } catch(err) {
+      return -1; // whatever
+    }
+  }
+
+  _filter(service) {
+    try {
+      let query = this.$.filterField.value.trim();
+      if (query.length < 1) return true;
+      let serviceAsJson = JSON.stringify(service);
+      return serviceAsJson.match(new RegExp(query, 'i'));
+    } catch(err) {
+      return true;
+    }
+  }
+
+  _triggerFilter(event) {
+    this.$.serviceList.render();
+  }
+
   _stringify(obj) {
     return JSON.stringify(obj);
   }
@@ -241,7 +268,7 @@ class ServicesView extends PolymerElement {
   }
 
   _split(stringWithCommas) {
-    return stringWithCommas.split(',');
+    return (stringWithCommas || "").split(',');
   }
 
   _count(stringWithCommas) {
@@ -257,8 +284,9 @@ class ServicesView extends PolymerElement {
   }
 
   _getLatestVersionNumber(obj) {
-    // FIXME: use proper semver sort
-    let latestVersion = Object.keys(obj).sort().reverse()[0];
+    // NOTE: sorting issue fixed
+    let latestVersion = Object.keys(obj).map( a => a.split('.').map( n => +n+1000000 ).join('.') ).sort()
+        .map( a => a.split('.').map( n => +n-1000000 ).join('.') ).reverse()[0];
     return latestVersion;
   }
 
@@ -266,7 +294,7 @@ class ServicesView extends PolymerElement {
     let latestVersionNumber = this._getLatestVersionNumber(obj);
     let latestRelease = obj[latestVersionNumber];
     // version number is key, let's add it so we can access it
-    latestRelease.version = latestVersionNumber;
+    (latestRelease || {}).version = latestVersionNumber;
     return latestRelease;
   }
 
@@ -283,7 +311,7 @@ class ServicesView extends PolymerElement {
   }
 
   _hasLocalRunningInstance(instances, serviceClass) {
-    return this._filterInstances(instances, serviceClass).filter(i => i.nodeId === this._nodeId.id).length > 0;
+    return this._filterInstances(instances, serviceClass).filter(i => i.nodeId === (this._nodeId || {}).id).length > 0;
   }
 
   _hasOnlyRemoteRunningInstance(instances, serviceClass) {
@@ -291,18 +319,18 @@ class ServicesView extends PolymerElement {
   }
 
   _classesNotRunningAnywhere(release) {
-    let classes = this._split(release.supplement.class)
+    let classes = this._split((release.supplement || {}).class)
     let missing = classes.filter(c => {
-      let instancesOfClass = release.instances.filter(i => i.className === c);
+      let instancesOfClass = (release.instances || []).filter(i => i.className === c);
       return instancesOfClass < 1;
     });
     return missing;
   }
 
   _classesNotRunningLocally(release) {
-    let classes = this._split(release.supplement.class);
+    let classes = this._split((release.supplement || {}).class);
     let missing = classes.filter(c => {
-      let localInstancesOfClass = release.instances.filter(i => i.className === c && i.nodeId === this._nodeId.id);
+      let localInstancesOfClass = (release.instances || []).filter(i => i.className === c && i.nodeId === (this._nodeId || {}).id);
       return localInstancesOfClass < 1;
     });
     return missing;
@@ -314,19 +342,19 @@ class ServicesView extends PolymerElement {
   }
 
   _countRunning(release) {
-    let classes = this._split(release.supplement.class);
+    let classes = this._split((release.supplement || {}).class);
     let missing = this._classesNotRunningAnywhere(release);
     return classes.length - missing.length;
   }
 
   _countRunningLocally(release) {
-    let classes = this._split(release.supplement.class);
+    let classes = this._split((release.supplement || {}).class);
     let missing = this._classesNotRunningLocally(release);
     return classes.length - missing.length;
   }
 
   _countMissingLocally(release) {
-   return this._count(release.supplement.class) - this._countRunningLocally(release);
+   return this._count((release.supplement || {}).class) - this._countRunningLocally(release);
   }
 
   _countRunningRemoteOnly(release) {
@@ -335,7 +363,7 @@ class ServicesView extends PolymerElement {
 
   // this counts several instances of a service class (in contrast, most other methods here ignore duplicates)
   _countInstancesRunningRemoteOnly(release) {
-    return release.instances.length - this._countRunningLocally(release);
+    return (release.instances || "").length - this._countRunningLocally(release);
   }
 
   _fullyAvailableAnywhere(release) {
@@ -348,7 +376,7 @@ class ServicesView extends PolymerElement {
 
   _frontendUrlIfServiceAvailable(release) {
     if (this._fullyAvailableAnywhere(release)) {
-      return release.supplement.frontendUrl;
+      return (release.supplement || {}).frontendUrl;
     } else {
       return false;
     }
