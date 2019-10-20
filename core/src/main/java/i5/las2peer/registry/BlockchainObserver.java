@@ -23,6 +23,9 @@ class BlockchainObserver {
 	/** Profiles to their owners */
 	ConcurrentMap<String, String> profiles;
 	
+	/** User registrations and time stamps */
+	ConcurrentMap<String, String> users;
+	
 	/** Tags to their description */
 	ConcurrentMap<String, String> tags;
 
@@ -104,12 +107,14 @@ class BlockchainObserver {
 		contracts = new Contracts.ContractsBuilder(contractsConfig).build();
 
 		profiles = new ConcurrentHashMap<>();
+		users = new ConcurrentHashMap<>();
 		tags = new ConcurrentHashMap<>();
 		serviceNameToAuthor = new ConcurrentHashMap<>();
 		releases = new ConcurrentHashMap<>();
 		releasesByVersion = new ConcurrentHashMap<>();
 		deployments = new ConcurrentHashMap<>();
 
+		observeUserRegistrations();
 		observeUserProfileCreations();
 		observeTagCreations();
 		observeServiceRegistrations();
@@ -124,6 +129,24 @@ class BlockchainObserver {
 			observedEventTxHashes.add(txHash);
 			return false;
 		}
+	}
+	
+	private void observeUserRegistrations() {
+		contracts.userRegistry.userRegisteredEventFlowable(DefaultBlockParameterName.EARLIEST,
+		DefaultBlockParameterName.LATEST)
+			.observeOn(Schedulers.io())
+			.subscribeOn(Schedulers.io())
+			.subscribe(user -> {
+				if (txHasAlreadyBeenHandled(user.log.getTransactionHash()))
+				{
+					return;
+				}
+				
+				String userName = Util.recoverString(user.name);
+				String timestamp = Util.recoverString(user.timestamp);
+				this.users.put(userName, timestamp);
+				logger.fine("observed user registration: " + "@[" + timestamp + "]: " + userName);
+			}, e -> logger.severe("Error observing user registration event: " + e.toString()));
 	}
 	
 	private void observeUserProfileCreations() {
