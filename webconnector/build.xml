@@ -4,7 +4,7 @@
 
 	<property name="ivy.organisation" value="i5"/>
 	<property name="ivy.revision" value="0.8"/>
-	<property name="ivy.build.number" value="0"/>
+	<property name="ivy.build.number" value="1"/>
 	<property name="ivy.deliver.revision" value="${ivy.revision}"/>
 	<property name="ivy.pom.version" value="${ivy.revision}"/>
 
@@ -198,18 +198,18 @@
             <arg value="fix"/>
         </exec>
     	-->
-        
+
 		<echo message="Building frontend ..."/>
 		<exec executable="npm" dir="frontend" failonerror="true">
 			<arg value="run"/>
 			<arg value="build"/>
 		</exec>
-		
+
 		<echo message="Fixing webapp symlink ..."/>
 		<exec executable="/bin/bash" failonerror="true">
 	    	<arg value="${basedir}/fix_symlink.sh"/>
 	  	</exec>
-		
+
 	</target>
 
 	<target name="main_jar" depends="compile_main, build_frontend">
