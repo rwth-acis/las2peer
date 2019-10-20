@@ -7,6 +7,7 @@ import i5.las2peer.registry.exceptions.EthereumException;
 import io.reactivex.schedulers.Schedulers;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -143,8 +144,10 @@ class BlockchainObserver {
 				}
 				
 				String userName = Util.recoverString(user.name);
-				String timestamp = Util.recoverString(user.timestamp);
-				this.users.put(userName, timestamp);
+				BigInteger timestamp = user.timestamp;
+				Instant i = Instant.ofEpochSecond(timestamp.longValue());
+				
+				this.users.put(userName, i.toString());
 				logger.fine("observed user registration: " + "@[" + timestamp + "]: " + userName);
 			}, e -> logger.severe("Error observing user registration event: " + e.toString()));
 	}
