@@ -346,14 +346,33 @@ public class AgentsHandler {
 		UserAgentImpl abelAgent = MockAgentFactory.getAbel();
 		
 		//UserAgentImpl[] agents = { adamAgent, eveAgent, abelAgent };
-		List<UserAgentImpl> agents = new ArrayList<UserAgentImpl>();
-		agents.add(adamAgent);
-		agents.add(eveAgent);
-		agents.add(abelAgent);
+		List<EthereumAgent> agents = new ArrayList<EthereumAgent>();
+		//agents.add(adamAgent);
+		//agents.add(eveAgent);
+		//agents.add(abelAgent);
 		
 		//observer.getUserProfiles();
-		ConcurrentMap<String, String> profiles = ethereumNode.getRegistryClient().getUserProfiles();
+		//ConcurrentMap<String, String> profiles = ethereumNode.getRegistryClient().getUserProfiles();
+		ConcurrentMap<String, String> userRegistrations = ethereumNode.getRegistryClient().getUserRegistrations();
 		
+		for( Map.Entry<String, String> userRegistration : userRegistrations.entrySet() )
+		{
+			String username = userRegistration.getKey().toString();
+			AgentImpl userAgent = null;
+			try {
+				userAgent = getAgentByDetail(null, username, null);
+				userAgent = ethereumNode.getAgent(userAgent.getIdentifier());
+				//userAgent = ethereumNode.getAgent(id)
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if ( userAgent instanceof EthereumAgent )
+			{
+				agents.add((EthereumAgent)userAgent);
+			}
+		}
+		/*
 		for( Map.Entry<String, String> profile : profiles.entrySet() )
 		{
 			String owner = profile.getKey().toString();
@@ -370,18 +389,23 @@ public class AgentsHandler {
 				agents.add((UserAgentImpl) userAgent);
 			}
 		}
+		*/
 		
 		JSONObject json = new JSONObject();
 		json.put("code", Status.OK.getStatusCode());
-		json.put("text", Status.OK.getStatusCode() + " - GroupAgent loaded");
+		json.put("text", Status.OK.getStatusCode() + " - UserList loaded");
 		JSONArray memberList = new JSONArray();
+		
+		
 		
 		// TODO: query agent list from blockchain
 		// TODO: figure out mapping blockchain <-> actors
-		for( UserAgentImpl agent: agents)
+		for( EthereumAgent agent: agents)
 		{
 			JSONObject member = new JSONObject();
 			member.put("agentid", agent.getIdentifier());
+			member.put("address", agent.getEthereumAddress());
+			
 			
 			member.put("username", agent.getLoginName());
 			member.put("email", agent.getEmail());
@@ -391,34 +415,6 @@ public class AgentsHandler {
 		}
 		
 		
-		// TODO: query agent list from blockchain
-		// TODO: figure out mapping blockchain <-> actors
-		/*for (String memberid : groupAgent.getMemberList()) {
-			JSONObject member = new JSONObject();
-			member.put("agentid", memberid);
-			try {
-				AgentImpl memberAgent = node.getAgent(memberid);
-				member.put("class", memberAgent.getClass().toString());
-				if (memberAgent instanceof UserAgentImpl) {
-					UserAgentImpl memberUserAgent = (UserAgentImpl) memberAgent;
-					member.put("username", memberUserAgent.getLoginName());
-					member.put("email", memberUserAgent.getEmail());
-					member.put("rating", rand.nextInt(6));
-				}
-			} catch (AgentException e) {
-				logger.log(Level.WARNING, "Could not retrieve group member agent from network", e);
-			}
-			memberList.add(member);
-		}*/
-		/*
-		JSONObject member = new JSONObject();
-		
-		member.put("agentid", adamAgent.getIdentifier());
-		member.put("username", adamAgent.getLoginName());
-		member.put("email", adamAgent.getEmail());
-		member.put("rating", rand.nextInt(6));
-		memberList.add(member);
-		*/
 		
 		json.put("members", memberList);
 		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();

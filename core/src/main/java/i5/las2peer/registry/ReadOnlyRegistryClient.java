@@ -186,6 +186,11 @@ public class ReadOnlyRegistryClient {
 	public ConcurrentMap<String, String> getUserProfiles() {
 		return observer.profiles;
 	}
+	
+	/** @return map of users to their registration time stamps */
+	public ConcurrentMap<String, String> getUserRegistrations() {
+		return observer.users;
+	}
 
 	/** @return map of names to service release objects */
 	public ConcurrentMap<String, List<ServiceReleaseData>> getServiceReleases() {

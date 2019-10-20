@@ -225,6 +225,7 @@ class AgentsView extends PolymerElement {
             <table width="100%">
               <tr>
               	<th>Agentid</th>
+              	<th>Adress</th>
               	<th>Username</th>
               	<th>Email</th>
               	<th>Reputation</th>
@@ -232,6 +233,7 @@ class AgentsView extends PolymerElement {
               <template is="dom-repeat" items="[[_listAgents]]" as="agent">
                 <tr>
                   <td>[[agent.shortid]]</td>
+                  <td>[[agent.address]]</td>
                   <td>[[agent.username]]</td>
                   <td>[[agent.email]]</td>
                   <td>
