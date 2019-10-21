@@ -38,6 +38,7 @@ import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.registry.ReadOnlyRegistryClient;
 import i5.las2peer.registry.data.UserData;
 import i5.las2peer.registry.exceptions.EthereumException;
+import i5.las2peer.registry.exceptions.NotFoundException;
 import i5.las2peer.serialization.MalformedXMLException;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.testing.MockAgentFactory;
@@ -402,9 +403,22 @@ public class AgentsHandler {
 		// TODO: figure out mapping blockchain <-> actors
 		for( EthereumAgent agent: agents)
 		{
+			String ownerAddress = "";
+			try {
+				ownerAddress = ethereumNode.getRegistryClient().getUser(agent.getLoginName()).getOwnerAddress();
+			} catch (EthereumException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (NotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if ( ownerAddress == "" ) {
+				ownerAddress = agent.getEthereumAddress();
+			}
 			JSONObject member = new JSONObject();
 			member.put("agentid", agent.getIdentifier());
-			member.put("address", agent.getEthereumAddress());
+			member.put("address", ownerAddress);
 			
 			
 			member.put("username", agent.getLoginName());
