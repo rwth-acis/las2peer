@@ -4,7 +4,6 @@ import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.logging.L2pLogger;
-import i5.las2peer.registry.BlockchainObserver;
 import i5.las2peer.registry.CredentialUtils;
 import i5.las2peer.registry.ReadWriteRegistryClient;
 import i5.las2peer.registry.data.RegistryConfiguration;
