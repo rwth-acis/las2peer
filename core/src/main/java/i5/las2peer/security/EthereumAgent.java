@@ -3,6 +3,8 @@ package i5.las2peer.security;
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentOperationFailedException;
+import i5.las2peer.logging.L2pLogger;
+import i5.las2peer.registry.BlockchainObserver;
 import i5.las2peer.registry.CredentialUtils;
 import i5.las2peer.registry.ReadWriteRegistryClient;
 import i5.las2peer.registry.data.RegistryConfiguration;
@@ -54,6 +56,8 @@ public class EthereumAgent extends UserAgentImpl {
 
 	/** This agent's registry client to make direct smart contract calls. */
 	private ReadWriteRegistryClient registryClient;
+	
+	private static final L2pLogger logger = L2pLogger.getInstance(EthereumAgent.class);
 
 	protected EthereumAgent(KeyPair pair, String passphrase, byte[] salt, String loginName, String ethereumMnemonic)
 			throws AgentOperationFailedException, CryptoException {
@@ -99,6 +103,7 @@ public class EthereumAgent extends UserAgentImpl {
 		credentials = CredentialUtils.fromMnemonic(ethereumMnemonic, passphrase);
 		registryClient = new ReadWriteRegistryClient(new RegistryConfiguration(), credentials);
 		ethereumAddress = credentials.getAddress();
+		logger.fine("unlocked ethereum agent ["+ethereumAddress +"]");
 	}
 
 	@Override
