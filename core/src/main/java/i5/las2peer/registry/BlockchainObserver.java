@@ -12,6 +12,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import java.math.BigInteger;
+
 /**
  * Observes blockchain events related to the registry and updates its state
  * accordingly.
