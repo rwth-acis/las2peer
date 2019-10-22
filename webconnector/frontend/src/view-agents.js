@@ -284,13 +284,14 @@ class AgentsView extends PolymerElement {
       error: { type: Object, notify: true },
       _working: Boolean,
       _ethProfile: { type: Array, value: [] },
-      _hasNoEthProfile: { type: Boolean, value: true },
-      _hasNoMemberAgents: { type: Boolean, value: true },
       _hasNoAgentsList: { type: Boolean, value: true },
-      _manageAgents: { type: Array, value: [] },
-      _listAgents: { type: Array, value: [] },
+      _hasNoEthProfile: { type: Boolean, value: true },
       _hasNoManageAgents: { type: Boolean, value: true },
-      _manageGroupAgentId: String
+      _hasNoMemberAgents: { type: Boolean, value: true },
+      _listAgents: { type: Array, value: [] },
+      _manageAgents: { type: Array, value: [] },
+      _manageGroupAgentId: String,
+      _memberAgents: { type: Array, value: [] },
     };
   }
 
