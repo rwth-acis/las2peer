@@ -141,17 +141,19 @@ public class AgentsHandler {
 			EthereumAgent ethAgent = (EthereumAgent) agent;
 			
 			json.put("eth-agent-address", ethAgent.getEthereumAddress());
-			json.put("eth-agent-pubkey", ethAgent.getPublicKey());
+			//json.put("eth-agent-pubkey", ethAgent.getPublicKey());
 			
 			UserData ethUser = ethereumNode.getRegistryClient().getUser(ethAgent.getLoginName());
 			if ( ethUser != null )
 			{
 				json.put("eth-user-address", ethUser.getOwnerAddress());
+				/*
 				try {
 					json.put("eth-user-pubkey", ethUser.getPublicKey().toString());
 				} catch (SerializationException e) {
 					// intentionally empty - ignore field if error
 				}
+				*/
 			}
 		}
 		return json;

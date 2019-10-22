@@ -115,12 +115,10 @@ class AgentsView extends PolymerElement {
         	<table width="100%">
 				<tr>
 				    <th>Eth Address</th>
-				    <th>Eth PubKey</th>
 				    <th>Eth Balance</th>
 				</tr>
 				<tr>
 					<td>agent: [[_ethProfile.eth-agent-address]] <br /> owner: [[_ethProfile.eth-user-address]]</td>
-					<td>agent: [[_ethProfile.eth-agent-pubkey]] <br /> owner: [[_ethProfile.eth-user-pubkey]]</td>
 					<td>xx.yy {TODO}</td>
 				</tr>
           </table>
