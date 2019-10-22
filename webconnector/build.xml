@@ -188,7 +188,7 @@
 
 	<target name="build_frontend" description="--> build the polymer frontend with bower">
 		<echo message="Installing dependencies (if needed) ..."/>
-		<exec executable="yarn" dir="frontend" failonerror="true">
+		<exec executable="npm" dir="frontend" failonerror="true">
 			<arg value="install"/>
 		</exec>
 		<!--
@@ -200,7 +200,7 @@
     	-->
 
 		<echo message="Building frontend ..."/>
-		<exec executable="yarn" dir="frontend" failonerror="true">
+		<exec executable="npm" dir="frontend" failonerror="true">
 			<arg value="run"/>
 			<arg value="build"/>
 		</exec>
