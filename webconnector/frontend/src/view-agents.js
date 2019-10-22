@@ -108,8 +108,8 @@ class AgentsView extends PolymerElement {
 
       <div class="card">
         <h1>Agents</h1>
+        <h2 on-click="toggleEthProfile" style="cursor:point">User Profile &nbsp; <paper-button raised on-click="refreshEthProfile">Refresh</paper-button></h2>
         <template is="dom-if" if="[[!_hasNoEthProfile]]">
-        <h2 on-click="toggleEthProfile" style="cursor:point">User Profile</h2>
         <iron-collapse opened id="collapseEthProfile">
         	<p>Welcome, [[_ethProfile.username]]</p>
         	<table width="100%">
@@ -298,14 +298,14 @@ class AgentsView extends PolymerElement {
   ready() {
     super.ready();
     let appThis = this;
-    window.setTimeout(function() { appThis.refresh(); }, 1);
-    this.$.ajaxGetEthProfile.generateRequest();
+    window.setTimeout(function() { appThis.refresh(); }, 5);
   }
 
   refresh() {
+	this.$.ajaxGetEthProfile.generateRequest();
     this.$.ajaxListAgents.generateRequest();
   }
-
+  refreshEthProfile() { this.$.ajaxGetEthProfile.generateRequest(); }
   toggleCreateAgent() { this.$.collapseCreateAgent.toggle(); }
   toggleAgentList() { this.$.collapseAgentList.toggle(); }
   toggleEthProfile() { this.$.collapseEthProfile.toggle(); }
