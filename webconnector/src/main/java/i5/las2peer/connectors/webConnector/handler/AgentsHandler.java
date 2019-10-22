@@ -127,6 +127,59 @@ public class AgentsHandler {
 		}
 		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
 	}
+	
+	private JSONObject addAgentDetailsToJson(AgentImpl agent, JSONObject json) throws EthereumException, NotFoundException
+	{
+		json.put("agentid", agent.getIdentifier());
+		if (agent instanceof UserAgentImpl) {
+			UserAgentImpl userAgent = (UserAgentImpl) agent;
+			json.put("username", userAgent.getLoginName());
+			json.put("email", userAgent.getEmail());
+		}
+		if (agent instanceof EthereumAgent)
+		{
+			EthereumAgent ethAgent = (EthereumAgent) agent;
+			
+			json.put("eth-agent-address", ethAgent.getEthereumAddress());
+			json.put("eth-agent-pubkey", ethAgent.getPublicKey());
+			
+			UserData ethUser = ethereumNode.getRegistryClient().getUser(ethAgent.getLoginName());
+			if ( ethUser != null )
+			{
+				json.put("eth-user-owner", ethUser.getOwnerAddress());
+				try {
+					json.put("eth-user-pubkey", ethUser.getPublicKey().toString());
+				} catch (SerializationException e) {
+					// intentionally empty - ignore field if error
+				}
+			}
+		}
+		return json;
+	}
+	
+	@GET
+	@Path("/getEthProfile")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response handleGetProfile(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId) //throws Exception
+	{
+		JSONObject json = new JSONObject();
+
+		AgentSession session = connector.getSessionById(sessionId);
+		if (session == null) {
+			return Response.status(Status.FORBIDDEN).entity("You have to be logged in").build();
+		}
+		
+		AgentImpl agent = session.getAgent();
+		try {
+			json = addAgentDetailsToJson(agent, json);
+		} catch (EthereumException e) {
+			return Response.status(Status.NOT_FOUND).entity("Agent not found").build();
+		} catch (NotFoundException e) {
+			return Response.status(Status.NOT_FOUND).entity("Username not registered").build();
+		}
+		
+		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
+	}
 
 	@POST
 	@Path("/getAgent")
@@ -135,11 +188,12 @@ public class AgentsHandler {
 			@FormDataParam("email") String email) throws Exception {
 		AgentImpl agent = getAgentByDetail(agentId, username, email);
 		JSONObject json = new JSONObject();
-		json.put("agentid", agent.getIdentifier());
-		if (agent instanceof UserAgentImpl) {
-			UserAgentImpl userAgent = (UserAgentImpl) agent;
-			json.put("username", userAgent.getLoginName());
-			json.put("email", userAgent.getEmail());
+		try {
+			json = addAgentDetailsToJson(agent, json);
+		} catch (EthereumException e) {
+			return Response.status(Status.NOT_FOUND).entity("Agent not found").build();
+		} catch (NotFoundException e) {
+			return Response.status(Status.NOT_FOUND).entity("Username not registered").build();
 		}
 		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
 	}
@@ -406,6 +460,7 @@ public class AgentsHandler {
 			String ownerAddress = "";
 			try {
 				ownerAddress = ethereumNode.getRegistryClient().getUser(agent.getLoginName()).getOwnerAddress();
+				logger.info("found user ["+agent.getLoginName()+"|"+ownerAddress+"]");
 			} catch (EthereumException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
