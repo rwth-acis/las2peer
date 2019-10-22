@@ -90,6 +90,13 @@ class AgentsView extends PolymerElement {
                  on-response="_handleRateAgentResponse"
                  on-error="_handleError"
                  loading="{{_working}}"></iron-ajax>
+      <iron-ajax id="ajaxGetEthProfile"
+                 method="POST"
+                 url$="[[apiEndpoint]]/agents/getEthProfile"
+                 handle-as="json"
+                 on-response="_handleGetEthProfileResponse"
+                 on-error="_handleError"
+                 loading="{{_working}}"></iron-ajax>
 
       <style include="shared-styles">
         :host {
@@ -101,6 +108,24 @@ class AgentsView extends PolymerElement {
 
       <div class="card">
         <h1>Agents</h1>
+        <template is="dom-if" if="[[!_hasNoEthProfile]]">
+        <h2 on-click="toggleEthProfile" style="cursor:point">User Profile</h2>
+        <iron-collapse opened id="collapseEthProfile">
+        	<p>Welcome, [[_ethProfile.username]]</p>
+        	<table width="100%">
+				<tr>
+				    <th>Eth Address</th>
+				    <th>Eth PubKey</th>
+				    <th>Eth Balance</th>
+				</tr>
+				<tr>
+					<td>agent: [[_ethProfile.eth-agent-address]] <br /> owner: [[_ethProfile.eth-user-address]]</td>
+					<td>agent: [[_ethProfile.eth-agent-pubkey]] <br /> owner: [[_ethProfile.eth-user-pubkey]]</td>
+					<td>xx.yy {TODO}</td>
+				</tr>
+          </table>
+        </iron-collapse>
+        </template>
         <h2 on-click="toggleCreateAgent" style="cursor: pointer">Register Agent</h2>
         <iron-collapse opened id="collapseCreateAgent">
           <p>
@@ -258,7 +283,8 @@ class AgentsView extends PolymerElement {
       agentId: { type: String, notify: true },
       error: { type: Object, notify: true },
       _working: Boolean,
-      _memberAgents: { type: Array, value: [] },
+      _ethProfile: { type: Array, value: [] },
+      _hasNoEthProfile: { type: Boolean, value: true },
       _hasNoMemberAgents: { type: Boolean, value: true },
       _hasNoAgentsList: { type: Boolean, value: true },
       _manageAgents: { type: Array, value: [] },
@@ -272,6 +298,7 @@ class AgentsView extends PolymerElement {
     super.ready();
     let appThis = this;
     window.setTimeout(function() { appThis.refresh(); }, 1);
+    this.$.ajaxGetEthProfile.generateRequest();
   }
 
   refresh() {
@@ -280,6 +307,7 @@ class AgentsView extends PolymerElement {
 
   toggleCreateAgent() { this.$.collapseCreateAgent.toggle(); }
   toggleAgentList() { this.$.collapseAgentList.toggle(); }
+  toggleEthProfile() { this.$.collapseEthProfile.toggle(); }
   
   _handleLoadAgentlistResponse(event) {
     console.log(event.detail.response);
@@ -310,6 +338,10 @@ class AgentsView extends PolymerElement {
       
       //this.$.toast.innerHTML = 'Rating (' + event.model.get('agent.username') + ': '+ event.detail.rating + ') successfully casted.';
 	  //this.$.toast.open();
+  }
+  _handleGetEthProfileResponse(event) {
+	  this._hasNoEthProfile = false;
+	  this._ethProfile = event.detail.response;
   }
 
   _keyPressedCreateAgent(event) {
