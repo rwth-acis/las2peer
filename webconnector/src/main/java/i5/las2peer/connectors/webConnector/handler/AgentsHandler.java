@@ -166,7 +166,7 @@ public class AgentsHandler {
 
 		AgentSession session = connector.getSessionById(sessionId);
 		if (session == null) {
-			return Response.status(Status.FORBIDDEN).entity("You have to be logged in").build();
+			return Response.status(Status.METHOD_NOT_ALLOWED).entity("You have to be logged in").build();
 		}
 		
 		AgentImpl agent = session.getAgent();
