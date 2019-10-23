@@ -159,7 +159,7 @@ public class AgentsHandler {
 		return json;
 	}
 	
-	@GET
+	@POST
 	@Path("/getEthProfile")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response handleGetProfile(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId) //throws Exception
@@ -168,7 +168,7 @@ public class AgentsHandler {
 
 		AgentSession session = connector.getSessionById(sessionId);
 		if (session == null) {
-			return Response.status(Status.METHOD_NOT_ALLOWED).entity("You have to be logged in").build();
+			return Response.status(Status.FORBIDDEN).entity("You have to be logged in").build();
 		}
 		
 		AgentImpl agent = session.getAgent();
