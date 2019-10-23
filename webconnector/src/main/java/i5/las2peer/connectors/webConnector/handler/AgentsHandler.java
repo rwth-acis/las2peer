@@ -154,6 +154,21 @@ public class AgentsHandler {
 	}
 	
 	@POST
+	@Path("/requestFaucet")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response handlerequestFaucet(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId) //throws Exception
+	{
+		JSONObject json = new JSONObject();
+
+		AgentSession session = connector.getSessionById(sessionId);
+		if (session == null) {
+			return Response.status(Status.FORBIDDEN).entity("You have to be logged in").build();
+		}
+		
+		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
+	}
+	
+	@POST
 	@Path("/getEthProfile")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response handleGetProfile(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId) //throws Exception
