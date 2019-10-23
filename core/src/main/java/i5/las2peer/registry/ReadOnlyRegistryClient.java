@@ -226,11 +226,15 @@ public class ReadOnlyRegistryClient {
 
 	public String getAccountBalance(String ethereumAddress)
 	{
-		EthGetBalance ethGetBalance = this.web3j
+		EthGetBalance ethGetBalance = null;
+		try {
+			EthGetBalance ethGetBalance = this.web3j
 				  .ethGetBalance(ethereumAddress, DefaultBlockParameterName.LATEST)
 				  .sendAsync()
 				  .get();
-
+		} catch (Exception e) {
+			throw new EthereumException(e);
+		}
 		BigInteger wei = ethGetBalance.getBalance();
 		java.math.BigDecimal tokenValue = Convert.fromWei(String.valueOf(wei), Convert.Unit.ETHER);
 		String strTokenAmount = String.valueOf(tokenValue);
