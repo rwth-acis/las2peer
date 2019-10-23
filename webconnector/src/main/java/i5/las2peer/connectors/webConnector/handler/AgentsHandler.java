@@ -159,7 +159,7 @@ public class AgentsHandler {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response handlerequestFaucet(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId) //throws Exception
 	{
-		JSONObject json = new JSONObject();
+		BigDecimal faucetAmount = new BigDecimal(2.5);
 
 		AgentSession session = connector.getSessionById(sessionId);
 		if (session == null) {
@@ -172,11 +172,18 @@ public class AgentsHandler {
 		EthereumAgent ethAgent = (EthereumAgent) agent;
 		
 		try {
-			ethereumNode.getRegistryClient().sendEther(ethAgent.getEthereumAddress(), new BigDecimal(5));
+			ethereumNode.getRegistryClient().sendEther(ethAgent.getEthereumAddress(), faucetAmount);
 		} catch (EthereumException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		JSONObject json = new JSONObject();
+		json.put("code", Status.OK.getStatusCode());		
+		json.put("text", Status.OK.getStatusCode() + " - Faucet triggered. Amount transferred");
+		json.put("agentid", agent.getIdentifier());
+		json.put("eth-target-add", ethAgent.getEthereumAddress());
+		json.put("faucet-amount", faucetAmount.toString());
 		
 		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
 	}

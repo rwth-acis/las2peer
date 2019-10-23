@@ -118,7 +118,9 @@ class AgentsView extends PolymerElement {
         <h2 on-click="toggleEthProfile" style="cursor:point">User Profile <small>(must be logged in)</small></h2>
         <p>
         <paper-button raised on-click="refreshEthProfile"><iron-icon icon="refresh"></iron-icon> Refresh User Profile</paper-button>
-        <paper-button raised on-click="requestEthFaucet"><iron-icon icon="card-giftcard"></iron-icon> Request funds from faucet</paper-button>
+        <template is="dom-if" if="[[!_hasNoEthProfile]]">
+        	<paper-button raised on-click="requestEthFaucet"><iron-icon icon="card-giftcard"></iron-icon> Request funds from faucet</paper-button>
+        </template>
         </p>
         <iron-collapse opened id="collapseEthProfile">
            <template is="dom-if" if="[[!_hasNoEthProfile]]">
@@ -315,7 +317,7 @@ class AgentsView extends PolymerElement {
     this.$.ajaxListAgents.generateRequest();
   }
   refreshEthProfile() { this.$.ajaxGetEthProfile.generateRequest(); }
-  requestFaucet() { this.$.ajaxRequestFaucet.generateRequest(); }
+  requestEthFaucet() { this.$.ajaxRequestFaucet.generateRequest(); }
   toggleCreateAgent() { this.$.collapseCreateAgent.toggle(); }
   toggleAgentList() { this.$.collapseAgentList.toggle(); }
   toggleEthProfile() { this.$.collapseEthProfile.toggle(); }
@@ -356,6 +358,7 @@ class AgentsView extends PolymerElement {
   }
   _handleRequestFaucetResponse(event) {
 	  console.log(event.detail.response);
+	  refreshEthProfile();
   }
 
   _keyPressedCreateAgent(event) {
