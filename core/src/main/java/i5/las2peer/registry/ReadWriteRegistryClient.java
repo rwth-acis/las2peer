@@ -298,7 +298,6 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 	 * client), to the given recipient address.
 	 */
 	// this is (so far) only for debugging / testing / etc.
-	@Deprecated
 	public void sendEther(String recipientAddress, BigDecimal valueInWei) throws EthereumException {
 		try {
 			TransactionReceipt receipt = Transfer.sendFunds(web3j, credentials, recipientAddress, valueInWei, Convert.Unit.WEI).send();

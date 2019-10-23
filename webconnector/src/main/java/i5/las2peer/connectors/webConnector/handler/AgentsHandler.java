@@ -2,6 +2,7 @@ package i5.las2peer.connectors.webConnector.handler;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -163,6 +164,18 @@ public class AgentsHandler {
 		AgentSession session = connector.getSessionById(sessionId);
 		if (session == null) {
 			return Response.status(Status.FORBIDDEN).entity("You have to be logged in").build();
+		}
+		AgentImpl agent = session.getAgent();
+		if (!(agent instanceof EthereumAgent)) {
+			return Response.status(Status.FORBIDDEN).entity("Must be EthereumAgent").build();
+		}
+		EthereumAgent ethAgent = (EthereumAgent) agent;
+		
+		try {
+			ethereumNode.getRegistryClient().sendEther(ethAgent.getEthereumAddress(), new BigDecimal(5));
+		} catch (EthereumException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
 		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
