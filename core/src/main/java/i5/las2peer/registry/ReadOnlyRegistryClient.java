@@ -16,7 +16,7 @@ import org.web3j.protocol.core.methods.response.Web3ClientVersion;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tuples.generated.Tuple2;
 import org.web3j.tuples.generated.Tuple4;
-import org.web3j.utils.Convert
+import org.web3j.utils.Convert;
 
 import java.io.IOException;
 import java.util.*;
