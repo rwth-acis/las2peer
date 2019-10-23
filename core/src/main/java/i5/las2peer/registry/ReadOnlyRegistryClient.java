@@ -7,12 +7,16 @@ import i5.las2peer.registry.data.ServiceReleaseData;
 import i5.las2peer.registry.data.UserData;
 import i5.las2peer.registry.exceptions.EthereumException;
 import i5.las2peer.registry.exceptions.NotFoundException;
+import java.math.BigInteger;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.response.EthGetBalance;
 import org.web3j.protocol.core.methods.response.Web3ClientVersion;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tuples.generated.Tuple2;
 import org.web3j.tuples.generated.Tuple4;
+import org.web3j.utils.Convert
 
 import java.io.IOException;
 import java.util.*;
@@ -220,6 +224,19 @@ public class ReadOnlyRegistryClient {
 		return getDeployments().stream().filter(d -> (d.getServicePackageName().equals(serviceName) && d.getVersion().equals(version))).collect(Collectors.toSet());
 	}
 
+	public String getAccountBalance(String ethereumAddress)
+	{
+		EthGetBalance ethGetBalance = this.web3j
+				  .ethGetBalance(ethereumAddress, DefaultBlockParameterName.LATEST)
+				  .sendAsync()
+				  .get();
+
+		BigInteger wei = ethGetBalance.getBalance();
+		java.math.BigDecimal tokenValue = Convert.fromWei(String.valueOf(wei), Convert.Unit.ETHER);
+		String strTokenAmount = String.valueOf(tokenValue);
+		return strTokenAmount;
+	}
+	
 	/*
 	@Deprecated
 	public Map<String, List<ServiceDeploymentData>> getServiceDeployments() {

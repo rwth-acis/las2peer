@@ -108,9 +108,12 @@ class AgentsView extends PolymerElement {
 
       <div class="card">
         <h1>Agents</h1>
-        <h2 on-click="toggleEthProfile" style="cursor:point">User Profile &nbsp; <paper-button raised on-click="refreshEthProfile">Refresh</paper-button></h2>
-        <template is="dom-if" if="[[!_hasNoEthProfile]]">
+        <h2 on-click="toggleEthProfile" style="cursor:point">User Profile <small>(must be logged in)</small></h2>
+        <p>
+        <paper-button raised on-click="refreshEthProfile"><iron-icon icon="refresh"></iron-icon> Refresh User Profile</paper-button>
+        </p>
         <iron-collapse opened id="collapseEthProfile">
+           <template is="dom-if" if="[[!_hasNoEthProfile]]">
         	<p>Welcome, [[_ethProfile.username]]</p>
         	<table width="100%">
 				<tr>
@@ -119,11 +122,11 @@ class AgentsView extends PolymerElement {
 				</tr>
 				<tr>
 					<td>agent: [[_ethProfile.eth-agent-address]] <br /> owner: [[_ethProfile.eth-user-address]]</td>
-					<td>xx.yy {TODO}</td>
+					<td>[[_ethProfile.eth-acc-balance]]</td>
 				</tr>
           </table>
+        	</template>
         </iron-collapse>
-        </template>
         <h2 on-click="toggleCreateAgent" style="cursor: pointer">Register Agent</h2>
         <iron-collapse opened id="collapseCreateAgent">
           <p>
@@ -300,7 +303,7 @@ class AgentsView extends PolymerElement {
   }
 
   refresh() {
-	this.$.ajaxGetEthProfile.generateRequest();
+	//this.$.ajaxGetEthProfile.generateRequest();
     this.$.ajaxListAgents.generateRequest();
   }
   refreshEthProfile() { this.$.ajaxGetEthProfile.generateRequest(); }

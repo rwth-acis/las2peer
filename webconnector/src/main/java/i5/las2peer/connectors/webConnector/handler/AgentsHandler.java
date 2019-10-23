@@ -139,21 +139,18 @@ public class AgentsHandler {
 		if (agent instanceof EthereumAgent)
 		{
 			EthereumAgent ethAgent = (EthereumAgent) agent;
+			String ethAddress = ethAgent.getEthereumAddress();
 			
-			json.put("eth-agent-address", ethAgent.getEthereumAddress());
-			//json.put("eth-agent-pubkey", ethAgent.getPublicKey());
+			json.put("eth-agent-address", ethAddress);
 			
-			UserData ethUser = ethereumNode.getRegistryClient().getUser(ethAgent.getLoginName());
-			if ( ethUser != null )
-			{
-				json.put("eth-user-address", ethUser.getOwnerAddress());
-				/*
-				try {
-					json.put("eth-user-pubkey", ethUser.getPublicKey().toString());
-				} catch (SerializationException e) {
-					// intentionally empty - ignore field if error
+			
+			String accBalance = ethereumNode.getRegistryClient().getAccountBalance(ethAddress);
+			json.put("eth-acc-balance", accBalance);
+			
+			//UserData ethUser = ethereumNode.getRegistryClient().getUser(ethAgent.getLoginName());
+			//if ( ethUser != null ) { json.put("eth-user-address", ethUser.getOwnerAddress()); }
 				}
-				*/
+		return json;
 			}
 		}
 		return json;
