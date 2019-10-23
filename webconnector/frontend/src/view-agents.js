@@ -129,8 +129,8 @@ class AgentsView extends PolymerElement {
 				    <th>Eth Balance</th>
 				</tr>
 				<tr>
-					<td>agent: [[_ethProfile.eth-agent-address]] <br /> owner: [[_ethProfile.eth-user-address]]</td>
-					<td>[[_ethProfile.eth-acc-balance]]</td>
+					<td><iron-icon icon="fingerprint"></iron-icon> [[_ethProfile.eth-agent-address]]</td>
+					<td><iron-icon icon="account-balance"></iron-icon> [[_ethProfile.eth-acc-balance]]</td>
 				</tr>
           	</table>
         	</template>
