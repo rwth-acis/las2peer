@@ -149,9 +149,6 @@ public class AgentsHandler {
 			
 			//UserData ethUser = ethereumNode.getRegistryClient().getUser(ethAgent.getLoginName());
 			//if ( ethUser != null ) { json.put("eth-user-address", ethUser.getOwnerAddress()); }
-				}
-		return json;
-			}
 		}
 		return json;
 	}
