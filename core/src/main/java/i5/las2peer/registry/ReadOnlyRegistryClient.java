@@ -228,7 +228,7 @@ public class ReadOnlyRegistryClient {
 	{
 		EthGetBalance ethGetBalance = null;
 		try {
-			EthGetBalance ethGetBalance = this.web3j
+			ethGetBalance = this.web3j
 				  .ethGetBalance(ethereumAddress, DefaultBlockParameterName.LATEST)
 				  .sendAsync()
 				  .get();
