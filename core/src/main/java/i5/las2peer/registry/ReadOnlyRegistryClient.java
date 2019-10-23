@@ -224,7 +224,7 @@ public class ReadOnlyRegistryClient {
 		return getDeployments().stream().filter(d -> (d.getServicePackageName().equals(serviceName) && d.getVersion().equals(version))).collect(Collectors.toSet());
 	}
 
-	public String getAccountBalance(String ethereumAddress)
+	public String getAccountBalance(String ethereumAddress) throws EthereumException
 	{
 		EthGetBalance ethGetBalance = null;
 		try {
