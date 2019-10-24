@@ -159,7 +159,7 @@ public class AgentsHandler {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response handlerequestFaucet(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId) //throws Exception
 	{
-		BigDecimal faucetAmount = new BigDecimal(2.5);
+		BigDecimal faucetAmount = new BigDecimal(50);
 
 		AgentSession session = connector.getSessionById(sessionId);
 		if (session == null) {
