@@ -324,21 +324,30 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 			String coinbase = this.getCoinbase().getResult();
 			BigInteger nonce = this.getNonce(coinbase);
 			// this is a contract method call -> gas limit higher than simple fund transfer
+			BigInteger gasPrice = this.getGasPrice();
 			BigInteger gasLimit = this.getGasLimit().multiply(BigInteger.valueOf(2)); 
 			Transaction transaction = Transaction.createEtherTransaction(
 					coinbase, 
 					nonce, 
-					this.getGasPrice(), 
+					gasPrice, 
 					gasLimit, 
 					recipientAddress, 
 					valueInWei);
-	
+			logger.info("[ETH] Preparing coinbase transaction...");
+			logger.fine("[ETH] > Coinbase: " + coinbase );
+			logger.fine("[ETH] > nonce: " + nonce );
+			logger.fine("[ETH] > gasPrice: " + gasPrice );
+			logger.fine("[ETH] > gasLimit: " + gasLimit );
+			logger.fine("[ETH] > recipientAddress: " + recipientAddress );
+			logger.fine("[ETH] > valueInWei: " + valueInWei );
+			
 			EthSendTransaction ethSendTransaction = web3j
 					.ethSendTransaction(transaction)
 					.sendAsync()
 					.get();
 	
 			String txHash = ethSendTransaction.getTransactionHash();
+			logger.info("[ETH] Sent transaction ["+txHash+"], waiting for receipt... ");
 			txR = waitForReceipt(txHash);
 		} catch( InterruptedException | ExecutionException e )
 		{
