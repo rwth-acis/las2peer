@@ -334,12 +334,12 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 					recipientAddress, 
 					valueInWei);
 			logger.info("[ETH] Preparing coinbase transaction...");
-			logger.fine("[ETH] > Coinbase: " + coinbase );
-			logger.fine("[ETH] > nonce: " + nonce );
-			logger.fine("[ETH] > gasPrice: " + gasPrice );
-			logger.fine("[ETH] > gasLimit: " + gasLimit );
-			logger.fine("[ETH] > recipientAddress: " + recipientAddress );
-			logger.fine("[ETH] > valueInWei: " + valueInWei );
+			logger.info("[ETH] > Coinbase: " + coinbase );
+			logger.info("[ETH] > nonce: " + nonce );
+			logger.info("[ETH] > gasPrice: " + gasPrice );
+			logger.info("[ETH] > gasLimit: " + gasLimit );
+			logger.info("[ETH] > recipientAddress: " + recipientAddress );
+			logger.info("[ETH] > valueInWei: " + valueInWei );
 			
 			EthSendTransaction ethSendTransaction = web3j
 					.ethSendTransaction(transaction)
