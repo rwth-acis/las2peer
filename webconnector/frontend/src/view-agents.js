@@ -14,6 +14,7 @@ import '@polymer/iron-collapse/iron-collapse.js';
 import '@polymer/iron-form/iron-form.js';
 import '@polymer/paper-input/paper-input.js';
 import '@polymer/paper-button/paper-button.js';
+import '@polymer/paper-spinner/paper-spinner.js';
 import '@cwmr/iron-star-rating/iron-star-rating.js';
 import './shared-styles.js';
 
@@ -115,7 +116,9 @@ class AgentsView extends PolymerElement {
 
       <div class="card">
         <h1>Agents</h1>
-        <h2 on-click="toggleEthProfile" style="cursor:point">User Profile <small>(must be logged in)</small></h2>
+
+        <paper-spinner active="[[_working]]" style="float:right;"></paper-spinner>
+
         <h2 on-click="toggleEthProfile" style="cursor:point">
           User Profile 
           <template is="dom-if" if="[[!_hasNoEthProfile]]"><small>(must be logged in)</small></template>
@@ -301,6 +304,7 @@ class AgentsView extends PolymerElement {
       _hasNoEthProfile: { type: Boolean, value: true },
       _hasNoManageAgents: { type: Boolean, value: true },
       _hasNoMemberAgents: { type: Boolean, value: true },
+      _isAjaxLoading: { type: Boolean, value: true },
       _listAgents: { type: Array, value: [] },
       _manageAgents: { type: Array, value: [] },
       _manageGroupAgentId: String,
@@ -318,7 +322,7 @@ class AgentsView extends PolymerElement {
 	//this.$.ajaxGetEthProfile.generateRequest();
     this.$.ajaxListAgents.generateRequest();
   }
-  refreshEthProfile() { this.$.ajaxGetEthProfile.generateRequest(); }
+  refreshEthProfile() { console.log(this.agentId); this.$.ajaxGetEthProfile.generateRequest(); }
   requestEthFaucet() { this.$.ajaxRequestFaucet.generateRequest(); }
   toggleCreateAgent() { this.$.collapseCreateAgent.toggle(); }
   toggleAgentList() { this.$.collapseAgentList.toggle(); }
