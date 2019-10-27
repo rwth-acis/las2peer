@@ -320,13 +320,20 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 	
 	public TransactionReceipt sendEtherFromCoinbase(String recipientAddress, BigInteger valueInWei) throws EthereumException {
 		
+		// see
+		// https://www.reddit.com/r/ethereum/comments/5g8ia6/attention_miners_we_recommend_raising_gas_limit/
+		BigInteger GAS_PRICE = BigInteger.valueOf(20_000_000_000L);
+
+		// http://ethereum.stackexchange.com/questions/1832/cant-send-transaction-exceeds-block-gas-limit-or-intrinsic-gas-too-low
+		BigInteger GAS_LIMIT_ETHER_TX = BigInteger.valueOf(21_000);
+
 		TransactionReceipt txR;
 		try {
 			String coinbase = this.getCoinbase().getResult();
 			BigInteger nonce = this.getNonce(coinbase);
 			// this is a contract method call -> gas limit higher than simple fund transfer
-			BigInteger gasPrice = this.getGasPrice();
-			BigInteger gasLimit = this.getGasLimit().multiply(BigInteger.valueOf(2)); 
+			BigInteger gasPrice = GAS_PRICE;
+			BigInteger gasLimit = GAS_LIMIT_ETHER_TX; 
 			Transaction transaction = Transaction.createEtherTransaction(
 					coinbase, 
 					nonce, 
@@ -334,7 +341,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 					gasLimit, 
 					recipientAddress, 
 					valueInWei);
-					
+
 			logger.info("[ETH] Preparing coinbase transaction...");
 			logger.info("[ETH] > Coinbase: " + coinbase );
 			logger.info("[ETH] > nonce: " + nonce );
