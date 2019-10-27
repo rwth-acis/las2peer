@@ -317,11 +317,14 @@ class AgentsView extends PolymerElement {
   ready() {
     super.ready();
     let appThis = this;
-    window.setTimeout(function() { appThis.refresh(); }, 5);
+    window.setTimeout(function() { appThis.refresh(); }, 10);
   }
 
   refresh() {
-    refreshAgentsList();
+    this.refreshAgentsList();
+    if ( this.agentId.length() > 5 )
+    {
+      this.refreshEthWallet();
   }
   refreshEthWallet() { this.$.ajaxGetEthWallet.generateRequest(); }
   requestEthFaucet() { this.$.ajaxRequestFaucet.generateRequest(); }
@@ -331,9 +334,11 @@ class AgentsView extends PolymerElement {
   toggleEthWallet() { this.$.collapseEthWallet.toggle(); }
 
   _agentIdChanged(agentid) {
-    if (this.agentId == "" )
+    if (this.agentId == '' )
       return;
-    refreshEthWallet();
+    if (this.agentId.length() > 5 ) {
+      this.refreshEthWallet();
+    }
   }
   
   _handleLoadAgentlistResponse(event) {
