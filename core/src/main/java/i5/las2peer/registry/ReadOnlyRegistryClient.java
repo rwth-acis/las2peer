@@ -299,7 +299,7 @@ public class ReadOnlyRegistryClient {
 	
 	/**
 	 * Waits for the receipt for the transaction specified by the provided tx hash.
-	 * Makes 40 attempts (waiting 0.5 sec. between attempts) to get the receipt object.
+	 * Makes 30 attempts (waiting 1 sec. between attempts) to get the receipt object.
 	 * In the happy case the tx receipt object is returned.
 	 * Otherwise, a runtime exception is thrown. 
 	 * https://github.com/matthiaszimmermann/web3j_demo / Web3jUtils
@@ -313,8 +313,8 @@ public class ReadOnlyRegistryClient {
 			throws InterruptedException, ExecutionException 
 	{
 
-		int attempts = 40; // const CONFIRMATION_ATTEMPTS
-		int sleep_millis = 500; // const SLEEP_DURATION
+		int attempts = 20; // const CONFIRMATION_ATTEMPTS
+		int sleep_millis = 1000; // const SLEEP_DURATION
 		
 		Optional<TransactionReceipt> receipt = this.getReceipt(transactionHash);
 
@@ -324,7 +324,7 @@ public class ReadOnlyRegistryClient {
 		}
 
 		if (attempts <= 0) {
-			throw new RuntimeException("No Tx receipt received");
+			throw new RuntimeException("No Tx receipt received for hash " + transactionHash);
 		}
 
 		return receipt.get();
