@@ -268,7 +268,6 @@ class AgentsView extends PolymerElement {
               	<th>Agentid</th>
               	<th>Adress</th>
               	<th>Username</th>
-              	<th>Email</th>
               	<th>Reputation</th>
               </tr>
               <template is="dom-repeat" items="[[_listAgents]]" as="agent">
@@ -276,7 +275,6 @@ class AgentsView extends PolymerElement {
                   <td>[[agent.shortid]]</td>
                   <td>[[agent.address]]</td>
                   <td>[[agent.username]]</td>
-                  <td>[[agent.email]]</td>
                   <td>
                   	<iron-star-rating value="[[agent.rating]]" on-rating-selected="rateAgent"></iron-star-rating>
                   </td>
