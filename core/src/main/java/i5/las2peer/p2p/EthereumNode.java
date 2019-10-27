@@ -163,6 +163,7 @@ public class EthereumNode extends PastryNodeImpl {
 		if (agent instanceof EthereumAgent) {
 			try {
 				registerAgentInBlockchain((EthereumAgent) agent);
+				logger.info("[ETH] Stored agent " + agent.getIdentifier());
 			} catch (AgentException|EthereumException|SerializationException e) {
 				logger.warning("Failed to register EthereumAgent; error: " + e);
 				throw new AgentException("Problem storing Ethereum agent", e);
