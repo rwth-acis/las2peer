@@ -341,15 +341,21 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 			logger.info("[ETH] > recipientAddress: " + recipientAddress );
 			logger.info("[ETH] > valueInWei: " + valueInWei );
 			
+			
 			EthSendTransaction ethSendTransaction = web3j
 					.ethSendTransaction(transaction)
-					.sendAsync()
-					.get();
-	
+			//		.sendAsync().get();
+					.send();
+			
 			String txHash = ethSendTransaction.getTransactionHash();
 			logger.info("[ETH] Sent transaction ["+txHash+"], waiting for receipt... ");
+			if ( txHash.length() < 2 )
+			{
+				throw new EthereumException("Could not create ethereum transaction");
+			}
+			
 			txR = waitForReceipt(txHash);
-		} catch( InterruptedException | ExecutionException e )
+		} catch( InterruptedException | ExecutionException | IOException e )
 		{
 			throw new EthereumException("Could not send ether to address '" + recipientAddress + "'", e);
 		}
