@@ -355,10 +355,10 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 			//		.sendAsync().get();
 					.send();
 
-			Response.Error error = ethSendTransaction.getError();
-			if ( error.getMessage().length() > 1 )
+			if ( ethSendTransaction.hasError() )
 			{
-				throw new EthereumException("Eth Transaction Error ["+error.getCode()+"]: " + error.getMessage());
+				Response.Error error = ethSendTransaction.getError();
+				throw new EthereumException("Eth Transaction Error [" + error.getCode() + "]: " + error.getMessage());
 			}
 			String txHash = ethSendTransaction.getTransactionHash();
 			logger.info("[ETH] Sent transaction ["+txHash+"], waiting for receipt... ");
