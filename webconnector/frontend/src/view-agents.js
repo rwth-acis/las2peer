@@ -120,19 +120,8 @@ class AgentsView extends PolymerElement {
         <paper-spinner active="[[_working]]" style="float:right;"></paper-spinner>
         <template is="dom-if" if="[[agentId]]">
           <h2 on-click="toggleEthWallet" style="cursor:point">
-            Ethereum Wallet
-            <template is="dom-if" if="[[_hasNoEthWallet]]"><small>(must be logged in)</small></template>
+            Ethereum Wallet <paper-button on-click="refreshEthWallet" disabled="[[_working]]"><iron-icon icon="refresh"></iron-icon>link</paper-button>
           </h2>
-          <p>
-          <paper-button raised on-click="refreshEthWallet" disabled="[[_working]]">
-            <iron-icon icon="refresh"></iron-icon> Refresh ETH Wallet
-          </paper-button>
-          <template is="dom-if" if="[[!_hasNoEthWallet]]">
-            <paper-button raised on-click="requestEthFaucet" disabled="[[_working]]">
-              <iron-icon icon="card-giftcard"></iron-icon> Request funds from faucet
-            </paper-button>
-          </template>
-          </p>
           <iron-collapse opened id="collapseEthWallet">
             <template is="dom-if" if="[[!_hasNoEthWallet]]">
               <p>Welcome, [[_EthWallet.username]]</p>
@@ -141,6 +130,13 @@ class AgentsView extends PolymerElement {
                 <strong><iron-icon icon="account-balance"></iron-icon> Eth Balance: </strong> [[_EthWallet.eth-acc-balance]]
               </p>
             </template>
+            <p>
+            <template is="dom-if" if="[[!_hasNoEthWallet]]">
+              <paper-button raised on-click="requestEthFaucet" disabled="[[_working]]">
+                <iron-icon icon="card-giftcard"></iron-icon> Request funds from faucet
+              </paper-button>
+            </template>
+            </p>
           </iron-collapse>
         </template>
         
@@ -296,7 +292,7 @@ class AgentsView extends PolymerElement {
   static get properties() {
     return {
       apiEndpoint: { type: String, notify: true },
-      agentId: { type: String, notify: true },
+      agentId: { type: String, notify: true, observer: '_agentIdChanged' },
       error: { type: Object, notify: true },
       _working: Boolean,
       _EthWallet: { type: Array, value: [] },
@@ -322,11 +318,17 @@ class AgentsView extends PolymerElement {
 	//this.$.ajaxGetEthWallet.generateRequest();
     this.$.ajaxListAgents.generateRequest();
   }
-  refreshEthWallet() { console.log(this.agentId); this.$.ajaxGetEthWallet.generateRequest(); }
+  refreshEthWallet() { this.$.ajaxGetEthWallet.generateRequest(); }
   requestEthFaucet() { this.$.ajaxRequestFaucet.generateRequest(); }
   toggleCreateAgent() { this.$.collapseCreateAgent.toggle(); }
   toggleAgentList() { this.$.collapseAgentList.toggle(); }
   toggleEthWallet() { this.$.collapseEthWallet.toggle(); }
+
+  _agentIdChanged(agentid) {
+    if (this.agentId == "" )
+      return;
+    refreshEthWallet();
+  }
   
   _handleLoadAgentlistResponse(event) {
     console.log(event.detail.response);
