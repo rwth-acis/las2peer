@@ -118,9 +118,11 @@ class AgentsView extends PolymerElement {
         <h1>Agents</h1>
 
         <paper-spinner active="[[_working]]" style="float:right;"></paper-spinner>
+
+        <!-- ETH WALLET -->
         <template is="dom-if" if="[[agentId]]">
           <h2 on-click="toggleEthWallet" style="cursor:point">
-            Ethereum Wallet <paper-button on-click="refreshEthWallet" disabled="[[_working]]"><iron-icon icon="refresh"></iron-icon>link</paper-button>
+            Ethereum Wallet <paper-button on-click="refreshEthWallet" disabled="[[_working]]"><iron-icon icon="refresh"></iron-icon></paper-button>
           </h2>
           <iron-collapse opened id="collapseEthWallet">
             <template is="dom-if" if="[[!_hasNoEthWallet]]">
@@ -139,6 +141,35 @@ class AgentsView extends PolymerElement {
             </p>
           </iron-collapse>
         </template>
+
+        <!-- AGENTS LIST -->
+        <h2 on-click="toggleAgentList" style="cursor: pointer">
+          List User Agents
+          <paper-button on-click="refreshAgentsList" disabled="[[_working]]"><iron-icon icon="refresh"></iron-icon></paper-button>
+        </h2>
+        <iron-collapse id="collapseAgentList">
+          <template is="dom-if" if="[[!_hasNoAgentsList]]">
+            <h3>Members</h3>
+            <table width="100%">
+              <tr>
+              	<th>Agentid</th>
+              	<th>Adress</th>
+              	<th>Username</th>
+              	<th>Reputation</th>
+              </tr>
+              <template is="dom-repeat" items="[[_listAgents]]" as="agent">
+                <tr>
+                  <td>[[agent.shortid]]</td>
+                  <td>[[agent.address]]</td>
+                  <td>[[agent.username]]</td>
+                  <td>
+                  	<iron-star-rating value="[[agent.rating]]" on-rating-selected="rateAgent"></iron-star-rating>
+                  </td>
+                </tr>
+              </template>
+            </table>
+          </template>
+        </iron-collapse>
         
         <h2 on-click="toggleCreateAgent" style="cursor: pointer">Register Agent</h2>
         <iron-collapse id="collapseCreateAgent">
@@ -256,31 +287,6 @@ class AgentsView extends PolymerElement {
             </form>
           </iron-form>
         </iron-collapse>
-
-        <h2 on-click="toggleAgentList" style="cursor: pointer">List User Agents</h2>
-        <iron-collapse id="collapseAgentList">
-          <template is="dom-if" if="[[!_hasNoAgentsList]]">
-            <h3>Members</h3>
-            <table width="100%">
-              <tr>
-              	<th>Agentid</th>
-              	<th>Adress</th>
-              	<th>Username</th>
-              	<th>Reputation</th>
-              </tr>
-              <template is="dom-repeat" items="[[_listAgents]]" as="agent">
-                <tr>
-                  <td>[[agent.shortid]]</td>
-                  <td>[[agent.address]]</td>
-                  <td>[[agent.username]]</td>
-                  <td>
-                  	<iron-star-rating value="[[agent.rating]]" on-rating-selected="rateAgent"></iron-star-rating>
-                  </td>
-                </tr>
-              </template>
-            </table>
-          </template>
-        </iron-collapse>
       </div>
       
               
@@ -315,11 +321,11 @@ class AgentsView extends PolymerElement {
   }
 
   refresh() {
-	//this.$.ajaxGetEthWallet.generateRequest();
-    this.$.ajaxListAgents.generateRequest();
+    refreshAgentsList();
   }
   refreshEthWallet() { this.$.ajaxGetEthWallet.generateRequest(); }
   requestEthFaucet() { this.$.ajaxRequestFaucet.generateRequest(); }
+  refreshAgentsList() { this.$.ajaxListAgents.generateRequest(); }
   toggleCreateAgent() { this.$.collapseCreateAgent.toggle(); }
   toggleAgentList() { this.$.collapseAgentList.toggle(); }
   toggleEthWallet() { this.$.collapseEthWallet.toggle(); }
