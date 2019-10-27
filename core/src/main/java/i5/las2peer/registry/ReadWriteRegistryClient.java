@@ -14,6 +14,7 @@ import i5.las2peer.serialization.SerializeTools;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.protocol.core.methods.response.EthGetTransactionReceipt;
@@ -333,6 +334,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 					gasLimit, 
 					recipientAddress, 
 					valueInWei);
+					
 			logger.info("[ETH] Preparing coinbase transaction...");
 			logger.info("[ETH] > Coinbase: " + coinbase );
 			logger.info("[ETH] > nonce: " + nonce );
@@ -341,12 +343,16 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 			logger.info("[ETH] > recipientAddress: " + recipientAddress );
 			logger.info("[ETH] > valueInWei: " + valueInWei );
 			
-			
 			EthSendTransaction ethSendTransaction = web3j
 					.ethSendTransaction(transaction)
 			//		.sendAsync().get();
 					.send();
-			
+
+			Response.Error error = ethSendTransaction.getError();
+			if ( error.getMessage().length() > 1 )
+			{
+				throw new EthereumException("Eth Transaction Error ["+error.getCode()+"]: " + error.getMessage());
+			}
 			String txHash = ethSendTransaction.getTransactionHash();
 			logger.info("[ETH] Sent transaction ["+txHash+"], waiting for receipt... ");
 			if ( txHash.length() < 2 )
