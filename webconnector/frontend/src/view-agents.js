@@ -118,30 +118,32 @@ class AgentsView extends PolymerElement {
         <h1>Agents</h1>
 
         <paper-spinner active="[[_working]]" style="float:right;"></paper-spinner>
-
-        <h2 on-click="toggleEthWallet" style="cursor:point">
-          Ethereum Wallet
-          <template is="dom-if" if="[[!_hasNoEthWallet]]"><small>(must be logged in)</small></template>
-        </h2>
-        <p>
-        <paper-button raised on-click="refreshEthWallet" disabled="[[_working]]">
-          <iron-icon icon="refresh"></iron-icon> Refresh ETH Wallet
-        </paper-button>
-        <template is="dom-if" if="[[!_hasNoEthWallet]]">
-          <paper-button raised on-click="requestEthFaucet" disabled="[[_working]]">
-            <iron-icon icon="card-giftcard"></iron-icon> Request funds from faucet
+        <template is="dom-if" if="[[agentId]]">
+          <h2 on-click="toggleEthWallet" style="cursor:point">
+            Ethereum Wallet
+            <template is="dom-if" if="[[_hasNoEthWallet]]"><small>(must be logged in)</small></template>
+          </h2>
+          <p>
+          <paper-button raised on-click="refreshEthWallet" disabled="[[_working]]">
+            <iron-icon icon="refresh"></iron-icon> Refresh ETH Wallet
           </paper-button>
-        </template>
-        </p>
-        <iron-collapse opened id="collapseEthWallet">
           <template is="dom-if" if="[[!_hasNoEthWallet]]">
-            <p>Welcome, [[_EthWallet.username]]</p>
-            <p>
-              <strong><iron-icon icon="fingerprint"></iron-icon> Eth Address: </strong> [[_EthWallet.eth-agent-address]] <br />
-              <strong><iron-icon icon="account-balance"></iron-icon> Eth Balance: </strong> [[_EthWallet.eth-acc-balance]]
-            </p>
-        	</template>
-        </iron-collapse>
+            <paper-button raised on-click="requestEthFaucet" disabled="[[_working]]">
+              <iron-icon icon="card-giftcard"></iron-icon> Request funds from faucet
+            </paper-button>
+          </template>
+          </p>
+          <iron-collapse opened id="collapseEthWallet">
+            <template is="dom-if" if="[[!_hasNoEthWallet]]">
+              <p>Welcome, [[_EthWallet.username]]</p>
+              <p>
+                <strong><iron-icon icon="fingerprint"></iron-icon> Eth Address: </strong> [[_EthWallet.eth-agent-address]] <br />
+                <strong><iron-icon icon="account-balance"></iron-icon> Eth Balance: </strong> [[_EthWallet.eth-acc-balance]]
+              </p>
+            </template>
+          </iron-collapse>
+        </template>
+        
         <h2 on-click="toggleCreateAgent" style="cursor: pointer">Register Agent</h2>
         <iron-collapse id="collapseCreateAgent">
           <p>
