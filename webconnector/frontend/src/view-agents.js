@@ -116,29 +116,31 @@ class AgentsView extends PolymerElement {
       <div class="card">
         <h1>Agents</h1>
         <h2 on-click="toggleEthProfile" style="cursor:point">User Profile <small>(must be logged in)</small></h2>
+        <h2 on-click="toggleEthProfile" style="cursor:point">
+          User Profile 
+          <template is="dom-if" if="[[!_hasNoEthProfile]]"><small>(must be logged in)</small></template>
+        </h2>
         <p>
-        <paper-button raised on-click="refreshEthProfile"><iron-icon icon="refresh"></iron-icon> Refresh User Profile</paper-button>
+        <paper-button raised on-click="refreshEthProfile" disabled="[[_working]]">
+          <iron-icon icon="refresh"></iron-icon> Refresh User Profile
+        </paper-button>
         <template is="dom-if" if="[[!_hasNoEthProfile]]">
-        	<paper-button raised on-click="requestEthFaucet"><iron-icon icon="card-giftcard"></iron-icon> Request funds from faucet</paper-button>
+          <paper-button raised on-click="requestEthFaucet" disabled="[[_working]]">
+            <iron-icon icon="card-giftcard"></iron-icon> Request funds from faucet
+          </paper-button>
         </template>
         </p>
         <iron-collapse opened id="collapseEthProfile">
-           <template is="dom-if" if="[[!_hasNoEthProfile]]">
-        	<p>Welcome, [[_ethProfile.username]]</p>
-        	<table width="100%">
-				<tr>
-				    <th>Eth Address</th>
-				    <th>Eth Balance</th>
-				</tr>
-				<tr>
-					<td><iron-icon icon="fingerprint"></iron-icon> [[_ethProfile.eth-agent-address]]</td>
-					<td><iron-icon icon="account-balance"></iron-icon> [[_ethProfile.eth-acc-balance]]</td>
-				</tr>
-          	</table>
+          <template is="dom-if" if="[[!_hasNoEthProfile]]">
+            <p>Welcome, [[_ethProfile.username]]</p>
+            <p>
+              <strong><iron-icon icon="fingerprint"></iron-icon> Eth Address: </strong> [[_ethProfile.eth-agent-address]] <br />
+              <strong><iron-icon icon="account-balance"></iron-icon> Eth Balance: </strong> [[_ethProfile.eth-acc-balance]]
+            </p>
         	</template>
         </iron-collapse>
         <h2 on-click="toggleCreateAgent" style="cursor: pointer">Register Agent</h2>
-        <iron-collapse opened id="collapseCreateAgent">
+        <iron-collapse id="collapseCreateAgent">
           <p>
             Create a new user agent and register it in the network for later usage.
             You will then be able to log in with your username and password.
@@ -354,11 +356,11 @@ class AgentsView extends PolymerElement {
   }
   _handleGetEthProfileResponse(event) {
 	  this._hasNoEthProfile = false;
-	  this._ethProfile = event.detail.response;
+    this._ethProfile = event.detail.response;
   }
   _handleRequestFaucetResponse(event) {
 	  console.log(event.detail.response);
-	  refreshEthProfile();
+	  this.refreshEthProfile();
   }
 
   _keyPressedCreateAgent(event) {
