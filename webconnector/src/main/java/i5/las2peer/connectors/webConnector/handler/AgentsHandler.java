@@ -3,6 +3,7 @@ package i5.las2peer.connectors.webConnector.handler;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -27,6 +28,8 @@ import i5.las2peer.api.security.UserAgent;
 import i5.las2peer.p2p.EthereumNode;
 import i5.las2peer.security.*;
 import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.utils.Convert;
 
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
@@ -37,6 +40,7 @@ import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.registry.ReadOnlyRegistryClient;
+import i5.las2peer.registry.ReadWriteRegistryClient;
 import i5.las2peer.registry.data.UserData;
 import i5.las2peer.registry.exceptions.EthereumException;
 import i5.las2peer.registry.exceptions.NotFoundException;
@@ -159,8 +163,6 @@ public class AgentsHandler {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response handlerequestFaucet(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId) //throws Exception
 	{
-		BigDecimal faucetAmount = new BigDecimal(50);
-
 		AgentSession session = connector.getSessionById(sessionId);
 		if (session == null) {
 			return Response.status(Status.FORBIDDEN).entity("You have to be logged in").build();
@@ -169,21 +171,39 @@ public class AgentsHandler {
 		if (!(agent instanceof EthereumAgent)) {
 			return Response.status(Status.FORBIDDEN).entity("Must be EthereumAgent").build();
 		}
+		
+		ReadWriteRegistryClient registryClient = ethereumNode.getRegistryClient();
 		EthereumAgent ethAgent = (EthereumAgent) agent;
+		String ethAddress = ethAgent.getEthereumAddress();
+		BigInteger faucetAmount = Convert.toWei("0.123", Convert.Unit.ETHER).toBigInteger(); // const FAUCET_AMOUNT
+		JSONObject json = new JSONObject();
+		json.put("agentid", agent.getIdentifier());
+		json.put("eth-target-add", ethAddress);
+		json.put("eth-faucet-amount", "0.123 ETH");
+		
+		TransactionReceipt txR = null;
 		
 		try {
-			ethereumNode.getRegistryClient().sendEther(ethAgent.getEthereumAddress(), faucetAmount);
+			txR = registryClient.sendEtherFromCoinbase(ethAddress, faucetAmount);
 		} catch (EthereumException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		JSONObject json = new JSONObject();
+		if ( txR == null || !txR.isStatusOK() )
+		{
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Transaction receipt not OK").build();
+		}
+		
+		//Web3jUtils.weiToEther(gasUsed.multiply(Web3jConstants.GAS_PRICE))
+		BigInteger gasUsed = txR.getCumulativeGasUsed();
+		
+		json.put("eth-gas-used", registryClient.weiToEther(gasUsed.multiply(registryClient.getGasPrice())).toString());
+		
+		
 		json.put("code", Status.OK.getStatusCode());		
 		json.put("text", Status.OK.getStatusCode() + " - Faucet triggered. Amount transferred");
-		json.put("agentid", agent.getIdentifier());
-		json.put("eth-target-add", ethAgent.getEthereumAddress());
-		json.put("faucet-amount", faucetAmount.toString());
+		
 		
 		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
 	}

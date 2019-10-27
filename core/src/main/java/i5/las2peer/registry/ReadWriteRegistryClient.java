@@ -13,14 +13,22 @@ import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.serialization.SerializeTools;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.crypto.Credentials;
+import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.request.Transaction;
+import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
+import org.web3j.protocol.core.methods.response.EthGetTransactionReceipt;
+import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.tx.Transfer;
 import org.web3j.utils.Convert;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Facade providing simple read/write access to the registry smart
@@ -308,4 +316,42 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 			throw new EthereumException("Could not send ether to address '" + recipientAddress + "'", e);
 		}
 	}
+	
+	public TransactionReceipt sendEtherFromCoinbase(String recipientAddress, BigInteger valueInWei) throws EthereumException {
+		
+		TransactionReceipt txR;
+		try {
+			String coinbase = this.getCoinbase().getResult();
+			BigInteger nonce = this.getNonce(coinbase);
+			// this is a contract method call -> gas limit higher than simple fund transfer
+			BigInteger gasLimit = this.getGasLimit().multiply(BigInteger.valueOf(2)); 
+			Transaction transaction = Transaction.createEtherTransaction(
+					coinbase, 
+					nonce, 
+					this.getGasPrice(), 
+					gasLimit, 
+					recipientAddress, 
+					valueInWei);
+	
+			EthSendTransaction ethSendTransaction = web3j
+					.ethSendTransaction(transaction)
+					.sendAsync()
+					.get();
+	
+			String txHash = ethSendTransaction.getTransactionHash();
+			txR = waitForReceipt(txHash);
+		} catch( InterruptedException | ExecutionException e )
+		{
+			throw new EthereumException("Could not send ether to address '" + recipientAddress + "'", e);
+		}
+		
+		if ( txR == null )
+		{
+			throw new EthereumException("Could not create faucet transaction.");
+		}
+		
+		return txR;
+	}
+	
+	
 }

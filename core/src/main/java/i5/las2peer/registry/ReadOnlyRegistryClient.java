@@ -7,11 +7,17 @@ import i5.las2peer.registry.data.ServiceReleaseData;
 import i5.las2peer.registry.data.UserData;
 import i5.las2peer.registry.exceptions.EthereumException;
 import i5.las2peer.registry.exceptions.NotFoundException;
+
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.response.EthCoinbase;
 import org.web3j.protocol.core.methods.response.EthGetBalance;
+import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
+import org.web3j.protocol.core.methods.response.EthGetTransactionReceipt;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.core.methods.response.Web3ClientVersion;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tuples.generated.Tuple2;
@@ -21,6 +27,7 @@ import org.web3j.utils.Convert;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 /**
@@ -34,6 +41,10 @@ public class ReadOnlyRegistryClient {
 	Contracts.ContractsConfig contractsConfig;
 	Contracts contracts;
 	BlockchainObserver observer;
+	//long gasPrice;
+	//long gasLimit;
+	BigInteger gasPrice;
+	BigInteger gasLimit;
 
 	// note: these are also baked into the TransactionManager, which is in
 	// turn baked into the contract wrappers. so we don't need this (and do
@@ -60,13 +71,28 @@ public class ReadOnlyRegistryClient {
 				registryConfiguration.getReputationRegistryAddress(), registryConfiguration.getEndpoint());
 
 		observer = BlockchainObserver.getInstance(contractsConfig);
+		
+		long _gasPrice = registryConfiguration.getGasPrice();
+		this.gasPrice = BigInteger.valueOf(_gasPrice);
+		
+		long _gasLimit = registryConfiguration.getGasLimit();
+		this.gasLimit = BigInteger.valueOf(_gasLimit);
 
 		contracts = new Contracts.ContractsBuilder(contractsConfig)
-				.setGasOptions(registryConfiguration.getGasPrice(), registryConfiguration.getGasLimit())
+				.setGasOptions(_gasPrice, _gasLimit)
 				.setCredentials(credentials) // may be null, that's okay here
 				.build();
 
 		this.credentials = credentials;
+	}
+	
+
+	public BigInteger getGasPrice() {
+		return gasPrice;
+	}
+
+	public BigInteger getGasLimit() {
+		return gasLimit;
 	}
 
 	/**
@@ -239,6 +265,109 @@ public class ReadOnlyRegistryClient {
 		java.math.BigDecimal tokenValue = Convert.fromWei(String.valueOf(wei), Convert.Unit.ETHER);
 		String strTokenAmount = String.valueOf(tokenValue);
 		return strTokenAmount;
+	}
+	
+	/**
+	 * Return the nonce (tx count) for the specified address.
+	 * https://github.com/matthiaszimmermann/web3j_demo / Web3jUtils
+	 * @param address target address
+	 * @return nonce
+	 * @throws InterruptedException
+	 * @throws ExecutionException
+	 */
+	public BigInteger getNonce(String address) throws InterruptedException, ExecutionException {
+		EthGetTransactionCount ethGetTransactionCount = 
+				web3j.ethGetTransactionCount(address, DefaultBlockParameterName.LATEST).sendAsync().get();
+
+		return ethGetTransactionCount.getTransactionCount();
+	}
+	
+	/**
+	 * Queries the coin base = the first account in the chain
+	 * By design, this is the account which the hosting node uses for mining in the background
+	 * https://github.com/matthiaszimmermann/web3j_demo / Web3jUtils
+	 * @return coinbase address
+	 * @throws InterruptedException
+	 * @throws ExecutionException
+	 */
+	public EthCoinbase getCoinbase() throws InterruptedException, ExecutionException {
+		return web3j
+				.ethCoinbase()
+				.sendAsync()
+				.get();
+	}
+	
+	/**
+	 * Waits for the receipt for the transaction specified by the provided tx hash.
+	 * Makes 40 attempts (waiting 0.5 sec. between attempts) to get the receipt object.
+	 * In the happy case the tx receipt object is returned.
+	 * Otherwise, a runtime exception is thrown. 
+	 * https://github.com/matthiaszimmermann/web3j_demo / Web3jUtils
+	 * @param transactionHash
+	 * @return 
+	 * @throws ExecutionException 
+	 * @throws InterruptedException 
+	 * @throws Exception
+	 */
+	protected TransactionReceipt waitForReceipt(String transactionHash) 
+			throws InterruptedException, ExecutionException 
+	{
+
+		int attempts = 40; // const CONFIRMATION_ATTEMPTS
+		int sleep_millis = 500; // const SLEEP_DURATION
+		
+		Optional<TransactionReceipt> receipt = this.getReceipt(transactionHash);
+
+		while(attempts-- > 0 && !receipt.isPresent()) {
+			Thread.sleep(sleep_millis);
+			receipt = getReceipt(transactionHash);
+		}
+
+		if (attempts <= 0) {
+			throw new RuntimeException("No Tx receipt received");
+		}
+
+		return receipt.get();
+	}
+
+	/**
+	 * Returns the TransactionRecipt for the specified tx hash as an optional.
+	 * https://github.com/matthiaszimmermann/web3j_demo / Web3jUtils
+	 * @param transactionHash
+	 * @return transactionReceipt
+	 * @throws ExecutionException 
+	 * @throws InterruptedException
+	 */
+	private Optional<TransactionReceipt> getReceipt(String transactionHash) 
+			throws InterruptedException, ExecutionException
+	{
+		EthGetTransactionReceipt receipt = web3j
+				.ethGetTransactionReceipt(transactionHash)
+				.sendAsync()
+				.get();
+
+		return receipt.getTransactionReceipt();
+	}
+	
+
+	/**
+	 * Converts the provided Wei amount (smallest value Unit) to Ethers.
+	 * https://github.com/matthiaszimmermann/web3j_demo / Web3jUtils
+	 * @param wei
+	 * @return
+	 */
+	public BigDecimal weiToEther(BigInteger wei) {
+		return Convert.fromWei(wei.toString(), Convert.Unit.ETHER);
+	}
+	
+	/**
+	 * Converts the provided Ether amount to Wei (smallest value Unit) .
+	 * https://github.com/matthiaszimmermann/web3j_demo / Web3jUtils
+	 * @param ether
+	 * @return
+	 */
+	public BigInteger etherToWei(BigDecimal ether) {
+		return Convert.toWei(ether, Convert.Unit.ETHER).toBigInteger();
 	}
 	
 	/*
