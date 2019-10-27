@@ -91,11 +91,11 @@ class AgentsView extends PolymerElement {
                  on-response="_handleRateAgentResponse"
                  on-error="_handleError"
                  loading="{{_working}}"></iron-ajax>
-      <iron-ajax id="ajaxGetEthProfile"
+      <iron-ajax id="ajaxGetEthWallet"
                  method="POST"
-                 url$="[[apiEndpoint]]/agents/getEthProfile"
+                 url$="[[apiEndpoint]]/agents/getEthWallet"
                  handle-as="json"
-                 on-response="_handleGetEthProfileResponse"
+                 on-response="_handleGetEthWalletResponse"
                  on-error="_handleError"
                  loading="{{_working}}"></iron-ajax>
       <iron-ajax id="ajaxRequestFaucet"
@@ -119,26 +119,26 @@ class AgentsView extends PolymerElement {
 
         <paper-spinner active="[[_working]]" style="float:right;"></paper-spinner>
 
-        <h2 on-click="toggleEthProfile" style="cursor:point">
-          User Profile 
-          <template is="dom-if" if="[[!_hasNoEthProfile]]"><small>(must be logged in)</small></template>
+        <h2 on-click="toggleEthWallet" style="cursor:point">
+          Ethereum Wallet
+          <template is="dom-if" if="[[!_hasNoEthWallet]]"><small>(must be logged in)</small></template>
         </h2>
         <p>
-        <paper-button raised on-click="refreshEthProfile" disabled="[[_working]]">
-          <iron-icon icon="refresh"></iron-icon> Refresh User Profile
+        <paper-button raised on-click="refreshEthWallet" disabled="[[_working]]">
+          <iron-icon icon="refresh"></iron-icon> Refresh ETH Wallet
         </paper-button>
-        <template is="dom-if" if="[[!_hasNoEthProfile]]">
+        <template is="dom-if" if="[[!_hasNoEthWallet]]">
           <paper-button raised on-click="requestEthFaucet" disabled="[[_working]]">
             <iron-icon icon="card-giftcard"></iron-icon> Request funds from faucet
           </paper-button>
         </template>
         </p>
-        <iron-collapse opened id="collapseEthProfile">
-          <template is="dom-if" if="[[!_hasNoEthProfile]]">
-            <p>Welcome, [[_ethProfile.username]]</p>
+        <iron-collapse opened id="collapseEthWallet">
+          <template is="dom-if" if="[[!_hasNoEthWallet]]">
+            <p>Welcome, [[_EthWallet.username]]</p>
             <p>
-              <strong><iron-icon icon="fingerprint"></iron-icon> Eth Address: </strong> [[_ethProfile.eth-agent-address]] <br />
-              <strong><iron-icon icon="account-balance"></iron-icon> Eth Balance: </strong> [[_ethProfile.eth-acc-balance]]
+              <strong><iron-icon icon="fingerprint"></iron-icon> Eth Address: </strong> [[_EthWallet.eth-agent-address]] <br />
+              <strong><iron-icon icon="account-balance"></iron-icon> Eth Balance: </strong> [[_EthWallet.eth-acc-balance]]
             </p>
         	</template>
         </iron-collapse>
@@ -297,9 +297,9 @@ class AgentsView extends PolymerElement {
       agentId: { type: String, notify: true },
       error: { type: Object, notify: true },
       _working: Boolean,
-      _ethProfile: { type: Array, value: [] },
+      _EthWallet: { type: Array, value: [] },
       _hasNoAgentsList: { type: Boolean, value: true },
-      _hasNoEthProfile: { type: Boolean, value: true },
+      _hasNoEthWallet: { type: Boolean, value: true },
       _hasNoManageAgents: { type: Boolean, value: true },
       _hasNoMemberAgents: { type: Boolean, value: true },
       _isAjaxLoading: { type: Boolean, value: true },
@@ -317,14 +317,14 @@ class AgentsView extends PolymerElement {
   }
 
   refresh() {
-	//this.$.ajaxGetEthProfile.generateRequest();
+	//this.$.ajaxGetEthWallet.generateRequest();
     this.$.ajaxListAgents.generateRequest();
   }
-  refreshEthProfile() { console.log(this.agentId); this.$.ajaxGetEthProfile.generateRequest(); }
+  refreshEthWallet() { console.log(this.agentId); this.$.ajaxGetEthWallet.generateRequest(); }
   requestEthFaucet() { this.$.ajaxRequestFaucet.generateRequest(); }
   toggleCreateAgent() { this.$.collapseCreateAgent.toggle(); }
   toggleAgentList() { this.$.collapseAgentList.toggle(); }
-  toggleEthProfile() { this.$.collapseEthProfile.toggle(); }
+  toggleEthWallet() { this.$.collapseEthWallet.toggle(); }
   
   _handleLoadAgentlistResponse(event) {
     console.log(event.detail.response);
@@ -356,13 +356,13 @@ class AgentsView extends PolymerElement {
       //this.$.toast.innerHTML = 'Rating (' + event.model.get('agent.username') + ': '+ event.detail.rating + ') successfully casted.';
 	  //this.$.toast.open();
   }
-  _handleGetEthProfileResponse(event) {
-	  this._hasNoEthProfile = false;
-    this._ethProfile = event.detail.response;
+  _handleGetEthWalletResponse(event) {
+	  this._hasNoEthWallet = false;
+    this._EthWallet = event.detail.response;
   }
   _handleRequestFaucetResponse(event) {
 	  console.log(event.detail.response);
-	  this.refreshEthProfile();
+	  this.refreshEthWallet();
   }
 
   _keyPressedCreateAgent(event) {

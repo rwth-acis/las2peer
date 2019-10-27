@@ -209,9 +209,9 @@ public class AgentsHandler {
 	}
 	
 	@POST
-	@Path("/getEthProfile")
+	@Path("/getEthWallet")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response handleGetProfile(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId) //throws Exception
+	public Response handleGetWallet(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId) //throws Exception
 	{
 		JSONObject json = new JSONObject();
 
