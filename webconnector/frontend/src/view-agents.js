@@ -122,7 +122,7 @@ class AgentsView extends PolymerElement {
         <!-- ETH WALLET -->
         <template is="dom-if" if="[[agentId]]">
           <h2 on-click="toggleEthWallet" style="cursor:point">
-            Ethereum Wallet <paper-button on-click="refreshEthWallet" disabled="[[_working]]"><iron-icon icon="refresh"></iron-icon></paper-button>
+            Ethereum Wallet <paper-icon-button icon="refresh" title="Refresh Ethereum Wallet" on-click="refreshEthWallet" disabled="[[_working]]"></paper-button>
           </h2>
           <iron-collapse opened id="collapseEthWallet">
             <template is="dom-if" if="[[!_hasNoEthWallet]]">
@@ -145,7 +145,7 @@ class AgentsView extends PolymerElement {
         <!-- AGENTS LIST -->
         <h2 on-click="toggleAgentList" style="cursor: pointer">
           List User Agents
-          <paper-button on-click="refreshAgentsList" disabled="[[_working]]"><iron-icon icon="refresh"></iron-icon></paper-button>
+          <paper-icon-button icon="refresh" title="Refresh Agents List" on-click="refreshAgentsList" disabled="[[_working]]"></paper-button>
         </h2>
         <iron-collapse id="collapseAgentList">
           <template is="dom-if" if="[[!_hasNoAgentsList]]">
