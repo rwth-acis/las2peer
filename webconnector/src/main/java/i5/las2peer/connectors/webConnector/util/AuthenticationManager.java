@@ -291,6 +291,7 @@ public class AuthenticationManager {
 				connector.getLockOidc().unlock(oidcAgentId);
 			}
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new InternalServerErrorException("OIDC agent creation failed", e);
 		}
 	}
