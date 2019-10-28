@@ -325,9 +325,9 @@ class AgentsView extends PolymerElement {
       this.refreshEthWallet();
     }
   }
-  refreshEthWallet(event) { event.preventDefault(); this.$.ajaxGetEthWallet.generateRequest(); }
-  requestEthFaucet(event) { event.preventDefault(); this.$.ajaxRequestFaucet.generateRequest(); }
-  refreshAgentsList(event) { event.preventDefault(); this.$.ajaxListAgents.generateRequest(); }
+  refreshEthWallet() { this.$.ajaxGetEthWallet.generateRequest(); }
+  requestEthFaucet() { this.$.ajaxRequestFaucet.generateRequest(); }
+  refreshAgentsList() { this.$.ajaxListAgents.generateRequest(); }
   toggleCreateAgent() { this.$.collapseCreateAgent.toggle(); }
   toggleAgentList() { this.$.collapseAgentList.toggle(); }
   toggleEthWallet() { this.$.collapseEthWallet.toggle(); }
