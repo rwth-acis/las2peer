@@ -131,14 +131,12 @@ class AgentsView extends PolymerElement {
                 <strong><iron-icon icon="fingerprint"></iron-icon> Eth Address: </strong> [[_EthWallet.eth-agent-address]] <br />
                 <strong><iron-icon icon="account-balance"></iron-icon> Eth Balance: </strong> [[_EthWallet.eth-acc-balance]]
               </p>
-            </template>
             <p>
-            <template is="dom-if" if="[[!_hasNoEthWallet]]">
               <paper-button raised on-click="requestEthFaucet" disabled="[[_working]]">
                 <iron-icon icon="card-giftcard"></iron-icon> Request funds from faucet
               </paper-button>
-            </template>
             </p>
+            </template>
           </iron-collapse>
         </template>
 
@@ -317,12 +315,12 @@ class AgentsView extends PolymerElement {
   ready() {
     super.ready();
     let appThis = this;
-    window.setTimeout(function() { appThis.refresh(); }, 10);
+    window.setTimeout(function() { appThis.refresh(); }, 5);
   }
 
   refresh() {
     this.refreshAgentsList();
-    if ( this.agentId.length() > 5 )
+    if ( this.agentId.length > 5 )
     {
       this.refreshEthWallet();
     }
@@ -337,7 +335,7 @@ class AgentsView extends PolymerElement {
   _agentIdChanged(agentid) {
     if (this.agentId == '' )
       return;
-    if (this.agentId.length() > 5 ) {
+    if (this.agentId.length > 5 ) {
       this.refreshEthWallet();
     }
   }
