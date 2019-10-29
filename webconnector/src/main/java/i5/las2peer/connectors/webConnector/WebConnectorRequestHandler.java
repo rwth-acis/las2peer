@@ -158,6 +158,7 @@ public class WebConnectorRequestHandler {
 			return Response.status(Status.NOT_FOUND).entity(e.getMessage()).build();
 		} catch (NotAuthorizedException e) {
 			connector.logError("authorization error: " + e.getMessage(), e);
+			logger.warning("authorization error: " + e.getMessage(), e);
 			return Response.status(Status.UNAUTHORIZED).entity(e.getMessage()).build();
 		} catch (InternalServerErrorException e) {
 			connector.logError("Internal Server Error: " + e.getMessage(), e);

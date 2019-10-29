@@ -84,10 +84,13 @@ public class AuthenticationManager {
 				return AnonymousAgentImpl.getInstance();
 			}
 		} catch (AgentNotFoundException e) {
+			logger.warning("agent not found");
 			throw new NotAuthorizedException("agent not found");
 		} catch (AgentAccessDeniedException e) {
+			logger.warning("passphrase invalid");
 			throw new NotAuthorizedException("passphrase invalid");
 		} catch (AgentException e) {
+			logger.warning("AgentException when trying to auth agent: not sure what went wrong");
 			throw new NotAuthorizedException("not sure what went wrong");
 		}
 	}
@@ -115,10 +118,11 @@ public class AuthenticationManager {
 				agentId = connector.getL2pNode().getAgentIdForLogin(prefixedIdentifier);
 			}
 		}
-
+		
 		AgentImpl agent = connector.getL2pNode().getAgent(agentId);
 		if (agent instanceof PassphraseAgentImpl) {
 			((PassphraseAgentImpl) agent).unlock(credentials.password);
+			logger.fine("passphrase accepted. Agent unlocked");
 		}
 		return agent;
 	}
@@ -133,6 +137,7 @@ public class AuthenticationManager {
 	 */
 	private PassphraseAgentImpl authenticateOIDC(String token, String oidcProviderHeader, Credentials credentials) throws AgentException {
 		try {
+			logger.info("OIDC sub known. Authenticating");
 			AgentImpl existingAgent = authenticateCredentials(credentials);
 			if (existingAgent instanceof UserAgentImpl) {
 				return (UserAgentImpl) existingAgent;
@@ -141,6 +146,7 @@ public class AuthenticationManager {
 			}
 		} catch (AgentNotFoundException e) {
 			// expected - auto-register
+			logger.info("OIDC sub uknown. Auto-register");
 			return createNewOidcAgent(token, oidcProviderHeader, credentials);
 		}
 	}

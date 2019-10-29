@@ -120,7 +120,7 @@ class AgentsView extends PolymerElement {
         <paper-spinner active="[[_working]]" style="float:right;"></paper-spinner>
 
         <!-- ETH WALLET -->
-        <template is="dom-if" if="[[agentId]]">
+        <template is="dom-if" if="[[agentId.length>5]]">
           <h2 on-click="toggleEthWallet" style="cursor:point">
             Ethereum Wallet <paper-icon-button icon="refresh" title="Refresh Ethereum Wallet" on-click="refreshEthWallet" disabled="[[_working]]"></paper-button>
           </h2>
