@@ -142,6 +142,7 @@ public class AuthenticationManager {
 			if (existingAgent instanceof UserAgentImpl) {
 				return (UserAgentImpl) existingAgent;
 			} else {
+				logger.warning("OIDC credentials were valid but agent had unexpected type");
 				throw new AgentException("credentials were valid but agent had unexpected type");
 			}
 		} catch (AgentNotFoundException e) {
