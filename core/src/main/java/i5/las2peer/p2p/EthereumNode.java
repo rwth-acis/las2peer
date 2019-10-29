@@ -1,26 +1,29 @@
 package i5.las2peer.p2p;
 
+import java.net.InetAddress;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.persistency.EnvelopeException;
-import i5.las2peer.api.security.*;
+import i5.las2peer.api.security.AgentAlreadyExistsException;
+import i5.las2peer.api.security.AgentException;
+import i5.las2peer.api.security.AgentLockedException;
+import i5.las2peer.api.security.ServiceAgent;
 import i5.las2peer.classLoaders.ClassManager;
 import i5.las2peer.classLoaders.libraries.BlockchainRepository;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.persistency.SharedStorage;
-import i5.las2peer.registry.*;
+import i5.las2peer.registry.CredentialUtils;
+import i5.las2peer.registry.ReadWriteRegistryClient;
 import i5.las2peer.registry.data.RegistryConfiguration;
 import i5.las2peer.registry.data.UserData;
 import i5.las2peer.registry.exceptions.EthereumException;
 import i5.las2peer.registry.exceptions.NotFoundException;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.EthereumAgent;
-import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.serialization.SerializationException;
-
-import java.net.InetAddress;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Node implementation that extends the FreePastry-based node with
@@ -194,8 +197,14 @@ public class EthereumNode extends PastryNodeImpl {
 	/** compares agent login name and public key */
 	private boolean agentMatchesUserRegistryData(EthereumAgent agent) throws EthereumException {
 		try {
+			logger.info("[ETH] matching agent ("+ agent.getLoginName() +") to registry:");
+			logger.info("AGENT DATA: " + agent.getIdentifier() + " | " + agent.getPublicKey());
+			
 			UserData userInBlockchain = registryClient.getUser(agent.getLoginName());
-
+			
+			logger.info("ETH   DATA: " + userInBlockchain.getAgentId().toString() + " | " + userInBlockchain.getPublicKey().toString());
+			logger.info("MATCHING ID? " + String.valueOf(userInBlockchain.getAgentId().equals(agent.getIdentifier())));
+			logger.info("MATCHING PubKey? " + String.valueOf(userInBlockchain.getPublicKey().equals(agent.getPublicKey()));
 			// damn, we might not be able to compare the ethereum address, because it may be null if the agent is locked
 			// does it matter? I guess not. if name and pubkey match, do we care who the owner address is?
 			// let's go with no. TODO: consider implications
@@ -203,6 +212,7 @@ public class EthereumNode extends PastryNodeImpl {
 					&& userInBlockchain.getAgentId().equals(agent.getIdentifier())
 					&& userInBlockchain.getPublicKey().equals(agent.getPublicKey());
 		} catch (NotFoundException e) {
+			logger.warning("User not found in registry");
 			return false;
 		} catch (SerializationException e) {
 			throw new EthereumException("Public key in user registry can't be deserialized.", e);
