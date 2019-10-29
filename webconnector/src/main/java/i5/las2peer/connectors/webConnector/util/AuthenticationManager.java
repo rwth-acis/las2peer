@@ -85,13 +85,13 @@ public class AuthenticationManager {
 			}
 		} catch (AgentNotFoundException e) {
 			logger.warning("agent not found");
-			throw new NotAuthorizedException("agent not found");
+			throw new NotAuthorizedException("agent not found", e);
 		} catch (AgentAccessDeniedException e) {
 			logger.warning("passphrase invalid");
-			throw new NotAuthorizedException("passphrase invalid");
+			throw new NotAuthorizedException("passphrase invalid", e);
 		} catch (AgentException e) {
-			logger.warning("AgentException when trying to auth agent: not sure what went wrong");
-			throw new NotAuthorizedException("not sure what went wrong");
+			logger.warning("AgentException when trying to auth agent: " + e.getMessage());
+			throw new NotAuthorizedException("not sure what went wrong", e);
 		}
 	}
 
@@ -118,6 +118,7 @@ public class AuthenticationManager {
 				agentId = connector.getL2pNode().getAgentIdForLogin(prefixedIdentifier);
 			}
 		}
+		
 		
 		AgentImpl agent = connector.getL2pNode().getAgent(agentId);
 		if (agent instanceof PassphraseAgentImpl) {
