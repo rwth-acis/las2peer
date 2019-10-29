@@ -47,6 +47,7 @@ import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.connectors.webConnector.handler.WebappHandler;
 import i5.las2peer.connectors.webConnector.util.AuthenticationManager;
+import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.p2p.AgentAlreadyRegisteredException;
 import i5.las2peer.p2p.AliasNotFoundException;
 import i5.las2peer.p2p.Node;
@@ -78,6 +79,8 @@ public class WebConnectorRequestHandler {
 
 	private WebConnector connector;
 	private Node l2pNode;
+
+	private final L2pLogger logger = L2pLogger.getInstance(WebConnectorRequestHandler.class.getName());
 
 	public WebConnectorRequestHandler(WebConnector connector) {
 		this.connector = connector;
