@@ -129,6 +129,7 @@ class AgentsView extends PolymerElement {
               <p>Welcome, [[_EthWallet.username]]</p>
               <p>
                 <strong><iron-icon icon="fingerprint"></iron-icon> Eth Address: </strong> [[_EthWallet.eth-agent-address]] <br />
+                <strong><iron-icon icon="account-balance-wallet"></iron-icon> Eth Mnemonic: </strong> [[_EthWallet.eth-mnemonic]] <br />
                 <strong><iron-icon icon="account-balance"></iron-icon> Eth Balance: </strong> [[_EthWallet.eth-acc-balance]]
               </p>
             <p>

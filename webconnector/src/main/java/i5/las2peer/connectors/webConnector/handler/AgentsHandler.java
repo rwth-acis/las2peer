@@ -33,6 +33,7 @@ import org.web3j.utils.Convert;
 
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
+import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.connectors.webConnector.WebConnector;
 import i5.las2peer.connectors.webConnector.util.AgentSession;
@@ -132,22 +133,32 @@ public class AgentsHandler {
 		}
 		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
 	}
-	
-	private JSONObject addAgentDetailsToJson(AgentImpl agent, JSONObject json) throws EthereumException, NotFoundException
+
+	private JSONObject addAgentDetailsToJson(AgentImpl agent, JSONObject json)
+			throws EthereumException, NotFoundException
 	{
+		// don't add mnemonic ( = defaults to false, override to true )
+		return this.addAgentDetailsToJson(agent, json, false);
+	}
+	private JSONObject addAgentDetailsToJson(AgentImpl agent, JSONObject json, Boolean addMnemonic)
+			throws EthereumException, NotFoundException {
 		json.put("agentid", agent.getIdentifier());
 		if (agent instanceof UserAgentImpl) {
 			UserAgentImpl userAgent = (UserAgentImpl) agent;
 			json.put("username", userAgent.getLoginName());
 			json.put("email", userAgent.getEmail());
 		}
-		if (agent instanceof EthereumAgent)
+		if (agent instanceof EthereumAgent) 
 		{
 			EthereumAgent ethAgent = (EthereumAgent) agent;
 			String ethAddress = ethAgent.getEthereumAddress();
-			
+
 			json.put("eth-agent-address", ethAddress);
 			
+			if ( addMnemonic && !agent.isLocked())
+			{
+				json.put("eth-mnemonic", ethAgent.getEthereumMnemonic());
+			}
 			
 			String accBalance = ethereumNode.getRegistryClient().getAccountBalance(ethAddress);
 			json.put("eth-acc-balance", accBalance);
@@ -222,7 +233,7 @@ public class AgentsHandler {
 		
 		AgentImpl agent = session.getAgent();
 		try {
-			json = addAgentDetailsToJson(agent, json);
+			json = addAgentDetailsToJson(agent, json, true);
 		} catch (EthereumException e) {
 			return Response.status(Status.NOT_FOUND).entity("Agent not found").build();
 		} catch (NotFoundException e) {

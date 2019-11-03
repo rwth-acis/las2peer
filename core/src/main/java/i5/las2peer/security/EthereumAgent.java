@@ -182,6 +182,10 @@ public class EthereumAgent extends UserAgentImpl {
 		return ethereumAddress;
 	}
 
+	public String getEthereumMnemonic() {
+		return ethereumMnemonic;
+	}
+
 	public Credentials getEthereumCredentials() throws AgentLockedException {
 		if (isLocked()) {
 			throw new AgentLockedException();
