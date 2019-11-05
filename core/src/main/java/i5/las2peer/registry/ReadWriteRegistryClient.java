@@ -19,7 +19,10 @@ import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.tx.RawTransactionManager;
+import org.web3j.tx.TransactionManager;
 import org.web3j.tx.Transfer;
+import org.web3j.tx.gas.DefaultGasProvider;
 import org.web3j.utils.Convert;
 
 import i5.las2peer.api.security.AgentLockedException;
@@ -138,10 +141,10 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		List<Type> inputParameters = new ArrayList<>();
 		inputParameters.add(new DynamicBytes(profileName));
 
-		Transaction transaction = this.prepareSmartContractCall(contractAddress, functionName, senderAddress,
+		String txHash = this.prepareSmartContractCall(contractAddress, functionName, senderAddress,
 				inputParameters);
 
-		TransactionReceipt txr = sendPreparedTransactionToChain(functionName, contractAddress, transaction);
+		TransactionReceipt txr = waitForTransactionReceipt(functionName, contractAddress, txHash);
 		if ( !txr.isStatusOK() )
 		{
 			throw new EthereumException("could not send transaction, transaction receipt not ok");
@@ -149,14 +152,14 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		return txr;
 	}
 
-	private Transaction prepareSmartContractCall(String contractAddress, String functionName, String senderAddress,
+	private String prepareSmartContractCall(String contractAddress, String functionName, String senderAddress,
 			List<Type> inputParameters) throws EthereumException {
 		return this.prepareSmartContractCall(contractAddress, functionName, senderAddress, inputParameters,
 				Collections.<TypeReference<?>>emptyList() // default to empty output
 		);
 	}
 
-	private Transaction prepareSmartContractCall(String contractAddress, String functionName, String senderAddress,
+	private String prepareSmartContractCall(String contractAddress, String functionName, String senderAddress,
 			List<Type> inputParameters, List<TypeReference<?>> outputParameters) throws EthereumException {
 		BigInteger nonce;
 		try {
@@ -168,32 +171,39 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		Function function = new Function(functionName, inputParameters, outputParameters // output params
 		);
 		String encodedFunction = FunctionEncoder.encode(function);
-		return Transaction.createFunctionCallTransaction(senderAddress, nonce, GAS_PRICE, GAS_LIMIT_ETHER_TX,
-				contractAddress, new BigInteger("0"), encodedFunction);
+		/*return Transaction.createFunctionCallTransaction(senderAddress, nonce, GAS_PRICE, GAS_LIMIT_ETHER_TX,
+				contractAddress, new BigInteger("0"), encodedFunction);*/
+		
+		// RawTransactionManager use a wallet (credential) to create and sign
+		// transaction
+		TransactionManager txManager = new RawTransactionManager(web3j, credentials);
+
+		// Send transaction
+		String txHash;
+		try {
+			EthSendTransaction ethSendTransaction = txManager
+					.sendTransaction(GAS_PRICE, GAS_LIMIT_ETHER_TX, contractAddress, encodedFunction, BigInteger.ZERO);
+			 txHash = ethSendTransaction.getTransactionHash();
+
+			// check for errors
+			if (ethSendTransaction.hasError()) {
+				Response.Error error = ethSendTransaction.getError();
+				throw new EthereumException("Eth Transaction Error [" + error.getCode() + "]" + error.getMessage());
+			}
+
+			if (txHash.length() < 2) {
+				throw new EthereumException("Could not create ethereum transaction");
+			}
+			logger.info("[ETH] Called contract [" + contractAddress + "]@[" + functionName + "]");
+			
+		} catch (IOException e) {
+			throw new EthereumException("Could not send contract call: " + e.getMessage(), e);
+		}
+		return txHash;
 	}
 
-	private TransactionReceipt sendPreparedTransactionToChain(String functionName, String contractAddress, Transaction transaction)
+	private TransactionReceipt waitForTransactionReceipt(String functionName, String contractAddress, String txHash)
 			throws EthereumException {
-		EthSendTransaction ethSendTransaction;
-		try {
-			ethSendTransaction = web3j.ethSendTransaction(transaction)
-					// .sendAsync().get();
-					.send();
-		} catch (IOException e) {
-			throw new EthereumException("Eth Could not send transaction", e); 
-		}
-
-		// check for errors
-		if (ethSendTransaction.hasError()) {
-			Response.Error error = ethSendTransaction.getError();
-			throw new EthereumException("Eth Transaction Error [" + error.getCode() + "]" + error.getMessage());
-		}
-
-		String txHash = ethSendTransaction.getTransactionHash();
-		if (txHash.length() < 2) {
-			throw new EthereumException("Could not create ethereum transaction");
-		}
-		logger.info("[ETH] Called contract [" + contractAddress + "]@[" + functionName + "]");
 		logger.fine("waiting for receipt on [" + txHash + "]... ");
 		TransactionReceipt txR;
 		try {
