@@ -1,5 +1,27 @@
 package i5.las2peer.registry;
 
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+
+import org.web3j.abi.FunctionEncoder;
+import org.web3j.abi.TypeReference;
+import org.web3j.abi.datatypes.DynamicBytes;
+import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.Type;
+import org.web3j.crypto.Credentials;
+import org.web3j.protocol.core.Response;
+import org.web3j.protocol.core.methods.request.Transaction;
+import org.web3j.protocol.core.methods.response.EthSendTransaction;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.tx.Transfer;
+import org.web3j.utils.Convert;
+
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.registry.contracts.ServiceRegistry;
@@ -8,28 +30,8 @@ import i5.las2peer.registry.data.RegistryConfiguration;
 import i5.las2peer.registry.data.UserData;
 import i5.las2peer.registry.exceptions.EthereumException;
 import i5.las2peer.security.EthereumAgent;
-import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.serialization.SerializeTools;
-import org.web3j.abi.datatypes.Function;
-import org.web3j.crypto.Credentials;
-import org.web3j.protocol.core.DefaultBlockParameterName;
-import org.web3j.protocol.core.Response;
-import org.web3j.protocol.core.methods.request.Transaction;
-import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
-import org.web3j.protocol.core.methods.response.EthGetTransactionReceipt;
-import org.web3j.protocol.core.methods.response.EthSendTransaction;
-import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.web3j.tx.Transfer;
-import org.web3j.utils.Convert;
-
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Facade providing simple read/write access to the registry smart
@@ -41,6 +43,13 @@ import java.util.concurrent.ExecutionException;
  * @see ReadOnlyRegistryClient
  */
 public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
+	// see
+	// https://www.reddit.com/r/ethereum/comments/5g8ia6/attention_miners_we_recommend_raising_gas_limit/
+	BigInteger GAS_PRICE = BigInteger.valueOf(20_000_000_000L);
+
+	// http://ethereum.stackexchange.com/questions/1832/cant-send-transaction-exceeds-block-gas-limit-or-intrinsic-gas-too-low
+	BigInteger GAS_LIMIT_ETHER_TX = BigInteger.valueOf(21_000);
+
 	private final L2pLogger logger = L2pLogger.getInstance(ReadWriteRegistryClient.class);
 
 	/**
@@ -114,22 +123,90 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 			throw new EthereumException("Could not register user", e);
 		}
 	}
-	
-	public void registerUserProfile(UserAgentImpl agent) throws EthereumException
-	{
-		if ( !agent.hasLoginName() )
-		{
+
+	public TransactionReceipt registerUserProfile(EthereumAgent agent) throws EthereumException {
+		if (!agent.hasLoginName()) {
 			throw new EthereumException("Could not register profile: agent has no login name");
 		}
-		
+
 		byte[] profileName = Util.padAndConvertString(agent.getLoginName(), 32);
-		logger.fine( "registering user profile: " + agent.getLoginName() + " | " + profileName.toString() );
-		
-		try {
-			contracts.reputationRegistry.createProfile(profileName).send();
-		} catch (Exception e) {
-			throw new EthereumException("Could not register profile: " + e.getMessage(), e);
+		logger.info("registering user profile: " + agent.getLoginName() + " | " + profileName.toString());
+
+		String functionName = "registerProfile";
+		String senderAddress = agent.getEthereumAddress();
+		String contractAddress = contracts.reputationRegistry.getContractAddress();
+		List<Type> inputParameters = new ArrayList<>();
+		inputParameters.add(new DynamicBytes(profileName));
+
+		Transaction transaction = this.prepareSmartContractCall(contractAddress, functionName, senderAddress,
+				inputParameters);
+
+		TransactionReceipt txr = sendPreparedTransactionToChain(functionName, contractAddress, transaction);
+		if ( !txr.isStatusOK() )
+		{
+			throw new EthereumException("could not send transaction, transaction receipt not ok");
 		}
+		return txr;
+	}
+
+	private Transaction prepareSmartContractCall(String contractAddress, String functionName, String senderAddress,
+			List<Type> inputParameters) throws EthereumException {
+		return this.prepareSmartContractCall(contractAddress, functionName, senderAddress, inputParameters,
+				Collections.<TypeReference<?>>emptyList() // default to empty output
+		);
+	}
+
+	private Transaction prepareSmartContractCall(String contractAddress, String functionName, String senderAddress,
+			List<Type> inputParameters, List<TypeReference<?>> outputParameters) throws EthereumException {
+		BigInteger nonce;
+		try {
+			nonce = this.getNonce(contractAddress);
+		} catch (InterruptedException | ExecutionException e) {
+			throw new EthereumException("Could not obtain nonce for contract: " + e.getMessage(), e);
+		}
+
+		Function function = new Function(functionName, inputParameters, outputParameters // output params
+		);
+		String encodedFunction = FunctionEncoder.encode(function);
+		return Transaction.createFunctionCallTransaction(senderAddress, nonce, GAS_PRICE, GAS_LIMIT_ETHER_TX,
+				contractAddress, new BigInteger("0"), encodedFunction);
+	}
+
+	private TransactionReceipt sendPreparedTransactionToChain(String functionName, String contractAddress, Transaction transaction)
+			throws EthereumException {
+		EthSendTransaction ethSendTransaction;
+		try {
+			ethSendTransaction = web3j.ethSendTransaction(transaction)
+					// .sendAsync().get();
+					.send();
+		} catch (IOException e) {
+			throw new EthereumException("Eth Could not send transaction", e); 
+		}
+
+		// check for errors
+		if (ethSendTransaction.hasError()) {
+			Response.Error error = ethSendTransaction.getError();
+			throw new EthereumException("Eth Transaction Error [" + error.getCode() + "]: " + error.getMessage());
+		}
+
+		String txHash = ethSendTransaction.getTransactionHash();
+		if (txHash.length() < 2) {
+			throw new EthereumException("Could not create ethereum transaction");
+		}
+		logger.info("[ETH] Called contract [" + contractAddress + "]@[" + functionName + "]");
+		logger.fine("waiting for receipt on [" + txHash + "]... ");
+		TransactionReceipt txR;
+		try {
+			txR = waitForReceipt(txHash);
+			if (txR == null) {
+				throw new EthereumException("Transaction sent, no receipt returned. Wait more?");
+			}
+		} catch (InterruptedException | ExecutionException e) {
+			throw new EthereumException("Wait for receipt interrupted or failed.");
+		}
+		logger.fine("receipt for [" + txHash + "] received.");
+		
+		return txR;
 	}
 	
 	public void addUserRating(UserData receivingAgent, Integer rating ) throws EthereumException
@@ -319,13 +396,6 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 	}
 	
 	public TransactionReceipt sendEtherFromCoinbase(String recipientAddress, BigInteger valueInWei) throws EthereumException {
-		
-		// see
-		// https://www.reddit.com/r/ethereum/comments/5g8ia6/attention_miners_we_recommend_raising_gas_limit/
-		BigInteger GAS_PRICE = BigInteger.valueOf(20_000_000_000L);
-
-		// http://ethereum.stackexchange.com/questions/1832/cant-send-transaction-exceeds-block-gas-limit-or-intrinsic-gas-too-low
-		BigInteger GAS_LIMIT_ETHER_TX = BigInteger.valueOf(21_000);
 
 		TransactionReceipt txR;
 		try {
