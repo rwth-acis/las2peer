@@ -124,15 +124,15 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		}
 	}
 
-	public TransactionReceipt registerUserProfile(EthereumAgent agent) throws EthereumException {
+	public TransactionReceipt registerReputationProfile(EthereumAgent agent) throws EthereumException {
 		if (!agent.hasLoginName()) {
-			throw new EthereumException("Could not register profile: agent has no login name");
+			throw new EthereumException("Could not create reputation profile: agent has no login name");
 		}
 
 		byte[] profileName = Util.padAndConvertString(agent.getLoginName(), 32);
-		logger.info("registering user profile: " + agent.getLoginName() + " | " + profileName.toString());
+		logger.info("registering user profile: " + agent.getLoginName());
 
-		String functionName = "registerProfile";
+		String functionName = "createProfile";
 		String senderAddress = agent.getEthereumAddress();
 		String contractAddress = contracts.reputationRegistry.getContractAddress();
 		List<Type> inputParameters = new ArrayList<>();
@@ -186,7 +186,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		// check for errors
 		if (ethSendTransaction.hasError()) {
 			Response.Error error = ethSendTransaction.getError();
-			throw new EthereumException("Eth Transaction Error [" + error.getCode() + "]: " + error.getMessage());
+			throw new EthereumException("Eth Transaction Error [" + error.getCode() + "]" + error.getMessage());
 		}
 
 		String txHash = ethSendTransaction.getTransactionHash();

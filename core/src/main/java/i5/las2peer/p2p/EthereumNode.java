@@ -292,7 +292,7 @@ public class EthereumNode extends PastryNodeImpl {
 	}
 	
 	//public void registerProfile(EthereumAgent author) throws EthereumException {
-	//	registryClient.registerUserProfile(author);
+	//	registryClient.registerReputationProfile(author);
 	//}
 	 
 }
