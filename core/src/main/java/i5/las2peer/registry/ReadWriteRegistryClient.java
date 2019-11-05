@@ -398,6 +398,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 	public TransactionReceipt sendEtherFromCoinbase(String recipientAddress, BigInteger valueInWei) throws EthereumException {
 
 		TransactionReceipt txR;
+		String txHash;
 		try {
 			String coinbase = this.getCoinbase().getResult();
 			BigInteger nonce = this.getNonce(coinbase);
@@ -430,8 +431,10 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 				Response.Error error = ethSendTransaction.getError();
 				throw new EthereumException("Eth Transaction Error [" + error.getCode() + "]: " + error.getMessage());
 			}
-			String txHash = ethSendTransaction.getTransactionHash();
-			logger.info("[ETH] Sent transaction ["+txHash+"], waiting for receipt... ");
+			txHash = ethSendTransaction.getTransactionHash();
+			logger.info("[ETH] Faucet Transaction sent.");
+			logger.fine("waiting for receipt on [" + txHash + "]... ");
+		
 			if ( txHash.length() < 2 )
 			{
 				throw new EthereumException("Could not create ethereum transaction");
@@ -447,7 +450,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		{
 			throw new EthereumException("Could not create faucet transaction.");
 		}
-		
+		logger.fine("receipt for [" + txHash + "] received.");
 		return txR;
 	}
 	
