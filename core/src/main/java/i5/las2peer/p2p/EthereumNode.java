@@ -197,14 +197,12 @@ public class EthereumNode extends PastryNodeImpl {
 	/** compares agent login name and public key */
 	private boolean agentMatchesUserRegistryData(EthereumAgent agent) throws EthereumException {
 		try {
-			logger.info("[ETH] matching agent ("+ agent.getLoginName() +") to registry:");
-			logger.info("AGENT DATA: " + agent.getIdentifier() + " | " + agent.getPublicKey());
+			logger.fine("[ETH] matching agent ("+ agent.getLoginName() +") to registry");
 			
 			UserData userInBlockchain = registryClient.getUser(agent.getLoginName());
 			
-			logger.info("ETH   DATA: " + userInBlockchain.getAgentId().toString() + " | " + userInBlockchain.getPublicKey().toString());
-			logger.info("MATCHING ID? " + String.valueOf(userInBlockchain.getAgentId().equals(agent.getIdentifier())));
-			logger.info("MATCHING PubKey? " + String.valueOf(userInBlockchain.getPublicKey().equals(agent.getPublicKey())));
+			logger.finer("MATCHING ID? " + String.valueOf(userInBlockchain.getAgentId().equals(agent.getIdentifier())));
+			logger.finer("MATCHING PubKey? " + String.valueOf(userInBlockchain.getPublicKey().equals(agent.getPublicKey())));
 			// damn, we might not be able to compare the ethereum address, because it may be null if the agent is locked
 			// does it matter? I guess not. if name and pubkey match, do we care who the owner address is?
 			// let's go with no. TODO: consider implications
@@ -293,7 +291,7 @@ public class EthereumNode extends PastryNodeImpl {
 		return registryClient;
 	}
 	
-	//public void registerProfile(UserAgentImpl author) throws EthereumException {
+	//public void registerProfile(EthereumAgent author) throws EthereumException {
 	//	registryClient.registerUserProfile(author);
 	//}
 	 
