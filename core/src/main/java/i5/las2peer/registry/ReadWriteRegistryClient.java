@@ -182,7 +182,13 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		String txHash;
 		try {
 			EthSendTransaction ethSendTransaction = txManager
-					.sendTransaction(GAS_PRICE, GAS_LIMIT_ETHER_TX, contractAddress, encodedFunction, BigInteger.ZERO);
+					.sendTransaction(
+						DefaultGasProvider.GAS_PRICE, 
+						DefaultGasProvider.GAS_LIMIT, 
+						contractAddress, 
+						encodedFunction, 
+						BigInteger.ZERO
+					);
 			 txHash = ethSendTransaction.getTransactionHash();
 
 			// check for errors
