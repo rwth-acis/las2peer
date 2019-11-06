@@ -439,7 +439,7 @@ public class AgentsHandler {
 			//ethereumNode.registerProfile(agent);
 			ethereumNode.getRegistryClient().registerReputationProfile(agent);
 		} catch (EthereumException e) {			
-			throw new BadRequestException("Profile registration failed" + e.getMessage());
+			throw new BadRequestException("Profile registration failed", e);
 		}
 		json.put("code", Status.OK.getStatusCode());
 		json.put("text", Status.OK.getStatusCode() + " - Profile creation successful");

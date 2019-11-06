@@ -141,31 +141,21 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		List<Type> inputParameters = new ArrayList<>();
 		inputParameters.add(new DynamicBytes(profileName));
 
-		String txHash = this.prepareSmartContractCall(contractAddress, functionName, senderAddress,
+		String txHash = this.prepareSmartContractCall(agent, contractAddress, functionName, senderAddress,
 				inputParameters);
 
 		TransactionReceipt txr = waitForTransactionReceipt(functionName, contractAddress, txHash);
-		if ( !txr.isStatusOK() )
-		{
-			logger.warning("trx fail with status " + txr.getStatus());
-			if ( txHash != txr.getTransactionHash() )
-			{
-				logger.warning("transaction hash mismatch");
-			}
-			logger.warning(txr.toString());
-			throw new EthereumException("could not send transaction, transaction receipt not ok");
-		}
 		return txr;
 	}
 
-	private String prepareSmartContractCall(String contractAddress, String functionName, String senderAddress,
+	private String prepareSmartContractCall(EthereumAgent agent, String contractAddress, String functionName, String senderAddress,
 			List<Type> inputParameters) throws EthereumException {
-		return this.prepareSmartContractCall(contractAddress, functionName, senderAddress, inputParameters,
+		return this.prepareSmartContractCall(agent, contractAddress, functionName, senderAddress, inputParameters,
 				Collections.<TypeReference<?>>emptyList() // default to empty output
 		);
 	}
 
-	private String prepareSmartContractCall(String contractAddress, String functionName, String senderAddress,
+	private String prepareSmartContractCall(EthereumAgent agent, String contractAddress, String functionName, String senderAddress,
 			List<Type> inputParameters, List<TypeReference<?>> outputParameters) throws EthereumException {
 		BigInteger nonce;
 		try {
@@ -182,7 +172,12 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		
 		// RawTransactionManager use a wallet (credential) to create and sign
 		// transaction
-		TransactionManager txManager = new RawTransactionManager(web3j, credentials);
+		TransactionManager txManager;
+		try {
+			txManager = new RawTransactionManager(web3j, agent.getEthereumCredentials());
+		} catch (AgentLockedException e) {
+			throw new EthereumException("couldn't initialize RawTransactionManager: eth agent locked", e);
+		}
 
 		// Send transaction
 		String txHash;
@@ -195,7 +190,9 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 						encodedFunction, 
 						BigInteger.ZERO
 					);
-			 txHash = ethSendTransaction.getTransactionHash();
+			
+			txHash = ethSendTransaction.getTransactionHash();
+			logger.info("transaction result: " + ethSendTransaction.getResult());
 
 			// check for errors
 			if (ethSendTransaction.hasError()) {
@@ -222,6 +219,14 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 			txR = waitForReceipt(txHash);
 			if (txR == null) {
 				throw new EthereumException("Transaction sent, no receipt returned. Wait more?");
+			}
+			if (!txR.isStatusOK()) {
+				logger.warning("trx fail with status " + txR.getStatus());
+				if (txHash != txR.getTransactionHash()) {
+					logger.warning("transaction hash mismatch");
+				}
+				logger.warning(txR.toString());
+				throw new EthereumException("could not send transaction, transaction receipt not ok");
 			}
 		} catch (InterruptedException | ExecutionException e) {
 			throw new EthereumException("Wait for receipt interrupted or failed.");
