@@ -147,6 +147,12 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		TransactionReceipt txr = waitForTransactionReceipt(functionName, contractAddress, txHash);
 		if ( !txr.isStatusOK() )
 		{
+			logger.warning("trx fail with status " + txr.getStatus());
+			if ( txHash != txr.getTransactionHash() )
+			{
+				logger.warning("transaction hash mismatch");
+			}
+			logger.warning(txr.toString());
 			throw new EthereumException("could not send transaction, transaction receipt not ok");
 		}
 		return txr;
