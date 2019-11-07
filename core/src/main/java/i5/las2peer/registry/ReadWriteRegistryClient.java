@@ -15,6 +15,8 @@ import org.web3j.abi.datatypes.DynamicBytes;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.crypto.Credentials;
+import org.web3j.crypto.RawTransaction;
+import org.web3j.crypto.TransactionEncoder;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.request.Transaction;
@@ -25,6 +27,7 @@ import org.web3j.tx.TransactionManager;
 import org.web3j.tx.Transfer;
 import org.web3j.tx.gas.DefaultGasProvider;
 import org.web3j.utils.Convert;
+import org.web3j.utils.Numeric;
 
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.logging.L2pLogger;
@@ -137,43 +140,43 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		byte[] profileName = Util.padAndConvertString(agent.getLoginName(), 32);
 		logger.info("registering user profile: " + agent.getLoginName());
 
-		
-		  String functionName = "createProfile"; 
-		  String senderAddress = agent.getEthereumAddress(); 
-		  String contractAddress = contracts.reputationRegistry.getContractAddress(); 
-		  List<Type> inputParameters = new ArrayList<>(); 
-		  inputParameters.add(new DynamicBytes(profileName));
-		 
+		String functionName = "createProfile";
+		String senderAddress = agent.getEthereumAddress();
+		String contractAddress = contracts.reputationRegistry.getContractAddress();
+		List<Type> inputParameters = new ArrayList<>();
+		inputParameters.add(new DynamicBytes(profileName));
+		List<TypeReference<?>> outputParameters = Collections.<TypeReference<?>>emptyList();
+		Function function = new Function(functionName, inputParameters, outputParameters);
+		String encodedFunction = FunctionEncoder.encode(function);
+
 		/*
-		  String txHash = this.prepareSmartContractCall(agent, contractAddress,
-		  functionName, senderAddress, inputParameters);
-		  
-		  TransactionReceipt txr = waitForTransactionReceipt(txHash);
+		   String txHash = this.prepareSmartContractCall(agent, contractAddress,
+		   functionName, senderAddress, inputParameters);
+		   
+		   TransactionReceipt txr = waitForTransactionReceipt(txHash);
 		 */
 		/*
-		  String txHash = this.prepareSmartContractCall(agent, contractAddress,
-		  functionName, senderAddress, inputParameters);
-		  logger.info("registering function called, transaction hash: " + txHash);
-		  //return functionCallValue; 
-		  waitForTransactionReceipt(txHash); 
-		  return txHash;
+		   String txHash = this.prepareSmartContractCall(agent, contractAddress,
+		   functionName, senderAddress, inputParameters);
+		   logger.info("registering function called, transaction hash: " + txHash);
+		   //return functionCallValue; waitForTransactionReceipt(txHash); return txHash;
 		 */
-		
-		  String retVal = prepareSmartContractCall2(agent, contractAddress,
-		  functionName, senderAddress, inputParameters,
-		  Collections.<TypeReference<?>>emptyList());
-		  logger.info("[ETH] contract call return value " + retVal); 
-		  return retVal;
 		/*
-		try {
-			contracts.reputationRegistry.createProfile(profileName).send();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			throw new EthereumException("couldn't create profile", e);
-		}
-		return "";
+		String retVal = prepareSmartContractCall2(agent, contractAddress, functionName, senderAddress, inputParameters,
+				Collections.<TypeReference<?>>emptyList());
+		logger.info("[ETH] contract call return value " + retVal);
+		return retVal;
 		*/
+
+		String txHash = this.callContract(agent, contractAddress, senderAddress, encodedFunction);
+		logger.info("[ETH] contract call txHash: " + txHash );
+		waitForTransactionReceipt(txHash);
+		return txHash;
+		/*
+		   try { contracts.reputationRegistry.createProfile(profileName).send(); } catch
+		   (Exception e) { // TODO Auto-generated catch block e.printStackTrace(); throw
+		   new EthereumException("couldn't create profile", e); } return "";
+		 */
 	}
 
 	private String prepareSmartContractCall(EthereumAgent agent, String contractAddress, String functionName,
@@ -188,7 +191,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 			throws EthereumException {
 
 		Function function = new Function(functionName, inputParameters, outputParameters);
-		
+
 		String callerAddress = agent.getEthereumAddress();
 		String functionCallValue;
 		try {
@@ -205,7 +208,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 
 		Function function = new Function(functionName, inputParameters, outputParameters);
 		String encodedFunction = FunctionEncoder.encode(function);
-		
+
 		// RawTransactionManager use a wallet (credential) to create and sign
 		// transaction
 		TransactionManager txManager;
@@ -218,15 +221,9 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		// Send transaction
 		String txHash;
 		try {
-			EthSendTransaction ethSendTransaction = txManager
-					.sendTransaction(
-						DefaultGasProvider.GAS_PRICE, 
-						DefaultGasProvider.GAS_LIMIT, 
-						contractAddress, 
-						encodedFunction, 
-						BigInteger.ONE
-					);
-			
+			EthSendTransaction ethSendTransaction = txManager.sendTransaction(DefaultGasProvider.GAS_PRICE,
+					DefaultGasProvider.GAS_LIMIT, contractAddress, encodedFunction, BigInteger.ONE);
+
 			txHash = ethSendTransaction.getTransactionHash();
 			logger.info("transaction result: " + ethSendTransaction.getResult());
 
@@ -240,12 +237,11 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 				throw new EthereumException("Could not create ethereum transaction");
 			}
 			logger.info("[ETH] Called contract [" + contractAddress + "]@[" + functionName + "]");
-			
+
 		} catch (IOException e) {
 			throw new EthereumException("Could not send contract call: " + e.getMessage(), e);
 		}
 		return txHash;
-		
 
 	}
 
@@ -255,25 +251,67 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		BigInteger nonce;
 		nonce = this.getNonce(contractAddress);
 		String encodedFunction = FunctionEncoder.encode(function);
-		logger.info("[ETH] creating function call [" + callerAddress + "]->[" + contractAddress + "]: nonce = "+ nonce);
-		
-		Transaction transaction = Transaction.createFunctionCallTransaction(callerAddress, nonce, DefaultGasProvider.GAS_PRICE, DefaultGasProvider.GAS_LIMIT, contractAddress, encodedFunction);
-		//Transaction transaction = Transaction.createEthCallTransaction(callerAddress, contractAddress, encodedFunction);
-		logger.info("[ETH] gas estimate: " + web3j.ethEstimateGas(transaction).send().getResult() );
-		logger.info("[ETH] gas price: " + DefaultGasProvider.GAS_PRICE + ", gas limit: " + DefaultGasProvider.GAS_LIMIT );
-		EthSendTransaction response = web3j
-				.ethSendTransaction(transaction)
-				//.sendAsync().get();
+		logger.info(
+				"[ETH] creating function call [" + callerAddress + "]->[" + contractAddress + "]: nonce = " + nonce);
+
+		Transaction transaction = Transaction.createFunctionCallTransaction(callerAddress, nonce,
+				DefaultGasProvider.GAS_PRICE, DefaultGasProvider.GAS_LIMIT, contractAddress, encodedFunction);
+		// Transaction transaction = Transaction.createEthCallTransaction(callerAddress,
+		// contractAddress, encodedFunction);
+		logger.info("[ETH] gas estimate: " + web3j.ethEstimateGas(transaction).send().getResult());
+		logger.info(
+				"[ETH] gas price: " + DefaultGasProvider.GAS_PRICE + ", gas limit: " + DefaultGasProvider.GAS_LIMIT);
+		EthSendTransaction response = web3j.ethSendTransaction(transaction)
+				// .sendAsync().get();
 				.send();
-		if ( response.hasError() )
-		{
-			throw new EthereumException("[ETH] transaction send failed, error [" + response.getError().getCode() + "]: " + response.getError().getMessage());
+		if (response.hasError()) {
+			throw new EthereumException("[ETH] transaction send failed, error [" + response.getError().getCode() + "]: "
+					+ response.getError().getMessage());
 		}
-		logger.info("[ETH] created function call [" + callerAddress + "]->[" + contractAddress + "]: txHash = " + response.getTransactionHash());
+		logger.info("[ETH] created function call [" + callerAddress + "]->[" + contractAddress + "]: txHash = "
+				+ response.getTransactionHash());
 
 		String respVal = response.getResult();
-		logger.info("[ETH] call completed, value returned: " + respVal );
+		logger.info("[ETH] call completed, value returned: " + respVal);
 		return respVal;
+	}
+
+	private String callContract(EthereumAgent agent, String contractAddress, String senderAddress,
+			String encodedFunction) throws EthereumException {
+		BigInteger nonce;
+		try {
+			nonce = this.getNonce(contractAddress);
+		} catch (InterruptedException | ExecutionException e) {
+			throw new EthereumException("couldn't get nonce", e);
+		}
+
+		RawTransaction rawTransaction = RawTransaction.createTransaction(
+			nonce, 
+			DefaultGasProvider.GAS_PRICE,
+			DefaultGasProvider.GAS_LIMIT, 
+			contractAddress, 
+			encodedFunction
+		);
+
+		byte[] signedMessage;
+		String hexValue;
+		EthSendTransaction transactionResponse;
+		try {
+			signedMessage = TransactionEncoder.signMessage(rawTransaction, agent.getEthereumCredentials());
+			hexValue = Numeric.toHexString(signedMessage);
+			try {
+				transactionResponse = web3j.ethSendRawTransaction(hexValue).sendAsync().get();
+			} catch (InterruptedException | ExecutionException e) {
+				throw new EthereumException("couldn't sent raw transaction", e);
+			}
+		} catch (AgentLockedException e) {
+			throw new EthereumException("agent is locked");
+		}
+		
+
+		
+
+		return transactionResponse.getTransactionHash();
 	}
 
 	private void waitForTransactionReceipt(String txHash)
