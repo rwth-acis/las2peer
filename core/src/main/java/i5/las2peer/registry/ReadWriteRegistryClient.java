@@ -150,10 +150,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		*/
 		String functionCallValue = this.prepareSmartContractCall(agent, contractAddress, functionName, senderAddress,
 				inputParameters);
-		if ( functionCallValue == "0x" )
-		{
-			logger.info("user profile registered. ");
-		}
+		logger.info("registering function called, return: " + functionCallValue);
 		return functionCallValue;
 	}
 
@@ -174,7 +171,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		String functionCallValue;
 		try {
 			functionCallValue = this.callSmartContractFunction(callerAddress, contractAddress, function);
-		} catch (InterruptedException | ExecutionException e) {
+		} catch (InterruptedException | ExecutionException | IOException e) {
 			throw new EthereumException("couldn't call smart contract function", e);
 		}
 		return functionCallValue;
@@ -233,7 +230,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 
 	// https://github.com/web3j/web3j/blob/master/integration-tests/src/test/java/org/web3j/protocol/scenarios/GreeterContractIT.java
 	private String callSmartContractFunction(String callerAddress, String contractAddress, Function function)
-			throws InterruptedException, ExecutionException {
+			throws InterruptedException, ExecutionException, IOException {
 
 		String encodedFunction = FunctionEncoder.encode(function);
 
@@ -241,7 +238,8 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		logger.info("[ETH] created function call [" + callerAddress + "]->[" + contractAddress + "].");
 		org.web3j.protocol.core.methods.response.EthCall response = web3j
 				.ethCall(transaction,DefaultBlockParameterName.LATEST)
-				.sendAsync().get();
+				//.sendAsync().get();
+				.send();
 		String respVal = response.getValue();
 		logger.info("[ETH] call completed, value returned: " + respVal );
 		return respVal;

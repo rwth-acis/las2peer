@@ -112,7 +112,7 @@ class AgentsView extends PolymerElement {
                  on-response="_handleRequestFaucetResponse"
                  on-error="_handleError"
                  loading="{{_working}}"></iron-ajax>
-      <iron-ajax id="ajaxRegisterProfile"
+      <iron-ajax id="ajaxReputationProfile"
                  method="POST"
                  url$="[[apiEndpoint]]/agents/registerProfile"
                  handle-as="json"
@@ -378,7 +378,7 @@ class AgentsView extends PolymerElement {
   }
   refreshEthWallet() { this.$.ajaxGetEthWallet.generateRequest(); }
   requestEthFaucet() { this.$.ajaxRequestFaucet.generateRequest(); }
-  requestRegisterProfile() { this.$.ajaxRegisterProfile.generateRequest(); }
+  requestReputationProfile() { this.$.ajaxReputationProfile.generateRequest(); }
   refreshAgentsList() { this.$.ajaxListAgents.generateRequest(); }
   refreshProfilesList() { this.$.ajaxListProfiles.generateRequest(); }
   toggleCreateAgent() { this.$.collapseCreateAgent.toggle(); }
