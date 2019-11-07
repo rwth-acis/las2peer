@@ -5,11 +5,14 @@ import i5.las2peer.registry.data.RegistryConfiguration;
 import i5.las2peer.registry.data.ServiceDeploymentData;
 import i5.las2peer.registry.data.ServiceReleaseData;
 import i5.las2peer.registry.data.UserData;
+import i5.las2peer.registry.data.UserProfileData;
 import i5.las2peer.registry.exceptions.EthereumException;
 import i5.las2peer.registry.exceptions.NotFoundException;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+
+import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
@@ -172,6 +175,22 @@ public class ReadOnlyRegistryClient {
 		}
 
 		return new UserData(userAsTuple.getValue1(), userAsTuple.getValue2(), userAsTuple.getValue3(), userAsTuple.getValue4());
+	}
+
+	public UserProfileData getProfile(String address) throws EthereumException, NotFoundException {
+		Tuple4<String, byte[], BigInteger, BigInteger> profileAsTuple;
+		try {
+			profileAsTuple = contracts.reputationRegistry.profiles(address).send();
+		} catch (Exception e) {
+			throw new EthereumException("Could not get profile", e);
+		}
+
+		String returnedAddress = profileAsTuple.getValue1();
+		if (returnedAddress == "") {
+			throw new NotFoundException("User profile apparently not registered.");
+		}
+		
+		return new UserProfileData(profileAsTuple.getValue1(), profileAsTuple.getValue2(), profileAsTuple.getValue3(), profileAsTuple.getValue4());
 	}
 
 	/**
