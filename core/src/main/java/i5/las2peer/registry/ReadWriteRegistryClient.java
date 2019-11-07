@@ -176,7 +176,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		String functionCallValue;
 		try {
 			functionCallValue = this.callSmartContractFunction(callerAddress, contractAddress, function);
-		} catch (InterruptedException | ExecutionException | IOException e) {
+		} catch (InterruptedException | ExecutionException | IOException | EthereumException e) {
 			throw new EthereumException("couldn't call smart contract function", e);
 		}
 		return functionCallValue;
@@ -234,18 +234,24 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 
 	// https://github.com/web3j/web3j/blob/master/integration-tests/src/test/java/org/web3j/protocol/scenarios/GreeterContractIT.java
 	private String callSmartContractFunction(String callerAddress, String contractAddress, Function function)
-			throws InterruptedException, ExecutionException, IOException {
+			throws InterruptedException, ExecutionException, IOException, EthereumException {
 		BigInteger nonce;
 		nonce = this.getNonce(contractAddress);
 		String encodedFunction = FunctionEncoder.encode(function);
 		Transaction transaction = Transaction.createFunctionCallTransaction(callerAddress, nonce, GAS_PRICE, GAS_LIMIT_ETHER_TX, contractAddress, encodedFunction);
 		//Transaction transaction = Transaction.createEthCallTransaction(callerAddress, contractAddress, encodedFunction);
-		logger.info("[ETH] created function call [" + callerAddress + "]->[" + contractAddress + "].");
-		org.web3j.protocol.core.methods.response.EthCall response = web3j
-				.ethCall(transaction,DefaultBlockParameterName.LATEST)
+		
+		EthSendTransaction response = web3j
+				.ethSendTransaction(transaction)
 				//.sendAsync().get();
 				.send();
-		String respVal = response.getValue();
+		if ( response.hasError() )
+		{
+			throw new EthereumException("[ETH] transaction send failed: " + response.getError());
+		}
+		logger.info("[ETH] created function call [" + callerAddress + "]->[" + contractAddress + "]: txHash = " + response.getTransactionHash());
+
+		String respVal = response.getResult();
 		logger.info("[ETH] call completed, value returned: " + respVal );
 		return respVal;
 	}
