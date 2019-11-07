@@ -28,6 +28,7 @@ import org.web3j.utils.Convert;
 
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.logging.L2pLogger;
+import i5.las2peer.registry.contracts.ReputationRegistry;
 import i5.las2peer.registry.contracts.ServiceRegistry;
 import i5.las2peer.registry.contracts.UserRegistry;
 import i5.las2peer.registry.data.RegistryConfiguration;
@@ -38,11 +39,10 @@ import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.serialization.SerializeTools;
 
 /**
- * Facade providing simple read/write access to the registry smart
- * contracts.
+ * Facade providing simple read/write access to the registry smart contracts.
  *
- * Requires Ethereum credentials with sufficient Ether funds to pay
- * for transaction gas.
+ * Requires Ethereum credentials with sufficient Ether funds to pay for
+ * transaction gas.
  *
  * @see ReadOnlyRegistryClient
  */
@@ -57,11 +57,10 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 	private final L2pLogger logger = L2pLogger.getInstance(ReadWriteRegistryClient.class);
 
 	/**
-	 * Create client providing access to both read and write registry
-	 * functions.
-	 * @param registryConfiguration addresses of registry contracts and
-	 *                              Ethereum client HTTP JSON RPC API
-	 *                              endpoint
+	 * Create client providing access to both read and write registry functions.
+	 * 
+	 * @param registryConfiguration addresses of registry contracts and Ethereum
+	 *                              client HTTP JSON RPC API endpoint
 	 */
 	public ReadWriteRegistryClient(RegistryConfiguration registryConfiguration, Credentials credentials) {
 		super(registryConfiguration, credentials);
@@ -69,9 +68,11 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 
 	/**
 	 * Create new tag on blockchain.
-	 * @param tagName tag name consisting of 1 to 32 UTF-8 characters
+	 * 
+	 * @param tagName        tag name consisting of 1 to 32 UTF-8 characters
 	 * @param tagDescription tag description of arbitrary length
-	 * @throws EthereumException if transaction failed for some reason (gas? networking?)
+	 * @throws EthereumException if transaction failed for some reason (gas?
+	 *                           networking?)
 	 */
 	public void createTag(String tagName, String tagDescription) throws EthereumException {
 		try {
@@ -86,33 +87,33 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 	/**
 	 * Register an Ethereum agent in the blockchain.
 	 *
-	 * This will register the user (login) name to the agent's Ethereum
-	 * account and store some additional fields that help others verify
-	 * the user's identity. (E.g., the las2peer public key is stored in
-	 * order to verify message signatures etc.)
+	 * This will register the user (login) name to the agent's Ethereum account and
+	 * store some additional fields that help others verify the user's identity.
+	 * (E.g., the las2peer public key is stored in order to verify message
+	 * signatures etc.)
 	 *
-	 * As with the other delegated registry methods, the registration
-	 * transaction itself is performed by the node operator; but the agent's
-	 * credentials are used to sign a message consenting to the registration.
-	 * The registry smart contracts verify that signature and perform the
-	 * registration as if the transaction came directly from the agent.
-	 * (This simply means that the user name is registered to the agent's
-	 * account, not the node operator's.)
+	 * As with the other delegated registry methods, the registration transaction
+	 * itself is performed by the node operator; but the agent's credentials are
+	 * used to sign a message consenting to the registration. The registry smart
+	 * contracts verify that signature and perform the registration as if the
+	 * transaction came directly from the agent. (This simply means that the user
+	 * name is registered to the agent's account, not the node operator's.)
 	 *
 	 * This means that the node operator pays the transaction fees.
 	 */
-	public void registerUser(EthereumAgent agent) throws EthereumException, AgentLockedException,
-			SerializationException {
+	public void registerUser(EthereumAgent agent)
+			throws EthereumException, AgentLockedException, SerializationException {
 		// TODO: check that this encoding is appropriate
-		//       (e.g., is there a more space-efficient way to store the public key? probably.)
+		// (e.g., is there a more space-efficient way to store the public key?
+		// probably.)
 		// TODO: reconsider which fields are actually strictly necessary
-		//       (e.g., since we have login name and pubkey, do we really need the agentId? what for?)
+		// (e.g., since we have login name and pubkey, do we really need the agentId?
+		// what for?)
 		byte[] name = Util.padAndConvertString(agent.getLoginName(), 32);
 		byte[] agentId = Util.padAndConvertString(agent.getIdentifier(), 128);
 		byte[] publicKey = SerializeTools.serialize(agent.getPublicKey());
 
-		final Function function = new Function(
-				UserRegistry.FUNC_REGISTER,
+		final Function function = new Function(UserRegistry.FUNC_REGISTER,
 				Arrays.asList(new org.web3j.abi.datatypes.generated.Bytes32(name),
 						new org.web3j.abi.datatypes.DynamicBytes(agentId),
 						new org.web3j.abi.datatypes.DynamicBytes(publicKey)),
@@ -136,27 +137,38 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		byte[] profileName = Util.padAndConvertString(agent.getLoginName(), 32);
 		logger.info("registering user profile: " + agent.getLoginName());
 
-		String functionName = "createProfile";
-		String senderAddress = agent.getEthereumAddress();
-		String contractAddress = contracts.reputationRegistry.getContractAddress();
-		List<Type> inputParameters = new ArrayList<>();
-		inputParameters.add(new DynamicBytes(profileName));
-
 		/*
-		String txHash = this.prepareSmartContractCall(agent, contractAddress, functionName, senderAddress,
-				inputParameters);
-
-		TransactionReceipt txr = waitForTransactionReceipt(txHash);
-		*/
-		/*String txHash = this.prepareSmartContractCall(agent, contractAddress, functionName, senderAddress,
-				inputParameters);
-		logger.info("registering function called, transaction hash: " + txHash);
-		//return functionCallValue;
-		waitForTransactionReceipt(txHash);
-		return txHash;*/
-		String retVal = prepareSmartContractCall2(agent, contractAddress, functionName, senderAddress, inputParameters, Collections.<TypeReference<?>>emptyList());
-		logger.info("[ETH] contract call return value " + retVal);
-		return retVal;
+		 * String functionName = "createProfile"; String senderAddress =
+		 * agent.getEthereumAddress(); String contractAddress =
+		 * contracts.reputationRegistry.getContractAddress(); List<Type> inputParameters
+		 * = new ArrayList<>(); inputParameters.add(new DynamicBytes(profileName));
+		 */
+		/*
+		 * String txHash = this.prepareSmartContractCall(agent, contractAddress,
+		 * functionName, senderAddress, inputParameters);
+		 * 
+		 * TransactionReceipt txr = waitForTransactionReceipt(txHash);
+		 */
+		/*
+		 * String txHash = this.prepareSmartContractCall(agent, contractAddress,
+		 * functionName, senderAddress, inputParameters);
+		 * logger.info("registering function called, transaction hash: " + txHash);
+		 * //return functionCallValue; waitForTransactionReceipt(txHash); return txHash;
+		 */
+		/*
+		 * String retVal = prepareSmartContractCall2(agent, contractAddress,
+		 * functionName, senderAddress, inputParameters,
+		 * Collections.<TypeReference<?>>emptyList());
+		 * logger.info("[ETH] contract call return value " + retVal); return retVal;
+		 */
+		try {
+			contracts.reputationRegistry.createProfile(profileName).send();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new EthereumException("couldn't create profile", e);
+		}
+		return "";
 	}
 
 	private String prepareSmartContractCall(EthereumAgent agent, String contractAddress, String functionName,
