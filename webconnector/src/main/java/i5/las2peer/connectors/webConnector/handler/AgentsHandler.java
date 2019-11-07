@@ -440,7 +440,8 @@ public class AgentsHandler {
 			//ethereumNode.registerProfile(agent);
 			String txHash = ethereumNode.getRegistryClient().registerReputationProfile(agent);
 			json.put("call-transaction-hash", txHash);
-		} catch (EthereumException e) {			
+		} catch (EthereumException e) {		
+			e.printStackTrace();	
 			throw new BadRequestException("Profile registration failed", e);
 		}
 		json.put("code", Status.OK.getStatusCode());
