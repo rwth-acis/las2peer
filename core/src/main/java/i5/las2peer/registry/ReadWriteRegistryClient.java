@@ -150,6 +150,10 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		*/
 		String functionCallValue = this.prepareSmartContractCall(agent, contractAddress, functionName, senderAddress,
 				inputParameters);
+		if ( functionCallValue == "0x" )
+		{
+			logger.info("user profile registered. ");
+		}
 		return functionCallValue;
 	}
 

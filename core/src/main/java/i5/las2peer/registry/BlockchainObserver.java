@@ -150,7 +150,7 @@ class BlockchainObserver {
 				Instant i = Instant.ofEpochSecond(timestamp.longValue());
 				
 				this.users.put(userName, i.toString());
-				logger.fine("observed user registration: " + "@[" + timestamp + "]: " + userName);
+				logger.info("observed user registration: " + "@[" + timestamp + "]: " + userName);
 			}, e -> logger.severe("Error observing user registration event: " + e.toString()));
 	}
 	
@@ -167,7 +167,7 @@ class BlockchainObserver {
 				String profileName = Util.recoverString(profile.name);
 				String profileOwner = Util.recoverString(profile.owner);
 				this.profiles.put(profileOwner, profileName);
-				logger.fine("observed profile creation: [" + profileOwner + "]: " + profileName);
+				logger.info("observed profile creation: [" + profileOwner + "]: " + profileName);
 				
 			}, e -> logger.severe("Error observing profile creation event: " + e.toString()));
 	}
