@@ -15,6 +15,7 @@ import org.web3j.abi.datatypes.DynamicBytes;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.crypto.Credentials;
+import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
@@ -127,7 +128,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		}
 	}
 
-	public TransactionReceipt registerReputationProfile(EthereumAgent agent) throws EthereumException {
+	public String registerReputationProfile(EthereumAgent agent) throws EthereumException {
 		if (!agent.hasLoginName()) {
 			throw new EthereumException("Could not create reputation profile: agent has no login name");
 		}
@@ -141,34 +142,47 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		List<Type> inputParameters = new ArrayList<>();
 		inputParameters.add(new DynamicBytes(profileName));
 
+		/*
 		String txHash = this.prepareSmartContractCall(agent, contractAddress, functionName, senderAddress,
 				inputParameters);
 
-		TransactionReceipt txr = waitForTransactionReceipt(functionName, contractAddress, txHash);
-		return txr;
+		TransactionReceipt txr = waitForTransactionReceipt(txHash);
+		*/
+		String functionCallValue = this.prepareSmartContractCall(agent, contractAddress, functionName, senderAddress,
+				inputParameters);
+		return functionCallValue;
 	}
 
-	private String prepareSmartContractCall(EthereumAgent agent, String contractAddress, String functionName, String senderAddress,
-			List<Type> inputParameters) throws EthereumException {
+	private String prepareSmartContractCall(EthereumAgent agent, String contractAddress, String functionName,
+			String senderAddress, List<Type> inputParameters) throws EthereumException {
 		return this.prepareSmartContractCall(agent, contractAddress, functionName, senderAddress, inputParameters,
 				Collections.<TypeReference<?>>emptyList() // default to empty output
 		);
 	}
 
-	private String prepareSmartContractCall(EthereumAgent agent, String contractAddress, String functionName, String senderAddress,
-			List<Type> inputParameters, List<TypeReference<?>> outputParameters) throws EthereumException {
+	private String prepareSmartContractCall(EthereumAgent agent, String contractAddress, String functionName,
+			String senderAddress, List<Type> inputParameters, List<TypeReference<?>> outputParameters)
+			throws EthereumException {
+
+		Function function = new Function(functionName, inputParameters, outputParameters);
+		
+		String callerAddress = agent.getEthereumAddress();
+		String functionCallValue;
+		try {
+			functionCallValue = this.callSmartContractFunction(callerAddress, contractAddress, function);
+		} catch (InterruptedException | ExecutionException e) {
+			throw new EthereumException("couldn't call smart contract function", e);
+		}
+		return functionCallValue;
+
+		/*
 		BigInteger nonce;
 		try {
 			nonce = this.getNonce(contractAddress);
 		} catch (InterruptedException | ExecutionException e) {
 			throw new EthereumException("Could not obtain nonce for contract: " + e.getMessage(), e);
 		}
-
-		Function function = new Function(functionName, inputParameters, outputParameters // output params
-		);
 		String encodedFunction = FunctionEncoder.encode(function);
-		/*return Transaction.createFunctionCallTransaction(senderAddress, nonce, GAS_PRICE, GAS_LIMIT_ETHER_TX,
-				contractAddress, new BigInteger("0"), encodedFunction);*/
 		
 		// RawTransactionManager use a wallet (credential) to create and sign
 		// transaction
@@ -209,11 +223,30 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 			throw new EthereumException("Could not send contract call: " + e.getMessage(), e);
 		}
 		return txHash;
+		*/
+
 	}
 
-	private TransactionReceipt waitForTransactionReceipt(String functionName, String contractAddress, String txHash)
+	// https://github.com/web3j/web3j/blob/master/integration-tests/src/test/java/org/web3j/protocol/scenarios/GreeterContractIT.java
+	private String callSmartContractFunction(String callerAddress, String contractAddress, Function function)
+			throws InterruptedException, ExecutionException {
+
+		String encodedFunction = FunctionEncoder.encode(function);
+
+		Transaction transaction = Transaction.createEthCallTransaction(callerAddress, contractAddress, encodedFunction);
+		logger.info("[ETH] created function call [" + callerAddress + "]->[" + contractAddress + "].");
+		logger.info("[ETH] call gas: " + transaction.getGas() + ", gas price" + transaction.getGasPrice() );
+		org.web3j.protocol.core.methods.response.EthCall response = web3j
+				.ethCall(transaction,DefaultBlockParameterName.LATEST)
+				.sendAsync().get();
+		String respVal = response.getValue();
+		logger.info("[ETH] call completed, value returned: " + respVal );
+		return respVal;
+	}
+
+	private TransactionReceipt waitForTransactionReceipt(String txHash)
 			throws EthereumException {
-		logger.fine("waiting for receipt on [" + txHash + "]... ");
+		logger.info("waiting for receipt on [" + txHash + "]... ");
 		TransactionReceipt txR;
 		try {
 			txR = waitForReceipt(txHash);
@@ -222,7 +255,9 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 			}
 			if (!txR.isStatusOK()) {
 				logger.warning("trx fail with status " + txR.getStatus());
-				if (txHash != txR.getTransactionHash()) {
+				String gasUsed = String.valueOf(Convert.fromWei(String.valueOf(txR.getCumulativeGasUsedRaw()), Convert.Unit.ETHER));
+				logger.warning("gas used " + gasUsed);
+				if (!txHash.equals(txR.getTransactionHash())) {
 					logger.warning("transaction hash mismatch");
 				}
 				logger.warning(txR.toString());
@@ -231,7 +266,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		} catch (InterruptedException | ExecutionException e) {
 			throw new EthereumException("Wait for receipt interrupted or failed.");
 		}
-		logger.fine("receipt for [" + txHash + "] received.");
+		logger.info("receipt for [" + txHash + "] received.");
 		
 		return txR;
 	}
