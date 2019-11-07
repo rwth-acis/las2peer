@@ -137,30 +137,34 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		byte[] profileName = Util.padAndConvertString(agent.getLoginName(), 32);
 		logger.info("registering user profile: " + agent.getLoginName());
 
+		
+		  String functionName = "createProfile"; 
+		  String senderAddress = agent.getEthereumAddress(); 
+		  String contractAddress = contracts.reputationRegistry.getContractAddress(); 
+		  List<Type> inputParameters = new ArrayList<>(); 
+		  inputParameters.add(new DynamicBytes(profileName));
+		 
 		/*
-		 * String functionName = "createProfile"; String senderAddress =
-		 * agent.getEthereumAddress(); String contractAddress =
-		 * contracts.reputationRegistry.getContractAddress(); List<Type> inputParameters
-		 * = new ArrayList<>(); inputParameters.add(new DynamicBytes(profileName));
+		  String txHash = this.prepareSmartContractCall(agent, contractAddress,
+		  functionName, senderAddress, inputParameters);
+		  
+		  TransactionReceipt txr = waitForTransactionReceipt(txHash);
 		 */
 		/*
-		 * String txHash = this.prepareSmartContractCall(agent, contractAddress,
-		 * functionName, senderAddress, inputParameters);
-		 * 
-		 * TransactionReceipt txr = waitForTransactionReceipt(txHash);
+		  String txHash = this.prepareSmartContractCall(agent, contractAddress,
+		  functionName, senderAddress, inputParameters);
+		  logger.info("registering function called, transaction hash: " + txHash);
+		  //return functionCallValue; 
+		  waitForTransactionReceipt(txHash); 
+		  return txHash;
 		 */
+		
+		  String retVal = prepareSmartContractCall2(agent, contractAddress,
+		  functionName, senderAddress, inputParameters,
+		  Collections.<TypeReference<?>>emptyList());
+		  logger.info("[ETH] contract call return value " + retVal); 
+		  return retVal;
 		/*
-		 * String txHash = this.prepareSmartContractCall(agent, contractAddress,
-		 * functionName, senderAddress, inputParameters);
-		 * logger.info("registering function called, transaction hash: " + txHash);
-		 * //return functionCallValue; waitForTransactionReceipt(txHash); return txHash;
-		 */
-		/*
-		 * String retVal = prepareSmartContractCall2(agent, contractAddress,
-		 * functionName, senderAddress, inputParameters,
-		 * Collections.<TypeReference<?>>emptyList());
-		 * logger.info("[ETH] contract call return value " + retVal); return retVal;
-		 */
 		try {
 			contracts.reputationRegistry.createProfile(profileName).send();
 		} catch (Exception e) {
@@ -169,6 +173,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 			throw new EthereumException("couldn't create profile", e);
 		}
 		return "";
+		*/
 	}
 
 	private String prepareSmartContractCall(EthereumAgent agent, String contractAddress, String functionName,
@@ -250,7 +255,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		BigInteger nonce;
 		nonce = this.getNonce(contractAddress);
 		String encodedFunction = FunctionEncoder.encode(function);
-		Transaction transaction = Transaction.createFunctionCallTransaction(callerAddress, nonce, GAS_PRICE, GAS_LIMIT_ETHER_TX, contractAddress, encodedFunction);
+		Transaction transaction = Transaction.createFunctionCallTransaction(callerAddress, nonce, DefaultGasProvider.GAS_PRICE, DefaultGasProvider.GAS_LIMIT, contractAddress, encodedFunction);
 		//Transaction transaction = Transaction.createEthCallTransaction(callerAddress, contractAddress, encodedFunction);
 		
 		EthSendTransaction response = web3j
