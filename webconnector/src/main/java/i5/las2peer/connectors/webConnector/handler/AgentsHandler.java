@@ -438,8 +438,8 @@ public class AgentsHandler {
 		//JSONObject json = new JSONObject();
 		try {
 			//ethereumNode.registerProfile(agent);
-			String retVal = ethereumNode.getRegistryClient().registerReputationProfile(agent);
-			json.put("call-return-value", retVal);
+			String txHash = ethereumNode.getRegistryClient().registerReputationProfile(agent);
+			json.put("call-transaction-hash", txHash);
 		} catch (EthereumException e) {			
 			throw new BadRequestException("Profile registration failed", e);
 		}

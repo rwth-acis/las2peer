@@ -148,10 +148,12 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 
 		TransactionReceipt txr = waitForTransactionReceipt(txHash);
 		*/
-		String functionCallValue = this.prepareSmartContractCall(agent, contractAddress, functionName, senderAddress,
+		String txHash = this.prepareSmartContractCall(agent, contractAddress, functionName, senderAddress,
 				inputParameters);
-		logger.info("registering function called, return: " + functionCallValue);
-		return functionCallValue;
+		logger.info("registering function called, transaction hash: " + txHash);
+		//return functionCallValue;
+		waitForTransactionReceipt(txHash);
+		return txHash;
 	}
 
 	private String prepareSmartContractCall(EthereumAgent agent, String contractAddress, String functionName,
@@ -251,7 +253,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		return respVal;
 	}
 
-	private TransactionReceipt waitForTransactionReceipt(String txHash)
+	private void waitForTransactionReceipt(String txHash)
 			throws EthereumException {
 		logger.info("waiting for receipt on [" + txHash + "]... ");
 		TransactionReceipt txR;
@@ -275,7 +277,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		}
 		logger.info("receipt for [" + txHash + "] received.");
 		
-		return txR;
+		//return txR;
 	}
 	
 	public void addUserRating(UserData receivingAgent, Integer rating ) throws EthereumException
