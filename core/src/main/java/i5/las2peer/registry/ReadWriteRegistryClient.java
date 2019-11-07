@@ -182,14 +182,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 	private String prepareSmartContractCall(EthereumAgent agent, String contractAddress, String functionName,
 			String senderAddress, List<Type> inputParameters, List<TypeReference<?>> outputParameters)
 			throws EthereumException {
-		/*
-		BigInteger nonce;
-		try {
-			nonce = this.getNonce(contractAddress);
-		} catch (InterruptedException | ExecutionException e) {
-			throw new EthereumException("Could not obtain nonce for contract: " + e.getMessage(), e);
-		}
-		*/
+
 		Function function = new Function(functionName, inputParameters, outputParameters);
 		String encodedFunction = FunctionEncoder.encode(function);
 		
@@ -239,10 +232,11 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 	// https://github.com/web3j/web3j/blob/master/integration-tests/src/test/java/org/web3j/protocol/scenarios/GreeterContractIT.java
 	private String callSmartContractFunction(String callerAddress, String contractAddress, Function function)
 			throws InterruptedException, ExecutionException, IOException {
-
+		BigInteger nonce;
+		nonce = this.getNonce(contractAddress);
 		String encodedFunction = FunctionEncoder.encode(function);
-
-		Transaction transaction = Transaction.createEthCallTransaction(callerAddress, contractAddress, encodedFunction);
+		Transaction transaction = Transaction.createFunctionCallTransaction(callerAddress, nonce, GAS_PRICE, GAS_LIMIT_ETHER_TX, contractAddress, encodedFunction);
+		//Transaction transaction = Transaction.createEthCallTransaction(callerAddress, contractAddress, encodedFunction);
 		logger.info("[ETH] created function call [" + callerAddress + "]->[" + contractAddress + "].");
 		org.web3j.protocol.core.methods.response.EthCall response = web3j
 				.ethCall(transaction,DefaultBlockParameterName.LATEST)
