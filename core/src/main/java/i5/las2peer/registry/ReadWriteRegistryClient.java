@@ -264,8 +264,8 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 			}
 			if (!txR.isStatusOK()) {
 				logger.warning("trx fail with status " + txR.getStatus());
-				String gasUsed = String.valueOf(Convert.fromWei(String.valueOf(txR.getCumulativeGasUsedRaw()), Convert.Unit.ETHER));
-				logger.warning("gas used " + gasUsed);
+				//String gasUsed = String.valueOf(Convert.fromWei(String.valueOf(txR.getCumulativeGasUsedRaw()), Convert.Unit.ETHER));
+				logger.warning("gas used " + txR.getCumulativeGasUsed());
 				if (!txHash.equals(txR.getTransactionHash())) {
 					logger.warning("transaction hash mismatch");
 				}
