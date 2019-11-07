@@ -113,7 +113,7 @@ class AgentsView extends PolymerElement {
                  on-error="_handleError"
                  loading="{{_working}}"></iron-ajax>
       <iron-ajax id="ajaxReputationProfile"
-                 method="POST"
+                 method="GET"
                  url$="[[apiEndpoint]]/agents/registerProfile"
                  handle-as="json"
                  on-response="_handleRegisterProfileResponse"
