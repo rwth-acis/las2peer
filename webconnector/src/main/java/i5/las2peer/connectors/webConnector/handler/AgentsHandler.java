@@ -187,11 +187,11 @@ public class AgentsHandler {
 		ReadWriteRegistryClient registryClient = ethereumNode.getRegistryClient();
 		EthereumAgent ethAgent = (EthereumAgent) agent;
 		String ethAddress = ethAgent.getEthereumAddress();
-		BigInteger faucetAmount = Convert.toWei("0.123", Convert.Unit.ETHER).toBigInteger(); // const FAUCET_AMOUNT
+		BigInteger faucetAmount = Convert.toWei("0.8", Convert.Unit.ETHER).toBigInteger(); // const FAUCET_AMOUNT
 		JSONObject json = new JSONObject();
 		json.put("agentid", agent.getIdentifier());
 		json.put("eth-target-add", ethAddress);
-		json.put("eth-faucet-amount", "0.123 ETH");
+		json.put("eth-faucet-amount", "0.8 ETH");
 		
 		TransactionReceipt txR = null;
 		

@@ -161,7 +161,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		);
 	}
 
-	private String prepareSmartContractCall(EthereumAgent agent, String contractAddress, String functionName,
+	private String prepareSmartContractCall2(EthereumAgent agent, String contractAddress, String functionName,
 			String senderAddress, List<Type> inputParameters, List<TypeReference<?>> outputParameters)
 			throws EthereumException {
 
@@ -175,7 +175,11 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 			throw new EthereumException("couldn't call smart contract function", e);
 		}
 		return functionCallValue;
+	}
 
+	private String prepareSmartContractCall(EthereumAgent agent, String contractAddress, String functionName,
+			String senderAddress, List<Type> inputParameters, List<TypeReference<?>> outputParameters)
+			throws EthereumException {
 		/*
 		BigInteger nonce;
 		try {
@@ -183,6 +187,8 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		} catch (InterruptedException | ExecutionException e) {
 			throw new EthereumException("Could not obtain nonce for contract: " + e.getMessage(), e);
 		}
+		*/
+		Function function = new Function(functionName, inputParameters, outputParameters);
 		String encodedFunction = FunctionEncoder.encode(function);
 		
 		// RawTransactionManager use a wallet (credential) to create and sign
@@ -203,7 +209,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 						DefaultGasProvider.GAS_LIMIT, 
 						contractAddress, 
 						encodedFunction, 
-						BigInteger.ZERO
+						BigInteger.ONE
 					);
 			
 			txHash = ethSendTransaction.getTransactionHash();
@@ -224,7 +230,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 			throw new EthereumException("Could not send contract call: " + e.getMessage(), e);
 		}
 		return txHash;
-		*/
+		
 
 	}
 
