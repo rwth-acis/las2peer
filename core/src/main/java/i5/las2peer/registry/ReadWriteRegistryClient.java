@@ -156,6 +156,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		return txHash;*/
 		String retVal = prepareSmartContractCall2(agent, contractAddress, functionName, senderAddress, inputParameters, Collections.<TypeReference<?>>emptyList());
 		logger.info("[ETH] contract call return value " + retVal);
+		return retVal;
 	}
 
 	private String prepareSmartContractCall(EthereumAgent agent, String contractAddress, String functionName,
