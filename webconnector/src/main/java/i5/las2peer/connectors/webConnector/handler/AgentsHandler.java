@@ -43,6 +43,7 @@ import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.registry.ReadOnlyRegistryClient;
 import i5.las2peer.registry.ReadWriteRegistryClient;
 import i5.las2peer.registry.data.UserData;
+import i5.las2peer.registry.data.UserProfileData;
 import i5.las2peer.registry.exceptions.EthereumException;
 import i5.las2peer.registry.exceptions.NotFoundException;
 import i5.las2peer.serialization.MalformedXMLException;
@@ -490,46 +491,20 @@ public class AgentsHandler {
 				agents.add((EthereumAgent)userAgent);
 			}
 		}
-		/*
-		for( Map.Entry<String, String> profile : profiles.entrySet() )
-		{
-			String owner = profile.getKey().toString();
-			String username = profile.getValue().toString();
-			AgentImpl userAgent = null;
-			try {
-				userAgent = getAgentByDetail(owner, username, null);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			if ( userAgent instanceof UserAgentImpl )
-			{
-				agents.add((UserAgentImpl) userAgent);
-			}
-		}
-		*/
 		
 		JSONObject json = new JSONObject();
 		json.put("code", Status.OK.getStatusCode());
 		json.put("text", Status.OK.getStatusCode() + " - UserList loaded");
 		JSONArray memberList = new JSONArray();
 		
-		
-		
-		// TODO: query agent list from blockchain
-		// TODO: figure out mapping blockchain <-> actors
 		for( EthereumAgent agent: agents)
 		{
 			String ownerAddress = "";
 			try {
 				ownerAddress = ethereumNode.getRegistryClient().getUser(agent.getLoginName()).getOwnerAddress();
 				logger.info("found user ["+agent.getLoginName()+"|"+ownerAddress+"]");
-			} catch (EthereumException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (NotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			} catch (EthereumException | NotFoundException e) {
+				throw new BadRequestException("cannot get ethereum owner address for user agent " + agent.getLoginName());
 			}
 			if ( ownerAddress == "" ) {
 				ownerAddress = agent.getEthereumAddress();
@@ -546,9 +521,70 @@ public class AgentsHandler {
 			memberList.add(member);
 		}
 		
-		
-		
 		json.put("members", memberList);
+		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
+	}
+
+	@POST
+	@Path("/listProfiles")
+	public Response handleListProfiles(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId) {
+		JSONObject json = new JSONObject();
+		
+		List<EthereumAgent> agents = new ArrayList<EthereumAgent>();
+		ConcurrentMap<String, String> userProfiles = ethereumNode.getRegistryClient().getUserProfiles();
+		for (Map.Entry<String, String> userProfile : userProfiles.entrySet()) {
+			String username = userProfile.getKey().toString();
+			AgentImpl userAgent = null;
+			try {
+				userAgent = getAgentByDetail(null, username, null);
+				userAgent = ethereumNode.getAgent(userAgent.getIdentifier());
+			} catch (Exception e) {
+				throw new BadRequestException("cannot get agent for profile");
+			}
+			if (userAgent instanceof EthereumAgent) {
+				agents.add((EthereumAgent) userAgent);
+			}
+		}
+
+		json.put("code", Status.OK.getStatusCode());
+		json.put("text", Status.OK.getStatusCode() + " - UserList loaded");
+		JSONArray memberList = new JSONArray();
+		
+		for (EthereumAgent agent : agents) {
+			String ownerAddress = agent.getEthereumAddress();
+			UserProfileData profile;
+			try {
+				profile = ethereumNode.getRegistryClient().getProfile(ownerAddress);
+			} catch (EthereumException | NotFoundException e) {
+				throw new BadRequestException("cannot get profile for agent", e);
+			}
+			
+			JSONObject member = new JSONObject();
+			member.put("agentid", agent.getIdentifier());
+			member.put("address", ownerAddress);
+
+			member.put("username", agent.getLoginName());
+			member.put("email", agent.getEmail());
+			BigInteger cumulativeScore = profile.getCumulativeScore();
+			BigInteger noTransactions = profile.getNoTransactions();
+			member.put("cumulative-score", cumulativeScore.toString());
+			member.put("no-of-transactions", noTransactions.toString());
+			if ( noTransactions.compareTo(BigInteger.ZERO) == 0 )
+			{
+				member.put("rating", 0);
+			}
+			else
+			{
+				member.put("rating", cumulativeScore.divide(noTransactions));
+			}
+
+			memberList.add(member);
+		}
+		
+		
+		
+		
+		
 		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
 	}
 	

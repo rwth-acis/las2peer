@@ -84,6 +84,13 @@ class AgentsView extends PolymerElement {
                  on-response="_handleLoadAgentlistResponse"
                  on-error="_handleError"
                  loading="{{_working}}"></iron-ajax>
+      <iron-ajax id="ajaxListProfiles"
+                 method="POST"
+                 url$="[[apiEndpoint]]/agents/listProfiles"
+                 handle-as="json"
+                 on-response="_handleLoadProfilelistResponse"
+                 on-error="_handleError"
+                 loading="{{_working}}"></iron-ajax>
       <iron-ajax id="ajaxRateAgent"
                  method="POST"
                  url$="[[apiEndpoint]]/agents/rateAgent"
@@ -105,6 +112,13 @@ class AgentsView extends PolymerElement {
                  on-response="_handleRequestFaucetResponse"
                  on-error="_handleError"
                  loading="{{_working}}"></iron-ajax>
+      <iron-ajax id="ajaxRegisterProfile"
+                 method="POST"
+                 url$="[[apiEndpoint]]/agents/registerProfile"
+                 handle-as="json"
+                 on-response="_handleRegisterProfileResponse"
+                 on-error="_handleError"
+                 loading="{{_working}}"></iron-ajax>                 
 
       <style include="shared-styles">
         :host {
@@ -136,6 +150,9 @@ class AgentsView extends PolymerElement {
               <paper-button raised on-click="requestEthFaucet" disabled="[[_working]]">
                 <iron-icon icon="card-giftcard"></iron-icon> Request funds from faucet
               </paper-button>
+              <paper-button raised on-click="requestReputationProfile" disabled="[[_working]]">
+                <iron-icon icon="record-voice-over"></iron-icon> Request reputation profile
+              </paper-button>
             </p>
             </template>
           </iron-collapse>
@@ -154,9 +171,40 @@ class AgentsView extends PolymerElement {
               	<th>Agentid</th>
               	<th>Adress</th>
               	<th>Username</th>
-              	<th>Reputation</th>
+              	<!--<th>Reputation</th>-->
               </tr>
               <template is="dom-repeat" items="[[_listAgents]]" as="agent">
+                <tr>
+                  <td>[[agent.shortid]]</td>
+                  <td>[[agent.address]]</td>
+                  <td>[[agent.username]]</td>
+                  <!--
+                  <td>
+                  	<iron-star-rating value="[[agent.rating]]" on-rating-selected="rateAgent"></iron-star-rating>
+                  </td>
+                  -->
+                </tr>
+              </template>
+            </table>
+          </template>
+        </iron-collapse>
+
+        <!-- PROFILES LIST -->
+        <h2 on-click="toggleProfileList" style="cursor: pointer">
+          List User Profiles
+          <paper-icon-button icon="refresh" title="Refresh Profiles List" on-click="refreshProfilesList" disabled="[[_working]]"></paper-button>
+        </h2>
+        <iron-collapse id="collapseProfileList">
+          <template is="dom-if" if="[[!_hasNoProfilesList]]">
+            <h3>Members</h3>
+            <table width="100%">
+              <tr>
+              	<th>Agentid</th>
+              	<th>Adress</th>
+              	<th>Username</th>
+              	<th>Reputation</th>
+              </tr>
+              <template is="dom-repeat" items="[[_listProfiles]]" as="agent">
                 <tr>
                   <td>[[agent.shortid]]</td>
                   <td>[[agent.address]]</td>
@@ -302,11 +350,13 @@ class AgentsView extends PolymerElement {
       _working: Boolean,
       _EthWallet: { type: Array, value: [] },
       _hasNoAgentsList: { type: Boolean, value: true },
+      _hasNoProfilesList: { type: Boolean, value: true },
       _hasNoEthWallet: { type: Boolean, value: true },
       _hasNoManageAgents: { type: Boolean, value: true },
       _hasNoMemberAgents: { type: Boolean, value: true },
       _isAjaxLoading: { type: Boolean, value: true },
       _listAgents: { type: Array, value: [] },
+      _listProfiles: { type: Array, value: [] },
       _manageAgents: { type: Array, value: [] },
       _manageGroupAgentId: String,
       _memberAgents: { type: Array, value: [] },
@@ -328,9 +378,12 @@ class AgentsView extends PolymerElement {
   }
   refreshEthWallet() { this.$.ajaxGetEthWallet.generateRequest(); }
   requestEthFaucet() { this.$.ajaxRequestFaucet.generateRequest(); }
+  requestRegisterProfile() { this.$.ajaxRegisterProfile.generateRequest(); }
   refreshAgentsList() { this.$.ajaxListAgents.generateRequest(); }
+  refreshProfilesList() { this.$.ajaxListProfiles.generateRequest(); }
   toggleCreateAgent() { this.$.collapseCreateAgent.toggle(); }
   toggleAgentList() { this.$.collapseAgentList.toggle(); }
+  toggleProfileList() { this.$.collapseProfileList.toggle(); }
   toggleEthWallet() { this.$.collapseEthWallet.toggle(); }
 
   _agentIdChanged(agentid) {
@@ -348,6 +401,13 @@ class AgentsView extends PolymerElement {
     this._listAgents = response.members;
     this._hasNoAgentsList = false;
   }
+  _handleLoadProfilelistResponse(event) {
+    console.log(event.detail.response);
+    let response = event.detail.response;
+    response.members.forEach(function (element) { element.shortid = element.agentid.substr(0, 15) + '...' });
+    this._listProfiles = response.members;
+    this._hasNoProfilesList = false;
+  }  
   _handleRateAgentResponse(event) {
 	  console.log(event);
 	  let response = event.detail.response;
@@ -378,6 +438,9 @@ class AgentsView extends PolymerElement {
   _handleRequestFaucetResponse(event) {
 	  console.log(event.detail.response);
 	  this.refreshEthWallet();
+  }
+  _handleRegisterProfileResponse(event) {
+    console.log(event.detail.response);
   }
 
   _keyPressedCreateAgent(event) {

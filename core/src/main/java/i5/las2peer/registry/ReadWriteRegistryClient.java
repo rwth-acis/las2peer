@@ -239,7 +239,6 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 
 		Transaction transaction = Transaction.createEthCallTransaction(callerAddress, contractAddress, encodedFunction);
 		logger.info("[ETH] created function call [" + callerAddress + "]->[" + contractAddress + "].");
-		logger.info("[ETH] call gas: " + transaction.getGas() + ", gas price" + transaction.getGasPrice() );
 		org.web3j.protocol.core.methods.response.EthCall response = web3j
 				.ethCall(transaction,DefaultBlockParameterName.LATEST)
 				.sendAsync().get();
