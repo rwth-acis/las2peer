@@ -255,9 +255,12 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		BigInteger nonce;
 		nonce = this.getNonce(contractAddress);
 		String encodedFunction = FunctionEncoder.encode(function);
+		logger.info("[ETH] creating function call [" + callerAddress + "]->[" + contractAddress + "]: nonce = "+ nonce);
+		
 		Transaction transaction = Transaction.createFunctionCallTransaction(callerAddress, nonce, DefaultGasProvider.GAS_PRICE, DefaultGasProvider.GAS_LIMIT, contractAddress, encodedFunction);
 		//Transaction transaction = Transaction.createEthCallTransaction(callerAddress, contractAddress, encodedFunction);
-		
+		logger.info("[ETH] gas estimate: " + web3j.ethEstimateGas(transaction).send().getResult() );
+		logger.info("[ETH] gas price: " + DefaultGasProvider.GAS_PRICE + ", gas limit: " + DefaultGasProvider.GAS_LIMIT );
 		EthSendTransaction response = web3j
 				.ethSendTransaction(transaction)
 				//.sendAsync().get();
