@@ -247,7 +247,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 				.send();
 		if ( response.hasError() )
 		{
-			throw new EthereumException("[ETH] transaction send failed: " + response.getError());
+			throw new EthereumException("[ETH] transaction send failed, error [" + response.getError().getCode() + "]: " + response.getError().getMessage());
 		}
 		logger.info("[ETH] created function call [" + callerAddress + "]->[" + contractAddress + "]: txHash = " + response.getTransactionHash());
 
