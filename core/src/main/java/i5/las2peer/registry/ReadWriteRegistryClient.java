@@ -148,12 +148,14 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 
 		TransactionReceipt txr = waitForTransactionReceipt(txHash);
 		*/
-		String txHash = this.prepareSmartContractCall(agent, contractAddress, functionName, senderAddress,
+		/*String txHash = this.prepareSmartContractCall(agent, contractAddress, functionName, senderAddress,
 				inputParameters);
 		logger.info("registering function called, transaction hash: " + txHash);
 		//return functionCallValue;
 		waitForTransactionReceipt(txHash);
-		return txHash;
+		return txHash;*/
+		String retVal = prepareSmartContractCall2(agent, contractAddress, functionName, senderAddress, inputParameters, Collections.<TypeReference<?>>emptyList());
+		logger.info("[ETH] contract call return value " + retVal);
 	}
 
 	private String prepareSmartContractCall(EthereumAgent agent, String contractAddress, String functionName,
