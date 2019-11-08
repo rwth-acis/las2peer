@@ -173,17 +173,18 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		logger.info("[ETH] contract call return value " + retVal);
 		return retVal;
 		*/
-		/*
+		
 		String txHash = this.callContract(agent, contractAddress, senderAddress, encodedFunction);
 		logger.info("[ETH] contract call txHash: " + txHash );
 		waitForTransactionReceipt(txHash);
 		return txHash;
-		*/
+		
 		/*
 		   try { contracts.reputationRegistry.createProfile(profileName).send(); } catch
 		   (Exception e) { // TODO Auto-generated catch block e.printStackTrace(); throw
 		   new EthereumException("couldn't create profile", e); } return "";
 		 */
+		/*
 		String respVal;
 		try {
 			respVal = this.callSmartContractFunction(senderAddress, contractAddress, function);
@@ -191,6 +192,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 			throw new EthereumException("couldn't execute smart contract function call", e);
 		}
 		return respVal;
+		*/
 	}
 
 	private String prepareSmartContractCall(EthereumAgent agent, String contractAddress, String functionName,
