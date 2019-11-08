@@ -145,6 +145,8 @@ class AgentsView extends PolymerElement {
                 <strong><iron-icon icon="fingerprint"></iron-icon> Eth Address: </strong> [[_EthWallet.eth-agent-address]] <br />
                 <strong><iron-icon icon="account-balance-wallet"></iron-icon> Eth Mnemonic: </strong> [[_EthWallet.eth-mnemonic]] <br />
                 <strong><iron-icon icon="account-balance"></iron-icon> Eth Balance: </strong> [[_EthWallet.eth-acc-balance]]
+                <strong><iron-icon icon="star-half"></iron-icon> Reputation Cumulative Score: </strong> [[_EthWallet.eth-cumulative-score]]
+                <strong><iron-icon icon="stars"></iron-icon> Reputation No Transactions: </strong> [[_EthWallet.eth-no-transactions]]
               </p>
             <p>
               <paper-button raised on-click="requestEthFaucet" disabled="[[_working]]">

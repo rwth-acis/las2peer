@@ -21,10 +21,10 @@ public class UserProfileData {
 	}
 
 	public String getOwner() {
-		return Util.recoverString(this.owner);
+		return this.owner;
 	}
 
-	public String getuserName() {
+	public String getUserName() {
 		return Util.recoverString(this.userName);
 	}
 
@@ -40,7 +40,7 @@ public class UserProfileData {
 	public String toString() {
 		return "UserProfileData("+
 			"owner: " + this.getOwner() + 
-			", userName: " + this.getuserName() + 
+			", userName: " + this.getUserName() + 
 			", cumulativeScore: " + this.getCumulativeScore().toString() + 
 			", noTransactions: " + this.getNoTransactions().toString() +
 		")";

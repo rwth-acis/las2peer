@@ -159,9 +159,27 @@ public class AgentsHandler {
 				json.put("eth-agent-address", ethAccId);
 				String accBalance = ethereumNode.getRegistryClient().getAccountBalance(ethAccId);
 				json.put("eth-acc-balance", accBalance);
+				UserProfileData upd = null;
+				try {
+					upd = ethereumNode.getRegistryClient().getProfile(ethAccId);
+					if (upd != null) {
+						if (upd.getOwner().length() > 0) {
+							json.put("eth-profile-owner", upd.getOwner());
+						}
+						json.put("eth-cumulative-score", upd.getCumulativeScore().toString());
+						json.put("eth-no-transactions", upd.getNoTransactions().toString());
+					} else {
+						json.put("eth-cumulative-score", "???");
+						json.put("eth-no-transactions", "???");
+					}
+				}
+				catch (EthereumException| NotFoundException e)
+				{
+					e.printStackTrace();
+				}
+
 			}
 			
-
 			String ethAddress = ethAgent.getEthereumAddress();
 			json.put("eth-agent-credentials-address", ethAddress);
 			
@@ -170,7 +188,6 @@ public class AgentsHandler {
 				json.put("eth-mnemonic", ethAgent.getEthereumMnemonic());
 			}
 			
-
 			
 			//UserData ethUser = ethereumNode.getRegistryClient().getUser(ethAgent.getLoginName());
 			//if ( ethUser != null ) { json.put("eth-user-address", ethUser.getOwnerAddress()); }
@@ -243,6 +260,7 @@ public class AgentsHandler {
 		AgentImpl agent = session.getAgent();
 		try {
 			json = addAgentDetailsToJson(agent, json, true);
+			
 		} catch (EthereumException e) {
 			return Response.status(Status.NOT_FOUND).entity("Agent not found").build();
 		} catch (NotFoundException e) {
