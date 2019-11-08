@@ -108,7 +108,7 @@ public class EthereumAgent extends UserAgentImpl {
 		ethereumAddress = credentials.getAddress();
 		if ( ethereumAccountId.length() > 0 )
 		{
-			Boolean personalAccUnlocked = registryClient.unlockAccount(ethereumAccountId, credentials.getEcKeyPair().getPrivateKey().toString());
+			Boolean personalAccUnlocked = registryClient.unlockAccount(ethereumAccountId, passphrase);
 			if ( !personalAccUnlocked )
 			{
 				throw new AgentAccessDeniedException("could not unlock ethereum personal account " + ethereumAccountId);
@@ -183,7 +183,7 @@ public class EthereumAgent extends UserAgentImpl {
 		KeyPair keyPair = CryptoTools.generateKeyPair();
 		String newAccId;
 		try {
-			newAccId = regClient.registerPersonalAccount(keyPair.getPrivate().toString());
+			newAccId = regClient.registerPersonalAccount(passphrase);
 		} catch (IOException e) {
 			throw new AgentOperationFailedException("couldn't register personal eth account", e);
 		}
