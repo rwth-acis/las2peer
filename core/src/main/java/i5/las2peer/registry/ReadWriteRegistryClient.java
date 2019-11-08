@@ -277,22 +277,25 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		// Transaction transaction = Transaction.createEthCallTransaction(callerAddress,
 		// contractAddress, encodedFunction);
 		//logger.info("[ETH] gas estimate: " + web3j.ethEstimateGas(transaction).send().getAmountUsed());
-		logger.info("[ETH] function gas: " + transaction.getGas() + ", gasPrice: " + transaction.getGasPrice());
+
+		String transactionGas = String.valueOf(Convert.fromWei(String.valueOf(transaction.getGas()), Convert.Unit.ETHER));
+		String transactionGasPrice = String
+				.valueOf(Convert.fromWei(String.valueOf(transaction.getGasPrice()), Convert.Unit.ETHER));
+
+		logger.info("[ETH] function gas: " + transactionGas + ", gasPrice: " + transactionGasPrice );
 		logger.info(
 				"[ETH] gas price: " + DefaultGasProvider.GAS_PRICE + ", gas limit: " + DefaultGasProvider.GAS_LIMIT);
 		EthSendTransaction response = web3j.ethSendTransaction(transaction)
-				// .sendAsync().get();
-				.send();
+				.sendAsync().get();
+				//.send();
 				
 		if (response.hasError()) {
 			throw new EthereumException("[ETH] transaction send failed, error [" + response.getError().getCode() + "]: "
 					+ response.getError().getMessage());
 		}
-		logger.info("[ETH] created function call [" + callerAddress + "]->[" + contractAddress + "]: txHash = "
-				+ response.getTransactionHash());
+		logger.info("[ETH] created function call [" + callerAddress + "]->[" + contractAddress + "]");
+		logger.info("[ETH] txHash = " + response.getTransactionHash() );
 
-		String respVal = response.getResult();
-		logger.info("[ETH] call completed, value returned: " + respVal);
 		return response.getTransactionHash();
 	}
 

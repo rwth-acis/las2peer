@@ -349,7 +349,7 @@ public class ReadOnlyRegistryClient {
 			throws InterruptedException, ExecutionException 
 	{
 
-		int attempts = 20; // const CONFIRMATION_ATTEMPTS
+		int attempts = 60; // const CONFIRMATION_ATTEMPTS
 		int sleep_millis = 1000; // const SLEEP_DURATION
 		
 		Optional<TransactionReceipt> receipt = this.getReceipt(transactionHash);
