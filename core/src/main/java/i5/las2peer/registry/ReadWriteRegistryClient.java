@@ -14,6 +14,7 @@ import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.DynamicBytes;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
+import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.TransactionEncoder;
@@ -146,11 +147,14 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		byte[] profileName = Util.padAndConvertString(agent.getLoginName(), 32);
 		logger.info("registering user profile: " + agent.getLoginName());
 
-		String functionName = "createProfile";
+		//String functionName = "createProfile";
+		String functionName = "create";
 		String senderAddress = agent.getEthereumAccountId();//agent.getEthereumAddress();
-		String contractAddress = contracts.reputationRegistry.getContractAddress();
+		String contractAddress = contracts.communityTagIndex.getContractAddress();//contracts.reputationRegistry.getContractAddress();
 		List<Type> inputParameters = new ArrayList<>();
+		//inputParameters.add(new DynamicBytes(profileName));
 		inputParameters.add(new DynamicBytes(profileName));
+		inputParameters.add(new Utf8String("test"));
 		List<TypeReference<?>> outputParameters = Collections.<TypeReference<?>>emptyList();
 		Function function = new Function(functionName, inputParameters, outputParameters);
 		String encodedFunction = FunctionEncoder.encode(function);

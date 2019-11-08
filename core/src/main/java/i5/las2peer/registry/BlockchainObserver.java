@@ -191,7 +191,8 @@ class BlockchainObserver {
 								}
 								logger.warning("Tag description returned empty, retrying");
 							}
-
+						logger.info("observed tag creation: " + tagName);
+						logger.info(tag.toString());
 						tags.put(tagName, tagDescription);
 					}
 				}, e -> logger.severe("Error observing tag event: " + e.toString()));
