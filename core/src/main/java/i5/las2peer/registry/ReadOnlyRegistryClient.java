@@ -16,6 +16,7 @@ import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.admin.Admin;
+import org.web3j.protocol.admin.methods.response.PersonalUnlockAccount;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthCoinbase;
 import org.web3j.protocol.core.methods.response.EthGetBalance;
@@ -99,6 +100,19 @@ public class ReadOnlyRegistryClient {
 
 	public BigInteger getGasLimit() {
 		return gasLimit;
+	}
+
+	public boolean unlockAccount(String accountAddress, String accountPassword) {
+		PersonalUnlockAccount personalUnlockAccount;
+		try {
+			personalUnlockAccount = web3j_admin.personalUnlockAccount(accountAddress, accountPassword).sendAsync()
+					.get();
+		} catch (InterruptedException | ExecutionException e) {
+			// TODO Auto-generated catch block
+			//e.printStackTrace();
+			return false;
+		}
+		return personalUnlockAccount.accountUnlocked();
 	}
 
 	/**

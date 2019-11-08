@@ -104,7 +104,16 @@ public class EthereumAgent extends UserAgentImpl {
 
 		credentials = CredentialUtils.fromMnemonic(ethereumMnemonic, passphrase);
 		registryClient = new ReadWriteRegistryClient(new RegistryConfiguration(), credentials);
+
 		ethereumAddress = credentials.getAddress();
+		if ( ethereumAccountId.length() > 0 )
+		{
+			Boolean personalAccUnlocked = registryClient.unlockAccount(ethereumAccountId, credentials.getEcKeyPair().getPrivateKey().toString());
+			if ( !personalAccUnlocked )
+			{
+				throw new AgentAccessDeniedException("could not unlock ethereum personal account " + ethereumAccountId);
+			}
+		}
 		logger.info("unlocked ethereum agent ["+ethereumAddress +"]");
 	}
 
@@ -171,13 +180,14 @@ public class EthereumAgent extends UserAgentImpl {
 			ReadWriteRegistryClient regClient, String ethereumMnemonic)
 			throws CryptoException, AgentOperationFailedException {
 		byte[] salt = CryptoTools.generateSalt();
+		KeyPair keyPair = CryptoTools.generateKeyPair();
 		String newAccId;
 		try {
-			newAccId = regClient.registerPersonalAccount(passphrase);
+			newAccId = regClient.registerPersonalAccount(keyPair.getPrivate().toString());
 		} catch (IOException e) {
 			throw new AgentOperationFailedException("couldn't register personal eth account", e);
 		}
-		return new EthereumAgent(CryptoTools.generateKeyPair(), passphrase, salt, loginName, ethereumMnemonic, newAccId);
+		return new EthereumAgent(keyPair, passphrase, salt, loginName, ethereumMnemonic, newAccId);
 	}
 
 	/**

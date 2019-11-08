@@ -206,7 +206,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 
 		Function function = new Function(functionName, inputParameters, outputParameters);
 
-		String callerAddress = agent.getEthereumAddress();
+		String callerAddress = agent.getEthereumAccountId();//agent.getEthereumAddress();
 		String functionCallValue;
 		try {
 			functionCallValue = this.callSmartContractFunction(callerAddress, contractAddress, function);
