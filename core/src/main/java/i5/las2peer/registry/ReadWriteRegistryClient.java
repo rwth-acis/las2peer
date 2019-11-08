@@ -167,16 +167,24 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		logger.info("[ETH] contract call return value " + retVal);
 		return retVal;
 		*/
-
+		/*
 		String txHash = this.callContract(agent, contractAddress, senderAddress, encodedFunction);
 		logger.info("[ETH] contract call txHash: " + txHash );
 		waitForTransactionReceipt(txHash);
 		return txHash;
+		*/
 		/*
 		   try { contracts.reputationRegistry.createProfile(profileName).send(); } catch
 		   (Exception e) { // TODO Auto-generated catch block e.printStackTrace(); throw
 		   new EthereumException("couldn't create profile", e); } return "";
 		 */
+		String respVal;
+		try {
+			respVal = this.callSmartContractFunction(senderAddress, contractAddress, function);
+		} catch (InterruptedException | ExecutionException | IOException e) {
+			throw new EthereumException("couldn't execute smart contract function call", e);
+		}
+		return respVal;
 	}
 
 	private String prepareSmartContractCall(EthereumAgent agent, String contractAddress, String functionName,
@@ -254,8 +262,9 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		logger.info(
 				"[ETH] creating function call [" + callerAddress + "]->[" + contractAddress + "]: nonce = " + nonce);
 
-		Transaction transaction = Transaction.createFunctionCallTransaction(callerAddress, nonce,
-				DefaultGasProvider.GAS_PRICE, DefaultGasProvider.GAS_LIMIT, contractAddress, encodedFunction);
+		//Transaction transaction = Transaction.createFunctionCallTransaction(callerAddress, nonce,
+		//		DefaultGasProvider.GAS_PRICE, DefaultGasProvider.GAS_LIMIT, contractAddress, encodedFunction);
+		Transaction transaction = Transaction.createContractTransaction(callerAddress, nonce, DefaultGasProvider.GAS_PRICE, DefaultGasProvider.GAS_LIMIT, BigInteger.ZERO, encodedFunction);
 		// Transaction transaction = Transaction.createEthCallTransaction(callerAddress,
 		// contractAddress, encodedFunction);
 		logger.info("[ETH] gas estimate: " + web3j.ethEstimateGas(transaction).send().getResult());
@@ -300,9 +309,9 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 			signedMessage = TransactionEncoder.signMessage(rawTransaction, agent.getEthereumCredentials());
 			hexValue = Numeric.toHexString(signedMessage);
 			try {
-				transactionResponse = web3j.ethSendRawTransaction(hexValue).sendAsync().get();
-			} catch (InterruptedException | ExecutionException e) {
-				throw new EthereumException("couldn't sent raw transaction", e);
+				transactionResponse = web3j.ethSendRawTransaction(hexValue).send();
+			} catch (IOException e) {
+				throw new EthereumException("couldn't send raw transaction", e);
 			}
 		} catch (AgentLockedException e) {
 			throw new EthereumException("agent is locked");
