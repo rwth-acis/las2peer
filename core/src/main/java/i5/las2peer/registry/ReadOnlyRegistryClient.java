@@ -313,7 +313,7 @@ public class ReadOnlyRegistryClient {
 	 */
 	public BigInteger getNonce(String address) throws InterruptedException, ExecutionException {
 		EthGetTransactionCount ethGetTransactionCount = 
-				web3j.ethGetTransactionCount(address, DefaultBlockParameterName.LATEST).sendAsync().get();
+				web3j.ethGetTransactionCount(address, DefaultBlockParameterName.PENDING).sendAsync().get();
 
 		return ethGetTransactionCount.getTransactionCount();
 	}
