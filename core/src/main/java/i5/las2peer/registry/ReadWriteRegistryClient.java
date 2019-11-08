@@ -278,11 +278,10 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		// contractAddress, encodedFunction);
 		//logger.info("[ETH] gas estimate: " + web3j.ethEstimateGas(transaction).send().getAmountUsed());
 
-		String transactionGas = String.valueOf(Convert.fromWei(String.valueOf(transaction.getGas()), Convert.Unit.ETHER));
-		String transactionGasPrice = String
-				.valueOf(Convert.fromWei(String.valueOf(transaction.getGasPrice()), Convert.Unit.ETHER));
+		//String transactionGas = String.valueOf(Convert.fromWei(String.valueOf(transaction.getGas()), Convert.Unit.ETHER));
+		//String transactionGasPrice = String.valueOf(Convert.fromWei(String.valueOf(transaction.getGasPrice()), Convert.Unit.ETHER));
 
-		logger.info("[ETH] function gas: " + transactionGas + ", gasPrice: " + transactionGasPrice );
+		//logger.info("[ETH] function gas: " + transactionGas + ", gasPrice: " + transactionGasPrice );
 		logger.info(
 				"[ETH] gas price: " + DefaultGasProvider.GAS_PRICE + ", gas limit: " + DefaultGasProvider.GAS_LIMIT);
 		EthSendTransaction response = web3j.ethSendTransaction(transaction)
