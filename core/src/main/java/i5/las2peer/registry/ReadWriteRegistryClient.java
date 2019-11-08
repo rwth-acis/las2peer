@@ -151,6 +151,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		String contractAddress = contracts.reputationRegistry.getContractAddress();
 		List<Type> inputParameters = new ArrayList<>();
 		inputParameters.add(new DynamicBytes(profileName));
+		logger.info("[ETH] input param profile name: " + inputParameters.get(0).toString());
 		List<TypeReference<?>> outputParameters = Collections.<TypeReference<?>>emptyList();
 		Function function = new Function(functionName, inputParameters, outputParameters);
 		String encodedFunction = FunctionEncoder.encode(function);
@@ -280,7 +281,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 
 		//String transactionGas = String.valueOf(Convert.fromWei(String.valueOf(transaction.getGas()), Convert.Unit.ETHER));
 		//String transactionGasPrice = String.valueOf(Convert.fromWei(String.valueOf(transaction.getGasPrice()), Convert.Unit.ETHER));
-
+		
 		//logger.info("[ETH] function gas: " + transactionGas + ", gasPrice: " + transactionGasPrice );
 		logger.info(
 				"[ETH] gas price: " + DefaultGasProvider.GAS_PRICE + ", gas limit: " + DefaultGasProvider.GAS_LIMIT);
