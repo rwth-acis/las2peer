@@ -275,7 +275,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		Transaction transaction = Transaction.createFunctionCallTransaction(callerAddress, nonce, DefaultGasProvider.GAS_PRICE, DefaultGasProvider.GAS_LIMIT, contractAddress, BigInteger.ZERO, encodedFunction);
 		// Transaction transaction = Transaction.createEthCallTransaction(callerAddress,
 		// contractAddress, encodedFunction);
-		logger.info("[ETH] gas estimate: " + web3j.ethEstimateGas(transaction).send().getResult());
+		logger.info("[ETH] gas estimate: " + web3j.ethEstimateGas(transaction).send().getAmountUsed());
 		logger.info(
 				"[ETH] gas price: " + DefaultGasProvider.GAS_PRICE + ", gas limit: " + DefaultGasProvider.GAS_LIMIT);
 		EthSendTransaction response = web3j.ethSendTransaction(transaction)
