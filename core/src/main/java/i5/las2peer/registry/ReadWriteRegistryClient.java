@@ -21,7 +21,6 @@ import org.web3j.protocol.admin.methods.response.NewAccountIdentifier;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.request.Transaction;
-import org.web3j.protocol.core.methods.response.EthCall;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.tx.RawTransactionManager;
@@ -189,7 +188,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		String txHash;
 		try {
 			txHash = this.callSmartContractFunction(senderAddress, contractAddress, function);
-			//waitForTransactionReceipt(txHash);
+			waitForTransactionReceipt(txHash);
 		} catch (InterruptedException | ExecutionException | IOException e) {
 			throw new EthereumException("couldn't execute smart contract function call", e);
 		}
@@ -285,26 +284,18 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		//logger.info("[ETH] function gas: " + transactionGas + ", gasPrice: " + transactionGasPrice );
 		logger.info(
 				"[ETH] gas price: " + DefaultGasProvider.GAS_PRICE + ", gas limit: " + DefaultGasProvider.GAS_LIMIT);
-		/*EthSendTransaction response = web3j.ethSendTransaction(transaction)
+		EthSendTransaction response = web3j.ethSendTransaction(transaction)
 				.sendAsync().get();
 				//.send();
-				*/
-		Transaction ethCallTransaction = Transaction.createEthCallTransaction(callerAddress, contractAddress, encodedFunction);
-		EthCall response = web3j
-				.ethCall(ethCallTransaction, DefaultBlockParameterName.LATEST)
-				.sendAsync().get();
-
-
-		//return response.getValue();
 				
 		if (response.hasError()) {
 			throw new EthereumException("[ETH] transaction send failed, error [" + response.getError().getCode() + "]: "
 					+ response.getError().getMessage());
 		}
 		logger.info("[ETH] created function call [" + callerAddress + "]->[" + contractAddress + "]");
-		//logger.info("[ETH] txHash = " + response.getTransactionHash() );
-		return response.getValue();
-		//return response.getTransactionHash();
+		logger.info("[ETH] txHash = " + response.getTransactionHash() );
+
+		return response.getTransactionHash();
 	}
 
 	private String callContract(EthereumAgent agent, String contractAddress, String senderAddress,
