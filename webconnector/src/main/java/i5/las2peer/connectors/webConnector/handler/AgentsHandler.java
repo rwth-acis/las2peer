@@ -154,7 +154,13 @@ public class AgentsHandler {
 		{
 			EthereumAgent ethAgent = (EthereumAgent) agent;
 			String ethAccId = ethAgent.getEthereumAccountId();
-			json.put("eth-agent-address", ethAccId);
+			if ( ethAccId.length() > 0 )
+			{
+				json.put("eth-agent-address", ethAccId);
+				String accBalance = ethereumNode.getRegistryClient().getAccountBalance(ethAccId);
+				json.put("eth-acc-balance", accBalance);
+			}
+			
 
 			String ethAddress = ethAgent.getEthereumAddress();
 			json.put("eth-agent-credentials-address", ethAddress);
@@ -164,8 +170,7 @@ public class AgentsHandler {
 				json.put("eth-mnemonic", ethAgent.getEthereumMnemonic());
 			}
 			
-			String accBalance = ethereumNode.getRegistryClient().getAccountBalance(ethAccId);
-			json.put("eth-acc-balance", accBalance);
+
 			
 			//UserData ethUser = ethereumNode.getRegistryClient().getUser(ethAgent.getLoginName());
 			//if ( ethUser != null ) { json.put("eth-user-address", ethUser.getOwnerAddress()); }
