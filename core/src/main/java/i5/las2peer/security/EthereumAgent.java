@@ -69,12 +69,12 @@ public class EthereumAgent extends UserAgentImpl {
 		this.ethereumAccountId = accountId;
 	}
 
-	protected EthereumAgent(PublicKey pubKey, byte[] encryptedPrivate, byte[] salt, String loginName,
-			String ethereumMnemonic) {
+	protected EthereumAgent(PublicKey pubKey, byte[] encryptedPrivate, byte[] salt, String loginName, String ethereumMnemonic, String accountId) {
 		super(pubKey, encryptedPrivate, salt);
 		checkLoginNameValidity(loginName);
 		this.sLoginName = loginName;
 		this.ethereumMnemonic = ethereumMnemonic;
+		this.ethereumAccountId = accountId;
 	}
 
 	// as in the superclass, it would be nicer not to use an exception
@@ -135,6 +135,7 @@ public class EthereumAgent extends UserAgentImpl {
 					+ "\t\t<salt encoding=\"base64\">" + Base64.getEncoder().encodeToString(getSalt()) + "</salt>\n"
 					+ "\t\t<data encoding=\"base64\">" + getEncodedPrivate() + "</data>\n" + "\t</privatekey>\n"
 					+ "\t<login>" + sLoginName + "</login>\n"
+					+ "\t<ethaccid>" + ethereumAccountId + "</ethaccid>\n"
 					+ "\t<ethereummnemonic>" + ethereumMnemonic + "</ethereummnemonic>\n");
 
 			if (sEmail != null) {
@@ -245,11 +246,14 @@ public class EthereumAgent extends UserAgentImpl {
 			Element loginElement = XmlTools.getSingularElement(root, "login");
 			String login = loginElement.getTextContent();
 
+			Element accIDElement = XmlTools.getSingularElement(root, "ethaccid");
+			String accID = accIDElement.getTextContent();
+
 			Element ethereumMnemonicElement = XmlTools.getSingularElement(root, "ethereummnemonic");
 			String ethereumMnemonic = ethereumMnemonicElement.getTextContent();
 
 			// required fields complete, create result
-			EthereumAgent result = new EthereumAgent(publicKey, encPrivate, salt, login, ethereumMnemonic);
+			EthereumAgent result = new EthereumAgent(publicKey, encPrivate, salt, login, ethereumMnemonic, accID);
 
 			// read and set optional fields
 			// note: login name is not optional here
