@@ -107,10 +107,11 @@ public class AgentsHandler {
 		// TODO: deduplicate this / AuthHandler#handleRegistration
 		UserAgentImpl agent;
 		if (node instanceof EthereumNode) {
+			EthereumNode ethNode = (EthereumNode) node;
 			if (ethereumMnemonic != null && !ethereumMnemonic.isEmpty()) {
-				agent = EthereumAgent.createEthereumAgent(username, password, ethereumMnemonic);
+				agent = EthereumAgent.createEthereumAgent(username, password, ethNode.getRegistryClient(), ethereumMnemonic);
 			} else {
-				agent = EthereumAgent.createEthereumAgent(username, password);
+				agent = EthereumAgent.createEthereumAgent(username, password, ethNode.getRegistryClient());
 			}
 		} else {
 			agent = UserAgentImpl.createUserAgent(password);
@@ -152,9 +153,11 @@ public class AgentsHandler {
 		if (agent instanceof EthereumAgent) 
 		{
 			EthereumAgent ethAgent = (EthereumAgent) agent;
-			String ethAddress = ethAgent.getEthereumAddress();
+			String ethAccId = ethAgent.getEthereumAccountId();
+			json.put("eth-agent-address", ethAccId);
 
-			json.put("eth-agent-address", ethAddress);
+			String ethAddress = ethAgent.getEthereumAddress();
+			json.put("eth-agent-credentials-address", ethAddress);
 			
 			if ( addMnemonic && !agent.isLocked())
 			{
@@ -424,7 +427,7 @@ public class AgentsHandler {
 	@GET
 	@Path("/registerProfile")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response handleTest(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId) throws MalformedXMLException, IOException
+	public Response handleRegisterProfile(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId) throws MalformedXMLException, IOException
 	{
 		
 		JSONObject json = new JSONObject();

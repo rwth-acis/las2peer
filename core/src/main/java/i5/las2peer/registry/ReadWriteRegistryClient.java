@@ -17,6 +17,7 @@ import org.web3j.abi.datatypes.Type;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.TransactionEncoder;
+import org.web3j.protocol.admin.methods.response.NewAccountIdentifier;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.request.Transaction;
@@ -87,6 +88,11 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		}
 	}
 
+	public String registerPersonalAccount(String password) throws IOException
+	{
+		return this.web3j_admin.personalNewAccount(password).send().getAccountId();
+	}
+
 	/**
 	 * Register an Ethereum agent in the blockchain.
 	 *
@@ -141,7 +147,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		logger.info("registering user profile: " + agent.getLoginName());
 
 		String functionName = "createProfile";
-		String senderAddress = agent.getEthereumAddress();
+		String senderAddress = agent.getEthereumAccountId();//agent.getEthereumAddress();
 		String contractAddress = contracts.reputationRegistry.getContractAddress();
 		List<Type> inputParameters = new ArrayList<>();
 		inputParameters.add(new DynamicBytes(profileName));

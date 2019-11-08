@@ -15,6 +15,7 @@ import java.math.BigInteger;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.admin.Admin;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthCoinbase;
 import org.web3j.protocol.core.methods.response.EthGetBalance;
@@ -41,6 +42,7 @@ import java.util.stream.Collectors;
  */
 public class ReadOnlyRegistryClient {
 	Web3j web3j;
+	Admin web3j_admin;
 	Contracts.ContractsConfig contractsConfig;
 	Contracts contracts;
 	BlockchainObserver observer;
@@ -68,6 +70,7 @@ public class ReadOnlyRegistryClient {
 
 	ReadOnlyRegistryClient(RegistryConfiguration registryConfiguration, Credentials credentials) {
 		web3j = Web3j.build(new HttpService(registryConfiguration.getEndpoint()));
+		web3j_admin = Admin.build(new HttpService(registryConfiguration.getEndpoint()));
 
 		contractsConfig = new Contracts.ContractsConfig(registryConfiguration.getCommunityTagIndexAddress(),
 				registryConfiguration.getUserRegistryAddress(), registryConfiguration.getServiceRegistryAddress(),

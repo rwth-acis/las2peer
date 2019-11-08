@@ -272,8 +272,9 @@ public class AuthenticationManager {
 		try {
 			UserAgentImpl oidcAgent;
 			if (connector.getL2pNode() instanceof EthereumNode) {
+				EthereumNode ethNode = (EthereumNode) connector.getL2pNode();
 				String loginName = (String) userInfo.get("preferred_username");
-				oidcAgent = EthereumAgent.createEthereumAgent(loginName, password);
+				oidcAgent = EthereumAgent.createEthereumAgent(loginName, password, ethNode.getRegistryClient());
 			} else {
 				// TODO: should we just always create an EthereumAgent?
 				// should Node have a createAgent (instance? static?) method?

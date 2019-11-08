@@ -99,10 +99,11 @@ public class AuthHandler {
 		// create new user agent and store in network
 		UserAgentImpl agent;
 		if (node instanceof EthereumNode) {
+			EthereumNode ethNode = (EthereumNode) node;
 			if (ethereumMnemonic != null) {
-				agent = EthereumAgent.createEthereumAgent(username, password, ethereumMnemonic);
+				agent = EthereumAgent.createEthereumAgent(username, password, ethNode.getRegistryClient(), ethereumMnemonic);
 			} else {
-				agent = EthereumAgent.createEthereumAgent(username, password);
+				agent = EthereumAgent.createEthereumAgent(username, password, ethNode.getRegistryClient());
 			}
 		} else {
 			agent = UserAgentImpl.createUserAgent(password);
