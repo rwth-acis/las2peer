@@ -164,7 +164,7 @@ public class AgentsHandler {
 				json.put("eth-mnemonic", ethAgent.getEthereumMnemonic());
 			}
 			
-			String accBalance = ethereumNode.getRegistryClient().getAccountBalance(ethAddress);
+			String accBalance = ethereumNode.getRegistryClient().getAccountBalance(ethAccId);
 			json.put("eth-acc-balance", accBalance);
 			
 			//UserData ethUser = ethereumNode.getRegistryClient().getUser(ethAgent.getLoginName());
@@ -189,7 +189,7 @@ public class AgentsHandler {
 		
 		ReadWriteRegistryClient registryClient = ethereumNode.getRegistryClient();
 		EthereumAgent ethAgent = (EthereumAgent) agent;
-		String ethAddress = ethAgent.getEthereumAddress();
+		String ethAddress = ethAgent.getEthereumAccountId();//ethAgent.getEthereumAddress();
 		BigInteger faucetAmount = Convert.toWei("0.8", Convert.Unit.ETHER).toBigInteger(); // const FAUCET_AMOUNT
 		JSONObject json = new JSONObject();
 		json.put("agentid", agent.getIdentifier());
