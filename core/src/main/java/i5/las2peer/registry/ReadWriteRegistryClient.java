@@ -203,10 +203,11 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 				logger.warning(txR.toString());
 				throw new EthereumException("could not send transaction, transaction receipt not ok");
 			}
+			txHash = txR.getBlockHash();
 		} catch (Exception e) {
 			throw new EthereumException("couldn't execute smart contract function call", e);
 		}
-		
+		return txHash;
 	}
 
 	private String prepareSmartContractCall(EthereumAgent agent, String contractAddress, String functionName,
