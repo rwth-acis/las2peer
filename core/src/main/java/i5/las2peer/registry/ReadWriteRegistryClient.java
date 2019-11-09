@@ -191,12 +191,21 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		
 		String txHash;
 		try {
-			txHash = this.callSmartContractFunction(senderAddress, contractAddress, function);
-			waitForTransactionReceipt(txHash);
-		} catch (InterruptedException | ExecutionException | IOException e) {
+			//txHash = this.callSmartContractFunction(senderAddress, contractAddress, function);
+			//waitForTransactionReceipt(txHash);
+			TransactionReceipt txR = contracts.communityTagIndex.create(profileName, "test").send();
+			if (!txR.isStatusOK()) {
+				logger.warning("trx fail with status " + txR.getStatus());
+				// String gasUsed =
+				// String.valueOf(Convert.fromWei(String.valueOf(txR.getCumulativeGasUsedRaw()),
+				// Convert.Unit.ETHER));
+				logger.warning("gas used " + txR.getCumulativeGasUsed());
+				logger.warning(txR.toString());
+				throw new EthereumException("could not send transaction, transaction receipt not ok");
+			}
+		} catch (Exception e) {
 			throw new EthereumException("couldn't execute smart contract function call", e);
 		}
-		return txHash;
 		
 	}
 

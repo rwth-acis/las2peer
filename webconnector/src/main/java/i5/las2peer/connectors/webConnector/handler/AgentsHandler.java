@@ -162,10 +162,8 @@ public class AgentsHandler {
 				UserProfileData upd = null;
 				try {
 					upd = ethereumNode.getRegistryClient().getProfile(ethAccId);
-					if (upd != null) {
-						if (upd.getOwner().length() > 0) {
-							json.put("eth-profile-owner", upd.getOwner());
-						}
+					if (upd != null && upd.getOwner() != "0x0000000000000000000000000000000000000000") {
+						json.put("eth-profile-owner", upd.getOwner());
 						json.put("eth-cumulative-score", upd.getCumulativeScore().toString());
 						json.put("eth-no-transactions", upd.getNoTransactions().toString());
 					} else {
