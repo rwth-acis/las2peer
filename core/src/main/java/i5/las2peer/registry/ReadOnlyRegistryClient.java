@@ -1,6 +1,7 @@
 package i5.las2peer.registry;
 
 import i5.las2peer.api.security.AgentException;
+import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.registry.data.RegistryConfiguration;
 import i5.las2peer.registry.data.ServiceDeploymentData;
 import i5.las2peer.registry.data.ServiceReleaseData;
@@ -58,6 +59,8 @@ public class ReadOnlyRegistryClient {
 	// as of this writing, this is only used for the sendEther method in the
 	// ReadWriteRegistryClient (which is only used for debugging)
 	Credentials credentials;
+
+	protected final L2pLogger logger = L2pLogger.getInstance(ReadWriteRegistryClient.class);
 
 	/**
 	 * Create client providing access to read-only registry functions.
@@ -198,6 +201,7 @@ public class ReadOnlyRegistryClient {
 		Tuple4<String, byte[], BigInteger, BigInteger> profileAsTuple;
 		try {
 			profileAsTuple = contracts.reputationRegistry.profiles(address).send();
+			logger.info("found user profile: " + profileAsTuple.toString());
 		} catch (Exception e) {
 			throw new EthereumException("Could not get profile", e);
 		}

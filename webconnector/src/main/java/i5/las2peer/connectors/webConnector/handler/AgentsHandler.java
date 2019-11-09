@@ -560,13 +560,9 @@ public class AgentsHandler {
 		for (Map.Entry<String, String> userProfile : userProfiles.entrySet()) {
 			String owner = userProfile.getKey().toString();
 			String username = userProfile.getValue().toString();
-			logger.info("reading user profile: " + username);
-			logger.info("owner address: "+ owner);
 			AgentImpl userAgent = null;
 			try {
-				logger.info("getting agent by username");
 				userAgent = getAgentByDetail(null, username, null);
-				logger.info("getting eth agent via useragent id");
 				userAgent = ethereumNode.getAgent(userAgent.getIdentifier());
 			} catch (Exception e) {
 				throw new BadRequestException("cannot get agent for profile", e);
@@ -581,11 +577,13 @@ public class AgentsHandler {
 		JSONArray memberList = new JSONArray();
 		
 		for (EthereumAgent agent : agents) {
-			String ownerAddress = agent.getEthereumAddress();
+			String ownerAddress = agent.getEthereumAccountId();
 			UserProfileData profile;
 			try {
+				logger.info("accessing profile of " + ownerAddress);
 				profile = ethereumNode.getRegistryClient().getProfile(ownerAddress);
 			} catch (EthereumException | NotFoundException e) {
+				e.printStackTrace();
 				throw new BadRequestException("cannot get profile for agent", e);
 			}
 			

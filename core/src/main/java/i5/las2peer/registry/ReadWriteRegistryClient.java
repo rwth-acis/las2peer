@@ -59,8 +59,6 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 	// http://ethereum.stackexchange.com/questions/1832/cant-send-transaction-exceeds-block-gas-limit-or-intrinsic-gas-too-low
 	BigInteger GAS_LIMIT_ETHER_TX = BigInteger.valueOf(21_000);
 
-	private final L2pLogger logger = L2pLogger.getInstance(ReadWriteRegistryClient.class);
-
 	/**
 	 * Create client providing access to both read and write registry functions.
 	 * 
