@@ -164,8 +164,8 @@ class BlockchainObserver {
 				{
 					return;
 				}
+				String profileOwner = profile.owner;
 				String profileName = Util.recoverString(profile.name);
-				String profileOwner = Util.recoverString(profile.owner);
 				this.profiles.put(profileOwner, profileName);
 				logger.info("observed profile creation: [" + profileOwner + "]: " + profileName);
 				
@@ -192,7 +192,6 @@ class BlockchainObserver {
 								logger.warning("Tag description returned empty, retrying");
 							}
 						logger.info("observed tag creation: " + tagName);
-						logger.info(tag.toString());
 						tags.put(tagName, tagDescription);
 					}
 				}, e -> logger.severe("Error observing tag event: " + e.toString()));

@@ -558,13 +558,18 @@ public class AgentsHandler {
 		List<EthereumAgent> agents = new ArrayList<EthereumAgent>();
 		ConcurrentMap<String, String> userProfiles = ethereumNode.getRegistryClient().getUserProfiles();
 		for (Map.Entry<String, String> userProfile : userProfiles.entrySet()) {
-			String username = userProfile.getKey().toString();
+			String owner = userProfile.getKey().toString();
+			String username = userProfile.getValue().toString();
+			logger.info("reading user profile: " + username);
+			logger.info("owner address: "+ owner);
 			AgentImpl userAgent = null;
 			try {
+				logger.info("getting agent by username");
 				userAgent = getAgentByDetail(null, username, null);
+				logger.info("getting eth agent via useragent id");
 				userAgent = ethereumNode.getAgent(userAgent.getIdentifier());
 			} catch (Exception e) {
-				throw new BadRequestException("cannot get agent for profile");
+				throw new BadRequestException("cannot get agent for profile", e);
 			}
 			if (userAgent instanceof EthereumAgent) {
 				agents.add((EthereumAgent) userAgent);
