@@ -193,17 +193,14 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		try {
 			//txHash = this.callSmartContractFunction(senderAddress, contractAddress, function);
 			//waitForTransactionReceipt(txHash);
-			TransactionReceipt txR = contracts.communityTagIndex.create(profileName, "test").send();
+			TransactionReceipt txR = contracts.reputationRegistry.createProfile(profileName).send();//contracts.communityTagIndex.create(profileName, "test").send();
 			if (!txR.isStatusOK()) {
 				logger.warning("trx fail with status " + txR.getStatus());
-				// String gasUsed =
-				// String.valueOf(Convert.fromWei(String.valueOf(txR.getCumulativeGasUsedRaw()),
-				// Convert.Unit.ETHER));
 				logger.warning("gas used " + txR.getCumulativeGasUsed());
 				logger.warning(txR.toString());
 				throw new EthereumException("could not send transaction, transaction receipt not ok");
 			}
-			txHash = txR.getBlockHash();
+			txHash = txR.getTransactionHash();
 		} catch (Exception e) {
 			throw new EthereumException("couldn't execute smart contract function call", e);
 		}
