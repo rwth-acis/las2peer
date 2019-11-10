@@ -180,7 +180,6 @@ public class AgentsHandler {
 
 			}
 			
-			String ethAddress = ethAgent.getEthereumAddress();
 			json.put("eth-agent-credentials-address", ethAddress);
 			
 			if ( addMnemonic && !agent.isLocked())
