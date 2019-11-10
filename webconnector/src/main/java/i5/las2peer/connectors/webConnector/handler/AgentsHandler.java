@@ -462,7 +462,7 @@ public class AgentsHandler {
 		//JSONObject json = new JSONObject();
 		try {
 			//ethereumNode.registerProfile(agent);
-			String txHash = ethereumNode.getRegistryClient().registerReputationProfile(agent);
+			String txHash = agent.getRegistryClient().registerReputationProfile(agent);
 			json.put("call-transaction-hash", txHash);
 		} catch (EthereumException e) {		
 			e.printStackTrace();	

@@ -184,8 +184,8 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		   (Exception e) { // TODO Auto-generated catch block e.printStackTrace(); throw
 		   new EthereumException("couldn't create profile", e); } return "";
 		 */
-
 		String txHash;
+		/*
 		BigInteger nonce = BigInteger.ZERO;
 		try {
 			nonce = this.getNonce(senderAddress);
@@ -228,10 +228,8 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 			throw new EthereumException("couldn't send transaction", e);
 		}
 		waitForTransactionReceipt(txHash);
-
-		// this calls with coinbase as sender.
-		// would need to refactor registry creation to use personal credentials.
-		/*
+		*/
+		
 		try {
 			TransactionReceipt txR = contracts.reputationRegistry.createProfile(profileName).send();
 			if (!txR.isStatusOK()) {
@@ -245,7 +243,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		} catch (Exception e) {
 			throw new EthereumException("couldn't execute smart contract function call", e);
 		}
-		*/
+		
 		return txHash;
 	}
 
