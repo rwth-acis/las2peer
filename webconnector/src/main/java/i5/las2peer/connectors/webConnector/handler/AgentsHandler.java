@@ -162,7 +162,7 @@ public class AgentsHandler {
 				UserProfileData upd = null;
 				try {
 					upd = ethereumNode.getRegistryClient().getProfile(ethAccId);
-					if (upd != null && upd.getOwner() != "0x0000000000000000000000000000000000000000") {
+					if (upd != null && !upd.getOwner().equals("0x0000000000000000000000000000000000000000")) {
 						json.put("eth-profile-owner", upd.getOwner());
 						json.put("eth-cumulative-score", upd.getCumulativeScore().toString());
 						json.put("eth-no-transactions", upd.getNoTransactions().toString());
@@ -574,7 +574,7 @@ public class AgentsHandler {
 		}
 
 		json.put("code", Status.OK.getStatusCode());
-		json.put("text", Status.OK.getStatusCode() + " - UserList loaded");
+		json.put("text", Status.OK.getStatusCode() + " - UserList loaded, found " + agents.size() + " agents");
 		JSONArray memberList = new JSONArray();
 		
 		for (EthereumAgent agent : agents) {
@@ -610,10 +610,7 @@ public class AgentsHandler {
 			memberList.add(member);
 		}
 		
-		
-		
-		
-		
+		json.put("members", memberList);
 		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
 	}
 	
