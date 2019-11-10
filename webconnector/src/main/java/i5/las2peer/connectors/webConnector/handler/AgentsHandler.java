@@ -565,7 +565,8 @@ public class AgentsHandler {
 				userAgent = getAgentByDetail(null, username, null);
 				userAgent = ethereumNode.getAgent(userAgent.getIdentifier());
 			} catch (Exception e) {
-				throw new BadRequestException("cannot get agent for profile", e);
+				e.printStackTrace();
+				throw new BadRequestException("cannot get ethereum agent by username", e);
 			}
 			if (userAgent instanceof EthereumAgent) {
 				agents.add((EthereumAgent) userAgent);
