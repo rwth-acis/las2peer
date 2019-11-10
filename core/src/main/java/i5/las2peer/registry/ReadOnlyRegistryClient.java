@@ -28,6 +28,7 @@ import org.web3j.protocol.core.methods.response.Web3ClientVersion;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tuples.generated.Tuple2;
 import org.web3j.tuples.generated.Tuple4;
+import org.web3j.tuples.generated.Tuple5;
 import org.web3j.utils.Convert;
 
 import java.io.IOException;
@@ -198,7 +199,7 @@ public class ReadOnlyRegistryClient {
 	}
 
 	public UserProfileData getProfile(String address) throws EthereumException, NotFoundException {
-		Tuple4<String, byte[], BigInteger, BigInteger> profileAsTuple;
+		Tuple5<String, byte[], BigInteger, BigInteger, BigInteger> profileAsTuple;
 		try {
 			profileAsTuple = contracts.reputationRegistry.profiles(address).send();
 			logger.info("found user profile: " + profileAsTuple.toString());
