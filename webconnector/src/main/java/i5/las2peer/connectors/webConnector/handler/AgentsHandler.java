@@ -154,10 +154,12 @@ public class AgentsHandler {
 		{
 			EthereumAgent ethAgent = (EthereumAgent) agent;
 			String ethAccId = ethAgent.getEthereumAccountId();
+			String ethAddress = ethAgent.getEthereumAddress();
 			if ( ethAccId.length() > 0 )
 			{
-				json.put("eth-agent-address", ethAccId);
-				String accBalance = ethereumNode.getRegistryClient().getAccountBalance(ethAccId);
+				json.put("eth-agent-address", ethAddress);
+				json.put("eth-agent-accid", ethAccId);
+				String accBalance = ethereumNode.getRegistryClient().getAccountBalance(ethAddress);
 				json.put("eth-acc-balance", accBalance);
 				UserProfileData upd = null;
 				try {
@@ -209,17 +211,20 @@ public class AgentsHandler {
 		
 		ReadWriteRegistryClient registryClient = ethereumNode.getRegistryClient();
 		EthereumAgent ethAgent = (EthereumAgent) agent;
-		String ethAddress = ethAgent.getEthereumAccountId();//ethAgent.getEthereumAddress();
+		String ethAccountId = ethAgent.getEthereumAccountId();
+		String ethAddress = ethAgent.getEthereumAddress();
+
+		String targetAddress = ethAddress;
 		BigInteger faucetAmount = Convert.toWei("0.8", Convert.Unit.ETHER).toBigInteger(); // const FAUCET_AMOUNT
 		JSONObject json = new JSONObject();
 		json.put("agentid", agent.getIdentifier());
-		json.put("eth-target-add", ethAddress);
+		json.put("eth-target-add", targetAddress);
 		json.put("eth-faucet-amount", "0.8 ETH");
 		
 		TransactionReceipt txR = null;
 		
 		try {
-			txR = registryClient.sendEtherFromCoinbase(ethAddress, faucetAmount);
+			txR = registryClient.sendEtherFromCoinbase(targetAddress, faucetAmount);
 		} catch (EthereumException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
