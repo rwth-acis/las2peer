@@ -159,7 +159,7 @@ public class AgentsHandler {
 			{
 				json.put("eth-agent-address", ethAddress);
 				json.put("eth-agent-accid", ethAccId);
-				String accBalance = ethereumNode.getRegistryClient().getAccountBalance(ethAddress);
+				String accBalance = ethereumNode.getRegistryClient().getAccountBalance(ethAccId);
 				json.put("eth-acc-balance", accBalance);
 				UserProfileData upd = null;
 				try {
@@ -213,7 +213,7 @@ public class AgentsHandler {
 		String ethAccountId = ethAgent.getEthereumAccountId();
 		String ethAddress = ethAgent.getEthereumAddress();
 
-		String targetAddress = ethAddress;
+		String targetAddress = ethAccountId;
 		BigInteger faucetAmount = Convert.toWei("0.8", Convert.Unit.ETHER).toBigInteger(); // const FAUCET_AMOUNT
 		JSONObject json = new JSONObject();
 		json.put("agentid", agent.getIdentifier());

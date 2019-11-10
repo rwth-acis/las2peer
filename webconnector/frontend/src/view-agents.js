@@ -142,7 +142,7 @@ class AgentsView extends PolymerElement {
             <template is="dom-if" if="[[!_hasNoEthWallet]]">
               <p>Welcome, [[_EthWallet.username]]</p>
               <p>
-                <strong><iron-icon icon="fingerprint"></iron-icon> Eth Credentials Address: </strong> [[_EthWallet.eth-agent-credentials-address]] 
+                <strong><iron-icon icon="fingerprint"></iron-icon> Eth Credentials Address: </strong> [[_EthWallet.eth-agent-credentials-address]] <br />
                 <strong><iron-icon icon="face"></iron-icon> Eth Personal Agent ID: </strong> [[_EthWallet.eth-agent-accid]] <br />
                 <strong><iron-icon icon="verified-user"></iron-icon> Eth Mnemonic: </strong> [[_EthWallet.eth-mnemonic]] <br />
                 <strong><iron-icon icon="account-balance"></iron-icon> Eth Balance: </strong> [[_EthWallet.eth-acc-balance]] <br />
