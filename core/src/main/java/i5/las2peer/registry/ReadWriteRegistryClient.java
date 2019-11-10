@@ -87,8 +87,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		}
 	}
 
-	public String registerPersonalAccount(String password) throws IOException
-	{
+	public String registerPersonalAccount(String password) throws IOException {
 		return this.web3j_admin.personalNewAccount(password).send().getAccountId();
 	}
 
@@ -145,12 +144,12 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		byte[] profileName = Util.padAndConvertString(agent.getLoginName(), 32);
 		logger.info("registering user profile: " + agent.getLoginName());
 
-		//String functionName = "createProfile";
+		// String functionName = "createProfile";
 		String functionName = "create";
-		String senderAddress = agent.getEthereumAccountId();//agent.getEthereumAddress();
-		String contractAddress = contracts.communityTagIndex.getContractAddress();//contracts.reputationRegistry.getContractAddress();
+		String senderAddress = agent.getEthereumAccountId();// agent.getEthereumAddress();
+		String contractAddress = contracts.communityTagIndex.getContractAddress();// contracts.reputationRegistry.getContractAddress();
 		List<Type> inputParameters = new ArrayList<>();
-		//inputParameters.add(new DynamicBytes(profileName));
+		// inputParameters.add(new DynamicBytes(profileName));
 		inputParameters.add(new DynamicBytes(profileName));
 		inputParameters.add(new Utf8String("test"));
 		List<TypeReference<?>> outputParameters = Collections.<TypeReference<?>>emptyList();
@@ -186,10 +185,39 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		   (Exception e) { // TODO Auto-generated catch block e.printStackTrace(); throw
 		   new EthereumException("couldn't create profile", e); } return "";
 		 */
+
+		String txHash;
+		BigInteger nonce = BigInteger.ZERO;
+		try {
+			nonce = this.getNonce(contractAddress);
+		} catch (InterruptedException | ExecutionException e1) {
+			throw new EthereumException("unable to get nonce");
+		}
+		logger.info("[ETH] creating function call [" + senderAddress + "]->[" + contractAddress + "]: nonce = " + nonce);
+		Transaction transaction = Transaction.createFunctionCallTransaction(senderAddress, nonce, DefaultGasProvider.GAS_PRICE, DefaultGasProvider.GAS_LIMIT, contractAddress, BigInteger.ZERO, encodedFunction);
 		
-		// call contract from personal account
-		String txHash = this.callContract(agent, contractAddress, senderAddress, encodedFunction);
-		logger.info("[ETH] contract call txHash: " + txHash);
+		try {
+			String passphrase = agent.getEthereumCredentials().getEcKeyPair().getPrivateKey().toString();
+			EthSendTransaction ethSendTransaction = web3j_admin.personalSendTransaction(transaction,passphrase).send();
+			txHash = ethSendTransaction.getTransactionHash();
+			logger.info("transaction result: " + ethSendTransaction.getResult());
+
+			// check for errors
+			if (ethSendTransaction.hasError()) {
+				Response.Error error = ethSendTransaction.getError();
+				throw new EthereumException("Eth Transaction Error [" + error.getCode() + "]" + error.getMessage());
+			}
+
+			if (txHash.length() < 2) {
+				throw new EthereumException("Could not create ethereum transaction");
+			}
+			logger.info("[ETH] Called contract [" + contractAddress + "]@[" + functionName + "]");
+
+		} catch (AgentLockedException e1) {
+			throw new EthereumException("agent locked");
+		} catch (IOException e) {
+			throw new EthereumException("couldn't send transaction", e);
+		}
 		waitForTransactionReceipt(txHash);
 
 		// this calls with coinbase as sender.
