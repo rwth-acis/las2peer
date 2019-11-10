@@ -144,14 +144,13 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		byte[] profileName = Util.padAndConvertString(agent.getLoginName(), 32);
 		logger.info("registering user profile: " + agent.getLoginName());
 
-		// String functionName = "createProfile";
-		String functionName = "create";
+		String functionName = "createProfile";
 		String senderAddress = agent.getEthereumAccountId();// agent.getEthereumAddress();
-		String contractAddress = contracts.communityTagIndex.getContractAddress();// contracts.reputationRegistry.getContractAddress();
+		String contractAddress = contracts.reputationRegistry.getContractAddress();
 		List<Type> inputParameters = new ArrayList<>();
 		// inputParameters.add(new DynamicBytes(profileName));
+		// Address tAddress = new Address(toAddress);
 		inputParameters.add(new DynamicBytes(profileName));
-		inputParameters.add(new Utf8String("test"));
 		List<TypeReference<?>> outputParameters = Collections.<TypeReference<?>>emptyList();
 		Function function = new Function(functionName, inputParameters, outputParameters);
 		String encodedFunction = FunctionEncoder.encode(function);
@@ -189,18 +188,28 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		String txHash;
 		BigInteger nonce = BigInteger.ZERO;
 		try {
-			nonce = this.getNonce(contractAddress);
+			nonce = this.getNonce(senderAddress);
 		} catch (InterruptedException | ExecutionException e1) {
 			throw new EthereumException("unable to get nonce");
 		}
 		logger.info("[ETH] creating function call [" + senderAddress + "]->[" + contractAddress + "]: nonce = " + nonce);
-		Transaction transaction = Transaction.createFunctionCallTransaction(senderAddress, nonce, DefaultGasProvider.GAS_PRICE, DefaultGasProvider.GAS_LIMIT, contractAddress, BigInteger.ZERO, encodedFunction);
+		Transaction transaction = Transaction.createFunctionCallTransaction(
+			senderAddress, 
+			nonce, 
+			DefaultGasProvider.GAS_PRICE.multiply(BigInteger.valueOf(10l)), 
+			DefaultGasProvider.GAS_LIMIT.multiply(BigInteger.valueOf(10l)), 
+			contractAddress, 
+			Convert.toWei(new BigDecimal("0.01"), Convert.Unit.ETHER).toBigInteger(), 
+			encodedFunction
+		);
 		
 		try {
 			String passphrase = agent.getEthereumCredentials().getEcKeyPair().getPrivateKey().toString();
 			EthSendTransaction ethSendTransaction = web3j_admin.personalSendTransaction(transaction,passphrase).send();
 			txHash = ethSendTransaction.getTransactionHash();
 			logger.info("transaction result: " + ethSendTransaction.getResult());
+
+
 
 			// check for errors
 			if (ethSendTransaction.hasError()) {
