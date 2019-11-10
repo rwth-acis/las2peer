@@ -231,7 +231,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		*/
 		
 		try {
-			TransactionReceipt txR = contracts.reputationRegistry.createProfile(profileName).send();
+			TransactionReceipt txR = contracts.communityTagIndex.create(profileName, "test").send();//.reputationRegistry.createProfile(profileName).send();
 			if (!txR.isStatusOK()) {
 				logger.warning("trx fail with status " + txR.getStatus());
 				logger.warning("gas used " + txR.getCumulativeGasUsed());
