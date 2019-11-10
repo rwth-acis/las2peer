@@ -196,8 +196,8 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		Transaction transaction = Transaction.createFunctionCallTransaction(
 			senderAddress, 
 			nonce, 
-			DefaultGasProvider.GAS_PRICE.multiply(BigInteger.valueOf(10l)), 
-			DefaultGasProvider.GAS_LIMIT.multiply(BigInteger.valueOf(10l)), 
+			DefaultGasProvider.GAS_PRICE, 
+			DefaultGasProvider.GAS_LIMIT, 
 			contractAddress, 
 			Convert.toWei(new BigDecimal("0.01"), Convert.Unit.ETHER).toBigInteger(), 
 			encodedFunction
