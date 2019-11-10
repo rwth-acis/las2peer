@@ -560,10 +560,14 @@ public class AgentsHandler {
 		for (Map.Entry<String, String> userProfile : userProfiles.entrySet()) {
 			String owner = userProfile.getKey().toString();
 			String username = userProfile.getValue().toString();
+			logger.info("found profile: " + username + " @ " + owner);
 			AgentImpl userAgent = null;
 			try {
 				userAgent = getAgentByDetail(null, username, null);
-				userAgent = ethereumNode.getAgent(userAgent.getIdentifier());
+				String agentId = userAgent.getIdentifier();
+				logger.fine("found matching user agent: " + agentId);
+				userAgent = ethereumNode.getAgent(agentId);
+				logger.fine("found matching eth agent: " + agentId);
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new BadRequestException("cannot get ethereum agent by username", e);
@@ -591,11 +595,11 @@ public class AgentsHandler {
 			JSONObject member = new JSONObject();
 			member.put("agentid", agent.getIdentifier());
 			member.put("address", ownerAddress);
-
 			member.put("username", agent.getLoginName());
 			member.put("email", agent.getEmail());
 			BigInteger cumulativeScore = profile.getCumulativeScore();
 			BigInteger noTransactions = profile.getNoTransactions();
+			member.put("eth-profile-owner", profile.getOwner());
 			member.put("cumulative-score", cumulativeScore.toString());
 			member.put("no-of-transactions", noTransactions.toString());
 			if ( noTransactions.compareTo(BigInteger.ZERO) == 0 )
