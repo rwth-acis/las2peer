@@ -23,6 +23,7 @@ import java.math.BigInteger;
  */
 class BlockchainObserver {
 	
+	List<String> errors;
 	/** Profiles to their owners */
 	ConcurrentMap<String, String> profiles;
 	
@@ -109,6 +110,7 @@ class BlockchainObserver {
 		logger.fine("Creating new blockchain observer");
 		contracts = new Contracts.ContractsBuilder(contractsConfig).build();
 
+		errors = new ArrayList<String>();
 		profiles = new ConcurrentHashMap<>();
 		users = new ConcurrentHashMap<>();
 		tags = new ConcurrentHashMap<>();
@@ -117,6 +119,7 @@ class BlockchainObserver {
 		releasesByVersion = new ConcurrentHashMap<>();
 		deployments = new ConcurrentHashMap<>();
 
+		observeErrorEvents();
 		observeUserRegistrations();
 		observeUserProfileCreations();
 		observeTagCreations();
@@ -133,7 +136,22 @@ class BlockchainObserver {
 			return false;
 		}
 	}
-	
+
+	private void observeErrorEvents() {
+		contracts.reputationRegistry
+				.errorEventEventFlowable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST)
+				.observeOn(Schedulers.io()).subscribeOn(Schedulers.io()).subscribe(error -> {
+					if (txHasAlreadyBeenHandled(error.log.getTransactionHash())) {
+						return;
+					}
+
+					String errorMsg = Util.recoverString(error.message);
+
+					this.errors.add(errorMsg);
+					logger.warning("observed error event: " + errorMsg);
+				}, e -> logger.severe("Error observing error event: " + e.toString()));
+	}
+
 	private void observeUserRegistrations() {
 		contracts.userRegistry.userRegisteredEventFlowable(DefaultBlockParameterName.EARLIEST,
 		DefaultBlockParameterName.LATEST)
