@@ -187,11 +187,16 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		   new EthereumException("couldn't create profile", e); } return "";
 		 */
 		
-		String txHash;
+		// call contract from personal account
+		String txHash = this.callContract(agent, contractAddress, senderAddress, encodedFunction);
+		logger.info("[ETH] contract call txHash: " + txHash);
+		waitForTransactionReceipt(txHash);
+
+		// this calls with coinbase as sender.
+		// would need to refactor registry creation to use personal credentials.
+		/*
 		try {
-			//txHash = this.callSmartContractFunction(senderAddress, contractAddress, function);
-			//waitForTransactionReceipt(txHash);
-			TransactionReceipt txR = contracts.reputationRegistry.createProfile(profileName).send();//contracts.communityTagIndex.create(profileName, "test").send();
+			TransactionReceipt txR = contracts.reputationRegistry.createProfile(profileName).send();
 			if (!txR.isStatusOK()) {
 				logger.warning("trx fail with status " + txR.getStatus());
 				logger.warning("gas used " + txR.getCumulativeGasUsed());
@@ -199,9 +204,11 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 				throw new EthereumException("could not send transaction, transaction receipt not ok");
 			}
 			txHash = txR.getTransactionHash();
+			waitForTransactionReceipt(txHash);
 		} catch (Exception e) {
 			throw new EthereumException("couldn't execute smart contract function call", e);
 		}
+		*/
 		return txHash;
 	}
 
