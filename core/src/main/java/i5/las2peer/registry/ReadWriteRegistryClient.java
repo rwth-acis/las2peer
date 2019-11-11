@@ -145,7 +145,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		logger.info("registering user profile: " + agent.getLoginName());
 
 		String functionName = "createProfile";
-		String senderAddress = agent.getEthereumAccountId();// agent.getEthereumAddress();
+		String senderAddress = agent.getEthereumAddress();// agent.getEthereumAccountId();// agent.getEthereumAddress();
 		String contractAddress = contracts.reputationRegistry.getContractAddress();
 		List<Type> inputParameters = new ArrayList<>();
 		// inputParameters.add(new DynamicBytes(profileName));
@@ -231,7 +231,8 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		*/
 		
 		try {
-			TransactionReceipt txR = contracts.communityTagIndex.create(profileName, "test").send();//.reputationRegistry.createProfile(profileName).send();
+			
+			TransactionReceipt txR = contracts.reputationRegistry.createProfile(profileName).send();//.reputationRegistry.createProfile(profileName).send();
 			if (!txR.isStatusOK()) {
 				logger.warning("trx fail with status " + txR.getStatus());
 				logger.warning("gas used " + txR.getCumulativeGasUsed());

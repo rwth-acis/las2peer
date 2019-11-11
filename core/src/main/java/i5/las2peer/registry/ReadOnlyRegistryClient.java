@@ -89,6 +89,7 @@ public class ReadOnlyRegistryClient {
 		long _gasLimit = registryConfiguration.getGasLimit();
 		this.gasLimit = BigInteger.valueOf(_gasLimit);
 
+		logger.info("creating smart contract wrapper with credentials:" + credentials.getAddress());
 		contracts = new Contracts.ContractsBuilder(contractsConfig)
 				.setGasOptions(_gasPrice, _gasLimit)
 				.setCredentials(credentials) // may be null, that's okay here
