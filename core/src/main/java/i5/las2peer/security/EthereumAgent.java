@@ -65,13 +65,15 @@ public class EthereumAgent extends UserAgentImpl {
 		checkLoginNameValidity(loginName);
 		this.sLoginName = loginName;
 		this.ethereumMnemonic = ethereumMnemonic;
+		this.ethereumAddress = CredentialUtils.fromMnemonic(ethereumMnemonic, passphrase).getAddress();
 	}
 
-	protected EthereumAgent(PublicKey pubKey, byte[] encryptedPrivate, byte[] salt, String loginName, String ethereumMnemonic) {
+	protected EthereumAgent(PublicKey pubKey, byte[] encryptedPrivate, byte[] salt, String loginName, String ethereumMnemonic, String ethereumAddress) {
 		super(pubKey, encryptedPrivate, salt);
 		checkLoginNameValidity(loginName);
 		this.sLoginName = loginName;
 		this.ethereumMnemonic = ethereumMnemonic;
+		this.ethereumAddress = ethereumAddress;
 	}
 
 	// as in the superclass, it would be nicer not to use an exception
@@ -133,6 +135,7 @@ public class EthereumAgent extends UserAgentImpl {
 					+ "\t\t<salt encoding=\"base64\">" + Base64.getEncoder().encodeToString(getSalt()) + "</salt>\n"
 					+ "\t\t<data encoding=\"base64\">" + getEncodedPrivate() + "</data>\n" + "\t</privatekey>\n"
 					+ "\t<login>" + sLoginName + "</login>\n"
+					+ "\t<ethereumaddress>" + ethereumAddress + "</ethereumaddress>\n"
 					+ "\t<ethereummnemonic>" + ethereumMnemonic + "</ethereummnemonic>\n");
 
 			if (sEmail != null) {
@@ -237,8 +240,11 @@ public class EthereumAgent extends UserAgentImpl {
 			Element ethereumMnemonicElement = XmlTools.getSingularElement(root, "ethereummnemonic");
 			String ethereumMnemonic = ethereumMnemonicElement.getTextContent();
 
+			Element ethereumAddressElement = XmlTools.getSingularElement(root, "ethereumaddress");
+			String ethereumAddress = ethereumAddressElement.getTextContent();
+
 			// required fields complete, create result
-			EthereumAgent result = new EthereumAgent(publicKey, encPrivate, salt, login, ethereumMnemonic);
+			EthereumAgent result = new EthereumAgent(publicKey, encPrivate, salt, login, ethereumMnemonic, ethereumAddress);
 
 			// read and set optional fields
 			// note: login name is not optional here
