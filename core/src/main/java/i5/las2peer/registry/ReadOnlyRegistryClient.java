@@ -372,6 +372,34 @@ public class ReadOnlyRegistryClient {
 		return receipt.get();
 	}
 
+	protected void waitForTransactionReceipt(String txHash) throws EthereumException {
+		logger.info("waiting for receipt on [" + txHash + "]... ");
+		TransactionReceipt txR;
+		try {
+			txR = waitForReceipt(txHash);
+			if (txR == null) {
+				throw new EthereumException("Transaction sent, no receipt returned. Wait more?");
+			}
+			if (!txR.isStatusOK()) {
+				logger.warning("trx fail with status " + txR.getStatus());
+				// String gasUsed =
+				// String.valueOf(Convert.fromWei(String.valueOf(txR.getCumulativeGasUsedRaw()),
+				// Convert.Unit.ETHER));
+				logger.warning("gas used " + txR.getCumulativeGasUsed());
+				if (!txHash.equals(txR.getTransactionHash())) {
+					logger.warning("transaction hash mismatch");
+				}
+				logger.warning(txR.toString());
+				throw new EthereumException("could not send transaction, transaction receipt not ok");
+			}
+		} catch (InterruptedException | ExecutionException e) {
+			throw new EthereumException("Wait for receipt interrupted or failed.");
+		}
+		logger.info("receipt for [" + txHash + "] received.");
+
+		// return txR;
+	}
+
 	/**
 	 * Returns the TransactionRecipt for the specified tx hash as an optional.
 	 * https://github.com/matthiaszimmermann/web3j_demo / Web3jUtils

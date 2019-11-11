@@ -3,37 +3,20 @@ package i5.las2peer.registry;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-import org.web3j.abi.FunctionEncoder;
-import org.web3j.abi.TypeReference;
-import org.web3j.abi.datatypes.DynamicBytes;
 import org.web3j.abi.datatypes.Function;
-import org.web3j.abi.datatypes.Type;
-import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.crypto.Credentials;
-import org.web3j.crypto.RawTransaction;
-import org.web3j.crypto.TransactionEncoder;
-import org.web3j.protocol.admin.methods.response.NewAccountIdentifier;
-import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.web3j.tx.RawTransactionManager;
-import org.web3j.tx.TransactionManager;
 import org.web3j.tx.Transfer;
-import org.web3j.tx.gas.DefaultGasProvider;
 import org.web3j.utils.Convert;
-import org.web3j.utils.Numeric;
 
 import i5.las2peer.api.security.AgentLockedException;
-import i5.las2peer.logging.L2pLogger;
-import i5.las2peer.registry.contracts.ReputationRegistry;
 import i5.las2peer.registry.contracts.ServiceRegistry;
 import i5.las2peer.registry.contracts.UserRegistry;
 import i5.las2peer.registry.data.RegistryConfiguration;
@@ -140,99 +123,11 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		if (!agent.hasLoginName()) {
 			throw new EthereumException("Could not create reputation profile: agent has no login name");
 		}
-
 		byte[] profileName = Util.padAndConvertString(agent.getLoginName(), 32);
 		logger.info("registering user profile: " + agent.getLoginName());
-
-		String functionName = "createProfile";
-		String senderAddress = agent.getEthereumAddress();// agent.getEthereumAccountId();// agent.getEthereumAddress();
-		String contractAddress = contracts.reputationRegistry.getContractAddress();
-		List<Type> inputParameters = new ArrayList<>();
-		// inputParameters.add(new DynamicBytes(profileName));
-		// Address tAddress = new Address(toAddress);
-		inputParameters.add(new DynamicBytes(profileName));
-		List<TypeReference<?>> outputParameters = Collections.<TypeReference<?>>emptyList();
-		Function function = new Function(functionName, inputParameters, outputParameters);
-		String encodedFunction = FunctionEncoder.encode(function);
-
-		/*
-		   String txHash = this.prepareSmartContractCall(agent, contractAddress,
-		   functionName, senderAddress, inputParameters);
-		   
-		   TransactionReceipt txr = waitForTransactionReceipt(txHash);
-		 */
-		/*
-		   String txHash = this.prepareSmartContractCall(agent, contractAddress,
-		   functionName, senderAddress, inputParameters);
-		   logger.info("registering function called, transaction hash: " + txHash);
-		   //return functionCallValue; waitForTransactionReceipt(txHash); return txHash;
-		 */
-		/*
-		String retVal = prepareSmartContractCall2(agent, contractAddress, functionName, senderAddress, inputParameters,
-				Collections.<TypeReference<?>>emptyList());
-		logger.info("[ETH] contract call return value " + retVal);
-		return retVal;
-		*/
-		/*
-		String txHash = this.callContract(agent, contractAddress, senderAddress, encodedFunction);
-		logger.info("[ETH] contract call txHash: " + txHash );
-		waitForTransactionReceipt(txHash);
-		return txHash;
-		*/
-		/*
-		   try { contracts.reputationRegistry.createProfile(profileName).send(); } catch
-		   (Exception e) { // TODO Auto-generated catch block e.printStackTrace(); throw
-		   new EthereumException("couldn't create profile", e); } return "";
-		 */
-		String txHash;
-		/*
-		BigInteger nonce = BigInteger.ZERO;
+		String txHash;		
 		try {
-			nonce = this.getNonce(senderAddress);
-		} catch (InterruptedException | ExecutionException e1) {
-			throw new EthereumException("unable to get nonce");
-		}
-		logger.info("[ETH] creating function call [" + senderAddress + "]->[" + contractAddress + "]: nonce = " + nonce);
-		Transaction transaction = Transaction.createFunctionCallTransaction(
-			senderAddress, 
-			nonce, 
-			DefaultGasProvider.GAS_PRICE, 
-			DefaultGasProvider.GAS_LIMIT, 
-			contractAddress, 
-			Convert.toWei(new BigDecimal("0.01"), Convert.Unit.ETHER).toBigInteger(), 
-			encodedFunction
-		);
-		
-		try {
-			String passphrase = agent.getEthereumCredentials().getEcKeyPair().getPrivateKey().toString();
-			EthSendTransaction ethSendTransaction = web3j_admin.personalSendTransaction(transaction,passphrase).send();
-			txHash = ethSendTransaction.getTransactionHash();
-			logger.info("transaction result: " + ethSendTransaction.getResult());
-
-
-
-			// check for errors
-			if (ethSendTransaction.hasError()) {
-				Response.Error error = ethSendTransaction.getError();
-				throw new EthereumException("Eth Transaction Error [" + error.getCode() + "]" + error.getMessage());
-			}
-
-			if (txHash.length() < 2) {
-				throw new EthereumException("Could not create ethereum transaction");
-			}
-			logger.info("[ETH] Called contract [" + contractAddress + "]@[" + functionName + "]");
-
-		} catch (AgentLockedException e1) {
-			throw new EthereumException("agent locked");
-		} catch (IOException e) {
-			throw new EthereumException("couldn't send transaction", e);
-		}
-		waitForTransactionReceipt(txHash);
-		*/
-		
-		try {
-			
-			TransactionReceipt txR = contracts.reputationRegistry.createProfile(profileName).send();//.reputationRegistry.createProfile(profileName).send();
+			TransactionReceipt txR = contracts.reputationRegistry.createProfile(profileName).send();
 			if (!txR.isStatusOK()) {
 				logger.warning("trx fail with status " + txR.getStatus());
 				logger.warning("gas used " + txR.getCumulativeGasUsed());
@@ -244,175 +139,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		} catch (Exception e) {
 			throw new EthereumException("couldn't execute smart contract function call", e);
 		}
-		
 		return txHash;
-	}
-
-	private String prepareSmartContractCall(EthereumAgent agent, String contractAddress, String functionName,
-			String senderAddress, List<Type> inputParameters) throws EthereumException {
-		return this.prepareSmartContractCall(agent, contractAddress, functionName, senderAddress, inputParameters,
-				Collections.<TypeReference<?>>emptyList() // default to empty output
-		);
-	}
-
-	private String prepareSmartContractCall2(EthereumAgent agent, String contractAddress, String functionName,
-			String senderAddress, List<Type> inputParameters, List<TypeReference<?>> outputParameters)
-			throws EthereumException {
-
-		Function function = new Function(functionName, inputParameters, outputParameters);
-
-		String callerAddress = agent.getEthereumAddress();
-		String functionCallValue;
-		try {
-			functionCallValue = this.callSmartContractFunction(callerAddress, contractAddress, function);
-		} catch (InterruptedException | ExecutionException | IOException | EthereumException e) {
-			throw new EthereumException("couldn't call smart contract function", e);
-		}
-		return functionCallValue;
-	}
-
-	private String prepareSmartContractCall(EthereumAgent agent, String contractAddress, String functionName,
-			String senderAddress, List<Type> inputParameters, List<TypeReference<?>> outputParameters)
-			throws EthereumException {
-
-		Function function = new Function(functionName, inputParameters, outputParameters);
-		String encodedFunction = FunctionEncoder.encode(function);
-
-		// RawTransactionManager use a wallet (credential) to create and sign
-		// transaction
-		TransactionManager txManager;
-		try {
-			txManager = new RawTransactionManager(web3j, agent.getEthereumCredentials());
-		} catch (AgentLockedException e) {
-			throw new EthereumException("couldn't initialize RawTransactionManager: eth agent locked", e);
-		}
-
-		// Send transaction
-		String txHash;
-		try {
-			EthSendTransaction ethSendTransaction = txManager.sendTransaction(DefaultGasProvider.GAS_PRICE,
-					DefaultGasProvider.GAS_LIMIT, contractAddress, encodedFunction, BigInteger.ONE);
-
-			txHash = ethSendTransaction.getTransactionHash();
-			logger.info("transaction result: " + ethSendTransaction.getResult());
-
-			// check for errors
-			if (ethSendTransaction.hasError()) {
-				Response.Error error = ethSendTransaction.getError();
-				throw new EthereumException("Eth Transaction Error [" + error.getCode() + "]" + error.getMessage());
-			}
-
-			if (txHash.length() < 2) {
-				throw new EthereumException("Could not create ethereum transaction");
-			}
-			logger.info("[ETH] Called contract [" + contractAddress + "]@[" + functionName + "]");
-
-		} catch (IOException e) {
-			throw new EthereumException("Could not send contract call: " + e.getMessage(), e);
-		}
-		return txHash;
-
-	}
-
-	// https://github.com/web3j/web3j/blob/master/integration-tests/src/test/java/org/web3j/protocol/scenarios/GreeterContractIT.java
-	private String callSmartContractFunction(String callerAddress, String contractAddress, Function function)
-			throws InterruptedException, ExecutionException, IOException, EthereumException {
-		BigInteger nonce;
-		nonce = this.getNonce(callerAddress);
-		String encodedFunction = FunctionEncoder.encode(function);
-		logger.info(
-				"[ETH] creating function call [" + callerAddress + "]->[" + contractAddress + "]: nonce = " + nonce);
-
-		//Transaction transaction = Transaction.createFunctionCallTransaction(callerAddress, nonce,
-		//		DefaultGasProvider.GAS_PRICE, DefaultGasProvider.GAS_LIMIT, contractAddress, encodedFunction);
-		Transaction transaction = Transaction.createFunctionCallTransaction(callerAddress, nonce, DefaultGasProvider.GAS_PRICE, DefaultGasProvider.GAS_LIMIT, contractAddress, BigInteger.ZERO, encodedFunction);
-		// Transaction transaction = Transaction.createEthCallTransaction(callerAddress,
-		// contractAddress, encodedFunction);
-		//logger.info("[ETH] gas estimate: " + web3j.ethEstimateGas(transaction).send().getAmountUsed());
-
-		//String transactionGas = String.valueOf(Convert.fromWei(String.valueOf(transaction.getGas()), Convert.Unit.ETHER));
-		//String transactionGasPrice = String.valueOf(Convert.fromWei(String.valueOf(transaction.getGasPrice()), Convert.Unit.ETHER));
-		
-		//logger.info("[ETH] function gas: " + transactionGas + ", gasPrice: " + transactionGasPrice );
-		logger.info(
-				"[ETH] gas price: " + DefaultGasProvider.GAS_PRICE + ", gas limit: " + DefaultGasProvider.GAS_LIMIT);
-		EthSendTransaction response = web3j.ethSendTransaction(transaction)
-				.sendAsync().get();
-				//.send();
-				
-		if (response.hasError()) {
-			throw new EthereumException("[ETH] transaction send failed, error [" + response.getError().getCode() + "]: "
-					+ response.getError().getMessage());
-		}
-		logger.info("[ETH] created function call [" + callerAddress + "]->[" + contractAddress + "]");
-		logger.info("[ETH] txHash = " + response.getTransactionHash() );
-
-		return response.getTransactionHash();
-	}
-
-	private String callContract(EthereumAgent agent, String contractAddress, String senderAddress,
-			String encodedFunction) throws EthereumException {
-		BigInteger nonce;
-		try {
-			nonce = this.getNonce(contractAddress);
-		} catch (InterruptedException | ExecutionException e) {
-			throw new EthereumException("couldn't get nonce", e);
-		}
-
-		RawTransaction rawTransaction = RawTransaction.createTransaction(
-			nonce, 
-			DefaultGasProvider.GAS_PRICE,
-			DefaultGasProvider.GAS_LIMIT, 
-			contractAddress, 
-			encodedFunction
-		);
-
-		byte[] signedMessage;
-		String hexValue;
-		EthSendTransaction transactionResponse;
-		try {
-			signedMessage = TransactionEncoder.signMessage(rawTransaction, agent.getEthereumCredentials());
-			hexValue = Numeric.toHexString(signedMessage);
-			try {
-				transactionResponse = web3j.ethSendRawTransaction(hexValue).send();
-			} catch (IOException e) {
-				throw new EthereumException("couldn't send raw transaction", e);
-			}
-		} catch (AgentLockedException e) {
-			throw new EthereumException("agent is locked");
-		}
-		
-
-		
-
-		return transactionResponse.getTransactionHash();
-	}
-
-	private void waitForTransactionReceipt(String txHash)
-			throws EthereumException {
-		logger.info("waiting for receipt on [" + txHash + "]... ");
-		TransactionReceipt txR;
-		try {
-			txR = waitForReceipt(txHash);
-			if (txR == null) {
-				throw new EthereumException("Transaction sent, no receipt returned. Wait more?");
-			}
-			if (!txR.isStatusOK()) {
-				logger.warning("trx fail with status " + txR.getStatus());
-				//String gasUsed = String.valueOf(Convert.fromWei(String.valueOf(txR.getCumulativeGasUsedRaw()), Convert.Unit.ETHER));
-				logger.warning("gas used " + txR.getCumulativeGasUsed());
-				if (!txHash.equals(txR.getTransactionHash())) {
-					logger.warning("transaction hash mismatch");
-				}
-				logger.warning(txR.toString());
-				throw new EthereumException("could not send transaction, transaction receipt not ok");
-			}
-		} catch (InterruptedException | ExecutionException e) {
-			throw new EthereumException("Wait for receipt interrupted or failed.");
-		}
-		logger.info("receipt for [" + txHash + "] received.");
-		
-		//return txR;
 	}
 	
 	public void addUserRating(UserData receivingAgent, Integer rating ) throws EthereumException
