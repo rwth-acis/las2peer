@@ -443,6 +443,8 @@ class AgentsView extends PolymerElement {
   }
   _handleRegisterProfileResponse(event) {
     console.log(event.detail.response);
+    this.refreshEthWallet();
+    this.refreshProfilesList();
   }
 
   _keyPressedCreateAgent(event) {
