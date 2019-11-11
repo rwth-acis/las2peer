@@ -50,7 +50,6 @@ public class EthereumAgent extends UserAgentImpl {
 	private String ethereumMnemonic;
 	/** Ethereum account address. (This is not secret.) */
 	private String ethereumAddress;
-	private String ethereumAccountId;
 
 	/** Ethereum credentials; used for Ethereum message signing. */
 	private Credentials credentials;
@@ -60,21 +59,19 @@ public class EthereumAgent extends UserAgentImpl {
 
 	private static final L2pLogger logger = L2pLogger.getInstance(EthereumAgent.class);
 
-	protected EthereumAgent(KeyPair pair, String passphrase, byte[] salt, String loginName, String ethereumMnemonic, String accountId)
+	protected EthereumAgent(KeyPair pair, String passphrase, byte[] salt, String loginName, String ethereumMnemonic)
 			throws AgentOperationFailedException, CryptoException {
 		super(pair, passphrase, salt);
 		checkLoginNameValidity(loginName);
 		this.sLoginName = loginName;
 		this.ethereumMnemonic = ethereumMnemonic;
-		this.ethereumAccountId = accountId;
 	}
 
-	protected EthereumAgent(PublicKey pubKey, byte[] encryptedPrivate, byte[] salt, String loginName, String ethereumMnemonic, String accountId) {
+	protected EthereumAgent(PublicKey pubKey, byte[] encryptedPrivate, byte[] salt, String loginName, String ethereumMnemonic) {
 		super(pubKey, encryptedPrivate, salt);
 		checkLoginNameValidity(loginName);
 		this.sLoginName = loginName;
 		this.ethereumMnemonic = ethereumMnemonic;
-		this.ethereumAccountId = accountId;
 	}
 
 	// as in the superclass, it would be nicer not to use an exception
@@ -106,16 +103,6 @@ public class EthereumAgent extends UserAgentImpl {
 		registryClient = new ReadWriteRegistryClient(new RegistryConfiguration(), credentials);
 
 		ethereumAddress = credentials.getAddress();
-		/*
-		if ( ethereumAccountId.length() > 0 )
-		{
-			Boolean personalAccUnlocked = registryClient.unlockAccount(ethereumAccountId, credentials.getEcKeyPair().getPrivateKey().toString());
-			if ( !personalAccUnlocked )
-			{
-				throw new AgentAccessDeniedException("could not unlock ethereum personal account " + ethereumAccountId);
-			}
-		}
-		*/
 		logger.info("unlocked ethereum agent ["+ethereumAddress +"]");
 	}
 
@@ -146,7 +133,6 @@ public class EthereumAgent extends UserAgentImpl {
 					+ "\t\t<salt encoding=\"base64\">" + Base64.getEncoder().encodeToString(getSalt()) + "</salt>\n"
 					+ "\t\t<data encoding=\"base64\">" + getEncodedPrivate() + "</data>\n" + "\t</privatekey>\n"
 					+ "\t<login>" + sLoginName + "</login>\n"
-					+ "\t<ethaccid>" + ethereumAccountId + "</ethaccid>\n"
 					+ "\t<ethereummnemonic>" + ethereumMnemonic + "</ethereummnemonic>\n");
 
 			if (sEmail != null) {
@@ -183,14 +169,7 @@ public class EthereumAgent extends UserAgentImpl {
 			throws CryptoException, AgentOperationFailedException {
 		byte[] salt = CryptoTools.generateSalt();
 		KeyPair keyPair = CryptoTools.generateKeyPair();
-		String newAccId = "???";
-		/*try {
-			newAccId = regClient.registerPersonalAccount(passphrase);
-		} catch (IOException e) {
-			throw new AgentOperationFailedException("couldn't register personal eth account", e);
-		}
-		*/
-		return new EthereumAgent(keyPair, passphrase, salt, loginName, ethereumMnemonic, newAccId);
+		return new EthereumAgent(keyPair, passphrase, salt, loginName, ethereumMnemonic);
 	}
 
 	/**
@@ -208,10 +187,6 @@ public class EthereumAgent extends UserAgentImpl {
 
 	public String getEthereumMnemonic() {
 		return ethereumMnemonic;
-	}
-
-	public String getEthereumAccountId() {
-		return ethereumAccountId;
 	}
 
 	public Credentials getEthereumCredentials() throws AgentLockedException {
@@ -259,14 +234,11 @@ public class EthereumAgent extends UserAgentImpl {
 			Element loginElement = XmlTools.getSingularElement(root, "login");
 			String login = loginElement.getTextContent();
 
-			Element accIDElement = XmlTools.getSingularElement(root, "ethaccid");
-			String accID = accIDElement.getTextContent();
-
 			Element ethereumMnemonicElement = XmlTools.getSingularElement(root, "ethereummnemonic");
 			String ethereumMnemonic = ethereumMnemonicElement.getTextContent();
 
 			// required fields complete, create result
-			EthereumAgent result = new EthereumAgent(publicKey, encPrivate, salt, login, ethereumMnemonic, accID);
+			EthereumAgent result = new EthereumAgent(publicKey, encPrivate, salt, login, ethereumMnemonic);
 
 			// read and set optional fields
 			// note: login name is not optional here
