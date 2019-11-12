@@ -22,6 +22,7 @@ import i5.las2peer.registry.contracts.UserRegistry;
 import i5.las2peer.registry.data.RegistryConfiguration;
 import i5.las2peer.registry.data.UserData;
 import i5.las2peer.registry.exceptions.EthereumException;
+import i5.las2peer.registry.exceptions.NotFoundException;
 import i5.las2peer.security.EthereumAgent;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.serialization.SerializeTools;
@@ -125,7 +126,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		}
 		byte[] profileName = Util.padAndConvertString(agent.getLoginName(), 32);
 		logger.info("registering user profile: " + agent.getLoginName());
-		String txHash;		
+		String txHash;
 		try {
 			TransactionReceipt txR = contracts.reputationRegistry.createProfile(profileName).send();
 			if (!txR.isStatusOK()) {
@@ -141,22 +142,45 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		}
 		return txHash;
 	}
-	
-	public void addUserRating(UserData receivingAgent, Integer rating ) throws EthereumException
-	{
+
+	public String addUserRating(EthereumAgent receivingAgent, Integer rating) throws EthereumException {
 		// see reputation registry
-	    int __amountMax = 5;
-	    int __amountMin = __amountMax * -1;
-		if ( rating > __amountMax || rating < __amountMin )
-			throw new EthereumException("Could not add user rating: rating outside bounds (" + __amountMin + " - " + __amountMax + ")");
-		
-		logger.fine( "rating user profile: " + receivingAgent.getName() + " | " + rating + "(" + BigInteger.valueOf(rating).intValue() + ")" );
-		
+		int __amountMax = 5;
+		int __amountMin = __amountMax * -1;
+		if (rating > __amountMax || rating < __amountMin)
+			throw new EthereumException(
+					"Could not add user rating: rating outside bounds (" + __amountMin + " - " + __amountMax + ")");
+
+		logger.info("rating user profile: " + receivingAgent.getLoginName() + " | " + rating + "("
+				+ BigInteger.valueOf(rating).intValue() + ")");
+
+		String txHash;
 		try {
-			contracts.reputationRegistry.addTransaction(receivingAgent.getPublicKey().toString(), BigInteger.valueOf(rating)).send();
+			TransactionReceipt txR = contracts.reputationRegistry
+					.addTransaction(receivingAgent.getEthereumAddress(), BigInteger.valueOf(rating)).send();
+			if (!txR.isStatusOK()) {
+				logger.warning("trx fail with status " + txR.getStatus());
+				logger.warning("gas used " + txR.getCumulativeGasUsed());
+				logger.warning(txR.toString());
+				throw new EthereumException("could not send transaction, transaction receipt not ok");
+			}
+			txHash = txR.getTransactionHash();
+			waitForTransactionReceipt(txHash);
 		} catch (Exception e) {
-			throw new EthereumException("Could not add user rating: " + e.getMessage(), e);
+			throw new EthereumException("couldn't execute smart contract function call", e);
 		}
+		return txHash;
+	}
+
+	public boolean hasReputationProfile(String profileName)
+		throws EthereumException {
+		Boolean hasProfile = Boolean.FALSE;
+		try {
+			hasProfile = contracts.reputationRegistry.hasProfile(profileName).send();
+		} catch (Exception e) {
+			throw new EthereumException("cannot check if profile exists");
+		}
+		return hasProfile.booleanValue();
 	}
 
 	/**

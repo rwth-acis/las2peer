@@ -449,7 +449,6 @@ public class AgentsHandler {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response handleRegisterProfile(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId) throws MalformedXMLException, IOException
 	{
-		
 		JSONObject json = new JSONObject();
 		AgentSession session = connector.getSessionById(sessionId);
 		if (session == null) {
@@ -457,10 +456,7 @@ public class AgentsHandler {
 		}
 		
 		EthereumAgent agent = (EthereumAgent) session.getAgent();
-		//UserAgentImpl agent = MockAgentFactory.getAdam();
-		//JSONObject json = new JSONObject();
 		try {
-			//ethereumNode.registerProfile(agent);
 			String txHash = agent.getRegistryClient().registerReputationProfile(agent);
 			json.put("call-transaction-hash", txHash);
 		} catch (EthereumException e) {		
@@ -505,7 +501,6 @@ public class AgentsHandler {
 			try {
 				userAgent = getAgentByDetail(null, username, null);
 				userAgent = ethereumNode.getAgent(userAgent.getIdentifier());
-				//userAgent = ethereumNode.getAgent(id)
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -631,39 +626,32 @@ public class AgentsHandler {
 		if (session == null) {
 			throw new BadRequestException("You have to be logged in to rate");
 		}
-		
-		/*// check if sender is ETH agent - necessary?
-		AgentImpl senderAgent = session.getAgent();
-		if ( !( senderAgent instanceof EthereumAgent ) )
-		{
-			throw new BadRequestException("Logged in agent is not EthereumAgent");
-		}
-		EthereumAgent senderEthAgent = (EthereumAgent) senderAgent;
-		*/
-		
-		// find recipient in user registry
-		AgentImpl recipientAgent = getAgentByDetail(agentId, null, null);
-		if ( !(recipientAgent instanceof UserAgentImpl) ) {
-			throw new BadRequestException("Recipient is not a UserAgent or cannot find by agentId");
-		}
-		UserAgentImpl recipientUserAgent = (UserAgentImpl) recipientAgent;
-		
-		// find recipient on blockchain
-		UserData userInBlockchain = ethereumNode.getRegistryClient().getUser(recipientUserAgent.getLoginName());
-		
-		// add transaction
-		// rating must be between amountMin and amountMax
+		EthereumAgent ethAgent = (EthereumAgent) session.getAgent();
+
+		EthereumAgent recipientAgent = null;
 		try {
-			ethereumNode.getRegistryClient().addUserRating(userInBlockchain, rating);
-		} catch (EthereumException e) {			
-			throw new BadRequestException("Profile rating failed: " + e.getMessage());
+			recipientAgent = (EthereumAgent) ethereumNode.getAgent(agentId);
+			if (!ethereumNode.getRegistryClient().hasReputationProfile(recipientAgent.getEthereumAddress())) {
+				throw new NotFoundException("recipient profile not found");
+			}
+			// add transaction
+			// rating must be between amountMin and amountMax
+			try {
+				ethAgent.getRegistryClient().addUserRating(recipientAgent, rating);
+			} catch (EthereumException e) {
+				throw new BadRequestException("Profile rating failed: " + e.getMessage());
+			}
+		}
+		catch (AgentException e)
+		{
+			throw new NotFoundException("recipient eth agent not found");
 		}
 		
 		JSONObject json = new JSONObject();
 		json.put("code", Status.OK.getStatusCode());
 		json.put("text", Status.OK.getStatusCode() + " - UserProfile rating added");
-		json.put("recipientid", userInBlockchain.getAgentId());
-		json.put("recipientname", userInBlockchain.getName());
+		json.put("recipientaddress", recipientAgent.getEthereumAddress());
+		json.put("recipientname", recipientAgent.getLoginName());
 		json.put("rating", rating);
 		
 		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
