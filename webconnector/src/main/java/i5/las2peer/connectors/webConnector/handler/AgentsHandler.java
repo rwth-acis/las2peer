@@ -639,12 +639,12 @@ public class AgentsHandler {
 			try {
 				ethAgent.getRegistryClient().addUserRating(recipientAgent, rating);
 			} catch (EthereumException e) {
-				throw new BadRequestException("Profile rating failed: " + e.getMessage());
+				throw new BadRequestException("Profile rating failed: ",e);
 			}
 		}
 		catch (AgentException e)
 		{
-			throw new NotFoundException("recipient eth agent not found");
+			throw new NotFoundException("recipient eth agent not found",e);
 		}
 		
 		JSONObject json = new JSONObject();

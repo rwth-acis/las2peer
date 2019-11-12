@@ -144,15 +144,18 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 	}
 
 	public String addUserRating(EthereumAgent receivingAgent, Integer rating) throws EthereumException {
+		
+		logger.info("rating user profile: " + receivingAgent.getLoginName() + " | " + rating + "("
+				+ BigInteger.valueOf(rating).intValue() + ")");
+
 		// see reputation registry
 		int __amountMax = 5;
 		int __amountMin = __amountMax * -1;
 		if (rating > __amountMax || rating < __amountMin)
+		{
 			throw new EthereumException(
 					"Could not add user rating: rating outside bounds (" + __amountMin + " - " + __amountMax + ")");
-
-		logger.info("rating user profile: " + receivingAgent.getLoginName() + " | " + rating + "("
-				+ BigInteger.valueOf(rating).intValue() + ")");
+		}
 
 		String txHash;
 		try {
