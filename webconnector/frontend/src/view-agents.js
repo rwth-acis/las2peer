@@ -126,16 +126,6 @@ class AgentsView extends PolymerElement {
 
           padding: 10px;
         }
-        body /deep/ .iron-icon.whole {
-              -webkit-clip-path: none !important;
-              -moz-clip-path: none !important;
-              -o-clip-path: none !important;
-              -ms-clip-path: none !important;
-              clip-path: none !important;
-        }
-        body /deep/ .iron-icon.half {
-          z-index: -333 !important;
-        }
       </style>
 
       <div class="card">
@@ -207,6 +197,18 @@ class AgentsView extends PolymerElement {
           <paper-icon-button icon="refresh" title="Refresh Profiles List" on-click="refreshProfilesList" disabled="[[_working]]"></paper-button>
         </h2>
         <iron-collapse id="collapseProfileList">
+          <style>
+            iron-star-rating::shadow .iron-icon.whole {
+              -webkit-clip-path: none !important;
+              -moz-clip-path: none !important;
+              -o-clip-path: none !important;
+              -ms-clip-path: none !important;
+              clip-path: none !important;
+            }
+            iron-star-rating::shadow .iron-icon.half {
+              z-index: -333 !important;
+            }
+          </style>
           <template is="dom-if" if="[[!_hasNoProfilesList]]">
             <h3>Members</h3>
             <table width="100%">
