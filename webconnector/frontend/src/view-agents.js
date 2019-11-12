@@ -126,14 +126,14 @@ class AgentsView extends PolymerElement {
 
           padding: 10px;
         }
-        iron-star-rating::shadow .iron-icon.whole {
+        body /deep/ .iron-icon.whole {
               -webkit-clip-path: none !important;
               -moz-clip-path: none !important;
               -o-clip-path: none !important;
               -ms-clip-path: none !important;
               clip-path: none !important;
         }
-        iron-star-rating::shadow .iron-icon.half {
+        body /deep/ .iron-icon.half {
           z-index: -333 !important;
         }
       </style>
