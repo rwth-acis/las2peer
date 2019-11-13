@@ -14,8 +14,10 @@ import '@polymer/iron-collapse/iron-collapse.js';
 import '@polymer/iron-form/iron-form.js';
 import '@polymer/paper-input/paper-input.js';
 import '@polymer/paper-button/paper-button.js';
+import '@polymer/paper-card/paper-card.js';
 import '@polymer/paper-spinner/paper-spinner.js';
-import '@cwmr/iron-star-rating/iron-star-rating.js';
+//import '@cwmr/iron-star-rating/iron-star-rating.js';
+import './custom-star-rating.js';
 import './shared-styles.js';
 
 class AgentsView extends PolymerElement {
@@ -182,7 +184,7 @@ class AgentsView extends PolymerElement {
                   <td>[[agent.username]]</td>
                   <!--
                   <td>
-                  	<iron-star-rating value="[[agent.rating]]" on-rating-selected="rateAgent"></iron-star-rating>
+                  	<custom-star-rating value="[[agent.rating]]" on-rating-selected="rateAgent"></custom-star-rating>
                   </td>
                   -->
                 </tr>
@@ -197,18 +199,7 @@ class AgentsView extends PolymerElement {
           <paper-icon-button icon="refresh" title="Refresh Profiles List" on-click="refreshProfilesList" disabled="[[_working]]"></paper-button>
         </h2>
         <iron-collapse id="collapseProfileList">
-          <style>
-            iron-star-rating::shadow .iron-icon.whole {
-              -webkit-clip-path: none !important;
-              -moz-clip-path: none !important;
-              -o-clip-path: none !important;
-              -ms-clip-path: none !important;
-              clip-path: none !important;
-            }
-            iron-star-rating::shadow .iron-icon.half {
-              z-index: -333 !important;
-            }
-          </style>
+
           <template is="dom-if" if="[[!_hasNoProfilesList]]">
             <h3>Members</h3>
             <table width="100%">
@@ -224,7 +215,7 @@ class AgentsView extends PolymerElement {
                   <td>[[agent.address]]</td>
                   <td>[[agent.username]]</td>
                   <td>
-                  	<iron-star-rating value="[[agent.rating]]" on-rating-selected="rateAgent"></iron-star-rating>
+                  	<custom-star-rating value="[[agent.rating]]" on-rating-selected="rateAgent"></custom-star-rating>
                   </td>
                 </tr>
               </template>
