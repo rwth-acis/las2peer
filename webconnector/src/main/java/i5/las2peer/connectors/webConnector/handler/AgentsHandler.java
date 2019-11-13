@@ -165,7 +165,8 @@ public class AgentsHandler {
 					if (upd != null && !upd.getOwner().equals("0x0000000000000000000000000000000000000000")) {
 						json.put("eth-profile-owner", upd.getOwner());
 						json.put("eth-cumulative-score", upd.getCumulativeScore().toString());
-						json.put("eth-no-transactions", upd.getNoTransactions().toString());
+						json.put("eth-no-transactions-sent", upd.getNoTransactionsSent().toString());
+						json.put("eth-no-transactions-rcvd", upd.getNoTransactionsRcvd().toString());
 					} else {
 						json.put("eth-cumulative-score", "???");
 						json.put("eth-no-transactions", "???");
@@ -592,17 +593,19 @@ public class AgentsHandler {
 			member.put("username", agent.getLoginName());
 			member.put("email", agent.getEmail());
 			BigInteger cumulativeScore = profile.getCumulativeScore();
-			BigInteger noTransactions = profile.getNoTransactions();
+			BigInteger noTransactionsSent = profile.getNoTransactionsSent();
+			BigInteger noTransactionsRcvd = profile.getNoTransactionsRcvd();
 			member.put("eth-profile-owner", profile.getOwner());
 			member.put("cumulative-score", cumulativeScore.toString());
-			member.put("no-of-transactions", noTransactions.toString());
-			if ( noTransactions.compareTo(BigInteger.ZERO) == 0 )
+			member.put("no-of-transactions-sent", noTransactionsSent.toString());
+			member.put("no-of-transactions-rcvd", noTransactionsRcvd.toString());
+			if ( noTransactionsRcvd.compareTo(BigInteger.ZERO) == 0 )
 			{
 				member.put("rating", 0);
 			}
 			else
 			{
-				member.put("rating", cumulativeScore.divide(noTransactions));
+				member.put("rating", cumulativeScore.divide(noTransactionsRcvd));
 			}
 
 			memberList.add(member);

@@ -16,7 +16,6 @@ import i5.las2peer.tools.CryptoTools;
 import org.w3c.dom.Element;
 import org.web3j.crypto.Credentials;
 
-import java.io.IOException;
 import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.Base64;

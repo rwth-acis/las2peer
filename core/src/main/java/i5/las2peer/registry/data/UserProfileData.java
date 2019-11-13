@@ -11,13 +11,24 @@ public class UserProfileData {
 	private String owner;
 	private byte[] userName;
 	private BigInteger cumulativeScore;
-	private BigInteger noTransactions;
+	private BigInteger noTransactionsSent;
+	private BigInteger noTransactionsRcvd;
+	private BigInteger profileIndex; 
 
-	public UserProfileData(String owner, byte[] userName, BigInteger cumulativeScore, BigInteger noTransactions) {
+	public UserProfileData(
+		String owner, 
+		byte[] userName, 
+		BigInteger cumulativeScore, 
+		BigInteger noTransactionsSent, 
+		BigInteger noTransactionsReceived,
+		BigInteger profileIndex
+	) {
 		this.owner = owner;
 		this.userName = userName;
 		this.cumulativeScore = cumulativeScore;
-		this.noTransactions = noTransactions;
+		this.noTransactionsSent = noTransactionsSent;
+		this.noTransactionsRcvd = noTransactionsReceived;
+		this.profileIndex = profileIndex;
 	}
 
 	public String getOwner() {
@@ -28,12 +39,20 @@ public class UserProfileData {
 		return Util.recoverString(this.userName);
 	}
 
-	public BigInteger getNoTransactions() {
-		return this.noTransactions;
+	public BigInteger getNoTransactionsSent() {
+		return this.noTransactionsSent;
+	}
+
+	public BigInteger getNoTransactionsRcvd() {
+		return this.noTransactionsRcvd;
 	}
 
 	public BigInteger getCumulativeScore() {
 		return this.cumulativeScore;
+	}
+
+	public BigInteger getProfileIndex() {
+		return this.profileIndex;
 	}
 
 	@Override
@@ -42,7 +61,9 @@ public class UserProfileData {
 			"owner: " + this.getOwner() + 
 			", userName: " + this.getUserName() + 
 			", cumulativeScore: " + this.getCumulativeScore().toString() + 
-			", noTransactions: " + this.getNoTransactions().toString() +
+			", noTransactionsSent: " + this.getNoTransactionsSent().toString() +
+			", noTransactionsRcvd: " + this.getNoTransactionsRcvd().toString() +
+			", profileIndex: " + this.getProfileIndex().toString() +
 		")";
 	}
 }

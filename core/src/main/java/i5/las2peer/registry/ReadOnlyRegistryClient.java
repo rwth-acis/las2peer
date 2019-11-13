@@ -211,7 +211,17 @@ public class ReadOnlyRegistryClient {
 			throw new NotFoundException("User profile apparently not registered.");
 		}
 		
-		return new UserProfileData(profileAsTuple.getValue1(), profileAsTuple.getValue2(), profileAsTuple.getValue3(), profileAsTuple.getValue4());
+		/*
+		 * owner userName cumulativeScore noTransactionsSent noTransactionsReceived
+		 */
+		return new UserProfileData(
+			profileAsTuple.getValue1(), // owner
+			profileAsTuple.getValue2(), // username
+			profileAsTuple.getValue3(), // score
+			profileAsTuple.getValue4(), // txsent
+			profileAsTuple.getValue5(), // txrcvd
+			profileAsTuple.getValue6() // index
+		);
 	}
 
 	/**
