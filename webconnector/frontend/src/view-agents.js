@@ -142,7 +142,7 @@ class AgentsView extends PolymerElement {
           </h2>
           <iron-collapse opened id="collapseEthWallet">
             <template is="dom-if" if="[[!_hasNoEthWallet]]">
-              <p>Welcome, [[_EthWallet.username]]</p>
+              <p>Welcome, [[_EthWallet.username]] <custom-star-rating value="[[_EthWallet.eth-cumulative-score]]" readonly></custom-star-rating></p>
               <p>
                 <strong><iron-icon icon="fingerprint"></iron-icon> Eth Credentials Address: </strong> [[_EthWallet.eth-agent-credentials-address]] <br />
                 <strong><iron-icon icon="verified-user"></iron-icon> Eth Mnemonic: </strong> [[_EthWallet.eth-mnemonic]] <br />
@@ -199,24 +199,26 @@ class AgentsView extends PolymerElement {
           <paper-icon-button icon="refresh" title="Refresh Profiles List" on-click="refreshProfilesList" disabled="[[_working]]"></paper-button>
         </h2>
         <iron-collapse id="collapseProfileList">
-
           <template is="dom-if" if="[[!_hasNoProfilesList]]">
             <h3>Members</h3>
             <table width="100%">
               <tr>
-              	<th>Agentid</th>
-              	<th>Adress</th>
-              	<th>Username</th>
-              	<th>Reputation</th>
+                <th>Username</th>
+                <th>Reputation</th>
+                <th>Tx: [Rcvd | Sent]</th>
+              	<th>Eth Adress</th>
               </tr>
               <template is="dom-repeat" items="[[_listProfiles]]" as="agent">
                 <tr>
-                  <td>[[agent.shortid]]</td>
-                  <td>[[agent.address]]</td>
                   <td>[[agent.username]]</td>
                   <td>
                   	<custom-star-rating value="[[agent.rating]]" on-rating-selected="rateAgent"></custom-star-rating>
                   </td>
+                  <td> 
+                    <iron-icon icon="cloud-download"></iron-icon> [[agent.no-of-transactions-rcvd]] | 
+                    <iron-icon icon="cloud-upload"></iron-icon> [[agent.no-of-transactions-sent]]
+                  </td>
+                  <td><iron-icon icon="fingerprint"></iron-icon> [[agent.address]]</td>
                 </tr>
               </template>
             </table>
@@ -353,7 +355,8 @@ class AgentsView extends PolymerElement {
       agentId: { type: String, notify: true, observer: '_agentIdChanged' },
       error: { type: Object, notify: true },
       _working: Boolean,
-      _EthWallet: { type: Array, value: [] },
+      _EthWallet: { type: Array, value: { 'eth-cumulative-score': 0 } },
+      _hasEthProfile: { type: Boolean, value: false },
       _hasNoAgentsList: { type: Boolean, value: true },
       _hasNoProfilesList: { type: Boolean, value: true },
       _hasNoEthWallet: { type: Boolean, value: true },
@@ -439,6 +442,11 @@ class AgentsView extends PolymerElement {
   _handleGetEthWalletResponse(event) {
 	  this._hasNoEthWallet = false;
     this._EthWallet = event.detail.response;
+    console.log(event.model.get('eth-cumulative-score'));
+    if (event.model.get('eth-cumulative-score') !== "???" )
+    {
+      this._hasEthProfile = true;
+    }
   }
   _handleRequestFaucetResponse(event) {
 	  console.log(event.detail.response);

@@ -169,7 +169,8 @@ public class AgentsHandler {
 						json.put("eth-no-transactions-rcvd", upd.getNoTransactionsRcvd().toString());
 					} else {
 						json.put("eth-cumulative-score", "???");
-						json.put("eth-no-transactions", "???");
+						json.put("eth-no-transactions-sent", "???");
+						json.put("eth-no-transactions-rcvd", "???");
 					}
 				}
 				catch (EthereumException| NotFoundException e)
@@ -591,7 +592,7 @@ public class AgentsHandler {
 			member.put("agentid", agent.getIdentifier());
 			member.put("address", ownerAddress);
 			member.put("username", agent.getLoginName());
-			member.put("email", agent.getEmail());
+			//member.put("email", agent.getEmail());
 			BigInteger cumulativeScore = profile.getCumulativeScore();
 			BigInteger noTransactionsSent = profile.getNoTransactionsSent();
 			BigInteger noTransactionsRcvd = profile.getNoTransactionsRcvd();
