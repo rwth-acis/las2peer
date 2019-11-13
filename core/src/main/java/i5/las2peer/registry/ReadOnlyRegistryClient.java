@@ -1,6 +1,5 @@
 package i5.las2peer.registry;
 
-import i5.las2peer.api.security.AgentException;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.registry.data.RegistryConfiguration;
 import i5.las2peer.registry.data.ServiceDeploymentData;
@@ -13,7 +12,6 @@ import i5.las2peer.registry.exceptions.NotFoundException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.admin.Admin;
@@ -28,7 +26,7 @@ import org.web3j.protocol.core.methods.response.Web3ClientVersion;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tuples.generated.Tuple2;
 import org.web3j.tuples.generated.Tuple4;
-import org.web3j.tuples.generated.Tuple5;
+import org.web3j.tuples.generated.Tuple6;
 import org.web3j.utils.Convert;
 
 import java.io.IOException;
@@ -200,7 +198,7 @@ public class ReadOnlyRegistryClient {
 	}
 
 	public UserProfileData getProfile(String address) throws EthereumException, NotFoundException {
-		Tuple5<String, byte[], BigInteger, BigInteger, BigInteger> profileAsTuple;
+		Tuple6<String, byte[], BigInteger, BigInteger, BigInteger, BigInteger> profileAsTuple;
 		try {
 			profileAsTuple = contracts.reputationRegistry.profiles(address).send();
 			logger.info("found user profile: " + profileAsTuple.toString());
