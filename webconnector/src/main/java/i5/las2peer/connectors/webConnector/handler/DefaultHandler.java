@@ -24,11 +24,13 @@ import i5.las2peer.connectors.webConnector.WebConnector;
 import i5.las2peer.connectors.webConnector.util.AuthenticationManager;
 import i5.las2peer.connectors.webConnector.util.KeystoreManager;
 import i5.las2peer.p2p.Node;
+import i5.las2peer.p2p.NodeInformation;
 import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.restMapper.RESTService;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.serialization.SerializationException;
+import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.L2pNodeLauncher;
 
 import net.minidev.json.JSONArray;
@@ -92,6 +94,30 @@ public class DefaultHandler {
 			localStorageSize = ((PastryNodeImpl) node).getLocalStorageSize();
 			maxLocalStorageSize = ((PastryNodeImpl) node).getLocalMaxStorageSize();
 		}
+
+		NodeInformation nodeInfo = null;
+		try {
+			nodeInfo = node.getNodeInformation();
+		} catch (CryptoException e) {
+			// should never happen O.o
+			e.printStackTrace();
+		}
+		if ( nodeInfo != null )
+		{
+			String nodeAdminName = nodeInfo.getAdminName();
+			String nodeAdminEmail = nodeInfo.getAdminEmail();
+			String nodeOrganization = nodeInfo.getOrganization();
+			String nodeDescription = nodeInfo.getDescription();
+			if (nodeAdminName.length() > 0)
+				response.put("nodeAdminName", nodeAdminName);
+			if (nodeAdminEmail.length() > 0)
+				response.put("nodeAdminEmail", nodeAdminEmail);
+			if (nodeOrganization.length() > 0)
+				response.put("nodeOrganization", nodeOrganization);
+			if (nodeDescription.length() > 0)
+				response.put("nodeDescription", nodeDescription);
+		}
+		
 		response.put("storageSize", localStorageSize);
 		response.put("storageSizeStr", humanReadableByteCount(localStorageSize, true));
 		response.put("maxStorageSize", maxLocalStorageSize);

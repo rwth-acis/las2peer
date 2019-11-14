@@ -31,13 +31,36 @@ class StatusView extends PolymerElement {
           padding: 10px;
         }
       </style>
+      <custom-style>
+        <style is="custom-style">
+          .flex-horizontal {
+            @apply --layout-horizontal;
+          }
+          .flexchild {
+            @apply --layout-flex;
+          }
+        </style>
+      </custom-style>
 
       <div class="card">
         <h1>Node Status <paper-icon-button icon="refresh" on-tap="refreshStatus"></paper-icon-button></h1>
-        Node ID: [[_status.nodeId]]<br>
-        CPU Load: [[_status.cpuLoad]]%<br>
-        Local Storage: <meter value="[[_status.storageSize]]" min="0" max="[[_status.maxStorageSize]]"></meter> [[_status.storageSizeStr]] of [[_status.maxStorageSizeStr]] used<br>
-        Uptime: [[_status.uptime]]
+
+        <div class="container flex-horizontal">
+          <div class="flexchild">
+            <!-- NODE STATUS -->
+            Uptime: [[_status.uptime]] <br />
+            CPU Load: [[_status.cpuLoad]]% <br >
+            Local Storage: <meter value="[[_status.storageSize]]" min="0" max="[[_status.maxStorageSize]]"></meter> [[_status.storageSizeStr]] of [[_status.maxStorageSizeStr]] used <br />
+            Node ID: [[_status.nodeId]] <br />
+          </div>
+          <div class="flexchild">
+            <!-- NODE ADMIN INFO + DESCRIPTION-->
+            Node Description: [[_status.nodeDescription]]
+            Node Organization: [[_status.nodeOrganization]]
+            Node Administrator: [[_status.nodeAdminName]] <[[_status.nodeAdminEmail]]>
+          </div>
+        </div>
+
         <h3>Known Nodes In Network</h3>
         <ul>
           <template is="dom-repeat" items="[[_status.otherNodes]]">
@@ -77,6 +100,10 @@ class StatusView extends PolymerElement {
       _status: {
         type: Object,
         value: {
+          nodeAdminName: "...",
+          nodeAdminEmail: "...@...",
+          nodeOrganization: "...",
+          nodeDescription: "...",
           nodeId: "...",
           cpuLoad: "...",
           storageSize: 0,
