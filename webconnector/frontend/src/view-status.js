@@ -48,16 +48,17 @@ class StatusView extends PolymerElement {
         <div class="container flex-horizontal">
           <div class="flexchild">
             <!-- NODE STATUS -->
-            Uptime: [[_status.uptime]] <br />
-            CPU Load: [[_status.cpuLoad]]% <br >
-            Local Storage: <meter value="[[_status.storageSize]]" min="0" max="[[_status.maxStorageSize]]"></meter> [[_status.storageSizeStr]] of [[_status.maxStorageSizeStr]] used <br />
-            Node ID: [[_status.nodeId]] <br />
+            <strong>Uptime</strong>: [[_status.uptime]] <br />
+            <strong>CPU Load</strong>: [[_status.cpuLoad]]% <br >
+            <strong>Local Storage</strong>: <meter value="[[_status.storageSize]]" min="0" max="[[_status.maxStorageSize]]"></meter> [[_status.storageSizeStr]] of [[_status.maxStorageSizeStr]] used <br />
+            <strong>Node ID</strong>: [[_status.nodeId]] <br />
           </div>
           <div class="flexchild">
             <!-- NODE ADMIN INFO + DESCRIPTION-->
-            Node Description: [[_status.nodeDescription]]
-            Node Organization: [[_status.nodeOrganization]]
-            Node Administrator: [[_status.nodeAdminName]] <[[_status.nodeAdminEmail]]>
+            <strong>Node Administrator</strong>: [[_status.nodeAdminName]] <[[_status.nodeAdminEmail]]>
+            <strong>Node Organization</strong>: [[_status.nodeOrganization]] <br />
+            <strong>Node Description</strong>: <br />
+            <p>[[_status.nodeDescription]]</p>
           </div>
         </div>
 
