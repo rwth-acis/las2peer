@@ -114,4 +114,4 @@ class CustomStarRating extends PolymerElement {
     }
 }
 
-window.customElements.define(IronStarRating.is, IronStarRating);
+window.customElements.define(CustomStarRating.is, CustomStarRating);
