@@ -108,13 +108,13 @@ public class DefaultHandler {
 			String nodeAdminEmail = nodeInfo.getAdminEmail();
 			String nodeOrganization = nodeInfo.getOrganization();
 			String nodeDescription = nodeInfo.getDescription();
-			if (nodeAdminName.length() > 0)
+			if (nodeAdminName != null && nodeAdminName.length() > 0)
 				response.put("nodeAdminName", nodeAdminName);
-			if (nodeAdminEmail.length() > 0)
+			if (nodeAdminEmail != null && nodeAdminEmail.length() > 0)
 				response.put("nodeAdminEmail", nodeAdminEmail);
-			if (nodeOrganization.length() > 0)
+			if (nodeOrganization != null && nodeOrganization.length() > 0)
 				response.put("nodeOrganization", nodeOrganization);
-			if (nodeDescription.length() > 0)
+			if (nodeDescription != null && nodeDescription.length() > 0)
 				response.put("nodeDescription", nodeDescription);
 		}
 		
