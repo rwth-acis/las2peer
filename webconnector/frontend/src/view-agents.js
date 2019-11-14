@@ -224,7 +224,9 @@ class AgentsView extends PolymerElement {
                   <td>[[agent.shortid]]</td>
                   <td>[[agent.address]]</td>
                   <td>[[agent.username]]</td>
-                  <td>[[agent.agentid]]</td>
+                  <td>
+                    <paper-icon-button icon="card-giftcard" title="Transfer ETH to Agent" on-click="sendGenericTransaction([[agent.agentid]])" disabled="[[_working]]"></paper-button>
+                  </td>
                 </tr>
               </template>
             </table>
