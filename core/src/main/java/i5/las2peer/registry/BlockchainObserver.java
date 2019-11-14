@@ -1,11 +1,15 @@
 package i5.las2peer.registry;
 
 import i5.las2peer.logging.L2pLogger;
+import i5.las2peer.registry.data.GenericTransactionData;
+import i5.las2peer.registry.data.SenderReceiverDoubleKey;
 import i5.las2peer.registry.data.ServiceDeploymentData;
 import i5.las2peer.registry.data.ServiceReleaseData;
 import i5.las2peer.registry.exceptions.EthereumException;
 import io.reactivex.schedulers.Schedulers;
 import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.tuples.Tuple;
+import org.web3j.utils.Convert;
 
 import java.time.Instant;
 import java.util.*;
@@ -38,6 +42,9 @@ class BlockchainObserver {
 
 	/** Service names to list of releases */
 	ConcurrentMap<String, List<ServiceReleaseData>> releases;
+
+	/** Generic ETH Transactions: (from,to) => List<amount, message> */
+	ConcurrentMap<SenderReceiverDoubleKey, List<GenericTransactionData>> genericTransactions;
 
 	/**
 	 * Nested map from service name and version components to that
@@ -118,7 +125,9 @@ class BlockchainObserver {
 		releases = new ConcurrentHashMap<>();
 		releasesByVersion = new ConcurrentHashMap<>();
 		deployments = new ConcurrentHashMap<>();
+		genericTransactions = new ConcurrentHashMap<>();
 
+		observeGenericTransactions();
 		observeErrorEvents();
 		observeUserRegistrations();
 		observeUserProfileCreations();
@@ -188,6 +197,40 @@ class BlockchainObserver {
 				logger.info("observed profile creation: [" + profileOwner + "]: " + profileName);
 				
 			}, e -> logger.severe("Error observing profile creation event: " + e.toString()));
+	}
+
+	private void observeGenericTransactions() {
+		contracts.reputationRegistry
+				.genericTransactionAddedEventFlowable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST)
+				.observeOn(Schedulers.io()).subscribeOn(Schedulers.io()).subscribe(transaction -> {
+					if (txHasAlreadyBeenHandled(transaction.log.getTransactionHash())) {
+						return;
+					}
+					String sender = transaction.sender;
+					String receiver = transaction.recipient;
+
+					String message = Util.recoverString(transaction.message);
+					BigInteger weiAmount = transaction.weiAmount;
+
+					SenderReceiverDoubleKey srdk = new SenderReceiverDoubleKey(sender, receiver);
+					GenericTransactionData gtd = new GenericTransactionData(weiAmount, message);
+
+					if ( !this.genericTransactions.containsKey(srdk) )
+					{
+						List<GenericTransactionData> lgtd = new ArrayList<GenericTransactionData>();
+						lgtd.add(gtd);
+						this.genericTransactions.put(srdk, lgtd);
+					} 
+					else
+					{
+						this.genericTransactions.get(srdk).add(gtd);
+					}
+
+					String wei = Convert.fromWei(weiAmount.toString(), Convert.Unit.ETHER).toString();
+
+					logger.info("observed generic transaction: [" + sender + "->" + receiver + "]@" +  wei + ": " + message);
+
+				}, e -> logger.severe("Error observing generic transaction: " + e.toString()));
 	}
 
 	private void observeTagCreations() {

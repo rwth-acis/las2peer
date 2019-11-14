@@ -120,7 +120,15 @@ class AgentsView extends PolymerElement {
                  handle-as="json"
                  on-response="_handleRegisterProfileResponse"
                  on-error="_handleError"
-                 loading="{{_working}}"></iron-ajax>                 
+                 loading="{{_working}}"></iron-ajax>  
+      <iron-ajax id="ajaxGenericTransaction"
+                 method="GET"
+                 url$="[[apiEndpoint]]/agents/addTransaction"
+                 handle-as="json"
+                 on-response="_handleGenericTransactionResponse"
+                 on-error="_handleError"
+                 loading="{{_working}}"></iron-ajax>           
+      
 
       <style include="shared-styles">
         :host {
@@ -129,6 +137,40 @@ class AgentsView extends PolymerElement {
           padding: 10px;
         }
       </style>
+
+      <custom-style>
+        <style>
+          paper-button.red {
+            --paper-button-ink-color: var(--paper-red-a200);
+            --paper-button-flat-keyboard-focus: {
+              background-color: var(--paper-red-a200) !important;
+              color: white !important;
+            };
+            --paper-button-raised-keyboard-focus: {
+              background-color: var(--paper-red-a200) !important;
+              color: white !important;
+            };
+          }
+          paper-button.red:hover {
+            background-color: var(--paper-red-100);
+          }
+
+          paper-button.green {
+            --paper-button-ink-color: var(--paper-green-a200);
+            --paper-button-flat-keyboard-focus: {
+              background-color: var(--paper-green-a200) !important;
+              color: white !important;
+            };
+            --paper-button-raised-keyboard-focus: {
+              background-color: var(--paper-green-a200) !important;
+              color: white !important;
+            };
+          }
+          paper-button.green:hover {
+            background-color: var(--paper-green-100);
+          }
+        </style>
+      </custom-style>
 
       <div class="card">
         <h1>Agents</h1>
@@ -175,18 +217,14 @@ class AgentsView extends PolymerElement {
               	<th>Agentid</th>
               	<th>Adress</th>
               	<th>Username</th>
-              	<!--<th>Reputation</th>-->
+              	<th>Actions</th>
               </tr>
               <template is="dom-repeat" items="[[_listAgents]]" as="agent">
                 <tr>
                   <td>[[agent.shortid]]</td>
                   <td>[[agent.address]]</td>
                   <td>[[agent.username]]</td>
-                  <!--
-                  <td>
-                  	<custom-star-rating value="[[agent.rating]]" on-rating-selected="rateAgent"></custom-star-rating>
-                  </td>
-                  -->
+                  <td>[[agent.agentid]]</td>
                 </tr>
               </template>
             </table>
@@ -346,6 +384,24 @@ class AgentsView extends PolymerElement {
               
       <!-- Toast Messages -->
       <paper-toast id="toast" horizontal-align="right"></paper-toast>
+
+      <!-- Dialog Boxes -->
+      <paper-dialog id="sendEthDialog">
+        <h1>Transfer ETH</h1>
+          <iron-form on-keypress="_keyPressedSendETHTransaction">
+            <form>
+              <paper-input label="AgentID" id="SendETHTransactionAgentID" disabled="[[_working]]" value="[[_chosenAgentID]]"></paper-input>
+              <paper-input label="Amount (in ETH)" id="SendETHTransactionWeiAmount" disabled="[[_working]]" value=""></paper-input>
+              <paper-textarea label="Textarea label" disabled="[[_working]]" id="SendETHTransactionMessage"></paper-textarea>
+              <paper-button raised on-click="closeEthDialog" class="red">
+                <iron-icon icon="block"></iron-icon> Cancel
+              </paper-button>
+              <paper-button raised on-click="SendETHTransaction" disabled="[[_working]]" class="green">
+                <iron-icon icon="check"></iron-icon> Send ETH Transaction
+              </paper-button>
+            </form>
+          </iron-form>
+      </paper-dialog>
     `;
   }
 
@@ -355,6 +411,7 @@ class AgentsView extends PolymerElement {
       agentId: { type: String, notify: true, observer: '_agentIdChanged' },
       error: { type: Object, notify: true },
       _working: Boolean,
+      _chosenAgentID: { type: String, value: "" },
       _EthWallet: { type: Array, value: { 'eth-cumulative-score': 0 } },
       _hasEthProfile: { type: Boolean, value: false },
       _hasNoAgentsList: { type: Boolean, value: true },
@@ -393,6 +450,11 @@ class AgentsView extends PolymerElement {
   toggleAgentList() { this.$.collapseAgentList.toggle(); }
   toggleProfileList() { this.$.collapseProfileList.toggle(); }
   toggleEthWallet() { this.$.collapseEthWallet.toggle(); }
+
+  openEthSendDialog(agentid) {
+    this._chosenAgentID = agentid;
+    this.$.sendEthDialog.open();
+  }
 
   _agentIdChanged(agentid) {
     if (this.agentId == '' )
@@ -456,6 +518,24 @@ class AgentsView extends PolymerElement {
     console.log(event.detail.response);
     this.refreshEthWallet();
     this.refreshProfilesList();
+  }
+
+  _keyPressedSendETHTransaction(event) {
+    if (event.which == 13 || event.keyCode == 13) {
+      event.preventDefault();
+      this.sendGenericTransaction();
+      return false;
+    }
+    return true;
+  }
+
+  sendGenericTransaction() {
+    let req = this.$.ajaxGenericTransaction;
+    req.body = new FormData();
+    req.body.append('agentid', this.$.SendETHTransactionAgentID.value);
+    req.body.append('weiAmount', this.$.SendETHTransactionWeiAmount.value);
+    req.body.append('message', this.$.SendETHTransactionMessage.value);
+    req.generateRequest();
   }
 
   _keyPressedCreateAgent(event) {

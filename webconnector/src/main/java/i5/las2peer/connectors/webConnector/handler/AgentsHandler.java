@@ -662,6 +662,46 @@ public class AgentsHandler {
 	}
 
 	@POST
+	@Path("/addTransaction")
+	public Response handleAddTransaction(
+			@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId,
+			@FormDataParam("agentid") String agentId, 
+			@FormDataParam("weiAmount") Float weiAmount,
+			@FormDataParam("message") String message
+		) throws Exception {
+		// check login
+		AgentSession session = connector.getSessionById(sessionId);
+		if (session == null) {
+			throw new BadRequestException("You have to be logged in to rate");
+		}
+		EthereumAgent ethAgent = (EthereumAgent) session.getAgent();
+
+		BigInteger weiAmountBI = Convert.toWei(weiAmount.toString(), Convert.Unit.ETHER).toBigInteger();
+
+		EthereumAgent recipientAgent = null;
+		try {
+			recipientAgent = (EthereumAgent) ethereumNode.getAgent(agentId);
+			try {
+				ethAgent.getRegistryClient().addGenericTransaction(recipientAgent, message, weiAmountBI);
+			} catch (EthereumException e) {
+				throw new BadRequestException("Generic transaction failed: ", e);
+			}
+		} catch (AgentException e) {
+			throw new NotFoundException("recipient eth agent not found", e);
+		}
+
+		JSONObject json = new JSONObject();
+		json.put("code", Status.OK.getStatusCode());
+		json.put("text", Status.OK.getStatusCode() + " - Generic Ether Transaction added");
+		json.put("recipientAddress", recipientAgent.getEthereumAddress());
+		json.put("recipientName", recipientAgent.getLoginName());
+		json.put("weiAmount", Convert.fromWei(Convert.toWei(weiAmount.toString(), Convert.Unit.ETHER), Convert.Unit.ETHER));
+		json.put("message", message);
+
+		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();		
+	}
+
+	@POST
 	@Path("/loadGroup")
 	public Response handleLoadGroup(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId,
 			@FormDataParam("agentid") String agentId) throws AgentException {

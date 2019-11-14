@@ -143,6 +143,29 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		return txHash;
 	}
 
+	public String addGenericTransaction(EthereumAgent receivingAgent, String message, BigInteger weiAmount) throws EthereumException
+	{
+		logger.info("[TX] adding generic transaction to: " + receivingAgent.getLoginName() + " | amount: " + weiAmount.intValue() );
+		logger.info("[TX] transaction message: " + weiAmount.intValue() + "");
+
+		String txHash;
+		try {
+			TransactionReceipt txR = contracts.reputationRegistry
+					.addGenericTransaction(receivingAgent.getEthereumAddress(), weiAmount, message, weiAmount).send();
+			if (!txR.isStatusOK()) {
+				logger.warning("trx fail with status " + txR.getStatus());
+				logger.warning("gas used " + txR.getCumulativeGasUsed());
+				logger.warning(txR.toString());
+				throw new EthereumException("could not send transaction, transaction receipt not ok");
+			}
+			txHash = txR.getTransactionHash();
+			waitForTransactionReceipt(txHash);
+		} catch (Exception e) {
+			throw new EthereumException("couldn't execute smart contract function call", e);
+		}
+		return txHash;
+	}
+
 	public String addUserRating(EthereumAgent receivingAgent, Integer rating) throws EthereumException {
 		
 		logger.info("rating user profile: " + receivingAgent.getLoginName() + " | " + rating + "("
