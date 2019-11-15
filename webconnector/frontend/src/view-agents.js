@@ -194,7 +194,10 @@ class AgentsView extends PolymerElement {
                 <strong><iron-icon icon="verified-user"></iron-icon> Eth Mnemonic</strong>: [[_EthWallet.eth-mnemonic]] <br />
                 <strong><iron-icon icon="account-balance"></iron-icon> Eth Balance</strong>: [[_EthWallet.eth-acc-balance]] <br />
                 <template is="dom-if" if="[[_hasEthProfile]]">
-                  <strong><iron-icon icon="stars"></iron-icon> Reputation No Transactions</strong> <small><em>[Rcvd | Sent]</em></small>: [[_EthWallet.eth-no-transactions]] <br />
+                  <strong><iron-icon icon="stars"></iron-icon> Reputation No Transactions</strong> <small><em>[Rcvd | Sent]</em></small>: 
+                    <iron-icon icon="cloud-download"></iron-icon> [[_EthWallet.eth-no-of-transactions-rcvd]] | 
+                    <iron-icon icon="cloud-upload"></iron-icon> [[_EthWallet.eth-no-of-transactions-sent]]
+                  <br />
                 </template>
               </p>
             <p>
@@ -252,7 +255,7 @@ class AgentsView extends PolymerElement {
               <tr>
                 <th>Username</th>
                 <th>Reputation</th>
-                <th>Tx: [Rcvd | Sent]</th>
+                <th>Tx: [<iron-icon icon="cloud-download" title="Received"></iron-icon> | <iron-icon icon="cloud-upload" title="Sent"></iron-icon>]</th>
               	<th>Eth Adress</th>
               </tr>
               <template is="dom-repeat" items="[[_listProfiles]]" as="agent">
@@ -262,8 +265,8 @@ class AgentsView extends PolymerElement {
                   	<custom-star-rating value="[[agent.rating]]" on-rating-selected="rateAgent"></custom-star-rating>
                   </td>
                   <td> 
-                    <iron-icon icon="cloud-download"></iron-icon> [[agent.no-of-transactions-rcvd]] | 
-                    <iron-icon icon="cloud-upload"></iron-icon> [[agent.no-of-transactions-sent]]
+                    [[agent.no-of-transactions-rcvd]] | 
+                    [[agent.no-of-transactions-sent]]
                   </td>
                   <td><iron-icon icon="fingerprint"></iron-icon> [[agent.address]]</td>
                 </tr>
