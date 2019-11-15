@@ -219,6 +219,7 @@ class AgentsView extends PolymerElement {
           List User Agents
           <paper-icon-button icon="refresh" title="Refresh Agents List" on-click="refreshAgentsList" disabled="[[_working]]"></paper-button>
         </h2>
+        <paper-spinner active="[[_working]]" style="float:right;"></paper-spinner>
         <iron-collapse id="collapseAgentList">
           <template is="dom-if" if="[[!_hasNoAgentsList]]">
             <h3>Members</h3>
@@ -248,6 +249,7 @@ class AgentsView extends PolymerElement {
           List User Profiles
           <paper-icon-button icon="refresh" title="Refresh Profiles List" on-click="refreshProfilesList" disabled="[[_working]]"></paper-button>
         </h2>
+        <paper-spinner active="[[_working]]" style="float:right;"></paper-spinner>
         <iron-collapse id="collapseProfileList">
           <template is="dom-if" if="[[!_hasNoProfilesList]]">
             <h3>Members</h3>
@@ -546,6 +548,7 @@ class AgentsView extends PolymerElement {
   }
 
   sendGenericTransaction() {
+    console.log("sending transaction: " + this.$.SendETHTransactionWeiAmount.value);
     this.$.sendEthDialog.close();
     let req = this.$.ajaxGenericTransaction;
     req.body = new FormData();
