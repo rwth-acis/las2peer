@@ -235,7 +235,7 @@ class AgentsView extends PolymerElement {
                   <td>[[agent.address]]</td>
                   <td>[[agent.username]]</td>
                   <td>
-                    <paper-icon-button icon="card-giftcard" title="Transfer ETH to Agent" on-click="openEthSendDialog([[agent.agentid]])" disabled="[[_working]]"></paper-button>
+                    <paper-icon-button icon="card-giftcard" title="Transfer ETH to Agent" on-click="openEthSendDialog" data-agentid="{{agent.agentid}}" disabled="[[_working]]"></paper-button>
                   </td>
                 </tr>
               </template>
@@ -465,10 +465,12 @@ class AgentsView extends PolymerElement {
   toggleProfileList() { this.$.collapseProfileList.toggle(); }
   toggleEthWallet() { this.$.collapseEthWallet.toggle(); }
 
-  openEthSendDialog(agentid) {
+  openEthSendDialog(event) {
+    var agentid = event.target.getAttribute('data-agentid');
     console.log("agentid chosen: "+agentid);
     this._chosenAgentID = agentid;
     this.$.sendEthDialog.open();
+    console.log("modal opened");
   }
 
   _agentIdChanged(agentid) {
