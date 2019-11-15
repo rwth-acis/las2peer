@@ -513,8 +513,7 @@ class AgentsView extends PolymerElement {
   _handleGetEthWalletResponse(event) {
 	  this._hasNoEthWallet = false;
     this._EthWallet = event.detail.response;
-    console.log(event.model.get('eth-cumulative-score'));
-    if (event.model.get('eth-cumulative-score') !== "???" )
+    if (this._EthWallet["eth-cumulative-score"] !== "???" )
     {
       this._hasEthProfile = true;
     }
