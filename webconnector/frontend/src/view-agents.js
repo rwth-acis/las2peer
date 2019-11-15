@@ -115,14 +115,14 @@ class AgentsView extends PolymerElement {
                  on-error="_handleError"
                  loading="{{_working}}"></iron-ajax>
       <iron-ajax id="ajaxReputationProfile"
-                 method="GET"
+                 method="POST"
                  url$="[[apiEndpoint]]/agents/registerProfile"
                  handle-as="json"
                  on-response="_handleRegisterProfileResponse"
                  on-error="_handleError"
                  loading="{{_working}}"></iron-ajax>  
       <iron-ajax id="ajaxGenericTransaction"
-                 method="GET"
+                 method="POST"
                  url$="[[apiEndpoint]]/agents/addTransaction"
                  handle-as="json"
                  on-response="_handleGenericTransactionResponse"
@@ -404,7 +404,7 @@ class AgentsView extends PolymerElement {
             <form>
               <paper-input label="AgentID" id="SendETHTransactionAgentID" disabled="[[_working]]" value="[[_chosenAgentID]]"></paper-input>
               <paper-input label="Amount (in ETH)" id="SendETHTransactionWeiAmount" disabled="[[_working]]" value=""></paper-input>
-              <paper-textarea label="Textarea label" disabled="[[_working]]" id="SendETHTransactionMessage"></paper-textarea>
+              <paper-textarea label="Transaction Message" disabled="[[_working]]" id="SendETHTransactionMessage"></paper-textarea>
             </form>
           </iron-form>
             <div class="buttons">

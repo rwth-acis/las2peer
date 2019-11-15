@@ -455,7 +455,7 @@ public class AgentsHandler {
 	 * @throws MalformedXMLException 
 	 */
 	
-	@GET
+	@POST
 	@Path("/registerProfile")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response handleRegisterProfile(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId) throws MalformedXMLException, IOException
