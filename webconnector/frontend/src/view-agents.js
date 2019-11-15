@@ -398,21 +398,23 @@ class AgentsView extends PolymerElement {
       <paper-toast id="toast" horizontal-align="right"></paper-toast>
 
       <!-- Dialog Boxes -->
-      <paper-dialog id="sendEthDialog">
+      <paper-dialog id="sendEthDialog" modal>
         <h1>Transfer ETH</h1>
           <iron-form on-keypress="_keyPressedSendETHTransaction">
             <form>
               <paper-input label="AgentID" id="SendETHTransactionAgentID" disabled="[[_working]]" value="[[_chosenAgentID]]"></paper-input>
               <paper-input label="Amount (in ETH)" id="SendETHTransactionWeiAmount" disabled="[[_working]]" value=""></paper-input>
               <paper-textarea label="Textarea label" disabled="[[_working]]" id="SendETHTransactionMessage"></paper-textarea>
-              <paper-button raised on-click="closeEthDialog" class="red">
-                <iron-icon icon="block"></iron-icon> Cancel
-              </paper-button>
-              <paper-button raised on-click="SendETHTransaction" disabled="[[_working]]" class="green">
-                <iron-icon icon="check"></iron-icon> Send ETH Transaction
-              </paper-button>
             </form>
           </iron-form>
+            <div class="buttons">
+              <paper-button dialog-confirm autofocus raised class="red">
+                <iron-icon icon="block"></iron-icon> Cancel
+              </paper-button>
+              <paper-button raised on-click="sendGenericTransaction" disabled="[[_working]]" class="green">
+                <iron-icon icon="check"></iron-icon> Send ETH Transaction
+              </paper-button>
+            </div>
       </paper-dialog>
     `;
   }
@@ -464,6 +466,7 @@ class AgentsView extends PolymerElement {
   toggleEthWallet() { this.$.collapseEthWallet.toggle(); }
 
   openEthSendDialog(agentid) {
+    console.log("agentid chosen: "+agentid);
     this._chosenAgentID = agentid;
     this.$.sendEthDialog.open();
   }
@@ -541,6 +544,7 @@ class AgentsView extends PolymerElement {
   }
 
   sendGenericTransaction() {
+    this.$.sendEthDialog.close();
     let req = this.$.ajaxGenericTransaction;
     req.body = new FormData();
     req.body.append('agentid', this.$.SendETHTransactionAgentID.value);
