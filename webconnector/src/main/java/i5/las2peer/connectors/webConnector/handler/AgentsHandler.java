@@ -167,6 +167,14 @@ public class AgentsHandler {
 						json.put("eth-cumulative-score", upd.getCumulativeScore().toString());
 						json.put("eth-no-transactions-sent", upd.getNoTransactionsSent().toString());
 						json.put("eth-no-transactions-rcvd", upd.getNoTransactionsRcvd().toString());
+						if ( upd.getNoTransactionsRcvd().compareTo(BigInteger.ZERO) == 0 )
+						{
+							json.put("eth-rating", 0);
+						}
+						else
+						{
+							json.put("eth-rating", upd.getCumulativeScore().divide(upd.getNoTransactionsRcvd()));
+						}
 					} else {
 						json.put("eth-cumulative-score", "???");
 						json.put("eth-no-transactions-sent", "???");

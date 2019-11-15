@@ -184,21 +184,28 @@ class AgentsView extends PolymerElement {
           </h2>
           <iron-collapse opened id="collapseEthWallet">
             <template is="dom-if" if="[[!_hasNoEthWallet]]">
-              <p>Welcome, [[_EthWallet.username]] <custom-star-rating value="[[_EthWallet.eth-cumulative-score]]" readonly></custom-star-rating></p>
+              <p>Welcome, [[_EthWallet.username]] 
+                <template is="dom-if" if="[[_hasEthProfile]]">
+                  <custom-star-rating value="[[_EthWallet.eth-rating]]" readonly></custom-star-rating>
+                </template>
+              </p>
               <p>
-                <strong><iron-icon icon="fingerprint"></iron-icon> Eth Credentials Address: </strong> [[_EthWallet.eth-agent-credentials-address]] <br />
-                <strong><iron-icon icon="verified-user"></iron-icon> Eth Mnemonic: </strong> [[_EthWallet.eth-mnemonic]] <br />
-                <strong><iron-icon icon="account-balance"></iron-icon> Eth Balance: </strong> [[_EthWallet.eth-acc-balance]] <br />
-                <strong><iron-icon icon="star-half"></iron-icon> Reputation Cumulative Score: </strong> [[_EthWallet.eth-cumulative-score]]
-                <strong><iron-icon icon="stars"></iron-icon> Reputation No Transactions: </strong> [[_EthWallet.eth-no-transactions]]
+                <strong><iron-icon icon="fingerprint"></iron-icon> Eth Credentials Address</strong>: [[_EthWallet.eth-agent-credentials-address]] <br />
+                <strong><iron-icon icon="verified-user"></iron-icon> Eth Mnemonic</strong>: [[_EthWallet.eth-mnemonic]] <br />
+                <strong><iron-icon icon="account-balance"></iron-icon> Eth Balance</strong>: [[_EthWallet.eth-acc-balance]] <br />
+                <template is="dom-if" if="[[_hasEthProfile]]">
+                  <strong><iron-icon icon="stars"></iron-icon> Reputation No Transactions</strong> <small><em>[Rcvd | Sent]</em></small>: [[_EthWallet.eth-no-transactions]] <br />
+                </template>
               </p>
             <p>
               <paper-button raised on-click="requestEthFaucet" disabled="[[_working]]">
                 <iron-icon icon="card-giftcard"></iron-icon> Request funds from faucet
               </paper-button>
-              <paper-button raised on-click="requestReputationProfile" disabled="[[_working]]">
-                <iron-icon icon="record-voice-over"></iron-icon> Request reputation profile
-              </paper-button>
+              <template is="dom-if" if="[[_hasEthProfile]]">
+                <paper-button raised on-click="requestReputationProfile" disabled="[[_working]]">
+                  <iron-icon icon="record-voice-over"></iron-icon> Request reputation profile
+                </paper-button>
+              </template>
             </p>
             </template>
           </iron-collapse>
