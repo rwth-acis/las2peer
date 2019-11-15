@@ -235,7 +235,7 @@ class AgentsView extends PolymerElement {
                   <td>[[agent.address]]</td>
                   <td>[[agent.username]]</td>
                   <td>
-                    <paper-icon-button icon="card-giftcard" title="Transfer ETH to Agent" on-click="openEthSendDialog" data-agentid="{{agent.agentid}}" disabled="[[_working]]"></paper-button>
+                    <paper-icon-button icon="card-giftcard" title="Transfer ETH to Agent" on-click="openEthSendDialog" data-agentid$="[[agent.agentid]]" disabled="[[_working]]"></paper-button>
                   </td>
                 </tr>
               </template>
@@ -398,7 +398,7 @@ class AgentsView extends PolymerElement {
       <paper-toast id="toast" horizontal-align="right"></paper-toast>
 
       <!-- Dialog Boxes -->
-      <paper-dialog id="sendEthDialog" modal>
+      <paper-dialog id="sendEthDialog">
         <h1>Transfer ETH</h1>
           <iron-form on-keypress="_keyPressedSendETHTransaction">
             <form>
