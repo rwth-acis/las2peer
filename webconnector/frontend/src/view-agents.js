@@ -195,8 +195,8 @@ class AgentsView extends PolymerElement {
                 <strong><iron-icon icon="account-balance"></iron-icon> Eth Balance</strong>: [[_EthWallet.eth-acc-balance]] <br />
                 <template is="dom-if" if="[[_hasEthProfile]]">
                   <strong><iron-icon icon="stars"></iron-icon> Reputation No Transactions</strong> <small><em>[Rcvd | Sent]</em></small>: 
-                    <iron-icon icon="cloud-download"></iron-icon> [[_EthWallet.eth-no-of-transactions-rcvd]] | 
-                    <iron-icon icon="cloud-upload"></iron-icon> [[_EthWallet.eth-no-of-transactions-sent]]
+                    <iron-icon icon="cloud-download"></iron-icon> [[_EthWallet.eth-no-transactions-rcvd]] | 
+                    <iron-icon icon="cloud-upload"></iron-icon> [[_EthWallet.eth-no-transactions-sent]]
                   <br />
                 </template>
               </p>
