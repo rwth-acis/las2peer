@@ -694,7 +694,7 @@ public class AgentsHandler {
 		try {
 			recipientAgent = (EthereumAgent) ethereumNode.getAgent(agentId);
 			try {
-				ethAgent.getRegistryClient().addGenericTransaction(recipientAgent, message, weiAmountBI);
+				ethAgent.getRegistryClient().addGenericTransaction(ethAgent, recipientAgent, message, weiAmountBI);
 			} catch (EthereumException e) {
 				throw new BadRequestException("Generic transaction failed: ", e);
 			}

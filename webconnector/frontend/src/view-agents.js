@@ -130,7 +130,7 @@ class AgentsView extends PolymerElement {
                  loading="{{_working}}"></iron-ajax>           
       
 
-      <style include="shared-styles">
+      <style include="shared-styles iron-flex iron-positioning iron-flex-alignment">
         :host {
           display: block;
 
@@ -402,6 +402,13 @@ class AgentsView extends PolymerElement {
       <!-- Dialog Boxes -->
       <paper-dialog id="sendEthDialog">
         <h1>Transfer ETH</h1>
+          <div class="horizontal layout center-justified">
+            <paper-spinner active="[[_working]]"></paper-spinner>
+            <template is="dom-if" if="[[_ethTransactionSent]]">
+              <iron-icon icon="done"></iron-icon>
+            </template>
+          </div>
+          
           <iron-form on-keypress="_keyPressedSendETHTransaction">
             <form>
               <paper-input label="AgentID" id="SendETHTransactionAgentID" disabled="[[_working]]" value="[[_chosenAgentID]]"></paper-input>
@@ -428,13 +435,14 @@ class AgentsView extends PolymerElement {
       error: { type: Object, notify: true },
       _working: Boolean,
       _chosenAgentID: { type: String, value: "" },
+      _ethTransactionSent: { type: Boolean, value: false },
       _EthWallet: { type: Array, value: { 'eth-cumulative-score': 0 } },
       _hasEthProfile: { type: Boolean, value: false },
       _hasNoAgentsList: { type: Boolean, value: true },
-      _hasNoProfilesList: { type: Boolean, value: true },
       _hasNoEthWallet: { type: Boolean, value: true },
       _hasNoManageAgents: { type: Boolean, value: true },
       _hasNoMemberAgents: { type: Boolean, value: true },
+      _hasNoProfilesList: { type: Boolean, value: true },
       _isAjaxLoading: { type: Boolean, value: true },
       _listAgents: { type: Array, value: [] },
       _listProfiles: { type: Array, value: [] },
@@ -466,14 +474,6 @@ class AgentsView extends PolymerElement {
   toggleAgentList() { this.$.collapseAgentList.toggle(); }
   toggleProfileList() { this.$.collapseProfileList.toggle(); }
   toggleEthWallet() { this.$.collapseEthWallet.toggle(); }
-
-  openEthSendDialog(event) {
-    var agentid = event.target.getAttribute('data-agentid');
-    console.log("agentid chosen: "+agentid);
-    this._chosenAgentID = agentid;
-    this.$.sendEthDialog.open();
-    console.log("modal opened");
-  }
 
   _agentIdChanged(agentid) {
     if (this.agentId == '' )
@@ -546,16 +546,31 @@ class AgentsView extends PolymerElement {
     }
     return true;
   }
-
+  openEthSendDialog(event) {
+    this._ethTransactionSent = false;
+    var agentid = event.target.getAttribute('data-agentid');
+    console.log("agentid chosen: " + agentid);
+    this._chosenAgentID = agentid;
+    this.$.sendEthDialog.open();
+    console.log("modal opened");
+  }
+  closeEthDialog() {
+    this.$.sendEthDialog.close();
+    this._ethTransactionSent = false;
+  }
   sendGenericTransaction() {
     console.log("sending transaction: " + this.$.SendETHTransactionWeiAmount.value);
-    this.$.sendEthDialog.close();
     let req = this.$.ajaxGenericTransaction;
     req.body = new FormData();
     req.body.append('agentid', this.$.SendETHTransactionAgentID.value);
     req.body.append('weiAmount', this.$.SendETHTransactionWeiAmount.value);
     req.body.append('message', this.$.SendETHTransactionMessage.value);
     req.generateRequest();
+  }
+  _handleGenericTransactionResponse(event)
+  {
+    this._ethTransactionSent = true;
+    setTimeout(function () { appThis.closeEthDialog(); }, 200);
   }
 
   _keyPressedCreateAgent(event) {
