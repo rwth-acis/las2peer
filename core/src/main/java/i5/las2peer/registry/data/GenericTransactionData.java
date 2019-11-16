@@ -2,6 +2,10 @@ package i5.las2peer.registry.data;
 
 import java.math.BigInteger;
 
+/**
+ * Represents the transaction with its message in the reputation smart contract
+ * @see ReputationRegistry.addGenericTransaction
+ */
 public class GenericTransactionData {
     private BigInteger amountInWei;
     private String message;

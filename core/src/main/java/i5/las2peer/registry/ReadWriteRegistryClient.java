@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 import org.web3j.abi.datatypes.Function;
@@ -12,6 +13,7 @@ import org.web3j.crypto.Credentials;
 import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
+import org.web3j.protocol.core.methods.response.EthTransaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.tx.Transfer;
 import org.web3j.utils.Convert;
@@ -19,6 +21,7 @@ import org.web3j.utils.Convert;
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.registry.contracts.ServiceRegistry;
 import i5.las2peer.registry.contracts.UserRegistry;
+import i5.las2peer.registry.data.BlockchainTransactionData;
 import i5.las2peer.registry.data.RegistryConfiguration;
 import i5.las2peer.registry.data.UserData;
 import i5.las2peer.registry.exceptions.EthereumException;
@@ -143,15 +146,19 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		return txHash;
 	}
 
-	public String addGenericTransaction(EthereumAgent receivingAgent, String message, BigInteger weiAmount) throws EthereumException
-	{
-		logger.info("[TX] adding generic transaction to: " + receivingAgent.getLoginName() + " | amount: " + weiAmount.intValue() );
+	public String addGenericTransaction(EthereumAgent senderAgent, EthereumAgent receivingAgent, String message, BigInteger weiAmount)
+			throws EthereumException {
+		logger.info("[TX] adding generic transaction to: " + receivingAgent.getLoginName() + " | amount: "
+				+ weiAmount.intValue());
 		logger.info("[TX] transaction message: " + weiAmount.intValue() + "");
+
+		String etherSendTxHash = sendEther(senderAgent.getEthereumAddress(), receivingAgent.getEthereumAddress(), weiAmount).getTransactionHash();
 
 		String txHash;
 		try {
 			TransactionReceipt txR = contracts.reputationRegistry
-					.addGenericTransaction(receivingAgent.getEthereumAddress(), weiAmount, message, weiAmount).send();
+					.addGenericTransaction(receivingAgent.getEthereumAddress(), weiAmount, etherSendTxHash, message, "GENERIC")
+					.send();
 			if (!txR.isStatusOK()) {
 				logger.warning("trx fail with status " + txR.getStatus());
 				logger.warning("gas used " + txR.getCumulativeGasUsed());
@@ -167,7 +174,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 	}
 
 	public String addUserRating(EthereumAgent receivingAgent, Integer rating) throws EthereumException {
-		
+
 		logger.info("rating user profile: " + receivingAgent.getLoginName() + " | " + rating + "("
 				+ BigInteger.valueOf(rating).intValue() + ")");
 
@@ -359,13 +366,6 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		}
 	}
 
-	/**
-	 * Send ether to the recipient address.
-	 *
-	 * This sends ether from the "owner" of this registry client (i.e., the
-	 * account specified by the credentials which were used to construct this
-	 * client), to the given recipient address.
-	 */
 	// this is (so far) only for debugging / testing / etc.
 	public void sendEther(String recipientAddress, BigDecimal valueInWei) throws EthereumException {
 		try {
@@ -377,64 +377,85 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 			throw new EthereumException("Could not send ether to address '" + recipientAddress + "'", e);
 		}
 	}
-	
-	public TransactionReceipt sendEtherFromCoinbase(String recipientAddress, BigInteger valueInWei) throws EthereumException {
 
+	/**
+	 * Send ether to the recipient address.
+	 * 
+	 * This sends ether from the "owner" of this registry client (i.e., the account
+	 * specified by the credentials which were used to construct this client), to
+	 * the given recipient address.
+	 * 
+	 * The calling agent (i.e. ethereumAgent vs ethereumNode) influences who pays
+	 * for the transaction fees. In smart contracts, this would also mean who is
+	 * msg.sender
+	 * 
+	 * @param senderAddress
+	 * @param recipientAddress
+	 * @param valueInWei
+	 * @return
+	 * @throws EthereumException
+	 */
+	public TransactionReceipt sendEther(String senderAddress, String recipientAddress, BigInteger valueInWei)
+			throws EthereumException {
 		TransactionReceipt txR;
 		String txHash;
 		try {
-			String coinbase = this.getCoinbase().getResult();
-			BigInteger nonce = this.getNonce(coinbase);
+			BigInteger nonce = this.getNonce(senderAddress);
 			// this is a contract method call -> gas limit higher than simple fund transfer
 			BigInteger gasPrice = GAS_PRICE;
-			BigInteger gasLimit = GAS_LIMIT_ETHER_TX; 
-			Transaction transaction = Transaction.createEtherTransaction(
-					coinbase, 
-					nonce, 
-					gasPrice, 
-					gasLimit, 
-					recipientAddress, 
-					valueInWei);
+			BigInteger gasLimit = GAS_LIMIT_ETHER_TX;
+			Transaction transaction = Transaction.createEtherTransaction(senderAddress, nonce, gasPrice, gasLimit,
+					recipientAddress, valueInWei);
 
-			logger.info("[ETH] Preparing coinbase transaction...");
-			logger.info("[ETH] > Coinbase: " + coinbase );
-			logger.info("[ETH] > nonce: " + nonce );
-			logger.info("[ETH] > gasPrice: " + gasPrice );
-			logger.info("[ETH] > gasLimit: " + gasLimit );
-			logger.info("[ETH] > recipientAddress: " + recipientAddress );
-			logger.info("[ETH] > valueInWei: " + valueInWei );
-			
-			EthSendTransaction ethSendTransaction = web3j
-					.ethSendTransaction(transaction)
-			//		.sendAsync().get();
+			logger.info("[ETH] Preparing transaction between accounts...");
+			logger.info("[ETH] > senderAddress: " + senderAddress);
+			logger.info("[ETH] > nonce: " + nonce);
+			logger.info("[ETH] > gasPrice: " + gasPrice);
+			logger.info("[ETH] > gasLimit: " + gasLimit);
+			logger.info("[ETH] > recipientAddress: " + recipientAddress);
+			logger.info("[ETH] > valueInWei: " + valueInWei);
+
+			EthSendTransaction ethSendTransaction = web3j.ethSendTransaction(transaction)
+					// .sendAsync().get();
 					.send();
 
-			if ( ethSendTransaction.hasError() )
-			{
+			if (ethSendTransaction.hasError()) {
 				Response.Error error = ethSendTransaction.getError();
 				throw new EthereumException("Eth Transaction Error [" + error.getCode() + "]: " + error.getMessage());
 			}
 			txHash = ethSendTransaction.getTransactionHash();
-			logger.info("[ETH] Faucet Transaction sent.");
-			logger.fine("waiting for receipt on [" + txHash + "]... ");
-		
-			if ( txHash.length() < 2 )
-			{
+			
+			if (txHash.length() < 2) {
 				throw new EthereumException("Could not create ethereum transaction");
 			}
 			
+			logger.fine("waiting for receipt on [" + txHash + "]... ");
 			txR = waitForReceipt(txHash);
-		} catch( InterruptedException | ExecutionException | IOException e )
-		{
+		} catch (InterruptedException | ExecutionException | IOException e) {
 			throw new EthereumException("Could not send ether to address '" + recipientAddress + "'", e);
 		}
-		
-		if ( txR == null )
-		{
-			throw new EthereumException("Could not create faucet transaction.");
+
+		if (txR == null) {
+			throw new EthereumException("Could not create eth sending transaction.");
 		}
 		logger.fine("receipt for [" + txHash + "] received.");
 		return txR;
+	}
+
+	public TransactionReceipt sendEtherFromCoinbase(String recipientAddress, BigInteger valueInWei)
+			throws EthereumException {
+		String coinbase = "";
+		try {
+			coinbase = this.getCoinbase().getResult();
+		} catch (InterruptedException | ExecutionException e) {
+			throw new EthereumException("Could not retreive coinbase address", e);
+		}
+		if ( coinbase == "" )
+		{
+			throw new EthereumException("Could not retreive coinbase address");
+		}
+		logger.info("[ETH] Sending Faucet Transaction");
+		return sendEther(coinbase, recipientAddress, valueInWei);
 	}
 	
 	
