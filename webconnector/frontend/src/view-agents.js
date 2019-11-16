@@ -204,7 +204,7 @@ class AgentsView extends PolymerElement {
               <paper-button raised on-click="requestEthFaucet" disabled="[[_working]]">
                 <iron-icon icon="card-giftcard"></iron-icon> Request funds from faucet
               </paper-button>
-              <template is="dom-if" if="[[_hasEthProfile]]">
+              <template is="dom-if" if="[[!_hasEthProfile && _EthWallet.eth-acc-balance !== 0]]">
                 <paper-button raised on-click="requestReputationProfile" disabled="[[_working]]">
                   <iron-icon icon="record-voice-over"></iron-icon> Request reputation profile
                 </paper-button>
