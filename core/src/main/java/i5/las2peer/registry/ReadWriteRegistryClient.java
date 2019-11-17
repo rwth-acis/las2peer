@@ -152,8 +152,9 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 				+ weiAmount.intValue());
 		logger.info("[TX] transaction message: " + weiAmount.intValue() + "");
 
-		String etherSendTxHash = sendEther(senderAgent.getEthereumAddress(), receivingAgent.getEthereumAddress(), weiAmount).getTransactionHash();
-
+		String etherSendTxHash = sendEther(receivingAgent.getEthereumAddress(), 
+				Convert.toWei(weiAmount.toString(), Convert.Unit.ETHER));//sendEther(senderAgent.getEthereumAddress(), receivingAgent.getEthereumAddress(), weiAmount).getTransactionHash();
+		waitForTransactionReceipt(etherSendTxHash);
 		String txHash;
 		try {
 			TransactionReceipt txR = contracts.reputationRegistry
@@ -367,15 +368,17 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 	}
 
 	// this is (so far) only for debugging / testing / etc.
-	public void sendEther(String recipientAddress, BigDecimal valueInWei) throws EthereumException {
+	public String sendEther(String recipientAddress, BigDecimal valueInWei) throws EthereumException {
+		TransactionReceipt receipt;
 		try {
-			TransactionReceipt receipt = Transfer.sendFunds(web3j, credentials, recipientAddress, valueInWei, Convert.Unit.WEI).send();
+			receipt = Transfer.sendFunds(web3j, credentials, recipientAddress, valueInWei, Convert.Unit.WEI).send();
 			if (!receipt.isStatusOK()) {
 				throw new EthereumException("TX status field is not OK. TX failed.");
 			}
 		} catch (Exception e) {
 			throw new EthereumException("Could not send ether to address '" + recipientAddress + "'", e);
 		}
+		return receipt.getTransactionHash();
 	}
 
 	/**
@@ -397,6 +400,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 	 */
 	public TransactionReceipt sendEther(String senderAddress, String recipientAddress, BigInteger valueInWei)
 			throws EthereumException {
+			
 		TransactionReceipt txR;
 		String txHash;
 		try {
