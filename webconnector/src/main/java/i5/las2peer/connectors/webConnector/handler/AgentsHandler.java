@@ -156,30 +156,30 @@ public class AgentsHandler {
 			String ethAddress = ethAgent.getEthereumAddress();
 			if ( ethAddress.length() > 0 )
 			{
-				json.put("eth-agent-address", ethAddress);
+				json.put("ethAgentAddress", ethAddress);
 				String accBalance = ethereumNode.getRegistryClient().getAccountBalance(ethAddress);
-				json.put("eth-acc-balance", accBalance);
+				json.put("ethAccBalance", accBalance);
 				UserProfileData upd = null;
 				try {
 					upd = ethereumNode.getRegistryClient().getProfile(ethAddress);
 					if (upd != null && !upd.getOwner().equals("0x0000000000000000000000000000000000000000")) {
-						json.put("eth-profile-owner", upd.getOwner());
-						json.put("eth-cumulative-score", upd.getCumulativeScore().toString());
-						json.put("eth-no-transactions-sent", upd.getNoTransactionsSent().toString());
-						json.put("eth-no-transactions-rcvd", upd.getNoTransactionsRcvd().toString());
+						json.put("ethProfileOwner", upd.getOwner());
+						json.put("ethCumulativeScore", upd.getCumulativeScore().toString());
+						json.put("ethNoTransactionsSent", upd.getNoTransactionsSent().toString());
+						json.put("ethNoTransactionsRcvd", upd.getNoTransactionsRcvd().toString());
 						if ( upd.getNoTransactionsRcvd().compareTo(BigInteger.ZERO) == 0 )
 						{
-							json.put("eth-rating", 0);
+							json.put("ethRating", 0);
 						}
 						else
 						{
-							json.put("eth-rating", upd.getCumulativeScore().divide(upd.getNoTransactionsRcvd()));
+							json.put("ethRating", upd.getCumulativeScore().divide(upd.getNoTransactionsRcvd()));
 						}
 					} else {
-						json.put("eth-rating", "0");
-						json.put("eth-cumulative-score", "???");
-						json.put("eth-no-transactions-sent", "???");
-						json.put("eth-no-transactions-rcvd", "???");
+						json.put("ethRating", "0");
+						json.put("ethCumulativeScore", "???");
+						json.put("ethNoTransactionsSent", "???");
+						json.put("ethNoTransactionsRcvd", "???");
 					}
 				}
 				catch (EthereumException| NotFoundException e)
@@ -189,11 +189,11 @@ public class AgentsHandler {
 
 			}
 			
-			json.put("eth-agent-credentials-address", ethAddress);
+			json.put("ethAgentCredentialsAddress", ethAddress);
 			
 			if ( addMnemonic && !agent.isLocked())
 			{
-				json.put("eth-mnemonic", ethAgent.getEthereumMnemonic());
+				json.put("ethMnemonic", ethAgent.getEthereumMnemonic());
 			}
 			
 			
@@ -445,16 +445,8 @@ public class AgentsHandler {
 		json.put("agentid", groupAgent.getIdentifier());
 		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
 	}
-	
-	/**
-	 * Template of a get function.
-	 *
-	 * @param randID Key of persistent storage ID
-	 * @return Returns an HTTP response with the username as string content.
-	 * @throws IOException 
-	 * @throws MalformedXMLException 
-	 */
-	
+
+
 	@POST
 	@Path("/registerProfile")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -469,7 +461,7 @@ public class AgentsHandler {
 		EthereumAgent agent = (EthereumAgent) session.getAgent();
 		try {
 			String txHash = agent.getRegistryClient().registerReputationProfile(agent);
-			json.put("call-transaction-hash", txHash);
+			json.put("callTransactionHash", txHash);
 		} catch (EthereumException e) {		
 			e.printStackTrace();	
 			throw new BadRequestException("Profile registration failed", e);
@@ -605,10 +597,10 @@ public class AgentsHandler {
 			BigInteger cumulativeScore = profile.getCumulativeScore();
 			BigInteger noTransactionsSent = profile.getNoTransactionsSent();
 			BigInteger noTransactionsRcvd = profile.getNoTransactionsRcvd();
-			member.put("eth-profile-owner", profile.getOwner());
-			member.put("cumulative-score", cumulativeScore.toString());
-			member.put("no-of-transactions-sent", noTransactionsSent.toString());
-			member.put("no-of-transactions-rcvd", noTransactionsRcvd.toString());
+			member.put("ethProfileOwner", profile.getOwner());
+			member.put("cumulativeScore", cumulativeScore.toString());
+			member.put("noOfTransactionsSent", noTransactionsSent.toString());
+			member.put("noOfTransactionsRcvd", noTransactionsRcvd.toString());
 			if ( noTransactionsRcvd.compareTo(BigInteger.ZERO) == 0 )
 			{
 				member.put("rating", 0);

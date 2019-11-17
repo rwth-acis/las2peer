@@ -186,17 +186,17 @@ class AgentsView extends PolymerElement {
             <template is="dom-if" if="[[!_hasNoEthWallet]]">
               <p>Welcome, [[_EthWallet.username]] 
                 <template is="dom-if" if="[[_hasEthProfile]]">
-                  <custom-star-rating value="[[_EthWallet.eth-rating]]" readonly></custom-star-rating>
+                  <custom-star-rating value="[[_EthWallet.ethRating]]" readonly></custom-star-rating>
                 </template>
               </p>
               <p>
-                <strong><iron-icon icon="fingerprint"></iron-icon> Eth Credentials Address</strong>: [[_EthWallet.eth-agent-credentials-address]] <br />
-                <strong><iron-icon icon="verified-user"></iron-icon> Eth Mnemonic</strong>: [[_EthWallet.eth-mnemonic]] <br />
-                <strong><iron-icon icon="account-balance"></iron-icon> Eth Balance</strong>: [[_EthWallet.eth-acc-balance]] <br />
+                <strong><iron-icon icon="fingerprint"></iron-icon> Eth Credentials Address</strong>: [[_EthWallet.ethAgentCredentialsAddress]] <br />
+                <strong><iron-icon icon="verified-user"></iron-icon> Eth Mnemonic</strong>: [[_EthWallet.ethMnemonic]] <br />
+                <strong><iron-icon icon="account-balance"></iron-icon> Eth Balance</strong>: [[_EthWallet.ethAccBalance]] <br />
                 <template is="dom-if" if="[[_hasEthProfile]]">
                   <strong><iron-icon icon="stars"></iron-icon> Reputation No Transactions</strong> <small><em>[Rcvd | Sent]</em></small>: 
-                    <iron-icon icon="cloud-download"></iron-icon> [[_EthWallet.eth-no-transactions-rcvd]] | 
-                    <iron-icon icon="cloud-upload"></iron-icon> [[_EthWallet.eth-no-transactions-sent]]
+                    <iron-icon icon="cloud-download"></iron-icon> [[_EthWallet.ethNoTransactionsRcvd]] | 
+                    <iron-icon icon="cloud-upload"></iron-icon> [[_EthWallet.ethNoTransactionsSent]]
                   <br />
                 </template>
               </p>
@@ -267,8 +267,8 @@ class AgentsView extends PolymerElement {
                   	<custom-star-rating value="[[agent.rating]]" on-rating-selected="rateAgent"></custom-star-rating>
                   </td>
                   <td> 
-                    [[agent.no-of-transactions-rcvd]] | 
-                    [[agent.no-of-transactions-sent]]
+                    [[agent.noOfTransactionsRcvd]] | 
+                    [[agent.noOfTransactionsSent]]
                   </td>
                   <td><iron-icon icon="fingerprint"></iron-icon> [[agent.address]]</td>
                 </tr>
@@ -436,7 +436,22 @@ class AgentsView extends PolymerElement {
       _working: Boolean,
       _chosenAgentID: { type: String, value: "" },
       _ethTransactionSent: { type: Boolean, value: false },
-      _EthWallet: { type: Array, value: { 'eth-cumulative-score': 0 } },
+      _EthWallet: { type: Object, 
+        value: { 
+          agentid: "",
+          email: "",
+          ethAccBalance: 0,
+          ethAgentAddress: "",
+          ethAgentCredentialsAddress: "",
+          ethCumulativeScore: 0,
+          ethMnemonic: "",
+          ethNoTransactionsRcvd: 0,
+          ethNoTransactionsSent: 0,
+          ethProfileOwner: "",
+          ethRating: 0,
+          username: ""
+        } 
+      },
       _hasEthProfile: { type: Boolean, value: false },
       _hasNoAgentsList: { type: Boolean, value: true },
       _hasNoEthWallet: { type: Boolean, value: true },
@@ -455,6 +470,7 @@ class AgentsView extends PolymerElement {
   ready() {
     super.ready();
     let appThis = this;
+    window.appThis = this;
     window.setTimeout(function() { appThis.refresh(); }, 5);
   }
 
@@ -468,7 +484,7 @@ class AgentsView extends PolymerElement {
   refreshEthWallet() { this.$.ajaxGetEthWallet.generateRequest(); }
   requestEthFaucet() { this.$.ajaxRequestFaucet.generateRequest(); }
   requestReputationProfile() { 
-    if (this.$._EthWallet["eth-acc-balance"]>0.15) {
+    if (this.$._EthWallet.ethAccBalance > 0.15) {
       this._errorChanged({ title: "Not enough funds", message: "Try requesting eth from the faucet?"});
     } else {
       this.$.ajaxReputationProfile.generateRequest(); 
@@ -529,7 +545,7 @@ class AgentsView extends PolymerElement {
   _handleGetEthWalletResponse(event) {
 	  this._hasNoEthWallet = false;
     this._EthWallet = event.detail.response;
-    if (this._EthWallet["eth-cumulative-score"] !== "???" )
+    if (this._EthWallet.ethCumulativeScore !== "???" )
     {
       this._hasEthProfile = true;
     }
