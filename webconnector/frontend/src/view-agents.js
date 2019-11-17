@@ -204,7 +204,7 @@ class AgentsView extends PolymerElement {
               <paper-button raised on-click="requestEthFaucet" disabled="[[_working]]">
                 <iron-icon icon="card-giftcard"></iron-icon> Request funds from faucet
               </paper-button>
-              <template is="dom-if" if="[[!_hasEthProfile && _EthWallet.eth-acc-balance !== 0]]">
+              <template is="dom-if" if="[[!_hasEthProfile]]">
                 <paper-button raised on-click="requestReputationProfile" disabled="[[_working]]">
                   <iron-icon icon="record-voice-over"></iron-icon> Request reputation profile
                 </paper-button>
@@ -467,7 +467,13 @@ class AgentsView extends PolymerElement {
   }
   refreshEthWallet() { this.$.ajaxGetEthWallet.generateRequest(); }
   requestEthFaucet() { this.$.ajaxRequestFaucet.generateRequest(); }
-  requestReputationProfile() { this.$.ajaxReputationProfile.generateRequest(); }
+  requestReputationProfile() { 
+    if (this.$._EthWallet["eth-acc-balance"]>0.15) {
+      this._errorChanged({ title: "Not enough funds", message: "Try requesting eth from the faucet?"});
+    } else {
+      this.$.ajaxReputationProfile.generateRequest(); 
+    }
+  }
   refreshAgentsList() { this.$.ajaxListAgents.generateRequest(); }
   refreshProfilesList() { this.$.ajaxListProfiles.generateRequest(); }
   toggleCreateAgent() { this.$.collapseCreateAgent.toggle(); }
