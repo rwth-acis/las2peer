@@ -484,8 +484,9 @@ class AgentsView extends PolymerElement {
   refreshEthWallet() { this.$.ajaxGetEthWallet.generateRequest(); }
   requestEthFaucet() { this.$.ajaxRequestFaucet.generateRequest(); }
   requestReputationProfile() { 
-    if (this._EthWallet.ethAccBalance > 0.15) {
-      this._errorChanged({ title: "Not enough funds", message: "Try requesting eth from the faucet?"});
+    if (this._EthWallet.ethAccBalance < 0.15) {
+      this.error = { title: "Not enough funds", message: "Try requesting eth from the faucet?" };
+      return;
     } else {
       this.$.ajaxReputationProfile.generateRequest(); 
     }
