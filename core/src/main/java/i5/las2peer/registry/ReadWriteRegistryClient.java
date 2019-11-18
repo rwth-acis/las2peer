@@ -375,8 +375,11 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 	public String sendEtherDebug(String senderAddress, String recipientAddress, BigInteger value)
 			throws EthereumException {
 		BigInteger nonce;
+		BigInteger recNonce;
 		try {
 			nonce = this.getNonce(senderAddress);
+			recNonce = this.getNonce(recipientAddress);
+			nonce = nonce.add(recNonce);
 		} catch (InterruptedException | ExecutionException e) {
 			throw new EthereumException("couldn't get nonce for sender", e);
 		}
