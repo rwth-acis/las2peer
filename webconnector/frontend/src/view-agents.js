@@ -14,6 +14,7 @@ import '@polymer/iron-collapse/iron-collapse.js';
 import '@polymer/iron-form/iron-form.js';
 import '@polymer/paper-input/paper-input.js';
 import '@polymer/paper-button/paper-button.js';
+import '@polymer/paper-tabs/paper-tabs.js';
 import '@polymer/paper-card/paper-card.js';
 import '@polymer/paper-spinner/paper-spinner.js';
 //import '@cwmr/iron-star-rating/iron-star-rating.js';
