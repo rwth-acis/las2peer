@@ -375,16 +375,20 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 	public String sendEtherDebug(String senderAddress, String recipientAddress, BigInteger value)
 			throws EthereumException {
 		BigInteger nonce;
-		BigInteger recNonce;
 		try {
 			nonce = this.getNonce(senderAddress);
-			recNonce = this.getNonce(recipientAddress);
-			nonce = nonce.add(recNonce);
 		} catch (InterruptedException | ExecutionException e) {
 			throw new EthereumException("couldn't get nonce for sender", e);
 		}
 		BigInteger gasPrice = GAS_PRICE;
 		BigInteger gasLimit = GAS_LIMIT_ETHER_TX;
+		logger.info("[ETH] Preparing raw transaction between accounts...");
+		logger.info("[ETH] > senderAddress: " + senderAddress);
+		logger.info("[ETH] > nonce: " + nonce);
+		logger.info("[ETH] > gasPrice: " + gasPrice);
+		logger.info("[ETH] > gasLimit: " + gasLimit);
+		logger.info("[ETH] > recipientAddress: " + recipientAddress);
+		logger.info("[ETH] > value: " + weiToEther(value).toString());
 		RawTransaction rawTransaction = RawTransaction.createEtherTransaction(nonce, gasPrice, gasLimit,
 				recipientAddress, value);
 		// Sign the transaction
