@@ -238,7 +238,7 @@ class AgentsView extends PolymerElement {
                       <th>TransactionValue</th>
                       <th>TXHash</th>
                     </tr>
-                    <template is="dom-repeat" items="[[_txSentLog]]" as="tx">
+                    <template is="dom-repeat" items="[[_EthTxLog.sentJsonLog]]" as="tx">
                       <tr>
                         <td><iron-icon icon="update"></iron-icon> [[tx.txTime]]</td>
                         <td><iron-icon icon="face"></iron-icon> [[tx.txSender]]</td>
@@ -261,7 +261,7 @@ class AgentsView extends PolymerElement {
                       <th>TransactionValue</th>
                       <th>TXHash</th>
                     </tr>
-                    <template is="dom-repeat" items="[[_txRcvdLog]]" as="tx">
+                    <template is="dom-repeat" items="[[_EthTxLog.rcvdJsonLog]]" as="tx">
                       <tr>
                         <td><iron-icon icon="update"></iron-icon> [[tx.txTime]]</td>
                         <td><iron-icon icon="face"></iron-icon> [[tx.txReceiver]]</td>
@@ -582,10 +582,10 @@ class AgentsView extends PolymerElement {
 
   _handleGenericTxLogResponse(event) {
     this._EthTxLog = event.detail.response;
-    console.log(_EthTxLog);
-    console.log(_EthTxLog.rcvdJsonLog.length);
-    console.log(_EthTxLog.sentJsonLog.length);
-    if (_EthTxLog.rcvdJsonLog.length == 0 && _EthTxLog.sentJsonLog.length == 0)
+    console.log(this._EthTxLog);
+    console.log(this._EthTxLog.rcvdJsonLog.length);
+    console.log(this._EthTxLog.sentJsonLog.length);
+    if (this._EthTxLog.rcvdJsonLog.length == 0 && this._EthTxLog.sentJsonLog.length == 0)
       this._hasNoTxLog = true;
     else
       this._hasNoTxLog = false;
