@@ -6,7 +6,6 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 import org.web3j.utils.Convert;
-import net.minidev.json.JSONObject;
 
 
 /* 
@@ -107,21 +106,5 @@ public class GenericTransactionData {
 
     public void setAmountInWei(BigInteger amountInWei) {
         this.amountInWei = amountInWei;
-    }
-
-    public JSONObject toJSONObject() {
-        JSONObject thisJSON = new JSONObject();
-
-        thisJSON.put("txSender", this.getSender());
-        thisJSON.put("txReceiver", this.getReceiver());
-        thisJSON.put("txMessage", this.getMessage());
-        thisJSON.put("txAmountInWei", this.getAmountInWei() );
-        thisJSON.put("txAmountInEth", this.getAmountInEth());
-        thisJSON.put("txTXHash", this.getTXHash() );
-        thisJSON.put("txTimestamp", this.getTimestamp() );
-        thisJSON.put("txDateTime", this.getTime());
-        thisJSON.put("txTransactionType", this.getTransactionType() );
-
-        return thisJSON;
     }
 }

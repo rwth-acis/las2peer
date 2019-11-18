@@ -279,6 +279,24 @@ public class AgentsHandler {
 		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
 	}
 
+	private JSONObject transactionDataToJSONObject(GenericTransactionData genericTransactionData) {
+		    
+        JSONObject thisJSON = new JSONObject();
+
+        thisJSON.put("txSender", genericTransactionData.getSender());
+        thisJSON.put("txReceiver", genericTransactionData.getReceiver());
+        thisJSON.put("txMessage", genericTransactionData.getMessage());
+        thisJSON.put("txAmountInWei", genericTransactionData.getAmountInWei() );
+        thisJSON.put("txAmountInEth", genericTransactionData.getAmountInEth());
+        thisJSON.put("txTXHash", genericTransactionData.getTXHash() );
+        thisJSON.put("txTimestamp", genericTransactionData.getTimestamp() );
+        thisJSON.put("txDateTime", genericTransactionData.getTime());
+        thisJSON.put("txTransactionType", genericTransactionData.getTransactionType() );
+
+        return thisJSON;
+    
+	}
+
 	@POST
 	@Path("/getGenericTxLog")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -304,13 +322,13 @@ public class AgentsHandler {
 		JSONObject json = new JSONObject();
 		JSONArray rcvdJsonLog = new JSONArray();
 		for (GenericTransactionData genericTransactionData : rcvdTxLog) {
-			rcvdJsonLog.add(genericTransactionData.toJSONObject());
+			rcvdJsonLog.add(transactionDataToJSONObject(genericTransactionData));
 		}
 
 		// parse sent log
 		JSONArray sentJsonLog = new JSONArray();
 		for (GenericTransactionData genericTransactionData : sentTxLog) {
-			sentJsonLog.add(genericTransactionData.toJSONObject());
+			sentJsonLog.add(transactionDataToJSONObject(genericTransactionData));
 		}
 		
 		json.put("rcvdJsonLog", rcvdJsonLog);
