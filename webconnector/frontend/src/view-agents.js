@@ -137,19 +137,21 @@ class AgentsView extends PolymerElement {
                  on-error="_handleError"
                  loading="{{_working}}"></iron-ajax>         
                  
-      
 
-      <style include="shared-styles iron-flex iron-positioning iron-flex-alignment">
+      <style include="shared-styles">
         :host {
           display: block;
 
           padding: 10px;
         }
-      </style>
 
-      <custom-style>
-        <style>
-          paper-button.red {
+        paper-tabs {
+          background-color: var(--tabs-background-colour, mediumslateblue);
+          --paper-tabs-selection-bar-color: var(--tabs-colour, white);
+          color: var(--tabs-colour, white);
+        }
+
+        paper-button.red {
             --paper-button-ink-color: var(--paper-red-a200);
             --paper-button-flat-keyboard-focus: {
               background-color: var(--paper-red-a200) !important;
@@ -178,8 +180,7 @@ class AgentsView extends PolymerElement {
           paper-button.green:hover {
             background-color: var(--paper-green-100);
           }
-        </style>
-      </custom-style>
+      </style>
 
       <div class="card">
         <h1>Agents</h1>
@@ -239,9 +240,9 @@ class AgentsView extends PolymerElement {
                       <th>TransactionValue</th>
                       <th>TXHash</th>
                     </tr>
-                    <template is="dom-repeat" items="[[_EthTxLog.sentJsonLog]]" as="tx">
+                    <template is="dom-repeat" items="[[_EthTxLog.rcvdJsonLog]]" as="tx">
                       <tr>
-                        <td><iron-icon icon="update"></iron-icon> [[tx.txTime]]</td>
+                        <td><iron-icon icon="update"></iron-icon> [[tx.txDateTime]]</td>
                         <td><iron-icon icon="face"></iron-icon> [[tx.txSender]]</td>
                         <td><iron-icon icon="class"></iron-icon> [[tx.txTransactionType]]</td>
                         <td><iron-icon icon="speaker-notes"></iron-icon> [[tx.txMessage]]</td>
@@ -262,9 +263,9 @@ class AgentsView extends PolymerElement {
                       <th>TransactionValue</th>
                       <th>TXHash</th>
                     </tr>
-                    <template is="dom-repeat" items="[[_EthTxLog.rcvdJsonLog]]" as="tx">
+                    <template is="dom-repeat" items="[[_EthTxLog.sentJsonLog]]" as="tx">
                       <tr>
-                        <td><iron-icon icon="update"></iron-icon> [[tx.txTime]]</td>
+                        <td><iron-icon icon="update"></iron-icon> [[tx.txDateTime]]</td>
                         <td><iron-icon icon="face"></iron-icon> [[tx.txReceiver]]</td>
                         <td><iron-icon icon="class"></iron-icon> [[tx.txTransactionType]]</td>
                         <td><iron-icon icon="speaker-notes"></iron-icon> [[tx.txMessage]]</td>
@@ -497,7 +498,7 @@ class AgentsView extends PolymerElement {
       apiEndpoint: { type: String, notify: true },
       agentId: { type: String, notify: true, observer: '_agentIdChanged' },
       error: { type: Object, notify: true },
-      _working: Boolean,
+      _working: { type: Boolean, value: false },
       _chosenAgentID: { type: String, value: "" },
       _ethTransactionSent: { type: Boolean, value: false },
       _EthWallet: { type: Object, 
@@ -535,7 +536,12 @@ class AgentsView extends PolymerElement {
       _manageAgents: { type: Array, value: [] },
       _manageGroupAgentId: String,
       _memberAgents: { type: Array, value: [] },
-      _selectedTab: { type: Object, value: 0 }
+      _selectedTab: {
+        type: Number,
+        value: 0,
+        notify: true,
+        reflectToAttribute: true
+      }
     };
   }
 
