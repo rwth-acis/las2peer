@@ -32,7 +32,6 @@ import org.web3j.tuples.generated.Tuple4;
 import org.web3j.tuples.generated.Tuple6;
 import org.web3j.utils.Convert;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
@@ -114,8 +113,6 @@ public class ReadOnlyRegistryClient {
 			personalUnlockAccount = web3j_admin.personalUnlockAccount(accountAddress, accountPassword).sendAsync()
 					.get();
 		} catch (InterruptedException | ExecutionException e) {
-			// TODO Auto-generated catch block
-			//e.printStackTrace();
 			return false;
 		}
 		return personalUnlockAccount.accountUnlocked();
@@ -130,16 +127,16 @@ public class ReadOnlyRegistryClient {
 	@Deprecated
 	public String getEthClientVersion() throws EthereumException {
 		try {
-			Web3ClientVersion web3ClientVersion = web3j.web3ClientVersion().send();
+			Web3ClientVersion web3ClientVersion = web3j.web3ClientVersion().sendAsync().get();
 			return web3ClientVersion.getWeb3ClientVersion();
-		} catch (IOException e) {
+		} catch (InterruptedException | ExecutionException e) {
 			throw new EthereumException("Failed to get client version", e);
 		}
 	}
 
 	private String getTagDescription(String tagName) throws EthereumException {
 		try {
-			return contracts.communityTagIndex.viewDescription(Util.padAndConvertString(tagName, 32)).send();
+			return contracts.communityTagIndex.viewDescription(Util.padAndConvertString(tagName, 32)).sendAsync().get();
 		} catch (IllegalArgumentException e) {
 			throw new IllegalArgumentException("Tag name invalid (too long?)", e);
 		} catch (Exception e) {
@@ -154,7 +151,7 @@ public class ReadOnlyRegistryClient {
 	 */
 	public boolean usernameIsAvailable(String name) throws EthereumException {
 		try {
-			return contracts.userRegistry.nameIsAvailable(Util.padAndConvertString(name, 32)).send();
+			return contracts.userRegistry.nameIsAvailable(Util.padAndConvertString(name, 32)).sendAsync().get();
 		} catch (Exception e) {
 			throw new EthereumException(e);
 		}
@@ -171,7 +168,7 @@ public class ReadOnlyRegistryClient {
 	 */
 	public boolean usernameIsValid(String name) throws EthereumException {
 		try {
-			return contracts.userRegistry.nameIsValid(Util.padAndConvertString(name, 32)).send();
+			return contracts.userRegistry.nameIsValid(Util.padAndConvertString(name, 32)).sendAsync().get();
 		} catch (Exception e) {
 			throw new EthereumException(e);
 		}
@@ -186,7 +183,7 @@ public class ReadOnlyRegistryClient {
 	public UserData getUser(String name) throws EthereumException, NotFoundException {
 		Tuple4<byte[], byte[], byte[], String> userAsTuple;
 		try {
-			userAsTuple = contracts.userRegistry.users(Util.padAndConvertString(name, 32)).send();
+			userAsTuple = contracts.userRegistry.users(Util.padAndConvertString(name, 32)).sendAsync().get();
 		} catch (Exception e) {
 			throw new EthereumException("Could not get user", e);
 		}
@@ -197,13 +194,14 @@ public class ReadOnlyRegistryClient {
 			throw new NotFoundException("User name apparently not registered.");
 		}
 
-		return new UserData(userAsTuple.getValue1(), userAsTuple.getValue2(), userAsTuple.getValue3(), userAsTuple.getValue4());
+		return new UserData(userAsTuple.getValue1(), userAsTuple.getValue2(), userAsTuple.getValue3(),
+				userAsTuple.getValue4());
 	}
 
 	public UserProfileData getProfile(String address) throws EthereumException, NotFoundException {
 		Tuple6<String, byte[], BigInteger, BigInteger, BigInteger, BigInteger> profileAsTuple;
 		try {
-			profileAsTuple = contracts.reputationRegistry.profiles(address).send();
+			profileAsTuple = contracts.reputationRegistry.profiles(address).sendAsync().get();
 			logger.info("found user profile: " + profileAsTuple.toString());
 		} catch (Exception e) {
 			throw new EthereumException("Could not get profile", e);
@@ -236,7 +234,7 @@ public class ReadOnlyRegistryClient {
 		byte[] serviceNameHash = Util.soliditySha3(serviceName);
 		Tuple2<String, byte[]> serviceNameAndOwner;
 		try {
-			serviceNameAndOwner = contracts.serviceRegistry.services(serviceNameHash).send();
+			serviceNameAndOwner = contracts.serviceRegistry.services(serviceNameHash).sendAsync().get();
 		} catch (Exception e) {
 			throw new EthereumException("Failed to look up service author", e);
 		}
@@ -320,14 +318,8 @@ public class ReadOnlyRegistryClient {
 		return strTokenAmount;
 	}
 
-
 	public BlockchainTransactionData getTransactionInfo(String txHash) throws EthereumException {
-		EthTransaction ethTransaction;
-		try {
-			ethTransaction = getTransactionByTxHash(txHash);
-		} catch (IOException e) {
-			throw new EthereumException("cannot get transaction by txhash", e);
-		}
+		EthTransaction ethTransaction = getTransactionByTxHash(txHash);
 		Optional<org.web3j.protocol.core.methods.response.Transaction> o = ethTransaction.getTransaction();
 		if (!o.isPresent()) {
 			throw new EthereumException("transaction not found");
@@ -339,8 +331,12 @@ public class ReadOnlyRegistryClient {
 		return btd;
 	}
 
-	public EthTransaction getTransactionByTxHash(String txHash) throws IOException {
-		return web3j.ethGetTransactionByHash(txHash).send();
+	public EthTransaction getTransactionByTxHash(String txHash) throws EthereumException {
+		try {
+			return web3j.ethGetTransactionByHash(txHash).sendAsync().get();
+		} catch (InterruptedException | ExecutionException e) {
+			throw new EthereumException("cannot get transaction info for " + txHash, e);
+		}
 	}
 
 	public List<GenericTransactionData> getTransactionLogBySender(String sender) {
