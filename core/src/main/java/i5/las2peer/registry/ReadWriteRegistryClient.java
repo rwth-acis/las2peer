@@ -155,8 +155,8 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 				+ weiAmount.toString());
 		logger.info("[TX] transaction message: " + message + "");
 
-		String etherSendTxHash = sendEther(receivingAgent.getEthereumAddress(), Convert.toWei(weiAmount.toString(), Convert.Unit.ETHER));
-		
+		String etherSendTxHash = sendEtherDebug(senderAgent.getEthereumAddress(), receivingAgent.getEthereumAddress(), weiAmount);
+		//sendEther(receivingAgent.getEthereumAddress(), Convert.toWei(weiAmount.toString(), Convert.Unit.ETHER));
 		// sendEther(senderAgent.getEthereumAddress(), receivingAgent.getEthereumAddress(), weiAmount).getTransactionHash();
 		waitForTransactionReceipt(etherSendTxHash);
 		String txHash;
