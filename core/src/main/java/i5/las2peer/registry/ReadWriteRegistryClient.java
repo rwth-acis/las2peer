@@ -10,6 +10,8 @@ import java.util.concurrent.ExecutionException;
 
 import org.web3j.abi.datatypes.Function;
 import org.web3j.crypto.Credentials;
+import org.web3j.crypto.RawTransaction;
+import org.web3j.crypto.TransactionEncoder;
 import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
@@ -17,6 +19,7 @@ import org.web3j.protocol.core.methods.response.EthTransaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.tx.Transfer;
 import org.web3j.utils.Convert;
+import org.web3j.utils.Numeric;
 
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.registry.contracts.ServiceRegistry;
@@ -149,11 +152,12 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 	public String addGenericTransaction(EthereumAgent senderAgent, EthereumAgent receivingAgent, String message, BigInteger weiAmount)
 			throws EthereumException {
 		logger.info("[TX] adding generic transaction to: " + receivingAgent.getLoginName() + " | amount: "
-				+ weiAmount.intValue());
-		logger.info("[TX] transaction message: " + weiAmount.intValue() + "");
+				+ weiAmount.toString());
+		logger.info("[TX] transaction message: " + message + "");
 
-		String etherSendTxHash = sendEther(receivingAgent.getEthereumAddress(), 
-				Convert.toWei(weiAmount.toString(), Convert.Unit.ETHER));//sendEther(senderAgent.getEthereumAddress(), receivingAgent.getEthereumAddress(), weiAmount).getTransactionHash();
+		String etherSendTxHash = sendEther(receivingAgent.getEthereumAddress(), Convert.toWei(weiAmount.toString(), Convert.Unit.ETHER));
+		
+		// sendEther(senderAgent.getEthereumAddress(), receivingAgent.getEthereumAddress(), weiAmount).getTransactionHash();
 		waitForTransactionReceipt(etherSendTxHash);
 		String txHash;
 		try {
@@ -177,7 +181,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 	public String addUserRating(EthereumAgent receivingAgent, Integer rating) throws EthereumException {
 
 		logger.info("rating user profile: " + receivingAgent.getLoginName() + " | " + rating + "("
-				+ BigInteger.valueOf(rating).intValue() + ")");
+				+ BigInteger.valueOf(rating).toString() + ")");
 
 		// see reputation registry
 		int __amountMax = 5;
@@ -365,6 +369,39 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 			throw new EthereumException("Failed to submit service deployment *end* announcement ("
 					+ "DEBUG: " + serviceClassName + ", " + e.getMessage() + ")", e);
 		}
+	}
+
+	public String sendEtherDebug(String senderAddress, String recipientAddress, BigInteger value)
+			throws EthereumException {
+		BigInteger nonce;
+		try {
+			nonce = this.getNonce(senderAddress);
+		} catch (InterruptedException | ExecutionException e) {
+			throw new EthereumException("couldn't get nonce for sender", e);
+		}
+		BigInteger gasPrice = GAS_PRICE;
+		BigInteger gasLimit = GAS_LIMIT_ETHER_TX;
+		RawTransaction rawTransaction = RawTransaction.createEtherTransaction(nonce, gasPrice, gasLimit,
+				recipientAddress, value);
+		// Sign the transaction
+		byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, credentials);
+
+		// Convert it to Hexadecimal String to be sent to the node
+		String hexValue = Numeric.toHexString(signedMessage);
+
+		// Send transaction
+		EthSendTransaction ethSendTransaction;
+		try {
+			ethSendTransaction = web3j.ethSendRawTransaction(hexValue).send();
+			if (ethSendTransaction.hasError()) {
+				Response.Error error = ethSendTransaction.getError();
+				throw new EthereumException("Eth Transaction Error [" + error.getCode() + "]: " + error.getMessage());
+			}
+		} catch (IOException e) {
+			throw new EthereumException("couldn't send raw transaction", e);
+		}
+
+		return ethSendTransaction.getTransactionHash();
 	}
 
 	// this is (so far) only for debugging / testing / etc.

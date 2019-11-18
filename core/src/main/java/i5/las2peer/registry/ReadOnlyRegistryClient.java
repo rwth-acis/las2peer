@@ -1,6 +1,7 @@
 package i5.las2peer.registry;
 
 import i5.las2peer.logging.L2pLogger;
+import i5.las2peer.registry.data.BlockchainTransactionData;
 import i5.las2peer.registry.data.RegistryConfiguration;
 import i5.las2peer.registry.data.ServiceDeploymentData;
 import i5.las2peer.registry.data.ServiceReleaseData;
@@ -21,6 +22,7 @@ import org.web3j.protocol.core.methods.response.EthCoinbase;
 import org.web3j.protocol.core.methods.response.EthGetBalance;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.protocol.core.methods.response.EthGetTransactionReceipt;
+import org.web3j.protocol.core.methods.response.EthTransaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.core.methods.response.Web3ClientVersion;
 import org.web3j.protocol.http.HttpService;
@@ -315,6 +317,29 @@ public class ReadOnlyRegistryClient {
 		java.math.BigDecimal tokenValue = Convert.fromWei(String.valueOf(wei), Convert.Unit.ETHER);
 		String strTokenAmount = String.valueOf(tokenValue);
 		return strTokenAmount;
+	}
+
+
+	public BlockchainTransactionData getTransactionInfo(String txHash) throws EthereumException {
+		EthTransaction ethTransaction;
+		try {
+			ethTransaction = getTransactionByTxHash(txHash);
+		} catch (IOException e) {
+			throw new EthereumException("cannot get transaction by txhash", e);
+		}
+		Optional<org.web3j.protocol.core.methods.response.Transaction> o = ethTransaction.getTransaction();
+		if (!o.isPresent()) {
+			throw new EthereumException("transaction not found");
+		}
+		org.web3j.protocol.core.methods.response.Transaction t = o.get();
+
+		BlockchainTransactionData btd = new BlockchainTransactionData(t.getBlockNumber(), t.getGas(), t.getGasPrice(),
+				t.getNonce(), t.getTransactionIndex(), t.getFrom(), t.getInput(), t.getTo());
+		return btd;
+	}
+
+	public EthTransaction getTransactionByTxHash(String txHash) throws IOException {
+		return web3j.ethGetTransactionByHash(txHash).send();
 	}
 	
 	/**

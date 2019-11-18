@@ -680,7 +680,7 @@ public class AgentsHandler {
 		BigDecimal weiAmountBD = Convert.toWei(weiAmount.toString(), Convert.Unit.ETHER);
 		BigInteger weiAmountBI = weiAmountBD.toBigInteger();
 
-		logger.info("[ETH] sending weiAmount: " + weiAmount.toString() + " | " + weiAmountBD.toString() + " | " + weiAmountBI.toString() );
+		logger.info("[ETH] sending weiAmount: " + weiAmount.toString() );
 
 		EthereumAgent recipientAgent = null;
 		try {
