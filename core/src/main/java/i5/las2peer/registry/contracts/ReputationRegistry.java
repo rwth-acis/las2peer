@@ -420,7 +420,7 @@ public class ReputationRegistry extends Contract {
                 FUNC_ADDGENERICTRANSACTION,
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(contrahent),
                         new org.web3j.abi.datatypes.generated.Uint256(weiAmount),
-                        new org.web3j.abi.datatypes.Address(txHash), new org.web3j.abi.datatypes.Utf8String(message),
+                        new org.web3j.abi.datatypes.Utf8String(txHash), new org.web3j.abi.datatypes.Utf8String(message),
                         new org.web3j.abi.datatypes.Utf8String(transactionType)),
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);

@@ -159,6 +159,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		//sendEther(receivingAgent.getEthereumAddress(), Convert.toWei(weiAmount.toString(), Convert.Unit.ETHER));
 		// sendEther(senderAgent.getEthereumAddress(), receivingAgent.getEthereumAddress(), weiAmount).getTransactionHash();
 		waitForTransactionReceipt(etherSendTxHash);
+		logger.info("[TX] sent funds, adding smart contract event for message and transaction type, txHash: " + etherSendTxHash);
 		String txHash;
 		try {
 			TransactionReceipt txR = contracts.reputationRegistry
