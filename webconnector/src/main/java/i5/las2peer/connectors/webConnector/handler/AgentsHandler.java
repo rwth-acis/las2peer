@@ -42,6 +42,7 @@ import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.registry.ReadOnlyRegistryClient;
 import i5.las2peer.registry.ReadWriteRegistryClient;
+import i5.las2peer.registry.data.GenericTransactionData;
 import i5.las2peer.registry.data.UserData;
 import i5.las2peer.registry.data.UserProfileData;
 import i5.las2peer.registry.exceptions.EthereumException;
@@ -277,6 +278,47 @@ public class AgentsHandler {
 		
 		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
 	}
+
+	@POST
+	@Path("/getGenericTxLog")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response handleGetGenericTxLogSent(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId)
+	{
+		AgentSession session = connector.getSessionById(sessionId);
+		if (session == null) {
+			return Response.status(Status.FORBIDDEN).entity("You have to be logged in").build();
+		}
+		AgentImpl agent = session.getAgent();
+		if (!(agent instanceof EthereumAgent)) {
+			return Response.status(Status.FORBIDDEN).entity("Must be EthereumAgent").build();
+		}
+		// get session eth agent
+		EthereumAgent ethAgent = (EthereumAgent) agent;
+		String agentAddress = ethAgent.getEthereumAddress();
+
+		// query transaction log events
+		List<GenericTransactionData> sentTxLog = ethAgent.getRegistryClient().getTransactionLogBySender(agentAddress);
+		List<GenericTransactionData> rcvdTxLog = ethAgent.getRegistryClient().getTransactionLogByReceiver(agentAddress);
+		
+		// parse received log
+		JSONObject json = new JSONObject();
+		JSONArray rcvdJsonLog = new JSONArray();
+		for (GenericTransactionData genericTransactionData : rcvdTxLog) {
+			rcvdJsonLog.add(genericTransactionData.toJSONObject());
+		}
+
+		// parse sent log
+		JSONArray sentJsonLog = new JSONArray();
+		for (GenericTransactionData genericTransactionData : sentTxLog) {
+			sentJsonLog.add(genericTransactionData.toJSONObject());
+		}
+		
+		json.put("rcvdJsonLog", rcvdJsonLog);
+		json.put("sentJsonLog", sentJsonLog);
+		
+		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
+	}
+	
 
 	@POST
 	@Path("/getAgent")

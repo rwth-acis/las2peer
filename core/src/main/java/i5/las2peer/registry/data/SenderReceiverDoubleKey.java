@@ -13,6 +13,16 @@ public class SenderReceiverDoubleKey {
         return sender;
     }
 
+    public boolean equalsSender(String sender)
+    {
+        return this.sender == sender;
+    }
+
+    public boolean equalsReceiver(String receiver)
+    {
+        return this.receiver == receiver;
+    }
+
     public void setSender(String sender) {
         this.sender = sender;
     }
@@ -23,5 +33,19 @@ public class SenderReceiverDoubleKey {
 
     public void setReceiver(String receiver) {
         this.receiver = receiver;
+    }
+
+    @Override   
+   public boolean equals(Object obj) {
+      if (!(obj instanceof SenderReceiverDoubleKey))
+        return false;
+      SenderReceiverDoubleKey ref = (SenderReceiverDoubleKey) obj;
+      return this.sender.equals(ref.sender) && 
+          this.receiver.equals(ref.receiver);
+   }
+
+    @Override
+    public int hashCode() {
+        return sender.hashCode() ^ receiver.hashCode();
     }
 }

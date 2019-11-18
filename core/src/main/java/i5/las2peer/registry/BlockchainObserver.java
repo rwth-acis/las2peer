@@ -199,6 +199,36 @@ class BlockchainObserver {
 			}, e -> logger.severe("Error observing profile creation event: " + e.toString()));
 	}
 
+
+	public List<GenericTransactionData> getTransactionLogBySender(String sender) {
+		List<GenericTransactionData> transactionList = new ArrayList<>();
+		for (SenderReceiverDoubleKey key : genericTransactions.keySet()) {
+			if ( key.equalsSender(sender) )
+			{
+				List<GenericTransactionData> keyTransactionList = genericTransactions.get(key);
+				for (GenericTransactionData genericTransactionData : keyTransactionList) {
+					transactionList.add(genericTransactionData);
+				}
+			}
+		}
+		logger.info("[TXLOG] found " + transactionList.size() + " entries for "+ sender);
+		return transactionList;
+	}
+
+	public List<GenericTransactionData> getTransactionLogByReceiver(String receiver) {
+		List<GenericTransactionData> transactionList = new ArrayList<>();
+		for (SenderReceiverDoubleKey key : genericTransactions.keySet()) {
+			if (key.equalsReceiver(receiver)) {
+				List<GenericTransactionData> keyTransactionList = genericTransactions.get(key);
+				for (GenericTransactionData genericTransactionData : keyTransactionList) {
+					transactionList.add(genericTransactionData);
+				}
+			}
+		}
+		logger.info("[TXLOG] found " + transactionList.size() + " entries for "+ receiver);
+		return transactionList;
+	}
+
 	private void observeGenericTransactions() {
 		contracts.reputationRegistry
 				.genericTransactionAddedEventFlowable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST)
@@ -208,12 +238,15 @@ class BlockchainObserver {
 					}
 					String sender = transaction.sender;
 					String receiver = transaction.recipient;
-
-					String message = Util.recoverString(transaction.message);
+					
+					String message = transaction.message;
 					BigInteger weiAmount = transaction.weiAmount;
+					BigInteger timestamp = transaction.timestamp;
+					String transactionType = transaction.transactionType;
+					String txHash = transaction.txHash;
 
 					SenderReceiverDoubleKey srdk = new SenderReceiverDoubleKey(sender, receiver);
-					GenericTransactionData gtd = new GenericTransactionData(weiAmount, message);
+					GenericTransactionData gtd = new GenericTransactionData(sender, receiver, weiAmount, timestamp, message, transactionType, txHash);
 
 					if ( !this.genericTransactions.containsKey(srdk) )
 					{

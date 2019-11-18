@@ -127,7 +127,15 @@ class AgentsView extends PolymerElement {
                  handle-as="json"
                  on-response="_handleGenericTransactionResponse"
                  on-error="_handleError"
-                 loading="{{_working}}"></iron-ajax>           
+                 loading="{{_working}}"></iron-ajax>   
+        <iron-ajax id="ajaxGenericTxLog"
+                 method="POST"
+                 url$="[[apiEndpoint]]/agents/getGenericTxLog"
+                 handle-as="json"
+                 on-response="_handleGenericTxLogResponse"
+                 on-error="_handleError"
+                 loading="{{_working}}"></iron-ajax>         
+                 
       
 
       <style include="shared-styles iron-flex iron-positioning iron-flex-alignment">
@@ -210,6 +218,61 @@ class AgentsView extends PolymerElement {
                 </paper-button>
               </template>
             </p>
+            </template>
+
+            <template is="dom-if" if="[[!_hasNoTxLog]]">
+              <paper-tabs selected="{{_selectedTab}}">
+                <paper-tab><iron-icon icon="cloud-download"></iron-icon> TX Received</paper-tab>
+                <paper-tab><iron-icon icon="cloud-upload"></iron-icon> TX Sent</paper-tab>
+              </paper-tabs>
+
+              <iron-pages selected="{{_selectedTab}}">
+                <div>
+                  <h2><iron-icon icon="cloud-download"></iron-icon> Transactions Received</paper-tab></h2>
+                  <table width="100%">
+                    <tr>
+                      <th>Timestamp</th>
+                      <th>Sender</th>
+                      <th>TransactionType</th>
+                      <th>Message</th>
+                      <th>TransactionValue</th>
+                      <th>TXHash</th>
+                    </tr>
+                    <template is="dom-repeat" items="[[_txSentLog]]" as="tx">
+                      <tr>
+                        <td><iron-icon icon="update"></iron-icon> [[tx.txTime]]</td>
+                        <td><iron-icon icon="face"></iron-icon> [[tx.txSender]]</td>
+                        <td><iron-icon icon="class"></iron-icon> [[tx.txTransactionType]]</td>
+                        <td><iron-icon icon="speaker-notes"></iron-icon> [[tx.txMessage]]</td>
+                        <td><iron-icon icon="card-giftcard"></iron-icon> [[tx.txAmountInEth]] ETH</td>
+                        <td><iron-icon icon="fingerprint"></iron-icon> [[tx.txTXHash]]</td>
+                      </tr>
+                    </template>
+                  </table>
+                </div>
+                <div>
+                  <h2><iron-icon icon="cloud-upload"></iron-icon> Transactions Sent</paper-tab></h2>
+                  <table width="100%">
+                    <tr>
+                      <th>Timestamp</th>
+                      <th>Receiver</th>
+                      <th>TransactionType</th>
+                      <th>Message</th>
+                      <th>TransactionValue</th>
+                      <th>TXHash</th>
+                    </tr>
+                    <template is="dom-repeat" items="[[_txRcvdLog]]" as="tx">
+                      <tr>
+                        <td><iron-icon icon="update"></iron-icon> [[tx.txTime]]</td>
+                        <td><iron-icon icon="face"></iron-icon> [[tx.txReceiver]]</td>
+                        <td><iron-icon icon="class"></iron-icon> [[tx.txTransactionType]]</td>
+                        <td><iron-icon icon="speaker-notes"></iron-icon> [[tx.txMessage]]</td>
+                        <td><iron-icon icon="card-giftcard"></iron-icon> [[tx.txAmountInEth]] ETH</td>
+                        <td><iron-icon icon="fingerprint"></iron-icon> [[tx.txTXHash]]</td>
+                      </tr>
+                    </template>
+                  </table></div>
+              </iron-pages>
             </template>
           </iron-collapse>
         </template>
@@ -452,18 +515,26 @@ class AgentsView extends PolymerElement {
           username: ""
         } 
       },
+      _EthTxLog: { type: Object, 
+        value: {
+          rcvdJsonLog: [],
+          sentJsonLog: []
+        } 
+      },
       _hasEthProfile: { type: Boolean, value: false },
       _hasNoAgentsList: { type: Boolean, value: true },
       _hasNoEthWallet: { type: Boolean, value: true },
       _hasNoManageAgents: { type: Boolean, value: true },
       _hasNoMemberAgents: { type: Boolean, value: true },
       _hasNoProfilesList: { type: Boolean, value: true },
+      _hasNoTxLog: { type: Boolean, value: true },
       _isAjaxLoading: { type: Boolean, value: true },
       _listAgents: { type: Array, value: [] },
       _listProfiles: { type: Array, value: [] },
       _manageAgents: { type: Array, value: [] },
       _manageGroupAgentId: String,
       _memberAgents: { type: Array, value: [] },
+      _selectedTab: { type: Object, value: 0 }
     };
   }
 
@@ -481,7 +552,10 @@ class AgentsView extends PolymerElement {
       this.refreshEthWallet();
     }
   }
-  refreshEthWallet() { this.$.ajaxGetEthWallet.generateRequest(); }
+  refreshEthWallet() { 
+    this.$.ajaxGetEthWallet.generateRequest(); 
+    this.$.ajaxGenericTxLog.generateRequest();
+  }
   requestEthFaucet() { this.$.ajaxRequestFaucet.generateRequest(); }
   requestReputationProfile() { 
     if (this._EthWallet.ethAccBalance < 0.15) {
@@ -504,6 +578,17 @@ class AgentsView extends PolymerElement {
     if (this.agentId.length > 5 ) {
       this.refreshEthWallet();
     }
+  }
+
+  _handleGenericTxLogResponse(event) {
+    this._EthTxLog = event.detail.response;
+    console.log(_EthTxLog);
+    console.log(_EthTxLog.rcvdJsonLog.length);
+    console.log(_EthTxLog.sentJsonLog.length);
+    if (_EthTxLog.rcvdJsonLog.length == 0 && _EthTxLog.sentJsonLog.length == 0)
+      this._hasNoTxLog = true;
+    else
+      this._hasNoTxLog = false;
   }
   
   _handleLoadAgentlistResponse(event) {

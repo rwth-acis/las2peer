@@ -2,6 +2,7 @@ package i5.las2peer.registry;
 
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.registry.data.BlockchainTransactionData;
+import i5.las2peer.registry.data.GenericTransactionData;
 import i5.las2peer.registry.data.RegistryConfiguration;
 import i5.las2peer.registry.data.ServiceDeploymentData;
 import i5.las2peer.registry.data.ServiceReleaseData;
@@ -340,6 +341,14 @@ public class ReadOnlyRegistryClient {
 
 	public EthTransaction getTransactionByTxHash(String txHash) throws IOException {
 		return web3j.ethGetTransactionByHash(txHash).send();
+	}
+
+	public List<GenericTransactionData> getTransactionLogBySender(String sender) {
+		return observer.getTransactionLogBySender(sender);
+	}
+
+	public List<GenericTransactionData> getTransactionLogByReceiver(String receiver) {
+		return observer.getTransactionLogByReceiver(receiver);
 	}
 	
 	/**
