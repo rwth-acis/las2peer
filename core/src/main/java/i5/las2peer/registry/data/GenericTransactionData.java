@@ -55,7 +55,7 @@ public class GenericTransactionData {
 
     // https://stackoverflow.com/a/31112092
     public String getTime() {
-        Instant instant = Instant.ofEpochMilli(timestamp.longValue());
+        Instant instant = Instant.ofEpochMilli(this.timestamp.longValue());
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         return fmt.format(instant.atZone(ZoneId.systemDefault()));
     }

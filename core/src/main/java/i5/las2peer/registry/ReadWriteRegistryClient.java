@@ -160,11 +160,13 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		// sendEther(senderAgent.getEthereumAddress(), receivingAgent.getEthereumAddress(), weiAmount).getTransactionHash();
 		waitForTransactionReceipt(etherSendTxHash);
 		logger.info("[TX] sent funds, adding smart contract event for message and transaction type, txHash: " + etherSendTxHash);
+
+		BigInteger timestamp = BigInteger.valueOf(java.lang.System.currentTimeMillis());
 		String txHash;
 		try {
 			TransactionReceipt txR = contracts.reputationRegistry
-					.addGenericTransaction(receivingAgent.getEthereumAddress(), weiAmount, etherSendTxHash, message, "GENERIC")
-					.send();
+					.addGenericTransaction(receivingAgent.getEthereumAddress(), weiAmount, timestamp, etherSendTxHash, message, "GENERIC")
+					.sendAsync().get();
 			if (!txR.isStatusOK()) {
 				logger.warning("trx fail with status " + txR.getStatus());
 				logger.warning("gas used " + txR.getCumulativeGasUsed());
