@@ -38,8 +38,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 /**
- * Facade providing simple read-only access to the registry smart
- * contracts.
+ * Facade providing simple read-only access to the registry smart contracts.
  *
  * @see ReadWriteRegistryClient
  */
@@ -49,8 +48,8 @@ public class ReadOnlyRegistryClient {
 	Contracts.ContractsConfig contractsConfig;
 	Contracts contracts;
 	BlockchainObserver observer;
-	//long gasPrice;
-	//long gasLimit;
+	// long gasPrice;
+	// long gasLimit;
 	BigInteger gasPrice;
 	BigInteger gasLimit;
 
@@ -65,9 +64,9 @@ public class ReadOnlyRegistryClient {
 
 	/**
 	 * Create client providing access to read-only registry functions.
-	 * @param registryConfiguration addresses of registry contracts and
-	 *                              Ethereum client HTTP JSON RPC API
-	 *                              endpoint
+	 * 
+	 * @param registryConfiguration addresses of registry contracts and Ethereum
+	 *                              client HTTP JSON RPC API endpoint
 	 */
 	public ReadOnlyRegistryClient(RegistryConfiguration registryConfiguration) {
 		this(registryConfiguration, null);
@@ -82,22 +81,20 @@ public class ReadOnlyRegistryClient {
 				registryConfiguration.getReputationRegistryAddress(), registryConfiguration.getEndpoint());
 
 		observer = BlockchainObserver.getInstance(contractsConfig);
-		
+
 		long _gasPrice = registryConfiguration.getGasPrice();
 		this.gasPrice = BigInteger.valueOf(_gasPrice);
-		
+
 		long _gasLimit = registryConfiguration.getGasLimit();
 		this.gasLimit = BigInteger.valueOf(_gasLimit);
 
 		logger.info("creating smart contract wrapper with credentials:" + credentials.getAddress());
-		contracts = new Contracts.ContractsBuilder(contractsConfig)
-				.setGasOptions(_gasPrice, _gasLimit)
+		contracts = new Contracts.ContractsBuilder(contractsConfig).setGasOptions(_gasPrice, _gasLimit)
 				.setCredentials(credentials) // may be null, that's okay here
 				.build();
 
 		this.credentials = credentials;
 	}
-	
 
 	public BigInteger getGasPrice() {
 		return gasPrice;
@@ -120,8 +117,9 @@ public class ReadOnlyRegistryClient {
 
 	/**
 	 * Return version string of connected Ethereum client.
-	 * @deprecated there's no reason to reveal this implementation
-	 * 	           detail, so this may be removed
+	 * 
+	 * @deprecated there's no reason to reveal this implementation detail, so this
+	 *             may be removed
 	 */
 	// this is the only place where `web3j` is (directly) accessed
 	@Deprecated
@@ -145,8 +143,9 @@ public class ReadOnlyRegistryClient {
 	}
 
 	/**
-	 * Return true if user name is both valid and not already taken and
-	 * thus can be registered.
+	 * Return true if user name is both valid and not already taken and thus can be
+	 * registered.
+	 * 
 	 * @param name user name consisting of 1 to 32 Unicode characters
 	 */
 	public boolean usernameIsAvailable(String name) throws EthereumException {
@@ -158,11 +157,11 @@ public class ReadOnlyRegistryClient {
 	}
 
 	/**
-	 * Return true if user name is both valid, as encoded in the
-	 * registry smart contract code.
+	 * Return true if user name is both valid, as encoded in the registry smart
+	 * contract code.
 	 *
-	 * (Any non-empty String of up to 32 characters should work, but
-	 * let's not press our luck.)
+	 * (Any non-empty String of up to 32 characters should work, but let's not press
+	 * our luck.)
 	 *
 	 * @param name user name consisting of 1 to 32 Unicode characters
 	 */
@@ -176,9 +175,10 @@ public class ReadOnlyRegistryClient {
 
 	/**
 	 * Retrieve user data stored in registry for given name.
+	 * 
 	 * @param name user name consisting of 1 to 32 Unicode characters
 	 * @return user data object containing ID and owner address, or
-	 * 		   <code>null</code> if user name is not taken
+	 *         <code>null</code> if user name is not taken
 	 */
 	public UserData getUser(String name) throws EthereumException, NotFoundException {
 		Tuple4<byte[], byte[], byte[], String> userAsTuple;
@@ -211,22 +211,22 @@ public class ReadOnlyRegistryClient {
 		if (returnedAddress == "") {
 			throw new NotFoundException("User profile apparently not registered.");
 		}
-		
+
 		/*
 		 * owner userName cumulativeScore noTransactionsSent noTransactionsReceived
 		 */
-		return new UserProfileData(
-			profileAsTuple.getValue1(), // owner
-			profileAsTuple.getValue2(), // username
-			profileAsTuple.getValue3(), // score
-			profileAsTuple.getValue4(), // txsent
-			profileAsTuple.getValue5(), // txrcvd
-			profileAsTuple.getValue6() // index
+		return new UserProfileData(profileAsTuple.getValue1(), // owner
+				profileAsTuple.getValue2(), // username
+				profileAsTuple.getValue3(), // score
+				profileAsTuple.getValue4(), // txsent
+				profileAsTuple.getValue5(), // txrcvd
+				profileAsTuple.getValue6() // index
 		);
 	}
 
 	/**
 	 * Look up author/owner for a given service.
+	 * 
 	 * @param serviceName service package name
 	 * @return author owning the service name
 	 */
@@ -262,12 +262,12 @@ public class ReadOnlyRegistryClient {
 	public ConcurrentMap<String, String> getServiceAuthors() {
 		return observer.serviceNameToAuthor;
 	}
-	
+
 	/** @return map of profile owners to their usernames */
 	public ConcurrentMap<String, String> getUserProfiles() {
 		return observer.profiles;
 	}
-	
+
 	/** @return map of users to their registration time stamps */
 	public ConcurrentMap<String, String> getUserRegistrations() {
 		return observer.users;
@@ -294,21 +294,21 @@ public class ReadOnlyRegistryClient {
 	}
 
 	public Set<ServiceDeploymentData> getDeployments(String serviceName) {
-		return getDeployments().stream().filter(d -> d.getServicePackageName().equals(serviceName)).collect(Collectors.toSet());
+		return getDeployments().stream().filter(d -> d.getServicePackageName().equals(serviceName))
+				.collect(Collectors.toSet());
 	}
 
 	public Set<ServiceDeploymentData> getDeployments(String serviceName, String version) {
-		return getDeployments().stream().filter(d -> (d.getServicePackageName().equals(serviceName) && d.getVersion().equals(version))).collect(Collectors.toSet());
+		return getDeployments().stream()
+				.filter(d -> (d.getServicePackageName().equals(serviceName) && d.getVersion().equals(version)))
+				.collect(Collectors.toSet());
 	}
 
-	public String getAccountBalance(String ethereumAddress) throws EthereumException
-	{
+	public String getAccountBalance(String ethereumAddress) throws EthereumException {
 		EthGetBalance ethGetBalance = null;
 		try {
-			ethGetBalance = this.web3j
-				  .ethGetBalance(ethereumAddress, DefaultBlockParameterName.LATEST)
-				  .sendAsync()
-				  .get();
+			ethGetBalance = this.web3j.ethGetBalance(ethereumAddress, DefaultBlockParameterName.LATEST).sendAsync()
+					.get();
 		} catch (Exception e) {
 			throw new EthereumException(e);
 		}

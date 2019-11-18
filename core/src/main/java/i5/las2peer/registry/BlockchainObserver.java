@@ -8,7 +8,6 @@ import i5.las2peer.registry.data.ServiceReleaseData;
 import i5.las2peer.registry.exceptions.EthereumException;
 import io.reactivex.schedulers.Schedulers;
 import org.web3j.protocol.core.DefaultBlockParameterName;
-import org.web3j.tuples.Tuple;
 import org.web3j.utils.Convert;
 
 import java.time.Instant;

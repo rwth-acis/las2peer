@@ -8,48 +8,44 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.CookieParam;
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import i5.las2peer.api.security.UserAgent;
-import i5.las2peer.p2p.EthereumNode;
-import i5.las2peer.security.*;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.utils.Convert;
 
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
-import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.connectors.webConnector.WebConnector;
 import i5.las2peer.connectors.webConnector.util.AgentSession;
 import i5.las2peer.logging.L2pLogger;
+import i5.las2peer.p2p.EthereumNode;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.PastryNodeImpl;
-import i5.las2peer.registry.ReadOnlyRegistryClient;
 import i5.las2peer.registry.ReadWriteRegistryClient;
 import i5.las2peer.registry.data.GenericTransactionData;
-import i5.las2peer.registry.data.UserData;
 import i5.las2peer.registry.data.UserProfileData;
 import i5.las2peer.registry.exceptions.EthereumException;
 import i5.las2peer.registry.exceptions.NotFoundException;
+import i5.las2peer.security.AgentImpl;
+import i5.las2peer.security.EthereumAgent;
+import i5.las2peer.security.GroupAgentImpl;
+import i5.las2peer.security.PassphraseAgentImpl;
+import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.serialization.MalformedXMLException;
 import i5.las2peer.serialization.SerializationException;
-import i5.las2peer.testing.MockAgentFactory;
 import i5.las2peer.tools.CryptoException;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -67,14 +63,12 @@ public class AgentsHandler {
 	private final Node node;
 	private final PastryNodeImpl pastryNode;
 	private final EthereumNode ethereumNode;
-	private final ReadOnlyRegistryClient registry;
 
 	public AgentsHandler(WebConnector connector) {
 		this.connector = connector;
 		this.node = connector.getL2pNode();
 		pastryNode = (node instanceof PastryNodeImpl) ? (PastryNodeImpl) node : null;
 		ethereumNode = (node instanceof EthereumNode) ? (EthereumNode) node : null;
-		registry = (node instanceof EthereumNode) ? ethereumNode.getRegistryClient() : null;
 	}
 
 	@POST
@@ -541,20 +535,7 @@ public class AgentsHandler {
 			return Response.status(Status.FORBIDDEN).entity("You have to be logged in to load a group").build();
 		}
 		*/
-		Random rand = new Random();
-		//GroupAgentImpl groupAgent = MockAgentFactory.getGroup3();
-		UserAgentImpl adamAgent = MockAgentFactory.getAdam();
-		UserAgentImpl eveAgent = MockAgentFactory.getEve();
-		UserAgentImpl abelAgent = MockAgentFactory.getAbel();
-		
-		//UserAgentImpl[] agents = { adamAgent, eveAgent, abelAgent };
 		List<EthereumAgent> agents = new ArrayList<EthereumAgent>();
-		//agents.add(adamAgent);
-		//agents.add(eveAgent);
-		//agents.add(abelAgent);
-		
-		//observer.getUserProfiles();
-		//ConcurrentMap<String, String> profiles = ethereumNode.getRegistryClient().getUserProfiles();
 		ConcurrentMap<String, String> userRegistrations = ethereumNode.getRegistryClient().getUserRegistrations();
 		
 		for( Map.Entry<String, String> userRegistration : userRegistrations.entrySet() )
@@ -598,7 +579,6 @@ public class AgentsHandler {
 			
 			member.put("username", agent.getLoginName());
 			member.put("email", agent.getEmail());
-			member.put("rating", rand.nextInt(6));
 			
 			memberList.add(member);
 		}
