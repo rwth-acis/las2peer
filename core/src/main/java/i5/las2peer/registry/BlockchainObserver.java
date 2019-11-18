@@ -202,10 +202,15 @@ class BlockchainObserver {
 
 	public List<GenericTransactionData> getTransactionLogBySender(String sender) {
 		List<GenericTransactionData> transactionList = new ArrayList<>();
-		for (SenderReceiverDoubleKey key : genericTransactions.keySet()) {
-			if ( key.equalsSender(sender) )
+		logger.info("[TXLOG] searching for sender: " + sender);
+		Set<SenderReceiverDoubleKey> transactions = genericTransactions.keySet();
+		for (SenderReceiverDoubleKey key : transactions) {
+			logger.info("[TXLOG] analyzing key: " + key.toString());
+			logger.info("[TXLOG] " + key.getSender() + "|" + sender);
+			if ( key.equalsSender(sender) || key.getSender() == sender )
 			{
 				List<GenericTransactionData> keyTransactionList = genericTransactions.get(key);
+				logger.info("[TXLOG] match found! " + keyTransactionList.size() + " entries");
 				for (GenericTransactionData genericTransactionData : keyTransactionList) {
 					transactionList.add(genericTransactionData);
 				}
@@ -217,9 +222,15 @@ class BlockchainObserver {
 
 	public List<GenericTransactionData> getTransactionLogByReceiver(String receiver) {
 		List<GenericTransactionData> transactionList = new ArrayList<>();
-		for (SenderReceiverDoubleKey key : genericTransactions.keySet()) {
-			if (key.equalsReceiver(receiver)) {
+		logger.info("[TXLOG] searching for receiver: " + receiver);
+		Set<SenderReceiverDoubleKey> transactions = genericTransactions.keySet();
+		for (SenderReceiverDoubleKey key : transactions) {
+			logger.info("[TXLOG] analyzing key: " + key.toString());
+			logger.info("[TXLOG] " + key.getReceiver() + "|" + receiver);
+			if (key.equalsReceiver(receiver) || key.getReceiver() == receiver) 
+			{
 				List<GenericTransactionData> keyTransactionList = genericTransactions.get(key);
+				logger.info("[TXLOG] match found! " + keyTransactionList.size() + " entries");
 				for (GenericTransactionData genericTransactionData : keyTransactionList) {
 					transactionList.add(genericTransactionData);
 				}

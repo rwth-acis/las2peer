@@ -15,12 +15,12 @@ public class SenderReceiverDoubleKey {
 
     public boolean equalsSender(String sender)
     {
-        return this.sender == sender;
+        return this.sender.equals(sender);
     }
 
     public boolean equalsReceiver(String receiver)
     {
-        return this.receiver == receiver;
+        return this.receiver.equals(receiver);
     }
 
     public void setSender(String sender) {
@@ -36,16 +36,21 @@ public class SenderReceiverDoubleKey {
     }
 
     @Override   
-   public boolean equals(Object obj) {
+    public boolean equals(Object obj) {
       if (!(obj instanceof SenderReceiverDoubleKey))
         return false;
       SenderReceiverDoubleKey ref = (SenderReceiverDoubleKey) obj;
       return this.sender.equals(ref.sender) && 
           this.receiver.equals(ref.receiver);
-   }
+    }
 
     @Override
     public int hashCode() {
         return sender.hashCode() ^ receiver.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "Sender: " + sender + " | " + "Receiver: " + receiver;
     }
 }
