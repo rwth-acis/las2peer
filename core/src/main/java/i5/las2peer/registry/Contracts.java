@@ -270,43 +270,28 @@ class Contracts {
 				return new ReadonlyTransactionManager(web3j, DEFAULT_FROM_ADDRESS);
 			} else {
 
-				// QueuingTrasaction Processor is necessary because otherwise, 
-				// sending a transaction while another is pending causes "nonce too low"
-				// see: 
+				// FIXME: "nonce too low" error still occurs
+				// it only seems to happen on the first couple of announcements, meaning it's
+				// not really a problem
+				// bit still, it should be fixed
+				//
+				// see:
 				// https://ethereum.stackexchange.com/questions/63818/quick-web3j-transactions-to-the-same-destination-address-results-in-replacement
 				// https://ethereum.stackexchange.com/questions/34502/how-could-i-send-transactions-continuously-by-web3j-generated-wrapper
-				// https://kb.myetherwallet.com/en/transactions/what-is-nonce/
-				// https://github.com/web3j/web3j/blob/5001c05f6165d24a3df95760ea8ed8343faf46c4/integration-tests/src/test/java/org/web3j/protocol/scenarios/FastRawTransactionManagerIT.java#L100
-				
-				RawTransactionManager transactionManager = new StaticNonceRawTransactionManager(
-					web3j, credentials, 
-					new QueuingTransactionReceiptProcessor(web3j,
-						new Callback() {
-							@Override
-							public void accept(TransactionReceipt transactionReceipt) {
-								Contracts.logger.info("[TX-LOG] tx receipt got for " + transactionReceipt.getTransactionHash());
-								Contracts.addTransactionReceipt(transactionReceipt);
-							}
-							@Override
-							public void exception(Exception e) {
-								e.printStackTrace();
-							}
-						}, 
-					DEFAULT_POLLING_ATTEMPTS_PER_TX_HASH, POLLING_FREQUENCY)
-					);
-				
-
-				// schedule polling, will be created on first creation of contracts
-				// https://www.baeldung.com/java-delay-code-execution
-				Contracts.isPolling = true;
-				Contracts.executorService.scheduleAtFixedRate(() -> {
-					try {
-						Contracts.pollTransactionList();
-					} catch (EthereumException e) {
-						Contracts.isPolling = false;
-						e.printStackTrace();
-					}
-				}, 0, POLLING_FREQUENCY, TimeUnit.MILLISECONDS);
+				//
+				// unfortunately, this is not working yet. the timeouts should be plenty:
+				// service announcements every 30 secs with polling 3 secs should be perfectly
+				// fine, but it's not.
+				// so let's reduce this. whatever.
+				//
+				// okay, frankly, I'm not even sure if this can fix the nonce too low error (but
+				// that's what the issue / StackEx suggest)
+				long pollingIntervalMillisecs = 1000;
+				int attempts = 90;
+				TransactionReceiptProcessor receiptProcessor = new PollingTransactionReceiptProcessor(web3j,
+						pollingIntervalMillisecs, attempts);
+				RawTransactionManager transactionManager = new StaticNonceRawTransactionManager(web3j, credentials,
+						receiptProcessor);
 
 				// txHashVerification throws false alarms (not sure why), disable check
 				// TODO: figure out what's going and and reenable
