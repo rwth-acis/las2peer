@@ -198,7 +198,7 @@ class Contracts {
 				long pollingIntervalMillisecs = 1000;
 				int attempts = 90;
 				TransactionReceiptProcessor receiptProcessor = new PollingTransactionReceiptProcessor(web3j, pollingIntervalMillisecs, attempts);
-				RawTransactionManager transactionManager = new FastRawTransactionManager(web3j, credentials, receiptProcessor);
+				RawTransactionManager transactionManager = new StaticNonceRawTransactionManager(web3j, credentials, receiptProcessor);
 
 				// txHashVerification throws false alarms (not sure why), disable check
 				// TODO: figure out what's going and and reenable

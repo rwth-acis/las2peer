@@ -356,10 +356,25 @@ public class ReadOnlyRegistryClient {
 	 * @throws ExecutionException
 	 */
 	public BigInteger getNonce(String address) throws InterruptedException, ExecutionException {
-		EthGetTransactionCount ethGetTransactionCount = 
-				web3j.ethGetTransactionCount(address, DefaultBlockParameterName.PENDING).sendAsync().get();
+		EthGetTransactionCount ethGetTransactionCount = web3j
+				.ethGetTransactionCount(address, DefaultBlockParameterName.PENDING).sendAsync().get();
 
-		return ethGetTransactionCount.getTransactionCount();
+		// synchronize between blockchain nonce and static internal nonce
+		// this is necessary because the faucet code and sending ether is used via raw
+		// transactions
+		// and the contract calls (e.g. registration, reputation) are done via managed
+		// transactions
+		String credentialAddress = credentials.getAddress();
+		BigInteger blockchainNonce = ethGetTransactionCount.getTransactionCount();
+		BigInteger staticNonce = StaticNonceRawTransactionManager.getStaticNonce(credentialAddress);
+		int compare = staticNonce.compareTo(blockchainNonce);
+		if (compare == -1) {
+			StaticNonceRawTransactionManager.setStaticNonce(credentialAddress, blockchainNonce.add(BigInteger.ONE));
+		} else if (compare == 1) {
+			StaticNonceRawTransactionManager.incStaticNonce(credentialAddress);
+			return staticNonce.add(BigInteger.ONE);
+		}
+		return blockchainNonce;
 	}
 	
 	/**
