@@ -224,26 +224,22 @@ public class EthereumNode extends PastryNodeImpl {
 	 * author, if those have not already happened.
 	 */
 	public void registerServiceInBlockchain(String serviceName, String serviceVersion, EthereumAgent author, byte[] supplementHash)
-			throws AgentException, SerializationException {
+			throws AgentException, SerializationException, EthereumException {
 		if (author.isLocked()) {
 			throw new AgentLockedException("Cannot register service because Ethereum-enabled agent is locked.");
 		}
 
-		try {
-			boolean serviceAlreadyRegistered = getRegistryClient().getServiceNames().contains(serviceName);
-			if (serviceAlreadyRegistered) {
-				if (!isServiceOwner(author.getLoginName(), serviceName)) {
-					throw new AgentException("Service is already registered to someone else, cannot register!");
-				}
-			} else {
-				registerServiceName(serviceName, author);
+		boolean serviceAlreadyRegistered = getRegistryClient().getServiceNames().contains(serviceName);
+		if (serviceAlreadyRegistered) {
+			if (!isServiceOwner(author.getLoginName(), serviceName)) {
+				throw new AgentException("Service is already registered to someone else, cannot register!");
 			}
-
-			logger.info("Registering service release '" + serviceName + "', v" + serviceVersion + " ...");
-			getRegistryClient().releaseService(serviceName, serviceVersion, author, supplementHash);
-		} catch (EthereumException e) {
-			logger.severe("FIXME Error while registering release: " + e);
+		} else {
+			registerServiceName(serviceName, author);
 		}
+
+		logger.info("Registering service release '" + serviceName + "', v" + serviceVersion + " ...");
+		getRegistryClient().releaseService(serviceName, serviceVersion, author, supplementHash);
 	}
 
 	private boolean isServiceOwner(String authorName, String serviceName) throws EthereumException {

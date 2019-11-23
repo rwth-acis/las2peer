@@ -28,6 +28,7 @@ import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.p2p.EthereumNode;
 import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.persistency.EnvelopeVersion;
+import i5.las2peer.registry.exceptions.EthereumException;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.EthereumAgent;
 import i5.las2peer.security.PassphraseAgentImpl;
@@ -79,7 +80,11 @@ public class PackageUploader {
 			JarInputStream jarInputStream = new JarInputStream(inputStream)
 		) {
 			uploadServicePackage(node, jarInputStream, devAgent, supplement);
-		} catch (IOException e) {
+		} 
+		catch (EthereumException e) {
+			logger.log(Level.SEVERE, "Exception while publishing service to Blockchain", e);
+		}
+		catch (IOException e) {
 			logger.log(Level.SEVERE, "Exception while reading jar file", e);
 		}
 	}
@@ -95,7 +100,7 @@ public class PackageUploader {
 	 * @throws ServicePackageException If an issue occurs with the service jar itself or its dependencies (jars).
 	 */
 	public static void uploadServicePackage(PastryNodeImpl node, JarInputStream jarInputStream, AgentImpl devAgent,
-			String supplement) throws ServicePackageException, EnvelopeAlreadyExistsException {
+			String supplement) throws ServicePackageException, EnvelopeAlreadyExistsException, EthereumException {
 		try {
 			long uploadStart = System.currentTimeMillis();
 			// read general service information from jar manifest
@@ -165,7 +170,7 @@ public class PackageUploader {
 
 	public static void uploadServicePackage(PastryNodeImpl node, String serviceName, String serviceVersion,
 			Map<String, byte[]> depHashes, Map<String, byte[]> jarFiles, AgentImpl devAgent, String supplement)
-			throws SerializationException, CryptoException, EnvelopeException, ServicePackageException, AgentException {
+			throws SerializationException, CryptoException, EnvelopeException, ServicePackageException, AgentException, EthereumException {
 		if (serviceName == null) {
 			throw new ServicePackageException("No service name given");
 		} else if (serviceVersion == null) {
@@ -183,7 +188,7 @@ public class PackageUploader {
 
 	private static void registerService(EthereumNode node, String serviceName, String serviceVersion,
 			AgentImpl devAgent, String supplement)
-			throws AgentException, EnvelopeException, CryptoException, SerializationException {
+			throws AgentException, EnvelopeException, CryptoException, SerializationException, EthereumException {
 		if (!(devAgent instanceof EthereumAgent)) {
 			throw new AgentException("Cannot use non-Ethereum agent to upload services on this Ethereum-enabled node!");
 		}
