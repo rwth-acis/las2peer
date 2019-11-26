@@ -1,4 +1,4 @@
-![las2peer](https://rwth-acis.github.io/las2peer/logo/vector/las2peer-logo.svg)
+![las2peer](img/logo/bitmap/las2peer-logo-128x128.png)
 
 # [![Build Status](https://jenkins.dbis.rwth-aachen.de/buildStatus/icon?job=las2peer%20Core)](https://jenkins.dbis.rwth-aachen.de/job/las2peer%20Core/) [![Build Status](https://travis-ci.org/rwth-acis/las2peer.svg?branch=master)](https://travis-ci.org/rwth-acis/las2peer) [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/rwth-acis/las2peer)
 

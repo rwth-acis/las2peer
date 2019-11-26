@@ -19,6 +19,7 @@
 		<ant dir="restmapper" antfile="build.xml" target="all" />
 		<ant dir="webconnector" antfile="build.xml" target="all" />
 		<ant dir="bundle" antfile="build.xml" target="all" />
+		<antcall target="deploy_javadoc" />
 	</target>
 
 	<target name="all-no-bundle" depends="clean, build-only-no-bundle" description="all">
