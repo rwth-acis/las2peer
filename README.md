@@ -81,5 +81,5 @@ JavaDocs of the latest release can be found online:
 
 ## CI
 
-Every commit to the develop branch is build by Jenkins and be published as a snapshot to our Archiva.
+Every commit to the develop branch is built by Jenkins and will be published as a snapshot to our Archiva.
 Releases are drafted from the master branch.
