@@ -1,5 +1,13 @@
 package i5.las2peer.logging.monitoring;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import i5.las2peer.api.execution.ServiceInvocationException;
 import i5.las2peer.api.logging.MonitoringEvent;
 import i5.las2peer.api.security.AgentException;
@@ -15,8 +23,6 @@ import i5.las2peer.security.MonitoringAgent;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.CryptoException;
 
-import java.util.concurrent.*;
-
 /**
  * 
  * This is the base class of the logging module of las2peer. It sends the collected data to the "Monitoring Data
@@ -27,7 +33,7 @@ import java.util.concurrent.*;
  */
 public class MonitoringObserver implements NodeObserver {
 
-	public static final String DATA_PROCESSING_SERVICE = "i5.las2peer.services.mobsos.dataProcessing.MonitoringDataProcessingService";
+	public static final String DATA_PROCESSING_SERVICE = "i5.las2peer.services.mobsos.dataProcessing.MobSOSDataProcessingService";
 	private static final int RMI_TIMEOUT = 5;
 	private boolean readyForInitializing = true; // Is set to false as long as the node is not ready to initialize the
 													// monitoring agents.
@@ -56,6 +62,7 @@ public class MonitoringObserver implements NodeObserver {
 		this.registeredAt = registeredAt;
 		waitUntilSend = 1000 * 10; // 10 s
 		Thread sendingThread = new Thread() {
+			@Override
 			public void run() {
 				try {
 					while (true) {
@@ -98,7 +105,6 @@ public class MonitoringObserver implements NodeObserver {
 			e.printStackTrace();
 		}
 	}
-
 
 	private void checkInit() {
 		if (readyForInitializing) {
@@ -149,28 +155,27 @@ public class MonitoringObserver implements NodeObserver {
 	/**
 	 * Try to fetch the agent ID of the processing service.
 	 * <p>
-	 * In rare cases this method invocation might cause a deadlock,
-	 * because the processing service is not fully booted up.
-	 * To avoid this we set a timeout on the method invocation. This is what the service executor is for.
+	 * In rare cases this method invocation might cause a deadlock, because the processing service is not fully booted
+	 * up. To avoid this we set a timeout on the method invocation. This is what the service executor is for.
 	 *
 	 * @return The agent ID of the processing service.
 	 * @throws ServiceInvocationException Any exception is converted to a ServiceInvocationException in order to behave
-	 *                                    like the invoke method.
+	 *             like the invoke method.
 	 */
 	private String getReceivingAgentID() throws ServiceInvocationException {
 		ExecutorService executor = Executors.newCachedThreadPool();
 		Callable<String> task = () -> {
-			String[] testParameters = {"Node " + registeredAt.getNodeId() + " registered observer!"};
-			return (String) registeredAt.invoke(sendingAgent, DATA_PROCESSING_SERVICE,
-					"getReceivingAgentId", testParameters);
+			String[] testParameters = { "Node " + registeredAt.getNodeId() + " registered observer!" };
+			return (String) registeredAt.invoke(sendingAgent, DATA_PROCESSING_SERVICE, "getReceivingAgentId",
+					testParameters);
 		};
 		Future<String> future = executor.submit(task);
 		try {
 			return future.get(RMI_TIMEOUT, TimeUnit.SECONDS);
 		} catch (TimeoutException | InterruptedException | ExecutionException ex) {
 			future.cancel(true);
-			throw new ServiceInvocationException("Monitoring: Could not fetch monitoring service agent. " +
-					"The monitoring service is either offline or still booting.", ex);
+			throw new ServiceInvocationException("Monitoring: Could not fetch monitoring service agent. "
+					+ "The monitoring service is either offline or still booting.", ex);
 		}
 	}
 
@@ -183,7 +188,7 @@ public class MonitoringObserver implements NodeObserver {
 	 */
 	@Override
 	public void log(Long timestamp, MonitoringEvent event, String sourceNode, String sourceAgentId,
-					String destinationNode, String destinationAgentId, String remarks) {
+			String destinationNode, String destinationAgentId, String remarks) {
 		if (sourceNode == null) {
 			return; // We do not log events without a source node into a database with different sources;-)
 		}
@@ -273,8 +278,8 @@ public class MonitoringObserver implements NodeObserver {
 				@Override
 				public void notifyException(Exception exception) {
 					resetReceivingAgent();
-					System.out.println("Monitoring: message " + las2peerMessage.getId() +
-							" encountered an exception: " + exception.getMessage());
+					System.out.println("Monitoring: message " + las2peerMessage.getId() + " encountered an exception: "
+							+ exception.getMessage());
 				}
 
 				@Override

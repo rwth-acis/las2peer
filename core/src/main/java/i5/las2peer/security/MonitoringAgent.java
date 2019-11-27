@@ -32,7 +32,7 @@ import i5.las2peer.tools.CryptoTools;
  */
 public class MonitoringAgent extends PassphraseAgentImpl {
 
-	public static final String PROCESSING_SERVICE_CLASS_NAME = "i5.las2peer.services.mobsos.dataProcessing.MonitoringDataProcessingService";
+	public static final String PROCESSING_SERVICE_CLASS_NAME = "i5.las2peer.services.mobsos.dataProcessing.MobSOSDataProcessingService";
 
 	/**
 	 * 
