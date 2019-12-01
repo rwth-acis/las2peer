@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 
@@ -26,6 +27,7 @@ import javax.ws.rs.core.Response.Status;
 
 import i5.las2peer.api.security.UserAgent;
 import i5.las2peer.p2p.EthereumNode;
+import i5.las2peer.registry.data.ServiceDeploymentData;
 import i5.las2peer.security.*;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
@@ -248,6 +250,41 @@ public class EthereumHandler {
 
         return thisJSON;
     
+	}
+
+	@GET
+	@Path("/getServicesByAgent")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getServicesByAgent(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId)
+	{
+		AgentSession session = connector.getSessionById(sessionId);
+		if (session == null) {
+			return Response.status(Status.FORBIDDEN).entity("You have to be logged in").build();
+		}
+		AgentImpl agent = session.getAgent();
+		if (!(agent instanceof EthereumAgent)) {
+			return Response.status(Status.FORBIDDEN).entity("Must be EthereumAgent").build();
+		}
+		// get session eth agent
+		EthereumAgent ethAgent = (EthereumAgent) agent;
+		String agentId = ethAgent.getIdentifier();
+		JSONObject json = new JSONObject();
+		
+		ConcurrentMap<String, String> serviceAuthors = ethereumNode.getRegistryClient().getServiceAuthors();
+
+		
+		List<String> serviceMap = new ArrayList<String>();
+		for(Map.Entry<String,String> entry : serviceAuthors.entrySet())
+		{
+			if ( entry.getValue().equals( agentId ) )
+			{
+				serviceMap.add(entry.getKey());
+			}
+		}
+		json.put("services", serviceMap);
+		
+
+		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
 	}
 
 	@POST
