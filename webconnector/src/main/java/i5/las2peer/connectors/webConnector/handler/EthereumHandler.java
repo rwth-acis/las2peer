@@ -267,7 +267,7 @@ public class EthereumHandler {
 		}
 		// get session eth agent
 		EthereumAgent ethAgent = (EthereumAgent) agent;
-		String agentId = ethAgent.getIdentifier();
+		String agentName = ethAgent.getLoginName();
 		JSONObject json = new JSONObject();
 		
 		ConcurrentMap<String, String> serviceAuthors = ethereumNode.getRegistryClient().getServiceAuthors();
@@ -276,7 +276,7 @@ public class EthereumHandler {
 		List<String> serviceMap = new ArrayList<String>();
 		for(Map.Entry<String,String> entry : serviceAuthors.entrySet())
 		{
-			if ( entry.getValue().equals( agentId ) )
+			if ( entry.getValue().equals( agentName ) )
 			{
 				serviceMap.add(entry.getKey());
 			}
