@@ -338,11 +338,19 @@ public class NodeInformation implements XmlAble {
 							// XXX logging
 							continue;
 						}
-						Element service = (Element) serviceNode;
-						if (!service.getTagName().equals("serviceClass")) {
-							throw new MalformedXMLException(service + " is not a service class element");
+
+						if (!( serviceNode instanceof Element ) )
+						{
+							serviceClasses.add(serviceNode.getTextContent());
 						}
-						serviceClasses.add(service.getTextContent());
+						else
+						{
+							Element service = (Element) serviceNode;
+							if (!service.getTagName().equals("serviceClass")) {
+								throw new MalformedXMLException(service + " is not a service class element");
+							}
+							serviceClasses.add(service.getTextContent());
+						}
 					}
 
 					result.hostedServices = serviceClasses.toArray(new ServiceNameVersion[0]);
