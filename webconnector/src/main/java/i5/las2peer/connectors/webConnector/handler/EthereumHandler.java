@@ -271,10 +271,20 @@ public class EthereumHandler {
 			NodeInformation nodeInfo;
 			try {
 				nodeInfo = ethereumNode.getNodeInformation(nodeHandle);
-				nodeMap.add(
-					nodeHandle.getNodeId() + " | " + nodeHandle.getId() + "\n"
-					+ nodeInfo.getAdminName() + " | " + nodeInfo.getAdminEmail()
-				);
+				if ( nodeInfo.getAdminEmail() == null )
+				{
+					nodeMap.add(
+						nodeHandle.getNodeId() + " | " + nodeHandle.getId() + "\n" +
+						"node information not found."
+					);
+				}
+				else
+				{
+					nodeMap.add(
+						nodeHandle.getNodeId() + " | " + nodeHandle.getId() + "\n"
+						+ nodeInfo.getAdminName() + " | " + nodeInfo.getAdminEmail()
+					);
+				}
 			} catch (NodeNotFoundException e) {
 				logger.severe("trying to access node " + nodeHandle.getNodeId() + " | " + nodeHandle.getId());
 				return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Trying to get nodeInformation failed: node not found").build();
