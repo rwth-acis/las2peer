@@ -139,7 +139,7 @@ class NodeFrontend extends PolymerElement {
             <services-view name="view-services" api-endpoint="[[apiEndpoint]]" agent-id="[[_agentId]]" error="{{_error}}"></services-view>
             <service-publish-view name="publish-service" api-endpoint="[[apiEndpoint]]" agent-id="[[_agentId]]" error="{{_error}}"></service-publish-view>
             <agents-view name="agent-tools" api-endpoint="[[apiEndpoint]]" agent-id="[[_agentId]]" error="{{_error}}"></agents-view>
-            <eth-view name="agent-tools" api-endpoint="[[apiEndpoint]]" agent-id="[[_agentId]]" error="{{_error}}"></eth-view>
+            <eth-view name="eth-tools" api-endpoint="[[apiEndpoint]]" agent-id="[[_agentId]]" error="{{_error}}"></eth-view>
             <my-view404 name="view404"></my-view404>
           </iron-pages>
         </div>
