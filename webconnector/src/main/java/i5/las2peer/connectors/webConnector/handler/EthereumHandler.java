@@ -97,11 +97,11 @@ public class EthereumHandler {
 	}
 
 	private JSONObject addAgentDetailsToJson(AgentImpl agent, JSONObject json)
-			throws EthereumException, NotFoundException
-	{
+			throws EthereumException, NotFoundException {
 		// don't add mnemonic ( = defaults to false, override to true )
 		return this.addAgentDetailsToJson(agent, json, false);
 	}
+
 	private JSONObject addAgentDetailsToJson(AgentImpl agent, JSONObject json, Boolean addMnemonic)
 			throws EthereumException, NotFoundException {
 		json.put("agentid", agent.getIdentifier());
@@ -110,12 +110,10 @@ public class EthereumHandler {
 			json.put("username", userAgent.getLoginName());
 			json.put("email", userAgent.getEmail());
 		}
-		if (agent instanceof EthereumAgent) 
-		{
+		if (agent instanceof EthereumAgent) {
 			EthereumAgent ethAgent = (EthereumAgent) agent;
 			String ethAddress = ethAgent.getEthereumAddress();
-			if ( ethAddress.length() > 0 )
-			{
+			if (ethAddress.length() > 0) {
 				json.put("ethAgentAddress", ethAddress);
 				String accBalance = ethereumNode.getRegistryClient().getAccountBalance(ethAddress);
 				json.put("ethAccBalance", accBalance);
@@ -127,12 +125,9 @@ public class EthereumHandler {
 						json.put("ethCumulativeScore", upd.getCumulativeScore().toString());
 						json.put("ethNoTransactionsSent", upd.getNoTransactionsSent().toString());
 						json.put("ethNoTransactionsRcvd", upd.getNoTransactionsRcvd().toString());
-						if ( upd.getNoTransactionsRcvd().compareTo(BigInteger.ZERO) == 0 )
-						{
+						if (upd.getNoTransactionsRcvd().compareTo(BigInteger.ZERO) == 0) {
 							json.put("ethRating", 0);
-						}
-						else
-						{
+						} else {
 							json.put("ethRating", upd.getCumulativeScore().divide(upd.getNoTransactionsRcvd()));
 						}
 					} else {
@@ -141,32 +136,31 @@ public class EthereumHandler {
 						json.put("ethNoTransactionsSent", "???");
 						json.put("ethNoTransactionsRcvd", "???");
 					}
-				}
-				catch (EthereumException| NotFoundException e)
-				{
+				} catch (EthereumException | NotFoundException e) {
 					e.printStackTrace();
 				}
 
 			}
-			
+
 			json.put("ethAgentCredentialsAddress", ethAddress);
-			
-			if ( addMnemonic && !agent.isLocked())
-			{
+
+			if (addMnemonic && !agent.isLocked()) {
 				json.put("ethMnemonic", ethAgent.getEthereumMnemonic());
 			}
-			
-			
-			//UserData ethUser = ethereumNode.getRegistryClient().getUser(ethAgent.getLoginName());
-			//if ( ethUser != null ) { json.put("eth-user-address", ethUser.getOwnerAddress()); }
+
+			// UserData ethUser =
+			// ethereumNode.getRegistryClient().getUser(ethAgent.getLoginName());
+			// if ( ethUser != null ) { json.put("eth-user-address",
+			// ethUser.getOwnerAddress()); }
 		}
 		return json;
 	}
-	
+
 	@POST
 	@Path("/requestFaucet")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response handlerequestFaucet(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId) //throws Exception
+	public Response handlerequestFaucet(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId) // throws
+																											// Exception
 	{
 		AgentSession session = connector.getSessionById(sessionId);
 		if (session == null) {
@@ -176,7 +170,7 @@ public class EthereumHandler {
 		if (!(agent instanceof EthereumAgent)) {
 			return Response.status(Status.FORBIDDEN).entity("Must be EthereumAgent").build();
 		}
-		
+
 		ReadWriteRegistryClient registryClient = ethereumNode.getRegistryClient();
 		EthereumAgent ethAgent = (EthereumAgent) agent;
 		String ethAddress = ethAgent.getEthereumAddress();
@@ -185,38 +179,36 @@ public class EthereumHandler {
 		json.put("agentid", agent.getIdentifier());
 		json.put("eth-target-add", ethAddress);
 		json.put("eth-faucet-amount", "0.8 ETH");
-		
+
 		TransactionReceipt txR = null;
-		
+
 		try {
 			txR = registryClient.sendEtherFromCoinbase(ethAddress, faucetAmount);
 		} catch (EthereumException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		if ( txR == null || !txR.isStatusOK() )
-		{
+
+		if (txR == null || !txR.isStatusOK()) {
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Transaction receipt not OK").build();
 		}
-		
-		//Web3jUtils.weiToEther(gasUsed.multiply(Web3jConstants.GAS_PRICE))
+
+		// Web3jUtils.weiToEther(gasUsed.multiply(Web3jConstants.GAS_PRICE))
 		BigInteger gasUsed = txR.getCumulativeGasUsed();
-		
+
 		json.put("eth-gas-used", registryClient.weiToEther(gasUsed.multiply(registryClient.getGasPrice())).toString());
-		
-		
-		json.put("code", Status.OK.getStatusCode());		
+
+		json.put("code", Status.OK.getStatusCode());
 		json.put("text", Status.OK.getStatusCode() + " - Faucet triggered. Amount transferred");
-		
-		
+
 		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
 	}
-	
+
 	@POST
 	@Path("/getEthWallet")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response handleGetWallet(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId) //throws Exception
+	public Response handleGetWallet(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId) // throws
+																										// Exception
 	{
 		JSONObject json = new JSONObject();
 
@@ -224,36 +216,36 @@ public class EthereumHandler {
 		if (session == null) {
 			return Response.status(Status.FORBIDDEN).entity("You have to be logged in").build();
 		}
-		
+
 		AgentImpl agent = session.getAgent();
 		try {
 			json = addAgentDetailsToJson(agent, json, true);
-			
+
 		} catch (EthereumException e) {
 			return Response.status(Status.NOT_FOUND).entity("Agent not found").build();
 		} catch (NotFoundException e) {
 			return Response.status(Status.NOT_FOUND).entity("Username not registered").build();
 		}
-		
+
 		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
 	}
 
 	private JSONObject transactionDataToJSONObject(GenericTransactionData genericTransactionData) {
-		    
-        JSONObject thisJSON = new JSONObject();
 
-        thisJSON.put("txSender", genericTransactionData.getSender());
-        thisJSON.put("txReceiver", genericTransactionData.getReceiver());
-        thisJSON.put("txMessage", genericTransactionData.getMessage());
-        thisJSON.put("txAmountInWei", genericTransactionData.getAmountInWei() );
-        thisJSON.put("txAmountInEth", genericTransactionData.getAmountInEth());
-        thisJSON.put("txTXHash", genericTransactionData.getTXHash() );
-        thisJSON.put("txTimestamp", genericTransactionData.getTimestamp() );
-        thisJSON.put("txDateTime", genericTransactionData.getTime());
-        thisJSON.put("txTransactionType", genericTransactionData.getTransactionType() );
+		JSONObject thisJSON = new JSONObject();
 
-        return thisJSON;
-    
+		thisJSON.put("txSender", genericTransactionData.getSender());
+		thisJSON.put("txReceiver", genericTransactionData.getReceiver());
+		thisJSON.put("txMessage", genericTransactionData.getMessage());
+		thisJSON.put("txAmountInWei", genericTransactionData.getAmountInWei());
+		thisJSON.put("txAmountInEth", genericTransactionData.getAmountInEth());
+		thisJSON.put("txTXHash", genericTransactionData.getTXHash());
+		thisJSON.put("txTimestamp", genericTransactionData.getTimestamp());
+		thisJSON.put("txDateTime", genericTransactionData.getTime());
+		thisJSON.put("txTransactionType", genericTransactionData.getTransactionType());
+
+		return thisJSON;
+
 	}
 
 	@GET
