@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +42,8 @@ import i5.las2peer.connectors.webConnector.WebConnector;
 import i5.las2peer.connectors.webConnector.util.AgentSession;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.p2p.Node;
+import i5.las2peer.p2p.NodeInformation;
+import i5.las2peer.p2p.NodeNotFoundException;
 import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.registry.ReadOnlyRegistryClient;
 import i5.las2peer.registry.ReadWriteRegistryClient;
@@ -57,6 +60,7 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
+import rice.pastry.NodeHandle;
 
 @Path(EthereumHandler.RESOURCE_PATH)
 public class EthereumHandler {
@@ -253,10 +257,9 @@ public class EthereumHandler {
 	}
 
 	@GET
-	@Path("/getServicesByAgent")
+	@Path("/getServices")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getServicesByAgent(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId)
-	{
+	public Response getServices(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId) {
 		AgentSession session = connector.getSessionById(sessionId);
 		if (session == null) {
 			return Response.status(Status.FORBIDDEN).entity("You have to be logged in").build();
@@ -269,7 +272,24 @@ public class EthereumHandler {
 		EthereumAgent ethAgent = (EthereumAgent) agent;
 		String agentName = ethAgent.getLoginName();
 		JSONObject json = new JSONObject();
-		
+
+		List<String> nodeMap = new ArrayList<String>();
+		Collection<NodeHandle> otherKnownNodes = ethereumNode.getPastryNode().getLeafSet().getUniqueSet();
+		for (NodeHandle nodeHandle : otherKnownNodes) {
+			NodeInformation nodeInfo;
+			try {
+				nodeInfo = ethereumNode.getNodeInformation(nodeHandle);
+				nodeMap.add(
+					nodeHandle.getNodeId() + " | " + nodeHandle.getId() + "\n"
+					+ nodeInfo.getAdminName() + " | " + nodeInfo.getAdminEmail()
+				);
+			} catch (NodeNotFoundException e) {
+				logger.severe("trying to access node " + nodeHandle.getNodeId() + " | " + nodeHandle.getId());
+				return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Trying to get nodeInformation failed: node not found").build();
+			}
+		}
+		json.put("nodes", nodeMap);
+
 		ConcurrentMap<String, String> serviceAuthors = ethereumNode.getRegistryClient().getServiceAuthors();
 
 		
