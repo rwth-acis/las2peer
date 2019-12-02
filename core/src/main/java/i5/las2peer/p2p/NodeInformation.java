@@ -3,6 +3,8 @@ package i5.las2peer.p2p;
 import java.io.IOException;
 import java.io.Serializable;
 import java.security.PublicKey;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 import org.w3c.dom.Element;
@@ -32,7 +34,7 @@ public class NodeInformation implements XmlAble {
 	private String adminEmail = null;
 	private String description = "A standard las2peer node -- no further information is provided.";
 
-	private ServiceNameVersion[] hostedServices = new ServiceNameVersion[0];
+	private List<ServiceNameVersion> hostedServices = new ArrayList<ServiceNameVersion>();
 
 	private PublicKey nodeKey;
 	private Serializable nodeHandle;
@@ -97,8 +99,8 @@ public class NodeInformation implements XmlAble {
 	 * 
 	 * @return array with service class names
 	 */
-	public ServiceNameVersion[] getHostedServices() {
-		return hostedServices.clone();
+	public List<ServiceNameVersion> getHostedServices() {
+		return hostedServices;
 	}
 
 	/**
@@ -107,10 +109,11 @@ public class NodeInformation implements XmlAble {
 	 * @param serviceAgents
 	 */
 	void setServices(ServiceAgentImpl[] serviceAgents) {
-		hostedServices = new ServiceNameVersion[serviceAgents.length];
+		hostedServices = new ArrayList<ServiceNameVersion>();
+		//hostedServices = new ServiceNameVersion[serviceAgents.length];
 
-		for (int i = 0; i < hostedServices.length; i++) {
-			hostedServices[i] = serviceAgents[i].getServiceNameVersion();
+		for (int i = 0; i < serviceAgents.length; i++) {
+			hostedServices.add( serviceAgents[i].getServiceNameVersion() );
 		}
 	}
 
@@ -219,7 +222,7 @@ public class NodeInformation implements XmlAble {
 
 		result.append("\t<description>").append(description).append("</description>\n");
 
-		if (hostedServices != null && hostedServices.length > 0) {
+		if (hostedServices != null && hostedServices.size() > 0) {
 			result.append("\t<services>\n");
 
 			for (ServiceNameVersion service : hostedServices) {
@@ -330,30 +333,27 @@ public class NodeInformation implements XmlAble {
 				} else if (child.getTagName().equals("signature")) {
 					result.signature = (byte[]) SerializeTools.deserializeBase64(child.getTextContent());
 				} else if (child.getTagName().equals("services")) {
-					Vector<String> serviceClasses = new Vector<String>();
+					List<ServiceNameVersion> serviceClasses = new ArrayList<ServiceNameVersion>();
 					NodeList services = child.getChildNodes();
 					for (int s = 0; s < services.getLength(); s++) {
 						Node serviceNode = services.item(s);
-						if (node.getNodeType() != Node.ELEMENT_NODE) {
-							// XXX logging
-							continue;
-						}
-
-						if (!( serviceNode instanceof Element ) )
-						{
-							serviceClasses.add(serviceNode.getTextContent());
-						}
-						else
-						{
-							Element service = (Element) serviceNode;
-							if (!service.getTagName().equals("serviceClass")) {
-								throw new MalformedXMLException(service + " is not a service class element");
+						if (node.getNodeType() == Node.ELEMENT_NODE) {
+							System.out.println("trying to parse: \n" + serviceNode.getTextContent());
+							if (!( serviceNode instanceof Element ) )
+							{
+								System.out.println("iz not element O.o");
+								serviceClasses.add(ServiceNameVersion.fromString(serviceNode.getTextContent()));
 							}
-							serviceClasses.add(service.getTextContent());
+							Element service = (Element) serviceNode;
+							serviceClasses.add(
+								ServiceNameVersion.fromString(
+									service.getElementsByTagName("serviceClass").item(0).getTextContent()
+								)
+							);
 						}
 					}
 
-					result.hostedServices = serviceClasses.toArray(new ServiceNameVersion[0]);
+					result.hostedServices = serviceClasses;//.toArray(new ServiceNameVersion[0]);
 				} else {
 					throw new MalformedXMLException("unknown xml element: " + child.getTagName());
 				}
