@@ -67,6 +67,7 @@ public class InfoResponseMessage implements Message {
 		try {
 			return NodeInformation.createFromXml(xmlContent);
 		} catch (Exception e) {
+			System.out.println("trying to read NodeInformation from: " + xmlContent);
 			e.printStackTrace();
 			// should not occur -- faulty message!
 			return null;

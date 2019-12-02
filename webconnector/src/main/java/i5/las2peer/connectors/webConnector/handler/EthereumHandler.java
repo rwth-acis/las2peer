@@ -251,7 +251,7 @@ public class EthereumHandler {
 	@GET
 	@Path("/getServices")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getServices(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId) {
+	public Response getServices(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId) throws Exception {
 		AgentSession session = connector.getSessionById(sessionId);
 		if (session == null) {
 			return Response.status(Status.FORBIDDEN).entity("You have to be logged in").build();
