@@ -132,8 +132,15 @@ public class DefaultHandler {
 		response.put("uptime", getUptime(node));
 		response.put("localServices", getLocalServices(node, uriInfo.getRequestUri()));
 		response.put("otherNodes", getOtherNodes(node));
-		response.put("otherNodeInfos", getOtherNodeInfos(node));
 		return response.toJSONString();
+	}
+
+	@GET
+	@Path("/getOtherNodesInfo")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String handleGetOtherNodeInfo()
+	{
+		return getOtherNodeInfos(node).toJSONString();
 	}
 
 	private int getCPULoad(Node node) {

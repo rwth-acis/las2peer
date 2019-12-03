@@ -12,6 +12,7 @@ import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 import '@polymer/iron-ajax/iron-ajax.js';
 import '@polymer/iron-icons/iron-icons.js';
 import '@polymer/paper-icon-button/paper-icon-button.js';
+import '@polymer/paper-checkbox/paper-checkbox.js';
 import './shared-styles.js';
 
 class StatusView extends PolymerElement {
@@ -21,6 +22,12 @@ class StatusView extends PolymerElement {
                  url$="[[apiEndpoint]]/status"
                  handle-as="json"
                  last-response="{{_status}}"
+                 on-error="_handleError"
+                 debounce-duration="300"></iron-ajax>
+      <iron-ajax id="ajaxOtherNodesInfo"
+                 url$="[[apiEndpoint]]/getOtherNodesInfo"
+                 handle-as="json"
+                 last-response="{{_otherNodeInfo}}"
                  on-error="_handleError"
                  debounce-duration="300"></iron-ajax>
 
@@ -63,25 +70,32 @@ class StatusView extends PolymerElement {
           </div>
         </div>
 
-        <h3>Known Nodes In Network</h3>
+        <h3>Known Nodes In Network <template is="dom-bind"><paper-checkbox id="checkbox" checked="{{queryAdvancedInfo}}">Query Extended Info</paper-checkbox></template></h3>
         <div class="container">
-          <template is="dom-repeat" items="[[_status.otherNodeInfos]]">
-            <p>
-              <strong>NodeID:</strong> [[item.nodeID]] <br />
-              <template is="dom-if" if="[[item.nodeInfo]]">
-                <template is="dom-if" if="[[item.nodeInfo.node-admin]]">
-                  <strong>NodeAdmin:</strong> [[item.nodeInfo.node-admin]] <br />
+          <template is="dom-if" if="[[queryAdvancedInfo]]">
+            <template is="dom-repeat" items="[[_otherNodeInfo]]">
+              <p>
+                <strong>NodeID:</strong> [[item.nodeID]] <br />
+                <template is="dom-if" if="[[item.nodeInfo]]">
+                  <template is="dom-if" if="[[item.nodeInfo.admin-name]]">
+                    <strong>NodeAdmin:</strong> [[item.nodeInfo.admin-name]] <br />
+                  </template>
+                  <template is="dom-if" if="[[item.nodeInfo.services]]">
+                    <strong>Services ([[item.nodeInfo.service-count]]):</strong> <br />
+                    <ul>
+                      <template is="dom-repeat" items="[[item.nodeInfo.services]]" as="service">
+                        [[service.service-name]] @ [[service.service-version]]
+                      </template>
+                    </ul>
+                  </template>
                 </template>
-                <template is="dom-if" if="[[item.nodeInfo.services]]">
-                  <strong>Services ([[item.nodeInfo.service-count]]):</strong> <br />
-                  <ul>
-                    <template is="dom-repeat" items="[[item.nodeInfo.services]]" as="service">
-                      [[service.service-name]] @ [[service.service-version]]
-                    </template>
-                  </ul>
-                </template>
-              </template>
-            </p>
+              </p>
+            </template>
+          </template>
+          <template is="dom-if" if="[[!queryAdvancedInfo]]">
+            <template is="dom-repeat" items="[[_status.otherNodes]]">
+              [item]
+            </template>
           </template>
         </div>
 
@@ -113,7 +127,9 @@ class StatusView extends PolymerElement {
     return {
       apiEndpoint: { type: String, notify: true },
       agentId: { type: String, notify: true },
+      queryAdvancedInfo: { type: Boolean, value: false, notify: true },
       error: { type: Object, notify: true },
+      _otherNodeInfo: { type: Object, notify: true },
       _status: {
         type: Object,
         value: {
@@ -136,11 +152,15 @@ class StatusView extends PolymerElement {
   ready() {
     super.ready();
     let appThis = this;
-    window.setTimeout(function() { appThis.refreshStatus(); }, 1);
+    //window.setTimeout(function() { appThis.refreshStatus(); }, 1);
     window.setInterval(function() { appThis.refreshStatus(); }, 5000);
   }
 
   refreshStatus() {
+    if ( this.queryAdvancedInfo )
+    {
+      this.$.ajaxOtherNodesInfo.generateRequest();
+    }
     this.$.ajaxStatus.generateRequest();
   }
 
