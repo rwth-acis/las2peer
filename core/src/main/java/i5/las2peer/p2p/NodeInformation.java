@@ -129,6 +129,10 @@ public class NodeInformation implements XmlAble {
 		this.signature = signature;
 	}
 
+	public byte[] getSignature() {
+		return signature;
+	}
+
 	/**
 	 * for the node itself: deliver the handle
 	 * 
@@ -273,7 +277,7 @@ public class NodeInformation implements XmlAble {
 		}
 
 		result.append("</las2peerNode>\n");
-		logger.info("[niXML] preparing NodeInfo.xml: \n" + result.toString());
+		//logger.info("[niXML] preparing NodeInfo.xml: \n" + result.toString());
 		return result.toString();
 	}
 
