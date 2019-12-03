@@ -12,6 +12,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import i5.las2peer.api.p2p.ServiceNameVersion;
+import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.persistency.VerificationFailedException;
 import i5.las2peer.security.InternalSecurityException;
 import i5.las2peer.security.ServiceAgentImpl;
@@ -40,6 +41,8 @@ public class NodeInformation implements XmlAble {
 	private Serializable nodeHandle;
 
 	private byte[] signature;
+
+	private static final L2pLogger logger = L2pLogger.getInstance(NodeInformation.class);
 
 	/**
 	 * create a new standard node information
@@ -270,7 +273,7 @@ public class NodeInformation implements XmlAble {
 		}
 
 		result.append("</las2peerNode>\n");
-		System.out.println("preparing NodeInfo.xml: \n" + result.toString());
+		logger.info("[niXML] preparing NodeInfo.xml: \n" + result.toString());
 		return result.toString();
 	}
 
@@ -350,27 +353,16 @@ public class NodeInformation implements XmlAble {
 					result.signature = (byte[]) SerializeTools.deserializeBase64(child.getTextContent());
 				} else if (child.getTagName().equals("services")) {
 					List<ServiceNameVersion> serviceClasses = new ArrayList<ServiceNameVersion>();
-					NodeList services = child.getChildNodes();
+					//NodeList services = child.getChildNodes();
+					NodeList services = child.getElementsByTagName("serviceClass");
+					logger.info("[niXML] found services tag with " + services.getLength() + " nodes: \n" + child.getTextContent());
 					for (int s = 0; s < services.getLength(); s++) {
 						Node serviceNode = services.item(s);
-						if (node.getNodeType() == Node.ELEMENT_NODE) {
-							//System.out.println("trying to parse: \n" + serviceNode.getTextContent());
-							if (!( serviceNode instanceof Element ) )
-							{
-								System.out.println("iz not element but attempting to read anyway" + child.getTextContent());
-								serviceClasses.add(ServiceNameVersion.fromString(serviceNode.getTextContent()));
-							}
-							else 
-							{
-								Element service = (Element) serviceNode;
-								System.out.println("iz element but attempting to read anyway " + service.getTextContent());
-								serviceClasses.add(
-									ServiceNameVersion.fromString(
-										service.getElementsByTagName("serviceClass").item(0).getTextContent()
-									)
-								);
-							}
-						}
+						String tagContents = serviceNode.getTextContent();
+						logger.info("[niXML] > parsing child tag #" + s + ": " + tagContents);
+						ServiceNameVersion snv = ServiceNameVersion.fromString(tagContents);
+						logger.info("[niXML] > found ServiceNameVersion: " + snv.getName() + " @ " + snv.getVersion().toString());
+						serviceClasses.add(snv);
 					}
 
 					result.hostedServices = serviceClasses;//.toArray(new ServiceNameVersion[0]);
