@@ -209,24 +209,34 @@ public class NodeInformation implements XmlAble {
 		StringBuffer result = new StringBuffer("<las2peerNode>\n");
 
 		if (organization != null) {
-			result.append("\t<organization>").append(organization).append("</organization>\n");
+			result.append("\t<organization>");
+			result.append(organization);
+			result.append("</organization>\n");
 		}
 
 		if (adminName != null) {
-			result.append("\t<adminName>").append(adminName).append("</adminName>\n");
+			result.append("\t<adminName>");
+			result.append(adminName);
+			result.append("</adminName>\n");
 		}
 
 		if (adminEmail != null) {
-			result.append("\t<adminEmail>").append(adminEmail).append("</adminEmail>\n");
+			result.append("\t<adminEmail>");
+			result.append(adminEmail);
+			result.append("</adminEmail>\n");
 		}
 
-		result.append("\t<description>").append(description).append("</description>\n");
+		result.append("\t<description>");
+		result.append(description);
+		result.append("</description>\n");
 
 		if (hostedServices != null && hostedServices.size() > 0) {
 			result.append("\t<services>\n");
 
 			for (ServiceNameVersion service : hostedServices) {
-				result.append("\t\t<serviceClass>").append(service.toString()).append("</serviceClass>\n");
+				result.append("\t\t<serviceClass>");
+				result.append(service.toString());
+				result.append("</serviceClass>\n");
 			}
 
 			result.append("\t</services>\n");
@@ -234,27 +244,33 @@ public class NodeInformation implements XmlAble {
 
 		try {
 			if (nodeKey != null) {
-				result.append("\t<nodeKey encoding=\"base64\">").append(SerializeTools.serializeToBase64(nodeKey))
-						.append("</nodeKey>\n");
+				result.append("\t<nodeKey encoding=\"base64\">");
+				result.append(SerializeTools.serializeToBase64(nodeKey));
+				result.append("</nodeKey>\n");
 			}
 
 			if (signature != null) {
-				result.append("\t<signature encoding=\"base64\">").append(SerializeTools.serializeToBase64(signature))
-						.append("</signature>\n");
+				result.append("\t<signature encoding=\"base64\">");
+				result.append(SerializeTools.serializeToBase64(signature));
+				result.append("</signature>\n");
 			}
 
 			if (nodeHandle != null) {
-				result.append("\t<nodeHandle>\n").append("\t\t<plain><![CDATA[").append(nodeHandle.toString())
-						.append("]]></plain>\n").append("\t\t<serialized encoding=\"base64\">")
-						.append(SerializeTools.serializeToBase64(nodeHandle)).append("</serialized>\n")
-						.append("\t</nodeHandle>\n");
+				result.append("\t<nodeHandle>\n");
+				result.append("\t\t<plain><![CDATA[");
+				result.append(nodeHandle.toString());
+				result.append("]]></plain>\n");
+				result.append("\t\t<serialized encoding=\"base64\">");
+				result.append(SerializeTools.serializeToBase64(nodeHandle));
+				result.append("</serialized>\n");
+				result.append("\t</nodeHandle>\n");
 			}
 		} catch (SerializationException e) {
 			throw new RuntimeException("critical: should not occur!");
 		}
 
 		result.append("</las2peerNode>\n");
-		//System.out.println("preparing NodeInfo.xml: \n" + result.toString());
+		System.out.println("preparing NodeInfo.xml: \n" + result.toString());
 		return result.toString();
 	}
 
