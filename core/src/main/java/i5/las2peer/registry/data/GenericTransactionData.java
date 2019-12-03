@@ -7,8 +7,6 @@ import java.time.format.DateTimeFormatter;
 
 import org.web3j.utils.Convert;
 
-import net.minidev.json.JSONObject;
-
 
 /* 
  * 
@@ -124,21 +122,4 @@ public class GenericTransactionData {
             "txDateTime: " + getTime() + "\n"
         ;
     }
-
-    public JSONObject toJSON() {
-
-		JSONObject thisJSON = new JSONObject();
-
-		thisJSON.put("txSender", sender);
-		thisJSON.put("txReceiver", receiver);
-		thisJSON.put("txMessage", message);
-		thisJSON.put("txAmountInWei", amountInWei);
-		thisJSON.put("txAmountInEth", getAmountInEth());
-		thisJSON.put("txTXHash", txHash);
-		thisJSON.put("txTimestamp", timestamp);
-		thisJSON.put("txDateTime", getTime());
-		thisJSON.put("txTransactionType", transactionType);
-
-		return thisJSON;
-	}
 }

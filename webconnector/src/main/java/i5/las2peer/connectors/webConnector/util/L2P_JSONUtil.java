@@ -16,6 +16,53 @@ import net.minidev.json.JSONObject;
 
 public class L2P_JSONUtil {
 
+	public static JSONObject genericTransactionDatatoJSON(GenericTransactionData genericTransactionData)
+	{
+		JSONObject thisJSON = new JSONObject();
+
+		thisJSON.put("txSender", genericTransactionData.getSender());
+		thisJSON.put("txReceiver", genericTransactionData.getReceiver());
+		thisJSON.put("txMessage", genericTransactionData.getMessage());
+		thisJSON.put("txAmountInWei", genericTransactionData.getAmountInWei());
+		thisJSON.put("txAmountInEth", genericTransactionData.getAmountInEth());
+		thisJSON.put("txTXHash", genericTransactionData.getTXHash());
+		thisJSON.put("txTimestamp", genericTransactionData.getTimestamp());
+		thisJSON.put("txDateTime", genericTransactionData.getTime());
+		thisJSON.put("txTransactionType", genericTransactionData.getTransactionType());
+
+		return thisJSON;	
+	}
+
+	public static JSONObject nodeInformationtoJSON(NodeInformation nodeInfo)
+	{
+		JSONObject thisJSON = new JSONObject();
+		if ( nodeInfo.getDescription() != null )
+		{
+			thisJSON.put("description", nodeInfo.getDescription());
+		}
+		if ( nodeInfo.getAdminName() != null )
+		{
+			thisJSON.put("admin-name", nodeInfo.getAdminName());
+		}
+		if ( nodeInfo.getAdminEmail() != null )
+		{
+			thisJSON.put("admin-mail", nodeInfo.getAdminEmail());
+		}
+		if ( nodeInfo.getOrganization() != null )
+		{
+			thisJSON.put("organization", nodeInfo.getOrganization());
+		}
+		if ( nodeInfo.getHostedServices().size() > 0 )
+		{
+			JSONObject serviceList = new JSONObject();
+			for (ServiceNameVersion snv : nodeInfo.getHostedServices()) {
+				serviceList.put(snv.getName(), snv.getVersion().toString());
+			}
+			thisJSON.put("services", serviceList);
+		}
+		return thisJSON;
+	}
+
 	public static JSONObject addAgentDetailsToJson(EthereumNode ethereumNode, AgentImpl agent, JSONObject json, Boolean addMnemonic)
 			throws EthereumException, NotFoundException {
 		json.put("agentid", agent.getIdentifier());
