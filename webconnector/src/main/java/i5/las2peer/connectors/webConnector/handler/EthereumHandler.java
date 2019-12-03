@@ -226,7 +226,11 @@ public class EthereumHandler {
 			}
 		}
 
-		json.put("eth-agent-admin-services", ethAgentAdminServices );
+		JSONObject jsonServices = new JSONObject();
+		for (Map.Entry<ServiceNameVersion, NodeInformation> entry : ethAgentAdminServices.entrySet()) {
+			jsonServices.put(entry.getKey().toString(), entry.getValue().toString());
+		}
+		json.put("eth-agent-admin-services", jsonServices );
 
 		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
 	}
