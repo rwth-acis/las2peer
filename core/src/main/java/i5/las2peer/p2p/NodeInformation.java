@@ -254,7 +254,7 @@ public class NodeInformation implements XmlAble {
 		}
 
 		result.append("</las2peerNode>\n");
-		System.out.println("preparing NodeInfo.xml: \n" + result.toString());
+		//System.out.println("preparing NodeInfo.xml: \n" + result.toString());
 		return result.toString();
 	}
 
@@ -338,18 +338,21 @@ public class NodeInformation implements XmlAble {
 					for (int s = 0; s < services.getLength(); s++) {
 						Node serviceNode = services.item(s);
 						if (node.getNodeType() == Node.ELEMENT_NODE) {
-							System.out.println("trying to parse: \n" + serviceNode.getTextContent());
+							//System.out.println("trying to parse: \n" + serviceNode.getTextContent());
 							if (!( serviceNode instanceof Element ) )
 							{
-								System.out.println("iz not element O.o" + child.getTextContent());
+								System.out.println("iz not element but attempting to read anyway" + child.getTextContent());
 								serviceClasses.add(ServiceNameVersion.fromString(serviceNode.getTextContent()));
 							}
-							Element service = (Element) serviceNode;
-							serviceClasses.add(
-								ServiceNameVersion.fromString(
-									service.getElementsByTagName("serviceClass").item(0).getTextContent()
-								)
-							);
+							else 
+							{
+								Element service = (Element) serviceNode;
+								serviceClasses.add(
+									ServiceNameVersion.fromString(
+										service.getElementsByTagName("serviceClass").item(0).getTextContent()
+									)
+								);
+							}
 						}
 					}
 
