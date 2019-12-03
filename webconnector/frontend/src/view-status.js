@@ -64,24 +64,24 @@ class StatusView extends PolymerElement {
         </div>
 
         <h3>Known Nodes In Network</h3>
-        <div class="container flex-horizontal">
+        <div class="container">
           <template is="dom-repeat" items="[[_status.otherNodeInfos]]">
-            <div class="flexchild">
+            <p>
               <strong>NodeID:</strong> [[item.nodeID]] <br />
               <template is="dom-if" if="[[item.nodeInfo]]">
                 <template is="dom-if" if="[[item.nodeInfo.node-admin]]">
                   <strong>NodeAdmin:</strong> [[item.nodeInfo.node-admin]] <br />
                 </template>
                 <template is="dom-if" if="[[item.nodeInfo.services]]">
-                  <strong>Services:</strong> <br />
+                  <strong>Services ([[item.nodeInfo.service-count]]):</strong> <br />
                   <ul>
                     <template is="dom-repeat" items="[[item.nodeInfo.services]]" as="service">
-                      [[service]]
+                      [[service.service-name]] @ [[service.service-version]]
                     </template>
                   </ul>
                 </template>
               </template>
-            </div>
+            </p>
           </template>
         </div>
 
