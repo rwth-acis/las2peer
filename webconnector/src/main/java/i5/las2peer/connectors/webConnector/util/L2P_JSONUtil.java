@@ -16,7 +16,7 @@ import net.minidev.json.JSONObject;
 
 public class L2P_JSONUtil {
 
-	public static JSONObject genericTransactionDatatoJSON(GenericTransactionData genericTransactionData)
+	public static JSONObject genericTransactionDataToJSON(GenericTransactionData genericTransactionData)
 	{
 		JSONObject thisJSON = new JSONObject();
 
@@ -33,7 +33,7 @@ public class L2P_JSONUtil {
 		return thisJSON;	
 	}
 
-	public static JSONObject nodeInformationtoJSON(NodeInformation nodeInfo)
+	public static JSONObject nodeInformationToJSON(NodeInformation nodeInfo)
 	{
 		JSONObject thisJSON = new JSONObject();
 		if ( nodeInfo.getDescription() != null )

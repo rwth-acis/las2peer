@@ -263,11 +263,11 @@ public class EthereumHandler {
 		}
 		if ( localNodeInfo != null )
 		{
-			nodeList.add(L2P_JSONUtil.nodeInformationtoJSON(localNodeInfo));
+			nodeList.add(L2P_JSONUtil.nodeInformationToJSON(localNodeInfo));
 			// is ethAgent admin of local node?
 			if ( localNodeInfo.getAdminEmail().equals(agentEmail) )
 			{
-				adminNodeList.add(L2P_JSONUtil.nodeInformationtoJSON(localNodeInfo));
+				adminNodeList.add(L2P_JSONUtil.nodeInformationToJSON(localNodeInfo));
 			}
 		}
 
@@ -277,11 +277,11 @@ public class EthereumHandler {
 			NodeInformation nodeInfo;
 			try {
 				nodeInfo = ethereumNode.getNodeInformation(nodeHandle);
-				nodeList.add(L2P_JSONUtil.nodeInformationtoJSON(nodeInfo));
+				nodeList.add(L2P_JSONUtil.nodeInformationToJSON(nodeInfo));
 				// is ethAgent admin of remote node?
 				if ( nodeInfo.getAdminEmail().equals(agentEmail) )
 				{
-					adminNodeList.add(L2P_JSONUtil.nodeInformationtoJSON(nodeInfo));
+					adminNodeList.add(L2P_JSONUtil.nodeInformationToJSON(nodeInfo));
 				}
 			} catch (NodeNotFoundException e) {
 				logger.severe("trying to access node " + nodeHandle.getNodeId() + " | " + nodeHandle.getId());
@@ -320,13 +320,13 @@ public class EthereumHandler {
 		JSONObject json = new JSONObject();
 		JSONArray rcvdJsonLog = new JSONArray();
 		for (GenericTransactionData genericTransactionData : rcvdTxLog) {
-			rcvdJsonLog.add(L2P_JSONUtil.genericTransactionDatatoJSON( genericTransactionData ));
+			rcvdJsonLog.add(L2P_JSONUtil.genericTransactionDataToJSON( genericTransactionData ));
 		}
 
 		// parse sent log
 		JSONArray sentJsonLog = new JSONArray();
 		for (GenericTransactionData genericTransactionData : sentTxLog) {
-			sentJsonLog.add(L2P_JSONUtil.genericTransactionDatatoJSON( genericTransactionData ));
+			sentJsonLog.add(L2P_JSONUtil.genericTransactionDataToJSON( genericTransactionData ));
 		}
 		
 		json.put("rcvdJsonLog", rcvdJsonLog);

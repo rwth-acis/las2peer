@@ -212,7 +212,7 @@ public class DefaultHandler {
 			try {
 				NodeInformation nodeInfo = node.getNodeInformation(nodeHandle);
 				nodeJSON.put("nodeID", nodeID);
-				nodeJSON.put("nodeInfo", L2P_JSONUtil.nodeInformationtoJSON(nodeInfo));
+				nodeJSON.put("nodeInfo", L2P_JSONUtil.nodeInformationToJSON(nodeInfo));
 			} catch (NodeNotFoundException e) {
 				logger.severe("trying to access nodeinfo of " + nodeHandle.getNodeId() + " | " + nodeHandle.getId());
 				e.printStackTrace();
