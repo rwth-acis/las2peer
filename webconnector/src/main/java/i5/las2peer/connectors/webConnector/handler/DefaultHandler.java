@@ -208,7 +208,7 @@ public class DefaultHandler {
 		Collection<NodeHandle> knownNodes = ((PastryNodeImpl) node).getPastryNode().getLeafSet().getUniqueSet();
 		for (NodeHandle nodeHandle : knownNodes) {
 			JSONObject nodeJSON = new JSONObject();
-			String nodeID = nodeHandle.getNodeId().toString();
+			String nodeID = nodeHandle.toString();
 			try {
 				NodeInformation nodeInfo = node.getNodeInformation(nodeHandle);
 				nodeJSON.put("nodeID", nodeID);

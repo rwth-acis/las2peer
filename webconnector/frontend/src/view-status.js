@@ -69,12 +69,6 @@ class StatusView extends PolymerElement {
             <div class="flexchild">
               <strong>NodeID:</strong> [[item.nodeID]] <br />
               <template is="dom-if" if="[[item.nodeInfo]]">
-                <template is="dom-if" if="[[item.nodeInfo.description]]">
-                  <strong>Description:</strong> [[item.nodeInfo.description]] <br />
-                </template>
-                <template is="dom-if" if="[[item.nodeInfo.organization]]">
-                  <strong>Organization:</strong> [[item.nodeInfo.organization]] <br />
-                </template>
                 <template is="dom-if" if="[[item.nodeInfo.node-admin]]">
                   <strong>NodeAdmin:</strong> [[item.nodeInfo.node-admin]] <br />
                 </template>
