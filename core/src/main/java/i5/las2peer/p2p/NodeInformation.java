@@ -347,6 +347,7 @@ public class NodeInformation implements XmlAble {
 							else 
 							{
 								Element service = (Element) serviceNode;
+								System.out.println("iz element but attempting to read anyway " + service.getTextContent());
 								serviceClasses.add(
 									ServiceNameVersion.fromString(
 										service.getElementsByTagName("serviceClass").item(0).getTextContent()
