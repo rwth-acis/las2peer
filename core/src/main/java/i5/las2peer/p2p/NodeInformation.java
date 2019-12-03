@@ -23,6 +23,7 @@ import i5.las2peer.serialization.XmlAble;
 import i5.las2peer.serialization.XmlTools;
 import i5.las2peer.tools.CryptoTools;
 import i5.las2peer.tools.FileContentReader;
+import net.minidev.json.JSONObject;
 
 /**
  * A NodeInformation gives basic information about a node.
@@ -205,6 +206,35 @@ public class NodeInformation implements XmlAble {
 	 */
 	public boolean isComplete() {
 		return nodeKey != null && signature != null && nodeHandle != null;
+	}
+
+	public JSONObject toJSON() {
+		JSONObject thisJSON = new JSONObject();
+		if ( description != null )
+		{
+			thisJSON.put("description", description);
+		}
+		if ( adminName != null )
+		{
+			thisJSON.put("admin-name", adminName);
+		}
+		if ( adminEmail != null )
+		{
+			thisJSON.put("admin-mail", adminEmail);
+		}
+		if ( organization != null )
+		{
+			thisJSON.put("organization", organization);
+		}
+		if ( hostedServices.size() > 0 )
+		{
+			JSONObject serviceList = new JSONObject();
+			for (ServiceNameVersion snv : hostedServices) {
+				serviceList.put(snv.getName(), snv.getVersion().toString());
+			}
+			thisJSON.put("services", serviceList);
+		}
+		return thisJSON;
 	}
 
 	@Override
