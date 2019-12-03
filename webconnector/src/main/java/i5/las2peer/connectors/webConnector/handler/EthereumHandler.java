@@ -178,7 +178,7 @@ public class EthereumHandler {
 		String agentEmail = ethAgent.getEmail();
 		JSONObject json = new JSONObject();
 
-		Map<ServiceNameVersion, NodeInformation> ethAgentAdminServices = new HashMap<>();
+		Map<ServiceNameVersion, String> ethAgentAdminServices = new HashMap<>();
 		
 		// is ethAgent admin of local node?
 		NodeInformation localNodeInfo = null;
@@ -198,7 +198,7 @@ public class EthereumHandler {
 				
 				ServiceNameVersion nameVersion = localServiceAgent.getServiceNameVersion();
 				//ethAgentAdminServices.pu();
-				ethAgentAdminServices.putIfAbsent(nameVersion, localNodeInfo);
+				ethAgentAdminServices.putIfAbsent(nameVersion, node.getNodeId().toString());
 			}
 		}
 		json.put("is-local-admin", isLocalNodeAdmin);
@@ -216,7 +216,7 @@ public class EthereumHandler {
 					// yes, query services
 					List<ServiceNameVersion> servicesOnRemoteNode = remoteNodeInfo.getHostedServices();
 					for (ServiceNameVersion removeSNV : servicesOnRemoteNode) {
-						ethAgentAdminServices.putIfAbsent(removeSNV, remoteNodeInfo);
+						ethAgentAdminServices.putIfAbsent(removeSNV, remoteNodeHandle.toString());
 					}
 				}
 			} catch (NodeNotFoundException e) {
@@ -227,8 +227,8 @@ public class EthereumHandler {
 		}
 
 		JSONObject jsonServices = new JSONObject();
-		for (Map.Entry<ServiceNameVersion, NodeInformation> entry : ethAgentAdminServices.entrySet()) {
-			jsonServices.put(entry.getKey().toString(), entry.getValue().toString());
+		for (Map.Entry<ServiceNameVersion, String> entry : ethAgentAdminServices.entrySet()) {
+			jsonServices.put(entry.getKey().toString(), entry.getValue());
 		}
 		json.put("eth-agent-admin-services", jsonServices );
 

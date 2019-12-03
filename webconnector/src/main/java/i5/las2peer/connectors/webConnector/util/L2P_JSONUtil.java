@@ -12,6 +12,7 @@ import i5.las2peer.registry.exceptions.NotFoundException;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.EthereumAgent;
 import i5.las2peer.security.UserAgentImpl;
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 
 public class L2P_JSONUtil {
@@ -57,11 +58,13 @@ public class L2P_JSONUtil {
 
 		if ( nodeInfo.getHostedServices().size() > 0 )
 		{
-			JSONObject serviceList = new JSONObject();
+			JSONArray serviceList = new JSONArray();
 			for (ServiceNameVersion snv : nodeInfo.getHostedServices()) 
 			{
-				serviceList.put("service-name", snv.getName());
-				serviceList.put("service-version", snv.getVersion().toString());
+				JSONObject serviceInfo = new JSONObject();
+				serviceInfo.put("service-name", snv.getName());
+				serviceInfo.put("service-version", snv.getVersion().toString());
+				serviceList.add(serviceInfo);
 			}
 			thisJSON.put("services", serviceList);
 		}
