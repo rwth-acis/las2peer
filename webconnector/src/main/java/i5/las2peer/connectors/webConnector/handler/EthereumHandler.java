@@ -1,19 +1,15 @@
 package i5.las2peer.connectors.webConnector.handler;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
-import java.util.logging.Level;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.CookieParam;
@@ -21,47 +17,39 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import i5.las2peer.api.security.UserAgent;
-import i5.las2peer.p2p.EthereumNode;
-import i5.las2peer.registry.data.ServiceDeploymentData;
-import i5.las2peer.security.*;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.utils.Convert;
 
 import i5.las2peer.api.p2p.ServiceNameVersion;
-import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
-import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.connectors.webConnector.WebConnector;
 import i5.las2peer.connectors.webConnector.util.AgentSession;
+import i5.las2peer.connectors.webConnector.util.L2P_JSONUtil;
 import i5.las2peer.logging.L2pLogger;
+import i5.las2peer.p2p.EthereumNode;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.NodeInformation;
 import i5.las2peer.p2p.NodeNotFoundException;
-import i5.las2peer.p2p.PastryNodeImpl;
-import i5.las2peer.registry.ReadOnlyRegistryClient;
 import i5.las2peer.registry.ReadWriteRegistryClient;
 import i5.las2peer.registry.data.GenericTransactionData;
-import i5.las2peer.registry.data.UserData;
 import i5.las2peer.registry.data.UserProfileData;
 import i5.las2peer.registry.exceptions.EthereumException;
 import i5.las2peer.registry.exceptions.NotFoundException;
+import i5.las2peer.security.AgentImpl;
+import i5.las2peer.security.EthereumAgent;
+import i5.las2peer.security.ServiceAgentImpl;
+import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.serialization.MalformedXMLException;
-import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.testing.MockAgentFactory;
 import i5.las2peer.tools.CryptoException;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
-import net.minidev.json.parser.JSONParser;
-import net.minidev.json.parser.ParseException;
 import rice.pastry.NodeHandle;
 
 @Path(EthereumHandler.RESOURCE_PATH)
@@ -98,70 +86,10 @@ public class EthereumHandler {
 		}
 	}
 
-	private JSONObject addAgentDetailsToJson(AgentImpl agent, JSONObject json)
-			throws EthereumException, NotFoundException {
-		// don't add mnemonic ( = defaults to false, override to true )
-		return this.addAgentDetailsToJson(agent, json, false);
-	}
-
-	private JSONObject addAgentDetailsToJson(AgentImpl agent, JSONObject json, Boolean addMnemonic)
-			throws EthereumException, NotFoundException {
-		json.put("agentid", agent.getIdentifier());
-		if (agent instanceof UserAgentImpl) {
-			UserAgentImpl userAgent = (UserAgentImpl) agent;
-			json.put("username", userAgent.getLoginName());
-			json.put("email", userAgent.getEmail());
-		}
-		if (agent instanceof EthereumAgent) {
-			EthereumAgent ethAgent = (EthereumAgent) agent;
-			String ethAddress = ethAgent.getEthereumAddress();
-			if (ethAddress.length() > 0) {
-				json.put("ethAgentAddress", ethAddress);
-				String accBalance = ethereumNode.getRegistryClient().getAccountBalance(ethAddress);
-				json.put("ethAccBalance", accBalance);
-				UserProfileData upd = null;
-				try {
-					upd = ethereumNode.getRegistryClient().getProfile(ethAddress);
-					if (upd != null && !upd.getOwner().equals("0x0000000000000000000000000000000000000000")) {
-						json.put("ethProfileOwner", upd.getOwner());
-						json.put("ethCumulativeScore", upd.getCumulativeScore().toString());
-						json.put("ethNoTransactionsSent", upd.getNoTransactionsSent().toString());
-						json.put("ethNoTransactionsRcvd", upd.getNoTransactionsRcvd().toString());
-						if (upd.getNoTransactionsRcvd().compareTo(BigInteger.ZERO) == 0) {
-							json.put("ethRating", 0);
-						} else {
-							json.put("ethRating", upd.getCumulativeScore().divide(upd.getNoTransactionsRcvd()));
-						}
-					} else {
-						json.put("ethRating", "0");
-						json.put("ethCumulativeScore", "???");
-						json.put("ethNoTransactionsSent", "???");
-						json.put("ethNoTransactionsRcvd", "???");
-					}
-				} catch (EthereumException | NotFoundException e) {
-					e.printStackTrace();
-				}
-
-			}
-
-			json.put("ethAgentCredentialsAddress", ethAddress);
-
-			if (addMnemonic && !agent.isLocked()) {
-				json.put("ethMnemonic", ethAgent.getEthereumMnemonic());
-			}
-
-			// UserData ethUser =
-			// ethereumNode.getRegistryClient().getUser(ethAgent.getLoginName());
-			// if ( ethUser != null ) { json.put("eth-user-address",
-			// ethUser.getOwnerAddress()); }
-		}
-		return json;
-	}
-
 	@POST
 	@Path("/requestFaucet")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response handlerequestFaucet(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId) // throws
+	public Response handleRequestFaucet(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId) // throws
 																											// Exception
 	{
 		AgentSession session = connector.getSessionById(sessionId);
@@ -221,7 +149,7 @@ public class EthereumHandler {
 
 		AgentImpl agent = session.getAgent();
 		try {
-			json = addAgentDetailsToJson(agent, json, true);
+			json = L2P_JSONUtil.addAgentDetailsToJson(ethereumNode, agent, json, true);
 
 		} catch (EthereumException e) {
 			return Response.status(Status.NOT_FOUND).entity("Agent not found").build();
@@ -232,58 +160,11 @@ public class EthereumHandler {
 		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
 	}
 
-	private JSONObject transactionDataToJSONObject(GenericTransactionData genericTransactionData) {
-
-		JSONObject thisJSON = new JSONObject();
-
-		thisJSON.put("txSender", genericTransactionData.getSender());
-		thisJSON.put("txReceiver", genericTransactionData.getReceiver());
-		thisJSON.put("txMessage", genericTransactionData.getMessage());
-		thisJSON.put("txAmountInWei", genericTransactionData.getAmountInWei());
-		thisJSON.put("txAmountInEth", genericTransactionData.getAmountInEth());
-		thisJSON.put("txTXHash", genericTransactionData.getTXHash());
-		thisJSON.put("txTimestamp", genericTransactionData.getTimestamp());
-		thisJSON.put("txDateTime", genericTransactionData.getTime());
-		thisJSON.put("txTransactionType", genericTransactionData.getTransactionType());
-
-		return thisJSON;
-
-	}
-
-	public JSONObject nodeInfoToJSON(NodeInformation nodeInfo)
-	{
-		JSONObject retVal = new JSONObject();
-		if ( nodeInfo.getDescription() != null )
-		{
-			retVal.put("description", nodeInfo.getDescription());
-		}
-		if ( nodeInfo.getAdminName() != null )
-		{
-			retVal.put("admin-name", nodeInfo.getAdminName());
-		}
-		if ( nodeInfo.getAdminEmail() != null )
-		{
-			retVal.put("admin-mail", nodeInfo.getAdminEmail());
-		}
-		if ( nodeInfo.getOrganization() != null )
-		{
-			retVal.put("organization", nodeInfo.getOrganization());
-		}
-		if ( nodeInfo.getHostedServices().size() > 0 )
-		{
-			JSONObject serviceList = new JSONObject();
-			for (ServiceNameVersion snv : nodeInfo.getHostedServices()) {
-				serviceList.put(snv.getName(), snv.getVersion().toString());
-			}
-			retVal.put("services", serviceList);
-		}
-		return retVal;
-	}
 
 	@GET
-	@Path("/getServices")
+	@Path("/getAdminServices")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getServices(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId) throws Exception {
+	public Response handleGetAdminServices(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId) throws Exception {
 		AgentSession session = connector.getSessionById(sessionId);
 		if (session == null) {
 			return Response.status(Status.FORBIDDEN).entity("You have to be logged in").build();
@@ -294,37 +175,122 @@ public class EthereumHandler {
 		}
 		// get session eth agent
 		EthereumAgent ethAgent = (EthereumAgent) agent;
-		String agentName = ethAgent.getLoginName();
+		String agentEmail = ethAgent.getEmail();
+		JSONObject json = new JSONObject();
+
+		Map<ServiceNameVersion, NodeInformation> ethAgentAdminServices = new HashMap<>();
+		
+		// is ethAgent admin of local node?
+		NodeInformation localNodeInfo = null;
+		try {
+			localNodeInfo = node.getNodeInformation();
+		} catch (CryptoException e) {
+			e.printStackTrace();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Could not get nodeInformation of local node").build();
+		}
+		Boolean isLocalNodeAdmin = localNodeInfo.getAdminEmail().equals(agentEmail);
+		if ( localNodeInfo != null && isLocalNodeAdmin )
+		{
+			// ethAgent is admin of local node, query local services
+			ServiceAgentImpl[] localServices = node.getRegisteredServices();
+			json.put("local-service-count", localServices.length);
+			for (ServiceAgentImpl localServiceAgent : localServices) {
+				
+				ServiceNameVersion nameVersion = localServiceAgent.getServiceNameVersion();
+				//ethAgentAdminServices.pu();
+				ethAgentAdminServices.putIfAbsent(nameVersion, localNodeInfo);
+			}
+		}
+		json.put("is-local-admin", isLocalNodeAdmin);
+
+		// get remote nodes info
+		Collection<NodeHandle> knownNodes = ethereumNode.getPastryNode().getLeafSet().getUniqueSet();
+		json.put("known-node-count", knownNodes.size() );
+		for (NodeHandle remoteNodeHandle : knownNodes) {
+			NodeInformation remoteNodeInfo;
+			try {
+				remoteNodeInfo = ethereumNode.getNodeInformation(remoteNodeHandle);
+				// is ethAgent admin of remote node?
+				if ( remoteNodeInfo.getAdminEmail().equals(agentEmail))
+				{
+					// yes, query services
+					List<ServiceNameVersion> servicesOnRemoteNode = remoteNodeInfo.getHostedServices();
+					for (ServiceNameVersion removeSNV : servicesOnRemoteNode) {
+						ethAgentAdminServices.putIfAbsent(removeSNV, remoteNodeInfo);
+					}
+				}
+			} catch (NodeNotFoundException e) {
+				logger.severe("trying to access node " + remoteNodeHandle.getNodeId() + " | " + remoteNodeHandle.getId());
+				e.printStackTrace();
+				return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Trying to get nodeInformation failed: node not found").build();
+			}
+		}
+
+		json.put("eth-agent-admin-services", ethAgentAdminServices );
+
+		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
+	}
+
+
+
+	@GET
+	@Path("/getAdminNodes")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response handleGetKnownNodeInfo(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId) throws Exception {
+		AgentSession session = connector.getSessionById(sessionId);
+		if (session == null) {
+			return Response.status(Status.FORBIDDEN).entity("You have to be logged in").build();
+		}
+		AgentImpl agent = session.getAgent();
+		if (!(agent instanceof EthereumAgent)) {
+			return Response.status(Status.FORBIDDEN).entity("Must be EthereumAgent").build();
+		}
+		// get session eth agent
+		EthereumAgent ethAgent = (EthereumAgent) agent;
+		String agentEmail = ethAgent.getEmail();
 		JSONObject json = new JSONObject();
 
 		JSONArray nodeList = new JSONArray();
-		Collection<NodeHandle> otherKnownNodes = ethereumNode.getPastryNode().getLeafSet().getUniqueSet();
-		for (NodeHandle nodeHandle : otherKnownNodes) {
+		JSONArray adminNodeList = new JSONArray();
+
+		// get local node info
+		NodeInformation localNodeInfo = null;
+		try {
+			localNodeInfo = node.getNodeInformation();
+		} catch (CryptoException e) {
+			e.printStackTrace();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Could not get nodeInformation of local node").build();
+		}
+		if ( localNodeInfo != null )
+		{
+			nodeList.add(localNodeInfo.toJSON());
+			// is ethAgent admin of local node?
+			if ( localNodeInfo.getAdminEmail().equals(agentEmail) )
+			{
+				adminNodeList.add(localNodeInfo.toJSON());
+			}
+		}
+
+		// get remote nodes info
+		Collection<NodeHandle> knownNodes = ethereumNode.getPastryNode().getLeafSet().getUniqueSet();
+		for (NodeHandle nodeHandle : knownNodes) {
 			NodeInformation nodeInfo;
 			try {
 				nodeInfo = ethereumNode.getNodeInformation(nodeHandle);
-				nodeList.add(nodeInfoToJSON(nodeInfo));
-
+				nodeList.add(nodeInfo.toJSON());
+				// is ethAgent admin of remote node?
+				if ( nodeInfo.getAdminEmail().equals(agentEmail) )
+				{
+					adminNodeList.add(nodeInfo.toJSON());
+				}
 			} catch (NodeNotFoundException e) {
 				logger.severe("trying to access node " + nodeHandle.getNodeId() + " | " + nodeHandle.getId());
+				e.printStackTrace();
 				return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Trying to get nodeInformation failed: node not found").build();
 			}
 		}
 		json.put("nodes", nodeList);
-
-		ConcurrentMap<String, String> serviceAuthors = ethereumNode.getRegistryClient().getServiceAuthors();
-
-		
-		List<String> serviceMap = new ArrayList<String>();
-		for(Map.Entry<String,String> entry : serviceAuthors.entrySet())
-		{
-			if ( entry.getValue().equals( agentName ) )
-			{
-				serviceMap.add(entry.getKey());
-			}
-		}
-		json.put("services", serviceMap);
-		
+		json.put("adminNodes", nodeList);
 
 		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
 	}
@@ -354,13 +320,13 @@ public class EthereumHandler {
 		JSONObject json = new JSONObject();
 		JSONArray rcvdJsonLog = new JSONArray();
 		for (GenericTransactionData genericTransactionData : rcvdTxLog) {
-			rcvdJsonLog.add(transactionDataToJSONObject(genericTransactionData));
+			rcvdJsonLog.add(genericTransactionData.toJSON());
 		}
 
 		// parse sent log
 		JSONArray sentJsonLog = new JSONArray();
 		for (GenericTransactionData genericTransactionData : sentTxLog) {
-			sentJsonLog.add(transactionDataToJSONObject(genericTransactionData));
+			sentJsonLog.add(genericTransactionData.toJSON());
 		}
 		
 		json.put("rcvdJsonLog", rcvdJsonLog);
