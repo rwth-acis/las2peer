@@ -353,15 +353,15 @@ public class NodeInformation implements XmlAble {
 					result.signature = (byte[]) SerializeTools.deserializeBase64(child.getTextContent());
 				} else if (child.getTagName().equals("services")) {
 					List<ServiceNameVersion> serviceClasses = new ArrayList<ServiceNameVersion>();
-					//NodeList services = child.getChildNodes();
+
 					NodeList services = child.getElementsByTagName("serviceClass");
-					logger.info("[niXML] found services tag with " + services.getLength() + " nodes: \n" + child.getTextContent());
+					// logger.info("[niXML] found services tag with " + services.getLength() + " nodes: \n" + child.getTextContent());
 					for (int s = 0; s < services.getLength(); s++) {
 						Node serviceNode = services.item(s);
 						String tagContents = serviceNode.getTextContent();
-						logger.info("[niXML] > parsing child tag #" + s + ": " + tagContents);
+						// logger.info("[niXML] > parsing child tag #" + s + ": " + tagContents);
 						ServiceNameVersion snv = ServiceNameVersion.fromString(tagContents);
-						logger.info("[niXML] > found ServiceNameVersion: " + snv.getName() + " @ " + snv.getVersion().toString());
+						// logger.info("[niXML] > found ServiceNameVersion: " + snv.getName() + " @ " + snv.getVersion().toString());
 						serviceClasses.add(snv);
 					}
 

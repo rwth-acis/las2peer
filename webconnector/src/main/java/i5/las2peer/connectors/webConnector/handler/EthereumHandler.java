@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,7 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.utils.Convert;
 
+import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentLockedException;
@@ -248,6 +250,36 @@ public class EthereumHandler {
 
 	}
 
+	public JSONObject nodeInfoToJSON(NodeInformation nodeInfo)
+	{
+		JSONObject retVal = new JSONObject();
+		if ( nodeInfo.getDescription() != null )
+		{
+			retVal.put("description", nodeInfo.getDescription());
+		}
+		if ( nodeInfo.getAdminName() != null )
+		{
+			retVal.put("admin-name", nodeInfo.getAdminName());
+		}
+		if ( nodeInfo.getAdminEmail() != null )
+		{
+			retVal.put("admin-mail", nodeInfo.getAdminEmail());
+		}
+		if ( nodeInfo.getOrganization() != null )
+		{
+			retVal.put("organization", nodeInfo.getOrganization());
+		}
+		if ( nodeInfo.getHostedServices().size() > 0 )
+		{
+			JSONObject serviceList = new JSONObject();
+			for (ServiceNameVersion snv : nodeInfo.getHostedServices()) {
+				serviceList.put(snv.getName(), snv.getVersion().toString());
+			}
+			retVal.put("services", serviceList);
+		}
+		return retVal;
+	}
+
 	@GET
 	@Path("/getServices")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -265,32 +297,20 @@ public class EthereumHandler {
 		String agentName = ethAgent.getLoginName();
 		JSONObject json = new JSONObject();
 
-		List<String> nodeMap = new ArrayList<String>();
+		JSONArray nodeList = new JSONArray();
 		Collection<NodeHandle> otherKnownNodes = ethereumNode.getPastryNode().getLeafSet().getUniqueSet();
 		for (NodeHandle nodeHandle : otherKnownNodes) {
 			NodeInformation nodeInfo;
 			try {
 				nodeInfo = ethereumNode.getNodeInformation(nodeHandle);
-				if ( nodeInfo.getAdminEmail() == null )
-				{
-					nodeMap.add(
-						nodeHandle.getNodeId() + " | " + nodeHandle.getId() + "\n" +
-						"node information not found."
-					);
-				}
-				else
-				{
-					nodeMap.add(
-						nodeHandle.getNodeId() + " | " + nodeHandle.getId() + "\n"
-						+ nodeInfo.getAdminName() + " | " + nodeInfo.getAdminEmail()
-					);
-				}
+				nodeList.add(nodeInfoToJSON(nodeInfo));
+
 			} catch (NodeNotFoundException e) {
 				logger.severe("trying to access node " + nodeHandle.getNodeId() + " | " + nodeHandle.getId());
 				return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Trying to get nodeInformation failed: node not found").build();
 			}
 		}
-		json.put("nodes", nodeMap);
+		json.put("nodes", nodeList);
 
 		ConcurrentMap<String, String> serviceAuthors = ethereumNode.getRegistryClient().getServiceAuthors();
 
