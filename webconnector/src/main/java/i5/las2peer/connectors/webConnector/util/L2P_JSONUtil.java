@@ -52,11 +52,16 @@ public class L2P_JSONUtil {
 		{
 			thisJSON.put("organization", nodeInfo.getOrganization());
 		}
+
+		thisJSON.put("service-count", nodeInfo.getHostedServices().size());
+
 		if ( nodeInfo.getHostedServices().size() > 0 )
 		{
 			JSONObject serviceList = new JSONObject();
-			for (ServiceNameVersion snv : nodeInfo.getHostedServices()) {
-				serviceList.put(snv.getName(), snv.getVersion().toString());
+			for (ServiceNameVersion snv : nodeInfo.getHostedServices()) 
+			{
+				serviceList.put("service-name", snv.getName());
+				serviceList.put("service-version", snv.getVersion().toString());
 			}
 			thisJSON.put("services", serviceList);
 		}
