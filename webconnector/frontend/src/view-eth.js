@@ -12,11 +12,14 @@ import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 import '@polymer/iron-ajax/iron-ajax.js';
 import '@polymer/iron-collapse/iron-collapse.js';
 import '@polymer/iron-form/iron-form.js';
-import '@polymer/paper-input/paper-input.js';
 import '@polymer/paper-button/paper-button.js';
-import '@polymer/paper-tabs/paper-tabs.js';
 import '@polymer/paper-card/paper-card.js';
+import '@polymer/paper-dropdown-menu/paper-dropdown-menu.js';
+import '@polymer/paper-input/paper-input.js';
+import '@polymer/paper-item/paper-item.js';
+import '@polymer/paper-listbox/paper-listbox.js';
 import '@polymer/paper-spinner/paper-spinner.js';
+import '@polymer/paper-tabs/paper-tabs.js';
 //import '@cwmr/iron-star-rating/iron-star-rating.js';
 import './custom-star-rating.js';
 import './shared-styles.js';
@@ -169,11 +172,13 @@ class EthereumView extends PolymerElement {
               <paper-button raised on-click="requestEthFaucet" disabled="[[_working]]">
                 <iron-icon icon="card-giftcard"></iron-icon> Request funds from faucet
               </paper-button>
-              <select class="form-control" on-change="_updateGroupMemberlist" id="groupSelect" style="width:150px">
-                <template is="dom-repeat" items="[[groups]]">
-                    <option value="{{item.groupID}}">{{item.groupName}}</option>
-                </template>
-              </select>
+              <paper-dropdown-menu-light label="Group Agent for Success Modeling" noink no-animations>
+                <paper-listbox slot="dropdown-content" class="dropdown-content" on-change="_updateGroupMemberlist" id="groupSelect">
+                  <template is="dom-repeat" items="[[groups]]">
+                  <paper-item value="{{item.groupID}}">{{item.groupName}}</paper-item>
+                  </template>
+                </paper-listbox>
+              </paper-dropdown-menu-light>
             </p>
             <p>
               <template is="dom-if" if="[[!_hasEthProfile]]">
@@ -433,10 +438,14 @@ class EthereumView extends PolymerElement {
     for (var i = 0; i < keys.length; i++) {
         this.groups.push(
           {
-            groupName: res[keys[i]],
-            groupID: key
+            groupID: keys[i],
+            groupName: res[keys[i]]
           }
         );
+        console.log({
+          groupID: keys[i],
+          groupName: res[keys[i]]
+        });
     }
     if (keys > 0) {
         if (this.$.groupSelect.value.length > 0) {
@@ -505,7 +514,7 @@ class EthereumView extends PolymerElement {
     {
       this._hasEthProfile = true;
     }
-    this.ajaxGetGroups.generateRequest();
+    this.$.ajaxGetGroups.generateRequest();
   }
   _handleRequestFaucetResponse(event) {
 	  console.log(event.detail.response);
