@@ -79,7 +79,17 @@ class EthereumView extends PolymerElement {
                  handle-as="json"
                  on-response="_handleGenericTxLogResponse"
                  on-error="_handleError"
-                 loading="{{_working}}"></iron-ajax>         
+                 loading="{{_working}}"></iron-ajax>    
+                 
+        <iron-ajax
+                 id="ajaxGetGroups"
+                 url='[[baseUrl]]/contactservice/groups'
+                 params='{}'
+                 handle-as="json"
+                 on-response="_updateGroups"
+                 on-error="_handleError"
+                 loading="{{_working}}">
+               </iron-ajax>
                  
 
       <style include="shared-styles">
@@ -146,7 +156,7 @@ class EthereumView extends PolymerElement {
               <p>
                 <strong><iron-icon icon="fingerprint"></iron-icon> Eth Credentials Address</strong>: [[_EthWallet.ethAgentCredentialsAddress]] <br />
                 <strong><iron-icon icon="verified-user"></iron-icon> Eth Mnemonic</strong>: [[_EthWallet.ethMnemonic]] <br />
-                <strong><iron-icon icon="account-balance"></iron-icon> Eth Balance</strong>: [[_EthWallet.ethAccBalance]] <br />
+                
                 <template is="dom-if" if="[[_hasEthProfile]]">
                   <strong><iron-icon icon="stars"></iron-icon> Reputation No Transactions</strong> <small><em>[Rcvd | Sent]</em></small>: 
                     <iron-icon icon="cloud-download"></iron-icon> [[_EthWallet.ethNoTransactionsRcvd]] | 
@@ -155,9 +165,17 @@ class EthereumView extends PolymerElement {
                 </template>
               </p>
             <p>
+              <strong><iron-icon icon="account-balance"></iron-icon> Eth Balance</strong>: [[_EthWallet.ethAccBalance]] <br />
               <paper-button raised on-click="requestEthFaucet" disabled="[[_working]]">
                 <iron-icon icon="card-giftcard"></iron-icon> Request funds from faucet
               </paper-button>
+              <select class="form-control" on-change="_updateGroupMemberlist" id="groupSelect" style="width:150px">
+                <template is="dom-repeat" items="[[groups]]">
+                    <option value="{{item.groupID}}">{{item.groupName}}</option>
+                </template>
+              </select>
+            </p>
+            <p>
               <template is="dom-if" if="[[!_hasEthProfile]]">
                 <paper-button raised on-click="requestReputationProfile" disabled="[[_working]]">
                   <iron-icon icon="record-voice-over"></iron-icon> Request reputation profile
@@ -323,6 +341,8 @@ class EthereumView extends PolymerElement {
       apiEndpoint: { type: String, notify: true },
       agentId: { type: String, notify: true, observer: '_agentIdChanged' },
       error: { type: Object, notify: true },
+      group: { type: String, value: "" },
+      groups: { type: Object, value: [] },
       _working: { type: Boolean, value: false },
       _chosenAgentID: { type: String, value: "" },
       _ethTransactionSent: { type: Boolean, value: false },
@@ -351,16 +371,10 @@ class EthereumView extends PolymerElement {
       _hasEthProfile: { type: Boolean, value: false },
       _hasNoAgentsList: { type: Boolean, value: true },
       _hasNoEthWallet: { type: Boolean, value: true },
-      _hasNoManageAgents: { type: Boolean, value: true },
-      _hasNoMemberAgents: { type: Boolean, value: true },
       _hasNoProfilesList: { type: Boolean, value: true },
       _hasNoTxLog: { type: Boolean, value: true },
-      _isAjaxLoading: { type: Boolean, value: true },
       _listAgents: { type: Array, value: [] },
       _listProfiles: { type: Array, value: [] },
-      _manageAgents: { type: Array, value: [] },
-      _manageGroupAgentId: String,
-      _memberAgents: { type: Array, value: [] },
       _selectedTab: {
         type: Number,
         value: 0,
@@ -410,6 +424,30 @@ class EthereumView extends PolymerElement {
     if (this.agentId.length > 5 ) {
       this.refreshEthWallet();
     }
+  }
+
+  _updateGroups(event) {
+    var res = event.detail.response;
+    this.groups = [];
+    let keys = Object.keys(res);
+    for (var i = 0; i < keys.length; i++) {
+        this.groups.push(
+          {
+            groupName: res[keys[i]],
+            groupID: key
+          }
+        );
+    }
+    if (keys > 0) {
+        if (this.$.groupSelect.value.length > 0) {
+            this._updateGroupMemberlist();
+        } else {
+            this.group = keys[0];
+        }
+    }
+  }
+  _updateGroupMemberlist(event) {
+    this.group = this.$.groupSelect.value;
   }
 
   _handleGenericTxLogResponse(event) {
@@ -467,6 +505,7 @@ class EthereumView extends PolymerElement {
     {
       this._hasEthProfile = true;
     }
+    this.ajaxGetGroups.generateRequest();
   }
   _handleRequestFaucetResponse(event) {
 	  console.log(event.detail.response);
