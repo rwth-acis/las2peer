@@ -155,6 +155,11 @@ class EthereumView extends PolymerElement {
                 <template is="dom-if" if="[[_hasEthProfile]]">
                   <custom-star-rating value="[[_EthWallet.ethRating]]" readonly></custom-star-rating>
                 </template>
+                <template is="dom-if" if="[[!_hasEthProfile]]">
+                  <paper-button raised on-click="requestReputationProfile" disabled="[[_working]]">
+                    <iron-icon icon="record-voice-over"></iron-icon> Request reputation profile
+                  </paper-button>
+                </template>
               </p>
               <p>
                 <strong><iron-icon icon="fingerprint"></iron-icon> Eth Credentials Address</strong>: [[_EthWallet.ethAgentCredentialsAddress]] <br />
@@ -168,23 +173,20 @@ class EthereumView extends PolymerElement {
                 </template>
               </p>
             <p>
-              <strong><iron-icon icon="account-balance"></iron-icon> Eth Balance</strong>: [[_EthWallet.ethAccBalance]] <br />
+              <strong><iron-icon icon="account-balance"></iron-icon> Eth Balance</strong>: [[_EthWallet.ethAccBalance]]
               <paper-button raised on-click="requestEthFaucet" disabled="[[_working]]">
                 <iron-icon icon="card-giftcard"></iron-icon> Request funds from faucet
-              </paper-button>
-              <paper-dropdown-menu-light label="Group Agent for Success Modeling" noink no-animations>
-                <paper-listbox slot="dropdown-content" class="dropdown-content" on-change="_updateGroupMemberlist" id="groupSelect">
-                  <template is="dom-repeat" items="[[groups]]">
-                  <paper-item value="{{item.groupID}}">{{item.groupName}}</paper-item>
-                  </template>
-                </paper-listbox>
-              </paper-dropdown-menu-light>
-            </p>
-            <p>
-              <template is="dom-if" if="[[!_hasEthProfile]]">
-                <paper-button raised on-click="requestReputationProfile" disabled="[[_working]]">
-                  <iron-icon icon="record-voice-over"></iron-icon> Request reputation profile
-                </paper-button>
+              </paper-button> 
+              <br />
+              <template is="dom-if" if="[[ groups.length ]]">
+                <strong>Select group agent for Success Modeling:</strong>
+                <paper-dropdown-menu label="Group Agent for Success Modeling" noink no-animations>
+                  <paper-listbox slot="dropdown-content" class="dropdown-content" on-change="_updateGroupMemberlist" id="groupSelect">
+                    <template is="dom-repeat" items="[[groups]]">
+                    <paper-item value="{{item.groupID}}">{{item.groupName}}</paper-item>
+                    </template>
+                  </paper-listbox>
+                </paper-dropdown-menu-light>
               </template>
             </p>
             </template>
