@@ -5,14 +5,12 @@ import java.io.Serializable;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import i5.las2peer.api.p2p.ServiceNameVersion;
-import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.persistency.VerificationFailedException;
 import i5.las2peer.security.InternalSecurityException;
 import i5.las2peer.security.ServiceAgentImpl;
@@ -41,8 +39,6 @@ public class NodeInformation implements XmlAble {
 	private Serializable nodeHandle;
 
 	private byte[] signature;
-
-	private static final L2pLogger logger = L2pLogger.getInstance(NodeInformation.class);
 
 	/**
 	 * create a new standard node information

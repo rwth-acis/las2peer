@@ -8,7 +8,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.ConcurrentMap;
 
 import javax.ws.rs.BadRequestException;
@@ -44,9 +43,7 @@ import i5.las2peer.registry.exceptions.NotFoundException;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.EthereumAgent;
 import i5.las2peer.security.ServiceAgentImpl;
-import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.serialization.MalformedXMLException;
-import i5.las2peer.testing.MockAgentFactory;
 import i5.las2peer.tools.CryptoException;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -414,20 +411,8 @@ public class EthereumHandler {
 			return Response.status(Status.FORBIDDEN).entity("You have to be logged in to load a group").build();
 		}
 		*/
-		Random rand = new Random();
-		//GroupAgentImpl groupAgent = MockAgentFactory.getGroup3();
-		UserAgentImpl adamAgent = MockAgentFactory.getAdam();
-		UserAgentImpl eveAgent = MockAgentFactory.getEve();
-		UserAgentImpl abelAgent = MockAgentFactory.getAbel();
 		
-		//UserAgentImpl[] agents = { adamAgent, eveAgent, abelAgent };
 		List<EthereumAgent> agents = new ArrayList<EthereumAgent>();
-		//agents.add(adamAgent);
-		//agents.add(eveAgent);
-		//agents.add(abelAgent);
-		
-		//observer.getUserProfiles();
-		//ConcurrentMap<String, String> profiles = ethereumNode.getRegistryClient().getUserProfiles();
 		ConcurrentMap<String, String> userRegistrations = ethereumNode.getRegistryClient().getUserRegistrations();
 		
 		for( Map.Entry<String, String> userRegistration : userRegistrations.entrySet() )
@@ -471,7 +456,7 @@ public class EthereumHandler {
 			
 			member.put("username", agent.getLoginName());
 			member.put("email", agent.getEmail());
-			member.put("rating", rand.nextInt(6));
+			//member.put("rating", rand.nextInt(6));
 			
 			memberList.add(member);
 		}

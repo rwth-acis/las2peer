@@ -1,5 +1,19 @@
 package i5.las2peer.registry;
 
+import java.math.BigInteger;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
+import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.utils.Convert;
+
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.registry.data.GenericTransactionData;
 import i5.las2peer.registry.data.SenderReceiverDoubleKey;
@@ -7,16 +21,6 @@ import i5.las2peer.registry.data.ServiceDeploymentData;
 import i5.las2peer.registry.data.ServiceReleaseData;
 import i5.las2peer.registry.exceptions.EthereumException;
 import io.reactivex.schedulers.Schedulers;
-import org.web3j.protocol.core.DefaultBlockParameterName;
-import org.web3j.tuples.Tuple;
-import org.web3j.utils.Convert;
-
-import java.time.Instant;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
-import java.math.BigInteger;
 
 /**
  * Observes blockchain events related to the registry and updates its state

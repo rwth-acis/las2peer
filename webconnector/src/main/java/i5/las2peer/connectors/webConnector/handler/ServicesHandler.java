@@ -2,49 +2,59 @@ package i5.las2peer.connectors.webConnector.handler;
 
 import java.io.InputStream;
 import java.io.Serializable;
-import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import java.util.jar.JarInputStream;
 
-import javax.ws.rs.*;
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.CookieParam;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.web3j.crypto.Credentials;
+
 import i5.las2peer.api.execution.ServiceNotFoundException;
 import i5.las2peer.api.p2p.ServiceNameVersion;
-import i5.las2peer.api.persistency.EnvelopeException;
-import i5.las2peer.api.security.AgentException;
-import i5.las2peer.p2p.*;
-import i5.las2peer.registry.CredentialUtils;
-import i5.las2peer.registry.ReadOnlyRegistryClient;
-import i5.las2peer.registry.data.ServiceDeploymentData;
-import i5.las2peer.registry.data.ServiceReleaseData;
-import i5.las2peer.registry.exceptions.EthereumException;
-import i5.las2peer.security.AgentImpl;
-import i5.las2peer.security.EthereumAgent;
-import i5.las2peer.security.UserAgentImpl;
-import i5.las2peer.tools.*;
-import net.minidev.json.parser.JSONParser;
-import net.minidev.json.parser.ParseException;
-import org.glassfish.jersey.media.multipart.FormDataParam;
-
 import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
+import i5.las2peer.api.persistency.EnvelopeException;
 import i5.las2peer.api.persistency.EnvelopeNotFoundException;
+import i5.las2peer.api.security.AgentException;
 import i5.las2peer.classLoaders.ClassManager;
 import i5.las2peer.classLoaders.libraries.SharedStorageRepository;
 import i5.las2peer.connectors.webConnector.WebConnector;
 import i5.las2peer.connectors.webConnector.util.AgentSession;
+import i5.las2peer.p2p.AgentNotRegisteredException;
+import i5.las2peer.p2p.EthereumNode;
+import i5.las2peer.p2p.Node;
+import i5.las2peer.p2p.NodeException;
+import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.persistency.EnvelopeVersion;
+import i5.las2peer.registry.CredentialUtils;
+import i5.las2peer.registry.ReadOnlyRegistryClient;
+import i5.las2peer.registry.data.ServiceReleaseData;
+import i5.las2peer.tools.CryptoException;
+import i5.las2peer.tools.PackageUploader;
 import i5.las2peer.tools.PackageUploader.ServiceVersionList;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import i5.las2peer.tools.ServicePackageException;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
-import org.web3j.crypto.Credentials;
+import net.minidev.json.parser.JSONParser;
+import net.minidev.json.parser.ParseException;
 
 @Path(ServicesHandler.RESOURCE_PATH)
 public class ServicesHandler {
