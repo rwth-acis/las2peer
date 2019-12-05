@@ -89,7 +89,7 @@ public class EthereumHandler {
 	@POST
 	@Path("/requestFaucet")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response handleRequestFaucet(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId) // throws
+	public Response handleRequestFaucet(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId, String groupID) // throws
 																											// Exception
 	{
 		AgentSession session = connector.getSessionById(sessionId);
@@ -104,6 +104,47 @@ public class EthereumHandler {
 		ReadWriteRegistryClient registryClient = ethereumNode.getRegistryClient();
 		EthereumAgent ethAgent = (EthereumAgent) agent;
 		String ethAddress = ethAgent.getEthereumAddress();
+
+		/* 
+			Faucet calculations:
+
+			Base Faucet Amount {BFA}: 1 ETH
+			BFA is there to keep the community going.
+			Reward scale of Service Success Model: clamped to [0-5] {SVC_Score}
+			
+			Faucet reward per request (should be time-limited):
+
+			[success_model_name] = "SuccessModel"
+			[success_model_url] = [apiUrl]/mobsos-success-modeling
+			[success_model_groups_url] = [success_model_url]/apiv2/models/
+
+				- query chosen group from ethAgent membership list
+				{GROUP_ID} is passed from frontend
+				- query success models within that group
+				[success_model_groups_url]{GROUP_ID}
+				=> returns list:
+					[service_name]=>[URL]
+				- query services running on all nodes 
+					with nodeInfo.xml showing 
+					adminEmail == ethAgent.adminEmail
+				- match running services with success models
+				
+				{SUM_SVC_Score} = 0;
+				for each relevant success model do:
+					{SVC_Score} = get success factor called "$_ServiceSuccess"
+						[success_model_url]/{GROUP_ID}/{SVC_NAME}/[success_model_name]
+						=> returns "no catalog found" if no success model exists
+					clamp {SVC_Score} to [0-5]
+					{SUM_SVC_Score} += {SVC_Score}
+
+			Faucet reward = {BFA} + {SUM_SVC_SCORE}
+
+		*/
+
+		
+
+
+
 		BigInteger faucetAmount = Convert.toWei("0.8", Convert.Unit.ETHER).toBigInteger(); // const FAUCET_AMOUNT
 		JSONObject json = new JSONObject();
 		json.put("agentid", agent.getIdentifier());

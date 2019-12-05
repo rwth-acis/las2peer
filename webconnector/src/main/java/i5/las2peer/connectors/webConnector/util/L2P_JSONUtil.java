@@ -15,7 +15,68 @@ import i5.las2peer.security.UserAgentImpl;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import net.minidev.json.parser.JSONParser;
+import net.minidev.json.parser.ParseException;
+
 public class L2P_JSONUtil {
+
+	public static List<String> parseContactGroupsResponse(String input) throws ParseException
+	{
+		JSONObject jsonObject = (JSONObject) new JSONParser(JSONParser.MODE_PERMISSIVE).parse(input);
+		List<String> contactGroups = new ArrayList<String>();
+		jsonObject.keySet().forEach(keyStr ->
+	    {
+	        Object keyvalue = jsonObject.get(keyStr);	        
+	        //System.out.println("groupID: "+ keyStr + "\n" + "groupName: " + keyvalue);
+	        contactGroups.add(keyvalue.toString());
+	    });
+		return contactGroups;
+		
+	}
+	
+	public static double parseMobSOSSuccessResponse(String input) throws ParseException
+	{
+		JSONObject jsonObject = (JSONObject) new JSONParser(JSONParser.MODE_PERMISSIVE).parse(input);
+		
+		String rawDataStr = jsonObject.get("data").toString();
+		// sanitize input
+		rawDataStr = rawDataStr.replace("\\n", "").replace("[\"", "").replace("\"]", "");
+		String[] rawDataParts = rawDataStr.split("\\|"); // | is regex metacharacter, needs to be escaped
+		// expected format of QV output: 
+		//					0					1				2			3
+		// 		["Row count: {ROW_COUNT}| {SQL_QUERY} \n| {VALUE_TYPE}\n| {VALUE}\n"]
+		
+		return Double.parseDouble(rawDataParts[3]);
+	}
+	
+	public static List<String> parseMobSOSGroup(String input) throws ParseException
+	{
+		JSONObject jsonObject = (JSONObject) new JSONParser(JSONParser.MODE_PERMISSIVE).parse(input);
+		List<String> serviceURLs = new ArrayList<String>();
+		jsonObject.keySet().forEach(keyStr ->
+	    {
+	        Object keyvalue = jsonObject.get(keyStr);	        
+	        //System.out.println("service: "+ keyStr + "\n" + "serviceURL: " + keyvalue);
+	        serviceURLs.add(keyvalue.toString());
+	    });
+		return serviceURLs;
+	}
+	
+	public static List<String> parseMobSOSModels(String input) throws ParseException
+	{
+		JSONObject jsonObject = (JSONObject) new JSONParser(JSONParser.MODE_PERMISSIVE).parse(input);
+		List<String> groupURLs = new ArrayList<String>();
+		jsonObject.keySet().forEach(keyStr ->
+	    {
+	        Object keyvalue = jsonObject.get(keyStr);	        
+	        //System.out.println("group: "+ keyStr + "\n" + "groupURL: " + keyvalue);
+	        groupURLs.add(keyvalue.toString());
+	    });
+		return groupURLs;
+	}
 
 	public static JSONObject genericTransactionDataToJSON(GenericTransactionData genericTransactionData)
 	{

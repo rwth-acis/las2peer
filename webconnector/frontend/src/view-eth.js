@@ -409,7 +409,13 @@ class EthereumView extends PolymerElement {
     this.$.ajaxGetEthWallet.generateRequest(); 
     this.$.ajaxGenericTxLog.generateRequest();
   }
-  requestEthFaucet() { this.$.ajaxRequestFaucet.generateRequest(); }
+  requestEthFaucet() { 
+    //his.$.ajaxRequestFaucet.generateRequest(); 
+    let req = this.$.ajaxRequestFaucet;
+      req.body = new FormData();
+      req.body.append('groupID', this.group);
+      req.generateRequest();
+  }
   requestReputationProfile() { 
     if (this._EthWallet.ethAccBalance < 0.15) {
       this.error = { title: "Not enough funds", message: "Try requesting eth from the faucet?" };
