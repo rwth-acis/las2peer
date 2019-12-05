@@ -5,6 +5,8 @@ package i5.las2peer.registry.exceptions;
  * the given password.
  */
 public class BadEthereumCredentialsException extends Exception {
+	private static final long serialVersionUID = 1L;
+
 	public BadEthereumCredentialsException() {
 	}
 
