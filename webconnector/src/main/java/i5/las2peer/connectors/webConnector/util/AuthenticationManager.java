@@ -106,7 +106,7 @@ public class AuthenticationManager {
 	private AgentImpl authenticateCredentials(Credentials credentials) throws AgentException {
 		String prefixedIdentifier = credentials.identifier;
 		String agentId;
-
+		logger.info("attempting login with id: " + prefixedIdentifier);
 		try {
 			agentId = connector.getL2pNode().getUserManager().getAgentId(prefixedIdentifier);
 		} catch (IllegalArgumentException e) {
