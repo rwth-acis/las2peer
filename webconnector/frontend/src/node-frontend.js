@@ -341,7 +341,7 @@ class NodeFrontend extends PolymerElement {
     let req = this.$.ajaxLogin;
     req.headers = { Authorization: 'Basic ' + btoa(prefixedIdentifier + ':' + credentials.oidcSub) };
     if (((this._oidcUser || {}).access_token || "").length > 0) {
-      req.headers['access_token'] = this._oidcUser.access_token;
+      req.headers['access-token'] = this._oidcUser.access_token;
     }
     req.generateRequest();
   }

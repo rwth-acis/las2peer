@@ -390,11 +390,11 @@ public class WebConnectorTest {
 			c.setLogin(testAgent.getIdentifier(), testPass);
 
 			// test auth params in GET
-			ClientResponse result = c.sendRequest("GET", "test/requesturi?param1=sadf&access_token=secret", "");
+			ClientResponse result = c.sendRequest("GET", "test/requesturi?param1=sadf&access-token=secret", "");
 			Assert.assertEquals(200, result.getHttpCode());
 			Assert.assertTrue(result.getResponse().contains("param1"));
 			Assert.assertFalse(result.getResponse().contains("secret"));
-			Assert.assertFalse(result.getResponse().contains("access_token"));
+			Assert.assertFalse(result.getResponse().contains("access-token"));
 
 			// test auth params in header
 			HashMap<String, String> headers = new HashMap<>();

@@ -36,7 +36,7 @@ public class AuthenticationManager {
 
 	private final L2pLogger logger = L2pLogger.getInstance(AuthenticationManager.class.getName());
 
-	public static final String ACCESS_TOKEN_KEY = "access_token";
+	public static final String ACCESS_TOKEN_KEY = "access-token";
 	public static final String OIDC_PROVIDER_KEY = "oidc_provider";
 
 	private final WebConnector connector;
