@@ -44,7 +44,8 @@ public class L2P_JSONUtil {
 		String rawDataStr = jsonObject.get("data").toString();
 		// sanitize input
 		rawDataStr = rawDataStr.replace("\\n", "").replace("[\"", "").replace("\"]", "");
-		String[] rawDataParts = rawDataStr.split("\\|"); // | is regex metacharacter, needs to be escaped
+		// | is regex metacharacter, needs to be escaped (\\)
+		String[] rawDataParts = rawDataStr.split("\\|"); 
 		// expected format of QV output: 
 		//					0					1				2			3
 		// 		["Row count: {ROW_COUNT}| {SQL_QUERY} \n| {VALUE_TYPE}\n| {VALUE}\n"]
@@ -52,7 +53,7 @@ public class L2P_JSONUtil {
 		return Float.parseFloat(rawDataParts[3]);
 	}
 	
-	public static List<String> parseMobSOSGroup(String input) throws ParseException
+	public static List<String> parseMobSOSGroupURLs(String input) throws ParseException
 	{
 		JSONObject jsonObject = (JSONObject) new JSONParser(JSONParser.MODE_PERMISSIVE).parse(input);
 		List<String> serviceURLs = new ArrayList<String>();
@@ -61,6 +62,19 @@ public class L2P_JSONUtil {
 	        Object keyvalue = jsonObject.get(keyStr);	        
 	        //System.out.println("service: "+ keyStr + "\n" + "serviceURL: " + keyvalue);
 	        serviceURLs.add(keyvalue.toString());
+	    });
+		return serviceURLs;
+	}
+
+	public static List<String> parseMobSOSGroupServiceNames(String input) throws ParseException
+	{
+		JSONObject jsonObject = (JSONObject) new JSONParser(JSONParser.MODE_PERMISSIVE).parse(input);
+		List<String> serviceURLs = new ArrayList<String>();
+		jsonObject.keySet().forEach(keyStr ->
+	    {
+	        Object keyvalue = jsonObject.get(keyStr);	        
+	        //System.out.println("service: "+ keyStr + "\n" + "serviceURL: " + keyvalue);
+	        serviceURLs.add(keyStr.toString());
 	    });
 		return serviceURLs;
 	}

@@ -111,13 +111,13 @@ public class EthereumHandler {
 		if (localNodeInfo == null)
 			throw new EthereumException("local node info null");
 		Boolean isLocalNodeAdmin = localNodeInfo.getAdminEmail().equals(agentEmail);
-		logger.info("[local isAdmin?] comparing nodeInfo ["+localNodeInfo.getAdminEmail()+"] vs. ["+agentEmail+"]");
+		logger.info("[local isAdmin?] comparing nodeInfo ["+localNodeInfo.getAdminEmail()+"] vs. ["+agentEmail+"] = " + isLocalNodeAdmin );
 		return isLocalNodeAdmin;
 	}
 
 	private int queryLocalServices(Map<String, String> ethAgentAdminServices, Boolean isLocalAdmin) {
 		ServiceAgentImpl[] localServices = node.getRegisteredServices();
-		if (!isLocalAdmin) {
+		if (isLocalAdmin) {
 			for (ServiceAgentImpl localServiceAgent : localServices) {
 				ServiceNameVersion nameVersion = localServiceAgent.getServiceNameVersion();
 				logger.info("[local SVC]: found service " + nameVersion.toString());
@@ -202,19 +202,20 @@ public class EthereumHandler {
 		float baseFaucetAmount = 1f;
 		float servicesScore = 0f;
 		float reward = 0f;
-		try {
-			logger.info("[ETH Faucet]: accessing success modeling group #" + groupID);
-			String successGroupResponse = L2P_HTTPUtil.getHTTP(successGroupURL, "GET");
-			List<String> servicesWithSuccessModel = L2P_JSONUtil.parseMobSOSGroup(successGroupResponse);
-			
-			logger.info("[ETH Faucet]: found " + servicesWithSuccessModel.size() + " services with success model.");
+		try {			
 			int localServicesCount = queryLocalServices(runningAdminServices, isLocalAdmin(agentEmail));
 			int remoteServicesCount = queryRemoteServices(runningAdminServices, agentEmail);
-
-			logger.info("[ETH Faucet]: found " + ( localServicesCount + remoteServicesCount ) + " services ran by ethAgent");
+			
+			logger.info("[ETH Faucet]: found " + ( localServicesCount + remoteServicesCount ) + " services ran by ethAgent: ");
 			runningAdminServices.forEach((k, v) -> {
 				logger.info("[ETH Faucet]: ethAgent is running service " + k + " at version " + v);
 			});
+
+			logger.info("[ETH Faucet]: accessing success modeling group #" + groupID);
+			String successGroupResponse = L2P_HTTPUtil.getHTTP(successGroupURL, "GET");
+			List<String> servicesWithSuccessModel = L2P_JSONUtil.parseMobSOSGroupServiceNames(successGroupResponse);
+			logger.info("[ETH Faucet]: found " + servicesWithSuccessModel.size() + " services with success model.");
+
 			if ( localServicesCount + remoteServicesCount == 0 )
 			{
 				// no services running that the agent is admin of.
