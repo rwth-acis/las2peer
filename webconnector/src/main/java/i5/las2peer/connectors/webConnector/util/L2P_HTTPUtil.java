@@ -12,10 +12,16 @@ import java.net.URLConnection;
 import java.net.URL;
 
 import i5.las2peer.api.execution.ServiceNotFoundException;
+import i5.las2peer.logging.L2pLogger;
 
 public class L2P_HTTPUtil {
+    private static final L2pLogger logger = L2pLogger.getInstance(L2P_HTTPUtil.class);
+
     public static String getHTTP(String requestURL, String requestMethod)
             throws MalformedURLException, ServiceNotFoundException {
+
+        logger.info("[HTTP] " + requestMethod + "@ " + requestURL);
+
         // https://stackoverflow.com/a/35013372
         // https://stackoverflow.com/q/33491373
         try {

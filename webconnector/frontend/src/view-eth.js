@@ -178,16 +178,14 @@ class EthereumView extends PolymerElement {
                 <iron-icon icon="card-giftcard"></iron-icon> Request funds from faucet
               </paper-button> 
               <br />
-              <template is="dom-if" if="[[ groups.length ]]">
-                <strong>Select group agent for Success Modeling:</strong>
-                <paper-dropdown-menu label="Group Agent for Success Modeling" noink no-animations>
-                  <paper-listbox slot="dropdown-content" class="dropdown-content" on-change="_updateGroupMemberlist" id="groupSelect">
-                    <template is="dom-repeat" items="[[groups]]">
-                    <paper-item value="{{item.groupID}}">{{item.groupName}}</paper-item>
-                    </template>
-                  </paper-listbox>
-                </paper-dropdown-menu-light>
-              </template>
+              <strong>Select group agent for Success Modeling (agent must be in group):</strong>
+              <paper-dropdown-menu label="Group Agent for Success Modeling" noink no-animations>
+                <paper-listbox slot="dropdown-content" class="dropdown-content" on-change="_updateGroupMemberlist" id="groupSelect">
+                  <template is="dom-repeat" items="[[groups]]">
+                  <paper-item value="{{item.groupID}}">{{item.groupName}}</paper-item>
+                  </template>
+                </paper-listbox>
+              </paper-dropdown-menu-light>
             </p>
             </template>
 
@@ -470,8 +468,6 @@ class EthereumView extends PolymerElement {
   _handleGenericTxLogResponse(event) {
     this._EthTxLog = event.detail.response;
     console.log(this._EthTxLog);
-    console.log(this._EthTxLog.rcvdJsonLog.length);
-    console.log(this._EthTxLog.sentJsonLog.length);
     if (this._EthTxLog.rcvdJsonLog.length == 0 && this._EthTxLog.sentJsonLog.length == 0)
       this._hasNoTxLog = true;
     else

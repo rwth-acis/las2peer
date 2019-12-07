@@ -37,7 +37,7 @@ public class L2P_JSONUtil {
 		
 	}
 	
-	public static double parseMobSOSSuccessResponse(String input) throws ParseException
+	public static float parseMobSOSSuccessResponse(String input) throws ParseException
 	{
 		JSONObject jsonObject = (JSONObject) new JSONParser(JSONParser.MODE_PERMISSIVE).parse(input);
 		
@@ -49,7 +49,7 @@ public class L2P_JSONUtil {
 		//					0					1				2			3
 		// 		["Row count: {ROW_COUNT}| {SQL_QUERY} \n| {VALUE_TYPE}\n| {VALUE}\n"]
 		
-		return Double.parseDouble(rawDataParts[3]);
+		return Float.parseFloat(rawDataParts[3]);
 	}
 	
 	public static List<String> parseMobSOSGroup(String input) throws ParseException
