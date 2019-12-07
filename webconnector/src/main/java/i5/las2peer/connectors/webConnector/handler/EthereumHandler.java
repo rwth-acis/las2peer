@@ -119,9 +119,15 @@ public class EthereumHandler {
 		if (!isLocalAdmin) {
 			for (ServiceAgentImpl localServiceAgent : localServices) {
 				ServiceNameVersion nameVersion = localServiceAgent.getServiceNameVersion();
+				logger.info("[local SVC]: found service " + nameVersion.toString());
 				ethAgentAdminServices.putIfAbsent(nameVersion.getName(), node.getNodeId().toString());
 			}
 		}
+		else
+		{
+			logger.info("[local SVC]: ethAgent is not local admin, omitting local services");
+		}
+
 		return localServices.length;
 	}
 
@@ -131,13 +137,19 @@ public class EthereumHandler {
 			NodeInformation remoteNodeInfo;
 			try {
 				remoteNodeInfo = ethereumNode.getNodeInformation(remoteNodeHandle);
+				logger.info("[remote SVC]: querying node #" + remoteNodeHandle.getNodeId());
 				// is ethAgent admin of remote node?
 				if (remoteNodeInfo.getAdminEmail().equals(agentEmail)) {
 					// yes, query services
 					List<ServiceNameVersion> servicesOnRemoteNode = remoteNodeInfo.getHostedServices();
 					for (ServiceNameVersion removeSNV : servicesOnRemoteNode) {
+						logger.info("[remote SVC]: found service " + removeSNV.toString());
 						ethAgentAdminServices.putIfAbsent(removeSNV.getName(), remoteNodeHandle.toString());
 					}
+				}
+				else
+				{
+					logger.info("[remote SVC]: ethAgent is not remote admin, omitting node");
 				}
 			} catch (NodeNotFoundException e) {
 				// logger.severe("trying to access node " + remoteNodeHandle.getNodeId() + " | "
@@ -198,6 +210,9 @@ public class EthereumHandler {
 			int remoteServicesCount = queryRemoteServices(runningAdminServices, agentEmail);
 
 			logger.info("[ETH Faucet]: found " + ( localServicesCount + remoteServicesCount ) + " services ran by ethAgent");
+			runningAdminServices.forEach((k, v) -> {
+				logger.info("[ETH Faucet]: ethAgent is running service " + k + " at version " + v);
+			});
 			if ( localServicesCount + remoteServicesCount == 0 )
 			{
 				// no services running that the agent is admin of.
@@ -207,6 +222,7 @@ public class EthereumHandler {
 			{
 				for(String svc: servicesWithSuccessModel)
 				{
+					logger.info("[ETH Faucet]: checking if service ("+svc+") is hosted by ethAgent");
 					if ( runningAdminServices.containsKey(svc) )
 					{
 						logger.info("[ETH Faucet]: found service ("+svc+") ran by ethAgent with a success model!");
@@ -317,10 +333,13 @@ public class EthereumHandler {
 		json.put("known-node-count", queryRemoteServices(ethAgentAdminServices, agentEmail) );
 		
 		// translate local and remote service info into JSON array
-		JSONObject jsonServices = new JSONObject();
+		JSONArray jsonServices = new JSONArray();
 		for (Map.Entry<String, String> entry : ethAgentAdminServices.entrySet()) 
 		{
-			jsonServices.put(entry.getKey(), entry.getValue());
+			JSONObject jsonService = new JSONObject();
+			jsonService.put("serviceName", entry.getKey());
+			jsonService.put("serviceVersion", entry.getValue());
+			jsonServices.add(jsonService);
 		}
 		json.put("eth-agent-admin-services", jsonServices );
 
