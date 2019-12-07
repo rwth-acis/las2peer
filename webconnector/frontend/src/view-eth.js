@@ -179,8 +179,8 @@ class EthereumView extends PolymerElement {
               </paper-button> 
               <br />
               <strong>Select group agent for Success Modeling (agent must be in group):</strong>
-              <paper-dropdown-menu label="Group Agent for Success Modeling" noink no-animations>
-                <paper-listbox slot="dropdown-content" class="dropdown-content" on-change="_updateGroupMemberlist" id="groupSelect">
+              <paper-dropdown-menu label="Group Agent for Success Modeling" on-change="_updateGroupMemberlist" noink no-animations selected-item="{{_groupSelected}}">
+                <paper-listbox slot="dropdown-content" class="dropdown-content" id="groupSelect">
                   <template is="dom-repeat" items="[[groups]]">
                   <paper-item value="{{item.groupID}}">{{item.groupName}}</paper-item>
                   </template>
@@ -347,7 +347,8 @@ class EthereumView extends PolymerElement {
       agentId: { type: String, notify: true, observer: '_agentIdChanged' },
       error: { type: Object, notify: true },
       group: { type: String, value: "" },
-      groups: { type: Object, value: [] },
+      groups: { type: Array, value: [] },
+      _groupSelected: {type: Object},
       _working: { type: Boolean, value: false },
       _chosenAgentID: { type: String, value: "" },
       _ethTransactionSent: { type: Boolean, value: false },
@@ -408,7 +409,8 @@ class EthereumView extends PolymerElement {
     this.$.ajaxGenericTxLog.generateRequest();
   }
   requestEthFaucet() { 
-    //his.$.ajaxRequestFaucet.generateRequest(); 
+    this.group = this._findGroupIDByName(this._groupSelected.innerHTML.trim());
+    console.log("faucet request for groupID: " + this.group);
     let req = this.$.ajaxRequestFaucet;
       req.body = new FormData();
       req.body.append('groupID', this.group);
@@ -437,6 +439,10 @@ class EthereumView extends PolymerElement {
     }
   }
 
+  _findGroupIDByName(name) {
+    return this.groups.find(g => g.groupName == name).groupID;
+  }
+
   _updateGroups(event) {
     var res = event.detail.response;
     this.groups = [];
@@ -461,8 +467,12 @@ class EthereumView extends PolymerElement {
         }
     }
   }
-  _updateGroupMemberlist(event) {
-    this.group = this.$.groupSelect.value;
+  _updateGroupMemberlist(e) {
+    console.log([e.selectedItem, e]);
+
+    console.log(this._groupSelected);
+    console.log(this._findGroupIDByName(this._groupSelected.innerHTML.trim()));
+    this.group = this._findGroupIDByName(this._groupSelected.innerHTML.trim());
   }
 
   _handleGenericTxLogResponse(event) {

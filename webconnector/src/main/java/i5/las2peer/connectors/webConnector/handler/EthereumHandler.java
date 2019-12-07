@@ -153,9 +153,9 @@ public class EthereumHandler {
 	@POST
 	@Path("/requestFaucet")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response handleRequestFaucet(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId,
-			String groupID) // throws
-	// Exception
+	public Response handleRequestFaucet(
+		@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId,
+		@FormDataParam("groupID") String groupID) 
 	{
 		AgentSession session = connector.getSessionById(sessionId);
 		if (session == null) {
@@ -176,7 +176,7 @@ public class EthereumHandler {
 		String agentEmail = ethAgent.getEmail();
 		String ethAddress = ethAgent.getEthereumAddress();
 
-		String apiBaseURL = connector.getHttpEndpoint();
+		String apiBaseURL = "http://tech4comp.dbis.rwth-aachen.de:32319";//connector.getHttpEndpoint();
 		String successBaseURL = apiBaseURL + "/mobsos-success-modeling";
 		String successModelsURL = successBaseURL + "/apiv2/models";
 
