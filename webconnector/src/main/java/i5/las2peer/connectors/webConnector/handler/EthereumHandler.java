@@ -111,6 +111,7 @@ public class EthereumHandler {
 		if (localNodeInfo == null)
 			throw new EthereumException("local node info null");
 		Boolean isLocalNodeAdmin = localNodeInfo.getAdminEmail().equals(agentEmail);
+		logger.info("[local isAdmin?] comparing nodeInfo ["+localNodeInfo.getAdminEmail()+"] vs. ["+agentEmail+"]");
 		return isLocalNodeAdmin;
 	}
 
@@ -133,11 +134,12 @@ public class EthereumHandler {
 
 	private int queryRemoteServices(Map<String, String> ethAgentAdminServices, String agentEmail) {
 		Collection<NodeHandle> knownNodes = ethereumNode.getPastryNode().getLeafSet().getUniqueSet();
+		logger.info("[remove SVC] checking " + knownNodes.size() + " known remote nodes, see if " + agentEmail + " is admin there...");
 		for (NodeHandle remoteNodeHandle : knownNodes) {
 			NodeInformation remoteNodeInfo;
 			try {
 				remoteNodeInfo = ethereumNode.getNodeInformation(remoteNodeHandle);
-				logger.info("[remote SVC]: querying node #" + remoteNodeHandle.getNodeId());
+				logger.info("[remote SVC]: querying node #" + remoteNodeHandle.getNodeId()+ ", admin: " + remoteNodeInfo.getAdminEmail());
 				// is ethAgent admin of remote node?
 				if (remoteNodeInfo.getAdminEmail().equals(agentEmail)) {
 					// yes, query services
