@@ -422,16 +422,21 @@ public class EthereumHandler {
 			developServicesScore = Math.min(RegistryConfiguration.Faucet_developMaxScore, developServicesScore);
 		}
 
-		reward = userRatingScore *
-					( hostingServicesScore + developServicesScore );
-		logger.info("[ETH Faucet]: calculating faucet amount: \n" +
+		reward = ( hostingServicesScore + developServicesScore );
+		if ( userRatingScore != 0f ) reward *= userRatingScore;
+		logger.info("[ETH Faucet]: calculating faucet amount:" );
 				//"> baseFaucetAmount: " + Float.toString(baseFaucetAmount) + " ETH \n" +
+		if ( userRatingScore != 0f )
+		{
+			logger.info(	
 				"> userRatingScore: " + 
 				"   " + Float.toString(RegistryConfiguration.Faucet_userScoreMultiplier) + "*" + 
 				"   " + Float.toString(userRatingScore_Raw) + " = " + 
 				"   " + Float.toString(userRatingScore) + " ETH \n" + 
-				"> * \n" +
-				"    ( \n" + 
+				"> * \n"
+			);
+		}
+		logger.info("    ( \n" + 
 				"       hostingServicesScore: " + 
 				"        " + Float.toString(RegistryConfiguration.Faucet_serviceHostingScoreMultiplier) + "*" + 
 				"        " + Float.toString(hostingServicesScore_Raw) + " = " + 
@@ -518,12 +523,12 @@ public class EthereumHandler {
 			}
 			else
 			{
-				logger.info("[ETH Faucet]: no valid reputation profile, setting agent reputation to 0" );
+				logger.info("[ETH Faucet]: no valid reputation profile, setting agent reputation to 1" );
 			}
 		} catch (EthereumException | NotFoundException e) {
 			logger.severe("[ETH Faucet]: failed to get user reputation for " + ethAddress );
 			e.printStackTrace();
-			return 0;
+			return 1;
 		}
 		return userRatingScore_Raw;
 	}

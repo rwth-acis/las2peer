@@ -523,8 +523,9 @@ class BlockchainObserver {
 				// search list of services announced
 				serviceMap.forEach((announcedServiceName,hostingNodeIDList)->
 				{
+					logger.info("[ChainObserver]    processing service '"+announcedServiceName+"', looking for '"+searchingForService+"':" );
 					// is this the service we're looking for?
-					if ( announcedServiceName.equals(searchingForService) )
+					if ( announcedServiceName == searchingForService )
 					{
 						logger.info("[ChainObserver]     found service " + announcedServiceName + ", running at " + hostingNodeIDList.size() + " nodes");
 						// yes -> count no. of increments per hosting node
