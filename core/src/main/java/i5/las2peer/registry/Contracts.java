@@ -35,16 +35,24 @@ import java.util.Objects;
  * a builder.
  */
 class Contracts {
+	
+	private Web3j web3j;
+
 	final CommunityTagIndex communityTagIndex;
 	final UserRegistry userRegistry;
 	final ServiceRegistry serviceRegistry;
 	final ReputationRegistry reputationRegistry;
 
-	private Contracts(CommunityTagIndex communityTagIndex, UserRegistry userRegistry, ServiceRegistry serviceRegistry, ReputationRegistry reputationRegistry) {
+	private Contracts(Web3j web3j, CommunityTagIndex communityTagIndex, UserRegistry userRegistry, ServiceRegistry serviceRegistry, ReputationRegistry reputationRegistry) {
+		this.web3j = web3j;
 		this.communityTagIndex = communityTagIndex;
 		this.userRegistry = userRegistry;
 		this.serviceRegistry = serviceRegistry;
 		this.reputationRegistry = reputationRegistry;
+	}
+
+	public Web3j getWeb3jClient() {
+		return web3j;
 	}
 
 	/**
@@ -175,7 +183,7 @@ class Contracts {
 			ServiceRegistry serviceRegistry = ServiceRegistry.load(config.serviceRegistryAddress, web3j, transactionManager, gasProvider);
 			ReputationRegistry reputationRegistry = ReputationRegistry.load(config.reputationRegistryAddress, web3j, transactionManager, gasProvider);
 
-			return new Contracts(communityTagIndex, userRegistry, serviceRegistry, reputationRegistry);
+			return new Contracts(web3j, communityTagIndex, userRegistry, serviceRegistry, reputationRegistry);
 		}
 
 		private TransactionManager constructTxManager(Web3j web3j, Credentials credentials) {
