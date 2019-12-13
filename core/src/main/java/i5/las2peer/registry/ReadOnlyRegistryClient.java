@@ -4,6 +4,7 @@ import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.registry.data.BlockchainTransactionData;
 import i5.las2peer.registry.data.GenericTransactionData;
 import i5.las2peer.registry.data.RegistryConfiguration;
+import i5.las2peer.registry.data.SenderReceiverDoubleKey;
 import i5.las2peer.registry.data.ServiceDeploymentData;
 import i5.las2peer.registry.data.ServiceReleaseData;
 import i5.las2peer.registry.data.UserData;
@@ -24,6 +25,7 @@ import org.web3j.protocol.core.methods.response.EthGetBalance;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.protocol.core.methods.response.EthGetTransactionReceipt;
 import org.web3j.protocol.core.methods.response.EthTransaction;
+import org.web3j.protocol.core.methods.response.Transaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.core.methods.response.Web3ClientVersion;
 import org.web3j.protocol.http.HttpService;
@@ -264,6 +266,12 @@ public class ReadOnlyRegistryClient {
 	public ConcurrentMap<String, String> getServiceAuthors() {
 		return observer.serviceNameToAuthor;
 	}
+
+	public String getServiceAuthor(String service) {
+		if ( !observer.serviceNameToAuthor.containsKey(service) )
+			return "";
+		return observer.serviceNameToAuthor.get(service);
+	}
 	
 	/** @return map of profile owners to their usernames */
 	public ConcurrentMap<String, String> getUserProfiles() {
@@ -320,6 +328,20 @@ public class ReadOnlyRegistryClient {
 		return strTokenAmount;
 	}
 
+	public ConcurrentMap<SenderReceiverDoubleKey, List<Transaction>> getTransactionLog() {
+		return observer.transactionLog;
+	}
+
+	/***
+	 * Query no. of service announcements which occurred since provide block
+	 * @param largerThanBlockNo block number to start querying at
+	 * @param searchingForService service which is to be found
+	 * @return HashMap< ServiceName, NoOfAnnouncements >
+	 */
+	public HashMap<String, Integer> getNoOfServiceAnnouncementSinceBlockOrderedByHostingNode(BigInteger largerThanBlockNo, String searchingForService)
+	{
+		return observer.getNoOfServiceAnnouncementSinceBlockOrderedByHostingNode(largerThanBlockNo, searchingForService);
+	}
 
 	public BlockchainTransactionData getTransactionInfo(String txHash) throws EthereumException {
 		EthTransaction ethTransaction;

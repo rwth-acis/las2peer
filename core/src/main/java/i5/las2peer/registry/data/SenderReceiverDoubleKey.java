@@ -37,11 +37,16 @@ public class SenderReceiverDoubleKey {
 
     @Override   
     public boolean equals(Object obj) {
-      if (!(obj instanceof SenderReceiverDoubleKey))
+    if (!(obj instanceof SenderReceiverDoubleKey))
         return false;
-      SenderReceiverDoubleKey ref = (SenderReceiverDoubleKey) obj;
-      return this.sender.equals(ref.sender) && 
-          this.receiver.equals(ref.receiver);
+    SenderReceiverDoubleKey ref = (SenderReceiverDoubleKey) obj;
+    // allow for wildcard comparison
+        if ( ref.receiver.equals("*") || this.receiver.equals("*") ) 
+            return this.sender.equals(ref.sender);
+        if ( ref.sender.equals("*") || this.sender.equals("*") ) 
+            return this.receiver.equals(ref.receiver);
+    return this.sender.equals(ref.sender) && 
+        this.receiver.equals(ref.receiver);
     }
 
     @Override
