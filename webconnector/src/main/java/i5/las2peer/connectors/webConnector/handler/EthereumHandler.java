@@ -395,6 +395,15 @@ public class EthereumHandler {
 		// QUERY USER REPUTATION PROFILE
 		userRatingScore_Raw = getUserRating(ethAddress);
 
+		// user needs ether to request reputation profile
+		// user without profile will have score of 0
+		// multiplying score onto faucet amount will disallow fresh users from entering the community
+		if ( userRatingScore_Raw == 0f ) 
+		{
+			userRatingScore_Raw = 1f;
+			logger.info("[ETH Faucet]: user has no profile. setting userRating multipler to 1");
+		}
+
 		// sum all values of hosted and developed services
 		for( Float serviceSucces: hostingServiceValue.values() )
 		{
@@ -523,12 +532,12 @@ public class EthereumHandler {
 			}
 			else
 			{
-				logger.info("[ETH Faucet]: no valid reputation profile, setting agent reputation to 1" );
+				logger.info("[ETH Faucet]: no valid reputation profile" );
 			}
 		} catch (EthereumException | NotFoundException e) {
 			logger.severe("[ETH Faucet]: failed to get user reputation for " + ethAddress );
 			e.printStackTrace();
-			return 1;
+			return 0;
 		}
 		return userRatingScore_Raw;
 	}
