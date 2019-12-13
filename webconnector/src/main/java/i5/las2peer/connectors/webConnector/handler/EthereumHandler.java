@@ -459,6 +459,14 @@ public class EthereumHandler {
 				"= " + reward + " ETH"
 			 );
 
+		if ( reward == 0f && largestBlockNo.equals(BigInteger.ZERO) )
+		{
+			// user never fauceted, payout base amount
+			reward = RegistryConfiguration.Faucet_baseFaucetAmount;
+			logger.info("[ETH Faucet]: detected new user (no reward, no last transaction).");
+			logger.info("[ETH Faucet]: setting payout to " + Float.toString(reward) + " ETH.");
+		}
+
 		BigInteger faucetAmount = Convert.toWei(Float.toString(reward), Convert.Unit.ETHER).toBigInteger();
 
 		JSONObject json = new JSONObject();
