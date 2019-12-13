@@ -51,6 +51,10 @@ public class UserProfileData {
 		return this.cumulativeScore;
 	}
 
+	public float getStarRating() {
+		return this.cumulativeScore.floatValue() / this.noTransactionsRcvd.floatValue();
+	}
+
 	public BigInteger getProfileIndex() {
 		return this.profileIndex;
 	}

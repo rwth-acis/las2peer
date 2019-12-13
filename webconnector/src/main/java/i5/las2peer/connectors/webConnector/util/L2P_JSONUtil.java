@@ -172,7 +172,7 @@ public class L2P_JSONUtil {
 						if (upd.getNoTransactionsRcvd().compareTo(BigInteger.ZERO) == 0) {
 							json.put("ethRating", 0);
 						} else {
-							json.put("ethRating", upd.getCumulativeScore().divide(upd.getNoTransactionsRcvd()));
+							json.put("ethRating", upd.getStarRating());
 						}
 					} else {
 						json.put("ethRating", "0");
