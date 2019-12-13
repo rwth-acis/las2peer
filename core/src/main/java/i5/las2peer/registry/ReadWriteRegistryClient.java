@@ -182,12 +182,10 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 				+ BigInteger.valueOf(rating).toString() + ")");
 
 		// see reputation registry
-		int __amountMax = 5;
-		int __amountMin = __amountMax * -1;
-		if (rating > __amountMax || rating < __amountMin)
+		if (rating > RegistryConfiguration.UserRating_maxRatingValue || rating < RegistryConfiguration.UserRating_minRatingValue)
 		{
 			throw new EthereumException(
-					"Could not add user rating: rating outside bounds (" + __amountMin + " - " + __amountMax + ")");
+					"Could not add user rating: rating outside bounds [" + RegistryConfiguration.UserRating_minRatingValue + " - " + RegistryConfiguration.UserRating_maxRatingValue + "]");
 		}
 
 		String txHash;
