@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.CookieParam;
@@ -22,6 +23,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.web3j.protocol.core.methods.response.Transaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.utils.Convert;
 
@@ -41,6 +43,8 @@ import i5.las2peer.p2p.NodeNotFoundException;
 import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.registry.ReadWriteRegistryClient;
 import i5.las2peer.registry.data.GenericTransactionData;
+import i5.las2peer.registry.data.RegistryConfiguration;
+import i5.las2peer.registry.data.SenderReceiverDoubleKey;
 import i5.las2peer.registry.data.UserProfileData;
 import i5.las2peer.registry.exceptions.EthereumException;
 import i5.las2peer.registry.exceptions.NotFoundException;
@@ -53,6 +57,7 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.ParseException;
 import rice.pastry.NodeHandle;
+import rice.pastry.PastryNode;
 
 @Path(EthereumHandler.RESOURCE_PATH)
 public class EthereumHandler {
@@ -63,14 +68,14 @@ public class EthereumHandler {
 
 	private final WebConnector connector;
 	private final Node node;
+	private final PastryNode pastryNode;
 	private final EthereumNode ethereumNode;
-
-	private final String SuccessMeasure_Label = "$_Success";
 
 	public EthereumHandler(WebConnector connector) {
 		this.connector = connector;
 		this.node = connector.getL2pNode();
-		ethereumNode = (node instanceof EthereumNode) ? (EthereumNode) node : null;
+		this.pastryNode = (node instanceof PastryNodeImpl) ? ((PastryNodeImpl) node).getPastryNode() : null;
+		this.ethereumNode = (node instanceof EthereumNode) ? (EthereumNode) node : null;
 	}
 
 	private AgentImpl getAgentByDetail(String agentId, String username, String email) throws Exception {
@@ -111,7 +116,8 @@ public class EthereumHandler {
 		if (localNodeInfo == null)
 			throw new EthereumException("local node info null");
 		Boolean isLocalNodeAdmin = localNodeInfo.getAdminEmail().equals(agentEmail);
-		logger.info("[local isAdmin?] comparing nodeInfo ["+localNodeInfo.getAdminEmail()+"] vs. ["+agentEmail+"] = " + isLocalNodeAdmin );
+		logger.info("[local isAdmin?] comparing nodeInfo [" + localNodeInfo.getAdminEmail() + "] vs. [" + agentEmail
+				+ "] = " + isLocalNodeAdmin);
 		return isLocalNodeAdmin;
 	}
 
@@ -123,9 +129,7 @@ public class EthereumHandler {
 				logger.info("[local SVC]: found service " + nameVersion.toString());
 				ethAgentAdminServices.putIfAbsent(nameVersion.getName(), node.getNodeId().toString());
 			}
-		}
-		else
-		{
+		} else {
 			logger.info("[local SVC]: ethAgent is not local admin, omitting local services");
 		}
 
@@ -134,12 +138,14 @@ public class EthereumHandler {
 
 	private int queryRemoteServices(Map<String, String> ethAgentAdminServices, String agentEmail) {
 		Collection<NodeHandle> knownNodes = ethereumNode.getPastryNode().getLeafSet().getUniqueSet();
-		logger.info("[remove SVC] checking " + knownNodes.size() + " known remote nodes, see if " + agentEmail + " is admin there...");
+		logger.info("[remove SVC] checking " + knownNodes.size() + " known remote nodes, see if " + agentEmail
+				+ " is admin there...");
 		for (NodeHandle remoteNodeHandle : knownNodes) {
 			NodeInformation remoteNodeInfo;
 			try {
 				remoteNodeInfo = ethereumNode.getNodeInformation(remoteNodeHandle);
-				logger.info("[remote SVC]: querying node #" + remoteNodeHandle.getNodeId()+ ", admin: " + remoteNodeInfo.getAdminEmail());
+				logger.info("[remote SVC]: querying node #" + remoteNodeHandle.getNodeId() + ", admin: "
+						+ remoteNodeInfo.getAdminEmail());
 				// is ethAgent admin of remote node?
 				if (remoteNodeInfo.getAdminEmail().equals(agentEmail)) {
 					// yes, query services
@@ -148,9 +154,7 @@ public class EthereumHandler {
 						logger.info("[remote SVC]: found service " + removeSNV.toString());
 						ethAgentAdminServices.putIfAbsent(removeSNV.getName(), remoteNodeHandle.toString());
 					}
-				}
-				else
-				{
+				} else {
 					logger.info("[remote SVC]: ethAgent is not remote admin, omitting node");
 				}
 			} catch (NodeNotFoundException e) {
@@ -164,13 +168,38 @@ public class EthereumHandler {
 		return knownNodes.size();
 	}
 
+	public List<String> getNodeIDsOfAdminNodes(String agentEmail) throws EthereumException {
+		List<String> adminNodeIDs = new ArrayList<>();
+		if (isLocalAdmin(agentEmail)) {
+			adminNodeIDs.add(pastryNode.getNodeId().toStringFull());
+		}
+
+		// get remote nodes info
+		Collection<NodeHandle> knownNodes = pastryNode.getLeafSet().getUniqueSet();
+		for (NodeHandle nodeHandle : knownNodes) {
+			NodeInformation nodeInfo;
+			try {
+				nodeInfo = ethereumNode.getNodeInformation(nodeHandle);
+				// is ethAgent admin of remote node?
+				if (nodeInfo.getAdminEmail().equals(agentEmail)) {
+					adminNodeIDs.add(nodeHandle.getNodeId().toStringFull());
+				}
+			} catch (NodeNotFoundException e) {
+				logger.severe("trying to access node " + nodeHandle.getNodeId() + " | " + nodeHandle.getId());
+				e.printStackTrace();
+				continue;
+				// return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Trying to get
+				// nodeInformation failed: node not found").build();
+			}
+		}
+		return adminNodeIDs;
+	}
+
 	@POST
 	@Path("/requestFaucet")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response handleRequestFaucet(
-		@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId,
-		@FormDataParam("groupID") String groupID) 
-	{
+	public Response handleRequestFaucet(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId,
+			@FormDataParam("groupID") String groupID) {
 		AgentSession session = connector.getSessionById(sessionId);
 		if (session == null) {
 			return Response.status(Status.FORBIDDEN).entity("You have to be logged in").build();
@@ -180,13 +209,27 @@ public class EthereumHandler {
 			return Response.status(Status.FORBIDDEN).entity("Must be EthereumAgent").build();
 		}
 
-		if ( groupID.length() < 120 )
+		if (groupID.length() < 120) 
 		{
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Must provide group agent id").build();
+			groupID = "";
+		}
+
+		if ( groupID == "" )
+		{
+			logger.info("[ETH Faucet]: no valid groupID provided, skipping service calculation" );
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("no valid groupID provided, no service calculation possible").build();
 		}
 
 		ReadWriteRegistryClient registryClient = ethereumNode.getRegistryClient();
 		EthereumAgent ethAgent = (EthereumAgent) agent;
+		String coinbase;
+		try {
+			coinbase = registryClient.getCoinbase().getResult();
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Couldn't get ethereum address: ").build();
+		}
+		String agentLogin = ethAgent.getLoginName();
 		String agentEmail = ethAgent.getEmail();
 		String ethAddress = ethAgent.getEthereumAddress();
 
@@ -195,68 +238,228 @@ public class EthereumHandler {
 		String successModelsURL = successBaseURL + "/apiv2/models";
 
 		String successGroupURL = successModelsURL + "/" + groupID;
+
 		
-		Map<String, String> runningAdminServices = new HashMap<>();
-
-		// get list of services for which this group has a success model
-		float baseFaucetAmount = 1f;
-		float servicesScore = 0f;
+		//float baseFaucetAmount = RegistryConfiguration.Faucet_baseFaucetAmount;
 		float reward = 0f;
-		try {			
-			int localServicesCount = queryLocalServices(runningAdminServices, isLocalAdmin(agentEmail));
-			int remoteServicesCount = queryRemoteServices(runningAdminServices, agentEmail);
-			
-			logger.info("[ETH Faucet]: found " + ( localServicesCount + remoteServicesCount ) + " services ran by ethAgent: ");
-			runningAdminServices.forEach((k, v) -> {
-				logger.info("[ETH Faucet]: ethAgent is running service " + k + " at version " + v);
-			});
+		float hostingServicesScore_Raw = 0f;
+		float developServicesScore_Raw = 0f;
+		float userRatingScore_Raw = 0f;
 
-			logger.info("[ETH Faucet]: accessing success modeling group #" + groupID);
-			String successGroupResponse = L2P_HTTPUtil.getHTTP(successGroupURL, "GET");
-			List<String> servicesWithSuccessModel = L2P_JSONUtil.parseMobSOSGroupServiceNames(successGroupResponse);
-			logger.info("[ETH Faucet]: found " + servicesWithSuccessModel.size() + " services with success model.");
+		JSONArray hostingServicesRatedByFaucet = new JSONArray();
+		JSONArray developServicesRatedByFaucet = new JSONArray();
+		List<String> developedServices = new ArrayList<>();
+		Map<String, Integer> hostingServicesToAnnouncementCount = new HashMap<>();
+		Map<String, Integer> authoredServicesToAnnouncementCount = new HashMap<>();
+		
+		Map<String, Float> hostingServiceValue = new HashMap<>();
+		Map<String, Float> developServiceValue = new HashMap<>();
 
-			if ( localServicesCount + remoteServicesCount == 0 )
+		// get admin nodeIDs
+		List<String> adminNodeIDs = new ArrayList<>();
+		try {
+			adminNodeIDs = getNodeIDsOfAdminNodes(agentEmail);
+		}
+		catch( EthereumException e )
+		{
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Couldn't query local node info").build();
+		}
+
+
+
+		// get transaction log and find last transaction sent from coinbase to ethAgent's account
+		SenderReceiverDoubleKey coinbaseToEthAgent = new SenderReceiverDoubleKey(coinbase, ethAddress);
+		BigInteger largestBlockNo = BigInteger.ZERO;
+		if ( registryClient.getTransactionLog().containsKey(coinbaseToEthAgent) )
+		{
+			List<Transaction> coinbaseTransactionLog = registryClient.getTransactionLog().get(coinbaseToEthAgent);
+			if ( coinbaseTransactionLog.size() > 0 )
 			{
-				// no services running that the agent is admin of.
-				servicesScore = 0f;
-			}
-			else
-			{
-				for(String svc: servicesWithSuccessModel)
+				logger.info("[ETH Faucet]: found "+coinbaseTransactionLog.size()+" transactions, finding largest block no " );
+				for(Transaction transaction: coinbaseTransactionLog)
 				{
-					logger.info("[ETH Faucet]: checking if service ("+svc+") is hosted by ethAgent");
-					if ( runningAdminServices.containsKey(svc) )
+					if ( transaction.getBlockNumber().compareTo(largestBlockNo) == 1 )
 					{
-						logger.info("[ETH Faucet]: found service ("+svc+") ran by ethAgent with a success model!");
-
-						// svc is the name of the service which both: 
-						// has a success model and is run by the ethAgent.
-						String serviceSuccessMeasureURL = successGroupURL + "/" + svc + "/" + SuccessMeasure_Label;
-						String serviceSuccessMeasureResponse = L2P_HTTPUtil.getHTTP(serviceSuccessMeasureURL, "GET");
-						float successMeasure = L2P_JSONUtil.parseMobSOSSuccessResponse(serviceSuccessMeasureResponse);
-						successMeasure = clamp( successMeasure, 0f, 5f);
-						logger.info("[ETH Faucet]: service is rated " + successMeasure + " / 5");
-						servicesScore += successMeasure;
-						logger.info("[ETH Faucet]: score for services = " + servicesScore);
+						largestBlockNo = transaction.getBlockNumber();
+						logger.info("[ETH Faucet]: found transaction on block " + largestBlockNo );
 					}
 				}
 			}
-
-		} catch (MalformedURLException | ServiceNotFoundException | ParseException | EthereumException e) {
-			logger.severe("[ETH Faucet]: cannot get info from mobsos success modeling for given group: " + groupID);
-			e.printStackTrace();
-			return Response.status(Status.INTERNAL_SERVER_ERROR)
-					.entity("cannot get info from mobsos success modeling for given group: " + e.getMessage()).build();
 		}
-		reward = baseFaucetAmount + servicesScore;
-		logger.info("[ETH Faucet]: calculating faucet amount: " + (reward) );
+		
+		logger.info("[ETH Faucet]: last transaction to this ethAgent was on block " + largestBlockNo );
+
+
+
+
+		// query mobsos success models to see for which services we have a succes model for this group
+		logger.info("[ETH Faucet/MobSOS]: accessing success modeling group #" + groupID);
+		String successGroupResponse;
+		List<String> servicesWithSuccessModel = new ArrayList<>();
+		try {
+			successGroupResponse = L2P_HTTPUtil.getHTTP(successGroupURL, "GET");
+			servicesWithSuccessModel = L2P_JSONUtil.parseMobSOSGroupServiceNames(successGroupResponse);
+		} catch (MalformedURLException | ServiceNotFoundException | ParseException e) {
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Couldn't query mobsos success model for group #" + groupID).build();
+		}
+		logger.info("[ETH Faucet/MobSOS]: found " + servicesWithSuccessModel.size() + " services with success model.");
+
+		if ( servicesWithSuccessModel.size() == 0 )
+		{
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Mobsos success model for group #" + groupID + " seems empty, aborting").build();
+		}
+
+		// go through services with success model and see if they're running and how often were they announced
+		for( String serviceWithSuccessModel : servicesWithSuccessModel )
+		{
+			logger.info("[ETH Faucet/MobSOS]: processing service '"+serviceWithSuccessModel+"':");
+
+			// check mobsos success model:
+
+			logger.info("[ETH Faucet/MobSOS]: querying service Hosting value: ");
+			String serviceSuccessMeasureURL_Hosting = successGroupURL + "/" + serviceWithSuccessModel + "/" + RegistryConfiguration.MobSOS_SuccessMeasure_Hosting_Label;
+			float serviceHostingValue = getSuccessMeasure(serviceSuccessMeasureURL_Hosting);
+
+			logger.info("[ETH Faucet/MobSOS]: querying service Develop value: ");
+			String serviceSuccessMeasureURL_Develop = successGroupURL + "/" + serviceWithSuccessModel + "/" + RegistryConfiguration.MobSOS_SuccessMeasure_Develop_Label;
+			float serviceDevelopValue = getSuccessMeasure(serviceSuccessMeasureURL_Develop);
+
+
+
+			// check if ethAgent is developer/author of service
+			String authorOfService = registryClient.getServiceAuthor(serviceWithSuccessModel);
+			Boolean isAuthorOfService = false;
+			if ( authorOfService != "" )
+			{
+				logger.info("[ETH Faucet/MobSOS]: checking for service authorship (comparing '" + authorOfService + "' with '"+agentLogin+"'):");
+				if ( authorOfService.equals(agentLogin) )
+				{
+					logger.info("         .!.         ethAgent is developer/author of this service.");
+					isAuthorOfService = true;
+					developedServices.add(serviceWithSuccessModel);
+				}
+			}
+
+			logger.info("[ETH Faucet/MobSOS]: checking how often service '" + serviceWithSuccessModel + "' has been announced since last faucet request.");
+
+			HashMap<String, Integer> serviceAnnouncementsPerNodeID = registryClient.getNoOfServiceAnnouncementSinceBlockOrderedByHostingNode(
+				largestBlockNo, serviceWithSuccessModel
+			);
+
+			// check if service is hosted by ethAgent
+			for( String adminNodeID: adminNodeIDs)
+			{
+				Integer serviceAnnouncementCount = serviceAnnouncementsPerNodeID.get(adminNodeID);
+				// check if one of the nodes running this service is administered by ethAgent
+				if ( serviceAnnouncementsPerNodeID.containsKey(adminNodeID) )
+				{
+					// found a service that has a success model and is hosted by ethAgent
+					logger.info("         .!.         found " + serviceAnnouncementCount + " announcements for node # " + adminNodeID);
+					hostingServicesToAnnouncementCount.putIfAbsent(serviceWithSuccessModel, 0);
+					hostingServicesToAnnouncementCount.merge( 
+						serviceWithSuccessModel, // key
+						serviceAnnouncementCount, // value to 'merge' with
+						Integer::sum // function to use for mergin
+					);
+				}
+				// check if this service was developed by ethAgent
+				if ( isAuthorOfService )
+				{
+					authoredServicesToAnnouncementCount.putIfAbsent(serviceWithSuccessModel, 0);
+					authoredServicesToAnnouncementCount.merge(
+						serviceWithSuccessModel, // key
+						serviceAnnouncementCount, // value to 'merge' with
+						Integer::sum // function to use for mergin
+					);
+				}
+			}
+			float serviceWasAnnouncedByEthAgent = hostingServicesToAnnouncementCount.getOrDefault( serviceWithSuccessModel, 0 );
+			serviceWasAnnouncedByEthAgent *= serviceHostingValue;
+			if ( serviceWasAnnouncedByEthAgent > 0 )
+			{
+				logger.info("[ETH Faucet]: service '" + serviceWithSuccessModel + "' is valued for hosting at "+serviceHostingValue+" and was announced " + (serviceWasAnnouncedByEthAgent/serviceHostingValue) + " times. ");
+				hostingServiceValue.put( serviceWithSuccessModel, serviceWasAnnouncedByEthAgent );
+				hostingServicesRatedByFaucet.add(serviceWithSuccessModel);
+			}
+
+			float serviceDevelopedByEthAgentWasAnnounced = authoredServicesToAnnouncementCount.getOrDefault( serviceWithSuccessModel, 0 );
+			serviceDevelopedByEthAgentWasAnnounced *= serviceDevelopValue;
+			if ( serviceDevelopedByEthAgentWasAnnounced > 0 )
+			{
+				logger.info("[ETH Faucet]: service '" + serviceWithSuccessModel + "' was developed by agent. Its development is rated at "+serviceDevelopValue+" and it was announced " + (serviceDevelopedByEthAgentWasAnnounced/serviceDevelopValue) + " times. ");
+				developServiceValue.put( serviceWithSuccessModel, serviceDevelopedByEthAgentWasAnnounced );
+				developServicesRatedByFaucet.add(serviceWithSuccessModel);
+			}
+		}
+
+		// QUERY USER REPUTATION PROFILE
+		userRatingScore_Raw = getUserRating(ethAddress);
+
+		// sum all values of hosted and developed services
+		for( Float serviceSucces: hostingServiceValue.values() )
+		{
+			hostingServicesScore_Raw += serviceSucces;
+		}
+		
+		for( Float serviceSucces: developServiceValue.values() )
+		{
+			developServicesScore_Raw += serviceSucces;
+		}
+
+		float userRatingScore = userRatingScore_Raw * RegistryConfiguration.Faucet_userScoreMultiplier;
+		float hostingServicesScore = hostingServicesScore_Raw * RegistryConfiguration.Faucet_serviceHostingScoreMultiplier;
+		float developServicesScore = developServicesScore_Raw * RegistryConfiguration.Faucet_serviceDevelopScoreMultiplier;
+
+		if ( RegistryConfiguration.Faucet_serviceMaxScore != -1f )
+		{
+			logger.info("[ETH Faucet]: hosting max score ("+RegistryConfiguration.Faucet_serviceMaxScore+") applied [was: "+hostingServicesScore+"].");
+			hostingServicesScore = Math.min(RegistryConfiguration.Faucet_serviceMaxScore, hostingServicesScore);
+		}
+
+		if ( RegistryConfiguration.Faucet_developMaxScore != -1f )
+		{
+			logger.info("[ETH Faucet]: develop max score ("+RegistryConfiguration.Faucet_developMaxScore+") applied [was: "+developServicesScore+"].");
+			developServicesScore = Math.min(RegistryConfiguration.Faucet_developMaxScore, developServicesScore);
+		}
+
+		reward = userRatingScore *
+					( hostingServicesScore + developServicesScore );
+		logger.info("[ETH Faucet]: calculating faucet amount: \n" +
+				//"> baseFaucetAmount: " + Float.toString(baseFaucetAmount) + " ETH \n" +
+				"> userRatingScore: " + 
+				"   " + Float.toString(RegistryConfiguration.Faucet_userScoreMultiplier) + "*" + 
+				"   " + Float.toString(userRatingScore_Raw) + " = " + 
+				"   " + Float.toString(userRatingScore) + " ETH \n" + 
+				"> * \n" +
+				"    ( \n" + 
+				"       hostingServicesScore: " + 
+				"        " + Float.toString(RegistryConfiguration.Faucet_serviceHostingScoreMultiplier) + "*" + 
+				"        " + Float.toString(hostingServicesScore_Raw) + " = " + 
+				"        " + Float.toString(hostingServicesScore) + " ETH \n" +
+				"     + developServicesScore: " + 
+				"        " + Float.toString(RegistryConfiguration.Faucet_serviceDevelopScoreMultiplier) + "*" + 
+				"        " + Float.toString(developServicesScore_Raw) + " = " + 
+				"        " + Float.toString(developServicesScore) + " ETH \n" +
+				"    ) \n" + 
+				"------------------------\n" +
+				"= " + reward + " ETH"
+			 );
 
 		BigInteger faucetAmount = Convert.toWei(Float.toString(reward), Convert.Unit.ETHER).toBigInteger();
+
 		JSONObject json = new JSONObject();
 		json.put("agentid", agent.getIdentifier());
 		json.put("eth-target-add", ethAddress);
 		json.put("eth-faucet-amount", Float.toString(reward) + " ETH");
+
+		JSONObject rewardDetails = new JSONObject();
+			//rewardDetails.put("base-faucet-amount", baseFaucetAmount);
+			rewardDetails.put("hosting-services-score", hostingServicesScore);
+			rewardDetails.put("develop-services-score", developServicesScore);
+			rewardDetails.put("user-rating-score", userRatingScore);
+			rewardDetails.put("rewarded-for-services-hosting", hostingServicesRatedByFaucet);
+			rewardDetails.put("rewarded-for-services-develop", developServicesRatedByFaucet);
+		json.put("rewardDetails", rewardDetails);
 
 		TransactionReceipt txR = null;
 
@@ -280,6 +483,49 @@ public class EthereumHandler {
 		json.put("text", Status.OK.getStatusCode() + " - Faucet triggered. Amount transferred");
 
 		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
+	}
+
+	private float getSuccessMeasure(String serviceSuccessMeasureURL) {
+		String serviceSuccessMeasureResponse;
+		float successMeasure = 0f;
+		try {
+			serviceSuccessMeasureResponse = L2P_HTTPUtil.getHTTP(serviceSuccessMeasureURL, "GET");
+			successMeasure = L2P_JSONUtil.parseMobSOSSuccessResponse(serviceSuccessMeasureResponse);
+		} catch (MalformedURLException | ServiceNotFoundException | ParseException e) {
+			logger.severe("Couldn't query mobsos success model for service: \n" + serviceSuccessMeasureURL);
+			e.printStackTrace();
+		}
+		successMeasure = clamp( successMeasure, RegistryConfiguration.Faucet_minRatingPerService, RegistryConfiguration.Faucet_maxRatingPerService);
+		logger.info("[ETH Faucet]: service is rated " + successMeasure + " / " + RegistryConfiguration.Faucet_maxRatingPerService);
+		return successMeasure;
+	}
+
+	private float getUserRating(String ethAddress) {
+		float userRatingScore_Raw = 0f;
+		UserProfileData upd = null;
+		try {
+			upd = ethereumNode.getRegistryClient().getProfile(ethAddress);
+			if (upd != null && !upd.getOwner().equals("0x0000000000000000000000000000000000000000")) 
+			{
+				if (upd.getNoTransactionsRcvd().compareTo(BigInteger.ZERO) == 0) {
+					logger.info("[ETH Faucet]: valid reputation profile, no incoming reputation yet." );
+				} 
+				else 
+				{
+					userRatingScore_Raw = upd.getStarRating();
+					logger.info("[ETH Faucet]: valid reputation profile, score: " + Float.toString(userRatingScore_Raw) );
+				}
+			}
+			else
+			{
+				logger.info("[ETH Faucet]: no valid reputation profile, setting agent reputation to 0" );
+			}
+		} catch (EthereumException | NotFoundException e) {
+			logger.severe("[ETH Faucet]: failed to get user reputation for " + ethAddress );
+			e.printStackTrace();
+			return 0;
+		}
+		return userRatingScore_Raw;
 	}
 
 	@POST

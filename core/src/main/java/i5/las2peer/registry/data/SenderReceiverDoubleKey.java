@@ -51,11 +51,13 @@ public class SenderReceiverDoubleKey {
 
     @Override
     public int hashCode() {
-        return sender.hashCode() ^ receiver.hashCode();
+        return 
+            sender.hashCode() ^ 
+            receiver.hashCode();
     }
 
     @Override
     public String toString() {
-        return "Sender: " + sender + " | " + "Receiver: " + receiver;
+        return "From: " + sender + " | " + "To: " + receiver;
     }
 }

@@ -66,7 +66,7 @@ class BlockchainObserver {
 	 * e.g. Block 5 -> "com.example.service" -> List of NodeIDs hosting this service
 	 */
 	ReentrantReadWriteLock serviceAnnouncementsPerBlockTree__lock = new ReentrantReadWriteLock();
-	TreeMap<BigInteger, HashMap<String, List<String>>> serviceAnnouncementsPerBlockTree = new TreeMap<>();
+	TreeMap<BigInteger, HashMap<String, List<String>>> serviceAnnouncementsPerBlockTree;
 
 	/**
 	 * Nested map from service name and version components to that
@@ -148,6 +148,8 @@ class BlockchainObserver {
 		releasesByVersion = new ConcurrentHashMap<>();
 		deployments = new ConcurrentHashMap<>();
 		genericTransactions = new ConcurrentHashMap<>();
+		transactionLog = new ConcurrentHashMap<>();
+		serviceAnnouncementsPerBlockTree = new TreeMap<>();
 
 		observeETHTransactions();
 		observeGenericTransactions();
@@ -182,19 +184,25 @@ class BlockchainObserver {
 				}
 
 				SenderReceiverDoubleKey transactionKey = new SenderReceiverDoubleKey(
-					transaction.getFrom(), 
-					transaction.getTo()
+					(transaction.getFrom() != null) ? transaction.getFrom() : "", // shouldn't be null
+					(transaction.getTo() != null) ? transaction.getTo() : ""
 				);
 
 				// https://stackoverflow.com/a/51062494
 				transactionLog.computeIfAbsent(transactionKey, k -> new ArrayList<>()).add(transaction);
 				
-				logger.info("[ChainObserver] observed transaction # "+transaction.getTransactionIndex().toString()+" [" + transactionKey + "]\n" +
-					" > block: " + transaction.getBlockNumber().toString() + "\n" +
-					" > value: " + transaction.getValue().toString() + "\n" 
+				logger.info("[ChainObserver] observed transaction # "+transaction.getTransactionIndex().toString()+"\n"+
+						    "                [" + transactionKey + "]\n" +
+							"                 > block: " + transaction.getBlockNumber().toString() + "\n" +
+							"                 > value: " + transaction.getValue().toString() + "\n" +
+							"                 > creates: " + transaction.getCreates().toString() + "\n" +
+							"                 > raw: " + transaction.getRaw().toString() + "\n"
 				);
 
-			}, e -> logger.severe("Error observing transaction event: " + e.toString()));
+			}, e -> { 
+				e.printStackTrace();
+				logger.severe("Error observing transaction event: " + e.toString()); 
+			});
 	}
 
 	private void observeErrorEvents() {
