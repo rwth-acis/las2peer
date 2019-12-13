@@ -194,9 +194,7 @@ class BlockchainObserver {
 				logger.info("[ChainObserver] observed transaction # "+transaction.getTransactionIndex().toString()+"\n"+
 						    "                [" + transactionKey + "]\n" +
 							"                 > block: " + transaction.getBlockNumber().toString() + "\n" +
-							"                 > value: " + transaction.getValue().toString() + "\n" +
-							"                 > creates: " + transaction.getCreates().toString() + "\n" +
-							"                 > raw: " + transaction.getRaw().toString() + "\n"
+							"                 > value: " + transaction.getValue().toString() + "\n"
 				);
 
 			}, e -> { 
@@ -465,10 +463,10 @@ class BlockchainObserver {
 						{
 							serviceAnnouncementsPerBlockTree
 								.computeIfAbsent(deployment.log.getBlockNumber(), k -> new HashMap<>())
-								.computeIfAbsent(serviceName, k -> new ArrayList<>())
+								.computeIfAbsent(serviceName+"."+deployment.className, k -> new ArrayList<>())
 								.add(deployment.nodeId);
 
-							logger.info("[ChainObserver] observed service announcement ("+serviceName+"): \n" + 
+							logger.info("[ChainObserver] observed service announcement ("+serviceName+"."+deployment.className+"): \n" + 
 								"block #: " + deployment.log.getBlockNumber() + "\n" + 
 								"node  #:" + deployment.nodeId
 							);
@@ -525,7 +523,7 @@ class BlockchainObserver {
 				{
 					logger.info("[ChainObserver]    processing service '"+announcedServiceName+"', looking for '"+searchingForService+"':" );
 					// is this the service we're looking for?
-					if ( announcedServiceName == searchingForService )
+					if ( announcedServiceName.equals(searchingForService) )
 					{
 						logger.info("[ChainObserver]     found service " + announcedServiceName + ", running at " + hostingNodeIDList.size() + " nodes");
 						// yes -> count no. of increments per hosting node
