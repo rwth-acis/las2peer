@@ -41,6 +41,7 @@ import i5.las2peer.classLoaders.libraries.SharedStorageRepository;
 import i5.las2peer.connectors.webConnector.WebConnector;
 import i5.las2peer.connectors.webConnector.util.AgentSession;
 import i5.las2peer.connectors.webConnector.util.L2P_JSONUtil;
+import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.p2p.AgentNotRegisteredException;
 import i5.las2peer.p2p.EthereumNode;
 import i5.las2peer.p2p.Node;
@@ -74,6 +75,8 @@ public class ServicesHandler {
 	private final PastryNodeImpl pastryNode;
 	private final EthereumNode ethereumNode;
 	private final ReadOnlyRegistryClient registry;
+
+	private final L2pLogger logger = L2pLogger.getInstance(ServicesHandler.class);
 
 	private ConcurrentHashMap<String, NodeInformation> nodeInfoCache = new ConcurrentHashMap<>();
 
@@ -199,43 +202,82 @@ public class ServicesHandler {
 	@Produces(MediaType.TEXT_PLAIN)
 	// sort of a duplicate of the status thing, but actually not, because this is the full Pastry node ID
 	public String getRawNodeId() {
+		return getPastryNodeId();
+	}
+
+	private String getPastryNodeId() {
 		return pastryNode.getPastryNode().getId().toStringFull();
 	}
 
-	private NodeInformation queryNodeInfo(String nodeID)
+	private NodeInformation queryNodeInfoWithCache(String nodeID)
 	{
+		logger.info("[NodeInfo] searching for node #" + nodeID);
+
+		// do we know this node?
 		if ( nodeInfoCache.containsKey( nodeID ) )
 		{
-			return nodeInfoCache.get( nodeID );
+			logger.info("[NodeInfo] ! found info for node #" + nodeID + ": ");
+			NodeInformation foundVal = nodeInfoCache.get( nodeID );
+			logger.info(foundVal.toString());
+			return foundVal;
 		}
-		else
+
+		// are we looking for this (local) node?
+		String localNodeID = getPastryNodeId();
+		logger.info("[NodeInfo] local node is #" + localNodeID + ", comparing... ");
+		if ( nodeID.equals(localNodeID) )
 		{
-			Collection<NodeHandle> knownNodes = ethereumNode.getPastryNode().getLeafSet().getUniqueSet();
-			for (NodeHandle nh : knownNodes) {
-				NodeInformation nodeInfo = new NodeInformation();
-				try {
-					nodeInfo = node.getNodeInformation(nh);
-				} catch (NodeNotFoundException e) {
-					// logger.severe("trying to access node " + remoteNodeHandle.getNodeId() + " | "
-					// + remoteNodeHandle.getId());
-					// ignore malformed nodeinfo / missing node
-					continue;
-				}
-				finally {
-					nodeInfoCache.put(nh.getNodeId().toString(), nodeInfo);
-				}
-				if ( nh.getNodeId().toString().equals(nodeID) )
-				{
-					return nodeInfo;
-				}
+			logger.info("[NodeInfo] ! node #" + nodeID + " is local node! ");
+			NodeInformation localNodeInfo = new NodeInformation();
+			try {
+				localNodeInfo = ethereumNode.getNodeInformation();
+				nodeInfoCache.put(localNodeID, localNodeInfo);
+			} 
+			catch (CryptoException e) {
+				logger.severe("trying to local access node info");
+				e.printStackTrace();
+			}
+			logger.info(localNodeInfo.toString());
+			return localNodeInfo;
+		}
+
+		logger.info("[NodeInfo] nodeID not found in cache, query network for info ...");
+
+		Collection<NodeHandle> knownNodes = ethereumNode.getPastryNode().getLeafSet().getUniqueSet();
+
+		int i = 0;
+		int k = knownNodes.size();
+		logger.info("[NodeInfo] > searching through " + k + " nodes");	
+		for (NodeHandle nh : knownNodes) {
+			String remoteNodeID = nh.getId().toStringFull();
+			logger.info("[NodeInfo]  >  loop: " + i + " / " + k );
+			logger.info("[NodeInfo]  >  getting nodeInfo for handle: " + nh.toString() );
+			logger.info("[NodeInfo]  >  access node #" + remoteNodeID);
+			
+			NodeInformation remoteNodeInfo = null;
+			try {
+				remoteNodeInfo = node.getNodeInformation(nh);
+			} catch (NodeNotFoundException e) {
+				// logger.severe("trying to access node " + remoteNodeHandle.getNodeId() + " | "
+				// + remoteNodeHandle.getId());
+				// ignore malformed nodeinfo / missing node
+				continue;
+			}
+			finally {
+				logger.info("[NodeInfo] !   got nodeInfo: " );
+				logger.info(remoteNodeInfo.toString());
+				nodeInfoCache.put(remoteNodeID, remoteNodeInfo);
 			}
 
-			if ( !nodeInfoCache.containsKey( nodeID ) )
+			if ( remoteNodeInfo != null && remoteNodeID.equals(nodeID) )
 			{
-				return new NodeInformation();
+				logger.info("[NodeInfo] ! found node " + nodeID + ", returning" );
+				return remoteNodeInfo;
 			}
-			return nodeInfoCache.get( nodeID );
 		}
+
+		logger.severe("[NodeInfo] NOT FOUND! " );
+		return new NodeInformation();
 	}
 
 	@GET
@@ -264,7 +306,7 @@ public class ServicesHandler {
 				JSONArray deploymentsJson = new JSONArray();
 				registry.getDeployments(name, release.getVersion()).forEach(deployment -> {
 					String deploymentNodeId = deployment.getNodeId();
-					NodeInformation hostedOn = queryNodeInfo(deploymentNodeId);
+					NodeInformation hostedOn = queryNodeInfoWithCache(deploymentNodeId);
 
 					deploymentsJson.add(new JSONObject()
 							.appendField("className", deployment.getServiceClassName())

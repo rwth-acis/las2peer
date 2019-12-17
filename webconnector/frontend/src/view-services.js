@@ -73,6 +73,10 @@ class ServicesView extends PolymerElement {
           width: 6.5em;
           margin-right: 1em;
         }
+        .service .nodeAdmin {
+          min-width: 6.5em;
+          margin-right: 1em;
+        }
         details {
           cursor: pointer;
         }
