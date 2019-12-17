@@ -82,28 +82,6 @@ public class EthereumHandler {
 		return Math.max(min, Math.min(max, val));
 	}
 
-	private NodeInformation getLocalNodeInfo() throws EthereumException {
-		NodeInformation localNodeInfo = null;
-		try {
-			localNodeInfo = node.getNodeInformation();
-		} catch (CryptoException e) {
-			logger.severe("trying to local access node info");
-			e.printStackTrace();
-			throw new EthereumException("Could not get nodeInformation of local node", e);
-		}
-		return localNodeInfo;
-	}
-
-	private Boolean isLocalAdmin(String agentEmail) throws EthereumException {
-		NodeInformation localNodeInfo = getLocalNodeInfo();
-		if (localNodeInfo == null)
-			throw new EthereumException("local node info null");
-		Boolean isLocalNodeAdmin = localNodeInfo.getAdminEmail().equals(agentEmail);
-		logger.info("[local isAdmin?] comparing nodeInfo [" + localNodeInfo.getAdminEmail() + "] vs. [" + agentEmail
-				+ "] = " + isLocalNodeAdmin);
-		return isLocalNodeAdmin;
-	}
-
 	private int queryLocalServices(Map<String, String> ethAgentAdminServices, Boolean isLocalAdmin) {
 		ServiceAgentImpl[] localServices = node.getRegisteredServices();
 		if (isLocalAdmin) {
@@ -153,7 +131,7 @@ public class EthereumHandler {
 
 	public List<String> getNodeIDsOfAdminNodes(String agentEmail) throws EthereumException {
 		List<String> adminNodeIDs = new ArrayList<>();
-		if (isLocalAdmin(agentEmail)) {
+		if (ethereumNode.isLocalAdmin(agentEmail)) {
 			adminNodeIDs.add(pastryNode.getNodeId().toStringFull());
 		}
 
@@ -551,7 +529,7 @@ public class EthereumHandler {
 		Map<String, String> ethAgentAdminServices = new HashMap<>();
 		
 		// is ethAgent admin of local node?
-		Boolean isLocalAdmin = isLocalAdmin(agentEmail);
+		Boolean isLocalAdmin = ethereumNode.isLocalAdmin(agentEmail);
 		json.put("is-local-admin", isLocalAdmin);
 		json.put("local-service-count", queryLocalServices(ethAgentAdminServices, isLocalAdmin));
 		

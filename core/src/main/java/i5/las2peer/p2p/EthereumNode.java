@@ -25,6 +25,7 @@ import i5.las2peer.registry.exceptions.NotFoundException;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.EthereumAgent;
 import i5.las2peer.serialization.SerializationException;
+import i5.las2peer.tools.CryptoException;
 
 /**
  * Node implementation that extends the FreePastry-based node with
@@ -145,6 +146,22 @@ public class EthereumNode extends PastryNodeImpl {
 		} catch (EthereumException e) {
 			logger.severe("Error while announcing end of deployment: " + e);
 		}
+	}
+
+	public Boolean isLocalAdmin(String agentEmail) throws EthereumException {
+		NodeInformation localNodeInfo = null;
+		try {
+			localNodeInfo = getNodeInformation();
+		} catch (CryptoException e) {
+			throw new EthereumException("cannot get local node info", e);
+		}
+		if (localNodeInfo == null)
+			throw new EthereumException("local node info null");
+		Boolean isLocalNodeAdmin = localNodeInfo.getAdminEmail().equals(agentEmail);
+		logger.info("[local isAdmin?] comparing nodeInfo: ");
+		logger.info("[local isAdmin?]  [" + localNodeInfo.getAdminEmail() + "] vs. [" + agentEmail + "]");
+		logger.info("[local isAdmin?]   = " + isLocalNodeAdmin.toString() );
+		return isLocalNodeAdmin;
 	}
 
 	@Override
