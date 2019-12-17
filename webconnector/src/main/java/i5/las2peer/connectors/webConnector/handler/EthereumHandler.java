@@ -78,23 +78,6 @@ public class EthereumHandler {
 		this.ethereumNode = (node instanceof EthereumNode) ? (EthereumNode) node : null;
 	}
 
-	private AgentImpl getAgentByDetail(String agentId, String username, String email) throws Exception {
-		try {
-			if (agentId == null || agentId.isEmpty()) {
-				if (username != null && !username.isEmpty()) {
-					agentId = node.getAgentIdForLogin(username);
-				} else if (email != null && !email.isEmpty()) {
-					agentId = node.getAgentIdForEmail(email);
-				} else {
-					throw new BadRequestException("No required agent detail provided");
-				}
-			}
-			return node.getAgent(agentId);
-		} catch (AgentNotFoundException e) {
-			throw new BadRequestException("Agent not found");
-		}
-	}
-
 	public float clamp(float val, float min, float max) {
 		return Math.max(min, Math.min(max, val));
 	}
@@ -393,7 +376,7 @@ public class EthereumHandler {
 		}
 
 		// QUERY USER REPUTATION PROFILE
-		userRatingScore_Raw = getUserRating(ethAddress);
+		userRatingScore_Raw = ethereumNode.getRegistryClient().getUserRating(ethAddress);
 
 		// user needs ether to request reputation profile
 		// user without profile will have score of 0
@@ -520,34 +503,6 @@ public class EthereumHandler {
 		successMeasure = clamp( successMeasure, RegistryConfiguration.Faucet_minRatingPerService, RegistryConfiguration.Faucet_maxRatingPerService);
 		logger.info("[ETH Faucet]: service is rated " + successMeasure + " / " + RegistryConfiguration.Faucet_maxRatingPerService);
 		return successMeasure;
-	}
-
-	private float getUserRating(String ethAddress) {
-		float userRatingScore_Raw = 0f;
-		UserProfileData upd = null;
-		try {
-			upd = ethereumNode.getRegistryClient().getProfile(ethAddress);
-			if (upd != null && !upd.getOwner().equals("0x0000000000000000000000000000000000000000")) 
-			{
-				if (upd.getNoTransactionsRcvd().compareTo(BigInteger.ZERO) == 0) {
-					logger.info("[ETH Faucet]: valid reputation profile, no incoming reputation yet." );
-				} 
-				else 
-				{
-					userRatingScore_Raw = upd.getStarRating();
-					logger.info("[ETH Faucet]: valid reputation profile, score: " + Float.toString(userRatingScore_Raw) );
-				}
-			}
-			else
-			{
-				logger.info("[ETH Faucet]: no valid reputation profile" );
-			}
-		} catch (EthereumException | NotFoundException e) {
-			logger.severe("[ETH Faucet]: failed to get user reputation for " + ethAddress );
-			e.printStackTrace();
-			return 0;
-		}
-		return userRatingScore_Raw;
 	}
 
 	@POST
@@ -764,7 +719,7 @@ public class EthereumHandler {
 			String username = userRegistration.getKey().toString();
 			AgentImpl userAgent = null;
 			try {
-				userAgent = getAgentByDetail(null, username, null);
+				userAgent = ethereumNode.getAgentByDetail(null, username, null);
 				userAgent = ethereumNode.getAgent(userAgent.getIdentifier());
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
@@ -822,7 +777,7 @@ public class EthereumHandler {
 			logger.info("found profile: " + username + " @ " + owner);
 			AgentImpl userAgent = null;
 			try {
-				userAgent = getAgentByDetail(null, username, null);
+				userAgent = ethereumNode.getAgentByDetail(null, username, null);
 				String agentId = userAgent.getIdentifier();
 				logger.fine("found matching user agent: " + agentId);
 				userAgent = ethereumNode.getAgent(agentId);

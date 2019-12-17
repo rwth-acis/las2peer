@@ -3,10 +3,12 @@ package i5.las2peer.connectors.webConnector.handler;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.jar.JarInputStream;
 
@@ -38,15 +40,20 @@ import i5.las2peer.classLoaders.ClassManager;
 import i5.las2peer.classLoaders.libraries.SharedStorageRepository;
 import i5.las2peer.connectors.webConnector.WebConnector;
 import i5.las2peer.connectors.webConnector.util.AgentSession;
+import i5.las2peer.connectors.webConnector.util.L2P_JSONUtil;
 import i5.las2peer.p2p.AgentNotRegisteredException;
 import i5.las2peer.p2p.EthereumNode;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.NodeException;
+import i5.las2peer.p2p.NodeInformation;
+import i5.las2peer.p2p.NodeNotFoundException;
 import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.persistency.EnvelopeVersion;
 import i5.las2peer.registry.CredentialUtils;
 import i5.las2peer.registry.ReadOnlyRegistryClient;
 import i5.las2peer.registry.data.ServiceReleaseData;
+import i5.las2peer.security.AgentImpl;
+import i5.las2peer.security.EthereumAgent;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.PackageUploader;
 import i5.las2peer.tools.PackageUploader.ServiceVersionList;
@@ -55,6 +62,7 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
+import rice.pastry.NodeHandle;
 
 @Path(ServicesHandler.RESOURCE_PATH)
 public class ServicesHandler {
@@ -66,6 +74,8 @@ public class ServicesHandler {
 	private final PastryNodeImpl pastryNode;
 	private final EthereumNode ethereumNode;
 	private final ReadOnlyRegistryClient registry;
+
+	private ConcurrentHashMap<String, NodeInformation> nodeInfoCache = new ConcurrentHashMap<>();
 
 	public ServicesHandler(WebConnector connector) {
 		this.connector = connector;
@@ -192,6 +202,42 @@ public class ServicesHandler {
 		return pastryNode.getPastryNode().getId().toStringFull();
 	}
 
+	private NodeInformation queryNodeInfo(String nodeID)
+	{
+		if ( nodeInfoCache.containsKey( nodeID ) )
+		{
+			return nodeInfoCache.get( nodeID );
+		}
+		else
+		{
+			Collection<NodeHandle> knownNodes = ethereumNode.getPastryNode().getLeafSet().getUniqueSet();
+			for (NodeHandle nh : knownNodes) {
+				NodeInformation nodeInfo = new NodeInformation();
+				try {
+					nodeInfo = node.getNodeInformation(nh);
+				} catch (NodeNotFoundException e) {
+					// logger.severe("trying to access node " + remoteNodeHandle.getNodeId() + " | "
+					// + remoteNodeHandle.getId());
+					// ignore malformed nodeinfo / missing node
+					continue;
+				}
+				finally {
+					nodeInfoCache.put(nh.getNodeId().toString(), nodeInfo);
+				}
+				if ( nh.getNodeId().toString().equals(nodeID) )
+				{
+					return nodeInfo;
+				}
+			}
+
+			if ( !nodeInfoCache.containsKey( nodeID ) )
+			{
+				return new NodeInformation();
+			}
+			return nodeInfoCache.get( nodeID );
+		}
+	}
+
 	@GET
 	@Path("/services")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -202,6 +248,8 @@ public class ServicesHandler {
 
 		registry.getServiceNames().forEach(name -> {
 			Map<String, JSONObject> releasesByVersion = new HashMap<>();
+
+			String serviceAuthor = registry.getServiceAuthors().get(name);
 
 			registry.getServiceReleases().getOrDefault(name, Collections.emptyList()).forEach(release -> {
 				// this is a bit ugly, but there's no way to handle errors in a lambda
@@ -215,22 +263,28 @@ public class ServicesHandler {
 
 				JSONArray deploymentsJson = new JSONArray();
 				registry.getDeployments(name, release.getVersion()).forEach(deployment -> {
+					String deploymentNodeId = deployment.getNodeId();
+					NodeInformation hostedOn = queryNodeInfo(deploymentNodeId);
+
 					deploymentsJson.add(new JSONObject()
 							.appendField("className", deployment.getServiceClassName())
-							.appendField("nodeId", deployment.getNodeId())
+							.appendField("nodeId", deploymentNodeId)
+							.appendField("nodeInfo", L2P_JSONUtil.nodeInformationToJSON(hostedOn))
+							.appendField("hosterReputation", ethereumNode.getAgentReputation(hostedOn.getAdminName(), hostedOn.getAdminEmail()))
 							.appendField("announcementEpochSeconds", deployment.getTimestamp().getEpochSecond())
-					);
-				});
-
-				releasesByVersion.put(release.getVersion(), new JSONObject()
+							);
+						});
+						
+					releasesByVersion.put(release.getVersion(), new JSONObject()
 						.appendField("publicationEpochSeconds", release.getTimestamp().getEpochSecond())
 						.appendField("instances", deploymentsJson)
 						.appendField("supplement", supplement));
-			});
-
-			services.appendElement(new JSONObject()
+				});
+					
+				services.appendElement(new JSONObject()
 					.appendField("name", name)
-					.appendField("authorName", registry.getServiceAuthors().get(name))
+					.appendField("authorName", serviceAuthor)
+					.appendField("authorReputation", ethereumNode.getAgentReputation(serviceAuthor, null))
 					.appendField("releases", new JSONObject(releasesByVersion))
 			);
 		});

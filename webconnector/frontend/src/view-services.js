@@ -19,6 +19,7 @@ import '@polymer/paper-card/paper-card.js';
 import '@polymer/paper-button/paper-button.js';
 import '@polymer/paper-input/paper-input.js';
 import '@polymer/paper-tooltip/paper-tooltip.js';
+import './custom-star-rating.js';
 import './shared-styles.js';
 
 class ServicesView extends PolymerElement {
@@ -62,7 +63,7 @@ class ServicesView extends PolymerElement {
 
           padding: 10px;
         }
-        .service .nodeId, .service .time {
+        .service .nodeId, .service .nodeAdmin,  .service .time {
           display: inline-block;
           white-space: nowrap;
           overflow: hidden;
@@ -104,7 +105,12 @@ class ServicesView extends PolymerElement {
                 <div style="margin-bottom: 8px">
                   <span class="package"><iron-icon icon="icons:archive" title="Part of package"></iron-icon>[[service.name]]</span>
                 </div>
-                <div>Author: <span class="author">[[service.authorName]]</span></div>
+                <div>
+                  Author: <span class="author">[[service.authorName]]</span> 
+                  <template is="dom-if" if="[[service.authorReputation]]">
+                    <custom-star-rating value="[[service.authorReputation]]" readonly></custom-star-rating>
+                  </template>
+                </div>
                 <div>
                   Latest version: <span class="version">[[release.version]]</span>
                   published <span class="timestamp">[[_toHumanDate(release.publicationEpochSeconds)]]</span>
@@ -157,6 +163,7 @@ class ServicesView extends PolymerElement {
                         <ul style="display: inline-block; list-style: none; padding-left: 0">
                           <li style="margin-left: 0">
                             <span class="nodeId"><iron-icon icon="hardware:device-hub" title="Running on Node"></iron-icon> <strong>Node ID</strong></span>
+                            <span class="nodeAdmin"><iron-icon icon="account-circle" title="Node Administrator"></iron-icon> <strong>Node Admin</strong></span>
                             <span class="time"><iron-icon icon="device:access-time" title="Last Announcement"></iron-icon> <strong>Last announced</strong></span>
                           </li>
                         </ul>
@@ -173,6 +180,15 @@ class ServicesView extends PolymerElement {
                           <template is="dom-repeat" items="[[_filterInstances(release.instances, class)]]" as="instance">
                             <li style="margin-left: 0">
                               <span class="nodeId">[[instance.nodeId]]</span>
+                              <template is="dom-if" if="[[instance.nodeInfo.admin-name]]">
+                                <span class="nodeAdmin">
+                                  [[instance.nodeInfo.admin-name]]
+                                  <template is="dom-if" if="[[instance.nodeInfo.hosterReputation]]">
+                                    <custom-star-rating value="[[instance.nodeInfo.hosterReputation]]" readonly></custom-star-rating>
+                                  </template>
+                                </span>
+
+                              </template>
                               <span class="time">[[_toHumanDate(instance.announcementEpochSeconds)]]</span>
                             </li>
                           </template>

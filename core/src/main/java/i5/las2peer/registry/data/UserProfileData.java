@@ -52,7 +52,8 @@ public class UserProfileData {
 	}
 
 	public float getStarRating() {
-		return this.cumulativeScore.floatValue() / this.noTransactionsRcvd.floatValue();
+		if ( this.noTransactionsRcvd.intValue() == 0 ) return 0f;
+		return this.cumulativeScore.floatValue() / this.noTransactionsRcvd.intValue();
 	}
 
 	public BigInteger getProfileIndex() {

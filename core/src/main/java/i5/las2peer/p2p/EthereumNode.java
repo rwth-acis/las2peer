@@ -10,6 +10,7 @@ import i5.las2peer.api.persistency.EnvelopeException;
 import i5.las2peer.api.security.AgentAlreadyExistsException;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentLockedException;
+import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.api.security.ServiceAgent;
 import i5.las2peer.classLoaders.ClassManager;
 import i5.las2peer.classLoaders.libraries.BlockchainRepository;
@@ -190,8 +191,57 @@ public class EthereumNode extends PastryNodeImpl {
 		} else if (agentMatchesUserRegistryData(ethereumAgent)) {
 			logger.fine("Agent was already registered (same data), so that's fine.");
 		} else {
-			throw new AgentAlreadyExistsException("Agent username is already taken in blockchain user registry and details do NOT match.");
+			throw new AgentAlreadyExistsException(
+					"Agent username is already taken in blockchain user registry and details do NOT match.");
 		}
+	}
+
+	public AgentImpl getAgentByDetail(String agentId, String username, String email) throws AgentNotFoundException {
+		try {
+			if (agentId == null || agentId.isEmpty()) {
+				if (username != null && !username.isEmpty()) {
+					agentId = getAgentIdForLogin(username);
+				} else if (email != null && !email.isEmpty()) {
+					agentId = getAgentIdForEmail(email);
+				} else {
+					throw new AgentNotFoundException("No required agent detail provided");
+				}
+			}
+			return getAgent(agentId);
+		} catch (AgentException e) {
+			throw new AgentNotFoundException("Agent not found");
+		}
+	}
+
+	public float getAgentReputation(String adminName, String adminEmail) {
+		// query node admin reputation
+		AgentImpl ethAgentAgent = null;
+		
+		try {
+			ethAgentAgent = getAgentByDetail(null, adminName, adminEmail);
+			ethAgentAgent = getAgent(ethAgentAgent.getIdentifier());
+		} catch (AgentException e) {
+			e.printStackTrace();
+			if ( adminName == null ) adminName = "";
+			if ( adminEmail == null ) adminEmail = "";
+			logger.severe("[Eth Reputation]: couldn't find credentials for " + adminName.toString() + "|" + adminEmail.toString());
+		}
+
+		if ( ethAgentAgent instanceof EthereumAgent )
+		{
+			EthereumAgent ethAgent = (EthereumAgent)ethAgentAgent;
+			String ethAddress = ethAgent.getEthereumAddress();
+			if ( ethAddress != "" )
+			{
+				float agentReputation = getRegistryClient().getUserRating(ethAddress);
+				if ( agentReputation > 0 )
+				{
+					logger.fine("[Eth Reputation]: agent " + ethAddress + " is rated " + agentReputation );
+					return agentReputation;
+				}
+			}
+		}
+		return 0f;
 	}
 
 	/** compares agent login name and public key */

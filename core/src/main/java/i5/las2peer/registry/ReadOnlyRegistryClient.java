@@ -229,6 +229,34 @@ public class ReadOnlyRegistryClient {
 		);
 	}
 
+	public float getUserRating(String ethAddress) {
+		float userRatingScore_Raw = 0f;
+		UserProfileData userProfileData = null;
+		try {
+			userProfileData = this.getProfile(ethAddress);
+			if (userProfileData != null && !userProfileData.getOwner().equals("0x0000000000000000000000000000000000000000")) 
+			{
+				if (userProfileData.getNoTransactionsRcvd().compareTo(BigInteger.ZERO) == 0) {
+					logger.info("[ETH Faucet]: valid reputation profile, no incoming reputation yet." );
+				} 
+				else 
+				{
+					userRatingScore_Raw = userProfileData.getStarRating();
+					logger.info("[ETH Faucet]: valid reputation profile, score: " + Float.toString(userRatingScore_Raw) );
+				}
+			}
+			else
+			{
+				logger.info("[ETH Faucet]: no valid reputation profile" );
+			}
+		} catch (EthereumException | NotFoundException e) {
+			logger.severe("[ETH Faucet]: failed to get user reputation for " + ethAddress );
+			e.printStackTrace();
+			return 0;
+		}
+		return userRatingScore_Raw;
+	}
+
 	/**
 	 * Look up author/owner for a given service.
 	 * @param serviceName service package name
