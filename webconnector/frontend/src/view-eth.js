@@ -313,8 +313,43 @@ class EthereumView extends PolymerElement {
       <paper-toast id="toast" horizontal-align="right"></paper-toast>
 
       <!-- Dialog Boxes -->
+      <paper-dialog id="ethFaucetDiaLog">
+          <h1>Faucet Transaction Log</h1>
+          <paper-dialog-scrollable>
+            <strong>UserRating Score</strong>: [[_ethFaucetLog.rewardDetails.userRatingScore]] <br />
+            <strong>HostingServices Score</strong>: [[_ethFaucetLog.rewardDetails.hostingServicesScore]], rewarded for the following services: <br />
+            <template is="dom-if" if="[[_ethFaucetLog.rewardDetails.rewardedForServicesHosting]]">
+              <ul>
+              <template is="dom-repeat" items="[[_ethFaucetLog.rewardDetails.rewardedForServicesHosting]]" as="service">
+                <li>[[service]]</li>
+              </template>
+              </ul>
+            </template>
+            <strong>DevelopServices Score</strong>: [[_ethFaucetLog.rewardDetails.developServicesScore]], rewarded for the following services: <br />
+            <template is="dom-if" if="[[_ethFaucetLog.rewardDetails.rewardedForServicesDevelop]]">
+              <ul>
+              <template is="dom-repeat" items="[[_ethFaucetLog.rewardDetails.rewardedForServicesDevelop]]" as="service">
+                <li>[[service]]</li>
+              </template>
+              </ul>
+            </template>
+
+            <p>
+              <pre>([[_ethFaucetLog.rewardDetails.u]] * UserRating)   *   (     ( [[_ethFaucetLog.rewardDetails.h]] * HostingServices ) + ( [[_ethFaucetLog.rewardDetails.d]] * DevelopServices )     ) </pre> <br />
+              <strong>Total Faucet Payout</strong>: [[_ethFaucetLog.ethFaucetAmount]] <br />
+            </p>
+          </paper-dialog-scrollable>
+          <div class="buttons">
+            <paper-button dialog-dismiss>
+              <iron-icon icon="check"></iron-icon> 
+              OK
+            </paper-button>
+          </div>
+        </paper-dialog>
+
       <paper-dialog id="sendEthDialog">
         <h1>Transfer ETH</h1>
+        <paper-dialog-scrollable>
           <div class="horizontal layout center-justified">
             <paper-spinner active="[[_working]]"></paper-spinner>
             <template is="dom-if" if="[[_ethTransactionSent]]">
@@ -329,14 +364,15 @@ class EthereumView extends PolymerElement {
               <paper-textarea label="Transaction Message" disabled="[[_working]]" id="SendETHTransactionMessage"></paper-textarea>
             </form>
           </iron-form>
-            <div class="buttons">
-              <paper-button dialog-confirm autofocus raised class="red">
-                <iron-icon icon="block"></iron-icon> Cancel
-              </paper-button>
-              <paper-button raised on-click="sendGenericTransaction" disabled="[[_working]]" class="green">
-                <iron-icon icon="check"></iron-icon> Send ETH Transaction
-              </paper-button>
-            </div>
+        </paper-dialog-scrollable>
+        <div class="buttons">
+          <paper-button dialog-confirm autofocus raised class="red">
+            <iron-icon icon="block"></iron-icon> Cancel
+          </paper-button>
+          <paper-button raised on-click="sendGenericTransaction" disabled="[[_working]]" class="green">
+            <iron-icon icon="check"></iron-icon> Send ETH Transaction
+          </paper-button>
+        </div>
       </paper-dialog>
     `;
   }
@@ -367,6 +403,21 @@ class EthereumView extends PolymerElement {
           ethRating: 0,
           username: ""
         } 
+      },
+      _ethFaucetLog: { type: Object, 
+        value: {
+          ethFaucetAmount: 0,
+          rewardDetails: Object, value: {
+            u: 0,
+            h: 0,
+            d: 0,
+            userRatingScore: 0,
+            hostingServicesScore: 0,
+            rewardedForServicesHosting: [],
+            developServicesScore: 0,
+            rewardedForServicesDevelop: []
+          }
+        }
       },
       _EthTxLog: { type: Object, 
         value: {
@@ -531,7 +582,9 @@ class EthereumView extends PolymerElement {
     this.$.ajaxGetGroups.generateRequest();
   }
   _handleRequestFaucetResponse(event) {
-	  console.log(event.detail.response);
+    this._ethFaucetLog = event.detail.response;
+    console.log(this._ethFaucetLog);
+    this.$.ethFaucetDiaLog.open();
 	  this.refreshEthWallet();
   }
   _handleRegisterProfileResponse(event) {

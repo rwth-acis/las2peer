@@ -432,16 +432,19 @@ public class EthereumHandler {
 
 		JSONObject json = new JSONObject();
 		json.put("agentid", agent.getIdentifier());
-		json.put("eth-target-add", ethAddress);
-		json.put("eth-faucet-amount", Float.toString(reward) + " ETH");
+		json.put("ethTargetAdd", ethAddress);
+		json.put("ethFaucetAmount", Float.toString(reward) + " ETH");
 
 		JSONObject rewardDetails = new JSONObject();
-			//rewardDetails.put("base-faucet-amount", baseFaucetAmount);
-			rewardDetails.put("hosting-services-score", hostingServicesScore);
-			rewardDetails.put("develop-services-score", developServicesScore);
-			rewardDetails.put("user-rating-score", userRatingScore);
-			rewardDetails.put("rewarded-for-services-hosting", hostingServicesRatedByFaucet);
-			rewardDetails.put("rewarded-for-services-develop", developServicesRatedByFaucet);
+			//rewardDetails.put("baseFaucetAmount", baseFaucetAmount);
+			rewardDetails.put("hostingServicesScore", hostingServicesScore);
+			rewardDetails.put("developServicesScore", developServicesScore);
+			rewardDetails.put("userRatingScore", userRatingScore);
+			rewardDetails.put("u", RegistryConfiguration.Faucet_userScoreMultiplier);
+			rewardDetails.put("h", RegistryConfiguration.Faucet_serviceHostingScoreMultiplier);
+			rewardDetails.put("d", RegistryConfiguration.Faucet_serviceDevelopScoreMultiplier);
+			rewardDetails.put("rewardedForServicesHosting", hostingServicesRatedByFaucet);
+			rewardDetails.put("rewardedForServicesDevelop", developServicesRatedByFaucet);
 		json.put("rewardDetails", rewardDetails);
 
 		TransactionReceipt txR = null;
