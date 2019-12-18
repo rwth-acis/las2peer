@@ -157,6 +157,34 @@ public class EthereumHandler {
 	}
 
 	@POST
+	@Path("/getCoinbaseBalance")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response handleGetCoinbaseBalance()
+	{
+		String coinbase;
+		String accBalance;
+		try {
+			coinbase = ethereumNode.getRegistryClient().getCoinbase().getResult();
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Couldn't get ethereum address: ").build();
+		}
+		try {
+			accBalance = ethereumNode.getRegistryClient().getAccountBalance(coinbase);
+		} catch (EthereumException e) {
+			// TODO Auto-generated catch block
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Couldn't get ethereum balance: ").build();
+		}
+		JSONObject json = new JSONObject();
+		json.put("coinbaseAddress", coinbase);
+		json.put("coinbaseBalance", accBalance);
+		json.put("code", Status.OK.getStatusCode());
+		json.put("text", Status.OK.getStatusCode() + " - coinbase balance returned");
+
+		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
+	}
+
+	@POST
 	@Path("/requestFaucet")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response handleRequestFaucet(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId,
@@ -173,12 +201,6 @@ public class EthereumHandler {
 		if (groupID.length() < 120) 
 		{
 			groupID = "";
-		}
-
-		if ( groupID == "" )
-		{
-			logger.info("[ETH Faucet]: no valid groupID provided, skipping service calculation" );
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("no valid groupID provided, no service calculation possible").build();
 		}
 
 		ReadWriteRegistryClient registryClient = ethereumNode.getRegistryClient();

@@ -48,6 +48,13 @@ class EthereumView extends PolymerElement {
                  on-response="_handleRateAgentResponse"
                  on-error="_handleError"
                  loading="{{_working}}"></iron-ajax>
+      <iron-ajax id="ajaxGetCoinbaseBalance"
+                 method="POST"
+                 url$="[[apiEndpoint]]/eth/getCoinbaseBalance"
+                 handle-as="json"
+                 on-response="_handleGetCoinbaseBalanceResponse"
+                 on-error="_handleError"
+                 loading="{{_working}}"></iron-ajax>
       <iron-ajax id="ajaxGetEthWallet"
                  method="POST"
                  url$="[[apiEndpoint]]/eth/getEthWallet"
@@ -207,7 +214,7 @@ class EthereumView extends PolymerElement {
                       <th>TransactionValue</th>
                       <th>TXHash</th>
                     </tr>
-                    <template is="dom-repeat" items="[[_EthTxLog.rcvdJsonLog]]" as="tx">
+                    <template is="dom-repeat" items="[[_ethTxLog.rcvdJsonLog]]" as="tx">
                       <tr>
                         <td><iron-icon icon="update"></iron-icon> [[tx.txDateTime]]</td>
                         <td><iron-icon icon="face"></iron-icon> [[tx.txSender]]</td>
@@ -230,7 +237,7 @@ class EthereumView extends PolymerElement {
                       <th>TransactionValue</th>
                       <th>TXHash</th>
                     </tr>
-                    <template is="dom-repeat" items="[[_EthTxLog.sentJsonLog]]" as="tx">
+                    <template is="dom-repeat" items="[[_ethTxLog.sentJsonLog]]" as="tx">
                       <tr>
                         <td><iron-icon icon="update"></iron-icon> [[tx.txDateTime]]</td>
                         <td><iron-icon icon="face"></iron-icon> [[tx.txReceiver]]</td>
@@ -426,11 +433,17 @@ class EthereumView extends PolymerElement {
           }
         }
       },
-      _EthTxLog: { type: Object, 
+      _ethTxLog: { type: Object, 
         value: {
           rcvdJsonLog: [],
           sentJsonLog: []
         } 
+      },
+      _ethCoinbaseInfo: { type: Object, 
+        value: {
+          coinbaseAddress: "",
+          coinbaseBalance: ""
+        }
       },
       _hasEthProfile: { type: Boolean, value: false },
       _hasNoAgentsList: { type: Boolean, value: true },
@@ -465,6 +478,7 @@ class EthereumView extends PolymerElement {
   refreshEthWallet() { 
     this.$.ajaxGetEthWallet.generateRequest(); 
     this.$.ajaxGenericTxLog.generateRequest();
+    this.$.ajaxGetCoinbaseBalance.generateRequest();
   }
   requestEthFaucet() { 
     if ( this._groupSelected == null || this._groupSelected.innerHTML == null )
@@ -541,9 +555,9 @@ class EthereumView extends PolymerElement {
   }
 
   _handleGenericTxLogResponse(event) {
-    this._EthTxLog = event.detail.response;
-    console.log(this._EthTxLog);
-    if (this._EthTxLog.rcvdJsonLog.length == 0 && this._EthTxLog.sentJsonLog.length == 0)
+    this._ethTxLog = event.detail.response;
+    console.log(this._ethTxLog);
+    if (this._ethTxLog.rcvdJsonLog.length == 0 && this._ethTxLog.sentJsonLog.length == 0)
       this._hasNoTxLog = true;
     else
       this._hasNoTxLog = false;
@@ -585,6 +599,10 @@ class EthereumView extends PolymerElement {
       
       //this.$.toast.innerHTML = 'Rating (' + event.model.get('agent.username') + ': '+ event.detail.rating + ') successfully casted.';
 	  //this.$.toast.open();
+  }
+  _handleGetCoinbaseBalanceResponse(event) {
+    this._ethCoinbaseInfo = event.detail.response;
+    
   }
   _handleGetEthWalletResponse(event) {
 	  this._hasNoEthWallet = false;
