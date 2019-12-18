@@ -31,11 +31,11 @@ class CustomStarRating extends PolymerElement {
             }
             iron-icon.selected,
             iron-icon.selected ~ iron-icon {
-                color: #fdd835;
+                color: #999999;
             }
             :host(:not([readonly])) iron-icon:hover,
             :host(:not([readonly])) iron-icon:hover ~ iron-icon {
-                color: #ffeb3b !important;
+                color: #9e9e9e !important;
             }
         </style>
     
