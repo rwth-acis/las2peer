@@ -97,26 +97,26 @@ public class EthereumHandler {
 		return localServices.length;
 	}
 
-	private int queryRemoteServices(Map<String, String> ethAgentAdminServices, String agentEmail) {
+	private int queryRemoteServicesWithoutBlockchain(Map<String, String> ethAgentAdminServices, String agentEmail) {
 		Collection<NodeHandle> knownNodes = ethereumNode.getPastryNode().getLeafSet().getUniqueSet();
-		logger.info("[remove SVC] checking " + knownNodes.size() + " known remote nodes, see if " + agentEmail
+		logger.info("[remote nodeInfo-SVC] checking " + knownNodes.size() + " known remote nodes, see if " + agentEmail
 				+ " is admin there...");
 		for (NodeHandle remoteNodeHandle : knownNodes) {
 			NodeInformation remoteNodeInfo;
 			try {
 				remoteNodeInfo = ethereumNode.getNodeInformation(remoteNodeHandle);
-				logger.info("[remote SVC]: querying node #" + remoteNodeHandle.getNodeId() + ", admin: "
+				logger.info("[remote nodeInfo-SVC]: querying node #" + remoteNodeHandle.getNodeId() + ", admin: "
 						+ remoteNodeInfo.getAdminEmail());
 				// is ethAgent admin of remote node?
 				if (remoteNodeInfo.getAdminEmail().equals(agentEmail)) {
 					// yes, query services
 					List<ServiceNameVersion> servicesOnRemoteNode = remoteNodeInfo.getHostedServices();
 					for (ServiceNameVersion removeSNV : servicesOnRemoteNode) {
-						logger.info("[remote SVC]: found service " + removeSNV.toString());
+						logger.info("[remote nodeInfo-SVC]: found service " + removeSNV.toString());
 						ethAgentAdminServices.putIfAbsent(removeSNV.getName(), remoteNodeHandle.toString());
 					}
 				} else {
-					logger.info("[remote SVC]: ethAgent is not remote admin, omitting node");
+					logger.info("[remote nodeInfo-SVC]: ethAgent is not remote admin, omitting node");
 				}
 			} catch (NodeNotFoundException e) {
 				// logger.severe("trying to access node " + remoteNodeHandle.getNodeId() + " | "
@@ -231,22 +231,7 @@ public class EthereumHandler {
 		// get transaction log and find last transaction sent from coinbase to ethAgent's account
 		SenderReceiverDoubleKey coinbaseToEthAgent = new SenderReceiverDoubleKey(coinbase, ethAddress);
 		BigInteger largestBlockNo = BigInteger.ZERO;
-		if ( registryClient.getTransactionLog().containsKey(coinbaseToEthAgent) )
-		{
-			List<Transaction> coinbaseTransactionLog = registryClient.getTransactionLog().get(coinbaseToEthAgent);
-			if ( coinbaseTransactionLog.size() > 0 )
-			{
-				logger.info("[ETH Faucet]: found "+coinbaseTransactionLog.size()+" transactions, finding largest block no " );
-				for(Transaction transaction: coinbaseTransactionLog)
-				{
-					if ( transaction.getBlockNumber().compareTo(largestBlockNo) == 1 )
-					{
-						largestBlockNo = transaction.getBlockNumber();
-						logger.info("[ETH Faucet]: found transaction on block " + largestBlockNo );
-					}
-				}
-			}
-		}
+		largestBlockNo = queryLargestBlockNo(registryClient, coinbaseToEthAgent);
 		
 		logger.info("[ETH Faucet]: last transaction to this ethAgent was on block " + largestBlockNo );
 
@@ -395,7 +380,6 @@ public class EthereumHandler {
 		reward = ( hostingServicesScore + developServicesScore );
 		if ( userRatingScore != 0f ) reward *= userRatingScore;
 		logger.info("[ETH Faucet]: calculating faucet amount:" );
-				//"> baseFaucetAmount: " + Float.toString(baseFaucetAmount) + " ETH \n" +
 		if ( userRatingScore != 0f )
 		{
 			logger.info(	
@@ -406,7 +390,7 @@ public class EthereumHandler {
 				"> * \n"
 			);
 		}
-		logger.info("    ( \n" + 
+			logger.info("    ( \n" + 
 				"       hostingServicesScore: " + 
 				"        " + Float.toString(RegistryConfiguration.Faucet_serviceHostingScoreMultiplier) + "*" + 
 				"        " + Float.toString(hostingServicesScore_Raw) + " = " + 
@@ -435,17 +419,17 @@ public class EthereumHandler {
 		json.put("ethTargetAdd", ethAddress);
 		json.put("ethFaucetAmount", Float.toString(reward) + " ETH");
 
-		JSONObject rewardDetails = new JSONObject();
-			//rewardDetails.put("baseFaucetAmount", baseFaucetAmount);
-			rewardDetails.put("hostingServicesScore", hostingServicesScore);
-			rewardDetails.put("developServicesScore", developServicesScore);
-			rewardDetails.put("userRatingScore", userRatingScore);
-			rewardDetails.put("u", RegistryConfiguration.Faucet_userScoreMultiplier);
-			rewardDetails.put("h", RegistryConfiguration.Faucet_serviceHostingScoreMultiplier);
-			rewardDetails.put("d", RegistryConfiguration.Faucet_serviceDevelopScoreMultiplier);
-			rewardDetails.put("rewardedForServicesHosting", hostingServicesRatedByFaucet);
-			rewardDetails.put("rewardedForServicesDevelop", developServicesRatedByFaucet);
-		json.put("rewardDetails", rewardDetails);
+		json.put("rewardDetails", 
+			new JSONObject()
+				.appendField("userRatingScore", userRatingScore)
+				.appendField("hostingServicesScore", hostingServicesScore)
+				.appendField("developServicesScore", developServicesScore)
+				.appendField("rewardedForServicesHosting", hostingServicesRatedByFaucet)
+				.appendField("rewardedForServicesDevelop", developServicesRatedByFaucet)
+				.appendField("u", RegistryConfiguration.Faucet_userScoreMultiplier)
+				.appendField("h", RegistryConfiguration.Faucet_serviceHostingScoreMultiplier)
+				.appendField("d", RegistryConfiguration.Faucet_serviceDevelopScoreMultiplier)
+		);
 
 		TransactionReceipt txR = null;
 
@@ -469,6 +453,31 @@ public class EthereumHandler {
 		json.put("text", Status.OK.getStatusCode() + " - Faucet triggered. Amount transferred");
 
 		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
+	}
+
+	private BigInteger queryLargestBlockNo(
+		ReadWriteRegistryClient registryClient, 
+		SenderReceiverDoubleKey searchKey
+	) {
+		BigInteger largestBlockNo = BigInteger.ZERO;
+		if ( registryClient.getTransactionLog().containsKey(searchKey) )
+		{
+			List<Transaction> coinbaseTransactionLog = registryClient.getTransactionLog().get(searchKey);
+			if ( coinbaseTransactionLog.size() > 0 )
+			{
+				logger.info("[ETH TxLog]: found "+coinbaseTransactionLog.size()+" transactions, finding largest block no " );
+				for(Transaction transaction: coinbaseTransactionLog)
+				{
+					if ( transaction.getBlockNumber().compareTo(largestBlockNo) == 1 )
+					{
+						largestBlockNo = transaction.getBlockNumber();
+						logger.info("[ETH TxLog]:   found transaction on block " + largestBlockNo );
+					}
+				}
+				logger.info("[ETH TxLog]: got " + largestBlockNo.toString() + " as largest block. " );
+			}
+		}
+		return largestBlockNo;
 	}
 
 	private float getSuccessMeasure(String serviceSuccessMeasureURL) {
@@ -539,7 +548,7 @@ public class EthereumHandler {
 		json.put("local-service-count", queryLocalServices(ethAgentAdminServices, isLocalAdmin));
 		
 		// query remote node infos
-		json.put("known-node-count", queryRemoteServices(ethAgentAdminServices, agentEmail) );
+		json.put("known-node-count", queryRemoteServicesWithoutBlockchain(ethAgentAdminServices, agentEmail) );
 		
 		// translate local and remote service info into JSON array
 		JSONArray jsonServices = new JSONArray();
