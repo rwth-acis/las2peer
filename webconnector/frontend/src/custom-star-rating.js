@@ -1,6 +1,7 @@
 import { html, PolymerElement } from '@polymer/polymer/polymer-element.js';
 import '@polymer/iron-icon/iron-icon.js';
 import '@polymer/iron-icons/iron-icons.js';
+import '@polymer/iron-icons/social-icons.js';
 /**
 * `iron-star-rating`
 * 5-star rating element (Polymer 3.x)
@@ -39,7 +40,7 @@ class CustomStarRating extends PolymerElement {
         </style>
     
         <template is="dom-repeat" items="[[ratings]]">
-            <iron-icon icon="[[icon]]" class\$="[[item.class]] [[_getSelected(item.selected)]]" on-click="_starClicked"></iron-icon>
+            <iron-icon icon="[[item.icon]]" class\$="[[item.class]] [[_getSelected(item.selected)]]" on-click="_starClicked"></iron-icon>
         </template>
 `;
     }
@@ -73,11 +74,11 @@ class CustomStarRating extends PolymerElement {
         super();
 
         this.ratings = [
-            { value: 5, class: 'whole', selected: false },
-            { value: 4, class: 'whole', selected: false },
-            { value: 3, class: 'whole', selected: false },
-            { value: 2, class: 'whole', selected: false },
-            { value: 1, class: 'whole', selected: false },
+            { value: 5, class: 'whole', icon: 'social:sentiment-very-satisfied', selected: false },
+            { value: 4, class: 'whole', icon: 'social:sentiment-satisfied', selected: false },
+            { value: 3, class: 'whole', icon: 'social:sentiment-neutral', selected: false },
+            { value: 2, class: 'whole', icon: 'social:sentiment-dissatisfied', selected: false },
+            { value: 1, class: 'whole', icon: 'social:sentiment-very-dissatisfied', selected: false },
         ];
     }
 

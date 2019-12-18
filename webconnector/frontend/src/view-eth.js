@@ -314,10 +314,12 @@ class EthereumView extends PolymerElement {
 
       <!-- Dialog Boxes -->
       <paper-dialog id="ethFaucetDiaLog">
-          <h1>Faucet Transaction Log - transaction successful.</h1>
+          <h1><iron-icon icon="receipt"></iron-icon> Faucet Transaction Log - transaction successful.</h1>
           <paper-dialog-scrollable>
+            <iron-icon icon="face"></iron-icon>
             <strong>UserRating Score</strong>: [[_ethFaucetLog.rewardDetails.userRatingScore]] <br />
             <p>
+              <iron-icon icon="important-devices"></iron-icon>
               <strong>HostingServices Score</strong>: [[_ethFaucetLog.rewardDetails.hostingServicesScore]]
               <template is="dom-if" if="[[_ethFaucetLog.rewardDetails.rewardedForServicesHosting]]">, rewarded for the following services: <br />
                 <ul>
@@ -328,6 +330,7 @@ class EthereumView extends PolymerElement {
               </template>
             </p>
             <p>
+              <iron-icon icon="cloud-upload"></iron-icon>
               <strong>DevelopServices Score</strong>: [[_ethFaucetLog.rewardDetails.developServicesScore]]
               <template is="dom-if" if="[[_ethFaucetLog.rewardDetails.rewardedForServicesDevelop]]">, rewarded for the following services: <br />
                 <ul>
@@ -338,8 +341,9 @@ class EthereumView extends PolymerElement {
               </template>
             </p>
             <p>
-            <strong>Total Faucet Payout</strong>: [[_ethFaucetLog.ethFaucetAmount]] <br />
-            <pre>= ([[_ethFaucetLog.rewardDetails.u]] * UserRating)   *   (     ( [[_ethFaucetLog.rewardDetails.h]] * HostingServices ) + ( [[_ethFaucetLog.rewardDetails.d]] * DevelopServices )     ) </pre> <br />
+              <iron-icon icon="redeem"></iron-icon>
+              <strong>Total Faucet Payout</strong>: [[_ethFaucetLog.ethFaucetAmount]] <br />
+              <pre>= ([[_ethFaucetLog.rewardDetails.u]] * UserRating)   *   (     ( [[_ethFaucetLog.rewardDetails.h]] * HostingServices ) + ( [[_ethFaucetLog.rewardDetails.d]] * DevelopServices )     ) </pre> <br />
             </p>
           </paper-dialog-scrollable>
           <div class="buttons">
