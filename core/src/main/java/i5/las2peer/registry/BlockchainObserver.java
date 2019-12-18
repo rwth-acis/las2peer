@@ -191,10 +191,14 @@ class BlockchainObserver {
 				// https://stackoverflow.com/a/51062494
 				transactionLog.computeIfAbsent(transactionKey, k -> new ArrayList<>()).add(transaction);
 				
-				logger.info("[ChainObserver] observed transaction # "+transaction.getTransactionIndex().toString()+"\n"+
+				String txIndex = ( transaction.getTransactionIndex() != null ) ? transaction.getTransactionIndex().toString() : "";
+				String blockNo = ( transaction.getBlockNumber() != null ) ? transaction.getBlockNumber().toString() : "";
+				String txValue = ( transaction.getValue() != null ) ? transaction.getValue().toString() : "";
+
+				logger.info("[ChainObserver] observed transaction # "+txIndex+"\n"+
 						    "                [" + transactionKey + "]\n" +
-							"                 > block: " + transaction.getBlockNumber().toString() + "\n" +
-							"                 > value: " + transaction.getValue().toString() + "\n"
+							"                 > block: " + blockNo + "\n" +
+							"                 > value: " + txValue + "\n"
 				);
 
 			}, e -> { 
