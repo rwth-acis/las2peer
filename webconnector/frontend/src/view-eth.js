@@ -248,7 +248,7 @@ class EthereumView extends PolymerElement {
 
         <!-- AGENTS LIST -->
         <h2 on-click="toggleAgentList" style="cursor: pointer">
-          List User Agents
+          List User Agents <small>(ethereum agents registered in the network)</small>
           <paper-icon-button icon="refresh" title="Refresh Agents List" on-click="refreshAgentsList" disabled="[[_working]]"></paper-button>
         </h2>
         <paper-spinner active="[[_working]]" style="float:right;"></paper-spinner>
@@ -278,7 +278,7 @@ class EthereumView extends PolymerElement {
 
         <!-- PROFILES LIST -->
         <h2 on-click="toggleProfileList" style="cursor: pointer">
-          List User Profiles
+          List User Profiles <small>(ethereum agents who have opted in to the Reputation System)</small>
           <paper-icon-button icon="refresh" title="Refresh Profiles List" on-click="refreshProfilesList" disabled="[[_working]]"></paper-button>
         </h2>
         <paper-spinner active="[[_working]]" style="float:right;"></paper-spinner>
