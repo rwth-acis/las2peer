@@ -70,8 +70,9 @@ class Contracts {
 
 	protected static L2pLogger logger = L2pLogger.getInstance(Contracts.class);
 
-	private Contracts(CommunityTagIndex communityTagIndex, UserRegistry userRegistry, ServiceRegistry serviceRegistry,
+	private Contracts(Web3j web3j, CommunityTagIndex communityTagIndex, UserRegistry userRegistry, ServiceRegistry serviceRegistry,
 			ReputationRegistry reputationRegistry, TransactionManager transactionManager) {
+		this.web3j = web3j;
 		this.communityTagIndex = communityTagIndex;
 		this.userRegistry = userRegistry;
 		this.serviceRegistry = serviceRegistry;
@@ -269,7 +270,7 @@ class Contracts {
 			ServiceRegistry serviceRegistry = ServiceRegistry.load(config.serviceRegistryAddress, web3j, transactionManager, gasProvider);
 			ReputationRegistry reputationRegistry = ReputationRegistry.load(config.reputationRegistryAddress, web3j, transactionManager, gasProvider);
 
-			return new Contracts(communityTagIndex, userRegistry, serviceRegistry, reputationRegistry, transactionManager);
+			return new Contracts(web3j, communityTagIndex, userRegistry, serviceRegistry, reputationRegistry, transactionManager);
 		}
 
 		private TransactionManager constructTxManager(Web3j web3j, Credentials credentials) {
