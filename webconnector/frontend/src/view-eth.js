@@ -180,7 +180,11 @@ class EthereumView extends PolymerElement {
                 </template>
               </p>
             <p>
-              <strong><iron-icon icon="account-balance"></iron-icon> Eth Balance</strong>: [[_EthWallet.ethAccBalance]]
+              <small>
+                <strong><iron-icon icon="account-balance"></iron-icon> Coinbase Balance</strong>: [[_ethCoinbaseInfo.coinbaseBalance]] 
+              </small><br />
+              <strong><iron-icon icon="account-balance-wallet"></iron-icon> Eth Balance</strong>: [[_EthWallet.ethAccBalance]] <br />
+              <br />
               <paper-button raised on-click="requestEthFaucet" disabled="[[_working]]">
                 <iron-icon icon="card-giftcard"></iron-icon> Request funds from faucet
               </paper-button> 
@@ -567,14 +571,14 @@ class EthereumView extends PolymerElement {
     console.log(event.detail.response);
     let response = event.detail.response;
     response.agents.forEach(function(element) { element.shortid = element.agentid.substr(0, 15) + '...' });
-    this._listAgents = response.members;
+    this._listAgents = response.agents;
     this._hasNoAgentsList = false;
   }
   _handleLoadProfilelistResponse(event) {
     console.log(event.detail.response);
     let response = event.detail.response;
     response.agents.forEach(function (element) { element.shortid = element.agentid.substr(0, 15) + '...' });
-    this._listProfiles = response.members;
+    this._listProfiles = response.agents;
     this._hasNoProfilesList = false;
   }  
   _handleRateAgentResponse(event) {
