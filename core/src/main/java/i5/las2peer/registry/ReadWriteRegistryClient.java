@@ -1,6 +1,5 @@
 package i5.las2peer.registry;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -64,16 +63,12 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 	 */
 	public void createTag(String tagName, String tagDescription) throws EthereumException {
 		try {
-			contracts.communityTagIndex.create(Util.padAndConvertString(tagName, 32), tagDescription).send();
+			contracts.communityTagIndex.create(Util.padAndConvertString(tagName, 32), tagDescription).sendAsync().get();
 		} catch (IllegalArgumentException e) {
 			throw new IllegalArgumentException("Tag name invalid (too long?)", e);
 		} catch (Exception e) {
 			throw new EthereumException(e);
 		}
-	}
-
-	public String registerPersonalAccount(String password) throws IOException {
-		return this.web3j_admin.personalNewAccount(password).send().getAccountId();
 	}
 
 	/**
@@ -115,7 +110,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		byte[] signature = SignatureUtils.signFunctionCall(function, agent.getEthereumCredentials());
 
 		try {
-			contracts.userRegistry.delegatedRegister(name, agentId, publicKey, consentee, signature).send();
+			contracts.userRegistry.delegatedRegister(name, agentId, publicKey, consentee, signature).sendAsync().get();
 		} catch (Exception e) {
 			throw new EthereumException("Could not register user", e);
 		}
@@ -129,7 +124,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		logger.info("registering user profile: " + agent.getLoginName());
 		String txHash;
 		try {
-			TransactionReceipt txR = contracts.reputationRegistry.createProfile(profileName).send();
+			TransactionReceipt txR = contracts.reputationRegistry.createProfile(profileName).sendAsync().get();
 			if (!txR.isStatusOK()) {
 				logger.warning("trx fail with status " + txR.getStatus());
 				logger.warning("gas used " + txR.getCumulativeGasUsed());
@@ -191,7 +186,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		String txHash;
 		try {
 			TransactionReceipt txR = contracts.reputationRegistry
-					.addTransaction(receivingAgent.getEthereumAddress(), BigInteger.valueOf(rating)).send();
+					.addTransaction(receivingAgent.getEthereumAddress(), BigInteger.valueOf(rating)).sendAsync().get();
 			if (!txR.isStatusOK()) {
 				logger.warning("trx fail with status " + txR.getStatus());
 				logger.warning("gas used " + txR.getCumulativeGasUsed());
@@ -210,7 +205,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		throws EthereumException {
 		Boolean hasProfile = Boolean.FALSE;
 		try {
-			hasProfile = contracts.reputationRegistry.hasProfile(profileName).send();
+			hasProfile = contracts.reputationRegistry.hasProfile(profileName).sendAsync().get();
 		} catch (Exception e) {
 			throw new EthereumException("cannot check if profile exists");
 		}
@@ -238,7 +233,8 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		byte[] signature = SignatureUtils.signFunctionCall(function, agent.getEthereumCredentials());
 
 		try {
-			contracts.serviceRegistry.delegatedRegister(serviceName, authorName, consentee, signature).send();
+			contracts.serviceRegistry.delegatedRegister(serviceName, authorName, consentee, signature).sendAsync()
+					.get();
 		} catch (Exception e) {
 			throw new EthereumException("Failed to register service", e);
 		}
@@ -309,7 +305,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		try {
 			contracts.serviceRegistry.delegatedRelease(serviceName, authorName,
 					BigInteger.valueOf(versionMajor), BigInteger.valueOf(versionMinor), BigInteger.valueOf(versionPatch),
-					supplementHash, consentee, signature).send();
+					supplementHash, consentee, signature).sendAsync().get();
 		} catch (Exception e) {
 			throw new EthereumException("Failed to submit service release", e);
 		}
@@ -333,7 +329,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		try {
 			contracts.serviceRegistry.announceDeployment(servicePackageName, serviceClassName,
 				BigInteger.valueOf(versionMajor), BigInteger.valueOf(versionMinor), BigInteger.valueOf(versionPatch),
-				nodeId).send();
+				nodeId).sendAsync().get();
 		} catch (Exception e) {
 			throw new EthereumException("Failed to submit service deployment announcement ("
 					+ "DEBUG: " + serviceClassName + ", " + e.getMessage() + ")", e);
@@ -360,7 +356,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		try {
 			contracts.serviceRegistry.announceDeploymentEnd(servicePackageName, serviceClassName,
 				BigInteger.valueOf(versionMajor), BigInteger.valueOf(versionMinor), BigInteger.valueOf(versionPatch),
-				nodeId).send();
+				nodeId).sendAsync().get();
 		} catch (Exception e) {
 			throw new EthereumException("Failed to submit service deployment *end* announcement ("
 					+ "DEBUG: " + serviceClassName + ", " + e.getMessage() + ")", e);
@@ -395,12 +391,12 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		// Send transaction
 		EthSendTransaction ethSendTransaction;
 		try {
-			ethSendTransaction = web3j.ethSendRawTransaction(hexValue).send();
+			ethSendTransaction = web3j.ethSendRawTransaction(hexValue).sendAsync().get();
 			if (ethSendTransaction.hasError()) {
 				Response.Error error = ethSendTransaction.getError();
 				throw new EthereumException("Eth Transaction Error [" + error.getCode() + "]: " + error.getMessage());
 			}
-		} catch (IOException e) {
+		} catch (InterruptedException | ExecutionException e) {
 			throw new EthereumException("couldn't send raw transaction", e);
 		}
 
@@ -411,7 +407,8 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 	public String sendEther(String recipientAddress, BigDecimal valueInWei) throws EthereumException {
 		TransactionReceipt receipt;
 		try {
-			receipt = Transfer.sendFunds(web3j, credentials, recipientAddress, valueInWei, Convert.Unit.WEI).send();
+			receipt = Transfer.sendFunds(web3j, credentials, recipientAddress, valueInWei, Convert.Unit.WEI).sendAsync()
+					.get();
 			if (!receipt.isStatusOK()) {
 				throw new EthereumException("TX status field is not OK. TX failed.");
 			}
@@ -460,8 +457,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 			logger.info("[ETH] > valueInWei: " + valueInWei);
 
 			EthSendTransaction ethSendTransaction = web3j.ethSendTransaction(transaction)
-					// .sendAsync().get();
-					.send();
+					.sendAsync().get();
 
 			if (ethSendTransaction.hasError()) {
 				Response.Error error = ethSendTransaction.getError();
@@ -475,7 +471,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 			
 			logger.fine("waiting for receipt on [" + txHash + "]... ");
 			txR = waitForReceipt(txHash);
-		} catch (InterruptedException | ExecutionException | IOException e) {
+		} catch (InterruptedException | ExecutionException e) {
 			throw new EthereumException("Could not send ether to address '" + recipientAddress + "'", e);
 		}
 

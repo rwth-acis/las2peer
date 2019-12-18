@@ -34,15 +34,13 @@ import org.web3j.tuples.generated.Tuple4;
 import org.web3j.tuples.generated.Tuple6;
 import org.web3j.utils.Convert;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 /**
- * Facade providing simple read-only access to the registry smart
- * contracts.
+ * Facade providing simple read-only access to the registry smart contracts.
  *
  * @see ReadWriteRegistryClient
  */
@@ -52,8 +50,8 @@ public class ReadOnlyRegistryClient {
 	Contracts.ContractsConfig contractsConfig;
 	Contracts contracts;
 	BlockchainObserver observer;
-	//long gasPrice;
-	//long gasLimit;
+	// long gasPrice;
+	// long gasLimit;
 	BigInteger gasPrice;
 	BigInteger gasLimit;
 
@@ -68,9 +66,9 @@ public class ReadOnlyRegistryClient {
 
 	/**
 	 * Create client providing access to read-only registry functions.
-	 * @param registryConfiguration addresses of registry contracts and
-	 *                              Ethereum client HTTP JSON RPC API
-	 *                              endpoint
+	 * 
+	 * @param registryConfiguration addresses of registry contracts and Ethereum
+	 *                              client HTTP JSON RPC API endpoint
 	 */
 	public ReadOnlyRegistryClient(RegistryConfiguration registryConfiguration) {
 		this(registryConfiguration, null);
@@ -85,22 +83,20 @@ public class ReadOnlyRegistryClient {
 				registryConfiguration.getReputationRegistryAddress(), registryConfiguration.getEndpoint());
 
 		observer = BlockchainObserver.getInstance(contractsConfig);
-		
+
 		long _gasPrice = registryConfiguration.getGasPrice();
 		this.gasPrice = BigInteger.valueOf(_gasPrice);
-		
+
 		long _gasLimit = registryConfiguration.getGasLimit();
 		this.gasLimit = BigInteger.valueOf(_gasLimit);
 
 		logger.info("creating smart contract wrapper with credentials:" + credentials.getAddress());
-		contracts = new Contracts.ContractsBuilder(contractsConfig)
-				.setGasOptions(_gasPrice, _gasLimit)
+		contracts = new Contracts.ContractsBuilder(contractsConfig).setGasOptions(_gasPrice, _gasLimit)
 				.setCredentials(credentials) // may be null, that's okay here
 				.build();
 
 		this.credentials = credentials;
 	}
-	
 
 	public BigInteger getGasPrice() {
 		return gasPrice;
@@ -116,8 +112,6 @@ public class ReadOnlyRegistryClient {
 			personalUnlockAccount = web3j_admin.personalUnlockAccount(accountAddress, accountPassword).sendAsync()
 					.get();
 		} catch (InterruptedException | ExecutionException e) {
-			// TODO Auto-generated catch block
-			//e.printStackTrace();
 			return false;
 		}
 		return personalUnlockAccount.accountUnlocked();
@@ -125,23 +119,24 @@ public class ReadOnlyRegistryClient {
 
 	/**
 	 * Return version string of connected Ethereum client.
-	 * @deprecated there's no reason to reveal this implementation
-	 * 	           detail, so this may be removed
+	 * 
+	 * @deprecated there's no reason to reveal this implementation detail, so this
+	 *             may be removed
 	 */
 	// this is the only place where `web3j` is (directly) accessed
 	@Deprecated
 	public String getEthClientVersion() throws EthereumException {
 		try {
-			Web3ClientVersion web3ClientVersion = web3j.web3ClientVersion().send();
+			Web3ClientVersion web3ClientVersion = web3j.web3ClientVersion().sendAsync().get();
 			return web3ClientVersion.getWeb3ClientVersion();
-		} catch (IOException e) {
+		} catch (InterruptedException | ExecutionException e) {
 			throw new EthereumException("Failed to get client version", e);
 		}
 	}
 
 	private String getTagDescription(String tagName) throws EthereumException {
 		try {
-			return contracts.communityTagIndex.viewDescription(Util.padAndConvertString(tagName, 32)).send();
+			return contracts.communityTagIndex.viewDescription(Util.padAndConvertString(tagName, 32)).sendAsync().get();
 		} catch (IllegalArgumentException e) {
 			throw new IllegalArgumentException("Tag name invalid (too long?)", e);
 		} catch (Exception e) {
@@ -150,30 +145,31 @@ public class ReadOnlyRegistryClient {
 	}
 
 	/**
-	 * Return true if user name is both valid and not already taken and
-	 * thus can be registered.
+	 * Return true if user name is both valid and not already taken and thus can be
+	 * registered.
+	 * 
 	 * @param name user name consisting of 1 to 32 Unicode characters
 	 */
 	public boolean usernameIsAvailable(String name) throws EthereumException {
 		try {
-			return contracts.userRegistry.nameIsAvailable(Util.padAndConvertString(name, 32)).send();
+			return contracts.userRegistry.nameIsAvailable(Util.padAndConvertString(name, 32)).sendAsync().get();
 		} catch (Exception e) {
 			throw new EthereumException(e);
 		}
 	}
 
 	/**
-	 * Return true if user name is both valid, as encoded in the
-	 * registry smart contract code.
+	 * Return true if user name is both valid, as encoded in the registry smart
+	 * contract code.
 	 *
-	 * (Any non-empty String of up to 32 characters should work, but
-	 * let's not press our luck.)
+	 * (Any non-empty String of up to 32 characters should work, but let's not press
+	 * our luck.)
 	 *
 	 * @param name user name consisting of 1 to 32 Unicode characters
 	 */
 	public boolean usernameIsValid(String name) throws EthereumException {
 		try {
-			return contracts.userRegistry.nameIsValid(Util.padAndConvertString(name, 32)).send();
+			return contracts.userRegistry.nameIsValid(Util.padAndConvertString(name, 32)).sendAsync().get();
 		} catch (Exception e) {
 			throw new EthereumException(e);
 		}
@@ -181,14 +177,15 @@ public class ReadOnlyRegistryClient {
 
 	/**
 	 * Retrieve user data stored in registry for given name.
+	 * 
 	 * @param name user name consisting of 1 to 32 Unicode characters
 	 * @return user data object containing ID and owner address, or
-	 * 		   <code>null</code> if user name is not taken
+	 *         <code>null</code> if user name is not taken
 	 */
 	public UserData getUser(String name) throws EthereumException, NotFoundException {
 		Tuple4<byte[], byte[], byte[], String> userAsTuple;
 		try {
-			userAsTuple = contracts.userRegistry.users(Util.padAndConvertString(name, 32)).send();
+			userAsTuple = contracts.userRegistry.users(Util.padAndConvertString(name, 32)).sendAsync().get();
 		} catch (Exception e) {
 			throw new EthereumException("Could not get user", e);
 		}
@@ -199,13 +196,14 @@ public class ReadOnlyRegistryClient {
 			throw new NotFoundException("User name apparently not registered.");
 		}
 
-		return new UserData(userAsTuple.getValue1(), userAsTuple.getValue2(), userAsTuple.getValue3(), userAsTuple.getValue4());
+		return new UserData(userAsTuple.getValue1(), userAsTuple.getValue2(), userAsTuple.getValue3(),
+				userAsTuple.getValue4());
 	}
 
 	public UserProfileData getProfile(String address) throws EthereumException, NotFoundException {
 		Tuple6<String, byte[], BigInteger, BigInteger, BigInteger, BigInteger> profileAsTuple;
 		try {
-			profileAsTuple = contracts.reputationRegistry.profiles(address).send();
+			profileAsTuple = contracts.reputationRegistry.profiles(address).sendAsync().get();
 			logger.info("found user profile: " + profileAsTuple.toString());
 		} catch (Exception e) {
 			throw new EthereumException("Could not get profile", e);
@@ -215,17 +213,16 @@ public class ReadOnlyRegistryClient {
 		if (returnedAddress == "") {
 			throw new NotFoundException("User profile apparently not registered.");
 		}
-		
+
 		/*
 		 * owner userName cumulativeScore noTransactionsSent noTransactionsReceived
 		 */
-		return new UserProfileData(
-			profileAsTuple.getValue1(), // owner
-			profileAsTuple.getValue2(), // username
-			profileAsTuple.getValue3(), // score
-			profileAsTuple.getValue4(), // txsent
-			profileAsTuple.getValue5(), // txrcvd
-			profileAsTuple.getValue6() // index
+		return new UserProfileData(profileAsTuple.getValue1(), // owner
+				profileAsTuple.getValue2(), // username
+				profileAsTuple.getValue3(), // score
+				profileAsTuple.getValue4(), // txsent
+				profileAsTuple.getValue5(), // txrcvd
+				profileAsTuple.getValue6() // index
 		);
 	}
 
@@ -259,6 +256,7 @@ public class ReadOnlyRegistryClient {
 
 	/**
 	 * Look up author/owner for a given service.
+	 * 
 	 * @param serviceName service package name
 	 * @return author owning the service name
 	 */
@@ -266,7 +264,7 @@ public class ReadOnlyRegistryClient {
 		byte[] serviceNameHash = Util.soliditySha3(serviceName);
 		Tuple2<String, byte[]> serviceNameAndOwner;
 		try {
-			serviceNameAndOwner = contracts.serviceRegistry.services(serviceNameHash).send();
+			serviceNameAndOwner = contracts.serviceRegistry.services(serviceNameHash).sendAsync().get();
 		} catch (Exception e) {
 			throw new EthereumException("Failed to look up service author", e);
 		}
@@ -305,7 +303,7 @@ public class ReadOnlyRegistryClient {
 	public ConcurrentMap<String, String> getUserProfiles() {
 		return observer.profiles;
 	}
-	
+
 	/** @return map of users to their registration time stamps */
 	public ConcurrentMap<String, String> getUserRegistrations() {
 		return observer.users;
@@ -332,21 +330,21 @@ public class ReadOnlyRegistryClient {
 	}
 
 	public Set<ServiceDeploymentData> getDeployments(String serviceName) {
-		return getDeployments().stream().filter(d -> d.getServicePackageName().equals(serviceName)).collect(Collectors.toSet());
+		return getDeployments().stream().filter(d -> d.getServicePackageName().equals(serviceName))
+				.collect(Collectors.toSet());
 	}
 
 	public Set<ServiceDeploymentData> getDeployments(String serviceName, String version) {
-		return getDeployments().stream().filter(d -> (d.getServicePackageName().equals(serviceName) && d.getVersion().equals(version))).collect(Collectors.toSet());
+		return getDeployments().stream()
+				.filter(d -> (d.getServicePackageName().equals(serviceName) && d.getVersion().equals(version)))
+				.collect(Collectors.toSet());
 	}
 
-	public String getAccountBalance(String ethereumAddress) throws EthereumException
-	{
+	public String getAccountBalance(String ethereumAddress) throws EthereumException {
 		EthGetBalance ethGetBalance = null;
 		try {
-			ethGetBalance = this.web3j
-				  .ethGetBalance(ethereumAddress, DefaultBlockParameterName.LATEST)
-				  .sendAsync()
-				  .get();
+			ethGetBalance = this.web3j.ethGetBalance(ethereumAddress, DefaultBlockParameterName.LATEST).sendAsync()
+					.get();
 		} catch (Exception e) {
 			throw new EthereumException(e);
 		}
@@ -372,12 +370,7 @@ public class ReadOnlyRegistryClient {
 	}
 
 	public BlockchainTransactionData getTransactionInfo(String txHash) throws EthereumException {
-		EthTransaction ethTransaction;
-		try {
-			ethTransaction = getTransactionByTxHash(txHash);
-		} catch (IOException e) {
-			throw new EthereumException("cannot get transaction by txhash", e);
-		}
+		EthTransaction ethTransaction = getTransactionByTxHash(txHash);
 		Optional<org.web3j.protocol.core.methods.response.Transaction> o = ethTransaction.getTransaction();
 		if (!o.isPresent()) {
 			throw new EthereumException("transaction not found");
@@ -389,8 +382,12 @@ public class ReadOnlyRegistryClient {
 		return btd;
 	}
 
-	public EthTransaction getTransactionByTxHash(String txHash) throws IOException {
-		return web3j.ethGetTransactionByHash(txHash).send();
+	public EthTransaction getTransactionByTxHash(String txHash) throws EthereumException {
+		try {
+			return web3j.ethGetTransactionByHash(txHash).sendAsync().get();
+		} catch (InterruptedException | ExecutionException e) {
+			throw new EthereumException("cannot get transaction info for " + txHash, e);
+		}
 	}
 
 	public List<GenericTransactionData> getTransactionLogBySender(String sender) {
@@ -410,10 +407,25 @@ public class ReadOnlyRegistryClient {
 	 * @throws ExecutionException
 	 */
 	public BigInteger getNonce(String address) throws InterruptedException, ExecutionException {
-		EthGetTransactionCount ethGetTransactionCount = 
-				web3j.ethGetTransactionCount(address, DefaultBlockParameterName.PENDING).sendAsync().get();
+		EthGetTransactionCount ethGetTransactionCount = web3j
+				.ethGetTransactionCount(address, DefaultBlockParameterName.PENDING).sendAsync().get();
 
-		return ethGetTransactionCount.getTransactionCount();
+		// synchronize between blockchain nonce and static internal nonce
+		// this is necessary because the faucet code and sending ether is used via raw
+		// transactions
+		// and the contract calls (e.g. registration, reputation) are done via managed
+		// transactions
+		String credentialAddress = credentials.getAddress();
+		BigInteger blockchainNonce = ethGetTransactionCount.getTransactionCount();
+		BigInteger staticNonce = StaticNonceRawTransactionManager.getStaticNonce(credentialAddress);
+		int compare = staticNonce.compareTo(blockchainNonce);
+		if (compare == -1) {
+			StaticNonceRawTransactionManager.setStaticNonce(credentialAddress, blockchainNonce.add(BigInteger.ONE));
+		} else if (compare == 1) {
+			StaticNonceRawTransactionManager.incStaticNonce(credentialAddress);
+			return staticNonce.add(BigInteger.ONE);
+		}
+		return blockchainNonce;
 	}
 	
 	/**

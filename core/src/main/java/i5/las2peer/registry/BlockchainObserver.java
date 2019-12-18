@@ -347,7 +347,7 @@ class BlockchainObserver {
 							String tagDescription = "";
 							for (int i = 0; i < 5; i++) {
 								tagDescription = contracts.communityTagIndex.viewDescription(
-										Util.padAndConvertString(tagName, 32)).send();
+										Util.padAndConvertString(tagName, 32)).sendAsync().get();
 								if (!tagDescription.isEmpty()) {
 									break;
 								}
@@ -390,7 +390,7 @@ class BlockchainObserver {
 		for (int i = 0; i < retries ; i++) {
 			try {
 				logger.finer("Lookup attempt " + i + "  querying Eth client ...");
-				String serviceName = contracts.serviceRegistry.hashToName(hashOfName).send();
+				String serviceName = contracts.serviceRegistry.hashToName(hashOfName).sendAsync().get();
 				if (!serviceName.isEmpty()) {
 					logger.finer("... succeeded.");
 					hashToNameCache.putIfAbsent(hashAsString, serviceName);
