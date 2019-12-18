@@ -237,20 +237,20 @@ public class ReadOnlyRegistryClient {
 			if (userProfileData != null && !userProfileData.getOwner().equals("0x0000000000000000000000000000000000000000")) 
 			{
 				if (userProfileData.getNoTransactionsRcvd().compareTo(BigInteger.ZERO) == 0) {
-					logger.info("[ETH Faucet]: valid reputation profile, no incoming reputation yet." );
+					logger.info("[User Reputation]: valid reputation profile, no incoming reputation yet." );
 				} 
 				else 
 				{
 					userRatingScore_Raw = userProfileData.getStarRating();
-					logger.info("[ETH Faucet]: valid reputation profile, score: " + Float.toString(userRatingScore_Raw) );
+					logger.info("[User Reputation]: valid reputation profile, score: " + Float.toString(userRatingScore_Raw) );
 				}
 			}
 			else
 			{
-				logger.info("[ETH Faucet]: no valid reputation profile" );
+				logger.info("[User Reputation]: no valid reputation profile" );
 			}
 		} catch (EthereumException | NotFoundException e) {
-			logger.severe("[ETH Faucet]: failed to get user reputation for " + ethAddress );
+			logger.severe("[User Reputation]: failed to get user reputation for " + ethAddress );
 			e.printStackTrace();
 			return 0;
 		}

@@ -216,18 +216,15 @@ public class ServicesHandler {
 		// do we know this node?
 		if ( nodeInfoCache.containsKey( nodeID ) )
 		{
-			logger.info("[NodeInfo] ! found info for node #" + nodeID + ": ");
 			NodeInformation foundVal = nodeInfoCache.get( nodeID );
-			logger.info(foundVal.toString());
+			logger.info("[NodeInfo] ! found info for node #" + nodeID + " in cache" );
 			return foundVal;
 		}
 
 		// are we looking for this (local) node?
 		String localNodeID = getPastryNodeId();
-		logger.info("[NodeInfo] local node is #" + localNodeID + ", comparing... ");
 		if ( nodeID.equals(localNodeID) )
 		{
-			logger.info("[NodeInfo] ! node #" + nodeID + " is local node! ");
 			NodeInformation localNodeInfo = new NodeInformation();
 			try {
 				localNodeInfo = ethereumNode.getNodeInformation();
@@ -237,23 +234,16 @@ public class ServicesHandler {
 				logger.severe("trying to local access node info");
 				e.printStackTrace();
 			}
-			logger.info(localNodeInfo.toString());
+			logger.info("[NodeInfo] ! node #" + nodeID + " is local node! ");
 			return localNodeInfo;
 		}
 
-		logger.info("[NodeInfo] nodeID not found in cache, query network for info ...");
-
 		Collection<NodeHandle> knownNodes = ethereumNode.getPastryNode().getLeafSet().getUniqueSet();
-
-		int i = 0;
-		int k = knownNodes.size();
-		logger.info("[NodeInfo] > searching through " + k + " nodes");	
+		
+		logger.info("[NodeInfo] nodeID not found in cache, query network for info on " +knownNodes.size()+ " nodes...");
+		
 		for (NodeHandle nh : knownNodes) {
 			String remoteNodeID = nh.getId().toStringFull();
-			logger.info("[NodeInfo]  >  loop: " + i + " / " + k );
-			logger.info("[NodeInfo]  >  getting nodeInfo for handle: " + nh.toString() );
-			logger.info("[NodeInfo]  >  access node #" + remoteNodeID);
-			
 			NodeInformation remoteNodeInfo = null;
 			try {
 				remoteNodeInfo = node.getNodeInformation(nh);
@@ -264,14 +254,13 @@ public class ServicesHandler {
 				continue;
 			}
 			finally {
-				logger.info("[NodeInfo] !   got nodeInfo: " );
 				logger.info(remoteNodeInfo.toString());
 				nodeInfoCache.put(remoteNodeID, remoteNodeInfo);
 			}
 
 			if ( remoteNodeInfo != null && remoteNodeID.equals(nodeID) )
 			{
-				logger.info("[NodeInfo] ! found node " + nodeID + ", returning" );
+				logger.info("[NodeInfo] ! found remote node " + nodeID );
 				return remoteNodeInfo;
 			}
 		}
