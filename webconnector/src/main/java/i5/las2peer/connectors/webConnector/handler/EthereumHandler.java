@@ -235,109 +235,6 @@ public class EthereumHandler {
 		
 		logger.info("[ETH Faucet]: last transaction to this ethAgent was on block " + largestBlockNo );
 
-
-
-
-		// query mobsos success models to see for which services we have a succes model for this group
-		logger.info("[ETH Faucet/MobSOS]: accessing success modeling group #" + groupID);
-		String successGroupResponse;
-		List<String> servicesWithSuccessModel = new ArrayList<>();
-		try {
-			successGroupResponse = L2P_HTTPUtil.getHTTP(successGroupURL, "GET");
-			servicesWithSuccessModel = L2P_JSONUtil.parseMobSOSGroupServiceNames(successGroupResponse);
-		} catch (MalformedURLException | ServiceNotFoundException | ParseException e) {
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Couldn't query mobsos success model for group #" + groupID).build();
-		}
-		logger.info("[ETH Faucet/MobSOS]: found " + servicesWithSuccessModel.size() + " services with success model.");
-
-		if ( servicesWithSuccessModel.size() == 0 )
-		{
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Mobsos success model for group #" + groupID + " seems empty, aborting").build();
-		}
-
-		// go through services with success model and see if they're running and how often were they announced
-		for( String serviceWithSuccessModel : servicesWithSuccessModel )
-		{
-			logger.info("[ETH Faucet/MobSOS]: processing service '"+serviceWithSuccessModel+"':");
-
-			// check mobsos success model:
-
-			logger.info("[ETH Faucet/MobSOS]: querying service Hosting value: ");
-			String serviceSuccessMeasureURL_Hosting = successGroupURL + "/" + serviceWithSuccessModel + "/" + RegistryConfiguration.MobSOS_SuccessMeasure_Hosting_Label;
-			float serviceHostingValue = getSuccessMeasure(serviceSuccessMeasureURL_Hosting);
-
-			logger.info("[ETH Faucet/MobSOS]: querying service Develop value: ");
-			String serviceSuccessMeasureURL_Develop = successGroupURL + "/" + serviceWithSuccessModel + "/" + RegistryConfiguration.MobSOS_SuccessMeasure_Develop_Label;
-			float serviceDevelopValue = getSuccessMeasure(serviceSuccessMeasureURL_Develop);
-
-
-
-			// check if ethAgent is developer/author of service
-			String authorOfService = registryClient.getServiceAuthor(serviceWithSuccessModel);
-			Boolean isAuthorOfService = false;
-			if ( authorOfService != "" )
-			{
-				logger.info("[ETH Faucet/MobSOS]: checking for service authorship (comparing '" + authorOfService + "' with '"+agentLogin+"'):");
-				if ( authorOfService.equals(agentLogin) )
-				{
-					logger.info("         .!.         ethAgent is developer/author of this service.");
-					isAuthorOfService = true;
-					developedServices.add(serviceWithSuccessModel);
-				}
-			}
-
-			logger.info("[ETH Faucet/MobSOS]: checking how often service '" + serviceWithSuccessModel + "' has been announced since last faucet request.");
-
-			HashMap<String, Integer> serviceAnnouncementsPerNodeID = registryClient.getNoOfServiceAnnouncementSinceBlockOrderedByHostingNode(
-				largestBlockNo, serviceWithSuccessModel
-			);
-
-			// check if service is hosted by ethAgent
-			for( String adminNodeID: adminNodeIDs)
-			{
-				Integer serviceAnnouncementCount = serviceAnnouncementsPerNodeID.get(adminNodeID);
-				// check if one of the nodes running this service is administered by ethAgent
-				if ( serviceAnnouncementsPerNodeID.containsKey(adminNodeID) )
-				{
-					// found a service that has a success model and is hosted by ethAgent
-					logger.info("         .!.         found " + serviceAnnouncementCount + " announcements for node # " + adminNodeID);
-					hostingServicesToAnnouncementCount.putIfAbsent(serviceWithSuccessModel, 0);
-					hostingServicesToAnnouncementCount.merge( 
-						serviceWithSuccessModel, // key
-						serviceAnnouncementCount, // value to 'merge' with
-						Integer::sum // function to use for mergin
-					);
-				}
-				// check if this service was developed by ethAgent
-				if ( isAuthorOfService )
-				{
-					authoredServicesToAnnouncementCount.putIfAbsent(serviceWithSuccessModel, 0);
-					authoredServicesToAnnouncementCount.merge(
-						serviceWithSuccessModel, // key
-						serviceAnnouncementCount, // value to 'merge' with
-						Integer::sum // function to use for mergin
-					);
-				}
-			}
-			float serviceWasAnnouncedByEthAgent = hostingServicesToAnnouncementCount.getOrDefault( serviceWithSuccessModel, 0 );
-			serviceWasAnnouncedByEthAgent *= serviceHostingValue;
-			if ( serviceWasAnnouncedByEthAgent > 0 )
-			{
-				logger.info("[ETH Faucet]: service '" + serviceWithSuccessModel + "' is valued for hosting at "+serviceHostingValue+" and was announced " + (serviceWasAnnouncedByEthAgent/serviceHostingValue) + " times. ");
-				hostingServiceValue.put( serviceWithSuccessModel, serviceWasAnnouncedByEthAgent );
-				hostingServicesRatedByFaucet.add(serviceWithSuccessModel);
-			}
-
-			float serviceDevelopedByEthAgentWasAnnounced = authoredServicesToAnnouncementCount.getOrDefault( serviceWithSuccessModel, 0 );
-			serviceDevelopedByEthAgentWasAnnounced *= serviceDevelopValue;
-			if ( serviceDevelopedByEthAgentWasAnnounced > 0 )
-			{
-				logger.info("[ETH Faucet]: service '" + serviceWithSuccessModel + "' was developed by agent. Its development is rated at "+serviceDevelopValue+" and it was announced " + (serviceDevelopedByEthAgentWasAnnounced/serviceDevelopValue) + " times. ");
-				developServiceValue.put( serviceWithSuccessModel, serviceDevelopedByEthAgentWasAnnounced );
-				developServicesRatedByFaucet.add(serviceWithSuccessModel);
-			}
-		}
-
 		// QUERY USER REPUTATION PROFILE
 		userRatingScore_Raw = ethereumNode.getRegistryClient().getUserRating(ethAddress);
 
@@ -350,16 +247,125 @@ public class EthereumHandler {
 			logger.info("[ETH Faucet]: user has no profile. setting userRating multipler to 1");
 		}
 
-		// sum all values of hosted and developed services
-		for( Float serviceSucces: hostingServiceValue.values() )
+		if ( groupID == "" )
 		{
-			hostingServicesScore_Raw += serviceSucces;
+			logger.info("[ETH Faucet]: groupID missing, only using userRating");
+			hostingServicesScore_Raw = 0f;
+			developServicesScore_Raw = 0f;
+		}
+		else {
+			// query mobsos success models to see for which services we have a succes model for this group
+			logger.info("[ETH Faucet/MobSOS]: accessing success modeling group #" + groupID);
+			String successGroupResponse;
+			List<String> servicesWithSuccessModel = new ArrayList<>();
+			try {
+				successGroupResponse = L2P_HTTPUtil.getHTTP(successGroupURL, "GET");
+				servicesWithSuccessModel = L2P_JSONUtil.parseMobSOSGroupServiceNames(successGroupResponse);
+			} catch (MalformedURLException | ServiceNotFoundException | ParseException e) {
+				return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Couldn't query mobsos success model for group #" + groupID).build();
+			}
+			logger.info("[ETH Faucet/MobSOS]: found " + servicesWithSuccessModel.size() + " services with success model.");
+
+			if ( servicesWithSuccessModel.size() == 0 )
+			{
+				return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Mobsos success model for group #" + groupID + " seems empty, aborting").build();
+			}
+
+			// go through services with success model and see if they're running and how often were they announced
+			for( String serviceWithSuccessModel : servicesWithSuccessModel )
+			{
+				logger.info("[ETH Faucet/MobSOS]: processing service '"+serviceWithSuccessModel+"':");
+
+				// check mobsos success model:
+
+				logger.info("[ETH Faucet/MobSOS]: querying service Hosting value: ");
+				String serviceSuccessMeasureURL_Hosting = successGroupURL + "/" + serviceWithSuccessModel + "/" + RegistryConfiguration.MobSOS_SuccessMeasure_Hosting_Label;
+				float serviceHostingValue = getSuccessMeasure(serviceSuccessMeasureURL_Hosting);
+
+				logger.info("[ETH Faucet/MobSOS]: querying service Develop value: ");
+				String serviceSuccessMeasureURL_Develop = successGroupURL + "/" + serviceWithSuccessModel + "/" + RegistryConfiguration.MobSOS_SuccessMeasure_Develop_Label;
+				float serviceDevelopValue = getSuccessMeasure(serviceSuccessMeasureURL_Develop);
+
+
+
+				// check if ethAgent is developer/author of service
+				String authorOfService = registryClient.getServiceAuthor(serviceWithSuccessModel);
+				Boolean isAuthorOfService = false;
+				if ( authorOfService != "" )
+				{
+					logger.info("[ETH Faucet/MobSOS]: checking for service authorship (comparing '" + authorOfService + "' with '"+agentLogin+"'):");
+					if ( authorOfService.equals(agentLogin) )
+					{
+						logger.info("         .!.         ethAgent is developer/author of this service.");
+						isAuthorOfService = true;
+						developedServices.add(serviceWithSuccessModel);
+					}
+				}
+
+				logger.info("[ETH Faucet/MobSOS]: checking how often service '" + serviceWithSuccessModel + "' has been announced since last faucet request.");
+
+				HashMap<String, Integer> serviceAnnouncementsPerNodeID = registryClient.getNoOfServiceAnnouncementSinceBlockOrderedByHostingNode(
+					largestBlockNo, serviceWithSuccessModel
+				);
+
+				// check if service is hosted by ethAgent
+				for( String adminNodeID: adminNodeIDs)
+				{
+					Integer serviceAnnouncementCount = serviceAnnouncementsPerNodeID.get(adminNodeID);
+					// check if one of the nodes running this service is administered by ethAgent
+					if ( serviceAnnouncementsPerNodeID.containsKey(adminNodeID) )
+					{
+						// found a service that has a success model and is hosted by ethAgent
+						logger.info("         .!.         found " + serviceAnnouncementCount + " announcements for node # " + adminNodeID);
+						hostingServicesToAnnouncementCount.putIfAbsent(serviceWithSuccessModel, 0);
+						hostingServicesToAnnouncementCount.merge( 
+							serviceWithSuccessModel, // key
+							serviceAnnouncementCount, // value to 'merge' with
+							Integer::sum // function to use for mergin
+						);
+					}
+					// check if this service was developed by ethAgent
+					if ( isAuthorOfService )
+					{
+						authoredServicesToAnnouncementCount.putIfAbsent(serviceWithSuccessModel, 0);
+						authoredServicesToAnnouncementCount.merge(
+							serviceWithSuccessModel, // key
+							serviceAnnouncementCount, // value to 'merge' with
+							Integer::sum // function to use for mergin
+						);
+					}
+				}
+				float serviceWasAnnouncedByEthAgent = hostingServicesToAnnouncementCount.getOrDefault( serviceWithSuccessModel, 0 );
+				serviceWasAnnouncedByEthAgent *= serviceHostingValue;
+				if ( serviceWasAnnouncedByEthAgent > 0 )
+				{
+					logger.info("[ETH Faucet]: service '" + serviceWithSuccessModel + "' is valued for hosting at "+serviceHostingValue+" and was announced " + (serviceWasAnnouncedByEthAgent/serviceHostingValue) + " times. ");
+					hostingServiceValue.put( serviceWithSuccessModel, serviceWasAnnouncedByEthAgent );
+					hostingServicesRatedByFaucet.add(serviceWithSuccessModel);
+				}
+
+				float serviceDevelopedByEthAgentWasAnnounced = authoredServicesToAnnouncementCount.getOrDefault( serviceWithSuccessModel, 0 );
+				serviceDevelopedByEthAgentWasAnnounced *= serviceDevelopValue;
+				if ( serviceDevelopedByEthAgentWasAnnounced > 0 )
+				{
+					logger.info("[ETH Faucet]: service '" + serviceWithSuccessModel + "' was developed by agent. Its development is rated at "+serviceDevelopValue+" and it was announced " + (serviceDevelopedByEthAgentWasAnnounced/serviceDevelopValue) + " times. ");
+					developServiceValue.put( serviceWithSuccessModel, serviceDevelopedByEthAgentWasAnnounced );
+					developServicesRatedByFaucet.add(serviceWithSuccessModel);
+				}
+			}
+
+			// sum all values of hosted and developed services
+			for( Float serviceSucces: hostingServiceValue.values() )
+			{
+				hostingServicesScore_Raw += serviceSucces;
+			}
+			
+			for( Float serviceSucces: developServiceValue.values() )
+			{
+				developServicesScore_Raw += serviceSucces;
+			}
 		}
 		
-		for( Float serviceSucces: developServiceValue.values() )
-		{
-			developServicesScore_Raw += serviceSucces;
-		}
 
 		float userRatingScore = userRatingScore_Raw * RegistryConfiguration.Faucet_userScoreMultiplier;
 		float hostingServicesScore = hostingServicesScore_Raw * RegistryConfiguration.Faucet_serviceHostingScoreMultiplier;

@@ -467,7 +467,14 @@ class EthereumView extends PolymerElement {
     this.$.ajaxGenericTxLog.generateRequest();
   }
   requestEthFaucet() { 
-    this.group = this._findGroupIDByName(this._groupSelected.innerHTML.trim());
+    if ( this._groupSelected == null || this._groupSelected.innerHTML == null )
+    {
+      this.group = "";
+    }
+    else
+    {
+      this.group = this._findGroupIDByName(this._groupSelected.innerHTML.trim());
+    }
     console.log("faucet request for groupID: " + this.group);
     let req = this.$.ajaxRequestFaucet;
       req.body = new FormData();
