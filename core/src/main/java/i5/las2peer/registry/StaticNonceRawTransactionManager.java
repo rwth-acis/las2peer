@@ -9,12 +9,13 @@ import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
 import org.web3j.tx.ChainId;
+import org.web3j.tx.FastRawTransactionManager;
 import org.web3j.tx.RawTransactionManager;
 import org.web3j.tx.response.TransactionReceiptProcessor;
 
 import i5.las2peer.logging.L2pLogger;
 
-class StaticNonceRawTransactionManager extends RawTransactionManager {
+class StaticNonceRawTransactionManager extends FastRawTransactionManager {
 
     protected final L2pLogger logger = L2pLogger.getInstance(StaticNonceRawTransactionManager.class);
 

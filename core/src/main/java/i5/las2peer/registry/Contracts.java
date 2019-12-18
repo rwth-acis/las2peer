@@ -16,6 +16,7 @@ import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.http.HttpService;
+import org.web3j.tx.FastRawTransactionManager;
 import org.web3j.tx.RawTransactionManager;
 import org.web3j.tx.ReadonlyTransactionManager;
 import org.web3j.tx.TransactionManager;
@@ -298,7 +299,7 @@ class Contracts {
 				int attempts = 90;
 				TransactionReceiptProcessor receiptProcessor = new PollingTransactionReceiptProcessor(web3j,
 						pollingIntervalMillisecs, attempts);
-				RawTransactionManager transactionManager = new StaticNonceRawTransactionManager(web3j, credentials,
+				RawTransactionManager transactionManager = new FastRawTransactionManager(web3j, credentials,
 						receiptProcessor);
 
 				// txHashVerification throws false alarms (not sure why), disable check

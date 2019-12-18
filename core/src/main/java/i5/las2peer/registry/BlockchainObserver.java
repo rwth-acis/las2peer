@@ -527,7 +527,7 @@ class BlockchainObserver {
 				// search list of services announced
 				serviceMap.forEach((announcedServiceName,hostingNodeIDList)->
 				{
-					logger.info("[ChainObserver]    processing service '"+announcedServiceName+"', looking for '"+searchingForService+"':" );
+
 					// is this the service we're looking for?
 					if ( announcedServiceName.equals(searchingForService) )
 					{
