@@ -3,9 +3,11 @@ package i5.las2peer.connectors.webConnector.util;
 import java.math.BigInteger;
 
 import i5.las2peer.api.p2p.ServiceNameVersion;
+import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.p2p.EthereumNode;
 import i5.las2peer.p2p.NodeInformation;
 import i5.las2peer.registry.data.GenericTransactionData;
+import i5.las2peer.registry.data.SenderReceiverDoubleKey;
 import i5.las2peer.registry.data.UserProfileData;
 import i5.las2peer.registry.exceptions.EthereumException;
 import i5.las2peer.registry.exceptions.NotFoundException;
@@ -17,11 +19,18 @@ import net.minidev.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import org.web3j.protocol.core.methods.response.Transaction;
+import java.util.concurrent.ConcurrentMap;
+import java.util.List;
 
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 
 public class L2P_JSONUtil {
+	private static final L2pLogger logger = L2pLogger.getInstance(L2P_JSONUtil.class);
 
 	public static List<String> parseContactGroupsResponse(String input) throws ParseException
 	{
@@ -146,7 +155,7 @@ public class L2P_JSONUtil {
 		return thisJSON;
 	}
 
-	public static JSONObject addAgentDetailsToJson(EthereumNode ethereumNode, AgentImpl agent, JSONObject json, Boolean addMnemonic)
+	public static JSONObject addAgentDetailsToJson(EthereumNode ethereumNode, AgentImpl agent, JSONObject json, Boolean addMnemonic, Boolean addTxLog)
 			throws EthereumException, NotFoundException {
 		json.put("agentid", agent.getIdentifier());
 		if (agent instanceof UserAgentImpl) {
@@ -154,49 +163,96 @@ public class L2P_JSONUtil {
 			json.put("username", userAgent.getLoginName());
 			json.put("email", userAgent.getEmail());
 		}
-		if (agent instanceof EthereumAgent) {
-			EthereumAgent ethAgent = (EthereumAgent) agent;
-			String ethAddress = ethAgent.getEthereumAddress();
-			if (ethAddress.length() > 0) {
-				json.put("ethAgentAddress", ethAddress);
-				String accBalance = ethereumNode.getRegistryClient().getAccountBalance(ethAddress);
-				json.put("ethAccBalance", accBalance);
-				UserProfileData upd = null;
-				try {
-					upd = ethereumNode.getRegistryClient().getProfile(ethAddress);
-					if (upd != null && !upd.getOwner().equals("0x0000000000000000000000000000000000000000")) {
-						json.put("ethProfileOwner", upd.getOwner());
-						json.put("ethCumulativeScore", upd.getCumulativeScore().toString());
-						json.put("ethNoTransactionsSent", upd.getNoTransactionsSent().toString());
-						json.put("ethNoTransactionsRcvd", upd.getNoTransactionsRcvd().toString());
-						if (upd.getNoTransactionsRcvd().compareTo(BigInteger.ZERO) == 0) {
-							json.put("ethRating", 0);
-						} else {
-							json.put("ethRating", upd.getStarRating());
-						}
-					} else {
-						json.put("ethRating", "0");
-						json.put("ethCumulativeScore", "???");
-						json.put("ethNoTransactionsSent", "???");
-						json.put("ethNoTransactionsRcvd", "???");
-					}
-				} catch (EthereumException | NotFoundException e) {
-					e.printStackTrace();
-				}
-
-			}
-
-			json.put("ethAgentCredentialsAddress", ethAddress);
-
-			if (addMnemonic && !agent.isLocked()) {
-				json.put("ethMnemonic", ethAgent.getEthereumMnemonic());
-			}
-
-			// UserData ethUser =
-			// ethereumNode.getRegistryClient().getUser(ethAgent.getLoginName());
-			// if ( ethUser != null ) { json.put("eth-user-address",
-			// ethUser.getOwnerAddress()); }
+		if (!(agent instanceof EthereumAgent)) {
+			return json;
 		}
+		EthereumAgent ethAgent = (EthereumAgent) agent;
+		String ethAddress = ethAgent.getEthereumAddress();
+		if (ethAddress.length() == 0) {
+			return json;
+		}
+
+		if (addMnemonic && !agent.isLocked()) {
+			json.put("ethMnemonic", ethAgent.getEthereumMnemonic());
+		}
+
+		json.put("ethAgentAddress", ethAddress);
+		String accBalance = ethereumNode.getRegistryClient().getAccountBalance(ethAddress);
+		json.put("ethAccBalance", accBalance);
+
+		UserProfileData upd = null;
+		try {
+			upd = ethereumNode.getRegistryClient().getProfile(ethAddress);
+			if (upd != null && !upd.getOwner().equals("0x0000000000000000000000000000000000000000")) {
+				json.put("ethProfileOwner", upd.getOwner());
+				json.put("ethCumulativeScore", upd.getCumulativeScore().toString());
+				json.put("ethNoTransactionsSent", upd.getNoTransactionsSent().toString());
+				json.put("ethNoTransactionsRcvd", upd.getNoTransactionsRcvd().toString());
+				if (upd.getNoTransactionsRcvd().compareTo(BigInteger.ZERO) == 0) {
+					json.put("ethRating", 0);
+				} else {
+					json.put("ethRating", upd.getStarRating());
+				}
+			} else {
+				json.put("ethRating", "0");
+				json.put("ethCumulativeScore", "???");
+				json.put("ethNoTransactionsSent", "???");
+				json.put("ethNoTransactionsRcvd", "???");
+			}
+		} catch (EthereumException | NotFoundException e) {
+			e.printStackTrace();
+		}
+
+		if ( addTxLog ) addTXLogInfo(ethereumNode, json, ethAddress);
+
+		json.put("ethAgentCredentialsAddress", ethAddress);
+
 		return json;
+	}
+
+	private static void addTXLogInfo(EthereumNode ethereumNode, JSONObject json, String ethAddress) {
+		ConcurrentMap<SenderReceiverDoubleKey, List<Transaction>> txLog = ethereumNode.getRegistryClient().getTransactionLog();
+		
+		int senderTxCount = 0;
+		int receiverTxCount = 0;
+		JSONArray sentTx = new JSONArray();
+		JSONArray rcvdTx = new JSONArray();
+		json.put("txLogSize", txLog.entrySet().size());
+		for( Map.Entry<SenderReceiverDoubleKey,List<Transaction>> entry : txLog.entrySet() )
+		{
+			if ( entry.getKey().equalsSender(ethAddress) )
+			{
+				senderTxCount += entry.getValue().size();
+				for( Transaction t : entry.getValue() ) 
+				{
+					JSONObject txJson = new JSONObject();
+					if ( t.getFrom() != null ) txJson.put("from", t.getFrom().toString());
+					if ( t.getTo() != null ) txJson.put("to", t.getTo().toString());
+					if ( t.getValue() != null ) txJson.put("value", t.getValue().toString());
+					sentTx.add(txJson);
+				}		
+			}
+			else if ( entry.getKey().equalsReceiver(ethAddress) )
+			{
+				receiverTxCount += entry.getValue().size();	
+				for( Transaction t : entry.getValue() ) 
+				{
+					JSONObject txJson = new JSONObject();
+					if ( t.getFrom() != null ) txJson.put("from", t.getFrom().toString());
+					if ( t.getTo() != null ) txJson.put("to", t.getTo().toString());
+					if ( t.getValue() != null ) txJson.put("value", t.getValue().toString());
+					rcvdTx.add(txJson);
+				}				
+			}
+			else
+			{
+				continue;
+			}
+		}
+		
+		json.put("senderTxCount", senderTxCount);
+		json.put("receiverTxCount", receiverTxCount);
+		json.put("sentTx", sentTx);
+		json.put("rcvdTx", rcvdTx);
 	}
 }

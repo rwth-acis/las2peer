@@ -463,7 +463,7 @@ public class EthereumHandler {
 		// Web3jUtils.weiToEther(gasUsed.multiply(Web3jConstants.GAS_PRICE))
 		BigInteger gasUsed = txR.getCumulativeGasUsed();
 
-		json.put("eth-gas-used", registryClient.weiToEther(gasUsed.multiply(registryClient.getGasPrice())).toString());
+		json.put("ethGasUsed", registryClient.weiToEther(gasUsed.multiply(registryClient.getGasPrice())).toString());
 
 		json.put("code", Status.OK.getStatusCode());
 		json.put("text", Status.OK.getStatusCode() + " - Faucet triggered. Amount transferred");
@@ -501,7 +501,7 @@ public class EthereumHandler {
 
 		AgentImpl agent = session.getAgent();
 		try {
-			json = L2P_JSONUtil.addAgentDetailsToJson(ethereumNode, agent, json, true);
+			json = L2P_JSONUtil.addAgentDetailsToJson(ethereumNode, agent, json, true, true);
 
 		} catch (EthereumException e) {
 			return Response.status(Status.NOT_FOUND).entity("Agent not found").build();
@@ -534,6 +534,8 @@ public class EthereumHandler {
 		// is ethAgent admin of local node?
 		Boolean isLocalAdmin = ethereumNode.isLocalAdmin(agentEmail);
 		json.put("is-local-admin", isLocalAdmin);
+
+		// FIXME: query blockchain services instead of pastry nodeInfos
 		json.put("local-service-count", queryLocalServices(ethAgentAdminServices, isLocalAdmin));
 		
 		// query remote node infos
@@ -715,33 +717,32 @@ public class EthereumHandler {
 		JSONObject json = new JSONObject();
 		json.put("code", Status.OK.getStatusCode());
 		json.put("text", Status.OK.getStatusCode() + " - UserList loaded");
-		JSONArray memberList = new JSONArray();
+		JSONArray agentList = new JSONArray();
 		
-		for( EthereumAgent agent: agents)
+		for( EthereumAgent ethAgent: agents)
 		{
 			String ownerAddress = "";
 			try {
-				ownerAddress = ethereumNode.getRegistryClient().getUser(agent.getLoginName()).getOwnerAddress();
-				logger.info("found user ["+agent.getLoginName()+"|"+ownerAddress+"]");
+				ownerAddress = ethereumNode.getRegistryClient().getUser(ethAgent.getLoginName()).getOwnerAddress();
+				logger.info("found user ["+ethAgent.getLoginName()+"|"+ownerAddress+"]");
 			} catch (EthereumException | NotFoundException e) {
-				throw new BadRequestException("cannot get ethereum owner address for user agent " + agent.getLoginName());
+				throw new BadRequestException("cannot get ethereum owner address for user agent " + ethAgent.getLoginName());
 			}
 			if ( ownerAddress == "" ) {
-				ownerAddress = agent.getEthereumAddress();
+				ownerAddress = ethAgent.getEthereumAddress();
 			}
-			JSONObject member = new JSONObject();
-			member.put("agentid", agent.getIdentifier());
-			member.put("address", ownerAddress);
+			JSONObject agent = new JSONObject();
+			agent.put("agentid", ethAgent.getIdentifier());
+			agent.put("address", ownerAddress);
 			
+			agent.put("username", ethAgent.getLoginName());
+			agent.put("email", ethAgent.getEmail());
+			//agent.put("rating", rand.nextInt(6));
 			
-			member.put("username", agent.getLoginName());
-			member.put("email", agent.getEmail());
-			//member.put("rating", rand.nextInt(6));
-			
-			memberList.add(member);
+			agentList.add(agent);
 		}
 		
-		json.put("members", memberList);
+		json.put("agents", agentList);
 		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
 	}
 
@@ -774,10 +775,10 @@ public class EthereumHandler {
 
 		json.put("code", Status.OK.getStatusCode());
 		json.put("text", Status.OK.getStatusCode() + " - UserList loaded, found " + agents.size() + " agents");
-		JSONArray memberList = new JSONArray();
+		JSONArray agentList = new JSONArray();
 		
-		for (EthereumAgent agent : agents) {
-			String ownerAddress = agent.getEthereumAddress();
+		for (EthereumAgent ethAgent : agents) {
+			String ownerAddress = ethAgent.getEthereumAddress();
 			UserProfileData profile;
 			try {
 				logger.info("accessing profile of " + ownerAddress);
@@ -787,32 +788,37 @@ public class EthereumHandler {
 				throw new BadRequestException("cannot get profile for agent", e);
 			}
 			
-			JSONObject member = new JSONObject();
-			member.put("agentid", agent.getIdentifier());
-			member.put("address", ownerAddress);
-			member.put("username", agent.getLoginName());
-			//member.put("email", agent.getEmail());
-			BigInteger cumulativeScore = profile.getCumulativeScore();
-			BigInteger noTransactionsSent = profile.getNoTransactionsSent();
-			BigInteger noTransactionsRcvd = profile.getNoTransactionsRcvd();
-			member.put("ethProfileOwner", profile.getOwner());
-			member.put("cumulativeScore", cumulativeScore.toString());
-			member.put("noOfTransactionsSent", noTransactionsSent.toString());
-			member.put("noOfTransactionsRcvd", noTransactionsRcvd.toString());
-			if ( noTransactionsRcvd.compareTo(BigInteger.ZERO) == 0 )
-			{
-				member.put("rating", 0);
-			}
-			else
-			{
-				member.put("rating", cumulativeScore.divide(noTransactionsRcvd));
-			}
+			JSONObject agent = addProfileInformationToJSON(ethAgent, ownerAddress, profile);
 
-			memberList.add(member);
+			agentList.add(agent);
 		}
 		
-		json.put("members", memberList);
+		json.put("agents", agentList);
 		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
+	}
+
+	private JSONObject addProfileInformationToJSON(EthereumAgent ethAgent, String ownerAddress, UserProfileData profile) {
+		JSONObject agent = new JSONObject();
+		agent.put("agentid", ethAgent.getIdentifier());
+		agent.put("address", ownerAddress);
+		agent.put("username", ethAgent.getLoginName());
+		//agent.put("email", agent.getEmail());
+		BigInteger cumulativeScore = profile.getCumulativeScore();
+		BigInteger noTransactionsSent = profile.getNoTransactionsSent();
+		BigInteger noTransactionsRcvd = profile.getNoTransactionsRcvd();
+		agent.put("ethProfileOwner", profile.getOwner());
+		agent.put("cumulativeScore", cumulativeScore.toString());
+		agent.put("noOfTransactionsSent", noTransactionsSent.toString());
+		agent.put("noOfTransactionsRcvd", noTransactionsRcvd.toString());
+		if ( noTransactionsRcvd.compareTo(BigInteger.ZERO) == 0 )
+		{
+			agent.put("rating", 0);
+		}
+		else
+		{
+			agent.put("rating", cumulativeScore.divide(noTransactionsRcvd));
+		}
+		return agent;
 	}
 	
 	@POST

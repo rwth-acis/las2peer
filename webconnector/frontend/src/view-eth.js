@@ -538,14 +538,14 @@ class EthereumView extends PolymerElement {
   _handleLoadAgentlistResponse(event) {
     console.log(event.detail.response);
     let response = event.detail.response;
-    response.members.forEach(function(element) { element.shortid = element.agentid.substr(0, 15) + '...' });
+    response.agents.forEach(function(element) { element.shortid = element.agentid.substr(0, 15) + '...' });
     this._listAgents = response.members;
     this._hasNoAgentsList = false;
   }
   _handleLoadProfilelistResponse(event) {
     console.log(event.detail.response);
     let response = event.detail.response;
-    response.members.forEach(function (element) { element.shortid = element.agentid.substr(0, 15) + '...' });
+    response.agents.forEach(function (element) { element.shortid = element.agentid.substr(0, 15) + '...' });
     this._listProfiles = response.members;
     this._hasNoProfilesList = false;
   }  
