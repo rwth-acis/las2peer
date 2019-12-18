@@ -194,11 +194,13 @@ class BlockchainObserver {
 				String txIndex = ( transaction.getTransactionIndex() != null ) ? transaction.getTransactionIndex().toString() : "";
 				String blockNo = ( transaction.getBlockNumber() != null ) ? transaction.getBlockNumber().toString() : "";
 				String txValue = ( transaction.getValue() != null ) ? transaction.getValue().toString() : "";
+				String txNonce = ( transaction.getNonce() != null ) ? transaction.getNonce().toString() : "";
 
 				logger.info("[ChainObserver] observed transaction # "+txIndex+"\n"+
 						    "                [" + transactionKey + "]\n" +
 							"                 > block: " + blockNo + "\n" +
-							"                 > value: " + txValue + "\n"
+							"                 > value: " + txValue + "\n" +
+							"                 > nonce: " + txNonce + "\n"
 				);
 
 			}, e -> { 
