@@ -314,29 +314,32 @@ class EthereumView extends PolymerElement {
 
       <!-- Dialog Boxes -->
       <paper-dialog id="ethFaucetDiaLog">
-          <h1>Faucet Transaction Log</h1>
+          <h1>Faucet Transaction Log - transaction successful.</h1>
           <paper-dialog-scrollable>
             <strong>UserRating Score</strong>: [[_ethFaucetLog.rewardDetails.userRatingScore]] <br />
-            <strong>HostingServices Score</strong>: [[_ethFaucetLog.rewardDetails.hostingServicesScore]], rewarded for the following services: <br />
-            <template is="dom-if" if="[[_ethFaucetLog.rewardDetails.rewardedForServicesHosting]]">
-              <ul>
-              <template is="dom-repeat" items="[[_ethFaucetLog.rewardDetails.rewardedForServicesHosting]]" as="service">
-                <li>[[service]]</li>
-              </template>
-              </ul>
-            </template>
-            <strong>DevelopServices Score</strong>: [[_ethFaucetLog.rewardDetails.developServicesScore]], rewarded for the following services: <br />
-            <template is="dom-if" if="[[_ethFaucetLog.rewardDetails.rewardedForServicesDevelop]]">
-              <ul>
-              <template is="dom-repeat" items="[[_ethFaucetLog.rewardDetails.rewardedForServicesDevelop]]" as="service">
-                <li>[[service]]</li>
-              </template>
-              </ul>
-            </template>
-
             <p>
-              <pre>([[_ethFaucetLog.rewardDetails.u]] * UserRating)   *   (     ( [[_ethFaucetLog.rewardDetails.h]] * HostingServices ) + ( [[_ethFaucetLog.rewardDetails.d]] * DevelopServices )     ) </pre> <br />
-              <strong>Total Faucet Payout</strong>: [[_ethFaucetLog.ethFaucetAmount]] <br />
+              <strong>HostingServices Score</strong>: [[_ethFaucetLog.rewardDetails.hostingServicesScore]]
+              <template is="dom-if" if="[[_ethFaucetLog.rewardDetails.rewardedForServicesHosting]]">, rewarded for the following services: <br />
+                <ul>
+                <template is="dom-repeat" items="[[_ethFaucetLog.rewardDetails.rewardedForServicesHosting]]" as="service">
+                  <li>[[service]]</li>
+                </template>
+                </ul>
+              </template>
+            </p>
+            <p>
+              <strong>DevelopServices Score</strong>: [[_ethFaucetLog.rewardDetails.developServicesScore]]
+              <template is="dom-if" if="[[_ethFaucetLog.rewardDetails.rewardedForServicesDevelop]]">, rewarded for the following services: <br />
+                <ul>
+                <template is="dom-repeat" items="[[_ethFaucetLog.rewardDetails.rewardedForServicesDevelop]]" as="service">
+                  <li>[[service]]</li>
+                </template>
+                </ul>
+              </template>
+            </p>
+            <p>
+            <strong>Total Faucet Payout</strong>: [[_ethFaucetLog.ethFaucetAmount]] <br />
+            <pre>= ([[_ethFaucetLog.rewardDetails.u]] * UserRating)   *   (     ( [[_ethFaucetLog.rewardDetails.h]] * HostingServices ) + ( [[_ethFaucetLog.rewardDetails.d]] * DevelopServices )     ) </pre> <br />
             </p>
           </paper-dialog-scrollable>
           <div class="buttons">
