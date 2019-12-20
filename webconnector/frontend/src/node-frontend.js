@@ -116,8 +116,8 @@ class NodeFrontend extends PolymerElement {
             <a name="status" href="[[rootPath]]status">Status</a>
             <a name="view-services" href="[[rootPath]]view-services">View Services</a>
             <a name="publish-service" href="[[rootPath]]publish-service">Publish Service</a>
+            <a name="eth-tools" href="[[rootPath]]eth-tools">Blockchain and Reputation</a>
             <a name="agent-tools" href="[[rootPath]]agent-tools">Agent Tools</a>
-            <a name="eth-tools" href="[[rootPath]]eth-tools">Ethereum Tools</a>
           </iron-selector>
         </app-drawer>
 
