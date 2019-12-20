@@ -114,6 +114,9 @@ class ServicesView extends PolymerElement {
                   <template is="dom-if" if="[[service.authorReputation]]">
                     <custom-star-rating value="[[service.authorReputation]]" readonly></custom-star-rating>
                   </template>
+                  <template is="dom-if" if="[[!service.authorReputation]]">
+                    <custom-star-rating disabled readonly></custom-star-rating>
+                  </template>
                 </div>
                 <div>
                   Latest version: <span class="version">[[release.version]]</span>
@@ -189,6 +192,9 @@ class ServicesView extends PolymerElement {
                                   [[instance.nodeInfo.admin-name]]
                                   <template is="dom-if" if="[[instance.nodeInfo.hosterReputation]]">
                                     <custom-star-rating value="[[instance.nodeInfo.hosterReputation]]" readonly></custom-star-rating>
+                                  </template>
+                                  <template is="dom-if" if="[[!instance.nodeInfo.hosterReputation]]">
+                                    <custom-star-rating disabled readonly></custom-star-rating>
                                   </template>
                                 </span>
 

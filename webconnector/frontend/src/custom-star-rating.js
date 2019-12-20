@@ -66,6 +66,11 @@ class CustomStarRating extends PolymerElement {
                 type: Boolean,
                 value: false,
                 reflectToAttribute: true,
+            },
+            disabled: {
+                type: Boolean,
+                value: false,
+                reflectToAttribute: true,
             }
         };
     }
@@ -73,13 +78,27 @@ class CustomStarRating extends PolymerElement {
     constructor() {
         super();
 
-        this.ratings = [
-            { value: 5, class: 'whole', icon: 'social:sentiment-very-satisfied', selected: false },
-            { value: 4, class: 'whole', icon: 'social:sentiment-satisfied', selected: false },
-            { value: 3, class: 'whole', icon: 'social:sentiment-neutral', selected: false },
-            { value: 2, class: 'whole', icon: 'social:sentiment-dissatisfied', selected: false },
-            { value: 1, class: 'whole', icon: 'social:sentiment-very-dissatisfied', selected: false },
-        ];
+        if ( this.disabled )
+        {
+            this.readonly = true;
+            this.ratings = [
+                { value: 5, class: 'whole', icon: 'icons:remove-circle-outline', selected: false },
+                { value: 4, class: 'whole', icon: 'icons:remove-circle-outline', selected: false },
+                { value: 3, class: 'whole', icon: 'icons:remove-circle-outline', selected: false },
+                { value: 2, class: 'whole', icon: 'icons:remove-circle-outline', selected: false },
+                { value: 1, class: 'whole', icon: 'icons:remove-circle-outline', selected: false },
+            ];
+        }
+        else
+        {
+            this.ratings = [
+                { value: 5, class: 'whole', icon: 'social:sentiment-very-satisfied', selected: false },
+                { value: 4, class: 'whole', icon: 'social:sentiment-satisfied', selected: false },
+                { value: 3, class: 'whole', icon: 'social:sentiment-neutral', selected: false },
+                { value: 2, class: 'whole', icon: 'social:sentiment-dissatisfied', selected: false },
+                { value: 1, class: 'whole', icon: 'social:sentiment-very-dissatisfied', selected: false },
+            ];
+        }
     }
 
     _valueChanged(newValue, oldValue) {
