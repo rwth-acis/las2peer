@@ -94,6 +94,7 @@ class Contracts {
 	}
 
 	public static void addPendingTXHash(String pendingTxHash) {
+		logger.info("[TXManager]: added tx #"+pendingTxHash+" to list of pending transactions");
 		Contracts.pendingTransactions.put(pendingTxHash, new Object());
 	}
 
@@ -106,6 +107,11 @@ class Contracts {
 	}
 
 	public static void addTransactionReceipt(TransactionReceipt reciept) {
+		logger.info("[TXManager] added tx receipt: " + Util.getOrDefault(reciept.getTransactionHash(), "??"));
+		logger.info("[TXManager] > blockHash: " + Util.getOrDefault(reciept.getBlockHash(), "??"));
+		logger.info("[TXManager] > gas used: " + Util.getOrDefault(reciept.getGasUsed(), "??"));
+		logger.info("[TXManager] > senderAddress: " + Util.getOrDefault(reciept.getFrom(), "??"));
+		logger.info("[TXManager] > recipientAddress: " + Util.getOrDefault(reciept.getTo(), "??"));
 		Contracts.transactionReceipts.add(reciept);
 	}
 
@@ -128,16 +134,17 @@ class Contracts {
 			return;
 
 		for (int i = 0; i < DEFAULT_POLLING_ATTEMPTS_PER_TX_HASH && !pendingTransactions.isEmpty(); i++) {
+			Contracts.logger.info("[TX-QUEUE] attempt #" + i + ", found " + transactionReceipts.size() + " tx's");
 			for (TransactionReceipt transactionReceipt : transactionReceipts) {
 				if (transactionReceipt.getBlockHash().isEmpty()) {
 					Contracts.logger.info("[TX-QUEUE] omitting tx receipt, not mined yet: " + transactionReceipt.getTransactionHash());
 					continue;//throw new EthereumException("polling tx receipt failed: block hash empty");
 				}
-				Contracts.logger.info("[TX-QUEUE] found tx receipt: " + transactionReceipt.getTransactionHash());
-				Contracts.logger.info("[TX-QUEUE] > senderAddress: " + transactionReceipt.getFrom());
-				Contracts.logger.info("[TX-QUEUE] > blockHash: " + transactionReceipt.getBlockHash());
-				Contracts.logger.info("[TX-QUEUE] > gas used: " + transactionReceipt.getGasUsed());
-				Contracts.logger.info("[TX-QUEUE] > recipientAddress: " + transactionReceipt.getTo());
+				logger.info("[TX-QUEUE] added tx receipt: " + Util.getOrDefault(transactionReceipt.getTransactionHash(), "??"));
+				logger.info("[TX-QUEUE] > blockHash: " + Util.getOrDefault(transactionReceipt.getBlockHash(), "??"));
+				logger.info("[TX-QUEUE] > gas used: " + Util.getOrDefault(transactionReceipt.getGasUsed(), "??"));
+				logger.info("[TX-QUEUE] > senderAddress: " + Util.getOrDefault(transactionReceipt.getFrom(), "??"));
+				logger.info("[TX-QUEUE] > recipientAddress: " + Util.getOrDefault(transactionReceipt.getTo(), "??"));
 				pendingTransactions.remove(transactionReceipt.getTransactionHash());
 				transactionReceipts.remove(transactionReceipt);
 			}
@@ -295,12 +302,36 @@ class Contracts {
 				//
 				// okay, frankly, I'm not even sure if this can fix the nonce too low error (but
 				// that's what the issue / StackEx suggest)
-				long pollingIntervalMillisecs = 1000;
-				int attempts = 90;
-				TransactionReceiptProcessor receiptProcessor = new PollingTransactionReceiptProcessor(web3j,
-						pollingIntervalMillisecs, attempts);
-				RawTransactionManager transactionManager = new FastRawTransactionManager(web3j, credentials,
-						receiptProcessor);
+				FastRawTransactionManager transactionManager = new StaticNonceRawTransactionManager(
+					web3j, credentials, 
+					new QueuingTransactionReceiptProcessor(web3j,
+						new Callback() {
+							@Override
+							public void accept(TransactionReceipt transactionReceipt) {
+								Contracts.addTransactionReceipt(transactionReceipt);
+							}
+							@Override
+							public void exception(Exception e) {
+								e.printStackTrace();
+							}
+						}, 
+					DEFAULT_POLLING_ATTEMPTS_PER_TX_HASH, POLLING_FREQUENCY)
+				);
+
+				// schedule polling, will be created on first creation of contracts
+				// https://www.baeldung.com/java-delay-code-execution
+				if (!Contracts.isPolling) {
+					Contracts.isPolling = true;
+					Contracts.executorService.scheduleAtFixedRate(() -> {
+						try {
+							System.out.println("[TXQUEUE] txList poll execution");
+							Contracts.pollTransactionList();
+						} catch (EthereumException e) {
+							Contracts.isPolling = false;
+							e.printStackTrace();
+						}
+					}, 0, POLLING_FREQUENCY, TimeUnit.MILLISECONDS);
+				}
 
 				// txHashVerification throws false alarms (not sure why), disable check
 				// TODO: figure out what's going and and reenable

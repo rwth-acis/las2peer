@@ -5,7 +5,9 @@ import java.math.BigInteger;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.web3j.crypto.Credentials;
+import org.web3j.crypto.RawTransaction;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
 import org.web3j.tx.ChainId;
@@ -48,6 +50,21 @@ class StaticNonceRawTransactionManager extends FastRawTransactionManager {
         BigInteger newValue = StaticNonceRawTransactionManager.staticNonces.get(address).add(BigInteger.ONE);
         StaticNonceRawTransactionManager.setStaticNonce(address, newValue);
         return newValue;
+    }
+
+    @Override
+    public EthSendTransaction signAndSend(RawTransaction rawTransaction) throws IOException {
+        EthSendTransaction signedTX = super.signAndSend(rawTransaction);
+
+        logger.info("[TXManager]: signing and sending transaction... " );
+        String txHash = signedTX.getTransactionHash();
+        if ( txHash.length() > 0 )
+        {
+            logger.info("[TXManager]  > txHash: " + txHash);
+            Contracts.addPendingTXHash(txHash);
+        }
+
+        return signedTX;
     }
 
     @Override
