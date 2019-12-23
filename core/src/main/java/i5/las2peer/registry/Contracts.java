@@ -129,18 +129,21 @@ class Contracts {
 	}
 
 	public static void pollTransactionList() throws EthereumException {
-		Contracts.logger.info("[TX-QUEUE] polling transaction list");
+		logger.info("[TX-QUEUE] polling transaction list");
 		if (!isPolling)
+			return;
+		if (transactionReceipts.size() == 0)
 			return;
 
 		for (int i = 0; i < DEFAULT_POLLING_ATTEMPTS_PER_TX_HASH && !pendingTransactions.isEmpty(); i++) {
-			Contracts.logger.info("[TX-QUEUE] attempt #" + i + ", found " + transactionReceipts.size() + " tx's");
+			if (transactionReceipts.size() != 0)
+			logger.info("[TX-QUEUE] attempt #" + i + ", found " + transactionReceipts.size() + " tx's");
 			for (TransactionReceipt transactionReceipt : transactionReceipts) {
 				if (transactionReceipt.getBlockHash().isEmpty()) {
-					Contracts.logger.info("[TX-QUEUE] omitting tx receipt, not mined yet: " + transactionReceipt.getTransactionHash());
+					logger.info("[TX-QUEUE] omitting tx receipt, not mined yet: " + transactionReceipt.getTransactionHash());
 					continue;//throw new EthereumException("polling tx receipt failed: block hash empty");
 				}
-				logger.info("[TX-QUEUE] added tx receipt: " + Util.getOrDefault(transactionReceipt.getTransactionHash(), "??"));
+				logger.info("[TX-QUEUE] observed tx receipt: " + Util.getOrDefault(transactionReceipt.getTransactionHash(), "??"));
 				logger.info("[TX-QUEUE] > blockHash: " + Util.getOrDefault(transactionReceipt.getBlockHash(), "??"));
 				logger.info("[TX-QUEUE] > gas used: " + Util.getOrDefault(transactionReceipt.getGasUsed(), "??"));
 				logger.info("[TX-QUEUE] > senderAddress: " + Util.getOrDefault(transactionReceipt.getFrom(), "??"));
