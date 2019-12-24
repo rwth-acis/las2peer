@@ -204,7 +204,7 @@ class EthereumView extends PolymerElement {
                   <custom-star-rating value="[[_EthWallet.ethRating]]" readonly></custom-star-rating>
                 </template>
                 <template is="dom-if" if="[[!_hasEthProfile]]">
-                  <template is="dom-if" if="[[_EthWallet.ethAccBalance > 0]]"> 
+                  <template is="dom-if" if="[[_EthWallet.ethAccBalance > 0.01]]"> 
                     <paper-button raised on-click="requestReputationProfile" disabled="[[_working]]">
                       <iron-icon icon="record-voice-over"></iron-icon> Opt-in to reputation
                     </paper-button>
@@ -225,7 +225,7 @@ class EthereumView extends PolymerElement {
               <div class="totalReputation">
                 <h4>
                   <iron-icon icon="account-balance"></iron-icon> Total reputation available for request:
-                  <small> [[_ethCoinbaseInfo.coinbaseBalance]] </small>
+                  <small> [[_ethCoinbaseInfo.coinbaseBalance]] L2P</small>
                 </h4>
               </div>
     
@@ -259,9 +259,9 @@ class EthereumView extends PolymerElement {
                   The wallet address can be used to send and receive transactions on the blockchain. <br />
                   The provided mnemonic is generated according to the <a href="https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki" target="_blank">BIP-39</a> standard. 
                 </paper-tooltip>
-                <strong><iron-icon icon="fingerprint"></iron-icon> Address</strong>: 
+                <strong><iron-icon icon="fingerprint"></iron-icon> Address</strong>:
                   <pre>[[_EthWallet.ethAgentCredentialsAddress]]</pre>
-                <strong><iron-icon icon="verified-user"></iron-icon> Mnemonic</strong>: 
+                <strong><iron-icon icon="verified-user"></iron-icon> Mnemonic</strong>:
                   <pre>[[_EthWallet.ethMnemonic]]</pre>
               </div>
             </div> <!-- END RIGHT HAND SIDE -->
@@ -595,7 +595,7 @@ class EthereumView extends PolymerElement {
       req.generateRequest();
   }
   requestReputationProfile() { 
-    if (this._EthWallet.ethAccBalance < 0.15) {
+    if (this._EthWallet.ethAccBalance < 0.01) {
       this.error = { title: "Not enough funds", message: "Try requesting eth from the faucet?" };
       return;
     } else {
@@ -718,6 +718,7 @@ class EthereumView extends PolymerElement {
     {
       this._hasNoTxLog = false;
     }
+    this._EthWallet.ethAccBalance = parseFloat(this._EthWallet.ethAccBalance);
     this.$.ajaxGetGroups.generateRequest();
   }
   _handleRequestFaucetResponse(event) {
