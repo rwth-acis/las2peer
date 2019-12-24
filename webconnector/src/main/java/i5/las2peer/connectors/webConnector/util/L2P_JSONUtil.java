@@ -1,11 +1,15 @@
 package i5.las2peer.connectors.webConnector.util;
 
 import java.math.BigInteger;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.p2p.EthereumNode;
 import i5.las2peer.p2p.NodeInformation;
+import i5.las2peer.registry.data.BlockchainTransactionData;
 import i5.las2peer.registry.data.GenericTransactionData;
 import i5.las2peer.registry.data.SenderReceiverDoubleKey;
 import i5.las2peer.registry.data.UserProfileData;
@@ -210,42 +214,54 @@ public class L2P_JSONUtil {
 		return json;
 	}
 
-	private static void addTXLogInfo(EthereumNode ethereumNode, JSONObject json, String ethAddress) {
-		ConcurrentMap<SenderReceiverDoubleKey, List<Transaction>> txLog = ethereumNode.getRegistryClient().getTransactionLog();
+	public static String timestampToString(BigInteger timestamp)
+	{
+        Instant instant = Instant.ofEpochMilli(timestamp.longValue());
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return fmt.format(instant.atZone(ZoneId.systemDefault()));
+	}
+
+	public static JSONObject transactionToJSON( BlockchainTransactionData btd )
+	{
+		JSONObject txJSON = new JSONObject();
+		if ( btd.getFrom() != null && btd.getFrom().length() > 0 )
+			txJSON.put("from", btd.getFrom());
+		if ( btd.getTo() != null && btd.getTo().length() > 0 )
+			txJSON.put("to", btd.getTo());
+		if ( btd.getValue() != null )
+			txJSON.put("value", btd.getValue());
+		if ( btd.getBlockTimeStamp() != null ) {
+			txJSON.put("blockTimeStamp", btd.getBlockTimeStamp());
+			txJSON.put("blockDateTime", timestampToString(btd.getBlockTimeStamp()));
+		}
+
+
+		return txJSON;
+	}
+
+	public static void addTXLogInfo(EthereumNode ethereumNode, JSONObject json, String ethAddress) {
+		ConcurrentMap<SenderReceiverDoubleKey, List<BlockchainTransactionData>> txLog = ethereumNode.getRegistryClient().getTransactionLog();
 		
 		int senderTxCount = 0;
 		int receiverTxCount = 0;
 		JSONArray sentTx = new JSONArray();
 		JSONArray rcvdTx = new JSONArray();
 		json.put("txLogSize", txLog.entrySet().size());
-		for( Map.Entry<SenderReceiverDoubleKey,List<Transaction>> entry : txLog.entrySet() )
+		for( Map.Entry<SenderReceiverDoubleKey,List<BlockchainTransactionData>> entry : txLog.entrySet() )
 		{
-			if ( entry.getKey().equalsSender(ethAddress) )
-			{
+			if ( entry.getKey().equalsSender(ethAddress) ) {
 				senderTxCount += entry.getValue().size();
-				for( Transaction t : entry.getValue() ) 
-				{
-					JSONObject txJson = new JSONObject();
-					if ( t.getFrom() != null ) txJson.put("from", t.getFrom().toString());
-					if ( t.getTo() != null ) txJson.put("to", t.getTo().toString());
-					if ( t.getValue() != null ) txJson.put("value", t.getValue().toString());
-					sentTx.add(txJson);
+				for( BlockchainTransactionData t : entry.getValue() ) {
+					sentTx.add(transactionToJSON(t));
 				}		
 			}
-			else if ( entry.getKey().equalsReceiver(ethAddress) )
-			{
+			else if ( entry.getKey().equalsReceiver(ethAddress) ) {
 				receiverTxCount += entry.getValue().size();	
-				for( Transaction t : entry.getValue() ) 
-				{
-					JSONObject txJson = new JSONObject();
-					if ( t.getFrom() != null ) txJson.put("from", t.getFrom().toString());
-					if ( t.getTo() != null ) txJson.put("to", t.getTo().toString());
-					if ( t.getValue() != null ) txJson.put("value", t.getValue().toString());
-					rcvdTx.add(txJson);
+				for( BlockchainTransactionData t : entry.getValue() )  {
+					rcvdTx.add(transactionToJSON(t));
 				}				
 			}
-			else
-			{
+			else {
 				continue;
 			}
 		}

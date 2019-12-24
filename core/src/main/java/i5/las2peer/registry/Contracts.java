@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -14,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tx.FastRawTransactionManager;
@@ -79,6 +81,19 @@ class Contracts {
 		this.serviceRegistry = serviceRegistry;
 		this.reputationRegistry = reputationRegistry;
 		this.transactionManager = transactionManager;
+	}
+
+	public BigInteger getBlockTimestamp(BigInteger blockNumber) throws EthereumException
+	{
+		try {
+			return web3j
+				.ethGetBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), true)
+				.sendAsync().get()
+				.getBlock()
+				.getTimestamp();
+		} catch (InterruptedException | ExecutionException e) {
+			throw new EthereumException("cannot get block info for " + blockNumber.toString(), e);
+		}
 	}
 
 	public Web3j getWeb3jClient() {

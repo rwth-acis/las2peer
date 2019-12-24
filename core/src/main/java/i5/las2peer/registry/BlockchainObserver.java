@@ -21,6 +21,7 @@ import org.web3j.utils.Convert;
 
 import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.logging.L2pLogger;
+import i5.las2peer.registry.data.BlockchainTransactionData;
 import i5.las2peer.registry.data.GenericTransactionData;
 import i5.las2peer.registry.data.SenderReceiverDoubleKey;
 import i5.las2peer.registry.data.ServiceDeploymentData;
@@ -56,7 +57,7 @@ class BlockchainObserver {
 	/** Generic ETH Transactions: (from,to) => List<amount, message> */
 	ConcurrentMap<SenderReceiverDoubleKey, List<GenericTransactionData>> genericTransactions;
 
-	ConcurrentMap<SenderReceiverDoubleKey, List<Transaction>> transactionLog;
+	ConcurrentMap<SenderReceiverDoubleKey, List<BlockchainTransactionData>> transactionLog;
 
 	/** 
 	 * Sorted mapping of Blocks to announcements
@@ -178,8 +179,7 @@ class BlockchainObserver {
 			 .observeOn(Schedulers.io())
 			 .subscribeOn(Schedulers.io())
 			 .subscribe(transaction -> {
-				if (txHasAlreadyBeenHandled(transaction.getHash()))
-				{
+				if (txHasAlreadyBeenHandled(transaction.getHash())) {
 					return;
 				}
 
@@ -188,20 +188,18 @@ class BlockchainObserver {
 					(transaction.getTo() != null) ? transaction.getTo() : ""
 				);
 
-				// https://stackoverflow.com/a/51062494
-				transactionLog.computeIfAbsent(transactionKey, k -> new ArrayList<>()).add(transaction);
-				
-				String txIndex = ( transaction.getTransactionIndex() != null ) ? transaction.getTransactionIndex().toString() : "";
-				String blockNo = ( transaction.getBlockNumber() != null ) ? transaction.getBlockNumber().toString() : "";
-				String txValue = ( transaction.getValue() != null ) ? transaction.getValue().toString() : "";
-				String txNonce = ( transaction.getNonce() != null ) ? transaction.getNonce().toString() : "";
+				// prepare l2p-local class to hold transaction info
+				BlockchainTransactionData btd = new BlockchainTransactionData( transaction );
+				if ( transaction.getBlockNumber() != null )
+				{	
+					// add block timestamp to transaction info
+					btd.setBlockTimeStamp( contracts.getBlockTimestamp(btd.getBlockNumber()) );
+				}
 
-				logger.info("[ChainObserver] observed transaction # "+txIndex+"\n"+
-						    "                [" + transactionKey + "]\n" +
-							"                 > block: " + blockNo + "\n" +
-							"                 > value: " + txValue + "\n" +
-							"                 > nonce: " + txNonce + "\n"
-				);
+				// https://stackoverflow.com/a/51062494
+				transactionLog.computeIfAbsent(transactionKey, k -> new ArrayList<>()).add(btd);
+
+				logger.info("[ChainObserver] observed: " + btd.toString());
 
 			}, e -> { 
 				e.printStackTrace();

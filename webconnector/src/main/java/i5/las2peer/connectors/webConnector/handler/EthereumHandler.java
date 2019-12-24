@@ -42,6 +42,8 @@ import i5.las2peer.p2p.NodeInformation;
 import i5.las2peer.p2p.NodeNotFoundException;
 import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.registry.ReadWriteRegistryClient;
+import i5.las2peer.registry.data.BlockchainTransactionData;
+import i5.las2peer.registry.data.BlockchainTransactionData;
 import i5.las2peer.registry.data.GenericTransactionData;
 import i5.las2peer.registry.data.RegistryConfiguration;
 import i5.las2peer.registry.data.SenderReceiverDoubleKey;
@@ -490,11 +492,11 @@ public class EthereumHandler {
 		BigInteger largestBlockNo = BigInteger.ZERO;
 		if ( registryClient.getTransactionLog().containsKey(searchKey) )
 		{
-			List<Transaction> coinbaseTransactionLog = registryClient.getTransactionLog().get(searchKey);
+			List<BlockchainTransactionData> coinbaseTransactionLog = registryClient.getTransactionLog().get(searchKey);
 			if ( coinbaseTransactionLog.size() > 0 )
 			{
 				logger.info("[ETH TxLog]: found "+coinbaseTransactionLog.size()+" transactions, finding largest block no " );
-				for(Transaction transaction: coinbaseTransactionLog)
+				for(BlockchainTransactionData transaction: coinbaseTransactionLog)
 				{
 					if ( transaction.getBlockNumber().compareTo(largestBlockNo) == 1 )
 					{
