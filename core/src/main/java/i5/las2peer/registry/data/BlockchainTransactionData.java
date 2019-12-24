@@ -159,9 +159,10 @@ public class BlockchainTransactionData {
         
         if ( from != null ) sb.append("> FROM: " + from + ", \n" );
         if ( to != null ) sb.append("> TO: " + to + ", \n" );
+        if ( value.compareTo(BigInteger.ZERO) > 0 ) sb.append("> VALUE: " + value + ", \n" );
         if ( gas.compareTo(BigInteger.ZERO) > 0 ) sb.append("> GAS: " + gas + ", \n" );
         if ( gasPrice.compareTo(BigInteger.ZERO) > 0 ) sb.append("> GAS PRICE: " + gasPrice + ", \n" );
-        if ( input != null ) sb.append("> INPUT: " + input + ", \n" );
+
 
         return sb.toString();
     }
