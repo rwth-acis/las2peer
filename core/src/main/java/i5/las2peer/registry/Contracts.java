@@ -144,7 +144,6 @@ class Contracts {
 	}
 
 	public static void pollTransactionList() throws EthereumException {
-		logger.info("[TX-QUEUE] polling transaction list");
 		if (!isPolling)
 			return;
 		if (transactionReceipts.size() == 0)
@@ -342,7 +341,6 @@ class Contracts {
 					Contracts.isPolling = true;
 					Contracts.executorService.scheduleAtFixedRate(() -> {
 						try {
-							System.out.println("[TXQUEUE] txList poll execution");
 							Contracts.pollTransactionList();
 						} catch (EthereumException e) {
 							Contracts.isPolling = false;
