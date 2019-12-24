@@ -788,6 +788,13 @@ public class EthereumHandler {
 	@POST
 	@Path("/listProfiles")
 	public Response handleListProfiles(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId) {
+		AgentSession session = connector.getSessionById(sessionId);
+		if (session == null) {
+			return Response.status(Status.FORBIDDEN).entity("You have to be logged in to list reputation profiles").build();
+		}
+		EthereumAgent ethAgent = (EthereumAgent) session.getAgent();
+		String sessionAgentId = ethAgent.getIdentifier();
+		
 		JSONObject json = new JSONObject();
 		
 		List<EthereumAgent> agents = new ArrayList<EthereumAgent>();
@@ -800,6 +807,8 @@ public class EthereumHandler {
 			try {
 				userAgent = ethereumNode.getAgentByDetail(null, username, null);
 				String agentId = userAgent.getIdentifier();
+				if ( agentId.equals(sessionAgentId) )
+					continue;
 				logger.fine("found matching user agent: " + agentId);
 				userAgent = ethereumNode.getAgent(agentId);
 				logger.fine("found matching eth agent: " + agentId);
@@ -816,8 +825,8 @@ public class EthereumHandler {
 		json.put("text", Status.OK.getStatusCode() + " - UserList loaded, found " + agents.size() + " agents");
 		JSONArray agentList = new JSONArray();
 		
-		for (EthereumAgent ethAgent : agents) {
-			String ownerAddress = ethAgent.getEthereumAddress();
+		for (EthereumAgent profileAgent : agents) {
+			String ownerAddress = profileAgent.getEthereumAddress();
 			UserProfileData profile;
 			try {
 				logger.info("accessing profile of " + ownerAddress);
@@ -827,7 +836,7 @@ public class EthereumHandler {
 				throw new BadRequestException("cannot get profile for agent", e);
 			}
 			
-			JSONObject agent = addProfileInformationToJSON(ethAgent, ownerAddress, profile);
+			JSONObject agent = addProfileInformationToJSON(profileAgent, ownerAddress, profile);
 
 			agentList.add(agent);
 		}
