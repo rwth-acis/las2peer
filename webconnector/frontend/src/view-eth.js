@@ -83,24 +83,20 @@ class EthereumView extends PolymerElement {
                  on-response="_handleGenericTransactionResponse"
                  on-error="_handleError"
                  loading="{{_working}}"></iron-ajax>   
-        <iron-ajax id="ajaxGenericTxLog"
+      <iron-ajax id="ajaxGenericTxLog"
                  method="POST"
                  url$="[[apiEndpoint]]/eth/getGenericTxLog"
                  handle-as="json"
                  on-response="_handleGenericTxLogResponse"
                  on-error="_handleError"
                  loading="{{_working}}"></iron-ajax>    
-                 
-        <iron-ajax
-                 id="ajaxGetGroups"
+      <iron-ajax id="ajaxGetGroups"
                  url='[[baseUrl]]/contactservice/groups'
                  params='{}'
                  handle-as="json"
                  on-response="_updateGroups"
                  on-error="_handleError"
-                 loading="{{_working}}">
-               </iron-ajax>
-                 
+                 loading="{{_working}}"></iron-ajax>
 
       <style include="shared-styles">
         :host {
@@ -144,126 +140,225 @@ class EthereumView extends PolymerElement {
           paper-button.green:hover {
             background-color: var(--paper-green-100);
           }
+
+          .flex-horizontal {
+            @apply --layout-horizontal;
+          }
+          .flexchild {
+            @apply --layout-flex;
+          }
+
+          .agentList, .profileList {
+            overflow-y: scroll;
+            max-height: 350px;
+          }
+
+          .ethInfo pre {
+            overflow-x: scroll;
+            max-width: 250px;
+            background: #f5f5f5;
+            padding: 2px 5px;
+            min-height: 2em;
+          }
       </style>
 
       <div class="card">
-        <h1>Agents</h1>
+        <h1>
+          Blockchain and Reputation
+        </h1>
 
         <paper-spinner active="[[_working]]" style="float:right;"></paper-spinner>
 
         <!-- ETH WALLET -->
         <template is="dom-if" if="[[agentId.length>5]]">
-          <h2 on-click="toggleEthWallet" style="cursor:point">
-            Ethereum Wallet <paper-icon-button icon="refresh" title="Refresh Ethereum Wallet" on-click="refreshEthWallet" disabled="[[_working]]"></paper-button>
+          <h2>
+            Reputation Wallet 
+            <paper-icon-button icon="refresh" title="Refresh Ethereum Wallet" on-click="refreshEthWallet" disabled="[[_working]]"></paper-button>
           </h2>
-          <iron-collapse opened id="collapseEthWallet">
-            <template is="dom-if" if="[[!_hasNoEthWallet]]">
+
+          <!--
+              WELCOME, $USER [* * * * *] or [REQUEST PROFILE] (0)
+              REPUTATION BALANCE
+
+              ---------------------
+
+              TOTAL REPUTATION: (1)        |       ETH WALLET INFO (4)
+              GROUP FOR MOBSOS: (2)        |          ETH ADDRESS
+              REQUEST  PAY-OUT: (3)        |          ETH MNEMONIC
+
+              ---------------------
+
+              TXLOG: FaucetLog, IncomingLog, OutgoingLog (5)
+
+              ---------------------
+      
+              LIST AGENTS (6)
+              LIST PROFILES (7)
+          -->
+
+          <!-- 0: WELCOME -->
+          <template is="dom-if" if="[[!_hasNoEthWallet]]">
+            <div class="welcome">
               <p>Welcome, [[_EthWallet.username]] 
                 <template is="dom-if" if="[[_hasEthProfile]]">
                   <custom-star-rating value="[[_EthWallet.ethRating]]" readonly></custom-star-rating>
                 </template>
                 <template is="dom-if" if="[[!_hasEthProfile]]">
-                  <paper-button raised on-click="requestReputationProfile" disabled="[[_working]]">
-                    <iron-icon icon="record-voice-over"></iron-icon> Request reputation profile
-                  </paper-button>
+                  <template is="dom-if" if="[[_EthWallet.ethAccBalance > 0]]"> 
+                    <paper-button raised on-click="requestReputationProfile" disabled="[[_working]]">
+                      <iron-icon icon="record-voice-over"></iron-icon> Opt-in to reputation
+                    </paper-button>
+                  </template>
                 </template>
               </p>
               <p>
-                <strong><iron-icon icon="fingerprint"></iron-icon> Eth Credentials Address</strong>: [[_EthWallet.ethAgentCredentialsAddress]] <br />
-                <strong><iron-icon icon="verified-user"></iron-icon> Eth Mnemonic</strong>: [[_EthWallet.ethMnemonic]] <br />
-                
-                <template is="dom-if" if="[[_hasEthProfile]]">
-                  <strong><iron-icon icon="stars"></iron-icon> Reputation No Transactions</strong> <small><em>[Rcvd | Sent]</em></small>: 
-                    <iron-icon icon="cloud-download"></iron-icon> [[_EthWallet.ethNoTransactionsRcvd]] | 
-                    <iron-icon icon="cloud-upload"></iron-icon> [[_EthWallet.ethNoTransactionsSent]]
-                  <br />
-                </template>
+                <strong><iron-icon icon="account-balance-wallet"></iron-icon> Accumulated reputation</strong>: 
+                  [[_EthWallet.ethAccBalance]] L2P
               </p>
-            <p>
-              <small>
-                <strong><iron-icon icon="account-balance"></iron-icon> Coinbase Balance</strong>: [[_ethCoinbaseInfo.coinbaseBalance]] 
-              </small><br />
-              <strong><iron-icon icon="account-balance-wallet"></iron-icon> Eth Balance</strong>: [[_EthWallet.ethAccBalance]] <br />
+            </div>
+
+
+          <div class="flex-horizontal">
+            <!-- LEFT HAND SIDE -->
+            <div class="flexchild">
+              <!-- 1: TOTAL REPUTATION -->
+              <div class="totalReputation">
+                <h4>
+                  <iron-icon icon="account-balance"></iron-icon> Total reputation available for request:
+                  <small> [[_ethCoinbaseInfo.coinbaseBalance]] </small>
+                </h4>
+              </div>
+    
+              <!-- 2: GROUP FOR MOBSOS -->
+              <div class="groupForMobsos">
+                <strong>Select group agent for Success Modeling (agent must be in group):</strong>
+                <paper-dropdown-menu label="Group Agent for Success Modeling" on-change="_updateGroupMemberlist" noink no-animations selected-item="{{_groupSelected}}">
+                  <paper-listbox slot="dropdown-content" class="dropdown-content" id="groupSelect">
+                    <template is="dom-repeat" items="[[groups]]">
+                    <paper-item value="{{item.groupID}}">{{item.groupName}}</paper-item>
+                    </template>
+                  </paper-listbox>
+                </paper-dropdown-menu>
+              </div>
+    
+              <!-- 3: REQUEST  PAY-OUT -->
+              <div class="totalReputation">
+                <paper-button raised on-click="requestEthFaucet" disabled="[[_working]]">
+                  <iron-icon icon="card-giftcard"></iron-icon> Request reputation pay-out
+                </paper-button>
+              </div>
+            </div> <!-- END LEFT HAND SIDE -->
+
+            <!-- RIGHT HAND SIDE -->
+            <div class="flexchild">
+              <!-- 4: ETH WALLET INFO -->
+              <div class="ethInfo">
+                <h4 id="ethInfoTitle">L2P Wallet Info <iron-icon icon="help-outline"></iron-icon></h4>
+                <paper-tooltip for="ethInfoTitle" offset="0" position="left">
+                  The las2peer (L2P) reputation profile is implemented by means of an Ethereum Wallet. <br />
+                  The wallet address can be used to send and receive transactions on the blockchain. <br />
+                  The provided mnemonic is generated according to the <a href="https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki" target="_blank">BIP-39</a> standard. 
+                </paper-tooltip>
+                <strong><iron-icon icon="fingerprint"></iron-icon> Address</strong>: 
+                  <pre>[[_EthWallet.ethAgentCredentialsAddress]]</pre>
+                <strong><iron-icon icon="verified-user"></iron-icon> Mnemonic</strong>: 
+                  <pre>[[_EthWallet.ethMnemonic]]</pre>
+              </div>
+            </div> <!-- END RIGHT HAND SIDE -->
+          </div>
+          
+
+          <template is="dom-if" if="[[!_hasNoTxLog]]">
+            <p>          
+              <strong><iron-icon icon="stars"></iron-icon> Reputation No Transactions</strong> <small><em>[Rcvd | Sent]</em></small>: 
+                <iron-icon icon="cloud-download"></iron-icon> [[_EthWallet.ethNoTransactionsRcvd]] | 
+                <iron-icon icon="cloud-upload"></iron-icon> [[_EthWallet.ethNoTransactionsSent]]
               <br />
-              <paper-button raised on-click="requestEthFaucet" disabled="[[_working]]">
-                <iron-icon icon="card-giftcard"></iron-icon> Request funds from faucet
-              </paper-button> 
-              <br />
-              <strong>Select group agent for Success Modeling (agent must be in group):</strong>
-              <paper-dropdown-menu label="Group Agent for Success Modeling" on-change="_updateGroupMemberlist" noink no-animations selected-item="{{_groupSelected}}">
-                <paper-listbox slot="dropdown-content" class="dropdown-content" id="groupSelect">
-                  <template is="dom-repeat" items="[[groups]]">
-                  <paper-item value="{{item.groupID}}">{{item.groupName}}</paper-item>
-                  </template>
-                </paper-listbox>
-              </paper-dropdown-menu-light>
             </p>
-            </template>
 
-            <template is="dom-if" if="[[!_hasNoTxLog]]">
-              <paper-tabs selected="{{_selectedTab}}">
-                <paper-tab><iron-icon icon="cloud-download"></iron-icon> TX Received</paper-tab>
-                <paper-tab><iron-icon icon="cloud-upload"></iron-icon> TX Sent</paper-tab>
-              </paper-tabs>
+            <paper-tabs selected="{{_selectedTab}}">
+              <paper-tab><iron-icon icon="assignment"></iron-icon> Faucet TX</paper-tab>
+              <paper-tab><iron-icon icon="cloud-download"></iron-icon> TX Received</paper-tab>
+              <paper-tab><iron-icon icon="cloud-upload"></iron-icon> TX Sent</paper-tab>
+            </paper-tabs>
 
-              <iron-pages selected="{{_selectedTab}}">
-                <div>
-                  <h2><iron-icon icon="cloud-download"></iron-icon> Transactions Received</paper-tab></h2>
-                  <table width="100%">
+            <iron-pages selected="{{_selectedTab}}">
+              <div>
+                <h2><iron-icon icon="assignment"></iron-icon> Faucet Transactions</h2>
+                <table width="100%">
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>TransactionValue</th>
+                  </tr>
+                  <template is="dom-repeat" items="[[_EthWallet.rcvdTx]]" as="tx">
                     <tr>
-                      <th>Timestamp</th>
-                      <th>Sender</th>
-                      <th>TransactionType</th>
-                      <th>Message</th>
-                      <th>TransactionValue</th>
-                      <th>TXHash</th>
+                      <td><iron-icon icon="update"></iron-icon> [[tx.blockDateTime]]</td>
+                      <td><iron-icon icon="card-giftcard"></iron-icon> [[tx.value]] L2P</td>
                     </tr>
-                    <template is="dom-repeat" items="[[_ethTxLog.rcvdJsonLog]]" as="tx">
-                      <tr>
-                        <td><iron-icon icon="update"></iron-icon> [[tx.txDateTime]]</td>
-                        <td><iron-icon icon="face"></iron-icon> [[tx.txSender]]</td>
-                        <td><iron-icon icon="class"></iron-icon> [[tx.txTransactionType]]</td>
-                        <td><iron-icon icon="speaker-notes"></iron-icon> [[tx.txMessage]]</td>
-                        <td><iron-icon icon="card-giftcard"></iron-icon> [[tx.txAmountInEth]] ETH</td>
-                        <td><iron-icon icon="fingerprint"></iron-icon> [[tx.txTXHash]]</td>
-                      </tr>
-                    </template>
-                  </table>
-                </div>
-                <div>
-                  <h2><iron-icon icon="cloud-upload"></iron-icon> Transactions Sent</paper-tab></h2>
-                  <table width="100%">
+                  </template>
+                </table>
+              </div>
+              <div>
+                <h2><iron-icon icon="cloud-download"></iron-icon> Transactions Received</h2>
+                <table width="100%">
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>Sender</th>
+                    <th>TransactionType</th>
+                    <th>Message</th>
+                    <th>TransactionValue</th>
+                    <th>TXHash</th>
+                  </tr>
+                  <template is="dom-repeat" items="[[_ethTxLog.rcvdJsonLog]]" as="tx">
+                    <template is="dom-if" if="[[tx.sender == _ethCoinbaseInfo.coinbaseAddress]]">
                     <tr>
-                      <th>Timestamp</th>
-                      <th>Receiver</th>
-                      <th>TransactionType</th>
-                      <th>Message</th>
-                      <th>TransactionValue</th>
-                      <th>TXHash</th>
+                      <td><iron-icon icon="update"></iron-icon> [[tx.txDateTime]]</td>
+                      <td><iron-icon icon="face"></iron-icon> [[tx.txSender]]</td>
+                      <td><iron-icon icon="class"></iron-icon> [[tx.txTransactionType]]</td>
+                      <td><iron-icon icon="speaker-notes"></iron-icon> [[tx.txMessage]]</td>
+                      <td><iron-icon icon="card-giftcard"></iron-icon> [[tx.txAmountInEth]] L2P</td>
+                      <td><iron-icon icon="fingerprint"></iron-icon> [[tx.txTXHash]]</td>
                     </tr>
-                    <template is="dom-repeat" items="[[_ethTxLog.sentJsonLog]]" as="tx">
-                      <tr>
-                        <td><iron-icon icon="update"></iron-icon> [[tx.txDateTime]]</td>
-                        <td><iron-icon icon="face"></iron-icon> [[tx.txReceiver]]</td>
-                        <td><iron-icon icon="class"></iron-icon> [[tx.txTransactionType]]</td>
-                        <td><iron-icon icon="speaker-notes"></iron-icon> [[tx.txMessage]]</td>
-                        <td><iron-icon icon="card-giftcard"></iron-icon> [[tx.txAmountInEth]] ETH</td>
-                        <td><iron-icon icon="fingerprint"></iron-icon> [[tx.txTXHash]]</td>
-                      </tr>
                     </template>
-                  </table></div>
-              </iron-pages>
-            </template>
-          </iron-collapse>
-        </template>
+                  </template>
+                </table>
+              </div>
+              <div>
+                <h2><iron-icon icon="cloud-upload"></iron-icon> Transactions Sent</h2>
+                <table width="100%">
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>Receiver</th>
+                    <th>TransactionType</th>
+                    <th>Message</th>
+                    <th>TransactionValue</th>
+                    <th>TXHash</th>
+                  </tr>
+                  <template is="dom-repeat" items="[[_ethTxLog.sentJsonLog]]" as="tx">
+                    <tr>
+                      <td><iron-icon icon="update"></iron-icon> [[tx.txDateTime]]</td>
+                      <td><iron-icon icon="face"></iron-icon> [[tx.txReceiver]]</td>
+                      <td><iron-icon icon="class"></iron-icon> [[tx.txTransactionType]]</td>
+                      <td><iron-icon icon="speaker-notes"></iron-icon> [[tx.txMessage]]</td>
+                      <td><iron-icon icon="card-giftcard"></iron-icon> [[tx.txAmountInEth]] L2P</td>
+                      <td><iron-icon icon="fingerprint"></iron-icon> [[tx.txTXHash]]</td>
+                    </tr>
+                  </template>
+                </table>
+              </div>
+            </iron-pages>
+          </template> <!-- END TX LOG -->
+        </template> <!-- END PROFILE -->
+
+
 
         <!-- AGENTS LIST -->
-        <h2 on-click="toggleAgentList" style="cursor: pointer">
+        <h2>
           List User Agents <small>(ethereum agents registered in the network)</small>
           <paper-icon-button icon="refresh" title="Refresh Agents List" on-click="refreshAgentsList" disabled="[[_working]]"></paper-button>
         </h2>
         <paper-spinner active="[[_working]]" style="float:right;"></paper-spinner>
-        <iron-collapse id="collapseAgentList">
+        <div class="agentList">
           <template is="dom-if" if="[[!_hasNoAgentsList]]">
             <h3>Members</h3>
             <table width="100%">
@@ -279,21 +374,21 @@ class EthereumView extends PolymerElement {
                   <td>[[agent.address]]</td>
                   <td>[[agent.username]]</td>
                   <td>
-                    <paper-icon-button icon="card-giftcard" title="Transfer ETH to Agent" on-click="openEthSendDialog" data-agentid$="[[agent.agentid]]" disabled="[[_working]]"></paper-button>
+                    <paper-icon-button icon="card-giftcard" title="Transfer L2P to Agent" on-click="openEthSendDialog" data-agentid$="[[agent.agentid]]" disabled="[[_working]]"></paper-button>
                   </td>
                 </tr>
               </template>
             </table>
           </template>
-        </iron-collapse>
+        </div>
 
         <!-- PROFILES LIST -->
-        <h2 on-click="toggleProfileList" style="cursor: pointer">
+        <h2>
           List User Profiles <small>(ethereum agents who have opted in to the Reputation System)</small>
           <paper-icon-button icon="refresh" title="Refresh Profiles List" on-click="refreshProfilesList" disabled="[[_working]]"></paper-button>
         </h2>
         <paper-spinner active="[[_working]]" style="float:right;"></paper-spinner>
-        <iron-collapse id="collapseProfileList">
+        <div class="profileList">
           <template is="dom-if" if="[[!_hasNoProfilesList]]">
             <h3>Members</h3>
             <table width="100%">
@@ -318,7 +413,7 @@ class EthereumView extends PolymerElement {
               </template>
             </table>
           </template>
-        </iron-collapse>
+        </div>
               
       <!-- Toast Messages -->
       <paper-toast id="toast" horizontal-align="right"></paper-toast>
@@ -366,7 +461,7 @@ class EthereumView extends PolymerElement {
         </paper-dialog>
 
       <paper-dialog id="sendEthDialog">
-        <h1>Transfer ETH</h1>
+        <h1>Transfer L2P</h1>
         <paper-dialog-scrollable>
           <div class="horizontal layout center-justified">
             <paper-spinner active="[[_working]]"></paper-spinner>
@@ -378,7 +473,7 @@ class EthereumView extends PolymerElement {
           <iron-form on-keypress="_keyPressedSendETHTransaction">
             <form>
               <paper-input label="AgentID" id="SendETHTransactionAgentID" disabled="[[_working]]" value="[[_chosenAgentID]]"></paper-input>
-              <paper-input label="Amount (in ETH)" id="SendETHTransactionWeiAmount" disabled="[[_working]]" value=""></paper-input>
+              <paper-input label="Amount (in L2P)" id="SendETHTransactionWeiAmount" disabled="[[_working]]" value=""></paper-input>
               <paper-textarea label="Transaction Message" disabled="[[_working]]" id="SendETHTransactionMessage"></paper-textarea>
             </form>
           </iron-form>
@@ -614,6 +709,14 @@ class EthereumView extends PolymerElement {
     if (this._EthWallet.ethCumulativeScore !== "???" )
     {
       this._hasEthProfile = true;
+    }
+    if ( this._EthWallet.rcvdTx.length == 0 )
+    {
+      this._hasNoTxLog = true;
+    }
+    else
+    {
+      this._hasNoTxLog = false;
     }
     this.$.ajaxGetGroups.generateRequest();
   }
