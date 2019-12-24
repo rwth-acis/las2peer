@@ -67,10 +67,10 @@ class CustomStarRating extends PolymerElement {
                 value: false,
                 reflectToAttribute: true,
             },
-            disabled: {
+            disableRating: {
                 type: Boolean,
                 value: false,
-                reflectToAttribute: true,
+                notify: true
             }
         };
     }
