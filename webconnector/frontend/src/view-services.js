@@ -63,19 +63,24 @@ class ServicesView extends PolymerElement {
 
           padding: 10px;
         }
-        .service .nodeId, .service .nodeAdmin,  .service .time {
+        .service .nodeId, .service .nodeAdmin, .service .nodeAdminRating, .service .time {
           display: inline-block;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
         }
-        .service .nodeId {
-          width: 6.5em;
+        .service .nodeId, .service .nodeAdmin, .service .nodeAdminRating 
+        {
           margin-right: 1em;
         }
+        .service .nodeId {
+          width: 6.5em;
+        }
         .service .nodeAdmin {
-          min-width: 6.5em;
-          margin-right: 1em;
+          min-width: 8em;
+        }
+        .service .nodeAdminRating {
+          min-width: 120px;
         }
         details {
           cursor: pointer;
@@ -171,6 +176,7 @@ class ServicesView extends PolymerElement {
                           <li style="margin-left: 0">
                             <span class="nodeId"><iron-icon icon="hardware:device-hub" title="Running on Node"></iron-icon> <strong>Node ID</strong></span>
                             <span class="nodeAdmin"><iron-icon icon="account-circle" title="Node Administrator"></iron-icon> <strong>Node Admin</strong></span>
+                            <span class="nodeAdminRating"><iron-icon icon="face" title="Node Admin Rating"></iron-icon> <strong>Admin Rating</strong></span>
                             <span class="time"><iron-icon icon="device:access-time" title="Last Announcement"></iron-icon> <strong>Last announced</strong></span>
                           </li>
                         </ul>
@@ -190,6 +196,8 @@ class ServicesView extends PolymerElement {
                               <template is="dom-if" if="[[instance.nodeInfo.admin-name]]">
                                 <span class="nodeAdmin">
                                   [[instance.nodeInfo.admin-name]]
+                                </span>
+                                <span class="nodeAdminRating">
                                   <template is="dom-if" if="[[instance.nodeInfo.hosterReputation]]">
                                     <custom-star-rating value="[[instance.nodeInfo.hosterReputation]]" readonly></custom-star-rating>
                                   </template>
