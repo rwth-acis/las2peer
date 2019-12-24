@@ -20,6 +20,7 @@ import '@polymer/paper-item/paper-item.js';
 import '@polymer/paper-listbox/paper-listbox.js';
 import '@polymer/paper-spinner/paper-spinner.js';
 import '@polymer/paper-tabs/paper-tabs.js';
+import '@polymer/paper-tooltip/paper-tooltip.js';
 //import '@cwmr/iron-star-rating/iron-star-rating.js';
 import './custom-star-rating.js';
 import './shared-styles.js';
@@ -110,13 +111,18 @@ class EthereumView extends PolymerElement {
           max-height: 350px;
         }
 
-          .ethInfo pre {
+        pre {
           overflow-x: scroll;
-            max-width: 250px;
+          min-width: 200px;
+          max-width: 400px;
           background: #f5f5f5;
-            padding: 2px 5px;
-            min-height: 2em;
-          }
+          padding: 2px 5px;
+          min-height: 2em;
+        }
+
+        .walletInfo {
+          max-width: 30%;
+        }
       </style>
 
       <div class="card">
@@ -162,9 +168,14 @@ class EthereumView extends PolymerElement {
                 </template>
                 <template is="dom-if" if="[[!_hasEthProfile]]">
                   <template is="dom-if" if="[[_EthWallet.ethAccBalance > 0.01]]"> 
-                    <paper-button raised on-click="requestReputationProfile" disabled="[[_working]]">
+                    <paper-button id="reputationOptIn" raised on-click="requestReputationProfile" disabled="[[_working]]">
                       <iron-icon icon="record-voice-over"></iron-icon> Opt-in to reputation
                     </paper-button>
+                    <paper-tooltip for="reputationOptIn" offset="0" position="right">
+                      The reputation system requires users to register accounts, in other words opt-in to the system. <br />
+                      This opt-in is required to rate other agents or be awarded user rating by others. <br />
+                      The user rating multiplies the amount of reputation paid out by the system.
+                    </paper-tooltip>
                   </template>
                 </template>
               </p>
@@ -180,10 +191,14 @@ class EthereumView extends PolymerElement {
             <div class="flexchild">
               <!-- 1: TOTAL REPUTATION -->
               <div class="totalReputation">
-                <h4>
+                <h4 id="totalReputation">
                   <iron-icon icon="account-balance"></iron-icon> Total reputation available for request:
                   <small> [[_ethCoinbaseInfo.coinbaseBalance]] L2P</small>
                 </h4>
+                <paper-tooltip for="totalReputation" offset="0" position="bottom">
+                  This value represents the total amount of reputation that can be paid out to all users. <br />
+                  Technically, it's the amount of Ether in the coinbase account, i.e. the account which by default configuration is rewarded the mined coins.
+                </paper-tooltip>
               </div>
     
               <!-- 2: GROUP FOR MOBSOS -->
@@ -200,14 +215,19 @@ class EthereumView extends PolymerElement {
     
               <!-- 3: REQUEST  PAY-OUT -->
               <div class="totalReputation">
-                <paper-button raised on-click="requestEthFaucet" disabled="[[_working]]">
+                <paper-button id="requestPayOut" raised on-click="requestEthFaucet" disabled="[[_working]]">
                   <iron-icon icon="card-giftcard"></iron-icon> Request reputation pay-out
                 </paper-button>
+                <paper-tooltip for="requestPayOut" offset="0" position="right">
+                  Pay-out of reputation is proprotional to the community contribution. <br />
+                  Currently, this means that users get rewarded for hosting and authoring services. <br />
+                  The value of the reward is proportional to the usage this service provides to the community, as defined in the MobSOS service success model relevant for the service.
+                </paper-tooltip>
               </div>
             </div> <!-- END LEFT HAND SIDE -->
 
             <!-- RIGHT HAND SIDE -->
-            <div class="flexchild">
+            <div class="walletInfo">
               <!-- 4: ETH WALLET INFO -->
               <div class="ethInfo">
                 <h4 id="ethInfoTitle">L2P Wallet Info <iron-icon icon="help-outline"></iron-icon></h4>
@@ -305,6 +325,8 @@ class EthereumView extends PolymerElement {
               </div>
             </iron-pages>
           </template> <!-- END TX LOG -->
+
+          <hr />
         </template> <!-- END PROFILE -->
 
 
