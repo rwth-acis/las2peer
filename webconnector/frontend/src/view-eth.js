@@ -105,58 +105,15 @@ class EthereumView extends PolymerElement {
           padding: 10px;
         }
 
-        paper-tabs {
-          background-color: var(--tabs-background-colour, mediumslateblue);
-          --paper-tabs-selection-bar-color: var(--tabs-colour, white);
-          color: var(--tabs-colour, white);
+        .agentList, .profileList {
+          overflow-y: scroll;
+          max-height: 350px;
         }
 
-        paper-button.red {
-            --paper-button-ink-color: var(--paper-red-a200);
-            --paper-button-flat-keyboard-focus: {
-              background-color: var(--paper-red-a200) !important;
-              color: white !important;
-            };
-            --paper-button-raised-keyboard-focus: {
-              background-color: var(--paper-red-a200) !important;
-              color: white !important;
-            };
-          }
-          paper-button.red:hover {
-            background-color: var(--paper-red-100);
-          }
-
-          paper-button.green {
-            --paper-button-ink-color: var(--paper-green-a200);
-            --paper-button-flat-keyboard-focus: {
-              background-color: var(--paper-green-a200) !important;
-              color: white !important;
-            };
-            --paper-button-raised-keyboard-focus: {
-              background-color: var(--paper-green-a200) !important;
-              color: white !important;
-            };
-          }
-          paper-button.green:hover {
-            background-color: var(--paper-green-100);
-          }
-
-          .flex-horizontal {
-            @apply --layout-horizontal;
-          }
-          .flexchild {
-            @apply --layout-flex;
-          }
-
-          .agentList, .profileList {
-            overflow-y: scroll;
-            max-height: 350px;
-          }
-
           .ethInfo pre {
-            overflow-x: scroll;
+          overflow-x: scroll;
             max-width: 250px;
-            background: #f5f5f5;
+          background: #f5f5f5;
             padding: 2px 5px;
             min-height: 2em;
           }

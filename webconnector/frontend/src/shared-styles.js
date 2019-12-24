@@ -40,6 +40,55 @@ $_documentContainer.innerHTML = `<dom-module id="shared-styles">
         color: #212121;
         font-size: 22px;
       }
+
+      paper-tooltip {
+        --paper-tooltip: {
+          font-size: 16px;
+        }
+      }
+
+      paper-tabs {
+        background-color: var(--tabs-background-colour, mediumslateblue);
+        --paper-tabs-selection-bar-color: var(--tabs-colour, white);
+        color: var(--tabs-colour, white);
+      }
+
+      paper-button.red {
+        --paper-button-ink-color: var(--paper-red-a200);
+        --paper-button-flat-keyboard-focus: {
+          background-color: var(--paper-red-a200) !important;
+          color: white !important;
+        };
+        --paper-button-raised-keyboard-focus: {
+          background-color: var(--paper-red-a200) !important;
+          color: white !important;
+        };
+      }
+      paper-button.red:hover {
+        background-color: var(--paper-red-100);
+      }
+
+      paper-button.green {
+        --paper-button-ink-color: var(--paper-green-a200);
+        --paper-button-flat-keyboard-focus: {
+          background-color: var(--paper-green-a200) !important;
+          color: white !important;
+        };
+        --paper-button-raised-keyboard-focus: {
+          background-color: var(--paper-green-a200) !important;
+          color: white !important;
+        };
+      }
+      paper-button.green:hover {
+        background-color: var(--paper-green-100);
+      }
+
+      .flex-horizontal {
+        @apply --layout-horizontal;
+      }
+      .flexchild {
+        @apply --layout-flex;
+      }
     </style>
   </template>
 </dom-module>`;
