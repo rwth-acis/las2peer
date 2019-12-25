@@ -175,6 +175,8 @@ class EthereumView extends PolymerElement {
             <paper-icon-button icon="refresh" title="Refresh Reputation Wallet" on-click="refreshEthWallet" disabled="[[_working]]"></paper-button>
           </h2>
 
+          <paper-spinner active="[[_working]]" style="float:right;"></paper-spinner>
+
           <template is="dom-if" if="[[!_hasNoEthWallet]]">
 
             <div class="flex-horizontal">
