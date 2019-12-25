@@ -13,6 +13,7 @@ import '@polymer/iron-ajax/iron-ajax.js';
 import '@polymer/iron-collapse/iron-collapse.js';
 import '@polymer/iron-form/iron-form.js';
 import '@polymer/paper-button/paper-button.js';
+import '@polymer/paper-badge/paper-badge.js';
 import '@polymer/paper-card/paper-card.js';
 import '@polymer/paper-dropdown-menu/paper-dropdown-menu.js';
 import '@polymer/paper-input/paper-input.js';
@@ -102,9 +103,16 @@ class EthereumView extends PolymerElement {
       <style include="shared-styles">
         :host {
           display: block;
-
           padding: 10px;
         }
+
+        --paper-tabs-selection-bar-color: var(--paper-light-blue-900);
+        --paper-tab-ink: var(--paper-light-blue-100);
+      
+        --paper-tabs: {
+          color: white;
+          background-color: var(--paper-light-blue-500);
+        };
 
         .agentList, .profileList {
           overflow-y: scroll;
@@ -123,6 +131,7 @@ class EthereumView extends PolymerElement {
         .walletInfo {
           max-width: 30%;
         }
+
       </style>
 
       <div class="card">
@@ -246,22 +255,24 @@ class EthereumView extends PolymerElement {
           
 
           <template is="dom-if" if="[[!_hasNoTxLog]]">
-            <p>          
-              <strong><iron-icon icon="stars"></iron-icon> Reputation No Transactions</strong> <small><em>[Rcvd | Sent]</em></small>: 
-                <iron-icon icon="cloud-download"></iron-icon> [[_EthWallet.ethNoTransactionsRcvd]] | 
-                <iron-icon icon="cloud-upload"></iron-icon> [[_EthWallet.ethNoTransactionsSent]]
-              <br />
-            </p>
-
             <paper-tabs selected="{{_selectedTab}}">
-              <paper-tab><iron-icon icon="assignment"></iron-icon> Faucet TX</paper-tab>
-              <paper-tab><iron-icon icon="cloud-download"></iron-icon> TX Received</paper-tab>
-              <paper-tab><iron-icon icon="cloud-upload"></iron-icon> TX Sent</paper-tab>
+              <paper-tab>
+                <span id="faucet-tx"><iron-icon icon="assignment"></iron-icon> Repuation pay-out Log</span>
+                <paper-badge for="faucet-tx" label="[[_EthWallet.rcvdTx.length]]"></paper-badge>
+              </paper-tab>
+              <paper-tab>
+                <span id="rcvd-tx"><iron-icon icon="cloud-download"></iron-icon> Incoming reputation</span>
+                <paper-badge for="rcvd-tx" label="[[_ethTxLog.rcvdJsonLog.length]]"></paper-badge>
+              </paper-tab>
+              <paper-tab>
+                <span id="sent-tx"><iron-icon icon="cloud-upload"></iron-icon> Outgoing reputation</span>
+                <paper-badge for="sent-tx" label="[[_ethTxLog.sentJsonLog.length]]"></paper-badge>
+              </paper-tab>
             </paper-tabs>
 
             <iron-pages selected="{{_selectedTab}}">
               <div>
-                <h2><iron-icon icon="assignment"></iron-icon> Faucet Transactions</h2>
+                <h2><iron-icon icon="assignment"></iron-icon> Repuation pay-out Log</h2>
                 <table width="100%">
                   <tr>
                     <th>Timestamp</th>
@@ -276,7 +287,7 @@ class EthereumView extends PolymerElement {
                 </table>
               </div>
               <div>
-                <h2><iron-icon icon="cloud-download"></iron-icon> Transactions Received</h2>
+                <h2><iron-icon icon="cloud-download"></iron-icon> Incoming reputation</h2>
                 <table width="100%">
                   <tr>
                     <th>Timestamp</th>
@@ -301,7 +312,7 @@ class EthereumView extends PolymerElement {
                 </table>
               </div>
               <div>
-                <h2><iron-icon icon="cloud-upload"></iron-icon> Transactions Sent</h2>
+                <h2><iron-icon icon="cloud-upload"></iron-icon> Outgoing reputation</h2>
                 <table width="100%">
                   <tr>
                     <th>Timestamp</th>
