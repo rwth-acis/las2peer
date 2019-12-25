@@ -239,26 +239,24 @@ class EthereumView extends PolymerElement {
               </div> <!-- END LEFT HAND SIDE -->
 
               <!-- RIGHT HAND SIDE -->
-              <div class="flexchild">
-                <div class="walletInfo">
-                  <!-- ETH WALLET INFO -->
-                  <div class="ethInfo">
-                    <h4 id="ethInfoTitle">L2P Wallet Info <iron-icon icon="help-outline"></iron-icon></h4>
-                    <p class="description">
-                      The las2peer (L2P) reputation profile is implemented by means of an Ethereum Wallet. <br />
-                      The wallet address can be used to send and receive transactions on the blockchain. <br />
-                      The provided mnemonic is generated according to the <a href="https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki" target="_blank">BIP-39</a> standard. 
-                    </p>
-                    <strong><iron-icon icon="fingerprint"></iron-icon>Wallet Address</strong>:
-                      <pre>[[_EthWallet.ethAgentCredentialsAddress]]</pre>
-                    <strong><iron-icon icon="verified-user"></iron-icon>Wallet Mnemonic</strong>:
-                      <pre>[[_EthWallet.ethMnemonic]]</pre>
-                  </div>
-              </div> <!-- END RIGHT HAND SIDE -->
-          </div>        
-          
+              <div class="walletInfo">
+                <!-- ETH WALLET INFO -->
+                <div class="ethInfo">
+                  <h4 id="ethInfoTitle">L2P Wallet Info <iron-icon icon="help-outline"></iron-icon></h4>
+                  <p class="description">
+                    The las2peer (L2P) reputation profile is implemented by means of an Ethereum Wallet. <br />
+                    The wallet address can be used to send and receive transactions on the blockchain. <br />
+                    The provided mnemonic is generated according to the <a href="https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki" target="_blank">BIP-39</a> standard. 
+                  </p>
+                  <strong><iron-icon icon="fingerprint"></iron-icon>Wallet Address</strong>:
+                    <pre>[[_EthWallet.ethAgentCredentialsAddress]]</pre>
+                  <strong><iron-icon icon="verified-user"></iron-icon>Wallet Mnemonic</strong>:
+                    <pre>[[_EthWallet.ethMnemonic]]</pre>
+              </div><!-- END RIGHT HAND SIDE -->
+          </div>
+        </template> <!-- END PROFILE -->
 
-          <template is="dom-if" if="[[!_hasNoTxLog]]">
+        <template is="dom-if" if="[[!_hasNoTxLog]]">
             <paper-tabs selected="{{_selectedTab}}">
               <paper-tab>
                 <span id="faucet-tx"><iron-icon icon="assignment"></iron-icon> Repuation pay-out Log</span>
@@ -342,9 +340,6 @@ class EthereumView extends PolymerElement {
           </template> <!-- END TX LOG -->
 
           <hr />
-        </template> <!-- END PROFILE -->
-
-
         
         <!-- AGENTS LIST -->
         <h2>
