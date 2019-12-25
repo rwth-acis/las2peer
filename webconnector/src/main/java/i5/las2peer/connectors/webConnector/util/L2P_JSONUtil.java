@@ -27,6 +27,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.web3j.protocol.core.methods.response.Transaction;
+import org.web3j.utils.Convert;
+
 import java.util.concurrent.ConcurrentMap;
 import java.util.List;
 
@@ -216,7 +218,7 @@ public class L2P_JSONUtil {
 
 	public static String timestampToString(BigInteger timestamp)
 	{
-        Instant instant = Instant.ofEpochMilli(timestamp.longValue());
+        Instant instant = Instant.ofEpochSecond(timestamp.longValue());
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         return fmt.format(instant.atZone(ZoneId.systemDefault()));
 	}
@@ -229,12 +231,11 @@ public class L2P_JSONUtil {
 		if ( btd.getTo() != null && btd.getTo().length() > 0 )
 			txJSON.put("to", btd.getTo());
 		if ( btd.getValue() != null )
-			txJSON.put("value", btd.getValue());
+			txJSON.put("value", Convert.fromWei(btd.getValue().toString(), Convert.Unit.ETHER));
 		if ( btd.getBlockTimeStamp() != null ) {
 			txJSON.put("blockTimeStamp", btd.getBlockTimeStamp());
 			txJSON.put("blockDateTime", timestampToString(btd.getBlockTimeStamp()));
 		}
-
 
 		return txJSON;
 	}
