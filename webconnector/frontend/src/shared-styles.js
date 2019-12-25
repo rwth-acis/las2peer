@@ -43,7 +43,7 @@ $_documentContainer.innerHTML = `<dom-module id="shared-styles">
 
       paper-tooltip {
         --paper-tooltip: {
-          font-size: 16px;
+          font-size: 14px;
         }
       }
 
