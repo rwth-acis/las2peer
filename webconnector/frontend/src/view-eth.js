@@ -141,117 +141,119 @@ class EthereumView extends PolymerElement {
 
         <paper-spinner active="[[_working]]" style="float:right;"></paper-spinner>
 
+        <p class="description">
+          To incentivize las2peer users to contribute to the community, a reputation system has been introduced. <br />
+          Technically, this reputation is represented by a las2peer-internal cryptocurrency called <strong>L2P</strong>. 
+        </p>
+        <p class="description">
+          While user agents can be rated directly, the value a service provides to the different communities cannot be immediately evaluated and thus is based on the <a href="https://github.com/rwth-acis/mobsos-success-modeling/wiki/Manual">MobSOS success model</a>.
+          This means, that each community <small>(<em>represented by a las2peer group</em>)</small> can use a separate success model to easily rate the value a service is providing to them.
+          For security reasons, the rewarded user agent also must be part of the group, otherwise they would not have access to the rating value assigned to the hosted/developed service.
+        </p>
+        <p class="description">
+          To differentiate the effort related to <strong>service development</strong> and <strong>service hosting</strong>, two community service values have been introduced <iron-icon icon="help-outline" id="mobsos-values"></iron-icon>: <br />
+        </p>
+        <ol>
+            <li>The agent responsible for <strong>hosting</strong> a service is the administrator of the las2peer node on which the service is running.</li>
+            <li>The user who publishes a service is understood as its <strong>developer</strong> as they provide the jar binary containing the files necessary to deploy.</li>
+        </ol>
+        <p class="description">
+          <strong>User rating</strong> is used to multiply the value gained by counting the services hosted and/or developed by the requesting agent and thus gives the community a more personal way of influencing the amount of reputation gained by hosting. <br />
+          In other words, <em>an unpopular user will gain less for hosting a popular service than a popular user hosting an unpopular service. </em>
+        </p>
+
+        <paper-tooltip for="mobsos-values" offset="0">
+          See class i5.las2peer.registry.data.RegistryConfiguration for details
+        </paper-tooltip>
+
+        <hr />
+
         <!-- ETH WALLET -->
         <template is="dom-if" if="[[agentId.length>5]]">
           <h2>
             Reputation Wallet 
-            <paper-icon-button icon="refresh" title="Refresh Ethereum Wallet" on-click="refreshEthWallet" disabled="[[_working]]"></paper-button>
+            <paper-icon-button icon="refresh" title="Refresh Reputation Wallet" on-click="refreshEthWallet" disabled="[[_working]]"></paper-button>
           </h2>
 
-          <!--
-              WELCOME, $USER [* * * * *] or [REQUEST PROFILE] (0)
-              REPUTATION BALANCE
-
-              ---------------------
-
-              TOTAL REPUTATION: (1)        |       ETH WALLET INFO (4)
-              GROUP FOR MOBSOS: (2)        |          ETH ADDRESS
-              REQUEST  PAY-OUT: (3)        |          ETH MNEMONIC
-
-              ---------------------
-
-              TXLOG: FaucetLog, IncomingLog, OutgoingLog (5)
-
-              ---------------------
-      
-              LIST AGENTS (6)
-              LIST PROFILES (7)
-          -->
-
-          <!-- 0: WELCOME -->
           <template is="dom-if" if="[[!_hasNoEthWallet]]">
-            <div class="welcome">
-              <p>Welcome, [[_EthWallet.username]] 
-                <template is="dom-if" if="[[_hasEthProfile]]">
-                  <custom-star-rating value="[[_EthWallet.ethRating]]" readonly></custom-star-rating>
-                </template>
+
+            <div class="flex-horizontal">
+
+              <!-- LEFT HAND SIDE -->
+              <div class="flexchild">
+
+                <!--  WELCOME -->
+                <div class="welcome">
+                  <p>Welcome, [[_EthWallet.username]] 
+                    <template is="dom-if" if="[[_hasEthProfile]]">
+                      <custom-star-rating value="[[_EthWallet.ethRating]]" readonly></custom-star-rating>
+                    </template> 
+                    <br />
+                    <strong><iron-icon icon="account-balance-wallet"></iron-icon> Accumulated reputation</strong>: 
+                      [[_EthWallet.ethAccBalance]] L2P
+                  </p>
+                </div>
+
+                <!-- TOTAL REPUTATION -->
+                <p class="totalReputation">
+                  <strong><iron-icon icon="account-balance"></iron-icon> Total reputation available for request</strong>:
+                  <small> [[_ethCoinbaseInfo.coinbaseBalance]] L2P</small> <iron-icon id="totalReputation" icon="help-outline"></iron-icon>
+                  <paper-tooltip for="totalReputation" offset="0">
+                    This value represents the total amount of reputation that can be paid out to all users. <br />
+                    Technically, it's the amount of Ether in the coinbase account, i.e. the account which by default configuration is rewarded the mined coins.
+                  </paper-tooltip>
+                </p>
+      
+                <!-- REQUEST  PAY-OUT -->
+                <div class="totalReputation">
+                  <template is="dom-if" if="[[groups.length]]">
+                    <paper-dropdown-menu style="min-width: 250px" label="Group to use for Success Modeling" on-change="_updateGroupMemberlist" noink no-animations selected-item="{{_groupSelected}}">
+                      <paper-listbox slot="dropdown-content" class="dropdown-content" id="groupSelect">
+                        <template is="dom-repeat" items="[[groups]]">
+                        <paper-item value="{{item.groupID}}">{{item.groupName}}</paper-item>
+                        </template>
+                      </paper-listbox>
+                    </paper-dropdown-menu>
+                  </template> 
+                  <paper-button raised on-click="requestEthFaucet" disabled="[[_working]]">
+                    <iron-icon icon="card-giftcard"></iron-icon> Request reputation pay-out
+                  </paper-button>
+                </div>
+
+                <!-- REQUEST REPUTATION PROFILE -->
                 <template is="dom-if" if="[[!_hasEthProfile]]">
-                  <template is="dom-if" if="[[_EthWallet.ethAccBalance > 0.01]]"> 
+                  <template is="dom-if" if="[[_EthWallet.ethAccBalance]]"> 
+                    <p class="description">
+                      las2peer user reputation requires users to <em>opt-in</em> to the system to rate others and, most importantly, be rated by others. <br />
+                      Each transaction on the blockchain <small>(<em>which is the backing mechanism of las2peer reputation</em>)</small> requires a small transaction fee.
+                      To welcome new users to the community <small>(<em>through <abbr title="Legitimate peripheral participation">LPP</abbr></em>)</small>, a small amount of reputation is paid out on their first request to allow them to participate in the user rating system.
+                    </p>
                     <paper-button id="reputationOptIn" raised on-click="requestReputationProfile" disabled="[[_working]]">
                       <iron-icon icon="record-voice-over"></iron-icon> Opt-in to reputation
                     </paper-button>
-                    <paper-tooltip for="reputationOptIn" offset="0" position="right">
-                      The reputation system requires users to register accounts, in other words opt-in to the system. <br />
-                      This opt-in is required to rate other agents or be awarded user rating by others. <br />
-                      The user rating multiplies the amount of reputation paid out by the system.
-                    </paper-tooltip>
                   </template>
-                </template>
-              </p>
-              <p>
-                <strong><iron-icon icon="account-balance-wallet"></iron-icon> Accumulated reputation</strong>: 
-                  [[_EthWallet.ethAccBalance]] L2P
-              </p>
-            </div>
+                </template>  
 
+              </div> <!-- END LEFT HAND SIDE -->
 
-          <div class="flex-horizontal">
-            <!-- LEFT HAND SIDE -->
-            <div class="flexchild">
-              <!-- 1: TOTAL REPUTATION -->
-              <div class="totalReputation">
-                <h4 id="totalReputation">
-                  <iron-icon icon="account-balance"></iron-icon> Total reputation available for request:
-                  <small> [[_ethCoinbaseInfo.coinbaseBalance]] L2P</small>
-                </h4>
-                <paper-tooltip for="totalReputation" offset="0" position="bottom">
-                  This value represents the total amount of reputation that can be paid out to all users. <br />
-                  Technically, it's the amount of Ether in the coinbase account, i.e. the account which by default configuration is rewarded the mined coins.
-                </paper-tooltip>
-              </div>
-    
-              <!-- 2: GROUP FOR MOBSOS -->
-              <div class="groupForMobsos">
-                <strong>Select group agent for Success Modeling (agent must be in group):</strong>
-                <paper-dropdown-menu label="Group Agent for Success Modeling" on-change="_updateGroupMemberlist" noink no-animations selected-item="{{_groupSelected}}">
-                  <paper-listbox slot="dropdown-content" class="dropdown-content" id="groupSelect">
-                    <template is="dom-repeat" items="[[groups]]">
-                    <paper-item value="{{item.groupID}}">{{item.groupName}}</paper-item>
-                    </template>
-                  </paper-listbox>
-                </paper-dropdown-menu>
-              </div>
-    
-              <!-- 3: REQUEST  PAY-OUT -->
-              <div class="totalReputation">
-                <paper-button id="requestPayOut" raised on-click="requestEthFaucet" disabled="[[_working]]">
-                  <iron-icon icon="card-giftcard"></iron-icon> Request reputation pay-out
-                </paper-button>
-                <paper-tooltip for="requestPayOut" offset="0" position="right">
-                  Pay-out of reputation is proprotional to the community contribution. <br />
-                  Currently, this means that users get rewarded for hosting and authoring services. <br />
-                  The value of the reward is proportional to the usage this service provides to the community, as defined in the MobSOS service success model relevant for the service.
-                </paper-tooltip>
-              </div>
-            </div> <!-- END LEFT HAND SIDE -->
-
-            <!-- RIGHT HAND SIDE -->
-            <div class="walletInfo">
-              <!-- 4: ETH WALLET INFO -->
-              <div class="ethInfo">
-                <h4 id="ethInfoTitle">L2P Wallet Info <iron-icon icon="help-outline"></iron-icon></h4>
-                <paper-tooltip for="ethInfoTitle" offset="0" position="left">
-                  The las2peer (L2P) reputation profile is implemented by means of an Ethereum Wallet. <br />
-                  The wallet address can be used to send and receive transactions on the blockchain. <br />
-                  The provided mnemonic is generated according to the <a href="https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki" target="_blank">BIP-39</a> standard. 
-                </paper-tooltip>
-                <strong><iron-icon icon="fingerprint"></iron-icon> Address</strong>:
-                  <pre>[[_EthWallet.ethAgentCredentialsAddress]]</pre>
-                <strong><iron-icon icon="verified-user"></iron-icon> Mnemonic</strong>:
-                  <pre>[[_EthWallet.ethMnemonic]]</pre>
-              </div>
-            </div> <!-- END RIGHT HAND SIDE -->
-          </div>
+              <!-- RIGHT HAND SIDE -->
+              <div class="flexchild">
+                <div class="walletInfo">
+                  <!-- ETH WALLET INFO -->
+                  <div class="ethInfo">
+                    <h4 id="ethInfoTitle">L2P Wallet Info <iron-icon icon="help-outline"></iron-icon></h4>
+                    <p class="description">
+                      The las2peer (L2P) reputation profile is implemented by means of an Ethereum Wallet. <br />
+                      The wallet address can be used to send and receive transactions on the blockchain. <br />
+                      The provided mnemonic is generated according to the <a href="https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki" target="_blank">BIP-39</a> standard. 
+                    </p>
+                    <strong><iron-icon icon="fingerprint"></iron-icon>Wallet Address</strong>:
+                      <pre>[[_EthWallet.ethAgentCredentialsAddress]]</pre>
+                    <strong><iron-icon icon="verified-user"></iron-icon>Wallet Mnemonic</strong>:
+                      <pre>[[_EthWallet.ethMnemonic]]</pre>
+                  </div>
+              </div> <!-- END RIGHT HAND SIDE -->
+          </div>        
           
 
           <template is="dom-if" if="[[!_hasNoTxLog]]">
@@ -341,7 +343,7 @@ class EthereumView extends PolymerElement {
         </template> <!-- END PROFILE -->
 
 
-
+        
         <!-- AGENTS LIST -->
         <h2>
           List User Agents <small>(ethereum agents registered in the network)</small>
@@ -349,7 +351,7 @@ class EthereumView extends PolymerElement {
         </h2>
         <paper-spinner active="[[_working]]" style="float:right;"></paper-spinner>
         <div class="agentList">
-          <template is="dom-if" if="[[!_hasNoAgentsList]]">
+          <template is="dom-if" if="[[_listAgents.length]]">
             <h3>Members</h3>
             <table width="100%">
               <tr>
@@ -371,6 +373,7 @@ class EthereumView extends PolymerElement {
             </table>
           </template>
         </div>
+        
 
         <!-- PROFILES LIST -->
         <h2>
@@ -379,7 +382,7 @@ class EthereumView extends PolymerElement {
         </h2>
         <paper-spinner active="[[_working]]" style="float:right;"></paper-spinner>
         <div class="profileList">
-          <template is="dom-if" if="[[!_hasNoProfilesList]]">
+          <template is="dom-if" if="[[_listProfiles.length]]">
             <h3>Members</h3>
             <table width="100%">
               <tr>
