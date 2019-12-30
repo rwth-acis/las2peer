@@ -202,7 +202,8 @@ class EthereumView extends PolymerElement {
                   <small> [[_ethCoinbaseInfo.coinbaseBalance]] L2P</small> <iron-icon id="totalReputation" icon="help-outline"></iron-icon>
                   <paper-tooltip for="totalReputation" offset="0">
                     This value represents the total amount of reputation that can be paid out to all users. <br />
-                    Technically, it's the amount of Ether in the coinbase account, i.e. the account which by default configuration is rewarded the mined coins.
+                    Technically, it's the amount of Ether in the coinbase account, <br />
+                    i.e. the account which by default configuration is rewarded the mined coins.
                   </paper-tooltip>
                 </p>
       
@@ -226,9 +227,9 @@ class EthereumView extends PolymerElement {
                 <template is="dom-if" if="[[!_hasEthProfile]]">
                   <template is="dom-if" if="[[_EthWallet.ethAccBalance]]"> 
                     <p class="description">
-                      las2peer user reputation requires users to <em>opt-in</em> to the system to rate others and, most importantly, be rated by others. <br />
+                      las2peer user reputation requires users to <em>opt-in</em> to the system to rate others and, most importantly, be rated by others. 
                       Each transaction on the blockchain <small>(<em>which is the backing mechanism of las2peer reputation</em>)</small> requires a small transaction fee.
-                      To welcome new users to the community <small>(<em>through <abbr title="Legitimate peripheral participation">LPP</abbr></em>)</small>, a small amount of reputation is paid out on their first request to allow them to participate in the user rating system.
+                      To welcome new users to the community <small>(<em>through <abbr title="Legitimate peripheral participation">LPP</abbr></em>)</small>, a small amount of reputation is paid out on their first pay-out request to allow them to participate in the user rating system.
                     </p>
                     <paper-button id="reputationOptIn" raised on-click="requestReputationProfile" disabled="[[_working]]">
                       <iron-icon icon="record-voice-over"></iron-icon> Opt-in to reputation
