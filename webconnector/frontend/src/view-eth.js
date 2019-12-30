@@ -478,6 +478,7 @@ class EthereumView extends PolymerElement {
           </paper-button>
         </div>
       </paper-dialog>
+    </div>
     `;
   }
 
