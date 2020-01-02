@@ -141,30 +141,31 @@ class EthereumView extends PolymerElement {
 
         <paper-spinner active="[[_working]]" style="float:right;"></paper-spinner>
 
-        <p class="description">
-          To incentivize las2peer users to contribute to the community, a reputation system has been introduced. <br />
-          Technically, this reputation is represented by a las2peer-internal cryptocurrency called <strong>L2P</strong>. 
-        </p>
-        <p class="description">
-          While user agents can be rated directly, the value a service provides to the different communities cannot be immediately evaluated and thus is based on the <a href="https://github.com/rwth-acis/mobsos-success-modeling/wiki/Manual">MobSOS success model</a>.
-          This means, that each community <small>(<em>represented by a las2peer group</em>)</small> can use a separate success model to easily rate the value a service is providing to them.
-          For security reasons, the rewarded user agent also must be part of the group, otherwise they would not have access to the rating value assigned to the hosted/developed service.
-        </p>
-        <p class="description">
-          To differentiate the effort related to <strong>service development</strong> and <strong>service hosting</strong>, two community service values have been introduced <iron-icon icon="help-outline" id="mobsos-values"></iron-icon>: <br />
-        </p>
-        <ol>
-            <li>The agent responsible for <strong>hosting</strong> a service is the administrator of the las2peer node on which the service is running.</li>
-            <li>The user who publishes a service is understood as its <strong>developer</strong> as they provide the jar binary containing the files necessary to deploy.</li>
-        </ol>
-        <p class="description">
-          <strong>User rating</strong> is used to multiply the value gained by counting the services hosted and/or developed by the requesting agent and thus gives the community a more personal way of influencing the amount of reputation gained by hosting. <br />
-          In other words, <em>an unpopular user will gain less for hosting a popular service than a popular user hosting an unpopular service. </em>
-        </p>
-
-        <paper-tooltip for="mobsos-values" offset="0">
-          See class i5.las2peer.registry.data.RegistryConfiguration for details
-        </paper-tooltip>
+        <div class="introText">
+          <p class="description">
+            To incentivize las2peer users to contribute to the community, a reputation system has been introduced. <br />
+            Technically, this reputation is represented by a las2peer-internal cryptocurrency called <strong>L2P</strong>. 
+          </p>
+          <p class="description">
+            While user agents can be rated directly, the value a service provides to the different communities cannot be immediately evaluated and thus is based on the <a href="https://github.com/rwth-acis/mobsos-success-modeling/wiki/Manual">MobSOS success model</a>.
+            This means, that each community <small>(<em>represented by a las2peer group</em>)</small> can use a separate success model to easily rate the value a service is providing to them.
+            For security reasons, the rewarded user agent also must be part of the group, otherwise they would not have access to the rating value assigned to the hosted/developed service.
+          </p>
+          <p class="description">
+            To differentiate the effort related to <strong>service development</strong> and <strong>service hosting</strong>, two community service values have been introduced <iron-icon icon="help-outline" id="mobsosValues"></iron-icon>: <br />
+          </p>
+          <ol>
+              <li>The agent responsible for <strong>hosting</strong> a service is the administrator of the las2peer node on which the service is running.</li>
+              <li>The user who publishes a service is understood as its <strong>developer</strong> as they provide the jar binary containing the files necessary to deploy.</li>
+          </ol>
+          <p class="description">
+            <strong>User rating</strong> is used to multiply the value gained by counting the services hosted and/or developed by the requesting agent and thus gives the community a more personal way of influencing the amount of reputation gained by hosting. <br />
+            In other words, <em>an unpopular user will gain less for hosting a popular service than a popular user hosting an unpopular service. </em>
+          </p>
+          <paper-tooltip for="mobsosValues" offset="0">
+            See class i5.las2peer.registry.data.RegistryConfiguration for details
+          </paper-tooltip>
+        </div>
 
         <hr />
 
@@ -197,7 +198,7 @@ class EthereumView extends PolymerElement {
                 </div>
 
                 <!-- TOTAL REPUTATION -->
-                <p class="totalReputation">
+                <p>
                   <strong><iron-icon icon="account-balance"></iron-icon> Total reputation available for request</strong>:
                   <small> [[_ethCoinbaseInfo.coinbaseBalance]] L2P</small> <iron-icon id="totalReputation" icon="help-outline"></iron-icon>
                   <paper-tooltip for="totalReputation" offset="0">
@@ -208,7 +209,7 @@ class EthereumView extends PolymerElement {
                 </p>
       
                 <!-- REQUEST  PAY-OUT -->
-                <div class="totalReputation">
+                <div>
                   <template is="dom-if" if="[[groups.length]]">
                     <paper-dropdown-menu style="min-width: 250px" label="Group to use for Success Modeling" on-change="_updateGroupMemberlist" noink no-animations selected-item="{{_groupSelected}}">
                       <paper-listbox slot="dropdown-content" class="dropdown-content" id="groupSelect">
