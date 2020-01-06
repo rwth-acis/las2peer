@@ -26,6 +26,7 @@ import i5.las2peer.connectors.webConnector.util.AuthenticationManager;
 import i5.las2peer.connectors.webConnector.util.KeystoreManager;
 import i5.las2peer.connectors.webConnector.util.L2P_JSONUtil;
 import i5.las2peer.logging.L2pLogger;
+import i5.las2peer.p2p.EthereumNode;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.p2p.NodeInformation;
 import i5.las2peer.p2p.NodeNotFoundException;
@@ -50,10 +51,19 @@ public class DefaultHandler {
 
 	private final WebConnector connector;
 	private final Node node;
+	private final EthereumNode ethNode;
 
 	public DefaultHandler(WebConnector connector) {
 		this.connector = connector;
 		node = connector.getL2pNode();
+		if ( node instanceof EthereumNode )
+		{
+			ethNode = (EthereumNode) node;
+		}
+		else
+		{
+			ethNode = null;
+		}
 	}
 
 	@GET
@@ -118,7 +128,11 @@ public class DefaultHandler {
 			if (nodeAdminName != null && nodeAdminName.length() > 0)
 				response.put("nodeAdminName", nodeAdminName);
 			if (nodeAdminEmail != null && nodeAdminEmail.length() > 0)
-				response.put("nodeAdminEmail", nodeAdminEmail);
+			{
+				if ( ethNode != null )
+					response.put("nodeAdminReputation", ethNode.getAgentReputation(nodeAdminName, nodeAdminEmail));
+			}
+				
 			if (nodeOrganization != null && nodeOrganization.length() > 0)
 				response.put("nodeOrganization", nodeOrganization);
 			if (nodeDescription != null && nodeDescription.length() > 0)
@@ -209,15 +223,25 @@ public class DefaultHandler {
 
 	private JSONArray getOtherNodeInfos(Node node) {
 		JSONArray result = new JSONArray();
-		if (!( node instanceof PastryNodeImpl )) {
+
+		if (!( node instanceof EthereumNode )) {
 			return result;
 		}
-		Collection<NodeHandle> knownNodes = ((PastryNodeImpl) node).getPastryNode().getLeafSet().getUniqueSet();
+		EthereumNode ethNode = (EthereumNode) node;
+		Collection<NodeHandle> knownNodes = ethNode.getPastryNode().getLeafSet().getUniqueSet();
 		for (NodeHandle nodeHandle : knownNodes) {
 			JSONObject nodeJSON = new JSONObject();
 			String nodeID = nodeHandle.toString();
 			try {
 				NodeInformation nodeInfo = node.getNodeInformation(nodeHandle);
+				if ( nodeInfo.getAdminName() != null && nodeInfo.getAdminName().length() > 2 && 
+					 nodeInfo.getAdminEmail() != null && nodeInfo.getAdminEmail().length() > 2 
+					)
+				{
+					nodeJSON.put("nodeAdminReputation", 
+						ethNode.getAgentReputation(nodeInfo.getAdminName(), nodeInfo.getAdminEmail())
+					);
+				}
 				nodeJSON.put("nodeID", nodeID);
 				nodeJSON.put("nodeInfo", L2P_JSONUtil.nodeInformationToJSON(nodeInfo));
 			} catch (NodeNotFoundException e) {

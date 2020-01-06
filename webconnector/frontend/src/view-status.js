@@ -67,7 +67,14 @@ class StatusView extends PolymerElement {
           </div>
           <div class="flexchild">
             <!-- NODE ADMIN INFO + DESCRIPTION-->
-            <strong>Node Administrator</strong>: [[_status.nodeAdminName]] <[[_status.nodeAdminEmail]]> <br />
+            <strong>Node Administrator</strong>: [[_status.nodeAdminName]] <br /> 
+            <strong>Node Admin Email</strong> <[[_status.nodeAdminEmail]]> <br />
+              <template is="dom-if" if="[[_status.nodeAdminReputation]]">
+                <custom-star-rating value="[[_status.nodeAdminReputation]]" readonly></custom-star-rating> <br />
+              </template>
+              <template is="dom-if" if="[[!_status.nodeAdminReputation]]">
+                <custom-star-rating disable-rating readonly></custom-star-rating> <br />
+              </template>
             <strong>Node Organization</strong>: 
               <p>[[_status.nodeOrganization]]</p>
             <strong>Node Description</strong>:
@@ -83,7 +90,16 @@ class StatusView extends PolymerElement {
                 <strong>NodeID:</strong> [[otherNode.nodeID]] <br />
                 <template is="dom-if" if="[[otherNode.nodeInfo]]">
                   <template is="dom-if" if="[[otherNode.nodeInfo.admin-name]]">
-                    <strong>NodeAdmin:</strong> [[otherNode.nodeInfo.admin-name]] <br />
+                    <strong>NodeAdmin:</strong> [[otherNode.nodeInfo.admin-name]] 
+                    
+                    <template is="dom-if" if="[[otherNode.nodeAdminReputation]]">
+                      <custom-star-rating value="[[otherNode.nodeAdminReputation]]" readonly></custom-star-rating>
+                    </template>
+                    <template is="dom-if" if="[[!otherNode.nodeAdminReputation]]">
+                      <custom-star-rating disable-rating readonly></custom-star-rating>
+                    </template>
+                    
+                    <br />
                   </template>
                   <template is="dom-if" if="[[otherNode.nodeInfo.services]]">
                     <strong>Services ([[otherNode.nodeInfo.service-count]]):</strong> <br />
