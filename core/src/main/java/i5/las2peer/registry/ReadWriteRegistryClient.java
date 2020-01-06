@@ -186,10 +186,12 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 					"Could not add user rating: rating outside bounds [" + RegistryConfiguration.UserRating_minRatingValue + " - " + RegistryConfiguration.UserRating_maxRatingValue + "]");
 		}
 
+		BigInteger timestamp = BigInteger.valueOf(java.lang.System.currentTimeMillis());
+
 		String txHash;
 		try {
 			TransactionReceipt txR = contracts.reputationRegistry
-					.addTransaction(receivingAgent.getEthereumAddress(), BigInteger.valueOf(rating)).sendAsync().get();
+					.addTransaction(receivingAgent.getEthereumAddress(), timestamp, BigInteger.valueOf(rating)).sendAsync().get();
 			if (!txR.isStatusOK()) {
 				logger.warning("trx fail with status " + txR.getStatus());
 				logger.warning("gas used " + txR.getCumulativeGasUsed());

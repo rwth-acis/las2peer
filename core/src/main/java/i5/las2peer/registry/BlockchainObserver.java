@@ -153,6 +153,7 @@ class BlockchainObserver {
 		serviceAnnouncementsPerBlockTree = new TreeMap<>();
 
 		observeETHTransactions();
+		observeUserVotingTransactions();
 		observeGenericTransactions();
 		observeErrorEvents();
 		observeUserRegistrations();
@@ -205,6 +206,52 @@ class BlockchainObserver {
 				e.printStackTrace();
 				logger.severe("Error observing transaction event: " + e.toString()); 
 			});
+	}
+
+	private void observeUserVotingTransactions() {
+		contracts.reputationRegistry
+				.transactionAddedEventFlowable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST)
+				.observeOn(Schedulers.io())
+				.subscribeOn(Schedulers.io())
+				.subscribe(transaction -> {
+					String txHash = transaction.log.getTransactionHash();
+					if (txHasAlreadyBeenHandled(txHash)) {
+						return;
+					}
+
+					String txSender = Util.recoverString(transaction.sender);
+					String txRecipient = Util.recoverString(transaction.recipient);
+					
+					BigInteger grade = Util.getOrDefault(transaction.grade, BigInteger.ZERO);
+					BigInteger recipientNewScore = Util.getOrDefault(transaction.recipientNewScore, BigInteger.ZERO);
+
+					BigInteger timestamp = Util.getOrDefault( transaction.timestamp, BigInteger.ZERO );
+
+					SenderReceiverDoubleKey srdk = new SenderReceiverDoubleKey(txSender, txRecipient);
+					GenericTransactionData gtd = new GenericTransactionData(
+						txSender, 
+						txRecipient, 
+						BigInteger.ZERO, // amountInWei
+						timestamp, 
+						"Rating: [ "+grade+" ], \nRecipientNewScore: [ "+recipientNewScore+" ]", 
+						"L2P USER RATING", 
+						txHash
+					);
+
+					if ( !this.genericTransactions.containsKey(srdk) )
+					{
+						List<GenericTransactionData> lgtd = new ArrayList<GenericTransactionData>();
+						lgtd.add(gtd);
+						this.genericTransactions.put(srdk, lgtd);
+					} 
+					else
+					{
+						this.genericTransactions.get(srdk).add(gtd);
+					}
+
+					logger.info("[ChainObserver] observed user voting: \n" + 
+								"[" + txSender + "]->[" + txRecipient + "]: " + grade + ", new grade: " + recipientNewScore);
+				}, e -> logger.severe("Error observing user voting event: " + e.toString()));
 	}
 
 	private void observeErrorEvents() {
