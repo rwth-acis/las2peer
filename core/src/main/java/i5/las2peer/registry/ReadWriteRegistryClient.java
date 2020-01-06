@@ -191,7 +191,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		String txHash;
 		try {
 			TransactionReceipt txR = contracts.reputationRegistry
-					.addTransaction(receivingAgent.getEthereumAddress(), timestamp, BigInteger.valueOf(rating)).sendAsync().get();
+					.addTransaction(receivingAgent.getEthereumAddress(), BigInteger.valueOf(rating), timestamp).sendAsync().get();
 			if (!txR.isStatusOK()) {
 				logger.warning("trx fail with status " + txR.getStatus());
 				logger.warning("gas used " + txR.getCumulativeGasUsed());
