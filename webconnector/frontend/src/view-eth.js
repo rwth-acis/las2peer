@@ -173,7 +173,7 @@ class EthereumView extends PolymerElement {
         <template is="dom-if" if="[[agentId.length>5]]">
           <h2>
             Reputation Wallet 
-            <paper-icon-button icon="refresh" title="Refresh Reputation Wallet" on-click="refreshEthWallet" disabled="[[_working]]"></paper-button>
+            <paper-icon-button icon="refresh" title="Refresh Reputation Wallet" on-click="refreshEthWallet" disabled="[[_working]"></paper-icon-button>
           </h2>
 
           <paper-spinner active="[[_working]]" style="float:right;"></paper-spinner>
@@ -346,7 +346,7 @@ class EthereumView extends PolymerElement {
         <!-- AGENTS LIST -->
         <h2>
           List User Agents <small>(ethereum agents registered in the network)</small>
-          <paper-icon-button icon="refresh" title="Refresh Agents List" on-click="refreshAgentsList" disabled="[[_working]]"></paper-button>
+          <paper-icon-button icon="refresh" title="Refresh Agents List" on-click="refreshAgentsList" disabled="[[_working]]"></paper-icon-button>
         </h2>
         <paper-spinner active="[[_working]]" style="float:right;"></paper-spinner>
         <div class="agentList">
@@ -365,7 +365,7 @@ class EthereumView extends PolymerElement {
                   <td>[[agent.address]]</td>
                   <td>[[agent.username]]</td>
                   <td>
-                    <paper-icon-button icon="card-giftcard" title="Transfer L2P to Agent" on-click="openEthSendDialog" data-agentid$="[[agent.agentid]]" disabled="[[_working]]"></paper-button>
+                    <paper-icon-button icon="card-giftcard" title="Transfer L2P to Agent" on-click="openEthSendicon-Dialog" data-agentid$="[[agent.agentid]]" disabled="[[_working]]"></paper-icon-button>
                   </td>
                 </tr>
               </template>
@@ -377,7 +377,7 @@ class EthereumView extends PolymerElement {
         <!-- PROFILES LIST -->
         <h2>
           List User Profiles <small>(ethereum agents who have opted in to the Reputation System)</small>
-          <paper-icon-button icon="refresh" title="Refresh Profiles List" on-click="refreshProfilesList" disabled="[[_working]]"></paper-button>
+          <paper-icon-button icon="refresh" title="Refresh Profiles List" on-click="refreshProfilesList" disabled="[[_working]]"></paper-icon-button>
         </h2>
         <paper-spinner active="[[_working]]" style="float:right;"></paper-spinner>
         <div class="profileList">
@@ -562,6 +562,7 @@ class EthereumView extends PolymerElement {
 
   refresh() {
     this.refreshAgentsList();
+    this.refreshProfilesList();
     if ( this.agentId.length > 5 )
     {
       this.refreshEthWallet();
