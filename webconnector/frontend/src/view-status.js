@@ -83,6 +83,9 @@ class StatusView extends PolymerElement {
         </div>
 
         <h3>Known Nodes In Network <paper-checkbox id="checkbox" checked="{{queryAdvancedInfo}}" on-click="queryAdvancedClick">Query Extended Info</paper-checkbox></h3>
+        <p>"<em>Extended info</em>" queries the <b>nodeInfo.xml</b> of the nodes in las2peer. <br /> 
+        The provided list of services for each node is <u>not verified via the blockchain</u>, but has been included for backwards compatibility. <br />
+        <small><em>This was necessary since some services (e.g. MobSOS) cannot be easily compressed to a jar file due to external requirements.</em></small></p>
         <div class="container">
           <template is="dom-if" if="[[queryAdvancedInfo]]">
             <template is="dom-repeat" items="[[_otherNodeInfo]]" as="otherNode">
