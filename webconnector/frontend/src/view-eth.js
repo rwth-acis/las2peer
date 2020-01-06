@@ -135,6 +135,79 @@ class EthereumView extends PolymerElement {
       </style>
 
       <div class="card">
+             
+        <!-- Toast Messages -->
+        <paper-toast id="toast" horizontal-align="right"></paper-toast>
+
+        <!-- Dialog Boxes -->
+        <paper-dialog id="ethFaucetDiaLog">
+            <h1><iron-icon icon="receipt"></iron-icon> Faucet Transaction Log - transaction successful.</h1>
+            <paper-dialog-scrollable>
+              <iron-icon icon="face"></iron-icon>
+              <strong>UserRating Score</strong>: [[_ethFaucetLog.rewardDetails.userRatingScore]] <br />
+              <p>
+                <iron-icon icon="important-devices"></iron-icon>
+                <strong>HostingServices Score</strong>: [[_ethFaucetLog.rewardDetails.hostingServicesScore]]
+                <template is="dom-if" if="[[_ethFaucetLog.rewardDetails.rewardedForServicesHosting]]">, rewarded for the following services: <br />
+                  <ul>
+                  <template is="dom-repeat" items="[[_ethFaucetLog.rewardDetails.rewardedForServicesHosting]]" as="service">
+                    <li>[[service]]</li>
+                  </template>
+                  </ul>
+                </template>
+              </p>
+              <p>
+                <iron-icon icon="cloud-upload"></iron-icon>
+                <strong>DevelopServices Score</strong>: [[_ethFaucetLog.rewardDetails.developServicesScore]]
+                <template is="dom-if" if="[[_ethFaucetLog.rewardDetails.rewardedForServicesDevelop]]">, rewarded for the following services: <br />
+                  <ul>
+                  <template is="dom-repeat" items="[[_ethFaucetLog.rewardDetails.rewardedForServicesDevelop]]" as="service">
+                    <li>[[service]]</li>
+                  </template>
+                  </ul>
+                </template>
+              </p>
+              <p>
+                <iron-icon icon="redeem"></iron-icon>
+                <strong>Total Faucet Payout</strong>: [[_ethFaucetLog.ethFaucetAmount]] <br />
+                <pre>= ([[_ethFaucetLog.rewardDetails.u]] * UserRating)   *   (     ( [[_ethFaucetLog.rewardDetails.h]] * HostingServices ) + ( [[_ethFaucetLog.rewardDetails.d]] * DevelopServices )     ) </pre> <br />
+              </p>
+            </paper-dialog-scrollable>
+            <div class="buttons">
+              <paper-button dialog-dismiss>
+                <iron-icon icon="check"></iron-icon> 
+                OK
+              </paper-button>
+            </div>
+          </paper-dialog>
+
+        <paper-dialog id="sendEthDialog">
+          <h1>Transfer L2P</h1>
+          <paper-dialog-scrollable>
+            <div class="horizontal layout center-justified">
+              <paper-spinner active="[[_working]]"></paper-spinner>
+              <template is="dom-if" if="[[_ethTransactionSent]]">
+                <iron-icon icon="done"></iron-icon>
+              </template>
+            </div>
+            <iron-form on-keypress="_keyPressedSendETHTransaction">
+              <form>
+                <paper-input label="AgentID" id="SendETHTransactionAgentID" disabled="[[_working]]" value="[[_chosenAgentID]]"></paper-input>
+                <paper-input label="Amount (in L2P)" id="SendETHTransactionWeiAmount" disabled="[[_working]]" value=""></paper-input>
+                <paper-textarea label="Transaction Message" disabled="[[_working]]" id="SendETHTransactionMessage"></paper-textarea>
+              </form>
+            </iron-form>
+          </paper-dialog-scrollable>
+          <div class="buttons">
+            <paper-button dialog-confirm autofocus raised class="red">
+              <iron-icon icon="block"></iron-icon> Cancel
+            </paper-button>
+            <paper-button raised on-click="sendGenericTransaction" disabled="[[_working]]" class="green">
+              <iron-icon icon="check"></iron-icon> Send ETH Transaction
+            </paper-button>
+          </div>
+        </paper-dialog>
+
         <h1>
           Blockchain and Reputation
         </h1>
@@ -406,79 +479,6 @@ class EthereumView extends PolymerElement {
             </table>
           </template>
         </div>
-              
-      <!-- Toast Messages -->
-      <paper-toast id="toast" horizontal-align="right"></paper-toast>
-
-      <!-- Dialog Boxes -->
-      <paper-dialog id="ethFaucetDiaLog">
-          <h1><iron-icon icon="receipt"></iron-icon> Faucet Transaction Log - transaction successful.</h1>
-          <paper-dialog-scrollable>
-            <iron-icon icon="face"></iron-icon>
-            <strong>UserRating Score</strong>: [[_ethFaucetLog.rewardDetails.userRatingScore]] <br />
-            <p>
-              <iron-icon icon="important-devices"></iron-icon>
-              <strong>HostingServices Score</strong>: [[_ethFaucetLog.rewardDetails.hostingServicesScore]]
-              <template is="dom-if" if="[[_ethFaucetLog.rewardDetails.rewardedForServicesHosting]]">, rewarded for the following services: <br />
-                <ul>
-                <template is="dom-repeat" items="[[_ethFaucetLog.rewardDetails.rewardedForServicesHosting]]" as="service">
-                  <li>[[service]]</li>
-                </template>
-                </ul>
-              </template>
-            </p>
-            <p>
-              <iron-icon icon="cloud-upload"></iron-icon>
-              <strong>DevelopServices Score</strong>: [[_ethFaucetLog.rewardDetails.developServicesScore]]
-              <template is="dom-if" if="[[_ethFaucetLog.rewardDetails.rewardedForServicesDevelop]]">, rewarded for the following services: <br />
-                <ul>
-                <template is="dom-repeat" items="[[_ethFaucetLog.rewardDetails.rewardedForServicesDevelop]]" as="service">
-                  <li>[[service]]</li>
-                </template>
-                </ul>
-              </template>
-            </p>
-            <p>
-              <iron-icon icon="redeem"></iron-icon>
-              <strong>Total Faucet Payout</strong>: [[_ethFaucetLog.ethFaucetAmount]] <br />
-              <pre>= ([[_ethFaucetLog.rewardDetails.u]] * UserRating)   *   (     ( [[_ethFaucetLog.rewardDetails.h]] * HostingServices ) + ( [[_ethFaucetLog.rewardDetails.d]] * DevelopServices )     ) </pre> <br />
-            </p>
-          </paper-dialog-scrollable>
-          <div class="buttons">
-            <paper-button dialog-dismiss>
-              <iron-icon icon="check"></iron-icon> 
-              OK
-            </paper-button>
-          </div>
-        </paper-dialog>
-
-      <paper-dialog id="sendEthDialog">
-        <h1>Transfer L2P</h1>
-        <paper-dialog-scrollable>
-          <div class="horizontal layout center-justified">
-            <paper-spinner active="[[_working]]"></paper-spinner>
-            <template is="dom-if" if="[[_ethTransactionSent]]">
-              <iron-icon icon="done"></iron-icon>
-            </template>
-          </div>
-          
-          <iron-form on-keypress="_keyPressedSendETHTransaction">
-            <form>
-              <paper-input label="AgentID" id="SendETHTransactionAgentID" disabled="[[_working]]" value="[[_chosenAgentID]]"></paper-input>
-              <paper-input label="Amount (in L2P)" id="SendETHTransactionWeiAmount" disabled="[[_working]]" value=""></paper-input>
-              <paper-textarea label="Transaction Message" disabled="[[_working]]" id="SendETHTransactionMessage"></paper-textarea>
-            </form>
-          </iron-form>
-        </paper-dialog-scrollable>
-        <div class="buttons">
-          <paper-button dialog-confirm autofocus raised class="red">
-            <iron-icon icon="block"></iron-icon> Cancel
-          </paper-button>
-          <paper-button raised on-click="sendGenericTransaction" disabled="[[_working]]" class="green">
-            <iron-icon icon="check"></iron-icon> Send ETH Transaction
-          </paper-button>
-        </div>
-      </paper-dialog>
     </div>
     `;
   }
