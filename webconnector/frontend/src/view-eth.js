@@ -287,15 +287,15 @@ class EthereumView extends PolymerElement {
       
                 <!-- REQUEST  PAY-OUT -->
                 <div>
-                  <template is="dom-if" if="[[groups.length]]">
-                    <paper-dropdown-menu style="min-width: 250px" label="Group to use for Success Modeling" on-change="_updateGroupMemberlist" noink no-animations selected-item="{{_groupSelected}}">
-                      <paper-listbox slot="dropdown-content" class="dropdown-content" id="groupSelect">
-                        <template is="dom-repeat" items="[[groups]]">
-                        <paper-item value="{{item.groupID}}">{{item.groupName}}</paper-item>
-                        </template>
-                      </paper-listbox>
-                    </paper-dropdown-menu>
-                  </template> 
+
+                  <paper-dropdown-menu style="min-width: 250px" label="Group to use for Success Modeling" on-change="_updateGroupMemberlist" noink no-animations selected-item="{{_groupSelected}}">
+                    <paper-listbox slot="dropdown-content" class="dropdown-content" id="groupSelect">
+                      <template is="dom-repeat" items="[[groups]]">
+                      <paper-item value="{{item.groupID}}">{{item.groupName}}</paper-item>
+                      </template>
+                    </paper-listbox>
+                  </paper-dropdown-menu>
+
                   <paper-button raised on-click="requestEthFaucet" disabled="[[_working]]">
                     <iron-icon icon="card-giftcard"></iron-icon> Request reputation pay-out
                   </paper-button>
