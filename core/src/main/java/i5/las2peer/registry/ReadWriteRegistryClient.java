@@ -132,7 +132,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 				throw new EthereumException("could not send transaction, transaction receipt not ok");
 			}
 			txHash = txR.getTransactionHash();
-			waitForTransactionReceipt(txHash);
+			//waitForTransactionReceipt(txHash);
 		} catch (Exception e) {
 			throw new EthereumException("couldn't execute smart contract function call", e);
 		}
@@ -148,7 +148,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		String etherSendTxHash = sendEtherDebug(senderAgent.getEthereumAddress(), receivingAgent.getEthereumAddress(), weiAmount);
 		//sendEther(receivingAgent.getEthereumAddress(), Convert.toWei(weiAmount.toString(), Convert.Unit.ETHER));
 		// sendEther(senderAgent.getEthereumAddress(), receivingAgent.getEthereumAddress(), weiAmount).getTransactionHash();
-		waitForTransactionReceipt(etherSendTxHash);
+		//waitForTransactionReceipt(etherSendTxHash);
 		logger.info("[TX] sent funds, adding smart contract event for message and transaction type, txHash: " + etherSendTxHash);
 
 		BigInteger timestamp = BigInteger.valueOf(java.lang.System.currentTimeMillis());
@@ -164,7 +164,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 				throw new EthereumException("could not send transaction, transaction receipt not ok");
 			}
 			txHash = txR.getTransactionHash();
-			waitForTransactionReceipt(txHash);
+			//waitForTransactionReceipt(txHash);
 		} catch (Exception e) {
 			throw new EthereumException("couldn't execute smart contract function call", e);
 		}
