@@ -67,14 +67,15 @@ class StatusView extends PolymerElement {
           </div>
           <div class="flexchild">
             <!-- NODE ADMIN INFO + DESCRIPTION-->
-            <strong>Node Administrator</strong>: [[_status.nodeAdminName]] <br /> 
-            <strong>Node Admin Email</strong> <[[_status.nodeAdminEmail]]> <br />
+            <strong>Node Administrator</strong>: [[_status.nodeAdminName]] 
               <template is="dom-if" if="[[_status.nodeAdminReputation]]">
-                <custom-star-rating value="[[_status.nodeAdminReputation]]" readonly></custom-star-rating> <br />
+                <custom-star-rating value="[[_status.nodeAdminReputation]]" readonly></custom-star-rating>
               </template>
               <template is="dom-if" if="[[!_status.nodeAdminReputation]]">
-                <custom-star-rating disable-rating readonly></custom-star-rating> <br />
+                <custom-star-rating disable-rating readonly></custom-star-rating>
               </template>
+            <br /> 
+            <strong>Node Admin Email</strong> <[[_status.nodeAdminEmail]]> <br />
             <strong>Node Organization</strong>: 
               <p>[[_status.nodeOrganization]]</p>
             <strong>Node Description</strong>:

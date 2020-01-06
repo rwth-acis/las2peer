@@ -129,6 +129,7 @@ public class DefaultHandler {
 				response.put("nodeAdminName", nodeAdminName);
 			if (nodeAdminEmail != null && nodeAdminEmail.length() > 0)
 			{
+				response.put("nodeAdminEmail", nodeAdminEmail);
 				if ( ethNode != null )
 					response.put("nodeAdminReputation", ethNode.getAgentReputation(nodeAdminName, nodeAdminEmail));
 			}
