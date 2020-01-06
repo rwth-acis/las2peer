@@ -168,10 +168,14 @@ class EthereumView extends PolymerElement {
                 </template>
               </p>
               <p>
-                <iron-icon icon="redeem"></iron-icon>
-                <strong>Total Faucet Payout</strong>: [[_ethFaucetLog.ethFaucetAmount]] <br />
-                <pre>= ([[_ethFaucetLog.rewardDetails.u]] * UserRating)   *   (     ( [[_ethFaucetLog.rewardDetails.h]] * HostingServices ) + ( [[_ethFaucetLog.rewardDetails.d]] * DevelopServices )     ) </pre> <br />
+                <iron-icon icon="redeem"></iron-icon> <strong>Total Faucet Payout</strong>: [[_ethFaucetLog.ethFaucetAmount]] <br />
+                The reputation pay-out has been obtained as follows: 
               </p>
+              <ul>
+                <li>&nbsp;&nbsp;UserRating <small>(* [[_ethFaucetLog.rewardDetails.u]])</small></li>
+                <li>+&nbsp;HostingServices <small>(* [[_ethFaucetLog.rewardDetails.h]])</small></li>
+                <li>+&nbsp;DevelopServices <small>(* [[_ethFaucetLog.rewardDetails.d]])</small></li>
+              </ul>
             </paper-dialog-scrollable>
             <div class="buttons">
               <paper-button dialog-dismiss>
@@ -246,7 +250,7 @@ class EthereumView extends PolymerElement {
         <template is="dom-if" if="[[agentId.length>5]]">
           <h2>
             Reputation Wallet 
-            <paper-icon-button icon="refresh" title="Refresh Reputation Wallet" on-click="refreshEthWallet" disabled="[[_working]"></paper-icon-button>
+            <paper-icon-button icon="refresh" title="Refresh Reputation Wallet" on-click="refreshEthWallet" disabled="[[_working]]"></paper-icon-button>
           </h2>
 
           <paper-spinner active="[[_working]]" style="float:right;"></paper-spinner>
