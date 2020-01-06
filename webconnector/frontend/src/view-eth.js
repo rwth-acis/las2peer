@@ -442,7 +442,7 @@ class EthereumView extends PolymerElement {
                   <td>[[agent.address]]</td>
                   <td>[[agent.username]]</td>
                   <td>
-                    <paper-icon-button icon="card-giftcard" title="Transfer L2P to Agent" on-click="openEthSendicon-Dialog" data-agentid$="[[agent.agentid]]" disabled="[[_working]]"></paper-icon-button>
+                    <paper-icon-button icon="card-giftcard" title="Transfer L2P to Agent" on-click="openEthSendDialog" data-agentid$="[[agent.agentid]]" disabled="[[_working]]"></paper-icon-button>
                   </td>
                 </tr>
               </template>
