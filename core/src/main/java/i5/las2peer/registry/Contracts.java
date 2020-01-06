@@ -315,7 +315,7 @@ class Contracts {
 				//
 				// okay, frankly, I'm not even sure if this can fix the nonce too low error (but
 				// that's what the issue / StackEx suggest)
-				FastRawTransactionManager transactionManager = new StaticNonceRawTransactionManager(
+				/*FastRawTransactionManager transactionManager = new StaticNonceRawTransactionManager(
 					web3j, credentials, 
 					new QueuingTransactionReceiptProcessor(web3j,
 						new Callback() {
@@ -343,7 +343,14 @@ class Contracts {
 							e.printStackTrace();
 						}
 					}, 0, POLLING_FREQUENCY, TimeUnit.MILLISECONDS);
-				}
+				}*/
+
+				long pollingIntervalMillisecs = 1000;
+				int attempts = 90;
+				TransactionReceiptProcessor receiptProcessor = new PollingTransactionReceiptProcessor(web3j,
+						pollingIntervalMillisecs, attempts);
+				RawTransactionManager transactionManager = new FastRawTransactionManager(web3j, credentials,
+						receiptProcessor);
 
 				// txHashVerification throws false alarms (not sure why), disable check
 				// TODO: figure out what's going and and reenable
