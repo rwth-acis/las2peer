@@ -123,10 +123,6 @@ class Contracts {
 
 	public static void addTransactionReceipt(TransactionReceipt reciept) {
 		logger.info("[TXManager] added tx receipt: " + Util.getOrDefault(reciept.getTransactionHash(), "??"));
-		logger.info("[TXManager] > blockHash: " + Util.getOrDefault(reciept.getBlockHash(), "??"));
-		logger.info("[TXManager] > gas used: " + Util.getOrDefault(reciept.getGasUsed(), "??"));
-		logger.info("[TXManager] > senderAddress: " + Util.getOrDefault(reciept.getFrom(), "??"));
-		logger.info("[TXManager] > recipientAddress: " + Util.getOrDefault(reciept.getTo(), "??"));
 		Contracts.transactionReceipts.add(reciept);
 	}
 
