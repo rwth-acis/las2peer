@@ -120,11 +120,12 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		if (!agent.hasLoginName()) {
 			throw new EthereumException("Could not create reputation profile: agent has no login name");
 		}
+		String agentAddress = agent.getEthereumAddress();
 		byte[] profileName = Util.padAndConvertString(agent.getLoginName(), 32);
 		logger.info("registering user profile: " + agent.getLoginName());
 		String txHash;
 		try {
-			TransactionReceipt txR = contracts.reputationRegistry.createProfile(profileName).sendAsync().get();
+			TransactionReceipt txR = contracts.reputationRegistry.createProfile(agentAddress, profileName).sendAsync().get();
 			if (!txR.isStatusOK()) {
 				logger.warning("trx fail with status " + txR.getStatus());
 				logger.warning("gas used " + txR.getCumulativeGasUsed());
@@ -132,7 +133,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 				throw new EthereumException("could not send transaction, transaction receipt not ok");
 			}
 			txHash = txR.getTransactionHash();
-			if ( txR != null ) { Contracts.addTransactionReceipt(txR); }
+			//if ( txR != null ) { Contracts.addTransactionReceipt(txR); }
 			//waitForTransactionReceipt(txHash);
 		} catch (Exception e) {
 			throw new EthereumException("couldn't execute smart contract function call", e);
