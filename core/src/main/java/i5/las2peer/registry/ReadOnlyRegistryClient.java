@@ -207,7 +207,7 @@ public class ReadOnlyRegistryClient {
 		Tuple6<String, byte[], BigInteger, BigInteger, BigInteger, BigInteger> profileAsTuple;
 		try {
 			profileAsTuple = contracts.reputationRegistry.profiles(address).sendAsync().get();
-			logger.info("found user profile: " + profileAsTuple.toString());
+			logger.fine("found user profile: " + profileAsTuple.toString());
 		} catch (Exception e) {
 			throw new EthereumException("Could not get profile", e);
 		}

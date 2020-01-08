@@ -65,7 +65,7 @@ public class EthereumAgent extends UserAgentImpl {
 		this.sLoginName = loginName;
 		this.ethereumMnemonic = ethereumMnemonic;
 		this.ethereumAddress = CredentialUtils.fromMnemonic(ethereumMnemonic, passphrase).getAddress();
-		logger.info("creating ethereum agent [" + ethereumAddress + "]");
+		logger.fine("creating ethereum agent [" + ethereumAddress + "]");
 	}
 
 	protected EthereumAgent(PublicKey pubKey, byte[] encryptedPrivate, byte[] salt, String loginName, String ethereumMnemonic, String ethereumAddress) {
@@ -74,7 +74,7 @@ public class EthereumAgent extends UserAgentImpl {
 		this.sLoginName = loginName;
 		this.ethereumMnemonic = ethereumMnemonic;
 		this.ethereumAddress = ethereumAddress;
-		logger.info("creating ethereum agent [" + ethereumAddress + "]");
+		logger.fine("creating ethereum agent [" + ethereumAddress + "]");
 	}
 
 	// as in the superclass, it would be nicer not to use an exception
