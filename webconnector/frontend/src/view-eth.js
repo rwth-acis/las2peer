@@ -291,7 +291,7 @@ class EthereumView extends PolymerElement {
                   <paper-dropdown-menu style="min-width: 250px" label="Group to use for Success Modeling" on-change="_updateGroupMemberlist" noink no-animations selected-item="{{_groupSelected}}">
                     <paper-listbox slot="dropdown-content" class="dropdown-content" id="groupSelect">
                       <template is="dom-repeat" items="[[groups]]">
-                      <paper-item value="{{item.groupID}}">{{item.groupName}}</paper-item>
+                        <paper-item value="{{item.groupID}}">{{item.groupName}}</paper-item>
                       </template>
                     </paper-listbox>
                   </paper-dropdown-menu>
@@ -338,6 +338,9 @@ class EthereumView extends PolymerElement {
         <template is="dom-if" if="[[!_hasNoTxLog]]">
             <paper-tabs selected="{{_selectedTab}}">
               <paper-tab>
+                <span id="dashboard"><iron-icon icon="store"></iron-icon> Dashboard</span>
+              </paper-tab>
+              <paper-tab>
                 <span id="faucet-tx"><iron-icon icon="assignment"></iron-icon> Repuation pay-out Log</span>
                 <paper-badge for="faucet-tx" label="[[_EthWallet.rcvdTx.length]]"></paper-badge>
               </paper-tab>
@@ -349,11 +352,50 @@ class EthereumView extends PolymerElement {
                 <span id="sent-tx"><iron-icon icon="cloud-upload"></iron-icon> Outgoing reputation</span>
                 <paper-badge for="sent-tx" label="[[_ethTxLog.sentJsonLog.length]]"></paper-badge>
               </paper-tab>
+              <paper-tab>
+                <span id="profiles-list"><iron-icon icon="supervisor-account"></iron-icon> User list</span>
+                <paper-badge for="profiles-list" label="[[_listProfiles.length]]"></paper-badge>
+              </paper-tab>
             </paper-tabs>
 
             <iron-pages selected="{{_selectedTab}}">
-              <div>
-                <h2><iron-icon icon="assignment"></iron-icon> Repuation pay-out Log</h2>
+              <div> <!-- Reputation dashboard -->
+                <h2>
+                  Reputation Dashboard
+                  <paper-icon-button icon="refresh" title="Refresh Profiles List" on-click="refreshProfilesList" disabled="[[_working]]"></paper-icon-button> <br />
+                  <small>(all users who have <u>opted in</u> to the Reputation System)</small>
+                </h2>
+                <paper-spinner active="[[_working]]" style="float:right;"></paper-spinner>
+                <div class="profileList">
+                  <template is="dom-if" if="[[_listProfiles.length]]">
+                    <h3>Members</h3>
+                    <table width="100%">
+                      <tr>
+                        <th>Username</th>
+                        <th>Reputation</th>
+                        <th>Tx: [<iron-icon icon="cloud-download" title="Received"></iron-icon> | <iron-icon icon="cloud-upload" title="Sent"></iron-icon>]</th>
+                        <th>Eth Adress</th>
+                      </tr>
+                      <template is="dom-repeat" items="[[_listProfiles]]" as="agent">
+                        <tr>
+                          <td>[[agent.username]]</td>
+                          <td>
+                            <custom-star-rating value="[[agent.rating]]" on-rating-selected="rateAgent"></custom-star-rating>
+                          </td>
+                          <td> 
+                            [[agent.noOfTransactionsRcvd]] | 
+                            [[agent.noOfTransactionsSent]]
+                          </td>
+                          <td><iron-icon icon="fingerprint"></iron-icon> [[agent.address]]</td>
+                        </tr>
+                      </template>
+                    </table>
+                  </template>
+                </div>
+              </div> <!-- End Reputation dashboard -->
+            
+              <div> <!-- Faucet Payout-Log -->
+                <h2><iron-icon icon="assignment"></iron-icon> Repuation pay-out log</h2>
                 <table width="100%">
                   <tr>
                     <th>Timestamp</th>
@@ -366,8 +408,8 @@ class EthereumView extends PolymerElement {
                     </tr>
                   </template>
                 </table>
-              </div>
-              <div>
+              </div> <!-- End Faucet Pay-out Log -->
+              <div> <!-- Incoming TX Log -->
                 <h2><iron-icon icon="cloud-download"></iron-icon> Incoming reputation</h2>
                 <table width="100%">
                   <tr>
@@ -391,8 +433,9 @@ class EthereumView extends PolymerElement {
                     </template>
                   </template>
                 </table>
-              </div>
-              <div>
+              </div> <!-- End Incoming TX Log -->
+
+              <div> <!-- Outgoing TX Log -->
                 <h2><iron-icon icon="cloud-upload"></iron-icon> Outgoing reputation</h2>
                 <table width="100%">
                   <tr>
@@ -414,75 +457,42 @@ class EthereumView extends PolymerElement {
                     </tr>
                   </template>
                 </table>
+              </div> <!-- End outgoing TX log -->
+
+              <div> <!-- User list -->
+                <h2>
+                  User Agents
+                  <paper-icon-button icon="refresh" title="Refresh Agents List" on-click="refreshAgentsList" disabled="[[_working]]"></paper-icon-button> <br />
+                  <small>(all users who have <u>registered</u>)</small>
+                </h2>
+                <paper-spinner active="[[_working]]" style="float:right;"></paper-spinner>
+                <div class="agentList">
+                  <template is="dom-if" if="[[_listAgents.length]]">
+                    <h3>Members</h3>
+                    <table width="100%">
+                      <tr>
+                        <th>Agentid</th>
+                        <th>Adress</th>
+                        <th>Username</th>
+                        <th>Actions</th>
+                      </tr>
+                      <template is="dom-repeat" items="[[_listAgents]]" as="agent">
+                        <tr>
+                          <td>[[agent.shortid]]</td>
+                          <td>[[agent.address]]</td>
+                          <td>[[agent.username]]</td>
+                          <td>
+                            <paper-icon-button icon="card-giftcard" title="Transfer L2P to Agent" on-click="openEthSendDialog" data-agentid$="[[agent.agentid]]" disabled="[[_working]]"></paper-icon-button>
+                          </td>
+                        </tr>
+                      </template>
+                    </table>
+                  </template>
+                </div>
               </div>
             </iron-pages>
           </template> <!-- END TX LOG -->
 
-          <hr />
-        
-        <!-- AGENTS LIST -->
-        <h2>
-          List User Agents <small>(ethereum agents registered in the network)</small>
-          <paper-icon-button icon="refresh" title="Refresh Agents List" on-click="refreshAgentsList" disabled="[[_working]]"></paper-icon-button>
-        </h2>
-        <paper-spinner active="[[_working]]" style="float:right;"></paper-spinner>
-        <div class="agentList">
-          <template is="dom-if" if="[[_listAgents.length]]">
-            <h3>Members</h3>
-            <table width="100%">
-              <tr>
-              	<th>Agentid</th>
-              	<th>Adress</th>
-              	<th>Username</th>
-              	<th>Actions</th>
-              </tr>
-              <template is="dom-repeat" items="[[_listAgents]]" as="agent">
-                <tr>
-                  <td>[[agent.shortid]]</td>
-                  <td>[[agent.address]]</td>
-                  <td>[[agent.username]]</td>
-                  <td>
-                    <paper-icon-button icon="card-giftcard" title="Transfer L2P to Agent" on-click="openEthSendDialog" data-agentid$="[[agent.agentid]]" disabled="[[_working]]"></paper-icon-button>
-                  </td>
-                </tr>
-              </template>
-            </table>
-          </template>
-        </div>
-        
-
-        <!-- PROFILES LIST -->
-        <h2>
-          List User Profiles <small>(ethereum agents who have opted in to the Reputation System)</small>
-          <paper-icon-button icon="refresh" title="Refresh Profiles List" on-click="refreshProfilesList" disabled="[[_working]]"></paper-icon-button>
-        </h2>
-        <paper-spinner active="[[_working]]" style="float:right;"></paper-spinner>
-        <div class="profileList">
-          <template is="dom-if" if="[[_listProfiles.length]]">
-            <h3>Members</h3>
-            <table width="100%">
-              <tr>
-                <th>Username</th>
-                <th>Reputation</th>
-                <th>Tx: [<iron-icon icon="cloud-download" title="Received"></iron-icon> | <iron-icon icon="cloud-upload" title="Sent"></iron-icon>]</th>
-              	<th>Eth Adress</th>
-              </tr>
-              <template is="dom-repeat" items="[[_listProfiles]]" as="agent">
-                <tr>
-                  <td>[[agent.username]]</td>
-                  <td>
-                  	<custom-star-rating value="[[agent.rating]]" on-rating-selected="rateAgent"></custom-star-rating>
-                  </td>
-                  <td> 
-                    [[agent.noOfTransactionsRcvd]] | 
-                    [[agent.noOfTransactionsSent]]
-                  </td>
-                  <td><iron-icon icon="fingerprint"></iron-icon> [[agent.address]]</td>
-                </tr>
-              </template>
-            </table>
-          </template>
-        </div>
     </div>
     `;
   }
