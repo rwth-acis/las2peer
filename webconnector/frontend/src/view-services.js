@@ -175,8 +175,8 @@ class ServicesView extends PolymerElement {
                         <ul style="display: inline-block; list-style: none; padding-left: 0">
                           <li style="margin-left: 0">
                             <span class="nodeId"><iron-icon icon="hardware:device-hub" title="Running on Node"></iron-icon> <strong>Node ID</strong></span>
-                            <span class="nodeAdmin"><iron-icon icon="account-circle" title="Node Administrator"></iron-icon> <strong>Node Admin</strong></span>
-                            <span class="nodeAdminRating"><iron-icon icon="face" title="Node Admin Rating"></iron-icon> <strong>Admin Rating</strong></span>
+                            <span class="nodeAdmin"><iron-icon icon="account-circle" title="Service Hoster"></iron-icon> <strong>Service Hoster</strong></span>
+                            <span class="nodeAdminRating"><iron-icon icon="face" title="Hoster Rating"></iron-icon> <strong>Hoster Rating</strong></span>
                             <span class="time"><iron-icon icon="device:access-time" title="Last Announcement"></iron-icon> <strong>Last announced</strong></span>
                           </li>
                         </ul>
@@ -198,10 +198,10 @@ class ServicesView extends PolymerElement {
                                   [[instance.nodeInfo.admin-name]]
                                 </span>
                                 <span class="nodeAdminRating">
-                                  <template is="dom-if" if="[[instance.nodeInfo.hosterReputation]]">
-                                    <custom-star-rating value="[[instance.nodeInfo.hosterReputation]]" readonly></custom-star-rating>
+                                  <template is="dom-if" if="[[instance.hosterReputation]]">
+                                    <custom-star-rating value="[[instance.hosterReputation]]" readonly></custom-star-rating>
                                   </template>
-                                  <template is="dom-if" if="[[!instance.nodeInfo.hosterReputation]]">
+                                  <template is="dom-if" if="[[!instance.hosterReputation]]">
                                     <custom-star-rating disable-rating readonly></custom-star-rating>
                                   </template>
                                 </span>
@@ -254,9 +254,9 @@ class ServicesView extends PolymerElement {
 
   ready() {
     super.ready();
-    let appThis = this;
-    window.setTimeout(function() { appThis.refresh(); }, 1);
-    window.setInterval(function() { appThis.refresh(); }, 5000);
+    window.appThis = this;
+    window.setTimeout(function() { window.appThis.refresh(); }, 1);
+    window.setInterval(function() { window.appThis.refresh(); }, 5000);
   }
 
   refresh() {
