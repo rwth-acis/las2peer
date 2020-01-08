@@ -211,13 +211,13 @@ public class ServicesHandler {
 
 	private NodeInformation queryNodeInfoWithCache(String nodeID)
 	{
-		logger.info("[NodeInfo] searching for node #" + nodeID);
+		logger.fine("[NodeInfo] searching for node #" + nodeID);
 
 		// do we know this node?
 		if ( nodeInfoCache.containsKey( nodeID ) )
 		{
 			NodeInformation foundVal = nodeInfoCache.get( nodeID );
-			logger.info("[NodeInfo] ! found info for node #" + nodeID + " in cache" );
+			logger.fine("[NodeInfo] ! found info for node #" + nodeID + " in cache" );
 			return foundVal;
 		}
 
@@ -234,7 +234,7 @@ public class ServicesHandler {
 				logger.severe("trying to local access node info");
 				e.printStackTrace();
 			}
-			logger.info("[NodeInfo] ! node #" + nodeID + " is local node! ");
+			logger.fine("[NodeInfo] ! node #" + nodeID + " is local node! ");
 			return localNodeInfo;
 		}
 
@@ -254,13 +254,13 @@ public class ServicesHandler {
 				continue;
 			}
 			finally {
-				logger.info(remoteNodeInfo.toString());
+				logger.fine(remoteNodeInfo.toString());
 				nodeInfoCache.put(remoteNodeID, remoteNodeInfo);
 			}
 
 			if ( remoteNodeInfo != null && remoteNodeID.equals(nodeID) )
 			{
-				logger.info("[NodeInfo] ! found remote node " + nodeID );
+				logger.fine("[NodeInfo] ! found remote node " + nodeID );
 				return remoteNodeInfo;
 			}
 		}
