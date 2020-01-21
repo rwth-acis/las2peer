@@ -249,7 +249,7 @@ class BlockchainObserver {
 						this.genericTransactions.get(srdk).add(gtd);
 					}
 
-					logger.info("[ChainObserver] observed user voting: \n" + 
+					logger.info("[ChainObserver] observed user voting: " + 
 								"[" + txSender + "]->[" + txRecipient + "]: " + grade + ", new grade: " + recipientNewScore);
 				}, e -> logger.severe("Error observing user voting event: " + e.toString()));
 	}
@@ -262,7 +262,7 @@ class BlockchainObserver {
 						return;
 					}
 
-					String errorMsg = Util.recoverString(error.message);
+					String errorMsg = Util.getOrDefault(error.message, "no error message provided");
 
 					this.errors.add(errorMsg);
 					logger.severe("[ChainObserver] observed error event: " + errorMsg);
@@ -355,14 +355,14 @@ class BlockchainObserver {
 					if (txHasAlreadyBeenHandled(transaction.log.getTransactionHash())) {
 						return;
 					}
-					String sender = transaction.sender;
-					String receiver = transaction.recipient;
+					String sender = Util.recoverString(transaction.sender);
+					String receiver = Util.recoverString(transaction.recipient);
 					
-					String message = transaction.message;
-					BigInteger weiAmount = transaction.weiAmount;
-					BigInteger timestamp = transaction.timestamp;
-					String transactionType = transaction.transactionType;
-					String txHash = transaction.txHash;
+					String message = Util.getOrDefault(transaction.message, "no message");
+					BigInteger weiAmount = Util.getOrDefault(transaction.weiAmount, BigInteger.ZERO);
+					BigInteger timestamp = Util.getOrDefault(transaction.timestamp, BigInteger.ZERO);
+					String transactionType = Util.getOrDefault(transaction.transactionType, "no txType");
+					String txHash = Util.getOrDefault(transaction.txHash, "no txHash");
 
 					SenderReceiverDoubleKey srdk = new SenderReceiverDoubleKey(sender, receiver);
 					GenericTransactionData gtd = new GenericTransactionData(sender, receiver, weiAmount, timestamp, message, transactionType, txHash);
