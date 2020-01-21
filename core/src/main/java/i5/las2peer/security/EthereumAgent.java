@@ -106,7 +106,7 @@ public class EthereumAgent extends UserAgentImpl {
 		registryClient = new ReadWriteRegistryClient(new RegistryConfiguration(), credentials);
 
 		ethereumAddress = credentials.getAddress();
-		logger.info("unlocked ethereum agent ["+ethereumAddress +"]");
+		logger.fine("unlocked ethereum agent ["+ethereumAddress +"]");
 	}
 
 	@Override

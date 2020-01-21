@@ -763,7 +763,7 @@ public class EthereumHandler {
 			String ownerAddress = "";
 			try {
 				ownerAddress = ethereumNode.getRegistryClient().getUser(ethAgent.getLoginName()).getOwnerAddress();
-				logger.info("found user ["+ethAgent.getLoginName()+"|"+ownerAddress+"]");
+				logger.fine("found user ["+ethAgent.getLoginName()+"|"+ownerAddress+"]");
 			} catch (EthereumException | NotFoundException e) {
 				throw new BadRequestException("cannot get ethereum owner address for user agent " + ethAgent.getLoginName());
 			}
@@ -802,7 +802,7 @@ public class EthereumHandler {
 		for (Map.Entry<String, String> userProfile : userProfiles.entrySet()) {
 			String owner = userProfile.getKey().toString();
 			String username = userProfile.getValue().toString();
-			logger.info("found profile: " + username + " @ " + owner);
+			logger.fine("found profile: " + username + " @ " + owner);
 			AgentImpl userAgent = null;
 			try {
 				userAgent = ethereumNode.getAgentByDetail(null, username, null);

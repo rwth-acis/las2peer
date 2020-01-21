@@ -568,7 +568,7 @@ class BlockchainObserver {
 
 			tailMap.forEach((announcedBlockNo,serviceMap)->
 			{
-				logger.info("[ChainObserver]   processing block # " + announcedBlockNo + ":" );
+				logger.fine("[ChainObserver]   processing block # " + announcedBlockNo + ":" );
 				// search list of services announced
 				serviceMap.forEach((announcedServiceName,hostingNodeIDList)->
 				{
