@@ -113,9 +113,9 @@ public class EthereumHandler {
 				if (remoteNodeInfo.getAdminEmail().equals(agentEmail)) {
 					// yes, query services
 					List<ServiceNameVersion> servicesOnRemoteNode = remoteNodeInfo.getHostedServices();
-					for (ServiceNameVersion removeSNV : servicesOnRemoteNode) {
-						logger.info("[remote nodeInfo-SVC]: found service " + removeSNV.toString());
-						ethAgentAdminServices.putIfAbsent(removeSNV.getName(), remoteNodeHandle.toString());
+					for (ServiceNameVersion remoteSNV : servicesOnRemoteNode) {
+						logger.info("[remote nodeInfo-SVC]: found service " + remoteSNV.toString());
+						ethAgentAdminServices.putIfAbsent(remoteSNV.getName(), remoteNodeHandle.toString());
 					}
 				} else {
 					logger.info("[remote nodeInfo-SVC]: ethAgent is not remote admin, omitting node");
