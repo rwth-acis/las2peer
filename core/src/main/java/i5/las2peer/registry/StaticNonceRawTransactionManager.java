@@ -24,7 +24,7 @@ class StaticNonceRawTransactionManager extends FastRawTransactionManager {
     private volatile BigInteger nonce = BigInteger.valueOf(-1);
     private String credentialAddress = "";
     private TransactionReceiptProcessor transactionReceiptProcessor;
-    private static ConcurrentHashMap<String, BigInteger> staticNonces = new ConcurrentHashMap<>();// ;
+    
 
     public StaticNonceRawTransactionManager(Web3j web3j, Credentials credentials,
             TransactionReceiptProcessor transactionReceiptProcessor) {
@@ -32,24 +32,10 @@ class StaticNonceRawTransactionManager extends FastRawTransactionManager {
         this.transactionReceiptProcessor = transactionReceiptProcessor;
         credentialAddress = credentials.getAddress();
         try {
-            StaticNonceRawTransactionManager.staticNonces.put(credentialAddress, super.getNonce());
+            StaticNonce.Manager().putStaticNonce(credentialAddress, super.getNonce());
         } catch (IOException e) {
-            StaticNonceRawTransactionManager.staticNonces.put(credentialAddress, BigInteger.valueOf(-1));
+            StaticNonce.Manager().putStaticNonce(credentialAddress, BigInteger.valueOf(-1));
         }
-    }
-
-    public static BigInteger getStaticNonce(String address) {
-        return StaticNonceRawTransactionManager.staticNonces.putIfAbsent(address, BigInteger.valueOf(-1));
-    }
-
-    public static void setStaticNonce(String address, BigInteger value) {
-        StaticNonceRawTransactionManager.staticNonces.put(address, value);
-    }
-
-    public static synchronized BigInteger incStaticNonce(String address) {
-        BigInteger newValue = StaticNonceRawTransactionManager.staticNonces.get(address).add(BigInteger.ONE);
-        StaticNonceRawTransactionManager.setStaticNonce(address, newValue);
-        return newValue;
     }
 
     @Override
@@ -69,7 +55,7 @@ class StaticNonceRawTransactionManager extends FastRawTransactionManager {
 
     @Override
     protected synchronized BigInteger getNonce() throws IOException {
-        int staticNonce = StaticNonceRawTransactionManager.getStaticNonce(credentialAddress).intValue();
+        int staticNonce = StaticNonce.Manager().getStaticNonce(credentialAddress).intValue();
         if (staticNonce == -1) {
             BigInteger parentNonce = super.getNonce();
             logger.info(
@@ -77,10 +63,10 @@ class StaticNonceRawTransactionManager extends FastRawTransactionManager {
             setNonce(parentNonce);
         } else {
             logger.info("[TX-NONCE] consecutive transactions: set nonce to no. of pending transactions (="
-                    + StaticNonceRawTransactionManager.getStaticNonce(credentialAddress) + " + 1)");
-            StaticNonceRawTransactionManager.incStaticNonce(credentialAddress);
+                    + StaticNonce.Manager().getStaticNonce(credentialAddress) + " + 1)");
+            StaticNonce.Manager().incStaticNonce(credentialAddress);
         }
-        return StaticNonceRawTransactionManager.getStaticNonce(credentialAddress);
+        return StaticNonce.Manager().getStaticNonce(credentialAddress);
     }
 
     public BigInteger getCurrentNonce() {
@@ -95,7 +81,7 @@ class StaticNonceRawTransactionManager extends FastRawTransactionManager {
 
     public synchronized void setNonce(BigInteger value) {
         nonce = value;
-        StaticNonceRawTransactionManager.setStaticNonce(credentialAddress, nonce);
+        StaticNonce.Manager().putStaticNonce(credentialAddress, nonce);
         logger.info("[TX-NONCE] set nonce to:" + value);
     }
 
