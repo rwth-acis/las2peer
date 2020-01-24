@@ -238,10 +238,9 @@ public class EthereumNode extends PastryNodeImpl {
 			ethAgentAgent = getAgentByDetail(null, adminName, adminEmail);
 			ethAgentAgent = getAgent(ethAgentAgent.getIdentifier());
 		} catch (AgentException e) {
-			e.printStackTrace();
 			if ( adminName == null ) adminName = "";
 			if ( adminEmail == null ) adminEmail = "";
-			logger.severe("[Eth Reputation]: couldn't find credentials for " + adminName.toString() + "|" + adminEmail.toString());
+			logger.severe("[Eth Reputation]: couldn't find EthereumAgent called " + adminName.toString() + " with mail " + adminEmail.toString());
 		}
 
 		if ( ethAgentAgent instanceof EthereumAgent )
