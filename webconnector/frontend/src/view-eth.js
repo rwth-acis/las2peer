@@ -186,7 +186,7 @@ class EthereumView extends PolymerElement {
           </paper-dialog>
 
         <paper-dialog id="sendEthDialog">
-          <h1>Transfer L2P</h1>
+          <h1>Transfer L2Pcoin</h1>
           <paper-dialog-scrollable>
             <div class="horizontal layout center-justified">
               <paper-spinner active="[[_working]]"></paper-spinner>
@@ -197,7 +197,7 @@ class EthereumView extends PolymerElement {
             <iron-form on-keypress="_keyPressedSendETHTransaction">
               <form>
                 <paper-input label="AgentID" id="SendETHTransactionAgentID" disabled="[[_working]]" value="[[_chosenAgentID]]"></paper-input>
-                <paper-input label="Amount (in L2P)" id="SendETHTransactionWeiAmount" disabled="[[_working]]" value=""></paper-input>
+                <paper-input label="Amount (in L2Pcoin)" id="SendETHTransactionWeiAmount" disabled="[[_working]]" value=""></paper-input>
                 <paper-textarea label="Transaction Message" disabled="[[_working]]" id="SendETHTransactionMessage"></paper-textarea>
               </form>
             </iron-form>
@@ -207,7 +207,7 @@ class EthereumView extends PolymerElement {
               <iron-icon icon="block"></iron-icon> Cancel
             </paper-button>
             <paper-button raised on-click="sendGenericTransaction" disabled="[[_working]]" class="green">
-              <iron-icon icon="check"></iron-icon> Send ETH Transaction
+              <iron-icon icon="check"></iron-icon> Send L2Pcoin Transaction
             </paper-button>
           </div>
         </paper-dialog>
@@ -221,7 +221,7 @@ class EthereumView extends PolymerElement {
         <div class="introText">
           <p class="description">
             To incentivize las2peer users to contribute to the community, a reputation system has been introduced. <br />
-            Technically, this reputation is represented by a las2peer-internal cryptocurrency called <strong>L2P</strong>. 
+            Technically, this reputation is represented by a las2peer-internal cryptocurrency called <strong>L2Pcoin</strong>. 
           </p>
           <p class="description">
             While user agents can be rated directly, the value a service provides to the different communities cannot be immediately evaluated and thus is based on the <a href="https://github.com/rwth-acis/mobsos-success-modeling/wiki/Manual">MobSOS success model</a>.
@@ -270,14 +270,14 @@ class EthereumView extends PolymerElement {
                     </template> 
                     <br />
                     <strong><iron-icon icon="account-balance-wallet"></iron-icon> Accumulated reputation</strong>: 
-                      [[_EthWallet.ethAccBalance]] L2P
+                      [[_EthWallet.ethAccBalance]] L2Pcoin
                   </p>
                 </div>
 
                 <!-- TOTAL REPUTATION -->
                 <p>
                   <strong><iron-icon icon="account-balance"></iron-icon> Total reputation available for request</strong>:
-                  <small> [[_ethCoinbaseInfo.coinbaseBalance]] L2P</small> <iron-icon id="totalReputation" icon="help-outline"></iron-icon>
+                  <small> [[_ethCoinbaseInfo.coinbaseBalance]] L2Pcoin</small> <iron-icon id="totalReputation" icon="help-outline"></iron-icon>
                   <paper-tooltip for="totalReputation" offset="0">
                     This value represents the total amount of reputation that can be paid out to all users. <br />
                     Technically, it's the amount of Ether in the coinbase account, <br />
@@ -301,9 +301,9 @@ class EthereumView extends PolymerElement {
                   </paper-button>
                 </div>
 
-                <!-- REQUEST REPUTATION PROFILE -->
+                <!-- REQUEST REPUTATION PROFILE (OPT-IN) -->
                 <template is="dom-if" if="[[!_hasEthProfile]]">
-                  <template is="dom-if" if="[[_EthWallet.ethAccBalance]]"> 
+                  <template is="dom-if" if="[[_EthWallet.ethAccBalance > 0.0001]]"> 
                     <p class="description">
                       las2peer user reputation requires users to <em>opt-in</em> to the system to rate others and, most importantly, be rated by others. 
                       Each transaction on the blockchain <small>(<em>which is the backing mechanism of las2peer reputation</em>)</small> requires a small transaction fee.
@@ -321,9 +321,9 @@ class EthereumView extends PolymerElement {
               <div class="walletInfo">
                 <!-- ETH WALLET INFO -->
                 <div class="ethInfo">
-                  <h4 id="ethInfoTitle">L2P Wallet Info <iron-icon icon="help-outline"></iron-icon></h4>
+                  <h4 id="ethInfoTitle">L2Pcoin Wallet Info <iron-icon icon="help-outline"></iron-icon></h4>
                   <p class="description">
-                    The las2peer (L2P) reputation profile is implemented by means of an Ethereum Wallet. <br />
+                    The las2peer (<small><em>L2P, the namesake for the cryptocurrency L2Pcoin</em></small>) reputation profile is implemented by means of an Ethereum Wallet. <br />
                     The wallet address can be used to send and receive transactions on the blockchain. <br />
                     The provided mnemonic is generated according to the <a href="https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki" target="_blank">BIP-39</a> standard. 
                   </p>
@@ -404,7 +404,7 @@ class EthereumView extends PolymerElement {
                   <template is="dom-repeat" items="[[_EthWallet.rcvdTx]]" as="tx">
                     <tr>
                       <td><iron-icon icon="update"></iron-icon> [[tx.blockDateTime]]</td>
-                      <td><iron-icon icon="card-giftcard"></iron-icon> [[tx.value]] L2P</td>
+                      <td><iron-icon icon="card-giftcard"></iron-icon> [[tx.value]] L2Pcoin</td>
                     </tr>
                   </template>
                 </table>
@@ -427,7 +427,7 @@ class EthereumView extends PolymerElement {
                       <td><iron-icon icon="face"></iron-icon> [[tx.txSender]]</td>
                       <td><iron-icon icon="class"></iron-icon> [[tx.txTransactionType]]</td>
                       <td><iron-icon icon="speaker-notes"></iron-icon> [[tx.txMessage]]</td>
-                      <td><iron-icon icon="card-giftcard"></iron-icon> [[tx.txAmountInEth]] L2P</td>
+                      <td><iron-icon icon="card-giftcard"></iron-icon> [[tx.txAmountInEth]] L2Pcoin</td>
                       <td><iron-icon icon="fingerprint"></iron-icon> [[tx.txTXHash]]</td>
                     </tr>
                     </template>
@@ -452,7 +452,7 @@ class EthereumView extends PolymerElement {
                       <td><iron-icon icon="face"></iron-icon> [[tx.txReceiver]]</td>
                       <td><iron-icon icon="class"></iron-icon> [[tx.txTransactionType]]</td>
                       <td><iron-icon icon="speaker-notes"></iron-icon> [[tx.txMessage]]</td>
-                      <td><iron-icon icon="card-giftcard"></iron-icon> [[tx.txAmountInEth]] L2P</td>
+                      <td><iron-icon icon="card-giftcard"></iron-icon> [[tx.txAmountInEth]] L2Pcoin</td>
                       <td><iron-icon icon="fingerprint"></iron-icon> [[tx.txTXHash]]</td>
                     </tr>
                   </template>
@@ -482,7 +482,7 @@ class EthereumView extends PolymerElement {
                           <td>[[agent.address]]</td>
                           <td>[[agent.username]]</td>
                           <td>
-                            <paper-icon-button icon="card-giftcard" title="Transfer L2P to Agent" on-click="openEthSendDialog" data-agentid$="[[agent.agentid]]" disabled="[[_working]]"></paper-icon-button>
+                            <paper-icon-button icon="card-giftcard" title="Transfer L2Pcoin to Agent" on-click="openEthSendDialog" data-agentid$="[[agent.agentid]]" disabled="[[_working]]"></paper-icon-button>
                           </td>
                         </tr>
                       </template>
