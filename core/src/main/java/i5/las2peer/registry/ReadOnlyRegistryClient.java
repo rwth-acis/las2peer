@@ -425,6 +425,11 @@ public class ReadOnlyRegistryClient {
 		
 		BigInteger staticNonce = StaticNonce.Manager().getStaticNonce(credentialAddress);
 		int compare = staticNonce.compareTo(blockchainNonce);
+		
+		logger.info("[RORC Nonce] bchain nonce: " + blockchainNonce);
+		logger.info("[RORC Nonce] static nonce: " + staticNonce);
+		logger.info("[RORC Nonce] compare: " + compare);
+
 		if (compare == -1) {
 			StaticNonce.Manager().incStaticNonce(credentialAddress);
 		} else if (compare == 1) {
