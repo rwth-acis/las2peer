@@ -219,8 +219,8 @@ class BlockchainObserver {
 						return;
 					}
 
-					String txSender = Util.recoverString(transaction.sender);
-					String txRecipient = Util.recoverString(transaction.recipient);
+					String txSender = Util.getOrDefault(transaction.sender, "uknown sender");
+					String txRecipient = Util.getOrDefault(transaction.recipient, "uknown recipient");
 					
 					BigInteger grade = Util.getOrDefault(transaction.grade, BigInteger.ZERO);
 					BigInteger recipientNewScore = Util.getOrDefault(transaction.recipientNewScore, BigInteger.ZERO);
@@ -299,7 +299,7 @@ class BlockchainObserver {
 				{
 					return;
 				}
-				String profileOwner = profile.owner;
+				String profileOwner = Util.getOrDefault(profile.owner, "???");
 				String profileName = Util.recoverString(profile.name);
 				this.profiles.put(profileOwner, profileName);
 				logger.info("[ChainObserver] observed profile creation: [" + profileOwner + "]: " + profileName);
@@ -355,8 +355,8 @@ class BlockchainObserver {
 					if (txHasAlreadyBeenHandled(transaction.log.getTransactionHash())) {
 						return;
 					}
-					String sender = Util.recoverString(transaction.sender);
-					String receiver = Util.recoverString(transaction.recipient);
+					String txSender = Util.getOrDefault(transaction.sender, "uknown sender");
+					String txRecipient = Util.getOrDefault(transaction.recipient, "uknown recipient");
 					
 					String message = Util.getOrDefault(transaction.message, "no message");
 					BigInteger weiAmount = Util.getOrDefault(transaction.weiAmount, BigInteger.ZERO);
@@ -364,8 +364,8 @@ class BlockchainObserver {
 					String transactionType = Util.getOrDefault(transaction.transactionType, "no txType");
 					String txHash = Util.getOrDefault(transaction.txHash, "no txHash");
 
-					SenderReceiverDoubleKey srdk = new SenderReceiverDoubleKey(sender, receiver);
-					GenericTransactionData gtd = new GenericTransactionData(sender, receiver, weiAmount, timestamp, message, transactionType, txHash);
+					SenderReceiverDoubleKey srdk = new SenderReceiverDoubleKey(txSender, txRecipient);
+					GenericTransactionData gtd = new GenericTransactionData(txSender, txRecipient, weiAmount, timestamp, message, transactionType, txHash);
 
 					if ( !this.genericTransactions.containsKey(srdk) )
 					{
@@ -380,7 +380,7 @@ class BlockchainObserver {
 
 					String wei = Convert.fromWei(weiAmount.toString(), Convert.Unit.ETHER).toString();
 
-					logger.info("[ChainObserver] observed generic transaction: [" + sender + "->" + receiver + "]@" +  wei + ": " + message);
+					logger.info("[ChainObserver] observed generic transaction: [" + txSender + "->" + txRecipient + "]@" +  wei + ": " + message);
 
 				}, e -> logger.severe("Error observing generic transaction: " + e.toString()));
 	}
