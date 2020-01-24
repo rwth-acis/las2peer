@@ -237,19 +237,19 @@ public class ReadOnlyRegistryClient {
 			if (userProfileData != null && !userProfileData.getOwner().equals("0x0000000000000000000000000000000000000000")) 
 			{
 				if (userProfileData.getNoTransactionsRcvd().compareTo(BigInteger.ZERO) == 0) {
-					logger.info("[User Reputation]: valid reputation profile, no incoming reputation yet." );
+					logger.fine("[User Reputation]: valid reputation profile [" + userProfileData.getUserName() + "], no incoming reputation yet." );
 					return 0f;
 				} 
 				else 
 				{
 					userRatingScore_Raw = userProfileData.getStarRating();
-					logger.info("[User Reputation]: valid reputation profile, score: " + Float.toString(userRatingScore_Raw) );
+					logger.fine("[User Reputation]: valid reputation profile [" + userProfileData.getUserName() + "], score: " + Float.toString(userRatingScore_Raw) );
 					return userRatingScore_Raw;
 				}
 			}
 			else
 			{
-				logger.info("[User Reputation]: no valid reputation profile" );
+				logger.fine("[User Reputation]: no valid reputation profile" );
 				return 0f;
 			}
 		} catch (EthereumException | NotFoundException e) {
