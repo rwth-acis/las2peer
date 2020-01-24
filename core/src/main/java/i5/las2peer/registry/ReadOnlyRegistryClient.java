@@ -422,7 +422,7 @@ public class ReadOnlyRegistryClient {
 		// transactions
 		String credentialAddress = credentials.getAddress();
 		BigInteger blockchainNonce = ethGetTransactionCount.getTransactionCount();
-		/*
+		
 		BigInteger staticNonce = StaticNonceRawTransactionManager.getStaticNonce(credentialAddress);
 		int compare = staticNonce.compareTo(blockchainNonce);
 		if (compare == -1) {
@@ -430,7 +430,7 @@ public class ReadOnlyRegistryClient {
 		} else if (compare == 1) {
 			StaticNonceRawTransactionManager.incStaticNonce(credentialAddress);
 			return staticNonce.add(BigInteger.ONE);
-		}*/
+		}
 		return blockchainNonce;
 	}
 	
