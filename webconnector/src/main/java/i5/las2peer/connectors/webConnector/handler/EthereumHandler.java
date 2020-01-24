@@ -498,7 +498,7 @@ public class EthereumHandler {
 				logger.info("[ETH TxLog]: found "+coinbaseTransactionLog.size()+" transactions, finding largest block no " );
 				for(BlockchainTransactionData transaction: coinbaseTransactionLog)
 				{
-					if ( transaction.getBlockNumber().compareTo(largestBlockNo) == 1 )
+					if ( transaction.getBlockNumber().compareTo(largestBlockNo) >= 1 )
 					{
 						largestBlockNo = transaction.getBlockNumber();
 						logger.info("[ETH TxLog]:   found transaction on block " + largestBlockNo );
@@ -864,7 +864,7 @@ public class EthereumHandler {
 		}
 		else
 		{
-			agent.put("rating", cumulativeScore.divide(noTransactionsRcvd));
+			agent.put("rating", profile.getStarRating());
 		}
 		return agent;
 	}
