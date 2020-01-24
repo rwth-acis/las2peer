@@ -29,12 +29,33 @@ class CustomStarRating extends PolymerElement {
                 color: #eeeeee;
                 float: right;
             }
+            iron-icon .color-1 {
+                color: #d7191c;
+                opacity: 0.9;
+            }
+            iron-icon .color-2 {
+                color: #fdae61;
+                opacity: 0.9;
+            }
+            iron-icon .color-3 {
+                color: #ffffbf;
+                opacity: 0.9;
+            }
+            iron-icon .color-4 {
+                color: #abd9e9;
+                opacity: 0.9;
+            }
+            iron-icon .color-5 {
+                color: #2c7bb6;
+                opacity: 0.9;
+            }
             iron-icon.selected {
                 color: #999999;
             }
             :host(:not([readonly])) iron-icon:hover,
             :host(:not([readonly])) iron-icon:hover ~ iron-icon {
-                color: #9e9e9e !important;
+                //color: #9e9e9e !important;
+                opacity: 1.0;
             }
         </style>
     
@@ -77,6 +98,13 @@ class CustomStarRating extends PolymerElement {
     constructor() {
         super();
 
+        if ( this.value == 0 && this.readonly )
+        {
+            this.ratings = [
+                { value: 3, class: 'whole', icon: 'social:sentiment-neutral', selected: false },
+            ];
+        } 
+        else 
         if ( this.disabled )
         {
             this.readonly = true;
@@ -91,11 +119,11 @@ class CustomStarRating extends PolymerElement {
         else
         {
             this.ratings = [
-                { value: 5, class: 'whole', icon: 'social:sentiment-very-satisfied', selected: false },
-                { value: 4, class: 'whole', icon: 'social:sentiment-satisfied', selected: false },
-                { value: 3, class: 'whole', icon: 'social:sentiment-neutral', selected: false },
-                { value: 2, class: 'whole', icon: 'social:sentiment-dissatisfied', selected: false },
-                { value: 1, class: 'whole', icon: 'social:sentiment-very-dissatisfied', selected: false },
+                { value: 5, class: 'whole color-5', icon: 'social:sentiment-very-satisfied', selected: false },
+                { value: 4, class: 'whole color-4', icon: 'social:sentiment-satisfied', selected: false },
+                { value: 3, class: 'whole color-3', icon: 'social:sentiment-neutral', selected: false },
+                { value: 2, class: 'whole color-2', icon: 'social:sentiment-dissatisfied', selected: false },
+                { value: 1, class: 'whole color-1', icon: 'social:sentiment-very-dissatisfied', selected: false },
             ];
         }
     }
