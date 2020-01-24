@@ -148,9 +148,9 @@ public class BlockchainTransactionData {
         StringBuilder sb = new StringBuilder("Transaction ");
         if ( transactionIndex.compareTo(BigInteger.ZERO) > 0 && nonce.compareTo(BigInteger.ZERO) > 0) 
             sb.append(
-                "["
+                "[ tx#: "
                     +transactionIndex+
-                    "|"
+                    "| nonce: "
                     +nonce+
                 "]"
             );
