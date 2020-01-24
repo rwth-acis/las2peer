@@ -12,6 +12,7 @@ import i5.las2peer.registry.data.UserProfileData;
 import i5.las2peer.registry.exceptions.EthereumException;
 import i5.las2peer.registry.exceptions.NotFoundException;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
@@ -31,6 +32,7 @@ import org.web3j.protocol.core.methods.response.Transaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.core.methods.response.Web3ClientVersion;
 import org.web3j.protocol.core.methods.response.EthBlock.Block;
+import org.web3j.protocol.exceptions.TransactionException;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tuples.generated.Tuple2;
 import org.web3j.tuples.generated.Tuple4;
@@ -234,8 +236,8 @@ public class ReadOnlyRegistryClient {
 		UserProfileData userProfileData = null;
 		try {
 			userProfileData = this.getProfile(ethAddress);
-			if (userProfileData != null && !userProfileData.getOwner().equals("0x0000000000000000000000000000000000000000")) 
-			{
+			if (userProfileData != null
+					&& !userProfileData.getOwner().equals("0x0000000000000000000000000000000000000000")) {
 				if (userProfileData.getNoTransactionsRcvd().compareTo(BigInteger.ZERO) == 0) {
 					logger.fine("[User Reputation]: valid reputation profile [" + userProfileData.getUserName() + "], no incoming reputation yet." );
 					return 0f;
@@ -253,7 +255,7 @@ public class ReadOnlyRegistryClient {
 				return 0f;
 			}
 		} catch (EthereumException | NotFoundException e) {
-			logger.severe("[User Reputation]: failed to get user reputation for " + ethAddress );
+			logger.severe("[User Reputation]: failed to get user reputation for " + ethAddress);
 			e.printStackTrace();
 			return 0f;
 		}
@@ -299,11 +301,11 @@ public class ReadOnlyRegistryClient {
 	}
 
 	public String getServiceAuthor(String service) {
-		if ( !observer.serviceNameToAuthor.containsKey(service) )
+		if (!observer.serviceNameToAuthor.containsKey(service))
 			return "";
 		return observer.serviceNameToAuthor.get(service);
 	}
-	
+
 	/** @return map of profile owners to their usernames */
 	public ConcurrentMap<String, String> getUserProfiles() {
 		return observer.profiles;
@@ -365,13 +367,15 @@ public class ReadOnlyRegistryClient {
 
 	/***
 	 * Query no. of service announcements which occurred since provide block
-	 * @param largerThanBlockNo block number to start querying at
+	 * 
+	 * @param largerThanBlockNo   block number to start querying at
 	 * @param searchingForService service which is to be found
 	 * @return HashMap< ServiceName, NoOfAnnouncements >
 	 */
-	public HashMap<String, Integer> getNoOfServiceAnnouncementSinceBlockOrderedByHostingNode(BigInteger largerThanBlockNo, String searchingForService)
-	{
-		return observer.getNoOfServiceAnnouncementSinceBlockOrderedByHostingNode(largerThanBlockNo, searchingForService);
+	public HashMap<String, Integer> getNoOfServiceAnnouncementSinceBlockOrderedByHostingNode(
+			BigInteger largerThanBlockNo, String searchingForService) {
+		return observer.getNoOfServiceAnnouncementSinceBlockOrderedByHostingNode(largerThanBlockNo,
+				searchingForService);
 	}
 
 	public BlockchainTransactionData getTransactionInfo(String txHash) throws EthereumException {
@@ -402,10 +406,11 @@ public class ReadOnlyRegistryClient {
 	public List<GenericTransactionData> getTransactionLogByReceiver(String receiver) {
 		return observer.getTransactionLogByReceiver(receiver);
 	}
-	
+
 	/**
 	 * Return the nonce (tx count) for the specified address.
 	 * https://github.com/matthiaszimmermann/web3j_demo / Web3jUtils
+	 * 
 	 * @param address target address
 	 * @return nonce
 	 * @throws InterruptedException
@@ -422,13 +427,10 @@ public class ReadOnlyRegistryClient {
 		// transactions
 		String credentialAddress = credentials.getAddress();
 		BigInteger blockchainNonce = ethGetTransactionCount.getTransactionCount();
-		
+
 		BigInteger staticNonce = StaticNonce.Manager().getStaticNonce(credentialAddress);
+
 		int compare = staticNonce.compareTo(blockchainNonce);
-		
-		logger.info("[RORC Nonce] bchain nonce: " + blockchainNonce);
-		logger.info("[RORC Nonce] static nonce: " + staticNonce);
-		logger.info("[RORC Nonce] compare: " + compare);
 
 		if (compare == -1) {
 			StaticNonce.Manager().incStaticNonce(credentialAddress);
@@ -438,44 +440,42 @@ public class ReadOnlyRegistryClient {
 		}
 		return blockchainNonce;
 	}
-	
+
 	/**
-	 * Queries the coin base = the first account in the chain
-	 * By design, this is the account which the hosting node uses for mining in the background
+	 * Queries the coin base = the first account in the chain By design, this is the
+	 * account which the hosting node uses for mining in the background
 	 * https://github.com/matthiaszimmermann/web3j_demo / Web3jUtils
+	 * 
 	 * @return coinbase address
 	 * @throws InterruptedException
 	 * @throws ExecutionException
 	 */
 	public EthCoinbase getCoinbase() throws InterruptedException, ExecutionException {
-		return web3j
-				.ethCoinbase()
-				.sendAsync()
-				.get();
+		return web3j.ethCoinbase().sendAsync().get();
 	}
-	
+
 	/**
 	 * Waits for the receipt for the transaction specified by the provided tx hash.
-	 * Makes 30 attempts (waiting 1 sec. between attempts) to get the receipt object.
-	 * In the happy case the tx receipt object is returned.
-	 * Otherwise, a runtime exception is thrown. 
-	 * https://github.com/matthiaszimmermann/web3j_demo / Web3jUtils
+	 * Makes 30 attempts (waiting 1 sec. between attempts) to get the receipt
+	 * object. In the happy case the tx receipt object is returned. Otherwise, a
+	 * runtime exception is thrown. https://github.com/matthiaszimmermann/web3j_demo
+	 * / Web3jUtils
+	 * 
 	 * @param transactionHash
-	 * @return 
-	 * @throws ExecutionException 
-	 * @throws InterruptedException 
+	 * @return
+	 * @throws ExecutionException
+	 * @throws InterruptedException
 	 * @throws Exception
 	 */
-	protected TransactionReceipt waitForReceipt(String transactionHash) 
-			throws InterruptedException, ExecutionException 
-	{
+	protected TransactionReceipt waitForReceipt(String transactionHash)
+			throws InterruptedException, ExecutionException {
 
 		int attempts = 60; // const CONFIRMATION_ATTEMPTS
 		int sleep_millis = 1000; // const SLEEP_DURATION
-		
+
 		Optional<TransactionReceipt> receipt = this.getReceipt(transactionHash);
 
-		while(attempts-- > 0 && !receipt.isPresent()) {
+		while (attempts-- > 0 && !receipt.isPresent()) {
 			Thread.sleep(sleep_millis);
 			receipt = getReceipt(transactionHash);
 		}
@@ -488,31 +488,34 @@ public class ReadOnlyRegistryClient {
 	}
 
 	protected void waitForTransactionReceipt(String txHash) throws EthereumException {
-		logger.info("waiting for receipt on [" + txHash + "]... ");
+		logger.info("[TX-Wait] waiting for receipt on [" + txHash + "]... ");
+
 		TransactionReceipt txR;
 		try {
-			txR = waitForReceipt(txHash);
+			txR = contracts.tryGetNonceTransactionManager().waitForTxReceipt(txHash);// waitForReceipt(txHash);
 			if (txR == null) {
-				throw new EthereumException("Transaction sent, no receipt returned. Wait more?");
+				throw new EthereumException("Transaction sent, no receipt returned. Increase wait time?");
+			}
+
+			if (txR.getBlockNumber().compareTo(BigInteger.ZERO) <= 0) {
+				logger.severe(txR.toString());
+				throw new EthereumException("[TX-Wait] trx fail - tx not mined into an active block");
+			}
+			if (!txHash.equals(txR.getTransactionHash())) {
+				logger.severe(txR.toString());
+				throw new EthereumException("[TX-Wait] trx fail - transaction hash mismatch");
 			}
 			if (!txR.isStatusOK()) {
-				logger.warning("trx fail with status " + txR.getStatus());
-				// String gasUsed =
-				// String.valueOf(Convert.fromWei(String.valueOf(txR.getCumulativeGasUsedRaw()),
-				// Convert.Unit.ETHER));
-				logger.warning("gas used " + txR.getCumulativeGasUsed());
-				if (!txHash.equals(txR.getTransactionHash())) {
-					logger.warning("transaction hash mismatch");
-				}
-				logger.warning(txR.toString());
+				logger.severe("[TX-Wait] trx fail - status: " + txR.getStatus());
+
+				logger.severe(txR.toString());
 				throw new EthereumException("could not send transaction, transaction receipt not ok");
 			}
-		} catch (InterruptedException | ExecutionException e) {
+		} catch (IOException | TransactionException e) { // catch (InterruptedException | ExecutionException e) {
 			throw new EthereumException("Wait for receipt interrupted or failed.");
 		}
-		logger.info("receipt for [" + txHash + "] received.");
 
-		// return txR;
+		logger.info("[TX-Wait] receipt for [" + txHash + "] received.");
 	}
 
 	/**

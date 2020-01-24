@@ -475,7 +475,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 				throw new EthereumException("Could not create ethereum transaction");
 			}
 			
-			logger.fine("waiting for receipt on [" + txHash + "]... ");
+			logger.info("[ETH] waiting for receipt on [" + txHash + "]... ");
 			txR = waitForReceipt(txHash);
 		} catch (InterruptedException | ExecutionException e) {
 			throw new EthereumException("Could not send ether to address '" + recipientAddress + "'", e);
@@ -484,7 +484,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		if (txR == null) {
 			throw new EthereumException("Could not create eth sending transaction.");
 		}
-		logger.fine("receipt for [" + txHash + "] received.");
+		logger.info("[ETH] receipt for [" + txHash + "] received.");
 		return txR;
 	}
 

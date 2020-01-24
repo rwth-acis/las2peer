@@ -69,7 +69,7 @@ class Contracts {
 	private static ConcurrentLinkedQueue<TransactionReceipt> transactionReceipts = new ConcurrentLinkedQueue<>();
 
 	private static boolean isPolling = false;
-	private static final long POLLING_FREQUENCY = 15000;
+	private static final long POLLING_FREQUENCY = 1500;
 
 	protected static L2pLogger logger = L2pLogger.getInstance(Contracts.class);
 
@@ -146,8 +146,11 @@ class Contracts {
 			return;
 
 		for (int i = 0; i < DEFAULT_POLLING_ATTEMPTS_PER_TX_HASH && !pendingTransactions.isEmpty(); i++) {
-			if (transactionReceipts.size() != 0)
-			logger.info("[TX-QUEUE] attempt #" + i + ", found " + transactionReceipts.size() + " tx's");
+			if (transactionReceipts.size() > 0 ) 
+				logger.info("[TX-QUEUE] attempt #" + i + ", found " + transactionReceipts.size() + " tx's");
+			else
+				continue;
+			
 			for (TransactionReceipt transactionReceipt : transactionReceipts) {
 				if (transactionReceipt.getBlockHash().isEmpty()) {
 					logger.info("[TX-QUEUE] omitting tx receipt, not mined yet: " + transactionReceipt.getTransactionHash());
@@ -329,6 +332,13 @@ class Contracts {
 							}
 						}, 
 					DEFAULT_POLLING_ATTEMPTS_PER_TX_HASH, POLLING_FREQUENCY)
+					*/
+				long pollingIntervalMillisecs = 1000;
+				int attempts = 90;
+				TransactionReceiptProcessor receiptProcessor = new PollingTransactionReceiptProcessor(
+					web3j, pollingIntervalMillisecs, attempts);
+				FastRawTransactionManager transactionManager = new FastRawTransactionManager(
+					web3j, credentials, receiptProcessor
 				);
 
 				// schedule polling, will be created on first creation of contracts
@@ -343,14 +353,14 @@ class Contracts {
 							e.printStackTrace();
 						}
 					}, 0, POLLING_FREQUENCY, TimeUnit.MILLISECONDS);
-				}*/
+				}
 
-				long pollingIntervalMillisecs = 1000;
+				/*long pollingIntervalMillisecs = 1000;
 				int attempts = 90;
 				TransactionReceiptProcessor receiptProcessor = new PollingTransactionReceiptProcessor(web3j,
 						pollingIntervalMillisecs, attempts);
 				RawTransactionManager transactionManager = new FastRawTransactionManager(web3j, credentials,
-						receiptProcessor);
+						receiptProcessor);*/
 
 				// txHashVerification throws false alarms (not sure why), disable check
 				// TODO: figure out what's going and and reenable

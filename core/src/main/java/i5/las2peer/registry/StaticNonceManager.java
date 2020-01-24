@@ -23,7 +23,15 @@ class StaticNonce
 
     // put if absent used to init all values which have been requested but not sent yet to -1
     public BigInteger getStaticNonce(String address) {
-        return staticNonces.putIfAbsent(address, BigInteger.valueOf(-1));
+        if (!staticNonces.containsKey(address))
+        {
+            staticNonces.put(address, BigInteger.valueOf(-1));
+            return BigInteger.valueOf(-1);
+        }
+        else
+        {
+            return staticNonces.get(address);
+        }
     }
 
     public BigInteger putStaticNonce(String key, BigInteger value)
