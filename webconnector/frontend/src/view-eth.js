@@ -604,7 +604,7 @@ class EthereumView extends PolymerElement {
   }
   requestReputationProfile() { 
     if (this._EthWallet.ethAccBalance < 0.01) {
-      this.error = { title: "Not enough funds", message: "Try requesting eth from the faucet?" };
+      this.error = { title: "Not enough funds", msg: "Try requesting reputation (L2Pcoin) from the faucet? Hosting or publishing services will positively influence Your reputation. <br>\n Interact with users and get them to rate You positively, the rating is factored in the reputation payout." };
       return;
     } else {
       this.$.ajaxReputationProfile.generateRequest(); 
