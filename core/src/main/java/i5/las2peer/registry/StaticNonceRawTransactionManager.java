@@ -2,17 +2,12 @@ package i5.las2peer.registry;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.web3j.crypto.Credentials;
-import org.web3j.crypto.RawTransaction;
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
-import org.web3j.tx.ChainId;
 import org.web3j.tx.FastRawTransactionManager;
-import org.web3j.tx.RawTransactionManager;
 import org.web3j.tx.response.TransactionReceiptProcessor;
 
 import i5.las2peer.logging.L2pLogger;
@@ -27,15 +22,12 @@ class StaticNonceRawTransactionManager extends FastRawTransactionManager {
     
 
     public StaticNonceRawTransactionManager(Web3j web3j, Credentials credentials,
-            TransactionReceiptProcessor transactionReceiptProcessor) {
+            TransactionReceiptProcessor transactionReceiptProcessor, BigInteger nonce) {
         super(web3j, credentials, transactionReceiptProcessor);
         this.transactionReceiptProcessor = transactionReceiptProcessor;
-        credentialAddress = credentials.getAddress();
-        try {
-            StaticNonce.Manager().putStaticNonce(credentialAddress, super.getNonce());
-        } catch (IOException e) {
-            StaticNonce.Manager().putStaticNonce(credentialAddress, BigInteger.valueOf(-1));
-        }
+        this.credentialAddress = credentials.getAddress();
+        logger.info("[TX-NONCE@"+credentialAddress+"] init to " + nonce);
+        StaticNonce.Manager().putStaticNonceIfAbsent(credentialAddress, nonce);
     }
 
     /*@Override
@@ -58,11 +50,11 @@ class StaticNonceRawTransactionManager extends FastRawTransactionManager {
         if (StaticNonce.Manager().getStaticNonce(credentialAddress) == BigInteger.valueOf(-1l)) {
             BigInteger parentNonce = super.getNonce();
             logger.info(
-                    "[TX-NONCE] first transaction: set nonce to " + parentNonce);
+                    "[TX-NONCE@"+credentialAddress+"] first transaction: set nonce to " + parentNonce);
             setNonce(parentNonce);
         } else {
             StaticNonce.Manager().incStaticNonce(credentialAddress);
-            logger.info("[TX-NONCE] consecutive transactions: set nonce to "
+            logger.info("[TX-NONCE@"+credentialAddress+"] consecutive transactions: set nonce to "
                     + StaticNonce.Manager().getStaticNonce(credentialAddress));
         }
         return StaticNonce.Manager().getStaticNonce(credentialAddress);
@@ -70,13 +62,13 @@ class StaticNonceRawTransactionManager extends FastRawTransactionManager {
 
     @Override
     public BigInteger getCurrentNonce() {
-        return nonce;
+        return StaticNonce.Manager().getStaticNonce(credentialAddress);
     }
 
     @Override
     public synchronized void resetNonce() throws IOException {
         BigInteger parentNonce = super.getNonce();
-        logger.info("[TX-NONCE] resetting nonce (=" + parentNonce + ")");
+        logger.info("[TX-NONCE@"+credentialAddress+"] resetting nonce (=" + parentNonce + ")");
         setNonce(parentNonce);
     }
 
@@ -84,7 +76,7 @@ class StaticNonceRawTransactionManager extends FastRawTransactionManager {
     public synchronized void setNonce(BigInteger value) {
         nonce = value;
         StaticNonce.Manager().putStaticNonce(credentialAddress, nonce);
-        logger.info("[TX-NONCE] set nonce to:" + value);
+        logger.info("[TX-NONCE@"+credentialAddress+"] set nonce to:" + value);
     }
 
     public TransactionReceipt waitForTxReceipt(String txHash) throws IOException, TransactionException

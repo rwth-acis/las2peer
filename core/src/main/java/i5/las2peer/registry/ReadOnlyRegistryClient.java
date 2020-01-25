@@ -95,10 +95,21 @@ public class ReadOnlyRegistryClient {
 		long _gasLimit = registryConfiguration.getGasLimit();
 		this.gasLimit = BigInteger.valueOf(_gasLimit);
 
-		logger.fine("creating smart contract wrapper with credentials:" + credentials.getAddress());
+		String credentialsAddress = credentials.getAddress();
+		BigInteger nonce = BigInteger.ZERO;
+		if ( credentialsAddress.length() > 0 )
+		{
+			try {
+				nonce = this.getNonce(credentialsAddress);
+			} catch (InterruptedException | ExecutionException e) {
+				nonce = BigInteger.ZERO;
+			}
+		}
+
+		logger.fine("creating smart contract wrapper with credentials:" + credentialsAddress);
 		contracts = new Contracts.ContractsBuilder(contractsConfig).setGasOptions(_gasPrice, _gasLimit)
 				.setCredentials(credentials) // may be null, that's okay here
-				.build();
+				.build(nonce);
 
 		this.credentials = credentials;
 	}
@@ -425,19 +436,24 @@ public class ReadOnlyRegistryClient {
 		// transactions
 		// and the contract calls (e.g. registration, reputation) are done via managed
 		// transactions
-		String credentialAddress = credentials.getAddress();
 		BigInteger blockchainNonce = ethGetTransactionCount.getTransactionCount();
+		String credentialAddress = "";
+		BigInteger staticNonce = BigInteger.valueOf(-1);
+		if ( credentials != null )
+		{
+			credentialAddress = credentials.getAddress();
+			staticNonce = StaticNonce.Manager().getStaticNonce(credentialAddress);
+			int compare = staticNonce.compareTo(blockchainNonce);
 
-		BigInteger staticNonce = StaticNonce.Manager().getStaticNonce(credentialAddress);
-
-		int compare = staticNonce.compareTo(blockchainNonce);
-
-		if (compare == -1) {
-			StaticNonce.Manager().incStaticNonce(credentialAddress);
-		} else if (compare == 1) {
-			StaticNonce.Manager().incStaticNonce(credentialAddress);
-			return staticNonce.add(BigInteger.ONE);
+			if (compare == -1) {
+				StaticNonce.Manager().putStaticNonce(credentialAddress, blockchainNonce.add(BigInteger.ONE));
+			} 
+			else {
+				StaticNonce.Manager().incStaticNonce(credentialAddress);
+				return staticNonce.add(BigInteger.ONE);
+			}
 		}
+
 		return blockchainNonce;
 	}
 

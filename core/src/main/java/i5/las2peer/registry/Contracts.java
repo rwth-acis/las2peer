@@ -281,14 +281,26 @@ class Contracts {
 		 * baked into the wrapper: They cannot be changed (or removed).
 		 * @return instance of contracts wrapper, ready for use
 		 */
-		public Contracts build() {
+		public Contracts build()
+		{
+			return build(BigInteger.ZERO);
+		}
+
+		/**
+		 * Constructs the Ethereum smart contract wrapper instances
+		 * for the given configuration. Notably, the credentials are
+		 * baked into the wrapper: They cannot be changed (or removed).
+		 * @param nonce value to initialize transaction manager nonce with
+		 * @return instance of contracts wrapper, ready for use
+		 */
+		public Contracts build(BigInteger nonce) {
 			if (gasProvider == null) {
 				gasProvider = new DefaultGasProvider();
 			}
 
 			Web3j web3j = Web3j.build((config.endpoint == null) ? new HttpService() : new HttpService(config.endpoint));
 
-			TransactionManager transactionManager = constructTxManager(web3j, credentials);
+			TransactionManager transactionManager = constructTxManager(web3j, credentials, nonce);
 			CommunityTagIndex communityTagIndex = CommunityTagIndex.load(config.communityTagIndexAddress, web3j, transactionManager, gasProvider);
 			UserRegistry userRegistry = UserRegistry.load(config.userRegistryAddress, web3j, transactionManager, gasProvider);
 			ServiceRegistry serviceRegistry = ServiceRegistry.load(config.serviceRegistryAddress, web3j, transactionManager, gasProvider);
@@ -297,7 +309,7 @@ class Contracts {
 			return new Contracts(web3j, communityTagIndex, userRegistry, serviceRegistry, reputationRegistry, transactionManager);
 		}
 
-		private TransactionManager constructTxManager(Web3j web3j, Credentials credentials) {
+		private TransactionManager constructTxManager(Web3j web3j, Credentials credentials, BigInteger nonce) {
 			if (credentials == null) {
 				return new ReadonlyTransactionManager(web3j, DEFAULT_FROM_ADDRESS);
 			} else {
@@ -338,7 +350,7 @@ class Contracts {
 				TransactionReceiptProcessor receiptProcessor = new PollingTransactionReceiptProcessor(
 					web3j, pollingIntervalMillisecs, attempts);
 				FastRawTransactionManager transactionManager = new StaticNonceRawTransactionManager(
-					web3j, credentials, receiptProcessor
+					web3j, credentials, receiptProcessor, nonce
 				);
 
 				// schedule polling, will be created on first creation of contracts
