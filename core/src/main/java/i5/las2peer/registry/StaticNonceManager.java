@@ -34,17 +34,17 @@ class StaticNonce
         }
     }
 
-    public BigInteger putStaticNonce(String key, BigInteger value)
+    public synchronized BigInteger putStaticNonce(String key, BigInteger value)
     {
         return staticNonces.put(key, value);
     }
 
-    public BigInteger putStaticNonceIfAbsent(String key, BigInteger value) 
+    public synchronized BigInteger putStaticNonceIfAbsent(String key, BigInteger value) 
     {
         return staticNonces.putIfAbsent(key, value);
     }
 
-    public BigInteger incStaticNonce(String key)
+    public synchronized BigInteger incStaticNonce(String key)
     {
         BigInteger currVal = staticNonces.get(key);
         BigInteger incVal  = currVal.add(BigInteger.ONE);

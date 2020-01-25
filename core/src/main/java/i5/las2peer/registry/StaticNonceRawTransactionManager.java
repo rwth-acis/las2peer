@@ -55,30 +55,32 @@ class StaticNonceRawTransactionManager extends FastRawTransactionManager {
     */
     @Override
     protected synchronized BigInteger getNonce() throws IOException {
-        int staticNonce = StaticNonce.Manager().getStaticNonce(credentialAddress).intValue();
-        if (staticNonce == -1) {
+        if (StaticNonce.Manager().getStaticNonce(credentialAddress) == BigInteger.valueOf(-1l)) {
             BigInteger parentNonce = super.getNonce();
             logger.info(
-                    "[TX-NONCE] first transaction: set nonce to no. of pending transactions (=" + parentNonce + ")");
+                    "[TX-NONCE] first transaction: set nonce to " + parentNonce);
             setNonce(parentNonce);
         } else {
-            logger.info("[TX-NONCE] consecutive transactions: set nonce to no. of pending transactions (="
-                    + StaticNonce.Manager().getStaticNonce(credentialAddress) + " + 1)");
             StaticNonce.Manager().incStaticNonce(credentialAddress);
+            logger.info("[TX-NONCE] consecutive transactions: set nonce to "
+                    + StaticNonce.Manager().getStaticNonce(credentialAddress));
         }
         return StaticNonce.Manager().getStaticNonce(credentialAddress);
     }
 
+    @Override
     public BigInteger getCurrentNonce() {
         return nonce;
     }
 
+    @Override
     public synchronized void resetNonce() throws IOException {
         BigInteger parentNonce = super.getNonce();
         logger.info("[TX-NONCE] resetting nonce (=" + parentNonce + ")");
         setNonce(parentNonce);
     }
 
+    @Override
     public synchronized void setNonce(BigInteger value) {
         nonce = value;
         StaticNonce.Manager().putStaticNonce(credentialAddress, nonce);
