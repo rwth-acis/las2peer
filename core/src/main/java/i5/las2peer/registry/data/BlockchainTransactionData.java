@@ -146,19 +146,17 @@ public class BlockchainTransactionData {
     public String toString() 
     {
         StringBuilder sb = new StringBuilder("Transaction ");
-        if ( transactionIndex.compareTo(BigInteger.ZERO) > 0 && nonce.compareTo(BigInteger.ZERO) > 0) 
-            sb.append(
-                "[ tx#: "
-                    +transactionIndex+
-                    "| nonce: "
-                    +nonce+
-                "]"
-            );
+        sb.append("[");
+        if ( transactionIndex.compareTo(BigInteger.ZERO) > 0 )
+            sb.append(" #: "+transactionIndex);
+        if ( nonce.compareTo(BigInteger.ZERO) > 0) 
+            sb.append(" nonce: "+nonce);
         if ( blockNumber.compareTo(BigInteger.ZERO) > 0 )
-            sb.append(" @ block #"+blockNumber+": \n");
+            sb.append(" @ block #"+blockNumber+"");
+        sb.append("]: \n");
         
-        if ( from != null ) sb.append("> FROM: " + from + ", \n" );
-        if ( to != null ) sb.append("> TO: " + to + ", \n" );
+        if ( from != null && from.length() > 0 ) sb.append("> FROM: " + from + ", \n" );
+        if ( to != null && to.length() > 0 ) sb.append("> TO: " + to + ", \n" );
         if ( value.compareTo(BigInteger.ZERO) > 0 ) sb.append("> VALUE: " + value + ", \n" );
         if ( gas.compareTo(BigInteger.ZERO) > 0 ) sb.append("> GAS: " + gas + ", \n" );
         if ( gasPrice.compareTo(BigInteger.ZERO) > 0 ) sb.append("> GAS PRICE: " + gasPrice + ", \n" );
