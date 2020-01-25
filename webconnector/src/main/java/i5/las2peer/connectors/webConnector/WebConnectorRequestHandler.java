@@ -191,7 +191,7 @@ public class WebConnectorRequestHandler {
 			serviceName = response.getServiceName();
 			serviceAliasLength = response.getNumMatchedParts();
 		} catch (AliasNotFoundException e1) {
-			throw new NotFoundException("Could not resolve " + requestPath + " to a service name.", e1);
+			throw new NotFoundException("Could not resolve " + requestPath + " to a service name.");
 		}
 		// get service version
 		ServiceVersion serviceVersion;
