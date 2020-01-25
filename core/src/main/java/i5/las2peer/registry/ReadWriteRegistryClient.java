@@ -1,5 +1,6 @@
 package i5.las2peer.registry;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -8,15 +9,14 @@ import java.util.concurrent.ExecutionException;
 
 import org.web3j.abi.datatypes.Function;
 import org.web3j.crypto.Credentials;
-import org.web3j.crypto.RawTransaction;
-import org.web3j.crypto.TransactionEncoder;
 import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.protocol.exceptions.TransactionException;
 import org.web3j.tx.Transfer;
 import org.web3j.utils.Convert;
-import org.web3j.utils.Numeric;
+import org.web3j.utils.Convert.Unit;
 
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.registry.contracts.ServiceRegistry;
@@ -386,27 +386,20 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		logger.info("[ETH] > gasLimit: " + gasLimit);
 		logger.info("[ETH] > recipientAddress: " + recipientAddress);
 		logger.info("[ETH] > value: " + weiToEther(value).toString());
-		RawTransaction rawTransaction = RawTransaction.createEtherTransaction(nonce, gasPrice, gasLimit,
-				recipientAddress, value);
-		// Sign the transaction
-		byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, credentials);
-
-		// Convert it to Hexadecimal String to be sent to the node
-		String hexValue = Numeric.toHexString(signedMessage);
-
-		// Send transaction
-		EthSendTransaction ethSendTransaction;
+		
+		TransactionReceipt receipt = null;
 		try {
-			ethSendTransaction = web3j.ethSendRawTransaction(hexValue).sendAsync().get();
-			if (ethSendTransaction.hasError()) {
-				Response.Error error = ethSendTransaction.getError();
-				throw new EthereumException("Eth Transaction Error [" + error.getCode() + "]: " + error.getMessage());
-			}
-		} catch (InterruptedException | ExecutionException e) {
-			throw new EthereumException("couldn't send raw transaction", e);
+			receipt = Transfer.sendFunds(this.web3j, credentials, recipientAddress, weiToEther(value), Unit.ETHER)
+					.sendAsync().get();
+		} catch (InterruptedException | ExecutionException | IOException | TransactionException e) {
+			throw new EthereumException("couldn't send ether", e);
 		}
 
-		return ethSendTransaction.getTransactionHash();
+		if (receipt == null || !receipt.isStatusOK()) {
+			throw new EthereumException("TX status field is not OK. TX failed.");
+		}
+
+		return receipt.getTransactionHash();
 	}
 
 	// this is (so far) only for debugging / testing / etc.
