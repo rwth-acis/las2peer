@@ -38,7 +38,7 @@ class StaticNonceRawTransactionManager extends FastRawTransactionManager {
         }
     }
 
-    @Override
+    /*@Override
     public EthSendTransaction signAndSend(RawTransaction rawTransaction) throws IOException {
         EthSendTransaction signedTX = super.signAndSend(rawTransaction);
 
@@ -52,7 +52,7 @@ class StaticNonceRawTransactionManager extends FastRawTransactionManager {
 
         return signedTX;
     }
-
+    */
     @Override
     protected synchronized BigInteger getNonce() throws IOException {
         int staticNonce = StaticNonce.Manager().getStaticNonce(credentialAddress).intValue();

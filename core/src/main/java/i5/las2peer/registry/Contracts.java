@@ -337,7 +337,7 @@ class Contracts {
 				int attempts = 90;
 				TransactionReceiptProcessor receiptProcessor = new PollingTransactionReceiptProcessor(
 					web3j, pollingIntervalMillisecs, attempts);
-				FastRawTransactionManager transactionManager = new FastRawTransactionManager(
+				FastRawTransactionManager transactionManager = new StaticNonceRawTransactionManager(
 					web3j, credentials, receiptProcessor
 				);
 
