@@ -14,6 +14,7 @@ import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
+import org.web3j.tx.FastRawTransactionManager;
 import org.web3j.tx.Transfer;
 import org.web3j.utils.Convert;
 import org.web3j.utils.Convert.Unit;
@@ -147,7 +148,9 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 				+ weiAmount.toString());
 		logger.info("[TX] transaction message: " + message + "");
 
-		String etherSendTxHash = sendEtherDebug(senderAgent.getEthereumAddress(), receivingAgent.getEthereumAddress(), weiAmount);
+		String etherSendTxHash = sendEtherManaged(
+				senderAgent.getEthereumAddress(), receivingAgent.getEthereumAddress(), 
+				weiAmount);
 		//sendEther(receivingAgent.getEthereumAddress(), Convert.toWei(weiAmount.toString(), Convert.Unit.ETHER));
 		// sendEther(senderAgent.getEthereumAddress(), receivingAgent.getEthereumAddress(), weiAmount).getTransactionHash();
 		//waitForTransactionReceipt(etherSendTxHash);
@@ -369,7 +372,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		}
 	}
 
-	public String sendEtherDebug(String senderAddress, String recipientAddress, BigInteger value)
+	public String sendEtherManaged(String senderAddress, String recipientAddress, BigInteger value)
 			throws EthereumException {
 		BigInteger nonce;
 		try {
@@ -380,15 +383,12 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		BigInteger gasPrice = GAS_PRICE;
 		BigInteger gasLimit = GAS_LIMIT_ETHER_TX;
 		logger.info("[ETH] Preparing raw transaction between accounts...");
-		logger.info("[ETH] > senderAddress: " + senderAddress);
-		logger.info("[ETH] > nonce: " + nonce);
-		logger.info("[ETH] > gasPrice: " + gasPrice);
-		logger.info("[ETH] > gasLimit: " + gasLimit);
-		logger.info("[ETH] > recipientAddress: " + recipientAddress);
-		logger.info("[ETH] > value: " + weiToEther(value).toString());
+
+		updateTxManNonce(senderAddress, nonce);
 		
 		TransactionReceipt receipt = null;
 		try {
+			// through managed transaction with provided credentials
 			receipt = Transfer.sendFunds(this.web3j, credentials, recipientAddress, weiToEther(value), Unit.ETHER)
 					.sendAsync().get();
 		} catch (InterruptedException | ExecutionException | IOException | TransactionException e) {
@@ -399,22 +399,43 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 			throw new EthereumException("TX status field is not OK. TX failed.");
 		}
 
+		logger.info("[ETH] tx sent." );
+		logger.info("[ETH] > senderAddress: " + senderAddress);
+		logger.info("[ETH] > nonce: " + nonce);
+		logger.info("[ETH] > gasPrice: " + gasPrice);
+		logger.info("[ETH] > gasLimit: " + gasLimit);
+		logger.info("[ETH] > recipientAddress: " + recipientAddress);
+		logger.info("[ETH] > value: " + weiToEther(value).toString());
+
 		return receipt.getTransactionHash();
 	}
 
-	// this is (so far) only for debugging / testing / etc.
-	public String sendEther(String recipientAddress, BigDecimal valueInWei) throws EthereumException {
-		TransactionReceipt receipt;
-		try {
-			receipt = Transfer.sendFunds(web3j, credentials, recipientAddress, valueInWei, Convert.Unit.WEI).sendAsync()
-					.get();
-			if (!receipt.isStatusOK()) {
-				throw new EthereumException("TX status field is not OK. TX failed.");
+	/**
+	 * Overrides nonce of transactionManager with local nonce.
+	 * @param nonce
+	 */
+	private void updateTxManNonce(String senderAddress, BigInteger nonce) {
+		if ( this.contracts.transactionManager instanceof FastRawTransactionManager )
+		{
+			// raw tx - sending directly, fast raw - nonce management
+			FastRawTransactionManager txMan = (FastRawTransactionManager) this.contracts.transactionManager;
+			// local client has larger nonce than txman?
+			BigInteger txManNonce = txMan.getCurrentNonce();
+			switch (txManNonce.compareTo(nonce)) {
+				case -1: // txMan nonce is behind local
+					logger.info("[ETH] FastRaw TX (nonce: "+txManNonce+"): setting txMan to " + nonce);
+					txMan.setNonce(nonce);
+					break;
+				case 1: // txMan nonce is ahead of local
+					logger.info("[ETH] FastRaw TX (nonce: "+txManNonce+"): setting local to " + nonce);
+					StaticNonce.Manager().putStaticNonceIfAbsent(senderAddress, txManNonce);
+					break;
+				case 0: // they are in sync - should be fine?
+				default:
+					logger.info("[ETH] FastRaw TX (nonce: "+txManNonce+") no action necessary?");
+					break;
 			}
-		} catch (Exception e) {
-			throw new EthereumException("Could not send ether to address '" + recipientAddress + "'", e);
 		}
-		return receipt.getTransactionHash();
 	}
 
 	/**
@@ -444,7 +465,9 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 			// this is a contract method call -> gas limit higher than simple fund transfer
 			BigInteger gasPrice = GAS_PRICE;
 			BigInteger gasLimit = GAS_LIMIT_ETHER_TX;
-			Transaction transaction = Transaction.createEtherTransaction(senderAddress, nonce, gasPrice, gasLimit,
+			Transaction transaction = Transaction.createEtherTransaction(
+					senderAddress, nonce, 
+					gasPrice, gasLimit,
 					recipientAddress, valueInWei);
 
 			logger.info("[ETH] Preparing transaction between accounts...");
@@ -455,6 +478,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 			logger.info("[ETH] > recipientAddress: " + recipientAddress);
 			logger.info("[ETH] > valueInWei: " + valueInWei);
 
+			// directly through web3j since coinbase is one of 10 unlocked accounts.
 			EthSendTransaction ethSendTransaction = web3j.ethSendTransaction(transaction)
 					.sendAsync().get();
 

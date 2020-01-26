@@ -109,7 +109,7 @@ public class ReadOnlyRegistryClient {
 		logger.fine("creating smart contract wrapper with credentials:" + credentialsAddress);
 		contracts = new Contracts.ContractsBuilder(contractsConfig).setGasOptions(_gasPrice, _gasLimit)
 				.setCredentials(credentials) // may be null, that's okay here
-				.build(nonce);
+				.build();
 
 		this.credentials = credentials;
 	}
