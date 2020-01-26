@@ -37,6 +37,7 @@ import org.web3j.protocol.http.HttpService;
 import org.web3j.tuples.generated.Tuple2;
 import org.web3j.tuples.generated.Tuple4;
 import org.web3j.tuples.generated.Tuple6;
+import org.web3j.tx.FastRawTransactionManager;
 import org.web3j.utils.Convert;
 
 import java.util.*;
@@ -67,6 +68,11 @@ public class ReadOnlyRegistryClient {
 	// ReadWriteRegistryClient (which is only used for debugging)
 	Credentials credentials;
 
+	// raw tx - sending directly, fast raw - nonce management
+	boolean updateNonceTxMan = false;
+	FastRawTransactionManager txMan;
+			
+
 	protected final L2pLogger logger = L2pLogger.getInstance(ReadWriteRegistryClient.class);
 
 	/**
@@ -96,15 +102,6 @@ public class ReadOnlyRegistryClient {
 		this.gasLimit = BigInteger.valueOf(_gasLimit);
 
 		String credentialsAddress = credentials.getAddress();
-		BigInteger nonce = BigInteger.ZERO;
-		if ( credentialsAddress.length() > 0 )
-		{
-			try {
-				nonce = this.getNonce(credentialsAddress);
-			} catch (InterruptedException | ExecutionException e) {
-				nonce = BigInteger.ZERO;
-			}
-		}
 
 		logger.fine("creating smart contract wrapper with credentials:" + credentialsAddress);
 		contracts = new Contracts.ContractsBuilder(contractsConfig).setGasOptions(_gasPrice, _gasLimit)
@@ -112,6 +109,12 @@ public class ReadOnlyRegistryClient {
 				.build();
 
 		this.credentials = credentials;
+
+		if ( this.contracts.transactionManager instanceof FastRawTransactionManager ) 
+		{
+			this.updateNonceTxMan = true;
+			this.txMan = (FastRawTransactionManager) this.contracts.transactionManager;
+		}
 	}
 
 	public BigInteger getGasPrice() {
@@ -428,6 +431,14 @@ public class ReadOnlyRegistryClient {
 	 * @throws ExecutionException
 	 */
 	public BigInteger getNonce(String address) throws InterruptedException, ExecutionException {
+		if ( address.length() == 0 )
+		{
+			if ( credentials != null )
+			{
+				address = credentials.getAddress();
+			}
+		}
+		
 		EthGetTransactionCount ethGetTransactionCount = web3j
 				.ethGetTransactionCount(address, DefaultBlockParameterName.PENDING).sendAsync().get();
 
@@ -437,24 +448,55 @@ public class ReadOnlyRegistryClient {
 		// and the contract calls (e.g. registration, reputation) are done via managed
 		// transactions
 		BigInteger blockchainNonce = ethGetTransactionCount.getTransactionCount();
-		String credentialAddress = "";
-		BigInteger staticNonce = BigInteger.valueOf(-1);
-		if ( credentials != null )
-		{
-			credentialAddress = credentials.getAddress();
-			staticNonce = StaticNonce.Manager().getStaticNonce(credentialAddress);
-			int compare = staticNonce.compareTo(blockchainNonce);
+		
+		BigInteger retVal = BigInteger.ZERO;
+		BigInteger staticNonce = StaticNonce.Manager().getStaticNonce(address);
 
-			if (compare == -1) {
-				StaticNonce.Manager().putStaticNonce(credentialAddress, blockchainNonce.add(BigInteger.ONE));
-			} 
-			else {
-				StaticNonce.Manager().incStaticNonce(credentialAddress);
-				return staticNonce.add(BigInteger.ONE);
-			}
+		switch (staticNonce.compareTo(blockchainNonce)) {
+			default:
+			case 0: // they are in sync
+			case 1: // local nonce is ahead
+				logger.info("[TX Nonce] nonce: "+staticNonce+", incrementing by 1.");
+				retVal = StaticNonce.Manager().incStaticNonce(address);
+				break;
+			case -1: // local nonce is behind
+				logger.info("[TX Nonce] nonce: "+staticNonce+": override to " + blockchainNonce + "+1");
+				retVal = StaticNonce.Manager().putStaticNonce(address, blockchainNonce.add(BigInteger.ONE));
+				break;
 		}
 
-		return blockchainNonce;
+		retVal = blockchainNonce;
+
+		return retVal;
+	}
+
+
+
+	/**
+	 * Overrides nonce of transactionManager with local nonce.
+	 * @param nonce
+	 */
+	protected void updateTxManNonce(String address) {
+		if ( updateNonceTxMan )
+		{
+			// local client has larger nonce than txman?
+			BigInteger txManNonce = txMan.getCurrentNonce();
+			BigInteger staticNonce = StaticNonce.Manager().getStaticNonce(address);
+			switch (txManNonce.compareTo(staticNonce)) {
+				case -1: // txMan nonce is behind local
+					logger.info("[FastRaw TX] (nonce: "+txManNonce+"): setting txMan to " + staticNonce);
+					txMan.setNonce(staticNonce);
+					break;
+				case 1: // txMan nonce is ahead of local
+					logger.info("[FastRaw TX] (nonce: "+txManNonce+"): setting local to " + staticNonce);
+					StaticNonce.Manager().putStaticNonceIfAbsent(address, txManNonce);
+					break;
+				case 0: // they are in sync - should be fine?
+				default:
+					logger.info("[FastRaw TX] (nonce: "+txManNonce+") no action necessary?");
+					break;
+			}
+		}
 	}
 
 	/**

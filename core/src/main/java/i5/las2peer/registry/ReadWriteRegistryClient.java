@@ -383,8 +383,6 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		BigInteger gasPrice = GAS_PRICE;
 		BigInteger gasLimit = GAS_LIMIT_ETHER_TX;
 		logger.info("[ETH] Preparing raw transaction between accounts...");
-
-		updateTxManNonce(senderAddress, nonce);
 		
 		TransactionReceipt receipt = null;
 		try {
@@ -399,7 +397,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 			throw new EthereumException("TX status field is not OK. TX failed.");
 		}
 
-		logger.info("[ETH] tx sent." );
+		logger.info("[ETH] raw tx sent." );
 		logger.info("[ETH] > senderAddress: " + senderAddress);
 		logger.info("[ETH] > nonce: " + nonce);
 		logger.info("[ETH] > gasPrice: " + gasPrice);
@@ -407,35 +405,9 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		logger.info("[ETH] > recipientAddress: " + recipientAddress);
 		logger.info("[ETH] > value: " + weiToEther(value).toString());
 
-		return receipt.getTransactionHash();
-	}
+		updateTxManNonce(senderAddress);
 
-	/**
-	 * Overrides nonce of transactionManager with local nonce.
-	 * @param nonce
-	 */
-	private void updateTxManNonce(String senderAddress, BigInteger nonce) {
-		if ( this.contracts.transactionManager instanceof FastRawTransactionManager )
-		{
-			// raw tx - sending directly, fast raw - nonce management
-			FastRawTransactionManager txMan = (FastRawTransactionManager) this.contracts.transactionManager;
-			// local client has larger nonce than txman?
-			BigInteger txManNonce = txMan.getCurrentNonce();
-			switch (txManNonce.compareTo(nonce)) {
-				case -1: // txMan nonce is behind local
-					logger.info("[ETH] FastRaw TX (nonce: "+txManNonce+"): setting txMan to " + nonce);
-					txMan.setNonce(nonce);
-					break;
-				case 1: // txMan nonce is ahead of local
-					logger.info("[ETH] FastRaw TX (nonce: "+txManNonce+"): setting local to " + nonce);
-					StaticNonce.Manager().putStaticNonceIfAbsent(senderAddress, txManNonce);
-					break;
-				case 0: // they are in sync - should be fine?
-				default:
-					logger.info("[ETH] FastRaw TX (nonce: "+txManNonce+") no action necessary?");
-					break;
-			}
-		}
+		return receipt.getTransactionHash();
 	}
 
 	/**
@@ -460,8 +432,9 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 			
 		TransactionReceipt txR;
 		String txHash;
+		BigInteger nonce = BigInteger.valueOf(-1);
 		try {
-			BigInteger nonce = this.getNonce(senderAddress);
+			nonce = this.getNonce(senderAddress);
 			// this is a contract method call -> gas limit higher than simple fund transfer
 			BigInteger gasPrice = GAS_PRICE;
 			BigInteger gasLimit = GAS_LIMIT_ETHER_TX;
@@ -470,13 +443,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 					gasPrice, gasLimit,
 					recipientAddress, valueInWei);
 
-			logger.info("[ETH] Preparing transaction between accounts...");
-			logger.info("[ETH] > senderAddress: " + senderAddress);
-			logger.info("[ETH] > nonce: " + nonce);
-			logger.info("[ETH] > gasPrice: " + gasPrice);
-			logger.info("[ETH] > gasLimit: " + gasLimit);
-			logger.info("[ETH] > recipientAddress: " + recipientAddress);
-			logger.info("[ETH] > valueInWei: " + valueInWei);
+			logger.info("[ETH] Preparing web3j transaction between accounts...");
 
 			// directly through web3j since coinbase is one of 10 unlocked accounts.
 			EthSendTransaction ethSendTransaction = web3j.ethSendTransaction(transaction)
@@ -492,8 +459,11 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 				throw new EthereumException("Could not create ethereum transaction");
 			}
 			
+			updateTxManNonce(senderAddress);
+			
 			logger.info("[ETH] waiting for receipt on [" + txHash + "]... ");
 			txR = waitForReceipt(txHash);
+
 		} catch (InterruptedException | ExecutionException e) {
 			throw new EthereumException("Could not send ether to address '" + recipientAddress + "'", e);
 		}
@@ -502,6 +472,15 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 			throw new EthereumException("Could not create eth sending transaction.");
 		}
 		logger.info("[ETH] receipt for [" + txHash + "] received.");
+
+		logger.info("[ETH] web3j transaction sent. ");
+		logger.info("[ETH] > senderAddress: " + senderAddress);
+		logger.info("[ETH] > nonce: " + nonce);
+		logger.info("[ETH] > gasPrice: " + gasPrice);
+		logger.info("[ETH] > gasLimit: " + gasLimit);
+		logger.info("[ETH] > recipientAddress: " + recipientAddress);
+		logger.info("[ETH] > valueInWei: " + valueInWei);
+
 		return txR;
 	}
 
