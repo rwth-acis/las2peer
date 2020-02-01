@@ -138,7 +138,7 @@ public class AuthenticationManager {
 	 */
 	private PassphraseAgentImpl authenticateOIDC(String token, String oidcProviderHeader, Credentials credentials) throws AgentException {
 		try {
-			logger.info("OIDC sub known. Authenticating");
+			logger.info("OIDC sub found. Authenticating...");
 			AgentImpl existingAgent = authenticateCredentials(credentials);
 			if (existingAgent instanceof UserAgentImpl) {
 				return (UserAgentImpl) existingAgent;
@@ -148,7 +148,7 @@ public class AuthenticationManager {
 			}
 		} catch (AgentNotFoundException e) {
 			// expected - auto-register
-			logger.info("OIDC sub uknown. Auto-register");
+			logger.info("OIDC sub uknown. Auto-register...");
 			return createNewOidcAgent(token, oidcProviderHeader, credentials);
 		}
 	}
