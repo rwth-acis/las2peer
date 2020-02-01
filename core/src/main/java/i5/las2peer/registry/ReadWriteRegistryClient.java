@@ -384,12 +384,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 
 	public String sendEtherManaged(String senderAddress, String recipientAddress, BigInteger value)
 			throws EthereumException {
-		BigInteger nonce;
-		try {
-			nonce = this.getNonce(senderAddress);
-		} catch (InterruptedException | ExecutionException e) {
-			throw new EthereumException("couldn't get nonce for sender", e);
-		}
+		BigInteger nonce = this.getNonce(senderAddress);
 		BigInteger gasPrice = GAS_PRICE;
 		BigInteger gasLimit = GAS_LIMIT_ETHER_TX;
 		logger.info("[ETH] Preparing raw transaction between accounts...");
