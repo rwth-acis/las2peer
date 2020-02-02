@@ -64,7 +64,6 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 	 */
 	public void createTag(String tagName, String tagDescription) throws EthereumException {
 		try {
-			updateTxManNonce(this.credentials.getAddress());
 			contracts.communityTagIndex.create(Util.padAndConvertString(tagName, 32), tagDescription).sendAsync().get();
 		} catch (IllegalArgumentException e) {
 			throw new IllegalArgumentException("Tag name invalid (too long?)", e);
@@ -111,11 +110,23 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		String consentee = agent.getEthereumAddress();
 		byte[] signature = SignatureUtils.signFunctionCall(function, agent.getEthereumCredentials());
 
+		if ( txMan != null )
+		{
+			BigInteger txManNonce = txMan.getCurrentNonce();
+			logger.info("[TX Nonce] before: " + txManNonce);
+		}
+
+
 		try {
-			updateTxManNonce(this.credentials.getAddress());
 			contracts.userRegistry.delegatedRegister(name, agentId, publicKey, consentee, signature).sendAsync().get();
 		} catch (Exception e) {
 			throw new EthereumException("Could not register user", e);
+		}
+
+		if ( txMan != null )
+		{
+			BigInteger txManNonce = txMan.getCurrentNonce();
+			logger.info("[TX Nonce] after: " + txManNonce);
 		}
 	}
 
@@ -128,7 +139,6 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		logger.info("[Reputation] registering profile: " + agent.getLoginName());
 		String txHash;
 		try {
-			updateTxManNonce(this.credentials.getAddress());
 			TransactionReceipt txR = contracts.reputationRegistry.createProfile(agentAddress, profileName).sendAsync().get();
 			if (!txR.isStatusOK()) {
 				logger.warning("trx fail with status " + txR.getStatus());
@@ -163,7 +173,6 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		BigInteger timestamp = BigInteger.valueOf(java.lang.System.currentTimeMillis());
 		String txHash;
 		try {
-			updateTxManNonce(this.credentials.getAddress());;
 			TransactionReceipt txR = contracts.reputationRegistry
 					.addGenericTransaction(receivingAgent.getEthereumAddress(), weiAmount, timestamp, etherSendTxHash, message, "GENERIC")
 					.sendAsync().get();
@@ -198,7 +207,6 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 
 		String txHash;
 		try {
-			updateTxManNonce(this.credentials.getAddress());
 			TransactionReceipt txR = contracts.reputationRegistry
 					.addTransaction(receivingAgent.getEthereumAddress(), BigInteger.valueOf(rating), timestamp).sendAsync().get();
 			if (!txR.isStatusOK()) {
@@ -248,7 +256,6 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		byte[] signature = SignatureUtils.signFunctionCall(function, agent.getEthereumCredentials());
 
 		try {
-			updateTxManNonce(this.credentials.getAddress());
 			contracts.serviceRegistry.delegatedRegister(serviceName, authorName, consentee, signature).sendAsync()
 					.get();
 		} catch (Exception e) {
@@ -319,7 +326,6 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		byte[] signature = SignatureUtils.signFunctionCall(function, author.getEthereumCredentials());
 
 		try {
-			updateTxManNonce(this.credentials.getAddress());
 			contracts.serviceRegistry.delegatedRelease(serviceName, authorName,
 					BigInteger.valueOf(versionMajor), BigInteger.valueOf(versionMinor), BigInteger.valueOf(versionPatch),
 					supplementHash, consentee, signature).sendAsync().get();
@@ -344,7 +350,6 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 								   int versionMajor, int versionMinor, int versionPatch,
 								   String nodeId) throws EthereumException {
 		try {
-			updateTxManNonce(this.credentials.getAddress());
 			contracts.serviceRegistry.announceDeployment(servicePackageName, serviceClassName,
 				BigInteger.valueOf(versionMajor), BigInteger.valueOf(versionMinor), BigInteger.valueOf(versionPatch),
 				nodeId).sendAsync().get();
@@ -372,7 +377,6 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 									  int versionMajor, int versionMinor, int versionPatch,
 									  String nodeId) throws EthereumException {
 		try {
-			updateTxManNonce(this.credentials.getAddress());
 			contracts.serviceRegistry.announceDeploymentEnd(servicePackageName, serviceClassName,
 				BigInteger.valueOf(versionMajor), BigInteger.valueOf(versionMinor), BigInteger.valueOf(versionPatch),
 				nodeId).sendAsync().get();
@@ -389,12 +393,17 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		BigInteger gasLimit = GAS_LIMIT_ETHER_TX;
 		logger.info("[ETH] Preparing raw transaction between accounts...");
 		
+		Transfer transfer = new Transfer(this.web3j, this.contracts.transactionManager);
+
+		
+
+
+
 		TransactionReceipt receipt = null;
 		try {
 			// through managed transaction with provided credentials
-			receipt = Transfer.sendFunds(this.web3j, credentials, recipientAddress, weiToEther(value), Unit.ETHER)
-					.sendAsync().get();
-		} catch (InterruptedException | ExecutionException | IOException | TransactionException e) {
+			receipt = transfer.sendFunds(recipientAddress, weiToEther(value), Unit.ETHER).sendAsync().get();
+		} catch (InterruptedException | ExecutionException e) {
 			throw new EthereumException("couldn't send ether", e);
 		}
 
@@ -410,7 +419,6 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		logger.info("[ETH] > recipientAddress: " + recipientAddress);
 		logger.info("[ETH] > value: " + weiToEther(value).toString());
 
-		updateTxManNonce(senderAddress);
 
 		return receipt.getTransactionHash();
 	}
@@ -432,6 +440,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 	 * @return
 	 * @throws EthereumException
 	 */
+	@Deprecated
 	public TransactionReceipt sendEther(String senderAddress, String recipientAddress, BigInteger valueInWei)
 			throws EthereumException {
 			
@@ -464,7 +473,6 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 				throw new EthereumException("Could not create ethereum transaction");
 			}
 
-			updateTxManNonce(senderAddress);
 			
 			logger.info("[ETH] waiting for receipt on [" + txHash + "]... ");
 			txR = waitForReceipt(txHash);
@@ -489,7 +497,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		return txR;
 	}
 
-	public TransactionReceipt sendEtherFromCoinbase(String recipientAddress, BigInteger valueInWei)
+	public String sendEtherFromCoinbase(String recipientAddress, BigInteger valueInWei)
 			throws EthereumException {
 		String coinbase = "";
 		try {
@@ -502,7 +510,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 			throw new EthereumException("Could not retreive coinbase address");
 		}
 		logger.info("[ETH] Sending Faucet Transaction");
-		return sendEther(coinbase, recipientAddress, valueInWei);
+		return sendEtherManaged(coinbase, recipientAddress, valueInWei);
 	}
 	
 	

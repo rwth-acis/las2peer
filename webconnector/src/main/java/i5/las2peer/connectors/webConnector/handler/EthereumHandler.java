@@ -461,27 +461,20 @@ public class EthereumHandler {
 				.appendField("d", RegistryConfiguration.Faucet_serviceDevelopScoreMultiplier)
 		);
 
-		TransactionReceipt txR = null;
-
+		String txHash;
 		try {
-			txR = registryClient.sendEtherFromCoinbase(ethAddress, faucetAmount);
+			txHash = registryClient.sendEtherFromCoinbase(ethAddress, faucetAmount);
 		} catch (EthereumException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.severe(e.getMessage());
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(
+				"Couldn't transfer funds." + "\n <br /> " + e.getMessage()
+			).build();
 		}
-
-		if (txR == null || !txR.isStatusOK()) {
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Transaction receipt not OK").build();
-		}
-
-		// Web3jUtils.weiToEther(gasUsed.multiply(Web3jConstants.GAS_PRICE))
-		BigInteger gasUsed = txR.getCumulativeGasUsed();
-
-		json.put("ethGasUsed", registryClient.weiToEther(gasUsed.multiply(registryClient.getGasPrice())).toString());
+		json.put("txHash", txHash);
 
 		json.put("code", Status.OK.getStatusCode());
 		json.put("text", Status.OK.getStatusCode() + " - Faucet triggered. Amount transferred");
-
+		
 		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
 	}
 

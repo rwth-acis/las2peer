@@ -103,12 +103,13 @@ public class ReadOnlyRegistryClient {
 
 		String credentialsAddress = credentials.getAddress();
 
-		logger.info("creating smart contract wrapper with credentials:" + credentialsAddress + "\n contract ID:" + this.contracts.transactionManager.hashCode());
 		contracts = new Contracts.ContractsBuilder(contractsConfig).setGasOptions(_gasPrice, _gasLimit)
 				.setCredentials(credentials) // may be null, that's okay here
 				.build();
 
 		this.credentials = credentials;
+
+		logger.info("created smart contract wrapper with credentials:" + credentialsAddress + "\n contract ID:" + this.contracts.transactionManager.hashCode());
 
 		
 
