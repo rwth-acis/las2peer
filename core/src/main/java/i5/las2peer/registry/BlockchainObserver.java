@@ -310,41 +310,45 @@ class BlockchainObserver {
 
 	public List<GenericTransactionData> getTransactionLogBySender(String sender) {
 		List<GenericTransactionData> transactionList = new ArrayList<>();
-		logger.info("[TXLOG] searching for sender: " + sender);
+		logger.fine("[TXLOG] searching for sender: " + sender);
 		Set<SenderReceiverDoubleKey> transactions = genericTransactions.keySet();
 		for (SenderReceiverDoubleKey key : transactions) {
-			logger.info("[TXLOG] analyzing key: " + key.toString());
-			logger.info("[TXLOG] " + key.getSender() + "|" + sender);
+			logger.fine("[TXLOG] analyzing key: " + key.toString());
+			logger.fine("[TXLOG] " + key.getSender() + "|" + sender);
 			if ( key.equalsSender(sender) || key.getSender() == sender )
 			{
 				List<GenericTransactionData> keyTransactionList = genericTransactions.get(key);
-				logger.info("[TXLOG] match found! " + keyTransactionList.size() + " entries");
+				logger.fine("[TXLOG] match found! " + keyTransactionList.size() + " entries");
 				for (GenericTransactionData genericTransactionData : keyTransactionList) {
 					transactionList.add(genericTransactionData);
 				}
 			}
 		}
-		logger.info("[TXLOG] found " + transactionList.size() + " entries for "+ sender);
+		if ( transactionList.size() > 0 ) {
+			logger.info("[TXLOG] found " + transactionList.size() + " entries for "+ sender);
+		}
 		return transactionList;
 	}
 
 	public List<GenericTransactionData> getTransactionLogByReceiver(String receiver) {
 		List<GenericTransactionData> transactionList = new ArrayList<>();
-		logger.info("[TXLOG] searching for receiver: " + receiver);
+		logger.fine("[TXLOG] searching for receiver: " + receiver);
 		Set<SenderReceiverDoubleKey> transactions = genericTransactions.keySet();
 		for (SenderReceiverDoubleKey key : transactions) {
-			logger.info("[TXLOG] analyzing key: " + key.toString());
-			logger.info("[TXLOG] " + key.getReceiver() + "|" + receiver);
+			logger.fine("[TXLOG] analyzing key: " + key.toString());
+			logger.fine("[TXLOG] " + key.getReceiver() + "|" + receiver);
 			if (key.equalsReceiver(receiver) || key.getReceiver() == receiver) 
 			{
 				List<GenericTransactionData> keyTransactionList = genericTransactions.get(key);
-				logger.info("[TXLOG] match found! " + keyTransactionList.size() + " entries");
+				logger.fine("[TXLOG] match found! " + keyTransactionList.size() + " entries");
 				for (GenericTransactionData genericTransactionData : keyTransactionList) {
 					transactionList.add(genericTransactionData);
 				}
 			}
 		}
-		logger.info("[TXLOG] found " + transactionList.size() + " entries for "+ receiver);
+		if ( transactionList.size() > 0 ) {
+			logger.info("[TXLOG] found " + transactionList.size() + " entries for "+ receiver);
+		}
 		return transactionList;
 	}
 
