@@ -325,6 +325,12 @@ public class EthereumHandler {
 						developedServices.add(serviceWithSuccessModel);
 					}
 				}
+				else
+				{
+					logger.info("[ETH Faucet/MobSOS]: authorship check failed, searching for " + agentLogin + ":");
+					logger.info(registryClient.getServiceAuthors().toString());
+					logger.info( ( registryClient.getServiceAuthors().containsKey(agentLogin) ? "YES" : "NO" ) );
+				}
 
 				logger.info("[ETH Faucet/MobSOS]: checking how often service '" + serviceWithSuccessModel + "' has been announced since last faucet request.");
 
@@ -351,6 +357,7 @@ public class EthereumHandler {
 					// check if this service was developed by ethAgent
 					if ( isAuthorOfService )
 					{
+						logger.info("         .!.         ethAgent is developer/author of this service.");
 						authoredServicesToAnnouncementCount.putIfAbsent(serviceWithSuccessModel, 0);
 						authoredServicesToAnnouncementCount.merge(
 							serviceWithSuccessModel, // key

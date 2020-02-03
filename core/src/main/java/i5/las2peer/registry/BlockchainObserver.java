@@ -469,6 +469,9 @@ class BlockchainObserver {
 					if (!txHasAlreadyBeenHandled(service.log.getTransactionHash())) {
 						String serviceName = lookupServiceName(service.nameHash);
 						serviceNameToAuthor.put(serviceName, Util.recoverString(service.author));
+						logger.info("[ChainObserver] observed service registration :\n" +
+									" > "+serviceName+" by "+Util.recoverString(service.author)
+							);
 					}
 				}, e -> logger.severe("Error observing service registration event: " + e.toString()));
 	}
