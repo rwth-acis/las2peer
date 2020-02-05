@@ -724,6 +724,82 @@ public class EthereumHandler {
 	}
 	
 	@POST
+	@Path("/dashboardList")
+	public Response handleDashboardList(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId) {
+		AgentSession session = connector.getSessionById(sessionId);
+		if (session == null) {
+			return Response.status(Status.FORBIDDEN).entity("You have to be logged in to access the dashboard").build();
+		}
+
+		List<EthereumAgent> agents = new ArrayList<EthereumAgent>();
+		ReadWriteRegistryClient client = ethereumNode.getRegistryClient();
+		ConcurrentMap<String, String> userRegistrations = client.getUserRegistrations();
+		ConcurrentMap<String, String> userProfiles = client.getUserProfiles();
+		JSONObject dashboardJson = new JSONObject();
+
+		dashboardJson.put("agentsCount", userRegistrations.size() );
+		dashboardJson.put("profilesCount", userProfiles.size() );
+
+
+		JSONArray agentList = new JSONArray();
+		JSONArray errorList = new JSONArray();
+		for (Map.Entry<String, String> userRegistration : userRegistrations.entrySet()) {
+			JSONObject agentJson = new JSONObject();
+			String username = userRegistration.getKey().toString();
+			agentJson.put("agent-username", username);
+
+			AgentImpl userAgent = null;
+			String agentId = "";
+			try {
+				// query username in pastry
+				userAgent = ethereumNode.getAgentByDetail(null, username, null);
+				agentId = userAgent.getIdentifier();
+				// query chain agent
+				userAgent = ethereumNode.getAgent(agentId);
+			} catch (AgentNotFoundException e) {
+				logger.severe("[Dash] registered agent '"+ username +"' not found in DHT.");
+				errorList.add("[Dash] registered agent '"+ username +"' not found in DHT.");
+				continue;
+			} catch (AgentException e) {
+				logger.severe("[Dash] registered Pastry Agent ('"+ username +":"+agentId+"') not EthAgent?!");
+				errorList.add("[Dash] registered Pastry Agent ('"+ username +":"+agentId+"') not EthAgent?!");
+				continue;
+			}
+			if ( !(userAgent instanceof EthereumAgent) )
+			{
+				logger.severe("[Dash] queried agent not EthAgent?!");
+				errorList.add("[Dash] queried agent not EthAgent?!");
+				continue;
+			}
+			EthereumAgent ethAgent = (EthereumAgent)userAgent;
+			agents.add(ethAgent);
+			
+			String ownerAddress = ethAgent.getEthereumAddress();
+			UserProfileData profile = null;
+			if ( userProfiles.containsKey(ownerAddress) )
+			{
+				try {
+					profile = ethereumNode.getRegistryClient().getProfile(ownerAddress);
+				} catch (EthereumException | NotFoundException e) {
+					logger.severe("[Dash] profile ('"+ username +":"+ownerAddress+"') not on chain?!");
+					errorList.add("[Dash] profile ('"+ username +":"+ownerAddress+"') not on chain?!");
+					continue;
+				}
+			}
+			JSONObject agent = addProfileInformationToJSON(ethAgent, ownerAddress, profile);
+			agentList.add(agent);
+		}
+
+		dashboardJson.put("list-size", agentList.size() );
+		dashboardJson.put("agentList", agentList );
+		dashboardJson.put("errorList", errorList );
+
+		dashboardJson.put("code", Status.OK.getStatusCode());
+		dashboardJson.put("text", Status.OK.getStatusCode() + " - Dashboard loaded");
+		return Response.ok(dashboardJson.toJSONString(), MediaType.APPLICATION_JSON).build();
+	}
+	
+	@POST
 	@Path("/listAgents")
 	public Response handleListAgents(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId) throws MalformedXMLException, IOException {
 		/*
@@ -851,20 +927,28 @@ public class EthereumHandler {
 		agent.put("address", ownerAddress);
 		agent.put("username", ethAgent.getLoginName());
 		//agent.put("email", agent.getEmail());
-		BigInteger cumulativeScore = profile.getCumulativeScore();
-		BigInteger noTransactionsSent = profile.getNoTransactionsSent();
-		BigInteger noTransactionsRcvd = profile.getNoTransactionsRcvd();
-		agent.put("ethProfileOwner", profile.getOwner());
-		agent.put("cumulativeScore", cumulativeScore.toString());
-		agent.put("noOfTransactionsSent", noTransactionsSent.toString());
-		agent.put("noOfTransactionsRcvd", noTransactionsRcvd.toString());
-		if ( noTransactionsRcvd.compareTo(BigInteger.ZERO) == 0 )
+		if ( profile != null )
 		{
-			agent.put("rating", 0);
+			agent.put("agent-has-profile", "true");
+			BigInteger cumulativeScore = profile.getCumulativeScore();
+			BigInteger noTransactionsSent = profile.getNoTransactionsSent();
+			BigInteger noTransactionsRcvd = profile.getNoTransactionsRcvd();
+			agent.put("ethProfileOwner", profile.getOwner());
+			agent.put("cumulativeScore", cumulativeScore.toString());
+			agent.put("noOfTransactionsSent", noTransactionsSent.toString());
+			agent.put("noOfTransactionsRcvd", noTransactionsRcvd.toString());
+			if ( noTransactionsRcvd.compareTo(BigInteger.ZERO) == 0 )
+			{
+				agent.put("rating", 0);
+			}
+			else
+			{
+				agent.put("rating", profile.getStarRating());
+			}
 		}
 		else
 		{
-			agent.put("rating", profile.getStarRating());
+			agent.put("agent-has-profile", "false");
 		}
 		return agent;
 	}
