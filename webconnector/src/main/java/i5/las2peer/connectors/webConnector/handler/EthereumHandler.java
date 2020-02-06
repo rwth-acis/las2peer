@@ -946,26 +946,26 @@ public class EthereumHandler {
 		//agent.put("email", agent.getEmail());
 		if ( profile != null )
 		{
-			agent.put("agent-has-profile", "true");
+			agent.put("agentHasProfile", 1);
 			BigInteger cumulativeScore = profile.getCumulativeScore();
 			BigInteger noTransactionsSent = profile.getNoTransactionsSent();
 			BigInteger noTransactionsRcvd = profile.getNoTransactionsRcvd();
 			agent.put("ethProfileOwner", profile.getOwner());
-			agent.put("cumulativeScore", cumulativeScore.toString());
-			agent.put("noOfTransactionsSent", noTransactionsSent.toString());
-			agent.put("noOfTransactionsRcvd", noTransactionsRcvd.toString());
+			agent.put("cumulativeScore", cumulativeScore.intValue());
+			agent.put("noOfTransactionsSent", noTransactionsSent.intValue());
+			agent.put("noOfTransactionsRcvd", noTransactionsRcvd.intValue());
 			if ( noTransactionsRcvd.compareTo(BigInteger.ZERO) == 0 )
 			{
-				agent.put("rating", 0);
+				agent.put("ethRating", 0);
 			}
 			else
 			{
-				agent.put("rating", profile.getStarRating());
+				agent.put("ethRating", profile.getStarRating());
 			}
 		}
 		else
 		{
-			agent.put("agent-has-profile", "false");
+			agent.put("agentHasProfile", 0);
 		}
 		return agent;
 	}

@@ -369,7 +369,7 @@ class EthereumView extends PolymerElement {
 									</dl>
 
 									<!-- REQUEST REPUTATION PROFILE (OPT-IN) -->
-									<template is="dom-if" if="[[_EthWallet.ethAccBalance > 0.0001]]">
+									<template is="dom-if" if="[[_EthWallet.ethAccBalance]]">
 										<template is="dom-if" if="[[!_hasEthProfile]]"> 
 											<p class="description">
 												las2peer user reputation requires users to <em>opt-in</em> to the system to rate others and, most importantly, be rated by others. 
@@ -402,7 +402,7 @@ class EthereumView extends PolymerElement {
 					</div>
 				</template> <!-- END PROFILE -->
 
-				<template is="dom-if" if="[[!_hasNoTxLog]]">
+				<template is="dom-if" if="[[_hasEthProfile]]">
 						<paper-tabs selected="{{_selectedTab}}">
 							<paper-tab>
 								<span id="dashboard"><iron-icon icon="store"></iron-icon> Dashboard</span>
@@ -422,55 +422,63 @@ class EthereumView extends PolymerElement {
 						</paper-tabs>
 
 						<iron-pages selected="{{_selectedTab}}">
-							<div> <!-- Reputation dashboard -->
-								<h2>
+							<div class="dashboardList"> <!-- Reputation dashboard -->
+								<!--<h2>
 									Reputation Dashboard
 									<paper-icon-button icon="refresh" title="Refresh Profiles List" on-click="refreshProfilesList" disabled="[[_working]]"></paper-icon-button> <br />
 									<small>(all users who have <u>opted in</u> to the Reputation System)</small>
-								</h2>
+								</h2>-->
 								<paper-spinner active="[[_working]]" style="float:right;"></paper-spinner>
 
-								<div class="dashboardList">
-									<table width="100%">
+								<table width="100%">
+										<tr>
+											<th> <iron-icon icon="perm-identity" title="Username"></iron-icon> Username</th>
+											<th> <iron-icon icon="account-circle" title="Reputation"></iron-icon> Reputation</th>
+											<th> <iron-icon icon="assessment" title="Voting Statistics"></iron-icon> Voting Statistics</th>
+											<th> <iron-icon icon="fingerprint" title="Wallet address"></iron-icon> Wallet address</th>
+											<th> <iron-icon icon="touch-app" title="Actions"></iron-icon> Actions </th>
+										</tr>
+
+										<template is="dom-repeat" items="[[_listDashboard]]" as="agent">
 											<tr>
-												<th> <iron-icon icon="perm-identity" title="Username"></iron-icon> Username</th>
-												<th> <iron-icon icon="account-circle" title="Reputation"></iron-icon> Reputation</th>
-												<th> <iron-icon icon="assessment" title="Voting Statistics"></iron-icon> Voting Statistics</th>
-												<th> <iron-icon icon="fingerprint" title="Wallet address"></iron-icon> Wallet address</th>
-												<th> <iron-icon icon="touch-app" title="Actions"></iron-icon> Actions </th>
-											</tr>
+												<td>
+													[[agent.username]]
+												</td>
 
-											<template is="dom-repeat" items="[[_listDashboard]]" as="agent">
-												<tr>
-													<td>
-														[[agent.username]]
-													</td>
-
-													<td>
+												<td>
+													<template is="dom-if" if="[[agent.agentHasProfile]]">
 														<custom-star-rating on-rating-selected="rateAgent"></custom-star-rating>
-														<custom-star-rating value="[[agent.rating]]" readonly single></custom-star-rating>
-													</td>
+														<custom-star-rating value="[[agent.ethRating]]" readonly single></custom-star-rating>
+													</template>
+													<template is="dom-if" if="[[!agent.agentHasProfile]]">
+														<custom-star-rating readonly></custom-star-rating>
+													</template>
+												</td>
 
-													<td> 
-														X̄ = [[agent.rating]] | 
+												<td> 
+													<template is="dom-if" if="[[agent.agentHasProfile]]">
+														X̄ = [[agent.ethRating]] | 
 														N = [[agent.noOfTransactionsRcvd]] | 
 														sent: [[agent.noOfTransactionsSent]]
-													</td>
+													</template>	
+													<template is="dom-if" if="[[!agent.agentHasProfile]]">
+														-
+													</template>
+												</td>
 
-													<td> 
-														<iron-icon icon="fingerprint"></iron-icon> 
-														<pre class="address">[[agent.address]]</pre> 
-													</td>
+												<td> 
+													<pre class="address">[[agent.address]]</pre> 
+												</td>
 
-													<td>
-														<paper-icon-button icon="card-giftcard" title="Transfer L2Pcoin to Agent" on-click="openEthSendDialog" data-username$="[[agent.username]]" data-agentid$="[[agent.agentid]]" disabled="[[_working]]"></paper-icon-button>
+												<td>
+													<paper-icon-button icon="card-giftcard" title="Transfer L2Pcoin to Agent" on-click="openEthSendDialog" data-username$="[[agent.username]]" data-agentid$="[[agent.agentid]]" disabled="[[_working]]"></paper-icon-button>
 
-													</td>
-												</tr>
-											</template
-									</table>
-								</div> <!-- End Reputation dashboard -->
-						
+												</td>
+											</tr>
+										</template>
+								</table>
+								<!-- End Reputation dashboard -->
+							</div>
 							<div> <!-- Faucet Payout-Log -->
 								<h2><iron-icon icon="assignment"></iron-icon> Repuation pay-out log</h2>
 								<table width="100%">
@@ -535,7 +543,6 @@ class EthereumView extends PolymerElement {
 									</template>
 								</table>
 							</div> <!-- End outgoing TX log -->
-							</div>
 						</iron-pages>
 					</template> <!-- END TX LOG -->
 

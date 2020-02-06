@@ -191,19 +191,21 @@ public class L2P_JSONUtil {
 			upd = ethereumNode.getRegistryClient().getProfile(ethAddress);
 			if (upd != null && !upd.getOwner().equals("0x0000000000000000000000000000000000000000")) {
 				json.put("ethProfileOwner", upd.getOwner());
-				json.put("ethCumulativeScore", upd.getCumulativeScore().toString());
-				json.put("ethNoTransactionsSent", upd.getNoTransactionsSent().toString());
-				json.put("ethNoTransactionsRcvd", upd.getNoTransactionsRcvd().toString());
+				json.put("ethCumulativeScore", upd.getCumulativeScore().intValue());
+				json.put("ethNoTransactionsSent", upd.getNoTransactionsSent().intValue());
+				json.put("ethNoTransactionsRcvd", upd.getNoTransactionsRcvd().intValue());
 				if (upd.getNoTransactionsRcvd().compareTo(BigInteger.ZERO) == 0) {
 					json.put("ethRating", 0);
 				} else {
 					json.put("ethRating", upd.getStarRating());
 				}
+				json.put("agentHasProfile", 1);
 			} else {
-				json.put("ethRating", "0");
+				json.put("ethRating", 0);
 				json.put("ethCumulativeScore", "???");
 				json.put("ethNoTransactionsSent", "???");
 				json.put("ethNoTransactionsRcvd", "???");
+				json.put("agentHasProfile", 0);
 			}
 		} catch (EthereumException | NotFoundException e) {
 			e.printStackTrace();
