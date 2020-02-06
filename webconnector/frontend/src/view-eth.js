@@ -28,7 +28,14 @@ import './shared-styles.js';
 
 class EthereumView extends PolymerElement {
   static get template() {
-    return html`
+		return html`
+			<iron-ajax id="ajaxDashboardList"
+                 method="POST"
+                 url$="[[apiEndpoint]]/eth/dashboardList"
+                 handle-as="json"
+                 on-response="_handleDashboardListResponse"
+                 on-error="_handleError"
+                 loading="{{_working}}"></iron-ajax>
       <iron-ajax id="ajaxListAgents"
                  method="POST"
                  url$="[[apiEndpoint]]/eth/listAgents"
@@ -612,8 +619,10 @@ class EthereumView extends PolymerElement {
       _hasEthProfile: { type: Boolean, value: false },
       _hasNoAgentsList: { type: Boolean, value: true },
       _hasNoEthWallet: { type: Boolean, value: true },
-      _hasNoProfilesList: { type: Boolean, value: true },
-      _hasNoTxLog: { type: Boolean, value: true },
+			_hasNoProfilesList: { type: Boolean, value: true },
+			_hasNoDashboard : { type: Boolean, value: true },
+			_hasNoTxLog: { type: Boolean, value: true },
+			_listDashboard: { type: Array, value: [] },
       _listAgents: { type: Array, value: [] },
       _listProfiles: { type: Array, value: [] },
       _selectedTab: {
@@ -641,6 +650,7 @@ class EthereumView extends PolymerElement {
     }
   }
   refreshEthWallet() { 
+		this.$.ajaxDashboardList.generateRequest();
     this.$.ajaxGetEthWallet.generateRequest(); 
     this.$.ajaxGenericTxLog.generateRequest();
     this.$.ajaxGetCoinbaseBalance.generateRequest();
@@ -727,7 +737,15 @@ class EthereumView extends PolymerElement {
     else
       this._hasNoTxLog = false;
   }
-  
+	
+	_handleDashboardListResponse(event) {
+		console.log(event.detail.response);
+		let response = event.detail.response;
+		response.agentList.forEach(function(element) { element.shortid = element.agentid.substr(0, 15) + '...' });
+		this._listDashboard = response.agentList;
+		this._hasNoDashboard = false;
+	}
+
   _handleLoadAgentlistResponse(event) {
     console.log(event.detail.response);
     let response = event.detail.response;
