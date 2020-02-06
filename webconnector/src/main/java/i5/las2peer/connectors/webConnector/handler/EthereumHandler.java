@@ -730,7 +730,9 @@ public class EthereumHandler {
 		if (session == null) {
 			return Response.status(Status.FORBIDDEN).entity("You have to be logged in to access the dashboard").build();
 		}
-
+		
+		String sessionAgentId = session.getAgent().getIdentifier();
+		
 		List<EthereumAgent> agents = new ArrayList<EthereumAgent>();
 		ReadWriteRegistryClient client = ethereumNode.getRegistryClient();
 		ConcurrentMap<String, String> userRegistrations = client.getUserRegistrations();
@@ -754,6 +756,8 @@ public class EthereumHandler {
 				// query username in pastry
 				userAgent = ethereumNode.getAgentByDetail(null, username, null);
 				agentId = userAgent.getIdentifier();
+				if ( agentId.equals(sessionAgentId) )
+					continue;
 				// query chain agent
 				userAgent = ethereumNode.getAgent(agentId);
 			} catch (AgentNotFoundException e) {
