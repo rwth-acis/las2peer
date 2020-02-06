@@ -223,13 +223,14 @@ class EthereumView extends PolymerElement {
 							<template is="dom-if" if="[[_ethTransactionSent]]">
 								<iron-icon icon="done"></iron-icon>
 							</template>
-            </div>
-            <iron-form on-keypress="_keyPressedSendETHTransaction">
-              <form>
-                <paper-input label="AgentID" id="SendETHTransactionAgentID" disabled="[[_working]]" value="[[_chosenAgentID]]"></paper-input>
-                <paper-input label="Amount (in L2Pcoin)" id="SendETHTransactionWeiAmount" disabled="[[_working]]" value=""></paper-input>
-                <paper-textarea label="Transaction Message" disabled="[[_working]]" id="SendETHTransactionMessage"></paper-textarea>
-              </form>
+						</div>
+						<iron-form on-keypress="_keyPressedSendETHTransaction">
+							<form>
+								<paper-input label="AgentID" id="SendETHTransactionAgentID" readonly value="[[_chosenAgentID]]"></paper-input>
+								<paper-input label="Username" id="SendETHTransactionUserName" readonly value="[[_chosenUsername]]"></paper-input>
+								<paper-input label="Amount (in L2Pcoin)" id="SendETHTransactionWeiAmount" disabled="[[_working]]" value=""></paper-input>
+								<paper-textarea label="Transaction Message" disabled="[[_working]]" id="SendETHTransactionMessage"></paper-textarea>
+							</form>
 						</iron-form>
 					</paper-dialog-scrollable>
 					<div class="buttons">
@@ -549,12 +550,13 @@ class EthereumView extends PolymerElement {
 			error: { type: Object, notify: true },
 			group: { type: String, value: "" },
 			groups: { type: Array, value: [] },
-      _groupSelected: {type: Object},
-      _working: { type: Boolean, value: false },
-      _chosenAgentID: { type: String, value: "" },
-      _ethTransactionSent: { type: Boolean, value: false },
-      _EthWallet: { type: Object, 
-        value: { 
+			_groupSelected: {type: Object},
+			_working: { type: Boolean, value: false },
+			_chosenAgentID: { type: String, value: "" },
+			_chosenUsername: { type: String, value: "" },
+			_ethTransactionSent: { type: Boolean, value: false },
+			_EthWallet: { type: Object, 
+				value: { 
 					agentid: "",
 					email: "",
 					ethAccBalance: 0,
@@ -805,14 +807,15 @@ class EthereumView extends PolymerElement {
 		}
 		return true;
 	}
-  openEthSendDialog(event) {
-    this._ethTransactionSent = false;
-    var agentid = event.target.getAttribute('data-agentid');
-    console.log("agentid chosen: " + agentid);
-    this._chosenAgentID = agentid;
-    this.$.sendEthDialog.open();
-    console.log("modal opened");
-  }
+	openEthSendDialog(event) {
+		this._ethTransactionSent = false;
+		var agentid = event.target.getAttribute('data-agentid');
+		var username = event.target.getAttribute('data-username');
+		this._chosenAgentID = agentid;
+		this._chosenUsername = username;
+		this.$.sendEthDialog.open();
+		console.log("modal opened");
+	}
 	closeEthDialog() {
 		this.$.sendEthDialog.close();
 		this._ethTransactionSent = false;
