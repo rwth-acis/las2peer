@@ -332,7 +332,7 @@ class EthereumView extends PolymerElement {
 											</dt>
 
 											<dd>
-												[[_EthWallet.coinbaseBalance]] L2Pcoin
+												[[_ethCoinbaseInfo.coinbaseBalance]] L2Pcoin
 											</dd>
 
 											<!-- REQUEST  PAY-OUT -->
