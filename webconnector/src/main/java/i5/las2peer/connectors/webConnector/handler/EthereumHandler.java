@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 
@@ -72,6 +73,8 @@ public class EthereumHandler {
 	private final Node node;
 	private final PastryNode pastryNode;
 	private final EthereumNode ethereumNode;
+
+	ConcurrentHashMap<String, String> walletAddressToUserNameCache = new ConcurrentHashMap<String, String>();
 
 	public EthereumHandler(WebConnector connector) {
 		this.connector = connector;
@@ -548,6 +551,12 @@ public class EthereumHandler {
 			return Response.status(Status.NOT_FOUND).entity("Username not registered").build();
 		}
 
+		// update address->username cache
+		walletAddressToUserNameCache.putIfAbsent(
+			json.getAsString("ethAgentAddress"), 
+			json.getAsString("username")
+		);
+
 		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
 	}
 	
@@ -683,13 +692,13 @@ public class EthereumHandler {
 		JSONObject json = new JSONObject();
 		JSONArray rcvdJsonLog = new JSONArray();
 		for (GenericTransactionData genericTransactionData : rcvdTxLog) {
-			rcvdJsonLog.add(L2P_JSONUtil.genericTransactionDataToJSON( genericTransactionData ));
+			rcvdJsonLog.add(L2P_JSONUtil.genericTransactionDataToJSON( genericTransactionData, walletAddressToUserNameCache ));
 		}
 
 		// parse sent log
 		JSONArray sentJsonLog = new JSONArray();
 		for (GenericTransactionData genericTransactionData : sentTxLog) {
-			sentJsonLog.add(L2P_JSONUtil.genericTransactionDataToJSON( genericTransactionData ));
+			sentJsonLog.add(L2P_JSONUtil.genericTransactionDataToJSON( genericTransactionData, walletAddressToUserNameCache ));
 		}
 		
 		json.put("rcvdJsonLog", rcvdJsonLog);
@@ -732,7 +741,7 @@ public class EthereumHandler {
 		}
 		
 		String sessionAgentId = session.getAgent().getIdentifier();
-		
+
 		List<EthereumAgent> agents = new ArrayList<EthereumAgent>();
 		ReadWriteRegistryClient client = ethereumNode.getRegistryClient();
 		ConcurrentMap<String, String> userRegistrations = client.getUserRegistrations();
@@ -760,6 +769,7 @@ public class EthereumHandler {
 					continue;
 				// query chain agent
 				userAgent = ethereumNode.getAgent(agentId);
+				
 			} catch (AgentNotFoundException e) {
 				logger.severe("[Dash] registered agent '"+ username +"' not found in DHT.");
 				errorList.add("[Dash] registered agent '"+ username +"' not found in DHT.");
@@ -771,14 +781,17 @@ public class EthereumHandler {
 			}
 			if ( !(userAgent instanceof EthereumAgent) )
 			{
-				logger.severe("[Dash] queried agent not EthAgent?!");
-				errorList.add("[Dash] queried agent not EthAgent?!");
+				logger.severe("[Dash] queried agent ('"+ username+"') not EthAgent?!");
+				errorList.add("[Dash] queried agent ('"+ username+"') not EthAgent?!");
 				continue;
 			}
 			EthereumAgent ethAgent = (EthereumAgent)userAgent;
 			agents.add(ethAgent);
-			
 			String ownerAddress = ethAgent.getEthereumAddress();
+
+			// update address->username cache
+			walletAddressToUserNameCache.putIfAbsent(ownerAddress, username);
+
 			UserProfileData profile = null;
 			if ( userProfiles.containsKey(ownerAddress) )
 			{

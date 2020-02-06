@@ -107,12 +107,12 @@ public class L2P_JSONUtil {
 		return groupURLs;
 	}
 
-	public static JSONObject genericTransactionDataToJSON(GenericTransactionData genericTransactionData)
+	public static JSONObject genericTransactionDataToJSON(GenericTransactionData genericTransactionData, ConcurrentMap<String, String> addressToUsername)
 	{
 		JSONObject thisJSON = new JSONObject();
 
-		thisJSON.put("txSender", genericTransactionData.getSender());
-		thisJSON.put("txReceiver", genericTransactionData.getReceiver());
+		thisJSON.put("txSenderAddress", addressToUsername.getOrDefault(genericTransactionData.getSender(), genericTransactionData.getSender()));
+		thisJSON.put("txReceiverAddress", addressToUsername.getOrDefault(genericTransactionData.getReceiver(), genericTransactionData.getReceiver()));
 		thisJSON.put("txMessage", genericTransactionData.getMessage());
 		thisJSON.put("txAmountInWei", genericTransactionData.getAmountInWei());
 		thisJSON.put("txAmountInEth", genericTransactionData.getAmountInEth());
