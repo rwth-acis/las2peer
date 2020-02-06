@@ -48,7 +48,7 @@ $_documentContainer.innerHTML = `<dom-module id="shared-styles">
       }
 
       paper-tabs {
-        background-color: var(--tabs-background-colour, mediumslateblue);
+        background-color: var(--tabs-background-colour, #4285f4);
         --paper-tabs-selection-bar-color: var(--tabs-colour, white);
         color: var(--tabs-colour, white);
       }

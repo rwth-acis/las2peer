@@ -352,7 +352,7 @@ class EthereumView extends PolymerElement {
 											</dt>
 
 											<dd>
-												<paper-button raised on-click="requestEthFaucet" disabled="[[_working]]">
+												<paper-button class="green" raised on-click="requestEthFaucet" disabled="[[_working]]">
 													<iron-icon icon="card-giftcard"></iron-icon> Request reputation pay-out
 												</paper-button>
 											</dd>
@@ -367,7 +367,7 @@ class EthereumView extends PolymerElement {
 												Each transaction on the blockchain <small>(<em>which is the backing mechanism of las2peer reputation</em>)</small> requires a small transaction fee.
 												To welcome new users to the community <small>(<em>through <abbr title="Legitimate peripheral participation">LPP</abbr></em>)</small>, a small amount of reputation is paid out on their first pay-out request to allow them to participate in the user rating system.
 											</p>
-											<paper-button id="reputationOptIn" raised on-click="requestReputationProfile" disabled="[[_working]]">
+											<paper-button class="green" id="reputationOptIn" raised on-click="requestReputationProfile" disabled="[[_working]]">
 												<iron-icon icon="record-voice-over"></iron-icon> Opt-in to reputation
 											</paper-button>
 										</template>
