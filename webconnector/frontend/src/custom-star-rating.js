@@ -90,12 +90,45 @@ class CustomStarRating extends PolymerElement {
                 type: Boolean,
                 value: false,
                 notify: true
+            },
+            single: {
+                type: Boolean,
+                value: false,
+                notify: true,
+                reflectToAttribute: true,
             }
         };
     }
 
     constructor() {
         super();
+
+        if ( this.single )
+        {
+            var valueToFace = '';
+
+            switch (this.value) {
+                case 1:
+                    valueToFace = 'remove-circle-outline';
+                    break;
+                case 2:
+                    valueToFace = 'sentiment-dissatisfied';
+                break;  
+                default:
+                case 3:
+                    valueToFace = 'sentiment-neutral';
+                break; 
+                case 4:
+                    valueToFace = 'sentiment-satisfied';
+                break; 
+                case 5:
+                    valueToFace = 'sentiment-very-satisfied';
+                break;
+            }
+            this.ratings = [
+                { value: this.value, class: 'whole', icon: 'icons:' + valueToFace, selected: false }
+            ]
+        }
 
         if ( this.value == 0 && this.readonly )
         {
