@@ -132,6 +132,28 @@ class EthereumView extends PolymerElement {
           max-width: 30%;
         }
 
+        dl {
+          width: 100%;
+          overflow: hidden;
+          padding: 0;
+          margin: 0;
+        }
+        dt {
+          float: left;
+          clear: left;
+          width: 50%;
+          padding: 0;
+          margin: 0;
+        }
+        dd {
+          float: left;
+          width: 45%;
+          padding: 0;
+          margin: 0;
+          padding-right: 5%;
+          text-align: right;
+        }
+
       </style>
 
       <div class="card">
@@ -262,58 +284,94 @@ class EthereumView extends PolymerElement {
               <!-- LEFT HAND SIDE -->
               <div class="flexchild">
 
-                <!--  WELCOME -->
-                <div class="welcome">
-                  <p>Welcome, [[_EthWallet.username]] 
-                    <template is="dom-if" if="[[_hasEthProfile]]">
-                      <custom-star-rating value="[[_EthWallet.ethRating]]" readonly></custom-star-rating>
-                    </template> 
-                    <br />
-                    <strong><iron-icon icon="account-balance-wallet"></iron-icon> Accumulated reputation</strong>: 
-                      [[_EthWallet.ethAccBalance]] L2Pcoin
-                  </p>
-                </div>
+                	<!--  WELCOME -->
+                  <p>Welcome, [[_EthWallet.username]]</p>
 
-                <!-- TOTAL REPUTATION -->
-                <p>
-                  <strong><iron-icon icon="account-balance"></iron-icon> Total reputation available for request</strong>:
-                  <small> [[_ethCoinbaseInfo.coinbaseBalance]] L2Pcoin</small> <iron-icon id="totalReputation" icon="help-outline"></iron-icon>
-                  <paper-tooltip for="totalReputation" offset="0">
-                    This value represents the total amount of reputation that can be paid out to all users. <br />
-                    Technically, it's the amount of Ether in the coinbase account, <br />
-                    i.e. the account which by default configuration is rewarded the mined coins.
-                  </paper-tooltip>
-                </p>
-      
-                <!-- REQUEST  PAY-OUT -->
-                <div>
+                  <dl>
+											<template is="dom-if" if="[[_hasEthProfile]]">
+												<!-- USER RATING -->
+												<dt>
+													<iron-icon icon="account-circle"></iron-icon> User rating
+												</dt>
 
-                  <paper-dropdown-menu style="min-width: 250px" label="Group to use for Success Modeling" on-change="_updateGroupMemberlist" noink no-animations selected-item="{{_groupSelected}}">
-                    <paper-listbox slot="dropdown-content" class="dropdown-content" id="groupSelect">
-                      <template is="dom-repeat" items="[[groups]]">
-                        <paper-item value="{{item.groupID}}">{{item.groupName}}</paper-item>
-                      </template>
-                    </paper-listbox>
-                  </paper-dropdown-menu>
+												<dd>
+													<custom-star-rating value="[[_EthWallet.ethRating]]" readonly></custom-star-rating>
+												</dd>
 
-                  <paper-button raised on-click="requestEthFaucet" disabled="[[_working]]">
-                    <iron-icon icon="card-giftcard"></iron-icon> Request reputation pay-out
-                  </paper-button>
-                </div>
 
-                <!-- REQUEST REPUTATION PROFILE (OPT-IN) -->
-                <template is="dom-if" if="[[!_hasEthProfile]]">
-                  <template is="dom-if" if="[[_EthWallet.ethAccBalance > 0.0001]]"> 
-                    <p class="description">
-                      las2peer user reputation requires users to <em>opt-in</em> to the system to rate others and, most importantly, be rated by others. 
-                      Each transaction on the blockchain <small>(<em>which is the backing mechanism of las2peer reputation</em>)</small> requires a small transaction fee.
-                      To welcome new users to the community <small>(<em>through <abbr title="Legitimate peripheral participation">LPP</abbr></em>)</small>, a small amount of reputation is paid out on their first pay-out request to allow them to participate in the user rating system.
-                    </p>
-                    <paper-button id="reputationOptIn" raised on-click="requestReputationProfile" disabled="[[_working]]">
-                      <iron-icon icon="record-voice-over"></iron-icon> Opt-in to reputation
-                    </paper-button>
-                  </template>
-                </template>  
+												<!-- NO. OF VOTES -->
+												<dt>
+													<iron-icon icon="assessment"></iron-icon> Number of user ratings
+												</dt>
+
+												<dd>
+													<iron-icon icon="cloud-download"></iron-icon> [[_ethTxLog.rcvdJsonLog.length]] | 
+													<iron-icon icon="cloud-upload"></iron-icon> [[_ethTxLog.sentJsonLog.length]]
+												</dd>
+
+												</template> 
+
+											<!-- ACCUMULATED REPUTATION -->
+											<dt>
+												<iron-icon icon="account-balance-wallet"></iron-icon> Accumulated reputation
+											</dt>
+
+											<dd>
+												[[_EthWallet.ethAccBalance]] L2Pcoin
+											</dd>
+
+											<!--  TOTAL REPUTATION -->
+											<dt>
+												<iron-icon icon="account-balance"></iron-icon> Total reputation available for request
+													<iron-icon id="totalReputation" icon="help-outline"></iron-icon>
+													<paper-tooltip for="totalReputation" offset="0">
+														This value represents the total amount of reputation that can be paid out to all users. <br />
+														Technically, it's the amount of Ether in the coinbase account, <br />
+														i.e. the account which by default configuration is rewarded the mined coins.
+													</paper-tooltip>
+											</dt>
+
+											<dd>
+												[[_EthWallet.coinbaseBalance]] L2Pcoin
+											</dd>
+
+											<!-- REQUEST  PAY-OUT -->
+											<dt>
+												<paper-dropdown-menu 
+													style="min-width: 250px" 
+													label="Group to use for Success Modeling" 
+													on-change="_updateGroupMemberlist" 
+													noink no-animations 
+													selected-item="{{_groupSelected}}">
+													<paper-listbox slot="dropdown-content" class="dropdown-content" id="groupSelect">
+														<template is="dom-repeat" items="[[groups]]">
+															<paper-item value="{{item.groupID}}">{{item.groupName}}</paper-item>
+														</template>
+													</paper-listbox>
+												</paper-dropdown-menu>
+											</dt>
+
+											<dd>
+												<paper-button raised on-click="requestEthFaucet" disabled="[[_working]]">
+													<iron-icon icon="card-giftcard"></iron-icon> Request reputation pay-out
+												</paper-button>
+											</dd>
+												
+									</dl>
+
+									<!-- REQUEST REPUTATION PROFILE (OPT-IN) -->
+									<template is="dom-if" if="[[_EthWallet.ethAccBalance > 0.0001]]">
+										<template is="dom-if" if="[[!_hasEthProfile]]"> 
+											<p class="description">
+												las2peer user reputation requires users to <em>opt-in</em> to the system to rate others and, most importantly, be rated by others. 
+												Each transaction on the blockchain <small>(<em>which is the backing mechanism of las2peer reputation</em>)</small> requires a small transaction fee.
+												To welcome new users to the community <small>(<em>through <abbr title="Legitimate peripheral participation">LPP</abbr></em>)</small>, a small amount of reputation is paid out on their first pay-out request to allow them to participate in the user rating system.
+											</p>
+											<paper-button id="reputationOptIn" raised on-click="requestReputationProfile" disabled="[[_working]]">
+												<iron-icon icon="record-voice-over"></iron-icon> Opt-in to reputation
+											</paper-button>
+										</template>
+									</template> 
 
               </div> <!-- END LEFT HAND SIDE -->
 
