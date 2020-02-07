@@ -314,8 +314,10 @@ class EthereumView extends PolymerElement {
 												</dt>
 
 												<dd>
-													<iron-icon icon="cloud-download"></iron-icon> [[_ethTxLog.rcvdJsonLog.length]] | 
-													<iron-icon icon="cloud-upload"></iron-icon> [[_ethTxLog.sentJsonLog.length]]
+													<iron-icon icon="cloud-download" title="Incoming votes"></iron-icon> 
+													[[_ethTxLog.rcvdJsonLog.length]] | 
+													<iron-icon icon="cloud-upload" title="Outgoing votes"></iron-icon> 
+													[[_ethTxLog.sentJsonLog.length]]
 												</dd>
 
 												</template> 
@@ -445,7 +447,7 @@ class EthereumView extends PolymerElement {
 													[[agent.username]]
 												</td>
 
-												<td>
+												<td> <!-- RATING -->
 													<template is="dom-if" if="[[agent.agentHasProfile]]">
 														<custom-star-rating on-rating-selected="rateAgent" value="[[agent.ethRating]]"></custom-star-rating>
 														<custom-star-rating value="[[agent.ethRating]]" readonly single></custom-star-rating>
@@ -455,11 +457,14 @@ class EthereumView extends PolymerElement {
 													</template>
 												</td>
 
-												<td> 
+												<td> <!-- VOTING STATISTICS -->
 													<template is="dom-if" if="[[agent.agentHasProfile]]">
-														X̄ = [[agent.ethRating]] | 
-														N = [[agent.noOfTransactionsRcvd]] | 
-														sent: [[agent.noOfTransactionsSent]]
+														<iron-icon icon="notification:network-check" title="Average grade"></iron-icon>
+													 	[[agent.ethRating]] | 
+														<iron-icon icon="cloud-download" title="Incoming votes"></iron-icon> 
+														[[agent.noOfTransactionsRcvd]] | 
+														<iron-icon icon="cloud-upload" title="Outgoing votes"></iron-icon> 
+														[[agent.noOfTransactionsSent]]
 													</template>	
 													<template is="dom-if" if="[[!agent.agentHasProfile]]">
 														-
@@ -480,7 +485,6 @@ class EthereumView extends PolymerElement {
 								<!-- End Reputation dashboard -->
 							</div>
 							<div> <!-- Faucet Payout-Log -->
-								<h2><iron-icon icon="assignment"></iron-icon> Repuation pay-out log</h2>
 								<table width="100%">
 									<tr>
 										<th>Timestamp</th>
@@ -495,7 +499,6 @@ class EthereumView extends PolymerElement {
 								</table>
 							</div> <!-- End Faucet Pay-out Log -->
 							<div> <!-- Incoming TX Log -->
-								<h2><iron-icon icon="cloud-download"></iron-icon> Incoming reputation</h2>
 								<table width="100%">
 									<tr>
 										<th>Timestamp</th>
@@ -526,7 +529,6 @@ class EthereumView extends PolymerElement {
 							</div> <!-- End Incoming TX Log -->
 
 							<div> <!-- Outgoing TX Log -->
-								<h2><iron-icon icon="cloud-upload"></iron-icon> Outgoing reputation</h2>
 								<table width="100%">
 									<tr>
 										<th>Timestamp</th>
@@ -534,7 +536,6 @@ class EthereumView extends PolymerElement {
 										<th>TransactionType</th>
 										<th>Message</th>
 										<th>TransactionValue</th>
-										<th>TXHash</th>
 									</tr>
 									<template is="dom-repeat" items="[[_ethTxLog.sentJsonLog]]" as="tx">
 										<tr>
@@ -542,7 +543,14 @@ class EthereumView extends PolymerElement {
 											<td><iron-icon icon="face"></iron-icon> [[tx.txReceiver]]</td>
 											<td><iron-icon icon="class"></iron-icon> [[tx.txTransactionType]]</td>
 											<td><iron-icon icon="speaker-notes"></iron-icon> [[tx.txMessage]]</td>
-											<td><iron-icon icon="card-giftcard"></iron-icon> [[tx.txAmountInEth]] L2Pcoin</td>
+											<td>
+											<template is="dom-if" if="[[tx.transactionType == 'L2P USER RATING']]">
+												<iron-icon icon="record-voice-over"></iron-icon> Rating
+											</template>
+											<template is="dom-if" if="[[tx.txAmountInEth]]">
+												<iron-icon icon="card-giftcard"></iron-icon> [[tx.txAmountInEth]] L2Pcoin
+											</template>
+											</td>
 										</tr>
 									</template>
 								</table>
