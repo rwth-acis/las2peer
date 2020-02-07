@@ -552,10 +552,19 @@ public class EthereumHandler {
 		}
 
 		// update address->username cache
-		walletAddressToUserNameCache.putIfAbsent(
-			json.getAsString("ethAgentAddress"), 
-			json.getAsString("username")
-		);
+		String ownerAddress = json.getAsString("ethAgentAddress");
+		String username = json.getAsString("username");
+		if ( !this.walletAddressToUserNameCache.containsKey(ownerAddress) )
+		{ 
+			logger.info(
+				"[WalletCache] updating agent info: " + 
+				ownerAddress + " | " + username
+			);
+			this.walletAddressToUserNameCache.put(
+				ownerAddress, 
+				username
+			);
+		}
 
 		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
 	}
@@ -692,13 +701,13 @@ public class EthereumHandler {
 		JSONObject json = new JSONObject();
 		JSONArray rcvdJsonLog = new JSONArray();
 		for (GenericTransactionData genericTransactionData : rcvdTxLog) {
-			rcvdJsonLog.add(L2P_JSONUtil.genericTransactionDataToJSON( genericTransactionData, walletAddressToUserNameCache ));
+			rcvdJsonLog.add(L2P_JSONUtil.genericTransactionDataToJSON( genericTransactionData, this.walletAddressToUserNameCache ));
 		}
 
 		// parse sent log
 		JSONArray sentJsonLog = new JSONArray();
 		for (GenericTransactionData genericTransactionData : sentTxLog) {
-			sentJsonLog.add(L2P_JSONUtil.genericTransactionDataToJSON( genericTransactionData, walletAddressToUserNameCache ));
+			sentJsonLog.add(L2P_JSONUtil.genericTransactionDataToJSON( genericTransactionData, this.walletAddressToUserNameCache ));
 		}
 		
 		json.put("rcvdJsonLog", rcvdJsonLog);
@@ -790,7 +799,14 @@ public class EthereumHandler {
 			String ownerAddress = ethAgent.getEthereumAddress();
 
 			// update address->username cache
-			walletAddressToUserNameCache.putIfAbsent(ownerAddress, username);
+			if ( !this.walletAddressToUserNameCache.containsKey(ownerAddress) )
+			{ 
+				logger.info(
+					"[WalletCache] updating agent info: " + 
+					ownerAddress + " | " + username
+				);
+				this.walletAddressToUserNameCache.put(ownerAddress, username);
+			}
 
 			UserProfileData profile = null;
 			if ( userProfiles.containsKey(ownerAddress) )
@@ -922,7 +938,7 @@ public class EthereumHandler {
 			String ownerAddress = profileAgent.getEthereumAddress();
 			UserProfileData profile;
 			try {
-				logger.info("accessing profile of " + ownerAddress);
+				logger.fine("accessing profile of " + ownerAddress);
 				profile = ethereumNode.getRegistryClient().getProfile(ownerAddress);
 			} catch (EthereumException | NotFoundException e) {
 				e.printStackTrace();

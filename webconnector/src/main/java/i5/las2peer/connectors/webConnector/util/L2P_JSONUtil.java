@@ -111,8 +111,18 @@ public class L2P_JSONUtil {
 	{
 		JSONObject thisJSON = new JSONObject();
 
-		thisJSON.put("txSenderAddress", addressToUsername.getOrDefault(genericTransactionData.getSender(), genericTransactionData.getSender()));
-		thisJSON.put("txReceiverAddress", addressToUsername.getOrDefault(genericTransactionData.getReceiver(), genericTransactionData.getReceiver()));
+		String sender = genericTransactionData.getSender();
+		String receiver = genericTransactionData.getReceiver();
+		if ( !addressToUsername.containsKey(sender) )
+		{
+			logger.info("[JSON TX LOG] address to username not found: " + sender );
+		}
+		if ( !addressToUsername.containsKey(receiver) )
+		{
+			logger.info("[JSON TX LOG] address to username not found: " + receiver );
+		}
+		thisJSON.put("txSenderAddress", addressToUsername.getOrDefault(sender, sender));
+		thisJSON.put("txReceiverAddress", addressToUsername.getOrDefault(receiver, receiver));
 		thisJSON.put("txMessage", genericTransactionData.getMessage());
 		thisJSON.put("txAmountInWei", genericTransactionData.getAmountInWei());
 		thisJSON.put("txAmountInEth", genericTransactionData.getAmountInEth());
