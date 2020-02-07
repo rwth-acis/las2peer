@@ -503,7 +503,6 @@ class EthereumView extends PolymerElement {
 										<th>TransactionType</th>
 										<th>Message</th>
 										<th>TransactionValue</th>
-										<th>TXHash</th>
 									</tr>
 									<template is="dom-repeat" items="[[_ethTxLog.rcvdJsonLog]]" as="tx">
 										<template is="dom-if" if="[[tx.sender == _ethCoinbaseInfo.coinbaseAddress]]">
@@ -512,8 +511,14 @@ class EthereumView extends PolymerElement {
 											<td><iron-icon icon="face"></iron-icon> [[tx.txSender]]</td>
 											<td><iron-icon icon="class"></iron-icon> [[tx.txTransactionType]]</td>
 											<td><iron-icon icon="speaker-notes"></iron-icon> [[tx.txMessage]]</td>
-											<td><iron-icon icon="card-giftcard"></iron-icon> [[tx.txAmountInEth]] L2Pcoin</td>
-											<td><iron-icon icon="fingerprint"></iron-icon> [[tx.txTXHash]]</td>
+											<td>
+											<template is="dom-if" if="[[tx.transactionType == 'L2P USER RATING']]">
+												<iron-icon icon="record-voice-over"></iron-icon> Rating
+											</template>
+											<template is="dom-if" if="[[tx.txAmountInEth]]">
+												<iron-icon icon="card-giftcard"></iron-icon> [[tx.txAmountInEth]] L2Pcoin
+											</template>
+											</td>
 										</tr>
 										</template>
 									</template>
@@ -538,7 +543,6 @@ class EthereumView extends PolymerElement {
 											<td><iron-icon icon="class"></iron-icon> [[tx.txTransactionType]]</td>
 											<td><iron-icon icon="speaker-notes"></iron-icon> [[tx.txMessage]]</td>
 											<td><iron-icon icon="card-giftcard"></iron-icon> [[tx.txAmountInEth]] L2Pcoin</td>
-											<td><iron-icon icon="fingerprint"></iron-icon> [[tx.txTXHash]]</td>
 										</tr>
 									</template>
 								</table>

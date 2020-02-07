@@ -233,7 +233,7 @@ class BlockchainObserver {
 						txRecipient, 
 						BigInteger.ZERO, // amountInWei
 						timestamp, 
-						"Rating: [ "+grade+" ], \nRecipientNewScore: [ "+recipientNewScore+" ]", 
+						"Rating: "+grade, 
 						"L2P USER RATING", 
 						txHash
 					);
