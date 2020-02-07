@@ -216,7 +216,7 @@ class EthereumView extends PolymerElement {
 					</paper-dialog>
 
 				<paper-dialog id="sendEthDialog">
-					<h1>Transfer L2Pcoin</h1>
+					<h1>Transfer L2Pcoin to [[_chosenUsername]]</h1>
 					<paper-dialog-scrollable>
 						<div class="horizontal layout center-justified">
 							<paper-spinner active="[[_working]]"></paper-spinner>
@@ -226,8 +226,8 @@ class EthereumView extends PolymerElement {
 						</div>
 						<iron-form on-keypress="_keyPressedSendETHTransaction">
 							<form>
-								<paper-input label="AgentID" id="SendETHTransactionAgentID" readonly value="[[_chosenAgentID]]"></paper-input>
-								<paper-input label="Username" id="SendETHTransactionUserName" readonly value="[[_chosenUsername]]"></paper-input>
+								<paper-input label="AgentID" id="SendETHTransactionAgentID" hidden readonly value="[[_chosenAgentID]]"></paper-input>
+								<paper-input label="Username" id="SendETHTransactionUserName" hidden readonly value="[[_chosenUsername]]"></paper-input>
 								<paper-input label="Amount (in L2Pcoin)" id="SendETHTransactionWeiAmount" disabled="[[_working]]" value=""></paper-input>
 								<paper-textarea label="Transaction Message" disabled="[[_working]]" id="SendETHTransactionMessage"></paper-textarea>
 							</form>
