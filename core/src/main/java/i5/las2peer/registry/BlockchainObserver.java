@@ -325,7 +325,7 @@ class BlockchainObserver {
 			}
 		}
 		if ( transactionList.size() > 0 ) {
-			logger.info("[TXLOG] found " + transactionList.size() + " entries for "+ sender);
+			logger.fine("[TXLOG] found " + transactionList.size() + " entries for "+ sender);
 		}
 		return transactionList;
 	}
@@ -347,7 +347,7 @@ class BlockchainObserver {
 			}
 		}
 		if ( transactionList.size() > 0 ) {
-			logger.info("[TXLOG] found " + transactionList.size() + " entries for "+ receiver);
+			logger.fine("[TXLOG] found " + transactionList.size() + " entries for "+ receiver);
 		}
 		return transactionList;
 	}
