@@ -447,7 +447,7 @@ class EthereumView extends PolymerElement {
 
 												<td>
 													<template is="dom-if" if="[[agent.agentHasProfile]]">
-														<custom-star-rating on-rating-selected="rateAgent"></custom-star-rating>
+														<custom-star-rating on-rating-selected="rateAgent" value="[[agent.ethRating]]"></custom-star-rating>
 														<custom-star-rating value="[[agent.ethRating]]" readonly single></custom-star-rating>
 													</template>
 													<template is="dom-if" if="[[!agent.agentHasProfile]]">

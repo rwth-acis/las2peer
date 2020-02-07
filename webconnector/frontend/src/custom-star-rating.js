@@ -29,26 +29,26 @@ class CustomStarRating extends PolymerElement {
                 color: #eeeeee;
                 float: right;
             }
-            iron-icon.color-1 {
+            iron-icon.selected {
+                color: #999999;
+            }
+            iron-icon.color-1.selected {
                 color: #d7191c;
             }
-            iron-icon.color-2 {
+            iron-icon.color-2.selected {
                 color: #fdae61;
             }
-            iron-icon.color-3 {
+            iron-icon.color-3.selected {
                 color: #bbb;
             }
-            iron-icon.color-4 {
-                color: #abd9e9;
+            iron-icon.color-4.selected {
+                color: #5ac4e8;
             }
-            iron-icon.color-5 {
+            iron-icon.color-5.selected {
                 color: #2c7bb6;
             }
             :host(:not([readonly])) iron-icon.whole {
                 opacity: 0.4;
-            }
-            iron-icon.selected {
-                color: #999999;
             }
             :host[single] {
                 opacity: 1.0;
@@ -139,7 +139,7 @@ class CustomStarRating extends PolymerElement {
         {
             var valueToFace = '';
 
-            switch (this.value) {
+            switch (this.value.toFixed(0)) {
                 case 1:
                     valueToFace = 'remove-circle-outline';
                     break;
@@ -158,7 +158,7 @@ class CustomStarRating extends PolymerElement {
                 break;
             }
             this.ratings = [
-                { value: this.value, class: 'whole color-'+this.value, icon: 'icons:' + valueToFace, selected: false }
+                { value: this.value, class: 'whole color-'+this.value.toFixed(0), icon: 'icons:' + valueToFace, selected: false }
             ];
         } 
         else
