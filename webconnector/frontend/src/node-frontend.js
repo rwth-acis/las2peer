@@ -127,6 +127,9 @@ class NodeFrontend extends PolymerElement {
 
         <!-- Main content -->
         <div class="app-header">
+          <template is="dom-if" if="[[_submittingLogin]]">
+            <paper-spinner style="left: 38%; position: absolute; z-index: 10" active="[[_submittingLogin]]"></paper-spinner>
+          </template>
           <div class="cursorwrapper">
           <las2peer-frontend-statusbar id="statusbar"
             base-url="[[hostUrl]]" service="las2peer Node Front-End"
@@ -344,6 +347,7 @@ class NodeFrontend extends PolymerElement {
       return;
     }
 
+    this._submittingLogin = true;
     let req = this.$.ajaxLogin;
     req.headers = { Authorization: 'Basic ' + btoa(prefixedIdentifier + ':' + credentials.oidcSub) };
     if (((this._oidcUser || {}).access_token || "").length > 0) {
@@ -361,6 +365,7 @@ class NodeFrontend extends PolymerElement {
   }
 
   _handleLoginResponse(event) {
+    this._submittingLogin = false;
     console.log("login response: ", event);
     let resp = event.detail.response;
     if (resp && resp.hasOwnProperty('agentid')) {
