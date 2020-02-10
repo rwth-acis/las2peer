@@ -120,7 +120,9 @@ class NodeFrontend extends PolymerElement {
             <a name="status" href="[[rootPath]]status">Status</a>
             <a name="view-services" href="[[rootPath]]view-services">View Services</a>
             <a name="publish-service" href="[[rootPath]]publish-service">Publish Service</a>
-            <a name="eth-tools" href="[[rootPath]]eth-tools">Blockchain and Reputation</a>
+            <template is="dom-if" if="[[_isEthAgent]]">
+              <a name="eth-tools" href="[[rootPath]]eth-tools">Blockchain and Reputation</a>
+            </template>
             <a name="agent-tools" href="[[rootPath]]agent-tools">Agent Tools</a>
           </iron-selector>
         </app-drawer>
@@ -148,7 +150,9 @@ class NodeFrontend extends PolymerElement {
             <services-view name="view-services" api-endpoint="[[apiEndpoint]]" agent-id="[[_agentId]]" error="{{_error}}"></services-view>
             <service-publish-view name="publish-service" api-endpoint="[[apiEndpoint]]" agent-id="[[_agentId]]" error="{{_error}}"></service-publish-view>
             <agents-view name="agent-tools" api-endpoint="[[apiEndpoint]]" agent-id="[[_agentId]]" error="{{_error}}"></agents-view>
-            <eth-view name="eth-tools" api-endpoint="[[apiEndpoint]]" agent-id="[[_agentId]]" error="{{_error}}"></eth-view>
+            <template is="dom-if" if="[[_isEthAgent]]">
+              <eth-view name="eth-tools" api-endpoint="[[apiEndpoint]]" agent-id="[[_agentId]]" error="{{_error}}"></eth-view>
+            </template>
             <my-view404 name="view404"></my-view404>
           </iron-pages>
         </div>
@@ -215,7 +219,8 @@ class NodeFrontend extends PolymerElement {
       _agentId: { type: String, value: '' },
       _submittingLogin: { type: Boolean, value: false },
       _error: { type: Object, observer: '_errorChanged' },
-      _oidcUser: { type: Object, value: null}
+      _oidcUser: { type: Object, value: null},
+      _isEthAgent: { type: Boolean, value: false },
     };
   }
 
@@ -375,6 +380,11 @@ class NodeFrontend extends PolymerElement {
       this.$.userIdField.value = '';
       this.$.passwordField.value = '';
       this.$.statusbar._appendWidget();
+      if ( resp.hasOwnProperty('ethaddress') )
+      {
+        console.log("ethereum agent detected: " + resp.ethaddress);
+        this._isEthAgent = true;
+      }
     } else {
       this._handleError(event, "Bad response", "Login returned no agent ID")
     }

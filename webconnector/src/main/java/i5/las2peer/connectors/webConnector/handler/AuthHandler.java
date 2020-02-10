@@ -135,6 +135,9 @@ public class AuthHandler {
 			json.put("username", user.getLoginName());
 			json.put("email", user.getEmail());
 		}
+		if (agent instanceof EthereumAgent) {
+			json.put("ethaddress", ((EthereumAgent) agent).getEthereumAddress());
+		}
 		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).cookie(cookie).build();
 	}
 

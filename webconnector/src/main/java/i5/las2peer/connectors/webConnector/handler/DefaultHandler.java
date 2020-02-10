@@ -225,11 +225,10 @@ public class DefaultHandler {
 	private JSONArray getOtherNodeInfos(Node node) {
 		JSONArray result = new JSONArray();
 
-		if (!( node instanceof EthereumNode )) {
+		if (!( node instanceof PastryNodeImpl )) {
 			return result;
 		}
-		EthereumNode ethNode = (EthereumNode) node;
-		Collection<NodeHandle> knownNodes = ethNode.getPastryNode().getLeafSet().getUniqueSet();
+		Collection<NodeHandle> knownNodes = ((PastryNodeImpl) node).getPastryNode().getLeafSet().getUniqueSet();
 		for (NodeHandle nodeHandle : knownNodes) {
 			JSONObject nodeJSON = new JSONObject();
 			String nodeID = nodeHandle.toString();
@@ -239,9 +238,11 @@ public class DefaultHandler {
 					 nodeInfo.getAdminEmail() != null && nodeInfo.getAdminEmail().length() > 2 
 					)
 				{
-					nodeJSON.put("nodeAdminReputation", 
-						ethNode.getAgentReputation(nodeInfo.getAdminName(), nodeInfo.getAdminEmail())
-					);
+					if (ethNode != null) {
+						nodeJSON.put("nodeAdminReputation", 
+							ethNode.getAgentReputation(nodeInfo.getAdminName(), nodeInfo.getAdminEmail())
+						);
+					}
 				}
 				nodeJSON.put("nodeID", nodeID);
 				nodeJSON.put("nodeInfo", L2P_JSONUtil.nodeInformationToJSON(nodeInfo));
