@@ -101,6 +101,10 @@ class NodeFrontend extends PolymerElement {
           color: black;
           font-weight: bold;
         }
+
+        .cursorwrapper:hover {
+          cursor:pointer;
+        }
       </style>
 
       <app-location route="{{route}}" url-space-regex="^[[rootPath]]"></app-location>
@@ -123,6 +127,7 @@ class NodeFrontend extends PolymerElement {
 
         <!-- Main content -->
         <div class="app-header">
+          <div class="cursorwrapper">
           <las2peer-frontend-statusbar id="statusbar"
             base-url="[[hostUrl]]" service="las2peer Node Front-End"
             oidcclientid="bdda7396-3f6d-4d83-ac21-65b4069d0eab"
@@ -132,6 +137,7 @@ class NodeFrontend extends PolymerElement {
             loginoidctoken$="[[_oidcUser.access_token]]"
             loginoidcprovider="https://api.learning-layers.eu/o/oauth2"
           ></las2peer-frontend-statusbar>
+          </div>
 
           <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
             <welcome-view name="welcome" api-endpoint="[[apiEndpoint]]" agent-id="[[_agentId]]" error="{{_error}}"></welcome-view>
