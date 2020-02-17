@@ -203,7 +203,7 @@ class CustomStarRating extends PolymerElement {
 
         var self = this;
         this.ratings.forEach(function (rating, index) {
-            if (rating.value === newValue) {
+            if (Math.round(rating.value) === newValue) {
                 rating.selected = true;
             } else {
                 rating.selected = false;
