@@ -130,19 +130,17 @@ class NodeFrontend extends PolymerElement {
         <!-- Main content -->
         <div class="app-header">
           <template is="dom-if" if="[[_submittingLogin]]">
-            <paper-spinner style="left: 38%; position: absolute; z-index: 10" active="[[_submittingLogin]]"></paper-spinner>
+            <paper-spinner style="position: absolute;float: right;right: 170px;top: 25px;z-index: 1;" active="[[_submittingLogin]]"></paper-spinner>
           </template>
-          <div class="cursorwrapper">
-          <las2peer-frontend-statusbar id="statusbar"
-            base-url="[[hostUrl]]" service="las2peer Node Front-End"
-            oidcclientid="bdda7396-3f6d-4d83-ac21-65b4069d0eab"
-            oidcpopupsigninurl$="[[_loadUrl]]"
-            oidcpopupsignouturl$="[[_loadUrl]]"
-            oidcsilentsigninurl$="[[_loadUrl]]"
-            loginoidctoken$="[[_oidcUser.access_token]]"
-            loginoidcprovider="https://api.learning-layers.eu/o/oauth2"
-          ></las2peer-frontend-statusbar>
-          </div>
+            <las2peer-frontend-statusbar id="statusbar"
+              base-url="[[hostUrl]]" service="las2peer Node Front-End"
+              oidcclientid="bdda7396-3f6d-4d83-ac21-65b4069d0eab"
+              oidcpopupsigninurl$="[[_loadUrl]]"
+              oidcpopupsignouturl$="[[_loadUrl]]"
+              oidcsilentsigninurl$="[[_loadUrl]]"
+              loginoidctoken$="[[_oidcUser.access_token]]"
+              loginoidcprovider="https://api.learning-layers.eu/o/oauth2"
+            ></las2peer-frontend-statusbar>
 
           <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
             <welcome-view name="welcome" api-endpoint="[[apiEndpoint]]" agent-id="[[_agentId]]" error="{{_error}}"></welcome-view>
@@ -221,6 +219,7 @@ class NodeFrontend extends PolymerElement {
       _error: { type: Object, observer: '_errorChanged' },
       _oidcUser: { type: Object, value: null},
       _isEthAgent: { type: Boolean, value: false },
+      _isLoggedIn: { type: Boolean, value: false }
     };
   }
 
