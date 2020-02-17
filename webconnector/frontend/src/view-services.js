@@ -50,12 +50,14 @@ class ServicesView extends PolymerElement {
                  method="POST"
                  url$="[[apiEndpoint]]/services/start"
                  handle-as="text"
-                 on-error="_handleError"></iron-ajax>
+                 on-error="_handleError"
+                 loading="{{_working}}"></iron-ajax>
       <iron-ajax id="ajaxStopService"
                  method="POST"
                  url$="[[apiEndpoint]]/services/stop"
                  handle-as="text"
-                 on-error="_handleError"></iron-ajax>
+                 on-error="_handleError"
+                 loading="{{_working}}"></iron-ajax>
 
       <style include="shared-styles">
         :host {
@@ -220,7 +222,7 @@ class ServicesView extends PolymerElement {
               </div>
               <div class="card-actions">
                   <paper-button on-click="_handleStartButton"
-                                data-args$="[[service.name]]#[[_classesNotRunningLocally(release)]]@[[release.version]]">Start on this Node</paper-button>
+                                data-args$="[[service.name]]#[[_classesNotRunningLocally(release)]]@[[release.version]]" disabled$=[[_working]]>Start on this Node</paper-button>
                   <paper-button on-click="_handleStopButton"
                                 disabled$="[[!_countRunningLocally(release)]]"
                                 data-args$="[[service.name]]#[[release.supplement.class]]@[[release.version]]">Stop</paper-button>
@@ -231,6 +233,7 @@ class ServicesView extends PolymerElement {
                                 on-click="_handleFrontendButton"
                                 disabled$="[[!_fullyAvailableAnywhere(release)]]"
                                 data-args$="[[_frontendUrlIfServiceAvailable(release)]]">Open front-end</paper-button>
+                  <paper-spinner style="padding: 0.7em;float: right;" active="[[_working]]"></paper-spinner>
               </div>
             </paper-card>
           </template>
@@ -248,7 +251,9 @@ class ServicesView extends PolymerElement {
       _services: { type: Object },
       _communityTags: { type: Object },
       _submittingSearch: { type: Boolean },
-      _submittingUpload: { type: Boolean }
+      _submittingUpload: { type: Boolean },
+      _hasNoEther: { type: Boolean, value: false },
+      _working: { type: Boolean, value: false }
     };
   }
 
@@ -260,6 +265,8 @@ class ServicesView extends PolymerElement {
   }
 
   refresh() {
+    if ( this._hasNoEther )
+      return;
     this.$.ajaxNodeId.generateRequest();
     this.$.ajaxServiceData.generateRequest();
     this.$.ajaxCommunityTags.generateRequest();
@@ -485,6 +492,9 @@ class ServicesView extends PolymerElement {
     } else if (event.detail.error && event.detail.error.message) {
       errorTitle = event.detail.request.xhr.status + " - " + event.detail.request.xhr.statusText;
       errorMsg = event.detail.error.message;
+    }
+    if ( errorMsg.includes("Node does not use registry") ) {
+      this._hasNoEther = true;
     }
     console.log(errorTitle + ' - ' + errorMsg);
     // do not set error dialog params to prevent dialog spamming
