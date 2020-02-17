@@ -177,7 +177,7 @@ public class ServicesHandler {
 	public Response handleStartService(@QueryParam("serviceName") String serviceName, @QueryParam("version") String version)
 			throws CryptoException, AgentException {
 		// TODO: uhhh, about that password -- is that relevant??
-		ethereumNode.startService(ServiceNameVersion.fromString(serviceName + "@" + version), "foofoo");
+		pastryNode.startService(ServiceNameVersion.fromString(serviceName + "@" + version), "foofoo");
 		return Response.ok().build();
 	}
 
@@ -185,7 +185,7 @@ public class ServicesHandler {
 	@Path("/stop")
 	public Response handleStopService(@QueryParam("serviceName") String serviceName, @QueryParam("version") String version)
 			throws NodeException, AgentNotRegisteredException, ServiceNotFoundException {
-		ethereumNode.stopService(ServiceNameVersion.fromString(serviceName + "@" + version));
+		pastryNode.stopService(ServiceNameVersion.fromString(serviceName + "@" + version));
 		return Response.ok().build();
 	}
 	

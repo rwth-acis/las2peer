@@ -108,6 +108,20 @@ class ServicesView extends PolymerElement {
           There are no services published in this network.<br/>
           Feel free to use the <a href="[[rootPath]]publish-service">Publish Service</a> tab.
         </p>
+
+        <template is="dom-if" if="[[_hasNoEther]]">
+          <p>
+            No Blockchain instance detected. <em>Fallback to manual service starting procedure.</em> <br />
+            Service must be uploaded to Pastry storage via "Publish service" first. <br />
+            Enter full namespace + service name / class name followed by '@' and the version number, e.g.: <br />
+            <pre>i5.las2peer.services.fileService.FileService@2.2.5</pre>
+          </p>
+          <paper-input label="ServiceFullName@Version" id="serviceString" disabled="[[!_hasNoEther]]" value="@"></paper-input> <br />
+          <paper-button on-click="_handleStartButtonNoChain">Start sevice locally</paper-button>
+          <paper-spinner style="padding: 0.7em;float: right;" active="[[_working]]"></paper-spinner>
+
+        </template>
+
         <template id="serviceList" is="dom-repeat" items="[[_services]]" as="service" sort="_sort" filter="_filter">
           <template is="dom-repeat" items="[[_getLatestAsArray(service.releases)]]" as="release">
             <!-- we actually just want a single item here: the latest release. but I don't know how to do that without abusing repeat like this -->
@@ -441,6 +455,13 @@ class ServicesView extends PolymerElement {
     for (let c of classes) {
       this.startService(packageName + '.' + c, version);
     }
+  }
+
+  _handleStartButtonNoChain(event) {
+    let serviceString = this.$.serviceString.value.split("@");
+    let serviceName = serviceString[0];
+    let serviceVersion = serviceString[1];
+    this.startService(serviceName, serviceVersion);
   }
 
   startService(fullClassName, version) {
