@@ -51,6 +51,7 @@ class ServicesView extends PolymerElement {
                  url$="[[apiEndpoint]]/services/start"
                  handle-as="text"
                  on-error="_handleError"
+                 on-response="_handleServiceStart"
                  loading="{{_working}}"></iron-ajax>
       <iron-ajax id="ajaxStopService"
                  method="POST"
@@ -116,7 +117,7 @@ class ServicesView extends PolymerElement {
             Enter full namespace + service name / class name followed by '@' and the version number, e.g.: <br />
             <pre>i5.las2peer.services.fileService.FileService@2.2.5</pre>
           </p>
-          <paper-input label="ServiceFullName@Version" id="serviceString" disabled="[[!_hasNoEther]]" value="@"></paper-input> <br />
+          <paper-input label="ServiceFullName@Version" id="serviceString" disabled="[[!_hasNoEther]]" value$="[[_serviceString]]"></paper-input> <br />
           <paper-button on-click="_handleStartButtonNoChain">Start sevice locally</paper-button>
           <paper-spinner style="padding: 0.7em;float: right;" active="[[_working]]"></paper-spinner>
 
@@ -267,7 +268,8 @@ class ServicesView extends PolymerElement {
       _submittingSearch: { type: Boolean },
       _submittingUpload: { type: Boolean },
       _hasNoEther: { type: Boolean, value: false },
-      _working: { type: Boolean, value: false }
+      _working: { type: Boolean, value: false },
+      _serviceString: { type: String, value: "@", notify: true }
     };
   }
 
@@ -458,7 +460,7 @@ class ServicesView extends PolymerElement {
   }
 
   _handleStartButtonNoChain(event) {
-    let serviceString = this.$.serviceString.value.split("@");
+    let serviceString = this._serviceString.split("@");
     let serviceName = serviceString[0];
     let serviceVersion = serviceString[1];
     this.startService(serviceName, serviceVersion);
@@ -499,6 +501,10 @@ class ServicesView extends PolymerElement {
     if (event.target.getAttribute('data-args')) {
       window.open(event.target.getAttribute('data-args'));
     }
+  }
+
+  _handleServiceStart(event) {
+    this.checkStatus();
   }
 
   _handleError(event) {

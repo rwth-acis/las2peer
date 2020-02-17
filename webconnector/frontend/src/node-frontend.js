@@ -59,6 +59,25 @@ class NodeFrontend extends PolymerElement {
                  on-error="_handleError"
                  loading="{{_submittingLogin}}"></iron-ajax>
 
+      <iron-ajax id="ajaxCheckETH"
+                 url$="[[apiEndpoint]]/check-eth"
+                 handle-as="json"
+                 on-response="_handleCheckETHResponse"
+                 on-error="_handleCheckETHError"
+                 loading="{{_checking}}"></iron-ajax>
+      <iron-ajax id="ajaxCheckFileService"
+                 url$="[[hostRoot]]fileservice/index.html"
+                 handle-as="text"
+                 on-response="_handleCheckFSResponse"
+                 on-error="_handleCheckFSError"
+                 loading="{{_checking}}"></iron-ajax>
+      <iron-ajax id="ajaxCheckContactService"
+                 url$="[[hostRoot]]contactservice"
+                 handle-as="text"
+                 on-response="_handleCheckCSResponse"
+                 on-error="_handleCheckCSError"
+                 loading="{{_checking}}"></iron-ajax>
+
 
       <style>
         :host {
@@ -119,7 +138,67 @@ class NodeFrontend extends PolymerElement {
       <app-drawer-layout fullbleed="" narrow="{{narrow}}">
         <!-- Drawer content -->
         <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]">
-          <app-toolbar>Menu</app-toolbar>
+          <app-toolbar>
+            <div style="">
+              Menu
+            </div>
+
+            
+            <div style="margin-left: auto;order: 2;display: flex;align-content: center;align-items: center;">
+              <paper-spinner active="[[_checking]]" style="width: 18px; height: 18px;"></paper-spinner>
+              </span>
+              <!-- Is running blockchain? -->
+              <template is="dom-if" if="[[_isEthNode]]">
+                <iron-icon icon="fingerprint" 
+                  title="Node is running on Ethereum" 
+                  style="width: 18px; height: 18px; color: green;"></iron-icon> 
+              </template>
+              <template is="dom-if" if="[[!_isEthNode]]">
+                <iron-icon icon="fingerprint" 
+                  title="Node is NOT running on Ethereum" 
+                  style="width: 18px; height: 18px; color: red;"></iron-icon> 
+              </template>
+
+              <!-- Is FileService running? -->
+              <template is="dom-if" if="[[_isFileService]]">
+                <iron-icon icon="description" 
+                  title="FileService is Running" 
+                  style="width: 18px; height: 18px; color: green;"></iron-icon> 
+              </template>
+              <template is="dom-if" if="[[!_isFileService]]">
+                <iron-icon icon="description" 
+                  title="FileService is NOT Running" 
+                  style="width: 18px; height: 18px; color: red;"></iron-icon> 
+              </template
+              
+              <!-- Is ContactService running? -->
+              <template is="dom-if" if="[[_isContactService]]">
+                <iron-icon icon="perm-contact-calendar" 
+                  title="ContactService is Running" 
+                  style="width: 18px; height: 18px; color: green;"></iron-icon> 
+              </template>
+              <template is="dom-if" if="[[!_isContactService]]">
+                <iron-icon icon="perm-contact-calendar" 
+                  title="ContactService is NOT Running" 
+                  style="width: 18px; height: 18px; color: red;"></iron-icon> 
+              </template>
+
+              <!-- Is UserInformationService running? 
+              <template is="dom-if" if="[[_isUserInformationService]]">
+                <iron-icon icon="supervisor-account" 
+                  title="UserInformationService is Running" 
+                  style="width: 18px; height: 18px; color: green;"></iron-icon> 
+              </template>
+              <template is="dom-if" if="[[!_isUserInformationService]]">
+                <iron-icon icon="supervisor-account" 
+                  title="UserInformationService is NOT Running" 
+                  style="width: 18px; height: 18px; color: red;"></iron-icon> 
+              </template>
+              -->
+              <paper-icon-button icon="refresh" title="Refresh Status" on-click$="checkStatus" disabled="[[_checking]]"></paper-icon-button>
+            </div>
+          </app-toolbar>
+
           <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
             <a name="welcome" href="[[rootPath]]welcome">Welcome</a>
             <a name="status" href="[[rootPath]]status">Status</a>
@@ -218,12 +297,18 @@ class NodeFrontend extends PolymerElement {
       subroute: Object,
       hostUrl: {type: String, value: null},
       apiEndpoint: { type: String, value: '/las2peer' },
+      hostRoot: { type: String, value: document.URL.split(":")[0] + "://" + window.location.host + '/' },
       _agentId: { type: String, value: '' },
       _submittingLogin: { type: Boolean, value: false },
       _error: { type: Object, observer: '_errorChanged' },
       _oidcUser: { type: Object, value: null},
       _isEthAgent: { type: Boolean, value: false },
-      _isLoggedIn: { type: Boolean, value: false }
+      _isLoggedIn: { type: Boolean, value: false },
+      _checking: { type: Boolean, value: false },
+      _isEthNode: { type: Boolean, value: false },
+      _isFileService: { type: Boolean, value: false },
+      _isContactService: { type: Boolean, value: false },
+      _isUserInformationService: { type: Boolean, value: false },
     };
   }
 
@@ -288,7 +373,8 @@ class NodeFrontend extends PolymerElement {
 
   ready() {
     super.ready();
-    let appThis = this;
+    let rootThis = this;
+    window.rootThis = rootThis;
 
     this._loadUrl = document.URL; // there's definitely better ways to do this, but I have no idea
 
@@ -297,17 +383,20 @@ class NodeFrontend extends PolymerElement {
 
     this.$.ajaxValidateSession.generateRequest(); // validate old session
 
-    this.$.statusbar.addEventListener('signed-in', function(event) { appThis.storeOidcUser(event.detail); });
+    this.$.statusbar.addEventListener('signed-in', function(event) { rootThis.storeOidcUser(event.detail); });
 
-    this.$.statusbar.addEventListener('signed-out', function() { appThis._oidcUser = null; appThis.destroySession(); });
+    this.$.statusbar.addEventListener('signed-out', function() { rootThis._oidcUser = null; rootThis.destroySession(); });
 
     // deprecated code supporting login with las2peer credentials
     // trigger the hidden, real submit button
-    this.$.loginButton.addEventListener('click', function() { appThis.$.loginSubmitButton.click(); });
+    this.$.loginButton.addEventListener('click', function() { rootThis.$.loginSubmitButton.click(); });
 
-    this.$.loginForm.addEventListener('submit', function(event) { event.preventDefault(); appThis.sendLogin(); });
+    this.$.loginForm.addEventListener('submit', function(event) { event.preventDefault(); rootThis.sendLogin(); });
 
-    this.$.oidcChangeUserButton.addEventListener('click', function() { appThis.$.statusbar.shadowRoot.querySelector("#oidcButton")._handleClick(); });
+    this.$.oidcChangeUserButton.addEventListener('click', function() { rootThis.$.statusbar.shadowRoot.querySelector("#oidcButton")._handleClick(); });
+
+    this.checkStatus();
+    window.setInterval(function() { rootThis.checkStatus(); }, 10000);
   }
 
   oidcTokenStillValid(userObject) {
@@ -408,6 +497,38 @@ class NodeFrontend extends PolymerElement {
     }
   }
 
+  checkStatus()
+  {
+    this.$.ajaxCheckETH.generateRequest();
+    this.$.ajaxCheckFileService.generateRequest();
+    this.$.ajaxCheckContactService.generateRequest();
+  }
+
+  _handleCheckETHResponse(event) {
+    console.log(["CheckETHResponse", event]);
+    this._isEthNode = true;
+  }
+  _handleCheckETHError(event) {
+    console.log(["CheckETHError", event]);
+    this._isEthNode = false;
+  }
+  _handleCheckFSResponse(event) {
+    console.log(["CheckFSResponse", event]);
+    this._isFileService = true;
+  }
+  _handleCheckFSError(event) {
+    console.log(["CheckFSError", event]);
+    this._isFileService = false;
+  }
+  _handleCheckCSResponse(event) {
+    console.log(["CheckCSResponse", event]);
+    this._isContactService = true;
+  }
+  _handleCheckCSError(event) {
+    console.log(["CheckCSError", event]);
+    this._isContactService = false;
+  }
+
   // iron-ajax error event for some reason passes two arguments
   // that can be confusing, but it's not a problem
   _handleError(object, title, message) {
@@ -433,6 +554,19 @@ class NodeFrontend extends PolymerElement {
       } else {
         title = "Unknown error";
         message = "Could not determine type of error, check manually in console"
+      }
+
+      if ( event.details.request.__data.status == 404 )
+      {
+        title = "Service unreachable";
+        if ( event.details.request.url.includes("/contactservice/") )
+        {
+          errorMsg = "ContactService not reachable. Ensure it is running.";
+        }
+        if ( event.details.request.url.includes("/fileservice/") )
+        {
+          errorMsg = "FileService not reachable. Ensure it is running.";
+        }
       }
     }
     this._error = { title: title, msg: message, obj: object };

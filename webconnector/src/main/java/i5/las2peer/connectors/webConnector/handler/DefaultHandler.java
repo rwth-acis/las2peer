@@ -67,6 +67,22 @@ public class DefaultHandler {
 	}
 
 	@GET
+	@Path("/check-eth")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response checkEth() throws NotFoundException {
+		if ( node instanceof EthereumNode ) 
+		{
+			JSONObject json = new JSONObject();
+			json.put("msg", "found eth");
+			return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
+		}
+		else
+		{
+			throw new NotFoundException("Node does not use registry.");
+		}
+	}
+
+	@GET
 	public Response rootPath() throws URISyntaxException {
 		return Response.temporaryRedirect(new URI(WebappHandler.DEFAULT_ROUTE)).build();
 	}
