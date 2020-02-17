@@ -113,14 +113,6 @@ class EthereumView extends PolymerElement {
 					padding: 10px;
 				}
 
-				--paper-tabs-selection-bar-color: var(--paper-light-blue-900);
-				--paper-tab-ink: var(--paper-light-blue-100);
-			
-				--paper-tabs: {
-					color: white;
-					background-color: var(--paper-light-blue-500);
-				};
-
 				.agentList, .profileList {
 					overflow-y: scroll;
 					max-height: 350px;

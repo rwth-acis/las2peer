@@ -83,6 +83,14 @@ $_documentContainer.innerHTML = `<dom-module id="shared-styles">
         background-color: var(--paper-green-100);
       }
 
+      --paper-tabs-selection-bar-color: var(--paper-light-blue-900);
+      --paper-tab-ink: var(--paper-light-blue-100);
+    
+      --paper-tabs: {
+        color: white;
+        background-color: var(--paper-light-blue-500);
+      };
+
       .flex-horizontal {
         @apply --layout-horizontal;
       }
