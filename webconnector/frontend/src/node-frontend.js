@@ -105,6 +105,11 @@ class NodeFrontend extends PolymerElement {
         .cursorwrapper:hover {
           cursor:pointer;
         }
+
+        paper-toast .error {
+          --paper-toast-background-color: rgba(255,0,0,0.7);
+          --paper-toast-color: white;
+        }
       </style>
 
       <app-location route="{{route}}" url-space-regex="^[[rootPath]]"></app-location>
@@ -195,15 +200,14 @@ class NodeFrontend extends PolymerElement {
           <div hidden$="[[toBool(_oidcUser)]]">To register, use the <a dialog-dismiss name="view-agents" href="[[rootPath]]agent-tools">Agents</a> tab.</div>
         </paper-dialog>
 
-        <paper-dialog id="las2peerErrorDialog">
-          <h2 id="las2peerErrorDialogTitle">Error</h2>
-          <div id="las2peerErrorDialogMessage"></div>
-          <div class="buttons">
-            <paper-button dialog-dismiss>OK</paper-button>
-          </div>
-        </paper-dialog>
-
       </app-drawer-layout>
+
+
+
+      <paper-toast id="las2peerErrorDialog" horizontal-align="left" class="error">
+        <h2 id="las2peerErrorDialogTitle">Error</h2>
+        <div id="las2peerErrorDialogMessage"></div>
+      </paper-toast>
     `;
   }
 
