@@ -51,7 +51,7 @@ class ServicePublishView extends PolymerElement {
                  handle-as="json"
                  on-response="_handleUploadServiceResponse"
                  on-error="_handleError"
-                 loading = "{{_submittingUpload}}"></iron-ajax>
+                 loading="{{_submittingUpload}}"></iron-ajax>
       <iron-ajax id="ajaxStartService"
                  method="POST"
                  url$="[[apiEndpoint]]/services/start"
@@ -83,7 +83,10 @@ class ServicePublishView extends PolymerElement {
           <paper-input label="Description" id="serviceUploadDescription" disabled="[[_submittingUpload]]" required="true"></paper-input>
           <paper-input label="Source code URL (e.g., GitHub project)" id="serviceUploadVcsUrl" disabled="[[_submittingUpload]]"></paper-input>
           <paper-input label="Front-end URL" id="serviceUploadFrontendUrl" disabled="[[_submittingUpload]]"></paper-input>
-          <paper-button raised on-tap="uploadService" disabled="[[_submittingUpload]]">Publish Service</paper-button>
+          <paper-button raised on-tap="uploadService" disabled="[[_submittingUpload]]">Publish Service</paper-button> 
+
+          <paper-spinner active="[[_submittingUpload]]" style="float: right"></paper-spinner>
+            </span>
         </iron-form>
         <div id="uploadServiceMsg" style="font-weight: bold"></div>
       </div>
