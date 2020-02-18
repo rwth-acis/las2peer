@@ -22,7 +22,9 @@ import '@polymer/paper-listbox/paper-listbox.js';
 import '@polymer/paper-spinner/paper-spinner.js';
 import '@polymer/paper-tabs/paper-tabs.js';
 import '@polymer/paper-tooltip/paper-tooltip.js';
-//import '@cwmr/iron-star-rating/iron-star-rating.js';
+import '@polymer/iron-icon/iron-icon.js';
+import '@polymer/iron-icons/iron-icons.js';
+import '@polymer/iron-icons/notification-icons.js';
 import './custom-star-rating.js';
 import './shared-styles.js';
 
