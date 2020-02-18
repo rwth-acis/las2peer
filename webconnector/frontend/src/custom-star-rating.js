@@ -116,7 +116,7 @@ class CustomStarRating extends PolymerElement {
         super.connectedCallback();
 
 
-        if ( !this.value && this.readonly )
+        if ( this.value <= 0 && this.readonly )
         {
             this.ratings = [
                 { value: 3, class: 'whole', icon: 'social:sentiment-neutral', selected: false },
@@ -139,7 +139,7 @@ class CustomStarRating extends PolymerElement {
         {
             var valueToFace = '';
 
-            switch (this.value.toFixed(0)) {
+            switch (Math.round(this.value)) {
                 case 1:
                     valueToFace = 'remove-circle-outline';
                     break;
@@ -158,7 +158,7 @@ class CustomStarRating extends PolymerElement {
                 break;
             }
             this.ratings = [
-                { value: this.value, class: 'whole color-'+this.value.toFixed(0), icon: 'icons:' + valueToFace, selected: false }
+                { value: this.value, class: 'whole color-'+Math.round(this.value), icon: 'icons:' + valueToFace, selected: false }
             ];
         } 
         else
