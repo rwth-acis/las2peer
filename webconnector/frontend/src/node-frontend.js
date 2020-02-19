@@ -157,42 +157,42 @@ class NodeFrontend extends PolymerElement {
               </template>
 
               <!-- Is FileService running? -->
-              <template is="dom-if" if="[[_isFileService]]">
+              <template is="dom-if" if="[[_isFileServiceRunning]]">
                 <iron-icon icon="description" 
                   title="FileService is Running" 
                   style="width: 18px; height: 18px; color: green;"></iron-icon> 
               </template>
-              <template is="dom-if" if="[[!_isFileService]]">
+              <template is="dom-if" if="[[!_isFileServiceRunning]]">
                 <iron-icon icon="description" 
                   title="FileService is NOT Running" 
                   style="width: 18px; height: 18px; color: red;"></iron-icon> 
               </template
               
               <!-- Is ContactService running? -->
-              <template is="dom-if" if="[[_isContactService]]">
+              <template is="dom-if" if="[[_isContactServiceRunning]]">
                 <iron-icon icon="perm-contact-calendar" 
                   title="ContactService is Running" 
                   style="width: 18px; height: 18px; color: green;"></iron-icon> 
               </template>
-              <template is="dom-if" if="[[!_isContactService]]">
+              <template is="dom-if" if="[[!_isContactServiceRunning]]">
                 <iron-icon icon="perm-contact-calendar" 
                   title="ContactService is NOT Running" 
                   style="width: 18px; height: 18px; color: red;"></iron-icon> 
               </template>
 
               <!-- Is UserInformationService running? 
-              <template is="dom-if" if="[[_isUserInformationService]]">
+              <template is="dom-if" if="[[_isUserInformationServiceRunning]]">
                 <iron-icon icon="supervisor-account" 
                   title="UserInformationService is Running" 
                   style="width: 18px; height: 18px; color: green;"></iron-icon> 
               </template>
-              <template is="dom-if" if="[[!_isUserInformationService]]">
+              <template is="dom-if" if="[[!_isUserInformationServiceRunning]]">
                 <iron-icon icon="supervisor-account" 
                   title="UserInformationService is NOT Running" 
                   style="width: 18px; height: 18px; color: red;"></iron-icon> 
               </template>
               -->
-              <paper-icon-button icon="refresh" title="Refresh Status" on-click$="checkStatus" disabled="[[_checking]]"></paper-icon-button>
+              <paper-icon-button icon="refresh" title="Refresh Status" on-click="window.rootThis.checkStatus" disabled="[[_checking]]"></paper-icon-button>
             </div>
           </app-toolbar>
 
@@ -301,9 +301,9 @@ class NodeFrontend extends PolymerElement {
       _isLoggedIn: { type: Boolean, value: false },
       _checking: { type: Boolean, value: false },
       _isEthNode: { type: Boolean, value: false },
-      _isFileService: { type: Boolean, value: false },
-      _isContactService: { type: Boolean, value: false },
-      _isUserInformationService: { type: Boolean, value: false },
+      _isFileServiceRunning: { type: Boolean, value: false },
+      _isContactServiceRunning: { type: Boolean, value: false },
+      _isUserInformationServiceRunning: { type: Boolean, value: false },
     };
   }
 
@@ -391,7 +391,7 @@ class NodeFrontend extends PolymerElement {
     this.$.oidcChangeUserButton.addEventListener('click', function() { rootThis.$.statusbar.shadowRoot.querySelector("#oidcButton")._handleClick(); });
 
     this.checkStatus();
-    window.setInterval(function() { rootThis.checkStatus(); }, 50000);
+    //window.setInterval(function() { rootThis.checkStatus(); }, 50000);
   }
 
   oidcTokenStillValid(userObject) {
@@ -506,34 +506,35 @@ class NodeFrontend extends PolymerElement {
     this._isEthNode = false;
   }
   _handleCheckFSResponse(event) {
-    this._isFileService = true;
+    this._isFileServiceRunning = true;
   }
   _handleCheckFSError(event) {
-    this._isFileService = false;
+    this._isFileServiceRunning = false;
   }
   _handleCheckCSResponse(event) {
-    this._isContactService = true;
+    this._isContactServiceRunning = true;
   }
   _handleCheckCSError(event) {
-    this._isContactService = false;
+    this._isContactServiceRunning = false;
   }
 
   // iron-ajax error event for some reason passes two arguments
   // that can be confusing, but it's not a problem
   _handleError(object, title, message) {
-    console.warning("[DEBUG] object: ", object);
-    console.warning("[DEBUG] title: ", title);
-    console.warning("[DEBUG] message: ", message);
+    console.warn("[DEBUG] object: ", object);
+    console.warn("[DEBUG] title: ", title);
+    console.warn("[DEBUG] message: ", message);
     if (!title || !message) {
       // try to get details of known possible errors
       let maybeDetail = (object || {}).detail;
       let maybeError = (maybeDetail || {}).error;
-      let maybeXhr = ((maybeDetail || {}).request || {}).xhr;
+      let maybeRequest = (maybeDetail || {}).request;
+      let maybeXhr = (maybeRequest || {}).xhr;
 
       // TODO: this is for from perfect. all fields should be checked before usage
       if ((maybeXhr || {}).readyState === 4 && (maybeXhr || {}).status === 0) { // network issues
         title = 'Network Connection Error';
-        message = 'Could not connect to: ' + object.detail.request.url;
+        message = 'Could not connect to: ' + (maybeRequest || {}).url;
       } else if ((maybeXhr || {}).status && (maybeXhr.response || {}).msg) {
         title = maybeXhr.status + " - " + maybeXhr.statusText;
         message = maybeXhr.response.msg;
@@ -545,22 +546,22 @@ class NodeFrontend extends PolymerElement {
         message = "Could not determine type of error, check manually in console"
       }
 
-      if ( event.details.request.__data.status == 404 )
+      if ( ((maybeRequest || {}).__data || {}).status == 404 )
       {
         title = "Service unreachable";
-        if ( event.details.request.url.includes("/contactservice/") )
+        if ( (maybeRequest || {}).url.includes("/contactservice/") )
         {
-          errorMsg = "ContactService not reachable. Ensure it is running.";
-          if ( !this._isContactService )
+          message = "ContactService not reachable. Ensure it is running.";
+          if ( !this._isContactServiceRunning )
             return;
-          this._isContactService = false;
+          this._isContactServiceRunning = false;
         }
-        if ( event.details.request.url.includes("/fileservice/") )
+        if ( (maybeRequest || {}).url.includes("/fileservice/") )
         {
-          errorMsg = "FileService not reachable. Ensure it is running.";
-          if ( !this._isFileService )
+          message = "FileService not reachable. Ensure it is running.";
+          if ( !this._isFileServiceRunning )
             return;
-          this._isFileService = false;
+          this._isFileServiceRunning = false;
         }
       }
       if ( message.includes("Node does not use registry") ) {

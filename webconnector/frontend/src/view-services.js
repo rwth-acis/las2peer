@@ -504,7 +504,7 @@ class ServicesView extends PolymerElement {
   }
 
   _handleServiceStart(event) {
-    this.checkStatus();
+    window.rootThis.checkStatus();
   }
 
   _handleError(object, title, message) {

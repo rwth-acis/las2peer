@@ -372,8 +372,8 @@ class EthereumView extends PolymerElement {
 									</dl>
 
 									<!-- REQUEST REPUTATION PROFILE (OPT-IN) -->
-									<template is="dom-if" if="[[_EthWallet.ethAccBalance]]">
-										<template is="dom-if" if="[[!_hasEthProfile]]"> 
+									<template is="dom-if" if="[[!_hasEthProfile]]">
+										<template is="dom-if" if="[[_EthWallet.ethAccBalance]]"> 
 											<p class="description">
 												las2peer user reputation requires users to <em>opt-in</em> to the system to rate others and, most importantly, be rated by others. 
 												Each transaction on the blockchain <small>(<em>which is the backing mechanism of las2peer reputation</em>)</small> requires a small transaction fee.
@@ -436,8 +436,8 @@ class EthereumView extends PolymerElement {
 								<table width="100%">
 										<tr>
 											<th> <iron-icon icon="perm-identity" title="Username"></iron-icon> Username</th>
-											<th> <iron-icon icon="account-circle" title="Reputation"></iron-icon> Reputation</th>
-											<th> <iron-icon icon="assessment" title="Voting Statistics"></iron-icon> Voting Statistics</th>
+											<th> <iron-icon icon="account-circle" title="Rate user"></iron-icon> Rate user</th>
+											<th> <iron-icon icon="assessment" title="Reputation Statistics"></iron-icon> Reputation Statistics</th>
 											<th> <iron-icon icon="fingerprint" title="Wallet address"></iron-icon> Wallet address</th>
 											<th> <iron-icon icon="touch-app" title="Actions"></iron-icon> Actions </th>
 										</tr>
@@ -450,8 +450,8 @@ class EthereumView extends PolymerElement {
 
 												<td> <!-- RATING -->
 													<template is="dom-if" if="[[agent.agentHasProfile]]">
-														<custom-star-rating on-rating-selected="rateAgent" value="[[agent.ethRating]]"></custom-star-rating>
-														<custom-star-rating value="[[agent.ethRating]]" readonly single></custom-star-rating>
+														<custom-star-rating on-rating-selected="rateAgent" value$="[[agent.ethRating]]"></custom-star-rating>
+														
 													</template>
 													<template is="dom-if" if="[[!agent.agentHasProfile]]">
 														<custom-star-rating readonly></custom-star-rating>
@@ -459,17 +459,19 @@ class EthereumView extends PolymerElement {
 												</td>
 
 												<td> <!-- VOTING STATISTICS -->
-													<template is="dom-if" if="[[agent.agentHasProfile]]">
-														<iron-icon icon="notification:network-check" title="Average grade"></iron-icon>
-													 	[[agent.ethRating]] | 
-														<iron-icon icon="cloud-download" title="Incoming votes"></iron-icon> 
-														[[agent.noOfTransactionsRcvd]] | 
-														<iron-icon icon="cloud-upload" title="Outgoing votes"></iron-icon> 
-														[[agent.noOfTransactionsSent]]
-													</template>	
-													<template is="dom-if" if="[[!agent.agentHasProfile]]">
-														-
-													</template>
+													<div style="display: flex; align-content: center; align-items: center;">
+														<template is="dom-if" if="[[!agent.agentHasProfile]]">
+															-
+														</template>
+														<template is="dom-if" if="[[agent.agentHasProfile]]">
+															
+															<iron-icon icon="notification:network-check" title="User reputation"></iron-icon> <custom-star-rating value="[[agent.ethRating]]" readonly="" single=""></custom-star-rating> ( [[agent.ethRating]] ) &nbsp;|&nbsp;
+															
+															<iron-icon icon="cloud-download" title="Incoming votes"></iron-icon> &nbsp;[[agent.noOfTransactionsRcvd]] &nbsp;|&nbsp; 
+															
+															<iron-icon icon="cloud-upload" title="Outgoing votes"></iron-icon> &nbsp;[[agent.noOfTransactionsSent]]
+														</template>	
+													</div>
 												</td>
 
 												<td> 
@@ -710,10 +712,6 @@ class EthereumView extends PolymerElement {
 						groupName: res[keys[i]]
 					}
 				);
-				console.log({
-					groupID: keys[i],
-					groupName: res[keys[i]]
-				});
 		}
 		if (keys > 0) {
 				if (this.$.groupSelect.value.length > 0) {
@@ -724,16 +722,11 @@ class EthereumView extends PolymerElement {
 		}
 	}
 	_updateGroupMemberlist(e) {
-		console.log([e.selectedItem, e]);
-
-		console.log(this._groupSelected);
-		console.log(this._findGroupIDByName(this._groupSelected.innerHTML.trim()));
 		this.group = this._findGroupIDByName(this._groupSelected.innerHTML.trim());
 	}
 
 	_handleGenericTxLogResponse(event) {
 		this._ethTxLog = event.detail.response;
-		console.log(this._ethTxLog);
 		if (this._ethTxLog.rcvdJsonLog.length == 0 && this._ethTxLog.sentJsonLog.length == 0)
 			this._hasNoTxLog = true;
 		else
@@ -741,7 +734,6 @@ class EthereumView extends PolymerElement {
 	}
 	
 	_handleDashboardListResponse(event) {
-		console.log(event.detail.response);
 		let response = event.detail.response;
 		response.agentList.forEach(function(element) { element.shortid = element.agentid.substr(0, 15) + '...' });
 		this._listDashboard = response.agentList;
@@ -749,32 +741,24 @@ class EthereumView extends PolymerElement {
 	}
 
 	_handleLoadAgentlistResponse(event) {
-		console.log(event.detail.response);
 		let response = event.detail.response;
 		response.agents.forEach(function(element) { element.shortid = element.agentid.substr(0, 15) + '...' });
 		this._listAgents = response.agents;
 		this._hasNoAgentsList = false;
 	}
 	_handleLoadProfilelistResponse(event) {
-		console.log(event.detail.response);
 		let response = event.detail.response;
 		response.agents.forEach(function (element) { element.shortid = element.agentid.substr(0, 15) + '...' });
 		this._listProfiles = response.agents;
 		this._hasNoProfilesList = false;
 	}  
 	_handleRateAgentResponse(event) {
-		console.log(event);
 		let response = event.detail.response;
 		
 		this.$.toast.innerHTML = 'Rating (' + response.recipientname + ': '+ response.rating + ') successfully casted.';
 		this.$.toast.open();
 	}
 	rateAgent(event) {
-		console.log(event);
-		console.log(event.model.get('agent'));
-		console.log(event.model.get('agent.shortid'));
-		console.log(event.model.get('agent.username'));
-		
 		//let req = this.$.ajaxRateAgentMock;
 		let req = this.$.ajaxRateAgent;
 			req.body = new FormData();
@@ -809,12 +793,10 @@ class EthereumView extends PolymerElement {
 	}
 	_handleRequestFaucetResponse(event) {
 		this._ethFaucetLog = event.detail.response;
-		console.log(this._ethFaucetLog);
 		this.$.ethFaucetDiaLog.open();
 		this.refreshEthWallet();
 	}
 	_handleRegisterProfileResponse(event) {
-		console.log(event.detail.response);
 		this.refreshEthWallet();
 		this.refreshProfilesList();
 	}
@@ -834,7 +816,6 @@ class EthereumView extends PolymerElement {
 		this._chosenAgentID = agentid;
 		this._chosenUsername = username;
 		this.$.sendEthDialog.open();
-		console.log("modal opened");
 	}
 	closeEthDialog() {
 		this.$.sendEthDialog.close();
