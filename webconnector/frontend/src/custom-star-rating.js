@@ -29,32 +29,32 @@ class CustomStarRating extends PolymerElement {
                 color: #eeeeee;
                 float: right;
             }
-            iron-icon.selected {
-                color: #999999;
-            }
-            iron-icon.color-1.selected {
+            iron-icon.color-1, :host([single]) > iron-icon.color-1 {
                 color: #d7191c;
             }
-            iron-icon.color-2.selected {
+            iron-icon.color-2, :host([single]) > iron-icon.color-2 {
                 color: #fdae61;
             }
-            iron-icon.color-3.selected {
+            iron-icon.color-3, :host([single]) > iron-icon.color-3 {
                 color: #bbb;
             }
-            iron-icon.color-4.selected {
+            iron-icon.color-4, :host([single]) > iron-icon.color-4 {
                 color: #5ac4e8;
             }
-            iron-icon.color-5.selected {
+            iron-icon.color-5, :host([single]) > iron-icon.color-5 {
                 color: #2c7bb6;
+            }
+            iron-icon.selected {
+                opacity: 1.0;
             }
             :host(:not([readonly])) iron-icon.whole {
                 opacity: 0.4;
             }
-            :host[single] {
+            :host([single]) {
                 opacity: 1.0;
             }
             :host(:not([readonly])) iron-icon:hover {
-                opacity: 1.0;
+                opacity: 0.8;
             }
         </style>
     
@@ -157,8 +157,9 @@ class CustomStarRating extends PolymerElement {
                     valueToFace = 'sentiment-very-satisfied';
                 break;
             }
+            console.log("single face: " + valueToFace);
             this.ratings = [
-                { value: this.value, class: 'whole color-'+Math.round(this.value), icon: 'icons:' + valueToFace, selected: false }
+                { value: Math.round(this.value), class: 'whole color-'+Math.round(this.value), icon: 'social:' + valueToFace, selected: false }
             ];
         } 
         else
@@ -187,11 +188,13 @@ class CustomStarRating extends PolymerElement {
 
         console.log(
             {
-                1: (this.readonly) ? this.readonly : "?r?",
-                2: (this.disabled) ? this.disabled : "?d?",
-                3: (this.single) ? this.single : "?s?",
-                4: (this.value) ? this.value : "?v?",
-                5: this.ratings.length
+                "readonly": (this.readonly) ? this.readonly : "r; nope",
+                "disabled": (this.disabled) ? this.disabled : "d; nope",
+                "single": (this.single) ? this.single : "s; nope",
+                "rounded value": (this.value) ? Math.round(this.value) : "v; nope",
+                "value": (this.value) ? Math.round(this.value) : "v; nope",
+                "no. elements": this.ratings.length,
+                "ratings": this.ratings
             }
         );
     }
