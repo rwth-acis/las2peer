@@ -305,7 +305,7 @@ class EthereumView extends PolymerElement {
 												</dt>
 
 												<dd>
-													<custom-star-rating value="[[_EthWallet.ethRating]]" readonly></custom-star-rating>
+													<custom-star-rating value="[[_EthWallet.ethRating]]" readonly single></custom-star-rating>
 												</dd>
 
 
@@ -409,6 +409,7 @@ class EthereumView extends PolymerElement {
 						<paper-tabs selected="{{_selectedTab}}">
 							<paper-tab>
 								<span id="dashboard"><iron-icon icon="store"></iron-icon> Dashboard</span>
+								<paper-spinner active="[[_working]]" style="float:right;"></paper-spinner>
 							</paper-tab>
 							<paper-tab>
 								<span id="faucet-tx"><iron-icon icon="assignment"></iron-icon> Repuation pay-out Log</span>
@@ -426,13 +427,6 @@ class EthereumView extends PolymerElement {
 
 						<iron-pages selected="{{_selectedTab}}">
 							<div class="dashboardList"> <!-- Reputation dashboard -->
-								<!--<h2>
-									Reputation Dashboard
-									<paper-icon-button icon="refresh" title="Refresh Profiles List" on-click="refreshProfilesList" disabled="[[_working]]"></paper-icon-button> <br />
-									<small>(all users who have <u>opted in</u> to the Reputation System)</small>
-								</h2>-->
-								<paper-spinner active="[[_working]]" style="float:right;"></paper-spinner>
-
 								<table width="100%">
 										<tr>
 											<th> <iron-icon icon="perm-identity" title="Username"></iron-icon> Username</th>
@@ -514,15 +508,17 @@ class EthereumView extends PolymerElement {
 										<template is="dom-if" if="[[tx.sender == _ethCoinbaseInfo.coinbaseAddress]]">
 										<tr>
 											<td><iron-icon icon="update"></iron-icon> [[tx.txDateTime]]</td>
-											<td><iron-icon icon="face"></iron-icon> [[tx.txSender]]</td>
+											<td><iron-icon icon="face"></iron-icon> [[tx.txSenderAddress]]</td>
 											<td><iron-icon icon="class"></iron-icon> [[tx.txTransactionType]]</td>
 											<td><iron-icon icon="speaker-notes"></iron-icon> [[tx.txMessage]]</td>
 											<td>
-											<template is="dom-if" if="[[tx.transactionType == 'L2P USER RATING']]">
+											<template is="dom-if" if="[[_isUserRating(tx.transactionType)]]">
 												<iron-icon icon="record-voice-over"></iron-icon> Rating
 											</template>
-											<template is="dom-if" if="[[tx.txAmountInEth]]">
-												<iron-icon icon="card-giftcard"></iron-icon> [[tx.txAmountInEth]] L2Pcoin
+											<template is="dom-if" if=[[!_isUserRating(tx.transactionType)]]">
+												<template is="dom-if" if="[[tx.txAmountInEth]]">
+													<iron-icon icon="card-giftcard"></iron-icon> [[tx.txAmountInEth]] L2Pcoin
+												</template>
 											</template>
 											</td>
 										</tr>
@@ -543,7 +539,7 @@ class EthereumView extends PolymerElement {
 									<template is="dom-repeat" items="[[_ethTxLog.sentJsonLog]]" as="tx">
 										<tr>
 											<td><iron-icon icon="update"></iron-icon> [[tx.txDateTime]]</td>
-											<td><iron-icon icon="face"></iron-icon> [[tx.txReceiver]]</td>
+											<td><iron-icon icon="face"></iron-icon> [[tx.txReceiverAddress]]</td>
 											<td><iron-icon icon="class"></iron-icon> [[tx.txTransactionType]]</td>
 											<td><iron-icon icon="speaker-notes"></iron-icon> [[tx.txMessage]]</td>
 											<td>
@@ -757,6 +753,7 @@ class EthereumView extends PolymerElement {
 		
 		this.$.toast.innerHTML = 'Rating (' + response.recipientname + ': '+ response.rating + ') successfully casted.';
 		this.$.toast.open();
+		this.refreshWallet();
 	}
 	rateAgent(event) {
 		//let req = this.$.ajaxRateAgentMock;
@@ -838,6 +835,11 @@ class EthereumView extends PolymerElement {
 
 	_handleError(object, title, message) {
 		window.rootThis._handleError(object, title, message)
+	}
+
+	_isUserRating(val)
+	{
+		return val == "L2P USER RATING";
 	}
 }
 

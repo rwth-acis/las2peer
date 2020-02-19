@@ -44,16 +44,16 @@ class CustomStarRating extends PolymerElement {
             iron-icon.color-5, :host([single]) > iron-icon.color-5 {
                 color: #2c7bb6;
             }
-            iron-icon.selected {
-                opacity: 1.0;
-            }
             :host(:not([readonly])) iron-icon.whole {
-                opacity: 0.4;
+                opacity: 0.5;
+            }
+            :host(:not([readonly])) iron-icon:hover {
+                opacity: 1.0;
             }
             :host([single]) {
                 opacity: 1.0;
             }
-            :host(:not([readonly])) iron-icon:hover {
+            iron-icon.selected {
                 opacity: 0.8;
             }
         </style>
@@ -115,14 +115,6 @@ class CustomStarRating extends PolymerElement {
     connectedCallback() {
         super.connectedCallback();
 
-
-        if ( this.value <= 0 && this.readonly )
-        {
-            this.ratings = [
-                { value: 3, class: 'whole', icon: 'social:sentiment-neutral', selected: false },
-            ];
-        } 
-        else 
         if ( this.disabled )
         {
             this.readonly = true;
@@ -142,7 +134,7 @@ class CustomStarRating extends PolymerElement {
             switch (Math.round(this.value)) {
                 case 1:
                     valueToFace = 'remove-circle-outline';
-                    break;
+                break;
                 case 2:
                     valueToFace = 'sentiment-dissatisfied';
                 break;  
@@ -157,9 +149,15 @@ class CustomStarRating extends PolymerElement {
                     valueToFace = 'sentiment-very-satisfied';
                 break;
             }
-            console.log("single face: " + valueToFace);
             this.ratings = [
                 { value: Math.round(this.value), class: 'whole color-'+Math.round(this.value), icon: 'social:' + valueToFace, selected: false }
+            ];
+        } 
+        else 
+        if ( this.value <= 0 && this.readonly )
+        {
+            this.ratings = [
+                { value: 3, class: 'whole', icon: 'social:sentiment-neutral', selected: false },
             ];
         } 
         else
@@ -173,7 +171,7 @@ class CustomStarRating extends PolymerElement {
                     { value: 2, class: 'whole color-2', icon: 'social:sentiment-dissatisfied', selected: false },
                     { value: 1, class: 'whole color-1', icon: 'social:sentiment-very-dissatisfied', selected: false },
                 ];
-            }
+            } 
             else
             {
                 this.ratings = [
@@ -183,7 +181,7 @@ class CustomStarRating extends PolymerElement {
                     { value: 2, class: 'whole', icon: 'social:sentiment-dissatisfied', selected: false },
                     { value: 1, class: 'whole', icon: 'social:sentiment-very-dissatisfied', selected: false },
                 ];               
-            }   
+            } 
         }
 
         console.log(

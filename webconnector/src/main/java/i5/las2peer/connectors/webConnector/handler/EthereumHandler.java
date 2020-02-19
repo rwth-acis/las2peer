@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -976,7 +977,10 @@ public class EthereumHandler {
 			}
 			else
 			{
-				agent.put("ethRating", profile.getStarRating());
+				DecimalFormat f = new DecimalFormat("#.00");
+				agent.put("ethRating", f.format(
+					profile.getStarRating()
+				));
 			}
 		}
 		else

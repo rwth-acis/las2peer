@@ -134,10 +134,10 @@ class ServicesView extends PolymerElement {
                 <div>
                   Author: <span class="author">[[service.authorName]]</span> 
                   <template is="dom-if" if="[[service.authorReputation]]">
-                    <custom-star-rating value="[[service.authorReputation]]" readonly></custom-star-rating>
+                    <custom-star-rating value="[[service.authorReputation]]" readonly single></custom-star-rating>
                   </template>
                   <template is="dom-if" if="[[!service.authorReputation]]">
-                    <custom-star-rating disable-rating readonly></custom-star-rating>
+                    <custom-star-rating disable-rating readonly single></custom-star-rating>
                   </template>
                 </div>
                 <div>
@@ -216,10 +216,10 @@ class ServicesView extends PolymerElement {
                                 </span>
                                 <span class="nodeAdminRating">
                                   <template is="dom-if" if="[[instance.hosterReputation]]">
-                                    <custom-star-rating value="[[instance.hosterReputation]]" readonly></custom-star-rating>
+                                    <custom-star-rating value="[[instance.hosterReputation]]" readonly single></custom-star-rating>
                                   </template>
                                   <template is="dom-if" if="[[!instance.hosterReputation]]">
-                                    <custom-star-rating disable-rating readonly></custom-star-rating>
+                                    <custom-star-rating disable-rating readonly single></custom-star-rating>
                                   </template>
                                 </span>
 

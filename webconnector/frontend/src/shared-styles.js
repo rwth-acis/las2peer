@@ -48,12 +48,15 @@ $_documentContainer.innerHTML = `<dom-module id="shared-styles">
       }
 
       paper-tabs {
-        background-color: var(--tabs-background-colour, #4285f4);
-        --paper-tabs-selection-bar-color: var(--tabs-colour, white);
+        background-color: var(--paper-light-blue-500);
+        --paper-tabs-selection-bar-color: var(--paper-light-blue-900);
         color: var(--tabs-colour, white);
+        --paper-tab-ink: var(--paper-light-blue-100);
       }
 
       paper-button.red {
+        background-color: var(--paper-red-a100);
+        color: var(--paper-red-800);
         --paper-button-ink-color: var(--paper-red-a200);
         --paper-button-flat-keyboard-focus: {
           background-color: var(--paper-red-a200) !important;
@@ -69,6 +72,8 @@ $_documentContainer.innerHTML = `<dom-module id="shared-styles">
       }
 
       paper-button.green {
+        background-color: var(--paper-green-100);
+        color: var(--paper-green-800);
         --paper-button-ink-color: var(--paper-green-a200);
         --paper-button-flat-keyboard-focus: {
           background-color: var(--paper-green-a200) !important;
@@ -80,16 +85,11 @@ $_documentContainer.innerHTML = `<dom-module id="shared-styles">
         };
       }
       paper-button.green:hover {
-        background-color: var(--paper-green-100);
+        background-color: var(--paper-green-a200);
+        color: white;
       }
 
-      --paper-tabs-selection-bar-color: var(--paper-light-blue-900);
-      --paper-tab-ink: var(--paper-light-blue-100);
     
-      --paper-tabs: {
-        color: white;
-        background-color: var(--paper-light-blue-500);
-      };
 
       .flex-horizontal {
         @apply --layout-horizontal;

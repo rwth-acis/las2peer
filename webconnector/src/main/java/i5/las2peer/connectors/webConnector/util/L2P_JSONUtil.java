@@ -1,6 +1,7 @@
 package i5.las2peer.connectors.webConnector.util;
 
 import java.math.BigInteger;
+import java.text.DecimalFormat;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -207,7 +208,10 @@ public class L2P_JSONUtil {
 				if (upd.getNoTransactionsRcvd().compareTo(BigInteger.ZERO) == 0) {
 					json.put("ethRating", 0);
 				} else {
-					json.put("ethRating", upd.getStarRating());
+					DecimalFormat f = new DecimalFormat("#.00");
+					json.put("ethRating", f.format(
+						upd.getStarRating()
+					));
 				}
 				json.put("agentHasProfile", 1);
 			} else {

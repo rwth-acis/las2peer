@@ -68,11 +68,13 @@ class NodeFrontend extends PolymerElement {
                  url$="[[hostRoot]]fileservice/index.html"
                  on-response="_handleCheckFSResponse"
                  on-error="_handleCheckFSError"
+                 handle-as="document"
                  loading="{{_checking}}"></iron-ajax>
       <iron-ajax id="ajaxCheckContactService"
                  url$="[[hostRoot]]contactservice"
                  on-response="_handleCheckCSResponse"
                  on-error="_handleCheckCSError"
+                 handle-as="document"
                  loading="{{_checking}}"></iron-ajax>
 
 

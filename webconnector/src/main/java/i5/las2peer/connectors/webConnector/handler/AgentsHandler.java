@@ -2,6 +2,7 @@ package i5.las2peer.connectors.webConnector.handler;
 
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.logging.Level;
@@ -155,7 +156,10 @@ public class AgentsHandler {
 						}
 						else
 						{
-							json.put("ethRating", upd.getCumulativeScore().divide(upd.getNoTransactionsRcvd()));
+							DecimalFormat f = new DecimalFormat("#.00");
+							json.put("ethRating", f.format(
+								upd.getCumulativeScore().divide(upd.getNoTransactionsRcvd())
+							));
 						}
 					} else {
 						json.put("ethRating", "0");
