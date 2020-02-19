@@ -154,23 +154,8 @@ class ServicePublishView extends PolymerElement {
     this.$.uploadServiceMsg.innerHTML = event.detail.response.msg;
   }
 
-  _handleError(event) {
-    console.log(event);
-    let errorTitle = 'Error', errorMsg = 'An unknown error occurred. Please check console output.';
-    if (event.detail.request.xhr.readyState == 4 && event.detail.request.xhr.status == 0) { // network issues
-      errorTitle = 'Network Connection Error';
-      errorMsg = 'Could not connect to: ' + event.detail.request.url;
-    } else if (event.detail.request.xhr.response && event.detail.request.xhr.response.msg) {
-      errorTitle = event.detail.request.xhr.status + " - " + event.detail.request.xhr.statusText;
-      errorMsg = event.detail.request.xhr.response.msg;
-    } else if (event.detail.error && event.detail.error.message) {
-      errorTitle = event.detail.request.xhr.status + " - " + event.detail.request.xhr.statusText;
-      errorMsg = event.detail.error.message;
-    }
-    console.log(errorTitle + ' - ' + errorMsg);
-    // do not set error dialog params to prevent dialog spamming
-
-    this.error = { title: errorTitle, msg: errorMsg, obj: event };
+  _handleError(object, title, message) {
+    window.rootThis._handleError(object, title, message)
   }
 }
 

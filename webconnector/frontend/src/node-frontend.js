@@ -61,19 +61,16 @@ class NodeFrontend extends PolymerElement {
 
       <iron-ajax id="ajaxCheckETH"
                  url$="[[apiEndpoint]]/check-eth"
-                 handle-as="json"
                  on-response="_handleCheckETHResponse"
                  on-error="_handleCheckETHError"
                  loading="{{_checking}}"></iron-ajax>
       <iron-ajax id="ajaxCheckFileService"
                  url$="[[hostRoot]]fileservice/index.html"
-                 handle-as="text"
                  on-response="_handleCheckFSResponse"
                  on-error="_handleCheckFSError"
                  loading="{{_checking}}"></iron-ajax>
       <iron-ajax id="ajaxCheckContactService"
                  url$="[[hostRoot]]contactservice"
-                 handle-as="text"
                  on-response="_handleCheckCSResponse"
                  on-error="_handleCheckCSError"
                  loading="{{_checking}}"></iron-ajax>
@@ -232,9 +229,7 @@ class NodeFrontend extends PolymerElement {
             <services-view name="view-services" api-endpoint="[[apiEndpoint]]" agent-id="[[_agentId]]" error="{{_error}}"></services-view>
             <service-publish-view name="publish-service" api-endpoint="[[apiEndpoint]]" agent-id="[[_agentId]]" error="{{_error}}"></service-publish-view>
             <agents-view name="agent-tools" api-endpoint="[[apiEndpoint]]" agent-id="[[_agentId]]" error="{{_error}}"></agents-view>
-            <template is="dom-if" if="[[_isEthAgent]]">
-              <eth-view name="eth-tools" api-endpoint="[[apiEndpoint]]" agent-id="[[_agentId]]" error="{{_error}}"></eth-view>
-            </template>
+            <eth-view name="eth-tools" api-endpoint="[[apiEndpoint]]" agent-id="[[_agentId]]" error="{{_error}}"></eth-view>
             <my-view404 name="view404"></my-view404>
           </iron-pages>
         </div>
@@ -396,7 +391,7 @@ class NodeFrontend extends PolymerElement {
     this.$.oidcChangeUserButton.addEventListener('click', function() { rootThis.$.statusbar.shadowRoot.querySelector("#oidcButton")._handleClick(); });
 
     this.checkStatus();
-    window.setInterval(function() { rootThis.checkStatus(); }, 10000);
+    window.setInterval(function() { rootThis.checkStatus(); }, 50000);
   }
 
   oidcTokenStillValid(userObject) {
@@ -505,36 +500,30 @@ class NodeFrontend extends PolymerElement {
   }
 
   _handleCheckETHResponse(event) {
-    console.log(["CheckETHResponse", event]);
     this._isEthNode = true;
   }
   _handleCheckETHError(event) {
-    console.log(["CheckETHError", event]);
     this._isEthNode = false;
   }
   _handleCheckFSResponse(event) {
-    console.log(["CheckFSResponse", event]);
     this._isFileService = true;
   }
   _handleCheckFSError(event) {
-    console.log(["CheckFSError", event]);
     this._isFileService = false;
   }
   _handleCheckCSResponse(event) {
-    console.log(["CheckCSResponse", event]);
     this._isContactService = true;
   }
   _handleCheckCSError(event) {
-    console.log(["CheckCSError", event]);
     this._isContactService = false;
   }
 
   // iron-ajax error event for some reason passes two arguments
   // that can be confusing, but it's not a problem
   _handleError(object, title, message) {
-    console.log("[DEBUG] object: ", object);
-    console.log("[DEBUG] title: ", title);
-    console.log("[DEBUG] message: ", message);
+    console.warning("[DEBUG] object: ", object);
+    console.warning("[DEBUG] title: ", title);
+    console.warning("[DEBUG] message: ", message);
     if (!title || !message) {
       // try to get details of known possible errors
       let maybeDetail = (object || {}).detail;
@@ -562,11 +551,20 @@ class NodeFrontend extends PolymerElement {
         if ( event.details.request.url.includes("/contactservice/") )
         {
           errorMsg = "ContactService not reachable. Ensure it is running.";
+          if ( !this._isContactService )
+            return;
+          this._isContactService = false;
         }
         if ( event.details.request.url.includes("/fileservice/") )
         {
           errorMsg = "FileService not reachable. Ensure it is running.";
+          if ( !this._isFileService )
+            return;
+          this._isFileService = false;
         }
+      }
+      if ( message.includes("Node does not use registry") ) {
+        this._isEthNode = false;
       }
     }
     this._error = { title: title, msg: message, obj: object };

@@ -854,6 +854,10 @@ class EthereumView extends PolymerElement {
 		this._ethTransactionSent = true;
 		setTimeout(function () { appThis.closeEthDialog(); }, 200);
 	}
+
+	_handleError(object, title, message) {
+		window.rootThis._handleError(object, title, message)
+	}
 }
 
 window.customElements.define('eth-view', EthereumView);

@@ -507,24 +507,8 @@ class ServicesView extends PolymerElement {
     this.checkStatus();
   }
 
-  _handleError(event) {
-    console.log(event);
-    let errorTitle = 'Error', errorMsg = 'An unknown error occurred. Please check console output.';
-    if (event.detail.request.xhr.readyState == 4 && event.detail.request.xhr.status == 0) { // network issues
-      errorTitle = 'Network Connection Error';
-      errorMsg = 'Could not connect to: ' + event.detail.request.url;
-    } else if (event.detail.request.xhr.response && event.detail.request.xhr.response.msg) {
-      errorTitle = event.detail.request.xhr.status + " - " + event.detail.request.xhr.statusText;
-      errorMsg = event.detail.request.xhr.response.msg;
-    } else if (event.detail.error && event.detail.error.message) {
-      errorTitle = event.detail.request.xhr.status + " - " + event.detail.request.xhr.statusText;
-      errorMsg = event.detail.error.message;
-    }
-    if ( errorMsg.includes("Node does not use registry") ) {
-      this._hasNoEther = true;
-    }
-    console.log(errorTitle + ' - ' + errorMsg);
-    // do not set error dialog params to prevent dialog spamming
+  _handleError(object, title, message) {
+    window.rootThis._handleError(object, title, message)
   }
 }
 
