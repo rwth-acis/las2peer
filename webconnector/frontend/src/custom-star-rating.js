@@ -133,7 +133,7 @@ class CustomStarRating extends PolymerElement {
 
             switch (Math.round(this.value)) {
                 case 1:
-                    valueToFace = 'remove-circle-outline';
+                    valueToFace = 'sentiment-very-dissatisfied';
                 break;
                 case 2:
                     valueToFace = 'sentiment-dissatisfied';
