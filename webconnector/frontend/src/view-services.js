@@ -275,9 +275,12 @@ class ServicesView extends PolymerElement {
 
   ready() {
     super.ready();
-    window.appThis = this;
-    window.setTimeout(function() { window.appThis.refresh(); }, 1);
-    window.setInterval(function() { window.appThis.refresh(); }, 5000);
+    window.serviceThis = this;
+    window.setTimeout(function() { window.serviceThis.refresh(); }, 1);
+    if ( window.rootThis._isEthNode ) 
+    {
+      window.setInterval(function() { window.serviceThis.refresh(); }, 5000);
+    }
   }
 
   refresh() {
@@ -459,8 +462,8 @@ class ServicesView extends PolymerElement {
     }
   }
 
-  _handleStartButtonNoChain(event) {
-    let serviceString = this._serviceString.split("@");
+  _handleStartButtonNoChain(event) { 
+    let serviceString = this.shadowRoot.querySelector('#serviceString').split("@");
     let serviceName = serviceString[0];
     let serviceVersion = serviceString[1];
     this.startService(serviceName, serviceVersion);

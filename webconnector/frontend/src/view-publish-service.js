@@ -108,9 +108,13 @@ class ServicePublishView extends PolymerElement {
 
   ready() {
     super.ready();
-    let appThis = this;
-    window.setTimeout(function() { appThis.refresh(); }, 1);
-    window.setInterval(function() { appThis.refresh(); }, 5000);
+    let publishThis = this;
+    window.publishThis = publishThis;
+    window.setTimeout(function() { publishThis.refresh(); }, 1);
+    if ( window.rootThis._isEthNode ) 
+    {
+      window.setInterval(function() { publishThis.refresh(); }, 5000);
+    }
   }
 
   refresh() {

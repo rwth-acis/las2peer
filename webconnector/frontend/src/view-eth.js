@@ -636,9 +636,9 @@ class EthereumView extends PolymerElement {
 
 	ready() {
 		super.ready();
-		let appThis = this;
-		window.appThis = this;
-		window.setTimeout(function() { appThis.refreshWallet(); }, 5);
+		let ethThis = this;
+		window.ethThis = this;
+		window.setTimeout(function() { ethThis.refreshWallet(); }, 5);
 	}
 
 	refreshWallet() {
@@ -830,7 +830,7 @@ class EthereumView extends PolymerElement {
 	_handleGenericTransactionResponse(event)
 	{
 		this._ethTransactionSent = true;
-		setTimeout(function () { appThis.closeEthDialog(); }, 200);
+		setTimeout(function () { ethThis.closeEthDialog(); }, 200);
 	}
 
 	_handleError(object, title, message) {
