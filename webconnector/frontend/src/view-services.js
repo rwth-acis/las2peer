@@ -110,14 +110,14 @@ class ServicesView extends PolymerElement {
           Feel free to use the <a href="[[rootPath]]publish-service">Publish Service</a> tab.
         </p>
 
-        <template is="dom-if" if="[[_hasNoEther]]">
+        <template is="dom-if" if="[[window.rootThis._isEthNode]]">
           <p>
             No Blockchain instance detected. <em>Fallback to manual service starting procedure.</em> <br />
             Service must be uploaded to Pastry storage via "Publish service" first. <br />
             Enter full namespace + service name / class name followed by '@' and the version number, e.g.: <br />
             <pre>i5.las2peer.services.fileService.FileService@2.2.5</pre>
           </p>
-          <paper-input label="ServiceFullName@Version" id="serviceString" disabled="[[!_hasNoEther]]" value$="[[_serviceString]]"></paper-input> <br />
+          <paper-input label="ServiceFullName@Version" id="serviceString" disabled="[[!window.rootThis._isEthNode]]" value$="[[_serviceString]]"></paper-input> <br />
           <paper-button on-click="_handleStartButtonNoChain">Start sevice locally</paper-button>
           <paper-spinner style="padding: 0.7em;float: right;" active="[[_working]]"></paper-spinner>
 
@@ -284,7 +284,7 @@ class ServicesView extends PolymerElement {
   }
 
   refresh() {
-    if ( this._hasNoEther )
+    if ( window.rootThis._isEthNode )
       return;
     this.$.ajaxNodeId.generateRequest();
     this.$.ajaxServiceData.generateRequest();

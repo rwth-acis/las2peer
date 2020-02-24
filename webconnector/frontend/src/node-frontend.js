@@ -523,9 +523,6 @@ class NodeFrontend extends PolymerElement {
   // iron-ajax error event for some reason passes two arguments
   // that can be confusing, but it's not a problem
   _handleError(object, title, message) {
-    console.warn("[DEBUG] object: ", object);
-    console.warn("[DEBUG] title: ", title);
-    console.warn("[DEBUG] message: ", message);
     if (!title || !message) {
       // try to get details of known possible errors
       let maybeDetail = (object || {}).detail;
