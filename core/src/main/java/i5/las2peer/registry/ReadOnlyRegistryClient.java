@@ -318,6 +318,15 @@ public class ReadOnlyRegistryClient {
 	}
 
 	public String getServiceAuthor(String service) {
+
+		logger.info("[service names] searching for: " + service);
+		for (Map.Entry<String, String> entry : observer.serviceNameToAuthor.entrySet()) {
+			logger.info(
+				"[service names] found entry: " + entry.getKey() + " | " + entry.getValue()
+			);
+		}
+
+
 		if (!observer.serviceNameToAuthor.containsKey(service))
 			return "";
 		return observer.serviceNameToAuthor.get(service);
