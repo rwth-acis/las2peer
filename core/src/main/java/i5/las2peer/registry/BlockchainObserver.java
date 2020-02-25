@@ -583,7 +583,7 @@ class BlockchainObserver {
 					// is this the service we're looking for?
 					if ( announcedServiceName.equals(searchingForService) )
 					{
-						logger.info("[ChainObserver]     found service " + announcedServiceName + ", running at " + hostingNodeIDList.size() + " nodes");
+						logger.fine("[ChainObserver]     found service " + announcedServiceName + ", running at " + hostingNodeIDList.size() + " nodes");
 						// yes -> count no. of increments per hosting node
 						hostingNodeIDList.forEach(hostingNodeID-> 
 						{

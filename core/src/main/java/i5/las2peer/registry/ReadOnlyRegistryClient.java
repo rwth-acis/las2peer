@@ -318,18 +318,26 @@ public class ReadOnlyRegistryClient {
 	}
 
 	public String getServiceAuthor(String service) {
+		int lastDotIndex = service.lastIndexOf('.');
+		String serviceNamespace = service.substring(0, lastDotIndex);
+		logger.info("[service names] searching for: " + serviceNamespace);
 
-		logger.info("[service names] searching for: " + service);
-		for (Map.Entry<String, String> entry : observer.serviceNameToAuthor.entrySet()) {
-			logger.info(
-				"[service names] found entry: " + entry.getKey() + " | " + entry.getValue()
-			);
+		for (Map.Entry<String, String> entry : observer.serviceNameToAuthor.entrySet()) 
+		{
+			if ( entry.getKey().equals(serviceNamespace) )
+			{
+				logger.info(
+					"[service names] found entry: " + entry.getKey() + " | " + entry.getValue()
+				);
+			}
 		}
 
-
-		if (!observer.serviceNameToAuthor.containsKey(service))
+		if (!observer.serviceNameToAuthor.containsKey(serviceNamespace))
+		{
+			logger.warning("[service author] not found: " + serviceNamespace);
 			return "";
-		return observer.serviceNameToAuthor.get(service);
+		}
+		return observer.serviceNameToAuthor.get(serviceNamespace);
 	}
 
 	/** @return map of profile owners to their usernames */

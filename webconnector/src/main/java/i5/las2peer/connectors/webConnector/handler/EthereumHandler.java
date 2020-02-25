@@ -225,7 +225,7 @@ public class EthereumHandler {
 		String ethAddress = ethAgent.getEthereumAddress();
 
 		String apiBaseURL = uriInfo.getBaseUri().toString();//connector.getHttpEndpoint();
-		String successBaseURL = apiBaseURL + "/mobsos-success-modeling";
+		String successBaseURL = apiBaseURL + "mobsos-success-modeling";
 		String successModelsURL = successBaseURL + "/apiv2/models";
 
 		String successGroupURL = successModelsURL + "/" + groupID;
@@ -308,13 +308,13 @@ public class EthereumHandler {
 
 				// check mobsos success model:
 
-				logger.info("[ETH Faucet/MobSOS]: querying service Hosting value: ");
 				String serviceSuccessMeasureURL_Hosting = successGroupURL + "/" + serviceWithSuccessModel + "/" + RegistryConfiguration.MobSOS_SuccessMeasure_Hosting_Label;
 				float serviceHostingValue = getSuccessMeasure(serviceSuccessMeasureURL_Hosting);
-
-				logger.info("[ETH Faucet/MobSOS]: querying service Develop value: ");
+				logger.info("[ETH Faucet/MobSOS]: querying service Hosting value: " + serviceHostingValue);
+				
 				String serviceSuccessMeasureURL_Develop = successGroupURL + "/" + serviceWithSuccessModel + "/" + RegistryConfiguration.MobSOS_SuccessMeasure_Develop_Label;
 				float serviceDevelopValue = getSuccessMeasure(serviceSuccessMeasureURL_Develop);
+				logger.info("[ETH Faucet/MobSOS]: queryied service Develop value: " + serviceDevelopValue);
 
 
 
@@ -324,19 +324,13 @@ public class EthereumHandler {
 				Boolean isAuthorOfService = false;
 				if ( authorOfService != "" )
 				{
-					logger.info("[ETH Faucet/MobSOS]: checking for service authorship (comparing '" + authorOfService + "' with '"+agentLogin+"'):");
+					logger.info("[ETH Faucet/MobSOS]: service author info found (comparing '" + authorOfService + "' with '"+agentLogin+"'):");
 					if ( authorOfService.equals(agentLogin) )
 					{
 						logger.info("         .!.         ethAgent is developer/author of this service.");
 						isAuthorOfService = true;
 						developedServices.add(serviceWithSuccessModel);
 					}
-				}
-				else
-				{
-					logger.info("[ETH Faucet/MobSOS]: authorship check failed, searching for " + agentLogin + ":");
-					logger.info(registryClient.getServiceAuthors().toString());
-					logger.info( ( registryClient.getServiceAuthors().containsKey(agentLogin) ? "YES" : "NO" ) );
 				}
 
 				logger.info("[ETH Faucet/MobSOS]: checking how often service '" + serviceWithSuccessModel + "' has been announced since last faucet request.");
@@ -349,16 +343,23 @@ public class EthereumHandler {
 				for( String adminNodeID: adminNodeIDs)
 				{
 					Integer serviceAnnouncementCount = serviceAnnouncementsPerNodeID.get(adminNodeID);
+					logger.fine(
+						"         .!.         found " + serviceAnnouncementCount + 
+						" announcements for node # " + adminNodeID
+					);
 					// check if one of the nodes running this service is administered by ethAgent
 					if ( serviceAnnouncementsPerNodeID.containsKey(adminNodeID) )
 					{
 						// found a service that has a success model and is hosted by ethAgent
-						logger.info("         .!.         found " + serviceAnnouncementCount + " announcements for node # " + adminNodeID);
+						logger.info("         .!.         ethAgent is hoster of this service.");
 						hostingServicesToAnnouncementCount.putIfAbsent(serviceWithSuccessModel, 0);
 						hostingServicesToAnnouncementCount.merge( 
 							serviceWithSuccessModel, // key
 							serviceAnnouncementCount, // value to 'merge' with
 							Integer::sum // function to use for mergin
+						);
+						logger.info("=> incremented value to: " + 
+							hostingServicesToAnnouncementCount.get(serviceWithSuccessModel)
 						);
 					}
 					// check if this service was developed by ethAgent
@@ -371,24 +372,42 @@ public class EthereumHandler {
 							serviceAnnouncementCount, // value to 'merge' with
 							Integer::sum // function to use for mergin
 						);
+						logger.info("=> incremented value to: " + 
+							authoredServicesToAnnouncementCount.get(serviceWithSuccessModel)
+						);
 					}
 				}
 				float serviceWasAnnouncedByEthAgent = hostingServicesToAnnouncementCount.getOrDefault( serviceWithSuccessModel, 0 );
-				serviceWasAnnouncedByEthAgent *= serviceHostingValue;
 				if ( serviceWasAnnouncedByEthAgent > 0 )
 				{
-					logger.info("[ETH Faucet]: service '" + serviceWithSuccessModel + "' is valued for hosting at "+serviceHostingValue+" and was announced " + (serviceWasAnnouncedByEthAgent/serviceHostingValue) + " times. ");
-					hostingServiceValue.put( serviceWithSuccessModel, serviceWasAnnouncedByEthAgent );
+					logger.info("[ETH Faucet]: service '" + serviceWithSuccessModel + "' is valued for hosting at "+serviceHostingValue+" and was announced " + (serviceWasAnnouncedByEthAgent) + " times. ");
+					hostingServiceValue.put( serviceWithSuccessModel, 
+						serviceWasAnnouncedByEthAgent * serviceHostingValue
+					);
 					hostingServicesRatedByFaucet.add(serviceWithSuccessModel);
+				}
+				else
+				{
+					logger.info("[ETH Faucet] ethAgent didn't host the service.");
 				}
 
 				float serviceDevelopedByEthAgentWasAnnounced = authoredServicesToAnnouncementCount.getOrDefault( serviceWithSuccessModel, 0 );
-				serviceDevelopedByEthAgentWasAnnounced *= serviceDevelopValue;
 				if ( serviceDevelopedByEthAgentWasAnnounced > 0 )
 				{
-					logger.info("[ETH Faucet]: service '" + serviceWithSuccessModel + "' was developed by agent. Its development is rated at "+serviceDevelopValue+" and it was announced " + (serviceDevelopedByEthAgentWasAnnounced/serviceDevelopValue) + " times. ");
-					developServiceValue.put( serviceWithSuccessModel, serviceDevelopedByEthAgentWasAnnounced );
+					logger.info("[ETH Faucet]: service '" + serviceWithSuccessModel + "' was developed by agent. Its development is rated at "+serviceDevelopValue+" and it was announced " + (serviceDevelopedByEthAgentWasAnnounced) + " times. ");
+					developServiceValue.put( serviceWithSuccessModel, 
+						serviceDevelopedByEthAgentWasAnnounced * serviceDevelopValue
+					);
 					developServicesRatedByFaucet.add(serviceWithSuccessModel);
+				}
+				else
+				{
+					logger.info("[ETH Faucet] ethAgent didn't develop the service.");
+				}
+
+				if ( serviceWasAnnouncedByEthAgent == 0 && serviceDevelopedByEthAgentWasAnnounced == 0 )
+				{
+					logger.info("[ETH Faucet] ethAgent has no affiliation with the service.");
 				}
 			}
 

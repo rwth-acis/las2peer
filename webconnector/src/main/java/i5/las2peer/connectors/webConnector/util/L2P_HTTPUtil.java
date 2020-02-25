@@ -20,7 +20,7 @@ public class L2P_HTTPUtil {
     public static String getHTTP(String requestURL, String requestMethod)
             throws MalformedURLException, ServiceNotFoundException {
 
-        logger.info("[HTTP] " + requestMethod + "@ " + requestURL);
+        logger.fine("[HTTP] " + requestMethod + "@ " + requestURL);
 
         // https://stackoverflow.com/a/35013372
         // https://stackoverflow.com/q/33491373
