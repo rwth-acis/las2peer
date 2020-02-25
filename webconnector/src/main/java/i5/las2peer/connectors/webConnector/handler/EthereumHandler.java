@@ -20,8 +20,10 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Response.Status;
 
 import org.glassfish.jersey.media.multipart.FormDataParam;
@@ -193,7 +195,7 @@ public class EthereumHandler {
 	@POST
 	@Path("/requestFaucet")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response handleRequestFaucet(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId,
+	public Response handleRequestFaucet(@Context UriInfo uriInfo, @CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId,
 			@FormDataParam("groupID") String groupID) {
 		AgentSession session = connector.getSessionById(sessionId);
 		if (session == null) {
@@ -222,7 +224,7 @@ public class EthereumHandler {
 		String agentEmail = ethAgent.getEmail();
 		String ethAddress = ethAgent.getEthereumAddress();
 
-		String apiBaseURL = "http://tech4comp.dbis.rwth-aachen.de:32319";//connector.getHttpEndpoint();
+		String apiBaseURL = uriInfo.getBaseUri().toString();//connector.getHttpEndpoint();
 		String successBaseURL = apiBaseURL + "/mobsos-success-modeling";
 		String successModelsURL = successBaseURL + "/apiv2/models";
 
@@ -318,6 +320,7 @@ public class EthereumHandler {
 
 				// check if ethAgent is developer/author of service
 				String authorOfService = registryClient.getServiceAuthor(serviceWithSuccessModel);
+				logger.info("[ETH Faucet/MobSOS]: checking for service authorship");
 				Boolean isAuthorOfService = false;
 				if ( authorOfService != "" )
 				{
