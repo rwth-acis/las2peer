@@ -342,8 +342,10 @@ public class EthereumHandler {
 				// check if service is hosted by ethAgent
 				for( String adminNodeID: adminNodeIDs)
 				{
-					Integer serviceAnnouncementCount = serviceAnnouncementsPerNodeID.get(adminNodeID);
-					logger.fine(
+					Integer serviceAnnouncementCount = serviceAnnouncementsPerNodeID.getOrDefault(
+						adminNodeID, Integer.valueOf(0)
+					);
+					logger.info(
 						"         .!.         found " + serviceAnnouncementCount + 
 						" announcements for node # " + adminNodeID
 					);
@@ -352,11 +354,13 @@ public class EthereumHandler {
 					{
 						// found a service that has a success model and is hosted by ethAgent
 						logger.info("         .!.         ethAgent is hoster of this service.");
-						hostingServicesToAnnouncementCount.putIfAbsent(serviceWithSuccessModel, 0);
+						hostingServicesToAnnouncementCount.putIfAbsent(
+							serviceWithSuccessModel, Integer.valueOf(0)
+						);
 						hostingServicesToAnnouncementCount.merge( 
 							serviceWithSuccessModel, // key
 							serviceAnnouncementCount, // value to 'merge' with
-							Integer::sum // function to use for mergin
+							(a,b) -> a + b // function to use for mergin
 						);
 						logger.info("=> incremented value to: " + 
 							hostingServicesToAnnouncementCount.get(serviceWithSuccessModel)
@@ -366,11 +370,13 @@ public class EthereumHandler {
 					if ( isAuthorOfService )
 					{
 						logger.info("         .!.         ethAgent is developer/author of this service.");
-						authoredServicesToAnnouncementCount.putIfAbsent(serviceWithSuccessModel, 0);
+						authoredServicesToAnnouncementCount.putIfAbsent(
+							serviceWithSuccessModel, Integer.valueOf(0)
+						);
 						authoredServicesToAnnouncementCount.merge(
 							serviceWithSuccessModel, // key
 							serviceAnnouncementCount, // value to 'merge' with
-							Integer::sum // function to use for mergin
+							(a,b) -> a + b // function to use for mergin
 						);
 						logger.info("=> incremented value to: " + 
 							authoredServicesToAnnouncementCount.get(serviceWithSuccessModel)
