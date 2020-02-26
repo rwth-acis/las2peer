@@ -75,6 +75,7 @@ class NodeFrontend extends PolymerElement {
                  on-response="_handleCheckCSResponse"
                  on-error="_handleCheckCSError"
                  handle-as="document"
+                 params='{}'
                  loading="{{_checking}}"></iron-ajax>
 
 
@@ -178,7 +179,7 @@ class NodeFrontend extends PolymerElement {
               </template>
               <template is="dom-if" if="[[!_isContactServiceRunning]]">
                 <iron-icon icon="perm-contact-calendar" 
-                  title="ContactService is NOT Running" 
+                  title="ContactService is NOT Running OR user is not logged in." 
                   style="width: 18px; height: 18px; color: red;"></iron-icon> 
               </template>
 
