@@ -1,5 +1,6 @@
 package i5.las2peer.registry.data;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -100,8 +101,8 @@ public class GenericTransactionData {
         return amountInWei;
     }
 
-    public String getAmountInEth() {
-        return Convert.fromWei(amountInWei.toString(), Convert.Unit.ETHER).toString();
+    public BigDecimal getAmountInEth() {
+        return Convert.fromWei(amountInWei.toString(), Convert.Unit.ETHER);
     }
 
     public void setAmountInWei(BigInteger amountInWei) {
