@@ -480,7 +480,7 @@ public class EthereumHandler {
 		JSONObject json = new JSONObject();
 		json.put("agentid", agent.getIdentifier());
 		json.put("ethTargetAdd", ethAddress);
-		json.put("ethFaucetAmount", Float.toString(reward) + " ETH");
+		json.put("ethFaucetAmount", Float.toString(reward) + " L2Pcoin");
 
 		json.put("rewardDetails", 
 			new JSONObject()
