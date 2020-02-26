@@ -513,10 +513,10 @@ class EthereumView extends PolymerElement {
 											<td><iron-icon icon="class"></iron-icon> [[tx.txTransactionType]]</td>
 											<td><iron-icon icon="speaker-notes"></iron-icon> [[tx.txMessage]]</td>
 											<td>
-											<template is="dom-if" if="[[_isUserRating(tx.transactionType)]]">
+											<template is="dom-if" if="[[!tx.txAmountInEth]]">
 												<iron-icon icon="record-voice-over"></iron-icon> Rating
 											</template>
-											<template is="dom-if" if=[[!_isUserRating(tx.transactionType)]]">
+											<template is="dom-if" if=[[tx.txAmountInEth)]]">
 												<template is="dom-if" if="[[tx.txAmountInEth]]">
 													<iron-icon icon="card-giftcard"></iron-icon> [[tx.txAmountInEth]] L2Pcoin
 												</template>
@@ -544,10 +544,10 @@ class EthereumView extends PolymerElement {
 											<td><iron-icon icon="class"></iron-icon> [[tx.txTransactionType]]</td>
 											<td><iron-icon icon="speaker-notes"></iron-icon> [[tx.txMessage]]</td>
 											<td>
-											<template is="dom-if" if="[[_isUserRating(tx.transactionType)]]">
+											<template is="dom-if" if="[[!tx.txAmountInEth]]">
 												<iron-icon icon="record-voice-over"></iron-icon> Rating
 											</template>
-											<template is="dom-if" if=[[!_isUserRating(tx.transactionType)]]">
+											<template is="dom-if" if=[[tx.txAmountInEth]]">
 												<template is="dom-if" if="[[tx.txAmountInEth]]">
 													<iron-icon icon="card-giftcard"></iron-icon> [[tx.txAmountInEth]] L2Pcoin
 												</template>
