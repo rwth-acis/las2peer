@@ -194,7 +194,7 @@ class NodeFrontend extends PolymerElement {
                   style="width: 18px; height: 18px; color: red;"></iron-icon> 
               </template>
               -->
-              <paper-icon-button icon="refresh" title="Refresh Status" on-click="window.rootThis.checkStatus" disabled="[[_checking]]"></paper-icon-button>
+              <paper-icon-button icon="refresh" title="Refresh Status" on-click="checkStatusWrapper" disabled="[[_checking]]"></paper-icon-button>
             </div>
           </app-toolbar>
 
@@ -492,6 +492,11 @@ class NodeFrontend extends PolymerElement {
     } else {
       this._agentId = resp.agentid;
     }
+  }
+
+  checkStatusWrapper()
+  {
+    window.rootThis.checkStatus();
   }
 
   checkStatus()
