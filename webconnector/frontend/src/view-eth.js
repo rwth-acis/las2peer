@@ -203,9 +203,11 @@ class EthereumView extends PolymerElement {
 								The reputation pay-out has been obtained as follows: 
 							</p>
 							<p>
-								UserRating <small>(* [[_ethFaucetLog.rewardDetails.u]])</small> * <br />
-								 [ &nbsp;HostingServices <small>(* [[_ethFaucetLog.rewardDetails.h]])</small>&nbsp;+&nbsp;DevelopServices <small>(* [[_ethFaucetLog.rewardDetails.d]])</small> ]
+								UserRating <small>(* [[_ethFaucetLog.rewardDetails.u]])</small> * 
+								 [ &nbsp;HostingServices <small>(* [[_ethFaucetLog.rewardDetails.h]]&nbsp;%)</small> &nbsp;+&nbsp; DevelopServices <small>(* [[_ethFaucetLog.rewardDetails.d]]&nbsp;%)</small> ]
 							</p>
+							<p><small>A UserRating of "1" in case there is no reputation profile or no incoming votes indicates a placeholder. <br />
+							If no contributions are detected, the payout is still 0.</small></p>
 						</paper-dialog-scrollable>
 						<div class="buttons">
 							<paper-button dialog-dismiss>
