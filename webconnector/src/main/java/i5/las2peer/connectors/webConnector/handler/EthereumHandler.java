@@ -149,6 +149,8 @@ public class EthereumHandler {
 			NodeInformation nodeInfo;
 			try {
 				nodeInfo = ethereumNode.getNodeInformation(nodeHandle);
+				if ( nodeInfo.getAdminEmail() == null )
+					continue;
 				// is ethAgent admin of remote node?
 				if (nodeInfo.getAdminEmail().equals(agentEmail)) {
 					adminNodeIDs.add(nodeHandle.getNodeId().toStringFull());
