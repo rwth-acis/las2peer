@@ -563,6 +563,7 @@ class BlockchainObserver {
 	{
 		// NodeID -> no. of Announcements
 		HashMap<String, Integer> retVal = new HashMap<>();
+		int sumOfAnn = 0;
 		
 		serviceAnnouncementsPerBlockTree__lock.readLock().lock();
 		try 
@@ -573,13 +574,15 @@ class BlockchainObserver {
 			logger.info("[ChainObserver] searching for announcements of '"+searchingForService+"', starting from block #" + largerThanBlockNo + "."); 
 			logger.info("                searching through " + tailMap.size() + " / " + serviceAnnouncementsPerBlockTree.size() + " blocks due to ordering");
 
-			tailMap.forEach((announcedBlockNo,serviceMap)->
+			for( Map.Entry<BigInteger, HashMap<String, List<String>>> entry: tailMap.entrySet())
 			{
+				BigInteger announcedBlockNo = entry.getKey();
+				HashMap<String, List<String>> serviceMap = entry.getValue();
 				logger.fine("[ChainObserver]   processing block # " + announcedBlockNo + ":" );
-				// search list of services announced
-				serviceMap.forEach((announcedServiceName,hostingNodeIDList)->
+				for( Map.Entry<String, List<String>> innerEntry: serviceMap.entrySet() )
 				{
-
+					String announcedServiceName = innerEntry.getKey();
+					List<String> hostingNodeIDList = innerEntry.getValue();
 					// is this the service we're looking for?
 					if ( announcedServiceName.equals(searchingForService) )
 					{
@@ -589,9 +592,11 @@ class BlockchainObserver {
 						{
 							retVal.merge(hostingNodeID, 1, (a,b) -> a + b);
 						});
+						sumOfAnn += 1;
 					}
-				});
-			});
+				}
+			}
+			retVal.put("_totalNoOfServiceAnnouncements", Integer.valueOf(sumOfAnn));
 		}
 		finally
 		{

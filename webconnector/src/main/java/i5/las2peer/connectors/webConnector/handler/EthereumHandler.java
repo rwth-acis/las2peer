@@ -339,6 +339,14 @@ public class EthereumHandler {
 					largestBlockNo, serviceWithSuccessModel
 				);
 
+				logger.info("[ETH Faucet]: searching through list of adminNodeIDs with " + adminNodeIDs.size() + " elements" );
+
+				logger.info("[ETH Faucet]: printing adminNodeID list:");
+				for ( String s: adminNodeIDs )
+				{
+					logger.info("> " + s);
+				}
+
 				// check if service is hosted by ethAgent
 				for( String adminNodeID: adminNodeIDs)
 				{
@@ -366,23 +374,35 @@ public class EthereumHandler {
 							hostingServicesToAnnouncementCount.get(serviceWithSuccessModel)
 						);
 					}
-					// check if this service was developed by ethAgent
-					if ( isAuthorOfService )
+				}
+
+				// check if this service was developed by ethAgent
+				if ( isAuthorOfService )
+				{
+					Integer totalAnnouncementCount = serviceAnnouncementsPerNodeID.getOrDefault(
+						"_totalNoOfServiceAnnouncements", Integer.valueOf(0)
+					);
+					logger.info("         .!.         ethAgent is developer/author of this service.");
+					logger.info("> the service was announced " + totalAnnouncementCount + " times.");
+					authoredServicesToAnnouncementCount.putIfAbsent(
+						serviceWithSuccessModel, Integer.valueOf(0)
+					);
+					authoredServicesToAnnouncementCount.merge(
+						serviceWithSuccessModel, // key
+						totalAnnouncementCount, // value to 'merge' with, should be 0
+						(a,b) -> a + b // function to use for mergin
+					);
+					if ( !authoredServicesToAnnouncementCount
+						.get(serviceWithSuccessModel)
+						.equals(totalAnnouncementCount)
+					)
 					{
-						logger.info("         .!.         ethAgent is developer/author of this service.");
-						authoredServicesToAnnouncementCount.putIfAbsent(
-							serviceWithSuccessModel, Integer.valueOf(0)
-						);
-						authoredServicesToAnnouncementCount.merge(
-							serviceWithSuccessModel, // key
-							serviceAnnouncementCount, // value to 'merge' with
-							(a,b) -> a + b // function to use for mergin
-						);
 						logger.info("=> incremented value to: " + 
 							authoredServicesToAnnouncementCount.get(serviceWithSuccessModel)
 						);
 					}
 				}
+
 				float serviceWasAnnouncedByEthAgent = hostingServicesToAnnouncementCount.getOrDefault( serviceWithSuccessModel, 0 );
 				if ( serviceWasAnnouncedByEthAgent > 0 )
 				{
