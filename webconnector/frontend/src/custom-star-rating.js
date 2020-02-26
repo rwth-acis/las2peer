@@ -36,7 +36,7 @@ class CustomStarRating extends PolymerElement {
                 color: #fdae61;
             }
             iron-icon.color-3, :host([single]) > iron-icon.color-3 {
-                color: #ccc;
+                color: #aaa;
             }
             iron-icon.color-4, :host([single]) > iron-icon.color-4 {
                 color: #5ac4e8;
@@ -45,7 +45,7 @@ class CustomStarRating extends PolymerElement {
                 color: #2c7bb6;
             }
             :host(:not([readonly])) iron-icon.whole {
-                opacity: 0.6;
+                opacity: 0.5;
             }
             :host(:not([readonly])) iron-icon:hover {
                 opacity: 1.0;
