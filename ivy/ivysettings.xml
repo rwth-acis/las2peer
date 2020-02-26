@@ -26,8 +26,8 @@
 	<properties environment="env"/>
 	<include file="${env.CREDENTIALS_FILE}" optional="true"/>
 	<include file="archiva_credentials.xml" optional="true"/>
-	<credentials host="role.dbis.rwth-aachen.de" realm="Repository Archiva Managed snapshots Repository"
+	<credentials host="archiva.dbis.rwth-aachen.de" realm="Repository Archiva Managed snapshots Repository"
 	             username="${archiva.user}" passwd="${archiva.pass}"/>
-	<credentials host="role.dbis.rwth-aachen.de" realm="Repository Archiva Managed internal Repository"
+	<credentials host="archiva.dbis.rwth-aachen.de" realm="Repository Archiva Managed internal Repository"
 	             username="${archiva.user}" passwd="${archiva.pass}"/>
 </ivysettings>
