@@ -49,7 +49,14 @@ import i5.las2peer.communication.Message;
 import i5.las2peer.connectors.Connector;
 import i5.las2peer.connectors.ConnectorException;
 import i5.las2peer.logging.L2pLogger;
-import i5.las2peer.p2p.*;
+import i5.las2peer.p2p.AgentAlreadyRegisteredException;
+import i5.las2peer.p2p.AgentNotRegisteredException;
+import i5.las2peer.p2p.EthereumNode;
+import i5.las2peer.p2p.Node;
+import i5.las2peer.p2p.NodeException;
+import i5.las2peer.p2p.NodeInformation;
+import i5.las2peer.p2p.PastryNodeImpl;
+import i5.las2peer.p2p.TimeoutException;
 import i5.las2peer.persistency.EncodingFailedException;
 import i5.las2peer.persistency.SharedStorage;
 import i5.las2peer.persistency.SharedStorage.STORAGE_MODE;
@@ -327,9 +334,10 @@ public class L2pNodeLauncher {
 	 * @param developerPassword The password for the developer agent.
 	 * @param supplement Additional service metadata string.
 	 */
-	public void uploadServicePackage(String serviceJarFile, String developerAgentXMLFile, String developerPassword, String supplement)
-			throws ServicePackageException, EnvelopeAlreadyExistsException {
-		PackageUploader.uploadServicePackage((PastryNodeImpl) node, serviceJarFile, developerAgentXMLFile, developerPassword, supplement);
+	public void uploadServicePackage(String serviceJarFile, String developerAgentXMLFile, String developerPassword,
+			String supplement) throws ServicePackageException, EnvelopeAlreadyExistsException {
+		PackageUploader.uploadServicePackage((PastryNodeImpl) node, serviceJarFile, developerAgentXMLFile,
+				developerPassword, supplement);
 	}
 
 	/**
@@ -803,7 +811,7 @@ public class L2pNodeLauncher {
 	 * @param nodeIdSeed the seed to generate node IDs from
 	 */
 	private L2pNodeLauncher(InetAddress bindAddress, Integer port, List<String> bootstrap, STORAGE_MODE storageMode,
-							String storageDir, Boolean monitoringObserver, ClassManager cl, Long nodeIdSeed) {
+			String storageDir, Boolean monitoringObserver, ClassManager cl, Long nodeIdSeed) {
 		this(bindAddress, port, bootstrap, storageMode, storageDir, monitoringObserver, cl, nodeIdSeed, null, null);
 	}
 
@@ -821,8 +829,8 @@ public class L2pNodeLauncher {
 	 * @param nodeIdSeed the seed to generate node IDs from
 	 */
 	private L2pNodeLauncher(InetAddress bindAddress, Integer port, List<String> bootstrap, STORAGE_MODE storageMode,
-			String storageDir, Boolean monitoringObserver, ClassManager cl, Long nodeIdSeed,
-			String ethereumMnemonic, String ethereumPassword) {
+			String storageDir, Boolean monitoringObserver, ClassManager cl, Long nodeIdSeed, String ethereumMnemonic,
+			String ethereumPassword) {
 		if (monitoringObserver == null) {
 			monitoringObserver = false;
 		}
@@ -1029,7 +1037,7 @@ public class L2pNodeLauncher {
 				printMessage("All commands have been handled, but not finished yet -> keeping node open!");
 			}
 			return launcher;
-		} catch (NodeException e) {
+		} catch (NullPointerException | NodeException e) {
 			launcher.bFinished = true;
 			logger.printStackTrace(e);
 			throw e;
@@ -1067,7 +1075,8 @@ public class L2pNodeLauncher {
 		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_BOOTSTRAP + "|"
 				+ L2pNodeLauncherConfiguration.ARG_SHORT_BOOTSTRAP
 				+ " ADDRESS|IP:PORT,...\trequires a comma seperated list of [ADDRESS|IP:PORT] pairs of bootstrap nodes to connect to.");
-		System.out.println("\t\t\t\t\tno bootstrap argument states, that a complete new las2peer network is to start\n");
+		System.out
+				.println("\t\t\t\t\tno bootstrap argument states, that a complete new las2peer network is to start\n");
 		System.out.println("  " + L2pNodeLauncherConfiguration.ARG_LOG_DIRECTORY + "|"
 				+ L2pNodeLauncherConfiguration.ARG_SHORT_LOG_DIRECTORY
 				+ " DIRECTORY\t\tlets you choose the directory for log files (default: "
@@ -1143,13 +1152,13 @@ public class L2pNodeLauncher {
 	public static void main(String[] argv) {
 		try {
 			// self test system encryption
-			
+
 			String version = System.getProperty("java.version");
-			if(!version.startsWith("1.8")) {
-				throw new JavaVersionException("Unsupported Java version "+version+". las2peer only runs with Java 8");
+			if (!version.startsWith("1.8")) {
+				throw new JavaVersionException(
+						"Unsupported Java version " + version + ". las2peer only runs with Java 8");
 			}
-			
-			
+
 			try {
 				CryptoTools.encryptSymmetric("las2peer rulez!".getBytes(), CryptoTools.generateSymmetricKey());
 			} catch (CryptoException e) {
@@ -1204,7 +1213,7 @@ public class L2pNodeLauncher {
 			}
 		} catch (CryptoException e) {
 			e.printStackTrace();
-		} catch (NodeException e) {
+		} catch (NullPointerException | NodeException e) {
 			// exception already logged
 			System.exit(2);
 		}
