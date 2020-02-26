@@ -115,4 +115,14 @@ public class Util {
 		sdf.setTimeZone(java.util.TimeZone.getTimeZone("Europe/Berlin"));
 		return sdf.format(date);
 	}
+
+	/***
+	 * Returns the value of the first parameter if it is not null and the second param otherwise
+	 * @param value
+	 * @param defaultValue
+	 * @return
+	 */
+	public static <T> T getOrDefault(T value, T defaultValue) {
+		return value == null ? defaultValue : value;
+	}
 }

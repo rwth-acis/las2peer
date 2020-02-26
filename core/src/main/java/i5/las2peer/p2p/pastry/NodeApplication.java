@@ -254,6 +254,8 @@ public class NodeApplication implements Application, ScribeMultiClient {
 				InfoResponseMessage answer = new InfoResponseMessage(gim.getId(), getLocalHandle(),
 						l2pNode.getNodeInformation());
 
+				logger.info("created info response message: \n" + answer.toString());
+
 				sendMessageDirectly(answer, gim.getSender());
 			} catch (CryptoException e) {
 				throw new RuntimeException("Critical - I'm not able to create my own Node Information!");

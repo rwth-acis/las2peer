@@ -71,5 +71,7 @@
 	<classpathentry kind="lib" path="webconnector/lib/commons-io-2.4.jar"/>
 	<classpathentry kind="lib" path="webconnector/lib/oauth2-oidc-sdk-4.17.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="core/lib/slf4j-api-1.7.25.jar"/>
+	<classpathentry kind="lib" path="core/lib/slf4j-simple-1.7.25.jar"/>
 	<classpathentry kind="output" path="output"/>
 </classpath>

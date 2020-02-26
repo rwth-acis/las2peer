@@ -1,6 +1,8 @@
 package i5.las2peer.connectors.webConnector.handler;
 
 import java.io.InputStream;
+import java.math.BigInteger;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.logging.Level;
@@ -15,9 +17,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import i5.las2peer.api.security.UserAgent;
-import i5.las2peer.p2p.EthereumNode;
-import i5.las2peer.security.*;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import i5.las2peer.api.security.AgentAccessDeniedException;
@@ -26,7 +25,16 @@ import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.connectors.webConnector.WebConnector;
 import i5.las2peer.connectors.webConnector.util.AgentSession;
 import i5.las2peer.logging.L2pLogger;
+import i5.las2peer.p2p.EthereumNode;
 import i5.las2peer.p2p.Node;
+import i5.las2peer.registry.data.UserProfileData;
+import i5.las2peer.registry.exceptions.EthereumException;
+import i5.las2peer.registry.exceptions.NotFoundException;
+import i5.las2peer.security.AgentImpl;
+import i5.las2peer.security.EthereumAgent;
+import i5.las2peer.security.GroupAgentImpl;
+import i5.las2peer.security.PassphraseAgentImpl;
+import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.CryptoException;
 import net.minidev.json.JSONArray;
@@ -43,10 +51,12 @@ public class AgentsHandler {
 
 	private final WebConnector connector;
 	private final Node node;
+	private final EthereumNode ethereumNode;
 
 	public AgentsHandler(WebConnector connector) {
 		this.connector = connector;
 		this.node = connector.getL2pNode();
+		ethereumNode = (node instanceof EthereumNode) ? (EthereumNode) node : null;
 	}
 
 	@POST
@@ -80,10 +90,11 @@ public class AgentsHandler {
 		// TODO: deduplicate this / AuthHandler#handleRegistration
 		UserAgentImpl agent;
 		if (node instanceof EthereumNode) {
+			EthereumNode ethNode = (EthereumNode) node;
 			if (ethereumMnemonic != null && !ethereumMnemonic.isEmpty()) {
-				agent = EthereumAgent.createEthereumAgent(username, password, ethereumMnemonic);
+				agent = EthereumAgent.createEthereumAgent(username, password, ethNode.getRegistryClient(), ethereumMnemonic);
 			} else {
-				agent = EthereumAgent.createEthereumAgent(username, password);
+				agent = EthereumAgent.createEthereumAgent(username, password, ethNode.getRegistryClient());
 			}
 		} else {
 			agent = UserAgentImpl.createUserAgent(password);
@@ -108,6 +119,71 @@ public class AgentsHandler {
 		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
 	}
 
+	private JSONObject addAgentDetailsToJson(AgentImpl agent, JSONObject json)
+			throws EthereumException, NotFoundException
+	{
+		// don't add mnemonic ( = defaults to false, override to true )
+		return this.addAgentDetailsToJson(agent, json, false);
+	}
+	private JSONObject addAgentDetailsToJson(AgentImpl agent, JSONObject json, Boolean addMnemonic)
+			throws EthereumException, NotFoundException {
+		json.put("agentid", agent.getIdentifier());
+		if (agent instanceof UserAgentImpl) {
+			UserAgentImpl userAgent = (UserAgentImpl) agent;
+			json.put("username", userAgent.getLoginName());
+			json.put("email", userAgent.getEmail());
+		}
+		if (agent instanceof EthereumAgent) 
+		{
+			EthereumAgent ethAgent = (EthereumAgent) agent;
+			String ethAddress = ethAgent.getEthereumAddress();
+			if ( ethAddress.length() > 0 )
+			{
+				json.put("ethAgentAddress", ethAddress);
+				String accBalance = ethereumNode.getRegistryClient().getAccountBalance(ethAddress);
+				json.put("ethAccBalance", accBalance);
+				UserProfileData upd = null;
+				try {
+					upd = ethereumNode.getRegistryClient().getProfile(ethAddress);
+					if (upd != null && !upd.getOwner().equals("0x0000000000000000000000000000000000000000")) {
+						json.put("ethProfileOwner", upd.getOwner());
+						json.put("ethCumulativeScore", upd.getCumulativeScore().toString());
+						json.put("ethNoTransactionsSent", upd.getNoTransactionsSent().toString());
+						json.put("ethNoTransactionsRcvd", upd.getNoTransactionsRcvd().toString());
+						if ( upd.getNoTransactionsRcvd().compareTo(BigInteger.ZERO) == 0 )
+						{
+							json.put("ethRating", 0);
+						}
+						else
+						{
+							DecimalFormat f = new DecimalFormat("#.00");
+							json.put("ethRating", f.format(
+								upd.getCumulativeScore().divide(upd.getNoTransactionsRcvd())
+							));
+						}
+					} else {
+						json.put("ethRating", "0");
+						json.put("ethCumulativeScore", "???");
+						json.put("ethNoTransactionsSent", "???");
+						json.put("ethNoTransactionsRcvd", "???");
+					}
+				}
+				catch (EthereumException| NotFoundException e)
+				{
+					e.printStackTrace();
+				}
+			}
+			
+			json.put("ethAgentCredentialsAddress", ethAddress);
+			
+			if ( addMnemonic && !agent.isLocked())
+			{
+				json.put("ethMnemonic", ethAgent.getEthereumMnemonic());
+			}
+		}
+		return json;
+	}
+
 	@POST
 	@Path("/getAgent")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -115,11 +191,12 @@ public class AgentsHandler {
 			@FormDataParam("email") String email) throws Exception {
 		AgentImpl agent = getAgentByDetail(agentId, username, email);
 		JSONObject json = new JSONObject();
-		json.put("agentid", agent.getIdentifier());
-		if (agent instanceof UserAgentImpl) {
-			UserAgentImpl userAgent = (UserAgentImpl) agent;
-			json.put("username", userAgent.getLoginName());
-			json.put("email", userAgent.getEmail());
+		try {
+			json = addAgentDetailsToJson(agent, json);
+		} catch (EthereumException e) {
+			return Response.status(Status.NOT_FOUND).entity("Agent not found").build();
+		} catch (NotFoundException e) {
+			return Response.status(Status.NOT_FOUND).entity("Username not registered").build();
 		}
 		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
 	}

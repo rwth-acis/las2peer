@@ -43,6 +43,7 @@ import i5.las2peer.connectors.ConnectorException;
 import i5.las2peer.connectors.webConnector.handler.AgentsHandler;
 import i5.las2peer.connectors.webConnector.handler.AuthHandler;
 import i5.las2peer.connectors.webConnector.handler.DefaultHandler;
+import i5.las2peer.connectors.webConnector.handler.EthereumHandler;
 import i5.las2peer.connectors.webConnector.handler.ServicesHandler;
 import i5.las2peer.connectors.webConnector.handler.SwaggerUIHandler;
 import i5.las2peer.connectors.webConnector.handler.WebappHandler;
@@ -377,6 +378,7 @@ public class WebConnector extends Connector {
 			config.register(new AuthHandler(this));
 			config.register(new ServicesHandler(this));
 			config.register(new AgentsHandler(this));
+			config.register(new EthereumHandler(this));
 			config.register(new SwaggerUIHandler(this));
 			if (startHttp) {
 				startHttpServer(config);

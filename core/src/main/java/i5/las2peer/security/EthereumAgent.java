@@ -3,6 +3,7 @@ package i5.las2peer.security;
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentOperationFailedException;
+import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.registry.CredentialUtils;
 import i5.las2peer.registry.ReadWriteRegistryClient;
 import i5.las2peer.registry.data.RegistryConfiguration;
@@ -55,20 +56,25 @@ public class EthereumAgent extends UserAgentImpl {
 	/** This agent's registry client to make direct smart contract calls. */
 	private ReadWriteRegistryClient registryClient;
 
+	private static final L2pLogger logger = L2pLogger.getInstance(EthereumAgent.class);
+
 	protected EthereumAgent(KeyPair pair, String passphrase, byte[] salt, String loginName, String ethereumMnemonic)
 			throws AgentOperationFailedException, CryptoException {
 		super(pair, passphrase, salt);
 		checkLoginNameValidity(loginName);
 		this.sLoginName = loginName;
 		this.ethereumMnemonic = ethereumMnemonic;
+		this.ethereumAddress = CredentialUtils.fromMnemonic(ethereumMnemonic, passphrase).getAddress();
+		logger.fine("creating ethereum agent [" + ethereumAddress + "]");
 	}
 
-	protected EthereumAgent(PublicKey pubKey, byte[] encryptedPrivate, byte[] salt, String loginName,
-			String ethereumMnemonic) {
+	protected EthereumAgent(PublicKey pubKey, byte[] encryptedPrivate, byte[] salt, String loginName, String ethereumMnemonic, String ethereumAddress) {
 		super(pubKey, encryptedPrivate, salt);
 		checkLoginNameValidity(loginName);
 		this.sLoginName = loginName;
 		this.ethereumMnemonic = ethereumMnemonic;
+		this.ethereumAddress = ethereumAddress;
+		logger.fine("creating ethereum agent [" + ethereumAddress + "]");
 	}
 
 	// as in the superclass, it would be nicer not to use an exception
@@ -98,7 +104,9 @@ public class EthereumAgent extends UserAgentImpl {
 
 		credentials = CredentialUtils.fromMnemonic(ethereumMnemonic, passphrase);
 		registryClient = new ReadWriteRegistryClient(new RegistryConfiguration(), credentials);
+
 		ethereumAddress = credentials.getAddress();
+		logger.fine("unlocked ethereum agent ["+ethereumAddress +"]");
 	}
 
 	@Override
@@ -128,6 +136,7 @@ public class EthereumAgent extends UserAgentImpl {
 					+ "\t\t<salt encoding=\"base64\">" + Base64.getEncoder().encodeToString(getSalt()) + "</salt>\n"
 					+ "\t\t<data encoding=\"base64\">" + getEncodedPrivate() + "</data>\n" + "\t</privatekey>\n"
 					+ "\t<login>" + sLoginName + "</login>\n"
+					+ "\t<ethereumaddress>" + ethereumAddress + "</ethereumaddress>\n"
 					+ "\t<ethereummnemonic>" + ethereumMnemonic + "</ethereummnemonic>\n");
 
 			if (sEmail != null) {
@@ -152,17 +161,19 @@ public class EthereumAgent extends UserAgentImpl {
 	 * @throws CryptoException if there is an internal error during
 	 *                         Ethereum key creation
 	 */
-	public static EthereumAgent createEthereumAgent(String loginName, String passphrase)
-			throws CryptoException, AgentOperationFailedException {
-		return createEthereumAgent(loginName, passphrase, CredentialUtils.createMnemonic());
+	public static EthereumAgent createEthereumAgent(String loginName, String passphrase,
+			ReadWriteRegistryClient regClient) throws CryptoException, AgentOperationFailedException {
+		return createEthereumAgent(loginName, passphrase, regClient, CredentialUtils.createMnemonic());
 	}
 
 	// use this if you already want to use a mnemonic generated somewhere else
 	// note that this still uses the password to generate the key pair
-	public static EthereumAgent createEthereumAgent(String loginName, String passphrase, String ethereumMnemonic)
+	public static EthereumAgent createEthereumAgent(String loginName, String passphrase,
+			ReadWriteRegistryClient regClient, String ethereumMnemonic)
 			throws CryptoException, AgentOperationFailedException {
 		byte[] salt = CryptoTools.generateSalt();
-		return new EthereumAgent(CryptoTools.generateKeyPair(), passphrase, salt, loginName, ethereumMnemonic);
+		KeyPair keyPair = CryptoTools.generateKeyPair();
+		return new EthereumAgent(keyPair, passphrase, salt, loginName, ethereumMnemonic);
 	}
 
 	/**
@@ -176,6 +187,10 @@ public class EthereumAgent extends UserAgentImpl {
 	/** @return address of the Ethereum key pair associated with the agent */
 	public String getEthereumAddress() {
 		return ethereumAddress;
+	}
+
+	public String getEthereumMnemonic() {
+		return ethereumMnemonic;
 	}
 
 	public Credentials getEthereumCredentials() throws AgentLockedException {
@@ -226,8 +241,11 @@ public class EthereumAgent extends UserAgentImpl {
 			Element ethereumMnemonicElement = XmlTools.getSingularElement(root, "ethereummnemonic");
 			String ethereumMnemonic = ethereumMnemonicElement.getTextContent();
 
+			Element ethereumAddressElement = XmlTools.getSingularElement(root, "ethereumaddress");
+			String ethereumAddress = ethereumAddressElement.getTextContent();
+
 			// required fields complete, create result
-			EthereumAgent result = new EthereumAgent(publicKey, encPrivate, salt, login, ethereumMnemonic);
+			EthereumAgent result = new EthereumAgent(publicKey, encPrivate, salt, login, ethereumMnemonic, ethereumAddress);
 
 			// read and set optional fields
 			// note: login name is not optional here

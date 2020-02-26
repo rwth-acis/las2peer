@@ -1,15 +1,33 @@
 package i5.las2peer.registry;
 
+import java.math.BigInteger;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
+
+import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.response.Transaction;
+import org.web3j.utils.Convert;
+
+import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.logging.L2pLogger;
+import i5.las2peer.registry.data.BlockchainTransactionData;
+import i5.las2peer.registry.data.GenericTransactionData;
+import i5.las2peer.registry.data.SenderReceiverDoubleKey;
 import i5.las2peer.registry.data.ServiceDeploymentData;
 import i5.las2peer.registry.data.ServiceReleaseData;
 import i5.las2peer.registry.exceptions.EthereumException;
 import io.reactivex.schedulers.Schedulers;
-import org.web3j.protocol.core.DefaultBlockParameterName;
-
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * Observes blockchain events related to the registry and updates its state
@@ -19,6 +37,14 @@ import java.util.concurrent.ConcurrentMap;
  * the main thread.
  */
 class BlockchainObserver {
+	
+	List<String> errors;
+	/** Profiles to their owners */
+	ConcurrentMap<String, String> profiles;
+	
+	/** User registrations and time stamps */
+	ConcurrentMap<String, String> users;
+	
 	/** Tags to their description */
 	ConcurrentMap<String, String> tags;
 
@@ -27,6 +53,21 @@ class BlockchainObserver {
 
 	/** Service names to list of releases */
 	ConcurrentMap<String, List<ServiceReleaseData>> releases;
+
+	/** Generic ETH Transactions: (from,to) => List<amount, message> */
+	ConcurrentMap<SenderReceiverDoubleKey, List<GenericTransactionData>> genericTransactions;
+
+	ConcurrentMap<SenderReceiverDoubleKey, List<BlockchainTransactionData>> transactionLog;
+
+	/** 
+	 * Sorted mapping of Blocks to announcements
+	 * because TreeMap is not thread-safe, we need to use a custom lock. https://riptutorial.com/java/example/30472/treemap-and-treeset-thread-safety
+	 * this is used for the faucet to see how many svc announcements we did since the last faucet payout
+	 * 
+	 * e.g. Block 5 -> "com.example.service" -> List of NodeIDs hosting this service
+	 */
+	ReentrantReadWriteLock serviceAnnouncementsPerBlockTree__lock = new ReentrantReadWriteLock();
+	TreeMap<BigInteger, HashMap<String, List<String>>> serviceAnnouncementsPerBlockTree;
 
 	/**
 	 * Nested map from service name and version components to that
@@ -99,12 +140,24 @@ class BlockchainObserver {
 		logger.fine("Creating new blockchain observer");
 		contracts = new Contracts.ContractsBuilder(contractsConfig).build();
 
+		errors = new ArrayList<String>();
+		profiles = new ConcurrentHashMap<>();
+		users = new ConcurrentHashMap<>();
 		tags = new ConcurrentHashMap<>();
 		serviceNameToAuthor = new ConcurrentHashMap<>();
 		releases = new ConcurrentHashMap<>();
 		releasesByVersion = new ConcurrentHashMap<>();
 		deployments = new ConcurrentHashMap<>();
+		genericTransactions = new ConcurrentHashMap<>();
+		transactionLog = new ConcurrentHashMap<>();
+		serviceAnnouncementsPerBlockTree = new TreeMap<>();
 
+		observeETHTransactions();
+		observeUserVotingTransactions();
+		observeGenericTransactions();
+		observeErrorEvents();
+		observeUserRegistrations();
+		observeUserProfileCreations();
 		observeTagCreations();
 		observeServiceRegistrations();
 		observeServiceReleases();
@@ -120,6 +173,222 @@ class BlockchainObserver {
 		}
 	}
 
+	private void observeETHTransactions() 
+	{
+		contracts.getWeb3jClient()
+			 .replayPastAndFutureTransactionsFlowable(DefaultBlockParameterName.EARLIEST)
+			 .observeOn(Schedulers.io())
+			 .subscribeOn(Schedulers.io())
+			 .subscribe(transaction -> {
+				if (txHasAlreadyBeenHandled(transaction.getHash())) {
+					return;
+				}
+
+				SenderReceiverDoubleKey transactionKey = new SenderReceiverDoubleKey(
+					(transaction.getFrom() != null) ? transaction.getFrom() : "", // shouldn't be null
+					(transaction.getTo() != null) ? transaction.getTo() : ""
+				);
+
+				// prepare l2p-local class to hold transaction info
+				BlockchainTransactionData btd = new BlockchainTransactionData( transaction );
+				if ( transaction.getBlockNumber() != null )
+				{	
+					// add block timestamp to transaction info
+					btd.setBlockTimeStamp( contracts.getBlockTimestamp(btd.getBlockNumber()) );
+				}
+
+				// https://stackoverflow.com/a/51062494
+				transactionLog.computeIfAbsent(transactionKey, k -> new ArrayList<>()).add(btd);
+
+				logger.info("[ChainObserver] observed: " + btd.toString());
+
+			}, e -> { 
+				e.printStackTrace();
+				logger.severe("Error observing transaction event: " + e.toString()); 
+			});
+	}
+
+	private void observeUserVotingTransactions() {
+		contracts.reputationRegistry
+				.transactionAddedEventFlowable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST)
+				.observeOn(Schedulers.io())
+				.subscribeOn(Schedulers.io())
+				.subscribe(transaction -> {
+					String txHash = transaction.log.getTransactionHash();
+					if (txHasAlreadyBeenHandled(txHash)) {
+						return;
+					}
+
+					String txSender = Util.getOrDefault(transaction.sender, "uknown sender");
+					String txRecipient = Util.getOrDefault(transaction.recipient, "uknown recipient");
+					
+					BigInteger grade = Util.getOrDefault(transaction.grade, BigInteger.ZERO);
+					BigInteger recipientNewScore = Util.getOrDefault(transaction.recipientNewScore, BigInteger.ZERO);
+
+					BigInteger timestamp = Util.getOrDefault( transaction.timestamp, BigInteger.ZERO );
+
+					SenderReceiverDoubleKey srdk = new SenderReceiverDoubleKey(txSender, txRecipient);
+					GenericTransactionData gtd = new GenericTransactionData(
+						txSender, 
+						txRecipient, 
+						BigInteger.ZERO, // amountInWei
+						timestamp, 
+						"Rating: "+grade, 
+						"L2P USER RATING", 
+						txHash
+					);
+
+					if ( !this.genericTransactions.containsKey(srdk) )
+					{
+						List<GenericTransactionData> lgtd = new ArrayList<GenericTransactionData>();
+						lgtd.add(gtd);
+						this.genericTransactions.put(srdk, lgtd);
+					} 
+					else
+					{
+						this.genericTransactions.get(srdk).add(gtd);
+					}
+
+					logger.info("[ChainObserver] observed user voting: " + 
+								"[" + txSender + "]->[" + txRecipient + "]: " + grade + ", new grade: " + recipientNewScore);
+				}, e -> logger.severe("Error observing user voting event: " + e.toString()));
+	}
+
+	private void observeErrorEvents() {
+		contracts.reputationRegistry
+				.errorEventEventFlowable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST)
+				.observeOn(Schedulers.io()).subscribeOn(Schedulers.io()).subscribe(error -> {
+					if (txHasAlreadyBeenHandled(error.log.getTransactionHash())) {
+						return;
+					}
+
+					String errorMsg = Util.getOrDefault(error.message, "no error message provided");
+
+					this.errors.add(errorMsg);
+					logger.severe("[ChainObserver] observed error event: " + errorMsg);
+				}, e -> logger.severe("Error observing error event: " + e.toString()));
+	}
+
+	private void observeUserRegistrations() {
+		contracts.userRegistry.userRegisteredEventFlowable(DefaultBlockParameterName.EARLIEST,
+		DefaultBlockParameterName.LATEST)
+			.observeOn(Schedulers.io())
+			.subscribeOn(Schedulers.io())
+			.subscribe(user -> {
+				if (txHasAlreadyBeenHandled(user.log.getTransactionHash()))
+				{
+					return;
+				}
+				
+				String userName = Util.recoverString(user.name);
+				BigInteger timestamp = user.timestamp;
+				Instant i = Instant.ofEpochSecond(timestamp.longValue());
+				
+				this.users.put(userName, i.toString());
+				logger.info("[ChainObserver] observed user registration: " + "@[" + timestamp + "]: " + userName);
+			}, e -> logger.severe("Error observing user registration event: " + e.toString()));
+	}
+	
+	private void observeUserProfileCreations() {
+		contracts.reputationRegistry.userProfileCreatedEventFlowable(DefaultBlockParameterName.EARLIEST,
+		DefaultBlockParameterName.LATEST)
+			.observeOn(Schedulers.io())
+			.subscribeOn(Schedulers.io())
+			.subscribe(profile -> {
+				if (txHasAlreadyBeenHandled(profile.log.getTransactionHash()))
+				{
+					return;
+				}
+				String profileOwner = Util.getOrDefault(profile.owner, "???");
+				String profileName = Util.recoverString(profile.name);
+				this.profiles.put(profileOwner, profileName);
+				logger.info("[ChainObserver] observed profile creation: [" + profileOwner + "]: " + profileName);
+				
+			}, e -> logger.severe("Error observing profile creation event: " + e.toString()));
+	}
+
+
+	public List<GenericTransactionData> getTransactionLogBySender(String sender) {
+		List<GenericTransactionData> transactionList = new ArrayList<>();
+		logger.fine("[TXLOG] searching for sender: " + sender);
+		Set<SenderReceiverDoubleKey> transactions = genericTransactions.keySet();
+		for (SenderReceiverDoubleKey key : transactions) {
+			logger.fine("[TXLOG] analyzing key: " + key.toString());
+			logger.fine("[TXLOG] " + key.getSender() + "|" + sender);
+			if ( key.equalsSender(sender) || key.getSender() == sender )
+			{
+				List<GenericTransactionData> keyTransactionList = genericTransactions.get(key);
+				logger.fine("[TXLOG] match found! " + keyTransactionList.size() + " entries");
+				for (GenericTransactionData genericTransactionData : keyTransactionList) {
+					transactionList.add(genericTransactionData);
+				}
+			}
+		}
+		if ( transactionList.size() > 0 ) {
+			logger.fine("[TXLOG] found " + transactionList.size() + " entries for "+ sender);
+		}
+		return transactionList;
+	}
+
+	public List<GenericTransactionData> getTransactionLogByReceiver(String receiver) {
+		List<GenericTransactionData> transactionList = new ArrayList<>();
+		logger.fine("[TXLOG] searching for receiver: " + receiver);
+		Set<SenderReceiverDoubleKey> transactions = genericTransactions.keySet();
+		for (SenderReceiverDoubleKey key : transactions) {
+			logger.fine("[TXLOG] analyzing key: " + key.toString());
+			logger.fine("[TXLOG] " + key.getReceiver() + "|" + receiver);
+			if (key.equalsReceiver(receiver) || key.getReceiver() == receiver) 
+			{
+				List<GenericTransactionData> keyTransactionList = genericTransactions.get(key);
+				logger.fine("[TXLOG] match found! " + keyTransactionList.size() + " entries");
+				for (GenericTransactionData genericTransactionData : keyTransactionList) {
+					transactionList.add(genericTransactionData);
+				}
+			}
+		}
+		if ( transactionList.size() > 0 ) {
+			logger.fine("[TXLOG] found " + transactionList.size() + " entries for "+ receiver);
+		}
+		return transactionList;
+	}
+
+	private void observeGenericTransactions() {
+		contracts.reputationRegistry
+				.genericTransactionAddedEventFlowable(DefaultBlockParameterName.EARLIEST, DefaultBlockParameterName.LATEST)
+				.observeOn(Schedulers.io()).subscribeOn(Schedulers.io()).subscribe(transaction -> {
+					if (txHasAlreadyBeenHandled(transaction.log.getTransactionHash())) {
+						return;
+					}
+					String txSender = Util.getOrDefault(transaction.sender, "uknown sender");
+					String txRecipient = Util.getOrDefault(transaction.recipient, "uknown recipient");
+					
+					String message = Util.getOrDefault(transaction.message, "no message");
+					BigInteger weiAmount = Util.getOrDefault(transaction.weiAmount, BigInteger.ZERO);
+					BigInteger timestamp = Util.getOrDefault(transaction.timestamp, BigInteger.ZERO);
+					String transactionType = Util.getOrDefault(transaction.transactionType, "no txType");
+					String txHash = Util.getOrDefault(transaction.txHash, "no txHash");
+
+					SenderReceiverDoubleKey srdk = new SenderReceiverDoubleKey(txSender, txRecipient);
+					GenericTransactionData gtd = new GenericTransactionData(txSender, txRecipient, weiAmount, timestamp, message, transactionType, txHash);
+
+					if ( !this.genericTransactions.containsKey(srdk) )
+					{
+						List<GenericTransactionData> lgtd = new ArrayList<GenericTransactionData>();
+						lgtd.add(gtd);
+						this.genericTransactions.put(srdk, lgtd);
+					} 
+					else
+					{
+						this.genericTransactions.get(srdk).add(gtd);
+					}
+
+					String wei = Convert.fromWei(weiAmount.toString(), Convert.Unit.ETHER).toString();
+
+					logger.info("[ChainObserver] observed generic transaction: [" + txSender + "->" + txRecipient + "]@" +  wei + ": " + message);
+
+				}, e -> logger.severe("Error observing generic transaction: " + e.toString()));
+	}
+
 	private void observeTagCreations() {
 		contracts.communityTagIndex.communityTagCreatedEventFlowable(DefaultBlockParameterName.EARLIEST,
 		DefaultBlockParameterName.LATEST)
@@ -133,13 +402,13 @@ class BlockchainObserver {
 							String tagDescription = "";
 							for (int i = 0; i < 5; i++) {
 								tagDescription = contracts.communityTagIndex.viewDescription(
-										Util.padAndConvertString(tagName, 32)).send();
+										Util.padAndConvertString(tagName, 32)).sendAsync().get();
 								if (!tagDescription.isEmpty()) {
 									break;
 								}
 								logger.warning("Tag description returned empty, retrying");
 							}
-
+						logger.info("[ChainObserver] observed tag creation: " + tagName);
 						tags.put(tagName, tagDescription);
 					}
 				}, e -> logger.severe("Error observing tag event: " + e.toString()));
@@ -176,7 +445,7 @@ class BlockchainObserver {
 		for (int i = 0; i < retries ; i++) {
 			try {
 				logger.finer("Lookup attempt " + i + "  querying Eth client ...");
-				String serviceName = contracts.serviceRegistry.hashToName(hashOfName).send();
+				String serviceName = contracts.serviceRegistry.hashToName(hashOfName).sendAsync().get();
 				if (!serviceName.isEmpty()) {
 					logger.finer("... succeeded.");
 					hashToNameCache.putIfAbsent(hashAsString, serviceName);
@@ -200,6 +469,9 @@ class BlockchainObserver {
 					if (!txHasAlreadyBeenHandled(service.log.getTransactionHash())) {
 						String serviceName = lookupServiceName(service.nameHash);
 						serviceNameToAuthor.put(serviceName, Util.recoverString(service.author));
+						logger.info("[ChainObserver] observed service registration :\n" +
+									" > "+serviceName+" by "+Util.recoverString(service.author)
+							);
 					}
 				}, e -> logger.severe("Error observing service registration event: " + e.toString()));
 	}
@@ -232,10 +504,35 @@ class BlockchainObserver {
 				.subscribe(deployment -> {
 					if (!txHasAlreadyBeenHandled(deployment.log.getTransactionHash())) {
 						String serviceName = lookupServiceName(deployment.nameHash);
-						ServiceDeploymentData deploymentData = new ServiceDeploymentData(serviceName, deployment.className,
+						ServiceDeploymentData deploymentData = new ServiceDeploymentData(
+								serviceName, deployment.className,
 								deployment.versionMajor, deployment.versionMinor, deployment.versionPatch,
-								deployment.nodeId, deployment.timestamp);
+								deployment.nodeId, deployment.timestamp
+							);
 						addOrUpdateDeployment(deploymentData);
+
+						// save announcement log:
+							// for each block number
+								// for each service (mobsos success model is currently not using service version anyway)
+									// save nodeID who is hosting / has deployed this service
+						// used for eth faucet calculations, where we count the number of announcements since block X
+						serviceAnnouncementsPerBlockTree__lock.writeLock().lock();
+						try
+						{
+							serviceAnnouncementsPerBlockTree
+								.computeIfAbsent(deployment.log.getBlockNumber(), k -> new HashMap<>())
+								.computeIfAbsent(serviceName+"."+deployment.className, k -> new ArrayList<>())
+								.add(deployment.nodeId);
+
+							logger.info("[ChainObserver] observed service announcement ("+serviceName+"."+deployment.className+"): \n" + 
+								"block #: " + deployment.log.getBlockNumber() + "\n" + 
+								"node  #:" + deployment.nodeId
+							);
+						}
+						finally
+						{
+							serviceAnnouncementsPerBlockTree__lock.writeLock().unlock();
+						}
 					}
 				}, e -> logger.severe("Error observing service deployment event: " + e.toString()));
 
@@ -260,6 +557,54 @@ class BlockchainObserver {
 						addOrUpdateDeployment(deploymentThatEnded);
 					}
 				}, e -> logger.severe("Error observing service deployment end event: " + e.toString()));
+	}
+
+	public HashMap<String, Integer> getNoOfServiceAnnouncementSinceBlockOrderedByHostingNode(BigInteger largerThanBlockNo, String searchingForService)
+	{
+		// NodeID -> no. of Announcements
+		HashMap<String, Integer> retVal = new HashMap<>();
+		
+		serviceAnnouncementsPerBlockTree__lock.readLock().lock();
+		try 
+		{
+			SortedMap<BigInteger, HashMap<String, List<String>>> tailMap = 
+				serviceAnnouncementsPerBlockTree.tailMap(largerThanBlockNo);
+
+			logger.info("[ChainObserver] searching for announcements of '"+searchingForService+"', starting from block #" + largerThanBlockNo + "."); 
+			logger.info("                searching through " + tailMap.size() + " / " + serviceAnnouncementsPerBlockTree.size() + " blocks due to ordering");
+
+			tailMap.forEach((announcedBlockNo,serviceMap)->
+			{
+				logger.fine("[ChainObserver]   processing block # " + announcedBlockNo + ":" );
+				// search list of services announced
+				serviceMap.forEach((announcedServiceName,hostingNodeIDList)->
+				{
+
+					// is this the service we're looking for?
+					if ( announcedServiceName.equals(searchingForService) )
+					{
+						logger.fine("[ChainObserver]     found service " + announcedServiceName + ", running at " + hostingNodeIDList.size() + " nodes");
+						// yes -> count no. of increments per hosting node
+						hostingNodeIDList.forEach(hostingNodeID-> 
+						{
+							retVal.merge(hostingNodeID, 1, (a,b) -> a + b);
+						});
+					}
+				});
+			});
+		}
+		finally
+		{
+			serviceAnnouncementsPerBlockTree__lock.readLock().unlock();
+		}
+		retVal.forEach((nodeID,noOfAnnouncements) -> {
+			logger.info(
+				"[ChainObserver] found announcement count: \n" + 
+				"                 nodeID: " + nodeID + "\n" + 
+				"                noOfAnn: " + noOfAnnouncements
+			);
+		});
+		return retVal;
 	}
 
 	/**

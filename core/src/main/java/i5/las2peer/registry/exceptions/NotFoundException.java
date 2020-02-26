@@ -5,6 +5,8 @@ package i5.las2peer.registry.exceptions;
  * entry does not exist.
  */
 public class NotFoundException extends Exception {
+	private static final long serialVersionUID = 1L;
+
 	public NotFoundException() {
 	}
 

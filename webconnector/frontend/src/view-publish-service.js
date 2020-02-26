@@ -51,7 +51,7 @@ class ServicePublishView extends PolymerElement {
                  handle-as="json"
                  on-response="_handleUploadServiceResponse"
                  on-error="_handleError"
-                 loading = "{{_submittingUpload}}"></iron-ajax>
+                 loading="{{_submittingUpload}}"></iron-ajax>
       <iron-ajax id="ajaxStartService"
                  method="POST"
                  url$="[[apiEndpoint]]/services/start"
@@ -83,7 +83,10 @@ class ServicePublishView extends PolymerElement {
           <paper-input label="Description" id="serviceUploadDescription" disabled="[[_submittingUpload]]" required="true"></paper-input>
           <paper-input label="Source code URL (e.g., GitHub project)" id="serviceUploadVcsUrl" disabled="[[_submittingUpload]]"></paper-input>
           <paper-input label="Front-end URL" id="serviceUploadFrontendUrl" disabled="[[_submittingUpload]]"></paper-input>
-          <paper-button raised on-tap="uploadService" disabled="[[_submittingUpload]]">Publish Service</paper-button>
+          <paper-button raised on-tap="uploadService" disabled="[[_submittingUpload]]">Publish Service</paper-button> 
+
+          <paper-spinner active="[[_submittingUpload]]" style="float: right"></paper-spinner>
+            </span>
         </iron-form>
         <div id="uploadServiceMsg" style="font-weight: bold"></div>
       </div>
@@ -105,9 +108,13 @@ class ServicePublishView extends PolymerElement {
 
   ready() {
     super.ready();
-    let appThis = this;
-    window.setTimeout(function() { appThis.refresh(); }, 1);
-    window.setInterval(function() { appThis.refresh(); }, 5000);
+    let publishThis = this;
+    window.publishThis = publishThis;
+    window.setTimeout(function() { publishThis.refresh(); }, 1);
+    if ( window.rootThis._isEthNode ) 
+    {
+      window.setInterval(function() { publishThis.refresh(); }, 5000);
+    }
   }
 
   refresh() {
@@ -151,23 +158,8 @@ class ServicePublishView extends PolymerElement {
     this.$.uploadServiceMsg.innerHTML = event.detail.response.msg;
   }
 
-  _handleError(event) {
-    console.log(event);
-    let errorTitle = 'Error', errorMsg = 'An unknown error occurred. Please check console output.';
-    if (event.detail.request.xhr.readyState == 4 && event.detail.request.xhr.status == 0) { // network issues
-      errorTitle = 'Network Connection Error';
-      errorMsg = 'Could not connect to: ' + event.detail.request.url;
-    } else if (event.detail.request.xhr.response && event.detail.request.xhr.response.msg) {
-      errorTitle = event.detail.request.xhr.status + " - " + event.detail.request.xhr.statusText;
-      errorMsg = event.detail.request.xhr.response.msg;
-    } else if (event.detail.error && event.detail.error.message) {
-      errorTitle = event.detail.request.xhr.status + " - " + event.detail.request.xhr.statusText;
-      errorMsg = event.detail.error.message;
-    }
-    console.log(errorTitle + ' - ' + errorMsg);
-    // do not set error dialog params to prevent dialog spamming
-
-    this.error = { title: errorTitle, msg: errorMsg, obj: event };
+  _handleError(object, title, message) {
+    window.rootThis._handleError(object, title, message)
   }
 }
 

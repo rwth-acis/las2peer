@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collection;
 import java.util.Date;
 
 import javax.ws.rs.*;
@@ -23,28 +24,62 @@ import i5.las2peer.api.security.Agent;
 import i5.las2peer.connectors.webConnector.WebConnector;
 import i5.las2peer.connectors.webConnector.util.AuthenticationManager;
 import i5.las2peer.connectors.webConnector.util.KeystoreManager;
+import i5.las2peer.connectors.webConnector.util.L2P_JSONUtil;
+import i5.las2peer.logging.L2pLogger;
+import i5.las2peer.p2p.EthereumNode;
 import i5.las2peer.p2p.Node;
+import i5.las2peer.p2p.NodeInformation;
+import i5.las2peer.p2p.NodeNotFoundException;
 import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.restMapper.RESTService;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.serialization.SerializationException;
-import i5.las2peer.tools.L2pNodeLauncher;
+import i5.las2peer.tools.CryptoException;
+import i5.las2peer.tools.L2pNodeLauncher; 
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import rice.pastry.NodeHandle;
 
 @Path(DefaultHandler.ROOT_RESOURCE_PATH)
 public class DefaultHandler {
 
 	public static final String ROOT_RESOURCE_PATH = "/las2peer";
 
+	private final L2pLogger logger = L2pLogger.getInstance(DefaultHandler.class);
+
 	private final WebConnector connector;
 	private final Node node;
+	private final EthereumNode ethNode;
 
 	public DefaultHandler(WebConnector connector) {
 		this.connector = connector;
 		node = connector.getL2pNode();
+		if ( node instanceof EthereumNode )
+		{
+			ethNode = (EthereumNode) node;
+		}
+		else
+		{
+			ethNode = null;
+		}
+	}
+
+	@GET
+	@Path("/check-eth")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response checkEth() throws NotFoundException {
+		if ( node instanceof EthereumNode ) 
+		{
+			JSONObject json = new JSONObject();
+			json.put("msg", "found eth");
+			return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
+		}
+		else
+		{
+			throw new NotFoundException("Node does not use registry.");
+		}
 	}
 
 	@GET
@@ -92,6 +127,35 @@ public class DefaultHandler {
 			localStorageSize = ((PastryNodeImpl) node).getLocalStorageSize();
 			maxLocalStorageSize = ((PastryNodeImpl) node).getLocalMaxStorageSize();
 		}
+
+		NodeInformation nodeInfo = null;
+		try {
+			nodeInfo = node.getNodeInformation();
+		} catch (CryptoException e) {
+			// should never happen O.o
+			e.printStackTrace();
+		}
+		if ( nodeInfo != null )
+		{
+			String nodeAdminName = nodeInfo.getAdminName();
+			String nodeAdminEmail = nodeInfo.getAdminEmail();
+			String nodeOrganization = nodeInfo.getOrganization();
+			String nodeDescription = nodeInfo.getDescription();
+			if (nodeAdminName != null && nodeAdminName.length() > 0)
+				response.put("nodeAdminName", nodeAdminName);
+			if (nodeAdminEmail != null && nodeAdminEmail.length() > 0)
+			{
+				response.put("nodeAdminEmail", nodeAdminEmail);
+				if ( ethNode != null )
+					response.put("nodeAdminReputation", ethNode.getAgentReputation(nodeAdminName, nodeAdminEmail));
+			}
+				
+			if (nodeOrganization != null && nodeOrganization.length() > 0)
+				response.put("nodeOrganization", nodeOrganization);
+			if (nodeDescription != null && nodeDescription.length() > 0)
+				response.put("nodeDescription", nodeDescription);
+		}
+		
 		response.put("storageSize", localStorageSize);
 		response.put("storageSizeStr", humanReadableByteCount(localStorageSize, true));
 		response.put("maxStorageSize", maxLocalStorageSize);
@@ -100,6 +164,14 @@ public class DefaultHandler {
 		response.put("localServices", getLocalServices(node, uriInfo.getRequestUri()));
 		response.put("otherNodes", getOtherNodes(node));
 		return response.toJSONString();
+	}
+
+	@GET
+	@Path("/getOtherNodesInfo")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String handleGetOtherNodeInfo()
+	{
+		return getOtherNodeInfos(node).toJSONString();
 	}
 
 	private int getCPULoad(Node node) {
@@ -162,6 +234,40 @@ public class DefaultHandler {
 		JSONArray result = new JSONArray();
 		for (Object other : node.getOtherKnownNodes()) {
 			result.add(other.toString());
+		}
+		return result;
+	}
+
+	private JSONArray getOtherNodeInfos(Node node) {
+		JSONArray result = new JSONArray();
+
+		if (!( node instanceof PastryNodeImpl )) {
+			return result;
+		}
+		Collection<NodeHandle> knownNodes = ((PastryNodeImpl) node).getPastryNode().getLeafSet().getUniqueSet();
+		for (NodeHandle nodeHandle : knownNodes) {
+			JSONObject nodeJSON = new JSONObject();
+			String nodeID = nodeHandle.toString();
+			try {
+				NodeInformation nodeInfo = node.getNodeInformation(nodeHandle);
+				if ( nodeInfo.getAdminName() != null && nodeInfo.getAdminName().length() > 2 && 
+					 nodeInfo.getAdminEmail() != null && nodeInfo.getAdminEmail().length() > 2 
+					)
+				{
+					if (ethNode != null) {
+						nodeJSON.put("nodeAdminReputation", 
+							ethNode.getAgentReputation(nodeInfo.getAdminName(), nodeInfo.getAdminEmail())
+						);
+					}
+				}
+				nodeJSON.put("nodeID", nodeID);
+				nodeJSON.put("nodeInfo", L2P_JSONUtil.nodeInformationToJSON(nodeInfo));
+			} catch (NodeNotFoundException e) {
+				logger.severe("trying to access nodeinfo of " + nodeHandle.getNodeId() + " | " + nodeHandle.getId());
+				e.printStackTrace();
+				continue;
+			}
+			result.add(nodeJSON);
 		}
 		return result;
 	}

@@ -84,11 +84,14 @@ public class AuthenticationManager {
 				return AnonymousAgentImpl.getInstance();
 			}
 		} catch (AgentNotFoundException e) {
-			throw new NotAuthorizedException("agent not found");
+			logger.warning("agent not found");
+			throw new NotAuthorizedException("agent not found", e);
 		} catch (AgentAccessDeniedException e) {
-			throw new NotAuthorizedException("passphrase invalid");
+			logger.warning("passphrase invalid");
+			throw new NotAuthorizedException("passphrase invalid", e);
 		} catch (AgentException e) {
-			throw new NotAuthorizedException("not sure what went wrong");
+			logger.warning("AgentException when trying to auth agent: " + e.getMessage());
+			throw new NotAuthorizedException("not sure what went wrong", e);
 		}
 	}
 
@@ -103,7 +106,7 @@ public class AuthenticationManager {
 	private AgentImpl authenticateCredentials(Credentials credentials) throws AgentException {
 		String prefixedIdentifier = credentials.identifier;
 		String agentId;
-
+		logger.info("attempting login with id: " + prefixedIdentifier);
 		try {
 			agentId = connector.getL2pNode().getUserManager().getAgentId(prefixedIdentifier);
 		} catch (IllegalArgumentException e) {
@@ -115,10 +118,12 @@ public class AuthenticationManager {
 				agentId = connector.getL2pNode().getAgentIdForLogin(prefixedIdentifier);
 			}
 		}
-
+		
+		
 		AgentImpl agent = connector.getL2pNode().getAgent(agentId);
 		if (agent instanceof PassphraseAgentImpl) {
 			((PassphraseAgentImpl) agent).unlock(credentials.password);
+			logger.fine("passphrase accepted. Agent unlocked");
 		}
 		return agent;
 	}
@@ -133,14 +138,17 @@ public class AuthenticationManager {
 	 */
 	private PassphraseAgentImpl authenticateOIDC(String token, String oidcProviderHeader, Credentials credentials) throws AgentException {
 		try {
+			logger.info("OIDC sub found. Authenticating...");
 			AgentImpl existingAgent = authenticateCredentials(credentials);
 			if (existingAgent instanceof UserAgentImpl) {
 				return (UserAgentImpl) existingAgent;
 			} else {
+				logger.warning("OIDC credentials were valid but agent had unexpected type");
 				throw new AgentException("credentials were valid but agent had unexpected type");
 			}
 		} catch (AgentNotFoundException e) {
 			// expected - auto-register
+			logger.info("OIDC sub uknown. Auto-register...");
 			return createNewOidcAgent(token, oidcProviderHeader, credentials);
 		}
 	}
@@ -264,8 +272,9 @@ public class AuthenticationManager {
 		try {
 			UserAgentImpl oidcAgent;
 			if (connector.getL2pNode() instanceof EthereumNode) {
+				EthereumNode ethNode = (EthereumNode) connector.getL2pNode();
 				String loginName = (String) userInfo.get("preferred_username");
-				oidcAgent = EthereumAgent.createEthereumAgent(loginName, password);
+				oidcAgent = EthereumAgent.createEthereumAgent(loginName, password, ethNode.getRegistryClient());
 			} else {
 				// TODO: should we just always create an EthereumAgent?
 				// should Node have a createAgent (instance? static?) method?
@@ -291,6 +300,7 @@ public class AuthenticationManager {
 				connector.getLockOidc().unlock(oidcAgentId);
 			}
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new InternalServerErrorException("OIDC agent creation failed", e);
 		}
 	}

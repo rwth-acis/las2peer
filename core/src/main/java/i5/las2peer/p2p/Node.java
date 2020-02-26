@@ -526,7 +526,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 		}
 
 		result.setNodeHandle(getNodeId());
-
+		//logger.info("retrieving node info: \n" + result.toXmlString());
 		return result;
 	}
 

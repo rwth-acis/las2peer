@@ -59,6 +59,25 @@ class NodeFrontend extends PolymerElement {
                  on-error="_handleError"
                  loading="{{_submittingLogin}}"></iron-ajax>
 
+      <iron-ajax id="ajaxCheckETH"
+                 url$="[[apiEndpoint]]/check-eth"
+                 on-response="_handleCheckETHResponse"
+                 on-error="_handleCheckETHError"
+                 loading="{{_checking}}"></iron-ajax>
+      <iron-ajax id="ajaxCheckFileService"
+                 url$="[[hostRoot]]fileservice/index.html"
+                 on-response="_handleCheckFSResponse"
+                 on-error="_handleCheckFSError"
+                 handle-as="document"
+                 loading="{{_checking}}"></iron-ajax>
+      <iron-ajax id="ajaxCheckContactService"
+                 url$="[[hostRoot]]contactservice"
+                 on-response="_handleCheckCSResponse"
+                 on-error="_handleCheckCSError"
+                 handle-as="document"
+                 params='{}'
+                 loading="{{_checking}}"></iron-ajax>
+
 
       <style>
         :host {
@@ -101,6 +120,15 @@ class NodeFrontend extends PolymerElement {
           color: black;
           font-weight: bold;
         }
+
+        .cursorwrapper:hover {
+          cursor:pointer;
+        }
+
+        paper-toast .error {
+          --paper-toast-background-color: rgba(255,0,0,0.7);
+          --paper-toast-color: white;
+        }
       </style>
 
       <app-location route="{{route}}" url-space-regex="^[[rootPath]]"></app-location>
@@ -110,27 +138,93 @@ class NodeFrontend extends PolymerElement {
       <app-drawer-layout fullbleed="" narrow="{{narrow}}">
         <!-- Drawer content -->
         <app-drawer id="drawer" slot="drawer" swipe-open="[[narrow]]">
-          <app-toolbar>Menu</app-toolbar>
+          <app-toolbar>
+            <div style="">
+              Menu
+            </div>
+
+            
+            <div style="margin-left: auto;order: 2;display: flex;align-content: center;align-items: center;">
+              <paper-spinner active="[[_checking]]" style="width: 18px; height: 18px;"></paper-spinner>
+              </span>
+              <!-- Is running blockchain? -->
+              <template is="dom-if" if="[[_isEthNode]]">
+                <iron-icon icon="fingerprint" 
+                  title="Node is running on Ethereum" 
+                  style="width: 18px; height: 18px; color: green;"></iron-icon> 
+              </template>
+              <template is="dom-if" if="[[!_isEthNode]]">
+                <iron-icon icon="fingerprint" 
+                  title="Node is NOT running on Ethereum" 
+                  style="width: 18px; height: 18px; color: red;"></iron-icon> 
+              </template>
+
+              <!-- Is FileService running? -->
+              <template is="dom-if" if="[[_isFileServiceRunning]]">
+                <iron-icon icon="description" 
+                  title="FileService is Running" 
+                  style="width: 18px; height: 18px; color: green;"></iron-icon> 
+              </template>
+              <template is="dom-if" if="[[!_isFileServiceRunning]]">
+                <iron-icon icon="description" 
+                  title="FileService is NOT Running" 
+                  style="width: 18px; height: 18px; color: red;"></iron-icon> 
+              </template
+              
+              <!-- Is ContactService running? -->
+              <template is="dom-if" if="[[_isContactServiceRunning]]">
+                <iron-icon icon="perm-contact-calendar" 
+                  title="ContactService is Running" 
+                  style="width: 18px; height: 18px; color: green;"></iron-icon> 
+              </template>
+              <template is="dom-if" if="[[!_isContactServiceRunning]]">
+                <iron-icon icon="perm-contact-calendar" 
+                  title="ContactService is NOT Running OR user is not logged in." 
+                  style="width: 18px; height: 18px; color: red;"></iron-icon> 
+              </template>
+
+              <!-- Is UserInformationService running? 
+              <template is="dom-if" if="[[_isUserInformationServiceRunning]]">
+                <iron-icon icon="supervisor-account" 
+                  title="UserInformationService is Running" 
+                  style="width: 18px; height: 18px; color: green;"></iron-icon> 
+              </template>
+              <template is="dom-if" if="[[!_isUserInformationServiceRunning]]">
+                <iron-icon icon="supervisor-account" 
+                  title="UserInformationService is NOT Running" 
+                  style="width: 18px; height: 18px; color: red;"></iron-icon> 
+              </template>
+              -->
+              <paper-icon-button icon="refresh" title="Refresh Status" on-click="checkStatusWrapper" disabled="[[_checking]]"></paper-icon-button>
+            </div>
+          </app-toolbar>
+
           <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
             <a name="welcome" href="[[rootPath]]welcome">Welcome</a>
             <a name="status" href="[[rootPath]]status">Status</a>
             <a name="view-services" href="[[rootPath]]view-services">View Services</a>
             <a name="publish-service" href="[[rootPath]]publish-service">Publish Service</a>
+            <template is="dom-if" if="[[_isEthAgent]]">
+              <a name="eth-tools" href="[[rootPath]]eth-tools">Blockchain and Reputation</a>
+            </template>
             <a name="agent-tools" href="[[rootPath]]agent-tools">Agent Tools</a>
           </iron-selector>
         </app-drawer>
 
         <!-- Main content -->
         <div class="app-header">
-          <las2peer-frontend-statusbar id="statusbar"
-            base-url="[[hostUrl]]" service="las2peer Node Front-End"
-            oidcclientid="bdda7396-3f6d-4d83-ac21-65b4069d0eab"
-            oidcpopupsigninurl$="[[_loadUrl]]"
-            oidcpopupsignouturl$="[[_loadUrl]]"
-            oidcsilentsigninurl$="[[_loadUrl]]"
-            loginoidctoken$="[[_oidcUser.access_token]]"
-            loginoidcprovider="https://api.learning-layers.eu/o/oauth2"
-          ></las2peer-frontend-statusbar>
+          <template is="dom-if" if="[[_submittingLogin]]">
+            <paper-spinner style="position: absolute;float: right;right: 170px;top: 25px;z-index: 1;" active="[[_submittingLogin]]"></paper-spinner>
+          </template>
+            <las2peer-frontend-statusbar id="statusbar"
+              base-url="[[hostUrl]]" service="las2peer Node Front-End"
+              oidcclientid="bdda7396-3f6d-4d83-ac21-65b4069d0eab"
+              oidcpopupsigninurl$="[[_loadUrl]]"
+              oidcpopupsignouturl$="[[_loadUrl]]"
+              oidcsilentsigninurl$="[[_loadUrl]]"
+              loginoidctoken$="[[_oidcUser.access_token]]"
+              loginoidcprovider="https://api.learning-layers.eu/o/oauth2"
+            ></las2peer-frontend-statusbar>
 
           <iron-pages selected="[[page]]" attr-for-selected="name" fallback-selection="view404" role="main">
             <welcome-view name="welcome" api-endpoint="[[apiEndpoint]]" agent-id="[[_agentId]]" error="{{_error}}"></welcome-view>
@@ -138,6 +232,7 @@ class NodeFrontend extends PolymerElement {
             <services-view name="view-services" api-endpoint="[[apiEndpoint]]" agent-id="[[_agentId]]" error="{{_error}}"></services-view>
             <service-publish-view name="publish-service" api-endpoint="[[apiEndpoint]]" agent-id="[[_agentId]]" error="{{_error}}"></service-publish-view>
             <agents-view name="agent-tools" api-endpoint="[[apiEndpoint]]" agent-id="[[_agentId]]" error="{{_error}}"></agents-view>
+            <eth-view name="eth-tools" api-endpoint="[[apiEndpoint]]" agent-id="[[_agentId]]" error="{{_error}}"></eth-view>
             <my-view404 name="view404"></my-view404>
           </iron-pages>
         </div>
@@ -182,15 +277,14 @@ class NodeFrontend extends PolymerElement {
           <div hidden$="[[toBool(_oidcUser)]]">To register, use the <a dialog-dismiss name="view-agents" href="[[rootPath]]agent-tools">Agents</a> tab.</div>
         </paper-dialog>
 
-        <paper-dialog id="las2peerErrorDialog">
-          <h2 id="las2peerErrorDialogTitle">Error</h2>
-          <div id="las2peerErrorDialogMessage"></div>
-          <div class="buttons">
-            <paper-button dialog-dismiss>OK</paper-button>
-          </div>
-        </paper-dialog>
-
       </app-drawer-layout>
+
+
+
+      <paper-toast id="las2peerErrorDialog" horizontal-align="left" class="error">
+        <h2 id="las2peerErrorDialogTitle">Error</h2>
+        <div id="las2peerErrorDialogMessage"></div>
+      </paper-toast>
     `;
   }
 
@@ -201,10 +295,18 @@ class NodeFrontend extends PolymerElement {
       subroute: Object,
       hostUrl: {type: String, value: null},
       apiEndpoint: { type: String, value: '/las2peer' },
+      hostRoot: { type: String, value: document.URL.split(":")[0] + "://" + window.location.host + '/' },
       _agentId: { type: String, value: '' },
       _submittingLogin: { type: Boolean, value: false },
       _error: { type: Object, observer: '_errorChanged' },
-      _oidcUser: { type: Object, value: null}
+      _oidcUser: { type: Object, value: null},
+      _isEthAgent: { type: Boolean, value: false },
+      _isLoggedIn: { type: Boolean, value: false },
+      _checking: { type: Boolean, value: false },
+      _isEthNode: { type: Boolean, value: false },
+      _isFileServiceRunning: { type: Boolean, value: false },
+      _isContactServiceRunning: { type: Boolean, value: false },
+      _isUserInformationServiceRunning: { type: Boolean, value: false },
     };
   }
 
@@ -225,7 +327,7 @@ class NodeFrontend extends PolymerElement {
      // Show 'view1' in that case. And if the page doesn't exist, show 'view404'.
     if (!page) {
       this.page = 'welcome';
-    } else if (['welcome', 'status', 'view-services', 'publish-service', 'agent-tools'].indexOf(page) !== -1) {
+    } else if (['welcome', 'status', 'view-services', 'publish-service', 'agent-tools', 'eth-tools'].indexOf(page) !== -1) {
       this.page = page;
     } else {
       this.page = 'view404';
@@ -258,6 +360,9 @@ class NodeFrontend extends PolymerElement {
       case 'agent-tools':
         import('./view-agents.js');
         break;
+      case 'eth-tools':
+        import('./view-eth.js');
+        break;
       case 'view404':
         import('./my-view404.js');
         break;
@@ -266,7 +371,8 @@ class NodeFrontend extends PolymerElement {
 
   ready() {
     super.ready();
-    let appThis = this;
+    let rootThis = this;
+    window.rootThis = rootThis;
 
     this._loadUrl = document.URL; // there's definitely better ways to do this, but I have no idea
 
@@ -275,17 +381,20 @@ class NodeFrontend extends PolymerElement {
 
     this.$.ajaxValidateSession.generateRequest(); // validate old session
 
-    this.$.statusbar.addEventListener('signed-in', function(event) { appThis.storeOidcUser(event.detail); });
+    this.$.statusbar.addEventListener('signed-in', function(event) { rootThis.storeOidcUser(event.detail); });
 
-    this.$.statusbar.addEventListener('signed-out', function() { appThis._oidcUser = null; appThis.destroySession(); });
+    this.$.statusbar.addEventListener('signed-out', function() { rootThis._oidcUser = null; rootThis.destroySession(); });
 
     // deprecated code supporting login with las2peer credentials
     // trigger the hidden, real submit button
-    this.$.loginButton.addEventListener('click', function() { appThis.$.loginSubmitButton.click(); });
+    this.$.loginButton.addEventListener('click', function() { rootThis.$.loginSubmitButton.click(); });
 
-    this.$.loginForm.addEventListener('submit', function(event) { event.preventDefault(); appThis.sendLogin(); });
+    this.$.loginForm.addEventListener('submit', function(event) { event.preventDefault(); rootThis.sendLogin(); });
 
-    this.$.oidcChangeUserButton.addEventListener('click', function() { appThis.$.statusbar.shadowRoot.querySelector("#oidcButton")._handleClick(); });
+    this.$.oidcChangeUserButton.addEventListener('click', function() { rootThis.$.statusbar.shadowRoot.querySelector("#oidcButton")._handleClick(); });
+
+    this.checkStatus();
+    //window.setInterval(function() { rootThis.checkStatus(); }, 50000);
   }
 
   oidcTokenStillValid(userObject) {
@@ -333,6 +442,7 @@ class NodeFrontend extends PolymerElement {
       return;
     }
 
+    this._submittingLogin = true;
     let req = this.$.ajaxLogin;
     req.headers = { Authorization: 'Basic ' + btoa(prefixedIdentifier + ':' + credentials.oidcSub) };
     if (((this._oidcUser || {}).access_token || "").length > 0) {
@@ -350,6 +460,7 @@ class NodeFrontend extends PolymerElement {
   }
 
   _handleLoginResponse(event) {
+    this._submittingLogin = false;
     console.log("login response: ", event);
     let resp = event.detail.response;
     if (resp && resp.hasOwnProperty('agentid')) {
@@ -359,6 +470,11 @@ class NodeFrontend extends PolymerElement {
       this.$.userIdField.value = '';
       this.$.passwordField.value = '';
       this.$.statusbar._appendWidget();
+      if ( resp.hasOwnProperty('ethaddress') )
+      {
+        console.log("ethereum agent detected: " + resp.ethaddress);
+        this._isEthAgent = true;
+      }
     } else {
       this._handleError(event, "Bad response", "Login returned no agent ID")
     }
@@ -379,22 +495,51 @@ class NodeFrontend extends PolymerElement {
     }
   }
 
+  checkStatusWrapper()
+  {
+    window.rootThis.checkStatus();
+  }
+
+  checkStatus()
+  {
+    this.$.ajaxCheckETH.generateRequest();
+    this.$.ajaxCheckFileService.generateRequest();
+    this.$.ajaxCheckContactService.generateRequest();
+  }
+
+  _handleCheckETHResponse(event) {
+    this._isEthNode = true;
+  }
+  _handleCheckETHError(event) {
+    this._isEthNode = false;
+  }
+  _handleCheckFSResponse(event) {
+    this._isFileServiceRunning = true;
+  }
+  _handleCheckFSError(event) {
+    this._isFileServiceRunning = false;
+  }
+  _handleCheckCSResponse(event) {
+    this._isContactServiceRunning = true;
+  }
+  _handleCheckCSError(event) {
+    this._isContactServiceRunning = false;
+  }
+
   // iron-ajax error event for some reason passes two arguments
   // that can be confusing, but it's not a problem
   _handleError(object, title, message) {
-    console.log("[DEBUG] object: ", object);
-    console.log("[DEBUG] title: ", title);
-    console.log("[DEBUG] message: ", message);
     if (!title || !message) {
       // try to get details of known possible errors
       let maybeDetail = (object || {}).detail;
       let maybeError = (maybeDetail || {}).error;
-      let maybeXhr = ((maybeDetail || {}).request || {}).xhr;
+      let maybeRequest = (maybeDetail || {}).request;
+      let maybeXhr = (maybeRequest || {}).xhr;
 
       // TODO: this is for from perfect. all fields should be checked before usage
       if ((maybeXhr || {}).readyState === 4 && (maybeXhr || {}).status === 0) { // network issues
         title = 'Network Connection Error';
-        message = 'Could not connect to: ' + object.detail.request.url;
+        message = 'Could not connect to: ' + (maybeRequest || {}).url;
       } else if ((maybeXhr || {}).status && (maybeXhr.response || {}).msg) {
         title = maybeXhr.status + " - " + maybeXhr.statusText;
         message = maybeXhr.response.msg;
@@ -404,6 +549,28 @@ class NodeFrontend extends PolymerElement {
       } else {
         title = "Unknown error";
         message = "Could not determine type of error, check manually in console"
+      }
+
+      if ( ((maybeRequest || {}).__data || {}).status == 404 )
+      {
+        title = "Service unreachable";
+        if ( (maybeRequest || {}).url.includes("/contactservice/") )
+        {
+          message = "ContactService not reachable. Ensure it is running.";
+          if ( !this._isContactServiceRunning )
+            return;
+          this._isContactServiceRunning = false;
+        }
+        if ( (maybeRequest || {}).url.includes("/fileservice/") )
+        {
+          message = "FileService not reachable. Ensure it is running.";
+          if ( !this._isFileServiceRunning )
+            return;
+          this._isFileServiceRunning = false;
+        }
+      }
+      if ( message.includes("Node does not use registry") ) {
+        this._isEthNode = false;
       }
     }
     this._error = { title: title, msg: message, obj: object };

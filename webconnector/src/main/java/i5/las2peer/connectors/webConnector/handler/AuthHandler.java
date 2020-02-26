@@ -1,30 +1,31 @@
 package i5.las2peer.connectors.webConnector.handler;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.CookieParam;
-import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.NewCookie;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 
 import i5.las2peer.api.security.Agent;
-import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentNotFoundException;
-import i5.las2peer.api.security.PassphraseAgent;
 import i5.las2peer.connectors.webConnector.WebConnector;
 import i5.las2peer.connectors.webConnector.util.AgentSession;
 import i5.las2peer.connectors.webConnector.util.AuthenticationManager;
 import i5.las2peer.p2p.EthereumNode;
 import i5.las2peer.p2p.Node;
-import i5.las2peer.security.*;
+import i5.las2peer.security.AgentImpl;
+import i5.las2peer.security.AnonymousAgentImpl;
+import i5.las2peer.security.EthereumAgent;
+import i5.las2peer.security.PassphraseAgentImpl;
+import i5.las2peer.security.UserAgentImpl;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
@@ -99,10 +100,11 @@ public class AuthHandler {
 		// create new user agent and store in network
 		UserAgentImpl agent;
 		if (node instanceof EthereumNode) {
+			EthereumNode ethNode = (EthereumNode) node;
 			if (ethereumMnemonic != null) {
-				agent = EthereumAgent.createEthereumAgent(username, password, ethereumMnemonic);
+				agent = EthereumAgent.createEthereumAgent(username, password, ethNode.getRegistryClient(), ethereumMnemonic);
 			} else {
-				agent = EthereumAgent.createEthereumAgent(username, password);
+				agent = EthereumAgent.createEthereumAgent(username, password, ethNode.getRegistryClient());
 			}
 		} else {
 			agent = UserAgentImpl.createUserAgent(password);
@@ -132,6 +134,9 @@ public class AuthHandler {
 			UserAgentImpl user = (UserAgentImpl) agent;
 			json.put("username", user.getLoginName());
 			json.put("email", user.getEmail());
+		}
+		if (agent instanceof EthereumAgent) {
+			json.put("ethaddress", ((EthereumAgent) agent).getEthereumAddress());
 		}
 		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).cookie(cookie).build();
 	}
