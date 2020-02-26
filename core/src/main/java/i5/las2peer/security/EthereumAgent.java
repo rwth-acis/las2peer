@@ -161,7 +161,7 @@ public class EthereumAgent extends UserAgentImpl {
 	 * @throws CryptoException if there is an internal error during
 	 *                         Ethereum key creation
 	 */
-	public static EthereumAgent createEthereumAgent(String loginName, String passphrase,
+	public static EthereumAgent createEthereumAgentWithClient(String loginName, String passphrase,
 			ReadWriteRegistryClient regClient) throws CryptoException, AgentOperationFailedException {
 		return createEthereumAgent(loginName, passphrase, regClient, CredentialUtils.createMnemonic());
 	}

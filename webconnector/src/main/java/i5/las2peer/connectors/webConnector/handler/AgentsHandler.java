@@ -94,7 +94,7 @@ public class AgentsHandler {
 			if (ethereumMnemonic != null && !ethereumMnemonic.isEmpty()) {
 				agent = EthereumAgent.createEthereumAgent(username, password, ethNode.getRegistryClient(), ethereumMnemonic);
 			} else {
-				agent = EthereumAgent.createEthereumAgent(username, password, ethNode.getRegistryClient());
+				agent = EthereumAgent.createEthereumAgentWithClient(username, password, ethNode.getRegistryClient());
 			}
 		} else {
 			agent = UserAgentImpl.createUserAgent(password);

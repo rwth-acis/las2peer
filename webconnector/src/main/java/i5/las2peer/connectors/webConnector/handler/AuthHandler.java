@@ -104,7 +104,7 @@ public class AuthHandler {
 			if (ethereumMnemonic != null) {
 				agent = EthereumAgent.createEthereumAgent(username, password, ethNode.getRegistryClient(), ethereumMnemonic);
 			} else {
-				agent = EthereumAgent.createEthereumAgent(username, password, ethNode.getRegistryClient());
+				agent = EthereumAgent.createEthereumAgentWithClient(username, password, ethNode.getRegistryClient());
 			}
 		} else {
 			agent = UserAgentImpl.createUserAgent(password);

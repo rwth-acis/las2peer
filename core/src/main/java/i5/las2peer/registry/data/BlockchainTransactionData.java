@@ -8,7 +8,6 @@ import i5.las2peer.registry.Util;
 
 /**
  * Represents the raw ethereum blockchain transaction
- * @see https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_gettransactionbyhash
  */
 public class BlockchainTransactionData {
 	private BigInteger blockNumber;

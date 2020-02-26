@@ -404,7 +404,6 @@ public class ReadOnlyRegistryClient {
 	 * 
 	 * @param largerThanBlockNo   block number to start querying at
 	 * @param searchingForService service which is to be found
-	 * @return HashMap< ServiceName, NoOfAnnouncements >
 	 */
 	public HashMap<String, Integer> getNoOfServiceAnnouncementSinceBlockOrderedByHostingNode(
 			BigInteger largerThanBlockNo, String searchingForService) {
@@ -447,8 +446,6 @@ public class ReadOnlyRegistryClient {
 	 * 
 	 * @param address target address
 	 * @return nonce
-	 * @throws InterruptedException
-	 * @throws ExecutionException
 	 */
 	public BigInteger getNonce(String address) {
 		if ( address.length() == 0 )
@@ -501,7 +498,7 @@ public class ReadOnlyRegistryClient {
 
 	/**
 	 * Overrides nonce of transactionManager with local nonce.
-	 * @param nonce
+	 * @param address
 	 */
 	protected synchronized void updateTxManNonce(String address) {
 		if ( updateNonceTxMan )
@@ -552,9 +549,6 @@ public class ReadOnlyRegistryClient {
 	 * 
 	 * @param transactionHash
 	 * @return
-	 * @throws ExecutionException
-	 * @throws InterruptedException
-	 * @throws Exception
 	 */
 	protected TransactionReceipt waitForReceipt(String transactionHash)
 			throws InterruptedException, ExecutionException {
