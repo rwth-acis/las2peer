@@ -837,8 +837,7 @@ class EthereumView extends PolymerElement {
 	}
 
 	_handleError(object, title, message) {
-		if ( title.includes("Couldn't query mobsos success model for group") || 
-			message.includes("Couldn't query mobsos success model for group") )
+		if ( message.includes("Couldn't query mobsos success model for group") )
 		{
 			this.error = { title: "Couldn't query MobSOS success model", msg: "Either the service is not running or the success model is not setup." };
 		}
