@@ -71,10 +71,10 @@ class NodeFrontend extends PolymerElement {
                  handle-as="document"
                  loading="{{_checking}}"></iron-ajax>
       <iron-ajax id="ajaxCheckContactService"
-                 url$="[[hostRoot]]contactservice"
+                 url$="[[hostRoot]]contactservice/groups"
                  on-response="_handleCheckCSResponse"
                  on-error="_handleCheckCSError"
-                 handle-as="document"
+                 handle-as="json"
                  params='{}'
                  loading="{{_checking}}"></iron-ajax>
 
@@ -502,6 +502,7 @@ class NodeFrontend extends PolymerElement {
 
   checkStatus()
   {
+    this.$.ajaxCheckContactService.headers = this.$.ajaxLogin.headers;
     this.$.ajaxCheckETH.generateRequest();
     this.$.ajaxCheckFileService.generateRequest();
     this.$.ajaxCheckContactService.generateRequest();

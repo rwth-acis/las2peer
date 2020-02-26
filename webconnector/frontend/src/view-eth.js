@@ -793,6 +793,7 @@ class EthereumView extends PolymerElement {
 			this._hasNoTxLog = false;
 		}
 		this._EthWallet.ethAccBalance = parseFloat(this._EthWallet.ethAccBalance);
+		this.$.ajaxGetGroups.headers = window.rootThis.$.ajaxLogin.headers;
 		this.$.ajaxGetGroups.generateRequest();
 	}
 	_handleRequestFaucetResponse(event) {
