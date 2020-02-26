@@ -26,7 +26,7 @@ class CustomStarRating extends PolymerElement {
                 display: none !important;
             }
             iron-icon {
-                color: #eeeeee;
+                color: #bbb;
                 float: right;
             }
             iron-icon.color-1, :host([single]) > iron-icon.color-1 {
@@ -36,7 +36,7 @@ class CustomStarRating extends PolymerElement {
                 color: #fdae61;
             }
             iron-icon.color-3, :host([single]) > iron-icon.color-3 {
-                color: #bbb;
+                color: #ccc;
             }
             iron-icon.color-4, :host([single]) > iron-icon.color-4 {
                 color: #5ac4e8;
@@ -45,7 +45,7 @@ class CustomStarRating extends PolymerElement {
                 color: #2c7bb6;
             }
             :host(:not([readonly])) iron-icon.whole {
-                opacity: 0.5;
+                opacity: 0.6;
             }
             :host(:not([readonly])) iron-icon:hover {
                 opacity: 1.0;
@@ -54,7 +54,7 @@ class CustomStarRating extends PolymerElement {
                 opacity: 1.0;
             }
             iron-icon.selected {
-                opacity: 0.8;
+                opacity: 0.95;
             }
         </style>
     
