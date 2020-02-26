@@ -17,9 +17,9 @@
 			<resolver ref="local"/>
 			<ibiblio name="central" m2compatible="true"/>
 			<ibiblio name="acis-internal" m2compatible="true"
-			         root="http://role.dbis.rwth-aachen.de:9911/archiva/repository/internal/"/>
+			         root="https://archiva.dbis.rwth-aachen.de:9911/repository/internal/"/>
 			<ibiblio name="acis-snapshots" m2compatible="true"
-			         root="http://role.dbis.rwth-aachen.de:9911/archiva/repository/snapshots/"/>
+			         root="https://archiva.dbis.rwth-aachen.de:9911/repository/snapshots/"/>
 		</chain>
 	</resolvers>
 
