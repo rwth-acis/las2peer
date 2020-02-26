@@ -202,11 +202,10 @@ class EthereumView extends PolymerElement {
 								<iron-icon icon="redeem"></iron-icon> <strong>Total Faucet Payout</strong>: [[_ethFaucetLog.ethFaucetAmount]] <br />
 								The reputation pay-out has been obtained as follows: 
 							</p>
-							<ul>
-								<li>&nbsp;&nbsp;UserRating <small>(* [[_ethFaucetLog.rewardDetails.u]])</small></li>
-								<li>+&nbsp;HostingServices <small>(* [[_ethFaucetLog.rewardDetails.h]])</small></li>
-								<li>+&nbsp;DevelopServices <small>(* [[_ethFaucetLog.rewardDetails.d]])</small></li>
-							</ul>
+							<p>
+								UserRating <small>(* [[_ethFaucetLog.rewardDetails.u]])</small> * <br />
+								 [ &nbsp;HostingServices <small>(* [[_ethFaucetLog.rewardDetails.h]])</small>&nbsp;+&nbsp;DevelopServices <small>(* [[_ethFaucetLog.rewardDetails.d]])</small> ]
+							</p>
 						</paper-dialog-scrollable>
 						<div class="buttons">
 							<paper-button dialog-dismiss>
