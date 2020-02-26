@@ -292,7 +292,7 @@ public class EthereumHandler {
 				successGroupResponse = L2P_HTTPUtil.getHTTP(successGroupURL, "GET");
 				servicesWithSuccessModel = L2P_JSONUtil.parseMobSOSGroupServiceNames(successGroupResponse);
 			} catch (MalformedURLException | ServiceNotFoundException | ParseException e) {
-				return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Couldn't query mobsos success model for group #" + groupID).build();
+				return Response.status(Status.NO_CONTENT).entity("Couldn't query mobsos success model for group #" + groupID).build();
 			}
 			logger.info("[ETH Faucet/MobSOS]: found " + servicesWithSuccessModel.size() + " services with success model.");
 
@@ -496,8 +496,8 @@ public class EthereumHandler {
 				.appendField("rewardedForServicesHosting", hostingServicesRatedByFaucet)
 				.appendField("rewardedForServicesDevelop", developServicesRatedByFaucet)
 				.appendField("u", RegistryConfiguration.Faucet_userScoreMultiplier)
-				.appendField("h", RegistryConfiguration.Faucet_serviceHostingScoreMultiplier)
-				.appendField("d", RegistryConfiguration.Faucet_serviceDevelopScoreMultiplier)
+				.appendField("h", RegistryConfiguration.Faucet_serviceHostingScoreMultiplier * 100)
+				.appendField("d", RegistryConfiguration.Faucet_serviceDevelopScoreMultiplier * 100)
 		);
 
 		String txHash;
