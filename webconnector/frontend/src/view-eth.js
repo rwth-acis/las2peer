@@ -163,6 +163,10 @@ class EthereumView extends PolymerElement {
 					text-align: left;
 				}
 
+				tr:nth-child(even) {
+					background-color: #fafafa;
+				}
+
 			</style>
 
 			<div class="card">
