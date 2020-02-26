@@ -129,29 +129,7 @@ class CustomStarRating extends PolymerElement {
         else
         if ( this.single )
         {
-            var valueToFace = '';
-
-            switch (Math.round(this.value)) {
-                case 1:
-                    valueToFace = 'sentiment-very-dissatisfied';
-                break;
-                case 2:
-                    valueToFace = 'sentiment-dissatisfied';
-                break;  
-                default:
-                case 3:
-                    valueToFace = 'sentiment-neutral';
-                break; 
-                case 4:
-                    valueToFace = 'sentiment-satisfied';
-                break; 
-                case 5:
-                    valueToFace = 'sentiment-very-satisfied';
-                break;
-            }
-            this.ratings = [
-                { value: Math.round(this.value), class: 'whole color-'+Math.round(this.value), icon: 'social:' + valueToFace, selected: false }
-            ];
+            this._updateSingleFace();
         } 
         else 
         if ( this.value <= 0 && this.readonly )
@@ -162,28 +140,16 @@ class CustomStarRating extends PolymerElement {
         } 
         else
         {
-            if ( this.value > 0 )
-            {
-                this.ratings = [
-                    { value: 5, class: 'whole color-5', icon: 'social:sentiment-very-satisfied', selected: false },
-                    { value: 4, class: 'whole color-4', icon: 'social:sentiment-satisfied', selected: false },
-                    { value: 3, class: 'whole color-3', icon: 'social:sentiment-neutral', selected: false },
-                    { value: 2, class: 'whole color-2', icon: 'social:sentiment-dissatisfied', selected: false },
-                    { value: 1, class: 'whole color-1', icon: 'social:sentiment-very-dissatisfied', selected: false },
-                ];
-            } 
-            else
-            {
-                this.ratings = [
-                    { value: 5, class: 'whole', icon: 'social:sentiment-very-satisfied', selected: false },
-                    { value: 4, class: 'whole', icon: 'social:sentiment-satisfied', selected: false },
-                    { value: 3, class: 'whole', icon: 'social:sentiment-neutral', selected: false },
-                    { value: 2, class: 'whole', icon: 'social:sentiment-dissatisfied', selected: false },
-                    { value: 1, class: 'whole', icon: 'social:sentiment-very-dissatisfied', selected: false },
-                ];               
-            } 
+            this.ratings = [
+                { value: 5, class: 'whole color-5', icon: 'social:sentiment-very-satisfied', selected: false },
+                { value: 4, class: 'whole color-4', icon: 'social:sentiment-satisfied', selected: false },
+                { value: 3, class: 'whole color-3', icon: 'social:sentiment-neutral', selected: false },
+                { value: 2, class: 'whole color-2', icon: 'social:sentiment-dissatisfied', selected: false },
+                { value: 1, class: 'whole color-1', icon: 'social:sentiment-very-dissatisfied', selected: false },
+            ];
         }
 
+        /*
         console.log(
             {
                 "readonly": (this.readonly) ? this.readonly : "r; nope",
@@ -195,9 +161,44 @@ class CustomStarRating extends PolymerElement {
                 "ratings": this.ratings
             }
         );
+        */
+    }
+
+    _updateSingleFace() {
+        var valueToFace = '';
+        switch (Math.round(this.value)) {
+            case 1:
+                valueToFace = 'sentiment-very-dissatisfied';
+            break;
+            case 2:
+                valueToFace = 'sentiment-dissatisfied';
+            break;  
+            default:
+            case 3:
+                valueToFace = 'sentiment-neutral';
+            break; 
+            case 4:
+                valueToFace = 'sentiment-satisfied';
+            break; 
+            case 5:
+                valueToFace = 'sentiment-very-satisfied';
+            break;
+        }
+        this.ratings = [
+            { 
+                value: Math.round(this.value), 
+                class: 'whole color-'+Math.round(this.value), 
+                icon: 'social:' + valueToFace, 
+                selected: false 
+            }
+        ];
     }
 
     _valueChanged(newValue, oldValue) {
+        if (this.single)
+        {
+            this._updateSingleFace();
+        } 
         if (newValue !== 0 && !newValue && this.ratings.length > 0) {
             return;
         }
