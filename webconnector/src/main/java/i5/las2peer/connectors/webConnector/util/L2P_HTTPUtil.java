@@ -22,6 +22,15 @@ public class L2P_HTTPUtil {
 
         logger.info("[HTTP] " + requestMethod + "@ " + requestURL);
 
+        boolean forceHTTPS = true;
+        // TODO: refactor this into environment variable.
+        if ( forceHTTPS )
+        {
+            // https://stackoverflow.com/a/1884427
+            logger.info("[HTTP] forcing https");
+            requestURL = requestURL.replace("http://", "https://");
+        }
+
         // https://stackoverflow.com/a/35013372
         // https://stackoverflow.com/q/33491373
         try {
@@ -45,8 +54,10 @@ public class L2P_HTTPUtil {
 
             if ( redirect )
             {
+                
                 // get redirect url from "location" header field
                 String newUrl = http.getHeaderField("Location");
+                logger.info("[HTTP] following redirect to " + newUrl);
 
                 // get the cookie if need, for login
                 String cookies = http.getHeaderField("Set-Cookie");
