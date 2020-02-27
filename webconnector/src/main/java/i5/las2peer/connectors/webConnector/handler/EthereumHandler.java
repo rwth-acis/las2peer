@@ -294,7 +294,7 @@ public class EthereumHandler {
 				successGroupResponse = L2P_HTTPUtil.getHTTP(successGroupURL, "GET");
 				servicesWithSuccessModel = L2P_JSONUtil.parseMobSOSGroupServiceNames(successGroupResponse);
 			} catch (MalformedURLException | ServiceNotFoundException | ParseException e) {
-				return Response.status(Status.NO_CONTENT).entity("Couldn't query mobsos success model for group #" + groupID).build();
+				return Response.status(Status.SERVICE_UNAVAILABLE).entity("Couldn't query mobsos success model for group #" + groupID).build();
 			}
 			logger.info("[ETH Faucet/MobSOS]: found " + servicesWithSuccessModel.size() + " services with success model.");
 
