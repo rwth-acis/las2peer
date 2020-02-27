@@ -84,14 +84,21 @@ public class L2P_JSONUtil {
 
 	public static List<String> parseMobSOSGroupServiceNames(String input) throws ParseException
 	{
-		JSONObject jsonObject = (JSONObject) new JSONParser(JSONParser.MODE_PERMISSIVE).parse(input);
 		List<String> serviceURLs = new ArrayList<String>();
-		jsonObject.keySet().forEach(keyStr ->
-	    {
-	        Object keyvalue = jsonObject.get(keyStr);	        
-	        //System.out.println("service: "+ keyStr + "\n" + "serviceURL: " + keyvalue);
-	        serviceURLs.add(keyStr.toString());
-	    });
+		try {
+			JSONObject jsonObject = (JSONObject) new JSONParser(JSONParser.MODE_PERMISSIVE).parse(input);
+			jsonObject.keySet().forEach(keyStr ->
+			{
+				Object keyvalue = jsonObject.get(keyStr);	        
+				//System.out.println("service: "+ keyStr + "\n" + "serviceURL: " + keyvalue);
+				serviceURLs.add(keyStr.toString());
+			});
+		}
+		catch ( Exception e )
+		{
+			e.printStackTrace();
+			logger.severe("failed to parse: " + input);
+		}
 		return serviceURLs;
 	}
 	
