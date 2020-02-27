@@ -392,14 +392,14 @@ class AgentsView extends PolymerElement {
 
   _handleLoadGroupResponse(event) {
     let response = event.detail.response;
-    response.members.forEach(function(element) { element.shortid = element.agentid.substr(0, 15) + '...' });
+    response.members.forEach(function (element) { element.shortid = element.agentid.substr(0, 15) + '...' });
     this._manageAgents = response.members;
     this._hasNoManageAgents = false;
   }
 
   removeManageMember(event) {
     let agentid = event.model.get('agent.agentid');
-    this._manageAgents = this._manageAgents.filter(function(obj) { return obj.agentid !== agentid; });
+    this._manageAgents = this._manageAgents.filter(function (obj) { return obj.agentid !== agentid; });
   }
 
   saveGroup() {
@@ -416,21 +416,8 @@ class AgentsView extends PolymerElement {
     this._hasNoManageAgents = true;
   }
 
-  _handleError(event) {
-    console.log(event);
-    let errorTitle = 'Error', errorMsg = 'An unknown error occurred. Please check console output.';
-    if (event.detail.request.xhr.readyState == 4 && event.detail.request.xhr.status == 0) { // network issues
-      errorTitle = 'Network Connection Error';
-      errorMsg = 'Could not connect to: ' + event.detail.request.url;
-    } else if (event.detail.request.xhr.response && event.detail.request.xhr.response.msg) {
-      errorTitle = event.detail.request.xhr.status + " - " + event.detail.request.xhr.statusText;
-      errorMsg = event.detail.request.xhr.response.msg;
-    } else if (event.detail.error && event.detail.error.message) {
-      errorTitle = event.detail.request.xhr.status + " - " + event.detail.request.xhr.statusText;
-      errorMsg = event.detail.error.message;
-    }
-    console.log(errorTitle + ' - ' + errorMsg);
-    this.error = { title: errorTitle, msg: errorMsg };
+  _handleError(object, title, message) {
+    window.rootThis._handleError(object, title, message)
   }
 }
 

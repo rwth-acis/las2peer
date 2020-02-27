@@ -18,7 +18,7 @@ public class NodeInformationTest {
 		assertEquals("test@bla.com", testee.getAdminEmail());
 		assertEquals("Steven", testee.getAdminName());
 		assertNull(testee.getOrganization());
-		assertEquals(0, testee.getHostedServices().length);
+		assertEquals(0, testee.getHostedServices().size());
 		assertEquals("some desc", testee.getDescription());
 
 		String xml = testee.toXmlString();
@@ -27,7 +27,7 @@ public class NodeInformationTest {
 		assertEquals("test@bla.com", testee2.getAdminEmail());
 		assertEquals("Steven", testee2.getAdminName());
 		assertNull(testee2.getOrganization());
-		assertEquals(0, testee2.getHostedServices().length);
+		assertEquals(0, testee2.getHostedServices().size());
 		assertEquals("some desc", testee2.getDescription());
 
 	}

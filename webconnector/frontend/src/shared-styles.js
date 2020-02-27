@@ -40,6 +40,63 @@ $_documentContainer.innerHTML = `<dom-module id="shared-styles">
         color: #212121;
         font-size: 22px;
       }
+
+      paper-tooltip {
+        --paper-tooltip: {
+          font-size: 14px;
+        }
+      }
+
+      paper-tabs {
+        background-color: var(--paper-light-blue-500);
+        --paper-tabs-selection-bar-color: var(--paper-light-blue-900);
+        color: var(--tabs-colour, white);
+        --paper-tab-ink: var(--paper-light-blue-100);
+      }
+
+      paper-button.red {
+        background-color: var(--paper-red-a100);
+        color: var(--paper-red-800);
+        --paper-button-ink-color: var(--paper-red-a200);
+        --paper-button-flat-keyboard-focus: {
+          background-color: var(--paper-red-a200) !important;
+          color: white !important;
+        };
+        --paper-button-raised-keyboard-focus: {
+          background-color: var(--paper-red-a200) !important;
+          color: white !important;
+        };
+      }
+      paper-button.red:hover {
+        background-color: var(--paper-red-100);
+      }
+
+      paper-button.green {
+        background-color: var(--paper-green-100);
+        color: var(--paper-green-800);
+        --paper-button-ink-color: var(--paper-green-a200);
+        --paper-button-flat-keyboard-focus: {
+          background-color: var(--paper-green-a200) !important;
+          color: white !important;
+        };
+        --paper-button-raised-keyboard-focus: {
+          background-color: var(--paper-green-a200) !important;
+          color: white !important;
+        };
+      }
+      paper-button.green:hover {
+        background-color: var(--paper-green-a200);
+        color: white;
+      }
+
+    
+
+      .flex-horizontal {
+        @apply --layout-horizontal;
+      }
+      .flexchild {
+        @apply --layout-flex;
+      }
     </style>
   </template>
 </dom-module>`;

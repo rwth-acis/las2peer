@@ -6,6 +6,8 @@ package i5.las2peer.registry.exceptions;
  * communication with the Ethereum client.
  */
 public class EthereumException extends Exception {
+	private static final long serialVersionUID = 1L;
+
 	public EthereumException() {
 	}
 

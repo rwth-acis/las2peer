@@ -1,13 +1,23 @@
 package i5.las2peer.p2p;
 
+import java.net.InetAddress;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.api.persistency.EnvelopeException;
-import i5.las2peer.api.security.*;
+import i5.las2peer.api.security.AgentAlreadyExistsException;
+import i5.las2peer.api.security.AgentException;
+import i5.las2peer.api.security.AgentLockedException;
+import i5.las2peer.api.security.AgentNotFoundException;
+import i5.las2peer.api.security.ServiceAgent;
 import i5.las2peer.classLoaders.ClassManager;
 import i5.las2peer.classLoaders.libraries.BlockchainRepository;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.persistency.SharedStorage;
-import i5.las2peer.registry.*;
+import i5.las2peer.registry.CredentialUtils;
+import i5.las2peer.registry.ReadWriteRegistryClient;
 import i5.las2peer.registry.data.RegistryConfiguration;
 import i5.las2peer.registry.data.UserData;
 import i5.las2peer.registry.exceptions.EthereumException;
@@ -15,11 +25,7 @@ import i5.las2peer.registry.exceptions.NotFoundException;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.EthereumAgent;
 import i5.las2peer.serialization.SerializationException;
-
-import java.net.InetAddress;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import i5.las2peer.tools.CryptoException;
 
 /**
  * Node implementation that extends the FreePastry-based node with
@@ -142,6 +148,22 @@ public class EthereumNode extends PastryNodeImpl {
 		}
 	}
 
+	public Boolean isLocalAdmin(String agentEmail) throws EthereumException {
+		NodeInformation localNodeInfo = null;
+		try {
+			localNodeInfo = getNodeInformation();
+		} catch (CryptoException e) {
+			throw new EthereumException("cannot get local node info", e);
+		}
+		if (localNodeInfo == null)
+			throw new EthereumException("local node info null");
+		Boolean isLocalNodeAdmin = localNodeInfo.getAdminEmail().equals(agentEmail);
+		logger.info("[local isAdmin?] comparing nodeInfo: ");
+		logger.info("[local isAdmin?]  [" + localNodeInfo.getAdminEmail() + "] vs. [" + agentEmail + "]");
+		logger.info("[local isAdmin?]   = " + isLocalNodeAdmin.toString() );
+		return isLocalNodeAdmin;
+	}
+
 	@Override
 	public AgentImpl getAgent(String id) throws AgentException {
 		AgentImpl agent = super.getAgent(id);
@@ -162,6 +184,7 @@ public class EthereumNode extends PastryNodeImpl {
 		if (agent instanceof EthereumAgent) {
 			try {
 				registerAgentInBlockchain((EthereumAgent) agent);
+				logger.info("[ETH] Stored agent " + agent.getIdentifier());
 			} catch (AgentException|EthereumException|SerializationException e) {
 				logger.warning("Failed to register EthereumAgent; error: " + e);
 				throw new AgentException("Problem storing Ethereum agent", e);
@@ -185,15 +208,67 @@ public class EthereumNode extends PastryNodeImpl {
 		} else if (agentMatchesUserRegistryData(ethereumAgent)) {
 			logger.fine("Agent was already registered (same data), so that's fine.");
 		} else {
-			throw new AgentAlreadyExistsException("Agent username is already taken in blockchain user registry and details do NOT match.");
+			throw new AgentAlreadyExistsException(
+					"Agent username is already taken in blockchain user registry and details do NOT match.");
 		}
+	}
+
+	public AgentImpl getAgentByDetail(String agentId, String username, String email) throws AgentNotFoundException {
+		try {
+			if (agentId == null || agentId.isEmpty()) {
+				if (username != null && !username.isEmpty()) {
+					agentId = getAgentIdForLogin(username);
+				} else if (email != null && !email.isEmpty()) {
+					agentId = getAgentIdForEmail(email);
+				} else {
+					throw new AgentNotFoundException("No required agent detail provided");
+				}
+			}
+			return getAgent(agentId);
+		} catch (AgentException e) {
+			throw new AgentNotFoundException("Agent not found");
+		}
+	}
+
+	public float getAgentReputation(String adminName, String adminEmail) {
+		// query node admin reputation
+		AgentImpl ethAgentAgent = null;
+		
+		try {
+			ethAgentAgent = getAgentByDetail(null, adminName, adminEmail);
+			ethAgentAgent = getAgent(ethAgentAgent.getIdentifier());
+		} catch (AgentException e) {
+			if ( adminName == null ) adminName = "";
+			if ( adminEmail == null ) adminEmail = "";
+			logger.severe("[Eth Reputation]: couldn't find EthereumAgent called " + adminName.toString() + " with mail " + adminEmail.toString());
+		}
+
+		if ( ethAgentAgent instanceof EthereumAgent )
+		{
+			EthereumAgent ethAgent = (EthereumAgent)ethAgentAgent;
+			String ethAddress = ethAgent.getEthereumAddress();
+			if ( ethAddress != "" )
+			{
+				float agentReputation = getRegistryClient().getUserRating(ethAddress);
+				if ( agentReputation > 0 )
+				{
+					logger.fine("[Eth Reputation]: agent " + ethAddress + " is rated " + agentReputation );
+					return agentReputation;
+				}
+			}
+		}
+		return 0f;
 	}
 
 	/** compares agent login name and public key */
 	private boolean agentMatchesUserRegistryData(EthereumAgent agent) throws EthereumException {
 		try {
+			logger.fine("[ETH] matching agent ("+ agent.getLoginName() +") to registry");
+			
 			UserData userInBlockchain = registryClient.getUser(agent.getLoginName());
-
+			
+			logger.finer("MATCHING ID? " + String.valueOf(userInBlockchain.getAgentId().equals(agent.getIdentifier())));
+			logger.finer("MATCHING PubKey? " + String.valueOf(userInBlockchain.getPublicKey().equals(agent.getPublicKey())));
 			// damn, we might not be able to compare the ethereum address, because it may be null if the agent is locked
 			// does it matter? I guess not. if name and pubkey match, do we care who the owner address is?
 			// let's go with no. TODO: consider implications
@@ -201,6 +276,7 @@ public class EthereumNode extends PastryNodeImpl {
 					&& userInBlockchain.getAgentId().equals(agent.getIdentifier())
 					&& userInBlockchain.getPublicKey().equals(agent.getPublicKey());
 		} catch (NotFoundException e) {
+			logger.warning("User not found in registry");
 			return false;
 		} catch (SerializationException e) {
 			throw new EthereumException("Public key in user registry can't be deserialized.", e);
@@ -214,26 +290,22 @@ public class EthereumNode extends PastryNodeImpl {
 	 * author, if those have not already happened.
 	 */
 	public void registerServiceInBlockchain(String serviceName, String serviceVersion, EthereumAgent author, byte[] supplementHash)
-			throws AgentException, SerializationException {
+			throws AgentException, SerializationException, EthereumException {
 		if (author.isLocked()) {
 			throw new AgentLockedException("Cannot register service because Ethereum-enabled agent is locked.");
 		}
 
-		try {
-			boolean serviceAlreadyRegistered = getRegistryClient().getServiceNames().contains(serviceName);
-			if (serviceAlreadyRegistered) {
-				if (!isServiceOwner(author.getLoginName(), serviceName)) {
-					throw new AgentException("Service is already registered to someone else, cannot register!");
-				}
-			} else {
-				registerServiceName(serviceName, author);
+		boolean serviceAlreadyRegistered = getRegistryClient().getServiceNames().contains(serviceName);
+		if (serviceAlreadyRegistered) {
+			if (!isServiceOwner(author.getLoginName(), serviceName)) {
+				throw new AgentException("Service is already registered to someone else, cannot register!");
 			}
-
-			logger.info("Registering service release '" + serviceName + "', v" + serviceVersion + " ...");
-			getRegistryClient().releaseService(serviceName, serviceVersion, author, supplementHash);
-		} catch (EthereumException e) {
-			logger.severe("FIXME Error while registering release: " + e);
+		} else {
+			registerServiceName(serviceName, author);
 		}
+
+		logger.info("Registering service release '" + serviceName + "', v" + serviceVersion + " ...");
+		getRegistryClient().releaseService(serviceName, serviceVersion, author, supplementHash);
 	}
 
 	private boolean isServiceOwner(String authorName, String serviceName) throws EthereumException {
@@ -280,4 +352,9 @@ public class EthereumNode extends PastryNodeImpl {
 	public ReadWriteRegistryClient getRegistryClient() {
 		return registryClient;
 	}
+	
+	//public void registerProfile(EthereumAgent author) throws EthereumException {
+	//	registryClient.registerReputationProfile(author);
+	//}
+	 
 }

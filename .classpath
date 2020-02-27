@@ -14,6 +14,15 @@
 	<classpathentry kind="lib" path="core/lib/jaxp-api-1.4.5.jar"/>
 	<classpathentry kind="lib" path="core/lib/junit-4.12.jar"/>
 	<classpathentry kind="lib" path="core/lib/xpp3-1.1.4c.jar"/>
+	<classpathentry kind="lib" path="core/lib/abi-4.0.1.jar"/>
+	<classpathentry kind="lib" path="core/lib/core-4.0.1.jar"/>
+	<classpathentry kind="lib" path="core/lib/crypto-4.0.1.jar"/>
+	<classpathentry kind="lib" path="core/lib/rlp-4.0.1.jar"/>
+	<classpathentry kind="lib" path="core/lib/tuples-4.0.1.jar"/>
+	<classpathentry kind="lib" path="core/lib/utils-4.0.1.jar"/>
+	<classpathentry kind="lib" path="core/lib/rxjava-2.2.2.jar"/>
+	<classpathentry kind="lib" path="core/lib/reactive-streams-1.0.2.jar"/>
+	<classpathentry kind="lib" path="core/lib/mockito-all-1.9.5.jar"/>
 	<classpathentry kind="lib" path="restmapper/lib/swagger-jersey2-jaxrs-1.5.17.jar"/>
 	<classpathentry exported="true" kind="lib" path="restmapper/lib/javax.ws.rs-api-2.0.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="restmapper/lib/jersey-server-2.25.1.jar"/>
@@ -50,7 +59,7 @@
 	<classpathentry kind="lib" path="restmapper/lib/osgi-resource-locator-1.0.1.jar"/>
 	<classpathentry kind="lib" path="restmapper/lib/reflections-0.9.11.jar"/>
 	<classpathentry kind="lib" path="restmapper/lib/servlet-api-2.5.jar"/>
-	<classpathentry kind="lib" path="restmapper/lib/slf4j-api-1.7.22.jar"/>
+	<classpathentry kind="lib" path="restmapper/lib/slf4j-api-1.7.25.jar"/>
 	<classpathentry kind="lib" path="restmapper/lib/snakeyaml-1.17.jar"/>
 	<classpathentry kind="lib" path="restmapper/lib/validation-api-1.1.0.Final.jar"/>
 	<classpathentry kind="lib" path="webconnector/lib/accessors-smart-1.2.jar"/>
@@ -62,5 +71,7 @@
 	<classpathentry kind="lib" path="webconnector/lib/commons-io-2.4.jar"/>
 	<classpathentry kind="lib" path="webconnector/lib/oauth2-oidc-sdk-4.17.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="core/lib/slf4j-api-1.7.25.jar"/>
+	<classpathentry kind="lib" path="core/lib/slf4j-simple-1.7.25.jar"/>
 	<classpathentry kind="output" path="output"/>
 </classpath>

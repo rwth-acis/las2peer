@@ -19,6 +19,7 @@ import '@polymer/paper-card/paper-card.js';
 import '@polymer/paper-button/paper-button.js';
 import '@polymer/paper-input/paper-input.js';
 import '@polymer/paper-tooltip/paper-tooltip.js';
+import './custom-star-rating.js';
 import './shared-styles.js';
 
 class ServicesView extends PolymerElement {
@@ -49,12 +50,15 @@ class ServicesView extends PolymerElement {
                  method="POST"
                  url$="[[apiEndpoint]]/services/start"
                  handle-as="text"
-                 on-error="_handleError"></iron-ajax>
+                 on-error="_handleError"
+                 on-response="_handleServiceStart"
+                 loading="{{_working}}"></iron-ajax>
       <iron-ajax id="ajaxStopService"
                  method="POST"
                  url$="[[apiEndpoint]]/services/stop"
                  handle-as="text"
-                 on-error="_handleError"></iron-ajax>
+                 on-error="_handleError"
+                 loading="{{_working}}"></iron-ajax>
 
       <style include="shared-styles">
         :host {
@@ -62,15 +66,24 @@ class ServicesView extends PolymerElement {
 
           padding: 10px;
         }
-        .service .nodeId, .service .time {
+        .service .nodeId, .service .nodeAdmin, .service .nodeAdminRating, .service .time {
           display: inline-block;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
         }
+        .service .nodeId, .service .nodeAdmin, .service .nodeAdminRating 
+        {
+          margin-right: 1em;
+        }
         .service .nodeId {
           width: 6.5em;
-          margin-right: 1em;
+        }
+        .service .nodeAdmin {
+          min-width: 8em;
+        }
+        .service .nodeAdminRating {
+          min-width: 120px;
         }
         details {
           cursor: pointer;
@@ -96,6 +109,20 @@ class ServicesView extends PolymerElement {
           There are no services published in this network.<br/>
           Feel free to use the <a href="[[rootPath]]publish-service">Publish Service</a> tab.
         </p>
+
+        <template is="dom-if" if="[[window.rootThis._isEthNode]]">
+          <p>
+            No Blockchain instance detected. <em>Fallback to manual service starting procedure.</em> <br />
+            Service must be uploaded to Pastry storage via "Publish service" first. <br />
+            Enter full namespace + service name / class name followed by '@' and the version number, e.g.: <br />
+            <pre>i5.las2peer.services.fileService.FileService@2.2.5</pre>
+          </p>
+          <paper-input label="ServiceFullName@Version" id="serviceString" disabled="[[!window.rootThis._isEthNode]]" value$="[[_serviceString]]"></paper-input> <br />
+          <paper-button on-click="_handleStartButtonNoChain">Start sevice locally</paper-button>
+          <paper-spinner style="padding: 0.7em;float: right;" active="[[_working]]"></paper-spinner>
+
+        </template>
+
         <template id="serviceList" is="dom-repeat" items="[[_services]]" as="service" sort="_sort" filter="_filter">
           <template is="dom-repeat" items="[[_getLatestAsArray(service.releases)]]" as="release">
             <!-- we actually just want a single item here: the latest release. but I don't know how to do that without abusing repeat like this -->
@@ -104,7 +131,15 @@ class ServicesView extends PolymerElement {
                 <div style="margin-bottom: 8px">
                   <span class="package"><iron-icon icon="icons:archive" title="Part of package"></iron-icon>[[service.name]]</span>
                 </div>
-                <div>Author: <span class="author">[[service.authorName]]</span></div>
+                <div>
+                  Author: <span class="author">[[service.authorName]]</span> 
+                  <template is="dom-if" if="[[service.authorReputation]]">
+                    <custom-star-rating value="[[service.authorReputation]]" readonly single></custom-star-rating>
+                  </template>
+                  <template is="dom-if" if="[[!service.authorReputation]]">
+                    <custom-star-rating disable-rating readonly single></custom-star-rating>
+                  </template>
+                </div>
                 <div>
                   Latest version: <span class="version">[[release.version]]</span>
                   published <span class="timestamp">[[_toHumanDate(release.publicationEpochSeconds)]]</span>
@@ -157,6 +192,8 @@ class ServicesView extends PolymerElement {
                         <ul style="display: inline-block; list-style: none; padding-left: 0">
                           <li style="margin-left: 0">
                             <span class="nodeId"><iron-icon icon="hardware:device-hub" title="Running on Node"></iron-icon> <strong>Node ID</strong></span>
+                            <span class="nodeAdmin"><iron-icon icon="account-circle" title="Service Hoster"></iron-icon> <strong>Service Hoster</strong></span>
+                            <span class="nodeAdminRating"><iron-icon icon="face" title="Hoster Rating"></iron-icon> <strong>Hoster Rating</strong></span>
                             <span class="time"><iron-icon icon="device:access-time" title="Last Announcement"></iron-icon> <strong>Last announced</strong></span>
                           </li>
                         </ul>
@@ -173,6 +210,20 @@ class ServicesView extends PolymerElement {
                           <template is="dom-repeat" items="[[_filterInstances(release.instances, class)]]" as="instance">
                             <li style="margin-left: 0">
                               <span class="nodeId">[[instance.nodeId]]</span>
+                              <template is="dom-if" if="[[instance.nodeInfo.admin-name]]">
+                                <span class="nodeAdmin">
+                                  [[instance.nodeInfo.admin-name]]
+                                </span>
+                                <span class="nodeAdminRating">
+                                  <template is="dom-if" if="[[instance.hosterReputation]]">
+                                    <custom-star-rating value="[[instance.hosterReputation]]" readonly single></custom-star-rating>
+                                  </template>
+                                  <template is="dom-if" if="[[!instance.hosterReputation]]">
+                                    <custom-star-rating disable-rating readonly single></custom-star-rating>
+                                  </template>
+                                </span>
+
+                              </template>
                               <span class="time">[[_toHumanDate(instance.announcementEpochSeconds)]]</span>
                             </li>
                           </template>
@@ -186,7 +237,7 @@ class ServicesView extends PolymerElement {
               </div>
               <div class="card-actions">
                   <paper-button on-click="_handleStartButton"
-                                data-args$="[[service.name]]#[[_classesNotRunningLocally(release)]]@[[release.version]]">Start on this Node</paper-button>
+                                data-args$="[[service.name]]#[[_classesNotRunningLocally(release)]]@[[release.version]]" disabled$=[[_working]]>Start on this Node</paper-button>
                   <paper-button on-click="_handleStopButton"
                                 disabled$="[[!_countRunningLocally(release)]]"
                                 data-args$="[[service.name]]#[[release.supplement.class]]@[[release.version]]">Stop</paper-button>
@@ -197,6 +248,7 @@ class ServicesView extends PolymerElement {
                                 on-click="_handleFrontendButton"
                                 disabled$="[[!_fullyAvailableAnywhere(release)]]"
                                 data-args$="[[_frontendUrlIfServiceAvailable(release)]]">Open front-end</paper-button>
+                  <paper-spinner style="padding: 0.7em;float: right;" active="[[_working]]"></paper-spinner>
               </div>
             </paper-card>
           </template>
@@ -214,18 +266,26 @@ class ServicesView extends PolymerElement {
       _services: { type: Object },
       _communityTags: { type: Object },
       _submittingSearch: { type: Boolean },
-      _submittingUpload: { type: Boolean }
+      _submittingUpload: { type: Boolean },
+      _hasNoEther: { type: Boolean, value: false },
+      _working: { type: Boolean, value: false },
+      _serviceString: { type: String, value: "@", notify: true }
     };
   }
 
   ready() {
     super.ready();
-    let appThis = this;
-    window.setTimeout(function() { appThis.refresh(); }, 1);
-    window.setInterval(function() { appThis.refresh(); }, 5000);
+    window.serviceThis = this;
+    window.setTimeout(function() { window.serviceThis.refresh(); }, 1);
+    if ( window.rootThis._isEthNode ) 
+    {
+      window.setInterval(function() { window.serviceThis.refresh(); }, 5000);
+    }
   }
 
   refresh() {
+    if ( window.rootThis._isEthNode )
+      return;
     this.$.ajaxNodeId.generateRequest();
     this.$.ajaxServiceData.generateRequest();
     this.$.ajaxCommunityTags.generateRequest();
@@ -402,6 +462,13 @@ class ServicesView extends PolymerElement {
     }
   }
 
+  _handleStartButtonNoChain(event) { 
+    let serviceString = this.shadowRoot.querySelector('#serviceString').split("@");
+    let serviceName = serviceString[0];
+    let serviceVersion = serviceString[1];
+    this.startService(serviceName, serviceVersion);
+  }
+
   startService(fullClassName, version) {
     let req = this.$.ajaxStartService;
     req.params = { 'serviceName': fullClassName, 'version': version };
@@ -439,21 +506,12 @@ class ServicesView extends PolymerElement {
     }
   }
 
-  _handleError(event) {
-    console.log(event);
-    let errorTitle = 'Error', errorMsg = 'An unknown error occurred. Please check console output.';
-    if (event.detail.request.xhr.readyState == 4 && event.detail.request.xhr.status == 0) { // network issues
-      errorTitle = 'Network Connection Error';
-      errorMsg = 'Could not connect to: ' + event.detail.request.url;
-    } else if (event.detail.request.xhr.response && event.detail.request.xhr.response.msg) {
-      errorTitle = event.detail.request.xhr.status + " - " + event.detail.request.xhr.statusText;
-      errorMsg = event.detail.request.xhr.response.msg;
-    } else if (event.detail.error && event.detail.error.message) {
-      errorTitle = event.detail.request.xhr.status + " - " + event.detail.request.xhr.statusText;
-      errorMsg = event.detail.error.message;
-    }
-    console.log(errorTitle + ' - ' + errorMsg);
-    // do not set error dialog params to prevent dialog spamming
+  _handleServiceStart(event) {
+    window.rootThis.checkStatus();
+  }
+
+  _handleError(object, title, message) {
+    window.rootThis._handleError(object, title, message)
   }
 }
 

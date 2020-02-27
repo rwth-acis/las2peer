@@ -3,7 +3,8 @@ package i5.las2peer.p2p;
 import java.io.IOException;
 import java.io.Serializable;
 import java.security.PublicKey;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -32,7 +33,7 @@ public class NodeInformation implements XmlAble {
 	private String adminEmail = null;
 	private String description = "A standard las2peer node -- no further information is provided.";
 
-	private ServiceNameVersion[] hostedServices = new ServiceNameVersion[0];
+	private List<ServiceNameVersion> hostedServices = new ArrayList<ServiceNameVersion>();
 
 	private PublicKey nodeKey;
 	private Serializable nodeHandle;
@@ -97,8 +98,8 @@ public class NodeInformation implements XmlAble {
 	 * 
 	 * @return array with service class names
 	 */
-	public ServiceNameVersion[] getHostedServices() {
-		return hostedServices.clone();
+	public List<ServiceNameVersion> getHostedServices() {
+		return hostedServices;
 	}
 
 	/**
@@ -107,10 +108,11 @@ public class NodeInformation implements XmlAble {
 	 * @param serviceAgents
 	 */
 	void setServices(ServiceAgentImpl[] serviceAgents) {
-		hostedServices = new ServiceNameVersion[serviceAgents.length];
+		hostedServices = new ArrayList<ServiceNameVersion>();
+		//hostedServices = new ServiceNameVersion[serviceAgents.length];
 
-		for (int i = 0; i < hostedServices.length; i++) {
-			hostedServices[i] = serviceAgents[i].getServiceNameVersion();
+		for (int i = 0; i < serviceAgents.length; i++) {
+			hostedServices.add( serviceAgents[i].getServiceNameVersion() );
 		}
 	}
 
@@ -121,6 +123,10 @@ public class NodeInformation implements XmlAble {
 	 */
 	public void setSignature(byte[] signature) {
 		this.signature = signature;
+	}
+
+	public byte[] getSignature() {
+		return signature;
 	}
 
 	/**
@@ -206,24 +212,34 @@ public class NodeInformation implements XmlAble {
 		StringBuffer result = new StringBuffer("<las2peerNode>\n");
 
 		if (organization != null) {
-			result.append("\t<organization>").append(organization).append("</organization>\n");
+			result.append("\t<organization>");
+			result.append(organization);
+			result.append("</organization>\n");
 		}
 
 		if (adminName != null) {
-			result.append("\t<adminName>").append(adminName).append("</adminName>\n");
+			result.append("\t<adminName>");
+			result.append(adminName);
+			result.append("</adminName>\n");
 		}
 
 		if (adminEmail != null) {
-			result.append("\t<adminEmail>").append(adminEmail).append("</adminEmail>\n");
+			result.append("\t<adminEmail>");
+			result.append(adminEmail);
+			result.append("</adminEmail>\n");
 		}
 
-		result.append("\t<description>").append(description).append("</description>\n");
+		result.append("\t<description>");
+		result.append(description);
+		result.append("</description>\n");
 
-		if (hostedServices != null && hostedServices.length > 0) {
+		if (hostedServices != null && hostedServices.size() > 0) {
 			result.append("\t<services>\n");
 
 			for (ServiceNameVersion service : hostedServices) {
-				result.append("\t\t<serviceClass>").append(service.toString()).append("</serviceClass>\n");
+				result.append("\t\t<serviceClass>");
+				result.append(service.toString());
+				result.append("</serviceClass>\n");
 			}
 
 			result.append("\t</services>\n");
@@ -231,27 +247,33 @@ public class NodeInformation implements XmlAble {
 
 		try {
 			if (nodeKey != null) {
-				result.append("\t<nodeKey encoding=\"base64\">").append(SerializeTools.serializeToBase64(nodeKey))
-						.append("</nodeKey>\n");
+				result.append("\t<nodeKey encoding=\"base64\">");
+				result.append(SerializeTools.serializeToBase64(nodeKey));
+				result.append("</nodeKey>\n");
 			}
 
 			if (signature != null) {
-				result.append("\t<signature encoding=\"base64\">").append(SerializeTools.serializeToBase64(signature))
-						.append("</signature>\n");
+				result.append("\t<signature encoding=\"base64\">");
+				result.append(SerializeTools.serializeToBase64(signature));
+				result.append("</signature>\n");
 			}
 
 			if (nodeHandle != null) {
-				result.append("\t<nodeHandle>\n").append("\t\t<plain><![CDATA[").append(nodeHandle.toString())
-						.append("]]></plain>\n").append("\t\t<serialized encoding=\"base64\">")
-						.append(SerializeTools.serializeToBase64(nodeHandle)).append("</serialized>\n")
-						.append("\t</nodeHandle>\n");
+				result.append("\t<nodeHandle>\n");
+				result.append("\t\t<plain><![CDATA[");
+				result.append(nodeHandle.toString());
+				result.append("]]></plain>\n");
+				result.append("\t\t<serialized encoding=\"base64\">");
+				result.append(SerializeTools.serializeToBase64(nodeHandle));
+				result.append("</serialized>\n");
+				result.append("\t</nodeHandle>\n");
 			}
 		} catch (SerializationException e) {
 			throw new RuntimeException("critical: should not occur!");
 		}
 
 		result.append("</las2peerNode>\n");
-
+		//logger.info("[niXML] preparing NodeInfo.xml: \n" + result.toString());
 		return result.toString();
 	}
 
@@ -330,22 +352,20 @@ public class NodeInformation implements XmlAble {
 				} else if (child.getTagName().equals("signature")) {
 					result.signature = (byte[]) SerializeTools.deserializeBase64(child.getTextContent());
 				} else if (child.getTagName().equals("services")) {
-					Vector<String> serviceClasses = new Vector<String>();
-					NodeList services = child.getChildNodes();
+					List<ServiceNameVersion> serviceClasses = new ArrayList<ServiceNameVersion>();
+
+					NodeList services = child.getElementsByTagName("serviceClass");
+					// logger.info("[niXML] found services tag with " + services.getLength() + " nodes: \n" + child.getTextContent());
 					for (int s = 0; s < services.getLength(); s++) {
 						Node serviceNode = services.item(s);
-						if (node.getNodeType() != Node.ELEMENT_NODE) {
-							// XXX logging
-							continue;
-						}
-						Element service = (Element) serviceNode;
-						if (!service.getTagName().equals("serviceClass")) {
-							throw new MalformedXMLException(service + " is not a service class element");
-						}
-						serviceClasses.add(service.getTextContent());
+						String tagContents = serviceNode.getTextContent();
+						// logger.info("[niXML] > parsing child tag #" + s + ": " + tagContents);
+						ServiceNameVersion snv = ServiceNameVersion.fromString(tagContents);
+						// logger.info("[niXML] > found ServiceNameVersion: " + snv.getName() + " @ " + snv.getVersion().toString());
+						serviceClasses.add(snv);
 					}
 
-					result.hostedServices = serviceClasses.toArray(new ServiceNameVersion[0]);
+					result.hostedServices = serviceClasses;//.toArray(new ServiceNameVersion[0]);
 				} else {
 					throw new MalformedXMLException("unknown xml element: " + child.getTagName());
 				}

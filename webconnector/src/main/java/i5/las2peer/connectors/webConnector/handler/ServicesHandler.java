@@ -3,41 +3,67 @@ package i5.las2peer.connectors.webConnector.handler;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.jar.JarInputStream;
 
-import javax.ws.rs.*;
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.CookieParam;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.web3j.crypto.Credentials;
+
 import i5.las2peer.api.execution.ServiceNotFoundException;
 import i5.las2peer.api.p2p.ServiceNameVersion;
-import i5.las2peer.api.persistency.EnvelopeException;
-import i5.las2peer.api.security.AgentException;
-import i5.las2peer.p2p.*;
-import i5.las2peer.registry.CredentialUtils;
-import i5.las2peer.registry.ReadOnlyRegistryClient;
-import i5.las2peer.registry.data.ServiceDeploymentData;
-import i5.las2peer.registry.data.ServiceReleaseData;
-import i5.las2peer.security.EthereumAgent;
-import i5.las2peer.tools.*;
-import net.minidev.json.parser.JSONParser;
-import net.minidev.json.parser.ParseException;
-import org.glassfish.jersey.media.multipart.FormDataParam;
-
 import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
+import i5.las2peer.api.persistency.EnvelopeException;
 import i5.las2peer.api.persistency.EnvelopeNotFoundException;
+import i5.las2peer.api.security.AgentException;
 import i5.las2peer.classLoaders.ClassManager;
 import i5.las2peer.classLoaders.libraries.SharedStorageRepository;
 import i5.las2peer.connectors.webConnector.WebConnector;
 import i5.las2peer.connectors.webConnector.util.AgentSession;
+import i5.las2peer.connectors.webConnector.util.L2P_JSONUtil;
+import i5.las2peer.logging.L2pLogger;
+import i5.las2peer.p2p.AgentNotRegisteredException;
+import i5.las2peer.p2p.EthereumNode;
+import i5.las2peer.p2p.Node;
+import i5.las2peer.p2p.NodeException;
+import i5.las2peer.p2p.NodeInformation;
+import i5.las2peer.p2p.NodeNotFoundException;
+import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.persistency.EnvelopeVersion;
+import i5.las2peer.registry.CredentialUtils;
+import i5.las2peer.registry.ReadOnlyRegistryClient;
+import i5.las2peer.registry.data.ServiceReleaseData;
+import i5.las2peer.security.AgentImpl;
+import i5.las2peer.security.EthereumAgent;
+import i5.las2peer.tools.CryptoException;
+import i5.las2peer.tools.PackageUploader;
 import i5.las2peer.tools.PackageUploader.ServiceVersionList;
+import i5.las2peer.tools.ServicePackageException;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
-import org.web3j.crypto.Credentials;
+import net.minidev.json.parser.JSONParser;
+import net.minidev.json.parser.ParseException;
+import rice.pastry.NodeHandle;
 
 @Path(ServicesHandler.RESOURCE_PATH)
 public class ServicesHandler {
@@ -49,6 +75,10 @@ public class ServicesHandler {
 	private final PastryNodeImpl pastryNode;
 	private final EthereumNode ethereumNode;
 	private final ReadOnlyRegistryClient registry;
+
+	private final L2pLogger logger = L2pLogger.getInstance(ServicesHandler.class);
+
+	private ConcurrentHashMap<String, NodeInformation> nodeInfoCache = new ConcurrentHashMap<>();
 
 	public ServicesHandler(WebConnector connector) {
 		this.connector = connector;
@@ -147,7 +177,7 @@ public class ServicesHandler {
 	public Response handleStartService(@QueryParam("serviceName") String serviceName, @QueryParam("version") String version)
 			throws CryptoException, AgentException {
 		// TODO: uhhh, about that password -- is that relevant??
-		ethereumNode.startService(ServiceNameVersion.fromString(serviceName + "@" + version), "foofoo");
+		pastryNode.startService(ServiceNameVersion.fromString(serviceName + "@" + version), "foofoo");
 		return Response.ok().build();
 	}
 
@@ -155,10 +185,10 @@ public class ServicesHandler {
 	@Path("/stop")
 	public Response handleStopService(@QueryParam("serviceName") String serviceName, @QueryParam("version") String version)
 			throws NodeException, AgentNotRegisteredException, ServiceNotFoundException {
-		ethereumNode.stopService(ServiceNameVersion.fromString(serviceName + "@" + version));
+		pastryNode.stopService(ServiceNameVersion.fromString(serviceName + "@" + version));
 		return Response.ok().build();
 	}
-
+	
 	@GET
 	@Path("/node-id")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -172,7 +202,71 @@ public class ServicesHandler {
 	@Produces(MediaType.TEXT_PLAIN)
 	// sort of a duplicate of the status thing, but actually not, because this is the full Pastry node ID
 	public String getRawNodeId() {
+		return getPastryNodeId();
+	}
+
+	private String getPastryNodeId() {
 		return pastryNode.getPastryNode().getId().toStringFull();
+	}
+
+	private NodeInformation queryNodeInfoWithCache(String nodeID)
+	{
+		logger.fine("[NodeInfo] searching for node #" + nodeID);
+
+		// do we know this node?
+		if ( nodeInfoCache.containsKey( nodeID ) )
+		{
+			NodeInformation foundVal = nodeInfoCache.get( nodeID );
+			logger.fine("[NodeInfo] ! found info for node #" + nodeID + " in cache" );
+			return foundVal;
+		}
+
+		// are we looking for this (local) node?
+		String localNodeID = getPastryNodeId();
+		if ( nodeID.equals(localNodeID) )
+		{
+			NodeInformation localNodeInfo = new NodeInformation();
+			try {
+				localNodeInfo = ethereumNode.getNodeInformation();
+				nodeInfoCache.put(localNodeID, localNodeInfo);
+			} 
+			catch (CryptoException e) {
+				logger.severe("trying to local access node info");
+				e.printStackTrace();
+			}
+			logger.fine("[NodeInfo] ! node #" + nodeID + " is local node! ");
+			return localNodeInfo;
+		}
+
+		Collection<NodeHandle> knownNodes = ethereumNode.getPastryNode().getLeafSet().getUniqueSet();
+		
+		logger.info("[NodeInfo] nodeID not found in cache, query network for info on " +knownNodes.size()+ " nodes...");
+		
+		for (NodeHandle nh : knownNodes) {
+			String remoteNodeID = nh.getId().toStringFull();
+			NodeInformation remoteNodeInfo = null;
+			try {
+				remoteNodeInfo = node.getNodeInformation(nh);
+			} catch (NodeNotFoundException e) {
+				// logger.severe("trying to access node " + remoteNodeHandle.getNodeId() + " | "
+				// + remoteNodeHandle.getId());
+				// ignore malformed nodeinfo / missing node
+				continue;
+			}
+			finally {
+				logger.fine(remoteNodeInfo.toString());
+				nodeInfoCache.put(remoteNodeID, remoteNodeInfo);
+			}
+
+			if ( remoteNodeInfo != null && remoteNodeID.equals(nodeID) )
+			{
+				logger.fine("[NodeInfo] ! found remote node " + nodeID );
+				return remoteNodeInfo;
+			}
+		}
+
+		logger.severe("[NodeInfo] NOT FOUND! " );
+		return new NodeInformation();
 	}
 
 	@GET
@@ -186,6 +280,8 @@ public class ServicesHandler {
 		registry.getServiceNames().forEach(name -> {
 			Map<String, JSONObject> releasesByVersion = new HashMap<>();
 
+			String serviceAuthor = registry.getServiceAuthors().get(name);
+
 			registry.getServiceReleases().getOrDefault(name, Collections.emptyList()).forEach(release -> {
 				// this is a bit ugly, but there's no way to handle errors in a lambda
 				byte[] rawSupplement = new byte[0];
@@ -198,22 +294,28 @@ public class ServicesHandler {
 
 				JSONArray deploymentsJson = new JSONArray();
 				registry.getDeployments(name, release.getVersion()).forEach(deployment -> {
+					String deploymentNodeId = deployment.getNodeId();
+					NodeInformation hostedOn = queryNodeInfoWithCache(deploymentNodeId);
+
 					deploymentsJson.add(new JSONObject()
 							.appendField("className", deployment.getServiceClassName())
-							.appendField("nodeId", deployment.getNodeId())
+							.appendField("nodeId", deploymentNodeId)
+							.appendField("nodeInfo", L2P_JSONUtil.nodeInformationToJSON(hostedOn))
+							.appendField("hosterReputation", ethereumNode.getAgentReputation(hostedOn.getAdminName(), hostedOn.getAdminEmail()))
 							.appendField("announcementEpochSeconds", deployment.getTimestamp().getEpochSecond())
-					);
-				});
-
-				releasesByVersion.put(release.getVersion(), new JSONObject()
+							);
+						});
+						
+					releasesByVersion.put(release.getVersion(), new JSONObject()
 						.appendField("publicationEpochSeconds", release.getTimestamp().getEpochSecond())
 						.appendField("instances", deploymentsJson)
 						.appendField("supplement", supplement));
-			});
-
-			services.appendElement(new JSONObject()
+				});
+					
+				services.appendElement(new JSONObject()
 					.appendField("name", name)
-					.appendField("authorName", registry.getServiceAuthors().get(name))
+					.appendField("authorName", serviceAuthor)
+					.appendField("authorReputation", ethereumNode.getAgentReputation(serviceAuthor, null))
 					.appendField("releases", new JSONObject(releasesByVersion))
 			);
 		});
