@@ -573,6 +573,11 @@ class NodeFrontend extends PolymerElement {
       if ( message.includes("Node does not use registry") ) {
         this._isEthNode = false;
       }
+      if ( message.includes("Couldn't query mobsos success model for group") )
+      {
+        this._error = { title: "Couldn't query MobSOS success model", msg: "Either the service is not running or the success model is not setup." };
+        return;
+      }
     }
     this._error = { title: title, msg: message, obj: object };
   }
