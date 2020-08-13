@@ -13,6 +13,7 @@ import i5.las2peer.serialization.SerializeTools;
 import i5.las2peer.serialization.XmlTools;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
+import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Element;
 import org.web3j.crypto.Credentials;
 
@@ -162,9 +163,16 @@ public class EthereumAgent extends UserAgentImpl {
 	 * @return new EthereumAgent instance
 	 * @throws CryptoException if there is an internal error during Ethereum key creation
 	 */
-	public static EthereumAgent createEthereumAgentWithClient(String loginName, String passphrase,
-			ReadWriteRegistryClient regClient) throws CryptoException, AgentOperationFailedException {
-		return createEthereumAgent(loginName, passphrase, regClient, CredentialUtils.createMnemonic());
+	// TODO: when does it throw an AgentOperationFailedException?
+	public static @NotNull
+	EthereumAgent createEthereumAgentWithClient(
+			String loginName,
+			String passphrase,
+			ReadWriteRegistryClient regClient
+	) throws CryptoException, AgentOperationFailedException {
+		String mnemonic = CredentialUtils.createMnemonic();
+
+		return createEthereumAgent(loginName, passphrase, regClient, mnemonic);
 	}
 
 	/**
@@ -181,11 +189,17 @@ public class EthereumAgent extends UserAgentImpl {
 	 * @return new EthereumAgent instance
 	 * @throws CryptoException if there is an internal error during Ethereum key creation
 	 */
-	public static EthereumAgent createEthereumAgent(String loginName, String passphrase,
-			ReadWriteRegistryClient regClient, String ethereumMnemonic)
-			throws CryptoException, AgentOperationFailedException {
+	// TODO: when does it throw an AgentOperationFailedException?
+	public static @NotNull
+	EthereumAgent createEthereumAgent(
+			String loginName,
+			String passphrase,
+			ReadWriteRegistryClient regClient,
+			String ethereumMnemonic
+	) throws CryptoException, AgentOperationFailedException {
 		byte[] salt = CryptoTools.generateSalt();
 		KeyPair keyPair = CryptoTools.generateKeyPair();
+
 		return new EthereumAgent(keyPair, passphrase, salt, loginName, ethereumMnemonic);
 	}
 
