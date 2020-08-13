@@ -118,8 +118,8 @@ public class AuthenticationManager {
 				agentId = connector.getL2pNode().getAgentIdForLogin(prefixedIdentifier);
 			}
 		}
-		
-		
+
+
 		AgentImpl agent = connector.getL2pNode().getAgent(agentId);
 		if (agent instanceof PassphraseAgentImpl) {
 			((PassphraseAgentImpl) agent).unlock(credentials.password);
