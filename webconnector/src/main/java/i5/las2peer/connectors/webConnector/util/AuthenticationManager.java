@@ -148,7 +148,7 @@ public class AuthenticationManager {
 			}
 		} catch (AgentNotFoundException e) {
 			// expected - auto-register
-			logger.info("OIDC sub uknown. Auto-register...");
+			logger.info("OIDC sub unknown. Auto-register...");
 			return createNewOidcAgent(token, oidcProviderHeader, credentials);
 		}
 	}
