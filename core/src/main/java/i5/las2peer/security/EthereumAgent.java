@@ -167,8 +167,20 @@ public class EthereumAgent extends UserAgentImpl {
 		return createEthereumAgent(loginName, passphrase, regClient, CredentialUtils.createMnemonic());
 	}
 
-	// use this if you already want to use a mnemonic generated somewhere else
-	// note that this still uses the password to generate the key pair
+	/**
+	 * Creates new agent with a given login name, passphrase, registry client, and mnemonic.
+	 * Can be used whenever an existing wallet should be used instead of a new one.
+	 * @param loginName name matching [a-zA-Z].{3,31} (hopefully UTF-8
+	 *                  characters, let's not get too crazy)
+	 * @param passphrase passphrase with which both the agent key pair
+	 *                   and the Ethereum key pair are encrypted
+	 * @param regClient read-/write-capable Ethereum registry client to register the login name to the
+	 *                  Ethereum blockchain with the UserRegistry contract.
+	 * @param ethereumMnemonic BIP 39-compliant mnemonic from which the key pair for the Ethereum wallet will be
+	 *                         created.
+	 * @return new EthereumAgent instance
+	 * @throws CryptoException if there is an internal error during Ethereum key creation
+	 */
 	public static EthereumAgent createEthereumAgent(String loginName, String passphrase,
 			ReadWriteRegistryClient regClient, String ethereumMnemonic)
 			throws CryptoException, AgentOperationFailedException {
