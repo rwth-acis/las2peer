@@ -152,14 +152,15 @@ public class EthereumAgent extends UserAgentImpl {
 	}
 
 	/**
-	 * Creates new agent with given passphrase and login name.
-	 * @param passphrase passphrase with which both the agent key pair
-	 *                   and the Ethereum key pair are encrypted
+	 * Creates new agent with a given login name, passphrase, and registry client.
 	 * @param loginName name matching [a-zA-Z].{3,31} (hopefully UTF-8
 	 *                  characters, let's not get too crazy)
+	 * @param passphrase passphrase with which both the agent key pair
+	 *                   and the Ethereum key pair are encrypted
+	 * @param regClient read-/write-capable Ethereum registry client to register the login name to the
+	 *                  Ethereum blockchain with the UserRegistry contract.
 	 * @return new EthereumAgent instance
-	 * @throws CryptoException if there is an internal error during
-	 *                         Ethereum key creation
+	 * @throws CryptoException if there is an internal error during Ethereum key creation
 	 */
 	public static EthereumAgent createEthereumAgentWithClient(String loginName, String passphrase,
 			ReadWriteRegistryClient regClient) throws CryptoException, AgentOperationFailedException {
