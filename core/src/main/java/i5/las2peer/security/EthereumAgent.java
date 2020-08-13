@@ -190,6 +190,8 @@ public class EthereumAgent extends UserAgentImpl {
 	 * @throws CryptoException if there is an internal error during Ethereum key creation
 	 */
 	// TODO: when does it throw an AgentOperationFailedException?
+	// TODO: regClient not used. Seems like the registry client of the las2peer node is being used instead.
+	// See
 	public static @NotNull
 	EthereumAgent createEthereumAgent(
 			String loginName,
