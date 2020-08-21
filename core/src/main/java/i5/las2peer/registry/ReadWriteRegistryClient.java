@@ -14,6 +14,7 @@ import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
+import org.web3j.tx.Contract;
 import org.web3j.tx.FastRawTransactionManager;
 import org.web3j.tx.Transfer;
 import org.web3j.utils.Convert;
@@ -513,5 +514,16 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		return sendEtherManaged(coinbase, recipientAddress, valueInWei);
 	}
 	
+	public <T extends Contract> T deploySmartContract(Class<T> contractClass, String contractBinary) {
+		T contract = null;
+		try {
+			// TODO Add binary!
+			contract = T.deployRemoteCall(contractClass, web3j, credentials, gasPrice, gasLimit, contractBinary, "", BigInteger.ZERO).send();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return contract;
+	}
 	
 }
