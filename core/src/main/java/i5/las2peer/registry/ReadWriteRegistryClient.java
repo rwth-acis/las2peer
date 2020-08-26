@@ -517,7 +517,6 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 	public <T extends Contract> T deploySmartContract(Class<T> contractClass, String contractBinary) {
 		T contract = null;
 		try {
-			// TODO Add binary!
 			contract = T.deployRemoteCall(contractClass, web3j, credentials, gasPrice, gasLimit, contractBinary, "", BigInteger.ZERO).send();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
