@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -159,6 +161,35 @@ public class XmlTools {
 			return (Element) firstNode;
 		} else {
 			// no child element with tag name found
+			return null;
+		}
+	}
+	
+	/**
+	 * Gets all elements with the given child tag from given parent XML element.
+	 * 
+	 * @param parent The parent XML element.
+	 * @param tagName The tag name of the child elements. CASE SENSITIVE
+	 * @return Returns the child elements with the given tag name or null if no child matches the given tag name.
+	 * @throws MalformedXMLException If it's not a node itself.
+	 */
+	public static List<Element> getElementList(Element parent, String tagName) throws MalformedXMLException {
+		NodeList nodeList = parent.getElementsByTagName(tagName);
+		int len = nodeList.getLength();
+		if (len > 0) {
+			ArrayList<Element> elements = new ArrayList<>();
+			for (int i = 0; i < len; i++) {
+				org.w3c.dom.Node firstNode = nodeList.item(i);
+				short nodeType = firstNode.getNodeType();
+				if (nodeType != org.w3c.dom.Node.ELEMENT_NODE) {
+					throw new MalformedXMLException(
+							"Node type (" + nodeType + ") is not type element (" + org.w3c.dom.Node.ELEMENT_NODE + ")");
+				}
+				elements.add((Element) firstNode);
+			}
+			return elements;
+		} else {
+			// no child elements with tag name found
 			return null;
 		}
 	}
