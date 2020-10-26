@@ -1,33 +1,19 @@
 package i5.las2peer.registry;
 
+import i5.las2peer.logging.L2pLogger;
+import i5.las2peer.registry.data.*;
+import i5.las2peer.registry.exceptions.EthereumException;
+import i5.las2peer.security.DIDDocument;
+import io.reactivex.schedulers.Schedulers;
+import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.utils.Convert;
+
 import java.math.BigInteger;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
-
-import org.web3j.protocol.core.DefaultBlockParameterName;
-import org.web3j.protocol.core.methods.response.Transaction;
-import org.web3j.utils.Convert;
-
-import i5.las2peer.api.p2p.ServiceNameVersion;
-import i5.las2peer.logging.L2pLogger;
-import i5.las2peer.registry.data.BlockchainTransactionData;
-import i5.las2peer.registry.data.GenericTransactionData;
-import i5.las2peer.registry.data.SenderReceiverDoubleKey;
-import i5.las2peer.registry.data.ServiceDeploymentData;
-import i5.las2peer.registry.data.ServiceReleaseData;
-import i5.las2peer.registry.exceptions.EthereumException;
-import io.reactivex.schedulers.Schedulers;
 
 /**
  * Observes blockchain events related to the registry and updates its state
@@ -37,14 +23,14 @@ import io.reactivex.schedulers.Schedulers;
  * the main thread.
  */
 class BlockchainObserver {
-	
+
 	List<String> errors;
 	/** Profiles to their owners */
 	ConcurrentMap<String, String> profiles;
-	
+
 	/** User registrations and time stamps */
 	ConcurrentMap<String, String> users;
-	
+
 	/** Tags to their description */
 	ConcurrentMap<String, String> tags;
 
@@ -59,11 +45,14 @@ class BlockchainObserver {
 
 	ConcurrentMap<SenderReceiverDoubleKey, List<BlockchainTransactionData>> transactionLog;
 
-	/** 
+	/** DID documents */
+	ConcurrentHashMap<String, DIDDocument> didDocuments;
+
+	/**
 	 * Sorted mapping of Blocks to announcements
 	 * because TreeMap is not thread-safe, we need to use a custom lock. https://riptutorial.com/java/example/30472/treemap-and-treeset-thread-safety
 	 * this is used for the faucet to see how many svc announcements we did since the last faucet payout
-	 * 
+	 *
 	 * e.g. Block 5 -> "com.example.service" -> List of NodeIDs hosting this service
 	 */
 	ReentrantReadWriteLock serviceAnnouncementsPerBlockTree__lock = new ReentrantReadWriteLock();
@@ -152,10 +141,14 @@ class BlockchainObserver {
 		transactionLog = new ConcurrentHashMap<>();
 		serviceAnnouncementsPerBlockTree = new TreeMap<>();
 
+		// DID
+		didDocuments = new ConcurrentHashMap<>();
+
 		observeETHTransactions();
 		observeUserVotingTransactions();
 		observeGenericTransactions();
 		observeErrorEvents();
+		observeUserAttributeChanges();
 		observeUserRegistrations();
 		observeUserProfileCreations();
 		observeTagCreations();
@@ -173,7 +166,7 @@ class BlockchainObserver {
 		}
 	}
 
-	private void observeETHTransactions() 
+	private void observeETHTransactions()
 	{
 		contracts.getWeb3jClient()
 			 .replayPastAndFutureTransactionsFlowable(DefaultBlockParameterName.EARLIEST)
@@ -192,7 +185,7 @@ class BlockchainObserver {
 				// prepare l2p-local class to hold transaction info
 				BlockchainTransactionData btd = new BlockchainTransactionData( transaction );
 				if ( transaction.getBlockNumber() != null )
-				{	
+				{
 					// add block timestamp to transaction info
 					btd.setBlockTimeStamp( contracts.getBlockTimestamp(btd.getBlockNumber()) );
 				}
@@ -202,9 +195,9 @@ class BlockchainObserver {
 
 				logger.info("[ChainObserver] observed: " + btd.toString());
 
-			}, e -> { 
+			}, e -> {
 				e.printStackTrace();
-				logger.severe("Error observing transaction event: " + e.toString()); 
+				logger.severe("Error observing transaction event: " + e.toString());
 			});
 	}
 
@@ -221,7 +214,7 @@ class BlockchainObserver {
 
 					String txSender = Util.getOrDefault(transaction.sender, "uknown sender");
 					String txRecipient = Util.getOrDefault(transaction.recipient, "uknown recipient");
-					
+
 					BigInteger grade = Util.getOrDefault(transaction.grade, BigInteger.ZERO);
 					BigInteger recipientNewScore = Util.getOrDefault(transaction.recipientNewScore, BigInteger.ZERO);
 
@@ -229,12 +222,12 @@ class BlockchainObserver {
 
 					SenderReceiverDoubleKey srdk = new SenderReceiverDoubleKey(txSender, txRecipient);
 					GenericTransactionData gtd = new GenericTransactionData(
-						txSender, 
-						txRecipient, 
+						txSender,
+						txRecipient,
 						BigInteger.ZERO, // amountInWei
-						timestamp, 
-						"Rating: "+grade, 
-						"L2P USER RATING", 
+						timestamp,
+						"Rating: "+grade,
+						"L2P USER RATING",
 						txHash
 					);
 
@@ -243,13 +236,13 @@ class BlockchainObserver {
 						List<GenericTransactionData> lgtd = new ArrayList<GenericTransactionData>();
 						lgtd.add(gtd);
 						this.genericTransactions.put(srdk, lgtd);
-					} 
+					}
 					else
 					{
 						this.genericTransactions.get(srdk).add(gtd);
 					}
 
-					logger.info("[ChainObserver] observed user voting: " + 
+					logger.info("[ChainObserver] observed user voting: " +
 								"[" + txSender + "]->[" + txRecipient + "]: " + grade + ", new grade: " + recipientNewScore);
 				}, e -> logger.severe("Error observing user voting event: " + e.toString()));
 	}
@@ -269,6 +262,45 @@ class BlockchainObserver {
 				}, e -> logger.severe("Error observing error event: " + e.toString()));
 	}
 
+	private void observeUserAttributeChanges() {
+		contracts.userRegistry.dIDAttributeChangedEventFlowable(DefaultBlockParameterName.EARLIEST,
+			DefaultBlockParameterName.LATEST)
+				.observeOn(Schedulers.io())
+				.subscribeOn(Schedulers.io())
+				.subscribe(change -> {
+					if (txHasAlreadyBeenHandled(change.log.getTransactionHash())) {
+						return;
+					}
+
+					String userName = Util.recoverString(change.userName);
+					String attrName = Util.recoverString(change.attrName);
+					byte[] value = change.value;
+					BigInteger validTo = change.validTo;
+					BigInteger previousChange = change.previousChange;
+
+					DIDDocument doc = didDocuments.get(userName);
+					if (doc == null) {
+						doc = new DIDDocument(userName);
+					}
+
+					// if validTo is equal to 0 the attribute has been revoked
+					// FIXME: automatic revocation using a timestamp is not yet supported.
+					if (BigInteger.valueOf(0).equals(validTo)) {
+						// revocation
+						doc.removeAttribute(attrName, value);
+					} else {
+						doc.addAttribute(attrName, value);
+					}
+
+
+					logger.info(String.format(
+							"[ChainObserver] observed user attribute change: [%s] until [%d]: %s: %s",
+							change.userName, change.validTo, change.attrName, change.value
+							));
+				}, e -> logger.severe("Error observing user attribute change event: " + e.toString()));
+
+	}
+
 	private void observeUserRegistrations() {
 		contracts.userRegistry.userRegisteredEventFlowable(DefaultBlockParameterName.EARLIEST,
 		DefaultBlockParameterName.LATEST)
@@ -279,16 +311,16 @@ class BlockchainObserver {
 				{
 					return;
 				}
-				
+
 				String userName = Util.recoverString(user.name);
 				BigInteger timestamp = user.timestamp;
 				Instant i = Instant.ofEpochSecond(timestamp.longValue());
-				
+
 				this.users.put(userName, i.toString());
 				logger.info("[ChainObserver] observed user registration: " + "@[" + timestamp + "]: " + userName);
 			}, e -> logger.severe("Error observing user registration event: " + e.toString()));
 	}
-	
+
 	private void observeUserProfileCreations() {
 		contracts.reputationRegistry.userProfileCreatedEventFlowable(DefaultBlockParameterName.EARLIEST,
 		DefaultBlockParameterName.LATEST)
@@ -303,7 +335,7 @@ class BlockchainObserver {
 				String profileName = Util.recoverString(profile.name);
 				this.profiles.put(profileOwner, profileName);
 				logger.info("[ChainObserver] observed profile creation: [" + profileOwner + "]: " + profileName);
-				
+
 			}, e -> logger.severe("Error observing profile creation event: " + e.toString()));
 	}
 
@@ -337,7 +369,7 @@ class BlockchainObserver {
 		for (SenderReceiverDoubleKey key : transactions) {
 			logger.fine("[TXLOG] analyzing key: " + key.toString());
 			logger.fine("[TXLOG] " + key.getReceiver() + "|" + receiver);
-			if (key.equalsReceiver(receiver) || key.getReceiver() == receiver) 
+			if (key.equalsReceiver(receiver) || key.getReceiver() == receiver)
 			{
 				List<GenericTransactionData> keyTransactionList = genericTransactions.get(key);
 				logger.fine("[TXLOG] match found! " + keyTransactionList.size() + " entries");
@@ -361,7 +393,7 @@ class BlockchainObserver {
 					}
 					String txSender = Util.getOrDefault(transaction.sender, "uknown sender");
 					String txRecipient = Util.getOrDefault(transaction.recipient, "uknown recipient");
-					
+
 					String message = Util.getOrDefault(transaction.message, "no message");
 					BigInteger weiAmount = Util.getOrDefault(transaction.weiAmount, BigInteger.ZERO);
 					BigInteger timestamp = Util.getOrDefault(transaction.timestamp, BigInteger.ZERO);
@@ -376,7 +408,7 @@ class BlockchainObserver {
 						List<GenericTransactionData> lgtd = new ArrayList<GenericTransactionData>();
 						lgtd.add(gtd);
 						this.genericTransactions.put(srdk, lgtd);
-					} 
+					}
 					else
 					{
 						this.genericTransactions.get(srdk).add(gtd);
@@ -524,8 +556,8 @@ class BlockchainObserver {
 								.computeIfAbsent(serviceName+"."+deployment.className, k -> new ArrayList<>())
 								.add(deployment.nodeId);
 
-							logger.info("[ChainObserver] observed service announcement ("+serviceName+"."+deployment.className+"): \n" + 
-								"block #: " + deployment.log.getBlockNumber() + "\n" + 
+							logger.info("[ChainObserver] observed service announcement ("+serviceName+"."+deployment.className+"): \n" +
+								"block #: " + deployment.log.getBlockNumber() + "\n" +
 								"node  #:" + deployment.nodeId
 							);
 						}
@@ -564,14 +596,14 @@ class BlockchainObserver {
 		// NodeID -> no. of Announcements
 		HashMap<String, Integer> retVal = new HashMap<>();
 		int sumOfAnn = 0;
-		
+
 		serviceAnnouncementsPerBlockTree__lock.readLock().lock();
-		try 
+		try
 		{
-			SortedMap<BigInteger, HashMap<String, List<String>>> tailMap = 
+			SortedMap<BigInteger, HashMap<String, List<String>>> tailMap =
 				serviceAnnouncementsPerBlockTree.tailMap(largerThanBlockNo);
 
-			logger.info("[ChainObserver] searching for announcements of '"+searchingForService+"', starting from block #" + largerThanBlockNo + "."); 
+			logger.info("[ChainObserver] searching for announcements of '"+searchingForService+"', starting from block #" + largerThanBlockNo + ".");
 			logger.info("                searching through " + tailMap.size() + " / " + serviceAnnouncementsPerBlockTree.size() + " blocks due to ordering");
 
 			for( Map.Entry<BigInteger, HashMap<String, List<String>>> entry: tailMap.entrySet())
@@ -588,7 +620,7 @@ class BlockchainObserver {
 					{
 						logger.fine("[ChainObserver]     found service " + announcedServiceName + ", running at " + hostingNodeIDList.size() + " nodes");
 						// yes -> count no. of increments per hosting node
-						hostingNodeIDList.forEach(hostingNodeID-> 
+						hostingNodeIDList.forEach(hostingNodeID->
 						{
 							retVal.merge(hostingNodeID, 1, (a,b) -> a + b);
 						});
@@ -604,8 +636,8 @@ class BlockchainObserver {
 		}
 		retVal.forEach((nodeID,noOfAnnouncements) -> {
 			logger.info(
-				"[ChainObserver] found announcement count: \n" + 
-				"                 nodeID: " + nodeID + "\n" + 
+				"[ChainObserver] found announcement count: \n" +
+				"                 nodeID: " + nodeID + "\n" +
 				"                noOfAnn: " + noOfAnnouncements
 			);
 		});

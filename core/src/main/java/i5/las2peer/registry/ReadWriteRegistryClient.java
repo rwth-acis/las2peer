@@ -1,32 +1,29 @@
 package i5.las2peer.registry;
 
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.concurrent.ExecutionException;
-
-import org.web3j.abi.datatypes.Function;
-import org.web3j.crypto.Credentials;
-import org.web3j.protocol.core.Response;
-import org.web3j.protocol.core.methods.request.Transaction;
-import org.web3j.protocol.core.methods.response.EthSendTransaction;
-import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.web3j.protocol.exceptions.TransactionException;
-import org.web3j.tx.FastRawTransactionManager;
-import org.web3j.tx.Transfer;
-import org.web3j.utils.Convert;
-import org.web3j.utils.Convert.Unit;
-
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.registry.contracts.ServiceRegistry;
 import i5.las2peer.registry.contracts.UserRegistry;
 import i5.las2peer.registry.data.RegistryConfiguration;
 import i5.las2peer.registry.exceptions.EthereumException;
+import i5.las2peer.security.DIDAttribute;
 import i5.las2peer.security.EthereumAgent;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.serialization.SerializeTools;
+import org.web3j.abi.datatypes.*;
+import org.web3j.crypto.Credentials;
+import org.web3j.protocol.core.Response;
+import org.web3j.protocol.core.methods.request.Transaction;
+import org.web3j.protocol.core.methods.response.EthSendTransaction;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.tx.Transfer;
+import org.web3j.utils.Convert.Unit;
+
+import java.math.BigInteger;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Facade providing simple read/write access to the registry smart contracts.
@@ -46,7 +43,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 
 	/**
 	 * Create client providing access to both read and write registry functions.
-	 * 
+	 *
 	 * @param registryConfiguration addresses of registry contracts and Ethereum
 	 *                              client HTTP JSON RPC API endpoint
 	 */
@@ -56,7 +53,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 
 	/**
 	 * Create new tag on blockchain.
-	 * 
+	 *
 	 * @param tagName        tag name consisting of 1 to 32 UTF-8 characters
 	 * @param tagDescription tag description of arbitrary length
 	 * @throws EthereumException if transaction failed for some reason (gas?
@@ -130,6 +127,63 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		}
 	}
 
+	public void addAttributeToUser(DIDAttribute attr, EthereumAgent agent) throws EthereumException, AgentLockedException {
+
+		byte[] userName = Util.padAndConvertString(agent.getLoginName(), 32);
+		String attrName = attr.getEncodedName();
+		byte[] value = attr.getEncodedValue();
+		BigInteger validTo = new BigInteger(Instant.now().plus(10, ChronoUnit.CENTURIES).toString());
+
+
+		final Function function = new Function(UserRegistry.FUNC_SETATTRIBUTE,
+			Arrays.asList(
+				new org.web3j.abi.datatypes.generated.Bytes32(userName),
+				new org.web3j.abi.datatypes.Utf8String(attrName),
+				new org.web3j.abi.datatypes.DynamicBytes(value),
+				new	org.web3j.abi.datatypes.Uint(validTo)
+			),
+			Collections.emptyList()
+		);
+
+		String consentee = agent.getEthereumAddress();
+		byte[] signature = SignatureUtils.signFunctionCall(function, agent.getEthereumCredentials());
+
+		try {
+			contracts.userRegistry.delegatedSetAttribute(userName, attrName, value, validTo, consentee, signature)
+				.sendAsync().get();
+		} catch (Exception e) {
+			throw new EthereumException("Failed to set attribute", e);
+		}
+	}
+
+	public void revokeAttributeOfUser(DIDAttribute attr, EthereumAgent agent) throws EthereumException, AgentLockedException {
+
+		byte[] userName = Util.padAndConvertString(agent.getLoginName(), 32);
+		String attrName = attr.getEncodedName();
+		byte[] value = attr.getEncodedValue();
+		BigInteger validTo = new BigInteger("0");
+
+
+		final Function function = new Function(UserRegistry.FUNC_REVOKEATTRIBUTE,
+			Arrays.asList(
+				new org.web3j.abi.datatypes.generated.Bytes32(userName),
+				new org.web3j.abi.datatypes.Utf8String(attrName),
+				new org.web3j.abi.datatypes.DynamicBytes(value)
+			),
+			Collections.emptyList()
+		);
+
+		String consentee = agent.getEthereumAddress();
+		byte[] signature = SignatureUtils.signFunctionCall(function, agent.getEthereumCredentials());
+
+		try {
+			contracts.userRegistry.delegatedRevokeAttribute(userName, attrName, value, consentee, signature)
+				.sendAsync().get();
+		} catch (Exception e) {
+			throw new EthereumException("Failed to set attribute", e);
+		}
+	}
+
 	public String registerReputationProfile(EthereumAgent agent) throws EthereumException {
 		if (!agent.hasLoginName()) {
 			throw new EthereumException("Could not create reputation profile: agent has no login name");
@@ -163,7 +217,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		logger.info("[TX] transaction message: " + message + "");
 
 		String etherSendTxHash = sendEtherManaged(
-				senderAgent.getEthereumAddress(), receivingAgent.getEthereumAddress(), 
+				senderAgent.getEthereumAddress(), receivingAgent.getEthereumAddress(),
 				weiAmount);
 		//sendEther(receivingAgent.getEthereumAddress(), Convert.toWei(weiAmount.toString(), Convert.Unit.ETHER));
 		// sendEther(senderAgent.getEthereumAddress(), receivingAgent.getEthereumAddress(), weiAmount).getTransactionHash();
@@ -392,10 +446,10 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		BigInteger gasPrice = GAS_PRICE;
 		BigInteger gasLimit = GAS_LIMIT_ETHER_TX;
 		logger.info("[ETH] Preparing raw transaction between accounts...");
-		
+
 		Transfer transfer = new Transfer(this.web3j, this.contracts.transactionManager);
 
-		
+
 
 
 
@@ -425,15 +479,15 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 
 	/**
 	 * Send ether to the recipient address.
-	 * 
+	 *
 	 * This sends ether from the "owner" of this registry client (i.e., the account
 	 * specified by the credentials which were used to construct this client), to
 	 * the given recipient address.
-	 * 
+	 *
 	 * The calling agent (i.e. ethereumAgent vs ethereumNode) influences who pays
 	 * for the transaction fees. In smart contracts, this would also mean who is
 	 * msg.sender
-	 * 
+	 *
 	 * @param senderAddress
 	 * @param recipientAddress
 	 * @param valueInWei
@@ -443,7 +497,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 	@Deprecated
 	public TransactionReceipt sendEther(String senderAddress, String recipientAddress, BigInteger valueInWei)
 			throws EthereumException {
-			
+
 		TransactionReceipt txR;
 		String txHash;
 		BigInteger nonce = BigInteger.valueOf(-1);
@@ -453,7 +507,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 			BigInteger gasPrice = GAS_PRICE;
 			BigInteger gasLimit = GAS_LIMIT_ETHER_TX;
 			Transaction transaction = Transaction.createEtherTransaction(
-					senderAddress, nonce, 
+					senderAddress, nonce,
 					gasPrice, gasLimit,
 					recipientAddress, valueInWei);
 
@@ -468,12 +522,12 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 				throw new EthereumException("Eth Transaction Error [" + error.getCode() + "]: " + error.getMessage());
 			}
 			txHash = ethSendTransaction.getTransactionHash();
-			
+
 			if (txHash.length() < 2) {
 				throw new EthereumException("Could not create ethereum transaction");
 			}
 
-			
+
 			logger.info("[ETH] waiting for receipt on [" + txHash + "]... ");
 			txR = waitForReceipt(txHash);
 
@@ -512,6 +566,4 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		logger.info("[ETH] Sending Faucet Transaction");
 		return sendEtherManaged(coinbase, recipientAddress, valueInWei);
 	}
-	
-	
 }

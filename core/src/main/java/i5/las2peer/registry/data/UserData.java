@@ -1,10 +1,13 @@
 package i5.las2peer.registry.data;
 
 import i5.las2peer.registry.Util;
+import i5.las2peer.security.DIDPublicKey;
+import i5.las2peer.security.DIDService;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.serialization.SerializeTools;
 
 import java.security.PublicKey;
+import java.util.concurrent.ConcurrentMap;
 
 // do we really need this?
 /**
@@ -17,6 +20,10 @@ public class UserData {
 	private byte[] agentId;
 	private byte[] publicKey;
 	private String ownerAddress;
+
+	// DID Attributes
+	private ConcurrentMap<String, DIDPublicKey> publicKeys;
+	private ConcurrentMap<String, DIDService> serviceEndpoints;
 
 	public UserData(byte[] name, byte[] agentId, byte[] publicKey, String ownerAddress) {
 		this.name = name;
@@ -45,6 +52,15 @@ public class UserData {
 	public PublicKey getPublicKey() throws SerializationException {
 		return (PublicKey) SerializeTools.deserialize(this.publicKey);
 	}
+
+	// DID
+	public ConcurrentMap<String, DIDPublicKey> getPublicKeys() { return publicKeys; }
+
+	protected void setPublicKeys(ConcurrentMap<String, DIDPublicKey> publicKeys) { this.publicKeys = publicKeys; }
+
+	public ConcurrentMap<String, DIDService> getServiceEndpoints() { return serviceEndpoints; }
+
+	protected void setServices(ConcurrentMap<String, DIDService> serviceEndpoints) { this.serviceEndpoints = serviceEndpoints; }
 
 	@Override
 	public String toString() {

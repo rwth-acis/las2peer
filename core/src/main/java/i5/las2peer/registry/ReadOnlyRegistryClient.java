@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
+import i5.las2peer.security.DIDDocument;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.admin.Admin;
@@ -71,13 +72,13 @@ public class ReadOnlyRegistryClient {
 	// raw tx - sending directly, fast raw - nonce management
 	boolean updateNonceTxMan = false;
 	FastRawTransactionManager txMan;
-			
+
 
 	protected final L2pLogger logger = L2pLogger.getInstance(ReadWriteRegistryClient.class);
 
 	/**
 	 * Create client providing access to read-only registry functions.
-	 * 
+	 *
 	 * @param registryConfiguration addresses of registry contracts and Ethereum
 	 *                              client HTTP JSON RPC API endpoint
 	 */
@@ -111,9 +112,9 @@ public class ReadOnlyRegistryClient {
 
 		logger.info("created smart contract wrapper with credentials:" + credentialsAddress + "\n contract ID:" + this.contracts.transactionManager.hashCode());
 
-		
 
-		if ( this.contracts.transactionManager instanceof FastRawTransactionManager ) 
+
+		if ( this.contracts.transactionManager instanceof FastRawTransactionManager )
 		{
 			this.updateNonceTxMan = true;
 			this.txMan = (FastRawTransactionManager) this.contracts.transactionManager;
@@ -141,7 +142,7 @@ public class ReadOnlyRegistryClient {
 
 	/**
 	 * Return version string of connected Ethereum client.
-	 * 
+	 *
 	 * @deprecated there's no reason to reveal this implementation detail, so this
 	 *             may be removed
 	 */
@@ -169,7 +170,7 @@ public class ReadOnlyRegistryClient {
 	/**
 	 * Return true if user name is both valid and not already taken and thus can be
 	 * registered.
-	 * 
+	 *
 	 * @param name user name consisting of 1 to 32 Unicode characters
 	 */
 	public boolean usernameIsAvailable(String name) throws EthereumException {
@@ -199,7 +200,7 @@ public class ReadOnlyRegistryClient {
 
 	/**
 	 * Retrieve user data stored in registry for given name.
-	 * 
+	 *
 	 * @param name user name consisting of 1 to 32 Unicode characters
 	 * @return user data object containing ID and owner address, or
 	 *         <code>null</code> if user name is not taken
@@ -218,8 +219,18 @@ public class ReadOnlyRegistryClient {
 			throw new NotFoundException("User name apparently not registered.");
 		}
 
-		return new UserData(userAsTuple.getValue1(), userAsTuple.getValue2(), userAsTuple.getValue3(),
+		UserData userData =  new UserData(userAsTuple.getValue1(), userAsTuple.getValue2(), userAsTuple.getValue3(),
 				userAsTuple.getValue4());
+
+		return userData;
+	}
+
+	public DIDDocument getDIDDocument(String userName) throws NoSuchElementException {
+		if (!observer.didDocuments.containsKey(userName)) {
+			throw new NoSuchElementException(String.format("No document found for user name \"%s\"", userName));
+		}
+
+		return observer.didDocuments.get(userName);
 	}
 
 	public UserProfileData getProfile(String address) throws EthereumException, NotFoundException {
@@ -258,8 +269,8 @@ public class ReadOnlyRegistryClient {
 				if (userProfileData.getNoTransactionsRcvd().compareTo(BigInteger.ZERO) == 0) {
 					logger.fine("[User Reputation]: valid reputation profile [" + userProfileData.getUserName() + "], no incoming reputation yet." );
 					return 0f;
-				} 
-				else 
+				}
+				else
 				{
 					userRatingScore_Raw = userProfileData.getStarRating();
 					logger.fine("[User Reputation]: valid reputation profile [" + userProfileData.getUserName() + "], score: " + Float.toString(userRatingScore_Raw) );
@@ -280,7 +291,7 @@ public class ReadOnlyRegistryClient {
 
 	/**
 	 * Look up author/owner for a given service.
-	 * 
+	 *
 	 * @param serviceName service package name
 	 * @return author owning the service name
 	 */
@@ -322,7 +333,7 @@ public class ReadOnlyRegistryClient {
 		String serviceNamespace = service.substring(0, lastDotIndex);
 		logger.info("[service names] searching for: " + serviceNamespace);
 
-		for (Map.Entry<String, String> entry : observer.serviceNameToAuthor.entrySet()) 
+		for (Map.Entry<String, String> entry : observer.serviceNameToAuthor.entrySet())
 		{
 			if ( entry.getKey().equals(serviceNamespace) )
 			{
@@ -401,7 +412,7 @@ public class ReadOnlyRegistryClient {
 
 	/***
 	 * Query no. of service announcements which occurred since provide block
-	 * 
+	 *
 	 * @param largerThanBlockNo   block number to start querying at
 	 * @param searchingForService service which is to be found
 	 */
@@ -443,7 +454,7 @@ public class ReadOnlyRegistryClient {
 	/**
 	 * Return the nonce (tx count) for the specified address.
 	 * https://github.com/matthiaszimmermann/web3j_demo / Web3jUtils
-	 * 
+	 *
 	 * @param address target address
 	 * @return nonce
 	 */
@@ -472,7 +483,7 @@ public class ReadOnlyRegistryClient {
 		// transactions
 		// and the contract calls (e.g. registration, reputation) are done via managed
 		// transactions
-		
+
 		BigInteger retVal = BigInteger.ZERO;
 		BigInteger localNonce = StaticNonce.Manager().getStaticNonce(address);
 
@@ -531,7 +542,7 @@ public class ReadOnlyRegistryClient {
 	 * Queries the coin base = the first account in the chain By design, this is the
 	 * account which the hosting node uses for mining in the background
 	 * https://github.com/matthiaszimmermann/web3j_demo / Web3jUtils
-	 * 
+	 *
 	 * @return coinbase address
 	 * @throws InterruptedException
 	 * @throws ExecutionException
@@ -546,7 +557,7 @@ public class ReadOnlyRegistryClient {
 	 * object. In the happy case the tx receipt object is returned. Otherwise, a
 	 * runtime exception is thrown. https://github.com/matthiaszimmermann/web3j_demo
 	 * / Web3jUtils
-	 * 
+	 *
 	 * @param transactionHash
 	 * @return
 	 */
@@ -606,10 +617,10 @@ public class ReadOnlyRegistryClient {
 	 * https://github.com/matthiaszimmermann/web3j_demo / Web3jUtils
 	 * @param transactionHash
 	 * @return transactionReceipt
-	 * @throws ExecutionException 
+	 * @throws ExecutionException
 	 * @throws InterruptedException
 	 */
-	private Optional<TransactionReceipt> getReceipt(String transactionHash) 
+	private Optional<TransactionReceipt> getReceipt(String transactionHash)
 			throws InterruptedException, ExecutionException
 	{
 		EthGetTransactionReceipt receipt = web3j
@@ -619,7 +630,7 @@ public class ReadOnlyRegistryClient {
 
 		return receipt.getTransactionReceipt();
 	}
-	
+
 
 	/**
 	 * Converts the provided Wei amount (smallest value Unit) to Ethers.
@@ -630,7 +641,7 @@ public class ReadOnlyRegistryClient {
 	public BigDecimal weiToEther(BigInteger wei) {
 		return Convert.fromWei(wei.toString(), Convert.Unit.ETHER);
 	}
-	
+
 	/**
 	 * Converts the provided Ether amount to Wei (smallest value Unit) .
 	 * https://github.com/matthiaszimmermann/web3j_demo / Web3jUtils
@@ -640,7 +651,7 @@ public class ReadOnlyRegistryClient {
 	public BigInteger etherToWei(BigDecimal ether) {
 		return Convert.toWei(ether, Convert.Unit.ETHER).toBigInteger();
 	}
-	
+
 	/*
 	@Deprecated
 	public Map<String, List<ServiceDeploymentData>> getServiceDeployments() {
