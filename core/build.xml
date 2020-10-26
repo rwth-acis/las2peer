@@ -90,7 +90,7 @@
 	</target>
 
 	<target name="get_deps" depends="install-ivy" description="--> resolve dependencies">
-		<ivy:retrieve type="jar, bundle" conf="*" pattern="${lib.dir}/[artifact]-[revision].[ext]"/>
+		<ivy:retrieve type="jar, bundle" conf="*" pattern="${lib.dir}/[artifact]-[revision](-[classifier]).[ext]"/>
 	</target>
 
 	<target name="deploy-local" depends="main_jar" description="--> deploy locally">
