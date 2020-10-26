@@ -1,10 +1,31 @@
 package i5.las2peer.connectors.webConnector;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.OutputStream;
+import com.nimbusds.oauth2.sdk.http.HTTPRequest;
+import com.nimbusds.oauth2.sdk.http.HTTPRequest.Method;
+import com.sun.net.httpserver.HttpServer;
+import com.sun.net.httpserver.HttpsServer;
+import i5.las2peer.api.logging.MonitoringEvent;
+import i5.las2peer.connectors.Connector;
+import i5.las2peer.connectors.ConnectorException;
+import i5.las2peer.connectors.webConnector.handler.*;
+import i5.las2peer.connectors.webConnector.util.*;
+import i5.las2peer.logging.L2pLogger;
+import i5.las2peer.p2p.Node;
+import i5.las2peer.p2p.PastryNodeImpl;
+import i5.las2peer.security.AgentImpl;
+import i5.las2peer.security.PassphraseAgentImpl;
+import net.minidev.json.JSONObject;
+import net.minidev.json.JSONValue;
+import org.glassfish.jersey.jackson.JacksonFeature;
+import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import org.glassfish.jersey.server.ResourceConfig;
+
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLException;
+import javax.ws.rs.core.MultivaluedMap;
+import java.io.*;
 import java.math.BigInteger;
 import java.net.URI;
 import java.net.URL;
@@ -21,45 +42,6 @@ import java.util.concurrent.Executors;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.StreamHandler;
-
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLException;
-import javax.ws.rs.core.MultivaluedMap;
-
-import org.glassfish.jersey.jackson.JacksonFeature;
-import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
-import org.glassfish.jersey.media.multipart.MultiPartFeature;
-import org.glassfish.jersey.server.ResourceConfig;
-
-import com.nimbusds.oauth2.sdk.http.HTTPRequest;
-import com.nimbusds.oauth2.sdk.http.HTTPRequest.Method;
-import com.sun.net.httpserver.HttpServer;
-import com.sun.net.httpserver.HttpsServer;
-
-import i5.las2peer.api.logging.MonitoringEvent;
-import i5.las2peer.connectors.Connector;
-import i5.las2peer.connectors.ConnectorException;
-import i5.las2peer.connectors.webConnector.handler.AgentsHandler;
-import i5.las2peer.connectors.webConnector.handler.AuthHandler;
-import i5.las2peer.connectors.webConnector.handler.DefaultHandler;
-import i5.las2peer.connectors.webConnector.handler.EthereumHandler;
-import i5.las2peer.connectors.webConnector.handler.ServicesHandler;
-import i5.las2peer.connectors.webConnector.handler.SwaggerUIHandler;
-import i5.las2peer.connectors.webConnector.handler.WebappHandler;
-import i5.las2peer.connectors.webConnector.util.AgentSession;
-import i5.las2peer.connectors.webConnector.util.AuthenticationManager;
-import i5.las2peer.connectors.webConnector.util.CORSResponseFilter;
-import i5.las2peer.connectors.webConnector.util.KeystoreManager;
-import i5.las2peer.connectors.webConnector.util.NameLock;
-import i5.las2peer.connectors.webConnector.util.WebConnectorExceptionMapper;
-import i5.las2peer.logging.L2pLogger;
-import i5.las2peer.p2p.Node;
-import i5.las2peer.p2p.PastryNodeImpl;
-import i5.las2peer.security.AgentImpl;
-import i5.las2peer.security.PassphraseAgentImpl;
-import net.minidev.json.JSONObject;
-import net.minidev.json.JSONValue;
 
 /**
  * Starter class for registering the Web Connector at the las2peer server.
@@ -168,7 +150,7 @@ public class WebConnector extends Connector {
 
 	/**
 	 * create a new web connector instance.
-	 * 
+	 *
 	 * @param http
 	 * @param httpPort
 	 * @param https
@@ -189,7 +171,7 @@ public class WebConnector extends Connector {
 
 	/**
 	 * set the log file for this connector
-	 * 
+	 *
 	 * @param filename
 	 * @throws IOException
 	 */
@@ -199,7 +181,7 @@ public class WebConnector extends Connector {
 
 	/**
 	 * set the port for the HTTP connector to listen to
-	 * 
+	 *
 	 * @param port
 	 */
 	public void setHttpPort(Integer port) {
@@ -215,7 +197,7 @@ public class WebConnector extends Connector {
 
 	/**
 	 * set the port for the web connector to listen to for the secure line
-	 * 
+	 *
 	 * @param port
 	 */
 	public void setHttpsPort(Integer port) {
@@ -231,7 +213,7 @@ public class WebConnector extends Connector {
 
 	/**
 	 * enables/disables HTTP/HTTPs
-	 * 
+	 *
 	 * @param http enable HTTP
 	 * @param https enable HTTPS
 	 */
@@ -242,7 +224,7 @@ public class WebConnector extends Connector {
 
 	/**
 	 * @deprecated This method is no longer supported and will be removed in the future.
-	 * 
+	 *
 	 * @param timeoutInMs
 	 */
 	@Deprecated
@@ -252,7 +234,7 @@ public class WebConnector extends Connector {
 
 	/**
 	 * set a stream to log all messages to
-	 * 
+	 *
 	 * @param stream
 	 */
 	public void setLogStream(OutputStream stream) {
@@ -275,7 +257,7 @@ public class WebConnector extends Connector {
 
 	/**
 	 * set the SSL key password
-	 * 
+	 *
 	 * @param password
 	 */
 	public void setSslKeyPassword(String password) {
@@ -284,7 +266,7 @@ public class WebConnector extends Connector {
 
 	/**
 	 * set the location of the SSL keystore
-	 * 
+	 *
 	 * @param keystore
 	 */
 	public void setSslKeystore(String keystore) {
@@ -293,7 +275,7 @@ public class WebConnector extends Connector {
 
 	/**
 	 * set the cross origin resource domain
-	 * 
+	 *
 	 * @param cord
 	 */
 	public void setCrossOriginResourceDomain(String cord) {
@@ -314,7 +296,7 @@ public class WebConnector extends Connector {
 
 	/**
 	 * allow cross origin resource sharing
-	 * 
+	 *
 	 * @param enable
 	 */
 	public void setCrossOriginResourceSharing(boolean enable) {
@@ -327,7 +309,7 @@ public class WebConnector extends Connector {
 
 	/**
 	 * prefer local services
-	 * 
+	 *
 	 * @param enable
 	 */
 	public void setPreferLocalServices(boolean enable) {
@@ -349,6 +331,7 @@ public class WebConnector extends Connector {
 		}
 
 		for (String uri : oidcProviders) {
+			// TODO(Julius)?
 			try {
 				uri = uri.trim();
 				if (uri.endsWith("/")) {
@@ -379,6 +362,7 @@ public class WebConnector extends Connector {
 			config.register(new ServicesHandler(this));
 			config.register(new AgentsHandler(this));
 			config.register(new EthereumHandler(this));
+			config.register(new DIDHandler(this));
 			config.register(new SwaggerUIHandler(this));
 			if (startHttp) {
 				startHttpServer(config);
@@ -496,7 +480,7 @@ public class WebConnector extends Connector {
 
 	/**
 	 * get the node, this connector is running at / for
-	 * 
+	 *
 	 * @return the Las2Peer node of this connector
 	 */
 	public Node getL2pNode() {
@@ -505,7 +489,7 @@ public class WebConnector extends Connector {
 
 	/**
 	 * Logs a message.
-	 * 
+	 *
 	 * @param message
 	 */
 	public void logMessage(String message) {
@@ -518,7 +502,7 @@ public class WebConnector extends Connector {
 
 	/**
 	 * Logs an error with throwable.
-	 * 
+	 *
 	 * @param message
 	 * @param throwable
 	 */
@@ -534,7 +518,7 @@ public class WebConnector extends Connector {
 
 	/**
 	 * Logs an error.
-	 * 
+	 *
 	 * @param message
 	 */
 	public void logError(String message) {
@@ -542,7 +526,7 @@ public class WebConnector extends Connector {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return true, if local running versions of services are preferred before broadcasting
 	 */
 	boolean onlyLocalServices() {
@@ -556,12 +540,13 @@ public class WebConnector extends Connector {
 	/**
 	 * Fetches Open ID Connect provider configuration, according to the OpenID Connect discovery specification (cf.
 	 * http://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig)
-	 * 
+	 *
 	 * @param providerURI
 	 * @return
 	 * @throws IOException
 	 */
 	private JSONObject fetchOidcProviderConfig(String providerURI) throws IOException {
+		// TODO(Julius)?
 		JSONObject result = new JSONObject();
 
 		// send Open ID Provider Config request
@@ -606,7 +591,7 @@ public class WebConnector extends Connector {
 
 	/**
 	 * Gets the currently used CA certificate.
-	 * 
+	 *
 	 * @return Returns the CA certificate or {@code null}, if the connector is not started.
 	 * @throws FileNotFoundException If the certificate is not stored in the local keystore.
 	 */
