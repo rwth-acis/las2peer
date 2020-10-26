@@ -1,24 +1,5 @@
 package i5.las2peer.connectors.webConnector.handler;
 
-import java.io.InputStream;
-import java.math.BigInteger;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.logging.Level;
-
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.CookieParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.ServerErrorException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
-import org.glassfish.jersey.media.multipart.FormDataParam;
-
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentNotFoundException;
@@ -30,17 +11,25 @@ import i5.las2peer.p2p.Node;
 import i5.las2peer.registry.data.UserProfileData;
 import i5.las2peer.registry.exceptions.EthereumException;
 import i5.las2peer.registry.exceptions.NotFoundException;
-import i5.las2peer.security.AgentImpl;
-import i5.las2peer.security.EthereumAgent;
-import i5.las2peer.security.GroupAgentImpl;
-import i5.las2peer.security.PassphraseAgentImpl;
-import i5.las2peer.security.UserAgentImpl;
+import i5.las2peer.security.*;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.CryptoException;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
+import org.glassfish.jersey.media.multipart.FormDataParam;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import java.io.InputStream;
+import java.math.BigInteger;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.logging.Level;
 
 @Path(AgentsHandler.RESOURCE_PATH)
 public class AgentsHandler {
@@ -132,8 +121,10 @@ public class AgentsHandler {
 			UserAgentImpl userAgent = (UserAgentImpl) agent;
 			json.put("username", userAgent.getLoginName());
 			json.put("email", userAgent.getEmail());
+			json.put("authenticationFlowType", userAgent.getAuthenticationFlowType());
+			json.put("salt", userAgent.getSalt().toString());
 		}
-		if (agent instanceof EthereumAgent) 
+		if (agent instanceof EthereumAgent)
 		{
 			EthereumAgent ethAgent = (EthereumAgent) agent;
 			String ethAddress = ethAgent.getEthereumAddress();
@@ -173,9 +164,9 @@ public class AgentsHandler {
 					e.printStackTrace();
 				}
 			}
-			
+
 			json.put("ethAgentCredentialsAddress", ethAddress);
-			
+
 			if ( addMnemonic && !agent.isLocked())
 			{
 				json.put("ethMnemonic", ethAgent.getEthereumMnemonic());

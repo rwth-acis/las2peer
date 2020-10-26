@@ -53,6 +53,12 @@ public class CredentialUtils {
 		return Credentials.create(keyPair);
 	}
 
+	public static Credentials fromMnemonic(String mnemonic, byte[] hash) {
+		byte[] seed = MnemonicUtils.generateSeed(mnemonic, new String(hash));
+		ECKeyPair keyPair = ECKeyPair.create(sha256(seed));
+		return Credentials.create(keyPair);
+	}
+
 	/**
 	 * Create new BIP39 mnemonic string using secure randomness.
 	 * @return string of words. Can be used to deterministically

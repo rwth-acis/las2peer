@@ -1,41 +1,20 @@
 package i5.las2peer.tools;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.Serializable;
-import java.security.InvalidKeyException;
-import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.Signature;
-import java.security.SignatureException;
+import i5.las2peer.persistency.VerificationFailedException;
+import i5.las2peer.serialization.SerializationException;
+import i5.las2peer.serialization.SerializeTools;
+
+import javax.crypto.*;
+import javax.crypto.interfaces.PBEKey;
+import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.SecretKeySpec;
+import java.io.*;
+import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Base64;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.KeyGenerator;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.interfaces.PBEKey;
-import javax.crypto.spec.PBEKeySpec;
-import javax.crypto.spec.SecretKeySpec;
-
-import i5.las2peer.persistency.VerificationFailedException;
-import i5.las2peer.serialization.SerializationException;
-import i5.las2peer.serialization.SerializeTools;
 
 /**
  * Simple <i>static</i> class collecting useful cryptographic methods end encapsulating the access to the underlying
@@ -66,7 +45,7 @@ public class CryptoTools {
 
 	/**
 	 * used hash method
-	 * 
+	 *
 	 * @return used hash method
 	 */
 	public static String getHashMethod() {
@@ -75,7 +54,7 @@ public class CryptoTools {
 
 	/**
 	 * get the asymmetric encryption algorithm in use
-	 * 
+	 *
 	 * @return asymetric algorithm
 	 */
 	public static String getAsymmetricAlgorithm() {
@@ -84,7 +63,7 @@ public class CryptoTools {
 
 	/**
 	 * get the symmetric algorithm in use
-	 * 
+	 *
 	 * @return symetric algorithm
 	 */
 	public static String getSymmetricAlgorithm() {
@@ -93,7 +72,7 @@ public class CryptoTools {
 
 	/**
 	 * get the signature method in use
-	 * 
+	 *
 	 * @return signature method
 	 */
 	public static String getSignatureMethod() {
@@ -102,7 +81,7 @@ public class CryptoTools {
 
 	/**
 	 * get the factory method for symmetric keys
-	 * 
+	 *
 	 * @return factory method in use
 	 */
 	public static String getSymmetricKeygenMethod() {
@@ -111,7 +90,7 @@ public class CryptoTools {
 
 	/**
 	 * set the preferred size for asymmetric keys
-	 * 
+	 *
 	 * @param size The key size that is used to create asymmetric keys.
 	 */
 	public static void setAsymmetricKeySize(int size) {
@@ -125,7 +104,7 @@ public class CryptoTools {
 
 	/**
 	 * set the preferred size for symmetric keys
-	 * 
+	 *
 	 * @param size The key size that is used to create symmetric keys.
 	 */
 	public static void setSymmetricKeySize(int size) {
@@ -136,7 +115,7 @@ public class CryptoTools {
 	/**
 	 * generate a symmetric key for the given passphrase using the given salt make sure to use real random salts e.g.
 	 * via the {@link #generateSalt} method
-	 * 
+	 *
 	 * @param passphrase The secret that is used to generate the key.
 	 * @param salt A salt that is used with the given passphrase.
 	 * @return a symmetric key for the given passphrase
@@ -159,10 +138,24 @@ public class CryptoTools {
 	}
 
 	/**
+	 * generate a symmetric key for the given hash
+	 *
+	 * @param hash The secret that is used to generate the key.
+	 * @return a symmetric key for the given hash
+	 * @throws CryptoException If the selected algorithm does not exist or an issue with the given key occurs.
+	 */
+	public static SecretKey generateKeyForPassphrase(byte[] hash) throws CryptoException {
+		if (hash == null || hash.length == 0) {
+			throw new CryptoException("Null or empty byte array given as hash");
+		}
+		return new SecretKeySpec(hash, 0, hash.length, "AES");
+	}
+
+	/**
 	 * encrypt a serializable object using the given passphrase an salt
-	 * 
+	 *
 	 * make sure to use real random salts e.g. via the {@link #generateSalt} method
-	 * 
+	 *
 	 * @param object The data that is encrypted.
 	 * @param passphrase The secret that is used to encrypt the given data.
 	 * @param salt A salt that is used with the given passphrase.
@@ -194,7 +187,7 @@ public class CryptoTools {
 
 	/**
 	 * descrypt (and deserialize) the given encrypted data using the given passphrase and salt
-	 * 
+	 *
 	 * @param content The data that is decrypted.
 	 * @param salt A salt that is used with the given passphrase.
 	 * @param passphrase The secret that is used to decrypt the given data.
@@ -226,10 +219,10 @@ public class CryptoTools {
 
 	/**
 	 * generate a random salt
-	 * 
+	 *
 	 * @return a random salt for later use
 	 * @throws CryptoException If the selected salt algorithm does not exist.
-	 * 
+	 *
 	 */
 	public static byte[] generateSalt() throws CryptoException {
 		try {
@@ -245,7 +238,7 @@ public class CryptoTools {
 
 	/**
 	 * decrypt the given content with the given private key and try to deserialize the resulting byte array
-	 * 
+	 *
 	 * @param data The encrypted data that is decrypted.
 	 * @param key The key that is used to decrypt the given data.
 	 * @return decrypted and deserialized content as java object
@@ -276,7 +269,7 @@ public class CryptoTools {
 
 	/**
 	 * decrypt a symmetrically encrypted byte block using the given key
-	 * 
+	 *
 	 * @param baCipherData The encrypted data that is decrypted.
 	 * @param key The key that is used to decrypt the given data.
 	 * @return decrypted content as byte array
@@ -302,7 +295,7 @@ public class CryptoTools {
 
 	/**
 	 * encrypt the given data after serialization using the given public key
-	 * 
+	 *
 	 * @param content The object that is encrypted.
 	 * @param key The key that is used to encrypt the given object.
 	 * @return encrypted content as byte array
@@ -316,7 +309,7 @@ public class CryptoTools {
 
 	/**
 	 * encrypt the given data asymmetrically using the given public key
-	 * 
+	 *
 	 * @param content The object that is encrypted.
 	 * @param key The key that is used to encrypt the given object.
 	 * @return encrypted content as byte array
@@ -343,7 +336,7 @@ public class CryptoTools {
 
 	/**
 	 * sign the given content with the given private key
-	 * 
+	 *
 	 * @param content The content that is signed with the given key.
 	 * @param key The key that is used to sign the given content.
 	 * @return signature as byte array
@@ -368,7 +361,7 @@ public class CryptoTools {
 
 	/**
 	 * tries to verify the given signature of the given content with the given public key
-	 * 
+	 *
 	 * @param signature The (possibly malicious) signature that is attached to the content.
 	 * @param content The (possibly malicious) content that is verified.
 	 * @param key The key that is verfied as the trusted signer.
@@ -393,7 +386,7 @@ public class CryptoTools {
 
 	/**
 	 * generate a new key for the symmetric crypto operations of this class
-	 * 
+	 *
 	 * @return new symmetric key
 	 */
 	public static SecretKey generateSymmetricKey() {
@@ -405,7 +398,7 @@ public class CryptoTools {
 
 	/**
 	 * generate a new asymmetric key pair
-	 * 
+	 *
 	 * @return new key pair
 	 */
 	public static KeyPair generateKeyPair() {
@@ -418,7 +411,7 @@ public class CryptoTools {
 
 	/**
 	 * encrypt the given data symmetrically with the given key
-	 * 
+	 *
 	 * @param baPlainData The data that is encrypted.
 	 * @param symmetricKey The key that is used to encrypt the given data.
 	 * @return encrypted content as byte array
@@ -445,7 +438,7 @@ public class CryptoTools {
 
 	/**
 	 * encrypt the given object after serialization with the givne key
-	 * 
+	 *
 	 * @param plainData The data that is encrypted.
 	 * @param key The key that is used to encrypt the given data.
 	 * @return encrypted content as byte array
@@ -574,7 +567,7 @@ public class CryptoTools {
 
 	/**
 	 * main (command line) method: create a key pair in the given file name prefix
-	 * 
+	 *
 	 * @param argv See usage output for details.
 	 */
 	public static void main(String[] argv) {

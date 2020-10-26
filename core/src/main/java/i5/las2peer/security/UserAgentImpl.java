@@ -1,12 +1,5 @@
 package i5.las2peer.security;
 
-import java.security.KeyPair;
-import java.security.PublicKey;
-import java.util.Base64;
-import java.util.regex.Pattern;
-
-import org.w3c.dom.Element;
-
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentOperationFailedException;
@@ -22,19 +15,26 @@ import i5.las2peer.serialization.SerializeTools;
 import i5.las2peer.serialization.XmlTools;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
+import org.w3c.dom.Element;
+
+import java.security.KeyPair;
+import java.security.PublicKey;
+import java.util.Base64;
+import java.util.regex.Pattern;
 
 /**
  * An UserAgent represent a (End)user of the las2peer system.
- * 
+ *
  */
 public class UserAgentImpl extends PassphraseAgentImpl implements UserAgent {
 
 	protected String sLoginName = null;
 	protected String sEmail = null;
+	protected String sFlowType = null;
 
 	/**
 	 * atm constructor for the MockAgent class, just don't know, how agent creation will take place later
-	 * 
+	 *
 	 * @param pair
 	 * @param passphrase
 	 * @param salt
@@ -46,11 +46,16 @@ public class UserAgentImpl extends PassphraseAgentImpl implements UserAgent {
 		super(pair, passphrase, salt);
 	}
 
+	protected UserAgentImpl(KeyPair pair, byte[] hash, byte[] salt)
+		throws AgentOperationFailedException, CryptoException {
+		super(pair, hash, salt);
+	}
+
 	/**
 	 * create an agent with a locked private key
-	 * 
+	 *
 	 * used within {@link #createFromXml}
-	 * 
+	 *
 	 * @param pubKey
 	 * @param encryptedPrivate
 	 * @param salt
@@ -67,6 +72,11 @@ public class UserAgentImpl extends PassphraseAgentImpl implements UserAgent {
 	@Override
 	public boolean hasLoginName() {
 		return getLoginName() != null;
+	}
+
+	@Override
+	public boolean hasAuthenticationFlowType() {
+		return sFlowType != null;
 	}
 
 	@Override
@@ -108,6 +118,19 @@ public class UserAgentImpl extends PassphraseAgentImpl implements UserAgent {
 
 		// duplicate check is performed when storing/updating an UserAgent in a Node
 		this.sEmail = email.toLowerCase();
+	}
+
+	@Override
+	public void setAuthenticationFlowType(String flowType) throws IllegalArgumentException {
+		if (!flowType.equals("simple") && !flowType.equals("advanced")) {
+			throw new IllegalArgumentException("Authentication flow type must be either \"simple\" or \"advanced\"");
+		}
+		this.sFlowType = flowType;
+	}
+
+	@Override
+	public String getAuthenticationFlowType() {
+		return this.sFlowType;
 	}
 
 	@Override
@@ -154,7 +177,7 @@ public class UserAgentImpl extends PassphraseAgentImpl implements UserAgent {
 
 	/**
 	 * Create a new UserAgent protected by the given passphrase.
-	 * 
+	 *
 	 * @param passphrase passphrase for the secret key of the new user
 	 * @return Returns a new UserAgent instance
 	 * @throws CryptoException
@@ -164,6 +187,20 @@ public class UserAgentImpl extends PassphraseAgentImpl implements UserAgent {
 			throws CryptoException, AgentOperationFailedException {
 		byte[] salt = CryptoTools.generateSalt();
 		return new UserAgentImpl(CryptoTools.generateKeyPair(), passphrase, salt);
+	}
+
+	/**
+	 * Create a new UserAgent protected by the given hash.
+	 *
+	 * @param hash hash of the passphrase for the secret key of the new user
+	 * @param salt salt with which the passphrase was salted before hashing
+	 * @return Returns a new UserAgent instance
+	 * @throws CryptoException
+	 * @throws AgentOperationFailedException
+	 */
+	public static UserAgentImpl createUserAgent(byte[] hash, byte[] salt)
+		throws CryptoException, AgentOperationFailedException {
+		return new UserAgentImpl(CryptoTools.generateKeyPair(), hash, salt);
 	}
 
 	/**
@@ -263,7 +300,7 @@ public class UserAgentImpl extends PassphraseAgentImpl implements UserAgent {
 
 	/**
 	 * get the email address assigned to this agent
-	 * 
+	 *
 	 * @return an email address
 	 */
 	@Override
@@ -273,7 +310,7 @@ public class UserAgentImpl extends PassphraseAgentImpl implements UserAgent {
 
 	/**
 	 * has this user a registered email address?
-	 * 
+	 *
 	 * @return true, if an email address is assigned
 	 */
 	@Override

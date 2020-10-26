@@ -1,16 +1,16 @@
 package i5.las2peer.security;
 
-import java.security.KeyPair;
-import java.security.PublicKey;
-
-import javax.crypto.SecretKey;
-
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.api.security.PassphraseAgent;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
+
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.security.KeyPair;
+import java.security.PublicKey;
 
 /**
  * Base class for pass phrase protected agents.
@@ -29,7 +29,7 @@ public abstract class PassphraseAgentImpl extends AgentImpl implements Passphras
 
 	/**
 	 * atm constructor for the MockAgent class, just don't know, how agent creation will take place later
-	 * 
+	 *
 	 * @param pair
 	 * @param passphrase
 	 * @param salt
@@ -48,11 +48,24 @@ public abstract class PassphraseAgentImpl extends AgentImpl implements Passphras
 		// lockPrivateKey();
 	}
 
+	protected PassphraseAgentImpl(KeyPair pair, byte[] hash, byte[] salt)
+		throws AgentOperationFailedException, CryptoException {
+		// TODO: Get algorithm from CryptoTools. Is private for some reason.
+		super(pair, new SecretKeySpec(hash, "AES"));
+
+		this.salt = salt.clone();
+
+		this.passphrase = null;
+
+		// done in constructor of superclass
+		// lockPrivateKey();
+	}
+
 	/**
 	 * create an agent with a locked private key
-	 * 
+	 *
 	 * used within {@link #createFromXml}
-	 * 
+	 *
 	 * @param pubKey
 	 * @param encodedPrivate
 	 * @param salt
@@ -74,13 +87,20 @@ public abstract class PassphraseAgentImpl extends AgentImpl implements Passphras
 	}
 
 	@Override
+	public void unlock(byte[] hash) throws AgentAccessDeniedException, AgentOperationFailedException {
+		SecretKey key = new SecretKeySpec(hash, 0, hash.length, "AES");
+		super.unlockPrivateKey(key);
+		this.passphrase = new String(hash);
+	}
+
+	@Override
 	public void unlockPrivateKey(String passphrase) throws AgentAccessDeniedException, AgentOperationFailedException {
 		unlock(passphrase);
 	}
 
 	/**
 	 * encrypt the private key into a byte array with strong encryption based on a passphrase to unlock the key
-	 * 
+	 *
 	 * @param passphrase
 	 * @throws AgentOperationFailedException
 	 * @throws AgentLockedException
@@ -95,17 +115,48 @@ public abstract class PassphraseAgentImpl extends AgentImpl implements Passphras
 	}
 
 	/**
+	 * encrypt the private key into a byte array with strong encryption based on a hash of a passphrase to unlock
+	 * the key
+	 *
+	 * @param hash
+	 * @param salt
+	 * @throws AgentOperationFailedException
+	 * @throws AgentLockedException
+	 */
+	private void encryptPrivateKey(byte[] hash, byte[] salt) throws AgentOperationFailedException, AgentLockedException {
+		this.salt = salt;
+		super.encryptPrivateKey(new SecretKeySpec(hash, 0, hash.length, "AES"));
+	}
+
+	/**
+	 * encrypt the private key into a byte array with strong encryption based on a hash to unlock the key
+	 *
+	 * @param hash
+	 * @throws AgentOperationFailedException
+	 * @throws AgentLockedException
+	 */
+//	private void encryptPrivateKeyWithHash(String hash) throws AgentOperationFailedException, AgentLockedException {
+//		try {
+//			salt = CryptoTools.generateSalt();
+//			super.encryptPrivateKey(hash);
+//		} catch (CryptoException e) {
+//			throw new AgentOperationFailedException("problems with key generation for passphrase", e);
+//		}
+//	}
+
+	/**
 	 * provide access to salt for subclasses (security risk? - probably not)
-	 * 
+	 *
 	 * @return the random salt used to encode the private key
 	 */
-	protected byte[] getSalt() {
+	public byte[] getSalt() {
 		return salt;
 	}
 
 	/**
 	 * Change the passphrase for unlocking the private key. The key has to be unlocked first, of course.
-	 * 
+	 * Implicitly changes creates a new salt through {@link #encryptPrivateKey}.
+	 *
 	 * @param passphrase
 	 * @throws AgentOperationFailedException
 	 * @throws AgentLockedException
@@ -117,6 +168,21 @@ public abstract class PassphraseAgentImpl extends AgentImpl implements Passphras
 		encryptPrivateKey(passphrase);
 	}
 
+	/**
+	 * Change the passphrase for unlocking the private key. The key has to be unlocked first, of course.
+	 *
+	 * @param hash
+	 * @param salt
+	 * @throws AgentOperationFailedException
+	 * @throws AgentLockedException
+	 */
+	public void changePassphrase(byte[] hash, byte[] salt) throws AgentOperationFailedException, AgentLockedException {
+		if (isLocked()) {
+			throw new AgentLockedException();
+		}
+		encryptPrivateKey(hash, salt);
+	}
+
 	@Override
 	public void lockPrivateKey() {
 		super.lockPrivateKey();
@@ -125,11 +191,12 @@ public abstract class PassphraseAgentImpl extends AgentImpl implements Passphras
 
 	/**
 	 * Gets the current passphrase
-	 * 
+	 *
 	 * @return Returns the passphrase of this agent
 	 * @throws AgentLockedException
 	 */
 	public String getPassphrase() throws AgentLockedException {
+		// Should this method be public?
 		if (isLocked()) {
 			throw new AgentLockedException();
 		}

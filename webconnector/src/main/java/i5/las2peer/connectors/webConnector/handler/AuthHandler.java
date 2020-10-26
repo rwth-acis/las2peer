@@ -1,19 +1,5 @@
 package i5.las2peer.connectors.webConnector.handler;
 
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.CookieParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.NewCookie;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriInfo;
-
 import i5.las2peer.api.security.Agent;
 import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.connectors.webConnector.WebConnector;
@@ -22,13 +8,16 @@ import i5.las2peer.connectors.webConnector.util.AuthenticationManager;
 import i5.las2peer.p2p.EthereumNode;
 import i5.las2peer.p2p.Node;
 import i5.las2peer.security.AgentImpl;
-import i5.las2peer.security.AnonymousAgentImpl;
 import i5.las2peer.security.EthereumAgent;
 import i5.las2peer.security.PassphraseAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
+import javax.ws.rs.core.Response.Status;
 
 @Path(AuthHandler.RESOURCE_PATH)
 public class AuthHandler {
@@ -47,6 +36,7 @@ public class AuthHandler {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("/login")
 	public Response getLogin(@Context UriInfo uriInfo, @Context HttpHeaders httpHeaders) throws Exception {
+		// Retrieve or create agent by OIDC data
 		Agent agent = connector.authenticateAgent(httpHeaders.getRequestHeaders(),
 				uriInfo.getQueryParameters().getFirst(AuthenticationManager.ACCESS_TOKEN_KEY));
 		if (!(agent instanceof PassphraseAgentImpl)) {
@@ -71,8 +61,24 @@ public class AuthHandler {
 		} catch (ParseException e) {
 			throw new BadRequestException("Could not parse json request body");
 		}
+
+		// TODO(Julius): add flow type
+
 		String password = payload.getAsString("password");
-		if (password == null || password.isEmpty()) {
+		String hashString = payload.getAsString("hash");
+		String saltString = payload.getAsString("salt");
+
+		boolean useHashed = !(hashString == null || hashString.isEmpty() || saltString == null || saltString.isEmpty());
+		System.out.println(useHashed);
+
+		byte[] hash = null;
+		byte[] salt = null;
+		if (useHashed) {
+			hash = hashString.getBytes();
+			salt = saltString.getBytes();
+		}
+
+		if ((password == null || password.isEmpty()) && !useHashed) {
 			throw new BadRequestException("No password provided");
 		}
 		String username = payload.getAsString("username");
@@ -90,7 +96,7 @@ public class AuthHandler {
 			// check if email is already taken
 			try {
 				node.getAgentIdForEmail(email);
-				throw new BadRequestException("Username already taken");
+				throw new BadRequestException("Email already taken");
 			} catch (AgentNotFoundException e) {
 				// expected
 			}
@@ -102,14 +108,31 @@ public class AuthHandler {
 		if (node instanceof EthereumNode) {
 			EthereumNode ethNode = (EthereumNode) node;
 			if (ethereumMnemonic != null) {
-				agent = EthereumAgent.createEthereumAgent(username, password, ethNode.getRegistryClient(), ethereumMnemonic);
+				if (useHashed) {
+					agent = EthereumAgent.createEthereumAgent(username, hash, salt, ethNode.getRegistryClient(), ethereumMnemonic);
+				} else {
+					agent = EthereumAgent.createEthereumAgent(username, password, ethNode.getRegistryClient(), ethereumMnemonic);
+				}
 			} else {
-				agent = EthereumAgent.createEthereumAgentWithClient(username, password, ethNode.getRegistryClient());
+				if (useHashed) {
+					agent = EthereumAgent.createEthereumAgentWithClient(username, hash, salt,  ethNode.getRegistryClient());
+				} else {
+					agent = EthereumAgent.createEthereumAgentWithClient(username, password, ethNode.getRegistryClient());
+				}
 			}
 		} else {
-			agent = UserAgentImpl.createUserAgent(password);
+			if (useHashed) {
+				agent = UserAgentImpl.createUserAgent(hash, salt);
+			} else {
+				agent = UserAgentImpl.createUserAgent(password);
+			}
 		}
-		agent.unlock(password);
+		if (useHashed) {
+			agent.unlock(hash);
+		} else {
+			agent.unlock(password);
+		}
+
 		if (username != null && !username.isEmpty()) {
 			agent.setLoginName(username);
 		}
@@ -170,7 +193,7 @@ public class AuthHandler {
 		AgentSession session = connector.getSessionById(sessionId);
 		if (session != null) {
 			AgentImpl activeAgent = session.getAgent();
-			if (activeAgent != null && !(activeAgent instanceof AnonymousAgentImpl)) {
+			if (activeAgent != null) {
 				JSONObject json = new JSONObject();
 				json.put("code", Status.OK.getStatusCode());
 				json.put("text", Status.OK.getStatusCode() + " - Session OK");

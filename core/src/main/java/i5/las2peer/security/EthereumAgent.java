@@ -13,7 +13,6 @@ import i5.las2peer.serialization.SerializeTools;
 import i5.las2peer.serialization.XmlTools;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
-import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Element;
 import org.web3j.crypto.Credentials;
 
@@ -66,6 +65,17 @@ public class EthereumAgent extends UserAgentImpl {
 		this.sLoginName = loginName;
 		this.ethereumMnemonic = ethereumMnemonic;
 		this.ethereumAddress = CredentialUtils.fromMnemonic(ethereumMnemonic, passphrase).getAddress();
+		logger.fine("creating ethereum agent [" + ethereumAddress + "]");
+	}
+
+	protected EthereumAgent(KeyPair pair, byte[] hash, byte[] salt, String loginName, String ethereumMnemonic)
+		throws AgentOperationFailedException, CryptoException {
+		super(pair, hash, salt);
+		checkLoginNameValidity(loginName);
+		this.sLoginName = loginName;
+		this.ethereumMnemonic = ethereumMnemonic;
+		// TODO(Julius) mnemonics without passphrase
+		this.ethereumAddress = CredentialUtils.fromMnemonic(ethereumMnemonic, new String(hash)).getAddress();
 		logger.fine("creating ethereum agent [" + ethereumAddress + "]");
 	}
 
@@ -127,31 +137,6 @@ public class EthereumAgent extends UserAgentImpl {
 		}
 	}
 
-	@Override
-	public String toXmlString() {
-		try {
-			StringBuffer result = new StringBuffer("<las2peer:agent type=\"ethereum\">\n" + "\t<id>" + getIdentifier()
-					+ "</id>\n" + "\t<publickey encoding=\"base64\">" + SerializeTools.serializeToBase64(getPublicKey())
-					+ "</publickey>\n" + "\t<privatekey encrypted=\"" + CryptoTools.getSymmetricAlgorithm()
-					+ "\" keygen=\"" + CryptoTools.getSymmetricKeygenMethod() + "\">\n"
-					+ "\t\t<salt encoding=\"base64\">" + Base64.getEncoder().encodeToString(getSalt()) + "</salt>\n"
-					+ "\t\t<data encoding=\"base64\">" + getEncodedPrivate() + "</data>\n" + "\t</privatekey>\n"
-					+ "\t<login>" + sLoginName + "</login>\n"
-					+ "\t<ethereumaddress>" + ethereumAddress + "</ethereumaddress>\n"
-					+ "\t<ethereummnemonic>" + ethereumMnemonic + "</ethereummnemonic>\n");
-
-			if (sEmail != null) {
-				result.append("\t<email>" + sEmail + "</email>\n");
-			}
-
-			result.append("</las2peer:agent>\n");
-
-			return result.toString();
-		} catch (SerializationException e) {
-			throw new RuntimeException("Serialization problems with keys");
-		}
-	}
-
 	/**
 	 * Creates new agent with a given login name, passphrase, and registry client.
 	 * @param loginName name matching [a-zA-Z].{3,31} (hopefully UTF-8
@@ -164,7 +149,7 @@ public class EthereumAgent extends UserAgentImpl {
 	 * @throws CryptoException if there is an internal error during Ethereum key creation
 	 */
 	// TODO: when does it throw an AgentOperationFailedException?
-	public static @NotNull
+	public static
 	EthereumAgent createEthereumAgentWithClient(
 			String loginName,
 			String passphrase,
@@ -173,6 +158,31 @@ public class EthereumAgent extends UserAgentImpl {
 		String mnemonic = CredentialUtils.createMnemonic();
 
 		return createEthereumAgent(loginName, passphrase, regClient, mnemonic);
+	}
+
+	/**
+	 * Creates new agent with a given login name, passphrase, and registry client.
+	 * @param loginName name matching [a-zA-Z].{3,31} (hopefully UTF-8
+	 *                  characters, let's not get too crazy)
+	 * @param hash      hash of the passphrase with which both the agent key pair
+	 *                   and the Ethereum key pair are encrypted
+	 * @param salt      salt with which the passphrase was salted before hashing
+	 * @param regClient read-/write-capable Ethereum registry client to register the login name to the
+	 *                  Ethereum blockchain with the UserRegistry contract.
+	 * @return new EthereumAgent instance
+	 * @throws CryptoException if there is an internal error during Ethereum key creation
+	 */
+	// TODO: when does it throw an AgentOperationFailedException?
+	public static
+	EthereumAgent createEthereumAgentWithClient(
+		String loginName,
+		byte[] hash,
+		byte[] salt,
+		ReadWriteRegistryClient regClient
+	) throws CryptoException, AgentOperationFailedException {
+		String mnemonic = CredentialUtils.createMnemonic();
+
+		return createEthereumAgent(loginName, hash, salt, regClient, mnemonic);
 	}
 
 	/**
@@ -192,7 +202,7 @@ public class EthereumAgent extends UserAgentImpl {
 	// TODO: when does it throw an AgentOperationFailedException?
 	// TODO: regClient not used. Seems like the registry client of the las2peer node is being used instead.
 	// See
-	public static @NotNull
+	public static
 	EthereumAgent createEthereumAgent(
 			String loginName,
 			String passphrase,
@@ -203,6 +213,19 @@ public class EthereumAgent extends UserAgentImpl {
 		KeyPair keyPair = CryptoTools.generateKeyPair();
 
 		return new EthereumAgent(keyPair, passphrase, salt, loginName, ethereumMnemonic);
+	}
+
+	public static
+	EthereumAgent createEthereumAgent(
+		String loginName,
+		byte[] hash,
+		byte[] salt,
+		ReadWriteRegistryClient regClient,
+		String ethereumMnemonic
+	) throws CryptoException, AgentOperationFailedException {
+		KeyPair keyPair = CryptoTools.generateKeyPair();
+
+		return new EthereumAgent(keyPair, hash, salt, loginName, ethereumMnemonic);
 	}
 
 	/**
@@ -228,6 +251,9 @@ public class EthereumAgent extends UserAgentImpl {
 		}
 		return this.credentials;
 	}
+
+	// DID
+	// TODO: Julius: add getters and setters for attributes stored in blockchain
 
 	public static EthereumAgent createFromXml(String xml) throws MalformedXMLException {
 		return createFromXml(XmlTools.getRootElement(xml, "las2peer:agent"));
@@ -287,6 +313,31 @@ public class EthereumAgent extends UserAgentImpl {
 			return result;
 		} catch (SerializationException e) {
 			throw new MalformedXMLException("Deserialization problems", e);
+		}
+	}
+
+	@Override
+	public String toXmlString() {
+		try {
+			StringBuffer result = new StringBuffer("<las2peer:agent type=\"ethereum\">\n" + "\t<id>" + getIdentifier()
+					+ "</id>\n" + "\t<publickey encoding=\"base64\">" + SerializeTools.serializeToBase64(getPublicKey())
+					+ "</publickey>\n" + "\t<privatekey encrypted=\"" + CryptoTools.getSymmetricAlgorithm()
+					+ "\" keygen=\"" + CryptoTools.getSymmetricKeygenMethod() + "\">\n"
+					+ "\t\t<salt encoding=\"base64\">" + Base64.getEncoder().encodeToString(getSalt()) + "</salt>\n"
+					+ "\t\t<data encoding=\"base64\">" + getEncodedPrivate() + "</data>\n" + "\t</privatekey>\n"
+					+ "\t<login>" + sLoginName + "</login>\n"
+					+ "\t<ethereumaddress>" + ethereumAddress + "</ethereumaddress>\n"
+					+ "\t<ethereummnemonic>" + ethereumMnemonic + "</ethereummnemonic>\n");
+
+			if (sEmail != null) {
+				result.append("\t<email>" + sEmail + "</email>\n");
+			}
+
+			result.append("</las2peer:agent>\n");
+
+			return result.toString();
+		} catch (SerializationException e) {
+			throw new RuntimeException("Serialization problems with keys");
 		}
 	}
 }
