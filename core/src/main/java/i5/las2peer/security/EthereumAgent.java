@@ -335,6 +335,12 @@ public class EthereumAgent extends UserAgentImpl {
 				result.sEmail = email.getTextContent();
 			}
 
+			// optional authentication flow type
+			Element flowType = XmlTools.getOptionalElement(root, "authenticationFlowType");
+			if (flowType != null) {
+				result.sFlowType = flowType.getTextContent();
+			}
+
 			return result;
 		} catch (SerializationException e) {
 			throw new MalformedXMLException("Deserialization problems", e);
@@ -356,6 +362,10 @@ public class EthereumAgent extends UserAgentImpl {
 
 			if (sEmail != null) {
 				result.append("\t<email>" + sEmail + "</email>\n");
+			}
+
+			if (sFlowType != null) {
+				result.append("\t<authenticationFlowType>" + sFlowType + "</authenticationFlowType>\n");
 			}
 
 			result.append("</las2peer:agent>\n");
