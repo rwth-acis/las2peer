@@ -124,7 +124,7 @@ public class AgentsHandler {
 			UserAgentImpl userAgent = (UserAgentImpl) agent;
 			json.put("username", userAgent.getLoginName());
 			json.put("email", userAgent.getEmail());
-			json.put("authenticationFlowType", userAgent.getAuthenticationFlowType());
+			json.put("flowType", userAgent.getAuthenticationFlowType());
 			json.put("salt", Base64.getEncoder().encodeToString(userAgent.getSalt()));
 		}
 		if (agent instanceof EthereumAgent)
