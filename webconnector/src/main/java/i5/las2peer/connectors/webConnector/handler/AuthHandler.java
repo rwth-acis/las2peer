@@ -14,10 +14,12 @@ import i5.las2peer.security.UserAgentImpl;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
+import org.apache.commons.lang3.ArrayUtils;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.Status;
+import java.util.Base64;
 
 @Path(AuthHandler.RESOURCE_PATH)
 public class AuthHandler {
@@ -62,21 +64,12 @@ public class AuthHandler {
 			throw new BadRequestException("Could not parse json request body");
 		}
 
-		// TODO(Julius): add flow type
-
 		String password = payload.getAsString("password");
-		String hashString = payload.getAsString("hash");
-		String saltString = payload.getAsString("salt");
+		byte[] hash = Base64.getDecoder().decode(payload.getAsString("hash"));
+		byte[] salt = Base64.getDecoder().decode(payload.getAsString("salt"));
 
-		boolean useHashed = !(hashString == null || hashString.isEmpty() || saltString == null || saltString.isEmpty());
+		boolean useHashed = !(ArrayUtils.isEmpty(hash) || ArrayUtils.isEmpty(salt));
 		System.out.println(useHashed);
-
-		byte[] hash = null;
-		byte[] salt = null;
-		if (useHashed) {
-			hash = hashString.getBytes();
-			salt = saltString.getBytes();
-		}
 
 		if ((password == null || password.isEmpty()) && !useHashed) {
 			throw new BadRequestException("No password provided");
@@ -127,6 +120,7 @@ public class AuthHandler {
 				agent = UserAgentImpl.createUserAgent(password);
 			}
 		}
+
 		if (useHashed) {
 			agent.unlock(hash);
 		} else {
@@ -138,6 +132,10 @@ public class AuthHandler {
 		}
 		if (email != null && !email.isEmpty()) {
 			agent.setEmail(email);
+		}
+		String flowType = payload.getAsString("flowType");
+		if (flowType != null && !flowType.isEmpty()) {
+			agent.setAuthenticationFlowType(flowType);
 		}
 		node.storeAgent(agent);
 		return registerAgentSession(agent);
