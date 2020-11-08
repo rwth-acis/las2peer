@@ -29,7 +29,7 @@
 		<dependency org="ch.qos.logback" name="logback-core" rev="1.2.3">
 			<artifact name="logback-core" type="jar"/>
 		</dependency>
-		<dependency org="org.web3j" name="core" rev="4.7.0"/>
+		<dependency org="org.web3j" name="core" rev="4.8.0"/>
 		<dependency org="org.slf4j" name="slf4j-simple" rev="1.7.25"/>
 		<!--dependency org="ch.qos.logback" name="logback-classic" rev="1.2.3" /-->
 	</dependencies>
