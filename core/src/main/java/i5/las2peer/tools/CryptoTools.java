@@ -28,8 +28,8 @@ public class CryptoTools {
 	private static String DEFAULT_ASYMMETRIC_ALGORITHM = "RSA";
 	private static String asymmetricAlgorithm = DEFAULT_ASYMMETRIC_ALGORITHM;
 
-	private static String DEFAULT_SYMMETIC_ALGORITHM = "AES";
-	private static String symmetricAlgorithm = DEFAULT_SYMMETIC_ALGORITHM;
+	private static String DEFAULT_SYMMETRIC_ALGORITHM = "AES";
+	private static String symmetricAlgorithm = DEFAULT_SYMMETRIC_ALGORITHM;
 
 	private static final int DEFAULT_ASYM_KEYSIZE = 2048;
 	private static int asymmetricKeySize = DEFAULT_ASYM_KEYSIZE;
