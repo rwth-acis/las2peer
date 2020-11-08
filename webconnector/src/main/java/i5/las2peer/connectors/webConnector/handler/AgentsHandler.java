@@ -28,6 +28,7 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashSet;
 import java.util.logging.Level;
 
@@ -95,13 +96,15 @@ public class AgentsHandler {
 		if (email != null && !email.isEmpty()) {
 			agent.setEmail(email);
 		}
+
 		node.storeAgent(agent);
 		JSONObject json = new JSONObject()
 				.appendField("code", Status.OK.getStatusCode())
 				.appendField("text", Status.OK.getStatusCode() + " - Agent created")
 				.appendField("agentid", agent.getIdentifier())
 				.appendField("username", agent.getLoginName())
-				.appendField("email", agent.getEmail());
+				.appendField("email", agent.getEmail())
+				.appendField("authenticationFlowType", agent.getAuthenticationFlowType());
 		if (agent instanceof EthereumAgent) {
 			json.put("registryAddress", ((EthereumAgent) agent).getEthereumAddress());
 		}
@@ -122,7 +125,7 @@ public class AgentsHandler {
 			json.put("username", userAgent.getLoginName());
 			json.put("email", userAgent.getEmail());
 			json.put("authenticationFlowType", userAgent.getAuthenticationFlowType());
-			json.put("salt", userAgent.getSalt().toString());
+			json.put("salt", Base64.getEncoder().encodeToString(userAgent.getSalt()));
 		}
 		if (agent instanceof EthereumAgent)
 		{

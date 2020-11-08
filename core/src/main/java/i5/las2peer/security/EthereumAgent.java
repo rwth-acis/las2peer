@@ -121,6 +121,17 @@ public class EthereumAgent extends UserAgentImpl {
 	}
 
 	@Override
+	public void unlock(byte[] hash) throws AgentAccessDeniedException, AgentOperationFailedException {
+		super.unlock(hash);
+
+		credentials = CredentialUtils.fromMnemonic(ethereumMnemonic, new String(hash));
+		registryClient = new ReadWriteRegistryClient(new RegistryConfiguration(), credentials);
+
+		ethereumAddress = credentials.getAddress();
+		logger.fine("unlocked ethereum agent ["+ethereumAddress +"]");
+	}
+
+	@Override
 	public boolean isLocked() {
 		boolean ethereumIsLocked = (registryClient == null);
 		boolean userAgentIsLocked = super.isLocked();
@@ -208,6 +219,20 @@ public class EthereumAgent extends UserAgentImpl {
 			String passphrase,
 			ReadWriteRegistryClient regClient,
 			String ethereumMnemonic
+	) throws CryptoException, AgentOperationFailedException {
+		byte[] salt = CryptoTools.generateSalt();
+		KeyPair keyPair = CryptoTools.generateKeyPair();
+
+		return new EthereumAgent(keyPair, passphrase, salt, loginName, ethereumMnemonic);
+	}
+
+	public static
+	EthereumAgent createEthereumAgent(
+		String loginName,
+		String passphrase,
+		String flowType,
+		ReadWriteRegistryClient regClient,
+		String ethereumMnemonic
 	) throws CryptoException, AgentOperationFailedException {
 		byte[] salt = CryptoTools.generateSalt();
 		KeyPair keyPair = CryptoTools.generateKeyPair();

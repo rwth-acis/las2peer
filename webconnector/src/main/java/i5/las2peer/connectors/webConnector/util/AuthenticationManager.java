@@ -1,19 +1,5 @@
 package i5.las2peer.connectors.webConnector.util;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.logging.Level;
-
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ForbiddenException;
-import javax.ws.rs.InternalServerErrorException;
-import javax.ws.rs.NotAuthorizedException;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MultivaluedMap;
-
 import com.nimbusds.oauth2.sdk.ErrorObject;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
@@ -23,7 +9,6 @@ import com.nimbusds.openid.connect.sdk.UserInfoErrorResponse;
 import com.nimbusds.openid.connect.sdk.UserInfoResponse;
 import com.nimbusds.openid.connect.sdk.UserInfoSuccessResponse;
 import com.nimbusds.openid.connect.sdk.claims.UserInfo;
-
 import i5.las2peer.api.security.*;
 import i5.las2peer.connectors.webConnector.WebConnector;
 import i5.las2peer.logging.L2pLogger;
@@ -31,6 +16,19 @@ import i5.las2peer.p2p.EthereumNode;
 import i5.las2peer.security.*;
 import i5.las2peer.tools.CryptoTools;
 import net.minidev.json.JSONObject;
+
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.ForbiddenException;
+import javax.ws.rs.InternalServerErrorException;
+import javax.ws.rs.NotAuthorizedException;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MultivaluedMap;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.logging.Level;
 
 public class AuthenticationManager {
 
@@ -122,7 +120,24 @@ public class AuthenticationManager {
 
 		AgentImpl agent = connector.getL2pNode().getAgent(agentId);
 		if (agent instanceof PassphraseAgentImpl) {
-			((PassphraseAgentImpl) agent).unlock(credentials.password);
+			try {
+				// Passphrase
+				((PassphraseAgentImpl) agent).unlock(credentials.password);
+			} catch (AgentAccessDeniedException e) {
+				AgentAccessDeniedException exception = null;
+				try {
+					// Hash
+					byte[] hash = Base64.getDecoder().decode(credentials.password.getBytes());
+					((PassphraseAgentImpl) agent).unlock(hash);
+				} catch ( AgentAccessDeniedException f) {
+					exception = f;
+				}
+				if (exception != null) {
+					// Neither the passphrase nor the hash is correct
+					throw e;
+				}
+			}
+
 			logger.fine("passphrase accepted. Agent unlocked");
 		}
 		return agent;
