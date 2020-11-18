@@ -161,6 +161,11 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	private Timer tidyUpTimer;
 
 	/**
+	 * Runtime to get performance information (RAM)
+	 */
+	private Runtime runtime;
+
+	/**
 	 * status of this node
 	 */
 	private NodeStatus status = NodeStatus.UNCONFIGURED;
@@ -191,7 +196,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 */
 	private L2pLogger serviceLogger;
 	private static final String SERVICE_LOGFILE = "service.log";
-	
+
 	/**
 	 * maps names and emails to UserAgents
 	 */
@@ -251,7 +256,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 			initStandardLogfile();
 			initServiceLogfile();
 		}
-		
+
 		if (monitoringObserver) {
 			addObserver(new MonitoringObserver(50, this));
 		}
@@ -267,6 +272,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 
 		userManager = new UserAgentManager(this);
 		aliasManager = new ServiceAliasManager(this);
+
+		this.runtime = Runtime.getRuntime();
 	}
 
 	/**
@@ -276,7 +283,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 		L2pLogger logger = L2pLogger.getInstance(this.getClass());
 		addObserver(logger);
 	}
-	
+
 	/**
 	 * Creates an additional observer for the log-file for custom mesages
 	 */
@@ -286,9 +293,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 			serviceLogger.setLogfilePrefix(SERVICE_LOGFILE);
 			addObserver(serviceLogger);
 		} catch (IOException e) {
-			System.err.println("Fatal Error! Can't use logging prefix '"
-					+ SERVICE_LOGFILE
-					+ "'! File logging is disabled!");
+			System.err.println(
+					"Fatal Error! Can't use logging prefix '" + SERVICE_LOGFILE + "'! File logging is disabled!");
 		}
 	}
 
@@ -409,8 +415,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 		String sourceNodeRepresentation = getNodeRepresentation(sourceNode);
 		String destinationNodeRepresentation = getNodeRepresentation(destinationNode);
 		for (NodeObserver ob : observers) {
-			if (ob == serviceLogger 
-					&& (Math.abs(event.getCode()) < 7500 || Math.abs(event.getCode()) >= 7600)) {
+			if (ob == serviceLogger && (Math.abs(event.getCode()) < 7500 || Math.abs(event.getCode()) >= 7600)) {
 				// custom logger shall only log service messages
 				continue;
 			}
@@ -526,7 +531,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 		}
 
 		result.setNodeHandle(getNodeId());
-		//logger.info("retrieving node info: \n" + result.toXmlString());
+		// logger.info("retrieving node info: \n" + result.toXmlString());
 		return result;
 	}
 
@@ -1716,6 +1721,19 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 
 	public void setCpuLoadThreshold(double cpuLoadThreshold) {
 		this.cpuLoadThreshold = cpuLoadThreshold;
+	}
+
+	/**
+	 * Gets the approximate RAM load of the JVM the Node is running on.
+	 * 
+	 * @return the total amount of memory currently available for current and future objects, measured in bytes.
+	 */
+	public long getNodeRAMLoad() {
+		return runtime.totalMemory();
+	}
+
+	public long getNodeFreeRAMLoad() {
+		return runtime.freeMemory();
 	}
 
 	// Tidy up Timer
