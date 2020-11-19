@@ -1520,6 +1520,29 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 			return;
 		}
 		htAnswerListeners.put(messageId, listener);
+		// Thread to check whether a listener reaches timeout and needs to be removed from the table
+		new Thread() {
+		      public void run(){
+		    	  	long listenerId =  messageId;
+		    	  	long sleepTime = listener.getTimeoutTime();
+			        while(!htAnswerListeners.get(listenerId).checkTimeOut()) {			        	
+				        try {
+							Thread.sleep(sleepTime);		
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							System.out.println("Thread interupted because of "+e );
+							e.printStackTrace();
+						}
+				        if(htAnswerListeners.get(listenerId) == null) {
+							this.interrupt();
+							break;
+						}
+			        }
+			        if(!this.isInterrupted()) {
+			        	htAnswerListeners.remove(listenerId);
+			        }
+		        }
+		   }.start();
 	}
 
 	/**
@@ -1541,9 +1564,12 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 			System.out.println("Did not find corresponding observer!");
 			return false;
 		}
-
+		
 		listener.collectAnswer(answer);
-
+		// Remove listener from list if no more messages are expected
+		if(listener.getNumberOfExpectedResults() == listener.getNumberOfResults()) {
+			htAnswerListeners.remove(answer.getResponseToId());
+		}
 		return true;
 	}
 
