@@ -190,6 +190,10 @@ public class MessageResultListener {
 	public long getAgeMs() {
 		return new Date().getTime() - startedAt;
 	}
+	
+	public long getTimeoutTime() {
+		return timeoutMs;
+	}
 
 	/**
 	 * was their any exception during sending or processing the corresponding message
