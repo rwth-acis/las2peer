@@ -127,6 +127,10 @@ public class DefaultHandlerTest extends AbstractTestHandler {
 			JSONObject result = (JSONObject) new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(bytes);
 			Assert.assertEquals(nodes.get(0).getNodeId().toString(), result.getAsString("nodeId"));
 			Assert.assertNotNull(result.get("cpuLoad"));
+			Assert.assertNotNull(result.get("ramLoad"));
+			Assert.assertNotNull(result.get("ramLoadStr"));
+			Assert.assertNotNull(result.get("maxRamLoad"));
+			Assert.assertNotNull(result.get("maxRamLoadStr"));
 			Assert.assertNotNull(result.get("storageSize"));
 			Assert.assertNotNull(result.get("storageSizeStr"));
 			Assert.assertNotNull(result.get("maxStorageSize"));

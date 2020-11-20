@@ -9,7 +9,11 @@ import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Date;
 
-import javax.ws.rs.*;
+import javax.ws.rs.GET;
+import javax.ws.rs.InternalServerErrorException;
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -36,8 +40,7 @@ import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.ServiceAgentImpl;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.CryptoException;
-import i5.las2peer.tools.L2pNodeLauncher; 
-
+import i5.las2peer.tools.L2pNodeLauncher;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import rice.pastry.NodeHandle;
@@ -56,12 +59,9 @@ public class DefaultHandler {
 	public DefaultHandler(WebConnector connector) {
 		this.connector = connector;
 		node = connector.getL2pNode();
-		if ( node instanceof EthereumNode )
-		{
+		if (node instanceof EthereumNode) {
 			ethNode = (EthereumNode) node;
-		}
-		else
-		{
+		} else {
 			ethNode = null;
 		}
 	}
@@ -70,14 +70,11 @@ public class DefaultHandler {
 	@Path("/check-eth")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response checkEth() throws NotFoundException {
-		if ( node instanceof EthereumNode ) 
-		{
+		if (node instanceof EthereumNode) {
 			JSONObject json = new JSONObject();
 			json.put("msg", "found eth");
 			return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
-		}
-		else
-		{
+		} else {
 			throw new NotFoundException("Node does not use registry.");
 		}
 	}
@@ -121,6 +118,10 @@ public class DefaultHandler {
 		JSONObject response = new JSONObject();
 		response.put("nodeId", node.getNodeId().toString());
 		response.put("cpuLoad", getCPULoad(node));
+		response.put("ramLoad", getRamLoad(node) - getFreeRamLoad(node));
+		response.put("maxRamLoad", getRamLoad(node));
+		response.put("ramLoadStr", humanReadableByteCount(getRamLoad(node) - getFreeRamLoad(node), true));
+		response.put("maxRamLoadStr", humanReadableByteCount(getRamLoad(node), true));
 		long localStorageSize = -1;
 		long maxLocalStorageSize = -1;
 		if (node instanceof PastryNodeImpl) {
@@ -135,27 +136,25 @@ public class DefaultHandler {
 			// should never happen O.o
 			e.printStackTrace();
 		}
-		if ( nodeInfo != null )
-		{
+		if (nodeInfo != null) {
 			String nodeAdminName = nodeInfo.getAdminName();
 			String nodeAdminEmail = nodeInfo.getAdminEmail();
 			String nodeOrganization = nodeInfo.getOrganization();
 			String nodeDescription = nodeInfo.getDescription();
 			if (nodeAdminName != null && nodeAdminName.length() > 0)
 				response.put("nodeAdminName", nodeAdminName);
-			if (nodeAdminEmail != null && nodeAdminEmail.length() > 0)
-			{
+			if (nodeAdminEmail != null && nodeAdminEmail.length() > 0) {
 				response.put("nodeAdminEmail", nodeAdminEmail);
-				if ( ethNode != null )
+				if (ethNode != null)
 					response.put("nodeAdminReputation", ethNode.getAgentReputation(nodeAdminName, nodeAdminEmail));
 			}
-				
+
 			if (nodeOrganization != null && nodeOrganization.length() > 0)
 				response.put("nodeOrganization", nodeOrganization);
 			if (nodeDescription != null && nodeDescription.length() > 0)
 				response.put("nodeDescription", nodeDescription);
 		}
-		
+
 		response.put("storageSize", localStorageSize);
 		response.put("storageSizeStr", humanReadableByteCount(localStorageSize, true));
 		response.put("maxStorageSize", maxLocalStorageSize);
@@ -169,13 +168,20 @@ public class DefaultHandler {
 	@GET
 	@Path("/getOtherNodesInfo")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String handleGetOtherNodeInfo()
-	{
+	public String handleGetOtherNodeInfo() {
 		return getOtherNodeInfos(node).toJSONString();
 	}
 
 	private int getCPULoad(Node node) {
 		return (int) (node.getNodeCpuLoad() * 100);
+	}
+
+	private long getRamLoad(Node node) {
+		return node.getNodeRAMLoad();
+	}
+
+	private long getFreeRamLoad(Node node) {
+		return node.getNodeFreeRAMLoad();
 	}
 
 	// Source: http://stackoverflow.com/questions/3758606/how-to-convert-byte-size-into-human-readable-format-in-java
@@ -241,7 +247,7 @@ public class DefaultHandler {
 	private JSONArray getOtherNodeInfos(Node node) {
 		JSONArray result = new JSONArray();
 
-		if (!( node instanceof PastryNodeImpl )) {
+		if (!(node instanceof PastryNodeImpl)) {
 			return result;
 		}
 		Collection<NodeHandle> knownNodes = ((PastryNodeImpl) node).getPastryNode().getLeafSet().getUniqueSet();
@@ -250,14 +256,11 @@ public class DefaultHandler {
 			String nodeID = nodeHandle.toString();
 			try {
 				NodeInformation nodeInfo = node.getNodeInformation(nodeHandle);
-				if ( nodeInfo.getAdminName() != null && nodeInfo.getAdminName().length() > 2 && 
-					 nodeInfo.getAdminEmail() != null && nodeInfo.getAdminEmail().length() > 2 
-					)
-				{
+				if (nodeInfo.getAdminName() != null && nodeInfo.getAdminName().length() > 2
+						&& nodeInfo.getAdminEmail() != null && nodeInfo.getAdminEmail().length() > 2) {
 					if (ethNode != null) {
-						nodeJSON.put("nodeAdminReputation", 
-							ethNode.getAgentReputation(nodeInfo.getAdminName(), nodeInfo.getAdminEmail())
-						);
+						nodeJSON.put("nodeAdminReputation",
+								ethNode.getAgentReputation(nodeInfo.getAdminName(), nodeInfo.getAdminEmail()));
 					}
 				}
 				nodeJSON.put("nodeID", nodeID);
