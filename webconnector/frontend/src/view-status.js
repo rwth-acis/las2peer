@@ -62,6 +62,7 @@ class StatusView extends PolymerElement {
             <!-- NODE STATUS -->
             <strong>Uptime</strong>: [[_status.uptime]] <br />
             <strong>CPU Load</strong>: [[_status.cpuLoad]]% <br />
+	    <strong>RAM Usage</strong>: <meter value="[[_status.ramLoad]]" min="0" max="[[_status.maxRamLoad]]"></meter> [[_status.ramLoadStr]] of [[_status.maxRamLoadStr]] used <br />
             <strong>Local Storage</strong>: <meter value="[[_status.storageSize]]" min="0" max="[[_status.maxStorageSize]]"></meter> [[_status.storageSizeStr]] of [[_status.maxStorageSizeStr]] used <br />
             <strong>Node ID</strong>: [[_status.nodeId]] <br />
           </div>
@@ -166,6 +167,10 @@ class StatusView extends PolymerElement {
           nodeDescription: "...",
           nodeId: "...",
           cpuLoad: "...",
+          ramLoad: 0,
+          maxRamLoad: 1,
+          ramLoadStr: "...",
+          maxRamLoadStr: "...",
           storageSize: 0,
           maxStorageSize: 1,
           storageSizeStr: "...",
