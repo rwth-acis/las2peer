@@ -187,6 +187,11 @@
 	<target name="junit_jars" depends=""/>
 
 	<target name="build_frontend" description="--> build the polymer frontend with bower">
+        <replaceregexp file="./frontend/src/node-frontend.js"
+                       match="subtitle=&quot;v(.*)&quot;"
+                       replace="subtitle=&quot;v${ivy.las2peer.version}&quot;"
+        />
+
 		<echo message="Installing dependencies (if needed) ..."/>
 		<exec executable="npm" dir="frontend" failonerror="true">
 			<arg value="install"/>
