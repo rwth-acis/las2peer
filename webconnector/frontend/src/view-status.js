@@ -70,7 +70,7 @@ class StatusView extends PolymerElement {
             <!-- NODE ADMIN INFO + DESCRIPTION-->
             <strong>Node Hoster</strong>: [[_status.nodeAdminName]] 
               <template is="dom-if" if="[[_status.nodeAdminReputation]]">
-                <custom-star-rating value="[[_status.nodeAdminReputation]]" readonly></custom-star-rating>
+                <custom-star-rating value="[[_status.nodeAdminReputation]]" readonly single></custom-star-rating>
               </template>
               <template is="dom-if" if="[[!_status.nodeAdminReputation]]">
                 <custom-star-rating disable-rating readonly></custom-star-rating>
@@ -98,7 +98,7 @@ class StatusView extends PolymerElement {
                     <strong>NodeAdmin:</strong> [[otherNode.nodeInfo.admin-name]] 
                     
                     <template is="dom-if" if="[[otherNode.nodeAdminReputation]]">
-                      <custom-star-rating value="[[otherNode.nodeAdminReputation]]" readonly></custom-star-rating>
+                      <custom-star-rating value="[[otherNode.nodeAdminReputation]]" readonly single></custom-star-rating>
                     </template>
                     <template is="dom-if" if="[[!otherNode.nodeAdminReputation]]">
                       <custom-star-rating disable-rating readonly></custom-star-rating>
