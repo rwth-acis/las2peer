@@ -191,7 +191,7 @@
 		       includeantruntime="false">
 			<compilerarg value="-XDignore.symbol.file"/> <!-- fix build in JDK8 -->
 			<compilerarg value="-Xlint:deprecation" />
-		<!--	<compilerarg line="-add-exports java.desktop/com.sun.beans.finder=ALL-UNNAMED" />-->
+			<compilerarg line="--add-exports java.desktop/com.sun.beans.finder=ALL-UNNAMED" />
 		</javac>
 		<copy todir="${tmp.classes}">
 			<fileset dir="${src.main}">
