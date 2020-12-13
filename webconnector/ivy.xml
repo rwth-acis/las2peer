@@ -17,5 +17,6 @@
 		<dependency org="org.glassfish.jersey.containers" name="jersey-container-jdk-http" rev="2.25.1"/>
 		<dependency org="net.minidev" name="json-smart" rev="2.3"/>
 		<dependency org="org.webjars" name="swagger-ui" rev="3.6.1"/>
+        <dependency org="javax.xml.bind" name="jaxb-api" rev="2.3.1"/> 
 	</dependencies>
 </ivy-module>

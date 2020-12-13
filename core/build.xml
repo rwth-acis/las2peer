@@ -65,10 +65,10 @@
 	   <echo>Java/JVM version: ${ant.java.version}</echo>
 	   <echo>Java/JVM detail version: ${java.version}</echo>
 		<fail message="Unsupported Java version: ${ant.java.version}.
-		  Make sure that the Java version is 1.8.">
+		  Make sure that the Java version is 14.">
 		  <condition>
 		  	<not>
-				<equals arg1="${ant.java.version}" arg2="1.8"/>
+				<equals arg1="${ant.java.version}" arg2="14"/>
 			</not>
 		  </condition>
 		</fail>
@@ -177,11 +177,21 @@
 
 
 	<!-- Compilation -->
-
+	
+	
+	<target name="jdk_version_validation">
+	    <echo message="Java Version: ${java.version}" />
+	    <echo message="Java home: ${java.home}" />
+	    <echo message="JAVA_HOME: ${env.JAVA_HOME}" />
+	    <echo message="JAVACMD: ${env.JAVACMD}" />
+	</target>
+	
 	<target name="compile_main" depends="init_compile">
 		<javac srcdir="${src.main}" destdir="${tmp.classes}" classpathref="classpath" debug="on" encoding="UTF-8"
 		       includeantruntime="false">
 			<compilerarg value="-XDignore.symbol.file"/> <!-- fix build in JDK8 -->
+			<compilerarg value="-Xlint:deprecation" />
+		<!--	<compilerarg line="-add-exports java.desktop/com.sun.beans.finder=ALL-UNNAMED" />-->
 		</javac>
 		<copy todir="${tmp.classes}">
 			<fileset dir="${src.main}">

@@ -19,5 +19,6 @@
 		<dependency org="org.glassfish.jersey.media" name="jersey-media-json-jackson" rev="2.25.1"/>
 		<dependency org="javax.ws.rs" name="javax.ws.rs-api" rev="2.0.1"/>
 		<dependency org="org.glassfish.jersey.media" name="jersey-media-multipart" rev="2.25.1"/>
+        <dependency org="javax.xml.bind" name="jaxb-api" rev="2.3.1"/>
 	</dependencies>
 </ivy-module>
