@@ -14,11 +14,12 @@
 		<dependency org="i5" name="las2peer" rev="${ivy.las2peer.version}" changing="true"/>
 
 		<dependency org="io.swagger" name="swagger-jersey2-jaxrs" rev="1.5.17"/>
-		<dependency org="org.glassfish.jersey.core" name="jersey-server" rev="2.25.1"/>
-		<dependency org="org.glassfish.jersey.core" name="jersey-common" rev="2.25.1"/>
-		<dependency org="org.glassfish.jersey.media" name="jersey-media-json-jackson" rev="2.25.1"/>
+		<dependency org="org.glassfish.jersey.core" name="jersey-server" rev="2.32"/>
+		<dependency org="org.glassfish.jersey.core" name="jersey-common" rev="2.32"/>
+		<dependency org="org.glassfish.jersey.media" name="jersey-media-json-jackson" rev="2.32"/>
 		<dependency org="javax.ws.rs" name="javax.ws.rs-api" rev="2.0.1"/>
-		<dependency org="org.glassfish.jersey.media" name="jersey-media-multipart" rev="2.25.1"/>
+		<dependency org="org.glassfish.jersey.media" name="jersey-media-multipart" rev="2.32"/>
         <dependency org="javax.xml.bind" name="jaxb-api" rev="2.3.1"/>
+        <dependency org="org.glassfish.jersey.inject" name="jersey-hk2" rev="2.32"/>
 	</dependencies>
 </ivy-module>
