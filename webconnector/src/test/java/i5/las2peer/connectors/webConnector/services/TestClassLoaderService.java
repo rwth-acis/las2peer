@@ -9,7 +9,6 @@ public class TestClassLoaderService extends RESTService {
 
 	@Override
 	protected void initResources() {
-		//getResourceConfig().register(TestResource.class);
 		getResourceConfig().packages(TestResource.class.getPackage().toString());
 	}
 
