@@ -8,8 +8,7 @@ install:
   - rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh && nvm install $TRAVIS_NODE_VERSION
   - npm install
 script: 
-  - export JAVA_HOME=$HOME/openjdk14
-  - $TRAVIS_BUILD_DIR/install-jdk.sh --install openjdk14 --target $JAVA_HOME
+  - echo $JAVA_HOME
   - ant all
 sudo: false
 after_success:
