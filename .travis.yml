@@ -1,5 +1,6 @@
 language: java
 jdk:
+- oraclejdk14
 - openjdk14
 env:
   - TRAVIS_NODE_VERSION="8"
