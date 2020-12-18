@@ -64,14 +64,14 @@
 	<target name="print-version">
 	   <echo>Java/JVM version: ${ant.java.version}</echo>
 	   <echo>Java/JVM detail version: ${java.version}</echo>
-	<!--	<fail message="Unsupported Java version: ${ant.java.version}.
+		<fail message="Unsupported Java version: ${ant.java.version}.
 		  Make sure that the Java version is 14.">
 		  <condition>
 		  	<not>
-				<equals arg1="${java.version}" arg2="14"/>
+				<equals arg1="${ant.java.version}" arg2="14"/>
 			</not>
 		  </condition>
-		</fail>-->
+		</fail>
 	</target>
 
 	<!-- Download Dependencies (IVY) -->
