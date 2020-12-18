@@ -9,9 +9,8 @@ install:
   - npm install
 script: 
   - export JAVA_HOME=~/openjdk14
-  - export JAVACMD=~/openjdk14/bin/java.exe
-  - echo $JAVACMD
   - export JDK_HOME=~/openjdk14
+  - set
   - ant -diagnostics
   - ant all
 sudo: false
