@@ -68,7 +68,7 @@
 		  Make sure that the Java version is 14.">
 		  <condition>
 		  	<not>
-				<equals arg1="${ant.java.version}" arg2="14"/>
+				<equals arg1="${java.version}" arg2="14"/>
 			</not>
 		  </condition>
 		</fail>
