@@ -274,6 +274,14 @@
 			<packageset dir="${src.main}" defaultexcludes="yes">
 				<include name="i5/las2peer/**"/>
 			</packageset>
+			<arg value="--add-exports"/>
+			<arg value="java.base/sun.security.provider=ALL-UNNAMED"/>
+			<arg value="--add-exports"/>
+			<arg value="java.base/sun.security.tools.keytool=ALL-UNNAMED"/>
+			<arg value="--add-exports"/>
+			<arg value="java.base/sun.security.util=ALL-UNNAMED"/>
+			<arg value="--add-exports"/>
+			<arg value="java.base/sun.security.x509=ALL-UNNAMED"/>
 		</javadoc>
 	</target>
 
