@@ -4,10 +4,11 @@ jdk:
 env:
   - TRAVIS_NODE_VERSION="8"
 before_install:
-  - wget --no-check-certificate https://www.apache.org/dist/ant/binaries/apache-ant-1.10.7-bin.tar.gz
-  - tar -xzvf apache-ant-1.10.7-bin.tar.gz
-  - export PATH=`pwd`/apache-ant-1.10.7/bin:$PATH
-  - echo $(ant -version)
+  - wget http://archive.apache.org/dist/ant/binaries/apache-ant-1.10.7-bin.tar.gz
+  - tar xvfvz apache-ant-1.10.7-bin.tar.gz
+  - sudo mv apache-ant-1.10.7 /opt/ant
+  - sudo sh -c 'echo ANT_HOME=/opt/ant >> /etc/environment'
+  - sudo ln -s /opt/ant/apache-ant-1.10.7/bin/ant /usr/bin/ant
 install:
   - rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh && nvm install $TRAVIS_NODE_VERSION
   - npm install
