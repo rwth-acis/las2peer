@@ -11,6 +11,7 @@ script:
   - export JAVA_HOME=~/openjdk14
   - export JDK_HOME=~/openjdk14
   - export ANT_HOME=/usr/share/ant
+  - export JAVACMD=${JAVA_HOME}/bin/java
   - export PATH=${PATH}:${ANT_HOME}/bin
   - echo ${ANT_HOME}
   - echo $ANT_HOME
