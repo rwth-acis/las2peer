@@ -8,7 +8,7 @@ before_install:
   - tar xvfvz apache-ant-1.10.7-bin.tar.gz
   - sudo mv apache-ant-1.10.7 /opt/ant
   - sudo sh -c 'echo ANT_HOME=/opt/ant >> /etc/environment'
-  - sudo ln -s /opt/ant/apache-ant-1.10.7/bin/ant /usr/bin/ant
+  - sudo ln -s /opt/ant/apache-ant-1.10.7/bin/ant /usr/bin/ant -f
 install:
   - rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh && nvm install $TRAVIS_NODE_VERSION
   - npm install
