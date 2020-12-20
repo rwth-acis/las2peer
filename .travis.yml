@@ -17,7 +17,6 @@ script:
   - export JAVA_HOME=~/openjdk14
   - export JDK_HOME=~/openjdk14
  # - export PATH=${PATH}:${ANT_HOME}/bin
-  - set
   - ant -diagnostics
   - ant all
 sudo: false
