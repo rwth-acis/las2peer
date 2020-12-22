@@ -13,7 +13,7 @@
 		<dependency org="junit" name="junit" rev="4.12" conf="*"/>
         <dependency org="org.mockito" name="mockito-all" rev="1.9.5" conf="test->*"/>
 
-		<dependency org="FreePastry" name="FreePastry" rev="2.1.1"/>
+		<dependency org="FreePastry" name="FreePastry" rev="3.0.0"/>
 		<dependency org="xpp3" name="xpp3" rev="1.1.4c"/> <!-- FreePastry dependency -->
 		<dependency org="javax.xml.parsers" name="jaxp-api" rev="1.4.5"/>
 

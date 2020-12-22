@@ -29,7 +29,7 @@ public class ConnectorException extends Exception {
 	 * @param message the detail message. The detail message is saved for later retrieval by the {@link #getMessage()}
 	 *            method.
 	 * @param cause cause the cause (which is saved for later retrieval by the {@link #getCause()} method). (A
-	 *            <tt>null</tt> value is permitted, and indicates that the cause is nonexistent or unknown.)
+	 *            <code>null</code> value is permitted, and indicates that the cause is nonexistent or unknown.)
 	 */
 	public ConnectorException(String message, Throwable cause) {
 		super(message, cause);

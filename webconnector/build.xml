@@ -216,36 +216,7 @@
 	        <os family="unix" />
 	    </condition>
 	</target>	
-	<target name="build_frontend" description="--> build the polymer frontend with bower" depends="checkOS, build_frontend_windows, build_frontend_linux">
-	</target>
-	<target name="build_frontend_windows" description="--> build the polymer frontend with bower" depends="checkOS" if="isWindows">
-		<echo message="npm on windows"/>
-		<!--<echo message="Installing dependencies (if needed) ..."/>
-		<exec executable="C:\Program Files\nodejs\npm.cmd" dir="frontend" failonerror="true">
-			<arg value="install"/>
-		</exec>
-		
-		
-        <echo message="Fixing vulnerabilities ..."/>
-        <exec executable="npm" dir="frontend" failonerror="true">
-            <arg value="audit"/>
-            <arg value="fix"/>
-        </exec>
-    	
-
-		<echo message="Building frontend ..."/>
-		<exec executable="C:\Program Files\nodejs\npm.cmd" dir="frontend" failonerror="true">
-			<arg value="run"/>
-			<arg value="build"/>
-		</exec>-->
-
-		<echo message="Fixing webapp symlink ..."/>
-		<exec executable="cmd.exe" failonerror="true">
-	    	<arg value="${basedir}/fix_symlink.sh"/>
-	  	</exec>
-	</target>
-	<target name="build_frontend_linux" description="--> build the polymer frontend with bower" depends="checkOS" if="isLinux">
-		<echo message="npm on linux"/>
+	<target name="build_frontend" description="--> build the polymer frontend with bower">
 		<echo message="Installing dependencies (if needed) ..."/>
 		<exec executable="npm" dir="frontend" failonerror="true">
 			<arg value="install"/>
@@ -265,9 +236,10 @@
 		</exec>
 
 		<echo message="Fixing webapp symlink ..."/>
-		<exec executable="bin/bash" failonerror="true">
-			    	<arg value="${basedir}/fix_symlink.sh"/>
-		</exec>
+		<exec executable="/bin/bash" failonerror="true">
+	    	<arg value="${basedir}/fix_symlink.sh"/>
+	  	</exec>
+
 	</target>
 		
 
@@ -302,6 +274,14 @@
 			<packageset dir="${src.main}" defaultexcludes="yes">
 				<include name="i5/las2peer/**"/>
 			</packageset>
+			<arg value="--add-exports"/>
+			<arg value="java.base/sun.security.provider=ALL-UNNAMED"/>
+			<arg value="--add-exports"/>
+			<arg value="java.base/sun.security.tools.keytool=ALL-UNNAMED"/>
+			<arg value="--add-exports"/>
+			<arg value="java.base/sun.security.util=ALL-UNNAMED"/>
+			<arg value="--add-exports"/>
+			<arg value="java.base/sun.security.x509=ALL-UNNAMED"/>
 		</javadoc>
 	</target>
 

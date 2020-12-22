@@ -384,13 +384,14 @@
 	<!-- Documentation -->
 
 	<target name="javadoc" depends="java_doc, junit_doc" description="--> javadoc"/>
-
 	<target name="java_doc" depends="init_doc, compile_main">
 		<javadoc destdir="${export.doc}" author="true" version="true" use="true" windowtitle="las2peer Documentation"
 		         failonerror="yes" encoding="utf8" classpathref="classpath" classpath="${tmp.classes}">
 			<packageset dir="${src.main}" defaultexcludes="yes">
 				<include name="i5/las2peer/**"/>
 			</packageset>
+			 <arg value="--add-exports"/>
+			 <arg value="java.desktop/com.sun.beans.finder=ALL-UNNAMED"/>
 		</javadoc>
 	</target>
 
