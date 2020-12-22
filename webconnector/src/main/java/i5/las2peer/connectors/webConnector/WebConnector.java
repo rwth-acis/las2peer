@@ -164,6 +164,7 @@ public class WebConnector extends Connector {
 		agentIdToSessionId = new HashMap<>();
 		sessions = new HashMap<>();
 		secureRandom = new SecureRandom();
+		this.logger.setLevel(Level.SEVERE);
 	}
 
 	/**
