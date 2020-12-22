@@ -180,6 +180,7 @@ public class WebConnector extends Connector {
 		enableHttpHttps(http, https);
 		setHttpPort(httpPort);
 		setHttpsPort(httpsPort);
+		this.logger.setLevel(Level.SEVERE);
 	}
 
 	public WebConnector(Integer httpPort) {
