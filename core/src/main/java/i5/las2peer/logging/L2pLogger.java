@@ -201,6 +201,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	 */
 	protected L2pLogger(String name, String resourceBundleName) throws IllegalArgumentException {
 		super(name, resourceBundleName);
+		L2pLogger.getLogger("org.glassfish.jersey.internal.inject.Providers").setLevel(Level.SEVERE);
 		// if the logger is not added to the LogManager, the log files may not be closed correctly
 		if (!LogManager.getLogManager().addLogger(this)) {
 			// a logger with that name is already registered
