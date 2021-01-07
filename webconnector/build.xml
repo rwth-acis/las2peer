@@ -216,7 +216,7 @@
 	        <os family="unix" />
 	    </condition>
 	</target>	
-	<target name="build_frontend" description="--> build the polymer frontend with bower">
+	<target name="build_frontend" description="--> build the polymer frontend">
         <replaceregexp file="./frontend/src/node-frontend.js"
                        match="subtitle=&quot;v(.*)&quot;"
                        replace="subtitle=&quot;v${ivy.las2peer.version}&quot;"
