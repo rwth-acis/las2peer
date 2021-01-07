@@ -201,6 +201,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	 */
 	protected L2pLogger(String name, String resourceBundleName) throws IllegalArgumentException {
 		super(name, resourceBundleName);
+		// Changed logging level of Providers class as the jersey update caused a lot of new provider warnings to pop up when starting a node. This disables them (see https://github.com/eclipse-ee4j/jersey/issues/3700).
 		L2pLogger.getLogger("org.glassfish.jersey.internal.inject.Providers").setLevel(Level.SEVERE);
 		// if the logger is not added to the LogManager, the log files may not be closed correctly
 		if (!LogManager.getLogManager().addLogger(this)) {
