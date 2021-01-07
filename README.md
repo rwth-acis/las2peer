@@ -20,11 +20,7 @@ If you want to learn more about las2peer, please visit the [las2peer Template Pr
 
 ### Java
 
-las2peer uses **Java 8**.
-
-If you use an Oracle Java version, please make sure you have **Java 8u162** or later installed, so that the Java Cryptography Extension (JCE) is enabled.
-Otherwise, you have to enable it manually.
-Each las2peer node performs an encryption self-test on startup.
+las2peer uses **Java 14**.
 
 ### Build Dependencies
 
