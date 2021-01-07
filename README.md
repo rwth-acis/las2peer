@@ -25,7 +25,7 @@ las2peer uses **Java 14**.
 ### Build Dependencies
 
 * Apache ant
-* Node 6 / npm
+* Node 8 / npm
 
 ## Project Structure
 
