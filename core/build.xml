@@ -3,8 +3,8 @@
 	<property environment="env"/>
 
 	<property name="ivy.organisation" value="i5"/>
-	<property name="ivy.revision" value="1.0"/>
-	<property name="ivy.build.number" value="1"/>
+	<property name="ivy.revision" value="1.1"/>
+	<property name="ivy.build.number" value="0"/>
 	<property name="ivy.deliver.revision" value="${ivy.revision}"/>
 	<property name="ivy.pom.version" value="${ivy.revision}"/>
 
@@ -65,10 +65,10 @@
 	   <echo>Java/JVM version: ${ant.java.version}</echo>
 	   <echo>Java/JVM detail version: ${java.version}</echo>
 		<fail message="Unsupported Java version: ${ant.java.version}.
-		  Make sure that the Java version is 1.8.">
+		  Make sure that the Java version is 14.">
 		  <condition>
 		  	<not>
-				<equals arg1="${ant.java.version}" arg2="1.8"/>
+				<equals arg1="${ant.java.version}" arg2="14"/>
 			</not>
 		  </condition>
 		</fail>
@@ -177,11 +177,21 @@
 
 
 	<!-- Compilation -->
-
+	
+	
+	<target name="jdk_version_validation">
+	    <echo message="Java Version: ${java.version}" />
+	    <echo message="Java home: ${java.home}" />
+	    <echo message="JAVA_HOME: ${env.JAVA_HOME}" />
+	    <echo message="JAVACMD: ${env.JAVACMD}" />
+	</target>
+	
 	<target name="compile_main" depends="init_compile">
 		<javac srcdir="${src.main}" destdir="${tmp.classes}" classpathref="classpath" debug="on" encoding="UTF-8"
 		       includeantruntime="false">
 			<compilerarg value="-XDignore.symbol.file"/> <!-- fix build in JDK8 -->
+			<compilerarg value="-Xlint:deprecation" />
+			<compilerarg line="--add-exports java.desktop/com.sun.beans.finder=ALL-UNNAMED" />
 		</javac>
 		<copy todir="${tmp.classes}">
 			<fileset dir="${src.main}">
@@ -374,13 +384,14 @@
 	<!-- Documentation -->
 
 	<target name="javadoc" depends="java_doc, junit_doc" description="--> javadoc"/>
-
 	<target name="java_doc" depends="init_doc, compile_main">
 		<javadoc destdir="${export.doc}" author="true" version="true" use="true" windowtitle="las2peer Documentation"
 		         failonerror="yes" encoding="utf8" classpathref="classpath" classpath="${tmp.classes}">
 			<packageset dir="${src.main}" defaultexcludes="yes">
 				<include name="i5/las2peer/**"/>
 			</packageset>
+			 <arg value="--add-exports"/>
+			 <arg value="java.desktop/com.sun.beans.finder=ALL-UNNAMED"/>
 		</javadoc>
 	</target>
 

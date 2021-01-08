@@ -19,7 +19,7 @@ import javax.security.auth.x500.X500Principal;
 
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.tools.CryptoTools;
-import sun.misc.BASE64Encoder;
+import java.util.Base64;
 import sun.security.provider.X509Factory;
 import sun.security.tools.keytool.CertAndKeyGen;
 import sun.security.util.DerOutputStream;
@@ -103,7 +103,8 @@ public class KeystoreManager {
 	public static void writeCertificateToPEMStream(Certificate certificate, OutputStreamWriter outputStreamWriter)
 			throws IOException, CertificateEncodingException {
 		outputStreamWriter.write(X509Factory.BEGIN_CERT + "\n");
-		outputStreamWriter.write(new BASE64Encoder().encodeBuffer(certificate.getEncoded()));
+	//	outputStreamWriter.write(new BASE64Encoder().encodeBuffer(certificate.getEncoded()));
+		outputStreamWriter.write(Base64.getEncoder().encodeToString(certificate.getEncoded()));
 		outputStreamWriter.write(X509Factory.END_CERT);
 	}
 

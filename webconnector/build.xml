@@ -3,8 +3,8 @@
 	<property environment="env"/>
 
 	<property name="ivy.organisation" value="i5"/>
-	<property name="ivy.revision" value="1.0"/>
-	<property name="ivy.build.number" value="1"/>
+	<property name="ivy.revision" value="1.1"/>
+	<property name="ivy.build.number" value="0"/>
 	<property name="ivy.deliver.revision" value="${ivy.revision}"/>
 	<property name="ivy.pom.version" value="${ivy.revision}"/>
 
@@ -160,6 +160,10 @@
 		<javac srcdir="${src.main}" destdir="${tmp.classes}" classpathref="classpath" debug="on" encoding="UTF-8"
 		       includeantruntime="false">
 			<compilerarg value="-XDignore.symbol.file"/> <!-- fix build in JDK8 -->
+			<compilerarg line="--add-exports java.base/sun.security.provider=ALL-UNNAMED"/>
+			<compilerarg line="--add-exports java.base/sun.security.tools.keytool=ALL-UNNAMED"/>
+			<compilerarg line="--add-exports java.base/sun.security.util=ALL-UNNAMED"/>
+			<compilerarg line="--add-exports java.base/sun.security.x509=ALL-UNNAMED"/>
 		</javac>
 		<copy todir="${tmp.classes}">
 			<fileset dir="${src.main}">
@@ -185,8 +189,39 @@
 
 	<target name="jars" depends="main_jar"/>
 	<target name="junit_jars" depends=""/>
+	
+	
+	<target name="prepare-copy" description="copy file based on condition"
+	    depends="prepare-copy-true, prepare-copy-false">
+	</target>
 
-	<target name="build_frontend" description="--> build the polymer frontend with bower">
+	<target name="prepare-copy-true" description="copy file based on condition"
+	    if="copy-condition">
+	    <echo>Get file based on condition being true</echo>
+	    <copy file="${some.dir}/true" todir="." />
+	</target>
+
+	<target name="prepare-copy-false" description="copy file based on false condition" 
+	    unless="copy-condition">
+	    <echo>Get file based on condition being false</echo>
+	    <copy file="${some.dir}/false" todir="." />
+	</target>
+
+	<target name="checkOS">
+	    <condition property="isWindows">
+	        <os family="windows" />
+	    </condition>
+
+	    <condition property="isLinux">
+	        <os family="unix" />
+	    </condition>
+	</target>	
+	<target name="build_frontend" description="--> build the polymer frontend">
+        <replaceregexp file="./frontend/src/node-frontend.js"
+                       match="subtitle=&quot;v(.*)&quot;"
+                       replace="subtitle=&quot;v${ivy.las2peer.version}&quot;"
+        />
+
 		<echo message="Installing dependencies (if needed) ..."/>
 		<exec executable="npm" dir="frontend" failonerror="true">
 			<arg value="install"/>
@@ -211,6 +246,7 @@
 	  	</exec>
 
 	</target>
+		
 
 	<target name="main_jar" depends="compile_main, build_frontend">
 		<!-- constructs the external libraries classpath name -->
@@ -243,6 +279,14 @@
 			<packageset dir="${src.main}" defaultexcludes="yes">
 				<include name="i5/las2peer/**"/>
 			</packageset>
+			<arg value="--add-exports"/>
+			<arg value="java.base/sun.security.provider=ALL-UNNAMED"/>
+			<arg value="--add-exports"/>
+			<arg value="java.base/sun.security.tools.keytool=ALL-UNNAMED"/>
+			<arg value="--add-exports"/>
+			<arg value="java.base/sun.security.util=ALL-UNNAMED"/>
+			<arg value="--add-exports"/>
+			<arg value="java.base/sun.security.x509=ALL-UNNAMED"/>
 		</javadoc>
 	</target>
 
