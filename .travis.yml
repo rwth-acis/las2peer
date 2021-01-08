@@ -18,6 +18,7 @@ script:
   - export JDK_HOME=~/openjdk14
  # - export PATH=${PATH}:${ANT_HOME}/bin
   - ant -diagnostics
+  - npm -version
   - ant all
 sudo: false
 after_success:
