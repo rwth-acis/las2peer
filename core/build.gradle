@@ -51,6 +51,11 @@ dependencies {
     api 'org.slf4j:slf4j-simple:1.7.25'
 }
 
+// put all .jar files into export/jars folder
+tasks.withType(Jar) {
+    destinationDir = file("$projectDir/export/jars")
+}
+
 // not yet working
 test {
     dependsOn 'jar_test1_1_1'
