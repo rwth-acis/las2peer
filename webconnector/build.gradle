@@ -1,0 +1,54 @@
+plugins {
+    id 'java'
+    id 'application'
+    // com.moowork.node is used for building the node frontend
+    id "com.moowork.node" version "1.3.1"
+}
+
+group = 'las2peer-web-connector'
+archivesBaseName = group
+version = "1.1.0"
+sourceCompatibility = 14
+targetCompatibility = 14
+
+repositories {
+    // Use JCenter for resolving dependencies.
+    jcenter()
+
+    // DBIS Archiva
+    maven {
+        url "https://archiva.dbis.rwth-aachen.de:9911/repository/internal/"
+    }
+}
+
+compileJava {
+    options.compilerArgs += ["-XDignore.symbol.file",
+    "--add-exports", "java.base/sun.security.provider=ALL-UNNAMED",
+    "--add-exports", "java.base/sun.security.tools.keytool=ALL-UNNAMED",
+    "--add-exports", "java.base/sun.security.util=ALL-UNNAMED",
+    "--add-exports", "java.base/sun.security.x509=ALL-UNNAMED"]
+    options.fork = true
+    options.forkOptions.executable = 'javac'
+}
+
+dependencies {
+    // Use JUnit test framework.
+    // in general this should be testImplementation, right?
+    implementation 'junit:junit:4.12'
+
+    compile project(':restmapper')
+
+    implementation 'com.nimbusds:oauth2-oidc-sdk:4.17'
+    implementation 'org.glassfish.jersey.containers:jersey-container-jdk-http:2.32'
+    implementation 'net.minidev:json-smart:2.3'
+    implementation 'org.webjars:swagger-ui:3.6.1'
+    implementation 'javax.xml.bind:jaxb-api:2.3.1'
+    implementation 'org.glassfish.jersey.inject:jersey-hk2:2.32'
+}
+
+// building frontend is not yet working
+task buildFrontend(type: NpmTask) {
+    description = "Installs dependencies from package.json"
+    workingDir = file("${project.projectDir}/frontend")
+    args = ['install']
+}

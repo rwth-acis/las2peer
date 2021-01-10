@@ -1,0 +1,40 @@
+plugins {
+    id 'java'
+    id 'application'
+    // plugin for building the las2peer bundle jar
+    id "com.github.johnrengelman.shadow" version "5.0.0"
+}
+
+group = 'las2peer-bundle'
+archivesBaseName = group
+version = "1.1.0"
+mainClassName = "i5.las2peer.tools.L2pNodeLauncher"
+sourceCompatibility = 14
+targetCompatibility = 14
+
+repositories {
+    // Use JCenter for resolving dependencies.
+    jcenter()
+
+    // DBIS Archiva
+    maven {
+        url "https://archiva.dbis.rwth-aachen.de:9911/repository/internal/"
+    }
+}
+
+dependencies {
+    compile project(':core')
+    compile project(':restmapper')
+    compile project(':webconnector')
+}
+
+jar {
+    manifest {
+        attributes "Main-Class": "i5.las2peer.tools.L2pNodeLauncher"
+    }
+}
+
+// las2peer bundle jar
+shadowJar {
+    mergeServiceFiles() 
+}

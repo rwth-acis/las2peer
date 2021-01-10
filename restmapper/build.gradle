@@ -1,0 +1,43 @@
+plugins {
+    id 'java-library'
+    id 'application'
+}
+
+group = 'las2peer-rest-mapper'
+archivesBaseName = group
+version = "1.1.0"
+sourceCompatibility = 14
+targetCompatibility = 14
+
+repositories {
+    // Use JCenter for resolving dependencies.
+    jcenter()
+
+    // DBIS Archiva
+    maven {
+        url "https://archiva.dbis.rwth-aachen.de:9911/repository/internal/"
+    }
+}
+
+compileJava {
+    options.compilerArgs += ["-XDignore.symbol.file"]
+    options.fork = true
+    options.forkOptions.executable = 'javac'
+}
+
+dependencies {
+    // Use JUnit test framework.
+    implementation 'junit:junit:4.12'
+    
+    compile project(':core')
+
+    api 'io.swagger:swagger-jersey2-jaxrs:1.5.17'
+    api 'org.glassfish.jersey.core:jersey-server:2.32'
+    api 'org.glassfish.jersey.core:jersey-common:2.32'
+    api 'org.glassfish.jersey.media:jersey-media-json-jackson:2.32'
+    api 'javax.ws.rs:javax.ws.rs-api:2.0.1'
+    api 'org.glassfish.jersey.media:jersey-media-multipart:2.32'
+    api 'javax.xml.bind:jaxb-api:2.3.1'
+    api 'org.glassfish.jaxb:jaxb-runtime:2.3.1'
+    api 'org.glassfish.jersey.inject:jersey-hk2:2.32'
+}

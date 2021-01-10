@@ -1,0 +1,168 @@
+plugins {
+    id 'java-library'
+    id 'application'
+}
+
+group = 'las2peer'
+archivesBaseName = group
+version = "1.1.0"
+mainClassName = "i5.las2peer.tools.L2pNodeLauncher"
+sourceCompatibility = 14
+targetCompatibility = 14
+
+repositories {
+    // Use JCenter for resolving dependencies.
+    jcenter()
+
+    // DBIS Archiva
+    maven {
+        url "https://archiva.dbis.rwth-aachen.de:9911/repository/internal/"
+    }
+}
+
+compileJava {
+    options.compilerArgs += ["-XDignore.symbol.file", "-Xlint:deprecation",
+    "--add-exports", "java.desktop/com.sun.beans.finder=ALL-UNNAMED"]
+    options.fork = true
+    options.forkOptions.executable = 'javac'
+}
+
+dependencies {
+    // Use JUnit test framework.
+    implementation 'junit:junit:4.12'
+    implementation 'org.mockito:mockito-all:1.9.5'
+
+    api 'FreePastry:FreePastry:3.0.0'
+    api 'xpp3:xpp3:1.1.4c'
+    api 'javax.xml.parsers:jaxp-api:1.4.5'
+    api('commons-jxpath:commons-jxpath:1.3') {
+        exclude module: 'xercesImpl'
+        exclude module: 'xml-apis'
+    }
+    api 'commons-logging:commons-logging:1.2'
+    api 'net:sbbi-upnplib:1.0.4'
+    api('ch.qos.logback:logback-core:1.2.3') {
+        artifact {
+            name = 'logback-core'
+            type = 'jar'
+        }
+    }
+    api 'org.web3j:core:4.5.5'
+    api 'org.slf4j:slf4j-simple:1.7.25'
+}
+
+// not yet working
+test {
+    dependsOn 'jar_test1_1_1'
+    dependsOn 'jar_test1_1_2'
+    dependsOn 'jar_test2_1_0'
+    dependsOn 'jar_testService1_1_0'
+    dependsOn 'jar_testService1_1_1'
+    dependsOn 'jar_testService2_1_0'
+    dependsOn 'jar_evilService'
+    dependsOn 'jar_testPackageService'
+
+    useJUnit()
+}
+
+
+task jar_test1_1_1(type: Jar) {
+    baseName = "i5.las2peer.classLoaders.testPackage1-1.0"
+    include "test_help/java/i5/las2peer/classLoaders/testPackage1/**/*"
+    
+    manifest {
+        attributes "Library-SymbolicName": "i5.las2peer.classLoaders.testPackage1"
+        attributes "Library-Version": "1.0"
+        attributes "Import-Bundle": ""
+        attributes "Library-Name": "JUNIT TestPackage(1)"
+        attributes "Library-Description": "a simple test package"
+        attributes "Import-Library": ""
+    }
+}
+
+task jar_test1_1_2(type: Jar) {
+    baseName = "i5.las2peer.classLoaders.testPackage1-1.1"
+    include "test_help2/java/i5/las2peer/classLoaders/testPackage1/**/*"
+
+    manifest {
+        attributes "Library-SymbolicName": "i5.las2peer.classLoaders.testPackage1"
+        attributes "Library-Version": "1.1"
+        attributes "Import-Bundle": ""
+        attributes "Library-Name": "JUNIT TestPackage(1)"
+        attributes "Library-Description": "a simple test package"
+        attributes "Import-Library": ""
+    }
+}
+
+task jar_test2_1_0(type: Jar) {
+    baseName = "i5.las2peer.classLoaders.testPackage2-1.0"
+    include "test_help/java/i5/las2peer/classLoaders/testPackage2/**/*"
+
+    manifest {
+        attributes "Library-SymbolicName": "i5.las2peer.classLoaders.testPackage2"
+        attributes "Library-Version": "1.0"
+        attributes "Import-Bundle": ""
+        attributes "Library-Name": "JUNIT TestPackage(2)"
+        attributes "Library-Description": "a simple test package"
+        attributes "Import-Library": 'i5.las2peer.classLoaders.testPackage1;version="[1.1,2.0)"'
+        attributes "l2p-Name": "test2"
+        attributes "l2p-Version": "1.0"
+        attributes "l2p-deps": "test1-(1.1--1.2)"
+    }
+}
+
+task jar_testService1_1_0(type: Jar) {
+    baseName = "i5.las2peer.testServices.testPackage1-1.0"
+    include "test_help/java/i5/las2peer/testServices/testPackage1/**/*"
+
+    manifest {
+        attributes "Library-SymbolicName": "i5.las2peer.testServices.testPackage1"
+        attributes "Library-Version": "1.0"
+    }
+}
+
+task jar_testService1_1_1(type: Jar) {
+    baseName = "i5.las2peer.testServices.testPackage1-1.1"
+    include "test_help2/java/i5/las2peer/testServices/testPackage1/**/*"
+
+    manifest {
+        attributes "Library-SymbolicName": "i5.las2peer.testServices.testPackage1"
+        attributes "Library-Version": "1.1"
+    }
+}
+
+task jar_testService2_1_0(type: Jar) {
+    baseName = "i5.las2peer.testServices.testPackage2-1.0"
+    include "test_help/java/i5/las2peer/testServices/testPackage2/**/*"
+
+    manifest {
+        attributes "Library-SymbolicName": "i5.las2peer.testServices.testPackage2"
+        attributes "Library-Version": "1.0"
+    }
+}
+
+task jar_evilService(type: Jar) {
+    baseName = "i5.las2peer.classLoaders.evilService-1.0"
+    include "test_help/java/i5/las2peer/classLoaders/evilService/**/*"
+
+    manifest {
+        attributes "Library-SymbolicName": "i5.las2peer.classLoaders.evilService"
+        attributes "Library-Version": "1.0"
+    }
+}
+
+task jar_testPackageService(type: Jar) {
+    baseName = "i5.las2peer.testServices.testPackage3-1.0"
+    include "test_help2/java/i5/las2peer/testServices/testPackage3/**/*"
+
+    manifest {
+        attributes "Library-SymbolicName": "i5.las2peer.testServices.testPackage3"
+        attributes "Library-Version": "1.0"
+    }
+}
+
+jar {
+    manifest {
+        attributes "Main-Class": "i5.las2peer.tools.L2pNodeLauncher"
+    }
+}
