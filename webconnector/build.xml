@@ -221,30 +221,29 @@
                        match="subtitle=&quot;v(.*)&quot;"
                        replace="subtitle=&quot;v${ivy.las2peer.version}&quot;"
         />
-
+		
 		<echo message="Installing dependencies (if needed) ..."/>
 		<exec executable="npm" dir="frontend" failonerror="true">
 			<arg value="install"/>
 		</exec>
-		<!--
+		
         <echo message="Fixing vulnerabilities ..."/>
         <exec executable="npm" dir="frontend" failonerror="true">
             <arg value="audit"/>
             <arg value="fix"/>
         </exec>
-    	-->
-
+    	
 		<echo message="Building frontend ..."/>
 		<exec executable="npm" dir="frontend" failonerror="true">
 			<arg value="run"/>
 			<arg value="build"/>
 		</exec>
-
+		
 		<echo message="Fixing webapp symlink ..."/>
 		<exec executable="/bin/bash" failonerror="true">
 	    	<arg value="${basedir}/fix_symlink.sh"/>
 	  	</exec>
-
+		
 	</target>
 		
 
