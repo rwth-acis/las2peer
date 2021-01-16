@@ -56,24 +56,89 @@ tasks.withType(Jar) {
     destinationDir = file("$projectDir/export/jars")
 }
 
+// Besides the standard main and test source sets, we also have two test_help source sets.
+// These use las2peer core (given by sourceSets.main.output) as their compile classpath.
+sourceSets {
+    testHelp {
+        java {
+            srcDirs = ["src/test_help"]
+        }
+        compileClasspath = sourceSets.main.output
+        java.outputDir = file("$buildDir/classes/java/test_help")
+    }
+    testHelp2 {
+        java {
+            srcDirs = ["src/test_help2"]
+        }
+        compileClasspath = sourceSets.main.output
+        java.outputDir = file("$buildDir/classes/java/test_help2")
+    }
+}
+
 // not yet working
+// execute all junit tests
 test {
-    dependsOn 'jar_test1_1_1'
-    dependsOn 'jar_test1_1_2'
-    dependsOn 'jar_test2_1_0'
-    dependsOn 'jar_testService1_1_0'
-    dependsOn 'jar_testService1_1_1'
-    dependsOn 'jar_testService2_1_0'
-    dependsOn 'jar_evilService'
-    dependsOn 'jar_testPackageService'
+    dependsOn "junit_jars"
+
+    // TODO: remove test logging
+    testLogging {
+        showStandardStreams = true
+    }
 
     useJUnit()
 }
 
+compileJava {
+    dependsOn "copyMain"
+}
+
+// Copies .xml files into build directory
+task copyMain(type: Copy) {
+    from "src/main/java"
+    include "**/*.xml"
+    into "$buildDir/classes/java/main"
+}
+
+compileTestHelpJava {
+    dependsOn "copyTestHelp"
+}
+
+// Copies files like .properties files into build directory
+task copyTestHelp(type: Copy) {
+    from "src/test_help/java"
+    exclude "**/*.java"
+    exclude "*.java"
+    into "$buildDir/classes/java/test_help"
+}
+
+compileTestHelp2Java {
+    dependsOn "copyTestHelp2"
+}
+
+// Copies files like .properties files into build directory
+task copyTestHelp2(type: Copy) {
+    from "src/test_help2/java"
+    exclude "**/*.java"
+    exclude "*.java"
+    into "$buildDir/classes/java/test_help2"
+}
+
+task junit_jars {
+    dependsOn "jar_test1_1_1"
+    dependsOn "jar_test1_1_2"
+    dependsOn "jar_test2_1_0"
+    dependsOn "jar_testService1_1_0"
+    dependsOn "jar_testService1_1_1"
+    dependsOn "jar_testService2_1_0"
+    dependsOn "jar_evilService"
+    dependsOn "jar_testPackageService"
+}
+
 
 task jar_test1_1_1(type: Jar) {
-    baseName = "i5.las2peer.classLoaders.testPackage1-1.0"
-    include "test_help/java/i5/las2peer/classLoaders/testPackage1/**/*"
+    archiveName = "i5.las2peer.classLoaders.testPackage1-1.0.jar"
+    from sourceSets.testHelp.output
+    include "i5/las2peer/classLoaders/testPackage1/**/*"
     
     manifest {
         attributes "Library-SymbolicName": "i5.las2peer.classLoaders.testPackage1"
@@ -86,8 +151,9 @@ task jar_test1_1_1(type: Jar) {
 }
 
 task jar_test1_1_2(type: Jar) {
-    baseName = "i5.las2peer.classLoaders.testPackage1-1.1"
-    include "test_help2/java/i5/las2peer/classLoaders/testPackage1/**/*"
+    archiveName = "i5.las2peer.classLoaders.testPackage1-1.1.jar"
+    from sourceSets.testHelp2.output
+    include "i5/las2peer/classLoaders/testPackage1/**/*"
 
     manifest {
         attributes "Library-SymbolicName": "i5.las2peer.classLoaders.testPackage1"
@@ -100,8 +166,9 @@ task jar_test1_1_2(type: Jar) {
 }
 
 task jar_test2_1_0(type: Jar) {
-    baseName = "i5.las2peer.classLoaders.testPackage2-1.0"
-    include "test_help/java/i5/las2peer/classLoaders/testPackage2/**/*"
+    archiveName = "i5.las2peer.classLoaders.testPackage2-1.0.jar"
+    from sourceSets.testHelp.output
+    include "i5/las2peer/classLoaders/testPackage2/**/*"
 
     manifest {
         attributes "Library-SymbolicName": "i5.las2peer.classLoaders.testPackage2"
@@ -117,8 +184,9 @@ task jar_test2_1_0(type: Jar) {
 }
 
 task jar_testService1_1_0(type: Jar) {
-    baseName = "i5.las2peer.testServices.testPackage1-1.0"
-    include "test_help/java/i5/las2peer/testServices/testPackage1/**/*"
+    archiveName = "i5.las2peer.testServices.testPackage1-1.0.jar"
+    from sourceSets.testHelp.output
+    include "i5/las2peer/testServices/testPackage1/**/*"
 
     manifest {
         attributes "Library-SymbolicName": "i5.las2peer.testServices.testPackage1"
@@ -127,8 +195,9 @@ task jar_testService1_1_0(type: Jar) {
 }
 
 task jar_testService1_1_1(type: Jar) {
-    baseName = "i5.las2peer.testServices.testPackage1-1.1"
-    include "test_help2/java/i5/las2peer/testServices/testPackage1/**/*"
+    archiveName = "i5.las2peer.testServices.testPackage1-1.1.jar"
+    from sourceSets.testHelp2.output
+    include "i5/las2peer/testServices/testPackage1/**/*"
 
     manifest {
         attributes "Library-SymbolicName": "i5.las2peer.testServices.testPackage1"
@@ -137,8 +206,9 @@ task jar_testService1_1_1(type: Jar) {
 }
 
 task jar_testService2_1_0(type: Jar) {
-    baseName = "i5.las2peer.testServices.testPackage2-1.0"
-    include "test_help/java/i5/las2peer/testServices/testPackage2/**/*"
+    archiveName = "i5.las2peer.testServices.testPackage2-1.0.jar"
+    from sourceSets.testHelp.output
+    include "i5/las2peer/testServices/testPackage2/**/*"
 
     manifest {
         attributes "Library-SymbolicName": "i5.las2peer.testServices.testPackage2"
@@ -147,8 +217,9 @@ task jar_testService2_1_0(type: Jar) {
 }
 
 task jar_evilService(type: Jar) {
-    baseName = "i5.las2peer.classLoaders.evilService-1.0"
-    include "test_help/java/i5/las2peer/classLoaders/evilService/**/*"
+    archiveName = "i5.las2peer.classLoaders.evilService-1.0.jar"
+    from sourceSets.testHelp.output
+    include "i5/las2peer/classLoaders/evilService/**/*"
 
     manifest {
         attributes "Library-SymbolicName": "i5.las2peer.classLoaders.evilService"
@@ -157,8 +228,9 @@ task jar_evilService(type: Jar) {
 }
 
 task jar_testPackageService(type: Jar) {
-    baseName = "i5.las2peer.testServices.testPackage3-1.0"
-    include "test_help2/java/i5/las2peer/testServices/testPackage3/**/*"
+    archiveName = "i5.las2peer.testServices.testPackage3-1.0.jar"
+    from sourceSets.testHelp2.output
+    include "i5/las2peer/testServices/testPackage3/**/*"
 
     manifest {
         attributes "Library-SymbolicName": "i5.las2peer.testServices.testPackage3"
