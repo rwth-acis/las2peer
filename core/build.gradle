@@ -75,7 +75,6 @@ sourceSets {
     }
 }
 
-// not yet working
 // execute all junit tests
 test {
     dependsOn "junit_jars"
@@ -84,6 +83,19 @@ test {
     testLogging {
         showStandardStreams = true
     }
+
+    // As soon as one test fails, the build should fail. This speeds up builds running on CI servers.
+    failFast = true
+
+    // TODO: is using maxParallelForks allowed?
+    // TODO: if set to 1 (default) then some tests fail (but if forkEvery = 1, then not), if set to 9 (and without forkEvery = 1) every test works => why?
+    maxParallelForks = 9
+
+    forkEvery = 1
+
+    include "**/*Test.class"
+    exclude "**/SandboxTest.class"
+    exclude "**/ReplicationTest.class"
 
     useJUnit()
 }
