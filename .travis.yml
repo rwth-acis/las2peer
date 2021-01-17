@@ -9,7 +9,7 @@ install:
 script: 
   - export JAVA_HOME=~/openjdk14
   - export JDK_HOME=~/openjdk14
-  - gradle :bundle:shadowJar
+  - ./gradlew build
 sudo: false
 after_success:
   - bash <(curl -s https://codecov.io/bash)
