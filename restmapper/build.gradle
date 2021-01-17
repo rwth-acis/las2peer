@@ -5,9 +5,9 @@ plugins {
 
 group = 'las2peer-rest-mapper'
 archivesBaseName = group
-version = "1.1.0"
-sourceCompatibility = 14
-targetCompatibility = 14
+version = "${project.property('las2peer.version')}"
+sourceCompatibility = "${project.property('java.version')}"
+targetCompatibility = "${project.property('java.version')}"
 
 repositories {
     // Use JCenter for resolving dependencies.
@@ -22,22 +22,22 @@ repositories {
 compileJava {
     options.compilerArgs += ["-XDignore.symbol.file"]
     options.fork = true
-    options.forkOptions.executable = 'javac'
+    options.forkOptions.executable = "javac"
 }
 
 dependencies {
     // Use JUnit test framework.
-    implementation 'junit:junit:4.12'
+    implementation "junit:junit:${project.property('junit.version')}"
     
-    compile project(':core')
+    compile project(":core")
 
-    api 'io.swagger:swagger-jersey2-jaxrs:1.5.17'
-    api 'org.glassfish.jersey.core:jersey-server:2.32'
-    api 'org.glassfish.jersey.core:jersey-common:2.32'
-    api 'org.glassfish.jersey.media:jersey-media-json-jackson:2.32'
-    api 'javax.ws.rs:javax.ws.rs-api:2.0.1'
-    api 'org.glassfish.jersey.media:jersey-media-multipart:2.32'
-    api 'javax.xml.bind:jaxb-api:2.3.1'
-    api 'org.glassfish.jaxb:jaxb-runtime:2.3.1'
-    api 'org.glassfish.jersey.inject:jersey-hk2:2.32'
+    api "io.swagger:swagger-jersey2-jaxrs:1.5.17"
+    api "org.glassfish.jersey.core:jersey-server:${project.property('jersey.version')}"
+    api "org.glassfish.jersey.core:jersey-common:${project.property('jersey.version')}"
+    api "org.glassfish.jersey.media:jersey-media-json-jackson:${project.property('jersey.version')}"
+    api "javax.ws.rs:javax.ws.rs-api:2.0.1"
+    api "org.glassfish.jersey.media:jersey-media-multipart:${project.property('jersey.version')}"
+    api "javax.xml.bind:jaxb-api:2.3.1"
+    api "org.glassfish.jaxb:jaxb-runtime:2.3.1"
+    api "org.glassfish.jersey.inject:jersey-hk2:${project.property('jersey.version')}"
 }

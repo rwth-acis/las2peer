@@ -5,10 +5,10 @@ plugins {
 
 group = 'las2peer'
 archivesBaseName = group
-version = "1.1.0"
+version = "${project.property('las2peer.version')}"
 mainClassName = "i5.las2peer.tools.L2pNodeLauncher"
-sourceCompatibility = 14
-targetCompatibility = 14
+sourceCompatibility = "${project.property('java.version')}"
+targetCompatibility = "${project.property('java.version')}"
 
 repositories {
     // Use JCenter for resolving dependencies.
@@ -24,31 +24,31 @@ compileJava {
     options.compilerArgs += ["-XDignore.symbol.file", "-Xlint:deprecation",
     "--add-exports", "java.desktop/com.sun.beans.finder=ALL-UNNAMED"]
     options.fork = true
-    options.forkOptions.executable = 'javac'
+    options.forkOptions.executable = "javac"
 }
 
 dependencies {
     // Use JUnit test framework.
-    implementation 'junit:junit:4.12'
-    implementation 'org.mockito:mockito-all:1.9.5'
+    implementation "junit:junit:${project.property('junit.version')}"
+    implementation "org.mockito:mockito-all:1.9.5"
 
-    api 'FreePastry:FreePastry:3.0.0'
-    api 'xpp3:xpp3:1.1.4c'
-    api 'javax.xml.parsers:jaxp-api:1.4.5'
-    api('commons-jxpath:commons-jxpath:1.3') {
-        exclude module: 'xercesImpl'
-        exclude module: 'xml-apis'
+    api "FreePastry:FreePastry:3.0.0"
+    api "xpp3:xpp3:1.1.4c"
+    api "javax.xml.parsers:jaxp-api:1.4.5"
+    api("commons-jxpath:commons-jxpath:1.3") {
+        exclude module: "xercesImpl"
+        exclude module: "xml-apis"
     }
-    api 'commons-logging:commons-logging:1.2'
-    api 'net:sbbi-upnplib:1.0.4'
-    api('ch.qos.logback:logback-core:1.2.3') {
+    api "commons-logging:commons-logging:1.2"
+    api "net:sbbi-upnplib:1.0.4"
+    api("ch.qos.logback:logback-core:1.2.3") {
         artifact {
-            name = 'logback-core'
-            type = 'jar'
+            name = "logback-core"
+            type = "jar"
         }
     }
-    api 'org.web3j:core:4.5.5'
-    api 'org.slf4j:slf4j-simple:1.7.25'
+    api "org.web3j:core:4.5.5"
+    api "org.slf4j:slf4j-simple:1.7.25"
 }
 
 // put all .jar files into export/jars folder

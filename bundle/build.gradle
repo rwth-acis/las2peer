@@ -7,10 +7,10 @@ plugins {
 
 group = 'las2peer-bundle'
 archivesBaseName = group
-version = "1.1.0"
+version = "${project.property('las2peer.version')}"
 mainClassName = "i5.las2peer.tools.L2pNodeLauncher"
-sourceCompatibility = 14
-targetCompatibility = 14
+sourceCompatibility = "${project.property('java.version')}"
+targetCompatibility = "${project.property('java.version')}"
 
 repositories {
     // Use JCenter for resolving dependencies.
@@ -23,9 +23,9 @@ repositories {
 }
 
 dependencies {
-    compile project(':core')
-    compile project(':restmapper')
-    compile project(':webconnector')
+    compile project(":core")
+    compile project(":restmapper")
+    compile project(":webconnector")
 }
 
 jar {

@@ -7,9 +7,9 @@ plugins {
 
 group = 'las2peer-web-connector'
 archivesBaseName = group
-version = "1.1.0"
-sourceCompatibility = 14
-targetCompatibility = 14
+version = "${project.property('las2peer.version')}"
+sourceCompatibility = "${project.property('java.version')}"
+targetCompatibility = "${project.property('java.version')}"
 
 repositories {
     // Use JCenter for resolving dependencies.
@@ -28,27 +28,27 @@ compileJava {
     "--add-exports", "java.base/sun.security.util=ALL-UNNAMED",
     "--add-exports", "java.base/sun.security.x509=ALL-UNNAMED"]
     options.fork = true
-    options.forkOptions.executable = 'javac'
+    options.forkOptions.executable = "javac"
 }
 
 dependencies {
     // Use JUnit test framework.
     // in general this should be testImplementation, right?
-    implementation 'junit:junit:4.12'
+    implementation "junit:junit:${project.property('junit.version')}"
 
-    compile project(':restmapper')
+    compile project(":restmapper")
 
-    implementation 'com.nimbusds:oauth2-oidc-sdk:4.17'
-    implementation 'org.glassfish.jersey.containers:jersey-container-jdk-http:2.32'
-    implementation 'net.minidev:json-smart:2.3'
-    implementation 'org.webjars:swagger-ui:3.6.1'
-    implementation 'javax.xml.bind:jaxb-api:2.3.1'
-    implementation 'org.glassfish.jersey.inject:jersey-hk2:2.32'
+    implementation "com.nimbusds:oauth2-oidc-sdk:4.17"
+    implementation "org.glassfish.jersey.containers:jersey-container-jdk-http:${project.property('jersey.version')}"
+    implementation "net.minidev:json-smart:2.3"
+    implementation "org.webjars:swagger-ui:3.6.1"
+    implementation "javax.xml.bind:jaxb-api:2.3.1"
+    implementation "org.glassfish.jersey.inject:jersey-hk2:${project.property('jersey.version')}"
 }
 
 // building frontend is not yet working
 task buildFrontend(type: NpmTask) {
     description = "Installs dependencies from package.json"
     workingDir = file("${project.projectDir}/frontend")
-    args = ['install']
+    args = ["install"]
 }
