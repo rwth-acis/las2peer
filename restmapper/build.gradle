@@ -27,7 +27,7 @@ compileJava {
 
 dependencies {
     // Use JUnit test framework.
-    implementation "junit:junit:${project.property('junit.version')}"
+    testImplementation "junit:junit:${project.property('junit.version')}"
     
     compile project(":core")
 

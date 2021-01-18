@@ -29,18 +29,23 @@ compileJava {
 
 dependencies {
     // Use JUnit test framework.
+    // Not just testImplementation, because JUnit asserts are used in main main/java/i5/las2peer/testing/TestSuite.java
     implementation "junit:junit:${project.property('junit.version')}"
-    implementation "org.mockito:mockito-all:1.9.5"
+    testImplementation "org.mockito:mockito-all:1.9.5"
 
     api "FreePastry:FreePastry:3.0.0"
-    api "xpp3:xpp3:1.1.4c"
+    api "xpp3:xpp3:1.1.4c" // FreePastry dependency
     api "javax.xml.parsers:jaxp-api:1.4.5"
+
+    // UPnP libs for NAT handling
     api("commons-jxpath:commons-jxpath:1.3") {
         exclude module: "xercesImpl"
         exclude module: "xml-apis"
     }
     api "commons-logging:commons-logging:1.2"
     api "net:sbbi-upnplib:1.0.4"
+
+    // Web3j for Ethereum node interaction
     api("ch.qos.logback:logback-core:1.2.3") {
         artifact {
             name = "logback-core"
