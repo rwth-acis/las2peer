@@ -28,6 +28,11 @@ dependencies {
     compile project(":webconnector")
 }
 
+// put all .jar files into export/jars folder
+tasks.withType(Jar) {
+    destinationDir = file("$projectDir/export/jars")
+}
+
 jar {
     manifest {
         attributes "Main-Class": "i5.las2peer.tools.L2pNodeLauncher"

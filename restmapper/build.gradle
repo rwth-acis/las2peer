@@ -41,3 +41,8 @@ dependencies {
     api "org.glassfish.jaxb:jaxb-runtime:2.3.1"
     api "org.glassfish.jersey.inject:jersey-hk2:${project.property('jersey.version')}"
 }
+
+// put all .jar files into export/jars folder
+tasks.withType(Jar) {
+    destinationDir = file("$projectDir/export/jars")
+}

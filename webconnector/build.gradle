@@ -43,6 +43,11 @@ dependencies {
     implementation "org.glassfish.jersey.inject:jersey-hk2:${project.property('jersey.version')}"
 }
 
+// put all .jar files into export/jars folder
+tasks.withType(Jar) {
+    destinationDir = file("$projectDir/export/jars")
+}
+
 jar {
     dependsOn "buildFrontend"
 }
@@ -50,9 +55,35 @@ jar {
 // building frontend is not yet working
 task buildFrontend(type: Exec) {
     description = "Installs dependencies from package.json"
-    workingDir = file("${project.projectDir}/frontend")
     
+    dependsOn "npmInstall"
+    dependsOn "npmBuild"
+    dependsOn "fixWebapp"
+}
+
+// TODO: replace version number in frontend statusbar 
+//task setVersionInStatusbar()
+
+task npmInstall(type: Exec) {
+    workingDir = file("${project.projectDir}/frontend")
+
     executable = "npm"
     args "install", "--production"
-    //commandLine "npm.cmd", "install", "--production"
 }
+
+task npmBuild(type: Exec) {
+    workingDir = file("${project.projectDir}/frontend")
+
+    executable = "npm"
+    args "run", "build"
+}
+
+task fixWebapp(type: Exec) {
+    executable = "/bin/bash"
+    args "${project.projectDir}/fix_symlink.sh"
+}
+
+/*task fixWebapp(type: Copy) {
+    from "${project.projectDir}/frontend/build/es6-bundled"
+    into "${project.projectDir}/resources/webapp"
+}*/
