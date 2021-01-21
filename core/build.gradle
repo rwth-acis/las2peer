@@ -78,6 +78,12 @@ sourceSets {
         compileClasspath = sourceSets.main.output
         java.outputDir = file("$buildDir/classes/java/test_help2")
     }
+    main {
+        resources {
+            // las2peer.policy
+            srcDirs = ["resources"]
+        }
+    }
 }
 
 // execute all junit tests
