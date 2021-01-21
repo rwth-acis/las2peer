@@ -48,6 +48,18 @@ tasks.withType(Jar) {
     destinationDir = file("$projectDir/export/jars")
 }
 
+compileTestJava {
+    dependsOn "copyTest"
+}
+
+// Copies files like .xml files into build directory
+task copyTest(type: Copy) {
+    from "src/test/java"
+    exclude "**/*.java"
+    exclude "*.java"
+    into "$buildDir/classes/java/test"
+}
+
 jar {
     dependsOn "buildFrontend"
 }
@@ -72,6 +84,8 @@ task npmInstall(type: Exec) {
 }
 
 task npmBuild(type: Exec) {
+    dependsOn "npmInstall"
+
     workingDir = file("${project.projectDir}/frontend")
 
     executable = "npm"
@@ -79,6 +93,8 @@ task npmBuild(type: Exec) {
 }
 
 task fixWebapp(type: Exec) {
+    dependsOn "npmBuild"
+
     executable = "/bin/bash"
     args "${project.projectDir}/fix_symlink.sh"
 }
