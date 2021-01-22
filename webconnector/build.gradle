@@ -95,7 +95,7 @@ task npmInstall(type: Exec) {
     workingDir = file("${project.projectDir}/frontend")
 
     executable = "npm"
-    args "install", "--production"
+    args "install"
 }
 
 task npmBuild(type: Exec) {
