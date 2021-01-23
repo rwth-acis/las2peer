@@ -83,7 +83,7 @@ jar {
 }
 
 // building frontend is not yet working
-task buildFrontend(type: Exec) {
+task buildFrontend {
     description = "Installs dependencies from package.json"
     
     dependsOn "npmInstall"
