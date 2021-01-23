@@ -91,10 +91,16 @@ task buildFrontend {
     dependsOn "fixWebapp"
 }
 
+OperatingSystem os = org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.currentOperatingSystem;
+
 task npmInstall(type: Exec) {
     workingDir = file("${project.projectDir}/frontend")
 
-    executable = "npm"
+    if(os.isWindows()) {
+        executable = "npm.cmd"
+    } else {
+        executable "npm"
+    }
     args "install"
 }
 
@@ -103,13 +109,21 @@ task npmBuild(type: Exec) {
 
     workingDir = file("${project.projectDir}/frontend")
 
-    executable = "npm"
+    if(os.isWindows()) {
+        executable = "npm.cmd"
+    } else {
+        executable "npm"
+    }
     args "run", "build"
 }
 
 task fixWebapp(type: Exec) {
     dependsOn "npmBuild"
 
-    executable = "/bin/bash"
-    args "${project.projectDir}/fix_symlink.sh"
+    if(os.isWindows()) {
+        commandLine = ["cmd", "/C", "${project.projectDir}\\fix_symlink.bat", "${project.projectDir}\\frontend\\build\\es6-bundled", "${project.projectDir}\\resources\\webapp"]
+    } else {
+        executable = "/bin/bash"
+        args "${project.projectDir}/fix_symlink.sh"
+    }
 }
