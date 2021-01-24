@@ -35,6 +35,8 @@ javadoc {
     destinationDir = file("$projectDir/export/javadoc")
 }
 
+build.dependsOn "javadoc"
+
 // TODO
 /*task junitdoc(type: Javadoc) {
     source = sourceSets.test.allJava
