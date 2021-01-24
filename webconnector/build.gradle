@@ -15,7 +15,7 @@ repositories {
 
     // DBIS Archiva
     maven {
-        url "https://archiva.dbis.rwth-aachen.de:9911/repository/internal/"
+        url "${project.property('dbis.archiva.url')}"
     }
 }
 

@@ -16,11 +16,13 @@ repositories {
 
     // DBIS Archiva
     maven {
-        url "https://archiva.dbis.rwth-aachen.de:9911/repository/internal/"
+        url "${project.property('dbis.archiva.url')}"
     }
 }
 
 compileJava {
+    // -XDignore.symbol.file fixes build in JDK8
+    // --add-exports fixes build in JDK14
     options.compilerArgs += ["-XDignore.symbol.file", "-Xlint:deprecation",
     "--add-exports", "java.desktop/com.sun.beans.finder=ALL-UNNAMED"]
     options.fork = true
@@ -32,6 +34,13 @@ javadoc {
     doFirst {options.addStringOption("-add-exports", "java.desktop/com.sun.beans.finder=ALL-UNNAMED")}
     destinationDir = file("$projectDir/export/javadoc")
 }
+
+// TODO
+/*task junitdoc(type: Javadoc) {
+    source = sourceSets.test.allJava
+    classpath = 
+    destinationDir = file("$projectDir/export/junitdoc")
+}*/
 
 dependencies {
     // Use JUnit test framework.
@@ -104,18 +113,10 @@ sourceSets {
 test {
     dependsOn "junit_jars"
 
-    // TODO: remove test logging
-    testLogging {
-        showStandardStreams = true
-    }
-
     // As soon as one test fails, the build should fail. This speeds up builds running on CI servers.
     failFast = true
 
-    // TODO: is using maxParallelForks allowed?
-    // TODO: if set to 1 (default) then some tests fail (but if forkEvery = 1, then not), if set to 9 (and without forkEvery = 1) every test works => why?
     maxParallelForks = 9
-
     forkEvery = 1
 
     include "**/*Test.class"
