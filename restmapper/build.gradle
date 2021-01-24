@@ -46,3 +46,10 @@ dependencies {
 tasks.withType(Jar) {
     destinationDir = file("$projectDir/export/jars")
 }
+
+jar {
+    manifest {
+        attributes("Implementation-Version": "${project.property('las2peer.version')}",
+                   "Class-Path": configurations.runtimeClasspath.files.collect { it.getName() }.join(" "))
+    }
+}

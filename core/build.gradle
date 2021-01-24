@@ -61,6 +61,14 @@ tasks.withType(Jar) {
     destinationDir = file("$projectDir/export/jars")
 }
 
+jar {
+    manifest {
+        attributes("Main-Class": "i5.las2peer.tools.L2pNodeLauncher", 
+                   "Implementation-Version": "${project.property('las2peer.version')}",
+                   "Class-Path": configurations.runtimeClasspath.files.collect { it.getName() }.join(" "))
+    }
+}
+
 // Besides the standard main and test source sets, we also have two test_help source sets.
 // These use las2peer core (given by sourceSets.main.output) as their compile classpath.
 sourceSets {
@@ -258,11 +266,5 @@ task jar_testPackageService(type: Jar) {
     manifest {
         attributes "Library-SymbolicName": "i5.las2peer.testServices.testPackage3"
         attributes "Library-Version": "1.0"
-    }
-}
-
-jar {
-    manifest {
-        attributes "Main-Class": "i5.las2peer.tools.L2pNodeLauncher"
     }
 }

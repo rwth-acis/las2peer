@@ -82,6 +82,13 @@ jar {
     dependsOn "buildFrontend"
 }
 
+jar {
+    manifest {
+        attributes("Implementation-Version": "${project.property('las2peer.version')}",
+                   "Class-Path": configurations.runtimeClasspath.files.collect { it.getName() }.join(" "))
+    }
+}
+
 // building frontend is not yet working
 task buildFrontend {
     description = "Installs dependencies from package.json"
