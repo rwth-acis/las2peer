@@ -317,7 +317,7 @@ public class AgentsHandler {
 	@POST
 	@Path("/createGroup")
 	public Response handleCreateGroup(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId,
-			@FormDataParam("members") String members) throws Exception {
+			@FormDataParam("members") String members, @FormDataParam("name") String groupName) throws Exception {
 		AgentSession session = connector.getSessionById(sessionId);
 		if (session == null) {
 			return Response.status(Status.FORBIDDEN).entity("You have to be logged in to create a group").build();
@@ -325,6 +325,11 @@ public class AgentsHandler {
 		if (members == null) {
 			return Response.status(Status.BAD_REQUEST).entity("No members provided").build();
 		}
+		
+		if (groupName == null || groupName.equals("")) {
+			return Response.status(Status.BAD_REQUEST).entity("No group name provided").build();
+		}
+		
 		JSONArray jsonMembers = (JSONArray) new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(members);
 		if (jsonMembers.isEmpty()) {
 			return Response.status(Status.BAD_REQUEST).entity("Members list empty").build();

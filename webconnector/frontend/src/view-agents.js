@@ -174,6 +174,7 @@ class AgentsView extends PolymerElement {
           </iron-form>
           <iron-form on-keypress="_keyPressedCreateGroup">
             <form>
+              <paper-input label="Group Name" id="addGroupName" disabled="[[_working]]" value=""></paper-input>
               <paper-button raised on-click="createGroup" disabled="[[_hasNoMemberAgents]]">Create Group</paper-button>
             </form>
           </iron-form>
@@ -193,7 +194,7 @@ class AgentsView extends PolymerElement {
           <iron-form>
             <form>
               <template is="dom-if" if="[[_hasNoManageAgents]]">
-                <paper-input label="group agentid" disabled="[[_working]]" value="{{_manageGroupAgentId}}"></paper-input>
+                <paper-input label="group agentid or group name" disabled="[[_working]]" value="{{_manageGroupAgentId}}"></paper-input>
                 <paper-button raised on-click="loadGroup">Load Group</paper-button>
               </template>
               <template is="dom-if" if="[[!_hasNoManageAgents]]">
@@ -372,6 +373,10 @@ class AgentsView extends PolymerElement {
     let req = this.$.ajaxCreateGroup;
     req.body = new FormData();
     req.body.append('members', JSON.stringify(this._memberAgents));
+    if(this.$.addGroupName.value != null){
+      req.body.append('name', this.$.addGroupName.value);
+    } else req.body.append('name', "");
+    console.log(req.body);
     req.generateRequest();
   }
 
