@@ -27,6 +27,12 @@ compileJava {
     options.forkOptions.executable = "javac"
 }
 
+javadoc {
+    // its important to only use -add-exports here instead of --add-exports (second "-" is added automatically)
+    doFirst {options.addStringOption("-add-exports", "java.desktop/com.sun.beans.finder=ALL-UNNAMED")}
+    destinationDir = file("$projectDir/export/javadoc")
+}
+
 dependencies {
     // Use JUnit test framework.
     // Not just testImplementation, because JUnit asserts are used in main main/java/i5/las2peer/testing/TestSuite.java

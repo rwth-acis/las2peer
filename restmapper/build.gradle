@@ -25,6 +25,10 @@ compileJava {
     options.forkOptions.executable = "javac"
 }
 
+javadoc {
+    destinationDir = file("$projectDir/export/javadoc")
+}
+
 dependencies {
     // Use JUnit test framework.
     testImplementation "junit:junit:${project.property('junit.version')}"
