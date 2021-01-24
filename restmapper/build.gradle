@@ -57,3 +57,7 @@ jar {
                    "Class-Path": configurations.runtimeClasspath.files.collect { it.getName() }.join(" "))
     }
 }
+
+clean.doLast {
+    file("export").deleteDir()
+}

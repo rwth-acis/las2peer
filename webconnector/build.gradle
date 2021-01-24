@@ -141,3 +141,7 @@ task fixWebapp(type: Exec) {
         args "${project.projectDir}/fix_symlink.sh"
     }
 }
+
+clean.doLast {
+    file("export").deleteDir()
+}

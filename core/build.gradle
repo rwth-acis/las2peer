@@ -274,3 +274,8 @@ task jar_testPackageService(type: Jar) {
         attributes "Library-Version": "1.0"
     }
 }
+
+clean.doLast {
+    file("tmp").deleteDir()
+    file("export").deleteDir()
+}
