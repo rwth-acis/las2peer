@@ -3,10 +3,12 @@ plugins {
     id 'application'
     // plugin for building the las2peer bundle jar
     id "com.github.johnrengelman.shadow" version "5.0.0"
+    // maven plugin is used to create .pom files
+    id 'maven-publish'
 }
 
-group = 'las2peer-bundle'
-archivesBaseName = group
+group = 'i5'
+archivesBaseName = 'las2peer-bundle'
 version = "${project.property('las2peer.version')}"
 mainClassName = "i5.las2peer.tools.L2pNodeLauncher"
 sourceCompatibility = "${project.property('java.version')}"
@@ -42,4 +44,15 @@ jar {
 // las2peer bundle jar
 shadowJar {
     mergeServiceFiles() 
+}
+
+publishing {
+    publications {
+        bundle(MavenPublication) {
+            pom {
+                artifactId "las2peer-bundle"
+                packaging "jar"
+            }
+        }
+    }
 }
