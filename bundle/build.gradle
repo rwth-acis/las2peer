@@ -46,6 +46,10 @@ shadowJar {
     mergeServiceFiles() 
 }
 
+clean.doLast {
+    file("export").deleteDir()
+}
+
 publishing {
     publications {
         bundle(MavenPublication) {
