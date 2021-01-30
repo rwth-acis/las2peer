@@ -41,8 +41,9 @@ build.dependsOn "javadoc"
 build.dependsOn "junitdoc"
 
 task junitdoc(type: Javadoc) {
-    source = sourceSets.test.allJava
+    doFirst {options.addStringOption("encoding", "iso-8859-1")}
     classpath = sourceSets.main.runtimeClasspath + sourceSets.test.runtimeClasspath
+    source = sourceSets.test.java
     destinationDir = file("$projectDir/export/junitdoc")
 }
 
