@@ -202,7 +202,11 @@
 
 	<target name="compile_junit" depends="init_compile, compile_main">
 		<javac srcdir="${src.junit}" destdir="${tmp.junit}" classpathref="classpath" classpath="${tmp.classes}"
-		       debug="on" encoding="UTF-8" includeantruntime="false"/>
+		       debug="on" encoding="UTF-8" includeantruntime="false">
+			<compilerarg value="-XDignore.symbol.file"/> <!-- fix build in JDK8 -->
+			<compilerarg value="-Xlint:deprecation" />
+			<compilerarg line="--add-exports java.desktop/com.sun.beans.finder=ALL-UNNAMED" />
+		</javac>
 		<copy todir="${tmp.junit}">
 			<fileset dir="${src.junit}">
 				<include name="**/*.xml"/>

@@ -9,6 +9,7 @@ import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.api.security.AnonymousAgent;
 import i5.las2peer.api.security.EmailAlreadyTakenException;
+import i5.las2peer.api.security.GroupAgent;
 import i5.las2peer.api.security.LoginNameAlreadyTakenException;
 import i5.las2peer.api.security.OIDCSubAlreadyTakenException;
 import i5.las2peer.api.security.UserAgent;
@@ -27,6 +28,7 @@ public class UserAgentManager {
 	private static final String PREFIX_USER_NAME = "USER_NAME-";
 	private static final String PREFIX_USER_MAIL = "USER_MAIL-";
 	private static final String PREFIX_OIDC_SUB = "OIDC_SUB-";
+	private static final String PREFIX_GROUP_NAME = "GROUP_NAME-";
 
 	private Node node;
 
@@ -100,6 +102,42 @@ public class UserAgentManager {
 				throw new EmailAlreadyTakenException();
 			} catch (SerializationException | CryptoException | EnvelopeException e) {
 				node.observerNotice(MonitoringEvent.NODE_ERROR, "Envelope error while registering email: " + e);
+			}
+		}
+	}
+	
+	/**
+	 * Stores group name of a group agent to the network
+	 * 
+	 * @param agent an unlocked GroupAgent
+	 * @throws NameAlreadyTakenException If the given name is already in use by another agent
+	 * @throws AgentLockedException If the given agent is not unlocked
+	 */
+	public void registerGroupAgent(GroupAgent agent)
+			throws LoginNameAlreadyTakenException, AgentLockedException {
+		if (agent.isLocked()) {
+			throw new AgentLockedException("Only unlocked Agents can be registered.");
+		}
+		String agentId = agent.getIdentifier();
+		System.out.println("Attempt at registering group name envelope...");
+		if (agent.hasGroupName()) {
+			try {
+				String identifier = PREFIX_GROUP_NAME + agent.getGroupName().toLowerCase();
+				try {
+					EnvelopeVersion stored = node.fetchEnvelope(identifier);
+					if (!stored.getContent().equals(agentId)) {
+						throw new LoginNameAlreadyTakenException();
+					}
+				} catch (EnvelopeNotFoundException e) {
+					EnvelopeVersion envName = node.createUnencryptedEnvelope(identifier,
+							((GroupAgentImpl) agent).getPublicKey(), agentId);
+					node.storeEnvelope(envName, ((GroupAgentImpl) agent));
+				}
+
+			} catch (EnvelopeAlreadyExistsException e) {
+				throw new LoginNameAlreadyTakenException();
+			} catch (SerializationException | CryptoException | EnvelopeException e) {
+				node.observerNotice(MonitoringEvent.NODE_ERROR, "Envelope error while registering group name: " + e);
 			}
 		}
 	}
@@ -224,5 +262,25 @@ public class UserAgentManager {
 			throw new AgentOperationFailedException("Could not read OIDC sub from storage");
 		}
 	}
+	
+	/**
+	 * get an {@link GroupAgentImpl}'s id by group name
+	 * 
+	 * @param name
+	 * @return the id of the agent
+	 * @throws AgentNotFoundException If no agent for the given login is found
+	 * @throws AgentOperationFailedException If any other issue with the agent occurs, e. g. XML not readable
+	 */
+	public String getAgentIdByGroupName(String groupName) throws AgentNotFoundException, AgentOperationFailedException{
+		try {
+			EnvelopeVersion env = node.fetchEnvelope(PREFIX_GROUP_NAME + groupName.toLowerCase());
+			return (String) env.getContent();
+		} catch (EnvelopeNotFoundException e) {
+			throw new AgentNotFoundException("Username not found!", e);
+		} catch (EnvelopeException | SerializationException | CryptoException e) {
+			throw new AgentOperationFailedException("Could not read agent id from storage");
+		}
+	}
+
 
 }

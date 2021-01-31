@@ -231,9 +231,9 @@ public class ExecutionContext implements Context {
 	}
 
 	@Override
-	public GroupAgent createGroupAgent(Agent[] members) throws AgentOperationFailedException {
+	public GroupAgent createGroupAgent(Agent[] members, String groupName) throws AgentOperationFailedException {
 		try {
-			GroupAgent agent = GroupAgentImpl.createGroupAgent(members);
+			GroupAgent agent = GroupAgentImpl.createGroupAgent(members,  groupName);
 			for (Agent a : members) {
 				try {
 					agent.unlock(a);

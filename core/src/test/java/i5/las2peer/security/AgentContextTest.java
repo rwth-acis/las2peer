@@ -33,7 +33,7 @@ public class AgentContextTest {
 		group1.unlock(adam);
 		GroupAgentImpl groupA = MockAgentFactory.getGroupA();
 		groupA.unlock(adam);
-		GroupAgentImpl groupSuper = GroupAgentImpl.createGroupAgent(new AgentImpl[] { group1, groupA });
+		GroupAgentImpl groupSuper = GroupAgentImpl.createGroupAgent(new AgentImpl[] { group1, groupA }, "testRequestAgent");
 		groupSuper.unlock(group1);
 		try {
 			node.storeAgent(group1);
@@ -86,7 +86,7 @@ public class AgentContextTest {
 		group1.unlock(adam);
 		GroupAgentImpl groupA = MockAgentFactory.getGroupA();
 		groupA.unlock(adam);
-		GroupAgentImpl groupSuper = GroupAgentImpl.createGroupAgent(new AgentImpl[] { group1, groupA });
+		GroupAgentImpl groupSuper = GroupAgentImpl.createGroupAgent(new AgentImpl[] { group1, groupA } , "testHasAccess");
 		groupSuper.unlock(group1);
 		try {
 			node.storeAgent(group1);

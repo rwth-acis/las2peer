@@ -30,7 +30,7 @@ public class AgentUpdateTest {
 			UserAgentImpl smith = MockAgentFactory.getAdam();
 			UserAgentImpl neo = MockAgentFactory.getEve();
 			neo.unlock("evespass");
-			GroupAgentImpl group = GroupAgentImpl.createGroupAgent(new AgentImpl[] { smith, neo });
+			GroupAgentImpl group = GroupAgentImpl.createGroupAgent(new AgentImpl[] { smith, neo },"testGroupAgentUpdate");
 			group.unlock(neo);
 			// store agents
 			firstNode.storeAgent(group);

@@ -391,7 +391,7 @@ class AgentsView extends PolymerElement {
   loadGroup() {
     let req = this.$.ajaxLoadGroup;
     req.body = new FormData();
-    req.body.append('agentid', this._manageGroupAgentId);
+    req.body.append('groupIdentifier', this._manageGroupAgentId);
     req.generateRequest();
   }
 
@@ -412,6 +412,8 @@ class AgentsView extends PolymerElement {
     req.body = new FormData();
     req.body.append('agentid', this._manageGroupAgentId);
     req.body.append('members', this._manageAgents);
+    console.log();
+    console.log(this._manageAgents);
     req.generateRequest();
   }
 
@@ -422,6 +424,9 @@ class AgentsView extends PolymerElement {
   }
 
   _handleError(object, title, message) {
+    console.log(object);
+    console.log(title);
+    console.log(message);
     window.rootThis._handleError(object, title, message)
   }
 }

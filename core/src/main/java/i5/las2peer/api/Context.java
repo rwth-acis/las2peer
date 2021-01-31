@@ -110,7 +110,7 @@ public interface Context {
 	 * @return A new unlocked GroupAgent which is not stored to the network yet.
 	 * @throws AgentOperationFailedException If an error occurred on the node.
 	 */
-	public GroupAgent createGroupAgent(Agent[] members) throws AgentOperationFailedException;
+	public GroupAgent createGroupAgent(Agent[] members, String groupName) throws AgentOperationFailedException;
 
 	/**
 	 * Fetches an agent from the network and trys to unlock it using the specified agent.

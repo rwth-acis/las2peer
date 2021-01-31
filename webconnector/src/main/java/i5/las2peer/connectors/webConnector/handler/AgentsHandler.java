@@ -347,32 +347,44 @@ public class AgentsHandler {
 			}
 		}
 		GroupAgentImpl groupAgent = GroupAgentImpl
-				.createGroupAgent(memberAgents.toArray(new AgentImpl[memberAgents.size()]));
+				.createGroupAgent(memberAgents.toArray(new AgentImpl[memberAgents.size()]), groupName);
 		groupAgent.unlock(session.getAgent());
 		node.storeAgent(groupAgent);
 		JSONObject json = new JSONObject();
 		json.put("code", Status.OK.getStatusCode());
 		json.put("text", Status.OK.getStatusCode() + " - GroupAgent created");
 		json.put("agentid", groupAgent.getIdentifier());
+		json.put("groupName", groupName);
 		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
 	}
 
 	@POST
 	@Path("/loadGroup")
 	public Response handleLoadGroup(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId,
-			@FormDataParam("agentid") String agentId) throws AgentException {
+			@FormDataParam("groupIdentifier") String agentId) throws AgentException {
 		AgentSession session = connector.getSessionById(sessionId);
 		if (session == null) {
 			return Response.status(Status.FORBIDDEN).entity("You have to be logged in to load a group").build();
 		}
 		if (agentId == null || agentId.isEmpty()) {
-			return Response.status(Status.BAD_REQUEST).entity("No agent id provided").build();
+			JSONObject error = new JSONObject();
+			error.put("title", "no group id given");
+			error.put("message", "pls add a group idd");
+			return Response.status(Status.BAD_REQUEST).entity(error).build();
 		}
 		AgentImpl agent;
+		System.out.println("Trying to get agent by group name in laod group call");
 		try {
-			agent = node.getAgent(agentId);
-		} catch (AgentNotFoundException e) {
-			return Response.status(Status.BAD_REQUEST).entity("Agent not found").build();
+		agent = getGroupByName(agentId);
+		} catch (Exception e) {
+			System.out.println("Exception " + e + "occured");
+			System.out.println("Couldn't find agent based on group name, trying group id...");
+			try {
+				agent = node.getAgent(agentId);
+				
+			} catch (AgentNotFoundException f) {
+				return Response.status(Status.BAD_REQUEST).entity("Agent not found").build();
+			}
 		}
 		if (!(agent instanceof GroupAgentImpl)) {
 			return Response.status(Status.BAD_REQUEST).entity("Agent is not a GroupAgent").build();
@@ -383,6 +395,8 @@ public class AgentsHandler {
 		} catch (AgentAccessDeniedException e) {
 			return Response.status(Status.BAD_REQUEST).entity("You must be a member of this group").build();
 		}
+		System.out.println(groupAgent.getGroupName());
+		System.out.println(groupAgent.getIdentifier());
 		JSONObject json = new JSONObject();
 		json.put("code", Status.OK.getStatusCode());
 		json.put("text", Status.OK.getStatusCode() + " - GroupAgent loaded");
@@ -405,6 +419,15 @@ public class AgentsHandler {
 		}
 		json.put("members", memberList);
 		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
+	} 
+	
+	private AgentImpl getGroupByName(String groupName) throws Exception {
+		try {
+			String agentId = node.getAgentIdForGroupName(groupName);
+			return node.getAgent(agentId);
+		} catch (AgentNotFoundException e) {
+			throw new BadRequestException("Agent not found");
+		}
 	}
 
 	@POST
@@ -428,9 +451,17 @@ public class AgentsHandler {
 		}
 		AgentImpl agent;
 		try {
-			agent = node.getAgent(agentId);
-		} catch (AgentNotFoundException e) {
-			return Response.status(Status.BAD_REQUEST).entity("Agent not found").build();
+		// for some reason, when loading group using group name results in identifier being group name
+		agent = getGroupByName(agentId);
+		} catch (Exception e) {
+			System.out.println("Exception " + e + "occured");
+			System.out.println("Couldn't find agent based on group name, trying group id...");
+			try {
+				agent = node.getAgent(agentId);
+				
+			} catch (AgentNotFoundException f) {
+				return Response.status(Status.BAD_REQUEST).entity("Agent not found").build();
+			}
 		}
 		if (!(agent instanceof GroupAgentImpl)) {
 			return Response.status(Status.BAD_REQUEST).entity("Agent is not a GroupAgent").build();
@@ -441,9 +472,11 @@ public class AgentsHandler {
 		} catch (AgentAccessDeniedException e) {
 			return Response.status(Status.BAD_REQUEST).entity("You must be a member of this group").build();
 		}
-		// add new members
+		// add new members // how?, currently only possile to remove users on agent tools frontend 
 		HashSet<String> memberIds = new HashSet<>();
 		for (Object obj : changedMembers) {
+			System.out.println(obj);
+			JSONObject jsonObj = (JSONObject) obj;
 			if (obj instanceof JSONObject) {
 				JSONObject json = (JSONObject) obj;
 				String memberid = json.getAsString("agentid");
@@ -464,9 +497,10 @@ public class AgentsHandler {
 				logger.info("Skipping invalid member object '" + obj.getClass().getCanonicalName() + "'");
 			}
 		}
+		/*
 		if (!memberIds.contains(session.getAgent().getIdentifier().toLowerCase())) {
 			return Response.status(Status.BAD_REQUEST).entity("You can't remove yourself from a group").build();
-		}
+		}*/
 		// remove all non members
 		for (String oldMemberId : groupAgent.getMemberList()) {
 			if (!memberIds.contains(oldMemberId)) {

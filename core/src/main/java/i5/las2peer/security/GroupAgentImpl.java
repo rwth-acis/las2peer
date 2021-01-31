@@ -13,16 +13,22 @@ import javax.crypto.SecretKey;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import i5.las2peer.p2p.Node;
 import i5.las2peer.api.logging.MonitoringEvent;
+import i5.las2peer.api.persistency.EnvelopeException;
+import i5.las2peer.api.persistency.EnvelopeNotFoundException;
 import i5.las2peer.api.security.Agent;
 import i5.las2peer.api.security.AgentAccessDeniedException;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentLockedException;
+import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.api.security.AgentOperationFailedException;
+import i5.las2peer.api.security.AnonymousAgent;
 import i5.las2peer.api.security.GroupAgent;
 import i5.las2peer.communication.Message;
 import i5.las2peer.communication.MessageException;
 import i5.las2peer.persistency.EncodingFailedException;
+import i5.las2peer.persistency.EnvelopeVersion;
 import i5.las2peer.serialization.MalformedXMLException;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.serialization.SerializeTools;
@@ -42,9 +48,12 @@ import i5.las2peer.tools.CryptoTools;
  * 
  */
 public class GroupAgentImpl extends AgentImpl implements GroupAgent {
-
+	
+	private Node node;
 	private SecretKey symmetricGroupKey;
 	private AgentImpl openedBy;
+	protected String groupName = null;
+	protected ArrayList<String> adminList = new ArrayList<String>();
 
 	/**
 	 * hashtable storing the encrypted versions of the group secret key for each member
@@ -73,11 +82,13 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	 * @throws CryptoException
 	 * @throws SerializationException
 	 */
-	protected GroupAgentImpl(KeyPair keys, SecretKey secret, Agent[] members)
+	protected GroupAgentImpl(KeyPair keys, SecretKey secret, Agent[] members, String groupName)
 			throws AgentOperationFailedException, CryptoException, SerializationException {
 		super(keys, secret);
 
 		symmetricGroupKey = secret;
+		//TODO: add method to check if groupname exists already...
+		this.groupName = groupName;
 		for (Agent a : members) {
 			try {
 				addMember((AgentImpl) a, false);
@@ -225,7 +236,9 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 					+ CryptoTools.getSymmetricAlgorithm() + "\">" + getEncodedPrivate() + "</privatekey>\n"
 					+ "\t<unlockKeys method=\"" + CryptoTools.getAsymmetricAlgorithm() + "\">\n" + keyList
 					+ "\t</unlockKeys>\n");
-
+			if (groupName != null) {
+				result.append("\t<groupName>" + groupName + "</groupName>\n");
+			}
 			result.append("</las2peer:agent>\n");
 
 			return result.toString();
@@ -277,6 +290,7 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 			if (!encryptedKeys.getAttribute("method").equals(CryptoTools.getAsymmetricAlgorithm())) {
 				throw new MalformedXMLException("base64 encoding expected");
 			}
+
 			HashMap<String, byte[]> htMemberKeys = new HashMap<>();
 			NodeList enGroups = encryptedKeys.getElementsByTagName("keyentry");
 			for (int n = 0; n < enGroups.getLength(); n++) {
@@ -299,7 +313,11 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 				htMemberKeys.put(agentId, content);
 			}
 			GroupAgentImpl result = new GroupAgentImpl(publicKey, encPrivate, htMemberKeys);
-
+			// read group Name
+			Element groupName = XmlTools.getOptionalElement(root, "groupName");
+			if (groupName != null) {
+				result.groupName = groupName.getTextContent();
+			}
 			return result;
 		} catch (SerializationException e) {
 			throw new MalformedXMLException("Deserialization problems", e);
@@ -317,9 +335,9 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	 * @throws CryptoException
 	 * @throws SerializationException
 	 */
-	public static GroupAgentImpl createGroupAgent(Agent[] members)
+	public static GroupAgentImpl createGroupAgent(Agent[] members, String groupName)
 			throws AgentOperationFailedException, CryptoException, SerializationException {
-		return new GroupAgentImpl(CryptoTools.generateKeyPair(), CryptoTools.generateSymmetricKey(), members);
+		return new GroupAgentImpl(CryptoTools.generateKeyPair(), CryptoTools.generateSymmetricKey(), members, groupName);
 	}
 
 	@Override
@@ -425,6 +443,18 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 		return (htEncryptedKeyVersions.get(agentId) != null || membersToAdd.containsKey(agentId))
 				&& !membersToRemove.containsKey(agentId);
 	}
+	
+	@Override
+	public String getGroupName() {
+		return groupName;
+	}
+
+	@Override
+	public boolean hasGroupName() {
+		return getGroupName() != null;
+	}
+	
+	
 
 	@Override
 	public void unlock(Agent agent)
