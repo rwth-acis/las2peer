@@ -119,7 +119,7 @@ task npmInstall(type: Exec) {
     } else {
         executable "npm"
     }
-    args "install", "--production"
+    args "install"
 }
 
 task npmBuild(type: Exec) {
