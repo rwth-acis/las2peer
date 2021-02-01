@@ -107,15 +107,3 @@ publishing {
         }
     }
 }
-
-// Task for checking whether the username and password required for publishing to archiva are set as environment variables.
-task checkArchivaEnv {
-    def username = System.env.ARCHIVA_USERNAME
-    if (username == null) throw new GradleException("Environment variable ARCHIVA_USERNAME is not set, but required for publishing.") 
-    def password = System.env.ARCHIVA_PASSWORD
-    if (password == null) throw new GradleException("Environment variable ARCHIVA_PASSWORD is not set, but required for publishing.") 
-}
-
-tasks.withType(PublishToMavenRepository) {
-    dependsOn checkArchivaEnv
-}
