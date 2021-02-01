@@ -5,9 +5,14 @@ plugins {
     id 'maven-publish'
 }
 
+def las2peerRevision = "${project.property('las2peer.revision')}"
+def las2peerBuildNumber = "${project.property('las2peer.build.number')}"
+def las2peerRelease = System.env.LAS2PEER_RELEASE != null
+def las2peerVersion = las2peerRelease ? "$las2peerRevision.$las2peerBuildNumber" : "$las2peerRevision-SNAPSHOT"
+
 group = 'i5'
 archivesBaseName = 'las2peer'
-version = "${project.property('las2peer.version')}"
+version = las2peerVersion
 mainClassName = "i5.las2peer.tools.L2pNodeLauncher"
 sourceCompatibility = "${project.property('java.version')}"
 targetCompatibility = "${project.property('java.version')}"
@@ -84,7 +89,7 @@ tasks.withType(Jar) {
 jar {
     manifest {
         attributes("Main-Class": "i5.las2peer.tools.L2pNodeLauncher", 
-                   "Implementation-Version": "${project.property('las2peer.version')}",
+                   "Implementation-Version": las2peerVersion,
                    "Class-Path": configurations.runtimeClasspath.files.collect { it.getName() }.join(" "))
     }
 }
@@ -299,11 +304,34 @@ publishing {
     publications {
         core(MavenPublication) {
             from components.java
-            artifact jar
             pom {
                 artifactId "las2peer"
                 packaging "jar"
             }
         }
     }
+
+    repositories {
+        maven {
+            if (las2peerRelease) url = "${project.property('dbis.archiva.url')}"
+            else url = "${project.property('dbis.archiva.url.snapshots')}"
+
+            credentials {
+                username = System.env.ARCHIVA_USERNAME
+                password = System.env.ARCHIVA_PASSWORD
+            }
+        }
+    }
+}
+
+// Task for checking whether the username and password required for publishing to archiva are set as environment variables.
+task checkArchivaEnv {
+    def username = System.env.ARCHIVA_USERNAME
+    if (username == null) throw new GradleException("Environment variable ARCHIVA_USERNAME is not set, but required for publishing.") 
+    def password = System.env.ARCHIVA_PASSWORD
+    if (password == null) throw new GradleException("Environment variable ARCHIVA_PASSWORD is not set, but required for publishing.") 
+}
+
+tasks.withType(PublishToMavenRepository) {
+    dependsOn checkArchivaEnv
 }

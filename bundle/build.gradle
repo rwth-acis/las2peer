@@ -7,9 +7,14 @@ plugins {
     id 'maven-publish'
 }
 
+def las2peerRevision = "${project.property('las2peer.revision')}"
+def las2peerBuildNumber = "${project.property('las2peer.build.number')}"
+def las2peerRelease = System.env.LAS2PEER_RELEASE != null
+def las2peerVersion = las2peerRelease ? "$las2peerRevision.$las2peerBuildNumber" : "$las2peerRevision-SNAPSHOT"
+
 group = 'i5'
 archivesBaseName = 'las2peer-bundle'
-version = "${project.property('las2peer.version')}"
+version = las2peerVersion
 mainClassName = "i5.las2peer.tools.L2pNodeLauncher"
 sourceCompatibility = "${project.property('java.version')}"
 targetCompatibility = "${project.property('java.version')}"
@@ -50,7 +55,7 @@ clean.doLast {
     file("export").deleteDir()
 }
 
-publishing {
+/*publishing {
     publications {
         bundle(MavenPublication) {
             pom {
@@ -59,4 +64,4 @@ publishing {
             }
         }
     }
-}
+}*/
