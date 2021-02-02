@@ -7,6 +7,8 @@ plugins {
     id 'maven-publish'
 }
 
+jar.enabled = false
+
 def las2peerRevision = "${project.property('las2peer.revision')}"
 def las2peerBuildNumber = "${project.property('las2peer.build.number')}"
 def las2peerRelease = System.env.LAS2PEER_RELEASE != null
@@ -48,7 +50,9 @@ jar {
 
 // las2peer bundle jar
 shadowJar {
+    // remove the "-all" at the end of the artifact / file name
     archiveClassifier = ""
+
     mergeServiceFiles() 
 }
 
