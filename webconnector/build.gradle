@@ -82,7 +82,7 @@ import org.apache.tools.ant.filters.ReplaceTokens
 processResources {
     from (sourceSets.main.resources) {
         include "webapp/src/node-frontend.js"
-        filter(ReplaceTokens, tokens: [LAS2PEER_VERSION : las2peerVersion])
+        filter(ReplaceTokens, tokens: [LAS2PEER_VERSION : "$las2peerVersion".toString()])
     }
 }
 
