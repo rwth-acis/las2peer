@@ -43,7 +43,14 @@ javadoc {
     destinationDir = file("$projectDir/export/javadoc")
 }
 
+task junitdoc(type: Javadoc) {
+    classpath = sourceSets.main.runtimeClasspath + sourceSets.test.runtimeClasspath
+    source = sourceSets.test.java
+    destinationDir = file("$projectDir/export/junitdoc")
+}
+
 build.dependsOn "javadoc"
+build.dependsOn "junitdoc"
 
 dependencies {
     // Use JUnit test framework.
