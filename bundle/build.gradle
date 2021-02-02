@@ -48,6 +48,7 @@ jar {
 
 // las2peer bundle jar
 shadowJar {
+    archiveClassifier = ""
     mergeServiceFiles() 
 }
 
