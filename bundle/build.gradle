@@ -60,13 +60,33 @@ clean.doLast {
     file("export").deleteDir()
 }
 
-/*publishing {
+publishing {
     publications {
         bundle(MavenPublication) {
+            from components.java
+            artifact shadowJar
             pom {
                 artifactId "las2peer-bundle"
                 packaging "jar"
             }
+
+            // fix pom file by removing dependencies node
+            pom.withXml {
+                Node pomNode = asNode()
+                pomNode.remove(pomNode.get("dependencies"))
+            }
         }
     }
-}*/
+
+    repositories {
+        maven {
+            if (las2peerRelease) url = "${project.property('dbis.archiva.url')}"
+            else url = "${project.property('dbis.archiva.url.snapshots')}"
+
+            credentials {
+                username = System.env.ARCHIVA_USERNAME
+                password = System.env.ARCHIVA_PASSWORD
+            }
+        }
+    }
+}
