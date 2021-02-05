@@ -56,6 +56,13 @@ The build script provides the following tasks:
 * `gradle shadowJar` will build the fat jar. The jar will be stored in `/export/jars`.
 * `gradle publishBundlePublicationToMavenLocal` publishes the bundle to the local maven repository.
 
+### Super Build Script
+
+To make life easier for developers, this repository contains a build script for conveniently building multiple submodules.
+
+* `gradle buildOnly` will run `publish<submodule>PublicationToMavenLocal` on each submodule
+* `gradle buildOnlyNoBundle` will run `publish<submodule>PublicationToMavenLocal` on each submodule except for the bundle
+
 ## Documentation
 
 JavaDocs of the latest release can be found online:

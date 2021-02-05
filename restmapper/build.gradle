@@ -1,7 +1,7 @@
 plugins {
     id 'java-library'
     id 'application'
-    // maven plugin is used to create .pom files
+    // maven plugin is used to create .pom files and for publishing
     id 'maven-publish'
 }
 
@@ -74,8 +74,16 @@ jar {
     }
 }
 
+task copyToLib(type: Copy) {
+    from configurations.runtimeClasspath
+    into "/lib"
+}
+
+build.dependsOn copyToLib
+
 clean.doLast {
     file("export").deleteDir()
+    file("lib").deleteDir()
 }
 
 // In .pom file, use "runtime" scope for dependencies declared with api configuration (instead of "compile" scope).
