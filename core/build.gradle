@@ -96,7 +96,7 @@ jar {
 
 task copyToLib(type: Copy) {
     from configurations.runtimeClasspath
-    into "/lib"
+    into "$projectDir/lib"
 }
 
 build.dependsOn copyToLib
