@@ -411,9 +411,13 @@ class AgentsView extends PolymerElement {
     let req = this.$.ajaxChangeGroup;
     req.body = new FormData();
     req.body.append('agentid', this._manageGroupAgentId);
-    req.body.append('members', this._manageAgents);
-    console.log();
-    console.log(this._manageAgents);
+    let jsonArray=[];
+
+    this._manageAgents.forEach(function(element) {
+      jsonArray.push(JSON.stringify(element));
+    })
+
+    req.body.append('members', JSON.stringify(jsonArray));
     req.generateRequest();
   }
 

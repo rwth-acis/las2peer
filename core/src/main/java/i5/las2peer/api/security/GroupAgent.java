@@ -89,6 +89,26 @@ public interface GroupAgent extends Agent {
 	 */
 	public boolean hasGroupName();
 
+	/**
+	 * Add an admin to the group.
+	 * 
+	 * @param agent Member to be made admin.
+	 */
+	void addAdmin(Agent agent);
+	
+	/**
+	 * Remove admin rights from member.
+	 * 
+	 * @param agent Member to remove admin rights from.
+	 */
+	void revokeAdmin(Agent agent);
+	
+	/**
+	 * Check admin rights for member.
+	 * 
+	 * @param agent Member to check admin rights for.
+	 */
+	boolean isAdmin(Agent agent);	
 	// TODO add admins to GroupAgents
 	/*
 	void addAdmin(Agent agent);

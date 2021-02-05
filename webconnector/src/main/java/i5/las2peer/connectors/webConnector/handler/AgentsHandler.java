@@ -349,6 +349,8 @@ public class AgentsHandler {
 		GroupAgentImpl groupAgent = GroupAgentImpl
 				.createGroupAgent(memberAgents.toArray(new AgentImpl[memberAgents.size()]), groupName);
 		groupAgent.unlock(session.getAgent());
+		groupAgent.addAdmin(session.getAgent());
+		System.out.println(session.getAgent().getIdentifier());
 		node.storeAgent(groupAgent);
 		JSONObject json = new JSONObject();
 		json.put("code", Status.OK.getStatusCode());
@@ -424,6 +426,7 @@ public class AgentsHandler {
 	private AgentImpl getGroupByName(String groupName) throws Exception {
 		try {
 			String agentId = node.getAgentIdForGroupName(groupName);
+			System.out.println("Agent id is" + agentId);
 			return node.getAgent(agentId);
 		} catch (AgentNotFoundException e) {
 			throw new BadRequestException("Agent not found");
@@ -445,7 +448,9 @@ public class AgentsHandler {
 		if (members == null) {
 			return Response.status(Status.BAD_REQUEST).entity("No members to change provided").build();
 		}
+		System.out.println(members);
 		JSONArray changedMembers = (JSONArray) new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(members);
+		System.out.println(changedMembers);
 		if (changedMembers.isEmpty()) {
 			return Response.status(Status.BAD_REQUEST).entity("Changed members list must not be empty").build();
 		}
@@ -476,7 +481,13 @@ public class AgentsHandler {
 		HashSet<String> memberIds = new HashSet<>();
 		for (Object obj : changedMembers) {
 			System.out.println(obj);
-			JSONObject jsonObj = (JSONObject) obj;
+			System.out.println(obj.toString());
+			try {
+				JSONObject json = (JSONObject) new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse((String)obj);
+				obj = json;
+			} catch (Exception e ) {
+				System.out.println("Could not convert string to json lol");
+			}
 			if (obj instanceof JSONObject) {
 				JSONObject json = (JSONObject) obj;
 				String memberid = json.getAsString("agentid");
@@ -501,6 +512,9 @@ public class AgentsHandler {
 		if (!memberIds.contains(session.getAgent().getIdentifier().toLowerCase())) {
 			return Response.status(Status.BAD_REQUEST).entity("You can't remove yourself from a group").build();
 		}*/
+		if(!groupAgent.isAdmin(session.getAgent())) {
+			return Response.status(Status.BAD_REQUEST).entity("You must be an admin of this group").build();
+		}
 		// remove all non members
 		for (String oldMemberId : groupAgent.getMemberList()) {
 			if (!memberIds.contains(oldMemberId)) {

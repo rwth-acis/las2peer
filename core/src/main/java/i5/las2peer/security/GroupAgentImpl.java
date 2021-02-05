@@ -135,6 +135,43 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	public void addMember(AgentImpl a) throws CryptoException, SerializationException, AgentLockedException {
 		addMember(a, true);
 	}
+	
+	/**
+	 * add a member to the admin list of this group
+	 * 
+	 * @param a
+	 * @throws CryptoException
+	 * @throws SerializationException
+	 * @throws AgentLockedException
+	 */
+	public void addAdmin(Agent a) {
+		if(!adminList.contains(a.getIdentifier())) {
+			adminList.add(a.getIdentifier());
+		}
+	}
+	
+	/**
+	 * remove a member from the admin list of this group
+	 * 
+	 * @param a
+	 * @throws CryptoException
+	 * @throws SerializationException
+	 * @throws AgentLockedException
+	 */
+	public void revokeAdmin(Agent a) {
+		if(adminList.contains(a.getIdentifier())) {
+			adminList.remove(a.getIdentifier());
+		}
+	}
+	
+	/**
+	 * Check admin rights for member.
+	 * 
+	 * @param agent Member to check admin rights for.
+	 */
+	public boolean isAdmin(Agent a){
+		return adminList.contains(a.getIdentifier());
+	}
 
 	/**
 	 * private version of adding members, mainly just for the constructor to add members without unlocking the private
@@ -229,7 +266,6 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 				keyList += "\t\t<keyentry forAgent=\"" + id + "\" encoding=\"base64\">"
 						+ Base64.getEncoder().encodeToString(htEncryptedKeyVersions.get(id)) + "</keyentry>\n";
 			}
-
 			StringBuffer result = new StringBuffer("<las2peer:agent type=\"group\">\n" + "\t<id>" + getIdentifier()
 					+ "</id>\n" + "\t<publickey encoding=\"base64\">" + SerializeTools.serializeToBase64(getPublicKey())
 					+ "</publickey>\n" + "\t<privatekey encoding=\"base64\" encrypted=\""
@@ -239,6 +275,12 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 			if (groupName != null) {
 				result.append("\t<groupName>" + groupName + "</groupName>\n");
 			}
+			
+			String admins = "";
+			for(int i = 0; i < adminList.size(); i++) {
+				admins += "\t\t<admin id=\"" + i + "\" >" + adminList.get(i) + "</admin>\n";
+			}
+			result.append("\t<adminList>" + admins + "</adminList>\n");
 			result.append("</las2peer:agent>\n");
 
 			return result.toString();
@@ -318,6 +360,22 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 			if (groupName != null) {
 				result.groupName = groupName.getTextContent();
 			}
+			
+			ArrayList<String> adminMembers = new ArrayList<String>();
+			Element admins = XmlTools.getSingularElement(root, "adminList");
+			enGroups = admins.getElementsByTagName("admin");
+			System.out.println(enGroups);
+			for (int n = 0; n < enGroups.getLength(); n++) {
+				org.w3c.dom.Node node = enGroups.item(n);
+				short nodeType = node.getNodeType();
+				if (nodeType != org.w3c.dom.Node.ELEMENT_NODE) {
+					throw new MalformedXMLException(
+							"Node type (" + nodeType + ") is not type element (" + org.w3c.dom.Node.ELEMENT_NODE + ")");
+				}
+				Element elKey = (Element) node;
+				adminMembers.add(elKey.getTextContent());
+			}
+			result.adminList = adminMembers;
 			return result;
 		} catch (SerializationException e) {
 			throw new MalformedXMLException("Deserialization problems", e);
