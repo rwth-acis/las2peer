@@ -3,11 +3,8 @@
 
 name: Java CI with Gradle
 
-on:
-  push:
-    branches: [ gradle ]
-  pull_request:
-    branches: [ gradle ]
+# Triggers the workflow on push or pull request events (on every branch)
+on: [push, pull_request]
 
 jobs:
   build:
@@ -24,3 +21,12 @@ jobs:
       run: chmod +x gradlew
     - name: Build with Gradle
       run: ./gradlew build
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: las2peer
+        path: |
+          core/export/jars/las2peer-*.jar
+          restmapper/export/jars/las2peer-rest-mapper*.jar
+          webconnector/export/jars/las2peer-web-connector*.jar
+          bundle/export/jars/las2peer-bundle-*.jar
