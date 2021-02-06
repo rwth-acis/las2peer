@@ -369,10 +369,7 @@ public class AgentsHandler {
 			return Response.status(Status.FORBIDDEN).entity("You have to be logged in to load a group").build();
 		}
 		if (agentId == null || agentId.isEmpty()) {
-			JSONObject error = new JSONObject();
-			error.put("title", "no group id given");
-			error.put("message", "pls add a group idd");
-			return Response.status(Status.BAD_REQUEST).entity(error).build();
+			return Response.status(Status.BAD_REQUEST).entity("No agent id provided").build();
 		}
 		AgentImpl agent;
 		System.out.println("Trying to get agent by group name in laod group call");
