@@ -1,6 +1,6 @@
 ![las2peer](img/logo/bitmap/las2peer-logo-128x128.png)
 
-# [![Build Status](https://jenkins.dbis.rwth-aachen.de/buildStatus/icon?job=las2peer%20Core)](https://jenkins.dbis.rwth-aachen.de/job/las2peer%20Core/) [![Build Status](https://travis-ci.org/rwth-acis/las2peer.svg?branch=master)](https://travis-ci.org/rwth-acis/las2peer) [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/rwth-acis/las2peer)
+# [![Java CI with Gradle](https://github.com/rwth-acis/las2peer/workflows/Java%20CI%20with%20Gradle/badge.svg?branch=master)](https://github.com/rwth-acis/las2peer/actions?query=workflow%3A%22Java+CI+with+Gradle%22+branch%3Amaster) [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/rwth-acis/las2peer)
 
 las2peer is a Java-based server framework for developing and deploying microservices in a distributed Peer-to-Peer (P2P) environment.
 It is developed by the Advanced Community Information Systems (ACIS) group at the Chair of Computer Science 5 (Information Systems & Databases), RWTH Aachen University, Germany.
@@ -73,5 +73,5 @@ JavaDocs of the latest release can be found online:
 
 ## CI
 
-Every commit to the develop branch is built by Jenkins and will be published as a snapshot to our Archiva.
+Every commit to the develop branch is built by GitHub actions and will be published as a snapshot to our Archiva.
 Releases are drafted from the master branch.
