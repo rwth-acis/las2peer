@@ -6,13 +6,13 @@
 			<attribute name="gradle_used_by_scope" value="main,test"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" output="bin/main" path="resources">
+	<classpathentry kind="src" output="output/main" path="resources">
 		<attributes>
 			<attribute name="gradle_scope" value="main"/>
 			<attribute name="gradle_used_by_scope" value="main,test"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" output="bin/test" path="src/test/java">
+	<classpathentry kind="src" output="output/test" path="src/test/java">
 		<attributes>
 			<attribute name="test" value="true"/>
 			<attribute name="gradle_scope" value="test"/>
@@ -26,5 +26,5 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.buildship.core.gradleclasspathcontainer"/>
-	<classpathentry kind="output" path="bin/default"/>
+	<classpathentry kind="output" path="output/default"/>
 </classpath>
