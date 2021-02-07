@@ -60,7 +60,7 @@ dependencies {
 
     api "FreePastry:FreePastry:3.0.0"
     api "xpp3:xpp3:1.1.4c" // FreePastry dependency
-    api "javax.xml.parsers:jaxp-api:1.4.5"
+    //api "javax.xml.parsers:jaxp-api:1.4.5"
 
     // UPnP libs for NAT handling
     api("commons-jxpath:commons-jxpath:1.3") {
