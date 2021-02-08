@@ -3,6 +3,7 @@ plugins {
     id 'application'
     // maven plugin is used to create .pom files and for publishing
     id 'maven-publish'
+    id 'eclipse'
 }
 
 def las2peerRevision = "${project.property('las2peer.revision')}"
