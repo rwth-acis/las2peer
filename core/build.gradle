@@ -331,3 +331,38 @@ publishing {
         }
     }
 }
+
+// configuration for eclipse (this allows to import las2peer as a gradle project in eclipse without any problems)
+eclipse {
+    classpath {
+      file {
+            whenMerged {
+                def jre = entries.find { it.path.contains "org.eclipse.jdt.launching.JRE_CONTAINER" }
+                jre.entryAttributes["add-exports"] = "java.desktop/com.sun.beans.finder=ALL-UNNAMED"
+                jre.entryAttributes["module"] = "true"
+
+
+                // remove test_help2 classpath entry for eclipse
+                entries.removeAll { it.path == "src/test_help2" }
+
+                // fix path and output directory of test_help
+                def testHelp = entries.find { it.path == "src/test_help" }
+                testHelp.path = "src/test_help/java"
+                testHelp.output = "output/testHelp"
+
+                // change output directory for test, main, resources and default
+                def test = entries.find { it.path == "src/test/java" }
+                test.output = "output/test"
+
+                def main = entries.find { it.path == "src/main/java" }
+                main.output = "output/main"
+
+                def resources = entries.find { it.path == "resources" }
+                resources.output = "output/main"
+
+                def defaultEntry = entries.find { it.kind == "output" && it.path == "bin/default" }
+                defaultEntry.path = "output/default"
+            }
+        }
+    }
+}
