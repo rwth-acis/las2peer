@@ -19,3 +19,5 @@ ivy.jar
 archiva_credentials.xml
 /javadoc/
 .gradle
+.classpath
+.project

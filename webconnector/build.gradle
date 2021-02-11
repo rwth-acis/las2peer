@@ -3,6 +3,7 @@ plugins {
     id 'application'
     // maven plugin is used to create .pom files and for publishing
     id 'maven-publish'
+    id 'eclipse'
 }
 
 def las2peerRevision = "${project.property('las2peer.revision')}"
@@ -198,6 +199,32 @@ publishing {
             credentials {
                 username = System.env.ARCHIVA_USERNAME
                 password = System.env.ARCHIVA_PASSWORD
+            }
+        }
+    }
+}
+
+// configuration for eclipse (this allows to import las2peer as a gradle project in eclipse without any problems)
+eclipse {
+    classpath {
+      file {
+            whenMerged {
+                def jre = entries.find { it.path.contains "org.eclipse.jdt.launching.JRE_CONTAINER" }
+                jre.entryAttributes["add-exports"] = "java.base/sun.security.provider=ALL-UNNAMED:java.base/sun.security.tools.keytool=ALL-UNNAMED:java.base/sun.security.util=ALL-UNNAMED:java.base/sun.security.x509=ALL-UNNAMED"
+                jre.entryAttributes["module"] = "true"
+
+                // change output directory for test, main, resources and default
+                def test = entries.find { it.path == "src/test/java" }
+                test.output = "output/test"
+
+                def main = entries.find { it.path == "src/main/java" }
+                main.output = "output/main"
+
+                def resources = entries.find { it.path == "resources" }
+                resources.output = "output/main"
+
+                def defaultEntry = entries.find { it.kind == "output" && it.path == "bin/default" }
+                defaultEntry.path = "output/default"
             }
         }
     }
