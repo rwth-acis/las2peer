@@ -21,3 +21,4 @@ archiva_credentials.xml
 .gradle
 .classpath
 .project
+.settings
