@@ -24,16 +24,19 @@ task deployJavadoc {
 }
 
 task copyCoreDocs(type: Copy) {
+    dependsOn ":core:javadoc"
     from "core/export/javadoc/"
     into "javadoc/core"
 }
 
 task copyRestmapperDocs(type: Copy) {
+    dependsOn ":restmapper:javadoc"
     from "restmapper/export/javadoc/"
     into "javadoc/restmapper"
 }
 
 task copyWebconnectorDocs(type: Copy) {
+    dependsOn ":webconnector:javadoc"
     from "webconnector/export/javadoc/"
     into "javadoc/webconnector"
 }
