@@ -204,6 +204,11 @@ publishing {
     }
 }
 
+// disable module metadata publication
+tasks.withType(GenerateModuleMetadata) {
+    enabled = false
+}
+
 // configuration for eclipse (this allows to import las2peer as a gradle project in eclipse without any problems)
 eclipse {
     classpath {
