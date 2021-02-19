@@ -99,6 +99,8 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 
 		lockPrivateKey();
 	}
+	
+
 
 	/**
 	 * decrypt the secret key of this group for the given agent (which is hopefully a member)
@@ -140,9 +142,6 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	 * add a member to the admin list of this group
 	 * 
 	 * @param a
-	 * @throws CryptoException
-	 * @throws SerializationException
-	 * @throws AgentLockedException
 	 */
 	public void addAdmin(Agent a) {
 		if(!adminList.contains(a.getIdentifier())) {
@@ -154,9 +153,6 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	 * remove a member from the admin list of this group
 	 * 
 	 * @param a
-	 * @throws CryptoException
-	 * @throws SerializationException
-	 * @throws AgentLockedException
 	 */
 	public void revokeAdmin(Agent a) {
 		if(adminList.contains(a.getIdentifier())) {
@@ -167,7 +163,8 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	/**
 	 * Check admin rights for member.
 	 * 
-	 * @param agent Member to check admin rights for.
+	 * @param a Member to check admin rights for.
+	 * @return if agent is admin
 	 */
 	public boolean isAdmin(Agent a){
 		return adminList.contains(a.getIdentifier());
@@ -388,6 +385,7 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	 * create a new group agent instance
 	 * 
 	 * @param members
+	 * @param groupName
 	 * @return a group agent
 	 * @throws AgentOperationFailedException
 	 * @throws CryptoException

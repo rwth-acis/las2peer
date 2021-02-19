@@ -30,22 +30,20 @@
     "@polymer/paper-button": "3.0.1",
     "@polymer/paper-card": "^3.0.1",
     "@polymer/paper-checkbox": "^3.0.1",
-    "@polymer/paper-tabs": "^3.0.1",
     "@polymer/paper-dialog": "^3.0.1",
-    "@polymer/paper-icon-button": "^3.0.1",
     "@polymer/paper-dropdown-menu": "^3.0.1",
+    "@polymer/paper-icon-button": "^3.0.1",
+    "@polymer/paper-input": "^3.0.1",
     "@polymer/paper-item": "^3.0.1",
     "@polymer/paper-listbox": "^3.0.1",
-    "@polymer/paper-input": "^3.0.1",
     "@polymer/paper-spinner": "^3.0.1",
+    "@polymer/paper-tabs": "^3.0.1",
     "@polymer/paper-tooltip": "^3.0.1",
     "@polymer/polymer": "^3.1.0",
     "@webcomponents/webcomponentsjs": "^2.2.1",
-    "las2peer-frontend-statusbar": "github:rwth-acis/las2peer-frontend-statusbar#fixUserGroups"
-  },
-  "devDependencies": {
-    "polymer-cli": "^1.9.7",
-    "wct-browser-legacy": "^1.0.2"
+    "las2peer-frontend-statusbar": "github:rwth-acis/las2peer-frontend-statusbar#fixUserGroups",
+    "lodash": "^4.17.20",
+    "polymer-cli": "^1.9.11"
   },
   "engines": {
     "node": ">=8.0"

@@ -11,6 +11,7 @@ import i5.las2peer.api.security.AnonymousAgent;
 import i5.las2peer.api.security.EmailAlreadyTakenException;
 import i5.las2peer.api.security.GroupAgent;
 import i5.las2peer.api.security.LoginNameAlreadyTakenException;
+import i5.las2peer.api.security.NameAlreadyTakenException;
 import i5.las2peer.api.security.OIDCSubAlreadyTakenException;
 import i5.las2peer.api.security.UserAgent;
 import i5.las2peer.p2p.Node;
@@ -114,7 +115,7 @@ public class UserAgentManager {
 	 * @throws AgentLockedException If the given agent is not unlocked
 	 */
 	public void registerGroupAgent(GroupAgent agent)
-			throws LoginNameAlreadyTakenException, AgentLockedException {
+			throws LoginNameAlreadyTakenException, NameAlreadyTakenException, AgentLockedException {
 		if (agent.isLocked()) {
 			throw new AgentLockedException("Only unlocked Agents can be registered.");
 		}
@@ -126,7 +127,7 @@ public class UserAgentManager {
 				try {
 					EnvelopeVersion stored = node.fetchEnvelope(identifier);
 					if (!stored.getContent().equals(agentId)) {
-						throw new LoginNameAlreadyTakenException();
+						throw new NameAlreadyTakenException();
 					}
 				} catch (EnvelopeNotFoundException e) {
 					EnvelopeVersion envName = node.createUnencryptedEnvelope(identifier,
@@ -266,7 +267,7 @@ public class UserAgentManager {
 	/**
 	 * get an {@link GroupAgentImpl}'s id by group name
 	 * 
-	 * @param name
+	 * @param groupName
 	 * @return the id of the agent
 	 * @throws AgentNotFoundException If no agent for the given login is found
 	 * @throws AgentOperationFailedException If any other issue with the agent occurs, e. g. XML not readable
