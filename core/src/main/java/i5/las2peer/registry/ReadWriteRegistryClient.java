@@ -30,6 +30,7 @@ import i5.las2peer.registry.contracts.UserRegistry;
 import i5.las2peer.registry.data.RegistryConfiguration;
 import i5.las2peer.registry.exceptions.EthereumException;
 import i5.las2peer.security.EthereumAgent;
+import i5.las2peer.security.GroupEthereumAgent;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.serialization.SerializeTools;
 
@@ -134,7 +135,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 			logger.info("[TX Nonce] after: " + txManNonce);
 		}
 	}
-
+	
 	public String registerReputationProfile(EthereumAgent agent) throws EthereumException {
 		if (!agent.hasLoginName()) {
 			throw new EthereumException("Could not create reputation profile: agent has no login name");
@@ -262,6 +263,35 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 
 		try {
 			contracts.serviceRegistry.delegatedRegister(serviceName, authorName, consentee, signature).sendAsync()
+			.get();
+		} catch (Exception e) {
+			throw new EthereumException("Failed to register service", e);
+		}
+	}
+	
+	/**
+	 * Register a group name to the given author.
+	 *
+	 * The registration call is delegated, see description of
+	 * {@link #registerUser(EthereumAgent)} for details.
+	 *
+	 * @param groupName group name of arbitrary length
+	 * @param agent Ethereum agent of the service author
+	 */
+	public void registerGroup(String groupName, EthereumAgent agent) throws EthereumException,
+	AgentLockedException {
+		// note that group agents are not really users of the blockchain, but rather an entity like a service 
+		byte[] authorName = Util.padAndConvertString(agent.getLoginName(), 32);
+
+		final Function function = new Function(ServiceRegistry.FUNC_REGISTER,
+				Arrays.asList(new org.web3j.abi.datatypes.Utf8String(groupName),
+						new org.web3j.abi.datatypes.generated.Bytes32(authorName)), Collections.emptyList());
+
+		String consentee = agent.getEthereumAddress();
+		byte[] signature = SignatureUtils.signFunctionCall(function, agent.getEthereumCredentials());
+
+		try {
+			contracts.serviceRegistry.delegatedRegister(groupName, authorName, consentee, signature).sendAsync()
 			.get();
 		} catch (Exception e) {
 			throw new EthereumException("Failed to register service", e);

@@ -33,6 +33,7 @@ import i5.las2peer.registry.exceptions.NotFoundException;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.EthereumAgent;
 import i5.las2peer.security.GroupAgentImpl;
+import i5.las2peer.security.GroupEthereumAgent;
 import i5.las2peer.security.PassphraseAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
 import i5.las2peer.serialization.SerializationException;
@@ -92,7 +93,8 @@ public class AgentsHandler {
 		if (node instanceof EthereumNode) {
 			EthereumNode ethNode = (EthereumNode) node;
 			if (ethereumMnemonic != null && !ethereumMnemonic.isEmpty()) {
-				agent = EthereumAgent.createEthereumAgent(username, password, ethNode.getRegistryClient(), ethereumMnemonic);
+				agent = EthereumAgent.createEthereumAgent(username, password, ethNode.getRegistryClient(),
+						ethereumMnemonic);
 			} else {
 				agent = EthereumAgent.createEthereumAgentWithClient(username, password, ethNode.getRegistryClient());
 			}
@@ -107,11 +109,9 @@ public class AgentsHandler {
 			agent.setEmail(email);
 		}
 		node.storeAgent(agent);
-		JSONObject json = new JSONObject()
-				.appendField("code", Status.OK.getStatusCode())
+		JSONObject json = new JSONObject().appendField("code", Status.OK.getStatusCode())
 				.appendField("text", Status.OK.getStatusCode() + " - Agent created")
-				.appendField("agentid", agent.getIdentifier())
-				.appendField("username", agent.getLoginName())
+				.appendField("agentid", agent.getIdentifier()).appendField("username", agent.getLoginName())
 				.appendField("email", agent.getEmail());
 		if (agent instanceof EthereumAgent) {
 			json.put("registryAddress", ((EthereumAgent) agent).getEthereumAddress());
@@ -120,11 +120,11 @@ public class AgentsHandler {
 	}
 
 	private JSONObject addAgentDetailsToJson(AgentImpl agent, JSONObject json)
-			throws EthereumException, NotFoundException
-	{
+			throws EthereumException, NotFoundException {
 		// don't add mnemonic ( = defaults to false, override to true )
 		return this.addAgentDetailsToJson(agent, json, false);
 	}
+
 	private JSONObject addAgentDetailsToJson(AgentImpl agent, JSONObject json, Boolean addMnemonic)
 			throws EthereumException, NotFoundException {
 		json.put("agentid", agent.getIdentifier());
@@ -133,12 +133,10 @@ public class AgentsHandler {
 			json.put("username", userAgent.getLoginName());
 			json.put("email", userAgent.getEmail());
 		}
-		if (agent instanceof EthereumAgent) 
-		{
+		if (agent instanceof EthereumAgent) {
 			EthereumAgent ethAgent = (EthereumAgent) agent;
 			String ethAddress = ethAgent.getEthereumAddress();
-			if ( ethAddress.length() > 0 )
-			{
+			if (ethAddress.length() > 0) {
 				json.put("ethAgentAddress", ethAddress);
 				String accBalance = ethereumNode.getRegistryClient().getAccountBalance(ethAddress);
 				json.put("ethAccBalance", accBalance);
@@ -150,16 +148,12 @@ public class AgentsHandler {
 						json.put("ethCumulativeScore", upd.getCumulativeScore().toString());
 						json.put("ethNoTransactionsSent", upd.getNoTransactionsSent().toString());
 						json.put("ethNoTransactionsRcvd", upd.getNoTransactionsRcvd().toString());
-						if ( upd.getNoTransactionsRcvd().compareTo(BigInteger.ZERO) == 0 )
-						{
+						if (upd.getNoTransactionsRcvd().compareTo(BigInteger.ZERO) == 0) {
 							json.put("ethRating", 0);
-						}
-						else
-						{
+						} else {
 							DecimalFormat f = new DecimalFormat("#.00");
-							json.put("ethRating", f.format(
-								upd.getCumulativeScore().divide(upd.getNoTransactionsRcvd())
-							));
+							json.put("ethRating",
+									f.format(upd.getCumulativeScore().divide(upd.getNoTransactionsRcvd())));
 						}
 					} else {
 						json.put("ethRating", "0");
@@ -167,17 +161,14 @@ public class AgentsHandler {
 						json.put("ethNoTransactionsSent", "???");
 						json.put("ethNoTransactionsRcvd", "???");
 					}
-				}
-				catch (EthereumException| NotFoundException e)
-				{
+				} catch (EthereumException | NotFoundException e) {
 					e.printStackTrace();
 				}
 			}
-			
+
 			json.put("ethAgentCredentialsAddress", ethAddress);
-			
-			if ( addMnemonic && !agent.isLocked())
-			{
+
+			if (addMnemonic && !agent.isLocked()) {
 				json.put("ethMnemonic", ethAgent.getEthereumMnemonic());
 			}
 		}
@@ -325,11 +316,11 @@ public class AgentsHandler {
 		if (members == null) {
 			return Response.status(Status.BAD_REQUEST).entity("No members provided").build();
 		}
-		
+
 		if (groupName == null || groupName.equals("")) {
 			return Response.status(Status.BAD_REQUEST).entity("No group name provided").build();
 		}
-		
+
 		JSONArray jsonMembers = (JSONArray) new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(members);
 		if (jsonMembers.isEmpty()) {
 			return Response.status(Status.BAD_REQUEST).entity("Members list empty").build();
@@ -346,8 +337,21 @@ public class AgentsHandler {
 				}
 			}
 		}
-		GroupAgentImpl groupAgent = GroupAgentImpl
-				.createGroupAgent(memberAgents.toArray(new AgentImpl[memberAgents.size()]), groupName);
+		try {
+			node.getAgentIdForGroupName(groupName);
+			return Response.status(Status.BAD_REQUEST).entity("Groupname already taken").build();
+		} catch (AgentNotFoundException e) {
+			// expected
+		}
+		GroupAgentImpl groupAgent;
+		if (node instanceof EthereumNode) {
+			EthereumNode ethNode = (EthereumNode) node;
+			groupAgent = GroupEthereumAgent.createGroupEthereumAgentWithClient(groupName, ethNode.getRegistryClient(),
+					memberAgents.toArray(new AgentImpl[memberAgents.size()]));
+		} else {
+			groupAgent = GroupAgentImpl.createGroupAgent(memberAgents.toArray(new AgentImpl[memberAgents.size()]),
+					groupName);
+		}
 		groupAgent.unlock(session.getAgent());
 		groupAgent.addAdmin(session.getAgent());
 		System.out.println(session.getAgent().getIdentifier());
@@ -374,13 +378,13 @@ public class AgentsHandler {
 		AgentImpl agent;
 		System.out.println("Trying to get agent by group name in laod group call");
 		try {
-		agent = getGroupByName(agentId);
+			agent = getGroupByName(agentId);
 		} catch (Exception e) {
 			System.out.println("Exception " + e + "occured");
 			System.out.println("Couldn't find agent based on group name, trying group id...");
 			try {
 				agent = node.getAgent(agentId);
-				
+
 			} catch (AgentNotFoundException f) {
 				return Response.status(Status.BAD_REQUEST).entity("Agent not found").build();
 			}
@@ -418,8 +422,8 @@ public class AgentsHandler {
 		}
 		json.put("members", memberList);
 		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
-	} 
-	
+	}
+
 	private AgentImpl getGroupByName(String groupName) throws Exception {
 		try {
 			String agentId = node.getAgentIdForGroupName(groupName);
@@ -453,14 +457,15 @@ public class AgentsHandler {
 		}
 		AgentImpl agent;
 		try {
-		// for some reason, when loading group using group name results in identifier being group name
-		agent = getGroupByName(agentId);
+			// for some reason, when loading group using group name results in identifier
+			// being group name
+			agent = getGroupByName(agentId);
 		} catch (Exception e) {
 			System.out.println("Exception " + e + "occured");
 			System.out.println("Couldn't find agent based on group name, trying group id...");
 			try {
 				agent = node.getAgent(agentId);
-				
+
 			} catch (AgentNotFoundException f) {
 				return Response.status(Status.BAD_REQUEST).entity("Agent not found").build();
 			}
@@ -474,15 +479,16 @@ public class AgentsHandler {
 		} catch (AgentAccessDeniedException e) {
 			return Response.status(Status.BAD_REQUEST).entity("You must be a member of this group").build();
 		}
-		// add new members // how?, currently only possile to remove users on agent tools frontend 
+		// add new members // how?, currently only possile to remove users on agent
+		// tools frontend
 		HashSet<String> memberIds = new HashSet<>();
 		for (Object obj : changedMembers) {
 			System.out.println(obj);
 			System.out.println(obj.toString());
 			try {
-				JSONObject json = (JSONObject) new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse((String)obj);
+				JSONObject json = (JSONObject) new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse((String) obj);
 				obj = json;
-			} catch (Exception e ) {
+			} catch (Exception e) {
 				System.out.println("Could not convert string to json lol");
 			}
 			if (obj instanceof JSONObject) {
@@ -506,10 +512,11 @@ public class AgentsHandler {
 			}
 		}
 		/*
-		if (!memberIds.contains(session.getAgent().getIdentifier().toLowerCase())) {
-			return Response.status(Status.BAD_REQUEST).entity("You can't remove yourself from a group").build();
-		}*/
-		if(!groupAgent.isAdmin(session.getAgent())) {
+		 * if (!memberIds.contains(session.getAgent().getIdentifier().toLowerCase())) {
+		 * return Response.status(Status.BAD_REQUEST).
+		 * entity("You can't remove yourself from a group").build(); }
+		 */
+		if (!groupAgent.isAdmin(session.getAgent())) {
 			return Response.status(Status.BAD_REQUEST).entity("You must be an admin of this group").build();
 		}
 		// remove all non members

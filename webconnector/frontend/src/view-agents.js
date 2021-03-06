@@ -354,6 +354,7 @@ class AgentsView extends PolymerElement {
     req.body.append('agentid', this.$.addMemberId.value);
     req.body.append('username', this.$.addMemberUsername.value);
     req.body.append('email', this.$.addMemberEmail.value);
+    let customer = {name: "person", address: "here"}
     req.generateRequest();
   }
 
@@ -399,6 +400,8 @@ class AgentsView extends PolymerElement {
     let response = event.detail.response;
     response.members.forEach(function (element) { element.shortid = element.agentid.substr(0, 15) + '...' });
     this._manageAgents = response.members;
+
+    response.members.every(elem => console.log(typeof elem));
     this._hasNoManageAgents = false;
   }
 

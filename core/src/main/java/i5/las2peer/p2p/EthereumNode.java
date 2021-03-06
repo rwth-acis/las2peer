@@ -24,6 +24,7 @@ import i5.las2peer.registry.exceptions.EthereumException;
 import i5.las2peer.registry.exceptions.NotFoundException;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.EthereumAgent;
+import i5.las2peer.security.GroupEthereumAgent;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.CryptoException;
 
@@ -189,6 +190,14 @@ public class EthereumNode extends PastryNodeImpl {
 				logger.warning("Failed to register EthereumAgent; error: " + e);
 				throw new AgentException("Problem storing Ethereum agent", e);
 			}
+		} else if(agent instanceof GroupEthereumAgent) {
+			try {
+				registerAgentInBlockchain((GroupEthereumAgent) agent);
+				logger.info("[ETH] Stored agent " + agent.getIdentifier());
+			} catch (AgentException|EthereumException|SerializationException e) {
+				logger.warning("Failed to register EthereumAgent; error: " + e);
+				throw new AgentException("Problem storing Ethereum agent", e);
+			}
 		}
 		super.storeAgent(agent);
 	}
@@ -211,6 +220,81 @@ public class EthereumNode extends PastryNodeImpl {
 			throw new AgentAlreadyExistsException(
 					"Agent username is already taken in blockchain user registry and details do NOT match.");
 		}
+	}
+	
+	private void registerAgentInBlockchain(GroupEthereumAgent groupEthereumAgent)
+			throws AgentException, EthereumException, SerializationException {
+		String name = groupEthereumAgent.getGroupName();
+
+		if (registryClient.usernameIsAvailable(name)) {
+			registryClient.registerGroup(groupEthereumAgent);
+		} else if (!registryClient.usernameIsValid(name)) {
+			// this should probably be checked during creation too
+			throw new AgentException("Agent login name is not valid for registry smart contracts.");
+		} else if (agentMatchesUserRegistryData(groupEthereumAgent)) {
+			logger.fine("Agent was already registered (same data), so that's fine.");
+		} else {
+			throw new AgentAlreadyExistsException(
+					"Agent username is already taken in blockchain user registry and details do NOT match.");
+		}
+	}
+	
+	
+	/**
+	 * Registers a group in the blockchain-based registry.
+	 *
+	 * Also registers the group name to the author, and registers the
+	 * author, if this has not already happened.
+	 */
+	public void registerGroupInBlockchain(GroupEthereumAgent groupEthereumAgent)
+			throws AgentException, SerializationException, EthereumException {
+		if (groupEthereumAgent.getOpeningAgent().isLocked()) {
+			throw new AgentLockedException("Cannot register service because Ethereum-enabled agent is locked.");
+		}
+
+		boolean groupAlreadyRegistered = getRegistryClient().getServiceNames().contains(groupEthereumAgent.getGroupName());
+		if (groupAlreadyRegistered) {
+			if (!isGroupOwner(((EthereumAgent) groupEthereumAgent.getOpeningAgent()).getLoginName(), groupEthereumAgent.getGroupName())) {
+				throw new AgentException("Group is already registered to someone else, cannot register!");
+			}
+		} else {
+			registerGroupName(groupEthereumAgent.getGroupName(), ((EthereumAgent) groupEthereumAgent.getOpeningAgent()));
+			registerServiceName(serviceName, author);
+		}
+
+		logger.info("Registering group '" + groupEthereumAgent.getGroupName() + "', created by " + ((EthereumAgent) groupEthereumAgent.getOpeningAgent()).getLoginName() + " ...");
+		getRegistryClient().releaseService(serviceName, serviceVersion, author, supplementHash);
+	}
+	
+	private boolean isGroupOwner(String authorName, String groupName) throws EthereumException {
+		try {
+			String groupOwnerName = getRegistryClient().lookupServiceAuthor(groupName);
+			String groupOwnerName = getRegistryClient().lookupServiceAuthor(groupName);
+			return authorName.equals(groupOwnerName);
+		} catch (NotFoundException|EthereumException e) {
+			throw new EthereumException("Ownership check errored or was inconsistent, investigate.");
+		}
+	}
+	
+	/** Register group name and if needed the author too */
+	private void registerGroupName(String name, EthereumAgent author)
+			throws EthereumException, AgentLockedException, SerializationException {
+		String authorName = author.getLoginName();
+
+		// register author if needed
+		try {
+			getRegistryClient().getUser(authorName);
+		} catch (NotFoundException e) {
+			if (!getRegistryClient().usernameIsAvailable(authorName)) {
+				throw new EthereumException("User name not available but also not found, lord help us!");
+			} else {
+				logger.info("User '" + authorName + "' not yet registered, registering now ...");
+				getRegistryClient().registerUser(author);
+			}
+		}
+
+		logger.fine("Service '" + name + "' not already known, registering ...");
+		getRegistryClient().registerService(name, author);
 	}
 
 	public AgentImpl getAgentByDetail(String agentId, String username, String email) throws AgentNotFoundException {
@@ -266,6 +350,29 @@ public class EthereumNode extends PastryNodeImpl {
 			logger.fine("[ETH] matching agent ("+ agent.getLoginName() +") to registry");
 			
 			UserData userInBlockchain = registryClient.getUser(agent.getLoginName());
+			
+			logger.finer("MATCHING ID? " + String.valueOf(userInBlockchain.getAgentId().equals(agent.getIdentifier())));
+			logger.finer("MATCHING PubKey? " + String.valueOf(userInBlockchain.getPublicKey().equals(agent.getPublicKey())));
+			// damn, we might not be able to compare the ethereum address, because it may be null if the agent is locked
+			// does it matter? I guess not. if name and pubkey match, do we care who the owner address is?
+			// let's go with no. TODO: consider implications
+			return true //userInBlockchain.getOwnerAddress().equals(agent.getEthereumAddress())
+					&& userInBlockchain.getAgentId().equals(agent.getIdentifier())
+					&& userInBlockchain.getPublicKey().equals(agent.getPublicKey());
+		} catch (NotFoundException e) {
+			logger.warning("User not found in registry");
+			return false;
+		} catch (SerializationException e) {
+			throw new EthereumException("Public key in user registry can't be deserialized.", e);
+		}
+	}
+	
+	/** compares agent login name and public key */
+	private boolean agentMatchesUserRegistryData(GroupEthereumAgent agent) throws EthereumException {
+		try {
+			logger.fine("[ETH] matching agent ("+ agent.getGroupName() +") to registry");
+			
+			UserData userInBlockchain = registryClient.getUser(agent.getGroupName());
 			
 			logger.finer("MATCHING ID? " + String.valueOf(userInBlockchain.getAgentId().equals(agent.getIdentifier())));
 			logger.finer("MATCHING PubKey? " + String.valueOf(userInBlockchain.getPublicKey().equals(agent.getPublicKey())));

@@ -301,6 +301,30 @@ public class ReadOnlyRegistryClient {
 			return ownerName;
 		}
 	}
+	
+	/**
+	 * Look up author/owner for a given group.
+	 * 
+	 * @param groupName name of group to check
+	 * @return author owning the group
+	 */
+	public String lookupGroupAuthor(String groupName) throws EthereumException, NotFoundException {
+		byte[] groupNameHash = Util.soliditySha3(groupName);
+		Tuple2<String, byte[]> groupNameAndOwner;
+		try {
+			groupNameAndOwner = contracts.serviceRegistry.services(groupNameHash).sendAsync().get();
+		} catch (Exception e) {
+			throw new EthereumException("Failed to look up service author", e);
+		}
+
+		String ownerName = Util.recoverString(serviceNameAndOwner.getValue2());
+
+		if (ownerName.equals("\u0000")) {
+			throw new NotFoundException("Service not registered, can't get author.");
+		} else {
+			return ownerName;
+		}
+	}
 
 	/** @return map of tags to descriptions */
 	public ConcurrentMap<String, String> getTags() {
