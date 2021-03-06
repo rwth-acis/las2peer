@@ -222,6 +222,29 @@ public class ReadOnlyRegistryClient {
 				userAsTuple.getValue4());
 	}
 
+	/**
+	 * Look up author/owner for a given group.
+	 * 
+	 * @param groupName name of group to check
+	 * @return author owning the group
+	 */
+	public UserData getGroup(String groupName) throws EthereumException, NotFoundException {
+		Tuple4<byte[], byte[], byte[], String> userAsTuple;
+		try {
+			userAsTuple = contracts.userRegistry.users(Util.padAndConvertString(groupName, 32)).sendAsync().get();
+		} catch (Exception e) {
+			throw new EthereumException("Could not get group", e);
+		}
+
+		byte[] returnedName = userAsTuple.getValue1();
+		if (Arrays.equals(returnedName, new byte[returnedName.length])) {
+			// name is 0s, meaning entry does not exist
+			throw new NotFoundException("group name apparently not registered.");
+		}
+
+		return new UserData(userAsTuple.getValue1(), userAsTuple.getValue2(), userAsTuple.getValue3(),
+				userAsTuple.getValue4());
+	}
 	public UserProfileData getProfile(String address) throws EthereumException, NotFoundException {
 		Tuple6<String, byte[], BigInteger, BigInteger, BigInteger, BigInteger> profileAsTuple;
 		try {
@@ -302,29 +325,6 @@ public class ReadOnlyRegistryClient {
 		}
 	}
 	
-	/**
-	 * Look up author/owner for a given group.
-	 * 
-	 * @param groupName name of group to check
-	 * @return author owning the group
-	 */
-	public String lookupGroupAuthor(String groupName) throws EthereumException, NotFoundException {
-		byte[] groupNameHash = Util.soliditySha3(groupName);
-		Tuple2<String, byte[]> groupNameAndOwner;
-		try {
-			groupNameAndOwner = contracts.serviceRegistry.services(groupNameHash).sendAsync().get();
-		} catch (Exception e) {
-			throw new EthereumException("Failed to look up service author", e);
-		}
-
-		String ownerName = Util.recoverString(serviceNameAndOwner.getValue2());
-
-		if (ownerName.equals("\u0000")) {
-			throw new NotFoundException("Service not registered, can't get author.");
-		} else {
-			return ownerName;
-		}
-	}
 
 	/** @return map of tags to descriptions */
 	public ConcurrentMap<String, String> getTags() {

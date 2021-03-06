@@ -240,41 +240,41 @@ public class EthereumNode extends PastryNodeImpl {
 	}
 	
 	
-	/**
-	 * Registers a group in the blockchain-based registry.
-	 *
-	 * Also registers the group name to the author, and registers the
-	 * author, if this has not already happened.
-	 */
-	public void registerGroupInBlockchain(GroupEthereumAgent groupEthereumAgent)
-			throws AgentException, SerializationException, EthereumException {
-		if (groupEthereumAgent.getOpeningAgent().isLocked()) {
-			throw new AgentLockedException("Cannot register service because Ethereum-enabled agent is locked.");
-		}
+	// /**
+	//  * Registers a group in the blockchain-based registry.
+	//  *
+	//  * Also registers the group name to the author, and registers the
+	//  * author, if this has not already happened.
+	//  */
+	// public void registerGroupInBlockchain(GroupEthereumAgent groupEthereumAgent)
+	// 		throws AgentException, SerializationException, EthereumException {
+	// 	if (groupEthereumAgent.getOpeningAgent().isLocked()) {
+	// 		throw new AgentLockedException("Cannot register service because Ethereum-enabled agent is locked.");
+	// 	}
 
-		boolean groupAlreadyRegistered = getRegistryClient().getServiceNames().contains(groupEthereumAgent.getGroupName());
-		if (groupAlreadyRegistered) {
-			if (!isGroupOwner(((EthereumAgent) groupEthereumAgent.getOpeningAgent()).getLoginName(), groupEthereumAgent.getGroupName())) {
-				throw new AgentException("Group is already registered to someone else, cannot register!");
-			}
-		} else {
-			registerGroupName(groupEthereumAgent.getGroupName(), ((EthereumAgent) groupEthereumAgent.getOpeningAgent()));
-			registerServiceName(serviceName, author);
-		}
+	// 	boolean groupAlreadyRegistered = getRegistryClient().getServiceNames().contains(groupEthereumAgent.getGroupName());
+	// 	if (groupAlreadyRegistered) {
+	// 		if (!isGroupOwner(((EthereumAgent) groupEthereumAgent.getOpeningAgent()).getLoginName(), groupEthereumAgent.getGroupName())) {
+	// 			throw new AgentException("Group is already registered to someone else, cannot register!");
+	// 		}
+	// 	} else {
+	// 		registerGroupName(groupEthereumAgent.getGroupName(), ((EthereumAgent) groupEthereumAgent.getOpeningAgent()));
+	// 		registerServiceName(serviceName, author);
+	// 	}
 
-		logger.info("Registering group '" + groupEthereumAgent.getGroupName() + "', created by " + ((EthereumAgent) groupEthereumAgent.getOpeningAgent()).getLoginName() + " ...");
-		getRegistryClient().releaseService(serviceName, serviceVersion, author, supplementHash);
-	}
+	// 	logger.info("Registering group '" + groupEthereumAgent.getGroupName() + "', created by " + ((EthereumAgent) groupEthereumAgent.getOpeningAgent()).getLoginName() + " ...");
+	// 	getRegistryClient().releaseService(serviceName, serviceVersion, author, supplementHash);
+	// }
 	
-	private boolean isGroupOwner(String authorName, String groupName) throws EthereumException {
-		try {
-			String groupOwnerName = getRegistryClient().lookupServiceAuthor(groupName);
-			String groupOwnerName = getRegistryClient().lookupServiceAuthor(groupName);
-			return authorName.equals(groupOwnerName);
-		} catch (NotFoundException|EthereumException e) {
-			throw new EthereumException("Ownership check errored or was inconsistent, investigate.");
-		}
-	}
+	// private boolean isGroupOwner(String authorName, String groupName) throws EthereumException {
+	// 	try {
+	// 		String groupOwnerName = getRegistryClient().lookupServiceAuthor(groupName);
+	// 		String groupOwnerName = getRegistryClient().lookupServiceAuthor(groupName);
+	// 		return authorName.equals(groupOwnerName);
+	// 	} catch (NotFoundException|EthereumException e) {
+	// 		throw new EthereumException("Ownership check errored or was inconsistent, investigate.");
+	// 	}
+	// }
 	
 	/** Register group name and if needed the author too */
 	private void registerGroupName(String name, EthereumAgent author)
