@@ -11,7 +11,7 @@ import org.junit.Test;
 import i5.las2peer.api.p2p.ServiceVersion;
 
 public class ServiceVersionTest {
-	ServiceVersion vNull, vStar, v0, v1, v1b, v10, v11, v100, v101, v1000, v1001, v100_alpha, v100_rc1, v100_pr_build, v100_build;
+	ServiceVersion vNull, vStar, v0, v1, v1b, v10, v11, v100, v101, v1000, v1001, v100_alpha, v100_rc1, v100_rc2, v100_pr_build, v100_build;
 
 	@Before
 	public void construct() {
@@ -29,6 +29,7 @@ public class ServiceVersionTest {
 
 		v100_alpha = new ServiceVersion("1.0.0-alpha");
 		v100_rc1 = new ServiceVersion("1.0.0-rc.1");
+		v100_rc2 = new ServiceVersion("1.0.0-rc.2");
 		v100_pr_build = new ServiceVersion("1.0.0-rc.1+sha.0abcd");
 		v100_build = new ServiceVersion("1.0.0+sha.0abcd");
 	}
@@ -47,13 +48,15 @@ public class ServiceVersionTest {
 		assertTrue(v0.fits(vStar));
 		assertFalse(vStar.fits(v0));
 		assertTrue(v1000.fits(v100));
-		assertTrue(v100.fits(v1000));
+		assertFalse(v100.fits(v1000));
 		assertTrue(v1.fits(v1b));
 		assertTrue(v11.fits(v1));
 		assertTrue(vStar.fits(vStar));
-		assertTrue(v100.fits(v100_alpha));
-		assertTrue(v100.fits(v100_alpha));
+		assertFalse(v100.fits(v100_alpha));
+		assertTrue(v100_alpha.fits(v100));
+		assertFalse(v100.fits(v100_alpha));
 		assertTrue(v100.fits(v100_build));
+		assertFalse((v100_rc2.fits(v100_rc1)));
 	}
 
 	@Test

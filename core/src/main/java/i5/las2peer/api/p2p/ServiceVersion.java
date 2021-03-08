@@ -54,6 +54,11 @@ public class ServiceVersion implements Comparable<ServiceVersion>, Serializable 
 					} else {
 						this.preRelease = split[0];
 					}
+
+					if (this.preRelease != null && this.preRelease.contains("-")){
+						throw new IllegalArgumentException("Syntax Error: pre-release should not contain a -.");
+					}
+
 					rawVersion = tokens[0];
 				}
 				else {
@@ -109,13 +114,29 @@ public class ServiceVersion implements Comparable<ServiceVersion>, Serializable 
 	 * @param major Major version number part
 	 * @param minor Minor version number part
 	 * @param patch Patch version number part
-	 * @param build Build number
+	 * @param preRelease  pre-release version
+	 * @param build build version
 	 * @throws IllegalArgumentException If a version number part is smaller than 0
 	 */
-	public ServiceVersion(int major, int minor, int patch, String build) throws IllegalArgumentException {
-		this(major, minor, patch);
+	public ServiceVersion(int major, int minor, int patch, String preRelease, String build) throws IllegalArgumentException {
+		this(major, minor, patch, preRelease);
 
 		this.build = build;
+	}
+
+	/**
+	 * generate a new ServiceVersion
+	 *
+	 * @param major Major version number part
+	 * @param minor Minor version number part
+	 * @param patch Patch version number part
+	 * @param preRelease  pre-release version
+	 * @throws IllegalArgumentException If a version number part is smaller than 0
+	 */
+	public ServiceVersion(int major, int minor, int patch, String preRelease) throws IllegalArgumentException {
+		this(major, minor, patch);
+
+		this.preRelease = preRelease;
 	}
 
 	/**
@@ -402,6 +423,13 @@ public class ServiceVersion implements Comparable<ServiceVersion>, Serializable 
 		return build;
 	}
 
+	public String getPreRelease() {
+		if (preRelease == null) {
+			return "";
+		}
+		return preRelease;
+	}
+
 	/**
 	 * @return a String representation of this version
 	 */
@@ -485,8 +513,20 @@ public class ServiceVersion implements Comparable<ServiceVersion>, Serializable 
 			return false;
 		}
 
+		if (required.preRelease == null) {
+			return true;
+		}
+
+		if (!Objects.equals(required.preRelease, this.preRelease)) {
+			return false;
+		}
+
 		if (required.build == null) {
 			return true;
+		}
+
+		if (this.build == null || !Objects.equals(required.build, this.build)) {
+			return false;
 		}
 
 		return true;
