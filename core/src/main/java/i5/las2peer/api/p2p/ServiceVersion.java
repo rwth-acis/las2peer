@@ -41,7 +41,7 @@ public class ServiceVersion implements Comparable<ServiceVersion>, Serializable 
 				String[] split;
 				String rawVersion;
 				// Separate additional metadata (pre-release/build)
-				if (hasPreRelease(version)) {
+				if (hasPreRelease()) {
 					String[] tokens;
 					tokens = value.split("-", 2);
 
@@ -185,10 +185,9 @@ public class ServiceVersion implements Comparable<ServiceVersion>, Serializable 
 
 	/**
 	 * Identify if this version contains a pre-release according to semver specification
-	 * @param version passed version string
 	 * @return if this version contains a pre-release
 	 */
-	private boolean hasPreRelease(String version) {
+	private boolean hasPreRelease() {
 
 		int firstIndexOfPlus = value.indexOf("+");
 		int firstIndexOfHyphen = value.indexOf("-");
