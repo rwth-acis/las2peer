@@ -1,5 +1,7 @@
 package i5.las2peer.security;
 
+import javax.naming.NameAlreadyBoundException;
+
 import i5.las2peer.api.logging.MonitoringEvent;
 import i5.las2peer.api.persistency.EnvelopeAlreadyExistsException;
 import i5.las2peer.api.persistency.EnvelopeException;
@@ -9,6 +11,7 @@ import i5.las2peer.api.security.AgentNotFoundException;
 import i5.las2peer.api.security.AgentOperationFailedException;
 import i5.las2peer.api.security.AnonymousAgent;
 import i5.las2peer.api.security.EmailAlreadyTakenException;
+import i5.las2peer.api.security.GroupAgent;
 import i5.las2peer.api.security.LoginNameAlreadyTakenException;
 import i5.las2peer.api.security.OIDCSubAlreadyTakenException;
 import i5.las2peer.api.security.UserAgent;
@@ -27,6 +30,7 @@ public class UserAgentManager {
 	private static final String PREFIX_USER_NAME = "USER_NAME-";
 	private static final String PREFIX_USER_MAIL = "USER_MAIL-";
 	private static final String PREFIX_OIDC_SUB = "OIDC_SUB-";
+	private static final String PREFIX_GROUP_NAME = "GROUP_NAME-";
 
 	private Node node;
 
@@ -38,9 +42,11 @@ public class UserAgentManager {
 	 * Stores login name and email of an user agent to the network
 	 * 
 	 * @param agent an unlocked UserAgent
-	 * @throws EmailAlreadyTakenException If the given email is already in use by another agent
-	 * @throws LoginNameAlreadyTakenException If the given login name is already in use by another agent
-	 * @throws AgentLockedException If the given agent is not unlocked
+	 * @throws EmailAlreadyTakenException     If the given email is already in use
+	 *                                        by another agent
+	 * @throws LoginNameAlreadyTakenException If the given login name is already in
+	 *                                        use by another agent
+	 * @throws AgentLockedException           If the given agent is not unlocked
 	 */
 	public void registerUserAgent(UserAgent agent)
 			throws EmailAlreadyTakenException, LoginNameAlreadyTakenException, AgentLockedException {
@@ -105,12 +111,50 @@ public class UserAgentManager {
 	}
 
 	/**
+	 * Stores group name of a group agent to the network
+	 * 
+	 * @param agent an unlocked GroupAgent
+	 * @throws NameAlreadyTakenException If the given name is already in use by
+	 *                                   another agent
+	 * @throws AgentLockedException      If the given agent is not unlocked
+	 */
+	public void registerGroupAgent(GroupAgent agent)
+			throws LoginNameAlreadyTakenException, NameAlreadyBoundException, AgentLockedException {
+		if (agent.isLocked()) {
+			throw new AgentLockedException("Only unlocked Agents can be registered.");
+		}
+		String agentId = agent.getIdentifier();
+		System.out.println("Attempt at registering group name envelope...");
+		if (agent.hasGroupName()) {
+			try {
+				String identifier = PREFIX_GROUP_NAME + agent.getGroupName().toLowerCase();
+				try {
+					EnvelopeVersion stored = node.fetchEnvelope(identifier);
+					if (!stored.getContent().equals(agentId)) {
+						throw new NameAlreadyBoundException();
+					}
+				} catch (EnvelopeNotFoundException e) {
+					EnvelopeVersion envName = node.createUnencryptedEnvelope(identifier,
+							((GroupAgentImpl) agent).getPublicKey(), agentId);
+					node.storeEnvelope(envName, ((GroupAgentImpl) agent));
+				}
+
+			} catch (EnvelopeAlreadyExistsException e) {
+				throw new LoginNameAlreadyTakenException();
+			} catch (SerializationException | CryptoException | EnvelopeException e) {
+				node.observerNotice(MonitoringEvent.NODE_ERROR, "Envelope error while registering group name: " + e);
+			}
+		}
+	}
+
+	/**
 	 * Stores OIDC sub of an user agent to the network
 	 * 
 	 * @param agent an unlocked UserAgent
-	 * @param sub The OIDC sub to register for this agent
-	 * @throws OIDCSubAlreadyTakenException If the given OIDC sub is already registered
-	 * @throws AgentLockedException If the given agent is not unlocked
+	 * @param sub   The OIDC sub to register for this agent
+	 * @throws OIDCSubAlreadyTakenException If the given OIDC sub is already
+	 *                                      registered
+	 * @throws AgentLockedException         If the given agent is not unlocked
 	 */
 	public void registerOIDCSub(UserAgentImpl agent, String sub)
 			throws OIDCSubAlreadyTakenException, AgentLockedException {
@@ -142,12 +186,16 @@ public class UserAgentManager {
 		}
 	}
 
-	// TODO: having this means that the "private" prefixes above are part of the API. whether this is desirable is
-	// debatable, but it definitely offers an advantage: being able to use them for the HTTP basic authorization
+	// TODO: having this means that the "private" prefixes above are part of the
+	// API. whether this is desirable is
+	// debatable, but it definitely offers an advantage: being able to use them for
+	// the HTTP basic authorization
 	// related to LAS-452
 	/**
-	 * Get agent ID for a prefixed identifier, i.e., a string consisting of one of the prefixes defined in this class
-	 * and the corresponding attribute (e.g., email address).
+	 * Get agent ID for a prefixed identifier, i.e., a string consisting of one of
+	 * the prefixes defined in this class and the corresponding attribute (e.g.,
+	 * email address).
+	 * 
 	 * @param prefixedIdentifier
 	 * @return agent ID
 	 */
@@ -170,8 +218,10 @@ public class UserAgentManager {
 	 * 
 	 * @param name
 	 * @return the id of the agent
-	 * @throws AgentNotFoundException If no agent for the given login is found
-	 * @throws AgentOperationFailedException If any other issue with the agent occurs, e. g. XML not readable
+	 * @throws AgentNotFoundException        If no agent for the given login is
+	 *                                       found
+	 * @throws AgentOperationFailedException If any other issue with the agent
+	 *                                       occurs, e. g. XML not readable
 	 */
 	public String getAgentIdByLogin(String name) throws AgentNotFoundException, AgentOperationFailedException {
 		if (name.equalsIgnoreCase(AnonymousAgent.LOGIN_NAME)) {
@@ -192,8 +242,10 @@ public class UserAgentManager {
 	 * 
 	 * @param email
 	 * @return the id of the agent
-	 * @throws AgentNotFoundException If no agent for the given email is found
-	 * @throws AgentOperationFailedException If any other issue with the agent occurs, e. g. XML not readable
+	 * @throws AgentNotFoundException        If no agent for the given email is
+	 *                                       found
+	 * @throws AgentOperationFailedException If any other issue with the agent
+	 *                                       occurs, e. g. XML not readable
 	 */
 	public String getAgentIdByEmail(String email) throws AgentNotFoundException, AgentOperationFailedException {
 		try {
@@ -211,8 +263,9 @@ public class UserAgentManager {
 	 * 
 	 * @param sub The OIDC sub to identify the user.
 	 * @return The id of the agent
-	 * @throws AgentNotFoundException If no agent for the given sub is found
-	 * @throws AgentOperationFailedException If any other issue with the agent occurs, e. g. XML not readable
+	 * @throws AgentNotFoundException        If no agent for the given sub is found
+	 * @throws AgentOperationFailedException If any other issue with the agent
+	 *                                       occurs, e. g. XML not readable
 	 */
 	public String getAgentIdByOIDCSub(String sub) throws AgentNotFoundException, AgentOperationFailedException {
 		try {
@@ -222,6 +275,27 @@ public class UserAgentManager {
 			throw new AgentNotFoundException("OIDC sub not found!", e);
 		} catch (EnvelopeException | SerializationException | CryptoException e) {
 			throw new AgentOperationFailedException("Could not read OIDC sub from storage");
+		}
+	}
+
+	/**
+	 * get an {@link GroupAgentImpl}'s id by group name
+	 * 
+	 * @param groupName
+	 * @return the id of the agent
+	 * @throws AgentNotFoundException        If no agent for the given login is
+	 *                                       found
+	 * @throws AgentOperationFailedException If any other issue with the agent
+	 *                                       occurs, e. g. XML not readable
+	 */
+	public String getAgentIdByGroupName(String groupName) throws AgentNotFoundException, AgentOperationFailedException {
+		try {
+			EnvelopeVersion env = node.fetchEnvelope(PREFIX_GROUP_NAME + groupName.toLowerCase());
+			return (String) env.getContent();
+		} catch (EnvelopeNotFoundException e) {
+			throw new AgentNotFoundException("Group not found!", e);
+		} catch (EnvelopeException | SerializationException | CryptoException e) {
+			throw new AgentOperationFailedException("Could not read agent id from storage");
 		}
 	}
 

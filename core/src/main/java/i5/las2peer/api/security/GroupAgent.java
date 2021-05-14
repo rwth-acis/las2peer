@@ -75,10 +75,39 @@ public interface GroupAgent extends Agent {
 	 */
 	public String[] getMemberList();
 
-	// TODO add admins to GroupAgents
-	/*
+
+	/**
+	 * Getter for the group name.
+	 * 
+	 * @return The group name.
+	 */
+	public String getGroupName();
+
+	/**
+	 * Check if the agent has a group name set.
+	 * 
+	 * @return true If a group name is set up.
+	 */
+	public boolean hasGroupName();
+
+	/**
+	 * Add an admin to the group.
+	 * 
+	 * @param agent Member to be made admin.
+	 */
 	void addAdmin(Agent agent);
+
+	/**
+	 * Remove admin rights from member.
+	 * 
+	 * @param agent Member to remove admin rights from.
+	 */
 	void revokeAdmin(Agent agent);
-	boolean hasAdmin(Agent agent);
-	*/
+
+	/**
+	 * Check admin rights for member.
+	 * 
+	 * @param agent Member to check admin rights for.
+	 */
+	boolean isAdmin(Agent agent);	
 }

@@ -190,19 +190,12 @@ public class ExecutionContextTest {
 
 			// TODO reclaim operation not (properly) implemented ...
 			/*
-			try {
-				context.reclaimEnvelope("id", eve);
-				fail("Exception expected");
-			} catch (EnvelopeAccessDeniedException e) {
-			}
-			
-			context.reclaimEnvelope("id");
-			try {
-				env = context.requestEnvelope("id");
-				fail("Exception expected");
-			} catch (EnvelopeNotFoundException e) {
-			}
-			*/
+			 * try { context.reclaimEnvelope("id", eve); fail("Exception expected"); } catch
+			 * (EnvelopeAccessDeniedException e) { }
+			 * 
+			 * context.reclaimEnvelope("id"); try { env = context.requestEnvelope("id");
+			 * fail("Exception expected"); } catch (EnvelopeNotFoundException e) { }
+			 */
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();
@@ -219,7 +212,7 @@ public class ExecutionContextTest {
 			context.storeEnvelope(env);
 
 			env = context.requestEnvelope("id");
-			GroupAgent group = context.createGroupAgent(new Agent[] { adam, eve });
+			GroupAgent group = context.createGroupAgent(new Agent[] { adam, eve }, "testEnvelopeReaderGroup");
 			context.storeAgent(group);
 			env.addReader(group);
 			context.storeEnvelope(env);
@@ -236,7 +229,7 @@ public class ExecutionContextTest {
 	@Test
 	public void testEnvelopeSigningGroup() {
 		try {
-			GroupAgent group = context.createGroupAgent(new Agent[] { adam, eve });
+			GroupAgent group = context.createGroupAgent(new Agent[] { adam, eve }, "testEnvelopeSigningGroup");
 			context.storeAgent(group);
 
 			Envelope env = context.createEnvelope("id", group);
@@ -337,7 +330,7 @@ public class ExecutionContextTest {
 			UserAgent userB = context.createUserAgent("passphrase");
 			assertFalse(userB.isLocked());
 
-			GroupAgent group = context.createGroupAgent(new Agent[] { userA, userB });
+			GroupAgent group = context.createGroupAgent(new Agent[] { userA, userB }, "testSecurity");
 			assertFalse(group.isLocked());
 
 			context.storeAgent(userA);
@@ -430,7 +423,7 @@ public class ExecutionContextTest {
 	public void testGroupAgents() {
 		try {
 			// create group
-			GroupAgent a = context.createGroupAgent(new Agent[] { adam });
+			GroupAgent a = context.createGroupAgent(new Agent[] { adam }, "testGroupAgentsa");
 			assertEquals(1, a.getMemberList().length);
 			context.storeAgent(a);
 
@@ -451,7 +444,7 @@ public class ExecutionContextTest {
 			// do the same with unlock instead of request:
 
 			// create group
-			GroupAgent b = context.createGroupAgent(new Agent[] { adam });
+			GroupAgent b = context.createGroupAgent(new Agent[] { adam }, "testGroupAgentsb");
 			context.storeAgent(b);
 
 			// add member

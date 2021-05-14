@@ -16,8 +16,9 @@ import i5.las2peer.testing.TestSuite;
 public class AgentUpdateTest {
 
 	/**
-	 * This test launches a network with two nodes. The first node creates an GroupAgent and modifies it. The second
-	 * node verifies that all changes are correctly stored in the network.
+	 * This test launches a network with two nodes. The first node creates an
+	 * GroupAgent and modifies it. The second node verifies that all changes are
+	 * correctly stored in the network.
 	 */
 	@Test
 	public void testGroupAgentUpdate() {
@@ -30,7 +31,8 @@ public class AgentUpdateTest {
 			UserAgentImpl smith = MockAgentFactory.getAdam();
 			UserAgentImpl neo = MockAgentFactory.getEve();
 			neo.unlock("evespass");
-			GroupAgentImpl group = GroupAgentImpl.createGroupAgent(new AgentImpl[] { smith, neo });
+			GroupAgentImpl group = GroupAgentImpl.createGroupAgent(new AgentImpl[] { smith, neo },
+					"testGroupAgentUpdate");
 			group.unlock(neo);
 			// store agents
 			firstNode.storeAgent(group);
