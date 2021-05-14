@@ -298,7 +298,15 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 					+ CryptoTools.getSymmetricAlgorithm() + "\">" + getEncodedPrivate() + "</privatekey>\n"
 					+ "\t<unlockKeys method=\"" + CryptoTools.getAsymmetricAlgorithm() + "\">\n" + keyList
 					+ "\t</unlockKeys>\n");
+			if (groupName != null) {
+				result.append("\t<groupName>" + groupName + "</groupName>\n");
+			}
 
+			String admins = "";
+			for(int i = 0; i < adminList.size(); i++) {
+				admins += "\t\t<admin id=\"" + i + "\" >" + adminList.get(i) + "</admin>\n";
+			}
+			result.append("\t<adminList>" + admins + "</adminList>\n");
 			result.append("</las2peer:agent>\n");
 
 			return result.toString();
