@@ -114,8 +114,6 @@ public class UserAgentManager {
 	 * Stores group name of a group agent to the network
 	 * 
 	 * @param agent an unlocked GroupAgent
-	 * @throws NameAlreadyTakenException If the given name is already in use by
-	 *                                   another agent
 	 * @throws AgentLockedException      If the given agent is not unlocked
 	 */
 	public void registerGroupAgent(GroupAgent agent)
