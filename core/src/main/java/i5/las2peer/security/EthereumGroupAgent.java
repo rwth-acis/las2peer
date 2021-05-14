@@ -27,7 +27,7 @@ import i5.las2peer.serialization.XmlTools;
 import i5.las2peer.tools.CryptoException;
 import i5.las2peer.tools.CryptoTools;
 
-public class GroupEthereumAgent extends GroupAgentImpl {
+public class EthereumGroupAgent extends GroupAgentImpl {
 	// this should probably be configured elsewhere
 
 	/**
@@ -53,7 +53,7 @@ public class GroupEthereumAgent extends GroupAgentImpl {
 
 	private static final L2pLogger logger = L2pLogger.getInstance(EthereumAgent.class);
 
-	protected GroupEthereumAgent(KeyPair pair, SecretKey secret, byte[] salt, String groupName, Agent[] members,
+	protected EthereumGroupAgent(KeyPair pair, SecretKey secret, byte[] salt, String groupName, Agent[] members,
 			String ethereumMnemonic) throws AgentOperationFailedException, CryptoException, SerializationException {
 		super(pair, secret, members, groupName);
 		checkGroupNameValidity(groupName);
@@ -63,7 +63,7 @@ public class GroupEthereumAgent extends GroupAgentImpl {
 		logger.fine("creating ethereum agent [" + ethereumAddress + "]");
 	}
 
-	protected GroupEthereumAgent(PublicKey pubKey, byte[] encryptedPrivate, HashMap<String, byte[]> htEncryptedKeys,
+	protected EthereumGroupAgent(PublicKey pubKey, byte[] encryptedPrivate, HashMap<String, byte[]> htEncryptedKeys,
 			String ethereumMnemonic, String ethereumAddress) throws AgentOperationFailedException {
 		super(pubKey, encryptedPrivate, htEncryptedKeys);
 		this.ethereumMnemonic = ethereumMnemonic;
@@ -148,12 +148,12 @@ public class GroupEthereumAgent extends GroupAgentImpl {
 	 * @throws CryptoException if there is an internal error during Ethereum key
 	 *                         creation
 	 */
-	public static GroupEthereumAgent createGroupEthereumAgentWithClient(String loginName,
+	public static EthereumGroupAgent createGroupEthereumAgentWithClient(String loginName,
 			ReadWriteRegistryClient regClient, Agent[] members)
 			throws CryptoException, AgentOperationFailedException, SerializationException {
 		byte[] salt = CryptoTools.generateSalt();
 		KeyPair keyPair = CryptoTools.generateKeyPair();
-		return new GroupEthereumAgent(keyPair, CryptoTools.generateSymmetricKey(), salt, loginName, members,
+		return new EthereumGroupAgent(keyPair, CryptoTools.generateSymmetricKey(), salt, loginName, members,
 				CredentialUtils.createMnemonic());
 	}
 
@@ -195,11 +195,11 @@ public class GroupEthereumAgent extends GroupAgentImpl {
 
 	}
 
-	public static GroupEthereumAgent createFromXml(String xml) throws MalformedXMLException {
+	public static EthereumGroupAgent createFromXml(String xml) throws MalformedXMLException {
 		return createFromXml(XmlTools.getRootElement(xml, "las2peer:agent"));
 	}
 
-	public static GroupEthereumAgent createFromXml(Element root) throws MalformedXMLException {
+	public static EthereumGroupAgent createFromXml(Element root) throws MalformedXMLException {
 		try {
 			// read id field from XML
 			Element elId = XmlTools.getSingularElement(root, "id");
@@ -249,7 +249,7 @@ public class GroupEthereumAgent extends GroupAgentImpl {
 			String ethereumMnemonic = ethereumMnemonicElement.getTextContent();
 			Element ethereumAddressElement = XmlTools.getSingularElement(root, "ethereumaddress");
 			String ethereumAddress = ethereumAddressElement.getTextContent();
-			GroupEthereumAgent result = new GroupEthereumAgent(publicKey, encPrivate, htMemberKeys, ethereumMnemonic,
+			EthereumGroupAgent result = new EthereumGroupAgent(publicKey, encPrivate, htMemberKeys, ethereumMnemonic,
 					ethereumAddress);
 			// read group Name
 			Element groupName = XmlTools.getOptionalElement(root, "groupName");
