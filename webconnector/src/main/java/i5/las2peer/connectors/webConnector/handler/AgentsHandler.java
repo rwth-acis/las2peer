@@ -347,7 +347,7 @@ public class AgentsHandler {
 		// 		.createGroupAgent(memberAgents.toArray(new AgentImpl[memberAgents.size()]));
 				if (node instanceof EthereumNode) {
 					EthereumNode ethNode = (EthereumNode) node;
-					groupAgent = EthereumGroupAgent.createGroupEthereumAgentWithClient(groupName, ethNode.getRegistryClient(),
+					groupAgent = EthereumGroupAgent.createEthereumGroupAgentWithClient(groupName, ethNode.getRegistryClient(),
 							memberAgents.toArray(new AgentImpl[memberAgents.size()]));
 				} else {
 					groupAgent = GroupAgentImpl.createGroupAgent(memberAgents.toArray(new AgentImpl[memberAgents.size()]),

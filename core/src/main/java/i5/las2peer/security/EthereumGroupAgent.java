@@ -73,7 +73,7 @@ public class EthereumGroupAgent extends GroupAgentImpl {
 
 	void checkGroupNameValidity(String groupName) throws IllegalArgumentException {
 		if (groupName.length() > 32) {
-			throw new IllegalArgumentException("Login name must be at most 32 characters");
+			throw new IllegalArgumentException("Group name must be at most 32 characters");
 		}
 	}
 
@@ -142,18 +142,18 @@ public class EthereumGroupAgent extends GroupAgentImpl {
 	/**
 	 * Creates new agent with given passphrase and login name.
 	 * 
-	 * @param loginName name matching [a-zA-Z].{3,31} (hopefully UTF-8 characters,
+	 * @param groupName name matching [a-zA-Z].{3,31} (hopefully UTF-8 characters,
 	 *                  let's not get too crazy)
 	 * @return new EthereumAgent instance
 	 * @throws CryptoException if there is an internal error during Ethereum key
 	 *                         creation
 	 */
-	public static EthereumGroupAgent createGroupEthereumAgentWithClient(String loginName,
+	public static EthereumGroupAgent createEthereumGroupAgentWithClient(String groupName,
 			ReadWriteRegistryClient regClient, Agent[] members)
 			throws CryptoException, AgentOperationFailedException, SerializationException {
 		byte[] salt = CryptoTools.generateSalt();
 		KeyPair keyPair = CryptoTools.generateKeyPair();
-		return new EthereumGroupAgent(keyPair, CryptoTools.generateSymmetricKey(), salt, loginName, members,
+		return new EthereumGroupAgent(keyPair, CryptoTools.generateSymmetricKey(), salt, groupName, members,
 				CredentialUtils.createMnemonic());
 	}
 
@@ -162,11 +162,11 @@ public class EthereumGroupAgent extends GroupAgentImpl {
 	/*
 	 * // use this if you already want to use a mnemonic generated somewhere else //
 	 * note that this still uses the password to generate the key pair public static
-	 * EthereumAgent createEthereumAgent(String loginName, String passphrase,
+	 * EthereumAgent createEthereumAgent(String groupName, String passphrase,
 	 * ReadWriteRegistryClient regClient, String ethereumMnemonic) throws
 	 * CryptoException, AgentOperationFailedException { byte[] salt =
 	 * CryptoTools.generateSalt(); KeyPair keyPair = CryptoTools.generateKeyPair();
-	 * return new EthereumAgent(keyPair, passphrase, salt, loginName,
+	 * return new EthereumAgent(keyPair, passphrase, salt, groupName,
 	 * ethereumMnemonic); }
 	 */
 
