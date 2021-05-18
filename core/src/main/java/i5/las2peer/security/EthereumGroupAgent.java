@@ -124,21 +124,10 @@ public class EthereumGroupAgent extends GroupAgentImpl {
 		String newResult = "";
 		String result = super.toXmlString();
 		newResult = result.replace("type=\"group\"", "type=\"ethereumGroup\"");
-		if (groupName != null) {
-			newResult = newResult.replace("</las2peer:agent>\n", "\t<groupName>" + groupName + "</groupName>\n" 
-											+ "</las2peer:agent>\n");
-		}
-		String admins = "";
-		for (int i = 0; i < adminList.size(); i++) {
-			admins += "\t\t<admin id=\"" + i + "\" >" + adminList.get(i) + "</admin>\n";
-		}
-		newResult = newResult.replace("</las2peer:agent>\n", "\t<adminList>" + admins + "</adminList>\n" + 
-					"</las2peer:agent>\n");
 		newResult = newResult.replace("</las2peer:agent>",
 				"\t<ethereumaddress>" + ethereumAddress + "</ethereumaddress>\n" + "\t<ethereummnemonic>"
 						+ ethereumMnemonic + "</ethereummnemonic>\n" + "</las2peer:agent>\n");
 		return newResult;
-
 	}
 
 	/**
