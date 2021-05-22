@@ -60,7 +60,7 @@ public class EthereumGroupAgent extends GroupAgentImpl {
 		this.groupName = groupName;
 		this.ethereumMnemonic = ethereumMnemonic;
 		this.ethereumAddress = CredentialUtils.fromMnemonic(ethereumMnemonic, groupName).getAddress();
-		logger.fine("creating ethereum agent [" + ethereumAddress + "]");
+		logger.fine("creating group ethereum agent [" + ethereumAddress + "]");
 	}
 
 	protected EthereumGroupAgent(PublicKey pubKey, byte[] encryptedPrivate, HashMap<String, byte[]> htEncryptedKeys,
@@ -68,7 +68,7 @@ public class EthereumGroupAgent extends GroupAgentImpl {
 		super(pubKey, encryptedPrivate, htEncryptedKeys);
 		this.ethereumMnemonic = ethereumMnemonic;
 		this.ethereumAddress = ethereumAddress;
-		logger.fine("creating ethereum agent [" + ethereumAddress + "]");
+		logger.fine("creating group ethereum agent [" + ethereumAddress + "]");
 	}
 
 	void checkGroupNameValidity(String groupName) throws IllegalArgumentException {
