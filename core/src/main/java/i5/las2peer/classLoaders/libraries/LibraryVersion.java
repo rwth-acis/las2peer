@@ -11,8 +11,6 @@ import i5.las2peer.api.p2p.ServiceVersion;
  */
 public class LibraryVersion  extends ServiceVersion {
 
-	private int major = 0;
-
 	/**
 	 * Generate a Version from String representation
 	 *
