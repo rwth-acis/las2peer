@@ -1,5 +1,6 @@
 package i5.las2peer.classLoaders.libraries;
 
+import i5.las2peer.api.SemverVersion;
 import i5.las2peer.api.p2p.ServiceVersion;
 
 /**
@@ -9,7 +10,7 @@ import i5.las2peer.api.p2p.ServiceVersion;
  *
  *
  */
-public class LibraryVersion  extends ServiceVersion {
+public class LibraryVersion  extends SemverVersion {
 
 	/**
 	 * Generate a Version from String representation
