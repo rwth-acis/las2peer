@@ -13,10 +13,10 @@ progressively loading them on-demand as the user navigates through the app.
 
 The PRPL pattern, in a nutshell:
 
-* **Push** components required for the initial route
-* **Render** initial route ASAP
-* **Pre-cache** components for remaining routes
-* **Lazy-load** and progressively upgrade next routes on-demand
+- **Push** components required for the initial route
+- **Render** initial route ASAP
+- **Pre-cache** components for remaining routes
+- **Lazy-load** and progressively upgrade next routes on-demand
 
 ### Setup
 
@@ -55,9 +55,9 @@ build/
   esm-bundled/
 ```
 
-* `es5-bundled` is a bundled, minified build with a service worker. ES6 code is compiled to ES5 for compatibility with older browsers.
-* `es6-bundled` is a bundled, minified build with a service worker. ES6 code is served as-is. This build is for browsers that can handle ES6 code - see [building your project for production](https://www.polymer-project.org/3.0/toolbox/build-for-production#compiling) for a list.
-* `esm-bundled` is a bundled, minified build with a service worker. It uses standard ES module import/export statements for browsers that support them.
+- `es5-bundled` is a bundled, minified build with a service worker. ES6 code is compiled to ES5 for compatibility with older browsers.
+- `es6-bundled` is a bundled, minified build with a service worker. ES6 code is served as-is. This build is for browsers that can handle ES6 code - see [building your project for production](https://www.polymer-project.org/3.0/toolbox/build-for-production#compiling) for a list.
+- `esm-bundled` is a bundled, minified build with a service worker. It uses standard ES module import/export statements for browsers that support them.
 
 Run `polymer help build` for the full list of available options and optimizations. Also, see the documentation on the [polymer.json specification](https://www.polymer-project.org/3.0/docs/tools/polymer-json) and [building your Polymer application for production](https://www.polymer-project.org/3.0/toolbox/build-for-production).
 

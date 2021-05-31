@@ -4,11 +4,12 @@
  Information Systems), RWTH Aachen University, Germany. All rights reserved.
  */
 
-import {LitElement, html} from '@polymer/lit-element';
-import Static from "../src/static";
-import Auth from "../src/util/auth";
+import { LitElement, html } from '@polymer/lit-element';
+
+import Static from '../src/static';
+import Auth from '../src/util/auth';
 import '@polymer/paper-spinner/paper-spinner-lite.js';
-import Common from "../src/util/common";
+import Common from '../src/util/common';
 
 /**
  * Callback element which gets called by GitHub API, after settings called GitHub's /login/oauth/authorize endpoint.
@@ -16,11 +17,13 @@ import Common from "../src/util/common";
  * We use the given code to request a GitHub access token.
  */
 class GitHubCallback extends LitElement {
-
   render() {
     return html`
       <div style="display: flex; height: 100%">
-        <paper-spinner-lite style="margin: auto auto auto auto" active></paper-spinner-lite>
+        <paper-spinner-lite
+          style="margin: auto auto auto auto"
+          active
+        ></paper-spinner-lite>
       </div>
     `;
   }
@@ -33,19 +36,19 @@ class GitHubCallback extends LitElement {
     const url_string = window.location.href;
     const url = new URL(url_string);
     // get code from query parameters
-    const code = url.searchParams.get("code");
-    if(url.searchParams.has("code")) {
+    const code = url.searchParams.get('code');
+    if (url.searchParams.has('code')) {
       // request access token from Project Management Service
       // The Project Management Service uses the given code to request an access token.
       // This request cannot be done at client-side, because it needs the client_secret
       // which should not be public.
-      fetch(Static.ProjectManagementServiceURL + "/users/githubcode/" + code, {
-        method: "POST",
-        headers: Auth.getAuthHeader()
-      }).then(response => {
-        if(response.ok) {
-          response.json().then(data => {
-            if(data.access_token && data.gitHubUsername) {
+      fetch(Static.ProjectManagementServiceURL + '/users/githubcode/' + code, {
+        method: 'POST',
+        headers: Auth.getAuthHeader(),
+      }).then((response) => {
+        if (response.ok) {
+          response.json().then((data) => {
+            if (data.access_token && data.gitHubUsername) {
               // received both access token for GitHub as well as the GitHub username of the user
 
               // store access token to localStorage
@@ -55,12 +58,11 @@ class GitHubCallback extends LitElement {
               // close window (then automatically return to settings page)
               window.close();
             }
-          })
+          });
         }
       });
     }
   }
-
 }
 
 customElements.define('github-callback', GitHubCallback);

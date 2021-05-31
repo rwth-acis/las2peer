@@ -1,7 +1,7 @@
 import { html, css, customElement, property } from 'lit-element';
 
 import { PageElement } from '../helpers/page-element.js';
-import { request } from '../helpers/request_helper.js';
+// import { request } from '../helpers/request_helper.js';
 import '@material/mwc-button';
 import '@material/mwc-textfield';
 
@@ -76,13 +76,13 @@ export class PagePublishService extends PageElement {
   }
 
   firstUpdated() {
-    const file = {
-      dom: document.getElementById('theFile'),
-      binary: null,
-    };
+    // const file = {
+    //   dom: document.getElementById('theFile'),
+    //   binary: null,
+    // };
   }
   handleshit() {
-    const reader = new FileReader();
+    // const reader = new FileReader();
 
     console.log('sdsds');
   }
@@ -100,13 +100,13 @@ export class PagePublishService extends PageElement {
     const body = new FormData();
     body.append('jarfile', bodyToSend.jarfile);
     body.append('supplement', JSON.stringify(bodyToSend.supplement));
-    const response = await request(
-      'https://las2peer.tech4comp.dbis.rwth-aachen.de/las2peer/services/upload',
-      {
-        method: 'POST',
-        body: body,
-      }
-    );
+    // const response = await request(
+    //   'https://las2peer.tech4comp.dbis.rwth-aachen.de/las2peer/services/upload',
+    //   {
+    //     method: 'POST',
+    //     body: body,
+    //   }
+    // );
   }
 }
 interface PublishServiceInfo {

@@ -1,14 +1,7 @@
-import {
-  LitElement,
-  html,
-  css,
-  customElement,
-  query,
-  property,
-} from 'lit-element';
+import { LitElement, html, css, customElement, query } from 'lit-element';
 
 import config from '../config.js';
-import { attachRouter, urlForName } from '../router/index.js';
+import { attachRouter } from '../router/index.js';
 import 'las2peer-frontend-statusbar/las2peer-frontend-statusbar.js';
 
 import 'pwa-helper-components/pwa-install-button.js';

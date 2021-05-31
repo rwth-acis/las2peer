@@ -13,10 +13,10 @@ Furthermore, this project is built on [TypeScript](https://www.typescriptlang.or
 ### Install the dependencies
 
     npm install
-  or
+
+or
 
     npm i
-  
 
 ### Start the development server
 
