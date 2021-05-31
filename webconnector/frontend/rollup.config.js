@@ -5,7 +5,7 @@ import { copy } from '@web/rollup-plugin-copy';
 import { black, blue } from 'chalk';
 import merge from 'deepmerge';
 
-const DIST_PATH = 'server/dist/';
+const DIST_PATH = 'build/es6-bundled/';
 
 const workboxConfig = {
   mode: 'production',
