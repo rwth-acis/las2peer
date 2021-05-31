@@ -9,7 +9,7 @@
     "node": ">=14.0.0"
   },
   "scripts": {
-    "build": "rimraf server/dist/ && rollup --config",
+    "build": "rimraf build/es6-bundled/ && rollup --config",
     "format": "npm-run-all format:*",
     "format:eslint": "npm run lint:eslint -- --fix",
     "format:prettier": "prettier . --ignore-path .gitignore --write",
