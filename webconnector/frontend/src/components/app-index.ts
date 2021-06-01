@@ -30,7 +30,7 @@ export class AppIndex extends LitElement {
       z-index: 1;
       top: 0;
       left: 0;
-      background-color: #111;
+      background-color: #c2adad;
       overflow-x: hidden;
       padding-top: 16px;
     }
