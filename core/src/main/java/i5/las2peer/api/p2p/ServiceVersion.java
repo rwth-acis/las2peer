@@ -13,10 +13,7 @@ import java.util.Objects;
  * and build are optional
  *
  */
-public class ServiceVersion extends SemverVersion implements Comparable<ServiceVersion>, Serializable {
-
-	@Serial
-	private static final long serialVersionUID = 1L;
+public class ServiceVersion extends SemverVersion implements Comparable<ServiceVersion> {
 
 	/**
 	 * Generate a Version from String representation

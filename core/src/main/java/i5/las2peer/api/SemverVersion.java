@@ -1,5 +1,6 @@
 package i5.las2peer.api;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -10,7 +11,10 @@ import java.util.Objects;
  * and build are optional
  *
  */
-public class SemverVersion {
+public class SemverVersion implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     private String value;
 
