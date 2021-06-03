@@ -4,20 +4,17 @@ import i5.las2peer.api.SemverVersion;
 import i5.las2peer.api.p2p.ServiceVersion;
 
 /**
- * a simple class managing a library version number in the format major.minor.subversion-build where minor, subversion
- * and build are optional
- *
- *
- *
+ * A simple class managing a library version number in the format
+ * {@code <major> "." <minor> "." <patch> "-" <pre-release> "+" <build>} (where minor, patch, pre-release and build
+ * are optional) or "*" (no version specified / matches all versions).
  */
 public class LibraryVersion  extends SemverVersion {
 
 	/**
 	 * Generate a Version from String representation
 	 *
-	 * format : major.minor.sub-build
-	 *
-	 * minor, subversion and build are optional
+	 * format : Semver {@code <major> "." <minor> "." <patch> "-" <pre-release> "+" <build>} (where minor, patch,
+	 * pre-release and build are optional) or "*" (no version specified / matches all versions)
 	 *
 	 * @param version A version string representation
 	 * @throws IllegalArgumentException If the string contains no valid version representation

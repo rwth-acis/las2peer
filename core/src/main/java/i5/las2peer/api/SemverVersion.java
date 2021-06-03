@@ -7,9 +7,9 @@ import java.util.Comparator;
 import java.util.Objects;
 
 /**
- * a simple class managing a service version number in the format major.minor.patchversion-build where minor, patchversion
- * and build are optional
- *
+ * A simple class managing a semantic version number in the format
+ * {@code <major> "." <minor> "." <patch> "-" <pre-release> "+" <build>} (where minor, patch, pre-release and build
+ * are optional) or "*" (no version specified / matches all versions).
  */
 public class SemverVersion implements Serializable {
 
