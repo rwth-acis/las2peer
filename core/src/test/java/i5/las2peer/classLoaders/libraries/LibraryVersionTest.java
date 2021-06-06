@@ -15,32 +15,32 @@ public class LibraryVersionTest {
 		LibraryVersion testee = new LibraryVersion("10.20.30-4010");
 		assertEquals(10, testee.getMajor());
 		assertEquals(20, testee.getMinor());
-		assertEquals(30, testee.getSub());
+		assertEquals(30, testee.getPatch());
 		assertEquals("4010", testee.getPreRelease());
 
 		testee = new LibraryVersion("10.20-4010");
 		assertEquals(10, testee.getMajor());
 		assertEquals(20, testee.getMinor());
-		assertEquals(0, testee.getSub());
+		assertEquals(0, testee.getPatch());
 		assertEquals("4010", testee.getPreRelease());
 
 		testee = new LibraryVersion("10.20");
 		assertEquals(10, testee.getMajor());
 		assertEquals(20, testee.getMinor());
-		assertEquals(0, testee.getSub());
+		assertEquals(0, testee.getPatch());
 		assertEquals("", testee.getBuild());
 		assertEquals("", testee.getPreRelease());
 
 		testee = new LibraryVersion("10-4010");
 		assertEquals(10, testee.getMajor());
 		assertEquals(0, testee.getMinor());
-		assertEquals(0, testee.getSub());
+		assertEquals(0, testee.getPatch());
 		assertEquals("4010", testee.getPreRelease());
 
 		testee = new LibraryVersion("10");
 		assertEquals(10, testee.getMajor());
 		assertEquals(0, testee.getMinor());
-		assertEquals(0, testee.getSub());
+		assertEquals(0, testee.getPatch());
 		assertEquals("", testee.getBuild());
 		assertEquals("", testee.getPreRelease());
 	}
