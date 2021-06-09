@@ -31,7 +31,7 @@ public class FileSystemRepository implements Repository {
 
 	/**
 	 * create a repository for the given directory, non-recursive
-	 * 
+	 *
 	 * @param directory A directory path name to use as repository
 	 */
 	public FileSystemRepository(String directory) {
@@ -40,7 +40,7 @@ public class FileSystemRepository implements Repository {
 
 	/**
 	 * create a repository for the given directory
-	 * 
+	 *
 	 * @param directory A directory path name to use as repository
 	 * @param recursive If true, recursion is used for sub-directories.
 	 */
@@ -50,7 +50,7 @@ public class FileSystemRepository implements Repository {
 
 	/**
 	 * create a repository for the given directories, non-recursive
-	 * 
+	 *
 	 * @param directories An array of directory path names to use as repository
 	 */
 	public FileSystemRepository(String[] directories) {
@@ -59,7 +59,7 @@ public class FileSystemRepository implements Repository {
 
 	/**
 	 * create a repository for the given directories
-	 * 
+	 *
 	 * @param directories An array of directory path names to use as repository
 	 * @param recursive If true, recursion is used for sub-directories.
 	 */
@@ -69,7 +69,7 @@ public class FileSystemRepository implements Repository {
 
 	/**
 	 * create a repository for the given directories
-	 * 
+	 *
 	 * @param directories A bunch of directory path names to use as repository
 	 * @param recursive If true, recursion is used for sub-directories.
 	 */
@@ -82,7 +82,7 @@ public class FileSystemRepository implements Repository {
 
 	/**
 	 * get the newest library for the given name
-	 * 
+	 *
 	 * @param name A library name to search for
 	 * @return Returns a LoadedLibrary for the requested library name
 	 * @throws LibraryNotFoundException If the library could not be found in this repository
@@ -117,7 +117,7 @@ public class FileSystemRepository implements Repository {
 
 	/**
 	 * get a library matching name and version of the given identifier
-	 * 
+	 *
 	 * @param lib A library identifier
 	 * @return Returns a LoadedLibrary for the requested library identifier
 	 * @throws LibraryNotFoundException If the library could not be found in this repository
@@ -149,7 +149,7 @@ public class FileSystemRepository implements Repository {
 
 	/**
 	 * get an array with all versions found for the given library name
-	 * 
+	 *
 	 * @param libraryName A canonical library name
 	 * @return array with all available versions of the given library
 	 */
@@ -159,7 +159,7 @@ public class FileSystemRepository implements Repository {
 
 	/**
 	 * get a collection with all versions found for the given library name
-	 * 
+	 *
 	 * @param libraryName A canonical library name
 	 * @return a collections with all versions of the given library
 	 */
@@ -174,7 +174,7 @@ public class FileSystemRepository implements Repository {
 
 	/**
 	 * get an array with found jar files within this repository
-	 * 
+	 *
 	 * @return an array with all libraries in this repository
 	 */
 	public String[] getAllLibraries() {
@@ -184,7 +184,7 @@ public class FileSystemRepository implements Repository {
 
 	/**
 	 * get a collection with all found jar files within this repository
-	 * 
+	 *
 	 * @return a collection with all libraries in this repository
 	 */
 	public Collection<String> getLibraryCollection() {
@@ -205,7 +205,7 @@ public class FileSystemRepository implements Repository {
 
 	/**
 	 * helper method to get the last modification date of a directory
-	 * 
+	 *
 	 * @param dir A directory
 	 * @param recursive If true also files inside the directory are considered
 	 * @return Returns the last modified date in epoch format
@@ -234,7 +234,7 @@ public class FileSystemRepository implements Repository {
 
 	/**
 	 * checks if there were changes made in the folder and re-reads repositories if so
-	 * 
+	 *
 	 * @param force if true, the repository will be updated independent from last modification
 	 */
 	private void updateRepository(boolean force) {
@@ -265,7 +265,7 @@ public class FileSystemRepository implements Repository {
 
 	/**
 	 * look for jars in the given directory, search recursive, if flag is set
-	 * 
+	 *
 	 * @param directory
 	 */
 	private void searchJars(String directory) {
@@ -284,7 +284,7 @@ public class FileSystemRepository implements Repository {
 
 		File[] entries = f.listFiles();
 
-		Pattern versionPattern = Pattern.compile("-[0-9]+(?:.[0-9]+(?:.[0-9]+)?)?(?:-[0-9]+)?$");
+		Pattern versionPattern = Pattern.compile("-(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(\\.(0|[1-9]\\d*))?(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$");
 
 		for (File entry : entries) {
 			if (entry.isDirectory()) {
@@ -314,7 +314,7 @@ public class FileSystemRepository implements Repository {
 
 	/**
 	 * register a found jar file to the hashtable of available jars in this repository
-	 * 
+	 *
 	 * @param file
 	 * @param name
 	 * @param version

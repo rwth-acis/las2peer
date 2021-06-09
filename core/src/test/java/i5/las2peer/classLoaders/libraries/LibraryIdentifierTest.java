@@ -15,7 +15,7 @@ public class LibraryIdentifierTest {
 		LibraryIdentifier testee = new LibraryIdentifier("testname;version=\"1.0.1-22\"");
 		assertEquals("testname", testee.getName());
 		assertEquals("1.0.1-22", testee.getVersion().toString());
-		assertEquals(22, testee.getVersion().getBuild());
+		assertEquals("22", testee.getVersion().getPreRelease());
 
 		testee = new LibraryIdentifier("testname-mit-strichen;version=\"1.0\"");
 		assertEquals("testname-mit-strichen", testee.getName());
