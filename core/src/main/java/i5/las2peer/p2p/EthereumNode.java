@@ -113,7 +113,7 @@ public class EthereumNode extends PastryNodeImpl {
 		String className = nameVersion.getSimpleClassName();
 		int versionMajor = nameVersion.getVersion().getMajor();
 		int versionMinor = nameVersion.getVersion().getMinor();
-		int versionPatch = nameVersion.getVersion().getSub();
+		int versionPatch = nameVersion.getVersion().getPatch();
 		String nodeId = getPastryNode().getId().toStringFull();
 		try {
 			registryClient.announceDeployment(serviceName, className, versionMajor, versionMinor, versionPatch, nodeId);
@@ -141,7 +141,7 @@ public class EthereumNode extends PastryNodeImpl {
 		String className = nameVersion.getSimpleClassName();
 		int versionMajor = nameVersion.getVersion().getMajor();
 		int versionMinor = nameVersion.getVersion().getMinor();
-		int versionPatch = nameVersion.getVersion().getSub();
+		int versionPatch = nameVersion.getVersion().getPatch();
 		String nodeId = getPastryNode().getId().toStringFull();
 		try {
 			registryClient.announceDeploymentEnd(serviceName, className, versionMajor, versionMinor, versionPatch, nodeId);
@@ -259,7 +259,7 @@ public class EthereumNode extends PastryNodeImpl {
 	public float getAgentReputation(String adminName, String adminEmail) {
 		// query node admin reputation
 		AgentImpl ethAgentAgent = null;
-		
+
 		try {
 			ethAgentAgent = getAgentByDetail(null, adminName, adminEmail);
 			ethAgentAgent = getAgent(ethAgentAgent.getIdentifier());
@@ -290,9 +290,9 @@ public class EthereumNode extends PastryNodeImpl {
 	private boolean agentMatchesUserRegistryData(EthereumAgent agent) throws EthereumException {
 		try {
 			logger.fine("[ETH] matching agent ("+ agent.getLoginName() +") to registry");
-			
+
 			UserData userInBlockchain = registryClient.getUser(agent.getLoginName());
-			
+
 			logger.finer("MATCHING ID? " + String.valueOf(userInBlockchain.getAgentId().equals(agent.getIdentifier())));
 			logger.finer("MATCHING PubKey? " + String.valueOf(userInBlockchain.getPublicKey().equals(agent.getPublicKey())));
 			// damn, we might not be able to compare the ethereum address, because it may be null if the agent is locked
@@ -401,9 +401,9 @@ public class EthereumNode extends PastryNodeImpl {
 	public ReadWriteRegistryClient getRegistryClient() {
 		return registryClient;
 	}
-	
+
 	//public void registerProfile(EthereumAgent author) throws EthereumException {
 	//	registryClient.registerReputationProfile(author);
 	//}
-	 
+
 }

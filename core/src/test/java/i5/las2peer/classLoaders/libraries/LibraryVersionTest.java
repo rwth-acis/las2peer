@@ -15,32 +15,34 @@ public class LibraryVersionTest {
 		LibraryVersion testee = new LibraryVersion("10.20.30-4010");
 		assertEquals(10, testee.getMajor());
 		assertEquals(20, testee.getMinor());
-		assertEquals(30, testee.getSub());
-		assertEquals(4010, testee.getBuild());
+		assertEquals(30, testee.getPatch());
+		assertEquals("4010", testee.getPreRelease());
 
 		testee = new LibraryVersion("10.20-4010");
 		assertEquals(10, testee.getMajor());
 		assertEquals(20, testee.getMinor());
-		assertEquals(0, testee.getSub());
-		assertEquals(4010, testee.getBuild());
+		assertEquals(0, testee.getPatch());
+		assertEquals("4010", testee.getPreRelease());
 
 		testee = new LibraryVersion("10.20");
 		assertEquals(10, testee.getMajor());
 		assertEquals(20, testee.getMinor());
-		assertEquals(0, testee.getSub());
-		assertEquals(0, testee.getBuild());
+		assertEquals(0, testee.getPatch());
+		assertEquals("", testee.getBuild());
+		assertEquals("", testee.getPreRelease());
 
 		testee = new LibraryVersion("10-4010");
 		assertEquals(10, testee.getMajor());
 		assertEquals(0, testee.getMinor());
-		assertEquals(0, testee.getSub());
-		assertEquals(4010, testee.getBuild());
+		assertEquals(0, testee.getPatch());
+		assertEquals("4010", testee.getPreRelease());
 
 		testee = new LibraryVersion("10");
 		assertEquals(10, testee.getMajor());
 		assertEquals(0, testee.getMinor());
-		assertEquals(0, testee.getSub());
-		assertEquals(0, testee.getBuild());
+		assertEquals(0, testee.getPatch());
+		assertEquals("", testee.getBuild());
+		assertEquals("", testee.getPreRelease());
 	}
 
 	@Test
@@ -77,12 +79,6 @@ public class LibraryVersionTest {
 		} catch (IllegalArgumentException e) {
 			// thats correct
 		}
-		try {
-			testee = new LibraryVersion("1.0-10.10");
-			fail("IllegalArgumentException should have been thrown");
-		} catch (IllegalArgumentException e) {
-			// thats correct
-		}
 	}
 
 	@Test
@@ -90,11 +86,11 @@ public class LibraryVersionTest {
 		// assertEquals ( new LibraryVersion ( "10.0.1-1234"), new LibraryVersion ( 10, 0, 1, 1234) );
 
 		LibraryVersion testee1 = new LibraryVersion("10.0.1-1234");
-		LibraryVersion testee2 = new LibraryVersion(10, 0, 1, 1234);
+		LibraryVersion testee2 = new LibraryVersion(10, 0, 1, "1234");
 		assertTrue(testee1.equals(testee2));
 		assertEquals(testee1, testee2);
 
-		assertFalse(new LibraryVersion("10.1.1-1234").equals(new LibraryVersion(10, 1, 1, 123)));
+		assertFalse(new LibraryVersion("10.1.1-1234").equals(new LibraryVersion(10, 1, 1, "123")));
 		assertFalse(new LibraryVersion("10.1.1-1234").equals(new LibraryVersion(10, 1, 1)));
 
 		// check for comparing against string versions
@@ -107,7 +103,7 @@ public class LibraryVersionTest {
 
 	@Test
 	public void testStringRepresentation() {
-		assertEquals("10.0.1-1234", new LibraryVersion(10, 0, 1, 1234).toString());
+		assertEquals("10.0.1-1234", new LibraryVersion(10, 0, 1, "1234").toString());
 		assertEquals("10.0-1234", new LibraryVersion("10.0-1234").toString());
 		assertEquals("10-1234", new LibraryVersion("10-1234").toString());
 		assertEquals("10.0.1", new LibraryVersion(10, 0, 1).toString());

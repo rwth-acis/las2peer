@@ -1,154 +1,96 @@
 package i5.las2peer.api.p2p;
 
+import i5.las2peer.api.SemverVersion;
+
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Objects;
 
 /**
- * a simple class managing a service version number in the format major.minor.subversion-build where minor, subversion
- * and build are optional
- *
+ * A simple class managing a service version number in the format
+ * {@code <major> "." <minor> "." <patch> "-" <pre-release> "+" <build>} (where minor, patch, pre-release and build
+ * are optional) or "*" (no version specified / matches all versions).
  */
-public class ServiceVersion implements Comparable<ServiceVersion>, Serializable {
-
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-
-	private Integer major = null;
-	private Integer minor = null;
-	private Integer sub = null;
-	private Integer build = null;
+public class ServiceVersion extends SemverVersion implements Comparable<ServiceVersion> {
 
 	/**
 	 * Generate a Version from String representation
-	 * 
-	 * format : major.minor.sub-build (where minor, subversion and build are optional) or "*" (no version specified /
+	 *
+	 * format : Semver {@code <major> "." <minor> "." <patch> "-" <pre-release> "+" <build>} (where minor, patch, pre-release and build are optional) or "*" (no version specified /
 	 * matches all versions)
-	 * 
+	 *
 	 * @param version A version string representation to parse
 	 * @throws IllegalArgumentException If the string contains no valid version representation
 	 */
 	public ServiceVersion(String version) throws IllegalArgumentException {
-		if (version != null && !version.equals("*")) {
-			try {
-				int posMinus = version.indexOf("-");
-				String[] split;
-				if (posMinus >= 0) {
-					split = version.split("-");
-					if (split.length != 2) {
-						throw new IllegalArgumentException("Syntax Error: more than one - in version string");
-					}
-
-					this.build = Integer.valueOf(split[1]);
-					version = split[0];
-
-					if (this.build < 0) {
-						throw new IllegalArgumentException("Negative version numbers are not allowed!");
-					}
-				}
-
-				split = version.split("\\.");
-				if (split.length > 3) {
-					throw new IllegalArgumentException(
-							"Syntax Error: too many version numbers, a maximum of three is allowed");
-				}
-
-				this.major = Integer.valueOf(split[0]);
-				if (this.major < 0) {
-					throw new IllegalArgumentException("Negative version numbers are not allowed!");
-				}
-
-				if (split.length > 1) {
-					this.minor = Integer.valueOf(split[1]);
-					if (this.minor < 0) {
-						throw new IllegalArgumentException("Negative version numbers are not allowed!");
-					}
-				} else {
-					this.minor = null;
-				}
-
-				if (split.length > 2) {
-					this.sub = Integer.valueOf(split[2]);
-					if (this.sub < 0) {
-						throw new IllegalArgumentException("Negative version numbers are not allowed!");
-					}
-				} else {
-					this.sub = null;
-				}
-			} catch (NumberFormatException e) {
-				throw new IllegalArgumentException(
-						"The given string contains invalid number representations: " + version, e);
-			}
-		}
+		super(version);
 	}
 
 	/**
 	 * generate a new ServiceVersion
-	 * 
+	 *
 	 * @param major Major version number part
 	 * @param minor Minor version number part
-	 * @param sub Sub version number part
-	 * @param build Build number
+	 * @param patch Patch version number part
+	 * @param preRelease  pre-release version
+	 * @param build build version
 	 * @throws IllegalArgumentException If a version number part is smaller than 0
 	 */
-	public ServiceVersion(int major, int minor, int sub, int build) throws IllegalArgumentException {
-		this(major, minor, sub);
-		if (build < 0) {
-			throw new IllegalArgumentException("Negative version numbers are not allowed!");
-		}
-
-		this.build = build;
+	public ServiceVersion(int major, int minor, int patch, String preRelease, String build) throws IllegalArgumentException {
+		super(major, minor, patch, preRelease, build);
 	}
 
 	/**
 	 * generate a new ServiceVersion
-	 * 
+	 *
 	 * @param major Major version number part
 	 * @param minor Minor version number part
-	 * @param sub Sub version number part
+	 * @param patch Patch version number part
+	 * @param preRelease  pre-release version
 	 * @throws IllegalArgumentException If a version number part is smaller than 0
 	 */
-	public ServiceVersion(int major, int minor, int sub) throws IllegalArgumentException {
-		this(major, minor);
-		if (sub < 0) {
-			throw new IllegalArgumentException("Negative version numbers are not allowed!");
-		}
-		this.sub = sub;
+	public ServiceVersion(int major, int minor, int patch, String preRelease) throws IllegalArgumentException {
+		super(major, minor, patch, preRelease);
 	}
 
 	/**
 	 * generate a new ServiceVersion
-	 * 
+	 *
+	 * @param major Major version number part
+	 * @param minor Minor version number part
+	 * @param patch Patch version number part
+	 * @throws IllegalArgumentException If a version number part is smaller than 0
+	 */
+	public ServiceVersion(int major, int minor, int patch) throws IllegalArgumentException {
+		super(major, minor,patch);
+	}
+
+	/**
+	 * generate a new ServiceVersion
+	 *
 	 * @param major Major version number part
 	 * @param minor Minor version number part
 	 * @throws IllegalArgumentException If a version number part is smaller than 0
 	 */
 	public ServiceVersion(int major, int minor) throws IllegalArgumentException {
-		this(major);
-		if (minor < 0) {
-			throw new IllegalArgumentException("Negative version numbers are not allowed!");
-		}
-		this.minor = minor;
+		super(major, minor);
 	}
 
 	/**
 	 * generate a new ServiceVersion
-	 * 
+	 *
 	 * @param major Major version number part
 	 * @throws IllegalArgumentException If a version number part is smaller than 0
 	 */
 	public ServiceVersion(int major) throws IllegalArgumentException {
-		if (major < 0) {
-			throw new IllegalArgumentException("Negative version numbers are not allowed!");
-		}
-		this.major = major;
+		super(major);
 	}
 
 	/**
 	 * check if this version is larger than the given one
-	 * 
+	 *
 	 * @param v Another service version to compare to
 	 * @return true, if this version is larger than the given one
 	 */
@@ -179,35 +121,38 @@ public class ServiceVersion implements Comparable<ServiceVersion>, Serializable 
 			return true;
 		}
 
-		if (this.sub != null && v.sub != null) {
-			if (this.sub > v.sub) {
+		if (this.patch != null && v.patch != null) {
+			if (this.patch > v.patch) {
 				return true;
 			}
-			if (this.sub < v.sub) {
+			if (this.patch < v.patch) {
 				return false;
 			}
-		} else if (this.sub == null) {
+		} else if (this.patch == null) {
 			return false;
-		} else if (v.sub == null) {
+		} else if (v.patch == null) {
 			return true;
 		}
 
-		if (this.build == null) {
+		// Check if both are not a pre-release
+		if (this.preRelease == null && v.preRelease == null) {
 			return false;
 		}
-		if (v.build == null) {
-			return true;
-		}
-		if (this.build > v.build) {
+
+		// At least one version is a pre-release
+
+		// Check self no pre-release, other pre-release, release takes precedence
+		if (this.preRelease == null) {
 			return true;
 		}
 
-		return false;
+		// Now compare pre-releases
+		return this.preRelease.compareTo(v.preRelease) > 0;
 	}
 
 	/**
 	 * check if this version is smaller than the given one
-	 * 
+	 *
 	 * @param v Another service version to compare to
 	 * @return true, if this version is smaller than the given one
 	 */
@@ -217,7 +162,7 @@ public class ServiceVersion implements Comparable<ServiceVersion>, Serializable 
 
 	/**
 	 * check if this version is larger than or equal to the given one
-	 * 
+	 *
 	 * @param v Another service version to compare to
 	 * @return true, if this version is larger than or equal to the given one
 	 */
@@ -227,7 +172,7 @@ public class ServiceVersion implements Comparable<ServiceVersion>, Serializable 
 
 	/**
 	 * check if this version is smaller than or equal to the given one
-	 * 
+	 *
 	 * @param v Another service version to compare to
 	 * @return true, if this version is smaller than or equal to the given one
 	 */
@@ -237,7 +182,7 @@ public class ServiceVersion implements Comparable<ServiceVersion>, Serializable 
 
 	/**
 	 * check if this version is between the given ones
-	 * 
+	 *
 	 * @param smaller A smaller service version to check for
 	 * @param larger A larger service version to check for
 	 * @return true, if this version is between the two given ones
@@ -258,7 +203,7 @@ public class ServiceVersion implements Comparable<ServiceVersion>, Serializable 
 
 	/**
 	 * tries to create a version number from the given strings and compares them to this version
-	 * 
+	 *
 	 * @param smaller A smaller service version to check for
 	 * @param larger A larger service version to check for
 	 * @return true, if this version is between the two given ones
@@ -268,119 +213,8 @@ public class ServiceVersion implements Comparable<ServiceVersion>, Serializable 
 	}
 
 	/**
-	 * compares to version and checks for equality
-	 * 
-	 * @param v Another service version to compare to
-	 * @return true, if this version is the same as the given one
-	 */
-	public boolean equals(ServiceVersion v) {
-		return v.toString().equals(this.toString());
-	}
-
-	/**
-	 * compares this version with any object
-	 * 
-	 * if the given object is a String, the string representation of this version is compared to the given string
-	 * 
-	 * @param o Another object to check
-	 * @return true, if the given object is a version and the same as this one
-	 */
-	@Override
-	public boolean equals(Object o) {
-		if (o instanceof ServiceVersion) {
-			return this.equals((ServiceVersion) o);
-		} else if (o instanceof String) {
-			return this.toString().equals(o);
-		} else {
-			return super.equals(o);
-		}
-	}
-
-	/**
-	 * since equals is overridden, we should implement an own hashCode.
-	 * 
-	 * @return a hash code as int
-	 */
-	@Override
-	public int hashCode() {
-		return (this.toString()).hashCode();
-	}
-
-	/**
-	 * get the minor version number
-	 * 
-	 * @return minor version number
-	 */
-	public int getMinor() {
-		if (minor == null) {
-			return 0;
-		}
-		return minor;
-	}
-
-	/**
-	 * get the major version number
-	 * 
-	 * @return major version number
-	 */
-	public int getMajor() {
-		if (major == null) {
-			return 0;
-		}
-		return major;
-	}
-
-	/**
-	 * get the subversion of the minor version number
-	 * 
-	 * @return suberverion number of minor
-	 */
-	public int getSub() {
-		if (sub == null) {
-			return 0;
-		}
-		return sub;
-	}
-
-	/**
-	 * get the build number of this (sub)version
-	 * 
-	 * @return build number
-	 */
-	public int getBuild() {
-		if (build == null) {
-			return 0;
-		}
-		return build;
-	}
-
-	/**
-	 * @return a String representation of this version
-	 */
-	@Override
-	public String toString() {
-		if (major == null) {
-			return "*";
-		}
-
-		String result = "" + major;
-		if (minor != null) {
-			result += "." + minor;
-			if (sub != null) {
-				result += "." + sub;
-			}
-		}
-
-		if (build != null) {
-			result += "-" + build;
-		}
-
-		return result;
-	}
-
-	/**
 	 * implementation of Comparable
-	 * 
+	 *
 	 * @param other Another service version to check
 	 * @return comparison code
 	 */
@@ -397,9 +231,9 @@ public class ServiceVersion implements Comparable<ServiceVersion>, Serializable 
 
 	/**
 	 * checks if this version "fits" to the required version
-	 * 
+	 *
 	 * e.g. "1.5.2-123" will fit "1.5", but "1.5" won't fit "1.6" or "1.5.2"
-	 * 
+	 *
 	 * @param required A required service version to check for
 	 * @return Returns true if this version fits the required version
 	 */
@@ -418,17 +252,26 @@ public class ServiceVersion implements Comparable<ServiceVersion>, Serializable 
 			return false;
 		}
 
-		if (required.sub == null) {
+		if (required.patch == null) {
 			return true;
 		}
-		if (this.sub == null || required.sub.intValue() != this.sub.intValue()) {
+		if (this.patch == null || required.patch.intValue() != this.patch.intValue()) {
+			return false;
+		}
+
+		if (required.preRelease == null) {
+			return true;
+		}
+
+		if (!Objects.equals(required.preRelease, this.preRelease)) {
 			return false;
 		}
 
 		if (required.build == null) {
 			return true;
 		}
-		if (this.build == null || required.build.intValue() != this.build.intValue()) {
+
+		if (this.build == null || !Objects.equals(required.build, this.build)) {
 			return false;
 		}
 
@@ -437,7 +280,7 @@ public class ServiceVersion implements Comparable<ServiceVersion>, Serializable 
 
 	/**
 	 * returns the newest ServiceVersion from all available ServiceVersions that fits this version
-	 * 
+	 *
 	 * @param available available versions
 	 * @return a fitting ServiceVersion or null if no fitting version exists
 	 */
