@@ -119,6 +119,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		{
 			BigInteger txManNonce = txMan.getCurrentNonce();
 			logger.info("[TX Nonce] before: " + txManNonce);
+			getNonce(txMan.getFromAddress()); // check if nonce has to be udpated
 		}
 
 
