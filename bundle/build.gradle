@@ -91,3 +91,8 @@ publishing {
         }
     }
 }
+
+// disable module metadata publication
+tasks.withType(GenerateModuleMetadata) {
+    enabled = false
+}
