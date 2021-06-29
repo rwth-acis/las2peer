@@ -18,12 +18,14 @@ import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.persistency.SharedStorage;
 import i5.las2peer.registry.CredentialUtils;
 import i5.las2peer.registry.ReadWriteRegistryClient;
+import i5.las2peer.registry.data.GroupData;
 import i5.las2peer.registry.data.RegistryConfiguration;
 import i5.las2peer.registry.data.UserData;
 import i5.las2peer.registry.exceptions.EthereumException;
 import i5.las2peer.registry.exceptions.NotFoundException;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.EthereumAgent;
+import i5.las2peer.security.EthereumGroupAgent;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.CryptoException;
 
@@ -111,7 +113,7 @@ public class EthereumNode extends PastryNodeImpl {
 		String className = nameVersion.getSimpleClassName();
 		int versionMajor = nameVersion.getVersion().getMajor();
 		int versionMinor = nameVersion.getVersion().getMinor();
-		int versionPatch = nameVersion.getVersion().getSub();
+		int versionPatch = nameVersion.getVersion().getPatch();
 		String nodeId = getPastryNode().getId().toStringFull();
 		try {
 			registryClient.announceDeployment(serviceName, className, versionMajor, versionMinor, versionPatch, nodeId);
@@ -139,7 +141,7 @@ public class EthereumNode extends PastryNodeImpl {
 		String className = nameVersion.getSimpleClassName();
 		int versionMajor = nameVersion.getVersion().getMajor();
 		int versionMinor = nameVersion.getVersion().getMinor();
-		int versionPatch = nameVersion.getVersion().getSub();
+		int versionPatch = nameVersion.getVersion().getPatch();
 		String nodeId = getPastryNode().getId().toStringFull();
 		try {
 			registryClient.announceDeploymentEnd(serviceName, className, versionMajor, versionMinor, versionPatch, nodeId);
@@ -189,6 +191,14 @@ public class EthereumNode extends PastryNodeImpl {
 				logger.warning("Failed to register EthereumAgent; error: " + e);
 				throw new AgentException("Problem storing Ethereum agent", e);
 			}
+		}else if(agent instanceof EthereumGroupAgent){
+			try {
+				registerEthereumGroupAgentInBlockchain((EthereumGroupAgent) agent);
+				logger.info("[ETH] Stored group agent " + agent.getIdentifier());
+			} catch (Exception e) {
+				logger.warning("Failed to register EthereumGroupAgent; error: " + e);
+				throw new AgentException("Problem storing EthereumGroupAgent", e);
+			}
 		}
 		super.storeAgent(agent);
 	}
@@ -213,6 +223,22 @@ public class EthereumNode extends PastryNodeImpl {
 		}
 	}
 
+	private void registerEthereumGroupAgentInBlockchain(EthereumGroupAgent ethereumGroupAgent)
+			throws AgentException, EthereumException, SerializationException {
+		String groupName = ethereumGroupAgent.getGroupName();
+
+		if (registryClient.groupNameIsAvailable(groupName)) {
+			registryClient.registerGroup(ethereumGroupAgent);
+		} else if (!registryClient.groupNameIsValid(groupName)) {
+			// this should probably be checked during creation too
+			throw new AgentException("Agent login name is not valid for registry smart contracts.");
+		} else if (agentMatchesUserRegistryData(ethereumGroupAgent)) {
+			logger.fine("Agent was already registered (same data), so that's fine.");
+		} else {
+			throw new AgentAlreadyExistsException(
+					"Agent username is already taken in blockchain user registry and details do NOT match.");
+		}
+	}
 	public AgentImpl getAgentByDetail(String agentId, String username, String email) throws AgentNotFoundException {
 		try {
 			if (agentId == null || agentId.isEmpty()) {
@@ -233,7 +259,7 @@ public class EthereumNode extends PastryNodeImpl {
 	public float getAgentReputation(String adminName, String adminEmail) {
 		// query node admin reputation
 		AgentImpl ethAgentAgent = null;
-		
+
 		try {
 			ethAgentAgent = getAgentByDetail(null, adminName, adminEmail);
 			ethAgentAgent = getAgent(ethAgentAgent.getIdentifier());
@@ -264,9 +290,9 @@ public class EthereumNode extends PastryNodeImpl {
 	private boolean agentMatchesUserRegistryData(EthereumAgent agent) throws EthereumException {
 		try {
 			logger.fine("[ETH] matching agent ("+ agent.getLoginName() +") to registry");
-			
+
 			UserData userInBlockchain = registryClient.getUser(agent.getLoginName());
-			
+
 			logger.finer("MATCHING ID? " + String.valueOf(userInBlockchain.getAgentId().equals(agent.getIdentifier())));
 			logger.finer("MATCHING PubKey? " + String.valueOf(userInBlockchain.getPublicKey().equals(agent.getPublicKey())));
 			// damn, we might not be able to compare the ethereum address, because it may be null if the agent is locked
@@ -280,6 +306,29 @@ public class EthereumNode extends PastryNodeImpl {
 			return false;
 		} catch (SerializationException e) {
 			throw new EthereumException("Public key in user registry can't be deserialized.", e);
+		}
+	}
+
+	/** compares group agent name and public key */
+	private boolean agentMatchesUserRegistryData(EthereumGroupAgent agent) throws EthereumException {
+		try {
+			logger.fine("[ETH] matching group agent ("+ agent.getGroupName() +") to registry");
+
+			GroupData groupInBlockchain = registryClient.getGroup(agent.getGroupName());
+
+			logger.finer("MATCHING ID? " + String.valueOf(groupInBlockchain.getAgentId().equals(agent.getIdentifier())));
+			logger.finer("MATCHING PubKey? " + String.valueOf(groupInBlockchain.getPublicKey().equals(agent.getPublicKey())));
+			// damn, we might not be able to compare the ethereum address, because it may be null if the agent is locked
+			// does it matter? I guess not. if name and pubkey match, do we care who the owner address is?
+			// let's go with no. TODO: consider implications
+			return true //userInBlockchain.getOwnerAddress().equals(agent.getEthereumAddress())
+					&& groupInBlockchain.getAgentId().equals(agent.getIdentifier())
+					&& groupInBlockchain.getPublicKey().equals(agent.getPublicKey());
+		} catch (NotFoundException e) {
+			logger.warning("Group not found in registry");
+			return false;
+		} catch (SerializationException e) {
+			throw new EthereumException("Public key in group registry can't be deserialized.", e);
 		}
 	}
 
@@ -352,9 +401,9 @@ public class EthereumNode extends PastryNodeImpl {
 	public ReadWriteRegistryClient getRegistryClient() {
 		return registryClient;
 	}
-	
+
 	//public void registerProfile(EthereumAgent author) throws EthereumException {
 	//	registryClient.registerReputationProfile(author);
 	//}
-	 
+
 }

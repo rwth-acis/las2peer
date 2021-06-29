@@ -45,15 +45,15 @@ public class GroupAgentImplTest {
 	public void testXmlAndBack()
 			throws NoSuchAlgorithmException, InternalSecurityException, CryptoException, SerializationException,
 			MalformedXMLException, AgentAccessDeniedException, AgentOperationFailedException, AgentLockedException {
-		GroupAgentImpl testee = GroupAgentImpl.createGroupAgent(new AgentImpl[] { adam, eve });
+		GroupAgentImpl testee = GroupAgentImpl.createGroupAgent(new AgentImpl[] { adam, eve }, "testXmlAndBack");
 		assertEquals(2, testee.getSize());
 		assertFalse(testee.hasMember(kain));
 		assertFalse(testee.hasMember(abel.getIdentifier()));
 		assertTrue(testee.hasMember(adam));
 		assertTrue(testee.hasMember(eve.getIdentifier()));
-		
+
 		testee.apply();
-		
+
 		assertEquals(2, testee.getSize());
 		assertFalse(testee.hasMember(kain));
 		assertFalse(testee.hasMember(abel.getIdentifier()));
@@ -82,7 +82,7 @@ public class GroupAgentImplTest {
 	@Test
 	public void testUnlocking() throws InternalSecurityException, CryptoException, SerializationException,
 			AgentAccessDeniedException, AgentOperationFailedException, AgentLockedException {
-		GroupAgentImpl testee = GroupAgentImpl.createGroupAgent(new AgentImpl[] { adam, eve });
+		GroupAgentImpl testee = GroupAgentImpl.createGroupAgent(new AgentImpl[] { adam, eve }, "testUnlocking");
 
 		try {
 			testee.addMember(kain);
@@ -116,7 +116,7 @@ public class GroupAgentImplTest {
 	@Test
 	public void testAdding() throws InternalSecurityException, CryptoException, SerializationException,
 			AgentAccessDeniedException, AgentOperationFailedException, AgentLockedException {
-		GroupAgentImpl testee = GroupAgentImpl.createGroupAgent(new AgentImpl[] { adam, eve });
+		GroupAgentImpl testee = GroupAgentImpl.createGroupAgent(new AgentImpl[] { adam, eve }, "testAdding");
 		abel.unlock(ABELSPASS);
 
 		try {
@@ -141,8 +141,9 @@ public class GroupAgentImplTest {
 	@Test
 	public void testSubGrouping() throws SerializationException, CryptoException, InternalSecurityException,
 			AgentAccessDeniedException, AgentOperationFailedException, AgentLockedException {
-		GroupAgentImpl subGroup = GroupAgentImpl.createGroupAgent(new AgentImpl[] { adam, eve });
-		GroupAgentImpl superGroup = GroupAgentImpl.createGroupAgent(new AgentImpl[] { abel, subGroup });
+		GroupAgentImpl subGroup = GroupAgentImpl.createGroupAgent(new AgentImpl[] { adam, eve }, "testSubGrouping1");
+		GroupAgentImpl superGroup = GroupAgentImpl.createGroupAgent(new AgentImpl[] { abel, subGroup },
+				"testSubGrouping2");
 
 		assertTrue(superGroup.hasMember(subGroup));
 
@@ -167,7 +168,7 @@ public class GroupAgentImplTest {
 
 	public void testApply() throws InternalSecurityException, CryptoException, SerializationException,
 			AgentAccessDeniedException, AgentOperationFailedException, AgentLockedException {
-		GroupAgentImpl agent = GroupAgentImpl.createGroupAgent(new AgentImpl[] { adam, eve });
+		GroupAgentImpl agent = GroupAgentImpl.createGroupAgent(new AgentImpl[] { adam, eve }, "testApply");
 		assertTrue(agent.hasMember(adam));
 		assertTrue(agent.hasMember(eve));
 		assertEquals(2, agent.getSize());

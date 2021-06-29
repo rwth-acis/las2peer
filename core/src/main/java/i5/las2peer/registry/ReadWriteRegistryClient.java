@@ -27,9 +27,11 @@ import org.web3j.utils.Convert.Unit;
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.registry.contracts.ServiceRegistry;
 import i5.las2peer.registry.contracts.UserRegistry;
+import i5.las2peer.registry.contracts.GroupRegistry;
 import i5.las2peer.registry.data.RegistryConfiguration;
 import i5.las2peer.registry.exceptions.EthereumException;
 import i5.las2peer.security.EthereumAgent;
+import i5.las2peer.security.EthereumGroupAgent;
 import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.serialization.SerializeTools;
 
@@ -119,6 +121,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		{
 			BigInteger txManNonce = txMan.getCurrentNonce();
 			logger.info("[TX Nonce] before: " + txManNonce);
+			getNonce(txMan.getFromAddress()); // check if nonce has to be udpated
 		}
 
 
@@ -130,6 +133,47 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 
 		if ( txMan != null )
 		{
+			BigInteger txManNonce = txMan.getCurrentNonce();
+			logger.info("[TX Nonce] after: " + txManNonce);
+		}
+	}
+
+	/**
+	 * Register a group name to the given author.
+	 *
+	 * The registration call is delegated, see description of
+	 * {@link #registerUser(EthereumAgent)} for details.
+	 *
+	 * @param agent EthereumGroupAgent of group to be saved
+	 */
+	public void registerGroup(EthereumGroupAgent agent)
+			throws EthereumException, AgentLockedException, SerializationException {
+				
+		byte[] name = Util.padAndConvertString(agent.getGroupName(), 32);
+		byte[] agentId = Util.padAndConvertString(agent.getIdentifier(), 128);
+		byte[] publicKey = SerializeTools.serialize(agent.getPublicKey());
+
+		final Function function = new Function(GroupRegistry.FUNC_REGISTER,
+				Arrays.asList(new org.web3j.abi.datatypes.generated.Bytes32(name),
+						new org.web3j.abi.datatypes.DynamicBytes(agentId),
+						new org.web3j.abi.datatypes.DynamicBytes(publicKey)),
+				Collections.emptyList());
+
+		String consentee = agent.getEthereumAddress();
+		byte[] signature = SignatureUtils.signFunctionCall(function, agent.getEthereumCredentials());
+
+		if (txMan != null) {
+			BigInteger txManNonce = txMan.getCurrentNonce();
+			logger.info("[TX Nonce] before in group registration: " + txManNonce);
+		}
+
+		try {
+			contracts.groupRegistry.delegatedRegister(name, agentId, publicKey, consentee, signature).sendAsync().get();
+		} catch (Exception e) {
+			throw new EthereumException("Could not register group", e);
+		}
+
+		if (txMan != null) {
 			BigInteger txManNonce = txMan.getCurrentNonce();
 			logger.info("[TX Nonce] after: " + txManNonce);
 		}

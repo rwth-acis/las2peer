@@ -160,7 +160,8 @@ public class ExecutionContext implements Context {
 			}
 			ClassLoader localServiceLoader = serviceAgent.getServiceInstance().getClass().getClassLoader();
 			if (rmiResult.getClass().getClassLoader() != localServiceLoader) {
-				// mimic global invocation serialization/deserialization to avoid class cast/not-found exceptions
+				// mimic global invocation serialization/deserialization to avoid class
+				// cast/not-found exceptions
 				try {
 					ByteArrayOutputStream baos = new ByteArrayOutputStream();
 					new ObjectOutputStream(baos).writeObject(rmiResult);
@@ -193,7 +194,7 @@ public class ExecutionContext implements Context {
 	public void monitorEvent(String message) {
 		monitorEvent(null, MonitoringEvent.SERVICE_MESSAGE, message);
 	}
-	
+
 	@Override
 	public void monitorEvent(MonitoringEvent event, String message) {
 		monitorEvent(null, event, message);
@@ -234,6 +235,26 @@ public class ExecutionContext implements Context {
 	public GroupAgent createGroupAgent(Agent[] members) throws AgentOperationFailedException {
 		try {
 			GroupAgent agent = GroupAgentImpl.createGroupAgent(members);
+			for (Agent a : members) {
+				try {
+					agent.unlock(a);
+					break;
+				} catch (AgentAccessDeniedException | AgentLockedException | AgentOperationFailedException e) {
+				}
+			}
+			if (agent.isLocked()) {
+				throw new AgentOperationFailedException("Cannot unlock group agent.");
+			}
+			return agent;
+		} catch (CryptoException | SerializationException e) {
+			throw new AgentOperationFailedException(e);
+		}
+	}
+
+	@Override
+	public GroupAgent createGroupAgent(Agent[] members, String groupName) throws AgentOperationFailedException {
+		try {
+			GroupAgent agent = GroupAgentImpl.createGroupAgent(members, groupName);
 			for (Agent a : members) {
 				try {
 					agent.unlock(a);

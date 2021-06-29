@@ -32,6 +32,7 @@ import i5.las2peer.registry.exceptions.EthereumException;
 import i5.las2peer.registry.exceptions.NotFoundException;
 import i5.las2peer.security.AgentImpl;
 import i5.las2peer.security.EthereumAgent;
+import i5.las2peer.security.EthereumGroupAgent;
 import i5.las2peer.security.GroupAgentImpl;
 import i5.las2peer.security.PassphraseAgentImpl;
 import i5.las2peer.security.UserAgentImpl;
@@ -92,7 +93,8 @@ public class AgentsHandler {
 		if (node instanceof EthereumNode) {
 			EthereumNode ethNode = (EthereumNode) node;
 			if (ethereumMnemonic != null && !ethereumMnemonic.isEmpty()) {
-				agent = EthereumAgent.createEthereumAgent(username, password, ethNode.getRegistryClient(), ethereumMnemonic);
+				agent = EthereumAgent.createEthereumAgent(username, password, ethNode.getRegistryClient(),
+						ethereumMnemonic);
 			} else {
 				agent = EthereumAgent.createEthereumAgentWithClient(username, password, ethNode.getRegistryClient());
 			}
@@ -107,11 +109,9 @@ public class AgentsHandler {
 			agent.setEmail(email);
 		}
 		node.storeAgent(agent);
-		JSONObject json = new JSONObject()
-				.appendField("code", Status.OK.getStatusCode())
+		JSONObject json = new JSONObject().appendField("code", Status.OK.getStatusCode())
 				.appendField("text", Status.OK.getStatusCode() + " - Agent created")
-				.appendField("agentid", agent.getIdentifier())
-				.appendField("username", agent.getLoginName())
+				.appendField("agentid", agent.getIdentifier()).appendField("username", agent.getLoginName())
 				.appendField("email", agent.getEmail());
 		if (agent instanceof EthereumAgent) {
 			json.put("registryAddress", ((EthereumAgent) agent).getEthereumAddress());
@@ -120,11 +120,11 @@ public class AgentsHandler {
 	}
 
 	private JSONObject addAgentDetailsToJson(AgentImpl agent, JSONObject json)
-			throws EthereumException, NotFoundException
-	{
+			throws EthereumException, NotFoundException {
 		// don't add mnemonic ( = defaults to false, override to true )
 		return this.addAgentDetailsToJson(agent, json, false);
 	}
+
 	private JSONObject addAgentDetailsToJson(AgentImpl agent, JSONObject json, Boolean addMnemonic)
 			throws EthereumException, NotFoundException {
 		json.put("agentid", agent.getIdentifier());
@@ -133,12 +133,10 @@ public class AgentsHandler {
 			json.put("username", userAgent.getLoginName());
 			json.put("email", userAgent.getEmail());
 		}
-		if (agent instanceof EthereumAgent) 
-		{
+		if (agent instanceof EthereumAgent) {
 			EthereumAgent ethAgent = (EthereumAgent) agent;
 			String ethAddress = ethAgent.getEthereumAddress();
-			if ( ethAddress.length() > 0 )
-			{
+			if (ethAddress.length() > 0) {
 				json.put("ethAgentAddress", ethAddress);
 				String accBalance = ethereumNode.getRegistryClient().getAccountBalance(ethAddress);
 				json.put("ethAccBalance", accBalance);
@@ -150,16 +148,12 @@ public class AgentsHandler {
 						json.put("ethCumulativeScore", upd.getCumulativeScore().toString());
 						json.put("ethNoTransactionsSent", upd.getNoTransactionsSent().toString());
 						json.put("ethNoTransactionsRcvd", upd.getNoTransactionsRcvd().toString());
-						if ( upd.getNoTransactionsRcvd().compareTo(BigInteger.ZERO) == 0 )
-						{
+						if (upd.getNoTransactionsRcvd().compareTo(BigInteger.ZERO) == 0) {
 							json.put("ethRating", 0);
-						}
-						else
-						{
+						} else {
 							DecimalFormat f = new DecimalFormat("#.00");
-							json.put("ethRating", f.format(
-								upd.getCumulativeScore().divide(upd.getNoTransactionsRcvd())
-							));
+							json.put("ethRating",
+									f.format(upd.getCumulativeScore().divide(upd.getNoTransactionsRcvd())));
 						}
 					} else {
 						json.put("ethRating", "0");
@@ -167,17 +161,14 @@ public class AgentsHandler {
 						json.put("ethNoTransactionsSent", "???");
 						json.put("ethNoTransactionsRcvd", "???");
 					}
-				}
-				catch (EthereumException| NotFoundException e)
-				{
+				} catch (EthereumException | NotFoundException e) {
 					e.printStackTrace();
 				}
 			}
-			
+
 			json.put("ethAgentCredentialsAddress", ethAddress);
-			
-			if ( addMnemonic && !agent.isLocked())
-			{
+
+			if (addMnemonic && !agent.isLocked()) {
 				json.put("ethMnemonic", ethAgent.getEthereumMnemonic());
 			}
 		}
@@ -317,13 +308,16 @@ public class AgentsHandler {
 	@POST
 	@Path("/createGroup")
 	public Response handleCreateGroup(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId,
-			@FormDataParam("members") String members) throws Exception {
+			@FormDataParam("members") String members, @FormDataParam("name") String groupName) throws Exception {
 		AgentSession session = connector.getSessionById(sessionId);
 		if (session == null) {
 			return Response.status(Status.FORBIDDEN).entity("You have to be logged in to create a group").build();
 		}
 		if (members == null) {
 			return Response.status(Status.BAD_REQUEST).entity("No members provided").build();
+		}
+		if (groupName == null || groupName.equals("")) {
+			return Response.status(Status.BAD_REQUEST).entity("No group name provided").build();
 		}
 		JSONArray jsonMembers = (JSONArray) new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(members);
 		if (jsonMembers.isEmpty()) {
@@ -341,21 +335,38 @@ public class AgentsHandler {
 				}
 			}
 		}
-		GroupAgentImpl groupAgent = GroupAgentImpl
-				.createGroupAgent(memberAgents.toArray(new AgentImpl[memberAgents.size()]));
+		try {
+			node.getAgentIdForGroupName(groupName);
+			return Response.status(Status.BAD_REQUEST).entity("Groupname already taken").build();
+		} catch (AgentNotFoundException e) {
+			// expected
+		}
+
+		GroupAgentImpl groupAgent;
+		// GroupAgentImpl groupAgent = GroupAgentImpl
+		// 		.createGroupAgent(memberAgents.toArray(new AgentImpl[memberAgents.size()]));
+				if (node instanceof EthereumNode) {
+					EthereumNode ethNode = (EthereumNode) node;
+					groupAgent = EthereumGroupAgent.createEthereumGroupAgentWithClient(groupName, ethNode.getRegistryClient(),
+							memberAgents.toArray(new AgentImpl[memberAgents.size()]));
+				} else {
+					groupAgent = GroupAgentImpl.createGroupAgent(memberAgents.toArray(new AgentImpl[memberAgents.size()]),
+							groupName);
+				}
 		groupAgent.unlock(session.getAgent());
 		node.storeAgent(groupAgent);
 		JSONObject json = new JSONObject();
 		json.put("code", Status.OK.getStatusCode());
 		json.put("text", Status.OK.getStatusCode() + " - GroupAgent created");
 		json.put("agentid", groupAgent.getIdentifier());
+		json.put("groupName", groupName);
 		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
 	}
 
 	@POST
 	@Path("/loadGroup")
 	public Response handleLoadGroup(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId,
-			@FormDataParam("agentid") String agentId) throws AgentException {
+			@FormDataParam("groupIdentifier") String agentId) throws AgentException {
 		AgentSession session = connector.getSessionById(sessionId);
 		if (session == null) {
 			return Response.status(Status.FORBIDDEN).entity("You have to be logged in to load a group").build();
@@ -365,9 +376,16 @@ public class AgentsHandler {
 		}
 		AgentImpl agent;
 		try {
-			agent = node.getAgent(agentId);
-		} catch (AgentNotFoundException e) {
-			return Response.status(Status.BAD_REQUEST).entity("Agent not found").build();
+			agent = getGroupByName(agentId);
+		} catch (Exception e) {
+			System.out.println("Exception " + e + "occurred");
+			System.out.println("Couldn't find agent based on group name, trying group id...");
+			try {
+				agent = node.getAgent(agentId);
+
+			} catch (AgentNotFoundException f) {
+				return Response.status(Status.BAD_REQUEST).entity("Agent not found").build();
+			}
 		}
 		if (!(agent instanceof GroupAgentImpl)) {
 			return Response.status(Status.BAD_REQUEST).entity("Agent is not a GroupAgent").build();
@@ -402,6 +420,16 @@ public class AgentsHandler {
 		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
 	}
 
+	private AgentImpl getGroupByName(String groupName) throws Exception {
+		try {
+			String agentId = node.getAgentIdForGroupName(groupName);
+			System.out.println("Group Agent id is" + agentId);
+			return node.getAgent(agentId);
+		} catch (AgentNotFoundException e) {
+			throw new BadRequestException("Group Agent not found");
+		}
+	}
+
 	@POST
 	@Path("/changeGroup")
 	public Response handleChangeGroup(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId,
@@ -423,9 +451,18 @@ public class AgentsHandler {
 		}
 		AgentImpl agent;
 		try {
-			agent = node.getAgent(agentId);
-		} catch (AgentNotFoundException e) {
-			return Response.status(Status.BAD_REQUEST).entity("Agent not found").build();
+			// for some reason, when loading group using group name results in identifier
+			// being group name
+			agent = getGroupByName(agentId);
+		} catch (Exception e) {
+			System.out.println("Exception " + e + "occured");
+			System.out.println("Couldn't find agent based on group name, trying group id...");
+			try {
+				agent = node.getAgent(agentId);
+
+			} catch (AgentNotFoundException f) {
+				return Response.status(Status.BAD_REQUEST).entity("Agent not found").build();
+			}
 		}
 		if (!(agent instanceof GroupAgentImpl)) {
 			return Response.status(Status.BAD_REQUEST).entity("Agent is not a GroupAgent").build();
@@ -439,6 +476,12 @@ public class AgentsHandler {
 		// add new members
 		HashSet<String> memberIds = new HashSet<>();
 		for (Object obj : changedMembers) {
+			try {
+				JSONObject json = (JSONObject) new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse((String) obj);
+				obj = json;
+			} catch (Exception e) {
+				System.out.println("Could not convert string to json");
+			}
 			if (obj instanceof JSONObject) {
 				JSONObject json = (JSONObject) obj;
 				String memberid = json.getAsString("agentid");
@@ -446,36 +489,49 @@ public class AgentsHandler {
 					logger.fine("Skipping invalid member id '" + memberid + "'");
 					continue;
 				}
-				memberIds.add(memberid.toLowerCase());
 				try {
-					AgentImpl memberAgent = node.getAgent(memberid);
+					String idofmember = node.getAgentIdForLogin(memberid);
+					AgentImpl memberAgent = node.getAgent(idofmember);
 					groupAgent.addMember(memberAgent);
-					logger.info("Added new member '" + memberid + "' to group");
-				} catch (AgentException e) {
-					logger.log(Level.WARNING, "Could not retrieve group member agent from network", e);
-					continue;
+					memberIds.add(idofmember.toLowerCase());
+				} catch (Exception e) {
+					System.out.println("Exception " + e + "occured");
+					System.out.println("Couldn't find agent based on name, trying id...");
+					try {
+						AgentImpl memberAgent = node.getAgent(memberid);
+						groupAgent.addMember(memberAgent);
+						memberIds.add(memberid.toLowerCase());
+					} catch (AgentNotFoundException f) {
+						logger.log(Level.WARNING, "Could not retrieve group member agent from network", f);
+						continue;
+					}
 				}
 			} else {
 				logger.info("Skipping invalid member object '" + obj.getClass().getCanonicalName() + "'");
 			}
-		}
-		if (!memberIds.contains(session.getAgent().getIdentifier().toLowerCase())) {
-			return Response.status(Status.BAD_REQUEST).entity("You can't remove yourself from a group").build();
-		}
-		// remove all non members
-		for (String oldMemberId : groupAgent.getMemberList()) {
-			if (!memberIds.contains(oldMemberId)) {
-				groupAgent.removeMember(oldMemberId);
-				logger.info("Removed old member '" + oldMemberId + "' from group");
 			}
-		}
-		// store changed group
-		node.storeAgent(groupAgent);
-		JSONObject json = new JSONObject();
-		json.put("code", Status.OK.getStatusCode());
-		json.put("text", Status.OK.getStatusCode() + " - GroupAgent changed");
-		json.put("agentid", groupAgent.getIdentifier());
-		return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
+			/*
+			* if (!memberIds.contains(session.getAgent().getIdentifier().toLowerCase())) {
+			* return Response.status(Status.BAD_REQUEST).
+			* entity("You can't remove yourself from a group").build(); }
+			*/
+			if (!groupAgent.isAdmin(session.getAgent())) {
+				return Response.status(Status.BAD_REQUEST).entity("You must be an admin of this group").build();
+			}
+			// remove all non members
+			for (String oldMemberId : groupAgent.getMemberList()) {
+				if (!memberIds.contains(oldMemberId)) {
+					groupAgent.removeMember(oldMemberId);
+					logger.info("Removed old member '" + oldMemberId + "' from group");
+				}
+			}
+			// store changed group
+			node.storeAgent(groupAgent);
+			JSONObject json = new JSONObject();
+			json.put("code", Status.OK.getStatusCode());
+			json.put("text", Status.OK.getStatusCode() + " - GroupAgent changed");
+			json.put("agentid", groupAgent.getIdentifier());
+			return Response.ok(json.toJSONString(), MediaType.APPLICATION_JSON).build();
 	}
 
 }

@@ -34,20 +34,22 @@ import i5.las2peer.tools.CryptoTools;
 /**
  * An agent representing a group of other agents.
  * 
- * The storage of the group information is stored encrypted in a similar manner to
- * {@link i5.las2peer.persistency.EnvelopeVersion}:
+ * The storage of the group information is stored encrypted in a similar manner
+ * to {@link i5.las2peer.persistency.EnvelopeVersion}:
  * 
- * The (symmetric) key to unlock the private key of the group is encrypted asymmetrically for each entitled agent (i.e.
- * <i>member</i> of the group).
+ * The (symmetric) key to unlock the private key of the group is encrypted
+ * asymmetrically for each entitled agent (i.e. <i>member</i> of the group).
  * 
  */
 public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 
 	private SecretKey symmetricGroupKey;
 	private AgentImpl openedBy;
-
+	protected String groupName;
+	protected ArrayList<String> adminList = new ArrayList<String>();
 	/**
-	 * hashtable storing the encrypted versions of the group secret key for each member
+	 * hashtable storing the encrypted versions of the group secret key for each
+	 * member
 	 */
 	private HashMap<String, byte[]> htEncryptedKeyVersions = new HashMap<>();
 
@@ -63,8 +65,8 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	}
 
 	/**
-	 * constructor for the {@link #createGroupAgent} factory simply necessary, since the secret key has to be stated for
-	 * the constructor of the superclass
+	 * constructor for the {@link #createGroupAgent} factory simply necessary, since
+	 * the secret key has to be stated for the constructor of the superclass
 	 * 
 	 * @param keys
 	 * @param secret
@@ -90,7 +92,36 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	}
 
 	/**
-	 * decrypt the secret key of this group for the given agent (which is hopefully a member)
+	 * constructor for the {@link #createGroupAgent} factory simply necessary, since
+	 * the secret key has to be stated for the constructor of the superclass
+	 * 
+	 * @param keys
+	 * @param secret
+	 * @param members
+	 * @param groupName
+	 * @throws AgentOperationFailedException
+	 * @throws CryptoException
+	 * @throws SerializationException
+	 */
+	protected GroupAgentImpl(KeyPair keys, SecretKey secret, Agent[] members, String groupName)
+			throws AgentOperationFailedException, CryptoException, SerializationException {
+		super(keys, secret);
+
+		symmetricGroupKey = secret;
+		for (Agent a : members) {
+			try {
+				addMember((AgentImpl) a, false);
+			} catch (AgentLockedException e) {
+				throw new IllegalStateException(e);
+			}
+		}
+
+		lockPrivateKey();
+	}
+
+	/**
+	 * decrypt the secret key of this group for the given agent (which is hopefully
+	 * a member)
 	 * 
 	 * @param agent
 	 * @throws SerializationException
@@ -114,6 +145,48 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	}
 
 	/**
+	 * add a member to the admin list of this group
+	 * 
+	 * @param a
+	 */
+	public void addAdmin(Agent a) {
+		if (!adminList.contains(a.getIdentifier())) {
+			adminList.add(a.getIdentifier());
+		}
+	}
+
+	/**
+	 * remove a member from the admin list of this group
+	 * 
+	 * @param a
+	 */
+	public void revokeAdmin(Agent a) {
+		if (adminList.contains(a.getIdentifier())) {
+			adminList.remove(a.getIdentifier());
+		}
+	}
+
+	/**
+	 * Check admin rights for member.
+	 * 
+	 * @param a Member to check admin rights for.
+	 * @return if agent is admin
+	 */
+	public boolean isAdmin(Agent a) {
+		return adminList.contains(a.getIdentifier());
+	}
+
+	@Override
+	public String getGroupName() {
+		return groupName;
+	}
+
+	@Override
+	public boolean hasGroupName() {
+		return getGroupName() != null;
+	}
+
+	/**
 	 * add a member to this group
 	 * 
 	 * @param a
@@ -126,8 +199,8 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	}
 
 	/**
-	 * private version of adding members, mainly just for the constructor to add members without unlocking the private
-	 * key of the group
+	 * private version of adding members, mainly just for the constructor to add
+	 * members without unlocking the private key of the group
 	 * 
 	 * @param a
 	 * @param securityCheck
@@ -225,7 +298,15 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 					+ CryptoTools.getSymmetricAlgorithm() + "\">" + getEncodedPrivate() + "</privatekey>\n"
 					+ "\t<unlockKeys method=\"" + CryptoTools.getAsymmetricAlgorithm() + "\">\n" + keyList
 					+ "\t</unlockKeys>\n");
+			if (groupName != null) {
+				result.append("\t<groupName>" + groupName + "</groupName>\n");
+			}
 
+			String admins = "";
+			for(int i = 0; i < adminList.size(); i++) {
+				admins += "\t\t<admin id=\"" + i + "\" >" + adminList.get(i) + "</admin>\n";
+			}
+			result.append("\t<adminList>" + admins + "</adminList>\n");
 			result.append("</las2peer:agent>\n");
 
 			return result.toString();
@@ -299,7 +380,26 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 				htMemberKeys.put(agentId, content);
 			}
 			GroupAgentImpl result = new GroupAgentImpl(publicKey, encPrivate, htMemberKeys);
+			// read group Name
+			Element groupName = XmlTools.getOptionalElement(root, "groupName");
+			if (groupName != null) {
+				result.groupName = groupName.getTextContent();
+			}
 
+			ArrayList<String> adminMembers = new ArrayList<String>();
+			Element admins = XmlTools.getSingularElement(root, "adminList");
+			enGroups = admins.getElementsByTagName("admin");
+			for (int n = 0; n < enGroups.getLength(); n++) {
+				org.w3c.dom.Node node = enGroups.item(n);
+				short nodeType = node.getNodeType();
+				if (nodeType != org.w3c.dom.Node.ELEMENT_NODE) {
+					throw new MalformedXMLException(
+							"Node type (" + nodeType + ") is not type element (" + org.w3c.dom.Node.ELEMENT_NODE + ")");
+				}
+				Element elKey = (Element) node;
+				adminMembers.add(elKey.getTextContent());
+			}
+			result.adminList = adminMembers;
 			return result;
 		} catch (SerializationException e) {
 			throw new MalformedXMLException("Deserialization problems", e);
@@ -318,6 +418,20 @@ public class GroupAgentImpl extends AgentImpl implements GroupAgent {
 	 * @throws SerializationException
 	 */
 	public static GroupAgentImpl createGroupAgent(Agent[] members)
+			throws AgentOperationFailedException, CryptoException, SerializationException {
+		return new GroupAgentImpl(CryptoTools.generateKeyPair(), CryptoTools.generateSymmetricKey(), members);
+	}
+
+	/**
+	 * create a new group agent instance with groupName
+	 * 
+	 * @param members
+	 * @return a group agent
+	 * @throws AgentOperationFailedException
+	 * @throws CryptoException
+	 * @throws SerializationException
+	 */
+	public static GroupAgentImpl createGroupAgent(Agent[] members, String groupName)
 			throws AgentOperationFailedException, CryptoException, SerializationException {
 		return new GroupAgentImpl(CryptoTools.generateKeyPair(), CryptoTools.generateSymmetricKey(), members);
 	}

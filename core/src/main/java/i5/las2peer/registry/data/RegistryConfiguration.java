@@ -31,12 +31,13 @@ public class RegistryConfiguration extends Configurable {
 
 	private String communityTagIndexAddress;
 	private String userRegistryAddress;
+	private String groupRegistryAddress;
 	private String serviceRegistryAddress;
 	private String reputationRegistryAddress;
 	
 	public RegistryConfiguration() {
 		setFieldValues();
-		if (endpoint == null || communityTagIndexAddress == null || userRegistryAddress == null
+		if (endpoint == null || communityTagIndexAddress == null || userRegistryAddress == null || groupRegistryAddress == null
 				|| serviceRegistryAddress == null || reputationRegistryAddress == null) {
 			throw new RuntimeException("Registry configuration file incomplete! This is almost certainly unintended.");
 		}
@@ -60,6 +61,10 @@ public class RegistryConfiguration extends Configurable {
 
 	public String getUserRegistryAddress() {
 		return userRegistryAddress;
+	}
+
+	public String getGroupRegistryAddress() {
+		return groupRegistryAddress;
 	}
 
 	public String getServiceRegistryAddress() {
