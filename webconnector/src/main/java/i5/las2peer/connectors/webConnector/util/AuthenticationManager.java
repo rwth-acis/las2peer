@@ -233,7 +233,11 @@ public class AuthenticationManager {
 	}
 
 	// FIXME find out why that lock is needed (is it??)
-	/** @deprecated */
+	/**
+	 * @deprecated is not used anymore
+	 * 
+	 */
+	@Deprecated
 	private PassphraseAgentImpl getExistingOidcAgent(String oidcAgentId, String password) throws AgentException {
 		try {
 			connector.getLockOidc().lock(oidcAgentId);
