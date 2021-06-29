@@ -19,13 +19,7 @@
 <script type="text/javascript" src="../../../../script-dir/jquery-ui.js"></script>
 </head>
 <body class="class-declaration">
-<script type="text/javascript">var data = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10};
-var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
-var altColor = "altColor";
-var rowColor = "rowColor";
-var tableTab = "tableTab";
-var activeTableTab = "activeTableTab";
-var pathtoroot = "../../../../";
+<script type="text/javascript">var pathtoroot = "../../../../";
 loadScripts(document, 'script');</script>
 <noscript>
 <div>JavaScript is disabled on your browser.</div>
@@ -56,7 +50,7 @@ loadScripts(document, 'script');</script>
 <ul class="subNavList">
 <li>Summary:&nbsp;</li>
 <li>Nested&nbsp;|&nbsp;</li>
-<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#field.summary">Field</a>&nbsp;|&nbsp;</li>
 <li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
 <li><a href="#method.summary">Method</a></li>
 </ul>
@@ -64,7 +58,7 @@ loadScripts(document, 'script');</script>
 <li>Detail:&nbsp;</li>
 <li>Field&nbsp;|&nbsp;</li>
 <li><a href="#constructor.detail">Constr</a>&nbsp;|&nbsp;</li>
-<li><a href="#method.detail">Method</a></li>
+<li>Method</li>
 </ul>
 </div>
 <div class="navListSearch"><label for="search">SEARCH:</label>
@@ -87,17 +81,41 @@ loadScripts(document, 'script');</script>
 </div>
 <div class="contentContainer">
 <div class="inheritance" title="Inheritance Tree">java.lang.Object
+<div class="inheritance"><a href="../../api/SemverVersion.html" title="class in i5.las2peer.api">i5.las2peer.api.SemverVersion</a>
 <div class="inheritance">i5.las2peer.classLoaders.libraries.LibraryVersion</div>
 </div>
+</div>
 <section class="description">
+<dl>
+<dt>All Implemented Interfaces:</dt>
+<dd><code>java.io.Serializable</code></dd>
+</dl>
 <hr>
 <pre>public class <span class="typeNameLabel">LibraryVersion</span>
-extends java.lang.Object</pre>
-<div class="block">a simple class managing a library version number in the format major.minor.subversion-build where minor, subversion
- and build are optional</div>
+extends <a href="../../api/SemverVersion.html" title="class in i5.las2peer.api">SemverVersion</a></pre>
+<div class="block">A simple class managing a library version number in the format
+ <code>&lt;major&gt; "." &lt;minor&gt; "." &lt;patch&gt; "-" &lt;pre-release&gt; "+" &lt;build&gt;</code> (where minor, patch, pre-release and build
+ are optional) or "*" (no version specified / matches all versions).</div>
+<dl>
+<dt><span class="seeLabel">See Also:</span></dt>
+<dd><a href="../../../../serialized-form.html#i5.las2peer.classLoaders.libraries.LibraryVersion">Serialized Form</a></dd>
+</dl>
 </section>
 <section class="summary">
 <ul class="blockList">
+<!-- =========== FIELD SUMMARY =========== -->
+<li class="blockList">
+<section class="fieldSummary"><a id="field.summary">
+<!--   -->
+</a>
+<h2>Field Summary</h2>
+<div class="inheritedList">
+<h3>Fields inherited from class&nbsp;i5.las2peer.api.<a href="../../api/SemverVersion.html" title="class in i5.las2peer.api">SemverVersion</a></h3>
+<a id="fields.inherited.from.class.i5.las2peer.api.SemverVersion">
+<!--   -->
+</a><code><a href="../../api/SemverVersion.html#build">build</a>, <a href="../../api/SemverVersion.html#major">major</a>, <a href="../../api/SemverVersion.html#minor">minor</a>, <a href="../../api/SemverVersion.html#patch">patch</a>, <a href="../../api/SemverVersion.html#preRelease">preRelease</a></code></div>
+</section>
+</li>
 <!-- ======== CONSTRUCTOR SUMMARY ======== -->
 <li class="blockList">
 <section class="constructorSummary"><a id="constructor.summary">
@@ -130,28 +148,37 @@ int&nbsp;minor)</code></th>
 <tr class="altColor">
 <th class="colConstructorName" scope="row"><code><span class="memberNameLink"><a href="#%3Cinit%3E(int,int,int)">LibraryVersion</a></span>&#8203;(int&nbsp;major,
 int&nbsp;minor,
-int&nbsp;sub)</code></th>
+int&nbsp;patch)</code></th>
 <td class="colLast">
 <div class="block">generate a new LibraryVersion</div>
 </td>
 </tr>
 <tr class="rowColor">
-<th class="colConstructorName" scope="row"><code><span class="memberNameLink"><a href="#%3Cinit%3E(int,int,int,int)">LibraryVersion</a></span>&#8203;(int&nbsp;major,
+<th class="colConstructorName" scope="row"><code><span class="memberNameLink"><a href="#%3Cinit%3E(int,int,int,java.lang.String)">LibraryVersion</a></span>&#8203;(int&nbsp;major,
 int&nbsp;minor,
-int&nbsp;sub,
-int&nbsp;build)</code></th>
+int&nbsp;patch,
+java.lang.String&nbsp;preRelease)</code></th>
 <td class="colLast">
 <div class="block">generate a new LibraryVersion</div>
 </td>
 </tr>
 <tr class="altColor">
+<th class="colConstructorName" scope="row"><code><span class="memberNameLink"><a href="#%3Cinit%3E(int,int,int,java.lang.String,java.lang.String)">LibraryVersion</a></span>&#8203;(int&nbsp;major,
+int&nbsp;minor,
+int&nbsp;patch,
+java.lang.String&nbsp;preRelease,
+java.lang.String&nbsp;build)</code></th>
+<td class="colLast">
+<div class="block">generate a new LibraryVersion</div>
+</td>
+</tr>
+<tr class="rowColor">
 <th class="colConstructorName" scope="row"><code><span class="memberNameLink"><a href="#%3Cinit%3E(java.lang.String)">LibraryVersion</a></span>&#8203;(java.lang.String&nbsp;version)</code></th>
 <td class="colLast">
 <div class="block">Generate a Version from String representation
- 
- format : major.minor.sub-build
- 
- minor, subversion and build are optional</div>
+
+ format : Semver <code>&lt;major&gt; "." &lt;minor&gt; "." &lt;patch&gt; "-" &lt;pre-release&gt; "+" &lt;build&gt;</code> (where minor, patch,
+ pre-release and build are optional) or "*" (no version specified / matches all versions)</div>
 </td>
 </tr>
 </tbody>
@@ -165,78 +192,11 @@ int&nbsp;build)</code></th>
 <!--   -->
 </a>
 <h2>Method Summary</h2>
-<div class="memberSummary">
-<div role="tablist" aria-orientation="horizontal"><button role="tab" aria-selected="true" aria-controls="memberSummary_tabpanel" tabindex="0" onkeydown="switchTab(event)" id="t0" class="activeTableTab">All Methods</button><button role="tab" aria-selected="false" aria-controls="memberSummary_tabpanel" tabindex="-1" onkeydown="switchTab(event)" id="t2" class="tableTab" onclick="show(2);">Instance Methods</button><button role="tab" aria-selected="false" aria-controls="memberSummary_tabpanel" tabindex="-1" onkeydown="switchTab(event)" id="t4" class="tableTab" onclick="show(8);">Concrete Methods</button></div>
-<div id="memberSummary_tabpanel" role="tabpanel">
-<table aria-labelledby="t0">
-<thead>
-<tr>
-<th class="colFirst" scope="col">Modifier and Type</th>
-<th class="colSecond" scope="col">Method</th>
-<th class="colLast" scope="col">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="altColor" id="i0">
-<td class="colFirst"><code>boolean</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#equals(i5.las2peer.classLoaders.libraries.LibraryVersion)">equals</a></span>&#8203;(<a href="LibraryVersion.html" title="class in i5.las2peer.classLoaders.libraries">LibraryVersion</a>&nbsp;v)</code></th>
-<td class="colLast">
-<div class="block">compares to version and checks for equality</div>
-</td>
-</tr>
-<tr class="rowColor" id="i1">
-<td class="colFirst"><code>boolean</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#equals(java.lang.Object)">equals</a></span>&#8203;(java.lang.Object&nbsp;o)</code></th>
-<td class="colLast">
-<div class="block">compares this version with any object
- 
- if the given object is a String, the string representation of this version is compared to the given string</div>
-</td>
-</tr>
-<tr class="altColor" id="i2">
-<td class="colFirst"><code>int</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getBuild()">getBuild</a></span>()</code></th>
-<td class="colLast">
-<div class="block">get the build number of this (sub)version</div>
-</td>
-</tr>
-<tr class="rowColor" id="i3">
-<td class="colFirst"><code>int</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getMajor()">getMajor</a></span>()</code></th>
-<td class="colLast">
-<div class="block">get the major version number</div>
-</td>
-</tr>
-<tr class="altColor" id="i4">
-<td class="colFirst"><code>int</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getMinor()">getMinor</a></span>()</code></th>
-<td class="colLast">
-<div class="block">get the minor version number</div>
-</td>
-</tr>
-<tr class="rowColor" id="i5">
-<td class="colFirst"><code>int</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getSub()">getSub</a></span>()</code></th>
-<td class="colLast">
-<div class="block">get the subversion of the minor version number</div>
-</td>
-</tr>
-<tr class="altColor" id="i6">
-<td class="colFirst"><code>int</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#hashCode()">hashCode</a></span>()</code></th>
-<td class="colLast">
-<div class="block">since equals is overridden, we should implement an own hashCode.</div>
-</td>
-</tr>
-<tr class="rowColor" id="i7">
-<td class="colFirst"><code>java.lang.String</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#toString()">toString</a></span>()</code></th>
-<td class="colLast">&nbsp;</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<div class="inheritedList">
+<h3>Methods inherited from class&nbsp;i5.las2peer.api.<a href="../../api/SemverVersion.html" title="class in i5.las2peer.api">SemverVersion</a></h3>
+<a id="methods.inherited.from.class.i5.las2peer.api.SemverVersion">
+<!--   -->
+</a><code><a href="../../api/SemverVersion.html#equals(i5.las2peer.api.SemverVersion)">equals</a>, <a href="../../api/SemverVersion.html#equals(java.lang.Object)">equals</a>, <a href="../../api/SemverVersion.html#getBuild()">getBuild</a>, <a href="../../api/SemverVersion.html#getMajor()">getMajor</a>, <a href="../../api/SemverVersion.html#getMinor()">getMinor</a>, <a href="../../api/SemverVersion.html#getPatch()">getPatch</a>, <a href="../../api/SemverVersion.html#getPreRelease()">getPreRelease</a>, <a href="../../api/SemverVersion.html#getSub()">getSub</a>, <a href="../../api/SemverVersion.html#hashCode()">hashCode</a>, <a href="../../api/SemverVersion.html#toString()">toString</a></code></div>
 <div class="inheritedList">
 <h3>Methods inherited from class&nbsp;java.lang.Object</h3>
 <a id="methods.inherited.from.class.java.lang.Object">
@@ -261,10 +221,9 @@ int&nbsp;build)</code></th>
 <div class="memberSignature"><span class="modifiers">public</span>&nbsp;<span class="memberName">LibraryVersion</span>&#8203;(<span class="arguments">java.lang.String&nbsp;version)</span>
                throws <span class="exceptions">java.lang.IllegalArgumentException</span></div>
 <div class="block">Generate a Version from String representation
- 
- format : major.minor.sub-build
- 
- minor, subversion and build are optional</div>
+
+ format : Semver <code>&lt;major&gt; "." &lt;minor&gt; "." &lt;patch&gt; "-" &lt;pre-release&gt; "+" &lt;build&gt;</code> (where minor, patch,
+ pre-release and build are optional) or "*" (no version specified / matches all versions)</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>version</code> - A version string representation</dd>
@@ -275,19 +234,41 @@ int&nbsp;build)</code></th>
 </li>
 <li class="blockList">
 <section class="detail">
-<h3><a id="&lt;init&gt;(int,int,int,int)">LibraryVersion</a></h3>
+<h3><a id="&lt;init&gt;(int,int,int,java.lang.String,java.lang.String)">LibraryVersion</a></h3>
 <div class="memberSignature"><span class="modifiers">public</span>&nbsp;<span class="memberName">LibraryVersion</span>&#8203;(<span class="arguments">int&nbsp;major,
 int&nbsp;minor,
-int&nbsp;sub,
-int&nbsp;build)</span>
+int&nbsp;patch,
+java.lang.String&nbsp;preRelease,
+java.lang.String&nbsp;build)</span>
                throws <span class="exceptions">java.lang.IllegalArgumentException</span></div>
 <div class="block">generate a new LibraryVersion</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>major</code> - Major version number part</dd>
 <dd><code>minor</code> - Minor version number part</dd>
-<dd><code>sub</code> - Sub version number part</dd>
-<dd><code>build</code> - Build number</dd>
+<dd><code>patch</code> - Sub version number part</dd>
+<dd><code>preRelease</code> - pre-release version</dd>
+<dd><code>build</code> - build version</dd>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code>java.lang.IllegalArgumentException</code> - If a version number part is smaller than 0</dd>
+</dl>
+</section>
+</li>
+<li class="blockList">
+<section class="detail">
+<h3><a id="&lt;init&gt;(int,int,int,java.lang.String)">LibraryVersion</a></h3>
+<div class="memberSignature"><span class="modifiers">public</span>&nbsp;<span class="memberName">LibraryVersion</span>&#8203;(<span class="arguments">int&nbsp;major,
+int&nbsp;minor,
+int&nbsp;patch,
+java.lang.String&nbsp;preRelease)</span>
+               throws <span class="exceptions">java.lang.IllegalArgumentException</span></div>
+<div class="block">generate a new LibraryVersion</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>major</code> - Major version number part</dd>
+<dd><code>minor</code> - Minor version number part</dd>
+<dd><code>patch</code> - Sub version number part</dd>
+<dd><code>preRelease</code> - pre-release version</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code>java.lang.IllegalArgumentException</code> - If a version number part is smaller than 0</dd>
 </dl>
@@ -298,14 +279,14 @@ int&nbsp;build)</span>
 <h3><a id="&lt;init&gt;(int,int,int)">LibraryVersion</a></h3>
 <div class="memberSignature"><span class="modifiers">public</span>&nbsp;<span class="memberName">LibraryVersion</span>&#8203;(<span class="arguments">int&nbsp;major,
 int&nbsp;minor,
-int&nbsp;sub)</span>
+int&nbsp;patch)</span>
                throws <span class="exceptions">java.lang.IllegalArgumentException</span></div>
 <div class="block">generate a new LibraryVersion</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>major</code> - Major version number part</dd>
 <dd><code>minor</code> - Minor version number part</dd>
-<dd><code>sub</code> - Sub version number part</dd>
+<dd><code>patch</code> - patch version number part</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code>java.lang.IllegalArgumentException</code> - If a version number part is smaller than 0</dd>
 </dl>
@@ -344,115 +325,6 @@ int&nbsp;minor)</span>
 </ul>
 </section>
 </li>
-<!-- ============ METHOD DETAIL ========== -->
-<li class="blockList">
-<section class="methodDetails"><a id="method.detail">
-<!--   -->
-</a>
-<h2>Method Details</h2>
-<ul class="blockList">
-<li class="blockList">
-<section class="detail">
-<h3><a id="equals(i5.las2peer.classLoaders.libraries.LibraryVersion)">equals</a></h3>
-<div class="memberSignature"><span class="modifiers">public</span>&nbsp;<span class="returnType">boolean</span>&nbsp;<span class="memberName">equals</span>&#8203;(<span class="arguments"><a href="LibraryVersion.html" title="class in i5.las2peer.classLoaders.libraries">LibraryVersion</a>&nbsp;v)</span></div>
-<div class="block">compares to version and checks for equality</div>
-<dl>
-<dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>v</code> - Another library version to check</dd>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd>true, if this version is the same as the given one</dd>
-</dl>
-</section>
-</li>
-<li class="blockList">
-<section class="detail">
-<h3><a id="equals(java.lang.Object)">equals</a></h3>
-<div class="memberSignature"><span class="modifiers">public</span>&nbsp;<span class="returnType">boolean</span>&nbsp;<span class="memberName">equals</span>&#8203;(<span class="arguments">java.lang.Object&nbsp;o)</span></div>
-<div class="block">compares this version with any object
- 
- if the given object is a String, the string representation of this version is compared to the given string</div>
-<dl>
-<dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
-<dd><code>equals</code>&nbsp;in class&nbsp;<code>java.lang.Object</code></dd>
-<dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>o</code> - Another version string to check</dd>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd>true, if the given object is a version and the same as this one</dd>
-</dl>
-</section>
-</li>
-<li class="blockList">
-<section class="detail">
-<h3><a id="hashCode()">hashCode</a></h3>
-<div class="memberSignature"><span class="modifiers">public</span>&nbsp;<span class="returnType">int</span>&nbsp;<span class="memberName">hashCode</span>()</div>
-<div class="block">since equals is overridden, we should implement an own hashCode.</div>
-<dl>
-<dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
-<dd><code>hashCode</code>&nbsp;in class&nbsp;<code>java.lang.Object</code></dd>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd>a hash code as int</dd>
-</dl>
-</section>
-</li>
-<li class="blockList">
-<section class="detail">
-<h3><a id="getMinor()">getMinor</a></h3>
-<div class="memberSignature"><span class="modifiers">public</span>&nbsp;<span class="returnType">int</span>&nbsp;<span class="memberName">getMinor</span>()</div>
-<div class="block">get the minor version number</div>
-<dl>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd>minor version number</dd>
-</dl>
-</section>
-</li>
-<li class="blockList">
-<section class="detail">
-<h3><a id="getMajor()">getMajor</a></h3>
-<div class="memberSignature"><span class="modifiers">public</span>&nbsp;<span class="returnType">int</span>&nbsp;<span class="memberName">getMajor</span>()</div>
-<div class="block">get the major version number</div>
-<dl>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd>major version number</dd>
-</dl>
-</section>
-</li>
-<li class="blockList">
-<section class="detail">
-<h3><a id="getSub()">getSub</a></h3>
-<div class="memberSignature"><span class="modifiers">public</span>&nbsp;<span class="returnType">int</span>&nbsp;<span class="memberName">getSub</span>()</div>
-<div class="block">get the subversion of the minor version number</div>
-<dl>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd>suberverion number of minor</dd>
-</dl>
-</section>
-</li>
-<li class="blockList">
-<section class="detail">
-<h3><a id="getBuild()">getBuild</a></h3>
-<div class="memberSignature"><span class="modifiers">public</span>&nbsp;<span class="returnType">int</span>&nbsp;<span class="memberName">getBuild</span>()</div>
-<div class="block">get the build number of this (sub)version</div>
-<dl>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd>build number</dd>
-</dl>
-</section>
-</li>
-<li class="blockList">
-<section class="detail">
-<h3><a id="toString()">toString</a></h3>
-<div class="memberSignature"><span class="modifiers">public</span>&nbsp;<span class="returnType">java.lang.String</span>&nbsp;<span class="memberName">toString</span>()</div>
-<dl>
-<dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
-<dd><code>toString</code>&nbsp;in class&nbsp;<code>java.lang.Object</code></dd>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd>a String representation of this version</dd>
-</dl>
-</section>
-</li>
-</ul>
-</section>
-</li>
 </ul>
 </section>
 </div>
@@ -483,7 +355,7 @@ int&nbsp;minor)</span>
 <ul class="subNavList">
 <li>Summary:&nbsp;</li>
 <li>Nested&nbsp;|&nbsp;</li>
-<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#field.summary">Field</a>&nbsp;|&nbsp;</li>
 <li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
 <li><a href="#method.summary">Method</a></li>
 </ul>
@@ -491,7 +363,7 @@ int&nbsp;minor)</span>
 <li>Detail:&nbsp;</li>
 <li>Field&nbsp;|&nbsp;</li>
 <li><a href="#constructor.detail">Constr</a>&nbsp;|&nbsp;</li>
-<li><a href="#method.detail">Method</a></li>
+<li>Method</li>
 </ul>
 </div>
 </div>

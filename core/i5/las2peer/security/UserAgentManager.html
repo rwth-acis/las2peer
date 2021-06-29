@@ -19,7 +19,7 @@
 <script type="text/javascript" src="../../../script-dir/jquery-ui.js"></script>
 </head>
 <body class="class-declaration">
-<script type="text/javascript">var data = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10};
+<script type="text/javascript">var data = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -144,8 +144,9 @@ extends java.lang.Object</pre>
 <td class="colFirst"><code>java.lang.String</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getAgentId(java.lang.String)">getAgentId</a></span>&#8203;(java.lang.String&nbsp;prefixedIdentifier)</code></th>
 <td class="colLast">
-<div class="block">Get agent ID for a prefixed identifier, i.e., a string consisting of one of the prefixes defined in this class
- and the corresponding attribute (e.g., email address).</div>
+<div class="block">Get agent ID for a prefixed identifier, i.e., a string consisting of one of
+ the prefixes defined in this class and the corresponding attribute (e.g.,
+ email address).</div>
 </td>
 </tr>
 <tr class="rowColor" id="i1">
@@ -157,19 +158,33 @@ extends java.lang.Object</pre>
 </tr>
 <tr class="altColor" id="i2">
 <td class="colFirst"><code>java.lang.String</code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getAgentIdByGroupName(java.lang.String)">getAgentIdByGroupName</a></span>&#8203;(java.lang.String&nbsp;groupName)</code></th>
+<td class="colLast">
+<div class="block">get an <a href="GroupAgentImpl.html" title="class in i5.las2peer.security"><code>GroupAgentImpl</code></a>'s id by group name</div>
+</td>
+</tr>
+<tr class="rowColor" id="i3">
+<td class="colFirst"><code>java.lang.String</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getAgentIdByLogin(java.lang.String)">getAgentIdByLogin</a></span>&#8203;(java.lang.String&nbsp;name)</code></th>
 <td class="colLast">
 <div class="block">get an <a href="UserAgentImpl.html" title="class in i5.las2peer.security"><code>UserAgentImpl</code></a>'s id by login name</div>
 </td>
 </tr>
-<tr class="rowColor" id="i3">
+<tr class="altColor" id="i4">
 <td class="colFirst"><code>java.lang.String</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getAgentIdByOIDCSub(java.lang.String)">getAgentIdByOIDCSub</a></span>&#8203;(java.lang.String&nbsp;sub)</code></th>
 <td class="colLast">
 <div class="block">Gets an <a href="UserAgentImpl.html" title="class in i5.las2peer.security"><code>UserAgentImpl</code></a>'s id by OIDC sub.</div>
 </td>
 </tr>
-<tr class="altColor" id="i4">
+<tr class="rowColor" id="i5">
+<td class="colFirst"><code>void</code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#registerGroupAgent(i5.las2peer.api.security.GroupAgent)">registerGroupAgent</a></span>&#8203;(<a href="../api/security/GroupAgent.html" title="interface in i5.las2peer.api.security">GroupAgent</a>&nbsp;agent)</code></th>
+<td class="colLast">
+<div class="block">Stores group name of a group agent to the network</div>
+</td>
+</tr>
+<tr class="altColor" id="i6">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#registerOIDCSub(i5.las2peer.security.UserAgentImpl,java.lang.String)">registerOIDCSub</a></span>&#8203;(<a href="UserAgentImpl.html" title="class in i5.las2peer.security">UserAgentImpl</a>&nbsp;agent,
 java.lang.String&nbsp;sub)</code></th>
@@ -177,7 +192,7 @@ java.lang.String&nbsp;sub)</code></th>
 <div class="block">Stores OIDC sub of an user agent to the network</div>
 </td>
 </tr>
-<tr class="rowColor" id="i5">
+<tr class="rowColor" id="i7">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#registerUserAgent(i5.las2peer.api.security.UserAgent)">registerUserAgent</a></span>&#8203;(<a href="../api/security/UserAgent.html" title="interface in i5.las2peer.api.security">UserAgent</a>&nbsp;agent)</code></th>
 <td class="colLast">
@@ -234,9 +249,29 @@ java.lang.String&nbsp;sub)</code></th>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>agent</code> - an unlocked UserAgent</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="../api/security/EmailAlreadyTakenException.html" title="class in i5.las2peer.api.security">EmailAlreadyTakenException</a></code> - If the given email is already in use by another agent</dd>
-<dd><code><a href="../api/security/LoginNameAlreadyTakenException.html" title="class in i5.las2peer.api.security">LoginNameAlreadyTakenException</a></code> - If the given login name is already in use by another agent</dd>
+<dd><code><a href="../api/security/EmailAlreadyTakenException.html" title="class in i5.las2peer.api.security">EmailAlreadyTakenException</a></code> - If the given email is already in use
+                                        by another agent</dd>
+<dd><code><a href="../api/security/LoginNameAlreadyTakenException.html" title="class in i5.las2peer.api.security">LoginNameAlreadyTakenException</a></code> - If the given login name is already in
+                                        use by another agent</dd>
 <dd><code><a href="../api/security/AgentLockedException.html" title="class in i5.las2peer.api.security">AgentLockedException</a></code> - If the given agent is not unlocked</dd>
+</dl>
+</section>
+</li>
+<li class="blockList">
+<section class="detail">
+<h3><a id="registerGroupAgent(i5.las2peer.api.security.GroupAgent)">registerGroupAgent</a></h3>
+<div class="memberSignature"><span class="modifiers">public</span>&nbsp;<span class="returnType">void</span>&nbsp;<span class="memberName">registerGroupAgent</span>&#8203;(<span class="arguments"><a href="../api/security/GroupAgent.html" title="interface in i5.las2peer.api.security">GroupAgent</a>&nbsp;agent)</span>
+                        throws <span class="exceptions"><a href="../api/security/LoginNameAlreadyTakenException.html" title="class in i5.las2peer.api.security">LoginNameAlreadyTakenException</a>,
+javax.naming.NameAlreadyBoundException,
+<a href="../api/security/AgentLockedException.html" title="class in i5.las2peer.api.security">AgentLockedException</a></span></div>
+<div class="block">Stores group name of a group agent to the network</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>agent</code> - an unlocked GroupAgent</dd>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="../api/security/AgentLockedException.html" title="class in i5.las2peer.api.security">AgentLockedException</a></code> - If the given agent is not unlocked</dd>
+<dd><code><a href="../api/security/LoginNameAlreadyTakenException.html" title="class in i5.las2peer.api.security">LoginNameAlreadyTakenException</a></code></dd>
+<dd><code>javax.naming.NameAlreadyBoundException</code></dd>
 </dl>
 </section>
 </li>
@@ -253,7 +288,8 @@ java.lang.String&nbsp;sub)</span>
 <dd><code>agent</code> - an unlocked UserAgent</dd>
 <dd><code>sub</code> - The OIDC sub to register for this agent</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="../api/security/OIDCSubAlreadyTakenException.html" title="class in i5.las2peer.api.security">OIDCSubAlreadyTakenException</a></code> - If the given OIDC sub is already registered</dd>
+<dd><code><a href="../api/security/OIDCSubAlreadyTakenException.html" title="class in i5.las2peer.api.security">OIDCSubAlreadyTakenException</a></code> - If the given OIDC sub is already
+                                      registered</dd>
 <dd><code><a href="../api/security/AgentLockedException.html" title="class in i5.las2peer.api.security">AgentLockedException</a></code> - If the given agent is not unlocked</dd>
 </dl>
 </section>
@@ -264,8 +300,9 @@ java.lang.String&nbsp;sub)</span>
 <div class="memberSignature"><span class="modifiers">public</span>&nbsp;<span class="returnType">java.lang.String</span>&nbsp;<span class="memberName">getAgentId</span>&#8203;(<span class="arguments">java.lang.String&nbsp;prefixedIdentifier)</span>
                             throws <span class="exceptions"><a href="../api/security/AgentNotFoundException.html" title="class in i5.las2peer.api.security">AgentNotFoundException</a>,
 <a href="../api/security/AgentOperationFailedException.html" title="class in i5.las2peer.api.security">AgentOperationFailedException</a></span></div>
-<div class="block">Get agent ID for a prefixed identifier, i.e., a string consisting of one of the prefixes defined in this class
- and the corresponding attribute (e.g., email address).</div>
+<div class="block">Get agent ID for a prefixed identifier, i.e., a string consisting of one of
+ the prefixes defined in this class and the corresponding attribute (e.g.,
+ email address).</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>prefixedIdentifier</code> - </dd>
@@ -290,8 +327,10 @@ java.lang.String&nbsp;sub)</span>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>the id of the agent</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="../api/security/AgentNotFoundException.html" title="class in i5.las2peer.api.security">AgentNotFoundException</a></code> - If no agent for the given login is found</dd>
-<dd><code><a href="../api/security/AgentOperationFailedException.html" title="class in i5.las2peer.api.security">AgentOperationFailedException</a></code> - If any other issue with the agent occurs, e. g. XML not readable</dd>
+<dd><code><a href="../api/security/AgentNotFoundException.html" title="class in i5.las2peer.api.security">AgentNotFoundException</a></code> - If no agent for the given login is
+                                       found</dd>
+<dd><code><a href="../api/security/AgentOperationFailedException.html" title="class in i5.las2peer.api.security">AgentOperationFailedException</a></code> - If any other issue with the agent
+                                       occurs, e. g. XML not readable</dd>
 </dl>
 </section>
 </li>
@@ -308,8 +347,10 @@ java.lang.String&nbsp;sub)</span>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>the id of the agent</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="../api/security/AgentNotFoundException.html" title="class in i5.las2peer.api.security">AgentNotFoundException</a></code> - If no agent for the given email is found</dd>
-<dd><code><a href="../api/security/AgentOperationFailedException.html" title="class in i5.las2peer.api.security">AgentOperationFailedException</a></code> - If any other issue with the agent occurs, e. g. XML not readable</dd>
+<dd><code><a href="../api/security/AgentNotFoundException.html" title="class in i5.las2peer.api.security">AgentNotFoundException</a></code> - If no agent for the given email is
+                                       found</dd>
+<dd><code><a href="../api/security/AgentOperationFailedException.html" title="class in i5.las2peer.api.security">AgentOperationFailedException</a></code> - If any other issue with the agent
+                                       occurs, e. g. XML not readable</dd>
 </dl>
 </section>
 </li>
@@ -327,7 +368,28 @@ java.lang.String&nbsp;sub)</span>
 <dd>The id of the agent</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="../api/security/AgentNotFoundException.html" title="class in i5.las2peer.api.security">AgentNotFoundException</a></code> - If no agent for the given sub is found</dd>
-<dd><code><a href="../api/security/AgentOperationFailedException.html" title="class in i5.las2peer.api.security">AgentOperationFailedException</a></code> - If any other issue with the agent occurs, e. g. XML not readable</dd>
+<dd><code><a href="../api/security/AgentOperationFailedException.html" title="class in i5.las2peer.api.security">AgentOperationFailedException</a></code> - If any other issue with the agent
+                                       occurs, e. g. XML not readable</dd>
+</dl>
+</section>
+</li>
+<li class="blockList">
+<section class="detail">
+<h3><a id="getAgentIdByGroupName(java.lang.String)">getAgentIdByGroupName</a></h3>
+<div class="memberSignature"><span class="modifiers">public</span>&nbsp;<span class="returnType">java.lang.String</span>&nbsp;<span class="memberName">getAgentIdByGroupName</span>&#8203;(<span class="arguments">java.lang.String&nbsp;groupName)</span>
+                                       throws <span class="exceptions"><a href="../api/security/AgentNotFoundException.html" title="class in i5.las2peer.api.security">AgentNotFoundException</a>,
+<a href="../api/security/AgentOperationFailedException.html" title="class in i5.las2peer.api.security">AgentOperationFailedException</a></span></div>
+<div class="block">get an <a href="GroupAgentImpl.html" title="class in i5.las2peer.security"><code>GroupAgentImpl</code></a>'s id by group name</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>groupName</code> - </dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>the id of the agent</dd>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="../api/security/AgentNotFoundException.html" title="class in i5.las2peer.api.security">AgentNotFoundException</a></code> - If no agent for the given login is
+                                       found</dd>
+<dd><code><a href="../api/security/AgentOperationFailedException.html" title="class in i5.las2peer.api.security">AgentOperationFailedException</a></code> - If any other issue with the agent
+                                       occurs, e. g. XML not readable</dd>
 </dl>
 </section>
 </li>

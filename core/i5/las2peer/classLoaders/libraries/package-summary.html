@@ -118,8 +118,9 @@ loadScripts(document, 'script');</script>
 <tr class="rowColor">
 <th class="colFirst" scope="row"><a href="LibraryVersion.html" title="class in i5.las2peer.classLoaders.libraries">LibraryVersion</a></th>
 <td class="colLast">
-<div class="block">a simple class managing a library version number in the format major.minor.subversion-build where minor, subversion
- and build are optional</div>
+<div class="block">A simple class managing a library version number in the format
+ <code>&lt;major&gt; "." &lt;minor&gt; "." &lt;patch&gt; "-" &lt;pre-release&gt; "+" &lt;build&gt;</code> (where minor, patch, pre-release and build
+ are optional) or "*" (no version specified / matches all versions).</div>
 </td>
 </tr>
 <tr class="altColor">

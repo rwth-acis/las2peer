@@ -83,6 +83,14 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Returns the given date increased by one day.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/api/security/GroupAgent.html#addAdmin(i5.las2peer.api.security.Agent)">addAdmin(Agent)</a></span> - Method in interface i5.las2peer.api.security.<a href="i5/las2peer/api/security/GroupAgent.html" title="interface in i5.las2peer.api.security">GroupAgent</a></dt>
+<dd>
+<div class="block">Add an admin to the group.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/security/GroupAgentImpl.html#addAdmin(i5.las2peer.api.security.Agent)">addAdmin(Agent)</a></span> - Method in class i5.las2peer.security.<a href="i5/las2peer/security/GroupAgentImpl.html" title="class in i5.las2peer.security">GroupAgentImpl</a></dt>
+<dd>
+<div class="block">add a member to the admin list of this group</div>
+</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/tools/helper/L2pNodeLauncherConfiguration.html#addBootstrap(java.lang.String)">addBootstrap(String)</a></span> - Method in class i5.las2peer.tools.helper.<a href="i5/las2peer/tools/helper/L2pNodeLauncherConfiguration.html" title="class in i5.las2peer.tools.helper">L2pNodeLauncherConfiguration</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/ReadWriteRegistryClient.html#addGenericTransaction(i5.las2peer.security.EthereumAgent,i5.las2peer.security.EthereumAgent,java.lang.String,java.math.BigInteger)">addGenericTransaction(EthereumAgent, EthereumAgent, String, BigInteger)</a></span> - Method in class i5.las2peer.registry.<a href="i5/las2peer/registry/ReadWriteRegistryClient.html" title="class in i5.las2peer.registry">ReadWriteRegistryClient</a></dt>
@@ -130,6 +138,8 @@ loadScripts(document, 'script');</script>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/ReputationRegistry.html#addTransaction(java.lang.String,java.math.BigInteger,java.math.BigInteger)">addTransaction(String, BigInteger, BigInteger)</a></span> - Method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/ReputationRegistry.html" title="class in i5.las2peer.registry.contracts">ReputationRegistry</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/ReadWriteRegistryClient.html#addUserRating(i5.las2peer.security.EthereumAgent,java.lang.Integer)">addUserRating(EthereumAgent, Integer)</a></span> - Method in class i5.las2peer.registry.<a href="i5/las2peer/registry/ReadWriteRegistryClient.html" title="class in i5.las2peer.registry">ReadWriteRegistryClient</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/security/GroupAgentImpl.html#adminList">adminList</a></span> - Variable in class i5.las2peer.security.<a href="i5/las2peer/security/GroupAgentImpl.html" title="class in i5.las2peer.security">GroupAgentImpl</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="i5/las2peer/api/security/Agent.html" title="interface in i5.las2peer.api.security"><span class="typeNameLink">Agent</span></a> - Interface in <a href="i5/las2peer/api/security/package-summary.html">i5.las2peer.api.security</a></dt>
 <dd>
@@ -615,6 +625,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="deprecationBlock"><span class="deprecatedLabel">Deprecated.</span></div>
 &nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/api/SemverVersion.html#build">build</a></span> - Variable in class i5.las2peer.api.<a href="i5/las2peer/api/SemverVersion.html" title="class in i5.las2peer.api">SemverVersion</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/persistency/EnvelopeArtifact.html#buildId(rice.pastry.commonapi.PastryIdFactory,java.lang.String,int)">buildId(PastryIdFactory, String, int)</a></span> - Static method in class i5.las2peer.persistency.<a href="i5/las2peer/persistency/EnvelopeArtifact.html" title="class in i5.las2peer.persistency">EnvelopeArtifact</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/persistency/HashedArtifact.html#buildIdFromHash(rice.pastry.commonapi.PastryIdFactory,byte%5B%5D)">buildIdFromHash(PastryIdFactory, byte[])</a></span> - Static method in class i5.las2peer.persistency.<a href="i5/las2peer/persistency/HashedArtifact.html" title="class in i5.las2peer.persistency">HashedArtifact</a></dt>
@@ -937,13 +949,15 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/api/Context.html#createEnvelope(java.lang.String)">createEnvelope(String)</a></span> - Method in interface i5.las2peer.api.<a href="i5/las2peer/api/Context.html" title="interface in i5.las2peer.api">Context</a></dt>
 <dd>
-<div class="block">Creates a new envelope with the current main agent as signing agent and first reader.</div>
+<div class="block">Creates a new envelope with the current main agent as signing agent and first
+ reader.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/execution/ExecutionContext.html#createEnvelope(java.lang.String)">createEnvelope(String)</a></span> - Method in class i5.las2peer.execution.<a href="i5/las2peer/execution/ExecutionContext.html" title="class in i5.las2peer.execution">ExecutionContext</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/api/Context.html#createEnvelope(java.lang.String,i5.las2peer.api.security.Agent)">createEnvelope(String, Agent)</a></span> - Method in interface i5.las2peer.api.<a href="i5/las2peer/api/Context.html" title="interface in i5.las2peer.api">Context</a></dt>
 <dd>
-<div class="block">Creates a new envelope with the given agent as signing agent and first reader.</div>
+<div class="block">Creates a new envelope with the given agent as signing agent and first
+ reader.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/execution/ExecutionContext.html#createEnvelope(java.lang.String,i5.las2peer.api.security.Agent)">createEnvelope(String, Agent)</a></span> - Method in class i5.las2peer.execution.<a href="i5/las2peer/execution/ExecutionContext.html" title="class in i5.las2peer.execution">ExecutionContext</a></dt>
 <dd>&nbsp;</dd>
@@ -974,6 +988,10 @@ loadScripts(document, 'script');</script>
 <dt><span class="memberNameLink"><a href="i5/las2peer/security/EthereumAgent.html#createEthereumAgent(java.lang.String,java.lang.String,i5.las2peer.registry.ReadWriteRegistryClient,java.lang.String)">createEthereumAgent(String, String, ReadWriteRegistryClient, String)</a></span> - Static method in class i5.las2peer.security.<a href="i5/las2peer/security/EthereumAgent.html" title="class in i5.las2peer.security">EthereumAgent</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/security/EthereumAgent.html#createEthereumAgentWithClient(java.lang.String,java.lang.String,i5.las2peer.registry.ReadWriteRegistryClient)">createEthereumAgentWithClient(String, String, ReadWriteRegistryClient)</a></span> - Static method in class i5.las2peer.security.<a href="i5/las2peer/security/EthereumAgent.html" title="class in i5.las2peer.security">EthereumAgent</a></dt>
+<dd>
+<div class="block">Creates new agent with given passphrase and login name.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/security/EthereumGroupAgent.html#createEthereumGroupAgentWithClient(java.lang.String,i5.las2peer.registry.ReadWriteRegistryClient,i5.las2peer.api.security.Agent%5B%5D)">createEthereumGroupAgentWithClient(String, ReadWriteRegistryClient, Agent[])</a></span> - Static method in class i5.las2peer.security.<a href="i5/las2peer/security/EthereumGroupAgent.html" title="class in i5.las2peer.security">EthereumGroupAgent</a></dt>
 <dd>
 <div class="block">Creates new agent with given passphrase and login name.</div>
 </dd>
@@ -1022,6 +1040,8 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/security/EthereumAgent.html#createFromXml(java.lang.String)">createFromXml(String)</a></span> - Static method in class i5.las2peer.security.<a href="i5/las2peer/security/EthereumAgent.html" title="class in i5.las2peer.security">EthereumAgent</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/security/EthereumGroupAgent.html#createFromXml(java.lang.String)">createFromXml(String)</a></span> - Static method in class i5.las2peer.security.<a href="i5/las2peer/security/EthereumGroupAgent.html" title="class in i5.las2peer.security">EthereumGroupAgent</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/security/GroupAgentImpl.html#createFromXml(java.lang.String)">createFromXml(String)</a></span> - Static method in class i5.las2peer.security.<a href="i5/las2peer/security/GroupAgentImpl.html" title="class in i5.las2peer.security">GroupAgentImpl</a></dt>
 <dd>
 <div class="block">factory - create an instance of GroupAgent from its XML representation</div>
@@ -1059,6 +1079,8 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/security/EthereumAgent.html#createFromXml(org.w3c.dom.Element)">createFromXml(Element)</a></span> - Static method in class i5.las2peer.security.<a href="i5/las2peer/security/EthereumAgent.html" title="class in i5.las2peer.security">EthereumAgent</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/security/EthereumGroupAgent.html#createFromXml(org.w3c.dom.Element)">createFromXml(Element)</a></span> - Static method in class i5.las2peer.security.<a href="i5/las2peer/security/EthereumGroupAgent.html" title="class in i5.las2peer.security">EthereumGroupAgent</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/security/GroupAgentImpl.html#createFromXml(org.w3c.dom.Element)">createFromXml(Element)</a></span> - Static method in class i5.las2peer.security.<a href="i5/las2peer/security/GroupAgentImpl.html" title="class in i5.las2peer.security">GroupAgentImpl</a></dt>
 <dd>
 <div class="block">factory - create an instance of GroupAgent based on a XML node</div>
@@ -1092,6 +1114,16 @@ loadScripts(document, 'script');</script>
 <dt><span class="memberNameLink"><a href="i5/las2peer/security/GroupAgentImpl.html#createGroupAgent(i5.las2peer.api.security.Agent%5B%5D)">createGroupAgent(Agent[])</a></span> - Static method in class i5.las2peer.security.<a href="i5/las2peer/security/GroupAgentImpl.html" title="class in i5.las2peer.security">GroupAgentImpl</a></dt>
 <dd>
 <div class="block">create a new group agent instance</div>
+</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/api/Context.html#createGroupAgent(i5.las2peer.api.security.Agent%5B%5D,java.lang.String)">createGroupAgent(Agent[], String)</a></span> - Method in interface i5.las2peer.api.<a href="i5/las2peer/api/Context.html" title="interface in i5.las2peer.api">Context</a></dt>
+<dd>
+<div class="block">Creates a new GroupAgent with groupName.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/execution/ExecutionContext.html#createGroupAgent(i5.las2peer.api.security.Agent%5B%5D,java.lang.String)">createGroupAgent(Agent[], String)</a></span> - Method in class i5.las2peer.execution.<a href="i5/las2peer/execution/ExecutionContext.html" title="class in i5.las2peer.execution">ExecutionContext</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/security/GroupAgentImpl.html#createGroupAgent(i5.las2peer.api.security.Agent%5B%5D,java.lang.String)">createGroupAgent(Agent[], String)</a></span> - Static method in class i5.las2peer.security.<a href="i5/las2peer/security/GroupAgentImpl.html" title="class in i5.las2peer.security">GroupAgentImpl</a></dt>
+<dd>
+<div class="block">create a new group agent instance with groupName</div>
 </dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/p2p/Node.html#createMediatorForAgent(i5.las2peer.security.AgentImpl)">createMediatorForAgent(AgentImpl)</a></span> - Method in class i5.las2peer.p2p.<a href="i5/las2peer/p2p/Node.html" title="class in i5.las2peer.p2p">Node</a></dt>
 <dd>
@@ -1320,6 +1352,8 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/classLoaders/policies/DefaultPolicy.html#%3Cinit%3E()">DefaultPolicy()</a></span> - Constructor for class i5.las2peer.classLoaders.policies.<a href="i5/las2peer/classLoaders/policies/DefaultPolicy.html" title="class in i5.las2peer.classLoaders.policies">DefaultPolicy</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.html#delegatedRegister(byte%5B%5D,byte%5B%5D,byte%5B%5D,java.lang.String,byte%5B%5D)">delegatedRegister(byte[], byte[], byte[], String, byte[])</a></span> - Method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.html" title="class in i5.las2peer.registry.contracts">GroupRegistry</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/UserRegistry.html#delegatedRegister(byte%5B%5D,byte%5B%5D,byte%5B%5D,java.lang.String,byte%5B%5D)">delegatedRegister(byte[], byte[], byte[], String, byte[])</a></span> - Method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/UserRegistry.html" title="class in i5.las2peer.registry.contracts">UserRegistry</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/ServiceRegistry.html#delegatedRegister(java.lang.String,byte%5B%5D,java.lang.String,byte%5B%5D)">delegatedRegister(String, byte[], String, byte[])</a></span> - Method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/ServiceRegistry.html" title="class in i5.las2peer.registry.contracts">ServiceRegistry</a></dt>
@@ -1340,6 +1374,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="deprecationBlock"><span class="deprecatedLabel">Deprecated.</span></div>
 </dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.html#deploy(org.web3j.protocol.Web3j,org.web3j.crypto.Credentials,java.math.BigInteger,java.math.BigInteger)">deploy(Web3j, Credentials, BigInteger, BigInteger)</a></span> - Static method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.html" title="class in i5.las2peer.registry.contracts">GroupRegistry</a></dt>
+<dd>
+<div class="deprecationBlock"><span class="deprecatedLabel">Deprecated.</span></div>
+</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/UserRegistry.html#deploy(org.web3j.protocol.Web3j,org.web3j.crypto.Credentials,java.math.BigInteger,java.math.BigInteger)">deploy(Web3j, Credentials, BigInteger, BigInteger)</a></span> - Static method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/UserRegistry.html" title="class in i5.las2peer.registry.contracts">UserRegistry</a></dt>
 <dd>
 <div class="deprecationBlock"><span class="deprecatedLabel">Deprecated.</span></div>
@@ -1354,6 +1392,8 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/CommunityTagIndex.html#deploy(org.web3j.protocol.Web3j,org.web3j.crypto.Credentials,org.web3j.tx.gas.ContractGasProvider)">deploy(Web3j, Credentials, ContractGasProvider)</a></span> - Static method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/CommunityTagIndex.html" title="class in i5.las2peer.registry.contracts">CommunityTagIndex</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.html#deploy(org.web3j.protocol.Web3j,org.web3j.crypto.Credentials,org.web3j.tx.gas.ContractGasProvider)">deploy(Web3j, Credentials, ContractGasProvider)</a></span> - Static method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.html" title="class in i5.las2peer.registry.contracts">GroupRegistry</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/UserRegistry.html#deploy(org.web3j.protocol.Web3j,org.web3j.crypto.Credentials,org.web3j.tx.gas.ContractGasProvider)">deploy(Web3j, Credentials, ContractGasProvider)</a></span> - Static method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/UserRegistry.html" title="class in i5.las2peer.registry.contracts">UserRegistry</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/ReputationRegistry.html#deploy(org.web3j.protocol.Web3j,org.web3j.crypto.Credentials,org.web3j.tx.gas.ContractGasProvider,java.lang.String)">deploy(Web3j, Credentials, ContractGasProvider, String)</a></span> - Static method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/ReputationRegistry.html" title="class in i5.las2peer.registry.contracts">ReputationRegistry</a></dt>
@@ -1361,6 +1401,10 @@ loadScripts(document, 'script');</script>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/ServiceRegistry.html#deploy(org.web3j.protocol.Web3j,org.web3j.crypto.Credentials,org.web3j.tx.gas.ContractGasProvider,java.lang.String)">deploy(Web3j, Credentials, ContractGasProvider, String)</a></span> - Static method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/ServiceRegistry.html" title="class in i5.las2peer.registry.contracts">ServiceRegistry</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/CommunityTagIndex.html#deploy(org.web3j.protocol.Web3j,org.web3j.tx.TransactionManager,java.math.BigInteger,java.math.BigInteger)">deploy(Web3j, TransactionManager, BigInteger, BigInteger)</a></span> - Static method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/CommunityTagIndex.html" title="class in i5.las2peer.registry.contracts">CommunityTagIndex</a></dt>
+<dd>
+<div class="deprecationBlock"><span class="deprecatedLabel">Deprecated.</span></div>
+</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.html#deploy(org.web3j.protocol.Web3j,org.web3j.tx.TransactionManager,java.math.BigInteger,java.math.BigInteger)">deploy(Web3j, TransactionManager, BigInteger, BigInteger)</a></span> - Static method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.html" title="class in i5.las2peer.registry.contracts">GroupRegistry</a></dt>
 <dd>
 <div class="deprecationBlock"><span class="deprecatedLabel">Deprecated.</span></div>
 </dd>
@@ -1377,6 +1421,8 @@ loadScripts(document, 'script');</script>
 <div class="deprecationBlock"><span class="deprecatedLabel">Deprecated.</span></div>
 </dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/CommunityTagIndex.html#deploy(org.web3j.protocol.Web3j,org.web3j.tx.TransactionManager,org.web3j.tx.gas.ContractGasProvider)">deploy(Web3j, TransactionManager, ContractGasProvider)</a></span> - Static method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/CommunityTagIndex.html" title="class in i5.las2peer.registry.contracts">CommunityTagIndex</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.html#deploy(org.web3j.protocol.Web3j,org.web3j.tx.TransactionManager,org.web3j.tx.gas.ContractGasProvider)">deploy(Web3j, TransactionManager, ContractGasProvider)</a></span> - Static method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.html" title="class in i5.las2peer.registry.contracts">GroupRegistry</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/UserRegistry.html#deploy(org.web3j.protocol.Web3j,org.web3j.tx.TransactionManager,org.web3j.tx.gas.ContractGasProvider)">deploy(Web3j, TransactionManager, ContractGasProvider)</a></span> - Static method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/UserRegistry.html" title="class in i5.las2peer.registry.contracts">UserRegistry</a></dt>
 <dd>&nbsp;</dd>
@@ -1603,7 +1649,7 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Creates a new version of an Envelope.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="i5/las2peer/api/p2p/ServiceVersion.html#equals(i5.las2peer.api.p2p.ServiceVersion)">equals(ServiceVersion)</a></span> - Method in class i5.las2peer.api.p2p.<a href="i5/las2peer/api/p2p/ServiceVersion.html" title="class in i5.las2peer.api.p2p">ServiceVersion</a></dt>
+<dt><span class="memberNameLink"><a href="i5/las2peer/api/SemverVersion.html#equals(i5.las2peer.api.SemverVersion)">equals(SemverVersion)</a></span> - Method in class i5.las2peer.api.<a href="i5/las2peer/api/SemverVersion.html" title="class in i5.las2peer.api">SemverVersion</a></dt>
 <dd>
 <div class="block">compares to version and checks for equality</div>
 </dd>
@@ -1611,30 +1657,20 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">compares this identifier to another one</div>
 </dd>
-<dt><span class="memberNameLink"><a href="i5/las2peer/classLoaders/libraries/LibraryVersion.html#equals(i5.las2peer.classLoaders.libraries.LibraryVersion)">equals(LibraryVersion)</a></span> - Method in class i5.las2peer.classLoaders.libraries.<a href="i5/las2peer/classLoaders/libraries/LibraryVersion.html" title="class in i5.las2peer.classLoaders.libraries">LibraryVersion</a></dt>
-<dd>
-<div class="block">compares to version and checks for equality</div>
-</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/api/p2p/ServiceNameVersion.html#equals(java.lang.Object)">equals(Object)</a></span> - Method in class i5.las2peer.api.p2p.<a href="i5/las2peer/api/p2p/ServiceNameVersion.html" title="class in i5.las2peer.api.p2p">ServiceNameVersion</a></dt>
 <dd>
 <div class="block">true if name and version are the same</div>
 </dd>
-<dt><span class="memberNameLink"><a href="i5/las2peer/api/p2p/ServiceVersion.html#equals(java.lang.Object)">equals(Object)</a></span> - Method in class i5.las2peer.api.p2p.<a href="i5/las2peer/api/p2p/ServiceVersion.html" title="class in i5.las2peer.api.p2p">ServiceVersion</a></dt>
+<dt><span class="memberNameLink"><a href="i5/las2peer/api/SemverVersion.html#equals(java.lang.Object)">equals(Object)</a></span> - Method in class i5.las2peer.api.<a href="i5/las2peer/api/SemverVersion.html" title="class in i5.las2peer.api">SemverVersion</a></dt>
 <dd>
 <div class="block">compares this version with any object
- 
+
  if the given object is a String, the string representation of this version is compared to the given string</div>
 </dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/classLoaders/libraries/LibraryIdentifier.html#equals(java.lang.Object)">equals(Object)</a></span> - Method in class i5.las2peer.classLoaders.libraries.<a href="i5/las2peer/classLoaders/libraries/LibraryIdentifier.html" title="class in i5.las2peer.classLoaders.libraries">LibraryIdentifier</a></dt>
 <dd>
 <div class="block">compares this identifier against other objects if a string is given, the string representation of this identifier
  is compared to the given string</div>
-</dd>
-<dt><span class="memberNameLink"><a href="i5/las2peer/classLoaders/libraries/LibraryVersion.html#equals(java.lang.Object)">equals(Object)</a></span> - Method in class i5.las2peer.classLoaders.libraries.<a href="i5/las2peer/classLoaders/libraries/LibraryVersion.html" title="class in i5.las2peer.classLoaders.libraries">LibraryVersion</a></dt>
-<dd>
-<div class="block">compares this version with any object
- 
- if the given object is a String, the string representation of this version is compared to the given string</div>
 </dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/p2p/NodeServiceCache.ServiceInstance.html#equals(java.lang.Object)">equals(Object)</a></span> - Method in class i5.las2peer.p2p.<a href="i5/las2peer/p2p/NodeServiceCache.ServiceInstance.html" title="class in i5.las2peer.p2p">NodeServiceCache.ServiceInstance</a></dt>
 <dd>&nbsp;</dd>
@@ -1691,6 +1727,12 @@ loadScripts(document, 'script');</script>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/exceptions/EthereumException.html#%3Cinit%3E(java.lang.String,java.lang.Throwable)">EthereumException(String, Throwable)</a></span> - Constructor for exception i5.las2peer.registry.exceptions.<a href="i5/las2peer/registry/exceptions/EthereumException.html" title="class in i5.las2peer.registry.exceptions">EthereumException</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/exceptions/EthereumException.html#%3Cinit%3E(java.lang.Throwable)">EthereumException(Throwable)</a></span> - Constructor for exception i5.las2peer.registry.exceptions.<a href="i5/las2peer/registry/exceptions/EthereumException.html" title="class in i5.las2peer.registry.exceptions">EthereumException</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="i5/las2peer/security/EthereumGroupAgent.html" title="class in i5.las2peer.security"><span class="typeNameLink">EthereumGroupAgent</span></a> - Class in <a href="i5/las2peer/security/package-summary.html">i5.las2peer.security</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/security/EthereumGroupAgent.html#%3Cinit%3E(java.security.KeyPair,javax.crypto.SecretKey,byte%5B%5D,java.lang.String,i5.las2peer.api.security.Agent%5B%5D,java.lang.String)">EthereumGroupAgent(KeyPair, SecretKey, byte[], String, Agent[], String)</a></span> - Constructor for class i5.las2peer.security.<a href="i5/las2peer/security/EthereumGroupAgent.html" title="class in i5.las2peer.security">EthereumGroupAgent</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/security/EthereumGroupAgent.html#%3Cinit%3E(java.security.PublicKey,byte%5B%5D,java.util.HashMap,java.lang.String,java.lang.String)">EthereumGroupAgent(PublicKey, byte[], HashMap&lt;String, byte[]&gt;, String, String)</a></span> - Constructor for class i5.las2peer.security.<a href="i5/las2peer/security/EthereumGroupAgent.html" title="class in i5.las2peer.security">EthereumGroupAgent</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="i5/las2peer/p2p/EthereumNode.html" title="class in i5.las2peer.p2p"><span class="typeNameLink">EthereumNode</span></a> - Class in <a href="i5/las2peer/p2p/package-summary.html">i5.las2peer.p2p</a></dt>
 <dd>
@@ -1952,7 +1994,7 @@ loadScripts(document, 'script');</script>
 <dt><span class="memberNameLink"><a href="i5/las2peer/api/p2p/ServiceVersion.html#fits(i5.las2peer.api.p2p.ServiceVersion)">fits(ServiceVersion)</a></span> - Method in class i5.las2peer.api.p2p.<a href="i5/las2peer/api/p2p/ServiceVersion.html" title="class in i5.las2peer.api.p2p">ServiceVersion</a></dt>
 <dd>
 <div class="block">checks if this version "fits" to the required version
- 
+
  e.g.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/tools/ColoredOutput.html#fontBlack()">fontBlack()</a></span> - Static method in class i5.las2peer.tools.<a href="i5/las2peer/tools/ColoredOutput.html" title="class in i5.las2peer.tools">ColoredOutput</a></dt>
@@ -2146,6 +2188,8 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/ReputationRegistry.html#FUNC_CREATEPROFILE">FUNC_CREATEPROFILE</a></span> - Static variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/ReputationRegistry.html" title="class in i5.las2peer.registry.contracts">ReputationRegistry</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.html#FUNC_DELEGATEDREGISTER">FUNC_DELEGATEDREGISTER</a></span> - Static variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.html" title="class in i5.las2peer.registry.contracts">GroupRegistry</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/ServiceRegistry.html#FUNC_DELEGATEDREGISTER">FUNC_DELEGATEDREGISTER</a></span> - Static variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/ServiceRegistry.html" title="class in i5.las2peer.registry.contracts">ServiceRegistry</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/UserRegistry.html#FUNC_DELEGATEDREGISTER">FUNC_DELEGATEDREGISTER</a></span> - Static variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/UserRegistry.html" title="class in i5.las2peer.registry.contracts">UserRegistry</a></dt>
@@ -2158,11 +2202,19 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/ReputationRegistry.html#FUNC_GETNOTRANSACTIONSSENT">FUNC_GETNOTRANSACTIONSSENT</a></span> - Static variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/ReputationRegistry.html" title="class in i5.las2peer.registry.contracts">ReputationRegistry</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.html#FUNC_GROUPNAMEISAVAILABLE">FUNC_GROUPNAMEISAVAILABLE</a></span> - Static variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.html" title="class in i5.las2peer.registry.contracts">GroupRegistry</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.html#FUNC_GROUPNAMEISVALID">FUNC_GROUPNAMEISVALID</a></span> - Static variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.html" title="class in i5.las2peer.registry.contracts">GroupRegistry</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.html#FUNC_GROUPS">FUNC_GROUPS</a></span> - Static variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.html" title="class in i5.las2peer.registry.contracts">GroupRegistry</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/ServiceRegistry.html#FUNC_HASHTONAME">FUNC_HASHTONAME</a></span> - Static variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/ServiceRegistry.html" title="class in i5.las2peer.registry.contracts">ServiceRegistry</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/ReputationRegistry.html#FUNC_HASPROFILE">FUNC_HASPROFILE</a></span> - Static variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/ReputationRegistry.html" title="class in i5.las2peer.registry.contracts">ReputationRegistry</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/CommunityTagIndex.html#FUNC_ISAVAILABLE">FUNC_ISAVAILABLE</a></span> - Static variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/CommunityTagIndex.html" title="class in i5.las2peer.registry.contracts">CommunityTagIndex</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.html#FUNC_ISOWNER">FUNC_ISOWNER</a></span> - Static variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.html" title="class in i5.las2peer.registry.contracts">GroupRegistry</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/UserRegistry.html#FUNC_ISOWNER">FUNC_ISOWNER</a></span> - Static variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/UserRegistry.html" title="class in i5.las2peer.registry.contracts">UserRegistry</a></dt>
 <dd>&nbsp;</dd>
@@ -2170,11 +2222,15 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/UserRegistry.html#FUNC_NAMEISAVAILABLE">FUNC_NAMEISAVAILABLE</a></span> - Static variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/UserRegistry.html" title="class in i5.las2peer.registry.contracts">UserRegistry</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.html#FUNC_NAMEISTAKEN">FUNC_NAMEISTAKEN</a></span> - Static variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.html" title="class in i5.las2peer.registry.contracts">GroupRegistry</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/UserRegistry.html#FUNC_NAMEISTAKEN">FUNC_NAMEISTAKEN</a></span> - Static variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/UserRegistry.html" title="class in i5.las2peer.registry.contracts">UserRegistry</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/UserRegistry.html#FUNC_NAMEISVALID">FUNC_NAMEISVALID</a></span> - Static variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/UserRegistry.html" title="class in i5.las2peer.registry.contracts">UserRegistry</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/ReputationRegistry.html#FUNC_PROFILES">FUNC_PROFILES</a></span> - Static variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/ReputationRegistry.html" title="class in i5.las2peer.registry.contracts">ReputationRegistry</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.html#FUNC_REGISTER">FUNC_REGISTER</a></span> - Static variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.html" title="class in i5.las2peer.registry.contracts">GroupRegistry</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/ServiceRegistry.html#FUNC_REGISTER">FUNC_REGISTER</a></span> - Static variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/ServiceRegistry.html" title="class in i5.las2peer.registry.contracts">ServiceRegistry</a></dt>
 <dd>&nbsp;</dd>
@@ -2189,6 +2245,8 @@ loadScripts(document, 'script');</script>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/ServiceRegistry.html#FUNC_STRINGHASH">FUNC_STRINGHASH</a></span> - Static variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/ServiceRegistry.html" title="class in i5.las2peer.registry.contracts">ServiceRegistry</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/CommunityTagIndex.html#FUNC_TAGINDEX">FUNC_TAGINDEX</a></span> - Static variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/CommunityTagIndex.html" title="class in i5.las2peer.registry.contracts">CommunityTagIndex</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.html#FUNC_TRANSFER">FUNC_TRANSFER</a></span> - Static variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.html" title="class in i5.las2peer.registry.contracts">GroupRegistry</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/UserRegistry.html#FUNC_TRANSFER">FUNC_TRANSFER</a></span> - Static variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/UserRegistry.html" title="class in i5.las2peer.registry.contracts">UserRegistry</a></dt>
 <dd>&nbsp;</dd>
@@ -2324,16 +2382,23 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">get the id of the agent to search</div>
 </dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/data/GroupData.html#getAgentId()">getAgentId()</a></span> - Method in class i5.las2peer.registry.data.<a href="i5/las2peer/registry/data/GroupData.html" title="class in i5.las2peer.registry.data">GroupData</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/data/UserData.html#getAgentId()">getAgentId()</a></span> - Method in class i5.las2peer.registry.data.<a href="i5/las2peer/registry/data/UserData.html" title="class in i5.las2peer.registry.data">UserData</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/security/UserAgentManager.html#getAgentId(java.lang.String)">getAgentId(String)</a></span> - Method in class i5.las2peer.security.<a href="i5/las2peer/security/UserAgentManager.html" title="class in i5.las2peer.security">UserAgentManager</a></dt>
 <dd>
-<div class="block">Get agent ID for a prefixed identifier, i.e., a string consisting of one of the prefixes defined in this class
- and the corresponding attribute (e.g., email address).</div>
+<div class="block">Get agent ID for a prefixed identifier, i.e., a string consisting of one of
+ the prefixes defined in this class and the corresponding attribute (e.g.,
+ email address).</div>
 </dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/security/UserAgentManager.html#getAgentIdByEmail(java.lang.String)">getAgentIdByEmail(String)</a></span> - Method in class i5.las2peer.security.<a href="i5/las2peer/security/UserAgentManager.html" title="class in i5.las2peer.security">UserAgentManager</a></dt>
 <dd>
 <div class="block">get an <a href="i5/las2peer/security/UserAgentImpl.html" title="class in i5.las2peer.security"><code>UserAgentImpl</code></a>'s id by email address</div>
+</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/security/UserAgentManager.html#getAgentIdByGroupName(java.lang.String)">getAgentIdByGroupName(String)</a></span> - Method in class i5.las2peer.security.<a href="i5/las2peer/security/UserAgentManager.html" title="class in i5.las2peer.security">UserAgentManager</a></dt>
+<dd>
+<div class="block">get an <a href="i5/las2peer/security/GroupAgentImpl.html" title="class in i5.las2peer.security"><code>GroupAgentImpl</code></a>'s id by group name</div>
 </dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/security/UserAgentManager.html#getAgentIdByLogin(java.lang.String)">getAgentIdByLogin(String)</a></span> - Method in class i5.las2peer.security.<a href="i5/las2peer/security/UserAgentManager.html" title="class in i5.las2peer.security">UserAgentManager</a></dt>
 <dd>
@@ -2348,6 +2413,10 @@ loadScripts(document, 'script');</script>
 <dt><span class="memberNameLink"><a href="i5/las2peer/p2p/Node.html#getAgentIdForEmail(java.lang.String)">getAgentIdForEmail(String)</a></span> - Method in class i5.las2peer.p2p.<a href="i5/las2peer/p2p/Node.html" title="class in i5.las2peer.p2p">Node</a></dt>
 <dd>
 <div class="block">Gets an id for the user for the given email address.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/p2p/Node.html#getAgentIdForGroupName(java.lang.String)">getAgentIdForGroupName(String)</a></span> - Method in class i5.las2peer.p2p.<a href="i5/las2peer/p2p/Node.html" title="class in i5.las2peer.p2p">Node</a></dt>
+<dd>
+<div class="block">Gets an id for the group for the given group name.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/p2p/Node.html#getAgentIdForLogin(java.lang.String)">getAgentIdForLogin(String)</a></span> - Method in class i5.las2peer.p2p.<a href="i5/las2peer/p2p/Node.html" title="class in i5.las2peer.p2p">Node</a></dt>
 <dd>
@@ -2429,13 +2498,9 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/tools/helper/L2pNodeLauncherConfiguration.html#getBootstrap()">getBootstrap()</a></span> - Method in class i5.las2peer.tools.helper.<a href="i5/las2peer/tools/helper/L2pNodeLauncherConfiguration.html" title="class in i5.las2peer.tools.helper">L2pNodeLauncherConfiguration</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="i5/las2peer/api/p2p/ServiceVersion.html#getBuild()">getBuild()</a></span> - Method in class i5.las2peer.api.p2p.<a href="i5/las2peer/api/p2p/ServiceVersion.html" title="class in i5.las2peer.api.p2p">ServiceVersion</a></dt>
+<dt><span class="memberNameLink"><a href="i5/las2peer/api/SemverVersion.html#getBuild()">getBuild()</a></span> - Method in class i5.las2peer.api.<a href="i5/las2peer/api/SemverVersion.html" title="class in i5.las2peer.api">SemverVersion</a></dt>
 <dd>
-<div class="block">get the build number of this (sub)version</div>
-</dd>
-<dt><span class="memberNameLink"><a href="i5/las2peer/classLoaders/libraries/LibraryVersion.html#getBuild()">getBuild()</a></span> - Method in class i5.las2peer.classLoaders.libraries.<a href="i5/las2peer/classLoaders/libraries/LibraryVersion.html" title="class in i5.las2peer.classLoaders.libraries">LibraryVersion</a></dt>
-<dd>
-<div class="block">get the build number of this (sub)version</div>
+<div class="block">get the build number of this (patch)version</div>
 </dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/execution/ExecutionContext.html#getCallerContext()">getCallerContext()</a></span> - Method in class i5.las2peer.execution.<a href="i5/las2peer/execution/ExecutionContext.html" title="class in i5.las2peer.execution">ExecutionContext</a></dt>
 <dd>&nbsp;</dd>
@@ -2591,9 +2656,15 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/security/EthereumAgent.html#getEthereumAddress()">getEthereumAddress()</a></span> - Method in class i5.las2peer.security.<a href="i5/las2peer/security/EthereumAgent.html" title="class in i5.las2peer.security">EthereumAgent</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/security/EthereumGroupAgent.html#getEthereumAddress()">getEthereumAddress()</a></span> - Method in class i5.las2peer.security.<a href="i5/las2peer/security/EthereumGroupAgent.html" title="class in i5.las2peer.security">EthereumGroupAgent</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/security/EthereumAgent.html#getEthereumCredentials()">getEthereumCredentials()</a></span> - Method in class i5.las2peer.security.<a href="i5/las2peer/security/EthereumAgent.html" title="class in i5.las2peer.security">EthereumAgent</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/security/EthereumGroupAgent.html#getEthereumCredentials()">getEthereumCredentials()</a></span> - Method in class i5.las2peer.security.<a href="i5/las2peer/security/EthereumGroupAgent.html" title="class in i5.las2peer.security">EthereumGroupAgent</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/security/EthereumAgent.html#getEthereumMnemonic()">getEthereumMnemonic()</a></span> - Method in class i5.las2peer.security.<a href="i5/las2peer/security/EthereumAgent.html" title="class in i5.las2peer.security">EthereumAgent</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/security/EthereumGroupAgent.html#getEthereumMnemonic()">getEthereumMnemonic()</a></span> - Method in class i5.las2peer.security.<a href="i5/las2peer/security/EthereumGroupAgent.html" title="class in i5.las2peer.security">EthereumGroupAgent</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/tools/helper/L2pNodeLauncherConfiguration.html#getEthereumMnemonic()">getEthereumMnemonic()</a></span> - Method in class i5.las2peer.tools.helper.<a href="i5/las2peer/tools/helper/L2pNodeLauncherConfiguration.html" title="class in i5.las2peer.tools.helper">L2pNodeLauncherConfiguration</a></dt>
 <dd>&nbsp;</dd>
@@ -2651,6 +2722,10 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/data/ReputationTransactionData.html#getGrading()">getGrading()</a></span> - Method in class i5.las2peer.registry.data.<a href="i5/las2peer/registry/data/ReputationTransactionData.html" title="class in i5.las2peer.registry.data">ReputationTransactionData</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/ReadOnlyRegistryClient.html#getGroup(java.lang.String)">getGroup(String)</a></span> - Method in class i5.las2peer.registry.<a href="i5/las2peer/registry/ReadOnlyRegistryClient.html" title="class in i5.las2peer.registry">ReadOnlyRegistryClient</a></dt>
+<dd>
+<div class="block">Retrieve group data stored in registry for given group name.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/testing/MockAgentFactory.html#getGroup1()">getGroup1()</a></span> - Static method in class i5.las2peer.testing.<a href="i5/las2peer/testing/MockAgentFactory.html" title="class in i5.las2peer.testing">MockAgentFactory</a></dt>
 <dd>
 <div class="block">get a group agent for group1 (containing Adam, eve and Abel)</div>
@@ -2671,6 +2746,18 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">get a string stored for the Group1</div>
 </dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/api/security/GroupAgent.html#getGroupName()">getGroupName()</a></span> - Method in interface i5.las2peer.api.security.<a href="i5/las2peer/api/security/GroupAgent.html" title="interface in i5.las2peer.api.security">GroupAgent</a></dt>
+<dd>
+<div class="block">Getter for the group name.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/security/GroupAgentImpl.html#getGroupName()">getGroupName()</a></span> - Method in class i5.las2peer.security.<a href="i5/las2peer/security/GroupAgentImpl.html" title="class in i5.las2peer.security">GroupAgentImpl</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.html#getGroupRegisteredEvents(org.web3j.protocol.core.methods.response.TransactionReceipt)">getGroupRegisteredEvents(TransactionReceipt)</a></span> - Method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.html" title="class in i5.las2peer.registry.contracts">GroupRegistry</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/data/RegistryConfiguration.html#getGroupRegistryAddress()">getGroupRegistryAddress()</a></span> - Method in class i5.las2peer.registry.data.<a href="i5/las2peer/registry/data/RegistryConfiguration.html" title="class in i5.las2peer.registry.data">RegistryConfiguration</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.html#getGroupTransferredEvents(org.web3j.protocol.core.methods.response.TransactionReceipt)">getGroupTransferredEvents(TransactionReceipt)</a></span> - Method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.html" title="class in i5.las2peer.registry.contracts">GroupRegistry</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/tools/CryptoTools.html#getHashMethod()">getHashMethod()</a></span> - Static method in class i5.las2peer.tools.<a href="i5/las2peer/tools/CryptoTools.html" title="class in i5.las2peer.tools">CryptoTools</a></dt>
 <dd>
 <div class="block">used hash method</div>
@@ -2827,11 +2914,7 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Gets the main agent of this context.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="i5/las2peer/api/p2p/ServiceVersion.html#getMajor()">getMajor()</a></span> - Method in class i5.las2peer.api.p2p.<a href="i5/las2peer/api/p2p/ServiceVersion.html" title="class in i5.las2peer.api.p2p">ServiceVersion</a></dt>
-<dd>
-<div class="block">get the major version number</div>
-</dd>
-<dt><span class="memberNameLink"><a href="i5/las2peer/classLoaders/libraries/LibraryVersion.html#getMajor()">getMajor()</a></span> - Method in class i5.las2peer.classLoaders.libraries.<a href="i5/las2peer/classLoaders/libraries/LibraryVersion.html" title="class in i5.las2peer.classLoaders.libraries">LibraryVersion</a></dt>
+<dt><span class="memberNameLink"><a href="i5/las2peer/api/SemverVersion.html#getMajor()">getMajor()</a></span> - Method in class i5.las2peer.api.<a href="i5/las2peer/api/SemverVersion.html" title="class in i5.las2peer.api">SemverVersion</a></dt>
 <dd>
 <div class="block">get the major version number</div>
 </dd>
@@ -2857,11 +2940,7 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/p2p/LocalNodeManager.html#getMinMessageWait()">getMinMessageWait()</a></span> - Method in class i5.las2peer.p2p.<a href="i5/las2peer/p2p/LocalNodeManager.html" title="class in i5.las2peer.p2p">LocalNodeManager</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="i5/las2peer/api/p2p/ServiceVersion.html#getMinor()">getMinor()</a></span> - Method in class i5.las2peer.api.p2p.<a href="i5/las2peer/api/p2p/ServiceVersion.html" title="class in i5.las2peer.api.p2p">ServiceVersion</a></dt>
-<dd>
-<div class="block">get the minor version number</div>
-</dd>
-<dt><span class="memberNameLink"><a href="i5/las2peer/classLoaders/libraries/LibraryVersion.html#getMinor()">getMinor()</a></span> - Method in class i5.las2peer.classLoaders.libraries.<a href="i5/las2peer/classLoaders/libraries/LibraryVersion.html" title="class in i5.las2peer.classLoaders.libraries">LibraryVersion</a></dt>
+<dt><span class="memberNameLink"><a href="i5/las2peer/api/SemverVersion.html#getMinor()">getMinor()</a></span> - Method in class i5.las2peer.api.<a href="i5/las2peer/api/SemverVersion.html" title="class in i5.las2peer.api">SemverVersion</a></dt>
 <dd>
 <div class="block">get the minor version number</div>
 </dd>
@@ -2880,6 +2959,8 @@ loadScripts(document, 'script');</script>
 <div class="block">Gets the service name</div>
 </dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/classLoaders/libraries/LibraryIdentifier.html#getName()">getName()</a></span> - Method in class i5.las2peer.classLoaders.libraries.<a href="i5/las2peer/classLoaders/libraries/LibraryIdentifier.html" title="class in i5.las2peer.classLoaders.libraries">LibraryIdentifier</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/data/GroupData.html#getName()">getName()</a></span> - Method in class i5.las2peer.registry.data.<a href="i5/las2peer/registry/data/GroupData.html" title="class in i5.las2peer.registry.data">GroupData</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/data/UserData.html#getName()">getName()</a></span> - Method in class i5.las2peer.registry.data.<a href="i5/las2peer/registry/data/UserData.html" title="class in i5.las2peer.registry.data">UserData</a></dt>
 <dd>&nbsp;</dd>
@@ -3023,6 +3104,8 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/data/UserProfileData.html#getOwner()">getOwner()</a></span> - Method in class i5.las2peer.registry.data.<a href="i5/las2peer/registry/data/UserProfileData.html" title="class in i5.las2peer.registry.data">UserProfileData</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/data/GroupData.html#getOwnerAddress()">getOwnerAddress()</a></span> - Method in class i5.las2peer.registry.data.<a href="i5/las2peer/registry/data/GroupData.html" title="class in i5.las2peer.registry.data">GroupData</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/data/UserData.html#getOwnerAddress()">getOwnerAddress()</a></span> - Method in class i5.las2peer.registry.data.<a href="i5/las2peer/registry/data/UserData.html" title="class in i5.las2peer.registry.data">UserData</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/api/persistency/Envelope.html#getOwnerId()">getOwnerId()</a></span> - Method in interface i5.las2peer.api.persistency.<a href="i5/las2peer/api/persistency/Envelope.html" title="interface in i5.las2peer.api.persistency">Envelope</a></dt>
@@ -3057,11 +3140,19 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">access to the underlying pastry node</div>
 </dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/api/SemverVersion.html#getPatch()">getPatch()</a></span> - Method in class i5.las2peer.api.<a href="i5/las2peer/api/SemverVersion.html" title="class in i5.las2peer.api">SemverVersion</a></dt>
+<dd>
+<div class="block">get the patch version of the minor version number</div>
+</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/p2p/PastryNodeImpl.html#getPort()">getPort()</a></span> - Method in class i5.las2peer.p2p.<a href="i5/las2peer/p2p/PastryNodeImpl.html" title="class in i5.las2peer.p2p">PastryNodeImpl</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/tools/helper/L2pNodeLauncherConfiguration.html#getPort()">getPort()</a></span> - Method in class i5.las2peer.tools.helper.<a href="i5/las2peer/tools/helper/L2pNodeLauncherConfiguration.html" title="class in i5.las2peer.tools.helper">L2pNodeLauncherConfiguration</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/api/SemverVersion.html#getPreRelease()">getPreRelease()</a></span> - Method in class i5.las2peer.api.<a href="i5/las2peer/api/SemverVersion.html" title="class in i5.las2peer.api">SemverVersion</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/CommunityTagIndex.html#getPreviouslyDeployedAddress(java.lang.String)">getPreviouslyDeployedAddress(String)</a></span> - Static method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/CommunityTagIndex.html" title="class in i5.las2peer.registry.contracts">CommunityTagIndex</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.html#getPreviouslyDeployedAddress(java.lang.String)">getPreviouslyDeployedAddress(String)</a></span> - Static method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.html" title="class in i5.las2peer.registry.contracts">GroupRegistry</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/ServiceRegistry.html#getPreviouslyDeployedAddress(java.lang.String)">getPreviouslyDeployedAddress(String)</a></span> - Static method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/ServiceRegistry.html" title="class in i5.las2peer.registry.contracts">ServiceRegistry</a></dt>
 <dd>&nbsp;</dd>
@@ -3099,6 +3190,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">access to the property file</div>
 </dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/data/GroupData.html#getPublicKey()">getPublicKey()</a></span> - Method in class i5.las2peer.registry.data.<a href="i5/las2peer/registry/data/GroupData.html" title="class in i5.las2peer.registry.data">GroupData</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/data/UserData.html#getPublicKey()">getPublicKey()</a></span> - Method in class i5.las2peer.registry.data.<a href="i5/las2peer/registry/data/UserData.html" title="class in i5.las2peer.registry.data">UserData</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/security/AgentImpl.html#getPublicKey()">getPublicKey()</a></span> - Method in class i5.las2peer.security.<a href="i5/las2peer/security/AgentImpl.html" title="class in i5.las2peer.security">AgentImpl</a></dt>
@@ -3108,6 +3201,10 @@ loadScripts(document, 'script');</script>
 <dt><span class="memberNameLink"><a href="i5/las2peer/p2p/pastry/L2pScribeContent.html#getRandomId()">getRandomId()</a></span> - Method in class i5.las2peer.p2p.pastry.<a href="i5/las2peer/p2p/pastry/L2pScribeContent.html" title="class in i5.las2peer.p2p.pastry">L2pScribeContent</a></dt>
 <dd>
 <div class="block">the (random) id of this content</div>
+</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/data/GroupData.html#getRawPublicKey()">getRawPublicKey()</a></span> - Method in class i5.las2peer.registry.data.<a href="i5/las2peer/registry/data/GroupData.html" title="class in i5.las2peer.registry.data">GroupData</a></dt>
+<dd>
+<div class="block">serialized (or otherwise encoded) form of public key</div>
 </dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/data/UserData.html#getRawPublicKey()">getRawPublicKey()</a></span> - Method in class i5.las2peer.registry.data.<a href="i5/las2peer/registry/data/UserData.html" title="class in i5.las2peer.registry.data">UserData</a></dt>
 <dd>
@@ -3150,6 +3247,10 @@ loadScripts(document, 'script');</script>
 <dt><span class="memberNameLink"><a href="i5/las2peer/p2p/EthereumNode.html#getRegistryClient()">getRegistryClient()</a></span> - Method in class i5.las2peer.p2p.<a href="i5/las2peer/p2p/EthereumNode.html" title="class in i5.las2peer.p2p">EthereumNode</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/security/EthereumAgent.html#getRegistryClient()">getRegistryClient()</a></span> - Method in class i5.las2peer.security.<a href="i5/las2peer/security/EthereumAgent.html" title="class in i5.las2peer.security">EthereumAgent</a></dt>
+<dd>
+<div class="block">Gets registry client that uses the agent's credentials.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/security/EthereumGroupAgent.html#getRegistryClient()">getRegistryClient()</a></span> - Method in class i5.las2peer.security.<a href="i5/las2peer/security/EthereumGroupAgent.html" title="class in i5.las2peer.security">EthereumGroupAgent</a></dt>
 <dd>
 <div class="block">Gets registry client that uses the agent's credentials.</div>
 </dd>
@@ -3454,6 +3555,8 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/CommunityTagIndex.html#getStaticDeployedAddress(java.lang.String)">getStaticDeployedAddress(String)</a></span> - Method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/CommunityTagIndex.html" title="class in i5.las2peer.registry.contracts">CommunityTagIndex</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.html#getStaticDeployedAddress(java.lang.String)">getStaticDeployedAddress(String)</a></span> - Method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.html" title="class in i5.las2peer.registry.contracts">GroupRegistry</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/ServiceRegistry.html#getStaticDeployedAddress(java.lang.String)">getStaticDeployedAddress(String)</a></span> - Method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/ServiceRegistry.html" title="class in i5.las2peer.registry.contracts">ServiceRegistry</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/UserRegistry.html#getStaticDeployedAddress(java.lang.String)">getStaticDeployedAddress(String)</a></span> - Method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/UserRegistry.html" title="class in i5.las2peer.registry.contracts">UserRegistry</a></dt>
@@ -3474,13 +3577,11 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">returns the stored string</div>
 </dd>
-<dt><span class="memberNameLink"><a href="i5/las2peer/api/p2p/ServiceVersion.html#getSub()">getSub()</a></span> - Method in class i5.las2peer.api.p2p.<a href="i5/las2peer/api/p2p/ServiceVersion.html" title="class in i5.las2peer.api.p2p">ServiceVersion</a></dt>
+<dt><span class="memberNameLink"><a href="i5/las2peer/api/SemverVersion.html#getSub()">getSub()</a></span> - Method in class i5.las2peer.api.<a href="i5/las2peer/api/SemverVersion.html" title="class in i5.las2peer.api">SemverVersion</a></dt>
 <dd>
-<div class="block">get the subversion of the minor version number</div>
-</dd>
-<dt><span class="memberNameLink"><a href="i5/las2peer/classLoaders/libraries/LibraryVersion.html#getSub()">getSub()</a></span> - Method in class i5.las2peer.classLoaders.libraries.<a href="i5/las2peer/classLoaders/libraries/LibraryVersion.html" title="class in i5.las2peer.classLoaders.libraries">LibraryVersion</a></dt>
-<dd>
-<div class="block">get the subversion of the minor version number</div>
+<div class="deprecationBlock"><span class="deprecatedLabel">Deprecated.</span>
+<div class="deprecationComment">use <a href="i5/las2peer/api/SemverVersion.html#getPatch()"><code>SemverVersion.getPatch()</code></a> instead</div>
+</div>
 </dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/data/ReputationTransactionData.html#getSubject()">getSubject()</a></span> - Method in class i5.las2peer.registry.data.<a href="i5/las2peer/registry/data/ReputationTransactionData.html" title="class in i5.las2peer.registry.data">ReputationTransactionData</a></dt>
 <dd>&nbsp;</dd>
@@ -3672,10 +3773,75 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/security/GroupAgentImpl.html#%3Cinit%3E(java.security.KeyPair,javax.crypto.SecretKey,i5.las2peer.api.security.Agent%5B%5D)">GroupAgentImpl(KeyPair, SecretKey, Agent[])</a></span> - Constructor for class i5.las2peer.security.<a href="i5/las2peer/security/GroupAgentImpl.html" title="class in i5.las2peer.security">GroupAgentImpl</a></dt>
 <dd>
-<div class="block">constructor for the <a href="i5/las2peer/security/GroupAgentImpl.html#createGroupAgent(i5.las2peer.api.security.Agent%5B%5D)"><code>GroupAgentImpl.createGroupAgent(i5.las2peer.api.security.Agent[])</code></a> factory simply necessary, since the secret key has to be stated for
- the constructor of the superclass</div>
+<div class="block">constructor for the <a href="i5/las2peer/security/GroupAgentImpl.html#createGroupAgent(i5.las2peer.api.security.Agent%5B%5D)"><code>GroupAgentImpl.createGroupAgent(i5.las2peer.api.security.Agent[])</code></a> factory simply necessary, since
+ the secret key has to be stated for the constructor of the superclass</div>
+</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/security/GroupAgentImpl.html#%3Cinit%3E(java.security.KeyPair,javax.crypto.SecretKey,i5.las2peer.api.security.Agent%5B%5D,java.lang.String)">GroupAgentImpl(KeyPair, SecretKey, Agent[], String)</a></span> - Constructor for class i5.las2peer.security.<a href="i5/las2peer/security/GroupAgentImpl.html" title="class in i5.las2peer.security">GroupAgentImpl</a></dt>
+<dd>
+<div class="block">constructor for the <a href="i5/las2peer/security/GroupAgentImpl.html#createGroupAgent(i5.las2peer.api.security.Agent%5B%5D)"><code>GroupAgentImpl.createGroupAgent(i5.las2peer.api.security.Agent[])</code></a> factory simply necessary, since
+ the secret key has to be stated for the constructor of the superclass</div>
 </dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/security/GroupAgentImpl.html#%3Cinit%3E(java.security.PublicKey,byte%5B%5D,java.util.HashMap)">GroupAgentImpl(PublicKey, byte[], HashMap&lt;String, byte[]&gt;)</a></span> - Constructor for class i5.las2peer.security.<a href="i5/las2peer/security/GroupAgentImpl.html" title="class in i5.las2peer.security">GroupAgentImpl</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="i5/las2peer/registry/data/GroupData.html" title="class in i5.las2peer.registry.data"><span class="typeNameLink">GroupData</span></a> - Class in <a href="i5/las2peer/registry/data/package-summary.html">i5.las2peer.registry.data</a></dt>
+<dd>
+<div class="block">Contains user data exactly as stored in blockchain.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/data/GroupData.html#%3Cinit%3E(byte%5B%5D,byte%5B%5D,byte%5B%5D,java.lang.String)">GroupData(byte[], byte[], byte[], String)</a></span> - Constructor for class i5.las2peer.registry.data.<a href="i5/las2peer/registry/data/GroupData.html" title="class in i5.las2peer.registry.data">GroupData</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/security/GroupAgentImpl.html#groupName">groupName</a></span> - Variable in class i5.las2peer.security.<a href="i5/las2peer/security/GroupAgentImpl.html" title="class in i5.las2peer.security">GroupAgentImpl</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.html#groupNameIsAvailable(byte%5B%5D)">groupNameIsAvailable(byte[])</a></span> - Method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.html" title="class in i5.las2peer.registry.contracts">GroupRegistry</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/ReadOnlyRegistryClient.html#groupNameIsAvailable(java.lang.String)">groupNameIsAvailable(String)</a></span> - Method in class i5.las2peer.registry.<a href="i5/las2peer/registry/ReadOnlyRegistryClient.html" title="class in i5.las2peer.registry">ReadOnlyRegistryClient</a></dt>
+<dd>
+<div class="block">Return true if user name is both valid and not already taken and thus can be
+ registered.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.html#groupNameIsValid(byte%5B%5D)">groupNameIsValid(byte[])</a></span> - Method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.html" title="class in i5.las2peer.registry.contracts">GroupRegistry</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/ReadOnlyRegistryClient.html#groupNameIsValid(java.lang.String)">groupNameIsValid(String)</a></span> - Method in class i5.las2peer.registry.<a href="i5/las2peer/registry/ReadOnlyRegistryClient.html" title="class in i5.las2peer.registry">ReadOnlyRegistryClient</a></dt>
+<dd>
+<div class="block">Return true if user name is both valid, as encoded in the registry smart
+ contract code.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.html#GROUPREGISTERED_EVENT">GROUPREGISTERED_EVENT</a></span> - Static variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.html" title="class in i5.las2peer.registry.contracts">GroupRegistry</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.html#groupRegisteredEventFlowable(org.web3j.protocol.core.DefaultBlockParameter,org.web3j.protocol.core.DefaultBlockParameter)">groupRegisteredEventFlowable(DefaultBlockParameter, DefaultBlockParameter)</a></span> - Method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.html" title="class in i5.las2peer.registry.contracts">GroupRegistry</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.html#groupRegisteredEventFlowable(org.web3j.protocol.core.methods.request.EthFilter)">groupRegisteredEventFlowable(EthFilter)</a></span> - Method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.html" title="class in i5.las2peer.registry.contracts">GroupRegistry</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.GroupRegisteredEventResponse.html#%3Cinit%3E()">GroupRegisteredEventResponse()</a></span> - Constructor for class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.GroupRegisteredEventResponse.html" title="class in i5.las2peer.registry.contracts">GroupRegistry.GroupRegisteredEventResponse</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="i5/las2peer/registry/contracts/GroupRegistry.html" title="class in i5.las2peer.registry.contracts"><span class="typeNameLink">GroupRegistry</span></a> - Class in <a href="i5/las2peer/registry/contracts/package-summary.html">i5.las2peer.registry.contracts</a></dt>
+<dd>
+<div class="block">Auto generated code.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.html#%3Cinit%3E(java.lang.String,org.web3j.protocol.Web3j,org.web3j.crypto.Credentials,java.math.BigInteger,java.math.BigInteger)">GroupRegistry(String, Web3j, Credentials, BigInteger, BigInteger)</a></span> - Constructor for class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.html" title="class in i5.las2peer.registry.contracts">GroupRegistry</a></dt>
+<dd>
+<div class="deprecationBlock"><span class="deprecatedLabel">Deprecated.</span></div>
+</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.html#%3Cinit%3E(java.lang.String,org.web3j.protocol.Web3j,org.web3j.crypto.Credentials,org.web3j.tx.gas.ContractGasProvider)">GroupRegistry(String, Web3j, Credentials, ContractGasProvider)</a></span> - Constructor for class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.html" title="class in i5.las2peer.registry.contracts">GroupRegistry</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.html#%3Cinit%3E(java.lang.String,org.web3j.protocol.Web3j,org.web3j.tx.TransactionManager,java.math.BigInteger,java.math.BigInteger)">GroupRegistry(String, Web3j, TransactionManager, BigInteger, BigInteger)</a></span> - Constructor for class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.html" title="class in i5.las2peer.registry.contracts">GroupRegistry</a></dt>
+<dd>
+<div class="deprecationBlock"><span class="deprecatedLabel">Deprecated.</span></div>
+</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.html#%3Cinit%3E(java.lang.String,org.web3j.protocol.Web3j,org.web3j.tx.TransactionManager,org.web3j.tx.gas.ContractGasProvider)">GroupRegistry(String, Web3j, TransactionManager, ContractGasProvider)</a></span> - Constructor for class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.html" title="class in i5.las2peer.registry.contracts">GroupRegistry</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="i5/las2peer/registry/contracts/GroupRegistry.GroupRegisteredEventResponse.html" title="class in i5.las2peer.registry.contracts"><span class="typeNameLink">GroupRegistry.GroupRegisteredEventResponse</span></a> - Class in <a href="i5/las2peer/registry/contracts/package-summary.html">i5.las2peer.registry.contracts</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="i5/las2peer/registry/contracts/GroupRegistry.GroupTransferredEventResponse.html" title="class in i5.las2peer.registry.contracts"><span class="typeNameLink">GroupRegistry.GroupTransferredEventResponse</span></a> - Class in <a href="i5/las2peer/registry/contracts/package-summary.html">i5.las2peer.registry.contracts</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.html#groups(byte%5B%5D)">groups(byte[])</a></span> - Method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.html" title="class in i5.las2peer.registry.contracts">GroupRegistry</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.html#GROUPTRANSFERRED_EVENT">GROUPTRANSFERRED_EVENT</a></span> - Static variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.html" title="class in i5.las2peer.registry.contracts">GroupRegistry</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.html#groupTransferredEventFlowable(org.web3j.protocol.core.DefaultBlockParameter,org.web3j.protocol.core.DefaultBlockParameter)">groupTransferredEventFlowable(DefaultBlockParameter, DefaultBlockParameter)</a></span> - Method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.html" title="class in i5.las2peer.registry.contracts">GroupRegistry</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.html#groupTransferredEventFlowable(org.web3j.protocol.core.methods.request.EthFilter)">groupTransferredEventFlowable(EthFilter)</a></span> - Method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.html" title="class in i5.las2peer.registry.contracts">GroupRegistry</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.GroupTransferredEventResponse.html#%3Cinit%3E()">GroupTransferredEventResponse()</a></span> - Constructor for class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.GroupTransferredEventResponse.html" title="class in i5.las2peer.registry.contracts">GroupRegistry.GroupTransferredEventResponse</a></dt>
 <dd>&nbsp;</dd>
 </dl>
 <a id="I:H">
@@ -3761,19 +3927,21 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">has this thread collected an exception ?</div>
 </dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/api/security/GroupAgent.html#hasGroupName()">hasGroupName()</a></span> - Method in interface i5.las2peer.api.security.<a href="i5/las2peer/api/security/GroupAgent.html" title="interface in i5.las2peer.api.security">GroupAgent</a></dt>
+<dd>
+<div class="block">Check if the agent has a group name set.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/security/GroupAgentImpl.html#hasGroupName()">hasGroupName()</a></span> - Method in class i5.las2peer.security.<a href="i5/las2peer/security/GroupAgentImpl.html" title="class in i5.las2peer.security">GroupAgentImpl</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/ServiceRegistry.ServiceReleasedEventResponse.html#hash">hash</a></span> - Variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/ServiceRegistry.ServiceReleasedEventResponse.html" title="class in i5.las2peer.registry.contracts">ServiceRegistry.ServiceReleasedEventResponse</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/api/p2p/ServiceNameVersion.html#hashCode()">hashCode()</a></span> - Method in class i5.las2peer.api.p2p.<a href="i5/las2peer/api/p2p/ServiceNameVersion.html" title="class in i5.las2peer.api.p2p">ServiceNameVersion</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="i5/las2peer/api/p2p/ServiceVersion.html#hashCode()">hashCode()</a></span> - Method in class i5.las2peer.api.p2p.<a href="i5/las2peer/api/p2p/ServiceVersion.html" title="class in i5.las2peer.api.p2p">ServiceVersion</a></dt>
+<dt><span class="memberNameLink"><a href="i5/las2peer/api/SemverVersion.html#hashCode()">hashCode()</a></span> - Method in class i5.las2peer.api.<a href="i5/las2peer/api/SemverVersion.html" title="class in i5.las2peer.api">SemverVersion</a></dt>
 <dd>
 <div class="block">since equals is overridden, we should implement an own hashCode.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/classLoaders/libraries/LibraryIdentifier.html#hashCode()">hashCode()</a></span> - Method in class i5.las2peer.classLoaders.libraries.<a href="i5/las2peer/classLoaders/libraries/LibraryIdentifier.html" title="class in i5.las2peer.classLoaders.libraries">LibraryIdentifier</a></dt>
-<dd>
-<div class="block">since equals is overridden, we should implement an own hashCode.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="i5/las2peer/classLoaders/libraries/LibraryVersion.html#hashCode()">hashCode()</a></span> - Method in class i5.las2peer.classLoaders.libraries.<a href="i5/las2peer/classLoaders/libraries/LibraryVersion.html" title="class in i5.las2peer.classLoaders.libraries">LibraryVersion</a></dt>
 <dd>
 <div class="block">since equals is overridden, we should implement an own hashCode.</div>
 </dd>
@@ -4007,8 +4175,8 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/api/Context.html#invoke(i5.las2peer.api.p2p.ServiceNameVersion,java.lang.String,java.io.Serializable...)">invoke(ServiceNameVersion, String, Serializable...)</a></span> - Method in interface i5.las2peer.api.<a href="i5/las2peer/api/Context.html" title="interface in i5.las2peer.api">Context</a></dt>
 <dd>
-<div class="block">Invokes the method of any other service on behalf of the main agent, thus sending the main agent as calling
- agent.</div>
+<div class="block">Invokes the method of any other service on behalf of the main agent, thus
+ sending the main agent as calling agent.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/execution/ExecutionContext.html#invoke(i5.las2peer.api.p2p.ServiceNameVersion,java.lang.String,java.io.Serializable...)">invoke(ServiceNameVersion, String, Serializable...)</a></span> - Method in class i5.las2peer.execution.<a href="i5/las2peer/execution/ExecutionContext.html" title="class in i5.las2peer.execution">ExecutionContext</a></dt>
 <dd>&nbsp;</dd>
@@ -4042,8 +4210,8 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/api/Context.html#invoke(java.lang.String,java.lang.String,java.io.Serializable...)">invoke(String, String, Serializable...)</a></span> - Method in interface i5.las2peer.api.<a href="i5/las2peer/api/Context.html" title="interface in i5.las2peer.api">Context</a></dt>
 <dd>
-<div class="block">Invokes the method of any other service on behalf of the main agent, thus sending the main agent as calling
- agent.</div>
+<div class="block">Invokes the method of any other service on behalf of the main agent, thus
+ sending the main agent as calling agent.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/execution/ExecutionContext.html#invoke(java.lang.String,java.lang.String,java.io.Serializable...)">invoke(String, String, Serializable...)</a></span> - Method in class i5.las2peer.execution.<a href="i5/las2peer/execution/ExecutionContext.html" title="class in i5.las2peer.execution">ExecutionContext</a></dt>
 <dd>&nbsp;</dd>
@@ -4082,6 +4250,14 @@ loadScripts(document, 'script');</script>
 <dt><span class="memberNameLink"><a href="i5/las2peer/tools/LocalNodeStarter.html#invokeStatic(java.lang.String,i5.las2peer.p2p.LocalNode)">invokeStatic(String, LocalNode)</a></span> - Static method in class i5.las2peer.tools.<a href="i5/las2peer/tools/LocalNodeStarter.html" title="class in i5.las2peer.tools">LocalNodeStarter</a></dt>
 <dd>
 <div class="block">invoke a static method which has the local node as possible parameter</div>
+</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/api/security/GroupAgent.html#isAdmin(i5.las2peer.api.security.Agent)">isAdmin(Agent)</a></span> - Method in interface i5.las2peer.api.security.<a href="i5/las2peer/api/security/GroupAgent.html" title="interface in i5.las2peer.api.security">GroupAgent</a></dt>
+<dd>
+<div class="block">Check admin rights for member.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/security/GroupAgentImpl.html#isAdmin(i5.las2peer.api.security.Agent)">isAdmin(Agent)</a></span> - Method in class i5.las2peer.security.<a href="i5/las2peer/security/GroupAgentImpl.html" title="class in i5.las2peer.security">GroupAgentImpl</a></dt>
+<dd>
+<div class="block">Check admin rights for member.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/tools/CryptoTools.html#isAgentID(java.lang.String)">isAgentID(String)</a></span> - Static method in class i5.las2peer.tools.<a href="i5/las2peer/tools/CryptoTools.html" title="class in i5.las2peer.tools">CryptoTools</a></dt>
 <dd>&nbsp;</dd>
@@ -4139,6 +4315,8 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/security/EthereumAgent.html#isLocked()">isLocked()</a></span> - Method in class i5.las2peer.security.<a href="i5/las2peer/security/EthereumAgent.html" title="class in i5.las2peer.security">EthereumAgent</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/security/EthereumGroupAgent.html#isLocked()">isLocked()</a></span> - Method in class i5.las2peer.security.<a href="i5/las2peer/security/EthereumGroupAgent.html" title="class in i5.las2peer.security">EthereumGroupAgent</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/security/AgentContext.html#isMemberRecursive(i5.las2peer.security.GroupAgentImpl,java.lang.String)">isMemberRecursive(GroupAgentImpl, String)</a></span> - Method in class i5.las2peer.security.<a href="i5/las2peer/security/AgentContext.html" title="class in i5.las2peer.security">AgentContext</a></dt>
 <dd>
 <div class="block">Checks if the given agent is transitive member of the given group.</div>
@@ -4150,6 +4328,8 @@ loadScripts(document, 'script');</script>
 <dt><span class="memberNameLink"><a href="i5/las2peer/persistency/EnvelopeArtifact.html#isMutable()">isMutable()</a></span> - Method in class i5.las2peer.persistency.<a href="i5/las2peer/persistency/EnvelopeArtifact.html" title="class in i5.las2peer.persistency">EnvelopeArtifact</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/communication/Message.html#isOpen()">isOpen()</a></span> - Method in class i5.las2peer.communication.<a href="i5/las2peer/communication/Message.html" title="class in i5.las2peer.communication">Message</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.html#isOwner(java.lang.String,byte%5B%5D)">isOwner(String, byte[])</a></span> - Method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.html" title="class in i5.las2peer.registry.contracts">GroupRegistry</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/UserRegistry.html#isOwner(java.lang.String,byte%5B%5D)">isOwner(String, byte[])</a></span> - Method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/UserRegistry.html" title="class in i5.las2peer.registry.contracts">UserRegistry</a></dt>
 <dd>&nbsp;</dd>
@@ -4375,8 +4555,9 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="i5/las2peer/classLoaders/libraries/LibraryVersion.html" title="class in i5.las2peer.classLoaders.libraries"><span class="typeNameLink">LibraryVersion</span></a> - Class in <a href="i5/las2peer/classLoaders/libraries/package-summary.html">i5.las2peer.classLoaders.libraries</a></dt>
 <dd>
-<div class="block">a simple class managing a library version number in the format major.minor.subversion-build where minor, subversion
- and build are optional</div>
+<div class="block">A simple class managing a library version number in the format
+ <code>&lt;major&gt; "." &lt;minor&gt; "." &lt;patch&gt; "-" &lt;pre-release&gt; "+" &lt;build&gt;</code> (where minor, patch, pre-release and build
+ are optional) or "*" (no version specified / matches all versions).</div>
 </dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/classLoaders/libraries/LibraryVersion.html#%3Cinit%3E(int)">LibraryVersion(int)</a></span> - Constructor for class i5.las2peer.classLoaders.libraries.<a href="i5/las2peer/classLoaders/libraries/LibraryVersion.html" title="class in i5.las2peer.classLoaders.libraries">LibraryVersion</a></dt>
 <dd>
@@ -4390,17 +4571,20 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">generate a new LibraryVersion</div>
 </dd>
-<dt><span class="memberNameLink"><a href="i5/las2peer/classLoaders/libraries/LibraryVersion.html#%3Cinit%3E(int,int,int,int)">LibraryVersion(int, int, int, int)</a></span> - Constructor for class i5.las2peer.classLoaders.libraries.<a href="i5/las2peer/classLoaders/libraries/LibraryVersion.html" title="class in i5.las2peer.classLoaders.libraries">LibraryVersion</a></dt>
+<dt><span class="memberNameLink"><a href="i5/las2peer/classLoaders/libraries/LibraryVersion.html#%3Cinit%3E(int,int,int,java.lang.String)">LibraryVersion(int, int, int, String)</a></span> - Constructor for class i5.las2peer.classLoaders.libraries.<a href="i5/las2peer/classLoaders/libraries/LibraryVersion.html" title="class in i5.las2peer.classLoaders.libraries">LibraryVersion</a></dt>
+<dd>
+<div class="block">generate a new LibraryVersion</div>
+</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/classLoaders/libraries/LibraryVersion.html#%3Cinit%3E(int,int,int,java.lang.String,java.lang.String)">LibraryVersion(int, int, int, String, String)</a></span> - Constructor for class i5.las2peer.classLoaders.libraries.<a href="i5/las2peer/classLoaders/libraries/LibraryVersion.html" title="class in i5.las2peer.classLoaders.libraries">LibraryVersion</a></dt>
 <dd>
 <div class="block">generate a new LibraryVersion</div>
 </dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/classLoaders/libraries/LibraryVersion.html#%3Cinit%3E(java.lang.String)">LibraryVersion(String)</a></span> - Constructor for class i5.las2peer.classLoaders.libraries.<a href="i5/las2peer/classLoaders/libraries/LibraryVersion.html" title="class in i5.las2peer.classLoaders.libraries">LibraryVersion</a></dt>
 <dd>
 <div class="block">Generate a Version from String representation
- 
- format : major.minor.sub-build
- 
- minor, subversion and build are optional</div>
+
+ format : Semver <code>&lt;major&gt; "." &lt;minor&gt; "." &lt;patch&gt; "-" &lt;pre-release&gt; "+" &lt;build&gt;</code> (where minor, patch,
+ pre-release and build are optional) or "*" (no version specified / matches all versions)</div>
 </dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/tools/ColoredOutput.BackgroundColor.html#LightBlue">LightBlue</a></span> - i5.las2peer.tools.<a href="i5/las2peer/tools/ColoredOutput.BackgroundColor.html" title="enum in i5.las2peer.tools">ColoredOutput.BackgroundColor</a></dt>
 <dd>&nbsp;</dd>
@@ -4471,6 +4655,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="deprecationBlock"><span class="deprecatedLabel">Deprecated.</span></div>
 </dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.html#load(java.lang.String,org.web3j.protocol.Web3j,org.web3j.crypto.Credentials,java.math.BigInteger,java.math.BigInteger)">load(String, Web3j, Credentials, BigInteger, BigInteger)</a></span> - Static method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.html" title="class in i5.las2peer.registry.contracts">GroupRegistry</a></dt>
+<dd>
+<div class="deprecationBlock"><span class="deprecatedLabel">Deprecated.</span></div>
+</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/ReputationRegistry.html#load(java.lang.String,org.web3j.protocol.Web3j,org.web3j.crypto.Credentials,java.math.BigInteger,java.math.BigInteger)">load(String, Web3j, Credentials, BigInteger, BigInteger)</a></span> - Static method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/ReputationRegistry.html" title="class in i5.las2peer.registry.contracts">ReputationRegistry</a></dt>
 <dd>
 <div class="deprecationBlock"><span class="deprecatedLabel">Deprecated.</span></div>
@@ -4485,6 +4673,8 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/CommunityTagIndex.html#load(java.lang.String,org.web3j.protocol.Web3j,org.web3j.crypto.Credentials,org.web3j.tx.gas.ContractGasProvider)">load(String, Web3j, Credentials, ContractGasProvider)</a></span> - Static method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/CommunityTagIndex.html" title="class in i5.las2peer.registry.contracts">CommunityTagIndex</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.html#load(java.lang.String,org.web3j.protocol.Web3j,org.web3j.crypto.Credentials,org.web3j.tx.gas.ContractGasProvider)">load(String, Web3j, Credentials, ContractGasProvider)</a></span> - Static method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.html" title="class in i5.las2peer.registry.contracts">GroupRegistry</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/ReputationRegistry.html#load(java.lang.String,org.web3j.protocol.Web3j,org.web3j.crypto.Credentials,org.web3j.tx.gas.ContractGasProvider)">load(String, Web3j, Credentials, ContractGasProvider)</a></span> - Static method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/ReputationRegistry.html" title="class in i5.las2peer.registry.contracts">ReputationRegistry</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/ServiceRegistry.html#load(java.lang.String,org.web3j.protocol.Web3j,org.web3j.crypto.Credentials,org.web3j.tx.gas.ContractGasProvider)">load(String, Web3j, Credentials, ContractGasProvider)</a></span> - Static method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/ServiceRegistry.html" title="class in i5.las2peer.registry.contracts">ServiceRegistry</a></dt>
@@ -4492,6 +4682,10 @@ loadScripts(document, 'script');</script>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/UserRegistry.html#load(java.lang.String,org.web3j.protocol.Web3j,org.web3j.crypto.Credentials,org.web3j.tx.gas.ContractGasProvider)">load(String, Web3j, Credentials, ContractGasProvider)</a></span> - Static method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/UserRegistry.html" title="class in i5.las2peer.registry.contracts">UserRegistry</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/CommunityTagIndex.html#load(java.lang.String,org.web3j.protocol.Web3j,org.web3j.tx.TransactionManager,java.math.BigInteger,java.math.BigInteger)">load(String, Web3j, TransactionManager, BigInteger, BigInteger)</a></span> - Static method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/CommunityTagIndex.html" title="class in i5.las2peer.registry.contracts">CommunityTagIndex</a></dt>
+<dd>
+<div class="deprecationBlock"><span class="deprecatedLabel">Deprecated.</span></div>
+</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.html#load(java.lang.String,org.web3j.protocol.Web3j,org.web3j.tx.TransactionManager,java.math.BigInteger,java.math.BigInteger)">load(String, Web3j, TransactionManager, BigInteger, BigInteger)</a></span> - Static method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.html" title="class in i5.las2peer.registry.contracts">GroupRegistry</a></dt>
 <dd>
 <div class="deprecationBlock"><span class="deprecatedLabel">Deprecated.</span></div>
 </dd>
@@ -4508,6 +4702,8 @@ loadScripts(document, 'script');</script>
 <div class="deprecationBlock"><span class="deprecatedLabel">Deprecated.</span></div>
 </dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/CommunityTagIndex.html#load(java.lang.String,org.web3j.protocol.Web3j,org.web3j.tx.TransactionManager,org.web3j.tx.gas.ContractGasProvider)">load(String, Web3j, TransactionManager, ContractGasProvider)</a></span> - Static method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/CommunityTagIndex.html" title="class in i5.las2peer.registry.contracts">CommunityTagIndex</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.html#load(java.lang.String,org.web3j.protocol.Web3j,org.web3j.tx.TransactionManager,org.web3j.tx.gas.ContractGasProvider)">load(String, Web3j, TransactionManager, ContractGasProvider)</a></span> - Static method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.html" title="class in i5.las2peer.registry.contracts">GroupRegistry</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/ReputationRegistry.html#load(java.lang.String,org.web3j.protocol.Web3j,org.web3j.tx.TransactionManager,org.web3j.tx.gas.ContractGasProvider)">load(String, Web3j, TransactionManager, ContractGasProvider)</a></span> - Static method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/ReputationRegistry.html" title="class in i5.las2peer.registry.contracts">ReputationRegistry</a></dt>
 <dd>&nbsp;</dd>
@@ -4606,11 +4802,20 @@ loadScripts(document, 'script');</script>
 <div class="block">Removes decrypted private key and the registry client (which
  contains user credentials).</div>
 </dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/security/EthereumGroupAgent.html#lockPrivateKey()">lockPrivateKey()</a></span> - Method in class i5.las2peer.security.<a href="i5/las2peer/security/EthereumGroupAgent.html" title="class in i5.las2peer.security">EthereumGroupAgent</a></dt>
+<dd>
+<div class="block">Removes decrypted private key and the registry client (which contains user
+ credentials).</div>
+</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/security/GroupAgentImpl.html#lockPrivateKey()">lockPrivateKey()</a></span> - Method in class i5.las2peer.security.<a href="i5/las2peer/security/GroupAgentImpl.html" title="class in i5.las2peer.security">GroupAgentImpl</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/security/PassphraseAgentImpl.html#lockPrivateKey()">lockPrivateKey()</a></span> - Method in class i5.las2peer.security.<a href="i5/las2peer/security/PassphraseAgentImpl.html" title="class in i5.las2peer.security">PassphraseAgentImpl</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/CommunityTagIndex.CommunityTagCreatedEventResponse.html#log">log</a></span> - Variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/CommunityTagIndex.CommunityTagCreatedEventResponse.html" title="class in i5.las2peer.registry.contracts">CommunityTagIndex.CommunityTagCreatedEventResponse</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.GroupRegisteredEventResponse.html#log">log</a></span> - Variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.GroupRegisteredEventResponse.html" title="class in i5.las2peer.registry.contracts">GroupRegistry.GroupRegisteredEventResponse</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.GroupTransferredEventResponse.html#log">log</a></span> - Variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.GroupTransferredEventResponse.html" title="class in i5.las2peer.registry.contracts">GroupRegistry.GroupTransferredEventResponse</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/ReputationRegistry.ErrorEventEventResponse.html#log">log</a></span> - Variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/ReputationRegistry.ErrorEventEventResponse.html" title="class in i5.las2peer.registry.contracts">ReputationRegistry.ErrorEventEventResponse</a></dt>
 <dd>&nbsp;</dd>
@@ -4786,10 +4991,6 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">main (command line) method: create a key pair in the given file name prefix</div>
 </dd>
-<dt><span class="memberNameLink"><a href="i5/las2peer/tools/GroupAgentGenerator.html#main(java.lang.String%5B%5D)">main(String[])</a></span> - Static method in class i5.las2peer.tools.<a href="i5/las2peer/tools/GroupAgentGenerator.html" title="class in i5.las2peer.tools">GroupAgentGenerator</a></dt>
-<dd>
-<div class="block">command line method printing a group XML file</div>
-</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/tools/L2pNodeLauncher.html#main(java.lang.String%5B%5D)">main(String[])</a></span> - Static method in class i5.las2peer.tools.<a href="i5/las2peer/tools/L2pNodeLauncher.html" title="class in i5.las2peer.tools">L2pNodeLauncher</a></dt>
 <dd>
 <div class="block">Main method for command line processing.</div>
@@ -4806,6 +5007,12 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">command line service agent generator</div>
 </dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/tools/GroupAgentGenerator.html#main(java.lang.String%5B%5D,java.lang.String)">main(String[], String)</a></span> - Static method in class i5.las2peer.tools.<a href="i5/las2peer/tools/GroupAgentGenerator.html" title="class in i5.las2peer.tools">GroupAgentGenerator</a></dt>
+<dd>
+<div class="block">command line method printing a group XML file</div>
+</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/api/SemverVersion.html#major">major</a></span> - Variable in class i5.las2peer.api.<a href="i5/las2peer/api/SemverVersion.html" title="class in i5.las2peer.api">SemverVersion</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="i5/las2peer/serialization/MalformedXMLException.html" title="class in i5.las2peer.serialization"><span class="typeNameLink">MalformedXMLException</span></a> - Exception in <a href="i5/las2peer/serialization/package-summary.html">i5.las2peer.serialization</a></dt>
 <dd>
 <div class="block">Exception for problems with XML-deserialization.</div>
@@ -4992,6 +5199,8 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/tools/AgentIdMigrator.html#migrateAgentXMLFile(java.lang.String)">migrateAgentXMLFile(String)</a></span> - Static method in class i5.las2peer.tools.<a href="i5/las2peer/tools/AgentIdMigrator.html" title="class in i5.las2peer.tools">AgentIdMigrator</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/api/SemverVersion.html#minor">minor</a></span> - Variable in class i5.las2peer.api.<a href="i5/las2peer/api/SemverVersion.html" title="class in i5.las2peer.api">SemverVersion</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/data/RegistryConfiguration.html#MobSOS_SuccessMeasure_Develop_Label">MobSOS_SuccessMeasure_Develop_Label</a></span> - Static variable in class i5.las2peer.registry.data.<a href="i5/las2peer/registry/data/RegistryConfiguration.html" title="class in i5.las2peer.registry.data">RegistryConfiguration</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/data/RegistryConfiguration.html#MobSOS_SuccessMeasure_Hosting_Label">MobSOS_SuccessMeasure_Hosting_Label</a></span> - Static variable in class i5.las2peer.registry.data.<a href="i5/las2peer/registry/data/RegistryConfiguration.html" title="class in i5.las2peer.registry.data">RegistryConfiguration</a></dt>
@@ -5101,6 +5310,10 @@ loadScripts(document, 'script');</script>
 <dl>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/CommunityTagIndex.CommunityTagCreatedEventResponse.html#name">name</a></span> - Variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/CommunityTagIndex.CommunityTagCreatedEventResponse.html" title="class in i5.las2peer.registry.contracts">CommunityTagIndex.CommunityTagCreatedEventResponse</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.GroupRegisteredEventResponse.html#name">name</a></span> - Variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.GroupRegisteredEventResponse.html" title="class in i5.las2peer.registry.contracts">GroupRegistry.GroupRegisteredEventResponse</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.GroupTransferredEventResponse.html#name">name</a></span> - Variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.GroupTransferredEventResponse.html" title="class in i5.las2peer.registry.contracts">GroupRegistry.GroupTransferredEventResponse</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/ReputationRegistry.UserProfileCreatedEventResponse.html#name">name</a></span> - Variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/ReputationRegistry.UserProfileCreatedEventResponse.html" title="class in i5.las2peer.registry.contracts">ReputationRegistry.UserProfileCreatedEventResponse</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/UserRegistry.UserRegisteredEventResponse.html#name">name</a></span> - Variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/UserRegistry.UserRegisteredEventResponse.html" title="class in i5.las2peer.registry.contracts">UserRegistry.UserRegisteredEventResponse</a></dt>
@@ -5118,6 +5331,8 @@ loadScripts(document, 'script');</script>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/UserRegistry.html#nameIsAvailable(byte%5B%5D)">nameIsAvailable(byte[])</a></span> - Method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/UserRegistry.html" title="class in i5.las2peer.registry.contracts">UserRegistry</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/ServiceRegistry.html#nameIsAvailable(java.lang.String)">nameIsAvailable(String)</a></span> - Method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/ServiceRegistry.html" title="class in i5.las2peer.registry.contracts">ServiceRegistry</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.html#nameIsTaken(byte%5B%5D)">nameIsTaken(byte[])</a></span> - Method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.html" title="class in i5.las2peer.registry.contracts">GroupRegistry</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/UserRegistry.html#nameIsTaken(byte%5B%5D)">nameIsTaken(byte[])</a></span> - Method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/UserRegistry.html" title="class in i5.las2peer.registry.contracts">UserRegistry</a></dt>
 <dd>&nbsp;</dd>
@@ -5575,11 +5790,15 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Constructor.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/api/SemverVersion.html#patch">patch</a></span> - Variable in class i5.las2peer.api.<a href="i5/las2peer/api/SemverVersion.html" title="class in i5.las2peer.api">SemverVersion</a></dt>
+<dd>&nbsp;</dd>
 <dt><a href="i5/las2peer/communication/PingPongContent.html" title="class in i5.las2peer.communication"><span class="typeNameLink">PingPongContent</span></a> - Class in <a href="i5/las2peer/communication/package-summary.html">i5.las2peer.communication</a></dt>
 <dd>
 <div class="block">a simple content for ping and pong message</div>
 </dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/communication/PingPongContent.html#%3Cinit%3E()">PingPongContent()</a></span> - Constructor for class i5.las2peer.communication.<a href="i5/las2peer/communication/PingPongContent.html" title="class in i5.las2peer.communication">PingPongContent</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/api/SemverVersion.html#preRelease">preRelease</a></span> - Variable in class i5.las2peer.api.<a href="i5/las2peer/api/SemverVersion.html" title="class in i5.las2peer.api">SemverVersion</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/tools/ColoredOutput.html#print(java.lang.Object)">print(Object)</a></span> - Static method in class i5.las2peer.tools.<a href="i5/las2peer/tools/ColoredOutput.html" title="class in i5.las2peer.tools">ColoredOutput</a></dt>
 <dd>
@@ -5814,6 +6033,8 @@ loadScripts(document, 'script');</script>
 &nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/tools/ColoredOutput.ForegroundColor.html#Red">Red</a></span> - i5.las2peer.tools.<a href="i5/las2peer/tools/ColoredOutput.ForegroundColor.html" title="enum in i5.las2peer.tools">ColoredOutput.ForegroundColor</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.html#register(byte%5B%5D,byte%5B%5D,byte%5B%5D)">register(byte[], byte[], byte[])</a></span> - Method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.html" title="class in i5.las2peer.registry.contracts">GroupRegistry</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/UserRegistry.html#register(byte%5B%5D,byte%5B%5D,byte%5B%5D)">register(byte[], byte[], byte[])</a></span> - Method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/UserRegistry.html" title="class in i5.las2peer.registry.contracts">UserRegistry</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/ServiceRegistry.html#register(java.lang.String,byte%5B%5D)">register(String, byte[])</a></span> - Method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/ServiceRegistry.html" title="class in i5.las2peer.registry.contracts">ServiceRegistry</a></dt>
@@ -5835,6 +6056,14 @@ loadScripts(document, 'script');</script>
 <dt><span class="memberNameLink"><a href="i5/las2peer/p2p/Node.html#registerAnswerListener(long,i5.las2peer.p2p.MessageResultListener)">registerAnswerListener(long, MessageResultListener)</a></span> - Method in class i5.las2peer.p2p.<a href="i5/las2peer/p2p/Node.html" title="class in i5.las2peer.p2p">Node</a></dt>
 <dd>
 <div class="block">Registers a MessageResultListener for collecting answers.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/ReadWriteRegistryClient.html#registerGroup(i5.las2peer.security.EthereumGroupAgent)">registerGroup(EthereumGroupAgent)</a></span> - Method in class i5.las2peer.registry.<a href="i5/las2peer/registry/ReadWriteRegistryClient.html" title="class in i5.las2peer.registry">ReadWriteRegistryClient</a></dt>
+<dd>
+<div class="block">Register a group name to the given author.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/security/UserAgentManager.html#registerGroupAgent(i5.las2peer.api.security.GroupAgent)">registerGroupAgent(GroupAgent)</a></span> - Method in class i5.las2peer.security.<a href="i5/las2peer/security/UserAgentManager.html" title="class in i5.las2peer.security">UserAgentManager</a></dt>
+<dd>
+<div class="block">Stores group name of a group agent to the network</div>
 </dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/p2p/NodeServiceCache.html#registerLocalService(i5.las2peer.security.ServiceAgentImpl)">registerLocalService(ServiceAgentImpl)</a></span> - Method in class i5.las2peer.p2p.<a href="i5/las2peer/p2p/NodeServiceCache.html" title="class in i5.las2peer.p2p">NodeServiceCache</a></dt>
 <dd>
@@ -6043,7 +6272,8 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/api/Context.html#requestAgent(java.lang.String,i5.las2peer.api.security.Agent)">requestAgent(String, Agent)</a></span> - Method in interface i5.las2peer.api.<a href="i5/las2peer/api/Context.html" title="interface in i5.las2peer.api">Context</a></dt>
 <dd>
-<div class="block">Fetches an agent from the network and trys to unlock it using the specified agent.</div>
+<div class="block">Fetches an agent from the network and trys to unlock it using the specified
+ agent.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/execution/ExecutionContext.html#requestAgent(java.lang.String,i5.las2peer.api.security.Agent)">requestAgent(String, Agent)</a></span> - Method in class i5.las2peer.execution.<a href="i5/las2peer/execution/ExecutionContext.html" title="class in i5.las2peer.execution">ExecutionContext</a></dt>
 <dd>&nbsp;</dd>
@@ -6142,6 +6372,14 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/tools/ColoredOutput.Formatting.html#Reverse">Reverse</a></span> - i5.las2peer.tools.<a href="i5/las2peer/tools/ColoredOutput.Formatting.html" title="enum in i5.las2peer.tools">ColoredOutput.Formatting</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/api/security/GroupAgent.html#revokeAdmin(i5.las2peer.api.security.Agent)">revokeAdmin(Agent)</a></span> - Method in interface i5.las2peer.api.security.<a href="i5/las2peer/api/security/GroupAgent.html" title="interface in i5.las2peer.api.security">GroupAgent</a></dt>
+<dd>
+<div class="block">Remove admin rights from member.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/security/GroupAgentImpl.html#revokeAdmin(i5.las2peer.api.security.Agent)">revokeAdmin(Agent)</a></span> - Method in class i5.las2peer.security.<a href="i5/las2peer/security/GroupAgentImpl.html" title="class in i5.las2peer.security">GroupAgentImpl</a></dt>
+<dd>
+<div class="block">remove a member from the admin list of this group</div>
+</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/api/security/GroupAgent.html#revokeMember(i5.las2peer.api.security.Agent)">revokeMember(Agent)</a></span> - Method in interface i5.las2peer.api.security.<a href="i5/las2peer/api/security/GroupAgent.html" title="interface in i5.las2peer.api.security">GroupAgent</a></dt>
 <dd>
 <div class="block">Revokes a group membership.</div>
@@ -6258,6 +6496,39 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/security/UserAgentImpl.html#sEmail">sEmail</a></span> - Variable in class i5.las2peer.security.<a href="i5/las2peer/security/UserAgentImpl.html" title="class in i5.las2peer.security">UserAgentImpl</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="i5/las2peer/api/SemverVersion.html" title="class in i5.las2peer.api"><span class="typeNameLink">SemverVersion</span></a> - Class in <a href="i5/las2peer/api/package-summary.html">i5.las2peer.api</a></dt>
+<dd>
+<div class="block">A simple class managing a semantic version number in the format
+ <code>&lt;major&gt; "." &lt;minor&gt; "." &lt;patch&gt; "-" &lt;pre-release&gt; "+" &lt;build&gt;</code> (where minor, patch, pre-release and build
+ are optional) or "*" (no version specified / matches all versions).</div>
+</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/api/SemverVersion.html#%3Cinit%3E(int)">SemverVersion(int)</a></span> - Constructor for class i5.las2peer.api.<a href="i5/las2peer/api/SemverVersion.html" title="class in i5.las2peer.api">SemverVersion</a></dt>
+<dd>
+<div class="block">generate a new ServiceVersion</div>
+</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/api/SemverVersion.html#%3Cinit%3E(int,int)">SemverVersion(int, int)</a></span> - Constructor for class i5.las2peer.api.<a href="i5/las2peer/api/SemverVersion.html" title="class in i5.las2peer.api">SemverVersion</a></dt>
+<dd>
+<div class="block">generate a new ServiceVersion</div>
+</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/api/SemverVersion.html#%3Cinit%3E(int,int,int)">SemverVersion(int, int, int)</a></span> - Constructor for class i5.las2peer.api.<a href="i5/las2peer/api/SemverVersion.html" title="class in i5.las2peer.api">SemverVersion</a></dt>
+<dd>
+<div class="block">generate a new ServiceVersion</div>
+</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/api/SemverVersion.html#%3Cinit%3E(int,int,int,java.lang.String)">SemverVersion(int, int, int, String)</a></span> - Constructor for class i5.las2peer.api.<a href="i5/las2peer/api/SemverVersion.html" title="class in i5.las2peer.api">SemverVersion</a></dt>
+<dd>
+<div class="block">generate a new ServiceVersion</div>
+</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/api/SemverVersion.html#%3Cinit%3E(int,int,int,java.lang.String,java.lang.String)">SemverVersion(int, int, int, String, String)</a></span> - Constructor for class i5.las2peer.api.<a href="i5/las2peer/api/SemverVersion.html" title="class in i5.las2peer.api">SemverVersion</a></dt>
+<dd>
+<div class="block">generate a new ServiceVersion</div>
+</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/api/SemverVersion.html#%3Cinit%3E(java.lang.String)">SemverVersion(String)</a></span> - Constructor for class i5.las2peer.api.<a href="i5/las2peer/api/SemverVersion.html" title="class in i5.las2peer.api">SemverVersion</a></dt>
+<dd>
+<div class="block">Generate a Version from String representation
+
+ format : Semver <code>&lt;major&gt; "." &lt;minor&gt; "." &lt;patch&gt; "-" &lt;pre-release&gt; "+" &lt;build&gt;</code> (where minor, patch, pre-release and build are optional) or "*" (no version specified /
+ matches all versions)</div>
+</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/tools/ColoredOutput.html#sendCode(int)">sendCode(int)</a></span> - Static method in class i5.las2peer.tools.<a href="i5/las2peer/tools/ColoredOutput.html" title="class in i5.las2peer.tools">ColoredOutput</a></dt>
 <dd>
 <div class="deprecationBlock"><span class="deprecatedLabel">Deprecated.</span>
@@ -7051,8 +7322,9 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><a href="i5/las2peer/api/p2p/ServiceVersion.html" title="class in i5.las2peer.api.p2p"><span class="typeNameLink">ServiceVersion</span></a> - Class in <a href="i5/las2peer/api/p2p/package-summary.html">i5.las2peer.api.p2p</a></dt>
 <dd>
-<div class="block">a simple class managing a service version number in the format major.minor.subversion-build where minor, subversion
- and build are optional</div>
+<div class="block">A simple class managing a service version number in the format
+ <code>&lt;major&gt; "." &lt;minor&gt; "." &lt;patch&gt; "-" &lt;pre-release&gt; "+" &lt;build&gt;</code> (where minor, patch, pre-release and build
+ are optional) or "*" (no version specified / matches all versions).</div>
 </dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/api/p2p/ServiceVersion.html#%3Cinit%3E(int)">ServiceVersion(int)</a></span> - Constructor for class i5.las2peer.api.p2p.<a href="i5/las2peer/api/p2p/ServiceVersion.html" title="class in i5.las2peer.api.p2p">ServiceVersion</a></dt>
 <dd>
@@ -7066,15 +7338,19 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">generate a new ServiceVersion</div>
 </dd>
-<dt><span class="memberNameLink"><a href="i5/las2peer/api/p2p/ServiceVersion.html#%3Cinit%3E(int,int,int,int)">ServiceVersion(int, int, int, int)</a></span> - Constructor for class i5.las2peer.api.p2p.<a href="i5/las2peer/api/p2p/ServiceVersion.html" title="class in i5.las2peer.api.p2p">ServiceVersion</a></dt>
+<dt><span class="memberNameLink"><a href="i5/las2peer/api/p2p/ServiceVersion.html#%3Cinit%3E(int,int,int,java.lang.String)">ServiceVersion(int, int, int, String)</a></span> - Constructor for class i5.las2peer.api.p2p.<a href="i5/las2peer/api/p2p/ServiceVersion.html" title="class in i5.las2peer.api.p2p">ServiceVersion</a></dt>
+<dd>
+<div class="block">generate a new ServiceVersion</div>
+</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/api/p2p/ServiceVersion.html#%3Cinit%3E(int,int,int,java.lang.String,java.lang.String)">ServiceVersion(int, int, int, String, String)</a></span> - Constructor for class i5.las2peer.api.p2p.<a href="i5/las2peer/api/p2p/ServiceVersion.html" title="class in i5.las2peer.api.p2p">ServiceVersion</a></dt>
 <dd>
 <div class="block">generate a new ServiceVersion</div>
 </dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/api/p2p/ServiceVersion.html#%3Cinit%3E(java.lang.String)">ServiceVersion(String)</a></span> - Constructor for class i5.las2peer.api.p2p.<a href="i5/las2peer/api/p2p/ServiceVersion.html" title="class in i5.las2peer.api.p2p">ServiceVersion</a></dt>
 <dd>
 <div class="block">Generate a Version from String representation
- 
- format : major.minor.sub-build (where minor, subversion and build are optional) or "*" (no version specified /
+
+ format : Semver <code>&lt;major&gt; "." &lt;minor&gt; "." &lt;patch&gt; "-" &lt;pre-release&gt; "+" &lt;build&gt;</code> (where minor, patch, pre-release and build are optional) or "*" (no version specified /
  matches all versions)</div>
 </dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/tools/PackageUploader.ServiceVersionList.html#%3Cinit%3E()">ServiceVersionList()</a></span> - Constructor for class i5.las2peer.tools.<a href="i5/las2peer/tools/PackageUploader.ServiceVersionList.html" title="class in i5.las2peer.tools">PackageUploader.ServiceVersionList</a></dt>
@@ -7704,6 +7980,8 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/communication/PingPongContent.html#timestamp">timestamp</a></span> - Variable in class i5.las2peer.communication.<a href="i5/las2peer/communication/PingPongContent.html" title="class in i5.las2peer.communication">PingPongContent</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.GroupRegisteredEventResponse.html#timestamp">timestamp</a></span> - Variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.GroupRegisteredEventResponse.html" title="class in i5.las2peer.registry.contracts">GroupRegistry.GroupRegisteredEventResponse</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/ReputationRegistry.GenericTransactionAddedEventResponse.html#timestamp">timestamp</a></span> - Variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/ReputationRegistry.GenericTransactionAddedEventResponse.html" title="class in i5.las2peer.registry.contracts">ReputationRegistry.GenericTransactionAddedEventResponse</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/ReputationRegistry.TransactionAddedEventResponse.html#timestamp">timestamp</a></span> - Variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/ReputationRegistry.TransactionAddedEventResponse.html" title="class in i5.las2peer.registry.contracts">ReputationRegistry.TransactionAddedEventResponse</a></dt>
@@ -7722,13 +8000,11 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/api/p2p/ServiceNameVersion.html#toString()">toString()</a></span> - Method in class i5.las2peer.api.p2p.<a href="i5/las2peer/api/p2p/ServiceNameVersion.html" title="class in i5.las2peer.api.p2p">ServiceNameVersion</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="i5/las2peer/api/p2p/ServiceVersion.html#toString()">toString()</a></span> - Method in class i5.las2peer.api.p2p.<a href="i5/las2peer/api/p2p/ServiceVersion.html" title="class in i5.las2peer.api.p2p">ServiceVersion</a></dt>
+<dt><span class="memberNameLink"><a href="i5/las2peer/api/SemverVersion.html#toString()">toString()</a></span> - Method in class i5.las2peer.api.<a href="i5/las2peer/api/SemverVersion.html" title="class in i5.las2peer.api">SemverVersion</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/classLoaders/libraries/FileSystemRepository.html#toString()">toString()</a></span> - Method in class i5.las2peer.classLoaders.libraries.<a href="i5/las2peer/classLoaders/libraries/FileSystemRepository.html" title="class in i5.las2peer.classLoaders.libraries">FileSystemRepository</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/classLoaders/libraries/LibraryIdentifier.html#toString()">toString()</a></span> - Method in class i5.las2peer.classLoaders.libraries.<a href="i5/las2peer/classLoaders/libraries/LibraryIdentifier.html" title="class in i5.las2peer.classLoaders.libraries">LibraryIdentifier</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="i5/las2peer/classLoaders/libraries/LibraryVersion.html#toString()">toString()</a></span> - Method in class i5.las2peer.classLoaders.libraries.<a href="i5/las2peer/classLoaders/libraries/LibraryVersion.html" title="class in i5.las2peer.classLoaders.libraries">LibraryVersion</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/communication/ListMethodsContent.html#toString()">toString()</a></span> - Method in class i5.las2peer.communication.<a href="i5/las2peer/communication/ListMethodsContent.html" title="class in i5.las2peer.communication">ListMethodsContent</a></dt>
 <dd>&nbsp;</dd>
@@ -7749,6 +8025,8 @@ loadScripts(document, 'script');</script>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/data/BlockchainTransactionData.html#toString()">toString()</a></span> - Method in class i5.las2peer.registry.data.<a href="i5/las2peer/registry/data/BlockchainTransactionData.html" title="class in i5.las2peer.registry.data">BlockchainTransactionData</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/data/GenericTransactionData.html#toString()">toString()</a></span> - Method in class i5.las2peer.registry.data.<a href="i5/las2peer/registry/data/GenericTransactionData.html" title="class in i5.las2peer.registry.data">GenericTransactionData</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/data/GroupData.html#toString()">toString()</a></span> - Method in class i5.las2peer.registry.data.<a href="i5/las2peer/registry/data/GroupData.html" title="class in i5.las2peer.registry.data">GroupData</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/data/ReputationTransactionData.html#toString()">toString()</a></span> - Method in class i5.las2peer.registry.data.<a href="i5/las2peer/registry/data/ReputationTransactionData.html" title="class in i5.las2peer.registry.data">ReputationTransactionData</a></dt>
 <dd>&nbsp;</dd>
@@ -7792,6 +8070,8 @@ loadScripts(document, 'script');</script>
 <dt><span class="memberNameLink"><a href="i5/las2peer/security/BotAgent.html#toXmlString()">toXmlString()</a></span> - Method in class i5.las2peer.security.<a href="i5/las2peer/security/BotAgent.html" title="class in i5.las2peer.security">BotAgent</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/security/EthereumAgent.html#toXmlString()">toXmlString()</a></span> - Method in class i5.las2peer.security.<a href="i5/las2peer/security/EthereumAgent.html" title="class in i5.las2peer.security">EthereumAgent</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/security/EthereumGroupAgent.html#toXmlString()">toXmlString()</a></span> - Method in class i5.las2peer.security.<a href="i5/las2peer/security/EthereumGroupAgent.html" title="class in i5.las2peer.security">EthereumGroupAgent</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/security/GroupAgentImpl.html#toXmlString()">toXmlString()</a></span> - Method in class i5.las2peer.security.<a href="i5/las2peer/security/GroupAgentImpl.html" title="class in i5.las2peer.security">GroupAgentImpl</a></dt>
 <dd>&nbsp;</dd>
@@ -7841,6 +8121,8 @@ loadScripts(document, 'script');</script>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/ReputationRegistry.GenericTransactionAddedEventResponse.html#transactionType">transactionType</a></span> - Variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/ReputationRegistry.GenericTransactionAddedEventResponse.html" title="class in i5.las2peer.registry.contracts">ReputationRegistry.GenericTransactionAddedEventResponse</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.html#transfer(byte%5B%5D,java.lang.String)">transfer(byte[], String)</a></span> - Method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.html" title="class in i5.las2peer.registry.contracts">GroupRegistry</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/UserRegistry.html#transfer(byte%5B%5D,java.lang.String)">transfer(byte[], String)</a></span> - Method in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/UserRegistry.html" title="class in i5.las2peer.registry.contracts">UserRegistry</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/ReputationRegistry.GenericTransactionAddedEventResponse.html#txHash">txHash</a></span> - Variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/ReputationRegistry.GenericTransactionAddedEventResponse.html" title="class in i5.las2peer.registry.contracts">ReputationRegistry.GenericTransactionAddedEventResponse</a></dt>
@@ -7871,6 +8153,8 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Unlock this group using a given agent.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/security/EthereumGroupAgent.html#unlock(i5.las2peer.api.security.Agent)">unlock(Agent)</a></span> - Method in class i5.las2peer.security.<a href="i5/las2peer/security/EthereumGroupAgent.html" title="class in i5.las2peer.security">EthereumGroupAgent</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/security/GroupAgentImpl.html#unlock(i5.las2peer.api.security.Agent)">unlock(Agent)</a></span> - Method in class i5.las2peer.security.<a href="i5/las2peer/security/GroupAgentImpl.html" title="class in i5.las2peer.security">GroupAgentImpl</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/api/security/PassphraseAgent.html#unlock(java.lang.String)">unlock(String)</a></span> - Method in interface i5.las2peer.api.security.<a href="i5/las2peer/api/security/PassphraseAgent.html" title="interface in i5.las2peer.api.security">PassphraseAgent</a></dt>
@@ -8396,6 +8680,8 @@ the order they are declared.</div>
 <h2 class="title">_</h2>
 <dl>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/CommunityTagIndex.html#_addresses">_addresses</a></span> - Static variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/CommunityTagIndex.html" title="class in i5.las2peer.registry.contracts">CommunityTagIndex</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/GroupRegistry.html#_addresses">_addresses</a></span> - Static variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/GroupRegistry.html" title="class in i5.las2peer.registry.contracts">GroupRegistry</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="i5/las2peer/registry/contracts/ServiceRegistry.html#_addresses">_addresses</a></span> - Static variable in class i5.las2peer.registry.contracts.<a href="i5/las2peer/registry/contracts/ServiceRegistry.html" title="class in i5.las2peer.registry.contracts">ServiceRegistry</a></dt>
 <dd>&nbsp;</dd>

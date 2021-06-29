@@ -19,7 +19,7 @@
 <script type="text/javascript" src="../../../script-dir/jquery-ui.js"></script>
 </head>
 <body class="class-declaration">
-<script type="text/javascript">var data = {"i0":10,"i1":10,"i2":10,"i3":9,"i4":9,"i5":9,"i6":10,"i7":10,"i8":10,"i9":10,"i10":10,"i11":10,"i12":10,"i13":10,"i14":10,"i15":10,"i16":10,"i17":10,"i18":10};
+<script type="text/javascript">var data = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":9,"i5":9,"i6":9,"i7":9,"i8":10,"i9":10,"i10":10,"i11":10,"i12":10,"i13":10,"i14":10,"i15":10,"i16":10,"i17":10,"i18":10,"i19":10,"i20":10,"i21":10,"i22":10,"i23":10,"i24":10};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -56,13 +56,13 @@ loadScripts(document, 'script');</script>
 <ul class="subNavList">
 <li>Summary:&nbsp;</li>
 <li>Nested&nbsp;|&nbsp;</li>
-<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#field.summary">Field</a>&nbsp;|&nbsp;</li>
 <li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
 <li><a href="#method.summary">Method</a></li>
 </ul>
 <ul class="subNavList">
 <li>Detail:&nbsp;</li>
-<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#field.detail">Field</a>&nbsp;|&nbsp;</li>
 <li><a href="#constructor.detail">Constr</a>&nbsp;|&nbsp;</li>
 <li><a href="#method.detail">Method</a></li>
 </ul>
@@ -96,20 +96,56 @@ loadScripts(document, 'script');</script>
 <dt>All Implemented Interfaces:</dt>
 <dd><code><a href="../api/security/Agent.html" title="interface in i5.las2peer.api.security">Agent</a></code>, <code><a href="../api/security/GroupAgent.html" title="interface in i5.las2peer.api.security">GroupAgent</a></code>, <code><a href="MessageReceiver.html" title="interface in i5.las2peer.security">MessageReceiver</a></code>, <code><a href="../serialization/XmlAble.html" title="interface in i5.las2peer.serialization">XmlAble</a></code>, <code>java.lang.Cloneable</code></dd>
 </dl>
+<dl>
+<dt>Direct Known Subclasses:</dt>
+<dd><code><a href="EthereumGroupAgent.html" title="class in i5.las2peer.security">EthereumGroupAgent</a></code></dd>
+</dl>
 <hr>
 <pre>public class <span class="typeNameLabel">GroupAgentImpl</span>
 extends <a href="AgentImpl.html" title="class in i5.las2peer.security">AgentImpl</a>
 implements <a href="../api/security/GroupAgent.html" title="interface in i5.las2peer.api.security">GroupAgent</a></pre>
 <div class="block">An agent representing a group of other agents.
  
- The storage of the group information is stored encrypted in a similar manner to
- <a href="../persistency/EnvelopeVersion.html" title="class in i5.las2peer.persistency"><code>EnvelopeVersion</code></a>:
+ The storage of the group information is stored encrypted in a similar manner
+ to <a href="../persistency/EnvelopeVersion.html" title="class in i5.las2peer.persistency"><code>EnvelopeVersion</code></a>:
  
- The (symmetric) key to unlock the private key of the group is encrypted asymmetrically for each entitled agent (i.e.
- <i>member</i> of the group).</div>
+ The (symmetric) key to unlock the private key of the group is encrypted
+ asymmetrically for each entitled agent (i.e. <i>member</i> of the group).</div>
 </section>
 <section class="summary">
 <ul class="blockList">
+<!-- =========== FIELD SUMMARY =========== -->
+<li class="blockList">
+<section class="fieldSummary"><a id="field.summary">
+<!--   -->
+</a>
+<h2>Field Summary</h2>
+<div class="memberSummary">
+<table>
+<caption><span>Fields</span><span class="tabEnd">&nbsp;</span></caption>
+<thead>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colSecond" scope="col">Field</th>
+<th class="colLast" scope="col">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="altColor">
+<td class="colFirst"><code>protected java.util.ArrayList&lt;java.lang.String&gt;</code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#adminList">adminList</a></span></code></th>
+<td class="colLast">&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>protected java.lang.String</code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#groupName">groupName</a></span></code></th>
+<td class="colLast">&nbsp;</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</li>
 <!-- ======== CONSTRUCTOR SUMMARY ======== -->
 <li class="blockList">
 <section class="constructorSummary"><a id="constructor.summary">
@@ -133,11 +169,22 @@ implements <a href="../api/security/GroupAgent.html" title="interface in i5.las2
 javax.crypto.SecretKey&nbsp;secret,
 <a href="../api/security/Agent.html" title="interface in i5.las2peer.api.security">Agent</a>[]&nbsp;members)</code></th>
 <td class="colLast">
-<div class="block">constructor for the <a href="#createGroupAgent(i5.las2peer.api.security.Agent%5B%5D)"><code>createGroupAgent(i5.las2peer.api.security.Agent[])</code></a> factory simply necessary, since the secret key has to be stated for
- the constructor of the superclass</div>
+<div class="block">constructor for the <a href="#createGroupAgent(i5.las2peer.api.security.Agent%5B%5D)"><code>createGroupAgent(i5.las2peer.api.security.Agent[])</code></a> factory simply necessary, since
+ the secret key has to be stated for the constructor of the superclass</div>
 </td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><code>protected </code></td>
+<th class="colConstructorName" scope="row"><code><span class="memberNameLink"><a href="#%3Cinit%3E(java.security.KeyPair,javax.crypto.SecretKey,i5.las2peer.api.security.Agent%5B%5D,java.lang.String)">GroupAgentImpl</a></span>&#8203;(java.security.KeyPair&nbsp;keys,
+javax.crypto.SecretKey&nbsp;secret,
+<a href="../api/security/Agent.html" title="interface in i5.las2peer.api.security">Agent</a>[]&nbsp;members,
+java.lang.String&nbsp;groupName)</code></th>
+<td class="colLast">
+<div class="block">constructor for the <a href="#createGroupAgent(i5.las2peer.api.security.Agent%5B%5D)"><code>createGroupAgent(i5.las2peer.api.security.Agent[])</code></a> factory simply necessary, since
+ the secret key has to be stated for the constructor of the superclass</div>
+</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>protected </code></td>
 <th class="colConstructorName" scope="row"><code><span class="memberNameLink"><a href="#%3Cinit%3E(java.security.PublicKey,byte%5B%5D,java.util.HashMap)">GroupAgentImpl</a></span>&#8203;(java.security.PublicKey&nbsp;pubKey,
 byte[]&nbsp;encryptedPrivate,
@@ -169,94 +216,130 @@ java.util.HashMap&lt;java.lang.String,&#8203;byte[]&gt;&nbsp;htEncryptedKeys)</c
 <tbody>
 <tr class="altColor" id="i0">
 <td class="colFirst"><code>void</code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#addAdmin(i5.las2peer.api.security.Agent)">addAdmin</a></span>&#8203;(<a href="../api/security/Agent.html" title="interface in i5.las2peer.api.security">Agent</a>&nbsp;a)</code></th>
+<td class="colLast">
+<div class="block">add a member to the admin list of this group</div>
+</td>
+</tr>
+<tr class="rowColor" id="i1">
+<td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#addMember(i5.las2peer.api.security.Agent)">addMember</a></span>&#8203;(<a href="../api/security/Agent.html" title="interface in i5.las2peer.api.security">Agent</a>&nbsp;agent)</code></th>
 <td class="colLast">
 <div class="block">Adds a member to the group.</div>
 </td>
 </tr>
-<tr class="rowColor" id="i1">
+<tr class="altColor" id="i2">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#addMember(i5.las2peer.security.AgentImpl)">addMember</a></span>&#8203;(<a href="AgentImpl.html" title="class in i5.las2peer.security">AgentImpl</a>&nbsp;a)</code></th>
 <td class="colLast">
 <div class="block">add a member to this group</div>
 </td>
 </tr>
-<tr class="altColor" id="i2">
+<tr class="rowColor" id="i3">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#apply()">apply</a></span>()</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
-<tr class="rowColor" id="i3">
+<tr class="altColor" id="i4">
 <td class="colFirst"><code>static <a href="GroupAgentImpl.html" title="class in i5.las2peer.security">GroupAgentImpl</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#createFromXml(java.lang.String)">createFromXml</a></span>&#8203;(java.lang.String&nbsp;xml)</code></th>
 <td class="colLast">
 <div class="block">factory - create an instance of GroupAgent from its XML representation</div>
 </td>
 </tr>
-<tr class="altColor" id="i4">
+<tr class="rowColor" id="i5">
 <td class="colFirst"><code>static <a href="GroupAgentImpl.html" title="class in i5.las2peer.security">GroupAgentImpl</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#createFromXml(org.w3c.dom.Element)">createFromXml</a></span>&#8203;(org.w3c.dom.Element&nbsp;root)</code></th>
 <td class="colLast">
 <div class="block">factory - create an instance of GroupAgent based on a XML node</div>
 </td>
 </tr>
-<tr class="rowColor" id="i5">
+<tr class="altColor" id="i6">
 <td class="colFirst"><code>static <a href="GroupAgentImpl.html" title="class in i5.las2peer.security">GroupAgentImpl</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#createGroupAgent(i5.las2peer.api.security.Agent%5B%5D)">createGroupAgent</a></span>&#8203;(<a href="../api/security/Agent.html" title="interface in i5.las2peer.api.security">Agent</a>[]&nbsp;members)</code></th>
 <td class="colLast">
 <div class="block">create a new group agent instance</div>
 </td>
 </tr>
-<tr class="altColor" id="i6">
+<tr class="rowColor" id="i7">
+<td class="colFirst"><code>static <a href="GroupAgentImpl.html" title="class in i5.las2peer.security">GroupAgentImpl</a></code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#createGroupAgent(i5.las2peer.api.security.Agent%5B%5D,java.lang.String)">createGroupAgent</a></span>&#8203;(<a href="../api/security/Agent.html" title="interface in i5.las2peer.api.security">Agent</a>[]&nbsp;members,
+java.lang.String&nbsp;groupName)</code></th>
+<td class="colLast">
+<div class="block">create a new group agent instance with groupName</div>
+</td>
+</tr>
+<tr class="altColor" id="i8">
+<td class="colFirst"><code>java.lang.String</code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getGroupName()">getGroupName</a></span>()</code></th>
+<td class="colLast">
+<div class="block">Getter for the group name.</div>
+</td>
+</tr>
+<tr class="rowColor" id="i9">
 <td class="colFirst"><code>java.lang.String[]</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getMemberList()">getMemberList</a></span>()</code></th>
 <td class="colLast">
 <div class="block">get an array with the ids of all direct group members without recursion</div>
 </td>
 </tr>
-<tr class="rowColor" id="i7">
+<tr class="altColor" id="i10">
 <td class="colFirst"><code><a href="AgentImpl.html" title="class in i5.las2peer.security">AgentImpl</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getOpeningAgent()">getOpeningAgent</a></span>()</code></th>
 <td class="colLast">
 <div class="block">returns the Agent by whom the private Key of this Group has been unlocked</div>
 </td>
 </tr>
-<tr class="altColor" id="i8">
+<tr class="rowColor" id="i11">
 <td class="colFirst"><code>int</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getSize()">getSize</a></span>()</code></th>
 <td class="colLast">
 <div class="block">how many members does this group have</div>
 </td>
 </tr>
-<tr class="rowColor" id="i9">
+<tr class="altColor" id="i12">
+<td class="colFirst"><code>boolean</code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#hasGroupName()">hasGroupName</a></span>()</code></th>
+<td class="colLast">
+<div class="block">Check if the agent has a group name set.</div>
+</td>
+</tr>
+<tr class="rowColor" id="i13">
 <td class="colFirst"><code>boolean</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#hasMember(i5.las2peer.api.security.Agent)">hasMember</a></span>&#8203;(<a href="../api/security/Agent.html" title="interface in i5.las2peer.api.security">Agent</a>&nbsp;agent)</code></th>
 <td class="colLast">
 <div class="block">Checks if the given agent is a member of this group.</div>
 </td>
 </tr>
-<tr class="altColor" id="i10">
+<tr class="altColor" id="i14">
 <td class="colFirst"><code>boolean</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#hasMember(java.lang.String)">hasMember</a></span>&#8203;(java.lang.String&nbsp;agentId)</code></th>
 <td class="colLast">
 <div class="block">Checks if the given agent is a member of this group.</div>
 </td>
 </tr>
-<tr class="rowColor" id="i11">
+<tr class="rowColor" id="i15">
+<td class="colFirst"><code>boolean</code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#isAdmin(i5.las2peer.api.security.Agent)">isAdmin</a></span>&#8203;(<a href="../api/security/Agent.html" title="interface in i5.las2peer.api.security">Agent</a>&nbsp;a)</code></th>
+<td class="colLast">
+<div class="block">Check admin rights for member.</div>
+</td>
+</tr>
+<tr class="altColor" id="i16">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#lockPrivateKey()">lockPrivateKey</a></span>()</code></th>
 <td class="colLast">
 <div class="block">(Re-)Lock the private key.</div>
 </td>
 </tr>
-<tr class="altColor" id="i12">
+<tr class="rowColor" id="i17">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#notifyUnregister()">notifyUnregister</a></span>()</code></th>
 <td class="colLast">
 <div class="block">Notifies this agent of unregistering from a node.</div>
 </td>
 </tr>
-<tr class="rowColor" id="i13">
+<tr class="altColor" id="i18">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#receiveMessage(i5.las2peer.communication.Message,i5.las2peer.security.AgentContext)">receiveMessage</a></span>&#8203;(<a href="../communication/Message.html" title="class in i5.las2peer.communication">Message</a>&nbsp;message,
 <a href="AgentContext.html" title="class in i5.las2peer.security">AgentContext</a>&nbsp;context)</code></th>
@@ -265,35 +348,42 @@ java.util.HashMap&lt;java.lang.String,&#8203;byte[]&gt;&nbsp;htEncryptedKeys)</c
  this agent.</div>
 </td>
 </tr>
-<tr class="altColor" id="i14">
+<tr class="rowColor" id="i19">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#removeMember(i5.las2peer.security.AgentImpl)">removeMember</a></span>&#8203;(<a href="AgentImpl.html" title="class in i5.las2peer.security">AgentImpl</a>&nbsp;a)</code></th>
 <td class="colLast">
 <div class="block">remove a member from this group</div>
 </td>
 </tr>
-<tr class="rowColor" id="i15">
+<tr class="altColor" id="i20">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#removeMember(java.lang.String)">removeMember</a></span>&#8203;(java.lang.String&nbsp;id)</code></th>
 <td class="colLast">
 <div class="block">remove a member from this group</div>
 </td>
 </tr>
-<tr class="altColor" id="i16">
+<tr class="rowColor" id="i21">
+<td class="colFirst"><code>void</code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#revokeAdmin(i5.las2peer.api.security.Agent)">revokeAdmin</a></span>&#8203;(<a href="../api/security/Agent.html" title="interface in i5.las2peer.api.security">Agent</a>&nbsp;a)</code></th>
+<td class="colLast">
+<div class="block">remove a member from the admin list of this group</div>
+</td>
+</tr>
+<tr class="altColor" id="i22">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#revokeMember(i5.las2peer.api.security.Agent)">revokeMember</a></span>&#8203;(<a href="../api/security/Agent.html" title="interface in i5.las2peer.api.security">Agent</a>&nbsp;agent)</code></th>
 <td class="colLast">
 <div class="block">Revokes a group membership.</div>
 </td>
 </tr>
-<tr class="rowColor" id="i17">
+<tr class="rowColor" id="i23">
 <td class="colFirst"><code>java.lang.String</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#toXmlString()">toXmlString</a></span>()</code></th>
 <td class="colLast">
 <div class="block">Returns a XML representation of this object.</div>
 </td>
 </tr>
-<tr class="altColor" id="i18">
+<tr class="altColor" id="i24">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#unlock(i5.las2peer.api.security.Agent)">unlock</a></span>&#8203;(<a href="../api/security/Agent.html" title="interface in i5.las2peer.api.security">Agent</a>&nbsp;agent)</code></th>
 <td class="colLast">
@@ -325,6 +415,28 @@ java.util.HashMap&lt;java.lang.String,&#8203;byte[]&gt;&nbsp;htEncryptedKeys)</c
 </section>
 <section class="details">
 <ul class="blockList">
+<!-- ============ FIELD DETAIL =========== -->
+<li class="blockList">
+<section class="fieldDetails"><a id="field.detail">
+<!--   -->
+</a>
+<h2>Field Details</h2>
+<ul class="blockList">
+<li class="blockList">
+<section class="detail">
+<h3><a id="groupName">groupName</a></h3>
+<div class="memberSignature"><span class="modifiers">protected</span>&nbsp;<span class="returnType">java.lang.String</span>&nbsp;<span class="memberName">groupName</span></div>
+</section>
+</li>
+<li class="blockList">
+<section class="detail">
+<h3><a id="adminList">adminList</a></h3>
+<div class="memberSignature"><span class="modifiers">protected</span>&nbsp;<span class="returnType">java.util.ArrayList&lt;java.lang.String&gt;</span>&nbsp;<span class="memberName">adminList</span></div>
+</section>
+</li>
+</ul>
+</section>
+</li>
 <!-- ========= CONSTRUCTOR DETAIL ======== -->
 <li class="blockList">
 <section class="constructorDetails"><a id="constructor.detail">
@@ -354,13 +466,38 @@ javax.crypto.SecretKey&nbsp;secret,
                   throws <span class="exceptions"><a href="../api/security/AgentOperationFailedException.html" title="class in i5.las2peer.api.security">AgentOperationFailedException</a>,
 <a href="../tools/CryptoException.html" title="class in i5.las2peer.tools">CryptoException</a>,
 <a href="../serialization/SerializationException.html" title="class in i5.las2peer.serialization">SerializationException</a></span></div>
-<div class="block">constructor for the <a href="#createGroupAgent(i5.las2peer.api.security.Agent%5B%5D)"><code>createGroupAgent(i5.las2peer.api.security.Agent[])</code></a> factory simply necessary, since the secret key has to be stated for
- the constructor of the superclass</div>
+<div class="block">constructor for the <a href="#createGroupAgent(i5.las2peer.api.security.Agent%5B%5D)"><code>createGroupAgent(i5.las2peer.api.security.Agent[])</code></a> factory simply necessary, since
+ the secret key has to be stated for the constructor of the superclass</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>keys</code> - </dd>
 <dd><code>secret</code> - </dd>
 <dd><code>members</code> - </dd>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="../api/security/AgentOperationFailedException.html" title="class in i5.las2peer.api.security">AgentOperationFailedException</a></code></dd>
+<dd><code><a href="../tools/CryptoException.html" title="class in i5.las2peer.tools">CryptoException</a></code></dd>
+<dd><code><a href="../serialization/SerializationException.html" title="class in i5.las2peer.serialization">SerializationException</a></code></dd>
+</dl>
+</section>
+</li>
+<li class="blockList">
+<section class="detail">
+<h3><a id="&lt;init&gt;(java.security.KeyPair,javax.crypto.SecretKey,i5.las2peer.api.security.Agent[],java.lang.String)">GroupAgentImpl</a></h3>
+<div class="memberSignature"><span class="modifiers">protected</span>&nbsp;<span class="memberName">GroupAgentImpl</span>&#8203;(<span class="arguments">java.security.KeyPair&nbsp;keys,
+javax.crypto.SecretKey&nbsp;secret,
+<a href="../api/security/Agent.html" title="interface in i5.las2peer.api.security">Agent</a>[]&nbsp;members,
+java.lang.String&nbsp;groupName)</span>
+                  throws <span class="exceptions"><a href="../api/security/AgentOperationFailedException.html" title="class in i5.las2peer.api.security">AgentOperationFailedException</a>,
+<a href="../tools/CryptoException.html" title="class in i5.las2peer.tools">CryptoException</a>,
+<a href="../serialization/SerializationException.html" title="class in i5.las2peer.serialization">SerializationException</a></span></div>
+<div class="block">constructor for the <a href="#createGroupAgent(i5.las2peer.api.security.Agent%5B%5D)"><code>createGroupAgent(i5.las2peer.api.security.Agent[])</code></a> factory simply necessary, since
+ the secret key has to be stated for the constructor of the superclass</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>keys</code> - </dd>
+<dd><code>secret</code> - </dd>
+<dd><code>members</code> - </dd>
+<dd><code>groupName</code> - </dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="../api/security/AgentOperationFailedException.html" title="class in i5.las2peer.api.security">AgentOperationFailedException</a></code></dd>
 <dd><code><a href="../tools/CryptoException.html" title="class in i5.las2peer.tools">CryptoException</a></code></dd>
@@ -378,6 +515,75 @@ javax.crypto.SecretKey&nbsp;secret,
 </a>
 <h2>Method Details</h2>
 <ul class="blockList">
+<li class="blockList">
+<section class="detail">
+<h3><a id="addAdmin(i5.las2peer.api.security.Agent)">addAdmin</a></h3>
+<div class="memberSignature"><span class="modifiers">public</span>&nbsp;<span class="returnType">void</span>&nbsp;<span class="memberName">addAdmin</span>&#8203;(<span class="arguments"><a href="../api/security/Agent.html" title="interface in i5.las2peer.api.security">Agent</a>&nbsp;a)</span></div>
+<div class="block">add a member to the admin list of this group</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../api/security/GroupAgent.html#addAdmin(i5.las2peer.api.security.Agent)">addAdmin</a></code>&nbsp;in interface&nbsp;<code><a href="../api/security/GroupAgent.html" title="interface in i5.las2peer.api.security">GroupAgent</a></code></dd>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>a</code> - </dd>
+</dl>
+</section>
+</li>
+<li class="blockList">
+<section class="detail">
+<h3><a id="revokeAdmin(i5.las2peer.api.security.Agent)">revokeAdmin</a></h3>
+<div class="memberSignature"><span class="modifiers">public</span>&nbsp;<span class="returnType">void</span>&nbsp;<span class="memberName">revokeAdmin</span>&#8203;(<span class="arguments"><a href="../api/security/Agent.html" title="interface in i5.las2peer.api.security">Agent</a>&nbsp;a)</span></div>
+<div class="block">remove a member from the admin list of this group</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../api/security/GroupAgent.html#revokeAdmin(i5.las2peer.api.security.Agent)">revokeAdmin</a></code>&nbsp;in interface&nbsp;<code><a href="../api/security/GroupAgent.html" title="interface in i5.las2peer.api.security">GroupAgent</a></code></dd>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>a</code> - </dd>
+</dl>
+</section>
+</li>
+<li class="blockList">
+<section class="detail">
+<h3><a id="isAdmin(i5.las2peer.api.security.Agent)">isAdmin</a></h3>
+<div class="memberSignature"><span class="modifiers">public</span>&nbsp;<span class="returnType">boolean</span>&nbsp;<span class="memberName">isAdmin</span>&#8203;(<span class="arguments"><a href="../api/security/Agent.html" title="interface in i5.las2peer.api.security">Agent</a>&nbsp;a)</span></div>
+<div class="block">Check admin rights for member.</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../api/security/GroupAgent.html#isAdmin(i5.las2peer.api.security.Agent)">isAdmin</a></code>&nbsp;in interface&nbsp;<code><a href="../api/security/GroupAgent.html" title="interface in i5.las2peer.api.security">GroupAgent</a></code></dd>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>a</code> - Member to check admin rights for.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>if agent is admin</dd>
+</dl>
+</section>
+</li>
+<li class="blockList">
+<section class="detail">
+<h3><a id="getGroupName()">getGroupName</a></h3>
+<div class="memberSignature"><span class="modifiers">public</span>&nbsp;<span class="returnType">java.lang.String</span>&nbsp;<span class="memberName">getGroupName</span>()</div>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../api/security/GroupAgent.html#getGroupName()">GroupAgent</a></code></span></div>
+<div class="block">Getter for the group name.</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../api/security/GroupAgent.html#getGroupName()">getGroupName</a></code>&nbsp;in interface&nbsp;<code><a href="../api/security/GroupAgent.html" title="interface in i5.las2peer.api.security">GroupAgent</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The group name.</dd>
+</dl>
+</section>
+</li>
+<li class="blockList">
+<section class="detail">
+<h3><a id="hasGroupName()">hasGroupName</a></h3>
+<div class="memberSignature"><span class="modifiers">public</span>&nbsp;<span class="returnType">boolean</span>&nbsp;<span class="memberName">hasGroupName</span>()</div>
+<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../api/security/GroupAgent.html#hasGroupName()">GroupAgent</a></code></span></div>
+<div class="block">Check if the agent has a group name set.</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../api/security/GroupAgent.html#hasGroupName()">hasGroupName</a></code>&nbsp;in interface&nbsp;<code><a href="../api/security/GroupAgent.html" title="interface in i5.las2peer.api.security">GroupAgent</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>true If a group name is set up.</dd>
+</dl>
+</section>
+</li>
 <li class="blockList">
 <section class="detail">
 <h3><a id="addMember(i5.las2peer.security.AgentImpl)">addMember</a></h3>
@@ -527,6 +733,27 @@ javax.crypto.SecretKey&nbsp;secret,
 <a href="../tools/CryptoException.html" title="class in i5.las2peer.tools">CryptoException</a>,
 <a href="../serialization/SerializationException.html" title="class in i5.las2peer.serialization">SerializationException</a></span></div>
 <div class="block">create a new group agent instance</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>members</code> - </dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>a group agent</dd>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="../api/security/AgentOperationFailedException.html" title="class in i5.las2peer.api.security">AgentOperationFailedException</a></code></dd>
+<dd><code><a href="../tools/CryptoException.html" title="class in i5.las2peer.tools">CryptoException</a></code></dd>
+<dd><code><a href="../serialization/SerializationException.html" title="class in i5.las2peer.serialization">SerializationException</a></code></dd>
+</dl>
+</section>
+</li>
+<li class="blockList">
+<section class="detail">
+<h3><a id="createGroupAgent(i5.las2peer.api.security.Agent[],java.lang.String)">createGroupAgent</a></h3>
+<div class="memberSignature"><span class="modifiers">public static</span>&nbsp;<span class="returnType"><a href="GroupAgentImpl.html" title="class in i5.las2peer.security">GroupAgentImpl</a></span>&nbsp;<span class="memberName">createGroupAgent</span>&#8203;(<span class="arguments"><a href="../api/security/Agent.html" title="interface in i5.las2peer.api.security">Agent</a>[]&nbsp;members,
+java.lang.String&nbsp;groupName)</span>
+                                       throws <span class="exceptions"><a href="../api/security/AgentOperationFailedException.html" title="class in i5.las2peer.api.security">AgentOperationFailedException</a>,
+<a href="../tools/CryptoException.html" title="class in i5.las2peer.tools">CryptoException</a>,
+<a href="../serialization/SerializationException.html" title="class in i5.las2peer.serialization">SerializationException</a></span></div>
+<div class="block">create a new group agent instance with groupName</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>members</code> - </dd>
@@ -713,13 +940,13 @@ javax.crypto.SecretKey&nbsp;secret,
 <ul class="subNavList">
 <li>Summary:&nbsp;</li>
 <li>Nested&nbsp;|&nbsp;</li>
-<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#field.summary">Field</a>&nbsp;|&nbsp;</li>
 <li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
 <li><a href="#method.summary">Method</a></li>
 </ul>
 <ul class="subNavList">
 <li>Detail:&nbsp;</li>
-<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#field.detail">Field</a>&nbsp;|&nbsp;</li>
 <li><a href="#constructor.detail">Constr</a>&nbsp;|&nbsp;</li>
 <li><a href="#method.detail">Method</a></li>
 </ul>

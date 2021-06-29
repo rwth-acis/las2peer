@@ -124,13 +124,19 @@ loadScripts(document, 'script');</script>
 </td>
 </tr>
 <tr class="altColor">
+<th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/api/SemverVersion.html#getSub()">i5.las2peer.api.SemverVersion.getSub()</a></th>
+<td class="colLast">
+<div class="deprecationComment">use <a href="i5/las2peer/api/SemverVersion.html#getPatch()"><code>SemverVersion.getPatch()</code></a> instead</div>
+</td>
+</tr>
+<tr class="rowColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/logging/L2pLogger.html#log(java.lang.Long,i5.las2peer.api.logging.MonitoringEvent,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String)">i5.las2peer.logging.L2pLogger.log&#8203;(Long, MonitoringEvent, String, String, String, String, String)</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/logging/L2pLogger.html#log(java.lang.Long,i5.las2peer.api.logging.MonitoringEvent,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String)"><code>L2pLogger.log(Long, MonitoringEvent, String, String, String, String, String)</code></a> instead. The coupling
              between nodes and services is softened now.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/logging/L2pLogger.html#logEvent(i5.las2peer.api.logging.MonitoringEvent,java.lang.String)">i5.las2peer.logging.L2pLogger.logEvent&#8203;(MonitoringEvent, String)</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/api/Context.html#monitorEvent(i5.las2peer.api.logging.MonitoringEvent,java.lang.String)"><code>Context.monitorEvent(MonitoringEvent, String)</code></a>
@@ -138,29 +144,29 @@ loadScripts(document, 'script');</script>
              Writes a log message. The given event can be used to differentiate between different log messages.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/p2p/LocalNode.html#fetchArtifact(long)">i5.las2peer.p2p.LocalNode.fetchArtifact&#8203;(long)</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/p2p/LocalNode.html#fetchEnvelope(java.lang.String)"><code>LocalNode.fetchEnvelope(String)</code></a> instead</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/p2p/LocalNode.html#removeArtifact(long,byte%5B%5D)">i5.las2peer.p2p.LocalNode.removeArtifact&#8203;(long, byte[])</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/p2p/LocalNode.html#removeEnvelope(java.lang.String)"><code>LocalNode.removeEnvelope(String)</code></a> instead</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/p2p/LocalNode.html#storeArtifact(i5.las2peer.persistency.EnvelopeVersion)">i5.las2peer.p2p.LocalNode.storeArtifact&#8203;(EnvelopeVersion)</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/p2p/LocalNode.html#storeEnvelope(i5.las2peer.persistency.EnvelopeVersion,i5.las2peer.security.AgentImpl)"><code>LocalNode.storeEnvelope(EnvelopeVersion, AgentImpl)</code></a> instead</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/p2p/LocalNode.html#updateAgent(i5.las2peer.security.AgentImpl)">i5.las2peer.p2p.LocalNode.updateAgent&#8203;(AgentImpl)</a></th>
 <td class="colLast"></td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/p2p/Node.html#fetchArtifact(long)">i5.las2peer.p2p.Node.fetchArtifact&#8203;(long)</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/persistency/NodeStorageInterface.html#fetchEnvelope(java.lang.String)"><code>NodeStorageInterface.fetchEnvelope(String)</code></a> instead
@@ -168,7 +174,7 @@ loadScripts(document, 'script');</script>
              Gets an artifact from the p2p storage.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/p2p/Node.html#removeArtifact(long,byte%5B%5D)">i5.las2peer.p2p.Node.removeArtifact&#8203;(long, byte[])</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/persistency/L2pStorageInterface.html#removeEnvelope(java.lang.String)"><code>L2pStorageInterface.removeEnvelope(String)</code></a> instead
@@ -177,7 +183,7 @@ loadScripts(document, 'script');</script>
              backend!</i></div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/p2p/Node.html#storeArtifact(i5.las2peer.persistency.EnvelopeVersion)">i5.las2peer.p2p.Node.storeArtifact&#8203;(EnvelopeVersion)</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/persistency/NodeStorageInterface.html#storeEnvelope(i5.las2peer.persistency.EnvelopeVersion,i5.las2peer.security.AgentImpl)"><code>NodeStorageInterface.storeEnvelope(EnvelopeVersion, AgentImpl)</code></a> instead
@@ -185,92 +191,100 @@ loadScripts(document, 'script');</script>
              Stores an artifact to the p2p storage.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/p2p/Node.html#updateAgent(i5.las2peer.security.AgentImpl)">i5.las2peer.p2p.Node.updateAgent&#8203;(AgentImpl)</a></th>
 <td class="colLast"></td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/p2p/PastryNodeImpl.html#fetchArtifact(long)">i5.las2peer.p2p.PastryNodeImpl.fetchArtifact&#8203;(long)</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/p2p/PastryNodeImpl.html#fetchEnvelope(java.lang.String)"><code>PastryNodeImpl.fetchEnvelope(String)</code></a> instead</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/p2p/PastryNodeImpl.html#removeArtifact(long,byte%5B%5D)">i5.las2peer.p2p.PastryNodeImpl.removeArtifact&#8203;(long, byte[])</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/p2p/PastryNodeImpl.html#removeEnvelope(java.lang.String)"><code>PastryNodeImpl.removeEnvelope(String)</code></a> instead</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/p2p/PastryNodeImpl.html#storeArtifact(i5.las2peer.persistency.EnvelopeVersion)">i5.las2peer.p2p.PastryNodeImpl.storeArtifact&#8203;(EnvelopeVersion)</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/p2p/PastryNodeImpl.html#storeEnvelope(i5.las2peer.persistency.EnvelopeVersion,i5.las2peer.security.AgentImpl)"><code>PastryNodeImpl.storeEnvelope(EnvelopeVersion, AgentImpl)</code></a> instead</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/p2p/PastryNodeImpl.html#updateAgent(i5.las2peer.security.AgentImpl)">i5.las2peer.p2p.PastryNodeImpl.updateAgent&#8203;(AgentImpl)</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/p2p/PastryNodeImpl.html#storeAgent(i5.las2peer.security.AgentImpl)"><code>PastryNodeImpl.storeAgent(AgentImpl)</code></a> instead</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/registry/contracts/CommunityTagIndex.html#deploy(org.web3j.protocol.Web3j,org.web3j.crypto.Credentials,java.math.BigInteger,java.math.BigInteger)">i5.las2peer.registry.contracts.CommunityTagIndex.deploy&#8203;(Web3j, Credentials, BigInteger, BigInteger)</a></th>
 <td class="colLast"></td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/registry/contracts/CommunityTagIndex.html#load(java.lang.String,org.web3j.protocol.Web3j,org.web3j.crypto.Credentials,java.math.BigInteger,java.math.BigInteger)">i5.las2peer.registry.contracts.CommunityTagIndex.load&#8203;(String, Web3j, Credentials, BigInteger, BigInteger)</a></th>
 <td class="colLast"></td>
 </tr>
+<tr class="rowColor">
+<th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/registry/contracts/GroupRegistry.html#deploy(org.web3j.protocol.Web3j,org.web3j.crypto.Credentials,java.math.BigInteger,java.math.BigInteger)">i5.las2peer.registry.contracts.GroupRegistry.deploy&#8203;(Web3j, Credentials, BigInteger, BigInteger)</a></th>
+<td class="colLast"></td>
+</tr>
 <tr class="altColor">
+<th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/registry/contracts/GroupRegistry.html#load(java.lang.String,org.web3j.protocol.Web3j,org.web3j.crypto.Credentials,java.math.BigInteger,java.math.BigInteger)">i5.las2peer.registry.contracts.GroupRegistry.load&#8203;(String, Web3j, Credentials, BigInteger, BigInteger)</a></th>
+<td class="colLast"></td>
+</tr>
+<tr class="rowColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/registry/contracts/ReputationRegistry.html#deploy(org.web3j.protocol.Web3j,org.web3j.crypto.Credentials,java.math.BigInteger,java.math.BigInteger,java.lang.String)">i5.las2peer.registry.contracts.ReputationRegistry.deploy&#8203;(Web3j, Credentials, BigInteger, BigInteger, String)</a></th>
 <td class="colLast"></td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/registry/contracts/ReputationRegistry.html#load(java.lang.String,org.web3j.protocol.Web3j,org.web3j.crypto.Credentials,java.math.BigInteger,java.math.BigInteger)">i5.las2peer.registry.contracts.ReputationRegistry.load&#8203;(String, Web3j, Credentials, BigInteger, BigInteger)</a></th>
 <td class="colLast"></td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/registry/contracts/ServiceRegistry.html#deploy(org.web3j.protocol.Web3j,org.web3j.crypto.Credentials,java.math.BigInteger,java.math.BigInteger,java.lang.String)">i5.las2peer.registry.contracts.ServiceRegistry.deploy&#8203;(Web3j, Credentials, BigInteger, BigInteger, String)</a></th>
 <td class="colLast"></td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/registry/contracts/ServiceRegistry.html#load(java.lang.String,org.web3j.protocol.Web3j,org.web3j.crypto.Credentials,java.math.BigInteger,java.math.BigInteger)">i5.las2peer.registry.contracts.ServiceRegistry.load&#8203;(String, Web3j, Credentials, BigInteger, BigInteger)</a></th>
 <td class="colLast"></td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/registry/contracts/UserRegistry.html#deploy(org.web3j.protocol.Web3j,org.web3j.crypto.Credentials,java.math.BigInteger,java.math.BigInteger)">i5.las2peer.registry.contracts.UserRegistry.deploy&#8203;(Web3j, Credentials, BigInteger, BigInteger)</a></th>
 <td class="colLast"></td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/registry/contracts/UserRegistry.html#load(java.lang.String,org.web3j.protocol.Web3j,org.web3j.crypto.Credentials,java.math.BigInteger,java.math.BigInteger)">i5.las2peer.registry.contracts.UserRegistry.load&#8203;(String, Web3j, Credentials, BigInteger, BigInteger)</a></th>
 <td class="colLast"></td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/registry/ReadOnlyRegistryClient.html#getEthClientVersion()">i5.las2peer.registry.ReadOnlyRegistryClient.getEthClientVersion()</a></th>
 <td class="colLast">
 <div class="deprecationComment">there's no reason to reveal this implementation detail, so this
              may be removed</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/registry/ReadWriteRegistryClient.html#sendEther(java.lang.String,java.lang.String,java.math.BigInteger)">i5.las2peer.registry.ReadWriteRegistryClient.sendEther&#8203;(String, String, BigInteger)</a></th>
 <td class="colLast"></td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/security/Mediator.html#invoke(java.lang.String,java.lang.String,java.io.Serializable%5B%5D,boolean)">i5.las2peer.security.Mediator.invoke&#8203;(String, String, Serializable[], boolean)</a></th>
 <td class="colLast"></td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/security/ServiceAgentImpl.html#createServiceAgent(java.lang.String,java.lang.String)">i5.las2peer.security.ServiceAgentImpl.createServiceAgent&#8203;(String, String)</a></th>
 <td class="colLast"></td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/security/ServiceAgentImpl.html#generateNewAgent(java.lang.String,java.lang.String)">i5.las2peer.security.ServiceAgentImpl.generateNewAgent&#8203;(String, String)</a></th>
 <td class="colLast">
 <div class="deprecationComment">Please use <a href="i5/las2peer/security/ServiceAgentImpl.html#createServiceAgent(i5.las2peer.api.p2p.ServiceNameVersion,java.lang.String)"><code>ServiceAgentImpl.createServiceAgent(ServiceNameVersion, String)</code></a> instead</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/ColoredOutput.html#backgroundBlack()">i5.las2peer.tools.ColoredOutput.backgroundBlack()</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/tools/ColoredOutput.html#colorize(java.lang.String,i5.las2peer.tools.ColoredOutput.ShellCode...)"><code>ColoredOutput.colorize(String, ShellCode...)</code></a> with <a href="i5/las2peer/tools/ColoredOutput.BackgroundColor.html#Black"><code>ColoredOutput.BackgroundColor.Black</code></a> instead!
@@ -278,7 +292,7 @@ loadScripts(document, 'script');</script>
              switch background to black</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/ColoredOutput.html#backgroundBlue()">i5.las2peer.tools.ColoredOutput.backgroundBlue()</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/tools/ColoredOutput.html#colorize(java.lang.String,i5.las2peer.tools.ColoredOutput.ShellCode...)"><code>ColoredOutput.colorize(String, ShellCode...)</code></a> with <a href="i5/las2peer/tools/ColoredOutput.BackgroundColor.html#Blue"><code>ColoredOutput.BackgroundColor.Blue</code></a> instead!
@@ -286,7 +300,7 @@ loadScripts(document, 'script');</script>
              switch background to blue</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/ColoredOutput.html#backgroundCyan()">i5.las2peer.tools.ColoredOutput.backgroundCyan()</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/tools/ColoredOutput.html#colorize(java.lang.String,i5.las2peer.tools.ColoredOutput.ShellCode...)"><code>ColoredOutput.colorize(String, ShellCode...)</code></a> with <a href="i5/las2peer/tools/ColoredOutput.BackgroundColor.html#Cyan"><code>ColoredOutput.BackgroundColor.Cyan</code></a> instead!
@@ -294,7 +308,7 @@ loadScripts(document, 'script');</script>
              switch background to cyan</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/ColoredOutput.html#backgroundGreen()">i5.las2peer.tools.ColoredOutput.backgroundGreen()</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/tools/ColoredOutput.html#colorize(java.lang.String,i5.las2peer.tools.ColoredOutput.ShellCode...)"><code>ColoredOutput.colorize(String, ShellCode...)</code></a> with <a href="i5/las2peer/tools/ColoredOutput.BackgroundColor.html#Green"><code>ColoredOutput.BackgroundColor.Green</code></a> instead!
@@ -302,7 +316,7 @@ loadScripts(document, 'script');</script>
              switch background to green</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/ColoredOutput.html#backgroundMagenta()">i5.las2peer.tools.ColoredOutput.backgroundMagenta()</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/tools/ColoredOutput.html#colorize(java.lang.String,i5.las2peer.tools.ColoredOutput.ShellCode...)"><code>ColoredOutput.colorize(String, ShellCode...)</code></a> with <a href="i5/las2peer/tools/ColoredOutput.BackgroundColor.html#Magenta"><code>ColoredOutput.BackgroundColor.Magenta</code></a>
@@ -311,7 +325,7 @@ loadScripts(document, 'script');</script>
              switch background to magenta</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/ColoredOutput.html#backgroundRed()">i5.las2peer.tools.ColoredOutput.backgroundRed()</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/tools/ColoredOutput.html#colorize(java.lang.String,i5.las2peer.tools.ColoredOutput.ShellCode...)"><code>ColoredOutput.colorize(String, ShellCode...)</code></a> with <a href="i5/las2peer/tools/ColoredOutput.BackgroundColor.html#Red"><code>ColoredOutput.BackgroundColor.Red</code></a> instead!
@@ -319,7 +333,7 @@ loadScripts(document, 'script');</script>
              switch background to red</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/ColoredOutput.html#backgroundWhite()">i5.las2peer.tools.ColoredOutput.backgroundWhite()</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/tools/ColoredOutput.html#colorize(java.lang.String,i5.las2peer.tools.ColoredOutput.ShellCode...)"><code>ColoredOutput.colorize(String, ShellCode...)</code></a> with <a href="i5/las2peer/tools/ColoredOutput.BackgroundColor.html#White"><code>ColoredOutput.BackgroundColor.White</code></a> instead!
@@ -327,7 +341,7 @@ loadScripts(document, 'script');</script>
              switch background to white</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/ColoredOutput.html#backgroundYellow()">i5.las2peer.tools.ColoredOutput.backgroundYellow()</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/tools/ColoredOutput.html#colorize(java.lang.String,i5.las2peer.tools.ColoredOutput.ShellCode...)"><code>ColoredOutput.colorize(String, ShellCode...)</code></a> with <a href="i5/las2peer/tools/ColoredOutput.BackgroundColor.html#Yellow"><code>ColoredOutput.BackgroundColor.Yellow</code></a> instead!
@@ -335,7 +349,7 @@ loadScripts(document, 'script');</script>
              switch background to yellow</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/ColoredOutput.html#blink()">i5.las2peer.tools.ColoredOutput.blink()</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/tools/ColoredOutput.html#colorize(java.lang.String,i5.las2peer.tools.ColoredOutput.ShellCode...)"><code>ColoredOutput.colorize(String, ShellCode...)</code></a> with <a href="i5/las2peer/tools/ColoredOutput.Formatting.html#Blink"><code>ColoredOutput.Formatting.Blink</code></a> instead!
@@ -343,7 +357,7 @@ loadScripts(document, 'script');</script>
              write blinking text</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/ColoredOutput.html#bold()">i5.las2peer.tools.ColoredOutput.bold()</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/tools/ColoredOutput.html#colorize(java.lang.String,i5.las2peer.tools.ColoredOutput.ShellCode...)"><code>ColoredOutput.colorize(String, ShellCode...)</code></a> with <a href="i5/las2peer/tools/ColoredOutput.Formatting.html#Bold"><code>ColoredOutput.Formatting.Bold</code></a> instead!
@@ -351,7 +365,7 @@ loadScripts(document, 'script');</script>
              write bold text</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/ColoredOutput.html#fontBlack()">i5.las2peer.tools.ColoredOutput.fontBlack()</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/tools/ColoredOutput.html#colorize(java.lang.String,i5.las2peer.tools.ColoredOutput.ShellCode...)"><code>ColoredOutput.colorize(String, ShellCode...)</code></a> with <a href="i5/las2peer/tools/ColoredOutput.ForegroundColor.html#Black"><code>ColoredOutput.ForegroundColor.Black</code></a> instead!
@@ -359,7 +373,7 @@ loadScripts(document, 'script');</script>
              switch to black font color</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/ColoredOutput.html#fontBlue()">i5.las2peer.tools.ColoredOutput.fontBlue()</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/tools/ColoredOutput.html#colorize(java.lang.String,i5.las2peer.tools.ColoredOutput.ShellCode...)"><code>ColoredOutput.colorize(String, ShellCode...)</code></a> with <a href="i5/las2peer/tools/ColoredOutput.ForegroundColor.html#Blue"><code>ColoredOutput.ForegroundColor.Blue</code></a> instead!
@@ -367,7 +381,7 @@ loadScripts(document, 'script');</script>
              switch to blue font color</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/ColoredOutput.html#fontBrown()">i5.las2peer.tools.ColoredOutput.fontBrown()</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/tools/ColoredOutput.html#colorize(java.lang.String,i5.las2peer.tools.ColoredOutput.ShellCode...)"><code>ColoredOutput.colorize(String, ShellCode...)</code></a> another <a href="i5/las2peer/tools/ColoredOutput.ForegroundColor.html" title="enum in i5.las2peer.tools"><code>ColoredOutput.ForegroundColor</code></a> instead!
@@ -375,7 +389,7 @@ loadScripts(document, 'script');</script>
              switch to brown font color</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/ColoredOutput.html#fontCyan()">i5.las2peer.tools.ColoredOutput.fontCyan()</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/tools/ColoredOutput.html#colorize(java.lang.String,i5.las2peer.tools.ColoredOutput.ShellCode...)"><code>ColoredOutput.colorize(String, ShellCode...)</code></a> with <a href="i5/las2peer/tools/ColoredOutput.ForegroundColor.html#Cyan"><code>ColoredOutput.ForegroundColor.Cyan</code></a> instead!
@@ -383,7 +397,7 @@ loadScripts(document, 'script');</script>
              switch to cyan font color</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/ColoredOutput.html#fontDarkGrey()">i5.las2peer.tools.ColoredOutput.fontDarkGrey()</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/tools/ColoredOutput.html#colorize(java.lang.String,i5.las2peer.tools.ColoredOutput.ShellCode...)"><code>ColoredOutput.colorize(String, ShellCode...)</code></a> with <a href="i5/las2peer/tools/ColoredOutput.ForegroundColor.html#DarkGrey"><code>ColoredOutput.ForegroundColor.DarkGrey</code></a>
@@ -392,7 +406,7 @@ loadScripts(document, 'script');</script>
              switch to dark grey font color</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/ColoredOutput.html#fontGreen()">i5.las2peer.tools.ColoredOutput.fontGreen()</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/tools/ColoredOutput.html#colorize(java.lang.String,i5.las2peer.tools.ColoredOutput.ShellCode...)"><code>ColoredOutput.colorize(String, ShellCode...)</code></a> with <a href="i5/las2peer/tools/ColoredOutput.ForegroundColor.html#Green"><code>ColoredOutput.ForegroundColor.Green</code></a> instead!
@@ -400,7 +414,7 @@ loadScripts(document, 'script');</script>
              switch to green font color</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/ColoredOutput.html#fontLightBlue()">i5.las2peer.tools.ColoredOutput.fontLightBlue()</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/tools/ColoredOutput.html#colorize(java.lang.String,i5.las2peer.tools.ColoredOutput.ShellCode...)"><code>ColoredOutput.colorize(String, ShellCode...)</code></a> with <a href="i5/las2peer/tools/ColoredOutput.ForegroundColor.html#LightBlue"><code>ColoredOutput.ForegroundColor.LightBlue</code></a>
@@ -409,7 +423,7 @@ loadScripts(document, 'script');</script>
              switch to light blue font color</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/ColoredOutput.html#fontLightCyan()">i5.las2peer.tools.ColoredOutput.fontLightCyan()</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/tools/ColoredOutput.html#colorize(java.lang.String,i5.las2peer.tools.ColoredOutput.ShellCode...)"><code>ColoredOutput.colorize(String, ShellCode...)</code></a> with <a href="i5/las2peer/tools/ColoredOutput.ForegroundColor.html#LightCyan"><code>ColoredOutput.ForegroundColor.LightCyan</code></a>
@@ -418,7 +432,7 @@ loadScripts(document, 'script');</script>
              switch to lighty cyan font color</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/ColoredOutput.html#fontLightGreen()">i5.las2peer.tools.ColoredOutput.fontLightGreen()</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/tools/ColoredOutput.html#colorize(java.lang.String,i5.las2peer.tools.ColoredOutput.ShellCode...)"><code>ColoredOutput.colorize(String, ShellCode...)</code></a> with <a href="i5/las2peer/tools/ColoredOutput.ForegroundColor.html#LightGreen"><code>ColoredOutput.ForegroundColor.LightGreen</code></a>
@@ -427,7 +441,7 @@ loadScripts(document, 'script');</script>
              switch to light green font color</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/ColoredOutput.html#fontLightGrey()">i5.las2peer.tools.ColoredOutput.fontLightGrey()</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/tools/ColoredOutput.html#colorize(java.lang.String,i5.las2peer.tools.ColoredOutput.ShellCode...)"><code>ColoredOutput.colorize(String, ShellCode...)</code></a> with <a href="i5/las2peer/tools/ColoredOutput.ForegroundColor.html#LightGrey"><code>ColoredOutput.ForegroundColor.LightGrey</code></a>
@@ -436,7 +450,7 @@ loadScripts(document, 'script');</script>
              switch to light grey font color</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/ColoredOutput.html#fontLightMagenta()">i5.las2peer.tools.ColoredOutput.fontLightMagenta()</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/tools/ColoredOutput.html#colorize(java.lang.String,i5.las2peer.tools.ColoredOutput.ShellCode...)"><code>ColoredOutput.colorize(String, ShellCode...)</code></a> with <a href="i5/las2peer/tools/ColoredOutput.ForegroundColor.html#LightMagenta"><code>ColoredOutput.ForegroundColor.LightMagenta</code></a>
@@ -445,7 +459,7 @@ loadScripts(document, 'script');</script>
              switch to light magenta font color</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/ColoredOutput.html#fontLightRed()">i5.las2peer.tools.ColoredOutput.fontLightRed()</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/tools/ColoredOutput.html#colorize(java.lang.String,i5.las2peer.tools.ColoredOutput.ShellCode...)"><code>ColoredOutput.colorize(String, ShellCode...)</code></a> with <a href="i5/las2peer/tools/ColoredOutput.ForegroundColor.html#LightRed"><code>ColoredOutput.ForegroundColor.LightRed</code></a>
@@ -454,7 +468,7 @@ loadScripts(document, 'script');</script>
              switch to light red font color</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/ColoredOutput.html#fontMagenta()">i5.las2peer.tools.ColoredOutput.fontMagenta()</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/tools/ColoredOutput.html#colorize(java.lang.String,i5.las2peer.tools.ColoredOutput.ShellCode...)"><code>ColoredOutput.colorize(String, ShellCode...)</code></a> with <a href="i5/las2peer/tools/ColoredOutput.ForegroundColor.html#Magenta"><code>ColoredOutput.ForegroundColor.Magenta</code></a>
@@ -463,7 +477,7 @@ loadScripts(document, 'script');</script>
              switch to magenta font color</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/ColoredOutput.html#fontRed()">i5.las2peer.tools.ColoredOutput.fontRed()</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/tools/ColoredOutput.html#colorize(java.lang.String,i5.las2peer.tools.ColoredOutput.ShellCode...)"><code>ColoredOutput.colorize(String, ShellCode...)</code></a> with <a href="i5/las2peer/tools/ColoredOutput.ForegroundColor.html#Red"><code>ColoredOutput.ForegroundColor.Red</code></a> instead!
@@ -471,7 +485,7 @@ loadScripts(document, 'script');</script>
              switch to red font color</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/ColoredOutput.html#fontReset()">i5.las2peer.tools.ColoredOutput.fontReset()</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/tools/ColoredOutput.html#colorize(java.lang.String,i5.las2peer.tools.ColoredOutput.ShellCode...)"><code>ColoredOutput.colorize(String, ShellCode...)</code></a> with <a href="i5/las2peer/tools/ColoredOutput.ForegroundColor.html#Default"><code>ColoredOutput.ForegroundColor.Default</code></a>
@@ -480,7 +494,7 @@ loadScripts(document, 'script');</script>
              reset to terminal default</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/ColoredOutput.html#fontWhite()">i5.las2peer.tools.ColoredOutput.fontWhite()</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/tools/ColoredOutput.html#colorize(java.lang.String,i5.las2peer.tools.ColoredOutput.ShellCode...)"><code>ColoredOutput.colorize(String, ShellCode...)</code></a> with <a href="i5/las2peer/tools/ColoredOutput.ForegroundColor.html#White"><code>ColoredOutput.ForegroundColor.White</code></a> instead!
@@ -488,7 +502,7 @@ loadScripts(document, 'script');</script>
              switch to white font color</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/ColoredOutput.html#fontYellow()">i5.las2peer.tools.ColoredOutput.fontYellow()</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/tools/ColoredOutput.html#colorize(java.lang.String,i5.las2peer.tools.ColoredOutput.ShellCode...)"><code>ColoredOutput.colorize(String, ShellCode...)</code></a> with <a href="i5/las2peer/tools/ColoredOutput.ForegroundColor.html#Yellow"><code>ColoredOutput.ForegroundColor.Yellow</code></a> instead!
@@ -496,7 +510,7 @@ loadScripts(document, 'script');</script>
              switch to yellow font color</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/ColoredOutput.html#inverted()">i5.las2peer.tools.ColoredOutput.inverted()</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/tools/ColoredOutput.html#colorize(java.lang.String,i5.las2peer.tools.ColoredOutput.ShellCode...)"><code>ColoredOutput.colorize(String, ShellCode...)</code></a> with <a href="i5/las2peer/tools/ColoredOutput.Formatting.html#Reverse"><code>ColoredOutput.Formatting.Reverse</code></a> instead!
@@ -504,7 +518,7 @@ loadScripts(document, 'script');</script>
              write inverted (swap back- and foreground color)</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/ColoredOutput.html#noBlink()">i5.las2peer.tools.ColoredOutput.noBlink()</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/tools/ColoredOutput.html#colorize(java.lang.String,i5.las2peer.tools.ColoredOutput.ShellCode...)"><code>ColoredOutput.colorize(String, ShellCode...)</code></a> with <a href="i5/las2peer/tools/ColoredOutput.Formatting.html#ResetBlink"><code>ColoredOutput.Formatting.ResetBlink</code></a> instead!
@@ -512,7 +526,7 @@ loadScripts(document, 'script');</script>
              turn off blinking text</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/ColoredOutput.html#noBold()">i5.las2peer.tools.ColoredOutput.noBold()</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/tools/ColoredOutput.html#colorize(java.lang.String,i5.las2peer.tools.ColoredOutput.ShellCode...)"><code>ColoredOutput.colorize(String, ShellCode...)</code></a> with <a href="i5/las2peer/tools/ColoredOutput.Formatting.html#ResetBold"><code>ColoredOutput.Formatting.ResetBold</code></a> instead!
@@ -520,7 +534,7 @@ loadScripts(document, 'script');</script>
              turn off bold text</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/ColoredOutput.html#print(java.lang.Object)">i5.las2peer.tools.ColoredOutput.print&#8203;(Object)</a></th>
 <td class="colLast">
 <div class="deprecationComment">This method is deprecated and will be removed in the future!
@@ -528,7 +542,7 @@ loadScripts(document, 'script');</script>
              print some text to the selected printstream</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/ColoredOutput.html#println(java.lang.String,i5.las2peer.tools.ColoredOutput.Color)">i5.las2peer.tools.ColoredOutput.println&#8203;(String, ColoredOutput.Color)</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/tools/ColoredOutput.html#colorize(java.lang.String,i5.las2peer.tools.ColoredOutput.ShellCode...)"><code>ColoredOutput.colorize(String, ShellCode...)</code></a> with a <a href="i5/las2peer/tools/ColoredOutput.ForegroundColor.html" title="enum in i5.las2peer.tools"><code>ColoredOutput.ForegroundColor</code></a> instead!
@@ -536,7 +550,7 @@ loadScripts(document, 'script');</script>
              print a text in the given color</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/ColoredOutput.html#printlnBold(java.lang.String)">i5.las2peer.tools.ColoredOutput.printlnBold&#8203;(String)</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/tools/ColoredOutput.html#colorize(java.lang.String,i5.las2peer.tools.ColoredOutput.ShellCode...)"><code>ColoredOutput.colorize(String, ShellCode...)</code></a> with <a href="i5/las2peer/tools/ColoredOutput.Formatting.html#Bold"><code>ColoredOutput.Formatting.Bold</code></a> instead!
@@ -544,7 +558,7 @@ loadScripts(document, 'script');</script>
              print a line of bold text</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/ColoredOutput.html#printlnRed(java.lang.String)">i5.las2peer.tools.ColoredOutput.printlnRed&#8203;(String)</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/tools/ColoredOutput.html#colorize(java.lang.String,i5.las2peer.tools.ColoredOutput.ShellCode...)"><code>ColoredOutput.colorize(String, ShellCode...)</code></a> with <a href="i5/las2peer/tools/ColoredOutput.ForegroundColor.html#Red"><code>ColoredOutput.ForegroundColor.Red</code></a> instead!
@@ -552,7 +566,7 @@ loadScripts(document, 'script');</script>
              print a line of red text</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/ColoredOutput.html#printlnYellow(java.lang.String)">i5.las2peer.tools.ColoredOutput.printlnYellow&#8203;(String)</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/tools/ColoredOutput.html#colorize(java.lang.String,i5.las2peer.tools.ColoredOutput.ShellCode...)"><code>ColoredOutput.colorize(String, ShellCode...)</code></a> with <a href="i5/las2peer/tools/ColoredOutput.ForegroundColor.html#Yellow"><code>ColoredOutput.ForegroundColor.Yellow</code></a> instead!
@@ -560,7 +574,7 @@ loadScripts(document, 'script');</script>
              print a line of yellow text</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/ColoredOutput.html#reset()">i5.las2peer.tools.ColoredOutput.reset()</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/tools/ColoredOutput.html#colorize(java.lang.String,i5.las2peer.tools.ColoredOutput.ShellCode...)"><code>ColoredOutput.colorize(String, ShellCode...)</code></a> with <a href="i5/las2peer/tools/ColoredOutput.Formatting.html#ResetAll"><code>ColoredOutput.Formatting.ResetAll</code></a> instead!
@@ -568,7 +582,7 @@ loadScripts(document, 'script');</script>
              simple reset the console to standard (colors and shape)</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/ColoredOutput.html#resetBackground()">i5.las2peer.tools.ColoredOutput.resetBackground()</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/tools/ColoredOutput.html#colorize(java.lang.String,i5.las2peer.tools.ColoredOutput.ShellCode...)"><code>ColoredOutput.colorize(String, ShellCode...)</code></a> with <a href="i5/las2peer/tools/ColoredOutput.BackgroundColor.html#Default"><code>ColoredOutput.BackgroundColor.Default</code></a>
@@ -577,7 +591,7 @@ loadScripts(document, 'script');</script>
              reset background to terminal default</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/ColoredOutput.html#sendCode(int)">i5.las2peer.tools.ColoredOutput.sendCode&#8203;(int)</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/tools/ColoredOutput.html#colorize(java.lang.String,i5.las2peer.tools.ColoredOutput.ShellCode...)"><code>ColoredOutput.colorize(String, ShellCode...)</code></a> instead!
@@ -585,7 +599,7 @@ loadScripts(document, 'script');</script>
              write a bash code</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/ColoredOutput.html#underline()">i5.las2peer.tools.ColoredOutput.underline()</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/tools/ColoredOutput.html#colorize(java.lang.String,i5.las2peer.tools.ColoredOutput.ShellCode...)"><code>ColoredOutput.colorize(String, ShellCode...)</code></a> with <a href="i5/las2peer/tools/ColoredOutput.Formatting.html#Underlined"><code>ColoredOutput.Formatting.Underlined</code></a> instead!
@@ -593,7 +607,7 @@ loadScripts(document, 'script');</script>
              write underlined text</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/ColoredOutput.html#useStream(java.io.PrintStream)">i5.las2peer.tools.ColoredOutput.useStream&#8203;(PrintStream)</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/tools/ColoredOutput.html#colorize(java.lang.String,i5.las2peer.tools.ColoredOutput.ShellCode...)"><code>ColoredOutput.colorize(String, ShellCode...)</code></a> instead!
@@ -601,7 +615,7 @@ loadScripts(document, 'script');</script>
              switch the stream to use for output</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/L2pNodeLauncher.html#launchSingle(java.lang.Iterable)">i5.las2peer.tools.L2pNodeLauncher.launchSingle&#8203;(Iterable&lt;String&gt;)</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/tools/L2pNodeLauncher.html#launchConfiguration(i5.las2peer.tools.helper.L2pNodeLauncherConfiguration)"><code>L2pNodeLauncher.launchConfiguration(L2pNodeLauncherConfiguration)</code></a> instead.
@@ -609,13 +623,13 @@ loadScripts(document, 'script');</script>
              Launches a single node.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/L2pNodeLauncher.html#startNodeAdminConnector()">i5.las2peer.tools.L2pNodeLauncher.startNodeAdminConnector()</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/tools/L2pNodeLauncher.html#startWebConnector()"><code>L2pNodeLauncher.startWebConnector()</code></a> instead.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/tools/L2pNodeLauncher.html#stopNodeAdminConnector()">i5.las2peer.tools.L2pNodeLauncher.stopNodeAdminConnector()</a></th>
 <td class="colLast">
 <div class="deprecationComment">Use <a href="i5/las2peer/tools/L2pNodeLauncher.html#stopWebConnector()"><code>L2pNodeLauncher.stopWebConnector()</code></a> instead.</div>
@@ -646,14 +660,18 @@ loadScripts(document, 'script');</script>
 <td class="colLast"></td>
 </tr>
 <tr class="rowColor">
-<th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/registry/contracts/ReputationRegistry.html#%3Cinit%3E(java.lang.String,org.web3j.protocol.Web3j,org.web3j.crypto.Credentials,java.math.BigInteger,java.math.BigInteger)">i5.las2peer.registry.contracts.ReputationRegistry&#8203;(String, Web3j, Credentials, BigInteger, BigInteger)</a></th>
+<th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/registry/contracts/GroupRegistry.html#%3Cinit%3E(java.lang.String,org.web3j.protocol.Web3j,org.web3j.crypto.Credentials,java.math.BigInteger,java.math.BigInteger)">i5.las2peer.registry.contracts.GroupRegistry&#8203;(String, Web3j, Credentials, BigInteger, BigInteger)</a></th>
 <td class="colLast"></td>
 </tr>
 <tr class="altColor">
-<th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/registry/contracts/ServiceRegistry.html#%3Cinit%3E(java.lang.String,org.web3j.protocol.Web3j,org.web3j.crypto.Credentials,java.math.BigInteger,java.math.BigInteger)">i5.las2peer.registry.contracts.ServiceRegistry&#8203;(String, Web3j, Credentials, BigInteger, BigInteger)</a></th>
+<th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/registry/contracts/ReputationRegistry.html#%3Cinit%3E(java.lang.String,org.web3j.protocol.Web3j,org.web3j.crypto.Credentials,java.math.BigInteger,java.math.BigInteger)">i5.las2peer.registry.contracts.ReputationRegistry&#8203;(String, Web3j, Credentials, BigInteger, BigInteger)</a></th>
 <td class="colLast"></td>
 </tr>
 <tr class="rowColor">
+<th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/registry/contracts/ServiceRegistry.html#%3Cinit%3E(java.lang.String,org.web3j.protocol.Web3j,org.web3j.crypto.Credentials,java.math.BigInteger,java.math.BigInteger)">i5.las2peer.registry.contracts.ServiceRegistry&#8203;(String, Web3j, Credentials, BigInteger, BigInteger)</a></th>
+<td class="colLast"></td>
+</tr>
+<tr class="altColor">
 <th class="colDeprecatedItemName" scope="row"><a href="i5/las2peer/registry/contracts/UserRegistry.html#%3Cinit%3E(java.lang.String,org.web3j.protocol.Web3j,org.web3j.crypto.Credentials,java.math.BigInteger,java.math.BigInteger)">i5.las2peer.registry.contracts.UserRegistry&#8203;(String, Web3j, Credentials, BigInteger, BigInteger)</a></th>
 <td class="colLast"></td>
 </tr>

@@ -192,8 +192,9 @@ java.lang.String&nbsp;password)</code></th>
 </tr>
 <tr class="rowColor" id="i3">
 <td class="colFirst"><code>javax.ws.rs.core.Response</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#handleCreateGroup(java.lang.String,java.lang.String)">handleCreateGroup</a></span>&#8203;(java.lang.String&nbsp;sessionId,
-java.lang.String&nbsp;members)</code></th>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#handleCreateGroup(java.lang.String,java.lang.String,java.lang.String)">handleCreateGroup</a></span>&#8203;(java.lang.String&nbsp;sessionId,
+java.lang.String&nbsp;members,
+java.lang.String&nbsp;groupName)</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr class="altColor" id="i4">
@@ -363,12 +364,13 @@ java.lang.String&nbsp;passphraseNew2)</span>
 </li>
 <li class="blockList">
 <section class="detail">
-<h3><a id="handleCreateGroup(java.lang.String,java.lang.String)">handleCreateGroup</a></h3>
+<h3><a id="handleCreateGroup(java.lang.String,java.lang.String,java.lang.String)">handleCreateGroup</a></h3>
 <div class="memberSignature"><span class="annotations">@POST
 @Path("/createGroup")
 </span><span class="modifiers">public</span>&nbsp;<span class="returnType">javax.ws.rs.core.Response</span>&nbsp;<span class="memberName">handleCreateGroup</span>&#8203;(<span class="arguments">@CookieParam("sessionid")
 java.lang.String&nbsp;sessionId,
-java.lang.String&nbsp;members)</span>
+java.lang.String&nbsp;members,
+java.lang.String&nbsp;groupName)</span>
                                             throws <span class="exceptions">java.lang.Exception</span></div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>

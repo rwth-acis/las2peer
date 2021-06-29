@@ -19,7 +19,7 @@
 <script type="text/javascript" src="../../../../script-dir/jquery-ui.js"></script>
 </head>
 <body class="class-declaration">
-<script type="text/javascript">var data = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10,"i9":10,"i10":10,"i11":10,"i12":10,"i13":10,"i14":10,"i15":10,"i16":10};
+<script type="text/javascript">var data = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -56,7 +56,7 @@ loadScripts(document, 'script');</script>
 <ul class="subNavList">
 <li>Summary:&nbsp;</li>
 <li>Nested&nbsp;|&nbsp;</li>
-<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#field.summary">Field</a>&nbsp;|&nbsp;</li>
 <li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
 <li><a href="#method.summary">Method</a></li>
 </ul>
@@ -87,7 +87,9 @@ loadScripts(document, 'script');</script>
 </div>
 <div class="contentContainer">
 <div class="inheritance" title="Inheritance Tree">java.lang.Object
+<div class="inheritance"><a href="../SemverVersion.html" title="class in i5.las2peer.api">i5.las2peer.api.SemverVersion</a>
 <div class="inheritance">i5.las2peer.api.p2p.ServiceVersion</div>
+</div>
 </div>
 <section class="description">
 <dl>
@@ -96,10 +98,11 @@ loadScripts(document, 'script');</script>
 </dl>
 <hr>
 <pre>public class <span class="typeNameLabel">ServiceVersion</span>
-extends java.lang.Object
-implements java.lang.Comparable&lt;<a href="ServiceVersion.html" title="class in i5.las2peer.api.p2p">ServiceVersion</a>&gt;, java.io.Serializable</pre>
-<div class="block">a simple class managing a service version number in the format major.minor.subversion-build where minor, subversion
- and build are optional</div>
+extends <a href="../SemverVersion.html" title="class in i5.las2peer.api">SemverVersion</a>
+implements java.lang.Comparable&lt;<a href="ServiceVersion.html" title="class in i5.las2peer.api.p2p">ServiceVersion</a>&gt;</pre>
+<div class="block">A simple class managing a service version number in the format
+ <code>&lt;major&gt; "." &lt;minor&gt; "." &lt;patch&gt; "-" &lt;pre-release&gt; "+" &lt;build&gt;</code> (where minor, patch, pre-release and build
+ are optional) or "*" (no version specified / matches all versions).</div>
 <dl>
 <dt><span class="seeLabel">See Also:</span></dt>
 <dd><a href="../../../../serialized-form.html#i5.las2peer.api.p2p.ServiceVersion">Serialized Form</a></dd>
@@ -107,6 +110,19 @@ implements java.lang.Comparable&lt;<a href="ServiceVersion.html" title="class in
 </section>
 <section class="summary">
 <ul class="blockList">
+<!-- =========== FIELD SUMMARY =========== -->
+<li class="blockList">
+<section class="fieldSummary"><a id="field.summary">
+<!--   -->
+</a>
+<h2>Field Summary</h2>
+<div class="inheritedList">
+<h3>Fields inherited from class&nbsp;i5.las2peer.api.<a href="../SemverVersion.html" title="class in i5.las2peer.api">SemverVersion</a></h3>
+<a id="fields.inherited.from.class.i5.las2peer.api.SemverVersion">
+<!--   -->
+</a><code><a href="../SemverVersion.html#build">build</a>, <a href="../SemverVersion.html#major">major</a>, <a href="../SemverVersion.html#minor">minor</a>, <a href="../SemverVersion.html#patch">patch</a>, <a href="../SemverVersion.html#preRelease">preRelease</a></code></div>
+</section>
+</li>
 <!-- ======== CONSTRUCTOR SUMMARY ======== -->
 <li class="blockList">
 <section class="constructorSummary"><a id="constructor.summary">
@@ -139,26 +155,36 @@ int&nbsp;minor)</code></th>
 <tr class="altColor">
 <th class="colConstructorName" scope="row"><code><span class="memberNameLink"><a href="#%3Cinit%3E(int,int,int)">ServiceVersion</a></span>&#8203;(int&nbsp;major,
 int&nbsp;minor,
-int&nbsp;sub)</code></th>
+int&nbsp;patch)</code></th>
 <td class="colLast">
 <div class="block">generate a new ServiceVersion</div>
 </td>
 </tr>
 <tr class="rowColor">
-<th class="colConstructorName" scope="row"><code><span class="memberNameLink"><a href="#%3Cinit%3E(int,int,int,int)">ServiceVersion</a></span>&#8203;(int&nbsp;major,
+<th class="colConstructorName" scope="row"><code><span class="memberNameLink"><a href="#%3Cinit%3E(int,int,int,java.lang.String)">ServiceVersion</a></span>&#8203;(int&nbsp;major,
 int&nbsp;minor,
-int&nbsp;sub,
-int&nbsp;build)</code></th>
+int&nbsp;patch,
+java.lang.String&nbsp;preRelease)</code></th>
 <td class="colLast">
 <div class="block">generate a new ServiceVersion</div>
 </td>
 </tr>
 <tr class="altColor">
+<th class="colConstructorName" scope="row"><code><span class="memberNameLink"><a href="#%3Cinit%3E(int,int,int,java.lang.String,java.lang.String)">ServiceVersion</a></span>&#8203;(int&nbsp;major,
+int&nbsp;minor,
+int&nbsp;patch,
+java.lang.String&nbsp;preRelease,
+java.lang.String&nbsp;build)</code></th>
+<td class="colLast">
+<div class="block">generate a new ServiceVersion</div>
+</td>
+</tr>
+<tr class="rowColor">
 <th class="colConstructorName" scope="row"><code><span class="memberNameLink"><a href="#%3Cinit%3E(java.lang.String)">ServiceVersion</a></span>&#8203;(java.lang.String&nbsp;version)</code></th>
 <td class="colLast">
 <div class="block">Generate a Version from String representation
- 
- format : major.minor.sub-build (where minor, subversion and build are optional) or "*" (no version specified /
+
+ format : Semver <code>&lt;major&gt; "." &lt;minor&gt; "." &lt;patch&gt; "-" &lt;pre-release&gt; "+" &lt;build&gt;</code> (where minor, patch, pre-release and build are optional) or "*" (no version specified /
  matches all versions)</div>
 </td>
 </tr>
@@ -201,65 +227,14 @@ int&nbsp;build)</code></th>
 </tr>
 <tr class="altColor" id="i2">
 <td class="colFirst"><code>boolean</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#equals(i5.las2peer.api.p2p.ServiceVersion)">equals</a></span>&#8203;(<a href="ServiceVersion.html" title="class in i5.las2peer.api.p2p">ServiceVersion</a>&nbsp;v)</code></th>
-<td class="colLast">
-<div class="block">compares to version and checks for equality</div>
-</td>
-</tr>
-<tr class="rowColor" id="i3">
-<td class="colFirst"><code>boolean</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#equals(java.lang.Object)">equals</a></span>&#8203;(java.lang.Object&nbsp;o)</code></th>
-<td class="colLast">
-<div class="block">compares this version with any object
- 
- if the given object is a String, the string representation of this version is compared to the given string</div>
-</td>
-</tr>
-<tr class="altColor" id="i4">
-<td class="colFirst"><code>boolean</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#fits(i5.las2peer.api.p2p.ServiceVersion)">fits</a></span>&#8203;(<a href="ServiceVersion.html" title="class in i5.las2peer.api.p2p">ServiceVersion</a>&nbsp;required)</code></th>
 <td class="colLast">
 <div class="block">checks if this version "fits" to the required version
- 
+
  e.g.</div>
 </td>
 </tr>
-<tr class="rowColor" id="i5">
-<td class="colFirst"><code>int</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getBuild()">getBuild</a></span>()</code></th>
-<td class="colLast">
-<div class="block">get the build number of this (sub)version</div>
-</td>
-</tr>
-<tr class="altColor" id="i6">
-<td class="colFirst"><code>int</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getMajor()">getMajor</a></span>()</code></th>
-<td class="colLast">
-<div class="block">get the major version number</div>
-</td>
-</tr>
-<tr class="rowColor" id="i7">
-<td class="colFirst"><code>int</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getMinor()">getMinor</a></span>()</code></th>
-<td class="colLast">
-<div class="block">get the minor version number</div>
-</td>
-</tr>
-<tr class="altColor" id="i8">
-<td class="colFirst"><code>int</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getSub()">getSub</a></span>()</code></th>
-<td class="colLast">
-<div class="block">get the subversion of the minor version number</div>
-</td>
-</tr>
-<tr class="rowColor" id="i9">
-<td class="colFirst"><code>int</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#hashCode()">hashCode</a></span>()</code></th>
-<td class="colLast">
-<div class="block">since equals is overridden, we should implement an own hashCode.</div>
-</td>
-</tr>
-<tr class="altColor" id="i10">
+<tr class="rowColor" id="i3">
 <td class="colFirst"><code>boolean</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#isBetween(i5.las2peer.api.p2p.ServiceVersion,i5.las2peer.api.p2p.ServiceVersion)">isBetween</a></span>&#8203;(<a href="ServiceVersion.html" title="class in i5.las2peer.api.p2p">ServiceVersion</a>&nbsp;smaller,
 <a href="ServiceVersion.html" title="class in i5.las2peer.api.p2p">ServiceVersion</a>&nbsp;larger)</code></th>
@@ -267,7 +242,7 @@ int&nbsp;build)</code></th>
 <div class="block">check if this version is between the given ones</div>
 </td>
 </tr>
-<tr class="rowColor" id="i11">
+<tr class="altColor" id="i4">
 <td class="colFirst"><code>boolean</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#isBetween(java.lang.String,java.lang.String)">isBetween</a></span>&#8203;(java.lang.String&nbsp;smaller,
 java.lang.String&nbsp;larger)</code></th>
@@ -275,43 +250,43 @@ java.lang.String&nbsp;larger)</code></th>
 <div class="block">tries to create a version number from the given strings and compares them to this version</div>
 </td>
 </tr>
-<tr class="altColor" id="i12">
+<tr class="rowColor" id="i5">
 <td class="colFirst"><code>boolean</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#isLargerOrEqual(i5.las2peer.api.p2p.ServiceVersion)">isLargerOrEqual</a></span>&#8203;(<a href="ServiceVersion.html" title="class in i5.las2peer.api.p2p">ServiceVersion</a>&nbsp;v)</code></th>
 <td class="colLast">
 <div class="block">check if this version is larger than or equal to the given one</div>
 </td>
 </tr>
-<tr class="rowColor" id="i13">
+<tr class="altColor" id="i6">
 <td class="colFirst"><code>boolean</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#isLargerThan(i5.las2peer.api.p2p.ServiceVersion)">isLargerThan</a></span>&#8203;(<a href="ServiceVersion.html" title="class in i5.las2peer.api.p2p">ServiceVersion</a>&nbsp;v)</code></th>
 <td class="colLast">
 <div class="block">check if this version is larger than the given one</div>
 </td>
 </tr>
-<tr class="altColor" id="i14">
+<tr class="rowColor" id="i7">
 <td class="colFirst"><code>boolean</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#isSmallerOrEqual(i5.las2peer.api.p2p.ServiceVersion)">isSmallerOrEqual</a></span>&#8203;(<a href="ServiceVersion.html" title="class in i5.las2peer.api.p2p">ServiceVersion</a>&nbsp;v)</code></th>
 <td class="colLast">
 <div class="block">check if this version is smaller than or equal to the given one</div>
 </td>
 </tr>
-<tr class="rowColor" id="i15">
+<tr class="altColor" id="i8">
 <td class="colFirst"><code>boolean</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#isSmallerThan(i5.las2peer.api.p2p.ServiceVersion)">isSmallerThan</a></span>&#8203;(<a href="ServiceVersion.html" title="class in i5.las2peer.api.p2p">ServiceVersion</a>&nbsp;v)</code></th>
 <td class="colLast">
 <div class="block">check if this version is smaller than the given one</div>
 </td>
 </tr>
-<tr class="altColor" id="i16">
-<td class="colFirst"><code>java.lang.String</code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#toString()">toString</a></span>()</code></th>
-<td class="colLast">&nbsp;</td>
-</tr>
 </tbody>
 </table>
 </div>
 </div>
+<div class="inheritedList">
+<h3>Methods inherited from class&nbsp;i5.las2peer.api.<a href="../SemverVersion.html" title="class in i5.las2peer.api">SemverVersion</a></h3>
+<a id="methods.inherited.from.class.i5.las2peer.api.SemverVersion">
+<!--   -->
+</a><code><a href="../SemverVersion.html#equals(i5.las2peer.api.SemverVersion)">equals</a>, <a href="../SemverVersion.html#equals(java.lang.Object)">equals</a>, <a href="../SemverVersion.html#getBuild()">getBuild</a>, <a href="../SemverVersion.html#getMajor()">getMajor</a>, <a href="../SemverVersion.html#getMinor()">getMinor</a>, <a href="../SemverVersion.html#getPatch()">getPatch</a>, <a href="../SemverVersion.html#getPreRelease()">getPreRelease</a>, <a href="../SemverVersion.html#getSub()">getSub</a>, <a href="../SemverVersion.html#hashCode()">hashCode</a>, <a href="../SemverVersion.html#toString()">toString</a></code></div>
 <div class="inheritedList">
 <h3>Methods inherited from class&nbsp;java.lang.Object</h3>
 <a id="methods.inherited.from.class.java.lang.Object">
@@ -336,8 +311,8 @@ java.lang.String&nbsp;larger)</code></th>
 <div class="memberSignature"><span class="modifiers">public</span>&nbsp;<span class="memberName">ServiceVersion</span>&#8203;(<span class="arguments">java.lang.String&nbsp;version)</span>
                throws <span class="exceptions">java.lang.IllegalArgumentException</span></div>
 <div class="block">Generate a Version from String representation
- 
- format : major.minor.sub-build (where minor, subversion and build are optional) or "*" (no version specified /
+
+ format : Semver <code>&lt;major&gt; "." &lt;minor&gt; "." &lt;patch&gt; "-" &lt;pre-release&gt; "+" &lt;build&gt;</code> (where minor, patch, pre-release and build are optional) or "*" (no version specified /
  matches all versions)</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
@@ -349,19 +324,41 @@ java.lang.String&nbsp;larger)</code></th>
 </li>
 <li class="blockList">
 <section class="detail">
-<h3><a id="&lt;init&gt;(int,int,int,int)">ServiceVersion</a></h3>
+<h3><a id="&lt;init&gt;(int,int,int,java.lang.String,java.lang.String)">ServiceVersion</a></h3>
 <div class="memberSignature"><span class="modifiers">public</span>&nbsp;<span class="memberName">ServiceVersion</span>&#8203;(<span class="arguments">int&nbsp;major,
 int&nbsp;minor,
-int&nbsp;sub,
-int&nbsp;build)</span>
+int&nbsp;patch,
+java.lang.String&nbsp;preRelease,
+java.lang.String&nbsp;build)</span>
                throws <span class="exceptions">java.lang.IllegalArgumentException</span></div>
 <div class="block">generate a new ServiceVersion</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>major</code> - Major version number part</dd>
 <dd><code>minor</code> - Minor version number part</dd>
-<dd><code>sub</code> - Sub version number part</dd>
-<dd><code>build</code> - Build number</dd>
+<dd><code>patch</code> - Patch version number part</dd>
+<dd><code>preRelease</code> - pre-release version</dd>
+<dd><code>build</code> - build version</dd>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code>java.lang.IllegalArgumentException</code> - If a version number part is smaller than 0</dd>
+</dl>
+</section>
+</li>
+<li class="blockList">
+<section class="detail">
+<h3><a id="&lt;init&gt;(int,int,int,java.lang.String)">ServiceVersion</a></h3>
+<div class="memberSignature"><span class="modifiers">public</span>&nbsp;<span class="memberName">ServiceVersion</span>&#8203;(<span class="arguments">int&nbsp;major,
+int&nbsp;minor,
+int&nbsp;patch,
+java.lang.String&nbsp;preRelease)</span>
+               throws <span class="exceptions">java.lang.IllegalArgumentException</span></div>
+<div class="block">generate a new ServiceVersion</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>major</code> - Major version number part</dd>
+<dd><code>minor</code> - Minor version number part</dd>
+<dd><code>patch</code> - Patch version number part</dd>
+<dd><code>preRelease</code> - pre-release version</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code>java.lang.IllegalArgumentException</code> - If a version number part is smaller than 0</dd>
 </dl>
@@ -372,14 +369,14 @@ int&nbsp;build)</span>
 <h3><a id="&lt;init&gt;(int,int,int)">ServiceVersion</a></h3>
 <div class="memberSignature"><span class="modifiers">public</span>&nbsp;<span class="memberName">ServiceVersion</span>&#8203;(<span class="arguments">int&nbsp;major,
 int&nbsp;minor,
-int&nbsp;sub)</span>
+int&nbsp;patch)</span>
                throws <span class="exceptions">java.lang.IllegalArgumentException</span></div>
 <div class="block">generate a new ServiceVersion</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>major</code> - Major version number part</dd>
 <dd><code>minor</code> - Minor version number part</dd>
-<dd><code>sub</code> - Sub version number part</dd>
+<dd><code>patch</code> - Patch version number part</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code>java.lang.IllegalArgumentException</code> - If a version number part is smaller than 0</dd>
 </dl>
@@ -509,105 +506,6 @@ java.lang.String&nbsp;larger)</span></div>
 </li>
 <li class="blockList">
 <section class="detail">
-<h3><a id="equals(i5.las2peer.api.p2p.ServiceVersion)">equals</a></h3>
-<div class="memberSignature"><span class="modifiers">public</span>&nbsp;<span class="returnType">boolean</span>&nbsp;<span class="memberName">equals</span>&#8203;(<span class="arguments"><a href="ServiceVersion.html" title="class in i5.las2peer.api.p2p">ServiceVersion</a>&nbsp;v)</span></div>
-<div class="block">compares to version and checks for equality</div>
-<dl>
-<dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>v</code> - Another service version to compare to</dd>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd>true, if this version is the same as the given one</dd>
-</dl>
-</section>
-</li>
-<li class="blockList">
-<section class="detail">
-<h3><a id="equals(java.lang.Object)">equals</a></h3>
-<div class="memberSignature"><span class="modifiers">public</span>&nbsp;<span class="returnType">boolean</span>&nbsp;<span class="memberName">equals</span>&#8203;(<span class="arguments">java.lang.Object&nbsp;o)</span></div>
-<div class="block">compares this version with any object
- 
- if the given object is a String, the string representation of this version is compared to the given string</div>
-<dl>
-<dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
-<dd><code>equals</code>&nbsp;in class&nbsp;<code>java.lang.Object</code></dd>
-<dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>o</code> - Another object to check</dd>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd>true, if the given object is a version and the same as this one</dd>
-</dl>
-</section>
-</li>
-<li class="blockList">
-<section class="detail">
-<h3><a id="hashCode()">hashCode</a></h3>
-<div class="memberSignature"><span class="modifiers">public</span>&nbsp;<span class="returnType">int</span>&nbsp;<span class="memberName">hashCode</span>()</div>
-<div class="block">since equals is overridden, we should implement an own hashCode.</div>
-<dl>
-<dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
-<dd><code>hashCode</code>&nbsp;in class&nbsp;<code>java.lang.Object</code></dd>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd>a hash code as int</dd>
-</dl>
-</section>
-</li>
-<li class="blockList">
-<section class="detail">
-<h3><a id="getMinor()">getMinor</a></h3>
-<div class="memberSignature"><span class="modifiers">public</span>&nbsp;<span class="returnType">int</span>&nbsp;<span class="memberName">getMinor</span>()</div>
-<div class="block">get the minor version number</div>
-<dl>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd>minor version number</dd>
-</dl>
-</section>
-</li>
-<li class="blockList">
-<section class="detail">
-<h3><a id="getMajor()">getMajor</a></h3>
-<div class="memberSignature"><span class="modifiers">public</span>&nbsp;<span class="returnType">int</span>&nbsp;<span class="memberName">getMajor</span>()</div>
-<div class="block">get the major version number</div>
-<dl>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd>major version number</dd>
-</dl>
-</section>
-</li>
-<li class="blockList">
-<section class="detail">
-<h3><a id="getSub()">getSub</a></h3>
-<div class="memberSignature"><span class="modifiers">public</span>&nbsp;<span class="returnType">int</span>&nbsp;<span class="memberName">getSub</span>()</div>
-<div class="block">get the subversion of the minor version number</div>
-<dl>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd>suberverion number of minor</dd>
-</dl>
-</section>
-</li>
-<li class="blockList">
-<section class="detail">
-<h3><a id="getBuild()">getBuild</a></h3>
-<div class="memberSignature"><span class="modifiers">public</span>&nbsp;<span class="returnType">int</span>&nbsp;<span class="memberName">getBuild</span>()</div>
-<div class="block">get the build number of this (sub)version</div>
-<dl>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd>build number</dd>
-</dl>
-</section>
-</li>
-<li class="blockList">
-<section class="detail">
-<h3><a id="toString()">toString</a></h3>
-<div class="memberSignature"><span class="modifiers">public</span>&nbsp;<span class="returnType">java.lang.String</span>&nbsp;<span class="memberName">toString</span>()</div>
-<dl>
-<dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
-<dd><code>toString</code>&nbsp;in class&nbsp;<code>java.lang.Object</code></dd>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd>a String representation of this version</dd>
-</dl>
-</section>
-</li>
-<li class="blockList">
-<section class="detail">
 <h3><a id="compareTo(i5.las2peer.api.p2p.ServiceVersion)">compareTo</a></h3>
 <div class="memberSignature"><span class="modifiers">public</span>&nbsp;<span class="returnType">int</span>&nbsp;<span class="memberName">compareTo</span>&#8203;(<span class="arguments"><a href="ServiceVersion.html" title="class in i5.las2peer.api.p2p">ServiceVersion</a>&nbsp;other)</span></div>
 <div class="block">implementation of Comparable</div>
@@ -626,7 +524,7 @@ java.lang.String&nbsp;larger)</span></div>
 <h3><a id="fits(i5.las2peer.api.p2p.ServiceVersion)">fits</a></h3>
 <div class="memberSignature"><span class="modifiers">public</span>&nbsp;<span class="returnType">boolean</span>&nbsp;<span class="memberName">fits</span>&#8203;(<span class="arguments"><a href="ServiceVersion.html" title="class in i5.las2peer.api.p2p">ServiceVersion</a>&nbsp;required)</span></div>
 <div class="block">checks if this version "fits" to the required version
- 
+
  e.g. "1.5.2-123" will fit "1.5", but "1.5" won't fit "1.6" or "1.5.2"</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
@@ -682,7 +580,7 @@ java.lang.String&nbsp;larger)</span></div>
 <ul class="subNavList">
 <li>Summary:&nbsp;</li>
 <li>Nested&nbsp;|&nbsp;</li>
-<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#field.summary">Field</a>&nbsp;|&nbsp;</li>
 <li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
 <li><a href="#method.summary">Method</a></li>
 </ul>

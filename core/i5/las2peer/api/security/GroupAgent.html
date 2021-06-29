@@ -19,7 +19,7 @@
 <script type="text/javascript" src="../../../../script-dir/jquery-ui.js"></script>
 </head>
 <body class="class-declaration">
-<script type="text/javascript">var data = {"i0":6,"i1":6,"i2":6,"i3":6,"i4":6,"i5":6,"i6":6};
+<script type="text/javascript">var data = {"i0":6,"i1":6,"i2":6,"i3":6,"i4":6,"i5":6,"i6":6,"i7":6,"i8":6,"i9":6,"i10":6,"i11":6};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],4:["t3","Abstract Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -93,7 +93,7 @@ loadScripts(document, 'script');</script>
 </dl>
 <dl>
 <dt>All Known Implementing Classes:</dt>
-<dd><code><a href="../../security/GroupAgentImpl.html" title="class in i5.las2peer.security">GroupAgentImpl</a></code></dd>
+<dd><code><a href="../../security/EthereumGroupAgent.html" title="class in i5.las2peer.security">EthereumGroupAgent</a></code>, <code><a href="../../security/GroupAgentImpl.html" title="class in i5.las2peer.security">GroupAgentImpl</a></code></dd>
 </dl>
 <hr>
 <pre>public interface <span class="typeNameLabel">GroupAgent</span>
@@ -126,47 +126,82 @@ extends <a href="Agent.html" title="interface in i5.las2peer.api.security">Agent
 <tbody>
 <tr class="altColor" id="i0">
 <td class="colFirst"><code>void</code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#addAdmin(i5.las2peer.api.security.Agent)">addAdmin</a></span>&#8203;(<a href="Agent.html" title="interface in i5.las2peer.api.security">Agent</a>&nbsp;agent)</code></th>
+<td class="colLast">
+<div class="block">Add an admin to the group.</div>
+</td>
+</tr>
+<tr class="rowColor" id="i1">
+<td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#addMember(i5.las2peer.api.security.Agent)">addMember</a></span>&#8203;(<a href="Agent.html" title="interface in i5.las2peer.api.security">Agent</a>&nbsp;agent)</code></th>
 <td class="colLast">
 <div class="block">Adds a member to the group.</div>
 </td>
 </tr>
-<tr class="rowColor" id="i1">
+<tr class="altColor" id="i2">
+<td class="colFirst"><code>java.lang.String</code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getGroupName()">getGroupName</a></span>()</code></th>
+<td class="colLast">
+<div class="block">Getter for the group name.</div>
+</td>
+</tr>
+<tr class="rowColor" id="i3">
 <td class="colFirst"><code>java.lang.String[]</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getMemberList()">getMemberList</a></span>()</code></th>
 <td class="colLast">
 <div class="block">Get a list of direct group members.</div>
 </td>
 </tr>
-<tr class="altColor" id="i2">
+<tr class="altColor" id="i4">
 <td class="colFirst"><code>int</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getSize()">getSize</a></span>()</code></th>
 <td class="colLast">
 <div class="block">Get the number of direct group members.</div>
 </td>
 </tr>
-<tr class="rowColor" id="i3">
+<tr class="rowColor" id="i5">
+<td class="colFirst"><code>boolean</code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#hasGroupName()">hasGroupName</a></span>()</code></th>
+<td class="colLast">
+<div class="block">Check if the agent has a group name set.</div>
+</td>
+</tr>
+<tr class="altColor" id="i6">
 <td class="colFirst"><code>boolean</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#hasMember(i5.las2peer.api.security.Agent)">hasMember</a></span>&#8203;(<a href="Agent.html" title="interface in i5.las2peer.api.security">Agent</a>&nbsp;agent)</code></th>
 <td class="colLast">
 <div class="block">Checks if the given agent is a member of this group.</div>
 </td>
 </tr>
-<tr class="altColor" id="i4">
+<tr class="rowColor" id="i7">
 <td class="colFirst"><code>boolean</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#hasMember(java.lang.String)">hasMember</a></span>&#8203;(java.lang.String&nbsp;agentId)</code></th>
 <td class="colLast">
 <div class="block">Checks if the given agent is a member of this group.</div>
 </td>
 </tr>
-<tr class="rowColor" id="i5">
+<tr class="altColor" id="i8">
+<td class="colFirst"><code>boolean</code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#isAdmin(i5.las2peer.api.security.Agent)">isAdmin</a></span>&#8203;(<a href="Agent.html" title="interface in i5.las2peer.api.security">Agent</a>&nbsp;agent)</code></th>
+<td class="colLast">
+<div class="block">Check admin rights for member.</div>
+</td>
+</tr>
+<tr class="rowColor" id="i9">
+<td class="colFirst"><code>void</code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#revokeAdmin(i5.las2peer.api.security.Agent)">revokeAdmin</a></span>&#8203;(<a href="Agent.html" title="interface in i5.las2peer.api.security">Agent</a>&nbsp;agent)</code></th>
+<td class="colLast">
+<div class="block">Remove admin rights from member.</div>
+</td>
+</tr>
+<tr class="altColor" id="i10">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#revokeMember(i5.las2peer.api.security.Agent)">revokeMember</a></span>&#8203;(<a href="Agent.html" title="interface in i5.las2peer.api.security">Agent</a>&nbsp;agent)</code></th>
 <td class="colLast">
 <div class="block">Revokes a group membership.</div>
 </td>
 </tr>
-<tr class="altColor" id="i6">
+<tr class="rowColor" id="i11">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#unlock(i5.las2peer.api.security.Agent)">unlock</a></span>&#8203;(<a href="Agent.html" title="interface in i5.las2peer.api.security">Agent</a>&nbsp;agent)</code></th>
 <td class="colLast">
@@ -294,6 +329,61 @@ extends <a href="Agent.html" title="interface in i5.las2peer.api.security">Agent
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>A list of ids of group members.</dd>
+</dl>
+</section>
+</li>
+<li class="blockList">
+<section class="detail">
+<h3><a id="getGroupName()">getGroupName</a></h3>
+<div class="memberSignature"><span class="returnType">java.lang.String</span>&nbsp;<span class="memberName">getGroupName</span>()</div>
+<div class="block">Getter for the group name.</div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The group name.</dd>
+</dl>
+</section>
+</li>
+<li class="blockList">
+<section class="detail">
+<h3><a id="hasGroupName()">hasGroupName</a></h3>
+<div class="memberSignature"><span class="returnType">boolean</span>&nbsp;<span class="memberName">hasGroupName</span>()</div>
+<div class="block">Check if the agent has a group name set.</div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>true If a group name is set up.</dd>
+</dl>
+</section>
+</li>
+<li class="blockList">
+<section class="detail">
+<h3><a id="addAdmin(i5.las2peer.api.security.Agent)">addAdmin</a></h3>
+<div class="memberSignature"><span class="returnType">void</span>&nbsp;<span class="memberName">addAdmin</span>&#8203;(<span class="arguments"><a href="Agent.html" title="interface in i5.las2peer.api.security">Agent</a>&nbsp;agent)</span></div>
+<div class="block">Add an admin to the group.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>agent</code> - Member to be made admin.</dd>
+</dl>
+</section>
+</li>
+<li class="blockList">
+<section class="detail">
+<h3><a id="revokeAdmin(i5.las2peer.api.security.Agent)">revokeAdmin</a></h3>
+<div class="memberSignature"><span class="returnType">void</span>&nbsp;<span class="memberName">revokeAdmin</span>&#8203;(<span class="arguments"><a href="Agent.html" title="interface in i5.las2peer.api.security">Agent</a>&nbsp;agent)</span></div>
+<div class="block">Remove admin rights from member.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>agent</code> - Member to remove admin rights from.</dd>
+</dl>
+</section>
+</li>
+<li class="blockList">
+<section class="detail">
+<h3><a id="isAdmin(i5.las2peer.api.security.Agent)">isAdmin</a></h3>
+<div class="memberSignature"><span class="returnType">boolean</span>&nbsp;<span class="memberName">isAdmin</span>&#8203;(<span class="arguments"><a href="Agent.html" title="interface in i5.las2peer.api.security">Agent</a>&nbsp;agent)</span></div>
+<div class="block">Check admin rights for member.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>agent</code> - Member to check admin rights for.</dd>
 </dl>
 </section>
 </li>
