@@ -33,6 +33,7 @@ import org.web3j.utils.TxHashVerifier;
 
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.registry.contracts.CommunityTagIndex;
+import i5.las2peer.registry.contracts.GroupRegistry;
 import i5.las2peer.registry.contracts.ReputationRegistry;
 import i5.las2peer.registry.contracts.ServiceRegistry;
 import i5.las2peer.registry.contracts.UserRegistry;
@@ -58,6 +59,7 @@ class Contracts {
 
 	final CommunityTagIndex communityTagIndex;
 	final UserRegistry userRegistry;
+	final GroupRegistry groupRegistry;
 	final ServiceRegistry serviceRegistry;
 	final ReputationRegistry reputationRegistry;
 	final TransactionManager transactionManager;
@@ -73,11 +75,12 @@ class Contracts {
 
 	protected static L2pLogger logger = L2pLogger.getInstance(Contracts.class);
 
-	private Contracts(Web3j web3j, CommunityTagIndex communityTagIndex, UserRegistry userRegistry, ServiceRegistry serviceRegistry,
+	private Contracts(Web3j web3j, CommunityTagIndex communityTagIndex, UserRegistry userRegistry, GroupRegistry groupRegistry, ServiceRegistry serviceRegistry,
 			ReputationRegistry reputationRegistry, TransactionManager transactionManager) {
 		this.web3j = web3j;
 		this.communityTagIndex = communityTagIndex;
 		this.userRegistry = userRegistry;
+		this.groupRegistry = groupRegistry;
 		this.serviceRegistry = serviceRegistry;
 		this.reputationRegistry = reputationRegistry;
 		this.transactionManager = transactionManager;
@@ -177,15 +180,17 @@ class Contracts {
 	static class ContractsConfig {
 		final String communityTagIndexAddress;
 		final String userRegistryAddress;
+		final String groupRegistryAddress;
 		final String serviceRegistryAddress;
 		final String reputationRegistryAddress;
 
 		final String endpoint;
 
-		ContractsConfig(String communityTagIndexAddress, String userRegistryAddress, String serviceRegistryAddress,
+		ContractsConfig(String communityTagIndexAddress, String userRegistryAddress, String groupRegistryAddress, String serviceRegistryAddress,
 				String reputationRegistryAddress, String endpoint) {
 			this.communityTagIndexAddress = communityTagIndexAddress;
 			this.userRegistryAddress = userRegistryAddress;
+			this.groupRegistryAddress = groupRegistryAddress;
 			this.serviceRegistryAddress = serviceRegistryAddress;
 			this.reputationRegistryAddress = reputationRegistryAddress;
 			this.endpoint = endpoint;
@@ -198,6 +203,7 @@ class Contracts {
 			ContractsConfig that = (ContractsConfig) o;
 			return Objects.equals(communityTagIndexAddress, that.communityTagIndexAddress) &&
 					Objects.equals(userRegistryAddress, that.userRegistryAddress) &&
+					Objects.equals(groupRegistryAddress, that.groupRegistryAddress) &&
 					Objects.equals(serviceRegistryAddress, that.serviceRegistryAddress) &&
 					Objects.equals(reputationRegistryAddress, that.reputationRegistryAddress) &&
 					Objects.equals(endpoint, that.endpoint);
@@ -205,7 +211,7 @@ class Contracts {
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(communityTagIndexAddress, userRegistryAddress, serviceRegistryAddress, reputationRegistryAddress, endpoint);
+			return Objects.hash(communityTagIndexAddress, userRegistryAddress, groupRegistryAddress, serviceRegistryAddress, reputationRegistryAddress, endpoint);
 		}
 	}
 
@@ -292,10 +298,11 @@ class Contracts {
 			TransactionManager transactionManager = constructTxManager(web3j, credentials);
 			CommunityTagIndex communityTagIndex = CommunityTagIndex.load(config.communityTagIndexAddress, web3j, transactionManager, gasProvider);
 			UserRegistry userRegistry = UserRegistry.load(config.userRegistryAddress, web3j, transactionManager, gasProvider);
+			GroupRegistry groupRegistry = GroupRegistry.load(config.groupRegistryAddress, web3j, transactionManager, gasProvider);
 			ServiceRegistry serviceRegistry = ServiceRegistry.load(config.serviceRegistryAddress, web3j, transactionManager, gasProvider);
 			ReputationRegistry reputationRegistry = ReputationRegistry.load(config.reputationRegistryAddress, web3j, transactionManager, gasProvider);
 
-			return new Contracts(web3j, communityTagIndex, userRegistry, serviceRegistry, reputationRegistry, transactionManager);
+			return new Contracts(web3j, communityTagIndex, userRegistry, groupRegistry, serviceRegistry, reputationRegistry, transactionManager);
 		}
 
 		private TransactionManager constructTxManager(Web3j web3j, Credentials credentials) {

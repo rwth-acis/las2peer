@@ -72,7 +72,7 @@ public interface Context {
 	/**
 	 * Get the current service, avoiding casting.
 	 * 
-	 * @param <T> type of the service
+	 * @param <T>         type of the service
 	 * @param serviceType service class
 	 * @return the current service
 	 */
@@ -113,13 +113,24 @@ public interface Context {
 	public GroupAgent createGroupAgent(Agent[] members) throws AgentOperationFailedException;
 
 	/**
-	 * Fetches an agent from the network and trys to unlock it using the specified agent.
+	 * Creates a new GroupAgent with groupName.
+	 * 
+	 * @param members Initial member list
+	 * @return A new unlocked GroupAgent which is not stored to the network yet.
+	 * @throws AgentOperationFailedException If an error occurred on the node.
+	 */
+	public GroupAgent createGroupAgent(Agent[] members, String groupName) throws AgentOperationFailedException;
+
+	/**
+	 * Fetches an agent from the network and trys to unlock it using the specified
+	 * agent.
 	 * 
 	 * @param agentId The id of the agent to fetch.
-	 * @param using The agent used to unlock the fetched agent.
+	 * @param using   The agent used to unlock the fetched agent.
 	 * @return An unlocked instance of the requested agent.
-	 * @throws AgentAccessDeniedException If the given agent cannot access the fetched agent.
-	 * @throws AgentNotFoundException If the specified agent cannot be found.
+	 * @throws AgentAccessDeniedException    If the given agent cannot access the
+	 *                                       fetched agent.
+	 * @throws AgentNotFoundException        If the specified agent cannot be found.
 	 * @throws AgentOperationFailedException If an error occurred on the node.
 	 */
 	public Agent requestAgent(String agentId, Agent using)
@@ -130,8 +141,9 @@ public interface Context {
 	 * 
 	 * @param agentId The id of the agent to fetch.
 	 * @return An unlocked instance of the requested agent.
-	 * @throws AgentAccessDeniedException If the main agent cannot access the fetched agent.
-	 * @throws AgentNotFoundException If the specified agent cannot be found.
+	 * @throws AgentAccessDeniedException    If the main agent cannot access the
+	 *                                       fetched agent.
+	 * @throws AgentNotFoundException        If the specified agent cannot be found.
 	 * @throws AgentOperationFailedException If an error occurred on the node.
 	 */
 	public Agent requestAgent(String agentId)
@@ -142,7 +154,7 @@ public interface Context {
 	 * 
 	 * @param agentId The id of the agent to fetch.
 	 * @return A probably locked instance of the specified agent.
-	 * @throws AgentNotFoundException If the specified agent cannot be found.
+	 * @throws AgentNotFoundException        If the specified agent cannot be found.
 	 * @throws AgentOperationFailedException If an error occurred on the node.
 	 */
 	public Agent fetchAgent(String agentId) throws AgentNotFoundException, AgentOperationFailedException;
@@ -153,33 +165,39 @@ public interface Context {
 	 * The given agent must be unlocked.
 	 * 
 	 * @param agent The unlocked agent to store.
-	 * @throws AgentAccessDeniedException If the agent cannot be overridden due to access restrictions. Or it is the
-	 *             AnonymousAgent.
-	 * @throws AgentAlreadyExistsException If another agent already exists (regarding some agent specific properties).
+	 * @throws AgentAccessDeniedException    If the agent cannot be overridden due
+	 *                                       to access restrictions. Or it is the
+	 *                                       AnonymousAgent.
+	 * @throws AgentAlreadyExistsException   If another agent already exists
+	 *                                       (regarding some agent specific
+	 *                                       properties).
 	 * @throws AgentOperationFailedException If an error occurred on the node.
-	 * @throws AgentLockedException If the agent is locked.
+	 * @throws AgentLockedException          If the agent is locked.
 	 */
 	public void storeAgent(Agent agent) throws AgentAccessDeniedException, AgentAlreadyExistsException,
 			AgentOperationFailedException, AgentLockedException;
 
 	/**
-	 * Checks if the agent specified by using is able to unlock the agent agentId. This also includes recursive
-	 * unlocking.
+	 * Checks if the agent specified by using is able to unlock the agent agentId.
+	 * This also includes recursive unlocking.
 	 * 
 	 * @param agentId The agent to be checked.
-	 * @param using The agent to unlock.
+	 * @param using   The agent to unlock.
 	 * @return true If using is able to unlock agentId.
-	 * @throws AgentNotFoundException If the agent specified by agentId does not exist.
+	 * @throws AgentNotFoundException        If the agent specified by agentId does
+	 *                                       not exist.
 	 * @throws AgentOperationFailedException If an error occurred on the node.
 	 */
 	public boolean hasAccess(String agentId, Agent using) throws AgentNotFoundException, AgentOperationFailedException;
 
 	/**
-	 * Checks if the main agent is able to unlock the agent agentId. This also includes recursive unlocking.
+	 * Checks if the main agent is able to unlock the agent agentId. This also
+	 * includes recursive unlocking.
 	 * 
 	 * @param agentId The agent to be checked.
 	 * @return true If the main agent is able to unlock the given agent.
-	 * @throws AgentNotFoundException If the agent specified by agentId does not exist.
+	 * @throws AgentNotFoundException        If the agent specified by agentId does
+	 *                                       not exist.
 	 * @throws AgentOperationFailedException If an error occurred on the node.
 	 */
 	public boolean hasAccess(String agentId) throws AgentNotFoundException, AgentOperationFailedException;
@@ -191,7 +209,8 @@ public interface Context {
 	 * 
 	 * @param loginName The user's login name
 	 * @return The identifier of the user agents.
-	 * @throws AgentNotFoundException If there is no agent with the given login name.
+	 * @throws AgentNotFoundException        If there is no agent with the given
+	 *                                       login name.
 	 * @throws AgentOperationFailedException On node errors.
 	 */
 	public String getUserAgentIdentifierByLoginName(String loginName)
@@ -202,7 +221,8 @@ public interface Context {
 	 * 
 	 * @param emailAddress The user's email address.
 	 * @return The identifier of the user agents.
-	 * @throws AgentNotFoundException If there is no agent with the given email address.
+	 * @throws AgentNotFoundException        If there is no agent with the given
+	 *                                       email address.
 	 * @throws AgentOperationFailedException On node errors.
 	 */
 	public String getUserAgentIdentifierByEmail(String emailAddress)
@@ -215,26 +235,32 @@ public interface Context {
 	// Envelopes
 
 	/**
-	 * Requests an envelope from the network. This means fetching and decrypting it using the specified agent.
+	 * Requests an envelope from the network. This means fetching and decrypting it
+	 * using the specified agent.
 	 * 
 	 * @param identifier Identifier of the envelope.
-	 * @param using Agentu sing to open the envelope.
+	 * @param using      Agentu sing to open the envelope.
 	 * @return An opened envelope.
-	 * @throws EnvelopeAccessDeniedException If the given agent is not able to access the envelope.
-	 * @throws EnvelopeNotFoundException If the envelope doesn not exist.
-	 * @throws EnvelopeOperationFailedException If an error occurred in the node or network.
+	 * @throws EnvelopeAccessDeniedException    If the given agent is not able to
+	 *                                          access the envelope.
+	 * @throws EnvelopeNotFoundException        If the envelope doesn not exist.
+	 * @throws EnvelopeOperationFailedException If an error occurred in the node or
+	 *                                          network.
 	 */
 	public Envelope requestEnvelope(String identifier, Agent using)
 			throws EnvelopeAccessDeniedException, EnvelopeNotFoundException, EnvelopeOperationFailedException;
 
 	/**
-	 * Requests an envelope from the network. This means fetching and decrypting it using the current main agent.
+	 * Requests an envelope from the network. This means fetching and decrypting it
+	 * using the current main agent.
 	 * 
 	 * @param identifier Identifier of the envelope.
 	 * @return An opened envelope.
-	 * @throws EnvelopeAccessDeniedException If the given agent is not able to access the envelope.
-	 * @throws EnvelopeNotFoundException If the envelope doesn not exist.
-	 * @throws EnvelopeOperationFailedException If an error occurred at the node or in the network.
+	 * @throws EnvelopeAccessDeniedException    If the given agent is not able to
+	 *                                          access the envelope.
+	 * @throws EnvelopeNotFoundException        If the envelope doesn not exist.
+	 * @throws EnvelopeOperationFailedException If an error occurred at the node or
+	 *                                          in the network.
 	 */
 	public Envelope requestEnvelope(String identifier)
 			throws EnvelopeAccessDeniedException, EnvelopeNotFoundException, EnvelopeOperationFailedException;
@@ -242,10 +268,12 @@ public interface Context {
 	/**
 	 * Stores the envelope to the network and signs it with the specified agent.
 	 * 
-	 * @param env The envelope to store.
+	 * @param env   The envelope to store.
 	 * @param using The agent to be used to sign the envelope.
-	 * @throws EnvelopeAccessDeniedException If the specified agent is not allowed to write to the envelope.
-	 * @throws EnvelopeOperationFailedException If an error occurred at the node or in the network.
+	 * @throws EnvelopeAccessDeniedException    If the specified agent is not
+	 *                                          allowed to write to the envelope.
+	 * @throws EnvelopeOperationFailedException If an error occurred at the node or
+	 *                                          in the network.
 	 */
 	public void storeEnvelope(Envelope env, Agent using)
 			throws EnvelopeAccessDeniedException, EnvelopeOperationFailedException;
@@ -254,20 +282,26 @@ public interface Context {
 	 * Stores the envelope to the network and signs it with the current main agent.
 	 * 
 	 * @param env The envelope to store.
-	 * @throws EnvelopeAccessDeniedException If the specified agent is not allowed to write to the envelope.
-	 * @throws EnvelopeOperationFailedException If an error occurred at the node or in the network.
+	 * @throws EnvelopeAccessDeniedException    If the specified agent is not
+	 *                                          allowed to write to the envelope.
+	 * @throws EnvelopeOperationFailedException If an error occurred at the node or
+	 *                                          in the network.
 	 */
 	public void storeEnvelope(Envelope env) throws EnvelopeAccessDeniedException, EnvelopeOperationFailedException;
 
 	/**
 	 * Stores the envelope to the network and signs it with the specified agent.
 	 * 
-	 * @param env The envelope to store.
-	 * @param handler An handler to resolve storage conflict (e.g. the envelope has been updated in the meantime).
-	 * @param using The agent to be used to sign the envelope (and must have signed the envelope or must have access to
-	 *            the signing agent if there are previous versions).
-	 * @throws EnvelopeAccessDeniedException If the specified agent is not allowed to write to the envelope.
-	 * @throws EnvelopeOperationFailedException If an error occurred at the node or in the network.
+	 * @param env     The envelope to store.
+	 * @param handler An handler to resolve storage conflict (e.g. the envelope has
+	 *                been updated in the meantime).
+	 * @param using   The agent to be used to sign the envelope (and must have
+	 *                signed the envelope or must have access to the signing agent
+	 *                if there are previous versions).
+	 * @throws EnvelopeAccessDeniedException    If the specified agent is not
+	 *                                          allowed to write to the envelope.
+	 * @throws EnvelopeOperationFailedException If an error occurred at the node or
+	 *                                          in the network.
 	 */
 	public void storeEnvelope(Envelope env, EnvelopeCollisionHandler handler, Agent using)
 			throws EnvelopeAccessDeniedException, EnvelopeOperationFailedException;
@@ -275,10 +309,13 @@ public interface Context {
 	/**
 	 * Stores the envelope to the network and signs it with the current main agent.
 	 * 
-	 * @param env The envelope to store.
-	 * @param handler An handler to resolve storage conflict (e.g. the envelope has been updated in the meantime).
-	 * @throws EnvelopeAccessDeniedException If the specified agent is not allowed to write to the envelope.
-	 * @throws EnvelopeOperationFailedException If an error occurred at the node or in the network.
+	 * @param env     The envelope to store.
+	 * @param handler An handler to resolve storage conflict (e.g. the envelope has
+	 *                been updated in the meantime).
+	 * @throws EnvelopeAccessDeniedException    If the specified agent is not
+	 *                                          allowed to write to the envelope.
+	 * @throws EnvelopeOperationFailedException If an error occurred at the node or
+	 *                                          in the network.
 	 */
 	public void storeEnvelope(Envelope env, EnvelopeCollisionHandler handler)
 			throws EnvelopeAccessDeniedException, EnvelopeOperationFailedException;
@@ -286,15 +323,19 @@ public interface Context {
 	/**
 	 * Reclaims the envelope using the specified agent.
 	 * 
-	 * A reclaim operation marks the envelope as deleted and indicates that the envelope is no longer needed anymore
-	 * (e.g. can be deleted by other nodes). However, it is not guaranteed that the envelope will be deleted since the
+	 * A reclaim operation marks the envelope as deleted and indicates that the
+	 * envelope is no longer needed anymore (e.g. can be deleted by other nodes).
+	 * However, it is not guaranteed that the envelope will be deleted since the
 	 * nature of a p2p network.
 	 * 
 	 * @param identifier The identifier of the envelope.
-	 * @param using The agent that has signed the envelope or an agent that has access to the signing agent.
-	 * @throws EnvelopeAccessDeniedException If the agent has not signed the envelope.
-	 * @throws EnvelopeNotFoundException If the envelope does not exist.
-	 * @throws EnvelopeOperationFailedException If an error occurred at the node or in the network.
+	 * @param using      The agent that has signed the envelope or an agent that has
+	 *                   access to the signing agent.
+	 * @throws EnvelopeAccessDeniedException    If the agent has not signed the
+	 *                                          envelope.
+	 * @throws EnvelopeNotFoundException        If the envelope does not exist.
+	 * @throws EnvelopeOperationFailedException If an error occurred at the node or
+	 *                                          in the network.
 	 */
 	public void reclaimEnvelope(String identifier, Agent using)
 			throws EnvelopeAccessDeniedException, EnvelopeNotFoundException, EnvelopeOperationFailedException;
@@ -302,37 +343,48 @@ public interface Context {
 	/**
 	 * Reclaims the envelope using the current main agent agent.
 	 * 
-	 * A reclaim operation marks the envelope as deleted and indicates that the envelope is no longer needed anymore
-	 * (e.g. can be deleted by other nodes). However, it is not guaranteed that the envelope will be deleted since the
+	 * A reclaim operation marks the envelope as deleted and indicates that the
+	 * envelope is no longer needed anymore (e.g. can be deleted by other nodes).
+	 * However, it is not guaranteed that the envelope will be deleted since the
 	 * nature of a p2p network.
 	 * 
 	 * @param identifier The identifier of the envelope.
-	 * @throws EnvelopeAccessDeniedException If the agent has not signed the envelope.
-	 * @throws EnvelopeNotFoundException If the envelope does not exist.
-	 * @throws EnvelopeOperationFailedException If an error occurred at the node or in the network.
+	 * @throws EnvelopeAccessDeniedException    If the agent has not signed the
+	 *                                          envelope.
+	 * @throws EnvelopeNotFoundException        If the envelope does not exist.
+	 * @throws EnvelopeOperationFailedException If an error occurred at the node or
+	 *                                          in the network.
 	 */
 	public void reclaimEnvelope(String identifier)
 			throws EnvelopeAccessDeniedException, EnvelopeNotFoundException, EnvelopeOperationFailedException;
 
 	/**
-	 * Creates a new envelope with the given agent as signing agent and first reader.
+	 * Creates a new envelope with the given agent as signing agent and first
+	 * reader.
 	 * 
 	 * @param identifier Identifier of the envelope.
-	 * @param using Signing agent (owner) of the envelope.
+	 * @param using      Signing agent (owner) of the envelope.
 	 * @return An envelope that is not stored to the network yet.
-	 * @throws EnvelopeOperationFailedException If an error occurred at the node or in the network.
-	 * @throws EnvelopeAccessDeniedException If the agent is not allowed to create envelopes (e.g. the AnonymousAgent).
+	 * @throws EnvelopeOperationFailedException If an error occurred at the node or
+	 *                                          in the network.
+	 * @throws EnvelopeAccessDeniedException    If the agent is not allowed to
+	 *                                          create envelopes (e.g. the
+	 *                                          AnonymousAgent).
 	 */
 	public Envelope createEnvelope(String identifier, Agent using)
 			throws EnvelopeOperationFailedException, EnvelopeAccessDeniedException;
 
 	/**
-	 * Creates a new envelope with the current main agent as signing agent and first reader.
+	 * Creates a new envelope with the current main agent as signing agent and first
+	 * reader.
 	 * 
 	 * @param identifier Identifier of the envelope.
 	 * @return An envelope that is not stored to the network yet.
-	 * @throws EnvelopeOperationFailedException If an error occurred at the node or in the network.
-	 * @throws EnvelopeAccessDeniedException If the agent is not allowed to create envelopes (e.g. the AnonymousAgent).
+	 * @throws EnvelopeOperationFailedException If an error occurred at the node or
+	 *                                          in the network.
+	 * @throws EnvelopeAccessDeniedException    If the agent is not allowed to
+	 *                                          create envelopes (e.g. the
+	 *                                          AnonymousAgent).
 	 */
 	public Envelope createEnvelope(String identifier)
 			throws EnvelopeOperationFailedException, EnvelopeAccessDeniedException;
@@ -340,22 +392,30 @@ public interface Context {
 	// RMI
 
 	/**
-	 * Invokes the method of any other service on behalf of the main agent, thus sending the main agent as calling
-	 * agent.
+	 * Invokes the method of any other service on behalf of the main agent, thus
+	 * sending the main agent as calling agent.
 	 * 
-	 * @param service The service class. A version may be specified (for example package.serviceClass@1.0.0-1 or
-	 *            package.serviceClass@1.0). The core tries to find an appropriate version (version 1.0.5 matches 1.0).
-	 *            If no version is specified, the newest version is picked.
-	 * @param method The service method.
+	 * @param service    The service class. A version may be specified (for example
+	 *                   package.serviceClass@1.0.0-1 or package.serviceClass@1.0).
+	 *                   The core tries to find an appropriate version (version
+	 *                   1.0.5 matches 1.0). If no version is specified, the newest
+	 *                   version is picked.
+	 * @param method     The service method.
 	 * @param parameters The parameters list.
 	 * @return The invocation result.
-	 * @throws ServiceNotFoundException If the service is not known to the network.
-	 * @throws ServiceNotAvailableException If the service is temporarily not available.
-	 * @throws InternalServiceException If the remote service throws an exception.
-	 * @throws ServiceMethodNotFoundException If the service method does not exist.
+	 * @throws ServiceNotFoundException         If the service is not known to the
+	 *                                          network.
+	 * @throws ServiceNotAvailableException     If the service is temporarily not
+	 *                                          available.
+	 * @throws InternalServiceException         If the remote service throws an
+	 *                                          exception.
+	 * @throws ServiceMethodNotFoundException   If the service method does not
+	 *                                          exist.
 	 * @throws ServiceInvocationFailedException If the service invocation failed.
-	 * @throws ServiceAccessDeniedException If the access to the service has been denied.
-	 * @throws ServiceNotAuthorizedException If access to the service method requires a logged in user.
+	 * @throws ServiceAccessDeniedException     If the access to the service has
+	 *                                          been denied.
+	 * @throws ServiceNotAuthorizedException    If access to the service method
+	 *                                          requires a logged in user.
 	 */
 	public Serializable invoke(String service, String method, Serializable... parameters)
 			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException,
@@ -363,22 +423,30 @@ public interface Context {
 			ServiceNotAuthorizedException;
 
 	/**
-	 * Invokes the method of any other service on behalf of the main agent, thus sending the main agent as calling
-	 * agent.
+	 * Invokes the method of any other service on behalf of the main agent, thus
+	 * sending the main agent as calling agent.
 	 * 
-	 * @param service The service class. A version may be specified (for example package.serviceClass@1.0.0-1 or
-	 *            package.serviceClass@1.0). The core tries to find an appropriate version (version 1.0.5 matches 1.0).
-	 *            If no version is specified, the newest version is picked.
-	 * @param method The service method.
+	 * @param service    The service class. A version may be specified (for example
+	 *                   package.serviceClass@1.0.0-1 or package.serviceClass@1.0).
+	 *                   The core tries to find an appropriate version (version
+	 *                   1.0.5 matches 1.0). If no version is specified, the newest
+	 *                   version is picked.
+	 * @param method     The service method.
 	 * @param parameters The parameters list.
 	 * @return The invocation result.
-	 * @throws ServiceNotFoundException If the service is not known to the network.
-	 * @throws ServiceNotAvailableException If the service is temporarily not available.
-	 * @throws InternalServiceException If the remote service throws an exception.
-	 * @throws ServiceMethodNotFoundException If the service method does not exist.
+	 * @throws ServiceNotFoundException         If the service is not known to the
+	 *                                          network.
+	 * @throws ServiceNotAvailableException     If the service is temporarily not
+	 *                                          available.
+	 * @throws InternalServiceException         If the remote service throws an
+	 *                                          exception.
+	 * @throws ServiceMethodNotFoundException   If the service method does not
+	 *                                          exist.
 	 * @throws ServiceInvocationFailedException If the service invocation failed.
-	 * @throws ServiceAccessDeniedException If the access to the service has been denied.
-	 * @throws ServiceNotAuthorizedException If access to the service method requires a logged in user.
+	 * @throws ServiceAccessDeniedException     If the access to the service has
+	 *                                          been denied.
+	 * @throws ServiceNotAuthorizedException    If access to the service method
+	 *                                          requires a logged in user.
 	 */
 	public Serializable invoke(ServiceNameVersion service, String method, Serializable... parameters)
 			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException,
@@ -388,19 +456,27 @@ public interface Context {
 	/**
 	 * Invokes a service method using the agent of this service as calling agent.
 	 * 
-	 * @param service The service class. A version may be specified (for example package.serviceClass@1.0.0-1 or
-	 *            package.serviceClass@1.0). The core tries to find an appropriate version (version 1.0.5 matches 1.0).
-	 *            If no version is specified, the newest version is picked.
-	 * @param method The service method.
+	 * @param service    The service class. A version may be specified (for example
+	 *                   package.serviceClass@1.0.0-1 or package.serviceClass@1.0).
+	 *                   The core tries to find an appropriate version (version
+	 *                   1.0.5 matches 1.0). If no version is specified, the newest
+	 *                   version is picked.
+	 * @param method     The service method.
 	 * @param parameters The parameters list.
 	 * @return The invocation result.
-	 * @throws ServiceNotFoundException If the service is not known to the network.
-	 * @throws ServiceNotAvailableException If the service is temporarily not available.
-	 * @throws InternalServiceException If the remote service throws an exception.
-	 * @throws ServiceMethodNotFoundException If the service method does not exist.
+	 * @throws ServiceNotFoundException         If the service is not known to the
+	 *                                          network.
+	 * @throws ServiceNotAvailableException     If the service is temporarily not
+	 *                                          available.
+	 * @throws InternalServiceException         If the remote service throws an
+	 *                                          exception.
+	 * @throws ServiceMethodNotFoundException   If the service method does not
+	 *                                          exist.
 	 * @throws ServiceInvocationFailedException If the service invocation failed.
-	 * @throws ServiceAccessDeniedException If the access to the service has been denied.
-	 * @throws ServiceNotAuthorizedException If access to the service method requires a logged in user.
+	 * @throws ServiceAccessDeniedException     If the access to the service has
+	 *                                          been denied.
+	 * @throws ServiceNotAuthorizedException    If access to the service method
+	 *                                          requires a logged in user.
 	 */
 	public Serializable invokeInternally(String service, String method, Serializable... parameters)
 			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException,
@@ -410,19 +486,27 @@ public interface Context {
 	/**
 	 * Invokes a service method using the agent of this service as calling agent.
 	 * 
-	 * @param service The service class. A version may be specified (for example package.serviceClass@1.0.0-1 or
-	 *            package.serviceClass@1.0). The core tries to find an appropriate version (version 1.0.5 matches 1.0).
-	 *            If no version is specified, the newest version is picked.
-	 * @param method The service method.
+	 * @param service    The service class. A version may be specified (for example
+	 *                   package.serviceClass@1.0.0-1 or package.serviceClass@1.0).
+	 *                   The core tries to find an appropriate version (version
+	 *                   1.0.5 matches 1.0). If no version is specified, the newest
+	 *                   version is picked.
+	 * @param method     The service method.
 	 * @param parameters The parameters list.
 	 * @return The invocation result.
-	 * @throws ServiceNotFoundException If the service is not known to the network.
-	 * @throws ServiceNotAvailableException If the service is temporarily not available.
-	 * @throws InternalServiceException If the remote service throws an exception.
-	 * @throws ServiceMethodNotFoundException If the service method does not exist.
+	 * @throws ServiceNotFoundException         If the service is not known to the
+	 *                                          network.
+	 * @throws ServiceNotAvailableException     If the service is temporarily not
+	 *                                          available.
+	 * @throws InternalServiceException         If the remote service throws an
+	 *                                          exception.
+	 * @throws ServiceMethodNotFoundException   If the service method does not
+	 *                                          exist.
 	 * @throws ServiceInvocationFailedException If the service invocation failed.
-	 * @throws ServiceAccessDeniedException If the access to the service has been denied.
-	 * @throws ServiceNotAuthorizedException If access to the service method requires a logged in user.
+	 * @throws ServiceAccessDeniedException     If the access to the service has
+	 *                                          been denied.
+	 * @throws ServiceNotAuthorizedException    If access to the service method
+	 *                                          requires a logged in user.
 	 */
 	public Serializable invokeInternally(ServiceNameVersion service, String method, Serializable... parameters)
 			throws ServiceNotFoundException, ServiceNotAvailableException, InternalServiceException,
@@ -434,7 +518,8 @@ public interface Context {
 	/**
 	 * Gets the executor for this service.
 	 * 
-	 * Async tasks should be handeld using this executor. They can access the current context.
+	 * Async tasks should be handeld using this executor. They can access the
+	 * current context.
 	 * 
 	 * @return The executor responsible for the current service call.
 	 */
@@ -453,46 +538,55 @@ public interface Context {
 
 	// Monitoring
 	/**
-	 * Writes a log message to the l2p system using node observers. Also makes data available to MobSOS.
+	 * Writes a log message to the l2p system using node observers. Also makes data
+	 * available to MobSOS.
 	 * 
-	 * Does not include the current acting main agent. The MonitoringEvent will default to MonitoringEvent.SERVICE_MESSAGE.
-	 * Use this method for trivial log messages.
+	 * Does not include the current acting main agent. The MonitoringEvent will
+	 * default to MonitoringEvent.SERVICE_MESSAGE. Use this method for trivial log
+	 * messages.
 	 *
 	 * @param message A message.
 	 */
 	public void monitorEvent(String message);
 
 	/**
-	 * Writes a log message to the l2p system using node observers. Also makes data available to MobSOS.
+	 * Writes a log message to the l2p system using node observers. Also makes data
+	 * available to MobSOS.
 	 * 
 	 * Does not include the current acting main agent.
 	 *
-	 * @param event Differentiates between different log messages. Use MonitoringEvent.SERVICE_CUSTOM_MESSAGE_XXX as
-	 *            parameter.
+	 * @param event   Differentiates between different log messages. Use
+	 *                MonitoringEvent.SERVICE_CUSTOM_MESSAGE_XXX as parameter.
 	 * @param message A message.
 	 */
 	public void monitorEvent(MonitoringEvent event, String message);
 
 	/**
-	 * Writes a log message to the l2p system using node observers. Also makes data available to MobSOS.
+	 * Writes a log message to the l2p system using node observers. Also makes data
+	 * available to MobSOS.
 	 * 
 	 * Does not include the current acting main agent.
 	 * 
-	 * @param from Specifies from which class the message is sent from. Usually "this" is passed as parameter.
-	 * @param event Differentiates between different log messages. Use MonitoringEvent.SERVICE_CUSTOM_MESSAGE_XXX as
-	 *            parameter.
+	 * @param from    Specifies from which class the message is sent from. Usually
+	 *                "this" is passed as parameter.
+	 * @param event   Differentiates between different log messages. Use
+	 *                MonitoringEvent.SERVICE_CUSTOM_MESSAGE_XXX as parameter.
 	 * @param message A message.
 	 */
 	public void monitorEvent(Object from, MonitoringEvent event, String message);
 
 	/**
-	 * Writes a log message to the l2p system using node observers. Also makes data available to MobSOS.
+	 * Writes a log message to the l2p system using node observers. Also makes data
+	 * available to MobSOS.
 	 *
-	 * @param from Specifies from which class the message is sent from. Usually "this" is passed as parameter.
-	 * @param event Differentiates between different log messages. Use MonitoringEvent.SERVICE_CUSTOM_MESSAGE_XXX as
-	 *            parameter.
-	 * @param message A message.
-	 * @param includeActingUser If set to true, the current main agent will be included.
+	 * @param from              Specifies from which class the message is sent from.
+	 *                          Usually "this" is passed as parameter.
+	 * @param event             Differentiates between different log messages. Use
+	 *                          MonitoringEvent.SERVICE_CUSTOM_MESSAGE_XXX as
+	 *                          parameter.
+	 * @param message           A message.
+	 * @param includeActingUser If set to true, the current main agent will be
+	 *                          included.
 	 */
 	public void monitorEvent(Object from, MonitoringEvent event, String message, boolean includeActingUser);
 
@@ -504,6 +598,5 @@ public interface Context {
 	 * @return The current service class loader.
 	 */
 	public ClassLoader getServiceClassLoader();
-
 
 }

@@ -1200,6 +1200,18 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	}
 
 	/**
+	 * Gets an id for the group for the given group name.
+	 * 
+	 * @param groupName The name of the group
+	 * @return agent id
+	 * @throws AgentNotFoundException If no agent for the given name is found
+	 * @throws AgentOperationFailedException If any other issue with the agent occurs, e. g. XML not readable
+	 */
+	public String getAgentIdForGroupName(String groupName) throws AgentNotFoundException, AgentOperationFailedException {
+		return userManager.getAgentIdByGroupName(groupName);
+	}
+
+	/**
 	 * get the manager responsible for the mapping from service alias to service names
 	 * 
 	 * @return Returns the {@code ServiceAliasManager} instance of this node

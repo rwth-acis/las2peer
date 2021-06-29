@@ -3,6 +3,7 @@ package i5.las2peer.registry;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.registry.data.BlockchainTransactionData;
 import i5.las2peer.registry.data.GenericTransactionData;
+import i5.las2peer.registry.data.GroupData;
 import i5.las2peer.registry.data.RegistryConfiguration;
 import i5.las2peer.registry.data.SenderReceiverDoubleKey;
 import i5.las2peer.registry.data.ServiceDeploymentData;
@@ -90,7 +91,7 @@ public class ReadOnlyRegistryClient {
 		web3j_admin = Admin.build(new HttpService(registryConfiguration.getEndpoint()));
 
 		contractsConfig = new Contracts.ContractsConfig(registryConfiguration.getCommunityTagIndexAddress(),
-				registryConfiguration.getUserRegistryAddress(), registryConfiguration.getServiceRegistryAddress(),
+				registryConfiguration.getUserRegistryAddress(), registryConfiguration.getGroupRegistryAddress(), registryConfiguration.getServiceRegistryAddress(),
 				registryConfiguration.getReputationRegistryAddress(), registryConfiguration.getEndpoint());
 
 		observer = BlockchainObserver.getInstance(contractsConfig);
@@ -181,6 +182,19 @@ public class ReadOnlyRegistryClient {
 	}
 
 	/**
+	 * Return true if user name is both valid and not already taken and thus can be
+	 * registered.
+	 * 
+	 * @param name user name consisting of 1 to 32 Unicode characters
+	 */
+	public boolean groupNameIsAvailable(String name) throws EthereumException {
+		try {
+			return contracts.groupRegistry.groupNameIsAvailable(Util.padAndConvertString(name, 32)).sendAsync().get();
+		} catch (Exception e) {
+			throw new EthereumException(e);
+		}
+	}
+	/**
 	 * Return true if user name is both valid, as encoded in the registry smart
 	 * contract code.
 	 *
@@ -197,6 +211,22 @@ public class ReadOnlyRegistryClient {
 		}
 	}
 
+	/**
+	 * Return true if user name is both valid, as encoded in the registry smart
+	 * contract code.
+	 *
+	 * (Any non-empty String of up to 32 characters should work, but let's not press
+	 * our luck.)
+	 *
+	 * @param name user name consisting of 1 to 32 Unicode characters
+	 */
+	public boolean groupNameIsValid(String name) throws EthereumException {
+		try {
+			return contracts.groupRegistry.groupNameIsValid(Util.padAndConvertString(name, 32)).sendAsync().get();
+		} catch (Exception e) {
+			throw new EthereumException(e);
+		}
+	}
 	/**
 	 * Retrieve user data stored in registry for given name.
 	 * 
@@ -220,6 +250,31 @@ public class ReadOnlyRegistryClient {
 
 		return new UserData(userAsTuple.getValue1(), userAsTuple.getValue2(), userAsTuple.getValue3(),
 				userAsTuple.getValue4());
+	}
+
+	/**
+	 * Retrieve group data stored in registry for given group name.
+	 * 
+	 * @param name group name consisting of 1 to 32 Unicode characters
+	 * @return group data object containing ID and owner address, or
+	 *         <code>null</code> if group name is not taken
+	 */
+	public GroupData getGroup(String name) throws EthereumException, NotFoundException {
+		Tuple4<byte[], byte[], byte[], String> groupAsTuple;
+		try {
+			groupAsTuple = contracts.groupRegistry.groups(Util.padAndConvertString(name, 32)).sendAsync().get();
+		} catch (Exception e) {
+			throw new EthereumException("Could not get group", e);
+		}
+
+		byte[] returnedName = groupAsTuple.getValue1();
+		if (Arrays.equals(returnedName, new byte[returnedName.length])) {
+			// name is 0s, meaning entry does not exist
+			throw new NotFoundException("Group name apparently not registered.");
+		}
+
+		return new GroupData(groupAsTuple.getValue1(), groupAsTuple.getValue2(), groupAsTuple.getValue3(),
+				groupAsTuple.getValue4());
 	}
 
 	public UserProfileData getProfile(String address) throws EthereumException, NotFoundException {

@@ -174,6 +174,7 @@ class AgentsView extends PolymerElement {
           </iron-form>
           <iron-form on-keypress="_keyPressedCreateGroup">
             <form>
+              <paper-input label="Group Name" id="addGroupName" disabled="[[_working]]" value=""></paper-input>
               <paper-button raised on-click="createGroup" disabled="[[_hasNoMemberAgents]]">Create Group</paper-button>
             </form>
           </iron-form>
@@ -193,6 +194,7 @@ class AgentsView extends PolymerElement {
           <iron-form>
             <form>
               <template is="dom-if" if="[[_hasNoManageAgents]]">
+                <paper-input label="group agentid or group name" disabled="[[_working]]" value="{{_manageGroupAgentId}}"></paper-input>
                 <paper-input label="group agentid" disabled="[[_working]]" value="{{_manageGroupAgentId}}"></paper-input>
                 <paper-button raised on-click="loadGroup">Load Group</paper-button>
               </template>
@@ -353,6 +355,7 @@ class AgentsView extends PolymerElement {
     req.body.append('agentid', this.$.addMemberId.value);
     req.body.append('username', this.$.addMemberUsername.value);
     req.body.append('email', this.$.addMemberEmail.value);
+    let customer = {name: "person", address: "here"}
     req.generateRequest();
   }
 
@@ -372,6 +375,9 @@ class AgentsView extends PolymerElement {
     let req = this.$.ajaxCreateGroup;
     req.body = new FormData();
     req.body.append('members', JSON.stringify(this._memberAgents));
+    if(this.$.addGroupName.value != null){
+      req.body.append('name', this.$.addGroupName.value);
+    } else req.body.append('name', "");
     req.generateRequest();
   }
 
@@ -386,7 +392,7 @@ class AgentsView extends PolymerElement {
   loadGroup() {
     let req = this.$.ajaxLoadGroup;
     req.body = new FormData();
-    req.body.append('agentid', this._manageGroupAgentId);
+    req.body.append('groupIdentifier', this._manageGroupAgentId);
     req.generateRequest();
   }
 
@@ -394,6 +400,7 @@ class AgentsView extends PolymerElement {
     let response = event.detail.response;
     response.members.forEach(function (element) { element.shortid = element.agentid.substr(0, 15) + '...' });
     this._manageAgents = response.members;
+    response.members.every(elem => console.log(typeof elem));
     this._hasNoManageAgents = false;
   }
 
@@ -407,6 +414,11 @@ class AgentsView extends PolymerElement {
     req.body = new FormData();
     req.body.append('agentid', this._manageGroupAgentId);
     req.body.append('members', this._manageAgents);
+    let jsonArray=[];
+    this._manageAgents.forEach(function(element) {
+      jsonArray.push(JSON.stringify(element));
+    })
+    req.body.append('members', JSON.stringify(jsonArray));
     req.generateRequest();
   }
 
