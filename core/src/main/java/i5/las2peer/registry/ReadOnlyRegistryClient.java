@@ -553,6 +553,12 @@ public class ReadOnlyRegistryClient {
 
 
 
+	void setLocalNonce(String address, long val){
+		StaticNonce.Manager().putStaticNonce(address, BigInteger.valueOf(val));
+	}
+	void setTxNonce(long val){
+		txMan.setNonce(BigInteger.valueOf(val)); // update nonce
+	}
 	/**
 	 * Overrides nonce of transactionManager with local nonce.
 	 * @param address
