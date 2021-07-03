@@ -183,6 +183,33 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 				}
 
 			}
+
+			String add = txMan.getFromAddress();
+			try {
+
+				System.out.println("GEETT NOONOCECEEEE PPEEENNDINNGG");
+
+				EthGetTransactionCount ethGetTransactionCount = web3j
+						.ethGetTransactionCount(add, DefaultBlockParameterName.PENDING).sendAsync().get();
+
+				BigInteger blockchainNonce = ethGetTransactionCount.getTransactionCount();
+				System.out.println(blockchainNonce.toString());
+				txMan.setNonce(blockchainNonce.add(BigInteger.valueOf(-1)));
+
+				System.out.println("NONCE AFTER SEETT");
+				System.out.println(txMan.getCurrentNonce());
+				System.out.println("GEETT NOONOCECEEEE LLAATESST");
+
+				ethGetTransactionCount = web3j.ethGetTransactionCount(add, DefaultBlockParameterName.PENDING)
+						.sendAsync().get();
+
+				blockchainNonce = ethGetTransactionCount.getTransactionCount();
+				System.out.println(blockchainNonce.toString());
+
+			} catch (InterruptedException | ExecutionException e) {
+				logger.severe("could not get nonce for address " + add);
+				logger.severe(e.getMessage());
+			}
 			// getNonce(txMan.getFromAddress()); // check if nonce has to be udpated
 		}
 
