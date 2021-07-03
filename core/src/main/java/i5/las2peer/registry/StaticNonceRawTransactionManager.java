@@ -62,12 +62,16 @@ class StaticNonceRawTransactionManager extends FastRawTransactionManager {
 
     @Override
     public BigInteger getCurrentNonce() {
+        System.out.println("Calling Static get Current nonce for address: ");
+        System.out.println(credentialAddress);
         return StaticNonce.Manager().getStaticNonce(credentialAddress);
     }
 
     @Override
     public synchronized void resetNonce() throws IOException {
         BigInteger parentNonce = super.getNonce();
+        System.out.println("[TX-NONCE@"+credentialAddress+"] resetting nonce (=" + parentNonce + ")");
+        System.out.println(credentialAddress);
         logger.info("[TX-NONCE@"+credentialAddress+"] resetting nonce (=" + parentNonce + ")");
         setNonce(parentNonce);
     }
@@ -75,6 +79,8 @@ class StaticNonceRawTransactionManager extends FastRawTransactionManager {
     @Override
     public synchronized void setNonce(BigInteger value) {
         nonce = value;
+        System.out.println("[TX-NONCE@"+credentialAddress+"] set nonce to:" + value);
+        System.out.println(credentialAddress);
         StaticNonce.Manager().putStaticNonce(credentialAddress, nonce);
         logger.info("[TX-NONCE@"+credentialAddress+"] set nonce to:" + value);
     }

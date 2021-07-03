@@ -133,7 +133,6 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 				System.out.println("THE 11111");
 				System.out.println(functionCode[1].split("@")[0]);
 				setTxNonce(Long.valueOf(functionCode[1].split("@")[0]));
-
 			}
 			// getNonce(txMan.getFromAddress()); // check if nonce has to be udpated
 		}
