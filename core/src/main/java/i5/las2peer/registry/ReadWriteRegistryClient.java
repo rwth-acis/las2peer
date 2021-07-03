@@ -11,8 +11,10 @@ import java.util.concurrent.ExecutionException;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.request.Transaction;
+import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
@@ -129,10 +131,57 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 				System.out.println(functionCode[1].split("@")[0]);
 				System.out.println(txMan.getFromAddress());
 				setLocalNonce(txMan.getFromAddress(), Long.valueOf(functionCode[1].split("@")[0]));
+				String add = txMan.getFromAddress();
+				try {
+					System.out.println("GEETT NOONOCECEEEE PPEEENNDINNGG");
+
+					EthGetTransactionCount ethGetTransactionCount = web3j
+							.ethGetTransactionCount(add, DefaultBlockParameterName.PENDING).sendAsync().get();
+
+					BigInteger blockchainNonce = ethGetTransactionCount.getTransactionCount();
+					System.out.println(blockchainNonce.toString());
+
+					System.out.println("GEETT NOONOCECEEEE LLAATESST");
+
+					ethGetTransactionCount = web3j.ethGetTransactionCount(add, DefaultBlockParameterName.PENDING)
+							.sendAsync().get();
+
+					blockchainNonce = ethGetTransactionCount.getTransactionCount();
+					System.out.println(blockchainNonce.toString());
+
+				} catch (InterruptedException | ExecutionException e) {
+					logger.severe("could not get nonce for address " + add);
+					logger.severe(e.getMessage());
+				}
 			} else if (functionCode[0].equals("1")) {
 				System.out.println("THE 11111");
 				System.out.println(functionCode[1].split("@")[0]);
 				setTxNonce(Long.valueOf(functionCode[1].split("@")[0]));
+				String add = txMan.getFromAddress();
+				System.out.println(txMan.getFromAddress());
+
+				try {
+					System.out.println("GEETT NOONOCECEEEE PPEEENNDINNGG");
+
+					EthGetTransactionCount ethGetTransactionCount = web3j
+							.ethGetTransactionCount(add, DefaultBlockParameterName.PENDING).sendAsync().get();
+
+					BigInteger blockchainNonce = ethGetTransactionCount.getTransactionCount();
+					System.out.println(blockchainNonce.toString());
+
+					System.out.println("GEETT NOONOCECEEEE LLAATESST");
+
+					ethGetTransactionCount = web3j.ethGetTransactionCount(add, DefaultBlockParameterName.PENDING)
+							.sendAsync().get();
+
+					blockchainNonce = ethGetTransactionCount.getTransactionCount();
+					System.out.println(blockchainNonce.toString());
+
+				} catch (InterruptedException | ExecutionException e) {
+					logger.severe("could not get nonce for address " + add);
+					logger.severe(e.getMessage());
+				}
+
 			}
 			// getNonce(txMan.getFromAddress()); // check if nonce has to be udpated
 		}
