@@ -143,7 +143,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 
 					System.out.println("GEETT NOONOCECEEEE LLAATESST");
 
-					ethGetTransactionCount = web3j.ethGetTransactionCount(add, DefaultBlockParameterName.PENDING)
+					ethGetTransactionCount = web3j.ethGetTransactionCount(add, DefaultBlockParameterName.LATEST)
 							.sendAsync().get();
 
 					blockchainNonce = ethGetTransactionCount.getTransactionCount();
@@ -171,7 +171,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 
 					System.out.println("GEETT NOONOCECEEEE LLAATESST");
 
-					ethGetTransactionCount = web3j.ethGetTransactionCount(add, DefaultBlockParameterName.PENDING)
+					ethGetTransactionCount = web3j.ethGetTransactionCount(add, DefaultBlockParameterName.LATEST)
 							.sendAsync().get();
 
 					blockchainNonce = ethGetTransactionCount.getTransactionCount();
