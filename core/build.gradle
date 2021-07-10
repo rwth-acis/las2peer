@@ -78,7 +78,7 @@ dependencies {
             type = "jar"
         }
     }
-    api "org.web3j:core:4.5.5"
+    api "org.web3j:core:4.8.4"
     api "org.slf4j:slf4j-simple:1.7.25"
 }
 
