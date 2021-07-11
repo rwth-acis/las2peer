@@ -345,10 +345,13 @@ class Contracts {
 				int attempts = 90;
 				TransactionReceiptProcessor receiptProcessor = new PollingTransactionReceiptProcessor(
 					web3j, pollingIntervalMillisecs, attempts);
-				FastRawTransactionManager transactionManager = new FastRawTransactionManager(
-					web3j, credentials, receiptProcessor
-				);
-
+					// FastRawTransactionManager transactionManager = new FastRawTransactionManager(
+					// 	web3j, credentials, receiptProcessor
+					// );
+					FastRawTransactionManager transactionManager = new StaticNonceRawTransactionManager(
+						web3j, credentials, receiptProcessor, BigInteger.valueOf(-1)
+					);
+				
 				// schedule polling, will be created on first creation of contracts
 				// https://www.baeldung.com/java-delay-code-execution
 				/*if (!Contracts.isPolling) {

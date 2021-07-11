@@ -1,0 +1,8 @@
+/output/
+/export/
+/tmp/
+/log/
+/lib/
+/junitvmwatcher*.properties
+/junit*.properties
+/build
