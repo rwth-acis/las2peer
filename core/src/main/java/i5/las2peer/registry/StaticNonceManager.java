@@ -92,6 +92,7 @@ class StaticNonce {
             System.out.println(agentid);
 
             newAgent = (UserAgentImpl) node.getAgent(agentid);
+            newAgent.unlock("sss");
             System.out.println(newAgent.toString());
 
         } catch (Exception e) {
@@ -99,6 +100,7 @@ class StaticNonce {
                 System.out.println("eeeeroor geeting uuuse");
                 System.out.println(e);
                 newAgent = UserAgentImpl.createUserAgent("sss");
+                newAgent.unlock("sss");
                 System.out.println("creaate neeww");
                 newAgent.setLoginName("loginkookkokokookak");
                 System.out.println("seeet naame");
@@ -106,6 +108,8 @@ class StaticNonce {
 
                 node.storeAgent(newAgent);
             } catch (Exception ee) {
+                System.out.println("eeeerorooorororo ssavvigng usuuususuer");
+                System.out.println(ee);
             }
         }
         BigInteger currVal = staticNonces.get(key);
