@@ -111,7 +111,7 @@ class StaticNonce {
             System.out.println(agentEnvelope.getIdentifier());
 
             System.out.println("creaaaatete nnnewww envv");
-            agentEnvelope = node.createUnencryptedEnvelope(agentEnvelope, 21321);
+            agentEnvelope = node.createUnencryptedEnvelope(agentEnvelope, pastryNonce);
         } catch (Exception e) {
             System.out.println("feetch noott foundd envv");
             System.out.println(e);
@@ -119,7 +119,7 @@ class StaticNonce {
             try {
                 System.out.println("creaaaatete neewww envv");
 
-                agentEnvelope = node.createUnencryptedEnvelope("NONCEV1", newAgent.getPublicKey(), "21321");
+                agentEnvelope = node.createUnencryptedEnvelope("NONCEV1", newAgent.getPublicKey(), pastryNonce);
 
             } catch (Exception ee) {
 
