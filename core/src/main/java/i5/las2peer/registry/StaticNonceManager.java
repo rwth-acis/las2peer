@@ -16,12 +16,17 @@ class StaticNonce {
     private static StaticNonce instance = null;
     private static Node node;
     private StaticNonceRawTransactionManager txMan;
+    private static UserAgentImpl newAgent;
 
     // singleton pattern for global nonce access
     public static StaticNonce Manager(Node nodee) {
         if (instance == null) {
             node = nodee;
             instance = new StaticNonce();
+            try {
+                newAgent = UserAgentImpl.createUserAgent("sss");
+            } catch (Exception e) {
+            }
         }
         return instance;
     }
@@ -34,7 +39,6 @@ class StaticNonce {
     // yet to -1
     public BigInteger getStaticNonce(String address, StaticNonceRawTransactionManager txMan) {
         EnvelopeVersion agentEnvelope = null;
-        UserAgentImpl newAgent = null;
         BigInteger parentNonce = BigInteger.valueOf(-1l);
         try {
             System.out.println("feeeetcchh envv ggeeeet");
@@ -93,9 +97,7 @@ class StaticNonce {
         System.out.println(incVal2.toString());
 
         EnvelopeVersion agentEnvelope = null;
-        UserAgentImpl newAgent = null;
         try {
-            newAgent = UserAgentImpl.createUserAgent("sss");
             newAgent.unlock("sss");
 
         } catch (Exception e) {
