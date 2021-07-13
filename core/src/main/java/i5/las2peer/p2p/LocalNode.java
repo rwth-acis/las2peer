@@ -32,8 +32,9 @@ import i5.las2peer.serialization.SerializationException;
 import i5.las2peer.tools.CryptoException;
 
 /**
- * Implementation of the abstract {@link Node} class mostly for testing purposes. All data and agents will be stored in
- * the same JVM, which may be used in JUnit test cases or to launch a <i>local only</i> server for example.
+ * Implementation of the abstract {@link Node} class mostly for testing
+ * purposes. All data and agents will be stored in the same JVM, which may be
+ * used in JUnit test cases or to launch a <i>local only</i> server for example.
  * 
  * TODO: uses loggers / observers
  */
@@ -59,7 +60,7 @@ public class LocalNode extends Node {
 	 * create a LocalNode
 	 * 
 	 * @param localNodeManager A manager to handle a group (network) of local nodes
-	 * @param classManager A class manager to use
+	 * @param classManager     A class manager to use
 	 */
 	public LocalNode(LocalNodeManager localNodeManager, ClassManager classManager) {
 		super(classManager);

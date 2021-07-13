@@ -27,6 +27,7 @@ import org.web3j.utils.Convert;
 import org.web3j.utils.Convert.Unit;
 
 import i5.las2peer.api.security.AgentLockedException;
+import i5.las2peer.p2p.Node;
 import i5.las2peer.registry.contracts.ServiceRegistry;
 import i5.las2peer.registry.contracts.UserRegistry;
 import i5.las2peer.registry.contracts.GroupRegistry;
@@ -59,8 +60,8 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 	 * @param registryConfiguration addresses of registry contracts and Ethereum
 	 *                              client HTTP JSON RPC API endpoint
 	 */
-	public ReadWriteRegistryClient(RegistryConfiguration registryConfiguration, Credentials credentials) {
-		super(registryConfiguration, credentials);
+	public ReadWriteRegistryClient(RegistryConfiguration registryConfiguration, Credentials credentials, Node node) {
+		super(registryConfiguration, credentials, node);
 	}
 
 	/**
@@ -511,13 +512,22 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 	public void announceDeployment(String servicePackageName, String serviceClassName, int versionMajor,
 			int versionMinor, int versionPatch, String nodeId) throws EthereumException {
 		try {
-			contracts.serviceRegistry
+			BigInteger txManNonce = txMan.getCurrentNonce();
+			logger.info("[TX Nonce] before sserv aannounc: " + txManNonce);
+
+			TransactionReceipt txR = contracts.serviceRegistry
 					.announceDeployment(servicePackageName, serviceClassName, BigInteger.valueOf(versionMajor),
 							BigInteger.valueOf(versionMinor), BigInteger.valueOf(versionPatch), nodeId)
 					.sendAsync().get();
+			String txHash = txR.getTransactionHash();
+			if (txR != null) {
+				Contracts.addTransactionReceipt(txR);
+			}
+			waitForTransactionReceipt(txHash);
+
 		} catch (Exception e) {
-			throw new EthereumException("Failed to submit service deployment announcement (" + "DEBUG: "
-					+ serviceClassName + ", " + e.getMessage() + ")", e);
+			throw new EthereumException("Failed to submit service deployment announcemento joj oj oj oj  ojo o ("
+					+ "DEBUG: " + serviceClassName + ", " + e.getMessage() + ")", e);
 		}
 	}
 

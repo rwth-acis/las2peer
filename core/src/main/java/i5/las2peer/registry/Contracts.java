@@ -32,6 +32,7 @@ import org.web3j.tx.response.TransactionReceiptProcessor;
 import org.web3j.utils.TxHashVerifier;
 
 import i5.las2peer.logging.L2pLogger;
+import i5.las2peer.p2p.Node;
 import i5.las2peer.registry.contracts.CommunityTagIndex;
 import i5.las2peer.registry.contracts.GroupRegistry;
 import i5.las2peer.registry.contracts.ReputationRegistry;
@@ -39,22 +40,21 @@ import i5.las2peer.registry.contracts.ServiceRegistry;
 import i5.las2peer.registry.contracts.UserRegistry;
 import i5.las2peer.registry.exceptions.EthereumException;
 
-
 /**
  * Wrapper for registry contracts instances.
  *
- * The contract instances should more accurately be named contract
- * accessors: They are <i>clients</i> of the actual contract instances
- * stored on the blockchain. Further, they contain user authentication.
+ * The contract instances should more accurately be named contract accessors:
+ * They are <i>clients</i> of the actual contract instances stored on the
+ * blockchain. Further, they contain user authentication.
  *
- * Thus it can make sense to have several instances, e.g., a read-only
- * instance and an instance for a currently used agent.
+ * Thus it can make sense to have several instances, e.g., a read-only instance
+ * and an instance for a currently used agent.
  *
- * They're also pretty complicated to instantiate, so that's done with
- * a builder.
+ * They're also pretty complicated to instantiate, so that's done with a
+ * builder.
  */
 class Contracts {
-	
+
 	private Web3j web3j;
 
 	final CommunityTagIndex communityTagIndex;
@@ -75,8 +75,9 @@ class Contracts {
 
 	protected static L2pLogger logger = L2pLogger.getInstance(Contracts.class);
 
-	private Contracts(Web3j web3j, CommunityTagIndex communityTagIndex, UserRegistry userRegistry, GroupRegistry groupRegistry, ServiceRegistry serviceRegistry,
-			ReputationRegistry reputationRegistry, TransactionManager transactionManager) {
+	private Contracts(Web3j web3j, CommunityTagIndex communityTagIndex, UserRegistry userRegistry,
+			GroupRegistry groupRegistry, ServiceRegistry serviceRegistry, ReputationRegistry reputationRegistry,
+			TransactionManager transactionManager, Node node) {
 		this.web3j = web3j;
 		this.communityTagIndex = communityTagIndex;
 		this.userRegistry = userRegistry;
@@ -86,14 +87,10 @@ class Contracts {
 		this.transactionManager = transactionManager;
 	}
 
-	public BigInteger getBlockTimestamp(BigInteger blockNumber) throws EthereumException
-	{
+	public BigInteger getBlockTimestamp(BigInteger blockNumber) throws EthereumException {
 		try {
-			return web3j
-				.ethGetBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), true)
-				.sendAsync().get()
-				.getBlock()
-				.getTimestamp();
+			return web3j.ethGetBlockByNumber(DefaultBlockParameter.valueOf(blockNumber), true).sendAsync().get()
+					.getBlock().getTimestamp();
 		} catch (InterruptedException | ExecutionException e) {
 			throw new EthereumException("cannot get block info for " + blockNumber.toString(), e);
 		}
@@ -112,7 +109,7 @@ class Contracts {
 	}
 
 	public static void addPendingTXHash(String pendingTxHash) {
-		logger.info("[TXManager]: added tx #"+pendingTxHash+" to list of pending transactions");
+		logger.info("[TXManager]: added tx #" + pendingTxHash + " to list of pending transactions");
 		Contracts.pendingTransactions.put(pendingTxHash, new Object());
 	}
 
@@ -133,12 +130,12 @@ class Contracts {
 		return transactionManager;
 	}
 
-	public StaticNonceRawTransactionManager tryGetNonceTransactionManager() throws EthereumException
-	{
-		if ( transactionManager instanceof StaticNonceRawTransactionManager ) {
+	public StaticNonceRawTransactionManager tryGetNonceTransactionManager() throws EthereumException {
+		if (transactionManager instanceof StaticNonceRawTransactionManager) {
 			return (StaticNonceRawTransactionManager) transactionManager;
 		} else {
-			throw new EthereumException("cannot cast transactionManager to manage internal nonces. credentials == null?");
+			throw new EthereumException(
+					"cannot cast transactionManager to manage internal nonces. credentials == null?");
 		}
 	}
 
@@ -149,17 +146,19 @@ class Contracts {
 			return;
 
 		for (int i = 0; i < DEFAULT_POLLING_ATTEMPTS_PER_TX_HASH && !pendingTransactions.isEmpty(); i++) {
-			if (transactionReceipts.size() > 0 ) 
+			if (transactionReceipts.size() > 0)
 				logger.info("[TX-QUEUE] attempt #" + i + ", found " + transactionReceipts.size() + " tx's");
 			else
 				continue;
-			
+
 			for (TransactionReceipt transactionReceipt : transactionReceipts) {
 				if (transactionReceipt.getBlockHash().isEmpty()) {
-					logger.info("[TX-QUEUE] omitting tx receipt, not mined yet: " + transactionReceipt.getTransactionHash());
-					continue;//throw new EthereumException("polling tx receipt failed: block hash empty");
+					logger.info("[TX-QUEUE] omitting tx receipt, not mined yet: "
+							+ transactionReceipt.getTransactionHash());
+					continue;// throw new EthereumException("polling tx receipt failed: block hash empty");
 				}
-				logger.info("[TX-QUEUE] observed tx receipt: " + Util.getOrDefault(transactionReceipt.getTransactionHash(), "??"));
+				logger.info("[TX-QUEUE] observed tx receipt: "
+						+ Util.getOrDefault(transactionReceipt.getTransactionHash(), "??"));
 				logger.info("[TX-QUEUE] > blockHash: " + Util.getOrDefault(transactionReceipt.getBlockHash(), "??"));
 				logger.info("[TX-QUEUE] > gas used: " + Util.getOrDefault(transactionReceipt.getGasUsed(), "??"));
 				logger.info("[TX-QUEUE] > senderAddress: " + Util.getOrDefault(transactionReceipt.getFrom(), "??"));
@@ -186,8 +185,8 @@ class Contracts {
 
 		final String endpoint;
 
-		ContractsConfig(String communityTagIndexAddress, String userRegistryAddress, String groupRegistryAddress, String serviceRegistryAddress,
-				String reputationRegistryAddress, String endpoint) {
+		ContractsConfig(String communityTagIndexAddress, String userRegistryAddress, String groupRegistryAddress,
+				String serviceRegistryAddress, String reputationRegistryAddress, String endpoint) {
 			this.communityTagIndexAddress = communityTagIndexAddress;
 			this.userRegistryAddress = userRegistryAddress;
 			this.groupRegistryAddress = groupRegistryAddress;
@@ -198,32 +197,35 @@ class Contracts {
 
 		@Override
 		public boolean equals(Object o) {
-			if (this == o) return true;
-			if (o == null || getClass() != o.getClass()) return false;
+			if (this == o)
+				return true;
+			if (o == null || getClass() != o.getClass())
+				return false;
 			ContractsConfig that = (ContractsConfig) o;
-			return Objects.equals(communityTagIndexAddress, that.communityTagIndexAddress) &&
-					Objects.equals(userRegistryAddress, that.userRegistryAddress) &&
-					Objects.equals(groupRegistryAddress, that.groupRegistryAddress) &&
-					Objects.equals(serviceRegistryAddress, that.serviceRegistryAddress) &&
-					Objects.equals(reputationRegistryAddress, that.reputationRegistryAddress) &&
-					Objects.equals(endpoint, that.endpoint);
+			return Objects.equals(communityTagIndexAddress, that.communityTagIndexAddress)
+					&& Objects.equals(userRegistryAddress, that.userRegistryAddress)
+					&& Objects.equals(groupRegistryAddress, that.groupRegistryAddress)
+					&& Objects.equals(serviceRegistryAddress, that.serviceRegistryAddress)
+					&& Objects.equals(reputationRegistryAddress, that.reputationRegistryAddress)
+					&& Objects.equals(endpoint, that.endpoint);
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(communityTagIndexAddress, userRegistryAddress, groupRegistryAddress, serviceRegistryAddress, reputationRegistryAddress, endpoint);
+			return Objects.hash(communityTagIndexAddress, userRegistryAddress, groupRegistryAddress,
+					serviceRegistryAddress, reputationRegistryAddress, endpoint);
 		}
 	}
 
 	/**
-	 * Sets up the contract wrappers (or: "clients"), possibly with
-	 * credentials.
+	 * Sets up the contract wrappers (or: "clients"), possibly with credentials.
 	 *
-	 * Credentials are optional but required for all state-changing
-	 * smart contract operations (see "call" vs "sendTransaction").
+	 * Credentials are optional but required for all state-changing smart contract
+	 * operations (see "call" vs "sendTransaction").
 	 */
 	static class ContractsBuilder {
-		// Not all JSON RPC calls require a "from" address, e.g., https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_call
+		// Not all JSON RPC calls require a "from" address, e.g.,
+		// https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_call
 		// However, Web3j requires one, even for ReadOnlyTransactionManager,
 		// so we can't just omit it -- instead, let's make one up.
 		// If the `call`ed Solidity smart contracts don't check `msg.sender`,
@@ -236,32 +238,34 @@ class Contracts {
 		private Credentials credentials;
 
 		/**
-		 * Create builder with the mandatory arguments. Optional fields
-		 * can then be set with the setter methods, before using the
-		 * build method to construct a {@link Contracts} instance.
-		 * @param config addresses of the registry contracts and
-		 *               Ethereum client HTTP JSON RPC API endpoint
+		 * Create builder with the mandatory arguments. Optional fields can then be set
+		 * with the setter methods, before using the build method to construct a
+		 * {@link Contracts} instance.
+		 * 
+		 * @param config addresses of the registry contracts and Ethereum client HTTP
+		 *               JSON RPC API endpoint
 		 */
 		public ContractsBuilder(ContractsConfig config) {
 			this.config = config;
 		}
 
 		/**
-		 * Configures the gas parameters of transactions sent via the
-		 * contracts wrappers.
+		 * Configures the gas parameters of transactions sent via the contracts
+		 * wrappers.
 		 *
-		 * Static gas parameters are used, i.e., all transactions use
-		 * the same values.
+		 * Static gas parameters are used, i.e., all transactions use the same values.
 		 *
-		 * @param gasPrice price (in Wei) to be paid per gas unit.
-		 *                 Offering a higher price will potentially
-		 *                 prioritise transactions for mining.
-		 * @param gasLimit maximum amount of gas a transaction may use.
-		 *                 If exceeded, the transaction fails and all
-		 *                 gas is still consumed.
+		 * @param gasPrice price (in Wei) to be paid per gas unit. Offering a higher
+		 *                 price will potentially prioritise transactions for mining.
+		 * @param gasLimit maximum amount of gas a transaction may use. If exceeded, the
+		 *                 transaction fails and all gas is still consumed.
 		 * @return this builder instance. Allows chained method calls.
-		 * @see <a href="https://ethereum.stackexchange.com/questions/3/what-is-meant-by-the-term-gas">Detailed explanations on StackExchange</a>
-		 * @see <a href="https://web3j.readthedocs.io/en/latest/smart_contracts.html#dynamic-gas-price-and-limit">web3j dynamic gas configuration</a>
+		 * @see <a href=
+		 *      "https://ethereum.stackexchange.com/questions/3/what-is-meant-by-the-term-gas">Detailed
+		 *      explanations on StackExchange</a>
+		 * @see <a href=
+		 *      "https://web3j.readthedocs.io/en/latest/smart_contracts.html#dynamic-gas-price-and-limit">web3j
+		 *      dynamic gas configuration</a>
 		 */
 		public ContractsBuilder setGasOptions(long gasPrice, long gasLimit) {
 			gasProvider = new StaticGasProvider(BigInteger.valueOf(gasPrice), BigInteger.valueOf(gasLimit));
@@ -269,10 +273,10 @@ class Contracts {
 		}
 
 		/**
-		 * Set credentials which are used to sign transactions sent via
-		 * the contract wrappers.
-		 * If no credentials are provided, the contracts must be used
-		 * as read-only (no state-changing function invocations).
+		 * Set credentials which are used to sign transactions sent via the contract
+		 * wrappers. If no credentials are provided, the contracts must be used as
+		 * read-only (no state-changing function invocations).
+		 * 
 		 * @param credentials wrapper of key pair and Ethereum address
 		 * @return this builder instance. Allows chained method calls.
 		 */
@@ -282,30 +286,37 @@ class Contracts {
 		}
 
 		/**
-		 * Constructs the Ethereum smart contract wrapper instances
-		 * for the given configuration. Notably, the credentials are
-		 * baked into the wrapper: They cannot be changed (or removed).
+		 * Constructs the Ethereum smart contract wrapper instances for the given
+		 * configuration. Notably, the credentials are baked into the wrapper: They
+		 * cannot be changed (or removed).
+		 * 
 		 * @param nonce value to initialize transaction manager nonce with
 		 * @return instance of contracts wrapper, ready for use
 		 */
-		public Contracts build() {
+		public Contracts build(Node node) {
 			if (gasProvider == null) {
 				gasProvider = new DefaultGasProvider();
 			}
 
 			Web3j web3j = Web3j.build((config.endpoint == null) ? new HttpService() : new HttpService(config.endpoint));
 
-			TransactionManager transactionManager = constructTxManager(web3j, credentials);
-			CommunityTagIndex communityTagIndex = CommunityTagIndex.load(config.communityTagIndexAddress, web3j, transactionManager, gasProvider);
-			UserRegistry userRegistry = UserRegistry.load(config.userRegistryAddress, web3j, transactionManager, gasProvider);
-			GroupRegistry groupRegistry = GroupRegistry.load(config.groupRegistryAddress, web3j, transactionManager, gasProvider);
-			ServiceRegistry serviceRegistry = ServiceRegistry.load(config.serviceRegistryAddress, web3j, transactionManager, gasProvider);
-			ReputationRegistry reputationRegistry = ReputationRegistry.load(config.reputationRegistryAddress, web3j, transactionManager, gasProvider);
+			TransactionManager transactionManager = constructTxManager(web3j, credentials, node);
+			CommunityTagIndex communityTagIndex = CommunityTagIndex.load(config.communityTagIndexAddress, web3j,
+					transactionManager, gasProvider);
+			UserRegistry userRegistry = UserRegistry.load(config.userRegistryAddress, web3j, transactionManager,
+					gasProvider);
+			GroupRegistry groupRegistry = GroupRegistry.load(config.groupRegistryAddress, web3j, transactionManager,
+					gasProvider);
+			ServiceRegistry serviceRegistry = ServiceRegistry.load(config.serviceRegistryAddress, web3j,
+					transactionManager, gasProvider);
+			ReputationRegistry reputationRegistry = ReputationRegistry.load(config.reputationRegistryAddress, web3j,
+					transactionManager, gasProvider);
 
-			return new Contracts(web3j, communityTagIndex, userRegistry, groupRegistry, serviceRegistry, reputationRegistry, transactionManager);
+			return new Contracts(web3j, communityTagIndex, userRegistry, groupRegistry, serviceRegistry,
+					reputationRegistry, transactionManager, node);
 		}
 
-		private TransactionManager constructTxManager(Web3j web3j, Credentials credentials) {
+		private TransactionManager constructTxManager(Web3j web3j, Credentials credentials, Node node) {
 			if (credentials == null) {
 				return new ReadonlyTransactionManager(web3j, DEFAULT_FROM_ADDRESS);
 			} else {
@@ -326,52 +337,44 @@ class Contracts {
 				//
 				// okay, frankly, I'm not even sure if this can fix the nonce too low error (but
 				// that's what the issue / StackEx suggest)
-				/*FastRawTransactionManager transactionManager = new StaticNonceRawTransactionManager(
-					web3j, credentials, 
-					new QueuingTransactionReceiptProcessor(web3j,
-						new Callback() {
-							@Override
-							public void accept(TransactionReceipt transactionReceipt) {
-								Contracts.addTransactionReceipt(transactionReceipt);
-							}
-							@Override
-							public void exception(Exception e) {
-								e.printStackTrace();
-							}
-						}, 
-					DEFAULT_POLLING_ATTEMPTS_PER_TX_HASH, POLLING_FREQUENCY)
-					*/
+				/*
+				 * FastRawTransactionManager transactionManager = new
+				 * StaticNonceRawTransactionManager( web3j, credentials, new
+				 * QueuingTransactionReceiptProcessor(web3j, new Callback() {
+				 * 
+				 * @Override public void accept(TransactionReceipt transactionReceipt) {
+				 * Contracts.addTransactionReceipt(transactionReceipt); }
+				 * 
+				 * @Override public void exception(Exception e) { e.printStackTrace(); } },
+				 * DEFAULT_POLLING_ATTEMPTS_PER_TX_HASH, POLLING_FREQUENCY)
+				 */
 				long pollingIntervalMillisecs = 1000;
-				int attempts = 90;
-				TransactionReceiptProcessor receiptProcessor = new PollingTransactionReceiptProcessor(
-					web3j, pollingIntervalMillisecs, attempts);
-					// FastRawTransactionManager transactionManager = new FastRawTransactionManager(
-					// 	web3j, credentials, receiptProcessor
-					// );
-					FastRawTransactionManager transactionManager = new StaticNonceRawTransactionManager(
-						web3j, credentials, receiptProcessor, BigInteger.valueOf(-1)
-					);
-				
-				// schedule polling, will be created on first creation of contracts
-				// https://www.baeldung.com/java-delay-code-execution
-				/*if (!Contracts.isPolling) {
-					Contracts.isPolling = true;
-					Contracts.executorService.scheduleAtFixedRate(() -> {
-						try {
-							Contracts.pollTransactionList();
-						} catch (EthereumException e) {
-							Contracts.isPolling = false;
-							e.printStackTrace();
-						}
-					}, 0, POLLING_FREQUENCY, TimeUnit.MILLISECONDS);
-				}*/
-
-				/*long pollingIntervalMillisecs = 1000;
 				int attempts = 90;
 				TransactionReceiptProcessor receiptProcessor = new PollingTransactionReceiptProcessor(web3j,
 						pollingIntervalMillisecs, attempts);
-				RawTransactionManager transactionManager = new FastRawTransactionManager(web3j, credentials,
-						receiptProcessor);*/
+				// FastRawTransactionManager transactionManager = new FastRawTransactionManager(
+				// web3j, credentials, receiptProcessor
+				// );
+				FastRawTransactionManager transactionManager = new StaticNonceRawTransactionManager(web3j, credentials,
+						receiptProcessor, BigInteger.valueOf(-1), node);
+
+				// schedule polling, will be created on first creation of contracts
+				// https://www.baeldung.com/java-delay-code-execution
+				/*
+				 * if (!Contracts.isPolling) { Contracts.isPolling = true;
+				 * Contracts.executorService.scheduleAtFixedRate(() -> { try {
+				 * Contracts.pollTransactionList(); } catch (EthereumException e) {
+				 * Contracts.isPolling = false; e.printStackTrace(); } }, 0, POLLING_FREQUENCY,
+				 * TimeUnit.MILLISECONDS); }
+				 */
+
+				/*
+				 * long pollingIntervalMillisecs = 1000; int attempts = 90;
+				 * TransactionReceiptProcessor receiptProcessor = new
+				 * PollingTransactionReceiptProcessor(web3j, pollingIntervalMillisecs,
+				 * attempts); RawTransactionManager transactionManager = new
+				 * FastRawTransactionManager(web3j, credentials, receiptProcessor);
+				 */
 
 				// txHashVerification throws false alarms (not sure why), disable check
 				// TODO: figure out what's going and and reenable
@@ -384,7 +387,8 @@ class Contracts {
 	}
 
 	static class NoopTxHashVerifier extends TxHashVerifier {
-		@Override public boolean verify(String hash1, String hash2) {
+		@Override
+		public boolean verify(String hash1, String hash2) {
 			return true;
 		}
 	}

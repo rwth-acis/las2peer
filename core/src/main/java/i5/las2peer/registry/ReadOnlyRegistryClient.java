@@ -1,6 +1,7 @@
 package i5.las2peer.registry;
 
 import i5.las2peer.logging.L2pLogger;
+import i5.las2peer.p2p.Node;
 import i5.las2peer.registry.data.BlockchainTransactionData;
 import i5.las2peer.registry.data.GenericTransactionData;
 import i5.las2peer.registry.data.GroupData;
@@ -71,8 +72,8 @@ public class ReadOnlyRegistryClient {
 
 	// raw tx - sending directly, fast raw - nonce management
 	boolean updateNonceTxMan = false;
-	FastRawTransactionManager txMan;
-			
+	StaticNonceRawTransactionManager txMan;
+	private Node node;
 
 	protected final L2pLogger logger = L2pLogger.getInstance(ReadWriteRegistryClient.class);
 
@@ -83,18 +84,19 @@ public class ReadOnlyRegistryClient {
 	 *                              client HTTP JSON RPC API endpoint
 	 */
 	public ReadOnlyRegistryClient(RegistryConfiguration registryConfiguration) {
-		this(registryConfiguration, null);
+		this(registryConfiguration, null, null);
 	}
 
-	ReadOnlyRegistryClient(RegistryConfiguration registryConfiguration, Credentials credentials) {
+	ReadOnlyRegistryClient(RegistryConfiguration registryConfiguration, Credentials credentials, Node node) {
 		web3j = Web3j.build(new HttpService(registryConfiguration.getEndpoint()));
 		web3j_admin = Admin.build(new HttpService(registryConfiguration.getEndpoint()));
 
 		contractsConfig = new Contracts.ContractsConfig(registryConfiguration.getCommunityTagIndexAddress(),
-				registryConfiguration.getUserRegistryAddress(), registryConfiguration.getGroupRegistryAddress(), registryConfiguration.getServiceRegistryAddress(),
-				registryConfiguration.getReputationRegistryAddress(), registryConfiguration.getEndpoint());
+				registryConfiguration.getUserRegistryAddress(), registryConfiguration.getGroupRegistryAddress(),
+				registryConfiguration.getServiceRegistryAddress(), registryConfiguration.getReputationRegistryAddress(),
+				registryConfiguration.getEndpoint());
 
-		observer = BlockchainObserver.getInstance(contractsConfig);
+		observer = BlockchainObserver.getInstance(contractsConfig, node);
 
 		long _gasPrice = registryConfiguration.getGasPrice();
 		this.gasPrice = BigInteger.valueOf(_gasPrice);
@@ -106,18 +108,16 @@ public class ReadOnlyRegistryClient {
 
 		contracts = new Contracts.ContractsBuilder(contractsConfig).setGasOptions(_gasPrice, _gasLimit)
 				.setCredentials(credentials) // may be null, that's okay here
-				.build();
+				.build(node);
 
 		this.credentials = credentials;
 
-		logger.info("created smart contract wrapper with credentials:" + credentialsAddress + "\n contract ID:" + this.contracts.transactionManager.hashCode());
+		logger.info("created smart contract wrapper with credentials:" + credentialsAddress + "\n contract ID:"
+				+ this.contracts.transactionManager.hashCode());
 
-		
-
-		if ( this.contracts.transactionManager instanceof FastRawTransactionManager ) 
-		{
+		if (this.contracts.transactionManager instanceof FastRawTransactionManager) {
 			this.updateNonceTxMan = true;
-			this.txMan = (FastRawTransactionManager) this.contracts.transactionManager;
+			this.txMan = (StaticNonceRawTransactionManager) this.contracts.transactionManager;
 		}
 	}
 
@@ -194,6 +194,7 @@ public class ReadOnlyRegistryClient {
 			throw new EthereumException(e);
 		}
 	}
+
 	/**
 	 * Return true if user name is both valid, as encoded in the registry smart
 	 * contract code.
@@ -227,6 +228,7 @@ public class ReadOnlyRegistryClient {
 			throw new EthereumException(e);
 		}
 	}
+
 	/**
 	 * Retrieve user data stored in registry for given name.
 	 * 
@@ -311,19 +313,17 @@ public class ReadOnlyRegistryClient {
 			if (userProfileData != null
 					&& !userProfileData.getOwner().equals("0x0000000000000000000000000000000000000000")) {
 				if (userProfileData.getNoTransactionsRcvd().compareTo(BigInteger.ZERO) == 0) {
-					logger.fine("[User Reputation]: valid reputation profile [" + userProfileData.getUserName() + "], no incoming reputation yet." );
+					logger.fine("[User Reputation]: valid reputation profile [" + userProfileData.getUserName()
+							+ "], no incoming reputation yet.");
 					return 0f;
-				} 
-				else 
-				{
+				} else {
 					userRatingScore_Raw = userProfileData.getStarRating();
-					logger.fine("[User Reputation]: valid reputation profile [" + userProfileData.getUserName() + "], score: " + Float.toString(userRatingScore_Raw) );
+					logger.fine("[User Reputation]: valid reputation profile [" + userProfileData.getUserName()
+							+ "], score: " + Float.toString(userRatingScore_Raw));
 					return userRatingScore_Raw;
 				}
-			}
-			else
-			{
-				logger.fine("[User Reputation]: no valid reputation profile" );
+			} else {
+				logger.fine("[User Reputation]: no valid reputation profile");
 				return 0f;
 			}
 		} catch (EthereumException | NotFoundException e) {
@@ -377,18 +377,13 @@ public class ReadOnlyRegistryClient {
 		String serviceNamespace = service.substring(0, lastDotIndex);
 		logger.info("[service names] searching for: " + serviceNamespace);
 
-		for (Map.Entry<String, String> entry : observer.serviceNameToAuthor.entrySet()) 
-		{
-			if ( entry.getKey().equals(serviceNamespace) )
-			{
-				logger.info(
-					"[service names] found entry: " + entry.getKey() + " | " + entry.getValue()
-				);
+		for (Map.Entry<String, String> entry : observer.serviceNameToAuthor.entrySet()) {
+			if (entry.getKey().equals(serviceNamespace)) {
+				logger.info("[service names] found entry: " + entry.getKey() + " | " + entry.getValue());
 			}
 		}
 
-		if (!observer.serviceNameToAuthor.containsKey(serviceNamespace))
-		{
+		if (!observer.serviceNameToAuthor.containsKey(serviceNamespace)) {
 			logger.warning("[service author] not found: " + serviceNamespace);
 			return "";
 		}
@@ -503,18 +498,16 @@ public class ReadOnlyRegistryClient {
 	 * @return nonce
 	 */
 	public BigInteger getNonce(String address) {
-		if ( address.length() == 0 )
-		{
-			if ( credentials != null )
-			{
+		if (address.length() == 0) {
+			if (credentials != null) {
 				address = credentials.getAddress();
 			}
 		}
 		BigInteger blockchainNonce = BigInteger.valueOf(-1);
 		EthGetTransactionCount ethGetTransactionCount;
 		try {
-			ethGetTransactionCount = web3j
-					.ethGetTransactionCount(address, DefaultBlockParameterName.PENDING).sendAsync().get();
+			ethGetTransactionCount = web3j.ethGetTransactionCount(address, DefaultBlockParameterName.PENDING)
+					.sendAsync().get();
 
 			blockchainNonce = ethGetTransactionCount.getTransactionCount();
 		} catch (InterruptedException | ExecutionException e) {
@@ -527,65 +520,70 @@ public class ReadOnlyRegistryClient {
 		// transactions
 		// and the contract calls (e.g. registration, reputation) are done via managed
 		// transactions
-		
+
 		BigInteger retVal = BigInteger.ZERO;
-		BigInteger localNonce = StaticNonce.Manager().getStaticNonce(address);
+		BigInteger localNonce = StaticNonce.Manager(node).getStaticNonce(address, txMan);
 
 		switch (localNonce.compareTo(blockchainNonce)) {
-			default:
-			case 0: // they are in sync
-				break;
-			case 1: // local nonce is ahead
-				logger.info("[TX Nonce] (chain: "+blockchainNonce+" vs. local: "+localNonce+"), incrementing by 1.");
-				retVal = StaticNonce.Manager().incStaticNonce(address);
-				break;
-			case -1: // local nonce is behind
-				logger.info("[TX Nonce] (chain: "+blockchainNonce+" vs. local: "+localNonce+"): override to " + blockchainNonce + "+1");
-				retVal = StaticNonce.Manager().putStaticNonce(address, blockchainNonce.add(BigInteger.ONE));
-				txMan.setNonce(blockchainNonce.add(BigInteger.valueOf(-1))); // update nonce
-				break;
+		default:
+		case 0: // they are in sync
+			break;
+		case 1: // local nonce is ahead
+			logger.info(
+					"[TX Nonce] (chain: " + blockchainNonce + " vs. local: " + localNonce + "), incrementing by 1.");
+			retVal = StaticNonce.Manager(node).incStaticNonce(address, txMan);
+			break;
+		case -1: // local nonce is behind
+			logger.info("[TX Nonce] (chain: " + blockchainNonce + " vs. local: " + localNonce + "): override to "
+					+ blockchainNonce + "+1");
+			retVal = StaticNonce.Manager(node).putStaticNonce(address, blockchainNonce.add(BigInteger.ONE));
+			txMan.setNonce(blockchainNonce.add(BigInteger.valueOf(-1))); // update nonce
+			break;
 		}
 
-		//retVal = blockchainNonce;
+		// retVal = blockchainNonce;
 
 		return retVal;
 	}
 
-
-
-	void setLocalNonce(String address, long val){
-		StaticNonce.Manager().putStaticNonce(address, BigInteger.valueOf(val));
+	void setLocalNonce(String address, long val) {
+		StaticNonce.Manager(node).putStaticNonce(address, BigInteger.valueOf(val));
 	}
-	void setTxNonce(long val){
+
+	void setTxNonce(long val) {
 		txMan.setNonce(BigInteger.valueOf(val)); // update nonce
 	}
+
 	/**
 	 * Overrides nonce of transactionManager with local nonce.
+	 * 
 	 * @param address
 	 */
 	protected synchronized void updateTxManNonce(String address) {
-		if ( updateNonceTxMan )
-		{
+		if (updateNonceTxMan) {
 			// local client has larger nonce than txman?
 			BigInteger txManNonce = txMan.getCurrentNonce();
 			BigInteger localNonce = this.getNonce(address);
-			BigInteger newNonce = localNonce.add(BigInteger.ONE);//StaticNonce.Manager().incStaticNonce(address);
+			BigInteger newNonce = localNonce.add(BigInteger.ONE);// StaticNonce.Manager().incStaticNonce(address);
 			switch (txManNonce.compareTo(localNonce)) {
-				case -1: // txMan nonce is behind local
-					logger.info("[FastRaw TX] (tx: "+txManNonce+"  < local: "+localNonce+"): setting txMan to " + newNonce);
-					txMan.setNonce(newNonce);
-					StaticNonce.Manager().incStaticNonce(address);
-					break;
-				case 1: // txMan nonce is ahead of local
-					logger.info("[FastRaw TX] (tx: "+txManNonce+"  > local: "+localNonce+"): setting local to " + txManNonce);
-					StaticNonce.Manager().putStaticNonceIfAbsent(address, txManNonce);
-					break;
-				case 0: // they are in sync - should be fine?
-				default:
-					logger.info("[FastRaw TX] (tx: "+txManNonce+" == local: "+localNonce+"): incrementing txMan to " + newNonce);
-					txMan.setNonce(newNonce);
-					StaticNonce.Manager().putStaticNonceIfAbsent(address, newNonce);
-					break;
+			case -1: // txMan nonce is behind local
+				logger.info("[FastRaw TX] (tx: " + txManNonce + "  < local: " + localNonce + "): setting txMan to "
+						+ newNonce);
+				txMan.setNonce(newNonce);
+				StaticNonce.Manager(node).incStaticNonce(address, txMan);
+				break;
+			case 1: // txMan nonce is ahead of local
+				logger.info("[FastRaw TX] (tx: " + txManNonce + "  > local: " + localNonce + "): setting local to "
+						+ txManNonce);
+				StaticNonce.Manager(node).putStaticNonceIfAbsent(address, txManNonce);
+				break;
+			case 0: // they are in sync - should be fine?
+			default:
+				logger.info("[FastRaw TX] (tx: " + txManNonce + " == local: " + localNonce + "): incrementing txMan to "
+						+ newNonce);
+				txMan.setNonce(newNonce);
+				StaticNonce.Manager(node).putStaticNonceIfAbsent(address, newNonce);
+				break;
 			}
 		}
 	}
@@ -642,7 +640,6 @@ public class ReadOnlyRegistryClient {
 			if (txR == null) {
 				throw new EthereumException("Transaction sent, no receipt returned. Increase wait time?");
 			}
-
 			if (txR.getBlockNumber().compareTo(BigInteger.ZERO) <= 0) {
 				logger.severe(txR.toString());
 				throw new EthereumException("[TX-Wait] trx fail - tx not mined into an active block");
@@ -667,55 +664,52 @@ public class ReadOnlyRegistryClient {
 	/**
 	 * Returns the TransactionRecipt for the specified tx hash as an optional.
 	 * https://github.com/matthiaszimmermann/web3j_demo / Web3jUtils
+	 * 
 	 * @param transactionHash
 	 * @return transactionReceipt
-	 * @throws ExecutionException 
+	 * @throws ExecutionException
 	 * @throws InterruptedException
 	 */
-	private Optional<TransactionReceipt> getReceipt(String transactionHash) 
-			throws InterruptedException, ExecutionException
-	{
-		EthGetTransactionReceipt receipt = web3j
-				.ethGetTransactionReceipt(transactionHash)
-				.sendAsync()
-				.get();
+	private Optional<TransactionReceipt> getReceipt(String transactionHash)
+			throws InterruptedException, ExecutionException {
+		EthGetTransactionReceipt receipt = web3j.ethGetTransactionReceipt(transactionHash).sendAsync().get();
 
 		return receipt.getTransactionReceipt();
 	}
-	
 
 	/**
 	 * Converts the provided Wei amount (smallest value Unit) to Ethers.
 	 * https://github.com/matthiaszimmermann/web3j_demo / Web3jUtils
+	 * 
 	 * @param wei
 	 * @return
 	 */
 	public BigDecimal weiToEther(BigInteger wei) {
 		return Convert.fromWei(wei.toString(), Convert.Unit.ETHER);
 	}
-	
+
 	/**
 	 * Converts the provided Ether amount to Wei (smallest value Unit) .
 	 * https://github.com/matthiaszimmermann/web3j_demo / Web3jUtils
+	 * 
 	 * @param ether
 	 * @return
 	 */
 	public BigInteger etherToWei(BigDecimal ether) {
 		return Convert.toWei(ether, Convert.Unit.ETHER).toBigInteger();
 	}
-	
+
 	/*
-	@Deprecated
-	public Map<String, List<ServiceDeploymentData>> getServiceDeployments() {
-		// just getting rid of the redundant (for our purposes) nested map
-		// and filtering out those deployments that have ended (we need to keep track of them internally, but don't
-		// want to expose them)
-		return observer.deployments.entrySet().stream()
-				.collect(Collectors.toMap(Map.Entry::getKey, value -> new ArrayList<>(value.getValue().values())))
-				.entrySet().stream() // OMG
-				.filter(e -> e.getValue().stream().anyMatch(deploymentData -> deploymentData.hasEnded()))
-				.collect(Collectors.toMap(e -> e.getKey(), e-> e.getValue())); // are you serious?
-		// ahhhahahahahaaahaaaa embrace the dark side, let it flow through you!
-	}
-	*/
+	 * @Deprecated public Map<String, List<ServiceDeploymentData>>
+	 * getServiceDeployments() { // just getting rid of the redundant (for our
+	 * purposes) nested map // and filtering out those deployments that have ended
+	 * (we need to keep track of them internally, but don't // want to expose them)
+	 * return observer.deployments.entrySet().stream()
+	 * .collect(Collectors.toMap(Map.Entry::getKey, value -> new
+	 * ArrayList<>(value.getValue().values()))) .entrySet().stream() // OMG
+	 * .filter(e -> e.getValue().stream().anyMatch(deploymentData ->
+	 * deploymentData.hasEnded())) .collect(Collectors.toMap(e -> e.getKey(), e->
+	 * e.getValue())); // are you serious? // ahhhahahahahaaahaaaa embrace the dark
+	 * side, let it flow through you! }
+	 */
 }

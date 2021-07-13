@@ -39,10 +39,10 @@ public class EthereumAgent extends UserAgentImpl {
 	 * BIP39 mnemonic used together with the agent's password to generate the
 	 * private key for Ethereum.
 	 *
-	 * (Instead of this, we could use the encrypted private key directly, like
-	 * the regular agent key pair, but using the mnemonic abstraction allows
-	 * the user to potentially use other wallet software/services and allows
-	 * us to delegate the tricky crypto operations to a compatible library.)
+	 * (Instead of this, we could use the encrypted private key directly, like the
+	 * regular agent key pair, but using the mnemonic abstraction allows the user to
+	 * potentially use other wallet software/services and allows us to delegate the
+	 * tricky crypto operations to a compatible library.)
 	 */
 	// should the salt be used, too? can't hurt, but not sure if there's an
 	// advantage. I'm fairly certain Web3J uses its own salt and whatnot
@@ -68,7 +68,8 @@ public class EthereumAgent extends UserAgentImpl {
 		logger.fine("creating ethereum agent [" + ethereumAddress + "]");
 	}
 
-	protected EthereumAgent(PublicKey pubKey, byte[] encryptedPrivate, byte[] salt, String loginName, String ethereumMnemonic, String ethereumAddress) {
+	protected EthereumAgent(PublicKey pubKey, byte[] encryptedPrivate, byte[] salt, String loginName,
+			String ethereumMnemonic, String ethereumAddress) {
 		super(pubKey, encryptedPrivate, salt);
 		checkLoginNameValidity(loginName);
 		this.sLoginName = loginName;
@@ -88,8 +89,8 @@ public class EthereumAgent extends UserAgentImpl {
 
 	// bit of unfortunate name here, but let's stick with it
 	/**
-	 * Removes decrypted private key and the registry client (which
-	 * contains user credentials).
+	 * Removes decrypted private key and the registry client (which contains user
+	 * credentials).
 	 */
 	@Override
 	public void lockPrivateKey() {
@@ -103,10 +104,10 @@ public class EthereumAgent extends UserAgentImpl {
 		super.unlock(passphrase);
 
 		credentials = CredentialUtils.fromMnemonic(ethereumMnemonic, passphrase);
-		registryClient = new ReadWriteRegistryClient(new RegistryConfiguration(), credentials);
+		registryClient = new ReadWriteRegistryClient(new RegistryConfiguration(), credentials, getRunningAtNode());
 
 		ethereumAddress = credentials.getAddress();
-		logger.fine("unlocked ethereum agent ["+ethereumAddress +"]");
+		logger.fine("unlocked ethereum agent [" + ethereumAddress + "]");
 	}
 
 	@Override
@@ -116,12 +117,14 @@ public class EthereumAgent extends UserAgentImpl {
 		if (userAgentIsLocked == ethereumIsLocked) {
 			return userAgentIsLocked;
 		} else {
-			// this hopefully only happens during initialization, where this is called from a superclass's constructor
+			// this hopefully only happens during initialization, where this is called from
+			// a superclass's constructor
 			if (ethereumMnemonic == null) {
 				// we're almost certainly in the middle of initialization
 				return userAgentIsLocked;
 			} else {
-				throw new RuntimeException("FIXME: inconsistent lock state should not be reachable -- figure out where this happens!");
+				throw new RuntimeException(
+						"FIXME: inconsistent lock state should not be reachable -- figure out where this happens!");
 			}
 		}
 	}
@@ -135,9 +138,8 @@ public class EthereumAgent extends UserAgentImpl {
 					+ "\" keygen=\"" + CryptoTools.getSymmetricKeygenMethod() + "\">\n"
 					+ "\t\t<salt encoding=\"base64\">" + Base64.getEncoder().encodeToString(getSalt()) + "</salt>\n"
 					+ "\t\t<data encoding=\"base64\">" + getEncodedPrivate() + "</data>\n" + "\t</privatekey>\n"
-					+ "\t<login>" + sLoginName + "</login>\n"
-					+ "\t<ethereumaddress>" + ethereumAddress + "</ethereumaddress>\n"
-					+ "\t<ethereummnemonic>" + ethereumMnemonic + "</ethereummnemonic>\n");
+					+ "\t<login>" + sLoginName + "</login>\n" + "\t<ethereumaddress>" + ethereumAddress
+					+ "</ethereumaddress>\n" + "\t<ethereummnemonic>" + ethereumMnemonic + "</ethereummnemonic>\n");
 
 			if (sEmail != null) {
 				result.append("\t<email>" + sEmail + "</email>\n");
@@ -153,13 +155,14 @@ public class EthereumAgent extends UserAgentImpl {
 
 	/**
 	 * Creates new agent with given passphrase and login name.
-	 * @param passphrase passphrase with which both the agent key pair
-	 *                   and the Ethereum key pair are encrypted
-	 * @param loginName name matching [a-zA-Z].{3,31} (hopefully UTF-8
-	 *                  characters, let's not get too crazy)
+	 * 
+	 * @param passphrase passphrase with which both the agent key pair and the
+	 *                   Ethereum key pair are encrypted
+	 * @param loginName  name matching [a-zA-Z].{3,31} (hopefully UTF-8 characters,
+	 *                   let's not get too crazy)
 	 * @return new EthereumAgent instance
-	 * @throws CryptoException if there is an internal error during
-	 *                         Ethereum key creation
+	 * @throws CryptoException if there is an internal error during Ethereum key
+	 *                         creation
 	 */
 	public static EthereumAgent createEthereumAgentWithClient(String loginName, String passphrase,
 			ReadWriteRegistryClient regClient) throws CryptoException, AgentOperationFailedException {
@@ -177,8 +180,8 @@ public class EthereumAgent extends UserAgentImpl {
 	}
 
 	/**
-	 * Gets registry client that uses the agent's credentials.
-	 * May be <code>null</code>; use {@link #unlock(String)}.
+	 * Gets registry client that uses the agent's credentials. May be
+	 * <code>null</code>; use {@link #unlock(String)}.
 	 */
 	public ReadWriteRegistryClient getRegistryClient() {
 		return registryClient;
@@ -245,7 +248,8 @@ public class EthereumAgent extends UserAgentImpl {
 			String ethereumAddress = ethereumAddressElement.getTextContent();
 
 			// required fields complete, create result
-			EthereumAgent result = new EthereumAgent(publicKey, encPrivate, salt, login, ethereumMnemonic, ethereumAddress);
+			EthereumAgent result = new EthereumAgent(publicKey, encPrivate, salt, login, ethereumMnemonic,
+					ethereumAddress);
 
 			// read and set optional fields
 			// note: login name is not optional here
