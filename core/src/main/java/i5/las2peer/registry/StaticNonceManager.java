@@ -89,6 +89,8 @@ class StaticNonce {
         BigInteger pastryNonce = getStaticNonce(key, txMan);
         System.out.println("ppaarernnt nooonce iiss");
         System.out.println(pastryNonce.toString());
+        BigInteger incVal2 = pastryNonce.add(BigInteger.ONE);
+        System.out.println(incVal2.toString());
 
         EnvelopeVersion agentEnvelope = null;
         UserAgentImpl newAgent = null;
@@ -111,7 +113,7 @@ class StaticNonce {
             System.out.println(agentEnvelope.getIdentifier());
 
             System.out.println("creaaaatete nnnewww envv");
-            agentEnvelope = node.createUnencryptedEnvelope(agentEnvelope, pastryNonce);
+            agentEnvelope = node.createUnencryptedEnvelope(agentEnvelope, incVal2);
         } catch (Exception e) {
             System.out.println("feetch noott foundd envv");
             System.out.println(e);
@@ -119,7 +121,7 @@ class StaticNonce {
             try {
                 System.out.println("creaaaatete neewww envv");
 
-                agentEnvelope = node.createUnencryptedEnvelope("NONCEV1", newAgent.getPublicKey(), pastryNonce);
+                agentEnvelope = node.createUnencryptedEnvelope("NONCEV1", newAgent.getPublicKey(), incVal2);
 
             } catch (Exception ee) {
 
