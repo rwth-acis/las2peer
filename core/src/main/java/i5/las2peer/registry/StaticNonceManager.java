@@ -24,8 +24,15 @@ class StaticNonce {
             node = nodee;
             instance = new StaticNonce();
             try {
-                newAgent = UserAgentImpl.createUserAgent("sss");
+                String agentid = nodee.getAgentIdForLogin("loginkookkokokookak");
+                newAgent = (UserAgentImpl) nodee.getAgent(agentid);
             } catch (Exception e) {
+                try {
+                    newAgent = UserAgentImpl.createUserAgent("sss");
+                    newAgent.setLoginName("loginkookkokokookak");
+                    node.storeAgent(newAgent);
+                } catch (Exception ee) {
+                }
             }
         }
         return instance;
