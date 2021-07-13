@@ -23,17 +23,7 @@ class StaticNonce {
         if (instance == null) {
             node = nodee;
             instance = new StaticNonce();
-            try {
-                String agentid = nodee.getAgentIdForLogin("loginkookkokokookak");
-                newAgent = (UserAgentImpl) nodee.getAgent(agentid);
-            } catch (Exception e) {
-                try {
-                    newAgent = UserAgentImpl.createUserAgent("sss");
-                    newAgent.setLoginName("loginkookkokokookak");
-                    node.storeAgent(newAgent);
-                } catch (Exception ee) {
-                }
-            }
+
         }
         return instance;
     }
@@ -94,6 +84,30 @@ class StaticNonce {
     }
 
     public synchronized BigInteger incStaticNonce(String key, StaticNonceRawTransactionManager txMan) {
+        try {
+            System.out.println("geeeeet ususer");
+
+            String agentid = node.getAgentIdForLogin("loginkookkokokookak");
+            System.out.println("geeeeet bbyy naammmee");
+            System.out.println(agentid);
+
+            newAgent = (UserAgentImpl) node.getAgent(agentid);
+            System.out.println(newAgent.toString());
+
+        } catch (Exception e) {
+            try {
+                System.out.println("eeeeroor geeting uuuse");
+                System.out.println(e);
+                newAgent = UserAgentImpl.createUserAgent("sss");
+                System.out.println("creaate neeww");
+                newAgent.setLoginName("loginkookkokokookak");
+                System.out.println("seeet naame");
+                System.out.println(newAgent.toString());
+
+                node.storeAgent(newAgent);
+            } catch (Exception ee) {
+            }
+        }
         BigInteger currVal = staticNonces.get(key);
         BigInteger incVal = currVal.add(BigInteger.ONE);
 
@@ -142,6 +156,7 @@ class StaticNonce {
         try {
             System.out.println(" eenv iiiddentnfi");
             System.out.println(agentEnvelope.getIdentifier());
+            System.out.println(agentEnvelope.getContent());
             System.out.println(newAgent.getIdentifier());
             System.out.println(newAgent.getPublicKey());
             System.out.println(newAgent.createSignature());
