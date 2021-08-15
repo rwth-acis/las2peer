@@ -39,7 +39,7 @@ class StaticNonce {
         BigInteger parentNonce = BigInteger.valueOf(-1l);
         try {
             System.out.println("feeeetcchh envv ggeeeet");
-            agentEnvelope = node.fetchEnvelope("NONCEV1", 300000);
+            agentEnvelope = node.fetchEnvelope(address, 300000);
             System.out.println("ccooonnteeeenntt envv   ggeeeet");
 
             System.out.println(agentEnvelope.toString());
@@ -131,7 +131,7 @@ class StaticNonce {
         }
         try {
             System.out.println("feeeetcchh envv");
-            agentEnvelope = node.fetchEnvelope("NONCEV1", 300000);
+            agentEnvelope = node.fetchEnvelope(key, 300000);
             System.out.println("ccooonnteeeenntt envv");
 
             System.out.println(agentEnvelope.toString());
@@ -148,7 +148,7 @@ class StaticNonce {
             try {
                 System.out.println("creaaaatete neewww envv");
 
-                agentEnvelope = node.createUnencryptedEnvelope("NONCEV1", newAgent.getPublicKey(), incVal2);
+                agentEnvelope = node.createUnencryptedEnvelope(key, newAgent.getPublicKey(), incVal2);
 
             } catch (Exception ee) {
 
