@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.ExecutionException;
@@ -223,6 +224,16 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		}
 
 		try {
+			System.out.println("consenteeconsenteeconsenteeconsenteeconsentee reeegiiisteerr");
+			System.out.println(consentee);
+			System.out.println(Keys.toChecksumAddress(consentee));
+			System.out.println(new String(name, StandardCharsets.UTF_8));
+			System.out.println(new String(agentId, StandardCharsets.UTF_8));
+			System.out.println(new String(agentId, StandardCharsets.UTF_8));
+			System.out.println(new String(publicKey, StandardCharsets.UTF_8));
+			System.out.println(new String(signature, StandardCharsets.UTF_8));
+			System.out.println(signature.toString());
+
 			TransactionReceipt txR = contracts.userRegistry
 					.delegatedRegister(name, agentId, publicKey, consentee, signature).sendAsync().get();
 			String txHash = txR.getTransactionHash();
