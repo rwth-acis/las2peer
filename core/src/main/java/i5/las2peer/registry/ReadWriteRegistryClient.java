@@ -10,6 +10,7 @@ import java.util.concurrent.ExecutionException;
 
 import org.web3j.abi.datatypes.Function;
 import org.web3j.crypto.Credentials;
+import org.web3j.crypto.Keys;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.Response;
@@ -418,12 +419,15 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		byte[] signature = SignatureUtils.signFunctionCall(function, agent.getEthereumCredentials());
 
 		try {
+			Keys.toChecksumAddress(consentee);
 			System.out.println("consenteeconsenteeconsenteeconsenteeconsentee");
 			System.out.println(consentee);
+			System.out.println(Keys.toChecksumAddress(consentee));
 			System.out.println(authorName.toString());
 			System.out.println(serviceName);
 			System.out.println(signature.toString());
-			contracts.serviceRegistry.delegatedRegister(serviceName, authorName, consentee, signature).sendAsync()
+			String newString = Keys.toChecksumAddress(consentee);
+			contracts.serviceRegistry.delegatedRegister(serviceName, authorName, newString, signature).sendAsync()
 					.get();
 		} catch (Exception e) {
 			throw new EthereumException("Failed to register service", e);
