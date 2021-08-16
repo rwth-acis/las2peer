@@ -420,6 +420,9 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		try {
 			System.out.println("consenteeconsenteeconsenteeconsenteeconsentee");
 			System.out.println(consentee);
+			System.out.println(authorName.toString());
+			System.out.println(serviceName);
+			System.out.println(signature.toString());
 			contracts.serviceRegistry.delegatedRegister(serviceName, authorName, consentee, signature).sendAsync()
 					.get();
 		} catch (Exception e) {
