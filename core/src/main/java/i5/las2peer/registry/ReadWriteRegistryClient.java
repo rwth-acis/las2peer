@@ -418,6 +418,8 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		byte[] signature = SignatureUtils.signFunctionCall(function, agent.getEthereumCredentials());
 
 		try {
+			System.out.println("consenteeconsenteeconsenteeconsenteeconsentee");
+			System.out.println(consentee);
 			contracts.serviceRegistry.delegatedRegister(serviceName, authorName, consentee, signature).sendAsync()
 					.get();
 		} catch (Exception e) {
