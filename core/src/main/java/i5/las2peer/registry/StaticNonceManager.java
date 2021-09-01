@@ -60,14 +60,20 @@ class StaticNonce {
     }
 
     public synchronized BigInteger putStaticNonce(String key, BigInteger value) {
+        newAgent = getNonceEnvelopeAgent();
+        staticNonces.put(key, value);
+
         return staticNonces.put(key, value);
     }
 
     public synchronized BigInteger putStaticNonceIfAbsent(String key, BigInteger value) {
+        newAgent = getNonceEnvelopeAgent();
+        staticNonces.put(key, value);
+
         return staticNonces.putIfAbsent(key, value);
     }
 
-    public synchronized BigInteger incStaticNonce(String key, StaticNonceRawTransactionManager txMan) {
+    private synchronized UserAgentImpl getNonceEnvelopeAgent() {
         try {
             logger.fine("Get agent handling envelopes for nonces");
 
@@ -75,6 +81,7 @@ class StaticNonce {
 
             newAgent = (UserAgentImpl) node.getAgent(agentid);
             newAgent.unlock("password");
+            return newAgent;
 
         } catch (Exception e) {
             try {
@@ -86,29 +93,23 @@ class StaticNonce {
 
                 newAgent.setLoginName("agentforenvelopes");
                 node.storeAgent(newAgent);
+                return newAgent;
             } catch (Exception ee) {
                 logger.severe("Error creating agent");
                 logger.severe(ee.getMessage());
             }
         }
-        BigInteger currVal = staticNonces.get(key);
-        BigInteger incVal = currVal.add(BigInteger.ONE);
-
-        BigInteger pastryNonce = getStaticNonce(key, txMan);
-
-        logger.fine("Parent nonce is" + pastryNonce.toString());
-
-        BigInteger incVal2 = pastryNonce.add(BigInteger.ONE);
-        logger.fine("Parent nonce increasing by 1");
-        logger.fine("Parent nonce is now" + incVal2.toString());
-
-        EnvelopeVersion agentEnvelope = null;
         try {
             newAgent.unlock("password");
 
         } catch (Exception e) {
             logger.severe(e.getMessage());
         }
+        return newAgent;
+    }
+
+    private synchronized void saveEnvelopeWithNonceForAddress(String key, BigInteger incVal2) {
+        EnvelopeVersion agentEnvelope = null;
         try {
             logger.fine("Fetching envelope with nonce for address " + key);
             agentEnvelope = node.fetchEnvelope(key, 300000);
@@ -116,7 +117,7 @@ class StaticNonce {
 
             agentEnvelope = node.createUnencryptedEnvelope(agentEnvelope, incVal2);
         } catch (Exception e) {
-            logger.fine("None noce envelope for address " + key + " present");
+            logger.fine("None nonce envelope for address " + key + " present");
 
             try {
                 logger.fine("Creating new envelope for nonce for address " + key);
@@ -136,6 +137,21 @@ class StaticNonce {
         } catch (Exception e) {
             logger.severe(e.getMessage());
         }
+    }
+
+    public synchronized BigInteger incStaticNonce(String key, StaticNonceRawTransactionManager txMan) {
+        newAgent = getNonceEnvelopeAgent();
+        BigInteger currVal = staticNonces.get(key);
+        BigInteger incVal = currVal.add(BigInteger.ONE);
+
+        BigInteger pastryNonce = getStaticNonce(key, txMan);
+
+        logger.fine("Parent nonce is" + pastryNonce.toString());
+
+        BigInteger incVal2 = pastryNonce.add(BigInteger.ONE);
+        logger.fine("Parent nonce increasing by 1");
+        logger.fine("Parent nonce is now" + incVal2.toString());
+        saveEnvelopeWithNonceForAddress(key, incVal2);
 
         staticNonces.put(key, incVal);
         return incVal;
