@@ -84,7 +84,7 @@ public class EthereumNode extends PastryNodeImpl {
 		setStatus(NodeStatus.STARTING);
 		RegistryConfiguration conf = new RegistryConfiguration();
 		registryClient = new ReadWriteRegistryClient(conf,
-				CredentialUtils.fromMnemonic(ethereumMnemonic, ethereumPassword));
+				CredentialUtils.fromMnemonic(ethereumMnemonic, ethereumPassword), this);
 		super.launchSub();
 	}
 

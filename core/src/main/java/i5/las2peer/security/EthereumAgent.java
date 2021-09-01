@@ -103,7 +103,7 @@ public class EthereumAgent extends UserAgentImpl {
 		super.unlock(passphrase);
 
 		credentials = CredentialUtils.fromMnemonic(ethereumMnemonic, passphrase);
-		registryClient = new ReadWriteRegistryClient(new RegistryConfiguration(), credentials);
+		registryClient = new ReadWriteRegistryClient(new RegistryConfiguration(), credentials, getRunningAtNode());
 
 		ethereumAddress = credentials.getAddress();
 		logger.fine("unlocked ethereum agent ["+ethereumAddress +"]");
