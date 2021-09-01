@@ -1,6 +1,7 @@
 package i5.las2peer.registry;
 
 import i5.las2peer.logging.L2pLogger;
+import i5.las2peer.p2p.Node;
 import i5.las2peer.registry.data.BlockchainTransactionData;
 import i5.las2peer.registry.data.GenericTransactionData;
 import i5.las2peer.registry.data.GroupData;
@@ -71,8 +72,10 @@ public class ReadOnlyRegistryClient {
 
 	// raw tx - sending directly, fast raw - nonce management
 	boolean updateNonceTxMan = false;
-	FastRawTransactionManager txMan;
-			
+	StaticNonceRawTransactionManager txMan;
+
+	private Node node;
+
 
 	protected final L2pLogger logger = L2pLogger.getInstance(ReadWriteRegistryClient.class);
 
@@ -83,10 +86,10 @@ public class ReadOnlyRegistryClient {
 	 *                              client HTTP JSON RPC API endpoint
 	 */
 	public ReadOnlyRegistryClient(RegistryConfiguration registryConfiguration) {
-		this(registryConfiguration, null);
+		this(registryConfiguration, null, null);
 	}
 
-	ReadOnlyRegistryClient(RegistryConfiguration registryConfiguration, Credentials credentials) {
+	ReadOnlyRegistryClient(RegistryConfiguration registryConfiguration, Credentials credentials, Node node) {
 		web3j = Web3j.build(new HttpService(registryConfiguration.getEndpoint()));
 		web3j_admin = Admin.build(new HttpService(registryConfiguration.getEndpoint()));
 
@@ -94,7 +97,7 @@ public class ReadOnlyRegistryClient {
 				registryConfiguration.getUserRegistryAddress(), registryConfiguration.getGroupRegistryAddress(), registryConfiguration.getServiceRegistryAddress(),
 				registryConfiguration.getReputationRegistryAddress(), registryConfiguration.getEndpoint());
 
-		observer = BlockchainObserver.getInstance(contractsConfig);
+		observer = BlockchainObserver.getInstance(contractsConfig, node);
 
 		long _gasPrice = registryConfiguration.getGasPrice();
 		this.gasPrice = BigInteger.valueOf(_gasPrice);
@@ -106,7 +109,7 @@ public class ReadOnlyRegistryClient {
 
 		contracts = new Contracts.ContractsBuilder(contractsConfig).setGasOptions(_gasPrice, _gasLimit)
 				.setCredentials(credentials) // may be null, that's okay here
-				.build();
+				.build(node);
 
 		this.credentials = credentials;
 
@@ -117,7 +120,7 @@ public class ReadOnlyRegistryClient {
 		if ( this.contracts.transactionManager instanceof FastRawTransactionManager ) 
 		{
 			this.updateNonceTxMan = true;
-			this.txMan = (FastRawTransactionManager) this.contracts.transactionManager;
+			this.txMan = (StaticNonceRawTransactionManager) this.contracts.transactionManager;
 		}
 	}
 
@@ -529,7 +532,7 @@ public class ReadOnlyRegistryClient {
 		// transactions
 		
 		BigInteger retVal = BigInteger.ZERO;
-		BigInteger localNonce = StaticNonce.Manager().getStaticNonce(address);
+		BigInteger localNonce = StaticNonce.Manager(node).getStaticNonce(address, txMan);
 
 		switch (localNonce.compareTo(blockchainNonce)) {
 			default:
@@ -537,11 +540,11 @@ public class ReadOnlyRegistryClient {
 				break;
 			case 1: // local nonce is ahead
 				logger.info("[TX Nonce] (chain: "+blockchainNonce+" vs. local: "+localNonce+"), incrementing by 1.");
-				retVal = StaticNonce.Manager().incStaticNonce(address);
+				retVal = StaticNonce.Manager(node).incStaticNonce(address, txMan);
 				break;
 			case -1: // local nonce is behind
 				logger.info("[TX Nonce] (chain: "+blockchainNonce+" vs. local: "+localNonce+"): override to " + blockchainNonce + "+1");
-				retVal = StaticNonce.Manager().putStaticNonce(address, blockchainNonce.add(BigInteger.ONE));
+				retVal = StaticNonce.Manager(node).putStaticNonce(address, blockchainNonce.add(BigInteger.ONE));
 				txMan.setNonce(blockchainNonce.add(BigInteger.valueOf(-1))); // update nonce
 				break;
 		}
@@ -568,17 +571,17 @@ public class ReadOnlyRegistryClient {
 				case -1: // txMan nonce is behind local
 					logger.info("[FastRaw TX] (tx: "+txManNonce+"  < local: "+localNonce+"): setting txMan to " + newNonce);
 					txMan.setNonce(newNonce);
-					StaticNonce.Manager().incStaticNonce(address);
+					StaticNonce.Manager(node).incStaticNonce(address, txMan);
 					break;
 				case 1: // txMan nonce is ahead of local
 					logger.info("[FastRaw TX] (tx: "+txManNonce+"  > local: "+localNonce+"): setting local to " + txManNonce);
-					StaticNonce.Manager().putStaticNonceIfAbsent(address, txManNonce);
+					StaticNonce.Manager(node).putStaticNonceIfAbsent(address, txManNonce);
 					break;
 				case 0: // they are in sync - should be fine?
 				default:
 					logger.info("[FastRaw TX] (tx: "+txManNonce+" == local: "+localNonce+"): incrementing txMan to " + newNonce);
 					txMan.setNonce(newNonce);
-					StaticNonce.Manager().putStaticNonceIfAbsent(address, newNonce);
+					StaticNonce.Manager(node).putStaticNonceIfAbsent(address, newNonce);
 					break;
 			}
 		}
