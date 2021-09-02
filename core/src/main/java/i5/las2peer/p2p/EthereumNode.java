@@ -225,10 +225,16 @@ public class EthereumNode extends PastryNodeImpl {
 				System.out.println(ethereumAgent.getIdentifier());
 				System.out.println(ethereumAgent.getLoginName());
 				System.out.println(ethereumAgent.getPassphrase());
+				System.out.println("BEFORE uupdate");
 
 				registryClient.updateUser(ethereumAgent);
+				System.out.println("AAAFFTER uupdate");
 			} catch (Exception e) {
+				System.out.println("BEFORE ERROR");
 				System.out.println(e.getMessage());
+				System.out.println(e);
+				System.out.println("AFTER ERROR");
+
 				throw new AgentAlreadyExistsException(
 						"Agent username is already taken in blockchain user registry and details do NOT match.");
 			}

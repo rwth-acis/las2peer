@@ -170,6 +170,9 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		try {
 			contracts.userRegistry.delegateUpdate(name, agentId, publicKey, consentee, signature).sendAsync().get();
 		} catch (Exception e) {
+			System.out.println("EERRORR uupdate");
+			System.out.println(e);
+			System.out.println(e.getMessage());
 			throw new EthereumException("Could not update user", e);
 		}
 
