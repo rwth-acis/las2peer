@@ -138,6 +138,48 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		}
 	}
 
+	public void updateUser(EthereumAgent agent)
+			throws EthereumException, AgentLockedException, SerializationException {
+		// TODO: check that this encoding is appropriate
+		// (e.g., is there a more space-efficient way to store the public key?
+		// probably.)
+		// TODO: reconsider which fields are actually strictly necessary
+		// (e.g., since we have login name and pubkey, do we really need the agentId?
+		// what for?)
+		byte[] name = Util.padAndConvertString(agent.getLoginName(), 32);
+		byte[] agentId = Util.padAndConvertString(agent.getIdentifier(), 128);
+		byte[] publicKey = SerializeTools.serialize(agent.getPublicKey());
+
+		final Function function = new Function(UserRegistry.FUNC_UPDATE,
+				Arrays.asList(new org.web3j.abi.datatypes.generated.Bytes32(name),
+						new org.web3j.abi.datatypes.DynamicBytes(agentId),
+						new org.web3j.abi.datatypes.DynamicBytes(publicKey)),
+				Collections.emptyList());
+
+		String consentee = agent.getEthereumAddress();
+		byte[] signature = SignatureUtils.signFunctionCall(function, agent.getEthereumCredentials());
+
+		if ( txMan != null )
+		{
+			BigInteger txManNonce = txMan.getCurrentNonce();
+			logger.info("[TX Nonce] before: " + txManNonce);
+			getNonce(txMan.getFromAddress()); // check if nonce has to be udpated
+		}
+
+
+		try {
+			contracts.userRegistry.delegateUpdate(name, agentId, publicKey, consentee, signature).sendAsync().get();
+		} catch (Exception e) {
+			throw new EthereumException("Could not update user", e);
+		}
+
+		if ( txMan != null )
+		{
+			BigInteger txManNonce = txMan.getCurrentNonce();
+			logger.info("[TX Nonce] after: " + txManNonce);
+		}
+	}
+
 	/**
 	 * Register a group name to the given author.
 	 *
