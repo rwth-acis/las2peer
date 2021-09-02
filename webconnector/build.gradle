@@ -88,6 +88,7 @@ sourceSets {
 // Replace las2peer version placeholder in node frontend statusbar title
 import org.apache.tools.ant.filters.ReplaceTokens 
 processResources {
+    dependsOn ":webconnector:buildFrontend"
     from (sourceSets.main.resources) {
         include "webapp/src/node-frontend.js"
         filter(ReplaceTokens, tokens: [LAS2PEER_VERSION : "$las2peerVersion".toString()])

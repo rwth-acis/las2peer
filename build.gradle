@@ -15,6 +15,7 @@ task buildOnlyNoBundle {
 
 // copy javadoc of all components into one single folder
 task deployJavadoc {
+    dependsOn ":webconnector:buildFrontend"
     dependsOn ":core:javadoc"
     dependsOn ":restmapper:javadoc"
     dependsOn ":webconnector:javadoc"
