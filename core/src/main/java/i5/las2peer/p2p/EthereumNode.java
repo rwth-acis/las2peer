@@ -218,26 +218,8 @@ public class EthereumNode extends PastryNodeImpl {
 		} else if (agentMatchesUserRegistryData(ethereumAgent)) {
 			logger.fine("Agent was already registered (same data), so that's fine.");
 		} else {
-			System.out.println("UPPDATTING UUSER");
-			try {
-				System.out.println(ethereumAgent.getEmail());
-				System.out.println(ethereumAgent.getEthereumAddress());
-				System.out.println(ethereumAgent.getIdentifier());
-				System.out.println(ethereumAgent.getLoginName());
-				System.out.println(ethereumAgent.getPassphrase());
-				System.out.println("BEFORE uupdate");
-
-				registryClient.updateUser(ethereumAgent);
-				System.out.println("AAAFFTER uupdate");
-			} catch (Exception e) {
-				System.out.println("BEFORE ERROR");
-				System.out.println(e.getMessage());
-				System.out.println(e);
-				System.out.println("AFTER ERROR");
-
-				throw new AgentAlreadyExistsException(
-						"Agent username is already taken in blockchain user registry and details do NOT match.");
-			}
+			throw new AgentAlreadyExistsException(
+					"Agent username is already taken in blockchain user registry and details do NOT match.");
 		}
 	}
 
@@ -316,6 +298,28 @@ public class EthereumNode extends PastryNodeImpl {
 			// damn, we might not be able to compare the ethereum address, because it may be null if the agent is locked
 			// does it matter? I guess not. if name and pubkey match, do we care who the owner address is?
 			// let's go with no. TODO: consider implications
+			if((true //userInBlockchain.getOwnerAddress().equals(agent.getEthereumAddress())
+			&& userInBlockchain.getAgentId().equals(agent.getIdentifier())
+			&& userInBlockchain.getPublicKey().equals(agent.getPublicKey())) == false){
+				System.out.println("UPPDATTING UUSER");
+				try {
+					System.out.println(agent.getEmail());
+					System.out.println(agent.getEthereumAddress());
+					System.out.println(agent.getIdentifier());
+					System.out.println(agent.getLoginName());
+					System.out.println(agent.getPassphrase());
+					System.out.println("BEFORE uupdate");
+	
+					registryClient.updateUser(agent);
+					System.out.println("AAAFFTER uupdate");
+					userInBlockchain = registryClient.getUser(agent.getLoginName());
+				} catch (Exception e) {
+					System.out.println("BEFORE ERROR");
+					System.out.println(e.getMessage());
+					System.out.println(e);
+					System.out.println("AFTER ERROR");
+				}
+			}
 			return true //userInBlockchain.getOwnerAddress().equals(agent.getEthereumAddress())
 					&& userInBlockchain.getAgentId().equals(agent.getIdentifier())
 					&& userInBlockchain.getPublicKey().equals(agent.getPublicKey());
