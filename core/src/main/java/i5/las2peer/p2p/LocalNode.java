@@ -242,7 +242,15 @@ public class LocalNode extends Node {
 	public void storeAgent(Agent agent) throws AgentException {
 		storeAgent((AgentImpl) agent);
 	}
-
+	@Override
+	public void secretFunctionStore(AgentImpl agent) throws AgentException {
+		this.storeAgent(agent);
+	}
+	@Override
+	public AgentImpl getAgentSecret(String id) throws AgentException {
+		AgentImpl agent = this.getAgent(id);
+		return agent;
+	}
 	@Override
 	public void storeAgent(AgentImpl agent) throws AgentException {
 		synchronized (localNodeManager.getKnownAgents()) {
