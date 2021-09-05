@@ -313,11 +313,19 @@ public class EthereumNode extends PastryNodeImpl {
 					registryClient.updateUser(agent);
 					System.out.println("AAAFFTER uupdate");
 					userInBlockchain = registryClient.getUser(agent.getLoginName());
+					System.out.println("AAAFFTER uupdate");
+					System.out.println(userInBlockchain.getAgentId().equals(agent.getIdentifier()));
+					System.out.println(userInBlockchain.getPublicKey().equals(agent.getPublicKey()));
+					System.out.println(userInBlockchain.getPublicKey().equals(agent.getPublicKey()));
+					System.out.println(userInBlockchain.getAgentId());
+					System.out.println(userInBlockchain.getPublicKey());
+					System.out.println(agent.getIdentifier());
+					System.out.println(agent.getPublicKey());
+					return true;
 				} catch (Exception e) {
 					System.out.println("BEFORE ERROR");
 					System.out.println(e.getMessage());
 					System.out.println(e);
-					System.out.println("AFTER ERROR");
 				}
 			}
 			return true //userInBlockchain.getOwnerAddress().equals(agent.getEthereumAddress())
@@ -325,6 +333,13 @@ public class EthereumNode extends PastryNodeImpl {
 					&& userInBlockchain.getPublicKey().equals(agent.getPublicKey());
 		} catch (NotFoundException e) {
 			logger.warning("User not found in registry");
+			System.out.println("User not found in registry");
+			try {
+				registryClient.registerUser(agent);
+				return true;
+			} catch (Exception e1) {
+				System.out.println(e1.getMessage());
+			} 
 			return false;
 		} catch (SerializationException e) {
 			throw new EthereumException("Public key in user registry can't be deserialized.", e);
