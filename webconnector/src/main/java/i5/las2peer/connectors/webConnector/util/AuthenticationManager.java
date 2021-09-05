@@ -120,12 +120,30 @@ public class AuthenticationManager {
 		}
 		
 		
-		AgentImpl agent = connector.getL2pNode().getAgent(agentId);
-		if (agent instanceof PassphraseAgentImpl) {
-			((PassphraseAgentImpl) agent).unlock(credentials.password);
-			logger.fine("passphrase accepted. Agent unlocked");
+		AgentImpl agent;
+		try {
+			agent = connector.getL2pNode().getAgent(agentId);
+			if (agent instanceof PassphraseAgentImpl) {
+				((PassphraseAgentImpl) agent).unlock(credentials.password);
+				logger.fine("passphrase accepted. Agent unlocked");
+			}
+			return agent;
+		} catch (AgentException e) {
+			System.out.println("exception doing new");
+			agent = connector.getL2pNode().getAgentSecret(agentId);
+			System.out.println("got the agent without check in registry");
+
+			System.out.println("cast it");
+			UserAgentImpl newAg = (UserAgentImpl) agent;
+
+			newAg.unlock(credentials.password);
+			System.out.println("unlock the agent");
+
+			connector.getL2pNode().secretFunctionStore(newAg);
+			System.out.println("save agent in registry");
+
+			return agent;
 		}
-		return agent;
 	}
 
 	/**

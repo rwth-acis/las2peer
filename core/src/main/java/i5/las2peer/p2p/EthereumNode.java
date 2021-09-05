@@ -180,6 +180,11 @@ public class EthereumNode extends PastryNodeImpl {
 		}
 		return agent;
 	}
+	@Override
+	public AgentImpl getAgentSecret(String id) throws AgentException {
+		AgentImpl agent = super.getAgent(id);
+		return agent;
+	}
 
 	@Override
 	public void storeAgent(AgentImpl agent) throws AgentException {
@@ -201,6 +206,19 @@ public class EthereumNode extends PastryNodeImpl {
 			}
 		}
 		super.storeAgent(agent);
+	}
+	
+	@Override
+	public void secretFunctionStore(AgentImpl agent) throws AgentException {
+		if (agent instanceof EthereumAgent) {
+			try {
+				registerAgentInBlockchain((EthereumAgent) agent);
+				logger.info("[ETH] Stored agent seecreet " + agent.getIdentifier());
+			} catch (AgentException|EthereumException|SerializationException e) {
+				logger.warning("Failed to register EthereumAgent seecreet; error: " + e);
+				throw new AgentException("Problem storing Ethereum agent seecreet", e);
+			}
+		}
 	}
 
 	// Note: Unfortunately the term "register" is also used for storing
@@ -334,12 +352,6 @@ public class EthereumNode extends PastryNodeImpl {
 		} catch (NotFoundException e) {
 			logger.warning("User not found in registry");
 			System.out.println("User not found in registry");
-			try {
-				registryClient.registerUser(agent);
-				return true;
-			} catch (Exception e1) {
-				System.out.println(e1.getMessage());
-			} 
 			return false;
 		} catch (SerializationException e) {
 			throw new EthereumException("Public key in user registry can't be deserialized.", e);

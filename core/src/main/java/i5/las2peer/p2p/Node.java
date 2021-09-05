@@ -464,6 +464,9 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 */
 	public abstract Serializable getNodeId();
 
+	public abstract AgentImpl getAgentSecret(String id) throws AgentException;
+	public abstract void secretFunctionStore(AgentImpl agent) throws AgentException;
+
 	/**
 	 * Gets the class loader, this node is bound to. In a <i>real</i> las2peer environment, this should refer to a
 	 * {@link i5.las2peer.classLoaders.ClassManager}

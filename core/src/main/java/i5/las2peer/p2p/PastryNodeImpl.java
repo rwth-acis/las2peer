@@ -522,7 +522,11 @@ public class PastryNodeImpl extends Node {
 			throw new AgentException("Unable to retrieve Agent " + id + " from past storage", e);
 		}
 	}
-
+	@Override
+	public AgentImpl getAgentSecret(String id) throws AgentException {
+		AgentImpl agent = this.getAgent(id);
+		return agent;
+	}
 	@Override
 	public void storeAgent(AgentImpl agent) throws AgentException {
 		if (agent.isLocked()) {
@@ -564,7 +568,11 @@ public class PastryNodeImpl extends Node {
 			throw new AgentException("Storage has been interrupted", e);
 		}
 	}
-
+	
+	@Override
+	public void secretFunctionStore(AgentImpl agent) throws AgentException {
+		this.storeAgent(agent);
+	}
 	/**
 	 * @deprecated Use {@link #storeAgent(AgentImpl)} instead
 	 */
