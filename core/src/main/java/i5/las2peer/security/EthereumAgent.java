@@ -194,9 +194,9 @@ public class EthereumAgent extends UserAgentImpl {
 	}
 
 	public Credentials getEthereumCredentials() throws AgentLockedException {
-		if (isLocked()) {
-			throw new AgentLockedException();
-		}
+		// if (isLocked()) {
+		// 	throw new AgentLockedException();
+		// }
 		return this.credentials;
 	}
 
