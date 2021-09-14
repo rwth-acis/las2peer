@@ -28,7 +28,7 @@ export const routes: Route[] = [
     component: 'page-status',
     meta: {
       title: 'Status',
-      description: 'About page description',
+      description: 'Status',
     },
     action: async () => {
       await import('../pages/page_status.js');
@@ -40,10 +40,22 @@ export const routes: Route[] = [
     component: 'page-publish-service',
     meta: {
       title: 'Publish Service',
-      description: 'About page description',
+      description: 'Publish Service',
     },
     action: async () => {
       await import('../pages/page_publish_service.js');
+    },
+  },
+  {
+    path: '/agent-tools',
+    name: 'agent-tools',
+    component: 'page-agent-tools',
+    meta: {
+      title: 'Agent Tools',
+      description: 'Agent Tools',
+    },
+    action: async () => {
+      await import('../pages/page_agent_tools.js');
     },
   },
   {

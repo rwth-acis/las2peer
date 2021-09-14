@@ -1,6 +1,9 @@
+/* eslint-disable import/no-duplicates */
+import { TextField } from '@material/mwc-textfield';
 import { html, css, customElement, property } from 'lit-element';
 
 import { PageElement } from '../helpers/page-element.js';
+
 // import { request } from '../helpers/request_helper.js';
 import '@material/mwc-button';
 import '@material/mwc-textfield';
@@ -53,7 +56,7 @@ export class PagePublishService extends PageElement {
           />
           <!-- </mwc-button> -->
           <mwc-textfield
-            helper="Service classes to start (comma-separated)"
+            id="someiiiiiidd"
             placeholder="Service classes to start (comma-separated)"
           ></mwc-textfield>
           <mwc-textfield helper="Name" placeholder="Name"></mwc-textfield>
@@ -69,7 +72,9 @@ export class PagePublishService extends PageElement {
             helper="Front-end URL"
             placeholder="Front-end URL"
           ></mwc-textfield>
-          <mwc-button>Publish your Service</mwc-button>
+          <mwc-button @click=${this.handleshit}
+            >Publish your Service</mwc-button
+          >
         </div>
       </section>
     `;
@@ -83,7 +88,9 @@ export class PagePublishService extends PageElement {
   }
   handleshit() {
     // const reader = new FileReader();
-
+    console.log(
+      (this.shadowRoot.getElementById('someiiiiiidd') as TextField).value
+    );
     console.log('sdsds');
   }
   async onClickPublishButton() {

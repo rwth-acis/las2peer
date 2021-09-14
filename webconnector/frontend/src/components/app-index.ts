@@ -6,6 +6,7 @@ import 'las2peer-frontend-statusbar/las2peer-frontend-statusbar.js';
 
 import 'pwa-helper-components/pwa-install-button.js';
 import 'pwa-helper-components/pwa-update-available.js';
+import './notification_toast.js';
 
 @customElement('app-index')
 export class AppIndex extends LitElement {
