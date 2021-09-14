@@ -434,6 +434,8 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 			System.out.println("consenteeconsenteeconsenteeconsenteeconsentee");
 			System.out.println(consentee);
 			System.out.println(Keys.toChecksumAddress(consentee));
+			String back = Keys.toChecksumAddress(consentee);
+			System.out.println(back);
 			System.out.println(authorName.toString());
 			System.out.println(serviceName);
 			System.out.println(signature.toString());
@@ -444,7 +446,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 				logger.info("[TX Nonce] before: " + txManNonce);
 				getNonce(txMan.getFromAddress()); // check if nonce has to be udpated
 			}
-			contracts.serviceRegistry.delegatedRegister(serviceName, authorName, consentee, signature).sendAsync()
+			contracts.serviceRegistry.delegatedRegister(serviceName, authorName, back, signature).sendAsync()
 			.get();
 			if ( txMan != null )
 			{
