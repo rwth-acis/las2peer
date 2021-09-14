@@ -438,8 +438,19 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 			System.out.println(serviceName);
 			System.out.println(signature.toString());
 			String newString = Keys.toChecksumAddress(consentee);
-			contracts.serviceRegistry.delegatedRegister(serviceName, authorName, newString, signature).sendAsync()
-					.get();
+			if ( txMan != null )
+			{
+				BigInteger txManNonce = txMan.getCurrentNonce();
+				logger.info("[TX Nonce] before: " + txManNonce);
+				getNonce(txMan.getFromAddress()); // check if nonce has to be udpated
+			}
+			contracts.serviceRegistry.delegatedRegister(serviceName, authorName, consentee, signature).sendAsync()
+			.get();
+			if ( txMan != null )
+			{
+				BigInteger txManNonce = txMan.getCurrentNonce();
+				logger.info("[TX Nonce] after: " + txManNonce);
+			}	
 		} catch (Exception e) {
 			throw new EthereumException("Failed to register service", e);
 		}
