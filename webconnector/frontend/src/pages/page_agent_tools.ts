@@ -67,10 +67,97 @@ export class PageAgentTools extends PageElement {
 
           <mwc-button @click=${this.exportAgent}>Export</mwc-button>
         </div>
+        <div>
+          <input type="file" id="file" />
+          <mwc-textfield
+            id="agent-upload-password"
+            placeholder="password (optional)"
+          ></mwc-textfield>
+
+          <mwc-button @click=${this.uploadAgent}>Upload</mwc-button>
+        </div>
+        <div>
+          <mwc-textfield
+            id="agent-group-member-username"
+            placeholder="username"
+          ></mwc-textfield>
+
+          <mwc-textfield
+            id="agent-group-member-agentid"
+            placeholder="agent-id"
+          ></mwc-textfield>
+
+          <mwc-textfield
+            id="agent-group-member-email"
+            placeholder="email"
+          ></mwc-textfield>
+          <mwc-button @click=${this.getAgent}>Add Member</mwc-button>
+
+          <mwc-textfield
+            id="agent-group-name"
+            placeholder="group name"
+          ></mwc-textfield>
+
+          <mwc-button @click=${this.exportAgent}>Create Group</mwc-button>
+        </div>
       </section>
     `;
   }
+  fileToUpload: File | null = null;
 
+  async getAgent() {
+    const usernameField = this.shadowRoot!.getElementById(
+      'agent-group-member-username'
+    ) as TextField;
+    const agentidField = this.shadowRoot!.getElementById(
+      'agent-group-member-agentid'
+    ) as TextField;
+    const emailField = this.shadowRoot!.getElementById(
+      'agent-group-member-email'
+    ) as TextField;
+
+    const user: GetAgentData = {
+      username: usernameField.value,
+      email: emailField.value,
+      agentid: agentidField.value,
+    };
+    const formData = new FormData();
+    formData.append('email', user.email);
+    formData.append('username', user.username);
+    formData.append('agentid', user.agentid);
+
+    const response: AddAgentResponse = await request<AddAgentResponse>(
+      config.url + '/las2peer/agents/getAgent',
+      {
+        method: 'POST',
+        body: formData,
+      }
+    );
+    showNotificationToast(response.text);
+  }
+  async createGroup() {
+    const groupNameField = this.shadowRoot!.getElementById(
+      'agent-group-name'
+    ) as TextField;
+
+    const group: GroupData = {
+      name: groupNameField.value,
+      members: [''],
+    };
+
+    const formData = new FormData();
+    formData.append('members', JSON.stringify(group.members));
+    formData.append('name', group.name);
+
+    const response: AddAgentResponse = await request<AddAgentResponse>(
+      config.url + '/las2peer/agents/createGroup',
+      {
+        method: 'POST',
+        body: formData,
+      }
+    );
+    showNotificationToast(response.text);
+  }
   async addAgent() {
     const usernameField = this.shadowRoot!.getElementById(
       'agent-username'
@@ -140,15 +227,57 @@ export class PageAgentTools extends PageElement {
         body: formData,
       }
     );
-    if (responseFile.code == 400) {
-      showNotificationToast('Agent not found');
-    } else {
+    if (responseFile.code == 200) {
       downloadBlobFile('agent.xml', responseFile.blob);
       showNotificationToast('Agent downloaded');
+    } else {
+      showNotificationToast('Agent not found');
+    }
+  }
+
+  async uploadAgent() {
+    const file = this.shadowRoot!.getElementById('file') as HTMLInputElement;
+    const passwordField = this.shadowRoot!.getElementById(
+      'agent-upload-password'
+    ) as TextField;
+
+    const user: UploadAgentData = {
+      agentFile: file.files![0],
+      password: passwordField.value,
+    };
+    const formData = new FormData();
+    formData.append('agentFile', user.agentFile);
+    formData.append('password', user.password);
+
+    const response = await request<UploadAgentResponse>(
+      config.url + '/las2peer/agents/uploadAgent',
+      {
+        method: 'POST',
+        body: formData,
+      }
+    );
+    if (response.code == 200) {
+      showNotificationToast(response.text);
+    } else {
+      showNotificationToast('Error uploading agent');
     }
   }
 }
 
+interface GroupData {
+  name: string;
+  members: [string];
+}
+interface GetAgentData {
+  username: string;
+  email: string;
+  agentid: string;
+}
+interface GetAgentResponse {
+  username: string;
+  email: string;
+  agentid: string;
+}
 interface AddAgentData {
   username: string;
   email: string;
@@ -160,6 +289,15 @@ interface ExportAgentData {
   agentid: string;
   email: string;
 }
+interface UploadAgentData {
+  agentFile: any;
+  password: string;
+}
+interface UploadAgentResponse {
+  agentFile: any;
+  code: number;
+  text: string;
+}
 interface AddAgentResponse extends RequestResponse {
   agentid: string;
   registryAddress: string;
@@ -167,4 +305,10 @@ interface AddAgentResponse extends RequestResponse {
   text: string;
   email: string;
   username: string;
+}
+
+interface FileList {
+  readonly length: number;
+  item(index: number): File;
+  [index: number]: File;
 }
