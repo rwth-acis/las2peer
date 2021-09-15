@@ -5,7 +5,7 @@ import { PageElement } from '../helpers/page-element.js';
 import '../components/other_node_information.js';
 import '../components/progress_indicator.js';
 import '../components/current_node_status.js';
-import { request } from '../helpers/request_helper.js';
+import { request, RequestResponse } from '../helpers/request_helper.js';
 
 @customElement('page-status')
 export class PageStatus extends PageElement {
@@ -71,6 +71,8 @@ export class PageStatus extends PageElement {
     maxRamLoadStr: '? MB',
     nodeId: 'loading ...',
     storageSizeStr: '? MB',
+    code: 0,
+    text: '',
   };
 
   progressColor = 10;
@@ -154,7 +156,7 @@ export class PageStatus extends PageElement {
     );
   }
 }
-export interface NodeStatus {
+export interface NodeStatus extends RequestResponse {
   nodeOrganization: string;
   nodeAdminReputation: number;
   ramLoadStr: string;
@@ -175,7 +177,7 @@ export interface NodeStatus {
   storageSizeStr: string;
 }
 
-export interface OtherNodesInfo {
+export interface OtherNodesInfo extends RequestResponse {
   nodeAdminReputation: number;
   nodeInfo: NodeInfo;
   nodeID: string;

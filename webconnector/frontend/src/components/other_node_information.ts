@@ -34,6 +34,8 @@ export class OtherNodesInformation extends PageElement {
   @property({ type: Array })
   otherNodesInfo: OtherNodesInfo[] | null = [
     {
+      code: 0,
+      text: '',
       nodeAdminReputation: 0.0,
       nodeInfo: {
         organization: 'loading ...',

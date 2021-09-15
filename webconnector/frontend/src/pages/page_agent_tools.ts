@@ -1,8 +1,9 @@
 /* eslint-disable import/no-duplicates */
 import { TextField } from '@material/mwc-textfield';
-import { html, css, customElement } from 'lit-element';
+import { html, css, customElement, property } from 'lit-element';
 
 import config from '../config.js';
+import { downloadBlobFile } from '../helpers/blob_downloader.js';
 import { showNotificationToast } from '../helpers/notification_helper.js';
 import { PageElement } from '../helpers/page-element.js';
 import '@material/mwc-textfield';
@@ -11,7 +12,6 @@ import {
   requestFile,
   RequestResponse,
 } from '../helpers/request_helper.js';
-import { downloadBlobFile } from '../helpers/blob_downloader.js';
 
 @customElement('page-agent-tools')
 export class PageAgentTools extends PageElement {
@@ -19,8 +19,27 @@ export class PageAgentTools extends PageElement {
     section {
       padding: 1rem;
     }
+    .group-member-item {
+      white-space: nowrap;
+      overflow: hidden;
+      width: 100%;
+      text-overflow: ellipsis;
+    }
+    #group-members-list-item {
+      margin-top: 1em;
+      margin-bottom: 1em;
+    }
   `;
+  fileToUpload: File | null = null;
+  ksks: GetAgentData = {
+    agentid:
+      '219071f26069a53410985205a70bf63c0cb8157658fc1adc2b19b2cfe41bb40edae12492bb059b89bd2d807f0c2615d55a3a28e0621ae537b04a7e3a9ced46c6',
+    email: 'klamma@dbis.rwth-aachen.de',
+    username: 'skmds',
+  };
 
+  @property({ type: Array })
+  groupMembers: GetAgentData[] = [];
   render() {
     return html`
       <section>
@@ -97,13 +116,23 @@ export class PageAgentTools extends PageElement {
             id="agent-group-name"
             placeholder="group name"
           ></mwc-textfield>
-
-          <mwc-button @click=${this.exportAgent}>Create Group</mwc-button>
+          <mwc-button @click=${this.createGroup}>Create Group</mwc-button>
+          ${this.groupMembers.map(
+            (member) => html` <div id="group-members-list-item">
+              <div class="group-member-item">
+                <b>Agentid: </b>
+                ${member.agentid}
+              </div>
+              <div class="group-member-item"><b>Email: </b>${member.email}</div>
+              <div class="group-member-item">
+                <b>Username: </b>${member.username}
+              </div>
+            </div>`
+          )}
         </div>
       </section>
     `;
   }
-  fileToUpload: File | null = null;
 
   async getAgent() {
     const usernameField = this.shadowRoot!.getElementById(
@@ -126,13 +155,26 @@ export class PageAgentTools extends PageElement {
     formData.append('username', user.username);
     formData.append('agentid', user.agentid);
 
-    const response: AddAgentResponse = await request<AddAgentResponse>(
+    const response: GetAgentResponse = await request<GetAgentResponse>(
       config.url + '/las2peer/agents/getAgent',
       {
         method: 'POST',
         body: formData,
       }
     );
+    if (response.code == 200) {
+      const receivedUser: GetAgentData = {
+        username: response.username,
+        email: response.email,
+        agentid: response.agentid,
+      };
+      this.requestUpdate();
+      console.log(this.groupMembers);
+      if (!this.groupMembers.some((e) => e.agentid == receivedUser.agentid)) {
+        this.groupMembers.push(receivedUser);
+      }
+      console.log(this.groupMembers);
+    }
     showNotificationToast(response.text);
   }
   async createGroup() {
@@ -273,7 +315,7 @@ interface GetAgentData {
   email: string;
   agentid: string;
 }
-interface GetAgentResponse {
+interface GetAgentResponse extends RequestResponse {
   username: string;
   email: string;
   agentid: string;
@@ -293,7 +335,7 @@ interface UploadAgentData {
   agentFile: any;
   password: string;
 }
-interface UploadAgentResponse {
+interface UploadAgentResponse extends RequestResponse {
   agentFile: any;
   code: number;
   text: string;
