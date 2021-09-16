@@ -125,7 +125,7 @@ public class AuthenticationManager {
 		try {
 			agent = connector.getL2pNode().getAgent(agentId);
 			return agent;
-		} catch (AgentNotFoundInRegistryException e) {
+		} catch (Exception e) {
 			logger.fine("Agent " + agentId + " not found in registry");
 			logger.fine("Try to register in registry");
 			Node runningNode = connector.getL2pNode();
