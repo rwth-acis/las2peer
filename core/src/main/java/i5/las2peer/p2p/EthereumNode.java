@@ -11,6 +11,7 @@ import i5.las2peer.api.security.AgentAlreadyExistsException;
 import i5.las2peer.api.security.AgentException;
 import i5.las2peer.api.security.AgentLockedException;
 import i5.las2peer.api.security.AgentNotFoundException;
+import i5.las2peer.api.security.AgentNotFoundInRegistryException;
 import i5.las2peer.api.security.ServiceAgent;
 import i5.las2peer.classLoaders.ClassManager;
 import i5.las2peer.classLoaders.libraries.BlockchainRepository;
@@ -167,7 +168,7 @@ public class EthereumNode extends PastryNodeImpl {
 	}
 
 	@Override
-	public AgentImpl getAgent(String id) throws AgentException {
+	public AgentImpl getAgent(String id) throws AgentException, AgentNotFoundInRegistryException {
 		AgentImpl agent = super.getAgent(id);
 		if (agent instanceof EthereumAgent) {
 			try {
@@ -286,8 +287,20 @@ public class EthereumNode extends PastryNodeImpl {
 		return 0f;
 	}
 
+	public void storeAgentInRegistry(AgentImpl agent) throws AgentException {
+		if (agent instanceof EthereumAgent) {
+			try {
+				registerAgentInBlockchain((EthereumAgent) agent);
+				logger.info("[ETH] Stored agent seecreet " + agent.getIdentifier());
+			} catch (AgentException|EthereumException|SerializationException e) {
+				logger.warning("Failed to register EthereumAgent seecreet; error: " + e);
+				throw new AgentException("Problem storing Ethereum agent seecreet", e);
+			}
+		}
+	}
+
 	/** compares agent login name and public key */
-	private boolean agentMatchesUserRegistryData(EthereumAgent agent) throws EthereumException {
+	private boolean agentMatchesUserRegistryData(EthereumAgent agent) throws EthereumException, AgentNotFoundInRegistryException {
 		try {
 			logger.fine("[ETH] matching agent ("+ agent.getLoginName() +") to registry");
 
@@ -303,7 +316,7 @@ public class EthereumNode extends PastryNodeImpl {
 					&& userInBlockchain.getPublicKey().equals(agent.getPublicKey());
 		} catch (NotFoundException e) {
 			logger.warning("User not found in registry");
-			return false;
+			throw new AgentNotFoundInRegistryException("User agent not found in registry ");
 		} catch (SerializationException e) {
 			throw new EthereumException("Public key in user registry can't be deserialized.", e);
 		}
