@@ -287,6 +287,10 @@ public class EthereumNode extends PastryNodeImpl {
 		return 0f;
 	}
 
+	public AgentImpl getAgentWithoutCheckInRegistry(String agentId) throws AgentException {
+		return super.getAgent(agentId);
+	}
+
 	public void storeAgentInRegistry(AgentImpl agent) throws AgentException {
 		if (agent instanceof EthereumAgent) {
 			try {

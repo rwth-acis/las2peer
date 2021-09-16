@@ -128,24 +128,26 @@ public class AuthenticationManager {
 		} catch (Exception e) {
 			logger.fine("Agent " + agentId + " not found in registry");
 			logger.fine("Try to register in registry");
+			
 			Node runningNode = connector.getL2pNode();
-			PastryNodeImpl pastryNode = (PastryNodeImpl) runningNode;
-			logger.fine("Get agent without check in registry");
-			agent = pastryNode.getAgent(agentId);
-
-			logger.fine("Unlock the agent");
-			if (agent instanceof PassphraseAgentImpl) {
-				((PassphraseAgentImpl) agent).unlock(credentials.password);
-				logger.fine("passphrase accepted. Agent unlocked");
-			}
 
 			if(runningNode instanceof EthereumNode){
 				EthereumNode ethNode = (EthereumNode) runningNode;
+				logger.fine("Get agent without check in registry");
+				agent = ethNode.getAgentWithoutCheckInRegistry(agentId);
+				logger.fine("Unlock the agent");
+				if (agent instanceof PassphraseAgentImpl) {
+					((PassphraseAgentImpl) agent).unlock(credentials.password);
+					logger.fine("passphrase accepted. Agent unlocked");
+				}
 				logger.fine("Store the agent only in the registry");
 				ethNode.storeAgentInRegistry(agent);
+				return agent;
+			}
+			else{
+				throw new AgentException(e);
 			}
 
-			return agent;
 		}
 	}
 
