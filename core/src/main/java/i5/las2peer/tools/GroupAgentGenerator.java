@@ -27,7 +27,7 @@ public class GroupAgentGenerator {
 	 * @throws CryptoException
 	 * @throws SerializationException
 	 */
-	public static void main(String[] argv, String groupName)
+	public static void main(String[] argv)
 			throws MalformedXMLException, IOException, AgentException, CryptoException, SerializationException {
 		if (argv.length == 0 || argv[0].equals("-?")) {
 			System.out.println("Just give a liste with xml files of the agents, you want to aggregate in a group");
@@ -41,7 +41,7 @@ public class GroupAgentGenerator {
 			agents.add(a);
 		}
 
-		GroupAgentImpl result = GroupAgentImpl.createGroupAgent(agents.toArray(new AgentImpl[0]), groupName);
+		GroupAgentImpl result = GroupAgentImpl.createGroupAgent(agents.toArray(new AgentImpl[0]));
 
 		System.out.println(result.toXmlString());
 	}
