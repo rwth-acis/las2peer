@@ -23,8 +23,8 @@ sourceCompatibility = "${project.property('java.version')}"
 targetCompatibility = "${project.property('java.version')}"
 
 repositories {
-    // Use JCenter for resolving dependencies.
-    jcenter()
+    // Use maven central for resolving dependencies.
+    mavenCentral()
 
     // DBIS Archiva
     maven {
@@ -33,14 +33,14 @@ repositories {
 }
 
 dependencies {
-    compile project(":core")
-    compile project(":restmapper")
-    compile project(":webconnector")
+    implementation project(":core")
+    implementation project(":restmapper")
+    implementation project(":webconnector")
 }
 
 // put all .jar files into export/jars folder
 tasks.withType(Jar) {
-    destinationDir = file("$projectDir/export/jars")
+    destinationDirectory = file("$projectDir/export/jars")
 }
 
 jar {
