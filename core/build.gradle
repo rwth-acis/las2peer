@@ -30,16 +30,12 @@ repositories {
 
 compileJava {
     // -XDignore.symbol.file fixes build in JDK8
-    // --add-exports fixes build in JDK14
-    options.compilerArgs += ["-XDignore.symbol.file", "-Xlint:deprecation",
-    "--add-exports", "java.desktop/com.sun.beans.finder=ALL-UNNAMED"]
+    options.compilerArgs += ["-XDignore.symbol.file", "-Xlint:deprecation"]
     options.fork = true
     options.forkOptions.executable = "javac"
 }
 
 javadoc {
-    // its important to only use -add-exports here instead of --add-exports (second "-" is added automatically)
-    doFirst {options.addStringOption("-add-exports", "java.desktop/com.sun.beans.finder=ALL-UNNAMED")}
     destinationDir = file("$projectDir/export/javadoc")
 }
 
