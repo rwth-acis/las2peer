@@ -2,7 +2,7 @@ plugins {
     id 'java'
     id 'application'
     // plugin for building the las2peer bundle jar
-    id "com.github.johnrengelman.shadow" version "5.0.0"
+    id "com.github.johnrengelman.shadow" version "7.0.0"
     // maven plugin is used to create .pom files and for publishing
     id 'maven-publish'
 }
