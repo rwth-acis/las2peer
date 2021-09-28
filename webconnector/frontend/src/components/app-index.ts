@@ -8,14 +8,16 @@ import {
 } from 'lit-element';
 
 import config from '../config.js';
+import { request } from '../helpers/request_helper.js';
 import { attachRouter } from '../router/index.js';
 import 'las2peer-frontend-statusbar/las2peer-frontend-statusbar.js';
-
 import 'pwa-helper-components/pwa-install-button.js';
 import 'pwa-helper-components/pwa-update-available.js';
 import './notification_toast.js';
-import { request } from '../helpers/request_helper.js';
 
+let oidcUser: User | undefined = undefined;
+
+export { oidcUser };
 @customElement('app-index')
 export class AppIndex extends LitElement {
   @query('main')
@@ -74,8 +76,9 @@ export class AppIndex extends LitElement {
       background-color: #eee;
     }
   `;
-  @property({ type: Object })
-  oidcUser: User | undefined = undefined;
+
+  // @property({ type: Object })
+  // oidcUser: User | undefined = undefined;
 
   render() {
     return html`
@@ -131,7 +134,7 @@ export class AppIndex extends LitElement {
   storeOidcUser(userObject: any) {
     if (userObject.token_type !== 'Bearer')
       throw 'unexpected OIDC token type, fix me';
-    this.oidcUser = userObject;
+    oidcUser = userObject;
     this.sendLogin();
   }
 
@@ -139,7 +142,7 @@ export class AppIndex extends LitElement {
     const PREFIX_OIDC_SUB = 'OIDC_SUB-';
 
     const credentials = {
-      oidcSub: ((this.oidcUser || {}).profile || {}).sub,
+      oidcSub: ((oidcUser || {}).profile || {}).sub,
     };
     const prefixedIdentifier = PREFIX_OIDC_SUB + credentials.oidcSub;
     const response = await request<LoginResponse>(
@@ -149,6 +152,7 @@ export class AppIndex extends LitElement {
         headers: {
           Authorization:
             'Basic ' + btoa(prefixedIdentifier + ':' + credentials.oidcSub),
+          'access-token': (oidcUser || {}).access_token || '',
         },
       }
     );

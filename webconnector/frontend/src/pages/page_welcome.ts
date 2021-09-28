@@ -168,7 +168,7 @@ export class PageHome extends PageElement {
           <div class="page-welcome-las2peer-description-item">
             <img src="/images/icon4.png" alt="" />
             <h3>
-              Services are are java programs running in the network. view
+              Services are java programs running in the network. Discover
               existing services or publish your own.
             </h3>
           </div>

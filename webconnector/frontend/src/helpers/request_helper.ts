@@ -1,7 +1,22 @@
+import { oidcUser } from '../components/app-index.js';
+
 export function request<TResponse extends RequestResponse>(
   url: string,
   config: RequestInit = {}
 ): Promise<TResponse> {
+  const PREFIX_OIDC_SUB = 'OIDC_SUB-';
+
+  const credentials = {
+    oidcSub: ((oidcUser || {}).profile || {}).sub,
+  };
+  const prefixedIdentifier = PREFIX_OIDC_SUB + credentials.oidcSub;
+
+  config.headers = {
+    ...config.headers,
+    Authorization:
+      'Basic ' + btoa(prefixedIdentifier + ':' + credentials.oidcSub),
+    'access-token': (oidcUser || {}).access_token || '',
+  };
   let status: number;
   return fetch(url, config)
     .then((response) => {

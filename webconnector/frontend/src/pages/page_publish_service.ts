@@ -58,6 +58,7 @@ export class PagePublishService extends PageElement {
           <mwc-textfield
             id="someiiiiiidd"
             placeholder="Service classes to start (comma-separated)"
+            helper="Service classes to start (comma-separated)"
           ></mwc-textfield>
           <mwc-textfield helper="Name" placeholder="Name"></mwc-textfield>
           <mwc-textfield

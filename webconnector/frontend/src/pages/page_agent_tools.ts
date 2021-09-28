@@ -47,6 +47,9 @@ export class PageAgentTools extends PageElement {
   @property({ type: Object })
   addedAgent: AddAgentResponse | undefined;
 
+  @property({ type: Object })
+  addedGroup: AddGroupResponse | undefined;
+
   render() {
     return html`
       <section>
@@ -153,6 +156,9 @@ export class PageAgentTools extends PageElement {
                   </div>
                 </div>`
               )}
+              ${this.addedGroup == undefined
+                ? html``
+                : html`Group created with id: ${this.addedGroup.agentid}`}
             </div>
           </a11y-collapse>
         </a11y-collapse-group>
@@ -210,20 +216,21 @@ export class PageAgentTools extends PageElement {
 
     const group: GroupData = {
       name: groupNameField.value,
-      members: [''],
+      members: this.groupMembers,
     };
 
     const formData = new FormData();
     formData.append('members', JSON.stringify(group.members));
     formData.append('name', group.name);
 
-    const response: AddAgentResponse = await request<AddAgentResponse>(
+    const response: AddGroupResponse = await request<AddGroupResponse>(
       config.url + '/las2peer/agents/createGroup',
       {
         method: 'POST',
         body: formData,
       }
     );
+    this.addedGroup = response;
     showNotificationToast(response.text);
   }
   async addAgent() {
@@ -335,7 +342,7 @@ export class PageAgentTools extends PageElement {
 
 interface GroupData {
   name: string;
-  members: [string];
+  members: GetAgentData[];
 }
 interface GetAgentData {
   username: string;
@@ -374,6 +381,12 @@ interface AddAgentResponse extends RequestResponse {
   text: string;
   email: string;
   username: string;
+}
+interface AddGroupResponse extends RequestResponse {
+  agentid: string;
+  groupName: string;
+  code: number;
+  text: string;
 }
 
 interface FileList {
