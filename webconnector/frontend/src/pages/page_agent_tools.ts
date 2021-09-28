@@ -7,11 +7,14 @@ import { downloadBlobFile } from '../helpers/blob_downloader.js';
 import { showNotificationToast } from '../helpers/notification_helper.js';
 import { PageElement } from '../helpers/page-element.js';
 import '@material/mwc-textfield';
+import '@material/mwc-button';
+import '@polymer/iron-collapse/iron-collapse.js';
 import {
   request,
   requestFile,
   RequestResponse,
 } from '../helpers/request_helper.js';
+import '@lrnwebcomponents/a11y-collapse';
 
 @customElement('page-agent-tools')
 export class PageAgentTools extends PageElement {
@@ -40,96 +43,119 @@ export class PageAgentTools extends PageElement {
 
   @property({ type: Array })
   groupMembers: GetAgentData[] = [];
+
+  @property({ type: Object })
+  addedAgent: AddAgentResponse | undefined;
+
   render() {
     return html`
       <section>
         <h1>Home</h1>
-        <div>
-          <mwc-textfield
-            id="agent-username"
-            placeholder="username"
-            helper="At least 4 characters"
-            ?required=${true}
-            validationMessage="At least 4 characters"
-            min="4"
-            minLength="4"
-          ></mwc-textfield>
+        <a11y-collapse-group>
+          <a11y-collapse accordion>
+            <p slot="heading">Create Agent</p>
+            <div>
+              <mwc-textfield
+                id="agent-username"
+                placeholder="username"
+                helper="At least 4 characters"
+                ?required=${true}
+                validationMessage="At least 4 characters"
+                min="4"
+                minLength="4"
+              ></mwc-textfield>
+              <mwc-textfield
+                id="agent-email"
+                placeholder="email (optional)"
+                validationMessage="Please enter valid email"
+                pattern="^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-.]+$"
+              ></mwc-textfield>
 
-          <mwc-textfield
-            id="agent-email"
-            placeholder="email (optional)"
-            validationMessage="Please enter valid email"
-            pattern="^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-.]+$"
-          ></mwc-textfield>
+              <mwc-textfield
+                id="agent-password"
+                placeholder="password"
+              ></mwc-textfield>
+              <mwc-button @click=${this.addAgent}>Add</mwc-button>
+            </div>
+            ${this.addedAgent == undefined
+              ? html``
+              : html`Agent created with id: ${this.addedAgent.agentid}`}
+          </a11y-collapse>
+          <a11y-collapse accordion>
+            <p slot="heading">Export Agent</p>
+            <div>
+              <mwc-textfield
+                id="agent-export-username"
+                placeholder="username"
+              ></mwc-textfield>
 
-          <mwc-textfield
-            id="agent-password"
-            placeholder="password"
-          ></mwc-textfield>
-          <mwc-button @click=${this.addAgent}>Add</mwc-button>
-        </div>
-        <div>
-          <mwc-textfield
-            id="agent-export-username"
-            placeholder="username"
-          ></mwc-textfield>
+              <mwc-textfield
+                id="agent-export-agentid"
+                placeholder="agent-id"
+              ></mwc-textfield>
 
-          <mwc-textfield
-            id="agent-export-agentid"
-            placeholder="agent-id"
-          ></mwc-textfield>
+              <mwc-textfield
+                id="agent-export-email"
+                placeholder="email"
+              ></mwc-textfield>
 
-          <mwc-textfield
-            id="agent-export-email"
-            placeholder="email"
-          ></mwc-textfield>
+              <mwc-button @click=${this.exportAgent}>Export</mwc-button>
+            </div>
+          </a11y-collapse>
+          <a11y-collapse accordion>
+            <p slot="heading">Upload Agent</p>
 
-          <mwc-button @click=${this.exportAgent}>Export</mwc-button>
-        </div>
-        <div>
-          <input type="file" id="file" />
-          <mwc-textfield
-            id="agent-upload-password"
-            placeholder="password (optional)"
-          ></mwc-textfield>
+            <div>
+              <input type="file" id="file" />
+              <mwc-textfield
+                id="agent-upload-password"
+                placeholder="password (optional)"
+              ></mwc-textfield>
 
-          <mwc-button @click=${this.uploadAgent}>Upload</mwc-button>
-        </div>
-        <div>
-          <mwc-textfield
-            id="agent-group-member-username"
-            placeholder="username"
-          ></mwc-textfield>
+              <mwc-button @click=${this.uploadAgent}>Upload</mwc-button>
+            </div>
+          </a11y-collapse>
+          <a11y-collapse accordion>
+            <p slot="heading">Create Group</p>
+            <div>
+              <mwc-textfield
+                id="agent-group-member-username"
+                placeholder="username"
+              ></mwc-textfield>
 
-          <mwc-textfield
-            id="agent-group-member-agentid"
-            placeholder="agent-id"
-          ></mwc-textfield>
+              <mwc-textfield
+                id="agent-group-member-agentid"
+                placeholder="agent-id"
+              ></mwc-textfield>
 
-          <mwc-textfield
-            id="agent-group-member-email"
-            placeholder="email"
-          ></mwc-textfield>
-          <mwc-button @click=${this.getAgent}>Add Member</mwc-button>
+              <mwc-textfield
+                id="agent-group-member-email"
+                placeholder="email"
+              ></mwc-textfield>
+              <mwc-button @click=${this.getAgent}>Add Member</mwc-button>
 
-          <mwc-textfield
-            id="agent-group-name"
-            placeholder="group name"
-          ></mwc-textfield>
-          <mwc-button @click=${this.createGroup}>Create Group</mwc-button>
-          ${this.groupMembers.map(
-            (member) => html` <div id="group-members-list-item">
-              <div class="group-member-item">
-                <b>Agentid: </b>
-                ${member.agentid}
-              </div>
-              <div class="group-member-item"><b>Email: </b>${member.email}</div>
-              <div class="group-member-item">
-                <b>Username: </b>${member.username}
-              </div>
-            </div>`
-          )}
-        </div>
+              <mwc-textfield
+                id="agent-group-name"
+                placeholder="group name"
+              ></mwc-textfield>
+              <mwc-button @click=${this.createGroup}>Create Group</mwc-button>
+              ${this.groupMembers.map(
+                (member) => html` <div id="group-members-list-item">
+                  <div class="group-member-item">
+                    <b>Agentid: </b>
+                    ${member.agentid}
+                  </div>
+                  <div class="group-member-item">
+                    <b>Email: </b>${member.email}
+                  </div>
+                  <div class="group-member-item">
+                    <b>Username: </b>${member.username}
+                  </div>
+                </div>`
+              )}
+            </div>
+          </a11y-collapse>
+        </a11y-collapse-group>
       </section>
     `;
   }
@@ -234,6 +260,7 @@ export class PageAgentTools extends PageElement {
           body: formData,
         }
       );
+      this.addedAgent = response;
       showNotificationToast(response.text);
     } else {
       showNotificationToast('Check your input');

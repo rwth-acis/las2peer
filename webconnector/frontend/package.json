@@ -22,10 +22,12 @@
     "test": "echo \"Error: no test specified\""
   },
   "dependencies": {
+    "@lrnwebcomponents/a11y-collapse": "^4.0.0",
     "@material/button": "^11.0.0",
     "@material/icon-button": "^11.0.0",
     "@material/mwc-button": "^0.21.0",
     "@material/mwc-textfield": "^0.21.0",
+    "@polymer/iron-collapse": "^3.0.1",
     "@polymer/paper-toast": "^3.0.1",
     "@vaadin/router": "^1.7.4",
     "las2peer-frontend-statusbar": "github:rwth-acis/las2peer-frontend-statusbar#0.3.1",
