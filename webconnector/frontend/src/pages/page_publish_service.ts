@@ -1,12 +1,10 @@
-/* eslint-disable import/no-duplicates */
-import { TextField } from '@material/mwc-textfield';
 import { html, css, customElement, property } from 'lit-element';
 
 import { PageElement } from '../helpers/page-element.js';
-
-// import { request } from '../helpers/request_helper.js';
+import { request } from '../helpers/request_helper.js';
 import '@material/mwc-button';
 import '@material/mwc-textfield';
+import config from '../config.js';
 
 @customElement('page-publish-service')
 export class PagePublishService extends PageElement {
@@ -48,12 +46,7 @@ export class PagePublishService extends PageElement {
 
         <div class="page-publish-service-fields">
           <!-- <mwc-button> -->
-          <input
-            type="file"
-            id="jarfile"
-            .multiple=${false}
-            onChange=${this.handleshit}
-          />
+          <input type="file" id="jarfile" .multiple=${false} />
           <!-- </mwc-button> -->
           <mwc-textfield
             id="someiiiiiidd"
@@ -73,7 +66,7 @@ export class PagePublishService extends PageElement {
             helper="Front-end URL"
             placeholder="Front-end URL"
           ></mwc-textfield>
-          <mwc-button @click=${this.handleshit}
+          <mwc-button @click=${this.onClickPublishButton}
             >Publish your Service</mwc-button
           >
         </div>
@@ -81,22 +74,10 @@ export class PagePublishService extends PageElement {
     `;
   }
 
-  firstUpdated() {
-    // const file = {
-    //   dom: document.getElementById('theFile'),
-    //   binary: null,
-    // };
-  }
-  handleshit() {
-    // const reader = new FileReader();
-    console.log(
-      (this.shadowRoot.getElementById('someiiiiiidd') as TextField).value
-    );
-    console.log('sdsds');
-  }
   async onClickPublishButton() {
+    const file = this.shadowRoot!.getElementById('jarfile') as HTMLInputElement;
     const bodyToSend: PublishServiceInfoToPost = {
-      jarfile: '',
+      jarfile: file.files![0],
       supplement: {
         class: this.publishServiceInfo.serviceClassesToStart,
         description: this.publishServiceInfo.description,
@@ -108,13 +89,11 @@ export class PagePublishService extends PageElement {
     const body = new FormData();
     body.append('jarfile', bodyToSend.jarfile);
     body.append('supplement', JSON.stringify(bodyToSend.supplement));
-    // const response = await request(
-    //   'https://las2peer.tech4comp.dbis.rwth-aachen.de/las2peer/services/upload',
-    //   {
-    //     method: 'POST',
-    //     body: body,
-    //   }
-    // );
+    const response = await request(config.url + '/las2peer/services/upload', {
+      method: 'POST',
+      body: body,
+    });
+    console.log(response);
   }
 }
 interface PublishServiceInfo {
@@ -126,7 +105,7 @@ interface PublishServiceInfo {
 }
 
 interface PublishServiceInfoToPost {
-  jarfile: string;
+  jarfile: any;
   supplement: {
     class: string;
     name: string;
