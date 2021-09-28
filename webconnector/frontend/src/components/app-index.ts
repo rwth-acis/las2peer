@@ -1,4 +1,11 @@
-import { LitElement, html, css, customElement, query } from 'lit-element';
+import {
+  LitElement,
+  html,
+  css,
+  customElement,
+  query,
+  property,
+} from 'lit-element';
 
 import config from '../config.js';
 import { attachRouter } from '../router/index.js';
@@ -7,6 +14,7 @@ import 'las2peer-frontend-statusbar/las2peer-frontend-statusbar.js';
 import 'pwa-helper-components/pwa-install-button.js';
 import 'pwa-helper-components/pwa-update-available.js';
 import './notification_toast.js';
+import { request } from '../helpers/request_helper.js';
 
 @customElement('app-index')
 export class AppIndex extends LitElement {
@@ -66,6 +74,8 @@ export class AppIndex extends LitElement {
       background-color: #eee;
     }
   `;
+  @property({ type: Object })
+  oidcUser: User | undefined = undefined;
 
   render() {
     return html`
@@ -108,6 +118,76 @@ export class AppIndex extends LitElement {
   }
 
   firstUpdated() {
+    const thiss = this;
+    this.shadowRoot!.getElementById('statusbar')!.addEventListener(
+      'signed-in',
+      function (event) {
+        console.log((event as SignedInEvent).detail);
+        thiss.storeOidcUser((event as SignedInEvent).detail);
+      }
+    );
     attachRouter(this.main);
   }
+  storeOidcUser(userObject: any) {
+    if (userObject.token_type !== 'Bearer')
+      throw 'unexpected OIDC token type, fix me';
+    this.oidcUser = userObject;
+    this.sendLogin();
+  }
+
+  async sendLogin() {
+    const PREFIX_OIDC_SUB = 'OIDC_SUB-';
+
+    const credentials = {
+      oidcSub: ((this.oidcUser || {}).profile || {}).sub,
+    };
+    const prefixedIdentifier = PREFIX_OIDC_SUB + credentials.oidcSub;
+    const response = await request<LoginResponse>(
+      config.url + '/las2peer/auth/login',
+      {
+        method: 'GET',
+        headers: {
+          Authorization:
+            'Basic ' + btoa(prefixedIdentifier + ':' + credentials.oidcSub),
+        },
+      }
+    );
+    console.log(response);
+  }
+}
+interface SignedInEvent extends Event {
+  detail: User;
+}
+export interface User {
+  id_token: string;
+  session_state: string;
+  access_token: string;
+  token_type: string;
+  profile: Profile;
+  expires_at: number;
+}
+export interface Profile {
+  auth_time: number;
+  jti: string;
+  sub: string;
+  typ: string;
+  azp: string;
+  session_state: string;
+  acr: string;
+  s_hash: string;
+  sid: string;
+  email_verified: boolean;
+  name: string;
+  preferred_username: string;
+  given_name: string;
+  family_name: string;
+  email: string;
+}
+interface LoginResponse {
+  agentid: string;
+  code: number;
+  ethaddress: string;
+  text: string;
+  email: string;
+  username: string;
 }
