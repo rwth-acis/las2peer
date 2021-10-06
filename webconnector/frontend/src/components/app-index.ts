@@ -14,6 +14,9 @@ import 'las2peer-frontend-statusbar/las2peer-frontend-statusbar.js';
 import 'pwa-helper-components/pwa-install-button.js';
 import 'pwa-helper-components/pwa-update-available.js';
 import './notification_toast.js';
+import '@polymer/paper-icon-button/paper-icon-button.js';
+import '@polymer/iron-icons/iron-icons.js';
+import './information_bar.js';
 
 let oidcUser: User | undefined = undefined;
 
@@ -77,12 +80,13 @@ export class AppIndex extends LitElement {
     }
   `;
 
-  // @property({ type: Object })
-  // oidcUser: User | undefined = undefined;
-
   render() {
     return html`
       <div class="sidebar">
+        <information-bar
+          id="information-bar"
+          class="information-bar"
+        ></information-bar>
         <a href="/"><i class="fa fa-fw fa-welcome"></i> Welcome</a>
         <a href="status"><i class="fa fa-fw fa-status"></i> Status</a>
         <a href="view-services"
@@ -121,12 +125,11 @@ export class AppIndex extends LitElement {
   }
 
   firstUpdated() {
-    const thiss = this;
+    const the = this;
     this.shadowRoot!.getElementById('statusbar')!.addEventListener(
       'signed-in',
       function (event) {
-        console.log((event as SignedInEvent).detail);
-        thiss.storeOidcUser((event as SignedInEvent).detail);
+        the.storeOidcUser((event as SignedInEvent).detail);
       }
     );
     attachRouter(this.main);

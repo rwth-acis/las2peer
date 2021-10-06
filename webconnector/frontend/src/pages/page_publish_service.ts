@@ -5,6 +5,7 @@ import { request } from '../helpers/request_helper.js';
 import '@material/mwc-button';
 import '@material/mwc-textfield';
 import config from '../config.js';
+import { TextField } from '@material/mwc-textfield';
 
 @customElement('page-publish-service')
 export class PagePublishService extends PageElement {
@@ -45,24 +46,29 @@ export class PagePublishService extends PageElement {
         </p>
 
         <div class="page-publish-service-fields">
-          <!-- <mwc-button> -->
           <input type="file" id="jarfile" .multiple=${false} />
-          <!-- </mwc-button> -->
           <mwc-textfield
-            id="someiiiiiidd"
+            id="service-classes-to-start"
             placeholder="Service classes to start (comma-separated)"
             helper="Service classes to start (comma-separated)"
           ></mwc-textfield>
-          <mwc-textfield helper="Name" placeholder="Name"></mwc-textfield>
           <mwc-textfield
+            id="name"
+            helper="Name"
+            placeholder="Name"
+          ></mwc-textfield>
+          <mwc-textfield
+            id="description"
             helper="Description"
             placeholder="Description"
           ></mwc-textfield>
           <mwc-textfield
+            id="source-code-url-field"
             helper="Source code URL (e.g., GitHub project)"
             placeholder="Source code URL (e.g., GitHub project)"
           ></mwc-textfield>
           <mwc-textfield
+            id="frontend-url"
             helper="Front-end URL"
             placeholder="Front-end URL"
           ></mwc-textfield>
@@ -76,6 +82,30 @@ export class PagePublishService extends PageElement {
 
   async onClickPublishButton() {
     const file = this.shadowRoot!.getElementById('jarfile') as HTMLInputElement;
+    const serviceClassesToStartField = this.shadowRoot!.getElementById(
+      'service-classes-to-start'
+    ) as TextField;
+
+    this.publishServiceInfo.serviceClassesToStart =
+      serviceClassesToStartField.value;
+    const descriptionField = this.shadowRoot!.getElementById(
+      'description'
+    ) as TextField;
+    this.publishServiceInfo.description = descriptionField.value;
+
+    const frontendUrlField = this.shadowRoot!.getElementById(
+      'frontend-url'
+    ) as TextField;
+    this.publishServiceInfo.frontendUrl = frontendUrlField.value;
+
+    const nameField = this.shadowRoot!.getElementById('name') as TextField;
+    this.publishServiceInfo.name = nameField.value;
+
+    const sourceCodeUrlField = this.shadowRoot!.getElementById(
+      'source-code-url-field'
+    ) as TextField;
+    this.publishServiceInfo.sourceCodeUrl = sourceCodeUrlField.value;
+
     const bodyToSend: PublishServiceInfoToPost = {
       jarfile: file.files![0],
       supplement: {
