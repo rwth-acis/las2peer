@@ -35,6 +35,18 @@ export const routes: Route[] = [
     },
   },
   {
+    path: '/view-services',
+    name: 'view-services',
+    component: 'page-view-services',
+    meta: {
+      title: 'View Services',
+      description: 'View Services',
+    },
+    action: async () => {
+      await import('../pages/page_view_services.js');
+    },
+  },
+  {
     path: '/publish-service',
     name: 'publish-service',
     component: 'page-publish-service',
