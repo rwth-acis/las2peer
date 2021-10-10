@@ -57,7 +57,7 @@ dependencies {
     
     api project(":core")
 
-    api "io.swagger:swagger-jersey2-jaxrs:1.5.17"
+    api "io.swagger:swagger-jersey2-jaxrs:1.6.3"
     api "org.glassfish.jersey.core:jersey-server:${project.property('jersey.version')}"
     api "org.glassfish.jersey.core:jersey-common:${project.property('jersey.version')}"
     api "org.glassfish.jersey.media:jersey-media-json-jackson:${project.property('jersey.version')}"
