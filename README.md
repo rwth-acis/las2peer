@@ -20,11 +20,11 @@ If you want to learn more about las2peer, please visit the [las2peer Template Pr
 
 ### Java
 
-las2peer uses **Java 14**.
+las2peer uses **Java 17**.
 
 ### Build Dependencies
 
-* Gradle 6.8
+* Gradle 7.2
 * Node 8 / npm
 
 ## Project Structure
