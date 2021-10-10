@@ -25,6 +25,11 @@ repositories {
     maven {
         url "${project.property('dbis.archiva.url')}"
     }
+
+    // DBIS Archiva (snapshots)
+    maven {
+        url "${project.property('dbis.archiva.url.snapshots')}"
+    }
 }
 
 compileJava {
