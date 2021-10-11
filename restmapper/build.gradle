@@ -18,12 +18,17 @@ sourceCompatibility = "${project.property('java.version')}"
 targetCompatibility = "${project.property('java.version')}"
 
 repositories {
-    // Use JCenter for resolving dependencies.
-    jcenter()
+    // Use maven central for resolving dependencies.
+    mavenCentral()
 
     // DBIS Archiva
     maven {
         url "${project.property('dbis.archiva.url')}"
+    }
+
+    // DBIS Archiva (snapshots)
+    maven {
+        url "${project.property('dbis.archiva.url.snapshots')}"
     }
 }
 
@@ -52,7 +57,7 @@ dependencies {
     
     api project(":core")
 
-    api "io.swagger:swagger-jersey2-jaxrs:1.5.17"
+    api "io.swagger:swagger-jersey2-jaxrs:1.6.3"
     api "org.glassfish.jersey.core:jersey-server:${project.property('jersey.version')}"
     api "org.glassfish.jersey.core:jersey-common:${project.property('jersey.version')}"
     api "org.glassfish.jersey.media:jersey-media-json-jackson:${project.property('jersey.version')}"
@@ -65,7 +70,7 @@ dependencies {
 
 // put all .jar files into export/jars folder
 tasks.withType(Jar) {
-    destinationDir = file("$projectDir/export/jars")
+    destinationDirectory = file("$projectDir/export/jars")
 }
 
 jar {

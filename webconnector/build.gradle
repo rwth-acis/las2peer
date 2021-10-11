@@ -18,12 +18,17 @@ sourceCompatibility = "${project.property('java.version')}"
 targetCompatibility = "${project.property('java.version')}"
 
 repositories {
-    // Use JCenter for resolving dependencies.
-    jcenter()
+    // Use maven central for resolving dependencies.
+    mavenCentral()
 
     // DBIS Archiva
     maven {
         url "${project.property('dbis.archiva.url')}"
+    }
+
+    // DBIS Archiva (snapshots)
+    maven {
+        url "${project.property('dbis.archiva.url.snapshots')}"
     }
 }
 
@@ -69,7 +74,7 @@ dependencies {
 
 // put all .jar files into export/jars folder
 tasks.withType(Jar) {
-    destinationDir = file("$projectDir/export/jars")
+    destinationDirectory = file("$projectDir/export/jars")
 }
 
 compileTestJava {
@@ -88,6 +93,7 @@ sourceSets {
 // Replace las2peer version placeholder in node frontend statusbar title
 import org.apache.tools.ant.filters.ReplaceTokens 
 processResources {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
     dependsOn ":webconnector:buildFrontend"
     from (sourceSets.main.resources) {
         include "webapp/src/node-frontend.js"

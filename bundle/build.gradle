@@ -2,7 +2,7 @@ plugins {
     id 'java'
     id 'application'
     // plugin for building the las2peer bundle jar
-    id "com.github.johnrengelman.shadow" version "5.0.0"
+    id "com.github.johnrengelman.shadow" version "7.0.0"
     // maven plugin is used to create .pom files and for publishing
     id 'maven-publish'
 }
@@ -23,29 +23,37 @@ sourceCompatibility = "${project.property('java.version')}"
 targetCompatibility = "${project.property('java.version')}"
 
 repositories {
-    // Use JCenter for resolving dependencies.
-    jcenter()
+    // Use maven central for resolving dependencies.
+    mavenCentral()
 
     // DBIS Archiva
     maven {
         url "${project.property('dbis.archiva.url')}"
     }
+
+    // DBIS Archiva (snapshots)
+    maven {
+        url "${project.property('dbis.archiva.url.snapshots')}"
+    }
 }
 
 dependencies {
-    compile project(":core")
-    compile project(":restmapper")
-    compile project(":webconnector")
+    implementation project(":core")
+    implementation project(":restmapper")
+    implementation project(":webconnector")
 }
 
 // put all .jar files into export/jars folder
 tasks.withType(Jar) {
-    destinationDir = file("$projectDir/export/jars")
+    destinationDirectory = file("$projectDir/export/jars")
 }
 
 jar {
     manifest {
-        attributes "Main-Class": "i5.las2peer.tools.L2pNodeLauncher"
+        attributes(
+            "Main-Class": "i5.las2peer.tools.L2pNodeLauncher",
+            "Add-Opens": "java.base/java.lang java.base/java.util"
+        )
     }
 }
 

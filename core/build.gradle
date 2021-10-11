@@ -19,27 +19,28 @@ sourceCompatibility = "${project.property('java.version')}"
 targetCompatibility = "${project.property('java.version')}"
 
 repositories {
-    // Use JCenter for resolving dependencies.
-    jcenter()
+    // Use maven central for resolving dependencies.
+    mavenCentral()
 
     // DBIS Archiva
     maven {
         url "${project.property('dbis.archiva.url')}"
     }
+
+    // DBIS Archiva (snapshots)
+    maven {
+        url "${project.property('dbis.archiva.url.snapshots')}"
+    }
 }
 
 compileJava {
     // -XDignore.symbol.file fixes build in JDK8
-    // --add-exports fixes build in JDK14
-    options.compilerArgs += ["-XDignore.symbol.file", "-Xlint:deprecation",
-    "--add-exports", "java.desktop/com.sun.beans.finder=ALL-UNNAMED"]
+    options.compilerArgs += ["-XDignore.symbol.file", "-Xlint:deprecation"]
     options.fork = true
     options.forkOptions.executable = "javac"
 }
 
 javadoc {
-    // its important to only use -add-exports here instead of --add-exports (second "-" is added automatically)
-    doFirst {options.addStringOption("-add-exports", "java.desktop/com.sun.beans.finder=ALL-UNNAMED")}
     destinationDir = file("$projectDir/export/javadoc")
 }
 
@@ -59,7 +60,7 @@ dependencies {
     implementation "junit:junit:${project.property('junit.version')}"
     testImplementation "org.mockito:mockito-all:1.9.5"
 
-    api "FreePastry:FreePastry:3.0.0"
+    api "FreePastry:FreePastry:3.1-SNAPSHOT"
     api "xpp3:xpp3:1.1.4c" // FreePastry dependency
     //api "javax.xml.parsers:jaxp-api:1.4.5"
 
@@ -84,7 +85,7 @@ dependencies {
 
 // put all .jar files into export/jars folder
 tasks.withType(Jar) {
-    destinationDir = file("$projectDir/export/jars")
+    destinationDirectory = file("$projectDir/export/jars")
 }
 
 jar {
@@ -192,7 +193,7 @@ task junit_jars {
 
 
 task jar_test1_1_1(type: Jar) {
-    archiveName = "i5.las2peer.classLoaders.testPackage1-1.0.jar"
+    archiveFileName = "i5.las2peer.classLoaders.testPackage1-1.0.jar"
     from sourceSets.testHelp.output
     include "i5/las2peer/classLoaders/testPackage1/**/*"
     
@@ -207,7 +208,7 @@ task jar_test1_1_1(type: Jar) {
 }
 
 task jar_test1_1_2(type: Jar) {
-    archiveName = "i5.las2peer.classLoaders.testPackage1-1.1.jar"
+    archiveFileName = "i5.las2peer.classLoaders.testPackage1-1.1.jar"
     from sourceSets.testHelp2.output
     include "i5/las2peer/classLoaders/testPackage1/**/*"
 
@@ -222,7 +223,7 @@ task jar_test1_1_2(type: Jar) {
 }
 
 task jar_test2_1_0(type: Jar) {
-    archiveName = "i5.las2peer.classLoaders.testPackage2-1.0.jar"
+    archiveFileName = "i5.las2peer.classLoaders.testPackage2-1.0.jar"
     from sourceSets.testHelp.output
     include "i5/las2peer/classLoaders/testPackage2/**/*"
 
@@ -240,7 +241,7 @@ task jar_test2_1_0(type: Jar) {
 }
 
 task jar_testService1_1_0(type: Jar) {
-    archiveName = "i5.las2peer.testServices.testPackage1-1.0.jar"
+    archiveFileName = "i5.las2peer.testServices.testPackage1-1.0.jar"
     from sourceSets.testHelp.output
     include "i5/las2peer/testServices/testPackage1/**/*"
 
@@ -251,7 +252,7 @@ task jar_testService1_1_0(type: Jar) {
 }
 
 task jar_testService1_1_1(type: Jar) {
-    archiveName = "i5.las2peer.testServices.testPackage1-1.1.jar"
+    archiveFileName = "i5.las2peer.testServices.testPackage1-1.1.jar"
     from sourceSets.testHelp2.output
     include "i5/las2peer/testServices/testPackage1/**/*"
 
@@ -262,7 +263,7 @@ task jar_testService1_1_1(type: Jar) {
 }
 
 task jar_testService2_1_0(type: Jar) {
-    archiveName = "i5.las2peer.testServices.testPackage2-1.0.jar"
+    archiveFileName = "i5.las2peer.testServices.testPackage2-1.0.jar"
     from sourceSets.testHelp.output
     include "i5/las2peer/testServices/testPackage2/**/*"
 
@@ -273,7 +274,7 @@ task jar_testService2_1_0(type: Jar) {
 }
 
 task jar_evilService(type: Jar) {
-    archiveName = "i5.las2peer.classLoaders.evilService-1.0.jar"
+    archiveFileName = "i5.las2peer.classLoaders.evilService-1.0.jar"
     from sourceSets.testHelp.output
     include "i5/las2peer/classLoaders/evilService/**/*"
 
@@ -284,7 +285,7 @@ task jar_evilService(type: Jar) {
 }
 
 task jar_testPackageService(type: Jar) {
-    archiveName = "i5.las2peer.testServices.testPackage3-1.0.jar"
+    archiveFileName = "i5.las2peer.testServices.testPackage3-1.0.jar"
     from sourceSets.testHelp2.output
     include "i5/las2peer/testServices/testPackage3/**/*"
 
