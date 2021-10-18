@@ -11,7 +11,7 @@ export class InformationBar extends PageElement {
 
   render() {
     return html` <div
-      style="margin-left: auto;order: 2;display: flex;align-content: center;align-items: center;"
+      style="margin-left: auto;order: 2;display: flex;align-content: center;align-items: center;justify-content: center;"
     >
       <!-- Is running blockchain? -->
       <eth-node-information></eth-node-information>
