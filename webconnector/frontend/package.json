@@ -28,6 +28,7 @@
     "@material/mwc-button": "^0.21.0",
     "@material/mwc-textfield": "^0.21.0",
     "@polymer/iron-collapse": "^3.0.1",
+    "@polymer/iron-pages": "^3.0.1",
     "@polymer/paper-button": "^3.0.1",
     "@polymer/paper-dialog": "^3.0.1",
     "@polymer/paper-icon-button": "^3.0.2",

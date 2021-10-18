@@ -17,6 +17,7 @@ import '@polymer/paper-listbox/paper-listbox.js';
 import '@polymer/paper-spinner/paper-spinner.js';
 import '@polymer/paper-tabs/paper-tabs.js';
 import '@polymer/paper-tooltip/paper-tooltip.js';
+import '@polymer/iron-pages/iron-pages.js';
 import { request, RequestResponse } from '../helpers/request_helper.js';
 
 @customElement('page-eth-tools')
@@ -166,7 +167,7 @@ export class PageHome extends PageElement {
   _listAgents = [];
   @property({ type: Array })
   _listProfiles = [];
-  @property({ type: Number })
+  @property({ type: Number, attribute: true, reflect: true })
   _selectedTab = 0;
   timer: NodeJS.Timeout | undefined;
 
@@ -562,7 +563,7 @@ export class PageHome extends PageElement {
         <!-- </template> -->
         ${this._hasEthProfile == true
           ? html` <paper-tabs selected=${this._selectedTab}>
-                <paper-tab>
+                <paper-tab @click=${() => (this._selectedTab = 0)}>
                   <span id="dashboard"
                     ><iron-icon icon="store"></iron-icon> Dashboard</span
                   >
@@ -571,7 +572,7 @@ export class PageHome extends PageElement {
                     style="float:right;"
                   ></paper-spinner> -->
                 </paper-tab>
-                <paper-tab>
+                <paper-tab @click=${() => (this._selectedTab = 1)}>
                   <span id="faucet-tx"
                     ><iron-icon icon="assignment"></iron-icon> Repuation pay-out
                     Log</span
@@ -581,7 +582,7 @@ export class PageHome extends PageElement {
                     label=${this._EthWallet.rcvdTx.length}
                   ></paper-badge>
                 </paper-tab>
-                <paper-tab>
+                <paper-tab @click=${() => (this._selectedTab = 2)}>
                   <span id="rcvd-tx"
                     ><iron-icon icon="cloud-download"></iron-icon> Incoming
                     reputation</span
@@ -591,7 +592,7 @@ export class PageHome extends PageElement {
                     label=${this._ethTxLog.rcvdJsonLog.length}
                   ></paper-badge>
                 </paper-tab>
-                <paper-tab>
+                <paper-tab @click=${() => (this._selectedTab = 3)}>
                   <span id="sent-tx"
                     ><iron-icon icon="cloud-upload"></iron-icon> Outgoing
                     reputation</span
@@ -1127,10 +1128,10 @@ export class PageHome extends PageElement {
     const username = event.target.getAttribute('data-username');
     this._chosenAgentID = agentid;
     this._chosenUsername = username;
-    this.$.sendEthDialog.open();
+    this.shadowRoot?.getElementById('sendEthDialog')!.open();
   }
   closeEthDialog() {
-    this.$.sendEthDialog.close();
+    this.shadowRoot?.getElementById('sendEthDialog')!.close();
     this._ethTransactionSent = false;
   }
   sendGenericTransaction() {
@@ -1146,6 +1147,8 @@ export class PageHome extends PageElement {
   }
   _handleGenericTransactionResponse(event: any) {
     this._ethTransactionSent = true;
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const ethThis = this;
     setTimeout(function () {
       ethThis.closeEthDialog();
     }, 200);
