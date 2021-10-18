@@ -95,7 +95,7 @@ export class AppIndex extends LitElement {
         <a href="publish-service"
           ><i class="fa fa-fw fa-publish-service"></i> Publish Service</a
         >
-        <a href="contact"
+        <a href="eth-tools"
           ><i class="fa fa-fw fa-eth-tools"></i> Blockchain and Reputation</a
         >
         <i class="fas fa-address-book"></i>

@@ -71,6 +71,18 @@ export const routes: Route[] = [
     },
   },
   {
+    path: '/eth-tools',
+    name: 'page-eth',
+    component: 'page-eth-tools',
+    meta: {
+      title: 'ETH Tools',
+      description: 'ETH Tools',
+    },
+    action: async () => {
+      await import('../pages/page_blockchain_and_reputation.js');
+    },
+  },
+  {
     path: '(.*)',
     name: 'not-found',
     component: 'page-not-found',

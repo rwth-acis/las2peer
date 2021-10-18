@@ -11,6 +11,36 @@ export class PageHome extends PageElement {
     section {
       padding: 1rem;
     }
+    :host {
+      display: block;
+      padding: 10px;
+    }
+    .service .nodeId,
+    .service .nodeAdmin,
+    .service .nodeAdminRating,
+    .service .time {
+      display: inline-block;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .service .nodeId,
+    .service .nodeAdmin,
+    .service .nodeAdminRating {
+      margin-right: 1em;
+    }
+    .service .nodeId {
+      width: 6.5em;
+    }
+    .service .nodeAdmin {
+      min-width: 8em;
+    }
+    .service .nodeAdminRating {
+      min-width: 120px;
+    }
+    details {
+      cursor: pointer;
+    }
   `;
 
   @property({ type: Object })
@@ -33,7 +63,7 @@ export class PageHome extends PageElement {
               ${this._getLatestAsArray(service.releases).map(
                 (release) => html`
                   <paper-card
-                    heading=${release.supplement.name}
+                    heading=${service.name}
                     style="width: 100%;margin-bottom: 1em"
                     class="service"
                   >
@@ -67,11 +97,15 @@ export class PageHome extends PageElement {
                       </div>
                       <div>
                         Latest version:
-                        <span class="version">${release.version}</span>
+                        <span class="version"
+                          >${release == null ? '' : release.version}</span
+                        >
                         published
                         <span class="timestamp"
                           >${this._toHumanDate(
-                            release.publicationEpochSeconds
+                            release == null
+                              ? 0
+                              : release.publicationEpochSeconds
                           )}</span
                         >
                         <span class="history">
@@ -97,7 +131,7 @@ export class PageHome extends PageElement {
                         </span>
                       </div>
                       <p class="description">
-                        ${release.supplement.description}
+                        ${release == null ? '' : release.supplement.description}
                       </p>
                       <details>
                         <summary>
@@ -105,9 +139,11 @@ export class PageHome extends PageElement {
                             style="display: inline-block; vertical-align: top"
                           >
                             Service consists of
-                            ${this._count(release.supplement.class)}
+                            ${this._count(
+                              release == null ? '' : release.supplement.class
+                            )}
                             microservice${this._pluralS(
-                              release.supplement.class
+                              release == null ? '' : release.supplement.class
                             )}<br />
                             ${this._countRunningLocally(release)} running
                             locally on this node,
@@ -143,13 +179,13 @@ export class PageHome extends PageElement {
                               Service not available
                             </div>
                             <!--
-                  [[_countRunningLocally(release)]] of [[_count(release.supplement.class)]] Service classes running on this node
-                  <iron-icon icon="hardware:security" title="Running locally"></iron-icon><br/>
-                  <span hidden$="[[_fullyAvailableLocally(release)]]">
-                  [[_countRunningRemoteOnly(release)]] of [[_countMissingLocally(release)]] running remotely in network
-                  <iron-icon icon="icons:cloud" title="Running on network nodes"></iron-icon>
-                  </span>
-                  -->
+                        [[_countRunningLocally(release)]] of [[_count(release.supplement.class)]] Service classes running on this node
+                        <iron-icon icon="hardware:security" title="Running locally"></iron-icon><br/>
+                        <span hidden$="[[_fullyAvailableLocally(release)]]">
+                        [[_countRunningRemoteOnly(release)]] of [[_countMissingLocally(release)]] running remotely in network
+                        <iron-icon icon="icons:cloud" title="Running on network nodes"></iron-icon>
+                        </span>
+                        -->
                           </div>
                         </summary>
                         <ul style="list-style: none">
@@ -355,6 +391,7 @@ export class PageHome extends PageElement {
         method: 'GET',
       }
     );
+    console.log(this.services);
   }
   _fullyAvailableLocally(release: Release) {
     return this._countMissingLocally(release) === 0;
@@ -492,6 +529,9 @@ export class PageHome extends PageElement {
   }
 
   _getLatestAsArray(service: Releases) {
+    console.log(this._getLatest(service));
+    console.log(this._getLatest(service));
+    console.log(this._getLatest(service));
     return [this._getLatest(service)];
   }
 }

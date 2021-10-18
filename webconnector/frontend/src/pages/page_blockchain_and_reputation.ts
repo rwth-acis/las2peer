@@ -1,22 +1,23 @@
 import { html, css, customElement, property } from 'lit-element';
 
+import config from '../config.js';
 import { PageElement } from '../helpers/page-element.js';
 import '@polymer/paper-button/paper-button.js';
 import '@polymer/iron-icon/iron-icon.js';
 import '@polymer/iron-icons/iron-icons.js';
 import '@polymer/iron-icons/notification-icons.js';
-import config from '../config.js';
-import {
-  request,
-  RequestResponse,
-  RequestResponse,
-  RequestResponse,
-  RequestResponse,
-  RequestResponse,
-  RequestResponse,
-  RequestResponse,
-  RequestResponse,
-} from '../helpers/request_helper.js';
+import '@polymer/iron-collapse/iron-collapse.js';
+import '@polymer/iron-form/iron-form.js';
+import '@polymer/paper-badge/paper-badge.js';
+import '@polymer/paper-card/paper-card.js';
+import '@polymer/paper-dropdown-menu/paper-dropdown-menu.js';
+import '@polymer/paper-input/paper-input.js';
+import '@polymer/paper-item/paper-item.js';
+import '@polymer/paper-listbox/paper-listbox.js';
+import '@polymer/paper-spinner/paper-spinner.js';
+import '@polymer/paper-tabs/paper-tabs.js';
+import '@polymer/paper-tooltip/paper-tooltip.js';
+import { request, RequestResponse } from '../helpers/request_helper.js';
 
 @customElement('page-eth-tools')
 export class PageHome extends PageElement {
@@ -28,7 +29,12 @@ export class PageHome extends PageElement {
       display: block;
       padding: 10px;
     }
-
+    .flex-horizontal {
+      display: var(--layout-horizontal_-_display);
+      -ms-flex-direction: var(--layout-horizontal_-_-ms-flex-direction);
+      /* -webkit-flex-direction: var(--layout-horizontal_-_-webkit-flex-direction); */
+      flex-direction: var(--layout-horizontal_-_flex-direction);
+    }
     .agentList,
     .profileList {
       overflow-y: scroll;
@@ -94,7 +100,7 @@ export class PageHome extends PageElement {
   groups: any = [];
   @property({ type: Object })
   _groupSelected: any;
-  @property({ type: Boolean })
+  @property({ type: Boolean, attribute: true })
   _working = false;
   @property({ type: String })
   _chosenAgentID = '';
@@ -109,13 +115,14 @@ export class PageHome extends PageElement {
     ethAccBalance: 0,
     ethAgentAddress: '',
     ethAgentCredentialsAddress: '',
-    ethCumulativeScore: 0,
+    ethCumulativeScore: ' 0',
     ethMnemonic: '',
     ethNoTransactionsRcvd: 0,
     ethNoTransactionsSent: 0,
     ethProfileOwner: '',
     ethRating: 0,
     username: '',
+    rcvdTx: [],
   };
   @property({ type: Object })
   _ethFaucetLog = {
@@ -142,7 +149,7 @@ export class PageHome extends PageElement {
     coinbaseBalance: '',
   };
   @property({ type: Boolean })
-  _hasEthProfile: undefined;
+  _hasEthProfile = false;
   @property({ type: Boolean })
   _hasNoAgentsList = true;
   @property({ type: Boolean })
@@ -161,6 +168,8 @@ export class PageHome extends PageElement {
   _listProfiles = [];
   @property({ type: Number })
   _selectedTab = 0;
+  timer: NodeJS.Timeout | undefined;
+
   render() {
     return html`
       <div class="card">
@@ -205,7 +214,7 @@ export class PageHome extends PageElement {
             <p>
               <iron-icon icon="redeem"></iron-icon>
               <strong>Total Faucet Payout</strong>:
-              [[_ethFaucetLog.ethFaucetAmount]] <br />
+              ${this._ethFaucetLog.ethFaucetAmount} <br />
               The reputation pay-out has been obtained as follows:
             </p>
             <p>
@@ -235,7 +244,7 @@ export class PageHome extends PageElement {
           <h1>Transfer L2Pcoin to ${this._chosenUsername}</h1>
           <paper-dialog-scrollable>
             <div class="horizontal layout center-justified">
-              <paper-spinner active=${this._working}></paper-spinner>
+              <!-- <paper-spinner ?active=${this._working}></paper-spinner> -->
               ${this._ethTransactionSent
                 ? html`<iron-icon icon="done"></iron-icon>`
                 : html``}
@@ -276,7 +285,7 @@ export class PageHome extends PageElement {
             </paper-button>
             <paper-button
               raised
-              @click="sendGenericTransaction"
+              @click=${this.sendGenericTransaction}
               disabled=${this._working}
               class="green"
             >
@@ -285,10 +294,10 @@ export class PageHome extends PageElement {
           </div>
         </paper-dialog>
         <h1>Blockchain and Reputation</h1>
-        <paper-spinner
+        <!-- <paper-spinner
           active=${this._working}
           style="float:right;"
-        ></paper-spinner>
+        ></paper-spinner> -->
         <div class="introText">
           <p class="description">
             To incentivize las2peer users to contribute to the community, a
@@ -355,15 +364,15 @@ export class PageHome extends PageElement {
           <paper-icon-button
             icon="refresh"
             title="Refresh Reputation Wallet"
-            @click="refreshEthWallet"
-            disabled=${this._working}
+            @click=${this.refreshEthWallet}
+            ?disabled=${this._working}
           ></paper-icon-button>
         </h2>
-        <paper-spinner
+        <!-- <paper-spinner
           active=${this._working}
           style="float:right;"
-        ></paper-spinner>
-        ${this._hasNoEthWallet == true
+        ></paper-spinner> -->
+        ${this._hasNoEthWallet == false
           ? html` <div class="flex-horizontal">
               <!-- LEFT HAND SIDE -->
               <div class="flexchild">
@@ -456,8 +465,8 @@ export class PageHome extends PageElement {
                       class="green"
                       style="margin-top:10px"
                       raised
-                      @click="requestEthFaucet"
-                      disabled=${this._working}
+                      @click=${this.requestEthFaucet}
+                      ?disabled=${this._working}
                     >
                       <iron-icon icon="card-giftcard"></iron-icon> Request
                       reputation pay-out
@@ -465,7 +474,7 @@ export class PageHome extends PageElement {
                   </dd>
                 </dl>
                 <!-- REQUEST REPUTATION PROFILE (OPT-IN) -->
-                ${this._hasEthProfile == true
+                ${this._hasEthProfile == false
                   ? html`
                       ${this._EthWallet.ethAccBalance
                         ? html` <p class="description">
@@ -497,8 +506,8 @@ export class PageHome extends PageElement {
                               class="green"
                               id="reputationOptIn"
                               raised
-                              @click="requestReputationProfile"
-                              disabled=${this._working}
+                              @click=${this.requestReputationProfile}
+                              ?disabled=${this._working}
                             >
                               <iron-icon icon="record-voice-over"></iron-icon>
                               Opt-in to reputation
@@ -547,7 +556,7 @@ export class PageHome extends PageElement {
               </div>
               <!-- END RIGHT HAND SIDE -->
             </div>`
-          : html``}:
+          : html``}
 
         <!-- END PROFILE -->
         <!-- </template> -->
@@ -557,10 +566,10 @@ export class PageHome extends PageElement {
                   <span id="dashboard"
                     ><iron-icon icon="store"></iron-icon> Dashboard</span
                   >
-                  <paper-spinner
-                    active=${this._working}
+                  <!-- <paper-spinner
+                    ?active=${this._working}
                     style="float:right;"
-                  ></paper-spinner>
+                  ></paper-spinner> -->
                 </paper-tab>
                 <paper-tab>
                   <span id="faucet-tx"
@@ -699,7 +708,7 @@ export class PageHome extends PageElement {
                           <paper-icon-button
                             icon="card-giftcard"
                             title="Transfer L2Pcoin to Agent"
-                            @click="openEthSendDialog"
+                            @click=${this.openEthSendDialog}
                             data-username=${agent.username}
                             data-agentid=${agent.agentid}
                             disabled=${this._working}
@@ -814,24 +823,28 @@ export class PageHome extends PageElement {
 
                     ${this._ethTxLog.sentJsonLog.map(
                       (tx: {
-                        transactionType: any;
+                        txDateTime: unknown;
+                        txReceiverAddress: unknown;
+                        txTransactionType: unknown;
+                        txMessage: unknown;
+                        transactionType: string;
                         txAmountInEth: unknown;
                       }) => html` <tr>
                         <td>
                           <iron-icon icon="update"></iron-icon>
-                          [[tx.txDateTime]]
+                          ${tx.txDateTime}
                         </td>
                         <td>
                           <iron-icon icon="face"></iron-icon>
-                          [[tx.txReceiverAddress]]
+                          ${tx.txReceiverAddress}
                         </td>
                         <td>
                           <iron-icon icon="class"></iron-icon>
-                          [[tx.txTransactionType]]
+                          ${tx.txTransactionType}
                         </td>
                         <td>
                           <iron-icon icon="speaker-notes"></iron-icon>
-                          [[tx.txMessage]]
+                          ${tx.txMessage}
                         </td>
                         <td>
                           ${this._isUserRating(tx.transactionType)
@@ -865,17 +878,15 @@ export class PageHome extends PageElement {
   }
   firstUpdated() {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const ethThis = this;
-    window.setTimeout(function () {
-      ethThis.refreshWallet();
-    }, 5);
+    this.refreshWallet();
+    this.timer = setInterval(() => this.refreshWallet(), 5000);
   }
-  refreshWallet() {
+  async refreshWallet() {
     this.refreshAgentsList();
     this.refreshProfilesList();
-    if (this.agentId.length > 5) {
-      this.refreshEthWallet();
-    }
+    // if (this.agentId.length > 5) {
+    this.refreshEthWallet();
+    // }
   }
   async refreshEthWallet() {
     const response = await request(config.url + '/las2peer/eth/dashboardList', {
@@ -997,8 +1008,8 @@ export class PageHome extends PageElement {
     this.group = this._findGroupIDByName(this._groupSelected.innerHTML.trim());
   }
 
-  _handleGenericTxLogResponse(event: RequestResponse) {
-    this._ethTxLog = event.detail.response;
+  _handleGenericTxLogResponse(event: any) {
+    this._ethTxLog = event;
     if (
       this._ethTxLog.rcvdJsonLog.length == 0 &&
       this._ethTxLog.sentJsonLog.length == 0
@@ -1007,8 +1018,8 @@ export class PageHome extends PageElement {
     else this._hasNoTxLog = false;
   }
 
-  _handleDashboardListResponse(event: RequestResponse) {
-    const response = event.detail.response;
+  _handleDashboardListResponse(event: any) {
+    const response = event;
     response.agentList.forEach(function (element: {
       shortid: string;
       agentid: string;
@@ -1019,8 +1030,8 @@ export class PageHome extends PageElement {
     this._hasNoDashboard = false;
   }
 
-  _handleLoadAgentlistResponse(event: RequestResponse) {
-    const response = event.detail.response;
+  _handleLoadAgentlistResponse(event: any) {
+    const response = event;
     response.agents.forEach(function (element: {
       shortid: string;
       agentid: string;
@@ -1030,8 +1041,8 @@ export class PageHome extends PageElement {
     this._listAgents = response.agents;
     this._hasNoAgentsList = false;
   }
-  _handleLoadProfilelistResponse(event: RequestResponse) {
-    const response = event.detail.response;
+  _handleLoadProfilelistResponse(event: any) {
+    const response = event;
     response.agents.forEach(function (element: {
       shortid: string;
       agentid: string;
@@ -1067,12 +1078,13 @@ export class PageHome extends PageElement {
     //this.$.toast.innerHTML = 'Rating (' + event.model.get('agent.username') + ': '+ event.detail.rating + ') successfully casted.';
     //this.$.toast.open();
   }
-  _handleGetCoinbaseBalanceResponse(event: RequestResponse) {
-    this._ethCoinbaseInfo = event.detail.response;
+  _handleGetCoinbaseBalanceResponse(event: any) {
+    this._ethCoinbaseInfo = event;
   }
-  _handleGetEthWalletResponse(event: RequestResponse) {
+  _handleGetEthWalletResponse(event: any) {
     this._hasNoEthWallet = false;
-    this._EthWallet = event.detail.response;
+    this._EthWallet = event;
+
     if (this._EthWallet.ethCumulativeScore !== '???') {
       this._hasEthProfile = true;
     }
@@ -1082,12 +1094,12 @@ export class PageHome extends PageElement {
       this._hasNoTxLog = false;
     }
     this._EthWallet.ethAccBalance = parseFloat(this._EthWallet.ethAccBalance);
-    this.$.ajaxGetGroups.headers = window.rootThis.$.ajaxLogin.headers;
-    this.$.ajaxGetGroups.generateRequest();
+    // this.$.ajaxGetGroups.headers = window.rootThis.$.ajaxLogin.headers;
+    // this.$.ajaxGetGroups.generateRequest();
   }
-  _handleRequestFaucetResponse(event: RequestResponse) {
-    this._ethFaucetLog = event.detail.response;
-    this.$.ethFaucetDiaLog.open();
+  _handleRequestFaucetResponse(event: any) {
+    this._ethFaucetLog = event;
+    this.shadowRoot?.getElementById('ethFaucetDiaLog')!.open();
     this.refreshEthWallet();
   }
   _handleRegisterProfileResponse(event: RequestResponse) {
@@ -1111,8 +1123,8 @@ export class PageHome extends PageElement {
     target: { getAttribute: (arg0: string) => any };
   }) {
     this._ethTransactionSent = false;
-    let agentid = event.target.getAttribute('data-agentid');
-    let username = event.target.getAttribute('data-username');
+    const agentid = event.target.getAttribute('data-agentid');
+    const username = event.target.getAttribute('data-username');
     this._chosenAgentID = agentid;
     this._chosenUsername = username;
     this.$.sendEthDialog.open();
