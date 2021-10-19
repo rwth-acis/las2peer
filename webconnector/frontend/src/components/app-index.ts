@@ -44,7 +44,7 @@ export class AppIndex extends LitElement {
       z-index: 1;
       top: 0;
       left: 0;
-      background-color: #c2adad;
+      background-color: #c6f5fc;
       overflow-x: hidden;
       padding-top: 16px;
     }
@@ -53,7 +53,7 @@ export class AppIndex extends LitElement {
       padding: 6px 8px 6px 16px;
       text-decoration: none;
       font-size: 20px;
-      color: #818181;
+      color: #353434;
       display: block;
     }
 
