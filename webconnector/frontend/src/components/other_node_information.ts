@@ -102,7 +102,7 @@ export class OtherNodesInformation extends PageElement {
     this.fetchOtherNodesInfo();
   }
   async fetchOtherNodesInfo() {
-    const response = await request<OtherNodesInfo[]>(
+    const response = await request<any>(
       config.url + '/las2peer/getOtherNodesInfo',
       {
         method: 'GET',

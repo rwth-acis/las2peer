@@ -42,17 +42,14 @@ export class ContactServiceInformation extends PageElement {
       oidcSub: ((oidcUser || {}).profile || {}).sub,
     };
     const prefixedIdentifier = PREFIX_OIDC_SUB + credentials.oidcSub;
-    const response = await request(
-      config.url + '/las2peer/contactservice/groups',
-      {
-        method: 'GET',
-        headers: {
-          Authorization:
-            'Basic ' + btoa(prefixedIdentifier + ':' + credentials.oidcSub),
-          'access-token': (oidcUser || {}).access_token || '',
-        },
-      }
-    );
+    const response = await request(config.url + '/contactservice/groups', {
+      method: 'GET',
+      headers: {
+        Authorization:
+          'Basic ' + btoa(prefixedIdentifier + ':' + credentials.oidcSub),
+        'access-token': (oidcUser || {}).access_token || '',
+      },
+    });
     if (response.code === 200) {
       this.isContactServiceRunning = true;
     }

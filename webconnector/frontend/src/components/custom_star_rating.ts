@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import '@polymer/iron-icon/iron-icon.js';
 import '@polymer/iron-icons/iron-icons.js';
 import '@polymer/iron-icons/social-icons.js';
@@ -105,6 +106,8 @@ export class CustomStarRating extends PageElement {
 
   @property({ type: Boolean })
   disableAutoUpdate = false;
+
+  notifyPath: any;
 
   render() {
     return html`
@@ -250,7 +253,7 @@ export class CustomStarRating extends PageElement {
     );
   }
 
-  _valueChanged(newValue: number, oldValue: any) {
+  _valueChanged(newValue: number) {
     if (this.single) {
       this._updateSingleFace();
     }

@@ -1,11 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { TextField } from '@material/mwc-textfield';
 import { html, css, customElement, property } from 'lit-element';
 
+import config from '../config.js';
 import { PageElement } from '../helpers/page-element.js';
 import { request } from '../helpers/request_helper.js';
 import '@material/mwc-button';
-import '@material/mwc-textfield';
-import config from '../config.js';
-import { TextField } from '@material/mwc-textfield';
 
 @customElement('page-publish-service')
 export class PagePublishService extends PageElement {

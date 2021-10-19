@@ -2,7 +2,10 @@ import { html, css, customElement, property } from 'lit-element';
 
 import config from '../config.js';
 import { PageElement } from '../helpers/page-element.js';
-import { request } from '../helpers/request_helper.js';
+import { request, RequestResponse } from '../helpers/request_helper.js';
+import '@polymer/iron-icon/iron-icon.js';
+import '@polymer/iron-icons/iron-icons.js';
+import '@polymer/iron-icons/notification-icons.js';
 import '../components/custom_star_rating.js';
 
 @customElement('page-view-services')
@@ -52,7 +55,8 @@ export class PageHome extends PageElement {
     code: 0,
     text: '',
   };
-
+  @property({ type: Boolean, attribute: true })
+  _working = false;
   render() {
     return html`
       <section>
@@ -334,33 +338,38 @@ export class PageHome extends PageElement {
                     </div>
                     <div class="card-actions">
                       <paper-button
-                        @click="_handleStartButton"
-                        data-args="[[service.name]]#[[_classesNotRunningLocally(release)]]@[[release.version]]"
-                        ?disabled="[[_working]]"
+                        @click=${this._handleStartButton}
+                        data-args="${service.name}#${this._classesNotRunningLocally(
+                          release
+                        )}@${release.version}"
+                        ?disabled=${this._working}
                         >Start on this Node</paper-button
                       >
                       <paper-button
-                        @click="_handleStopButton"
-                        ?disabled="[[!_countRunningLocally(release)]]"
-                        data-args="[[service.name]]#[[release.supplement.class]]@[[release.version]]"
+                        @click=${this._handleStopButton}
+                        ?disabled=${!this._countRunningLocally(release)}
+                        data-args="${service.name}#${release.supplement
+                          .class}@${release.version}"
                         >Stop</paper-button
                       >
                       <paper-button
-                        ?hidden="[[!release.supplement.vcsUrl]]"
-                        @click="_handleVcsButton"
-                        data-args="[[release.supplement.vcsUrl]]"
+                        ?hidden="${!release.supplement.vcsUrl}"
+                        @click=${this._handleVcsButton}
+                        data-args="${release.supplement.vcsUrl}"
                         >View source code</paper-button
                       >
                       <paper-button
-                        ?hidden="[[!release.supplement.frontendUrl]]"
-                        @click="_handleFrontendButton"
-                        ?disabled="[[!_fullyAvailableAnywhere(release)]]"
-                        data-args="[[_frontendUrlIfServiceAvailable(release)]]"
+                        ?hidden="${!release.supplement.frontendUrl}"
+                        @click=${this._handleFrontendButton}
+                        ?disabled="${!this._fullyAvailableAnywhere(release)}"
+                        data-args="${this._frontendUrlIfServiceAvailable(
+                          release
+                        )}"
                         >Open front-end</paper-button
                       >
                       <paper-spinner
                         style="padding: 0.7em;float: right;"
-                        active="[[_working]]"
+                        ?active=${this._working}
                       ></paper-spinner>
                     </div>
                   </paper-card>
@@ -385,7 +394,7 @@ export class PageHome extends PageElement {
     );
   }
   async fetchServicesInfo() {
-    this.services = await request<Service[]>(
+    this.services = await request<any>(
       config.url + '/las2peer/services/services',
       {
         method: 'GET',
@@ -393,11 +402,94 @@ export class PageHome extends PageElement {
     );
     console.log(this.services);
   }
+  _handleStartButton(event: {
+    target: { getAttribute: (arg0: string) => any };
+  }) {
+    const arg = event.target.getAttribute('data-args');
+    const packageName = arg.split('#')[0];
+    const version = arg.split('@')[1];
+    const classes = arg.split('#')[1].split('@')[0].split(',');
+
+    for (const c of classes) {
+      this.startService(packageName + '.' + c, version);
+    }
+  }
+  async startService(fullClassName: string, version: string) {
+    const response = await request(
+      config.url +
+        '/las2peer/services/start?' +
+        'serviceName=' +
+        fullClassName +
+        '&version=' +
+        version,
+      {
+        method: 'POST',
+      }
+    );
+    this._handleServiceStart(response);
+    console.log(
+      "Requesting start of '" + fullClassName + "'@'" + version + "' ..."
+    );
+  }
+  _handleVcsButton(event: {
+    target: { getAttribute: (arg0: string) => string | URL | undefined };
+  }) {
+    if (event.target.getAttribute('data-args')) {
+      window.open(event.target.getAttribute('data-args'));
+    }
+  }
+  _handleServiceStart(_event: RequestResponse) {
+    // window.rootThis.checkStatus();
+  }
+  _handleStopButton(event: {
+    target: { getAttribute: (arg0: string) => any };
+  }) {
+    const arg = event.target.getAttribute('data-args');
+    const packageName = arg.split('#')[0];
+    const version = arg.split('@')[1];
+    const classes = arg.split('#')[1].split('@')[0].split(',');
+
+    for (const c of classes) {
+      this.stopService(packageName + '.' + c, version);
+    }
+  }
+
+  async stopService(fullClassName: string, version: string) {
+    const response = await request(
+      config.url +
+        '/las2peer/services/stop?' +
+        'serviceName=' +
+        fullClassName +
+        '&version=' +
+        version,
+      {
+        method: 'POST',
+      }
+    );
+    console.log(
+      "Requesting stop of '" + fullClassName + "'@'" + version + "' ..."
+    );
+  }
+
+  _handleFrontendButton(event: {
+    target: { getAttribute: (arg0: string) => string | URL | undefined };
+  }) {
+    if (event.target.getAttribute('data-args')) {
+      window.open(event.target.getAttribute('data-args'));
+    }
+  }
   _fullyAvailableLocally(release: Release) {
     return this._countMissingLocally(release) === 0;
   }
   _toHumanDate(epochSeconds: number) {
     return new Date(epochSeconds * 1000).toLocaleString();
+  }
+  _frontendUrlIfServiceAvailable(release: Release) {
+    if (this._fullyAvailableAnywhere(release)) {
+      return (release.supplement || {}).frontendUrl;
+    } else {
+      return false;
+    }
   }
   _getLatestVersionNumber(obj: Releases) {
     // NOTE: sorting issue fixed
@@ -427,7 +519,7 @@ export class PageHome extends PageElement {
   _count(stringWithCommas: any) {
     return this._split(stringWithCommas).length;
   }
-  _countRunning(release: { supplement: any }) {
+  _countRunning(release: Release) {
     const classes = this._split((release.supplement || {}).class);
     const missing = this._classesNotRunningAnywhere(release);
     return classes.length - missing.length;
@@ -441,7 +533,7 @@ export class PageHome extends PageElement {
       const instancesOfClass = (release.instances || []).filter(
         (i) => i.className === c
       );
-      return instancesOfClass < 1;
+      return instancesOfClass.length < 1;
     });
     return missing;
   }
@@ -469,11 +561,11 @@ export class PageHome extends PageElement {
     instances: any[] | null | undefined,
     serviceClass: any
   ): InstancesEntity[] {
-    console.log('instances');
-    console.log(instances);
-    console.log(serviceClass);
-    console.log(instances.filter((i) => i.className === serviceClass));
-    return instances.filter((i) => i.className === serviceClass);
+    if (instances) {
+      return instances.filter((i) => i.className === serviceClass);
+    } else {
+      return [];
+    }
   }
   _countRunningLocally(release: { supplement: any }) {
     const classes = this._split((release.supplement || {}).class);
@@ -506,7 +598,7 @@ export class PageHome extends PageElement {
   }) {
     return this._classesNotRunningLocally(release).join(',');
   }
-  _countRunningRemoteOnly(release: { supplement: any }) {
+  _countRunningRemoteOnly(release: Release) {
     return this._countRunning(release) - this._countRunningLocally(release);
   }
   _pluralS(stringWithCommas: any) {

@@ -34,6 +34,8 @@ export class CurrentNodeStatus extends PageElement {
     maxRamLoadStr: '? MB',
     nodeId: 'loading ...',
     storageSizeStr: '? MB',
+    code: 0,
+    text: '',
   };
 
   render() {

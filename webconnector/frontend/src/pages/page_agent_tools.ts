@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable import/no-duplicates */
 import { TextField } from '@material/mwc-textfield';
 import { html, css, customElement, property } from 'lit-element';
@@ -34,12 +35,6 @@ export class PageAgentTools extends PageElement {
     }
   `;
   fileToUpload: File | null = null;
-  ksks: GetAgentData = {
-    agentid:
-      '219071f26069a53410985205a70bf63c0cb8157658fc1adc2b19b2cfe41bb40edae12492bb059b89bd2d807f0c2615d55a3a28e0621ae537b04a7e3a9ced46c6',
-    email: 'klamma@dbis.rwth-aachen.de',
-    username: 'skmds',
-  };
 
   @property({ type: Array })
   groupMembers: GetAgentData[] = [];
@@ -387,10 +382,4 @@ interface AddGroupResponse extends RequestResponse {
   groupName: string;
   code: number;
   text: string;
-}
-
-interface FileList {
-  readonly length: number;
-  item(index: number): File;
-  [index: number]: File;
 }

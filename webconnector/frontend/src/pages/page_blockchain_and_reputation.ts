@@ -1000,7 +1000,7 @@ export class PageHome extends PageElement {
         groupName: res[keys[i]],
       });
     }
-    if (keys > 0) {
+    if (keys.length > 0) {
       if (this.$.groupSelect.value.length > 0) {
         this._updateGroupMemberlist();
       } else {
@@ -1008,7 +1008,7 @@ export class PageHome extends PageElement {
       }
     }
   }
-  _updateGroupMemberlist(e: undefined) {
+  _updateGroupMemberlist() {
     this.group = this._findGroupIDByName(this._groupSelected.innerHTML.trim());
   }
 
