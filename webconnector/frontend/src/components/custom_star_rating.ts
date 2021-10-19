@@ -117,6 +117,9 @@ export class CustomStarRating extends PageElement {
             icon=${rating.icon}
             class="${rating.class} 
             ${this._getSelected(rating.selected)}"
+            @click=${(e: any) => {
+              this._starClicked(e, rating);
+            }}
           ></iron-icon>
         `
       )}
@@ -236,7 +239,10 @@ export class CustomStarRating extends PageElement {
       },
     ];
   }
-  _starClicked(e: any) {
+  _starClicked(
+    e: { preventDefault: () => void },
+    rating: { value: number; class: string; icon: string; selected: boolean }
+  ) {
     e.preventDefault();
 
     if (this.readonly) {
@@ -244,11 +250,11 @@ export class CustomStarRating extends PageElement {
     }
 
     if (!this.disableAutoUpdate) {
-      this.value = e.model.item.value;
+      this.value = rating.value;
     }
     this.dispatchEvent(
       new CustomEvent('rating-selected', {
-        detail: { rating: e.model.item.value },
+        detail: { rating: rating.value },
       })
     );
   }
@@ -272,66 +278,4 @@ export class CustomStarRating extends PageElement {
       self.notifyPath('ratings.' + index + '.selected');
     });
   }
-  // @click=${this._starClicked}
-
-  // static get is() {
-  //   return 'custom-star-rating';
-  // }
-  // static get properties() {
-  //   return {
-  //     value: {
-  //       type: Number,
-  //       value: 0,
-  //       notify: true,
-  //       observer: '_valueChanged',
-  //     },
-  //     icon: {
-  //       type: String,
-  //       value: 'social:sentiment-neutral',
-  //     },
-  //     disableAutoUpdate: {
-  //       type: Boolean,
-  //       value: false,
-  //     },
-  //     readonly: {
-  //       type: Boolean,
-  //       value: false,
-  //       reflectToAttribute: true,
-  //     },
-  //     disableRating: {
-  //       type: Boolean,
-  //       value: false,
-  //       notify: true,
-  //     },
-  //     single: {
-  //       type: Boolean,
-  //       value: false,
-  //       notify: true,
-  //       reflectToAttribute: true,
-  //     },
-  //   };
-  // }
-
-  // constructor() {
-  //   super();
 }
-
-// connectedCallback() {
-// super.connectedCallback();
-
-//   /*
-//       console.log(
-//           {
-//               "readonly": (this.readonly) ? this.readonly : "r; nope",
-//               "disabled": (this.disabled) ? this.disabled : "d; nope",
-//               "single": (this.single) ? this.single : "s; nope",
-//               "rounded value": (this.value) ? Math.round(this.value) : "v; nope",
-//               "value": (this.value) ? Math.round(this.value) : "v; nope",
-//               "no. elements": this.ratings.length,
-//               "ratings": this.ratings
-//           }
-//       );
-//       */
-// }
-
-// window.customElements.define(CustomStarRating.is, CustomStarRating);

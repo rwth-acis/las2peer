@@ -1,4 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { PaperDialogElement } from '@polymer/paper-dialog/paper-dialog';
+import { PaperInputElement } from '@polymer/paper-input/paper-input';
+import { PaperListboxElement } from '@polymer/paper-listbox/paper-listbox';
+import { PaperToastElement } from '@polymer/paper-toast/paper-toast';
 import { html, css, customElement, property } from 'lit-element';
 
 import config from '../config.js';
@@ -18,7 +22,7 @@ import '@polymer/paper-item/paper-item.js';
 import '@polymer/paper-listbox/paper-listbox.js';
 import '@polymer/paper-spinner/paper-spinner.js';
 import '@polymer/paper-tabs/paper-tabs.js';
-import '@polymer/paper-tooltip/paper-tooltip.js';
+import '@polymer/paper-toast/paper-toast.js';
 import '@polymer/paper-dialog/paper-dialog.js';
 import '@polymer/iron-pages/iron-pages.js';
 import { request, RequestResponse } from '../helpers/request_helper.js';
@@ -272,12 +276,12 @@ export class PageHome extends PageElement {
                 <paper-input
                   label="Amount (in L2Pcoin)"
                   id="SendETHTransactionWeiAmount"
-                  disabled=${this._working}
+                  ?disabled=${this._working}
                   value=""
                 ></paper-input>
                 <paper-textarea
                   label="Transaction Message"
-                  disabled=${this._working}
+                  ?disabled=${this._working}
                   id="SendETHTransactionMessage"
                 ></paper-textarea>
               </form>
@@ -290,7 +294,7 @@ export class PageHome extends PageElement {
             <paper-button
               raised
               @click=${this.sendGenericTransaction}
-              disabled=${this._working}
+              ?disabled=${this._working}
               class="green"
             >
               <iron-icon icon="check"></iron-icon> Send L2Pcoin Transaction
@@ -660,7 +664,9 @@ export class PageHome extends PageElement {
                           <!-- RATING -->
                           ${agent.agentHasProfile
                             ? html` <custom-star-rating
-                                @rating-selected="rateAgent"
+                                @rating-selected=${(e: any) => {
+                                  this.rateAgent(e, agent);
+                                }}
                                 value=${agent.ethRating}
                               ></custom-star-rating>`
                             : html``}
@@ -678,7 +684,7 @@ export class PageHome extends PageElement {
                             style="display: flex; align-content: center; align-items: center;"
                           >
                             ${!agent.agentHasProfile ? html` - ` : html``}
-                            ${!agent.agentHasProfile
+                            ${agent.agentHasProfile
                               ? html`
                                   <iron-icon
                                     icon="notification:network-check"
@@ -715,7 +721,7 @@ export class PageHome extends PageElement {
                             @click=${this.openEthSendDialog}
                             data-username=${agent.username}
                             data-agentid=${agent.agentid}
-                            disabled=${this._working}
+                            ?disabled=${this._working}
                           ></paper-icon-button>
                         </td>
                       </tr>`
@@ -978,7 +984,7 @@ export class PageHome extends PageElement {
     // this.$.collapseEthWallet.toggle();
   }
 
-  _agentIdChanged(agentid: any) {
+  _agentIdChanged() {
     if (this.agentId == '') return;
     if (this.agentId.length > 5) {
       this.refreshEthWallet();
@@ -1001,7 +1007,10 @@ export class PageHome extends PageElement {
       });
     }
     if (keys.length > 0) {
-      if (this.$.groupSelect.value.length > 0) {
+      if (
+        (this.shadowRoot!.getElementById('groupSelect') as PaperListboxElement)
+          .children.length > 0
+      ) {
         this._updateGroupMemberlist();
       } else {
         this.group = keys[0];
@@ -1056,30 +1065,46 @@ export class PageHome extends PageElement {
     this._listProfiles = response.agents;
     this._hasNoProfilesList = false;
   }
-  _handleRateAgentResponse(event: { detail: { response: any } }) {
-    const response = event.detail.response;
-
-    // this.$.toast.innerHTML =
-    //   'Rating (' +
-    //   response.recipientname +
-    //   ': ' +
-    //   response.rating +
-    //   ') successfully casted.';
-    // this.$.toast.open();
-    // this.refreshWallet();
+  _handleRateAgentResponse(event: any) {
+    const response = event;
+    (this.shadowRoot!.getElementById('toast') as PaperToastElement).innerHTML =
+      'Rating (' +
+      response.recipientname +
+      ': ' +
+      response.rating +
+      ') successfully casted.';
+    (this.shadowRoot!.getElementById('toast') as PaperToastElement).open();
+    this.refreshWallet();
   }
-  rateAgent(event: {
-    model: { get: (arg0: string) => any };
-    detail: { rating: any };
-  }) {
-    //let req = this.$.ajaxRateAgentMock;
-    // const req = this.$.ajaxRateAgent;
-    // req.body = new FormData();
-    // req.body.append('agentid', event.model.get('agent.agentid'));
-    // req.body.append('rating', event.detail.rating);
-    // req.generateRequest();
-    //this.$.toast.innerHTML = 'Rating (' + event.model.get('agent.username') + ': '+ event.detail.rating + ') successfully casted.';
-    //this.$.toast.open();
+  async rateAgent(
+    event: {
+      model: { get: (arg0: string) => string | Blob };
+      detail: { rating: string | Blob };
+    },
+    agent: {
+      username: unknown;
+      agentHasProfile: any;
+      ethRating: unknown;
+      noOfTransactionsRcvd: unknown;
+      noOfTransactionsSent: unknown;
+      address: unknown;
+      agentid: unknown;
+    }
+  ) {
+    console.log(agent);
+    const body = new FormData();
+
+    body.append('agentid', agent.agentid as string);
+    body.append('rating', event.detail.rating);
+
+    const response = await request<any>(
+      config.url + '/las2peer/eth/rateAgent',
+      {
+        method: 'POST',
+        body: body,
+      }
+    );
+    this._handleRateAgentResponse(response);
   }
   _handleGetCoinbaseBalanceResponse(event: any) {
     this._ethCoinbaseInfo = event;
@@ -1107,7 +1132,8 @@ export class PageHome extends PageElement {
     ).open();
     this.refreshEthWallet();
   }
-  _handleRegisterProfileResponse(event: RequestResponse) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _handleRegisterProfileResponse(_event: RequestResponse) {
     this.refreshEthWallet();
     this.refreshProfilesList();
   }
@@ -1142,18 +1168,46 @@ export class PageHome extends PageElement {
     ).close();
     this._ethTransactionSent = false;
   }
-  sendGenericTransaction() {
+  async sendGenericTransaction() {
     console.log(
-      'sending transaction: ' + this.$.SendETHTransactionWeiAmount.value
+      'sending transaction: ' +
+        (
+          this.shadowRoot?.getElementById(
+            'SendETHTransactionWeiAmount'
+          ) as PaperInputElement
+        ).value
     );
-    const req = this.$.ajaxGenericTransaction;
-    req.body = new FormData();
-    req.body.append('agentid', this.$.SendETHTransactionAgentID.value);
-    req.body.append('weiAmount', this.$.SendETHTransactionWeiAmount.value);
-    req.body.append('message', this.$.SendETHTransactionMessage.value);
-    req.generateRequest();
+    const body = new FormData();
+    body.append(
+      'agentid',
+      (
+        this.shadowRoot?.getElementById(
+          'SendETHTransactionAgentID'
+        ) as PaperInputElement
+      ).value!
+    );
+    body.append(
+      'weiAmount',
+      (
+        this.shadowRoot?.getElementById(
+          'SendETHTransactionWeiAmount'
+        ) as PaperInputElement
+      ).value!
+    );
+    body.append(
+      'message',
+      (
+        this.shadowRoot?.getElementById(
+          'SendETHTransactionMessage'
+        ) as PaperInputElement
+      ).value!
+    );
+    await request(config.url + '/las2peer/eth/addTransaction', {
+      method: 'POST',
+      body: body,
+    });
   }
-  _handleGenericTransactionResponse(event: any) {
+  _handleGenericTransactionResponse() {
     this._ethTransactionSent = true;
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const ethThis = this;
@@ -1162,11 +1216,16 @@ export class PageHome extends PageElement {
     }, 200);
   }
 
-  _handleError(object: any, title: any, message: any) {
-    window.rootThis._handleError(object, title, message);
+  _handleError() {
+    // window.rootThis._handleError(object, title, message);
   }
 
   _isUserRating(val: string) {
     return val == 'L2P USER RATING';
   }
 }
+
+// interface RatingResponse extends RequestResponse {
+//   recipientname: string;
+//   rating: string;
+// }

@@ -1,6 +1,5 @@
 import { html, css, customElement } from 'lit-element';
 
-import { showNotificationToast } from '../helpers/notification_helper.js';
 import { PageElement } from '../helpers/page-element.js';
 
 @customElement('page-welcome')
@@ -124,10 +123,7 @@ export class PageHome extends PageElement {
                 </h2>
               </div>
             </div>
-            <a
-              href="#page-welcome-las2peer-description"
-              class="myButton"
-              @click="${showNotificationToast}"
+            <a href="#page-welcome-las2peer-description" class="myButton"
               >Get Started</a
             >
           </div>
