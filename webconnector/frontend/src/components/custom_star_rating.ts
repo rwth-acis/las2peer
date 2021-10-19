@@ -1,113 +1,64 @@
 import '@polymer/iron-icon/iron-icon.js';
 import '@polymer/iron-icons/iron-icons.js';
 import '@polymer/iron-icons/social-icons.js';
-import { html, property } from 'lit-element';
+import { css, customElement, html, property } from 'lit-element';
 
 import { PageElement } from '../helpers/page-element.js';
 
-class CustomStarRating extends PageElement {
-  @property({ type: Object })
-  ratings: { value: number; class: string; icon: string; selected: boolean }[];
-  disabled: any;
-  readonly: boolean | undefined;
-  single: any;
-  value: number | undefined;
-  disableAutoUpdate: any;
-  render() {
-    return html`
-        <style>
-            :host {
-                display: inline-block;
-                --iron-icon-width: var(--star-rating-size, 24px);
-                --iron-icon-height: var(--star-rating-size, 24px);
-            }
-            :host(:not([readonly])) {
-                cursor: pointer;
-            }
-            :host[hidden] {
-                display: none !important;
-            }
-            iron-icon {
-                color: #bbb;
-                float: right;
-            }
-            iron-icon.color-1, :host([single]) > iron-icon.color-1 {
-                color: #d7191c;
-            }
-            iron-icon.color-2, :host([single]) > iron-icon.color-2 {
-                color: #fdae61;
-            }
-            iron-icon.color-3, :host([single]) > iron-icon.color-3 {
-                color: #aaa;
-            }
-            iron-icon.color-4, :host([single]) > iron-icon.color-4 {
-                color: #5ac4e8;
-            }
-            iron-icon.color-5, :host([single]) > iron-icon.color-5 {
-                color: #2c7bb6;
-            }
-            :host(:not([readonly])) iron-icon.whole {
-                opacity: 0.5;
-            }
-            :host(:not([readonly])) iron-icon:hover {
-                opacity: 1.0;
-            }
-            :host([single]) {
-                opacity: 1.0;
-            }
-            iron-icon.selected {
-                opacity: 0.95;
-            }
-        </style>
-    
-        <template is="dom-repeat" items="[[ratings]]">
-            <iron-icon icon="[[item.icon]]" class\="[[item.class]] [[_getSelected(item.selected)]]" @click=${this._starClicked}"></iron-icon>
-        </template>
-`;
-  }
-
-  static get is() {
-    return 'custom-star-rating';
-  }
-  static get properties() {
-    return {
-      value: {
-        type: Number,
-        value: 0,
-        notify: true,
-        observer: '_valueChanged',
-      },
-      icon: {
-        type: String,
-        value: 'social:sentiment-neutral',
-      },
-      disableAutoUpdate: {
-        type: Boolean,
-        value: false,
-      },
-      readonly: {
-        type: Boolean,
-        value: false,
-        reflectToAttribute: true,
-      },
-      disableRating: {
-        type: Boolean,
-        value: false,
-        notify: true,
-      },
-      single: {
-        type: Boolean,
-        value: false,
-        notify: true,
-        reflectToAttribute: true,
-      },
-    };
-  }
-
-  constructor() {
-    super();
-
-    this.ratings = [
+@customElement('custom-star-rating')
+export class CustomStarRating extends PageElement {
+  static styles = css`
+    :host {
+      display: inline-block;
+      --iron-icon-width: var(--star-rating-size, 24px);
+      --iron-icon-height: var(--star-rating-size, 24px);
+    }
+    :host(:not([readonly])) {
+      cursor: pointer;
+    }
+    :host[hidden] {
+      display: none !important;
+    }
+    iron-icon {
+      color: #bbb;
+      float: right;
+    }
+    iron-icon.color-1,
+    :host([single]) > iron-icon.color-1 {
+      color: #d7191c;
+    }
+    iron-icon.color-2,
+    :host([single]) > iron-icon.color-2 {
+      color: #fdae61;
+    }
+    iron-icon.color-3,
+    :host([single]) > iron-icon.color-3 {
+      color: #aaa;
+    }
+    iron-icon.color-4,
+    :host([single]) > iron-icon.color-4 {
+      color: #5ac4e8;
+    }
+    iron-icon.color-5,
+    :host([single]) > iron-icon.color-5 {
+      color: #2c7bb6;
+    }
+    :host(:not([readonly])) iron-icon.whole {
+      opacity: 0.5;
+    }
+    :host(:not([readonly])) iron-icon:hover {
+      opacity: 1;
+    }
+    :host([single]) {
+      opacity: 1;
+    }
+    iron-icon.selected {
+      opacity: 0.95;
+    }
+  `;
+  @property({ type: Array })
+  ratings: { value: number; class: string; icon: string; selected: boolean }[] =
+    [
       {
         value: 5,
         class: 'whole',
@@ -139,11 +90,37 @@ class CustomStarRating extends PageElement {
         selected: false,
       },
     ];
+
+  @property({ type: Boolean })
+  disabled = false;
+
+  @property({ type: Boolean })
+  readonly = false;
+
+  @property({ type: Boolean })
+  single = false;
+
+  @property({ type: Number })
+  value = 0;
+
+  @property({ type: Boolean })
+  disableAutoUpdate = false;
+
+  render() {
+    return html`
+      ${this.ratings.map(
+        (rating) => html`
+          <iron-icon
+            icon=${rating.icon}
+            class="${rating.class} 
+            ${this._getSelected(rating.selected)}"
+          ></iron-icon>
+        `
+      )}
+    `;
   }
 
-  connectedCallback() {
-    // super.connectedCallback();
-
+  firstUpdated() {
     if (this.disabled) {
       this.readonly = true;
       this.ratings = [
@@ -223,22 +200,10 @@ class CustomStarRating extends PageElement {
         },
       ];
     }
-
-    /*
-        console.log(
-            {
-                "readonly": (this.readonly) ? this.readonly : "r; nope",
-                "disabled": (this.disabled) ? this.disabled : "d; nope",
-                "single": (this.single) ? this.single : "s; nope",
-                "rounded value": (this.value) ? Math.round(this.value) : "v; nope",
-                "value": (this.value) ? Math.round(this.value) : "v; nope",
-                "no. elements": this.ratings.length,
-                "ratings": this.ratings
-            }
-        );
-        */
   }
-
+  _getSelected(selected: any) {
+    return selected ? 'selected' : '';
+  }
   _updateSingleFace() {
     let valueToFace = '';
     switch (Math.round(this.value)) {
@@ -268,30 +233,7 @@ class CustomStarRating extends PageElement {
       },
     ];
   }
-
-  _valueChanged(newValue: number, oldValue: any) {
-    if (this.single) {
-      this._updateSingleFace();
-    }
-    if (newValue !== 0 && !newValue && this.ratings.length > 0) {
-      return;
-    }
-
-    let self = this;
-    this.ratings.forEach(function (rating, index) {
-      if (Math.round(rating.value) === newValue) {
-        rating.selected = true;
-      } else {
-        rating.selected = false;
-      }
-      self.notifyPath('ratings.' + index + '.selected');
-    });
-  }
-  _getSelected(selected: any) {
-    return selected ? 'selected' : '';
-  }
-
-  _starClicked(e) {
+  _starClicked(e: any) {
     e.preventDefault();
 
     if (this.readonly) {
@@ -307,6 +249,86 @@ class CustomStarRating extends PageElement {
       })
     );
   }
+
+  _valueChanged(newValue: number, oldValue: any) {
+    if (this.single) {
+      this._updateSingleFace();
+    }
+    if (newValue !== 0 && !newValue && this.ratings.length > 0) {
+      return;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const self = this;
+    this.ratings.forEach(function (rating, index) {
+      if (Math.round(rating.value) === newValue) {
+        rating.selected = true;
+      } else {
+        rating.selected = false;
+      }
+      self.notifyPath('ratings.' + index + '.selected');
+    });
+  }
+  // @click=${this._starClicked}
+
+  // static get is() {
+  //   return 'custom-star-rating';
+  // }
+  // static get properties() {
+  //   return {
+  //     value: {
+  //       type: Number,
+  //       value: 0,
+  //       notify: true,
+  //       observer: '_valueChanged',
+  //     },
+  //     icon: {
+  //       type: String,
+  //       value: 'social:sentiment-neutral',
+  //     },
+  //     disableAutoUpdate: {
+  //       type: Boolean,
+  //       value: false,
+  //     },
+  //     readonly: {
+  //       type: Boolean,
+  //       value: false,
+  //       reflectToAttribute: true,
+  //     },
+  //     disableRating: {
+  //       type: Boolean,
+  //       value: false,
+  //       notify: true,
+  //     },
+  //     single: {
+  //       type: Boolean,
+  //       value: false,
+  //       notify: true,
+  //       reflectToAttribute: true,
+  //     },
+  //   };
+  // }
+
+  // constructor() {
+  //   super();
 }
 
-window.customElements.define(CustomStarRating.is, CustomStarRating);
+// connectedCallback() {
+// super.connectedCallback();
+
+//   /*
+//       console.log(
+//           {
+//               "readonly": (this.readonly) ? this.readonly : "r; nope",
+//               "disabled": (this.disabled) ? this.disabled : "d; nope",
+//               "single": (this.single) ? this.single : "s; nope",
+//               "rounded value": (this.value) ? Math.round(this.value) : "v; nope",
+//               "value": (this.value) ? Math.round(this.value) : "v; nope",
+//               "no. elements": this.ratings.length,
+//               "ratings": this.ratings
+//           }
+//       );
+//       */
+// }
+
+// window.customElements.define(CustomStarRating.is, CustomStarRating);

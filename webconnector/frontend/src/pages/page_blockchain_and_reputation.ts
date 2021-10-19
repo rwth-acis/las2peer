@@ -1,7 +1,9 @@
+import { PaperDialogElement } from '@polymer/paper-dialog/paper-dialog';
 import { html, css, customElement, property } from 'lit-element';
 
 import config from '../config.js';
 import { PageElement } from '../helpers/page-element.js';
+import '../components/custom_star_rating.js';
 import '@polymer/paper-button/paper-button.js';
 import '@polymer/iron-icon/iron-icon.js';
 import '@polymer/iron-icons/iron-icons.js';
@@ -17,6 +19,7 @@ import '@polymer/paper-listbox/paper-listbox.js';
 import '@polymer/paper-spinner/paper-spinner.js';
 import '@polymer/paper-tabs/paper-tabs.js';
 import '@polymer/paper-tooltip/paper-tooltip.js';
+import '@polymer/paper-dialog/paper-dialog.js';
 import '@polymer/iron-pages/iron-pages.js';
 import { request, RequestResponse } from '../helpers/request_helper.js';
 
@@ -245,7 +248,7 @@ export class PageHome extends PageElement {
           <h1>Transfer L2Pcoin to ${this._chosenUsername}</h1>
           <paper-dialog-scrollable>
             <div class="horizontal layout center-justified">
-              <!-- <paper-spinner ?active=${this._working}></paper-spinner> -->
+              <paper-spinner ?active=${this._working}></paper-spinner>
               ${this._ethTransactionSent
                 ? html`<iron-icon icon="done"></iron-icon>`
                 : html``}
@@ -295,10 +298,10 @@ export class PageHome extends PageElement {
           </div>
         </paper-dialog>
         <h1>Blockchain and Reputation</h1>
-        <!-- <paper-spinner
-          active=${this._working}
+        <paper-spinner
+          ?active=${this._working}
           style="float:right;"
-        ></paper-spinner> -->
+        ></paper-spinner>
         <div class="introText">
           <p class="description">
             To incentivize las2peer users to contribute to the community, a
@@ -369,10 +372,10 @@ export class PageHome extends PageElement {
             ?disabled=${this._working}
           ></paper-icon-button>
         </h2>
-        <!-- <paper-spinner
-          active=${this._working}
+        <paper-spinner
+          ?active=${this._working}
           style="float:right;"
-        ></paper-spinner> -->
+        ></paper-spinner>
         ${this._hasNoEthWallet == false
           ? html` <div class="flex-horizontal">
               <!-- LEFT HAND SIDE -->
@@ -453,8 +456,8 @@ export class PageHome extends PageElement {
                       >
                         ${this.groups.map(
                           (item: any) => html`
-                            <paper-item value="{{item.groupID}}"
-                              >{{item.groupName}}</paper-item
+                            <paper-item value=${item.groupID}
+                              >${item.groupName}</paper-item
                             >
                           `
                         )}
@@ -567,10 +570,10 @@ export class PageHome extends PageElement {
                   <span id="dashboard"
                     ><iron-icon icon="store"></iron-icon> Dashboard</span
                   >
-                  <!-- <paper-spinner
+                  <paper-spinner
                     ?active=${this._working}
                     style="float:right;"
-                  ></paper-spinner> -->
+                  ></paper-spinner>
                 </paper-tab>
                 <paper-tab @click=${() => (this._selectedTab = 1)}>
                   <span id="faucet-tx"
@@ -1056,26 +1059,25 @@ export class PageHome extends PageElement {
   _handleRateAgentResponse(event: { detail: { response: any } }) {
     const response = event.detail.response;
 
-    this.$.toast.innerHTML =
-      'Rating (' +
-      response.recipientname +
-      ': ' +
-      response.rating +
-      ') successfully casted.';
-    this.$.toast.open();
-    this.refreshWallet();
+    // this.$.toast.innerHTML =
+    //   'Rating (' +
+    //   response.recipientname +
+    //   ': ' +
+    //   response.rating +
+    //   ') successfully casted.';
+    // this.$.toast.open();
+    // this.refreshWallet();
   }
   rateAgent(event: {
     model: { get: (arg0: string) => any };
     detail: { rating: any };
   }) {
     //let req = this.$.ajaxRateAgentMock;
-    const req = this.$.ajaxRateAgent;
-    req.body = new FormData();
-    req.body.append('agentid', event.model.get('agent.agentid'));
-    req.body.append('rating', event.detail.rating);
-    req.generateRequest();
-
+    // const req = this.$.ajaxRateAgent;
+    // req.body = new FormData();
+    // req.body.append('agentid', event.model.get('agent.agentid'));
+    // req.body.append('rating', event.detail.rating);
+    // req.generateRequest();
     //this.$.toast.innerHTML = 'Rating (' + event.model.get('agent.username') + ': '+ event.detail.rating + ') successfully casted.';
     //this.$.toast.open();
   }
@@ -1100,7 +1102,9 @@ export class PageHome extends PageElement {
   }
   _handleRequestFaucetResponse(event: any) {
     this._ethFaucetLog = event;
-    this.shadowRoot?.getElementById('ethFaucetDiaLog')!.open();
+    (
+      this.shadowRoot?.getElementById('ethFaucetDiaLog') as PaperDialogElement
+    ).open();
     this.refreshEthWallet();
   }
   _handleRegisterProfileResponse(event: RequestResponse) {
@@ -1128,10 +1132,14 @@ export class PageHome extends PageElement {
     const username = event.target.getAttribute('data-username');
     this._chosenAgentID = agentid;
     this._chosenUsername = username;
-    this.shadowRoot?.getElementById('sendEthDialog')!.open();
+    (
+      this.shadowRoot?.getElementById('sendEthDialog') as PaperDialogElement
+    ).open();
   }
   closeEthDialog() {
-    this.shadowRoot?.getElementById('sendEthDialog')!.close();
+    (
+      this.shadowRoot?.getElementById('sendEthDialog') as PaperDialogElement
+    ).close();
     this._ethTransactionSent = false;
   }
   sendGenericTransaction() {
