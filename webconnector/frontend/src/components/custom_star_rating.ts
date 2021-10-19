@@ -230,6 +230,7 @@ export class CustomStarRating extends PageElement {
         valueToFace = 'sentiment-very-satisfied';
         break;
     }
+
     this.ratings = [
       {
         value: Math.round(this.value),

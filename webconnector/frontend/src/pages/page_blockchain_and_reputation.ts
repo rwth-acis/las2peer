@@ -396,8 +396,8 @@ export class PageHome extends PageElement {
                         <dd>
                           <custom-star-rating
                             value=${this._EthWallet.ethRating}
-                            readonly
-                            single
+                            readonly=""
+                            single=""
                           ></custom-star-rating>
                         </dd>
                         <!-- NO. OF VOTES -->
@@ -1091,7 +1091,6 @@ export class PageHome extends PageElement {
       agentid: unknown;
     }
   ) {
-    console.log(agent);
     const body = new FormData();
 
     body.append('agentid', agent.agentid as string);
