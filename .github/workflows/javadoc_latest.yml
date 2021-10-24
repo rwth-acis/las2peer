@@ -1,6 +1,7 @@
 # This workflow runs the deployJavadoc gradle task and then deploys the javadoc files to GitHub pages.
+# The javadoc files are stored inside the "latest" directory.
 
-name: Deploy Javadoc
+name: Deploy Javadoc (latest)
 
 # Triggers the workflow on push to master
 on: 
@@ -9,8 +10,7 @@ on:
       - master
 
 jobs:
-  build-and-deploy-javadoc:
-
+  deploy-javadoc-latest:
     runs-on: ubuntu-latest
 
     steps:
@@ -28,3 +28,4 @@ jobs:
       with:
         branch: gh-pages # deploy javadoc on gh-pages branch
         folder: javadoc # folder that should be deployed
+        target-folder: latest # where to store the javadoc files
