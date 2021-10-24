@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>las2peer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-wEmeIV1mKuiNpC+IOBjI7aAzPcEZeedi5yW5f2yOq55WWLwNGmvvx4Um1vskeMj0" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+    <link href="style.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar fixed-top navbar-expand-md navbar-light">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+            <img src="https://raw.githubusercontent.com/rwth-acis/las2peer/40bf6e152f835a13fafcce89b3af53ffc891910f/img/logo/vector/las2peer-logo.svg" alt="las2peer"/>
+            <span>las2peer</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#main-navigation" aria-controls="main-navigation" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="main-navigation">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#version-selector">Releases</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="https://github.com/rwth-acis/las2peer">GitHub</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="https://las2peer.org/about/">About</a>
+                </li>
+            </ul>
+        </div>
+      </div>
+    </nav>  
+
+    <section id="main-section" class="main-section d-flex align-items-center">
+
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-5 d-flex flex-column">
+            <h1 data-aos="fade-up">las2peer</h1>
+            <h2 data-aos="fade-up" data-aos-delay="400">A Java-based decentralized framework for distributing community services in a peer-to-peer infrastructure.</h2>
+            <div data-aos="fade-up" data-aos-delay="600">
+              <div class="text-center text-lg-start">
+                <a href="#version-selector" class="btn-get-started d-inline-flex align-items-center">
+                  <span>Releases</span>
+                  <i class="material-icons">arrow_right_alt</i>
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-7 d-flex">
+            <div class="row" data-aos="fade-left" data-aos-delay="700">
+                <div class="col-sm-6">
+                    <div class="card" style="margin-top: 1em">
+                        <div class="card-body">
+                          <h5 class="card-title">Core</h5>
+                          <p class="card-text">The core provides the p2p functionality, including low level communication as well as service execution.</p>
+                          <div class="text-center text-lg-start" style="bottom: 0">
+                            <a href="/las2peer/latest/core" class="btn-javadoc d-inline-flex align-items-center">
+                              <span>Javadoc (latest)</span>
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="card" style="margin-top: 1em">
+                        <div class="card-body">
+                          <h5 class="card-title">RESTMapper</h5>
+                          <p class="card-text">The RESTMapper provides functionality to implement a service that exposes a RESTful interface.</p>
+                          <div class="text-center text-lg-start" style="bottom: 0">
+                            <a href="/las2peer/latest/restmapper" class="btn-javadoc d-inline-flex align-items-center">
+                              <span>Javadoc (latest)</span>
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="card" style="margin-top: 1em">
+                        <div class="card-body">
+                          <h5 class="card-title">WebConnector</h5>
+                          <p class="card-text">The WebConnector makes the RESTful interfaces defined by the services available to the web and defines endpoints for creating agents and uploading services to the network.</p>
+                          <div class="text-center text-lg-start" style="bottom: 0">
+                            <a href="/las2peer/latest/webconnector" class="btn-javadoc d-inline-flex align-items-center">
+                              <span>Javadoc (latest)</span>
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+    </section>
+    <!-- End Main -->
+
+    <!-- Start Documentation Version Selection -->
+    <section id="version-selector" class="version-selector">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-12">
+            <h2 data-aos="fade-up">Select the documentation for your version:</h2>
+            <ul class="timeline">
+               
+                <!--Important: Do not remove the placeholder, as it is used by GitHub Actions to insert new releases -->
+                
+                <!--PLACEHOLDER-->
+                <li data-aos="fade-up" class="version">
+                    <h3>v1.1.2</h3>
+                    <p><a href="https://github.com/rwth-acis/las2peer/releases/tag/v1.1.2">Release notes</a></p>
+                    <p>Javadoc <a href="/las2peer/v1.1.2/core/index.html">Core</a>, <a href="/las2peer/v1.1.2/restmapper/index.html">RESTMapper</a>, <a href="/las2peer/v1.1.2/webconnector/index.html">WebConnector</a></p>
+                </li>
+                <li data-aos="fade-up" class="version">
+                    <h3>v1.1.1</h3>
+                    <p><a href="https://github.com/rwth-acis/las2peer/releases/tag/v1.1.1">Release notes</a></p>
+                    <p>Javadoc <a href="/las2peer/v1.1.1/core/index.html">Core</a>, <a href="/las2peer/v1.1.1/restmapper/index.html">RESTMapper</a>, <a href="/las2peer/v1.1.1/webconnector/index.html">WebConnector</a></p>
+                </li>
+                <li data-aos="fade-up" class="version">
+                    <h3>v1.1.0</h3>
+                    <p><a href="https://github.com/rwth-acis/las2peer/releases/tag/v1.1.0">Release notes</a></p>
+                    <p>Javadoc <a href="/las2peer/v1.1.0/core/index.html">Core</a>, <a href="/las2peer/v1.1.0/restmapper/index.html">RESTMapper</a>, <a href="/las2peer/v1.1.0/webconnector/index.html">WebConnector</a></p>
+                </li>
+               
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-p34f1UUtsS3wqzfto5wAAmdvj+osOnFyQFpp4Ua3gs/ZVWx6oOypYoCJhGGScy+8" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script>
+      AOS.init();
+    </script>
+    <script>
+      const navLinks = document.querySelectorAll('.nav-item:not(.dropdown)');
+      const menuToggle = document.getElementById('main-navigation');
+      const bsCollapse = new bootstrap.Collapse(menuToggle, {toggle: false});
+      navLinks.forEach( function(l) {
+        l.addEventListener('click', function() {
+          // avoid flickering on desktop
+          if (menuToggle.classList.contains('show')) {
+            bsCollapse.toggle();
+          }
+        });
+      }); 
+    </script>
+</body>
+</html>
