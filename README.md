@@ -67,9 +67,9 @@ To make life easier for developers, this repository contains a build script for 
 
 JavaDocs of the latest release can be found online:
 
-* [Core](http://rwth-acis.github.io/las2peer/core/ "Core")
-* [Web Connector](http://rwth-acis.github.io/las2peer/webconnector/ "Web Connector")
-* [Rest Mapper](http://rwth-acis.github.io/las2peer/restmapper/ "Rest Mapper")
+* [Core](http://rwth-acis.github.io/las2peer/latest/core/ "Core")
+* [Web Connector](http://rwth-acis.github.io/las2peer/latest/webconnector/ "Web Connector")
+* [Rest Mapper](http://rwth-acis.github.io/las2peer/latest/restmapper/ "Rest Mapper")
 
 ## CI
 
