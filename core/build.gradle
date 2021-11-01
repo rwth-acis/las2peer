@@ -60,7 +60,7 @@ dependencies {
     implementation "junit:junit:${project.property('junit.version')}"
     testImplementation "org.mockito:mockito-all:1.9.5"
 
-    api "FreePastry:FreePastry:3.1-SNAPSHOT"
+    api "FreePastry:FreePastry:3.1.0"
     api "xpp3:xpp3:1.1.4c" // FreePastry dependency
     //api "javax.xml.parsers:jaxp-api:1.4.5"
 
