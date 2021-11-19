@@ -3,7 +3,6 @@
 import { TextField } from '@material/mwc-textfield';
 import { html, css, customElement, property } from 'lit-element';
 
-import config from '../config.js';
 import { downloadBlobFile } from '../helpers/blob_downloader.js';
 import { showNotificationToast } from '../helpers/notification_helper.js';
 import { PageElement } from '../helpers/page-element.js';
@@ -183,7 +182,7 @@ export class PageAgentTools extends PageElement {
     formData.append('agentid', user.agentid);
 
     const response: GetAgentResponse = await request<GetAgentResponse>(
-      config.url + '/las2peer/agents/getAgent',
+      '/las2peer/agents/getAgent',
       {
         method: 'POST',
         body: formData,
@@ -219,7 +218,7 @@ export class PageAgentTools extends PageElement {
     formData.append('name', group.name);
 
     const response: AddGroupResponse = await request<AddGroupResponse>(
-      config.url + '/las2peer/agents/createGroup',
+      '/las2peer/agents/createGroup',
       {
         method: 'POST',
         body: formData,
@@ -256,7 +255,7 @@ export class PageAgentTools extends PageElement {
       formData.append('password', user.password);
 
       const response: AddAgentResponse = await request<AddAgentResponse>(
-        config.url + '/las2peer/agents/createAgent',
+        '/las2peer/agents/createAgent',
         {
           method: 'POST',
           body: formData,
@@ -292,7 +291,7 @@ export class PageAgentTools extends PageElement {
     formData.append('agentid', user.agentid);
 
     const responseFile = await requestFile(
-      config.url + '/las2peer/agents/exportAgent',
+      '/las2peer/agents/exportAgent',
       {
         method: 'POST',
         body: formData,
@@ -321,7 +320,7 @@ export class PageAgentTools extends PageElement {
     formData.append('password', user.password);
 
     const response = await request<UploadAgentResponse>(
-      config.url + '/las2peer/agents/uploadAgent',
+      '/las2peer/agents/uploadAgent',
       {
         method: 'POST',
         body: formData,

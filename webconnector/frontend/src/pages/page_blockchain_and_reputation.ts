@@ -5,7 +5,6 @@ import { PaperListboxElement } from '@polymer/paper-listbox/paper-listbox';
 import { PaperToastElement } from '@polymer/paper-toast/paper-toast';
 import { html, css, customElement, property } from 'lit-element';
 
-import config from '../config.js';
 import { PageElement } from '../helpers/page-element.js';
 import '../components/custom_star_rating.js';
 import '@polymer/paper-button/paper-button.js';
@@ -899,26 +898,26 @@ export class PageHome extends PageElement {
     // }
   }
   async refreshEthWallet() {
-    const response = await request(config.url + '/las2peer/eth/dashboardList', {
+    const response = await request('/las2peer/eth/dashboardList', {
       method: 'POST',
     });
     this._handleDashboardListResponse(response);
     const responseWallet = await request(
-      config.url + '/las2peer/eth/getEthWallet',
+      '/las2peer/eth/getEthWallet',
       {
         method: 'POST',
       }
     );
     this._handleGetEthWalletResponse(responseWallet);
     const responseLog = await request(
-      config.url + '/las2peer/eth/getGenericTxLog',
+      '/las2peer/eth/getGenericTxLog',
       {
         method: 'POST',
       }
     );
     this._handleGenericTxLogResponse(responseLog);
     const responseBalance = await request(
-      config.url + '/las2peer/eth/getCoinbaseBalance',
+      '/las2peer/eth/getCoinbaseBalance',
       {
         method: 'POST',
       }
@@ -936,7 +935,7 @@ export class PageHome extends PageElement {
     console.log('faucet request for groupID: ' + this.group);
     const body = new FormData();
     body.append('groupID', this.group);
-    const response = await request(config.url + '/las2peer/eth/requestFaucet', {
+    const response = await request('/las2peer/eth/requestFaucet', {
       method: 'POST',
       body: body,
     });
@@ -951,7 +950,7 @@ export class PageHome extends PageElement {
       return;
     } else {
       const response = await request(
-        config.url + '/las2peer/eth/registerProfile',
+        '/las2peer/eth/registerProfile',
         {
           method: 'POST',
         }
@@ -960,13 +959,13 @@ export class PageHome extends PageElement {
     }
   }
   async refreshAgentsList() {
-    const response = await request(config.url + '/las2peer/eth/listAgents', {
+    const response = await request('/las2peer/eth/listAgents', {
       method: 'POST',
     });
     this._handleLoadAgentlistResponse(response);
   }
   async refreshProfilesList() {
-    const response = await request(config.url + '/las2peer/eth/listProfiles', {
+    const response = await request('/las2peer/eth/listProfiles', {
       method: 'POST',
     });
     this._handleLoadProfilelistResponse(response);
@@ -1097,7 +1096,7 @@ export class PageHome extends PageElement {
     body.append('rating', event.detail.rating);
 
     const response = await request<any>(
-      config.url + '/las2peer/eth/rateAgent',
+      '/las2peer/eth/rateAgent',
       {
         method: 'POST',
         body: body,
@@ -1201,7 +1200,7 @@ export class PageHome extends PageElement {
         ) as PaperInputElement
       ).value!
     );
-    await request(config.url + '/las2peer/eth/addTransaction', {
+    await request('/las2peer/eth/addTransaction', {
       method: 'POST',
       body: body,
     });

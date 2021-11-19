@@ -1,6 +1,5 @@
 import { html, css, customElement, property } from 'lit-element';
 
-import config from '../config.js';
 import { PageElement } from '../helpers/page-element.js';
 import '../components/other_node_information.js';
 import '../components/progress_indicator.js';
@@ -149,7 +148,7 @@ export class PageStatus extends PageElement {
   }
   async fetchNodeInfo() {
     this.nodeStatus = await request<NodeStatus>(
-      config.url + '/las2peer/status',
+      '/las2peer/status',
       {
         method: 'GET',
       }

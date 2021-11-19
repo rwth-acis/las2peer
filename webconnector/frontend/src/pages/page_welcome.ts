@@ -128,7 +128,7 @@ export class PageHome extends PageElement {
             >
           </div>
           <div class="page-welcome-las2peer-image">
-            <img src="/images/las2peer.png" alt="" />
+            <img src="./images/las2peer.png" alt="" />
           </div>
         </div>
       </section>
@@ -141,28 +141,28 @@ export class PageHome extends PageElement {
         </div>
         <div class="page-welcome-las2peer-descriptions">
           <div class="page-welcome-las2peer-description-item">
-            <img src="/images/icon1.png" alt="" />
+            <img src="./images/icon1.png" alt="" />
             <h3>
               Each participating node contributes storage space and computing
               power that allow you to store and run services.
             </h3>
           </div>
           <div class="page-welcome-las2peer-description-item">
-            <img src="/images/icon2.png" alt="" />
+            <img src="./images/icon2.png" alt="" />
             <h3>
               This Web interface belongs to one specific node, operated by a
               community member. You can operate your own node.
             </h3>
           </div>
           <div class="page-welcome-las2peer-description-item">
-            <img src="/images/icon3.png" alt="" />
+            <img src="./images/icon3.png" alt="" />
             <h3>
               The authenticity of services started on your node is verified in a
               community blockchain.
             </h3>
           </div>
           <div class="page-welcome-las2peer-description-item">
-            <img src="/images/icon4.png" alt="" />
+            <img src="./images/icon4.png" alt="" />
             <h3>
               Services are java programs running in the network. Discover
               existing services or publish your own.

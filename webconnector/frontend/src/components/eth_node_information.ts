@@ -1,6 +1,5 @@
 import { css, customElement, html, property } from 'lit-element';
 
-import config from '../config.js';
 import { PageElement } from '../helpers/page-element.js';
 import { request } from '../helpers/request_helper.js';
 
@@ -32,7 +31,7 @@ export class EthNodeInformation extends PageElement {
     this.checkETHNode();
   }
   async checkETHNode() {
-    const response = await request(config.url + '/las2peer/check-eth', {
+    const response = await request('/las2peer/check-eth', {
       method: 'GET',
     });
     if (response.code === 200) {

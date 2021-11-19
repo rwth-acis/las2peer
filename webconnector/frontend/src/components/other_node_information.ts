@@ -1,5 +1,4 @@
 import { css, customElement, html, property } from 'lit-element';
-import config from '../config.js';
 
 import { PageElement } from '../helpers/page-element.js';
 import { request } from '../helpers/request_helper.js';
@@ -103,7 +102,7 @@ export class OtherNodesInformation extends PageElement {
   }
   async fetchOtherNodesInfo() {
     const response = await request<any>(
-      config.url + '/las2peer/getOtherNodesInfo',
+      '/las2peer/getOtherNodesInfo',
       {
         method: 'GET',
       }

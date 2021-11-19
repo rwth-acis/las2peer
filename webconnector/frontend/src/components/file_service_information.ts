@@ -1,6 +1,5 @@
 import { css, customElement, html, property } from 'lit-element';
 
-import config from '../config.js';
 import { PageElement } from '../helpers/page-element.js';
 import { request } from '../helpers/request_helper.js';
 
@@ -35,7 +34,7 @@ export class FileServiceInformation extends PageElement {
     this.checkFileService();
   }
   async checkFileService() {
-    const response = await request(config.url + '/fileservice/index.html', {
+    const response = await request('/fileservice/index.html', {
       method: 'GET',
     });
     if (response.code === 200) {

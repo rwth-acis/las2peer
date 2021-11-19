@@ -149,7 +149,7 @@ export class AppIndex extends LitElement {
     };
     const prefixedIdentifier = PREFIX_OIDC_SUB + credentials.oidcSub;
     const response = await request<LoginResponse>(
-      config.url + '/las2peer/auth/login',
+      '/las2peer/auth/login',
       {
         method: 'GET',
         headers: {

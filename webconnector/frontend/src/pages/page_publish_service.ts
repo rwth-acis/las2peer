@@ -2,7 +2,6 @@
 import { TextField } from '@material/mwc-textfield';
 import { html, css, customElement, property } from 'lit-element';
 
-import config from '../config.js';
 import { PageElement } from '../helpers/page-element.js';
 import { request } from '../helpers/request_helper.js';
 import '@material/mwc-button';
@@ -119,7 +118,7 @@ export class PagePublishService extends PageElement {
     const body = new FormData();
     body.append('jarfile', bodyToSend.jarfile);
     body.append('supplement', JSON.stringify(bodyToSend.supplement));
-    const response = await request(config.url + '/las2peer/services/upload', {
+    const response = await request('/las2peer/services/upload', {
       method: 'POST',
       body: body,
     });

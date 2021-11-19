@@ -10,7 +10,7 @@ export const pageNotFoundMeta = {
 
 export const routes: Route[] = [
   {
-    path: '/',
+    path: '/welcome',
     name: 'home',
     component: 'page-welcome',
     meta: {

@@ -1,6 +1,5 @@
 import { css, customElement, html, property } from 'lit-element';
 
-import config from '../config.js';
 import { PageElement } from '../helpers/page-element.js';
 import { request } from '../helpers/request_helper.js';
 import { oidcUser } from './app-index.js';
@@ -42,7 +41,7 @@ export class ContactServiceInformation extends PageElement {
       oidcSub: ((oidcUser || {}).profile || {}).sub,
     };
     const prefixedIdentifier = PREFIX_OIDC_SUB + credentials.oidcSub;
-    const response = await request(config.url + '/contactservice/groups', {
+    const response = await request('/contactservice/groups', {
       method: 'GET',
       headers: {
         Authorization:
