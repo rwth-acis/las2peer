@@ -47,6 +47,14 @@ const config = merge(
       }),
       replace({
         preventAssignment: true,
+        include: 'src/components/app-index.ts',
+        delimiters: ['', ''],
+        values: {
+            'LAS2PEER_VERSION': `${process.env.las2peerVersion}`,
+        },
+      }),
+      replace({
+        preventAssignment: true,
         values: {
           'process.env.NODE_ENV': JSON.stringify('production'),
         },

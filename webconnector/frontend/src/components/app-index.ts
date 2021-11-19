@@ -117,7 +117,7 @@ export class AppIndex extends LitElement {
           oidcsilentsigninurl=${this._loadUrl}
           loginoidctoken="[[_oidcUser.access_token]]"
           loginoidcprovider="https://api.learning-layers.eu/o/oauth2"
-          subtitle="v@LAS2PEER_VERSION@"
+          subtitle="vLAS2PEER_VERSION"
         ></las2peer-frontend-statusbar>
 
         <openidconnect-popup-signin-callback></openidconnect-popup-signin-callback>

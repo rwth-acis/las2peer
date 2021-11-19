@@ -85,15 +85,6 @@ sourceSets {
     }
 }
 
-// Replace las2peer version placeholder in node frontend statusbar title
-import org.apache.tools.ant.filters.ReplaceTokens 
-processResources {
-    from (sourceSets.main.resources) {
-        include "webapp/src/node-frontend.js"
-        filter(ReplaceTokens, tokens: [LAS2PEER_VERSION : "$las2peerVersion".toString()])
-    }
-}
-
 // Copies files like .xml files into build directory
 task copyTest(type: Copy) {
     from "src/test/java"
@@ -144,6 +135,8 @@ task npmInstall(type: Exec) {
 
 task npmBuild(type: Exec) {
     dependsOn "npmInstall"
+
+    environment = System.getenv() + ["las2peerVersion": "$las2peerVersion".toString()]
 
     workingDir = file("${project.projectDir}/frontend")
 
