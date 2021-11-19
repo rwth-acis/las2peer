@@ -26,6 +26,8 @@ export class AppIndex extends LitElement {
   @query('main')
   private main!: HTMLElement;
 
+  private _loadUrl = document.URL;
+
   static styles = css`
     #statusbar {
       position: sticky;
@@ -110,13 +112,18 @@ export class AppIndex extends LitElement {
           base-url="[[hostUrl]]"
           service="las2peer Node Front-End"
           oidcclientid="localtestclient"
-          oidcpopupsigninurl="/callbacks/popup-signin-callback.html"
-          oidcpopupsignouturl="/callbacks/popup-signout-callback.html"
-          oidcsilentsigninturl="/callbacks/silent-callback.html"
+          oidcpopupsigninurl=${this._loadUrl}
+          oidcpopupsignouturl=${this._loadUrl}
+          oidcsilentsigninurl=${this._loadUrl}
           loginoidctoken="[[_oidcUser.access_token]]"
           loginoidcprovider="https://api.learning-layers.eu/o/oauth2"
           subtitle="v@LAS2PEER_VERSION@"
         ></las2peer-frontend-statusbar>
+
+        <openidconnect-popup-signin-callback></openidconnect-popup-signin-callback>
+        <openidconnect-popup-signout-callback></openidconnect-popup-signout-callback>
+        <openidconnect-signin-silent-callback></openidconnect-signin-silent-callback>
+        
       </main>
       <footer>
         <span>Environment: ${config.environment}</span>
