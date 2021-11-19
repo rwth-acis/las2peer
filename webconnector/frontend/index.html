@@ -1,110 +1,94 @@
-<!--
-@license
-Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
-This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-Code distributed by Google as part of the polymer project is also
-subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
--->
-
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8">
-    <meta name="generator" content="Polymer Starter Kit">
-    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
 
-    <title>las2peer Node Front-End</title>
-    <meta name="description" content="Web front-end for las2peer nodes">
+    <title>Las2peer Node Frontend</title>
+    <meta name="description" content="MyApplication description" />
 
-    <!--
-      The `<base>` tag below is present to support two advanced deployment options:
-      1) Differential serving. 2) Serving from a non-root path.
+    <base href="/las2peer/webapp/" />
 
-      Instead of manually editing the `<base>` tag yourself, you should generally either:
-      a) Add a `basePath` property to the build configuration in your `polymer.json`.
-      b) Use the `--base-path` command-line option for `polymer build`.
+    <link rel="icon" href="images/favicon.ico" />
 
-      Note: If you intend to serve from a non-root path, see [polymer-root-path] below.
-    -->
-    <base href="/">
+    <link rel="manifest" href="manifest.webmanifest" />
 
-    <link rel="icon" href="images/favicon.ico">
+    <meta name="theme-color" content="#000000" />
 
-    <!-- See https://goo.gl/OOhYW5 -->
-    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="MyApplication" />
 
-    <!-- See https://goo.gl/qRE0vM -->
-    <meta name="theme-color" content="#3f51b5">
+    <link rel="apple-touch-icon" href="images/manifest/icon-192x192.png" />
 
-    <!-- Add to homescreen for Chrome on Android. Fallback for manifest.json -->
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="las2peer Node Front-End">
+    <link rel="canonical" href="http://localhost:8000" />
 
-    <!-- Add to homescreen for Safari on iOS -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="las2peer Node Front-End">
+    <meta property="og:title" content="Las2peer Node Frontend" />
+    <meta property="og:description" content="MyApplication description" />
+    <meta
+      property="og:image"
+      content="http://localhost:8000/images/open-graph/cover.png"
+    />
+    <meta property="og:image:alt" content="MyApplication logo" />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
+    <meta property="og:url" content="http://localhost:8000" />
 
-    <!-- Homescreen icons -->
-    <link rel="apple-touch-icon" href="images/manifest/icon-48x48.png">
-    <link rel="apple-touch-icon" sizes="72x72" href="images/manifest/icon-72x72.png">
-    <link rel="apple-touch-icon" sizes="96x96" href="images/manifest/icon-96x96.png">
-    <link rel="apple-touch-icon" sizes="144x144" href="images/manifest/icon-144x144.png">
-    <link rel="apple-touch-icon" sizes="192x192" href="images/manifest/icon-192x192.png">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-    <!-- Tile icon for Windows 8 (144x144 + tile color) -->
-    <meta name="msapplication-TileImage" content="images/manifest/icon-144x144.png">
-    <meta name="msapplication-TileColor" content="#3f51b5">
-    <meta name="msapplication-tap-highlight" content="no">
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+      integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l"
+      crossorigin="anonymous"
+    />
 
-    <script>
-      /**
-      * [polymer-root-path]
-      *
-      * Leave this line unchanged if you intend to serve your app from the root
-      * path (e.g., with URLs like `my.domain/` and `my.domain/view1`).
-      *
-      * If you intend to serve your app from a non-root path (e.g., with URLs
-      * like `my.domain/my-app/` and `my.domain/my-app/view1`), edit this line
-      * to indicate the path from which you'll be serving, including leading
-      * and trailing slashes (e.g., `/my-app/`).
-      */
-      window.NodeFrontendGlobals = { rootPath: '/las2peer/webapp/' };
+    <link
+      href="https://fonts.googleapis.com/css?family=Rubik"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=VT323"
+      rel="stylesheet"
+    />
 
-      // Load and register pre-caching Service Worker
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function() {
-          navigator.serviceWorker.register('service-worker.js', {
-            scope: NodeFrontendGlobals.rootPath
-          });
-        });
-      }
-    </script>
+    <script
+      src="https://kit.fontawesome.com/cf68b943d4.js"
+      crossorigin="anonymous"
+    ></script>
+    <link
+      rel="stylesheet"
+      href="https://use.fontawesome.com/releases/v5.12.1/css/all.css"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    />
 
-    <!-- Load webcomponents-loader.js to check and load any polyfills your browser needs -->
-    <script src="node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
-
-    <!-- Load your application shell -->
-    <script type="module" src="src/node-frontend.js"></script>
-
-    <!-- Add any global styles for body, document, etc. -->
     <style>
+      html,
+      body,
+      app-index {
+        height: 100%;
+      }
+
       body {
         margin: 0;
-        font-family: "Roboto", "Noto", sans-serif;
-        line-height: 1.5;
-        min-height: 100vh;
-        background-color: #eeeeee;
+        font-family: 'Rubik', sans-serif;
+      }
+
+      noscript {
+        display: block;
+        margin: 1em;
       }
     </style>
   </head>
   <body>
-    <node-frontend></node-frontend>
-    <noscript>
-      Please enable JavaScript to view this website.
-    </noscript>
-    <!-- Built with love using Polymer Starter Kit -->
+    <app-index class="app-index"></app-index>
+    <notification-toast id="notification"></notification-toast>
+    <noscript>Please enable JavaScript to view this website.</noscript>
+    <script type="module" src="src/components/app-index.ts"></script>
   </body>
 </html>

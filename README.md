@@ -25,7 +25,7 @@ las2peer uses **Java 17**.
 ### Build Dependencies
 
 * Gradle 7.2
-* Node 8 / npm
+* Node 14 / npm
 
 ## Project Structure
 

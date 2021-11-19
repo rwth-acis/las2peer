@@ -305,11 +305,23 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		String consentee = agent.getEthereumAddress();
 		byte[] signature = SignatureUtils.signFunctionCall(function, agent.getEthereumCredentials());
 
+		if ( txMan != null )
+		{
+			BigInteger txManNonce = txMan.getCurrentNonce();
+			logger.info("[TX Nonce] before: " + txManNonce);
+		}
+
 		try {
 			contracts.serviceRegistry.delegatedRegister(serviceName, authorName, consentee, signature).sendAsync()
 			.get();
 		} catch (Exception e) {
 			throw new EthereumException("Failed to register service", e);
+		}
+
+		if ( txMan != null )
+		{
+			BigInteger txManNonce = txMan.getCurrentNonce();
+			logger.info("[TX Nonce] after: " + txManNonce);
 		}
 	}
 
