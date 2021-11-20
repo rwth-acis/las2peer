@@ -387,7 +387,7 @@ export class PageHome extends PageElement {
   }
   async fetchNodeId() {
     this.nodeId = await request<NodeId>(
-      config.url + '/las2peer/services/node-id',
+      '/las2peer/services/node-id',
       {
         method: 'GET',
       }
@@ -395,7 +395,7 @@ export class PageHome extends PageElement {
   }
   async fetchServicesInfo() {
     this.services = await request<any>(
-      config.url + '/las2peer/services/services',
+      '/las2peer/services/services',
       {
         method: 'GET',
       }
@@ -416,7 +416,6 @@ export class PageHome extends PageElement {
   }
   async startService(fullClassName: string, version: string) {
     const response = await request(
-      config.url +
         '/las2peer/services/start?' +
         'serviceName=' +
         fullClassName +
@@ -456,7 +455,6 @@ export class PageHome extends PageElement {
 
   async stopService(fullClassName: string, version: string) {
     const response = await request(
-      config.url +
         '/las2peer/services/stop?' +
         'serviceName=' +
         fullClassName +
