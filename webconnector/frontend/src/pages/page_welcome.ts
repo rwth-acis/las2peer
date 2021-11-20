@@ -123,9 +123,6 @@ export class PageHome extends PageElement {
                 </h2>
               </div>
             </div>
-            <a href="#page-welcome-las2peer-description" class="myButton"
-              >Get Started</a
-            >
           </div>
           <div class="page-welcome-las2peer-image">
             <img src="./images/las2peer.png" alt="" />
