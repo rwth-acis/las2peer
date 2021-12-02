@@ -8,48 +8,14 @@ export class PageHome extends PageElement {
     html {
       scroll-behavior: smooth;
     }
-    .myButton {
-      width: fit-content;
-      background-color: #ffffff;
-      border-radius: 28px;
-      border: 1px solid #000000;
-      display: inline-block;
-      cursor: pointer;
-      color: #171617;
-      font-family: Arial;
-      font-size: 20px;
-      padding: 17px 31px;
-      text-decoration: none;
-      text-shadow: 0px 1px 0px #000000;
-      margin: 2rem;
-    }
-    .myButton:hover {
-      background-color: #19d2eb;
-    }
-    .myButton:active {
-      position: relative;
-      top: 1px;
-    }
-
-    .page-welcome-text-and-image {
-      display: flex;
-      padding-top: 5rem;
-    }
-    .page-welcome-text-and-button {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
     h1 {
-      color: white;
       font-size: 3rem;
       margin: 0;
     }
     h2 {
-      color: #ececec;
       font-size: 2rem;
       margin: 0;
-      padding-top: 2rem;
+      margin-bottom: 1rem;
       font-weight: 100;
     }
     h3 {
@@ -62,12 +28,6 @@ export class PageHome extends PageElement {
 
     section {
       padding: 1rem;
-      background-color: cornflowerblue;
-    }
-    #las2peer-text {
-      font-weight: bold;
-      font-size: 4rem;
-      display: inline;
     }
     .page-welcome-las2peer-description-title {
       text-align: center;
@@ -107,28 +67,21 @@ export class PageHome extends PageElement {
   render() {
     return html`
       <section>
-        <div class="page-welcome-text-and-image">
-          <div class="page-welcome-text-and-button">
-            <div>
-              <div class="page-welcome-title">
-                <h1>
-                  Welcome to this <br />
-                  <div id="las2peer-text">las2peer</div>
-                  Node
-                </h1>
-              </div>
-              <div class="page-welcome-subtitle">
-                <h2>
-                  Here you can view and start services in this las2peer network
-                </h2>
-              </div>
+        <div class="page-welcome-text-and-button">
+          <div>
+            <div class="page-welcome-title" style="display: flex; flex-direction: column;">
+              <h1 style="margin-left: auto; margin-right: auto">
+                Welcome to this las2peer node!
+              </h1>
+              <h2 style="margin-left: auto; margin-right: auto">
+                Here you can view and start services in this las2peer network.
+              </h2>
+              <img src="./images/las2peer.png" alt="las2peer logo" style="margin-left: auto; margin-right: auto"/>
             </div>
-          </div>
-          <div class="page-welcome-las2peer-image">
-            <img src="./images/las2peer.png" alt="" />
           </div>
         </div>
       </section>
+      <hr>
       <div>
         <div
           id="page-welcome-las2peer-description"
