@@ -29,24 +29,28 @@ export class AppIndex extends LitElement {
   private _loadUrl = document.URL;
 
   static styles = css`
+    :host {
+      --app-primary-color: #4285f4;
+    }
+
     #statusbar {
+      --statusbar-background: var(--app-primary-color);
+      --user-widget-button-background: white;
       position: sticky;
       z-index: 10;
       top: 0;
       width: 100%;
+      color: white;
     }
+
     .sidebar {
-      -moz-border-top-right-radius: 30px;
-      -webkit-border-top-right-radius: 30px;
-      border-top-right-radius: 30px;
-      -khtml-border-top-right-radius: 30px;
       height: 100%;
       width: 250px;
       position: fixed;
       z-index: 1;
       top: 0;
       left: 0;
-      background-color: #c6f5fc;
+      background-color: #f0f0f0;
       overflow-x: hidden;
       padding-top: 16px;
     }
@@ -60,7 +64,7 @@ export class AppIndex extends LitElement {
     }
 
     .sidebar a:hover {
-      color: #f1f1f1;
+      color: #bababa;
     }
     @media screen and (min-width: 800px) {
       main {
