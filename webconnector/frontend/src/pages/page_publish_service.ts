@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { TextField } from '@material/mwc-textfield';
+import '@material/mwc-textfield';
 import { html, css, customElement, property } from 'lit-element';
 
 import { PageElement } from '../helpers/page-element.js';
