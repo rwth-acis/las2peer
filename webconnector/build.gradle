@@ -90,6 +90,10 @@ sourceSets {
     }
 }
 
+processResources {
+    dependsOn ":webconnector:buildFrontend"
+}
+
 // Copies files like .xml files into build directory
 task copyTest(type: Copy) {
     from "src/test/java"
