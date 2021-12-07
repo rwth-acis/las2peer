@@ -18,12 +18,17 @@ sourceCompatibility = "${project.property('java.version')}"
 targetCompatibility = "${project.property('java.version')}"
 
 repositories {
-    // Use JCenter for resolving dependencies.
-    jcenter()
+    // Use maven central for resolving dependencies.
+    mavenCentral()
 
     // DBIS Archiva
     maven {
         url "${project.property('dbis.archiva.url')}"
+    }
+
+    // DBIS Archiva (snapshots)
+    maven {
+        url "${project.property('dbis.archiva.url.snapshots')}"
     }
 }
 
@@ -69,7 +74,7 @@ dependencies {
 
 // put all .jar files into export/jars folder
 tasks.withType(Jar) {
-    destinationDir = file("$projectDir/export/jars")
+    destinationDirectory = file("$projectDir/export/jars")
 }
 
 compileTestJava {
@@ -82,16 +87,6 @@ sourceSets {
             // add webapp (node frontend)
             srcDirs = ["resources"]
         }
-    }
-}
-
-// Replace las2peer version placeholder in node frontend statusbar title
-import org.apache.tools.ant.filters.ReplaceTokens 
-processResources {
-    dependsOn ":webconnector:buildFrontend"
-    from (sourceSets.main.resources) {
-        include "webapp/src/node-frontend.js"
-        filter(ReplaceTokens, tokens: [LAS2PEER_VERSION : "$las2peerVersion".toString()])
     }
 }
 
@@ -145,6 +140,8 @@ task npmInstall(type: Exec) {
 
 task npmBuild(type: Exec) {
     dependsOn "npmInstall"
+
+    environment = System.getenv() + ["las2peerVersion": "$las2peerVersion".toString()]
 
     workingDir = file("${project.projectDir}/frontend")
 

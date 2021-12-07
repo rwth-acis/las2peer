@@ -25,6 +25,7 @@ import org.web3j.utils.Convert;
 import org.web3j.utils.Convert.Unit;
 
 import i5.las2peer.api.security.AgentLockedException;
+import i5.las2peer.p2p.Node;
 import i5.las2peer.registry.contracts.ServiceRegistry;
 import i5.las2peer.registry.contracts.UserRegistry;
 import i5.las2peer.registry.contracts.GroupRegistry;
@@ -57,8 +58,8 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 	 * @param registryConfiguration addresses of registry contracts and Ethereum
 	 *                              client HTTP JSON RPC API endpoint
 	 */
-	public ReadWriteRegistryClient(RegistryConfiguration registryConfiguration, Credentials credentials) {
-		super(registryConfiguration, credentials);
+	public ReadWriteRegistryClient(RegistryConfiguration registryConfiguration, Credentials credentials, Node node) {
+		super(registryConfiguration, credentials, node);
 	}
 
 	/**
@@ -121,7 +122,7 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		{
 			BigInteger txManNonce = txMan.getCurrentNonce();
 			logger.info("[TX Nonce] before: " + txManNonce);
-			getNonce(txMan.getFromAddress()); // check if nonce has to be udpated
+			// getNonce(txMan.getFromAddress()); // check if nonce has to be udpated
 		}
 
 
@@ -304,11 +305,23 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		String consentee = agent.getEthereumAddress();
 		byte[] signature = SignatureUtils.signFunctionCall(function, agent.getEthereumCredentials());
 
+		if ( txMan != null )
+		{
+			BigInteger txManNonce = txMan.getCurrentNonce();
+			logger.info("[TX Nonce] before: " + txManNonce);
+		}
+
 		try {
 			contracts.serviceRegistry.delegatedRegister(serviceName, authorName, consentee, signature).sendAsync()
 			.get();
 		} catch (Exception e) {
 			throw new EthereumException("Failed to register service", e);
+		}
+
+		if ( txMan != null )
+		{
+			BigInteger txManNonce = txMan.getCurrentNonce();
+			logger.info("[TX Nonce] after: " + txManNonce);
 		}
 	}
 

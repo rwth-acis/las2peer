@@ -1154,9 +1154,9 @@ public class L2pNodeLauncher {
 			// self test system encryption
 
 			String version = System.getProperty("java.version");
-			if (!version.startsWith("14")) {
+			if (!version.startsWith("17")) {
 				throw new JavaVersionException(
-						"Unsupported Java version " + version + ". las2peer only runs with Java 14");
+						"Unsupported Java version " + version + ". las2peer only runs with Java 17");
 			}
 
 			try {

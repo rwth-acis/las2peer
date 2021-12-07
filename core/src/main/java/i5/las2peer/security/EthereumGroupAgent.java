@@ -94,7 +94,7 @@ public class EthereumGroupAgent extends GroupAgentImpl {
 		super.unlock(agent);
 
 		credentials = CredentialUtils.fromMnemonic(ethereumMnemonic, this.getGroupName());
-		registryClient = new ReadWriteRegistryClient(new RegistryConfiguration(), credentials);
+		registryClient = new ReadWriteRegistryClient(new RegistryConfiguration(), credentials, getRunningAtNode());
 
 		ethereumAddress = credentials.getAddress();
 		logger.fine("unlocked ethereum agent [" + ethereumAddress + "]");

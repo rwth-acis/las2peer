@@ -1,6 +1,6 @@
 ![las2peer](img/logo/bitmap/las2peer-logo-128x128.png)
 
-# [![Java CI with Gradle](https://github.com/rwth-acis/las2peer/workflows/Java%20CI%20with%20Gradle/badge.svg?branch=master)](https://github.com/rwth-acis/las2peer/actions?query=workflow%3A%22Java+CI+with+Gradle%22+branch%3Amaster) [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/rwth-acis/las2peer)
+# [![Java CI with Gradle](https://github.com/rwth-acis/las2peer/workflows/Java%20CI%20with%20Gradle/badge.svg?branch=master)](https://github.com/rwth-acis/las2peer/actions?query=workflow%3A%22Java+CI+with+Gradle%22+branch%3Amaster) [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/rwth-acis/las2peer) [![Javadoc](https://img.shields.io/github/deployments/rwth-acis/las2peer/github-pages?label=Javadoc)](https://rwth-acis.github.io/las2peer)
 
 las2peer is a Java-based server framework for developing and deploying microservices in a distributed Peer-to-Peer (P2P) environment.
 It is developed by the Advanced Community Information Systems (ACIS) group at the Chair of Computer Science 5 (Information Systems & Databases), RWTH Aachen University, Germany.
@@ -20,12 +20,12 @@ If you want to learn more about las2peer, please visit the [las2peer Template Pr
 
 ### Java
 
-las2peer uses **Java 14**.
+las2peer uses **Java 17**.
 
 ### Build Dependencies
 
-* Gradle 6.8
-* Node 8 / npm
+* Gradle 7.2
+* Node 14 / npm
 
 ## Project Structure
 
@@ -67,9 +67,9 @@ To make life easier for developers, this repository contains a build script for 
 
 JavaDocs of the latest release can be found online:
 
-* [Core](http://rwth-acis.github.io/las2peer/core/ "Core")
-* [Web Connector](http://rwth-acis.github.io/las2peer/webconnector/ "Web Connector")
-* [Rest Mapper](http://rwth-acis.github.io/las2peer/restmapper/ "Rest Mapper")
+* [Core](http://rwth-acis.github.io/las2peer/latest/core/ "Core")
+* [Web Connector](http://rwth-acis.github.io/las2peer/latest/webconnector/ "Web Connector")
+* [Rest Mapper](http://rwth-acis.github.io/las2peer/latest/restmapper/ "Rest Mapper")
 
 ## CI
 

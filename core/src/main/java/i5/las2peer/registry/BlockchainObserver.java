@@ -21,6 +21,7 @@ import org.web3j.utils.Convert;
 
 import i5.las2peer.api.p2p.ServiceNameVersion;
 import i5.las2peer.logging.L2pLogger;
+import i5.las2peer.p2p.Node;
 import i5.las2peer.registry.data.BlockchainTransactionData;
 import i5.las2peer.registry.data.GenericTransactionData;
 import i5.las2peer.registry.data.SenderReceiverDoubleKey;
@@ -120,6 +121,8 @@ class BlockchainObserver {
 
 	private static final L2pLogger logger = L2pLogger.getInstance(BlockchainObserver.class);
 
+	private static Node node;
+
 	/**
 	 * Returns a BlockchainObserver instance for the given contracts
 	 * configuration.
@@ -130,15 +133,16 @@ class BlockchainObserver {
 	 *                        client endpoint
 	 * @return BlockchainObserver reflecting the contracts' state
 	 */
-	public static BlockchainObserver getInstance(Contracts.ContractsConfig contractsConfig) {
+	public static BlockchainObserver getInstance(Contracts.ContractsConfig contractsConfig, Node theNode) {
 		logger.fine("Blockchain observer instance requested, looking up ...");
+		node = theNode;
 		instances.computeIfAbsent(contractsConfig, BlockchainObserver::new);
 		return instances.get(contractsConfig);
 	}
 
 	private BlockchainObserver(Contracts.ContractsConfig contractsConfig) {
 		logger.fine("Creating new blockchain observer");
-		contracts = new Contracts.ContractsBuilder(contractsConfig).build();
+		contracts = new Contracts.ContractsBuilder(contractsConfig).build(node);
 
 		errors = new ArrayList<String>();
 		profiles = new ConcurrentHashMap<>();

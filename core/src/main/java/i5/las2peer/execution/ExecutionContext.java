@@ -12,8 +12,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
-import com.sun.beans.finder.ClassFinder;
-
 import i5.las2peer.api.Context;
 import i5.las2peer.api.Service;
 import i5.las2peer.api.execution.InternalServiceException;
@@ -170,7 +168,7 @@ public class ExecutionContext implements Context {
 						@Override
 						protected Class<?> resolveClass(ObjectStreamClass classDesc)
 								throws IOException, ClassNotFoundException {
-							return ClassFinder.resolveClass(classDesc.getName(), localServiceLoader);
+							return localServiceLoader.loadClass(classDesc.getName());
 						}
 					};
 					rmiResult = (Serializable) ois.readObject();

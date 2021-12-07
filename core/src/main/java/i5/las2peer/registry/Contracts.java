@@ -32,6 +32,7 @@ import org.web3j.tx.response.TransactionReceiptProcessor;
 import org.web3j.utils.TxHashVerifier;
 
 import i5.las2peer.logging.L2pLogger;
+import i5.las2peer.p2p.Node;
 import i5.las2peer.registry.contracts.CommunityTagIndex;
 import i5.las2peer.registry.contracts.GroupRegistry;
 import i5.las2peer.registry.contracts.ReputationRegistry;
@@ -76,7 +77,7 @@ class Contracts {
 	protected static L2pLogger logger = L2pLogger.getInstance(Contracts.class);
 
 	private Contracts(Web3j web3j, CommunityTagIndex communityTagIndex, UserRegistry userRegistry, GroupRegistry groupRegistry, ServiceRegistry serviceRegistry,
-			ReputationRegistry reputationRegistry, TransactionManager transactionManager) {
+			ReputationRegistry reputationRegistry, TransactionManager transactionManager, Node node) {
 		this.web3j = web3j;
 		this.communityTagIndex = communityTagIndex;
 		this.userRegistry = userRegistry;
@@ -288,24 +289,24 @@ class Contracts {
 		 * @param nonce value to initialize transaction manager nonce with
 		 * @return instance of contracts wrapper, ready for use
 		 */
-		public Contracts build() {
+		public Contracts build(Node node) {
 			if (gasProvider == null) {
 				gasProvider = new DefaultGasProvider();
 			}
 
 			Web3j web3j = Web3j.build((config.endpoint == null) ? new HttpService() : new HttpService(config.endpoint));
 
-			TransactionManager transactionManager = constructTxManager(web3j, credentials);
+			TransactionManager transactionManager = constructTxManager(web3j, credentials, node);
 			CommunityTagIndex communityTagIndex = CommunityTagIndex.load(config.communityTagIndexAddress, web3j, transactionManager, gasProvider);
 			UserRegistry userRegistry = UserRegistry.load(config.userRegistryAddress, web3j, transactionManager, gasProvider);
 			GroupRegistry groupRegistry = GroupRegistry.load(config.groupRegistryAddress, web3j, transactionManager, gasProvider);
 			ServiceRegistry serviceRegistry = ServiceRegistry.load(config.serviceRegistryAddress, web3j, transactionManager, gasProvider);
 			ReputationRegistry reputationRegistry = ReputationRegistry.load(config.reputationRegistryAddress, web3j, transactionManager, gasProvider);
 
-			return new Contracts(web3j, communityTagIndex, userRegistry, groupRegistry, serviceRegistry, reputationRegistry, transactionManager);
+			return new Contracts(web3j, communityTagIndex, userRegistry, groupRegistry, serviceRegistry, reputationRegistry, transactionManager, node);
 		}
 
-		private TransactionManager constructTxManager(Web3j web3j, Credentials credentials) {
+		private TransactionManager constructTxManager(Web3j web3j, Credentials credentials, Node node) {
 			if (credentials == null) {
 				return new ReadonlyTransactionManager(web3j, DEFAULT_FROM_ADDRESS);
 			} else {
@@ -345,8 +346,8 @@ class Contracts {
 				int attempts = 90;
 				TransactionReceiptProcessor receiptProcessor = new PollingTransactionReceiptProcessor(
 					web3j, pollingIntervalMillisecs, attempts);
-				FastRawTransactionManager transactionManager = new FastRawTransactionManager(
-					web3j, credentials, receiptProcessor
+				FastRawTransactionManager transactionManager = new StaticNonceRawTransactionManager(
+					web3j, credentials, receiptProcessor, BigInteger.valueOf(-1), node
 				);
 
 				// schedule polling, will be created on first creation of contracts

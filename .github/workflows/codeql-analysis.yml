@@ -53,7 +53,8 @@ jobs:
 
     # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
     # If this step fails, then you should remove it and run the build manually (see below)
-    - name: Autobuild
+    - if: matrix.language == 'javascript' 
+      name: Autobuild
       uses: github/codeql-action/autobuild@v1
 
     # ℹ️ Command-line programs to run using the OS shell.
@@ -62,10 +63,18 @@ jobs:
     # ✏️ If the Autobuild fails above, remove it and uncomment the following three lines
     #    and modify them (or add more) to build your code if your project
     #    uses a compiled language
+    
+    - if: matrix.language == 'java' 
+      name: Set up JDK 17
+      uses: actions/setup-java@v1
+      with:
+        java-version: 17
+      
+    - if: matrix.language == 'java' 
+      run: |
+        chmod +x gradlew
+        ./gradlew build
 
-    #- run: |
-    #   make bootstrap
-    #   make release
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
