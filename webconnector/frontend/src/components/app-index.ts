@@ -115,7 +115,7 @@ export class AppIndex extends LitElement {
           id="statusbar"
           base-url="[[hostUrl]]"
           service="las2peer Node Front-End"
-          oidcclientid="localtestclient"
+          oidcclientid="bdda7396-3f6d-4d83-ac21-65b4069d0eab"
           oidcpopupsigninurl=${this._loadUrl}
           oidcpopupsignouturl=${this._loadUrl}
           oidcsilentsigninurl=${this._loadUrl}
