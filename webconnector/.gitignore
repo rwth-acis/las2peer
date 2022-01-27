@@ -7,3 +7,4 @@
 /junit*.properties
 /frontend/node_modules/
 /build
+/resources
