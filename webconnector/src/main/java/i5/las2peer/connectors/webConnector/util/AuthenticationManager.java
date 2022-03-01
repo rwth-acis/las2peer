@@ -124,6 +124,12 @@ public class AuthenticationManager {
 		AgentImpl agent;
 		try {
 			agent = connector.getL2pNode().getAgent(agentId);
+			logger.fine("Unlock the agent");
+			if (agent instanceof PassphraseAgentImpl) {
+				((PassphraseAgentImpl) agent).unlock(credentials.password);
+				logger.fine("Passphrase accepted. Agent unlocked");
+			}
+			logger.fine("Store the agent only in the registry");
 			return agent;
 		} catch (Exception e) {
 			logger.fine("Agent " + agentId + " not found in registry");
