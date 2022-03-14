@@ -28,6 +28,8 @@ import i5.las2peer.api.security.*;
 import i5.las2peer.connectors.webConnector.WebConnector;
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.p2p.EthereumNode;
+import i5.las2peer.p2p.Node;
+import i5.las2peer.p2p.PastryNodeImpl;
 import i5.las2peer.security.*;
 import i5.las2peer.tools.CryptoTools;
 import net.minidev.json.JSONObject;
@@ -118,14 +120,41 @@ public class AuthenticationManager {
 				agentId = connector.getL2pNode().getAgentIdForLogin(prefixedIdentifier);
 			}
 		}
-		
-		
-		AgentImpl agent = connector.getL2pNode().getAgent(agentId);
-		if (agent instanceof PassphraseAgentImpl) {
-			((PassphraseAgentImpl) agent).unlock(credentials.password);
-			logger.fine("passphrase accepted. Agent unlocked");
+
+		AgentImpl agent;
+		try {
+			agent = connector.getL2pNode().getAgent(agentId);
+			logger.fine("Unlock the agent");
+			if (agent instanceof PassphraseAgentImpl) {
+				((PassphraseAgentImpl) agent).unlock(credentials.password);
+				logger.fine("Passphrase accepted. Agent unlocked");
+			}
+			logger.fine("Store the agent only in the registry");
+			return agent;
+		} catch (Exception e) {
+			logger.fine("Agent " + agentId + " not found in registry");
+			logger.fine("Try to register in registry");
+			
+			Node runningNode = connector.getL2pNode();
+
+			if(runningNode instanceof EthereumNode){
+				EthereumNode ethNode = (EthereumNode) runningNode;
+				logger.fine("Get agent without check in registry");
+				agent = ethNode.getAgentWithoutCheckInRegistry(agentId);
+				logger.fine("Unlock the agent");
+				if (agent instanceof PassphraseAgentImpl) {
+					((PassphraseAgentImpl) agent).unlock(credentials.password);
+					logger.fine("passphrase accepted. Agent unlocked");
+				}
+				logger.fine("Store the agent only in the registry");
+				ethNode.storeAgentInRegistry(agent);
+				return agent;
+			}
+			else{
+				throw new AgentException(e);
+			}
+
 		}
-		return agent;
 	}
 
 	/**
