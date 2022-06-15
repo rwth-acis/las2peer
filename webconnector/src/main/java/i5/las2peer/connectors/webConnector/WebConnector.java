@@ -420,17 +420,10 @@ public class WebConnector extends Connector {
 	}
 
 	private void startHttpServer(ResourceConfig config) throws Exception {
-		http = GrizzlyHttpServerFactory.createHttpServer(new URI(getHttpEndpoint() + "/"), config, false);
+		http = GrizzlyHttpServerFactory.createHttpServer(new URI("http://0.0.0.0:"+ httpPort + "/"), config, false);
 		final TCPNIOTransport transport = http.getListener("grizzly").getTransport();
 		transport.setWorkerThreadPoolConfig(ThreadPoolConfig.defaultConfig().setCorePoolSize(maxThreads).setMaxPoolSize(maxThreads));
 		httpPort = http.getListener("grizzly").getPort();
-
-		// Add localhost 
-		InetAddress localHost = InetAddress.getLocalHost();
-		String localHostAddr = localHost.getHostAddress();
-		NetworkListener localHostListener = new NetworkListener("localhost", localHostAddr, httpPort);
-		http.addListener(localHostListener);
-
 		http.start();
 		logMessage("Web-Connector in HTTP mode running at " + getHttpEndpoint());
 	}
@@ -463,18 +456,11 @@ public class WebConnector extends Connector {
 		SSLContext sslContext = SSLContext.getInstance(SSL_INSTANCE_NAME);
 		sslContext.init(kmf.getKeyManagers(), null, null);
 		
-		https = GrizzlyHttpServerFactory.createHttpServer(new URI(getHttpEndpoint() + "/"), config,
+		https = GrizzlyHttpServerFactory.createHttpServer(new URI("https://0.0.0.0:"+ httpsPort + "/"), config,
 		sslContext);
 		final TCPNIOTransport httpsTransport = https.getListener("grizzly").getTransport();
 		httpsPort = https.getListener("grizzly").getPort();
 		httpsTransport.setWorkerThreadPoolConfig(ThreadPoolConfig.defaultConfig().setCorePoolSize(maxThreads).setMaxPoolSize(maxThreads));
-
-		// Add localhost 
-		InetAddress localHost = InetAddress.getLocalHost();
-		String localHostAddr = localHost.getHostAddress();
-		NetworkListener localHostListener = new NetworkListener("localhost", localHostAddr, httpsPort);
-		https.addListener(localHostListener);
-
 		https.start();
 	
 		logMessage("Web-Connector in HTTPS mode running at " + getHttpsEndpoint());
@@ -492,6 +478,8 @@ public class WebConnector extends Connector {
 		}
 	}
 
+
+	// We cannot use those when we start the http(s) server: https://stackoverflow.com/a/20007020
 	public String getHttpsEndpoint() {
 		return "https://" + getMyHostname() + ":" + httpsPort;
 	}
