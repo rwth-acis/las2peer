@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
+import java.net.InetAddress;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
@@ -27,6 +28,7 @@ import javax.net.ssl.SSLException;
 import javax.ws.rs.core.MultivaluedMap;
 
 import org.glassfish.grizzly.http.server.HttpServer;
+import org.glassfish.grizzly.http.server.NetworkListener;
 import org.glassfish.grizzly.nio.transport.TCPNIOTransport;
 import org.glassfish.grizzly.threadpool.ThreadPoolConfig;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
@@ -422,6 +424,13 @@ public class WebConnector extends Connector {
 		final TCPNIOTransport transport = http.getListener("grizzly").getTransport();
 		transport.setWorkerThreadPoolConfig(ThreadPoolConfig.defaultConfig().setCorePoolSize(maxThreads).setMaxPoolSize(maxThreads));
 		httpPort = http.getListener("grizzly").getPort();
+
+		// Add localhost 
+		InetAddress localHost = InetAddress.getLocalHost();
+		String localHostAddr = localHost.getHostAddress();
+		NetworkListener localHostListener = new NetworkListener("localhost", localHostAddr, httpPort);
+		http.addListener(localHostListener);
+
 		http.start();
 		logMessage("Web-Connector in HTTP mode running at " + getHttpEndpoint());
 	}
@@ -459,6 +468,13 @@ public class WebConnector extends Connector {
 		final TCPNIOTransport httpsTransport = https.getListener("grizzly").getTransport();
 		httpsPort = https.getListener("grizzly").getPort();
 		httpsTransport.setWorkerThreadPoolConfig(ThreadPoolConfig.defaultConfig().setCorePoolSize(maxThreads).setMaxPoolSize(maxThreads));
+
+		// Add localhost 
+		InetAddress localHost = InetAddress.getLocalHost();
+		String localHostAddr = localHost.getHostAddress();
+		NetworkListener localHostListener = new NetworkListener("localhost", localHostAddr, httpsPort);
+		https.addListener(localHostListener);
+
 		https.start();
 	
 		logMessage("Web-Connector in HTTPS mode running at " + getHttpsEndpoint());
