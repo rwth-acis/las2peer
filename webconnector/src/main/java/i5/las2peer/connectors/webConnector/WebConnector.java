@@ -423,8 +423,8 @@ public class WebConnector extends Connector {
 		http = GrizzlyHttpServerFactory.createHttpServer(new URI("http://0.0.0.0:"+ httpPort + "/"), config, false);
 		final TCPNIOTransport transport = http.getListener("grizzly").getTransport();
 		transport.setWorkerThreadPoolConfig(ThreadPoolConfig.defaultConfig().setCorePoolSize(maxThreads).setMaxPoolSize(maxThreads));
-		httpPort = http.getListener("grizzly").getPort();
 		http.start();
+		httpPort = http.getListener("grizzly").getPort();
 		logMessage("Web-Connector in HTTP mode running at " + getHttpEndpoint());
 	}
 
