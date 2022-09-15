@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
+import java.net.InetAddress;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
@@ -17,7 +18,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Executors;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.StreamHandler;
@@ -27,15 +27,17 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
 import javax.ws.rs.core.MultivaluedMap;
 
+import org.glassfish.grizzly.http.server.HttpServer;
+import org.glassfish.grizzly.http.server.NetworkListener;
+import org.glassfish.grizzly.nio.transport.TCPNIOTransport;
+import org.glassfish.grizzly.threadpool.ThreadPoolConfig;
+import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.jackson.JacksonFeature;
-import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest.Method;
-import com.sun.net.httpserver.HttpServer;
-import com.sun.net.httpserver.HttpsServer;
 
 import i5.las2peer.api.logging.MonitoringEvent;
 import i5.las2peer.connectors.Connector;
@@ -103,7 +105,7 @@ public class WebConnector extends Connector {
 
     public static final String SESSION_COOKIE = "cookie";
 
-	public static final String DEFAULT_DEFAULT_OIDC_PROVIDER = "https://api.learning-layers.eu/o/oauth2";
+	public static final String DEFAULT_DEFAULT_OIDC_PROVIDER = "https://auth.las2peer.org/auth/realms/main";
 	public String defaultOIDCProvider = DEFAULT_DEFAULT_OIDC_PROVIDER;
 	public ArrayList<String> oidcProviders = new ArrayList<>();
 
@@ -134,7 +136,7 @@ public class WebConnector extends Connector {
 	public static final String SSL_INSTANCE_NAME = "TLSv1.2";
 
 	private HttpServer http;
-	private HttpsServer https;
+	private HttpServer https;
 
 	private Node myNode = null;
 
@@ -396,7 +398,7 @@ public class WebConnector extends Connector {
 			if (http != null) {
 				// try to cleanup mess
 				try {
-					http.stop(0);
+					http.shutdownNow();
 				} catch (Exception e2) {
 					logger.log(Level.SEVERE, "HTTPS server cleanup failed after failed connector start", e2);
 				} finally {
@@ -406,7 +408,7 @@ public class WebConnector extends Connector {
 			if (https != null) {
 				// try to cleanup mess
 				try {
-					https.stop(0);
+					https.shutdownNow();
 				} catch (Exception e2) {
 					logger.log(Level.SEVERE, "HTTPS server cleanup failed after failed connector start", e2);
 				} finally {
@@ -418,10 +420,11 @@ public class WebConnector extends Connector {
 	}
 
 	private void startHttpServer(ResourceConfig config) throws Exception {
-		http = JdkHttpServerFactory.createHttpServer(new URI(getHttpEndpoint() + "/"), config, null, false);
-		httpPort = http.getAddress().getPort();
-		http.setExecutor(Executors.newFixedThreadPool(maxThreads));
+		http = GrizzlyHttpServerFactory.createHttpServer(new URI("http://0.0.0.0:"+ httpPort + "/"), config, false);
+		final TCPNIOTransport transport = http.getListener("grizzly").getTransport();
+		transport.setWorkerThreadPoolConfig(ThreadPoolConfig.defaultConfig().setCorePoolSize(maxThreads).setMaxPoolSize(maxThreads));
 		http.start();
+		httpPort = http.getListener("grizzly").getPort();
 		logMessage("Web-Connector in HTTP mode running at " + getHttpEndpoint());
 	}
 
@@ -452,11 +455,14 @@ public class WebConnector extends Connector {
 		kmf.init(keystore, keystoreSecret);
 		SSLContext sslContext = SSLContext.getInstance(SSL_INSTANCE_NAME);
 		sslContext.init(kmf.getKeyManagers(), null, null);
-		https = (HttpsServer) JdkHttpServerFactory.createHttpServer(new URI(getHttpsEndpoint() + "/"), config,
-				sslContext, false);
-		httpsPort = https.getAddress().getPort();
-		https.setExecutor(Executors.newFixedThreadPool(maxThreads));
+		
+		https = GrizzlyHttpServerFactory.createHttpServer(new URI("https://0.0.0.0:"+ httpsPort + "/"), config,
+		sslContext);
+		final TCPNIOTransport httpsTransport = https.getListener("grizzly").getTransport();
+		httpsPort = https.getListener("grizzly").getPort();
+		httpsTransport.setWorkerThreadPoolConfig(ThreadPoolConfig.defaultConfig().setCorePoolSize(maxThreads).setMaxPoolSize(maxThreads));
 		https.start();
+	
 		logMessage("Web-Connector in HTTPS mode running at " + getHttpsEndpoint());
 	}
 
@@ -472,6 +478,8 @@ public class WebConnector extends Connector {
 		}
 	}
 
+
+	// We cannot use those when we start the http(s) server: https://stackoverflow.com/a/20007020
 	public String getHttpsEndpoint() {
 		return "https://" + getMyHostname() + ":" + httpsPort;
 	}
@@ -484,10 +492,10 @@ public class WebConnector extends Connector {
 	public synchronized void stop() throws ConnectorException {
 		// stop the HTTP server
 		if (https != null) {
-			https.stop(0);
+			https.shutdownNow();
 		}
 		if (http != null) {
-			http.stop(0);
+			http.shutdownNow();
 		}
 		caCert = null;
 		agentIdToSessionId.clear();

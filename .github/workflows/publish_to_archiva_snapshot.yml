@@ -5,7 +5,7 @@ name: Publish artifacts as snapshot to archiva
 on:
   push:  
     branches:
-      - develop
+      - fix/agentNotFound
   workflow_dispatch:
 
 
