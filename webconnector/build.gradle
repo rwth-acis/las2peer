@@ -71,6 +71,9 @@ dependencies {
     implementation "org.webjars:swagger-ui:3.6.1"
     implementation "javax.xml.bind:jaxb-api:2.3.1"
     implementation "org.glassfish.jersey.inject:jersey-hk2:${project.property('jersey.version')}"
+    implementation "org.glassfish.grizzly:grizzly-http2:2.3.30"
+    implementation "org.glassfish.grizzly:grizzly-npn-api:1.8"
+    implementation "org.glassfish.grizzly:grizzly-npn-bootstrap:1.8.1"
 }
 
 // put all .jar files into export/jars folder
