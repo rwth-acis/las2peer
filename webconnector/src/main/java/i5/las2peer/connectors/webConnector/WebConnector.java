@@ -29,6 +29,8 @@ import javax.ws.rs.core.MultivaluedMap;
 
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.http.server.NetworkListener;
+import org.glassfish.grizzly.http2.Http2AddOn;
+import org.glassfish.grizzly.http2.Http2Configuration;
 import org.glassfish.grizzly.nio.transport.TCPNIOTransport;
 import org.glassfish.grizzly.threadpool.ThreadPoolConfig;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
@@ -421,8 +423,17 @@ public class WebConnector extends Connector {
 
 	private void startHttpServer(ResourceConfig config) throws Exception {
 		http = GrizzlyHttpServerFactory.createHttpServer(new URI("http://0.0.0.0:"+ httpPort + "/"), config, false);
+
 		final TCPNIOTransport transport = http.getListener("grizzly").getTransport();
 		transport.setWorkerThreadPoolConfig(ThreadPoolConfig.defaultConfig().setCorePoolSize(maxThreads).setMaxPoolSize(maxThreads));
+
+		// Create default HTTP/2 configuration and provide it to the AddOn
+		Http2Configuration configuration = Http2Configuration.builder().build();
+		Http2AddOn http2Addon = new Http2AddOn(configuration); 
+
+		// Register the Addon.
+		http.getListener("grizzly").registerAddOn(http2Addon);
+
 		http.start();
 		httpPort = http.getListener("grizzly").getPort();
 		logMessage("Web-Connector in HTTP mode running at " + getHttpEndpoint());
