@@ -423,19 +423,18 @@ public class WebConnector extends Connector {
 
 	private void startHttpServer(ResourceConfig config) throws Exception {
 		http = GrizzlyHttpServerFactory.createHttpServer(new URI("http://0.0.0.0:"+ httpPort + "/"), config, false);
-
-		final TCPNIOTransport transport = http.getListener("grizzly").getTransport();
-		transport.setWorkerThreadPoolConfig(ThreadPoolConfig.defaultConfig().setCorePoolSize(maxThreads).setMaxPoolSize(maxThreads));
-
+		NetworkListener listener = http.getListener("grizzly");
 		// Create default HTTP/2 configuration and provide it to the AddOn
 		Http2Configuration configuration = Http2Configuration.builder().build();
 		Http2AddOn http2Addon = new Http2AddOn(configuration); 
 
 		// Register the Addon.
-		http.getListener("grizzly").registerAddOn(http2Addon);
-
+		listener.registerAddOn(http2Addon);
+		final TCPNIOTransport transport = listener.getTransport();
+		transport.setWorkerThreadPoolConfig(ThreadPoolConfig.defaultConfig().setCorePoolSize(maxThreads).setMaxPoolSize(maxThreads));
+		
 		http.start();
-		httpPort = http.getListener("grizzly").getPort();
+		httpPort = listener.getPort();
 		logMessage("Web-Connector in HTTP mode running at " + getHttpEndpoint());
 	}
 
@@ -469,10 +468,17 @@ public class WebConnector extends Connector {
 		
 		https = GrizzlyHttpServerFactory.createHttpServer(new URI("https://0.0.0.0:"+ httpsPort + "/"), config,
 		sslContext);
-		final TCPNIOTransport httpsTransport = https.getListener("grizzly").getTransport();
-		httpsPort = https.getListener("grizzly").getPort();
+		NetworkListener listener = https.getListener("grizzly");
+		// Create default HTTP/2 configuration and provide it to the AddOn
+		Http2Configuration configuration = Http2Configuration.builder().build();
+		Http2AddOn http2Addon = new Http2AddOn(configuration); 
+
+		// Register the Addon.
+		listener.registerAddOn(http2Addon);
+		final TCPNIOTransport httpsTransport = listener.getTransport();
 		httpsTransport.setWorkerThreadPoolConfig(ThreadPoolConfig.defaultConfig().setCorePoolSize(maxThreads).setMaxPoolSize(maxThreads));
 		https.start();
+		httpsPort = listener.getPort();
 	
 		logMessage("Web-Connector in HTTPS mode running at " + getHttpsEndpoint());
 	}
