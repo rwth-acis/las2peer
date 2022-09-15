@@ -39,7 +39,7 @@
     "@polymer/paper-toast": "^3.0.1",
     "@polymer/paper-tooltip": "^3.0.1",
     "@vaadin/router": "^1.7.4",
-    "las2peer-frontend-statusbar": "github:rwth-acis/las2peer-frontend-statusbar#0.3.2",
+    "las2peer-frontend-statusbar": "github:rwth-acis/las2peer-frontend-statusbar#0.3.6",
     "lit-element": "^2.5.1",
     "pwa-helper-components": "~0.2.10",
     "tslib": "^2.2.0"
