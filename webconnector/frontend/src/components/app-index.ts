@@ -120,7 +120,7 @@ export class AppIndex extends LitElement {
           oidcpopupsignouturl=${this._loadUrl}
           oidcsilentsigninurl=${this._loadUrl}
           loginoidctoken="[[_oidcUser.access_token]]"
-          loginoidcprovider="https://api.learning-layers.eu/o/oauth2"
+          loginoidcprovider="https://auth.las2peer.org/auth/realms/main"
           subtitle="vLAS2PEER_VERSION"
         ></las2peer-frontend-statusbar>
 
