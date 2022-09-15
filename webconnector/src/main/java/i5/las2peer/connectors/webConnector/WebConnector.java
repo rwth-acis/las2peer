@@ -105,7 +105,7 @@ public class WebConnector extends Connector {
 
     public static final String SESSION_COOKIE = "cookie";
 
-	public static final String DEFAULT_DEFAULT_OIDC_PROVIDER = "https://api.learning-layers.eu/o/oauth2";
+	public static final String DEFAULT_DEFAULT_OIDC_PROVIDER = "https://auth.las2peer.org/auth/realms/main";
 	public String defaultOIDCProvider = DEFAULT_DEFAULT_OIDC_PROVIDER;
 	public ArrayList<String> oidcProviders = new ArrayList<>();
 
