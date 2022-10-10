@@ -3,7 +3,7 @@ name: Bug fix template
 about: Template for an issue reporting a bug in the system.
 title: "[BUG] Title"
 labels: bug
-assignees: ''
+assignees: 'Aran30'
 
 ---
 
