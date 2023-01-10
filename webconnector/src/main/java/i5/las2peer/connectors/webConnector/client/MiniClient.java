@@ -108,7 +108,7 @@ public class MiniClient {
 
 				// Send request
 				DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
-				wr.writeBytes(content);
+				wr.write(content.getBytes("UTF-8"));
 				wr.close();
 			}
 
