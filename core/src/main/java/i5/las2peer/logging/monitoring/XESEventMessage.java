@@ -12,7 +12,7 @@ import i5.las2peer.api.logging.MonitoringEvent;
  * 
  *
  */
-public class EventMessage extends MonitoringMessage {
+public class XESEventMessage extends MonitoringMessage {
 
 	private static final long serialVersionUID = -1481584785721621545L;
 
@@ -23,7 +23,9 @@ public class EventMessage extends MonitoringMessage {
 
 	/**
 	 * 
-	 * Constructor of a EventMessage.
+	 * Constructor of a XESEventMessage. This is a subclass of
+	 * {@link i5.las2peer.logging.monitoring.MonitoringMessage} with additional
+	 * fields for XES event log.
 	 * 
 	 * @param timestamp          A timestamp for this message
 	 * @param event              A monitoring event identifier
@@ -32,8 +34,13 @@ public class EventMessage extends MonitoringMessage {
 	 * @param destinationNode    A destination node
 	 * @param destinationAgentId A destination agent id
 	 * @param remarks            Any additional information about this message
+	 * @param caseId             caseId of the event
+	 * @param activityName       activityName of the event
+	 * @param resourceId         resourceId of the event
+	 * @param resourceType       resourceType of the event (e.g. user, service, bot,
+	 *                           etc.)
 	 */
-	public EventMessage(Long timestamp, MonitoringEvent event, String sourceNode, String sourceAgentId,
+	public XESEventMessage(Long timestamp, MonitoringEvent event, String sourceNode, String sourceAgentId,
 			String destinationNode, String destinationAgentId, String remarks, String caseId, String activityName,
 			String resourceId, String resourceType) {
 		super(timestamp, event, sourceNode, sourceAgentId, destinationNode, destinationAgentId, remarks);

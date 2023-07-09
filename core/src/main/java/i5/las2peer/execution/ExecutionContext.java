@@ -218,6 +218,13 @@ public class ExecutionContext implements Context {
 
 	}
 
+	public void monitorXESEvent(MonitoringEvent event, String message, String caseId, String activityName,
+			String resourceId, String resourceType) {
+		String sourceAgentId = serviceAgent != null ? serviceAgent.getIdentifier() : null;
+		node.observerNotice(event, node.getNodeId(), sourceAgentId, null, null, message, caseId, activityName,
+				resourceId, resourceType);
+	}
+
 	@Override
 	public UserAgent createUserAgent(String passphrase) throws AgentOperationFailedException {
 		try {

@@ -425,6 +425,37 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	}
 
 	/**
+	 * Logs an event to all observers.
+	 * 
+	 * @param event              The event for this notification.
+	 * @param sourceNode         A source node for this event
+	 * @param sourceAgentId      A source agent id for this event
+	 * @param destinationNode    A destination node for this event
+	 * @param destinationAgentId A destination agent id for this event
+	 * @param remarks            Some free text note or description about this
+	 *                           event.
+	 * @param caseId             caseId of the event
+	 * @param activityName       activityName of the event
+	 * @param resourceId         resourceId of the event
+	 * @param resourceType       resourceType of the event
+	 */
+	public void observerNotice(MonitoringEvent event, Object sourceNode, String sourceAgentId, Object destinationNode,
+			String destinationAgentId, String remarks, String caseId, String activityName, String resourceId,
+			String resourceType) {
+		long timestamp = new Date().getTime();
+		String sourceNodeRepresentation = getNodeRepresentation(sourceNode);
+		String destinationNodeRepresentation = getNodeRepresentation(destinationNode);
+		for (NodeObserver ob : observers) {
+			if (ob == serviceLogger && (Math.abs(event.getCode()) < 7500 || Math.abs(event.getCode()) >= 7600)) {
+				// custom logger shall only log service messages
+				continue;
+			}
+			ob.logXESEvent(timestamp, event, sourceNodeRepresentation, sourceAgentId, destinationNodeRepresentation,
+					destinationAgentId, remarks, caseId, activityName, resourceId, resourceType);
+		}
+	}
+
+	/**
 	 * Derive a String representation for a node from the given identifier object. The type of the object depends on the
 	 * setting of the current node.
 	 * 
