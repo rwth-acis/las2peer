@@ -238,7 +238,70 @@ public class MonitoringObserver implements NodeObserver {
 	}
 
 	/**
-	 * Checks whether the queue is ready to be flushed, either due to reaching the limit or because enough time has
+	 *
+	 * Processes the incoming data by generating a {@link XESEventMessage} of it.
+	 * This
+	 * {@link XESEventMessage} will
+	 * be stored in an array of {@link MonitoringMessage}s, which will be send via a
+	 * {@link i5.las2peer.communication.Message} to the Processing Service.
+	 *
+	 */
+	public void logXESEvent(Long timestamp, MonitoringEvent event, String sourceNode, String sourceAgentId,
+			String destinationNode, String destinationAgentId, String remarks, String caseId, String activityName,
+			String resourceId, String resourceType) {
+		if (sourceNode == null) {
+			return; // We do not log events without a source node into a database with different
+					// sources;-)
+		}
+
+		/*
+		 * Temporary fix to exclude the very frequent messages from monitoring
+		 * in order to not spam too much into the monitoring db.
+		 */
+		if (event == MonitoringEvent.ARTIFACT_FETCH_STARTED || event == MonitoringEvent.ARTIFACT_RECEIVED
+				|| event == MonitoringEvent.AGENT_GET_STARTED || event == MonitoringEvent.AGENT_GET_SUCCESS
+				|| event == MonitoringEvent.MESSAGE_SENDING || event == MonitoringEvent.ARTIFACT_FETCH_FAILED
+				|| event == MonitoringEvent.MESSAGE_RECEIVED_ANSWER || event == MonitoringEvent.MESSAGE_FORWARDING
+				|| event == MonitoringEvent.MESSAGE_RECEIVED) {
+			return;
+		}
+
+		monitoringMessages[messagesCount++] = new XESEventMessage(timestamp, event, sourceNode, sourceAgentId,
+				destinationNode, destinationAgentId, remarks, caseId, activityName, resourceId, resourceType);
+
+		if (readyToSend()) {
+			checkInit();
+			if (initializedDone) {
+				messagesCount = 0;
+				sendMessages();
+			} else {
+				messagesCount = 0;
+				System.out.println("Monitoring: Problems with initializing Agents..");
+			}
+		}
+
+		// We can only send our last message if the node is closing, so we will have to
+		// assume that all services are
+		// shutdown
+		// when a node is closed (seems to be a fair bet)
+		if (event == MonitoringEvent.NODE_SHUTDOWN) {
+			if (initializedDone) {
+				// To remove "old" messages since they are not overwritten
+				int counter = messagesCount;
+				while (counter < monitoringMessages.length) {
+					monitoringMessages[counter] = null;
+					counter++;
+				}
+				sendMessages();
+			} else {
+				System.out.println("Monitoring: Problems with initializing Agents..");
+			}
+		}
+	}
+
+	/**
+	 * Checks whether the queue is ready to be flushed, either due to reaching the
+	 * limit or because enough time has
 	 * passed
 	 * 
 	 * @return true is ready to flush
