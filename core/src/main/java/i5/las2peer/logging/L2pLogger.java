@@ -525,6 +525,26 @@ public final class L2pLogger extends Logger implements NodeObserver {
 		log(observerLevel, logLine.toString());
 	}
 
+	@Override
+	public void logXESEvent(Long timestamp, MonitoringEvent event, String sourceNode, String sourceAgentId,
+			String destinationNode, String destinationAgentId, String remarks, String caseId, String activityName,
+			String resourceId, String resourceType) {
+		StringBuilder logLine = new StringBuilder();
+		logLine.append(event + " (" + event.getCode() + ")\t");
+		logLine.append(appendPart(sourceNode));
+		logLine.append(appendPart(sourceAgentId));
+		logLine.append(appendPart(destinationNode));
+		logLine.append(appendPart(destinationAgentId));
+		logLine.append(appendPart(remarks));
+		logLine.append(appendPart(caseId));
+		logLine.append(appendPart(activityName));
+		logLine.append(appendPart(resourceId));
+		logLine.append(appendPart(resourceType));
+		// with default levels this hides the output from console and only writes it to
+		// logfile
+		log(observerLevel, logLine.toString());
+	}
+
 	/**
 	 * Simple method for one log line entry. Null will be printed as "-". All values will be followed by a tab char.
 	 *
