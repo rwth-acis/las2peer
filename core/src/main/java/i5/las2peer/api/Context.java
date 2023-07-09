@@ -590,6 +590,22 @@ public interface Context {
 	 */
 	public void monitorEvent(Object from, MonitoringEvent event, String message, boolean includeActingUser);
 
+	/**
+	 * Writes an XES event message to the l2p system using node observers. Also
+	 * makes data
+	 * available to MobSOS.
+	 * 
+	 * @param event        Differentiates between different log messages. Use
+	 *                     MonitoringEvent.SERVICE_CUSTOM_MESSAGE_XXX as parameter.
+	 * @param message      A message.
+	 * @param caseId       The case id of the XES event.
+	 * @param activityName The activity name of the XES event.
+	 * @param resourceId   The resource id of the XES event.
+	 * @param resourceType The resource type of the XES event.
+	 */
+	public void monitorXESEvent(MonitoringEvent event, String message, String caseId, String activityName,
+			String resourceId, String resourceType);
+
 	// Class loading
 
 	/**

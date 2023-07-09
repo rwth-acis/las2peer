@@ -477,6 +477,13 @@ public class ExecutionContextTest {
 				messages.add(timestamp + " " + event + " " + sourceNode + " " + sourceAgentId + " " + destinationNode
 						+ " " + destinationAgentId + " " + remarks);
 			}
+
+			public void logXESEvent(Long timestamp, MonitoringEvent event, String sourceNode, String sourceAgentId,
+					String destinationNode, String destinationAgentId, String remarks, String caseId,
+					String activityName,
+					String resourceId, String resourceType) {
+				// TODO Auto-generated method stub
+			}
 		});
 
 		context.monitorEvent(this, MonitoringEvent.SERVICE_CUSTOM_ERROR_1, "testMessage", true);
