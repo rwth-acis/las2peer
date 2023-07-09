@@ -246,6 +246,7 @@ public class MonitoringObserver implements NodeObserver {
 	 * {@link i5.las2peer.communication.Message} to the Processing Service.
 	 *
 	 */
+	@Override
 	public void logXESEvent(Long timestamp, MonitoringEvent event, String sourceNode, String sourceAgentId,
 			String destinationNode, String destinationAgentId, String remarks, String caseId, String activityName,
 			String resourceId, String resourceType) {
