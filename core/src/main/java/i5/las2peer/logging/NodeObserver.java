@@ -52,6 +52,6 @@ public interface NodeObserver {
 	 */
 	public void logXESEvent(Long timestamp, MonitoringEvent event, String sourceNode, String sourceAgentId,
 			String destinationNode, String destinationAgentId, String remarks, String caseId, String activityName,
-			String resourceId, String resourceType);
+			String resourceId, String resourceType, String lifecyclePhase);
 
 }
