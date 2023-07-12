@@ -249,7 +249,7 @@ public class MonitoringObserver implements NodeObserver {
 	@Override
 	public void logXESEvent(Long timestamp, MonitoringEvent event, String sourceNode, String sourceAgentId,
 			String destinationNode, String destinationAgentId, String remarks, String caseId, String activityName,
-			String resourceId, String resourceType, String lifecyclePhase) {
+			String resourceId, String resourceType, String lifecyclePhase,Long timeOfEvent) {
 		if (sourceNode == null) {
 			return; // We do not log events without a source node into a database with different
 					// sources;-)
@@ -269,7 +269,7 @@ public class MonitoringObserver implements NodeObserver {
 
 		monitoringMessages[messagesCount++] = new XESEventMessage(timestamp, event, sourceNode, sourceAgentId,
 				destinationNode, destinationAgentId, remarks, caseId, activityName, resourceId, resourceType,
-				lifecyclePhase);
+				lifecyclePhase, timeOfEvent);
 
 		if (readyToSend()) {
 			checkInit();

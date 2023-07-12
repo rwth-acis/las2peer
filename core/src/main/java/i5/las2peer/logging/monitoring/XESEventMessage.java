@@ -22,6 +22,8 @@ public class XESEventMessage extends MonitoringMessage {
 	private String resourceType;
 	private String lifecyclePhase;
 
+	private Long timeOfEvent;
+
 	/**
 	 * 
 	 * Constructor of a XESEventMessage. This is a subclass of
@@ -45,14 +47,14 @@ public class XESEventMessage extends MonitoringMessage {
 	 */
 	public XESEventMessage(Long timestamp, MonitoringEvent event, String sourceNode, String sourceAgentId,
 			String destinationNode, String destinationAgentId, String remarks, String caseId, String activityName,
-			String resourceId, String resourceType, String lifecyclePhase) {
+			String resourceId, String resourceType, String lifecyclePhase, Long timeOfEvent) {
 		super(timestamp, event, sourceNode, sourceAgentId, destinationNode, destinationAgentId, remarks);
-
 		this.caseId = caseId;
 		this.activityName = activityName;
 		this.resourceId = resourceId;
 		this.resourceType = resourceType;
 		this.lifecyclePhase = lifecyclePhase;
+		this.timeOfEvent = timeOfEvent;
 	}
 
 	public String getCaseId() {
@@ -73,6 +75,10 @@ public class XESEventMessage extends MonitoringMessage {
 
 	public String getLifecyclePhase() {
 		return lifecyclePhase;
+	}
+
+	public Long getTimeOfEvent() {
+		return timeOfEvent;
 	}
 
 }

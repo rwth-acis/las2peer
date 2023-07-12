@@ -606,7 +606,7 @@ public interface Context {
 	 */
 
 	public void monitorXESEvent(MonitoringEvent event, String message, String caseId, String activityName,
-			String resourceId, String resourceType, String lifecyclePhase);
+			String resourceId, String resourceType, String lifecyclePhase, Long timeOfEvent);
 
 	// Class loading
 

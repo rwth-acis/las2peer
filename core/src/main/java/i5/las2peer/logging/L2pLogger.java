@@ -528,7 +528,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 	@Override
 	public void logXESEvent(Long timestamp, MonitoringEvent event, String sourceNode, String sourceAgentId,
 			String destinationNode, String destinationAgentId, String remarks, String caseId, String activityName,
-			String resourceId, String resourceType, String lifecyclePhase) {
+			String resourceId, String resourceType, String lifecyclePhase, Long timeOfEvent) {
 		StringBuilder logLine = new StringBuilder();
 		logLine.append(event + " (" + event.getCode() + ")\t");
 		logLine.append(appendPart(sourceNode));
@@ -541,6 +541,7 @@ public final class L2pLogger extends Logger implements NodeObserver {
 		logLine.append(appendPart(resourceId));
 		logLine.append(appendPart(resourceType));
 		logLine.append(appendPart(lifecyclePhase));
+		logLine.append(appendPart(timeOfEvent));
 		// with default levels this hides the output from console and only writes it to
 		// logfile
 		log(observerLevel, logLine.toString());

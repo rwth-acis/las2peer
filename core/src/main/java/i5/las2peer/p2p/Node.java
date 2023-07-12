@@ -443,7 +443,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 			String destinationAgentId, String remarks, String caseId, String activityName, String resourceId,
 			String resourceType) {
 		observerNotice(event, sourceNode, sourceAgentId, destinationNode, destinationAgentId, remarks, caseId,
-				activityName, resourceId, resourceType, null);
+				activityName, resourceId, resourceType, null, null);
 	}
 
 	/**
@@ -463,7 +463,7 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 	 */
 	public void observerNotice(MonitoringEvent event, Object sourceNode, String sourceAgentId, Object destinationNode,
 			String destinationAgentId, String remarks, String caseId, String activityName, String resourceId,
-			String resourceType, String lifecyclePhase) {
+			String resourceType, String lifecyclePhase, Long timeOfEvent) {
 		long timestamp = new Date().getTime();
 		String sourceNodeRepresentation = getNodeRepresentation(sourceNode);
 		String destinationNodeRepresentation = getNodeRepresentation(destinationNode);
@@ -473,7 +473,8 @@ public abstract class Node extends Configurable implements AgentStorage, NodeSto
 				continue;
 			}
 			ob.logXESEvent(timestamp, event, sourceNodeRepresentation, sourceAgentId, destinationNodeRepresentation,
-					destinationAgentId, remarks, caseId, activityName, resourceId, resourceType, lifecyclePhase);
+					destinationAgentId, remarks, caseId, activityName, resourceId, resourceType, lifecyclePhase,
+					timeOfEvent);
 		}
 	}
 
