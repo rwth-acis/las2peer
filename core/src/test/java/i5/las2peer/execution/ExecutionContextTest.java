@@ -481,7 +481,7 @@ public class ExecutionContextTest {
 			public void logXESEvent(Long timestamp, MonitoringEvent event, String sourceNode, String sourceAgentId,
 					String destinationNode, String destinationAgentId, String remarks, String caseId,
 					String activityName,
-					String resourceId, String resourceType, String lifecyclePhase) {
+					String resourceId, String resourceType, String lifecyclePhase, Long timeOfEvent) {
 				// TODO Auto-generated method stub
 			}
 		});
