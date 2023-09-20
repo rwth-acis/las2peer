@@ -20,6 +20,9 @@ public class XESEventMessage extends MonitoringMessage {
 	private String activityName;
 	private String resourceId;
 	private String resourceType;
+	private String lifecyclePhase;
+
+	private Long timeOfEvent;
 
 	/**
 	 * 
@@ -39,16 +42,19 @@ public class XESEventMessage extends MonitoringMessage {
 	 * @param resourceId         resourceId of the event
 	 * @param resourceType       resourceType of the event (e.g. user, service, bot,
 	 *                           etc.)
+	 * @param lifecyclePhase     lifecyclePhase of the event (e.g. start, complete,
+	 *                           etc.)
 	 */
 	public XESEventMessage(Long timestamp, MonitoringEvent event, String sourceNode, String sourceAgentId,
 			String destinationNode, String destinationAgentId, String remarks, String caseId, String activityName,
-			String resourceId, String resourceType) {
+			String resourceId, String resourceType, String lifecyclePhase, Long timeOfEvent) {
 		super(timestamp, event, sourceNode, sourceAgentId, destinationNode, destinationAgentId, remarks);
-
 		this.caseId = caseId;
 		this.activityName = activityName;
 		this.resourceId = resourceId;
 		this.resourceType = resourceType;
+		this.lifecyclePhase = lifecyclePhase;
+		this.timeOfEvent = timeOfEvent;
 	}
 
 	public String getCaseId() {
@@ -65,6 +71,14 @@ public class XESEventMessage extends MonitoringMessage {
 
 	public String getResourceType() {
 		return resourceType;
+	}
+
+	public String getLifecyclePhase() {
+		return lifecyclePhase;
+	}
+
+	public Long getTimeOfEvent() {
+		return timeOfEvent;
 	}
 
 }

@@ -602,9 +602,11 @@ public interface Context {
 	 * @param activityName The activity name of the XES event.
 	 * @param resourceId   The resource id of the XES event.
 	 * @param resourceType The resource type of the XES event.
+	 * @param lifecyclePhase    The lifecycle of the XES event.
 	 */
+
 	public void monitorXESEvent(MonitoringEvent event, String message, String caseId, String activityName,
-			String resourceId, String resourceType);
+			String resourceId, String resourceType, String lifecyclePhase, Long timeOfEvent);
 
 	// Class loading
 
