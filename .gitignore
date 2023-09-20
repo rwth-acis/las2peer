@@ -22,3 +22,4 @@ archiva_credentials.xml
 .classpath
 .project
 .settings
+.vscode/settings.json
