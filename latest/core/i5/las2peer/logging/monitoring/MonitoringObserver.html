@@ -142,7 +142,7 @@ implements <a href="../NodeObserver.html" title="interface in i5.las2peer.loggin
 <div class="block">Processes the incoming data by generating a <a href="MonitoringMessage.html" title="class in i5.las2peer.logging.monitoring"><code>MonitoringMessage</code></a> of it.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#logXESEvent(java.lang.Long,i5.las2peer.api.logging.MonitoringEvent,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String)" class="member-name-link">logXESEvent</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Long.html" title="class or interface in java.lang" class="external-link">Long</a>&nbsp;timestamp,
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#logXESEvent(java.lang.Long,i5.las2peer.api.logging.MonitoringEvent,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.Long)" class="member-name-link">logXESEvent</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Long.html" title="class or interface in java.lang" class="external-link">Long</a>&nbsp;timestamp,
  <a href="../../api/logging/MonitoringEvent.html" title="enum class in i5.las2peer.api.logging">MonitoringEvent</a>&nbsp;event,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;sourceNode,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;sourceAgentId,
@@ -152,7 +152,9 @@ implements <a href="../NodeObserver.html" title="interface in i5.las2peer.loggin
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;caseId,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;activityName,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;resourceId,
- <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;resourceType)</code></div>
+ <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;resourceType,
+ <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;lifecyclePhase,
+ <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Long.html" title="class or interface in java.lang" class="external-link">Long</a>&nbsp;timeOfEvent)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Processes the incoming data by generating a <a href="XESEventMessage.html" title="class in i5.las2peer.logging.monitoring"><code>XESEventMessage</code></a> of it.</div>
 </div>
@@ -247,7 +249,7 @@ implements <a href="../NodeObserver.html" title="interface in i5.las2peer.loggin
 </section>
 </li>
 <li>
-<section class="detail" id="logXESEvent(java.lang.Long,i5.las2peer.api.logging.MonitoringEvent,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String)">
+<section class="detail" id="logXESEvent(java.lang.Long,i5.las2peer.api.logging.MonitoringEvent,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.Long)">
 <h3>logXESEvent</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">logXESEvent</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Long.html" title="class or interface in java.lang" class="external-link">Long</a>&nbsp;timestamp,
  <a href="../../api/logging/MonitoringEvent.html" title="enum class in i5.las2peer.api.logging">MonitoringEvent</a>&nbsp;event,
@@ -259,7 +261,9 @@ implements <a href="../NodeObserver.html" title="interface in i5.las2peer.loggin
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;caseId,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;activityName,
  <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;resourceId,
- <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;resourceType)</span></div>
+ <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;resourceType,
+ <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;lifecyclePhase,
+ <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Long.html" title="class or interface in java.lang" class="external-link">Long</a>&nbsp;timeOfEvent)</span></div>
 <div class="block">Processes the incoming data by generating a <a href="XESEventMessage.html" title="class in i5.las2peer.logging.monitoring"><code>XESEventMessage</code></a> of it.
  This
  <a href="XESEventMessage.html" title="class in i5.las2peer.logging.monitoring"><code>XESEventMessage</code></a> will
@@ -267,7 +271,7 @@ implements <a href="../NodeObserver.html" title="interface in i5.las2peer.loggin
  <a href="../../communication/Message.html" title="class in i5.las2peer.communication"><code>Message</code></a> to the Processing Service.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code><a href="../NodeObserver.html#logXESEvent(java.lang.Long,i5.las2peer.api.logging.MonitoringEvent,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String)">logXESEvent</a></code>&nbsp;in interface&nbsp;<code><a href="../NodeObserver.html" title="interface in i5.las2peer.logging">NodeObserver</a></code></dd>
+<dd><code><a href="../NodeObserver.html#logXESEvent(java.lang.Long,i5.las2peer.api.logging.MonitoringEvent,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.Long)">logXESEvent</a></code>&nbsp;in interface&nbsp;<code><a href="../NodeObserver.html" title="interface in i5.las2peer.logging">NodeObserver</a></code></dd>
 <dt>Parameters:</dt>
 <dd><code>timestamp</code> - UNIX time stamp of the event</dd>
 <dd><code>event</code> - the event to log</dd>
