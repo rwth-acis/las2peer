@@ -307,6 +307,14 @@ publishing.publications.all {
 publishing {
     repositories {
         maven {
+            name = "OSSRH"
+            url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+            credentials {
+                username = System.getenv("MAVEN_USERNAME")
+                password = System.getenv("MAVEN_PASSWORD")
+            }
+        }
+        maven {
             name = "GitHubPackages"
             url = uri("https://maven.pkg.github.com/rwth-acis/las2peer")
             credentials {
@@ -317,7 +325,11 @@ publishing {
     }
     publications {
         gpr(MavenPublication) {
-            from(components.java)
+            from components.java
+            pom {
+                artifactId "las2peer"
+                packaging "jar"
+            }
         }
     }
 }
