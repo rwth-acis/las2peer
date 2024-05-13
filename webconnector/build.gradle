@@ -20,16 +20,6 @@ targetCompatibility = "${project.property('java.version')}"
 repositories {
     // Use maven central for resolving dependencies.
     mavenCentral()
-
-    // DBIS Archiva
-    maven {
-        url "${project.property('dbis.archiva.url')}"
-    }
-
-    // DBIS Archiva (snapshots)
-    maven {
-        url "${project.property('dbis.archiva.url.snapshots')}"
-    }
 }
 
 compileJava {
@@ -63,6 +53,7 @@ dependencies {
     testImplementation "junit:junit:${project.property('junit.version')}"
 
     implementation project(":restmapper")
+    implementation files('../jars/FreePastry-3.1.0.jar')
 
     implementation "com.nimbusds:oauth2-oidc-sdk:4.17"
     implementation "org.glassfish.jersey.containers:jersey-container-jdk-http:${project.property('jersey.version')}"
@@ -187,25 +178,19 @@ publishing.publications.all {
 }
 
 publishing {
-    publications {
-        webconnector(MavenPublication) {
-            from components.java
-            pom {
-                artifactId "las2peer-web-connector"
-                packaging "jar"
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/rwth-acis/las2peer")
+            credentials {
+                username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+                password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
             }
         }
     }
-
-    repositories {
-        maven {
-            if (las2peerRelease) url = "${project.property('dbis.archiva.url')}"
-            else url = "${project.property('dbis.archiva.url.snapshots')}"
-
-            credentials {
-                username = System.env.ARCHIVA_USERNAME
-                password = System.env.ARCHIVA_PASSWORD
-            }
+    publications {
+        gpr(MavenPublication) {
+            from(components.java)
         }
     }
 }

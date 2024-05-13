@@ -22,15 +22,6 @@ repositories {
     // Use maven central for resolving dependencies.
     mavenCentral()
 
-    // DBIS Archiva
-    maven {
-        url "${project.property('dbis.archiva.url')}"
-    }
-
-    // DBIS Archiva (snapshots)
-    maven {
-        url "${project.property('dbis.archiva.url.snapshots')}"
-    }
 }
 
 compileJava {
@@ -60,7 +51,10 @@ dependencies {
     implementation "junit:junit:${project.property('junit.version')}"
     testImplementation "org.mockito:mockito-all:1.9.5"
 
-    api "FreePastry:FreePastry:3.1.0"
+    //use local jars
+    implementation fileTree(dir: '../jars', include: '*.jar')
+
+    //api "FreePastry:FreePastry:3.1.0"
     api "xpp3:xpp3:1.1.4c" // FreePastry dependency
     //api "javax.xml.parsers:jaxp-api:1.4.5"
 
@@ -70,7 +64,7 @@ dependencies {
         exclude module: "xml-apis"
     }
     api "commons-logging:commons-logging:1.2"
-    api "net:sbbi-upnplib:1.0.4"
+    //implementation group: 'net.sbbi', name: 'sbbi-upnplib', version: '1.0.4'
 
     // Web3j for Ethereum node interaction
     api("ch.qos.logback:logback-core:1.2.3") {
@@ -90,7 +84,7 @@ tasks.withType(Jar) {
 
 jar {
     manifest {
-        attributes("Main-Class": "i5.las2peer.tools.L2pNodeLauncher", 
+        attributes("Main-Class": "i5.las2peer.tools.L2pNodeLauncher",
                    "Implementation-Version": las2peerVersion,
                    "Class-Path": configurations.runtimeClasspath.files.collect { it.getName() }.join(" "))
     }
@@ -196,7 +190,7 @@ task jar_test1_1_1(type: Jar) {
     archiveFileName = "i5.las2peer.classLoaders.testPackage1-1.0.jar"
     from sourceSets.testHelp.output
     include "i5/las2peer/classLoaders/testPackage1/**/*"
-    
+
     manifest {
         attributes "Library-SymbolicName": "i5.las2peer.classLoaders.testPackage1"
         attributes "Library-Version": "1.0"
@@ -311,25 +305,19 @@ publishing.publications.all {
 }
 
 publishing {
-    publications {
-        core(MavenPublication) {
-            from components.java
-            pom {
-                artifactId "las2peer"
-                packaging "jar"
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/rwth-acis/las2peer")
+            credentials {
+                username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+                password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
             }
         }
     }
-
-    repositories {
-        maven {
-            if (las2peerRelease) url = "${project.property('dbis.archiva.url')}"
-            else url = "${project.property('dbis.archiva.url.snapshots')}"
-
-            credentials {
-                username = System.env.ARCHIVA_USERNAME
-                password = System.env.ARCHIVA_PASSWORD
-            }
+    publications {
+        gpr(MavenPublication) {
+            from(components.java)
         }
     }
 }
