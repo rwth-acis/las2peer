@@ -11,7 +11,7 @@ def las2peerBuildNumber = "${project.property('las2peer.build.number')}"
 def las2peerRelease = System.env.LAS2PEER_RELEASE != null
 def las2peerVersion = las2peerRelease ? "$las2peerRevision.$las2peerBuildNumber" : "$las2peerRevision-SNAPSHOT"
 
-group = 'i5'
+group = 'org'
 archivesBaseName = 'las2peer'
 version = las2peerVersion
 mainClassName = "i5.las2peer.tools.L2pNodeLauncher"
@@ -306,14 +306,6 @@ publishing.publications.all {
 
 publishing {
     repositories {
-        maven {
-            name = "OSSRH"
-            url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-            credentials {
-                username = System.getenv("MAVEN_USERNAME")
-                password = System.getenv("MAVEN_PASSWORD")
-            }
-        }
         maven {
             name = "GitHubPackages"
             url = uri("https://maven.pkg.github.com/rwth-acis/las2peer")
