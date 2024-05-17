@@ -108,6 +108,11 @@ jar {
     }
 }
 
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
 task copyToLib(type: Copy) {
     from configurations.runtimeClasspath
     into "$projectDir/lib"
