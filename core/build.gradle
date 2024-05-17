@@ -35,6 +35,11 @@ javadoc {
     destinationDir = file("$projectDir/export/javadoc")
 }
 
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
 task junitdoc(type: Javadoc) {
     doFirst {options.addStringOption("encoding", "iso-8859-1")}
     classpath = sourceSets.main.runtimeClasspath + sourceSets.test.runtimeClasspath

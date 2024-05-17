@@ -33,6 +33,11 @@ javadoc {
     destinationDir = file("$projectDir/export/javadoc")
 }
 
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
 task junitdoc(type: Javadoc) {
     classpath = sourceSets.main.runtimeClasspath + sourceSets.test.runtimeClasspath
     source = sourceSets.test.java
