@@ -75,3 +75,11 @@ JavaDocs of the latest release can be found online:
 
 Every commit to the develop branch is built by GitHub actions and will be published as a snapshot to our Archiva.
 Releases are drafted from the master branch.
+
+## Importing
+From Version 1.4.0 on, las2peer-bundle is available on Maven Central. To import las2peer into your project, add the following dependency to your build file:
+
+```groovy     
+implementation "io.github.rwth-acis.org.las2peer:las2peer-bundle:1.4.0"
+```
+As a repository, only Maven Central is required.
