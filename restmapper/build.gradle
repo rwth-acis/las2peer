@@ -11,7 +11,7 @@ def las2peerBuildNumber = "${project.property('las2peer.build.number')}"
 def las2peerRelease = System.env.LAS2PEER_RELEASE != null
 def las2peerVersion = las2peerRelease ? "$las2peerRevision.$las2peerBuildNumber" : "$las2peerRevision-SNAPSHOT"
 
-group = 'org'
+group = 'io.github.rwth-acis.org.las2peer'
 archivesBaseName = 'las2peer-rest-mapper'
 version = las2peerVersion
 sourceCompatibility = "${project.property('java.version')}"
@@ -111,9 +111,33 @@ publishing {
         gpr(MavenPublication) {
             from components.java
             pom {
-                artifactId "las2peer-rest-mapper"
-                packaging "jar"
+                name = 'las2peer-rest-mapper'
+                artifactId = 'las2peer-restmapper'
+                description = 'The restmapper component of the las2peer project'
+                url = 'https://las2peer.org/'
+                packaging = 'jar'
+                licenses {
+                    license {
+                        name = 'MIT License'
+                        url = 'https://github.com/rwth-acis/las2peer?tab=License-1-ov-file#readme'
+                        distribution = 'repo'
+                    }
+                }
+                developers {
+                    developer {
+                        name = 'rwth-acis'
+                        email= 'las2peer@dbis.rwth-aachen.de'
+                        organization = 'rwth-acis'
+                        organizationUrl = 'https://las2peer.org/'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/rwth-acis/las2peer.git'
+                    developerConnection = 'scm:git:ssh://git@github.com:rwth-acis/las2peer.git'
+                    url = 'https://github.com/rwth-acis/las2peer'
+                }
             }
+
         }
     }
 }
