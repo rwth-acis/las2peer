@@ -23,8 +23,8 @@ jobs:
       env:
         # set environment variable for release
         LAS2PEER_RELEASE: "yes"
-        ARCHIVA_USERNAME: ${{ secrets.ARCHIVA_USERNAME }}
-        ARCHIVA_PASSWORD: ${{ secrets.ARCHIVA_PASSWORD }} 
+        USERNAME: ${{ secrets.USERNAME }}
+        TOKEN: ${{ secrets.TOKEN }}
       run: ./gradlew publish
     - name: Upload artifacts on GitHub (attached to this workflow)
       uses: actions/upload-artifact@v2
