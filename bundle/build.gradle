@@ -15,7 +15,7 @@ def las2peerBuildNumber = "${project.property('las2peer.build.number')}"
 def las2peerRelease = System.env.LAS2PEER_RELEASE != null
 def las2peerVersion = las2peerRelease ? "$las2peerRevision.$las2peerBuildNumber" : "$las2peerRevision-SNAPSHOT"
 
-group = 'i5'
+group = 'io.github.rwth-acis.org.las2peer'
 archivesBaseName = 'las2peer-bundle'
 version = las2peerVersion
 mainClassName = "i5.las2peer.tools.L2pNodeLauncher"
@@ -25,16 +25,6 @@ targetCompatibility = "${project.property('java.version')}"
 repositories {
     // Use maven central for resolving dependencies.
     mavenCentral()
-
-    // DBIS Archiva
-    maven {
-        url "${project.property('dbis.archiva.url')}"
-    }
-
-    // DBIS Archiva (snapshots)
-    maven {
-        url "${project.property('dbis.archiva.url.snapshots')}"
-    }
 }
 
 dependencies {
@@ -57,6 +47,11 @@ jar {
     }
 }
 
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
 // las2peer bundle jar
 shadowJar {
     // remove the "-all" at the end of the artifact / file name
@@ -70,31 +65,54 @@ clean.doLast {
 }
 
 publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/rwth-acis/las2peer")
+            credentials {
+                username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+                password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
+            }
+        }
+    }
     publications {
-        bundle(MavenPublication) {
+        gpr(MavenPublication) {
             from components.java
             artifact shadowJar
             pom {
-                artifactId "las2peer-bundle"
-                packaging "jar"
+                name = 'las2peer-bundle'
+                artifactId = 'las2peer-bundle'
+                description = 'A bundle for the las2peer project'
+                url = 'https://las2peer.org/'
+                packaging = 'jar'
+                licenses {
+                    license {
+                        name = 'MIT License'
+                        url = 'https://github.com/rwth-acis/las2peer?tab=License-1-ov-file#readme'
+                        distribution = 'repo'
+                    }
+                }
+                developers {
+                    developer {
+                        name = 'rwth-acis'
+                        email= 'las2peer@dbis.rwth-aachen.de'
+                        organization = 'rwth-acis'
+                        organizationUrl = 'https://las2peer.org/'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/rwth-acis/las2peer.git'
+                    developerConnection = 'scm:git:ssh://git@github.com:rwth-acis/las2peer.git'
+                    url = 'https://github.com/rwth-acis/las2peer'
+                }
             }
 
             // fix pom file by removing dependencies node
             pom.withXml {
+                def packagingNode = asNode().appendNode('packaging', 'jar')
+
                 Node pomNode = asNode()
                 pomNode.remove(pomNode.get("dependencies"))
-            }
-        }
-    }
-
-    repositories {
-        maven {
-            if (las2peerRelease) url = "${project.property('dbis.archiva.url')}"
-            else url = "${project.property('dbis.archiva.url.snapshots')}"
-
-            credentials {
-                username = System.env.ARCHIVA_USERNAME
-                password = System.env.ARCHIVA_PASSWORD
             }
         }
     }

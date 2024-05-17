@@ -1,4 +1,4 @@
-name: Publish artifacts as snapshot to archiva
+name: Publish artifacts as snapshot to github packages
 
 # Run workflow on publish to develop branch automatically.
 # Also allow to run the workflow manually on every other branch.
@@ -27,8 +27,8 @@ jobs:
       run: chmod +x gradlew
     - name: Build with Gradle and publish as snapshot to archiva
       env:
-        ARCHIVA_USERNAME: ${{ secrets.ARCHIVA_USERNAME }}
-        ARCHIVA_PASSWORD: ${{ secrets.ARCHIVA_PASSWORD }} 
+        USERNAME: ${{ secrets.USERNAME }}
+        Token: ${{ secrets.TOKEN }}
       run: ./gradlew publish
     - name: Upload artifacts on GitHub (attached to this workflow)
       uses: actions/upload-artifact@v2
