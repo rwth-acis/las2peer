@@ -16,7 +16,7 @@ Goal: las2peer runs anywhere with one command, is production grade, has a modern
 ## Phase 1 — Clean base
 
 1. **Branching.** Work happens on `revival` in `las2peer` and `las2peer-registry-contracts` (and `las2peer-template-project`); nothing goes to `master` directly. Merge to `master` via PR once a phase is stable. The compose file builds the contracts from their `revival` branch — switch it to a tag when they are released.
-2. **Bring back your thesis branches**: `nonce-dev` (22 commits not on master), `userupdate` (9), `feature/addGroupsToBlockchain` (7), contracts `ba-erdzan` (5) — rebase onto `revival`, keep what still matters, drop the rest.
+2. **Thesis branches** `nonce-dev`, `userupdate`, `feature/addGroupsToBlockchain`, contracts `ba-erdzan`: diverged by ~750–890 changed lines per branch in the same files because master was reworked later; most thesis work landed via the 51 merged commits. Kept as archive; cherry-pick individual features if something turns out to be missing.
 3. **CI** (GitHub Actions): build, unit tests, `docker compose up` + smoke test on every PR; publish images to GHCR.
 4. **Test status (2026-10-07)**: las2peer 256 tests, 0 failures (19 skipped). Contracts 17 passing, **5 failing on master too**: the `ReputationContract` tests pass a username where `createProfile` now takes an address, so the tests are stale, not the contract.
 5. **Known issues to fix**: template `GET /template/get` returns 500 for anonymous users; startup logs `Error creating agent … pastStorage is null` (nonce agent created before storage is up); three duplicate SLF4J bindings; references to dead Archiva in build files.
@@ -25,8 +25,8 @@ Goal: las2peer runs anywhere with one command, is production grade, has a modern
 
 | Area | Now | Target | Notes |
 |---|---|---|---|
-| Java | 17 | 21 LTS, then 25 LTS | **Blocker:** the service sandbox is `L2pSecurityManager`; `SecurityManager` is permanently disabled since JDK 24 (JEP 486). Java 21 works with `-Djava.security.manager=allow`; for 25 the sandbox needs a redesign (e.g. one process/container per service, or strict classloader + module boundaries). |
-| Build | Gradle 7.3, local jars in `jars/` | Gradle 9, version catalog | Publish the FreePastry fork as a proper artifact or include it as a module. |
+| Java | ~~17~~ **21 ✅** | 25 LTS | The optional `--sandbox` (`L2pSecurityManager`) needs `-Djava.security.manager=allow` on 21 and cannot work on 24+ (JEP 486): redesign it (one process/container per service, or classloader + module boundaries) before moving to 25. Also: Mockito 1.9.5 in tests. |
+| Build | ~~Gradle 7.3~~ **Gradle 9.8 ✅**, local jars in `jars/` | version catalog | Publish the FreePastry fork as a proper artifact or include it as a module. HTTPS certs now via BouncyCastle instead of JDK-internal `sun.security.x509`. |
 | REST | Jersey 2.35 (javax) + Grizzly 2.4 | Jersey 3 / Jakarta EE 10, or Javalin/Helidon | javax → jakarta rename touches every service. |
 | Ethereum client | web3j 4.5.18 | web3j 4.12+ | Enables EIP-1559 txs → drop the `istanbul` hardfork pin. Replace the hand-rolled static nonce manager with one transaction manager per account. |
 | Contracts | Solidity 0.5, Truffle 5.0, ganache 7 | Solidity 0.8.x, **Foundry** (forge + anvil) | Truffle and Ganache were sunset by Consensys in 2023. 0.8 adds checked arithmetic. |

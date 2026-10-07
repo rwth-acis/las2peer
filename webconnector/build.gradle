@@ -12,10 +12,12 @@ def las2peerRelease = System.env.LAS2PEER_RELEASE != null
 def las2peerVersion = las2peerRelease ? "$las2peerRevision.$las2peerBuildNumber" : "$las2peerRevision-SNAPSHOT"
 
 group = 'io.github.rwth-acis.org.las2peer'
-archivesBaseName = 'las2peer-web-connector'
+base { archivesName = 'las2peer-web-connector' }
 version = las2peerVersion
-sourceCompatibility = "${project.property('java.version')}"
-targetCompatibility = "${project.property('java.version')}"
+java {
+    sourceCompatibility = JavaVersion.toVersion(project.property('java.version'))
+    targetCompatibility = JavaVersion.toVersion(project.property('java.version'))
+}
 
 repositories {
     // Use maven central for resolving dependencies.
@@ -28,8 +30,6 @@ compileJava {
     "--add-exports", "java.base/sun.security.tools.keytool=ALL-UNNAMED",
     "--add-exports", "java.base/sun.security.util=ALL-UNNAMED",
     "--add-exports", "java.base/sun.security.x509=ALL-UNNAMED"]
-    options.fork = true
-    options.forkOptions.executable = "javac"
 }
 
 javadoc {
@@ -49,6 +49,9 @@ build.dependsOn "javadoc"
 build.dependsOn "junitdoc"
 
 dependencies {
+    // self-signed certificates for HTTPS (matches the bcprov version web3j brings in)
+    implementation "org.bouncycastle:bcpkix-jdk15on:1.65"
+
     // Use JUnit test framework.
     testImplementation "junit:junit:${project.property('junit.version')}"
 
@@ -94,7 +97,7 @@ task copyTest(type: Copy) {
     from "src/test/java"
     exclude "**/*.java"
     exclude "*.java"
-    into "$buildDir/classes/java/test"
+    into "${layout.buildDirectory.get().asFile}/classes/java/test"
 }
 
 jar {

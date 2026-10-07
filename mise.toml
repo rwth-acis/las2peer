@@ -1,6 +1,6 @@
 # Toolchain for developing las2peer (https://mise.jdx.dev). `mise install`, then `mise tasks` for shortcuts.
 [tools]
-java = "temurin-17" # Gradle 7.3 wrapper requires JDK <= 17; the service sandbox needs SecurityManager
+java = "temurin-21" # LTS; the optional --sandbox needs -Djava.security.manager=allow (SecurityManager is gone in 24+)
 node = "16"         # webconnector frontend build (rollup 2, TS 4.2)
 npm = "8"           # npm >= 10 does not run on Node 16
 

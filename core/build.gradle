@@ -12,11 +12,13 @@ def las2peerRelease = System.env.LAS2PEER_RELEASE != null
 def las2peerVersion = las2peerRelease ? "$las2peerRevision.$las2peerBuildNumber" : "$las2peerRevision-SNAPSHOT"
 
 group = 'io.github.rwth-acis.org.las2peer'
-archivesBaseName = 'las2peer'
+base { archivesName = 'las2peer' }
 version = las2peerVersion
-mainClassName = "i5.las2peer.tools.L2pNodeLauncher"
-sourceCompatibility = "${project.property('java.version')}"
-targetCompatibility = "${project.property('java.version')}"
+application { mainClass = "i5.las2peer.tools.L2pNodeLauncher" }
+java {
+    sourceCompatibility = JavaVersion.toVersion(project.property('java.version'))
+    targetCompatibility = JavaVersion.toVersion(project.property('java.version'))
+}
 
 repositories {
     // Use maven central for resolving dependencies.
@@ -27,8 +29,6 @@ repositories {
 compileJava {
     // -XDignore.symbol.file fixes build in JDK8
     options.compilerArgs += ["-XDignore.symbol.file", "-Xlint:deprecation"]
-    options.fork = true
-    options.forkOptions.executable = "javac"
 }
 
 javadoc {
@@ -110,14 +110,14 @@ sourceSets {
             srcDirs = ["src/test_help"]
         }
         compileClasspath = sourceSets.main.output
-        java.outputDir = file("$buildDir/classes/java/test_help")
+        java.destinationDirectory = layout.buildDirectory.dir("classes/java/test_help")
     }
     testHelp2 {
         java {
             srcDirs = ["src/test_help2"]
         }
         compileClasspath = sourceSets.main.output
-        java.outputDir = file("$buildDir/classes/java/test_help2")
+        java.destinationDirectory = layout.buildDirectory.dir("classes/java/test_help2")
     }
     main {
         resources {
@@ -152,7 +152,7 @@ compileJava {
 task copyMain(type: Copy) {
     from "src/main/java"
     include "**/*.xml"
-    into "$buildDir/classes/java/main"
+    into "${layout.buildDirectory.get().asFile}/classes/java/main"
 }
 
 compileTestHelpJava {
@@ -164,7 +164,7 @@ task copyTestHelp(type: Copy) {
     from "src/test_help/java"
     exclude "**/*.java"
     exclude "*.java"
-    into "$buildDir/classes/java/test_help"
+    into "${layout.buildDirectory.get().asFile}/classes/java/test_help"
 }
 
 compileTestHelp2Java {
@@ -176,7 +176,7 @@ task copyTestHelp2(type: Copy) {
     from "src/test_help2/java"
     exclude "**/*.java"
     exclude "*.java"
-    into "$buildDir/classes/java/test_help2"
+    into "${layout.buildDirectory.get().asFile}/classes/java/test_help2"
 }
 
 task junit_jars {

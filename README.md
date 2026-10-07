@@ -27,7 +27,7 @@ Check that everything works end to end — users, on-chain groups, publishing a 
 
 ### Native development loop
 
-For quick edit/rebuild cycles run the pieces on your machine. Tool versions are pinned in `mise.toml` ([mise](https://mise.jdx.dev): `mise install`, then `mise tasks`); without mise, install Java 17 and Node 16 yourself. Check out [las2peer-registry-contracts](https://github.com/rwth-acis/las2peer-registry-contracts) (branch `revival`) next to this repository, then in three terminals:
+For quick edit/rebuild cycles run the pieces on your machine. Tool versions are pinned in `mise.toml` ([mise](https://mise.jdx.dev): `mise install`, then `mise tasks`); without mise, install Java 21 and Node 16 yourself. Check out [las2peer-registry-contracts](https://github.com/rwth-acis/las2peer-registry-contracts) (branch `revival`) next to this repository, then in three terminals:
 
 ```bash
 mise run chain                  # local Ethereum dev chain
@@ -48,11 +48,11 @@ If you want to learn more about las2peer, please visit the [las2peer Template Pr
 
 ### Java
 
-las2peer uses **Java 17**.
+las2peer uses **Java 21** (LTS). The optional `--sandbox` mode installs a `SecurityManager` and needs `-Djava.security.manager=allow`; it cannot run on Java 24+.
 
 ### Build Dependencies
 
-* Gradle 7.3 (via the included wrapper; needs JDK 17)
+* Gradle 9.8 (via the included wrapper)
 * Node 16 / npm 8
 
 ## Project Structure

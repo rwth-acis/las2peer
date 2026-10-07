@@ -12,10 +12,12 @@ def las2peerRelease = System.env.LAS2PEER_RELEASE != null
 def las2peerVersion = las2peerRelease ? "$las2peerRevision.$las2peerBuildNumber" : "$las2peerRevision-SNAPSHOT"
 
 group = 'io.github.rwth-acis.org.las2peer'
-archivesBaseName = 'las2peer-rest-mapper'
+base { archivesName = 'las2peer-rest-mapper' }
 version = las2peerVersion
-sourceCompatibility = "${project.property('java.version')}"
-targetCompatibility = "${project.property('java.version')}"
+java {
+    sourceCompatibility = JavaVersion.toVersion(project.property('java.version'))
+    targetCompatibility = JavaVersion.toVersion(project.property('java.version'))
+}
 
 repositories {
     // Use maven central for resolving dependencies.
@@ -25,8 +27,6 @@ repositories {
 
 compileJava {
     options.compilerArgs += ["-XDignore.symbol.file"]
-    options.fork = true
-    options.forkOptions.executable = "javac"
 }
 
 javadoc {

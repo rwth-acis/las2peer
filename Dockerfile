@@ -1,5 +1,5 @@
 # las2peer node built from source (core + restmapper + webconnector incl. frontend).
-FROM eclipse-temurin:17-jdk-jammy AS build
+FROM eclipse-temurin:21-jdk-noble AS build
 ARG NODE_VERSION=16.20.2
 ARG TARGETARCH
 RUN apt-get update && apt-get install -y --no-install-recommends curl xz-utils \
@@ -12,9 +12,9 @@ COPY . .
 RUN --mount=type=cache,target=/root/.gradle --mount=type=cache,target=/root/.npm \
     ./gradlew build -x test -x javadoc -x junitdoc --no-daemon --console=plain
 
-FROM eclipse-temurin:17-jre-jammy
+FROM eclipse-temurin:21-jre-noble
 RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/* \
-    && useradd --create-home --uid 1000 las2peer
+    && (userdel --remove ubuntu 2>/dev/null || true) && useradd --create-home --uid 1000 las2peer
 WORKDIR /app
 COPY --from=build /src/core/export/jars core/export/jars
 COPY --from=build /src/restmapper/export/jars restmapper/export/jars
