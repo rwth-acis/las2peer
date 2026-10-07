@@ -41,3 +41,9 @@ task copyWebconnectorDocs(type: Copy) {
     from "webconnector/export/javadoc/"
     into "javadoc/webconnector"
 }
+// FreePastry's filesystem storage reflects into JDK internals; nodes are launched with the same flags
+subprojects {
+    tasks.withType(Test).configureEach {
+        jvmArgs "--add-opens", "java.base/java.lang=ALL-UNNAMED", "--add-opens", "java.base/java.util=ALL-UNNAMED"
+    }
+}
