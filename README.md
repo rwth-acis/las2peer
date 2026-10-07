@@ -9,6 +9,34 @@ Communication between nodes is realized using the [FreePastry](http://www.freepa
 
 For more information on the core concepts of las2peer, please visit [las2peer.org](https://las2peer.org "las2peer.org") or read the [las2peer Primer](https://dx.doi.org/10.13140/RG.2.2.31456.48645 "las2peer Primer").
 
+## Run it locally
+
+The whole stack — a local Ethereum chain, the [registry contracts](https://github.com/rwth-acis/las2peer-registry-contracts) and a las2peer node with the web frontend — builds from source and starts with one command (only [Docker](https://docs.docker.com/get-docker/) needed):
+
+```bash
+docker compose up -d --build
+```
+
+Then open <http://localhost:8080/las2peer/webapp/welcome>. `docker compose down -v` stops it and wipes all state (the chain is in-memory, so every start is a fresh network). Ports and the node admin can be changed in `.env` (see `.env.example`). To use the node's interactive console: `docker attach las2peer-node-1` (detach with Ctrl-P Ctrl-Q).
+
+Check that everything works end to end — users, on-chain groups, publishing a service, faucet and reputation:
+
+```bash
+./dev/smoke-test.sh
+```
+
+### Native development loop
+
+For quick edit/rebuild cycles run the pieces on your machine. Tool versions are pinned in `mise.toml` ([mise](https://mise.jdx.dev): `mise install`, then `mise tasks`); without mise, install Java 17 and Node 16 yourself. Check out [las2peer-registry-contracts](https://github.com/rwth-acis/las2peer-registry-contracts) (branch `revival`) next to this repository, then in three terminals:
+
+```bash
+mise run chain                  # local Ethereum dev chain
+mise run deploy                 # deploy contracts, write etc/…RegistryConfiguration.properties
+mise run build && mise run node # build and start a node (interactive console)
+```
+
+After changing Java code, stop the node, `mise run build`, `mise run node`. See [ROADMAP.md](ROADMAP.md) for where the project is heading.
+
 ## Service Development
 
 This project contains las2peer itself.
@@ -24,8 +52,8 @@ las2peer uses **Java 17**.
 
 ### Build Dependencies
 
-* Gradle 7.2
-* Node 14 / npm
+* Gradle 7.3 (via the included wrapper; needs JDK 17)
+* Node 16 / npm 8
 
 ## Project Structure
 

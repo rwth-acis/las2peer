@@ -1,0 +1,43 @@
+# Toolchain for developing las2peer (https://mise.jdx.dev). `mise install`, then `mise tasks` for shortcuts.
+[tools]
+java = "temurin-17" # Gradle 7.3 wrapper requires JDK <= 17; the service sandbox needs SecurityManager
+node = "16"         # webconnector frontend build (rollup 2, TS 4.2)
+npm = "8"           # npm >= 10 does not run on Node 16
+
+# ── Docker: the whole stack from source, one command ─────────────────────────
+[tasks.up]
+description = "Build and start chain + contracts + node in Docker"
+run = "docker compose up -d --build && docker compose ps"
+
+[tasks.down]
+description = "Stop the Docker stack and wipe its state"
+run = "docker compose down -v"
+
+[tasks.logs]
+description = "Follow the node's logs"
+run = "docker compose logs -f node"
+
+# ── Native: run pieces on the host for a fast edit/rebuild loop ──────────────
+[tasks.build]
+description = "Build all modules + frontend without tests"
+run = "./gradlew build -x test -x javadoc -x junitdoc"
+
+[tasks.test]
+description = "Run the unit tests"
+run = "./gradlew test"
+
+[tasks.chain]
+description = "Run the local Ethereum dev chain (foreground)"
+run = "./dev/chain.sh"
+
+[tasks.deploy]
+description = "Deploy registry contracts (../las2peer-registry-contracts) and write etc/ registry config"
+run = "./dev/deploy-contracts.sh"
+
+[tasks.node]
+description = "Run a node from the local build with the Ethereum registry (foreground, interactive)"
+run = "./dev/node.sh"
+
+[tasks.smoke]
+description = "End-to-end check against a running node (users, groups, services, faucet, reputation)"
+run = "./dev/smoke-test.sh"

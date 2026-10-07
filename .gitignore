@@ -23,3 +23,7 @@ archiva_credentials.xml
 .project
 .settings
 .vscode/settings.json
+
+# local dev stack
+.env
+/services/*.jar
