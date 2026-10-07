@@ -2,7 +2,10 @@
 # End-to-end check of a running dev node with the Ethereum registry:
 # users -> on-chain group -> service publish/deploy -> faucet -> reputation profile -> rating.
 set -uo pipefail
-B=${BASE_URL:-http://localhost:8085}/las2peer
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+# same port as docker compose: LAS2PEER_HTTP_PORT from the environment or .env
+[[ -z "${LAS2PEER_HTTP_PORT:-}" && -f "$ROOT/.env" ]] && LAS2PEER_HTTP_PORT=$(sed -n 's/^LAS2PEER_HTTP_PORT=//p' "$ROOT/.env")
+B=${BASE_URL:-http://localhost:${LAS2PEER_HTTP_PORT:-8080}}/las2peer
 JAR=${SERVICE_JAR:-"$(cd "$(dirname "$0")" && pwd)/fixtures/i5.las2peer.services.templateService-1.0.0.jar"}
 TMP=$(mktemp -d); trap 'rm -rf "$TMP"' EXIT
 FAIL=0
