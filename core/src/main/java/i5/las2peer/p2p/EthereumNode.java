@@ -160,7 +160,7 @@ public class EthereumNode extends PastryNodeImpl {
 		}
 		if (localNodeInfo == null)
 			throw new EthereumException("local node info null");
-		Boolean isLocalNodeAdmin = localNodeInfo.getAdminEmail().equals(agentEmail);
+		Boolean isLocalNodeAdmin = agentEmail != null && agentEmail.equals(localNodeInfo.getAdminEmail());
 		logger.info("[local isAdmin?] comparing nodeInfo: ");
 		logger.info("[local isAdmin?]  [" + localNodeInfo.getAdminEmail() + "] vs. [" + agentEmail + "]");
 		logger.info("[local isAdmin?]   = " + isLocalNodeAdmin.toString() );

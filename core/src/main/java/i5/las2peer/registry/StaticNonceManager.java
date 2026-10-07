@@ -141,10 +141,11 @@ class StaticNonce {
 
     public synchronized BigInteger incStaticNonce(String key, StaticNonceRawTransactionManager txMan) {
         newAgent = getNonceEnvelopeAgent();
-        BigInteger currVal = staticNonces.get(key);
-        BigInteger incVal = currVal.add(BigInteger.ONE);
-
         BigInteger pastryNonce = getStaticNonce(key, txMan);
+
+        // a freshly started node has no in-memory nonce yet, so continue from the persisted one
+        BigInteger currVal = staticNonces.getOrDefault(key, pastryNonce);
+        BigInteger incVal = currVal.add(BigInteger.ONE);
 
         logger.fine("Parent nonce is" + pastryNonce.toString());
 

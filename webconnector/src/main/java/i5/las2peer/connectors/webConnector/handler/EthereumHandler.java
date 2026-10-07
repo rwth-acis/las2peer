@@ -116,7 +116,7 @@ public class EthereumHandler {
 				logger.info("[remote nodeInfo-SVC]: querying node #" + remoteNodeHandle.getNodeId() + ", admin: "
 						+ remoteNodeInfo.getAdminEmail());
 				// is ethAgent admin of remote node?
-				if (remoteNodeInfo.getAdminEmail().equals(agentEmail)) {
+				if (agentEmail != null && agentEmail.equals(remoteNodeInfo.getAdminEmail())) {
 					// yes, query services
 					List<ServiceNameVersion> servicesOnRemoteNode = remoteNodeInfo.getHostedServices();
 					for (ServiceNameVersion remoteSNV : servicesOnRemoteNode) {
@@ -152,7 +152,7 @@ public class EthereumHandler {
 				if ( nodeInfo.getAdminEmail() == null )
 					continue;
 				// is ethAgent admin of remote node?
-				if (nodeInfo.getAdminEmail().equals(agentEmail)) {
+				if (agentEmail != null && agentEmail.equals(nodeInfo.getAdminEmail())) {
 					adminNodeIDs.add(nodeHandle.getNodeId().toStringFull());
 				}
 			} catch (NodeNotFoundException e) {
@@ -697,7 +697,7 @@ public class EthereumHandler {
 		{
 			nodeList.add(L2P_JSONUtil.nodeInformationToJSON(localNodeInfo));
 			// is ethAgent admin of local node?
-			if ( localNodeInfo.getAdminEmail().equals(agentEmail) )
+			if ( agentEmail != null && agentEmail.equals(localNodeInfo.getAdminEmail()) )
 			{
 				adminNodeList.add(L2P_JSONUtil.nodeInformationToJSON(localNodeInfo));
 			}
@@ -711,7 +711,7 @@ public class EthereumHandler {
 				nodeInfo = ethereumNode.getNodeInformation(nodeHandle);
 				nodeList.add(L2P_JSONUtil.nodeInformationToJSON(nodeInfo));
 				// is ethAgent admin of remote node?
-				if ( nodeInfo.getAdminEmail().equals(agentEmail) )
+				if ( agentEmail != null && agentEmail.equals(nodeInfo.getAdminEmail()) )
 				{
 					adminNodeList.add(L2P_JSONUtil.nodeInformationToJSON(nodeInfo));
 				}
