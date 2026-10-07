@@ -31,7 +31,7 @@ check "create group" '"code":200' "$(curl -s -m 90 -b $TMP/$U1 -F name=group$S \
   -F "members=[{\"agentid\":\"$A1\"},{\"agentid\":\"$A2\"}]" $B/agents/createGroup)"
 
 if [[ -f "$JAR" ]]; then
-  UP=$(curl -s -m 120 -b $TMP/$U1 -F "jarfile=@$JAR" -F 'supplement={"name":"Template Service"}' $B/services/upload)
+  UP=$(curl -s -m 120 -b $TMP/$U1 -F "jarfile=@$JAR" -F 'supplement={"name":"Template Service","class":"TemplateService","description":"Example service from las2peer-template-project","vcsUrl":"https://github.com/rwth-acis/las2peer-template-project"}' $B/services/upload)
   [[ "$UP" == *"already known"* ]] && UP='"code":200 (already published)'
   check "publish service" '"code":200' "$UP"
   for _ in $(seq 1 30); do # filled asynchronously by the chain observer, like the user list

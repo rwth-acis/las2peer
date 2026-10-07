@@ -5,7 +5,9 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 CONTRACTS_DIR=${CONTRACTS_DIR:-"$ROOT/../las2peer-registry-contracts"}
 [[ -x "$CONTRACTS_DIR/scripts/deploy.sh" ]] || { echo "no contracts checkout at $CONTRACTS_DIR (set CONTRACTS_DIR)"; exit 1; }
-[[ -d "$CONTRACTS_DIR/node_modules" ]] || (cd "$CONTRACTS_DIR" && npm ci --no-audit --no-fund)
+# the contracts need their own toolchain (Node 16 for truffle 5.0), pinned in their mise.toml
+run() { if command -v mise >/dev/null; then (cd "$CONTRACTS_DIR" && mise exec -- "$@"); else (cd "$CONTRACTS_DIR" && "$@"); fi; }
+[[ -d "$CONTRACTS_DIR/node_modules" ]] || run npm ci --no-audit --no-fund
 mkdir -p "$ROOT/etc"
-REGISTRY_CONFIG="$ROOT/etc/i5.las2peer.registry.data.RegistryConfiguration.properties" \
-  exec "$CONTRACTS_DIR/scripts/deploy.sh"
+export REGISTRY_CONFIG="$ROOT/etc/i5.las2peer.registry.data.RegistryConfiguration.properties"
+run ./scripts/deploy.sh

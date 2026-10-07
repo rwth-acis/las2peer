@@ -82,15 +82,12 @@ compileTestJava {
 sourceSets {
     main {
         resources {
-            // add webapp (node frontend)
-            srcDirs = ["resources"]
+            // the built frontend (ui/dist) is copied to webapp/ inside generated resources
+            srcDirs = ["resources", files(layout.buildDirectory.dir("generated/webapp-resources")).builtBy("buildFrontend")]
         }
     }
 }
 
-processResources {
-    dependsOn ":webconnector:buildFrontend"
-}
 
 // Copies files like .xml files into build directory
 task copyTest(type: Copy) {
@@ -100,9 +97,6 @@ task copyTest(type: Copy) {
     into "${layout.buildDirectory.get().asFile}/classes/java/test"
 }
 
-jar {
-    dependsOn "buildFrontend"
-}
 
 jar {
     manifest {
@@ -123,52 +117,35 @@ task copyToLib(type: Copy) {
 
 build.dependsOn copyToLib
 
-// building frontend is not yet working
-task buildFrontend {
-    description = "Installs dependencies from package.json"
-    
-    dependsOn "npmInstall"
-    dependsOn "npmBuild"
-    dependsOn "fixWebapp"
-}
-
+// node frontend (React + Vite) in ui/
 OperatingSystem os = org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.currentOperatingSystem;
+def npm = os.isWindows() ? "npm.cmd" : "npm"
 
 task npmInstall(type: Exec) {
-    workingDir = file("${project.projectDir}/frontend")
-
-    if(os.isWindows()) {
-        executable = "npm.cmd"
-    } else {
-        executable "npm"
-    }
-    args "install"
+    description = "Installs the frontend dependencies (npm ci)"
+    workingDir = file("ui")
+    inputs.file("ui/package-lock.json")
+    outputs.dir("ui/node_modules")
+    commandLine npm, "ci", "--no-audit", "--no-fund"
 }
 
 task npmBuild(type: Exec) {
+    description = "Builds the frontend into ui/dist"
     dependsOn "npmInstall"
-
-    environment = System.getenv() + ["las2peerVersion": "$las2peerVersion".toString()]
-
-    workingDir = file("${project.projectDir}/frontend")
-
-    if(os.isWindows()) {
-        executable = "npm.cmd"
-    } else {
-        executable "npm"
-    }
-    args "run", "build"
+    workingDir = file("ui")
+    environment "VITE_LAS2PEER_VERSION", las2peerVersion
+    inputs.dir("ui/src")
+    inputs.files("ui/index.html", "ui/vite.config.ts", "ui/package-lock.json")
+    inputs.dir("ui/public")
+    outputs.dir("ui/dist")
+    commandLine npm, "run", "build"
 }
 
-task fixWebapp(type: Exec) {
+task buildFrontend(type: Copy) {
+    description = "Builds the frontend and stages it as the webapp resource"
     dependsOn "npmBuild"
-
-    if(os.isWindows()) {
-        commandLine = ["cmd", "/C", "${project.projectDir}\\fix_symlink.bat", "${project.projectDir}\\frontend\\build\\es6-bundled", "${project.projectDir}\\resources\\webapp"]
-    } else {
-        executable = "/bin/bash"
-        args "${project.projectDir}/fix_symlink.sh"
-    }
+    from "ui/dist"
+    into layout.buildDirectory.dir("generated/webapp-resources/webapp")
 }
 
 clean.doLast {

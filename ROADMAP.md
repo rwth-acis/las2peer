@@ -45,6 +45,10 @@ Goal: las2peer runs anywhere with one command, is production grade, has a modern
 
 ## Phase 4 — UI/UX
 
+**Started (2026-10-07):** new node frontend in `webconnector/ui` (React 19 + Vite + Tailwind 4, TanStack Query), replacing the Polymer/lit-element app and the Node 16 pin. Same pages, rebuilt: status (live meters, local services with OpenAPI links, known nodes), services (registry, versions, start/stop, deployments), publish (drag-and-drop), agents & groups (create/manage groups, export/import agents), wallet & reputation (pay-out breakdown, opt-in, rating, send L2Pcoin, activity). Light/dark mode, responsive, username/password sign-in and registration. Fixes the old UI's dead group selector, never-rendering incoming log, errors shown as success, leaking pollers. Backend: `/services/start|stop` now require a session; `/services/services` no longer fails when one peer is unreachable.
+
+Next: OIDC sign-in (oidc-client-ts, Keycloak in compose), service detail pages, live updates instead of polling, component tests (Vitest + Testing Library).
+
 - Redesign the node frontend: design system (tokens, light/dark), responsive layout, accessible components (WCAG 2.2 AA).
 - Clear flows for the main jobs: sign up / connect wallet → browse services → start/stop → publish a service → groups → reputation & wallet.
 - Live updates (chain events and node status via SSE/WebSocket instead of manual refresh buttons).

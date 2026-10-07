@@ -14,6 +14,8 @@ services:
       # pre-EIP-1559 so truffle 5.0 and web3j 4.5 work unchanged
       - --chain.hardfork=istanbul
       - --miner.blockGasLimit=6721975
+      # the node pays faucet rewards from its operator account and reports eth_coinbase as the pool
+      - --miner.coinbase=0xb5a66d27457af8be2a09f17add73c2ae46520e69
       - --logging.quiet
       # Dev-only funded accounts: the keys las2peer derives from the 10 dev mnemonics
       # (see dev/node.sh). Never use them anywhere real.

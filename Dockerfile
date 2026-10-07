@@ -1,6 +1,6 @@
 # las2peer node built from source (core + restmapper + webconnector incl. frontend).
 FROM eclipse-temurin:21-jdk-noble AS build
-ARG NODE_VERSION=16.20.2
+ARG NODE_VERSION=22.22.2
 ARG TARGETARCH
 RUN apt-get update && apt-get install -y --no-install-recommends curl xz-utils \
     && rm -rf /var/lib/apt/lists/* \

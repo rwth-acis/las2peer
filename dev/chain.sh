@@ -21,4 +21,4 @@ ARGS=()
 for k in "${KEYS[@]}"; do ARGS+=(--wallet.accounts "$k,$BALANCE"); done
 # istanbul: pre-EIP-1559, so truffle 5.0 and web3j 4.5 send legacy transactions without issues
 exec npx -y ganache@7.9.2 --chain.networkId 456719 --chain.chainId 456719 --chain.hardfork istanbul \
-  --miner.blockGasLimit 6721975 --logging.quiet "${ARGS[@]}"
+  --miner.blockGasLimit 6721975 --miner.coinbase 0xb5a66d27457af8be2a09f17add73c2ae46520e69 --logging.quiet "${ARGS[@]}"

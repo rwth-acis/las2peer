@@ -1,8 +1,7 @@
 # Toolchain for developing las2peer (https://mise.jdx.dev). `mise install`, then `mise tasks` for shortcuts.
 [tools]
 java = "temurin-21" # LTS; the optional --sandbox needs -Djava.security.manager=allow (SecurityManager is gone in 24+)
-node = "16"         # webconnector frontend build (rollup 2, TS 4.2)
-npm = "8"           # npm >= 10 does not run on Node 16
+node = "22"         # webconnector/ui (React + Vite)
 
 # ── Docker: the whole stack from source, one command ─────────────────────────
 [tasks.up]

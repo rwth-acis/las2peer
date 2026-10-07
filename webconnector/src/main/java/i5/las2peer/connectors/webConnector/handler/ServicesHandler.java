@@ -17,6 +17,7 @@ import javax.ws.rs.CookieParam;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -174,8 +175,10 @@ public class ServicesHandler {
 
 	@POST
 	@Path("/start")
-	public Response handleStartService(@QueryParam("serviceName") String serviceName, @QueryParam("version") String version)
+	public Response handleStartService(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId,
+			@QueryParam("serviceName") String serviceName, @QueryParam("version") String version)
 			throws CryptoException, AgentException {
+		requireSession(sessionId, "start services");
 		// TODO: uhhh, about that password -- is that relevant??
 		pastryNode.startService(ServiceNameVersion.fromString(serviceName + "@" + version), "foofoo");
 		return Response.ok().build();
@@ -183,8 +186,10 @@ public class ServicesHandler {
 
 	@POST
 	@Path("/stop")
-	public Response handleStopService(@QueryParam("serviceName") String serviceName, @QueryParam("version") String version)
+	public Response handleStopService(@CookieParam(WebConnector.COOKIE_SESSIONID_KEY) String sessionId,
+			@QueryParam("serviceName") String serviceName, @QueryParam("version") String version)
 			throws NodeException, AgentNotRegisteredException, ServiceNotFoundException {
+		requireSession(sessionId, "stop services");
 		pastryNode.stopService(ServiceNameVersion.fromString(serviceName + "@" + version));
 		return Response.ok().build();
 	}
@@ -248,13 +253,10 @@ public class ServicesHandler {
 			try {
 				remoteNodeInfo = node.getNodeInformation(nh);
 			} catch (NodeNotFoundException e) {
-				// logger.severe("trying to access node " + remoteNodeHandle.getNodeId() + " | "
-				// + remoteNodeHandle.getId());
-				// ignore malformed nodeinfo / missing node
+				// ignore malformed nodeinfo / missing node; one unreachable peer must not fail the whole listing
 				continue;
 			}
-			finally {
-				logger.fine(remoteNodeInfo.toString());
+			if (remoteNodeInfo != null) {
 				nodeInfoCache.put(remoteNodeID, remoteNodeInfo);
 			}
 
@@ -432,6 +434,16 @@ public class ServicesHandler {
 			return (JSONObject) new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE).parse(s);
 		} catch (ParseException e) {
 			throw new BadRequestException("Could not parse JSON");
+		}
+	}
+
+	private void requireSession(String sessionId, String action) {
+		if (connector.getSessionById(sessionId) == null) {
+			throw new NotAuthorizedException("You have to be logged in to " + action, "Basic");
+		}
+		if (pastryNode == null) {
+			throw new ServerErrorException("Only available on " + PastryNodeImpl.class.getSimpleName() + " nodes",
+					Status.INTERNAL_SERVER_ERROR);
 		}
 	}
 }
