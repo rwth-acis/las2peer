@@ -5,9 +5,9 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 CONTRACTS_DIR=${CONTRACTS_DIR:-"$ROOT/../las2peer-registry-contracts"}
 [[ -x "$CONTRACTS_DIR/scripts/deploy.sh" ]] || { echo "no contracts checkout at $CONTRACTS_DIR (set CONTRACTS_DIR)"; exit 1; }
-# the contracts need their own toolchain (Node 16 for truffle 5.0), pinned in their mise.toml
+# the contracts bring their own toolchain (Foundry), pinned in their mise.toml
 run() { if command -v mise >/dev/null; then (cd "$CONTRACTS_DIR" && mise exec -- "$@"); else (cd "$CONTRACTS_DIR" && "$@"); fi; }
-[[ -d "$CONTRACTS_DIR/node_modules" ]] || run npm ci --no-audit --no-fund
+[[ -d "$CONTRACTS_DIR/lib/forge-std" ]] || run forge install --no-git foundry-rs/forge-std@v1.17.0
 mkdir -p "$ROOT/etc"
 export REGISTRY_CONFIG="$ROOT/etc/i5.las2peer.registry.data.RegistryConfiguration.properties"
 run ./scripts/deploy.sh

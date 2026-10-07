@@ -118,12 +118,6 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		String consentee = agent.getEthereumAddress();
 		byte[] signature = SignatureUtils.signFunctionCall(function, agent.getEthereumCredentials());
 
-		if ( txMan != null )
-		{
-			BigInteger txManNonce = txMan.getCurrentNonce();
-			logger.info("[TX Nonce] before: " + txManNonce);
-			// getNonce(txMan.getFromAddress()); // check if nonce has to be udpated
-		}
 
 
 		try {
@@ -132,11 +126,6 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 			throw new EthereumException("Could not register user", e);
 		}
 
-		if ( txMan != null )
-		{
-			BigInteger txManNonce = txMan.getCurrentNonce();
-			logger.info("[TX Nonce] after: " + txManNonce);
-		}
 	}
 
 	/**
@@ -163,10 +152,6 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		String consentee = agent.getEthereumAddress();
 		byte[] signature = SignatureUtils.signFunctionCall(function, agent.getEthereumCredentials());
 
-		if (txMan != null) {
-			BigInteger txManNonce = txMan.getCurrentNonce();
-			logger.info("[TX Nonce] before in group registration: " + txManNonce);
-		}
 
 		try {
 			contracts.groupRegistry.delegatedRegister(name, agentId, publicKey, consentee, signature).sendAsync().get();
@@ -174,10 +159,6 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 			throw new EthereumException("Could not register group", e);
 		}
 
-		if (txMan != null) {
-			BigInteger txManNonce = txMan.getCurrentNonce();
-			logger.info("[TX Nonce] after: " + txManNonce);
-		}
 	}
 
 	public String registerReputationProfile(EthereumAgent agent) throws EthereumException {
@@ -305,11 +286,6 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 		String consentee = agent.getEthereumAddress();
 		byte[] signature = SignatureUtils.signFunctionCall(function, agent.getEthereumCredentials());
 
-		if ( txMan != null )
-		{
-			BigInteger txManNonce = txMan.getCurrentNonce();
-			logger.info("[TX Nonce] before: " + txManNonce);
-		}
 
 		try {
 			contracts.serviceRegistry.delegatedRegister(serviceName, authorName, consentee, signature).sendAsync()
@@ -318,11 +294,6 @@ public class ReadWriteRegistryClient extends ReadOnlyRegistryClient {
 			throw new EthereumException("Failed to register service", e);
 		}
 
-		if ( txMan != null )
-		{
-			BigInteger txManNonce = txMan.getCurrentNonce();
-			logger.info("[TX Nonce] after: " + txManNonce);
-		}
 	}
 
 	/** @see #releaseService(String, int, int, int, EthereumAgent, byte[]) */

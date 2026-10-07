@@ -3,6 +3,7 @@ package i5.las2peer.registry;
 import static org.web3j.tx.TransactionManager.DEFAULT_POLLING_ATTEMPTS_PER_TX_HASH;
 
 import java.math.BigInteger;
+import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,8 +19,8 @@ import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.http.HttpService;
-import org.web3j.tx.FastRawTransactionManager;
 import org.web3j.tx.RawTransactionManager;
+import org.web3j.protocol.exceptions.TransactionException;
 import org.web3j.tx.ReadonlyTransactionManager;
 import org.web3j.tx.TransactionManager;
 import org.web3j.tx.gas.ContractGasProvider;
@@ -64,6 +65,7 @@ class Contracts {
 	final ServiceRegistry serviceRegistry;
 	final ReputationRegistry reputationRegistry;
 	final TransactionManager transactionManager;
+	private final TransactionReceiptProcessor receiptProcessor;
 
 	static ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 	static ScheduledFuture<?> t;
@@ -73,12 +75,15 @@ class Contracts {
 
 	private static boolean isPolling = false;
 	private static final long POLLING_FREQUENCY = 1500;
+	private static final long RECEIPT_POLLING_MILLIS = 1000;
+	private static final int RECEIPT_POLLING_ATTEMPTS = 90;
 
 	protected static L2pLogger logger = L2pLogger.getInstance(Contracts.class);
 
 	private Contracts(Web3j web3j, CommunityTagIndex communityTagIndex, UserRegistry userRegistry, GroupRegistry groupRegistry, ServiceRegistry serviceRegistry,
 			ReputationRegistry reputationRegistry, TransactionManager transactionManager, Node node) {
 		this.web3j = web3j;
+		this.receiptProcessor = new PollingTransactionReceiptProcessor(web3j, RECEIPT_POLLING_MILLIS, RECEIPT_POLLING_ATTEMPTS);
 		this.communityTagIndex = communityTagIndex;
 		this.userRegistry = userRegistry;
 		this.groupRegistry = groupRegistry;
@@ -134,13 +139,9 @@ class Contracts {
 		return transactionManager;
 	}
 
-	public StaticNonceRawTransactionManager tryGetNonceTransactionManager() throws EthereumException
-	{
-		if ( transactionManager instanceof StaticNonceRawTransactionManager ) {
-			return (StaticNonceRawTransactionManager) transactionManager;
-		} else {
-			throw new EthereumException("cannot cast transactionManager to manage internal nonces. credentials == null?");
-		}
+	/** Waits (polling, up to 90 s) for the receipt of a transaction sent from this node. */
+	public TransactionReceipt waitForTxReceipt(String txHash) throws IOException, TransactionException {
+		return receiptProcessor.waitForTransactionReceipt(txHash);
 	}
 
 	public static void pollTransactionList() throws EthereumException {
@@ -311,69 +312,16 @@ class Contracts {
 				return new ReadonlyTransactionManager(web3j, DEFAULT_FROM_ADDRESS);
 			} else {
 
-				// FIXME: "nonce too low" error still occurs
-				// it only seems to happen on the first couple of announcements, meaning it's
-				// not really a problem
-				// bit still, it should be fixed
-				//
-				// see:
-				// https://ethereum.stackexchange.com/questions/63818/quick-web3j-transactions-to-the-same-destination-address-results-in-replacement
-				// https://ethereum.stackexchange.com/questions/34502/how-could-i-send-transactions-continuously-by-web3j-generated-wrapper
-				//
-				// unfortunately, this is not working yet. the timeouts should be plenty:
-				// service announcements every 30 secs with polling 3 secs should be perfectly
-				// fine, but it's not.
-				// so let's reduce this. whatever.
-				//
-				// okay, frankly, I'm not even sure if this can fix the nonce too low error (but
-				// that's what the issue / StackEx suggest)
-				/*FastRawTransactionManager transactionManager = new StaticNonceRawTransactionManager(
-					web3j, credentials, 
-					new QueuingTransactionReceiptProcessor(web3j,
-						new Callback() {
-							@Override
-							public void accept(TransactionReceipt transactionReceipt) {
-								Contracts.addTransactionReceipt(transactionReceipt);
-							}
-							@Override
-							public void exception(Exception e) {
-								e.printStackTrace();
-							}
-						}, 
-					DEFAULT_POLLING_ATTEMPTS_PER_TX_HASH, POLLING_FREQUENCY)
-					*/
-				long pollingIntervalMillisecs = 1000;
-				int attempts = 90;
-				TransactionReceiptProcessor receiptProcessor = new PollingTransactionReceiptProcessor(
-					web3j, pollingIntervalMillisecs, attempts);
-				FastRawTransactionManager transactionManager = new StaticNonceRawTransactionManager(
-					web3j, credentials, receiptProcessor, BigInteger.valueOf(-1), node
-				);
-
-				// schedule polling, will be created on first creation of contracts
-				// https://www.baeldung.com/java-delay-code-execution
-				/*if (!Contracts.isPolling) {
-					Contracts.isPolling = true;
-					Contracts.executorService.scheduleAtFixedRate(() -> {
-						try {
-							Contracts.pollTransactionList();
-						} catch (EthereumException e) {
-							Contracts.isPolling = false;
-							e.printStackTrace();
-						}
-					}, 0, POLLING_FREQUENCY, TimeUnit.MILLISECONDS);
-				}*/
-
-				/*long pollingIntervalMillisecs = 1000;
-				int attempts = 90;
-				TransactionReceiptProcessor receiptProcessor = new PollingTransactionReceiptProcessor(web3j,
-						pollingIntervalMillisecs, attempts);
-				RawTransactionManager transactionManager = new FastRawTransactionManager(web3j, credentials,
-						receiptProcessor);*/
-
-				// txHashVerification throws false alarms (not sure why), disable check
-				// TODO: figure out what's going and and reenable
-				// see https://github.com/web3j/web3j/pull/584
+				long chainId;
+				try {
+					chainId = web3j.ethChainId().send().getChainId().longValueExact();
+				} catch (IOException e) {
+					throw new IllegalStateException("cannot read chain id from " + config.endpoint, e);
+				}
+				RawTransactionManager transactionManager = new NonceManagedTransactionManager(web3j, credentials,
+						chainId, new PollingTransactionReceiptProcessor(web3j, RECEIPT_POLLING_MILLIS, RECEIPT_POLLING_ATTEMPTS));
+				// txHashVerification threw false alarms with unsigned-chain-id transactions; keep it off for now
+				// TODO: re-enable now that transactions carry the chain id (EIP-155)
 				transactionManager.setTxHashVerifier(new NoopTxHashVerifier());
 				return transactionManager;
 			}

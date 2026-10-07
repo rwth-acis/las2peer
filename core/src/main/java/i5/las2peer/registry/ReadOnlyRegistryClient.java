@@ -39,7 +39,6 @@ import org.web3j.protocol.http.HttpService;
 import org.web3j.tuples.generated.Tuple2;
 import org.web3j.tuples.generated.Tuple4;
 import org.web3j.tuples.generated.Tuple6;
-import org.web3j.tx.FastRawTransactionManager;
 import org.web3j.utils.Convert;
 
 import java.util.*;
@@ -71,8 +70,6 @@ public class ReadOnlyRegistryClient {
 	Credentials credentials;
 
 	// raw tx - sending directly, fast raw - nonce management
-	boolean updateNonceTxMan = false;
-	StaticNonceRawTransactionManager txMan;
 
 	private Node node;
 
@@ -116,12 +113,6 @@ public class ReadOnlyRegistryClient {
 		logger.info("created smart contract wrapper with credentials:" + credentialsAddress + "\n contract ID:" + this.contracts.transactionManager.hashCode());
 
 		
-
-		if ( this.contracts.transactionManager instanceof FastRawTransactionManager ) 
-		{
-			this.updateNonceTxMan = true;
-			this.txMan = (StaticNonceRawTransactionManager) this.contracts.transactionManager;
-		}
 	}
 
 	public BigInteger getGasPrice() {
@@ -499,91 +490,22 @@ public class ReadOnlyRegistryClient {
 	}
 
 	/**
-	 * Return the nonce (tx count) for the specified address.
-	 * https://github.com/matthiaszimmermann/web3j_demo / Web3jUtils
-	 * 
+	 * Returns the pending transaction count (= next free nonce on the chain) of the address, or of this client's
+	 * account if the address is empty. Read-only: transactions sent through this client's transaction manager
+	 * reserve their nonces via {@link NonceManager}.
+	 *
 	 * @param address target address
 	 * @return nonce
 	 */
 	public BigInteger getNonce(String address) {
-		if ( address.length() == 0 )
-		{
-			if ( credentials != null )
-			{
-				address = credentials.getAddress();
-			}
+		if (address.isEmpty() && credentials != null) {
+			address = credentials.getAddress();
 		}
-		BigInteger blockchainNonce = BigInteger.valueOf(-1);
-		EthGetTransactionCount ethGetTransactionCount;
 		try {
-			ethGetTransactionCount = web3j
-					.ethGetTransactionCount(address, DefaultBlockParameterName.PENDING).sendAsync().get();
-
-			blockchainNonce = ethGetTransactionCount.getTransactionCount();
-		} catch (InterruptedException | ExecutionException e) {
-			logger.severe("could not get nonce for address " + address);
-			logger.severe(e.getMessage());
-		}
-
-		// synchronize between blockchain nonce and static internal nonce
-		// this is necessary because the faucet code and sending ether is used via raw
-		// transactions
-		// and the contract calls (e.g. registration, reputation) are done via managed
-		// transactions
-		
-		BigInteger retVal = BigInteger.ZERO;
-		BigInteger localNonce = StaticNonce.Manager(node).getStaticNonce(address, txMan);
-
-		switch (localNonce.compareTo(blockchainNonce)) {
-			default:
-			case 0: // they are in sync
-				break;
-			case 1: // local nonce is ahead
-				logger.info("[TX Nonce] (chain: "+blockchainNonce+" vs. local: "+localNonce+"), incrementing by 1.");
-				retVal = StaticNonce.Manager(node).incStaticNonce(address, txMan);
-				break;
-			case -1: // local nonce is behind
-				logger.info("[TX Nonce] (chain: "+blockchainNonce+" vs. local: "+localNonce+"): override to " + blockchainNonce + "+1");
-				retVal = StaticNonce.Manager(node).putStaticNonce(address, blockchainNonce.add(BigInteger.ONE));
-				txMan.setNonce(blockchainNonce.add(BigInteger.valueOf(-1))); // update nonce
-				break;
-		}
-
-		//retVal = blockchainNonce;
-
-		return retVal;
-	}
-
-
-
-	/**
-	 * Overrides nonce of transactionManager with local nonce.
-	 * @param address
-	 */
-	protected synchronized void updateTxManNonce(String address) {
-		if ( updateNonceTxMan )
-		{
-			// local client has larger nonce than txman?
-			BigInteger txManNonce = txMan.getCurrentNonce();
-			BigInteger localNonce = this.getNonce(address);
-			BigInteger newNonce = localNonce.add(BigInteger.ONE);//StaticNonce.Manager().incStaticNonce(address);
-			switch (txManNonce.compareTo(localNonce)) {
-				case -1: // txMan nonce is behind local
-					logger.info("[FastRaw TX] (tx: "+txManNonce+"  < local: "+localNonce+"): setting txMan to " + newNonce);
-					txMan.setNonce(newNonce);
-					StaticNonce.Manager(node).incStaticNonce(address, txMan);
-					break;
-				case 1: // txMan nonce is ahead of local
-					logger.info("[FastRaw TX] (tx: "+txManNonce+"  > local: "+localNonce+"): setting local to " + txManNonce);
-					StaticNonce.Manager(node).putStaticNonceIfAbsent(address, txManNonce);
-					break;
-				case 0: // they are in sync - should be fine?
-				default:
-					logger.info("[FastRaw TX] (tx: "+txManNonce+" == local: "+localNonce+"): incrementing txMan to " + newNonce);
-					txMan.setNonce(newNonce);
-					StaticNonce.Manager(node).putStaticNonceIfAbsent(address, newNonce);
-					break;
-			}
+			return web3j.ethGetTransactionCount(address, DefaultBlockParameterName.PENDING).send().getTransactionCount();
+		} catch (IOException e) {
+			logger.severe("could not get nonce for address " + address + ": " + e.getMessage());
+			return BigInteger.valueOf(-1);
 		}
 	}
 
@@ -635,7 +557,7 @@ public class ReadOnlyRegistryClient {
 
 		TransactionReceipt txR;
 		try {
-			txR = contracts.tryGetNonceTransactionManager().waitForTxReceipt(txHash);// waitForReceipt(txHash);
+			txR = contracts.waitForTxReceipt(txHash);
 			if (txR == null) {
 				throw new EthereumException("Transaction sent, no receipt returned. Increase wait time?");
 			}

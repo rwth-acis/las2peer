@@ -28,8 +28,8 @@ Goal: las2peer runs anywhere with one command, is production grade, has a modern
 | Java | ~~17~~ **21 ✅** | 25 LTS | The optional `--sandbox` (`L2pSecurityManager`) needs `-Djava.security.manager=allow` on 21 and cannot work on 24+ (JEP 486): redesign it (one process/container per service, or classloader + module boundaries) before moving to 25. Also: Mockito 1.9.5 in tests. |
 | Build | ~~Gradle 7.3~~ **Gradle 9.8 ✅**, local jars in `jars/` | version catalog | Publish the FreePastry fork as a proper artifact or include it as a module. HTTPS certs now via BouncyCastle instead of JDK-internal `sun.security.x509`. |
 | REST | Jersey 2.35 (javax) + Grizzly 2.4 | Jersey 3 / Jakarta EE 10, or Javalin/Helidon | javax → jakarta rename touches every service. |
-| Ethereum client | web3j 4.5.18 | web3j 4.12+ | Enables EIP-1559 txs → drop the `istanbul` hardfork pin. Replace the hand-rolled static nonce manager with one transaction manager per account. |
-| Contracts | Solidity 0.5, Truffle 5.0, ganache 7 | Solidity 0.8.x, **Foundry** (forge + anvil) | Truffle and Ganache were sunset by Consensys in 2023. 0.8 adds checked arithmetic. |
+| Ethereum client | web3j 4.5.18 | web3j 4.14 / 6.x | Still open. The static nonce manager is ✅ replaced by `NonceManager` (chain pending nonce + per-account lock, EIP-155 signing); 4.5 already works on anvil's current hardfork. |
+| Contracts | ~~Solidity 0.5, Truffle 5.0, ganache 7~~ **Solidity 0.8.30, Foundry, anvil ✅** | — | ABIs unchanged; Foundry tests cover delegated (signed-consent) calls; dev chain runs the latest hardfork. |
 | Frontend | lit-element 2, Polymer paper-*, rollup 2, TS 4.2, Node 16 | Lit 3 + Vite + TS 5 (or React), Node 22 | Polymer is EOL; the frontend is the main reason Node 16 is still pinned. |
 
 ## Phase 3 — Production grade

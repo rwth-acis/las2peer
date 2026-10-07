@@ -95,7 +95,7 @@ jar {
     }
 }
 
-task copyToLib(type: Copy) {
+task copyToLib(type: Sync) { // Sync removes jars of dependency versions that are no longer used
     from configurations.runtimeClasspath
     into "$projectDir/lib"
 }
