@@ -17,9 +17,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf 
     && useradd --create-home --uid 1000 las2peer
 WORKDIR /app
 COPY --from=build /src/core/export/jars core/export/jars
-COPY --from=build /src/core/lib core/lib
 COPY --from=build /src/restmapper/export/jars restmapper/export/jars
-COPY --from=build /src/restmapper/lib restmapper/lib
 COPY --from=build /src/webconnector/export/jars webconnector/export/jars
 COPY --from=build /src/webconnector/lib webconnector/lib
 COPY docker/entrypoint.sh /app/entrypoint.sh

@@ -45,7 +45,8 @@ if [[ -n "${LAS2PEER_ETH_MNEMONIC:-}" ]]; then
   CMDS+=("node=getNodeAsEthereumNode()" "registry=node.getRegistryClient()")
 fi
 
-CP="core/export/jars/*:restmapper/export/jars/*:webconnector/export/jars/*:core/lib/*:restmapper/lib/*:webconnector/lib/*"
+# webconnector/lib holds all runtime dependencies (core/lib and restmapper/lib only add older duplicates)
+CP="core/export/jars/*:restmapper/export/jars/*:webconnector/export/jars/*:webconnector/lib/*"
 # shellcheck disable=SC2086
 exec java ${JAVA_OPTS:-} -cp "$CP" \
   --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED \

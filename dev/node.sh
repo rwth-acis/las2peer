@@ -18,7 +18,8 @@ MNEMONICS=(
 WALLET=${WALLET:-0}
 PORT=${PORT:-9011}
 cd "$ROOT"
-CP="core/export/jars/*:restmapper/export/jars/*:webconnector/export/jars/*:core/lib/*:restmapper/lib/*:webconnector/lib/*"
+# webconnector/lib holds all runtime dependencies (core/lib and restmapper/lib only add older duplicates)
+CP="core/export/jars/*:restmapper/export/jars/*:webconnector/export/jars/*:webconnector/lib/*"
 exec java -cp "$CP" --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED \
   i5.las2peer.tools.L2pNodeLauncher --service-directory "$ROOT/services" --port "$PORT" --node-id-seed "${NODE_ID_SEED:-$WALLET}" \
   ${BOOTSTRAP:+--bootstrap "$BOOTSTRAP"} \

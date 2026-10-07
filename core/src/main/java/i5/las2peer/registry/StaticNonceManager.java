@@ -59,18 +59,18 @@ class StaticNonce {
         return parentNonce;
     }
 
+    // the envelope agent is only needed when a nonce is persisted (incStaticNonce); fetching it
+    // here would store an agent while the node is still starting and has no storage yet
     public synchronized BigInteger putStaticNonce(String key, BigInteger value) {
-        newAgent = getNonceEnvelopeAgent();
         staticNonces.put(key, value);
-
-        return staticNonces.put(key, value);
+        return value;
     }
 
+    // NOTE: despite the name this overwrites; every new transaction manager starts from -1,
+    // i.e. re-reads the nonce from the chain on its first transaction
     public synchronized BigInteger putStaticNonceIfAbsent(String key, BigInteger value) {
-        newAgent = getNonceEnvelopeAgent();
         staticNonces.put(key, value);
-
-        return staticNonces.putIfAbsent(key, value);
+        return value;
     }
 
     private synchronized UserAgentImpl getNonceEnvelopeAgent() {

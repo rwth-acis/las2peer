@@ -27,6 +27,7 @@ class StaticNonceRawTransactionManager extends FastRawTransactionManager {
         super(web3j, credentials, transactionReceiptProcessor);
         this.transactionReceiptProcessor = transactionReceiptProcessor;
         this.credentialAddress = credentials.getAddress();
+        this.node = node;
         logger.info("[TX-NONCE@" + credentialAddress + "] init to " + nonce);
         StaticNonce.Manager(node).putStaticNonceIfAbsent(credentialAddress, nonce);
     }
@@ -45,7 +46,7 @@ class StaticNonceRawTransactionManager extends FastRawTransactionManager {
      */
     @Override
     protected synchronized BigInteger getNonce() throws IOException {
-        if (StaticNonce.Manager(node).getStaticNonce(credentialAddress, this) == BigInteger.valueOf(-1l)) {
+        if (StaticNonce.Manager(node).getStaticNonce(credentialAddress, this).equals(BigInteger.valueOf(-1l))) {
             BigInteger parentNonce = super.getNonce();
             logger.info("[TX-NONCE@" + credentialAddress + "] first transaction: set nonce to " + parentNonce);
             setNonce(parentNonce);
