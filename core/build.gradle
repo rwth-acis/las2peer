@@ -54,7 +54,7 @@ dependencies {
     // Use JUnit test framework.
     // Not just testImplementation, because JUnit asserts are used in main main/java/i5/las2peer/testing/TestSuite.java
     implementation "junit:junit:${project.property('junit.version')}"
-    testImplementation "org.mockito:mockito-all:1.9.5"
+    testImplementation "org.mockito:mockito-core:5.24.0"
 
     //use local jars
     implementation fileTree(dir: '../jars', include: '*.jar')
@@ -131,8 +131,6 @@ sourceSets {
 test {
     dependsOn "junit_jars"
 
-    // As soon as one test fails, the build should fail. This speeds up builds running on CI servers.
-    failFast = true
 
     maxParallelForks = 9
     forkEvery = 1

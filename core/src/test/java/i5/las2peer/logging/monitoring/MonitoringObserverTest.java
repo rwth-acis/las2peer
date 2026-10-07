@@ -11,11 +11,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.security.KeyPair;
 
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.*;
 
 /**
@@ -48,7 +48,7 @@ public class MonitoringObserverTest {
         reset(node);
         when(receivingAgent.getPublicKey()).thenReturn(RECEIVING_AGENT_KEY_PAIR.getPublic());
         when(receivingAgent.getIdentifier()).thenReturn(RECEIVING_AGENT_IDENTIFIER);
-        when(node.getAgent(anyString())).thenReturn(receivingAgent);
+        when(node.getAgent(nullable(String.class))).thenReturn(receivingAgent);
     }
 
     /**
@@ -58,7 +58,7 @@ public class MonitoringObserverTest {
      */
     public void setupNodeWithoutProcessingService() throws AgentException {
         reset(node);
-        when(node.getAgent(anyString())).thenThrow(new AgentException("Agent not found"));
+        when(node.getAgent(nullable(String.class))).thenThrow(new AgentException("Agent not found"));
     }
 
 
