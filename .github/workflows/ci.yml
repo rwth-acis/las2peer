@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build and unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      # installs Java/Node/npm exactly as pinned in mise.toml
+      - uses: jdx/mise-action@v5
+      - uses: gradle/actions/setup-gradle@v6
+      - name: Build and test
+        run: ./gradlew build --console=plain
+      - name: Upload test reports
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-reports
+          path: "*/build/reports/tests/"
+      - name: Upload jars
+        uses: actions/upload-artifact@v7
+        with:
+          name: las2peer
+          path: |
+            core/export/jars/las2peer-*.jar
+            restmapper/export/jars/las2peer-rest-mapper*.jar
+            webconnector/export/jars/las2peer-web-connector*.jar
+            bundle/export/jars/las2peer-bundle-*.jar
+
+  e2e:
+    name: Docker stack + smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Start stack
+        run: docker compose up -d --build
+      - name: Wait for node
+        run: |
+          for i in $(seq 1 90); do
+            [ "$(docker inspect -f '{{.State.Health.Status}}' las2peer-node-1)" = healthy ] && exit 0
+            sleep 2
+          done
+          echo "node did not become healthy"; exit 1
+      - name: Smoke test
+        run: ./dev/smoke-test.sh
+      - name: Logs
+        if: always()
+        run: docker compose logs --no-color
+      - name: Stop stack
+        if: always()
+        run: docker compose down -v
