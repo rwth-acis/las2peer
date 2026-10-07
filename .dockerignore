@@ -1,0 +1,17 @@
+.git
+.gradle
+**/build
+**/export
+**/node_modules
+core/lib
+restmapper/lib
+webconnector/lib
+webconnector/resources/webapp
+etc
+service
+node-storage
+log
+javadoc
+services
+.env
+dev
