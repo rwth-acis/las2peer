@@ -27,3 +27,4 @@ archiva_credentials.xml
 # local dev stack
 .env
 /services/*.jar
+/build/
