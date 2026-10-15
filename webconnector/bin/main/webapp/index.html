@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/las2peer/webapp/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Manage a las2peer node: services, agents, groups, wallet and reputation." />
+    <title>las2peer node</title>
+    <script>
+      // apply the saved theme before first paint to avoid a flash
+      try {
+        const t = localStorage.getItem('theme')
+        if (t === 'dark' || (!t && matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.classList.add('dark')
+      } catch {}
+    </script>
+    <script type="module" crossorigin src="/las2peer/webapp/assets/index-CERb4xmr.js"></script>
+    <link rel="stylesheet" crossorigin href="/las2peer/webapp/assets/index-C_lVuf67.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
